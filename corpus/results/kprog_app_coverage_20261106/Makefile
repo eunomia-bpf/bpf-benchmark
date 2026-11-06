@@ -131,3 +131,55 @@ abi-corpus-freeze:
 
 abi-positive-compile: abi-regression
 	$(MAKE) -f $(HERE)/Makefile compile PHASE=abi-positive
+
+pushpop-before-build:
+	python3 $(HERE)/check_pushpop.py before-build
+
+pushpop-before-kvm: pushpop-before-build
+	taskset -c 8-23 vng --run $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile pushpop-before-guest'
+
+pushpop-before-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod $(ROOT)/kprog/tv/build-x86/bpf_x86_native_lab.ko
+	python3 $(HERE)/check_pushpop.py before-bound
+
+pushpop-contract:
+	python3 $(ROOT)/kprog/formal/tools/generate_x86_specialization_spec.py
+
+pushpop-prepare:
+	python3 $(HERE)/check_pushpop.py prepare
+	for name in imm8_negative imm8_positive imm32_negative imm32_positive imm16 push_mem_old_sp pop_mem_new_sp pop_mem16 pop_mem_index; do cc -c $(HERE)/pushpop-build/$$name.S -o $(HERE)/pushpop-build/$$name.proof.o || exit 1; done
+	python3 $(HERE)/check_pushpop.py generate
+
+pushpop-host: pushpop-prepare
+	for name in imm8_negative imm8_positive imm32_negative imm32_positive imm16 push_mem_old_sp pop_mem_new_sp pop_mem16 pop_mem_index; do cc $(HOST_FLAGS) -DLICENSE=$${name}_license -c $(HERE)/pushpop-build/$$name.bpf.c -o $(HERE)/pushpop-build/$$name.sim.o || exit 1; done
+	cc -no-pie -O2 $(HERE)/pushpop-build/main.c $(HERE)/pushpop-build/*.proof.o $(HERE)/pushpop-build/*.sim.o -o $(HERE)/pushpop-build/check
+	taskset -c 8-23 $(HERE)/pushpop-build/check
+
+pushpop-after-build:
+	python3 $(HERE)/check_pushpop.py after-build
+
+pushpop-after-kvm: pushpop-after-build
+	taskset -c 8-23 vng --run $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile pushpop-after-guest'
+
+pushpop-after-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod $(ROOT)/kprog/tv/build-x86/bpf_x86_native_lab.ko
+	python3 $(HERE)/check_pushpop.py after-bound
+
+pushpop-bpf: pushpop-prepare
+	for name in imm8_negative imm8_positive imm32_negative imm32_positive imm16 push_mem_old_sp pop_mem_new_sp pop_mem16 pop_mem_index; do clang -g -O2 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/pushpop-build/$$name.bpf.c -o $(HERE)/pushpop-build/$$name.bpf.o || exit 1; done
+
+pushpop-kvm: pushpop-bpf
+	taskset -c 8-23 vng --run $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile pushpop-guest'
+
+pushpop-guest:
+	python3 $(HERE)/check_pushpop.py verify
+
+pushpop-formal:
+	python3 $(ROOT)/kprog/formal/tools/generate_x86_specialization_spec.py --check
+	cd $(ROOT)/kprog/formal && taskset -c 8-23 lake build KProgFormal.X86Specialization
+	cc -Wall -Wextra -O2 -I$(ROOT)/kprog/formal -I$(ROOT)/kprog/x86 -I$(ROOT)/kprog -I$(ROOT)/vendor/libbpf/src $(ROOT)/kprog/formal/oracles/test_x86_specialization_host.c -o $(HERE)/pushpop-build/specialization-host
+	$(HERE)/pushpop-build/specialization-host
+	cc -Wall -Wextra -O2 -I$(ROOT)/kprog/formal -I$(ROOT)/kprog/x86 -I$(ROOT)/kprog -I$(ROOT)/vendor/libbpf/src $(ROOT)/kprog/formal/oracles/test_x86_pushpop_route_host.c -o $(HERE)/pushpop-build/register-route-host
+	$(HERE)/pushpop-build/register-route-host

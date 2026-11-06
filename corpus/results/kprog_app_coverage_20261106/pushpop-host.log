@@ -1,0 +1,960 @@
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_pushpop.py prepare
+for name in imm8_negative imm8_positive imm32_negative imm32_positive imm16 push_mem_old_sp pop_mem_new_sp pop_mem16 pop_mem_index; do cc -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/$name.S -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/$name.proof.o || exit 1; done
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_pushpop.py generate
+for name in imm8_negative imm8_positive imm32_negative imm32_positive imm16 push_mem_old_sp pop_mem_new_sp pop_mem16 pop_mem_index; do cc -O2 -Wno-c23-extensions -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/vendor/libbpf/include/uapi -DLICENSE=${name}_license -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/$name.bpf.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/$name.sim.o || exit 1; done
+In file included from /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_negative.bpf.c:2:
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_negative.bpf.c: In function ‘imm8_negative_x86_sim_xdp’:
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2105:55: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 2105 |                                 __u64 __x86_l_count = X86_SIM_L_READ_REG(AUX);    \
+      |                                                       ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_negative.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 18446744073709551488ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2107:69: warning: conversion from ‘long long unsigned int’ to ‘__u32’ {aka ‘unsigned int’} changes value from ‘18446744073709551488’ to ‘4294967168’ [-Woverflow]
+ 2107 |                                         __x86_l_src, __x86_l_count, (IMM),        \
+      |                                                                     ^~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_negative.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 18446744073709551488ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1359:41: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1359 |                         __x86_l_count = X86_SIM_L_READ_REG(COUNT) &       \
+      |                                         ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1371:9: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI_STEP’
+ 1371 |         X86_SIM_L_EXEC_BZHI_STEP(0U, (DST), (SRC), (COUNT), 0U, (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2134:33: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI’
+ 2134 |                                 X86_SIM_L_EXEC_BZHI((DST), (SRC), (AUX), (FLAGS));\
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_negative.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 18446744073709551488ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1612:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1612 |         X86_SIM_L_EXEC_ANDN_STEP(0U, (DST), (SRC), (AUX), (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2152:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN’
+ 2152 |                                 X86_SIM_L_EXEC_ANDN((DST), (SRC), (AUX), (FLAGS)); \
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_negative.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 18446744073709551488ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1615:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1615 |         X86_SIM_L_EXEC_ANDN_STEP(1U, (DST), (SRC), (AUX), (FLAGS), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2154:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_MEM’
+ 2154 |                                 X86_SIM_L_EXEC_ANDN_MEM((DST), (SRC), (FLAGS), (AUX), (IMM));\
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_negative.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 18446744073709551488ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:820:60: note: in definition of macro ‘X86_SIM_L_READ_MEM_VALUE’
+  820 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1784:41: note: in expansion of macro ‘KPROG_X86_CMOV_MEM_DISP’
+ 1784 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1811:9: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_STEP’
+ 1811 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2084:25: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_MEM’
+ 2084 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_negative.bpf.c:13:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   13 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RAX, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+      |         ^~~~~~~~~~~~~~
+At top level:
+cc1: note: unrecognized command-line option ‘-Wno-c23-extensions’ may have been intended to silence earlier diagnostics
+In file included from /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_positive.bpf.c:2:
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_positive.bpf.c: In function ‘imm8_positive_x86_sim_xdp’:
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2105:55: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 2105 |                                 __u64 __x86_l_count = X86_SIM_L_READ_REG(AUX);    \
+      |                                                       ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_positive.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 127ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1359:41: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1359 |                         __x86_l_count = X86_SIM_L_READ_REG(COUNT) &       \
+      |                                         ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1371:9: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI_STEP’
+ 1371 |         X86_SIM_L_EXEC_BZHI_STEP(0U, (DST), (SRC), (COUNT), 0U, (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2134:33: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI’
+ 2134 |                                 X86_SIM_L_EXEC_BZHI((DST), (SRC), (AUX), (FLAGS));\
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_positive.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 127ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1612:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1612 |         X86_SIM_L_EXEC_ANDN_STEP(0U, (DST), (SRC), (AUX), (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2152:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN’
+ 2152 |                                 X86_SIM_L_EXEC_ANDN((DST), (SRC), (AUX), (FLAGS)); \
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_positive.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 127ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1615:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1615 |         X86_SIM_L_EXEC_ANDN_STEP(1U, (DST), (SRC), (AUX), (FLAGS), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2154:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_MEM’
+ 2154 |                                 X86_SIM_L_EXEC_ANDN_MEM((DST), (SRC), (FLAGS), (AUX), (IMM));\
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_positive.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 127ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:820:60: note: in definition of macro ‘X86_SIM_L_READ_MEM_VALUE’
+  820 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1784:41: note: in expansion of macro ‘KPROG_X86_CMOV_MEM_DISP’
+ 1784 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1811:9: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_STEP’
+ 1811 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2084:25: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_MEM’
+ 2084 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm8_positive.bpf.c:13:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   13 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RAX, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+      |         ^~~~~~~~~~~~~~
+At top level:
+cc1: note: unrecognized command-line option ‘-Wno-c23-extensions’ may have been intended to silence earlier diagnostics
+In file included from /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_negative.bpf.c:2:
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_negative.bpf.c: In function ‘imm32_negative_x86_sim_xdp’:
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2105:55: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 2105 |                                 __u64 __x86_l_count = X86_SIM_L_READ_REG(AUX);    \
+      |                                                       ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_negative.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 18446744071562067968ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2107:69: warning: conversion from ‘long long unsigned int’ to ‘__u32’ {aka ‘unsigned int’} changes value from ‘18446744071562067968’ to ‘2147483648’ [-Woverflow]
+ 2107 |                                         __x86_l_src, __x86_l_count, (IMM),        \
+      |                                                                     ^~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_negative.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 18446744071562067968ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1359:41: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1359 |                         __x86_l_count = X86_SIM_L_READ_REG(COUNT) &       \
+      |                                         ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1371:9: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI_STEP’
+ 1371 |         X86_SIM_L_EXEC_BZHI_STEP(0U, (DST), (SRC), (COUNT), 0U, (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2134:33: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI’
+ 2134 |                                 X86_SIM_L_EXEC_BZHI((DST), (SRC), (AUX), (FLAGS));\
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_negative.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 18446744071562067968ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1612:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1612 |         X86_SIM_L_EXEC_ANDN_STEP(0U, (DST), (SRC), (AUX), (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2152:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN’
+ 2152 |                                 X86_SIM_L_EXEC_ANDN((DST), (SRC), (AUX), (FLAGS)); \
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_negative.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 18446744071562067968ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1615:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1615 |         X86_SIM_L_EXEC_ANDN_STEP(1U, (DST), (SRC), (AUX), (FLAGS), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2154:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_MEM’
+ 2154 |                                 X86_SIM_L_EXEC_ANDN_MEM((DST), (SRC), (FLAGS), (AUX), (IMM));\
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_negative.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 18446744071562067968ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:820:60: note: in definition of macro ‘X86_SIM_L_READ_MEM_VALUE’
+  820 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1784:41: note: in expansion of macro ‘KPROG_X86_CMOV_MEM_DISP’
+ 1784 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1811:9: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_STEP’
+ 1811 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2084:25: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_MEM’
+ 2084 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_negative.bpf.c:13:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   13 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RAX, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+      |         ^~~~~~~~~~~~~~
+At top level:
+cc1: note: unrecognized command-line option ‘-Wno-c23-extensions’ may have been intended to silence earlier diagnostics
+In file included from /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_positive.bpf.c:2:
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_positive.bpf.c: In function ‘imm32_positive_x86_sim_xdp’:
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2105:55: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 2105 |                                 __u64 __x86_l_count = X86_SIM_L_READ_REG(AUX);    \
+      |                                                       ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_positive.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 305419896ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1359:41: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1359 |                         __x86_l_count = X86_SIM_L_READ_REG(COUNT) &       \
+      |                                         ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1371:9: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI_STEP’
+ 1371 |         X86_SIM_L_EXEC_BZHI_STEP(0U, (DST), (SRC), (COUNT), 0U, (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2134:33: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI’
+ 2134 |                                 X86_SIM_L_EXEC_BZHI((DST), (SRC), (AUX), (FLAGS));\
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_positive.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 305419896ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1612:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1612 |         X86_SIM_L_EXEC_ANDN_STEP(0U, (DST), (SRC), (AUX), (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2152:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN’
+ 2152 |                                 X86_SIM_L_EXEC_ANDN((DST), (SRC), (AUX), (FLAGS)); \
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_positive.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 305419896ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1615:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1615 |         X86_SIM_L_EXEC_ANDN_STEP(1U, (DST), (SRC), (AUX), (FLAGS), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2154:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_MEM’
+ 2154 |                                 X86_SIM_L_EXEC_ANDN_MEM((DST), (SRC), (FLAGS), (AUX), (IMM));\
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_positive.bpf.c:10:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   10 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, X86_PUSHPOP_AUX_IMM, 305419896ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:820:60: note: in definition of macro ‘X86_SIM_L_READ_MEM_VALUE’
+  820 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1784:41: note: in expansion of macro ‘KPROG_X86_CMOV_MEM_DISP’
+ 1784 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1811:9: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_STEP’
+ 1811 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2084:25: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_MEM’
+ 2084 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm32_positive.bpf.c:13:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   13 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RAX, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+      |         ^~~~~~~~~~~~~~
+At top level:
+cc1: note: unrecognized command-line option ‘-Wno-c23-extensions’ may have been intended to silence earlier diagnostics
+In file included from /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm16.bpf.c:2:
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm16.bpf.c: In function ‘imm16_x86_sim_xdp’:
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2105:55: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 2105 |                                 __u64 __x86_l_count = X86_SIM_L_READ_REG(AUX);    \
+      |                                                       ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm16.bpf.c:13:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   13 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_16, X86_PUSHPOP_AUX_IMM, 65535ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1359:41: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1359 |                         __x86_l_count = X86_SIM_L_READ_REG(COUNT) &       \
+      |                                         ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1371:9: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI_STEP’
+ 1371 |         X86_SIM_L_EXEC_BZHI_STEP(0U, (DST), (SRC), (COUNT), 0U, (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2134:33: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI’
+ 2134 |                                 X86_SIM_L_EXEC_BZHI((DST), (SRC), (AUX), (FLAGS));\
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm16.bpf.c:13:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   13 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_16, X86_PUSHPOP_AUX_IMM, 65535ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1612:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1612 |         X86_SIM_L_EXEC_ANDN_STEP(0U, (DST), (SRC), (AUX), (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2152:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN’
+ 2152 |                                 X86_SIM_L_EXEC_ANDN((DST), (SRC), (AUX), (FLAGS)); \
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm16.bpf.c:13:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   13 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_16, X86_PUSHPOP_AUX_IMM, 65535ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘16777216’ to ‘0’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1615:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1615 |         X86_SIM_L_EXEC_ANDN_STEP(1U, (DST), (SRC), (AUX), (FLAGS), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2154:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_MEM’
+ 2154 |                                 X86_SIM_L_EXEC_ANDN_MEM((DST), (SRC), (FLAGS), (AUX), (IMM));\
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm16.bpf.c:13:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   13 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_16, X86_PUSHPOP_AUX_IMM, 65535ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:820:60: note: in definition of macro ‘X86_SIM_L_READ_MEM_VALUE’
+  820 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1784:41: note: in expansion of macro ‘KPROG_X86_CMOV_MEM_DISP’
+ 1784 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1811:9: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_STEP’
+ 1811 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2084:25: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_MEM’
+ 2084 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/imm16.bpf.c:16:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   16 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RAX, X86_REG_NONE, X86_WIDTH_16, 0, 0);
+      |         ^~~~~~~~~~~~~~
+At top level:
+cc1: note: unrecognized command-line option ‘-Wno-c23-extensions’ may have been intended to silence earlier diagnostics
+In file included from /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/push_mem_old_sp.bpf.c:3:
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/push_mem_old_sp.bpf.c: In function ‘push_mem_old_sp_x86_sim_xdp’:
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘34078975’ to ‘255’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2105:55: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 2105 |                                 __u64 __x86_l_count = X86_SIM_L_READ_REG(AUX);    \
+      |                                                       ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/push_mem_old_sp.bpf.c:20:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   20 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RSP, X86_WIDTH_64, (X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64) | X86_PUSHPOP_AUX_MEM), 8ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘34078975’ to ‘255’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1359:41: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1359 |                         __x86_l_count = X86_SIM_L_READ_REG(COUNT) &       \
+      |                                         ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1371:9: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI_STEP’
+ 1371 |         X86_SIM_L_EXEC_BZHI_STEP(0U, (DST), (SRC), (COUNT), 0U, (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2134:33: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI’
+ 2134 |                                 X86_SIM_L_EXEC_BZHI((DST), (SRC), (AUX), (FLAGS));\
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/push_mem_old_sp.bpf.c:20:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   20 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RSP, X86_WIDTH_64, (X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64) | X86_PUSHPOP_AUX_MEM), 8ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘34078975’ to ‘255’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1612:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1612 |         X86_SIM_L_EXEC_ANDN_STEP(0U, (DST), (SRC), (AUX), (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2152:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN’
+ 2152 |                                 X86_SIM_L_EXEC_ANDN((DST), (SRC), (AUX), (FLAGS)); \
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/push_mem_old_sp.bpf.c:20:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   20 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RSP, X86_WIDTH_64, (X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64) | X86_PUSHPOP_AUX_MEM), 8ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘34078975’ to ‘255’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1615:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1615 |         X86_SIM_L_EXEC_ANDN_STEP(1U, (DST), (SRC), (AUX), (FLAGS), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2154:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_MEM’
+ 2154 |                                 X86_SIM_L_EXEC_ANDN_MEM((DST), (SRC), (FLAGS), (AUX), (IMM));\
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/push_mem_old_sp.bpf.c:20:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   20 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RSP, X86_WIDTH_64, (X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64) | X86_PUSHPOP_AUX_MEM), 8ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:820:60: note: in definition of macro ‘X86_SIM_L_READ_MEM_VALUE’
+  820 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1784:41: note: in expansion of macro ‘KPROG_X86_CMOV_MEM_DISP’
+ 1784 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1811:9: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_STEP’
+ 1811 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2084:25: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_MEM’
+ 2084 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/push_mem_old_sp.bpf.c:23:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   23 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RAX, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+      |         ^~~~~~~~~~~~~~
+At top level:
+cc1: note: unrecognized command-line option ‘-Wno-c23-extensions’ may have been intended to silence earlier diagnostics
+In file included from /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_new_sp.bpf.c:3:
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_new_sp.bpf.c: In function ‘pop_mem_new_sp_x86_sim_xdp’:
+/workspaces/repository/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:820:60: note: in definition of macro ‘X86_SIM_L_READ_MEM_VALUE’
+  820 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1784:41: note: in expansion of macro ‘KPROG_X86_CMOV_MEM_DISP’
+ 1784 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1811:9: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_STEP’
+ 1811 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2084:25: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_MEM’
+ 2084 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_new_sp.bpf.c:20:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   20 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RAX, X86_WIDTH_64, 0, 0);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘34078975’ to ‘255’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2105:55: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 2105 |                                 __u64 __x86_l_count = X86_SIM_L_READ_REG(AUX);    \
+      |                                                       ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_new_sp.bpf.c:23:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   23 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RSP, X86_REG_NONE, X86_WIDTH_64, (X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64) | X86_PUSHPOP_AUX_MEM), 0ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘34078975’ to ‘255’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1359:41: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1359 |                         __x86_l_count = X86_SIM_L_READ_REG(COUNT) &       \
+      |                                         ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1371:9: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI_STEP’
+ 1371 |         X86_SIM_L_EXEC_BZHI_STEP(0U, (DST), (SRC), (COUNT), 0U, (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2134:33: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI’
+ 2134 |                                 X86_SIM_L_EXEC_BZHI((DST), (SRC), (AUX), (FLAGS));\
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_new_sp.bpf.c:23:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   23 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RSP, X86_REG_NONE, X86_WIDTH_64, (X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64) | X86_PUSHPOP_AUX_MEM), 0ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘34078975’ to ‘255’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1612:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1612 |         X86_SIM_L_EXEC_ANDN_STEP(0U, (DST), (SRC), (AUX), (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2152:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN’
+ 2152 |                                 X86_SIM_L_EXEC_ANDN((DST), (SRC), (AUX), (FLAGS)); \
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_new_sp.bpf.c:23:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   23 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RSP, X86_REG_NONE, X86_WIDTH_64, (X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64) | X86_PUSHPOP_AUX_MEM), 0ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘34078975’ to ‘255’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1615:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1615 |         X86_SIM_L_EXEC_ANDN_STEP(1U, (DST), (SRC), (AUX), (FLAGS), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2154:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_MEM’
+ 2154 |                                 X86_SIM_L_EXEC_ANDN_MEM((DST), (SRC), (FLAGS), (AUX), (IMM));\
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_new_sp.bpf.c:23:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   23 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RSP, X86_REG_NONE, X86_WIDTH_64, (X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64) | X86_PUSHPOP_AUX_MEM), 0ULL);
+      |         ^~~~~~~~~~~~~~
+At top level:
+cc1: note: unrecognized command-line option ‘-Wno-c23-extensions’ may have been intended to silence earlier diagnostics
+In file included from /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem16.bpf.c:3:
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem16.bpf.c: In function ‘pop_mem16_x86_sim_xdp’:
+/workspaces/repository/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:820:60: note: in definition of macro ‘X86_SIM_L_READ_MEM_VALUE’
+  820 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1784:41: note: in expansion of macro ‘KPROG_X86_CMOV_MEM_DISP’
+ 1784 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1811:9: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_STEP’
+ 1811 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2084:25: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_MEM’
+ 2084 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem16.bpf.c:20:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   20 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RAX, X86_WIDTH_16, 0, 0);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘33685759’ to ‘255’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2105:55: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 2105 |                                 __u64 __x86_l_count = X86_SIM_L_READ_REG(AUX);    \
+      |                                                       ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem16.bpf.c:23:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   23 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RSP, X86_REG_NONE, X86_WIDTH_16, (X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16) | X86_PUSHPOP_AUX_MEM), 0ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘33685759’ to ‘255’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1359:41: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1359 |                         __x86_l_count = X86_SIM_L_READ_REG(COUNT) &       \
+      |                                         ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1371:9: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI_STEP’
+ 1371 |         X86_SIM_L_EXEC_BZHI_STEP(0U, (DST), (SRC), (COUNT), 0U, (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2134:33: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI’
+ 2134 |                                 X86_SIM_L_EXEC_BZHI((DST), (SRC), (AUX), (FLAGS));\
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem16.bpf.c:23:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   23 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RSP, X86_REG_NONE, X86_WIDTH_16, (X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16) | X86_PUSHPOP_AUX_MEM), 0ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘33685759’ to ‘255’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1612:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1612 |         X86_SIM_L_EXEC_ANDN_STEP(0U, (DST), (SRC), (AUX), (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2152:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN’
+ 2152 |                                 X86_SIM_L_EXEC_ANDN((DST), (SRC), (AUX), (FLAGS)); \
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem16.bpf.c:23:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   23 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RSP, X86_REG_NONE, X86_WIDTH_16, (X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16) | X86_PUSHPOP_AUX_MEM), 0ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘33685759’ to ‘255’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1615:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1615 |         X86_SIM_L_EXEC_ANDN_STEP(1U, (DST), (SRC), (AUX), (FLAGS), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2154:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_MEM’
+ 2154 |                                 X86_SIM_L_EXEC_ANDN_MEM((DST), (SRC), (FLAGS), (AUX), (IMM));\
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem16.bpf.c:23:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   23 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RSP, X86_REG_NONE, X86_WIDTH_16, (X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16) | X86_PUSHPOP_AUX_MEM), 0ULL);
+      |         ^~~~~~~~~~~~~~
+At top level:
+cc1: note: unrecognized command-line option ‘-Wno-c23-extensions’ may have been intended to silence earlier diagnostics
+In file included from /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_index.bpf.c:3:
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_index.bpf.c: In function ‘pop_mem_index_x86_sim_xdp’:
+/workspaces/repository/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:820:60: note: in definition of macro ‘X86_SIM_L_READ_MEM_VALUE’
+  820 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1784:41: note: in expansion of macro ‘KPROG_X86_CMOV_MEM_DISP’
+ 1784 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1811:9: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_STEP’
+ 1811 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2084:25: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_MEM’
+ 2084 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_index.bpf.c:20:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   20 |         X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RAX, X86_WIDTH_64, 0, 0);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘34079489’ to ‘1’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2105:55: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 2105 |                                 __u64 __x86_l_count = X86_SIM_L_READ_REG(AUX);    \
+      |                                                       ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_index.bpf.c:23:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   23 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RSP, X86_REG_NONE, X86_WIDTH_64, (X86_MEM_AUX_FULL(X86_RCX, 3, X86_WIDTH_64) | X86_PUSHPOP_AUX_MEM), 8ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘34079489’ to ‘1’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1359:41: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1359 |                         __x86_l_count = X86_SIM_L_READ_REG(COUNT) &       \
+      |                                         ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1371:9: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI_STEP’
+ 1371 |         X86_SIM_L_EXEC_BZHI_STEP(0U, (DST), (SRC), (COUNT), 0U, (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2134:33: note: in expansion of macro ‘X86_SIM_L_EXEC_BZHI’
+ 2134 |                                 X86_SIM_L_EXEC_BZHI((DST), (SRC), (AUX), (FLAGS));\
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_index.bpf.c:23:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   23 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RSP, X86_REG_NONE, X86_WIDTH_64, (X86_MEM_AUX_FULL(X86_RCX, 3, X86_WIDTH_64) | X86_PUSHPOP_AUX_MEM), 8ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘34079489’ to ‘1’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1612:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1612 |         X86_SIM_L_EXEC_ANDN_STEP(0U, (DST), (SRC), (AUX), (FLAGS), 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2152:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN’
+ 2152 |                                 X86_SIM_L_EXEC_ANDN((DST), (SRC), (AUX), (FLAGS)); \
+      |                                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_index.bpf.c:23:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   23 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RSP, X86_REG_NONE, X86_WIDTH_64, (X86_MEM_AUX_FULL(X86_RCX, 3, X86_WIDTH_64) | X86_PUSHPOP_AUX_MEM), 8ULL);
+      |         ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:386:37: warning: conversion from ‘unsigned int’ to ‘__u8’ {aka ‘unsigned char’} changes value from ‘34079489’ to ‘1’ [-Woverflow]
+  386 |                 __u8 __x86_rd_reg = (REG);                                  \
+      |                                     ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:398:9: note: in expansion of macro ‘X86_SIM_L_READ_REG_WIDTH_SHIFT’
+  398 |         X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1604:40: note: in expansion of macro ‘X86_SIM_L_READ_REG’
+ 1604 |                         __x86_l_src2 = X86_SIM_L_READ_REG(AUX);           \
+      |                                        ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1615:9: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_STEP’
+ 1615 |         X86_SIM_L_EXEC_ANDN_STEP(1U, (DST), (SRC), (AUX), (FLAGS), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2154:33: note: in expansion of macro ‘X86_SIM_L_EXEC_ANDN_MEM’
+ 2154 |                                 X86_SIM_L_EXEC_ANDN_MEM((DST), (SRC), (FLAGS), (AUX), (IMM));\
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2241:17: note: in expansion of macro ‘X86_SIM_L_EXEC’
+ 2241 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/pop_mem_index.bpf.c:23:9: note: in expansion of macro ‘X86_SIM_RUN_OP’
+   23 |         X86_SIM_RUN_OP(X86_OP_POP, X86_RSP, X86_REG_NONE, X86_WIDTH_64, (X86_MEM_AUX_FULL(X86_RCX, 3, X86_WIDTH_64) | X86_PUSHPOP_AUX_MEM), 8ULL);
+      |         ^~~~~~~~~~~~~~
+At top level:
+cc1: note: unrecognized command-line option ‘-Wno-c23-extensions’ may have been intended to silence earlier diagnostics
+cc -no-pie -O2 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/main.c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/*.proof.o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/*.sim.o -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/check
+taskset -c 8-23 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/check
+imm8_negative native=4294967295 simulator=4294967295 expected=4294967295
+imm8_positive native=127 simulator=127 expected=127
+imm32_negative native=4294967295 simulator=4294967295 expected=4294967295
+imm32_positive native=305419896 simulator=305419896 expected=305419896
+imm16 native=65535 simulator=65535 expected=65535
+push_mem_old_sp native=153 simulator=153 expected=153
+pop_mem_new_sp native=68 simulator=68 expected=68
+pop_mem16 native=4660 simulator=4660 expected=4660
+pop_mem_index native=85 simulator=85 expected=85

@@ -1909,6 +1909,45 @@ struct x86_sim_state {
 #define X86_SIM_L_EXEC_POP(DST, FLAGS)                                       \
 	X86_SIM_L_EXEC_PUSH_POP_STEP(1U, (DST), X86_REG_NONE, (FLAGS))
 
+/* Memory PUSH reads using old RSP; memory POP forms its effective address
+ * after incrementing RSP. Keep the actual transfer raw, like other memory ops. */
+#define X86_SIM_L_EXEC_PUSH_OP(SRC, FLAGS, AUX, IMM)                         \
+	do {                                                                \
+		if (X86_PUSHPOP_AUX_MODE(AUX) != 1U && X86_PUSHPOP_AUX_MODE(AUX) != 2U) {                     \
+			X86_SIM_L_EXEC_PUSH((SRC), (FLAGS));               \
+		} else {                                                    \
+			__u8 __x86_pp_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64; \
+			__u64 __x86_pp_value =                             \
+				X86_PUSHPOP_AUX_MODE(AUX) == 1U ? (__u64)(IMM) : \
+				X86_SIM_L_READ_MEM_VALUE((SRC), (AUX), (IMM), \
+					__x86_pp_width, 0);                    \
+			__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr -            \
+				KPROG_X86_PUSH_STEP_BYTES(__x86_pp_width);  \
+			X86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp.ptr,  \
+				__x86_pp_width, __x86_pp_value);            \
+		}                                                           \
+	} while (0)
+
+#define X86_SIM_L_EXEC_POP_OP(DST, FLAGS, AUX, IMM)                          \
+	do {                                                                \
+		if (X86_PUSHPOP_AUX_MODE(AUX) != 2U) {                     \
+			X86_SIM_L_EXEC_POP((DST), (FLAGS));                \
+		} else {                                                    \
+			__u8 __x86_pp_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64; \
+			__u64 __x86_pp_value = X86_SIM_L_STACK_READ(       \
+				(__s64)(long)__x86_rsp.ptr, __x86_pp_width); \
+			__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr +            \
+				KPROG_X86_PUSH_STEP_BYTES(__x86_pp_width);  \
+			__s64 __x86_pp_disp = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM)); \
+			if ((DST) == X86_RSP)                              \
+				X86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp.ptr + \
+					__x86_pp_disp, __x86_pp_width, __x86_pp_value); \
+			else                                                       \
+				X86_SIM_L_STORE_ADDR((__u8 *)X86_SIM_L_READ_REG_PTR(DST) + \
+					__x86_pp_disp, __x86_pp_width, __x86_pp_value); \
+		}                                                           \
+	} while (0)
+
 /*
  * The opcode dispatch chain.
  *
@@ -2191,9 +2230,9 @@ struct x86_sim_state {
 				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_dst, X86_WIDTH_32);\
 			}                                                   \
 		} else if (KPROG_X86_DISP_PUSH_HANDLED(OP)) {            \
-			X86_SIM_L_EXEC_PUSH((SRC), (FLAGS));                       \
+			X86_SIM_L_EXEC_PUSH_OP((SRC), (FLAGS), (AUX), (IMM)); \
 		} else if (KPROG_X86_DISP_POP_HANDLED(OP)) {             \
-			X86_SIM_L_EXEC_POP((DST), (FLAGS));               \
+			X86_SIM_L_EXEC_POP_OP((DST), (FLAGS), (AUX), (IMM)); \
 		}                                                         \
 	} while (0)
 

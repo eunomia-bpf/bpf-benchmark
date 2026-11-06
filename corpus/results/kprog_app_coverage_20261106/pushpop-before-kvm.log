@@ -1,0 +1,4 @@
+insmod /workspaces/repository/kprog/tv/build-x86/bpf_x86_native_lab.ko
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_pushpop.py before-bound
+{"arch": "x86", "path": "bound", "stages": {"accepted_finding": 1}}
+BUG reproduced: PUSH1 became PUSH0 and admitted unsafe native control flow; native was not executed

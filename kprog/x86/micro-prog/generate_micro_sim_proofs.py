@@ -96,6 +96,7 @@ class NativeInsn:
     reloc_target: int | None = None
     sim_imm: int | None = None
     end_addr: int | None = None
+    stack_width: int | None = None
 
 
 @dataclass(frozen=True)
@@ -151,9 +152,13 @@ def parse_asm_text(text: str) -> list[NativeInsn]:
         match = re.match(r"(?P<mnemonic>[a-z][a-z0-9]*)\s*(?P<operands>.*)$", asm)
         if match is None:
             continue
-        insns.append(NativeInsn(int(addr_text, 16), asm, match.group("mnemonic"),
+        mnemonic = match.group("mnemonic")
+        stack_width = 16 if mnemonic in {"pushw", "popw"} else None
+        if stack_width: mnemonic = mnemonic[:-1]
+        insns.append(NativeInsn(int(addr_text, 16), asm, mnemonic,
                                 split_operands(match.group("operands")),
-                                end_addr=int(addr_text, 16) + len(fields[1].split())))
+                                end_addr=int(addr_text, 16) + len(fields[1].split()),
+                                stack_width=stack_width))
     return insns
 
 
@@ -502,13 +507,36 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                 return enc("X86_OP_CALL_REG", src=call_reg[0])
         return enc("X86_OP_CALL", imm=c_u64(branch_target(ops[0]) if ops else 0))
     if op == "push":
-        src = reg_info(ops[0]) if ops else None
-        return enc("X86_OP_PUSH", src=src[0] if src else "X86_REG_NONE",
-                   flags=WIDTH_CONST.get(src[1], "X86_WIDTH_64") if src else "X86_WIDTH_64")
+        if len(ops) != 1:
+            raise ValueError(f"cannot encode {insn.raw}")
+        src = reg_info(ops[0])
+        width = insn.stack_width or (src[1] if src else operand_width(ops[0]))
+        if width not in {16,64}:
+            raise ValueError(f"invalid long-mode PUSH width in {insn.raw}")
+        if src:
+            return enc("X86_OP_PUSH",src=src[0],flags=WIDTH_CONST[width])
+        if is_int(ops[0]) and insn.reloc_symbol is None:
+            return enc("X86_OP_PUSH",flags=WIDTH_CONST[width],aux="X86_PUSHPOP_AUX_IMM",
+                       imm=c_u64(parse_int(ops[0])))
+        if is_mem(ops[0]):
+            return enc("X86_OP_PUSH",src=mem_base_reg(ops[0]),flags=WIDTH_CONST[width],
+                       aux=f"({mem_aux(ops[0],width)} | X86_PUSHPOP_AUX_MEM)",
+                       imm=c_u64(mem_disp(ops[0])))
+        raise ValueError(f"cannot encode PUSH source in {insn.raw}")
     if op == "pop":
-        dst = reg_info(ops[0]) if ops else None
-        return enc("X86_OP_POP", dst=dst[0] if dst else "X86_REG_NONE",
-                   flags=WIDTH_CONST.get(dst[1], "X86_WIDTH_64") if dst else "X86_WIDTH_64")
+        if len(ops) != 1:
+            raise ValueError(f"cannot encode {insn.raw}")
+        dst = reg_info(ops[0])
+        width = insn.stack_width or (dst[1] if dst else operand_width(ops[0]))
+        if width not in {16,64}:
+            raise ValueError(f"invalid long-mode POP width in {insn.raw}")
+        if dst:
+            return enc("X86_OP_POP",dst=dst[0],flags=WIDTH_CONST[width])
+        if is_mem(ops[0]):
+            return enc("X86_OP_POP",dst=mem_base_reg(ops[0]),flags=WIDTH_CONST[width],
+                       aux=f"({mem_aux(ops[0],width)} | X86_PUSHPOP_AUX_MEM)",
+                       imm=c_u64(mem_disp(ops[0])))
+        raise ValueError(f"cannot encode POP destination in {insn.raw}")
     if op.startswith("set") and op in CC_AUX:
         dst = reg_info(ops[0]) if ops else None
         if dst is None:

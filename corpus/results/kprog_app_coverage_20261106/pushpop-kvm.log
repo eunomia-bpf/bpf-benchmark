@@ -1,0 +1,71 @@
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_pushpop.py verify
+imm8_negative returncode 0
+imm8_positive returncode 0
+imm32_negative returncode 0
+imm32_positive returncode 0
+imm16 returncode 0
+push_mem_old_sp returncode 0
+pop_mem_new_sp returncode 0
+pop_mem16 returncode 0
+pop_mem_index returncode 0
+python3 /workspaces/repository/kprog/formal/tools/generate_x86_specialization_spec.py --check
+cd /workspaces/repository/kprog/formal && taskset -c 8-23 lake build KProgFormal.X86Specialization
+Build completed successfully.
+cc -Wall -Wextra -O2 -I/workspaces/repository/kprog/formal -I/workspaces/repository/kprog/x86 -I/workspaces/repository/kprog -I/workspaces/repository/vendor/libbpf/src /workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/specialization-host
+/workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c: In function ‘check_token’:
+/workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c:267:39: warning: passing argument 1 of ‘memcpy’ discards ‘volatile’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  267 |                 memcpy(__x86_stack_mem.b, stack_img, X86_SIM_STACK_BYTES);\
+      |                        ~~~~~~~~~~~~~~~^~
+/workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c:398:9: note: in expansion of macro ‘PLANT’
+  398 |         PLANT(op, dst, src);
+      |         ^~~~~
+In file included from /usr/include/features.h:502,
+                 from /usr/include/x86_64-linux-gnu/bits/libc-header-start.h:33,
+                 from /usr/include/stdint.h:26,
+                 from /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h:9,
+                 from /workspaces/repository/kprog/formal/oracles/generated_helper_calls.h:4,
+                 from /workspaces/repository/kprog/formal/oracles/x86_helper_environment_host.h:10,
+                 from /workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c:56:
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h:26:1: note: expected ‘void * restrict’ but argument is of type ‘volatile __u8 *’ {aka ‘volatile unsigned char *’}
+   26 | __NTH (memcpy (void *__restrict __dest, const void *__restrict __src,
+      | ^~~~~
+/workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c:401:5: warning: this ‘else’ clause does not guard... [-Wmisleading-indentation]
+  401 |     else
+      |     ^~~~
+/workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c:328:9: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘else’
+  328 |         do {                                                               \
+      |         ^~
+/workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c:403:9: note: in expansion of macro ‘TAKE_SNAP’
+  403 |         TAKE_SNAP(sa);
+      |         ^~~~~~~~~
+/workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c:335:53: warning: passing argument 2 of ‘memcpy’ discards ‘volatile’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  335 |                 memcpy((S).stack_sb, __x86_stack_mem.b,                   \
+      |                                      ~~~~~~~~~~~~~~~^~
+/workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c:403:9: note: in expansion of macro ‘TAKE_SNAP’
+  403 |         TAKE_SNAP(sa);
+      |         ^~~~~~~~~
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h:26:1: note: expected ‘const void * restrict’ but argument is of type ‘volatile __u8 *’ {aka ‘volatile unsigned char *’}
+   26 | __NTH (memcpy (void *__restrict __dest, const void *__restrict __src,
+      | ^~~~~
+/workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c:267:39: warning: passing argument 1 of ‘memcpy’ discards ‘volatile’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  267 |                 memcpy(__x86_stack_mem.b, stack_img, X86_SIM_STACK_BYTES);\
+      |                        ~~~~~~~~~~~~~~~^~
+/workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c:406:9: note: in expansion of macro ‘PLANT’
+  406 |         PLANT(op, dst, src);
+      |         ^~~~~
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h:26:1: note: expected ‘void * restrict’ but argument is of type ‘volatile __u8 *’ {aka ‘volatile unsigned char *’}
+   26 | __NTH (memcpy (void *__restrict __dest, const void *__restrict __src,
+      | ^~~~~
+/workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c:335:53: warning: passing argument 2 of ‘memcpy’ discards ‘volatile’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  335 |                 memcpy((S).stack_sb, __x86_stack_mem.b,                   \
+      |                                      ~~~~~~~~~~~~~~~^~
+/workspaces/repository/kprog/formal/oracles/test_x86_specialization_host.c:543:9: note: in expansion of macro ‘TAKE_SNAP’
+  543 |         TAKE_SNAP(sb);
+      |         ^~~~~~~~~
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h:26:1: note: expected ‘const void * restrict’ but argument is of type ‘volatile __u8 *’ {aka ‘volatile unsigned char *’}
+   26 | __NTH (memcpy (void *__restrict __dest, const void *__restrict __src,
+      | ^~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/pushpop-build/specialization-host
+MISMATCH direct count 47 want 49
+x86 specialization host cross-check: FAIL (1)
+make: *** [corpus/results/kprog_app_coverage_20261106/Makefile:183: pushpop-formal] Error 1

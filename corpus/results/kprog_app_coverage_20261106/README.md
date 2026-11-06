@@ -411,3 +411,42 @@ now accepts an explicit frozen generator; `defined-final` pins Python modules,
 helper declarations, C headers and native proof copies together. Its raw
 constructor outcomes supersede the earlier mutable-input/version diagnostics;
 all earlier records remain retained.
+
+
+## PUSH immediate and memory, POP memory: accepted safety bug repaired
+
+The production constructor formerly encoded every nonregister PUSH as
+`PUSH REG_NONE` (zero) and discarded POP memory destinations. The real bound
+loader accepted a candidate whose native `push 1; pop rax` selected an unsafe
+packet-end dereference while the simulator selected the safe zero arm. The
+unsafe native candidate was never executed. The before-fix acceptance is kept
+in `pushpop-before-bound/outcomes.json` inside the archive below.
+
+PUSH now preserves sign-extended immediate values and memory sources; POP
+preserves memory destinations. Operand-size16 uses a two-byte stack step.
+Memory PUSH computes its address before decrementing SP; memory POP computes
+its destination after incrementing SP, including indexed addresses. Definedness
+tracks those stack effects and known index literals. Both forms use the existing
+full-field `RUN_OP` route, removing two shortcuts that would lose AUX/IMM.
+The generated C/Python/Lean dispatch contracts agree; no ISA operation or
+runtime assertion was inserted.
+
+Commands, all through this directory's Makefile:
+
+- `pushpop-host`: all9 native/simulator cases return matching expected values.
+- `pushpop-kvm`: all9 generated programs pass the verifier and actual test run.
+- `pushpop-after-kvm`: the previously accepted unsafe candidate is rejected by
+  the real generation-bound verifier (`proof_bound=1`).
+- `pushpop-formal`: focused Lean specialization build passes; independent
+  specialization host467 and register PUSH/POP route31504 checks pass.
+- `abi-positive-compile`: all42 original micro/helper-map programs still
+  generate and compile.
+
+[Raw before/after, native, proof, KVM and source artifacts](pushpop-artifacts.tar.gz)
+retain all commands and verifier logs. [Bound rejection](pushpop-after-kvm.log),
+[nine KVM runs](pushpop-kvm.log), [host comparison](pushpop-host.log),
+[focused formal checks](pushpop-formal.log), and
+[42-program regression](pushpop-positive.log) are preserved separately.
+This closes the concrete PUSH/POP producer defect; full helper memory effects,
+base/address fidelity and six-application verified runtime integration remain
+active required work.

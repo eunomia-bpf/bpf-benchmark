@@ -107,8 +107,8 @@ def dispatch : Op -> Dispatch
   | .testReg => .directMacro
   | .jcc => .branchHandler
   | .jmp => .branchHandler
-  | .push => .directMacro
-  | .pop => .directMacro
+  | .push => .genericRunOp
+  | .pop => .genericRunOp
   | .call => .branchHandler
   | .cmov => .directMacro
   | .setcc => .directMacro
@@ -257,8 +257,8 @@ def chainMacro : Op -> String
   | .testReg => "X86_SIM_L_EXEC_CMP_REG_OP_AUX"
   | .jcc => ""
   | .jmp => ""
-  | .push => "X86_SIM_L_EXEC_PUSH"
-  | .pop => "X86_SIM_L_EXEC_POP"
+  | .push => "X86_SIM_L_EXEC_PUSH_OP"
+  | .pop => "X86_SIM_L_EXEC_POP_OP"
   | .call => ""
   | .cmov => "X86_SIM_L_EXEC_CMOV"
   | .setcc => "X86_SIM_L_EXEC_SETCC_STEP"
@@ -332,8 +332,8 @@ def directMacro : Op -> String
   | .testReg => "X86_SIM_L_EXEC_CMP_REG_OP"
   | .jcc => ""
   | .jmp => ""
-  | .push => "X86_SIM_L_EXEC_PUSH"
-  | .pop => "X86_SIM_L_EXEC_POP"
+  | .push => ""
+  | .pop => ""
   | .call => ""
   | .cmov => "X86_SIM_L_EXEC_CMOV"
   | .setcc => "X86_SIM_L_EXEC_SETCC"

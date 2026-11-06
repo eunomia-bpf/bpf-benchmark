@@ -26,6 +26,7 @@ class State:
     # stack initialization remains the actual BPF verifier's responsibility.
     opaque: dict[int, int]
     pointers: dict[int, int | bool | None]
+    constants: tuple[int | None, ...]
 
 
 def check_definedness(insns, targets, exit_addr, decode):
@@ -43,7 +44,7 @@ def check_definedness(insns, targets, exit_addr, decode):
     aliases = [None] * len(regs)
     defined[ri('rdi')[0]] = defined[rsp] = FULL
     aliases[ri('rdi')[0]], aliases[rsp] = False, 0
-    initial = State(tuple(defined), tuple(aliases), 0, {}, {})
+    initial = State(tuple(defined), tuple(aliases), 0, {}, {}, (None,)*len(regs))
     states = {((), insns[0].addr): initial}
     queue = deque(states)
     # Call-string contexts retain opaque callee saves from distinct callers.
@@ -63,7 +64,8 @@ def check_definedness(insns, targets, exit_addr, decode):
                     for p in a.pointers.keys() | b.pointers.keys()}
         return State(tuple(x & y for x, y in zip(a.defined, b.defined)),
                      tuple(x if same(x, y) else None for x, y in zip(a.aliases, b.aliases)),
-                     a.flags & b.flags, opaque, pointers)
+                     a.flags & b.flags, opaque, pointers,
+                     tuple(x if x == y else None for x,y in zip(a.constants,b.constants)))
 
     def push(context, addr, state):
         if addr == exit_addr:
@@ -107,8 +109,9 @@ def check_definedness(insns, targets, exit_addr, decode):
         bits, alias = list(incoming.defined), list(incoming.aliases)
         opaque, pointers = dict(incoming.opaque), dict(incoming.pointers)
         flags = incoming.flags
+        constants = list(incoming.constants)
 
-        def write(operand, value=None, pointer=False):
+        def write(operand, value=None, pointer=False, constant=None):
             parsed = ri(operand)
             if parsed is None:
                 return
@@ -119,6 +122,11 @@ def check_definedness(insns, targets, exit_addr, decode):
             if width == 32:
                 bits[reg] |= FULL ^ 0xffffffff
             alias[reg] = pointer if width == 64 else False
+            if constant is not None:
+                constant = (constant << shift) & lane
+                constants[reg] = (constant if width in {32,64,128} else
+                                  ((constants[reg] & ~lane) | constant) if constants[reg] is not None else None)
+            else: constants[reg] = None
 
         def address(operand):
             base, ix, scale, disp = decode.parse_mem_terms(operand)
@@ -127,7 +135,10 @@ def check_definedness(insns, targets, exit_addr, decode):
                 if reg != 'X86_REG_NONE':
                     need(incoming, regs[index[reg]].removeprefix('X86_').lower(), where)
             if ix != 'X86_REG_NONE':
-                return None if base != 'X86_REG_NONE' and alias[index[base]] is not False else False
+                iv = incoming.constants[index[ix]]
+                if base != 'X86_REG_NONE' and type(alias[index[base]]) is int:
+                    return alias[index[base]] + (iv << scale) + disp if iv is not None else None
+                return False if base == 'X86_REG_NONE' or alias[index[base]] is False else None
             if base == 'X86_REG_NONE':
                 return False
             origin = alias[index[base]]
@@ -167,7 +178,7 @@ def check_definedness(insns, targets, exit_addr, decode):
 
         # Memory addresses always execute, including false CMOV sources.
         for arg in args:
-            if decode.is_mem(arg) and op != 'lea':
+            if decode.is_mem(arg) and op not in {'lea','nop','data16','cs'}:
                 address(arg)
 
         if op in {'mov', 'movabs', 'movzx', 'movsx', 'movsxd', 'movaps', 'movups', 'movbe'}:
@@ -190,7 +201,12 @@ def check_definedness(insns, targets, exit_addr, decode):
                     value, pointer = FULL, False
                 if op == 'movbe':
                     value = int.from_bytes((value & ((1 << width)-1)).to_bytes((width+7)//8, 'little'), 'big')
-                write(args[0], value, pointer)
+                constant = None
+                if src and incoming.constants[src[0]] is not None:
+                    constant = (incoming.constants[src[0]] >> src[2]) & ((1 << src[1])-1)
+                elif decode.is_int(args[1]) and insn.reloc_symbol is None:
+                    constant = decode.parse_int(args[1])
+                write(args[0], value, pointer, constant)
             elif decode.is_mem(args[0]):
                 width = decode.operand_width(args[0],src[1] if src else 64)
                 value = mask(incoming,args[1])
@@ -202,30 +218,31 @@ def check_definedness(insns, targets, exit_addr, decode):
             write(args[0], FULL, location)
         elif op == 'push':
             need(incoming,'rsp',where)
-            width = ri(args[0])[1] if ri(args[0]) else 64
+            width = insn.stack_width or (ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0]))
             size = 2 if width == 16 else 8
+            value, pointer = (read_memory(args[0],width) if decode.is_mem(args[0]) else
+                              (mask(incoming,args[0]), incoming.aliases[ri(args[0])[0]] if ri(args[0]) else False))
             offset = alias[rsp]
             alias[rsp] = offset-size if type(offset) is int else None
             # Store at the decremented native SP without observing the saved bits.
             if type(alias[rsp]) is not int:
                 raise ValueError(f'native stack address relation unresolved at {where}')
-            old_alias = incoming.aliases
             at = alias[rsp]
-            value = mask(incoming,args[0])
             for j in range(size):
                 byte = (value >> (8*j)) & 255
                 if byte != 255: opaque[at+j] = byte
                 else: opaque.pop(at+j,None)
-            pointers[at] = old_alias[ri(args[0])[0]] if ri(args[0]) else False
+            pointers[at] = pointer
         elif op == 'pop':
             need(incoming,'rsp',where)
-            width = ri(args[0])[1]
+            width = insn.stack_width or (ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0]))
             size = 2 if width == 16 else 8
             offset = alias[rsp]
             value = sum(opaque.get(offset+j,255) << (8*j) for j in range(size)) if type(offset) is int else 0
             pointer = pointers.get(offset,False) if type(offset) is int and size == 8 else False
             alias[rsp] = offset+size if type(offset) is int else None
-            write(args[0],value,pointer)
+            if ri(args[0]): write(args[0],value,pointer)
+            else: store(args[0],width,value,pointer)
         elif op.startswith('cmov'):
             need(incoming,args[0],where)
             if ri(args[1]):
@@ -284,7 +301,7 @@ def check_definedness(insns, targets, exit_addr, decode):
                     if ri(arg): write(arg)
             elif args and ri(args[0]) and op not in {'cmp','test','bt'}:
                 old = alias[ri(args[0])[0]]
-                write(args[0])
+                write(args[0],constant=0 if zero else None)
                 if op in {'add','sub'} and len(args)==2 and decode.is_int(args[1]) and type(old) is int:
                     delta = decode.parse_int(args[1])
                     if delta >= 1 << 63: delta -= 1 << 64
@@ -303,7 +320,7 @@ def check_definedness(insns, targets, exit_addr, decode):
                     else: new |= flags & (ZF|SF)
                     flags = flags & new if count is None else new
 
-        state = State(tuple(bits),tuple(alias),flags,opaque,pointers)
+        state = State(tuple(bits),tuple(alias),flags,opaque,pointers,tuple(constants))
         next_pc = following.get(addr)
         direct = insn.reloc_target if insn.reloc_target is not None else decode.branch_target(args[0]) if args else None
         if op=='call':
@@ -325,14 +342,15 @@ def check_definedness(insns, targets, exit_addr, decode):
                         need(incoming,reg,where)
             if names:
                 for reg in CALLER_SAVED:
-                    bits[ri(reg)[0]]=0;alias[ri(reg)[0]]=None
-                bits[index['X86_XMM0']]=0;alias[index['X86_XMM0']]=None
-                bits[rax]=FULL;alias[rax]=False
-                push(context,next_pc,State(tuple(bits),tuple(alias),0,opaque,pointers))
+                    bits[ri(reg)[0]]=0;alias[ri(reg)[0]]=None;constants[ri(reg)[0]]=None
+                bits[index['X86_XMM0']]=0;alias[index['X86_XMM0']]=None;constants[index['X86_XMM0']]=None
+                bits[rax]=FULL;alias[rax]=False;constants[rax]=None
+                push(context,next_pc,State(tuple(bits),tuple(alias),0,opaque,pointers,tuple(constants)))
             code = [v for kind,v in choices if kind=='code']
             if not choices and not names: code=[direct]
             for target in code:
                 bits, alias = list(state.defined), list(state.aliases)
+                constants = list(state.constants)
                 child = context + (addr,)
                 if addr in context: child=context[:context.index(addr)+1]
                 edge = context,next_pc
@@ -347,7 +365,7 @@ def check_definedness(insns, targets, exit_addr, decode):
                 if type(alias[rsp]) is not int:
                     raise ValueError(f'native call stack relation unresolved at {where}')
                 entry_sp.setdefault(child,set()).add(alias[rsp])
-                push(child,target,State(tuple(bits),tuple(alias),flags,opaque,pointers))
+                push(child,target,State(tuple(bits),tuple(alias),flags,opaque,pointers,tuple(constants)))
         elif op=='ret':
             if type(alias[rsp]) is not int or alias[rsp] not in entry_sp[context]:
                 raise ValueError(f'native ABI return has an unbalanced stack pointer at {where}')
@@ -355,7 +373,7 @@ def check_definedness(insns, targets, exit_addr, decode):
                 offset=alias[rsp]
                 alias[rsp]=offset+8 if type(offset) is int else None
                 for parent,continuation in returns.get(context,set()):
-                    push(parent,continuation,State(tuple(bits),tuple(alias),flags,opaque,pointers))
+                    push(parent,continuation,State(tuple(bits),tuple(alias),flags,opaque,pointers,tuple(constants)))
             else: need(state,'eax',where)
         elif op=='jmp':
             for target in ([v for kind,v in targets.get(addr,()) if kind=='code'] if decode.is_indirect_branch(insn) else [direct]):

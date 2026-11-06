@@ -136,6 +136,11 @@
 
 #define X86_LEA_AUX_RODATA 1U
 
+/* PUSH/POP source form; low 24 AUX bits retain memory addressing fields. */
+#define X86_PUSHPOP_AUX_IMM (1U << 24)
+#define X86_PUSHPOP_AUX_MEM (2U << 24)
+#define X86_PUSHPOP_AUX_MODE(AUX) (((__u32)(AUX) >> 24) & 0xffU)
+
 #define X86_SKB_CB_OFF 0x30LL
 #define X86_SKB_DATA_END_OFF 0x50LL
 #define X86_SKB_DATA_OFF 0xd0LL
