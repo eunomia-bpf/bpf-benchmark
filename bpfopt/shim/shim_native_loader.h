@@ -510,7 +510,14 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
                  prog->bytecode_path, result.error);
         kmsg_line("native load-failed name=%s fd=%ld error=%s",
                   prog_name ? prog_name : "", original_fd, result.error);
-        shim_native_loader_fatal_reason("manifest-entry");
+        if (shim_native_loader_requires_bound_proof())
+            shim_native_loader_fatal_reason("manifest-entry");
+        /* Unbound runs keep measuring: this program stays eBPF and is logged. */
+        if (result.prog_fd >= 0)
+            real_close(result.prog_fd);
+        kmsg_line("native pass-through-after-failure name=%s fd=%ld",
+                  prog_name ? prog_name : "", original_fd);
+        return original_fd;
     }
     kmsg_line("native load-done name=%s fd=%ld replaced=%d native_fd=%d "
               "cache_hit=%d native_bytes=%llu link_exec_ns=%llu "
