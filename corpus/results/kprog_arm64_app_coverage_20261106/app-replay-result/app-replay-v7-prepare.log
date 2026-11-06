@@ -1,0 +1,10 @@
+make: Entering directory '/workspaces/repository/kprog/arm64/build/app-runtime-v7/spark'
+docker load -i /workspaces/repository/kprog/arm64/build/app-runtime-v7/image.tar
+Loaded image: bpf-benchmark/runner-runtime:arm64-a-context-v7
+install -d /workspaces/repository/kprog/arm64/build/app-runtime-v7/spark/root
+container=$(docker create bpf-benchmark/runner-runtime:arm64-a-context-v7); \
+trap 'docker rm "$container" >/dev/null' EXIT; \
+docker export "$container" | tar -xpf - -C /workspaces/repository/kprog/arm64/build/app-runtime-v7/spark/root
+WARNING: The requested image's platform (linux/arm64) does not match the detected host platform (linux/amd64/v3) and no specific platform was requested
+install -m 0755 qemu-init /workspaces/repository/kprog/arm64/build/app-runtime-v7/spark/root/qemu-init
+make: Leaving directory '/workspaces/repository/kprog/arm64/build/app-runtime-v7/spark'

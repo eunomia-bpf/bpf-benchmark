@@ -396,6 +396,20 @@ qemu-context-v2-app:
 runtime-results:
 	python3 $(HERE)/runtime_results.py $(RUNTIME_RESULTS_ARGS)
 
+.PHONY: app-replay-build
+app-replay-build:
+	python3 $(HERE)/app_replay.py build $(RUNTIME_BASE) $(RUNTIME_IMAGE)
+
+.PHONY: app-replay-run app-replay-collect
+app-replay-run:
+	taskset -c 8-11 $(MAKE) -C $(RUNTIME_BASE)/spark run \
+		ROOTFS=$(RUNTIME_BASE)/root IMAGE_TAR=$(RUNTIME_BASE)/image.tar APP=$(APP) \
+		SAMPLES=1 WORKLOAD_DURATION=2
+	$(MAKE) -f $(HERE)/Makefile app-replay-collect RUNTIME_BASE=$(RUNTIME_BASE)
+
+app-replay-collect:
+	cp -a $(RUNTIME_BASE)/root/workspaces/repository/corpus/results/. $(ROOT)/corpus/results/
+
 .PHONY: katran-root-build
 katran-root-build: direct-header-generate
 	python3 $(HERE)/katran_root.py $(HERE)/$(PHASE)
