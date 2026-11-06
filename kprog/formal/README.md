@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0986 - four theorems carry six vacuous arms
+
+The section makes a claim about the proof tree's shape rather than a count: the
+nonmember arm of each dispatch contract is vacuous only because a totality
+theorem proves the umbrella covers every constructor, and four such theorems
+carry all six arms.
+
+Both numbers are theorem declarations, so both were checked against the modules:
+four totality theorems and six nonmember arms, which is what the sentence
+states. The source says the same thing in a comment, that the vacuity is a
+theorem rather than a remark, and the paper repeats the distinction.
+
+The check reports a mismatch in either direction, verified by changing the
+stated count to five. Census unchanged; one claim about the proof's shape is
+bound.
+
 ### Step 0985 - the new check read a fifth of its subject
 
 The check that reads oracle sizes was reading five of them. A size may be

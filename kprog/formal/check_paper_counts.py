@@ -5046,6 +5046,7 @@ def main() -> None:
     # Oracle sizes are host outputs rather than gate banners, so the
     # hosts are built and read rather than trusted.
     problems.extend(oracle_sizes(text))
+    problems.extend(vacuity_arms())
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
@@ -5152,6 +5153,31 @@ def oracle_sizes(text: str) -> list[str]:
     for v in sorted(stated - printed):
         out.append("the section states a %d-case oracle and no host in the "
                    "tree prints that count" % v)
+    return out
+
+
+def vacuity_arms() -> list[str]:
+    """Problems with the claim that six nonmember arms rest on four theorems.
+
+    The section says the nonmember arm of each dispatch contract is vacuous
+    only because a totality theorem proves the umbrella covers every
+    constructor, and that four such theorems carry all six arms. Both counts
+    are theorem declarations, so a new arm or a lost totality theorem would
+    leave the sentence describing a tree it no longer matches.
+    """
+    here = pathlib.Path(__file__).parent / "KProgFormal"
+    totals = arms = 0
+    for f in here.glob("*Dispatch*.lean"):
+        body = f.read_text(errors="ignore")
+        totals += len(re.findall(r"^theorem \w*_ops_total\b", body, re.M))
+        arms += len(re.findall(r"^theorem \w*nonmember_unhandled\w*",
+                               body, re.M))
+    out = []
+    for stated, actual, what in ((4, totals, "totality theorems"),
+                                 (6, arms, "nonmember arms")):
+        if stated != actual:
+            out.append("the section states %d %s and the tree has %d"
+                       % (stated, what, actual))
     return out
 
 
