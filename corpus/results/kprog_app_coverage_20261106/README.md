@@ -200,3 +200,15 @@ scoped regression command is the one above with
 passing native/indirect-jump/timeout tests and the 29 unchanged micro sources
 for that C-only revision. Later encoder fixes can legitimately change the
 micro source comparison.
+
+Each phase's `compiled-objects.tar.gz` retains the completed successful BPF
+compiler outputs, alongside the generated source/input archives and raw load
+logs. Failed/in-flight compiler outputs remain in the work directories; no
+program failure was dropped. The expanded baseline KVM batch attempted 185
+compiled artifacts: 43 accepted and 142 failed (132 verifier rejections and
+10 load-preparation failures). Cilium's separate batch adds two accepted
+artifacts. These counts are artifact observations with the ABI/helper
+limitations above. The running queues and the table can advance beyond this
+checkpoint. The shared coordination file now requests R's public `make corpus`
+stock-control inventory for all six applications, to obtain current loaded
+program names/types/IDs without introducing a new launcher.
