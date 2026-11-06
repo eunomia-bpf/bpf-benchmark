@@ -173,33 +173,47 @@ Per-stressor, both arms did the same work (one stats-on run): syscall
 These pass through and do not stop the run, so the measurement is complete
 with 17 of 25 programs native.
 
-## katran: linked, now rejected by the kernel
+## katran: measures once pointed at the build's own manifest
 
-`balancer_ingress` is katran's only program, and it has not replaced yet,
-so **katran has no native number**. Its defect moved during this work,
-which is progress worth recording:
+The build writes `manifest.json` into the staged katran directory, the
+image carries it, and its `native_object` entries resolve relative to
+themanifest's own directory — so pointing the shim at
+`/artifacts/user/native-bpf/x86_64/katran/manifest.json` works with no
+rewriting. That also cleared the EPERM, which was an artefact of the
+hand-built manifests pointing at a stale object name.
 
-| manifest | failure |
-| --- | --- |
-| `katran-real-10` | `simulator proof contains an unresolved map/kfunc relocation` |
-| `katran-real-14` | `BPF_PROG_LOAD native_lab stub: Permission denied` |
+```
+corpus/results/x86_kvm_corpus_20261106_230835_743350   status ok
+1 program replaced (balancer_ingress), 0 failed
+```
 
-So the proof now links and reaches the kernel; the kernel refuses it with
-EPERM rather than EINVAL. The blob is `prog_type=6 blob_bytes=10243
-reloc_records=90 chunks=81`, well under the 512-chunk bound, so the
-refusal is not a chunk-count limit.
+| | katran |
+| --- | ---: |
+| packets sent in 60 s, baseline eBPF | 81,967,900 |
+| packets sent in 60 s, native | 83,273,693 |
+| **native/eBPF** | **1.016x** |
+| reference (2026-05-29) | **1.102x** |
 
-The only `-EPERM` returns in `kinsn/module/x86/bpf_x86_native_lab.c` are
-five `if (!capable(CAP_SYS_ADMIN))` sites, and two facts place the failure
-among them rather than at the blob size: katran's stub context reports
-`proof_bound=1` where bcc's working loads report `proof_bound=0`, and
-katran's shim log stops after `loaded shared object` + `source-context`
-with **no** `blob_upload` line, while bcc's log carries them. The bound
-path is therefore the one that demands `CAP_SYS_ADMIN`, and the writing
-process does not have it in this guest — bcc is the control that proves
-the unbound path works in exactly this environment. Reported to the
-kernel/module owner with the question of whether the bound path should
-require `CAP_SYS_ADMIN` rather than `CAP_BPF`/`bpf_capable()`.
+Both arms ran 60 s. Katran's work counters are equal in kind: `pass` 3 in
+both, `drop`/`encap_fail`/`lru_miss`/`consistent_hash_drop` all 0, and
+`tx`/`total` equal to the packet count — the same forwarding behaviour,
+so the comparison is like-for-like.
+
+**Does not reproduce at the reference size**: 1.016x against 1.102x. One
+of katran's programs runs native here; the reference's advantage was
+larger, which is a property of the native code, not of whether it ran.
+
+### Earlier katran attempts, and why they were not native
+
+| manifest | failure | replacements |
+| --- | --- | ---: |
+| `katran-real-10` (hand-built) | `simulator proof contains an unresolved map/kfunc relocation` | 0 |
+| `katran-real-14` (hand-built) | `BPF_PROG_LOAD native_lab stub: Permission denied` | 0 |
+| build's own `manifest.json` | — | **1** |
+
+The EPERM was traced to the five `capable(CAP_SYS_ADMIN)` sites in
+`bpf_x86_native_lab.c`, and the hand-built manifests were reaching them
+via a stale object name. With the build's manifest no such path is taken.
 
 ## otelcol: three packaging mismatches, each measured
 
