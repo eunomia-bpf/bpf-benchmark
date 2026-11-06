@@ -15,12 +15,13 @@ spills can be erased only after proving they are private. Helper results and
 arguments remain observable.
 
 This is a conditional composition theorem, not a per-program validation result.
-There is currently no compiled-BPF execution semantics or byte-decoding,
-whole-state native block semantics exported by `kprog/formal`. Its handler
-and condition-table theorems cannot instantiate this certificate. The checker
-must consume lane V's reference semantics when those interfaces exist; this
-directory must not introduce a second native ISA semantics. No micro program
-or application artifact is certified by `Composition.lean` alone.
+There is currently no compiled-BPF execution semantics or per-program block
+checker. Lane V now exports byte-decoded, whole-state CMOV transitions and
+canonical memory/helper events in `KProgFormal.Reference`; the remaining
+reference operations are under construction. The composition uses those
+canonical event types. This directory must not introduce a second native ISA
+semantics. No micro program or application artifact is certified by
+`Composition.lean` alone.
 
 The native-lab modules now require a seal for nonzero-generation calls.
 `blob<N>.binding` accepts a 64-byte `native_lab_binding` record followed by
@@ -60,19 +61,39 @@ runtime artifacts. The host test checks relocation-byte mismatches, all wire
 offsets, generation boundaries and the shared production validation functions
 with ASan/UBSan. Results are in `../results/kprog_tv_20261106/`.
 
-The x86 guest also exercises the real shared loader's `FdLoadOptions` path.
-It native-links one short and one long test entry, uploads the proof and seal,
-and runs the resulting one-chunk and three-chunk native programs. These are
+The x86 guest also exercises the real shared loader's `FdLoadOptions` path and
+public manifest C ABI, including short, three-chunk, helper and map entries.
+It prepares a real clang BPF object, reuses the original map ID, uploads its
+proof and seal, and runs native code returning 2. Both architectures reject
+uninitialized stack, bad helper arguments and out-of-bounds map values, and
+accept a 70,000-instruction proof restored to short native code. These are
 binding regression fixtures, not simulator translation-validation certificates.
 
 The group seal identifies byte zero and the ordered immutable upload. The TV
 certificate must still establish source-entry correspondence, reference-ISA
 ABI compatibility and specialization fidelity. The
-application C loader entry point currently supplies no simulator proof, and
-the kernel proof-region interface forbids helper calls and pseudo map loads.
-Consequently neither application binding nor helper/map program validation is
-completed by this change. Substituting the original application's BPF for
-the simulator proof would not meet the translation-validation obligation.
+application C loader entry point obtains the compiled simulator from paired
+manifest fields `simulator_object` and `simulator_program` in the selected
+`objects` entry. For example, add
+`"simulator_object":"proof.bpf.o","simulator_program":"proof_entry"`
+alongside the existing `program`, `native_object` and `symbol` fields. Paths
+resolve relative to the manifest. The explicit BPF entry must have the original
+program type. `bpf_object__prepare` performs real ELF/CO-RE relocations; referenced
+maps reuse original-program identities with matching layouts, including internal
+maps. Missing referenced maps fail; unused declarations do not create maps.
+The object keeps map FDs alive through the bound load. Supplying both raw proof
+instructions and a manifest proof fails. Substituting original app BPF for the
+simulator would not meet the translation-validation obligation.
+
+`native-proof-regions.patch` is applied idempotently by the existing host kernel
+build recipes. Rebuild the kernel and module together: native-proof descriptors
+now admit standard resolved helper calls and map FD/value loads, enforce
+initialized stack independently of CAP_PERFMON, and reserve native stack through
+metadata. A reservation never initializes verifier state. Proof counts use u32
+and a generation-bound size query up to the kernel's million-instruction budget;
+long EXIT redirections use JMP32 JA. Unresolved BPF subprogram/kfunc identities
+are currently rejected; transporting their metadata and preserving their call
+frames remains assigned implementation work.
 
 `make -C kprog/tv inventory` records both architectures' 29 configured micro
 programs and every entry in the C/A application generation inventories. Each
@@ -87,9 +108,9 @@ The trusted base of an instantiated proof consists of:
 
 - Kernel verifier soundness for the **instantiated** BPF program, including its
   helpers, context conversion, maps, verifier rewrites and execution environment.
-  This must name the actual privilege-dependent policy: this kernel permits
-  uninitialized stack reads with CAP_PERFMON. Acceptance cannot establish
-  stack-initialization safety or any property stronger than that policy.
+  Native-proof regions force initialized-stack checking even with CAP_PERFMON;
+  ordinary BPF and instruction-slice descriptors retain their existing policy.
+  This requires the paired patched kernel and native module, not a stock image.
 - Lane V's reference ISA specification and its connection to the hardware,
   checked independently by lane F. ISA decoding, ABI entry conditions and the
   trace projection must either be proved or explicitly added to this base.

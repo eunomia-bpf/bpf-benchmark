@@ -36,6 +36,7 @@
 #include <filesystem>
 #include <fstream>
 #include <limits>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <sstream>
@@ -330,7 +331,7 @@ constexpr NativeLabTarget kNativeLabTarget = {
 constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 constexpr const char *kDebugfsDir = "/sys/kernel/debug";
 constexpr uint32_t kMaxBlobs = 512;
-constexpr size_t kMaxBoundProofInsns = 4091;
+constexpr size_t kMaxBoundProofInsns = 1000000 - 4;
 
 bool native_lab_needs_tail_call_probe()
 {
@@ -1036,22 +1037,24 @@ std::vector<bpf_insn> bound_proof_sequence(const std::vector<bpf_insn> &program)
                  std::to_string(i));
         }
         if ((cls == BPF_JMP || cls == BPF_JMP32) &&
-            BPF_OP(insn.code) == BPF_CALL) {
-            fail("native_kernel bound proof contains a call at instruction " +
+            BPF_OP(insn.code) == BPF_CALL && insn.src_reg) {
+            fail("native proof call has an unresolved function identity at instruction " +
                  std::to_string(i));
         }
         if (cls == BPF_JMP && BPF_OP(insn.code) == BPF_EXIT) {
             insn.code = BPF_JMP | BPF_JA;
             insn.dst_reg = 0;
             insn.src_reg = 0;
-            insn.off = static_cast<int16_t>(proof.size() - i - 1);
-            insn.imm = 0;
+            const size_t distance = proof.size() - i - 1;
+            if (distance <= static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
+                insn.off = static_cast<int16_t>(distance);
+                insn.imm = 0;
+            } else {
+                insn.code = BPF_JMP32 | BPF_JA;
+                insn.off = 0;
+                insn.imm = static_cast<int32_t>(distance);
+            }
             exit_count++;
-        }
-        if (cls == BPF_LD && BPF_MODE(insn.code) == BPF_IMM &&
-            insn.src_reg != 0) {
-            fail("native_kernel bound proof contains pseudo ldimm64 at instruction " +
-                 std::to_string(i));
         }
     }
     if (exit_count == 0) {
@@ -4647,6 +4650,98 @@ std::vector<int> reopen_relocated_map_fds(const std::vector<uint32_t> &map_ids)
     return fds;
 }
 
+using SimulatorObject = std::unique_ptr<bpf_object, decltype(&bpf_object__close)>;
+
+SimulatorObject prepare_simulator_proof(
+    const std::filesystem::path &path, const std::string &entry,
+    const bpf_prog_info &original, const CompanionLoad &companion,
+    std::vector<bpf_insn> &proof)
+{
+    bpf_object *raw = bpf_object__open_file(path.c_str(), nullptr);
+    const long open_error = libbpf_get_error(raw);
+    if (open_error || !raw) {
+        fail("open simulator proof " + path.string() + ": " +
+             libbpf_error_string(open_error ? open_error : -errno));
+    }
+    SimulatorObject object(raw, bpf_object__close);
+    bpf_program *selected = bpf_object__find_program_by_name(raw, entry.c_str());
+    if (!selected) {
+        fail("simulator proof entry not found: " + entry + " in " + path.string());
+    }
+    if (static_cast<uint32_t>(bpf_program__type(selected)) != original.type) {
+        fail("simulator proof program type does not match original program: " + entry);
+    }
+    bpf_program *program;
+    bpf_object__for_each_program(program, raw) {
+        const int err = bpf_program__set_autoload(program, program == selected);
+        if (err) {
+            fail("set simulator proof entry: " + libbpf_error_string(err));
+        }
+    }
+    bpf_map *map;
+    bpf_object__for_each_map(map, raw) {
+        const std::string name = bpf_map__name(map);
+        std::optional<uint32_t> identity;
+        if (const auto exact = companion.map_addr_ids.find(name); exact != companion.map_addr_ids.end()) {
+            identity = exact->second;
+        }
+        if (bpf_map__is_internal(map)) {
+            for (const MapMeta &source : companion.maps) {
+                if (source.name == name || ends_with(source.name, name)) {
+                    if (identity && *identity != source.kernel_id) {
+                        fail("simulator internal map has ambiguous source identities: " + name);
+                    }
+                    identity = source.kernel_id;
+                }
+            }
+        }
+        if (!identity) {
+            /* Objects can declare maps unused by the selected entry. Never
+             * create a replacement app map; a referenced missing map makes
+             * prepare fail instead of supplying invented specialization data.
+             */
+            const int err = bpf_map__set_autocreate(map, false);
+            if (err) {
+                fail("disable unmatched simulator map " + name + ": " + libbpf_error_string(err));
+            }
+            continue;
+        }
+        ScopedFd fd(bpf_map_get_fd_by_id(*identity));
+        if (fd.get() < 0) {
+            fail("open simulator proof map " + name + ": " + std::strerror(errno));
+        }
+        const auto shape = load_map_info(fd.get());
+        if (shape.type != static_cast<uint32_t>(bpf_map__type(map)) ||
+            shape.key_size != bpf_map__key_size(map) ||
+            shape.value_size != bpf_map__value_size(map) ||
+            shape.max_entries != bpf_map__max_entries(map)) {
+            fail("simulator proof map layout does not match source map: " + name);
+        }
+        const int err = bpf_map__reuse_fd(map, fd.get());
+        if (err) {
+            fail("reuse simulator proof map " + name + ": " + libbpf_error_string(err));
+        }
+    }
+    const int err = bpf_object__prepare(raw);
+    if (err) {
+        fail("relocate simulator proof " + path.string() + ": " + libbpf_error_string(err));
+    }
+    const auto *instructions = bpf_program__insns(selected);
+    const size_t count = bpf_program__insn_cnt(selected);
+    if (!instructions || !count) {
+        fail("relocated simulator proof is empty: " + entry);
+    }
+    proof.assign(instructions, instructions + count);
+    for (const bpf_insn &insn : proof) {
+        if (insn.code == (BPF_LD | BPF_DW | BPF_IMM) &&
+            (insn.src_reg == BPF_PSEUDO_MAP_FD || insn.src_reg == BPF_PSEUDO_MAP_VALUE) &&
+            insn.imm < 0) {
+            fail("simulator proof references a map without source-program identity: " + entry);
+        }
+    }
+    return object;
+}
+
 void close_fd_vector(std::vector<int> &fds)
 {
     for (int fd : fds) {
@@ -4708,6 +4803,9 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     }
     std::vector<std::filesystem::path> native_data_object_paths;
     std::vector<NativeMapRule> map_rules;
+    std::filesystem::path simulator_object_path;
+    std::string simulator_program;
+    std::vector<bpf_insn> proof_insns = options.proof_insns;
     uint64_t manifest_resolve_ns = 0;
     if (native_object_path.empty()) {
         if (source_insns.empty()) {
@@ -4735,6 +4833,8 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         }
         native_data_object_paths = std::move(resolution->native_data_object_paths);
         map_rules = std::move(resolution->map_rules);
+        simulator_object_path = std::move(resolution->simulator_object_path);
+        simulator_program = std::move(resolution->simulator_program);
     }
     if (native_data_object_paths.empty()) {
         native_data_object_paths.push_back(native_object_path);
@@ -4753,6 +4853,14 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             source_insns.empty() ? nullptr : source_insns.data(),
             source_insns.size(),
             std::move(map_rules));
+    SimulatorObject simulator_object(nullptr, bpf_object__close);
+    if (!simulator_object_path.empty()) {
+        if (!proof_insns.empty()) {
+            fail("simulator proof supplied both as raw instructions and manifest object");
+        }
+        simulator_object = prepare_simulator_proof(simulator_object_path,
+            simulator_program, prog_info, companion, proof_insns);
+    }
     const auto native_data_symbols_start = std::chrono::steady_clock::now();
     {
         OpenProcessMapsCache open_maps_cache;
@@ -4788,7 +4896,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     try {
             loaded_stub = upload_and_load_stub(
                 linked,
-                options.proof_insns,
+                proof_insns,
                 prog_info.type,
                 stub_attrs,
                 companion.has_tail_call && native_lab_needs_tail_call_probe(),

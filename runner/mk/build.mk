@@ -120,6 +120,7 @@ $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf: $(HOST_KERNEL_BUILD_DIR_X
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 olddefconfig
 
 host-kernel-x86: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
+	python3 "$(ROOT_DIR)/kprog/tv/apply_kernel_patch.py"
 	"$(ROOT_DIR)/runner/scripts/with-katran-veth-xdp-ring" "$(KERNEL_DIR)" \
 		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
 	tmp="$$(mktemp -d "$(HOST_KERNEL_BUILD_DIR_X86)/.modules-install.XXXXXX")"; \
@@ -128,7 +129,8 @@ host-kernel-x86: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
 	bash "$(ROOT_DIR)/runner/scripts/publish-kernel-modules" "$$tmp" "$(HOST_KERNEL_MODULES_CONTEXT_X86)"; \
 	trap - EXIT
 
-$(HOST_KERNEL_IMAGE_X86) $(HOST_KERNEL_VMLINUX_X86) $(HOST_KERNEL_MODULES_ORDER_X86) &: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
+$(HOST_KERNEL_IMAGE_X86) $(HOST_KERNEL_VMLINUX_X86) $(HOST_KERNEL_MODULES_ORDER_X86) &: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf $(ROOT_DIR)/kprog/tv/native-proof-regions.patch
+	python3 "$(ROOT_DIR)/kprog/tv/apply_kernel_patch.py"
 	"$(ROOT_DIR)/runner/scripts/with-katran-veth-xdp-ring" "$(KERNEL_DIR)" \
 		$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
 	tmp="$$(mktemp -d "$(HOST_KERNEL_BUILD_DIR_X86)/.modules-install.XXXXXX")"; \
@@ -145,6 +147,7 @@ $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf: $(HOST_KERNEL_BUILD_DIR
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
 
 host-kernel-arm64: $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf
+	python3 "$(ROOT_DIR)/kprog/tv/apply_kernel_patch.py"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image vmlinuz.efi modules -j"$(IMAGE_BUILD_JOBS)"
 	tmp="$$(mktemp -d /tmp/bpfext-modules-arm64.XXXXXX)"; \
 	trap 'rm -rf "$$tmp"' EXIT; \
@@ -153,7 +156,8 @@ host-kernel-arm64: $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf
 	install -d "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install"; \
 	cp -a "$$tmp/." "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install/"
 
-$(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) $(HOST_KERNEL_VMLINUX_ARM64) $(HOST_KERNEL_MODULES_ORDER_ARM64) &: $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf
+$(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) $(HOST_KERNEL_VMLINUX_ARM64) $(HOST_KERNEL_MODULES_ORDER_ARM64) &: $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf $(ROOT_DIR)/kprog/tv/native-proof-regions.patch
+	python3 "$(ROOT_DIR)/kprog/tv/apply_kernel_patch.py"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image vmlinuz.efi modules -j"$(IMAGE_BUILD_JOBS)"
 	tmp="$$(mktemp -d /tmp/bpfext-modules-arm64.XXXXXX)"; \
 	trap 'rm -rf "$$tmp"' EXIT; \

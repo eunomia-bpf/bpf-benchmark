@@ -1,0 +1,1924 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+make kernel-build-arm64
+make[1]: Entering directory '/workspaces/repository/kprog/tv'
+python3 apply_kernel_patch.py
+native proof-region kernel patch already applied
+make -C ../../vendor/linux-framework O=/workspaces/repository/kprog/tv/build-kernel-arm64 \
+	ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j8 Image
+make[2]: Entering directory '/workspaces/repository/vendor/linux-framework'
+make[3]: Entering directory '/workspaces/repository/kprog/tv/build-kernel-arm64'
+  GEN     Makefile
+  DESCEND bpf/resolve_btfids
+  INSTALL libsubcmd_headers
+  CALL    /workspaces/repository/vendor/linux-framework/scripts/checksyscalls.sh
+  CC      kernel/bpf/arena.o
+  CC      kernel/bpf/range_tree.o
+  CC      net/ipv4/fib_trie.o
+  CC      net/ipv6/tcp_ipv6.o
+  CC      net/ipv6/ping.o
+  CC      kernel/bpf/dispatcher.o
+  CC      kernel/bpf/devmap.o
+  CC      net/ipv4/fib_notifier.o
+  CC      kernel/bpf/cpumap.o
+  CC      net/ipv4/inet_fragment.o
+  CC      kernel/bpf/offload.o
+  CC      kernel/bpf/net_namespace.o
+  CC      net/ipv4/ping.o
+  CC      kernel/bpf/tcx.o
+  CC      net/ipv6/exthdrs.o
+  CC      kernel/bpf/stackmap.o
+  CC      net/netlabel/netlabel_domainhash.o
+  CC      net/ipv6/datagram.o
+  CC      net/ipv6/ip6_flowlabel.o
+  CC      net/ipv4/ip_tunnel_core.o
+  CC      net/ipv4/gre_offload.o
+  CC      kernel/bpf/cgroup_iter.o
+  CC      net/netlabel/netlabel_addrlist.o
+  CC      net/ipv6/inet6_connection_sock.o
+  CC      net/ipv6/udp_offload.o
+  CC      kernel/bpf/bpf_cgrp_storage.o
+  CC      net/netlabel/netlabel_mgmt.o
+  CC      net/ipv4/metrics.o
+  CC      net/ipv4/netlink.o
+  CC      net/netlabel/netlabel_unlabeled.o
+  CC      kernel/bpf/cgroup.o
+  CC      kernel/bpf/reuseport_array.o
+  CC      net/ipv6/seg6.o
+  CC      net/ipv6/fib6_notifier.o
+  CC      net/ipv6/rpl.o
+  CC      net/ipv4/nexthop.o
+  CC      net/9p/client.o
+  CC      net/netlabel/netlabel_cipso_v4.o
+  CC      net/ipv6/ioam6.o
+  CC      net/ipv4/udp_tunnel_stub.o
+  CC      net/netlabel/netlabel_calipso.o
+  CC      net/ipv6/sysctl_net_ipv6.o
+  CC      kernel/bpf/bpf_struct_ops.o
+  CC      net/ipv4/sysctl_net_ipv4.o
+  CC      kernel/bpf/cpumask.o
+  CC      net/ipv6/ip6mr.o
+  AR      net/netlabel/built-in.a
+  CC      net/ipv6/xfrm6_policy.o
+  CC      kernel/bpf/bpf_lsm_proto.o
+  CC      net/9p/trans_fd.o
+  CC      net/9p/trans_virtio.o
+  CC      kernel/bpf/bpf_lsm.o
+  CC      net/ipv4/proc.o
+  CC      kernel/bpf/crypto.o
+  CC      kernel/bpf/relo_core.o
+  CC      kernel/bpf/btf_iter.o
+  CC      net/ipv6/xfrm6_state.o
+  AR      net/9p/built-in.a
+  CC      net/sysctl_net.o
+  CC      net/dcb/dcbnl.o
+  CC      net/dcb/dcbevent.o
+  CC      net/ipv4/fib_rules.o
+  CC      net/ipv4/ipmr.o
+  CC      kernel/bpf/btf_relocate.o
+  CC      net/ipv4/ipmr_base.o
+  CC      net/ipv6/xfrm6_input.o
+  CC      net/ipv4/syncookies.o
+  CC      net/ipv6/xfrm6_output.o
+  CC      kernel/bpf/kmem_cache_iter.o
+  CC      kernel/bpf/dmabuf_iter.o
+  AR      net/dcb/built-in.a
+  CC      net/switchdev/switchdev.o
+  CC      net/l3mdev/l3mdev.o
+  CC      net/ipv4/netfilter.o
+  CC      net/xdp/xsk.o
+  AR      kernel/bpf/built-in.a
+  AR      kernel/built-in.a
+  CC      net/xdp/xdp_umem.o
+  CC      net/ipv6/xfrm6_protocol.o
+  CC      net/ipv6/netfilter.o
+  AR      net/l3mdev/built-in.a
+  CC      net/ipv6/fib6_rules.o
+  CC      net/xdp/xsk_queue.o
+  AR      net/switchdev/built-in.a
+  CC      net/ipv4/tcp_cubic.o
+  CC      net/ipv4/tcp_bpf.o
+  CC      net/mptcp/protocol.o
+  CC      net/ipv4/udp_bpf.o
+  CC      net/ipv6/proc.o
+  CC      net/xdp/xskmap.o
+  CC      net/ipv6/syncookies.o
+  CC      net/ipv6/calipso.o
+  CC      net/xdp/xsk_buff_pool.o
+  CC      net/ipv4/cipso_ipv4.o
+  CC      net/mptcp/subflow.o
+  CC      net/handshake/alert.o
+  CC      net/ipv6/seg6_iptunnel.o
+  CC      net/ipv4/xfrm4_policy.o
+  CC      net/handshake/genl.o
+  AR      net/xdp/built-in.a
+  CC      net/ipv6/seg6_local.o
+  CC      net/ipv4/xfrm4_state.o
+  CC      net/mptcp/options.o
+  CC      net/mptcp/token.o
+  CC      net/handshake/netlink.o
+  CC      net/shaper/shaper.o
+  CC      net/mptcp/crypto.o
+  CC      net/ipv4/xfrm4_input.o
+  CC      net/ipv6/seg6_hmac.o
+  CC      net/ipv4/xfrm4_output.o
+  CC      net/handshake/request.o
+  CC      net/shaper/shaper_nl_gen.o
+  CC      net/handshake/tlshd.o
+  CC      net/handshake/trace.o
+  CC      net/mptcp/ctrl.o
+  AR      net/shaper/built-in.a
+  CC      net/mptcp/pm.o
+  CC      net/ipv4/xfrm4_protocol.o
+  CC      net/mptcp/diag.o
+  CC      net/ipv6/addrconf_core.o
+  CC      net/ipv4/bpf_tcp_ca.o
+  CC      net/mptcp/mib.o
+  AR      net/handshake/built-in.a
+  CC      net/mptcp/pm_netlink.o
+  CC      net/ipv6/exthdrs_core.o
+  CC      net/ipv6/ip6_checksum.o
+  CC      net/ipv6/ip6_icmp.o
+  CC      net/mptcp/sockopt.o
+  CC      net/ipv6/output_core.o
+  AR      net/ipv4/built-in.a
+  CC      net/mptcp/pm_userspace.o
+  CC      net/mptcp/fastopen.o
+  CC      net/mptcp/sched.o
+  CC      net/ipv6/protocol.o
+  CC      net/ipv6/ip6_offload.o
+  CC      net/mptcp/mptcp_pm_gen.o
+  CC      net/ipv6/exthdrs_offload.o
+  CC      net/ipv6/inet6_hashtables.o
+  CC      net/ipv6/mcast_snoop.o
+  CC      net/mptcp/pm_kernel.o
+  CC      net/mptcp/syncookies.o
+  CC      net/mptcp/bpf.o
+  AR      net/ipv6/built-in.a
+  AR      net/mptcp/built-in.a
+  AR      net/built-in.a
+  AR      built-in.a
+  AR      vmlinux.a
+  LD      vmlinux.o
+  GEN     .vmlinux.objs
+  MODPOST vmlinux.symvers
+WARNING: modpost: EXPORT symbol "netlbl_catmap_walk" [vmlinux] version generation failed, symbol will not be versioned.
+Is "netlbl_catmap_walk" prototyped in <asm/asm-prototypes.h>?
+WARNING: modpost: EXPORT symbol "netlbl_catmap_setbit" [vmlinux] version generation failed, symbol will not be versioned.
+Is "netlbl_catmap_setbit" prototyped in <asm/asm-prototypes.h>?
+WARNING: modpost: EXPORT symbol "netlbl_bitmap_walk" [vmlinux] version generation failed, symbol will not be versioned.
+Is "netlbl_bitmap_walk" prototyped in <asm/asm-prototypes.h>?
+WARNING: modpost: EXPORT symbol "netlbl_bitmap_setbit" [vmlinux] version generation failed, symbol will not be versioned.
+Is "netlbl_bitmap_setbit" prototyped in <asm/asm-prototypes.h>?
+WARNING: modpost: EXPORT symbol "netlbl_audit_start" [vmlinux] version generation failed, symbol will not be versioned.
+Is "netlbl_audit_start" prototyped in <asm/asm-prototypes.h>?
+  CC      .vmlinux.export.o
+  UPD     include/generated/utsversion.h
+  CC      init/version-timestamp.o
+  KSYMS   .tmp_vmlinux0.kallsyms.S
+  AS      .tmp_vmlinux0.kallsyms.o
+  LD      .tmp_vmlinux1
+  BTF     .tmp_vmlinux1
+  NM      .tmp_vmlinux1.syms
+  KSYMS   .tmp_vmlinux1.kallsyms.S
+  AS      .tmp_vmlinux1.kallsyms.o
+  LD      .tmp_vmlinux2
+  NM      .tmp_vmlinux2.syms
+  KSYMS   .tmp_vmlinux2.kallsyms.S
+  AS      .tmp_vmlinux2.kallsyms.o
+  LD      vmlinux.unstripped
+  BTFIDS  vmlinux.unstripped
+  NM      System.map
+  SORTTAB vmlinux.unstripped
+  OBJCOPY vmlinux
+  GEN     modules.builtin.modinfo
+  GEN     modules.builtin
+  OBJCOPY arch/arm64/boot/Image
+make[3]: Leaving directory '/workspaces/repository/kprog/tv/build-kernel-arm64'
+make[2]: Leaving directory '/workspaces/repository/vendor/linux-framework'
+cp build-kernel-arm64/vmlinux.symvers build-kernel-arm64/Module.symvers
+make[1]: Leaving directory '/workspaces/repository/kprog/tv'
+make module-check ARCH=arm64 KDIR=/workspaces/repository/kprog/tv/build-kernel-arm64
+make[1]: Entering directory '/workspaces/repository/kprog/tv'
+install -d build-arm64
+cp ../../kinsn/module/arm64/bpf_arm64_native_lab.c build-arm64/bpf_arm64_native_lab.c
+make -C /workspaces/repository/kprog/tv/build-kernel-arm64 M=/workspaces/repository/kprog/tv/build-arm64 ARCH=arm64 \
+	TV_ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules
+make[2]: Entering directory '/workspaces/repository/kprog/tv/build-kernel-arm64'
+make[3]: Entering directory '/workspaces/repository/kprog/tv/build-arm64'
+  CC [M]  bpf_arm64_native_lab.o
+  MODPOST Module.symvers
+  CC [M]  bpf_arm64_native_lab.mod.o
+  LD [M]  bpf_arm64_native_lab.ko
+  BTF [M] bpf_arm64_native_lab.ko
+make[3]: Leaving directory '/workspaces/repository/kprog/tv/build-arm64'
+make[2]: Leaving directory '/workspaces/repository/kprog/tv/build-kernel-arm64'
+make[1]: Leaving directory '/workspaces/repository/kprog/tv'
+install -d build-arm64/initramfs/sys build-arm64/initramfs/proc build-arm64/initramfs/dev
+cp build-arm64/test-binding-kernel build-arm64/initramfs/init
+cp build-arm64/bpf_arm64_native_lab.ko build-arm64/initramfs/module.ko
+cd build-arm64/initramfs && find . -print0 | cpio --null -o --format=newc > ../initramfs.cpio
+5594 blocks
+timeout 180 taskset -c 8-23 qemu-system-aarch64 -M virt -cpu cortex-a72 \
+	-accel tcg,thread=multi -smp 2 -m 2048 -nographic -no-reboot \
+	-kernel build-kernel-arm64/arch/arm64/boot/Image \
+	-initrd build-arm64/initramfs.cpio -append 'console=ttyAMA0 rdinit=/init panic=1' \
+	> build-arm64/kernel.log 2>&1
+cat build-arm64/kernel.log
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd083]
+[    0.000000] Linux version 7.0.0-rc2+ (root@coder-22123351-d4a5-40fc-bc3b-1b853af74a7e-c7ccfb766-mpvhz) (aarch64-linux-gnu-gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #20 SMP PREEMPT Fri Nov  6 08:27:13 UTC 2026
+[    0.000000] random: crng init done
+[    0.000000] Machine model: linux,dummy-virt
+[    0.000000] efi: UEFI not found.
+[    0.000000] OF: reserved mem: Reserved memory: No reserved-memory node in the DT
+[    0.000000] NUMA: Faking a node at [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000] NODE_DATA(0) allocated [mem 0xbfbfac80-0xbfbfdc7f]
+[    0.000000] cma: Reserved 64 MiB at 0x00000000bba00000
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: PSCIv1.1 detected in firmware.
+[    0.000000] psci: Using standard PSCI v0.2 function IDs
+[    0.000000] psci: Trusted OS migration not required
+[    0.000000] psci: SMC Calling Convention v1.0
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000]   DMA32    empty
+[    0.000000]   Normal   empty
+[    0.000000]   Device   empty
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000] percpu: Embedded 34 pages/cpu s101400 r8192 d29672 u139264
+[    0.000000] Detected PIPT I-cache on CPU0
+[    0.000000] CPU features: detected: Spectre-v2
+[    0.000000] CPU features: detected: Spectre-v4
+[    0.000000] CPU features: detected: Spectre-BHB
+[    0.000000] CPU features: detected: ARM erratum 1742098
+[    0.000000] CPU features: detected: ARM errata 1165522, 1319367, or 1530923
+[    0.000000] alternatives: applying boot alternatives
+[    0.000000] Kernel command line: console=ttyAMA0 rdinit=/init panic=1
+[    0.000000] printk: log buffer data + meta data: 2097152 + 7340032 = 9437184 bytes
+[    0.000000] Dentry cache hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 131072 (order: 8, 1048576 bytes, linear)
+[    0.000000] software IO TLB: SWIOTLB bounce buffer size adjusted to 2MB
+[    0.000000] software IO TLB: area num 2.
+[    0.000000] software IO TLB: mapped [mem 0x00000000b9600000-0x00000000b9800000] (2MB)
+[    0.000000] Fallback order for Node 0: 0 
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 524288
+[    0.000000] Policy zone: DMA
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
+[    0.000000] ftrace: allocating 49524 entries in 194 pages
+[    0.000000] ftrace: allocated 194 pages with 3 groups
+[    0.000000] rcu: Hierarchical RCU implementation.
+[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=4096 to nr_cpu_ids=2.
+[    0.000000] 	Trampoline variant of Tasks RCU enabled.
+[    0.000000] 	Rude variant of Tasks RCU enabled.
+[    0.000000] 	Tracing variant of Tasks RCU enabled.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 10 jiffies.
+[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=2
+[    0.000000] RCU Tasks: Setting shift to 1 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=2.
+[    0.000000] RCU Tasks Rude: Setting shift to 1 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=2.
+[    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+[    0.000000] Root IRQ handler: gic_handle_irq
+[    0.000000] GICv2m: range[mem 0x08020000-0x08020fff], SPI[80:143]
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] arch_timer: cp15 timer running at 62.50MHz (virt).
+[    0.000000] clocksource: arch_sys_counter: mask: 0x1ffffffffffffff max_cycles: 0x1cd42e208c, max_idle_ns: 881590405314 ns
+[    0.000075] sched_clock: 57 bits at 63MHz, resolution 16ns, wraps every 4398046511096ns
+[    0.005904] Console: colour dummy device 80x25
+[    0.008324] Calibrating delay loop (skipped), value calculated using timer frequency.. 125.00 BogoMIPS (lpj=625000)
+[    0.008504] pid_max: default: 32768 minimum: 301
+[    0.014388] landlock: Up and running.
+[    0.014423] Yama: becoming mindful.
+[    0.014604] SELinux:  Initializing.
+[    0.017540] LSM support for eBPF active
+[    0.019639] Mount-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    0.019692] Mountpoint-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    0.027620] VFS: Finished mounting rootfs on nullfs
+[    0.050851] cacheinfo: Unable to detect cache hierarchy for CPU 0
+[    0.065435] rcu: Hierarchical SRCU implementation.
+[    0.065491] rcu: 	Max phase no-delay instances is 1000.
+[    0.066895] Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[    0.070903] EFI services will not be available.
+[    0.072759] smp: Bringing up secondary CPUs ...
+[    0.077309] Detected PIPT I-cache on CPU1
+[    0.078454] CPU1: Booted secondary processor 0x0000000001 [0x410fd083]
+[    0.082342] smp: Brought up 1 node, 2 CPUs
+[    0.082387] SMP: Total of 2 processors activated.
+[    0.082415] CPU: All CPU(s) started at EL1
+[    0.082644] CPU features: detected: 32-bit EL0 Support
+[    0.082657] CPU features: detected: 32-bit EL1 Support
+[    0.082717] CPU features: detected: CRC32 instructions
+[    0.082920] CPU features: detected: PMUv3
+[    0.091747] alternatives: applying system-wide alternatives
+[    0.097931] CPU features: emulated: Privileged Access Never (PAN) using TTBR0_EL1 switching
+[    0.117719] Memory: 1927240K/2097152K available (15552K kernel code, 9226K rwdata, 10624K rodata, 5952K init, 11680K bss, 99520K reserved, 65536K cma-reserved)
+[    0.149225] devtmpfs: initialized
+[    0.175804] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.176416] posixtimers hash table entries: 1024 (order: 2, 16384 bytes, linear)
+[    0.176701] futex hash table entries: 512 (32768 bytes on 1 NUMA nodes, total 32 KiB, linear).
+[    0.180053] 19440 pages in range for non-PLT usage
+[    0.180113] 510960 pages in range for PLT usage
+[    0.185775] DMI not present or invalid.
+[    0.201230] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.212349] DMA: preallocated 256 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.212882] audit: initializing netlink subsys (disabled)
+[    0.215152] audit: type=2000 audit(0.200:1): state=initialized audit_enabled=0 res=1
+[    0.217635] thermal_sys: Registered thermal governor 'fair_share'
+[    0.217675] thermal_sys: Registered thermal governor 'step_wise'
+[    0.217686] thermal_sys: Registered thermal governor 'user_space'
+[    0.218162] cpuidle: using governor ladder
+[    0.218484] cpuidle: using governor menu
+[    0.219521] hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.
+[    0.220148] ASID allocator initialised with 65536 entries
+[    0.221219] Serial: AMBA PL011 UART driver
+[    0.251368] 9000000.pl011: ttyAMA0 at MMIO 0x9000000 (irq = 13, base_baud = 0) is a PL011 rev1
+[    0.254643] printk: console [ttyAMA0] enabled
+[    0.278611] HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.278706] HugeTLB: 0 KiB vmemmap can be freed for a 1.00 GiB page
+[    0.278750] HugeTLB: registered 32.0 MiB page size, pre-allocated 0 pages
+[    0.278762] HugeTLB: 0 KiB vmemmap can be freed for a 32.0 MiB page
+[    0.278775] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.278790] HugeTLB: 0 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.278802] HugeTLB: registered 64.0 KiB page size, pre-allocated 0 pages
+[    0.278812] HugeTLB: 0 KiB vmemmap can be freed for a 64.0 KiB page
+[    0.294780] ACPI: Interpreter disabled.
+[    0.297903] iommu: Default domain type: Translated
+[    0.297972] iommu: DMA domain TLB invalidation policy: lazy mode
+[    0.309415] pps_core: LinuxPPS API ver. 1 registered
+[    0.309499] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.309585] PTP clock support registered
+[    0.311389] EDAC MC: Ver: 3.0.0
+[    0.325166] NetLabel: Initializing
+[    0.325287] NetLabel:  domain hash size = 128
+[    0.325310] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.326194] NetLabel:  unlabeled traffic allowed by default
+[    0.328008] vgaarb: loaded
+[    0.337082] clocksource: Switched to clocksource arch_sys_counter
+[    0.340112] VFS: Disk quotas dquot_6.6.0
+[    0.340275] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.350228] netfs: FS-Cache loaded
+[    0.351687] pnp: PnP ACPI: disabled
+[    0.373898] NET: Registered PF_INET protocol family
+[    0.375881] IP idents hash table entries: 32768 (order: 6, 262144 bytes, linear)
+[    0.437445] tcp_listen_portaddr_hash hash table entries: 1024 (order: 2, 16384 bytes, linear)
+[    0.437681] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.437788] TCP established hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.438030] TCP bind hash table entries: 16384 (order: 7, 524288 bytes, linear)
+[    0.438316] TCP: Hash tables configured (established 16384 bind 16384)
+[    0.440080] MPTCP token hash table entries: 2048 (order: 4, 49152 bytes, linear)
+[    0.440516] UDP hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[    0.440811] UDP-Lite hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[    0.442334] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.442744] NET: Registered PF_XDP protocol family
+[    0.442928] PCI: CLS 0 bytes, default 64
+[    0.447741] kvm [1]: HYP mode not available
+[    0.452367] Trying to unpack rootfs image as initramfs...
+[    0.454532] Initialise system trusted keyrings
+[    0.455508] Key type blacklist registered
+[    0.467425] workingset: timestamp_bits=44 max_order=19 bucket_order=0
+[    0.472692] SGI XFS with ACLs, security attributes, quota, no debug enabled
+[    0.475642] 9p: Installing v9fs 9p2000 file system support
+[    0.479799] integrity: Platform Keyring initialized
+[    0.482439] Freeing initrd memory: 2796K
+[    0.525898] Key type asymmetric registered
+[    0.526142] Asymmetric key parser 'x509' registered
+[    0.526710] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 247)
+[    0.528481] io scheduler mq-deadline registered
+[    0.528583] io scheduler kyber registered
+[    0.528818] io scheduler bfq registered
+[    0.545409] pl061_gpio 9030000.pl061: PL061 GPIO chip registered
+[    0.551539] Serial: 8250/16550 driver, 4 ports, IRQ sharing disabled
+[    0.592541] loop: module loaded
+[    0.600052] hid: raw HID events driver (C) Jiri Kosina
+[    0.608081] hw perfevents: enabled with armv8_pmuv3 PMU driver, 7 (0,8000003f) counters available
+[    0.610585] NET: Registered PF_INET6 protocol family
+[    0.612301] watchdog: NMI not fully supported
+[    0.612363] watchdog: Hard watchdog permanently disabled
+[    0.619850] Segment Routing with IPv6
+[    0.620105] In-situ OAM (IOAM) with IPv6
+[    0.620738] NET: Registered PF_PACKET protocol family
+[    0.622095] 9pnet: Installing 9P2000 support
+[    0.648528] registered taskstats version 1
+[    0.651361] Loading compiled-in X.509 certificates
+[    0.668936] Loaded X.509 cert 'Build time autogenerated kernel key: 9f0cac519e1b43b7aed7b285e97f1d9691777458'
+[    0.694278] Demotion targets for Node 0: null
+[    0.695238] Key type .fscrypt registered
+[    0.695289] Key type fscrypt-provisioning registered
+[    0.697081] ima: No TPM chip found, activating TPM-bypass!
+[    0.697246] ima: Allocated hash algorithm: sha256
+[    0.699350] ima: No architecture policies found
+[    0.708387] clk: Disabling unused clocks
+[    0.708629] PM: genpd: Disabling unused power domains
+[    0.761584] Freeing unused kernel memory: 5952K
+[    0.762807] Run /init as init process
+[    0.810936] bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+[    0.811234] bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+unsealed proof: PASS (load rejected)
+entry mismatch: PASS (seal rejected)
+ABI version mismatch: PASS (seal rejected)
+architecture mismatch: PASS (seal rejected)
+specialization length mismatch: PASS (seal rejected)
+unknown metadata: PASS (seal rejected)
+native/proof byte mismatch: PASS (every changed byte rejected)
+exact binding: PASS (native execution returned 2)
+ABI mask mismatch at instantiation: PASS (load rejected)
+proof mutation after sealing: PASS (load rejected)
+new generation without resealing: PASS (load rejected)
+program type mismatch at JIT: PASS (load rejected)
+incomplete program group: PASS (load rejected)
+exact ordered program group: PASS (native execution returned 2)
+reordered native chunks: PASS (load rejected)
+missing native chunk/changed entry: PASS (load rejected)
+duplicated native chunk: PASS (load rejected)
+prefix must not initialize native stack: PASS (load rejected)
+peer mutation invalidates whole group: PASS (load rejected)
+verifier-visible helper call: PASS (native execution returned 2)
+privileged uninitialized stack negative: PASS (load rejected)
+helper with uninitialized arguments: PASS (load rejected)
+verifier-visible map load and lookup: PASS (native execution returned 2)
+map value out-of-bounds negative: PASS (load rejected)
+70000-instruction proof restored to native code: fd=-28 errno=28
+0 = 2                    ; R0=2
+68547: (b7) r0 = 2                    ; R0=2
+68548: (b7) r0 = 2                    ; R0=2
+68549: (b7) r0 = 2                    ; R0=2
+68550: (b7) r0 = 2                    ; R0=2
+68551: (b7) r0 = 2                    ; R0=2
+68552: (b7) r0 = 2                    ; R0=2
+68553: (b7) r0 = 2                    ; R0=2
+68554: (b7) r0 = 2                    ; R0=2
+68555: (b7) r0 = 2                    ; R0=2
+68556: (b7) r0 = 2                    ; R0=2
+68557: (b7) r0 = 2                    ; R0=2
+68558: (b7) r0 = 2                    ; R0=2
+68559: (b7) r0 = 2                    ; R0=2
+68560: (b7) r0 = 2                    ; R0=2
+68561: (b7) r0 = 2                    ; R0=2
+68562: (b7) r0 = 2                    ; R0=2
+68563: (b7) r0 = 2                    ; R0=2
+68564: (b7) r0 = 2                    ; R0=2
+68565: (b7) r0 = 2                    ; R0=2
+68566: (b7) r0 = 2                    ; R0=2
+68567: (b7) r0 = 2                    ; R0=2
+68568: (b7) r0 = 2                    ; R0=2
+68569: (b7) r0 = 2                    ; R0=2
+68570: (b7) r0 = 2                    ; R0=2
+68571: (b7) r0 = 2                    ; R0=2
+68572: (b7) r0 = 2                    ; R0=2
+68573: (b7) r0 = 2                    ; R0=2
+68574: (b7) r0 = 2                    ; R0=2
+68575: (b7) r0 = 2                    ; R0=2
+68576: (b7) r0 = 2                    ; R0=2
+68577: (b7) r0 = 2                    ; R0=2
+68578: (b7) r0 = 2                    ; R0=2
+68579: (b7) r0 = 2                    ; R0=2
+68580: (b7) r0 = 2                    ; R0=2
+68581: (b7) r0 = 2                    ; R0=2
+68582: (b7) r0 = 2                    ; R0=2
+68583: (b7) r0 = 2                    ; R0=2
+68584: (b7) r0 = 2                    ; R0=2
+68585: (b7) r0 = 2                    ; R0=2
+68586: (b7) r0 = 2                    ; R0=2
+68587: (b7) r0 = 2                    ; R0=2
+68588: (b7) r0 = 2                    ; R0=2
+68589: (b7) r0 = 2                    ; R0=2
+68590: (b7) r0 = 2                    ; R0=2
+68591: (b7) r0 = 2                    ; R0=2
+68592: (b7) r0 = 2                    ; R0=2
+68593: (b7) r0 = 2                    ; R0=2
+68594: (b7) r0 = 2                    ; R0=2
+68595: (b7) r0 = 2                    ; R0=2
+68596: (b7) r0 = 2                    ; R0=2
+68597: (b7) r0 = 2                    ; R0=2
+68598: (b7) r0 = 2                    ; R0=2
+68599: (b7) r0 = 2                    ; R0=2
+68600: (b7) r0 = 2                    ; R0=2
+68601: (b7) r0 = 2                    ; R0=2
+68602: (b7) r0 = 2                    ; R0=2
+68603: (b7) r0 = 2                    ; R0=2
+68604: (b7) r0 = 2                    ; R0=2
+68605: (b7) r0 = 2                    ; R0=2
+68606: (b7) r0 = 2                    ; R0=2
+68607: (b7) r0 = 2                    ; R0=2
+68608: (b7) r0 = 2                    ; R0=2
+68609: (b7) r0 = 2                    ; R0=2
+68610: (b7) r0 = 2                    ; R0=2
+68611: (b7) r0 = 2                    ; R0=2
+68612: (b7) r0 = 2                    ; R0=2
+68613: (b7) r0 = 2                    ; R0=2
+68614: (b7) r0 = 2                    ; R0=2
+68615: (b7) r0 = 2                    ; R0=2
+68616: (b7) r0 = 2                    ; R0=2
+68617: (b7) r0 = 2                    ; R0=2
+68618: (b7) r0 = 2                    ; R0=2
+68619: (b7) r0 = 2                    ; R0=2
+68620: (b7) r0 = 2                    ; R0=2
+68621: (b7) r0 = 2                    ; R0=2
+68622: (b7) r0 = 2                    ; R0=2
+68623: (b7) r0 = 2                    ; R0=2
+68624: (b7) r0 = 2                    ; R0=2
+68625: (b7) r0 = 2                    ; R0=2
+68626: (b7) r0 = 2                    ; R0=2
+68627: (b7) r0 = 2                    ; R0=2
+68628: (b7) r0 = 2                    ; R0=2
+68629: (b7) r0 = 2                    ; R0=2
+68630: (b7) r0 = 2                    ; R0=2
+68631: (b7) r0 = 2                    ; R0=2
+68632: (b7) r0 = 2                    ; R0=2
+68633: (b7) r0 = 2                    ; R0=2
+68634: (b7) r0 = 2                    ; R0=2
+68635: (b7) r0 = 2                    ; R0=2
+68636: (b7) r0 = 2                    ; R0=2
+68637: (b7) r0 = 2                    ; R0=2
+68638: (b7) r0 = 2                    ; R0=2
+68639: (b7) r0 = 2                    ; R0=2
+68640: (b7) r0 = 2                    ; R0=2
+68641: (b7) r0 = 2                    ; R0=2
+68642: (b7) r0 = 2                    ; R0=2
+68643: (b7) r0 = 2                    ; R0=2
+68644: (b7) r0 = 2                    ; R0=2
+68645: (b7) r0 = 2                    ; R0=2
+68646: (b7) r0 = 2                    ; R0=2
+68647: (b7) r0 = 2                    ; R0=2
+68648: (b7) r0 = 2                    ; R0=2
+68649: (b7) r0 = 2                    ; R0=2
+68650: (b7) r0 = 2                    ; R0=2
+68651: (b7) r0 = 2                    ; R0=2
+68652: (b7) r0 = 2                    ; R0=2
+68653: (b7) r0 = 2                    ; R0=2
+68654: (b7) r0 = 2                    ; R0=2
+68655: (b7) r0 = 2                    ; R0=2
+68656: (b7) r0 = 2                    ; R0=2
+68657: (b7) r0 = 2                    ; R0=2
+68658: (b7) r0 = 2                    ; R0=2
+68659: (b7) r0 = 2                    ; R0=2
+68660: (b7) r0 = 2                    ; R0=2
+68661: (b7) r0 = 2                    ; R0=2
+68662: (b7) r0 = 2                    ; R0=2
+68663: (b7) r0 = 2                    ; R0=2
+68664: (b7) r0 = 2                    ; R0=2
+68665: (b7) r0 = 2                    ; R0=2
+68666: (b7) r0 = 2                    ; R0=2
+68667: (b7) r0 = 2                    ; R0=2
+68668: (b7) r0 = 2                    ; R0=2
+68669: (b7) r0 = 2                    ; R0=2
+68670: (b7) r0 = 2                    ; R0=2
+68671: (b7) r0 = 2                    ; R0=2
+68672: (b7) r0 = 2                    ; R0=2
+68673: (b7) r0 = 2                    ; R0=2
+68674: (b7) r0 = 2                    ; R0=2
+68675: (b7) r0 = 2                    ; R0=2
+68676: (b7) r0 = 2                    ; R0=2
+68677: (b7) r0 = 2                    ; R0=2
+68678: (b7) r0 = 2                    ; R0=2
+68679: (b7) r0 = 2                    ; R0=2
+68680: (b7) r0 = 2                    ; R0=2
+68681: (b7) r0 = 2                    ; R0=2
+68682: (b7) r0 = 2                    ; R0=2
+68683: (b7) r0 = 2                    ; R0=2
+68684: (b7) r0 = 2                    ; R0=2
+68685: (b7) r0 = 2                    ; R0=2
+68686: (b7) r0 = 2                    ; R0=2
+68687: (b7) r0 = 2                    ; R0=2
+68688: (b7) r0 = 2                    ; R0=2
+68689: (b7) r0 = 2                    ; R0=2
+68690: (b7) r0 = 2                    ; R0=2
+68691: (b7) r0 = 2                    ; R0=2
+68692: (b7) r0 = 2                    ; R0=2
+68693: (b7) r0 = 2                    ; R0=2
+68694: (b7) r0 = 2                    ; R0=2
+68695: (b7) r0 = 2                    ; R0=2
+68696: (b7) r0 = 2                    ; R0=2
+68697: (b7) r0 = 2                    ; R0=2
+68698: (b7) r0 = 2                    ; R0=2
+68699: (b7) r0 = 2                    ; R0=2
+68700: (b7) r0 = 2                    ; R0=2
+68701: (b7) r0 = 2                    ; R0=2
+68702: (b7) r0 = 2                    ; R0=2
+68703: (b7) r0 = 2                    ; R0=2
+68704: (b7) r0 = 2                    ; R0=2
+68705: (b7) r0 = 2                    ; R0=2
+68706: (b7) r0 = 2                    ; R0=2
+68707: (b7) r0 = 2                    ; R0=2
+68708: (b7) r0 = 2                    ; R0=2
+68709: (b7) r0 = 2                    ; R0=2
+68710: (b7) r0 = 2                    ; R0=2
+68711: (b7) r0 = 2                    ; R0=2
+68712: (b7) r0 = 2                    ; R0=2
+68713: (b7) r0 = 2                    ; R0=2
+68714: (b7) r0 = 2                    ; R0=2
+68715: (b7) r0 = 2                    ; R0=2
+68716: (b7) r0 = 2                    ; R0=2
+68717: (b7) r0 = 2                    ; R0=2
+68718: (b7) r0 = 2                    ; R0=2
+68719: (b7) r0 = 2                    ; R0=2
+68720: (b7) r0 = 2                    ; R0=2
+68721: (b7) r0 = 2                    ; R0=2
+68722: (b7) r0 = 2                    ; R0=2
+68723: (b7) r0 = 2                    ; R0=2
+68724: (b7) r0 = 2                    ; R0=2
+68725: (b7) r0 = 2                    ; R0=2
+68726: (b7) r0 = 2                    ; R0=2
+68727: (b7) r0 = 2                    ; R0=2
+68728: (b7) r0 = 2                    ; R0=2
+68729: (b7) r0 = 2                    ; R0=2
+68730: (b7) r0 = 2                    ; R0=2
+68731: (b7) r0 = 2                    ; R0=2
+68732: (b7) r0 = 2                    ; R0=2
+68733: (b7) r0 = 2                    ; R0=2
+68734: (b7) r0 = 2                    ; R0=2
+68735: (b7) r0 = 2                    ; R0=2
+68736: (b7) r0 = 2                    ; R0=2
+68737: (b7) r0 = 2                    ; R0=2
+68738: (b7) r0 = 2                    ; R0=2
+68739: (b7) r0 = 2                    ; R0=2
+68740: (b7) r0 = 2                    ; R0=2
+68741: (b7) r0 = 2                    ; R0=2
+68742: (b7) r0 = 2                    ; R0=2
+68743: (b7) r0 = 2                    ; R0=2
+68744: (b7) r0 = 2                    ; R0=2
+68745: (b7) r0 = 2                    ; R0=2
+68746: (b7) r0 = 2                    ; R0=2
+68747: (b7) r0 = 2                    ; R0=2
+68748: (b7) r0 = 2                    ; R0=2
+68749: (b7) r0 = 2                    ; R0=2
+68750: (b7) r0 = 2                    ; R0=2
+68751: (b7) r0 = 2                    ; R0=2
+68752: (b7) r0 = 2                    ; R0=2
+68753: (b7) r0 = 2                    ; R0=2
+68754: (b7) r0 = 2                    ; R0=2
+68755: (b7) r0 = 2                    ; R0=2
+68756: (b7) r0 = 2                    ; R0=2
+68757: (b7) r0 = 2                    ; R0=2
+68758: (b7) r0 = 2                    ; R0=2
+68759: (b7) r0 = 2                    ; R0=2
+68760: (b7) r0 = 2                    ; R0=2
+68761: (b7) r0 = 2                    ; R0=2
+68762: (b7) r0 = 2                    ; R0=2
+68763: (b7) r0 = 2                    ; R0=2
+68764: (b7) r0 = 2                    ; R0=2
+68765: (b7) r0 = 2                    ; R0=2
+68766: (b7) r0 = 2                    ; R0=2
+68767: (b7) r0 = 2                    ; R0=2
+68768: (b7) r0 = 2                    ; R0=2
+68769: (b7) r0 = 2                    ; R0=2
+68770: (b7) r0 = 2                    ; R0=2
+68771: (b7) r0 = 2                    ; R0=2
+68772: (b7) r0 = 2                    ; R0=2
+68773: (b7) r0 = 2                    ; R0=2
+68774: (b7) r0 = 2                    ; R0=2
+68775: (b7) r0 = 2                    ; R0=2
+68776: (b7) r0 = 2                    ; R0=2
+68777: (b7) r0 = 2                    ; R0=2
+68778: (b7) r0 = 2                    ; R0=2
+68779: (b7) r0 = 2                    ; R0=2
+68780: (b7) r0 = 2                    ; R0=2
+68781: (b7) r0 = 2                    ; R0=2
+68782: (b7) r0 = 2                    ; R0=2
+68783: (b7) r0 = 2                    ; R0=2
+68784: (b7) r0 = 2                    ; R0=2
+68785: (b7) r0 = 2                    ; R0=2
+68786: (b7) r0 = 2                    ; R0=2
+68787: (b7) r0 = 2                    ; R0=2
+68788: (b7) r0 = 2                    ; R0=2
+68789: (b7) r0 = 2                    ; R0=2
+68790: (b7) r0 = 2                    ; R0=2
+68791: (b7) r0 = 2                    ; R0=2
+68792: (b7) r0 = 2                    ; R0=2
+68793: (b7) r0 = 2                    ; R0=2
+68794: (b7) r0 = 2                    ; R0=2
+68795: (b7) r0 = 2                    ; R0=2
+68796: (b7) r0 = 2                    ; R0=2
+68797: (b7) r0 = 2                    ; R0=2
+68798: (b7) r0 = 2                    ; R0=2
+68799: (b7) r0 = 2                    ; R0=2
+68800: (b7) r0 = 2                    ; R0=2
+68801: (b7) r0 = 2                    ; R0=2
+68802: (b7) r0 = 2                    ; R0=2
+68803: (b7) r0 = 2                    ; R0=2
+68804: (b7) r0 = 2                    ; R0=2
+68805: (b7) r0 = 2                    ; R0=2
+68806: (b7) r0 = 2                    ; R0=2
+68807: (b7) r0 = 2                    ; R0=2
+68808: (b7) r0 = 2                    ; R0=2
+68809: (b7) r0 = 2                    ; R0=2
+68810: (b7) r0 = 2                    ; R0=2
+68811: (b7) r0 = 2                    ; R0=2
+68812: (b7) r0 = 2                    ; R0=2
+68813: (b7) r0 = 2                    ; R0=2
+68814: (b7) r0 = 2                    ; R0=2
+68815: (b7) r0 = 2                    ; R0=2
+68816: (b7) r0 = 2                    ; R0=2
+68817: (b7) r0 = 2                    ; R0=2
+68818: (b7) r0 = 2                    ; R0=2
+68819: (b7) r0 = 2                    ; R0=2
+68820: (b7) r0 = 2                    ; R0=2
+68821: (b7) r0 = 2                    ; R0=2
+68822: (b7) r0 = 2                    ; R0=2
+68823: (b7) r0 = 2                    ; R0=2
+68824: (b7) r0 = 2                    ; R0=2
+68825: (b7) r0 = 2                    ; R0=2
+68826: (b7) r0 = 2                    ; R0=2
+68827: (b7) r0 = 2                    ; R0=2
+68828: (b7) r0 = 2                    ; R0=2
+68829: (b7) r0 = 2                    ; R0=2
+68830: (b7) r0 = 2                    ; R0=2
+68831: (b7) r0 = 2                    ; R0=2
+68832: (b7) r0 = 2                    ; R0=2
+68833: (b7) r0 = 2                    ; R0=2
+68834: (b7) r0 = 2                    ; R0=2
+68835: (b7) r0 = 2                    ; R0=2
+68836: (b7) r0 = 2                    ; R0=2
+68837: (b7) r0 = 2                    ; R0=2
+68838: (b7) r0 = 2                    ; R0=2
+68839: (b7) r0 = 2                    ; R0=2
+68840: (b7) r0 = 2                    ; R0=2
+68841: (b7) r0 = 2                    ; R0=2
+68842: (b7) r0 = 2                    ; R0=2
+68843: (b7) r0 = 2                    ; R0=2
+68844: (b7) r0 = 2                    ; R0=2
+68845: (b7) r0 = 2                    ; R0=2
+68846: (b7) r0 = 2                    ; R0=2
+68847: (b7) r0 = 2                    ; R0=2
+68848: (b7) r0 = 2                    ; R0=2
+68849: (b7) r0 = 2                    ; R0=2
+68850: (b7) r0 = 2                    ; R0=2
+68851: (b7) r0 = 2                    ; R0=2
+68852: (b7) r0 = 2                    ; R0=2
+68853: (b7) r0 = 2                    ; R0=2
+68854: (b7) r0 = 2                    ; R0=2
+68855: (b7) r0 = 2                    ; R0=2
+68856: (b7) r0 = 2                    ; R0=2
+68857: (b7) r0 = 2                    ; R0=2
+68858: (b7) r0 = 2                    ; R0=2
+68859: (b7) r0 = 2                    ; R0=2
+68860: (b7) r0 = 2                    ; R0=2
+68861: (b7) r0 = 2                    ; R0=2
+68862: (b7) r0 = 2                    ; R0=2
+68863: (b7) r0 = 2                    ; R0=2
+68864: (b7) r0 = 2                    ; R0=2
+68865: (b7) r0 = 2                    ; R0=2
+68866: (b7) r0 = 2                    ; R0=2
+68867: (b7) r0 = 2                    ; R0=2
+68868: (b7) r0 = 2                    ; R0=2
+68869: (b7) r0 = 2                    ; R0=2
+68870: (b7) r0 = 2                    ; R0=2
+68871: (b7) r0 = 2                    ; R0=2
+68872: (b7) r0 = 2                    ; R0=2
+68873: (b7) r0 = 2                    ; R0=2
+68874: (b7) r0 = 2                    ; R0=2
+68875: (b7) r0 = 2                    ; R0=2
+68876: (b7) r0 = 2                    ; R0=2
+68877: (b7) r0 = 2                    ; R0=2
+68878: (b7) r0 = 2                    ; R0=2
+68879: (b7) r0 = 2                    ; R0=2
+68880: (b7) r0 = 2                    ; R0=2
+68881: (b7) r0 = 2                    ; R0=2
+68882: (b7) r0 = 2                    ; R0=2
+68883: (b7) r0 = 2                    ; R0=2
+68884: (b7) r0 = 2                    ; R0=2
+68885: (b7) r0 = 2                    ; R0=2
+68886: (b7) r0 = 2                    ; R0=2
+68887: (b7) r0 = 2                    ; R0=2
+68888: (b7) r0 = 2                    ; R0=2
+68889: (b7) r0 = 2                    ; R0=2
+68890: (b7) r0 = 2                    ; R0=2
+68891: (b7) r0 = 2                    ; R0=2
+68892: (b7) r0 = 2                    ; R0=2
+68893: (b7) r0 = 2                    ; R0=2
+68894: (b7) r0 = 2                    ; R0=2
+68895: (b7) r0 = 2                    ; R0=2
+68896: (b7) r0 = 2                    ; R0=2
+68897: (b7) r0 = 2                    ; R0=2
+68898: (b7) r0 = 2                    ; R0=2
+68899: (b7) r0 = 2                    ; R0=2
+68900: (b7) r0 = 2                    ; R0=2
+68901: (b7) r0 = 2                    ; R0=2
+68902: (b7) r0 = 2                    ; R0=2
+68903: (b7) r0 = 2                    ; R0=2
+68904: (b7) r0 = 2                    ; R0=2
+68905: (b7) r0 = 2                    ; R0=2
+68906: (b7) r0 = 2                    ; R0=2
+68907: (b7) r0 = 2                    ; R0=2
+68908: (b7) r0 = 2                    ; R0=2
+68909: (b7) r0 = 2                    ; R0=2
+68910: (b7) r0 = 2                    ; R0=2
+68911: (b7) r0 = 2                    ; R0=2
+68912: (b7) r0 = 2                    ; R0=2
+68913: (b7) r0 = 2                    ; R0=2
+68914: (b7) r0 = 2                    ; R0=2
+68915: (b7) r0 = 2                    ; R0=2
+68916: (b7) r0 = 2                    ; R0=2
+68917: (b7) r0 = 2                    ; R0=2
+68918: (b7) r0 = 2                    ; R0=2
+68919: (b7) r0 = 2                    ; R0=2
+68920: (b7) r0 = 2                    ; R0=2
+68921: (b7) r0 = 2                    ; R0=2
+68922: (b7) r0 = 2                    ; R0=2
+68923: (b7) r0 = 2                    ; R0=2
+68924: (b7) r0 = 2                    ; R0=2
+68925: (b7) r0 = 2                    ; R0=2
+68926: (b7) r0 = 2                    ; R0=2
+68927: (b7) r0 = 2                    ; R0=2
+68928: (b7) r0 = 2                    ; R0=2
+68929: (b7) r0 = 2                    ; R0=2
+68930: (b7) r0 = 2                    ; R0=2
+68931: (b7) r0 = 2                    ; R0=2
+68932: (b7) r0 = 2                    ; R0=2
+68933: (b7) r0 = 2                    ; R0=2
+68934: (b7) r0 = 2                    ; R0=2
+68935: (b7) r0 = 2                    ; R0=2
+68936: (b7) r0 = 2                    ; R0=2
+68937: (b7) r0 = 2                    ; R0=2
+68938: (b7) r0 = 2                    ; R0=2
+68939: (b7) r0 = 2                    ; R0=2
+68940: (b7) r0 = 2                    ; R0=2
+68941: (b7) r0 = 2                    ; R0=2
+68942: (b7) r0 = 2                    ; R0=2
+68943: (b7) r0 = 2                    ; R0=2
+68944: (b7) r0 = 2                    ; R0=2
+68945: (b7) r0 = 2                    ; R0=2
+68946: (b7) r0 = 2                    ; R0=2
+68947: (b7) r0 = 2                    ; R0=2
+68948: (b7) r0 = 2                    ; R0=2
+68949: (b7) r0 = 2                    ; R0=2
+68950: (b7) r0 = 2                    ; R0=2
+68951: (b7) r0 = 2                    ; R0=2
+68952: (b7) r0 = 2                    ; R0=2
+68953: (b7) r0 = 2                    ; R0=2
+68954: (b7) r0 = 2                    ; R0=2
+68955: (b7) r0 = 2                    ; R0=2
+68956: (b7) r0 = 2                    ; R0=2
+68957: (b7) r0 = 2                    ; R0=2
+68958: (b7) r0 = 2                    ; R0=2
+68959: (b7) r0 = 2                    ; R0=2
+68960: (b7) r0 = 2                    ; R0=2
+68961: (b7) r0 = 2                    ; R0=2
+68962: (b7) r0 = 2                    ; R0=2
+68963: (b7) r0 = 2                    ; R0=2
+68964: (b7) r0 = 2                    ; R0=2
+68965: (b7) r0 = 2                    ; R0=2
+68966: (b7) r0 = 2                    ; R0=2
+68967: (b7) r0 = 2                    ; R0=2
+68968: (b7) r0 = 2                    ; R0=2
+68969: (b7) r0 = 2                    ; R0=2
+68970: (b7) r0 = 2                    ; R0=2
+68971: (b7) r0 = 2                    ; R0=2
+68972: (b7) r0 = 2                    ; R0=2
+68973: (b7) r0 = 2                    ; R0=2
+68974: (b7) r0 = 2                    ; R0=2
+68975: (b7) r0 = 2                    ; R0=2
+68976: (b7) r0 = 2                    ; R0=2
+68977: (b7) r0 = 2                    ; R0=2
+68978: (b7) r0 = 2                    ; R0=2
+68979: (b7) r0 = 2                    ; R0=2
+68980: (b7) r0 = 2                    ; R0=2
+68981: (b7) r0 = 2                    ; R0=2
+68982: (b7) r0 = 2                    ; R0=2
+68983: (b7) r0 = 2                    ; R0=2
+68984: (b7) r0 = 2                    ; R0=2
+68985: (b7) r0 = 2                    ; R0=2
+68986: (b7) r0 = 2                    ; R0=2
+68987: (b7) r0 = 2                    ; R0=2
+68988: (b7) r0 = 2                    ; R0=2
+68989: (b7) r0 = 2                    ; R0=2
+68990: (b7) r0 = 2                    ; R0=2
+68991: (b7) r0 = 2                    ; R0=2
+68992: (b7) r0 = 2                    ; R0=2
+68993: (b7) r0 = 2                    ; R0=2
+68994: (b7) r0 = 2                    ; R0=2
+68995: (b7) r0 = 2                    ; R0=2
+68996: (b7) r0 = 2                    ; R0=2
+68997: (b7) r0 = 2                    ; R0=2
+68998: (b7) r0 = 2                    ; R0=2
+68999: (b7) r0 = 2                    ; R0=2
+69000: (b7) r0 = 2                    ; R0=2
+69001: (b7) r0 = 2                    ; R0=2
+69002: (b7) r0 = 2                    ; R0=2
+69003: (b7) r0 = 2                    ; R0=2
+69004: (b7) r0 = 2                    ; R0=2
+69005: (b7) r0 = 2                    ; R0=2
+69006: (b7) r0 = 2                    ; R0=2
+69007: (b7) r0 = 2                    ; R0=2
+69008: (b7) r0 = 2                    ; R0=2
+69009: (b7) r0 = 2                    ; R0=2
+69010: (b7) r0 = 2                    ; R0=2
+69011: (b7) r0 = 2                    ; R0=2
+69012: (b7) r0 = 2                    ; R0=2
+69013: (b7) r0 = 2                    ; R0=2
+69014: (b7) r0 = 2                    ; R0=2
+69015: (b7) r0 = 2                    ; R0=2
+69016: (b7) r0 = 2                    ; R0=2
+69017: (b7) r0 = 2                    ; R0=2
+69018: (b7) r0 = 2                    ; R0=2
+69019: (b7) r0 = 2                    ; R0=2
+69020: (b7) r0 = 2                    ; R0=2
+69021: (b7) r0 = 2                    ; R0=2
+69022: (b7) r0 = 2                    ; R0=2
+69023: (b7) r0 = 2                    ; R0=2
+69024: (b7) r0 = 2                    ; R0=2
+69025: (b7) r0 = 2                    ; R0=2
+69026: (b7) r0 = 2                    ; R0=2
+69027: (b7) r0 = 2                    ; R0=2
+69028: (b7) r0 = 2                    ; R0=2
+69029: (b7) r0 = 2                    ; R0=2
+69030: (b7) r0 = 2                    ; R0=2
+69031: (b7) r0 = 2                    ; R0=2
+69032: (b7) r0 = 2                    ; R0=2
+69033: (b7) r0 = 2                    ; R0=2
+69034: (b7) r0 = 2                    ; R0=2
+69035: (b7) r0 = 2                    ; R0=2
+69036: (b7) r0 = 2                    ; R0=2
+69037: (b7) r0 = 2                    ; R0=2
+69038: (b7) r0 = 2                    ; R0=2
+69039: (b7) r0 = 2                    ; R0=2
+69040: (b7) r0 = 2                    ; R0=2
+69041: (b7) r0 = 2                    ; R0=2
+69042: (b7) r0 = 2                    ; R0=2
+69043: (b7) r0 = 2                    ; R0=2
+69044: (b7) r0 = 2                    ; R0=2
+69045: (b7) r0 = 2                    ; R0=2
+69046: (b7) r0 = 2                    ; R0=2
+69047: (b7) r0 = 2                    ; R0=2
+69048: (b7) r0 = 2                    ; R0=2
+69049: (b7) r0 = 2                    ; R0=2
+69050: (b7) r0 = 2                    ; R0=2
+69051: (b7) r0 = 2                    ; R0=2
+69052: (b7) r0 = 2                    ; R0=2
+69053: (b7) r0 = 2                    ; R0=2
+69054: (b7) r0 = 2                    ; R0=2
+69055: (b7) r0 = 2                    ; R0=2
+69056: (b7) r0 = 2                    ; R0=2
+69057: (b7) r0 = 2                    ; R0=2
+69058: (b7) r0 = 2                    ; R0=2
+69059: (b7) r0 = 2                    ; R0=2
+69060: (b7) r0 = 2                    ; R0=2
+69061: (b7) r0 = 2                    ; R0=2
+69062: (b7) r0 = 2                    ; R0=2
+69063: (b7) r0 = 2                    ; R0=2
+69064: (b7) r0 = 2                    ; R0=2
+69065: (b7) r0 = 2                    ; R0=2
+69066: (b7) r0 = 2                    ; R0=2
+69067: (b7) r0 = 2                    ; R0=2
+69068: (b7) r0 = 2                    ; R0=2
+69069: (b7) r0 = 2                    ; R0=2
+69070: (b7) r0 = 2                    ; R0=2
+69071: (b7) r0 = 2                    ; R0=2
+69072: (b7) r0 = 2                    ; R0=2
+69073: (b7) r0 = 2                    ; R0=2
+69074: (b7) r0 = 2                    ; R0=2
+69075: (b7) r0 = 2                    ; R0=2
+69076: (b7) r0 = 2                    ; R0=2
+69077: (b7) r0 = 2                    ; R0=2
+69078: (b7) r0 = 2                    ; R0=2
+69079: (b7) r0 = 2                    ; R0=2
+69080: (b7) r0 = 2                    ; R0=2
+69081: (b7) r0 = 2                    ; R0=2
+69082: (b7) r0 = 2                    ; R0=2
+69083: (b7) r0 = 2                    ; R0=2
+69084: (b7) r0 = 2                    ; R0=2
+69085: (b7) r0 = 2                    ; R0=2
+69086: (b7) r0 = 2                    ; R0=2
+69087: (b7) r0 = 2                    ; R0=2
+69088: (b7) r0 = 2                    ; R0=2
+69089: (b7) r0 = 2                    ; R0=2
+69090: (b7) r0 = 2                    ; R0=2
+69091: (b7) r0 = 2                    ; R0=2
+69092: (b7) r0 = 2                    ; R0=2
+69093: (b7) r0 = 2                    ; R0=2
+69094: (b7) r0 = 2                    ; R0=2
+69095: (b7) r0 = 2                    ; R0=2
+69096: (b7) r0 = 2                    ; R0=2
+69097: (b7) r0 = 2                    ; R0=2
+69098: (b7) r0 = 2                    ; R0=2
+69099: (b7) r0 = 2                    ; R0=2
+69100: (b7) r0 = 2                    ; R0=2
+69101: (b7) r0 = 2                    ; R0=2
+69102: (b7) r0 = 2                    ; R0=2
+69103: (b7) r0 = 2                    ; R0=2
+69104: (b7) r0 = 2                    ; R0=2
+69105: (b7) r0 = 2                    ; R0=2
+69106: (b7) r0 = 2                    ; R0=2
+69107: (b7) r0 = 2                    ; R0=2
+69108: (b7) r0 = 2                    ; R0=2
+69109: (b7) r0 = 2                    ; R0=2
+69110: (b7) r0 = 2                    ; R0=2
+69111: (b7) r0 = 2                    ; R0=2
+69112: (b7) r0 = 2                    ; R0=2
+69113: (b7) r0 = 2                    ; R0=2
+69114: (b7) r0 = 2                    ; R0=2
+69115: (b7) r0 = 2                    ; R0=2
+69116: (b7) r0 = 2                    ; R0=2
+69117: (b7) r0 = 2                    ; R0=2
+69118: (b7) r0 = 2                    ; R0=2
+69119: (b7) r0 = 2                    ; R0=2
+69120: (b7) r0 = 2                    ; R0=2
+69121: (b7) r0 = 2                    ; R0=2
+69122: (b7) r0 = 2                    ; R0=2
+69123: (b7) r0 = 2                    ; R0=2
+69124: (b7) r0 = 2                    ; R0=2
+69125: (b7) r0 = 2                    ; R0=2
+69126: (b7) r0 = 2                    ; R0=2
+69127: (b7) r0 = 2                    ; R0=2
+69128: (b7) r0 = 2                    ; R0=2
+69129: (b7) r0 = 2                    ; R0=2
+69130: (b7) r0 = 2                    ; R0=2
+69131: (b7) r0 = 2                    ; R0=2
+69132: (b7) r0 = 2                    ; R0=2
+69133: (b7) r0 = 2                    ; R0=2
+69134: (b7) r0 = 2                    ; R0=2
+69135: (b7) r0 = 2                    ; R0=2
+69136: (b7) r0 = 2                    ; R0=2
+69137: (b7) r0 = 2                    ; R0=2
+69138: (b7) r0 = 2                    ; R0=2
+69139: (b7) r0 = 2                    ; R0=2
+69140: (b7) r0 = 2                    ; R0=2
+69141: (b7) r0 = 2                    ; R0=2
+69142: (b7) r0 = 2                    ; R0=2
+69143: (b7) r0 = 2                    ; R0=2
+69144: (b7) r0 = 2                    ; R0=2
+69145: (b7) r0 = 2                    ; R0=2
+69146: (b7) r0 = 2                    ; R0=2
+69147: (b7) r0 = 2                    ; R0=2
+69148: (b7) r0 = 2                    ; R0=2
+69149: (b7) r0 = 2                    ; R0=2
+69150: (b7) r0 = 2                    ; R0=2
+69151: (b7) r0 = 2                    ; R0=2
+69152: (b7) r0 = 2                    ; R0=2
+69153: (b7) r0 = 2                    ; R0=2
+69154: (b7) r0 = 2                    ; R0=2
+69155: (b7) r0 = 2                    ; R0=2
+69156: (b7) r0 = 2                    ; R0=2
+69157: (b7) r0 = 2                    ; R0=2
+69158: (b7) r0 = 2                    ; R0=2
+69159: (b7) r0 = 2                    ; R0=2
+69160: (b7) r0 = 2                    ; R0=2
+69161: (b7) r0 = 2                    ; R0=2
+69162: (b7) r0 = 2                    ; R0=2
+69163: (b7) r0 = 2                    ; R0=2
+69164: (b7) r0 = 2                    ; R0=2
+69165: (b7) r0 = 2                    ; R0=2
+69166: (b7) r0 = 2                    ; R0=2
+69167: (b7) r0 = 2                    ; R0=2
+69168: (b7) r0 = 2                    ; R0=2
+69169: (b7) r0 = 2                    ; R0=2
+69170: (b7) r0 = 2                    ; R0=2
+69171: (b7) r0 = 2                    ; R0=2
+69172: (b7) r0 = 2                    ; R0=2
+69173: (b7) r0 = 2                    ; R0=2
+69174: (b7) r0 = 2                    ; R0=2
+69175: (b7) r0 = 2                    ; R0=2
+69176: (b7) r0 = 2                    ; R0=2
+69177: (b7) r0 = 2                    ; R0=2
+69178: (b7) r0 = 2                    ; R0=2
+69179: (b7) r0 = 2                    ; R0=2
+69180: (b7) r0 = 2                    ; R0=2
+69181: (b7) r0 = 2                    ; R0=2
+69182: (b7) r0 = 2                    ; R0=2
+69183: (b7) r0 = 2                    ; R0=2
+69184: (b7) r0 = 2                    ; R0=2
+69185: (b7) r0 = 2                    ; R0=2
+69186: (b7) r0 = 2                    ; R0=2
+69187: (b7) r0 = 2                    ; R0=2
+69188: (b7) r0 = 2                    ; R0=2
+69189: (b7) r0 = 2                    ; R0=2
+69190: (b7) r0 = 2                    ; R0=2
+69191: (b7) r0 = 2                    ; R0=2
+69192: (b7) r0 = 2                    ; R0=2
+69193: (b7) r0 = 2                    ; R0=2
+69194: (b7) r0 = 2                    ; R0=2
+69195: (b7) r0 = 2                    ; R0=2
+69196: (b7) r0 = 2                    ; R0=2
+69197: (b7) r0 = 2                    ; R0=2
+69198: (b7) r0 = 2                    ; R0=2
+69199: (b7) r0 = 2                    ; R0=2
+69200: (b7) r0 = 2                    ; R0=2
+69201: (b7) r0 = 2                    ; R0=2
+69202: (b7) r0 = 2                    ; R0=2
+69203: (b7) r0 = 2                    ; R0=2
+69204: (b7) r0 = 2                    ; R0=2
+69205: (b7) r0 = 2                    ; R0=2
+69206: (b7) r0 = 2                    ; R0=2
+69207: (b7) r0 = 2                    ; R0=2
+69208: (b7) r0 = 2                    ; R0=2
+69209: (b7) r0 = 2                    ; R0=2
+69210: (b7) r0 = 2                    ; R0=2
+69211: (b7) r0 = 2                    ; R0=2
+69212: (b7) r0 = 2                    ; R0=2
+69213: (b7) r0 = 2                    ; R0=2
+69214: (b7) r0 = 2                    ; R0=2
+69215: (b7) r0 = 2                    ; R0=2
+69216: (b7) r0 = 2                    ; R0=2
+69217: (b7) r0 = 2                    ; R0=2
+69218: (b7) r0 = 2                    ; R0=2
+69219: (b7) r0 = 2                    ; R0=2
+69220: (b7) r0 = 2                    ; R0=2
+69221: (b7) r0 = 2                    ; R0=2
+69222: (b7) r0 = 2                    ; R0=2
+69223: (b7) r0 = 2                    ; R0=2
+69224: (b7) r0 = 2                    ; R0=2
+69225: (b7) r0 = 2                    ; R0=2
+69226: (b7) r0 = 2                    ; R0=2
+69227: (b7) r0 = 2                    ; R0=2
+69228: (b7) r0 = 2                    ; R0=2
+69229: (b7) r0 = 2                    ; R0=2
+69230: (b7) r0 = 2                    ; R0=2
+69231: (b7) r0 = 2                    ; R0=2
+69232: (b7) r0 = 2                    ; R0=2
+69233: (b7) r0 = 2                    ; R0=2
+69234: (b7) r0 = 2                    ; R0=2
+69235: (b7) r0 = 2                    ; R0=2
+69236: (b7) r0 = 2                    ; R0=2
+69237: (b7) r0 = 2                    ; R0=2
+69238: (b7) r0 = 2                    ; R0=2
+69239: (b7) r0 = 2                    ; R0=2
+69240: (b7) r0 = 2                    ; R0=2
+69241: (b7) r0 = 2                    ; R0=2
+69242: (b7) r0 = 2                    ; R0=2
+69243: (b7) r0 = 2                    ; R0=2
+69244: (b7) r0 = 2                    ; R0=2
+69245: (b7) r0 = 2                    ; R0=2
+69246: (b7) r0 = 2                    ; R0=2
+69247: (b7) r0 = 2                    ; R0=2
+69248: (b7) r0 = 2                    ; R0=2
+69249: (b7) r0 = 2                    ; R0=2
+69250: (b7) r0 = 2                    ; R0=2
+69251: (b7) r0 = 2                    ; R0=2
+69252: (b7) r0 = 2                    ; R0=2
+69253: (b7) r0 = 2                    ; R0=2
+69254: (b7) r0 = 2                    ; R0=2
+69255: (b7) r0 = 2                    ; R0=2
+69256: (b7) r0 = 2                    ; R0=2
+69257: (b7) r0 = 2                    ; R0=2
+69258: (b7) r0 = 2                    ; R0=2
+69259: (b7) r0 = 2                    ; R0=2
+69260: (b7) r0 = 2                    ; R0=2
+69261: (b7) r0 = 2                    ; R0=2
+69262: (b7) r0 = 2                    ; R0=2
+69263: (b7) r0 = 2                    ; R0=2
+69264: (b7) r0 = 2                    ; R0=2
+69265: (b7) r0 = 2                    ; R0=2
+69266: (b7) r0 = 2                    ; R0=2
+69267: (b7) r0 = 2                    ; R0=2
+69268: (b7) r0 = 2                    ; R0=2
+69269: (b7) r0 = 2                    ; R0=2
+69270: (b7) r0 = 2                    ; R0=2
+69271: (b7) r0 = 2                    ; R0=2
+69272: (b7) r0 = 2                    ; R0=2
+69273: (b7) r0 = 2                    ; R0=2
+69274: (b7) r0 = 2                    ; R0=2
+69275: (b7) r0 = 2                    ; R0=2
+69276: (b7) r0 = 2                    ; R0=2
+69277: (b7) r0 = 2                    ; R0=2
+69278: (b7) r0 = 2                    ; R0=2
+69279: (b7) r0 = 2                    ; R0=2
+69280: (b7) r0 = 2                    ; R0=2
+69281: (b7) r0 = 2                    ; R0=2
+69282: (b7) r0 = 2                    ; R0=2
+69283: (b7) r0 = 2                    ; R0=2
+69284: (b7) r0 = 2                    ; R0=2
+69285: (b7) r0 = 2                    ; R0=2
+69286: (b7) r0 = 2                    ; R0=2
+69287: (b7) r0 = 2                    ; R0=2
+69288: (b7) r0 = 2                    ; R0=2
+69289: (b7) r0 = 2                    ; R0=2
+69290: (b7) r0 = 2                    ; R0=2
+69291: (b7) r0 = 2                    ; R0=2
+69292: (b7) r0 = 2                    ; R0=2
+69293: (b7) r0 = 2                    ; R0=2
+69294: (b7) r0 = 2                    ; R0=2
+69295: (b7) r0 = 2                    ; R0=2
+69296: (b7) r0 = 2                    ; R0=2
+69297: (b7) r0 = 2                    ; R0=2
+69298: (b7) r0 = 2                    ; R0=2
+69299: (b7) r0 = 2                    ; R0=2
+69300: (b7) r0 = 2                    ; R0=2
+69301: (b7) r0 = 2                    ; R0=2
+69302: (b7) r0 = 2                    ; R0=2
+69303: (b7) r0 = 2                    ; R0=2
+69304: (b7) r0 = 2                    ; R0=2
+69305: (b7) r0 = 2                    ; R0=2
+69306: (b7) r0 = 2                    ; R0=2
+69307: (b7) r0 = 2                    ; R0=2
+69308: (b7) r0 = 2                    ; R0=2
+69309: (b7) r0 = 2                    ; R0=2
+69310: (b7) r0 = 2                    ; R0=2
+69311: (b7) r0 = 2                    ; R0=2
+69312: (b7) r0 = 2                    ; R0=2
+69313: (b7) r0 = 2                    ; R0=2
+69314: (b7) r0 = 2                    ; R0=2
+69315: (b7) r0 = 2                    ; R0=2
+69316: (b7) r0 = 2                    ; R0=2
+69317: (b7) r0 = 2                    ; R0=2
+69318: (b7) r0 = 2                    ; R0=2
+69319: (b7) r0 = 2                    ; R0=2
+69320: (b7) r0 = 2                    ; R0=2
+69321: (b7) r0 = 2                    ; R0=2
+69322: (b7) r0 = 2                    ; R0=2
+69323: (b7) r0 = 2                    ; R0=2
+69324: (b7) r0 = 2                    ; R0=2
+69325: (b7) r0 = 2                    ; R0=2
+69326: (b7) r0 = 2                    ; R0=2
+69327: (b7) r0 = 2                    ; R0=2
+69328: (b7) r0 = 2                    ; R0=2
+69329: (b7) r0 = 2                    ; R0=2
+69330: (b7) r0 = 2                    ; R0=2
+69331: (b7) r0 = 2                    ; R0=2
+69332: (b7) r0 = 2                    ; R0=2
+69333: (b7) r0 = 2                    ; R0=2
+69334: (b7) r0 = 2                    ; R0=2
+69335: (b7) r0 = 2                    ; R0=2
+69336: (b7) r0 = 2                    ; R0=2
+69337: (b7) r0 = 2                    ; R0=2
+69338: (b7) r0 = 2                    ; R0=2
+69339: (b7) r0 = 2                    ; R0=2
+69340: (b7) r0 = 2                    ; R0=2
+69341: (b7) r0 = 2                    ; R0=2
+69342: (b7) r0 = 2                    ; R0=2
+69343: (b7) r0 = 2                    ; R0=2
+69344: (b7) r0 = 2                    ; R0=2
+69345: (b7) r0 = 2                    ; R0=2
+69346: (b7) r0 = 2                    ; R0=2
+69347: (b7) r0 = 2                    ; R0=2
+69348: (b7) r0 = 2                    ; R0=2
+69349: (b7) r0 = 2                    ; R0=2
+69350: (b7) r0 = 2                    ; R0=2
+69351: (b7) r0 = 2                    ; R0=2
+69352: (b7) r0 = 2                    ; R0=2
+69353: (b7) r0 = 2                    ; R0=2
+69354: (b7) r0 = 2                    ; R0=2
+69355: (b7) r0 = 2                    ; R0=2
+69356: (b7) r0 = 2                    ; R0=2
+69357: (b7) r0 = 2                    ; R0=2
+69358: (b7) r0 = 2                    ; R0=2
+69359: (b7) r0 = 2                    ; R0=2
+69360: (b7) r0 = 2                    ; R0=2
+69361: (b7) r0 = 2                    ; R0=2
+69362: (b7) r0 = 2                    ; R0=2
+69363: (b7) r0 = 2                    ; R0=2
+69364: (b7) r0 = 2                    ; R0=2
+69365: (b7) r0 = 2                    ; R0=2
+69366: (b7) r0 = 2                    ; R0=2
+69367: (b7) r0 = 2                    ; R0=2
+69368: (b7) r0 = 2                    ; R0=2
+69369: (b7) r0 = 2                    ; R0=2
+69370: (b7) r0 = 2                    ; R0=2
+69371: (b7) r0 = 2                    ; R0=2
+69372: (b7) r0 = 2                    ; R0=2
+69373: (b7) r0 = 2                    ; R0=2
+69374: (b7) r0 = 2                    ; R0=2
+69375: (b7) r0 = 2                    ; R0=2
+69376: (b7) r0 = 2                    ; R0=2
+69377: (b7) r0 = 2                    ; R0=2
+69378: (b7) r0 = 2                    ; R0=2
+69379: (b7) r0 = 2                    ; R0=2
+69380: (b7) r0 = 2                    ; R0=2
+69381: (b7) r0 = 2                    ; R0=2
+69382: (b7) r0 = 2                    ; R0=2
+69383: (b7) r0 = 2                    ; R0=2
+69384: (b7) r0 = 2                    ; R0=2
+69385: (b7) r0 = 2                    ; R0=2
+69386: (b7) r0 = 2                    ; R0=2
+69387: (b7) r0 = 2                    ; R0=2
+69388: (b7) r0 = 2                    ; R0=2
+69389: (b7) r0 = 2                    ; R0=2
+69390: (b7) r0 = 2                    ; R0=2
+69391: (b7) r0 = 2                    ; R0=2
+69392: (b7) r0 = 2                    ; R0=2
+69393: (b7) r0 = 2                    ; R0=2
+69394: (b7) r0 = 2                    ; R0=2
+69395: (b7) r0 = 2                    ; R0=2
+69396: (b7) r0 = 2                    ; R0=2
+69397: (b7) r0 = 2                    ; R0=2
+69398: (b7) r0 = 2                    ; R0=2
+69399: (b7) r0 = 2                    ; R0=2
+69400: (b7) r0 = 2                    ; R0=2
+69401: (b7) r0 = 2                    ; R0=2
+69402: (b7) r0 = 2                    ; R0=2
+69403: (b7) r0 = 2                    ; R0=2
+69404: (b7) r0 = 2                    ; R0=2
+69405: (b7) r0 = 2                    ; R0=2
+69406: (b7) r0 = 2                    ; R0=2
+69407: (b7) r0 = 2                    ; R0=2
+69408: (b7) r0 = 2                    ; R0=2
+69409: (b7) r0 = 2                    ; R0=2
+69410: (b7) r0 = 2                    ; R0=2
+69411: (b7) r0 = 2                    ; R0=2
+69412: (b7) r0 = 2                    ; R0=2
+69413: (b7) r0 = 2                    ; R0=2
+69414: (b7) r0 = 2                    ; R0=2
+69415: (b7) r0 = 2                    ; R0=2
+69416: (b7) r0 = 2                    ; R0=2
+69417: (b7) r0 = 2                    ; R0=2
+69418: (b7) r0 = 2                    ; R0=2
+69419: (b7) r0 = 2                    ; R0=2
+69420: (b7) r0 = 2                    ; R0=2
+69421: (b7) r0 = 2                    ; R0=2
+69422: (b7) r0 = 2                    ; R0=2
+69423: (b7) r0 = 2                    ; R0=2
+69424: (b7) r0 = 2                    ; R0=2
+69425: (b7) r0 = 2                    ; R0=2
+69426: (b7) r0 = 2                    ; R0=2
+69427: (b7) r0 = 2                    ; R0=2
+69428: (b7) r0 = 2                    ; R0=2
+69429: (b7) r0 = 2                    ; R0=2
+69430: (b7) r0 = 2                    ; R0=2
+69431: (b7) r0 = 2                    ; R0=2
+69432: (b7) r0 = 2                    ; R0=2
+69433: (b7) r0 = 2                    ; R0=2
+69434: (b7) r0 = 2                    ; R0=2
+69435: (b7) r0 = 2                    ; R0=2
+69436: (b7) r0 = 2                    ; R0=2
+69437: (b7) r0 = 2                    ; R0=2
+69438: (b7) r0 = 2                    ; R0=2
+69439: (b7) r0 = 2                    ; R0=2
+69440: (b7) r0 = 2                    ; R0=2
+69441: (b7) r0 = 2                    ; R0=2
+69442: (b7) r0 = 2                    ; R0=2
+69443: (b7) r0 = 2                    ; R0=2
+69444: (b7) r0 = 2                    ; R0=2
+69445: (b7) r0 = 2                    ; R0=2
+69446: (b7) r0 = 2                    ; R0=2
+69447: (b7) r0 = 2                    ; R0=2
+69448: (b7) r0 = 2                    ; R0=2
+69449: (b7) r0 = 2                    ; R0=2
+69450: (b7) r0 = 2                    ; R0=2
+69451: (b7) r0 = 2                    ; R0=2
+69452: (b7) r0 = 2                    ; R0=2
+69453: (b7) r0 = 2                    ; R0=2
+69454: (b7) r0 = 2                    ; R0=2
+69455: (b7) r0 = 2                    ; R0=2
+69456: (b7) r0 = 2                    ; R0=2
+69457: (b7) r0 = 2                    ; R0=2
+69458: (b7) r0 = 2                    ; R0=2
+69459: (b7) r0 = 2                    ; R0=2
+69460: (b7) r0 = 2                    ; R0=2
+69461: (b7) r0 = 2                    ; R0=2
+69462: (b7) r0 = 2                    ; R0=2
+69463: (b7) r0 = 2                    ; R0=2
+69464: (b7) r0 = 2                    ; R0=2
+69465: (b7) r0 = 2                    ; R0=2
+69466: (b7) r0 = 2                    ; R0=2
+69467: (b7) r0 = 2                    ; R0=2
+69468: (b7) r0 = 2                    ; R0=2
+69469: (b7) r0 = 2                    ; R0=2
+69470: (b7) r0 = 2                    ; R0=2
+69471: (b7) r0 = 2                    ; R0=2
+69472: (b7) r0 = 2                    ; R0=2
+69473: (b7) r0 = 2                    ; R0=2
+69474: (b7) r0 = 2                    ; R0=2
+69475: (b7) r0 = 2                    ; R0=2
+69476: (b7) r0 = 2                    ; R0=2
+69477: (b7) r0 = 2                    ; R0=2
+69478: (b7) r0 = 2                    ; R0=2
+69479: (b7) r0 = 2                    ; R0=2
+69480: (b7) r0 = 2                    ; R0=2
+69481: (b7) r0 = 2                    ; R0=2
+69482: (b7) r0 = 2                    ; R0=2
+69483: (b7) r0 = 2                    ; R0=2
+69484: (b7) r0 = 2                    ; R0=2
+69485: (b7) r0 = 2                    ; R0=2
+69486: (b7) r0 = 2                    ; R0=2
+69487: (b7) r0 = 2                    ; R0=2
+69488: (b7) r0 = 2                    ; R0=2
+69489: (b7) r0 = 2                    ; R0=2
+69490: (b7) r0 = 2                    ; R0=2
+69491: (b7) r0 = 2                    ; R0=2
+69492: (b7) r0 = 2                    ; R0=2
+69493: (b7) r0 = 2                    ; R0=2
+69494: (b7) r0 = 2                    ; R0=2
+69495: (b7) r0 = 2                    ; R0=2
+69496: (b7) r0 = 2                    ; R0=2
+69497: (b7) r0 = 2                    ; R0=2
+69498: (b7) r0 = 2                    ; R0=2
+69499: (b7) r0 = 2                    ; R0=2
+69500: (b7) r0 = 2                    ; R0=2
+69501: (b7) r0 = 2                    ; R0=2
+69502: (b7) r0 = 2                    ; R0=2
+69503: (b7) r0 = 2                    ; R0=2
+69504: (b7) r0 = 2                    ; R0=2
+69505: (b7) r0 = 2                    ; R0=2
+69506: (b7) r0 = 2                    ; R0=2
+69507: (b7) r0 = 2                    ; R0=2
+69508: (b7) r0 = 2                    ; R0=2
+69509: (b7) r0 = 2                    ; R0=2
+69510: (b7) r0 = 2                    ; R0=2
+69511: (b7) r0 = 2                    ; R0=2
+69512: (b7) r0 = 2                    ; R0=2
+69513: (b7) r0 = 2                    ; R0=2
+69514: (b7) r0 = 2                    ; R0=2
+69515: (b7) r0 = 2                    ; R0=2
+69516: (b7) r0 = 2                    ; R0=2
+69517: (b7) r0 = 2                    ; R0=2
+69518: (b7) r0 = 2                    ; R0=2
+69519: (b7) r0 = 2                    ; R0=2
+69520: (b7) r0 = 2                    ; R0=2
+69521: (b7) r0 = 2                    ; R0=2
+69522: (b7) r0 = 2                    ; R0=2
+69523: (b7) r0 = 2                    ; R0=2
+69524: (b7) r0 = 2                    ; R0=2
+69525: (b7) r0 = 2                    ; R0=2
+69526: (b7) r0 = 2                    ; R0=2
+69527: (b7) r0 = 2                    ; R0=2
+69528: (b7) r0 = 2                    ; R0=2
+69529: (b7) r0 = 2                    ; R0=2
+69530: (b7) r0 = 2                    ; R0=2
+69531: (b7) r0 = 2                    ; R0=2
+69532: (b7) r0 = 2                    ; R0=2
+69533: (b7) r0 = 2                    ; R0=2
+69534: (b7) r0 = 2                    ; R0=2
+69535: (b7) r0 = 2                    ; R0=2
+69536: (b7) r0 = 2                    ; R0=2
+69537: (b7) r0 = 2                    ; R0=2
+69538: (b7) r0 = 2                    ; R0=2
+69539: (b7) r0 = 2                    ; R0=2
+69540: (b7) r0 = 2                    ; R0=2
+69541: (b7) r0 = 2                    ; R0=2
+69542: (b7) r0 = 2                    ; R0=2
+69543: (b7) r0 = 2                    ; R0=2
+69544: (b7) r0 = 2                    ; R0=2
+69545: (b7) r0 = 2                    ; R0=2
+69546: (b7) r0 = 2                    ; R0=2
+69547: (b7) r0 = 2                    ; R0=2
+69548: (b7) r0 = 2                    ; R0=2
+69549: (b7) r0 = 2                    ; R0=2
+69550: (b7) r0 = 2                    ; R0=2
+69551: (b7) r0 = 2                    ; R0=2
+69552: (b7) r0 = 2                    ; R0=2
+69553: (b7) r0 = 2                    ; R0=2
+69554: (b7) r0 = 2                    ; R0=2
+69555: (b7) r0 = 2                    ; R0=2
+69556: (b7) r0 = 2                    ; R0=2
+69557: (b7) r0 = 2                    ; R0=2
+69558: (b7) r0 = 2                    ; R0=2
+69559: (b7) r0 = 2                    ; R0=2
+69560: (b7) r0 = 2                    ; R0=2
+69561: (b7) r0 = 2                    ; R0=2
+69562: (b7) r0 = 2                    ; R0=2
+69563: (b7) r0 = 2                    ; R0=2
+69564: (b7) r0 = 2                    ; R0=2
+69565: (b7) r0 = 2                    ; R0=2
+69566: (b7) r0 = 2                    ; R0=2
+69567: (b7) r0 = 2                    ; R0=2
+69568: (b7) r0 = 2                    ; R0=2
+69569: (b7) r0 = 2                    ; R0=2
+69570: (b7) r0 = 2                    ; R0=2
+69571: (b7) r0 = 2                    ; R0=2
+69572: (b7) r0 = 2                    ; R0=2
+69573: (b7) r0 = 2                    ; R0=2
+69574: (b7) r0 = 2                    ; R0=2
+69575: (b7) r0 = 2                    ; R0=2
+69576: (b7) r0 = 2                    ; R0=2
+69577: (b7) r0 = 2                    ; R0=2
+69578: (b7) r0 = 2                    ; R0=2
+69579: (b7) r0 = 2                    ; R0=2
+69580: (b7) r0 = 2                    ; R0=2
+69581: (b7) r0 = 2                    ; R0=2
+69582: (b7) r0 = 2                    ; R0=2
+69583: (b7) r0 = 2                    ; R0=2
+69584: (b7) r0 = 2                    ; R0=2
+69585: (b7) r0 = 2                    ; R0=2
+69586: (b7) r0 = 2                    ; R0=2
+69587: (b7) r0 = 2                    ; R0=2
+69588: (b7) r0 = 2                    ; R0=2
+69589: (b7) r0 = 2                    ; R0=2
+69590: (b7) r0 = 2                    ; R0=2
+69591: (b7) r0 = 2                    ; R0=2
+69592: (b7) r0 = 2                    ; R0=2
+69593: (b7) r0 = 2                    ; R0=2
+69594: (b7) r0 = 2                    ; R0=2
+69595: (b7) r0 = 2                    ; R0=2
+69596: (b7) r0 = 2                    ; R0=2
+69597: (b7) r0 = 2                    ; R0=2
+69598: (b7) r0 = 2                    ; R0=2
+69599: (b7) r0 = 2                    ; R0=2
+69600: (b7) r0 = 2                    ; R0=2
+69601: (b7) r0 = 2                    ; R0=2
+69602: (b7) r0 = 2                    ; R0=2
+69603: (b7) r0 = 2                    ; R0=2
+69604: (b7) r0 = 2                    ; R0=2
+69605: (b7) r0 = 2                    ; R0=2
+69606: (b7) r0 = 2                    ; R0=2
+69607: (b7) r0 = 2                    ; R0=2
+69608: (b7) r0 = 2                    ; R0=2
+69609: (b7) r0 = 2                    ; R0=2
+69610: (b7) r0 = 2                    ; R0=2
+69611: (b7) r0 = 2                    ; R0=2
+69612: (b7) r0 = 2                    ; R0=2
+69613: (b7) r0 = 2                    ; R0=2
+69614: (b7) r0 = 2                    ; R0=2
+69615: (b7) r0 = 2                    ; R0=2
+69616: (b7) r0 = 2                    ; R0=2
+69617: (b7) r0 = 2                    ; R0=2
+69618: (b7) r0 = 2                    ; R0=2
+69619: (b7) r0 = 2                    ; R0=2
+69620: (b7) r0 = 2                    ; R0=2
+69621: (b7) r0 = 2                    ; R0=2
+69622: (b7) r0 = 2                    ; R0=2
+69623: (b7) r0 = 2                    ; R0=2
+69624: (b7) r0 = 2                    ; R0=2
+69625: (b7) r0 = 2                    ; R0=2
+69626: (b7) r0 = 2                    ; R0=2
+69627: (b7) r0 = 2                    ; R0=2
+69628: (b7) r0 = 2                    ; R0=2
+69629: (b7) r0 = 2                    ; R0=2
+69630: (b7) r0 = 2                    ; R0=2
+69631: (b7) r0 = 2                    ; R0=2
+69632: (b7) r0 = 2                    ; R0=2
+69633: (b7) r0 = 2                    ; R0=2
+69634: (b7) r0 = 2                    ; R0=2
+69635: (b7) r0 = 2                    ; R0=2
+69636: (b7) r0 = 2                    ; R0=2
+69637: (b7) r0 = 2                    ; R0=2
+69638: (b7) r0 = 2                    ; R0=2
+69639: (b7) r0 = 2                    ; R0=2
+69640: (b7) r0 = 2                    ; R0=2
+69641: (b7) r0 = 2                    ; R0=2
+69642: (b7) r0 = 2                    ; R0=2
+69643: (b7) r0 = 2                    ; R0=2
+69644: (b7) r0 = 2                    ; R0=2
+69645: (b7) r0 = 2                    ; R0=2
+69646: (b7) r0 = 2                    ; R0=2
+69647: (b7) r0 = 2                    ; R0=2
+69648: (b7) r0 = 2                    ; R0=2
+69649: (b7) r0 = 2                    ; R0=2
+69650: (b7) r0 = 2                    ; R0=2
+69651: (b7) r0 = 2                    ; R0=2
+69652: (b7) r0 = 2                    ; R0=2
+69653: (b7) r0 = 2                    ; R0=2
+69654: (b7) r0 = 2                    ; R0=2
+69655: (b7) r0 = 2                    ; R0=2
+69656: (b7) r0 = 2                    ; R0=2
+69657: (b7) r0 = 2                    ; R0=2
+69658: (b7) r0 = 2                    ; R0=2
+69659: (b7) r0 = 2                    ; R0=2
+69660: (b7) r0 = 2                    ; R0=2
+69661: (b7) r0 = 2                    ; R0=2
+69662: (b7) r0 = 2                    ; R0=2
+69663: (b7) r0 = 2                    ; R0=2
+69664: (b7) r0 = 2                    ; R0=2
+69665: (b7) r0 = 2                    ; R0=2
+69666: (b7) r0 = 2                    ; R0=2
+69667: (b7) r0 = 2                    ; R0=2
+69668: (b7) r0 = 2                    ; R0=2
+69669: (b7) r0 = 2                    ; R0=2
+69670: (b7) r0 = 2                    ; R0=2
+69671: (b7) r0 = 2                    ; R0=2
+69672: (b7) r0 = 2                    ; R0=2
+69673: (b7) r0 = 2                    ; R0=2
+69674: (b7) r0 = 2                    ; R0=2
+69675: (b7) r0 = 2                    ; R0=2
+69676: (b7) r0 = 2                    ; R0=2
+69677: (b7) r0 = 2                    ; R0=2
+69678: (b7) r0 = 2                    ; R0=2
+69679: (b7) r0 = 2                    ; R0=2
+69680: (b7) r0 = 2                    ; R0=2
+69681: (b7) r0 = 2                    ; R0=2
+69682: (b7) r0 = 2                    ; R0=2
+69683: (b7) r0 = 2                    ; R0=2
+69684: (b7) r0 = 2                    ; R0=2
+69685: (b7) r0 = 2                    ; R0=2
+69686: (b7) r0 = 2                    ; R0=2
+69687: (b7) r0 = 2                    ; R0=2
+69688: (b7) r0 = 2                    ; R0=2
+69689: (b7) r0 = 2                    ; R0=2
+69690: (b7) r0 = 2                    ; R0=2
+69691: (b7) r0 = 2                    ; R0=2
+69692: (b7) r0 = 2                    ; R0=2
+69693: (b7) r0 = 2                    ; R0=2
+69694: (b7) r0 = 2                    ; R0=2
+69695: (b7) r0 = 2                    ; R0=2
+69696: (b7) r0 = 2                    ; R0=2
+69697: (b7) r0 = 2                    ; R0=2
+69698: (b7) r0 = 2                    ; R0=2
+69699: (b7) r0 = 2                    ; R0=2
+69700: (b7) r0 = 2                    ; R0=2
+69701: (b7) r0 = 2                    ; R0=2
+69702: (b7) r0 = 2                    ; R0=2
+69703: (b7) r0 = 2                    ; R0=2
+69704: (b7) r0 = 2                    ; R0=2
+69705: (b7) r0 = 2                    ; R0=2
+69706: (b7) r0 = 2                    ; R0=2
+69707: (b7) r0 = 2                    ; R0=2
+69708: (b7) r0 = 2                    ; R0=2
+69709: (b7) r0 = 2                    ; R0=2
+69710: (b7) r0 = 2                    ; R0=2
+69711: (b7) r0 = 2                    ; R0=2
+69712: (b7) r0 = 2                    ; R0=2
+69713: (b7) r0 = 2                    ; R0=2
+69714: (b7) r0 = 2                    ; R0=2
+69715: (b7) r0 = 2                    ; R0=2
+69716: (b7) r0 = 2                    ; R0=2
+69717: (b7) r0 = 2                    ; R0=2
+69718: (b7) r0 = 2                    ; R0=2
+69719: (b7) r0 = 2                    ; R0=2
+69720: (b7) r0 = 2                    ; R0=2
+69721: (b7) r0 = 2                    ; R0=2
+69722: (b7) r0 = 2                    ; R0=2
+69723: (b7) r0 = 2                    ; R0=2
+69724: (b7) r0 = 2                    ; R0=2
+69725: (b7) r0 = 2                    ; R0=2
+69726: (b7) r0 = 2                    ; R0=2
+69727: (b7) r0 = 2                    ; R0=2
+69728: (b7) r0 = 2                    ; R0=2
+69729: (b7) r0 = 2                    ; R0=2
+69730: (b7) r0 = 2                    ; R0=2
+69731: (b7) r0 = 2                    ; R0=2
+69732: (b7) r0 = 2                    ; R0=2
+69733: (b7) r0 = 2                    ; R0=2
+69734: (b7) r0 = 2                    ; R0=2
+69735: (b7) r0 = 2                    ; R0=2
+69736: (b7) r0 = 2                    ; R0=2
+69737: (b7) r0 = 2                    ; R0=2
+69738: (b7) r0 = 2                    ; R0=2
+69739: (b7) r0 = 2                    ; R0=2
+69740: (b7) r0 = 2                    ; R0=2
+69741: (b7) r0 = 2                    ; R0=2
+69742: (b7) r0 = 2                    ; R0=2
+69743: (b7) r0 = 2                    ; R0=2
+69744: (b7) r0 = 2                    ; R0=2
+69745: (b7) r0 = 2                    ; R0=2
+69746: (b7) r0 = 2                    ; R0=2
+69747: (b7) r0 = 2                    ; R0=2
+69748: (b7) r0 = 2                    ; R0=2
+69749: (b7) r0 = 2                    ; R0=2
+69750: (b7) r0 = 2                    ; R0=2
+69751: (b7) r0 = 2                    ; R0=2
+69752: (b7) r0 = 2                    ; R0=2
+69753: (b7) r0 = 2                    ; R0=2
+69754: (b7) r0 = 2                    ; R0=2
+69755: (b7) r0 = 2                    ; R0=2
+69756: (b7) r0 = 2                    ; R0=2
+69757: (b7) r0 = 2                    ; R0=2
+69758: (b7) r0 = 2                    ; R0=2
+69759: (b7) r0 = 2                    ; R0=2
+69760: (b7) r0 = 2                    ; R0=2
+69761: (b7) r0 = 2                    ; R0=2
+69762: (b7) r0 = 2                    ; R0=2
+69763: (b7) r0 = 2                    ; R0=2
+69764: (b7) r0 = 2                    ; R0=2
+69765: (b7) r0 = 2                    ; R0=2
+69766: (b7) r0 = 2                    ; R0=2
+69767: (b7) r0 = 2                    ; R0=2
+69768: (b7) r0 = 2                    ; R0=2
+69769: (b7) r0 = 2                    ; R0=2
+69770: (b7) r0 = 2                    ; R0=2
+69771: (b7) r0 = 2                    ; R0=2
+69772: (b7) r0 = 2                    ; R0=2
+69773: (b7) r0 = 2                    ; R0=2
+69774: (b7) r0 = 2                    ; R0=2
+69775: (b7) r0 = 2                    ; R0=2
+69776: (b7) r0 = 2                    ; R0=2
+69777: (b7) r0 = 2                    ; R0=2
+69778: (b7) r0 = 2                    ; R0=2
+69779: (b7) r0 = 2                    ; R0=2
+69780: (b7) r0 = 2                    ; R0=2
+69781: (b7) r0 = 2                    ; R0=2
+69782: (b7) r0 = 2                    ; R0=2
+69783: (b7) r0 = 2                    ; R0=2
+69784: (b7) r0 = 2                    ; R0=2
+69785: (b7) r0 = 2                    ; R0=2
+69786: (b7) r0 = 2                    ; R0=2
+69787: (b7) r0 = 2                    ; R0=2
+69788: (b7) r0 = 2                    ; R0=2
+69789: (b7) r0 = 2                    ; R0=2
+69790: (b7) r0 = 2                    ; R0=2
+69791: (b7) r0 = 2                    ; R0=2
+69792: (b7) r0 = 2                    ; R0=2
+69793: (b7) r0 = 2                    ; R0=2
+69794: (b7) r0 = 2                    ; R0=2
+69795: (b7) r0 = 2                    ; R0=2
+69796: (b7) r0 = 2                    ; R0=2
+69797: (b7) r0 = 2                    ; R0=2
+69798: (b7) r0 = 2                    ; R0=2
+69799: (b7) r0 = 2                    ; R0=2
+69800: (b7) r0 = 2                    ; R0=2
+69801: (b7) r0 = 2                    ; R0=2
+69802: (b7) r0 = 2                    ; R0=2
+69803: (b7) r0 = 2                    ; R0=2
+69804: (b7) r0 = 2                    ; R0=2
+69805: (b7) r0 = 2                    ; R0=2
+69806: (b7) r0 = 2                    ; R0=2
+69807: (b7) r0 = 2                    ; R0=2
+69808: (b7) r0 = 2                    ; R0=2
+69809: (b7) r0 = 2                    ; R0=2
+69810: (b7) r0 = 2                    ; R0=2
+69811: (b7) r0 = 2                    ; R0=2
+69812: (b7) r0 = 2                    ; R0=2
+69813: (b7) r0 = 2                    ; R0=2
+69814: (b7) r0 = 2                    ; R0=2
+69815: (b7) r0 = 2                    ; R0=2
+69816: (b7) r0 = 2                    ; R0=2
+69817: (b7) r0 = 2                    ; R0=2
+69818: (b7) r0 = 2                    ; R0=2
+69819: (b7) r0 = 2                    ; R0=2
+69820: (b7) r0 = 2                    ; R0=2
+69821: (b7) r0 = 2                    ; R0=2
+69822: (b7) r0 = 2                    ; R0=2
+69823: (b7) r0 = 2                    ; R0=2
+69824: (b7) r0 = 2                    ; R0=2
+69825: (b7) r0 = 2                    ; R0=2
+69826: (b7) r0 = 2                    ; R0=2
+69827: (b7) r0 = 2                    ; R0=2
+69828: (b7) r0 = 2                    ; R0=2
+69829: (b7) r0 = 2                    ; R0=2
+69830: (b7) r0 = 2                    ; R0=2
+69831: (b7) r0 = 2                    ; R0=2
+69832: (b7) r0 = 2                    ; R0=2
+69833: (b7) r0 = 2                    ; R0=2
+69834: (b7) r0 = 2                    ; R0=2
+69835: (b7) r0 = 2                    ; R0=2
+69836: (b7) r0 = 2                    ; R0=2
+69837: (b7) r0 = 2                    ; R0=2
+69838: (b7) r0 = 2                    ; R0=2
+69839: (b7) r0 = 2                    ; R0=2
+69840: (b7) r0 = 2                    ; R0=2
+69841: (b7) r0 = 2                    ; R0=2
+69842: (b7) r0 = 2                    ; R0=2
+69843: (b7) r0 = 2                    ; R0=2
+69844: (b7) r0 = 2                    ; R0=2
+69845: (b7) r0 = 2                    ; R0=2
+69846: (b7) r0 = 2                    ; R0=2
+69847: (b7) r0 = 2                    ; R0=2
+69848: (b7) r0 = 2                    ; R0=2
+69849: (b7) r0 = 2                    ; R0=2
+69850: (b7) r0 = 2                    ; R0=2
+69851: (b7) r0 = 2                    ; R0=2
+69852: (b7) r0 = 2                    ; R0=2
+69853: (b7) r0 = 2                    ; R0=2
+69854: (b7) r0 = 2                    ; R0=2
+69855: (b7) r0 = 2                    ; R0=2
+69856: (b7) r0 = 2                    ; R0=2
+69857: (b7) r0 = 2                    ; R0=2
+69858: (b7) r0 = 2                    ; R0=2
+69859: (b7) r0 = 2                    ; R0=2
+69860: (b7) r0 = 2                    ; R0=2
+69861: (b7) r0 = 2                    ; R0=2
+69862: (b7) r0 = 2                    ; R0=2
+69863: (b7) r0 = 2                    ; R0=2
+69864: (b7) r0 = 2                    ; R0=2
+69865: (b7) r0 = 2                    ; R0=2
+69866: (b7) r0 = 2                    ; R0=2
+69867: (b7) r0 = 2                    ; R0=2
+69868: (b7) r0 = 2                    ; R0=2
+69869: (b7) r0 = 2                    ; R0=2
+69870: (b7) r0 = 2                    ; R0=2
+69871: (b7) r0 = 2                    ; R0=2
+69872: (b7) r0 = 2                    ; R0=2
+69873: (b7) r0 = 2                    ; R0=2
+69874: (b7) r0 = 2                    ; R0=2
+69875: (b7) r0 = 2                    ; R0=2
+69876: (b7) r0 = 2                    ; R0=2
+69877: (b7) r0 = 2                    ; R0=2
+69878: (b7) r0 = 2                    ; R0=2
+69879: (b7) r0 = 2                    ; R0=2
+69880: (b7) r0 = 2                    ; R0=2
+69881: (b7) r0 = 2                    ; R0=2
+69882: (b7) r0 = 2                    ; R0=2
+69883: (b7) r0 = 2                    ; R0=2
+69884: (b7) r0 = 2                    ; R0=2
+69885: (b7) r0 = 2                    ; R0=2
+69886: (b7) r0 = 2                    ; R0=2
+69887: (b7) r0 = 2                    ; R0=2
+69888: (b7) r0 = 2                    ; R0=2
+69889: (b7) r0 = 2                    ; R0=2
+69890: (b7) r0 = 2                    ; R0=2
+69891: (b7) r0 = 2                    ; R0=2
+69892: (b7) r0 = 2                    ; R0=2
+69893: (b7) r0 = 2                    ; R0=2
+69894: (b7) r0 = 2                    ; R0=2
+69895: (b7) r0 = 2                    ; R0=2
+69896: (b7) r0 = 2                    ; R0=2
+69897: (b7) r0 = 2                    ; R0=2
+69898: (b7) r0 = 2                    ; R0=2
+69899: (b7) r0 = 2                    ; R0=2
+69900: (b7) r0 = 2                    ; R0=2
+69901: (b7) r0 = 2                    ; R0=2
+69902: (b7) r0 = 2                    ; R0=2
+69903: (b7) r0 = 2                    ; R0=2
+69904: (b7) r0 = 2                    ; R0=2
+69905: (b7) r0 = 2                    ; R0=2
+69906: (b7) r0 = 2                    ; R0=2
+69907: (b7) r0 = 2                    ; R0=2
+69908: (b7) r0 = 2                    ; R0=2
+69909: (b7) r0 = 2                    ; R0=2
+69910: (b7) r0 = 2                    ; R0=2
+69911: (b7) r0 = 2                    ; R0=2
+69912: (b7) r0 = 2                    ; R0=2
+69913: (b7) r0 = 2                    ; R0=2
+69914: (b7) r0 = 2                    ; R0=2
+69915: (b7) r0 = 2                    ; R0=2
+69916: (b7) r0 = 2                    ; R0=2
+69917: (b7) r0 = 2                    ; R0=2
+69918: (b7) r0 = 2                    ; R0=2
+69919: (b7) r0 = 2                    ; R0=2
+69920: (b7) r0 = 2                    ; R0=2
+69921: (b7) r0 = 2                    ; R0=2
+69922: (b7) r0 = 2                    ; R0=2
+69923: (b7) r0 = 2                    ; R0=2
+69924: (b7) r0 = 2                    ; R0=2
+69925: (b7) r0 = 2                    ; R0=2
+69926: (b7) r0 = 2                    ; R0=2
+69927: (b7) r0 = 2                    ; R0=2
+69928: (b7) r0 = 2                    ; R0=2
+69929: (b7) r0 = 2                    ; R0=2
+69930: (b7) r0 = 2                    ; R0=2
+69931: (b7) r0 = 2                    ; R0=2
+69932: (b7) r0 = 2                    ; R0=2
+69933: (b7) r0 = 2                    ; R0=2
+69934: (b7) r0 = 2                    ; R0=2
+69935: (b7) r0 = 2                    ; R0=2
+69936: (b7) r0 = 2                    ; R0=2
+69937: (b7) r0 = 2                    ; R0=2
+69938: (b7) r0 = 2                    ; R0=2
+69939: (b7) r0 = 2                    ; R0=2
+69940: (b7) r0 = 2                    ; R0=2
+69941: (b7) r0 = 2                    ; R0=2
+69942: (b7) r0 = 2                    ; R0=2
+69943: (b7) r0 = 2                    ; R0=2
+69944: (b7) r0 = 2                    ; R0=2
+69945: (b7) r0 = 2                    ; R0=2
+69946: (b7) r0 = 2                    ; R0=2
+69947: (b7) r0 = 2                    ; R0=2
+69948: (b7) r0 = 2                    ; R0=2
+69949: (b7) r0 = 2                    ; R0=2
+69950: (b7) r0 = 2                    ; R0=2
+69951: (b7) r0 = 2                    ; R0=2
+69952: (b7) r0 = 2                    ; R0=2
+69953: (b7) r0 = 2                    ; R0=2
+69954: (b7) r0 = 2                    ; R0=2
+69955: (b7) r0 = 2                    ; R0=2
+69956: (b7) r0 = 2                    ; R0=2
+69957: (b7) r0 = 2                    ; R0=2
+69958: (b7) r0 = 2                    ; R0=2
+69959: (b7) r0 = 2                    ; R0=2
+69960: (b7) r0 = 2                    ; R0=2
+69961: (b7) r0 = 2                    ; R0=2
+69962: (b7) r0 = 2                    ; R0=2
+69963: (b7) r0 = 2                    ; R0=2
+69964: (b7) r0 = 2                    ; R0=2
+69965: (b7) r0 = 2                    ; R0=2
+69966: (b7) r0 = 2                    ; R0=2
+69967: (b7) r0 = 2                    ; R0=2
+69968: (b7) r0 = 2                    ; R0=2
+69969: (b7) r0 = 2                    ; R0=2
+69970: (b7) r0 = 2                    ; R0=2
+69971: (b7) r0 = 2                    ; R0=2
+69972: (b7) r0 = 2                    ; R0=2
+69973: (b7) r0 = 2                    ; R0=2
+69974: (b7) r0 = 2                    ; R0=2
+69975: (b7) r0 = 2                    ; R0=2
+69976: (b7) r0 = 2                    ; R0=2
+69977: (b7) r0 = 2                    ; R0=2
+69978: (b7) r0 = 2                    ; R0=2
+69979: (b7) r0 = 2                    ; R0=2
+69980: (b7) r0 = 2                    ; R0=2
+69981: (b7) r0 = 2                    ; R0=2
+69982: (b7) r0 = 2                    ; R0=2
+69983: (b7) r0 = 2                    ; R0=2
+69984: (b7) r0 = 2                    ; R0=2
+69985: (b7) r0 = 2                    ; R0=2
+69986: (b7) r0 = 2                    ; R0=2
+69987: (b7) r0 = 2                    ; R0=2
+69988: (b7) r0 = 2                    ; R0=2
+69989: (b7) r0 = 2                    ; R0=2
+69990: (b7) r0 = 2                    ; R0=2
+69991: (b7) r0 = 2                    ; R0=2
+69992: (b7) r0 = 2                    ; R0=2
+69993: (b7) r0 = 2                    ; R0=2
+69994: (b7) r0 = 2                    ; R0=2
+69995: (b7) r0 = 2                    ; R0=2
+69996: (b7) r0 = 2                    ; R0=2
+69997: (b7) r0 = 2                    ; R0=2
+69998: (b7) r0 = 2                    ; R0=2
+69999: (b7) r0 = 2                    ; R0=2
+70000: (95) exit
+processed 70001 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+[   25.272402] Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000100
+[   25.273453] CPU: 0 UID: 0 PID: 1 Comm: init Tainted: G           OE       7.0.0-rc2+ #20 PREEMPTLAZY 
+[   25.273735] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[   25.273828] Hardware name: linux,dummy-virt (DT)
+[   25.274090] Call trace:
+[   25.274276]  show_stack+0x20/0x38 (C)
+[   25.274600]  dump_stack_lvl+0xc8/0xf8
+[   25.274682]  dump_stack+0x18/0x28
+[   25.274737]  vpanic+0x48c/0x4f8
+[   25.274799]  panic+0x68/0x70
+[   25.274850]  do_exit+0x41c/0x428
+[   25.274905]  do_group_exit+0x3c/0xa0
+[   25.274962]  __arm64_sys_exit_group+0x20/0x28
+[   25.275028]  invoke_syscall+0x50/0x120
+[   25.275088]  el0_svc_common.constprop.0+0x48/0xf0
+[   25.275157]  do_el0_svc+0x24/0x38
+[   25.275209]  el0_svc+0x3c/0x188
+[   25.275263]  el0t_64_sync_handler+0xa0/0xe8
+[   25.275325]  el0t_64_sync+0x1b0/0x1b8
+[   25.275611] SMP: stopping secondary CPUs
+[   25.276027] Kernel Offset: disabled
+[   25.276095] CPU features: 0x1000000,40068004,00020000,0400421b
+[   25.276209] Memory Limit: none
+[   25.276655] Rebooting in 1 seconds..
+rg -q '^kernel binding regression: PASS' build-arm64/kernel.log
+make: *** [Makefile:94: kernel-check-arm64] Error 1
+make: Leaving directory '/workspaces/repository/kprog/tv'

@@ -117,13 +117,18 @@ static void load_group(const uint32_t *order, const uint32_t *generations,
 	char log[65536] = {0};
 	int fds[] = {module_fd, module_fd};
 	LIBBPF_OPTS(bpf_prog_load_opts, opts, .fd_array = fds, .fd_array_cnt = 2,
-		.log_buf = log, .log_size = sizeof(log), .log_level = 2);
+		.log_buf = log, .log_size = sizeof(log), .log_level = reject ? 2 : 0);
 	int fd = bpf_prog_load(BPF_PROG_TYPE_XDP, "tv_binding", "GPL", insns, 2*count+1, &opts);
 	if ((fd < 0) != reject) {
 		fprintf(stderr, "%s: fd=%d errno=%d\n%s", name, fd, errno, log);
 		exit(1);
 	}
 	if (!reject) {
+		struct bpf_prog_info info = {0};
+		uint32_t length = sizeof(info);
+		if (bpf_obj_get_info_by_fd(fd, &info, &length))
+			fatal("bound native JIT info");
+		assert(info.jited_prog_len > 0 && info.jited_prog_len < 1024);
 		unsigned char packet[64] = {0};
 		LIBBPF_OPTS(bpf_test_run_opts, run, .data_in = packet, .data_size_in = sizeof(packet), .repeat = 1);
 		if (bpf_prog_test_run_opts(fd, &run))
@@ -184,9 +189,80 @@ static void group_regressions(void)
 	load_group(reversed, generations, 2, 0, 1, "reordered native chunks");
 	load_group(missing, generations, 1, 0, 1, "missing native chunk/changed entry");
 	load_group(duplicated, generations, 3, 0, 1, "duplicated native chunk");
+	const struct bpf_insn uninitialized = {
+		.code = BPF_LDX | BPF_DW | BPF_MEM, .src_reg = 10, .off = -512,
+	};
+	generations[1] = seal_group_chunk(1, nop, sizeof(nop), uninitialized, sizeof(native), total);
+	load_group(ordered, generations, 2, 0, 1, "prefix must not initialize native stack");
 	test_slot = 0;
 	upload("", native, sizeof(native), 0);
 	load_group(missing, generations, 1, 0, 1, "peer mutation invalidates whole group");
+}
+
+static void seal_single_proof(const struct bpf_insn *body, size_t count)
+{
+	test_slot = 0;
+	upload("", native, sizeof(native), 0);
+	upload(".proof", body, count * sizeof(*body), 0);
+	struct native_lab_binding b = {
+		.version = 1, .arch = TV_ARCH, .abi_version = 1,
+		.chunk_count = 1, .native_size = sizeof(native),
+		.total_native_size = sizeof(native), .proof_insns = count,
+		.prog_type = BPF_PROG_TYPE_XDP, .snapshot_generation = generation(),
+	};
+	size_t length = sizeof(b) + sizeof(native) + count * sizeof(*body);
+	unsigned char *envelope = malloc(length);
+	assert(envelope);
+	memcpy(envelope, &b, sizeof(b));
+	memcpy(envelope + sizeof(b), native, sizeof(native));
+	memcpy(envelope + sizeof(b) + sizeof(native), body, count * sizeof(*body));
+	upload(".binding", envelope, length, 0);
+	free(envelope);
+}
+
+static void helper_map_regressions(void)
+{
+	const struct bpf_insn helper[] = {
+		{ .code = BPF_JMP | BPF_CALL, .imm = BPF_FUNC_get_prandom_u32 }, proof,
+	};
+	seal_single_proof(helper, 2);
+	load(generation(), 0, 0, "verifier-visible helper call");
+	const struct bpf_insn uninitialized[] = {
+		{ .code = BPF_LDX | BPF_DW | BPF_MEM, .src_reg = 10, .off = -8 }, proof,
+	};
+	seal_single_proof(uninitialized, 2);
+	load(generation(), 0, 1, "privileged uninitialized stack negative");
+	const struct bpf_insn invalid_helper[] = {
+		{ .code = BPF_JMP | BPF_CALL, .imm = BPF_FUNC_map_lookup_elem }, proof,
+	};
+	seal_single_proof(invalid_helper, 2);
+	load(generation(), 0, 1, "helper with uninitialized arguments");
+	int map = bpf_map_create(BPF_MAP_TYPE_ARRAY, "tv_negative", 4, 4, 1, NULL);
+	if (map < 0)
+		fatal("negative map create");
+	struct bpf_insn map_proof[] = {
+		{ .code = BPF_LD | BPF_DW | BPF_IMM, .dst_reg = 1, .src_reg = BPF_PSEUDO_MAP_FD, .imm = map }, {},
+		{ .code = BPF_ST | BPF_W | BPF_MEM, .dst_reg = 10, .off = -4 },
+		{ .code = BPF_ALU64 | BPF_MOV | BPF_X, .dst_reg = 2, .src_reg = 10 },
+		{ .code = BPF_ALU64 | BPF_ADD | BPF_K, .dst_reg = 2, .imm = -4 },
+		{ .code = BPF_JMP | BPF_CALL, .imm = BPF_FUNC_map_lookup_elem },
+		{ .code = BPF_JMP | BPF_JEQ | BPF_K, .off = 1 },
+		{ .code = BPF_LDX | BPF_W | BPF_MEM, .off = 0 }, proof,
+	};
+	seal_single_proof(map_proof, 9);
+	load(generation(), 0, 0, "verifier-visible map load and lookup");
+	map_proof[7].off = 8;
+	seal_single_proof(map_proof, 9);
+	load(generation(), 0, 1, "map value out-of-bounds negative");
+	if (close(map))
+		fatal("close negative map");
+	struct bpf_insn *large = malloc(70000 * sizeof(*large));
+	assert(large);
+	for (size_t i = 0; i < 70000; i++)
+		large[i] = proof;
+	seal_single_proof(large, 70000);
+	load(generation(), 0, 0, "70000-instruction proof restored to native code");
+	free(large);
 }
 
 int main(void)
@@ -253,6 +329,7 @@ int main(void)
 	upload(".binding", envelope, sizeof(envelope), 0);
 	load(generation(), 0, 1, "program type mismatch at JIT");
 	group_regressions();
+	helper_map_regressions();
 	if (close(module_fd))
 		fatal("close module BTF");
 	puts("kernel binding regression: PASS");

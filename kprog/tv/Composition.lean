@@ -1,4 +1,4 @@
-import KProgFormal.TagErasure
+import KProgFormal.Reference.Memory
 
 /-
 This file supplies composition, not instruction semantics or a TV certificate.
@@ -7,20 +7,8 @@ actual verifier-facing BPF bytes. No such instantiation is assumed silently.
 -/
 namespace KProgTV
 
-abbrev Byte := Fin 256
-abbrev Address := KProgFormal.Word
-
-inductive AccessKind
-  | read | write | atomic
-  deriving DecidableEq, Repr
-
-/-- Architectural effects, in order. Helper identity, arguments and result
-are observable; equal call counts alone cannot establish refinement. -/
-inductive Event
-  | memory (kind : AccessKind) (address : Address) (bytes : Nat)
-      (value : List Byte)
-  | helper (identity : Address) (arguments : List Address) (result : Address)
-  deriving DecidableEq, Repr
+abbrev Byte := KProgFormal.Reference.Byte
+abbrev Event := KProgFormal.Reference.Event
 
 /-- Full identities, not hash equality. Metadata includes relocations, maps,
 ABI layout, specialization inputs and any instruction-to-block mapping. -/

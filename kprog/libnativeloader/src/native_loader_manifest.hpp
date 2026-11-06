@@ -41,6 +41,8 @@ struct NativeMapRule {
 struct ManifestResolution {
     std::filesystem::path native_object_path;
     std::string symbol_name;
+    std::filesystem::path simulator_object_path;
+    std::string simulator_program;
     std::vector<std::filesystem::path> native_data_object_paths;
     std::vector<NativeMapRule> map_rules;
 };
@@ -721,9 +723,21 @@ std::optional<ManifestResolution> resolve_native_manifest(
             manifest_relative_path(manifest_path,
                                    json_required_string(entry, "native_object"));
         candidate.symbol_name = json_object_string(entry, "symbol").value_or("");
+        const auto simulator_object = json_object_string(entry, "simulator_object");
+        const auto simulator_program = json_object_string(entry, "simulator_program");
+        if (simulator_object.has_value() != simulator_program.has_value() ||
+            (simulator_object && (simulator_object->empty() || simulator_program->empty()))) {
+            manifest_fail("native_loader: simulator_object and simulator_program must be specified together");
+        }
+        if (simulator_object) {
+            candidate.simulator_object_path = manifest_relative_path(manifest_path, *simulator_object);
+            candidate.simulator_program = *simulator_program;
+        }
         if (selected &&
             (selected->native_object_path != candidate.native_object_path ||
-             selected->symbol_name != candidate.symbol_name)) {
+             selected->symbol_name != candidate.symbol_name ||
+             selected->simulator_object_path != candidate.simulator_object_path ||
+             selected->simulator_program != candidate.simulator_program)) {
             manifest_fail("native_loader: manifest has ambiguous entries for prog=" +
                           prog_name);
         }

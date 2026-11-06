@@ -1,0 +1,215 @@
+diff --git a/arch/arm64/net/bpf_jit_comp.c b/arch/arm64/net/bpf_jit_comp.c
+index eee6fd9bd033..604f6de166ab 100644
+--- a/arch/arm64/net/bpf_jit_comp.c
++++ b/arch/arm64/net/bpf_jit_comp.c
+@@ -405,7 +405,7 @@ static int find_used_callee_regs(struct jit_ctx *ctx)
+ 		const struct bpf_kinsn *kinsn;
+ 		struct bpf_insn *proof_buf;
+ 		u64 payload;
+-		int cnt;
++		int cnt, capacity;
+ 		int err;
+ 
+ 		detect_insn_callee_regs(ctx, insn, 1, &reg_used);
+@@ -425,13 +425,16 @@ static int find_used_callee_regs(struct jit_ctx *ctx)
+ 		if (!kinsn || !kinsn->instantiate_insn || !kinsn->max_insn_cnt)
+ 			return -EINVAL;
+ 
+-		proof_buf = kvcalloc(kinsn->max_insn_cnt, sizeof(*proof_buf),
++		capacity = bpf_kinsn_proof_capacity(kinsn, payload);
++		if (capacity < 0)
++			return capacity;
++		proof_buf = kvcalloc(capacity, sizeof(*proof_buf),
+ 				     GFP_KERNEL);
+ 		if (!proof_buf)
+ 			return -ENOMEM;
+ 
+ 		cnt = kinsn->instantiate_insn(payload, proof_buf);
+-		if (cnt <= 0 || cnt > kinsn->max_insn_cnt) {
++		if (cnt <= 0 || cnt > capacity) {
+ 			kvfree(proof_buf);
+ 			return cnt ? -EFAULT : -EINVAL;
+ 		}
+diff --git a/arch/x86/net/bpf_jit_comp.c b/arch/x86/net/bpf_jit_comp.c
+index 41cddd5154b9..0bd137f8ca6e 100644
+--- a/arch/x86/net/bpf_jit_comp.c
++++ b/arch/x86/net/bpf_jit_comp.c
+@@ -1563,7 +1563,7 @@ static int detect_reg_usage(const struct bpf_prog *bpf_prog, bool *regs_used)
+ 		const struct bpf_insn *call;
+ 		struct bpf_insn *proof_buf;
+ 		u64 payload;
+-		int cnt;
++		int cnt, capacity;
+ 		int err;
+ 
+ 		if (!bpf_kinsn_is_sidecar_insn(&insn[i]))
+@@ -1582,13 +1582,16 @@ static int detect_reg_usage(const struct bpf_prog *bpf_prog, bool *regs_used)
+ 		if (!kinsn || !kinsn->instantiate_insn || !kinsn->max_insn_cnt)
+ 			return -EINVAL;
+ 
+-		proof_buf = kvcalloc(kinsn->max_insn_cnt, sizeof(*proof_buf),
++		capacity = bpf_kinsn_proof_capacity(kinsn, payload);
++		if (capacity < 0)
++			return capacity;
++		proof_buf = kvcalloc(capacity, sizeof(*proof_buf),
+ 				     GFP_KERNEL);
+ 		if (!proof_buf)
+ 			return -ENOMEM;
+ 
+ 		cnt = kinsn->instantiate_insn(payload, proof_buf);
+-		if (cnt <= 0 || cnt > kinsn->max_insn_cnt) {
++		if (cnt <= 0 || cnt > capacity) {
+ 			kvfree(proof_buf);
+ 			return cnt ? -EFAULT : -EINVAL;
+ 		}
+diff --git a/include/linux/bpf.h b/include/linux/bpf.h
+index 22ed55a5898c..c213e0b68732 100644
+--- a/include/linux/bpf.h
++++ b/include/linux/bpf.h
+@@ -967,8 +967,11 @@ struct bpf_func_proto {
+ 
+ struct bpf_kinsn {
+ 	struct module *owner; /* NULL for built-in/vmlinux descriptors */
+-	u16 max_insn_cnt;
++	u32 max_insn_cnt;
+ 	u16 max_emit_bytes;
++	u16 native_stack_depth;
++	/* Full verifier-facing native artifact, rather than an instruction slice. */
++	bool native_proof;
+ 
+ 	int (*instantiate_insn)(u64 payload, struct bpf_insn *insn_buf);
+ 
+@@ -980,6 +983,19 @@ struct bpf_kinsn {
+ 			  const u32 *final_ip);
+ };
+ 
++/* Native artifacts query their generation-bound size with a NULL buffer.
++ * Instruction-slice descriptors retain their existing fixed upper bound.
++ */
++static inline int bpf_kinsn_proof_capacity(const struct bpf_kinsn *kinsn, u64 payload)
++{
++	int count = kinsn->native_proof ?
++		kinsn->instantiate_insn(payload, NULL) : kinsn->max_insn_cnt;
++
++	if (count <= 0 || count > kinsn->max_insn_cnt)
++		return count < 0 ? count : -EINVAL;
++	return count;
++}
++
+ static inline bool bpf_kinsn_has_native_emit(const struct bpf_kinsn *kinsn)
+ {
+ 	if (!kinsn)
+diff --git a/include/linux/bpf_verifier.h b/include/linux/bpf_verifier.h
+index e4e6a4224914..cdb8e4b603fe 100644
+--- a/include/linux/bpf_verifier.h
++++ b/include/linux/bpf_verifier.h
+@@ -748,7 +748,7 @@ struct bpf_liveness;
+ 
+ struct bpf_kinsn_region {
+ 	u32 start;
+-	u16 proof_len;
++	u32 proof_len;
+ 	struct bpf_insn orig[2];
+ };
+ 
+diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
+index 97eb923617a4..4c6a2a7f50e0 100644
+--- a/kernel/bpf/verifier.c
++++ b/kernel/bpf/verifier.c
+@@ -3688,15 +3688,21 @@ static int validate_kinsn_proof_seq(struct bpf_verifier_env *env,
+ 		if (class == BPF_JMP || class == BPF_JMP32) {
+ 			u8 op = BPF_OP(insn->code);
+ 
+-			if (op == BPF_CALL || op == BPF_EXIT) {
+-				verbose(env, "kinsn proof sequence cannot contain calls or exits\n");
++			if (op == BPF_CALL && (!kinsn->native_proof || insn->src_reg)) {
++				verbose(env, "kinsn proof call requires a resolved helper identity\n");
++				return -EINVAL;
++			}
++			if (op == BPF_EXIT) {
++				verbose(env, "kinsn proof sequence cannot contain exits\n");
+ 				return -EINVAL;
+ 			}
+ 		}
+ 
+ 		if (class == BPF_LD && BPF_MODE(insn->code) == BPF_IMM &&
+-		    insn->src_reg != 0) {
+-			verbose(env, "kinsn proof sequence cannot contain pseudo ldimm64\n");
++		    insn->src_reg && (!kinsn->native_proof ||
++		    (insn->src_reg != BPF_PSEUDO_MAP_FD &&
++		     insn->src_reg != BPF_PSEUDO_MAP_VALUE))) {
++			verbose(env, "kinsn proof load requires a resolved map identity\n");
+ 			return -EINVAL;
+ 		}
+ 	}
+@@ -3729,7 +3735,7 @@ static int lower_kinsn_proof_regions(struct bpf_verifier_env *env)
+ 		struct bpf_insn *call;
+ 		const struct bpf_insn *sidecar = NULL;
+ 		u64 payload;
+-		int cnt;
++		int cnt, capacity;
+ 
+ 		proof_buf = NULL;
+ 		call = &env->prog->insnsi[i];
+@@ -3755,15 +3761,29 @@ static int lower_kinsn_proof_regions(struct bpf_verifier_env *env)
+ 		err = bpf_jit_get_kinsn_payload(env->prog, call, &kinsn, &payload);
+ 		if (err)
+ 			return err;
++		if (kinsn->native_proof) {
++			if (!env->prog->jit_requested || !bpf_kinsn_has_native_emit(kinsn)) {
++				verbose(env, "native proof requires native JIT emission\n");
++				return -EINVAL;
++			}
++			env->allow_uninit_stack = false;
++			if (kinsn->native_stack_depth > MAX_BPF_STACK)
++				return -EINVAL;
++			env->subprog_info[0].stack_depth = max_t(u32,
++				env->subprog_info[0].stack_depth, kinsn->native_stack_depth);
++		}
+ 
+-		proof_buf = kvcalloc(kinsn->max_insn_cnt, sizeof(*proof_buf),
++		capacity = bpf_kinsn_proof_capacity(kinsn, payload);
++		if (capacity < 0)
++			return capacity;
++		proof_buf = kvcalloc(capacity, sizeof(*proof_buf),
+ 				     GFP_KERNEL_ACCOUNT);
+ 		if (!proof_buf)
+ 			return -ENOMEM;
+ 
+ 		cnt = kinsn->instantiate_insn(payload, proof_buf);
+-		if (cnt <= 0) {
+-			err = cnt ? cnt : -EINVAL;
++		if (cnt <= 0 || cnt > capacity) {
++			err = cnt < 0 ? cnt : -EINVAL;
+ 			goto err_free_proof_buf;
+ 		}
+ 
+@@ -23743,6 +23763,7 @@ static int do_misc_fixups(struct bpf_verifier_env *env)
+ 			const struct bpf_kinsn *kinsn;
+ 			const struct bpf_insn *call = insn + 1;
+ 			struct bpf_insn *kinsn_proof;
++			int capacity;
+ 
+ 			if (i + 1 >= insn_cnt || !bpf_pseudo_kinsn_call(call))
+ 				goto next_insn;
+@@ -23751,14 +23772,17 @@ static int do_misc_fixups(struct bpf_verifier_env *env)
+ 			if (ret)
+ 				return ret;
+ 
+-			kinsn_proof = kvcalloc(kinsn->max_insn_cnt,
++			capacity = bpf_kinsn_proof_capacity(kinsn, bpf_kinsn_sidecar_payload(insn));
++			if (capacity < 0)
++				return capacity;
++			kinsn_proof = kvcalloc(capacity,
+ 					      sizeof(*kinsn_proof), GFP_KERNEL_ACCOUNT);
+ 			if (!kinsn_proof)
+ 				return -ENOMEM;
+ 			cnt = kinsn->instantiate_insn(bpf_kinsn_sidecar_payload(insn),
+ 						      kinsn_proof);
+-			if (cnt <= 0) {
+-				ret = cnt ? cnt : -EINVAL;
++			if (cnt <= 0 || cnt > capacity) {
++				ret = cnt < 0 ? cnt : -EINVAL;
+ 				goto free_kinsn_proof;
+ 			}
+ 

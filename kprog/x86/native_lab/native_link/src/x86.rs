@@ -2517,6 +2517,46 @@ fn apply_elf_relocations(
                     let section_name = target_section
                         .name()
                         .map_err(|e| anyhow!("PC32 target section name: {e}"))?;
+                    // A native map address is an external kernel identity,
+                    // not the ELF map descriptor's embedded data bytes. LEA
+                    // must load that identity from a literal, exactly like a
+                    // GOT map load. Keep the instruction width/layout intact.
+                    if let Some(&address) = map_addrs.get(&target_name) {
+                        let insn_idx = layout
+                            .insn_local_ip
+                            .iter()
+                            .enumerate()
+                            .filter(|(_, &ip)| ip != u64::MAX && ip <= local_patch_off)
+                            .max_by_key(|(_, &ip)| ip)
+                            .map(|(idx, _)| idx)
+                            .ok_or_else(|| anyhow!("map PC32 relocation has no instruction"))?;
+                        let insn_off = layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
+                        let mut decoder = Decoder::new(64, &blob[insn_off..], DecoderOptions::NONE);
+                        let instruction = decoder.decode();
+                        if instruction.code() == Code::Lea_r64_m && instruction.is_ip_rel_memory_operand() {
+                            if reloc.addend() != -4 {
+                                bail!("map address relocation {} has nonzero descriptor offset", target_name);
+                            }
+                            let disp_off = insn_off + (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
+                            if disp_off < 2 || blob.get(disp_off - 2) != Some(&0x8d) {
+                                bail!("map PC32 LEA has inconsistent displacement encoding");
+                            }
+                            let pool_off = if let Some(&offset) = map_pool_entry.get(&target_name) {
+                                offset
+                            } else {
+                                let offset = blob.len();
+                                blob.extend_from_slice(&address.to_le_bytes());
+                                map_pool_entry.insert(target_name.clone(), offset);
+                                map_patches.push(MapPatch { name: target_name.clone(), offset });
+                                offset
+                            };
+                            blob[disp_off - 2] = 0x8b; // LEA -> MOV of the kernel pointer
+                            let disp = i32::try_from(pool_off as i64 - (disp_off + 4) as i64)
+                                .map_err(|_| anyhow!("map PC32 literal exceeds rel32 range"))?;
+                            blob[disp_off..disp_off + 4].copy_from_slice(&disp.to_le_bytes());
+                            continue;
+                        }
+                    }
                     if section_name.starts_with(".text") {
                         let target_addr = i128::from(target_sym.address())
                             .checked_add(i128::from(reloc.addend()))

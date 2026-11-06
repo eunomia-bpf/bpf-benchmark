@@ -40,22 +40,46 @@ application-startup inventory or verified-path coverage.
 
 Outstanding dependencies and defects:
 
-- O1: lane V confirms its canonical byte-decoding, whole-state ISA step with
-  memory/helper effects is not implemented. Its bounded handler contracts
-  cannot substitute for that interface; lane F has real CPU counterexamples.
+- O1: lane V now exports canonical byte-decoded CMOV state/memory transitions.
+  The remaining reference operations and lane F's CPU counterexamples are
+  assigned work; bounded handler contracts alone cannot certify whole programs.
 - O2/O3: there is no compiled-BPF semantics or per-block translation checker.
   The actual post-link, verifier-instantiated instruction stream has not been
   certified against native bytes. No second native ISA model was introduced.
-- Application O4: the C loader entry supplies no simulator proof. The kernel's
-  `validate_kinsn_proof_seq` forbids calls and pseudo map loads, so helper/map
-  simulator proofs cannot use this interface. Real proof lookup/linking and a
-  call/map-capable verifier-region protocol remain necessary. Original app BPF
-  must not be substituted for the simulator proof.
+- Application integration now has compiled proof lookup/linking and a
+  helper/map-capable native-proof interface, detailed below. Actual six-app
+  program integration and unresolved subprogram/kfunc metadata remain active
+  work, together with per-program TV. Original app BPF must not be substituted
+  for the simulator proof.
 - The TV entry relation must still establish the linked source entry, ABI
   compatibility and specialization fidelity. Kernel identity binding alone
   proves none of these semantic facts.
 
 The exact trusted base is in [the checker README](../../tv/README.md).
-It explicitly includes the verifier's privilege-dependent policy; the current
-kernel permits uninitialized stack reads with CAP_PERFMON. Acceptance cannot
-imply a stronger initialization property.
+It explicitly includes the verifier policy. Native-proof regions now force
+initialized-stack checking even with CAP_PERFMON.
+
+The helper/map increment passes real x86 KVM and AArch64 QEMU tests; both
+`helper-map-final-*.status` files contain 0. The x86 public manifest C ABI
+selects an actual clang object/entry and runs helper and map native code
+returning 2. The map proof uses exactly the original map ID; an invented
+internal zero-map state is rejected. Both ISAs reject uninitialized-stack,
+bad-helper-argument and map-value out-of-bounds proofs and accept 70,000 proof
+instructions restored to short native code. These runs completed before the
+08:34 container restart. No timing result or per-program TV certificate is
+claimed by them.
+
+Two accepted-wrong behaviors were fixed, retaining their evidence:
+
+- `map-pc32-jit-before.bin` is the 93-byte x86 JIT image whose PC32 map LEA
+  addressed embedded ELF descriptor data, producing 0xCCCCCCCC while the
+  original map still held 2. The linker now loads the actual kernel map
+  identity from its relocated pointer literal. Raw and manifest map cases pass.
+- `arm64-prefix-stack-negative-before.log` records a synthetic chunk-prefix
+  reservation store initializing fp-512 and admitting an unsafe proof. The
+  store was removed; kernel stack-depth metadata reserves space without
+  initializing proof state. The same negative rejects on both ISAs.
+
+Earlier stale-symbol-version module-load failures and verbose-log ENOSPC
+failures are retained. Paired kernel/module exports and quiet successful-load
+logs correct the harness; verifier rejection cases retain verbose diagnostics.

@@ -58,7 +58,7 @@
  * back-to-back sidecar/call pairs.
  */
 #define NATIVE_LAB_MAX_BLOB_BYTES	128
-#define NATIVE_LAB_MAX_PROOF_INSNS	4096
+#define NATIVE_LAB_MAX_PROOF_INSNS	1000000
 
 /*
  * Stage 2 side-band relocations:
@@ -205,11 +205,19 @@ static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 			mutex_unlock(&blobs_lock);
 			return -E2BIG;
 		}
+		if (!insn_buf) {
+			cnt = blobs[blob_id].proof_len + hweight32(abi_mask);
+			mutex_unlock(&blobs_lock);
+			return cnt;
+		}
 		memcpy(insn_buf, blobs[blob_id].proof,
 		       blobs[blob_id].proof_len * sizeof(*insn_buf));
 		cnt = blobs[blob_id].proof_len;
 		mutex_unlock(&blobs_lock);
 	}
+
+	if (!insn_buf)
+		return hweight32(abi_mask) + 1;
 
 	if (abi_mask & NATIVE_LAB_ABI_RBX)
 		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_6, BPF_REG_0);
@@ -381,6 +389,7 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 const struct bpf_kinsn bpf_x86_native_lab_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = NATIVE_LAB_MAX_PROOF_INSNS,
+	.native_proof = true,
 	.max_emit_bytes = NATIVE_LAB_MAX_BLOB_BYTES,
 	.instantiate_insn = instantiate_native_lab,
 	.emit_x86 = emit_native_lab_x86,
@@ -442,7 +451,7 @@ static ssize_t blob_write(struct file *file, const char __user *ubuf,
 	kfree(blobs[priv->id].bytes);
 	/* Reuploading the blob invalidates any previously uploaded relocs. */
 	kfree(blobs[priv->id].relocs);
-	kfree(blobs[priv->id].proof);
+	kvfree(blobs[priv->id].proof);
 	blobs[priv->id].relocs = NULL;
 	blobs[priv->id].reloc_count = 0;
 	blobs[priv->id].proof = NULL;
@@ -520,7 +529,7 @@ static ssize_t proof_write(struct file *file, const char __user *ubuf,
 	count = len / sizeof(*kbuf);
 	if (count > NATIVE_LAB_MAX_PROOF_INSNS)
 		return -E2BIG;
-	kbuf = memdup_user(ubuf, len);
+	kbuf = vmemdup_user(ubuf, len);
 	if (IS_ERR(kbuf))
 		return PTR_ERR(kbuf);
 
@@ -528,10 +537,10 @@ static ssize_t proof_write(struct file *file, const char __user *ubuf,
 	err = native_lab_advance_generation(&blobs[priv->id]);
 	if (err) {
 		mutex_unlock(&blobs_lock);
-		kfree(kbuf);
+		kvfree(kbuf);
 		return err;
 	}
-	kfree(blobs[priv->id].proof);
+	kvfree(blobs[priv->id].proof);
 	blobs[priv->id].proof = kbuf;
 	blobs[priv->id].proof_len = count;
 	mutex_unlock(&blobs_lock);
@@ -560,7 +569,7 @@ static ssize_t binding_write(struct file *file, const char __user *ubuf,
 	    NATIVE_LAB_MAX_RELOCS * sizeof(struct native_lab_reloc_record) +
 	    NATIVE_LAB_MAX_PROOF_INSNS * sizeof(struct bpf_insn))
 		return -E2BIG;
-	data = memdup_user(ubuf, len);
+	data = vmemdup_user(ubuf, len);
 	if (IS_ERR(data))
 		return PTR_ERR(data);
 	memcpy(&header, data, sizeof(header));
@@ -595,7 +604,7 @@ static ssize_t binding_write(struct file *file, const char __user *ubuf,
 	}
 out:
 	mutex_unlock(&blobs_lock);
-	kfree(data);
+	kvfree(data);
 	if (err)
 		return err;
 	*ppos = len;
@@ -879,7 +888,7 @@ static void bpf_x86_native_lab_debugfs_exit(void)
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
 		kfree(blobs[i].bytes);
 		kfree(blobs[i].relocs);
-		kfree(blobs[i].proof);
+		kvfree(blobs[i].proof);
 		kfree(blobs[i].bound_generations);
 		blobs[i].bound_generations = NULL;
 		blobs[i].bytes = NULL;
