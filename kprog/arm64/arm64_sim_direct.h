@@ -64,7 +64,10 @@ do { \
 __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_result = \
-				ARM64_SIM_L_UNARY_VALUE((OP), (SRC), __a64_l_width); \
+				KPROG_ARM64_UNARY_VALUE((OP), \
+					ARM64_SIM_L_MOD_VALUE((SRC), ARM64_SIM_L_MOD(AUX), \
+						ARM64_SIM_L_SHIFT(AUX), __a64_l_width), \
+					__a64_l_width, ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_8(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \

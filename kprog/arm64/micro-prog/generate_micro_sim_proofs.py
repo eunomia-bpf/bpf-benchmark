@@ -417,8 +417,10 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
         return Encoded("ARM64_OP_SMADDL", reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]), reg_const(ops[3]),
                        width="ARM64_WIDTH_64")
     if op in {"mvn", "neg"}:
+        mod, shift = parse_modifier(ops, 2)
         return Encoded("ARM64_OP_MVN" if op == "mvn" else "ARM64_OP_NEG",
-                       reg_const(ops[0]), reg_const(ops[1]), width=width_const(reg_width(ops[0])))
+                       reg_const(ops[0]), reg_const(ops[1]), width=width_const(reg_width(ops[0])),
+                       aux=f"ARM64_AUX_ALU(0, {mod}, {shift})")
     if op == "cneg":
         return Encoded("ARM64_OP_CNEG", reg_const(ops[0]), reg_const(ops[1]),
                        width=width_const(reg_width(ops[0])), aux=COND[ops[2]])

@@ -1030,7 +1030,10 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_UNARY_HANDLED(OP)) {                 \
 			__u64 __a64_l_result =                              \
-				ARM64_SIM_L_UNARY_VALUE((OP), (SRC), __a64_l_width);\
+				KPROG_ARM64_UNARY_VALUE((OP),                       \
+					ARM64_SIM_L_MOD_VALUE((SRC), ARM64_SIM_L_MOD(AUX), \
+						ARM64_SIM_L_SHIFT(AUX), __a64_l_width),        \
+					__a64_l_width, ARM64_SIM_L_UNSUPPORTED_OPCODE());\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_CNEG_HANDLED(OP)) {                   \
 			__u64 __a64_l_result =                              \

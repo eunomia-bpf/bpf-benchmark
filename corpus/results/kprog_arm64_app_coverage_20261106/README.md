@@ -323,3 +323,19 @@ Use fresh phase names for new attempts; the committed archives preserve this
 run's source/header versions and outputs. Entry/clobber definedness, native
 stack-address observations, modified unary operations and real app integration
 are active repair work, and no accepted negative case is waived by these results.
+
+## Shifted unary producer bug closed
+
+`MVN` and `NEG` previously discarded trailing source modifiers. The producer
+now carries the actual modifier in AUX, and the canonical dispatcher applies
+its existing typed modifier contract before the existing unary contract. The
+old unshifted host API is preserved. Real assembled W/X variants at shift0,
+1,3,31 and X32/63, including MVN ROR, match every register, NZCV and V0 over
+70forms and71,680 native CPU states, zero mismatches. The original native
+encodings, full-state driver, exact source/header snapshot and static replay
+binary are archived in `unary-shifts/replay.tar.gz`; raw per-form counts are in
+`unary-shifts/differential/forms.tsv`. No unsafe native case is executed.
+
+```sh
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile direct-header-generate unary-check unary-artifacts PHASE=unary-shifts
+```

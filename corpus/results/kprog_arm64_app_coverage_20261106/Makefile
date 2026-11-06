@@ -101,3 +101,13 @@ direct-header-generate:
 
 direct-header-check:
 	python3 $(ROOT)/kprog/arm64/generate_sim_dispatch.py --check
+
+.PHONY: unary-check
+unary-check:
+	python3 $(HERE)/unary_check.py --arch arm64 --out $(ROOT)/kprog/fidelity/build-arm64-a-unary
+	taskset -c 16-23 $(MAKE) -C $(ROOT)/kprog/fidelity ARCH=arm64 BUILD=build-arm64-a-unary OUT=$(HERE)/$(PHASE)/differential CASES=1024 run-emulated
+
+
+.PHONY: unary-artifacts
+unary-artifacts:
+	tar -C $(ROOT)/kprog/fidelity -czf $(HERE)/$(PHASE)/replay.tar.gz driver.c driver.h generate.py tcb.py build-arm64-a-unary/generated.c build-arm64-a-unary/native.S build-arm64-a-unary/native.o build-arm64-a-unary/instructions.S build-arm64-a-unary/instructions.asm build-arm64-a-unary/coverage.json build-arm64-a-unary/cpu-differential build-arm64-a-unary/snapshot
