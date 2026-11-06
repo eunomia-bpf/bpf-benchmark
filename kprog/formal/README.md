@@ -16,7 +16,8 @@ accesses, control flow, and selected handler compositions for x86-64 and
 AArch64. Dispatcher coverage and exclusivity theorems concern the modeled
 routing tables; they are **not yet a full simulator-step refinement theorem**.
 The ISA reference lives in `KProgFormal/Reference/`; it imports no simulator
-contracts. `Refinement/X86Cmov.lean` and `Refinement/X86Bt.lean` connect CMOV and BT handlers to that reference
+contracts. `Refinement/X86Cmov.lean`, `Refinement/X86Bt.lean` and `Refinement/X86Bzhi.lean`
+connect CMOV, BT and BZHI handlers to that reference
 and lifts it to registers, flags, XMM0, memory, PC and ordered access/fault effects.
 
 Layout:

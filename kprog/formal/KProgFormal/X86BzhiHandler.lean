@@ -1,5 +1,6 @@
 import KProgFormal.Generated.GeneratedX86Bzhi
 import KProgFormal.X86LogicFlags
+import KProgFormal.X86BzhiFlags
 import KProgFormal.X86Bitops
 import KProgFormal.TagErasure
 import KProgFormal.X86MemAccess
@@ -207,40 +208,33 @@ theorem x86_bzhi_result_refines (src count : BitVec 64) (width : X86Width) :
   simp only [generatedX86BzhiResult, x86BzhiResultSpec]
   rw [x86_bzhi_refines_width]
 
-/-- **The headline flag asymmetry.** A BZHI body defines its flags by hand
-rather than through the shared logic-flag production: `OF = 0`, `SF = 0`
-*outright* even when the result's top bit is set, `ZF` the real zero test of the
-result, and `CF` the comparison of the *byte-masked count* against the width's
-bit count. SF is therefore *not* the sign of the result, and `CF` is derived
-from the width rather than from the value written. -/
+/-- The sole ISA flag rule, at the normalized count and resolved width. -/
 def x86BzhiFlagsSpec (count result : BitVec 64) (width : X86Width) : X86Flags :=
-  { cf := BitVec.ule (BitVec.ofNat 64 (x86WidthBitsSpec width)) count,
-    zf := result == 0,
-    sf := false,
-    of := false }
+  x86BzhiSetFlagsSpec count result width
 
-/-- The flags the generated body produces, restated. -/
-def generatedX86BzhiFlags (count result : BitVec 64) (width : X86Width) :
-    X86Flags :=
-  { cf := BitVec.ule (BitVec.ofNat 64 (GeneratedX86Width.bits width)) count,
-    zf := result == 0,
-    sf := false,
-    of := false }
+/-- The generated macro receives the production width, zero and sign predicates. -/
+def generatedX86BzhiFlags (count result : BitVec 64) (width : X86Width) : X86Flags :=
+  let f := GeneratedX86BzhiFlags.eval
+    (BitVec.ule (BitVec.ofNat 64 (GeneratedX86Width.bits width)) count)
+    (result == 0) (result.getLsbD (GeneratedX86Width.bits width - 1))
+  ⟨f.cf, f.zf, f.sf, f.of⟩
 
 /-- The generated flags equal the independent statement, for every count, result,
 and resolved width. -/
 theorem x86_bzhi_flags_refines (count result : BitVec 64) (width : X86Width) :
     generatedX86BzhiFlags count result width =
       x86BzhiFlagsSpec count result width := by
-  simp only [generatedX86BzhiFlags, x86BzhiFlagsSpec]
+  simp only [generatedX86BzhiFlags, x86BzhiFlagsSpec, x86BzhiSetFlagsSpec,
+    GeneratedX86BzhiFlags.eval, x86BzhiSetCfSpec, x86BzhiSetZfSpec,
+    Reference.X86.bzhiCarry, Reference.X86.resultZero, Reference.X86.resultSign]
   rw [x86_width_bits_refines]
 
-/-- BZHI clears `SF` and `OF` outright, whatever the count, result, and width -
-`SF` is *not* the sign of the result, unlike the shared logic-flag production. -/
-theorem x86_bzhi_clears_sf_of (count result : BitVec 64) (width : X86Width) :
+/-- SF clears for a nonnegative result, while OF always clears. -/
+theorem x86_bzhi_clears_sf_of (count result : BitVec 64) (width : X86Width)
+    (h : Reference.X86.resultSign result (x86WidthBitsSpec width) = false) :
     (x86BzhiFlagsSpec count result width).sf = false ∧
       (x86BzhiFlagsSpec count result width).of = false := by
-  exact ⟨rfl, rfl⟩
+  exact ⟨h, rfl⟩
 
 /-- `CF` is the byte-masked count reaching the *width's* bit count, not any
 property of the result: an 8-bit BZHI reports CF at count 8, while a 64-bit one
@@ -248,16 +242,15 @@ does not. Same count, same source, different width - a different carry. -/
 theorem x86_bzhi_cf_is_count_versus_width (result : BitVec 64) :
     (x86BzhiFlagsSpec 8 result .w8).cf = true ∧
       (x86BzhiFlagsSpec 8 result .w64).cf = false := by
-  refine ⟨?_, ?_⟩ <;> simp only [x86BzhiFlagsSpec, x86WidthBitsSpec] <;> decide
+  refine ⟨?_, ?_⟩ <;> simp only [x86BzhiFlagsSpec, x86BzhiSetFlagsSpec, x86WidthBitsSpec] <;> decide
 
-/-- `ZF` is the real zero test of the cleared value; `SF` stays false even when
-the result's top bit is set, so the two disagree. -/
+/-- ZF follows zero and SF follows sign, including a negative nonzero result. -/
 theorem x86_bzhi_zf_real_sf_cleared :
     (x86BzhiFlagsSpec 4 0 .w8).zf = true ∧
-      (x86BzhiFlagsSpec 4 0x80 .w8).sf = false ∧
+      (x86BzhiFlagsSpec 4 0x80 .w8).sf = true ∧
       x86SignSpec 0x80 .w8 = true := by
   refine ⟨?_, ?_, ?_⟩ <;>
-    simp only [x86BzhiFlagsSpec, x86SignSpec, x86NarrowSpec, x86WidthMaskSpec,
+    simp only [x86BzhiFlagsSpec, x86BzhiSetFlagsSpec, x86SignSpec, x86NarrowSpec, x86WidthMaskSpec,
       x86WidthBitsSpec] <;> decide
 
 /-- The effect of one `BZHI`/`BZHI_MEM` body. `valueSource` records where the
@@ -328,7 +321,7 @@ theorem x86_bzhi_step_refines (op : X86BzhiOp) (flagsCode : Code)
       x86BzhiCountReadSpec, x86BzhiCountSpec, generatedX86BzhiResult,
       x86BzhiResultSpec, generatedX86BzhiFlags, x86BzhiFlagsSpec,
       x86_mem_load_refines, x86_bzhi_refines_width, x86_width_bits_refines,
-      x86_reg_write_refines]
+      x86_reg_write_refines] <;> rfl
 
 /-- The one resolved width serves both the value read and the destination write,
 for both bodies - the same width, unlike `ANDN_MEM`'s separate memory width. -/
@@ -372,7 +365,7 @@ theorem x86_bzhi_count_byte_truncation_example :
     simp only [x86BzhiStepSpec, x86BzhiWidthSpec, x86BzhiCodeWidthSpec,
       x86BzhiValueSpec, x86BzhiValueSourceSpec, x86BzhiCountReadSpec,
       x86BzhiCountSourceSpec, x86BzhiCountSpec, x86BzhiResultSpec, x86BzhiSpec,
-      x86BitopsMaskCode, x86BzhiFlagsSpec, x86WidthBitsSpec,
+      x86BitopsMaskCode, x86BzhiFlagsSpec, x86BzhiSetFlagsSpec, x86WidthBitsSpec,
       x86WidthCodeSpec] <;>
     decide
 

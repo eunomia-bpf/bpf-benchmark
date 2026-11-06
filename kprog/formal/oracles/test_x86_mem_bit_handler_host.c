@@ -28,6 +28,9 @@ typedef unsigned long long __u64;
 #include "generated/x86_mem_access.h"
 #include "generated/x86_bitops.h"
 #include "generated/x86_reg_write.h"
+#define X86_OP_BZHI 0x34U
+#define X86_OP_BZHI_MEM 0x35U
+#include "generated/x86_bzhi_flags.h"
 
 #include <stdio.h>
 
@@ -153,10 +156,9 @@ static struct result generated_bzhi(const __u8 *mem, __u64 old, __u8 tag,
 	__u64 result = kprog_x86_bzhi_value(base, count, width);
 	unsigned bits = KPROG_X86_WIDTH_BITS(width);
 
-	out.flags.cf = (__u8)(count >= bits);
-	out.flags.zf = (__u8)(result == 0);
-	out.flags.sf = 0;
-	out.flags.of = 0;
+	KPROG_X86_SET_BZHI_FLAGS(out.flags.cf, out.flags.zf, out.flags.sf,
+				 out.flags.of, count >= bits, result == 0,
+				 (result >> (bits - 1U)) & 1U);
 	out.dst = generated_write(old, result, width, &tag);
 	out.tag = tag;
 	return out;
@@ -183,7 +185,7 @@ static struct result oracle_bzhi(const __u8 *mem, __u64 old, __u64 index,
 
 	out.flags.cf = (__u8)(count >= width_bits(width));
 	out.flags.zf = (__u8)(result == 0);
-	out.flags.sf = 0;
+	out.flags.sf = (__u8)((result >> (width_bits(width) - 1U)) & 1U);
 	out.flags.of = 0;
 	out.dst = oracle_write(old, result, width);
 	out.tag = 0;

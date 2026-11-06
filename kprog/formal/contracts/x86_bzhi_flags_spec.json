@@ -7,10 +7,11 @@
   ],
   "cf_source": "masked_count_at_least_width_bits",
   "zf_source": "result_is_zero",
+  "sf_source": "result_is_negative",
   "flags": {
     "cf": {"op": "input", "name": "count_at_least_width_bits"},
     "zf": {"op": "input", "name": "result_is_zero"},
-    "sf": {"op": "const", "value": false},
+    "sf": {"op": "input", "name": "result_is_negative"},
     "of": {"op": "const", "value": false}
   }
 }

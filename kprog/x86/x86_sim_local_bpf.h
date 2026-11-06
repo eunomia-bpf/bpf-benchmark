@@ -644,17 +644,13 @@ struct x86_sim_state {
 			x86_apply_width((SRC), __x86_pc_width) == 0);     \
 	} while (0)
 
-/*
- * The `BZHI`/`BZHI_MEM` flag block. `CF` is the byte-masked count reaching the
- * resolved width's bit count, `ZF` the real zero test of the cleared result,
- * and `SF`/`OF` are cleared; unlike the logical shape, `SF` is not the result
- * sign and `CF` is not a borrow.
- */
+/* BZHI sets CF from the byte count, ZF/SF from the result and clears OF. */
 #define X86_SIM_L_SET_BZHI_FLAGS(COUNT, BITS, RESULT)                       \
 	do {                                                               \
 		KPROG_X86_SET_BZHI_FLAGS(                                 \
 			__x86_cf, __x86_zf, __x86_sf, __x86_of,           \
-			(COUNT) >= (BITS), (RESULT) == 0);                \
+			(COUNT) >= (BITS), (RESULT) == 0,                  \
+			((RESULT) >> ((BITS) - 1U)) & 1U);                \
 	} while (0)
 
 #define X86_SIM_L_SET_SUB_FLAGS(LHS, RHS, RESULT, WIDTH)                    \

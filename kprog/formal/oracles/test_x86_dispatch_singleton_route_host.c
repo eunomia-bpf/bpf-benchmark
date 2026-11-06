@@ -1406,7 +1406,7 @@ static void model_bzhi(unsigned dst, unsigned src, unsigned count,
 
 	b->cf = (__u8)(c >= (__u64)bits);
 	b->zf = (__u8)(result == 0);
-	b->sf = 0;
+	b->sf = (__u8)((result >> (bits - 1U)) & 1U);
 	b->of = 0;
 	b->x[dst] = model_partial_write(seed->x[dst], result, w);
 	b->t[dst] = X86_SIM_TAG_SCALAR;

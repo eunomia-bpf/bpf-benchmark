@@ -249,7 +249,7 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 	mtag[dst_reg] = X86_SIM_TAG_SCALAR;
 	mcf = (__u8)(count >= model_bits(w));
 	mzf = (__u8)(result == 0U);
-	msf = 0U;
+	msf = (__u8)((result >> (model_bits(w) - 1U)) & 1U);
 	mof = 0U;
 
 	/* ---- run the real body ---- */

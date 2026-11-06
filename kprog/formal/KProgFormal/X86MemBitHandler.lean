@@ -1,5 +1,6 @@
 import KProgFormal.X86MemAccess
 import KProgFormal.X86Bitops
+import KProgFormal.X86BzhiFlags
 import KProgFormal.X86AluWriteback
 
 namespace KProgFormal
@@ -39,7 +40,7 @@ def generatedX86MemBitStep (op : X86MemBitOp) (state : X86RegAluState)
           { cf := BitVec.ule (BitVec.ofNat 64 (GeneratedX86Width.bits width))
               count
             zf := result == 0
-            sf := false
+            sf := result.getLsbD (GeneratedX86Width.bits width - 1)
             of := false } }
 
 /-- Independent statement of the same bit-test/zero-high-bits handlers: load
@@ -61,7 +62,7 @@ def x86MemBitStepSpec (op : X86MemBitOp) (state : X86RegAluState)
         flags :=
           { cf := BitVec.ule (BitVec.ofNat 64 (x86WidthBitsSpec width)) count
             zf := result == 0
-            sf := false
+            sf := Reference.X86.resultSign result (x86WidthBitsSpec width)
             of := false } }
 
 /-- The memory-source bit-test/zero-high-bits composition refines the
@@ -81,6 +82,7 @@ theorem x86_mem_bit_step_refines (op : X86MemBitOp)
     rw [x86_mem_load_refines]
     simp only [x86_bzhi_refines_width]
     rw [x86_width_bits_refines, x86_reg_write_refines]
+    rfl
 
 /-- `BT [mem], imm8` writes no register: the destination passes through
 unchanged. -/
@@ -99,13 +101,15 @@ theorem x86_mem_bt_only_cf (state : X86RegAluState)
         state.flags.of := by
   exact ⟨rfl, rfl, rfl⟩
 
-/-- `BZHI` defines SF and OF as zero, independent of the incoming flags. -/
+/-- BZHI sets SF from the width-confined result and clears OF. -/
 theorem x86_mem_bzhi_clears_sf_of (state : X86RegAluState)
-    (byte : Nat -> X86MemByte) (index : BitVec 64) (width : X86Width) :
+    (byte : Nat -> X86MemByte) (index : BitVec 64) (width : X86Width)
+    (h : (GeneratedX86Bitops.bzhi (GeneratedX86MemAccess.load byte width)
+      (index &&& 0xff) (GeneratedX86Width.code width)).getLsbD
+        (GeneratedX86Width.bits width - 1) = false) :
     (generatedX86MemBitStep .bzhi state byte index width).flags.sf = false ∧
-      (generatedX86MemBitStep .bzhi state byte index width).flags.of =
-        false := by
-  exact ⟨rfl, rfl⟩
+      (generatedX86MemBitStep .bzhi state byte index width).flags.of = false := by
+  exact ⟨h, rfl⟩
 
 /-- An 8-bit `BT` with index 3 reads a memory byte whose bit 3 is set, so CF is
 carried while the register and the other three flags are untouched. -/
@@ -140,7 +144,7 @@ theorem x86_mem_bzhi_count_reaches_width_example :
       (fun i => if i = 0 then 0xab else 0)
       0xff .w8 =
       { dst := { bits := 0x11223344556677ab, tag := .scalar },
-        flags := { cf := true, zf := false, sf := false, of := false } } := by
+        flags := { cf := true, zf := false, sf := true, of := false } } := by
   native_decide
 
 end KProgFormal

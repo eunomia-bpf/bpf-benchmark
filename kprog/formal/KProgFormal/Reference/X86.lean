@@ -89,6 +89,37 @@ def setFlag (flags : Word) (bit : Nat) (value : Bool) : Word :=
   let mask := (1 : Word) <<< bit
   if value then flags ||| mask else flags &&& ~~~mask
 
+/-- BMI2 zero-high-bits takes an unsigned byte index. This generalized
+primitive also serves narrower implementation contracts. -/
+def zeroHighBits (source count : Word) (operandBits : Nat) : Word :=
+  let index := count &&& 0xff
+  let mask := BitVec.ofNat 64 (2 ^ operandBits) - 1
+  let kept := if BitVec.ult index (BitVec.ofNat 64 operandBits)
+    then ((1 : Word) <<< index) - 1 else mask
+  source &&& kept &&& mask
+
+def bzhiCarry (normalizedCount : Word) (operandBits : Nat) : Bool :=
+  BitVec.ule (BitVec.ofNat 64 operandBits) normalizedCount
+
+def resultZero (result : Word) : Bool := result == 0
+
+def resultSign (result : Word) (operandBits : Nat) : Bool :=
+  result.getLsbD (operandBits - 1)
+
+/-- ZF/SF follow the result; CF reports an index at least the operand size,
+OF is cleared. AF/PF are undefined and are handled by the step relation. -/
+def bzhiFlags (flags normalizedCount result : Word) (operandBits : Nat) : Word :=
+  setFlag (setFlag (setFlag (setFlag flags 0 (bzhiCarry normalizedCount operandBits))
+    6 (resultZero result)) 7 (resultSign result operandBits)) 11 false
+
+inductive BzhiWidth
+  | w32 | w64
+  deriving DecidableEq, Repr
+
+def BzhiWidth.bytes : BzhiWidth → Nat | .w32 => 4 | .w64 => 8
+
+def BzhiWidth.bits (width : BzhiWidth) : Nat := width.bytes * 8
+
 inductive BitIndex
   | register (reg : Register)
   | immediate (value : Byte)
@@ -119,6 +150,8 @@ part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
   | cmov (width : CmovWidth) (cc : Fin 16) (dst : Register)
       (source : Source) (nextPc : Word)
+  | bzhi (width : BzhiWidth) (dst : Register) (source : Source)
+      (count : Register) (nextPc : Word)
   | bt (width : CmovWidth) (source : Source) (index : BitIndex) (nextPc : Word)
   deriving DecidableEq, Repr
 
@@ -137,11 +170,21 @@ def step (instruction : Instruction) (s : State) : Transition State :=
           ⟨{ s with rflags := setFlag s.rflags 0 (bitTest value (bitIndexValue s index) width.bits), pc := nextPc },
             events, none⟩
 
-/-- Only CF is set by BT; ZF is preserved, while OF/SF/AF/PF are undefined.
-The mask is semantic output, used by hardware checks and the step relation. -/
+  | .bzhi width dst source count nextPc =>
+      match readSource s source width.bytes with
+      | .error fault => ⟨s, [.fault fault], some fault⟩
+      | .ok (value, events) =>
+          let count := s.gpr count &&& 0xff
+          let result := zeroHighBits value count width.bits
+          ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), rflags := bzhiFlags s.rflags count result width.bits, pc := nextPc }, events, none⟩
+
+/-- Defined RFLAGS output bits. BT sets CF and preserves ZF; OF/SF/AF/PF
+are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
+checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
   | .cmov .. => 0xffffffffffffffff
   | .bt .. => 0xfffffffffffff76b
+  | .bzhi .. => 0xffffffffffffffeb
 
 /-- The executable gives a representative for undefined flags. The relational
 ISA semantics below admits every value for those bits, as required by the SDM. -/
@@ -161,19 +204,20 @@ private structure Prefix where
   address32 : Bool := false
   rex : Nat := 0
   segment : Nat := 0
+  vexInvalid : Bool := false
 
 private def prefixes : List Byte → Prefix → Nat → Prefix × List Byte × Nat
   | [], p, n => (p, [], n)
   | b :: rest, p, n =>
       let v := b.toNat
-      if v = 0x66 then prefixes rest { p with operand16 := true, rex := 0 } (n + 1)
+      if v = 0x66 then prefixes rest { p with operand16 := true, rex := 0, vexInvalid := true } (n + 1)
       else if v = 0x67 then prefixes rest { p with address32 := true, rex := 0 } (n + 1)
       else if v = 0x64 ∨ v = 0x65 then
         prefixes rest { p with segment := v, rex := 0 } (n + 1)
       else if v = 0x26 ∨ v = 0x2e ∨ v = 0x36 ∨ v = 0x3e then
         prefixes rest { p with segment := 0, rex := 0 } (n + 1)
-      else if v = 0xf2 ∨ v = 0xf3 then prefixes rest { p with rex := 0 } (n + 1)
-      else if 0x40 ≤ v ∧ v ≤ 0x4f then prefixes rest { p with rex := v - 0x40 } (n + 1)
+      else if v = 0xf2 ∨ v = 0xf3 then prefixes rest { p with rex := 0, vexInvalid := true } (n + 1)
+      else if 0x40 ≤ v ∧ v ≤ 0x4f then prefixes rest { p with rex := v - 0x40, vexInvalid := true } (n + 1)
       else (p, b :: rest, n)
 
 private def byteAt (bytes : Array Byte) (position : Nat) : Except String Nat :=
@@ -249,6 +293,22 @@ ModRM, SIB and signed displacement. No caller-supplied decode is trusted. -/
 def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   let (p, _, count) := prefixes bytes.toList {} 0
   let first ← byteAt bytes count
+  if first = 0xc4 then
+    let vex1 ← byteAt bytes (count + 1)
+    let vex2 ← byteAt bytes (count + 2)
+    let opcode ← byteAt bytes (count + 3)
+    if p.vexInvalid ∨ vex1 % 32 ≠ 2 ∨ vex2 % 8 ≠ 0 ∨ opcode ≠ 0xf5 then
+      throw "invalid BZHI VEX encoding"
+    let rex := (if vex1 / 128 = 0 then 4 else 0) +
+      (if (vex1 / 64) % 2 = 0 then 2 else 0) +
+      (if (vex1 / 32) % 2 = 0 then 1 else 0)
+    let p := { p with rex := rex }
+    let modrm ← byteAt bytes (count + 4)
+    let dst := registerCode ((modrm / 8) % 8 + 8 * ((rex / 4) % 2))
+    let index := registerCode (15 - (vex2 / 8) % 16)
+    let width := if vex2 / 128 = 0 then BzhiWidth.w32 else .w64
+    let (source, nextPc, _) ← operand bytes s p modrm (count + 5) 0
+    return .bzhi width dst source index nextPc
   let opcode ← byteAt bytes (count + 1)
   if first ≠ 0x0f then throw "expected two-byte native opcode"
   let modrm ← byteAt bytes (count + 2)

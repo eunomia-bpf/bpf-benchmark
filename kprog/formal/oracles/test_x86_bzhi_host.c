@@ -56,6 +56,7 @@ typedef signed long long __s64;
 #include "generated/x86_reg_write.h"
 #include "generated/x86_mem_access.h"
 #include "generated/x86_bitops.h"
+#include "generated/x86_bzhi_flags.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -350,12 +351,9 @@ static struct bzhi_effect contract_step(unsigned op_is_mem, unsigned flags,
 	/* The generated bit-clear helper, driven at the resolved width. */
 	r.result = kprog_x86_bzhi_value(r.value, r.count, width);
 
-	/* The hand-defined flags: CF from the masked count vs the width's bit
-	 * count, SF/OF hard-zero, ZF the real zero test of the result. */
-	r.cf = (__u8)(r.count >= (__u64)oracle_bits(width));
-	r.of = 0U;
-	r.sf = 0U;
-	r.zf = (__u8)(r.result == 0U);
+	KPROG_X86_SET_BZHI_FLAGS(r.cf, r.zf, r.sf, r.of,
+				 r.count >= oracle_bits(width), r.result == 0,
+				 (r.result >> (oracle_bits(width) - 1U)) & 1U);
 
 	/* The partial-register destination write at the resolved width. */
 	if (width == X86_WIDTH_8)
@@ -410,7 +408,7 @@ static struct bzhi_effect model_step(unsigned op_is_mem, unsigned flags,
 	r.result = oracle_bzhi(r.value, r.count, width);
 	r.cf = (__u8)(r.count >= (__u64)oracle_bits(width));
 	r.of = 0U;
-	r.sf = 0U;
+	r.sf = (__u8)((r.result >> (oracle_bits(width) - 1U)) & 1U);
 	r.zf = (__u8)(r.result == 0U);
 
 	oracle_regs[dst_reg].u.ptr = (void *)(long)oracle_write(
@@ -643,9 +641,7 @@ static unsigned part3(void)
 		cases++;
 	}
 
-	/* Pin 6: SF is hardcoded 0 while ZF is the real zero test — the
-	 * asymmetry against the shared logic-flag production. A value whose
-	 * top bit is set keeps SF clear. */
+	/* Pin 6: SF follows the result sign, and ZF follows result zero. */
 	{
 		struct bzhi_effect e;
 
@@ -658,7 +654,7 @@ static unsigned part3(void)
 				  X86_RBX, X86_RDX, 0);
 		if (e.result != 0x80ULL)
 			return 0;
-		if (e.sf != 0U)
+		if (e.sf != 1U)
 			return 0;
 		if (e.zf != 0U)
 			return 0;

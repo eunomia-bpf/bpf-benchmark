@@ -205,7 +205,7 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned src_reg,
 	mtag[dst_reg] = X86_SIM_TAG_SCALAR;
 	mcf = (__u8)((count_val & 0xffULL) >= model_bits(w));
 	mzf = (__u8)(result == 0U);
-	msf = 0U;
+	msf = (__u8)((result >> (model_bits(w) - 1U)) & 1U);
 	mof = 0U;
 
 	/* ---- run the real routed body ---- */

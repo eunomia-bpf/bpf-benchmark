@@ -12,16 +12,15 @@ the resolved width's bit count. -/
 def cfSource : String := "masked_count_at_least_width_bits"
 /-- The source the `ZF` input is derived from: the cleared result being zero. -/
 def zfSource : String := "result_is_zero"
-/-- The four arithmetic flags after an x86 `BZHI`/`BZHI_MEM`: `SF`/`OF` are
-cleared, `CF` is the count-versus-width comparison, and `ZF` is the result-zero
-predicate. -/
+/-- The source of SF is the sign of the width-confined result. -/
+def sfSource : String := "result_is_negative"
+/-- BZHI defines CF/ZF/SF and clears OF. -/
 structure Flags where
   cf : Bool
   zf : Bool
   sf : Bool
   of : Bool
   deriving DecidableEq, Repr
-/-- The `BZHI` flag transition: the two inputs are the count-versus-width
-comparison (`CF`) and the result-zero predicate (`ZF`). -/
-def eval (countAtLeastWidthBits : Bool) (resultIsZero : Bool) : Flags := { cf := countAtLeastWidthBits, zf := resultIsZero, sf := false, of := false }
+/-- Inputs are the count comparison, zero predicate and sign predicate. -/
+def eval (countAtLeastWidthBits : Bool) (resultIsZero : Bool) (resultIsNegative : Bool) : Flags := { cf := countAtLeastWidthBits, zf := resultIsZero, sf := resultIsNegative, of := false }
 end KProgFormal.GeneratedX86BzhiFlags

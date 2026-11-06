@@ -121,6 +121,43 @@ def main():
                 expected["events"] = [{"kind": "read", "address": address,
                                        "value": [0, 128], "initialized": False}]
         assert out == expected, (request, out, expected)
+    # BZHI sets SF from a retained sign bit and reads only the count's low byte.
+    bzhi_cases = []
+    def bzhi_request(code, count, value, result, flag_bits, dst=0, src=1, cnt=3, cells=None):
+        request = copy.deepcopy(base)
+        request["native_bytes"] = code
+        request["state"]["flags"] = 0xAD7
+        request["state"]["registers"][cnt] = count
+        request["state"]["registers"][src] = value
+        request["state"]["registers"][7] = 0x1FF8
+        request["state"]["memory"] = cells or []
+        bzhi_cases.append((request, result, flag_bits, dst))
+    bzhi_request([0xC4, 0xE2, 0xE0, 0xF5, 0xC1], 64, 1 << 63, 1 << 63, 0x81)
+    bzhi_request([0xC4, 0xE2, 0x60, 0xF5, 0xC1], 32, 0xFFFFFFFF80000000, 1 << 31, 0x81)
+    bzhi_request([0xC4, 0xE2, 0x60, 0xF5, 0xC1], 31, 0xFFFFFFFF80000000, 0, 0x40)
+    bzhi_request([0xC4, 0xE2, 0xE0, 0xF5, 0xC1], 256, (1 << 64) - 1, 0, 0x40)
+    bzhi_request([0xC4, 0x42, 0x30, 0xF5, 0xC2], 32, 0xFFFFFFFF80000000, 1 << 31,
+                 0x81, dst=8, src=10, cnt=9)
+    bzhi_mem = [dict(address=0x2000 + i, value=b, readable=True, writable=True,
+                     initialized=True) for i, b in enumerate(bytes.fromhex("efcdab8967452381"))]
+    bzhi_request([0xC4, 0xE2, 0xE0, 0xF5, 0x47, 8], 64, 0, 0x8123456789ABCDEF,
+                 0x81, cells=bzhi_mem)
+    run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
+                         input="".join(json.dumps(r) + "\n" for r, _, _, _ in bzhi_cases),
+                         text=True, stdout=subprocess.PIPE, check=True)
+    outputs = [json.loads(line) for line in run.stdout.splitlines()]
+    assert len(outputs) == len(bzhi_cases)
+    for (request, result, flag_bits, dst), out in zip(bzhi_cases, outputs):
+        expected = copy.deepcopy(request["state"])
+        expected["registers"][dst] = result
+        expected.update(flags=(expected["flags"] & ~0x8C1) | flag_bits,
+                        pc=expected["pc"] + len(request["native_bytes"]),
+                        defined_flags=0xFFFFFFFFFFFFFFEB, fault=None, events=[])
+        if expected["memory"]:
+            expected["events"] = [{"kind": "read", "address": 0x2000,
+                                   "value": list(bytes.fromhex("efcdab8967452381")),
+                                   "initialized": True}]
+        assert out == expected, (request, out, expected)
     # Reject rather than truncate malformed wire words and duplicate mappings.
     malformed = copy.deepcopy(base)
     malformed["state"]["registers"][0] = 1 << 64
@@ -154,7 +191,7 @@ def main():
         if got & 0x80000000:
             got -= 1 << 32
         assert got == disp, (insn, encoded, got)
-    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
+    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, BZHI VEX/result flags, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
 
 
 if __name__ == "__main__":

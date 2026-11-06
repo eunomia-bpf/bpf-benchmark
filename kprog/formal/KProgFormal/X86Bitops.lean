@@ -24,15 +24,9 @@ theorem x86_bt_refines (base index : BitVec 64) (widthCode : Nat)
       x86BitopsMaskCode, Reference.X86.bitTest, Reference.Word] <;>
     bv_decide
 
-/-- Independent statement of `bzhi`: keep the low `count` bits through the
-exponent-built mask rather than the generated `widthMask` table. -/
+/-- The sole ISA reference supplies the zero-high-bits rule. -/
 def x86BzhiSpec (src count : BitVec 64) (widthCode : Nat) : BitVec 64 :=
-  let b := widthCode * 8
-  let c := count &&& 0xff
-  let kept := if BitVec.ult c (BitVec.ofNat 64 b)
-              then (BitVec.ofNat 64 1 <<< c) - 1
-              else x86BitopsMaskCode widthCode
-  src &&& kept &&& x86BitopsMaskCode widthCode
+  Reference.X86.zeroHighBits src count (widthCode * 8)
 
 /-- The generated `bzhi` equals the independent kept-mask statement for all four
 width codes. -/
@@ -42,7 +36,7 @@ theorem x86_bzhi_refines (src count : BitVec 64) (widthCode : Nat)
       x86BzhiSpec src count widthCode := by
   rcases h with rfl | rfl | rfl | rfl <;>
     simp only [GeneratedX86Bitops.bzhi, GeneratedX86Bitops.widthMask, x86BzhiSpec,
-      x86BitopsMaskCode] <;>
+      x86BitopsMaskCode, Reference.X86.zeroHighBits, Reference.Word] <;>
     bv_decide
 
 /-- The four legal x86 width codes, as the closed set `bt`/`bzhi` are defined

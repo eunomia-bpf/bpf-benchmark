@@ -2,6 +2,7 @@ import KProgFormal.Generated.GeneratedX86BzhiFlags
 import KProgFormal.X86Width
 import KProgFormal.X86Opcode
 import KProgFormal.X86ControlFlow
+import KProgFormal.Reference.X86
 
 namespace KProgFormal
 
@@ -23,36 +24,30 @@ def x86BzhiSetFlagsOpcodeBitsSpec : Nat := 8
 byte-masked count reaching the resolved width's *bit count* (an unsigned
 `>=`), stated against the width contract's own bit count. -/
 def x86BzhiSetCfSpec (count : BitVec 64) (width : X86Width) : Bool :=
-  BitVec.ule (BitVec.ofNat 64 (x86WidthBitsSpec width)) count
+  Reference.X86.bzhiCarry count (x86WidthBitsSpec width)
 
 /-- Independent statement of the source the `ZF` input is read from: the
 cleared *result* being zero. -/
 def x86BzhiSetZfSpec (result : BitVec 64) : Bool :=
-  result == 0
+  Reference.X86.resultZero result
 
-/-- Independent statement of the flags after an x86 `BZHI`/`BZHI_MEM`: `SF` and
-`OF` are cleared; `CF` is set exactly when the byte-masked count reaches the
-resolved width's bit count; `ZF` is set exactly when the cleared result is zero.
-Unlike the logical shape, `SF` is *not* the sign of the result and `CF` is *not*
-a borrow -- it is derived from the count and the width, not from the value
-written. -/
+/-- BZHI sets CF from the normalized count, ZF/SF from the result, and clears OF. -/
 def x86BzhiSetFlagsSpec (count result : BitVec 64) (width : X86Width) : X86Flags :=
   { cf := x86BzhiSetCfSpec count width,
     zf := x86BzhiSetZfSpec result,
-    sf := false,
+    sf := Reference.X86.resultSign result (x86WidthBitsSpec width),
     of := false }
 
 /-- The generated transition, lifted into the shared `X86Flags` record the other
-flag contracts use. The two inputs are the spec's count-versus-width comparison
-and result-zero predicate. -/
+flag contracts use. Inputs are the count comparison and the result-zero/sign predicates. -/
 def generatedX86BzhiSetFlags (count result : BitVec 64) (width : X86Width) :
     X86Flags :=
   let f := eval (x86BzhiSetCfSpec count width) (x86BzhiSetZfSpec result)
+    (Reference.X86.resultSign result (x86WidthBitsSpec width))
   { cf := f.cf, zf := f.zf, sf := f.sf, of := f.of }
 
 /-- The generated transition equals the independent `BZHI` flag statement: the
-`CF` input lands in `CF`, the `ZF` input lands in `ZF`, and `SF`/`OF` are the
-generated clears. -/
+CF, ZF and SF inputs land in the corresponding flags, and OF is cleared. -/
 theorem x86_bzhi_set_flags_refines (count result : BitVec 64) (width : X86Width) :
     generatedX86BzhiSetFlags count result width = x86BzhiSetFlagsSpec count result width := by
   simp only [generatedX86BzhiSetFlags, x86BzhiSetFlagsSpec, eval]
@@ -94,13 +89,17 @@ input the header feeds cannot drift from the result. -/
 theorem x86_bzhi_set_flags_zf_source_refines :
     zfSource = "result_is_zero" := rfl
 
-/-- `BZHI` clears `SF` and `OF` outright, whatever the count, result, and
-width -- `SF` is *not* the sign of the result, unlike the shared logic-flag
-production. -/
-theorem x86_bzhi_set_flags_clears_sf_of (count result : BitVec 64) (width : X86Width) :
+/-- A nonnegative result clears SF; OF is always cleared. The sign premise
+is necessary: the old unconditional-SF-clear claim contradicted hardware. -/
+theorem x86_bzhi_set_flags_clears_sf_of (count result : BitVec 64) (width : X86Width)
+    (h : Reference.X86.resultSign result (x86WidthBitsSpec width) = false) :
     (x86BzhiSetFlagsSpec count result width).sf = false ∧
       (x86BzhiSetFlagsSpec count result width).of = false := by
-  exact ⟨rfl, rfl⟩
+  exact ⟨h, rfl⟩
+
+/-- The sign input of the generated macro is explicitly bound to the result. -/
+theorem x86_bzhi_set_flags_sf_source_refines :
+    GeneratedX86BzhiFlags.sfSource = "result_is_negative" := rfl
 
 /-- `CF` is the byte-masked count reaching the *width's* bit count, not any
 property of the result: an 8-bit BZHI reports `CF` at count 8, while a 64-bit
@@ -133,12 +132,12 @@ theorem x86_bzhi_set_flags_w8_cf_threshold :
   refine ⟨?_, ?_⟩ <;>
     simp only [x86BzhiSetFlagsSpec, x86BzhiSetCfSpec, x86WidthBitsSpec] <;> decide
 
-/-- `ZF` is the real zero test of the cleared result; `SF` stays false even when
-the result's top bit is set, so the two disagree. -/
+/-- Regression for the former SF-clear bug: a nonzero result with its sign
+bit set has ZF false and SF true. -/
 theorem x86_bzhi_set_flags_zf_real_sf_cleared :
     (x86BzhiSetFlagsSpec 4 0 .w8).zf = true ∧
       (x86BzhiSetFlagsSpec 4 0x80 .w8).zf = false ∧
-      (x86BzhiSetFlagsSpec 4 0x80 .w8).sf = false ∧
+      (x86BzhiSetFlagsSpec 4 0x80 .w8).sf = true ∧
       x86SignSpec 0x80 .w8 = true := by
   refine ⟨?_, ?_, ?_, ?_⟩ <;>
     simp only [x86BzhiSetFlagsSpec, x86BzhiSetZfSpec, x86SignSpec, x86NarrowSpec,
