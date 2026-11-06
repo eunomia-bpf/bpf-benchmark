@@ -69,3 +69,14 @@ negative-qemu: build-arm64/negative.cpio
 		-initrd build-arm64/negative.cpio -append 'console=ttyAMA0 rdinit=/init panic=-1' \
 		> ../results/kprog_fidelity_20261106/negative/arm64/guest-console.log 2>&1
 	$(PYTHON) negative.py collect --arch arm64 --build build-arm64/negative --out ../results/kprog_fidelity_20261106/negative/arm64
+
+.PHONY: check-loader-kallsyms
+build-x86/test-kallsyms: test_kallsyms.cpp ../libnativeloader/src/native_loader.cpp
+	install -d build-x86
+	$(CXX) -O2 -std=c++17 -I../libnativeloader/include -I../../micro/programs/build-x86 \
+		-I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/include \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		$< ../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -o $@
+
+check-loader-kallsyms: build-x86/test-kallsyms
+	./build-x86/test-kallsyms

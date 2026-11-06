@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <charconv>
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
@@ -39,6 +40,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -1988,53 +1990,57 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
         return table;
     }
 
-    std::vector<const char *> wanted;
+    std::unordered_set<std::string_view> wanted;
 #if defined(__x86_64__)
-    wanted.push_back("cpu_number");
-    wanted.push_back("this_cpu_off");
+    wanted.insert("cpu_number");
+    wanted.insert("this_cpu_off");
 #endif
     for (const auto &helper : kSupportedHelpers) {
-        wanted.push_back(helper.symbol);
+        wanted.insert(helper.symbol);
     }
     for (const char *symbol : kTypedHelperSymbols) {
-        wanted.push_back(symbol);
+        wanted.insert(symbol);
     }
     for (const char *symbol : kRuntimeCallSymbols) {
-        wanted.push_back(symbol);
+        wanted.insert(symbol);
     }
-    wanted.push_back(kHtabLookupElemSymbol);
-    wanted.push_back(kArrayOfMapLookupElemSymbol);
-    wanted.push_back(kHtabLruPercpuMapLookupElemSymbol);
-    const size_t wanted_count = wanted.size();
+    wanted.insert(kHtabLookupElemSymbol);
+    wanted.insert(kArrayOfMapLookupElemSymbol);
+    wanted.insert(kHtabLruPercpuMapLookupElemSymbol);
 
-    FILE *f = std::fopen("/proc/kallsyms", "re");
-    if (!f) {
+    std::ifstream input("/proc/kallsyms");
+    if (!input) {
         fail("open /proc/kallsyms: " + std::string(std::strerror(errno)));
     }
-    char line[512];
-    size_t found = 0;
-    while (std::fgets(line, sizeof(line), f)) {
-        char addr_text[32] = {};
-        char type = '\0';
-        char name[256] = {};
-        if (std::sscanf(line, "%31s %c %255s", addr_text, &type, name) != 3) {
+    std::string line;
+    while (std::getline(input, line)) {
+        const size_t address_end = line.find(' ');
+        const size_t type = line.find_first_not_of(" \t", address_end);
+        const size_t name_start = line.find_first_not_of(" \t", type + 1);
+        if (address_end == std::string::npos || type == std::string::npos ||
+            name_start == std::string::npos) {
+            fail("malformed /proc/kallsyms record");
+        }
+        const size_t name_end = line.find_first_of(" \t", name_start);
+        const std::string_view name(line.data() + name_start,
+            (name_end == std::string::npos ? line.size() : name_end) - name_start);
+        if (!wanted.erase(name)) {
             continue;
         }
-        (void)type;
-        for (size_t i = 0; i < wanted_count; i++) {
-            if (std::strcmp(name, wanted[i]) != 0 || table.count(wanted[i])) {
-                continue;
-            }
-            uint64_t addr = std::strtoull(addr_text, nullptr, 16);
-            table.emplace(wanted[i], addr);
-            found++;
-            break;
+        uint64_t address = 0;
+        const auto parsed = std::from_chars(line.data(), line.data() + address_end,
+                                            address, 16);
+        if (parsed.ec != std::errc{} || parsed.ptr != line.data() + address_end) {
+            fail("invalid address in /proc/kallsyms for " + std::string(name));
         }
-        if (found == wanted_count) {
+        table.emplace(name, address);
+        if (wanted.empty()) {
             break;
         }
     }
-    std::fclose(f);
+    if (input.bad()) {
+        fail("read /proc/kallsyms failed");
+    }
     return table;
 }
 

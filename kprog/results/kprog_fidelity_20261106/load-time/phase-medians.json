@@ -1,0 +1,158 @@
+[
+  {
+    "runtime": "kernel",
+    "phase": "compile_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 1869295
+  },
+  {
+    "runtime": "kernel",
+    "phase": "input_stage_ns",
+    "benchmarks": 23,
+    "median_of_benchmark_medians_ns": 718
+  },
+  {
+    "runtime": "kernel",
+    "phase": "memory_prepare_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 20850
+  },
+  {
+    "runtime": "kernel",
+    "phase": "object_load_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 1761762
+  },
+  {
+    "runtime": "kernel",
+    "phase": "object_open_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 106250
+  },
+  {
+    "runtime": "kernel",
+    "phase": "packet_prepare_ns",
+    "benchmarks": 6,
+    "median_of_benchmark_medians_ns": 588.0
+  },
+  {
+    "runtime": "kernel",
+    "phase": "prog_run_wall_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 50003337
+  },
+  {
+    "runtime": "kernel",
+    "phase": "result_extract_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 269
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "compile_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 116191654
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "blob_upload_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 57808
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "companion_load_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 4986088
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "companion_lookup_spec_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 107020773
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "companion_map_ptr_extract_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 199
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "companion_object_load_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 1773545
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "companion_open_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 9763
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "memory_prepare_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 21504
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "native_link_cache_lookup_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 87154
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "native_link_exec_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 0
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "native_link_map_patch_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 164
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "native_link_read_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 23321
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "native_load_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 116191654
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "packet_prepare_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 574
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "prog_load_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 2549634
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "prog_run_wall_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 60169130
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "proof_open_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 31490
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "proof_verifier_load_ns",
+    "benchmarks": 29,
+    "median_of_benchmark_medians_ns": 2528611
+  }
+]
