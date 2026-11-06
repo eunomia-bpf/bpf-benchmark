@@ -567,15 +567,13 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			__x86_stack_mem.q                               \
 				[KPROG_X86_STACK_WORD_INDEX(             \
 					__x86_stw_index)] = (VALUE);     \
-		} else if (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH) == X86_WIDTH_64) { \
-			KPROG_X86_MEM_STORE(                              \
-				(void *)&__x86_stack_mem.b[__x86_stw_index], \
-				X86_WIDTH_64, (VALUE));                   \
 		} else {                                                  \
 			__u8 __x86_stw_width =                            \
 				X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);         \
 			__u64 __x86_stw_narrowed = (VALUE) &              \
 				x86_width_mask(__x86_stw_width);          \
+			if (__x86_stw_width == X86_WIDTH_64)              \
+				X86_SIM_L_BARRIER_VAR(__x86_stw_narrowed);  \
 			__x86_stack_mem.b[__x86_stw_index] =              \
 				KPROG_X86_STACK_BYTE(__x86_stw_narrowed, 0);\
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 1))\
