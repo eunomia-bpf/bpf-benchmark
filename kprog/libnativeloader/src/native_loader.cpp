@@ -2945,6 +2945,15 @@ struct LinkedBlob {
     std::vector<NativeExclusiveSite> exclusive_sites;
 };
 
+bool proof_needs_kernel_symbols(const std::vector<bpf_insn> &proof)
+{
+    return proof.empty() || std::any_of(proof.begin(), proof.end(),
+        [](const bpf_insn &insn) {
+            return insn.code == (BPF_JMP | BPF_CALL) &&
+                insn.src_reg != BPF_PSEUDO_CALL;
+        });
+}
+
 struct CompanionLoad {
     uint64_t map_ptr_extract_ns = 0;
     uint64_t lookup_spec_ns = 0;
@@ -5419,11 +5428,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     }
     const auto native_data_symbols_end = std::chrono::steady_clock::now();
 
-    companion.needs_kernel_symbols |= proof_insns.empty() ||
-        std::any_of(proof_insns.begin(), proof_insns.end(),
-            [](const bpf_insn &insn) {
-                return insn.code == (BPF_JMP | BPF_CALL);
-            });
+    companion.needs_kernel_symbols |= proof_needs_kernel_symbols(proof_insns);
     LinkedBlob linked = load_or_link_native_blob(
         options.native_link_path,
         native_object_path,
