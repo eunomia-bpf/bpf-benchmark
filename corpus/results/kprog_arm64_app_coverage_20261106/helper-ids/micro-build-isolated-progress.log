@@ -29,3 +29,5 @@ simple_packet: ok: compile=8.628s proof_insns=21 direct_insns= verify=0.000s tes
 simple: ok: compile=9.814s proof_insns=24 direct_insns= verify=0.000s test=0.000s 
 bitmap_popcount_scan: ok: compile=30.987s proof_insns=113 direct_insns= verify=0.000s test=0.000s 
 sorted_rule_binary_search: ok: compile=82.602s proof_insns=180 direct_insns= verify=0.000s test=0.000s 
+bcc_runqlat_log2_histogram_bucket: compile-fail: compile=1449.848s proof_insns= direct_insns= verify=0.000s test=0.000s clang: error: clang frontend command failed with exit code 135 (use -v to see invocation) | Preprocessed source(s) and associated run script(s) are located at:
+packet_checksum_fold: ok: compile=14.154s proof_insns=101 direct_insns= verify=0.000s test=0.000s 

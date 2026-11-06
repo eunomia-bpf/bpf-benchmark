@@ -194,3 +194,11 @@ entrypoint description records the baseline; A app ABI/map generation, real
 startup inventory, complete verifier closure, bound QEMU workloads and their
 same-work counters remain unfinished. The portable archive is a diagnostic
 artifact replay, not a six-app performance bundle.
+
+Micro-build failure checkpoint, 07:58 UTC: the isolated rebuild reports
+`bcc_runqlat_log2_histogram_bucket` compile failure, clang exit 135, after
+1449.848 seconds. The existing driver emits a compact compiler error and
+continues the remaining cases; see `helper-ids/micro-build-isolated-progress.log`.
+The production stack header changed during that compile, so its cause has not
+been isolated. No architecture-wide build success is claimed. This is separate
+from the passing helper identity/ABI checks and the retained app artifact scan.
