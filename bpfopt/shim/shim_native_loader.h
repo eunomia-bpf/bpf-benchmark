@@ -435,11 +435,9 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     }
     if (shim_native_loader_active)
         return original_fd;
-    /* A probe is libbpf's own program, never an application program, so it
-     * can never carry a manifest entry. Gating this on the bound requirement
-     * made the requirement fatal for the probe itself and no application
-     * could start on the verified arm. */
-    if (shim_native_loader_is_libbpf_probe(prog)) {
+    /* The verified arm binds startup probes as well as resident programs. */
+    if (!shim_native_loader_requires_bound_proof() &&
+        shim_native_loader_is_libbpf_probe(prog)) {
         log_line("native-loader skipped feature probe program name=%s insn_cnt=%u",
                  prog_name ? prog_name : "", prog ? prog->insn_cnt : 0);
         kmsg_line("native skip-feature-probe name=%s fd=%ld",
