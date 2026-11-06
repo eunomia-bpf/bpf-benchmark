@@ -116,92 +116,58 @@ rule only for `NATIVE_LAB_ARCH_ARM64`.
 
 ## Corpus (six applications)
 
-**Not yet measured.** The corpus target builds the simulator proofs for the
-application programs, and that build currently stops on an entry-ABI
-question rather than a performance one:
+The corpus target builds and boots across the six applications. Two
+defects seen on the way were fixed by their owning lanes, not accepted as
+boundaries:
 
-```
-ValueError: undefined native ABI register esi at 0x256: shl esi,0x10
-```
+1. **`shl esi` generator failure.** `check_definedness` raised
+   `undefined native ABI register esi`, which I first read as an entry-ABI
+   coverage boundary. It was a **checker bug**, fixed by lane C
+   (`3c4a64711`); the corpus programs generate now.
+2. **Native-arm load failure under a `kinsn` plan.** Bisected on katran
+   with everything else fixed: `noop` and `dce` both measure both arms,
+   `kinsn` does not, failing in libbpf's
+   `bpf_object__probe_loading(): -EINVAL`. That is a pass-path defect, not
+   the native loader.
 
-raised from `kprog/x86/micro-prog/x86_abi.py:88` via `check_definedness`.
+The native arm itself is selected with
 
-Diagnosis, settled against the production header rather than inferred:
-`X86_SIM_ENTRY_XDP` and `X86_SIM_ENTRY_SKB` (`x86_sim_local_bpf.h:353-375`)
-initialize exactly `__x86_rdi = &__x86_sim_abi` plus the stack in `rsp`.
-The analyzer's seed is the same two registers, so it is an exact model of
-the entry ABI and the error is correct: the program reads `esi` before
-anything defines it. This is a **coverage boundary** of the modeled entry
-ABI, not an analyzer bug and not something to widen silently — widening
-the seed would accept a premise the simulator never establishes.
-
-What remains is a named decision for lane C: whether that program takes a
-second entry argument outside the modeled ABI, or whether its preamble is
-meant to materialize `esi` from the ABI struct and does not. Either way the
-corpus arm is reported with that boundary stated, not hidden.
-
-### State reached, 2026-11-06 10:47
-
-The corpus target builds and boots end to end
-(`corpus/results/x86_kvm_corpus_20261106_104647_576649`), and the **baseline
-(eBPF JIT) arm measures**: `phase_done status ok` with one workload record
-for `bcc/set`. The **native arm produces nothing**:
-
-```
-BCC tool capable exited before BPF programs were tracked by shim
-failed to load BPF skeleton 'capable_bpf': -22
-failed to load BPF object: -22
+```sh
+BPFREJIT_SHIM_NATIVE_LOADER=post \
+BPFREJIT_SHIM_NATIVE_MANIFEST=<complete-app-manifest> make corpus
 ```
 
-`-22` is EINVAL on the app's own `BPF_PROG_LOAD` after the shim handed it
-on, and `post_rejit.workloads` is empty — so this is the native-loader arm
-only, not app startup and not a general corpus regression. The
-`native/eBPF` ratio the reference quotes needs that arm; the baseline arm
-is available today. Reported to lanes T/F.
+and the verified arm adds `BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1`
+(lane C, `bb0b9c146`). A bcc application manifest with 25 programs exists
+at `corpus/results/kprog_app_coverage_20261106/bcc-real-4/manifest.json`;
+the remaining apps' complete manifests are lane C's.
 
-`katran` reproduces the same shape (`corpus/results/
-x86_kvm_corpus_20261106_110130_339829`: baseline one workload, post_rejit
-none) and pins the cause to the native path itself rather than to any app's
-bytecode:
+### Pass-list runs are bytecode reload, not native
 
-```
-libbpf: Error in bpf_object__probe_loading(): -EINVAL. Couldn't load
-trivial BPF program. ... RLIMIT_MEMLOCK ...
-BpfLoader.cpp:326 error while trying to load bpf object: .../balancer.bpf.o
-terminate called after throwing an instance of 'std::invalid_argument'
+**Correction.** Runs with `BPFREJIT_BENCH_PASSES=noop`, `dce` or `kinsn`
+reload eBPF bytecode through `bpfopt` and are **not** the native arm. The
+native arm is the native loader, selected with
+
+```sh
+BPFREJIT_SHIM_NATIVE_LOADER=post \
+BPFREJIT_SHIM_NATIVE_MANIFEST=<complete-app-manifest> make corpus
 ```
 
-`bpf_object__probe_loading` loads a two-instruction `r0=0; exit`. A trivial
-program failing with EINVAL means a precondition the patched native path
-imposes on every load in that phase, not a property of the six apps.
-RLIMIT_MEMLOCK is the other candidate the message names, but the baseline
-arm loads in the same process environment, so it is almost certainly the
-patch. Reported to lane T; not worked around here.
-
-### Four of six apps measure with a bytecode/`noop` pass
+and the verified arm adds `BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1`
+(lane C, `bb0b9c146`; see
+`corpus/results/kprog_app_coverage_20261106/README.md`). So no
+`native/eBPF` figure may be quoted from a pass-list run.
 
 `BPFREJIT_BENCH_PASSES=noop`, `SAMPLES=1 WORKLOAD_DURATION=60`
-(`corpus/results/x86_kvm_corpus_20261106_114826_062263`) gives `ok` with
-**both arms measured** for bcc/set, cilium/agent, otelcol-ebpf-profiler and
-tetragon/observer. Tracee/monitor did not produce a record in that run.
-
-The `kinsn` pass is the sole cause of the native-arm failure, bisected on
-katran with everything else held fixed:
-
-| `BPFREJIT_BENCH_PASSES` | status | arms | artifact |
-| --- | --- | ---: | --- |
-| `noop` | ok | 2/2 | `..._111521_609228` |
-| `dce` (BPF->BPF) | ok | 2/2 | `..._113727_795524` |
-| `kinsn` (native rewrite) | error | 1/2 | `..._112823_193051` |
-
-So the shim, loader, kernel patch and apps are all sound; installing a
-`kinsn` plan is what makes libbpf's trivial startup probe return EINVAL.
-Reported to the lanes that own the pass and shim.
+(`corpus/results/x86_kvm_corpus_20261106_114826_062263`) does give `ok`
+with both arms measured for bcc/set, cilium/agent, otelcol-ebpf-profiler
+and tetragon/observer — but that is a bytecode arm, useful only as the
+work-counter evidence below.
 
 ### Work done per arm (the operator's requirement)
 
 Each application's own counters are recorded for both arms in the run
-artifacts above. Sampled values at `noop`, 60 s:
+artifacts. Sampled at `noop`, 60 s:
 
 - **bcc/set** — stress-ng bogo-ops in both arms, same four stressors
   (syscall, cap, set, sockfd): cap 16,871,329 vs 16,974,156; set
@@ -218,10 +184,17 @@ artifacts above. Sampled values at `noop`, 60 s:
   carries no counters block, so its work figures come from the profiler's
   own output rather than a `config.outcomes` map.
 
-Cilium's volume differs by 14% between arms at `SAMPLES=1`, which is why
-the ratio must be taken from throughput over equal durations rather than
-from raw counters — the counters are evidence of *which work* was done, not
-of the rate.
+Cilium's volume differs by 14% between arms at `SAMPLES=1`, which is why a
+rate must come from throughput over equal durations rather than from raw
+counters — the counters are evidence of *which work* was done, not of the
+rate.
+
+### bcc at the operator recipe (bytecode arm)
+
+`SAMPLES=3 WORKLOAD_DURATION=180`, `noop`
+(`corpus/results/x86_kvm_corpus_20261106_125737_127074`): status `ok`,
+3 workloads per arm, stress-ng totals 275,414,345 bogo-ops baseline vs
+280,803,536 post, **1.020x**. This is a bytecode-arm figure.
 
 Reference `1.349x` is confirmed as the geometric mean of the six per-app
 `native/eBPF` ratios recorded in `kprog/docs/evaluation.md`
