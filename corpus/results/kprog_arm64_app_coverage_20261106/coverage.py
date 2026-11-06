@@ -15,16 +15,29 @@ def records(directory):
     return [json.loads(line) for line in (directory / 'programs.jsonl').read_text().splitlines()]
 
 
+def freeze_simulator(directory):
+    snapshot = directory / 'simulator'
+    if not snapshot.exists():
+        snapshot.mkdir()
+        for name in ['arm64_sim.h', 'arm64_sim_local_bpf.h']:
+            shutil.copy2(ROOT / 'kprog/arm64' / name, snapshot / name)
+        shutil.copytree(ROOT / 'kprog/formal/generated', directory / 'formal/generated')
+
+
 def compile_one(row, directory):
     log = directory / 'compile' / (row['name'] + '.json')
     if log.exists():
         return json.loads(log.read_text())
+    source = directory / 'compile-sources' / (row['name'] + '.bpf.c')
+    source.write_text(Path(row['source']).read_text().replace(
+        '#include "../arm64_sim_local_bpf.h"',
+        f'#include "{directory}/simulator/arm64_sim_local_bpf.h"'))
     command = ['clang', '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm',
                '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64',
                '-I', str(ROOT / 'vendor/libbpf/include/uapi'),
                '-I', str(ROOT / 'vendor/libbpf/src'),
                '-I', '/usr/include/x86_64-linux-gnu',
-               '-I', str(ROOT / 'kprog/arm64/micro-prog'), '-c', row['source'],
+               '-I', str(ROOT / 'kprog/arm64/micro-prog'), '-c', str(source),
                '-o', str(directory / 'objects' / (row['name'] + '.bpf.o'))]
     try:
         result = subprocess.run(command, text=True, capture_output=True, timeout=120)
@@ -39,9 +52,10 @@ def compile_one(row, directory):
 
 
 def compile_all(directory):
-    for name in ['compile', 'objects']:
+    for name in ['compile', 'objects', 'compile-sources']:
         (directory / name).mkdir(exist_ok=True)
     rows = [row for row in records(directory) if row['stage'] == 'generate' and row['ok']]
+    freeze_simulator(directory)
     failures = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         futures = [pool.submit(compile_one, row, directory) for row in rows]
@@ -104,6 +118,19 @@ def summarize(directory):
     with tarfile.open(directory / 'generated-sources.tar.gz', 'w:gz') as archive:
         for run_dir in sorted({Path(row['source']).parent for row in rows}):
             archive.add(run_dir, arcname=run_dir.name)
+        if (directory / 'compile-sources').exists():
+            archive.add(directory / 'compile-sources', arcname='compile-sources')
+    if (directory / 'simulator').exists():
+        with tarfile.open(directory / 'simulator-snapshot.tar.gz', 'w:gz') as archive:
+            for name in ['simulator', 'formal']:
+                archive.add(directory / name, arcname=name)
+    if (directory / 'objects').exists():
+        with tarfile.open(directory / 'compiled-objects.tar.gz', 'w:gz') as archive:
+            for log in sorted((directory / 'compile').glob('*.json')):
+                row = json.loads(log.read_text())
+                if row['returncode'] == 0:
+                    obj = directory / 'objects' / (row['name'] + '.bpf.o')
+                    archive.add(obj, arcname=obj.name)
     return 0
 
 

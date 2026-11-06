@@ -1,0 +1,9 @@
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/coverage.py package /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/uninitialized-stack-fix /workspaces/repository/kprog/arm64/build/app-coverage/uninitialized-stack-fix /workspaces/.agent-state/bpf-benchmark-supervisor/kfunc-inline-claude-20261004/round5-arm64.cpio.gz
+packaged 1 diagnostic artifacts in /workspaces/repository/kprog/arm64/build/app-coverage/uninitialized-stack-fix
+install -d /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/uninitialized-stack-fix/verify
+taskset -c 16-19 timeout 7200 qemu-system-aarch64 -M virt -cpu max -smp 2 -m 2048 -nographic -no-reboot \
+	-kernel /workspaces/repository/vendor/build/arm64/linux/arch/arm64/boot/Image -initrd /workspaces/repository/kprog/arm64/build/app-coverage/uninitialized-stack-fix/initramfs.cpio.gz \
+	-fsdev local,id=results,path=/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/uninitialized-stack-fix/verify,security_model=none \
+	-device virtio-9p-device,fsdev=results,mount_tag=results \
+	-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/uninitialized-stack-fix/qemu.log 2>&1
+test "$(cat /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/uninitialized-stack-fix/verify/guest-status)" = 0

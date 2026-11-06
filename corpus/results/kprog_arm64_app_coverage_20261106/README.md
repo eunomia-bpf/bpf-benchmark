@@ -86,3 +86,21 @@ the QEMU load all passed. The concurrent shared formal check currently fails
 in lane V's layout migration at `KProgFormal.CrossIsaRev`: duplicate
 `GeneratedArm64Width.Width.enumToBitVec` imports. No formal file was changed
 by this compact-removal increment; lane V is resolving the migration.
+
+## Uninitialized-stack diagnostic
+
+Lane F's negative suite accepts `ldur x0, [sp, #-8]; ret` with the production
+simulator, whose backing stack is zero-initialized. A snapshot-only experiment
+removed that initialization and made the backing union volatile. The resulting
+BPF is exactly an uninitialized `r10 - 8` read followed by `exit`; QEMU still
+accepted it. [Compiled instructions](uninitialized-stack-fix/compiled-bpf.asm)
+and [verifier log](uninitialized-stack-fix/verify/uninitialized_stack.verifier.log)
+retain the evidence. This experiment does **not** close the negative failure.
+No production stack change was made by lane A.
+
+The framework kernel's `include/linux/bpf.h:bpf_allow_uninit_stack` permits
+uninitialized stack reads for `CAP_PERFMON` callers, and `verifier.c` assigns
+that premise to `env->allow_uninit_stack`. The root guest uses that privileged
+verifier contract. Removing simulator initialization alone cannot establish
+the stricter negative-suite property. F owns the production stack correction;
+this additional verifier premise was reported to F/T in coordination.
