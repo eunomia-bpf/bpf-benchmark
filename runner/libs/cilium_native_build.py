@@ -4,6 +4,7 @@ import fcntl
 import hashlib
 import json
 import os
+import platform
 import re
 import shutil
 import subprocess
@@ -32,6 +33,7 @@ _ABI_DEFINES = frozenset(
         "BPFBENCH_CILIUM_HYBRID_ROUTING_ENABLED",
         "MICRO_NATIVE",
         "__TARGET_ARCH_x86",
+        "__TARGET_ARCH_arm64",
     }
 )
 _ABI_MACROS = frozenset(
@@ -257,6 +259,15 @@ def _native_preprocessor_args(
     return result
 
 
+def _native_arch() -> str:
+    machine = platform.machine()
+    if machine == "x86_64":
+        return "x86"
+    if machine == "aarch64":
+        return "arm64"
+    raise RuntimeError(f"Cilium native compiler architecture is not supported: {machine}")
+
+
 def native_compile_args(
     args: Sequence[str], output: Path, compat: Path, native_root: Path,
     native_source: Path, extra_defines: Sequence[str] = (),
@@ -264,10 +275,14 @@ def native_compile_args(
     original_source = _source_path(args)
     if original_source is None:
         raise RuntimeError("Cilium compile command has no C source")
+    arch = _native_arch()
+    arch_flags = (["-march=native", "-mno-red-zone"] if arch == "x86" else
+                  ["--target=aarch64-linux-gnu", "-mtune=neoverse-n1", "-mno-outline-atomics",
+                   "-ffixed-x18", "-ffixed-x26", "-ffixed-x27", "-ffixed-x28"])
     return [
-        "-O3", "-g", "-fPIC", "-c", "-DMICRO_NATIVE", "-D__TARGET_ARCH_x86",
+        "-O3", "-g", "-fPIC", "-c", "-DMICRO_NATIVE", f"-D__TARGET_ARCH_{arch}",
         *extra_defines,
-        "-fms-extensions", "-fomit-frame-pointer", "-march=native", "-mno-red-zone",
+        "-fms-extensions", "-fomit-frame-pointer", *arch_flags,
         "-mgeneral-regs-only", "-fno-stack-protector", "-fno-asynchronous-unwind-tables",
         "-fno-unwind-tables", "-fno-jump-tables", "-fno-optimize-sibling-calls",
         "-Wno-unknown-attributes", "-mllvm", "-switch-to-lookup=false",
@@ -359,7 +374,7 @@ def _macro_dump_args(
     common = ["-dM", "-E", *_include_and_define_args(args)]
     if native:
         return [
-            "-DMICRO_NATIVE", "-D__TARGET_ARCH_x86", *native_extra_defines,
+            "-DMICRO_NATIVE", f"-D__TARGET_ARCH_{_native_arch()}", *native_extra_defines,
             "-include", str(compat),
             "-dM", "-E",
             *_native_preprocessor_args(
@@ -373,7 +388,7 @@ def _macro_dump_args(
 def _compiler_baseline_macro_args(*, native: bool, compat: Path) -> list[str]:
     if native:
         return [
-            "-DMICRO_NATIVE", "-D__TARGET_ARCH_x86", "-include", str(compat),
+            "-DMICRO_NATIVE", f"-D__TARGET_ARCH_{_native_arch()}", "-include", str(compat),
             "-dM", "-E", "-x", "c", "/dev/null",
         ]
     return ["--target=bpf", "-dM", "-E", "-x", "c", "/dev/null"]

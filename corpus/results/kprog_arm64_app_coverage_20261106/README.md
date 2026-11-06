@@ -637,3 +637,21 @@ expanded existing FMOV oracle; its original V0 theorems and cases remain.
 compiled artifacts, frozen simulator headers, logs and a portable matched
 kernel/initramfs under `runtime/`. Run `make -C runtime run` after extraction;
 on DGX Spark use `make -C runtime run ACCEL=kvm CPU=host`.
+
+## Cilium runtime native compiler architecture
+
+The actual matched ARM guest started Cilium's baseline, then native proof
+linking failed on `tail_drop_notify` saving X28. Its runtime compiler had
+hardcoded the x86 architecture define and omitted ARM's reserved-register
+flags. It now uses the actual compiler host architecture, the same ARM target
+and X18/X26–X28 reservations as the static native backend, and matching
+architecture defines in both preprocessing audits. BPF source/configuration
+and workload are unchanged.
+
+All 13 Python tests pass, including both host architectures and all three
+compiler/preprocessor paths. [Replaying the captured failing configuration](cilium-native-arch/link-results.json)
+compiles an AArch64 ELF and links all eight native functions, including
+`tail_drop_notify`. [The captured inputs and rebuilt objects](cilium-native-arch/replay.tar.gz)
+retain the exact configuration headers, unchanged native ABI overlay, compiler
+arguments, every link outcome and unit-test log. The next application retry
+uses this compiler repair together with the readonly binder integration.

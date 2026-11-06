@@ -11,6 +11,8 @@ from runner.libs.cilium_native_build import (
     _ABI_PATCH_PATHS,
     _audit_native_abi_tree,
     _config_headers,
+    _compiler_baseline_macro_args,
+    _macro_dump_args,
     _make_native_abi_overlay,
     _publish_family_manifest,
     _read_unsigned_scalar,
@@ -70,7 +72,9 @@ def test_cilium_manifest_accepts_local_tail_call_entry_symbols() -> None:
     assert module.source_symbol_binding_allowed("STB_GLOBAL", include_local=True)
 
 
-def test_native_compile_preserves_generated_include_and_feature_defines(tmp_path: Path) -> None:
+@pytest.mark.parametrize("machine,arch", [("x86_64", "x86"), ("aarch64", "arm64")])
+def test_native_compile_preserves_generated_include_and_feature_defines(tmp_path: Path, monkeypatch, machine: str, arch: str) -> None:
+    monkeypatch.setattr("runner.libs.cilium_native_build.platform.machine", lambda: machine)
     source = tmp_path / "bpf_host.c"
     source.write_text("int x;\n", encoding="utf-8")
     compat = tmp_path / "native_compat.h"
@@ -98,10 +102,26 @@ def test_native_compile_preserves_generated_include_and_feature_defines(tmp_path
     assert "-DENABLE_IPV4=1" in native
     assert "--target=bpf" not in native
     assert "-DMICRO_NATIVE" in native
-    assert "-D__TARGET_ARCH_x86" in native
+    assert f"-D__TARGET_ARCH_{arch}" in native
+    if arch == "arm64":
+        assert "-D__TARGET_ARCH_x86" not in native
+        assert "--target=aarch64-linux-gnu" in native
+        assert "-mno-red-zone" not in native
+        assert {"-ffixed-x18", "-ffixed-x26", "-ffixed-x27", "-ffixed-x28"} <= set(native)
+    else:
+        assert "-mno-red-zone" in native
     assert "-DBPFBENCH_CILIUM_HYBRID_ROUTING_ENABLED=0" in native
     assert str(native_root) in native
     assert native[-1] == str(native_source)
+    macro_commands = [
+        _macro_dump_args(original, native=True, compat=compat,
+                         native_root=native_root, native_source=native_source),
+        _compiler_baseline_macro_args(native=True, compat=compat),
+    ]
+    for command in macro_commands:
+        assert f"-D__TARGET_ARCH_{arch}" in command
+        assert f"-D__TARGET_ARCH_{'x86' if arch == 'arm64' else 'arm64'}" not in command
+    assert validate_compile_defines(original, native)["non_abi_define_diff"] == {}
 
 
 def test_paired_config_scalar_decoding_is_bounds_checked() -> None:

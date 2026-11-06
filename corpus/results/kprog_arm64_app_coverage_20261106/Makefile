@@ -415,3 +415,16 @@ fmov-bank-check: fmov-bank-package
 		-device virtio-9p-device,fsdev=results,mount_tag=results \
 		-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >$(HERE)/$(PHASE)/qemu.log 2>&1
 	test "$$(cat $(HERE)/$(PHASE)/verify/guest-status)" = 0
+
+.PHONY: cilium-native-arch-check
+CILIUM_TEST_PYTHON := $(ROOT)/kprog/arm64/build/python-tests/bin/python
+$(CILIUM_TEST_PYTHON):
+	python3 -m venv --system-site-packages $(ROOT)/kprog/arm64/build/python-tests
+	$(CILIUM_TEST_PYTHON) -m pip install 'pytest>=8,<9'
+
+cilium-native-arch-check: $(CILIUM_TEST_PYTHON)
+	cd $(ROOT) && $(CILIUM_TEST_PYTHON) -m pytest -q tests/python/test_cilium_native_build.py
+
+.PHONY: cilium-native-arch-replay
+cilium-native-arch-replay:
+	python3 $(HERE)/cilium_arch_replay.py $(HERE)/$(PHASE)
