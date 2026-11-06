@@ -283,6 +283,35 @@ def main():
         expected = copy.deepcopy(request["state"])
         expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None, vector0=result)
         cases.append((request, expected))
+    # CCMP covers taken arithmetic and literal fallback independently, with
+    # signed-overflow/carry boundaries, W input truncation and AL/NV predicates.
+    for word, lhs, rhs, incoming, nzcv in [
+            (0x7A5F0825, 0xABCD00000000001F, 0, 4, 6),
+            (0x7A5F0825, 31, 0, 0, 5),
+            (0xFA40182A, 0, 0, 0, 6),
+            (0xFA40182A, 0, 0, 4, 10),
+            (0x7A42B02F, 0x80000000, 1, 8, 3),
+            (0x7A42B02F, 0x7FFFFFFF, 0xFFFFFFFF, 1, 9),
+            (0x7A42B02F, 0, 1, 0, 15),
+            (0xFA42A020, 0, 1, 0, 8),
+            (0xFA42A020, 0, 1, 8, 0),
+            (0xFA42A020, 0x8000000000000000, 1, 9, 3),
+            (0x7A42E3E2, 99, 1, 0, 8),
+            (0x7A42E3E2, 99, 0, 15, 6),
+            (0xFA5FF023, 0, 99, 0, 6),
+            (0xFA5FF023, 0x8000000000000000, 99, 15, 10),
+            (0x7A5F4BE7, 99, 99, 8, 8),
+            (0x7A5F4BE7, 99, 99, 0, 7),
+            (0xFA5E83C8, 99, 99, 2, 6),
+            (0xFA5E83C8, 99, 99, 6, 8)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["registers"][1:3] = [lhs, rhs]
+        request["state"]["flags"] = 0xA5A50000000ABCDE | (incoming << 28)
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None,
+                        flags=0xA5A50000000ABCDE | (nzcv << 28))
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -296,7 +325,8 @@ def main():
                  0x52C24680, 0x52E24680, 0x32824680,
                  0x9E670021, 0x9E660021, 0x1E270021, 0x1E260021,
                  0x1EE70020, 0x9EAE0001, 0x0E205801, 0x4E205820,
-                 0x2E303801, 0x6E303820, 0x2E703800, 0x6EB03800):
+                 0x2E303801, 0x6E303820, 0x2E703800, 0x6EB03800,
+                 0x7A5F0835, 0x7A5F0C25, 0x5A5F0825, 0x3A5F0825):
         request = copy.deepcopy(base)
         request["native_bytes"] = list(word.to_bytes(4, "little"))
         rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
@@ -327,7 +357,7 @@ def main():
     nv = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "nv"), "csel x0,x1,x2,nv")
     al = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "al"), "csel x0,x1,x2,al")
     assert encoder.encode(nv, {}, {}) == encoder.encode(al, {}, {})
-    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV/CNT/UADDLV, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV/CNT/UADDLV/CCMP, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":

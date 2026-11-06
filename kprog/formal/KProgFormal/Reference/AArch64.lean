@@ -316,10 +316,50 @@ def reductionValue (op : ReductionOp) (wide : Bool) (value : BitVec 128) : BitVe
 def reductionStep (op : ReductionOp) (wide : Bool) (s : State) : Transition State :=
   ⟨{ s with vector0 := reductionValue op wide s.vector0, pc := s.pc + 4 }, [], none⟩
 
+/-- AddWithCarry's NZCV: operands are narrowed before unsigned/signed widening.
+The extra precision distinguishes carry from signed overflow; subtraction is
+addition of the complemented width-sized right operand and carry-in one. -/
+def arithmeticFlags (width : Width) (subtract : Bool) (lhs rhs old : Reference.Word) : Reference.Word :=
+  let left := lhs.setWidth width.bits
+  let right := if subtract then ~~~(rhs.setWidth width.bits) else rhs.setWidth width.bits
+  let carry : BitVec 128 := if subtract then 1 else 0
+  let unsignedSum := left.setWidth 128 + right.setWidth 128 + carry
+  let signedSum := left.signExtend 128 + right.signExtend 128 + carry
+  let result := unsignedSum.setWidth width.bits
+  let n := result.getLsbD (width.bits - 1)
+  let z := result.setWidth 64 == (0 : Reference.Word)
+  let c := unsignedSum.getLsbD width.bits
+  let v := signedSum != result.signExtend 128
+  (old &&& 0xffffffff0fffffff) ||| (if n then 0x80000000 else 0) |||
+    (if z then 0x40000000 else 0) ||| (if c then 0x20000000 else 0) ||| (if v then 0x10000000 else 0)
+
+inductive CompareOperand
+  | register (src : Register)
+  | immediate (value : BitVec 5)
+  deriving DecidableEq, Repr
+
+def compareOperand (s : State) : CompareOperand → Word
+  | .register src => readReg s src
+  | .immediate value => value.setWidth 64
+
+def compareFallback (old : Word) (fallback : BitVec 4) : Word :=
+  (old &&& 0xffffffff0fffffff) ||| (fallback.setWidth 64 <<< 28)
+
+/-- CCMP reads the incoming condition before replacing NZCV. Its untaken
+path uses the literal four-bit fallback, preserving all other state. -/
+def compareStep (width : Width) (lhs : Register) (rhs : CompareOperand)
+    (predicate : Fin 16) (fallback : BitVec 4) (s : State) : Transition State :=
+  let flags := if condition s.flags predicate then
+      arithmeticFlags width true (readReg s lhs) (compareOperand s rhs) s.flags
+    else compareFallback s.flags fallback
+  ⟨{ s with flags := flags, pc := s.pc + 4 }, [], none⟩
+
 inductive Instruction
   | mul (instruction : MulInstruction)
   | fmov (instruction : FmovInstruction)
   | reduction (op : ReductionOp) (wide : Bool)
+  | compare (width : Width) (lhs : Register) (rhs : CompareOperand)
+      (predicate : Fin 16) (fallback : BitVec 4)
   | shift (instruction : ShiftInstruction)
   | logic (instruction : LogicInstruction)
   | keep (instruction : KeepInstruction)
@@ -334,6 +374,7 @@ def step (i : Instruction) (s : State) : Transition State :=
   | .mul instruction => mulStep instruction s
   | .fmov instruction => fmovStep instruction s
   | .reduction op wide => reductionStep op wide s
+  | .compare width lhs rhs predicate fallback => compareStep width lhs rhs predicate fallback s
   | .shift instruction => shiftStep instruction s
   | .logic instruction => logicStep instruction s
   | .keep instruction => keepStep instruction s
@@ -363,6 +404,12 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   let lhs := register (word / 2^5)
   let rhs := register (word / 2^16)
   let addend := register (word / 2^10)
+  let conditionalCompare := word &&& 0x7fe00c10
+  if conditionalCompare = 0x7a400000 ∨ conditionalCompare = 0x7a400800 then
+    let operand := if conditionalCompare = 0x7a400800 then
+        CompareOperand.immediate (BitVec.ofNat 5 (word / 2^16))
+      else .register rhs
+    return .compare width lhs operand ⟨(word / 2^12) % 16, Nat.mod_lt _ (by decide)⟩ (BitVec.ofNat 4 word)
   let reduction := word &&& 0xbffffc00
   if reduction = 0x0e205800 ∨ reduction = 0x2e303800 then
     if dst.val ≠ 0 ∨ lhs.val ≠ 0 then throw "byte reduction vector register is not V0"
