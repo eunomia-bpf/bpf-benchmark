@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+.SHELLFLAGS := -eu -o pipefail -c
 ROOT := /workspaces/repository
 HERE := $(ROOT)/corpus/results/kprog_app_coverage_20261106
 PHASE ?= baseline
@@ -298,3 +300,90 @@ code-dispatch-guest:
 
 startup-inventory:
 	python3 $(HERE)/capture_startup.py $(HERE)/startup-x86
+
+bcc-real-generate:
+	python3 $(HERE)/bcc_real.py $(HERE)/$(PHASE)
+
+bcc-real-compile:
+	KPROG_COMPILE_WORKERS=1 prlimit --as=8589934592 --core=0 -- $(MAKE) -f $(HERE)/Makefile compile PHASE=$(PHASE)
+
+raw-context-build:
+	python3 $(HERE)/check_raw_context.py prepare
+	for name in tail_word tail_signed frame_slot outside_frame; do cc -c $(HERE)/raw-context/$$name.S -o $(HERE)/raw-context/$$name.native.o || exit 1; done
+	python3 $(HERE)/check_raw_context.py generate
+	cc -no-pie -O2 $(HERE)/raw-context/host.c $(HERE)/raw-context/*.native.o -o $(HERE)/raw-context/host-check
+	$(HERE)/raw-context/host-check
+	for name in tail_word tail_signed frame_slot outside_frame; do clang -g -O2 -Wno-c23-extensions -target bpf -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/raw-context/$$name.bpf.c -o $(HERE)/raw-context/$$name.bpf.o || exit 1; done
+	clang -g -O2 -target bpf -DEXPECTED=0x84332211u -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/raw-context/source.bpf.c -o $(HERE)/raw-context/tail_word.source.bpf.o
+	clang -g -O2 -target bpf -DEXPECTED=0xffffff84u -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/raw-context/source.bpf.c -o $(HERE)/raw-context/tail_signed.source.bpf.o
+
+	for name in frame_slot outside_frame; do clang -g -O2 -target bpf -DEXPECTED=1 -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/raw-context/source.bpf.c -o $(HERE)/raw-context/$$name.source.bpf.o || exit 1; done
+
+raw-context-kvm: raw-context-build bcc-real-verify-build
+	$(MAKE) -C $(ROOT)/kprog/libnativeloader BUILD_DIR=build-ccontext
+	c++ -std=c++20 -Wall -Wextra -Werror -O2 -D__EXPORTED_HEADERS__ -DNATIVE_LINK_PATH='"$(HERE)/native-dispatch-link/release/native-link"' -I$(ROOT)/vendor/linux-framework/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include $(ROOT)/kprog/fidelity/bound_probe.cpp $(ROOT)/kprog/libnativeloader/build-ccontext/libnative_loader.a $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -o $(HERE)/raw-context/bound-probe
+	taskset -c 8-15 vng --run $(HERE)/entry-input/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile raw-context-guest'
+
+raw-context-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod $(HERE)/entry-input/bpf_x86_native_lab.ko
+	python3 $(HERE)/check_raw_context.py bound
+
+bcc-real-verify-build:
+	c++ -std=c++20 -Wall -Wextra -Werror -O2 -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include $(HERE)/verify_proof.cpp $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $(HERE)/verify-proof
+	install -d $(HERE)/entry-input
+	install -m 0644 $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage $(HERE)/entry-input/bzImage
+	install -m 0644 $(ROOT)/kprog/tv/build-kernel-x86/.config $(HERE)/entry-input/kernel.config
+	install -m 0644 $(ROOT)/kprog/tv/build-kernel-x86/Module.symvers $(HERE)/entry-input/Module.symvers
+	install -m 0644 $(ROOT)/kprog/tv/build-x86/bpf_x86_native_lab.ko $(HERE)/entry-input/bpf_x86_native_lab.ko
+
+bcc-real-verify: bcc-real-verify-build
+	taskset -c 8-15 vng --run $(HERE)/entry-input/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile guest-verify PHASE=$(PHASE)'
+
+context-runtime-build: pushpop-bpf bcc-real-verify-build
+	$(MAKE) -C $(ROOT)/kprog/libnativeloader BUILD_DIR=build-ccontext
+	$(MAKE) -C $(ROOT)/bpfopt/shim SHIM_SO=$(HERE)/context-runtime-shim.so $(HERE)/context-runtime-shim.so
+	install -d $(HERE)/context-runtime
+	clang -g -O2 -target bpf -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/runtime_source.bpf.c -o $(HERE)/context-runtime/source.bpf.o
+	c++ -O2 -I$(ROOT)/vendor/linux-framework/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include $(HERE)/runtime_startup.cpp $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $(HERE)/context-runtime/startup
+
+context-runtime-kvm: context-runtime-build
+	taskset -c 8-15 vng --run $(HERE)/entry-input/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile context-runtime-guest'
+
+context-runtime-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod $(HERE)/entry-input/bpf_x86_native_lab.ko
+	python3 $(HERE)/check_context_runtime.py
+
+raw-entry-census:
+	python3 $(HERE)/prepare_finite.py prepare raw-entry-census
+	$(MAKE) -C $(ROOT)/kprog/x86 app-proofs-build APP_SIM_PROOF_ARGS='--generate-only --proof-root $(HERE)/raw-entry-census/input --report-dir $(HERE)/raw-entry-census --output-dir $(ROOT)/kprog/x86/app-coverage-raw-entry --generator $(HERE)/raw-entry-census/simulator/kprog/x86/micro-prog/generate_micro_sim_proofs.py'
+
+raw-entry-host:
+	cc -O2 -I$(ROOT)/vendor/libbpf/src $(HERE)/raw_entry_host.c -o $(HERE)/raw-entry-host
+	$(HERE)/raw-entry-host
+
+BCC_RUNTIME_PACKAGE ?= bcc-runtime-7
+BCC_RUNTIME_IMAGE ?= bpf-benchmark/kprog-bcc:c-20261106-7
+BCC_RUNTIME_BASE ?= bpf-benchmark/kprog-bcc-base:c-20261106-7
+PAIRED_CONTEXT ?= /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/x86
+
+bcc-runtime-package:
+	python3 $(HERE)/package_bcc.py $(PHASE) $(BCC_RUNTIME_PACKAGE)
+
+bcc-runtime-image:
+	docker tag 4e0cc5f9ddf0 $(BCC_RUNTIME_BASE)
+	docker build --build-context paired-context=$(PAIRED_CONTEXT) --build-context bcc-verified=$(HERE)/$(BCC_RUNTIME_PACKAGE) --build-arg BASE_IMAGE=$(BCC_RUNTIME_BASE) -f $(HERE)/bcc-runtime.Dockerfile -t $(BCC_RUNTIME_IMAGE) $(HERE)/$(BCC_RUNTIME_PACKAGE)
+	docker save -o $(HERE)/$(BCC_RUNTIME_PACKAGE).image.tar $(BCC_RUNTIME_IMAGE)
+
+bcc-runtime-corpus:
+	install -d /workspaces/.agent-state/kprog-lanes/C/var-tmp-bcc-7
+	BPFREJIT_CORPUS_APPS=bcc BPFREJIT_BENCH_PASSES=noop BPFREJIT_SHIM_NATIVE_LOADER=post BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1 $(MAKE) -C $(ROOT) -o runtime-kernel-image corpus RUNTIME_CONTAINER_IMAGE=$(BCC_RUNTIME_IMAGE) RUNTIME_IMAGE_TAR=$(HERE)/$(BCC_RUNTIME_PACKAGE).image.tar BZIMAGE=$(PAIRED_CONTEXT)/bzImage VNG='vng --run $(PAIRED_CONTEXT)/bzImage --cwd $(ROOT) --disable-monitor --verbose --cpus 2 --pin 12-15 --memory 2G --rwdir $(ROOT) --rwdir /var/tmp=/workspaces/.agent-state/kprog-lanes/C/var-tmp-bcc-7 --overlay-rwdir /tmp --append "loglevel=4 panic=30 oops=panic"' VM_CPU_PIN=12-15 VM_CPUS=2 VM_MEM=2G SAMPLES=1 WORKLOAD_DURATION=5 TIMEOUT=900
+
+siphash-compile:
+	install -d $(HERE)/siphash-compile
+	taskset -c 12-15 clang -g -O3 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(ROOT)/kprog/x86/micro-prog/siphash_rotate64_mixer.bpf.c -o $(HERE)/siphash-compile/siphash.bpf.o
+
+raw-entry-artifacts:
+	python3 $(HERE)/archive_raw_entry.py
+	tar -czf $(HERE)/raw-formal-artifacts.tar.gz --exclude=.lake --exclude=target --exclude=build -C /workspaces/.agent-state/kprog-lanes/C raw-check-source -C $(HERE) raw-formal-export.log raw-formal-first-failure.log raw-source-revision.txt

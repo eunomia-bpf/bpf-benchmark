@@ -1,7 +1,9 @@
 #ifndef X86_SIM_LOCAL_BPF_H
 #define X86_SIM_LOCAL_BPF_H
 
+#ifndef __VMLINUX_H__
 #include <linux/bpf.h>
+#endif
 #include <bpf_helpers.h>
 
 #include "x86_sim.h"
@@ -373,6 +375,20 @@ struct x86_sim_state {
 	__x86_rdi.ptr = &__x86_sim_abi;                                     \
 	__x86_rdi_tag = X86_SIM_TAG_ABI
 
+#define X86_SIM_ABI_KIND_RAW 2U
+_Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
+               X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_SKB,
+               "raw context must not acquire packet ABI pointer tags");
+
+#define X86_SIM_ENTRY_RAW(CTX)                                               \
+	struct x86_sim_skb_abi __x86_sim_abi = {};                       \
+	struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;      \
+	__u8 __x86_sim_abi_kind = X86_SIM_ABI_KIND_RAW;                                     \
+	X86_SIM_L_DECLARE_STATE();                                       \
+	X86_SIM_L_DECLARE_STACK();                                       \
+	__x86_rdi.ptr = (void *)(CTX);                                   \
+	__x86_rdi_tag = X86_SIM_TAG_ABI
+
 #define X86_SIM_L_READ_REG_CASE(REG, NAME)                                  \
 	case REG:                                                          \
 		__x86_l_value = __x86_##NAME.ptr;                         \
@@ -627,7 +643,7 @@ struct x86_sim_state {
 
 #define X86_SIM_L_LOAD_ADDR(ADDR, WIDTH) KPROG_X86_MEM_LOAD((ADDR), (WIDTH))
 
-#define X86_SIM_L_LOAD_PTR_ADDR(ADDR) (*(void **)(ADDR))
+#define X86_SIM_L_LOAD_PTR_ADDR(ADDR) (*(void * volatile *)(ADDR))
 
 #define X86_SIM_L_STORE_ADDR(ADDR, WIDTH, VALUE)                           \
 	KPROG_X86_MEM_STORE((ADDR), (WIDTH), (VALUE))
@@ -819,7 +835,8 @@ struct x86_sim_state {
 		__s64 __x86_l_disp = (STORE_DISP) ?                      \
 			x86_store_imm_disp(IMM) : x86_simm(IMM);          \
 		__x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), __x86_l_disp);\
-		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
+		if (X86_SIM_L_REG_TAG(BASE_REG) != X86_SIM_TAG_ABI)      \
+			X86_SIM_L_BARRIER_VAR(__x86_l_disp);              \
 		if (KPROG_X86_REG_PRESENT(BASE_REG))                     \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(BASE_REG);\
 		__u64 __x86_l_value;                                     \
@@ -861,7 +878,8 @@ struct x86_sim_state {
 		__u64 __x86_l_value = 0;                                 \
 		if (KPROG_X86_REG_PRESENT(SRC))                          \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(SRC);   \
-		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
+		if (X86_SIM_L_REG_TAG(SRC) != X86_SIM_TAG_ABI)           \
+			X86_SIM_L_BARRIER_VAR(__x86_l_disp);              \
 		void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +           \
 				     __x86_l_disp;                       \
 		switch (X86_SIM_L_MEM_READ_SRC(SRC, __x86_l_mem_width)) {\
@@ -1055,15 +1073,15 @@ struct x86_sim_state {
 #define X86_SIM_L_EXEC_LEA(DST, SRC, FLAGS, AUX, IMM)                       \
 	do {                                                               \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
-		__s64 __x86_l_off = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM));\
-		X86_SIM_L_BARRIER_VAR(__x86_l_off);                     \
-		void *__x86_l_src_ptr = KPROG_X86_REG_ABSENT(SRC) ? (void *)0 :\
-					   X86_SIM_L_READ_REG_PTR(SRC);    \
-		__u8 __x86_l_src_tag = X86_SIM_L_REG_TAG(SRC);           \
 		if (__x86_l_width == X86_WIDTH_64 && KPROG_X86_REG_ABSENT(SRC) &&\
 		    (AUX) == X86_LEA_AUX_RODATA) {                        \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), (IMM), __x86_l_width);\
 		} else {                                                  \
+			__s64 __x86_l_off = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM));\
+			X86_SIM_L_BARRIER_VAR(__x86_l_off);               \
+			void *__x86_l_src_ptr = KPROG_X86_REG_ABSENT(SRC) ? (void *)0 :\
+				X86_SIM_L_READ_REG_PTR(SRC);                 \
+			__u8 __x86_l_src_tag = X86_SIM_L_REG_TAG(SRC);      \
 			void *__x86_l_result;                            \
 			if (__x86_l_width == X86_WIDTH_64) {              \
 				__u8 __x86_l_dst_tag =                 \

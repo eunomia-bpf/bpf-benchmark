@@ -693,3 +693,86 @@ capture this snapshot. [Startup records](startup-x86-artifacts.tar.gz) contain
 all794 attempts, full raw logs, original inventories, names/types/IDs, attach
 metadata, per-load errors and the extraction command. There are no unpaired
 load outcomes or unfinished attempts in this snapshot.
+
+## Real BCC entry proofs and source load context
+
+The actual BCC resident snapshot now pairs all25 load IDs with full source BTF
+symbols, original BPF program sections and unchanged upstream map/DATASEC
+declarations. Full BTF selectors distinguish entries whose kernel names share
+15-byte prefixes. The first source/header and CO-RE compilation failures are
+retained in phases1–2; phases3–6 retain the subsequent verifier diagnostics.
+Phase4's tentative frame sizing from memory operands was corrected before
+publication: only the minimum reachable native RSP determines allocated frame
+extent. An arbitrary access below RSP cannot enlarge the proof arena.
+
+| Actual application snapshot | Resident entries | Proof generated | Compiled | Verifier accepted | Verifier rejected | Load preparation failed |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| BCC, final `bcc-real-7` | 25 | 25 | 25 | 23 | 0 | 2 |
+
+The two preparation failures are capable's stackmap declarations with
+`max_entries=0`; the upstream loader supplies their actual capacity. They remain
+active integration work with live source-map reuse. These diagnostic loads do
+not establish an application run, and the77 actual startup load attempts
+(including probes and transient loads) remain the complete startup denominator.
+No program is discarded or classified as unsupported.
+
+The generic renderer now accepts the actual raw context and program section,
+includes original source declarations, preserves complete native readonly
+objects in a separate `.rodata.native` DATASEC, and applies PC-relative symbol
+interior offsets at the actual load width. Relocation forms without implemented
+semantics still produce recorded constructor errors. Raw context kind2 is
+distinct from XDP0/SKB1: a host regression checks exact64-bit loads at all four
+packet ABI offsets (0/8/80/208) stay scalar. Constant ABI load offsets retain
+their constants through compilation; volatile pointer loads preserve each
+native load. The LEA readonly fast path avoids an irrelevant indexed-address
+calculation that had produced pointer-plus-pointer verifier rejection.
+
+`raw-context-kvm` passes actual generation-bound readonly-tail32/signed-byte
+loads and a256-byte allocated frame (return2217943569/4294967172/1, generation1
+each). An initialized access at `[RSP-1024]` without allocation is rejected by
+the proof verifier with an explicit frame-pointer arithmetic diagnostic; that
+unsafe native fixture is never executed. An earlier mixed C++/library/kernel
+ABI failure is retained as infrastructure failure, not negative verifier
+success. Source/body SP and return-slot correspondence, numeric address
+observers and complete architectural flags remain cross-lane fidelity work;
+these fixture successes do not discharge those obligations.
+
+The production shim now calls the versioned source-context loader entry and
+forwards actual intercepted `prog_flags` and the flag-qualified token FD.
+The16-byte ABI checks offsets as well as size; a missing new export is fatal.
+Both x86 and Arm shim builds pass using vendored BPF UAPI headers. Real shim
+startup tests with flags0 and `BPF_F_TEST_STATE_FREQ=8` both execute the bound
+native program (generation1, return127); logs confirm actual captured flags
+and token FD=-1. An actual older bound-proof ABI1 library without the new
+context export exits97 at symbol resolution, before any old-entry fallback.
+This forwards existing source load metadata without changing
+the application's launch/workload or adding an admission condition.
+
+The final isolated full formal check passes (`make -C
+/workspaces/.agent-state/kprog-lanes/C/raw-check-source/kprog/formal check`):
+Lean build, wire suites, retained host oracles and12 map resolver regressions.
+Its immutable input is revision26325bd48 plus the three C simulator/generator
+changes. The first failed generic-memory fixture build is preserved, along
+with the corrected final check. The repeated1136 staged-artifact census still
+reports429 generated and707 recorded constructor failures; it is separate from
+actual application coverage.
+
+Commands:
+
+```sh
+make -f corpus/results/kprog_app_coverage_20261106/Makefile raw-entry-host
+make -f corpus/results/kprog_app_coverage_20261106/Makefile bcc-real-generate PHASE=bcc-real-7
+make -f corpus/results/kprog_app_coverage_20261106/Makefile bcc-real-compile PHASE=bcc-real-7
+make -f corpus/results/kprog_app_coverage_20261106/Makefile bcc-real-verify PHASE=bcc-real-7
+make -f corpus/results/kprog_app_coverage_20261106/Makefile raw-context-kvm context-runtime-kvm
+make -f corpus/results/kprog_app_coverage_20261106/Makefile raw-entry-census summarize
+```
+
+[Raw entry evidence](raw-entry-artifacts.tar.gz) preserves every BCC phase,
+per-entry compile/verifier logs, source snapshots, readonly/frame tests,
+context ABI startup logs and matched kernel/module/library inputs. The
+[frozen census archive](raw-entry-census-artifacts.tar.gz) holds all1136 outcomes
+and their generated source/proof objects. The
+[formal input and complete logs](raw-formal-artifacts.tar.gz) preserve both
+formal outcomes. The actual upstream BCC startup on an isolated runtime image
+is the next test; no application timing request has been added.

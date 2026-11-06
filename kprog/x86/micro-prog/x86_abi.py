@@ -54,6 +54,7 @@ def check_definedness(insns, targets, exit_addr, decode):
     initial = State(tuple(defined), tuple(aliases), 0, {}, {0:outer_return}, (None,)*len(regs))
     states = {((), insns[0].addr): initial}
     queue = deque(states)
+    lowest_stack = 0
     # Call-string contexts retain opaque callee saves from distinct callers.
     # Repeated call sites join to a finite context, never a runtime depth limit.
 
@@ -77,6 +78,9 @@ def check_definedness(insns, targets, exit_addr, decode):
                      tuple(x if x == y else None for x,y in zip(a.constants,b.constants)))
 
     def push(context, addr, state):
+        nonlocal lowest_stack
+        if type(state.aliases[rsp]) is int:
+            lowest_stack = min(lowest_stack,state.aliases[rsp])
         if addr == exit_addr:
             if context or type(state.aliases[rsp]) is not int or state.aliases[rsp] != 0:
                 raise ValueError('native entry return has an unbalanced stack pointer')
@@ -452,3 +456,4 @@ def check_definedness(insns, targets, exit_addr, decode):
         else:
             if op in decode.CC_AUX and op.startswith('j'): push(context,direct,state)
             if next_pc is not None: push(context,next_pc,state)
+    return -lowest_stack

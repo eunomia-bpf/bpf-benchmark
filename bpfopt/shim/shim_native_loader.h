@@ -37,7 +37,20 @@ struct native_loader_c_result {
     char error[65536];
 };
 
-typedef int (*native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn)(
+struct native_loader_source_load_context {
+    uint32_t version;
+    uint32_t prog_flags;
+    int32_t prog_token_fd;
+    uint32_t reserved;
+};
+_Static_assert(sizeof(struct native_loader_source_load_context) == 16,
+               "native loader source context ABI size");
+_Static_assert(offsetof(struct native_loader_source_load_context, prog_flags) == 4 &&
+               offsetof(struct native_loader_source_load_context, prog_token_fd) == 8 &&
+               offsetof(struct native_loader_source_load_context, reserved) == 12,
+               "native loader source context ABI offsets");
+
+typedef int (*native_loader_load_from_fd_with_manifest_path_btf_and_context_fn)(
     int original_prog_fd,
     const char *manifest_path,
     const char *source_bpf_path,
@@ -51,11 +64,12 @@ typedef int (*native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn)(
     uint32_t attach_btf_id,
     uint32_t attach_btf_obj_id,
     uint32_t attach_prog_id,
+    const struct native_loader_source_load_context *context,
     struct native_loader_c_result *out);
 
 static void *shim_native_loader_handle;
 static char *shim_native_loader_handle_path;
-static native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn
+static native_loader_load_from_fd_with_manifest_path_btf_and_context_fn
     shim_native_loader_load_fn;
 static pthread_mutex_t shim_native_loader_handle_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -89,7 +103,7 @@ static void shim_native_loader_check_bound_abi(void *handle) {
     }
 }
 
-static native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn
+static native_loader_load_from_fd_with_manifest_path_btf_and_context_fn
 shim_native_loader_resolve_load_fn(const char *so_path) {
     pthread_mutex_lock(&shim_native_loader_handle_lock);
     if (shim_native_loader_load_fn) {
@@ -100,7 +114,7 @@ shim_native_loader_resolve_load_fn(const char *so_path) {
             pthread_mutex_unlock(&shim_native_loader_handle_lock);
             shim_native_loader_fatal();
         }
-        native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn load =
+        native_loader_load_from_fd_with_manifest_path_btf_and_context_fn load =
             shim_native_loader_load_fn;
         pthread_mutex_unlock(&shim_native_loader_handle_lock);
         return load;
@@ -115,9 +129,9 @@ shim_native_loader_resolve_load_fn(const char *so_path) {
     shim_native_loader_check_bound_abi(handle);
 
     dlerror();
-    native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn load =
-        (native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn)dlsym(
-            handle, "native_loader_load_from_fd_with_manifest_path_btf_and_attach");
+    native_loader_load_from_fd_with_manifest_path_btf_and_context_fn load =
+        (native_loader_load_from_fd_with_manifest_path_btf_and_context_fn)dlsym(
+            handle, "native_loader_load_from_fd_with_manifest_path_btf_and_context");
     const char *sym_err = dlerror();
     if (sym_err || !load) {
         log_line("native-loader dlsym failed: %s", sym_err ? sym_err : "null");
@@ -461,7 +475,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     const char *so_path = getenv("BPFREJIT_NATIVE_LOADER_SO");
     if (!so_path || !so_path[0])
         so_path = "libnative_loader.so";
-    native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn load =
+    native_loader_load_from_fd_with_manifest_path_btf_and_context_fn load =
         shim_native_loader_resolve_load_fn(so_path);
 
     struct native_loader_c_result result;
@@ -470,13 +484,22 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     kmsg_line("native load-begin name=%s fd=%ld manifest=%s source=%s",
               prog_name ? prog_name : "", original_fd, manifest,
               prog->bytecode_path);
+    const struct native_loader_source_load_context source_context = {
+        .version = 1,
+        .prog_flags = prog->load_attr.prog_flags,
+        .prog_token_fd = (prog->load_attr.prog_flags & BPF_F_TOKEN_FD)
+            ? prog->load_attr.prog_token_fd : -1,
+        .reserved = 0,
+    };
+    log_line("native-loader source-context flags=%u token_fd=%d",
+             source_context.prog_flags, source_context.prog_token_fd);
     if (load((int)original_fd, manifest, prog->bytecode_path,
              prog->fd_array_snapshot, prog->fd_array_snapshot_n,
              prog->prog_btf_kid, prog->func_info_buf,
              prog->func_info_cnt, prog->func_info_rec_size,
              prog->expected_attach_type, prog->attach_btf_id,
              prog->attach_btf_obj_kid, prog->attach_prog_kid,
-             &result) != 0) {
+             &source_context, &result) != 0) {
         log_line("native-loader failed prog=%s manifest=%s source=%s error=%s",
                  prog_name ? prog_name : "", manifest,
                  prog->bytecode_path, result.error);

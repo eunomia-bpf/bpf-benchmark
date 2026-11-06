@@ -3,16 +3,26 @@
 #include <bpf/libbpf.h>
 #include <linux/bpf.h>
 #include <cstdio>
+#include <cstdlib>
+#include <cerrno>
+#include <climits>
 #include <vector>
 #include <unistd.h>
 
 int main(int argc, char **argv)
 {
-    if (argc != 2) return 2;
+    if (argc != 2 && argc != 3) return 2;
     bpf_object *obj = bpf_object__open_file(argv[1], nullptr);
-    if (!obj || bpf_object__load(obj)) return 3;
+    if (!obj) return 3;
     bpf_program *prog = bpf_object__find_program_by_name(obj, "runtime_source");
     if (!prog) return 4;
+    if (argc == 3) {
+        char *end;
+        errno = 0;
+        unsigned long flags = std::strtoul(argv[2], &end, 0);
+        if (errno || *end || flags > UINT_MAX || bpf_program__set_flags(prog, flags)) return 2;
+    }
+    if (bpf_object__load(obj)) return 3;
     /* The shim deliberately exposes original metadata on the loader FD.
      * A fresh descriptor lets this test inspect the actual installed program. */
     int fd = dup(bpf_program__fd(prog));

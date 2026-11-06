@@ -1,6 +1,7 @@
 """Reproduce this coverage experiment; each case retains its complete log."""
 import concurrent.futures
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -21,7 +22,7 @@ def compile_one(row, directory):
     source = Path(row["source"])
     build = directory / "objects"
     build.mkdir(exist_ok=True)
-    command = ["clang", "-O2", "-Wno-c23-extensions", "-target", "bpf", "-mllvm", "-bpf-stack-size=4096",
+    command = ["clang", "-O2", *row.get("compiler_flags", []), "-Wno-c23-extensions", "-target", "bpf", "-mllvm", "-bpf-stack-size=4096",
                "-D__TARGET_ARCH_x86", "-I", str(ROOT / "vendor/libbpf/include/uapi"),
                "-I", str(ROOT / "vendor/libbpf/src"), "-I", "/usr/include/x86_64-linux-gnu",
                "-I", str(ROOT / "kprog/x86/micro-prog"), "-c", str(source),
@@ -54,6 +55,11 @@ def execute(row, directory, stage, command, timeout):
 
 
 def verify_one(row, directory):
+    if row.get('program_section'):
+        command = [str(ROOT/'corpus/results/kprog_app_coverage_20261106/verify-proof'),
+            str(directory/'objects'/(row['name']+'.bpf.o')),row['name']+'_x86_sim_xdp',
+            str(directory/'verify'/(row['name']+'.verifier.log'))]
+        return execute(row,directory,'verify',command,60)
     command = [str(ROOT / "kprog/loader/target/debug/reversesim-loader"),
                "--object", str(directory / "objects" / (row["name"] + ".bpf.o")),
                "--program", row["name"] + "_x86_sim_xdp", "--load-only",
@@ -68,7 +74,7 @@ def main():
     rows = [json.loads(line) for line in (directory / "programs.jsonl").read_text().splitlines()]
     rows = [row for row in rows if row["stage"] == "generate" and row["ok"]]
     if stage == "compile":
-        worker, jobs = compile_one, 6
+        worker, jobs = compile_one, int(os.environ.get("KPROG_COMPILE_WORKERS","6"))
     elif stage == "verify":
         worker, jobs = verify_one, 2
         completed = {p.stem: returncode(p)

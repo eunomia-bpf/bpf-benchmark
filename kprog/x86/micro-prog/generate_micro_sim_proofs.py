@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from collections import deque
 import re
 import subprocess
@@ -97,6 +98,8 @@ class NativeInsn:
     sim_imm: int | None = None
     end_addr: int | None = None
     stack_width: int | None = None
+    reloc_type: str | None = None
+    symbol_offset: int = 0
 
 
 @dataclass(frozen=True)
@@ -131,10 +134,16 @@ def parse_asm_text(text: str) -> list[NativeInsn]:
     insns: list[NativeInsn] = []
     pending_prefix: tuple[int, list[int]] | None = None
     for line in text.splitlines():
-        reloc = re.search(r"\bR_X86_64_[A-Z0-9_]+\s+(\S+)", line)
+        reloc = re.search(r"([0-9a-fA-F]+):\s+(R_X86_64_[A-Z0-9_]+)\s+(\S+)", line)
         if reloc is not None and insns:
-            symbol = re.sub(r"([+-]0x[0-9a-fA-F]+)$", "", reloc.group(1))
-            insns[-1] = replace(insns[-1], reloc_symbol=symbol)
+            target = re.fullmatch(r"(.*?)([+-]0x[0-9a-fA-F]+)?", reloc.group(3))
+            symbol, addend = target.groups()
+            if insns[-1].end_addr is None:
+                raise ValueError("relocation lacks its native instruction extent")
+            offset = int(addend, 16) if addend else 0
+            offset += insns[-1].end_addr-int(reloc.group(1),16)
+            insns[-1] = replace(insns[-1], reloc_symbol=symbol,
+                                reloc_type=reloc.group(2), symbol_offset=offset)
             continue
         if ":" not in line:
             continue
@@ -219,13 +228,13 @@ def rodata_bytes(obj: Path) -> bytes:
     return bytes(out)
 
 
-def load_rodata16(obj: Path) -> dict[str, tuple[int, int]]:
+def load_rodata_blobs(obj: Path) -> dict[str, bytes]:
     data = rodata_bytes(obj)
     if not data:
         return {}
     result = subprocess.run(["objdump", "-t", str(obj)], cwd=REPO_ROOT,
                             check=True, text=True, stdout=subprocess.PIPE)
-    out: dict[str, tuple[int, int]] = {}
+    out: dict[str, bytes] = {}
     for line in result.stdout.splitlines():
         fields = line.split()
         if ".native_link_rodata" not in fields:
@@ -236,11 +245,9 @@ def load_rodata16(obj: Path) -> dict[str, tuple[int, int]]:
         offset = int(fields[0], 16)
         size = int(fields[idx + 1], 16)
         name = fields[-1]
-        if size >= 16 and offset + 16 <= len(data):
-            out[name] = (
-                int.from_bytes(data[offset:offset + 8], "little"),
-                int.from_bytes(data[offset + 8:offset + 16], "little"),
-            )
+        if size<=0 or offset+size>len(data):
+            raise ValueError(f"native readonly extent exceeds its section: {name}")
+        out[name] = data[offset:offset+size]
     return out
 
 
@@ -262,13 +269,13 @@ def parse_native_link_blob(
     proof_obj = proof_object_dir / f"{name}.proof.o"
     if not proof_obj.is_file():
         raise RuntimeError(f"missing proof object for {name}: {proof_obj}")
-    rodata16 = load_rodata16(proof_obj)
+    rodata16 = load_rodata_blobs(proof_obj)
     disasm = subprocess.run(
         ["objdump", "-dr", "--insn-width=16", "-Mintel", str(proof_obj)], cwd=REPO_ROOT, check=True, text=True,
         stdout=subprocess.PIPE)
     symbols = text_symbol_addrs(proof_obj)
     insns = [
-        replace(insn, reloc_target=symbols.get(insn.reloc_symbol))
+        replace(insn, reloc_target=symbols[insn.reloc_symbol]+insn.symbol_offset)
         if insn.reloc_symbol in symbols else insn
         for insn in parse_asm_text(disasm.stdout)
     ]
@@ -476,9 +483,22 @@ def rodata_ident_map(rodata16: dict[str, tuple[int, int]]) -> dict[str, str]:
     return {symbol: f"__x86_rodata_{index}" for index, symbol in enumerate(rodata16)}
 
 
+def relocated_data_address(insn: NativeInsn, rodata_idents: dict[str,str]) -> str:
+    if not insn.reloc_symbol:
+        raise ValueError(f"missing native data relocation: {insn.raw}")
+    base = rodata_idents.get(insn.reloc_symbol, f"&{insn.reloc_symbol}")
+    return c_ptr_u64(f"((__u8 *)({base}) + ({insn.symbol_offset}))")
+
+
 def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
     op = insn.mnemonic
     ops = insn.operands
+    if insn.reloc_type=="R_X86_64_PC32" and op not in {
+        "mov","movabs","movzx","movsx","movsxd","lea"
+    }:
+        raise ValueError(f"unresolved PC-relative data instruction: {insn.raw}")
+    if insn.reloc_type and "GOTPCREL" in insn.reloc_type and insn.symbol_offset:
+        raise ValueError(f"nonzero native GOT slot displacement: {insn.raw}")
 
     high_regs = [reg_info(operand) for operand in ops]
     high_positions = [index for index, reg in enumerate(high_regs)
@@ -608,6 +628,11 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        aux=c_reg_lane_aux("0", dst_shift=dst_reg[2],
                                           src_shift=src_reg[2]))
         if dst_reg and is_mem(src):
+            if insn.reloc_type=="R_X86_64_PC32":
+                return enc("X86_OP_MOV_LOAD",dst=dst_reg[0],src="X86_REG_NONE",
+                           flags=WIDTH_CONST[dst_reg[1]],
+                           aux=mem_aux(src,operand_width(src,dst_reg[1])),
+                           imm=relocated_data_address(insn,rodata_idents))
             if is_helper_symbol(insn.reloc_symbol):
                 return enc("X86_OP_MOV_LOAD_HELPER_ID", dst=dst_reg[0],
                            imm=f"X86_SIM_HELPER_{insn.reloc_symbol}")
@@ -667,7 +692,8 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
             return enc("X86_OP_MOVSX_LOAD" if op in {"movsx", "movsxd"} else "X86_OP_MOV_LOAD",
                        dst=dst_reg[0], src=mem_base_reg(ops[1]),
                        flags=WIDTH_CONST[dst_reg[1]], aux=mem_aux(ops[1], mem_width),
-                       imm=c_u64(mem_disp(ops[1])))
+                       imm=relocated_data_address(insn,rodata_idents)
+                           if insn.reloc_type=="R_X86_64_PC32" else c_u64(mem_disp(ops[1])))
         raise ValueError(f"cannot encode {insn.raw}")
 
     if op == "cdqe":
@@ -685,7 +711,8 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         if "[rip" in ops[1].lower():
             return enc("X86_OP_LEA", dst=dst_reg[0], src="X86_REG_NONE",
                        flags=WIDTH_CONST[dst_reg[1]], aux="X86_LEA_AUX_RODATA",
-                       imm=c_u64(mem_disp(ops[1])))
+                       imm=relocated_data_address(insn,rodata_idents)
+                           if insn.reloc_symbol else c_u64(mem_disp(ops[1])))
         return enc("X86_OP_LEA", dst=dst_reg[0], src=mem_base_reg(ops[1]),
                    flags=WIDTH_CONST[dst_reg[1]], aux=mem_aux(ops[1]),
                    imm=c_u64(mem_disp(ops[1])))
@@ -1459,7 +1486,14 @@ def render_program(name: str, insns: list[NativeInsn],
                    kind: str = "xdp",
                    exit_addr: int | None = None,
                    source_prelude: str = "",
-                   rodata16: dict[str, tuple[int, int]] | None = None) -> str:
+                   rodata16: dict[str, tuple[int, int] | bytes] | None = None,
+                   program_section: str | None = None,
+                   original_source: Path | None = None,
+                   original_symbols: set[str] | None = None) -> str:
+    if (original_source is None)!=(original_symbols is None):
+        raise ValueError("original source and ELF symbols must be supplied together")
+    rodata16 = {symbol:value for symbol,value in (rodata16 or {}).items()
+                if original_symbols is None or symbol not in original_symbols}
     ret_statement = "X86_SIM_X86_RET();"
     insns = annotated_fixed_count_ops(insns)
     subfunctions = {
@@ -1471,8 +1505,14 @@ def render_program(name: str, insns: list[NativeInsn],
     targets = indirect_targets(all_insns, exit_addr, {
         insns[0].addr, *(fn[0].addr for fn in subfunctions.values() if fn)
     }) if has_indirect else {}
-    check_definedness(all_insns, targets, exit_addr, sys.modules[__name__])
-    if kind == "tc":
+    stack_bytes = check_definedness(all_insns, targets, exit_addr, sys.modules[__name__])
+    if kind == "raw":
+        if not program_section:
+            raise ValueError("raw context requires its real BPF program section")
+        section = f'SEC({json.dumps(program_section)})'
+        ctx_type = "void *"
+        declare = "X86_SIM_ENTRY_RAW(ctx);"
+    elif kind == "tc":
         section = 'SEC("tc")'
         ctx_type = "struct __sk_buff *"
         declare = "X86_SIM_ENTRY_SKB(ctx);"
@@ -1480,10 +1520,12 @@ def render_program(name: str, insns: list[NativeInsn],
         section = 'SEC("cgroup_skb/egress")'
         ctx_type = "struct __sk_buff *"
         declare = "X86_SIM_ENTRY_SKB(ctx);"
-    else:
+    elif kind == "xdp":
         section = 'SEC("xdp")'
         ctx_type = "struct xdp_md *"
         declare = "X86_SIM_ENTRY_XDP(ctx);"
+    else:
+        raise ValueError(f"unknown native entry ABI: {kind}")
     addrs = {insn.addr for insn in all_insns}
     return_targets = {exit_addr} if exit_addr is not None else set()
     if exit_addr is not None:
@@ -1506,11 +1548,6 @@ def render_program(name: str, insns: list[NativeInsn],
         for fn_insns in [insns, *subfunctions.values()]
         for insn in fn_insns
     ) or bool(subfunctions)
-    has_stack_memory = any(
-        "[rsp" in insn.raw.lower() or "[rbp" in insn.raw.lower()
-        for fn_insns in [insns, *subfunctions.values()]
-        for insn in fn_insns
-    )
     next_addrs = {
         insn.addr: insns[index + 1].addr
         for index, insn in enumerate(insns[:-1])
@@ -1521,8 +1558,11 @@ def render_program(name: str, insns: list[NativeInsn],
     lines: list[str] = []
     if has_stack:
         lines.append('#define X86_SIM_ENABLE_STACK 1')
-        if has_stack_memory:
-            lines.append('#define X86_SIM_ENABLE_STACK_DEEP 1')
+        lines.append(f'#define X86_SIM_STACK_BYTES {max(1,(stack_bytes+7)//8*8)}U')
+    if original_source is not None:
+        lines.extend(['#define LICENSE __x86_original_license',
+                      f'#include {json.dumps(str(original_source.resolve()))}',
+                      '#undef LICENSE'])
     lines.extend([
         f'#include "{sim_header}"',
         "",
@@ -1537,8 +1577,14 @@ def render_program(name: str, insns: list[NativeInsn],
         lines.append(source_prelude.rstrip())
         lines.append("")
     for symbol, ident in rodata_idents.items():
-        lo, hi = rodata16[symbol]
-        lines.append(f"static const __u64 {ident}[2] = {{{c_u64(lo)}, {c_u64(hi)}}};")
+        value = rodata16[symbol]
+        if isinstance(value,bytes):
+            if not value:raise ValueError(f"empty native readonly extent: {symbol}")
+            values = ', '.join(f'0x{byte:02x}' for byte in value)
+            lines.append(f'static const __u8 {ident}[{len(value)}] SEC(".rodata.native") __attribute__((aligned(16))) = {{{values}}};')
+        else:
+            lo, hi = value
+            lines.append(f"static const __u64 {ident}[2] = {{{c_u64(lo)}, {c_u64(hi)}}};")
     if rodata_idents:
         lines.append("")
     lines.extend([
