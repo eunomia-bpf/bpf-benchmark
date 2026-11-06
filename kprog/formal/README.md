@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0960 - the fourth form of a line reference
+
+The line class read three forms and needed a fourth. Two identifiers can be
+written side by side with a slash, as in the line a macro names and the line
+after it, and that form matched neither the single-identifier pattern nor either
+range pattern, so ten more leftovers were references the class had missed.
+
+This is the second missing form in the same class, and it was found the same
+way: by reading what the unexplained figures actually said rather than by
+inspecting the pattern. With all four forms the class reads fifty-seven
+identifiers and the unexplained remainder falls from forty-nine to thirty-nine.
+
+The lesson is the one the earlier miss taught and this one confirms: a class
+with most of a form's variants looks populated enough to be finished, and only
+sampling its members shows which variant is absent. Census unchanged; one class
+reads four forms.
+
 ### Step 0959 - ten of the remainder are parts of a bound split
 
 The remainder after the line-reference fix was fifty-nine figures, and ten of
