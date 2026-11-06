@@ -1,0 +1,183 @@
+app,run,status,baseline_counter_rows,post_counter_rows,error
+cilium/agent,arm64_qemu_corpus_19700101_000006_530516,error,53,0,"Remote end closed connection without response; cilium-agent output tail:
+ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/conntrack.h:646:14: warning: taking address of packed member 'dport' of class or structure 'ipv6_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.105072944Z level=warn msg=""  646 |                                           dir, &tuple->dport);"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.105217552Z level=warn msg=""      |                                                 ^~~~~~~~~~~~"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.105355488Z level=warn msg=""/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/conntrack.h:783:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.105514512Z level=warn msg=""  783 |                                   CT_EGRESS, &tuple->dport);"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.105650928Z level=warn msg=""      |                                               ^~~~~~~~~~~~"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.105786784Z level=warn msg=""/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/conntrack.h:904:14: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.105949968Z level=warn msg=""  904 |                                           dir, &tuple->dport);"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.106086448Z level=warn msg=""      |                                                 ^~~~~~~~~~~~"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.106227424Z level=warn msg=""In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/bpf_xdp.c:47:"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.106378112Z level=warn msg=""In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nodeport.h:11:"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.106542736Z level=warn msg=""/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nat.h:833:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.10675624Z level=warn msg=""  833 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.106900336Z level=warn msg=""      |                                                  ^~~~~~~~~~~"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.10703984Z level=warn msg=""/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nat.h:946:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.107206048Z level=warn msg=""  946 |                                          CT_EGRESS, &tuple->dport);"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.107349344Z level=warn msg=""      |                                                      ^~~~~~~~~~~~"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.107487552Z level=warn msg=""/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nat.h:1060:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.107674096Z level=warn msg="" 1060 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.107843136Z level=warn msg=""      |                                                  ^~~~~~~~~~~"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.107984432Z level=warn msg=""/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nat.h:1159:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.108145408Z level=warn msg="" 1159 |                                          CT_INGRESS, &tuple.dport);"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.108293472Z level=warn msg=""      |                                                       ^~~~~~~~~~~"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.1084476Z level=warn msg=""In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/bpf_xdp.c:47:"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.108614752Z level=warn msg=""In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nodeport.h:14:"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.108766224Z level=warn msg=""/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/lb.h:1674:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.108926096Z level=warn msg="" 1674 |                                           CT_EGRESS, &tuple->dport);"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.109064784Z level=warn msg=""      |                                                       ^~~~~~~~~~~~"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.109210512Z level=warn msg=""/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/lb.h:2057:17: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.109372416Z level=warn msg="" 2057 |                 if (READ_ONCE(val->last_used) +"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.109510352Z level=warn msg=""      |                               ^~~~~~~~~~~~~~"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.109649616Z level=warn msg=""/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../compiler.h:108:37: note: expanded from macro 'READ_ONCE'"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.109805344Z level=warn msg=""  108 |                         ({ typeof(X) __val = __READ_ONCE(X);    \\"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.109982768Z level=warn msg=""      |                                                          ^"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.110283008Z level=warn msg=""/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../compiler.h:97:51: note: expanded from macro '__READ_ONCE'"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.110456112Z level=warn msg=""   97 | # define __READ_ONCE(X)         (*(volatile typeof(X) *)&X)"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.110600864Z level=warn msg=""      |                                                          ^"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.110741024Z level=warn msg=""In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/bpf_xdp.c:47:"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.110890992Z level=warn msg=""In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nodeport.h:14:"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.111040304Z level=warn msg=""/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/lb.h:2068:14: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.11120376Z level=warn msg="" 2068 |                 WRITE_ONCE(val->last_used, now);"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.111342944Z level=warn msg=""      |                            ^~~~~~~~~~~~~~"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.11148584Z level=warn msg=""/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../compiler.h:116:21: note: expanded from macro 'WRITE_ONCE'"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.11167624Z level=warn msg=""  116 |                                    __WRITE_ONCE(X, __val);      \\"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.111821248Z level=warn msg=""      |                                                 ^"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.111963344Z level=warn msg=""/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../compiler.h:101:54: note: expanded from macro '__WRITE_ONCE'"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.112119968Z level=warn msg=""  101 | # define __WRITE_ONCE(X, V)     (*(volatile typeof(X) *)&X) = (V)"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.112268544Z level=warn msg=""      |                                                          ^"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.11241016Z level=warn msg=""14 warnings generated."" module=agent.datapath.loader
+time=1970-01-01T00:11:37.112546416Z level=warn msg=""native-link: arm64 entry=cil_xdp_entry (980 bytes), 1 reachable symbol(s) total"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.11268688Z level=warn msg=""  - cil_xdp_entry (vaddr 0x0, 980 bytes) [entry]"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.112825888Z level=warn msg=""native-link: wrote proof object 988 bytes, 18 reloc(s) -> /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/objects/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699.cil_xdp_entry.proof.o"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.11300144Z level=warn msg=""native-link: arm64 entry=tail_drop_notify (896 bytes), 1 reachable symbol(s) total"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.113143168Z level=warn msg=""  - tail_drop_notify (vaddr 0x0, 896 bytes) [entry]"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.113285376Z level=warn msg=""Error: arm64 entry ABI uses unsupported callee-saved x28; compile native objects with -ffixed-x26 through -ffixed-x28"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.113427616Z level=warn msg=""Traceback (most recent call last):"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.11359264Z level=warn msg=""  File \""/usr/local/lib/bpfrejit/merlin/merlin_bpf_clang.py\"", line 313, in <module>"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.11373432Z level=warn msg=""    raise SystemExit(main())"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.11387272Z level=warn msg=""                     ^^^^^^"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.114026736Z level=warn msg=""  File \""/usr/local/lib/bpfrejit/merlin/merlin_bpf_clang.py\"", line 235, in main"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.114168864Z level=warn msg=""    return run_paired_cilium_compile(args.clang, clang_args)"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.114313232Z level=warn msg=""           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.114451872Z level=warn msg=""  File \""/workspaces/repository/runner/libs/cilium_native_build.py\"", line 766, in run_paired_cilium_compile"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.114593312Z level=warn msg=""    subprocess.run("" module=agent.datapath.loader
+time=1970-01-01T00:11:37.114729488Z level=warn msg=""  File \""/usr/lib/python3.12/subprocess.py\"", line 571, in run"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.114868304Z level=warn msg=""    raise CalledProcessError(retcode, process.args,"" module=agent.datapath.loader
+time=1970-01-01T00:11:37.115007712Z level=warn msg=""subprocess.CalledProcessError: Command '['/usr/local/bin/native-link', '--input', '/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/objects/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699.native.o', '--symbol', 'tail_drop_notify', '--output', '/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/objects/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699.tail_drop_notify.proof.o', '--mode', 'proof', '--preserve-entry-abi']' returned non-zero exit status 1."" module=agent.datapath.loader
+time=1970-01-01T00:11:39.116113952Z level=fatal msg=""Failed to compile XDP program"" module=agent.datapath.loader error=""attaching XDP program to interface bpfbench0: Failed to compile bpf_xdp.o: exit status 1"""
+katran,arm64_qemu_corpus_19700101_000006_530516,error,0,0,[Errno 22] Invalid argument
+otelcol-ebpf-profiler/profiling,arm64_qemu_corpus_19700101_000006_530516,error,12,0,"native app exited before BPF programs were tracked by shim
+stderr tail:
+1970-01-01T00:02:03.429Z	info	otelconftelemetry/metrics.go:24	Internal metrics telemetry disabled	{""resource"": {""service.instance.id"": ""a89ae0af-d13a-4e2d-a374-cbf6496f9746"", ""service.name"": ""otelcol-ebpf-profiler"", ""service.version"": ""0.140.0""}}
+1970-01-01T00:02:03.487Z	info	builders/builders.go:26	Development component. May change in the future.	{""resource"": {""service.instance.id"": ""a89ae0af-d13a-4e2d-a374-cbf6496f9746"", ""service.name"": ""otelcol-ebpf-profiler"", ""service.version"": ""0.140.0""}, ""otelcol.component.id"": ""debug"", ""otelcol.component.kind"": ""exporter"", ""otelcol.signal"": ""profiles""}
+1970-01-01T00:02:03.580Z	info	service@v0.139.0/service.go:222	Starting otelcol-ebpf-profiler...	{""resource"": {""service.instance.id"": ""a89ae0af-d13a-4e2d-a374-cbf6496f9746"", ""service.name"": ""otelcol-ebpf-profiler"", ""service.version"": ""0.140.0""}, ""Version"": ""0.140.0"", ""NumCPU"": 2}
+1970-01-01T00:02:03.587Z	info	extensions/extensions.go:40	Starting extensions...	{""resource"": {""service.instance.id"": ""a89ae0af-d13a-4e2d-a374-cbf6496f9746"", ""service.name"": ""otelcol-ebpf-profiler"", ""service.version"": ""0.140.0""}}
+1970-01-01T00:02:03.603Z	info	Interpreter tracers: perl,php,python,hotspot,ruby,v8,go,labels	{""resource"": {""service.instance.id"": ""a89ae0af-d13a-4e2d-a374-cbf6496f9746"", ""service.name"": ""otelcol-ebpf-profiler"", ""service.version"": ""0.140.0""}, ""otelcol.component.id"": ""profiling"", ""otelcol.component.kind"": ""receiver"", ""otelcol.signal"": ""profiles""}"
+tetragon/observer,arm64_qemu_corpus_19700101_000006_530516,error,0,0,"Tetragon exited before BPF programs were tracked by shim
+stdout tail:
+level=info msg=""Starting tetragon"" version=v1.8.0-pre.0-79-g8ca052908
+level=info msg=""config settings"" config=""map[bpf-dir:tetragon bpf-lib:/opt/bpf-benchmark/repo-artifacts/arm64/tetragon btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-cri:false enable-deprecated-tracingpolicy-grpc:false enable-event-metrics:true enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-environment-variables:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: filter-environment-variables:[] force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address:127.0.0.1:59955 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-file: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ parents-map-enabled:false parents-map-entries:0 parents-map-size: pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true retprobes-cache-size:4096 server-address:127.0.0.1:41791 tracing-policy: tracing-policy-dir:/workspaces/repository/runner/assets/tetragon_policies use-perf-ring-buffer:false username-metadata:disabled verbose:0]""
+level=info msg=""Tetragon current security context"" SELinux=""kernel\x00"" AppArmor="""" Smack="""" Lockdown=""""
+level=info msg=""Tetragon pid file creation succeeded"" pid=3248 pidfile=/var/run/tetragon/tetragon.pid
+level=info msg=""BPF: successfully released pinned BPF programs and maps"" bpf-dir=/sys/fs/bpf/tetragon
+level=info msg=""BTF discovery: default kernel btf file found"" btf-file=/sys/kernel/btf/vmlinux
+level=info msg=""BPF detected features: override_return: true, buildid: true, kprobe_multi: false, uprobe_multi: false, fmodret: true, fmodret_syscall: true, signal: true, large: true, link_pin: true, lsm: true, missed_stats_kprobe_multi: true, missed_stats_kprobe: true, batch_update: true, uprobe_refctroff: true, audit_loginuid: true, probe_write_user: true, uprobe_regs_change: true, mix_bpf_and_tail_calls: true, fentry: true, get_func_ret: true""
+level=info msg=""Cgroup mode detection succeeded"" cgroup.fs=/run/tetragon/cgroup2 cgroup.mode=""Unified mode (Cgroupv2)""
+level=info msg=""Cgroupv2 supported controllers detected successfully"" cgroup.fs=/run/tetragon/cgroup2 cgroup.path=/proc/1/root/run/tetragon/cgroup2 cgroup.controllers=""[cpuset cpu io memory hugetlb pids misc]"" cgroup.hierarchyID=0
+level=info msg=""Cgroupv2 supported controllers detected successfully"" cgroup.fs=/run/tetragon/cgroup2 cgroup.path=/run/tetragon/cgroup2 cgroup.controllers=""[cpuset cpu io memory hugetlb pids misc]"" cgroup.hierarchyID=0
+level=warn msg=""Failed to detect deployment mode from Cgroupv2 path"" cgroup.fs=/run/tetragon/cgroup2 error=""cgroup path is empty""
+level=warn msg=""Unable to find Cgroup migration path for pid=3248"" cgroup.fs=/run/tetragon/cgroup2 error=""could not validate Cgroupv2 hierarchy""
+level=warn msg=""Detection of deployment mode failed"" cgroup.fs=/run/tetragon/cgroup2 error=""could not detect Cgroup migration path for pid=3248""
+level=warn msg=""Deployment mode detection failed"" cgroup.fs=/run/tetragon/cgroup2 deployment.mode=unknown
+level=warn msg=""Deployment mode is unknown, advanced Cgroups tracking will be disabled"" confmap-update=tg_conf_map
+level=info msg=""Updated TetragonConf map successfully"" confmap-update=tg_conf_map deployment.mode=unknown log.level=0 cgroup.fs.magic=Cgroupv2 cgroup.hierarchyID=0 NSPID=3248
+level=info msg=""Disabling Kubernetes API""
+level=info msg=""Configured redaction filters"" redactionFilters=""""
+level=info msg=""Exit probe on acct_process""
+level=info msg=""Set execve_map entries 32768"" size=28M
+level=info msg=""BPF ring buffer size (bytes)"" total=128K
+level=info msg=""BTF file: using metadata file"" metadata=/sys/kernel/btf/vmlinux
+level=info msg=""Loading sensor"" name=__base__
+level=info msg=""Loading kernel version 7.0.0""
+level=info msg=""BPF events statistics: 0 received, 0% events loss""
+level=info msg=""Observer events statistics"" received=0 lost=0 errors=0 filterPass=0 filterDrop=0
+level=error msg=""Failed to execute tetragon"" error=""sensor __base__ from collection __base__ failed to load: tetragon, aborting could not find BPF programs: program \""bpf_execve_bprm_commit_creds.o\"" cannot be found (errors: bpf_execve_bprm_commit_creds.o: stat bpf_execve_bprm_commit_creds.o: no such file or directory;bpf_execve_bprm_commit_creds.o.gz: stat bpf_execve_bprm_commit_creds.o.gz: no such file or directory;/opt/bpf-benchmark/repo-artifacts/arm64/tetragon/bpf_execve_bprm_commit_creds.o: stat /opt/bpf-benchmark/repo-artifacts/arm64/tetragon/bpf_execve_bprm_commit_creds.o: no such file or directory;/opt/bpf-benchmark/repo-artifacts/arm64/tetragon/bpf_execve_bprm_commit_creds.o.gz: stat /opt/bpf-benchmark/repo-artifacts/arm64/tetragon/bpf_execve_bprm_commit_creds.o.gz: no such file or directory)"""
+tracee/monitor,arm64_qemu_corpus_19700101_000006_530516,error,151,0,"failed to launch Tracee: /artifacts/tracee/bin/tracee --events '*' --events -net_packet_raw,-print_mem_dump,-net_packet_ipv4,-net_packet_ipv6,-net_packet_tcp,-net_packet_udp,-net_packet_icmp,-net_packet_icmpv6,-net_packet_dns,-net_packet_dns_request,-net_packet_dns_response,-net_packet_http,-net_packet_http_request,-net_packet_http_response,-anti_debugging,-aslr_inspection,-cgroup_notify_on_release,-cgroup_release_agent,-core_pattern_modification,-default_loader_mod,-disk_mount,-docker_abuse,-dropped_executable,-dynamic_code_loading,-file_modification,-fileless_execution,-hidden_file_created,-hooked_seq_ops_detector,-hooked_syscall_detector,-illegitimate_shell,-k8s_service_account_token,-kernel_module_loading,-k8s_api_connection,-k8s_cert_theft,-ld_preload,-lsm_test,-proc_fops_hooking,-proc_kcore_read,-proc_mem_access,-proc_mem_code_injection,-process_vm_write_inject,-ptrace_code_injection,-rcd_modification,-sched_debug_recon,-scheduled_task_mod,-stack_pivot,-bpf_attach,-security_bpf,-security_bpf_map,-security_bpf_prog,-stdio_over_socket,-sudoers_modification,-syscall_hooking,-system_request_key_mod --output none --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/f933ef36/tracee/signatures --capabilities bypass=true: command exited with code 97: {""level"":""warn"",""ts"":3017.636941776,""msg"":""Event canceled because of missing kernel symbol dependency"",""missing symbols"":[""non_existing_symbol""],""event"":""missing_ksymbol""}
+{""level"":""warn"",""ts"":3017.659229952,""msg"":""Event canceled because of missing kernel symbol dependency"",""missing symbols"":[""non_existing_symbol""],""event"":""multiple_fallbacks_test""}
+{""level"":""error"",""ts"":3017.777755296,""msg"":""Failed to register detector"",""detector"":""TRC-1013"",""error"":""detector TRC-1013 requires enrichment \""environment\"" which is not enabled""}
+{""level"":""error"",""ts"":3017.784662128,""msg"":""Failed to register detector"",""detector"":""TRC-107"",""error"":""detector TRC-107 requires enrichment \""environment\"" which is not enabled""}"
+bcc/set,arm64_qemu_corpus_19700101_000009_181096,error,23,0,"BCC tool syscount exited before BPF programs were tracked by shim
+stderr tail:
+l
+i
+b
+b
+p
+f
+:
+ 
+e
+l
+f
+:
+ 
+s
+k
+i
+p
+p
+i
+n
+g
+ 
+u
+n
+r
+e
+c
+o
+g
+n
+i
+z
+e
+d
+ 
+d
+a
+t
+a
+ 
+s
+e
+c
+t
+i
+o
+n
+(
+1
+1
+)
+ 
+.
+n
+a
+t
+i
+v
+e
+_
+l
+a
+b
+.
+r
+o
+d
+a
+t
+a"

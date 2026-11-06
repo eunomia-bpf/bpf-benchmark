@@ -332,6 +332,9 @@ readonly-bound-artifacts:
 	tar --exclude=replay.tar.gz -C $(HERE)/$(PHASE) -czf $(HERE)/$(PHASE)/replay.tar.gz .
 
 APP ?= bcc/set
+VM_CPUS ?= 8
+RUNTIME_BASE ?= $(ROOT)/kprog/arm64/build/app-runtime-v2
+RUNTIME_IMAGE ?= bpf-benchmark/runner-runtime:arm64-a-context-v2
 TETRAGON_ALIGN_BUILD := $(ROOT)/kprog/arm64/build/tetragon-alignchecker
 
 .PHONY: tetragon-alignchecker
@@ -348,7 +351,7 @@ readonly-metadata-check:
 
 .PHONY: pin-runtime-v2
 pin-runtime-v2:
-	python3 $(HERE)/pin_runtime.py
+	python3 $(HERE)/pin_runtime.py $(RUNTIME_BASE)
 
 .PHONY: runtime-shim-v2
 runtime-shim-v2:
@@ -361,24 +364,24 @@ qemu-context-v2-root:
 		-o host-source-apps-arm64 -o host-runner-arm64 -o host-micro-programs-arm64 \
 		-o host-stage2-programs-arm64 -o host-arm64-sim-proofs -o host-bpfopt-llvm-arm64 \
 		-o host-native-bpf-arm64 -o host-merlin-runtime-context \
-		RUNNER_DIR=$(ROOT)/kprog/arm64/build/app-runtime-v2/runner \
-		HOST_KERNEL_BUILD_DIR_ARM64=$(ROOT)/kprog/arm64/build/app-runtime-v2/kernel \
-		HOST_KINSN_DIR_ARM64=$(ROOT)/kprog/arm64/build/app-runtime-v2/kinsn \
+		RUNNER_DIR=$(RUNTIME_BASE)/runner \
+		HOST_KERNEL_BUILD_DIR_ARM64=$(RUNTIME_BASE)/kernel \
+		HOST_KINSN_DIR_ARM64=$(RUNTIME_BASE)/kinsn \
 		BPFOPT_SHIM_BUILD_ARM64=$(ROOT)/bpfopt/shim/build-arm64-a-context-v2 \
 		NATIVE_BPF_ARTIFACTS_ARM64=$(ROOT)/kprog/arm64/build/app-verified-stage \
-		ARM64_RUNNER_RUNTIME_IMAGE=bpf-benchmark/runner-runtime:arm64-a-context-v2 \
-		ARM64_RUNNER_RUNTIME_IMAGE_TAR=$(ROOT)/kprog/arm64/build/app-runtime-v2/image.tar \
-		ARM64_QEMU_ROOT=$(ROOT)/kprog/arm64/build/app-runtime-v2/root
+		ARM64_RUNNER_RUNTIME_IMAGE=$(RUNTIME_IMAGE) \
+		ARM64_RUNNER_RUNTIME_IMAGE_TAR=$(RUNTIME_BASE)/image.tar \
+		ARM64_QEMU_ROOT=$(RUNTIME_BASE)/root
 
 .PHONY: qemu-context-v2-app
 qemu-context-v2-app:
 	taskset -c 8-11 timeout 7200 $(MAKE) -C $(ROOT) PLATFORM=qemu ARCH=arm64 corpus \
-		-o $(ROOT)/kprog/arm64/build/app-runtime-v2/root/qemu-init \
-		ARM64_QEMU_ROOT=$(ROOT)/kprog/arm64/build/app-runtime-v2/root \
-		ARM64_QEMU_KERNEL_IMAGE=$(ROOT)/kprog/arm64/build/app-runtime-v2/kernel/arch/arm64/boot/Image \
-		ARM64_RUNNER_RUNTIME_IMAGE=bpf-benchmark/runner-runtime:arm64-a-context-v2 \
-		ARM64_RUNNER_RUNTIME_IMAGE_TAR=$(ROOT)/kprog/arm64/build/app-runtime-v2/image.tar \
-		VM_CPUS=2 VM_MEM=4096 SAMPLES=1 WORKLOAD_DURATION=2 KEEP_WORKDIRS=1 \
+		-o $(RUNTIME_BASE)/root/qemu-init \
+		ARM64_QEMU_ROOT=$(RUNTIME_BASE)/root \
+		ARM64_QEMU_KERNEL_IMAGE=$(RUNTIME_BASE)/kernel/arch/arm64/boot/Image \
+		ARM64_RUNNER_RUNTIME_IMAGE=$(RUNTIME_IMAGE) \
+		ARM64_RUNNER_RUNTIME_IMAGE_TAR=$(RUNTIME_BASE)/image.tar \
+		VM_CPUS=$(VM_CPUS) VM_MEM=4096 SAMPLES=1 WORKLOAD_DURATION=2 KEEP_WORKDIRS=1 \
 		BPFREJIT_CORPUS_APP_TIMEOUT=7200 \
 		BPFREJIT_KEEP_ALL_WORKDIRS=1 BPFREJIT_CORPUS_BPF_STATS=1 \
 		BPFREJIT_CORPUS_APPS=$(APP) BPFREJIT_SHIM_NATIVE_LOADER=post \
@@ -386,7 +389,14 @@ qemu-context-v2-app:
 
 .PHONY: runtime-results
 runtime-results:
-	python3 $(HERE)/runtime_results.py
+	python3 $(HERE)/runtime_results.py $(RUNTIME_RESULTS_ARGS)
+
+.PHONY: tetragon-objects
+tetragon-objects:
+	install -d $(TETRAGON_ALIGN_BUILD)/objs $(TETRAGON_ALIGN_BUILD)/deps
+	taskset -c 12-15 $(MAKE) -j2 -C $(ROOT)/vendor/repos/tetragon/bpf -f Makefile -f $(HERE)/TetragonObjects.mk CLANG=clang \
+		BPF_TARGET_ARCH=arm64 OBJSDIR=$(TETRAGON_ALIGN_BUILD)/objs/ DEPSDIR=$(TETRAGON_ALIGN_BUILD)/deps/ all
+	install -m 0644 $(TETRAGON_ALIGN_BUILD)/objs/*.o $(ROOT)/vendor/build/arm64/tetragon/
 
 .PHONY: fmov-bank-build
 fmov-bank-build: direct-header-generate

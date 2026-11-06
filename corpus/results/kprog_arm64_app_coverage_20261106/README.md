@@ -655,3 +655,32 @@ compiles an AArch64 ELF and links all eight native functions, including
 retain the exact configuration headers, unchanged native ABI overlay, compiler
 arguments, every link outcome and unit-test log. The next application retry
 uses this compiler repair together with the readonly binder integration.
+
+## Completed matched-runtime census and first BCC native replacements
+
+[The next actual six-app table](runtime-context-v3/table.md) records 239 raw
+baseline counter rows: BCC 23, Cilium 53, OTel 12 and Tracee 151. Every row is
+retained in [resident-counters.csv](runtime-context-v3/resident-counters.csv).
+The [614 startup attempts](runtime-context-v3/all-startup-loads.jsonl) retain
+577 successful loads, 28 failures and nine unfinished loads, including feature
+probes and transients. [Nine BCC native replacements](runtime-context-v3/native-replacements.jsonl)
+are recorded before startup stops. No native workload measurement completed.
+
+Canonical DATASEC matching fixes vfsstat's real `.bss` and original readonly
+configuration map reuse. The remaining BCC failures are private readonly object
+identity and the stack-trace map's application-configured value size (declared
+zero, actual 1016). Exact readonly identity integration and zero-size adoption
+are the next loader revision. The full raw run archives preserve every attempt.
+
+Cilium's captured native compiler failure is repaired above. All 94 Tetragon
+upstream ARM BPF objects are now built and installed using unchanged upstream
+source and flags, closing the missing-object packaging errors. Katran's
+`EINVAL` comes from pinning NAPI threads to guest CPUs 5/6 with only two vCPUs;
+the recipe now exposes the existing CPU knob with eight vCPUs by default.
+Separate runtime directories keep an older guest's kernel, libraries and root
+filesystem intact while the next revision is built.
+
+The latest built runtime is `app-runtime-v3` with matched frozen context-v2
+kernel/modules and DATASEC loader revision `15b253cb4`; its exact build and
+run logs are retained here. Full end-to-end native results are still being
+repaired and measured; these startup records do not establish matching work.
