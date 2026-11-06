@@ -80,6 +80,35 @@ static void check(enum operation op, unsigned width, unsigned shift,
 	cases++;
 }
 
+/* Exercise the complete routed POPCNT, including all old flag combinations
+ * and destination/source aliasing. The expected count uses a bit walk. */
+static void check_popcount(unsigned width, __u64 source, unsigned flags, int alias)
+{
+	struct x86_sim_state state = {0};
+	X86_SIM_L_BIND_COMMON_STATE(&state);
+	__u64 old = alias ? source : 0xa5678901234589abULL;
+	state.rax.ptr = (void *)(unsigned long)old;
+	state.rbx.ptr = (void *)(unsigned long)source;
+	state.cf = flags & 1;
+	state.pf = (flags >> 1) & 1;
+	state.af = (flags >> 2) & 1;
+	state.zf = (flags >> 3) & 1;
+	state.sf = (flags >> 4) & 1;
+	state.of = (flags >> 5) & 1;
+	X86_SIM_L_EXEC(X86_OP_POPCNT, X86_RAX, alias ? X86_RAX : X86_RBX, width, 0xdeadbeefU, 0);
+	__u64 narrowed = source & (~0ULL >> (64 - width * 8));
+	__u64 count = 0;
+	for (unsigned bit = 0; bit < width * 8; bit++) count += (narrowed >> bit) & 1;
+	__u64 expected = width == 2 ? (old & ~0xffffULL) | count : count;
+	if ((__u64)(unsigned long)state.rax.ptr != expected ||
+	    (__u64)(unsigned long)state.rbx.ptr != source || state.rax_tag != X86_SIM_TAG_SCALAR ||
+	    state.cf || state.pf || state.af || state.sf || state.of || state.zf != (narrowed == 0)) {
+		fprintf(stderr, "POPCNT mismatch width=%u source=%llx flags=%u alias=%d\n", width, source, flags, alias);
+		exit(1);
+	}
+	cases++;
+}
+
 int main(void)
 {
 	/* Exhaustive byte arithmetic catches parity and nibble carry independently
@@ -102,6 +131,14 @@ int main(void)
 					for (enum operation op = ADD; op <= NOT; op++)
 						for (int imm = 0; imm < 2; imm++)
 							check(op, width, 0, imm, values[a], values[b], c);
+	for (unsigned width = 2; width <= 8; width *= 2)
+		for (unsigned flags = 0; flags < 64; flags++)
+			for (int alias = 0; alias < 2; alias++) {
+				for (unsigned bit = 0; bit < 64; bit++)
+					check_popcount(width, 1ULL << bit, flags, alias);
+				check_popcount(width, 0, flags, alias);
+				check_popcount(width, ~0ULL, flags, alias);
+			}
 	/* Non-arithmetic users of the new state must preserve or define PF/AF as
 	 * the ISA requires: zero shifts/rotates preserve, logic defines PF only. */
 	struct x86_sim_state state = {0};
