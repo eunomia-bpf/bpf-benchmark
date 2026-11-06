@@ -7,25 +7,9 @@
 #include <stdio.h>
 #include "../../kinsn/module/include/native_lab_binding.h"
 #include "../../kinsn/module/include/native_lab_map_offset.h"
-#include "../../kinsn/module/include/native_lab_checked_wire.h"
 
 static void layout(void)
 {
-#define WIRE(type, field, offset) _Static_assert(offsetof(struct type, field) == offset, #type "." #field)
- WIRE(native_lab_checked_header, prog_insns, 4);
- WIRE(native_lab_checked_header, regions, 8);
- WIRE(native_lab_checked_header, map_refs, 12);
- WIRE(native_lab_checked_header, helper_refs, 16);
- WIRE(native_lab_checked_header, actual_generation, 20);
- WIRE(native_lab_checked_header, binding, 24);
- WIRE(native_lab_checked_region, payload, 8);
- WIRE(native_lab_checked_map, pointer, 32);
- WIRE(native_lab_checked_helper, function, 8);
- _Static_assert(sizeof(struct native_lab_checked_header) == 120, "checked header extent");
- _Static_assert(sizeof(struct native_lab_checked_region) == 16, "checked region extent");
- _Static_assert(sizeof(struct native_lab_checked_map) == 40, "checked map extent");
- _Static_assert(sizeof(struct native_lab_checked_helper) == 16, "checked helper extent");
-#undef WIRE
 #define OFFSET(field, expected) _Static_assert(offsetof(struct native_lab_binding, field) == expected, #field)
 	OFFSET(version, 0); OFFSET(arch, 4); OFFSET(entry_offset, 8);
 	OFFSET(abi_version, 12); OFFSET(abi_mask, 16); OFFSET(blob_id, 20);

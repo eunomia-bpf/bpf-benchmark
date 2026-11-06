@@ -1,0 +1,144 @@
+{
+ "objects": [
+  {
+   "program": "read_task_struc",
+   "source_btf_symbol": "read_task_struct",
+   "prog_type": 17,
+   "source_bytecode_len": 448,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "read_task_struct",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_read_task_struct.linked.bpf.o",
+   "simulator_program": "otel_read_task_struct_x86_sim_xdp"
+  },
+  {
+   "program": "perf_unwind_sto",
+   "source_btf_symbol": "perf_unwind_stop",
+   "prog_type": 7,
+   "source_bytecode_len": 13048,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "perf_unwind_stop",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_perf_unwind_stop.linked.bpf.o",
+   "simulator_program": "otel_perf_unwind_stop_x86_sim_xdp"
+  },
+  {
+   "program": "perf_unwind_nat",
+   "source_btf_symbol": "perf_unwind_native",
+   "prog_type": 7,
+   "source_bytecode_len": 55776,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "perf_unwind_native",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_perf_unwind_native.linked.bpf.o",
+   "simulator_program": "otel_perf_unwind_native_x86_sim_xdp"
+  },
+  {
+   "program": "perf_unwind_hot",
+   "source_btf_symbol": "perf_unwind_hotspot",
+   "prog_type": 7,
+   "source_bytecode_len": 60744,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "perf_unwind_hotspot",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_perf_unwind_hotspot.linked.bpf.o",
+   "simulator_program": "otel_perf_unwind_hotspot_x86_sim_xdp"
+  },
+  {
+   "program": "perf_unwind_per",
+   "source_btf_symbol": "perf_unwind_perl",
+   "prog_type": 7,
+   "source_bytecode_len": 59800,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "perf_unwind_perl",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_perf_unwind_perl.linked.bpf.o",
+   "simulator_program": "otel_perf_unwind_perl_x86_sim_xdp"
+  },
+  {
+   "program": "perf_unwind_php",
+   "source_btf_symbol": "perf_unwind_php",
+   "prog_type": 7,
+   "source_bytecode_len": 55192,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "perf_unwind_php",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_perf_unwind_php.linked.bpf.o",
+   "simulator_program": "otel_perf_unwind_php_x86_sim_xdp"
+  },
+  {
+   "program": "perf_unwind_pyt",
+   "source_btf_symbol": "perf_unwind_python",
+   "prog_type": 7,
+   "source_bytecode_len": 47152,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "perf_unwind_python",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_perf_unwind_python.linked.bpf.o",
+   "simulator_program": "otel_perf_unwind_python_x86_sim_xdp"
+  },
+  {
+   "program": "perf_unwind_rub",
+   "source_btf_symbol": "perf_unwind_ruby",
+   "prog_type": 7,
+   "source_bytecode_len": 43664,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "perf_unwind_ruby",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_perf_unwind_ruby.linked.bpf.o",
+   "simulator_program": "otel_perf_unwind_ruby_x86_sim_xdp"
+  },
+  {
+   "program": "perf_unwind_v8",
+   "source_btf_symbol": "perf_unwind_v8",
+   "prog_type": 7,
+   "source_bytecode_len": 62536,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "perf_unwind_v8",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_perf_unwind_v8.linked.bpf.o",
+   "simulator_program": "otel_perf_unwind_v8_x86_sim_xdp"
+  },
+  {
+   "program": "perf_unwind_dot",
+   "source_btf_symbol": "perf_unwind_dotnet",
+   "prog_type": 7,
+   "source_bytecode_len": 63792,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "perf_unwind_dotnet",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_perf_unwind_dotnet.linked.bpf.o",
+   "simulator_program": "otel_perf_unwind_dotnet_x86_sim_xdp"
+  },
+  {
+   "program": "perf_go_labels",
+   "source_btf_symbol": "perf_go_labels",
+   "prog_type": 7,
+   "source_bytecode_len": 5464,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "perf_go_labels",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_perf_go_labels.linked.bpf.o",
+   "simulator_program": "otel_perf_go_labels_x86_sim_xdp"
+  },
+  {
+   "program": "tracepoint__sch",
+   "source_btf_symbol": "tracepoint__sched_process_free",
+   "prog_type": 5,
+   "source_bytecode_len": 2264,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "tracepoint__sched_process_free",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_tracepoint__sched_process_free.linked.bpf.o",
+   "simulator_program": "otel_tracepoint__sched_process_free_x86_sim_xdp"
+  },
+  {
+   "program": "native_tracer_e",
+   "source_btf_symbol": "native_tracer_entry",
+   "prog_type": 7,
+   "source_bytecode_len": 10576,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "native_tracer_entry",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_native_tracer_entry.linked.bpf.o",
+   "simulator_program": "otel_native_tracer_entry_x86_sim_xdp"
+  },
+  {
+   "program": "custom__generic",
+   "source_btf_symbol": "custom__generic",
+   "prog_type": 2,
+   "source_bytecode_len": 10024,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel.native.o",
+   "symbol": "custom__generic",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/otel-real-2/objects/otel_custom__generic.linked.bpf.o",
+   "simulator_program": "otel_custom__generic_x86_sim_xdp"
+  }
+ ]
+}

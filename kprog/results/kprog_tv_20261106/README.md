@@ -798,24 +798,3 @@ in the development archive. Platform mapped-context/frame/disjointness and
 entry-memory facts remain explicit premises to be established by the kernel
 ABI relation. Guard/store/return composition and explicit CPU-profile binding
 continue before this becomes a whole-program certificate.
-
-Complete BB0: `simple-first-block-final-and-mutants.log` records the full
-entry+guard composition and unchanged/eight-mutant regression. The linker
-identity result is in `simple-kernel-artifact-first.log`; exact84-byte
-output, ABI, relocation/environment files and generated Lean arrays are in
-`simple-first-block-inputs.tar.gz`. Failed proof-development attempts remain
-in `simple-first-block-development.tar.gz`. This is a complete first-block
-certificate, with explicit private-frame/platform premises, not yet the
-whole generation-bound program certificate.
-
-Exact verifier-input capture: `checked-simple-arm64-first.log` retains the
-production loader's actual29-instruction expanded proof and successful exact
-original/native packet comparison. `checked-capture-artifact-final.log`
-retains the Arm binding/map/helper capture regression.
-`checked-capture-final-all.log` includes Lean byte identity,14 metadata
-corruptions, four byte-mutant rejections and the complete x86 regression.
-`checked-proof-inputs.tar.gz` preserves exact snapshots, mutation sources/logs,
-small guest runtime and both capture modules; development failures remain
-in `checked-proof-development.tar.gz`. Read-only API and ownership are
-documented in the TV README and wire header. No whole-program TV claim is
-made from capture or successful execution alone.

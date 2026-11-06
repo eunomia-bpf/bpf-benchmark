@@ -359,7 +359,7 @@ pin-runtime-v2:
 runtime-shim-v2:
 	python3 $(HERE)/pin_shim.py
 	taskset -c 16-23 $(MAKE) -C $(ROOT) host-shim-arm64 \
-		BPFOPT_SHIM_DIR=$(ROOT)/kprog/arm64/build/published-shim-v8/bpfopt/shim \
+		BPFOPT_SHIM_DIR=$(ROOT)/kprog/arm64/build/published-shim-v5/bpfopt/shim \
 		BPFOPT_SHIM_BUILD_ARM64=$(RUNTIME_SHIM_BUILD)
 
 .PHONY: qemu-context-v2-root
@@ -396,37 +396,7 @@ qemu-context-v2-app:
 runtime-results:
 	python3 $(HERE)/runtime_results.py $(RUNTIME_RESULTS_ARGS)
 
-.PHONY: app-replay-build
-app-replay-build:
-	python3 $(HERE)/app_replay.py build $(RUNTIME_BASE) $(RUNTIME_IMAGE)
-
-.PHONY: app-replay-run app-replay-collect
-app-replay-run:
-	taskset -c 8-11 $(MAKE) -C $(RUNTIME_BASE)/spark run \
-		ROOTFS=$(RUNTIME_BASE)/root IMAGE_TAR=$(RUNTIME_BASE)/image.tar APP=$(APP) \
-		SAMPLES=1 WORKLOAD_DURATION=2
-	$(MAKE) -f $(HERE)/Makefile app-replay-collect RUNTIME_BASE=$(RUNTIME_BASE)
-
-app-replay-collect:
-	cp -a $(RUNTIME_BASE)/root/workspaces/repository/corpus/results/. $(ROOT)/corpus/results/
-
-.PHONY: runtime-loader-build katran-root-build katran-real-install katran-real-generate
-runtime-loader-build:
-	PKG_CONFIG_LIBDIR=$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu/pkgconfig \
-		PKG_CONFIG_SYSROOT_DIR=$(ROOT)/.cache/aarch64-sysroot \
-		CXX=aarch64-linux-gnu-g++ CC=aarch64-linux-gnu-gcc taskset -c 16-19 $(MAKE) -C $(ROOT)/kprog/libnativeloader \
-		BUILD_DIR=build-arm64-a-map-order-v2 \
-		LIBBPF_PREFIX=$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix \
-		LIBBPF_LIBRARY=$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
-		KERNEL_OFFSETS_INCLUDE=$(ROOT)/micro/programs/build-arm64
-
-
-katran-real-install:
-	python3 $(HERE)/katran_real.py $(HERE)/$(PHASE) install
-
-katran-real-generate: direct-header-generate
-	python3 $(HERE)/katran_real.py $(HERE)/$(PHASE)
-
+.PHONY: katran-root-build
 katran-root-build: direct-header-generate
 	python3 $(HERE)/katran_root.py $(HERE)/$(PHASE)
 	clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \

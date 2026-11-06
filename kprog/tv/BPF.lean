@@ -268,15 +268,6 @@ def execute (env : Environment) (program : Array Byte) (s : State) (i : Instruct
     else throw "BPF memory mode needs an explicit instruction rule"
   else throw "BPF opcode needs an explicit instruction rule"
 
-
-/-- Program bytes outside the current instruction affect execution only at
-an LDDW continuation. This is equality of the existing byte semantics. -/
-theorem execute_program_congr (env : Environment) (first second : Array Byte)
-    (s : State) (i : Instruction)
-    (high : decode first (s.pc.toNat + 1) = decode second (s.pc.toNat + 1)) :
-    execute env first s i = execute env second s i := by
-  simp only [execute, high]
-
 def step (env : Environment) (program : Array Byte) (s : State) :
     Except String (Transition State) :=
   if s.halted then .error "BPF execution already returned"

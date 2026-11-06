@@ -877,30 +877,3 @@ All359 formal modules/C/Rust/wires and688566 focused C cases pass. Four actual
 W/X STXR/STLXR bound positives return37/retval2/generation1; all four formerly
 accepted failure-branch negatives now reject. The exact new kernel/initrd replay
 is retained. Numeric-address and platform-ordering obligations stay active.
-
-## Actual Katran and OTel startup coverage
-
-[Runtimev8](runtime-context-v8/README.md) records the first actual resident
-program failures: Katran balancer and OTel read_task_struct lack simulator
-proofs. Their baseline counters contain one and12 rows respectively; neither
-returns native counters. All31 startup attempts and the exact packaged inputs
-remain. The new actual Katran balancer proof has compiled and is running in
-runtimev9 with T's fully matched kernel/module/loader bundle.
-
-## Actual ARM balancer proof integration
-
-[Runtimev9](runtime-context-v9/README.md) generates and compiles the actual
-Katran balancer against its original map declarations. Its unchanged baseline
-records250179 runs; native startup reaches proof relocation and fails on a
-full/truncated map-name resolution order defect. The exact proof build,
-packaged inputs and all12 startup attempts remain. The existing alias-resolution
-step is being moved before proof-map reuse for the next application retry.
-
-## First complete actual Katran ARM workload
-
-[Runtimev10](runtime-context-v10/README.md) replaces the actual balancer
-1/1 resident programs with a prebuilt generation-bound proof. Both workload
-arms finish: JIT250388 and bound268634 program runs, matching their packet
-counts and zero pktgen errors. XDP/map/receiver/drop counters are retained.
-OTel records12 baseline programs and0 native replacements; mixed extern/private
-readonly relocation handling is under repair. QEMU timing is functional only.

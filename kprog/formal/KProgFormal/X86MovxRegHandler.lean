@@ -23,10 +23,10 @@ inductive X86MovxOp
 
 /-- Composition used by the x86 register-source MOVZX/MOVSX handler after the
 opcode, the source register's raw 64-bit value, and the two width codes have
-been decoded. This stable interface takes the selected source register value;
-the source decoder and high-byte lane are connected in `Refinement/X86Movx`.
-The body narrows (`movzx`) or sign-extends (`movsx`) at the *source* width;
-the *destination* width confines the writeback, whose lane shift is zero. -/
+been decoded. The simulator reads the source with `X86_SIM_L_READ_REG`, i.e. the
+full 64-bit register with no byte lane, then narrows (`movzx`) or sign-extends
+(`movsx`) it at the *source* width; the *destination* width — `FLAGS` with the
+64-bit fallback — confines the writeback, whose lane shift is zero. -/
 def generatedX86MovxRegStep (state : X86MovxState) (src : BitVec 64)
     (op : X86MovxOp) (srcWidth dstWidth : X86Width) : X86MovxState :=
   let widened :=

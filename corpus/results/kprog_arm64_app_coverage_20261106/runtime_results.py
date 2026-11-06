@@ -57,5 +57,9 @@ table=['| Application | Baseline counter rows | Native counter rows | App status
 for app in sorted(apps,key=lambda row:row['app']):
     table.append(f'| {app["app"]} | {app["baseline_counter_rows"]} | {app["post_counter_rows"]} | {app["status"]} |')
 (out/'table.md').write_text('\n'.join(table)+'\n')
+for name in ['qemu-five-baselines','qemu-bcc-context-v2','qemu-context-v2-root','pin-runtime-v2','tetragon-alignchecker','tetragon-alignchecker-v2',
+             'qemu-five-context-v2','qemu-bcc-context-v3','runtime-context-v3-build','tetragon-all-objects']:
+    shutil.copy2(Path('/workspaces/.agent-state/kprog-lanes/A')/(name+'.log'),out/(name+'.log'))
+shutil.copy2(ROOT/'kprog/arm64/build/app-verified-stage/bcc/manifest.json',out/'bcc-manifest.json')
 print(f'All{len(loads)} startup load attempts retained: {dict(Counter(row["status"] for row in loads))}')
 print('\n'.join(table))

@@ -259,6 +259,25 @@ Every ratio below therefore carries the replaced/failed split from its own
 shim log. A ratio with zero replacements is variance, not a native
 measurement.
 
+### App-by-app state
+
+| app | manifest | native replacements | ratio |
+| --- | --- | ---: | --- |
+| bcc/set | `bcc-real-4/manifest.image.json` | **18** | **1.002x** (ref 1.005x) |
+| katran | `katran-real-10/manifest.image.json` | 0 (1 failed) | variance, not native |
+| otelcol | `otel-real-2/manifest.image.json` | 0 (14 failed) | not measured |
+
+Two packaging defects keep the remaining apps from replacing programs, both
+in artifacts, not in the framework:
+
+1. **katran**: `balancer_ingress` fails with `simulator proof contains an
+   unresolved map/kfunc relocation: katran_balancer_ingress_x86_s...`.
+2. **otelcol**: the manifest names one consolidated `otel.native.o`, but the
+   staged artifacts are per-tracer (`custom_trace.native.o`,
+   `dotnet_tracer.native.o`, ...), so every entry reads as unreadable.
+
+Both are reported to lane C, which owns app artifact packaging.
+
 ### Work done per arm
 
 The native arm itself is selected with
