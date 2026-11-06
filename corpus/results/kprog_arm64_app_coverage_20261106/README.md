@@ -371,3 +371,50 @@ absolute code/stack-address relation, every app's real entry context and
 original map bindings still require integration and artifact TV; neither
 logical offsets nor these tests establish that relation. This is active repair
 work, with no exemption for a failing program or accepted negative.
+
+## ABI state dependencies and remaining accepted findings
+
+The constructor now distinguishes defined native input bits from unspecified
+entry/call-clobbered GPRs, SIMD state and NZCV. It preserves blind private
+callee saves, tracks partial W/MOVK/shift/bitfield/mask dependencies, joins
+all CFG paths and separates local call contexts. Helpers use their real typed
+parameter widths, invalidate caller-saved state, and check tail-call arguments.
+Entry/local returns require balanced native SP. This analysis supplies no
+initial values, runtime guard or new native instruction semantics.
+
+All27 encoded effect regressions pass. All42 original micro/helper-map
+programs still generate; the13 helper/map cases compile again. The29 micro C
+sources are byte-identical to the fresh29/29 full-system QEMU passes in
+[control-return-micro/table.md](control-return-micro/table.md). The source-identity
+check is reproducible with `abi-positive-identity`.
+
+The actual generation-bound load-only negative trial retains all17 current F
+fixtures:9 verifier rejections,1 loader rejection,5 constructor rejections,
+and **two accepted bugs**: absolute SP flags and entry-X30 address flags.
+The three older undefined-entry/flags/helper-clobber acceptances are now
+constructor rejections; the return-register overwrite is verifier-rejected.
+No unsafe native fixture is executed. The two address observations require a
+real native-base/entry-state relation and remain required repair work, not
+accepted cases or exemptions. [Exact outcomes](abi-negative-final/outcomes.json),
+[constructor/effect/positive artifacts](abi-constructor-artifacts.tar.gz) and
+[paired kernel/initramfs/tools](abi-bound-runtime.tar.gz) retain the full trial.
+
+The [immutable1136-artifact constructor census](defined-frozen/table.md) records
+430 generated and706 rejected across all six apps, with no entry removed.
+[Constructor, input and command archive](defined-frozen/constructor-inputs.tar.gz)
+preserves its exact version independently of subsequent checker fixes.
+Compilation of every generated entry is running. Many staged FUNC_LOCAL
+subprograms need their true callers/entry state, and helper memory effects need
+integration; these are actual failures to close. This remains an artifact
+census, not the actual application startup inventory or a native TV certificate.
+
+```sh
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile abi-effect-check PHASE=abi-effects-tail
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile abi-negative-bound PHASE=abi-negative-final
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile abi-stage2-build PHASE=abi-stage2-final
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile generate-frozen PHASE=defined-frozen
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile compile PHASE=defined-frozen COMPILE_ARGS='0 430 900'
+```
+
+The negative target exits nonzero while either accepted bug remains. For fresh
+attempts use fresh phase names; the existing snapshots and outcomes stay intact.

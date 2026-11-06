@@ -1,0 +1,119 @@
+{
+  "arch": "arm64",
+  "cases": [
+    {
+      "name": "past_data_end_read",
+      "assembly": "ldr x1, [x0, #8]; ldrb w0, [x1]; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=231\nstub fd_array_cnt=2 fd_array=0:9,1:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=4;1:code=133,dst=0,src=4,off=1,imm=126375;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n1: (71) r0 = *(u8 *)(r1 +0)\nR1 invalid mem access 'pkt_end'\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,197,885608,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,885837,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126375\nnative_blob_diag: fnv64=8390e88279162497 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1\nchunk_bytes=0:20\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "returncode": 1
+    },
+    {
+      "name": "past_data_end_write",
+      "assembly": "ldr x1, [x0, #8]; mov w2, #1; strb w2, [x1]; mov w0, #2; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=276\nstub fd_array_cnt=2 fd_array=0:9,1:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=8;1:code=133,dst=0,src=4,off=1,imm=126375;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n1: (b7) r2 = 1                        ; R2=1\n2: (73) *(u8 *)(r1 +0) = r2\nR1 invalid mem access 'pkt_end'\nprocessed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,197,885608,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,885837,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=28 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126375\nnative_blob_diag: fnv64=0330b138d1d15997 word_count=7 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=28 final_size_matches=1\nchunk_bytes=0:28\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "returncode": 1
+    },
+    {
+      "name": "missing_data_end_check",
+      "assembly": "ldr x1, [x0]; ldrb w0, [x1]; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=292\nstub fd_array_cnt=2 fd_array=0:9,1:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=12;1:code=133,dst=0,src=4,off=1,imm=126375;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (61) r1 = *(u32 *)(r1 +0)          ; R1=pkt(r=0)\n1: (71) r0 = *(u8 *)(r1 +0)\ninvalid access to packet, off=0 size=1, R1(id=0,off=0,r=0)\nR1 offset is outside of the packet\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,197,885608,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,885837,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126375\nnative_blob_diag: fnv64=7c32214a9a3e17f3 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1\nchunk_bytes=0:20\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "returncode": 1
+    },
+    {
+      "name": "map_value_oob",
+      "assembly": "ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; str x30, [sp, #-16]!; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; ldr x30, [sp], #16; cbz x0, 1f; ldr x0, [x0, #8]; ret; 1: mov x0, #0; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=975\nstub fd_array_cnt=3 fd_array=0:11,1:11,2:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=16;1:code=133,dst=0,src=4,off=1,imm=126375;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (b7) r6 = 0                        ; R6=0\n1: (61) r3 = *(u32 *)(r1 +4)          ; R1=ctx() R3=pkt_end()\n2: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n3: (bf) r1 = r2                       ; R1=pkt(r=0) R2=pkt(r=0)\n4: (07) r1 += 4                       ; R1=pkt(off=4,r=0)\n5: (2d) if r1 > r3 goto pc+25         ; R1=pkt(off=4,r=4) R3=pkt_end()\n6: (7b) *(u64 *)(r10 -8) = r6         ; R6=0 R10=fp0 fp-8=0\n7: (18) r1 = 0xffff0000041a3c00       ; R1=map_ptr(map=neg_map,ks=4,vs=8)\n9: (85) call bpf_map_lookup_elem#1    ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)\n10: (79) r1 = *(u64 *)(r10 -8)        ; R1=0 R10=fp0 fp-8=0\n11: (15) if r0 == 0x0 goto pc+17      ; R0=map_value(map=neg_map,ks=4,vs=8)\n12: (71) r2 = *(u8 *)(r0 +8)\ninvalid access to map value, value_size=8 off=8 size=1\nR0 min value is outside of the allowed memory range\nprocessed 12 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\nkernel log tail:\n4,197,885608,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,885837,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=100 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126375\nretained_map_info=9:id=4:type=2:name=neg_map\nnative_blob_diag: fnv64=d92060ee0a3a10bd word_count=25 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=88 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=100 final_size_matches=1\nchunk_bytes=0:100\nreloc_targets=88:0x4\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "returncode": 1
+    },
+    {
+      "name": "nullable_map_dereference",
+      "assembly": "ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; str x30, [sp, #-16]!; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; ldr x30, [sp], #16; ldr x0, [x0]; ret; 1: mov x0, #0; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1017\nstub fd_array_cnt=3 fd_array=0:11,1:11,2:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=20;1:code=133,dst=0,src=4,off=1,imm=126375;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 0                        ; R0=0\n1: (61) r3 = *(u32 *)(r1 +4)          ; R1=ctx() R3=pkt_end()\n2: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n3: (bf) r1 = r2                       ; R1=pkt(r=0) R2=pkt(r=0)\n4: (07) r1 += 4                       ; R1=pkt(off=4,r=0)\n5: (2d) if r1 > r3 goto pc+25         ; R1=pkt(off=4,r=4) R3=pkt_end()\n6: (b7) r1 = 0                        ; R1=0\n7: (7b) *(u64 *)(r10 -8) = r1         ; R1=0 R10=fp0 fp-8=0\n8: (18) r1 = 0xffff00000442c800       ; R1=map_ptr(map=neg_map,ks=4,vs=8)\n10: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)\n11: (bf) r1 = r0                      ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8) R1=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)\n12: (79) r2 = *(u64 *)(r10 -8)        ; R2=0 R10=fp0 fp-8=0\n13: (71) r3 = *(u8 *)(r1 +0)\nR1 invalid mem access 'map_value_or_null'\nprocessed 13 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\nkernel log tail:\n4,197,885608,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,885837,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=92 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126375\nretained_map_info=9:id=5:type=2:name=neg_map\nnative_blob_diag: fnv64=67c938b210766f03 word_count=23 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=80 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=92 final_size_matches=1\nchunk_bytes=0:92\nreloc_targets=80:0x5\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "returncode": 1
+    },
+    {
+      "name": "invalid_helper_argument",
+      "assembly": "str x30, [sp, #-16]!; mov x0, #1; mov x1, #0; bl bpf_map_lookup_elem; ldr x30, [sp], #16; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=380\nstub fd_array_cnt=2 fd_array=0:9,1:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=24;1:code=133,dst=0,src=4,off=1,imm=126375;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (b7) r1 = 0                        ; R1=0\n1: (7b) *(u64 *)(r10 -8) = r1         ; R1=0 R10=fp0 fp-8=0\n2: (b7) r1 = 1                        ; R1=1\n3: (b7) r2 = 0                        ; R2=0\n4: (85) call bpf_map_lookup_elem#1\nR1 type=scalar expected=map_ptr\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,197,885608,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,885837,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=52 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126375\nnative_blob_diag: fnv64=29c8727fed9e3df0 word_count=13 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=52 final_size_matches=1\nchunk_bytes=0:52\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "returncode": 1
+    },
+    {
+      "name": "stack_oob",
+      "assembly": "ldr x0, [sp, #1024]; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=161\nstub fd_array_cnt=2 fd_array=0:9,1:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=28;1:code=133,dst=0,src=4,off=1,imm=126375;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (05) goto pc+0\n1: (95) exit\nR0 !read_ok\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,197,885608,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,885837,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126375\nnative_blob_diag: fnv64=04e9cefe01762702 word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1\nchunk_bytes=0:12\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "returncode": 1
+    },
+    {
+      "name": "uninitialized_stack",
+      "assembly": "ldur x0, [sp, #-8]; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=190\nstub fd_array_cnt=2 fd_array=0:9,1:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=32;1:code=133,dst=0,src=4,off=1,imm=126375;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (79) r0 = *(u64 *)(r10 -8)\ninvalid read from stack R10 off=-8 size=8\nprocessed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,197,885608,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,885837,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126375\nnative_blob_diag: fnv64=ed7a608bbfe6da68 word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1\nchunk_bytes=0:12\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "returncode": 1
+    },
+    {
+      "name": "unbounded_loop",
+      "assembly": "1: b 1b",
+      "stage": "loader_rejected",
+      "message": "bound-probe: native_kernel bound proof contains no BPF exit\n",
+      "returncode": 1
+    },
+    {
+      "name": "unbounded_indirect_jump",
+      "assembly": "ldr x1, [x0]; br x1",
+      "stage": "specialization_rejected",
+      "message": "unbounded indirect target at 0x4: br x1"
+    },
+    {
+      "name": "unsupported_instruction",
+      "assembly": "brk #0; ret",
+      "stage": "specialization_rejected",
+      "message": "unsupported arm64 instruction: brk #0x0"
+    },
+    {
+      "name": "entry_return_address_flags",
+      "assembly": "mov w0, #2; cmp x30, #0; b.eq 1f; mov x1, #0; ldr w0, [x1]; 1: ret",
+      "stage": "accepted_finding",
+      "message": "bound program id=71 chunks=1 nonzero_generations=1\n",
+      "returncode": 0
+    },
+    {
+      "name": "return_register_overwrite",
+      "assembly": "mov x30, #0; mov w0, #2; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Invalid argument\ndiagnostic BPF_PROG_LOAD: Invalid argument\nstub verifier_log_size=262144 log_true_size=166\nstub fd_array_cnt=2 fd_array=0:9,1:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=42;1:code=133,dst=0,src=4,off=1,imm=126375;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (85) call unknown#-1\ninvalid func unknown#-1\nprocessed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,197,885608,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,885837,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126375\nnative_blob_diag: fnv64=63bdd71299e4207c word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1\nchunk_bytes=0:20\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\n",
+      "returncode": 1
+    },
+    {
+      "name": "stack_base_flags",
+      "assembly": "mov w0, #2; sub sp, sp, #16; add sp, sp, #16; cmp sp, #0; b.eq 1f; mov x1, #0; ldr w0, [x1]; 1: ret",
+      "stage": "accepted_finding",
+      "message": "bound program id=86 chunks=1 nonzero_generations=1\n",
+      "returncode": 0
+    },
+    {
+      "name": "undefined_entry_register",
+      "assembly": "cbz x1, 1f; ldr x1, [x0, #8]; ldrb w0, [x1]; ret; 1: mov w0, #2; ret",
+      "stage": "specialization_rejected",
+      "message": "undefined native ABI register x1 at 0x0: cbz x1, 10 <entry+0x10>"
+    },
+    {
+      "name": "undefined_entry_flags",
+      "assembly": "b.cc 1f; ldr x1, [x0, #8]; ldrb w0, [x1]; ret; 1: mov w0, #2; ret",
+      "stage": "specialization_rejected",
+      "message": "undefined native ABI flags at 0x0: b.cc 10 <entry+0x10>"
+    },
+    {
+      "name": "helper_clobbered_register",
+      "assembly": "stp x19, x30, [sp, #-16]!; mov x19, x0; mov x1, #0; bl bpf_get_current_uid_gid; cbz x1, 1f; ldr x1, [x19, #8]; ldrb w0, [x1]; b 2f; 1: mov w0, #2; 2: ldp x19, x30, [sp], #16; ret",
+      "stage": "specialization_rejected",
+      "message": "undefined native ABI register x1 at 0x10: cbz x1, 20 <entry+0x20>"
+    }
+  ]
+}

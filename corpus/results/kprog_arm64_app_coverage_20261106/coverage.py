@@ -1,4 +1,5 @@
 """Diagnostic artifact census; no workload, ratio, or native-binding claims."""
+from collections import Counter
 import concurrent.futures
 import csv
 import fcntl
@@ -149,7 +150,10 @@ def summarize(directory):
                         detail += '\n' + verifier.read_text()
         cause = ''
         if status.endswith('_failed') or status == 'verifier_rejected':
-            causes = ['unsupported arm64 instruction', 'unsupported indirect call', 'undeclared function',
+            causes = ['undefined native ABI register', 'undefined native ABI flags',
+                      'unbalanced stack pointer', 'unresolved native ABI external call',
+                      'escapes private stack', 'unbounded indirect target',
+                      'unsupported arm64 instruction', 'unsupported indirect call', 'undeclared function',
                       'unsupported opcode', 'arm64_sim_unsupported_opcode', 'stack limit',
                       'stack frame', 'compile timeout', 'unknown func', 'invalid mem access',
                       'BPF program is too large', 'infinite loop', 'loop is not bounded',
@@ -177,6 +181,12 @@ def summarize(directory):
     for app, count in sorted(counts.items()):
         lines.append('| ' + app + ' | ' + str(sum(count.values())) + ' | ' +
                      ' | '.join(str(count.get(s, 0)) for s in statuses) + ' |')
+    failures = Counter((row['app'], row['status'], row['cause']) for row in rows if row['cause'])
+    if failures:
+        lines += ['', '| App | Stage | Error class | Artifacts |',
+                  '| --- | --- | --- | ---: |']
+        lines += [f'| {app} | {stage} | {cause} | {count} |'
+                  for (app, stage, cause), count in sorted(failures.items())]
     (directory / 'table.md').write_text('\n'.join(lines) + '\n')
     print('\n'.join(lines))
     with tarfile.open(directory / 'generated-sources.tar.gz', 'w:gz') as archive:

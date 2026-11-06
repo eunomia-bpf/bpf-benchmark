@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import re
 import subprocess
+import sys
 from collections import OrderedDict, deque
 from dataclasses import dataclass
 from pathlib import Path
@@ -18,6 +19,8 @@ from generated_arm64_helper_idents import HELPER_IDENTS
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(REPO_ROOT / "kprog"))
+from arm64_abi import check_definedness
 OUT_DIR = Path(__file__).resolve().parent
 MICRO_PROGRAMS = REPO_ROOT / "micro" / "programs"
 STAGE2_PROGRAMS = REPO_ROOT / "kprog" / "test"
@@ -873,6 +876,7 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         for index in range(len(insns) - 1)
     }
     targets_by_addr = indirect_targets(all_insns)
+    check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])
     returns_by_addr = return_targets(all_insns, targets_by_addr)
     return_addrs = sorted(next_by_addr[insn.addr] for insn in all_insns
                           if insn.mnemonic in {"bl", "blr"})

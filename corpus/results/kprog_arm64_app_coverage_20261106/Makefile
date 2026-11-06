@@ -142,3 +142,48 @@ return-negative-check:
 control-artifacts:
 	tar -C $(ROOT)/kprog/arm64/build/bounded-dispatch -czf $(HERE)/bounded-return-v2/native-fixtures.tar.gz native bounded_branch.proof.o bounded_dispatch.proof.o
 	tar -C $(HERE)/return-forgery -czf $(HERE)/return-forgery/native-fixtures.tar.gz outer_scalar_zero.S outer_scalar_zero.asm outer_scalar_zero.proof.o local_scalar_pc.S local_scalar_pc.asm local_scalar_pc.proof.o
+
+.PHONY: abi-stage2-build abi-negative-build
+abi-stage2-build:
+	taskset -c 16-23 python3 $(ROOT)/kprog/fidelity/stage2.py build --arch arm64 --build $(HERE)/$(PHASE)
+
+abi-negative-build:
+	taskset -c 16-23 $(MAKE) -C $(ROOT)/kprog/fidelity negative-build ARCH=arm64 NEGATIVE_BUILD=$(HERE)/$(PHASE)
+
+
+.PHONY: abi-effect-check
+abi-effect-check:
+	taskset -c 16-23 python3 $(HERE)/abi_check.py $(HERE)/$(PHASE)
+
+
+.PHONY: generate-frozen
+generate-frozen:
+	python3 $(HERE)/freeze_constructor.py $(HERE)/$(PHASE)
+	taskset -c 16-19 $(MAKE) -C $(ROOT)/kprog/arm64 app-proofs-build \
+		APP_SIM_PROOF_ARGS='--generate-only --proof-root $(HERE)/$(PHASE)/input --generator $(HERE)/$(PHASE)/constructor/kprog/arm64/micro-prog/generate_micro_sim_proofs.py --report-dir $(HERE)/$(PHASE) --output-dir $(ROOT)/kprog/arm64/app-coverage-$(PHASE)'
+
+
+.PHONY: abi-negative-bound
+abi-negative-bound: abi-negative-build
+	cp $(ROOT)/kprog/fidelity/build-arm64/bound-probe $(HERE)/bound-probe
+	cp $(ROOT)/kprog/fidelity/build-arm64/negative-companion.bpf.o $(HERE)/negative-companion.bpf.o
+	aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -static -DBOUND_NEGATIVE $(ROOT)/kprog/fidelity/negative_init.c -o $(HERE)/negative-bound-init
+	python3 $(ROOT)/kprog/fidelity/negative.py package-bound --arch arm64 --build $(HERE)/$(PHASE)
+	taskset -c 12-15 timeout 300 qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 2 -m 2048 \
+		-nographic -no-reboot -kernel $(ROOT)/kprog/tv/build-kernel-arm64/arch/arm64/boot/Image \
+		-initrd $(HERE)/negative-bound.cpio -append 'console=ttyAMA0 rdinit=/init panic=-1' \
+		>$(HERE)/$(PHASE)/guest-console.log 2>&1
+	python3 $(ROOT)/kprog/fidelity/negative.py collect-bound --arch arm64 --build $(HERE)/$(PHASE) --out $(HERE)/$(PHASE)
+
+.PHONY: abi-artifacts
+abi-artifacts:
+	tar -C $(HERE) -czf $(HERE)/abi-constructor-artifacts.tar.gz abi-effects-before abi-effects-fixed abi-effects-tail abi-negative-final abi-stage2-final abi-positives-fixed abi_check.py
+
+.PHONY: abi-positive-identity
+abi-positive-identity:
+	python3 -c 'from pathlib import Path; base=Path("$(HERE)"); new=list((base/"abi-positives-fixed/sources").glob("*.bpf.c")); assert len(new)==29; assert all(p.read_bytes()==(base/"control-return-micro/sources"/p.name).read_bytes() for p in new); print("29 current ABI-checked C sources exactly match the 29 full-system QEMU passes")'
+
+.PHONY: abi-census-artifacts
+abi-census-artifacts:
+	tar -C $(HERE)/defined-frozen -czf $(HERE)/defined-frozen/constructor-inputs.tar.gz constructor input commands.jsonl
+	tar -C $(ROOT) -czf $(HERE)/abi-bound-runtime.tar.gz kprog/tv/build-kernel-arm64/arch/arm64/boot/Image corpus/results/kprog_arm64_app_coverage_20261106/negative-bound.cpio kprog/fidelity/negative.py kprog/fidelity/negative_init.c kprog/fidelity/bound_probe.cpp kprog/fidelity/negative_companion.bpf.c
