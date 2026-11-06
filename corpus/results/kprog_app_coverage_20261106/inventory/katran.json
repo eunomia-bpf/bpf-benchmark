@@ -1,0 +1,22 @@
+{
+  "app": "katran",
+  "objects": [
+    {
+      "native_object": "balancer.native.o",
+      "program": "balancer_ingres",
+      "symbol": "balancer_ingress"
+    },
+    {
+      "native_object": "healthchecking_ipip.native.o",
+      "program": "healthcheck_enc",
+      "symbol": "healthcheck_encap"
+    },
+    {
+      "native_object": "xdp_root.native.o",
+      "program": "xdp_root",
+      "symbol": "xdp_root"
+    }
+  ],
+  "status": "native-objects-proof-linked",
+  "version": 1
+}

@@ -1,0 +1,1235 @@
+{
+  "app": "tracee",
+  "map_rules": [
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 2,
+      "object_scoped": true,
+      "pattern": "execve_calls",
+      "type": 3,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "tcpmon_map",
+      "type": 4,
+      "value_size": 4
+    },
+    {
+      "match": "exact",
+      "max_entries": 524288,
+      "object_scoped": true,
+      "pattern": "tg_rb_events",
+      "type": 27
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "buffer_heap_map",
+      "type": 6,
+      "value_size": 4352
+    },
+    {
+      "exclude": "string_maps_heap",
+      "key_size": 4,
+      "match": "prefix",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "string_maps_",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "string_maps_heap",
+      "type": 6,
+      "value_size": 16384
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "substring_map",
+      "type": 2,
+      "value_size": 100
+    },
+    {
+      "key_size": 12,
+      "match": "exact",
+      "max_entries": 1024,
+      "object_scoped": true,
+      "pattern": "tg_errmetrics_map",
+      "type": 10,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_conf_map",
+      "type": 2,
+      "value_size": 48
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "policy_conf",
+      "type": 2,
+      "value_size": 1
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "execve_msg_heap_map",
+      "type": 6,
+      "value_size": 6224
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_binary_heap",
+      "type": 6,
+      "value_size": 792
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_parents_bin",
+      "type": 9,
+      "value_size": 792
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 32768,
+      "object_scoped": true,
+      "pattern": "execve_map",
+      "type": 1,
+      "value_size": 896
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 3,
+      "object_scoped": true,
+      "pattern": "execve_map_stats",
+      "type": 6,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "execve_val",
+      "type": 6,
+      "value_size": 896
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "execve_heap",
+      "type": 6,
+      "value_size": 4112
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 8192,
+      "object_scoped": true,
+      "pattern": "tg_execve_joined_info_map",
+      "type": 9,
+      "value_size": 16
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 3,
+      "object_scoped": true,
+      "pattern": "tg_execve_joined_info_map_stats",
+      "type": 6,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_stats_map",
+      "type": 6,
+      "value_size": 14336
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 32768,
+      "object_scoped": true,
+      "pattern": "tg_cgrps_tracking_map",
+      "type": 1,
+      "value_size": 144
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_cgrps_tracking_heap",
+      "type": 6,
+      "value_size": 144
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_cgrps_msg_heap",
+      "type": 6,
+      "value_size": 4312
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_cgtracker_map",
+      "type": 1,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "string_prefix_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "string_prefix_maps_heap",
+      "type": 6,
+      "value_size": 260
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "string_postfix_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "string_postfix_maps_heap",
+      "type": 6,
+      "value_size": 132
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "cgroup_rate_options_map",
+      "type": 2,
+      "value_size": 16
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "cgroup_rate_map",
+      "type": 5,
+      "value_size": 40
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "throttle_heap_map",
+      "type": 6,
+      "value_size": 160
+    },
+    {
+      "key_size": 256,
+      "match": "exact",
+      "max_entries": 1024,
+      "object_scoped": true,
+      "pattern": "tg_mbset_map",
+      "type": 1,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_mbset_gen",
+      "type": 2,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "data_heap",
+      "type": 6,
+      "value_size": 32768
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "heap_ro_zero",
+      "type": 2,
+      "value_size": 16384
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "heap",
+      "type": 6,
+      "value_size": 4104
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "process_call_heap",
+      "type": 6,
+      "value_size": 25632
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "override_tasks",
+      "type": 1,
+      "value_size": 4
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "enforcer_data",
+      "type": 1,
+      "value_size": 12
+    },
+    {
+      "key_size": 12,
+      "match": "exact",
+      "max_entries": 128,
+      "object_scoped": true,
+      "pattern": "enforcer_missed_notifications",
+      "type": 1,
+      "value_size": 4
+    },
+    {
+      "key_size": 224,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "ratelimit_map",
+      "type": 9,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "ratelimit_heap",
+      "type": 6,
+      "value_size": 352
+    },
+    {
+      "key_size": 16,
+      "match": "exact",
+      "max_entries": 1024,
+      "object_scoped": true,
+      "pattern": "retprobe_map",
+      "type": 1,
+      "value_size": 24
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "socktrack_map",
+      "type": 9,
+      "value_size": 16
+    },
+    {
+      "key_size": 16,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "fdinstall_map",
+      "type": 9,
+      "value_size": 4104
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "stack_trace_map",
+      "type": 7,
+      "value_size": 1016
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "sleepable_preload",
+      "type": 1,
+      "value_size": 4100
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_ipv6_ext_heap",
+      "type": 6,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 10,
+      "object_scoped": true,
+      "pattern": "tg_mb_sel_opts",
+      "type": 2,
+      "value_size": 12
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 10,
+      "object_scoped": true,
+      "pattern": "tg_mb_paths",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "addr4lpm_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "addr6lpm_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "policy_stats",
+      "type": 2,
+      "value_size": 80
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "filter_map",
+      "type": 2,
+      "value_size": 4096
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "config_map",
+      "type": 2,
+      "value_size": 736
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "write_offload",
+      "type": 1,
+      "value_size": 16
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "argfilter_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 794,
+      "inner_type": 1,
+      "inner_value_size": 64,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "events_map_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "uid_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "pid_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "mnt_ns_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "pid_ns_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 16,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "uts_ns_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 16,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "comm_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "cgroup_id_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 10240,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "process_tree_map_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 260,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "binary_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 8,
+      "inner_max_entries": 1,
+      "inner_type": 1,
+      "inner_value_size": 1,
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 128,
+      "object_scoped": true,
+      "pattern": "policy_filter_maps",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 128,
+      "inner_type": 1,
+      "inner_value_size": 1,
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1024,
+      "object_scoped": true,
+      "pattern": "policy_filter_cgroup_maps",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "exit_heap_map",
+      "type": 6,
+      "value_size": 40
+    }
+  ],
+  "objects": [
+    {
+      "native_object": "tracee.native.o",
+      "program": "cgroup_bpf_run_",
+      "symbol": "cgroup_bpf_run_filter_skb"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "cgroup_mkdir_si",
+      "symbol": "cgroup_mkdir_signal"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "cgroup_rmdir_si",
+      "symbol": "cgroup_rmdir_signal"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "cgroup_skb_egre",
+      "symbol": "cgroup_skb_egress"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "cgroup_skb_ingr",
+      "symbol": "cgroup_skb_ingress"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "empty_kprobe",
+      "symbol": "empty_kprobe"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "hash_task_id",
+      "symbol": "hash_task_id"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "hash_u32_and_u6",
+      "symbol": "hash_u32_and_u64"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "heartbeat_captu",
+      "symbol": "heartbeat_capture"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "kernel_write_ma"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "lkm_seeker_kset",
+      "symbol": "lkm_seeker_kset_tail"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "lkm_seeker_mod_",
+      "symbol": "lkm_seeker_mod_tree_tail"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "lkm_seeker_modt",
+      "symbol": "lkm_seeker_modtree_loop"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "lkm_seeker_new_",
+      "symbol": "lkm_seeker_new_mod_only_tail"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "lkm_seeker_proc",
+      "symbol": "lkm_seeker_proc_tail"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "lkm_seeker_send",
+      "symbol": "lkm_seeker_send_to_userspace"
+    },
+    {
+      "native_object": "lsm_check.native.o",
+      "program": "lsm_bpf_check",
+      "symbol": "lsm_bpf_check"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "lsm_file_open_t",
+      "symbol": "lsm_file_open_test"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "murmur32",
+      "symbol": "murmur32"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "process_execute",
+      "symbol": "process_execute_failed_tail"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "sched_process_e"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "sched_process_f",
+      "symbol": "sched_process_fork_signal"
+    },
+    {
+      "native_object": "kprobe_check.native.o",
+      "program": "security_bpf_kp",
+      "symbol": "security_bpf_kprobe"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "send_bin",
+      "symbol": "send_bin"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "send_bin_tp",
+      "symbol": "send_bin_tp"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "sys_dup_exit_ta",
+      "symbol": "sys_dup_exit_tail"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "sys_enter_init",
+      "symbol": "sys_enter_init"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "sys_enter_submi",
+      "symbol": "sys_enter_submit"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "sys_exit_init",
+      "symbol": "sys_exit_init"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "sys_exit_submit",
+      "symbol": "sys_exit_submit"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "syscall__accept",
+      "symbol": "syscall__accept4"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "syscall__execve"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "syscall__init_m",
+      "symbol": "syscall__init_module"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "syscall_checker",
+      "symbol": "syscall_checker"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace___debugfs",
+      "symbol": "trace___debugfs_create_file"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace___registe",
+      "symbol": "trace___register_chrdev"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_arch_prct",
+      "symbol": "trace_arch_prctl"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_bpf_check",
+      "symbol": "trace_bpf_check"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_call_user",
+      "symbol": "trace_call_usermodehelper"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_cap_capab",
+      "symbol": "trace_cap_capable"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_check_hel",
+      "symbol": "trace_check_helper_call"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_check_map",
+      "symbol": "trace_check_map_func_compatibility"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_chmod_com",
+      "symbol": "trace_chmod_common"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_commit_cr",
+      "symbol": "trace_commit_creds"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_debugfs_c",
+      "symbol": "trace_debugfs_create_dir"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_device_ad",
+      "symbol": "trace_device_add"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_do_exit",
+      "symbol": "trace_do_exit"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_do_init_m",
+      "symbol": "trace_do_init_module"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_do_mmap",
+      "symbol": "trace_do_mmap"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_do_sigact",
+      "symbol": "trace_do_sigaction"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_do_splice",
+      "symbol": "trace_do_splice"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_do_trunca",
+      "symbol": "trace_do_truncate"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_dup",
+      "symbol": "trace_dup"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_dup2",
+      "symbol": "trace_dup2"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_dup3",
+      "symbol": "trace_dup3"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_exec_binp",
+      "symbol": "trace_exec_binprm"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_execute_f",
+      "symbol": "trace_execute_finished"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_fd_instal",
+      "symbol": "trace_fd_install"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_file_modi",
+      "symbol": "trace_file_modified"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_file_upda",
+      "symbol": "trace_file_update_time"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_filldir64",
+      "symbol": "trace_filldir64"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_filp_clos",
+      "symbol": "trace_filp_close"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_inotify_f",
+      "symbol": "trace_inotify_find_inode"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_kallsyms_",
+      "symbol": "trace_kallsyms_lookup_name"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_kernel_wr",
+      "symbol": "trace_kernel_write"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_load_elf_",
+      "symbol": "trace_load_elf_phdrs"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_mmap_aler",
+      "symbol": "trace_mmap_alert"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_proc_crea",
+      "symbol": "trace_proc_create"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_process_v",
+      "symbol": "trace_process_vm_writev"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ptrace",
+      "symbol": "trace_ptrace"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_register_",
+      "symbol": "trace_register_kprobe"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret__regi",
+      "symbol": "trace_ret__register_chrdev"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_arch_",
+      "symbol": "trace_ret_arch_prctl"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_do_in",
+      "symbol": "trace_ret_do_init_module"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_do_mm",
+      "symbol": "trace_ret_do_mmap"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_do_sp",
+      "symbol": "trace_ret_do_splice"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_dup",
+      "symbol": "trace_ret_dup"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_dup2",
+      "symbol": "trace_ret_dup2"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_dup3",
+      "symbol": "trace_ret_dup3"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_file_"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_inoti",
+      "symbol": "trace_ret_inotify_find_inode"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_kalls",
+      "symbol": "trace_ret_kallsyms_lookup_name"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_kerne"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_proce",
+      "symbol": "trace_ret_process_vm_writev"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_ptrac",
+      "symbol": "trace_ret_ptrace"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_regis",
+      "symbol": "trace_ret_register_kprobe"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_sock_",
+      "symbol": "trace_ret_sock_alloc_file"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_vfs_r"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_ret_vfs_w"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_security_"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_set_fs_pw",
+      "symbol": "trace_set_fs_pwd"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_sock_allo",
+      "symbol": "trace_sock_alloc_file"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_switch_ta",
+      "symbol": "trace_switch_task_namespaces"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_sys_enter",
+      "symbol": "trace_sys_enter"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_sys_exit",
+      "symbol": "trace_sys_exit"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_tracepoin",
+      "symbol": "trace_tracepoint_probe_register_prio_may_exist"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_utimes_co",
+      "symbol": "trace_utimes_common"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_vfs_read",
+      "symbol": "trace_vfs_read"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_vfs_readv",
+      "symbol": "trace_vfs_readv"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_vfs_utime",
+      "symbol": "trace_vfs_utimes"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "trace_vfs_write"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "tracepoint__cgr"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "tracepoint__exe",
+      "symbol": "tracepoint__exec_test"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "tracepoint__mod"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "tracepoint__raw"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "tracepoint__sch"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "tracepoint__tas",
+      "symbol": "tracepoint__task__task_rename"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "uprobe__feature"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "uprobe_lkm_seek"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "uprobe_mem_dump",
+      "symbol": "uprobe_mem_dump_trigger"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "uprobe_seq_ops_",
+      "symbol": "uprobe_seq_ops_trigger"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "uprobe_syscall_",
+      "symbol": "uprobe_syscall_table_check"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "vfs_write_magic"
+    },
+    {
+      "native_object": "tracee.native.o",
+      "program": "vfs_writev_magi"
+    }
+  ],
+  "status": "native-objects-proof-linked",
+  "version": 1
+}

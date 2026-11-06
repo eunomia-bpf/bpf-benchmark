@@ -1,0 +1,689 @@
+{
+  "app": "cilium",
+  "map_rules": [
+    {
+      "match": "suffix",
+      "pattern": "_fix",
+      "type": 1
+    },
+    {
+      "match": "suffix",
+      "pattern": "_dyn",
+      "type": 11
+    },
+    {
+      "match": "suffix",
+      "max_entries": 64,
+      "pattern": "_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 64,
+      "pattern": "cilium_ratelimit_metrics",
+      "type": 1,
+      "value_size": 8
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1024,
+      "pattern": "cilium_ratelimit",
+      "type": 9,
+      "value_size": 16
+    },
+    {
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 65536,
+      "pattern": "cilium_lb4_reverse_nat",
+      "type": 1,
+      "value_size": 6
+    },
+    {
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 65536,
+      "pattern": "cilium_lb6_reverse_nat",
+      "type": 1,
+      "value_size": 18
+    },
+    {
+      "key_size": 14,
+      "match": "exact",
+      "pattern": "cilium_snat_v4_external",
+      "type": 9,
+      "value_size": 40
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 33,
+      "pattern": "cilium_snat_v4_alloc_retries",
+      "type": 6,
+      "value_size": 4
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 4096,
+      "pattern": "cilium_l2_responder_v4",
+      "type": 1,
+      "value_size": 8
+    },
+    {
+      "key_size": 24,
+      "match": "exact",
+      "max_entries": 4096,
+      "pattern": "cilium_l2_responder_v6",
+      "type": 1,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 512,
+      "object_scoped": true,
+      "pattern": "cilium_devices",
+      "type": 1,
+      "value_size": 16
+    },
+    {
+      "key_size": 12,
+      "match": "exact",
+      "max_entries": 16384,
+      "object_scoped": true,
+      "pattern": "cilium_policy_v2",
+      "type": 11,
+      "value_size": 12
+    },
+    {
+      "key_size": 24,
+      "match": "exact",
+      "max_entries": 1024,
+      "pattern": "cilium_subnet_map",
+      "type": 11,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "cilium_nodeport_nat_buffer",
+      "type": 6,
+      "value_size": 18
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "cilium_nodeport_neigh4",
+      "type": 9,
+      "value_size": 8
+    },
+    {
+      "key_size": 16,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "cilium_nodeport_neigh6",
+      "type": 9,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "cilium_tail_call_buffer6",
+      "type": 6,
+      "value_size": 60
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "cilium_tail_call_buffer4",
+      "type": 6,
+      "value_size": 60
+    },
+    {
+      "key_size": 4,
+      "match": "prefix",
+      "native_symbol": "cilium_calls",
+      "object_scoped": true,
+      "pattern": "cilium_calls",
+      "type": 3,
+      "value_size": 4
+    }
+  ],
+  "objects": [
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "cil_from_contai",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "cil_from_container"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "cil_from_host",
+      "source_map_prefix": "cilium_calls_ho",
+      "symbol": "cil_from_host"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "cil_from_host",
+      "source_map_prefix": "cilium_calls_ne",
+      "symbol": "cil_from_host"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "cil_from_netdev",
+      "source_map_prefix": "cilium_calls_ho",
+      "symbol": "cil_from_netdev"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "cil_from_netdev",
+      "source_map_prefix": "cilium_calls_ne",
+      "symbol": "cil_from_netdev"
+    },
+    {
+      "native_object": "bpf_overlay.native.o",
+      "program": "cil_from_overla",
+      "source_map_prefix": "cilium_calls_ov",
+      "symbol": "cil_from_overlay"
+    },
+    {
+      "native_object": "bpf_wireguard.native.o",
+      "program": "cil_from_wiregu",
+      "source_map_prefix": "cilium_calls_wi",
+      "symbol": "cil_from_wireguard"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "cil_host_policy",
+      "source_lacks_map_prefix": [
+        "cilium_calls_ho",
+        "cilium_calls_ne"
+      ],
+      "source_xlated_len": 16,
+      "symbol": "cil_host_policy"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "cil_host_policy",
+      "source_map_prefix": "cilium_calls_ho",
+      "symbol": "cil_host_policy"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "cil_host_policy",
+      "source_map_prefix": "cilium_calls_ne",
+      "symbol": "cil_host_policy"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "cil_lxc_policy",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "cil_lxc_policy"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "cil_lxc_policy_",
+      "source_lacks_map_prefix": [
+        "cilium_calls_0"
+      ],
+      "source_xlated_len": 16,
+      "symbol": "cil_lxc_policy_egress"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "cil_lxc_policy_",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "cil_lxc_policy_egress"
+    },
+    {
+      "native_object": "bpf_sock.native.o",
+      "program": "cil_sock4_conne",
+      "symbol": "cil_sock4_connect"
+    },
+    {
+      "native_object": "bpf_sock.native.o",
+      "program": "cil_sock4_post_",
+      "symbol": "cil_sock4_post_bind"
+    },
+    {
+      "native_object": "bpf_sock.native.o",
+      "program": "cil_sock4_recvm",
+      "symbol": "cil_sock4_recvmsg"
+    },
+    {
+      "native_object": "bpf_sock.native.o",
+      "program": "cil_sock4_sendm",
+      "symbol": "cil_sock4_sendmsg"
+    },
+    {
+      "native_object": "bpf_sock.native.o",
+      "program": "cil_sock6_conne",
+      "symbol": "cil_sock6_connect"
+    },
+    {
+      "native_object": "bpf_sock.native.o",
+      "program": "cil_sock6_post_",
+      "symbol": "cil_sock6_post_bind"
+    },
+    {
+      "native_object": "bpf_sock.native.o",
+      "program": "cil_sock6_recvm",
+      "symbol": "cil_sock6_recvmsg"
+    },
+    {
+      "native_object": "bpf_sock.native.o",
+      "program": "cil_sock6_sendm",
+      "symbol": "cil_sock6_sendmsg"
+    },
+    {
+      "native_object": "bpf_sock.native.o",
+      "program": "cil_sock_releas",
+      "symbol": "cil_sock_release"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "cil_to_containe",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "cil_to_container"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "cil_to_host",
+      "source_map_prefix": "cilium_calls_ho",
+      "symbol": "cil_to_host"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "cil_to_host",
+      "source_map_prefix": "cilium_calls_ne",
+      "symbol": "cil_to_host"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "cil_to_netdev",
+      "source_map_prefix": "cilium_calls_ho",
+      "symbol": "cil_to_netdev"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "cil_to_netdev",
+      "source_map_prefix": "cilium_calls_ne",
+      "symbol": "cil_to_netdev"
+    },
+    {
+      "native_object": "bpf_overlay.native.o",
+      "program": "cil_to_overlay",
+      "source_map_prefix": "cilium_calls_ov",
+      "symbol": "cil_to_overlay"
+    },
+    {
+      "native_object": "bpf_wireguard.native.o",
+      "program": "cil_to_wireguar",
+      "source_map_prefix": "cilium_calls_wi",
+      "symbol": "cil_to_wireguard"
+    },
+    {
+      "native_object": "bpf_xdp.native.o",
+      "prog_type": 6,
+      "program": "cil_xdp_entry",
+      "symbol": "cil_xdp_entry"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_drop_notif",
+      "source_xlated_len": 752,
+      "symbol": "tail_drop_notify"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_drop_notif",
+      "source_map_prefix": "cilium_calls_ho",
+      "symbol": "tail_drop_notify"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_drop_notif",
+      "source_map_prefix": "cilium_calls_ne",
+      "symbol": "tail_drop_notify"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_drop_notif",
+      "source_xlated_len": 696,
+      "symbol": "tail_drop_notify"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_drop_notif",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "tail_drop_notify"
+    },
+    {
+      "native_object": "bpf_overlay.native.o",
+      "program": "tail_drop_notif",
+      "source_map_prefix": "cilium_calls_ov",
+      "symbol": "tail_drop_notify"
+    },
+    {
+      "native_object": "bpf_wireguard.native.o",
+      "program": "tail_drop_notif",
+      "source_map_prefix": "cilium_calls_wi",
+      "symbol": "tail_drop_notify"
+    },
+    {
+      "native_object": "bpf_xdp.native.o",
+      "prog_type": 6,
+      "program": "tail_drop_notif",
+      "symbol": "tail_drop_notify"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_handle_arp",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "tail_handle_arp"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_handle_ipv",
+      "source_map_prefix": "cilium_calls_ho"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_handle_ipv",
+      "source_map_prefix": "cilium_calls_ne"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_handle_ipv",
+      "source_map_prefix": "cilium_calls_0"
+    },
+    {
+      "native_object": "bpf_overlay.native.o",
+      "program": "tail_handle_ipv",
+      "source_map_prefix": "cilium_calls_ov",
+      "symbol": "tail_handle_ipv4"
+    },
+    {
+      "native_object": "bpf_wireguard.native.o",
+      "program": "tail_handle_ipv",
+      "source_map_prefix": "cilium_calls_wi",
+      "symbol": "tail_handle_ipv4"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_handle_nat",
+      "source_map_prefix": "cilium_calls_ho",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_handle_nat",
+      "source_map_prefix": "cilium_calls_ne",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "native_object": "bpf_overlay.native.o",
+      "program": "tail_handle_nat",
+      "source_map_prefix": "cilium_calls_ov",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "native_object": "bpf_wireguard.native.o",
+      "program": "tail_handle_nat",
+      "source_map_prefix": "cilium_calls_wi",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_handle_sna",
+      "source_map_prefix": "cilium_calls_ho",
+      "symbol": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_handle_sna",
+      "source_map_prefix": "cilium_calls_ne",
+      "symbol": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "native_object": "bpf_overlay.native.o",
+      "program": "tail_handle_sna",
+      "source_map_prefix": "cilium_calls_ov",
+      "symbol": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "native_object": "bpf_wireguard.native.o",
+      "program": "tail_handle_sna",
+      "source_map_prefix": "cilium_calls_wi",
+      "symbol": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_icmp6_hand",
+      "source_map_prefix": "cilium_calls_ho",
+      "symbol": "tail_icmp6_handle_ns"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_icmp6_hand",
+      "source_map_prefix": "cilium_calls_ne",
+      "symbol": "tail_icmp6_handle_ns"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_icmp6_hand",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "tail_icmp6_handle_ns"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_icmp6_send",
+      "source_map_prefix": "cilium_calls_ho",
+      "symbol": "tail_icmp6_send_time_exceeded"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_icmp6_send",
+      "source_map_prefix": "cilium_calls_ne",
+      "symbol": "tail_icmp6_send_time_exceeded"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_icmp6_send",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "tail_icmp6_send_time_exceeded"
+    },
+    {
+      "native_object": "bpf_overlay.native.o",
+      "program": "tail_icmp6_send",
+      "source_map_prefix": "cilium_calls_ov",
+      "symbol": "tail_icmp6_send_time_exceeded"
+    },
+    {
+      "native_object": "bpf_wireguard.native.o",
+      "program": "tail_icmp6_send",
+      "source_map_prefix": "cilium_calls_wi",
+      "symbol": "tail_icmp6_send_time_exceeded"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_ipv4_ct_eg",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "tail_ipv4_ct_egress"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_ipv4_ct_in",
+      "source_map_prefix": "cilium_calls_0"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_ipv4_polic",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "tail_ipv4_policy"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_ipv4_to_en",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "tail_ipv4_to_endpoint"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_no_service",
+      "source_map_prefix": "cilium_calls_ho",
+      "symbol": "tail_no_service_ipv4"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_no_service",
+      "source_map_prefix": "cilium_calls_ne",
+      "symbol": "tail_no_service_ipv4"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_no_service",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "tail_no_service_ipv4"
+    },
+    {
+      "native_object": "bpf_overlay.native.o",
+      "program": "tail_no_service",
+      "source_map_prefix": "cilium_calls_ov",
+      "symbol": "tail_no_service_ipv4"
+    },
+    {
+      "native_object": "bpf_wireguard.native.o",
+      "program": "tail_no_service",
+      "source_map_prefix": "cilium_calls_wi",
+      "symbol": "tail_no_service_ipv4"
+    },
+    {
+      "native_object": "bpf_xdp.native.o",
+      "prog_type": 6,
+      "program": "tail_no_service",
+      "symbol": "tail_no_service_ipv4"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_nodeport_i",
+      "source_map_prefix": "cilium_calls_ho",
+      "symbol": "tail_nodeport_ipv4_dsr"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_nodeport_i",
+      "source_map_prefix": "cilium_calls_ne",
+      "symbol": "tail_nodeport_ipv4_dsr"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_nodeport_i",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "tail_nodeport_ipv4_dsr"
+    },
+    {
+      "native_object": "bpf_overlay.native.o",
+      "program": "tail_nodeport_i",
+      "source_map_prefix": "cilium_calls_ov",
+      "symbol": "tail_nodeport_ipv4_dsr"
+    },
+    {
+      "native_object": "bpf_wireguard.native.o",
+      "program": "tail_nodeport_i",
+      "source_map_prefix": "cilium_calls_wi",
+      "symbol": "tail_nodeport_ipv4_dsr"
+    },
+    {
+      "native_object": "bpf_xdp.native.o",
+      "prog_type": 6,
+      "program": "tail_nodeport_i",
+      "symbol": "tail_nodeport_ipv4_dsr"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_nodeport_n",
+      "source_map_prefix": "cilium_calls_ho"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_nodeport_n",
+      "source_map_prefix": "cilium_calls_ne"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_nodeport_n",
+      "source_map_prefix": "cilium_calls_0"
+    },
+    {
+      "native_object": "bpf_overlay.native.o",
+      "program": "tail_nodeport_n",
+      "source_map_prefix": "cilium_calls_ov"
+    },
+    {
+      "native_object": "bpf_wireguard.native.o",
+      "program": "tail_nodeport_n",
+      "source_map_prefix": "cilium_calls_wi"
+    },
+    {
+      "native_object": "bpf_xdp.native.o",
+      "prog_type": 6,
+      "program": "tail_nodeport_n"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_nodeport_r",
+      "source_map_prefix": "cilium_calls_ho",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "native_object": "bpf_host.native.o",
+      "program": "tail_nodeport_r",
+      "source_map_prefix": "cilium_calls_ne",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_nodeport_r",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "native_object": "bpf_overlay.native.o",
+      "program": "tail_nodeport_r",
+      "source_map_prefix": "cilium_calls_ov",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "native_object": "bpf_wireguard.native.o",
+      "program": "tail_nodeport_r",
+      "source_map_prefix": "cilium_calls_wi",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "native_object": "bpf_xdp.native.o",
+      "prog_type": 6,
+      "program": "tail_nodeport_r",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "native_object": "bpf_lxc.native.o",
+      "program": "tail_policy_den",
+      "source_map_prefix": "cilium_calls_0",
+      "symbol": "tail_policy_denied_ipv4"
+    }
+  ],
+  "status": "native-objects-proof-linked",
+  "version": 1
+}

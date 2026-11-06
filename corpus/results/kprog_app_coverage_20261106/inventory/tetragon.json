@@ -1,0 +1,2256 @@
+{
+  "app": "tetragon",
+  "map_rules": [
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 2,
+      "object_scoped": true,
+      "pattern": "execve_calls",
+      "type": 3,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "tcpmon_map",
+      "type": 4,
+      "value_size": 4
+    },
+    {
+      "match": "exact",
+      "max_entries": 524288,
+      "object_scoped": true,
+      "pattern": "tg_rb_events",
+      "type": 27
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "buffer_heap_map",
+      "type": 6,
+      "value_size": 4352
+    },
+    {
+      "exclude": "string_maps_heap",
+      "key_size": 4,
+      "match": "prefix",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "string_maps_",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "string_maps_heap",
+      "type": 6,
+      "value_size": 16384
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "substring_map",
+      "type": 2,
+      "value_size": 100
+    },
+    {
+      "key_size": 12,
+      "match": "exact",
+      "max_entries": 1024,
+      "object_scoped": true,
+      "pattern": "tg_errmetrics_map",
+      "type": 10,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_conf_map",
+      "type": 2,
+      "value_size": 48
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "policy_conf",
+      "type": 2,
+      "value_size": 1
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "execve_msg_heap_map",
+      "type": 6,
+      "value_size": 6224
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_binary_heap",
+      "type": 6,
+      "value_size": 792
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_parents_bin",
+      "type": 9,
+      "value_size": 792
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 32768,
+      "object_scoped": true,
+      "pattern": "execve_map",
+      "type": 1,
+      "value_size": 896
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 3,
+      "object_scoped": true,
+      "pattern": "execve_map_stats",
+      "type": 6,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "execve_val",
+      "type": 6,
+      "value_size": 896
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "execve_heap",
+      "type": 6,
+      "value_size": 4112
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 8192,
+      "object_scoped": true,
+      "pattern": "tg_execve_joined_info_map",
+      "type": 9,
+      "value_size": 16
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 3,
+      "object_scoped": true,
+      "pattern": "tg_execve_joined_info_map_stats",
+      "type": 6,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_stats_map",
+      "type": 6,
+      "value_size": 14336
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 32768,
+      "object_scoped": true,
+      "pattern": "tg_cgrps_tracking_map",
+      "type": 1,
+      "value_size": 144
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_cgrps_tracking_heap",
+      "type": 6,
+      "value_size": 144
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_cgrps_msg_heap",
+      "type": 6,
+      "value_size": 4312
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_cgtracker_map",
+      "type": 1,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "string_prefix_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "string_prefix_maps_heap",
+      "type": 6,
+      "value_size": 260
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "string_postfix_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "string_postfix_maps_heap",
+      "type": 6,
+      "value_size": 132
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "cgroup_rate_options_map",
+      "type": 2,
+      "value_size": 16
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "cgroup_rate_map",
+      "type": 5,
+      "value_size": 40
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "throttle_heap_map",
+      "type": 6,
+      "value_size": 160
+    },
+    {
+      "key_size": 256,
+      "match": "exact",
+      "max_entries": 1024,
+      "object_scoped": true,
+      "pattern": "tg_mbset_map",
+      "type": 1,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_mbset_gen",
+      "type": 2,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "data_heap",
+      "type": 6,
+      "value_size": 32768
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "heap_ro_zero",
+      "type": 2,
+      "value_size": 16384
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "heap",
+      "type": 6,
+      "value_size": 4104
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "process_call_heap",
+      "type": 6,
+      "value_size": 25632
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "override_tasks",
+      "type": 1,
+      "value_size": 4
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "enforcer_data",
+      "type": 1,
+      "value_size": 12
+    },
+    {
+      "key_size": 12,
+      "match": "exact",
+      "max_entries": 128,
+      "object_scoped": true,
+      "pattern": "enforcer_missed_notifications",
+      "type": 1,
+      "value_size": 4
+    },
+    {
+      "key_size": 224,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "ratelimit_map",
+      "type": 9,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "ratelimit_heap",
+      "type": 6,
+      "value_size": 352
+    },
+    {
+      "key_size": 16,
+      "match": "exact",
+      "max_entries": 1024,
+      "object_scoped": true,
+      "pattern": "retprobe_map",
+      "type": 1,
+      "value_size": 24
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "socktrack_map",
+      "type": 9,
+      "value_size": 16
+    },
+    {
+      "key_size": 16,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "fdinstall_map",
+      "type": 9,
+      "value_size": 4104
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "stack_trace_map",
+      "type": 7,
+      "value_size": 1016
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "sleepable_preload",
+      "type": 1,
+      "value_size": 4100
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_ipv6_ext_heap",
+      "type": 6,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 10,
+      "object_scoped": true,
+      "pattern": "tg_mb_sel_opts",
+      "type": 2,
+      "value_size": 12
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 10,
+      "object_scoped": true,
+      "pattern": "tg_mb_paths",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "addr4lpm_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "addr6lpm_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "policy_stats",
+      "type": 2,
+      "value_size": 80
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "filter_map",
+      "type": 2,
+      "value_size": 4096
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "config_map",
+      "type": 2,
+      "value_size": 736
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "write_offload",
+      "type": 1,
+      "value_size": 16
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "argfilter_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 794,
+      "inner_type": 1,
+      "inner_value_size": 64,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "events_map_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "uid_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "pid_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "mnt_ns_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "pid_ns_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 16,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "uts_ns_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 16,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "comm_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "cgroup_id_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 10240,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "process_tree_map_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 260,
+      "inner_max_entries": 256,
+      "inner_type": 1,
+      "inner_value_size": 16,
+      "key_size": 2,
+      "match": "exact",
+      "max_entries": 64,
+      "object_scoped": true,
+      "pattern": "binary_filter_version",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 8,
+      "inner_max_entries": 1,
+      "inner_type": 1,
+      "inner_value_size": 1,
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 128,
+      "object_scoped": true,
+      "pattern": "policy_filter_maps",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 128,
+      "inner_type": 1,
+      "inner_value_size": 1,
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1024,
+      "object_scoped": true,
+      "pattern": "policy_filter_cgroup_maps",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "exit_heap_map",
+      "type": 6,
+      "value_size": 40
+    }
+  ],
+  "objects": [
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "__do_bytes",
+      "symbol": "__do_bytes"
+    },
+    {
+      "native_object": "bpf_execve_event_v61.native.o",
+      "program": "__do_str",
+      "symbol": "__do_str"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "cwd_read_v61",
+      "symbol": "cwd_read_v61"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "data_event_byte",
+      "symbol": "data_event_bytes"
+    },
+    {
+      "native_object": "bpf_execve_event_v61.native.o",
+      "program": "data_event_str",
+      "symbol": "data_event_str"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "do_action",
+      "symbol": "do_action"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "do_bytes",
+      "symbol": "do_bytes"
+    },
+    {
+      "native_object": "bpf_execve_event_v61.native.o",
+      "program": "do_str",
+      "symbol": "do_str"
+    },
+    {
+      "native_object": "bpf_execve_event_v310.native.o",
+      "program": "event_execve",
+      "source_bytecode_len": 30120,
+      "source_lacks_helper": 174,
+      "symbol": "event_execve"
+    },
+    {
+      "native_object": "bpf_execve_event_v511.native.o",
+      "program": "event_execve",
+      "source_bytecode_len": 129120,
+      "source_lacks_helper": 174,
+      "symbol": "event_execve"
+    },
+    {
+      "native_object": "bpf_execve_event_v53.native.o",
+      "program": "event_execve",
+      "source_bytecode_len": 126304,
+      "source_lacks_helper": 174,
+      "symbol": "event_execve"
+    },
+    {
+      "native_object": "bpf_execve_event_v61.native.o",
+      "program": "event_execve",
+      "source_bytecode_len": 16272,
+      "source_lacks_helper": 174,
+      "symbol": "event_execve"
+    },
+    {
+      "native_object": "bpf_exit_v310.native.o",
+      "program": "event_exit_acct",
+      "source_bytecode_len": 1120,
+      "source_lacks_helper": 174,
+      "symbol": "event_exit_acct_process"
+    },
+    {
+      "native_object": "bpf_exit_v511.native.o",
+      "program": "event_exit_acct",
+      "source_bytecode_len": 1464,
+      "source_lacks_helper": 174,
+      "symbol": "event_exit_acct_process"
+    },
+    {
+      "native_object": "bpf_exit_v310.native.o",
+      "program": "event_exit_disa",
+      "source_bytecode_len": 1232,
+      "source_lacks_helper": 174,
+      "symbol": "event_exit_disassociate_ctty"
+    },
+    {
+      "native_object": "bpf_exit_v511.native.o",
+      "program": "event_exit_disa",
+      "source_bytecode_len": 1544,
+      "source_lacks_helper": 174,
+      "symbol": "event_exit_disassociate_ctty"
+    },
+    {
+      "native_object": "bpf_fork_v310.native.o",
+      "program": "event_wake_up_n",
+      "source_bytecode_len": 7624,
+      "source_lacks_helper": 174,
+      "symbol": "event_wake_up_new_task"
+    },
+    {
+      "native_object": "bpf_fork_v511.native.o",
+      "program": "event_wake_up_n",
+      "source_bytecode_len": 10896,
+      "source_lacks_helper": 174,
+      "symbol": "event_wake_up_new_task"
+    },
+    {
+      "native_object": "bpf_execve_map_update_v53.native.o",
+      "program": "execve_map_upda",
+      "source_bytecode_len": 392,
+      "source_lacks_helper": 174,
+      "symbol": "execve_map_update"
+    },
+    {
+      "native_object": "bpf_execve_map_update_v61.native.o",
+      "program": "execve_map_upda",
+      "source_bytecode_len": 776,
+      "source_lacks_helper": 174,
+      "symbol": "execve_map_update"
+    },
+    {
+      "native_object": "bpf_execve_event_v53.native.o",
+      "program": "execve_rate",
+      "source_bytecode_len": 1648,
+      "source_lacks_helper": 174,
+      "symbol": "execve_rate"
+    },
+    {
+      "native_object": "bpf_execve_event_v61.native.o",
+      "program": "execve_rate",
+      "source_bytecode_len": 1928,
+      "source_lacks_helper": 174,
+      "symbol": "execve_rate"
+    },
+    {
+      "native_object": "bpf_execve_event_v310.native.o",
+      "program": "execve_send",
+      "source_bytecode_len": 2808,
+      "source_lacks_helper": 174,
+      "symbol": "execve_send"
+    },
+    {
+      "native_object": "bpf_execve_event_v511.native.o",
+      "program": "execve_send",
+      "source_bytecode_len": 114824,
+      "source_lacks_helper": 174,
+      "symbol": "execve_send"
+    },
+    {
+      "native_object": "bpf_execve_event_v53.native.o",
+      "program": "execve_send",
+      "source_bytecode_len": 117480,
+      "source_lacks_helper": 174,
+      "symbol": "execve_send"
+    },
+    {
+      "native_object": "bpf_execve_event_v61.native.o",
+      "program": "execve_send",
+      "source_bytecode_len": 10368,
+      "source_lacks_helper": 174,
+      "symbol": "execve_send"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "extract_arg_dep",
+      "symbol": "extract_arg_depth"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_16ty",
+      "symbol": "filter_16ty"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_16ty_map",
+      "symbol": "filter_16ty_map"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_16ty_ran",
+      "symbol": "filter_16ty_range"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_16ty_sel",
+      "symbol": "filter_16ty_selector_val"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_32ty",
+      "symbol": "filter_32ty"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_32ty_map",
+      "symbol": "filter_32ty_map"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_32ty_ran",
+      "symbol": "filter_32ty_range"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_32ty_sel",
+      "symbol": "filter_32ty_selector_val"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_64ty",
+      "symbol": "filter_64ty"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_64ty_map",
+      "symbol": "filter_64ty_map"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_64ty_ran",
+      "symbol": "filter_64ty_range"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_64ty_sel",
+      "symbol": "filter_64ty_selector_val"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_8ty",
+      "symbol": "filter_8ty"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_8ty_map",
+      "symbol": "filter_8ty_map"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_8ty_rang",
+      "symbol": "filter_8ty_range"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_8ty_sele",
+      "symbol": "filter_8ty_selector_val"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_char_buf"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_char_sub",
+      "symbol": "filter_char_substring"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_file_buf",
+      "symbol": "filter_file_buf"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_file_typ",
+      "symbol": "filter_file_type"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_inet",
+      "symbol": "filter_inet"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "filter_sockaddr",
+      "symbol": "filter_sockaddr_un"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v511.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 127512,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_process_filter"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v511.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 140344,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_process_event"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v511.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 31176,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v511.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 7392,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_actions"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v53.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 107856,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_path"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v53.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 126184,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_process_filter"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v53.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 137520,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_process_event"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v53.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 2664,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_output"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v53.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 27448,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v53.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 3376,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_event"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v53.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 7200,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_actions"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v61.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 2096,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_setup_event"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v61.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 22424,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_process_filter"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v61.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 27328,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_process_event"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v61.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 2920,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v61.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 3016,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_output"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v61.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 3368,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_event"
+    },
+    {
+      "native_object": "bpf_generic_fentry_v61.native.o",
+      "program": "generic_fentry_",
+      "source_bytecode_len": 800,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fentry_actions"
+    },
+    {
+      "native_object": "bpf_generic_fexit_v511.native.o",
+      "program": "generic_fexit_a",
+      "source_bytecode_len": 7392,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fexit_actions"
+    },
+    {
+      "native_object": "bpf_generic_fexit_v53.native.o",
+      "program": "generic_fexit_a",
+      "source_bytecode_len": 7200,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fexit_actions"
+    },
+    {
+      "native_object": "bpf_generic_fexit_v61.native.o",
+      "program": "generic_fexit_a",
+      "source_bytecode_len": 800,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fexit_actions"
+    },
+    {
+      "native_object": "bpf_generic_fexit_v511.native.o",
+      "program": "generic_fexit_e",
+      "source_bytecode_len": 129416,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fexit_event"
+    },
+    {
+      "native_object": "bpf_generic_fexit_v53.native.o",
+      "program": "generic_fexit_e",
+      "source_bytecode_len": 127432,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fexit_event"
+    },
+    {
+      "native_object": "bpf_generic_fexit_v61.native.o",
+      "program": "generic_fexit_e",
+      "source_bytecode_len": 25936,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fexit_event"
+    },
+    {
+      "native_object": "bpf_generic_fexit_v511.native.o",
+      "program": "generic_fexit_f",
+      "source_bytecode_len": 30976,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fexit_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_fexit_v53.native.o",
+      "program": "generic_fexit_f",
+      "source_bytecode_len": 27248,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fexit_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_fexit_v61.native.o",
+      "program": "generic_fexit_f",
+      "source_bytecode_len": 2720,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fexit_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_fexit_v53.native.o",
+      "program": "generic_fexit_o",
+      "source_bytecode_len": 680,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fexit_output"
+    },
+    {
+      "native_object": "bpf_generic_fexit_v61.native.o",
+      "program": "generic_fexit_o",
+      "source_bytecode_len": 1024,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fexit_output"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "program": "generic_fmodret",
+      "source_bytecode_len": 152,
+      "source_lacks_helper": 174,
+      "symbol": "generic_fmodret_override"
+    },
+    {
+      "native_object": "bpf_generic_kprobe_v53.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 3376,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_event"
+    },
+    {
+      "native_object": "bpf_generic_kprobe_v61.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 3368,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_event"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v511.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 127512,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_process_filter"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v511.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 141288,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_process_event"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v511.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 32272,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_filter_arg"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v511.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 9376,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_actions"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v53.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 107856,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_path"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v53.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 126184,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_process_filter"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v53.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 138472,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_process_event"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v53.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 2664,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_output"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v53.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 28296,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_filter_arg"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v53.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 3448,
+      "source_has_helper": 174,
+      "symbol": "generic_kprobe_event"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v53.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 9424,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_actions"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 168,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_override"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 2040,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_setup_event"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 22424,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_process_filter"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 27536,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_process_event"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 3016,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_output"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 3440,
+      "source_has_helper": 174,
+      "symbol": "generic_kprobe_event"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 3496,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_filter_arg"
+    },
+    {
+      "native_object": "bpf_multi_kprobe_v61.native.o",
+      "program": "generic_kprobe_",
+      "source_bytecode_len": 800,
+      "source_lacks_helper": 174,
+      "symbol": "generic_kprobe_actions"
+    },
+    {
+      "native_object": "bpf_generic_lsm_core_v511.native.o",
+      "program": "generic_lsm_act",
+      "source_bytecode_len": 8544,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_actions"
+    },
+    {
+      "native_object": "bpf_generic_lsm_core_v61.native.o",
+      "program": "generic_lsm_act",
+      "source_bytecode_len": 1704,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_actions"
+    },
+    {
+      "native_object": "bpf_generic_lsm_core_v511.native.o",
+      "program": "generic_lsm_eve",
+      "source_bytecode_len": 3376,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_event"
+    },
+    {
+      "native_object": "bpf_generic_lsm_core_v61.native.o",
+      "program": "generic_lsm_eve",
+      "source_bytecode_len": 3368,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_event"
+    },
+    {
+      "native_object": "bpf_generic_lsm_core_v511.native.o",
+      "program": "generic_lsm_fil",
+      "source_bytecode_len": 31176,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_lsm_core_v61.native.o",
+      "program": "generic_lsm_fil",
+      "source_bytecode_len": 2920,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_lsm_output_v61.native.o",
+      "program": "generic_lsm_out",
+      "source_bytecode_len": 3504,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_output"
+    },
+    {
+      "native_object": "bpf_generic_lsm_core_v511.native.o",
+      "program": "generic_lsm_pat",
+      "source_bytecode_len": 107856,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_path"
+    },
+    {
+      "native_object": "bpf_generic_lsm_core_v511.native.o",
+      "program": "generic_lsm_pro",
+      "source_bytecode_len": 127512,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_process_filter"
+    },
+    {
+      "native_object": "bpf_generic_lsm_core_v511.native.o",
+      "program": "generic_lsm_pro",
+      "source_bytecode_len": 140344,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_process_event"
+    },
+    {
+      "native_object": "bpf_generic_lsm_core_v61.native.o",
+      "program": "generic_lsm_pro",
+      "source_bytecode_len": 22424,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_process_filter"
+    },
+    {
+      "native_object": "bpf_generic_lsm_core_v61.native.o",
+      "program": "generic_lsm_pro",
+      "source_bytecode_len": 27328,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_process_event"
+    },
+    {
+      "native_object": "bpf_generic_lsm_core_v61.native.o",
+      "program": "generic_lsm_set",
+      "source_bytecode_len": 976,
+      "source_lacks_helper": 174,
+      "symbol": "generic_lsm_setup_event"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v511.native.o",
+      "program": "generic_rawtp_a",
+      "source_bytecode_len": 7392,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_actions"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v53.native.o",
+      "program": "generic_rawtp_a",
+      "source_bytecode_len": 7200,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_actions"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v61.native.o",
+      "program": "generic_rawtp_a",
+      "source_bytecode_len": 800,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_actions"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v53.native.o",
+      "program": "generic_rawtp_e",
+      "source_bytecode_len": 3376,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_event"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v61.native.o",
+      "program": "generic_rawtp_e",
+      "source_bytecode_len": 3368,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_event"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v511.native.o",
+      "program": "generic_rawtp_f",
+      "source_bytecode_len": 31176,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v53.native.o",
+      "program": "generic_rawtp_f",
+      "source_bytecode_len": 27448,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v61.native.o",
+      "program": "generic_rawtp_f",
+      "source_bytecode_len": 2920,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v53.native.o",
+      "program": "generic_rawtp_o",
+      "source_bytecode_len": 2664,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_output"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v61.native.o",
+      "program": "generic_rawtp_o",
+      "source_bytecode_len": 3016,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_output"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v511.native.o",
+      "program": "generic_rawtp_p",
+      "source_bytecode_len": 127512,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_process_filter"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v511.native.o",
+      "program": "generic_rawtp_p",
+      "source_bytecode_len": 140344,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_process_event"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v53.native.o",
+      "program": "generic_rawtp_p",
+      "source_bytecode_len": 107856,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_path"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v53.native.o",
+      "program": "generic_rawtp_p",
+      "source_bytecode_len": 126184,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_process_filter"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v53.native.o",
+      "program": "generic_rawtp_p",
+      "source_bytecode_len": 137520,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_process_event"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v61.native.o",
+      "program": "generic_rawtp_p",
+      "source_bytecode_len": 22424,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_process_filter"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v61.native.o",
+      "program": "generic_rawtp_p",
+      "source_bytecode_len": 27328,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_process_event"
+    },
+    {
+      "native_object": "bpf_generic_rawtp_v61.native.o",
+      "program": "generic_rawtp_s",
+      "source_bytecode_len": 976,
+      "source_lacks_helper": 174,
+      "symbol": "generic_rawtp_setup_event"
+    },
+    {
+      "native_object": "bpf_generic_retkprobe_v511.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 129400,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retkprobe_event"
+    },
+    {
+      "native_object": "bpf_generic_retkprobe_v53.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 127416,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retkprobe_event"
+    },
+    {
+      "native_object": "bpf_generic_retkprobe_v61.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 25920,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retkprobe_event"
+    },
+    {
+      "native_object": "bpf_multi_retkprobe_v511.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 129416,
+      "source_has_helper": 174,
+      "symbol": "generic_retkprobe_event"
+    },
+    {
+      "native_object": "bpf_multi_retkprobe_v511.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 30976,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retkprobe_filter_arg"
+    },
+    {
+      "native_object": "bpf_multi_retkprobe_v511.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 7392,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retkprobe_actions"
+    },
+    {
+      "native_object": "bpf_multi_retkprobe_v53.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 127432,
+      "source_has_helper": 174,
+      "symbol": "generic_retkprobe_event"
+    },
+    {
+      "native_object": "bpf_multi_retkprobe_v53.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 27248,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retkprobe_filter_arg"
+    },
+    {
+      "native_object": "bpf_multi_retkprobe_v53.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 680,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retkprobe_output"
+    },
+    {
+      "native_object": "bpf_multi_retkprobe_v53.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 7200,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retkprobe_actions"
+    },
+    {
+      "native_object": "bpf_multi_retkprobe_v61.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 1024,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retkprobe_output"
+    },
+    {
+      "native_object": "bpf_multi_retkprobe_v61.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 25936,
+      "source_has_helper": 174,
+      "symbol": "generic_retkprobe_event"
+    },
+    {
+      "native_object": "bpf_multi_retkprobe_v61.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 2720,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retkprobe_filter_arg"
+    },
+    {
+      "native_object": "bpf_multi_retkprobe_v61.native.o",
+      "program": "generic_retkpro",
+      "source_bytecode_len": 800,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retkprobe_actions"
+    },
+    {
+      "native_object": "bpf_generic_retuprobe_v511.native.o",
+      "program": "generic_retupro",
+      "source_bytecode_len": 129328,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retuprobe_event"
+    },
+    {
+      "native_object": "bpf_generic_retuprobe_v53.native.o",
+      "program": "generic_retupro",
+      "source_bytecode_len": 127328,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retuprobe_event"
+    },
+    {
+      "native_object": "bpf_generic_retuprobe_v53.native.o",
+      "program": "generic_retupro",
+      "source_bytecode_len": 27248,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retuprobe_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_retuprobe_v53.native.o",
+      "program": "generic_retupro",
+      "source_bytecode_len": 680,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retuprobe_output"
+    },
+    {
+      "native_object": "bpf_generic_retuprobe_v53.native.o",
+      "program": "generic_retupro",
+      "source_bytecode_len": 7200,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retuprobe_actions"
+    },
+    {
+      "native_object": "bpf_generic_retuprobe_v61.native.o",
+      "program": "generic_retupro",
+      "source_bytecode_len": 25424,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retuprobe_event"
+    },
+    {
+      "native_object": "bpf_multi_retuprobe_v511.native.o",
+      "program": "generic_retupro",
+      "source_bytecode_len": 129344,
+      "source_has_helper": 174,
+      "symbol": "generic_retuprobe_event"
+    },
+    {
+      "native_object": "bpf_multi_retuprobe_v511.native.o",
+      "program": "generic_retupro",
+      "source_bytecode_len": 30976,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retuprobe_filter_arg"
+    },
+    {
+      "native_object": "bpf_multi_retuprobe_v511.native.o",
+      "program": "generic_retupro",
+      "source_bytecode_len": 7392,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retuprobe_actions"
+    },
+    {
+      "native_object": "bpf_multi_retuprobe_v61.native.o",
+      "program": "generic_retupro",
+      "source_bytecode_len": 1024,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retuprobe_output"
+    },
+    {
+      "native_object": "bpf_multi_retuprobe_v61.native.o",
+      "program": "generic_retupro",
+      "source_bytecode_len": 25440,
+      "source_has_helper": 174,
+      "symbol": "generic_retuprobe_event"
+    },
+    {
+      "native_object": "bpf_multi_retuprobe_v61.native.o",
+      "program": "generic_retupro",
+      "source_bytecode_len": 2720,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retuprobe_filter_arg"
+    },
+    {
+      "native_object": "bpf_multi_retuprobe_v61.native.o",
+      "program": "generic_retupro",
+      "source_bytecode_len": 800,
+      "source_lacks_helper": 174,
+      "symbol": "generic_retuprobe_actions"
+    },
+    {
+      "native_object": "bpf_generic_uprobe_v511.native.o",
+      "program": "generic_sleepab",
+      "source_bytecode_len": 52064,
+      "source_lacks_helper": 174,
+      "symbol": "generic_sleepable_preload"
+    },
+    {
+      "native_object": "bpf_generic_uprobe_v53.native.o",
+      "program": "generic_sleepab",
+      "source_bytecode_len": 38496,
+      "source_lacks_helper": 174,
+      "symbol": "generic_sleepable_preload"
+    },
+    {
+      "native_object": "bpf_generic_usdt_v511.native.o",
+      "program": "generic_sleepab",
+      "source_bytecode_len": 59696,
+      "source_lacks_helper": 174,
+      "symbol": "generic_sleepable_preload"
+    },
+    {
+      "native_object": "bpf_generic_usdt_v53.native.o",
+      "program": "generic_sleepab",
+      "source_bytecode_len": 45064,
+      "source_lacks_helper": 174,
+      "symbol": "generic_sleepable_preload"
+    },
+    {
+      "native_object": "bpf_generic_usdt_v61.native.o",
+      "program": "generic_sleepab",
+      "source_bytecode_len": 376,
+      "source_lacks_helper": 174,
+      "symbol": "generic_sleepable_preload"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v511.native.o",
+      "program": "generic_sleepab",
+      "source_bytecode_len": 11160,
+      "source_lacks_helper": 174,
+      "symbol": "generic_sleepable_offload"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v511.native.o",
+      "program": "generic_sleepab",
+      "source_bytecode_len": 51992,
+      "source_has_helper": 174,
+      "symbol": "generic_sleepable_preload"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v61.native.o",
+      "program": "generic_sleepab",
+      "source_bytecode_len": 784,
+      "source_lacks_helper": 174,
+      "symbol": "generic_sleepable_offload"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v511.native.o",
+      "program": "generic_sleepab",
+      "source_bytecode_len": 59696,
+      "source_has_helper": 174,
+      "symbol": "generic_sleepable_preload"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "generic_sleepab",
+      "source_bytecode_len": 160,
+      "source_lacks_helper": 174,
+      "symbol": "generic_sleepable_offload"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "generic_sleepab",
+      "source_bytecode_len": 376,
+      "source_has_helper": 174,
+      "symbol": "generic_sleepable_preload"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "generic_sleepab",
+      "source_bytecode_len": 72,
+      "source_lacks_helper": 174,
+      "symbol": "generic_sleepable_preload_cleanup"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v511.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 127512,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_filter"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v511.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 133296,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_process_event"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v511.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 31176,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_arg"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v511.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 8896,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_actions"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v53.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 126184,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_filter"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v53.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 130728,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_process_event"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v53.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 2664,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_output"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v53.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 27448,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_arg"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v53.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 8960,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_actions"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v61.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 22424,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_filter"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v61.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 26568,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_process_event"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v61.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 26744,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_event"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v61.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 2920,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_arg"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v61.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 3016,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_output"
+    },
+    {
+      "native_object": "bpf_generic_tracepoint_v61.native.o",
+      "program": "generic_tracepo",
+      "source_bytecode_len": 800,
+      "source_lacks_helper": 174,
+      "symbol": "generic_tracepoint_actions"
+    },
+    {
+      "native_object": "bpf_generic_uprobe_v53.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 126184,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_process_filter"
+    },
+    {
+      "native_object": "bpf_generic_uprobe_v53.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 134008,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_process_event"
+    },
+    {
+      "native_object": "bpf_generic_uprobe_v53.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 2664,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_output"
+    },
+    {
+      "native_object": "bpf_generic_uprobe_v53.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 28296,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_uprobe_v53.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 3376,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_event"
+    },
+    {
+      "native_object": "bpf_generic_uprobe_v53.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 7664,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_actions"
+    },
+    {
+      "native_object": "bpf_generic_uprobe_v61.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 3368,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_event"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v511.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 107856,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_path"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v511.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 127512,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_process_filter"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v511.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 135976,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_process_event"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v511.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 32272,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_filter_arg"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v511.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 3448,
+      "source_has_helper": 174,
+      "symbol": "generic_uprobe_event"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v511.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 7680,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_actions"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v61.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 1592,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_setup_event"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v61.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 22424,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_process_filter"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v61.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 27144,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_process_event"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v61.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 3016,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_output"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v61.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 3440,
+      "source_has_helper": 174,
+      "symbol": "generic_uprobe_event"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v61.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 3496,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_filter_arg"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v61.native.o",
+      "program": "generic_uprobe_",
+      "source_bytecode_len": 800,
+      "source_lacks_helper": 174,
+      "symbol": "generic_uprobe_actions"
+    },
+    {
+      "native_object": "bpf_generic_usdt_v53.native.o",
+      "program": "generic_usdt_ac",
+      "source_bytecode_len": 8440,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_actions"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v511.native.o",
+      "program": "generic_usdt_ac",
+      "source_bytecode_len": 8392,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_actions"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "generic_usdt_ac",
+      "source_bytecode_len": 800,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_actions"
+    },
+    {
+      "native_object": "bpf_generic_usdt_v53.native.o",
+      "program": "generic_usdt_ev",
+      "source_bytecode_len": 3376,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_event"
+    },
+    {
+      "native_object": "bpf_generic_usdt_v61.native.o",
+      "program": "generic_usdt_ev",
+      "source_bytecode_len": 3368,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_event"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v511.native.o",
+      "program": "generic_usdt_ev",
+      "source_bytecode_len": 3448,
+      "source_has_helper": 174,
+      "symbol": "generic_usdt_event"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "generic_usdt_ev",
+      "source_bytecode_len": 3440,
+      "source_has_helper": 174,
+      "symbol": "generic_usdt_event"
+    },
+    {
+      "native_object": "bpf_generic_usdt_v53.native.o",
+      "program": "generic_usdt_fi",
+      "source_bytecode_len": 27448,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_filter_arg"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v511.native.o",
+      "program": "generic_usdt_fi",
+      "source_bytecode_len": 31176,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_filter_arg"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "generic_usdt_fi",
+      "source_bytecode_len": 2920,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_filter_arg"
+    },
+    {
+      "native_object": "bpf_generic_usdt_v53.native.o",
+      "program": "generic_usdt_ou",
+      "source_bytecode_len": 2664,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_output"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "generic_usdt_ou",
+      "source_bytecode_len": 3016,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_output"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v511.native.o",
+      "program": "generic_usdt_pa",
+      "source_bytecode_len": 107856,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_path"
+    },
+    {
+      "native_object": "bpf_generic_usdt_v53.native.o",
+      "program": "generic_usdt_pr",
+      "source_bytecode_len": 126184,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_process_filter"
+    },
+    {
+      "native_object": "bpf_generic_usdt_v53.native.o",
+      "program": "generic_usdt_pr",
+      "source_bytecode_len": 135992,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_process_event"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v511.native.o",
+      "program": "generic_usdt_pr",
+      "source_bytecode_len": 127512,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_process_filter"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v511.native.o",
+      "program": "generic_usdt_pr",
+      "source_bytecode_len": 138504,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_process_event"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "generic_usdt_pr",
+      "source_bytecode_len": 22424,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_process_filter"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "generic_usdt_pr",
+      "source_bytecode_len": 27448,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_process_event"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "generic_usdt_se",
+      "source_bytecode_len": 7800,
+      "source_lacks_helper": 174,
+      "symbol": "generic_usdt_setup_event"
+    },
+    {
+      "native_object": "bpf_generic_lsm_ima_bprm_v61.native.o",
+      "program": "ima_bprm",
+      "source_bytecode_len": 304,
+      "source_lacks_helper": 174,
+      "symbol": "ima_bprm"
+    },
+    {
+      "native_object": "bpf_generic_lsm_ima_file_v61.native.o",
+      "program": "ima_file",
+      "source_bytecode_len": 304,
+      "source_lacks_helper": 174,
+      "symbol": "ima_file"
+    },
+    {
+      "native_object": "bpf_loader_v511.native.o",
+      "program": "loader_kprobe",
+      "source_bytecode_len": 1656,
+      "source_lacks_helper": 174,
+      "symbol": "loader_kprobe"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v511.native.o",
+      "program": "native_bpf_strn",
+      "symbol": "native_bpf_strncasestr"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "read_reg",
+      "symbol": "read_reg"
+    },
+    {
+      "native_object": "bpf_cgroup_mkdir_v511.native.o",
+      "program": "tg_tp_cgrp_mkdi",
+      "source_bytecode_len": 3856,
+      "source_lacks_helper": 174,
+      "symbol": "tg_tp_cgrp_mkdir"
+    },
+    {
+      "native_object": "bpf_cgroup_release_v511.native.o",
+      "program": "tg_tp_cgrp_rele",
+      "source_bytecode_len": 3096,
+      "source_lacks_helper": 174,
+      "symbol": "tg_tp_cgrp_release"
+    },
+    {
+      "native_object": "bpf_cgroup_rmdir_v511.native.o",
+      "program": "tg_tp_cgrp_rmdi",
+      "source_bytecode_len": 3096,
+      "source_lacks_helper": 174,
+      "symbol": "tg_tp_cgrp_rmdir"
+    },
+    {
+      "native_object": "bpf_multi_usdt_v61.native.o",
+      "program": "try_preload_arg",
+      "symbol": "try_preload_arg"
+    },
+    {
+      "native_object": "bpf_multi_uprobe_v61.native.o",
+      "program": "write_reg",
+      "symbol": "write_reg"
+    }
+  ],
+  "status": "native-objects-proof-linked",
+  "version": 1
+}
