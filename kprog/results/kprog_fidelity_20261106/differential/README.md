@@ -450,3 +450,23 @@ The605 remaining forms have explicit decoder/block-interface diagnostics;
 `reference-check` exits1. Full721-form CPU/simulator agreement is distinct from
 this incomplete canonical-reference coverage. Both sets of per-form results
 and the exact diagnostics are retained in `x86-current-stack-reference/`.
+
+
+## Same-input reference replay after the shift/unary proofs
+
+V's canonical shift/unary increment, included in `0ce49da1d`, raises the Arm
+reference comparison to **377 forms / 386048 cases / zero mismatches**.
+`arm64-reference-shift/` reuses the unchanged563-form production binary and
+CPU trace above. All77 newly covered forms agree;186 forms still report exact
+reference-decoder failures and the command exits1. This replay changes no
+simulator or native instruction and adds no independent ISA implementation.
+
+```sh
+taskset -c 16-19 make -C kprog/fidelity reference-replay ARCH=arm64 BUILD=build-arm64-production-current OUT=../results/kprog_fidelity_20261106/differential/arm64-reference-shift CASES=1024
+```
+
+The output directory reuses `cpu-states.bin`, `forms.tsv`, `native-code.json`
+and `host.txt` from `arm64-production-reference-current/`; only the canonical
+reference outputs differ. Exact new per-form counts, decoder diagnostics and
+empty mismatch record are published alongside the log. The563-form static
+hardware handoff is unchanged.
