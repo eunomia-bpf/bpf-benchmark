@@ -188,12 +188,30 @@ Blockers cleared in order (each was a real, reproducible failure):
    `runner/build-llvmbpf/native_loader` and
    `runner/build-host-docker-llvmbpf/native_loader` before packaging.
 
-The native arm now fails one layer deeper, with a message that names the
-defect: `verified native runtime has no manifest entry for prog= manifest=
-.../bcc-real-4/manifest.json`. `prog=` is **empty** for all five loads,
-while the manifest carries 25 real entries (`kprobe__cap_cap`,
-`tracepoint__sys`, `fentry_vfs_read`, ...), so the lookup cannot match:
-the program name is not reaching the verified-runtime lookup. Reported.
+The native arm then fails on `verified native runtime has no manifest
+entry for prog= ...`, and the logs name the cause exactly. Every failing
+load is the **same two-instruction program**:
+
+```
+BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2
+  hash=39f82ae52884c235 ...      (x6, from capable/biosnoop/vfsstat/opensnoop)
+```
+
+That is libbpf's startup **feature probe**, not any application program.
+`bpfopt/shim/shim_native_loader.h:429` exempts probe programs only when
+the bound requirement is *off*:
+
+```c
+if (!shim_native_loader_requires_bound_proof() &&
+    shim_native_loader_is_libbpf_probe(prog)) { /* skip */ }
+```
+
+so on the verified arm (`REQUIRE_BOUND_PROOF=1`) the probe reaches the
+fatal `!result.replaced` path and the application dies before loading a
+single real program. A probe's bytecode is libbpf's, not the app's, so it
+can never appear in a manifest. The log's zero "skipped feature probe"
+lines against five fatal lines on one probe hash confirm the branch is
+never taken. Reported to the shim owner as a one-line ordering defect.
 
 The native arm itself is selected with
 
