@@ -112,6 +112,29 @@ def bzhiFlags (flags normalizedCount result : Word) (operandBits : Nat) : Word :
   setFlag (setFlag (setFlag (setFlag flags 0 (bzhiCarry normalizedCount operandBits))
     6 (resultZero result)) 7 (resultSign result operandBits)) 11 false
 
+/-- Double shifts use five count bits, or six at operand size 64. -/
+def doubleShiftCount (count : Word) (operandBits : Nat) : Word :=
+  count &&& (if operandBits = 64 then 63 else 31)
+
+/-- Form a double-width concatenation, shift it, and select the destination
+half. For counts exceeding operand size the ISA permits any low-lane result;
+this expression is an executable representative, not an extra defined result. -/
+def doubleShiftValue (left : Bool) (destination source count : Word)
+    (operandBits : Nat) : Word :=
+  let mask := BitVec.ofNat 64 (2 ^ operandBits) - 1
+  let dst := (destination &&& mask).setWidth 128
+  let src := (source &&& mask).setWidth 128
+  let amount := (doubleShiftCount count operandBits).setWidth 128
+  let pair := if left then (dst <<< operandBits) ||| src else (src <<< operandBits) ||| dst
+  let shifted := if left then (pair <<< amount) >>> BitVec.ofNat 128 operandBits
+    else pair >>> amount
+  (shifted.setWidth operandBits).setWidth 64
+
+/-- OF at count one reports a sign change for both SHLD and SHRD. The
+preserved representative at other counts imposes no ISA-defined flag value. -/
+def doubleShiftOverflow (original result count : Word) (operandBits : Nat) (old : Bool) : Bool :=
+  if count = 1 then resultSign original operandBits != resultSign result operandBits else old
+
 inductive BzhiWidth
   | w32 | w64
   deriving DecidableEq, Repr

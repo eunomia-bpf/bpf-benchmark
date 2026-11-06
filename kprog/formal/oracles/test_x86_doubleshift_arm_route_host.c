@@ -9,7 +9,8 @@
  * reports the `X86_ALU_SHL` family; the `X86_OP_SHRD_IMM` opcode computes the
  * right double shift `x86_shrd` and reports the `X86_ALU_SHR` family. Both sit
  * behind the count-zero step gate: when the hardware-masked count is zero the
- * arm computes no result, writes no register, and leaves every flag untouched.
+ * arm preserves flags and 16/64-bit destinations; a 32-bit destination
+ * still zero-extends. OF at count one is original sign XOR result sign.
  * This oracle drives the real `X86_SIM_L_EXEC` body and restates the double
  * shift bit by bit from the doubled word (never the macro's OR-of-two-shifts),
  * a second independent restatement of the shift flags, and the partial-register
@@ -140,7 +141,7 @@ static void model_shift_flags(unsigned alu, __u64 a, unsigned count, __u64 r,
 	} else if (alu == 6U) { /* X86_ALU_SHR */
 		mcf = count <= bits ? (unsigned)((a >> (count - 1)) & 1U) : 0U;
 		if (count == 1)
-			mof = (__u8)((a & sign) != 0);
+			mof = (__u8)(((a & sign) != 0) ^ ((r & sign) != 0));
 	}
 }
 
@@ -157,8 +158,13 @@ static void model_doubleshift(unsigned op, unsigned dst, unsigned src,
 	__u64 srcv = mreg[src];
 	__u64 result;
 
-	if (count == 0)
+	if (count == 0) {
+		if (w == X86_WIDTH_32) {
+			mreg[dst] = dstv & 0xffffffffULL;
+			mtag[dst] = X86_SIM_TAG_SCALAR;
+		}
 		return;
+	}
 
 	if (op == X86_OP_SHLD_IMM)
 		result = shld_oracle(dstv, srcv, count, bits);

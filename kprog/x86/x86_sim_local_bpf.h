@@ -2140,8 +2140,14 @@ struct x86_sim_state {
 					__x86_l_result = x86_shrd(__x86_l_dst, __x86_l_src, (IMM), __x86_l_width);\
 					X86_SIM_L_SET_SHIFT_FLAGS(__x86_l_dst, (IMM), __x86_l_result, __x86_l_alu, __x86_l_width);\
 				}                                           \
+				__x86_of = KPROG_X86_DOUBLESHIFT_OF(             \
+					((__x86_l_dst & x86_width_sign_mask(__x86_l_width)) != 0),    \
+					((__x86_l_result & x86_width_sign_mask(__x86_l_width)) != 0), \
+					x86_shift_count((IMM), __x86_l_width), __x86_of);\
 				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,\
 							  __x86_l_width);    \
+			} else if (__x86_l_width == X86_WIDTH_32) {       \
+				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_dst, X86_WIDTH_32);\
 			}                                                   \
 		} else if (KPROG_X86_DISP_PUSH_HANDLED(OP)) {            \
 			X86_SIM_L_EXEC_PUSH((SRC));                       \

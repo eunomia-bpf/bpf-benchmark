@@ -49,4 +49,8 @@ def armOfFlags (op : Nat) : Nat :=
 /-- The body an arm code names, or `none` when the code names no arm. -/
 def armOfCode (code : Nat) : Option Arm :=
   (armCodes.zip [.shld, .shrd]).lookup code
+/-- Both double shifts report a sign change at count one, preserving OF
+as an implementation representative at other counts. -/
+def overflow (originalSign resultSign : Bool) (count : BitVec 64) (old : Bool) : Bool :=
+  if count = 1 then originalSign != resultSign else old
 end KProgFormal.GeneratedX86DoubleShiftArm

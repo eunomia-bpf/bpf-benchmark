@@ -319,13 +319,13 @@ static void model_shift_flags(unsigned alu, __u64 a, unsigned count, __u64 r,
 		b->cf = count <= bits ? (unsigned)((a >> (count - 1)) & 1U)
 				      : 0U;
 		if (count == 1)
-			b->of = (__u8)((a & sign) != 0);
+			b->of = (__u8)(((a & sign) != 0) ^ ((r & sign) != 0));
 	}
 }
 
 /* Restate the inlined double-shift arm: select the SHLD/SHRD arm from the
  * opcode, compute the result, update the shift flags, and write the
- * destination at the FLAGS width. A zero count performs nothing. */
+ * destination at the FLAGS width. A zero count preserves flags and zero-extends a 32-bit destination. */
 static void model_doubleshift(unsigned op, unsigned dst, unsigned src,
 			      unsigned flags, __u64 imm, struct snap *b)
 {
@@ -339,8 +339,13 @@ static void model_doubleshift(unsigned op, unsigned dst, unsigned src,
 	__u64 result;
 	unsigned alu;
 
-	if (count == 0)
+	if (count == 0) {
+		if (w == X86_WIDTH_32) {
+			b->x[dst] = dstv & 0xffffffffULL;
+			b->t[dst] = X86_SIM_TAG_SCALAR;
+		}
 		return;
+	}
 
 	if (op == X86_OP_SHLD_IMM) {
 		result = shld_oracle(dstv, srcv, count, bits);

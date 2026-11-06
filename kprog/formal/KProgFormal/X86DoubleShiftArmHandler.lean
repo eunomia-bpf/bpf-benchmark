@@ -6,6 +6,7 @@ import KProgFormal.X86Width
 import KProgFormal.X86ControlFlow
 import KProgFormal.X86ShiftCount
 import KProgFormal.X86ShiftFlags
+import KProgFormal.X86RegWrite
 
 namespace KProgFormal
 
@@ -235,5 +236,27 @@ theorem x86_doubleshift_arm_is_doubleshift :
     (resultOfArm .shrd = "shrd" →
       GeneratedX86DoubleShift.shrd 0xf0 0x0f 4 1 = 0xff) :=
   ⟨fun _ => x86_shld_w64_example, fun _ => x86_shrd_w8_example⟩
+
+/-- The generated overflow correction equals the sole ISA sign-change rule,
+including the preserved representative outside count one. -/
+theorem x86_doubleshift_overflow_refines (original result count : BitVec 64)
+    (width : X86Width) (old : Bool) :
+    GeneratedX86DoubleShiftArm.overflow (x86SignSpec original width)
+      (x86SignSpec result width) count old =
+      Reference.X86.doubleShiftOverflow original result count (x86WidthBitsSpec width) old := by
+  cases width <;>
+    simp only [GeneratedX86DoubleShiftArm.overflow, Reference.X86.doubleShiftOverflow,
+      Reference.X86.resultSign, x86SignSpec, x86NarrowSpec, x86WidthMaskSpec,
+      x86WidthBitsSpec, Reference.Word] <;> bv_decide
+
+/-- Zero-count 32-bit writes still clear the high half and scalarize the tag;
+this is distinct from the flag no-op and the 16/64-bit value no-op. -/
+theorem x86_doubleshift_count_zero_w32_write (old : X86RegValue) :
+    (generatedX86RegWrite old old.bits .w32).bits = old.bits &&& 0xffffffff ∧
+      (generatedX86RegWrite old old.bits .w32).tag = .scalar := by
+  simp only [generatedX86RegWrite, GeneratedX86RegWrite.write,
+    GeneratedX86RegWrite.writeAt, GeneratedX86RegWrite.bitsAt,
+    GeneratedX86RegWrite.bits, GeneratedX86RegWrite.byteShift]
+  exact ⟨rfl, rfl⟩
 
 end KProgFormal

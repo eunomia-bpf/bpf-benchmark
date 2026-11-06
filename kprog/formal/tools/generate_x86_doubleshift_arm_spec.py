@@ -14,10 +14,8 @@ two bodies plus the flag family each body reports to the shift-flag contract:
     width)` (fill the high bits from the bottom of `src`) and reports the `SHR`
     flag family (`X86_ALU_SHR`), taking the right-count path.
 
-Both bodies sit behind the count-zero *step gate*: when the hardware-masked
-count `x86_shift_count(imm, width)` is zero neither the result function nor the
-flag family is consulted -- the arm computes no result, writes no register, and
-leaves every flag untouched (the architectural `SHLD`/`SHRD` count-zero no-op).
+Nonzero counts compute the result and flags. At zero count flags and 16/64-bit
+destinations are preserved; a 32-bit destination still zero-extends.
 
 The double-shift *values* (`x86_shld`/`x86_shrd`) and the count-zero value
 identity are already proved by `GeneratedX86DoubleShift.lean`; this contract
@@ -61,6 +59,8 @@ EXPECTED = {
     "operation": "x86DoubleShiftArmSelector",
     "selector": "opcode_then_arm",
     "opcode_bits": OPCODE_BITS,
+    "overflow": "original_sign_xor_result_sign_when_count_one",
+    "zero_count_writeback": "zero_extend_32_preserve_16_64",
     "arms": [{"arm": arm, "arm_define": define, "opcode": opcode,
               "opcode_define": opcode_define, "result": result,
               "flag_family_code": flag_code,
@@ -115,7 +115,11 @@ def check_against_header():
     if ARM_STEP_GATE not in region:
         raise SystemExit(
             "x86 doubleshift arm has no count-zero step gate")
-    if flat(region).count("} else if (") != 1:
+    if "KPROG_X86_DOUBLESHIFT_OF(" not in region:
+        raise SystemExit("x86 doubleshift arm omits its sign-change overflow rule")
+    if "else if (__x86_l_width == X86_WIDTH_32)" not in region:
+        raise SystemExit("x86 doubleshift arm omits zero-count 32-bit writeback")
+    if flat(region).count("} else if (") != 2:
         raise SystemExit(
             "x86 doubleshift arm region is not exactly one arm")
     if "X86_ALU_SHL" in region or "X86_ALU_SHR" in region:
@@ -216,6 +220,10 @@ def armOfFlags (op : Nat) : Nat :=
 /-- The body an arm code names, or `none` when the code names no arm. -/
 def armOfCode (code : Nat) : Option Arm :=
   (armCodes.zip [{ctor}]).lookup code
+/-- Both double shifts report a sign change at count one, preserving OF
+as an implementation representative at other counts. -/
+def overflow (originalSign resultSign : Bool) (count : BitVec 64) (old : Bool) : Bool :=
+  if count = 1 then originalSign != resultSign else old
 end KProgFormal.GeneratedX86DoubleShiftArm
 '''
 
@@ -259,14 +267,9 @@ def render_c(spec: dict) -> str:
  * `X86_OP_SHLD_IMM` body computes the left double shift `x86_shld` and reports
  * the `X86_ALU_SHL` flag family; the `X86_OP_SHRD_IMM` body computes the right
  * double shift `x86_shrd` and reports the `X86_ALU_SHR` family. Both bodies sit
- * behind the count-zero *step gate*: at a hardware-masked count of zero neither
- * the result function nor the flag family is consulted, so the arm computes no
- * result, writes no register, and leaves every flag untouched.
- * `KProgFormal/X86DoubleShiftArmHandler.lean` proves the generated `armOf` and
- * `armOfFlags` equal an independent construction from the opcode literals, that
- * the two arm name/code/opcode/result/flag-family tables are exactly the two
- * bodies, and that the count-zero gate leaves the destination and the flags
- * untouched.
+ * behind the count-zero flag gate. At zero count all flags survive;
+ * a 32-bit destination still zero-extends. At count one OF is original sign
+ * XOR result sign for both directions.
  * This header is included after the `X86_OP_SHLD_IMM` / `X86_OP_SHRD_IMM` /
  * `X86_ALU_SHL` / `X86_ALU_SHR` decodes, so the drift checks bind the
  * hand-written constants to the generated table.
@@ -291,6 +294,9 @@ def render_c(spec: dict) -> str:
 \t\t ? {first["flag_family_define"]} : {last["flag_family_define"]})
 _Static_assert(KPROG_X86_DOUBLESHIFT_ARM_COUNT == {count}U,
 \t       "x86 doubleshift arm count drift");
+/* Unlike ordinary SHR, SHRD compares the original and final sign. */
+#define KPROG_X86_DOUBLESHIFT_OF(ORIGINAL_SIGN, RESULT_SIGN, COUNT, OLD_OF) \\
+	((COUNT) == 1 ? ((ORIGINAL_SIGN) != (RESULT_SIGN)) : (OLD_OF))
 {opcode_asserts}
 {flag_asserts}
 _Static_assert({first["arm_define"]} != {last["arm_define"]},

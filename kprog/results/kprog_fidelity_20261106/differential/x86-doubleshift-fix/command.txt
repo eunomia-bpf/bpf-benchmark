@@ -1,0 +1,3 @@
+taskset -c 8-15 make -C kprog/fidelity ARCH=x86 BUILD=build-x86-v-doubleshift OUT=/workspaces/.agent-state/kprog-lanes/V/doubleshift-cpu-results CASES=1024 run
+Base commit: a692e7870, plus the source inputs retained in source-inputs.tar.gz.
+Exit 1: push bx and pop ax each have1024 mismatches; no other form differs.

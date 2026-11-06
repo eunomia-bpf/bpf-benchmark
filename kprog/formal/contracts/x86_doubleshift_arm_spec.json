@@ -3,6 +3,8 @@
   "operation": "x86DoubleShiftArmSelector",
   "selector": "opcode_then_arm",
   "opcode_bits": 8,
+  "overflow": "original_sign_xor_result_sign_when_count_one",
+  "zero_count_writeback": "zero_extend_32_preserve_16_64",
   "arms": [
     {
       "arm": "shld",

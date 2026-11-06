@@ -9,14 +9,9 @@
  * `X86_OP_SHLD_IMM` body computes the left double shift `x86_shld` and reports
  * the `X86_ALU_SHL` flag family; the `X86_OP_SHRD_IMM` body computes the right
  * double shift `x86_shrd` and reports the `X86_ALU_SHR` family. Both bodies sit
- * behind the count-zero *step gate*: at a hardware-masked count of zero neither
- * the result function nor the flag family is consulted, so the arm computes no
- * result, writes no register, and leaves every flag untouched.
- * `KProgFormal/X86DoubleShiftArmHandler.lean` proves the generated `armOf` and
- * `armOfFlags` equal an independent construction from the opcode literals, that
- * the two arm name/code/opcode/result/flag-family tables are exactly the two
- * bodies, and that the count-zero gate leaves the destination and the flags
- * untouched.
+ * behind the count-zero flag gate. At zero count all flags survive;
+ * a 32-bit destination still zero-extends. At count one OF is original sign
+ * XOR result sign for both directions.
  * This header is included after the `X86_OP_SHLD_IMM` / `X86_OP_SHRD_IMM` /
  * `X86_ALU_SHL` / `X86_ALU_SHR` decodes, so the drift checks bind the
  * hand-written constants to the generated table.
@@ -42,6 +37,9 @@
 		 ? X86_ALU_SHL : X86_ALU_SHR)
 _Static_assert(KPROG_X86_DOUBLESHIFT_ARM_COUNT == 2U,
 	       "x86 doubleshift arm count drift");
+/* Unlike ordinary SHR, SHRD compares the original and final sign. */
+#define KPROG_X86_DOUBLESHIFT_OF(ORIGINAL_SIGN, RESULT_SIGN, COUNT, OLD_OF) \
+	((COUNT) == 1 ? ((ORIGINAL_SIGN) != (RESULT_SIGN)) : (OLD_OF))
 _Static_assert(X86_OP_SHLD_IMM == 27U,
 	       "x86 doubleshift arm shld opcode drift");
 _Static_assert(X86_OP_SHRD_IMM == 28U,
