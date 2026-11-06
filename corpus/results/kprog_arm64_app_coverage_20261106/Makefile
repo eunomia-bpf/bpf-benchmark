@@ -69,3 +69,13 @@ helper-abi-update:
 .PHONY: census
 census:
 	python3 $(HERE)/coverage.py census $(HERE)/complete $(HERE)/real-helpers $(HERE)/helper-complete-75
+
+.PHONY: compare-cond-proof compare-cond-generate compare-cond-host
+compare-cond-proof:
+	cd $(ROOT)/kprog/formal && taskset -c 16-23 lake build KProgFormal.Arm64CompareCond
+
+compare-cond-generate:
+	python3 $(HERE)/compare_check.py $(HERE)/$(PHASE)
+
+compare-cond-host:
+	taskset -c 16-23 python3 $(HERE)/register_cells_check.py $(HERE)/$(PHASE) test_arm64_compare_cond_host

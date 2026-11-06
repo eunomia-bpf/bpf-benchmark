@@ -268,3 +268,28 @@ mechanical constant-op dispatcher is being validated to reduce C front-end
 expansion, while preserving the canonical C bodies. This table is not an
 inventory of real application startup, verifier completion, bound execution or
 same-work workload counters. Those parts of lane A remain active.
+
+## Event-dispatch verifier failure closed
+
+The unchanged `trace_event_type_switch_dispatch` native artifact and original
+input now pass the full-system QEMU result check: retval2 and result16.
+[compare-gt/](compare-gt/table.md) retains the accepted proof and verifier log;
+`register-cells-v2/` retains its earlier1M-instruction rejection. Together with
+the preceding28 unchanged-input passes, this closes that29-case functional
+batch. A fresh full29-case run with the mechanically specialized dispatcher is
+also running.
+
+The fix composes adjacent `CMP; B.GT` only when no other control-flow edge
+enters between them. It still computes every NZCV flag with the existing SUB
+contract, and exposes the equivalent signed comparison directly to clang and
+the verifier. Two Lean theorems prove the32/64-bit equivalence for all operand
+bits;8648 C checks compare the old/new branch, all flags and unchanged GPRs.
+No native instruction, workload, input, loop bound or memory guard changes.
+Both the normal compiler and a separately retained no-unroll trial pass; the
+normal compiler result establishes this fix.
+
+```sh
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile compare-cond-proof
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile compare-cond-generate compare-cond-host compile PHASE=compare-gt COMPILE_ARGS='0 1 900'
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile verify PHASE=compare-gt
+```

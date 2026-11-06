@@ -1528,6 +1528,24 @@ ARM64_SIM_CONCAT(__a64_sim_jcc_fallthrough_, ID):                            \
 #define ARM64_SIM_A64_JCC(COND, CURRENT, TARGET, LABEL)                     \
 	ARM64_SIM_A64_JCC_IMPL((COND), (CURRENT), (TARGET), LABEL, __LINE__)
 
+/* CMP followed by B.GT, with no other incoming edge between them. Preserve
+ * all four flags, while exposing the equivalent signed comparison directly.
+ * KProgFormal.Arm64CompareCond proves this from the existing SUB/NZCV rules. */
+#define ARM64_SIM_A64_CMP_GT(OP, LHS, RHS, WIDTH, AUX, IMM, LABEL)          \
+    do {                                                                 \
+        __u8 __a64_cmp_width = (WIDTH);                                  \
+        __u64 __a64_cmp_lhs = ARM64_SIM_L_READ_REG(LHS);                  \
+        __u64 __a64_cmp_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM),           \
+            ARM64_SIM_L_MOD_VALUE((RHS), ARM64_SIM_L_MOD(AUX),           \
+                ARM64_SIM_L_SHIFT(AUX), __a64_cmp_width));                \
+        ARM64_SIM_L_SET_SUB_FLAGS(__a64_cmp_lhs, __a64_cmp_rhs, __a64_cmp_width); \
+        if (__a64_cmp_width == ARM64_WIDTH_32) {                         \
+            if ((__s32)__a64_cmp_lhs > (__s32)__a64_cmp_rhs) goto LABEL;  \
+        } else if (__a64_cmp_width == ARM64_WIDTH_64) {                  \
+            if ((__s64)__a64_cmp_lhs > (__s64)__a64_cmp_rhs) goto LABEL;  \
+        } else { ARM64_SIM_L_UNSUPPORTED_OPCODE(); }                    \
+    } while (0)
+
 #define ARM64_SIM_A64_CBZ_IMPL(REG, KIND, CURRENT, TARGET, LABEL, ID)        \
 	do {                                                               \
 		__u64 __a64_l_value = ARM64_SIM_L_READ_REG(REG);          \

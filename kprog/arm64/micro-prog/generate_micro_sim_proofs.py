@@ -791,11 +791,31 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         "{",
         f"\t{entry}",
     ])
+    incoming = set(return_addrs)
+    for insn in all_insns:
+        if insn.mnemonic in {'b', 'bl', 'cbz', 'cbnz', 'tbz', 'tbnz'} or insn.mnemonic.startswith('b.'):
+            if not insn.reloc_symbol:
+                incoming.add(branch_target(insn.operands[-1]))
     for fn_symbol, insns in functions.items():
         if fn_symbol != symbol:
             lines.append(f"\t/* native subroutine {c_comment(fn_symbol)} */")
-        for insn in insns:
+        fused = set()
+        for index, insn in enumerate(insns):
+            if insn.addr in fused:
+                continue
             lines.append(f"{label(insn.addr)}:")
+            if insn.mnemonic == 'cmp' and index + 1 < len(insns):
+                branch = insns[index + 1]
+                if branch.mnemonic == 'b.gt' and branch.addr not in incoming:
+                    enc = encode(insn, rodata_idents, reloc_idents)
+                    lines.extend([f'\t/* 0x{insn.addr:x}: {c_comment(insn.raw)}; '
+                                  f'0x{branch.addr:x}: {c_comment(branch.raw)} */',
+                                  f'{label(branch.addr)}:',
+                                  f'\tARM64_SIM_A64_CMP_GT({enc.op}, {enc.dst}, {enc.src}, '
+                                  f'{enc.width}, {enc.aux}, {enc.imm}, '
+                                  f'{label(branch_target(branch.operands[0]))});'])
+                    fused.add(branch.addr)
+                    continue
             append_insn(lines, insn, all_addrs, next_by_addr.get(insn.addr),
                         helper_by_addr.get(insn.addr),
                         rodata_idents, reloc_idents)
