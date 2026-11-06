@@ -1,0 +1,4 @@
+insmod /workspaces/repository/kprog/tv/build-x86/bpf_x86_native_lab.ko
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_return.py before bound
+{"arch": "x86", "path": "bound", "stages": {"verifier_rejected": 1}}
+before outcome: verifier_rejected

@@ -1,0 +1,52 @@
+[
+  {
+    "name": "intact",
+    "accepted": true
+  },
+  {
+    "name": "mov QWORD PTR [rsp],0",
+    "accepted": false,
+    "message": "native return address lacks call/entry provenance at 0x2: ret"
+  },
+  {
+    "name": "mov BYTE PTR [rsp+7],0",
+    "accepted": false,
+    "message": "native return address lacks call/entry provenance at 0x2: ret"
+  },
+  {
+    "name": "add QWORD PTR [rsp],1",
+    "accepted": false,
+    "message": "native return address lacks call/entry provenance at 0x2: ret"
+  },
+  {
+    "name": "not QWORD PTR [rsp]",
+    "accepted": false,
+    "message": "native return address lacks call/entry provenance at 0x2: ret"
+  },
+  {
+    "name": "saved_outer",
+    "accepted": true
+  },
+  {
+    "name": "exchanged_outer",
+    "accepted": true
+  },
+  {
+    "name": "partial_outer",
+    "accepted": false,
+    "message": "native return address lacks call/entry provenance at 0x4: ret"
+  },
+  {
+    "name": "internal_call",
+    "accepted": true
+  },
+  {
+    "name": "internal_corrupt",
+    "accepted": false,
+    "message": "native return address lacks call/entry provenance at 0x4: ret"
+  },
+  {
+    "name": "internal_saved_return",
+    "accepted": true
+  }
+]

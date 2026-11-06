@@ -526,3 +526,28 @@ Commands: `helper-effects-census`, `helper-effects-regression`,
 1136-record snapshots, frozen Python/header/helper inputs, commands,23-case
 regression, all finite verifier records and42-case build log. Native source
 proof copies remain those retained in the earlier finite input archive.
+
+
+## Native return-slot provenance
+
+The constructor now tracks the entry return token and finite actual CALL return
+continuations through full-width stack/register copies. RET follows the saved
+token's continuation rather than assuming the current syntactic call context.
+Partial writes and arithmetic updates invalidate return provenance; blind
+MOV/PUSH/POP/XCHG saves/restores remain valid. Entry fallthrough also requires
+the original outer return slot. No runtime assertion or stack-write ban was
+added. Memory arithmetic now invalidates saved-pointer metadata consistently.
+
+`ret-regression` passes11 cases including partial/arithmetic corruption,
+internal-call corruption, preserved outer saves/exchanges and internal token
+POP/PUSH. `ret-after-kvm` records constructor rejection before upload of
+`mov QWORD PTR [rsp],0; mov eax,2; ret`. Its archived before-fix outcome was
+already **verifier rejected** for an invalid BPFfp+0 stack write, not an
+accepted finding; unsafe native was never executed. The change closes the
+constructor's missing provenance premise without misreporting that baseline.
+All42 existing sources generate/compile and all23 helper-effect regressions pass.
+
+[Return artifacts](ret-artifacts.tar.gz) retain before/after input, frozen source,
+proof, bound load logs and regression records. Absolute native code/stack-address
+observation and general return-target translation remain active fidelity work;
+this constructor result alone does not discharge those obligations.

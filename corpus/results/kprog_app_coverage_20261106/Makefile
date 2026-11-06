@@ -208,3 +208,28 @@ runtime-guest:
 
 runtime-python:
 	python3 -m unittest discover -s $(ROOT)/tests/python -p test_corpus_incremental.py
+
+ret-before-build:
+	python3 $(HERE)/check_return.py before build
+
+ret-before-kvm: ret-before-build
+	taskset -c 8-23 vng --run $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile ret-before-guest'
+
+ret-before-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod $(ROOT)/kprog/tv/build-x86/bpf_x86_native_lab.ko
+	python3 $(HERE)/check_return.py before bound
+
+ret-after-build:
+	python3 $(HERE)/check_return.py after build
+
+ret-regression:
+	python3 $(HERE)/check_return.py after regression
+
+ret-after-kvm: ret-after-build
+	taskset -c 8-23 vng --run $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile ret-after-guest'
+
+ret-after-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod $(ROOT)/kprog/tv/build-x86/bpf_x86_native_lab.ko
+	python3 $(HERE)/check_return.py after bound

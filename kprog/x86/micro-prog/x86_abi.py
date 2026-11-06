@@ -17,15 +17,21 @@ CC_FLAGS = {'A': CF | ZF, 'AE': CF, 'B': CF, 'BE': CF | ZF,
 CALLER_SAVED = ('rax', 'rcx', 'rdx', 'rsi', 'rdi', 'r8', 'r9', 'r10', 'r11')
 
 
+@dataclass(frozen=True)
+class ReturnAddress:
+    context: tuple[int, ...]
+    target: int | None
+
+
 @dataclass
 class State:
     defined: tuple[int, ...]
-    aliases: tuple[int | bool | None, ...]
+    aliases: tuple[int | bool | frozenset[ReturnAddress] | None, ...]
     flags: int
     # Only bytes depending on unspecified ABI values need entries. Other raw
     # stack initialization remains the actual BPF verifier's responsibility.
     opaque: dict[int, int]
-    pointers: dict[int, int | bool | None]
+    pointers: dict[int, int | bool | frozenset[ReturnAddress] | None]
     constants: tuple[int | None, ...]
 
 
@@ -44,26 +50,29 @@ def check_definedness(insns, targets, exit_addr, decode):
     aliases = [None] * len(regs)
     defined[ri('rdi')[0]] = defined[rsp] = FULL
     aliases[ri('rdi')[0]], aliases[rsp] = False, 0
-    initial = State(tuple(defined), tuple(aliases), 0, {}, {}, (None,)*len(regs))
+    outer_return = frozenset({ReturnAddress((),None)})
+    initial = State(tuple(defined), tuple(aliases), 0, {}, {0:outer_return}, (None,)*len(regs))
     states = {((), insns[0].addr): initial}
     queue = deque(states)
     # Call-string contexts retain opaque callee saves from distinct callers.
     # Repeated call sites join to a finite context, never a runtime depth limit.
-    returns = {}
-    entry_sp = {(): {0}}
 
     def same(a, b):
         return type(a) is type(b) and a == b
+
+    def joined_pointer(a,b):
+        if isinstance(a,frozenset) and isinstance(b,frozenset):
+            return a | b
+        return a if same(a,b) else None
 
     def joined(a, b):
         opaque = {p: a.opaque.get(p, 255) & b.opaque.get(p, 255)
                   for p in a.opaque.keys() | b.opaque.keys()}
         opaque = {p: v for p, v in opaque.items() if v != 255}
-        pointers = {p: a.pointers[p] if p in a.pointers and p in b.pointers and
-                    same(a.pointers[p], b.pointers[p]) else None
+        pointers = {p: joined_pointer(a.pointers.get(p), b.pointers.get(p))
                     for p in a.pointers.keys() | b.pointers.keys()}
         return State(tuple(x & y for x, y in zip(a.defined, b.defined)),
-                     tuple(x if same(x, y) else None for x, y in zip(a.aliases, b.aliases)),
+                     tuple(joined_pointer(x,y) for x,y in zip(a.aliases,b.aliases)),
                      a.flags & b.flags, opaque, pointers,
                      tuple(x if x == y else None for x,y in zip(a.constants,b.constants)))
 
@@ -71,6 +80,8 @@ def check_definedness(insns, targets, exit_addr, decode):
         if addr == exit_addr:
             if context or type(state.aliases[rsp]) is not int or state.aliases[rsp] != 0:
                 raise ValueError('native entry return has an unbalanced stack pointer')
+            if state.pointers.get(0) != outer_return:
+                raise ValueError('native entry return address was overwritten')
             need(state, 'eax', 'native entry return')
             return
         if addr not in by_addr:
@@ -247,7 +258,7 @@ def check_definedness(insns, targets, exit_addr, decode):
             need(incoming,args[0],where)
             if ri(args[1]):
                 need(incoming,args[1],where)
-                pointer = alias[ri(args[0])[0]] if same(alias[ri(args[0])[0]],alias[ri(args[1])[0]]) else None
+                pointer = joined_pointer(alias[ri(args[0])[0]],alias[ri(args[1])[0]])
                 write(args[0],FULL,pointer)
             else:
                 value, pointer = read_memory(args[1],decode.operand_width(args[1],ri(args[0])[1]))
@@ -255,6 +266,13 @@ def check_definedness(insns, targets, exit_addr, decode):
         elif op.startswith('set') and op in decode.CC_AUX:
             if ri(args[0]): write(args[0])
             else: store(args[0],8)
+        elif op=='xchg':
+            width = ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0])
+            values = [read_memory(arg,width) if decode.is_mem(arg) else
+                      (mask(incoming,arg),incoming.aliases[ri(arg)[0]]) for arg in args]
+            for arg,(value,pointer) in zip(args,reversed(values)):
+                if ri(arg): write(arg,value,pointer)
+                else: store(arg,width,value,pointer)
         elif op in {'shl','shr','sar'} and (len(args)==1 or decode.is_int(args[1])):
             width = ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0])
             value = mask(incoming,args[0]) if ri(args[0]) else read_memory(args[0],width)[0]
@@ -296,7 +314,7 @@ def check_definedness(insns, targets, exit_addr, decode):
             elif op=='mulx':
                 need(incoming,'rdx',where)
                 write(args[0]);write(args[1])
-            elif op in {'xchg','xadd'}:
+            elif op=='xadd':
                 for arg in args:
                     if ri(arg): write(arg)
             elif args and ri(args[0]) and op not in {'cmp','test','bt'}:
@@ -306,6 +324,8 @@ def check_definedness(insns, targets, exit_addr, decode):
                     delta = decode.parse_int(args[1])
                     if delta >= 1 << 63: delta -= 1 << 64
                     alias[ri(args[0])[0]] = old + (delta if op=='add' else -delta)
+            if args and decode.is_mem(args[0]) and op not in {'cmp','test','bt','call'}:
+                store(args[0],decode.operand_width(args[0]))
             if op in {'add','sub','adc','sbb','cmp','test','xor','and','or','neg','xadd','bzhi','popcnt','andn'}:
                 flags = ALL_FLAGS
             elif op in {'inc','dec'}: flags = (flags & CF) | ZF | SF | OF
@@ -382,28 +402,29 @@ def check_definedness(insns, targets, exit_addr, decode):
                 constants = list(state.constants)
                 child = context + (addr,)
                 if addr in context: child=context[:context.index(addr)+1]
-                edge = context,next_pc
-                if edge not in returns.setdefault(child,set()):
-                    returns[child].add(edge)
-                    queue.extend(k for k in states if k[0]==child and by_addr[k[1]].mnemonic=='ret')
                 at=alias[rsp]
                 alias[rsp]=at-8 if type(at) is int else None
                 if type(alias[rsp]) is int:
                     for j in range(8): opaque.pop(alias[rsp]+j,None)
-                    pointers[alias[rsp]]=False
+                    pointers[alias[rsp]]=frozenset({ReturnAddress(context,next_pc)})
                 if type(alias[rsp]) is not int:
                     raise ValueError(f'native call stack relation unresolved at {where}')
-                entry_sp.setdefault(child,set()).add(alias[rsp])
                 push(child,target,State(tuple(bits),tuple(alias),flags,opaque,pointers,tuple(constants)))
         elif op=='ret':
-            if type(alias[rsp]) is not int or alias[rsp] not in entry_sp[context]:
+            if type(alias[rsp]) is not int:
                 raise ValueError(f'native ABI return has an unbalanced stack pointer at {where}')
-            if context:
-                offset=alias[rsp]
-                alias[rsp]=offset+8 if type(offset) is int else None
-                for parent,continuation in returns.get(context,set()):
-                    push(parent,continuation,State(tuple(bits),tuple(alias),flags,opaque,pointers,tuple(constants)))
-            else: need(state,'eax',where)
+            destinations=pointers.get(alias[rsp])
+            if not isinstance(destinations,frozenset) or not destinations:
+                raise ValueError(f'native return address lacks call/entry provenance at {where}')
+            for destination in destinations:
+                if destination.target is None:
+                    if alias[rsp] != 0:
+                        raise ValueError(f'native entry return has an unbalanced stack pointer at {where}')
+                    need(state,'eax',where)
+                else:
+                    returned_alias=list(alias)
+                    returned_alias[rsp]+=8
+                    push(destination.context,destination.target,State(tuple(bits),tuple(returned_alias),flags,opaque,pointers,tuple(constants)))
         elif op=='jmp':
             for target in ([v for kind,v in targets.get(addr,()) if kind=='code'] if decode.is_indirect_branch(insn) else [direct]):
                 push(context,target,state)
