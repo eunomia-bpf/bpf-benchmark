@@ -1,0 +1,79 @@
+taskset -c 16-23 cargo test --manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml --target-dir /workspaces/repository/kprog/arm64/build/app-native-link
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.99s
+     Running unittests src/main.rs (kprog/arm64/build/app-native-link/debug/deps/native_link-47f135697fa1259b)
+
+running 67 tests
+test tests::arm64_entry_abi_strip_allows_multiple_epilogues ... ok
+test tests::arm64_entry_abi_strip_matches_writeback_push_pop ... ok
+test tests::arm64_entry_abi_strip_scans_past_frame_record_pairs ... ok
+test tests::arm64_entry_abi_strip_preserves_frame_record_pairs ... ok
+test tests::arm64_entry_abi_strip_ignores_body_spills ... ok
+test tests::arm64_entry_abi_strip_strips_standalone_lr_save_restore ... ok
+test tests::arm64_entry_abi_strip_preserves_native_saved_x23_x24 ... ok
+test tests::arm64_entry_abi_strip_rejects_unsupported_native_callee_saved_regs ... ok
+test tests::arm64_helper_id_dead_load_read_tracking_is_conservative ... ok
+test tests::arm64_entry_abi_strip_strips_lr_callee_saved_pairs ... ok
+test tests::arm64_get_current_task_helpers_inline_without_reloc ... ok
+test tests::arm64_immediate_helper_call_patterns_decode ... ok
+test tests::arm64_hash_of_maps_lookup_postprocess_is_rejected ... ok
+test tests::arm64_helper_call_uses_arm64_reloc_placeholder ... ok
+test tests::arm64_helper_call_uses_direct_or_far_reloc_placeholder ... ok
+test tests::arm64_helper_call_uses_literal_load_when_far_safe ... ok
+test tests::arm64_kernel_blob_control_flow_allows_helper_blr_x10_literal ... ok
+test tests::arm64_kernel_blob_control_flow_allows_tail_call_br_x10_and_ignores_data ... ok
+test tests::arm64_kernel_blob_control_flow_rejects_helper_blr_x10_user_literal ... ok
+test tests::arm64_kernel_blob_control_flow_rejects_non_tail_br ... ok
+test tests::arm64_kernel_blob_control_flow_rejects_residual_blr ... ok
+test tests::arm64_kernel_blob_control_flow_rejects_unguarded_tail_call_br ... ok
+test tests::arm64_literal_pool_alignment_handles_unaligned_data ... ok
+test tests::arm64_lookup_selection_exact_name_beats_earlier_truncation ... ok
+test tests::arm64_lookup_selection_prefers_native_map_over_ordinal_order ... ok
+test tests::arm64_lookup_selection_rejects_ambiguous_truncation_without_consuming ... ok
+test tests::arm64_lookup_selection_uses_lookup_maps_for_extra_native_map_calls ... ok
+test tests::arm64_observed_callee_saved_mask_detects_unsaved_bpf_regs ... ok
+test tests::arm64_observed_callee_saved_mask_ignores_stripped_save_restore_only ... ok
+test tests::arm64_percpu_array_lookup_records_mrs_reloc ... ok
+test tests::arm64_proof_callee_saved_mask_wins_for_kernel_rewrite ... ok
+test tests::arm64_reachable_helper_id_survives_branch_around_map_load ... ok
+test tests::arm64_stp_ldp_pair_rejects_non_pair_instructions ... ok
+test tests::arm64_tail_call_cleanup_accepts_postindexed_frame_restore ... ok
+test tests::arm64_tail_call_cleanup_drops_frame_record_across_return_value_move ... ok
+test tests::arm64_tail_call_cleanup_ignores_stripped_restore_padding ... ok
+test tests::arm64_tail_call_cleanup_uses_rewritten_epilogue ... ok
+test tests::arm64_tail_call_counter_pointer_uses_saved_x26_slot ... ok
+test tests::arm64_tail_call_detection_requires_tail_helper ... ok
+test tests::arm64_tail_call_inline_patches_all_failure_branches ... ok
+test tests::arm64_tail_call_inline_pops_proof_sidecar_callee_saved_regs ... ok
+test tests::arm64_tbz_tbnz_branches_decode_and_patch ... ok
+test tests::arm64_tail_call_requires_tracked_prog_array_map ... ok
+test tests::arm64_update_selection_does_not_use_a_different_named_map ... ok
+test tests::arm64_tbz_tbnz_long_branch_uses_reserved_slot ... ok
+test tests::arm64_proof_data_preserves_object_extent_and_relocation_addend ... ok
+test tests::arm64_update_selection_exact_name_beats_ordinal_and_truncation ... ok
+test tests::arm64_update_selection_preserves_distinct_calls_for_the_same_map ... ok
+test tests::arm64_update_selection_rejects_ambiguous_truncation_without_consuming ... ok
+test tests::arm64_written_gpr_covers_common_map_pointer_clobbers ... ok
+test x86::tests::hash_of_maps_lookup_postprocess_is_rejected ... ok
+test x86::tests::helper_call_reloc_slot_encodes_only_call_rel32 ... ok
+test x86::tests::helper_id_load_accepts_32bit_register_write ... ok
+test x86::tests::helper_id_register_move_preserves_register_family ... ok
+test x86::tests::indirect_code_edge_visits_exact_target_in_its_section ... ok
+test x86::tests::helper_got_join_keeps_both_symbol_definitions ... ok
+test x86::tests::helper_join_keeps_both_ids_and_unknown_predecessor ... ok
+test x86::tests::helper_flow_kills_partial_implicit_and_call_writes ... ok
+test x86::tests::direct_call_to_section_offset_zero_is_relocated ... ok
+test x86::tests::helper_table_dispatch_keeps_id_index_and_flags ... ok
+test x86::tests::lookup_selection_prefers_exact_match_over_truncated_match ... ok
+test x86::tests::lookup_selection_rejects_ambiguous_truncated_matches ... ok
+test x86::tests::lookup_selection_uses_lookup_map_before_truncated_sites ... ok
+test x86::tests::native_code_call_cannot_promise_sysv_register_preservation ... ok
+test x86::tests::tail_call_frame_keeps_imm8_stack_adjust ... ok
+test x86::tests::preserve_entry_abi_keeps_callee_saved_in_body ... ok
+test x86::tests::update_selection_prefers_native_map_over_ordinal_order ... ok
+
+test result: ok. 67 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+taskset -c 16-23 cargo build --release --manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml --target-dir /workspaces/repository/kprog/arm64/build/app-native-link
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 13.53s

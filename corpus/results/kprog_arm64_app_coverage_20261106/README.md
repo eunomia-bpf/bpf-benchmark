@@ -481,3 +481,23 @@ baseline counters are real; no post-native counters or same-work comparison was
 produced. This completed run supplements the earlier interrupted startup census,
 whose feature probes, retries and 74 load attempts remain intact. Capture again
 with `make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile runtime-complete-capture PHASE=<new-directory>`.
+
+## Complete ARM linker readonly extents
+
+The real BCC load diagnostics exposed two linker defects: ARM proof emission
+copied only 16 bytes of every readonly target and used the relocation addend
+as its section offset, ignoring a named object's own offset. It now preserves
+the complete named ELF object (or section), keeps the original relocation
+addend, and reports malformed extents. This fixes the actual 32-byte
+`sys_exit.zero` and 120-byte runqlat histogram initializer proofs: both changed
+from verifier rejection for out-of-bounds map-update input to verifier acceptance.
+These are selected-proof load diagnostics with original BPF sections/maps;
+app startup and matching-work execution are separate observations.
+
+[All 67 native-link Rust tests and the release build passed](readonly-link/check.log).
+The focused regression includes 8/32/120-byte objects, a nonzero object base,
+interior and section addends, and an invalid extent. [Replay inputs and raw
+before/after verifier evidence](readonly-link/replay.tar.gz) preserve both
+original native objects and old/new proof outputs. Run `make -f
+corpus/results/kprog_arm64_app_coverage_20261106/Makefile native-link-check
+native-link-build` to repeat the component checks.

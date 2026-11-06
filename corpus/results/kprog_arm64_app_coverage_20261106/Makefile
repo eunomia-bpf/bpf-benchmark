@@ -203,3 +203,13 @@ sp-write-artifacts:
 .PHONY: runtime-complete-capture
 runtime-complete-capture:
 	python3 $(HERE)/runtime_complete.py $(HERE)/$(PHASE)
+
+.PHONY: native-link-check native-link-build native-link-ro-artifacts
+native-link-check:
+	taskset -c 16-23 cargo test --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml --target-dir $(ROOT)/kprog/arm64/build/app-native-link
+
+native-link-build:
+	taskset -c 16-23 cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml --target-dir $(ROOT)/kprog/arm64/build/app-native-link
+
+native-link-ro-artifacts:
+	tar -C $(ROOT) -czf $(HERE)/readonly-link/replay.tar.gz -T $(HERE)/readonly-link/replay-files.txt

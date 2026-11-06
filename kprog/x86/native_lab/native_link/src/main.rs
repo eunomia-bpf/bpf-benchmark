@@ -2385,7 +2385,7 @@ fn arm64_text_relocations(
     Ok(out)
 }
 
-fn arm64_reloc_data(elf: &object::File, reloc: &Arm64RelocInfo, max_len: usize) -> Result<Vec<u8>> {
+fn arm64_reloc_data(elf: &object::File, reloc: &Arm64RelocInfo) -> Result<Vec<u8>> {
     let section_index = reloc.target_section_index.ok_or_else(|| {
         anyhow!(
             "arm64 proof data relocation {} has no target section",
@@ -2404,16 +2404,29 @@ fn arm64_reloc_data(elf: &object::File, reloc: &Arm64RelocInfo, max_len: usize) 
         .with_context(|| format!("arm64 proof data section {section_index:?}"))?;
     let data = arm64_section_materialized_data(&section)
         .with_context(|| format!("read arm64 proof data section {section_index:?}"))?;
-    let start = reloc.addend as usize;
-    if start >= data.len() {
-        bail!(
-            "arm64 proof data relocation {} addend {} exceeds section size {}",
-            reloc.target_name,
-            reloc.addend,
-            data.len()
-        );
+    let base = reloc.target_address
+        .and_then(|address| address.checked_sub(reloc.addend as u64))
+        .ok_or_else(|| anyhow!("arm64 proof data relocation {} has no symbol base", reloc.target_name))?;
+    let start = usize::try_from(base.checked_sub(section.address())
+        .ok_or_else(|| anyhow!("arm64 proof data symbol precedes its section"))?)?;
+    let mut size = None;
+    for symbol in elf.symbols() {
+        if symbol.section_index() == Some(section_index) && symbol.address() == base &&
+            symbol.kind() == SymbolKind::Data && symbol.name()? == reloc.target_name {
+            if symbol.size() != 0 { size = Some(symbol.size()); }
+            break;
+        }
     }
-    let end = data.len().min(start + max_len);
+    // A named object owns its complete ELF extent; a section relocation owns
+    // that section's remaining bytes. Preserve the original addend separately.
+    let end = match size {
+        Some(size) => start.checked_add(usize::try_from(size)?),
+        None => Some(data.len()),
+    }.ok_or_else(|| anyhow!("arm64 proof data extent overflows"))?;
+    if start >= end || end > data.len() {
+        bail!("arm64 proof data relocation {} extent {}..{} exceeds section size {}",
+            reloc.target_name, start, end, data.len());
+    }
     Ok(data[start..end].to_vec())
 }
 
@@ -2425,11 +2438,7 @@ fn arm64_local_call_target(reloc: &Arm64RelocInfo) -> Option<Arm64AddressKey> {
 }
 
 fn arm64_proof_reloc_addend(reloc: &Arm64RelocInfo) -> i64 {
-    if reloc.target_name.starts_with("__arm64_section_") {
-        0
-    } else {
-        reloc.addend
-    }
+    reloc.addend
 }
 
 fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<SymInfo>> {
@@ -3614,7 +3623,7 @@ fn rewrite_arm64(
                                 r_type: reloc.r_type,
                                 symbol: reloc.target_name.clone(),
                                 addend: arm64_proof_reloc_addend(reloc),
-                                data: Some(arm64_reloc_data(elf, reloc, 16)?),
+                                data: Some(arm64_reloc_data(elf, reloc)?),
                             });
                             blob.extend_from_slice(&insn.to_le_bytes());
                             continue;
@@ -4244,6 +4253,38 @@ fn disasm_arm64_words(blob: &[u8]) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn arm64_proof_data_preserves_object_extent_and_relocation_addend() {
+        for (size, declared, offset) in [(8usize, 8u64, 0i64), (32, 32, 7), (120, 120, 48), (32, 80, 0)] {
+            let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::Aarch64, Endianness::Little);
+            let section = object.add_section(Vec::new(), b".rodata".to_vec(), SectionKind::ReadOnlyData);
+            let bytes = (0..size+24).map(|i| (i*13+7) as u8).collect::<Vec<_>>();
+            object.append_section_data(section, &bytes, 8);
+            object.add_symbol(WriteSymbol {
+                name: b"value".to_vec(), value: 16, size: declared,
+                kind: SymbolKind::Data, scope: SymbolScope::Linkage, weak: false,
+                section: WriteSymbolSection::Section(section), flags: SymbolFlags::None,
+            });
+            let encoded = object.write().unwrap();
+            let elf = object::File::parse(encoded.as_slice()).unwrap();
+            let section_index = elf.section_by_name(".rodata").unwrap().index();
+            let mut reloc = Arm64RelocInfo {
+                r_type: R_AARCH64_ADR_PREL_PG_HI21, target_name: "value".to_string(),
+                target_section_index: Some(section_index), target_address: Some(16+offset as u64), addend: offset,
+            };
+            if declared as usize > size+8 {
+                assert!(arm64_reloc_data(&elf, &reloc).unwrap_err().to_string().contains("exceeds section size"));
+                continue;
+            }
+            assert_eq!(arm64_reloc_data(&elf, &reloc).unwrap(), bytes[16..16+size]);
+            assert_eq!(arm64_proof_reloc_addend(&reloc), offset);
+            reloc.target_name = "__arm64_section_test_addend_7".to_string();
+            reloc.target_address = Some(7); reloc.addend = 7;
+            assert_eq!(arm64_reloc_data(&elf, &reloc).unwrap(), bytes);
+            assert_eq!(arm64_proof_reloc_addend(&reloc), 7);
+        }
+    }
 
     #[test]
     fn arm64_entry_abi_strip_allows_multiple_epilogues() {
