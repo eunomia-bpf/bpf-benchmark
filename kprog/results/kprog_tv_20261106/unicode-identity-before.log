@@ -1,0 +1,6 @@
+make: Entering directory '/workspaces/.agent-state/kprog-lanes/T/unicode-identity/before'
+g++ -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined negative.cpp -o negative
+./negative
+UNSAFE_ACCEPT: Unicode a bound to distinct question-mark symbol
+make: *** [Makefile:4: negative-check] Error 1
+make: Leaving directory '/workspaces/.agent-state/kprog-lanes/T/unicode-identity/before'

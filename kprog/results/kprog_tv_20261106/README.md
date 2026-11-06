@@ -569,3 +569,22 @@ existing BPF/input/CMOV/context checks and all their mutation negatives pass.
 This is a universal certificate for the real store block. Full-program entry,
 context access, private spill, preceding CFG and composition obligations
 continue separately; no whole-program pass is inferred from this block.
+
+Unicode metadata identity rejection
+-----------------------------------
+
+The old central JSON parser replaced every Unicode escape with a question
+mark. The before run against the committed parser actually accepts native
+layout symbol `\\u0061` (Unicode a) for a distinct proof symbol `?`. The
+repaired parser decodes the exact UTF-8 identity; the same negative rejects.
+Literal a matches its escaped spelling. Accented, Chinese and surrogate-pair
+emoji identities decode exactly; malformed hex, unpaired surrogates,
+non-scalar/overlong UTF-8 and embedded NUL reject.
+
+The isolated after run uses precisely the proposed string-parser hunk and
+the otherwise unchanged committed readonly metadata consumer. Both the
+negative and full readonly metadata regression pass under ASan/UBSan.
+The input archive retains old/new headers, the actual negative, regression
+source and Makefile; no unfinished source-map consumer code is needed to
+reproduce this result. This fixes an accepted metadata negative; it does not
+add a whole-program TV claim.

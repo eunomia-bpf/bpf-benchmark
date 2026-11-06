@@ -144,6 +144,20 @@ inline size_t json_skip_ws(const std::string &text, size_t pos)
     manifest_fail("native_loader manifest JSON: " + message);
 }
 
+inline void json_append_scalar(std::string &out, uint32_t scalar)
+{
+    if (!scalar || scalar > 0x10ffff || (scalar >= 0xd800 && scalar <= 0xdfff))
+        json_fail("invalid Unicode scalar in metadata identity");
+    if (scalar < 0x80) out.push_back(static_cast<char>(scalar));
+    else {
+        const unsigned tails = scalar < 0x800 ? 1 : scalar < 0x10000 ? 2 : 3;
+        out.push_back(static_cast<char>((tails == 1 ? 0xc0 : tails == 2 ? 0xe0 : 0xf0) |
+            (scalar >> (6 * tails))));
+        for (unsigned left = tails; left > 0; left--)
+            out.push_back(static_cast<char>(0x80 | ((scalar >> (6 * (left - 1))) & 0x3f)));
+    }
+}
+
 inline std::string json_parse_string_value(const std::string &text, size_t &pos)
 {
     pos = json_skip_ws(text, pos);
@@ -183,18 +197,54 @@ inline std::string json_parse_string_value(const std::string &text, size_t &pos)
             case 't':
                 out.push_back('\t');
                 break;
-            case 'u':
-                if (pos + 4 > text.size()) {
-                    json_fail("short unicode escape");
+            case 'u': {
+                const auto unit = [&]() {
+                    uint32_t value = 0;
+                    for (unsigned i = 0; i < 4; i++) {
+                        if (pos == text.size()) json_fail("short unicode escape");
+                        const unsigned char digit = text[pos++];
+                        unsigned nibble;
+                        if (digit >= '0' && digit <= '9') nibble = digit - '0';
+                        else if (digit >= 'a' && digit <= 'f') nibble = digit - 'a' + 10;
+                        else if (digit >= 'A' && digit <= 'F') nibble = digit - 'A' + 10;
+                        else json_fail("nonhexadecimal unicode escape");
+                        value = value * 16 + nibble;
+                    }
+                    return value;
+                };
+                uint32_t scalar = unit();
+                if (scalar >= 0xd800 && scalar <= 0xdbff) {
+                    if (text.size() - pos < 2 || text[pos] != '\\' || text[pos + 1] != 'u')
+                        json_fail("Unicode high surrogate lacks a low surrogate");
+                    pos += 2;
+                    const uint32_t low = unit();
+                    if (low < 0xdc00 || low > 0xdfff) json_fail("invalid Unicode low surrogate");
+                    scalar = 0x10000 + ((scalar - 0xd800) << 10) + low - 0xdc00;
                 }
-                out.push_back('?');
-                pos += 4;
+                json_append_scalar(out, scalar);
                 break;
+            }
             default:
                 json_fail("invalid string escape");
             }
         } else {
-            out.push_back(ch);
+            const unsigned char lead = static_cast<unsigned char>(ch);
+            if (lead < 0x20) json_fail("unescaped control byte in string");
+            if (lead < 0x80) out.push_back(ch);
+            else {
+                const unsigned tails = lead >= 0xc2 && lead <= 0xdf ? 1 :
+                    lead >= 0xe0 && lead <= 0xef ? 2 : lead >= 0xf0 && lead <= 0xf4 ? 3 : 0;
+                if (!tails || text.size() - pos < tails) json_fail("invalid UTF-8 metadata string");
+                uint32_t scalar = lead & (tails == 1 ? 0x1f : tails == 2 ? 0x0f : 7);
+                for (unsigned i = 0; i < tails; i++) {
+                    const unsigned char byte = text[pos++];
+                    if ((byte & 0xc0) != 0x80) json_fail("invalid UTF-8 continuation");
+                    scalar = (scalar << 6) | (byte & 0x3f);
+                }
+                if ((tails == 2 && scalar < 0x800) || (tails == 3 && scalar < 0x10000))
+                    json_fail("overlong UTF-8 metadata string");
+                json_append_scalar(out, scalar);
+            }
         }
     }
     json_fail("unterminated string");

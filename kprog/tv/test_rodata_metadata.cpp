@@ -40,5 +40,16 @@ int main()
     rejects([&] { resolve_readonly_extent(wrong, layout, 8); }, "sizes differ");
     auto duplicate = std::string(R"({"proof_section":".rodata.native.0","proof_symbol":"p0","native_symbol":"a","size":16})");
     rejects([&] { parse_proof_readonly_bindings("{\"version\":1,\"objects\":[" + duplicate + "," + duplicate + "]}"); }, "duplicate");
+    const auto escaped = parse_native_readonly_layout(R"({"version":1,"objects":[
+        {"native_symbol":"\u0061","offset":0,"size":16}]})", 16);
+    assert(resolve_readonly_extent(proof[0], escaped, 16).offset == 0);
+    auto other = proof[0]; other.native_symbol = "?";
+    rejects([&] { resolve_readonly_extent(other, escaped, 16); }, "absent");
+    size_t pos = 0;
+    assert(json_parse_string_value(R"("\u00e9\u4e2d\ud83d\ude00")", pos) == "\xc3\xa9\xe4\xb8\xad\xf0\x9f\x98\x80");
+    for (const char *bad : {R"("\u00xz")", R"("\ud800")", R"("\udc00")",
+         R"("\ud800\u0041")", R"("\u0000")", "\"\xc0\xaf\"", "\"\xed\xa0\x80\"", "\"\xf4\x90\x80\x80\""}) {
+        rejects([&] { size_t index = 0; json_parse_string_value(bad, index); }, "");
+    }
     std::puts("readonly symbol identity/size/overflow/version/duplicate/unknown/JSON rejection: PASS");
 }
