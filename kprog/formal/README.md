@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0971 - six separators and the nouns they introduce
+
+The last six figures needed four more separators and four more nouns. A figure
+followed by `of` is a part of a whole named after the whole's number, as in a
+count of modules out of a larger count; a figure followed by `rather` is a
+comparative; a figure followed by a comma or a semicolon is continuing the
+sentence; and one followed by a refinement count names it with a hyphenated
+word.
+
+With those the stated-size class holds twenty-nine figures and the unexplained
+remainder falls from six to two. The two are a count of static assertions
+followed by the macro that holds them, and a figure in a parenthetical that
+continues with a clause rather than a noun.
+
+Census unchanged; the report names nine classes and states two unreached.
+
 ### Step 0970 - the separator between a figure and its noun varies
 
 The separator between a figure and the noun it counts is not one character. A
