@@ -1615,8 +1615,15 @@ def render_program(name: str, insns: list[NativeInsn],
     ])
     if has_indirect:
         lines.extend([
+            '#if defined(__bpf__) || defined(__BPF__)',
+            'static __attribute__((always_inline)) inline void',
+            '__x86_sim_unresolved_indirect_target(void) {',
+            '\tasm volatile("call -1" ::: "r0", "r1", "r2", "r3", "r4", "r5", "memory");',
+            '}',
+            '#else',
             'extern void __x86_sim_unresolved_indirect_target(void)',
             '\t__attribute__((error("indirect target was not eliminated by specialization")));',
+            '#endif',
             '',
         ])
     if source_prelude:

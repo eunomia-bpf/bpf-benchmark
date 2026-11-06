@@ -975,3 +975,38 @@ separate linker defect: an undefined symbol before a local callee caused symbol
 lookup to return immediately. Both x86 symbol scans now continue past undefined
 symbols. The existing local-call relocation regression now includes that ordering;
 all76 native-link tests pass. No kernel reference check is relaxed.
+
+
+## Original context at helper calls
+
+Native XDP/SKB context reads use an expanded pointer-width ABI, whereas public
+kernel helpers require the original kernel context. The simulator now records
+both addresses and translates exactly that ABI base at helper-context arguments;
+raw contexts, offset pointers and ordinary memory arguments retain their identity.
+XDP adjustment helpers refresh the expanded data/end pointers after the call.
+The JSON-generated C/Lean address selector and an external-call composition
+refinement both build. The focused host regression checks exact-base translation,
+offset/raw identity and the refreshed packet window. Existing helper dispatch
+still passes18,690 cases; stack arm/write-lane checks pass117,782/1,401,654 cases.
+
+A real KVM generation-bound XDP fixture calls adjust_head(0), reloads the window,
+writes42 and returns XDP_PASS. Baseline and native both report result42/retval2;
+the native load has one chunk and a nonzero generation. This is a functional
+regression, not an application timing result.
+
+Katran's actual balancer entry now generates and compiles. Its finite indirect
+helper dispatch uses the same unreachable-invalid-helper marker as AArch64:
+unknown target construction still fails; any non-eliminated marker is rejected
+by the verifier. It never supplies an executable fallback. Exact8-byte stack
+stores also remain one store at unaligned offsets, preventing LLVM from hoisting
+pointer byte-extraction arithmetic. Phase4 passes the old pointer-spill error;
+phase5 additionally passes the XDP helper-context error and reaches a partial
+`bpl` write to a register holding a verifier map pointer. Phase6 tests an exact
+volatile byte-store representation for that remaining issue; it is not adopted
+in the production register-write contract at this checkpoint.
+
+[Packet-context evidence](packet-context-artifacts.tar.gz) contains the fixture,
+raw KVM output, host/Lean logs and Katran phases1–5. Reproduce with targets
+`packet-helper-contract`, `packet-helper-host`, `packet-stack-host`,
+`packet-helper-bound-build`, `packet-helper-kvm`, `katran-real-5`, and
+`katran-verify KATRAN_PHASE=katran-real-5` under `strict-runtime.mk`.

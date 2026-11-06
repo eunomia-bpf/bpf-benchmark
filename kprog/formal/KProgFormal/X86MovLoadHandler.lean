@@ -357,4 +357,23 @@ theorem x86_mov_load_movscalar_example :
       { dst := { bits := 0x44332211, tag := .scalar } } := by
   native_decide
 
+/-- The external helper sees the original kernel context exactly at the expanded
+native ABI base. Every other address, including base+offset, remains unchanged. -/
+def abiHelperContextSpec (available : Bool) (value base kernel : Nat) : Nat :=
+  if available = true ∧ value = base then kernel else value
+
+theorem abi_helper_context_refines (available : Bool) (value base kernel : Nat) :
+    GeneratedAbiLoad.helperContext available value base kernel =
+      abiHelperContextSpec available value base kernel := by
+  cases available <;> by_cases h : value = base <;>
+    simp [GeneratedAbiLoad.helperContext, abiHelperContextSpec, h]
+
+/-- Substituting that address relation preserves an arbitrary external helper
+transition, including its return value, memory effect and fault outcome. -/
+theorem abi_helper_call_refines {α : Type} (externalCall : Nat → α)
+    (available : Bool) (value base kernel : Nat) :
+    externalCall (GeneratedAbiLoad.helperContext available value base kernel) =
+      externalCall (abiHelperContextSpec available value base kernel) := by
+  rw [abi_helper_context_refines]
+
 end KProgFormal
