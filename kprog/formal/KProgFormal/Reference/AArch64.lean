@@ -354,10 +354,20 @@ def compareStep (width : Width) (lhs : Register) (rhs : CompareOperand)
     else compareFallback s.flags fallback
   ⟨{ s with flags := flags, pc := s.pc + 4 }, [], none⟩
 
+/-- ADD/SUB immediate, with flag-setting and CMP/CMN aliases. Native decode
+selects SP or ZR for field31 before entering this normalized arithmetic step. -/
+def arithmeticImmediateStep (width : Width) (subtract setFlags : Bool)
+    (dst src : RegisterRef) (rhs : Word) (s : State) : Transition State :=
+  let lhs := readData s src
+  let value := if subtract then lhs - rhs else lhs + rhs
+  let flags := if setFlags then arithmeticFlags width subtract lhs rhs s.flags else s.flags
+  ⟨{ writeData s dst value width with flags := flags, pc := s.pc + 4 }, [], none⟩
+
 inductive Instruction
   | mul (instruction : MulInstruction)
   | fmov (instruction : FmovInstruction)
   | reduction (op : ReductionOp) (wide : Bool)
+  | arithmeticImmediate (width : Width) (subtract setFlags : Bool) (dst src : RegisterRef) (rhs : Word)
   | compare (width : Width) (lhs : Register) (rhs : CompareOperand)
       (predicate : Fin 16) (fallback : BitVec 4)
   | shift (instruction : ShiftInstruction)
@@ -374,6 +384,7 @@ def step (i : Instruction) (s : State) : Transition State :=
   | .mul instruction => mulStep instruction s
   | .fmov instruction => fmovStep instruction s
   | .reduction op wide => reductionStep op wide s
+  | .arithmeticImmediate width subtract setFlags dst src rhs => arithmeticImmediateStep width subtract setFlags dst src rhs s
   | .compare width lhs rhs predicate fallback => compareStep width lhs rhs predicate fallback s
   | .shift instruction => shiftStep instruction s
   | .logic instruction => logicStep instruction s
@@ -429,6 +440,12 @@ def decode (bytes : Array Byte) : Except String Instruction := do
     return .moveRegister width (dataRegister dst false) (dataRegister rhs false)
   if word &&& 0x7ffffc00 = 0x11000000 ∧ (dst.val = 31 ∨ lhs.val = 31) then
     return .moveRegister width (dataRegister dst true) (dataRegister lhs true)
+  if word &&& 0x1f800000 = 0x11000000 then
+    let setFlags := (word / 2^29) % 2 == 1
+    let subtract := (word / 2^30) % 2 == 1
+    let shift := if (word / 2^22) % 2 = 1 then 12 else 0
+    return .arithmeticImmediate width subtract setFlags (dataRegister dst (!setFlags))
+      (dataRegister lhs true) (BitVec.ofNat 64 ((word / 2^10) % 2^12) <<< shift)
   if word &&& 0x7f800000 = 0x72800000 then
     let column := (word / 2^21) % 4
     if h : column < width.bits / 16 then

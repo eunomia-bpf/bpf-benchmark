@@ -1,5 +1,10 @@
 import KProgFormal.Refinement.Arm64Logic
 import KProgFormal.Refinement.Arm64Condition
+import KProgFormal.Refinement.Arm64Move
+import KProgFormal.Generated.GeneratedArm64AluHandler
+import KProgFormal.Generated.GeneratedArm64AluOperandSelect
+import KProgFormal.Generated.GeneratedArm64FlagHandler
+import KProgFormal.Generated.GeneratedPtrAdd
 import KProgFormal.Generated.GeneratedArm64CcmpHandler
 import KProgFormal.Generated.GeneratedArm64FlagOperand
 
@@ -84,5 +89,73 @@ theorem nv_handler_refines (width : Width) (lhs : Register) (rhs : CompareOperan
     (fallback : BitVec 4) (s : Reference.AArch64.State) :
     Reference.AArch64.Step (.compare width lhs rhs 15 fallback) s
       (handlerStep width lhs rhs .al fallback s) := handler_refines width lhs rhs .al fallback s
+
+/-- Both immediate routing tables select the decoded immediate. The pointer
+ADD branch is included for either input tag classification; its architectural
+bits use the same source-value lift as the scalar branch. -/
+def immediateHandlerStep (width : Width) (subtract setFlags sourceIsScalar : Bool)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Reference.Word) (s : Reference.AArch64.State) :
+    Transition Reference.AArch64.State :=
+  let lhs := Arm64Move.readData s src
+  let rhs := if setFlags then
+      if GeneratedArm64FlagOperand.immediate (if subtract then .subsImm else .addsImm) then rhs else 0
+    else if GeneratedArm64AluOperandSelect.immediate .aluImm then rhs else 0
+  let op := if subtract then GeneratedArm64AluDecode.Alu.sub else .add
+  let value := GeneratedArm64AluResult.result op lhs rhs
+  let write := if !setFlags && GeneratedArm64AluHandler.usePointer (Arm64Register.handlerWidth width)
+      op (decide (dst = .stack)) sourceIsScalar then
+      Arm64Move.widthWrite s dst (GeneratedPtrAdd.bits lhs rhs) .w64
+    else Arm64Move.widthWrite s dst value width
+  let flags := if setFlags then Arm64Logic.flagsWord s.flags
+      (GeneratedArm64FlagHandler.flags (if subtract then .sub else .add) lhs rhs
+        (Arm64Register.handlerWidth width)) else s.flags
+  ⟨{ write with flags := flags, pc := s.pc + 4 }, [], none⟩
+
+theorem family_flags_refines (width : Width) (subtract : Bool) (lhs rhs old : Reference.Word) :
+    Arm64Logic.flagsWord old
+      (GeneratedArm64FlagHandler.flags (if subtract then .sub else .add) lhs rhs
+        (Arm64Register.handlerWidth width)) = Reference.AArch64.arithmeticFlags width subtract lhs rhs old := by
+  cases subtract
+  · exact flags_refines width false lhs rhs old
+  · exact flags_refines width true lhs rhs old
+
+theorem immediate_step_refines (width : Width) (subtract setFlags sourceIsScalar : Bool)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Reference.Word) (s : Reference.AArch64.State) :
+    immediateHandlerStep width subtract setFlags sourceIsScalar dst src rhs s =
+      Reference.AArch64.step (.arithmeticImmediate width subtract setFlags dst src rhs) s := by
+  simp only [immediateHandlerStep, family_flags_refines]
+  cases width <;> cases subtract <;> cases setFlags <;> cases sourceIsScalar <;>
+    simp [immediateHandlerStep, Reference.AArch64.step, Reference.AArch64.arithmeticImmediateStep,
+      Arm64Move.read_data_refines, Arm64Move.width_write_refines, Arm64Register.handlerWidth,
+      GeneratedArm64FlagOperand.immediate, GeneratedArm64AluOperandSelect.immediate,
+      GeneratedArm64AluHandler.usePointer, GeneratedArm64AluResult.result, GeneratedPtrAdd.bits,
+      family_flags_refines]
+
+theorem immediate_handler_refines (width : Width) (subtract setFlags sourceIsScalar : Bool)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Reference.Word) (s : Reference.AArch64.State) :
+    Reference.AArch64.Step (.arithmeticImmediate width subtract setFlags dst src rhs) s
+      (immediateHandlerStep width subtract setFlags sourceIsScalar dst src rhs s) :=
+  (immediate_step_refines width subtract setFlags sourceIsScalar dst src rhs s).symm
+
+/-- CMP and CMN use the compare body, which updates flags without a
+writeback. CMP selects its immediate through the generated flag table. -/
+def compareImmediateHandlerStep (width : Width) (subtract : Bool)
+    (src : Reference.AArch64.RegisterRef) (rhs : Reference.Word) (s : Reference.AArch64.State) :
+    Transition Reference.AArch64.State :=
+  let rhs := if subtract then
+      if GeneratedArm64FlagOperand.immediate .cmpImm then rhs else 0 else rhs
+  let flags := GeneratedArm64FlagHandler.flags (if subtract then .sub else .add)
+    (Arm64Move.readData s src) rhs (Arm64Register.handlerWidth width)
+  ⟨{ s with flags := Arm64Logic.flagsWord s.flags flags, pc := s.pc + 4 }, [], none⟩
+
+theorem immediate_compare_alias_refines (width : Width) (subtract : Bool)
+    (src : Reference.AArch64.RegisterRef) (rhs : Reference.Word) (s : Reference.AArch64.State) :
+    Reference.AArch64.Step (.arithmeticImmediate width subtract true .zero src rhs) s
+      (compareImmediateHandlerStep width subtract src rhs s) := by
+  unfold Reference.AArch64.Step
+  simp only [compareImmediateHandlerStep, Reference.AArch64.step, Reference.AArch64.arithmeticImmediateStep,
+    Reference.AArch64.writeData, GeneratedArm64FlagOperand.immediate, ↓reduceIte,
+    family_flags_refines, Arm64Move.read_data_refines]
+  cases subtract <;> rfl
 
 end KProgFormal.Refinement.Arm64Arithmetic
