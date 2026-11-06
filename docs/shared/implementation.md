@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0966 measured the 31: 9 are asserted by
+check_lean_claims, 22 are oracle sizes bound by their
+own hosts, not the gate.
+
+
 Step 0965 classified the 4 ISA bucket totals (held by
 the split check): unexplained 35 -> 31, 8 classes
 reported.

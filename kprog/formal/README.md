@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0966 - nine of the thirty-one are asserted elsewhere
+
+The thirty-one figures the report calls unclassified are not all unheld. Reading
+each against the two checkers, nine appear as literals in the claims checker,
+which does assert several of them: the theorem totals, the axiom classes, and
+the refinement population. The figure classifier knows only about its own
+classes, so its report understates the reach rather than overstating it, which
+is the safer error and still worth correcting in the account.
+
+The remaining twenty-two are sizes of independent oracles, written as a count
+followed by cases, and they are not gate banners: an oracle is a C program the
+harness compiles and runs, not a line in the gate log. A separate check already
+reads the population of sweep claims, holds it at twenty-two, and requires that
+any case count a sweep claim prints is a banner; these twenty-two are the sizes
+of oracles the sweep check does not read.
+
+So the honest statement is that thirty-one figures are outside the classifier's
+classes and that nine of them are asserted by the claims checker, leaving
+twenty-two oracle sizes bound by their own hosts rather than by the gate. Census
+unchanged; the division is measured.
+
 ### Step 0965 - four of the remainder are the split's own totals
 
 The four figures that are the instruction-set split's case totals were counted
