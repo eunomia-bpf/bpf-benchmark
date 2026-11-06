@@ -170,6 +170,31 @@ cc .../vendor/build/x86/linux/vmlinux.o -o .../vendor/build/x86/linux/vmlinux
 That fails `host-micro-programs-x86` and blocks both `make micro` and
 `make corpus`. Reported; not worked around here.
 
+### Native arm state at 16:34
+
+Blockers cleared in order (each was a real, reproducible failure):
+
+1. module/kernel BTF mismatch — rebuilt the module against the current
+   kernel and repackaged the image;
+2. `vmlinux` relinked with the host `cc` because `vmlinux.o` sat beside it
+   and make's builtin `%: %.o` rule applied;
+3. `native-link` did not compile (`missing field readonly_objects`);
+4. `siphash_rotate64_mixer` hit `error in backend: IO failure on output
+   stream: Bad address` under concurrent load;
+5. the image shipped a **stale prebuilt loader** from an earlier state of
+   the dirty `native_loader.cpp`, which reported
+   `manifest native object is unreadable` — a check absent from the
+   current source. Cleared by removing
+   `runner/build-llvmbpf/native_loader` and
+   `runner/build-host-docker-llvmbpf/native_loader` before packaging.
+
+The native arm now fails one layer deeper, with a message that names the
+defect: `verified native runtime has no manifest entry for prog= manifest=
+.../bcc-real-4/manifest.json`. `prog=` is **empty** for all five loads,
+while the manifest carries 25 real entries (`kprobe__cap_cap`,
+`tracepoint__sys`, `fentry_vfs_read`, ...), so the lookup cannot match:
+the program name is not reaching the verified-runtime lookup. Reported.
+
 The native arm itself is selected with
 
 ```sh
