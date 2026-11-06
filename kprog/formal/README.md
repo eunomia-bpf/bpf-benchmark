@@ -7606,6 +7606,21 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0970 - the separator between a figure and its noun varies
+
+The separator between a figure and the noun it counts is not one character. A
+hyphen joins them in a case count, a closing math delimiter in a routed count, a
+space or a semicolon in prose, and a parenthesis in a parenthesised value. A
+pattern written for one separator classified the figures using it and left the
+others unread.
+
+With a character class admitting all of them, twenty-five figures are classified
+as stated sizes and the unexplained remainder falls from nine to six. The six
+are figures with no noun after them whatever: a sum that would otherwise be one
+higher, and a count that is the sentence's own subject.
+
+Census unchanged; the report names nine classes and states six unreached.
+
 ### Step 0969 - a figure inside inline math has its noun after the
 delimiter
 

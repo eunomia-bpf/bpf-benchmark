@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0970 generalised the figure-noun separator
+(hyphen, math close, space, semicolon): unexplained 9
+-> 6.
+
+
 Step 0969 extended the noun class to theorems/modules
 and to figures in inline math: unexplained 17 -> 9.
 
