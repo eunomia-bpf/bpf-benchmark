@@ -1,0 +1,42 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build
+cd ../formal && lake env lean -R ../tv -o ../tv/build/Composition.olean ../tv/Composition.lean
+'KProgTV.validated_execution' depends on axioms: [propext]
+'KProgTV.native_effects_checked' depends on axioms: [propext]
+cd ../formal && lake env lean -R ../tv -o ../tv/build/BPF.olean ../tv/BPF.lean
+cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv -o ../tv/build/BPFPath.olean ../tv/BPFPath.lean
+'KProgTV.BPFPath.evaluate_sound' depends on axioms: [propext, Quot.sound]
+cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv ../tv/BPFChecks.lean
+make input-certificate
+make[1]: Entering directory '/workspaces/repository/kprog/tv'
+cd ../formal && LEAN_PATH=../tv/build/inputs:../tv/build lake env lean -R ../tv/build/inputs \
+	-o ../tv/build/inputs/CompiledBlocks.olean ../tv/build/inputs/CompiledBlocks.lean
+cd ../formal && LEAN_PATH=../tv/build/inputs:../tv/build lake env lean -R ../tv ../tv/InputCertificate.lean
+../tv/InputCertificate.lean:65:35: error: unsolved goals
+native : EntryEnvironment.Environment
+frame : EntryEnvironment.Frame
+argumentRegister : X86.Register
+argument returnSlot : Word
+source : X86.State
+memory : Memory
+witness : EntryEnvironment.X86Entry native frame argumentRegister argument returnSlot source
+⊢ native.bodyCode + native.bodyStack =
+    native.bodyCode + frame.codeBias - frame.codeBias + (native.bodyStack + frame.stackBias - frame.stackBias)
+../tv/InputCertificate.lean:76:35: error: unsolved goals
+native : EntryEnvironment.Environment
+frame : EntryEnvironment.Frame
+argumentRegister : AArch64.Gpr
+argument : Word
+source : AArch64.State
+memory : Memory
+witness : EntryEnvironment.Arm64Entry native frame argumentRegister argument source
+⊢ native.bodyCode + native.bodyStack =
+    native.bodyCode + frame.codeBias - frame.codeBias + (native.bodyStack + frame.stackBias - frame.stackBias)
+'KProgTV.InputCertificate.compiled_inputs' depends on axioms: [propext, Quot.sound]
+'KProgTV.InputCertificate.compiled_execution' depends on axioms: [propext, Quot.sound]
+'KProgTV.InputCertificate.compiled_x86_entry' depends on axioms: [propext, sorryAx, Quot.sound]
+'KProgTV.InputCertificate.compiled_arm64_entry' depends on axioms: [propext, sorryAx, Quot.sound]
+make[1]: *** [Makefile:194: input-certificate] Error 1
+make[1]: Leaving directory '/workspaces/repository/kprog/tv'
+make: *** [Makefile:189: input-check] Error 2
+make: Leaving directory '/workspaces/repository/kprog/tv'

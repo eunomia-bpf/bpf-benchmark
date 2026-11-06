@@ -242,3 +242,23 @@ program with no BTF. All prior loader/binding/input regressions also pass.
 `full-btf-manifest-inputs.tar.gz` retains production/test sources, actual
 compiled BPF/native objects, manifests and executables. This is source-to-native
 selection/binding evidence; it does not replace their per-program TV proof.
+
+Canonical same-invocation entry relation
+--------------------------------------
+
+The actual clang input certificate now consumes V's canonical
+`Refinement.EntryEnvironment.Environment`, published in `4c6ed8913`.
+`compiled_x86_entry` and `compiled_arm64_entry` prove its computed result comes
+from a single source-state witness, including explicit source/body stack and
+code biases, argument-register mapping and the actual x86 saved return slot or
+Arm LR. All four theorem axiom reports are exactly `propext, Quot.sound`.
+The unchanged ELF and all four semantic mutations pass their expected outcomes.
+The first development proof needed the explicit modular add/sub cancellation
+lemma; that failed log and the final passing log are retained.
+
+These are conditional entry-component theorems, requiring actual ABI witnesses.
+In particular, the x86 native emitter copies inline bytes without a hardware
+CALL. Its body SP does not point at the saved outer return address; seeding
+that word with a return token invents state. The producer's normalization of
+linked JMP-to-end into a fictitious RET has been reported to C for correction.
+This observation is not hidden by granting a guessed stack-base relation.

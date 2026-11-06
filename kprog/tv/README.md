@@ -50,6 +50,12 @@ arbitrary memory, with unchanged memory and empty effects. The resulting
 execution theorem uses `BPFPath.evaluate_sound`; it is an input-ABI component,
 not a whole-program native certificate. Mutated stack/return selectors, numeric
 source and input ABI each fail the semantic theorem; the unchanged ELF passes.
+The environment is lane V's canonical `Refinement.EntryEnvironment.Environment`.
+`compiled_x86_entry` and `compiled_arm64_entry` connect those actual clang
+instructions to one native state witness, with explicit stack/code biases and
+argument-register/return-slot mappings. The kernel and each program's ABI
+certificate must establish the witness; these theorems never assume a return
+address at the current x86 stack pointer.
 Kernel regressions check stable actual
 entry values, 64-bit numeric identity, malformed markers, unreadable arguments,
 unsafe branches that an erroneous MOV-immediate interpretation would prune,
