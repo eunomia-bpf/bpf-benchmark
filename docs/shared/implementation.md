@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0957 extended the self-test to four cases, one
+per check function; a fifth had to be dropped because
+another checker owns it.
+
+
 Step 0956 added --self-test: it perturbs two owned
 claims and requires a report, under a lock (a
 concurrent run had left a value behind).

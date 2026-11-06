@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0957 - one self-test case per check function
+
+The self-test covered two claims; it now covers four, one for each check
+function, so a function that stopped being called fails here even with its
+assertions untouched. The cases are the gate case total, the banner count, a
+battery row count, and the route host count.
+
+Choosing them needed the same care as before. A first candidate was the
+specification count, which belongs to the claims checker that runs inside the
+gate: perturbing it here left this run green, which reads as a missing binding
+and is not one. The battery and route host counts are this checker's own.
+
+The runs also showed what an interrupted self-test costs. A run killed mid-case
+leaves its perturbation in the section, and three separate leftovers were found
+and restored while the cases were being settled: a case total one higher, a
+banner count one higher, a battery row count one higher. The lock prevents
+two runs from interleaving but not one from being killed, so the restore is in a
+finally block and the files are checked after each run.
+
+Census unchanged; four bindings are now checked on every self-test.
+
 ### Step 0956 - the bindings now verify themselves
 
 Every binding in this checker was verified by hand once, by editing the section

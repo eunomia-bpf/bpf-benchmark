@@ -5080,6 +5080,14 @@ def self_test() -> int:
         # here would leave this run green and read as a missing binding.
         ("248 independent oracle banners",
          "249 independent oracle banners", "banner count"),
+        # One case per check function, so a function that stopped being
+        # called would fail here even if its assertions were untouched. The
+        # specification and module counts are `check_lean_claims`'s, so a
+        # case for them here would stay green and read as a missing binding.
+        ("32 catchable rows are caught",
+         "33 catchable rows are caught", "battery row count"),
+        ("the fourteen battery-local route hosts",
+         "the fifteen battery-local route hosts", "route host count"),
     ]
     # Two concurrent runs would clobber each other's edits and could leave a
     # perturbed value behind, so a second run waits for the first.
