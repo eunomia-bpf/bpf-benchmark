@@ -1,0 +1,16 @@
+[
+  {
+    "name": "tail_helper_direct",
+    "expected": 37,
+    "preserve_entry_abi": false,
+    "native_log": "kernel result=37 retval=2 expected_result=37 expected_retval=2\nbound program id=16 chunks=1 nonzero_generations=1\nnative_bound result=37 retval=2 expected_result=37 expected_retval=2\n",
+    "proof_log": "case=simple retval=2 result=37 repeat=1 data_size_out=72\ntiming verify_s=0.049710 test_s=0.001443\n"
+  },
+  {
+    "name": "tail_helper_local",
+    "expected": 37,
+    "preserve_entry_abi": true,
+    "native_log": "kernel result=37 retval=2 expected_result=37 expected_retval=2\nbound program id=32 chunks=1 nonzero_generations=1\nnative_bound result=37 retval=2 expected_result=37 expected_retval=2\n",
+    "proof_log": "case=simple retval=2 result=37 repeat=1 data_size_out=72\ntiming verify_s=0.019044 test_s=0.000554\n"
+  }
+]

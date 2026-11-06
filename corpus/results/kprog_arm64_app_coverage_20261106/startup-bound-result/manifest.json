@@ -1,0 +1,58 @@
+{
+  "objects": [
+    {
+      "program": "",
+      "prog_type": 1,
+      "source_bytecode_hex": "b7000000000000009500000000000000",
+      "native_object": "/cases/startup_0.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "/cases/startup_0.bpf.o",
+      "simulator_program": "startup_0_arm64_sim_xdp"
+    },
+    {
+      "program": "libbpf_nametest",
+      "prog_type": 1,
+      "source_bytecode_hex": "b7000000000000009500000000000000",
+      "native_object": "/cases/startup_1.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "/cases/startup_1.bpf.o",
+      "simulator_program": "startup_1_arm64_sim_xdp"
+    },
+    {
+      "program": "",
+      "prog_type": 1,
+      "source_bytecode_hex": "85000000a00000009500000000000000",
+      "native_object": "/cases/startup_2.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "/cases/startup_2.bpf.o",
+      "simulator_program": "startup_2_arm64_sim_xdp"
+    },
+    {
+      "program": "det_arg_ctx",
+      "prog_type": 2,
+      "source_bytecode_hex": "8510000001000000950000000000000085000000ad0000009500000000000000",
+      "native_object": "/cases/startup_3.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "/cases/startup_3.bpf.o",
+      "simulator_program": "startup_3_arm64_sim_xdp"
+    },
+    {
+      "program": "",
+      "prog_type": 9,
+      "source_bytecode_hex": "b7000000000000009500000000000000",
+      "native_object": "/cases/startup_4.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "/cases/startup_4.bpf.o",
+      "simulator_program": "startup_4_arm64_sim_xdp"
+    },
+    {
+      "program": "runtime_source",
+      "prog_type": 6,
+      "source_bytecode_hex": "b70000007f0000009500000000000000",
+      "native_object": "/cases/startup_5.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "/cases/startup_5.bpf.o",
+      "simulator_program": "startup_5_arm64_sim_xdp"
+    }
+  ]
+}

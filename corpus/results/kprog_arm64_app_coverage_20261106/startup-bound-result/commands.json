@@ -1,0 +1,344 @@
+[
+  {
+    "command": [
+      "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift-bpf-ir",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_0.bin",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_0.ll"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "opt-18",
+      "-O3",
+      "-S",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_0.ll",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_0.opt.ll"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-mtriple=aarch64-linux-gnu",
+      "-mcpu=generic",
+      "-mattr=+reserve-x18,+reserve-x26,+reserve-x27,+reserve-x28",
+      "-filetype=obj",
+      "-O=3",
+      "-relocation-model=pic",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_0.opt.ll",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_0.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_0.native.o",
+      "--symbol",
+      "bpf_main",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_0.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=bpf_main (8 bytes), 1 reachable symbol(s) total\n  - bpf_main (vaddr 0x0, 8 bytes) [entry]\nnative-link: wrote proof object 12 bytes, 0 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_0.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift-bpf-ir",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_1.bin",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_1.ll"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "opt-18",
+      "-O3",
+      "-S",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_1.ll",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_1.opt.ll"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-mtriple=aarch64-linux-gnu",
+      "-mcpu=generic",
+      "-mattr=+reserve-x18,+reserve-x26,+reserve-x27,+reserve-x28",
+      "-filetype=obj",
+      "-O=3",
+      "-relocation-model=pic",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_1.opt.ll",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_1.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_1.native.o",
+      "--symbol",
+      "bpf_main",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_1.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=bpf_main (8 bytes), 1 reachable symbol(s) total\n  - bpf_main (vaddr 0x0, 8 bytes) [entry]\nnative-link: wrote proof object 12 bytes, 0 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_1.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift-bpf-ir",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_2.bin",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_2.ll"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "opt-18",
+      "-O3",
+      "-S",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_2.ll",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_2.opt.ll"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-mtriple=aarch64-linux-gnu",
+      "-mcpu=generic",
+      "-mattr=+reserve-x18,+reserve-x26,+reserve-x27,+reserve-x28",
+      "-filetype=obj",
+      "-O=3",
+      "-relocation-model=pic",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_2.opt.ll",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_2.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_2.native.o",
+      "--symbol",
+      "bpf_main",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_2.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=bpf_main (20 bytes), 1 reachable symbol(s) total\n  - bpf_main (vaddr 0x0, 20 bytes) [entry]\nnative-link: wrote proof object 36 bytes, 1 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_2.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift-bpf-ir",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_3.bin",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_3.ll"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "opt-18",
+      "-O3",
+      "-S",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_3.ll",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_3.opt.ll"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-mtriple=aarch64-linux-gnu",
+      "-mcpu=generic",
+      "-mattr=+reserve-x18,+reserve-x26,+reserve-x27,+reserve-x28",
+      "-filetype=obj",
+      "-O=3",
+      "-relocation-model=pic",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_3.opt.ll",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_3.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_3.native.o",
+      "--symbol",
+      "bpf_main",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_3.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=bpf_main (20 bytes), 1 reachable symbol(s) total\n  - bpf_main (vaddr 0x0, 20 bytes) [entry]\nnative-link: wrote proof object 36 bytes, 1 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_3.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift-bpf-ir",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_4.bin",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_4.ll"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "opt-18",
+      "-O3",
+      "-S",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_4.ll",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_4.opt.ll"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-mtriple=aarch64-linux-gnu",
+      "-mcpu=generic",
+      "-mattr=+reserve-x18,+reserve-x26,+reserve-x27,+reserve-x28",
+      "-filetype=obj",
+      "-O=3",
+      "-relocation-model=pic",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_4.opt.ll",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_4.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_4.native.o",
+      "--symbol",
+      "bpf_main",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_4.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=bpf_main (8 bytes), 1 reachable symbol(s) total\n  - bpf_main (vaddr 0x0, 8 bytes) [entry]\nnative-link: wrote proof object 12 bytes, 0 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_4.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift-bpf-ir",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_5.bin",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_5.ll"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "opt-18",
+      "-O3",
+      "-S",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_5.ll",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_5.opt.ll"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-mtriple=aarch64-linux-gnu",
+      "-mcpu=generic",
+      "-mattr=+reserve-x18,+reserve-x26,+reserve-x27,+reserve-x28",
+      "-filetype=obj",
+      "-O=3",
+      "-relocation-model=pic",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/startup_5.opt.ll",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_5.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_5.native.o",
+      "--symbol",
+      "bpf_main",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_5.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=bpf_main (8 bytes), 1 reachable symbol(s) total\n  - bpf_main (vaddr 0x0, 8 bytes) [entry]\nnative-link: wrote proof object 12 bytes, 0 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-tail-v6/native/startup_5.proof.o\n"
+  }
+]

@@ -777,3 +777,15 @@ Two source/simulator/bound QEMU cases retain a real helper call and a local
 slot in an indexed32-byte frame; both produce37, return2 and generation1.
 The exact native proof is packaged with each paired simulator. Portable
 kernel/initrd replay and Spark KVM commands are included in its archive.
+
+## Strict application startup on ARM
+
+[The common libbpf startup now passes](startup-bound-result/README.md): all six
+loads are replaced on the generation-bound path for both original flags0/8,
+with main return127 and generation1. ARM helper tail relocations and transitive
+resolved tail-branch callees are preserved. Both additional subprogram controls
+produce37, return2 and generation1; all73 Rust tests pass. Earlier failed
+attempts, including the nested native crash, are retained in the matched
+portable replay archive. No probe/name bypass is used. The five startup
+selectors and complete artifact triples are installed in each app manifest
+for the next strict corpus run.

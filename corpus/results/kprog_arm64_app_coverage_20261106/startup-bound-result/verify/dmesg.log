@@ -1,0 +1,386 @@
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x000f0510]
+[    0.000000] Linux version 7.0.0-rc2+ (root@coder-22123351-d4a5-40fc-bc3b-1b853af74a7e-c7ccfb766-mpvhz) (aarch64-linux-gnu-gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #23 SMP PREEMPT Fri Nov  6 13:38:07 UTC 2026
+[    0.000000] random: crng init done
+[    0.000000] Machine model: linux,dummy-virt
+[    0.000000] efi: UEFI not found.
+[    0.000000] OF: reserved mem: Reserved memory: No reserved-memory node in the DT
+[    0.000000] NUMA: Faking a node at [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000] NODE_DATA(0) allocated [mem 0xbfbfac80-0xbfbfdc7f]
+[    0.000000] cma: Reserved 64 MiB at 0x00000000bba00000
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: PSCIv1.1 detected in firmware.
+[    0.000000] psci: Using standard PSCI v0.2 function IDs
+[    0.000000] psci: Trusted OS migration not required
+[    0.000000] psci: SMC Calling Convention v1.0
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000]   DMA32    empty
+[    0.000000]   Normal   empty
+[    0.000000]   Device   empty
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000] percpu: Embedded 34 pages/cpu s101400 r8192 d29672 u139264
+[    0.000000] pcpu-alloc: s101400 r8192 d29672 u139264 alloc=34*4096
+[    0.000000] pcpu-alloc: [0] 0 [0] 1 
+[    0.000000] Detected PIPT I-cache on CPU0
+[    0.000000] CPU features: detected: Address authentication (architected QARMA5 algorithm)
+[    0.000000] CPU features: detected: HCRX_EL2 register
+[    0.000000] CPU features: detected: Spectre-v4
+[    0.000000] CPU features: detected: Spectre-BHB
+[    0.000000] alternatives: applying boot alternatives
+[    0.000000] Kernel command line: console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic
+[    0.000000] printk: log buffer data + meta data: 2097152 + 7340032 = 9437184 bytes
+[    0.000000] Dentry cache hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 131072 (order: 8, 1048576 bytes, linear)
+[    0.000000] software IO TLB: SWIOTLB bounce buffer size adjusted to 2MB
+[    0.000000] software IO TLB: area num 2.
+[    0.000000] software IO TLB: mapped [mem 0x00000000b9600000-0x00000000b9800000] (2MB)
+[    0.000000] Fallback order for Node 0: 0 
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 524288
+[    0.000000] Policy zone: DMA
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
+[    0.000000] ftrace: allocating 49524 entries in 194 pages
+[    0.000000] ftrace: allocated 194 pages with 3 groups
+[    0.000000] rcu: Hierarchical RCU implementation.
+[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=4096 to nr_cpu_ids=2.
+[    0.000000] 	Trampoline variant of Tasks RCU enabled.
+[    0.000000] 	Rude variant of Tasks RCU enabled.
+[    0.000000] 	Tracing variant of Tasks RCU enabled.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 10 jiffies.
+[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=2
+[    0.000000] RCU Tasks: Setting shift to 1 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=2.
+[    0.000000] RCU Tasks Rude: Setting shift to 1 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=2.
+[    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+[    0.000000] Root IRQ handler: gic_handle_irq
+[    0.000000] GICv2m: range[mem 0x08020000-0x08020fff], SPI[80:143]
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] arch_timer: cp15 timer running at 62.50MHz (virt).
+[    0.000000] clocksource: arch_sys_counter: mask: 0x1ffffffffffffff max_cycles: 0x1cd42e208c, max_idle_ns: 881590405314 ns
+[    0.000080] sched_clock: 57 bits at 63MHz, resolution 16ns, wraps every 4398046511096ns
+[    0.017682] Console: colour dummy device 80x25
+[    0.024646] Calibrating delay loop (skipped), value calculated using timer frequency.. 125.00 BogoMIPS (lpj=625000)
+[    0.025441] pid_max: default: 32768 minimum: 301
+[    0.032786] landlock: Up and running.
+[    0.032843] Yama: becoming mindful.
+[    0.033245] SELinux:  Initializing.
+[    0.047219] LSM support for eBPF active
+[    0.051978] Mount-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    0.052128] Mountpoint-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    0.064204] VFS: Finished mounting rootfs on nullfs
+[    0.099971] cacheinfo: Unable to detect cache hierarchy for CPU 0
+[    0.123957] rcu: Hierarchical SRCU implementation.
+[    0.124032] rcu: 	Max phase no-delay instances is 1000.
+[    0.127514] Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[    0.138704] EFI services will not be available.
+[    0.141761] smp: Bringing up secondary CPUs ...
+[    0.153020] Detected PIPT I-cache on CPU1
+[    0.157602] CPU1: Booted secondary processor 0x0000000001 [0x000f0510]
+[    0.162740] smp: Brought up 1 node, 2 CPUs
+[    0.162830] SMP: Total of 2 processors activated.
+[    0.162895] CPU: All CPU(s) started at EL1
+[    0.163153] CPU features: detected: Branch Target Identification
+[    0.163228] CPU features: detected: 32-bit EL0 Support
+[    0.163269] CPU features: detected: 32-bit EL1 Support
+[    0.163313] CPU features: detected: ARMv8.4 Translation Table Level
+[    0.163370] CPU features: detected: Data cache clean to the PoU not required for I/D coherence
+[    0.163447] CPU features: detected: Common not Private translations
+[    0.163489] CPU features: detected: CRC32 instructions
+[    0.163531] CPU features: detected: Data independent timing control (DIT)
+[    0.163577] CPU features: detected: E0PD
+[    0.163626] CPU features: detected: Enhanced Privileged Access Never
+[    0.163667] CPU features: detected: Enhanced Virtualization Traps
+[    0.163712] CPU features: detected: Fine Grained Traps
+[    0.163842] CPU features: detected: Generic authentication (architected QARMA5 algorithm)
+[    0.163953] CPU features: detected: RCpc load-acquire (LDAPR)
+[    0.164028] CPU features: detected: 52-bit Virtual Addressing for KVM (LPA2)
+[    0.164071] CPU features: detected: LSE atomic instructions
+[    0.164120] CPU features: detected: Memory Copy and Memory Set instructions
+[    0.164163] CPU features: detected: Privileged Access Never
+[    0.164233] CPU features: detected: PMUv3
+[    0.164278] CPU features: detected: RAS Extension Support
+[    0.164376] CPU features: detected: RASv1p1 Extension Support
+[    0.164418] CPU features: detected: Random Number Generator
+[    0.164459] CPU features: detected: Speculation barrier (SB)
+[    0.164500] CPU features: detected: Stage-2 Force Write-Back
+[    0.164545] CPU features: detected: Trap EL0 IMPLEMENTATION DEFINED functionality
+[    0.164590] CPU features: detected: TLB range maintenance instructions
+[    0.164635] CPU features: detected: XNX
+[    0.164764] CPU features: detected: Scalable Matrix Extension
+[    0.164806] CPU features: detected: FA64
+[    0.164851] CPU features: detected: Speculative Store Bypassing Safe (SSBS)
+[    0.164892] CPU features: detected: Scalable Vector Extension
+[    0.176611] alternatives: applying system-wide alternatives
+[    0.199916] CPU features: detected: Hardware dirty bit management on CPU0-1
+[    0.200924] SVE: maximum available vector length 256 bytes per vector
+[    0.201120] SVE: default vector length 64 bytes per vector
+[    0.201256] SME: minimum available vector length 16 bytes per vector
+[    0.201300] SME: maximum available vector length 256 bytes per vector
+[    0.201343] SME: default vector length 32 bytes per vector
+[    0.222995] Memory: 1924184K/2097152K available (15552K kernel code, 9226K rwdata, 10696K rodata, 5952K init, 11680K bss, 102576K reserved, 65536K cma-reserved)
+[    0.263417] devtmpfs: initialized
+[    0.339786] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.340469] posixtimers hash table entries: 1024 (order: 2, 16384 bytes, linear)
+[    0.340883] futex hash table entries: 512 (32768 bytes on 1 NUMA nodes, total 32 KiB, linear).
+[    0.347320] 19408 pages in range for non-PLT usage
+[    0.347408] 510928 pages in range for PLT usage
+[    0.357296] DMI not present or invalid.
+[    0.380143] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.404626] DMA: preallocated 256 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.405556] audit: initializing netlink subsys (disabled)
+[    0.410243] audit: type=2000 audit(0.370:1): state=initialized audit_enabled=0 res=1
+[    0.417701] thermal_sys: Registered thermal governor 'fair_share'
+[    0.417779] thermal_sys: Registered thermal governor 'step_wise'
+[    0.417827] thermal_sys: Registered thermal governor 'user_space'
+[    0.418811] cpuidle: using governor ladder
+[    0.419475] cpuidle: using governor menu
+[    0.422193] hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.
+[    0.423384] ASID allocator initialised with 65536 entries
+[    0.425823] Serial: AMBA PL011 UART driver
+[    0.529779] 9000000.pl011: ttyAMA0 at MMIO 0x9000000 (irq = 13, base_baud = 0) is a PL011 rev1
+[    0.533806] printk: console [ttyAMA0] enabled
+[    0.611568] HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.613088] HugeTLB: 0 KiB vmemmap can be freed for a 1.00 GiB page
+[    0.613416] HugeTLB: registered 32.0 MiB page size, pre-allocated 0 pages
+[    0.613508] HugeTLB: 0 KiB vmemmap can be freed for a 32.0 MiB page
+[    0.613622] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.613706] HugeTLB: 0 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.613816] HugeTLB: registered 64.0 KiB page size, pre-allocated 0 pages
+[    0.613901] HugeTLB: 0 KiB vmemmap can be freed for a 64.0 KiB page
+[    0.661441] ACPI: Interpreter disabled.
+[    0.670957] iommu: Default domain type: Translated
+[    0.671146] iommu: DMA domain TLB invalidation policy: lazy mode
+[    0.685938] pps_core: LinuxPPS API ver. 1 registered
+[    0.686121] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.686389] PTP clock support registered
+[    0.691168] EDAC MC: Ver: 3.0.0
+[    0.725058] NetLabel: Initializing
+[    0.725222] NetLabel:  domain hash size = 128
+[    0.725316] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.727203] NetLabel:  unlabeled traffic allowed by default
+[    0.735087] vgaarb: loaded
+[    0.751420] clocksource: Switched to clocksource arch_sys_counter
+[    0.759622] VFS: Disk quotas dquot_6.6.0
+[    0.760164] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.787228] netfs: FS-Cache loaded
+[    0.791478] pnp: PnP ACPI: disabled
+[    0.892022] NET: Registered PF_INET protocol family
+[    0.894190] IP idents hash table entries: 32768 (order: 6, 262144 bytes, linear)
+[    1.379969] tcp_listen_portaddr_hash hash table entries: 1024 (order: 2, 16384 bytes, linear)
+[    1.380366] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    1.380606] TCP established hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    1.381485] TCP bind hash table entries: 16384 (order: 7, 524288 bytes, linear)
+[    1.381959] TCP: Hash tables configured (established 16384 bind 16384)
+[    1.384799] MPTCP token hash table entries: 2048 (order: 4, 49152 bytes, linear)
+[    1.385514] UDP hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[    1.385931] UDP-Lite hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[    1.388472] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    1.389091] NET: Registered PF_XDP protocol family
+[    1.389390] PCI: CLS 0 bytes, default 64
+[    1.397262] Trying to unpack rootfs image as initramfs...
+[    1.451104] kvm [1]: HYP mode not available
+[    1.470130] Initialise system trusted keyrings
+[    1.506338] Key type blacklist registered
+[    1.515735] workingset: timestamp_bits=44 max_order=19 bucket_order=0
+[    1.530594] SGI XFS with ACLs, security attributes, quota, no debug enabled
+[    1.602768] 9p: Installing v9fs 9p2000 file system support
+[    1.612109] integrity: Platform Keyring initialized
+[    1.994314] Key type asymmetric registered
+[    1.994651] Asymmetric key parser 'x509' registered
+[    1.995830] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 247)
+[    2.003348] io scheduler mq-deadline registered
+[    2.003579] io scheduler kyber registered
+[    2.004050] io scheduler bfq registered
+[    2.045050] pl061_gpio 9030000.pl061: PL061 GPIO chip registered
+[    2.078224] Serial: 8250/16550 driver, 4 ports, IRQ sharing disabled
+[    2.194515] Freeing initrd memory: 5724K
+[    2.239156] loop: module loaded
+[    2.264013] hid: raw HID events driver (C) Jiri Kosina
+[    2.278763] hw perfevents: enabled with armv8_pmuv3 PMU driver, 7 (0,8000003f) counters available
+[    2.281496] watchdog: NMI not fully supported
+[    2.281654] watchdog: Hard watchdog permanently disabled
+[    2.287280] NET: Registered PF_INET6 protocol family
+[    2.301785] Segment Routing with IPv6
+[    2.302400] In-situ OAM (IOAM) with IPv6
+[    2.303434] NET: Registered PF_PACKET protocol family
+[    2.305397] 9pnet: Installing 9P2000 support
+[    2.550324] registered taskstats version 1
+[    2.560220] Loading compiled-in X.509 certificates
+[    2.576522] Loaded X.509 cert 'Build time autogenerated kernel key: 9f0cac519e1b43b7aed7b285e97f1d9691777458'
+[    2.828258] Demotion targets for Node 0: null
+[    2.831497] Key type .fscrypt registered
+[    2.831644] Key type fscrypt-provisioning registered
+[    2.834255] ima: No TPM chip found, activating TPM-bypass!
+[    2.834553] ima: Allocated hash algorithm: sha256
+[    2.836956] ima: No architecture policies found
+[    2.858610] clk: Disabling unused clocks
+[    2.858993] PM: genpd: Disabling unused power domains
+[    3.164421] Freeing unused kernel memory: 5952K
+[    3.166886] Run /init as init process
+[    3.167116]   with arguments:
+[    3.167262]     /init
+[    3.167338]   with environment:
+[    3.167402]     HOME=/
+[    3.167525]     TERM=linux
+[    3.383687] bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+[    3.384009] bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+[    3.897930] bpfrejit-shim[501]: shim-init exe=/startup
+[    3.921138] bpfrejit-shim[501]: native consider name= type=1 insns=2 hash=39f82ae52884c235 fd=5
+[    3.934780] bpfrejit-shim[501]: native load-begin name= fd=5 manifest=/cases/manifest.json source=/tmp/shim0/bpfrejit_501_39f82ae52884c235.bpf
+[   15.296484] bpfrejit-native-loader[501]: upload-begin name=native_lab_stub type=1 blob_bytes=52 blob_fnv=b66d9497fb787944 reloc_records=1 reloc_bytes=16 chunks=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 first_chunk=0+52 last_chunk=0+52 first_reloc=20:2:0xffff8000802f1448 last_reloc=20:2:0xffff8000802f1448
+[   15.309744] bpfrejit-native-loader[501]: upload-done name=native_lab_stub blob_bytes=52 reloc_records=1 chunks=1 proof_bound=1 upload_ns=20159488
+[   15.310633] bpfrejit-native-loader[501]: stub-btf-lookup-begin name=native_lab_stub
+[   15.708350] bpfrejit-native-loader[501]: stub-btf-lookup-done name=native_lab_stub module_btf_id=2 kfunc_btf_id=126376 mod_btf_fd=9
+[   15.711470] bpfrejit-native-loader[501]: stub-load-syscall-begin name=native_lab_stub type=1 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 insns=3 fd_array_cnt=2 attach_prog_fd=-1 attach_btf_obj_fd=-1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0
+[   15.723101] bpfrejit-native-loader[501]: stub-load-syscall-done name=native_lab_stub fd=10 log_true_size=0
+[   15.727674] bpfrejit-shim[501]: native load-done name= fd=5 replaced=1 native_fd=10 cache_hit=0 native_bytes=52 link_exec_ns=164397488 blob_fnv=b66d9497fb787944 relocs=1 chunks=1 callee_saved=0 first_reloc=20:2:0xffff8000802f1448 last_reloc=20:2:0xffff8000802f1448
+[   15.730016] bpfrejit-shim[501]: native jit-info label=original fd=5 id=5 type=1 name= jited_len=64 xlated_len=16 nr_ksyms=1 ksym0=0xffff80008355d888
+[   15.740356] bpfrejit-shim[501]: native jit-info label=native fd=10 id=10 type=1 name=native_lab_stub jited_len=128 xlated_len=24 nr_ksyms=1 ksym0=0xffff80008355d930
+[   15.743871] bpfrejit-shim[501]: native replaced name= original_fd=5 native_fd=10
+[   15.746043] bpfrejit-shim[501]: prog-load done name= ret=10 errno=0 kid=10
+[   15.750058] bpfrejit-shim[501]: native consider name= type=1 insns=2 hash=58255400910d7827 fd=5
+[   15.751158] bpfrejit-shim[501]: native load-begin name= fd=5 manifest=/cases/manifest.json source=/tmp/shim0/bpfrejit_501_58255400910d7827.bpf
+[   15.976277] bpfrejit-native-loader[501]: upload-begin name=native_lab_stub type=1 blob_bytes=12 blob_fnv=91be27c0011c0f66 reloc_records=0 reloc_bytes=0 chunks=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 first_chunk=0+12 last_chunk=0+12
+[   15.980541] bpfrejit-native-loader[501]: upload-done name=native_lab_stub blob_bytes=12 reloc_records=0 chunks=1 proof_bound=1 upload_ns=5359952
+[   15.981566] bpfrejit-native-loader[501]: stub-btf-lookup-begin name=native_lab_stub
+[   15.984479] bpfrejit-native-loader[501]: stub-btf-lookup-done name=native_lab_stub module_btf_id=2 kfunc_btf_id=126376 mod_btf_fd=10
+[   15.985853] bpfrejit-native-loader[501]: stub-load-syscall-begin name=native_lab_stub type=1 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 insns=3 fd_array_cnt=2 attach_prog_fd=-1 attach_btf_obj_fd=-1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0
+[   15.988499] bpfrejit-native-loader[501]: stub-load-syscall-done name=native_lab_stub fd=11 log_true_size=0
+[   15.990242] bpfrejit-shim[501]: native load-done name= fd=5 replaced=1 native_fd=11 cache_hit=0 native_bytes=12 link_exec_ns=115885744 blob_fnv=91be27c0011c0f66 relocs=0 chunks=1 callee_saved=0 first_reloc=0:0:0x0000000000000000 last_reloc=0:0:0x0000000000000000
+[   15.992247] bpfrejit-shim[501]: native jit-info label=original fd=5 id=11 type=1 name= jited_len=64 xlated_len=16 nr_ksyms=1 ksym0=0xffff80008355d9d8
+[   15.993602] bpfrejit-shim[501]: native jit-info label=native fd=11 id=13 type=1 name=native_lab_stub jited_len=80 xlated_len=24 nr_ksyms=1 ksym0=0xffff80008355da58
+[   15.996865] bpfrejit-shim[501]: native replaced name= original_fd=5 native_fd=11
+[   15.998441] bpfrejit-shim[501]: prog-load done name= ret=11 errno=0 kid=13
+[   16.003903] bpfrejit-shim[501]: native consider name=libbpf_nametest type=1 insns=2 hash=58255400910d7827 fd=9
+[   16.004749] bpfrejit-shim[501]: native load-begin name=libbpf_nametest fd=9 manifest=/cases/manifest.json source=/tmp/shim0/bpfrejit_501_58255400910d7827.bpf
+[   16.228959] bpfrejit-native-loader[501]: upload-begin name=libbpf_nametest type=1 blob_bytes=12 blob_fnv=91be27c0011c0f66 reloc_records=0 reloc_bytes=0 chunks=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 first_chunk=0+12 last_chunk=0+12
+[   16.233271] bpfrejit-native-loader[501]: upload-done name=libbpf_nametest blob_bytes=12 reloc_records=0 chunks=1 proof_bound=1 upload_ns=5408032
+[   16.233958] bpfrejit-native-loader[501]: stub-btf-lookup-begin name=libbpf_nametest
+[   16.235921] bpfrejit-native-loader[501]: stub-btf-lookup-done name=libbpf_nametest module_btf_id=2 kfunc_btf_id=126376 mod_btf_fd=12
+[   16.237275] bpfrejit-native-loader[501]: stub-load-syscall-begin name=libbpf_nametest type=1 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 insns=3 fd_array_cnt=2 attach_prog_fd=-1 attach_btf_obj_fd=-1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0
+[   16.239932] bpfrejit-native-loader[501]: stub-load-syscall-done name=libbpf_nametest fd=13 log_true_size=0
+[   16.241914] bpfrejit-shim[501]: native load-done name=libbpf_nametest fd=9 replaced=1 native_fd=13 cache_hit=0 native_bytes=12 link_exec_ns=115288352 blob_fnv=91be27c0011c0f66 relocs=0 chunks=1 callee_saved=0 first_reloc=0:0:0x0000000000000000 last_reloc=0:0:0x0000000000000000
+[   16.243652] bpfrejit-shim[501]: native jit-info label=original fd=9 id=14 type=1 name=libbpf_nametest jited_len=64 xlated_len=16 nr_ksyms=1 ksym0=0xffff80008355dad8
+[   16.244984] bpfrejit-shim[501]: native jit-info label=native fd=13 id=16 type=1 name=libbpf_nametest jited_len=80 xlated_len=24 nr_ksyms=1 ksym0=0xffff80008355da60
+[   16.248125] bpfrejit-shim[501]: native replaced name=libbpf_nametest original_fd=9 native_fd=13
+[   16.249624] bpfrejit-shim[501]: prog-load done name=libbpf_nametest ret=13 errno=0 kid=16
+[   16.254181] bpfrejit-shim[501]: native consider name=det_arg_ctx type=2 insns=4 hash=3ae725ddb7d69e19 fd=9
+[   16.254984] bpfrejit-shim[501]: native load-begin name=det_arg_ctx fd=9 manifest=/cases/manifest.json source=/tmp/shim0/bpfrejit_501_3ae725ddb7d69e19.bpf
+[   16.532065] bpfrejit-native-loader[501]: upload-begin name=det_arg_ctx type=2 blob_bytes=52 blob_fnv=b66d9497fb787944 reloc_records=1 reloc_bytes=16 chunks=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 first_chunk=0+52 last_chunk=0+52 first_reloc=20:2:0xffff800080298dd0 last_reloc=20:2:0xffff800080298dd0
+[   16.536297] bpfrejit-native-loader[501]: upload-done name=det_arg_ctx blob_bytes=52 reloc_records=1 chunks=1 proof_bound=1 upload_ns=5714592
+[   16.536997] bpfrejit-native-loader[501]: stub-btf-lookup-begin name=det_arg_ctx
+[   16.539042] bpfrejit-native-loader[501]: stub-btf-lookup-done name=det_arg_ctx module_btf_id=2 kfunc_btf_id=126376 mod_btf_fd=13
+[   16.540483] bpfrejit-native-loader[501]: stub-load-syscall-begin name=det_arg_ctx type=2 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 insns=3 fd_array_cnt=2 attach_prog_fd=-1 attach_btf_obj_fd=-1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0
+[   16.545017] bpfrejit-native-loader[501]: stub-load-syscall-done name=det_arg_ctx fd=15 log_true_size=0
+[   16.546892] bpfrejit-shim[501]: native load-done name=det_arg_ctx fd=9 replaced=1 native_fd=15 cache_hit=0 native_bytes=52 link_exec_ns=139856224 blob_fnv=b66d9497fb787944 relocs=1 chunks=1 callee_saved=0 first_reloc=20:2:0xffff800080298dd0 last_reloc=20:2:0xffff800080298dd0
+[   16.548648] bpfrejit-shim[501]: native jit-info label=original fd=9 id=17 type=2 name=det_arg_ctx jited_len=128 xlated_len=32 nr_ksyms=2 ksym0=0xffff80008355db48
+[   16.550130] bpfrejit-shim[501]: native jit-info label=native fd=15 id=19 type=2 name=det_arg_ctx jited_len=144 xlated_len=24 nr_ksyms=1 ksym0=0xffff80008355dc58
+[   16.553496] bpfrejit-shim[501]: native replaced name=det_arg_ctx original_fd=9 native_fd=15
+[   16.554888] bpfrejit-shim[501]: prog-load done name=det_arg_ctx ret=15 errno=0 kid=19
+[   16.563100] bpfrejit-shim[501]: native consider name= type=9 insns=2 hash=58255400910d7827 fd=9
+[   16.563987] bpfrejit-shim[501]: native load-begin name= fd=9 manifest=/cases/manifest.json source=/tmp/shim0/bpfrejit_501_58255400910d7827.bpf
+[   16.788651] bpfrejit-native-loader[501]: upload-begin name=native_lab_stub type=9 blob_bytes=12 blob_fnv=91be27c0011c0f66 reloc_records=0 reloc_bytes=0 chunks=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=2 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 first_chunk=0+12 last_chunk=0+12
+[   16.792927] bpfrejit-native-loader[501]: upload-done name=native_lab_stub blob_bytes=12 reloc_records=0 chunks=1 proof_bound=1 upload_ns=5274816
+[   16.793643] bpfrejit-native-loader[501]: stub-btf-lookup-begin name=native_lab_stub
+[   16.795624] bpfrejit-native-loader[501]: stub-btf-lookup-done name=native_lab_stub module_btf_id=2 kfunc_btf_id=126376 mod_btf_fd=14
+[   16.796984] bpfrejit-native-loader[501]: stub-load-syscall-begin name=native_lab_stub type=9 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 insns=3 fd_array_cnt=2 attach_prog_fd=-1 attach_btf_obj_fd=-1 expected_attach_type=2 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0
+[   16.799907] bpfrejit-native-loader[501]: stub-load-syscall-done name=native_lab_stub fd=15 log_true_size=0
+[   16.801957] bpfrejit-shim[501]: native load-done name= fd=9 replaced=1 native_fd=15 cache_hit=0 native_bytes=12 link_exec_ns=115498000 blob_fnv=91be27c0011c0f66 relocs=0 chunks=1 callee_saved=0 first_reloc=0:0:0x0000000000000000 last_reloc=0:0:0x0000000000000000
+[   16.803564] bpfrejit-shim[501]: native jit-info label=original fd=9 id=20 type=9 name= jited_len=64 xlated_len=16 nr_ksyms=1 ksym0=0xffff80008355da70
+[   16.804878] bpfrejit-shim[501]: native jit-info label=native fd=15 id=22 type=9 name=native_lab_stub jited_len=80 xlated_len=24 nr_ksyms=1 ksym0=0xffff80008355dc48
+[   16.807752] bpfrejit-shim[501]: native replaced name= original_fd=9 native_fd=15
+[   16.809142] bpfrejit-shim[501]: prog-load done name= ret=15 errno=0 kid=22
+[   16.813308] bpfrejit-shim[501]: native consider name=runtime_source type=6 insns=2 hash=fb3f789aa6beae88 fd=9
+[   16.814140] bpfrejit-shim[501]: native load-begin name=runtime_source fd=9 manifest=/cases/manifest.json source=/tmp/shim0/bpfrejit_501_fb3f789aa6beae88.bpf
+[   17.038105] bpfrejit-native-loader[501]: upload-begin name=runtime_source type=6 blob_bytes=12 blob_fnv=5843d378bd3650f9 reloc_records=0 reloc_bytes=0 chunks=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 first_chunk=0+12 last_chunk=0+12
+[   17.042308] bpfrejit-native-loader[501]: upload-done name=runtime_source blob_bytes=12 reloc_records=0 chunks=1 proof_bound=1 upload_ns=5194704
+[   17.042962] bpfrejit-native-loader[501]: stub-btf-lookup-begin name=runtime_source
+[   17.044860] bpfrejit-native-loader[501]: stub-btf-lookup-done name=runtime_source module_btf_id=2 kfunc_btf_id=126376 mod_btf_fd=15
+[   17.046251] bpfrejit-native-loader[501]: stub-load-syscall-begin name=runtime_source type=6 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 insns=3 fd_array_cnt=2 attach_prog_fd=-1 attach_btf_obj_fd=-1 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0
+[   17.048884] bpfrejit-native-loader[501]: stub-load-syscall-done name=runtime_source fd=17 log_true_size=0
+[   17.050621] bpfrejit-shim[501]: native load-done name=runtime_source fd=9 replaced=1 native_fd=17 cache_hit=0 native_bytes=12 link_exec_ns=115290448 blob_fnv=5843d378bd3650f9 relocs=0 chunks=1 callee_saved=0 first_reloc=0:0:0x0000000000000000 last_reloc=0:0:0x0000000000000000
+[   17.052511] bpfrejit-shim[501]: native jit-info label=original fd=9 id=23 type=6 name=runtime_source jited_len=64 xlated_len=16 nr_ksyms=1 ksym0=0xffff80008355dcf0
+[   17.053722] bpfrejit-shim[501]: native jit-info label=native fd=17 id=25 type=6 name=runtime_source jited_len=80 xlated_len=24 nr_ksyms=1 ksym0=0xffff80008355dc50
+[   17.056511] bpfrejit-shim[501]: native replaced name=runtime_source original_fd=9 native_fd=17
+[   17.057894] bpfrejit-shim[501]: prog-load done name=runtime_source ret=17 errno=0 kid=25
+[   17.343664] bpfrejit-shim[512]: shim-init exe=/startup
+[   17.364383] bpfrejit-shim[512]: native consider name= type=1 insns=2 hash=39f82ae52884c235 fd=5
+[   17.378061] bpfrejit-shim[512]: native load-begin name= fd=5 manifest=/cases/manifest.json source=/tmp/shim8/bpfrejit_512_39f82ae52884c235.bpf
+[   28.562717] bpfrejit-native-loader[512]: upload-begin name=native_lab_stub type=1 blob_bytes=52 blob_fnv=b66d9497fb787944 reloc_records=1 reloc_bytes=16 chunks=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 first_chunk=0+52 last_chunk=0+52 first_reloc=20:2:0xffff8000802f1448 last_reloc=20:2:0xffff8000802f1448
+[   28.572787] bpfrejit-native-loader[512]: upload-done name=native_lab_stub blob_bytes=52 reloc_records=1 chunks=1 proof_bound=1 upload_ns=14837184
+[   28.573619] bpfrejit-native-loader[512]: stub-btf-lookup-begin name=native_lab_stub
+[   28.577332] bpfrejit-native-loader[512]: stub-btf-lookup-done name=native_lab_stub module_btf_id=2 kfunc_btf_id=126376 mod_btf_fd=9
+[   28.580045] bpfrejit-native-loader[512]: stub-load-syscall-begin name=native_lab_stub type=1 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 insns=3 fd_array_cnt=2 attach_prog_fd=-1 attach_btf_obj_fd=-1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0
+[   28.585129] bpfrejit-native-loader[512]: stub-load-syscall-done name=native_lab_stub fd=10 log_true_size=0
+[   28.589295] bpfrejit-shim[512]: native load-done name= fd=5 replaced=1 native_fd=10 cache_hit=1 native_bytes=52 link_exec_ns=0 blob_fnv=b66d9497fb787944 relocs=1 chunks=1 callee_saved=0 first_reloc=20:2:0xffff8000802f1448 last_reloc=20:2:0xffff8000802f1448
+[   28.591331] bpfrejit-shim[512]: native jit-info label=original fd=5 id=26 type=1 name= jited_len=64 xlated_len=16 nr_ksyms=1 ksym0=0xffff80008355d898
+[   28.592765] bpfrejit-shim[512]: native jit-info label=native fd=10 id=31 type=1 name=native_lab_stub jited_len=128 xlated_len=24 nr_ksyms=1 ksym0=0xffff80008355db98
+[   28.596257] bpfrejit-shim[512]: native replaced name= original_fd=5 native_fd=10
+[   28.598165] bpfrejit-shim[512]: prog-load done name= ret=10 errno=0 kid=31
+[   28.602915] bpfrejit-shim[512]: native consider name= type=1 insns=2 hash=58255400910d7827 fd=5
+[   28.603465] bpfrejit-shim[512]: native load-begin name= fd=5 manifest=/cases/manifest.json source=/tmp/shim8/bpfrejit_512_58255400910d7827.bpf
+[   28.705961] bpfrejit-native-loader[512]: upload-begin name=native_lab_stub type=1 blob_bytes=12 blob_fnv=91be27c0011c0f66 reloc_records=0 reloc_bytes=0 chunks=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 first_chunk=0+12 last_chunk=0+12
+[   28.709998] bpfrejit-native-loader[512]: upload-done name=native_lab_stub blob_bytes=12 reloc_records=0 chunks=1 proof_bound=1 upload_ns=5024336
+[   28.710676] bpfrejit-native-loader[512]: stub-btf-lookup-begin name=native_lab_stub
+[   28.712898] bpfrejit-native-loader[512]: stub-btf-lookup-done name=native_lab_stub module_btf_id=2 kfunc_btf_id=126376 mod_btf_fd=10
+[   28.714230] bpfrejit-native-loader[512]: stub-load-syscall-begin name=native_lab_stub type=1 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 insns=3 fd_array_cnt=2 attach_prog_fd=-1 attach_btf_obj_fd=-1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0
+[   28.716687] bpfrejit-native-loader[512]: stub-load-syscall-done name=native_lab_stub fd=11 log_true_size=0
+[   28.718297] bpfrejit-shim[512]: native load-done name= fd=5 replaced=1 native_fd=11 cache_hit=1 native_bytes=12 link_exec_ns=0 blob_fnv=91be27c0011c0f66 relocs=0 chunks=1 callee_saved=0 first_reloc=0:0:0x0000000000000000 last_reloc=0:0:0x0000000000000000
+[   28.719812] bpfrejit-shim[512]: native jit-info label=original fd=5 id=32 type=1 name= jited_len=64 xlated_len=16 nr_ksyms=1 ksym0=0xffff80008355d918
+[   28.721277] bpfrejit-shim[512]: native jit-info label=native fd=11 id=34 type=1 name=native_lab_stub jited_len=80 xlated_len=24 nr_ksyms=1 ksym0=0xffff80008355da20
+[   28.724191] bpfrejit-shim[512]: native replaced name= original_fd=5 native_fd=11
+[   28.725711] bpfrejit-shim[512]: prog-load done name= ret=11 errno=0 kid=34
+[   28.730206] bpfrejit-shim[512]: native consider name=libbpf_nametest type=1 insns=2 hash=58255400910d7827 fd=9
+[   28.730693] bpfrejit-shim[512]: native load-begin name=libbpf_nametest fd=9 manifest=/cases/manifest.json source=/tmp/shim8/bpfrejit_512_58255400910d7827.bpf
+[   28.833860] bpfrejit-native-loader[512]: upload-begin name=libbpf_nametest type=1 blob_bytes=12 blob_fnv=91be27c0011c0f66 reloc_records=0 reloc_bytes=0 chunks=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 first_chunk=0+12 last_chunk=0+12
+[   28.837977] bpfrejit-native-loader[512]: upload-done name=libbpf_nametest blob_bytes=12 reloc_records=0 chunks=1 proof_bound=1 upload_ns=5228352
+[   28.838698] bpfrejit-native-loader[512]: stub-btf-lookup-begin name=libbpf_nametest
+[   28.840731] bpfrejit-native-loader[512]: stub-btf-lookup-done name=libbpf_nametest module_btf_id=2 kfunc_btf_id=126376 mod_btf_fd=12
+[   28.842383] bpfrejit-native-loader[512]: stub-load-syscall-begin name=libbpf_nametest type=1 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 insns=3 fd_array_cnt=2 attach_prog_fd=-1 attach_btf_obj_fd=-1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0
+[   28.845129] bpfrejit-native-loader[512]: stub-load-syscall-done name=libbpf_nametest fd=13 log_true_size=0
+[   28.846928] bpfrejit-shim[512]: native load-done name=libbpf_nametest fd=9 replaced=1 native_fd=13 cache_hit=1 native_bytes=12 link_exec_ns=0 blob_fnv=91be27c0011c0f66 relocs=0 chunks=1 callee_saved=0 first_reloc=0:0:0x0000000000000000 last_reloc=0:0:0x0000000000000000
+[   28.848419] bpfrejit-shim[512]: native jit-info label=original fd=9 id=35 type=1 name=libbpf_nametest jited_len=64 xlated_len=16 nr_ksyms=1 ksym0=0xffff80008355da90
+[   28.849627] bpfrejit-shim[512]: native jit-info label=native fd=13 id=37 type=1 name=libbpf_nametest jited_len=80 xlated_len=24 nr_ksyms=1 ksym0=0xffff80008355da10
+[   28.852719] bpfrejit-shim[512]: native replaced name=libbpf_nametest original_fd=9 native_fd=13
+[   28.853933] bpfrejit-shim[512]: prog-load done name=libbpf_nametest ret=13 errno=0 kid=37
+[   28.858435] bpfrejit-shim[512]: native consider name=det_arg_ctx type=2 insns=4 hash=3ae725ddb7d69e19 fd=9
+[   28.858930] bpfrejit-shim[512]: native load-begin name=det_arg_ctx fd=9 manifest=/cases/manifest.json source=/tmp/shim8/bpfrejit_512_3ae725ddb7d69e19.bpf
+[   28.989040] bpfrejit-native-loader[512]: upload-begin name=det_arg_ctx type=2 blob_bytes=52 blob_fnv=b66d9497fb787944 reloc_records=1 reloc_bytes=16 chunks=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 first_chunk=0+52 last_chunk=0+52 first_reloc=20:2:0xffff800080298dd0 last_reloc=20:2:0xffff800080298dd0
+[   28.993434] bpfrejit-native-loader[512]: upload-done name=det_arg_ctx blob_bytes=52 reloc_records=1 chunks=1 proof_bound=1 upload_ns=5633424
+[   28.994095] bpfrejit-native-loader[512]: stub-btf-lookup-begin name=det_arg_ctx
+[   28.996034] bpfrejit-native-loader[512]: stub-btf-lookup-done name=det_arg_ctx module_btf_id=2 kfunc_btf_id=126376 mod_btf_fd=13
+[   28.997477] bpfrejit-native-loader[512]: stub-load-syscall-begin name=det_arg_ctx type=2 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 insns=3 fd_array_cnt=2 attach_prog_fd=-1 attach_btf_obj_fd=-1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0
+[   29.001052] bpfrejit-native-loader[512]: stub-load-syscall-done name=det_arg_ctx fd=15 log_true_size=0
+[   29.002741] bpfrejit-shim[512]: native load-done name=det_arg_ctx fd=9 replaced=1 native_fd=15 cache_hit=1 native_bytes=52 link_exec_ns=0 blob_fnv=b66d9497fb787944 relocs=1 chunks=1 callee_saved=0 first_reloc=20:2:0xffff800080298dd0 last_reloc=20:2:0xffff800080298dd0
+[   29.004256] bpfrejit-shim[512]: native jit-info label=original fd=9 id=38 type=2 name=det_arg_ctx jited_len=128 xlated_len=32 nr_ksyms=2 ksym0=0xffff80008355db08
+[   29.005445] bpfrejit-shim[512]: native jit-info label=native fd=15 id=40 type=2 name=det_arg_ctx jited_len=144 xlated_len=24 nr_ksyms=1 ksym0=0xffff80008355dc10
+[   29.008008] bpfrejit-shim[512]: native replaced name=det_arg_ctx original_fd=9 native_fd=15
+[   29.009208] bpfrejit-shim[512]: prog-load done name=det_arg_ctx ret=15 errno=0 kid=40
+[   29.015478] bpfrejit-shim[512]: native consider name= type=9 insns=2 hash=58255400910d7827 fd=9
+[   29.015970] bpfrejit-shim[512]: native load-begin name= fd=9 manifest=/cases/manifest.json source=/tmp/shim8/bpfrejit_512_58255400910d7827.bpf
+[   29.118218] bpfrejit-native-loader[512]: upload-begin name=native_lab_stub type=9 blob_bytes=12 blob_fnv=91be27c0011c0f66 reloc_records=0 reloc_bytes=0 chunks=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=2 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 first_chunk=0+12 last_chunk=0+12
+[   29.122390] bpfrejit-native-loader[512]: upload-done name=native_lab_stub blob_bytes=12 reloc_records=0 chunks=1 proof_bound=1 upload_ns=5132896
+[   29.123089] bpfrejit-native-loader[512]: stub-btf-lookup-begin name=native_lab_stub
+[   29.125003] bpfrejit-native-loader[512]: stub-btf-lookup-done name=native_lab_stub module_btf_id=2 kfunc_btf_id=126376 mod_btf_fd=14
+[   29.126328] bpfrejit-native-loader[512]: stub-load-syscall-begin name=native_lab_stub type=9 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 insns=3 fd_array_cnt=2 attach_prog_fd=-1 attach_btf_obj_fd=-1 expected_attach_type=2 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0
+[   29.128905] bpfrejit-native-loader[512]: stub-load-syscall-done name=native_lab_stub fd=15 log_true_size=0
+[   29.130525] bpfrejit-shim[512]: native load-done name= fd=9 replaced=1 native_fd=15 cache_hit=1 native_bytes=12 link_exec_ns=0 blob_fnv=91be27c0011c0f66 relocs=0 chunks=1 callee_saved=0 first_reloc=0:0:0x0000000000000000 last_reloc=0:0:0x0000000000000000
+[   29.132253] bpfrejit-shim[512]: native jit-info label=original fd=9 id=41 type=9 name= jited_len=64 xlated_len=16 nr_ksyms=1 ksym0=0xffff80008355da28
+[   29.133475] bpfrejit-shim[512]: native jit-info label=native fd=15 id=43 type=9 name=native_lab_stub jited_len=80 xlated_len=24 nr_ksyms=1 ksym0=0xffff80008355dc10
+[   29.136079] bpfrejit-shim[512]: native replaced name= original_fd=9 native_fd=15
+[   29.137313] bpfrejit-shim[512]: prog-load done name= ret=15 errno=0 kid=43
+[   29.141074] bpfrejit-shim[512]: native consider name=runtime_source type=6 insns=2 hash=fb3f789aa6beae88 fd=9
+[   29.141615] bpfrejit-shim[512]: native load-begin name=runtime_source fd=9 manifest=/cases/manifest.json source=/tmp/shim8/bpfrejit_512_fb3f789aa6beae88.bpf
+[   29.244909] bpfrejit-native-loader[512]: upload-begin name=runtime_source type=6 blob_bytes=12 blob_fnv=5843d378bd3650f9 reloc_records=0 reloc_bytes=0 chunks=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 first_chunk=0+12 last_chunk=0+12
+[   29.248756] bpfrejit-native-loader[512]: upload-done name=runtime_source blob_bytes=12 reloc_records=0 chunks=1 proof_bound=1 upload_ns=4818480
+[   29.249408] bpfrejit-native-loader[512]: stub-btf-lookup-begin name=runtime_source
+[   29.251571] bpfrejit-native-loader[512]: stub-btf-lookup-done name=runtime_source module_btf_id=2 kfunc_btf_id=126376 mod_btf_fd=15
+[   29.252975] bpfrejit-native-loader[512]: stub-load-syscall-begin name=runtime_source type=6 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 insns=3 fd_array_cnt=2 attach_prog_fd=-1 attach_btf_obj_fd=-1 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0
+[   29.255643] bpfrejit-native-loader[512]: stub-load-syscall-done name=runtime_source fd=17 log_true_size=0
+[   29.257290] bpfrejit-shim[512]: native load-done name=runtime_source fd=9 replaced=1 native_fd=17 cache_hit=1 native_bytes=12 link_exec_ns=0 blob_fnv=5843d378bd3650f9 relocs=0 chunks=1 callee_saved=0 first_reloc=0:0:0x0000000000000000 last_reloc=0:0:0x0000000000000000
+[   29.258723] bpfrejit-shim[512]: native jit-info label=original fd=9 id=44 type=6 name=runtime_source jited_len=64 xlated_len=16 nr_ksyms=1 ksym0=0xffff80008355dca8
+[   29.259914] bpfrejit-shim[512]: native jit-info label=native fd=17 id=46 type=6 name=runtime_source jited_len=80 xlated_len=24 nr_ksyms=1 ksym0=0xffff80008355dc20
+[   29.262697] bpfrejit-shim[512]: native replaced name=runtime_source original_fd=9 native_fd=17
+[   29.263920] bpfrejit-shim[512]: prog-load done name=runtime_source ret=17 errno=0 kid=46

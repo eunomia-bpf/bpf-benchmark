@@ -9,6 +9,8 @@ ROOT=Path(__file__).resolve().parents[3]
 sys.path.insert(0,str(ROOT/'kprog/arm64/micro-prog'))
 import generate_micro_sim_proofs as gen
 phase=Path(sys.argv[1]).resolve();phase.mkdir();(phase/'native').mkdir()
+tail_helpers=len(sys.argv)>2 and sys.argv[2]=='tail'
+if len(sys.argv)>2 and not tail_helpers:raise ValueError(sys.argv[2])
 body='''stp x19,x30,[sp,#-32]!
 ldr x19,[x0]
 ldr x2,[x0,#8]
@@ -28,14 +30,20 @@ ret
 '''
 rows=[]
 for preserve in [False,True]:
-    name='entry_abi_'+('preserved' if preserve else 'stripped')
+    name=('tail_helper_'+('local' if preserve else 'direct') if tail_helpers else
+        'entry_abi_'+('preserved' if preserve else 'stripped'))
     source=phase/'native'/(name+'.S');native=source.with_suffix('.native.o')
-    source.write_text('.text\n.global entry\n.type entry,%function\nentry:\n'+body+'.size entry,.-entry\n')
+    text=body.replace('bl bpf_get_current_uid_gid','bl leaf') if tail_helpers else body
+    text='.text\n.global entry\n.type entry,%function\nentry:\n'+text+'.size entry,.-entry\n'
+    if tail_helpers:
+        text+='\n.global leaf\n.type leaf,%function\nleaf:\nb '+('leaf2' if preserve else 'bpf_get_current_uid_gid')+'\n.size leaf,.-leaf\n'
+        if preserve:text+='\n.global leaf2\n.type leaf2,%function\nleaf2:\nb bpf_get_current_uid_gid\n.size leaf2,.-leaf2\n'
+    source.write_text(text)
     subprocess.run(['aarch64-linux-gnu-gcc','-c',source,'-o',native],check=True)
     proof=phase/'native'/(name+'.proof.o')
     command=[ROOT/'kprog/arm64/build/app-native-link/release/native-link','--input',native,'--symbol','entry',
         '--mode','proof','--output',proof]
-    if preserve:command.append('--preserve-entry-abi')
+    if preserve or tail_helpers:command.append('--preserve-entry-abi')
     subprocess.run(command,check=True)
     shutil.copy2(proof,phase/'native'/(name+'.entry.proof.o'))
     functions,rodata=gen.parse_native_linked_program(gen.Bench(name,'entry','xdp'),phase/'native')

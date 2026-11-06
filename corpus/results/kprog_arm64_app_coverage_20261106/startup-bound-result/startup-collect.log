@@ -1,0 +1,9 @@
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup_arm64.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-final-v7 collect
+all6 actual libbpf startup loads generation-bound for both flags0/8; no probe/name bypass; native main returns127
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup_arm64.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-arm64-final-v7 install
+bcc: installed all5 exact startup probe selectors and native/proof/simulator triples
+cilium: installed all5 exact startup probe selectors and native/proof/simulator triples
+katran: installed all5 exact startup probe selectors and native/proof/simulator triples
+otelcol-ebpf-profiler: installed all5 exact startup probe selectors and native/proof/simulator triples
+tetragon: installed all5 exact startup probe selectors and native/proof/simulator triples
+tracee: installed all5 exact startup probe selectors and native/proof/simulator triples

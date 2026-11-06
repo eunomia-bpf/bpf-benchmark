@@ -335,6 +335,7 @@ APP ?= bcc/set
 VM_CPUS ?= 8
 RUNTIME_BASE ?= $(ROOT)/kprog/arm64/build/app-runtime-v2
 RUNTIME_IMAGE ?= bpf-benchmark/runner-runtime:arm64-a-context-v2
+RUNTIME_SHIM_BUILD ?= $(ROOT)/bpfopt/shim/build-arm64-a-context-v2
 TETRAGON_ALIGN_BUILD := $(ROOT)/kprog/arm64/build/tetragon-alignchecker
 
 .PHONY: tetragon-alignchecker
@@ -355,7 +356,10 @@ pin-runtime-v2:
 
 .PHONY: runtime-shim-v2
 runtime-shim-v2:
-	taskset -c 16-23 $(MAKE) -C $(ROOT) host-shim-arm64 BPFOPT_SHIM_BUILD_ARM64=$(ROOT)/bpfopt/shim/build-arm64-a-context-v2
+	python3 $(HERE)/pin_shim.py
+	taskset -c 16-23 $(MAKE) -C $(ROOT) host-shim-arm64 \
+		BPFOPT_SHIM_DIR=$(ROOT)/kprog/arm64/build/published-shim-v5/bpfopt/shim \
+		BPFOPT_SHIM_BUILD_ARM64=$(RUNTIME_SHIM_BUILD)
 
 .PHONY: qemu-context-v2-root
 qemu-context-v2-root:
@@ -367,7 +371,7 @@ qemu-context-v2-root:
 		RUNNER_DIR=$(RUNTIME_BASE)/runner \
 		HOST_KERNEL_BUILD_DIR_ARM64=$(RUNTIME_BASE)/kernel \
 		HOST_KINSN_DIR_ARM64=$(RUNTIME_BASE)/kinsn \
-		BPFOPT_SHIM_BUILD_ARM64=$(ROOT)/bpfopt/shim/build-arm64-a-context-v2 \
+		BPFOPT_SHIM_BUILD_ARM64=$(RUNTIME_SHIM_BUILD) \
 		NATIVE_BPF_ARTIFACTS_ARM64=$(ROOT)/kprog/arm64/build/app-verified-stage \
 		ARM64_RUNNER_RUNTIME_IMAGE=$(RUNTIME_IMAGE) \
 		ARM64_RUNNER_RUNTIME_IMAGE_TAR=$(RUNTIME_BASE)/image.tar \
@@ -466,9 +470,52 @@ memory-width-check: memory-width-generate
 	cd $(ROOT)/kprog/formal && cc -Wall -Wextra -Werror -O2 -I. oracles/test_arm64_store_bytes_host.c -o $(HERE)/$(PHASE)/store-oracle
 	$(HERE)/$(PHASE)/store-oracle
 
+.PHONY: startup-arm64-build
+startup-arm64-build: direct-header-generate
+	python3 $(HERE)/startup_arm64.py $(HERE)/$(PHASE) prepare
+	clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
+		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
+		-c $(HERE)/$(PHASE)/source.bpf.c -o $(HERE)/$(PHASE)/source.bpf.o
+	python3 $(HERE)/startup_arm64.py $(HERE)/$(PHASE) generate
+	for source in $(HERE)/$(PHASE)/startup_*.bpf.c; do \
+		clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
+		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
+		-c $$source -o $${source%.c}.o || exit 1; \
+	done
+	$(MAKE) -f $(HERE)/Makefile startup-arm64-driver PHASE=$(PHASE)
+
+.PHONY: startup-arm64-driver
+startup-arm64-driver:
+	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 $(HERE)/startup_inspect.cpp -ldl -o $(HERE)/$(PHASE)/inspect
+	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -D__EXPORTED_HEADERS__ \
+		-I$(ROOT)/vendor/linux-framework/include/uapi -I$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+		$(ROOT)/corpus/results/kprog_app_coverage_20261106/runtime_startup.cpp \
+		$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+		-L$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -o $(HERE)/$(PHASE)/startup
+
+.PHONY: startup-arm64-check
+STARTUP_LOADER ?= /workspaces/.agent-state/kprog-lanes/T/context-v2-func-ip/arm64/libnative_loader.so
+startup-arm64-check:
+	python3 $(HERE)/startup_arm64.py $(HERE)/$(PHASE) package $(BASE_INITRAMFS) $(STARTUP_LOADER)
+	install -d $(HERE)/$(PHASE)/verify
+	taskset -c 12-15 timeout 600 qemu-system-aarch64 -M virt -cpu max -smp 2 -m 2048 -nographic -no-reboot \
+		-kernel /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/Image -initrd $(BUILD)/initramfs.cpio.gz \
+		-fsdev local,id=results,path=$(HERE)/$(PHASE)/verify,security_model=none \
+		-device virtio-9p-device,fsdev=results,mount_tag=results \
+		-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >$(HERE)/$(PHASE)/qemu.log 2>&1
+	python3 $(HERE)/startup_arm64.py $(HERE)/$(PHASE) collect
+
+.PHONY: startup-arm64-install
+startup-arm64-install:
+	python3 $(HERE)/startup_arm64.py $(HERE)/$(PHASE) install
+
+.PHONY: startup-arm64-collect
+startup-arm64-collect:
+	python3 $(HERE)/startup_arm64.py $(HERE)/$(PHASE) collect
+
 .PHONY: entry-abi-build
 entry-abi-build: direct-header-generate
-	python3 $(HERE)/entry_abi.py $(HERE)/$(PHASE)
+	python3 $(HERE)/entry_abi.py $(HERE)/$(PHASE) $(ENTRY_ABI_ARGS)
 	for source in $(HERE)/$(PHASE)/*.bpf.c; do \
 		clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
 		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \

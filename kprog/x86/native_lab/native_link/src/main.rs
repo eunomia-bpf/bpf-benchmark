@@ -2335,6 +2335,7 @@ fn arm64_section_materialized_data(section: &object::Section) -> Result<Vec<u8>>
 
 const R_AARCH64_ADR_PREL_PG_HI21: u32 = 275;
 const R_AARCH64_ADD_ABS_LO12_NC: u32 = 277;
+const R_AARCH64_JUMP26: u32 = 282;
 const R_AARCH64_CALL26: u32 = 283;
 const R_AARCH64_ADR_GOT_PAGE: u32 = 311;
 const R_AARCH64_LD64_GOT_LO12_NC: u32 = 312;
@@ -2472,7 +2473,7 @@ fn arm64_reloc_data(elf: &object::File, reloc: &Arm64RelocInfo) -> Result<Vec<u8
 }
 
 fn arm64_local_call_target(reloc: &Arm64RelocInfo) -> Option<Arm64AddressKey> {
-    if reloc.r_type != R_AARCH64_CALL26 {
+    if !matches!(reloc.r_type, R_AARCH64_CALL26 | R_AARCH64_JUMP26) {
         return None;
     }
     Some((reloc.target_section_index?, reloc.target_address?))
@@ -2498,15 +2499,22 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
             let insn = u32::from_le_bytes(word.try_into().unwrap());
             let reloc = relocs.get(&((sym.section_index, sym.address), (word_index * 4) as u64));
             let (target_section_index, target_address) =
-                if let Some(reloc) = reloc.filter(|reloc| reloc.r_type == R_AARCH64_CALL26) {
+                if let Some(reloc) = reloc.filter(|reloc| matches!(reloc.r_type, R_AARCH64_CALL26 | R_AARCH64_JUMP26)) {
                     let Some((section_index, address)) = arm64_local_call_target(reloc) else {
                         continue;
                     };
+                    if reloc.r_type == R_AARCH64_JUMP26 && section_index == sym.section_index &&
+                        address >= sym.address && address < sym.address + sym.size { continue; }
                     (section_index, address)
                 } else {
-                    let Some(target) = a64_bl_target(sym.address, word_index, insn) else {
+                    let branch = if a64_is_uncond_b(insn) && !a64_is_bl(insn) {
+                        a64_branch_target(sym.address, word_index, insn)
+                            .filter(|target| *target < sym.address || *target >= sym.address + sym.size)
+                    } else { None };
+                    let Some(target) = a64_bl_target(sym.address, word_index, insn).or(branch) else {
                         continue;
                     };
+                    if branch.is_some() && arm64_is_return_trampoline_target(elf, target)? { continue; }
                     (sym.section_index, target)
                 };
             let target_key = (target_section_index, target_address);
@@ -2798,7 +2806,7 @@ fn arm64_symbol_has_tail_call(
     let flow = arm64_helper_flow(bytes, sym, relocs);
     for (index, word) in bytes.chunks_exact(4).enumerate() {
         if relocs.get(&(sym_key, (index * 4) as u64)).is_some_and(|r|
-            r.r_type == R_AARCH64_CALL26 && r.target_name == "bpf_tail_call") { return true; }
+            matches!(r.r_type, R_AARCH64_CALL26 | R_AARCH64_JUMP26) && r.target_name == "bpf_tail_call") { return true; }
         let insn = u32::from_le_bytes(word.try_into().unwrap());
         if let Some(reg) = a64_blr_reg(insn) {
             if flow.get(&index).and_then(|s| s[reg].as_ref())
@@ -3701,9 +3709,12 @@ fn rewrite_arm64(
                         blob.extend_from_slice(&insn.to_le_bytes());
                         continue;
                     }
-                    R_AARCH64_CALL26 => {
+                    R_AARCH64_CALL26 | R_AARCH64_JUMP26 => {
+                        let tail = reloc.r_type == R_AARCH64_JUMP26;
                         if let Some(target) = arm64_local_call_target(reloc) {
-                            if !included
+                            let local_branch = tail && target.0 == sym.section_index &&
+                                target.1 >= sym.address && target.1 < end;
+                            if !local_branch && !included
                                 .iter()
                                 .any(|s| (s.section_index, s.address) == target)
                             {
@@ -3716,48 +3727,65 @@ fn rewrite_arm64(
                             }
                             patches.push(Arm64Patch {
                                 word_index: emit_word_index,
-                                kind: Arm64PatchKind::Bl {
-                                    target_symbol: target,
-                                },
+                                kind: if tail { Arm64PatchKind::B {
+                                    source_symbol: target,
+                                    target_is_symbol_end: false,
+                                    target_address: target.1,
+                                } } else { Arm64PatchKind::Bl { target_symbol: target } },
                             });
                             blob.extend_from_slice(&insn.to_le_bytes());
                             continue;
                         }
+                        // A source tail branch keeps its caller's LR. The helper
+                        // call veneer uses BL, so preserve LR in a private frame.
+                        if tail { append_u32(&mut blob, 0xa9bf_7bfd); }
+                        let call_word_index = blob.len() / 4;
                         if proof_mode {
                             proof_relocs.push(ProofReloc {
-                                offset: (emit_word_index * 4) as u64,
-                                r_type: reloc.r_type,
+                                offset: (call_word_index * 4) as u64,
+                                r_type: R_AARCH64_CALL26,
                                 symbol: reloc.target_name.clone(),
                                 addend: reloc.addend,
                                 data: None,
                             });
-                            blob.extend_from_slice(&insn.to_le_bytes());
-                            continue;
+                            append_u32(&mut blob, 0x9400_0000);
+                        } else {
+                            let cleanup = if tail {
+                                [vec![0xa8c1_7bfd], entry_abi_strip.tail_call_cleanup_words.clone()].concat()
+                            } else { entry_abi_strip.tail_call_cleanup_words.clone() };
+                            for word in build_arm64_helper_call(
+                                &reloc.target_name,
+                                &sym.name,
+                                off,
+                                blob.len(),
+                                is_entry,
+                                helper_addrs,
+                                tail_call_maps,
+                                lookup_sites,
+                                lookup_maps,
+                                update_sites,
+                                callee_saved_mask,
+                                &cleanup,
+                                entry_abi_strip.tail_call_cnt_ptr_stack_offset.map(|offset| offset + if tail { 16 } else { 0 }),
+                                &mut lookup_call_counter,
+                                &mut update_call_counter,
+                                &mut reg_map_names,
+                                &mut lookup_site_used,
+                                &mut update_site_by_map,
+                                &mut helper_literal_loads,
+                                &mut native_relocs,
+                                helper_call_slot,
+                            )? {
+                                append_u32(&mut blob, word);
+                            }
                         }
-                        for word in build_arm64_helper_call(
-                            &reloc.target_name,
-                            &sym.name,
-                            off,
-                            blob.len(),
-                            is_entry,
-                            helper_addrs,
-                            tail_call_maps,
-                            lookup_sites,
-                            lookup_maps,
-                            update_sites,
-                            callee_saved_mask,
-                            &entry_abi_strip.tail_call_cleanup_words,
-                            entry_abi_strip.tail_call_cnt_ptr_stack_offset,
-                            &mut lookup_call_counter,
-                            &mut update_call_counter,
-                            &mut reg_map_names,
-                            &mut lookup_site_used,
-                            &mut update_site_by_map,
-                            &mut helper_literal_loads,
-                            &mut native_relocs,
-                            helper_call_slot,
-                        )? {
-                            append_u32(&mut blob, word);
+                        if tail {
+                            append_u32(&mut blob, 0xa8c1_7bfd);
+                            if is_entry {
+                                patches.push(Arm64Patch { word_index: blob.len() / 4,
+                                    kind: Arm64PatchKind::ReturnToTrampoline });
+                                append_u32(&mut blob, A64_NOP);
+                            } else { append_u32(&mut blob, 0xd65f_03c0); }
                         }
                         continue;
                     }
@@ -3968,6 +3996,15 @@ fn rewrite_arm64(
                         kind: Arm64PatchKind::ReturnToTrampoline,
                     });
                     blob.extend_from_slice(&0u32.to_le_bytes());
+                    continue;
+                }
+                if a64_is_uncond_b(insn) && included.iter().any(|other|
+                    other.section_index == sym.section_index && other.address == target &&
+                    other.address != sym.address) {
+                    patches.push(Arm64Patch { word_index: emit_word_index,
+                        kind: Arm64PatchKind::B { source_symbol: (sym.section_index, target),
+                            target_is_symbol_end: false, target_address: target } });
+                    blob.extend_from_slice(&insn.to_le_bytes());
                     continue;
                 }
                 if target < sym.address || target > end {
@@ -4330,6 +4367,62 @@ fn disasm_arm64_words(blob: &[u8]) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn arm64_resolved_tail_branches_keep_transitive_callees() {
+        let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::Aarch64, Endianness::Little);
+        let section = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
+        let words = [0x1400_0001u32, 0x1400_0001, 0xd280_0000, 0xd65f_03c0];
+        object.append_section_data(section, &words.iter().flat_map(|w| w.to_le_bytes()).collect::<Vec<_>>(), 4);
+        for (name, value, size) in [("entry", 0, 4), ("leaf", 4, 4), ("leaf2", 8, 8)] {
+            object.add_symbol(WriteSymbol { name: name.as_bytes().to_vec(), value, size,
+                kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+                section: WriteSymbolSection::Section(section), flags: SymbolFlags::None });
+        }
+        let bytes = object.write().unwrap();
+        let elf = object::File::parse(bytes.as_slice()).unwrap();
+        let entry = find_symbol_by_name(&elf, "entry").unwrap();
+        let included = discover_reachable_arm64(&elf, &entry).unwrap();
+        assert_eq!(included.iter().map(|s| s.name.as_str()).collect::<Vec<_>>(), vec!["entry", "leaf", "leaf2"]);
+        let output = rewrite_arm64(&elf, &entry, &included, &HashMap::new(), &HashMap::new(),
+            &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, false, false, false).unwrap();
+        assert_eq!(&output.blob[..16], &words.iter().flat_map(|w| w.to_le_bytes()).collect::<Vec<_>>());
+    }
+
+    #[test]
+    fn arm64_external_tail_helper_retains_relocation_and_callers_lr() {
+        let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::Aarch64, Endianness::Little);
+        let section = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
+        object.append_section_data(section, &0x1400_0000u32.to_le_bytes(), 4);
+        object.add_symbol(WriteSymbol { name: b"entry".to_vec(), value: 0, size: 4,
+            kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+            section: WriteSymbolSection::Section(section), flags: SymbolFlags::None });
+        let helper = object.add_symbol(WriteSymbol { name: b"bpf_ktime_get_coarse_ns".to_vec(), value: 0, size: 0,
+            kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+            section: WriteSymbolSection::Undefined, flags: SymbolFlags::None });
+        object.add_relocation(section, WriteRelocation { offset: 0, symbol: helper, addend: 0,
+            flags: RelocationFlags::Elf { r_type: R_AARCH64_JUMP26 } }).unwrap();
+        let bytes = object.write().unwrap();
+        let elf = object::File::parse(bytes.as_slice()).unwrap();
+        let entry = find_symbol_by_name(&elf, "entry").unwrap();
+        let included = discover_reachable_arm64(&elf, &entry).unwrap();
+        for proof in [true, false] {
+            let helpers = HashMap::from([("bpf_ktime_get_coarse_ns".to_string(), 0xffff_8000_1234_0000)]);
+            let output = rewrite_arm64(&elf, &entry, &included, &helpers, &HashMap::new(),
+                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, proof, true, false).unwrap();
+            assert_eq!(arm64_word_at(&output.blob, 0), Some(0xa9bf_7bfd));
+            if proof {
+                assert_eq!(output.proof_relocs.len(), 1);
+                assert_eq!(output.proof_relocs[0].r_type, R_AARCH64_CALL26);
+                assert_eq!(output.proof_relocs[0].offset, 4);
+                assert_eq!(output.proof_relocs[0].symbol, "bpf_ktime_get_coarse_ns");
+                assert_eq!(arm64_word_at(&output.blob, 2), Some(0xa8c1_7bfd));
+            } else {
+                assert_eq!(a64_blr_reg(arm64_word_at(&output.blob, 2).unwrap()), Some(10));
+                assert_eq!(arm64_word_at(&output.blob, 3), Some(0xa8c1_7bfd));
+            }
+        }
+    }
 
     #[test]
     fn arm64_entry_save_removal_keeps_stack_writeback() {
