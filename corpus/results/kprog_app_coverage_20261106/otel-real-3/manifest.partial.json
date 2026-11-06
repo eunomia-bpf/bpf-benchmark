@@ -1,0 +1,64 @@
+{
+ "objects": [
+  {
+   "program": "read_task_struc",
+   "source_btf_symbol": "read_task_struct",
+   "prog_type": 17,
+   "source_bytecode_len": 448,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+   "symbol": "read_task_struct",
+   "simulator_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel_read_task_struct.bpf.o",
+   "simulator_program": "otel_read_task_struct_x86_sim_xdp"
+  },
+  {
+   "program": "perf_unwind_sto",
+   "source_btf_symbol": "perf_unwind_stop",
+   "prog_type": 7,
+   "source_bytecode_len": 13048,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+   "symbol": "perf_unwind_stop",
+   "simulator_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel_perf_unwind_stop.bpf.o",
+   "simulator_program": "otel_perf_unwind_stop_x86_sim_xdp"
+  },
+  {
+   "program": "perf_go_labels",
+   "source_btf_symbol": "perf_go_labels",
+   "prog_type": 7,
+   "source_bytecode_len": 5464,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+   "symbol": "perf_go_labels",
+   "simulator_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel_perf_go_labels.bpf.o",
+   "simulator_program": "otel_perf_go_labels_x86_sim_xdp"
+  },
+  {
+   "program": "tracepoint__sch",
+   "source_btf_symbol": "tracepoint__sched_process_free",
+   "prog_type": 5,
+   "source_bytecode_len": 2264,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+   "symbol": "tracepoint__sched_process_free",
+   "simulator_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel_tracepoint__sched_process_free.bpf.o",
+   "simulator_program": "otel_tracepoint__sched_process_free_x86_sim_xdp"
+  },
+  {
+   "program": "native_tracer_e",
+   "source_btf_symbol": "native_tracer_entry",
+   "prog_type": 7,
+   "source_bytecode_len": 10576,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+   "symbol": "native_tracer_entry",
+   "simulator_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel_native_tracer_entry.bpf.o",
+   "simulator_program": "otel_native_tracer_entry_x86_sim_xdp"
+  },
+  {
+   "program": "custom__generic",
+   "source_btf_symbol": "custom__generic",
+   "prog_type": 2,
+   "source_bytecode_len": 10024,
+   "native_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+   "symbol": "custom__generic",
+   "simulator_object": "/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/otel_custom__generic.bpf.o",
+   "simulator_program": "otel_custom__generic_x86_sim_xdp"
+  }
+ ]
+}

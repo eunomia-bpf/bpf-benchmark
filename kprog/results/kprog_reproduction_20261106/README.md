@@ -189,14 +189,33 @@ EPERM rather than EINVAL. The blob is `prog_type=6 blob_bytes=10243
 reloc_records=90 chunks=81`, well under the 512-chunk bound, so the
 refusal is not a chunk-count limit. Reported to the kernel/module owner.
 
-## otelcol: manifest names a consolidated object that is not staged
+## otelcol: three packaging mismatches, each measured
 
-`otel-real-2/manifest.json` names a single `otel.native.o` for all 14
-objects, but the staged artifacts are per-tracer
-(`custom_trace.native.o`, `dotnet_tracer.native.o`,
-`go_labels.native.o`, `hotspot_tracer.native.o`, ...), so every entry
-reads as unreadable. Needs one row per staged object, or a consolidated
-object built. Reported to lane C, which owns app artifact packaging.
+`otel-real-3` was taken apart entry by entry. Each fix moved the failure
+one layer deeper, which is why the remaining work is now unambiguous:
+
+1. **Consolidated object name.** The manifest names
+   `<...>/native/otel.native.o`, which does not exist. The build
+   (`vendor/bpf/Makefile:332`) installs that object as
+   `otelcol-ebpf-profiler.native.o`, which **is** in the image
+   (2,341,976 bytes). With the manifest pointed at the real name the
+   loader stopped reporting it unreadable.
+2. **Simulator object names.** Every `simulator_object` is
+   `<prog>.linked.bpf.o`, but the artifacts are `<prog>.bpf.o`; 6 of 14
+   exist, and the other 8 (`otel_perf_unwind_{dotnet,hotspot,native,
+   perl,php,python,ruby,v8}`) are not built for x86 at all.
+3. **Simulator objects are not in the image.** Even using the 6 that
+   exist, the loader reports `open simulator proof /artifacts/.../
+   <prog>.bpf.o: No such file`, because `native-otel` installs only
+   `*.native.o` and `*.proof.o` into the stage directory.
+
+`vendor/bpf/Makefile` already writes a `manifest.json` into the stage
+dir, but in a different schema (`data_objects: [{native_object:
+"<tracer>.native.o"}]`, with no `source_btf_symbol`, `program` or
+`simulator_object`), so it is not a drop-in for
+`BPFREJIT_SHIM_NATIVE_MANIFEST`. Reported to lane C with the three
+points; bcc proves the schema itself is settled, so this is otel's
+packaging only.
 
 ## tetragon, cilium, tracee
 
