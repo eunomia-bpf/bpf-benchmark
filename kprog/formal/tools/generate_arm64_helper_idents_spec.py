@@ -27,7 +27,7 @@ LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64HelperIdents.lean"
 C_HEADER = ROOT / "generated/arm64_helper_idents.h"
 PYTHON = ROOT.parent / "arm64/micro-prog/generated_arm64_helper_idents.py"
 
-# The encoder's 75 helper ids in the specification's id-sorted order, as the
+# The encoder's 77 helper ids in the specification's id-sorted order, as the
 # encoder's `HELPER_IDENTS` table defines them.
 EXPECTED: list[tuple[int, str]] = [
     (1, "bpf_map_lookup_elem"),
@@ -94,7 +94,9 @@ EXPECTED: list[tuple[int, str]] = [
     (152, "bpf_redirect_neigh"),
     (155, "bpf_redirect_peer"),
     (158, "bpf_get_current_task_btf"),
+    (160, "bpf_ktime_get_coarse_ns"),
     (161, "bpf_ima_inode_hash"),
+    (173, "bpf_get_func_ip"),
     (174, "bpf_get_attach_cookie"),
     (175, "bpf_task_pt_regs"),
     (181, "bpf_loop"),

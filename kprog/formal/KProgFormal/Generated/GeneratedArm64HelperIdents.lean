@@ -66,7 +66,9 @@ inductive Helper
   | bpf_redirect_neigh
   | bpf_redirect_peer
   | bpf_get_current_task_btf
+  | bpf_ktime_get_coarse_ns
   | bpf_ima_inode_hash
+  | bpf_get_func_ip
   | bpf_get_attach_cookie
   | bpf_task_pt_regs
   | bpf_loop
@@ -143,7 +145,9 @@ def id : Helper -> Nat
   | .bpf_redirect_neigh => 152
   | .bpf_redirect_peer => 155
   | .bpf_get_current_task_btf => 158
+  | .bpf_ktime_get_coarse_ns => 160
   | .bpf_ima_inode_hash => 161
+  | .bpf_get_func_ip => 173
   | .bpf_get_attach_cookie => 174
   | .bpf_task_pt_regs => 175
   | .bpf_loop => 181
@@ -219,7 +223,9 @@ def name : Helper -> String
   | .bpf_redirect_neigh => "bpf_redirect_neigh"
   | .bpf_redirect_peer => "bpf_redirect_peer"
   | .bpf_get_current_task_btf => "bpf_get_current_task_btf"
+  | .bpf_ktime_get_coarse_ns => "bpf_ktime_get_coarse_ns"
   | .bpf_ima_inode_hash => "bpf_ima_inode_hash"
+  | .bpf_get_func_ip => "bpf_get_func_ip"
   | .bpf_get_attach_cookie => "bpf_get_attach_cookie"
   | .bpf_task_pt_regs => "bpf_task_pt_regs"
   | .bpf_loop => "bpf_loop"

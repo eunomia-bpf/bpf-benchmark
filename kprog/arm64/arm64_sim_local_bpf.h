@@ -1552,8 +1552,14 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 #define ARM64_SIM_BPF_CALL_bpf_get_current_task_btf() \
 	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_get_current_task_btf())
 
+#define ARM64_SIM_BPF_CALL_bpf_ktime_get_coarse_ns() \
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ktime_get_coarse_ns())
+
 #define ARM64_SIM_BPF_CALL_bpf_ima_inode_hash() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ima_inode_hash((struct inode *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
+
+#define ARM64_SIM_BPF_CALL_bpf_get_func_ip() \
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ip((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
 
 #define ARM64_SIM_BPF_CALL_bpf_get_attach_cookie() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_attach_cookie((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))

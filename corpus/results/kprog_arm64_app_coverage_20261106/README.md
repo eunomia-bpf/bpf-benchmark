@@ -759,3 +759,11 @@ artifact/stub failures recorded there, with no native workload counter rows.
 The BCC payload archive captures the stale proof lookup fixed by aefcd9c71;
 its manifest is extracted from that payload. The next run uses the repaired
 triple pairing and strict all-probe generation-bound startup artifacts.
+
+## Typed helpers for actual startup programs
+
+[The startup-helper increment](startup-helper-checked/README.md) adds real
+coarse-time and function-IP calls (IDs160/173), preserving all75 existing
+helpers. The154 ABI cases,79 identity cases and unchanged full345-module
+formal/C/Rust/wire retry pass. All six captured ARM startup pairs compile;
+the separate loader startup failure remains under active repair.

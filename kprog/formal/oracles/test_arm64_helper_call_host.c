@@ -72,7 +72,9 @@ typedef signed int __s32;
 #define bpf_redirect_neigh bpf_redirect_neigh_defs
 #define bpf_redirect_peer bpf_redirect_peer_defs
 #define bpf_get_current_task_btf bpf_get_current_task_btf_defs
+#define bpf_ktime_get_coarse_ns bpf_ktime_get_coarse_ns_defs
 #define bpf_ima_inode_hash bpf_ima_inode_hash_defs
+#define bpf_get_func_ip bpf_get_func_ip_defs
 #define bpf_get_attach_cookie bpf_get_attach_cookie_defs
 #define bpf_task_pt_regs bpf_task_pt_regs_defs
 #define bpf_loop bpf_loop_defs
@@ -148,7 +150,9 @@ typedef signed int __s32;
 #undef bpf_redirect_neigh
 #undef bpf_redirect_peer
 #undef bpf_get_current_task_btf
+#undef bpf_ktime_get_coarse_ns
 #undef bpf_ima_inode_hash
+#undef bpf_get_func_ip
 #undef bpf_get_attach_cookie
 #undef bpf_task_pt_regs
 #undef bpf_loop
@@ -746,6 +750,13 @@ static struct task_struct * bpf_get_current_task_btf(void)
     return (struct task_struct *)(unsigned long)RETURN_BITS;
 }
 
+static __u64 bpf_ktime_get_coarse_ns(void)
+{
+    seen_id = 160; calls++;
+
+    return (__u64)(unsigned long)RETURN_BITS;
+}
+
 static long bpf_ima_inode_hash(struct inode * arg0, void * arg1, __u32 arg2)
 {
     seen_id = 161; calls++;
@@ -753,6 +764,13 @@ static long bpf_ima_inode_hash(struct inode * arg0, void * arg1, __u32 arg2)
     check_arg(1, (__u64)(unsigned long)arg1);
     check_arg(2, (__u64)(unsigned long)arg2);
     return (long)(unsigned long)RETURN_BITS;
+}
+
+static __u64 bpf_get_func_ip(void * arg0)
+{
+    seen_id = 173; calls++;
+    check_arg(0, (__u64)(unsigned long)arg0);
+    return (__u64)(unsigned long)RETURN_BITS;
 }
 
 static __u64 bpf_get_attach_cookie(void * arg0)
@@ -1116,10 +1134,14 @@ static void run(unsigned stack_mode) {
         expected[1] = (__u64)(unsigned long)(__u64)value_for(1););
     helper_id=158; CHECK_HELPER(bpf_get_current_task_btf, struct task_struct *, 0, ARM64_SIM_TAG_MAP_VALUE, -1,
         );
+    helper_id=160; CHECK_HELPER(bpf_ktime_get_coarse_ns, __u64, 0, ARM64_SIM_TAG_SCALAR, -1,
+        );
     helper_id=161; CHECK_HELPER(bpf_ima_inode_hash, long, 3, ARM64_SIM_TAG_SCALAR, -1,
         expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0);
         expected[1] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(1);
         expected[2] = (__u64)(unsigned long)(__u32)value_for(2););
+    helper_id=173; CHECK_HELPER(bpf_get_func_ip, __u64, 1, ARM64_SIM_TAG_SCALAR, -1,
+        expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0););
     helper_id=174; CHECK_HELPER(bpf_get_attach_cookie, __u64, 1, ARM64_SIM_TAG_SCALAR, -1,
         expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0););
     helper_id=175; CHECK_HELPER(bpf_task_pt_regs, long, 1, ARM64_SIM_TAG_SCALAR, -1,

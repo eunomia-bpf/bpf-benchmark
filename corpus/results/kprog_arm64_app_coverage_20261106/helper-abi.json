@@ -1256,6 +1256,12 @@
     "parameters": []
   },
   {
+    "id": 160,
+    "name": "bpf_ktime_get_coarse_ns",
+    "result": "__u64",
+    "parameters": []
+  },
+  {
     "id": 161,
     "name": "bpf_ima_inode_hash",
     "result": "long",
@@ -1274,6 +1280,18 @@
         "type": "__u32",
         "name": "size",
         "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 173,
+    "name": "bpf_get_func_ip",
+    "result": "__u64",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
       }
     ]
   },
