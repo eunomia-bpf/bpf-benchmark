@@ -54,7 +54,7 @@ typedef union {
 } host_stack_arena;
 static volatile host_stack_arena *host_stack;
 #define __a64_stack (*host_stack)
-static __u8 __a64_stack_tag[KPROG_ARM64_STACK_TAG_SLOTS(ARM64_SIM_STACK_BYTES)];
+static __u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(ARM64_SIM_STACK_BYTES)] __attribute__((aligned(8)));
 struct memory_access { long off; __u32 width; int is_write; };
 static void access_boundary(void *argument)
 {

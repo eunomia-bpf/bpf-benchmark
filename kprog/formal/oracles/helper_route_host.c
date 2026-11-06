@@ -25,16 +25,13 @@
  * Stack-arena convention (both sides agree by construction): each
  * stack-tagged argument is planted at a valid distinct arena offset, so its redirected pointer
  * points into `__a64_stack.b` at that offset, independently of its contents.
+ * Output buffers use bounded lengths, and an independent byte-interval model
+ * checks every stack byte and whole-word provenance tag after each call.
  * Raw-pointer lanes pass the register value through unchanged. A body that
  * reads the wrong lane gets a peripheral byte (or reg pattern) and fails
  * the compare.
  *
- * Build and run:
- *   cd kprog/formal &&
- *   cc -Wall -Wextra -Werror -O2 -I. -I../arm64 -I../../kprog \
- *      -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf \
- *      build/helper_route_host.c -o build/mut_helperroute &&
- *   ./build/mut_helperroute
+ * Build and run: make -C kprog/formal check
  */
 
 #define __BPF_HELPERS__ 1
@@ -71,7 +68,22 @@ typedef signed int __s32;
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+/* The success fixture executes a real bounded copy as well as capturing the
+ * public ABI. Default failures retain the original capture-only scenes. */
+static int probe_succeeds;
+static long capture_probe_kernel(void *dst, __u32 size, const void *src)
+{
+    long result = bpf_probe_read_kernel(dst, size, src);
+    if (probe_succeeds) {
+        memcpy(dst, src, size);
+        return 0;
+    }
+    return result;
+}
+#define bpf_probe_read_kernel capture_probe_kernel
 
 static int failures;
 static unsigned long cases;
@@ -107,6 +119,69 @@ static __s64 msp;
 #define STACK_SLOTS 20U
 static __u8 stk_img[STACK_BYTES];
 static __u8 stk_tag_img[STACK_SLOTS];
+
+static void reset_arena_model(void)
+{
+    unsigned i;
+    for (i = 0; i < STACK_BYTES; i++) stk_img[i] = (__u8)(0xc0U + i * 7U);
+    for (i = 0; i < STACK_SLOTS; i++) stk_tag_img[i] = (__u8)(1U + i % 5U);
+}
+
+/* Literal helper identities and public argument positions are independent of
+ * production's FULL_WRITES table. Only stack outputs need bounded fixture sizes;
+ * nonstack cases retain their original full-width ABI argument patterns. */
+static int writer_destination(unsigned id)
+{
+    switch (id) {
+    case 4: case 16: case 45: case 112: case 113: case 114: case 115: case 148: return 0;
+    case 26: case 68: return 2;
+    case 67: return 1;
+    default: return -1;
+    }
+}
+
+static unsigned writer_length(unsigned id)
+{
+    return id == 67 ? 2 : (id == 26 || id == 68) ? 3 : 1;
+}
+
+static __u64 fixture_result(unsigned id)
+{
+    return id == 113 && probe_succeeds ? 0 : ora_expected_result(id);
+}
+
+static void model_helper_effect(unsigned id, __u64 result)
+{
+    int destination = writer_destination(id);
+    unsigned i;
+    __u8 old_tags[STACK_SLOTS];
+    __u64 length, start, end, source;
+    int copy;
+    if (destination < 0 || mtag[destination] != 4U) return;
+    length = (__u32)mreg[writer_length(id)];
+    start = 96 + (__s64)mreg[destination];
+    end = start + length;
+    if (start > STACK_BYTES || end > STACK_BYTES || end < start) {
+        fprintf(stderr, "helper route fixture output outside arena: helper%u\n", id);
+        exit(1);
+    }
+    copy = (id == 4 || id == 112 || id == 113 || id == 148) && result == 0 && mtag[2] == 4U;
+    source = 96 + (__s64)mreg[2];
+    if (copy && (source > STACK_BYTES || length > STACK_BYTES - source)) {
+        fprintf(stderr, "helper route fixture source outside arena: helper%u\n", id);
+        exit(1);
+    }
+    memcpy(old_tags, stk_tag_img, sizeof(old_tags));
+    for (i = 0; i < STACK_SLOTS; i++) {
+        __u64 word = 8U * i;
+        if (length && start < word + 8 && word < end) {
+            stk_tag_img[i] = 0;
+            if (copy && start <= word && word + 8 <= end && !((source + word - start) & 7U))
+                stk_tag_img[i] = old_tags[(source + word - start) / 8];
+        }
+    }
+    if (id == 113 && probe_succeeds) memcpy(stk_img + start, stk_img + source, length);
+}
 
 /* A deterministic register pattern: distinct per index, never zero (so a
  * stale zero-write arm cannot alias a planted pointer), high bits set (so
@@ -158,6 +233,7 @@ static __u8 pattern_tag(unsigned i)
 #define INIT_ARENA()                                                       \
 	do {                                                               \
 		unsigned __ai_i;                                           \
+		reset_arena_model();                                      \
 		for (__ai_i = 0; __ai_i < STACK_BYTES; __ai_i++)            \
 			__a64_stack.b[__ai_i] = stk_img[__ai_i];           \
 		for (__ai_i = 0; __ai_i < STACK_SLOTS; __ai_i++)            \
@@ -227,6 +303,21 @@ static __u8 pattern_tag(unsigned i)
 				       mtag[__cs_i]);                      \
 				failures++;                                \
 				return;                                    \
+			}                                                  \
+		}                                                          \
+		for (__cs_i = 0; __cs_i < STACK_BYTES; __cs_i++) {           \
+			cases++;                                           \
+			if (__a64_stack.b[__cs_i] != stk_img[__cs_i]) {      \
+				printf("MISMATCH %s arena byte%u\n", (VIA), __cs_i); \
+				failures++; return;                         \
+			}                                                  \
+		}                                                          \
+		for (__cs_i = 0; __cs_i < STACK_SLOTS; __cs_i++) {           \
+			cases++;                                           \
+			if (__a64_stack_tag[__cs_i] != stk_tag_img[__cs_i]) { \
+				printf("MISMATCH %s arena tag%u: got%u want%u\n", \
+				 (VIA), __cs_i, __a64_stack_tag[__cs_i], stk_tag_img[__cs_i]); \
+				failures++; return;                         \
 			}                                                  \
 		}                                                          \
 		cases++;                                                   \
@@ -347,11 +438,11 @@ static void compare_capture(const char *via, const __u64 *v, unsigned n, unsigne
 	((__u64)(unsigned long)(void *)&__a64_stack.b[                     \
 		KPROG_ARM64_STACK_PTR_INDEX((OFF), ARM64_SIM_STACK_BIAS)])
 
-#define PREPARE_TYPED_HELPER(ID)                                           \
+#define PREPARE_TYPED_HELPER_AT(ID, ADJUST)                                           \
 	__u64 typed_raw[5], typed_want[5];                                 \
 	unsigned typed_n, typed_j;                                        \
 	for (typed_j = 0; typed_j < 5; typed_j++) {                         \
-		if ((ora_pointer_arguments(ID) & (1U << typed_j)) &&       \
+		if ((ADJUST) && (ora_pointer_arguments(ID) & (1U << typed_j)) && \
 		    mtag[typed_j] == 4U) {                                \
 			void *__a64_plant_ptr = (void *)(long)(12 + typed_j * 8); \
 			__u8 __a64_plant_tag = 4U;                         \
@@ -363,11 +454,14 @@ static void compare_capture(const char *via, const __u64 *v, unsigned n, unsigne
 			 mtag[typed_j] == 4U) ?                            \
 			ARG_LANE_VALUE((__s64)mreg[typed_j]) : mreg[typed_j]; \
 	}                                                                 \
+	model_helper_effect((ID), fixture_result(ID));                    \
 	typed_n = ora_expected_arguments((ID), typed_raw, typed_want);      \
-	expect_commit(ora_expected_result(ID), ora_pointer_result(ID) ? 6U : 0U); \
-	mreg[0] = ora_expected_result(ID);                                 \
+	expect_commit(fixture_result(ID), ora_pointer_result(ID) ? 6U : 0U); \
+	mreg[0] = fixture_result(ID);                                 \
 	mtag[0] = ora_pointer_result(ID) ? 6U : 0U;                         \
 	capture_reset()
+
+#define PREPARE_TYPED_HELPER(ID) PREPARE_TYPED_HELPER_AT(ID, 1)
 
 #define CHECK_TYPED_HELPER(VIA, ID) do {                                 \
 	compare_capture((VIA), typed_want, typed_n, (ID));                  \
@@ -588,6 +682,7 @@ static void scene_probe(const char *via, unsigned which)
 	v[1] = 28;
 	v[2] = mreg[2];
 	expect_commit(ORA_PROBE, 0U);
+    model_helper_effect(ids[which], (__u64)(long)ORA_PROBE);
 
 	capture_reset();
 	switch (which) {
@@ -773,6 +868,7 @@ static void scene_skb_load(const char *via, unsigned relative)
 	v[3] = 33;
 	v[4] = 2;
 	expect_commit(ORA_SKB + relative + 1, 0U);
+    model_helper_effect(relative ? 68 : 26, (__u64)(long)(ORA_SKB + relative + 1));
 
 	capture_reset();
 	if (relative)
@@ -912,17 +1008,48 @@ static void scene_task_file(const char *via, unsigned which)
 	CHECK_TYPED_HELPER(via, identity);
 }
 
+/* Exercise all newly effectful routes with bounded real stack destinations.
+ * The probe success/failure pair detects incorrect result-dependent tag copies;
+ * misaligned source/destination and zero length cover whole-word boundaries. */
+static void scene_writer(unsigned id, __s64 destination, __s64 source, unsigned length, int success)
+{
+    DECL_STATE();
+    PLANT_STATE();
+    INIT_ARENA();
+    if (writer_destination(id) == 0) {
+        PLANT_STACK_TAGGED(ARM64_X0, x0, destination);
+        PLANT_VAL(ARM64_X1, x1, length);
+        PLANT_STACK_TAGGED(ARM64_X2, x2, source);
+    } else if (writer_destination(id) == 2) {
+        PLANT_RAW(ARM64_X0, x0, 0x12345678);
+        PLANT_STACK_TAGGED(ARM64_X2, x2, destination);
+        PLANT_VAL(ARM64_X3, x3, length);
+    } else {
+        PLANT_RAW(ARM64_X0, x0, 0x12345678);
+        PLANT_STACK_TAGGED(ARM64_X1, x1, destination);
+        PLANT_VAL(ARM64_X2, x2, length);
+    }
+    probe_succeeds = success;
+    PREPARE_TYPED_HELPER_AT(id, 0);
+    switch (id) {
+    case 4: ARM64_SIM_BPF_CALL_bpf_probe_read(); break;
+    case 16: ARM64_SIM_BPF_CALL_bpf_get_current_comm(); break;
+    case 45: ARM64_SIM_BPF_CALL_bpf_probe_read_str(); break;
+    case 26: ARM64_SIM_BPF_CALL_bpf_skb_load_bytes(); break;
+    case 67: ARM64_SIM_BPF_CALL_bpf_get_stack(); break;
+    case 68: ARM64_SIM_BPF_CALL_bpf_skb_load_bytes_relative(); break;
+    case 112: ARM64_SIM_BPF_CALL_bpf_probe_read_user(); break;
+    case 113: ARM64_SIM_BPF_CALL_bpf_probe_read_kernel(); break;
+    case 114: ARM64_SIM_BPF_CALL_bpf_probe_read_user_str(); break;
+    case 115: ARM64_SIM_BPF_CALL_bpf_probe_read_kernel_str(); break;
+    case 148: ARM64_SIM_BPF_CALL_bpf_copy_from_user(); break;
+    }
+    probe_succeeds = 0;
+    CHECK_TYPED_HELPER("stack writer", id);
+}
+
 int main(void)
 {
-	unsigned i;
-
-	/* The stack-arena image: deterministic per byte, so every ARG lane
-	 * resolves a different byte off its offset and a wrong lane index
-	 * cannot alias the right one. */
-	for (i = 0; i < STACK_BYTES; i++)
-		stk_img[i] = (__u8)(0xc0U + i * 7U);
-	for (i = 0; i < STACK_SLOTS; i++)
-		stk_tag_img[i] = (__u8)(1U + (i % 5U));
 
 	/* --- map family --- */
 	scene_lookup("map_lookup", 0U);
@@ -1008,6 +1135,15 @@ int main(void)
 	scene_task_file("alias_task_pt_regs", 1U);
 	scene_task_file("alias_ima_file_hash", 2U);
 
+    {
+        static const unsigned ids[] = {4,16,26,45,67,68,112,113,114,115,148};
+        unsigned j;
+        for (j = 0; j < sizeof(ids)/sizeof(ids[0]); j++) scene_writer(ids[j], 8, 32, 8, 0);
+        scene_writer(113, 8, 32, 8, 1);
+        scene_writer(113, 12, 32, 8, 1);
+        scene_writer(113, 8, 36, 8, 1);
+        scene_writer(113, 8, 32, 0, 1);
+    }
 	if (failures != 0) {
 		printf("arm64 helper route host cross-check: FAIL (%d)\n",
 		       failures);

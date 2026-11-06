@@ -189,7 +189,12 @@ static void model_exec(unsigned op, unsigned dst, unsigned src, unsigned src2,
 		result = KPROG_ALU64_RESULT(alu_op, lhs, rhs, model_unsupported());
 		src_tag = m_rtag(src);
 
-		if (KPROG_ARM64_ALU_USE_POINTER(width, alu_op, dst == ARM64_SP,
+		/* A64's certified source-stack base is 16-byte aligned. OR of
+		 * only low bits therefore changes the private offset by OR too. */
+		if (width == ARM64_WIDTH_64 && alu_op == ARM64_ALU_ORR &&
+		    src_tag == ARM64_SIM_TAG_STACK && rhs < 16U)
+			model_write_reg_ptr_tag(dst, lhs | rhs, ARM64_SIM_TAG_STACK);
+		else if (KPROG_ARM64_ALU_USE_POINTER(width, alu_op, dst == ARM64_SP,
 						src_tag == ARM64_SIM_TAG_SCALAR))
 			model_write_reg_ptr_tag(dst,
 				(__u64)(__u8 *)(long)m_reg(src) + rhs, src_tag);

@@ -36,6 +36,7 @@ typedef signed int __s32;
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
+#include "stack_store_model_host.h"
 #include "guarded_memory_host.h"
 
 /* Unsupported opcode callbacks are forbidden for the valid-width sweeps.
@@ -53,7 +54,7 @@ typedef union {
 } host_stack_arena;
 static volatile host_stack_arena *host_stack;
 #define __a64_stack (*host_stack)
-static __u8 __a64_stack_tag[KPROG_ARM64_STACK_TAG_SLOTS(ARM64_SIM_STACK_BYTES)];
+static __u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(ARM64_SIM_STACK_BYTES)] __attribute__((aligned(8)));
 struct memory_access { long off; __u32 width; int is_write; };
 static void access_boundary(void *argument)
 {
@@ -186,29 +187,12 @@ static void drive_read(__s64 off, __u32 width)
 static void drive_write_read(__s64 off, __u32 width, __u64 value, __u8 tag)
 {
 	__u32 idx = ref_index(off);
-	unsigned w64 = (width == ARM64_WIDTH_64);
-	unsigned aligned = ((idx & 7U) == 0U);
-	__u32 word = idx >> 3;
-	unsigned n = width_bytes(width);
-	unsigned k;
+	unsigned n = width_bytes(width), k;
 
 	ARM64_SIM_L_STACK_WRITE_TAG(off, width, value, tag);
-
-	/* The write helper's 3-way action (STEP 0137) commits the byte image
-	 * and, for the word-and-tag arm, the slot tag. */
-	if (w64 && aligned) {
-		__u64 *q = (__u64 *)(model_b + word * 8U);
-
-		*q = value;
-		model_tag[word] = tag;
-	} else {
-		if (aligned)
-			model_tag[word] = ARM64_SIM_TAG_SCALAR;
-		for (k = 0; k < n; k++)
-			model_b[idx + k] =
-				(__u8)((value >> (8 * k)) & 0xffULL);
-	}
-
+	for (k = 0; k < n; k++)
+		model_b[idx + k] = (__u8)(value >> (8 * k));
+	host_stack_store_tags(model_tag, idx, n, tag);
 	drive_read(off, width);
 }
 
@@ -236,8 +220,7 @@ int main(void)
 	cases++;
 	if (sizeof(__a64_stack.b) != ARM64_SIM_STACK_BYTES ||
 	    sizeof(__a64_stack.q) != ARM64_SIM_STACK_BYTES ||
-	    sizeof(__a64_stack_tag) !=
-	    KPROG_ARM64_STACK_TAG_SLOTS(ARM64_SIM_STACK_BYTES)) {
+	    sizeof(__a64_stack_tag) != ((ARM64_SIM_STACK_BYTES + 63U) / 64U) * 8U) {
 		printf("MISMATCH layout: b=%lu q=%lu tag=%lu\n",
 		       (unsigned long)sizeof(__a64_stack.b),
 		       (unsigned long)sizeof(__a64_stack.q),

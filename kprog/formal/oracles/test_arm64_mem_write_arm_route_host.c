@@ -13,8 +13,8 @@
  * heap untouched, and a scalar base must write the heap and leave the arena
  * untouched. A helper routed to the wrong destination — or to both — diverges.
  * The arena's byte image and slot-tag image are both modelled: an independent
- * model of the slot-tag rule (a qword-aligned 64-bit write tags the slot, a
- * sub-qword aligned write scalarises it, an unaligned write leaves it alone)
+ * model of the slot-tag rule (a qword-aligned 64-bit write tags the slot, every
+ * other write clears all overlapped pointer-word tags)
  * must match byte for byte.
  *
  * The write is then read back through the real load path to close the round
@@ -41,6 +41,7 @@ typedef signed int __s32;
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
+#include "stack_store_model_host.h"
 #include <string.h>
 
 static void arm64_sim_unsupported_opcode(void)
@@ -84,18 +85,10 @@ static void model_store(__u8 *base, unsigned width, __u64 value)
 		base[i] = (__u8)(v >> (8 * i));
 }
 
-/* Independent statement of the slot tag a stack write installs: a 64-bit
- * qword-aligned access tags the whole 8-byte slot, a sub-qword access at a
- * qword-aligned index drops the slot to the scalar tag, and an unaligned index
- * leaves every slot tag alone. */
+/* Every byte touched by this store invalidates its old pointer word. */
 static void model_stack_tag(__u8 *tags, unsigned index, unsigned width, __u8 tag)
 {
-	if (index % 8U != 0U)
-		return;
-	if (width == ARM64_WIDTH_64)
-		tags[index / 8U] = tag;
-	else
-		tags[index / 8U] = ARM64_SIM_TAG_SCALAR;
+	host_stack_store_tags(tags, index, width_bytes(width), tag);
 }
 
 static void fill_images(void)

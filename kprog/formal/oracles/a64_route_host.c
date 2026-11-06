@@ -56,6 +56,7 @@ typedef signed int __s32;
 #pragma GCC diagnostic ignored "-Warray-bounds"
 #include "../arm64/arm64_sim_local_bpf.h"
 #include <stdio.h>
+#include "stack_store_model_host.h"
 
 static int failures;
 static int unsupported_hits;
@@ -293,31 +294,17 @@ static void model_stack_reset(void)
 		model_stack_tags[i] = 0U;
 }
 
-/* One hand-restate of a stack write: the generated width-mask + write-lane +
- * word-index + write-tag-action contracts over the model image. */
+/* Independent byte scatter and whole-word provenance for a stack store. */
 static void model_stack_write(__s64 off, unsigned width, __u64 value,
 			      unsigned tag)
 {
-	__u32 idx = KPROG_ARM64_STACK_INDEX(off, ARM64_SIM_STACK_BIAS);
-	__u64 v = KPROG_ARM64_APPLY_WIDTH(value, (width) ? (width) : 8U);
-	unsigned w = KPROG_ARM64_STACK_WORD_INDEX(idx);
-	int aligned = KPROG_ARM64_STACK_WORD_ALIGNED(idx);
-	unsigned action = KPROG_ARM64_STACK_WRITE_TAG_ACTION(
-		width == ARM64_WIDTH_64, aligned);
-	unsigned l;
+	unsigned idx = (__u32)(ARM64_SIM_STACK_BIAS + off);
+	unsigned bytes = width ? width : 8U;
+	unsigned lane;
 
-	if (action == 0U) {
-		for (l = 0; l < 8U; l++)
-			model_stack_bytes[idx + l] = (__u8)(v >> (l * 8U));
-		model_stack_tags[w] = (__u8)tag;
-	} else {
-		if (action == 1U)
-			model_stack_tags[w] = ARM64_SIM_TAG_SCALAR;
-		for (l = 0; l < 8U; l++)
-			if (KPROG_ARM64_STACK_WRITE_LANE_ACTIVE(width, l))
-				model_stack_bytes[idx + l] =
-					(__u8)(v >> (l * 8U));
-	}
+	for (lane = 0; lane < bytes; lane++)
+		model_stack_bytes[idx + lane] = (__u8)(value >> (lane * 8U));
+	host_stack_store_tags(model_stack_tags, idx, bytes, tag);
 }
 
 /* One hand-restate of a stack read: every width/alignment pair reassembles

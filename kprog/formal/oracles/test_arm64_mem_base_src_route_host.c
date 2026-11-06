@@ -48,6 +48,7 @@ typedef signed int __s32;
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
+#include "stack_store_model_host.h"
 #include <string.h>
 
 ARM64_SIM_L_DECLARE_STATE();
@@ -135,21 +136,11 @@ static __u8 stack_read_tag(__u32 idx, unsigned width)
 	return ARM64_SIM_TAG_SCALAR;
 }
 
-/* `ARM64_SIM_L_STACK_WRITE_TAG`: the qword-aligned 64-bit case stores the word
- * and the slot tag; the byte case scatters `width` bytes and, at a qword
- * boundary, drops the slot tag to scalar. */
+/* Stack bytes and whole-word provenance are checked independently. */
 static void stack_write(__u32 idx, unsigned width, __u64 value, __u8 tag)
 {
-	__u64 v = KPROG_ARM64_APPLY_WIDTH(value, width);
-
-	if (width == ARM64_WIDTH_64 && (idx & 7U) == 0U) {
-		img_store(&stk_exp[idx], ARM64_WIDTH_64, v);
-		stk_tag_exp[idx >> 3] = tag;
-	} else {
-		if ((idx & 7U) == 0U)
-			stk_tag_exp[idx >> 3] = ARM64_SIM_TAG_SCALAR;
-		img_store(&stk_exp[idx], width, v);
-	}
+	img_store(&stk_exp[idx], width, value);
+	host_stack_store_tags(stk_tag_exp, idx, width, tag);
 }
 
 /* The independent base-address source selection, restated from the raw

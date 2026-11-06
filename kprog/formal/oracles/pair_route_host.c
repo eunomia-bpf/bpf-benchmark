@@ -43,6 +43,7 @@ typedef signed int __s32;
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
+#include "stack_store_model_host.h"
 #include <string.h>
 
 static unsigned long unsupported_calls;
@@ -175,16 +176,8 @@ static __u8 stack_read_tag(__u32 idx, unsigned width)
 
 static void stack_write(__u32 idx, unsigned width, __u64 value, __u8 tag)
 {
-	__u64 v = KPROG_ARM64_APPLY_WIDTH(value, width);
-
-	if (KPROG_ARM64_STACK_TAG(width == ARM64_WIDTH_64, (idx & 7U) == 0U)) {
-		img_store(&stk_exp[idx], ARM64_WIDTH_64, v);
-		stk_tag_exp[idx >> 3] = tag;
-	} else {
-		if ((idx & 7U) == 0U)
-			stk_tag_exp[idx >> 3] = ARM64_SIM_TAG_SCALAR;
-		img_store(&stk_exp[idx], width, v);
-	}
+	img_store(&stk_exp[idx], width, value);
+	host_stack_store_tags(stk_tag_exp, idx, width, tag);
 }
 
 static __u64 m_base_val(unsigned base)

@@ -16,12 +16,7 @@
  * window, the wrong word slot, the wrong alignment guard or the wrong tag slot
  * diverges from the model.
  *
- * Build and run:
- *   cd kprog/formal &&
- *   cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog \
- *      -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf \
- *      test_arm64_stack_arena_route_host.c -o build/test_arm64_stack_arena_route_host &&
- *   ./build/test_arm64_stack_arena_route_host
+ * Build and run: make -C kprog/formal check
  */
 
 #define ARM64_SIM_ENABLE_STACK 1
@@ -37,6 +32,7 @@ typedef signed int __s32;
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
+#include "stack_store_model_host.h"
 #include "guarded_memory_host.h"
 
 /* Unsupported opcode callbacks are forbidden for the valid-width sweeps.
@@ -54,7 +50,7 @@ typedef union {
 } host_stack_arena;
 static volatile host_stack_arena *host_stack;
 #define __a64_stack (*host_stack)
-static __u8 __a64_stack_tag[KPROG_ARM64_STACK_TAG_SLOTS(ARM64_SIM_STACK_BYTES)];
+static __u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(ARM64_SIM_STACK_BYTES)] __attribute__((aligned(8)));
 struct memory_access { long off; __u32 width; int is_write; };
 static void access_boundary(void *argument)
 {
@@ -70,7 +66,7 @@ static unsigned long cases;
 
 /* Independent model of the arena storage and its tag array. */
 static __u8 model_b[ARM64_SIM_STACK_BYTES];
-static __u8 model_tag[ARM64_SIM_STACK_BYTES / 8];
+static __u8 model_tag[((ARM64_SIM_STACK_BYTES + 63U) / 64U) * 8U];
 
 static __u32 ref_index(__s64 off)
 {
@@ -108,9 +104,7 @@ static void model_write(__s64 off, __u32 width, __u64 value, __u32 tag)
 
 	for (k = 0; k < n; k++)
 		model_b[idx + k] = (__u8)((masked >> (8 * k)) & 0xffU);
-	if (ref_aligned(idx))
-		model_tag[idx >> 3] =
-			(width == ARM64_WIDTH_64) ? (__u8)tag : ARM64_SIM_TAG_SCALAR;
+	host_stack_store_tags(model_tag, idx, n, tag);
 }
 
 static __u64 model_read(__s64 off, __u32 width)
@@ -146,7 +140,7 @@ static void check_image(const char *what)
 			failures++;
 		}
 	}
-	for (i = 0; i < (unsigned long)(ARM64_SIM_STACK_BYTES / 8); i++) {
+	for (i = 0; i < sizeof(model_tag); i++) {
 		cases++;
 		if (__a64_stack_tag[i] != model_tag[i]) {
 			printf("MISMATCH %s tag %lu: got=%u want=%u\n", what, i,
@@ -164,7 +158,7 @@ static void zero_arena(void)
 		__a64_stack.b[i] = 0;
 		model_b[i] = 0;
 	}
-	for (i = 0; i < (unsigned long)(ARM64_SIM_STACK_BYTES / 8); i++) {
+	for (i = 0; i < sizeof(model_tag); i++) {
 		__a64_stack_tag[i] = 0;
 		model_tag[i] = 0;
 	}
@@ -217,7 +211,7 @@ int main(void)
 	cases += 3;
 	if (sizeof(__a64_stack.b) != ARM64_SIM_STACK_BYTES ||
 	    sizeof(__a64_stack.q) != ARM64_SIM_STACK_BYTES ||
-	    sizeof(__a64_stack_tag) != ARM64_SIM_STACK_BYTES / 8) {
+	    sizeof(__a64_stack_tag) != sizeof(model_tag)) {
 		printf("MISMATCH layout: b=%lu q=%lu tag=%lu\n",
 		       (unsigned long)sizeof(__a64_stack.b),
 		       (unsigned long)sizeof(__a64_stack.q),

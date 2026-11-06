@@ -2,27 +2,13 @@
  * Host cross-check for the AArch64 simulator's *routing* of its stack write
  * slot-tag action (STEP 0137).
  *
- * The module under test is the live
- * `ARM64_SIM_L_STACK_WRITE_TAG` / `ARM64_SIM_L_STACK_WRITE` helpers in
- * `../arm64/arm64_sim_local_bpf.h`, which must select their slot-tag action
- * through the generated `KPROG_ARM64_STACK_WRITE_TAG_ACTION` selector rather
- * than by hand: the 64-bit aligned access reaches the word-and-tag arm (the
- * full qword is stored and the caller's slot tag is written), every aligned
- * sub-qword access reaches the clear-and-write-bytes arm (the slot tag is
- * cleared to the scalar marker and the width's active byte lanes are written),
- * and every unaligned access reaches the plain byte write (the width's active
- * byte lanes are written with the slot tag untouched). This oracle drives the
- * real helpers over an independent byte image and slot tag array model and
- * cross-checks the generated selector against the independent 3-way
- * statement. Exit 1 on mismatch.
+ * Drives the live STACK_WRITE_TAG / STACK_WRITE helpers and independently
+ * checks every byte and shadow tag. Only a complete aligned 64-bit store
+ * transfers its input tag; every other write clears ALL overlapped word tags,
+ * including unaligned and cross-word writes. The generated 3-way selector is
+ * checked separately as a routing predicate, not a complete mutation rule.
  *
- * Build/run:
- *   cd kprog/formal
- *   cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog \
- *       -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf \
- *       test_arm64_stack_write_tag_action_route_host.c \
- *       -o /tmp/t_swta_route
- *   /tmp/t_swta_route
+ * Build/run: make -C kprog/formal check
  */
 
 #define ARM64_SIM_ENABLE_STACK 1
@@ -38,6 +24,7 @@ typedef signed int __s32;
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
+#include "stack_store_model_host.h"
 #include "guarded_memory_host.h"
 
 /* Unsupported opcode callbacks are forbidden for the valid-width sweeps.
@@ -55,7 +42,7 @@ typedef union {
 } host_stack_arena;
 static volatile host_stack_arena *host_stack;
 #define __a64_stack (*host_stack)
-static __u8 __a64_stack_tag[KPROG_ARM64_STACK_TAG_SLOTS(ARM64_SIM_STACK_BYTES)];
+static __u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(ARM64_SIM_STACK_BYTES)] __attribute__((aligned(8)));
 struct memory_access { long off; __u32 width; int is_write; };
 static void access_boundary(void *argument)
 {
@@ -71,7 +58,7 @@ static unsigned long cases;
 
 /* Independent models of the arena byte image and the slot tag array. */
 static __u8 model_b[ARM64_SIM_STACK_BYTES];
-static __u8 model_tag[KPROG_ARM64_STACK_TAG_SLOTS(ARM64_SIM_STACK_BYTES)];
+static __u8 model_tag[((ARM64_SIM_STACK_BYTES + 63U) / 64U) * 8U];
 
 static __u32 ref_index(__s64 off)
 {
@@ -129,7 +116,7 @@ static void fill_pattern(void)
 		model_b[i] = v;
 	}
 	for (i = 0;
-	     i < KPROG_ARM64_STACK_TAG_SLOTS(ARM64_SIM_STACK_BYTES); i++) {
+	     i < sizeof(model_tag); i++) {
 		__u8 v = (__u8)((i * 13UL + 5UL) & 0xffUL);
 
 		__a64_stack_tag[i] = v;
@@ -156,7 +143,7 @@ static void check_tags(const char *what)
 	unsigned long i;
 
 	for (i = 0;
-	     i < KPROG_ARM64_STACK_TAG_SLOTS(ARM64_SIM_STACK_BYTES); i++) {
+	     i < sizeof(model_tag); i++) {
 		cases++;
 		if (__a64_stack_tag[i] != model_tag[i]) {
 			printf("MISMATCH %s tag slot %lu: got=%u want=%u\n",
@@ -166,33 +153,17 @@ static void check_tags(const char *what)
 	}
 }
 
-/* Commit a tagged stack write to the independent models: the word-and-tag
- * arm stores the full qword and the caller's slot tag, the clear-and-write-
- * bytes arm clears the slot tag to the scalar marker and writes the width's
- * byte window, and the plain byte write writes the width's byte window with
- * the slot tag untouched. */
+/* Byte intervals state the mutation independently of production's byte ladder
+ * and selector. Untouched bytes and word tags must remain unchanged. */
 static void model_write(__s64 off, __u32 width, __u64 value, __u8 tag)
 {
 	__u32 idx = ref_index(off);
-	unsigned w64 = (width == ARM64_WIDTH_64);
-	unsigned aligned = ((idx & 7U) == 0U);
-	__u32 word = idx >> 3;
 	unsigned n = width_bytes(width);
-	__u64 v = value & model_mask(width);
 	unsigned k;
 
-	if (w64 && aligned) {
-		__u64 *q = (__u64 *)(model_b + word * 8U);
-
-		*q = v;
-		model_tag[word] = tag;
-		return;
-	}
-
-	if (aligned)
-		model_tag[word] = ARM64_SIM_TAG_SCALAR;
 	for (k = 0; k < n; k++)
-		model_b[idx + k] = (__u8)((v >> (8 * k)) & 0xffULL);
+		model_b[idx + k] = (__u8)(value >> (8 * k));
+	host_stack_store_tags(model_tag, idx, n, tag);
 }
 
 /* The generated selector must name the same action the independent 3-way
@@ -316,8 +287,7 @@ int main(void)
 	cases++;
 	if (sizeof(__a64_stack.b) != ARM64_SIM_STACK_BYTES ||
 	    sizeof(__a64_stack.q) != ARM64_SIM_STACK_BYTES ||
-	    sizeof(__a64_stack_tag) !=
-	    KPROG_ARM64_STACK_TAG_SLOTS(ARM64_SIM_STACK_BYTES)) {
+	    sizeof(__a64_stack_tag) != sizeof(model_tag)) {
 		printf("MISMATCH layout: b=%lu q=%lu tag=%lu\n",
 		       (unsigned long)sizeof(__a64_stack.b),
 		       (unsigned long)sizeof(__a64_stack.q),
@@ -327,11 +297,8 @@ int main(void)
 
 	check_selector();
 
-	/* Every reachable offset at every width, at the boundary patterns and
-	 * at each slot tag value: the word-and-tag arm must store the full
-	 * qword and the caller's tag, the aligned clear arm must clear the tag
-	 * to the scalar marker, and the unaligned write must leave the tag
-	 * array untouched. */
+	/* Keep the exhaustive offset/width/value/tag sweep, including every
+	 * crossing of a word boundary and both arena edges. */
 	for (t = 0; t < sizeof(tags) / sizeof(tags[0]); t++) {
 		for (p = 0; p < sizeof(patterns) / sizeof(patterns[0]); p++) {
 			for (wi = 0; wi < sizeof(widths) / sizeof(widths[0]);

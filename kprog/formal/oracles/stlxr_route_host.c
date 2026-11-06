@@ -64,6 +64,7 @@ typedef signed int __s32;
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
+#include "stack_store_model_host.h"
 #include <string.h>
 
 static unsigned long unsupported_calls;
@@ -172,20 +173,11 @@ static void heap_read_state(const __u8 *src, unsigned n)
 		printf("%02x", src[i]);
 }
 
-/* `ARM64_SIM_L_STACK_WRITE_TAG`, restated over the flat arena image: the
- * qword-aligned 64-bit case stores the word and the slot tag, the
- * qword-boundary sub-qword case scatters `width` bytes and drops the slot tag
- * to scalar, the unaligned case scatters bytes without touching the tag. */
+/* Stack bytes and whole-word provenance are checked independently. */
 static void stack_write(__u32 idx, unsigned width, __u64 value, __u8 tag)
 {
-	if (width == ARM64_WIDTH_64 && (idx & 7U) == 0U) {
-		img_store(&stk_exp[idx], ARM64_WIDTH_64, value);
-		stk_tag_exp[idx >> 3] = tag;
-	} else {
-		if ((idx & 7U) == 0U)
-			stk_tag_exp[idx >> 3] = ARM64_SIM_TAG_SCALAR;
-		img_store(&stk_exp[idx], width, value);
-	}
+	img_store(&stk_exp[idx], width, value);
+	host_stack_store_tags(stk_tag_exp, idx, width, tag);
 }
 
 /* The register file as the memory macros read it: the stack pointer's raw
