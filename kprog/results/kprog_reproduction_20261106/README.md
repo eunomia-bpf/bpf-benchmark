@@ -229,6 +229,23 @@ pass through and do not stop the run (lane's `9962aec5e`):
 6. libbpf's probe was fatal on the verified arm (fixed upstream in
    `20aae50eb` after `dd3707caf` had made it deliberate).
 
+### bcc at the operator recipe
+
+`SAMPLES=3 WORKLOAD_DURATION=180`, `bpf_stats` on, unbound native
+(`corpus/results/x86_kvm_corpus_20261106_190628_159160`): status `ok`,
+3 workloads per arm, **18 programs replaced natively and 7 passed
+through**.
+
+| | bcc/set |
+| --- | ---: |
+| stress-ng bogo-ops, baseline eBPF | 278,893,541 |
+| stress-ng bogo-ops, native | 279,417,520 |
+| **native/eBPF** | **1.002x** |
+| reference (2026-05-29) | 1.005x |
+
+Both arms ran the same four stressors for the same 180 s, so the ratio is
+like-for-like. **bcc reproduces.**
+
 ### Work done per arm
 
 The native arm itself is selected with
