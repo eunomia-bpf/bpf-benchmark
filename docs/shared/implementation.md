@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0982 verified the three-kind sum relation is
+bound: perturbing it reports the counts, the overlap,
+and the arithmetic.
+
+
 Step 0981 tested ragged bottoms: underfull 33307 ->
 33174, overfull unchanged at 55, so the looseness is
 inside paragraphs.

@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0982 - the three kinds sum by arithmetic, and it is checked
+
+The section states that its three kinds of native-decide use sum to one fewer
+than the construct's total, because two uses are counted in two kinds. That
+relation is bound: changing the stated sum makes the run report the three
+counts, the overlap, and the arithmetic that does not close.
+
+The gate's own line reports the three populations the section describes, and the
+paper describes them under its own names rather than the gate's. The
+bounded-enumeration population is called a bounded fragment in the prose, which
+is the same thing said differently, and the contract count is stated as the
+specification count.
+
+This is the shape the section needs: the numbers are the tree's, the relation
+between them is arithmetic rather than a claim, and both are checked. Census
+unchanged; one relation verified by perturbing it.
+
 ### Step 0981 - ragged bottoms are not the lever
 
 The class file sets pages flush, so every page is the same height and the last
