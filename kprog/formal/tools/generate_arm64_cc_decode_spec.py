@@ -3,9 +3,9 @@
 
 The AArch64 artifact encoder
 (`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`) turns a textual
-condition mnemonic into an `ARM64_COND_*` token. Seventeen mnemonics mark the
-fifteen architectural condition codes: `cs`/`cc` are also spelled `hs`/`lo`,
-so two mnemonics share each of those codes. The numeric codes themselves are
+condition mnemonic into an `ARM64_COND_*` token. Eighteen mnemonics select the
+fifteen implementation predicates: `hs`/`lo` select `cs`/`cc`, and raw `nv`
+normalizes to `al` because both architectural conditions always hold. The numeric codes themselves are
 the shared `arm64_cond_spec.json` contract, re-read here so this table cannot
 drift from the predicate the C simulator and the Lean model use.
 
@@ -49,6 +49,7 @@ EXPECTED: list[tuple[str, str, bool]] = [
     ("gt", "gt", False),
     ("le", "le", False),
     ("al", "al", False),
+    ("nv", "al", True),
 ]
 
 
@@ -176,7 +177,7 @@ def render_c(rows: list[dict[str, object]], codes: dict[str, int]) -> str:
  * The AArch64 artifact encoder's textual condition mnemonics. Every mnemonic
  * selects an `ARM64_COND_*` code, whose numeric values are pinned by the
  * shared condition contract. There are {len(rows)} mnemonics for {len(set(r["cond"] for r in rows))}
- * conditions: `hs` and `lo` are the architectural aliases of `cs` and `cc`.
+ * predicates: `hs`/`lo` select `cs`/`cc`, and `nv` selects always-true `al`.
  */
 {asserts}
 #define KPROG_ARM64_CC_DECODE_MNEMONIC_COUNT {len(rows)}U

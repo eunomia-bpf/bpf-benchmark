@@ -27,6 +27,21 @@ structure State where
   memory : Memory
   pc : Word
 
+/-- Arm ConditionHolds for all sixteen raw encoding values. AL and NV both
+hold; inversion is suppressed for NV in the architectural pseudocode. -/
+def condition (flags : Word) (cc : Fin 16) : Bool :=
+  let n := flags.getLsbD 31
+  let z := flags.getLsbD 30
+  let c := flags.getLsbD 29
+  let v := flags.getLsbD 28
+  match cc.val with
+  | 0 => z | 1 => !z | 2 => c | 3 => !c
+  | 4 => n | 5 => !n | 6 => v | 7 => !v
+  | 8 => c && !z | 9 => !c || z
+  | 10 => n == v | 11 => n != v
+  | 12 => !z && (n == v) | 13 => z || (n != v)
+  | _ => true
+
 /-- In arithmetic register encodings, field31 is ZR, never SP. -/
 def readReg (s : State) (r : Register) : Word :=
   if h : r.val < 31 then s.gpr ⟨r.val, h⟩ else 0

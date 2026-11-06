@@ -19,6 +19,7 @@ inductive Mnemonic
   | gt
   | le
   | al
+  | nv
   deriving DecidableEq, Repr
 def cond : Mnemonic -> String
   | .eq => "eq"
@@ -38,6 +39,7 @@ def cond : Mnemonic -> String
   | .gt => "gt"
   | .le => "le"
   | .al => "al"
+  | .nv => "al"
 def mnemonic : Mnemonic -> String
   | .eq => "eq"
   | .ne => "ne"
@@ -56,6 +58,7 @@ def mnemonic : Mnemonic -> String
   | .gt => "gt"
   | .le => "le"
   | .al => "al"
+  | .nv => "nv"
 def define : Mnemonic -> String
   | .eq => "ARM64_COND_EQ"
   | .ne => "ARM64_COND_NE"
@@ -74,6 +77,7 @@ def define : Mnemonic -> String
   | .gt => "ARM64_COND_GT"
   | .le => "ARM64_COND_LE"
   | .al => "ARM64_COND_AL"
+  | .nv => "ARM64_COND_AL"
 def code : Mnemonic -> Nat
   | .eq => 0
   | .ne => 1
@@ -92,6 +96,7 @@ def code : Mnemonic -> Nat
   | .gt => 12
   | .le => 13
   | .al => 14
+  | .nv => 14
 def isAlias : Mnemonic -> Bool
   | .eq => false
   | .ne => false
@@ -110,4 +115,5 @@ def isAlias : Mnemonic -> Bool
   | .gt => false
   | .le => false
   | .al => false
+  | .nv => true
 end KProgFormal.GeneratedArm64CcDecode

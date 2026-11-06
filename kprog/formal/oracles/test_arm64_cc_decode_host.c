@@ -6,9 +6,9 @@
  * (`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`, `COND`) uses to turn
  * a parsed benchmark condition mnemonic into an `ARM64_COND_*` code. It pins
  * each of the 15 architectural conditions to its `ARM64_COND_*` value, and
- * keeps the two alias mnemonics `hs`/`lo` on the same codes as `cs`/`cc`.
+ * keeps `hs`/`lo` on `cs`/`cc`, and always-true `nv` on `al`.
  *
- * This oracle restates the 17 mnemonics and the mnemonic -> code map by hand
+ * This oracle restates the 18 mnemonics and the mnemonic -> code map by hand
  * and drives the generated selector `KPROG_ARM64_CC_DECODE_COND` over the
  * generated mnemonic codes, over every out-of-range code in a dense slice,
  * and checks that no new condition is invented by the aliases. Exit 1 on
@@ -49,12 +49,12 @@ typedef signed long long __s64;
 static int failures;
 static unsigned long cases;
 
-/* The 17 condition mnemonics the encoder spells, in `COND` order. */
+/* The 18 condition mnemonics the encoder spells, in `COND` order. */
 static const char *const mnemonics[] = {
 	"eq", "ne", "cs", "hs", "cc", "lo", "mi", "pl", "vs", "vc",
-	"hi", "ls", "ge", "lt", "gt", "le", "al",
+	"hi", "ls", "ge", "lt", "gt", "le", "al", "nv",
 };
-#define MNEMONIC_COUNT 17U
+#define MNEMONIC_COUNT 18U
 
 /* The distinct architectural conditions the encoder reaches, in contract
  * order. The canonical mnemonics name these; `hs`/`lo` alias two of them. */
@@ -87,6 +87,7 @@ static unsigned model_code(unsigned mnemonic_index)
 	case 14U: return ARM64_COND_GT;
 	case 15U: return ARM64_COND_LE;
 	case 16U: return ARM64_COND_AL;
+	case 17U: return ARM64_COND_AL; /* NV is architecturally always true */
 	default:  return 0xffffU;
 	}
 }
@@ -122,6 +123,7 @@ static void check_mnemonic_codes(void)
 		KPROG_ARM64_CC_DECODE_MNEMONIC_GT,
 		KPROG_ARM64_CC_DECODE_MNEMONIC_LE,
 		KPROG_ARM64_CC_DECODE_MNEMONIC_AL,
+		KPROG_ARM64_CC_DECODE_MNEMONIC_NV,
 	};
 	unsigned i;
 
@@ -204,6 +206,12 @@ static void check_aliases(void)
 	if (KPROG_ARM64_CC_DECODE_COND(KPROG_ARM64_CC_DECODE_MNEMONIC_LO) !=
 	    KPROG_ARM64_CC_DECODE_COND(KPROG_ARM64_CC_DECODE_MNEMONIC_CC)) {
 		printf("MISMATCH arm64 cc decode alias lo != cc\n");
+		failures++;
+	}
+	cases++;
+	if (KPROG_ARM64_CC_DECODE_COND(KPROG_ARM64_CC_DECODE_MNEMONIC_NV) !=
+	    KPROG_ARM64_CC_DECODE_COND(KPROG_ARM64_CC_DECODE_MNEMONIC_AL)) {
+		printf("MISMATCH arm64 cc decode NV != AL\n");
 		failures++;
 	}
 	/* Every distinct condition is reached, and the alias spellings are the

@@ -18,6 +18,7 @@
     {"mnemonic": "lt", "cond": "lt", "alias": false},
     {"mnemonic": "gt", "cond": "gt", "alias": false},
     {"mnemonic": "le", "cond": "le", "alias": false},
-    {"mnemonic": "al", "cond": "al", "alias": false}
+    {"mnemonic": "al", "cond": "al", "alias": false},
+    {"mnemonic": "nv", "cond": "al", "alias": true}
   ]
 }

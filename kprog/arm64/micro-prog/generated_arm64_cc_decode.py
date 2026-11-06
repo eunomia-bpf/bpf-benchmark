@@ -17,4 +17,5 @@ COND = {
     "gt": "ARM64_COND_GT",
     "le": "ARM64_COND_LE",
     "al": "ARM64_COND_AL",
+    "nv": "ARM64_COND_AL",
 }

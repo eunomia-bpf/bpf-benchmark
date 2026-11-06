@@ -4,8 +4,8 @@
 /*
  * The AArch64 artifact encoder's textual condition mnemonics. Every mnemonic
  * selects an `ARM64_COND_*` code, whose numeric values are pinned by the
- * shared condition contract. There are 17 mnemonics for 15
- * conditions: `hs` and `lo` are the architectural aliases of `cs` and `cc`.
+ * shared condition contract. There are 18 mnemonics for 15
+ * predicates: `hs`/`lo` select `cs`/`cc`, and `nv` selects always-true `al`.
  */
 _Static_assert(ARM64_COND_EQ == 0U, "AArch64 cc decode condition code drift");
 _Static_assert(ARM64_COND_NE == 1U, "AArch64 cc decode condition code drift");
@@ -22,7 +22,7 @@ _Static_assert(ARM64_COND_LT == 11U, "AArch64 cc decode condition code drift");
 _Static_assert(ARM64_COND_GT == 12U, "AArch64 cc decode condition code drift");
 _Static_assert(ARM64_COND_LE == 13U, "AArch64 cc decode condition code drift");
 _Static_assert(ARM64_COND_AL == 14U, "AArch64 cc decode condition code drift");
-#define KPROG_ARM64_CC_DECODE_MNEMONIC_COUNT 17U
+#define KPROG_ARM64_CC_DECODE_MNEMONIC_COUNT 18U
 #define KPROG_ARM64_CC_DECODE_CONDITION_COUNT 15U
 #define KPROG_ARM64_CC_DECODE_MNEMONIC_EQ 0U
 #define KPROG_ARM64_CC_DECODE_MNEMONIC_NE 1U
@@ -41,6 +41,7 @@ _Static_assert(ARM64_COND_AL == 14U, "AArch64 cc decode condition code drift");
 #define KPROG_ARM64_CC_DECODE_MNEMONIC_GT 14U
 #define KPROG_ARM64_CC_DECODE_MNEMONIC_LE 15U
 #define KPROG_ARM64_CC_DECODE_MNEMONIC_AL 16U
+#define KPROG_ARM64_CC_DECODE_MNEMONIC_NV 17U
 #define KPROG_ARM64_CC_DECODE_MNEMONIC_TEXT_EQ "eq"
 #define KPROG_ARM64_CC_DECODE_MNEMONIC_TEXT_NE "ne"
 #define KPROG_ARM64_CC_DECODE_MNEMONIC_TEXT_CS "cs"
@@ -58,6 +59,7 @@ _Static_assert(ARM64_COND_AL == 14U, "AArch64 cc decode condition code drift");
 #define KPROG_ARM64_CC_DECODE_MNEMONIC_TEXT_GT "gt"
 #define KPROG_ARM64_CC_DECODE_MNEMONIC_TEXT_LE "le"
 #define KPROG_ARM64_CC_DECODE_MNEMONIC_TEXT_AL "al"
+#define KPROG_ARM64_CC_DECODE_MNEMONIC_TEXT_NV "nv"
 /*
  * The `ARM64_COND_*` code a mnemonic selects. The input is evaluated once. A
  * mnemonic code outside the table reaches the 0 default; the table is total
@@ -81,8 +83,9 @@ _Static_assert(ARM64_COND_AL == 14U, "AArch64 cc decode condition code drift");
 	 (MNEMONIC) == KPROG_ARM64_CC_DECODE_MNEMONIC_GT ? ARM64_COND_GT : \
 	 (MNEMONIC) == KPROG_ARM64_CC_DECODE_MNEMONIC_LE ? ARM64_COND_LE : \
 	 (MNEMONIC) == KPROG_ARM64_CC_DECODE_MNEMONIC_AL ? ARM64_COND_AL : \
+	 (MNEMONIC) == KPROG_ARM64_CC_DECODE_MNEMONIC_NV ? ARM64_COND_AL : \
 	 0)
-_Static_assert(KPROG_ARM64_CC_DECODE_MNEMONIC_COUNT == 17U,
+_Static_assert(KPROG_ARM64_CC_DECODE_MNEMONIC_COUNT == 18U,
 	       "AArch64 cc decode mnemonic count drift");
 _Static_assert(KPROG_ARM64_CC_DECODE_CONDITION_COUNT ==
 	       15U,
@@ -104,6 +107,7 @@ _Static_assert(KPROG_ARM64_CC_DECODE_COND(KPROG_ARM64_CC_DECODE_MNEMONIC_LT) == 
 _Static_assert(KPROG_ARM64_CC_DECODE_COND(KPROG_ARM64_CC_DECODE_MNEMONIC_GT) == ARM64_COND_GT, "AArch64 cc decode mnemonic selection drift");
 _Static_assert(KPROG_ARM64_CC_DECODE_COND(KPROG_ARM64_CC_DECODE_MNEMONIC_LE) == ARM64_COND_LE, "AArch64 cc decode mnemonic selection drift");
 _Static_assert(KPROG_ARM64_CC_DECODE_COND(KPROG_ARM64_CC_DECODE_MNEMONIC_AL) == ARM64_COND_AL, "AArch64 cc decode mnemonic selection drift");
+_Static_assert(KPROG_ARM64_CC_DECODE_COND(KPROG_ARM64_CC_DECODE_MNEMONIC_NV) == ARM64_COND_AL, "AArch64 cc decode mnemonic selection drift");
 /* The selector is total: a mnemonic code past the table reaches the default. */
 _Static_assert(KPROG_ARM64_CC_DECODE_COND(
 	KPROG_ARM64_CC_DECODE_MNEMONIC_COUNT) == 0,
@@ -111,4 +115,5 @@ _Static_assert(KPROG_ARM64_CC_DECODE_COND(
 /* The aliases name the same condition as their canonical spelling. */
 _Static_assert(KPROG_ARM64_CC_DECODE_COND(KPROG_ARM64_CC_DECODE_MNEMONIC_HS) == ARM64_COND_CS, "AArch64 cc decode alias drift");
 _Static_assert(KPROG_ARM64_CC_DECODE_COND(KPROG_ARM64_CC_DECODE_MNEMONIC_LO) == ARM64_COND_CC, "AArch64 cc decode alias drift");
+_Static_assert(KPROG_ARM64_CC_DECODE_COND(KPROG_ARM64_CC_DECODE_MNEMONIC_NV) == ARM64_COND_AL, "AArch64 cc decode alias drift");
 #endif

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Regress real A64 byte encodings, ZR/SP separation and scalar boundary cases."""
 import copy
+import importlib.util
+import sys
 import json
 from pathlib import Path
 import subprocess
@@ -66,6 +68,17 @@ def main():
         run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                              input=json.dumps(request) + "\n", text=True, capture_output=True)
         assert run.returncode == 1 and run.stderr.startswith("reference:"), (request, run)
+    # The real encoder must accept NV and normalize it to the proved AL
+    # predicate; parity of the raw spelling must not turn it into "never".
+    directory = ROOT.parent / "arm64/micro-prog"
+    sys.path.insert(0, str(directory))
+    spec = importlib.util.spec_from_file_location("arm_reference_encoder", directory / "generate_micro_sim_proofs.py")
+    encoder = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = encoder
+    spec.loader.exec_module(encoder)
+    nv = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "nv"), "csel x0,x1,x2,nv")
+    al = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "al"), "csel x0,x1,x2,al")
+    assert encoder.encode(nv, {}, {}) == encoder.encode(al, {}, {})
     print("AArch64 reference: multiply/divide, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 

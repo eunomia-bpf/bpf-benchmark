@@ -3,10 +3,10 @@ import KProgFormal.Generated.GeneratedArm64Cond
 
 namespace KProgFormal
 
-/-- Independent enumeration of the encoder's 17 condition mnemonics with the
+/-- Independent enumeration of the encoder's 18 condition mnemonics with the
 `ARM64_COND_*` token and numeric code each one denotes, in the order `COND`
 spells them. Written out by hand so it shares no structure with the generated
-table. The two aliases `hs`/`lo` name the same codes as `cs`/`cc`. -/
+table. The aliases `hs`/`lo` select `cs`/`cc`; NV selects the AL predicate. -/
 def ccArm64MnemonicSpec : List (String × String × Nat) := [
   ("eq", "ARM64_COND_EQ", 0), ("ne", "ARM64_COND_NE", 1),
   ("cs", "ARM64_COND_CS", 2), ("hs", "ARM64_COND_CS", 2),
@@ -16,7 +16,7 @@ def ccArm64MnemonicSpec : List (String × String × Nat) := [
   ("hi", "ARM64_COND_HI", 8), ("ls", "ARM64_COND_LS", 9),
   ("ge", "ARM64_COND_GE", 10), ("lt", "ARM64_COND_LT", 11),
   ("gt", "ARM64_COND_GT", 12), ("le", "ARM64_COND_LE", 13),
-  ("al", "ARM64_COND_AL", 14),
+  ("al", "ARM64_COND_AL", 14), ("nv", "ARM64_COND_AL", 14),
 ]
 
 /-- Independent enumeration of the shared condition contract's name/code pairs,
@@ -28,15 +28,15 @@ def ccArm64CondSpec : List (String × Nat) := [
   ("gt", 12), ("le", 13), ("al", 14),
 ]
 
-/-- The two alias mnemonics, whose condition a canonical mnemonic also names. -/
-def ccArm64AliasSpec : List String := ["hs", "lo"]
+/-- The three alias mnemonics, whose condition a canonical mnemonic also names. -/
+def ccArm64AliasSpec : List String := ["hs", "lo", "nv"]
 
 /-- Constructor enumeration of the generated table, in specification order; the
 values still come from the generated `cond`/`mnemonic`/`define`/`code`/
 `isAlias` definitions. -/
 def allArm64Mnemonics : List GeneratedArm64CcDecode.Mnemonic := [
   .eq, .ne, .cs, .hs, .cc, .lo, .mi, .pl, .vs, .vc, .hi, .ls, .ge, .lt, .gt,
-  .le, .al,
+  .le, .al, .nv,
 ]
 
 /-- The generated table, projected to `(mnemonic, token, code)` triples, equals
@@ -59,8 +59,8 @@ theorem arm64_cc_decode_code_matches_cond :
   native_decide
 
 /-- The distinct conditions the encoder reaches are exactly the shared
-contract's conditions: seventeen mnemonics cover all fifteen conditions with
-the two aliases adding no new one. -/
+contract's conditions: eighteen mnemonics cover all fifteen implementation predicates with
+the aliases adding no new predicate. -/
 theorem arm64_cc_decode_conds_exact :
     (allArm64Mnemonics.map GeneratedArm64CcDecode.cond).eraseDups =
       (ccArm64CondSpec.map Prod.fst) := by
@@ -75,7 +75,7 @@ theorem arm64_cc_decode_canonical_covers :
       (ccArm64CondSpec.map Prod.fst) := by
   native_decide
 
-/-- The alias mnemonics are exactly `hs` and `lo`. -/
+/-- The alias mnemonics are exactly `hs`, `lo` and `nv`. -/
 theorem arm64_cc_decode_aliases_exact :
     (allArm64Mnemonics.filter GeneratedArm64CcDecode.isAlias).map
         GeneratedArm64CcDecode.mnemonic =
@@ -92,7 +92,7 @@ theorem arm64_cc_decode_alias_same_code :
 /-- An alias mnemonic is never counted among the canonical spellings. -/
 theorem arm64_cc_decode_alias_not_canonical (m : GeneratedArm64CcDecode.Mnemonic) :
     GeneratedArm64CcDecode.isAlias m = true →
-      m == .hs || m == .lo := by
+      m == .hs || m == .lo || m == .nv := by
   cases m <;> decide
 
 end KProgFormal
