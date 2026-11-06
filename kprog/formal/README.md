@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0969 - a figure inside inline math has its noun after the
+delimiter
+
+The noun class needed two extensions. Eight more figures are followed by a noun
+the list did not hold, most of them theorems and modules, which are the same
+kind of stated size as cases and scenes. Four more are written inside inline
+math, where the closing delimiter sits between the figure and its noun, so the
+match has to cross it.
+
+With both, twenty-two figures are classified as stated sizes and the unexplained
+remainder falls from seventeen to nine. Those nine are the figures with no noun
+at all: a sum that would otherwise be one higher, a count that is the sentence's
+own subject, and a value in a parenthesis with no word after it.
+
+Census unchanged; the report names nine classes and states nine unreached.
+
 ### Step 0968 - fourteen figures are followed by the noun they count
 
 Fourteen of the remaining figures are followed by the noun they count: cases,

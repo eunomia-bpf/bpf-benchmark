@@ -3795,8 +3795,9 @@ def figure_coverage(log: pathlib.Path) -> tuple[int, int, int, set[int]]:
     _rest = (left - line_ids - rows - catches - padded - inside - sibling
              - split)
     sized = {v for v in _rest if re.search(
-        r"(%s|%d)\s*(?:-|\s)?(?:case|insn|scene|modeled|grid|parameters|"
-        r"distinct|routed|LCG|fixed-seed)"
+        r"(%s|%d)(?:\\\)|-[a-z]|\s)\s*(?:case|insn|scene|modeled|grid|"
+        r"parameters|distinct|routed|LCG|fixed-seed|theorems|modules|"
+        r"mutations|specifications|axioms|rows|name|use|aggregate)"
         % (re.escape("{:,}".format(v)), v), flat)}
     return len(figs), bound, len(held), (
         left, line_ids, rows, catches, padded, inside, sibling, split,
