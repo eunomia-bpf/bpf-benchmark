@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0991 - the compiled paper has no figures
+
+The paper's measurement section reports execution ratios, code sizes, site
+counts and case totals, and it reports them all in prose. Counting the figures
+the compiled document includes gives zero: every figure input lives in a section
+main.tex does not include, and the compiled sections carry two tables and no
+figures.
+
+Seventeen figure files are in the tree, including the pipeline diagram and the
+per-case plots the dead sections reference. Three of those figures are
+referenced and one of the three is in a live section, so the material for at
+least one figure is already wired for a section that is compiled.
+
+This is a shape observation rather than a defect in any sentence: every claim
+the prose makes is bound, and the paper does have a claim-ledger table and an
+evaluation table. What it does not have is a single picture, which for a systems
+paper reporting four kinds of measurement is worth stating.
+
+Census unchanged; the figure count is measured.
+
 ### Step 0990 - a check left its own artefact in the tree
 
 The check that builds every host to read its case count left one probe binary
