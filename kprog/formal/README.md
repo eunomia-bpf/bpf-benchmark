@@ -7606,6 +7606,21 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0974 - the cited paths could not break
+
+The paper compiled without errors but with thirteen thousand overfull boxes, and
+one paragraph was two hundred and twenty-three points too wide. The cause was
+the archived run paths added earlier in this sequence: a path longer than a line
+set in a text group that cannot break.
+
+Setting them as paths lets TeX break at the separators. The section that carried
+them now has no overfull boxes, and the paper's total falls by forty-one. The
+remaining ones are in the safety section, where the text is dense with macro
+names and line references, and are a different problem from this one.
+
+The checker still passes, since the text of each path is unchanged. Census
+unchanged; one typographic defect is fixed where it was measurable.
+
 ### Step 0973 - the whole sequence verified together
 
 The sequence that reduced the unexplained figure count from seventy-six to one
