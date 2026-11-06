@@ -537,6 +537,10 @@ source-map-arm64-check:
 source-map-arm64-install:
 	python3 $(HERE)/source_map_arm64.py $(HERE)/$(PHASE) install
 
+.PHONY: exclusive-layout-check
+exclusive-layout-check:
+	python3 $(HERE)/exclusive_layout.py $(HERE)/$(PHASE)
+
 .PHONY: entry-abi-build
 entry-abi-build: direct-header-generate
 	python3 $(HERE)/entry_abi.py $(HERE)/$(PHASE) $(ENTRY_ABI_ARGS)

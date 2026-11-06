@@ -114,6 +114,10 @@ struct Args {
     #[arg(long)]
     output_data_layout: Option<PathBuf>,
 
+    /// Exact source proof PCs and final ARM exclusive-store sites.
+    #[arg(long)]
+    output_environment_layout: Option<PathBuf>,
+
     /// Versioned structured link plan containing helper/map/callsite facts.
     /// This is the stable loader/native-link boundary for kernel mode.
     #[arg(long)]
@@ -493,6 +497,9 @@ fn main() -> Result<()> {
     let elf = object::File::parse(&*bytes)
         .with_context(|| format!("parse ELF {}", args.input.display()))?;
     let proof_input = elf.section_by_name(".native_link_abi").is_some();
+    if args.output_environment_layout.is_some() && elf.architecture() != object::Architecture::Aarch64 {
+        bail!("exclusive environment layout requires ARM input");
+    }
     if !proof_mode && !proof_input {
         bail!("--mode kernel requires a .proof.o produced by --mode proof");
     }
@@ -505,6 +512,7 @@ fn main() -> Result<()> {
         update_sites,
         arm64_helper_call_slot,
     } = load_link_side_inputs(&args)?;
+    let mut environment_sites = Vec::new();
     let RewriteResult {
         blob,
         relocs,
@@ -589,6 +597,7 @@ fn main() -> Result<()> {
                 proof_mode,
                 args.preserve_entry_abi,
                 args.show,
+                &mut environment_sites,
             )?
         }
         arch => bail!("unsupported input ELF arch: {:?}", arch),
@@ -598,6 +607,7 @@ fn main() -> Result<()> {
             || args.output_map_patches.is_some()
             || args.output_abi.is_some()
             || args.output_data_layout.is_some()
+            || args.output_environment_layout.is_some()
         {
             bail!("proof mode writes a single .proof.o; do not pass kernel sideband outputs");
         }
@@ -684,6 +694,24 @@ fn main() -> Result<()> {
             }
         }
         let layout = serde_json::json!({"version": 1, "objects": readonly_objects});
+        fs::write(path, serde_json::to_vec(&layout)?)
+            .with_context(|| format!("write {}", path.display()))?;
+    }
+    if let Some(path) = &args.output_environment_layout {
+        let mut seen = HashSet::new();
+        for site in &environment_sites {
+            if !seen.insert(site.source_pc) || site.source_pc % 4 != 0 ||
+                site.source_pc > i32::MAX as u64 || site.offset % 4 != 0 ||
+                site.offset.checked_add(4).is_none_or(|end| end as usize > blob.len()) {
+                bail!("exclusive environment site is ambiguous or outside final blob");
+            }
+            let word = arm64_word_at(&blob, site.offset as usize / 4)
+                .ok_or_else(|| anyhow!("exclusive environment site has no native instruction"))?;
+            if arm64_exclusive_store_shape(word) != Some((site.width, site.release)) {
+                bail!("exclusive environment site differs from final native instruction");
+            }
+        }
+        let layout = serde_json::json!({"version": 1, "sites": environment_sites});
         fs::write(path, serde_json::to_vec(&layout)?)
             .with_context(|| format!("write {}", path.display()))?;
     }
@@ -1004,6 +1032,21 @@ struct ReadonlyObject {
     native_symbol: String,
     offset: u64,
     size: u64,
+}
+
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+struct Arm64EnvironmentSite {
+    source_pc: u64,
+    offset: u32,
+    width: u32,
+    release: bool,
+}
+
+fn arm64_exclusive_store_shape(insn: u32) -> Option<(u32, bool)> {
+    match insn & 0xbfe0_fc00 {
+        0x8800_7c00 | 0x8800_fc00 => Some((if insn & (1 << 30) != 0 { 8 } else { 4 }, insn & (1 << 15) != 0)),
+        _ => None,
+    }
 }
 
 fn record_readonly_object(objects: &mut Vec<ReadonlyObject>, name: &str,
@@ -3554,6 +3597,7 @@ fn rewrite_arm64(
     proof_mode: bool,
     preserve_entry_abi: bool,
     show: bool,
+    environment_sites: &mut Vec<Arm64EnvironmentSite>,
 ) -> Result<RewriteResult> {
     let mut blob = Vec::new();
     let mut sym_start_word_offset: HashMap<Arm64AddressKey, usize> = HashMap::new();
@@ -3631,6 +3675,15 @@ fn rewrite_arm64(
                 insn = arm64_stripped_save_instruction(insn);
                 blob.extend_from_slice(&insn.to_le_bytes());
                 continue;
+            }
+            if !proof_mode {
+                if let Some((width, release)) = arm64_exclusive_store_shape(insn) {
+                    environment_sites.push(Arm64EnvironmentSite {
+                        source_pc: sym.address + off as u64,
+                        offset: u32::try_from(blob.len()).context("exclusive native offset exceeds u32")?,
+                        width, release,
+                    });
+                }
             }
             let reloc = relocs.get(&((sym.section_index, sym.address), off as u64));
             for reg in 0..32 {
@@ -4369,6 +4422,39 @@ mod tests {
     use super::*;
 
     #[test]
+    fn arm64_exclusive_layout_tracks_helper_expansion_and_exact_store_shape() {
+        for (store, width, release) in [(0x8800_7c22u32, 4, false), (0x8800_fc22, 4, true),
+            (0xc800_7c22, 8, false), (0xc800_fc22, 8, true)] {
+            let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::Aarch64, Endianness::Little);
+            let section = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
+            let words = [0x9400_0000u32, store, 0xd65f_03c0];
+            object.append_section_data(section, &words.iter().flat_map(|w| w.to_le_bytes()).collect::<Vec<_>>(), 4);
+            object.add_symbol(WriteSymbol { name: b"entry".to_vec(), value: 0, size: 12,
+                kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+                section: WriteSymbolSection::Section(section), flags: SymbolFlags::None });
+            let helper = object.add_symbol(WriteSymbol { name: b"bpf_get_current_uid_gid".to_vec(), value: 0, size: 0,
+                kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+                section: WriteSymbolSection::Undefined, flags: SymbolFlags::None });
+            object.add_relocation(section, WriteRelocation { offset: 0, symbol: helper, addend: 0,
+                flags: RelocationFlags::Elf { r_type: R_AARCH64_CALL26 } }).unwrap();
+            let bytes = object.write().unwrap();
+            let elf = object::File::parse(bytes.as_slice()).unwrap();
+            let entry = find_symbol_by_name(&elf, "entry").unwrap();
+            let mut sites = Vec::new();
+            let output = rewrite_arm64(&elf, &entry, &[entry.clone()],
+                &HashMap::from([("bpf_get_current_uid_gid".to_string(), 0xffff_8000_1234_0000)]), &HashMap::new(),
+                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, false, false, false, &mut sites).unwrap();
+            assert_eq!(sites, vec![Arm64EnvironmentSite {source_pc: 4, offset: 8, width, release}]);
+            assert_eq!(arm64_word_at(&output.blob, 2), Some(store));
+            let value = serde_json::to_value(&sites[0]).unwrap();
+            assert_eq!(value, serde_json::json!({"source_pc":4,"offset":8,"width":width,"release":release}));
+        }
+        for word in [0xc85f_7c22, 0xc85f_fc22, 0xc89f_fc22, 0xf900_0022, 0xd503_3f5f] {
+            assert_eq!(arm64_exclusive_store_shape(word), None);
+        }
+    }
+
+    #[test]
     fn arm64_resolved_tail_branches_keep_transitive_callees() {
         let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::Aarch64, Endianness::Little);
         let section = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
@@ -4385,7 +4471,7 @@ mod tests {
         let included = discover_reachable_arm64(&elf, &entry).unwrap();
         assert_eq!(included.iter().map(|s| s.name.as_str()).collect::<Vec<_>>(), vec!["entry", "leaf", "leaf2"]);
         let output = rewrite_arm64(&elf, &entry, &included, &HashMap::new(), &HashMap::new(),
-            &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, false, false, false).unwrap();
+            &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, false, false, false, &mut Vec::new()).unwrap();
         assert_eq!(&output.blob[..16], &words.iter().flat_map(|w| w.to_le_bytes()).collect::<Vec<_>>());
     }
 
@@ -4409,7 +4495,7 @@ mod tests {
         for proof in [true, false] {
             let helpers = HashMap::from([("bpf_ktime_get_coarse_ns".to_string(), 0xffff_8000_1234_0000)]);
             let output = rewrite_arm64(&elf, &entry, &included, &helpers, &HashMap::new(),
-                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, proof, true, false).unwrap();
+                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, proof, true, false, &mut Vec::new()).unwrap();
             assert_eq!(arm64_word_at(&output.blob, 0), Some(0xa9bf_7bfd));
             if proof {
                 assert_eq!(output.proof_relocs.len(), 1);
@@ -4453,7 +4539,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry").unwrap();
         for preserve in [false, true] {
             let linked = rewrite_arm64(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
-                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, true, preserve, false).unwrap();
+                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, true, preserve, false, &mut Vec::new()).unwrap();
             let output = linked.blob.chunks_exact(4).map(|w| u32::from_le_bytes(w.try_into().unwrap())).collect::<Vec<_>>();
             assert_eq!(output[0], if preserve { words[0] } else { 0xd100_83ff });
             assert_eq!(output[3], if preserve { words[3] } else { 0x9100_83ff });
@@ -4504,7 +4590,7 @@ mod tests {
             assert_eq!(arm64_proof_reloc_addend(&reloc), offset);
             let entry = find_symbol_by_name(&elf, "entry").unwrap();
             let linked = rewrite_arm64(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
-                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, false, false, false).unwrap();
+                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, false, false, false, &mut Vec::new()).unwrap();
             let instruction = u32::from_le_bytes(linked.blob[..4].try_into().unwrap());
             assert_eq!(instruction & 0x9f00001f, 0x10000000); // ADR x0, actual data address
             let displacement = ((instruction >> 29) & 3) | (((instruction >> 5) & 0x7ffff) << 2);

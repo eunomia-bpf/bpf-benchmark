@@ -816,3 +816,12 @@ and no map reset. Erasing the proof offset rejects before execution. Explicit
 source-site metadata replaces invented map declarations; missing original
 identity fails generation. All29 original micro cases recompile and pass full-system QEMU. The replay
 archive includes the matched built kernel/module/loader and Spark KVM command.
+
+## Exclusive-store source and final native positions
+
+[The environment layout output](exclusive-layout-result/README.md) records
+exact STXR/STLXR source proof PCs, final blob offsets, widths and release bits.
+All four real W/X store variants are checked after helper expansion, along
+with sideband rejection on proof/x86 input. All75 Rust tests and both release
+builds pass. T can bind its per-site choice descriptor to these exact positions;
+exclusive-store semantics and unsafe failure branches remain active repair.

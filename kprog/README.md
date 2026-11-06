@@ -50,3 +50,11 @@ variable starts at offset0 and spans the map value. This metadata connects the
 proof object to the canonical native object; byte searching cannot establish
 that identity. See the dated application coverage results for the paired
 x86/AArch64 relocation regressions.
+
+Kernel-mode ARM linking also accepts `--output-environment-layout PATH`,
+writing `{"version":1,"sites":[{"source_pc":16,"offset":20,"width":8,"release":true}]}`.
+Each source proof byte PC maps to the exact final STXR/STLXR instruction after
+helper expansion. Width/release are checked against that final word; source
+PCs are unique/aligned and fit the signed32 marker payload. This ARM-only
+sideband supplies instruction identity for bound environment witnesses and
+does not alter native instructions. Proof mode rejects the sideband.

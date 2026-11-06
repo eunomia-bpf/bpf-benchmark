@@ -1,0 +1,16 @@
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive_layout.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive-layout-v1
+Traceback (most recent call last):
+  File "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive_layout.py", line 28, in <module>
+    run(base)
+  File "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive_layout.py", line 16, in run
+    if result.returncode!=expected:raise RuntimeError(result.stderr)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: error: unexpected argument '--helper' found
+
+  tip: a similar argument exists: '--help'
+
+Usage: native-link --input <INPUT> --symbol <SYMBOL> --output <OUTPUT> --mode <MODE> --output-relocs <OUTPUT_RELOCS> --output-environment-layout <OUTPUT_ENVIRONMENT_LAYOUT> --help
+
+For more information, try '--help'.
+
+make: *** [corpus/results/kprog_arm64_app_coverage_20261106/Makefile:542: exclusive-layout-check] Error 1
