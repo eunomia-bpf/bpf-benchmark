@@ -23,10 +23,10 @@ manifest=OUT/'manifest.json';manifest.write_text(json.dumps(dict(objects=entries
 for name,flags in [('zero',0),('freq',8)]:
     directory=OUT/name;directory.mkdir(exist_ok=True)
     command=[str(HERE/'context-runtime/startup'),str(HERE/'context-runtime/source.bpf.o'),str(flags)]
-    env=dict(os.environ,LD_PRELOAD=str(SOURCE/'shim-after.so'),BPFREJIT_SHIM_NATIVE_LOADER='1',
+    env=dict(os.environ,LD_PRELOAD=os.environ.get('KPROG_TEST_SHIM',str(SOURCE/'shim-after.so')),BPFREJIT_SHIM_NATIVE_LOADER='1',
         BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1',BPFREJIT_SHIM_NATIVE_MANIFEST=str(manifest),
         BPFREJIT_NATIVE_LINK_BINARY=str(ROOT/'kprog/x86/native_lab/native_link/target-c-readonly/release/native-link'),
-        BPFREJIT_NATIVE_LOADER_SO=str(SOURCE/'build/libnative_loader.so'),
+        BPFREJIT_NATIVE_LOADER_SO=os.environ.get('KPROG_TEST_LOADER',str(SOURCE/'build/libnative_loader.so')),
         BPFREJIT_SHIM_DIR=str(directory),BPFREJIT_SHIM_LOG=str(directory/'shim.log'),
         BPFREJIT_SHIM_SOCK_DIR=str(directory/'sockets'))
     result=subprocess.run(command,env=env,capture_output=True,text=True,timeout=120)

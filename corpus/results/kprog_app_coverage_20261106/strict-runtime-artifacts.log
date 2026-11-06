@@ -1,0 +1,1 @@
+tar -czf /workspaces/repository/corpus/results/kprog_app_coverage_20261106/strict-runtime-artifacts.tar.gz --exclude='sockets' -C /workspaces/repository/corpus/results/kprog_app_coverage_20261106 strict-runtime-input object-startup-published

@@ -244,11 +244,8 @@ static int shim_native_loader_is_libbpf_probe(const struct prog_entry *prog) {
     return 0;
 }
 
-static int shim_native_loader_is_internal_prog(const struct prog_entry *prog) {
-    const char *name = prog ? prog->name : "";
-
-    return name && strcmp(name, "native_lab_stub") == 0;
-}
+/* Only nested loads made by NativeLoader itself bypass replacement. */
+static _Thread_local unsigned shim_native_loader_active;
 
 static int shim_native_loader_is_runtime_helper(const struct prog_entry *prog,
                                                 const char *manifest) {
@@ -427,17 +424,13 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
         errno = EINVAL;
         return -1;
     }
-    if (shim_native_loader_is_libbpf_probe(prog)) {
+    if (shim_native_loader_active)
+        return original_fd;
+    if (!shim_native_loader_requires_bound_proof() &&
+        shim_native_loader_is_libbpf_probe(prog)) {
         log_line("native-loader skipped feature probe program name=%s insn_cnt=%u",
                  prog_name ? prog_name : "", prog ? prog->insn_cnt : 0);
         kmsg_line("native skip-feature-probe name=%s fd=%ld",
-                  prog_name ? prog_name : "", original_fd);
-        return original_fd;
-    }
-    if (shim_native_loader_is_internal_prog(prog)) {
-        log_line("native-loader skipped internal program name=%s insn_cnt=%u",
-                 prog_name ? prog_name : "", prog ? prog->insn_cnt : 0);
-        kmsg_line("native skip-internal name=%s fd=%ld",
                   prog_name ? prog_name : "", original_fd);
         return original_fd;
     }
@@ -493,13 +486,16 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     };
     log_line("native-loader source-context flags=%u token_fd=%d",
              source_context.prog_flags, source_context.prog_token_fd);
-    if (load((int)original_fd, manifest, prog->bytecode_path,
+    ++shim_native_loader_active;
+    int load_status = load((int)original_fd, manifest, prog->bytecode_path,
              prog->fd_array_snapshot, prog->fd_array_snapshot_n,
              prog->prog_btf_kid, prog->func_info_buf,
              prog->func_info_cnt, prog->func_info_rec_size,
              prog->expected_attach_type, prog->attach_btf_id,
              prog->attach_btf_obj_kid, prog->attach_prog_kid,
-             &source_context, &result) != 0) {
+             &source_context, &result);
+    --shim_native_loader_active;
+    if (load_status != 0) {
         log_line("native-loader failed prog=%s manifest=%s source=%s error=%s",
                  prog_name ? prog_name : "", manifest,
                  prog->bytecode_path, result.error);

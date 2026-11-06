@@ -1,5 +1,10 @@
 # Lane C: application proof-artifact coverage, 2026-11-06
 
+[Production strict startup](strict-runtime.md) replaces all six successful
+programs of the tested libbpf object startup with generation-bound native
+programs, with source load flags0 and8. Complete corpus-app coverage remains
+in progress.
+
 [Startup helper checkpoint](startup-helpers.md): typed helpers160/173,
 exact anonymous-bytecode selection, and private strict-shim startup regressions
 pass. Full six-application coverage and matching-work timing remain incomplete.
