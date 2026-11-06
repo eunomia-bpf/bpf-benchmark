@@ -509,3 +509,31 @@ calls the same helper. Wrong tracing target/type negatives and all existing
 binding regressions pass. Both architecture libraries build. Latest compatible
 libraries are under context-v2-func-ip; binding wire2, C shim ABI and the required
 readonly native-link interface are unchanged.
+
+Actual clang store-width counterexample
+--------------------------------------
+
+`simple-arm64-before-width-inputs.tar.gz` retains the exact 84-byte native
+entry/text including its return trampoline, 224-byte/28-instruction clang BPF
+entry, generated C, both disassemblies, and frozen production specialization
+dependencies. The canonical ISA step functions, rather than disassembly or a
+second interpreter, evaluate native PCs44/48/52/56/60/64/68/72 and proof PCs14
+through26. At the matching successful-block entry, the native writes widths
+4/1/2/1 at data+3/+7/+0/+2; clang writes eight individual bytes at
++3/+4/+5/+6/+7/+0/+1/+2. Both return2 and produce equal packet bytes, but the
+requested ordered address/size/kind traces differ. The Lean result is a real
+compiled-block counterexample, not a positive whole-program certificate.
+
+`simple-arm64-counterexample.log` checks both concrete effect lists, their
+strict inequality, equal packet bytes, and existence of actual reference
+executions using the generic checked-path soundness theorems. Those generic
+theorems trust only propext/Quot.sound. The concrete evaluation uses
+native_decide and additionally trusts Lean.ofReduceBool; no solver success
+or clang correctness is assumed. The original direct reduction consumed too
+much memory and was stopped; its raw attempt is retained. The completed run
+uses a12GiB address-space limit and has no sorryAx.
+
+A's production width repair is separately pushed as1d260495a. This archived
+result preserves the before-repair bug; T continues on a newly compiled pair
+and does not weaken the strict trace requirement. Full micro/application
+translation validation and concrete end-to-end composition remain active.

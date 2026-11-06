@@ -310,3 +310,25 @@ build/capture-context: capture_context.cpp
 	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 \
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include $< \
 		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $@
+
+.PHONY: simple-arm64-artifacts
+simple-arm64-artifacts:
+	python3 prepare_simple_arm64.py
+	clang -O2 -g -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_arm64 \
+		-I../../vendor/libbpf/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include/bpf \
+		-I/usr/include/x86_64-linux-gnu -c build/simple-arm64/simple.bpf.c -o build/simple-arm64/simple.bpf.o
+	aarch64-linux-gnu-objdump -dr build/simple-arm64/native-link/simple.proof.o > build/simple-arm64/native.asm
+	llvm-objdump-18 -d build/simple-arm64/simple.bpf.o > build/simple-arm64/proof.asm
+
+.PHONY: native-path-check
+native-path-check: bpf-check
+	cd ../formal && lake build KProgFormal.Reference.AArch64
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv -o ../tv/build/ARM64Path.olean ../tv/ARM64Path.lean
+
+.PHONY: simple-arm64-counterexample
+simple-arm64-counterexample: native-path-check
+	python3 extract_simple_arm64.py
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
+		-o ../tv/build/simple-arm64/SimpleCompiled.olean ../tv/build/simple-arm64/SimpleCompiled.lean
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv ../tv/SimpleStoreCounterexample.lean

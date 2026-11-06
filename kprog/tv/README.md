@@ -326,3 +326,23 @@ virtual LDXW opcode, physical offsets and all ordered nested loads. Changed
 pointer width, end-pointer offset, load ordering, and an erased nested access
 fail the same semantic checks that the unchanged captured copy passes.
 These platform fixtures do not certify the micro or application native blocks.
+
+`ARM64Path.lean` fetches actual native bytes by the reference PC, decodes
+with V's canonical AArch64 decoder and executes its full-state transition.
+Its position witness checks each real successor and cannot force a branch or
+continue after a fault. `evaluate_sound` proves an actual reference execution;
+its only printed axioms are `propext` and `Quot.sound`.
+
+The archived `simple-arm64-before-width-inputs.tar.gz` contains an actual
+native/clang pair and its specialization dependencies from before the memory
+width repair. To replay, extract it in this directory, then run
+`make -C kprog/tv simple-arm64-counterexample` from the repository root.
+The counterexample proves that the successful store block has four native
+writes versus eight clang writes, despite equal final packet bytes. It also
+proves both observed traces are real executions of the canonical semantics.
+This is a block counterexample, not a whole-program entry certificate.
+Concrete observations use `native_decide`, adding `Lean.ofReduceBool` to
+their trusted base; the generic path/composition theorems do not.
+`simple-arm64-artifacts` regenerates a fresh pair with the current producer;
+it must not be run over the archived before-repair input when replaying this
+counterexample.
