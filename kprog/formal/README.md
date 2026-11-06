@@ -17,11 +17,16 @@ AArch64. Dispatcher coverage and exclusivity theorems concern the modeled
 routing tables; they are **not yet a full simulator-step refinement theorem**.
 The ISA reference lives in `KProgFormal/Reference/`; it imports no simulator
 contracts. The step refinements in `Refinement/` connect CMOV, BT, BZHI,
-ANDN, BMI2 shifts/rotates, BSWAP/MOVBE, ordinary MOV and register/immediate/memory PUSH/POP handlers to that reference, including registers,
+ANDN, BMI2 shifts/rotates, BSWAP/MOVBE, ordinary MOV, ADD/ADC/SUB/SBB/CMP and register/immediate/memory PUSH/POP handlers to that reference, including registers,
 flags, XMM0, memory, PC and ordered access/fault effects. MOV includes AL/AH,
 REX byte registers, partial/zero-extending writes, immediate/ModRM/moffs forms,
 prefix ordering and source/destination aliases. Its shared scalar primitives
-operate on materialized native register values. The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary, logical-register, MOVK, move-immediate, register-move, all32 SIMD/GPR bit-transfer (FMOV), byte-vector reduction (CNT/UADDLV), conditional-compare (CCMP), ADD/SUB immediate/shifted-register/extended-register, NOP, ordinary-branch, scalar immediate-memory and LDP/STP signed-offset
+operate on materialized native register values. Arithmetic covers all four widths,
+six status flags, incoming carry/borrow, byte lanes, native immediates, CMP
+without data writeback, and ordered read/write faults. PF uses independent
+low-byte parity and AF uses widened nibble arithmetic in the reference;
+production C macros are checked against an independent integer oracle.
+The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary, logical-register, MOVK, move-immediate, register-move, all32 SIMD/GPR bit-transfer (FMOV), byte-vector reduction (CNT/UADDLV), conditional-compare (CCMP), ADD/SUB immediate/shifted-register/extended-register, NOP, ordinary-branch, scalar immediate-memory and LDP/STP signed-offset
 families connect through their modules in `Refinement/`, including native
 aliases, all raw NZCV predicates, ZR/SP separation including MOV destinations, legal extract immediates,
 shifted source modifiers, exact NZCV updates and W zero-extension. Arithmetic NZCV uses width-sized operands

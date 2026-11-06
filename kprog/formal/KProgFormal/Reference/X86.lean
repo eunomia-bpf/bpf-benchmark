@@ -276,6 +276,55 @@ def ScalarWidth.bytes : ScalarWidth → Nat
 
 def ScalarWidth.bits (width : ScalarWidth) : Nat := width.bytes * 8
 
+/-- PF is even parity of the low byte, stated as a bit walk rather than the
+implementation's four-bit lookup table. -/
+def evenParity (value : Word) : Bool :=
+  !((List.range 8).foldl (fun parity bit => parity != value.getLsbD bit) false)
+
+/-- AF is carry/borrow across the low nibble. Widening to five bits retains
+both a right nibble of15 plus incoming carry and the outgoing addition bit. -/
+def auxiliaryCarry (subtract carry : Bool) (left right : Word) : Bool :=
+  let a := (left.setWidth 4).setWidth 5
+  let b := (right.setWidth 4).setWidth 5 + (if carry then (1 : BitVec 5) else 0)
+  if subtract then BitVec.ult a b else (a + b).getLsbD 4
+
+inductive ArithmeticKind | add | adc | sub | sbb | compare
+  deriving DecidableEq, Repr
+
+def ArithmeticKind.subtract : ArithmeticKind → Bool
+  | .sub | .sbb | .compare => true | _ => false
+
+def ArithmeticKind.carry (kind : ArithmeticKind) (flags : Word) : Bool :=
+  (kind == .adc || kind == .sbb) && flags.getLsbD 0
+
+/-- Extra unsigned precision supplies carry/borrow; independent signed
+precision supplies overflow. Inputs are narrowed before either widening. -/
+def arithmeticValue (width : ScalarWidth) (subtract carry : Bool) (left right : Word) : Word :=
+  let a := (left.setWidth width.bits).setWidth 128
+  let b := (right.setWidth width.bits).setWidth 128
+  let incoming : BitVec 128 := if carry then 1 else 0
+  let result := if subtract then a - b - incoming else a + b + incoming
+  (result.setWidth width.bits).setWidth 64
+
+def arithmeticFlags (width : ScalarWidth) (subtract carry : Bool) (left right old : Word) : Word :=
+  let a := left.setWidth width.bits
+  let b := right.setWidth width.bits
+  let incoming : BitVec 128 := if carry then 1 else 0
+  let unsignedResult := if subtract then a.setWidth 128 - b.setWidth 128 - incoming
+    else a.setWidth 128 + b.setWidth 128 + incoming
+  let signedResult := if subtract then a.signExtend 128 - b.signExtend 128 - incoming
+    else a.signExtend 128 + b.signExtend 128 + incoming
+  let result := unsignedResult.setWidth width.bits
+  let cf := if subtract then BitVec.ult (a.setWidth 128) (b.setWidth 128 + incoming)
+    else unsignedResult.getLsbD width.bits
+  let pf := evenParity (result.setWidth 64)
+  let af := auxiliaryCarry subtract carry left right
+  let zf := result.setWidth 64 == (0 : Word)
+  let sf := result.getLsbD (width.bits - 1)
+  let of := signedResult != result.signExtend 128
+  (old &&& 0xfffffffffffff72a) ||| (if cf then 1 else 0) ||| (if pf then 4 else 0) |||
+    (if af then 16 else 0) ||| (if zf then 64 else 0) ||| (if sf then 128 else 0) ||| (if of then 2048 else 0)
+
 inductive RegisterSlice
   | low (reg : Register)
   | high (reg : Fin 4)
@@ -327,6 +376,28 @@ def scalarWrite (s : State) (width : ScalarWidth) (destination : ScalarDestinati
       | .error fault => .error fault
       | .ok (memory, event) => .ok ({ s with memory := memory }, [event])
 
+def ScalarDestination.source : ScalarDestination → ScalarSource
+  | .register slice => .register slice | .memory address => .memory address
+
+/-- ADD/ADC/SUB/SBB/CMP replace all six arithmetic status flags, preserving
+all other RFLAGS bits. A write fault commits neither data nor flags. -/
+def arithmeticStep (width : ScalarWidth) (kind : ArithmeticKind) (dst : ScalarDestination)
+    (src : ScalarSource) (nextPc : Word) (s : State) : Transition State :=
+  match scalarRead s width dst.source with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (left, firstReads) =>
+      match scalarRead s width src with
+      | .error fault => ⟨s, firstReads ++ [.fault fault], some fault⟩
+      | .ok (right, secondReads) =>
+          let carry := kind.carry s.rflags
+          let flags := arithmeticFlags width kind.subtract carry left right s.rflags
+          let reads := firstReads ++ secondReads
+          if kind = .compare then ⟨{ s with rflags := flags, pc := nextPc }, reads, none⟩
+          else
+            match scalarWrite s width dst (arithmeticValue width kind.subtract carry left right) with
+            | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
+            | .ok (result, writes) => ⟨{ result with rflags := flags, pc := nextPc }, reads ++ writes, none⟩
+
 /-- Ordinary MOV reads its source before changing an aliased destination or
 address register. Byte/word writes preserve other bits, E writes zero-extend,
 and every flag and vector is preserved, including on a memory fault. -/
@@ -343,6 +414,8 @@ def moveStep (width : ScalarWidth) (dst : ScalarDestination) (src : ScalarSource
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | arithmetic (width : ScalarWidth) (kind : ArithmeticKind) (dst : ScalarDestination)
+      (src : ScalarSource) (nextPc : Word)
   | move (width : ScalarWidth) (dst : ScalarDestination) (src : ScalarSource) (nextPc : Word)
   | push (width : StackWidth) (src : Register) (nextPc : Word)
   | pushImmediate (width : StackWidth) (value nextPc : Word)
@@ -364,6 +437,7 @@ inductive Instruction
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .arithmetic width kind dst src nextPc => arithmeticStep width kind dst src nextPc s
   | .move width dst src nextPc => moveStep width dst src nextPc s
   | .byteSwap width dst nextPc => swapStep width dst nextPc s
   | .movbeLoad width dst address nextPc => movbeLoadStep width dst address nextPc s
@@ -425,6 +499,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .arithmetic .. => 0xffffffffffffffff
   | .move .. => 0xffffffffffffffff
   | .push .. | .pushImmediate .. | .pushMemory .. | .popMemory .. => 0xffffffffffffffff
   | .byteSwap .. | .movbeLoad .. | .movbeStore .. => 0xffffffffffffffff
@@ -549,6 +624,9 @@ private def scalarSlice (p : Prefix) (width : ScalarWidth) (code : Nat) : Regist
     .high ⟨code - 4, by omega⟩
   else .low (registerCode code)
 
+private def arithmeticKind : Nat → Option ArithmeticKind
+  | 0 => some .add | 2 => some .adc | 3 => some .sbb | 5 => some .sub | 7 => some .compare | _ => none
+
 private def scalarSource (p : Prefix) (width : ScalarWidth) : Source → ScalarSource
   | .register reg => .register (scalarSlice p width reg.val)
   | .memory address => .memory address
@@ -567,6 +645,29 @@ ModRM, SIB and signed displacement. No caller-supplied decode is trusted. -/
 def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   let (p, _, count) := prefixes bytes.toList {} 0
   let first ← byteAt bytes count
+  if first < 0x40 ∧ first % 8 < 6 then
+    if let some kind := arithmeticKind (first / 8) then
+      let form := first % 8
+      let width := scalarWidth p (form % 2 == 0)
+      if form < 4 then
+        let modrm ← byteAt bytes (count + 1)
+        let reg := scalarSlice p width ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
+        let (rm, nextPc, _) ← operand bytes s p modrm (count + 2) 0
+        if form < 2 then return .arithmetic width kind (scalarDestination p width rm) (.register reg) nextPc
+        else return .arithmetic width kind (.register reg) (scalarSource p width rm) nextPc
+      else
+        let size := if width = .w64 then 4 else width.bytes
+        let immediate ← signedDisplacement bytes (count + 1) size
+        let nextPc ← fallthrough s (count + 1 + size)
+        return .arithmetic width kind (.register (.low 0)) (.immediate immediate) nextPc
+  if first = 0x80 ∨ first = 0x81 ∨ first = 0x83 then
+    let modrm ← byteAt bytes (count + 1)
+    if let some kind := arithmeticKind ((modrm / 8) % 8) then
+      let width := scalarWidth p (first == 0x80)
+      let size := if first = 0x83 then 1 else if width = .w64 then 4 else width.bytes
+      let (rm, nextPc, cursor) ← operand bytes s p modrm (count + 2) size
+      let immediate ← signedDisplacement bytes cursor size
+      return .arithmetic width kind (scalarDestination p width rm) (.immediate immediate) nextPc
   if 0xb0 ≤ first ∧ first ≤ 0xbf then
     let width := scalarWidth p (decide (first < 0xb8))
     let size := width.bytes

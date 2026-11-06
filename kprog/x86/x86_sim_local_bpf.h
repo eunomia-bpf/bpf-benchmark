@@ -13,6 +13,7 @@
 #include "../formal/generated/x86_logic_flags.h"
 #include "../formal/generated/x86_sub_flags.h"
 #include "../formal/generated/x86_add_flags.h"
+#include "../formal/generated/x86_aux_flags.h"
 #include "../formal/generated/x86_sbb_result.h"
 #include "../formal/generated/x86_sbb_flags.h"
 #include "../formal/generated/x86_adc.h"
@@ -250,6 +251,8 @@ struct x86_sim_state {
 	__u8 zf;
 	__u8 sf;
 	__u8 of;
+	__u8 pf;
+	__u8 af;
 	__u64 xmm0_lo;
 	__u64 xmm0_hi;
 	__u64 ret_addr;
@@ -302,6 +305,8 @@ struct x86_sim_state {
 #define __x86_zf (__x86_state->zf)
 #define __x86_sf (__x86_state->sf)
 #define __x86_of (__x86_state->of)
+#define __x86_pf (__x86_state->pf)
+#define __x86_af (__x86_state->af)
 #define __x86_xmm0_lo (__x86_state->xmm0_lo)
 #define __x86_xmm0_hi (__x86_state->xmm0_hi)
 #define __x86_sim_ret_addr (__x86_state->ret_addr)
@@ -317,6 +322,8 @@ struct x86_sim_state {
 	__u8 __x86_zf = 0;                                                  \
 	__u8 __x86_sf = 0;                                                  \
 	__u8 __x86_of = 0;                                                  \
+	__u8 __x86_pf = 0;                                                  \
+	__u8 __x86_af = 0;                                                  \
 	__u64 __x86_xmm0_lo = 0;                                            \
 	__u64 __x86_xmm0_hi = 0;                                            \
 	__u64 __x86_sim_ret_addr = 0
@@ -659,6 +666,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		KPROG_X86_SET_LOGIC_FLAGS(__x86_cf, __x86_zf, __x86_sf,  \
 			__x86_of, __x86_fl_value == 0,                     \
 			(__x86_fl_value >> (__x86_fl_bits - 1)) & 1);       \
+		__x86_pf = KPROG_X86_PARITY(__x86_fl_value);             \
 	} while (0)
 
 #define X86_SIM_L_SET_POPCNT_FLAGS(SRC, WIDTH)                              \
@@ -667,6 +675,8 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		KPROG_X86_SET_POPCNT_FLAGS(                               \
 			__x86_cf, __x86_zf, __x86_sf, __x86_of,           \
 			x86_apply_width((SRC), __x86_pc_width) == 0);     \
+		__x86_pf = 0;                                           \
+		__x86_af = 0;                                           \
 	} while (0)
 
 /* BZHI sets CF from the byte count, ZF/SF from the result and clears OF. */
@@ -689,6 +699,9 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		KPROG_X86_SET_SUB_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
 			__x86_of, __x86_sub_a, __x86_sub_b, __x86_sub_r, \
 			__x86_sub_sign);                                    \
+		__x86_pf = KPROG_X86_PARITY(__x86_sub_r);              \
+		__x86_af = KPROG_X86_AUX_CARRY(__x86_sub_a,            \
+			__x86_sub_b, __x86_sub_r);                      \
 	} while (0)
 
 #define X86_SIM_L_SET_ADD_FLAGS(LHS, RHS, RESULT, WIDTH)                    \
@@ -702,6 +715,9 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		KPROG_X86_SET_ADD_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
 			__x86_of, __x86_add_a, __x86_add_b, __x86_add_r, \
 			__x86_add_sign);                                    \
+		__x86_pf = KPROG_X86_PARITY(__x86_add_r);              \
+		__x86_af = KPROG_X86_AUX_CARRY(__x86_add_a,            \
+			__x86_add_b, __x86_add_r);                      \
 	} while (0)
 
 #define X86_SIM_L_SET_ADC_FLAGS(LHS, RHS, CARRY, RESULT, WIDTH)             \
@@ -715,6 +731,9 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		KPROG_X86_SET_ADC_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
 			__x86_of, __x86_adc_a, __x86_adc_b, __x86_adc_r, \
 			__x86_adc_sign, (CARRY));                           \
+		__x86_pf = KPROG_X86_PARITY(__x86_adc_r);              \
+		__x86_af = KPROG_X86_AUX_CARRY(__x86_adc_a,            \
+			__x86_adc_b, __x86_adc_r);                      \
 	} while (0)
 
 #define X86_SIM_L_SET_SBB_FLAGS(LHS, RHS, BORROW, RESULT, WIDTH)            \
@@ -728,6 +747,9 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		KPROG_X86_SET_SBB_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
 			__x86_of, __x86_sbb_a, __x86_sbb_b, __x86_sbb_r,  \
 			__x86_sbb_sign, (BORROW));                          \
+		__x86_pf = KPROG_X86_PARITY(__x86_sbb_r);              \
+		__x86_af = KPROG_X86_AUX_CARRY(__x86_sbb_a,            \
+			__x86_sbb_b, __x86_sbb_r);                      \
 	} while (0)
 
 #define X86_SIM_L_SET_IMUL_FLAGS(LHS, RHS, WIDTH)                           \
@@ -761,6 +783,11 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		KPROG_X86_SET_SHIFT_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
 			__x86_of, __x86_sh_a, __x86_sh_count, __x86_sh_r,   \
 			__x86_sh_bits, __x86_sh_sign, __x86_sh_alu);          \
+		if (__x86_sh_count != 0 &&                              \
+		    (__x86_sh_alu == X86_ALU_SHL ||                      \
+		     __x86_sh_alu == X86_ALU_SHR ||                      \
+		     __x86_sh_alu == X86_ALU_SAR))                       \
+			__x86_pf = KPROG_X86_PARITY(__x86_sh_r);          \
 	} while (0)
 
 #define X86_SIM_L_SET_ALU_FLAGS(LHS, RHS, RESULT, ALU, WIDTH)               \

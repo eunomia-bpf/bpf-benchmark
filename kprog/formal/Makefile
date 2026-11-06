@@ -106,6 +106,7 @@ check:
 	python3 tools/generate_x86_reg_lane_aux_spec.py --check
 	python3 tools/generate_x86_sub_flags_spec.py --check
 	python3 tools/generate_x86_add_flags_spec.py --check
+	python3 tools/generate_x86_aux_flags_spec.py --check
 	python3 tools/generate_x86_sbb_result_spec.py --check
 	python3 tools/generate_x86_sbb_flags_spec.py --check
 	python3 tools/generate_x86_adc_spec.py --check
@@ -153,9 +154,12 @@ check:
 	lake build
 	python3 tools/check_reference.py
 	python3 tools/check_reference_x86_scalar.py
+	python3 tools/check_reference_x86_arithmetic.py
 	python3 tools/check_x86_memory_widths.py
 	python3 tools/check_reference_arm64.py
 	python3 tools/check_no_sorry.py --check
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I. -I../x86 -I../../vendor/libbpf/src oracles/test_x86_six_flags_host.c -o build/test_x86_six_flags_host
+	./build/test_x86_six_flags_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_cond_host.c -o build/test_arm64_cond_host
 	./build/test_arm64_cond_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_branch_emit_host.c -o build/test_x86_branch_emit_host

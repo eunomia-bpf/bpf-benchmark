@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "operation": "x86AuxiliaryFlags",
+  "parity": {"table": 38505, "fold_shift": 4, "index_mask": 15, "result_mask": 1},
+  "auxiliary": {"mask": 16}
+}
