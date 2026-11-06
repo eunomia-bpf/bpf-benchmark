@@ -74,6 +74,15 @@ Consequently neither application binding nor helper/map program validation is
 completed by this change. Substituting the original application's BPF for
 the simulator proof would not meet the translation-validation obligation.
 
+`make -C kprog/tv inventory` records both architectures' 29 configured micro
+programs and every entry in the C/A application generation inventories. Each
+record retains ELF machine, executable-section and file hashes, function
+offsets, relocation counts, compiler/load-record provenance and missing inputs.
+`programs.jsonl.gz` retains all phase variants losslessly. Every record states
+`not_validated`: neither these pre-link ELF inputs nor a standalone BPF load
+establishes the identity of the linked native and instantiated proof bytes.
+This command inventories evidence; it does not run translation validation.
+
 The trusted base of an instantiated proof consists of:
 
 - Kernel verifier soundness for the **instantiated** BPF program, including its

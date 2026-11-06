@@ -2,7 +2,7 @@ ARCH ?= x86
 KDIR ?= $(abspath ../../vendor/build/$(ARCH)/linux)
 CROSS_arm64 := aarch64-linux-gnu-
 
-.PHONY: check binding-check module-check kernel-check guest-kernel-check kernel-check-arm64
+.PHONY: check binding-check module-check kernel-check guest-kernel-check kernel-check-arm64 inventory
 
 check: binding-check
 	cd ../formal && lake env lean ../tv/Composition.lean
@@ -80,3 +80,6 @@ kernel-check-arm64: build-arm64/test-binding-kernel
 		> build-arm64/kernel.log 2>&1
 	cat build-arm64/kernel.log
 	rg -q '^kernel binding regression: PASS' build-arm64/kernel.log
+
+inventory:
+	python3 inventory.py --out ../results/kprog_tv_20261106/programs.jsonl
