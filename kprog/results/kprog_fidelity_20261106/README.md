@@ -48,3 +48,7 @@ builds pass, and three valid alignment controls remain bound-load accepted.
 The18-case Arm suite retains only its two prior numeric-address accepts.
 The full32-vector FMOV observer adds128forms/131072QEMUcases with zero
 CPU/simulator/reference differences and a static hardware handoff.
+
+The canonical Arm memory/pair replay now checks543forms/556032cases on the
+identical saved CPU inputs: zero CPU differences,4096 unchanged model SP/WSP
+differences, and24 encoding forms still in the active canonical coverage queue.

@@ -639,3 +639,13 @@ missing encodings. A new static full-bank hardware handoff is
 through `ARM64_HANDOFF`. A733-form/16-state x86 compatibility run retains
 exactly the previous per-form agreement status after the shared observer
 layout extension. Earlier SP and address-state findings remain unchanged.
+
+## Canonical Arm scalar memory and pair replay
+
+`arm64-memory-reference/README.md` reuses the identical567-form CPU trace
+with a frozen canonical executable:543 forms /556032 cases checked, zero
+CPU differences,4096 unchanged model SP/WSP differences. Twenty additional
+forms now decode, including scalar loads/stores and LDP/STP. All24 remaining
+encoding requests stay in the report and active coverage queue. The adapter
+reads the original trace directly and freezes the reference executable before
+the replay, avoiding another duplicate1GiB trace.

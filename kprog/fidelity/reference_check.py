@@ -23,10 +23,14 @@ def main():
     parser.add_argument('--cases',type=int,required=True)
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--reuse-trace',action='store_true')
+    parser.add_argument('--trace',type=Path)
+    parser.add_argument('--reference',type=Path,default=ROOT/'kprog/formal/.lake/build/bin/reference')
     args=parser.parse_args()
+    if args.trace and not args.reuse_trace:
+        parser.error('--trace requires --reuse-trace')
     args.out.mkdir(parents=True,exist_ok=True)
     forms=json.loads((args.binary.parent/'coverage.json').read_text())
-    trace=args.out/'cpu-states.bin'
+    trace=args.trace if args.trace else args.out/'cpu-states.bin'
     if args.reuse_trace:
         with (args.out/'forms.tsv').open() as source:
             cpu_failed=any(int(row['mismatches']) for row in csv.DictReader(source,delimiter='\t'))
@@ -34,7 +38,7 @@ def main():
         command=(['qemu-aarch64-static'] if args.arch=='arm64' and platform.machine()!='aarch64' else [])
         cpu_failed=subprocess.run(command+[str(args.binary.resolve()),str(args.cases),str(args.out),str(trace)]).returncode != 0
     native_code=json.loads((args.out/'native-code.json').read_text())
-    reference=ROOT/'kprog/formal/.lake/build/bin/reference'
+    reference=args.reference
     # Only a serialization optimization: every non-composite encoding is
     # probed against the reference, including opcodes absent from this set.
     arm_without_memory = {
@@ -119,7 +123,10 @@ def main():
                 expected_memory=bytes(expected_bytes[address+i] for i in range(256)) if not omit_memory else before
                 expected_stack=bytes(expected_bytes[stack_base-64+i] for i in range(64)).hex() if args.arch=='x86' or (stack_base and not omit_memory) else initial['stack']
                 reg_count=16 if args.arch=='x86' else 32
-                flag_mask=0x8c1 if args.arch=='x86' else 0xf0000000
+                # Compare all six arithmetic flags, including PF/AF. Older
+                # simulator traces contain only four; a newly defined missing
+                # output bit is a model difference, never an undefined waiver.
+                flag_mask=0x8d5 if args.arch=='x86' else 0xf0000000
                 def differs(actual,actual_mem):
                     return (response['fault'] is not None or (omit_memory and (response['events'] or response['memory'])) or response['pc']!=native_code['forms'][index]['next_pc'] or actual['registers'][:reg_count]!=registers or ((actual['flags']^response['flags'])&response['defined_flags']&flag_mask)!=0 or actual['vector']!=vector or actual['stack']!=expected_stack or actual_mem!=expected_memory)
                 c=differs(native,native_mem);s=differs(simulator,sim_mem)
