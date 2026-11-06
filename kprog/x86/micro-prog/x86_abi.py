@@ -6,7 +6,7 @@ instruction values/flags remain implemented by the C simulator and its contracts
 from collections import deque
 from dataclasses import dataclass
 
-from helper_abi import helper_idents, helper_prototypes
+from helper_abi import HELPER_COPY_SOURCES, HELPER_FULL_WRITES, helper_idents, helper_prototypes
 
 FULL = (1 << 64) - 1
 CF, ZF, SF, OF = 1, 2, 4, 8
@@ -341,6 +341,35 @@ def check_definedness(insns, targets, exit_addr, decode):
                             reg = {'rdi':'edi','rsi':'esi','rdx':'edx','rcx':'ecx','r8':'r8d'}[reg]
                         need(incoming,reg,where)
             if names:
+                # Only remove opaque bytes overwritten by every possible
+                # callee. A helper writing four bytes must not initialize an
+                # adjacent saved ABI register or a string helper's suffix.
+                effects = []
+                arg_regs = ('rdi','rsi','rdx','rcx','r8')
+                for name in names:
+                    written, saved = dict(state.opaque), dict(state.pointers)
+                    effect = HELPER_FULL_WRITES.get(name)
+                    if effect is not None:
+                        dst, size = (ri(arg_regs[n])[0] for n in effect)
+                        start, length = incoming.aliases[dst], incoming.constants[size]
+                        if type(start) is int and length is not None:
+                            length &= 0xffffffff
+                            end = start + length
+                            written = {p:v for p,v in written.items() if not start <= p < end}
+                            saved = {p:v for p,v in saved.items() if not (p < end and p+8 > start)}
+                            if name in HELPER_COPY_SOURCES:
+                                source = incoming.aliases[ri(arg_regs[HELPER_COPY_SOURCES[name]])[0]]
+                                if source is None:
+                                    raise ValueError(f'native helper source stack relation unresolved at {where}')
+                                if type(source) is int:
+                                    written.update({start+p-source:v for p,v in state.opaque.items()
+                                                    if source <= p < source+length})
+                                    saved.update({start+p-source:v for p,v in state.pointers.items()
+                                                  if source <= p and p+8 <= source+length})
+                    effects.append(State(state.defined,state.aliases,state.flags,written,saved,state.constants))
+                effect = effects[0]
+                for branch in effects[1:]: effect = joined(effect,branch)
+                opaque, pointers = effect.opaque, effect.pointers
                 for reg in CALLER_SAVED:
                     bits[ri(reg)[0]]=0;alias[ri(reg)[0]]=None;constants[ri(reg)[0]]=None
                 bits[index['X86_XMM0']]=0;alias[index['X86_XMM0']]=None;constants[index['X86_XMM0']]=None

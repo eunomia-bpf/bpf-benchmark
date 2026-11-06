@@ -184,6 +184,13 @@ pushpop-formal:
 	cc -Wall -Wextra -O2 -I$(ROOT)/kprog/formal -I$(ROOT)/kprog/x86 -I$(ROOT)/kprog -I$(ROOT)/vendor/libbpf/src $(ROOT)/kprog/formal/oracles/test_x86_pushpop_route_host.c -o $(HERE)/pushpop-build/register-route-host
 	$(HERE)/pushpop-build/register-route-host
 
+helper-effects-regression:
+	python3 $(HERE)/check_helper_effects.py
+
+helper-effects-census:
+	python3 $(HERE)/prepare_finite.py prepare helper-effects
+	$(MAKE) -C $(ROOT)/kprog/x86 app-proofs-build APP_SIM_PROOF_ARGS='--generate-only --proof-root $(HERE)/helper-effects/input --report-dir $(HERE)/helper-effects --output-dir $(ROOT)/kprog/x86/app-coverage-helper-effects --generator $(HERE)/helper-effects/simulator/kprog/x86/micro-prog/generate_micro_sim_proofs.py'
+
 runtime-build: pushpop-bpf
 	$(MAKE) -C $(ROOT)/kprog/libnativeloader BUILD_DIR=build-capplication
 	$(MAKE) -C $(ROOT)/bpfopt/shim SHIM_SO=$(HERE)/verified-runtime-shim.so $(HERE)/verified-runtime-shim.so

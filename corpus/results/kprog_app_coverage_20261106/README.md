@@ -490,3 +490,39 @@ normal app/sample controls. Complete manifests and actual program ABI/map
 pairing are still being built; no application is handed to R as a successful
 verified timing run at this checkpoint. App event/sample/action/drop counters
 must be paired with actual startup results before a same-work timing claim.
+
+
+## Helper write effects and complete finite-phase verifier snapshot
+
+`helper_abi.py` records eight narrow kernel contracts that overwrite the full
+requested output region on both success and error. These are stronger than
+`ARG_PTR_TO_UNINIT_MEM`; string reads cannot initialize an untouched suffix.
+The definedness checker applies the actual constant u32 byte extent and joins
+all finite helper callees. Probe/copy helpers propagate opaque private-stack
+source bytes and saved pointer provenance into the destination; copying a
+saved unknown register does not initialize its value. Unknown native-stack
+source relations remain explicit constructor failures requiring resolution.
+
+`helper-effects-regression` passes23 cases: written prefixes, untouched suffixes,
+opaque copies, defined copy prefixes and multi-target call joins.
+`abi-positive-compile` still generates/compiles all42 micro/helper-map programs.
+The immutable `helper-effects` constructor census finishes all1136 inputs:
+421 generate and715 reject. The prior `defined-final` snapshot generated549;
+the new source-footprint check exposes129 previously unchecked stack relations,
+while other precision repairs admit one additional case. All outcomes are
+retained. These rejections are active defects/precision work, not exclusions.
+
+The completed `finite` compiler phase has937 successful compiles out of1136.
+The resumed verifier run now covers every one:40 artifact acceptances and897
+failures, split by verifier rejection versus preparation failure in
+[tables.md](tables.md). These diagnostics use the frozen pre-definedness
+simulator and XDP artifact ABI, and do not certify a whole application.
+The table now includes both definedness phases and current error categories;
+[coverage.csv](coverage.csv) retains individual status/cause rows.
+
+Commands: `helper-effects-census`, `helper-effects-regression`,
+`verify PHASE=finite`, and `summarize`, all via this directory's Makefile.
+[Census/verification archive](helper-effects-artifacts.tar.gz) retains both
+1136-record snapshots, frozen Python/header/helper inputs, commands,23-case
+regression, all finite verifier records and42-case build log. Native source
+proof copies remain those retained in the earlier finite input archive.

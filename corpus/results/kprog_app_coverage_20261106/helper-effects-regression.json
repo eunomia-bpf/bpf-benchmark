@@ -1,0 +1,107 @@
+[
+  {
+    "name": "bpf_probe_read_written4",
+    "accepted": true
+  },
+  {
+    "name": "bpf_probe_read_suffix_opaque",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x8: ret"
+  },
+  {
+    "name": "bpf_probe_read_user_written4",
+    "accepted": true
+  },
+  {
+    "name": "bpf_probe_read_user_suffix_opaque",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x8: ret"
+  },
+  {
+    "name": "bpf_probe_read_kernel_written4",
+    "accepted": true
+  },
+  {
+    "name": "bpf_probe_read_kernel_suffix_opaque",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x8: ret"
+  },
+  {
+    "name": "bpf_get_current_comm_written4",
+    "accepted": true
+  },
+  {
+    "name": "bpf_get_current_comm_suffix_opaque",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x7: ret"
+  },
+  {
+    "name": "bpf_copy_from_user_written4",
+    "accepted": true
+  },
+  {
+    "name": "bpf_copy_from_user_suffix_opaque",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x8: ret"
+  },
+  {
+    "name": "bpf_get_stack_written4",
+    "accepted": true
+  },
+  {
+    "name": "bpf_get_stack_suffix_opaque",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x8: ret"
+  },
+  {
+    "name": "bpf_skb_load_bytes_written4",
+    "accepted": true
+  },
+  {
+    "name": "bpf_skb_load_bytes_suffix_opaque",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x8: ret"
+  },
+  {
+    "name": "bpf_skb_load_bytes_relative_written4",
+    "accepted": true
+  },
+  {
+    "name": "bpf_skb_load_bytes_relative_suffix_opaque",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x9: ret"
+  },
+  {
+    "name": "bpf_probe_read_kernel_str_suffix",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x7: ret"
+  },
+  {
+    "name": "bpf_probe_read_user_str_suffix",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x7: ret"
+  },
+  {
+    "name": "probe_copies_opaque",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x8: ret"
+  },
+  {
+    "name": "probe_copies_defined_prefix",
+    "accepted": true
+  },
+  {
+    "name": "probe_preserves_opaque_copy_suffix",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0xa: ret"
+  },
+  {
+    "name": "all_targets_must_write",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x7: ret"
+  },
+  {
+    "name": "both_probe_targets_write",
+    "accepted": true
+  }
+]

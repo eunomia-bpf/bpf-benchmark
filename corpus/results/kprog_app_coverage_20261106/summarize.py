@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parent
 totals = collections.defaultdict(collections.Counter)
 causes = collections.Counter()
 rows = []
-for phase in ("baseline", "cilium-baseline", "unbounded", "cilium-unbounded", "label", "cilium-label", "finite"):
+for phase in ("baseline", "cilium-baseline", "unbounded", "cilium-unbounded", "label", "cilium-label", "finite", "defined-final", "helper-effects"):
     directory = ROOT / phase
     group = phase.removeprefix("cilium-")
     for line in (directory / "programs.jsonl").read_text().splitlines():
@@ -64,7 +64,10 @@ for phase in ("baseline", "cilium-baseline", "unbounded", "cilium-unbounded", "l
                                 cause = result["stderr"].strip().splitlines()[0]
         counts[status] += 1
         if cause:
-            causes[(group, status, cause)] += 1
+            category = cause.splitlines()[-1]
+            if status == 'generation-failed':
+                category = category.split(' at 0x')[0]
+            causes[(group, status, category)] += 1
         rows.append((app, record["name"], phase, status, cause))
 with (ROOT / "coverage.csv").open("w") as output:
     writer = csv.writer(output, lineterminator="\n")
@@ -73,7 +76,7 @@ with (ROOT / "coverage.csv").open("w") as output:
 lines = ["| Phase | Application | Available artifacts | Generation attempted | Generated | Compile done | Compiled | Artifact accepted | Verifier rejected | Load preparation failed |",
          "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
 apps = sorted(app for group, app in totals if group == "baseline")
-for group in ("baseline", "unbounded", "label", "finite"):
+for group in ("baseline", "unbounded", "label", "finite", "defined-final", "helper-effects"):
     for app in apps:
         c = totals[(group, app)]
         available = totals[("baseline", app)]["total"]

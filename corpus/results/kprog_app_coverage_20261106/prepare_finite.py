@@ -41,7 +41,7 @@ if sys.argv[1]=='prepare':
         source = (pinned[row['app'],Path(row['object']).name] if pinned else
                   Path(row.get('replacement_object',row['object'])))
         if not source.is_file(): raise FileNotFoundError(source)
-        target=PHASE/'input'/row['app']/source.name
+        target=PHASE/'input'/row['app']/Path(row['object']).name
         target.parent.mkdir(parents=True,exist_ok=True)
         target.symlink_to(source)
     print('frozen simulator/includes/generator and linked all1136 inputs')
