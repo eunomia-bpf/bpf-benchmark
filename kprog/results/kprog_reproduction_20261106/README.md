@@ -140,6 +140,25 @@ second entry argument outside the modeled ABI, or whether its preamble is
 meant to materialize `esi` from the ABI struct and does not. Either way the
 corpus arm is reported with that boundary stated, not hidden.
 
+### State reached, 2026-11-06 10:47
+
+The corpus target builds and boots end to end
+(`corpus/results/x86_kvm_corpus_20261106_104647_576649`), and the **baseline
+(eBPF JIT) arm measures**: `phase_done status ok` with one workload record
+for `bcc/set`. The **native arm produces nothing**:
+
+```
+BCC tool capable exited before BPF programs were tracked by shim
+failed to load BPF skeleton 'capable_bpf': -22
+failed to load BPF object: -22
+```
+
+`-22` is EINVAL on the app's own `BPF_PROG_LOAD` after the shim handed it
+on, and `post_rejit.workloads` is empty — so this is the native-loader arm
+only, not app startup and not a general corpus regression. The
+`native/eBPF` ratio the reference quotes needs that arm; the baseline arm
+is available today. Reported to lanes T/F.
+
 Reference `1.349x` is confirmed as the geometric mean of the six per-app
 `native/eBPF` ratios recorded in `kprog/docs/evaluation.md`
 (`1.005, 1.824, 2.358, 1.323, 1.102, 0.958`).
