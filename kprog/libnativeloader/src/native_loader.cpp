@@ -4908,6 +4908,13 @@ SimulatorObject open_simulator_proof(
             fail("open simulator proof map " + name + ": " + std::strerror(errno));
         }
         const auto shape = load_map_info(fd.get());
+        /* Zero is an application-configured declaration, not a zero-capacity
+         * replacement map. Adopt the exact original FD's runtime capacity.
+         */
+        if (!bpf_map__is_internal(map) && !bpf_map__max_entries(map)) {
+            const int err = bpf_map__set_max_entries(map, shape.max_entries);
+            if (err) fail("configure simulator map capacity " + name + ": " + libbpf_error_string(err));
+        }
         if (shape.type != static_cast<uint32_t>(bpf_map__type(map)) ||
             shape.key_size != bpf_map__key_size(map) ||
             shape.value_size != bpf_map__value_size(map) ||

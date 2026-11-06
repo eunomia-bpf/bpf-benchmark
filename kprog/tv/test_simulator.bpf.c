@@ -1,9 +1,12 @@
 #include <linux/bpf.h>
 #include <bpf/bpf_helpers.h>
 
+#ifndef TV_MAP_MAX_ENTRIES
+#define TV_MAP_MAX_ENTRIES 1
+#endif
 struct {
     __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
+    __uint(max_entries, TV_MAP_MAX_ENTRIES);
     __type(key, int);
     __type(value, int);
 } tv_map SEC(".maps");

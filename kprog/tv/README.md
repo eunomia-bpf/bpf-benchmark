@@ -183,7 +183,10 @@ missing-BTF selectors fail; a different full name does not match. This resolves
 real application entries sharing the same 15-byte name, type and bytecode size.
 The explicit BPF entry must have the original program type. `bpf_object__prepare` performs real ELF/CO-RE relocations; referenced
 maps reuse original-program identities with matching layouts, including internal
-maps. Unmatched writable declarations are disabled; referencing one fails.
+maps. A noninternal map declared with zero `max_entries` receives the original
+application map's configured capacity before relocation and FD reuse. The binder
+compares type, key/value sizes and declared nonzero capacity against that FD.
+Unmatched writable declarations are disabled; referencing one fails.
 Internal maps also require the same BTF DATASEC section, byte extent and
 ordered variable names, offsets and sizes. This is checked before
 `bpf_map__reuse_fd` replaces the simulator's map metadata. Raw proof maps from

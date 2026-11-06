@@ -310,3 +310,22 @@ module trees. Source/core outputs from other lanes were not replaced. Full
 per-program TV and its concrete entry witnesses remain active work; the
 conditional composition theorem is unchanged and its trusted kernel binding
 base now includes these context and BTF-prototype checks.
+
+Application-configured proof map capacity
+----------------------------------------
+
+Real application map declarations can have zero max_entries until userspace
+configures the map. The proof binder now sets that noninternal declaration's
+capacity from the exact original application FD before strict shape validation
+and reuse_fd. This addresses the two real BCC capable declarations without
+creating a replacement map or substituting another program.
+
+The actual x86 kernel/C loader regression passes a clang-produced zero-capacity
+proof against a configured original map: bound native execution returns 2 and
+the loaded program retains that exact original map ID. A declared nonzero
+capacity that differs from the original rejects. All prior binding, BTF,
+context, DATASEC, helper/map and readonly tests also pass. Both architecture
+libraries build; kernel/module wire ABI stays at version 2. Sources, both
+capacity variants and native/BPF artifacts are retained in the input archive.
+Updated libraries are separately snapshotted under the lane checkpoint's
+context-v2-map-capacity/ directory for use with the existing matched v2 pair.
