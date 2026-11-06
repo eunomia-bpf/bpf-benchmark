@@ -2,7 +2,7 @@ import KProgFormal.Reference.Memory
 
 /-!
 AArch64 reference semantics, from Arm DDI0602 A64 Base Instructions
-(scalar multiply/divide, shifts, unary, select and byte/extract operations)
+(scalar operations, FMOV bit transfers and byte-vector reductions)
 and shared X[] register access:
 https://documentation-service.arm.com/static/67e40f3398aa3c3b6eea6a85
 Shifted MVN/NEG are also described by Arm 100076_0100 D2.114/D2.115:
@@ -294,9 +294,32 @@ def fmovStep (i : FmovInstruction) (s : State) : Transition State :=
     | .fromVector width dst => writeReg s dst (narrow (s.vector0.setWidth 64) width)
   ⟨{ result with pc := s.pc + 4 }, [], none⟩
 
+inductive ReductionOp | count | unsignedSum
+  deriving DecidableEq, Repr
+
+/-- Population count is a bit walk within each source byte; no generated
+bit-extraction or byte-ladder contract is used by this reference. -/
+def byteCount (value : Byte) : Byte :=
+  (List.range 8).foldl (fun total index => total + if value.getLsbD index then 1 else 0) 0
+
+def vectorBytes (value : BitVec 128) (wide : Bool) : List Byte :=
+  (List.range (if wide then 16 else 8)).map (fun i => (value >>> (8 * i)).setWidth 8)
+
+/-- CNT and UADDLV's 8B/16B variants. UADDLV widens unsigned bytes before
+summing into H0; both operations clear every inactive upper vector bit. -/
+def reductionValue (op : ReductionOp) (wide : Bool) (value : BitVec 128) : BitVec 128 :=
+  let bytes := vectorBytes value wide
+  match op with
+  | .count => littleEndian 128 (bytes.map byteCount)
+  | .unsignedSum => (bytes.foldl (fun (sum : BitVec 16) byte => sum + byte.setWidth 16) 0).setWidth 128
+
+def reductionStep (op : ReductionOp) (wide : Bool) (s : State) : Transition State :=
+  ⟨{ s with vector0 := reductionValue op wide s.vector0, pc := s.pc + 4 }, [], none⟩
+
 inductive Instruction
   | mul (instruction : MulInstruction)
   | fmov (instruction : FmovInstruction)
+  | reduction (op : ReductionOp) (wide : Bool)
   | shift (instruction : ShiftInstruction)
   | logic (instruction : LogicInstruction)
   | keep (instruction : KeepInstruction)
@@ -310,6 +333,7 @@ def step (i : Instruction) (s : State) : Transition State :=
   match i with
   | .mul instruction => mulStep instruction s
   | .fmov instruction => fmovStep instruction s
+  | .reduction op wide => reductionStep op wide s
   | .shift instruction => shiftStep instruction s
   | .logic instruction => logicStep instruction s
   | .keep instruction => keepStep instruction s
@@ -339,6 +363,10 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   let lhs := register (word / 2^5)
   let rhs := register (word / 2^16)
   let addend := register (word / 2^10)
+  let reduction := word &&& 0xbffffc00
+  if reduction = 0x0e205800 ∨ reduction = 0x2e303800 then
+    if dst.val ≠ 0 ∨ lhs.val ≠ 0 then throw "byte reduction vector register is not V0"
+    return .reduction (if reduction = 0x0e205800 then .count else .unsignedSum) ((word / 2^30) % 2 == 1)
   -- FMOV's floating register field is explicit: this state models V0.
   -- Other vector-register fields must never silently alias V0.
   let transfer := word &&& 0xfffffc00

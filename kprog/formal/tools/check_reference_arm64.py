@@ -264,6 +264,25 @@ def main():
         elif dst != 31:
             expected["registers"][dst] = 0x80000001 if word < (1 << 31) else 0x7FF8000080000001
         cases.append((request, expected))
+    # CNT's inactive upper half clears even when it held data; UADDLV
+    # sums unsigned lanes into H0 and clears the rest of the vector.
+    for word, vector, result in [
+            (0x0E205800, 0, 0), (0x4E205800, 0, 0),
+            (0x2E303800, 0, 0), (0x6E303800, 0, 0),
+            (0x0E205800, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF, 0x0808080808080808),
+            (0x4E205800, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF, 0x08080808080808080808080808080808),
+            (0x2E303800, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF, 2040),
+            (0x6E303800, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF, 4080),
+            (0x0E205800, 0xFF007F01030F55AA8040201008040201, 0x0101010101010101),
+            (0x4E205800, 0xFF007F01030F55AA8040201008040201, 0x08000701020404040101010101010101),
+            (0x2E303800, 0xFF007F01030F55AA8040201008040201, 255),
+            (0x6E303800, 0xFF007F01030F55AA8040201008040201, 911)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["vector0"] = vector
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None, vector0=result)
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -276,7 +295,8 @@ def main():
                  0x72C24680, 0x72E24680, 0x72024680, 0x12C24680, 0x12E24680,
                  0x52C24680, 0x52E24680, 0x32824680,
                  0x9E670021, 0x9E660021, 0x1E270021, 0x1E260021,
-                 0x1EE70020, 0x9EAE0001):
+                 0x1EE70020, 0x9EAE0001, 0x0E205801, 0x4E205820,
+                 0x2E303801, 0x6E303820, 0x2E703800, 0x6EB03800):
         request = copy.deepcopy(base)
         request["native_bytes"] = list(word.to_bytes(4, "little"))
         rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
@@ -307,7 +327,7 @@ def main():
     nv = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "nv"), "csel x0,x1,x2,nv")
     al = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "al"), "csel x0,x1,x2,al")
     assert encoder.encode(nv, {}, {}) == encoder.encode(al, {}, {})
-    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV/CNT/UADDLV, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":
