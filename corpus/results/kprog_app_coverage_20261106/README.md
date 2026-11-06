@@ -237,3 +237,32 @@ verification command resumed recorded cases (no duplicate loads were needed):
 See `baseline/verify-final.make.log`. The unbounded and label queues remain
 active; take their next checkpoint after completion rather than relaunching
 active workers.
+
+
+## Recovery and zero-address direct-call correction
+
+The 08:34 UTC container restart stopped the two post-fix compiler queues.
+Completed per-program records survived; neither queue is currently running.
+The completed baseline table above remains unchanged.
+
+The two previously described "self-recursive" `try_preload_arg` failures
+were a native-link relocation bug. The original Tetragon source calls
+`read_reg`; its native implementation starts at `.text` offset zero.
+Reachability discovery skipped that address, and rewriting left the old
+relative call displacement in the moved entry. The proof therefore called
+its own entry instead of `read_reg`. Both zero-address exclusions are removed.
+A regression builds a two-function ELF object with the callee at zero and
+checks that discovery includes it and that the rewritten CALL reaches its
+new, nonzero address.
+
+`taskset -c 8-23 make -f corpus/results/kprog_app_coverage_20261106/Makefile zero-address-call`
+passes all 54 native-link unit tests and regenerates both affected proofs,
+each with `try_preload_arg` and `read_reg` (2,547 native bytes, six relocations).
+`taskset -c 8-23 make -f corpus/results/kprog_app_coverage_20261106/Makefile zero-address-sources`
+generates both simulator sources successfully. This closes their generation
+failure; compilation, verifier acceptance with the actual application ABI/maps,
+and generation-bound execution remain required and are not claimed here.
+Logs: [link/test](zero-address-call.log),
+[source generation](zero-address-sources.log). The
+[artifact archive](zero-address-call/artifacts.tar.gz) retains the replacement
+proof objects, generated C sources and per-program generation records.

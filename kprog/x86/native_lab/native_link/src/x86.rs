@@ -591,9 +591,6 @@ pub(super) fn discover_reachable(elf: &object::File, entry: &SymInfo) -> Result<
                     continue;
                 }
                 let target = insn.near_branch_target();
-                if target == 0 {
-                    continue;
-                }
                 let called = find_decoded_call_target(elf, &sym, target).ok_or_else(|| {
                     anyhow!(
                         "{} calls {:#x} but no symbol covers that address",
@@ -1398,7 +1395,6 @@ pub(super) fn rewrite_x86(
             // objects decode the placeholder as a call to the containing
             // symbol's first byte, so the relocation pre-scan is authoritative.
             if matches!(insn.flow_control(), FlowControl::Call)
-                && original_target != 0
                 && !helper_call_sites.contains_key(&site_key)
             {
                 let target_symbol =
@@ -4131,6 +4127,45 @@ fn build_x86_array_update(spec: &UpdateSiteSpec) -> Result<Vec<Instruction>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn direct_call_to_section_offset_zero_is_relocated() -> Result<()> {
+        // read_reg is first in .text; entry calls it without an ELF relocation.
+        // Treating address zero as "no target" either drops the callee or
+        // leaves a stale call displacement pointing into the relocated entry.
+        let mut object = WriteObject::new(
+            BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
+        let text = object.section_id(StandardSection::Text);
+        object.append_section_data(text, &[
+            0xb8, 42, 0, 0, 0, 0xc3,       // read_reg: mov eax,42; ret
+            0xe8, 0xf5, 0xff, 0xff, 0xff,  // entry: call read_reg (address 0)
+            0x83, 0xc0, 1, 0xc3,           // add eax,1; ret
+        ], 1);
+        for (name, value, size) in [("read_reg", 0, 6), ("entry", 6, 9)] {
+            object.add_symbol(WriteSymbol {
+                name: name.as_bytes().to_vec(), value, size,
+                kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+                section: WriteSymbolSection::Section(text), flags: SymbolFlags::None,
+            });
+        }
+        let bytes = object.write()?;
+        let elf = object::File::parse(bytes.as_slice())?;
+        let entry = find_symbol_by_name(&elf, "entry")?;
+        let included = discover_reachable(&elf, &entry)?;
+        assert_eq!(included.iter().map(|s| s.name.as_str()).collect::<Vec<_>>(),
+                   vec!["entry", "read_reg"]);
+        let linked = rewrite_x86(&elf, &entry, &included,
+            &HashMap::new(), &HashMap::new(), &HashSet::new(), &[],
+            &HashMap::new(), &[], true, true, false)?;
+        let callee = linked.proof_symbols.iter().find(|s| s.name == "read_reg")
+            .ok_or_else(|| anyhow!("linked proof lost read_reg"))?;
+        let instructions = decode_x86(&linked.blob)?;
+        assert_eq!(instructions[0].flow_control(), FlowControl::Call);
+        assert_eq!(instructions[0].near_branch_target(), callee.offset);
+        assert_ne!(callee.offset, 0, "call must not recurse into entry");
+        assert_eq!(&linked.blob[callee.offset as usize..][..6], &[0xb8,42,0,0,0,0xc3]);
+        Ok(())
+    }
 
     fn decode_x86(bytes: &[u8]) -> Result<Vec<Instruction>> {
         let mut decoder = Decoder::with_ip(64, bytes, 0, DecoderOptions::NONE);

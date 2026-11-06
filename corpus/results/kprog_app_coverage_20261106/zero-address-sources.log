@@ -1,0 +1,10 @@
+install -d /workspaces/repository/corpus/results/kprog_app_coverage_20261106/zero-address-call/input/tetragon
+install -m 0644 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/zero-address-call/uprobe.proof.o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/zero-address-call/input/tetragon/bpf_generic_uprobe_v61.try_preload_arg.proof.o
+install -m 0644 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/zero-address-call/multi-uprobe.proof.o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/zero-address-call/input/tetragon/bpf_multi_uprobe_v61.try_preload_arg.proof.o
+make -C /workspaces/repository/kprog/x86 app-proofs-build APP_SIM_PROOF_ARGS='--generate-only --proof-root /workspaces/repository/corpus/results/kprog_app_coverage_20261106/zero-address-call/input --report-dir /workspaces/repository/corpus/results/kprog_app_coverage_20261106/zero-address-call/generation --output-dir /workspaces/repository/kprog/x86/app-coverage-zero-address'
+make[1]: Entering directory '/workspaces/repository/kprog/x86'
+python3 run_app_sim_smoke.py --keep-going --generate-only --proof-root /workspaces/repository/corpus/results/kprog_app_coverage_20261106/zero-address-call/input --report-dir /workspaces/repository/corpus/results/kprog_app_coverage_20261106/zero-address-call/generation --output-dir /workspaces/repository/kprog/x86/app-coverage-zero-address
+generated tetragon_bpf_generic_uprobe_v61_try_preload_arg
+generated tetragon_bpf_multi_uprobe_v61_try_preload_arg
+app proof smoke passed: 2 generated
+make[1]: Leaving directory '/workspaces/repository/kprog/x86'
