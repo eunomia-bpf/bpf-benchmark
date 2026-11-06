@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0967 corrected step 0966: only 2 of the 22 are
+written as case counts; the rest are scenes,
+parameters, insn counts.
+
+
 Step 0966 measured the 31: 9 are asserted by
 check_lean_claims, 22 are oracle sizes bound by their
 own hosts, not the gate.

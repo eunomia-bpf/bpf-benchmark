@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0967 - only two of the twenty-two are case counts
+
+The previous step said the twenty-two figures outside the classifier were sizes
+of independent oracles. That is wrong for most of them: reading what each figure
+is followed by, two are written as a count of cases, two are scene counts, two
+are modeled-case totals, and the rest are a parameter count, an instruction
+count, a pair count, and several figures with no noun after them at all.
+
+One of the two case counts was verified against its host: the x86 memory-logic
+host prints twenty-one thousand five hundred and thirty-six cases, which is the
+figure the paragraph states. That confirms the mechanism for a case count
+without confirming that every one of the twenty-two is one.
+
+So the honest statement is narrower than the previous step made it: thirty-one
+figures are outside the classifier's classes, nine of them appear in the claims
+checker, and of the remaining twenty-two only some are oracle sizes. The rest
+are counts of other things, and which is which was not measured before being
+asserted.
+
+Census unchanged; the characterization is corrected.
+
 ### Step 0966 - nine of the thirty-one are asserted elsewhere
 
 The thirty-one figures the report calls unclassified are not all unheld. Reading
