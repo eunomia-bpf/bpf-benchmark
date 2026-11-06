@@ -10,8 +10,8 @@
  * `== 8` branch consults.
  *
  * Part 2 drives the real body — both directly through `X86_SIM_L_EXEC_SETCC`
- * and through the `X86_OP_SETCC` dispatcher arm — over all 14 accepted
- * condition codes, the two unsupported codes, every destination shift in a
+ * and through the `X86_OP_SETCC` dispatcher arm — over all sixteen
+ * condition codes and out-of-range codes, every destination shift in a
  * dense slice around 8, both register lanes, and every raw flag nibble, while
  * comparing all 16 modeled registers (value and tag) to an independent model
  * of `KPROG_X86_EVAL_CC` + a one-byte little-endian register write.
@@ -77,6 +77,8 @@ static unsigned model_cc_true(unsigned cc, unsigned cf, unsigned zf,
 	case 7U: return (!cf) && (!zf);
 	case 8U: return sf;
 	case 9U: return !sf;
+	case 10U: return 0U; /* These retained route fixtures seed PF=0. */
+	case 11U: return 1U;
 	case 12U: return sf != of;
 	case 13U: return sf == of;
 	case 14U: return zf || (sf != of);
@@ -250,7 +252,8 @@ int main(void)
 		X86_CC_O, X86_CC_NO, X86_CC_B, X86_CC_AE, X86_CC_E,
 		X86_CC_NE, X86_CC_BE, X86_CC_A, X86_CC_S, X86_CC_NS,
 		X86_CC_L, X86_CC_GE, X86_CC_LE, X86_CC_G,
-		10U, 11U, 16U, 0xffU,   /* unsupported / out-of-range */
+		10U, 11U,             /* parity / not-parity */
+		16U, 0xffU,          /* out-of-range */
 	};
 	static const unsigned shift_slice[] = { 0U, 1U, 7U, 8U, 9U, 15U, 16U,
 						0xffU };

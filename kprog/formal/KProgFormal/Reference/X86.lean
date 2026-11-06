@@ -414,6 +414,9 @@ def moveStep (width : ScalarWidth) (dst : ScalarDestination) (src : ScalarSource
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | nop (nextPc : Word)
+  | branch (condition : Option (Fin 16)) (target nextPc : Word)
+  | setcc (condition : Fin 16) (dst : ScalarDestination) (nextPc : Word)
   | arithmetic (width : ScalarWidth) (kind : ArithmeticKind) (dst : ScalarDestination)
       (src : ScalarSource) (nextPc : Word)
   | move (width : ScalarWidth) (dst : ScalarDestination) (src : ScalarSource) (nextPc : Word)
@@ -437,6 +440,14 @@ inductive Instruction
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .nop nextPc => ⟨{ s with pc := nextPc }, [], none⟩
+  | .branch cc target nextPc =>
+      let taken := match cc with | none => true | some code => condition s.rflags code
+      ⟨{ s with pc := if taken then target else nextPc }, [], none⟩
+  | .setcc cc dst nextPc =>
+      match scalarWrite s .w8 dst (if condition s.rflags cc then 1 else 0) with
+      | .error fault => ⟨s, [.fault fault], some fault⟩
+      | .ok (result, events) => ⟨{ result with pc := nextPc }, events, none⟩
   | .arithmetic width kind dst src nextPc => arithmeticStep width kind dst src nextPc s
   | .move width dst src nextPc => moveStep width dst src nextPc s
   | .byteSwap width dst nextPc => swapStep width dst nextPc s
@@ -499,6 +510,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .nop .. | .branch .. | .setcc .. => 0xffffffffffffffff
   | .arithmetic .. => 0xffffffffffffffff
   | .move .. => 0xffffffffffffffff
   | .push .. | .pushImmediate .. | .pushMemory .. | .popMemory .. => 0xffffffffffffffff
@@ -645,6 +657,30 @@ ModRM, SIB and signed displacement. No caller-supplied decode is trusted. -/
 def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   let (p, _, count) := prefixes bytes.toList {} 0
   let first ← byteAt bytes count
+  if first = 0x90 ∧ p.rex % 2 = 0 then
+    return .nop (← fallthrough s (count + 1))
+  if first = 0xeb ∨ first = 0xe9 ∨ (0x70 ≤ first ∧ first ≤ 0x7f) then
+    let size := if first = 0xe9 then 4 else 1
+    let offset ← signedDisplacement bytes (count + 1) size
+    let nextPc ← fallthrough s (count + 1 + size)
+    let cc := if first = 0xeb ∨ first = 0xe9 then none
+      else some (⟨first % 16, Nat.mod_lt _ (by decide)⟩ : Fin 16)
+    return .branch cc (nextPc + offset) nextPc
+  if first = 0x0f then
+    let opcode ← byteAt bytes (count + 1)
+    if opcode = 0x1f then
+      let modrm ← byteAt bytes (count + 2)
+      if (modrm / 8) % 8 != 0 then throw "reserved native NOP extension"
+      let (_, nextPc, _) ← operand bytes s p modrm (count + 3) 0
+      return .nop nextPc
+    if 0x80 ≤ opcode ∧ opcode ≤ 0x8f then
+      let offset ← signedDisplacement bytes (count + 2) 4
+      let nextPc ← fallthrough s (count + 6)
+      return .branch (some ⟨opcode % 16, Nat.mod_lt _ (by decide)⟩) (nextPc + offset) nextPc
+    if 0x90 ≤ opcode ∧ opcode ≤ 0x9f then
+      let modrm ← byteAt bytes (count + 2)
+      let (destination, nextPc, _) ← operand bytes s p modrm (count + 3) 0
+      return .setcc ⟨opcode % 16, Nat.mod_lt _ (by decide)⟩ (scalarDestination p .w8 destination) nextPc
   if first < 0x40 ∧ first % 8 < 6 then
     if let some kind := arithmeticKind (first / 8) then
       let form := first % 8

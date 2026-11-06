@@ -9,7 +9,7 @@
 #include "x86_sim.h"
 #include "../formal/generated/abi_load.h"
 #include "../formal/generated/ptr_add.h"
-#include "../formal/generated/x86_cond.h"
+#include "../formal/generated/x86_full_condition.h"
 #include "../formal/generated/x86_logic_flags.h"
 #include "../formal/generated/x86_sub_flags.h"
 #include "../formal/generated/x86_add_flags.h"
@@ -830,7 +830,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 	} while (0)
 
 #define X86_SIM_L_EVAL_CC(CC)                                               \
-	KPROG_X86_EVAL_CC((CC), __x86_cf, __x86_zf, __x86_sf, __x86_of)
+	KPROG_X86_EVAL_FULL_CC((CC), __x86_cf, __x86_zf, __x86_sf, __x86_of, __x86_pf)
 
 /* The read-dispatch classification (stack read vs. ABI pointer load vs.
  * ordinary load) is the machine-checked KPROG_X86_MEM_READ_SRC contract — the
@@ -1879,7 +1879,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			__x86_l_sc_shift);                                   \
 		X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST),                      \
 			X86_SIM_L_EVAL_CC(                                           \
-				KPROG_X86_SETCC_COND_MATCHED(                               \
+				KPROG_X86_FULL_CONDITION_MATCHED(                            \
 					KPROG_X86_REG_LANE_AUX_PAYLOAD(AUX))),                     \
 			X86_WIDTH_8,                                        \
 			__x86_l_sc_lane == KPROG_X86_SETCC_LANE_HIGH        \

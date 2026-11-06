@@ -9,11 +9,12 @@ from dataclasses import dataclass
 from helper_abi import HELPER_COPY_SOURCES, HELPER_FULL_WRITES, helper_idents, helper_prototypes
 
 FULL = (1 << 64) - 1
-CF, ZF, SF, OF = 1, 2, 4, 8
-ALL_FLAGS = CF | ZF | SF | OF
+CF, ZF, SF, OF, PF, AF = 1, 2, 4, 8, 16, 32
+ALL_FLAGS = CF | ZF | SF | OF | PF | AF
 CC_FLAGS = {'A': CF | ZF, 'AE': CF, 'B': CF, 'BE': CF | ZF,
             'E': ZF, 'NE': ZF, 'G': ZF | SF | OF, 'GE': SF | OF,
-            'L': SF | OF, 'LE': ZF | SF | OF, 'S': SF, 'NS': SF}
+            'L': SF | OF, 'LE': ZF | SF | OF, 'S': SF, 'NS': SF,
+            'O': OF, 'NO': OF, 'P': PF, 'NP': PF}
 CALLER_SAVED = ('rax', 'rcx', 'rdx', 'rsi', 'rdi', 'r8', 'r9', 'r10', 'r11')
 
 
@@ -125,6 +126,16 @@ def check_definedness(insns, targets, exit_addr, decode):
         opaque, pointers = dict(incoming.opaque), dict(incoming.pointers)
         flags = incoming.flags
         constants = list(incoming.constants)
+
+        def shift_count(operand, width):
+            if decode.is_int(operand):
+                value = decode.parse_int(operand)
+            else:
+                reg = ri(operand)
+                value = incoming.constants[reg[0]] if reg else None
+                if value is not None:
+                    value >>= reg[2]
+            return None if value is None else value & (63 if width == 64 else 31)
 
         def write(operand, value=None, pointer=False, constant=None):
             parsed = ri(operand)
@@ -289,13 +300,22 @@ def check_definedness(insns, targets, exit_addr, decode):
                     result=value >> count
                     if op=='shr' or value & (1 << (width-1)): result |= fill
                 flags=(SF if result & (1 << (width-1)) else 0) | (ZF if result==full else 0)
-                bit=width-count if op=='shl' else count-1
-                if count < width and value & (1 << bit): flags |= CF
+                if result & 255 == 255: flags |= PF
+                bit=width-count if op=='shl' else min(count-1,width-1)
+                if (count < width or op=='sar') and value & (1 << bit): flags |= CF
                 if count==1 and (op=='sar' or value & (1 << (width-1))):
                     if op!='shl' or flags & CF: flags |= OF
             else: result=value
             if ri(args[0]): write(args[0],result)
             else: store(args[0],width,result)
+        elif op in {'shld','shrd'} and ri(args[0]) and ri(args[0])[1] == 16 and (
+                shift_count(args[-1],16) is None or shift_count(args[-1],16) > 16):
+            # A masked count17..31 makes the result and all six status flags
+            # undefined. Do not admit the simulator's particular chosen value
+            # as an ISA guarantee; allow a later overwrite before observation.
+            if not decode.is_int(args[-1]): need(incoming,args[-1],where)
+            write(args[0],0)
+            flags = 0
         elif op in {'add','sub','adc','sbb','cmp','test'}:
             width = ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0])
             full = (1 << width)-1
@@ -305,14 +325,19 @@ def check_definedness(insns, targets, exit_addr, decode):
             known = full if zero else values[0] & values[1] & full
             if op=='test':
                 # TEST always clears CF/OF, even with unspecified data bits.
+                for arg in args:
+                    if decode.is_int(arg): known |= ~decode.parse_int(arg) & full
                 flags = CF | OF | (SF if known & (1 << (width-1)) else 0)
                 if known==full: flags |= ZF
+                if known & 255 == 255: flags |= PF
             else:
                 # An unknown input bit may carry/borrow into every higher bit.
                 # Lower known bits survive and may be the only lanes observed.
                 unknown = full ^ known
                 result = full if not unknown else (unknown & -unknown)-1
-                flags = ALL_FLAGS if result==full else 0
+                flags = (CF | ZF | SF | OF) if result==full else 0
+                if result & 255 == 255: flags |= PF
+                if result & 15 == 15: flags |= AF
                 if op!='cmp':
                     old = alias[ri(args[0])[0]] if ri(args[0]) else False
                     if ri(args[0]): write(args[0],result,constant=0 if zero else None)
@@ -351,18 +376,21 @@ def check_definedness(insns, targets, exit_addr, decode):
                 write(args[0],constant=0 if zero else None)
             if args and decode.is_mem(args[0]) and op!='bt':
                 store(args[0],decode.operand_width(args[0]))
-            if op in {'xor','and','or','neg','xadd','bzhi','popcnt','andn'}:
+            if op in {'neg','xadd','popcnt'}:
                 flags = ALL_FLAGS
-            elif op in {'inc','dec'}: flags = (flags & CF) | ZF | SF | OF
+            elif op in {'xor','and','or'}: flags = CF | ZF | SF | OF | PF
+            elif op in {'bzhi','andn'}: flags = CF | ZF | SF | OF
+            elif op in {'inc','dec'}: flags = (flags & CF) | ZF | SF | OF | PF | AF
             elif op in {'mul','imul'}: flags = CF | OF
             elif op in {'div','idiv'}: flags = 0
             elif op=='bt': flags = (flags & ZF) | CF
             elif op in {'shl','shr','sar','shld','shrd','rol','ror'}:
-                count = decode.parse_int(args[-1]) & (63 if ri(args[0]) and ri(args[0])[1]==64 else 31) if decode.is_int(args[-1]) else None
+                width = ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0])
+                count = shift_count(args[-1],width)
                 if count != 0:
                     new = CF | (OF if count==1 else 0)
-                    if op not in {'rol','ror'}: new |= ZF | SF
-                    else: new |= flags & (ZF|SF)
+                    if op not in {'rol','ror'}: new |= ZF | SF | PF
+                    else: new |= flags & (ZF|SF|PF|AF)
                     flags = flags & new if count is None else new
 
         state = State(tuple(bits),tuple(alias),flags,opaque,pointers,tuple(constants))

@@ -59,6 +59,8 @@ static unsigned model_cc_true(unsigned cc, unsigned cf, unsigned zf,
 	case 7U: return !cf && !zf;
 	case 8U: return sf;
 	case 9U: return !sf;
+	case 10U: return 0U; /* These retained route fixtures seed PF=0. */
+	case 11U: return 1U;
 	case 12U: return sf != of;
 	case 13U: return sf == of;
 	case 14U: return zf || (sf != of);
@@ -169,7 +171,8 @@ int main(void)
 		X86_CC_O, X86_CC_NO, X86_CC_B, X86_CC_AE, X86_CC_E,
 		X86_CC_NE, X86_CC_BE, X86_CC_A, X86_CC_S, X86_CC_NS,
 		X86_CC_L, X86_CC_GE, X86_CC_LE, X86_CC_G,
-		10U, 11U, 16U, 0xffU,   /* unsupported / out-of-range */
+		10U, 11U,             /* parity / not-parity */
+		16U, 0xffU,          /* out-of-range */
 	};
 	/* Forward edges, equal edges, and backward edges in the same sweep. */
 	static const unsigned long pairs[][2] = {

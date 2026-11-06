@@ -21,7 +21,7 @@ from helper_abi import helper_idents, is_helper_symbol
 from x86_abi import check_definedness
 
 from generated_x86_alu_decode import ALU_AUX
-from generated_x86_cc_decode import CC_AUX
+from generated_x86_full_condition import CC_AUX
 from generated_x86_opcode import X86_OPCODE, X86_OPCODE_NAME
 from generated_x86_reg_lane_aux import c_reg_lane_aux
 from generated_x86_specialization import (X86_SPECIALIZATION_AUX_CALL,
@@ -991,19 +991,21 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
             raise ValueError(f"cannot encode {insn.raw}")
         dst = reg_info(ops[0])
         src = reg_info(ops[1])
-        if dst is None or src is None or not is_int(ops[2]):
+        if dst is None or src is None or not (is_int(ops[2]) or ops[2] == "cl"):
             raise ValueError(f"cannot encode {insn.raw}")
         return enc("X86_OP_SHLD_IMM", dst=dst[0], src=src[0],
-                   flags=WIDTH_CONST[dst[1]], imm=c_u64(parse_int(ops[2])))
+                   flags=WIDTH_CONST[dst[1]], imm=c_u64(parse_int(ops[2])) if is_int(ops[2]) else
+                   "X86_SIM_L_READ_REG_WIDTH_SHIFT(X86_RCX, X86_WIDTH_8, 0)")
     if op == "shrd":
         if len(ops) != 3:
             raise ValueError(f"cannot encode {insn.raw}")
         dst = reg_info(ops[0])
         src = reg_info(ops[1])
-        if dst is None or src is None or not is_int(ops[2]):
+        if dst is None or src is None or not (is_int(ops[2]) or ops[2] == "cl"):
             raise ValueError(f"cannot encode {insn.raw}")
         return enc("X86_OP_SHRD_IMM", dst=dst[0], src=src[0],
-                   flags=WIDTH_CONST[dst[1]], imm=c_u64(parse_int(ops[2])))
+                   flags=WIDTH_CONST[dst[1]], imm=c_u64(parse_int(ops[2])) if is_int(ops[2]) else
+                   "X86_SIM_L_READ_REG_WIDTH_SHIFT(X86_RCX, X86_WIDTH_8, 0)")
 
     raise ValueError(f"unsupported mnemonic: {insn.raw}")
 

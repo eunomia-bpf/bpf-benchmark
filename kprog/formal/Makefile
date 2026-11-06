@@ -83,6 +83,7 @@ check:
 	python3 tools/generate_arm64_vreg_field_spec.py --check
 	python3 tools/generate_arm64_write_arm_spec.py --check
 	python3 tools/generate_x86_cond_spec.py --check
+	python3 tools/generate_x86_full_condition_spec.py --check
 	python3 tools/generate_x86_cc_decode_spec.py --check
 	python3 tools/generate_x86_logic_flags_spec.py --check
 	python3 tools/generate_x86_width_spec.py --check
@@ -155,11 +156,15 @@ check:
 	python3 tools/check_reference.py
 	python3 tools/check_reference_x86_scalar.py
 	python3 tools/check_reference_x86_arithmetic.py
+	python3 tools/check_x86_flag_definedness.py
+	python3 tools/check_reference_x86_condition.py
 	python3 tools/check_x86_memory_widths.py
 	python3 tools/check_reference_arm64.py
 	python3 tools/check_no_sorry.py --check
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I. -I../x86 -I../../vendor/libbpf/src oracles/test_x86_six_flags_host.c -o build/test_x86_six_flags_host
 	./build/test_x86_six_flags_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I. -I../x86 -I../../vendor/libbpf/src oracles/test_x86_full_condition_host.c -o build/test_x86_full_condition_host
+	./build/test_x86_full_condition_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_cond_host.c -o build/test_arm64_cond_host
 	./build/test_arm64_cond_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_branch_emit_host.c -o build/test_x86_branch_emit_host

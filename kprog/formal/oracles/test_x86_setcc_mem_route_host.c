@@ -76,7 +76,7 @@ static __u8 synthetic(unsigned i)
 
 /* The condition expression table, a restatement of `KPROG_X86_EVAL_CC`'s
  * boolean arms from the raw codes. `cc` is compared as the promoted word, so a
- * value outside the 14-code table matches no arm and yields the C default 0. */
+ * value outside the sixteen-code table matches no arm and yields the C default 0. */
 static unsigned model_cc_true(unsigned cc, unsigned cf, unsigned zf,
 			      unsigned sf, unsigned of)
 {
@@ -91,6 +91,8 @@ static unsigned model_cc_true(unsigned cc, unsigned cf, unsigned zf,
 	case 7U: return (!cf) && (!zf);
 	case 8U: return sf;
 	case 9U: return !sf;
+	case 10U: return 0U; /* These retained route fixtures seed PF=0. */
+	case 11U: return 1U;
 	case 12U: return sf != of;
 	case 13U: return sf == of;
 	case 14U: return zf || (sf != of);
@@ -435,7 +437,8 @@ int main(void)
 		X86_CC_O, X86_CC_NO, X86_CC_B, X86_CC_AE, X86_CC_E,
 		X86_CC_NE, X86_CC_BE, X86_CC_A, X86_CC_S, X86_CC_NS,
 		X86_CC_L, X86_CC_GE, X86_CC_LE, X86_CC_G,
-		10U, 11U, 16U, 0xffU,   /* unsupported / out-of-range */
+		10U, 11U,             /* parity / not-parity */
+		16U, 0xffU,          /* out-of-range */
 	};
 	static const unsigned dsts[3] = { X86_RBX, X86_RSP, X86_REG_NONE };
 	static const unsigned mw_codes[2] = { 0U, X86_WIDTH_8 };

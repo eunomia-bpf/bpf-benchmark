@@ -93,6 +93,8 @@
 #define X86_CC_A 7U
 #define X86_CC_S 8U
 #define X86_CC_NS 9U
+#define X86_CC_P 10U
+#define X86_CC_NP 11U
 #define X86_CC_L 12U
 #define X86_CC_GE 13U
 #define X86_CC_LE 14U

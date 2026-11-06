@@ -12,8 +12,8 @@ structure X86Flags where
 
 abbrev X86Cond := GeneratedX86Cond.Cond
 
-/-- Independent architectural statement of every x86 condition supported by
-the native simulator. Parity conditions are outside the accepted subset. -/
+/-- Preserved four-flag condition projection. The PF-aware wrapper and its
+all-sixteen-code canonical refinement live in Refinement/X86Condition. -/
 def x86CondSpec (flags : X86Flags) : X86Cond -> Bool
   | .o => flags.of
   | .no => !flags.of

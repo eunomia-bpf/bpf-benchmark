@@ -558,6 +558,10 @@ static unsigned eval_cc_oracle(unsigned cc, __u8 cf, __u8 zf, __u8 sf, __u8 of)
 		return (unsigned)bsf;
 	case X86_CC_NS:
 		return (unsigned)!bsf;
+	case X86_CC_P:
+		return 0U; /* This retained fixture seeds PF=0. */
+	case X86_CC_NP:
+		return 1U;
 	case X86_CC_L:
 		return (unsigned)(bsf != bof);
 	case X86_CC_GE:
@@ -596,6 +600,10 @@ static unsigned setcc_matched_oracle(unsigned cc)
 		return 8U;
 	case X86_CC_NS:
 		return 9U;
+	case X86_CC_P:
+		return 10U;
+	case X86_CC_NP:
+		return 11U;
 	case X86_CC_L:
 		return 12U;
 	case X86_CC_GE:

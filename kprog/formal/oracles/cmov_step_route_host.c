@@ -85,6 +85,8 @@ static unsigned model_cc_true(unsigned cc, unsigned cf, unsigned zf,
 	case X86_CC_A:  return !cf && !zf;
 	case X86_CC_S:  return sf;
 	case X86_CC_NS: return !sf;
+	case 10U: return 0U; /* These retained route fixtures seed PF=0. */
+	case 11U: return 1U;
 	case X86_CC_L:  return sf != of;
 	case X86_CC_GE: return sf == of;
 	case X86_CC_LE: return zf || (sf != of);

@@ -26,6 +26,13 @@ six status flags, incoming carry/borrow, byte lanes, native immediates, CMP
 without data writeback, and ordered read/write faults. PF uses independent
 low-byte parity and AF uses widened nibble arithmetic in the reference;
 production C macros are checked against an independent integer oracle.
+All sixteen native conditions refine the reference, including PF, through
+CMOV, SETcc and direct branches. SETcc includes high-byte/REX destinations,
+exact one-byte stores and write faults; CMOV retains eager read faults.
+Native branch displacement decoding, PC wrap and ordinary NOPs are covered.
+The encoder admits defined parity uses and rejects observations of undefined
+flags/results, including16-bit SHLD/SHRD counts17..31. CL-count forms use the
+actual count register, including destination aliases, and compile to BPF.
 The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary, logical-register, MOVK, move-immediate, register-move, all32 SIMD/GPR bit-transfer (FMOV), byte-vector reduction (CNT/UADDLV), conditional-compare (CCMP), ADD/SUB immediate/shifted-register/extended-register, NOP, ordinary-branch, scalar immediate-memory and LDP/STP signed-offset
 families connect through their modules in `Refinement/`, including native
 aliases, all raw NZCV predicates, ZR/SP separation including MOV destinations, legal extract immediates,
