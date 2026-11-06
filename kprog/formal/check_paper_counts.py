@@ -5014,6 +5014,13 @@ def main() -> None:
     # them a banner or a sequence check holds.
     figs_total, banner_bound, stated, rest = figure_coverage(
         pathlib.Path(args.log))
+    # The population must consist of figures: one that does not occur in
+    # the text is a pattern artifact, which the counts above would then be
+    # describing rather than the section.
+    _flat = re.sub(r"\s+", " ", pathlib.Path(args.section).read_text())
+    _flat = _flat.replace("\\brk", "").replace("{,}", ",")
+    _flat = re.sub(r"\\\{\d[\d,]*(?:,\d[\d,]*)*\\\}", "", _flat)
+    problems.extend(population_check(_flat, rest[0]))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
@@ -5075,6 +5082,29 @@ def main() -> None:
               f"{len(ISA)}-way split over "
               f"{sum(n for n, _ in buckets.values())} banners, and the "
               "section's own figures against each other")
+
+
+def population_check(flat: str, figs: set) -> list[str]:
+    """Figures in the population that do not occur in the text.
+
+    A pattern can admit something that is not a figure: a macro name whose
+    widths sit inside TeX-escaped braces reads as one large numeral. The
+    test is the reverse of the usual one -- for every figure the pattern
+    produced, the text must contain it in one of the three forms it can be
+    written in.
+
+    The forms matter: a figure may be plain, comma-grouped, or zero-padded,
+    and a pattern for one reports the other two as absent. Getting that
+    wrong here reports real figures as artifacts.
+    """
+    out = []
+    for v in sorted(figs):
+        grouped = "{:,}".format(v)
+        if not re.search(r"(?<![\w.])(%s|0*%d)(?![\w])"
+                         % (re.escape(grouped), v), flat):
+            out.append("%d is in the figure population and does not occur "
+                       "in the text" % v)
+    return out
 
 
 def self_test() -> int:

@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0964 - the population check runs with the run
+
+The check that every figure occurs in the text was written by hand once, in the
+step that removed a macro name from the population. It is now part of the run,
+so a pattern that starts admitting something that is not a figure fails here
+rather than inflating the population the other counts are measured against.
+
+The check reads the population the same way the run does, and requires each
+figure to appear in one of the three forms it can be written in. That last part
+is what makes it usable: a pattern for one form reports real figures as
+artifacts, and the earlier hand check did exactly that nine times.
+
+Verified by the run passing on the current section, whose population is four
+hundred and sixty-eight figures, and by the artifact the previous step removed
+no longer appearing in it. Census unchanged; one run-time invariant is added.
+
 ### Step 0963 - every figure has an occurrence, verified
 
 The removal of a false figure was verified by the same direction that found it:
