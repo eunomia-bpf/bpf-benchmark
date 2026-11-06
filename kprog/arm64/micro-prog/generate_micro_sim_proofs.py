@@ -62,6 +62,7 @@ class NativeInsn:
     raw: str
     reloc_symbol: str | None = None
     reloc_addend: int = 0
+    source_pointer: tuple[bool, str] | None = None
 
 
 @dataclass(frozen=True)
@@ -409,6 +410,8 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
     if op == "adrp":
         if not insn.reloc_symbol:
             raise ValueError(f"unsupported adrp without relocation: {insn.raw}")
+        if insn.source_pointer is not None:
+            return Encoded("ARM64_OP_ADRP_GOT", reg_const(ops[0]), imm=c_ptr_u64(insn.source_pointer[1]))
         if insn.reloc_symbol in rodata_idents:
             return Encoded(
                 "ARM64_OP_ADRP_RODATA",
@@ -864,6 +867,14 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
                 reloc_idents: dict[str, str]) -> None:
     lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
     op = insn.mnemonic
+    if insn.source_pointer is not None and op == "ldr":
+        mem = parse_mem(insn.operands, 1)
+        if reg_width(insn.operands[0]) != 8 or mem.index != "ARM64_REG_NONE" or mem.offset or mem.flags or insn.reloc_addend:
+            raise ValueError(f"source-map GOT load must retain its exact base: {insn.raw}")
+        value, _ = insn.source_pointer
+        tag = "ARM64_SIM_TAG_MAP_VALUE" if value else "ARM64_SIM_TAG_MAP_PTR"
+        lines.append(f"\tARM64_SIM_L_WRITE_REG_PTR_TAG({reg_const(insn.operands[0])}, ARM64_SIM_L_READ_REG_PTR({mem.base}), {tag});")
+        return
     if op.startswith("b."):
         target = branch_target(insn.operands[0])
         lines.append(f"\tARM64_SIM_A64_JCC({COND[op.split('.', 1)[1]]}, 0x{insn.addr:x}, 0x{target:x}, {label(target)});")
@@ -920,12 +931,37 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
                    rodata16: dict[str, bytes | tuple[int, int]] | None = None,
                    linked_exit: bool = False, program_section: str | None = None,
                    original_source: Path | None = None,
-                   original_symbols: set[str] | None = None) -> str:
+                   original_symbols: set[str] | None = None,
+                   source_map_bindings: list[dict] | None = None) -> str:
     if (original_source is None) != (original_symbols is None):
         raise ValueError("original source and ELF-defined symbol set must be supplied together")
     rodata16 = {symbol: value for symbol, value in (rodata16 or {}).items()
                 if original_symbols is None or symbol not in original_symbols}
+    source_map_bindings = source_map_bindings or []
+    source_pointers = {}
+    proof_symbols = set()
+    for binding in source_map_bindings:
+        if set(binding) != {"native_symbol", "source_insn", "proof_symbol", "kind", "value_offset"}:
+            raise ValueError("source-map binding fields must be explicit")
+        native, proof = binding["native_symbol"], binding["proof_symbol"]
+        if any(not isinstance(item, str) or re.fullmatch(r"[A-Za-z_]\w*", item) is None for item in (native, proof)):
+            raise ValueError("source-map symbols must be C identifiers")
+        if native in source_pointers or proof in proof_symbols or type(binding["kind"]) is not int or binding["kind"] not in {1, 2}:
+            raise ValueError("duplicate source-map symbol or invalid source kind")
+        if type(binding["source_insn"]) is not int or binding["source_insn"] < 0:
+            raise ValueError("source-map instruction index must be nonnegative")
+        offset = binding["value_offset"]
+        if type(offset) is not int or not 0 <= offset <= 0xffffffff or (binding["kind"] == 1 and offset):
+            raise ValueError("source-map value offset is invalid")
+        source_pointers[native] = (binding["kind"] == 2, f"({proof} + {offset}ULL)")
+        proof_symbols.add(proof)
+    functions = OrderedDict((fn, [replace(insn, source_pointer=source_pointers[insn.reloc_symbol])
+        if insn.reloc_symbol in source_pointers else insn for insn in body]) for fn, body in functions.items())
     all_insns = [insn for fn in functions.values() for insn in fn]
+    if {insn.reloc_symbol for insn in all_insns} & source_pointers.keys() != source_pointers.keys():
+        raise ValueError("source-map binding has no native address relocation")
+    if any(insn.source_pointer is not None and insn.mnemonic not in {"adrp", "ldr"} for insn in all_insns):
+        raise ValueError("source-map binding requires an explicit GOT address/load pair")
     all_addrs = {insn.addr for insn in all_insns}
     next_by_addr = {
         insns[index].addr: insns[index + 1].addr
@@ -977,6 +1013,13 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
     if prelude:
         lines.append(prelude.rstrip())
         lines.append("")
+    if source_map_bindings:
+        for binding in source_map_bindings:
+            lines.append(f'extern __u8 {binding["proof_symbol"]}[] __ksym;')
+        objects = [{key: binding[key] for key in ("native_symbol", "source_insn", "proof_symbol")}
+                   for binding in source_map_bindings]
+        metadata = json.dumps(dict(version=1, objects=objects), separators=(",", ":"))
+        lines.append('static const char __arm64_source_map_metadata[] SEC(".native_lab.source_maps") = ' + json.dumps(metadata) + ';')
     rodata_idents = rodata_ident_map(rodata16)
     rodata_objects = []
     for index, (symbol, ident) in enumerate(rodata_idents.items()):
@@ -1003,27 +1046,12 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         and insn.reloc_symbol not in rodata_idents
         and not is_helper_symbol(insn.reloc_symbol)
         and insn.reloc_symbol not in {"memcpy", "memset"}
+        and insn.reloc_symbol not in source_pointers
     })
     source_maps = set(original_symbols or ()) | set(re.findall(r'\b([A-Za-z_]\w*)\s+SEC\(\s*"\.maps"\s*\)', prelude))
-    if (prelude or original_source is not None) and set(map_symbols) - source_maps:
+    if set(map_symbols) - source_maps:
         raise ValueError(f"native relocation lacks an original map declaration: {sorted(set(map_symbols) - source_maps)}")
-    reloc_idents = {
-        symbol: symbol if symbol in source_maps else c_ident("__arm64_reloc", symbol, index)
-        for index, symbol in enumerate(map_symbols)
-    }
-    for map_symbol in map_symbols:
-        if map_symbol in source_maps:
-            continue
-        map_ident = reloc_idents[map_symbol]
-        lines.extend([
-            "struct {",
-            "\t__uint(type, BPF_MAP_TYPE_ARRAY);",
-            "\t__uint(max_entries, 1);",
-            "\t__type(key, __u32);",
-            "\t__type(value, __u64);",
-            f"}} {map_ident} SEC(\".maps\");",
-            "",
-        ])
+    reloc_idents = {symbol: symbol for symbol in map_symbols}
     lines.extend([
         section,
         f"int {name}_arm64_sim_xdp({ctx}ctx)",

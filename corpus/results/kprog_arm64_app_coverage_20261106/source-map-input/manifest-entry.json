@@ -1,0 +1,18 @@
+{
+  "program": "",
+  "source_bytecode_hex": "182100000000000000000000100000007a0100002a000000b7000000000000009500000000000000",
+  "native_object": "/cases/source_map.native.o",
+  "symbol": "bpf_main",
+  "simulator_object": "/cases/source_map.bpf.o",
+  "simulator_program": "source_map_arm64_sim_xdp",
+  "source_map_fd_sites": [
+    0
+  ],
+  "source_map_bindings": [
+    {
+      "native_symbol": "__native_source_map_0",
+      "source_insn": 0
+    }
+  ],
+  "prog_type": 1
+}

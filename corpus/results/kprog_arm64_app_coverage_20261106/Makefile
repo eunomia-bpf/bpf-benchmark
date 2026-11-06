@@ -513,6 +513,30 @@ startup-arm64-install:
 startup-arm64-collect:
 	python3 $(HERE)/startup_arm64.py $(HERE)/$(PHASE) collect
 
+.PHONY: source-map-arm64-build
+source-map-arm64-build:
+	python3 $(HERE)/source_map_arm64.py $(HERE)/$(PHASE)
+
+.PHONY: source-map-arm64-check
+source-map-arm64-check:
+	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static -D__EXPORTED_HEADERS__ \
+		-I$(ROOT)/vendor/linux-framework/include/uapi -I$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+		$(HERE)/source_map_probe.cpp /workspaces/.agent-state/kprog-lanes/T/context-v2-source-map/arm64/libnative_loader.a \
+		$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+		-L$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -o $(HERE)/$(PHASE)/source-map-probe
+	python3 $(HERE)/source_map_arm64.py $(HERE)/$(PHASE) package $(BASE_INITRAMFS)
+	install -d $(HERE)/$(PHASE)/verify
+	taskset -c 12-15 timeout 600 qemu-system-aarch64 -M virt -cpu max -smp 2 -m 2048 -nographic -no-reboot \
+		-kernel /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/Image -initrd $(BUILD)/initramfs.cpio.gz \
+		-fsdev local,id=results,path=$(HERE)/$(PHASE)/verify,security_model=none \
+		-device virtio-9p-device,fsdev=results,mount_tag=results \
+		-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >$(HERE)/$(PHASE)/qemu.log 2>&1
+	test "$$(cat $(HERE)/$(PHASE)/verify/guest-status)" = 0
+
+.PHONY: source-map-arm64-install
+source-map-arm64-install:
+	python3 $(HERE)/source_map_arm64.py $(HERE)/$(PHASE) install
+
 .PHONY: entry-abi-build
 entry-abi-build: direct-header-generate
 	python3 $(HERE)/entry_abi.py $(HERE)/$(PHASE) $(ENTRY_ABI_ARGS)

@@ -1,0 +1,32 @@
+[
+  {
+    "case": "missing original map identity",
+    "rejected": true,
+    "error": "native relocation lacks an original map declaration: ['__native_source_map_0']"
+  },
+  {
+    "case": "invalid source kind",
+    "rejected": true,
+    "error": "duplicate source-map symbol or invalid source kind"
+  },
+  {
+    "case": "boolean source kind",
+    "rejected": true,
+    "error": "duplicate source-map symbol or invalid source kind"
+  },
+  {
+    "case": "negative source offset",
+    "rejected": true,
+    "error": "source-map value offset is invalid"
+  },
+  {
+    "case": "overflow source offset",
+    "rejected": true,
+    "error": "source-map value offset is invalid"
+  },
+  {
+    "case": "duplicate source identity",
+    "rejected": true,
+    "error": "duplicate source-map symbol or invalid source kind"
+  }
+]

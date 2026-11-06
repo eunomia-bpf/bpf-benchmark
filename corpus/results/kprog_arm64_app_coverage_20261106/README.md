@@ -806,3 +806,13 @@ before an additional tracing probe and seven runtime-FD map-value probes
 failed. All104 startup attempts and exact packaged inputs are retained. These
 additional source-map/startup artifacts are being integrated into the next
 runtime; no native workload counter comparison is claimed for this run.
+
+## Source-site map-value binding on ARM
+
+[The actual BCC global-data probe now passes](source-map-result/README.md)
+through native compilation, simulator generation and bound QEMU execution.
+Source and native write42 at16 with generation1, unchanged neighboring bytes
+and no map reset. Erasing the proof offset rejects before execution. Explicit
+source-site metadata replaces invented map declarations; missing original
+identity fails generation. All29 original micro cases recompile and pass full-system QEMU. The replay
+archive includes the matched built kernel/module/loader and Spark KVM command.
