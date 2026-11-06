@@ -1,0 +1,7 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build-arm64
+aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static -D__EXPORTED_HEADERS__ \
+	-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+	capture_context_init.cpp ../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+	-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -o build-arm64/capture-context
+make: Leaving directory '/workspaces/repository/kprog/tv'

@@ -423,3 +423,56 @@ build/context-helper-%.bpf.o: test_contextual_helpers.bpf.c
 	clang -O2 -g -target bpf -DTV_CONTEXT_HELPER=$* -I../../vendor/libbpf/include/uapi \
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		-I/usr/include/x86_64-linux-gnu -c $< -o $@
+
+build-arm64/capture-context: capture_context_init.cpp capture_context.cpp
+	install -d build-arm64
+	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static -D__EXPORTED_HEADERS__ \
+		-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+		$< ../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+		-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -o $@
+
+.PHONY: simple-context-kernel-check-arm64
+simple-context-kernel-check-arm64: build-arm64/capture-context
+	test -s build/simple-arm64/simple.bpf.o
+	install -d build-arm64/context-initramfs/capture
+	cp build-arm64/capture-context build-arm64/context-initramfs/init
+	cp build/simple-arm64/simple.bpf.o build-arm64/context-initramfs/simple.bpf.o
+	cd build-arm64/context-initramfs && find . -print0 | cpio --null -o --format=newc > ../context-initramfs.cpio
+	timeout 180 taskset -c 8-11 qemu-system-aarch64 -M virt -cpu cortex-a72 \
+		-accel tcg,thread=multi -smp 2 -m 2048 -nographic -no-reboot \
+		-kernel build-kernel-arm64/arch/arm64/boot/Image \
+		-initrd build-arm64/context-initramfs.cpio -append 'console=ttyAMA0 rdinit=/init panic=1' \
+		> build-arm64/context-kernel.log 2>&1
+	cat build-arm64/context-kernel.log
+	rg -q '^actual ARM kernel context capture: PASS' build-arm64/context-kernel.log
+	python3 extract_arm64_context.py
+
+.PHONY: exclusive-runtime-arm64
+exclusive-runtime-arm64:
+	$(MAKE) -C ../../vendor/linux-framework O=$(CURDIR)/build-kernel-arm64 \
+		ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j8 vmlinuz.efi modules
+	cp build-kernel-arm64/vmlinux.symvers build-kernel-arm64/Module.symvers
+	$(MAKE) -C build-kernel-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+		M=$(abspath ../../kinsn/module/arm64) MO=$(CURDIR)/build-arm64/all-exclusive modules
+	$(MAKE) -C build-kernel-arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+		INSTALL_MOD_PATH=$(CURDIR)/build-arm64/exclusive-stock modules_install
+
+build-arm64/all-modules-init: arm64_all_modules_init.c
+	install -d build-arm64
+	aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -static $< -o $@
+
+.PHONY: kernel-check-arm64-all
+kernel-check-arm64-all: build-arm64/all-modules-init build-arm64/test-binding-kernel
+	install -d build-arm64/all-initramfs/sys build-arm64/all-initramfs/proc build-arm64/all-initramfs/dev build-arm64/all-initramfs/kinsn
+	cp build-arm64/all-modules-init build-arm64/all-initramfs/init
+	cp build-arm64/test-binding-kernel build-arm64/all-initramfs/test-binding-kernel
+	cp build-arm64/all-exclusive/*.ko build-arm64/all-initramfs/kinsn/
+	cp build-arm64/all-exclusive/bpf_arm64_native_lab.ko build-arm64/all-initramfs/module.ko
+	cd build-arm64/all-initramfs && find . -print0 | cpio --null -o --format=newc > ../all-initramfs.cpio
+	timeout 180 taskset -c 8-11 qemu-system-aarch64 -M virt -cpu cortex-a72 \
+		-accel tcg,thread=multi -smp 2 -m 2048 -nographic -no-reboot \
+		-kernel build-kernel-arm64/arch/arm64/boot/Image \
+		-initrd build-arm64/all-initramfs.cpio -append 'console=ttyAMA0 rdinit=/init panic=1' \
+		> build-arm64/all-kernel.log 2>&1
+	cat build-arm64/all-kernel.log
+	rg -q '^kernel binding regression: PASS' build-arm64/all-kernel.log

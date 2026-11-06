@@ -18,7 +18,7 @@ static void write(const std::string &path, const void *bytes, size_t size)
     if (!file) throw std::runtime_error("write " + path);
 }
 
-int main(int argc, char **argv)
+static int capture_context_main(int argc, char **argv)
 {
     try {
         if (argc != 1 && argc != 3) throw std::runtime_error("expected optional object and output directory");
@@ -64,4 +64,9 @@ int main(int argc, char **argv)
         std::fprintf(stderr, "%s\n", error.what());
         return 1;
     }
+    return 0;
 }
+
+#ifndef TV_CONTEXT_INIT
+int main(int argc, char **argv) { return capture_context_main(argc, argv); }
+#endif

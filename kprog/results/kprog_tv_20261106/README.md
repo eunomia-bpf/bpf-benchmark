@@ -736,3 +736,37 @@ failed compilation; its raw log is retained before the corrected public
 proof-insns/proof-object interface run. Full application replay is performed
 by C/A with their real startup captures; these controls alone make no claim
 that every application now executes.
+
+Final Arm runtime pair, complete program capture and cleanup
+---------------------------------------------------------
+
+The final new Image/EFI kernel, all stock modules and all11 kinsn modules
+build from the same configuration/source. All11 kinsn modules insert together
+in an actual2GiB Cortex-A72 guest before the complete binding regression
+passes, including kind5 choices and kind9 cross-chunk bindings. The core
+archive retains that exact final Image/EFI, modules and loader. The immutable
+full handoff also contains stock modules; its file inventory and source
+commits are recorded without content-hash gates. Both libraries were rebuilt
+from stable combined tracing-helper/local-call source.
+
+A second actual Arm guest loads the complete clang224-byte/28-instruction
+simple proof and captures its kernel-converted bytecode and load attributes.
+Both raw and physical streams equal the whole checked x86 capture; type6,
+attach37 and flags0 also agree. The two virtual pointer LDXW instructions
+become physical LDXDW at0/8. Exact captured bytes/context are retained,
+including source program ID. No application native workload is substituted.
+The x86 six-field capture and all four semantic mutations also pass after
+factoring the capture entry point for the Arm guest.
+
+After export and final checks,7,128 lane-owned files (6,589,600,300logical
+bytes) were removed: rebuildable kernel objects/archives and the duplicate
+installed stock-module tree. Images, vmlinux/BTF, symvers, generated headers,
+scripts/tools and every current immutable handoff remain. The compressed
+per-file deletion inventory is retained. Filesystem free space returned to
+43GiB (84% used), with other lanes’ outputs untouched.
+
+The actual Arm userspace source-map positive and erased-offset rejection
+reported earlier as pending have independently passed in A’s source-map
+result, along with all29 micro programs. The whole-program ISA translation
+validation and explicit CPU-profile binding continue separately from these
+source-map/runtime/capture checks.

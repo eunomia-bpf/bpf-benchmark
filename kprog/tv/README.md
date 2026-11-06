@@ -387,8 +387,9 @@ checker belongs to the explicitly trusted kernel binding implementation.
 The real captured BCC global-data probe, both unnamed-map paths, rejection
 cases and earlier loader regressions pass in x86 KVM. Both architecture
 libraries build, and both binding-kernel suites pass including the new exact
-offset positive/negative. New source-map fixtures have not yet been executed
-through the Arm userspace loader. Consume the updated loader **and**
+offset positive/negative. A’s actual Arm userspace source-map positive and erased-offset negative
+also pass; the full29-micro QEMU run is recorded in the Arm lane’s
+[source-map result](../../corpus/results/kprog_arm64_app_coverage_20261106/source-map-result/README.md). Consume the updated loader **and**
 native_lab module from the immutable source-map handoff; wire2 and the
 existing paired kernel image remain compatible. Whole-program ISA TV remains
 a separate obligation from these binding/runtime checks.
@@ -449,3 +450,23 @@ binds the original maps/context, attaches the native fentry replacement and
 triggers its real target; all three native programs execute. Both libraries
 build and the complete x86 binding/loader regression passes. No kernel helper
 identity comparison is relaxed.
+
+The `context-v2-exclusive-choice` handoff pairs the new Arm Image/EFI kernel,
+all stock modules, all11 kinsn modules and both loader libraries. Every kinsn
+module inserts together before the complete binding regression runs in QEMU.
+Both unsafe exclusive-choice branches and retry/chunk/site negatives reject.
+The actual Arm capture of the complete simple proof also matches the entire
+checked x86 physical byte stream and type6/attach37/flags0; this supplies a real
+Arm platform input for the entry proof. `kernel-check-arm64-all` and
+`simple-context-kernel-check-arm64` reproduce these checks. The original
+six-field x86 capture and all four context mutations still pass after the
+capture entry point was factored for the small Arm guest.
+
+`exclusive-runtime-arm64` builds the matching EFI kernel, stock modules and
+kinsn modules in T’s private output directories. The final core archive and
+full build log are retained with the result. Exported kernel objects and the
+duplicate installed stock-module tree were removed after the immutable full
+handoff was complete; final images, vmlinux/BTF, symvers, generated headers,
+tools and the earlier runtime pairs remain. A later kernel rebuild after
+that cleanup requires recompilation. These runtime checks and captures do not
+substitute for the continuing whole-program translation-validation proof.
