@@ -45,8 +45,8 @@ structure X86CmovMem where
   isAbi : Bool
 
 /-- The effect of the x86-64 `CMOV` / `CMOV_MEM` handler. Both forms are
-*conditional* — the whole body is inside the condition test — so the effect
-records the evaluated condition, the write width, the memory form's access
+conditional in value selection, with an unconditional source read and
+32-bit upper-half clearing. The effect records the evaluated condition, the write width, the memory form's access
 width, the value the source produced, the destination's pristine value, and the
 destination's value after the (possibly skipped) writeback. The writeback is a
 register write, not a memory update, so there is no byte function here. -/
@@ -289,10 +289,9 @@ from the AUX source-shift byte for the memory form; the generated dispatch table
 selects the memory form's read source; and the generated writeback table selects
 between the pointer-preserving write and the scalarizing partial-register write.
 
-Three x86-specific asymmetries are worth naming. Both forms are conditional: the
-entire body, including both the value production and the writeback, is inside the
-condition test, so a false condition leaves the destination *exactly* as it was
-— this is not a conditional *value* with an unconditional write. The register
+Three x86-specific properties are worth naming. Both forms evaluate the
+condition test for taken writeback; the source load occurs regardless of the
+condition. A false 32-bit condition still clears the destination's high half. The register
 form's condition comes from the whole AUX word, while the memory form's comes
 from the source-shift byte at bits 24..31. And the 64-bit arm preserves the
 source's provenance tag, while every narrower arm scalarizes — unlike an
@@ -318,7 +317,9 @@ def generatedX86CmovStep (state : X86CmovState)
         (generatedX86MovPointerWrite { dst := state.dst } value src.tag).dst
     | .scalarize => generatedX86RegWrite state.dst value width
   { cond := cond, width := width, memWidth := memWidth, value := value,
-    before := state.dst, dst := if cond then write else state.dst }
+    before := state.dst, dst := if cond then write
+      else if width = .w32 then generatedX86RegWrite state.dst state.dst.bits .w32
+      else state.dst }
 
 /-- Independent statement of the same handler: the condition is the
 architectural condition table (with the C default false), the memory read source
@@ -343,7 +344,9 @@ def x86CmovStepSpec (state : X86CmovState)
       (x86MovPointerWriteSpec { dst := state.dst } value src.tag).dst
     else x86RegWriteSpec state.dst value width
   { cond := cond, width := width, memWidth := memWidth, value := value,
-    before := state.dst, dst := if cond then write else state.dst }
+    before := state.dst, dst := if cond then write
+      else if width = .w32 then x86RegWriteSpec state.dst state.dst.bits .w32
+      else state.dst }
 
 /-- The `CMOV` / `CMOV_MEM` handler composition refines the independent
 condition/value/dispatch/writeback statement for arbitrary destination state,
@@ -366,20 +369,29 @@ theorem x86_cmov_step_refines (state : X86CmovState)
       x86MemReadSrcSpec, x86_mem_load_refines, x86_mov_pointer_write_refines,
       x86_reg_write_refines, x86WidthIs64, reduceCtorEq, ↓reduceIte]
 
-/-- A false condition writes nothing: the destination's value after the step is
-its pristine value, at every width and for every operand. This is the property
-the condition test's *scope* gives — the value production is inside the test
-too, so nothing about the source can leak into the product. -/
+/-- A false condition preserves 16/64-bit destinations. At 32 bits the
+architectural write still zero-extends the old low half and scalarizes it. -/
 theorem x86_cmov_false_condition_no_write (state : X86CmovState)
     (op : GeneratedX86Cmov.X86CmovOp) (src : X86CmovSrc) (mem : X86CmovMem)
     (aux : BitVec 32) (flags : X86Flags) (width memWidth : X86Width)
     (ptrValue : BitVec 64)
-    (h : x86CmovConditionSpec op aux flags = false) :
+    (h : x86CmovConditionSpec op aux flags = false)
+    (hw : width ≠ .w32) :
     (x86CmovStepSpec state op src mem aux flags width memWidth ptrValue).dst =
       state.dst ∧
       (x86CmovStepSpec state op src mem aux flags width memWidth ptrValue).before =
         state.dst := by
-  simp [x86CmovStepSpec, h, ↓reduceIte]
+  simp [x86CmovStepSpec, h, hw, ↓reduceIte]
+
+/-- The previously missing 32-bit false-condition path still writes the low
+half, zero-extends it, and scalarizes its provenance. -/
+theorem x86_cmov_false_condition_w32_zero_extends (state : X86CmovState)
+    (op : GeneratedX86Cmov.X86CmovOp) (src : X86CmovSrc) (mem : X86CmovMem)
+    (aux : BitVec 32) (flags : X86Flags) (memWidth : X86Width)
+    (ptrValue : BitVec 64) (h : x86CmovConditionSpec op aux flags = false) :
+    (x86CmovStepSpec state op src mem aux flags .w32 memWidth ptrValue).dst =
+      ⟨state.dst.bits &&& 0xffffffff, .scalar⟩ := by
+  simp [x86CmovStepSpec, h, x86RegWriteSpec, x86RegWriteBitsSpec]
 
 /-- The 64-bit arm preserves the source's provenance tag and its bits verbatim,
 whatever the source tag is: the pointer write bypasses the register-lane logic
@@ -396,8 +408,8 @@ theorem x86_cmov_w64_arm_preserves_source_tag (state : X86CmovState)
 /-- Every narrower arm scalarizes the destination's provenance when the
 condition holds, at every width below 64 bits and for every source tag: only
 the 64-bit arm can preserve it. The condition must hold — a false condition
-leaves the destination untouched — so this is a statement about the writeback
-arm that ran, not the absence of one. -/
+preserves the destination only at 8/16/64-bit width, whereas a false 32-bit
+condition also scalarizes the zero-extended result. -/
 theorem x86_cmov_narrow_arm_scalarizes (state : X86CmovState)
     (src : X86CmovSrc) (mem : X86CmovMem) (aux : BitVec 32) (flags : X86Flags)
     (width : X86Width) (memWidth : X86Width) (ptrValue : BitVec 64)

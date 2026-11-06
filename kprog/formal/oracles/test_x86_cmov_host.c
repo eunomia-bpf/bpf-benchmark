@@ -33,9 +33,8 @@
  * destination's tag must match the hand-written model.
  *
  * The point of this oracle is the asymmetries the composition is about:
- * both forms are *conditional* (the whole body, value production included,
- * is inside the condition test, so a false condition leaves the destination
- * exactly as it was), the register form's condition is the whole AUX word
+ * the source is read unconditionally and a false 32-bit condition clears
+ * the destination's upper half; the register form's condition is the whole AUX word
  * while the memory form's is the source-shift byte, and the 64-bit
  * writeback preserves the source's provenance tag only in the register form
  * — the memory form scalarizes through the partial-register write at every
@@ -564,6 +563,10 @@ static struct cmov_reg_effect contract_step_reg(unsigned dst, unsigned src,
 						X86_SIM_TAG_SCALAR);
 		}
 	}
+	if (!cond && width == X86_WIDTH_32) {
+		oracle_regs[dst].u.ptr = (void *)(uintptr_t)(__u32)(uintptr_t)oracle_regs[dst].u.ptr;
+		oracle_regs[dst].tag = X86_SIM_TAG_SCALAR;
+	}
 	r.dst = (__u64)(uintptr_t)oracle_regs[dst].u.ptr;
 	r.dst_tag = oracle_regs[dst].tag;
 	return r;
@@ -605,6 +608,10 @@ static struct cmov_reg_effect model_step_reg(unsigned dst, unsigned src,
 							   width);
 			oracle_regs[dst].tag = X86_SIM_TAG_SCALAR;
 		}
+	}
+	if (!cond && width == X86_WIDTH_32) {
+		oracle_regs[dst].u.ptr = (void *)(uintptr_t)(__u32)(uintptr_t)oracle_regs[dst].u.ptr;
+		oracle_regs[dst].tag = X86_SIM_TAG_SCALAR;
 	}
 	r.dst = (__u64)(uintptr_t)oracle_regs[dst].u.ptr;
 	r.dst_tag = oracle_regs[dst].tag;
@@ -744,7 +751,7 @@ static struct cmov_mem_effect contract_step_mem(unsigned dst, unsigned base,
 	r.cond = cond;
 	r.width = width;
 	r.mem_width = mem_width;
-	if (cond) {
+	{
 		__u8 eff = mem_width ? mem_width : X86_WIDTH_64;
 		__s64 disp = KPROG_X86_CMOV_MEM_DISP(imm);
 		__u8 src_code = KPROG_X86_MEM_READ_SRC(
@@ -766,6 +773,8 @@ static struct cmov_mem_effect contract_step_mem(unsigned dst, unsigned base,
 			value = KPROG_X86_MEM_LOAD(
 				&oracle_mem[oracle_slot(addr)], eff);
 
+		r.value = value;
+		if (cond) {
 		/* The memory form writes through the partial-register
 		 * write at every width, including the 64-bit one:
 		 * unconditionally scalarizing, unlike the register
@@ -786,7 +795,11 @@ static struct cmov_mem_effect contract_step_mem(unsigned dst, unsigned base,
 			KPROG_X86_WRITE_REG64(oracle_regs[dst].u,
 					oracle_regs[dst].tag, value,
 					X86_SIM_TAG_SCALAR);
-		r.value = value;
+		}
+	}
+	if (!cond && width == X86_WIDTH_32) {
+		oracle_regs[dst].u.ptr = (void *)(uintptr_t)(__u32)(uintptr_t)oracle_regs[dst].u.ptr;
+		oracle_regs[dst].tag = X86_SIM_TAG_SCALAR;
 	}
 	r.dst = (__u64)(uintptr_t)oracle_regs[dst].u.ptr;
 	r.dst_tag = oracle_regs[dst].tag;
@@ -819,11 +832,6 @@ static struct cmov_mem_effect model_step_mem(unsigned dst, unsigned base,
 	r.cond = cond;
 	r.width = width;
 	r.mem_width = mem_width;
-	if (!cond) {
-		r.dst = (__u64)(uintptr_t)oracle_regs[dst].u.ptr;
-		r.dst_tag = oracle_regs[dst].tag;
-		return r;
-	}
 
 	{
 		__u8 eff = mem_width ? mem_width : X86_WIDTH_64;
@@ -839,13 +847,16 @@ static struct cmov_mem_effect model_step_mem(unsigned dst, unsigned base,
 			value = oracle_load(addr, eff);
 	}
 	old = (__u64)(uintptr_t)oracle_regs[dst].u.ptr;
-	/* The memory form scalarizes at every width. */
-	oracle_regs[dst].u.ptr =
-		(void *)(long)oracle_write(old, value, width);
-	oracle_regs[dst].tag = X86_SIM_TAG_SCALAR;
+	if (cond) {
+		oracle_regs[dst].u.ptr = (void *)(long)oracle_write(old, value, width);
+		oracle_regs[dst].tag = X86_SIM_TAG_SCALAR;
+	} else if (width == X86_WIDTH_32) {
+		oracle_regs[dst].u.ptr = (void *)(uintptr_t)(__u32)old;
+		oracle_regs[dst].tag = X86_SIM_TAG_SCALAR;
+	}
 	r.value = value;
 	r.dst = (__u64)(uintptr_t)oracle_regs[dst].u.ptr;
-	r.dst_tag = X86_SIM_TAG_SCALAR;
+	r.dst_tag = oracle_regs[dst].tag;
 	return r;
 }
 
@@ -1014,9 +1025,8 @@ static unsigned part5(void)
 {
 	unsigned cases = 0;
 
-	/* Pin 1: a false condition writes nothing, register form — the
-	 * destination's bits and tag are exactly untouched at every
-	 * width. `e` on a clear zero flag is false. */
+	/* Pin 1: false-condition 32-bit CMOV clears the high half and
+	 * scalarizes; other widths preserve the destination. */
 	{
 		static const __u8 width_codes[4] = { X86_WIDTH_8,
 						      X86_WIDTH_16,
@@ -1028,8 +1038,13 @@ static unsigned part5(void)
 			oracle_restore_pristine();
 			(void)contract_step_reg(0, 3U, X86_CC_E, 0U,
 						 width_codes[wi]);
-			if (memcmp(&oracle_regs[0], &pristine_regs[0],
-				   sizeof(struct oracle_reg)))
+			if (width_codes[wi] == X86_WIDTH_32) {
+				if ((__u64)(uintptr_t)oracle_regs[0].u.ptr !=
+				    (__u32)(uintptr_t)pristine_regs[0].u.ptr ||
+				    oracle_regs[0].tag != X86_SIM_TAG_SCALAR)
+					return 0;
+			} else if (memcmp(&oracle_regs[0], &pristine_regs[0],
+					  sizeof(struct oracle_reg)))
 				return 0;
 			cases++;
 		}

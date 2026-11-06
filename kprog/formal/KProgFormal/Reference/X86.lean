@@ -1,0 +1,198 @@
+import KProgFormal.Reference.Memory
+
+/-!
+The x86-64 reference semantics. Architectural rules come from Intel SDM
+Volume 2, instruction Operation/Flags Affected descriptions:
+https://cdrdv2-public.intel.com/874240/325462-090-sdm-vol-1-2abcd-3abcd-4.pdf
+No simulator or generated-contract module is imported here.
+-/
+namespace KProgFormal.Reference.X86
+
+abbrev Register := Fin 16
+
+/-- CMOV has no 8-bit encoding. Width is architectural operand size, not the
+simulator's byte-count code or its absent-width sentinel. -/
+inductive CmovWidth
+  | w16 | w32 | w64
+  deriving DecidableEq, Repr
+
+def CmovWidth.bytes : CmovWidth → Nat
+  | .w16 => 2
+  | .w32 => 4
+  | .w64 => 8
+
+structure State where
+  gpr : Register → Word
+  rflags : Word
+  xmm0 : BitVec 128
+  memory : Memory
+  pc : Word
+  fsBase : Word
+  gsBase : Word
+
+/-- All sixteen architectural condition codes, including parity. -/
+def condition (flags : Word) (code : Fin 16) : Bool :=
+  let cf := flags.getLsbD 0
+  let pf := flags.getLsbD 2
+  let zf := flags.getLsbD 6
+  let sf := flags.getLsbD 7
+  let of := flags.getLsbD 11
+  match code.val with
+  | 0 => of
+  | 1 => !of
+  | 2 => cf
+  | 3 => !cf
+  | 4 => zf
+  | 5 => !zf
+  | 6 => cf || zf
+  | 7 => !cf && !zf
+  | 8 => sf
+  | 9 => !sf
+  | 10 => pf
+  | 11 => !pf
+  | 12 => sf != of
+  | 13 => sf == of
+  | 14 => zf || (sf != of)
+  | _ => !zf && (sf == of)
+
+/-- The operand is read before the destination is changed, including aliasing
+registers and a memory source addressed by the destination register. -/
+inductive Source
+  | register (reg : Register)
+  | memory (address : Word)
+  deriving DecidableEq, Repr
+
+def readSource (s : State) (source : Source) (bytes : Nat) :
+    Except Fault (Word × List Event) :=
+  match source with
+  | .register r => .ok (s.gpr r, [])
+  | .memory address =>
+      match readMemory s.memory address bytes with
+      | .error fault => .error fault
+      | .ok (value, event) => .ok (value, [event])
+
+/-- Intel CMOVcc Operation: 32-bit writes zero-extend even when the condition
+is false. The 16-bit untaken case preserves every destination bit. -/
+def cmovValue (width : CmovWidth) (taken : Bool) (old source : Word) : Word :=
+  match width with
+  | .w16 => if taken then (old &&& 0xffffffffffff0000) ||| (source &&& 0xffff)
+      else old
+  | .w32 => (if taken then source else old) &&& 0xffffffff
+  | .w64 => if taken then source else old
+
+/-- One architectural instruction with its decoded fall-through address.
+Effective-address decoding supplies the memory source address; reads remain
+part of this step, so a false-condition CMOV cannot suppress an access fault. -/
+inductive Instruction
+  | cmov (width : CmovWidth) (cc : Fin 16) (dst : Register)
+      (source : Source) (nextPc : Word)
+  deriving DecidableEq, Repr
+
+def step (instruction : Instruction) (s : State) : Transition State :=
+  match instruction with
+  | .cmov width cc dst source nextPc =>
+      match readSource s source width.bytes with
+      | .error fault => ⟨s, [.fault fault], some fault⟩
+      | .ok (value, events) =>
+          let result := cmovValue width (condition s.rflags cc) (s.gpr dst) value
+          ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), pc := nextPc }, events, none⟩
+
+/-- Legacy prefix state for 64-bit decoding. A legacy prefix after a REX
+invalidates that REX; a later REX supersedes earlier ones. -/
+private structure Prefix where
+  operand16 : Bool := false
+  address32 : Bool := false
+  rex : Nat := 0
+  segment : Nat := 0
+
+private def prefixes : List Byte → Prefix → Nat → Prefix × List Byte × Nat
+  | [], p, n => (p, [], n)
+  | b :: rest, p, n =>
+      let v := b.toNat
+      if v = 0x66 then prefixes rest { p with operand16 := true, rex := 0 } (n + 1)
+      else if v = 0x67 then prefixes rest { p with address32 := true, rex := 0 } (n + 1)
+      else if v = 0x64 ∨ v = 0x65 then
+        prefixes rest { p with segment := v, rex := 0 } (n + 1)
+      else if v = 0x26 ∨ v = 0x2e ∨ v = 0x36 ∨ v = 0x3e then
+        prefixes rest { p with segment := 0, rex := 0 } (n + 1)
+      else if v = 0xf2 ∨ v = 0xf3 then prefixes rest { p with rex := 0 } (n + 1)
+      else if 0x40 ≤ v ∧ v ≤ 0x4f then prefixes rest { p with rex := v - 0x40 } (n + 1)
+      else (p, b :: rest, n)
+
+private def byteAt (bytes : Array Byte) (position : Nat) : Except String Nat :=
+  match bytes[position]? with
+  | some b => .ok b.toNat
+  | none => .error "truncated CMOV encoding"
+
+private def signedDisplacement (bytes : Array Byte) (position size : Nat) :
+    Except String Word := do
+  let mut value := 0
+  for i in [:size] do
+    value := value + (← byteAt bytes (position + i)) * 256 ^ i
+  if size = 0 then pure 0
+  else pure ((BitVec.ofNat (size * 8) value).signExtend 64)
+
+private def registerCode (code : Nat) : Register :=
+  ⟨code % 16, Nat.mod_lt _ (by decide)⟩
+
+private structure AddressParts where
+  base : Word
+  index : Word
+  relative : Bool
+  missingBase : Bool
+  cursor : Nat
+
+/-- Intel 64 ModRM/SIB addressing. RIP-relative and no-base SIB are distinct;
+REX.X permits R12 as an index where the unextended index code means no index. -/
+private def addressParts (s : State) (p : Prefix) (bytes : Array Byte)
+    (mode rm cursor : Nat) : Except String AddressParts := do
+  if rm = 4 then
+    let sib ← byteAt bytes cursor
+    let baseCode := sib % 8
+    let indexCode := (sib / 8) % 8
+    let scale := 2 ^ (sib / 64)
+    let index := if indexCode = 4 ∧ (p.rex / 2) % 2 = 0 then 0
+      else s.gpr (registerCode (indexCode + 8 * ((p.rex / 2) % 2))) * BitVec.ofNat 64 scale
+    let missing : Bool := mode == 0 && baseCode == 5
+    pure ⟨if missing then 0 else s.gpr (registerCode (baseCode + 8 * (p.rex % 2))),
+      index, false, missing, cursor + 1⟩
+  else
+    let relative : Bool := mode == 0 && rm == 5
+    pure ⟨if relative then 0 else s.gpr (registerCode (rm + 8 * (p.rex % 2))),
+      0, relative, relative, cursor⟩
+
+/-- Decode exactly one native CMOVcc, including REX, operand/address size,
+segment bases, ModRM, SIB and signed displacement. The instruction's PC is
+computed from consumed bytes, never supplied as an unchecked next-PC claim. -/
+def decodeCmov (bytes : Array Byte) (s : State) : Except String Instruction := do
+  let (p, _, count) := prefixes bytes.toList {} 0
+  let first ← byteAt bytes count
+  let opcode ← byteAt bytes (count + 1)
+  if first ≠ 0x0f ∨ opcode < 0x40 ∨ 0x4f < opcode then
+    throw "expected CMOVcc native opcode"
+  let modrm ← byteAt bytes (count + 2)
+  let mode := modrm / 64
+  let rm := modrm % 8
+  let dst := registerCode ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
+  let cc : Fin 16 := ⟨opcode % 16, Nat.mod_lt _ (by decide)⟩
+  let width := if p.rex / 8 = 1 then CmovWidth.w64
+    else if p.operand16 then .w16 else .w32
+  let cursor := count + 3
+  if mode = 3 then
+    if cursor > 15 then throw "CMOV encoding exceeds the architectural 15-byte limit"
+    pure (.cmov width cc dst (.register (registerCode (rm + 8 * (p.rex % 2))))
+      (s.pc + BitVec.ofNat 64 cursor))
+  else
+    let parts ← addressParts s p bytes mode rm cursor
+    let size := if mode = 1 then 1 else if mode = 2 ∨ parts.missingBase then 4 else 0
+    let displacement ← signedDisplacement bytes parts.cursor size
+    let length := parts.cursor + size
+    if length > 15 then throw "CMOV encoding exceeds the architectural 15-byte limit"
+    let nextPc := s.pc + BitVec.ofNat 64 length
+    let base := if parts.relative then nextPc else parts.base
+    let offset := base + parts.index + displacement
+    let offset := if p.address32 then (offset.setWidth 32).setWidth 64 else offset
+    let segment := if p.segment = 0x64 then s.fsBase else if p.segment = 0x65 then s.gsBase else 0
+    pure (.cmov width cc dst (.memory (segment + offset)) nextPc)
+
+end KProgFormal.Reference.X86

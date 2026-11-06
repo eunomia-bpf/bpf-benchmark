@@ -1,7 +1,11 @@
 name = "KProgFormal"
 version = "0.1.0"
-defaultTargets = ["KProgFormal"]
+defaultTargets = ["KProgFormal", "reference"]
 
 [[lean_lib]]
 name = "KProgFormal"
 globs = ["KProgFormal.*"]
+
+[[lean_exe]]
+name = "reference"
+root = "ReferenceMain"

@@ -1763,20 +1763,22 @@ struct x86_sim_state {
  * provenance at 64 bits) and the memory form (which scalarizes at every width)
  * cannot drift: at 64 bits the memory form passes a scalar source tag, which
  * writes exactly the bits and tag the scalarizing partial-register write did. */
+/* Intel SDM CMOVcc: the source is read even when the condition is false.
+ * Keep that read observable to clang; a plain unused load can be eliminated.
+ * A false 32-bit CMOV still clears the destination's upper 32 bits. */
 #define X86_SIM_L_EXEC_CMOV_STEP(RHS_IS_MEM, DST, SRC, FLAGS, AUX, IMM)     \
 	do {                                                               \
 		__u32 __x86_l_cc = (RHS_IS_MEM) ?                         \
 			(__u32)KPROG_X86_CMOV_MEM_CONDITION(AUX) :        \
 			(__u32)KPROG_X86_CMOV_CONDITION(AUX);             \
+		__u8 __x86_l_width = KPROG_X86_CMOV_WIDTH(FLAGS);         \
+		__u8 __x86_l_cmw = (RHS_IS_MEM) ?                         \
+			KPROG_X86_CMOV_MEM_WIDTH(AUX, FLAGS) : __x86_l_width; \
+		volatile __u64 __x86_l_value = (RHS_IS_MEM) ?              \
+			X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),                    \
+				KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0) :   \
+			X86_SIM_L_READ_REG(SRC);                                  \
 		if (X86_SIM_L_EVAL_CC(__x86_l_cc)) {                      \
-			__u8 __x86_l_width = KPROG_X86_CMOV_WIDTH(FLAGS); \
-			__u8 __x86_l_cmw = (RHS_IS_MEM) ?                 \
-				KPROG_X86_CMOV_MEM_WIDTH(AUX, FLAGS) :    \
-				__x86_l_width;                            \
-			__u64 __x86_l_value = (RHS_IS_MEM) ?              \
-				X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),   \
-					KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0) : \
-				X86_SIM_L_READ_REG(SRC);                  \
 			__u8 __x86_l_wb = KPROG_X86_CMOV_WRITEBACK(       \
 				__x86_l_width == X86_WIDTH_64);           \
 			if (__x86_l_wb ==                                 \
@@ -1788,6 +1790,9 @@ struct x86_sim_state {
 			else                                              \
 				X86_SIM_L_WRITE_REG_WIDTH((DST),          \
 					__x86_l_value, __x86_l_width);    \
+		} else if (__x86_l_width == X86_WIDTH_32) {                  \
+			X86_SIM_L_WRITE_REG_WIDTH((DST),                         \
+				X86_SIM_L_READ_REG(DST), X86_WIDTH_32);              \
 		}                                                         \
 	} while (0)
 

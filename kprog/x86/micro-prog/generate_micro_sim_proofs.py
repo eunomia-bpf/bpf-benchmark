@@ -511,7 +511,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        src=mem_base_reg(ops[1]),
                        flags=WIDTH_CONST[dst[1]],
                        aux=f"({mem_aux(ops[1], width)} | X86_REG_AUX_SRC_SHIFT({CC_AUX[op]}))",
-                       imm=c_u64(mem_disp(ops[1])))
+                       imm=c_u64((mem_disp(ops[1]) & 0xffffffff) << 32))
         if dst is None or src is None:
             raise ValueError(f"cannot encode {insn.raw}")
         return enc("X86_OP_CMOV", dst=dst[0], src=src[0],

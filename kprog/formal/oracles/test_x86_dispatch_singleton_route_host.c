@@ -1255,8 +1255,13 @@ static void model_cmov(unsigned dst, unsigned src, unsigned flags,
 	unsigned cc = is_mem ? ((aux >> 24) & 0xffU) : aux;
 	unsigned w = flags ? flags : X86_WIDTH_64;
 
-	if (!eval_cc_oracle(cc, seed->cf, seed->zf, seed->sf, seed->of))
+	if (!eval_cc_oracle(cc, seed->cf, seed->zf, seed->sf, seed->of)) {
+		if (w == X86_WIDTH_32) {
+			b->x[dst] = seed->x[dst] & 0xffffffffULL;
+			b->t[dst] = X86_SIM_TAG_SCALAR;
+		}
 		return;
+	}
 	if (!is_mem) {
 		if (w == X86_WIDTH_64) {
 			b->x[dst] = seed->x[src];

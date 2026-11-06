@@ -149,6 +149,7 @@ check:
 	python3 tools/generate_x86_dispatch_family_spec.py --check
 	python3 tools/generate_x86_dispatch_singleton_spec.py --check
 	lake build
+	python3 tools/check_reference.py
 	python3 tools/check_no_sorry.py --check
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_cond_host.c -o build/test_arm64_cond_host
 	./build/test_arm64_cond_host

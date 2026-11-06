@@ -20,6 +20,11 @@ typedef signed int __s32;
 #include "../x86/x86_sim_local_bpf.h"
 
 #include <stdio.h>
+#include <signal.h>
+#include <sys/mman.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include "test_core_dumps.h"
 
 static int failures;
 static unsigned long cases;
@@ -247,6 +252,11 @@ static void check_reg(__u32 aux_word, unsigned flags, unsigned dst,
 		}
 	}
 
+	if (!taken && w == X86_WIDTH_32) {
+		mreg[dst] &= 0xffffffffULL;
+		mtag[dst] = X86_SIM_TAG_SCALAR;
+	}
+
 	/* ---- run the real body through one of the three gates ---- */
 	if (via == 0U)
 		X86_SIM_L_EXEC_CMOV(dst, src, flags, aux_word);
@@ -347,6 +357,11 @@ static void check_mem(unsigned src, unsigned base_tag, __u8 cc_byte,
 		}
 	}
 
+	if (!taken && w == X86_WIDTH_32) {
+		mreg[dst] &= 0xffffffffULL;
+		mtag[dst] = X86_SIM_TAG_SCALAR;
+	}
+
 	/* ---- run the real body through one of the three gates ---- */
 	if (via == 0U)
 		X86_SIM_L_EXEC_CMOV_MEM(dst, src, flags, aux, imm);
@@ -368,6 +383,37 @@ static void check_width_lane(unsigned flags, unsigned cc, unsigned dst,
 			     unsigned src, unsigned via)
 {
 	check_reg(cc, flags, dst, src, 1U, 0U, 0U, 0U, via);
+}
+
+/* Regression: clang must retain the source load even with a false condition.
+ * A protected page makes a missing access observable without relying on the
+ * value of an invalid C load. Widths 16/32/64 are all real CMOV encodings. */
+static void check_untaken_memory_fault(unsigned width)
+{
+	pid_t child = fork();
+	int status;
+	if (child < 0) { perror("fork"); failures++; return; }
+	if (child == 0) {
+		void *page = mmap(NULL, 4096, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+		if (page == MAP_FAILED) { perror("mmap"); _exit(2); }
+		X86_SIM_L_DECLARE_STATE();
+		X86_SIM_L_DECLARE_STACK();
+		struct x86_sim_xdp_abi __x86_sim_abi = {};
+		struct __sk_buff *__x86_sim_skb_ctx = NULL;
+		__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;
+		__x86_zf = 0;
+		X86_SIM_L_WRITE_REG_PTR_TAG(X86_RDX, page, X86_SIM_TAG_SCALAR);
+		X86_SIM_L_EXEC_CMOV_MEM(X86_RAX, X86_RDX, width,
+			X86_MEM_AUX_FULL(X86_REG_NONE, 0, width) |
+			X86_REG_AUX_SRC_SHIFT(X86_CC_E), 0);
+		_exit(0);
+	}
+	if (waitpid(child, &status, 0) != child) { perror("waitpid"); failures++; return; }
+	if (!WIFSIGNALED(status) || WTERMSIG(status) != SIGSEGV) {
+		printf("untaken CMOV source access missing width=%u status=%d\n", width, status);
+		failures++;
+	}
+	cases++;
 }
 
 int main(void)
@@ -481,6 +527,10 @@ int main(void)
 		for (f = 0; f < 5U; f++)
 			check_width_lane(flags_codes[f], X86_CC_S, 9U, 4U,
 					 via);
+
+	check_untaken_memory_fault(X86_WIDTH_16);
+	check_untaken_memory_fault(X86_WIDTH_32);
+	check_untaken_memory_fault(X86_WIDTH_64);
 
 	if (failures) {
 		printf("x86 cmov step route cross-check: FAIL (%d)\n",

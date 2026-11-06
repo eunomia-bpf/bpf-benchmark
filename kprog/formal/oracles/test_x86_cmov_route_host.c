@@ -279,6 +279,11 @@ static void check_reg(__u32 aux_word, unsigned flags, unsigned dst,
 		}
 	}
 
+	if (!taken && w == X86_WIDTH_32) {
+		mreg[dst] &= 0xffffffffULL;
+		mtag[dst] = X86_SIM_TAG_SCALAR;
+	}
+
 	/* ---- run the real body ---- */
 	if (via)
 		X86_SIM_L_EXEC(X86_OP_CMOV, dst, src, flags, aux_word, 0ULL);
@@ -372,6 +377,11 @@ static void check_mem(unsigned src, unsigned base_tag, __u8 cc_byte,
 			mreg[dst] = model_partial_write(mreg[dst], value, w);
 			mtag[dst] = X86_SIM_TAG_SCALAR;
 		}
+	}
+
+	if (!taken && w == X86_WIDTH_32) {
+		mreg[dst] &= 0xffffffffULL;
+		mtag[dst] = X86_SIM_TAG_SCALAR;
 	}
 
 	/* ---- run the real body ---- */
