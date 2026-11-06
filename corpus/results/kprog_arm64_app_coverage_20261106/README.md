@@ -684,3 +684,20 @@ The latest built runtime is `app-runtime-v3` with matched frozen context-v2
 kernel/modules and DATASEC loader revision `15b253cb4`; its exact build and
 run logs are retained here. Full end-to-end native results are still being
 repaired and measured; these startup records do not establish matching work.
+
+## Native proof ELF pairing at the loader lookup boundary
+
+The actual readonly binder caught an additional packaging defect: the runtime
+stage retained an inherited native `.proof.o`, even after the raw native ELF
+and simulator artifact were updated. The loader implicitly selected that stale
+file. BCC pairing now records the exact generated native proof ELF and installs
+it at the loader's first lookup candidate, `<object>.<symbol>.proof.o`.
+
+[All 23 ELF checks](bcc-native-proof-pairing/checks.json) compare staged text,
+readonly bytes and ABI sections against the exact native proof used to generate
+the simulator. Every comparison passes, and all 23 simulator objects compile.
+[The readonly extent records](bcc-native-proof-pairing/readonly-extents.json)
+retain inherited and correctly paired SYS_EXIT/RUNQLAT extents.
+[The replay archive](bcc-native-proof-pairing/replay.tar.gz) includes native,
+native-proof and simulator artifacts together. Runtime binder checks remain
+strict; the following startup retry uses the complete matched triple.

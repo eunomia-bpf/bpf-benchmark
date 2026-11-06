@@ -1,0 +1,34 @@
+[
+  {
+    "stem": "syscount",
+    "symbol": "sys_exit",
+    "kind": "inherited",
+    "readonly_object_sizes": [
+      16
+    ]
+  },
+  {
+    "stem": "syscount",
+    "symbol": "sys_exit",
+    "kind": "paired",
+    "readonly_object_sizes": [
+      48
+    ]
+  },
+  {
+    "stem": "runqlat",
+    "symbol": "sched_switch",
+    "kind": "inherited",
+    "readonly_object_sizes": [
+      16
+    ]
+  },
+  {
+    "stem": "runqlat",
+    "symbol": "sched_switch",
+    "kind": "paired",
+    "readonly_object_sizes": [
+      120
+    ]
+  }
+]

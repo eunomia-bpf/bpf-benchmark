@@ -53,7 +53,7 @@ for program in programs:
   source.write_text(text);row['ok']=True
  except ValueError as error: row['note']=str(error)
  paired.append(dict(original_id=program['id'],original_name=symbol,original_object=str(original),
-    program_section=section,native_object=str(native),
+    program_section=section,native_object=str(native),native_proof=str(local),
     symbol=symbol,simulator_object=str(phase/'objects'/(name+'.bpf.o')),
     simulator_program=name+'_arm64_sim_xdp'))
  rows.append(row)
