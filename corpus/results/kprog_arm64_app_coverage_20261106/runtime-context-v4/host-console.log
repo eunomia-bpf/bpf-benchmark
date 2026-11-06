@@ -1,0 +1,735 @@
+taskset -c 16-23 cargo build --release --manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml --target-dir /workspaces/repository/kprog/arm64/build/app-native-link
+    Finished `release` profile [optimized] target(s) in 0.02s
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/bcc_real.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/bcc-bound-v4 /workspaces/repository/kprog/arm64/build/app-native-link/release/native-link
+23/23 real BCC entries generate; every capture retained
+taskset -c 16-23 python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/coverage.py compile /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/bcc-bound-v4 0 23 180 1 2048
+compile 1/23 bcc_opensnoop_tracepoint__syscalls__sys_enter_openat: 0
+compile 2/23 bcc_opensnoop_tracepoint__syscalls__sys_exit_openat: 0
+compile 3/23 bcc_capable_kprobe__cap_capable_entry: 0
+compile 4/23 bcc_capable_kprobe__cap_capable_exit: 0
+compile 5/23 bcc_tcplife_inet_sock_set_state: 0
+compile 6/23 bcc_biosnoop_blk_account_io_merge_bio: 0
+compile 7/23 bcc_biosnoop_block_rq_insert: 0
+compile 8/23 bcc_biosnoop_block_rq_issue: 0
+compile 9/23 bcc_biosnoop_block_rq_complete: 0
+compile 10/23 bcc_tcpconnect_tcp_v4_connect: 0
+compile 11/23 bcc_tcpconnect_tcp_v4_connect_ret: 0
+compile 12/23 bcc_tcpconnect_tcp_v6_connect: 0
+compile 13/23 bcc_tcpconnect_tcp_v6_connect_ret: 0
+compile 14/23 bcc_vfsstat_fentry_vfs_read: 0
+compile 15/23 bcc_vfsstat_fentry_vfs_write: 0
+compile 16/23 bcc_vfsstat_fentry_vfs_fsync: 0
+compile 17/23 bcc_vfsstat_fentry_vfs_open: 0
+compile 18/23 bcc_syscount_sys_enter: 0
+compile 19/23 bcc_vfsstat_fentry_vfs_create: 0
+compile 20/23 bcc_syscount_sys_exit: 0
+compile 21/23 bcc_runqlat_sched_wakeup: 0
+compile 22/23 bcc_runqlat_sched_wakeup_new: 0
+compile 23/23 bcc_runqlat_sched_switch: 0
+compile: 0/23 failures
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/bcc_manifest.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/bcc-bound-v4
+23 captured entries have distinct exact full-BTF/type/bytecode-length selectors and compiled simulator proofs
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/pin_runtime.py /workspaces/repository/kprog/arm64/build/app-runtime-v4
+matched kernel/EFI/7.0.0-rc2+ stock modules/all11 kinsn/library copied into /workspaces/repository/kprog/arm64/build/app-runtime-v4
+taskset -c 16-23 make -C /workspaces/repository PLATFORM=qemu ARCH=arm64 arm64-qemu-root \
+	-o host-kernel-arm64 -o host-kinsn-arm64 -o host-rust-arm64 -o host-shim-arm64 \
+	-o host-source-apps-arm64 -o host-runner-arm64 -o host-micro-programs-arm64 \
+	-o host-stage2-programs-arm64 -o host-arm64-sim-proofs -o host-bpfopt-llvm-arm64 \
+	-o host-native-bpf-arm64 -o host-merlin-runtime-context \
+	RUNNER_DIR=/workspaces/repository/kprog/arm64/build/app-runtime-v4/runner \
+	HOST_KERNEL_BUILD_DIR_ARM64=/workspaces/repository/kprog/arm64/build/app-runtime-v4/kernel \
+	HOST_KINSN_DIR_ARM64=/workspaces/repository/kprog/arm64/build/app-runtime-v4/kinsn \
+	BPFOPT_SHIM_BUILD_ARM64=/workspaces/repository/bpfopt/shim/build-arm64-a-context-v2 \
+	NATIVE_BPF_ARTIFACTS_ARM64=/workspaces/repository/kprog/arm64/build/app-verified-stage \
+	ARM64_RUNNER_RUNTIME_IMAGE=bpf-benchmark/runner-runtime:arm64-a-context-v4 \
+	ARM64_RUNNER_RUNTIME_IMAGE_TAR=/workspaces/repository/kprog/arm64/build/app-runtime-v4/image.tar \
+	ARM64_QEMU_ROOT=/workspaces/repository/kprog/arm64/build/app-runtime-v4/root
+make[1]: Entering directory '/workspaces/repository'
+install -d "/workspaces/repository/.cache/container-images"
+install -d "/workspaces/repository/kprog/arm64/build/app-runtime-v4/kernel/bpf-benchmark-kernel-config-context"
+cp "/workspaces/repository/kprog/arm64/build/app-runtime-v4/kernel/.config" "/workspaces/repository/kprog/arm64/build/app-runtime-v4/kernel/bpf-benchmark-kernel-config-context/config"
+kernel_release="$(cat "/workspaces/repository/kprog/arm64/build/app-runtime-v4/kernel/include/config/kernel.release")"; \
+	test -n "${kernel_release}"; \
+	printf '{"kernel_release":"%s","target_arch":"arm64","kernel_image":"vmlinuz.efi"}\n' "${kernel_release}" > "/workspaces/repository/kprog/arm64/build/app-runtime-v4/kernel/bpf-benchmark-kernel-config-context/manifest.json"
+docker build --platform linux/arm64 \
+	--target runner-runtime \
+	--build-context runner-runtime-host-runner-build="/workspaces/repository/kprog/arm64/build/app-runtime-v4/runner/build-arm64-llvmbpf" \
+	--build-context runner-runtime-host-micro-programs="/workspaces/repository/micro/programs/build-arm64" \
+	--build-context runner-runtime-host-stage2-programs="/workspaces/repository/kprog/test/build-arm64" \
+	--build-context runner-runtime-host-kernel-image="/workspaces/repository/kprog/arm64/build/app-runtime-v4/kernel/arch/arm64/boot" \
+	--build-context runner-runtime-host-kernel-config="/workspaces/repository/kprog/arm64/build/app-runtime-v4/kernel/bpf-benchmark-kernel-config-context" \
+	--build-context runner-runtime-host-kernel-offsets="/workspaces/repository/micro/programs/build-arm64" \
+	--build-context runner-runtime-host-kernel-modules="/workspaces/repository/kprog/arm64/build/app-runtime-v4/kernel/modules-install/lib/modules" \
+		--build-context runner-runtime-host-kinsn-artifacts="/workspaces/repository/kprog/arm64/build/app-runtime-v4/kinsn" \
+		--build-context runner-runtime-host-shim="/workspaces/repository/bpfopt/shim/build-arm64-a-context-v2" \
+		--build-context runner-runtime-host-native-bpf="/workspaces/repository/kprog/arm64/build/app-verified-stage" \
+		--build-context runner-runtime-host-merlin="/workspaces/repository/vendor/build/merlin-runtime-context" \
+	--build-arg IMAGE_WORKSPACE="/workspaces/repository" \
+	--build-arg RUN_TARGET_ARCH=arm64 \
+	--build-arg VENDOR_BUILD_ARCH=arm64 \
+	--build-arg RUNNER_BUILD_DIR_NAME=build-arm64-llvmbpf \
+	--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
+	--build-arg BPFOPT_HOST_BIN="bpfopt/llvm/build-kinsn-arm64/bpfopt" \
+	--build-arg KINSNPROBER_HOST_BIN="bpfopt/target/aarch64-unknown-linux-gnu/release/kinsnprober" \
+	--build-arg BPFPROF_HOST_BIN="runner/assets/bpfprof-arm64-unavailable" \
+	--build-arg NATIVE_LINK_HOST_BIN="kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link" \
+	-t "bpf-benchmark/runner-runtime:arm64-a-context-v4" -f "/workspaces/repository/kprog/arm64/build/app-runtime-v4/runner/containers/runner-runtime.Dockerfile" "/workspaces/repository"
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from runner-runtime.Dockerfile
+#1 transferring dockerfile: 10.03kB done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1.6
+#2 DONE 0.7s
+
+#3 docker-image://docker.io/docker/dockerfile:1.6@sha256:ac85f380a63b13dfcefa89046420e1781752bab202122f8f50032edf31be0021
+#3 resolve docker.io/docker/dockerfile:1.6@sha256:ac85f380a63b13dfcefa89046420e1781752bab202122f8f50032edf31be0021 0.0s done
+#3 CACHED
+
+#4 [internal] load metadata for docker.io/library/ubuntu:24.04
+#4 ...
+
+#5 [context runner-runtime-host-kernel-config] load .dockerignore
+#5 transferring runner-runtime-host-kernel-config: 2B done
+#5 DONE 0.0s
+
+#6 [context runner-runtime-host-stage2-programs] load .dockerignore
+#6 transferring runner-runtime-host-stage2-programs: 2B done
+#6 DONE 0.0s
+
+#7 [context runner-runtime-host-kernel-modules] load .dockerignore
+#7 transferring runner-runtime-host-kernel-modules: 2B done
+#7 DONE 0.1s
+
+#8 [context runner-runtime-host-micro-programs] load .dockerignore
+#8 transferring runner-runtime-host-micro-programs: 2B done
+#8 DONE 0.1s
+
+#9 [context runner-runtime-host-runner-build] load .dockerignore
+#9 transferring runner-runtime-host-runner-build: 2B done
+#9 DONE 0.1s
+
+#10 [context runner-runtime-host-shim] load .dockerignore
+#10 transferring runner-runtime-host-shim: 2B done
+#10 DONE 0.1s
+
+#11 [context runner-runtime-host-kernel-image] load .dockerignore
+#11 transferring runner-runtime-host-kernel-image: 2B done
+#11 DONE 0.1s
+
+#12 [context runner-runtime-host-merlin] load .dockerignore
+#12 transferring runner-runtime-host-merlin: 2B done
+#12 DONE 0.1s
+
+#13 [context runner-runtime-host-kinsn-artifacts] load .dockerignore
+#13 transferring runner-runtime-host-kinsn-artifacts: 2B done
+#13 DONE 0.1s
+
+#14 [context runner-runtime-host-native-bpf] load .dockerignore
+#14 transferring runner-runtime-host-native-bpf: 2B done
+#14 DONE 0.1s
+
+#15 [context runner-runtime-host-kernel-offsets] load .dockerignore
+#15 transferring runner-runtime-host-kernel-offsets: 2B done
+#15 DONE 0.1s
+
+#4 [internal] load metadata for docker.io/library/ubuntu:24.04
+#4 DONE 0.5s
+
+#16 [internal] load .dockerignore
+#16 transferring context: 5.09kB done
+#16 DONE 0.0s
+
+#17 [runner-runtime-runtime-base 1/4] FROM docker.io/library/ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
+#17 resolve docker.io/library/ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852 0.0s done
+#17 DONE 0.0s
+
+#18 [context runner-runtime-host-merlin] load from client
+#18 transferring runner-runtime-host-merlin: 104B done
+#18 DONE 0.0s
+
+#19 [context runner-runtime-host-shim] load from client
+#19 transferring runner-runtime-host-shim: 561.78kB 0.0s done
+#19 DONE 0.0s
+
+#20 [context runner-runtime-host-kernel-config] load from client
+#20 transferring runner-runtime-host-kernel-config: 163.22kB done
+#20 DONE 0.1s
+
+#21 [context runner-runtime-host-kernel-modules] load from client
+#21 ...
+
+#22 [context runner-runtime-host-kinsn-artifacts] load from client
+#22 transferring runner-runtime-host-kinsn-artifacts: 6.96MB 0.1s done
+#22 DONE 0.1s
+
+#23 [context runner-runtime-host-micro-programs] load from client
+#23 transferring runner-runtime-host-micro-programs: 2.71MB 0.1s done
+#23 DONE 0.1s
+
+#24 [context runner-runtime-host-kernel-offsets] load from client
+#24 transferring runner-runtime-host-kernel-offsets: 2.71MB 0.1s done
+#24 DONE 0.1s
+
+#25 [context runner-runtime-host-stage2-programs] load from client
+#25 transferring runner-runtime-host-stage2-programs: 3.04MB 0.1s done
+#25 DONE 0.1s
+
+#21 [context runner-runtime-host-kernel-modules] load from client
+#21 ...
+
+#26 [context runner-runtime-host-kernel-image] load from client
+#26 transferring runner-runtime-host-kernel-image: 55.38MB 0.3s done
+#26 DONE 0.3s
+
+#21 [context runner-runtime-host-kernel-modules] load from client
+#21 ...
+
+#27 [context runner-runtime-host-runner-build] load from client
+#27 transferring runner-runtime-host-runner-build: 77.82MB 0.4s done
+#27 DONE 0.4s
+
+#21 [context runner-runtime-host-kernel-modules] load from client
+#21 ...
+
+#28 [context runner-runtime-host-native-bpf] load from client
+#28 transferring runner-runtime-host-native-bpf: 128.26MB 0.6s done
+#28 DONE 0.7s
+
+#21 [context runner-runtime-host-kernel-modules] load from client
+#21 transferring runner-runtime-host-kernel-modules: 1.43GB 2.7s done
+#21 DONE 2.7s
+
+#29 [internal] load build context
+#29 transferring context: 77.20MB 5.0s
+#29 transferring context: 625.10MB 7.4s done
+#29 DONE 7.4s
+
+#30 [runner-runtime 11/42] COPY --link --from=runner-runtime-artifacts /workspaces/repository/runner /workspaces/repository/runner
+#30 CACHED
+
+#31 [runner-runtime-artifacts  2/17] COPY --link vendor/build/arm64/tetragon/ /artifacts/tetragon/
+#31 CACHED
+
+#32 [runner-runtime-artifacts 11/17] COPY --link --from=runner-runtime-host-kernel-config /manifest.json /artifacts/manifest.json
+#32 CACHED
+
+#33 [runner-runtime  1/42] COPY --link --from=runner-runtime-artifacts /artifacts/tracee /artifacts/tracee
+#33 CACHED
+
+#34 [runner-runtime-artifacts 17/17] COPY --link --from=runner-runtime-host-stage2-programs / /artifacts/user/stage2-programs/arm64/
+#34 CACHED
+
+#35 [runner-runtime-artifacts 15/17] COPY --link --from=runner-runtime-host-runner-build /micro_exec /workspaces/repository/runner/build-arm64-llvmbpf/micro_exec
+#35 CACHED
+
+#36 [runner-runtime  5/42] COPY --link --from=runner-runtime-artifacts /var/lib/cilium /var/lib/cilium
+#36 CACHED
+
+#37 [runner-runtime  9/42] COPY --link --from=runner-runtime-artifacts /artifacts/lib/modules /artifacts/lib/modules
+#37 CACHED
+
+#38 [runner-runtime-artifacts  8/17] RUN set -eux;     repo_artifact_root="/artifacts/user/repo-artifacts/arm64";     mkdir -p         "${repo_artifact_root}"         "${repo_artifact_root}/cilium/bin"         "${repo_artifact_root}/otelcol-ebpf-profiler/bin";     ln -sfn /artifacts/tracee "${repo_artifact_root}/tracee";     ln -sfn /artifacts/tetragon "${repo_artifact_root}/tetragon";     ln -sfn /artifacts/tracee/bin/tracee /usr/local/bin/tracee;     ln -sfn /artifacts/tetragon/bin/tetragon /usr/local/bin/tetragon;     ln -sfn /usr/local/bin/cilium-agent "${repo_artifact_root}/cilium/bin/cilium-agent";     ln -sfn /usr/local/bin/otelcol-ebpf-profiler "${repo_artifact_root}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
+#38 CACHED
+
+#39 [runner-runtime 10/42] COPY --link --from=runner-runtime-artifacts /artifacts/manifest.json /artifacts/manifest.json
+#39 CACHED
+
+#40 [runner-runtime-artifacts 10/17] COPY --link --from=runner-runtime-host-kernel-config /config /artifacts/kernel/config
+#40 CACHED
+
+#41 [runner-runtime-artifacts  6/17] COPY --link vendor/repos/cilium/bpf/ /var/lib/cilium/bpf/
+#41 CACHED
+
+#42 [runner-runtime-runtime-base 4/4] WORKDIR /workspaces/repository
+#42 CACHED
+
+#43 [runner-runtime-artifacts  5/17] COPY --link --from=runner-runtime-host-runner-build /katran_transport.bpf.o /artifacts/user/repo-artifacts/arm64/katran/bpf/katran_transport.bpf.o
+#43 CACHED
+
+#44 [runner-runtime-artifacts 16/17] COPY --link --from=runner-runtime-host-micro-programs / /artifacts/user/micro-programs/arm64/
+#44 CACHED
+
+#45 [runner-runtime-artifacts 14/17] RUN set -eux;     kernel_release="$(python3 -c 'import json; print(json.load(open("/artifacts/manifest.json"))["kernel_release"])')";     mkdir -p /artifacts/boot /boot;     cp /artifacts/kernel/config "/artifacts/boot/config-${kernel_release}";     cp /artifacts/kernel/config "/boot/config-${kernel_release}";     depmod -b /artifacts "$kernel_release"
+#45 CACHED
+
+#46 [runner-runtime-runtime-base 3/4] RUN mkdir -p "/workspaces/repository"
+#46 CACHED
+
+#47 [runner-runtime-artifacts  4/17] COPY --link vendor/build/arm64/katran/bpf/*.bpf.o /artifacts/user/repo-artifacts/arm64/katran/bpf/
+#47 CACHED
+
+#48 [runner-runtime-runtime-base 2/4] RUN apt-get update     && apt-get install -y --no-install-recommends         auditd         bash         binutils         bzip2         ca-certificates         clang         curl         debianutils         diffutils         elfutils         etcd-server         file         findutils         fio         ipset         iptables         iproute2         jq         kmod         libaio1t64         libboost-atomic1.83.0         libboost-context1.83.0         libboost-filesystem1.83.0         libboost-program-options1.83.0         libboost-regex1.83.0         libbpf1         libbz2-1.0         libcap2         libcurl4t64         libdouble-conversion3         libdw1t64         libdwarf1         libelf1t64         libevent-2.1-7t64         libfmt9         libgflags2.2         libgoogle-glog0v6t64         libgrpc++1.51t64         liblz4-1         libmnl0         libpcap0.8t64         libprotobuf32t64         libre2-10         libsodium23         libsnappy1v5         libspdlog1.12         libssl3t64         libunwind8         libyaml-cpp0.8         llvm-18         libzstd1         lz4         nftables         openssl         nodejs         perl         php-cli         procps         python3         python3-pyelftools         python3-yaml         ruby         stress-ng         tar         util-linux         wrk         xz-utils         zlib1g         zstd     && rm -rf /var/lib/apt/lists/*
+#48 CACHED
+
+#49 [runner-runtime-artifacts 13/17] COPY --link --from=runner-runtime-host-kernel-modules / /artifacts/lib/modules
+#49 CACHED
+
+#50 [runner-runtime-artifacts  9/17] COPY --link --from=runner-runtime-host-kernel-image /vmlinuz.efi /artifacts/kernel/vmlinuz.efi
+#50 CACHED
+
+#51 [runner-runtime  4/42] COPY --link --from=runner-runtime-artifacts /usr/local/bin/ /usr/local/bin/
+#51 CACHED
+
+#52 [runner-runtime-artifacts 12/17] COPY --link --from=runner-runtime-host-kernel-offsets /kernel_offsets.h /artifacts/kernel/kernel_offsets.h
+#52 CACHED
+
+#53 [runner-runtime-artifacts  3/17] COPY --link --chmod=0755 vendor/binary/katran/arm64/bin/katran_server_grpc /artifacts/user/repo-artifacts/arm64/katran/bin/katran_server_grpc
+#53 CACHED
+
+#54 [runner-runtime-artifacts  1/17] COPY --link --chmod=0755 vendor/build/arm64/tracee/bin/tracee /artifacts/tracee/bin/tracee
+#54 CACHED
+
+#55 [runner-runtime  2/42] COPY --link --from=runner-runtime-artifacts /artifacts/tetragon /artifacts/tetragon
+#55 CACHED
+
+#56 [runner-runtime  3/42] COPY --link --from=runner-runtime-artifacts /artifacts/user/repo-artifacts /artifacts/user/repo-artifacts
+#56 CACHED
+
+#57 [runner-runtime 12/42] COPY --link --from=runner-runtime-artifacts /artifacts/user/micro-programs /artifacts/user/micro-programs
+#57 CACHED
+
+#58 [runner-runtime  8/42] COPY --link --from=runner-runtime-artifacts /boot /boot
+#58 CACHED
+
+#59 [runner-runtime  7/42] COPY --link --from=runner-runtime-artifacts /artifacts/boot /artifacts/boot
+#59 CACHED
+
+#60 [runner-runtime-artifacts  7/17] COPY --link --chmod=0755     vendor/build/arm64/bcc/bin/capable     vendor/build/arm64/bcc/bin/biosnoop     vendor/build/arm64/bcc/bin/vfsstat     vendor/build/arm64/bcc/bin/opensnoop     vendor/build/arm64/bcc/bin/syscount     vendor/build/arm64/bcc/bin/tcpconnect     vendor/build/arm64/bcc/bin/tcplife     vendor/build/arm64/bcc/bin/runqlat     vendor/build/arm64/cilium/bin/cilium-agent     vendor/build/arm64/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler     vendor/build/arm64/bpftool/bin/bpftool     /usr/local/bin/
+#60 CACHED
+
+#61 [runner-runtime  6/42] COPY --link --from=runner-runtime-artifacts /artifacts/kernel /artifacts/kernel
+#61 CACHED
+
+#62 [runner-runtime 13/42] COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /artifacts/user/stage2-programs
+#62 CACHED
+
+#63 [runner-runtime 14/42] COPY --link --from=runner-runtime-host-native-bpf / /artifacts/user/native-bpf/arm64/
+#63 DONE 0.1s
+
+#64 [runner-runtime 15/42] COPY --link vendor/linux-framework/tools/net/ynl/pyynl /usr/local/lib/bpfrejit/linux/tools/net/ynl/pyynl
+#64 DONE 0.0s
+
+#65 [runner-runtime 16/42] COPY --link vendor/linux-framework/Documentation/netlink /usr/share/ynl
+#65 DONE 0.0s
+
+#66 [runner-runtime 17/42] COPY --link tests /workspaces/repository/tests
+#66 merging
+#66 merging 0.2s done
+#66 DONE 0.3s
+
+#67 [runner-runtime 18/42] COPY --link --chmod=0755 bpfopt/llvm/build-kinsn-arm64/bpfopt /usr/local/bin/bpfopt
+#67 DONE 0.9s
+
+#68 [runner-runtime 19/42] COPY --link --chmod=0755     bpfopt/target/aarch64-unknown-linux-gnu/release/kinsnprober     runner/assets/bpfprof-arm64-unavailable     kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link     /usr/local/bin/
+#68 DONE 0.1s
+
+#69 [runner-runtime 20/42] COPY --link vendor/merlin_bpf_clang.py /usr/local/lib/bpfrejit/merlin/merlin_bpf_clang.py
+#69 DONE 0.0s
+
+#70 [runner-runtime 21/42] COPY --link --from=runner-runtime-host-merlin / /usr/local/lib/bpfrejit/merlin/
+#70 merging 0.3s done
+#70 DONE 0.3s
+
+#71 [runner-runtime 22/42] COPY --chmod=0755 runner/scripts/merlin-bpf-clang /usr/local/bin/merlin-bpf-clang
+#71 DONE 0.0s
+
+#72 [runner-runtime 23/42] RUN set -eux;     mkdir -p /opt;     ln -sfn /artifacts/user /opt/bpf-benchmark;     ln -sfn /usr/local/bin/merlin-bpf-clang /usr/local/bin/clang;     ln -sfn /usr/local/bin/merlin-bpf-clang /usr/local/bin/clang-18;     ldconfig
+#72 0.169 + mkdir -p /opt
+#72 0.196 + ln -sfn /artifacts/user /opt/bpf-benchmark
+#72 0.216 + ln -sfn /usr/local/bin/merlin-bpf-clang /usr/local/bin/clang
+#72 0.235 + ln -sfn /usr/local/bin/merlin-bpf-clang /usr/local/bin/clang-18
+#72 0.254 + ldconfig
+#72 DONE 0.5s
+
+#73 [runner-runtime 24/42] COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
+#73 DONE 0.0s
+
+#74 [runner-runtime 25/42] COPY --link --from=runner-runtime-host-shim /libbpfrejit_shim.so /usr/local/lib/bpfrejit/libbpfrejit_shim.so
+#74 DONE 0.0s
+
+#75 [runner-runtime 26/42] COPY --link --from=runner-runtime-host-runner-build /native_loader/libnative_loader.so /usr/local/lib/bpfrejit/libnative_loader.so
+#75 merging 0.4s done
+#75 DONE 0.4s
+
+#76 [runner-runtime 27/42] COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
+#76 DONE 0.0s
+
+#77 [runner-runtime 28/42] COPY --chmod=0644 vendor/bpf/native_compat.h /usr/local/lib/bpfrejit/native/native_compat.h
+#77 DONE 0.0s
+
+#78 [runner-runtime 29/42] COPY --chmod=0755 vendor/bpf/write_native_manifest.py /usr/local/lib/bpfrejit/native/write_native_manifest.py
+#78 DONE 0.0s
+
+#79 [runner-runtime 30/42] COPY vendor/bpf/cilium/bpf /usr/local/lib/bpfrejit/native/cilium-bpf
+#79 DONE 0.0s
+
+#80 [runner-runtime 31/42] COPY vendor/repos/cilium/bpf /usr/local/lib/bpfrejit/native/cilium-bpf-original
+#80 DONE 0.1s
+
+#81 [runner-runtime 32/42] COPY runner/__init__.py ./runner/
+#81 DONE 0.0s
+
+#82 [runner-runtime 33/42] COPY runner/config ./runner/config
+#82 DONE 0.1s
+
+#83 [runner-runtime 34/42] COPY runner/libs ./runner/libs
+#83 DONE 0.0s
+
+#84 [runner-runtime 35/42] COPY runner/suites ./runner/suites
+#84 DONE 0.0s
+
+#85 [runner-runtime 36/42] COPY micro/*.py ./micro/
+#85 DONE 0.0s
+
+#86 [runner-runtime 37/42] COPY micro/config ./micro/config
+#86 DONE 0.0s
+
+#87 [runner-runtime 38/42] COPY corpus/*.py ./corpus/
+#87 DONE 0.0s
+
+#88 [runner-runtime 39/42] COPY corpus/config ./corpus/config
+#88 DONE 0.0s
+
+#89 [runner-runtime 40/42] COPY corpus/inputs ./corpus/inputs
+#89 DONE 0.0s
+
+#90 [runner-runtime 41/42] COPY --link runner/assets ./runner/assets
+#90 DONE 0.2s
+
+#90 [runner-runtime 41/42] COPY --link runner/assets ./runner/assets
+#90 merging 0.6s done
+#90 DONE 0.8s
+
+#91 [runner-runtime 42/42] RUN mkdir -p micro/results corpus/results tests/results /var/tmp/bpfrejit-runtime
+#91 DONE 0.2s
+
+#92 exporting to image
+#92 exporting layers
+#92 exporting layers 4.5s done
+#92 exporting manifest sha256:b0f9aa374c1958c729b962d1ff6e5303282ba46c4d2613f745b0f99cf79df4f2 0.0s done
+#92 exporting config sha256:3a7c3e50203f4d6141a4272066b7696501df5aef6bcb03fa5b42254880e5648f 0.0s done
+#92 exporting attestation manifest sha256:a731ab090d8e3e69cc9971ef27181610b4a8e8e4dc5dec3a67811022fe6a39d6 0.0s done
+#92 exporting manifest list sha256:2dd04e65c79f5c7a58666d10d7cfe3d157af430c0d899c524ba1f82e7a170980 0.0s done
+#92 naming to docker.io/bpf-benchmark/runner-runtime:arm64-a-context-v4
+#92 naming to docker.io/bpf-benchmark/runner-runtime:arm64-a-context-v4 done
+#92 DONE 4.6s
+docker save -o "/workspaces/repository/kprog/arm64/build/app-runtime-v4/image.tar.tmp" "bpf-benchmark/runner-runtime:arm64-a-context-v4"
+mv -f "/workspaces/repository/kprog/arm64/build/app-runtime-v4/image.tar.tmp" "/workspaces/repository/kprog/arm64/build/app-runtime-v4/image.tar"
+test -n "/usr/bin/qemu-system-aarch64"
+install -d "/workspaces/repository/.cache"
+rm -rf "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root.tmp"
+install -d "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root.tmp"
+docker load -i "/workspaces/repository/kprog/arm64/build/app-runtime-v4/image.tar" >/dev/null
+cid=$(docker create --platform linux/arm64 "bpf-benchmark/runner-runtime:arm64-a-context-v4" /bin/true); \
+	trap 'docker rm -f '"$cid"' >/dev/null 2>&1 || true; rm -rf "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root.tmp"' EXIT; \
+	docker export "$cid" | tar -C "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root.tmp" -xf -; \
+	docker rm "$cid" >/dev/null; \
+	trap - EXIT; \
+		rm -rf "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root"; \
+		mv "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root.tmp" "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root"
+sed "s|__BPFREJIT_IMAGE_WORKSPACE__|/workspaces/repository|g" "/workspaces/repository/kprog/arm64/build/app-runtime-v4/runner/scripts/qemu-arm64-init" \
+	>"/workspaces/repository/kprog/arm64/build/app-runtime-v4/root/qemu-init.tmp"
+install -m 0755 "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root/qemu-init.tmp" "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root/qemu-init"
+rm -f "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root/qemu-init.tmp"
+make[1]: Leaving directory '/workspaces/repository'
+taskset -c 8-11 timeout 7200 make -C /workspaces/repository PLATFORM=qemu ARCH=arm64 corpus \
+	-o /workspaces/repository/kprog/arm64/build/app-runtime-v4/root/qemu-init \
+	ARM64_QEMU_ROOT=/workspaces/repository/kprog/arm64/build/app-runtime-v4/root \
+	ARM64_QEMU_KERNEL_IMAGE=/workspaces/repository/kprog/arm64/build/app-runtime-v4/kernel/arch/arm64/boot/Image \
+	ARM64_RUNNER_RUNTIME_IMAGE=bpf-benchmark/runner-runtime:arm64-a-context-v4 \
+	ARM64_RUNNER_RUNTIME_IMAGE_TAR=/workspaces/repository/kprog/arm64/build/app-runtime-v4/image.tar \
+	VM_CPUS=8 VM_MEM=4096 SAMPLES=1 WORKLOAD_DURATION=2 KEEP_WORKDIRS=1 \
+	BPFREJIT_CORPUS_APP_TIMEOUT=7200 \
+	BPFREJIT_KEEP_ALL_WORKDIRS=1 BPFREJIT_CORPUS_BPF_STATS=1 \
+	BPFREJIT_CORPUS_APPS=bcc/set,tetragon/observer,katran BPFREJIT_SHIM_NATIVE_LOADER=post \
+	BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1
+make[1]: Entering directory '/workspaces/repository'
+printf '%s\n' "#!/bin/sh" "set -eu" "export BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 HOME=/root TARGET='arm64-qemu' RUN_TARGET_NAME='arm64-qemu' RUN_TARGET_ARCH='arm64' RUN_EXECUTOR='kvm' RUNTIME_CONTAINER_IMAGE='bpf-benchmark/runner-runtime:arm64-a-context-v4' RUNTIME_IMAGE_TAR='/workspaces/repository/kprog/arm64/build/app-runtime-v4/image.tar' RUN_REMOTE_PYTHON_BIN='python3' RUN_RUNTIME_PYTHON_BIN='python3' RUN_BPFTOOL_BIN='bpftool' RUN_NATIVE_REPOS_CSV='bcc,katran,tracee,tetragon' RUN_TOKEN='6e178fc3' SAMPLES='1'      FUZZ_ROUNDS='1000'  WORKLOAD_DURATION='2' KEEP_WORKDIRS='1'  BPFREJIT_CORPUS_APPS='bcc/set,tetragon/observer,katran'           MERLIN_COMPILETIME_MODE='none' BPFREJIT_CORPUS_APP_TIMEOUT='7200'   BPFREJIT_CORPUS_BPF_STATS='1'  BPFREJIT_SHIM_NATIVE_LOADER='post'      BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1'         CILIUM_PROFILE_ARM='all'   " "exec python3 -m corpus.driver" >"/workspaces/repository/kprog/arm64/build/app-runtime-v4/root/qemu-run.sh"
+chmod +x "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root/qemu-run.sh"
+rm -f "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root/qemu-status"
+"/usr/bin/qemu-system-aarch64" -M virt -cpu cortex-a57 -smp "8" -m "4096" -nographic -no-reboot \
+	-kernel "/workspaces/repository/kprog/arm64/build/app-runtime-v4/kernel/arch/arm64/boot/Image" \
+	-fsdev local,id=rootfs,path="/workspaces/repository/kprog/arm64/build/app-runtime-v4/root",security_model=none,multidevs=remap \
+	-device virtio-9p-device,fsdev=rootfs,mount_tag=/dev/root \
+	-append "console=ttyAMA0 root=/dev/root rootfstype=9p rootflags=trans=virtio,version=9p2000.L,access=any rw init=/qemu-init loglevel=7 panic=30 oops=panic raid=noautodetect"
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x411fd070]
+[    0.000000] Linux version 7.0.0-rc2+ (root@coder-22123351-d4a5-40fc-bc3b-1b853af74a7e-c7ccfb766-mpvhz) (aarch64-linux-gnu-gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #23 SMP PREEMPT Fri Nov  6 13:38:07 UTC 2026
+[    0.000000] random: crng init done
+[    0.000000] Machine model: linux,dummy-virt
+[    0.000000] efi: UEFI not found.
+[    0.000000] OF: reserved mem: Reserved memory: No reserved-memory node in the DT
+[    0.000000] NUMA: Faking a node at [mem 0x0000000040000000-0x000000013fffffff]
+[    0.000000] NODE_DATA(0) allocated [mem 0x13f7f6dc0-0x13f7f9dbf]
+[    0.000000] cma: Reserved 64 MiB at 0x00000000fc000000
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: PSCIv1.1 detected in firmware.
+[    0.000000] psci: Using standard PSCI v0.2 function IDs
+[    0.000000] psci: Trusted OS migration not required
+[    0.000000] psci: SMC Calling Convention v1.0
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000000040000000-0x00000000ffffffff]
+[    0.000000]   DMA32    empty
+[    0.000000]   Normal   [mem 0x0000000100000000-0x000000013fffffff]
+[    0.000000]   Device   empty
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000040000000-0x000000013fffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x000000013fffffff]
+[    0.000000] percpu: Embedded 34 pages/cpu s101400 r8192 d29672 u139264
+[    0.000000] Detected PIPT I-cache on CPU0
+[    0.000000] CPU features: detected: Spectre-v2
+[    0.000000] CPU features: detected: Spectre-v4
+[    0.000000] CPU features: detected: Spectre-BHB
+[    0.000000] CPU features: detected: ARM erratum 834220
+[    0.000000] CPU features: detected: ARM erratum 1742098
+[    0.000000] CPU features: detected: ARM erratum 832075
+[    0.000000] CPU features: detected: ARM errata 1165522, 1319367, or 1530923
+[    0.000000] alternatives: applying boot alternatives
+[    0.000000] Kernel command line: console=ttyAMA0 root=/dev/root rootfstype=9p rootflags=trans=virtio,version=9p2000.L,access=any rw init=/qemu-init loglevel=7 panic=30 oops=panic raid=noautodetect
+[    0.000000] printk: log buffer data + meta data: 2097152 + 7340032 = 9437184 bytes
+[    0.000000] Dentry cache hash table entries: 524288 (order: 10, 4194304 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.000000] software IO TLB: area num 8.
+[    0.000000] software IO TLB: mapped [mem 0x00000000f8000000-0x00000000fc000000] (64MB)
+[    0.000000] Fallback order for Node 0: 0 
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 1048576
+[    0.000000] Policy zone: Normal
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=8, Nodes=1
+[    0.000000] ftrace: allocating 49524 entries in 194 pages
+[    0.000000] ftrace: allocated 194 pages with 3 groups
+[    0.000000] rcu: Hierarchical RCU implementation.
+[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=4096 to nr_cpu_ids=8.
+[    0.000000] 	Trampoline variant of Tasks RCU enabled.
+[    0.000000] 	Rude variant of Tasks RCU enabled.
+[    0.000000] 	Tracing variant of Tasks RCU enabled.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 10 jiffies.
+[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=8
+[    0.000000] RCU Tasks: Setting shift to 3 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=8.
+[    0.000000] RCU Tasks Rude: Setting shift to 3 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=8.
+[    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+[    0.000000] Root IRQ handler: gic_handle_irq
+[    0.000000] GICv2m: range[mem 0x08020000-0x08020fff], SPI[80:143]
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] arch_timer: cp15 timer running at 62.50MHz (virt).
+[    0.000000] clocksource: arch_sys_counter: mask: 0x1ffffffffffffff max_cycles: 0x1cd42e208c, max_idle_ns: 881590405314 ns
+[    0.000073] sched_clock: 57 bits at 63MHz, resolution 16ns, wraps every 4398046511096ns
+[    0.006856] Console: colour dummy device 80x25
+[    0.012498] Calibrating delay loop (skipped), value calculated using timer frequency.. 125.00 BogoMIPS (lpj=625000)
+[    0.012685] pid_max: default: 32768 minimum: 301
+[    0.016354] landlock: Up and running.
+[    0.016382] Yama: becoming mindful.
+[    0.016631] SELinux:  Initializing.
+[    0.024697] LSM support for eBPF active
+[    0.027381] Mount-cache hash table entries: 8192 (order: 4, 65536 bytes, linear)
+[    0.027452] Mountpoint-cache hash table entries: 8192 (order: 4, 65536 bytes, linear)
+[    0.036048] VFS: Finished mounting rootfs on nullfs
+[    0.060548] cacheinfo: Unable to detect cache hierarchy for CPU 0
+[    0.075335] rcu: Hierarchical SRCU implementation.
+[    0.075392] rcu: 	Max phase no-delay instances is 1000.
+[    0.076939] Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[    0.081227] EFI services will not be available.
+[    0.083392] smp: Bringing up secondary CPUs ...
+[    0.087212] Detected PIPT I-cache on CPU1
+[    0.088353] CPU1: Booted secondary processor 0x0000000001 [0x411fd070]
+[    0.094916] Detected PIPT I-cache on CPU2
+[    0.095274] CPU2: Booted secondary processor 0x0000000002 [0x411fd070]
+[    0.098321] Detected PIPT I-cache on CPU3
+[    0.098591] CPU3: Booted secondary processor 0x0000000003 [0x411fd070]
+[    0.100806] Detected PIPT I-cache on CPU4
+[    0.101086] CPU4: Booted secondary processor 0x0000000004 [0x411fd070]
+[    0.102687] Detected PIPT I-cache on CPU5
+[    0.102945] CPU5: Booted secondary processor 0x0000000005 [0x411fd070]
+[    0.104935] Detected PIPT I-cache on CPU6
+[    0.105220] CPU6: Booted secondary processor 0x0000000006 [0x411fd070]
+[    0.106954] Detected PIPT I-cache on CPU7
+[    0.107229] CPU7: Booted secondary processor 0x0000000007 [0x411fd070]
+[    0.107605] smp: Brought up 1 node, 8 CPUs
+[    0.107635] SMP: Total of 8 processors activated.
+[    0.107663] CPU: All CPU(s) started at EL1
+[    0.107879] CPU features: detected: 32-bit EL0 Support
+[    0.107891] CPU features: detected: 32-bit EL1 Support
+[    0.107950] CPU features: detected: CRC32 instructions
+[    0.108226] CPU features: detected: PMUv3
+[    0.138265] alternatives: applying system-wide alternatives
+[    0.166576] CPU features: emulated: Privileged Access Never (PAN) using TTBR0_EL1 switching
+[    0.186900] Memory: 3918928K/4194304K available (15552K kernel code, 9226K rwdata, 10696K rodata, 5952K init, 11680K bss, 201852K reserved, 65536K cma-reserved)
+[    0.220756] devtmpfs: initialized
+[    0.249492] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.250308] posixtimers hash table entries: 4096 (order: 4, 65536 bytes, linear)
+[    0.250620] futex hash table entries: 2048 (131072 bytes on 1 NUMA nodes, total 128 KiB, linear).
+[    0.253917] 19408 pages in range for non-PLT usage
+[    0.253976] 510928 pages in range for PLT usage
+[    0.260411] DMI not present or invalid.
+[    0.280074] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.292730] DMA: preallocated 512 KiB GFP_KERNEL pool for atomic allocations
+[    0.293472] DMA: preallocated 512 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.293877] audit: initializing netlink subsys (disabled)
+[    0.296188] audit: type=2000 audit(0.250:1): state=initialized audit_enabled=0 res=1
+[    0.298878] thermal_sys: Registered thermal governor 'fair_share'
+[    0.298916] thermal_sys: Registered thermal governor 'step_wise'
+[    0.298924] thermal_sys: Registered thermal governor 'user_space'
+[    0.299479] cpuidle: using governor ladder
+[    0.299914] cpuidle: using governor menu
+[    0.301072] hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.
+[    0.302771] ASID allocator initialised with 65536 entries
+[    0.304016] Serial: AMBA PL011 UART driver
+[    0.334998] 9000000.pl011: ttyAMA0 at MMIO 0x9000000 (irq = 13, base_baud = 0) is a PL011 rev1
+[    0.337976] printk: console [ttyAMA0] enabled
+[    0.359964] HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.360049] HugeTLB: 0 KiB vmemmap can be freed for a 1.00 GiB page
+[    0.360108] HugeTLB: registered 32.0 MiB page size, pre-allocated 0 pages
+[    0.360144] HugeTLB: 0 KiB vmemmap can be freed for a 32.0 MiB page
+[    0.360162] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.360168] HugeTLB: 0 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.360182] HugeTLB: registered 64.0 KiB page size, pre-allocated 0 pages
+[    0.360187] HugeTLB: 0 KiB vmemmap can be freed for a 64.0 KiB page
+[    0.375534] ACPI: Interpreter disabled.
+[    0.377157] iommu: Default domain type: Translated
+[    0.377242] iommu: DMA domain TLB invalidation policy: lazy mode
+[    0.401487] pps_core: LinuxPPS API ver. 1 registered
+[    0.401585] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.401677] PTP clock support registered
+[    0.403596] EDAC MC: Ver: 3.0.0
+[    0.416963] NetLabel: Initializing
+[    0.417110] NetLabel:  domain hash size = 128
+[    0.417144] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.418228] NetLabel:  unlabeled traffic allowed by default
+[    0.419873] vgaarb: loaded
+[    0.450346] clocksource: Switched to clocksource arch_sys_counter
+[    0.453554] VFS: Disk quotas dquot_6.6.0
+[    0.453727] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.463058] netfs: FS-Cache loaded
+[    0.464732] pnp: PnP ACPI: disabled
+[    0.494738] NET: Registered PF_INET protocol family
+[    0.496678] IP idents hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.558905] tcp_listen_portaddr_hash hash table entries: 2048 (order: 3, 32768 bytes, linear)
+[    0.559129] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.559244] TCP established hash table entries: 32768 (order: 6, 262144 bytes, linear)
+[    0.559608] TCP bind hash table entries: 32768 (order: 8, 1048576 bytes, linear)
+[    0.560003] TCP: Hash tables configured (established 32768 bind 32768)
+[    0.562126] MPTCP token hash table entries: 4096 (order: 5, 98304 bytes, linear)
+[    0.562697] UDP hash table entries: 2048 (order: 5, 131072 bytes, linear)
+[    0.563073] UDP-Lite hash table entries: 2048 (order: 5, 131072 bytes, linear)
+[    0.564920] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.565440] NET: Registered PF_XDP protocol family
+[    0.565673] PCI: CLS 0 bytes, default 64
+[    0.573756] kvm [1]: HYP mode not available
+[    0.582187] Initialise system trusted keyrings
+[    0.583807] Key type blacklist registered
+[    0.615834] workingset: timestamp_bits=44 max_order=20 bucket_order=0
+[    0.621888] SGI XFS with ACLs, security attributes, quota, no debug enabled
+[    0.626016] 9p: Installing v9fs 9p2000 file system support
+[    0.640254] integrity: Platform Keyring initialized
+[    0.685417] Key type asymmetric registered
+[    0.685687] Asymmetric key parser 'x509' registered
+[    0.686286] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 247)
+[    0.687803] io scheduler mq-deadline registered
+[    0.687919] io scheduler kyber registered
+[    0.688233] io scheduler bfq registered
+[    0.703956] pl061_gpio 9030000.pl061: PL061 GPIO chip registered
+[    0.711543] Serial: 8250/16550 driver, 4 ports, IRQ sharing disabled
+[    0.757835] loop: module loaded
+[    0.765392] hid: raw HID events driver (C) Jiri Kosina
+[    0.772310] hw perfevents: enabled with armv8_pmuv3 PMU driver, 7 (0,8000003f) counters available
+[    0.775394] NET: Registered PF_INET6 protocol family
+[    0.777697] watchdog: NMI not fully supported
+[    0.777762] watchdog: Hard watchdog permanently disabled
+[    0.785373] Segment Routing with IPv6
+[    0.785673] In-situ OAM (IOAM) with IPv6
+[    0.786381] NET: Registered PF_PACKET protocol family
+[    0.787816] 9pnet: Installing 9P2000 support
+[    0.819894] registered taskstats version 1
+[    0.858762] Loading compiled-in X.509 certificates
+[    0.878101] Loaded X.509 cert 'Build time autogenerated kernel key: 9f0cac519e1b43b7aed7b285e97f1d9691777458'
+[    0.901953] Demotion targets for Node 0: null
+[    0.903355] Key type .fscrypt registered
+[    0.903428] Key type fscrypt-provisioning registered
+[    0.905387] ima: No TPM chip found, activating TPM-bypass!
+[    0.905583] ima: Allocated hash algorithm: sha256
+[    0.908049] ima: No architecture policies found
+[    0.917645] clk: Disabling unused clocks
+[    0.917890] PM: genpd: Disabling unused power domains
+[    0.924324] md: Skipping autodetection of RAID arrays. (raid=autodetect will force)
+[    0.934150] VFS: Mounted root (9p filesystem) on device 0:25.
+[    0.936510] devtmpfs: mounted
+[    0.938832] VFS: Pivoted into new rootfs
+[    1.051046] Freeing unused kernel memory: 5952K
+[    1.052993] Run /qemu-init as init process
+{"active_env_keys": [], "event": "native_loader_mode", "phase": "post", "saved_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", "BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO", "BPFREJIT_SHIM_NATIVE_LOADER"]}
+[    8.116271] bpf_arm64_ccmp: loading out-of-tree module taints kernel.
+[    8.116567] bpf_arm64_ccmp: module verification failed: signature and/or required key missing - tainting kernel
+{"app": "bcc/set", "event": "app_start", "runner": "bcc_set", "workload": "stress_ng_bcc_hook_hot"}
+{"app": "bcc/set", "event": "phase_start", "phase": "baseline_start", "runner": "bcc_set", "workload": "stress_ng_bcc_hook_hot"}
+{"active_env_keys": [], "app": "bcc/set", "event": "native_loader_phase_env", "phase": "baseline_start", "runner": "bcc_set", "temporary_set_keys": ["BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+[   13.565315] NOTICE: Automounting of tracing to debugfs is deprecated and will be removed in 2030
+{"app": "bcc/set", "event": "phase_done", "phase": "baseline_start", "runner": "bcc_set", "status": "ok"}
+{"app": "bcc/set", "event": "measurement_start", "phase": "baseline", "runner": "bcc_set", "samples": 1, "workload": "stress_ng_bcc_hook_hot"}
+[  127.158595] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[  127.158852] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+[  130.303497] mmap: stress-ng-sysca (714) uses deprecated remap_file_pages() syscall. See Documentation/mm/remap_file_pages.rst.
+[  131.597812] capability: warning: `stress-ng-cap' uses deprecated v2 capabilities in a way that may be insecure
+[  131.598670] capability: warning: `stress-ng-cap' uses 32-bit capabilities (legacy support in use)
+[  134.311871] mmap: stress-ng-sysca (755) uses deprecated remap_file_pages() syscall. See Documentation/mm/remap_file_pages.rst.
+{"app": "bcc/set", "event": "measurement_done", "phase": "baseline", "runner": "bcc_set", "status": "ok"}
+{"app": "bcc/set", "event": "phase_start", "phase": "baseline_stop", "runner": "bcc_set"}
+{"app": "bcc/set", "event": "phase_step", "phase": "baseline_stop", "runner": "bcc_set", "step": "runner_stop_done"}
+{"app": "bcc/set", "event": "phase_step", "phase": "baseline_stop", "runner": "bcc_set", "step": "quiesce_start"}
+{"app": "bcc/set", "event": "phase_step", "phase": "baseline_stop", "runner": "bcc_set", "step": "quiesce_done"}
+{"app": "bcc/set", "event": "phase_step", "phase": "baseline_stop", "runner": "bcc_set", "step": "bpf_stats_disabled"}
+{"app": "bcc/set", "event": "phase_done", "phase": "baseline_stop", "runner": "bcc_set", "status": "ok"}
+{"active_env_keys": [], "app": "bcc/set", "event": "native_loader_phase_env", "phase": "post_rejit_start", "runner": "bcc_set", "temporary_set_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", "BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO", "BPFREJIT_REPO_ROOT", "BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG", "BPFREJIT_SHIM_NATIVE_LOADER"], "temporary_unset_keys": ["BPFREJIT_NATIVE_DISABLE_MAP_LOWERING", "BPFREJIT_NATIVE_LINK_BINARY", "BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT", "BPFREJIT_SHIM_NATIVE_KMSG_PROGRESS", "BPFREJIT_SHIM_NATIVE_MANIFEST"]}
+{"app": "bcc/set", "event": "loadtime_plan_done", "runner": "bcc_set", "status": "verified_native_loader"}
+{"app": "bcc/set", "event": "phase_start", "phase": "post_rejit_start", "runner": "bcc_set", "workload": "stress_ng_bcc_hook_hot"}
+{"app": "bcc/set", "error": "BCC tool syscount exited before BPF programs were tracked by shim\nstderr tail:\nl\ni\nb\nb\np\nf\n:\n \ne\nl\nf\n:\n \ns\nk\ni\np\np\ni\nn\ng\n \nu\nn\nr\ne\nc\no\ng\nn\ni\nz\ne\nd\n \nd\na\nt\na\n \ns\ne\nc\nt\ni\no\nn\n(\n1\n1\n)\n \n.\nn\na\nt\ni\nv\ne\n_\nl\na\nb\n.\nr\no\nd\na\nt\na", "event": "phase_error", "phase": "post_rejit_start", "runner": "bcc_set"}
+{"app": "bcc/set", "error": "BCC tool syscount exited before BPF programs were tracked by shim\nstderr tail:\nl\ni\nb\nb\np\nf\n:\n \ne\nl\nf\n:\n \ns\nk\ni\np\np\ni\nn\ng\n \nu\nn\nr\ne\nc\no\ng\nn\ni\nz\ne\nd\n \nd\na\nt\na\n \ns\ne\nc\nt\ni\no\nn\n(\n1\n1\n)\n \n.\nn\na\nt\ni\nv\ne\n_\nl\na\nb\n.\nr\no\nd\na\nt\na", "event": "app_done", "status": "error"}
+{"app": "tetragon/observer", "event": "app_start", "runner": "tetragon", "workload": "stress_ng_tetragon_policy_hot"}
+{"app": "tetragon/observer", "event": "phase_start", "phase": "baseline_start", "runner": "tetragon", "workload": "stress_ng_tetragon_policy_hot"}
+{"active_env_keys": [], "app": "tetragon/observer", "event": "native_loader_phase_env", "phase": "baseline_start", "runner": "tetragon", "temporary_set_keys": ["BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+{"app": "tetragon/observer", "event": "phase_done", "phase": "baseline_start", "runner": "tetragon", "status": "ok"}
+{"app": "tetragon/observer", "event": "measurement_start", "phase": "baseline", "runner": "tetragon", "samples": 1, "workload": "stress_ng_tetragon_policy_hot"}
+{"app": "tetragon/observer", "event": "measurement_done", "phase": "baseline", "runner": "tetragon", "status": "ok"}
+{"app": "tetragon/observer", "event": "phase_start", "phase": "baseline_stop", "runner": "tetragon"}
+{"app": "tetragon/observer", "event": "phase_step", "phase": "baseline_stop", "runner": "tetragon", "step": "runner_stop_done"}
+{"app": "tetragon/observer", "event": "phase_step", "phase": "baseline_stop", "runner": "tetragon", "step": "quiesce_start"}
+{"app": "tetragon/observer", "event": "phase_step", "phase": "baseline_stop", "runner": "tetragon", "step": "quiesce_done"}
+{"app": "tetragon/observer", "event": "phase_step", "phase": "baseline_stop", "runner": "tetragon", "step": "bpf_stats_disabled"}
+{"app": "tetragon/observer", "event": "phase_done", "phase": "baseline_stop", "runner": "tetragon", "status": "ok"}
+{"active_env_keys": [], "app": "tetragon/observer", "event": "native_loader_phase_env", "phase": "post_rejit_start", "runner": "tetragon", "temporary_set_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", "BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO", "BPFREJIT_REPO_ROOT", "BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG", "BPFREJIT_SHIM_NATIVE_LOADER"], "temporary_unset_keys": ["BPFREJIT_NATIVE_DISABLE_MAP_LOWERING", "BPFREJIT_NATIVE_LINK_BINARY", "BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT", "BPFREJIT_SHIM_NATIVE_KMSG_PROGRESS", "BPFREJIT_SHIM_NATIVE_MANIFEST"]}
+{"app": "tetragon/observer", "event": "loadtime_plan_done", "runner": "tetragon", "status": "verified_native_loader"}
+{"app": "tetragon/observer", "event": "phase_start", "phase": "post_rejit_start", "runner": "tetragon", "workload": "stress_ng_tetragon_policy_hot"}
+{"app": "tetragon/observer", "error": "Tetragon exited before BPF programs were tracked by shim\nstdout tail:\nlevel=info msg=\"Starting tetragon\" version=v1.8.0-pre.0-79-g8ca052908\nlevel=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/opt/bpf-benchmark/repo-artifacts/arm64/tetragon btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-cri:false enable-deprecated-tracingpolicy-grpc:false enable-event-metrics:true enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-environment-variables:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: filter-environment-variables:[] force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address:127.0.0.1:39191 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-file: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ parents-map-enabled:false parents-map-entries:0 parents-map-size: pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true retprobes-cache-size:4096 server-address:127.0.0.1:46845 tracing-policy: tracing-policy-dir:/workspaces/repository/runner/assets/tetragon_policies use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"\nlevel=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=\"\"\nlevel=info msg=\"Tetragon pid file creation succeeded\" pid=1496 pidfile=/var/run/tetragon/tetragon.pid\nlevel=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/sys/fs/bpf/tetragon\nlevel=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux", "event": "phase_error", "phase": "post_rejit_start", "runner": "tetragon"}
+{"app": "tetragon/observer", "error": "Tetragon exited before BPF programs were tracked by shim\nstdout tail:\nlevel=info msg=\"Starting tetragon\" version=v1.8.0-pre.0-79-g8ca052908\nlevel=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/opt/bpf-benchmark/repo-artifacts/arm64/tetragon btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-cri:false enable-deprecated-tracingpolicy-grpc:false enable-event-metrics:true enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-environment-variables:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: filter-environment-variables:[] force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address:127.0.0.1:39191 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-file: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ parents-map-enabled:false parents-map-entries:0 parents-map-size: pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true retprobes-cache-size:4096 server-address:127.0.0.1:46845 tracing-policy: tracing-policy-dir:/workspaces/repository/runner/assets/tetragon_policies use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"\nlevel=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=\"\"\nlevel=info msg=\"Tetragon pid file creation succeeded\" pid=1496 pidfile=/var/run/tetragon/tetragon.pid\nlevel=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/sys/fs/bpf/tetragon\nlevel=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux", "event": "app_done", "status": "error"}
+{"app": "katran", "event": "app_start", "runner": "katran", "workload": "xdp_pktgen"}
+{"app": "katran", "event": "phase_start", "phase": "baseline_start", "runner": "katran", "workload": "xdp_pktgen"}
+{"active_env_keys": [], "app": "katran", "event": "native_loader_phase_env", "phase": "baseline_start", "runner": "katran", "temporary_set_keys": ["BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+[ 1037.896695] ipip: IPv4 and MPLS over IPv4 tunneling driver
+[ 1045.921164] NET: Registered PF_ALG protocol family
+{"app": "katran", "event": "phase_done", "phase": "baseline_start", "runner": "katran", "status": "ok"}
+{"app": "katran", "event": "measurement_start", "phase": "baseline", "runner": "katran", "samples": 1, "workload": "xdp_pktgen"}
+[ 1163.547349] pktgen: Packet Generator for packet performance testing. Version: 2.75
+{"app": "katran", "event": "measurement_done", "phase": "baseline", "runner": "katran", "status": "ok"}
+{"app": "katran", "event": "phase_start", "phase": "baseline_stop", "runner": "katran"}
+{"app": "katran", "event": "phase_step", "phase": "baseline_stop", "runner": "katran", "step": "runner_stop_done"}
+{"app": "katran", "event": "phase_step", "phase": "baseline_stop", "runner": "katran", "step": "quiesce_start"}
+{"app": "katran", "event": "phase_step", "phase": "baseline_stop", "runner": "katran", "step": "quiesce_done"}
+{"app": "katran", "event": "phase_step", "phase": "baseline_stop", "runner": "katran", "step": "bpf_stats_disabled"}
+{"app": "katran", "event": "phase_done", "phase": "baseline_stop", "runner": "katran", "status": "ok"}
+{"active_env_keys": [], "app": "katran", "event": "native_loader_phase_env", "phase": "post_rejit_start", "runner": "katran", "temporary_set_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", "BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO", "BPFREJIT_REPO_ROOT", "BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG", "BPFREJIT_SHIM_NATIVE_LOADER"], "temporary_unset_keys": ["BPFREJIT_NATIVE_DISABLE_MAP_LOWERING", "BPFREJIT_NATIVE_LINK_BINARY", "BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT", "BPFREJIT_SHIM_NATIVE_KMSG_PROGRESS", "BPFREJIT_SHIM_NATIVE_MANIFEST"]}
+{"app": "katran", "event": "loadtime_plan_done", "runner": "katran", "status": "verified_native_loader"}
+{"app": "katran", "event": "phase_start", "phase": "post_rejit_start", "runner": "katran", "workload": "xdp_pktgen"}
+{"app": "katran", "error": "Katran server did not expose an attached XDP program on katran0", "event": "phase_error", "phase": "post_rejit_start", "runner": "katran"}
+{"app": "katran", "error": "Katran server did not expose an attached XDP program on katran0", "event": "app_done", "status": "error"}
+{
+  "status": "error",
+  "artifact_run_dir": "/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000007_589955",
+  "artifact_metadata": "/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000007_589955/metadata.json"
+}
+[ 1338.005789] sysrq: Power Off
+[ 1338.014265] reboot: Power down
+test "$(cat "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root/qemu-status")" = "0"
+install -d "/workspaces/repository/corpus/results"
+cp -a "/workspaces/repository/kprog/arm64/build/app-runtime-v4/root/workspaces/repository/corpus/results/." "/workspaces/repository/corpus/results/"
+make[1]: Leaving directory '/workspaces/repository'

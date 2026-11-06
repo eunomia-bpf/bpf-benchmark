@@ -5,7 +5,7 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[3]
 source=Path('/workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64')
-library=Path('/workspaces/.agent-state/kprog-lanes/T/context-v2-datasec/arm64')
+library=Path('/workspaces/.agent-state/kprog-lanes/T/context-v2-map-value/arm64')
 base=Path(sys.argv[1]).resolve()
 kernel=base/'kernel'
 boot=kernel/'arch/arm64/boot';boot.mkdir(parents=True,exist_ok=True)

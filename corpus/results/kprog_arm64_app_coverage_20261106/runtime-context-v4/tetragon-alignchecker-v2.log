@@ -1,0 +1,8 @@
+install -d /workspaces/repository/kprog/arm64/build/tetragon-alignchecker/objs /workspaces/repository/kprog/arm64/build/tetragon-alignchecker/deps
+taskset -c 16-23 make -C /workspaces/repository/vendor/repos/tetragon/bpf -f Makefile -f /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/TetragonObjects.mk CLANG=clang \
+	BPF_TARGET_ARCH=arm64 OBJSDIR=/workspaces/repository/kprog/arm64/build/tetragon-alignchecker/objs/ DEPSDIR=/workspaces/repository/kprog/arm64/build/tetragon-alignchecker/deps/ \
+	/workspaces/repository/kprog/arm64/build/tetragon-alignchecker/objs/bpf_alignchecker.o
+make[1]: Entering directory '/workspaces/repository/vendor/repos/tetragon/bpf'
+clang -I./ -Wall -Werror -Wimplicit-fallthrough -Wno-address-of-packed-member -Wno-compare-distinct-pointer-types -Wno-unknown-warning-option -O2 -I ./libbpf/ -I ./include/ -I ./lib -I ./errmetrics/ -target bpf -mcpu=v2 -g -D__TARGET_ARCH_arm64 -fdebug-default-version=4    -c alignchecker/bpf_alignchecker.c -o /workspaces/repository/kprog/arm64/build/tetragon-alignchecker/objs/bpf_alignchecker.o
+make[1]: Leaving directory '/workspaces/repository/vendor/repos/tetragon/bpf'
+install -m 0644 /workspaces/repository/kprog/arm64/build/tetragon-alignchecker/objs/bpf_alignchecker.o /workspaces/repository/vendor/build/arm64/tetragon/bpf_alignchecker.o

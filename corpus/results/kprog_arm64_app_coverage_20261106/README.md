@@ -747,3 +747,15 @@ retain sources, complete simulator snapshots, compiled BPF and raw outcomes.
 This closes the scalar access-width bridge finding; CPU-feature-dependent
 pair atomicity and complete per-application certificates continue as active
 implementation and validation work.
+
+## Eight-vCPU runtime retry: Tetragon and Katran baseline counters
+
+[The recovered runtime-v4 census](runtime-context-v4/README.md) retains 23 BCC,
+287 Tetragon and one Katran baseline program-counter rows. All 480 startup
+attempts and ten native replacements are recorded. Eight guest CPUs close
+Katran's CPU-affinity startup error; installing all upstream ARM objects lets
+Tetragon reach its baseline workload. Native startup still exposes the exact
+artifact/stub failures recorded there, with no native workload counter rows.
+The BCC payload archive captures the stale proof lookup fixed by aefcd9c71;
+its manifest is extracted from that payload. The next run uses the repaired
+triple pairing and strict all-probe generation-bound startup artifacts.

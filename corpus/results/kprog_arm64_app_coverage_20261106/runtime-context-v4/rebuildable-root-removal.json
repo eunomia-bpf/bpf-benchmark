@@ -1,0 +1,12 @@
+[
+  {
+    "path": "kprog/arm64/build/app-runtime-v4/root",
+    "bytes": 3472554614,
+    "rebuild": "make qemu-context-v2-root with the recorded RUNTIME_BASE/image/kernel inputs"
+  },
+  {
+    "path": "kprog/arm64/build/app-qemu-root",
+    "bytes": 2011338344,
+    "rebuild": "make qemu-context-v2-root with the recorded RUNTIME_BASE/image/kernel inputs"
+  }
+]
