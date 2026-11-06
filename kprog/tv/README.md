@@ -27,6 +27,37 @@ exchange and compare/exchange. One indivisible atomic event contains the old
 bytes; the complete resulting memory and returned registers contain the update.
 Failed compare/exchange preserves both byte values and initialization state.
 
+The private proof-input ABI is defined in
+`kinsn/module/include/native_lab_input.h` (ABI 2, eight-byte MOV64K marker,
+source nibble 9). Kinds 1/2/3 expose native body-entry SP, code base and saved
+outer return address; kind 4 preserves the current R1 word while erasing
+pointer provenance. These are explicit invocation inputs, with no guest memory
+access or helper event. The verifier quantifies over all 64-bit scalar values,
+requires initialized R1 for kind 4, checks the exact kind/version/destination,
+and requires pointer-leak privilege and the x86/arm64 host JIT. Constant blinding
+preserves the marker. Entry inputs are restricted to the main body. Both JITs
+implement the same values for standalone proof execution, including the
+physical CPU frame when the BPF stack is private. Bound native execution removes
+the private proof instructions as part of the existing proof-region restoration.
+The entry relation must instantiate the inputs with the same native invocation;
+source/body stack and code offsets, rewritten register mappings and return
+provenance still require that program's ABI certificate. An arena offset is
+never an absolute native address.
+
+`make -C kprog/tv input-negative-check` extracts the actual clang-compiled marker block
+and proves its result for arbitrary 64-bit SP/code/return/argument values and
+arbitrary memory, with unchanged memory and empty effects. The resulting
+execution theorem uses `BPFPath.evaluate_sound`; it is an input-ABI component,
+not a whole-program native certificate. Mutated stack/return selectors, numeric
+source and input ABI each fail the semantic theorem; the unchanged ELF passes.
+Kernel regressions check stable actual
+entry values, 64-bit numeric identity, malformed markers, unreadable arguments,
+unsafe branches that an erroneous MOV-immediate interpretation would prune,
+input markers inside generation-bound native proofs, and forced constant
+blinding. The private input
+verifier/JIT implementation and its native invocation relation are part of the
+explicit kernel ABI trusted base.
+
 `BPFPath.evaluate` checks a finite instruction-position witness against every
 actual successor, with no forced branch or PC update. `evaluate_sound` proves
 that success gives a real execution prefix with exactly the same full BPF state

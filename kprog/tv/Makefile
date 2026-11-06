@@ -64,7 +64,7 @@ build-$(ARCH)/bpf_$(ARCH)_native_lab.c: ../../kinsn/module/$(ARCH)/bpf_$(ARCH)_n
 	install -d build-$(ARCH)
 	cp $< $@
 
-build/test-binding-kernel: test_binding_kernel.c ../../kinsn/module/include/native_lab_binding.h
+build/test-binding-kernel: test_binding_kernel.c test_native_inputs.h ../../kinsn/module/include/native_lab_input.h ../../kinsn/module/include/native_lab_binding.h
 	install -d build
 	$(CC) -Wall -Wextra -Werror -O2 -g -D__EXPORTED_HEADERS__ \
 		-I../../vendor/linux-framework/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
@@ -127,12 +127,12 @@ build/wrong-readonly/simulator.bpf.o: test_simulator.bpf.c
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		-I/usr/include/x86_64-linux-gnu -c $< -o $@
 
-build-arm64/test-binding-kernel: test_binding_kernel.c ../../kinsn/module/include/native_lab_binding.h
+build-arm64/test-binding-kernel: test_binding_kernel.c test_native_inputs.h ../../kinsn/module/include/native_lab_input.h ../../kinsn/module/include/native_lab_binding.h
 	install -d build-arm64
 	aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -g -static -D__EXPORTED_HEADERS__ \
 		-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
 		$< ../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
-		-lelf -lz -lzstd -o $@
+		-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -o $@
 
 kernel-check-arm64: build-arm64/test-binding-kernel
 	$(MAKE) kernel-build-arm64
@@ -174,3 +174,25 @@ build-kernel-arm64/.copied:
 	install -d build-kernel-arm64
 	cp -a --reflink=auto ../../vendor/build/arm64/linux/. build-kernel-arm64/
 	touch $@
+
+.PHONY: input-check
+build/input-block.bpf.o: input_block.bpf.c ../../kinsn/module/include/native_lab_input.h
+	install -d build
+	clang -O2 -target bpf -c $< -o $@
+
+build/inputs/CompiledBlocks.lean: build/input-block.bpf.o extract_blocks.py
+	install -d build/inputs
+	python3 extract_blocks.py $< $@
+
+INPUT_BLOCK_DIR ?= build/inputs
+input-check: bpf-check build/inputs/CompiledBlocks.lean
+	$(MAKE) input-certificate
+
+.PHONY: input-certificate input-negative-check
+input-certificate:
+	cd ../formal && LEAN_PATH=../tv/$(INPUT_BLOCK_DIR):../tv/build lake env lean -R ../tv/$(INPUT_BLOCK_DIR) \
+		-o ../tv/$(INPUT_BLOCK_DIR)/CompiledBlocks.olean ../tv/$(INPUT_BLOCK_DIR)/CompiledBlocks.lean
+	cd ../formal && LEAN_PATH=../tv/$(INPUT_BLOCK_DIR):../tv/build lake env lean -R ../tv ../tv/InputCertificate.lean
+
+input-negative-check: input-check
+	python3 test_compiled_blocks.py input

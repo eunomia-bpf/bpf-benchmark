@@ -1,0 +1,31 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build
+cd ../formal && lake env lean -R ../tv -o ../tv/build/Composition.olean ../tv/Composition.lean
+'KProgTV.validated_execution' depends on axioms: [propext]
+'KProgTV.native_effects_checked' depends on axioms: [propext]
+cd ../formal && lake env lean -R ../tv -o ../tv/build/BPF.olean ../tv/BPF.lean
+cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv -o ../tv/build/BPFPath.olean ../tv/BPFPath.lean
+'KProgTV.BPFPath.evaluate_sound' depends on axioms: [propext, Quot.sound]
+cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv ../tv/BPFChecks.lean
+install -d build
+clang -O3 -target bpf -I../../vendor/libbpf/include/uapi \
+	-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include/bpf \
+	-I/usr/include/x86_64-linux-gnu -c cmov_block.bpf.c -o build/cmov-block.bpf.o
+python3 extract_blocks.py build/cmov-block.bpf.o build/CompiledBlocks.lean
+make cmov-certificate
+make[1]: Entering directory '/workspaces/repository/kprog/tv'
+cd ../formal && LEAN_PATH=../tv/build:../tv/build lake env lean -R ../tv/build \
+	-o ../tv/build/CompiledBlocks.olean ../tv/build/CompiledBlocks.lean
+cd ../formal && LEAN_PATH=../tv/build:../tv/build lake env lean -R ../tv ../tv/CmovCertificate.lean
+'KProgTV.CmovCertificate.compiled_value' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+'KProgTV.CmovCertificate.compiled_execution' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+make[1]: Leaving directory '/workspaces/repository/kprog/tv'
+python3 test_compiled_blocks.py
+unchanged clang artifact: PASS
+wrong-condition: PASS (compiled artifact rejected)
+wrong-successor: PASS (compiled artifact rejected)
+wrong-source: PASS (compiled artifact rejected)
+make: Leaving directory '/workspaces/repository/kprog/tv'

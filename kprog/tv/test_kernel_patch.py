@@ -26,6 +26,8 @@ with tempfile.TemporaryDirectory() as directory:
         target.write_bytes(subprocess.run(["git", "show", "HEAD:" + name],
             cwd=here.parents[1] / "vendor/linux-framework", check=True, capture_output=True).stdout)
     apply(kernel, patch)
+    assert (kernel / "include/linux/bpf_native_input.h").read_bytes() == (
+        here.parents[1] / "kinsn/module/include/native_lab_input.h").read_bytes()
     modified = source.read_bytes()
     assert modified != base
     assert b"env->allow_uninit_stack = false;" in modified

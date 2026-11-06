@@ -33,6 +33,46 @@ def externals : Environment where
     .ok ⟨instruction.imm.signExtend 64 + 1000, 2⟩
   helper := fun _ arguments m => .ok ⟨arguments.foldl (· + ·) 37, m, [], fun _ => 99⟩
 
+-- The private marker must never decode as MOV imm=2 or expose fake effects.
+def inputExternals : Environment :=
+  { externals with nativeInput := fun
+      | .stackPointer => .ok 0x12340000
+      | .codeBase => .ok 0xffff000011112222
+      | .returnAddress => .ok 0xffff000033334444 }
+
+theorem native_entry_input_uses_bound_value :
+    (step inputExternals #[0xb7,0x90,1,0,2,0,0,0] initial).map
+      (fun r => (r.state.regs 0, r.state.pc, r.events, r.fault)) =
+      .ok (0x12340000, 1, [], none) := by rfl
+
+theorem native_code_input_keeps_all_bits :
+    (step inputExternals #[0xb7,0x90,2,0,2,0,0,0] initial).map
+      (fun r => r.state.regs 0) = .ok 0xffff000011112222 := by rfl
+
+theorem native_return_input_keeps_all_bits :
+    (step inputExternals #[0xb7,0x90,3,0,2,0,0,0] initial).map
+      (fun r => r.state.regs 0) = .ok 0xffff000033334444 := by rfl
+
+theorem numeric_input_preserves_word_and_memory (s : State) :
+    execute inputExternals #[] s ⟨0xb7, 0, 9, 4, 2⟩ =
+      .ok ⟨setReg { s with pc := s.pc + 1 } 0 (s.regs 1), [], none⟩ := by rfl
+
+theorem unbound_entry_input_rejected :
+    step externals #[0xb7,0x90,1,0,2,0,0,0] initial =
+      .error "unbound native proof input" := by rfl
+
+theorem native_input_rejects_wrong_abi :
+    step inputExternals #[0xb7,0x90,1,0,1,0,0,0] initial =
+      .error "invalid native proof input ABI/kind/register" := by rfl
+
+theorem native_input_rejects_wrong_destination :
+    step inputExternals #[0xb7,0x91,1,0,2,0,0,0] initial =
+      .error "invalid native proof input ABI/kind/register" := by rfl
+
+theorem native_input_rejects_unknown_kind :
+    step inputExternals #[0xb7,0x90,5,0,2,0,0,0] initial =
+      .error "invalid native proof input ABI/kind/register" := by rfl
+
 -- JMP32 JA takes imm32, not off16. This catches the long-EXIT bug directly.
 theorem gotol_uses_signed_imm32 :
     (step externals #[0x06,0,2,0, 0,0x80,0,0] initial).map (fun r => r.state.pc) =

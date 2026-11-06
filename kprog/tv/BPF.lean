@@ -49,7 +49,14 @@ def helperArguments (call : HelperCall) (s : State) : List Word :=
   (List.finRange call.argumentCount.val).map fun r =>
     s.regs ⟨r.val + 1, by have := r.isLt; have := call.argumentCount.isLt; omega⟩
 
+/-- Values from the same native invocation, after its host JIT prologue.
+    A program certificate must prove the source/body ABI relation separately. -/
+inductive NativeInput where
+  | stackPointer | codeBase | returnAddress
+  deriving Repr, DecidableEq
+
 structure Environment where
+  nativeInput : NativeInput → Except String Word := fun _ => .error "unbound native proof input"
   immediate : Instruction → BitVec 32 → State → Except String Word
   helperCall : Instruction → State → Except String HelperCall
   helper : HelperCall → List Word → Memory → Except String HelperResult
@@ -178,7 +185,16 @@ def execute (env : Environment) (program : Array Byte) (s : State) (i : Instruct
   let cls := i.code % 8
   let operation := i.code / 16
   let next := { s with pc := s.pc + 1 }
-  if cls = 4 ∨ cls = 7 then
+  if i.code = 0xb7 ∧ i.src = 9 then
+    if i.dst ≠ 0 ∨ i.imm ≠ 2 then throw "invalid native proof input ABI/kind/register"
+    let value ← match i.offset.toNat with
+      | 1 => env.nativeInput .stackPointer
+      | 2 => env.nativeInput .codeBase
+      | 3 => env.nativeInput .returnAddress
+      | 4 => pure (s.regs 1)
+      | _ => throw "invalid native proof input ABI/kind/register"
+    pure ⟨setReg next 0 value, [], none⟩
+  else if cls = 4 ∨ cls = 7 then
     if i.dst = 10 then throw "BPF arithmetic overwrites frame pointer"
     if operation = 13 then
       let count := i.imm.toNat / 8

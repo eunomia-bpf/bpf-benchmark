@@ -528,6 +528,8 @@ static void helper_map_regressions(void)
 	free(large);
 }
 
+#include "test_native_inputs.h"
+
 int main(void)
 {
 	/* A static PID 1 allows AArch64 full-system testing without a runtime
@@ -544,6 +546,8 @@ int main(void)
 		if (close(fd))
 			fatal("close initramfs module");
 	}
+	native_input_regressions();
+	native_input_blinding_regressions();
 	discover();
 	upload("", native, sizeof(native), 0);
 	upload(".proof", &proof, sizeof(proof), 0);
@@ -598,6 +602,7 @@ int main(void)
 	helper_pointer_regressions();
 	readonly_data_regressions();
 	readonly_overlap_regression();
+	bound_native_input_regressions();
 	if (close(module_fd))
 		fatal("close module BTF");
 	puts("kernel binding regression: PASS");

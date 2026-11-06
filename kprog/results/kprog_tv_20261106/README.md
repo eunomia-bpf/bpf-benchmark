@@ -177,3 +177,42 @@ artifact staging; `readonly-stage2-arm64-inputs.tar.gz` preserves the actual
 runtime initramfs, compiled/generated inputs and source snapshot. This closes
 the previously recorded readonly-data load failure. It does not discharge the
 per-program reference-state/trace proof.
+
+Proof-entry ABI 2: actual compiled inputs and both kernel JITs
+-----------------------------------------------------------
+
+The dedicated eight-byte private proof instruction supplies native body SP,
+body code base and saved outer return address as arbitrary initialized 64-bit
+scalars. Numeric R1 preserves all actual bits and erases pointer provenance.
+The shared header is copied byte-for-byte into the kernel patch, checked by the
+patch regression. Binding envelope version remains 1/64 bytes; this input ABI
+is separate from the native-loader bound-proof C ABI.
+
+`make -C kprog/tv input-negative-check` passes the actual clang ELF theorem for
+all 64-bit entry/argument values and arbitrary memory, unchanged memory, empty
+effects and a real byte-decoded BPF execution. Selector/source/ABI mutations
+fail the semantic theorem; unchanged ELF passes. Axioms are `propext` and
+`Quot.sound`. Existing CMOVE compiled-artifact positives and mutations pass.
+
+`make -C kprog/tv -o kernel-build-x86 -o linker-build kernel-check` and
+`make -C kprog/tv kernel-check-arm64` pass: stable actual entry addresses,
+nonzero high address bits, exact numeric 64-bit identity, forced constant
+blinding, malformed ABI/kind/destination rejection, unreadable R1 rejection,
+and unsafe scalar accesses hidden by an erroneous MOV-constant interpretation
+reject. All four input kinds also pass through actual sealed native proof
+lowering/restoration and native execution. Existing binding/helper/map/readonly
+regressions and actual x86 manifest/raw loader checks remain passing.
+
+The first Arm attempt failed to find cross libelf/zlib/zstd. The checker
+Makefile now uses the existing repository AArch64 sysroot explicitly; the final
+run passes without manual environment setup. Both attempt logs are retained.
+`proof-input-abi2-inputs.tar.gz` retains exact source/proof ELF/Lean extraction,
+mutation artifacts and logs, both test binaries/modules, Arm runtime initramfs,
+kernel configurations and raw kernel build logs; the manifest hashes kernels
+as well. Logs retain original bytes, including Arm serial CRLF.
+
+This is the proof-input component and real kernel binding evidence. Full
+per-program TV, the same-invocation native/source ABI relation, and closing the
+production SP/LR counterexamples require the remaining C/A/V/T integration;
+none is certified by these component runs. The marker verifier/JIT semantics
+are explicitly part of the kernel ABI trusted base.
