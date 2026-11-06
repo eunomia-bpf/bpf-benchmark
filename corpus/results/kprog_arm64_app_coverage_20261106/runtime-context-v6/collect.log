@@ -1,0 +1,5 @@
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/runtime_results.py corpus/results/kprog_arm64_app_coverage_20261106/runtime-context-v6 arm64_qemu_corpus_19700101_000009_080977
+All116 startup load attempts retained: {'loaded': 108, 'unfinished': 8}
+| Application | Baseline counter rows | Native counter rows | App status |
+| --- | ---: | ---: | --- |
+| bcc/set | 23 | 0 | error |

@@ -43,7 +43,7 @@ elif sys.argv[2]=='generate':
         run([ROOT/'kprog/arm64/build/app-native-link/release/native-link','--input',native,
              '--symbol','bpf_main','--mode','proof','--preserve-entry-abi','--output',proof])
         functions,rodata=gen.parse_native_linked_program(gen.Bench(name,'bpf_main','raw'),phase/'native')
-        section={1:'socket',2:'kprobe',9:'cgroup/sock',6:'xdp'}[entry['prog_type']]
+        section={1:'socket',2:'kprobe',9:'cgroup/sock',6:'xdp',26:'fentry/native_startup_probe',5:'tracepoint/native/startup'}[entry['prog_type']]
         text=gen.render_program(name,'bpf_main',functions,'raw',rodata16=rodata,
             linked_exit=True,program_section=section)
         (phase/(name+'.bpf.c')).write_text(text)

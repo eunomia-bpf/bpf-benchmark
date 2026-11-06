@@ -5,7 +5,7 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[3]
 source=Path('/workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64')
-library=Path('/workspaces/.agent-state/kprog-lanes/T/context-v2-func-ip/arm64')
+library=Path('/workspaces/.agent-state/kprog-lanes/T/context-v2-source-map/arm64')
 base=Path(sys.argv[1]).resolve()
 kernel=base/'kernel'
 boot=kernel/'arch/arm64/boot';boot.mkdir(parents=True,exist_ok=True)
@@ -22,6 +22,7 @@ kinsn=base/'kinsn';kinsn.mkdir(exist_ok=True)
 custom=list(source.glob('*.ko'))
 if len(custom)!=11: raise RuntimeError(f'expected the matched11 ARM kinsn modules, found{len(custom)}')
 for path in custom: shutil.copy2(path,kinsn/path.name)
+shutil.copy2(library/'bpf_arm64_native_lab.ko',kinsn/'bpf_arm64_native_lab.ko')
 runner=base/'runner';runner.mkdir(exist_ok=True)
 for path in (ROOT/'runner').iterdir():
     if path.name=='build-arm64-llvmbpf': continue

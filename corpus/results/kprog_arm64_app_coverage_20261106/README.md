@@ -825,3 +825,12 @@ All four real W/X store variants are checked after helper expansion, along
 with sideband rejection on proof/x86 input. All75 Rust tests and both release
 builds pass. T can bind its per-site choice descriptor to these exact positions;
 exclusive-store semantics and unsafe failure branches remain active repair.
+
+## Strict BCC source-map runtime retry
+
+[Runtimev6](runtime-context-v6/README.md) records34 bound replacements,
+including eight runtime-FD map-value probes and real fentry_vfs_read. All116
+startup attempts and23 baseline counter rows remain. Six helper113 proofs
+reject; native workload counters are absent. Their one-byte native frame and
+ARM stack-SUB provenance loss are identified defects under repair, with the
+exact packaged32-entry payload retained before further staging changes.
