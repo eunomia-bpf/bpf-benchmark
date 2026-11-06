@@ -1,0 +1,13 @@
+{
+  "repository": "f5692f1151ddcf9b6b363e6e45a4428a83a37b6e",
+  "note": "Paired artifacts hashed immediately after both completed runs; shared worktree source changes are recorded in frozen per-fixture snapshots.",
+  "artifacts": {
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "ca0c7afa8ee4ce7afe5424b552333e8ae661f7b8ac0840effc5f17d160b7b145",
+    "kprog/tv/build-kernel-arm64/arch/arm64/boot/Image": "3b4978dab2904c83b2d69bc9a3f53aa75b78c4d1bf37e110535deac3c8d70236",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "beb8dbd492079863c737158446e533da3e4c338f2a02642899a8ba9a946db682",
+    "kprog/tv/build-arm64/bpf_arm64_native_lab.ko": "32ae1890c62723bbc4ab297620ad8a2d141cb0bd7bf8b32505995a15cf46ba11",
+    "kprog/fidelity/build-x86/bound-probe": "cfacc5c1fac20bb03ed7c6c11972d2b971487fc9f4a6d59f49aa5d5bad2de8bc",
+    "kprog/fidelity/build-arm64/bound-probe": "a4727079d5c0da5f4003ad75e26cc0ce626fa52f69c48c85909c3faf11f91e51",
+    "kprog/fidelity/build-arm64/negative-bound.cpio": "583ae292ac3547d8c91d6654deadf70b2361ea61eb745e72a8ee2fdfbc133da2"
+  }
+}

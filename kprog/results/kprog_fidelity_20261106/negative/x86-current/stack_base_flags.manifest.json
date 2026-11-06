@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-x86/negative-current/stack_base_flags.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/negative-current/stack_base_flags.bpf.o",
+      "simulator_program": "stack_base_flags_x86_sim_xdp"
+    }
+  ]
+}

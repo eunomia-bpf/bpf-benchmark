@@ -3,10 +3,10 @@
 - `differential/README.md`: real x86 CPU matrix and counterexamples; static
   AArch64 harness delivered. Both Spark core types pass the width-fix matrix
   on hardware; both also pass the newer register-cell replay.
-- `negative/README.md`: baseline findings and fresh bound-path sweeps on both
-  ISAs; original14x86reject, but the15th stack-base flag case accepts on both
-  ISAs. Arm also retains three ABI acceptances. These are open safety bugs.
-  Exact diagnostics and repair ownership are retained.
+- `negative/README.md`: current17-case bound suites reject16 on x86 and15 on
+  Arm. All11 original negatives reject on both; stack-base flags still accept
+  on both, and Arm entry return-address flags also accept. These remain open
+  safety bugs. Earlier ABI/return findings and their repairs stay recorded.
 - `helper-map/README.md`: all13 x86 cases pass bound execution; after immutable
   readonly-data binding repair, all13 Arm QEMU cases also pass exact results,
   return values and nonzero-generation checks. The earlier12/13 is retained.

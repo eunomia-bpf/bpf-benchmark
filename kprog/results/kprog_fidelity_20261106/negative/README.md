@@ -215,3 +215,45 @@ taskset -c 16-23 make -C kprog/fidelity negative-build NEGATIVE_BUILD=build-x86/
 taskset -c 16-23 make -C kprog/fidelity negative-bound-kvm NEGATIVE_BUILD=build-x86/negative-stack-base NEGATIVE_BOUND_OUT=../results/kprog_fidelity_20261106/negative/x86-stack-base
 taskset -c 16-23 make -C kprog/fidelity negative-bound-qemu ARM_NEGATIVE_BOUND_BUILD=build-arm64/negative-stack-base ARM_NEGATIVE_BOUND_OUT=../results/kprog_fidelity_20261106/negative/arm64-stack-base
 ```
+
+## Current17-case bound replay after entry-provenance repairs
+
+The new frozen suites retain all11 original negatives and add immediate-PUSH,
+outer-return and ABI/address observations. **x86 rejects16/17; Arm rejects15/17**.
+All11 original negatives reject on both ISAs. Exact stage/message/command for
+every case is in `x86-current/outcomes.json` or `arm64-current/outcomes.json`;
+the compressed logs preserve complete verifier diagnostics.
+
+| Case group | x86 KVM | Arm full-system QEMU |
+| --- | --- | --- |
+| Packet read/write past end; missing end check | verifier rejects3 | verifier rejects3 |
+| Map OOB; nullable result; invalid helper argument | verifier rejects3 | verifier rejects3 |
+| Stack OOB; uninitialized stack | verifier rejects2 | verifier rejects2 |
+| Unbounded loop | loader: `native_kernel bound proof contains no BPF exit` | same |
+| Unbounded indirect jump; unsupported instruction | specialization rejects2 | specialization rejects2 |
+| Undefined entry register/flags; helper-clobbered register | specialization rejects3 | specialization rejects3 |
+| Immediate-PUSH unsafe branch / overwritten return register | verifier rejects PUSH branch | verifier rejects overwritten X30 |
+| Overwritten entry return slot / entry return-address flags | specialization rejects return-slot overwrite | **accepted address-flags finding** |
+| Balanced stack-base flags | **accepted finding** | **accepted finding** |
+
+x86's return-slot case now reports
+`native return address lacks call/entry provenance at 0xd: ret`, following
+C's `ac10dbfab` repair. Its immediate-PUSH case reaches the real invalid-memory
+verifier rejection instead of the earlier incorrect PUSH0 specialization.
+Arm's return-register overwrite rejects with A's RETURN provenance; its
+three previous undefined-ABI findings now reject with A's dependency checker.
+The remaining three accepted outcomes across ISAs are still safety defects.
+Unsafe native code is never executed; accepted bound loads record nonzero
+generation only. A guessed stack/code base or a blanket instruction exclusion
+would not repair these address-state relations.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity bound-probe-build negative-build NEGATIVE_BUILD=build-x86/negative-current
+taskset -c 16-23 make -C kprog/fidelity negative-bound-kvm NEGATIVE_BUILD=build-x86/negative-current NEGATIVE_BOUND_OUT=../results/kprog_fidelity_20261106/negative/x86-current
+taskset -c 16-23 make -C kprog/fidelity negative-bound-qemu ARM_NEGATIVE_BOUND_BUILD=build-arm64/negative-current ARM_NEGATIVE_BOUND_OUT=../results/kprog_fidelity_20261106/negative/arm64-current
+```
+
+Each VM has2vCPUs/2GiB and runs only on host CPUs16–23. Both suite commands
+return nonzero for the retained findings, with zero infrastructure failures.
+`current-negative-artifacts.tar.gz` preserves native/proof inputs, compiler
+diagnostics and the exact production include/import snapshots for both ISAs.
