@@ -936,8 +936,9 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(SRC);   \
 		if (X86_SIM_L_REG_TAG(SRC) != X86_SIM_TAG_ABI)           \
 			X86_SIM_L_BARRIER_VAR(__x86_l_disp);              \
-		void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +           \
-				     __x86_l_disp;                       \
+		void *__x86_l_addr = KPROG_X86_REG_PRESENT(SRC) ?         \
+			(__u8 *)__x86_l_base_ptr + __x86_l_disp :         \
+			(void *)(unsigned long)__x86_l_disp;              \
 		switch (X86_SIM_L_MEM_READ_SRC(SRC, __x86_l_mem_width)) {\
 		case KPROG_X86_MEM_SRC_STACK:                            \
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
@@ -1812,7 +1813,9 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		__u8 __x86_l_src_width =                                  \
 			KPROG_X86_MOVX_SRC_WIDTH((AUX), __x86_l_width);   \
 		__u8 __x86_l_shape = KPROG_X86_MOVX_SHAPE((OP));          \
-		__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);            \
+		__u64 __x86_l_value = X86_SIM_L_READ_REG_WIDTH_SHIFT(   \
+			KPROG_X86_MOVX_SOURCE_REG(SRC), __x86_l_src_width, \
+			KPROG_X86_MOVX_SOURCE_SHIFT(SRC));            \
 		if (__x86_l_shape ==                                      \
 		    KPROG_X86_MOVX_SHAPE_SIGN_EXTEND) {                   \
 			__x86_l_value = x86_sign_extend(__x86_l_value,    \
@@ -2102,22 +2105,8 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 					KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX));\
 			}                                                 \
 		} else if (KPROG_X86_MOVX_REG_HANDLED(OP)) {              \
-			__u8 __x86_l_src_width =                          \
-				KPROG_X86_MOVX_SRC_WIDTH((AUX),           \
-					__x86_l_width);                   \
-			__u8 __x86_l_shape = KPROG_X86_MOVX_SHAPE((OP));   \
-			__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);     \
-			if (__x86_l_shape ==                               \
-			    KPROG_X86_MOVX_SHAPE_SIGN_EXTEND) {            \
-				__x86_l_value = x86_sign_extend(           \
-					__x86_l_value, __x86_l_src_width); \
-			} else {                                           \
-				__x86_l_value = x86_apply_width(           \
-					__x86_l_value, __x86_l_src_width); \
-			}                                                  \
-			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
-						  __x86_l_width);        \
-			} else if (KPROG_X86_MOV_LOAD_HANDLED(OP)) {              \
+			X86_SIM_L_EXEC_MOVX_REG((OP), (DST), (SRC), (FLAGS), (AUX)); \
+		} else if (KPROG_X86_MOV_LOAD_HANDLED(OP)) {              \
 				X86_SIM_L_EXEC_MOV_LOAD((OP), (DST), (SRC), (FLAGS),\
 							(AUX), (IMM));          \
 			} else if (KPROG_X86_DISP_MOVBE_LOAD_HANDLED(OP)) {     \
