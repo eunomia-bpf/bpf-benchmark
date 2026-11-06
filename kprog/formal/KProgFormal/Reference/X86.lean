@@ -21,6 +21,17 @@ def CmovWidth.bytes : CmovWidth → Nat
   | .w32 => 4
   | .w64 => 8
 
+/-- Long-mode stack transfers have 16- or 64-bit operands; 32-bit stack
+operands cannot be encoded. REX.W does not override the operand-size prefix. -/
+inductive StackWidth
+  | w16 | w64
+  deriving DecidableEq, Repr
+
+def StackWidth.bytes : StackWidth → Nat | .w16 => 2 | .w64 => 8
+
+def StackWidth.registerWidth : StackWidth → CmovWidth
+  | .w16 => .w16 | .w64 => .w64
+
 structure State where
   gpr : Register → Word
   rflags : Word
@@ -179,6 +190,7 @@ def bitBaseSource (width : CmovWidth) (source : Source) (index : BitIndex)
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | pop (width : StackWidth) (dst : Register) (nextPc : Word)
   | cmov (width : CmovWidth) (cc : Fin 16) (dst : Register)
       (source : Source) (nextPc : Word)
   | bzhi (width : BzhiWidth) (dst : Register) (source : Source)
@@ -188,6 +200,14 @@ inductive Instruction
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .pop width dst nextPc =>
+      match readSource s (.memory (s.gpr 4)) width.bytes with
+      | .error fault => ⟨s, [.fault fault], some fault⟩
+      | .ok (value, events) =>
+          let advanced := s.gpr 4 + BitVec.ofNat 64 width.bytes
+          let afterStack := fun r => if r = 4 then advanced else s.gpr r
+          let result := cmovValue width.registerWidth true (afterStack dst) value
+          ⟨{ s with gpr := (fun r => if r = dst then result else afterStack r), pc := nextPc }, events, none⟩
   | .cmov width cc dst source nextPc =>
       match readSource s source width.bytes with
       | .error fault => ⟨s, [.fault fault], some fault⟩
@@ -213,6 +233,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .pop .. => 0xffffffffffffffff
   | .cmov .. => 0xffffffffffffffff
   | .bt .. => 0xfffffffffffff76b
   | .bzhi .. => 0xffffffffffffffeb
@@ -324,6 +345,21 @@ ModRM, SIB and signed displacement. No caller-supplied decode is trusted. -/
 def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   let (p, _, count) := prefixes bytes.toList {} 0
   let first ← byteAt bytes count
+  if 0x58 ≤ first ∧ first ≤ 0x5f then
+    let length := count + 1
+    if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
+    let dst := registerCode (first % 8 + 8 * (p.rex % 2))
+    let width := if p.operand16 then StackWidth.w16 else .w64
+    return .pop width dst (s.pc + BitVec.ofNat 64 length)
+  if first = 0x8f then
+    let modrm ← byteAt bytes (count + 1)
+    if modrm / 64 ≠ 3 ∨ (modrm / 8) % 8 ≠ 0 then
+      throw "expected POP register encoding"
+    let length := count + 2
+    if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
+    let dst := registerCode (modrm % 8 + 8 * (p.rex % 2))
+    let width := if p.operand16 then StackWidth.w16 else .w64
+    return .pop width dst (s.pc + BitVec.ofNat 64 length)
   if first = 0xc4 then
     let vex1 ← byteAt bytes (count + 1)
     let vex2 ← byteAt bytes (count + 2)

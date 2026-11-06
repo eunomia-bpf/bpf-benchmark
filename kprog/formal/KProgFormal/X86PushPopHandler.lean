@@ -27,8 +27,8 @@ def x86PushPopToOp : X86PushPopOp -> GeneratedX86PushPop.Op
   | .pop => .pop
 
 /-- Independent statement of the step direction each body takes: `PUSH`
-decrements the stack pointer before its store, `POP` increments it after its
-load and destination write. -/
+decrements the stack pointer before its store; `POP` loads, increments the old
+stack pointer, then writes its destination. -/
 def x86PushPopStepDirectionSpec : X86PushPopOp -> StepDirection
   | .push => .preDecrement
   | .pop => .postIncrement

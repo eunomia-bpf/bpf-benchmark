@@ -158,6 +158,44 @@ def main():
                                    "value": list(bytes.fromhex("efcdab8967452381")),
                                    "initialized": True}]
         assert out == expected, (request, out, expected)
+    # POP reads the old stack, advances it, then writes the destination. Include
+    # aliasing SP with a low16 carry, full RSP replacement, REX.B and faults.
+    pop_cases = []
+    for code, dst, width, rsp, value, fault in [
+            ([0x5C], 4, 8, 0x2000, 0x3000, False),
+            ([0x66, 0x5C], 4, 2, 0xFFFF, 0x1234, False),
+            ([0x41, 0x5C], 12, 8, 0x2000, 0xFEDCBA9876543210, False),
+            ([0x66, 0x41, 0x5C], 12, 2, 0x2000, 0x1234, False),
+            ([0x8F, 0xC4], 4, 8, 0x2000, 0x3000, False),
+            ([0x66, 0x8F, 0xC0], 0, 2, 0x2000, 0x1234, False),
+            ([0x58], 0, 8, 0x2000, 0x3000, True)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = code
+        request["state"]["registers"][4] = rsp
+        request["state"]["memory"] = [
+            dict(address=rsp + i, value=b, readable=not fault, writable=False,
+                 initialized=i != 0) for i, b in enumerate(value.to_bytes(width, "little"))]
+        expected = copy.deepcopy(request["state"])
+        expected.update(defined_flags=(1 << 64) - 1, fault=None, events=[])
+        if fault:
+            reason = dict(kind="read", address=rsp, bytes=width)
+            expected.update(fault=reason, events=[dict(kind="fault", fault=reason)])
+        else:
+            expected["pc"] += len(code)
+            expected["registers"][4] = rsp + width
+            old = expected["registers"][dst]
+            expected["registers"][dst] = value if width == 8 else (old & ~0xFFFF) | value
+            expected["events"] = [dict(kind="read", address=rsp,
+                                       value=list(value.to_bytes(width, "little")),
+                                       initialized=False)]
+        pop_cases.append((request, expected))
+    run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
+                         input="".join(json.dumps(r) + "\n" for r, _ in pop_cases),
+                         text=True, stdout=subprocess.PIPE, check=True)
+    outputs = [json.loads(line) for line in run.stdout.splitlines()]
+    assert len(outputs) == len(pop_cases)
+    for (request, expected), out in zip(pop_cases, outputs):
+        assert out == expected, (request, out, expected)
     # Reject rather than truncate malformed wire words and duplicate mappings.
     malformed = copy.deepcopy(base)
     malformed["state"]["registers"][0] = 1 << 64
@@ -191,7 +229,7 @@ def main():
         if got & 0x80000000:
             got -= 1 << 32
         assert got == disp, (insn, encoded, got)
-    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, BZHI VEX/result flags, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
+    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, BZHI VEX/result flags, POP stack/destination alias and faults, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
 
 
 if __name__ == "__main__":
