@@ -3728,6 +3728,10 @@ def figure_coverage(log: pathlib.Path) -> tuple[int, int, int, set[int]]:
     # disk would make the coverage figures describe an earlier tree while
     # every other claim in the run described this one.
     counts, _, _ = read_log(log) if log.exists() else (set(), 0, 0)
+    # A macro name may list widths inside TeX-escaped braces
+    # (`...\_REG\{8,16,32,64\}`), and the digits there read as one
+    # numeral. Such a group is removed before figures are collected.
+    flat = re.sub(r"\\\{\d[\d,]*(?:,\d[\d,]*)*\\\}", "", flat)
     figs = {int(x.replace(",", "")) for x in
             re.findall(r"(?<![\w.,])(\d[\d,]{2,})(?![\w,])", flat)}
     bound = len(figs & counts)

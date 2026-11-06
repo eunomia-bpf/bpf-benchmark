@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0962 - a macro name was being read as a figure
+
+One of the leftover figures was not a figure. A macro name lists its widths
+inside TeX-escaped braces, and the digits and commas inside those braces read to
+the collection pattern as a single large numeral, so a name became a figure with
+no occurrence in the text of its own.
+
+It was found by the opposite of the usual way: not by reading a figure the
+pattern missed, but by looking for the text of a figure the pattern admitted and
+finding none. Three did not occur; two were comma-grouped forms the search
+itself had missed, and the third was this artifact.
+
+The pattern now removes an escaped-brace width list before collecting, which
+drops the figure count from four hundred and sixty-nine to four hundred and
+sixty-eight and the leftover count by one. The report's other lines move with it
+because the population they are counted against did.
+
+Census unchanged; the figure population no longer includes a macro name.
+
 ### Step 0961 - a group's middle member is a member
 
 The slash-separated form needed one more correction. An identifier group can
