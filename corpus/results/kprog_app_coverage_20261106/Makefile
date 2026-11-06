@@ -240,3 +240,36 @@ ret-after-guest:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod $(ROOT)/kprog/tv/build-x86/bpf_x86_native_lab.ko
 	python3 $(HERE)/check_return.py after bound
+
+native-dispatch-test:
+	taskset -c 8-15 cargo test --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+
+native-dispatch-build:
+	taskset -c 8-15 cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml --target-dir $(HERE)/native-dispatch-link
+	python3 $(HERE)/check_native_dispatch.py prepare
+	cc -c $(HERE)/native-dispatch/join_dispatch.S -o $(HERE)/native-dispatch/join_dispatch.o
+	cc -c $(HERE)/native-dispatch/cmov_dispatch.S -o $(HERE)/native-dispatch/cmov_dispatch.o
+	cc -c $(HERE)/native-dispatch/got_dispatch.S -o $(HERE)/native-dispatch/got_dispatch.o
+	python3 $(HERE)/check_native_dispatch.py link
+	cc -no-pie -O2 $(HERE)/native-dispatch/host.c $(HERE)/native-dispatch/*.host.S -o $(HERE)/native-dispatch/host-check
+	$(HERE)/native-dispatch/host-check
+	clang -g -O2 -target bpf -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/native-dispatch/join_dispatch.bpf.c -o $(HERE)/native-dispatch/join_dispatch.bpf.o
+	clang -g -O2 -target bpf -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/native-dispatch/cmov_dispatch.bpf.c -o $(HERE)/native-dispatch/cmov_dispatch.bpf.o
+	clang -g -O2 -target bpf -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/native-dispatch/got_dispatch.bpf.c -o $(HERE)/native-dispatch/got_dispatch.bpf.o
+	clang -g -O2 -target bpf -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/native-dispatch/source.bpf.c -o $(HERE)/native-dispatch/join_dispatch.source.bpf.o
+	clang -g -O2 -target bpf -DINVERT -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/native-dispatch/source.bpf.c -o $(HERE)/native-dispatch/cmov_dispatch.source.bpf.o
+	clang -g -O2 -target bpf -DGOT_RESULT -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/native-dispatch/source.bpf.c -o $(HERE)/native-dispatch/got_dispatch.source.bpf.o
+
+native-dispatch-bound-build: native-dispatch-build
+	$(MAKE) -C $(ROOT)/kprog/libnativeloader BUILD_DIR=build-cdispatch
+	c++ -std=c++20 -Wall -Wextra -Werror -O2 -D__EXPORTED_HEADERS__ -DNATIVE_LINK_PATH='"$(HERE)/native-dispatch-link/release/native-link"' -I$(ROOT)/vendor/linux-framework/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include $(ROOT)/kprog/fidelity/bound_probe.cpp $(ROOT)/kprog/libnativeloader/build-cdispatch/libnative_loader.a $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -o $(HERE)/native-dispatch/bound-probe
+	install -m 0644 $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage $(HERE)/native-dispatch/bzImage
+	install -m 0644 $(ROOT)/kprog/tv/build-x86/bpf_x86_native_lab.ko $(HERE)/native-dispatch/bpf_x86_native_lab.ko
+
+native-dispatch-kvm: native-dispatch-bound-build
+	taskset -c 8-15 vng --run $(HERE)/native-dispatch/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile native-dispatch-guest'
+
+native-dispatch-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod $(HERE)/native-dispatch/bpf_x86_native_lab.ko
+	python3 $(HERE)/check_native_dispatch.py bound

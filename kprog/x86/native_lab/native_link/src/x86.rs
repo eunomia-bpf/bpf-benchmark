@@ -1,10 +1,11 @@
 use anyhow::{anyhow, bail, Result};
 use iced_x86::{
     BlockEncoder, BlockEncoderOptions, BlockEncoderResult, Code, Decoder, DecoderOptions,
-    FlowControl, Instruction, InstructionBlock, Mnemonic, OpKind, Register,
+    ConditionCode, FlowControl, Instruction, InstructionBlock, InstructionInfoFactory, Mnemonic, OpAccess,
+    OpKind, Register,
 };
 use object::{Object, ObjectSection, ObjectSymbol, RelocationFlags, RelocationTarget};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet, VecDeque};
 
 use crate::*;
 
@@ -16,9 +17,106 @@ const X86_BPF_PROG_BPF_FUNC_OFFSET_KEY: &str = "__native_x86_bpf_prog_bpf_func_o
 const X86_TAIL_CALL_OFFSET_KEY: &str = "__native_x86_tail_call_offset";
 const X86_JMP_END_PLACEHOLDER_TARGET: u64 = 0x4000_0000;
 const NATIVE_LAB_RELOC_HELPER_CALL_REL32: u32 = 1;
+const NATIVE_LAB_RELOC_HELPER_POINTER: u32 = 7;
 const X86_HELPER_CALL_REL32_SLOT: [u8; 5] = [0xE8, 0, 0, 0, 0];
 type SymbolKey = (object::SectionIndex, u64);
 type LocalSiteKey = (object::SectionIndex, u64, u64);
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+enum X86Callee {
+    Id(u64),
+    Symbol(String),
+}
+
+/// Finite reaching definitions, independent of byte order at CFG joins.
+/// Missing registers mean unknown, so an unknown predecessor cannot be erased
+/// by a later-known predecessor. Values come only from literal/GOT definitions.
+fn x86_callee_flow(
+    instructions: &[Instruction],
+    got: &HashMap<u64, String>,
+    external_calls: &HashSet<u64>,
+) -> Result<HashMap<u64, BTreeSet<X86Callee>>> {
+    type Values = HashMap<Register, BTreeSet<X86Callee>>;
+    if instructions.is_empty() { bail!("empty x86 callee-flow input"); }
+    let indices: HashMap<_, _> = instructions.iter().enumerate().map(|(i,x)| (x.ip(),i)).collect();
+    let mut states: Vec<Option<Values>> = vec![None; instructions.len()];
+    states[0] = Some(Values::new());
+    let mut queue = VecDeque::from([0]);
+    let mut factory = InstructionInfoFactory::new();
+    while let Some(i) = queue.pop_front() {
+        let insn = &instructions[i];
+        let incoming = states[i].as_ref().expect("queued reaching state exists");
+        let mut next = incoming.clone();
+        for used in factory.info(insn).used_registers() {
+            if matches!(used.access(), OpAccess::Write | OpAccess::CondWrite |
+                        OpAccess::ReadWrite | OpAccess::ReadCondWrite) {
+                if let Some(reg) = x86_gpr64_family(used.register()) { next.remove(&reg); }
+            }
+        }
+        if insn.op_count() >= 2 && insn.op0_kind() == OpKind::Register && insn.op0_register().size() >= 4 {
+            let dst = x86_gpr64_family(insn.op0_register());
+            let value = if insn.mnemonic() == Mnemonic::Mov {
+                if let Some((_,v)) = x86_mov_imm_to_gpr64(insn) {
+                    Some(BTreeSet::from([X86Callee::Id(if insn.op0_register().size()==4 {v & 0xffff_ffff} else {v})]))
+                } else if insn.op1_kind() == OpKind::Register {
+                    x86_gpr64_family(insn.op1_register()).and_then(|src| incoming.get(&src)).map(|values| {
+                        values.iter().map(|v| match v {
+                            X86Callee::Id(n) if insn.op0_register().size()==4 => Some(X86Callee::Id(n & 0xffff_ffff)),
+                            _ if insn.op0_register().size()==8 => Some(v.clone()),
+                            _ => None,
+                        }).collect::<Option<BTreeSet<_>>>()
+                    }).flatten()
+                } else if insn.op0_register().size()==8 {
+                    got.get(&insn.ip()).map(|name| BTreeSet::from([X86Callee::Symbol(name.clone())]))
+                } else { None }
+            } else if insn.condition_code()!=ConditionCode::None && insn.op0_register().size()==8 {
+                // CMOV selects either reaching value; flags are not guessed.
+                dst.and_then(|d| incoming.get(&d)).and_then(|a| {
+                    let b = if insn.op1_kind()==OpKind::Register {
+                        x86_gpr64_family(insn.op1_register()).and_then(|r| incoming.get(&r)).cloned()
+                    } else { got.get(&insn.ip()).map(|n| BTreeSet::from([X86Callee::Symbol(n.clone())])) };
+                    b.map(|b| a.union(&b).cloned().collect())
+                })
+            } else { None };
+            if let (Some(dst),Some(value)) = (dst,value) { next.insert(dst,value); }
+        }
+        let flow = insn.flow_control();
+        if matches!(flow, FlowControl::Call | FlowControl::IndirectCall) {
+            let canonical_helper = external_calls.contains(&insn.ip()) ||
+                x86_indirect_call_register(insn).and_then(|r| incoming.get(&r)).is_some();
+            if canonical_helper { clear_x86_call_clobbered_registers(&mut next); }
+            else { next.clear(); } // A native code callee may write any GPR.
+        }
+        let mut successors = Vec::new();
+        if matches!(flow, FlowControl::ConditionalBranch | FlowControl::UnconditionalBranch) {
+            if let Some(target) = indices.get(&insn.near_branch_target()) { successors.push(*target); }
+        }
+        if flow == FlowControl::IndirectBranch {
+            // Until its finite code targets are resolved, it may enter any
+            // instruction with unknown registers. Never choose the last ID.
+            next.clear();
+            successors.extend(0..instructions.len());
+        } else if !matches!(flow, FlowControl::Return | FlowControl::UnconditionalBranch |
+                            FlowControl::Interrupt | FlowControl::Exception) && i+1 < instructions.len() {
+            successors.push(i+1);
+        }
+        for target in successors {
+            let joined = match &states[target] {
+                None => next.clone(),
+                Some(old) => old.iter().filter_map(|(reg,a)| next.get(reg)
+                    .map(|b| (*reg,a.union(b).cloned().collect()))).collect(),
+            };
+            if states[target].as_ref() != Some(&joined) {
+                states[target] = Some(joined);
+                queue.push_back(target);
+            }
+        }
+    }
+    Ok(instructions.iter().zip(states).filter_map(|(insn,state)| {
+        let reg = x86_indirect_call_register(insn)?;
+        state?.remove(&reg).map(|values| (insn.ip(),values))
+    }).collect())
+}
 
 fn symbol_key(sym: &SymInfo) -> SymbolKey {
     (sym.section_index, sym.address)
@@ -622,6 +720,8 @@ enum PatchKind {
     /// must patch the rel32 displacement after the blob lands in executable
     /// memory.
     HelperCallRel32 { target_addr: u64 },
+    HelperPointer { target_addr: u64 },
+    HelperDispatch { targets: Vec<(u64, u64)> },
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
     /// patches the immediate field with the live kernel map pointer.
     MapImmediate { name: String, imm_offset: usize },
@@ -1009,12 +1109,6 @@ fn x86_immediate_helper_load_before_call(
     }
 }
 
-fn x86_known_helper_id_load(insn: &Instruction) -> Option<(Register, u64)> {
-    let (reg, helper_id) = x86_mov_imm_to_gpr64(insn)?;
-    bpf_helper_name_from_id(helper_id)?;
-    Some((reg, helper_id))
-}
-
 fn x86_symbol_has_immediate_helper_id(bytes: &[u8], sym_addr: u64, helper_id: u64) -> Result<bool> {
     let mut decoder = Decoder::with_ip(64, bytes, sym_addr, DecoderOptions::NONE);
     while decoder.can_decode() {
@@ -1200,8 +1294,17 @@ pub(super) fn rewrite_x86(
         // inter-symbol call targets. Below we re-anchor each instruction
         // to a per-symbol IP=0 layout before encoding.
         let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
-        let mut helper_got_registers: HashMap<Register, String> = HashMap::new();
-        let mut helper_imm_registers: HashMap<Register, u64> = HashMap::new();
+        let decoded: Vec<_> = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE).into_iter().collect();
+        let got_defs = decoded.iter().filter_map(|insn| {
+            if insn.is_ip_rel_memory_operand() {
+                let patch = insn.ip() - sym.address + insn.len() as u64 - 4;
+                got_relocations.get(&local_site_key(sym,patch))
+                    .map(|name| (insn.ip(),name.clone()))
+            } else { None }
+        }).collect();
+        let external_calls = helper_call_sites.keys().filter_map(|key|
+            (key.0==sym.section_index && key.1==sym.address).then_some(sym.address+key.2)).collect();
+        let helper_targets = x86_callee_flow(&decoded,&got_defs,&external_calls)?;
         let mut map_symbol_registers: HashMap<Register, String> = HashMap::new();
 
         // Side table: per-entry patch kind, paired with each kept Instruction
@@ -1235,21 +1338,6 @@ pub(super) fn rewrite_x86(
                 remap_x86_entry_registers(&mut insn, &entry_abi_strip.register_renames)?;
             }
 
-            let mut helper_imm_load_reg = None;
-            if let Some((reg, helper_id)) =
-                x86_immediate_helper_load_before_call(&bytes, sym.address, local_ip, &insn)
-            {
-                helper_imm_registers.insert(reg, helper_id);
-                helper_imm_load_reg = Some(reg);
-                if !proof_mode {
-                    continue;
-                }
-            } else if let Some((reg, helper_id)) = x86_known_helper_id_load(&insn) {
-                helper_imm_registers.insert(reg, helper_id);
-                helper_imm_load_reg = Some(reg);
-            }
-
-            let mut helper_got_load_reg = None;
             if insn.mnemonic() == Mnemonic::Mov
                 && insn.op_count() >= 2
                 && insn.op0_kind() == OpKind::Register
@@ -1296,10 +1384,12 @@ pub(super) fn rewrite_x86(
                                     dst
                                 )
                             })?;
-                            helper_got_registers.insert(dst_family, target_name.clone());
-                            helper_got_load_reg = Some(dst_family);
                             map_symbol_registers.remove(&dst_family);
                             if !proof_mode {
+                                push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,local_ip,
+                                    build_x86_movabs_reg(dst,0)?,
+                                    Some(PatchKind::HelperPointer { target_addr: resolve_helper_target(
+                                        target_name,helper_addrs,"x86 helper GOT value")? }));
                                 resolved_got_relocations.insert(patch_key);
                                 continue;
                             }
@@ -1428,24 +1518,36 @@ pub(super) fn rewrite_x86(
                 let mut helper_call_name = helper_call_sites.get(&site_key).cloned();
                 if helper_call_name.is_none() {
                     if let Some(reg) = call_reg {
-                        if let Some(helper_id) = helper_imm_registers.get(&reg).copied() {
-                            let name = bpf_helper_name_from_id(helper_id).ok_or_else(|| {
-                                anyhow!(
-                                    "x86 immediate BPF helper id {} in {} at local offset {:#x} is unsupported",
-                                    helper_id,
-                                    sym.name,
-                                    local_ip
-                                )
-                            })?;
-                            helper_call_name = Some(name.to_string());
-                        } else {
-                            helper_call_name = helper_got_registers.get(&reg).cloned();
+                        if let Some(values) = helper_targets.get(&(sym.address+local_ip)) {
+                            if values.len() > 1 {
+                                if proof_mode {
+                                    local.push(insn); kinds.push(None); insn_local_ip.push(local_ip);
+                                } else if values.iter().all(|v| matches!(v,X86Callee::Id(_))) {
+                                    let targets = values.iter().map(|v| {
+                                        let X86Callee::Id(id) = v else { unreachable!() };
+                                        let name = bpf_helper_name_from_id(*id).ok_or_else(|| anyhow!("unknown helper ID {id}"))?;
+                                        Ok((*id,resolve_helper_target(name,helper_addrs,"finite x86 helper dispatch")?))
+                                    }).collect::<Result<Vec<_>>>()?;
+                                    let dispatch = build_x86_helper_dispatch(reg)?;
+                                    push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,local_ip,
+                                        declared_bytes(&dispatch)?,Some(PatchKind::HelperDispatch { targets }));
+                                } else if values.iter().all(|v| matches!(v,X86Callee::Symbol(_))) {
+                                    // GOT loads now hold generation-bound actual helper addresses.
+                                    local.push(insn); kinds.push(None); insn_local_ip.push(local_ip);
+                                } else { bail!("mixed helper ID/address dispatch in {} at {local_ip:#x}",sym.name); }
+                                clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                                continue;
+                            }
+                            helper_call_name = match values.first() {
+                                Some(X86Callee::Id(id)) => Some(bpf_helper_name_from_id(*id)
+                                    .ok_or_else(|| anyhow!("unknown helper ID {id} in {} at {local_ip:#x}",sym.name))?.to_string()),
+                                Some(X86Callee::Symbol(name)) => Some(name.clone()),
+                                None => None,
+                            };
                         }
                     }
                 }
                 if let Some(name) = helper_call_name {
-                    clear_x86_call_clobbered_registers(&mut helper_imm_registers);
-                    clear_x86_call_clobbered_registers(&mut helper_got_registers);
                     if proof_mode {
                         local.push(insn);
                         kinds.push(None);
@@ -1668,18 +1770,6 @@ pub(super) fn rewrite_x86(
                     .cloned()
                     .map(|name| (dst, name))
             });
-            let helper_imm_reg_move = reg_move.and_then(|(dst, src)| {
-                helper_imm_registers
-                    .get(&src)
-                    .copied()
-                    .map(|helper_id| (dst, helper_id))
-            });
-            let helper_got_reg_move = reg_move.and_then(|(dst, src)| {
-                helper_got_registers
-                    .get(&src)
-                    .cloned()
-                    .map(|name| (dst, name))
-            });
             let written_reg = x86_written_gpr_family(&insn);
             local.push(insn);
             kinds.push(None);
@@ -1707,24 +1797,10 @@ pub(super) fn rewrite_x86(
             }
             if call_clobbers {
                 clear_x86_call_clobbered_registers(&mut map_symbol_registers);
-                clear_x86_call_clobbered_registers(&mut helper_got_registers);
-                clear_x86_call_clobbered_registers(&mut helper_imm_registers);
             } else if let Some((dst, name)) = map_reg_move {
                 map_symbol_registers.insert(dst, name);
             } else if let Some(reg) = written_reg {
                 map_symbol_registers.remove(&reg);
-            }
-            if let Some(reg) = written_reg {
-                if let Some((dst, name)) = helper_got_reg_move {
-                    helper_got_registers.insert(dst, name);
-                } else if helper_got_load_reg != Some(reg) {
-                    helper_got_registers.remove(&reg);
-                }
-                if let Some((dst, helper_id)) = helper_imm_reg_move {
-                    helper_imm_registers.insert(dst, helper_id);
-                } else if helper_imm_load_reg != Some(reg) {
-                    helper_imm_registers.remove(&reg);
-                }
             }
         }
 
@@ -1780,6 +1856,30 @@ pub(super) fn rewrite_x86(
     let mut relocs = Vec::new();
     for p in &patches {
         match &p.kind {
+            PatchKind::HelperPointer { target_addr } => {
+                relocs.push(RelocRecord {
+                    offset: u32::try_from(p.global_offset+2)?,
+                    kind: NATIVE_LAB_RELOC_HELPER_POINTER,
+                    target: *target_addr,
+                });
+            }
+            PatchKind::HelperDispatch { targets } => {
+                let max_id = targets.iter().map(|(id,_)| *id).max()
+                    .ok_or_else(|| anyhow!("empty native helper dispatch"))?;
+                let size = usize::try_from(max_id.checked_add(1)
+                    .and_then(|n| n.checked_mul(8)).ok_or_else(|| anyhow!("helper table overflow"))?)?;
+                let table = blob.len();
+                blob.resize(table.checked_add(size).ok_or_else(|| anyhow!("helper table overflow"))?,0);
+                let displacement = i32::try_from(table as i64 - (p.global_offset+7) as i64)?;
+                blob[p.global_offset+3..p.global_offset+7].copy_from_slice(&displacement.to_le_bytes());
+                for (id,target) in targets {
+                    relocs.push(RelocRecord {
+                        offset: u32::try_from(table+usize::try_from(*id)?*8)?,
+                        kind: NATIVE_LAB_RELOC_HELPER_POINTER,
+                        target: *target,
+                    });
+                }
+            }
             PatchKind::MapImmediate { name, imm_offset } => {
                 let offset = p
                     .global_offset
@@ -3644,6 +3744,18 @@ fn build_x86_helper_call_rel32_slot() -> Result<Instruction> {
     declared_bytes(&X86_HELPER_CALL_REL32_SLOT)
 }
 
+fn build_x86_helper_dispatch(reg: Register) -> Result<Vec<u8>> {
+    if reg == Register::RSP || x86_gpr64_family(reg) != Some(reg) {
+        bail!("helper dispatch needs a 64-bit non-SP register, got {reg:?}");
+    }
+    let index = reg.number() as u8;
+    // R10/R11 are caller-clobbered SysV scratch registers, never an argument.
+    // LEA and the SIB-indirect CALL preserve flags and the original helper ID.
+    let scratch = if reg==Register::R11 { 2 } else { 3 };
+    Ok(vec![0x4c,0x8d,0x05 | (scratch<<3),0,0,0,0,
+            0x41 | ((index>>3)<<1),0xff,0x14,0xc0 | ((index & 7)<<3) | scratch])
+}
+
 fn push_x86_helper_call_reloc(
     local: &mut Vec<Instruction>,
     kinds: &mut Vec<Option<PatchKind>>,
@@ -4316,8 +4428,8 @@ mod tests {
         ])?;
 
         assert_eq!(
-            x86_known_helper_id_load(&insns[0]),
-            Some((Register::RBX, 112))
+            x86_callee_flow(&insns,&HashMap::new(),&HashSet::new())?.get(&5),
+            Some(&BTreeSet::from([X86Callee::Id(112)]))
         );
         assert_eq!(x86_indirect_call_register(&insns[1]), Some(Register::RBX));
         Ok(())
@@ -4328,16 +4440,94 @@ mod tests {
         let insns = decode_x86(&[
             0xb8, 0x2d, 0x00, 0x00, 0x00, // mov eax, 45
             0x49, 0x89, 0xc5, // mov r13, rax
+            0x41, 0xff, 0xd5, // call r13
         ])?;
 
         assert_eq!(
-            x86_known_helper_id_load(&insns[0]),
-            Some((Register::RAX, 45))
+            x86_callee_flow(&insns,&HashMap::new(),&HashSet::new())?.get(&8),
+            Some(&BTreeSet::from([X86Callee::Id(45)]))
         );
         assert_eq!(
             x86_mov_gpr64_to_gpr64(&insns[1]),
             Some((Register::R13, Register::RAX))
         );
+        Ok(())
+    }
+
+    #[test]
+    fn helper_join_keeps_both_ids_and_unknown_predecessor() -> Result<()> {
+        let joined = decode_x86(&[0x85,0xff,0x74,7,0xb8,4,0,0,0,0xeb,5,
+                                 0xb8,148,0,0,0,0xff,0xd0,0xc3])?;
+        assert_eq!(x86_callee_flow(&joined,&HashMap::new(),&HashSet::new())?.get(&16),
+                   Some(&BTreeSet::from([X86Callee::Id(4),X86Callee::Id(148)])));
+        let unknown = decode_x86(&[0x85,0xff,0x74,5,0xb8,4,0,0,0,0xff,0xd0,0xc3])?;
+        assert!(!x86_callee_flow(&unknown,&HashMap::new(),&HashSet::new())?.contains_key(&9));
+        let cmov = decode_x86(&[0xb8,4,0,0,0,0xb9,148,0,0,0,0x85,0xff,
+                               0x48,0x0f,0x45,0xc1,0xff,0xd0,0xc3])?;
+        assert_eq!(x86_callee_flow(&cmov,&HashMap::new(),&HashSet::new())?.get(&16),
+                   Some(&BTreeSet::from([X86Callee::Id(4),X86Callee::Id(148)])));
+        Ok(())
+    }
+
+    #[test]
+    fn helper_got_join_keeps_both_symbol_definitions() -> Result<()> {
+        let insns = decode_x86(&[0x85,0xff,0x74,9,0x48,0x8b,0x05,0,0,0,0,
+                                 0xeb,7,0x48,0x8b,0x05,0,0,0,0,0xff,0xd0,0xc3])?;
+        let got = HashMap::from([(4,"bpf_get_current_pid_tgid".to_string()),
+                                 (13,"bpf_get_current_uid_gid".to_string())]);
+        assert_eq!(x86_callee_flow(&insns,&got,&HashSet::new())?.get(&20),
+                   Some(&got.values().cloned().map(X86Callee::Symbol).collect()));
+        // Truncating a joined pointer/literal cannot discard the pointer arm.
+        let mixed = decode_x86(&[0x85,0xff,0x74,7,0xb8,14,0,0,0,0xeb,7,
+                                 0x48,0x8b,0x05,0,0,0,0,0x89,0xc1,0xff,0xd1,0xc3])?;
+        let got = HashMap::from([(11,"bpf_get_current_uid_gid".to_string())]);
+        assert!(!x86_callee_flow(&mixed,&got,&HashSet::new())?.contains_key(&20));
+        Ok(())
+    }
+
+    #[test]
+    fn helper_flow_kills_partial_implicit_and_call_writes() -> Result<()> {
+        for (change,call) in [(&[0xb0,14][..],&[0xff,0xd0][..]),
+                              (&[0x48,0xf7,0xe1][..],&[0xff,0xd0][..]),
+                              (&[0xff,0xd0][..],&[0xff,0xd0][..])] {
+            let mut bytes = vec![0xb8,4,0,0,0];
+            bytes.extend_from_slice(change);
+            let at = bytes.len() as u64;
+            bytes.extend_from_slice(call);
+            bytes.push(0xc3);
+            assert!(!x86_callee_flow(&decode_x86(&bytes)?,&HashMap::new(),&HashSet::new())?.contains_key(&at));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn native_code_call_cannot_promise_sysv_register_preservation() -> Result<()> {
+        // A local native callee is instruction bytes, not an external ABI
+        // premise: it may overwrite RBX before the later indirect call.
+        let insns = decode_x86(&[0xbb,14,0,0,0,0xe8,3,0,0,0,0xff,0xd3,0xc3,
+                                 0xbb,15,0,0,0,0xc3])?;
+        assert!(!x86_callee_flow(&insns,&HashMap::new(),&HashSet::new())?.contains_key(&10));
+        assert_eq!(x86_callee_flow(&insns,&HashMap::new(),&HashSet::from([5]))?.get(&10),
+                   Some(&BTreeSet::from([X86Callee::Id(14)])));
+        Ok(())
+    }
+
+    #[test]
+    fn helper_table_dispatch_keeps_id_index_and_flags() -> Result<()> {
+        for reg in [Register::RAX,Register::RCX,Register::RDX,Register::RBX,
+                    Register::RBP,Register::RSI,Register::RDI,Register::R8,Register::R9,
+                    Register::R10,Register::R11,Register::R12,Register::R13,Register::R14,Register::R15] {
+            let insns = decode_x86(&build_x86_helper_dispatch(reg)?)?;
+            assert_eq!(insns.len(),2);
+            assert_eq!(insns[0].mnemonic(),Mnemonic::Lea);
+            assert_eq!(insns[0].op0_register(),if reg==Register::R11 {Register::R10} else {Register::R11});
+            assert_eq!(insns[1].flow_control(),FlowControl::IndirectCall);
+            assert_eq!(insns[1].memory_base(),insns[0].op0_register());
+            assert_eq!(insns[1].memory_index(),reg);
+            assert_eq!(insns[1].memory_index_scale(),8);
+            assert_eq!(insns[0].rflags_written(),0);
+            assert_eq!(insns[1].rflags_written(),0);
+        }
         Ok(())
     }
 

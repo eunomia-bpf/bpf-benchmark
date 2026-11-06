@@ -585,3 +585,49 @@ lane V under the shared one-check rule; C stopped its duplicate invocation and
 does not report that invocation as a pass. [Raw arithmetic evidence](arithmetic-artifacts.tar.gz)
 contains all1136 outcomes/commands, frozen constructor/header inputs, generated
 sources,42-case compilation records and focused regression output.
+
+## Native helper dispatch through CFG joins
+
+The native linker now joins reaching helper definitions instead of using the
+last helper seen in file order. It retains every reachable literal/GOT target,
+intersects knowledge across unknown predecessors and invalidates partial,
+implicit and call-clobbered writes. A native-code callee cannot be assumed to
+preserve registers merely because a canonical external helper does. Original
+helper-ID loads remain present, including when the ID is observed after a call.
+
+For several possible IDs, the linker emits LEA plus an indexed native CALL
+through a finite per-site table; its target is the original ID register.
+Table entries are zero-valued kind7 canonical-helper relocation slots, checked
+and patched by the existing generation-bound loader. Joined GOT helper loads
+retain their actual, separately bound pointer values. No runtime guard, trap,
+last-target choice or synthetic flag condition was added.
+
+`native-dispatch-test` passes65 Rust tests (including existing Arm map resolver
+regressions). Six actual CPU observations check both inputs of joined IDs,
+CMOV-selected IDs and joined GOT addresses, checking the selected callee as
+well as the native return. All three generated BPF proofs compile.
+`native-dispatch-kvm` runs the production manifest/linker/binding path: kernel
+and native return14/15/2 respectively; native program inspection finds2/2/1
+nonzero-generation chunks. These fixtures establish dispatch integration and
+execution, not six-application coverage or complete ISA-fidelity discharge.
+
+Reproduce with `make -f corpus/results/kprog_app_coverage_20261106/Makefile
+native-dispatch-test native-dispatch-kvm`. The linker and loader build into
+isolated C directories; KVM uses a copied matched x86 kernel/module from lane T
+(the11:10/11:25 pair). The first load attempt incorrectly supplied the prepared
+proof as a raw object and was processed twice; its failed diagnostic is kept.
+The corrected fixture uses the production raw-object/sibling-proof convention
+and explicitly requires both prebuilt and bound proofs. No loader change was
+needed for that correction.
+
+C's first full `make -C kprog/formal check` attempt stopped at lane V's
+concurrently edited `Refinement/Arm64Logic.lean` goals; that failure is retained.
+V corrected its logic lift and reran the sole full check to exit0 (333 Lean
+jobs, wire suites, retained C oracles and12 map-selection Rust regressions).
+The [complete final check log](native-dispatch-formal-final.log.gz) records
+that workspace pass. All65 Rust cases and three generation-bound cases also
+pass on the final C source. [Native dispatch evidence](native-dispatch-artifacts.tar.gz) contains
+commands, full logs, production source inputs, native/proof objects, zero-slot
+relocations, manifests, the isolated linker/probe, and the copied VM pair.
+Native code-target dispatch and actual app entry/map pairing remain active
+work; no application timing command is added from these fixture results.
