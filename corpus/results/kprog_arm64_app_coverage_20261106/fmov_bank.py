@@ -53,7 +53,7 @@ elif sys.argv[2]=='package':
     (root/'input.mem').write_bytes(bytes(64))
     shutil.copy2(ROOT/'kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link',root/'native-link')
     shutil.copy2('/usr/aarch64-linux-gnu/lib/libgcc_s.so.1',root/'lib/libgcc_s.so.1')
-    shutil.copy2('/workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/bpf_arm64_native_lab.ko',root/'native_lab.ko')
+    shutil.copy2(sys.argv[4],root/'native_lab.ko')
     for source in list(phase.glob('*.bpf.o'))+list(phase.glob('*.manifest.json'))+list((phase/'native').glob('*.native.o'))+list((phase/'native').glob('*.entry.proof.o')):
         shutil.copy2(source,root/'cases'/source.name)
     script=['#!/bin/sh','export PATH=/bin','busybox mount -t proc proc /proc || exit 1',
@@ -68,6 +68,8 @@ elif sys.argv[2]=='package':
         else:
             commands=[('proof',f'/loader --object /cases/{name}.bpf.o --program {name}_arm64_sim_xdp --input /input.mem --expected-result {expected} --expect-retval 2 --result-channel packet'),
                 ('native',f'/bound-probe /cases/{name}.source.bpf.o /cases/{name}.manifest.json {expected} 2')]
+            if row.get('bound_only'):
+                commands=commands[1:]
             expected_rc=0
         for kind,command in commands:
             script += [command+f' >/results/{name}.{kind}.log 2>&1','rc=$?',f'echo "$rc" >/results/{name}.{kind}.rc',f'if [ "$rc" != {expected_rc} ]; then status=1; fi']

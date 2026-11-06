@@ -326,7 +326,7 @@ readonly-bound-check: readonly-bound-package
 .PHONY: readonly-bound-artifacts
 readonly-bound-artifacts:
 	install -d $(HERE)/$(PHASE)/runtime
-	cp /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/Image $(HERE)/$(PHASE)/runtime/Image
+	cp $(BOUND_KERNEL) $(HERE)/$(PHASE)/runtime/Image
 	cp $(BUILD)/initramfs.cpio.gz $(HERE)/$(PHASE)/runtime/initramfs.cpio.gz
 	cp $(HERE)/Replay.mk $(HERE)/$(PHASE)/runtime/Makefile
 	tar --exclude=replay.tar.gz -C $(HERE)/$(PHASE) -czf $(BUILD)/replay.tar.gz .
@@ -418,14 +418,16 @@ fmov-bank-build: direct-header-generate
 		-L$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -o $(HERE)/$(PHASE)/bound-probe
 
 .PHONY: fmov-bank-package
+BOUND_KERNEL ?= /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/Image
+BOUND_MODULE ?= /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/bpf_arm64_native_lab.ko
 fmov-bank-package:
-	python3 $(HERE)/fmov_bank.py $(HERE)/$(PHASE) package $(BASE_INITRAMFS)
+	python3 $(HERE)/fmov_bank.py $(HERE)/$(PHASE) package $(BASE_INITRAMFS) $(BOUND_MODULE)
 
 .PHONY: fmov-bank-check
 fmov-bank-check: fmov-bank-package
 	install -d $(HERE)/$(PHASE)/verify
 	taskset -c 12-15 timeout 600 qemu-system-aarch64 -M virt -cpu max -smp 2 -m 2048 -nographic -no-reboot \
-		-kernel /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/Image -initrd $(BUILD)/initramfs.cpio.gz \
+		-kernel $(BOUND_KERNEL) -initrd $(BUILD)/initramfs.cpio.gz \
 		-fsdev local,id=results,path=$(HERE)/$(PHASE)/verify,security_model=none \
 		-device virtio-9p-device,fsdev=results,mount_tag=results \
 		-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >$(HERE)/$(PHASE)/qemu.log 2>&1
@@ -551,7 +553,31 @@ stack-sub-check:
 	$(ROOT)/kprog/formal/build/test_arm64_alu_operand_select_route_host
 	$(MAKE) -f $(HERE)/Makefile direct-header-generate
 
-.PHONY: code-dispatch-build
+.PHONY: code-dispatch-build exclusive-choice-check exclusive-choice-build
+exclusive-choice-build: direct-header-generate
+	python3 $(HERE)/exclusive_choice.py $(HERE)/$(PHASE)
+	for source in $(HERE)/$(PHASE)/*.bpf.c; do \
+		clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
+		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
+		-c $$source -o $${source%.c}.o || exit 1; \
+	done
+
+exclusive-choice-check: direct-header-generate
+	cd $(ROOT)/kprog/formal && python3 tools/generate_arm64_stlxr_spec.py
+	cd $(ROOT)/kprog/formal && taskset -c 16-19 lake build KProgFormal.Arm64Stlxr
+	cd $(ROOT)/kprog/formal && cc -Wall -Wextra -Werror -O2 -I. oracles/test_arm64_stlxr_host.c -o build/test_arm64_stlxr_host
+	$(ROOT)/kprog/formal/build/test_arm64_stlxr_host
+	cd $(ROOT)/kprog/formal && cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stlxr_route_host.c -o build/test_arm64_stlxr_route_host
+	$(ROOT)/kprog/formal/build/test_arm64_stlxr_route_host
+	cd $(ROOT)/kprog/formal && cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/stlxr_route_host.c -o build/stlxr_route_host
+	$(ROOT)/kprog/formal/build/stlxr_route_host
+	$(MAKE) -f $(HERE)/Makefile direct-header-generate
+
+.PHONY: exclusive-legacy-host-check
+exclusive-legacy-host-check:
+	cd $(ROOT)/kprog/formal && cc -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/value_route_host.c -o build/value_route_host
+	$(ROOT)/kprog/formal/build/value_route_host
+
 code-dispatch-build: direct-header-generate
 	python3 $(HERE)/code_dispatch.py $(HERE)/$(PHASE)
 	for source in $(HERE)/$(PHASE)/*.bpf.c; do \

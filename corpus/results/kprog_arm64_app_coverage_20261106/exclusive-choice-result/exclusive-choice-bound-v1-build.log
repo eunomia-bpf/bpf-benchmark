@@ -1,0 +1,19 @@
+python3 /workspaces/repository/kprog/arm64/generate_sim_dispatch.py
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive_choice.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive-choice-bound-v1
+native-link: arm64 entry=entry (92 bytes), 1 reachable symbol(s) total
+  - entry (vaddr 0x0, 92 bytes) [entry]
+native-link: wrote proof object 100 bytes, 0 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive-choice-bound-v1/native/exclusive_4_0.proof.o
+native-link: arm64 entry=entry (92 bytes), 1 reachable symbol(s) total
+  - entry (vaddr 0x0, 92 bytes) [entry]
+native-link: wrote proof object 100 bytes, 0 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive-choice-bound-v1/native/exclusive_4_1.proof.o
+native-link: arm64 entry=entry (92 bytes), 1 reachable symbol(s) total
+  - entry (vaddr 0x0, 92 bytes) [entry]
+native-link: wrote proof object 100 bytes, 0 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive-choice-bound-v1/native/exclusive_8_0.proof.o
+native-link: arm64 entry=entry (92 bytes), 1 reachable symbol(s) total
+  - entry (vaddr 0x0, 92 bytes) [entry]
+native-link: wrote proof object 100 bytes, 0 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive-choice-bound-v1/native/exclusive_8_1.proof.o
+for source in /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive-choice-bound-v1/*.bpf.c; do \
+	clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
+	-I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
+	-c $source -o ${source%.c}.o || exit 1; \
+done

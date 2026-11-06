@@ -1,0 +1,36 @@
+python3 /workspaces/repository/kprog/arm64/generate_sim_dispatch.py
+cd /workspaces/repository/kprog/formal && python3 tools/generate_arm64_stlxr_spec.py
+cd /workspaces/repository/kprog/formal && taskset -c 16-19 lake build KProgFormal.Arm64Stlxr
+✔ [6/7] Built KProgFormal.Generated.GeneratedArm64Stlxr
+✔ [7/7] Built KProgFormal.Arm64Stlxr
+Build completed successfully.
+cd /workspaces/repository/kprog/formal && cc -Wall -Wextra -Werror -O2 -I. oracles/test_arm64_stlxr_host.c -o build/test_arm64_stlxr_host
+/workspaces/repository/kprog/formal/build/test_arm64_stlxr_host
+arm64 stlxr host cross-check: OK (2056 cases)
+cd /workspaces/repository/kprog/formal && cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stlxr_route_host.c -o build/test_arm64_stlxr_route_host
+/workspaces/repository/kprog/formal/build/test_arm64_stlxr_route_host
+arm64 stlxr route host cross-check: OK (400 cases)
+cd /workspaces/repository/kprog/formal && cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/stlxr_route_host.c -o build/stlxr_route_host
+oracles/stlxr_route_host.c: In function ‘check_case’:
+oracles/stlxr_route_host.c:395:31: warning: passing argument 1 of ‘memcmp’ discards ‘volatile’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  395 |         if (memcmp(__a64_stack.b, stk_exp, STACK_BYTES) != 0) {
+      |                    ~~~~~~~~~~~^~
+In file included from oracles/stlxr_route_host.c:19:
+/usr/include/string.h:64:32: note: expected ‘const void *’ but argument is of type ‘volatile __u8 *’ {aka ‘volatile unsigned char *’}
+   64 | extern int memcmp (const void *__s1, const void *__s2, size_t __n)
+      |                    ~~~~~~~~~~~~^~~~
+oracles/stlxr_route_host.c:397:45: warning: passing argument 1 of ‘heap_read_state’ discards ‘volatile’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  397 |                                  __a64_stack.b);
+      |                                             ^
+oracles/stlxr_route_host.c:285:34: note: in definition of macro ‘REPORT_MEM_STATE’
+  285 |                 heap_read_state((MEM), 8);                                 \
+      |                                  ^~~
+oracles/stlxr_route_host.c:127:41: note: expected ‘const __u8 *’ {aka ‘const unsigned char *’} but argument is of type ‘volatile __u8 *’ {aka ‘volatile unsigned char *’}
+  127 | static void heap_read_state(const __u8 *src, unsigned n)
+      |                             ~~~~~~~~~~~~^~~
+/workspaces/repository/kprog/formal/build/stlxr_route_host
+arm64 stlxr route host cross-check: OK (686110 cases)
+make -f /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/Makefile direct-header-generate
+make[1]: Entering directory '/workspaces/repository'
+python3 /workspaces/repository/kprog/arm64/generate_sim_dispatch.py
+make[1]: Leaving directory '/workspaces/repository'

@@ -1,55 +1,6 @@
-/*
- * Step 0451 battery-local route oracle: drives the real AArch64 STLXR arm of
- * `ARM64_SIM_L_EXEC` (the `KPROG_ARM64_STLXR_HANDLED` gate) against an
- * independent model of the arm's two-commit lattice.
- *
- * Unlike the tracked oracle (`test_arm64_stlxr_host.c` — the raw status switch
- * over 256 opcode bytes), this oracle paints the sim-local arm's own line
- * paragraphs: the store body `ARM64_SIM_L_MEM_WRITE((SRC2), ARM64_REG_NONE,
- * (AUX), 0, 0, __a64_l_width, ARM64_SIM_L_READ_REG(SRC),
- * ARM64_SIM_L_REG_TAG(SRC))` — the address is the source-two pointer with no
- * index (the sentinel 0xff) and a literal-zero immediate regardless of the
- * AUX word, the width is the dispatcher's effective width, and the payload
- * and provenance tag come from the source register as the memory macros read
- * them — followed by the status commit
- * `ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_STLXR_VALUE((OP)),
- * ARM64_WIDTH_32)` AFTER the store (so a dst==base scene keeps the store's
- * pre-clobber address), with every out-of-family opcode reaching the caller
- * hook once and touching nothing. The model restates those lanes from the raw
- * opcode bytes:
- *
- *   arm(op)        = op != STLXR -> the counted hook once, no state change
- *   store          = MEM_WRITE restated: the stack body exactly when src2 is
- *                    the SP or a stack-tagged register (value read as a
- *                    bias-subtracted arena index like the dispatcher reads
- *                    the base), the plain little-endian byte store otherwise
- *                    at base+0 for `__a64_l_width` bytes from
- *                    `KPROG_ARM64_APPLY_WIDTH(value, width)`
- *   status         = 0 written to dst at exactly 32 bits through the same
- *                    register-write cell (SP takes the raw s64 slot, the
- *                    zero register and the no-register sentinel skip), the
- *                    tag always scalarized
- *
- * Scenes drive the two op types x the destination classes (scalar GPR, the
- * zero register, the SP, the base alias) x the payload register classes with
- * distinct provenance tags (scalar GPR, ABI-tagged GPR, the zero register,
- * the SP) x the base classes (a scalar heap pointer, a map-tagged heap
- * pointer, a stack-tagged register at the planted base value, the SP) x all
- * four effective width codes x five AUX words (the flags byte is the top
- * byte; the arm keeps the index sentinel and the zero immediate for every
- * aux, so the write address stays base+0 — the probe scenes pin that) and
- * direct-replay status-value selector scenes. A rewritten gate, a swapped
- * base or payload lane, a width repaint, a re-addressed store, a status write
- * re-targeted at another register or width, or a broken unsupported arm shows
- * up as a register, tag, SP, heap-byte, stack-byte, slot-tag, or hook-count
- * difference.
- *
- * Build and run:
- *   cd kprog/formal &&
- *   cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog \
- *      -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf \
- *      build/stlxr_route_host.c -o build/mut_stlxrroute &&
- *   ./build/mut_stlxrroute
+/* Full register, provenance, SP, heap/stack byte and slot-tag regression
+ * for success and failure. All previous destination/source/base/width/aux
+ * scenes remain; a failed store changes only its 32-bit status destination.
  */
 #define ARM64_SIM_ENABLE_STACK 1
 typedef unsigned char __u8;
@@ -66,6 +17,14 @@ typedef signed int __s32;
 #include <stdio.h>
 #include "stack_store_model_host.h"
 #include <string.h>
+#include <stdlib.h>
+
+static unsigned failure;
+unsigned long native_lab_exclusive_failure_choice(unsigned int site)
+{
+	if (site != 0) abort();
+	return failure;
+}
 
 static unsigned long unsupported_calls;
 static void arm64_sim_unsupported_opcode(void)
@@ -225,9 +184,9 @@ static void model_mem_write(unsigned base, unsigned width, __u64 value,
 static void model_write_status(unsigned dst)
 {
 	if (dst == ARM64_SP) {
-		msp = 0;
+		msp = failure;
 	} else if (dst != ARM64_XZR && dst != ARM64_REG_NONE) {
-		mreg[dst] = 0;
+		mreg[dst] = failure;
 		mtag[dst] = ARM64_SIM_TAG_SCALAR;
 	}
 }
@@ -241,7 +200,8 @@ static void model_stlxr(unsigned op, unsigned dst, unsigned src,
 		return;
 	}
 	(void)aux;
-	model_mem_write(base, width, m_reg(src), m_rtag(src));
+	if (!failure)
+		model_mem_write(base, width, m_reg(src), m_rtag(src));
 	model_write_status(dst);
 }
 
@@ -399,12 +359,13 @@ static void check_case(unsigned op, unsigned dst, unsigned src,
 		/* The direct lane replays the arm's own two-statement body
 		 * against the same planted state. */
 		do {
+			if (!NATIVE_LAB_EXCLUSIVE_FAILURE(0))
 			ARM64_SIM_L_MEM_WRITE(base, ARM64_REG_NONE, aux, 0, 0,
 					      width,
 					      ARM64_SIM_L_READ_REG(src),
 					      ARM64_SIM_L_REG_TAG(src));
 			ARM64_SIM_L_WRITE_REG_WIDTH(dst,
-					ARM64_SIM_L_STLXR_VALUE(op),
+					ARM64_SIM_L_STLXR_VALUE(op, failure),
 					ARM64_WIDTH_32);
 		} while (0);
 	else
@@ -470,9 +431,9 @@ static void check_selectors(void)
 			__u64 v;
 
 			cases++;
-			v = KPROG_ARM64_STLXR_VALUE(ops[o], widths[w],
+			v = KPROG_ARM64_STLXR_VALUE(ops[o], widths[w], failure,
 					arm64_sim_unsupported_opcode());
-			if (v != 0) {
+			if (v != (ops[o] == ARM64_OP_STLXR ? failure : 0)) {
 				printf("MISMATCH selector op=%#x width=%u "
 				       "value=%#llx\n", ops[o], widths[w],
 				       (unsigned long long)v);
@@ -494,8 +455,8 @@ static void check_selectors(void)
 		__u64 v;
 
 		cases++;
-		v = ARM64_SIM_L_STLXR_VALUE(ops[o]);
-		if (v != 0) {
+		v = ARM64_SIM_L_STLXR_VALUE(ops[o], failure);
+		if (v != (ops[o] == ARM64_OP_STLXR ? failure : 0)) {
 			printf("MISMATCH wrapper op=%#x value=%#llx\n",
 			       ops[o], (unsigned long long)v);
 			failures++;
@@ -547,6 +508,7 @@ int main(void)
 
 	/* The exec lane: the real STLXR exec arm over the whole lattice, one
 	 * full checker invocation per scene. */
+	for (failure = 0; failure < 2U; failure++) {
 	for (via = 0; via < 2U; via++)
 		for (o = 0; o < 2U; o++)
 			for (d = 0; d < 4U; d++)
@@ -561,8 +523,8 @@ int main(void)
 			}
 
 	check_selectors();
+	}
 
-	/* check_selectors disabled for bisect */
 
 	if (failures != 0) {
 		printf("arm64 stlxr route host cross-check: FAIL (%d)\n",

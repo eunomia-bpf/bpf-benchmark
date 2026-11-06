@@ -1,0 +1,25 @@
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=878
+stub fd_array_cnt=2 fd_array=0:9,1:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=42;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (b7) r1 = 2                        ; R1=2
+1: (7b) *(u64 *)(r10 -8) = r1         ; R1=2 R10=fp0 fp-8=2
+2: (b7) r2 = 0                        ; R2=0
+3: (7b) *(u64 *)(r10 -16) = r2        ; R2=0 R10=fp0 fp-16=0
+4: (79) r3 = *(u64 *)(r10 -16)        ; R3=0 R10=fp0 fp-16=0
+5: (57) r3 &= -256                    ; R3=0
+6: (7b) *(u64 *)(r10 -16) = r3        ; R3=0 R10=fp0 fp-16=0
+7: (b7) r0 = 16                       ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))
+8: (55) if r0 != 0x0 goto pc+5 14: R0=1 R1=2 R2=0 R3=0 R10=fp0 fp-8=2 fp-16=0
+14: (61) r1 = *(u32 *)(r2 +0)
+R2 invalid mem access 'scalar'
+processed 18 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+
+native_lab stub context: prog_type=6 blob_bytes=52 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374
+native_blob_diag: fnv64=d14d398858aea937 word_count=13 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=52 final_size_matches=1
+chunk_bytes=0:52
+reloc_targets=16:0x1000000007
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied

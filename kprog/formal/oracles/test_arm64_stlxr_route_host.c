@@ -1,34 +1,7 @@
-/*
- * Host cross-check for the AArch64 simulator's *store-release exclusive*
- * body (STLXR), driven through the real dispatcher `ARM64_SIM_L_EXEC`.
- *
- * Why this host exists. Step 0519 recorded twelve families the C chain routes
- * but the generated dispatch model does not name; STLXR was one of the five
- * left with only a model-side host. Of the remaining five it is the only one
- * with *two* observable effects -- the dispatcher stores the source value to
- * memory and then writes a status word to the destination -- so a misroute can
- * corrupt the atomic-success signal while leaving memory correct, or the
- * reverse.
- *
- * What is checked, for each case:
- *
- *   - the memory word the dispatcher stored equals the source value;
- *   - the destination holds the status the contract defines (zero, meaning
- *     the exclusive store succeeded) written at 32 bits -- so a write at the
- *     access width instead of the fixed status width is observable;
- *   - the source register is unchanged, since a store-exclusive reads it.
- *
- * The expected values are computed here rather than by calling the generated
- * macro, so a consistent error in the contract is not reproduced.
- *
- * Build and run:
- *   cd kprog/formal &&
- *   cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog \
- *      -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf \
- *      test_arm64_stlxr_route_host.c -o build/test_arm64_stlxr_route_host &&
- *   ./build/test_arm64_stlxr_route_host
+/* Exercise the real exclusive-store handler for both explicit outcomes.
+ * Failure must preserve every byte, success writes exactly its width, status
+ * is zero-extended at 32 bits and the source register remains unchanged.
  */
-
 #define ARM64_SIM_ENABLE_STACK 1
 typedef unsigned char __u8;
 typedef unsigned short __u16;
@@ -44,6 +17,15 @@ typedef signed int __s32;
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+static unsigned failure;
+unsigned long native_lab_exclusive_failure_choice(unsigned int site)
+{
+	if (site != 0) abort();
+	return failure;
+}
 
 static unsigned long unsupported_calls;
 static void arm64_sim_unsupported_opcode(void)
@@ -109,6 +91,7 @@ int main(void)
 	static __u64 scratch[8];
 	unsigned vi, wi, ri;
 
+	for (failure = 0; failure < 2; failure++)
 	for (vi = 0; vi < sizeof(values) / sizeof(values[0]); vi++)
 		for (wi = 0; wi < sizeof(wids) / sizeof(wids[0]); wi++)
 			for (ri = 0; ri < sizeof(nregs) / sizeof(nregs[0]); ri++) {
@@ -119,11 +102,16 @@ int main(void)
 				unsigned width = wids[wi];
 				__u64 value = values[vi];
 				__u64 before_s1, after_s1, status;
-				__u64 want_status = 0;   /* exclusive store succeeded */
-				__u64 mem_want, mem_got;
+				__u64 want_status = failure;
+				unsigned char expected[sizeof(scratch)];
 
 				DECL_STATE();
 				SEED_STATE();
+				memset(scratch, 0xa5, sizeof(scratch));
+				memcpy(expected, scratch, sizeof(scratch));
+				if (!failure)
+					for (unsigned byte = 0; byte < width; byte++)
+						expected[byte] = (unsigned char)(value >> (byte * 8));
 
 				/* The base register points into the scratch memory
 				 * area; the offset is zero so the stored word is
@@ -153,10 +141,8 @@ int main(void)
 				status = ARM64_SIM_L_READ_REG(dst);
 				cases++;
 
-				/* The status is written at 32 bits, so only the
-				 * low word is defined; the high half is not
-				 * part of the contract. */
-				if ((status & 0xffffffffULL) != want_status) {
+				/* A W-register status write clears the high half. */
+				if (status != want_status) {
 					printf("STATUS w=%u v=%#llx: got %#llx "
 					       "want %#llx\n", width,
 					       (unsigned long long)value,
@@ -173,26 +159,9 @@ int main(void)
 					failures++;
 				}
 
-				/* The memory effect: the value stored is the
-				 * source narrowed to the access width, and the
-				 * dispatcher writes a whole word there. Read it
-				 * back through the simulator's own load path. */
-				mem_want = value & (width == ARM64_WIDTH_64
-							    ? ~0ULL
-						    : width == ARM64_WIDTH_32
-							    ? 0xffffffffULL
-						    : width == ARM64_WIDTH_16
-							    ? 0xffffULL
-							    : 0xffULL);
-				mem_got = ARM64_SIM_L_MEM_READ(base,
-							       ARM64_REG_NONE,
-							       0, 0, 0,
-							       ARM64_WIDTH_64);
-				if ((mem_got & mem_want) != mem_want) {
-					printf("MEMORY w=%u v=%#llx: got %#llx\n",
-					       width,
-					       (unsigned long long)value,
-					       (unsigned long long)mem_got);
+				if (memcmp(scratch, expected, sizeof(scratch)) != 0) {
+					printf("MEMORY w=%u failure=%u value=%#llx\n",
+					       width, failure, (unsigned long long)value);
 					failures++;
 				}
 			}

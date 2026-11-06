@@ -13,14 +13,12 @@ def code : Stlxr -> Nat
 /-- The AArch64 mnemonic of the status. -/
 def mnemonic : Stlxr -> String
   | .stlxr => "STLXR"
-/-- The status value written back to the status register, narrowed to the
-destination width. The exclusive store succeeds unconditionally, so the arm is
-the success code `0`; `narrow` keeps only the low `bits width` lanes, exactly the
-C `& __kprog_a64_stlxr_wmask` step. -/
-def value (op : Stlxr) (width : Width) : BitVec 64 :=
+/-- Architectural status for the explicit environment outcome, narrowed to
+the destination width. False is success/zero, true is failure/one. -/
+def value (op : Stlxr) (width : Width) (failure : Bool) : BitVec 64 :=
   match op with
   | .stlxr =>
-    narrow 0 width
+    narrow (if failure then 1 else 0) width
 /-- STLXR writes the status register but no NZCV, so the flag state threads
 through unchanged. -/
 def flagsUnchanged (op : Stlxr) : Bool :=

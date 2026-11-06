@@ -1,3 +1,4 @@
+ARM64_HOST_ENV := -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h
 .PHONY: check
 
 check:
@@ -268,7 +269,7 @@ check:
 	./build/x86_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/btmem_index_route_host.c -o build/btmem_index_route_host
 	./build/btmem_index_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/value_route_host.c -o build/value_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/value_route_host.c -o build/value_route_host
 	./build/value_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_xchg_host.c -o build/test_x86_xchg_host
 	./build/test_x86_xchg_host
@@ -413,15 +414,15 @@ check:
 	./build/test_x86_cmp_mem_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_cmov_route_host.c -o build/test_x86_cmov_route_host
 	./build/test_x86_cmov_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/cross_isa_tag_host.c -o build/cross_isa_tag_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/cross_isa_tag_host.c -o build/cross_isa_tag_host
 	./build/cross_isa_tag_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/cross_isa_differential_host.c -o build/cross_isa_differential_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/cross_isa_differential_host.c -o build/cross_isa_differential_host
 	./build/cross_isa_differential_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_width_host.c -o build/test_arm64_width_host
 	./build/test_arm64_width_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_width_effective_host.c -o build/test_arm64_width_effective_host
 	./build/test_arm64_width_effective_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_width_effective_route_host.c -o build/test_arm64_width_effective_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_width_effective_route_host.c -o build/test_arm64_width_effective_route_host
 	./build/test_arm64_width_effective_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_flags_host.c -o build/test_arm64_flags_host
 	./build/test_arm64_flags_host
@@ -435,11 +436,11 @@ check:
 	./build/test_arm64_flag_operand_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_imm_operand_host.c -o build/test_arm64_imm_operand_host
 	./build/test_arm64_imm_operand_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_imm_operand_route_host.c -o build/test_arm64_imm_operand_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_imm_operand_route_host.c -o build/test_arm64_imm_operand_route_host
 	./build/test_arm64_imm_operand_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_alu_operand_select_host.c -o build/test_arm64_alu_operand_select_host
 	./build/test_arm64_alu_operand_select_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_alu_operand_select_route_host.c -o build/test_arm64_alu_operand_select_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_alu_operand_select_route_host.c -o build/test_arm64_alu_operand_select_route_host
 	./build/test_arm64_alu_operand_select_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_flag_handler_host.c -o build/test_arm64_flag_handler_host
 	./build/test_arm64_flag_handler_host
@@ -447,15 +448,15 @@ check:
 	./build/test_arm64_logic_flag_handler_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_ccmp_handler_host.c -o build/test_arm64_ccmp_handler_host
 	./build/test_arm64_ccmp_handler_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_ccmp_decode_host.c -o build/test_arm64_ccmp_decode_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_ccmp_decode_host.c -o build/test_arm64_ccmp_decode_host
 	./build/test_arm64_ccmp_decode_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_dispatch_family_host.c -o build/test_arm64_dispatch_family_host
 	./build/test_arm64_dispatch_family_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dispatch_family_route_host.c -o build/test_arm64_dispatch_family_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dispatch_family_route_host.c -o build/test_arm64_dispatch_family_route_host
 	./build/test_arm64_dispatch_family_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_dispatch_singleton_host.c -o build/test_arm64_dispatch_singleton_host
 	./build/test_arm64_dispatch_singleton_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dispatch_singleton_route_host.c -o build/test_arm64_dispatch_singleton_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dispatch_singleton_route_host.c -o build/test_arm64_dispatch_singleton_route_host
 	./build/test_arm64_dispatch_singleton_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mod_host.c -o build/test_arm64_mod_host
 	./build/test_arm64_mod_host
@@ -463,17 +464,17 @@ check:
 	./build/test_arm64_bitfield_host
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I. oracles/test_arm64_mul_host.c -o build/test_arm64_mul_host
 	./build/test_arm64_mul_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mul_route_host.c -o build/test_arm64_mul_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mul_route_host.c -o build/test_arm64_mul_route_host
 	./build/test_arm64_mul_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_flag_route_host.c -o build/test_arm64_flag_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_flag_route_host.c -o build/test_arm64_flag_route_host
 	./build/test_arm64_flag_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_csel_route_host.c -o build/test_arm64_csel_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_csel_route_host.c -o build/test_arm64_csel_route_host
 	./build/test_arm64_csel_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mul_wide_host.c -o build/test_arm64_mul_wide_host
 	./build/test_arm64_mul_wide_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_imul_flags_wide_host.c -o build/test_x86_imul_flags_wide_host
 	./build/test_x86_imul_flags_wide_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/mul_route_host.c -o build/mut_mulroute
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/mul_route_host.c -o build/mut_mulroute
 	./build/mut_mulroute
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_extrev_host.c -o build/test_arm64_extrev_host
 	./build/test_arm64_extrev_host
@@ -485,11 +486,11 @@ check:
 	./build/test_arm64_branch_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_branch_emit_host.c -o build/test_arm64_branch_emit_host
 	./build/test_arm64_branch_emit_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/a64_route_host.c -o build/a64_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/a64_route_host.c -o build/a64_route_host
 	./build/a64_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_control_flow_trace_host.c -o build/test_control_flow_trace_host
 	./build/test_control_flow_trace_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_control_flow_trace_route_host.c -o build/test_control_flow_trace_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../x86 -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_control_flow_trace_route_host.c -o build/test_control_flow_trace_route_host
 	./build/test_control_flow_trace_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_movk_host.c -o build/test_arm64_movk_host
 	./build/test_arm64_movk_host
@@ -497,37 +498,37 @@ check:
 	./build/test_arm64_shift_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_reduction_host.c -o build/test_arm64_reduction_host
 	./build/test_arm64_reduction_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/reduction_route_host.c -o build/reduction_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/reduction_route_host.c -o build/reduction_route_host
 	./build/reduction_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_unary_host.c -o build/test_arm64_unary_host
 	./build/test_arm64_unary_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_unary_route_host.c -o build/test_arm64_unary_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_unary_route_host.c -o build/test_arm64_unary_route_host
 	./build/test_arm64_unary_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_cneg_route_host.c -o build/test_arm64_cneg_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_cneg_route_host.c -o build/test_arm64_cneg_route_host
 	./build/test_arm64_cneg_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stlxr_route_host.c -o build/test_arm64_stlxr_route_host
 	./build/test_arm64_stlxr_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_reduction_route_host.c -o build/test_arm64_reduction_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_reduction_route_host.c -o build/test_arm64_reduction_route_host
 	./build/test_arm64_reduction_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_adrp_route_host.c -o build/test_arm64_adrp_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_adrp_route_host.c -o build/test_arm64_adrp_route_host
 	./build/test_arm64_adrp_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_extrev_route_host.c -o build/test_arm64_extrev_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_extrev_route_host.c -o build/test_arm64_extrev_route_host
 	./build/test_arm64_extrev_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_orn_route_host.c -o build/test_arm64_orn_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_orn_route_host.c -o build/test_arm64_orn_route_host
 	./build/test_arm64_orn_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_branch_emit_route_host.c -o build/test_arm64_branch_emit_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_branch_emit_route_host.c -o build/test_arm64_branch_emit_route_host
 	./build/test_arm64_branch_emit_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_cbz_tbz_route_host.c -o build/test_arm64_cbz_tbz_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_cbz_tbz_route_host.c -o build/test_arm64_cbz_tbz_route_host
 	./build/test_arm64_cbz_tbz_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_call_ret_route_host.c -o build/test_arm64_call_ret_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_call_ret_route_host.c -o build/test_arm64_call_ret_route_host
 	./build/test_arm64_call_ret_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_call_ret_route_host.c -o build/test_x86_call_ret_route_host
 	./build/test_x86_call_ret_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_helper_call_host.c -o build/test_arm64_helper_call_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_helper_call_host.c -o build/test_arm64_helper_call_host
 	./build/test_arm64_helper_call_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_helper_call_host.c -o build/test_x86_helper_call_host
 	./build/test_x86_helper_call_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_entry_context_host.c -o build/test_arm64_entry_context_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_entry_context_host.c -o build/test_arm64_entry_context_host
 	./build/test_arm64_entry_context_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_cneg_host.c -o build/test_arm64_cneg_host
 	./build/test_arm64_cneg_host
@@ -543,11 +544,11 @@ check:
 	./build/test_arm64_mov_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_ldrsx_host.c -o build/test_arm64_ldrsx_host
 	./build/test_arm64_ldrsx_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/ldrsx_route_host.c -o build/ldrsx_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/ldrsx_route_host.c -o build/ldrsx_route_host
 	./build/ldrsx_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_ldrsx_op_host.c -o build/test_arm64_ldrsx_op_host
 	./build/test_arm64_ldrsx_op_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_ldrsx_op_route_host.c -o build/test_arm64_ldrsx_op_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_ldrsx_op_route_host.c -o build/test_arm64_ldrsx_op_route_host
 	./build/test_arm64_ldrsx_op_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_load_tag_host.c -o build/test_arm64_load_tag_host
 	./build/test_arm64_load_tag_host
@@ -557,15 +558,15 @@ check:
 	./build/test_arm64_mem_offset_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mem_index_host.c -o build/test_arm64_mem_index_host
 	./build/test_arm64_mem_index_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_index_route_host.c -o build/test_arm64_mem_index_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_index_route_host.c -o build/test_arm64_mem_index_route_host
 	./build/test_arm64_mem_index_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_reg_presence_host.c -o build/test_arm64_reg_presence_host
 	./build/test_arm64_reg_presence_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_reg_presence_route_host.c -o build/test_arm64_reg_presence_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_reg_presence_route_host.c -o build/test_arm64_reg_presence_route_host
 	./build/test_arm64_reg_presence_route_host
-	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_reg_dispatch_host.c -o build/test_arm64_reg_dispatch_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. oracles/test_arm64_reg_dispatch_host.c -o build/test_arm64_reg_dispatch_host
 	./build/test_arm64_reg_dispatch_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_reg_dispatch_route_host.c -o build/test_arm64_reg_dispatch_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_reg_dispatch_route_host.c -o build/test_arm64_reg_dispatch_route_host
 	./build/test_arm64_reg_dispatch_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_fmov_host.c -o build/test_arm64_fmov_host
 	./build/test_arm64_fmov_host
@@ -575,7 +576,7 @@ check:
 	./build/test_arm64_load_bytes_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_store_bytes_host.c -o build/test_arm64_store_bytes_host
 	./build/test_arm64_store_bytes_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_store_bytes_route_host.c -o build/test_arm64_store_bytes_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_store_bytes_route_host.c -o build/test_arm64_store_bytes_route_host
 	./build/test_arm64_store_bytes_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_byte_lane_host.c -o build/test_arm64_byte_lane_host
 	./build/test_arm64_byte_lane_host
@@ -583,85 +584,85 @@ check:
 	./build/test_arm64_mem_dispatch_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mem_write_arm_host.c -o build/test_arm64_mem_write_arm_host
 	./build/test_arm64_mem_write_arm_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_write_arm_route_host.c -o build/test_arm64_mem_write_arm_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_write_arm_route_host.c -o build/test_arm64_mem_write_arm_route_host
 	./build/test_arm64_mem_write_arm_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_tag_host.c -o build/test_arm64_stack_tag_host
 	./build/test_arm64_stack_tag_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_arm_host.c -o build/test_arm64_stack_arm_host
 	./build/test_arm64_stack_arm_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_arm_route_host.c -o build/test_arm64_stack_arm_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_arm_route_host.c -o build/test_arm64_stack_arm_route_host
 	./build/test_arm64_stack_arm_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_write_lanes_host.c -o build/test_arm64_stack_write_lanes_host
 	./build/test_arm64_stack_write_lanes_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_write_lanes_route_host.c -o build/test_arm64_stack_write_lanes_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_write_lanes_route_host.c -o build/test_arm64_stack_write_lanes_route_host
 	./build/test_arm64_stack_write_lanes_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_write_tag_action_host.c -o build/test_arm64_stack_write_tag_action_host
 	./build/test_arm64_stack_write_tag_action_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_write_tag_action_route_host.c -o build/test_arm64_stack_write_tag_action_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_write_tag_action_route_host.c -o build/test_arm64_stack_write_tag_action_route_host
 	./build/test_arm64_stack_write_tag_action_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_read_tag_source_host.c -o build/test_arm64_stack_read_tag_source_host
 	./build/test_arm64_stack_read_tag_source_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_read_tag_source_route_host.c -o build/test_arm64_stack_read_tag_source_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_read_tag_source_route_host.c -o build/test_arm64_stack_read_tag_source_route_host
 	./build/test_arm64_stack_read_tag_source_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_helper_arg_ptr_host.c -o build/test_arm64_helper_arg_ptr_host
 	./build/test_arm64_helper_arg_ptr_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_helper_arg_ptr_route_host.c -o build/test_arm64_helper_arg_ptr_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_helper_arg_ptr_route_host.c -o build/test_arm64_helper_arg_ptr_route_host
 	./build/test_arm64_helper_arg_ptr_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/helper_route_host.c -o build/helper_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/helper_route_host.c -o build/helper_route_host
 	./build/helper_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mem_base_src_host.c -o build/test_arm64_mem_base_src_host
 	./build/test_arm64_mem_base_src_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_base_src_route_host.c -o build/test_arm64_mem_base_src_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_base_src_route_host.c -o build/test_arm64_mem_base_src_route_host
 	./build/test_arm64_mem_base_src_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mem_index_value_host.c -o build/test_arm64_mem_index_value_host
 	./build/test_arm64_mem_index_value_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_index_value_route_host.c -o build/test_arm64_mem_index_value_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_index_value_route_host.c -o build/test_arm64_mem_index_value_route_host
 	./build/test_arm64_mem_index_value_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_dq_mem_extra_host.c -o build/test_arm64_dq_mem_extra_host
 	./build/test_arm64_dq_mem_extra_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dq_mem_extra_route_host.c -o build/test_arm64_dq_mem_extra_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dq_mem_extra_route_host.c -o build/test_arm64_dq_mem_extra_route_host
 	./build/test_arm64_dq_mem_extra_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_vreg_field_host.c -o build/test_arm64_vreg_field_host
 	./build/test_arm64_vreg_field_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_vreg_field_route_host.c -o build/test_arm64_vreg_field_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_vreg_field_route_host.c -o build/test_arm64_vreg_field_route_host
 	./build/test_arm64_vreg_field_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_write_arm_host.c -o build/test_arm64_write_arm_host
 	./build/test_arm64_write_arm_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_write_arm_route_host.c -o build/test_arm64_write_arm_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_write_arm_route_host.c -o build/test_arm64_write_arm_route_host
 	./build/test_arm64_write_arm_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_dq_mem_host.c -o build/test_arm64_dq_mem_host
 	./build/test_arm64_dq_mem_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dq_mem_route_host.c -o build/test_arm64_dq_mem_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dq_mem_route_host.c -o build/test_arm64_dq_mem_route_host
 	./build/test_arm64_dq_mem_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_pair_mem_host.c -o build/test_arm64_pair_mem_host
 	./build/test_arm64_pair_mem_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_pair_mem_route_host.c -o build/test_arm64_pair_mem_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_pair_mem_route_host.c -o build/test_arm64_pair_mem_route_host
 	./build/test_arm64_pair_mem_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/pair_route_host.c -o build/pair_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/pair_route_host.c -o build/pair_route_host
 	./build/pair_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/fmov_route_host.c -o build/fmov_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/fmov_route_host.c -o build/fmov_route_host
 	./build/fmov_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/ccmp_decode_route_host.c -o build/ccmp_decode_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/ccmp_decode_route_host.c -o build/ccmp_decode_route_host
 	./build/ccmp_decode_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/flag_route_host.c -o build/flag_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/flag_route_host.c -o build/flag_route_host
 	./build/flag_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mem_prepost_host.c -o build/test_arm64_mem_prepost_host
 	./build/test_arm64_mem_prepost_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_prepost_route_host.c -o build/test_arm64_mem_prepost_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_prepost_route_host.c -o build/test_arm64_mem_prepost_route_host
 	./build/test_arm64_mem_prepost_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_vreg_host.c -o build/test_arm64_vreg_host
 	./build/test_arm64_vreg_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_vreg_route_host.c -o build/test_arm64_vreg_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_vreg_route_host.c -o build/test_arm64_vreg_route_host
 	./build/test_arm64_vreg_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 oracles/test_arm64_aux_host.c -o build/test_arm64_aux_host
 	./build/test_arm64_aux_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_aux_route_host.c -o build/test_arm64_aux_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_aux_route_host.c -o build/test_arm64_aux_route_host
 	./build/test_arm64_aux_route_host
-	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_arena_host.c -o build/test_arm64_stack_arena_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_arena_host.c -o build/test_arm64_stack_arena_host
 	./build/test_arm64_stack_arena_host
-	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_index_host.c -o build/test_arm64_stack_index_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_index_host.c -o build/test_arm64_stack_index_host
 	./build/test_arm64_stack_index_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_arena_route_host.c -o build/test_arm64_stack_arena_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_arena_route_host.c -o build/test_arm64_stack_arena_route_host
 	./build/test_arm64_stack_arena_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 oracles/test_arm64_decode_host.c -o build/test_arm64_decode_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 oracles/test_arm64_decode_host.c -o build/test_arm64_decode_host
 	./build/test_arm64_decode_host

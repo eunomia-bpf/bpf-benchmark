@@ -5,6 +5,7 @@
 #include <linux/bpf.h>
 #endif
 #include <bpf_helpers.h>
+#include "../../kinsn/module/include/native_lab_input.h"
 
 #include "arm64_sim.h"
 #include "../formal/generated/abi_load.h"
@@ -146,8 +147,8 @@ union arm64_sim_gpr {
 #include "../formal/generated/arm64_pair_load_tag.h"
 #define ARM64_SIM_L_ADRP_TAG(OP)                                            \
 	KPROG_ARM64_ADRP_TAG((OP), ARM64_SIM_L_UNSUPPORTED_OPCODE())
-#define ARM64_SIM_L_STLXR_VALUE(OP)                                         \
-	KPROG_ARM64_STLXR_VALUE((OP), ARM64_WIDTH_32,                      \
+#define ARM64_SIM_L_STLXR_VALUE(OP, FAILURE)                                \
+	KPROG_ARM64_STLXR_VALUE((OP), ARM64_WIDTH_32, (FAILURE),           \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE())
 #define ARM64_SIM_L_MOV_PTR_TAG_PATH(OP, WIDTH)                             \
 	KPROG_ARM64_MOV_PTR_TAG_PATH((OP), (WIDTH),                        \
@@ -1253,11 +1254,13 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 				ARM64_SIM_L_REG_TAG(SRC));                  \
 			ARM64_SIM_L_MEM_POST((DST), (AUX), (IMM));             \
 		} else if (KPROG_ARM64_STLXR_HANDLED(OP)) {                \
-			ARM64_SIM_L_MEM_WRITE((SRC2), ARM64_REG_NONE,        \
+			__u64 __a64_l_failure = NATIVE_LAB_EXCLUSIVE_FAILURE(IMM); \
+			if (!__a64_l_failure)                              \
+				ARM64_SIM_L_MEM_WRITE((SRC2), ARM64_REG_NONE, \
 				(AUX), 0, 0, __a64_l_width,                 \
 				ARM64_SIM_L_READ_REG(SRC),                  \
 				ARM64_SIM_L_REG_TAG(SRC));                  \
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_STLXR_VALUE((OP)), ARM64_WIDTH_32);\
+			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_STLXR_VALUE((OP), __a64_l_failure), ARM64_WIDTH_32);\
 		} else if (KPROG_ARM64_DISP_LDP_HANDLED(OP)) {                 \
 			ARM64_SIM_L_LDP((DST), (SRC), (SRC2), (SRC3),          \
 				(AUX), (IMM), __a64_l_width);                  \

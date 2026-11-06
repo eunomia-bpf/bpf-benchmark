@@ -66,6 +66,12 @@ def freeze_simulator(directory):
         snapshot.mkdir()
         for name in ['arm64_sim.h', 'arm64_sim_local_bpf.h', 'arm64_sim_direct.h']:
             shutil.copy2(ROOT / 'kprog/arm64' / name, snapshot / name)
+        header = snapshot / 'arm64_sim_local_bpf.h'
+        header.write_text(header.read_text().replace(
+            '../../kinsn/module/include/native_lab_input.h', '../kinsn/module/include/native_lab_input.h'))
+        inputs = directory / 'kinsn/module/include'
+        inputs.mkdir(parents=True)
+        shutil.copy2(ROOT / 'kinsn/module/include/native_lab_input.h', inputs / 'native_lab_input.h')
         shutil.copytree(ROOT / 'kprog/formal/generated', directory / 'formal/generated')
 
 

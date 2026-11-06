@@ -543,7 +543,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
         mem = parse_mem(ops, 2)
         width = reg_width(ops[1])
         return Encoded("ARM64_OP_STLXR", reg_const(ops[0]), reg_const(ops[1]), mem.base,
-                       width=width_const(width), aux=mem_aux(mem))
+                       width=width_const(width), aux=mem_aux(mem), imm=c_u64(insn.addr))
     if op in {"cmp", "tst"}:
         width = width_const(reg_width(ops[0]))
         imm = ops[1].startswith("#")

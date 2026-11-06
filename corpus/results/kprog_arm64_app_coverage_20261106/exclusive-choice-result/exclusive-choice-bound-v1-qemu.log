@@ -1,0 +1,8 @@
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/fmov_bank.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive-choice-bound-v1 package /workspaces/.agent-state/bpf-benchmark-supervisor/kfunc-inline-claude-20261004/round5-arm64.cpio.gz /workspaces/repository/kprog/tv/build-arm64/bpf_arm64_native_lab.ko
+install -d /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive-choice-bound-v1/verify
+taskset -c 12-15 timeout 600 qemu-system-aarch64 -M virt -cpu max -smp 2 -m 2048 -nographic -no-reboot \
+	-kernel /workspaces/repository/kprog/tv/build-kernel-arm64/arch/arm64/boot/Image -initrd /workspaces/repository/kprog/arm64/build/app-coverage/exclusive-choice-bound-v1/initramfs.cpio.gz \
+	-fsdev local,id=results,path=/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive-choice-bound-v1/verify,security_model=none \
+	-device virtio-9p-device,fsdev=results,mount_tag=results \
+	-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive-choice-bound-v1/qemu.log 2>&1
+test "$(cat /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/exclusive-choice-bound-v1/verify/guest-status)" = 0
