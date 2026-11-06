@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0954 tested both checkers together: each owns
+its figures exclusively (tree counts vs gate totals),
+verified in both directions.
+
+
 Step 0953 checked sort safety: 26 directional words,
 all geometric; but 147 harness blocks alternate with
 97 prose blocks 73 times.

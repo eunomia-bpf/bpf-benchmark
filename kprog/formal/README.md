@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0954 - the two checkers own disjoint figures
+
+The two checkers were tested together rather than one at a time: two figures
+perturbed in one pass, one owned by each. Each was reported by the checker that
+owns it and by no other, so the division is exclusive rather than redundant.
+
+The tree figures are the claims checker's, which reads them from the Lean
+modules and reports both the statement and the tree's own count. The gate totals
+are the paper checker's, which reads them from the log. A figure that both read
+would be one whose drift could confuse the report; none does.
+
+This matters because the paper checker prints a success line naming what it
+verified, and a reader could take that line as covering the whole section. It
+covers the figures that come from the log and the tree names and the batteries;
+the proof-tree counts are the other checker's, and that checker runs inside the
+gate.
+
+Census unchanged; the division of labour between the two is now verified rather
+than assumed.
+
 ### Step 0953 - safe to reorder, expensive to reorder
 
 Whether the catalogue can be reordered safely was checked rather than assumed. A
