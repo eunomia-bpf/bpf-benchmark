@@ -63,6 +63,17 @@ theorem sub_refines (env : Environment) (frame : Frame) (value : Value) (delta :
     materialize env frame (sub value delta) = materialize env frame value - delta := by
   cases value <;> simp only [sub, materialize, Reference.Word] <;> bv_decide
 
+/-- A native OR of only the low four bits can keep a relative pointer when
+its actual base (including frame bias) is 16-byte aligned. This premise must
+come from the entry ABI certificate; the private offset is not an address. -/
+theorem aligned_low_or_refines (env : Environment) (frame : Frame) (origin : Base)
+    (offset bits : Reference.Word)
+    (aligned : base env frame origin &&& 15 = 0) (low : bits < 16) :
+    materialize env frame (.relative origin (offset + (bits &&& ~~~offset))) =
+      materialize env frame (.relative origin offset) ||| bits := by
+  simp only [materialize, Reference.Word] at *
+  bv_decide
+
 /-- Same-base differences may cancel a base; flags, masks, partial writes and
 stored words must still materialize their inputs before observing them. -/
 theorem same_base_difference (env : Environment) (frame : Frame) (origin : Base)
