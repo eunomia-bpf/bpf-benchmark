@@ -86,6 +86,21 @@ def main():
     check([("test", ("rbx", "0xffffffff")), ("sets", ("al",))] + finish, "undefined native ABI flags")
     check([("test", ("rbx", "0x80000000")), ("setp", ("al",))] + finish)
     check([("test", ("rbx", "0x80000000")), ("sets", ("al",))] + finish, "undefined native ABI flags")
+    for op in ("inc", "dec", "neg", "not"):
+        prefix = low + [(op, ("edx",))]
+        check(prefix + [("movzx", ("eax", "dx")), ("ret", ())])
+        check(prefix + [("mov", ("eax", "edx")), ("ret", ())], "undefined native ABI register eax")
+        if op != "not":
+            check(prefix + [("setp", ("al",))] + finish)
+            check(prefix + [("sets", ("al",))] + finish, "undefined native ABI flags")
+    for op in ("inc", "dec"):
+        check(initialize + [(op, ("eax",)), ("setb", ("al",))] + finish, "undefined native ABI flags")
+        check(initialize + [("cmp", ("eax", "ebx")), (op, ("eax",)), ("setb", ("al",))] + finish)
+    check(initialize + [("not", ("eax",)), ("setp", ("al",))] + finish, "undefined native ABI flags")
+    check(initialize + [("cmp", ("eax", "ebx")), ("not", ("eax",)), ("setp", ("al",))] + finish)
+    for op in ("inc", "dec"):
+        inverse = "dec" if op == "inc" else "inc"
+        check([(op, ("rsp",)), (inverse, ("rsp",))] + finish)
     print(f"x86 flag definedness: {cases} encoder/ABI condition and undefined-result cases OK")
     check_compiled_counts()
 

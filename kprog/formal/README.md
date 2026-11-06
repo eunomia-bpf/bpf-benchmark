@@ -31,6 +31,9 @@ CF/OF clear, SF/ZF/PF follow the operand-width result, and AF is undefined.
 TEST preserves its data destination. Native group/immediate forms share the
 arithmetic decoder, including64-bit sign extension. ABI masks track logical
 zero/one bits so a mask may discard unspecified register bits before use.
+INC/DEC/NEG/NOT use all scalar widths, byte lanes and register/memory
+destinations. INC/DEC preserve CF, NOT preserves every flag, and RMW write
+faults preserve data/flags while retaining the completed read event.
 All sixteen native conditions refine the reference, including PF, through
 CMOV, SETcc and direct branches. SETcc includes high-byte/REX destinations,
 exact one-byte stores and write faults; CMOV retains eager read faults.

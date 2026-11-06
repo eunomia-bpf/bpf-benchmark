@@ -350,6 +350,29 @@ def check_definedness(insns, targets, exit_addr, decode):
                 elif op == 'or' and (left == full or right == full): constant = full
                 if ri(args[0]): write(args[0],known,constant=constant)
                 else: store(args[0],width,known)
+        elif op in {'inc','dec','neg','not'}:
+            width = ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0])
+            full = (1 << width)-1
+            known = mask(incoming,args[0]) if ri(args[0]) else read_memory(args[0],width)[0]
+            result = known
+            if op != 'not':
+                unknown = full ^ known
+                result = full if not unknown else (unknown & -unknown)-1
+                flags = (ZF | SF | OF) if result == full else 0
+                if result & 255 == 255: flags |= PF
+                if result & 15 == 15: flags |= AF
+                flags |= incoming.flags & CF if op in {'inc','dec'} else CF if result == full else 0
+            if ri(args[0]):
+                reg,width,shift = ri(args[0])
+                old = incoming.constants[reg]
+                constant = None if old is None else (old >> shift) & full
+                if constant is not None:
+                    constant = (constant+1 if op == 'inc' else constant-1 if op == 'dec' else
+                                -constant if op == 'neg' else ~constant) & full
+                write(args[0],result,constant=constant)
+                if width == 64 and type(incoming.aliases[reg]) is int and op in {'inc','dec'}:
+                    alias[reg] = incoming.aliases[reg] + (1 if op == 'inc' else -1)
+            else: store(args[0],width,result)
         elif op in {'add','sub','adc','sbb','cmp'}:
             width = ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0])
             full = (1 << width)-1
@@ -402,10 +425,9 @@ def check_definedness(insns, targets, exit_addr, decode):
                 write(args[0],constant=0 if zero else None)
             if args and decode.is_mem(args[0]) and op!='bt':
                 store(args[0],decode.operand_width(args[0]))
-            if op in {'neg','xadd','popcnt'}:
+            if op in {'xadd','popcnt'}:
                 flags = ALL_FLAGS
             elif op in {'bzhi','andn'}: flags = CF | ZF | SF | OF
-            elif op in {'inc','dec'}: flags = (flags & CF) | ZF | SF | OF | PF | AF
             elif op in {'mul','imul'}: flags = CF | OF
             elif op in {'div','idiv'}: flags = 0
             elif op=='bt': flags = (flags & ZF) | CF

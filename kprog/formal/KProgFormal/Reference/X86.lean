@@ -338,6 +338,20 @@ def logicalFlags (width : ScalarWidth) (kind : LogicKind) (left right old : Refe
   (old &&& 0xfffffffffffff73a) ||| (if evenParity result then 4 else 0) |||
     (if result = 0 then 64 else 0) ||| (if result.getLsbD (width.bits - 1) then 128 else 0)
 
+inductive UnaryKind | inc | dec | neg | not
+  deriving DecidableEq, Repr
+
+def unaryValue (width : ScalarWidth) (kind : UnaryKind) (source : Reference.Word) : Reference.Word :=
+  let value := source.setWidth width.bits
+  ((match kind with | .inc => value + 1 | .dec => value - 1 | .neg => -value | .not => ~~~value).setWidth 64)
+
+def unaryFlags (width : ScalarWidth) (kind : UnaryKind) (value old : Reference.Word) : Reference.Word :=
+  match kind with
+  | .inc => setFlag (arithmeticFlags width false false value 1 old) 0 (old.getLsbD 0)
+  | .dec => setFlag (arithmeticFlags width true false value 1 old) 0 (old.getLsbD 0)
+  | .neg => arithmeticFlags width true false 0 value old
+  | .not => old
+
 inductive RegisterSlice
   | low (reg : Register)
   | high (reg : Fin 4)
@@ -440,10 +454,22 @@ def logicalStep (width : ScalarWidth) (kind : LogicKind) (dst : ScalarDestinatio
             | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
             | .ok (result, writes) => ⟨{ result with rflags := flags, pc := nextPc }, reads ++ writes, none⟩
 
+
+def unaryStep (width : ScalarWidth) (kind : UnaryKind) (dst : ScalarDestination)
+    (nextPc : Word) (s : State) : Transition State :=
+  match scalarRead s width dst.source with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (value, reads) =>
+      match scalarWrite s width dst (unaryValue width kind value) with
+      | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
+      | .ok (result, writes) =>
+          ⟨{ result with rflags := unaryFlags width kind value s.rflags, pc := nextPc }, reads ++ writes, none⟩
+
 /-- One architectural instruction with its decoded fall-through address.
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | unary (width : ScalarWidth) (kind : UnaryKind) (dst : ScalarDestination) (nextPc : Word)
   | logic (width : ScalarWidth) (kind : LogicKind) (dst : ScalarDestination) (src : ScalarSource) (nextPc : Word)
   | nop (nextPc : Word)
   | branch (condition : Option (Fin 16)) (target nextPc : Word)
@@ -471,6 +497,7 @@ inductive Instruction
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .unary width kind dst nextPc => unaryStep width kind dst nextPc s
   | .logic width kind dst src nextPc => logicalStep width kind dst src nextPc s
   | .nop nextPc => ⟨{ s with pc := nextPc }, [], none⟩
   | .branch cc target nextPc =>
@@ -542,6 +569,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .unary .. => 0xffffffffffffffff
   | .logic .. => 0xffffffffffffffef
   | .nop .. | .branch .. | .setcc .. => 0xffffffffffffffff
   | .arithmetic .. => 0xffffffffffffffff
@@ -760,12 +788,24 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     return .logic width .test (.register (.low 0)) (.immediate immediate) nextPc
   if first = 0xf6 ∨ first = 0xf7 then
     let modrm ← byteAt bytes (count + 1)
-    if (modrm / 8) % 8 = 0 then
+    let group := (modrm / 8) % 8
+    if group = 2 ∨ group = 3 then
+      let width := scalarWidth p (first == 0xf6)
+      let (rm, nextPc, _) ← operand bytes s p modrm (count + 2) 0
+      return .unary width (if group = 2 then .not else .neg) (scalarDestination p width rm) nextPc
+    if group = 0 then
       let width := scalarWidth p (first == 0xf6)
       let size := if width = .w64 then 4 else width.bytes
       let (rm, nextPc, cursor) ← operand bytes s p modrm (count + 2) size
       let immediate ← signedDisplacement bytes cursor size
       return .logic width .test (scalarDestination p width rm) (.immediate immediate) nextPc
+  if first = 0xfe ∨ first = 0xff then
+    let modrm ← byteAt bytes (count + 1)
+    let group := (modrm / 8) % 8
+    if group = 0 ∨ group = 1 then
+      let width := scalarWidth p (first == 0xfe)
+      let (rm, nextPc, _) ← operand bytes s p modrm (count + 2) 0
+      return .unary width (if group = 0 then .inc else .dec) (scalarDestination p width rm) nextPc
   if 0xb0 ≤ first ∧ first ≤ 0xbf then
     let width := scalarWidth p (decide (first < 0xb8))
     let size := width.bytes
