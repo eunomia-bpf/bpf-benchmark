@@ -45,3 +45,39 @@ an earlier BPF object. `symbol-guard-build.log.gz` and
 taskset -c 16-23 make -C kprog/fidelity stage2-build STAGE2_BUILD=build-x86/stage2-symbol-guard
 taskset -c 16-23 make -C kprog/fidelity stage2-kvm STAGE2_BUILD=build-x86/stage2-symbol-guard STAGE2_OUT=../results/kprog_fidelity_20261106/helper-map/x86-symbol-guard
 ```
+
+## Arm full-system QEMU: actual bound execution
+
+All13 original workloads were independently generated/compiled from their
+Arm native objects and original map declarations. **12 pass** exact kernel
+and bound-native64-bit result, retval2 and nonzero-generation checks under
+full-system QEMU. **map_hash_str_key fails** load preparation with
+`simulator proof contains an unresolved map/kfunc relocation`; the original
+kernel BPF result is correct. All13 commands/outcomes remain under `arm64/`;
+the suite exits nonzero rather than dropping this program.
+
+The generator now reuses actual declarations from the supplied original source
+prelude, preserving name, type, key/value layout and capacity. It fails clearly
+if a relocation lacks an original declaration; it does not invent an ARRAY
+with a different ABI for these real source objects. This fixes actual hash,
+perCPU and multi-map pairing. The generalized test adapter also repeats all13
+x86 cases successfully (`x86-arch-adapter/`). Neither workload nor common
+runner/launcher was changed.
+
+The remaining Arm failure is native readonly data: the16-byte string-key table
+becomes a simulator internal `.rodata` map, while the original BPF stores
+constants directly and has no such map. The current loader correctly refuses
+an unpaired proof map. T owns its byte/immutability/native-address binding;
+we did not relax map identities, replace the real map, change the key, or
+move immutable memory into a writable stack surrogate to manufacture a pass.
+The failure remains open. Complete build/guest logs and exact original/proof
+objects/header+encoder snapshots are retained in the accompanying archive.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity stage2-arm64-build
+taskset -c 16-23 make -C kprog/fidelity stage2-arm64-qemu
+```
+
+The initramfs uses T's paired Arm kernel/module and the production manifest,
+loader and linker. Twelve successful native executions are emulation evidence;
+they are neither hardware timing nor an application-program coverage claim.

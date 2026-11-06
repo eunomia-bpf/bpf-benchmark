@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "map_array_index",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/map_array_index_packet.native.o",
+      "symbol": "map_array_index_packet",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/stage2-symbol-guard/map_array_index_packet.bpf.o",
+      "simulator_program": "map_array_index_packet_x86_sim_xdp"
+    }
+  ]
+}

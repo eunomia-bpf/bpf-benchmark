@@ -6,7 +6,8 @@
 - `negative/README.md`: baseline findings and fresh bound-path sweeps on both
   ISAs; all14 x86 cases now reject; three Arm ABI acceptances remain open.
   Exact diagnostics and repair ownership are retained.
-- `helper-map/README.md`: all 13 x86 stage2 cases pass bound native result/return-value checks.
+- `helper-map/README.md`: all13 x86 cases pass bound execution; Arm QEMU12pass,
+  1open readonly-data binding failure.
 - Generation-bound load time and helper/map timing: exact requests entered
   under "Timing requests" in `/workspaces/.agent-state/kprog-lanes/COORDINATION.md`
   for lane R, which owns timing.

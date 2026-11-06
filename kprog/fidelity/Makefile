@@ -242,3 +242,19 @@ arm64-control-handoff:
 	gzip -dc $(ARM64_CONTROL_HANDOFF) > $(ARM64_CONTROL_BUILD)/cpu-differential-handoff
 	chmod +x $(ARM64_CONTROL_BUILD)/cpu-differential-handoff
 	./$(ARM64_CONTROL_BUILD)/cpu-differential-handoff $(CASES) $(ARM64_CONTROL_OUT)
+
+.PHONY: stage2-arm64-build stage2-arm64-qemu
+ARM_STAGE2_BUILD ?= build-arm64/stage2-bound
+ARM_STAGE2_OUT ?= ../results/kprog_fidelity_20261106/helper-map/arm64
+stage2-arm64-build: bound-probe-build-arm64
+	$(PYTHON) stage2.py build --arch arm64 --build $(ARM_STAGE2_BUILD)
+
+stage2-arm64-qemu:
+	aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -static -DBOUND_STAGE2 negative_init.c -o build-arm64/stage2-init
+	$(PYTHON) stage2.py package --arch arm64 --build $(ARM_STAGE2_BUILD)
+	install -d $(ARM_STAGE2_OUT)
+	timeout 600 qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 2 -m 2048 \
+		-nographic -no-reboot -kernel $(ROOT)/kprog/tv/build-kernel-arm64/arch/arm64/boot/Image \
+		-initrd $(ARM_STAGE2_BUILD)/stage2.cpio -append 'console=ttyAMA0 rdinit=/init panic=-1' \
+		> $(ARM_STAGE2_OUT)/guest-console.log 2>&1
+	$(PYTHON) stage2.py collect --arch arm64 --build $(ARM_STAGE2_BUILD) --out $(ARM_STAGE2_OUT)

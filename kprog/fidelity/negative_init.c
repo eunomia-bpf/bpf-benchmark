@@ -7,7 +7,7 @@
 #include <sys/mount.h>
 #include <sys/reboot.h>
 #include <sys/wait.h>
-#ifdef BOUND_NEGATIVE
+#if defined(BOUND_NEGATIVE) || defined(BOUND_STAGE2)
 #include <sys/syscall.h>
 #endif
 #include <unistd.h>
@@ -28,7 +28,7 @@ int main(void)
     if (console > 2 && close(console)) die("close console");
     if (mount("proc", "/proc", "proc", 0, NULL)) die("mount proc");
     if (mount("sysfs", "/sys", "sysfs", 0, NULL)) die("mount sysfs");
-#ifdef BOUND_NEGATIVE
+#if defined(BOUND_NEGATIVE) || defined(BOUND_STAGE2)
     if (mount("debugfs", "/sys/kernel/debug", "debugfs", 0, NULL)) die("mount debugfs");
     int module=open("/module.ko",O_RDONLY);
     if (module<0) die("open native module");
@@ -40,8 +40,15 @@ int main(void)
     char name[128];
     while (fgets(name, sizeof(name), cases)) {
         name[strcspn(name, "\n")] = 0;
+#ifdef BOUND_STAGE2
+        char expected[32], retval[16], fixture[128];
+        if (sscanf(name, "%127s %31s %15s", fixture, expected, retval) != 3) {
+            errno = EINVAL; die("stage2 case values");
+        }
+        strcpy(name, fixture);
+#endif
         char object[256], program[256];
-#ifdef BOUND_NEGATIVE
+#if defined(BOUND_NEGATIVE) || defined(BOUND_STAGE2)
         int a = snprintf(object, sizeof(object), "/proofs/%s.manifest.json", name);
 #else
         int a = snprintf(object, sizeof(object), "/proofs/%s.bpf.o", name);
@@ -53,7 +60,12 @@ int main(void)
         pid_t pid = fork();
         if (pid < 0) die("fork");
         if (!pid) {
-#ifdef BOUND_NEGATIVE
+#ifdef BOUND_STAGE2
+            char original[256];
+            int n = snprintf(original, sizeof(original), "/proofs/%s.original.bpf.o", name);
+            if (n < 0 || (size_t)n >= sizeof(original)) _exit(127);
+            execl("/bound-probe", "bound-probe", original, object, expected, retval, NULL);
+#elif defined(BOUND_NEGATIVE)
             execl("/bound-probe", "bound-probe", "/companion.bpf.o", object, NULL);
 #else
             execl("/loader", "loader", "--object", object, "--program", program, "--load-only", NULL);

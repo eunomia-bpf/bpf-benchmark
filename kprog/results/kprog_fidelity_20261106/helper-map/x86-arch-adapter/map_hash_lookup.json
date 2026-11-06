@@ -1,0 +1,13 @@
+{
+  "name": "map_hash_lookup",
+  "native_object": "/workspaces/repository/kprog/test/build-x86/map_hash_lookup.native.o",
+  "stage": "passed",
+  "returncode": 0,
+  "command": [
+    "/workspaces/repository/kprog/fidelity/build-x86/bound-probe",
+    "/workspaces/repository/kprog/test/build-x86/map_hash_lookup.bpf.o",
+    "/workspaces/repository/kprog/results/kprog_fidelity_20261106/helper-map/x86-arch-adapter/map_hash_lookup.manifest.json",
+    "1234605616436508552",
+    "2"
+  ]
+}

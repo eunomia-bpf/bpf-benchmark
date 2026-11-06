@@ -772,11 +772,16 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         and insn.reloc_symbol not in rodata_idents
         and not is_helper_symbol(insn.reloc_symbol)
     })
+    source_maps = set(re.findall(r'\b([A-Za-z_]\w*)\s+SEC\(\s*"\.maps"\s*\)', prelude))
+    if prelude and set(map_symbols) - source_maps:
+        raise ValueError(f"native relocation lacks an original map declaration: {sorted(set(map_symbols) - source_maps)}")
     reloc_idents = {
-        symbol: c_ident("__arm64_reloc", symbol, index)
+        symbol: symbol if symbol in source_maps else c_ident("__arm64_reloc", symbol, index)
         for index, symbol in enumerate(map_symbols)
     }
     for map_symbol in map_symbols:
+        if map_symbol in source_maps:
+            continue
         map_ident = reloc_idents[map_symbol]
         lines.extend([
             "struct {",

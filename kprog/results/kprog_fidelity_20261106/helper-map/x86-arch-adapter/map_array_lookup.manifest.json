@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "map_array_looku",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/map_array_lookup.native.o",
+      "symbol": "map_array_lookup",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/stage2-symbol-guard/map_array_lookup.bpf.o",
+      "simulator_program": "map_array_lookup_x86_sim_xdp"
+    }
+  ]
+}
