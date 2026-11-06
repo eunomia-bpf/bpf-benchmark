@@ -98,3 +98,5 @@ The requested helper/map timing replay is recorded in helper-map/timed-x86/:
 all117 samples match expected results/retval2. TCB after-memory/ now inventories
 shared input/metadata contracts and loader/module support explicitly, with
 exact counted-source bytes. Pure simple15 load-time confirmation remains open.
+
+Current V MOVX replay checks551/799forms and564224 savedCPUcases: CPU/reference0, unchanged modelSP10240;248 decoder/block forms remain explicit. See differential/x86-movx-reference/ for all per-form outcomes and26 newly checked forms.
