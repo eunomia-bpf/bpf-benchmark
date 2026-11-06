@@ -517,7 +517,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
     high_supported = (
         (op in {"mov", "movabs"} and len(ops) == 2 and (
             (reg_info(ops[0]) is not None and
-             (is_int(ops[1]) or reg_info(ops[1]) is not None)) or
+             (is_int(ops[1]) or reg_info(ops[1]) is not None or is_mem(ops[1]))) or
             (is_mem(ops[0]) and reg_info(ops[1]) is not None))) or
         (op in {"add", "adc", "sub", "sbb"} and len(ops) == 2 and
          reg_info(ops[0]) is not None and
@@ -641,6 +641,16 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        aux=c_reg_lane_aux("0", dst_shift=dst_reg[2],
                                           src_shift=src_reg[2]))
         if dst_reg and is_mem(src):
+            if dst_reg[2]:
+                if operand_width(src, dst_reg[1]) != 8:
+                    raise ValueError(f"high-byte load requires a byte memory operand: {insn.raw}")
+                if insn.reloc_symbol and (is_helper_symbol(insn.reloc_symbol) or
+                        insn.reloc_type not in {"R_X86_64_PC32", "R_X86_64_32", "R_X86_64_32S"}):
+                    raise ValueError(f"unresolved high-byte data relocation: {insn.raw}")
+                address = relocated_data_address(insn,rodata_idents) if insn.reloc_symbol else c_u64(mem_disp(src))
+                value = f"X86_SIM_L_READ_MEM_VALUE({mem_base_reg(src)}, {mem_aux(src)}, {address}, X86_WIDTH_8, 0)"
+                return enc("X86_OP_MOV_IMM", dst=dst_reg[0], flags="X86_WIDTH_8",
+                           aux=c_reg_lane_aux("0", dst_shift=dst_reg[2]), imm=value)
             if insn.reloc_type=="R_X86_64_PC32":
                 return enc("X86_OP_MOV_LOAD",dst=dst_reg[0],src="X86_REG_NONE",
                            flags=WIDTH_CONST[dst_reg[1]],

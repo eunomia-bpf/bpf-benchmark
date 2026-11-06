@@ -20,7 +20,9 @@ contracts. The step refinements in `Refinement/` connect CMOV, BT, BZHI,
 ANDN, BMI2 shifts/rotates, BSWAP/MOVBE, ordinary MOV, ADD/ADC/SUB/SBB/CMP and register/immediate/memory PUSH/POP handlers to that reference, including registers,
 flags, XMM0, memory, PC and ordered access/fault effects. MOV includes AL/AH,
 REX byte registers, partial/zero-extending writes, immediate/ModRM/moffs forms,
-prefix ordering and source/destination aliases. Its shared scalar primitives
+prefix ordering and source/destination aliases. High-byte memory loads use the existing
+eager memory reader followed by the generated high-lane MOV writer; the proof
+preserves the read/fault sequence and every other register byte. Its shared scalar primitives
 operate on materialized native register values. Arithmetic covers all four widths,
 six status flags, incoming carry/borrow, byte lanes, native immediates, CMP
 without data writeback, and ordered read/write faults. PF uses independent
