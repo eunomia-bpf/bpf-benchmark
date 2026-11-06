@@ -66,4 +66,22 @@ def readMemory (m : Memory) (address : Word) (bytes : Nat) :
       .memory .read address (bytesAt m address bytes) (initializedAt m address bytes))
   else .error (.read address bytes)
 
+/-- Little-endian bytes written by a scalar store. Address arithmetic wraps
+at the architectural width; permissions are checked before any byte changes. -/
+def valueBytes (value : Word) (bytes : Nat) : List Byte :=
+  (List.range bytes).map (fun i => (value >>> (8 * i)).setWidth 8)
+
+def storeMemory (m : Memory) (address value : Word) (bytes : Nat) : Memory :=
+  { m with
+    value := fun a =>
+      let offset := (a - address).toNat
+      if offset < bytes then (value >>> (8 * offset)).setWidth 8 else m.value a
+    initialized := fun a => if (a - address).toNat < bytes then true else m.initialized a }
+
+def writeMemory (m : Memory) (address value : Word) (bytes : Nat) :
+    Except Fault (Memory × Event) :=
+  if permitted m.writable address bytes then
+    .ok (storeMemory m address value bytes, .memory .write address (valueBytes value bytes) true)
+  else .error (.write address bytes)
+
 end KProgFormal.Reference

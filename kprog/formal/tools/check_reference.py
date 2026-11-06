@@ -196,6 +196,45 @@ def main():
     assert len(outputs) == len(pop_cases)
     for (request, expected), out in zip(pop_cases, outputs):
         assert out == expected, (request, out, expected)
+    # PUSH captures the old source (including RSP), writes exactly the operand
+    # bytes, initializes those bytes only, and commits nothing on a late fault.
+    push_cases = []
+    for width in (2, 8):
+        for src in range(16):
+            for fault in (False, True):
+                request = copy.deepcopy(base)
+                request["native_bytes"] = ([0x66] if width == 2 else []) + (
+                    [0x41] if src >= 8 else []) + [0x50 + src % 8]
+                registers = request["state"]["registers"]
+                registers[src] = 0xFEDCBA9876543210
+                registers[4] = 0x2000
+                address = 0x2000 - width
+                cells = [dict(address=address + i, value=0xAA, readable=True,
+                              writable=not (fault and i == width - 1), initialized=False)
+                         for i in range(width + 1)]
+                request["state"]["memory"] = cells
+                expected = copy.deepcopy(request["state"])
+                expected.update(defined_flags=(1 << 64) - 1, fault=None, events=[])
+                if fault:
+                    reason = dict(kind="write", address=address, bytes=width)
+                    expected.update(fault=reason, events=[dict(kind="fault", fault=reason)])
+                else:
+                    expected["pc"] += len(request["native_bytes"])
+                    expected["registers"][4] = address
+                    value = registers[src] & ((1 << (8 * width)) - 1)
+                    written = list(value.to_bytes(width, "little"))
+                    for cell, byte in zip(expected["memory"], written):
+                        cell.update(value=byte, initialized=True)
+                    expected["events"] = [dict(kind="write", address=address,
+                                               value=written, initialized=True)]
+                push_cases.append((request, expected))
+    run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
+                         input="".join(json.dumps(r) + "\n" for r, _ in push_cases),
+                         text=True, stdout=subprocess.PIPE, check=True)
+    outputs = [json.loads(line) for line in run.stdout.splitlines()]
+    assert len(outputs) == len(push_cases)
+    for (request, expected), out in zip(push_cases, outputs):
+        assert out == expected, (request, out, expected)
     # Reject rather than truncate malformed wire words and duplicate mappings.
     malformed = copy.deepcopy(base)
     malformed["state"]["registers"][0] = 1 << 64
@@ -229,7 +268,7 @@ def main():
         if got & 0x80000000:
             got -= 1 << 32
         assert got == disp, (insn, encoded, got)
-    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, BZHI VEX/result flags, POP stack/destination alias and faults, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
+    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, BZHI VEX/result flags, PUSH/POP stack aliases, exact writes and faults, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
 
 
 if __name__ == "__main__":

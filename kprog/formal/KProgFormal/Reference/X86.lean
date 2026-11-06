@@ -190,6 +190,7 @@ def bitBaseSource (width : CmovWidth) (source : Source) (index : BitIndex)
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | push (width : StackWidth) (src : Register) (nextPc : Word)
   | pop (width : StackWidth) (dst : Register) (nextPc : Word)
   | cmov (width : CmovWidth) (cc : Fin 16) (dst : Register)
       (source : Source) (nextPc : Word)
@@ -200,6 +201,12 @@ inductive Instruction
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .push width src nextPc =>
+      let address := s.gpr 4 - BitVec.ofNat 64 width.bytes
+      match writeMemory s.memory address (s.gpr src) width.bytes with
+      | .error fault => ⟨s, [.fault fault], some fault⟩
+      | .ok (memory, event) =>
+          ⟨{ s with gpr := (fun r => if r = 4 then address else s.gpr r), memory := memory, pc := nextPc }, [event], none⟩
   | .pop width dst nextPc =>
       match readSource s (.memory (s.gpr 4)) width.bytes with
       | .error fault => ⟨s, [.fault fault], some fault⟩
@@ -233,6 +240,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .push .. => 0xffffffffffffffff
   | .pop .. => 0xffffffffffffffff
   | .cmov .. => 0xffffffffffffffff
   | .bt .. => 0xfffffffffffff76b
@@ -345,6 +353,12 @@ ModRM, SIB and signed displacement. No caller-supplied decode is trusted. -/
 def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   let (p, _, count) := prefixes bytes.toList {} 0
   let first ← byteAt bytes count
+  if 0x50 ≤ first ∧ first ≤ 0x57 then
+    let length := count + 1
+    if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
+    let src := registerCode (first % 8 + 8 * (p.rex % 2))
+    let width := if p.operand16 then StackWidth.w16 else .w64
+    return .push width src (s.pc + BitVec.ofNat 64 length)
   if 0x58 ≤ first ∧ first ≤ 0x5f then
     let length := count + 1
     if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
