@@ -216,3 +216,12 @@ taskset -c 16-19 make -C kprog/fidelity tcb
 `scale-completion-inventory.log.gz` retains the exact command output.
 
 This snapshot identifies 23 binding functions (912 overlapping physical lines). Kernel changes span 13 files, with 1167 added and 123 deleted lines against the recorded kernel base.
+
+## Snapshot after full-bank FMOV and LDP source validation
+
+`after-fmov-ldp/README.md` contains the separate updated component table and
+exact counted-source archive, without replacing the historical snapshots above.
+It includes the full32-vector simulator, LDP/SP source validation, readonly
+binding integration and current generators. The binding subset is23 functions,
+917 overlapping physical lines; incremental kernel changes remain1167 added
+and123 deleted across13 files. Full file/provenance records accompany the table.

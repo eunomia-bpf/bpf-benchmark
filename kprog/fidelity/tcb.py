@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Explicit project TCB inventory: physical and nonblank lines, no semantic-size claim."""
 import ast
+import argparse
 import csv
 import json
+import io
 from pathlib import Path
 import re
 import subprocess
+import tarfile
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT/'kprog/results/kprog_fidelity_20261106/tcb'
@@ -46,8 +49,7 @@ def imports(path, seen=None):
     return seen
 
 
-def function_spans(path, names):
-    text=path.read_text()
+def function_spans(path, names, text):
     scrub=re.sub(r'/\*[\s\S]*?\*/|//[^\n]*|"(?:\\.|[^"\\])*"', lambda m: ''.join('\n' if c=='\n' else ' ' for c in m.group()), text)
     rows=[]
     for name in names:
@@ -62,7 +64,10 @@ def function_spans(path, names):
 
 
 def main():
-    OUT.mkdir(parents=True,exist_ok=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--out', type=Path, default=OUT)
+    out = parser.parse_args().out.resolve()
+    out.mkdir(parents=True,exist_ok=True)
     sim = {arch:includes(ROOT/f'kprog/{arch}/{arch}_sim_local_bpf.h') for arch in ['x86','arm64']}
     shared = sim['x86'] & sim['arm64']
     groups = {f'{arch} simulator (including ISA-specific generated C)':paths-shared for arch,paths in sim.items()}
@@ -87,14 +92,17 @@ def main():
     groups['native-proof kernel patch and application (patch text, not SLOC)'] = {ROOT/'kprog/tv/native-proof-regions.patch',ROOT/'kprog/tv/apply_kernel_patch.py'}
     groups['existing verifier context (not incremental kernel changes)'] = {ROOT/'vendor/linux-framework/kernel/bpf/verifier.c',ROOT/'vendor/linux-framework/include/linux/bpf_verifier.h'}
     rows=[]
+    contents={}
     for component,paths in groups.items():
         if not paths:
             raise RuntimeError(f'empty component: {component}')
         for path in sorted(paths):
-            text=path.read_text()
+            if path not in contents:
+                contents[path]=path.read_bytes()
+            text=contents[path].decode()
             lines=text.splitlines()
             rows.append(dict(component=component,path=str(path.relative_to(ROOT)),physical_lines=len(lines),nonblank_lines=sum(bool(x.strip()) for x in lines)))
-    with (OUT/'files.csv').open('w') as file:
+    with (out/'files.csv').open('w') as file:
         writer=csv.DictWriter(file,fieldnames=['component','path','physical_lines','nonblank_lines'],lineterminator='\n');writer.writeheader();writer.writerows(rows)
     totals=[]
     for component in groups:
@@ -102,15 +110,23 @@ def main():
         totals.append(dict(component=component,files=len(selected),physical_lines=sum(row['physical_lines'] for row in selected),nonblank_lines=sum(row['nonblank_lines'] for row in selected)))
     binding=[]
     for arch in ['x86','arm64']:
-        binding += function_spans(ROOT/f'kinsn/module/{arch}/bpf_{arch}_native_lab.c', ['decode_native_lab_payload','native_lab_advance_generation','instantiate_native_lab','blob_write','relocs_write','proof_write','binding_write','generation_read'])
-    binding += function_spans(ROOT/'kprog/libnativeloader/src/native_loader.cpp', ['bound_proof_sequence','upload_proof_chunk','read_blob_generation','seal_bound_chunk','upload_bound_proofs','open_simulator_proof','finish_simulator_proof'])
-    (OUT/'binding-functions.json').write_text(json.dumps(binding,indent=2)+'\n')
-    (OUT/'components.json').write_text(json.dumps(totals,indent=2)+'\n')
+        path=ROOT/f'kinsn/module/{arch}/bpf_{arch}_native_lab.c'
+        binding += function_spans(path, ['decode_native_lab_payload','native_lab_advance_generation','instantiate_native_lab','blob_write','relocs_write','proof_write','binding_write','generation_read'], contents[path].decode())
+    path=ROOT/'kprog/libnativeloader/src/native_loader.cpp'
+    binding += function_spans(path, ['bound_proof_sequence','upload_proof_chunk','read_blob_generation','seal_bound_chunk','upload_bound_proofs','open_simulator_proof','finish_simulator_proof'], contents[path].decode())
+    (out/'binding-functions.json').write_text(json.dumps(binding,indent=2)+'\n')
+    (out/'components.json').write_text(json.dumps(totals,indent=2)+'\n')
+    with tarfile.open(out/'counted-source.tar.gz','w:gz') as archive:
+        for path,data in sorted(contents.items()):
+            entry=tarfile.TarInfo(str(path.relative_to(ROOT)))
+            entry.size=len(data)
+            entry.mode=path.stat().st_mode & 0o777
+            archive.addfile(entry,io.BytesIO(data))
     kernel=ROOT/'vendor/linux-framework'
     base='6f0caf14e995^'
     diff=command('git','diff','--numstat',base,cwd=kernel)
-    (OUT/'kernel-changes.tsv').write_text('added\tdeleted\tpath\n'+diff+'\n')
-    (OUT/'provenance.txt').write_text('repository='+command('git','rev-parse','HEAD')+'\nkernel='+command('git','rev-parse','HEAD',cwd=kernel)+'\nkernel_base='+command('git','rev-parse',base,cwd=kernel)+'\n\n'+command('git','status','--short')+'\n\nkernel status:\n'+command('git','status','--short',cwd=kernel)+'\n')
+    (out/'kernel-changes.tsv').write_text('added\tdeleted\tpath\n'+diff+'\n')
+    (out/'provenance.txt').write_text('repository='+command('git','rev-parse','HEAD')+'\nkernel='+command('git','rev-parse','HEAD',cwd=kernel)+'\nkernel_base='+command('git','rev-parse',base,cwd=kernel)+'\n\n'+command('git','status','--short')+'\n\nkernel status:\n'+command('git','status','--short',cwd=kernel)+'\n')
     for row in totals:print(f"{row['component']}: {row['files']} files, {row['physical_lines']} physical, {row['nonblank_lines']} nonblank")
 
 

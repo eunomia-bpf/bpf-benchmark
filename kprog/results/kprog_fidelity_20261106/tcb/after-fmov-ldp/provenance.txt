@@ -1,0 +1,691 @@
+repository=15ca4fc79b1cd01766f0193cebde7a8080c7ff42
+kernel=24cd6e63ce912a4e220ca1cae3137ab29706551b
+kernel_base=c23719abc3308df7ed3ad35650ad211fb2d2003d
+
+M corpus/results/kprog_app_coverage_20261106/Makefile
+ M corpus/results/kprog_app_coverage_20261106/README.md
+ M corpus/results/kprog_arm64_app_coverage_20261106/Makefile
+ M corpus/results/kprog_arm64_app_coverage_20261106/bcc_manifest.py
+ M corpus/results/kprog_arm64_app_coverage_20261106/bcc_real.py
+ M corpus/results/kprog_arm64_app_coverage_20261106/pin_runtime.py
+ ? docs/ebpf27-bpfoptbench
+ ? docs/paper
+ M kprog/fidelity/reference_check.py
+ M kprog/fidelity/tcb.py
+ M kprog/formal/KProgFormal/Generated/GeneratedX86HelperDispatch.lean
+ M kprog/formal/KProgFormal/Reference/X86.lean
+ M kprog/formal/KProgFormal/X86HelperDispatch.lean
+ M kprog/formal/contracts/x86_helper_dispatch_spec.json
+ M kprog/formal/generated/x86_helper_dispatch.h
+ M kprog/formal/oracles/generated_helper_calls.h
+ M kprog/formal/oracles/test_x86_helper_dispatch_host.c
+ M kprog/formal/oracles/test_x86_helper_dispatch_route_host.c
+ M kprog/formal/oracles/x86_helper_environment_host.h
+ M kprog/formal/tools/generate_x86_helper_dispatch_spec.py
+ M kprog/libnativeloader/src/native_loader.cpp
+ M kprog/libnativeloader/src/native_loader_link_schema.hpp
+ M kprog/libnativeloader/src/native_loader_manifest.hpp
+ M kprog/tv/Makefile
+ M kprog/tv/test_loader.cpp
+ M kprog/tv/test_native_entry.c
+ M kprog/x86/micro-prog/bcc_runqlat_log2_histogram_bucket.bpf.c
+ M kprog/x86/micro-prog/bcc_tcpconnect_ipv4_tuple_filter.bpf.c
+ M kprog/x86/micro-prog/bpf_local_call_fanout_dispatch.bpf.c
+ M kprog/x86/micro-prog/bpftrace_comm_key_fnv_hash.bpf.c
+ M kprog/x86/micro-prog/bpftrace_string_search_prefix_scan.bpf.c
+ M kprog/x86/micro-prog/cgroup_skb_hash_chain.bpf.c
+ M kprog/x86/micro-prog/cilium_ct_nat_tuple_rewrite.bpf.c
+ M kprog/x86/micro-prog/cilium_policy_guard_tree_filter.bpf.c
+ M kprog/x86/micro-prog/cilium_socket_lb_service_select.bpf.c
+ M kprog/x86/micro-prog/combined_helper_map.bpf.c
+ M kprog/x86/micro-prog/flow_5tuple_rss_hash.bpf.c
+ M kprog/x86/micro-prog/flow_record_field_scan.bpf.c
+ M kprog/x86/micro-prog/helper_chain_simple.bpf.c
+ M kprog/x86/micro-prog/helper_only_uid_gid.bpf.c
+ M kprog/x86/micro-prog/katran_lb_consistent_hash_select.bpf.c
+ M kprog/x86/micro-prog/map_array_index_packet.bpf.c
+ M kprog/x86/micro-prog/map_array_lookup.bpf.c
+ M kprog/x86/micro-prog/map_hash_lookup.bpf.c
+ M kprog/x86/micro-prog/map_hash_str_key.bpf.c
+ M kprog/x86/micro-prog/map_lru_hash_counter.bpf.c
+ M kprog/x86/micro-prog/map_percpu_array.bpf.c
+ M kprog/x86/micro-prog/map_percpu_hash_counter.bpf.c
+ M kprog/x86/micro-prog/multi_map_policy.bpf.c
+ M kprog/x86/micro-prog/otel_stack_frame_unwind_scan.bpf.c
+ M kprog/x86/micro-prog/packed_header_bitfield_decode.bpf.c
+ M kprog/x86/micro-prog/packet_5tuple_classify.bpf.c
+ M kprog/x86/micro-prog/packet_record_bounds_window.bpf.c
+ M kprog/x86/micro-prog/packet_toeplitz_rss_hash.bpf.c
+ M kprog/x86/micro-prog/packet_vlan_tcpopt_parser.bpf.c
+ M kprog/x86/micro-prog/siphash_rotate64_mixer.bpf.c
+ M kprog/x86/micro-prog/sorted_rule_binary_search.bpf.c
+ M kprog/x86/micro-prog/stats_mixed_helpers.bpf.c
+ M kprog/x86/micro-prog/tetragon_process_event_arg_filter.bpf.c
+ M kprog/x86/micro-prog/trace_event_type_switch_dispatch.bpf.c
+ M kprog/x86/micro-prog/tracee_http_method_prefix_detect.bpf.c
+ M kprog/x86/micro-prog/tracee_syscall_name_table_lookup.bpf.c
+ M kprog/x86/native_lab/native_link/src/main.rs
+ M kprog/x86/x86_sim_local_bpf.h
+ M vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h
+ M vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h
+ m vendor/linux-framework
+?? corpus/results/arm64_qemu_corpus_19700101_000006_311551/
+?? corpus/results/arm64_qemu_corpus_19700101_000006_530516/
+?? corpus/results/arm64_qemu_corpus_19700101_000006_886537/
+?? corpus/results/arm64_qemu_corpus_19700101_000009_181096/
+?? corpus/results/arm64_qemu_corpus_19700101_000010_879201/
+?? corpus/results/arm64_qemu_corpus_19700101_000013_229609/
+?? corpus/results/cilium_native_lab_20261009/
+?? corpus/results/kprog_app_coverage_20261106/abi-bound/invalid_helper_argument.manifest.json
+?? corpus/results/kprog_app_coverage_20261106/abi-bound/map_value_oob.manifest.json
+?? corpus/results/kprog_app_coverage_20261106/abi-bound/missing_data_end_check.manifest.json
+?? corpus/results/kprog_app_coverage_20261106/abi-bound/nullable_map_dereference.manifest.json
+?? corpus/results/kprog_app_coverage_20261106/abi-bound/past_data_end_read.manifest.json
+?? corpus/results/kprog_app_coverage_20261106/abi-bound/past_data_end_write.manifest.json
+?? corpus/results/kprog_app_coverage_20261106/abi-bound/stack_oob.manifest.json
+?? corpus/results/kprog_app_coverage_20261106/abi-bound/unbounded_loop.manifest.json
+?? corpus/results/kprog_app_coverage_20261106/abi-bound/uninitialized_stack.manifest.json
+?? corpus/results/kprog_app_coverage_20261106/anonymous-helper-host
+?? corpus/results/kprog_app_coverage_20261106/anonymous-helper-route-host
+?? corpus/results/kprog_app_coverage_20261106/anonymous-manifest-host
+?? corpus/results/kprog_app_coverage_20261106/anonymous-manifest-host-cases/
+?? corpus/results/kprog_app_coverage_20261106/anonymous-startup
+?? corpus/results/kprog_app_coverage_20261106/anonymous-startup-results/
+?? corpus/results/kprog_app_coverage_20261106/anonymous.mk
+?? corpus/results/kprog_app_coverage_20261106/anonymous_startup.cpp
+?? corpus/results/kprog_app_coverage_20261106/archive_startup_helpers.py
+?? corpus/results/kprog_app_coverage_20261106/arithmetic/
+?? corpus/results/kprog_app_coverage_20261106/baseline-tail/compile
+?? corpus/results/kprog_app_coverage_20261106/baseline-tail/objects
+?? corpus/results/kprog_app_coverage_20261106/baseline-tail/verify
+?? corpus/results/kprog_app_coverage_20261106/bcc-real-1/
+?? corpus/results/kprog_app_coverage_20261106/bcc-real-10/
+?? corpus/results/kprog_app_coverage_20261106/bcc-real-11/
+?? corpus/results/kprog_app_coverage_20261106/bcc-real-2/
+?? corpus/results/kprog_app_coverage_20261106/bcc-real-3/
+?? corpus/results/kprog_app_coverage_20261106/bcc-real-4/
+?? corpus/results/kprog_app_coverage_20261106/bcc-real-5/
+?? corpus/results/kprog_app_coverage_20261106/bcc-real-6/
+?? corpus/results/kprog_app_coverage_20261106/bcc-real-7/
+?? corpus/results/kprog_app_coverage_20261106/bcc-real-8/
+?? corpus/results/kprog_app_coverage_20261106/bcc-real-9/
+?? corpus/results/kprog_app_coverage_20261106/bcc-runtime-7.image.tar
+?? corpus/results/kprog_app_coverage_20261106/bcc-runtime-7/
+?? corpus/results/kprog_app_coverage_20261106/bpf-lift/
+?? corpus/results/kprog_app_coverage_20261106/check_anonymous_manifest.cpp
+?? corpus/results/kprog_app_coverage_20261106/check_anonymous_startup.py
+?? corpus/results/kprog_app_coverage_20261106/check_bpf_lift.py
+?? corpus/results/kprog_app_coverage_20261106/check_object_startup.py
+?? corpus/results/kprog_app_coverage_20261106/check_source_calls.py
+?? corpus/results/kprog_app_coverage_20261106/cilium-label/compile
+?? corpus/results/kprog_app_coverage_20261106/cilium-label/objects
+?? corpus/results/kprog_app_coverage_20261106/cilium-label/verify
+?? corpus/results/kprog_app_coverage_20261106/code-dispatch/
+?? corpus/results/kprog_app_coverage_20261106/context-runtime/
+?? corpus/results/kprog_app_coverage_20261106/defined-final/
+?? corpus/results/kprog_app_coverage_20261106/defined-pinned/
+?? corpus/results/kprog_app_coverage_20261106/defined/
+?? corpus/results/kprog_app_coverage_20261106/entry-input/
+?? corpus/results/kprog_app_coverage_20261106/helper-effects/
+?? corpus/results/kprog_app_coverage_20261106/helper-formal-source.txt
+?? corpus/results/kprog_app_coverage_20261106/helper-micro-negative/
+?? corpus/results/kprog_app_coverage_20261106/helper-micro/
+?? corpus/results/kprog_app_coverage_20261106/indirect-sites.json
+?? corpus/results/kprog_app_coverage_20261106/lift-bpf-ir
+?? corpus/results/kprog_app_coverage_20261106/lift_bpf_ir.cpp
+?? corpus/results/kprog_app_coverage_20261106/lift_bpf_ir_backend.before-local.cpp
+?? corpus/results/kprog_app_coverage_20261106/lift_bpf_ir_backend.cpp
+?? corpus/results/kprog_app_coverage_20261106/lift_bpf_ir_backend.h
+?? corpus/results/kprog_app_coverage_20261106/lift_startup_proofs.py
+?? corpus/results/kprog_app_coverage_20261106/native-dispatch-link/
+?? corpus/results/kprog_app_coverage_20261106/native-dispatch/
+?? corpus/results/kprog_app_coverage_20261106/object-startup-results-3/
+?? corpus/results/kprog_app_coverage_20261106/object-startup-results/
+?? corpus/results/kprog_app_coverage_20261106/pin_helper_census.py
+?? corpus/results/kprog_app_coverage_20261106/pushpop-after-bound/
+?? corpus/results/kprog_app_coverage_20261106/pushpop-after/
+?? corpus/results/kprog_app_coverage_20261106/pushpop-before-bound/
+?? corpus/results/kprog_app_coverage_20261106/pushpop-before/
+?? corpus/results/kprog_app_coverage_20261106/pushpop-build/
+?? corpus/results/kprog_app_coverage_20261106/raw-context/
+?? corpus/results/kprog_app_coverage_20261106/raw-entry-census/
+?? corpus/results/kprog_app_coverage_20261106/raw-entry-host
+?? corpus/results/kprog_app_coverage_20261106/readonly-census/
+?? corpus/results/kprog_app_coverage_20261106/readonly-layout/
+?? corpus/results/kprog_app_coverage_20261106/ret-after-bound/
+?? corpus/results/kprog_app_coverage_20261106/ret-after/
+?? corpus/results/kprog_app_coverage_20261106/ret-before-bound/
+?? corpus/results/kprog_app_coverage_20261106/ret-before/
+?? corpus/results/kprog_app_coverage_20261106/runtime-pair-input/
+?? corpus/results/kprog_app_coverage_20261106/source-call-fixtures
+?? corpus/results/kprog_app_coverage_20261106/source-call-inputs/
+?? corpus/results/kprog_app_coverage_20261106/source-call-results/
+?? corpus/results/kprog_app_coverage_20261106/source_call_fixtures.cpp
+?? corpus/results/kprog_app_coverage_20261106/sp-lea-census/
+?? corpus/results/kprog_app_coverage_20261106/sp-lea/
+?? corpus/results/kprog_app_coverage_20261106/startup-helper-census/
+?? corpus/results/kprog_app_coverage_20261106/startup-helpers.md
+?? corpus/results/kprog_app_coverage_20261106/startup-lift/
+?? corpus/results/kprog_app_coverage_20261106/startup-x86/
+?? corpus/results/kprog_app_coverage_20261106/verified-runtime/
+?? corpus/results/kprog_app_coverage_20261106/verify-proof
+?? corpus/results/kprog_app_coverage_20261106/zero-address-call/generation/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-effects-before/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-effects-fixed/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-effects-tail/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-frame-effects/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-memory-effects/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-memory-final-v2/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-memory-final/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-memory-tags/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-micro-source/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/build.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/cases
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/entry_return_address_flags.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/entry_return_address_flags.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/entry_return_address_flags.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/entry_return_address_flags.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/helper_clobbered_register.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/helper_clobbered_register.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/initramfs.spec
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/invalid_helper_argument.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/invalid_helper_argument.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/invalid_helper_argument.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/invalid_helper_argument.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/map_value_oob.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/map_value_oob.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/map_value_oob.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/map_value_oob.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/missing_data_end_check.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/missing_data_end_check.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/missing_data_end_check.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/missing_data_end_check.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/nullable_map_dereference.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/nullable_map_dereference.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/nullable_map_dereference.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/nullable_map_dereference.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/past_data_end_read.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/past_data_end_read.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/past_data_end_read.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/past_data_end_read.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/past_data_end_write.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/past_data_end_write.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/past_data_end_write.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/past_data_end_write.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/return_register_overwrite.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/return_register_overwrite.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/return_register_overwrite.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/return_register_overwrite.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/snapshot/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/stack_base_flags.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/stack_base_flags.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/stack_base_flags.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/stack_base_flags.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/stack_oob.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/stack_oob.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/stack_oob.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/stack_oob.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/unbounded_indirect_jump.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/unbounded_indirect_jump.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/unbounded_loop.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/unbounded_loop.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/unbounded_loop.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/unbounded_loop.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/undefined_entry_flags.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/undefined_entry_flags.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/undefined_entry_register.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/undefined_entry_register.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/uninitialized_stack.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/uninitialized_stack.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/uninitialized_stack.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/uninitialized_stack.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/unsupported_instruction.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative-final/unsupported_instruction.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-negative/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-positives-fixed/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-stack-join/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-stage2-final/
+?? corpus/results/kprog_arm64_app_coverage_20261106/abi-stage2/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-bound-v4/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-bound-v5/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-packed-tags-v2/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-packed-tags/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-paired-frozen/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-readonly-metadata/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-real-entries-v2/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-real-entries-v3/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-real-entries-v4/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-real-entries-v5/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-real-entries-v6/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-real-entries-v7/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-real-entries-v8/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-real-entries-v9/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bcc-tag-word/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bound-probe
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-all/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-dispatch-v2/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-dispatch-v3/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-dispatch-v4/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-dispatch/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-final-negative/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-final/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-return-negative/inputs/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-return-negative/verify/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-return-v2/inputs/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-return-v2/verify/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-return/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-verifier-negative/
+?? corpus/results/kprog_arm64_app_coverage_20261106/bounded-verifier/
+?? corpus/results/kprog_arm64_app_coverage_20261106/cilium-native-arch/config/
+?? corpus/results/kprog_arm64_app_coverage_20261106/cilium-native-arch/native-abi-overlay/
+?? corpus/results/kprog_arm64_app_coverage_20261106/cilium-native-arch/native_compat.h
+?? corpus/results/kprog_arm64_app_coverage_20261106/cilium-native-arch/original-parity.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/control-hosts-final/
+?? corpus/results/kprog_arm64_app_coverage_20261106/control-return-micro/inputs/
+?? corpus/results/kprog_arm64_app_coverage_20261106/control-return-micro/verify/
+?? corpus/results/kprog_arm64_app_coverage_20261106/defined-frozen/commands.jsonl
+?? corpus/results/kprog_arm64_app_coverage_20261106/defined-frozen/compile/
+?? corpus/results/kprog_arm64_app_coverage_20261106/defined-frozen/constructor/
+?? corpus/results/kprog_arm64_app_coverage_20261106/defined-known/
+?? corpus/results/kprog_arm64_app_coverage_20261106/direct-dispatch-v2/
+?? corpus/results/kprog_arm64_app_coverage_20261106/direct-dispatch-v3/compile/
+?? corpus/results/kprog_arm64_app_coverage_20261106/direct-dispatch-v3/dispatch-map.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/direct-dispatch-v3/inputs/
+?? corpus/results/kprog_arm64_app_coverage_20261106/direct-dispatch-v3/programs.jsonl
+?? corpus/results/kprog_arm64_app_coverage_20261106/direct-dispatch-v3/verify/
+?? corpus/results/kprog_arm64_app_coverage_20261106/direct-dispatch/
+?? corpus/results/kprog_arm64_app_coverage_20261106/fmov-bank-abi-v2/
+?? corpus/results/kprog_arm64_app_coverage_20261106/fmov-bank-abi/
+?? corpus/results/kprog_arm64_app_coverage_20261106/fmov-bank-bound-v2/
+?? corpus/results/kprog_arm64_app_coverage_20261106/fmov-bank-bound/
+?? corpus/results/kprog_arm64_app_coverage_20261106/fmov-bank-checked/runtime/
+?? corpus/results/kprog_arm64_app_coverage_20261106/fmov-bank-micro/
+?? corpus/results/kprog_arm64_app_coverage_20261106/fmov_bank_host.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/helper-complete/
+?? corpus/results/kprog_arm64_app_coverage_20261106/helper-dispatch-bound/
+?? corpus/results/kprog_arm64_app_coverage_20261106/helper_dispatch.py
+?? corpus/results/kprog_arm64_app_coverage_20261106/known-micro-source/
+?? corpus/results/kprog_arm64_app_coverage_20261106/known-micro/inputs/
+?? corpus/results/kprog_arm64_app_coverage_20261106/known-micro/verify/
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v310_execve_rate.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v310_execve_send.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v511_event_execve.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v511_execve_send.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v53_event_execve.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v53_execve_rate.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v53_execve_send.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v61___do_bytes.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v61___do_str.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_arch_prctl.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_bpf_check.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_call_usermodehelper.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_cap_capable.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_check_helper_call.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_check_map_func_compatibility.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_chmod_common.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_commit_creds.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_do_init_module.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_do_mmap.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/memory-final-micro/
+?? corpus/results/kprog_arm64_app_coverage_20261106/memory-final-stage2/
+?? corpus/results/kprog_arm64_app_coverage_20261106/memory-micro/
+?? corpus/results/kprog_arm64_app_coverage_20261106/memory-return-final/
+?? corpus/results/kprog_arm64_app_coverage_20261106/memory-stage2/
+?? corpus/results/kprog_arm64_app_coverage_20261106/memory-tags-packed/
+?? corpus/results/kprog_arm64_app_coverage_20261106/memory-tags-v2/
+?? corpus/results/kprog_arm64_app_coverage_20261106/memory-tags/
+?? corpus/results/kprog_arm64_app_coverage_20261106/negative-bound-init
+?? corpus/results/kprog_arm64_app_coverage_20261106/negative-bound.cpio
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/bound-probe
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/native/
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_119.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_119.expected
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_119.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_119.no-addend.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_119.source.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_64.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_64.expected
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_64.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_64.no-addend.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_64.source.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_7.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_7.expected
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_7.manifest.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_7.no-addend.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/readonly_7.source.bpf.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/runtime/
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-checked/verify/
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior-final/
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-interior/
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-metadata-abi/
+?? corpus/results/kprog_arm64_app_coverage_20261106/readonly-micro-identity/
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_host_tail_no_service_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_host_tail_nodeport_ipv4_dsr.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_host_tail_nodeport_nat_egress_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_host_tail_nodeport_nat_ingress_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_host_tail_nodeport_rev_dnat_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_cil_from_container.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_cil_lxc_policy.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_cil_lxc_policy_egress.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_cil_to_container.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_drop_notify.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_handle_arp.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_handle_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_icmp6_handle_ns.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_icmp6_send_time_exceeded.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_ipv4_ct_egress.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_ipv4_ct_ingress.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_ipv4_ct_ingress_policy_only.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_ipv4_to_endpoint.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_no_service_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_nodeport_ipv4_dsr.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_nodeport_nat_egress_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_nodeport_nat_ingress_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_nodeport_rev_dnat_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_lxc_tail_policy_denied_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_overlay_cil_from_overlay.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_overlay_cil_to_overlay.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_overlay_tail_drop_notify.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_overlay_tail_handle_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_overlay_tail_handle_nat_fwd_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_overlay_tail_handle_snat_fwd_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_overlay_tail_icmp6_send_time_exceeded.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/cilium_bpf_overlay_tail_no_service_ipv4.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_execve_event_v61_event_execve.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_execve_event_v61_execve_send.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_fork_v310_event_wake_up_new_task.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_fork_v511_event_wake_up_new_task.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v511_generic_fentry_actions.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v511_generic_fentry_event.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v511_generic_fentry_filter_arg.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v511_generic_fentry_output.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v511_generic_fentry_path.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v511_generic_fentry_process_event.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v511_generic_fentry_process_filter.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v511_generic_fentry_setup_event.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v511_native_bpf_strncasestr.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v53_generic_fentry_actions.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v53_generic_fentry_event.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v53_generic_fentry_filter_arg.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v53_generic_fentry_output.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v53_generic_fentry_path.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v53_generic_fentry_process_event.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v53_generic_fentry_process_filter.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v53_generic_fentry_setup_event.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v53_native_bpf_strncasestr.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61___do_bytes.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_cwd_read_v61.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_data_event_bytes.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_do_action.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_do_bytes.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_extract_arg_depth.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_16ty.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_16ty_map.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_16ty_range.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_16ty_selector_val.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_32ty.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_32ty_map.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_32ty_range.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_32ty_selector_val.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_64ty.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_64ty_map.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_64ty_range.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_64ty_selector_val.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_8ty.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_8ty_map.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_8ty_range.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_8ty_selector_val.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_char_buf.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_char_buf_equal.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_char_buf_postfix.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_char_buf_prefix.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_char_substring.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_file_buf.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_file_type.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_inet.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_filter_sockaddr_un.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_generic_fentry_actions.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_generic_fentry_event.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/real-helpers/compile/tetragon_bpf_generic_fentry_v61_generic_fentry_output.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/return-byte-before/
+?? corpus/results/kprog_arm64_app_coverage_20261106/return-byte-forgery/
+?? corpus/results/kprog_arm64_app_coverage_20261106/return-byte-load-only/
+?? corpus/results/kprog_arm64_app_coverage_20261106/return-forgery/inputs/
+?? corpus/results/kprog_arm64_app_coverage_20261106/return-forgery/local_scalar_pc.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/return-forgery/local_scalar_pc.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/return-forgery/outer_scalar_zero.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/return-forgery/outer_scalar_zero.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/return-forgery/verify/
+?? corpus/results/kprog_arm64_app_coverage_20261106/runtime-preflight-1/
+?? corpus/results/kprog_arm64_app_coverage_20261106/runtime-preflight-2/host-Makefile
+?? corpus/results/kprog_arm64_app_coverage_20261106/runtime-preflight-2/interrupted-run/
+?? corpus/results/kprog_arm64_app_coverage_20261106/runtime-preflight-2/qemu-init
+?? corpus/results/kprog_arm64_app_coverage_20261106/runtime-preflight-2/qemu-run.sh
+?? corpus/results/kprog_arm64_app_coverage_20261106/sp-alignment-before/
+?? corpus/results/kprog_arm64_app_coverage_20261106/sp-write/inputs/
+?? corpus/results/kprog_arm64_app_coverage_20261106/sp-write/main.c
+?? corpus/results/kprog_arm64_app_coverage_20261106/sp-write/native
+?? corpus/results/kprog_arm64_app_coverage_20261106/sp-write/sp_restore.S
+?? corpus/results/kprog_arm64_app_coverage_20261106/sp-write/sp_restore.asm
+?? corpus/results/kprog_arm64_app_coverage_20261106/sp-write/verify/
+?? corpus/results/kprog_arm64_app_coverage_20261106/sp_alignment.py
+?? corpus/results/kprog_arm64_app_coverage_20261106/stack-store-packed/
+?? corpus/results/kprog_arm64_app_coverage_20261106/stack-store-tags/
+?? corpus/results/kprog_arm64_app_coverage_20261106/verify-proof
+?? corpus/results/x86_kvm_corpus_20261009_155809_919194/
+?? corpus/results/x86_kvm_corpus_20261009_160148_125322/
+?? corpus/results/x86_kvm_corpus_20261106_111521_609228/
+?? corpus/results/x86_kvm_corpus_20261106_112823_193051/
+?? corpus/results/x86_kvm_corpus_20261106_113727_795524/
+?? corpus/results/x86_kvm_corpus_20261106_114826_062263/
+?? corpus/results/x86_kvm_corpus_20261106_125737_127074/
+?? corpus/results/x86_kvm_corpus_20261106_155514_416268/
+?? corpus/results/x86_kvm_corpus_20261106_161648_583558/
+?? kprog/arm64/app-coverage-baseline-run-3607553/
+?? kprog/arm64/app-coverage-bounded-all-run-238812/
+?? kprog/arm64/app-coverage-defined-frozen-run-1216226/
+?? kprog/arm64/app-coverage-defined-known-run-1150429/
+?? kprog/arm64/app-coverage-helper-complete-75-run-623109/
+?? kprog/arm64/app-coverage-helper-complete-run-621776/
+?? kprog/arm64/app-coverage-helper-ids-run-3723782/
+?? kprog/arm64/app-coverage-label-all-run-3659439/
+?? kprog/arm64/app-coverage-label-pilot-run-3644785/
+?? kprog/arm64/app-coverage-pilot-run-3607178/
+?? kprog/arm64/app-coverage-real-helpers-run-505183/
+?? kprog/formal/KProgFormal/Refinement/X86Scalar.lean
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-bank32/cpu-states.bin.removed
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-bank32/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-bank32/reference-mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-bank32/reference-unavailable.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-control-current/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-control-movsp/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-control-qemu/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-control-return-tag/
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-control-sp-observer-before/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-control-sp-observer/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-control-stack-base/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-extend-reference/cpu-states.bin.removed
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-extend-reference/reference-mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-extend-reference/reference-unavailable.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-memory-reference/
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-current/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-reference-current/cpu-states.bin.removed
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-reference-current/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-reference-current/reference-mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-reference-current/reference-unavailable.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-reference/forms.tsv
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-reference/host.txt
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-reference/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-reference/native-code.json
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-reference/reference-forms-before-probe.tsv.gz
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-reference/reference-forms.tsv
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-reference/reference-mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-reference/reference-unavailable.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-unary-reference/forms.tsv
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-unary-reference/host.txt
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-unary-reference/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-unary-reference/native-code.json
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-unary-reference/reference-forms.tsv
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-unary-reference/reference-mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-production-unary-reference/reference-unavailable.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-reference-shift/forms.tsv
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-reference-shift/host.txt
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-reference-shift/native-code.json
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-reference-shift/reference-mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-reference-shift/reference-unavailable.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-reference/cpu-states.bin.removed
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-register-cells/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-simd-fix/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-sp-observer/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-sp-reference/cpu-states.bin
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-sp-reference/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-sp-reference/reference-mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-sp-reference/reference-unavailable.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/arm64-width-fix/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-after-lea-complete/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-cpu-fixed/cpu-states.bin.removed
+?? kprog/results/kprog_fidelity_20261106/differential/x86-cpu-fixed/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-current-stack-reference/cpu-states.bin.removed
+?? kprog/results/kprog_fidelity_20261106/differential/x86-current-stack-reference/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-current-stack-reference/reference-mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-current-stack-reference/reference-unavailable.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-current-stack/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-driver-layout/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-encoding-fix-rebuilt/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-encoding-fix/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-lea-sp-after/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-memory-fix/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-recovery/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-reference-bt-cmov/cpu-states.bin.removed
+?? kprog/results/kprog_fidelity_20261106/differential/x86-reference-bt-cmov/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-reference-bzhi/cpu-states.bin.removed
+?? kprog/results/kprog_fidelity_20261106/differential/x86-reference-bzhi/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-reference-cmov-bytes/cpu-states.bin.removed
+?? kprog/results/kprog_fidelity_20261106/differential/x86-reference-cmov-bytes/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-reference-isa-adapter/cpu-states.bin.removed
+?? kprog/results/kprog_fidelity_20261106/differential/x86-reference-pop/cpu-states.bin.removed
+?? kprog/results/kprog_fidelity_20261106/differential/x86-sp-observer-control/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-sp-observer/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-sp-reference/cpu-states.bin
+?? kprog/results/kprog_fidelity_20261106/differential/x86-sp-reference/mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-sp-reference/reference-mismatches.jsonl
+?? kprog/results/kprog_fidelity_20261106/differential/x86-sp-reference/reference-unavailable.jsonl
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp-matched/immediate_push_branch.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp-matched/invalid_helper_argument.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp-matched/map_value_oob.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp-matched/missing_data_end_check.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp-matched/nullable_map_dereference.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp-matched/past_data_end_read.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp-matched/past_data_end_write.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp-matched/stack_base_flags.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp-matched/stack_oob.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp-matched/unbounded_loop.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp-matched/uninitialized_stack.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp/immediate_push_branch.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp/invalid_helper_argument.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp/map_value_oob.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp/missing_data_end_check.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp/nullable_map_dereference.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp/past_data_end_read.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp/past_data_end_write.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp/stack_base_flags.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp/stack_oob.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp/unbounded_loop.manifest.json
+?? kprog/results/kprog_fidelity_20261106/negative/x86-post-ldp/uninitialized_stack.manifest.json
+?? kprog/results/kprog_fidelity_20261106/scale/100k-pointer-direct-kvm/n100000_ptr_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/100k-pointer-indirect-kvm/n100000_ptr_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/factored-followup-kvm/n100000_scalar_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/factored-followup-kvm/n10000_ptr_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/factored-kvm/n100000_scalar_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/factored-kvm/n10000_scalar_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/final-code-validation/
+?? kprog/results/kprog_fidelity_20261106/scale/first-eight/n1000_ptr_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/first-eight/n1000_ptr_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/first-eight/n1000_scalar_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/first-eight/n1000_scalar_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/first-eight/n100_ptr_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/first-eight/n100_ptr_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/first-eight/n100_scalar_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/first-eight/n100_scalar_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/late-indirect-kvm/n10000_ptr_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/late-regref-kvm/n10000_ptr_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/late-regref-kvm/n100_ptr_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/late-scalar-indirect-kvm/n10000_scalar_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/provenance-validation/n100_ptr_direct.json
+?? kprog/results/kprog_fidelity_20261106/scale/provenance-validation/n100_ptr_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/provenance-validation/n100_ptr_indirect.json
+?? kprog/results/kprog_fidelity_20261106/scale/provenance-validation/n100_ptr_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/provenance-validation/n100_scalar_direct.json
+?? kprog/results/kprog_fidelity_20261106/scale/provenance-validation/n100_scalar_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/provenance-validation/n100_scalar_indirect.json
+?? kprog/results/kprog_fidelity_20261106/scale/provenance-validation/n100_scalar_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/register-cells-cpu/
+?? kprog/results/kprog_fidelity_20261106/scale/smoke-memory-final/
+?? kprog/results/kprog_fidelity_20261106/scale/smoke-memory/
+?? kprog/results/kprog_fidelity_20261106/scale/smoke-traced-retry/
+?? kprog/results/kprog_fidelity_20261106/scale/smoke-traced/
+?? kprog/results/kprog_fidelity_20261106/scale/smoke/
+?? kprog/results/kprog_fidelity_20261106/scale/x86-checkpoint/
+?? kprog/results/kprog_fidelity_20261106/scale/x86/guest.txt
+?? kprog/results/kprog_fidelity_20261106/scale/x86/n10000_scalar_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/x86/n1000_ptr_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/x86/n1000_ptr_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/x86/n1000_scalar_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/x86/n1000_scalar_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/x86/n100_ptr_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/x86/n100_ptr_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/x86/n100_scalar_direct.trace.txt
+?? kprog/results/kprog_fidelity_20261106/scale/x86/n100_scalar_indirect.trace.txt
+?? kprog/results/kprog_fidelity_20261106/tcb/after-fmov-ldp/
+?? kprog/results/kprog_tv_20261106/external-binding-kernel-arm64-before-helper-negative.status
+?? kprog/results/kprog_tv_20261106/external-binding-kernel-arm64.status
+?? kprog/results/kprog_tv_20261106/external-binding-kernel-x86
+?? kprog/results/kprog_tv_20261106/external-binding-kernel-x86.status
+?? kprog/results/kprog_tv_20261106/programs.jsonl
+?? kprog/results/kprog_tv_20261106/raw-proof-map-relink-x86.status
+?? kprog/tv/prepare_simple_arm64.py
+?? kprog/x86/app-coverage-arithmetic-run-1256204/
+?? kprog/x86/app-coverage-arithmetic-run-18349/
+?? kprog/x86/app-coverage-baseline-run-3594374/
+?? kprog/x86/app-coverage-cilium-baseline-run-3599863/
+?? kprog/x86/app-coverage-cilium-label-run-3670160/
+?? kprog/x86/app-coverage-cilium-unbounded-run-3642134/
+?? kprog/x86/app-coverage-defined-final-run-951574/
+?? kprog/x86/app-coverage-defined-pinned-run-887877/
+?? kprog/x86/app-coverage-defined-run-878815/
+?? kprog/x86/app-coverage-finite-run-507685/
+?? kprog/x86/app-coverage-helper-effects-run-1200998/
+?? kprog/x86/app-coverage-label-run-3670126/
+?? kprog/x86/app-coverage-pilot-run-3596819/
+?? kprog/x86/app-coverage-raw-entry-run-606511/
+?? kprog/x86/app-coverage-readonly-run-1464089/
+?? kprog/x86/app-coverage-sp-lea-run-895787/
+?? kprog/x86/app-coverage-startup-helpers-run-1660781/
+?? kprog/x86/app-coverage-unbounded-run-3619651/
+?? kprog/x86/app-coverage-zero-address-run-19999/
+?? kprog/x86/native_lab/native_link/target-c-readonly/
+?? micro/results/x86_kvm_micro_20261106_095456_941507/
+?? tests/results/11ed5ed2/
+?? tests/results/2d93bbd5/
+?? tests/results/37246ee1/
+?? tests/results/47d2bc99/
+?? tests/results/57b89846/
+?? tests/results/843bd311/
+?? tests/results/ce321f56/
+?? tests/results/dda2eeac/
+?? tests/results/e084a44b/
+?? tests/results/e54648e4/
+?? tests/results/e81210f7/
+
+kernel status:
+M arch/arm64/net/bpf_jit_comp.c
+ M arch/x86/net/bpf_jit_comp.c
+ M include/linux/bpf.h
+ M include/linux/bpf_verifier.h
+ M kernel/bpf/btf.c
+ M kernel/bpf/core.c
+ M kernel/bpf/offload.c
+ M kernel/bpf/syscall.c
+ M kernel/bpf/verifier.c
+?? drivers/net/veth.c.orig
+?? include/linux/bpf_native_input.h
