@@ -425,6 +425,57 @@ def main():
         if nzcv is not None:
             expected["flags"] = 0xA5A50000000ABCDE | (nzcv << 28)
         cases.append((request, expected))
+    # Control transfers use signed byte displacements from the current PC.
+    # Compare complete states so a branch cannot clobber flags, SP or memory.
+    for word, pc, nzcv, src, value, target in [
+            (0xD503201F, 0x1000, 15, None, None, 0x1004),
+            (0xD503201F, 0xFFFFFFFFFFFFFFFC, 0, None, None, 0),
+            (0x14000000, 0x1000, 15, None, None, 0x1000),
+            (0x14000001, 0x1000, 15, None, None, 0x1004),
+            (0x17FFFFFF, 0x1000, 15, None, None, 0xFFC),
+            (0x15FFFFFF, 0x1000, 15, None, None, 0x8000FFC),
+            (0x16000000, 0x1000, 15, None, None, 0xFFFFFFFFF8001000),
+            (0x14000002, 0xFFFFFFFFFFFFFFFC, 15, None, None, 4),
+            (0x17FFFFFF, 0, 15, None, None, 0xFFFFFFFFFFFFFFFC),
+            (0x54000108, 0x1000, 2, None, None, 0x1020),
+            (0x54000108, 0x1000, 6, None, None, 0x1004),
+            (0x54000108, 0x1000, 0, None, None, 0x1004),
+            (0x54000109, 0x1000, 2, None, None, 0x1004),
+            (0x54000109, 0x1000, 6, None, None, 0x1020),
+            (0x54000109, 0x1000, 0, None, None, 0x1020),
+            (0x54FFFFE0, 0x1000, 4, None, None, 0xFFC),
+            (0x54FFFFE0, 0x1000, 0, None, None, 0x1004),
+            (0x5400010F, 0x1000, 0, None, None, 0x1020),
+            (0x5400010E, 0x1000, 15, None, None, 0x1020),
+            (0x547FFFE8, 0x1000, 2, None, None, 0x100FFC),
+            (0x54800008, 0x1000, 2, None, None, 0xFFFFFFFFFFF01000),
+            (0x34000101, 0x1000, 15, 1, 0x100000000, 0x1020),
+            (0xB4000101, 0x1000, 15, 1, 0x100000000, 0x1004),
+            (0x35000101, 0x1000, 15, 1, 0x100000000, 0x1004),
+            (0x35000101, 0x1000, 15, 1, 1, 0x1020),
+            (0xB5000101, 0x1000, 15, 1, 0x100000000, 0x1020),
+            (0xB5000101, 0x1000, 15, 1, 0, 0x1004),
+            (0x3400011F, 0x1000, 15, 31, 123, 0x1020),
+            (0xB500011F, 0x1000, 15, 31, 123, 0x1004),
+            (0x36000101, 0x1000, 15, 1, 0, 0x1020),
+            (0x36000101, 0x1000, 15, 1, 1, 0x1004),
+            (0xB7F80101, 0x1000, 15, 1, 0x8000000000000000, 0x1020),
+            (0xB7F80101, 0x1000, 15, 1, 0x7FFFFFFFFFFFFFFF, 0x1004),
+            (0x36F80101, 0x1000, 15, 1, 0xFFFFFFFF00000000, 0x1020),
+            (0x36F80101, 0x1000, 15, 1, 0x80000000, 0x1004),
+            (0x37F8011F, 0x1000, 15, 31, 123, 0x1004),
+            (0xB6F8011F, 0x1000, 15, 31, 123, 0x1020),
+            (0x36040001, 0x1000, 15, 1, 0, 0xFFFFFFFFFFFF9000),
+            (0x3603FFE1, 0x1000, 15, 1, 0, 0x8FFC)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["pc"] = pc
+        request["state"]["flags"] = 0xA5A50000000ABCDE | (nzcv << 28)
+        if src is not None:
+            request["state"]["registers"][src] = value
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=target, defined_flags=(1 << 64) - 1, events=[], fault=None)
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -442,7 +493,8 @@ def main():
                  0x7A5F0835, 0x7A5F0C25, 0x5A5F0825, 0x3A5F0825,
                  0x91800420, 0xD1800420, 0x31800420, 0xF1800420,
                  0x0BC20020, 0x8BC20020, 0x0B028020, 0x0B828020, 0x6BC20020,
-                 0x8B221420, 0x0B221820, 0x6B22FC20, 0xEB2277FF, 0x4B2117E0):
+                 0x8B221420, 0x0B221820, 0x6B22FC20, 0xEB2277FF, 0x4B2117E0,
+                 0x54000118, 0xD4000108, 0xD503203F):
         request = copy.deepcopy(base)
         request["native_bytes"] = list(word.to_bytes(4, "little"))
         rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
@@ -526,7 +578,7 @@ def main():
             assert str(error).startswith(("invalid move-wide", "invalid NEGS", "invalid AArch64 extend")), error
             continue
         raise AssertionError((mnemonic, operands, "invalid alias was accepted"))
-    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV/CNT/UADDLV/CCMP/ADD-SUB-immediate/shifted-register/extended-register, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV/CNT/UADDLV/CCMP/ADD-SUB-immediate/shifted-register/extended-register/NOP/branches, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":

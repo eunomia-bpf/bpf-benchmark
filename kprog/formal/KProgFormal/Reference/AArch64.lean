@@ -392,7 +392,24 @@ def arithmeticExtendedStep (width : Width) (subtract setFlags : Bool)
   arithmeticImmediateStep width subtract setFlags dst src
     (extendValue width kind (readReg s rhs) (BitVec.ofNat 64 amount.val)) s
 
+/-- Branch offsets are signed native BYTE displacements relative to the
+branch instruction, with wrapping64-bit PC arithmetic. -/
+def branchStep (taken : Bool) (displacement : Word) (s : State) : Transition State :=
+  ⟨{ s with pc := if taken then s.pc + displacement else s.pc + 4 }, [], none⟩
+
+def zeroBranch (width : Width) (nonzero : Bool) (value : Word) : Bool :=
+  if nonzero then narrow value width != 0 else narrow value width == 0
+
+def bitBranch (nonzero : Bool) (value : Word) (bit : BitVec 6) : Bool :=
+  let selected := (value >>> bit.setWidth 64).setWidth 1
+  if nonzero then selected != 0 else selected == 0
+
 inductive Instruction
+  | nop
+  | branch (displacement : Word)
+  | branchConditional (predicate : Fin 16) (displacement : Word)
+  | branchZero (width : Width) (nonzero : Bool) (src : Register) (displacement : Word)
+  | branchBit (nonzero : Bool) (src : Register) (bit : BitVec 6) (displacement : Word)
   | mul (instruction : MulInstruction)
   | fmov (instruction : FmovInstruction)
   | reduction (op : ReductionOp) (wide : Bool)
@@ -414,6 +431,11 @@ inductive Instruction
 
 def step (i : Instruction) (s : State) : Transition State :=
   match i with
+  | .nop => ⟨{ s with pc := s.pc + 4 }, [], none⟩
+  | .branch displacement => branchStep true displacement s
+  | .branchConditional predicate displacement => branchStep (condition s.flags predicate) displacement s
+  | .branchZero width nonzero src displacement => branchStep (zeroBranch width nonzero (readReg s src)) displacement s
+  | .branchBit nonzero src bit displacement => branchStep (bitBranch nonzero (readReg s src) bit) displacement s
   | .mul instruction => mulStep instruction s
   | .fmov instruction => fmovStep instruction s
   | .reduction op wide => reductionStep op wide s
@@ -452,6 +474,19 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   let lhs := register (word / 2^5)
   let rhs := register (word / 2^16)
   let addend := register (word / 2^10)
+  if word = 0xd503201f then return .nop
+  if word &&& 0xfc000000 = 0x14000000 then
+    return .branch ((BitVec.ofNat 26 word).signExtend 64 <<< 2)
+  if word &&& 0xff000010 = 0x54000000 then
+    return .branchConditional ⟨word % 16, Nat.mod_lt _ (by decide)⟩
+      ((BitVec.ofNat 19 (word / 2^5)).signExtend 64 <<< 2)
+  if word &&& 0x7e000000 = 0x34000000 then
+    return .branchZero width ((word / 2^24) % 2 == 1) dst
+      ((BitVec.ofNat 19 (word / 2^5)).signExtend 64 <<< 2)
+  if word &&& 0x7e000000 = 0x36000000 then
+    let bit := BitVec.ofNat 6 ((word / 2^31) * 32 + (word / 2^19) % 32)
+    return .branchBit ((word / 2^24) % 2 == 1) dst bit
+      ((BitVec.ofNat 14 (word / 2^5)).signExtend 64 <<< 2)
   let conditionalCompare := word &&& 0x7fe00c10
   if conditionalCompare = 0x7a400000 ∨ conditionalCompare = 0x7a400800 then
     let operand := if conditionalCompare = 0x7a400800 then
