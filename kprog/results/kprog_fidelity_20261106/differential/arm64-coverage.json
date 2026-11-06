@@ -1,0 +1,2487 @@
+[
+  {
+    "assembly": "nop",
+    "decoded": "nop",
+    "opcode": "ARM64_OP_NOP"
+  },
+  {
+    "assembly": "add w0, w1, w2",
+    "decoded": "add w0, w1, w2",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "add w0, w1, w2, lsl #3",
+    "decoded": "add w0, w1, w2, lsl #3",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "add w0, w1, #127",
+    "decoded": "add w0, w1, #0x7f",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sub w0, w1, w2",
+    "decoded": "sub w0, w1, w2",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "sub w0, w1, w2, lsl #3",
+    "decoded": "sub w0, w1, w2, lsl #3",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "sub w0, w1, #127",
+    "decoded": "sub w0, w1, #0x7f",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "and w0, w1, w2",
+    "decoded": "and w0, w1, w2",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "and w0, w1, w2, lsl #3",
+    "decoded": "and w0, w1, w2, lsl #3",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "bic w0, w1, w2",
+    "decoded": "bic w0, w1, w2",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "bic w0, w1, w2, lsl #3",
+    "decoded": "bic w0, w1, w2, lsl #3",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "eor w0, w1, w2",
+    "decoded": "eor w0, w1, w2",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "eor w0, w1, w2, lsl #3",
+    "decoded": "eor w0, w1, w2, lsl #3",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "orr w0, w1, w2",
+    "decoded": "orr w0, w1, w2",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "orr w0, w1, w2, lsl #3",
+    "decoded": "orr w0, w1, w2, lsl #3",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "orn w0, w1, w2",
+    "decoded": "orn w0, w1, w2",
+    "opcode": "ARM64_OP_ORN_REG"
+  },
+  {
+    "assembly": "orn w0, w1, w2, lsl #3",
+    "decoded": "orn w0, w1, w2, lsl #3",
+    "opcode": "ARM64_OP_ORN_REG"
+  },
+  {
+    "assembly": "adds w0, w1, w2",
+    "decoded": "adds w0, w1, w2",
+    "opcode": "ARM64_OP_ADDS_REG"
+  },
+  {
+    "assembly": "adds w0, w1, w2, lsl #3",
+    "decoded": "adds w0, w1, w2, lsl #3",
+    "opcode": "ARM64_OP_ADDS_REG"
+  },
+  {
+    "assembly": "adds w0, w1, #127",
+    "decoded": "adds w0, w1, #0x7f",
+    "opcode": "ARM64_OP_ADDS_IMM"
+  },
+  {
+    "assembly": "subs w0, w1, w2",
+    "decoded": "subs w0, w1, w2",
+    "opcode": "ARM64_OP_SUBS_REG"
+  },
+  {
+    "assembly": "subs w0, w1, w2, lsl #3",
+    "decoded": "subs w0, w1, w2, lsl #3",
+    "opcode": "ARM64_OP_SUBS_REG"
+  },
+  {
+    "assembly": "subs w0, w1, #127",
+    "decoded": "subs w0, w1, #0x7f",
+    "opcode": "ARM64_OP_SUBS_IMM"
+  },
+  {
+    "assembly": "ands w0, w1, w2",
+    "decoded": "ands w0, w1, w2",
+    "opcode": "ARM64_OP_ANDS_REG"
+  },
+  {
+    "assembly": "ands w0, w1, w2, lsl #3",
+    "decoded": "ands w0, w1, w2, lsl #3",
+    "opcode": "ARM64_OP_ANDS_REG"
+  },
+  {
+    "assembly": "bics w0, w1, w2",
+    "decoded": "bics w0, w1, w2",
+    "opcode": "ARM64_OP_BICS_REG"
+  },
+  {
+    "assembly": "bics w0, w1, w2, lsl #3",
+    "decoded": "bics w0, w1, w2, lsl #3",
+    "opcode": "ARM64_OP_BICS_REG"
+  },
+  {
+    "assembly": "cmp w1, w2",
+    "decoded": "cmp w1, w2",
+    "opcode": "ARM64_OP_CMP_REG"
+  },
+  {
+    "assembly": "cmp w1, w2, lsl #3",
+    "decoded": "cmp w1, w2, lsl #3",
+    "opcode": "ARM64_OP_CMP_REG"
+  },
+  {
+    "assembly": "cmn w1, w2",
+    "decoded": "cmn w1, w2",
+    "opcode": "ARM64_OP_CMN_REG"
+  },
+  {
+    "assembly": "cmn w1, w2, lsl #3",
+    "decoded": "cmn w1, w2, lsl #3",
+    "opcode": "ARM64_OP_CMN_REG"
+  },
+  {
+    "assembly": "tst w1, w2",
+    "decoded": "tst w1, w2",
+    "opcode": "ARM64_OP_TST_REG"
+  },
+  {
+    "assembly": "tst w1, w2, lsl #3",
+    "decoded": "tst w1, w2, lsl #3",
+    "opcode": "ARM64_OP_TST_REG"
+  },
+  {
+    "assembly": "mov w0, w1",
+    "decoded": "mov w0, w1",
+    "opcode": "ARM64_OP_MOV_REG"
+  },
+  {
+    "assembly": "mov w0, #127",
+    "decoded": "mov w0, #0x7f",
+    "opcode": "ARM64_OP_MOV_IMM"
+  },
+  {
+    "assembly": "movk w0, #0xdead, lsl #16",
+    "decoded": "movk w0, #0xdead, lsl #16",
+    "opcode": "ARM64_OP_MOVK"
+  },
+  {
+    "assembly": "mvn w0, w1",
+    "decoded": "mvn w0, w1",
+    "opcode": "ARM64_OP_MVN"
+  },
+  {
+    "assembly": "neg w0, w1",
+    "decoded": "neg w0, w1",
+    "opcode": "ARM64_OP_NEG"
+  },
+  {
+    "assembly": "rev w0, w1",
+    "decoded": "rev w0, w1",
+    "opcode": "ARM64_OP_REV"
+  },
+  {
+    "assembly": "rev16 w0, w1",
+    "decoded": "rev16 w0, w1",
+    "opcode": "ARM64_OP_REV16"
+  },
+  {
+    "assembly": "sxtb w0, w1",
+    "decoded": "sxtb w0, w1",
+    "opcode": "ARM64_OP_SXTB"
+  },
+  {
+    "assembly": "sxth w0, w1",
+    "decoded": "sxth w0, w1",
+    "opcode": "ARM64_OP_SXTH"
+  },
+  {
+    "assembly": "mul w0, w1, w2",
+    "decoded": "mul w0, w1, w2",
+    "opcode": "ARM64_OP_MUL"
+  },
+  {
+    "assembly": "udiv w0, w1, w2",
+    "decoded": "udiv w0, w1, w2",
+    "opcode": "ARM64_OP_UDIV"
+  },
+  {
+    "assembly": "madd w0, w1, w2, w3",
+    "decoded": "madd w0, w1, w2, w3",
+    "opcode": "ARM64_OP_MADD"
+  },
+  {
+    "assembly": "msub w0, w1, w2, w3",
+    "decoded": "msub w0, w1, w2, w3",
+    "opcode": "ARM64_OP_MSUB"
+  },
+  {
+    "assembly": "lsl w0, w1, w2",
+    "decoded": "lsl w0, w1, w2",
+    "opcode": "ARM64_OP_SHIFT_REG"
+  },
+  {
+    "assembly": "lsl w0, w1, #0",
+    "decoded": "lsr w0, w1, #0",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsl w0, w1, #1",
+    "decoded": "lsl w0, w1, #1",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsl w0, w1, #7",
+    "decoded": "lsl w0, w1, #7",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsl w0, w1, #31",
+    "decoded": "lsl w0, w1, #31",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsr w0, w1, w2",
+    "decoded": "lsr w0, w1, w2",
+    "opcode": "ARM64_OP_SHIFT_REG"
+  },
+  {
+    "assembly": "lsr w0, w1, #0",
+    "decoded": "lsr w0, w1, #0",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsr w0, w1, #1",
+    "decoded": "lsr w0, w1, #1",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsr w0, w1, #7",
+    "decoded": "lsr w0, w1, #7",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsr w0, w1, #31",
+    "decoded": "lsr w0, w1, #31",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "asr w0, w1, w2",
+    "decoded": "asr w0, w1, w2",
+    "opcode": "ARM64_OP_SHIFT_REG"
+  },
+  {
+    "assembly": "asr w0, w1, #0",
+    "decoded": "asr w0, w1, #0",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "asr w0, w1, #1",
+    "decoded": "asr w0, w1, #1",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "asr w0, w1, #7",
+    "decoded": "asr w0, w1, #7",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "asr w0, w1, #31",
+    "decoded": "asr w0, w1, #31",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "ror w0, w1, w2",
+    "decoded": "ror w0, w1, w2",
+    "opcode": "ARM64_OP_SHIFT_REG"
+  },
+  {
+    "assembly": "ror w0, w1, #0",
+    "decoded": "ror w0, w1, #0",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "ror w0, w1, #1",
+    "decoded": "ror w0, w1, #1",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "ror w0, w1, #7",
+    "decoded": "ror w0, w1, #7",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "ror w0, w1, #31",
+    "decoded": "ror w0, w1, #31",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "extr w0, w1, w2, #7",
+    "decoded": "extr w0, w1, w2, #7",
+    "opcode": "ARM64_OP_EXTR"
+  },
+  {
+    "assembly": "ubfx w0, w1, #7, #13",
+    "decoded": "ubfx w0, w1, #7, #13",
+    "opcode": "ARM64_OP_BITFIELD"
+  },
+  {
+    "assembly": "sbfx w0, w1, #7, #13",
+    "decoded": "sbfx w0, w1, #7, #13",
+    "opcode": "ARM64_OP_BITFIELD"
+  },
+  {
+    "assembly": "ubfiz w0, w1, #7, #13",
+    "decoded": "ubfiz w0, w1, #7, #13",
+    "opcode": "ARM64_OP_BITFIELD"
+  },
+  {
+    "assembly": "bfxil w0, w1, #7, #13",
+    "decoded": "bfxil w0, w1, #7, #13",
+    "opcode": "ARM64_OP_BITFIELD"
+  },
+  {
+    "assembly": "bfi w0, w1, #7, #13",
+    "decoded": "bfi w0, w1, #7, #13",
+    "opcode": "ARM64_OP_BITFIELD"
+  },
+  {
+    "assembly": "csel w0, w1, w2, eq",
+    "decoded": "csel w0, w1, w2, eq",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, eq",
+    "decoded": "csinc w0, w1, w2, eq",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, eq",
+    "decoded": "csinv w0, w1, w2, eq",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, eq",
+    "decoded": "csneg w0, w1, w2, eq",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, eq",
+    "decoded": "cinc w0, w1, eq",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, eq",
+    "decoded": "cinv w0, w1, eq",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, eq",
+    "decoded": "cneg w0, w1, eq",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, eq",
+    "decoded": "cset w0, eq",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, eq",
+    "decoded": "csetm w0, eq",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, eq",
+    "decoded": "ccmp w1, w2, #0x5, eq",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, eq",
+    "decoded": "ccmp w1, #0x7, #0xa, eq",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel w0, w1, w2, ne",
+    "decoded": "csel w0, w1, w2, ne",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, ne",
+    "decoded": "csinc w0, w1, w2, ne",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, ne",
+    "decoded": "csinv w0, w1, w2, ne",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, ne",
+    "decoded": "csneg w0, w1, w2, ne",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, ne",
+    "decoded": "cinc w0, w1, ne",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, ne",
+    "decoded": "cinv w0, w1, ne",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, ne",
+    "decoded": "cneg w0, w1, ne",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, ne",
+    "decoded": "cset w0, ne",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, ne",
+    "decoded": "csetm w0, ne",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, ne",
+    "decoded": "ccmp w1, w2, #0x5, ne",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, ne",
+    "decoded": "ccmp w1, #0x7, #0xa, ne",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel w0, w1, w2, cs",
+    "decoded": "csel w0, w1, w2, cs",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, cs",
+    "decoded": "csinc w0, w1, w2, cs",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, cs",
+    "decoded": "csinv w0, w1, w2, cs",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, cs",
+    "decoded": "csneg w0, w1, w2, cs",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, cs",
+    "decoded": "cinc w0, w1, cs",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, cs",
+    "decoded": "cinv w0, w1, cs",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, cs",
+    "decoded": "cneg w0, w1, cs",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, cs",
+    "decoded": "cset w0, cs",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, cs",
+    "decoded": "csetm w0, cs",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, cs",
+    "decoded": "ccmp w1, w2, #0x5, cs",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, cs",
+    "decoded": "ccmp w1, #0x7, #0xa, cs",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel w0, w1, w2, cc",
+    "decoded": "csel w0, w1, w2, cc",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, cc",
+    "decoded": "csinc w0, w1, w2, cc",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, cc",
+    "decoded": "csinv w0, w1, w2, cc",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, cc",
+    "decoded": "csneg w0, w1, w2, cc",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, cc",
+    "decoded": "cinc w0, w1, cc",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, cc",
+    "decoded": "cinv w0, w1, cc",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, cc",
+    "decoded": "cneg w0, w1, cc",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, cc",
+    "decoded": "cset w0, cc",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, cc",
+    "decoded": "csetm w0, cc",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, cc",
+    "decoded": "ccmp w1, w2, #0x5, cc",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, cc",
+    "decoded": "ccmp w1, #0x7, #0xa, cc",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel w0, w1, w2, mi",
+    "decoded": "csel w0, w1, w2, mi",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, mi",
+    "decoded": "csinc w0, w1, w2, mi",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, mi",
+    "decoded": "csinv w0, w1, w2, mi",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, mi",
+    "decoded": "csneg w0, w1, w2, mi",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, mi",
+    "decoded": "cinc w0, w1, mi",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, mi",
+    "decoded": "cinv w0, w1, mi",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, mi",
+    "decoded": "cneg w0, w1, mi",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, mi",
+    "decoded": "cset w0, mi",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, mi",
+    "decoded": "csetm w0, mi",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, mi",
+    "decoded": "ccmp w1, w2, #0x5, mi",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, mi",
+    "decoded": "ccmp w1, #0x7, #0xa, mi",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel w0, w1, w2, pl",
+    "decoded": "csel w0, w1, w2, pl",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, pl",
+    "decoded": "csinc w0, w1, w2, pl",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, pl",
+    "decoded": "csinv w0, w1, w2, pl",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, pl",
+    "decoded": "csneg w0, w1, w2, pl",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, pl",
+    "decoded": "cinc w0, w1, pl",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, pl",
+    "decoded": "cinv w0, w1, pl",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, pl",
+    "decoded": "cneg w0, w1, pl",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, pl",
+    "decoded": "cset w0, pl",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, pl",
+    "decoded": "csetm w0, pl",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, pl",
+    "decoded": "ccmp w1, w2, #0x5, pl",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, pl",
+    "decoded": "ccmp w1, #0x7, #0xa, pl",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel w0, w1, w2, vs",
+    "decoded": "csel w0, w1, w2, vs",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, vs",
+    "decoded": "csinc w0, w1, w2, vs",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, vs",
+    "decoded": "csinv w0, w1, w2, vs",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, vs",
+    "decoded": "csneg w0, w1, w2, vs",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, vs",
+    "decoded": "cinc w0, w1, vs",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, vs",
+    "decoded": "cinv w0, w1, vs",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, vs",
+    "decoded": "cneg w0, w1, vs",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, vs",
+    "decoded": "cset w0, vs",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, vs",
+    "decoded": "csetm w0, vs",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, vs",
+    "decoded": "ccmp w1, w2, #0x5, vs",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, vs",
+    "decoded": "ccmp w1, #0x7, #0xa, vs",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel w0, w1, w2, vc",
+    "decoded": "csel w0, w1, w2, vc",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, vc",
+    "decoded": "csinc w0, w1, w2, vc",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, vc",
+    "decoded": "csinv w0, w1, w2, vc",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, vc",
+    "decoded": "csneg w0, w1, w2, vc",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, vc",
+    "decoded": "cinc w0, w1, vc",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, vc",
+    "decoded": "cinv w0, w1, vc",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, vc",
+    "decoded": "cneg w0, w1, vc",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, vc",
+    "decoded": "cset w0, vc",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, vc",
+    "decoded": "csetm w0, vc",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, vc",
+    "decoded": "ccmp w1, w2, #0x5, vc",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, vc",
+    "decoded": "ccmp w1, #0x7, #0xa, vc",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel w0, w1, w2, hi",
+    "decoded": "csel w0, w1, w2, hi",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, hi",
+    "decoded": "csinc w0, w1, w2, hi",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, hi",
+    "decoded": "csinv w0, w1, w2, hi",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, hi",
+    "decoded": "csneg w0, w1, w2, hi",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, hi",
+    "decoded": "cinc w0, w1, hi",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, hi",
+    "decoded": "cinv w0, w1, hi",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, hi",
+    "decoded": "cneg w0, w1, hi",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, hi",
+    "decoded": "cset w0, hi",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, hi",
+    "decoded": "csetm w0, hi",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, hi",
+    "decoded": "ccmp w1, w2, #0x5, hi",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, hi",
+    "decoded": "ccmp w1, #0x7, #0xa, hi",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel w0, w1, w2, ls",
+    "decoded": "csel w0, w1, w2, ls",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, ls",
+    "decoded": "csinc w0, w1, w2, ls",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, ls",
+    "decoded": "csinv w0, w1, w2, ls",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, ls",
+    "decoded": "csneg w0, w1, w2, ls",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, ls",
+    "decoded": "cinc w0, w1, ls",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, ls",
+    "decoded": "cinv w0, w1, ls",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, ls",
+    "decoded": "cneg w0, w1, ls",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, ls",
+    "decoded": "cset w0, ls",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, ls",
+    "decoded": "csetm w0, ls",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, ls",
+    "decoded": "ccmp w1, w2, #0x5, ls",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, ls",
+    "decoded": "ccmp w1, #0x7, #0xa, ls",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel w0, w1, w2, ge",
+    "decoded": "csel w0, w1, w2, ge",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, ge",
+    "decoded": "csinc w0, w1, w2, ge",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, ge",
+    "decoded": "csinv w0, w1, w2, ge",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, ge",
+    "decoded": "csneg w0, w1, w2, ge",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, ge",
+    "decoded": "cinc w0, w1, ge",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, ge",
+    "decoded": "cinv w0, w1, ge",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, ge",
+    "decoded": "cneg w0, w1, ge",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, ge",
+    "decoded": "cset w0, ge",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, ge",
+    "decoded": "csetm w0, ge",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, ge",
+    "decoded": "ccmp w1, w2, #0x5, ge",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, ge",
+    "decoded": "ccmp w1, #0x7, #0xa, ge",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel w0, w1, w2, lt",
+    "decoded": "csel w0, w1, w2, lt",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, lt",
+    "decoded": "csinc w0, w1, w2, lt",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, lt",
+    "decoded": "csinv w0, w1, w2, lt",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, lt",
+    "decoded": "csneg w0, w1, w2, lt",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, lt",
+    "decoded": "cinc w0, w1, lt",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, lt",
+    "decoded": "cinv w0, w1, lt",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, lt",
+    "decoded": "cneg w0, w1, lt",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, lt",
+    "decoded": "cset w0, lt",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, lt",
+    "decoded": "csetm w0, lt",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, lt",
+    "decoded": "ccmp w1, w2, #0x5, lt",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, lt",
+    "decoded": "ccmp w1, #0x7, #0xa, lt",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel w0, w1, w2, gt",
+    "decoded": "csel w0, w1, w2, gt",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, gt",
+    "decoded": "csinc w0, w1, w2, gt",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, gt",
+    "decoded": "csinv w0, w1, w2, gt",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, gt",
+    "decoded": "csneg w0, w1, w2, gt",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, gt",
+    "decoded": "cinc w0, w1, gt",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, gt",
+    "decoded": "cinv w0, w1, gt",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, gt",
+    "decoded": "cneg w0, w1, gt",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, gt",
+    "decoded": "cset w0, gt",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, gt",
+    "decoded": "csetm w0, gt",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, gt",
+    "decoded": "ccmp w1, w2, #0x5, gt",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, gt",
+    "decoded": "ccmp w1, #0x7, #0xa, gt",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel w0, w1, w2, le",
+    "decoded": "csel w0, w1, w2, le",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc w0, w1, w2, le",
+    "decoded": "csinc w0, w1, w2, le",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv w0, w1, w2, le",
+    "decoded": "csinv w0, w1, w2, le",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg w0, w1, w2, le",
+    "decoded": "csneg w0, w1, w2, le",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc w0, w1, le",
+    "decoded": "cinc w0, w1, le",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv w0, w1, le",
+    "decoded": "cinv w0, w1, le",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg w0, w1, le",
+    "decoded": "cneg w0, w1, le",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset w0, le",
+    "decoded": "cset w0, le",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm w0, le",
+    "decoded": "csetm w0, le",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp w1, w2, #5, le",
+    "decoded": "ccmp w1, w2, #0x5, le",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp w1, #7, #10, le",
+    "decoded": "ccmp w1, #0x7, #0xa, le",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "ldr w0, [x4, #8]",
+    "decoded": "ldr w0, [x4, #8]",
+    "opcode": "ARM64_OP_LOAD"
+  },
+  {
+    "assembly": "str w0, [x4, #8]",
+    "decoded": "str w0, [x4, #8]",
+    "opcode": "ARM64_OP_STORE"
+  },
+  {
+    "assembly": "ldur w0, [x4, #8]",
+    "decoded": "ldur w0, [x4, #8]",
+    "opcode": "ARM64_OP_LOAD"
+  },
+  {
+    "assembly": "stur w0, [x4, #8]",
+    "decoded": "stur w0, [x4, #8]",
+    "opcode": "ARM64_OP_STORE"
+  },
+  {
+    "assembly": "ldr w0, [x4, #8]!",
+    "decoded": "ldr w0, [x4, #8]!",
+    "opcode": "ARM64_OP_LOAD"
+  },
+  {
+    "assembly": "ldr w0, [x4], #8",
+    "decoded": "ldr w0, [x4], #8",
+    "opcode": "ARM64_OP_LOAD"
+  },
+  {
+    "assembly": "ldr w0, [x4, x5, lsl #2]",
+    "decoded": "ldr w0, [x4, x5, lsl #2]",
+    "opcode": "ARM64_OP_LOAD"
+  },
+  {
+    "assembly": "str w0, [x4, #8]!",
+    "decoded": "str w0, [x4, #8]!",
+    "opcode": "ARM64_OP_STORE"
+  },
+  {
+    "assembly": "str w0, [x4], #8",
+    "decoded": "str w0, [x4], #8",
+    "opcode": "ARM64_OP_STORE"
+  },
+  {
+    "assembly": "str w0, [x4, x5, lsl #2]",
+    "decoded": "str w0, [x4, x5, lsl #2]",
+    "opcode": "ARM64_OP_STORE"
+  },
+  {
+    "assembly": "ldrb w0, [x4, #8]",
+    "decoded": "ldrb w0, [x4, #8]",
+    "opcode": "ARM64_OP_LOAD"
+  },
+  {
+    "assembly": "ldrh w0, [x4, #8]",
+    "decoded": "ldrh w0, [x4, #8]",
+    "opcode": "ARM64_OP_LOAD"
+  },
+  {
+    "assembly": "strb w0, [x4, #8]",
+    "decoded": "strb w0, [x4, #8]",
+    "opcode": "ARM64_OP_STORE"
+  },
+  {
+    "assembly": "strh w0, [x4, #8]",
+    "decoded": "strh w0, [x4, #8]",
+    "opcode": "ARM64_OP_STORE"
+  },
+  {
+    "assembly": "ldrsb w0, [x4, #8]",
+    "decoded": "ldrsb w0, [x4, #8]",
+    "opcode": "ARM64_OP_LDRSB"
+  },
+  {
+    "assembly": "ldrsh w0, [x4, #8]",
+    "decoded": "ldrsh w0, [x4, #8]",
+    "opcode": "ARM64_OP_LDRSH"
+  },
+  {
+    "assembly": "add x0, x1, x2",
+    "decoded": "add x0, x1, x2",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "add x0, x1, x2, lsl #3",
+    "decoded": "add x0, x1, x2, lsl #3",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "add x0, x1, #127",
+    "decoded": "add x0, x1, #0x7f",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sub x0, x1, x2",
+    "decoded": "sub x0, x1, x2",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "sub x0, x1, x2, lsl #3",
+    "decoded": "sub x0, x1, x2, lsl #3",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "sub x0, x1, #127",
+    "decoded": "sub x0, x1, #0x7f",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "and x0, x1, x2",
+    "decoded": "and x0, x1, x2",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "and x0, x1, x2, lsl #3",
+    "decoded": "and x0, x1, x2, lsl #3",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "bic x0, x1, x2",
+    "decoded": "bic x0, x1, x2",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "bic x0, x1, x2, lsl #3",
+    "decoded": "bic x0, x1, x2, lsl #3",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "eor x0, x1, x2",
+    "decoded": "eor x0, x1, x2",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "eor x0, x1, x2, lsl #3",
+    "decoded": "eor x0, x1, x2, lsl #3",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "orr x0, x1, x2",
+    "decoded": "orr x0, x1, x2",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "orr x0, x1, x2, lsl #3",
+    "decoded": "orr x0, x1, x2, lsl #3",
+    "opcode": "ARM64_OP_ALU_REG"
+  },
+  {
+    "assembly": "orn x0, x1, x2",
+    "decoded": "orn x0, x1, x2",
+    "opcode": "ARM64_OP_ORN_REG"
+  },
+  {
+    "assembly": "orn x0, x1, x2, lsl #3",
+    "decoded": "orn x0, x1, x2, lsl #3",
+    "opcode": "ARM64_OP_ORN_REG"
+  },
+  {
+    "assembly": "adds x0, x1, x2",
+    "decoded": "adds x0, x1, x2",
+    "opcode": "ARM64_OP_ADDS_REG"
+  },
+  {
+    "assembly": "adds x0, x1, x2, lsl #3",
+    "decoded": "adds x0, x1, x2, lsl #3",
+    "opcode": "ARM64_OP_ADDS_REG"
+  },
+  {
+    "assembly": "adds x0, x1, #127",
+    "decoded": "adds x0, x1, #0x7f",
+    "opcode": "ARM64_OP_ADDS_IMM"
+  },
+  {
+    "assembly": "subs x0, x1, x2",
+    "decoded": "subs x0, x1, x2",
+    "opcode": "ARM64_OP_SUBS_REG"
+  },
+  {
+    "assembly": "subs x0, x1, x2, lsl #3",
+    "decoded": "subs x0, x1, x2, lsl #3",
+    "opcode": "ARM64_OP_SUBS_REG"
+  },
+  {
+    "assembly": "subs x0, x1, #127",
+    "decoded": "subs x0, x1, #0x7f",
+    "opcode": "ARM64_OP_SUBS_IMM"
+  },
+  {
+    "assembly": "ands x0, x1, x2",
+    "decoded": "ands x0, x1, x2",
+    "opcode": "ARM64_OP_ANDS_REG"
+  },
+  {
+    "assembly": "ands x0, x1, x2, lsl #3",
+    "decoded": "ands x0, x1, x2, lsl #3",
+    "opcode": "ARM64_OP_ANDS_REG"
+  },
+  {
+    "assembly": "bics x0, x1, x2",
+    "decoded": "bics x0, x1, x2",
+    "opcode": "ARM64_OP_BICS_REG"
+  },
+  {
+    "assembly": "bics x0, x1, x2, lsl #3",
+    "decoded": "bics x0, x1, x2, lsl #3",
+    "opcode": "ARM64_OP_BICS_REG"
+  },
+  {
+    "assembly": "cmp x1, x2",
+    "decoded": "cmp x1, x2",
+    "opcode": "ARM64_OP_CMP_REG"
+  },
+  {
+    "assembly": "cmp x1, x2, lsl #3",
+    "decoded": "cmp x1, x2, lsl #3",
+    "opcode": "ARM64_OP_CMP_REG"
+  },
+  {
+    "assembly": "cmn x1, x2",
+    "decoded": "cmn x1, x2",
+    "opcode": "ARM64_OP_CMN_REG"
+  },
+  {
+    "assembly": "cmn x1, x2, lsl #3",
+    "decoded": "cmn x1, x2, lsl #3",
+    "opcode": "ARM64_OP_CMN_REG"
+  },
+  {
+    "assembly": "tst x1, x2",
+    "decoded": "tst x1, x2",
+    "opcode": "ARM64_OP_TST_REG"
+  },
+  {
+    "assembly": "tst x1, x2, lsl #3",
+    "decoded": "tst x1, x2, lsl #3",
+    "opcode": "ARM64_OP_TST_REG"
+  },
+  {
+    "assembly": "mov x0, x1",
+    "decoded": "mov x0, x1",
+    "opcode": "ARM64_OP_MOV_REG"
+  },
+  {
+    "assembly": "mov x0, #127",
+    "decoded": "mov x0, #0x7f",
+    "opcode": "ARM64_OP_MOV_IMM"
+  },
+  {
+    "assembly": "movk x0, #0xdead, lsl #16",
+    "decoded": "movk x0, #0xdead, lsl #16",
+    "opcode": "ARM64_OP_MOVK"
+  },
+  {
+    "assembly": "mvn x0, x1",
+    "decoded": "mvn x0, x1",
+    "opcode": "ARM64_OP_MVN"
+  },
+  {
+    "assembly": "neg x0, x1",
+    "decoded": "neg x0, x1",
+    "opcode": "ARM64_OP_NEG"
+  },
+  {
+    "assembly": "rev x0, x1",
+    "decoded": "rev x0, x1",
+    "opcode": "ARM64_OP_REV"
+  },
+  {
+    "assembly": "rev16 x0, x1",
+    "decoded": "rev16 x0, x1",
+    "opcode": "ARM64_OP_REV16"
+  },
+  {
+    "assembly": "sxtb x0, w1",
+    "decoded": "sxtb x0, w1",
+    "opcode": "ARM64_OP_SXTB"
+  },
+  {
+    "assembly": "sxth x0, w1",
+    "decoded": "sxth x0, w1",
+    "opcode": "ARM64_OP_SXTH"
+  },
+  {
+    "assembly": "mul x0, x1, x2",
+    "decoded": "mul x0, x1, x2",
+    "opcode": "ARM64_OP_MUL"
+  },
+  {
+    "assembly": "udiv x0, x1, x2",
+    "decoded": "udiv x0, x1, x2",
+    "opcode": "ARM64_OP_UDIV"
+  },
+  {
+    "assembly": "madd x0, x1, x2, x3",
+    "decoded": "madd x0, x1, x2, x3",
+    "opcode": "ARM64_OP_MADD"
+  },
+  {
+    "assembly": "msub x0, x1, x2, x3",
+    "decoded": "msub x0, x1, x2, x3",
+    "opcode": "ARM64_OP_MSUB"
+  },
+  {
+    "assembly": "lsl x0, x1, x2",
+    "decoded": "lsl x0, x1, x2",
+    "opcode": "ARM64_OP_SHIFT_REG"
+  },
+  {
+    "assembly": "lsl x0, x1, #0",
+    "decoded": "lsr x0, x1, #0",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsl x0, x1, #1",
+    "decoded": "lsl x0, x1, #1",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsl x0, x1, #7",
+    "decoded": "lsl x0, x1, #7",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsl x0, x1, #31",
+    "decoded": "lsl x0, x1, #31",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsr x0, x1, x2",
+    "decoded": "lsr x0, x1, x2",
+    "opcode": "ARM64_OP_SHIFT_REG"
+  },
+  {
+    "assembly": "lsr x0, x1, #0",
+    "decoded": "lsr x0, x1, #0",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsr x0, x1, #1",
+    "decoded": "lsr x0, x1, #1",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsr x0, x1, #7",
+    "decoded": "lsr x0, x1, #7",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "lsr x0, x1, #31",
+    "decoded": "lsr x0, x1, #31",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "asr x0, x1, x2",
+    "decoded": "asr x0, x1, x2",
+    "opcode": "ARM64_OP_SHIFT_REG"
+  },
+  {
+    "assembly": "asr x0, x1, #0",
+    "decoded": "asr x0, x1, #0",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "asr x0, x1, #1",
+    "decoded": "asr x0, x1, #1",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "asr x0, x1, #7",
+    "decoded": "asr x0, x1, #7",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "asr x0, x1, #31",
+    "decoded": "asr x0, x1, #31",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "ror x0, x1, x2",
+    "decoded": "ror x0, x1, x2",
+    "opcode": "ARM64_OP_SHIFT_REG"
+  },
+  {
+    "assembly": "ror x0, x1, #0",
+    "decoded": "ror x0, x1, #0",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "ror x0, x1, #1",
+    "decoded": "ror x0, x1, #1",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "ror x0, x1, #7",
+    "decoded": "ror x0, x1, #7",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "ror x0, x1, #31",
+    "decoded": "ror x0, x1, #31",
+    "opcode": "ARM64_OP_SHIFT_IMM"
+  },
+  {
+    "assembly": "extr x0, x1, x2, #7",
+    "decoded": "extr x0, x1, x2, #7",
+    "opcode": "ARM64_OP_EXTR"
+  },
+  {
+    "assembly": "ubfx x0, x1, #7, #13",
+    "decoded": "ubfx x0, x1, #7, #13",
+    "opcode": "ARM64_OP_BITFIELD"
+  },
+  {
+    "assembly": "sbfx x0, x1, #7, #13",
+    "decoded": "sbfx x0, x1, #7, #13",
+    "opcode": "ARM64_OP_BITFIELD"
+  },
+  {
+    "assembly": "ubfiz x0, x1, #7, #13",
+    "decoded": "ubfiz x0, x1, #7, #13",
+    "opcode": "ARM64_OP_BITFIELD"
+  },
+  {
+    "assembly": "bfxil x0, x1, #7, #13",
+    "decoded": "bfxil x0, x1, #7, #13",
+    "opcode": "ARM64_OP_BITFIELD"
+  },
+  {
+    "assembly": "bfi x0, x1, #7, #13",
+    "decoded": "bfi x0, x1, #7, #13",
+    "opcode": "ARM64_OP_BITFIELD"
+  },
+  {
+    "assembly": "csel x0, x1, x2, eq",
+    "decoded": "csel x0, x1, x2, eq",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, eq",
+    "decoded": "csinc x0, x1, x2, eq",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, eq",
+    "decoded": "csinv x0, x1, x2, eq",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, eq",
+    "decoded": "csneg x0, x1, x2, eq",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, eq",
+    "decoded": "cinc x0, x1, eq",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, eq",
+    "decoded": "cinv x0, x1, eq",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, eq",
+    "decoded": "cneg x0, x1, eq",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, eq",
+    "decoded": "cset x0, eq",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, eq",
+    "decoded": "csetm x0, eq",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, eq",
+    "decoded": "ccmp x1, x2, #0x5, eq",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, eq",
+    "decoded": "ccmp x1, #0x7, #0xa, eq",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel x0, x1, x2, ne",
+    "decoded": "csel x0, x1, x2, ne",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, ne",
+    "decoded": "csinc x0, x1, x2, ne",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, ne",
+    "decoded": "csinv x0, x1, x2, ne",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, ne",
+    "decoded": "csneg x0, x1, x2, ne",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, ne",
+    "decoded": "cinc x0, x1, ne",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, ne",
+    "decoded": "cinv x0, x1, ne",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, ne",
+    "decoded": "cneg x0, x1, ne",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, ne",
+    "decoded": "cset x0, ne",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, ne",
+    "decoded": "csetm x0, ne",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, ne",
+    "decoded": "ccmp x1, x2, #0x5, ne",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, ne",
+    "decoded": "ccmp x1, #0x7, #0xa, ne",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel x0, x1, x2, cs",
+    "decoded": "csel x0, x1, x2, cs",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, cs",
+    "decoded": "csinc x0, x1, x2, cs",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, cs",
+    "decoded": "csinv x0, x1, x2, cs",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, cs",
+    "decoded": "csneg x0, x1, x2, cs",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, cs",
+    "decoded": "cinc x0, x1, cs",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, cs",
+    "decoded": "cinv x0, x1, cs",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, cs",
+    "decoded": "cneg x0, x1, cs",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, cs",
+    "decoded": "cset x0, cs",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, cs",
+    "decoded": "csetm x0, cs",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, cs",
+    "decoded": "ccmp x1, x2, #0x5, cs",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, cs",
+    "decoded": "ccmp x1, #0x7, #0xa, cs",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel x0, x1, x2, cc",
+    "decoded": "csel x0, x1, x2, cc",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, cc",
+    "decoded": "csinc x0, x1, x2, cc",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, cc",
+    "decoded": "csinv x0, x1, x2, cc",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, cc",
+    "decoded": "csneg x0, x1, x2, cc",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, cc",
+    "decoded": "cinc x0, x1, cc",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, cc",
+    "decoded": "cinv x0, x1, cc",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, cc",
+    "decoded": "cneg x0, x1, cc",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, cc",
+    "decoded": "cset x0, cc",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, cc",
+    "decoded": "csetm x0, cc",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, cc",
+    "decoded": "ccmp x1, x2, #0x5, cc",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, cc",
+    "decoded": "ccmp x1, #0x7, #0xa, cc",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel x0, x1, x2, mi",
+    "decoded": "csel x0, x1, x2, mi",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, mi",
+    "decoded": "csinc x0, x1, x2, mi",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, mi",
+    "decoded": "csinv x0, x1, x2, mi",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, mi",
+    "decoded": "csneg x0, x1, x2, mi",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, mi",
+    "decoded": "cinc x0, x1, mi",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, mi",
+    "decoded": "cinv x0, x1, mi",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, mi",
+    "decoded": "cneg x0, x1, mi",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, mi",
+    "decoded": "cset x0, mi",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, mi",
+    "decoded": "csetm x0, mi",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, mi",
+    "decoded": "ccmp x1, x2, #0x5, mi",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, mi",
+    "decoded": "ccmp x1, #0x7, #0xa, mi",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel x0, x1, x2, pl",
+    "decoded": "csel x0, x1, x2, pl",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, pl",
+    "decoded": "csinc x0, x1, x2, pl",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, pl",
+    "decoded": "csinv x0, x1, x2, pl",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, pl",
+    "decoded": "csneg x0, x1, x2, pl",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, pl",
+    "decoded": "cinc x0, x1, pl",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, pl",
+    "decoded": "cinv x0, x1, pl",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, pl",
+    "decoded": "cneg x0, x1, pl",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, pl",
+    "decoded": "cset x0, pl",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, pl",
+    "decoded": "csetm x0, pl",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, pl",
+    "decoded": "ccmp x1, x2, #0x5, pl",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, pl",
+    "decoded": "ccmp x1, #0x7, #0xa, pl",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel x0, x1, x2, vs",
+    "decoded": "csel x0, x1, x2, vs",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, vs",
+    "decoded": "csinc x0, x1, x2, vs",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, vs",
+    "decoded": "csinv x0, x1, x2, vs",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, vs",
+    "decoded": "csneg x0, x1, x2, vs",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, vs",
+    "decoded": "cinc x0, x1, vs",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, vs",
+    "decoded": "cinv x0, x1, vs",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, vs",
+    "decoded": "cneg x0, x1, vs",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, vs",
+    "decoded": "cset x0, vs",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, vs",
+    "decoded": "csetm x0, vs",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, vs",
+    "decoded": "ccmp x1, x2, #0x5, vs",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, vs",
+    "decoded": "ccmp x1, #0x7, #0xa, vs",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel x0, x1, x2, vc",
+    "decoded": "csel x0, x1, x2, vc",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, vc",
+    "decoded": "csinc x0, x1, x2, vc",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, vc",
+    "decoded": "csinv x0, x1, x2, vc",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, vc",
+    "decoded": "csneg x0, x1, x2, vc",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, vc",
+    "decoded": "cinc x0, x1, vc",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, vc",
+    "decoded": "cinv x0, x1, vc",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, vc",
+    "decoded": "cneg x0, x1, vc",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, vc",
+    "decoded": "cset x0, vc",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, vc",
+    "decoded": "csetm x0, vc",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, vc",
+    "decoded": "ccmp x1, x2, #0x5, vc",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, vc",
+    "decoded": "ccmp x1, #0x7, #0xa, vc",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel x0, x1, x2, hi",
+    "decoded": "csel x0, x1, x2, hi",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, hi",
+    "decoded": "csinc x0, x1, x2, hi",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, hi",
+    "decoded": "csinv x0, x1, x2, hi",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, hi",
+    "decoded": "csneg x0, x1, x2, hi",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, hi",
+    "decoded": "cinc x0, x1, hi",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, hi",
+    "decoded": "cinv x0, x1, hi",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, hi",
+    "decoded": "cneg x0, x1, hi",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, hi",
+    "decoded": "cset x0, hi",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, hi",
+    "decoded": "csetm x0, hi",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, hi",
+    "decoded": "ccmp x1, x2, #0x5, hi",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, hi",
+    "decoded": "ccmp x1, #0x7, #0xa, hi",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel x0, x1, x2, ls",
+    "decoded": "csel x0, x1, x2, ls",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, ls",
+    "decoded": "csinc x0, x1, x2, ls",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, ls",
+    "decoded": "csinv x0, x1, x2, ls",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, ls",
+    "decoded": "csneg x0, x1, x2, ls",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, ls",
+    "decoded": "cinc x0, x1, ls",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, ls",
+    "decoded": "cinv x0, x1, ls",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, ls",
+    "decoded": "cneg x0, x1, ls",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, ls",
+    "decoded": "cset x0, ls",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, ls",
+    "decoded": "csetm x0, ls",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, ls",
+    "decoded": "ccmp x1, x2, #0x5, ls",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, ls",
+    "decoded": "ccmp x1, #0x7, #0xa, ls",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel x0, x1, x2, ge",
+    "decoded": "csel x0, x1, x2, ge",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, ge",
+    "decoded": "csinc x0, x1, x2, ge",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, ge",
+    "decoded": "csinv x0, x1, x2, ge",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, ge",
+    "decoded": "csneg x0, x1, x2, ge",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, ge",
+    "decoded": "cinc x0, x1, ge",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, ge",
+    "decoded": "cinv x0, x1, ge",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, ge",
+    "decoded": "cneg x0, x1, ge",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, ge",
+    "decoded": "cset x0, ge",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, ge",
+    "decoded": "csetm x0, ge",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, ge",
+    "decoded": "ccmp x1, x2, #0x5, ge",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, ge",
+    "decoded": "ccmp x1, #0x7, #0xa, ge",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel x0, x1, x2, lt",
+    "decoded": "csel x0, x1, x2, lt",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, lt",
+    "decoded": "csinc x0, x1, x2, lt",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, lt",
+    "decoded": "csinv x0, x1, x2, lt",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, lt",
+    "decoded": "csneg x0, x1, x2, lt",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, lt",
+    "decoded": "cinc x0, x1, lt",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, lt",
+    "decoded": "cinv x0, x1, lt",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, lt",
+    "decoded": "cneg x0, x1, lt",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, lt",
+    "decoded": "cset x0, lt",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, lt",
+    "decoded": "csetm x0, lt",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, lt",
+    "decoded": "ccmp x1, x2, #0x5, lt",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, lt",
+    "decoded": "ccmp x1, #0x7, #0xa, lt",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel x0, x1, x2, gt",
+    "decoded": "csel x0, x1, x2, gt",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, gt",
+    "decoded": "csinc x0, x1, x2, gt",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, gt",
+    "decoded": "csinv x0, x1, x2, gt",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, gt",
+    "decoded": "csneg x0, x1, x2, gt",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, gt",
+    "decoded": "cinc x0, x1, gt",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, gt",
+    "decoded": "cinv x0, x1, gt",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, gt",
+    "decoded": "cneg x0, x1, gt",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, gt",
+    "decoded": "cset x0, gt",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, gt",
+    "decoded": "csetm x0, gt",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, gt",
+    "decoded": "ccmp x1, x2, #0x5, gt",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, gt",
+    "decoded": "ccmp x1, #0x7, #0xa, gt",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "csel x0, x1, x2, le",
+    "decoded": "csel x0, x1, x2, le",
+    "opcode": "ARM64_OP_CSEL"
+  },
+  {
+    "assembly": "csinc x0, x1, x2, le",
+    "decoded": "csinc x0, x1, x2, le",
+    "opcode": "ARM64_OP_CSINC"
+  },
+  {
+    "assembly": "csinv x0, x1, x2, le",
+    "decoded": "csinv x0, x1, x2, le",
+    "opcode": "ARM64_OP_CSINV"
+  },
+  {
+    "assembly": "csneg x0, x1, x2, le",
+    "decoded": "csneg x0, x1, x2, le",
+    "opcode": "ARM64_OP_CSNEG"
+  },
+  {
+    "assembly": "cinc x0, x1, le",
+    "decoded": "cinc x0, x1, le",
+    "opcode": "ARM64_OP_CINC"
+  },
+  {
+    "assembly": "cinv x0, x1, le",
+    "decoded": "cinv x0, x1, le",
+    "opcode": "ARM64_OP_CINV"
+  },
+  {
+    "assembly": "cneg x0, x1, le",
+    "decoded": "cneg x0, x1, le",
+    "opcode": "ARM64_OP_CNEG"
+  },
+  {
+    "assembly": "cset x0, le",
+    "decoded": "cset x0, le",
+    "opcode": "ARM64_OP_CSET"
+  },
+  {
+    "assembly": "csetm x0, le",
+    "decoded": "csetm x0, le",
+    "opcode": "ARM64_OP_CSETM"
+  },
+  {
+    "assembly": "ccmp x1, x2, #5, le",
+    "decoded": "ccmp x1, x2, #0x5, le",
+    "opcode": "ARM64_OP_CCMP_REG"
+  },
+  {
+    "assembly": "ccmp x1, #7, #10, le",
+    "decoded": "ccmp x1, #0x7, #0xa, le",
+    "opcode": "ARM64_OP_CCMP_IMM"
+  },
+  {
+    "assembly": "ldr x0, [x4, #8]",
+    "decoded": "ldr x0, [x4, #8]",
+    "opcode": "ARM64_OP_LOAD"
+  },
+  {
+    "assembly": "str x0, [x4, #8]",
+    "decoded": "str x0, [x4, #8]",
+    "opcode": "ARM64_OP_STORE"
+  },
+  {
+    "assembly": "ldur x0, [x4, #8]",
+    "decoded": "ldur x0, [x4, #8]",
+    "opcode": "ARM64_OP_LOAD"
+  },
+  {
+    "assembly": "stur x0, [x4, #8]",
+    "decoded": "stur x0, [x4, #8]",
+    "opcode": "ARM64_OP_STORE"
+  },
+  {
+    "assembly": "ldr x0, [x4, #8]!",
+    "decoded": "ldr x0, [x4, #8]!",
+    "opcode": "ARM64_OP_LOAD"
+  },
+  {
+    "assembly": "ldr x0, [x4], #8",
+    "decoded": "ldr x0, [x4], #8",
+    "opcode": "ARM64_OP_LOAD"
+  },
+  {
+    "assembly": "ldr x0, [x4, x5, lsl #3]",
+    "decoded": "ldr x0, [x4, x5, lsl #3]",
+    "opcode": "ARM64_OP_LOAD"
+  },
+  {
+    "assembly": "str x0, [x4, #8]!",
+    "decoded": "str x0, [x4, #8]!",
+    "opcode": "ARM64_OP_STORE"
+  },
+  {
+    "assembly": "str x0, [x4], #8",
+    "decoded": "str x0, [x4], #8",
+    "opcode": "ARM64_OP_STORE"
+  },
+  {
+    "assembly": "str x0, [x4, x5, lsl #3]",
+    "decoded": "str x0, [x4, x5, lsl #3]",
+    "opcode": "ARM64_OP_STORE"
+  },
+  {
+    "assembly": "ldrsb x0, [x4, #8]",
+    "decoded": "ldrsb x0, [x4, #8]",
+    "opcode": "ARM64_OP_LDRSB"
+  },
+  {
+    "assembly": "ldrsh x0, [x4, #8]",
+    "decoded": "ldrsh x0, [x4, #8]",
+    "opcode": "ARM64_OP_LDRSH"
+  },
+  {
+    "assembly": "sxtw x0, w1",
+    "decoded": "sxtw x0, w1",
+    "opcode": "ARM64_OP_SXTW"
+  },
+  {
+    "assembly": "umulh x0, x1, x2",
+    "decoded": "umulh x0, x1, x2",
+    "opcode": "ARM64_OP_UMULH"
+  },
+  {
+    "assembly": "umull x0, w1, w2",
+    "decoded": "umull x0, w1, w2",
+    "opcode": "ARM64_OP_UMULL"
+  },
+  {
+    "assembly": "umaddl x0, w1, w2, x3",
+    "decoded": "umaddl x0, w1, w2, x3",
+    "opcode": "ARM64_OP_UMADDL"
+  },
+  {
+    "assembly": "smaddl x0, w1, w2, x3",
+    "decoded": "smaddl x0, w1, w2, x3",
+    "opcode": "ARM64_OP_SMADDL"
+  },
+  {
+    "assembly": "ldrsw x0, [x4, #8]",
+    "decoded": "ldrsw x0, [x4, #8]",
+    "opcode": "ARM64_OP_LDRSW"
+  },
+  {
+    "assembly": "ldp x0, x1, [x4, #8]",
+    "decoded": "ldp x0, x1, [x4, #8]",
+    "opcode": "ARM64_OP_LDP"
+  },
+  {
+    "assembly": "stp x0, x1, [x4, #8]",
+    "decoded": "stp x0, x1, [x4, #8]",
+    "opcode": "ARM64_OP_STP"
+  },
+  {
+    "assembly": "fmov d0, x0",
+    "decoded": "fmov d0, x0",
+    "opcode": "ARM64_OP_FMOV"
+  },
+  {
+    "assembly": "fmov x0, d0",
+    "decoded": "fmov x0, d0",
+    "opcode": "ARM64_OP_FMOV"
+  },
+  {
+    "assembly": "fmov s0, w0",
+    "decoded": "fmov s0, w0",
+    "opcode": "ARM64_OP_FMOV"
+  },
+  {
+    "assembly": "fmov w0, s0",
+    "decoded": "fmov w0, s0",
+    "opcode": "ARM64_OP_FMOV"
+  },
+  {
+    "assembly": "cnt v0.8b, v0.8b",
+    "decoded": "cnt v0.8b, v0.8b",
+    "opcode": "ARM64_OP_CNT"
+  },
+  {
+    "assembly": "cnt v0.16b, v0.16b",
+    "decoded": "cnt v0.16b, v0.16b",
+    "opcode": "ARM64_OP_CNT"
+  },
+  {
+    "assembly": "uaddlv h0, v0.8b",
+    "decoded": "uaddlv h0, v0.8b",
+    "opcode": "ARM64_OP_UADDLV"
+  },
+  {
+    "assembly": "uaddlv h0, v0.16b",
+    "decoded": "uaddlv h0, v0.16b",
+    "opcode": "ARM64_OP_UADDLV"
+  },
+  {
+    "assembly": "ldr q0, [x4, #16]",
+    "decoded": "ldr q0, [x4, #16]",
+    "opcode": "ARM64_OP_LOAD_Q0"
+  },
+  {
+    "assembly": "str q0, [x4, #16]",
+    "decoded": "str q0, [x4, #16]",
+    "opcode": "ARM64_OP_STORE_Q0"
+  }
+]

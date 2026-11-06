@@ -1,0 +1,498 @@
+assembly	opcode	cases	mismatches
+nop	ARM64_OP_NOP	16	0
+add w0, w1, w2	ARM64_OP_ALU_REG	16	0
+add w0, w1, w2, lsl #3	ARM64_OP_ALU_REG	16	0
+add w0, w1, #127	ARM64_OP_ALU_IMM	16	0
+sub w0, w1, w2	ARM64_OP_ALU_REG	16	0
+sub w0, w1, w2, lsl #3	ARM64_OP_ALU_REG	16	0
+sub w0, w1, #127	ARM64_OP_ALU_IMM	16	0
+and w0, w1, w2	ARM64_OP_ALU_REG	16	0
+and w0, w1, w2, lsl #3	ARM64_OP_ALU_REG	16	0
+bic w0, w1, w2	ARM64_OP_ALU_REG	16	0
+bic w0, w1, w2, lsl #3	ARM64_OP_ALU_REG	16	0
+eor w0, w1, w2	ARM64_OP_ALU_REG	16	0
+eor w0, w1, w2, lsl #3	ARM64_OP_ALU_REG	16	0
+orr w0, w1, w2	ARM64_OP_ALU_REG	16	0
+orr w0, w1, w2, lsl #3	ARM64_OP_ALU_REG	16	0
+orn w0, w1, w2	ARM64_OP_ORN_REG	16	0
+orn w0, w1, w2, lsl #3	ARM64_OP_ORN_REG	16	0
+adds w0, w1, w2	ARM64_OP_ADDS_REG	16	0
+adds w0, w1, w2, lsl #3	ARM64_OP_ADDS_REG	16	0
+adds w0, w1, #127	ARM64_OP_ADDS_IMM	16	0
+subs w0, w1, w2	ARM64_OP_SUBS_REG	16	0
+subs w0, w1, w2, lsl #3	ARM64_OP_SUBS_REG	16	0
+subs w0, w1, #127	ARM64_OP_SUBS_IMM	16	0
+ands w0, w1, w2	ARM64_OP_ANDS_REG	16	0
+ands w0, w1, w2, lsl #3	ARM64_OP_ANDS_REG	16	0
+bics w0, w1, w2	ARM64_OP_BICS_REG	16	0
+bics w0, w1, w2, lsl #3	ARM64_OP_BICS_REG	16	0
+cmp w1, w2	ARM64_OP_CMP_REG	16	0
+cmp w1, w2, lsl #3	ARM64_OP_CMP_REG	16	0
+cmn w1, w2	ARM64_OP_CMN_REG	16	0
+cmn w1, w2, lsl #3	ARM64_OP_CMN_REG	16	0
+tst w1, w2	ARM64_OP_TST_REG	16	0
+tst w1, w2, lsl #3	ARM64_OP_TST_REG	16	0
+mov w0, w1	ARM64_OP_MOV_REG	16	0
+mov w0, #127	ARM64_OP_MOV_IMM	16	0
+movk w0, #0xdead, lsl #16	ARM64_OP_MOVK	16	0
+mvn w0, w1	ARM64_OP_MVN	16	0
+neg w0, w1	ARM64_OP_NEG	16	0
+rev w0, w1	ARM64_OP_REV	16	0
+rev16 w0, w1	ARM64_OP_REV16	16	0
+sxtb w0, w1	ARM64_OP_SXTB	16	0
+sxth w0, w1	ARM64_OP_SXTH	16	0
+mul w0, w1, w2	ARM64_OP_MUL	16	0
+udiv w0, w1, w2	ARM64_OP_UDIV	16	0
+madd w0, w1, w2, w3	ARM64_OP_MADD	16	0
+msub w0, w1, w2, w3	ARM64_OP_MSUB	16	0
+lsl w0, w1, w2	ARM64_OP_SHIFT_REG	16	0
+lsl w0, w1, #0	ARM64_OP_SHIFT_IMM	16	0
+lsl w0, w1, #1	ARM64_OP_SHIFT_IMM	16	0
+lsl w0, w1, #7	ARM64_OP_SHIFT_IMM	16	0
+lsl w0, w1, #31	ARM64_OP_SHIFT_IMM	16	0
+lsr w0, w1, w2	ARM64_OP_SHIFT_REG	16	0
+lsr w0, w1, #0	ARM64_OP_SHIFT_IMM	16	0
+lsr w0, w1, #1	ARM64_OP_SHIFT_IMM	16	0
+lsr w0, w1, #7	ARM64_OP_SHIFT_IMM	16	0
+lsr w0, w1, #31	ARM64_OP_SHIFT_IMM	16	0
+asr w0, w1, w2	ARM64_OP_SHIFT_REG	16	0
+asr w0, w1, #0	ARM64_OP_SHIFT_IMM	16	0
+asr w0, w1, #1	ARM64_OP_SHIFT_IMM	16	0
+asr w0, w1, #7	ARM64_OP_SHIFT_IMM	16	0
+asr w0, w1, #31	ARM64_OP_SHIFT_IMM	16	0
+ror w0, w1, w2	ARM64_OP_SHIFT_REG	16	0
+ror w0, w1, #0	ARM64_OP_SHIFT_IMM	16	0
+ror w0, w1, #1	ARM64_OP_SHIFT_IMM	16	0
+ror w0, w1, #7	ARM64_OP_SHIFT_IMM	16	0
+ror w0, w1, #31	ARM64_OP_SHIFT_IMM	16	0
+extr w0, w1, w2, #7	ARM64_OP_EXTR	16	0
+ubfx w0, w1, #7, #13	ARM64_OP_BITFIELD	16	0
+sbfx w0, w1, #7, #13	ARM64_OP_BITFIELD	16	0
+ubfiz w0, w1, #7, #13	ARM64_OP_BITFIELD	16	0
+bfxil w0, w1, #7, #13	ARM64_OP_BITFIELD	16	0
+bfi w0, w1, #7, #13	ARM64_OP_BITFIELD	16	0
+csel w0, w1, w2, eq	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, eq	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, eq	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, eq	ARM64_OP_CSNEG	16	0
+cinc w0, w1, eq	ARM64_OP_CINC	16	0
+cinv w0, w1, eq	ARM64_OP_CINV	16	0
+cneg w0, w1, eq	ARM64_OP_CNEG	16	0
+cset w0, eq	ARM64_OP_CSET	16	0
+csetm w0, eq	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, eq	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, eq	ARM64_OP_CCMP_IMM	16	0
+csel w0, w1, w2, ne	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, ne	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, ne	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, ne	ARM64_OP_CSNEG	16	0
+cinc w0, w1, ne	ARM64_OP_CINC	16	0
+cinv w0, w1, ne	ARM64_OP_CINV	16	0
+cneg w0, w1, ne	ARM64_OP_CNEG	16	0
+cset w0, ne	ARM64_OP_CSET	16	0
+csetm w0, ne	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, ne	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, ne	ARM64_OP_CCMP_IMM	16	0
+csel w0, w1, w2, cs	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, cs	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, cs	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, cs	ARM64_OP_CSNEG	16	0
+cinc w0, w1, cs	ARM64_OP_CINC	16	0
+cinv w0, w1, cs	ARM64_OP_CINV	16	0
+cneg w0, w1, cs	ARM64_OP_CNEG	16	0
+cset w0, cs	ARM64_OP_CSET	16	0
+csetm w0, cs	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, cs	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, cs	ARM64_OP_CCMP_IMM	16	0
+csel w0, w1, w2, cc	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, cc	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, cc	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, cc	ARM64_OP_CSNEG	16	0
+cinc w0, w1, cc	ARM64_OP_CINC	16	0
+cinv w0, w1, cc	ARM64_OP_CINV	16	0
+cneg w0, w1, cc	ARM64_OP_CNEG	16	0
+cset w0, cc	ARM64_OP_CSET	16	0
+csetm w0, cc	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, cc	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, cc	ARM64_OP_CCMP_IMM	16	0
+csel w0, w1, w2, mi	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, mi	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, mi	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, mi	ARM64_OP_CSNEG	16	0
+cinc w0, w1, mi	ARM64_OP_CINC	16	0
+cinv w0, w1, mi	ARM64_OP_CINV	16	0
+cneg w0, w1, mi	ARM64_OP_CNEG	16	0
+cset w0, mi	ARM64_OP_CSET	16	0
+csetm w0, mi	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, mi	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, mi	ARM64_OP_CCMP_IMM	16	0
+csel w0, w1, w2, pl	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, pl	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, pl	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, pl	ARM64_OP_CSNEG	16	0
+cinc w0, w1, pl	ARM64_OP_CINC	16	0
+cinv w0, w1, pl	ARM64_OP_CINV	16	0
+cneg w0, w1, pl	ARM64_OP_CNEG	16	0
+cset w0, pl	ARM64_OP_CSET	16	0
+csetm w0, pl	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, pl	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, pl	ARM64_OP_CCMP_IMM	16	0
+csel w0, w1, w2, vs	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, vs	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, vs	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, vs	ARM64_OP_CSNEG	16	0
+cinc w0, w1, vs	ARM64_OP_CINC	16	0
+cinv w0, w1, vs	ARM64_OP_CINV	16	0
+cneg w0, w1, vs	ARM64_OP_CNEG	16	0
+cset w0, vs	ARM64_OP_CSET	16	0
+csetm w0, vs	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, vs	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, vs	ARM64_OP_CCMP_IMM	16	0
+csel w0, w1, w2, vc	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, vc	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, vc	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, vc	ARM64_OP_CSNEG	16	0
+cinc w0, w1, vc	ARM64_OP_CINC	16	0
+cinv w0, w1, vc	ARM64_OP_CINV	16	0
+cneg w0, w1, vc	ARM64_OP_CNEG	16	0
+cset w0, vc	ARM64_OP_CSET	16	0
+csetm w0, vc	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, vc	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, vc	ARM64_OP_CCMP_IMM	16	0
+csel w0, w1, w2, hi	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, hi	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, hi	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, hi	ARM64_OP_CSNEG	16	0
+cinc w0, w1, hi	ARM64_OP_CINC	16	0
+cinv w0, w1, hi	ARM64_OP_CINV	16	0
+cneg w0, w1, hi	ARM64_OP_CNEG	16	0
+cset w0, hi	ARM64_OP_CSET	16	0
+csetm w0, hi	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, hi	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, hi	ARM64_OP_CCMP_IMM	16	0
+csel w0, w1, w2, ls	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, ls	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, ls	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, ls	ARM64_OP_CSNEG	16	0
+cinc w0, w1, ls	ARM64_OP_CINC	16	0
+cinv w0, w1, ls	ARM64_OP_CINV	16	0
+cneg w0, w1, ls	ARM64_OP_CNEG	16	0
+cset w0, ls	ARM64_OP_CSET	16	0
+csetm w0, ls	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, ls	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, ls	ARM64_OP_CCMP_IMM	16	0
+csel w0, w1, w2, ge	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, ge	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, ge	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, ge	ARM64_OP_CSNEG	16	0
+cinc w0, w1, ge	ARM64_OP_CINC	16	0
+cinv w0, w1, ge	ARM64_OP_CINV	16	0
+cneg w0, w1, ge	ARM64_OP_CNEG	16	0
+cset w0, ge	ARM64_OP_CSET	16	0
+csetm w0, ge	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, ge	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, ge	ARM64_OP_CCMP_IMM	16	0
+csel w0, w1, w2, lt	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, lt	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, lt	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, lt	ARM64_OP_CSNEG	16	0
+cinc w0, w1, lt	ARM64_OP_CINC	16	0
+cinv w0, w1, lt	ARM64_OP_CINV	16	0
+cneg w0, w1, lt	ARM64_OP_CNEG	16	0
+cset w0, lt	ARM64_OP_CSET	16	0
+csetm w0, lt	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, lt	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, lt	ARM64_OP_CCMP_IMM	16	0
+csel w0, w1, w2, gt	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, gt	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, gt	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, gt	ARM64_OP_CSNEG	16	0
+cinc w0, w1, gt	ARM64_OP_CINC	16	0
+cinv w0, w1, gt	ARM64_OP_CINV	16	0
+cneg w0, w1, gt	ARM64_OP_CNEG	16	0
+cset w0, gt	ARM64_OP_CSET	16	0
+csetm w0, gt	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, gt	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, gt	ARM64_OP_CCMP_IMM	16	0
+csel w0, w1, w2, le	ARM64_OP_CSEL	16	0
+csinc w0, w1, w2, le	ARM64_OP_CSINC	16	0
+csinv w0, w1, w2, le	ARM64_OP_CSINV	16	0
+csneg w0, w1, w2, le	ARM64_OP_CSNEG	16	0
+cinc w0, w1, le	ARM64_OP_CINC	16	0
+cinv w0, w1, le	ARM64_OP_CINV	16	0
+cneg w0, w1, le	ARM64_OP_CNEG	16	0
+cset w0, le	ARM64_OP_CSET	16	0
+csetm w0, le	ARM64_OP_CSETM	16	0
+ccmp w1, w2, #5, le	ARM64_OP_CCMP_REG	16	0
+ccmp w1, #7, #10, le	ARM64_OP_CCMP_IMM	16	0
+ldr w0, [x4, #8]	ARM64_OP_LOAD	16	0
+str w0, [x4, #8]	ARM64_OP_STORE	16	0
+ldur w0, [x4, #8]	ARM64_OP_LOAD	16	0
+stur w0, [x4, #8]	ARM64_OP_STORE	16	0
+ldr w0, [x4, #8]!	ARM64_OP_LOAD	16	0
+ldr w0, [x4], #8	ARM64_OP_LOAD	16	0
+ldr w0, [x4, x5, lsl #2]	ARM64_OP_LOAD	16	0
+str w0, [x4, #8]!	ARM64_OP_STORE	16	0
+str w0, [x4], #8	ARM64_OP_STORE	16	0
+str w0, [x4, x5, lsl #2]	ARM64_OP_STORE	16	0
+ldrb w0, [x4, #8]	ARM64_OP_LOAD	16	0
+ldrh w0, [x4, #8]	ARM64_OP_LOAD	16	0
+strb w0, [x4, #8]	ARM64_OP_STORE	16	0
+strh w0, [x4, #8]	ARM64_OP_STORE	16	0
+ldrsb w0, [x4, #8]	ARM64_OP_LDRSB	16	0
+ldrsh w0, [x4, #8]	ARM64_OP_LDRSH	16	0
+add x0, x1, x2	ARM64_OP_ALU_REG	16	0
+add x0, x1, x2, lsl #3	ARM64_OP_ALU_REG	16	0
+add x0, x1, #127	ARM64_OP_ALU_IMM	16	0
+sub x0, x1, x2	ARM64_OP_ALU_REG	16	0
+sub x0, x1, x2, lsl #3	ARM64_OP_ALU_REG	16	0
+sub x0, x1, #127	ARM64_OP_ALU_IMM	16	0
+and x0, x1, x2	ARM64_OP_ALU_REG	16	0
+and x0, x1, x2, lsl #3	ARM64_OP_ALU_REG	16	0
+bic x0, x1, x2	ARM64_OP_ALU_REG	16	0
+bic x0, x1, x2, lsl #3	ARM64_OP_ALU_REG	16	0
+eor x0, x1, x2	ARM64_OP_ALU_REG	16	0
+eor x0, x1, x2, lsl #3	ARM64_OP_ALU_REG	16	0
+orr x0, x1, x2	ARM64_OP_ALU_REG	16	0
+orr x0, x1, x2, lsl #3	ARM64_OP_ALU_REG	16	0
+orn x0, x1, x2	ARM64_OP_ORN_REG	16	0
+orn x0, x1, x2, lsl #3	ARM64_OP_ORN_REG	16	0
+adds x0, x1, x2	ARM64_OP_ADDS_REG	16	0
+adds x0, x1, x2, lsl #3	ARM64_OP_ADDS_REG	16	0
+adds x0, x1, #127	ARM64_OP_ADDS_IMM	16	0
+subs x0, x1, x2	ARM64_OP_SUBS_REG	16	0
+subs x0, x1, x2, lsl #3	ARM64_OP_SUBS_REG	16	0
+subs x0, x1, #127	ARM64_OP_SUBS_IMM	16	0
+ands x0, x1, x2	ARM64_OP_ANDS_REG	16	0
+ands x0, x1, x2, lsl #3	ARM64_OP_ANDS_REG	16	0
+bics x0, x1, x2	ARM64_OP_BICS_REG	16	0
+bics x0, x1, x2, lsl #3	ARM64_OP_BICS_REG	16	0
+cmp x1, x2	ARM64_OP_CMP_REG	16	0
+cmp x1, x2, lsl #3	ARM64_OP_CMP_REG	16	0
+cmn x1, x2	ARM64_OP_CMN_REG	16	0
+cmn x1, x2, lsl #3	ARM64_OP_CMN_REG	16	0
+tst x1, x2	ARM64_OP_TST_REG	16	0
+tst x1, x2, lsl #3	ARM64_OP_TST_REG	16	0
+mov x0, x1	ARM64_OP_MOV_REG	16	0
+mov x0, #127	ARM64_OP_MOV_IMM	16	0
+movk x0, #0xdead, lsl #16	ARM64_OP_MOVK	16	0
+mvn x0, x1	ARM64_OP_MVN	16	0
+neg x0, x1	ARM64_OP_NEG	16	0
+rev x0, x1	ARM64_OP_REV	16	0
+rev16 x0, x1	ARM64_OP_REV16	16	0
+sxtb x0, w1	ARM64_OP_SXTB	16	0
+sxth x0, w1	ARM64_OP_SXTH	16	0
+mul x0, x1, x2	ARM64_OP_MUL	16	0
+udiv x0, x1, x2	ARM64_OP_UDIV	16	0
+madd x0, x1, x2, x3	ARM64_OP_MADD	16	0
+msub x0, x1, x2, x3	ARM64_OP_MSUB	16	0
+lsl x0, x1, x2	ARM64_OP_SHIFT_REG	16	0
+lsl x0, x1, #0	ARM64_OP_SHIFT_IMM	16	0
+lsl x0, x1, #1	ARM64_OP_SHIFT_IMM	16	0
+lsl x0, x1, #7	ARM64_OP_SHIFT_IMM	16	0
+lsl x0, x1, #31	ARM64_OP_SHIFT_IMM	16	0
+lsr x0, x1, x2	ARM64_OP_SHIFT_REG	16	0
+lsr x0, x1, #0	ARM64_OP_SHIFT_IMM	16	0
+lsr x0, x1, #1	ARM64_OP_SHIFT_IMM	16	0
+lsr x0, x1, #7	ARM64_OP_SHIFT_IMM	16	0
+lsr x0, x1, #31	ARM64_OP_SHIFT_IMM	16	0
+asr x0, x1, x2	ARM64_OP_SHIFT_REG	16	0
+asr x0, x1, #0	ARM64_OP_SHIFT_IMM	16	0
+asr x0, x1, #1	ARM64_OP_SHIFT_IMM	16	0
+asr x0, x1, #7	ARM64_OP_SHIFT_IMM	16	0
+asr x0, x1, #31	ARM64_OP_SHIFT_IMM	16	0
+ror x0, x1, x2	ARM64_OP_SHIFT_REG	16	0
+ror x0, x1, #0	ARM64_OP_SHIFT_IMM	16	0
+ror x0, x1, #1	ARM64_OP_SHIFT_IMM	16	0
+ror x0, x1, #7	ARM64_OP_SHIFT_IMM	16	0
+ror x0, x1, #31	ARM64_OP_SHIFT_IMM	16	0
+extr x0, x1, x2, #7	ARM64_OP_EXTR	16	0
+ubfx x0, x1, #7, #13	ARM64_OP_BITFIELD	16	0
+sbfx x0, x1, #7, #13	ARM64_OP_BITFIELD	16	0
+ubfiz x0, x1, #7, #13	ARM64_OP_BITFIELD	16	0
+bfxil x0, x1, #7, #13	ARM64_OP_BITFIELD	16	0
+bfi x0, x1, #7, #13	ARM64_OP_BITFIELD	16	0
+csel x0, x1, x2, eq	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, eq	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, eq	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, eq	ARM64_OP_CSNEG	16	0
+cinc x0, x1, eq	ARM64_OP_CINC	16	0
+cinv x0, x1, eq	ARM64_OP_CINV	16	0
+cneg x0, x1, eq	ARM64_OP_CNEG	16	0
+cset x0, eq	ARM64_OP_CSET	16	0
+csetm x0, eq	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, eq	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, eq	ARM64_OP_CCMP_IMM	16	0
+csel x0, x1, x2, ne	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, ne	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, ne	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, ne	ARM64_OP_CSNEG	16	0
+cinc x0, x1, ne	ARM64_OP_CINC	16	0
+cinv x0, x1, ne	ARM64_OP_CINV	16	0
+cneg x0, x1, ne	ARM64_OP_CNEG	16	0
+cset x0, ne	ARM64_OP_CSET	16	0
+csetm x0, ne	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, ne	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, ne	ARM64_OP_CCMP_IMM	16	0
+csel x0, x1, x2, cs	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, cs	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, cs	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, cs	ARM64_OP_CSNEG	16	0
+cinc x0, x1, cs	ARM64_OP_CINC	16	0
+cinv x0, x1, cs	ARM64_OP_CINV	16	0
+cneg x0, x1, cs	ARM64_OP_CNEG	16	0
+cset x0, cs	ARM64_OP_CSET	16	0
+csetm x0, cs	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, cs	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, cs	ARM64_OP_CCMP_IMM	16	0
+csel x0, x1, x2, cc	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, cc	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, cc	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, cc	ARM64_OP_CSNEG	16	0
+cinc x0, x1, cc	ARM64_OP_CINC	16	0
+cinv x0, x1, cc	ARM64_OP_CINV	16	0
+cneg x0, x1, cc	ARM64_OP_CNEG	16	0
+cset x0, cc	ARM64_OP_CSET	16	0
+csetm x0, cc	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, cc	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, cc	ARM64_OP_CCMP_IMM	16	0
+csel x0, x1, x2, mi	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, mi	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, mi	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, mi	ARM64_OP_CSNEG	16	0
+cinc x0, x1, mi	ARM64_OP_CINC	16	0
+cinv x0, x1, mi	ARM64_OP_CINV	16	0
+cneg x0, x1, mi	ARM64_OP_CNEG	16	0
+cset x0, mi	ARM64_OP_CSET	16	0
+csetm x0, mi	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, mi	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, mi	ARM64_OP_CCMP_IMM	16	0
+csel x0, x1, x2, pl	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, pl	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, pl	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, pl	ARM64_OP_CSNEG	16	0
+cinc x0, x1, pl	ARM64_OP_CINC	16	0
+cinv x0, x1, pl	ARM64_OP_CINV	16	0
+cneg x0, x1, pl	ARM64_OP_CNEG	16	0
+cset x0, pl	ARM64_OP_CSET	16	0
+csetm x0, pl	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, pl	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, pl	ARM64_OP_CCMP_IMM	16	0
+csel x0, x1, x2, vs	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, vs	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, vs	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, vs	ARM64_OP_CSNEG	16	0
+cinc x0, x1, vs	ARM64_OP_CINC	16	0
+cinv x0, x1, vs	ARM64_OP_CINV	16	0
+cneg x0, x1, vs	ARM64_OP_CNEG	16	0
+cset x0, vs	ARM64_OP_CSET	16	0
+csetm x0, vs	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, vs	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, vs	ARM64_OP_CCMP_IMM	16	0
+csel x0, x1, x2, vc	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, vc	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, vc	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, vc	ARM64_OP_CSNEG	16	0
+cinc x0, x1, vc	ARM64_OP_CINC	16	0
+cinv x0, x1, vc	ARM64_OP_CINV	16	0
+cneg x0, x1, vc	ARM64_OP_CNEG	16	0
+cset x0, vc	ARM64_OP_CSET	16	0
+csetm x0, vc	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, vc	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, vc	ARM64_OP_CCMP_IMM	16	0
+csel x0, x1, x2, hi	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, hi	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, hi	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, hi	ARM64_OP_CSNEG	16	0
+cinc x0, x1, hi	ARM64_OP_CINC	16	0
+cinv x0, x1, hi	ARM64_OP_CINV	16	0
+cneg x0, x1, hi	ARM64_OP_CNEG	16	0
+cset x0, hi	ARM64_OP_CSET	16	0
+csetm x0, hi	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, hi	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, hi	ARM64_OP_CCMP_IMM	16	0
+csel x0, x1, x2, ls	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, ls	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, ls	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, ls	ARM64_OP_CSNEG	16	0
+cinc x0, x1, ls	ARM64_OP_CINC	16	0
+cinv x0, x1, ls	ARM64_OP_CINV	16	0
+cneg x0, x1, ls	ARM64_OP_CNEG	16	0
+cset x0, ls	ARM64_OP_CSET	16	0
+csetm x0, ls	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, ls	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, ls	ARM64_OP_CCMP_IMM	16	0
+csel x0, x1, x2, ge	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, ge	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, ge	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, ge	ARM64_OP_CSNEG	16	0
+cinc x0, x1, ge	ARM64_OP_CINC	16	0
+cinv x0, x1, ge	ARM64_OP_CINV	16	0
+cneg x0, x1, ge	ARM64_OP_CNEG	16	0
+cset x0, ge	ARM64_OP_CSET	16	0
+csetm x0, ge	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, ge	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, ge	ARM64_OP_CCMP_IMM	16	0
+csel x0, x1, x2, lt	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, lt	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, lt	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, lt	ARM64_OP_CSNEG	16	0
+cinc x0, x1, lt	ARM64_OP_CINC	16	0
+cinv x0, x1, lt	ARM64_OP_CINV	16	0
+cneg x0, x1, lt	ARM64_OP_CNEG	16	0
+cset x0, lt	ARM64_OP_CSET	16	0
+csetm x0, lt	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, lt	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, lt	ARM64_OP_CCMP_IMM	16	0
+csel x0, x1, x2, gt	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, gt	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, gt	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, gt	ARM64_OP_CSNEG	16	0
+cinc x0, x1, gt	ARM64_OP_CINC	16	0
+cinv x0, x1, gt	ARM64_OP_CINV	16	0
+cneg x0, x1, gt	ARM64_OP_CNEG	16	0
+cset x0, gt	ARM64_OP_CSET	16	0
+csetm x0, gt	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, gt	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, gt	ARM64_OP_CCMP_IMM	16	0
+csel x0, x1, x2, le	ARM64_OP_CSEL	16	0
+csinc x0, x1, x2, le	ARM64_OP_CSINC	16	0
+csinv x0, x1, x2, le	ARM64_OP_CSINV	16	0
+csneg x0, x1, x2, le	ARM64_OP_CSNEG	16	0
+cinc x0, x1, le	ARM64_OP_CINC	16	0
+cinv x0, x1, le	ARM64_OP_CINV	16	0
+cneg x0, x1, le	ARM64_OP_CNEG	16	0
+cset x0, le	ARM64_OP_CSET	16	0
+csetm x0, le	ARM64_OP_CSETM	16	0
+ccmp x1, x2, #5, le	ARM64_OP_CCMP_REG	16	0
+ccmp x1, #7, #10, le	ARM64_OP_CCMP_IMM	16	0
+ldr x0, [x4, #8]	ARM64_OP_LOAD	16	0
+str x0, [x4, #8]	ARM64_OP_STORE	16	0
+ldur x0, [x4, #8]	ARM64_OP_LOAD	16	0
+stur x0, [x4, #8]	ARM64_OP_STORE	16	0
+ldr x0, [x4, #8]!	ARM64_OP_LOAD	16	0
+ldr x0, [x4], #8	ARM64_OP_LOAD	16	0
+ldr x0, [x4, x5, lsl #3]	ARM64_OP_LOAD	16	0
+str x0, [x4, #8]!	ARM64_OP_STORE	16	0
+str x0, [x4], #8	ARM64_OP_STORE	16	0
+str x0, [x4, x5, lsl #3]	ARM64_OP_STORE	16	0
+ldrsb x0, [x4, #8]	ARM64_OP_LDRSB	16	0
+ldrsh x0, [x4, #8]	ARM64_OP_LDRSH	16	0
+sxtw x0, w1	ARM64_OP_SXTW	16	0
+umulh x0, x1, x2	ARM64_OP_UMULH	16	0
+umull x0, w1, w2	ARM64_OP_UMULL	16	0
+umaddl x0, w1, w2, x3	ARM64_OP_UMADDL	16	0
+smaddl x0, w1, w2, x3	ARM64_OP_SMADDL	16	0
+ldrsw x0, [x4, #8]	ARM64_OP_LDRSW	16	0
+ldp x0, x1, [x4, #8]	ARM64_OP_LDP	16	0
+stp x0, x1, [x4, #8]	ARM64_OP_STP	16	0
+fmov d0, x0	ARM64_OP_FMOV	16	16
+fmov x0, d0	ARM64_OP_FMOV	16	0
+fmov s0, w0	ARM64_OP_FMOV	16	16
+fmov w0, s0	ARM64_OP_FMOV	16	0
+cnt v0.8b, v0.8b	ARM64_OP_CNT	16	16
+cnt v0.16b, v0.16b	ARM64_OP_CNT	16	16
+uaddlv h0, v0.8b	ARM64_OP_UADDLV	16	16
+uaddlv h0, v0.16b	ARM64_OP_UADDLV	16	16
+ldr q0, [x4, #16]	ARM64_OP_LOAD_Q0	16	0
+str q0, [x4, #16]	ARM64_OP_STORE_Q0	16	0
