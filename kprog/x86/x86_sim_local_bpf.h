@@ -2020,9 +2020,9 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			(void)0;                                           \
 		} else if (KPROG_X86_MOV_LOAD_PTR_HANDLED(OP)) {          \
 			__u8 __x86_l_pw_tag =                             \
-				KPROG_X86_PTR_WRITE_TAG(                  \
+				KPROG_X86_PTR_WRITE_SOURCE_TAG(           \
 					(OP) == X86_OP_MOV_LOAD_MAP_PTR,   \
-					(OP) == X86_OP_MOV_LOAD_HELPER_ID);\
+					(OP) == X86_OP_MOV_LOAD_HELPER_ID, (AUX));\
 			if (KPROG_X86_PTR_WRITE_IS_HELPER_ID(             \
 				    __x86_l_pw_tag))                      \
 				X86_SIM_L_WRITE_REG_WIDTH((DST), (IMM), \

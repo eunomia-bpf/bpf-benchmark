@@ -89,6 +89,17 @@ theorem x86_ptr_write_tag_select_refines (isMapPtr isHelperId : Bool) :
       x86PtrWriteTagSelectSpec isMapPtr isHelperId := by
   cases isMapPtr <;> cases isHelperId <;> rfl
 
+/-- Source-map value addresses keep the value provenance rather than map-object
+provenance. The source binding, not the numeric address, supplies this fact. -/
+def x86SourcePtrTagSpec (isMapPtr isHelperId isValue : Bool) : Option Nat :=
+  if isMapPtr then some (if isValue then 6 else 5)
+  else if isHelperId then some 7 else none
+
+theorem x86_source_ptr_tag_refines (isMapPtr isHelperId isValue : Bool) :
+    GeneratedX86PtrWrite.sourceTagCode isMapPtr isHelperId isValue =
+      x86SourcePtrTagSpec isMapPtr isHelperId isValue := by
+  cases isMapPtr <;> cases isHelperId <;> cases isValue <;> rfl
+
 /-- Both tags the opcode table selects are reachable and neither is the scalar
 tag, so no pointer-write opcode scalarizes its provenance. -/
 theorem x86_ptr_write_tag_all_reachable :
@@ -146,6 +157,23 @@ theorem x86_ptr_write_state_refines (state : X86PtrWriteState)
       simp [generatedX86PtrWriteState, x86PtrWriteStateSpec,
         generatedX86MovPointerWrite, x86MovPointerWriteSpec,
         GeneratedPtrAdd.bits, GeneratedPtrAdd.tag]
+
+/-- The production source-map arm composes the generated tag selection with
+whole-width pointer writeback. No scalar narrowing or map-object cast occurs. -/
+def generatedX86SourcePtrWrite (state : X86PtrWriteState) (value : BitVec 64)
+    (isValue : Bool) : X86PtrWriteState :=
+  let tag := if GeneratedX86PtrWrite.sourceTagCode true false isValue == some 6
+    then Tag.mapValue else Tag.mapPtr
+  generatedX86PtrWriteState state value tag
+
+theorem x86_source_ptr_write_refines (state : X86PtrWriteState)
+    (value : BitVec 64) (isValue : Bool) :
+    generatedX86SourcePtrWrite state value isValue =
+      x86PtrWriteStateSpec state value (if isValue then .mapValue else .mapPtr) := by
+  cases isValue <;>
+    simp [generatedX86SourcePtrWrite, GeneratedX86PtrWrite.sourceTagCode,
+      GeneratedX86PtrWrite.tagOfSelectors, GeneratedX86PtrWrite.code,
+      x86_ptr_write_state_refines]
 
 /-- Composition used by the x86-64 pointer-write opcodes after the opcode, the
 destination register's identity, and the instruction-immediate artifact have

@@ -3,13 +3,13 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 ROOT := /workspaces/repository
 HERE := $(ROOT)/corpus/results/kprog_app_coverage_20261106
-PACKAGE := bcc-runtime-11
-IMAGE := bpf-benchmark/kprog-bcc:c-20261106-11
-IMAGE_TAR := /workspaces/.agent-state/kprog-lanes/C/bcc-runtime-11.image.tar
+PACKAGE := bcc-runtime-13
+IMAGE := bpf-benchmark/kprog-bcc:c-20261106-13
+IMAGE_TAR := /workspaces/.agent-state/kprog-lanes/C/bcc-runtime-13.image.tar
 PAIRED := /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/x86
 
 package:
-	python3 $(HERE)/package_bcc.py bcc-real-11 $(PACKAGE)
+	python3 $(HERE)/package_bcc.py bcc-real-13 $(PACKAGE)
 
 image:
 	docker build -f $(HERE)/bcc-strict.Dockerfile -t $(IMAGE) $(HERE)/$(PACKAGE)

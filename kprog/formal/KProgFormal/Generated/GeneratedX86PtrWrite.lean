@@ -46,4 +46,8 @@ def tagOfSelectors (isMapPtr isHelperId : Bool) : Option Tag :=
   | true, false => some .mapPtr
   | false, true => some .helperId
   | false, false => none
+/-- Explicit source-map value binding refines the ordinary map-pointer arm. -/
+def sourceTagCode (isMapPtr isHelperId isValue : Bool) : Option Nat :=
+  (tagOfSelectors isMapPtr isHelperId).map fun tag =>
+    if tag == .mapPtr && isValue then 6 else code tag
 end KProgFormal.GeneratedX86PtrWrite

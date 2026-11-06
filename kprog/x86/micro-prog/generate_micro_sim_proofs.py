@@ -100,6 +100,7 @@ class NativeInsn:
     stack_width: int | None = None
     reloc_type: str | None = None
     symbol_offset: int = 0
+    source_pointer: tuple[bool, str] | None = None
 
 
 @dataclass(frozen=True)
@@ -493,6 +494,16 @@ def relocated_data_address(insn: NativeInsn, rodata_idents: dict[str,str]) -> st
 def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
     op = insn.mnemonic
     ops = insn.operands
+    if insn.source_pointer is not None:
+        is_value, expression = insn.source_pointer
+        dst = reg_info(ops[0]) if ops else None
+        address_form = (op == "lea" and insn.reloc_type == "R_X86_64_PC32") or (
+            op == "mov" and insn.reloc_type and "GOTPCREL" in insn.reloc_type)
+        if not address_form or dst is None or dst[1] != 64 or insn.symbol_offset:
+            raise ValueError(f"source-map address needs a zero-offset 64-bit LEA/GOT load: {insn.raw}")
+        return enc("X86_OP_MOV_LOAD_MAP_PTR", dst=dst[0],
+                   aux="X86_MAP_PTR_AUX_VALUE" if is_value else "0",
+                   imm=c_ptr_u64(expression))
     if insn.reloc_type=="R_X86_64_PC32" and op not in {
         "mov","movabs","movzx","movsx","movsxd","lea"
     }:
@@ -1491,7 +1502,8 @@ def render_program(name: str, insns: list[NativeInsn],
                    rodata16: dict[str, tuple[int, int] | bytes] | None = None,
                    program_section: str | None = None,
                    original_source: Path | None = None,
-                   original_symbols: set[str] | None = None) -> str:
+                   original_symbols: set[str] | None = None,
+                   source_map_bindings: list[dict] | None = None) -> str:
     if (original_source is None)!=(original_symbols is None):
         raise ValueError("original source and ELF symbols must be supplied together")
     rodata16 = {symbol:value for symbol,value in (rodata16 or {}).items()
@@ -1502,6 +1514,31 @@ def render_program(name: str, insns: list[NativeInsn],
         symbol: annotated_fixed_count_ops(fn_insns)
         for symbol, fn_insns in (subfunctions or {}).items()
     }
+    all_insns = [*insns, *(i for fn in subfunctions.values() for i in fn)]
+    source_map_bindings = source_map_bindings or []
+    source_pointers = {}
+    for binding in source_map_bindings:
+        if set(binding) != {"native_symbol", "source_insn", "proof_symbol", "kind", "value_offset"}:
+            raise ValueError("source-map binding fields must be explicit")
+        symbol, proof_symbol = binding["native_symbol"], binding["proof_symbol"]
+        if any(re.fullmatch(r"[A-Za-z_]\w*", item) is None for item in (symbol, proof_symbol)):
+            raise ValueError("source-map symbols must be C identifiers")
+        if symbol in source_pointers or binding["kind"] not in {1, 2}:
+            raise ValueError("duplicate source-map identity or invalid source kind")
+        if type(binding["source_insn"]) is not int or binding["source_insn"] < 0:
+            raise ValueError("source-map instruction index must be nonnegative")
+        offset = binding["value_offset"]
+        if type(offset) is not int or offset < 0 or offset > 0xffffffff or (binding["kind"] == 1 and offset):
+            raise ValueError("source-map value offset is invalid")
+        source_pointers[symbol] = (binding["kind"] == 2, f"({proof_symbol} + {offset}ULL)")
+    used = {i.reloc_symbol for i in all_insns} & source_pointers.keys()
+    if used != source_pointers.keys():
+        raise ValueError("source-map binding has no native address relocation")
+    def source_annotations(body):
+        return [replace(i, source_pointer=source_pointers[i.reloc_symbol])
+                if i.reloc_symbol in source_pointers else i for i in body]
+    insns = source_annotations(insns)
+    subfunctions = {symbol: source_annotations(body) for symbol, body in subfunctions.items()}
     all_insns = [*insns, *(i for fn in subfunctions.values() for i in fn)]
     has_indirect = any(is_indirect_branch(i) for i in all_insns)
     targets = indirect_targets(all_insns, exit_addr, {
@@ -1577,6 +1614,15 @@ def render_program(name: str, insns: list[NativeInsn],
         ])
     if source_prelude:
         lines.append(source_prelude.rstrip())
+        lines.append("")
+    if source_map_bindings:
+        for binding in source_map_bindings:
+            lines.append(f'extern __u8 {binding["proof_symbol"]}[] __ksym;')
+        objects = [{key: binding[key] for key in ("native_symbol", "source_insn", "proof_symbol")}
+                   for binding in source_map_bindings]
+        metadata = json.dumps(dict(version=1, objects=objects), separators=(",", ":"))
+        lines.append('static const char __x86_source_map_metadata[] SEC(".native_lab.source_maps") = '
+                     + json.dumps(metadata) + ';')
         lines.append("")
     rodata_objects = []
     for index, (symbol, ident) in enumerate(rodata_idents.items()):

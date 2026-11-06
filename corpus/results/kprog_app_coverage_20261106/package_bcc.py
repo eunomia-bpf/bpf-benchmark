@@ -39,6 +39,9 @@ for entry in manifest['objects']:
         shutil.copy2(source,app/source.name)
         entry[field]='/opt/bpf-benchmark/native-bpf/x86_64/bcc/'+source.name
 probe_manifest=json.loads((HERE/'object-startup-published/manifest.json').read_text())
+for name,kind in [('bcc_map_value_v2',1),('bcc_trace_read',5),('bcc_trace_zero',5),('bcc_fentry_zero',26)]:
+    entry=json.loads((HERE/'startup-lift'/name/'manifest-entry.json').read_text())
+    probe_manifest['objects'].append(dict(entry,prog_type=kind))
 for probe in probe_manifest['objects']:
     if probe['program']=='runtime_source':continue
     native_source=Path(probe['native_object'])
@@ -51,8 +54,9 @@ for probe in probe_manifest['objects']:
     manifest['objects'].append(probe)
 (app/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 for source,name in [(HERE/'strict-runtime-input/libbpfrejit_shim.so','libbpfrejit_shim.so'),
-                    (HERE.parents[2]/'kprog/x86/native_lab/native_link/target-c-readonly/release/native-link','native-link'),
-                    (HERE/'strict-runtime-input/libnative_loader.so','libnative_loader.so')]:
+                    (HERE.parents[2]/'kprog/x86/native_lab/native_link/target-c-tail/release/native-link','native-link'),
+                    (HERE/'strict-runtime-input/libnative_loader.so','libnative_loader.so'),
+                    (HERE/'strict-runtime-input/bpf_x86_native_lab.ko','bpf_x86_native_lab.ko')]:
     shutil.copy2(source,out/name)
 shutil.copy2(phase/'load-pairing.json',out/'load-pairing.json')
 print(f'packaged all {len(rows)} BCC resident entries; probes/transient coverage remains in startup records')

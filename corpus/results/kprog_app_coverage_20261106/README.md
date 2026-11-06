@@ -1,5 +1,10 @@
 # Lane C: application proof-artifact coverage, 2026-11-06
 
+[Captured source-map producer](source-maps.md) preserves original map identity
+and value offsets through native/proof generation; actual generation-bound KVM
+map execution passes. BCC phase13 reaches37 bound replacements, then stops on
+six tracepoint-stack and one context-load verifier rejection; both are being fixed.
+
 [External helper tail-jump repair](tail-helpers.md) preserves direct, GOT,
 numeric-ID and subprogram tail-helper operations through proof/kernel linking.
 All four forms pass actual bound startup controls; unknown targets reject.

@@ -53,4 +53,15 @@ _Static_assert(KPROG_X86_PTR_WRITE_TAG_HELPER_ID == X86_SIM_TAG_HELPER_ID, "x86 
  */
 #define KPROG_X86_PTR_WRITE_IS_HELPER_ID(TAG)                               \
 	((TAG) == KPROG_X86_PTR_WRITE_TAG_HELPER_ID)
+/* AUX is meaningful only for an explicitly bound source map-value address. */
+#define X86_MAP_PTR_AUX_VALUE 1U
+#define KPROG_X86_PTR_WRITE_TAG_MAP_VALUE 6U
+_Static_assert(KPROG_X86_PTR_WRITE_TAG_MAP_VALUE == X86_SIM_TAG_MAP_VALUE,
+               "x86 source-map value tag drift");
+#define KPROG_X86_PTR_WRITE_SOURCE_TAG(IS_MAP_PTR, IS_HELPER_ID, AUX) \
+	({ __u8 __kprog_x86_source_tag = KPROG_X86_PTR_WRITE_TAG(IS_MAP_PTR, IS_HELPER_ID); \
+	   if (__kprog_x86_source_tag == KPROG_X86_PTR_WRITE_TAG_MAP_PTR && \
+	       ((AUX) & X86_MAP_PTR_AUX_VALUE)) \
+	       __kprog_x86_source_tag = KPROG_X86_PTR_WRITE_TAG_MAP_VALUE; \
+	   __kprog_x86_source_tag; })
 #endif

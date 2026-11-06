@@ -33,6 +33,7 @@ EXPECTED = {
     "schema_version": 1,
     "operation": "x86PtrWrite",
     "selector": "opcode_then_provenance_tag",
+    "source_value": {"tag_code": 6, "aux_mask": 1},
     "tag_rows": [
         {
             "tag": "scalar",
@@ -192,6 +193,10 @@ as `none` so the selector is total. -/
 def tagOfSelectors (isMapPtr isHelperId : Bool) : Option Tag :=
   match isMapPtr, isHelperId with
 {select_table}
+/-- Explicit source-map value binding refines the ordinary map-pointer arm. -/
+def sourceTagCode (isMapPtr isHelperId isValue : Bool) : Option Nat :=
+  (tagOfSelectors isMapPtr isHelperId).map fun tag =>
+    if tag == .mapPtr && isValue then {EXPECTED['source_value']['tag_code']} else code tag
 end KProgFormal.GeneratedX86PtrWrite
 '''
 
@@ -257,6 +262,17 @@ def render_c(tag_rows, opcode_rows) -> str:
  */
 #define KPROG_X86_PTR_WRITE_IS_HELPER_ID(TAG)                               \\
 \t((TAG) == KPROG_X86_PTR_WRITE_TAG_HELPER_ID)
+/* AUX is meaningful only for an explicitly bound source map-value address. */
+#define X86_MAP_PTR_AUX_VALUE {EXPECTED['source_value']['aux_mask']}U
+#define KPROG_X86_PTR_WRITE_TAG_MAP_VALUE {EXPECTED['source_value']['tag_code']}U
+_Static_assert(KPROG_X86_PTR_WRITE_TAG_MAP_VALUE == X86_SIM_TAG_MAP_VALUE,
+               "x86 source-map value tag drift");
+#define KPROG_X86_PTR_WRITE_SOURCE_TAG(IS_MAP_PTR, IS_HELPER_ID, AUX) \\
+\t({{ __u8 __kprog_x86_source_tag = KPROG_X86_PTR_WRITE_TAG(IS_MAP_PTR, IS_HELPER_ID); \\
+\t   if (__kprog_x86_source_tag == KPROG_X86_PTR_WRITE_TAG_MAP_PTR && \\
+\t       ((AUX) & X86_MAP_PTR_AUX_VALUE)) \\
+\t       __kprog_x86_source_tag = KPROG_X86_PTR_WRITE_TAG_MAP_VALUE; \\
+\t   __kprog_x86_source_tag; }})
 #endif
 '''
 

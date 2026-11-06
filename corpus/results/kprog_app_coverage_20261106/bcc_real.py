@@ -12,14 +12,16 @@ HERE=Path(__file__).resolve().parent
 sys.path.insert(0,str(ROOT/'kprog/x86/micro-prog'))
 import generate_micro_sim_proofs as gen
 phase=Path(sys.argv[1]).resolve();phase.mkdir()
+base=Path(sys.argv[2]).resolve() if len(sys.argv)==3 else None
 for name in ('sources','native','upstream','original'): (phase/name).mkdir()
-upstream=ROOT/'vendor/bpf/bcc/libbpf-tools'
+upstream=base/'upstream' if base else ROOT/'vendor/bpf/bcc/libbpf-tools'
 for path in upstream.glob('*.h'):shutil.copy2(path,phase/'upstream'/path.name)
-shutil.copy2(upstream/'x86/vmlinux.h',phase/'upstream/vmlinux.h')
+shutil.copy2(upstream/('vmlinux.h' if base else 'x86/vmlinux.h'),phase/'upstream/vmlinux.h')
 loads=[json.loads(line) for line in (HERE/'startup-x86/bcc/loads.jsonl').read_text().splitlines()]
 programs={r['id']:r for r in loads if r['resident']}
 rows=[];paired=[];native_inputs={};native_entries={}
-for raw_native in sorted((ROOT/'vendor/build/native-bpf/x86/stage/bcc').glob('*.native.o')):
+native_root=base/'native' if base else ROOT/'vendor/build/native-bpf/x86/stage/bcc'
+for raw_native in sorted(native_root.glob('*.native.o')):
     local_native=phase/'native'/raw_native.name
     shutil.copy2(raw_native,local_native)
     native_inputs[local_native.name]=dict(source=str(raw_native),
@@ -34,7 +36,7 @@ for program in programs.values():
     candidates=native_entries.get(symbol,[])
     if len(candidates)!=1:raise ValueError(f'whole native entry not unique for {symbol}: {candidates}')
     local_native=candidates[0];stem=local_native.name.removesuffix('.native.o')
-    original=ROOT/f'vendor/build/.bcc-libbpf/none/x86/output/{stem}.bpf.o'
+    original=base/'original'/(stem+'.bpf.o') if base else ROOT/f'vendor/build/.bcc-libbpf/none/x86/output/{stem}.bpf.o'
     original_copy=phase/'original'/original.name
     if not original_copy.exists():shutil.copy2(original,original_copy)
     with original_copy.open('rb') as stream:
@@ -51,7 +53,7 @@ for program in programs.values():
         original_id=program['id'],original_name=symbol,original_object=str(original_copy),program_type=program['type'],
         program_section=section,compiler_flags=['-g','-I'+str(phase/'upstream'),'-I'+str(ROOT/'vendor/libbpf/include')])
     try:
-        command=[str(ROOT/'kprog/x86/native_lab/native_link/target-c-readonly/release/native-link'),'--input',str(local_native),
+        command=[str(ROOT/'kprog/x86/native_lab/native_link/target-c-tail/release/native-link'),'--input',str(local_native),
             '--symbol',symbol,'--mode','proof','--preserve-entry-abi','--output',str(local)]
         result=subprocess.run(command,cwd=ROOT,text=True,capture_output=True,timeout=120)
         with (phase/'commands.jsonl').open('a') as stream:

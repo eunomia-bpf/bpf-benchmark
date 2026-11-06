@@ -2300,6 +2300,25 @@ fn collect_x86_proof_relocs(
                     });
                 }
                 2 => {
+                    if target_sym.is_undefined() {
+                        let insn_idx = layout.insn_local_ip.iter().enumerate()
+                            .filter(|(_, &ip)| ip != u64::MAX && ip <= local_patch_off)
+                            .max_by_key(|(_, &ip)| ip).map(|(idx, _)| idx)
+                            .ok_or_else(|| anyhow!("external PC32 relocation has no instruction"))?;
+                        let source_offset = usize::try_from(layout.sym.address - section.address()
+                            + layout.insn_local_ip[insn_idx])?;
+                        let mut decoder = Decoder::new(64, &section.data()?[source_offset..], DecoderOptions::NONE);
+                        let original = decoder.decode();
+                        if original.code() != Code::Lea_r64_m || !original.is_ip_rel_memory_operand()
+                            || reloc.addend() != -4 {
+                            bail!("external PC32 proof relocation {} requires a zero-offset 64-bit LEA", target_name);
+                        }
+                        let offset = layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize
+                            + (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
+                        relocs.push(ProofReloc { offset: offset as u64, r_type,
+                            symbol: target_name, addend: reloc.addend(), data: None });
+                        continue;
+                    }
                     let target_section_idx = target_sym.section_index().ok_or_else(|| {
                         anyhow!("PC32 proof reloc target {} has no section", target_name)
                     })?;
@@ -2749,19 +2768,6 @@ fn apply_elf_relocations(
                 // mechanism (PC-relative form here -- clang shouldn't
                 // be emitting 32S in -fPIC code, but handle defensively).
                 2 => {
-                    let target_section_idx = target_sym.section_index().ok_or_else(|| {
-                        anyhow!("PC32 reloc target {} has no section", target_name)
-                    })?;
-                    let target_section = elf
-                        .section_by_index(target_section_idx)
-                        .with_context(|| format!("PC32 target section {target_section_idx:?}"))?;
-                    let target_data = target_section
-                        .data()
-                        .with_context(|| format!("read section {target_section_idx:?} data"))?;
-                    let sec_base = target_section.address();
-                    let section_name = target_section
-                        .name()
-                        .map_err(|e| anyhow!("PC32 target section name: {e}"))?;
                     // A native map address is an external kernel identity,
                     // not the ELF map descriptor's embedded data bytes. LEA
                     // must load that identity from a literal, exactly like a
@@ -2802,6 +2808,19 @@ fn apply_elf_relocations(
                             continue;
                         }
                     }
+                    let target_section_idx = target_sym.section_index().ok_or_else(|| {
+                        anyhow!("PC32 reloc target {} has no section", target_name)
+                    })?;
+                    let target_section = elf
+                        .section_by_index(target_section_idx)
+                        .with_context(|| format!("PC32 target section {target_section_idx:?}"))?;
+                    let target_data = target_section
+                        .data()
+                        .with_context(|| format!("read section {target_section_idx:?} data"))?;
+                    let sec_base = target_section.address();
+                    let section_name = target_section
+                        .name()
+                        .map_err(|e| anyhow!("PC32 target section name: {e}"))?;
                     if section_name.starts_with(".text") {
                         let target_addr = i128::from(target_sym.address())
                             .checked_add(i128::from(reloc.addend()))
@@ -4404,6 +4423,57 @@ mod tests {
         assert_eq!(instructions[0].near_branch_target(), callee.offset);
         assert_ne!(callee.offset, 0, "call must not recurse into entry");
         assert_eq!(&linked.blob[callee.offset as usize..][..6], &[0xb8,42,0,0,0,0xc3]);
+        Ok(())
+    }
+
+    #[test]
+    fn external_pc32_map_value_keeps_identity_and_kernel_literal() -> Result<()> {
+        // A source MAP_VALUE pointer may be emitted as LEA against an undefined
+        // symbol. Proof mode must retain it; kernel mode must resolve its identity,
+        // rather than require an ELF data section or embed unrelated data bytes.
+        let mut object = WriteObject::new(
+            BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
+        let text = object.section_id(StandardSection::Text);
+        object.append_section_data(text, &[0x48,0x8d,0x05,0,0,0,0,0xc3], 1);
+        object.add_symbol(WriteSymbol {
+            name: b"entry".to_vec(), value: 0, size: 8, kind: SymbolKind::Text,
+            scope: SymbolScope::Linkage, weak: false,
+            section: WriteSymbolSection::Section(text), flags: SymbolFlags::None,
+        });
+        let value = object.add_symbol(WriteSymbol {
+            name: b"source_value".to_vec(), value: 0, size: 0, kind: SymbolKind::Data,
+            scope: SymbolScope::Linkage, weak: false,
+            section: WriteSymbolSection::Undefined, flags: SymbolFlags::None,
+        });
+        object.add_relocation(text, object::write::Relocation {
+            offset: 3, symbol: value, addend: -4,
+            flags: RelocationFlags::Elf { r_type: 2 },
+        })?;
+        let bytes = object.write()?;
+        let elf = object::File::parse(bytes.as_slice())?;
+        let entry = find_symbol_by_name(&elf, "entry")?;
+        let included = discover_reachable(&elf, &entry)?;
+        let proof = rewrite_x86(&elf, &entry, &included,
+            &HashMap::new(), &HashMap::new(), &HashSet::new(), &[],
+            &HashMap::new(), &[], true, true, false)?;
+        assert_eq!(proof.proof_relocs.len(), 1);
+        let reloc = &proof.proof_relocs[0];
+        assert_eq!((reloc.symbol.as_str(), reloc.r_type, reloc.addend), ("source_value", 2, -4));
+        assert!(reloc.data.is_none());
+        let address = 0xffff888012345610u64;
+        let maps = HashMap::from([("source_value".to_string(), address)]);
+        let kernel = rewrite_x86(&elf, &entry, &included,
+            &HashMap::new(), &maps, &HashSet::new(), &[],
+            &HashMap::new(), &[], false, true, false)?;
+        assert_eq!(kernel.map_patches.len(), 1);
+        let patch = &kernel.map_patches[0];
+        assert_eq!(patch.name, "source_value");
+        assert_eq!(&kernel.blob[patch.offset..patch.offset+8], &address.to_le_bytes());
+        let mut decoder = Decoder::new(64, &kernel.blob, DecoderOptions::NONE);
+        assert_eq!(decoder.decode().code(), Code::Mov_r64_rm64);
+        assert!(rewrite_x86(&elf, &entry, &included,
+            &HashMap::new(), &HashMap::new(), &HashSet::new(), &[],
+            &HashMap::new(), &[], false, true, false).is_err());
         Ok(())
     }
 

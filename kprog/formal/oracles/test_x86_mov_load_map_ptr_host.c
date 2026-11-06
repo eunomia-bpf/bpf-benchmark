@@ -624,6 +624,16 @@ int main(void)
 {
 	unsigned total = 0U;
 
+	/* Catch source MAP_VALUE being mislabeled as a map object, and AUX
+	 * accidentally changing helper/fallthrough tags or unrelated AUX bits. */
+	for (unsigned map = 0; map < 2; ++map)
+		for (unsigned helper = 0; helper < 2; ++helper)
+			for (unsigned aux = 0; aux < 256; ++aux) {
+				const __u8 expected = map ? ((aux & 1) ? 6 : 5) : (helper ? 7 : 255);
+				if (KPROG_X86_PTR_WRITE_SOURCE_TAG(map, helper, aux) != expected)
+					++mismatches;
+				++total;
+			}
 	oracle_reset();
 	oracle_snapshot_pristine();
 
