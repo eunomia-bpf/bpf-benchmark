@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0983 - three relations, two exact and one partial by design
+
+Three arithmetic relations were checked after the three-kind sum turned out to
+be bound. The four instruction-set buckets partition the gate and are asserted
+to sum to its banner count, with the run exiting if they do not; the three
+native-decide kinds sum to one fewer than their total, which the earlier step
+verified; and the twenty-four four-stage row splits must not exceed their
+totals.
+
+The last one allows a partial sum rather than requiring equality, and reading
+the function's own note says why: the fourth stage carries a parenthetical that
+the pattern does not parse, so only the three that are parsed are compared, and
+a partial sum over the total is impossible however the fourth is counted.
+
+So the relation is right for what it measures, and the distinction is the useful
+part: a split that overcounts is arithmetic error, and one that undercounts only
+means a stage was not parsed. Census unchanged; the three relations are read and
+their bounds are explained.
+
 ### Step 0982 - the three kinds sum by arithmetic, and it is checked
 
 The section states that its three kinds of native-decide use sum to one fewer

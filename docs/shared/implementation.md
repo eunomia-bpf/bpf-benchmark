@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0983 surveyed the three arithmetic relations:
+partition and three-kind sum are exact, row splits
+allow a partial sum by design.
+
+
 Step 0982 verified the three-kind sum relation is
 bound: perturbing it reports the counts, the overlap,
 and the arithmetic.
