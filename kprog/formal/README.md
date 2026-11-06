@@ -7606,6 +7606,28 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0977 - seven paragraphs hold half the section
+
+The overfull boxes that remain are not spread across the text. Four hundred and
+twenty-seven of the four hundred and forty-seven are in one section, and the
+worst of them sat in a paragraph of six thousand words that holds thirty-six
+macro names longer than forty characters.
+
+Measuring the section by paragraph rather than by line shows why: two hundred
+and sixty-five blocks, and seven of them hold fifty thousand of the section's
+ninety-six thousand words. Half the section is seven paragraphs, each continuing
+for pages without a break.
+
+That is the same concentration the earlier steps measured between sections, one
+level down: the paper's words are mostly in one section, and that section's
+words are mostly in seven blocks. It explains the overfull boxes without
+excusing them, since a paragraph that long leaves TeX few places to break.
+
+One unbreakable name was repaired, which took the worst line from eighty-one
+points to sixty-nine. The rest need the paragraphs divided, which is the
+editorial work the reordering step described. Census unchanged; the distribution
+is measured one level down.
+
 ### Step 0976 - the stretch was chosen, so its cost was measured
 
 The stretch was chosen without measuring its cost, so the cost was measured: at
