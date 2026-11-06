@@ -18,10 +18,9 @@ routing tables; they are **not yet a full simulator-step refinement theorem**.
 The ISA reference lives in `KProgFormal/Reference/`; it imports no simulator
 contracts. The step refinements in `Refinement/` connect CMOV, BT, BZHI,
 ANDN and register PUSH/POP handlers to that reference, including registers,
-flags, XMM0, memory, PC and ordered access/fault effects. The AArch64
-multiply/divide family (MADD, MSUB, MUL, UMULL, UMADDL, SMADDL, UMULH and
-UDIV) connects through `Refinement/Arm64Mul.lean`, including generated GPR
-selection, ZR discard, W writeback and preservation of SP/NZCV/vector/memory.
+flags, XMM0, memory, PC and ordered access/fault effects. The AArch64 multiply/divide and conditional-select families connect through
+`Refinement/Arm64Mul.lean` and `Refinement/Arm64Select.lean`, including native
+aliases, all raw NZCV predicates, ZR/SP separation and W zero-extension.
 
 Layout:
 
@@ -49,6 +48,8 @@ separate expressions. Generator freshness checks and C semantic oracles test
 that boundary but do not prove arbitrary C compilation correct. Hardware
 fidelity, verifier acceptance, helper behavior, and artifact binding require
 separate evidence; these local proofs do not establish them by themselves.
+The lifts take architectural register values; connecting virtual stack/code/helper
+encodings to those values is part of the ongoing dispatcher proof.
 
 The checked reference also builds as `.lake/build/bin/reference`: JSON lines
 on stdin, one JSON transition per line on stdout. Inputs contain `state`

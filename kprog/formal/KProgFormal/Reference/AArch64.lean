@@ -93,12 +93,29 @@ def mulStep (i : MulInstruction) (s : State) : Transition State :=
   let (dst, value) := mulResult i s
   ⟨{ writeReg s dst value with pc := s.pc + 4 }, [], none⟩
 
+inductive SelectElse | keep | increment | invert | negate
+  deriving DecidableEq, Repr
+
+/-- A64 conditional-select sources are read at the operand size, with the
+false-path operation applied before the zero-extending destination write. -/
+def selectValue (width : Width) (alternative : SelectElse) (taken : Bool)
+    (lhs rhs : Word) : Word :=
+  let lhs := narrow lhs width
+  let rhs := narrow rhs width
+  narrow (if taken then lhs else match alternative with
+    | .keep => rhs | .increment => rhs + 1 | .invert => ~~~rhs | .negate => -rhs) width
+
 inductive Instruction
   | mul (instruction : MulInstruction)
+  | select (width : Width) (alternative : SelectElse) (dst lhs rhs : Register) (predicate : Fin 16)
   deriving DecidableEq, Repr
 
 def step (i : Instruction) (s : State) : Transition State :=
-  match i with | .mul instruction => mulStep instruction s
+  match i with
+  | .mul instruction => mulStep instruction s
+  | .select width alternative dst lhs rhs predicate =>
+      let value := selectValue width alternative (condition s.flags predicate) (readReg s lhs) (readReg s rhs)
+      ⟨{ writeReg s dst value with pc := s.pc + 4 }, [], none⟩
 
 def Step (i : Instruction) (before : State) (after : Transition State) : Prop :=
   step i before = after
@@ -115,6 +132,12 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   let lhs := register (word / 2^5)
   let rhs := register (word / 2^16)
   let addend := register (word / 2^10)
+  if word &&& 0x3fe00800 = 0x1a800000 then
+    let alternative := if (word / 2^30) % 2 = 0 then
+      (if (word / 2^10) % 2 = 0 then SelectElse.keep else .increment)
+      else (if (word / 2^10) % 2 = 0 then .invert else .negate)
+    let predicate : Fin 16 := ⟨(word / 2^12) % 16, Nat.mod_lt _ (by decide)⟩
+    return .select width alternative dst lhs rhs predicate
   if word &&& 0x7fe00000 = 0x1b000000 then
     return .mul (.multiply width ((word / 2^15) % 2 == 1) dst lhs rhs addend)
   if word &&& 0xffe08000 = 0x9ba00000 then

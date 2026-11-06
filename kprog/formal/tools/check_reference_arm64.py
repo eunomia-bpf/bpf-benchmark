@@ -48,6 +48,33 @@ def main():
         if dst is not None:
             expected["registers"][dst] = result
         cases.append((request, expected))
+    for word, flags, result, dst in [
+            (0x1A820020, 0x40000000, 5, 0),  # CSEL W EQ true/false
+            (0x1A820020, 0, 7, 0),
+            (0x9A82C020, 0, 0xFEED000000000005, 0),  # CSEL X GT
+            (0x9A82C020, 0x40000000, 0xDEAD000000000007, 0),
+            (0x1A820420, 0, 8, 0),  # CSINC false
+            (0x1A820420, 0x40000000, 5, 0),
+            (0xDA821020, 0x40000000, 0x2152FFFFFFFFFFF8, 0),  # CSINV false
+            (0x5A82C420, 0x40000000, 0xFFFFFFF9, 0),  # CSNEG W false
+            (0x5A82C420, 0, 5, 0),
+            (0x1A9F17E0, 0x40000000, 1, 0),  # CSET alias
+            (0x1A9F17E0, 0, 0, 0),
+            (0xDA9F13E0, 0x40000000, 0xFFFFFFFFFFFFFFFF, 0),  # CSETM
+            (0x1A811420, 0x40000000, 6, 0),  # CINC
+            (0xDA811020, 0x40000000, 0x0112FFFFFFFFFFFA, 0),  # CINV
+            (0x5A811420, 0x40000000, 0xFFFFFFFB, 0),  # CNEG W
+            (0x9A82F020, 0, 0xFEED000000000005, 0),  # NV always true
+            (0x9A82E03F, 0, None, None)]:  # discard to ZR, preserve SP
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["registers"][1:3] = [0xFEED000000000005, 0xDEAD000000000007]
+        request["state"]["flags"] = flags
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
+        if dst is not None:
+            expected["registers"][dst] = result
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -79,7 +106,7 @@ def main():
     nv = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "nv"), "csel x0,x1,x2,nv")
     al = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "al"), "csel x0,x1,x2,al")
     assert encoder.encode(nv, {}, {}) == encoder.encode(al, {}, {})
-    print("AArch64 reference: multiply/divide, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":
