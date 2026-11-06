@@ -1,0 +1,26 @@
+[
+  {
+    "name": "readonly_7",
+    "offset": 7,
+    "expected_retval": 98,
+    "native_rc": 0,
+    "proof_rc": 0,
+    "mutant_rc": 1
+  },
+  {
+    "name": "readonly_64",
+    "offset": 64,
+    "expected_retval": 71,
+    "native_rc": 0,
+    "proof_rc": 0,
+    "mutant_rc": 1
+  },
+  {
+    "name": "readonly_119",
+    "offset": 119,
+    "expected_retval": 18,
+    "native_rc": 0,
+    "proof_rc": 0,
+    "mutant_rc": 1
+  }
+]

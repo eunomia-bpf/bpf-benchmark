@@ -61,6 +61,7 @@ class NativeInsn:
     operands: tuple[str, ...]
     raw: str
     reloc_symbol: str | None = None
+    reloc_addend: int = 0
 
 
 @dataclass(frozen=True)
@@ -154,13 +155,17 @@ def parse_flat_instructions(text: str) -> list[NativeInsn]:
     for line in text.splitlines():
         reloc = re.search(r"\bR_AARCH64_[A-Z0-9_]+\s+(\S+)", line)
         if reloc is not None and insns:
-            symbol = re.sub(r"([+-]0x[0-9a-fA-F]+)$", "", reloc.group(1))
+            expression = reloc.group(1)
+            suffix = re.search(r"([+-])0x([0-9a-fA-F]+)$", expression)
+            symbol = expression[:suffix.start()] if suffix else expression
+            addend = (int(suffix[2], 16) * (-1 if suffix[1] == '-' else 1)) if suffix else 0
             insns[-1] = NativeInsn(
                 insns[-1].addr,
                 insns[-1].mnemonic,
                 insns[-1].operands,
                 insns[-1].raw,
                 symbol,
+                addend,
             )
             continue
         m_insn = insn_re.match(line)
@@ -367,7 +372,8 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
             return Encoded(
                 "ARM64_OP_ADRP_RODATA",
                 reg_const(ops[0]),
-                imm=c_ptr_u64(rodata_idents[insn.reloc_symbol]),
+                imm=c_ptr_u64(f"((const __u8 *){rodata_idents[insn.reloc_symbol]} + {insn.reloc_addend})")
+                    if insn.reloc_addend else c_ptr_u64(rodata_idents[insn.reloc_symbol]),
             )
         if is_helper_symbol(insn.reloc_symbol):
             raise ValueError(f"unsupported adrp helper relocation: {insn.raw}")

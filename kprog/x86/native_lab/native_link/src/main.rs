@@ -3635,12 +3635,16 @@ fn rewrite_arm64(
                                 reloc.target_name
                             )
                         })?;
+                        let section = elf.section_by_index(section_index)?;
+                        let target_offset = reloc.target_address
+                            .and_then(|address| address.checked_sub(section.address()))
+                            .ok_or_else(|| anyhow!("arm64 local data {} has no section-relative address", reloc.target_name))?;
                         patches.push(Arm64Patch {
                             word_index: emit_word_index,
                             kind: Arm64PatchKind::LocalDataAdr {
                                 target_name: reloc.target_name.clone(),
                                 section_index,
-                                addend: reloc.addend,
+                                addend: i64::try_from(target_offset).context("arm64 local data offset exceeds i64")?,
                             },
                         });
                         blob.extend_from_slice(&insn.to_le_bytes());
@@ -4255,17 +4259,29 @@ mod tests {
     use super::*;
 
     #[test]
-    fn arm64_proof_data_preserves_object_extent_and_relocation_addend() {
+    fn arm64_readonly_relocations_preserve_symbol_base_extent_and_addend() {
         for (size, declared, offset) in [(8usize, 8u64, 0i64), (32, 32, 7), (120, 120, 48), (32, 80, 0)] {
             let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::Aarch64, Endianness::Little);
             let section = object.add_section(Vec::new(), b".rodata".to_vec(), SectionKind::ReadOnlyData);
             let bytes = (0..size+24).map(|i| (i*13+7) as u8).collect::<Vec<_>>();
             object.append_section_data(section, &bytes, 8);
-            object.add_symbol(WriteSymbol {
+            let value = object.add_symbol(WriteSymbol {
                 name: b"value".to_vec(), value: 16, size: declared,
                 kind: SymbolKind::Data, scope: SymbolScope::Linkage, weak: false,
                 section: WriteSymbolSection::Section(section), flags: SymbolFlags::None,
             });
+            let code = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
+            let words = [0x90000000u32, 0x91000000u32, 0x39400000u32, 0xd65f03c0u32];
+            object.append_section_data(code, &words.iter().flat_map(|word| word.to_le_bytes()).collect::<Vec<_>>(), 4);
+            object.add_symbol(WriteSymbol {
+                name: b"entry".to_vec(), value: 0, size: 16, kind: SymbolKind::Text,
+                scope: SymbolScope::Linkage, weak: false, section: WriteSymbolSection::Section(code), flags: SymbolFlags::None,
+            });
+            for (at, kind) in [(0, R_AARCH64_ADR_PREL_PG_HI21), (4, R_AARCH64_ADD_ABS_LO12_NC)] {
+                object.add_relocation(code, WriteRelocation {
+                    offset: at, symbol: value, addend: offset, flags: RelocationFlags::Elf { r_type: kind },
+                }).unwrap();
+            }
             let encoded = object.write().unwrap();
             let elf = object::File::parse(encoded.as_slice()).unwrap();
             let section_index = elf.section_by_name(".rodata").unwrap().index();
@@ -4279,6 +4295,14 @@ mod tests {
             }
             assert_eq!(arm64_reloc_data(&elf, &reloc).unwrap(), bytes[16..16+size]);
             assert_eq!(arm64_proof_reloc_addend(&reloc), offset);
+            let entry = find_symbol_by_name(&elf, "entry").unwrap();
+            let linked = rewrite_arm64(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
+                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, false, false).unwrap();
+            let instruction = u32::from_le_bytes(linked.blob[..4].try_into().unwrap());
+            assert_eq!(instruction & 0x9f00001f, 0x10000000); // ADR x0, actual data address
+            let displacement = ((instruction >> 29) & 3) | (((instruction >> 5) & 0x7ffff) << 2);
+            assert_eq!(linked.blob[displacement as usize], bytes[16+offset as usize]);
+
             reloc.target_name = "__arm64_section_test_addend_7".to_string();
             reloc.target_address = Some(7); reloc.addend = 7;
             assert_eq!(arm64_reloc_data(&elf, &reloc).unwrap(), bytes);

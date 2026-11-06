@@ -281,3 +281,52 @@ memory-artifacts:
 		abi-memory-final-v2 memory-tags-packed stack-store-packed memory-final-micro memory-final-stage2 \
 		bcc-real-entries-v8 bcc-real-entries-v9 bcc-tag-word bcc-packed-tags bcc-packed-tags-v2 \
 		memory-return-final return-byte-before
+
+.PHONY: native-link-arm64
+native-link-arm64:
+	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
+		taskset -c 16-23 cargo build --release --target aarch64-unknown-linux-gnu \
+		--manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml --target-dir $(ROOT)/kprog/arm64/build/app-native-link
+	install -m 0755 $(ROOT)/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link \
+		$(ROOT)/kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link
+
+.PHONY: readonly-bound-build
+readonly-bound-build:
+	python3 $(HERE)/readonly_bound.py $(HERE)/$(PHASE) prepare
+	for name in readonly_7 readonly_64 readonly_119; do \
+		clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
+		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
+		-c $(HERE)/$(PHASE)/$$name.bpf.c -o $(HERE)/$(PHASE)/$$name.bpf.o || exit 1; \
+		clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
+		-c $(HERE)/$(PHASE)/$$name.no-addend.bpf.c -o $(HERE)/$(PHASE)/$$name.no-addend.bpf.o || exit 1; \
+		clang -g -O2 -target bpf -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src \
+		-I/usr/include/x86_64-linux-gnu -c $(HERE)/$(PHASE)/$$name.source.bpf.c -o $(HERE)/$(PHASE)/$$name.source.bpf.o || exit 1; \
+	done
+	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static -D__EXPORTED_HEADERS__ -DNATIVE_LINK_PATH='"/native-link"' \
+		-I$(ROOT)/vendor/linux-framework/include/uapi -I$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+		$(ROOT)/kprog/fidelity/bound_probe.cpp /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/libnative_loader.a \
+		$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+		-L$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -o $(HERE)/$(PHASE)/bound-probe
+
+.PHONY: readonly-bound-package
+readonly-bound-package:
+	python3 $(HERE)/readonly_bound.py $(HERE)/$(PHASE) package $(BASE_INITRAMFS)
+
+.PHONY: readonly-bound-check
+readonly-bound-check: readonly-bound-package
+	install -d $(HERE)/$(PHASE)/verify
+	taskset -c 12-15 timeout 600 qemu-system-aarch64 -M virt -cpu max -smp 2 -m 2048 -nographic -no-reboot \
+		-kernel /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/Image -initrd $(BUILD)/initramfs.cpio.gz \
+		-fsdev local,id=results,path=$(HERE)/$(PHASE)/verify,security_model=none \
+		-device virtio-9p-device,fsdev=results,mount_tag=results \
+		-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >$(HERE)/$(PHASE)/qemu.log 2>&1
+	test "$$(cat $(HERE)/$(PHASE)/verify/guest-status)" = 0
+	python3 $(HERE)/readonly_bound.py $(HERE)/$(PHASE) collect
+
+.PHONY: readonly-bound-artifacts
+readonly-bound-artifacts:
+	install -d $(HERE)/$(PHASE)/runtime
+	cp /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/Image $(HERE)/$(PHASE)/runtime/Image
+	cp $(BUILD)/initramfs.cpio.gz $(HERE)/$(PHASE)/runtime/initramfs.cpio.gz
+	cp $(HERE)/Replay.mk $(HERE)/$(PHASE)/runtime/Makefile
+	tar --exclude=replay.tar.gz -C $(HERE)/$(PHASE) -czf $(HERE)/$(PHASE)/replay.tar.gz .

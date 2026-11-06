@@ -540,3 +540,22 @@ and tracing relocation failures. SP/initial-LR numeric-address findings also
 remain active defects. This increment does not claim a complete native safety
 certificate, successful BCC treatment, or matching work. The native binder and
 numeric/reference representation fixes continue from these recorded failures.
+
+## Interior readonly references on the bound native path
+
+Kernel-mode ARM linking now includes the named object's own section offset.
+The Python decoder also preserves relocation addends instead of stripping
+`+0x...` from the symbol and losing the offset. [The checked fixture outcomes](readonly-interior-checked/outcomes.json)
+cover bytes 7, 64 and 119 of a 120-byte object at section offset 16. Original
+source, simulator and generation-bound native runs all return 98, 71 and 18,
+respectively; every native run records a nonzero generation. Three simulator
+mutants that erase the addend return 7 and fail the exact expected-result check.
+All 67 linker tests pass, including checks against the emitted native ADR target;
+the 29 zero-addend micro sources exactly match the full-QEMU-passed sources.
+
+[Replay inputs, compiled artifacts and runtime](readonly-interior-checked/replay.tar.gz)
+include the matched context-v2 kernel and initramfs. Extract into a new directory,
+then run `make -C runtime run`; on an ARM KVM host, use
+`make -C runtime run ACCEL=kvm CPU=host`. These are functional checks. The
+[full build/run log](readonly-interior-checked/build-and-qemu.log) preserves the
+exact commands and library/kernel pairing.
