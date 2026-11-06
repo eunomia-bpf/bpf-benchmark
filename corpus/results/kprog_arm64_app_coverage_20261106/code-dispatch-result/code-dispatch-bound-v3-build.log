@@ -1,0 +1,46 @@
+python3 /workspaces/repository/kprog/arm64/generate_sim_dispatch.py
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code_dispatch.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3
+native-link: arm64 entry=entry (88 bytes), 1 reachable symbol(s) total
+  - entry (vaddr 0x0, 88 bytes) [entry]
+native-link: wrote proof object 92 bytes, 1 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3/native/code_branch_0.proof.o
+native-link: arm64 entry=entry (88 bytes), 1 reachable symbol(s) total
+  - entry (vaddr 0x0, 88 bytes) [entry]
+native-link: wrote 108 bytes -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3/native/code_branch_0.bin (0 relocs)
+native-link: wrote 0 relocs -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3/native/code_branch_0.relocs.bin
+native-link: arm64 entry=entry (92 bytes), 1 reachable symbol(s) total
+  - entry (vaddr 0x0, 92 bytes) [entry]
+native-link: wrote proof object 100 bytes, 1 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3/native/code_branch_1.proof.o
+native-link: arm64 entry=entry (92 bytes), 1 reachable symbol(s) total
+  - entry (vaddr 0x0, 92 bytes) [entry]
+native-link: wrote 108 bytes -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3/native/code_branch_1.bin (0 relocs)
+native-link: wrote 0 relocs -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3/native/code_branch_1.relocs.bin
+native-link: arm64 entry=entry (80 bytes), 3 reachable symbol(s) total
+  - entry (vaddr 0x0, 80 bytes) [entry]
+  - case37 (vaddr 0x50, 8 bytes)
+  - case41 (vaddr 0x58, 8 bytes)
+native-link: wrote proof object 100 bytes, 1 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3/native/code_call_0.proof.o
+native-link: arm64 entry=entry (80 bytes), 3 reachable symbol(s) total
+  - entry (vaddr 0x0, 80 bytes) [entry]
+  - case37 (vaddr 0x50, 8 bytes)
+  - case41 (vaddr 0x58, 8 bytes)
+native-link: wrote 116 bytes -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3/native/code_call_0.bin (0 relocs)
+native-link: wrote 0 relocs -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3/native/code_call_0.relocs.bin
+native-link: arm64 entry=entry (84 bytes), 3 reachable symbol(s) total
+  - entry (vaddr 0x0, 84 bytes) [entry]
+  - case37 (vaddr 0x54, 8 bytes)
+  - case41 (vaddr 0x5c, 8 bytes)
+native-link: wrote proof object 108 bytes, 1 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3/native/code_call_1.proof.o
+native-link: arm64 entry=entry (84 bytes), 3 reachable symbol(s) total
+  - entry (vaddr 0x0, 84 bytes) [entry]
+  - case37 (vaddr 0x54, 8 bytes)
+  - case41 (vaddr 0x5c, 8 bytes)
+native-link: wrote 116 bytes -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3/native/code_call_1.bin (0 relocs)
+native-link: wrote 0 relocs -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3/native/code_call_1.relocs.bin
+native-link: arm64 entry=entry (92 bytes), 1 reachable symbol(s) total
+  - entry (vaddr 0x0, 92 bytes) [entry]
+native-link: wrote proof object 100 bytes, 1 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v3/native/unknown_join.proof.o
+Traceback (most recent call last):
+  File "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code_dispatch.py", line 125, in <module>
+    raise RuntimeError('unknown CODE target was admitted or produced partial output')
+RuntimeError: unknown CODE target was admitted or produced partial output
+make: *** [corpus/results/kprog_arm64_app_coverage_20261106/Makefile:555: code-dispatch-build] Error 1

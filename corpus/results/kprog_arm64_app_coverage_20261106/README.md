@@ -843,3 +843,13 @@ check,336 predicate cases and21688 route cases pass. Both actual bound QEMU
 controls return0/retval2/generation1 through a sound32-byte native frame.
 The failed BCC helper artifact will be regenerated with this repair and the
 separate source-frame allocation fix; its prior rejection remains recorded.
+
+## Finite native code-address calls and branches
+
+[The CODE dispatch increment](code-dispatch-result/README.md) relocates ADR
+addresses after helper expansion and preserves actual finite BR/BLR operations.
+Four source/simulator/bound QEMU controls exercise both37/41 targets with
+retval2/generation1; three unknown/clobbered target controls reject before
+native output. All76 Rust tests and both release builds pass. The complete
+built replay and exact final-target checks are retained; remaining address
+and control-flow forms continue through implementation and validation.

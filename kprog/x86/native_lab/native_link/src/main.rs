@@ -1225,6 +1225,12 @@ fn a64_adr(rd: u32, word_index: usize, target_byte_offset: usize) -> Result<u32>
     Ok(0x1000_0000 | immlo | immhi | rd)
 }
 
+fn a64_adr_target(insn: u32, pc: u64) -> Option<u64> {
+    if insn & 0x9f00_0000 != 0x1000_0000 { return None; }
+    let imm = ((insn >> 29) & 3) | (((insn >> 5) & 0x7ffff) << 2);
+    pc.checked_add_signed(a64_sign_extend(imm, 21))
+}
+
 fn a64_is_uncond_b(insn: u32) -> bool {
     (insn & 0x7c00_0000) == 0x1400_0000
 }
@@ -1367,6 +1373,7 @@ fn validate_arm64_kernel_blob_control_flow(
     blob: &[u8],
     code_word_count: usize,
     ret_trampoline_word: usize,
+    finite_code_sites: &HashSet<usize>,
 ) -> Result<()> {
     if blob.len() % 4 != 0 {
         bail!("arm64 kernel blob size is not 4-byte aligned");
@@ -1389,6 +1396,8 @@ fn validate_arm64_kernel_blob_control_flow(
         }
         let off = word_index * 4;
         let insn = u32::from_le_bytes(blob[off..off + 4].try_into().unwrap());
+        if finite_code_sites.contains(&word_index) &&
+            (a64_blr_reg(insn).is_some() || a64_br_reg(insn).is_some()) { continue; }
         if let Some(reg) = a64_blr_reg(insn) {
             if reg == 10 && arm64_blr_x10_has_kernel_literal(blob, word_index) {
                 continue;
@@ -2376,6 +2385,7 @@ fn arm64_section_materialized_data(section: &object::Section) -> Result<Vec<u8>>
     Ok(materialized)
 }
 
+const R_AARCH64_ADR_PREL_LO21: u32 = 274;
 const R_AARCH64_ADR_PREL_PG_HI21: u32 = 275;
 const R_AARCH64_ADD_ABS_LO12_NC: u32 = 277;
 const R_AARCH64_JUMP26: u32 = 282;
@@ -2549,6 +2559,14 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
                     if reloc.r_type == R_AARCH64_JUMP26 && section_index == sym.section_index &&
                         address >= sym.address && address < sym.address + sym.size { continue; }
                     (section_index, address)
+                } else if let Some(target) = reloc.filter(|r| r.r_type == R_AARCH64_ADR_PREL_LO21)
+                    .and_then(|r| Some((r.target_section_index?, r.target_address?))) {
+                    if target.0 == sym.section_index && target.1 >= sym.address &&
+                        target.1 < sym.address + sym.size { continue; }
+                    target
+                } else if let Some(target) = a64_adr_target(insn, sym.address + (word_index * 4) as u64) {
+                    if target >= sym.address && target < sym.address + sym.size { continue; }
+                    (sym.section_index, target)
                 } else {
                     let branch = if a64_is_uncond_b(insn) && !a64_is_bl(insn) {
                         a64_branch_target(sym.address, word_index, insn)
@@ -2592,6 +2610,7 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
 
 #[derive(Clone)]
 enum Arm64PatchKind {
+    LocalCodeAdr { rd: u32, target: Arm64AddressKey },
     ReturnToTrampoline,
     Bl {
         target_symbol: Arm64AddressKey,
@@ -2862,6 +2881,7 @@ fn arm64_symbol_has_tail_call(
 fn arm64_reloc_written_gpr(reloc: &Arm64RelocInfo, insn: u32) -> Option<usize> {
     match reloc.r_type {
         R_AARCH64_ADR_PREL_PG_HI21
+        | R_AARCH64_ADR_PREL_LO21
         | R_AARCH64_ADD_ABS_LO12_NC
         | R_AARCH64_ADR_GOT_PAGE
         | R_AARCH64_LD64_GOT_LO12_NC => Some((insn & 0x1f) as usize),
@@ -2924,6 +2944,15 @@ fn arm64_helper_flow(
     bytes: &[u8], sym: &SymInfo,
     relocs: &HashMap<Arm64RelocKey, Arm64RelocInfo>,
 ) -> HashMap<usize, Arm64HelperState> {
+    arm64_target_flow(bytes, sym, relocs, false)
+}
+
+// CODE mode tracks actual local ADR addresses, never scalar helper IDs.
+// Unknown on any incoming edge remains unknown at the join.
+fn arm64_target_flow(
+    bytes: &[u8], sym: &SymInfo,
+    relocs: &HashMap<Arm64RelocKey, Arm64RelocInfo>, code: bool,
+) -> HashMap<usize, Arm64HelperState> {
     let count = bytes.len() / 4;
     let initial: Arm64HelperState = std::array::from_fn(|_| None);
     let mut states = HashMap::from([(0usize, initial)]);
@@ -2939,6 +2968,7 @@ fn arm64_helper_flow(
         }
         // Unrecognized instruction families cannot retain stale target facts.
         let known_no_write = insn == A64_NOP || a64_is_ret(insn) ||
+            a64_adr_target(insn, sym.address + (index * 4) as u64).is_some() ||
             a64_is_bl(insn) || a64_blr_reg(insn).is_some() || a64_br_reg(insn).is_some() ||
             a64_is_uncond_b(insn) || a64_is_b_cond(insn) ||
             a64_is_cbz_cbnz(insn) || a64_is_tbz_tbnz(insn) ||
@@ -2949,9 +2979,23 @@ fn arm64_helper_flow(
         if !known_no_write && writes.iter().all(Option::is_none) && reloc.is_none() {
             next.fill(None);
         }
-        if let Some((reg, id)) = a64_known_helper_id_load(insn) {
+        let code_address = if (insn & 31) == 31 { None } else {
+            match reloc {
+                Some(r) if r.r_type == R_AARCH64_ADR_PREL_LO21 &&
+                    r.target_section_index == Some(sym.section_index) => r.target_address,
+                None => a64_adr_target(insn, sym.address + (index * 4) as u64),
+                _ => None,
+            }
+        };
+        if a64_adr_target(insn, sym.address + (index * 4) as u64).is_some() {
+            next[(insn & 31) as usize] = None;
+        }
+        if let Some(target) = code_address.filter(|_| code) {
+            next[(insn & 31) as usize] = Some(BTreeSet::from([target]));
+        } else if !code && a64_known_helper_id_load(insn).is_some() {
+            let (reg, id) = a64_known_helper_id_load(insn).unwrap();
             next[reg] = Some(BTreeSet::from([id]));
-        } else if let Some((dst, src)) = a64_mov_reg64(insn | 0x8000_0000) {
+        } else if let Some((dst, src)) = a64_mov_reg64(if code { insn } else { insn | 0x8000_0000 }) {
             next[dst] = incoming[src].clone();
         } else if (insn & 0xffe0_0c00) == 0x9a80_0000 {
             let dst = (insn & 31) as usize;
@@ -2965,10 +3009,24 @@ fn arm64_helper_flow(
         if a64_is_bl(insn) || a64_blr_reg(insn).is_some() {
             let named_helper = reloc.is_some_and(|r| r.target_name.starts_with("bpf_"));
             let indirect_helper = a64_blr_reg(insn).is_some_and(|r| incoming[r].is_some());
-            let clobbered = if named_helper || indirect_helper { 19 } else { 31 };
+            let clobbered = if !code && (named_helper || indirect_helper) { 19 } else { 31 };
             next[..clobbered].fill(None); next[30] = None;
         }
-        for successor in arm64_helper_successors(sym, count, index, insn) {
+        if code { next[31] = None; } // XZR is never a stored code address.
+        let mut successors = arm64_helper_successors(sym, count, index, insn);
+        if code {
+            if let Some(reg) = a64_br_reg(insn).or_else(|| a64_blr_reg(insn)) {
+                if let Some(targets) = &incoming[reg] {
+                    for &target in targets {
+                        if target >= sym.address && target < sym.address + sym.size &&
+                            (target - sym.address) % 4 == 0 {
+                            successors.push(((target - sym.address) / 4) as usize);
+                        }
+                    }
+                }
+            }
+        }
+        for successor in successors {
             let changed = if let Some(old) = states.get_mut(&successor) {
                 let mut changed = false;
                 for reg in 0..32 {
@@ -3604,6 +3662,7 @@ fn rewrite_arm64(
     let mut sym_end_word_offset: HashMap<Arm64AddressKey, usize> = HashMap::new();
     let mut addr_word_offset: HashMap<Arm64AddressKey, usize> = HashMap::new();
     let mut patches: Vec<Arm64Patch> = Vec::new();
+    let mut finite_code_sites = HashSet::new();
     let relocs = arm64_text_relocations(elf, included)?;
     let mut native_relocs: Vec<RelocRecord> = Vec::new();
     let mut helper_literal_loads: Vec<Arm64HelperLiteralLoad> = Vec::new();
@@ -3631,6 +3690,7 @@ fn rewrite_arm64(
             );
         }
         let helper_flow = arm64_helper_flow(&bytes, sym, &relocs);
+        let code_flow = arm64_target_flow(&bytes, sym, &relocs, true);
         let mut helper_imm_registers: [Option<u64>; 32] = std::array::from_fn(|_| None);
         let mut helper_imm_word_indices: [Option<usize>; 32] = std::array::from_fn(|_| None);
         let mut helper_imm_read_since_load: [bool; 32] = [false; 32];
@@ -3709,6 +3769,19 @@ fn rewrite_arm64(
 
             if let Some(reloc) = reloc {
                 match reloc.r_type {
+                    R_AARCH64_ADR_PREL_LO21 => {
+                        let target = (reloc.target_section_index
+                            .ok_or_else(|| anyhow!("arm64 ADR target has no section"))?,
+                            reloc.target_address.ok_or_else(|| anyhow!("arm64 ADR target has no address"))?);
+                        if !included.iter().any(|s| s.section_index == target.0 && target.1 >= s.address &&
+                            target.1 < s.address + s.size && (target.1 - s.address) % 4 == 0) {
+                            bail!("arm64 ADR relocation does not name included CODE: {}", reloc.target_name);
+                        }
+                        patches.push(Arm64Patch { word_index: emit_word_index,
+                            kind: Arm64PatchKind::LocalCodeAdr { rd: insn & 31, target } });
+                        blob.extend_from_slice(&insn.to_le_bytes());
+                        continue;
+                    }
                     R_AARCH64_ADR_PREL_PG_HI21 => {
                         if proof_mode {
                             proof_relocs.push(ProofReloc {
@@ -3908,6 +3981,21 @@ fn rewrite_arm64(
                 }
             }
 
+            if let Some(reg) = a64_br_reg(insn).or_else(|| a64_blr_reg(insn)) {
+                if let Some(targets) = code_flow.get(&local_word_index).and_then(|s| if reg < 31 { s[reg].as_ref() } else { None }) {
+                    if targets.is_empty() || targets.iter().any(|&target| !included.iter().any(|s|
+                        s.section_index == sym.section_index && target >= s.address &&
+                        target < s.address + s.size && (target - s.address) % 4 == 0 &&
+                        (a64_br_reg(insn).is_none() || !is_entry || (target >= sym.address && target < end)) &&
+                        (a64_blr_reg(insn).is_none() ||
+                            (target == s.address && (s.section_index, s.address) != (entry.section_index, entry.address))))) {
+                        bail!("arm64 finite CODE target outside {} at byte offset {off:#x}", sym.name);
+                    }
+                    finite_code_sites.insert(emit_word_index);
+                    blob.extend_from_slice(&insn.to_le_bytes());
+                    continue;
+                }
+            }
             if let Some(reg) = a64_blr_reg(insn) {
                 let direct_helper_id = helper_imm_registers[reg];
                 let helper_ids = helper_flow.get(&local_word_index).and_then(|s| s[reg].as_ref());
@@ -4004,6 +4092,19 @@ fn rewrite_arm64(
             }
 
             if a64_is_adr_or_adrp(insn) {
+                if reloc.is_none() {
+                    if let Some(target) = a64_adr_target(insn, sym.address + off as u64) {
+                        if !included.iter().any(|s| s.section_index == sym.section_index &&
+                            target >= s.address && target < s.address + s.size && (target - s.address) % 4 == 0) {
+                            bail!("arm64 ADR CODE target outside {} at byte offset {off:#x}", sym.name);
+                        }
+                        patches.push(Arm64Patch { word_index: emit_word_index,
+                            kind: Arm64PatchKind::LocalCodeAdr { rd: insn & 31,
+                                target: (sym.section_index, target) } });
+                        blob.extend_from_slice(&insn.to_le_bytes());
+                        continue;
+                    }
+                }
                 bail!(
                     "arm64 native-link does not support ADR/ADRP yet in {} at byte offset {off:#x}",
                     sym.name
@@ -4243,6 +4344,7 @@ fn rewrite_arm64(
         matches!(
             p.kind,
             Arm64PatchKind::ReturnToTrampoline
+                | Arm64PatchKind::LocalCodeAdr { .. }
                 | Arm64PatchKind::Bl { .. }
                 | Arm64PatchKind::B { .. }
                 | Arm64PatchKind::BCond { .. }
@@ -4251,6 +4353,11 @@ fn rewrite_arm64(
         )
     }) {
         let patched = match patch.kind {
+            Arm64PatchKind::LocalCodeAdr { rd, target } => {
+                let target_word = *addr_word_offset.get(&target)
+                    .ok_or_else(|| anyhow!("arm64 ADR CODE target missing from linked code"))?;
+                a64_adr(rd, patch.word_index, target_word * 4)?
+            }
             Arm64PatchKind::ReturnToTrampoline => {
                 a64_patch_b(patch.word_index, ret_trampoline_word)?
             }
@@ -4326,7 +4433,7 @@ fn rewrite_arm64(
     }
 
     if !proof_mode {
-        validate_arm64_kernel_blob_control_flow(&blob, code_word_count, ret_trampoline_word)?;
+        validate_arm64_kernel_blob_control_flow(&blob, code_word_count, ret_trampoline_word, &finite_code_sites)?;
     }
 
     if show {
@@ -4815,7 +4922,7 @@ mod tests {
             blob.extend_from_slice(&word.to_le_bytes());
         }
 
-        validate_arm64_kernel_blob_control_flow(&blob, 3, 4).unwrap();
+        validate_arm64_kernel_blob_control_flow(&blob, 3, 4, &HashSet::new()).unwrap();
     }
 
     #[test]
@@ -4825,7 +4932,7 @@ mod tests {
             blob.extend_from_slice(&word.to_le_bytes());
         }
 
-        let err = validate_arm64_kernel_blob_control_flow(&blob, 2, 2).unwrap_err();
+        let err = validate_arm64_kernel_blob_control_flow(&blob, 2, 2, &HashSet::new()).unwrap_err();
         assert!(err
             .to_string()
             .contains("without a dominating kernel-address guard"));
@@ -4838,7 +4945,7 @@ mod tests {
             blob.extend_from_slice(&word.to_le_bytes());
         }
 
-        let err = validate_arm64_kernel_blob_control_flow(&blob, 2, 2).unwrap_err();
+        let err = validate_arm64_kernel_blob_control_flow(&blob, 2, 2, &HashSet::new()).unwrap_err();
         assert!(err.to_string().contains("register-indirect call blr x8"));
     }
 
@@ -4853,7 +4960,7 @@ mod tests {
         let ldr = a64_ldr_lit64(10, 0, literal_offset).unwrap();
         blob[0..4].copy_from_slice(&ldr.to_le_bytes());
 
-        validate_arm64_kernel_blob_control_flow(&blob, 2, ret_trampoline_word).unwrap();
+        validate_arm64_kernel_blob_control_flow(&blob, 2, ret_trampoline_word, &HashSet::new()).unwrap();
     }
 
     #[test]
@@ -4868,7 +4975,7 @@ mod tests {
         blob[0..4].copy_from_slice(&ldr.to_le_bytes());
 
         let err =
-            validate_arm64_kernel_blob_control_flow(&blob, 2, ret_trampoline_word).unwrap_err();
+            validate_arm64_kernel_blob_control_flow(&blob, 2, ret_trampoline_word, &HashSet::new()).unwrap_err();
         assert!(err.to_string().contains("register-indirect call blr x10"));
     }
 
@@ -4879,7 +4986,7 @@ mod tests {
             blob.extend_from_slice(&word.to_le_bytes());
         }
 
-        let err = validate_arm64_kernel_blob_control_flow(&blob, 2, 2).unwrap_err();
+        let err = validate_arm64_kernel_blob_control_flow(&blob, 2, 2, &HashSet::new()).unwrap_err();
         assert!(err.to_string().contains("branch br x0"));
     }
 
@@ -5196,6 +5303,28 @@ mod tests {
             arm64_helper_flow(&bytes, &sym, &relocs)[&4][24],
             None
         );
+    }
+
+    #[test]
+    fn arm64_code_flow_joins_local_addresses_without_inventing_unknown_edges() {
+        let words = [
+            a64_patch_cbz_cbnz(a64_cbz64(0).unwrap(), 0, 3).unwrap(),
+            a64_adr(8, 1, 24).unwrap(), a64_patch_b(2, 4).unwrap(),
+            a64_adr(8, 3, 28).unwrap(), 0xaa08_03e9, // mov x9,x8
+            a64_br(9).unwrap(), 0xd65f_03c0, 0xd65f_03c0,
+        ];
+        let bytes: Vec<u8> = words.into_iter().flat_map(u32::to_le_bytes).collect();
+        let sym = SymInfo { name: "code_join".into(), address: 0, size: bytes.len() as u64,
+            section_index: object::SectionIndex(1) };
+        assert_eq!(arm64_target_flow(&bytes, &sym, &HashMap::new(), true)[&5][9],
+            Some(BTreeSet::from([24, 28])));
+        for overwrite in [A64_NOP, 0x2a08_03e8, 0x9e66_0008, 0xd63f_0140] {
+            let mut changed = bytes.clone();
+            changed[12..16].copy_from_slice(&overwrite.to_le_bytes());
+            assert_eq!(arm64_target_flow(&changed, &sym, &HashMap::new(), true)[&5][9], None);
+        }
+        assert_eq!(a64_adr_target(a64_adr(8, 7, 4).unwrap(), 28), Some(4));
+        assert_eq!(a64_adr_target(0x9000_0008, 0), None); // ADRP is not a byte address.
     }
 
     #[test]

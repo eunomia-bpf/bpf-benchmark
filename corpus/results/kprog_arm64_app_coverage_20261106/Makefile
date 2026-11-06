@@ -329,7 +329,8 @@ readonly-bound-artifacts:
 	cp /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/Image $(HERE)/$(PHASE)/runtime/Image
 	cp $(BUILD)/initramfs.cpio.gz $(HERE)/$(PHASE)/runtime/initramfs.cpio.gz
 	cp $(HERE)/Replay.mk $(HERE)/$(PHASE)/runtime/Makefile
-	tar --exclude=replay.tar.gz -C $(HERE)/$(PHASE) -czf $(HERE)/$(PHASE)/replay.tar.gz .
+	tar --exclude=replay.tar.gz -C $(HERE)/$(PHASE) -czf $(BUILD)/replay.tar.gz .
+	mv $(BUILD)/replay.tar.gz $(HERE)/$(PHASE)/replay.tar.gz
 
 APP ?= bcc/set
 VM_CPUS ?= 8
@@ -549,6 +550,15 @@ stack-sub-check:
 	cd $(ROOT)/kprog/formal && cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_alu_operand_select_route_host.c -o build/test_arm64_alu_operand_select_route_host
 	$(ROOT)/kprog/formal/build/test_arm64_alu_operand_select_route_host
 	$(MAKE) -f $(HERE)/Makefile direct-header-generate
+
+.PHONY: code-dispatch-build
+code-dispatch-build: direct-header-generate
+	python3 $(HERE)/code_dispatch.py $(HERE)/$(PHASE)
+	for source in $(HERE)/$(PHASE)/*.bpf.c; do \
+		clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
+		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
+		-c $$source -o $${source%.c}.o || exit 1; \
+	done
 
 .PHONY: entry-abi-build
 entry-abi-build: direct-header-generate

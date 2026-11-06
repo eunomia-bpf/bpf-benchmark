@@ -1,0 +1,17 @@
+[
+  {
+    "name": "unknown_join",
+    "returncode": 1,
+    "stderr": "native-link: arm64 entry=entry (92 bytes), 1 reachable symbol(s) total\n  - entry (vaddr 0x0, 92 bytes) [entry]\nError: arm64 kernel blob contains tail-call branch br x10 at word index 14 without a dominating kernel-address guard\n"
+  },
+  {
+    "name": "narrow_code",
+    "returncode": 1,
+    "stderr": "native-link: arm64 entry=entry (92 bytes), 1 reachable symbol(s) total\n  - entry (vaddr 0x0, 92 bytes) [entry]\nError: arm64 kernel blob contains tail-call branch br x10 at word index 14 without a dominating kernel-address guard\n"
+  },
+  {
+    "name": "helper_clobber",
+    "returncode": 1,
+    "stderr": "native-link: arm64 entry=entry (92 bytes), 1 reachable symbol(s) total\n  - entry (vaddr 0x0, 92 bytes) [entry]\nError: arm64 kernel blob contains tail-call branch br x10 at word index 15 without a dominating kernel-address guard\n"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "name": "code_branch_0",
+    "targets": [
+      {
+        "offset": 40,
+        "target": 56,
+        "value": 37
+      },
+      {
+        "offset": 44,
+        "target": 64,
+        "value": 41
+      }
+    ]
+  },
+  {
+    "name": "code_branch_1",
+    "targets": [
+      {
+        "offset": 44,
+        "target": 60,
+        "value": 37
+      },
+      {
+        "offset": 48,
+        "target": 68,
+        "value": 41
+      }
+    ]
+  },
+  {
+    "name": "code_call_0",
+    "targets": [
+      {
+        "offset": 40,
+        "target": 84,
+        "value": 37
+      },
+      {
+        "offset": 44,
+        "target": 92,
+        "value": 41
+      }
+    ]
+  },
+  {
+    "name": "code_call_1",
+    "targets": [
+      {
+        "offset": 44,
+        "target": 88,
+        "value": 37
+      },
+      {
+        "offset": 48,
+        "target": 96,
+        "value": 41
+      }
+    ]
+  }
+]

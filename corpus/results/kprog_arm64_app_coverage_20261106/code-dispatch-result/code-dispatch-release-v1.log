@@ -1,0 +1,10 @@
+taskset -c 16-23 cargo build --release --manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml --target-dir /workspaces/repository/kprog/arm64/build/app-native-link
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 17.90s
+CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
+	taskset -c 16-23 cargo build --release --target aarch64-unknown-linux-gnu \
+	--manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml --target-dir /workspaces/repository/kprog/arm64/build/app-native-link
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 17.57s
+install -m 0755 /workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link \
+	/workspaces/repository/kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link

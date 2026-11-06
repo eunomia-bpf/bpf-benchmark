@@ -1,0 +1,6 @@
+install -d /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v5/runtime
+cp /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/Image /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v5/runtime/Image
+cp /workspaces/repository/kprog/arm64/build/app-coverage/code-dispatch-bound-v5/initramfs.cpio.gz /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v5/runtime/initramfs.cpio.gz
+cp /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/Replay.mk /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v5/runtime/Makefile
+tar --exclude=replay.tar.gz -C /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v5 -czf /workspaces/repository/kprog/arm64/build/app-coverage/code-dispatch-bound-v5/replay.tar.gz .
+mv /workspaces/repository/kprog/arm64/build/app-coverage/code-dispatch-bound-v5/replay.tar.gz /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/code-dispatch-bound-v5/replay.tar.gz
