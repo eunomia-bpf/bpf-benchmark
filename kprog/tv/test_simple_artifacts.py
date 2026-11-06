@@ -30,6 +30,10 @@ cases = [
     ("native-wrong-width", "native-link/simple.proof.o", 52, bytes.fromhex("1f0d0039")),
     ("native-wrong-successor", "native-link/simple.proof.o", 72, bytes.fromhex("03000014")),
     ("before-width", "simple.bpf.o", 0, None),
+    ("wrong-first-guard", "simple.bpf.o", 7 * 8 + 2, b"\x12"),
+    ("wrong-guard-bound", "simple.bpf.o", 9 * 8 + 4, b"\x10"),
+    ("native-wrong-condition", "native-link/simple.proof.o", 12, b"\xc0"),
+    ("native-wrong-ccmp-fallback", "native-link/simple.proof.o", 28, b"\x40"),
 ]
 for name, target, offset, replacement in cases:
     directory = root / "build/simple-arm64-mutations" / name
@@ -63,7 +67,8 @@ for name, target, offset, replacement in cases:
             raise RuntimeError(f"unchanged artifact failed: {directory}/certificate.log")
         print("unchanged actual native/clang pair: PASS", flush=True)
     else:
-        if (not result.returncode or b"SimpleStoreCertificate.lean:" not in result.stdout or
+        if (not result.returncode or not any(file in result.stdout for file in
+                    (b"SimpleStoreCertificate.lean:", b"SimpleGuardCertificate.lean:")) or
                 (not any(message in result.stdout for message in
                     (b"error: type mismatch", b"tactic 'rfl' failed")) or b"decode" not in result.stdout)):
             raise RuntimeError(f"{name}: semantic rejection missing: {directory}/certificate.log")

@@ -341,6 +341,7 @@ simple-arm64-certificate: native-path-check
 	cd ../formal && LEAN_PATH=../tv/build:../tv/$(SIMPLE_BLOCK_DIR) lake env lean -R ../tv/$(SIMPLE_BLOCK_DIR) \
 		-o ../tv/$(SIMPLE_BLOCK_DIR)/SimpleCompiled.olean ../tv/$(SIMPLE_BLOCK_DIR)/SimpleCompiled.lean
 	cd ../formal && LEAN_PATH=../tv/build:../tv/$(SIMPLE_BLOCK_DIR) lake env lean -R ../tv ../tv/SimpleStoreCertificate.lean
+	cd ../formal && LEAN_PATH=../tv/build:../tv/$(SIMPLE_BLOCK_DIR) lake env lean -R ../tv ../tv/SimpleGuardCertificate.lean
 
 simple-arm64-negative-check: simple-arm64-certificate
 	python3 test_simple_artifacts.py
@@ -369,3 +370,31 @@ build/bcc-map-probe/manifest.json: ../results/kprog_tv_20261106/source-map-bcc-p
 	install -d build/bcc-map-probe
 	tar -xzf $< -C build/bcc-map-probe
 	touch $@
+
+.PHONY: simple-arm64-guard-check
+simple-arm64-guard-check: native-path-check
+	python3 extract_simple_arm64.py
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
+		-o ../tv/build/simple-arm64/SimpleCompiled.olean ../tv/build/simple-arm64/SimpleCompiled.lean
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv ../tv/SimpleGuardCertificate.lean
+
+.PHONY: simple-context-kernel-check guest-simple-context-kernel-check
+simple-context-kernel-check: build/capture-context
+	test -s build/simple-arm64/simple.bpf.o
+	taskset -c 8-23 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
+		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/tv guest-simple-context-kernel-check'
+
+guest-simple-context-kernel-check:
+	install -d build/simple-context
+	./build/capture-context build/simple-arm64/simple.bpf.o build/simple-context
+
+.PHONY: simple-platform-check
+simple-platform-check: native-path-check
+	python3 extract_simple_arm64.py
+	python3 extract_simple_context.py
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
+		-o ../tv/build/simple-arm64/SimpleCompiled.olean ../tv/build/simple-arm64/SimpleCompiled.lean
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
+		-o ../tv/build/simple-arm64/SimplePlatform.olean ../tv/build/simple-arm64/SimplePlatform.lean

@@ -1,0 +1,49 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+python3 extract_simple_arm64.py
+exact ELF entry bytes: native=84 BPF=224
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
+	-o ../tv/build/simple-arm64/SimpleCompiled.olean ../tv/build/simple-arm64/SimpleCompiled.lean
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv ../tv/SimpleGuardCertificate.lean
+../tv/SimpleGuardCertificate.lean:152:58: error: unsolved goals
+case pos
+p : BPF.State
+pointer limit : Word
+h8 : BitVec.toNat limit < (BitVec.toNat pointer + 8) % 18446744073709551616
+h72 : BitVec.toNat limit < (BitVec.toNat pointer + 72) % 18446744073709551616
+⊢ 27 =
+    if
+        (BitVec.toNat pointer + 8) % 18446744073709551616 ≤ BitVec.toNat limit ∧
+          (BitVec.toNat pointer + 72) % 18446744073709551616 ≤ BitVec.toNat limit then
+      14
+    else 27
+
+case neg
+p : BPF.State
+pointer limit : Word
+h8 : BitVec.toNat limit < (BitVec.toNat pointer + 8) % 18446744073709551616
+h72 : (BitVec.toNat pointer + 72) % 18446744073709551616 ≤ BitVec.toNat limit
+⊢ 27 = if (BitVec.toNat pointer + 8) % 18446744073709551616 ≤ BitVec.toNat limit then 14 else 27
+
+case pos
+p : BPF.State
+pointer limit : Word
+h8 : (BitVec.toNat pointer + 8) % 18446744073709551616 ≤ BitVec.toNat limit
+h72 : BitVec.toNat limit < (BitVec.toNat pointer + 72) % 18446744073709551616
+⊢ 27 = if (BitVec.toNat pointer + 72) % 18446744073709551616 ≤ BitVec.toNat limit then 14 else 27
+'KProgTV.SimpleGuardCertificate.native_first_block' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleGuardCertificate.proof_first_block' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleGuardCertificate.native_second_block' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleGuardCertificate.proof_second_block' depends on axioms: [propext, sorryAx, Quot.sound]
+'KProgTV.SimpleGuardCertificate.actual_block_executions' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+make: *** [Makefile:377: simple-arm64-guard-check] Error 1
+make: Leaving directory '/workspaces/repository/kprog/tv'

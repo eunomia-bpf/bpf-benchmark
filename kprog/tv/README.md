@@ -392,3 +392,23 @@ through the Arm userspace loader. Consume the updated loader **and**
 native_lab module from the immutable source-map handoff; wire2 and the
 existing paired kernel image remain compatible. Whole-program ISA TV remains
 a separate obligation from these binding/runtime checks.
+
+`SimpleGuardCertificate.lean` validates both actual native guard blocks and
+their corresponding clang paths for arbitrary64-bit packet/end pointers,
+including wrapping additions. It proves complete native and BPF post-states,
+exact branch PCs, no memory/helper effects and real reference executions.
+The native CCMP fallback is checked rather than replaced with a forced CFG
+choice. Guard axioms are propext, Classical.choice, Lean.ofReduceBool and
+Quot.sound; store and generic path results retain their previously listed
+axioms. Ten actual native/clang mutations now reject in the same decoder
+certificates, including wrong guard successors, bounds, condition and fallback.
+
+`simple-context-kernel-check simple-platform-check` captures and binds the
+complete clang/kernel program with its actual type6/attach37/flags0 context.
+`SimplePlatform.raw_is_exact_clang` checks equality to the entire extracted
+clang entry. For this captured x86 kernel the only changes are the two XDP
+pointer loads: physical64-bit accesses at0/8 replace virtual32-bit loads
+at0/4. This capture is explicit platform input; its kernel/specification
+agreement remains trusted. Entry, private-spill and return composition,
+and target CPU feature/profile binding, remain active implementation work
+before a whole-program native-safety certificate can be claimed.

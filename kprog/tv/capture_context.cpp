@@ -18,11 +18,14 @@ static void write(const std::string &path, const void *bytes, size_t size)
     if (!file) throw std::runtime_error("write " + path);
 }
 
-int main()
+int main(int argc, char **argv)
 {
     try {
+        if (argc != 1 && argc != 3) throw std::runtime_error("expected optional object and output directory");
+        const char *path = argc == 3 ? argv[1] : "build/context-fields.bpf.o";
+        const char *directory = argc == 3 ? argv[2] : "build/context-access";
         std::unique_ptr<bpf_object, decltype(&bpf_object__close)> object(
-            bpf_object__open_file("build/context-fields.bpf.o", nullptr), bpf_object__close);
+            bpf_object__open_file(path, nullptr), bpf_object__close);
         if (!object || libbpf_get_error(object.get())) throw std::runtime_error("open context artifact");
         bpf_program *program;
         bpf_object__for_each_program(program, object.get())
@@ -31,7 +34,7 @@ int main()
                 throw std::runtime_error("set egress context attach type");
         if (bpf_object__load(object.get())) throw std::runtime_error("load context artifact");
         bpf_object__for_each_program(program, object.get()) {
-            const std::string base = std::string("build/context-access/") + bpf_program__name(program);
+            const std::string base = std::string(directory) + "/" + bpf_program__name(program);
             write(base + ".raw.bin", bpf_program__insns(program),
                 bpf_program__insn_cnt(program) * sizeof(bpf_insn));
             bpf_prog_info info{};

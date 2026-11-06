@@ -645,3 +645,40 @@ kernel-build invocation after object cleanup was stopped; the final run uses
 the retained exported Image through an explicit Make prerequisite override.
 No shared image or current runtime pair was overwritten. These results
 establish binding/runtime behavior, not whole-program translation validation.
+
+Actual guard blocks and complete kernel program capture
+-------------------------------------------------------
+
+Both actual native guard blocks (PC4/8/12 and16/20/24/28/32) and their
+compiled BPF paths now have universal complete-post-state and actual-execution
+theorems. Every64-bit packet/end combination is covered, including wrapping
++8/+72 additions. Exact native flags, every register/SP/vector/memory field,
+all BPF registers/memory and branch successors are retained. No memory or
+helper effect occurs in these blocks. The canonical CMP/CCMP condition
+lemmas check the real fallback2 and both condition outcomes. Their trusted
+logical base explicitly includes Lean.ofReduceBool from bv_decide, alongside
+propext/Classical.choice/Quot.sound. There is no sorryAx in the passing run.
+
+Ten actual-byte mutations reject: the six prior store/CFG/before-width
+cases and changed first-guard successor, bound, native condition and CCMP
+fallback. Unchanged artifacts pass both store and guard certificates.
+The initial single-unroll proof checked inefficiently; splitting at actual
+3/5-instruction native block boundaries solves the same constraints quickly.
+Failed development attempts remain in the development archive.
+
+The complete actual clang/kernel program is captured with type6/attach37/
+flags0, source ID and attach metadata. Its224bytes/28instructions differ
+only at pointer loads0 and2: LDXDW/context offsets0/8 replace LDXW/0/4.
+The extractor checks captured raw bytes against the actual ELF symbol extent;
+Lean checks whole-array equality with the compiled artifact. This is an
+x86-kernel platform capture for the Arm-native reference fixture, not a
+claim that Arm hardware/kernel context conversion has been validated.
+
+These are real per-block certificates and complete platform inputs. The
+remaining entry/private-spill/return composition and explicit ISA CPU-profile
+binding are still being implemented. No whole-program micro/application TV
+status changes solely from these component results.
+
+The original six-field capture regression also passes after the optional
+whole-object capture arguments were added, including all four context-byte
+mutation rejections (`simple-capture-default-regression.log`).

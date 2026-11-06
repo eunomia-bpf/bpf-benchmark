@@ -1,0 +1,10 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+python3 extract_simple_arm64.py
+exact ELF entry bytes: native=84 BPF=224
+python3 extract_simple_context.py
+complete actual clang 224 B / kernel 224 B; type6/attach37/flags0
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
+	-o ../tv/build/simple-arm64/SimpleCompiled.olean ../tv/build/simple-arm64/SimpleCompiled.lean
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
+	-o ../tv/build/simple-arm64/SimplePlatform.olean ../tv/build/simple-arm64/SimplePlatform.lean
+make: Leaving directory '/workspaces/repository/kprog/tv'
