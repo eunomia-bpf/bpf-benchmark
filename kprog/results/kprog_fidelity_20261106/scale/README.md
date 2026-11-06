@@ -216,3 +216,59 @@ taskset -c 16-19 make -C kprog/results/kprog_fidelity_20261106/scale/branch-pari
 exact native binaries and the probe sources/binary. This is correctness
 validation, not workload timing. A chunked-preprocessing100K trial is active
 under the same12GiB process cap; its outcome will be recorded separately.
+
+## First100K native artifact accepted after frontend factoring
+
+The original100K scalar/direct program now passes the actual KVM verifier and
+matches native CPU execution for all eight packet selectors used above.
+Native instructions:100036; BPF instructions:88; verified instructions:132;
+result10713441450579470919 and retval2 for the original byte8=1 input.
+Verifier time92us, peak states8, slab peak77528B, vmap reserved24576B,
+program memlock4096B, JIT365B, loader maximum RSS1252KiB. No trace events
+were lost. This scalar fixture folds extensively;88BPF instructions do not
+measure verifier scalability for a general100K-instruction scalar proof.
+
+Two separate unchanged-C diagnostics first passed the frontend's macro
+source-location limit through chunked preprocessing, then exhausted the12GiB
+process address-space cap: one with debug metadata and one without it. The
+chunker preserves source line numbers (including branch macro `__LINE__`)
+and its1K control produced exactly the same13623470 C tokens as monolithic
+preprocessing. The full1.7GiB expanded100K C remains in the owning build dir;
+its generator, original C and logs are archived. These failures are retained,
+not silently replaced by the successful path.
+
+The successful experimental path factors repeated **existing** arithmetic
+macro invocations into always-inline functions. Each function takes the
+actual R8 register cell, provenance tag and four modeled flag cells, invokes
+the exact original macro with its original literal arguments, then returns
+those cells. Main-program entry initialization, native instructions, branches,
+packet operations and output checks are unchanged. Optimizing these small
+functions before inlining avoids100K copies of their unoptimized frontend
+expansion. Only unreferenced C labels are removed. The helper bodies are
+internalized and removed after inlining; the accepted object has no remaining
+helper calls. This is a frozen experimental compiler representation, not a
+production generator/header change or a new ISA interpreter. An earlier full
+state-struct factoring prototype failed to specialize indirect targets; its
+source and errors remain archived too.
+
+The10K scalar/indirect control also passes this path (104BPF instructions,
+89us verifier, slab77544B/vmap24576B, zero lost events). `factored-parity/`
+retains16/16 native/proof pairs: both this10K control and the100K scalar/direct
+fixture agree for bytes0,1,2,3,127,128,254,255, each with retval2.
+
+```sh
+python3 kprog/fidelity/build-x86/scale-factored-cells/factor.py kprog/fidelity/build-x86/scale-100k-preprocess/program.bpf.c kprog/fidelity/build-x86/scale-factored-cells/n100000_scalar_direct
+taskset -c 20-23 prlimit --as=12884901888 -- timeout 1800 make -C kprog/fidelity/build-x86/scale-factored-cells/n100000_scalar_direct
+taskset -c 16-19 make -C kprog/results/kprog_fidelity_20261106/scale/factored-parity build
+taskset -c 16-19 make -C kprog/results/kprog_fidelity_20261106/scale/factored-parity kvm
+taskset -c 16-19 make -C kprog/fidelity scale-kvm SCALE_BUILD=build-x86/scale-factored-accepted SCALE_OUT=../results/kprog_fidelity_20261106/scale/factored-kvm
+```
+
+`100k-scalar-direct-artifacts.tar.gz` contains the exact factoring/preprocessing
+scripts, Makefiles, frozen header closure, generated sources, accepted BPF
+objects and unchanged native assembly/objects, plus successful and failed
+compiler diagnostics. `factored-traces.tar.gz` retains the full verifier and
+allocation traces; `factored-parity/raw-evidence.tar.gz` retains every native,
+probe and verifier log plus exact native binaries and the probe source/binary.
+Per-case JSON and guest provenance remain directly readable. The100K scalar
+indirect and pointer variants continue as separate attempts.

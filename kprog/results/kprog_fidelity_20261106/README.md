@@ -24,3 +24,12 @@ Latest replay: x86721forms/738304realCPUcases/zero; Arm563forms/576512QEMUcases/
 Scale follow-up: the unchanged10036-instruction pointer-direct fixture now passes in a frozen experimental compiler/representation path (30055BPF instructions, result5015, retval2). Exactsourceandtracearchives are under scale/. Original production-header compile repair remains active; experimental headers are not promoted.
 
 Actual-SP observer follow-up: x86733forms/750592cases retain11264 address-state differences; Arm567forms/580608cases retain4096. All earlier721/563forms still agree. Canonical CPU comparisons are zero for144x86/419Arm forms; rawmodeldifferences and missingreferenceencodings are retained. Arm77controls confirm MOVSP repair and realnonzeroSP capture while retaining1024SP-flag counterexamples. See differential/README.md.
+
+Scale recovery follow-up: all four10K shapes now have accepted, correct
+artifacts, with32/32 additional native-CPU/kernel-proof input pairs matching.
+The first100K native fixture (100036 scalar/direct instructions) also passes,
+with88BPF instructions after folding and eight more native/proof input pairs
+matching. Verifier timing and allocation traces, all earlier failures, and the
+experimental factoring path are documented in scale/README.md. LEA-to-RSP's
+focused post-repair replay is31forms/31744cases with zero mismatches; the
+remaining broader SP/address observations stay open.
