@@ -16,7 +16,7 @@ accesses, control flow, and selected handler compositions for x86-64 and
 AArch64. Dispatcher coverage and exclusivity theorems concern the modeled
 routing tables; they are **not yet a full simulator-step refinement theorem**.
 The ISA reference lives in `KProgFormal/Reference/`; it imports no simulator
-contracts. `Refinement/X86Cmov.lean` connects CMOV writeback to that reference
+contracts. `Refinement/X86Cmov.lean` and `Refinement/X86Bt.lean` connect CMOV and BT handlers to that reference
 and lifts it to registers, flags, XMM0, memory, PC and ordered access/fault effects.
 
 Layout:
@@ -49,7 +49,9 @@ separate evidence; these local proofs do not establish them by themselves.
 The checked reference also builds as `.lake/build/bin/reference`: JSON lines
 on stdin, one JSON transition per line on stdout. Inputs contain `state`
 (registers, flags, PC, XMM0, FS/GS bases and explicit memory cells) and
-`native_bytes`; the ISA decoder determines operands and the next PC. Memory cells must supply a
+`native_bytes`; the ISA decoder determines operands and the next PC. Outputs
+include `defined_flags`, the ISA-defined RFLAGS bits; the relational step permits
+any values for undefined bits, and faults preserve every flag. Memory cells must supply a
 value, read/write permissions and initialization status; absent cells fault.
 `tools/check_reference.py` supplies concrete wire examples and checks the
 CPU counterexamples and the encoder's signed displacement packing. The binary

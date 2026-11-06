@@ -80,12 +80,46 @@ def cmovValue (width : CmovWidth) (taken : Bool) (old source : Word) : Word :=
   | .w32 => (if taken then source else old) &&& 0xffffffff
   | .w64 => if taken then source else old
 
+/-- Bit selection wraps modulo the operand size. The instruction layer only
+supplies architectural widths; the generalized primitive also covers byte lanes. -/
+def bitTest (base index : Word) (operandBits : Nat) : Bool :=
+  (base &&& ((1 : Word) <<< (index &&& (BitVec.ofNat 64 operandBits - 1)))) != 0
+
+def setFlag (flags : Word) (bit : Nat) (value : Bool) : Word :=
+  let mask := (1 : Word) <<< bit
+  if value then flags ||| mask else flags &&& ~~~mask
+
+inductive BitIndex
+  | register (reg : Register)
+  | immediate (value : Byte)
+  deriving DecidableEq, Repr
+
+def CmovWidth.bits (width : CmovWidth) : Nat := width.bytes * 8
+
+def bitIndexValue (s : State) : BitIndex → Word
+  | .register r => s.gpr r
+  | .immediate b => b.setWidth 64
+
+/-- A memory bit string with a register index uses a signed word displacement;
+immediate indices use the instruction's already encoded effective address. -/
+def bitBaseSource (width : CmovWidth) (source : Source) (index : BitIndex)
+    (s : State) : Source :=
+  match source, index with
+  | .memory address, .register r =>
+      let value := match width with
+        | .w16 => ((s.gpr r).setWidth 16).toInt
+        | .w32 => ((s.gpr r).setWidth 32).toInt
+        | .w64 => (s.gpr r).toInt
+      .memory (address + BitVec.ofInt 64 (value / width.bits * width.bytes))
+  | _, _ => source
+
 /-- One architectural instruction with its decoded fall-through address.
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
   | cmov (width : CmovWidth) (cc : Fin 16) (dst : Register)
       (source : Source) (nextPc : Word)
+  | bt (width : CmovWidth) (source : Source) (index : BitIndex) (nextPc : Word)
   deriving DecidableEq, Repr
 
 def step (instruction : Instruction) (s : State) : Transition State :=
@@ -96,6 +130,29 @@ def step (instruction : Instruction) (s : State) : Transition State :=
       | .ok (value, events) =>
           let result := cmovValue width (condition s.rflags cc) (s.gpr dst) value
           ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), pc := nextPc }, events, none⟩
+  | .bt width source index nextPc =>
+      match readSource s (bitBaseSource width source index s) width.bytes with
+      | .error fault => ⟨s, [.fault fault], some fault⟩
+      | .ok (value, events) =>
+          ⟨{ s with rflags := setFlag s.rflags 0 (bitTest value (bitIndexValue s index) width.bits), pc := nextPc },
+            events, none⟩
+
+/-- Only CF is set by BT; ZF is preserved, while OF/SF/AF/PF are undefined.
+The mask is semantic output, used by hardware checks and the step relation. -/
+def definedFlags : Instruction → Word
+  | .cmov .. => 0xffffffffffffffff
+  | .bt .. => 0xfffffffffffff76b
+
+/-- The executable gives a representative for undefined flags. The relational
+ISA semantics below admits every value for those bits, as required by the SDM. -/
+def matchesTransition (i : Instruction) (expected actual : Transition State) : Prop :=
+  expected.events = actual.events ∧ expected.fault = actual.fault ∧
+    let mask := if expected.fault.isSome then 0xffffffffffffffff else definedFlags i
+    { expected.state with rflags := expected.state.rflags &&& mask } =
+      { actual.state with rflags := actual.state.rflags &&& mask }
+
+def Step (i : Instruction) (before : State) (after : Transition State) : Prop :=
+  matchesTransition i (step i before) after
 
 /-- Legacy prefix state for 64-bit decoding. A legacy prefix after a REX
 invalidates that REX; a later REX supersedes earlier ones. -/
@@ -122,7 +179,7 @@ private def prefixes : List Byte → Prefix → Nat → Prefix × List Byte × N
 private def byteAt (bytes : Array Byte) (position : Nat) : Except String Nat :=
   match bytes[position]? with
   | some b => .ok b.toNat
-  | none => .error "truncated CMOV encoding"
+  | none => .error "truncated native encoding"
 
 private def signedDisplacement (bytes : Array Byte) (position size : Nat) :
     Except String Word := do
@@ -161,38 +218,54 @@ private def addressParts (s : State) (p : Prefix) (bytes : Array Byte)
     pure ⟨if relative then 0 else s.gpr (registerCode (rm + 8 * (p.rex % 2))),
       0, relative, relative, cursor⟩
 
-/-- Decode exactly one native CMOVcc, including REX, operand/address size,
-segment bases, ModRM, SIB and signed displacement. The instruction's PC is
-computed from consumed bytes, never supplied as an unchecked next-PC claim. -/
-def decodeCmov (bytes : Array Byte) (s : State) : Except String Instruction := do
-  let (p, _, count) := prefixes bytes.toList {} 0
-  let first ← byteAt bytes count
-  let opcode ← byteAt bytes (count + 1)
-  if first ≠ 0x0f ∨ opcode < 0x40 ∨ 0x4f < opcode then
-    throw "expected CMOVcc native opcode"
-  let modrm ← byteAt bytes (count + 2)
+/-- Shared register/memory operand decoding. Trailing immediate bytes count
+in RIP-relative addressing and in the architectural instruction-length limit. -/
+private def operand (bytes : Array Byte) (s : State) (p : Prefix)
+    (modrm cursor trailing : Nat) : Except String (Source × Word × Nat) := do
   let mode := modrm / 64
   let rm := modrm % 8
-  let dst := registerCode ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
-  let cc : Fin 16 := ⟨opcode % 16, Nat.mod_lt _ (by decide)⟩
-  let width := if p.rex / 8 = 1 then CmovWidth.w64
-    else if p.operand16 then .w16 else .w32
-  let cursor := count + 3
   if mode = 3 then
-    if cursor > 15 then throw "CMOV encoding exceeds the architectural 15-byte limit"
-    pure (.cmov width cc dst (.register (registerCode (rm + 8 * (p.rex % 2))))
-      (s.pc + BitVec.ofNat 64 cursor))
+    let length := cursor + trailing
+    if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
+    pure (.register (registerCode (rm + 8 * (p.rex % 2))),
+      s.pc + BitVec.ofNat 64 length, cursor)
   else
     let parts ← addressParts s p bytes mode rm cursor
     let size := if mode = 1 then 1 else if mode = 2 ∨ parts.missingBase then 4 else 0
     let displacement ← signedDisplacement bytes parts.cursor size
-    let length := parts.cursor + size
-    if length > 15 then throw "CMOV encoding exceeds the architectural 15-byte limit"
+    let afterDisp := parts.cursor + size
+    let length := afterDisp + trailing
+    if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
     let nextPc := s.pc + BitVec.ofNat 64 length
     let base := if parts.relative then nextPc else parts.base
     let offset := base + parts.index + displacement
     let offset := if p.address32 then (offset.setWidth 32).setWidth 64 else offset
     let segment := if p.segment = 0x64 then s.fsBase else if p.segment = 0x65 then s.gsBase else 0
-    pure (.cmov width cc dst (.memory (segment + offset)) nextPc)
+    pure (.memory (segment + offset), nextPc, afterDisp)
+
+/-- Decode a native instruction. Operands, effective addresses and fall-through
+PC are obtained from bytes, including REX, operand/address size, segment bases,
+ModRM, SIB and signed displacement. No caller-supplied decode is trusted. -/
+def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
+  let (p, _, count) := prefixes bytes.toList {} 0
+  let first ← byteAt bytes count
+  let opcode ← byteAt bytes (count + 1)
+  if first ≠ 0x0f then throw "expected two-byte native opcode"
+  let modrm ← byteAt bytes (count + 2)
+  let reg := registerCode ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
+  let width := if p.rex / 8 = 1 then CmovWidth.w64
+    else if p.operand16 then .w16 else .w32
+  if 0x40 ≤ opcode ∧ opcode ≤ 0x4f then
+    let (source, nextPc, _) ← operand bytes s p modrm (count + 3) 0
+    let cc : Fin 16 := ⟨opcode % 16, Nat.mod_lt _ (by decide)⟩
+    pure (.cmov width cc reg source nextPc)
+  else if opcode = 0xa3 then
+    let (source, nextPc, _) ← operand bytes s p modrm (count + 3) 0
+    pure (.bt width source (.register reg) nextPc)
+  else if opcode = 0xba ∧ (modrm / 8) % 8 = 4 then
+    let (source, nextPc, cursor) ← operand bytes s p modrm (count + 3) 1
+    let immediate ← byteAt bytes cursor
+    pure (.bt width source (.immediate (BitVec.ofNat 8 immediate)) nextPc)
+  else throw "unrecognized native opcode"
 
 end KProgFormal.Reference.X86

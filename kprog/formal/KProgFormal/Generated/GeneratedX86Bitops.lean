@@ -7,14 +7,9 @@ def widthMask (widthCode : Nat) : BitVec 64 :=
   | 2 => 0xffff
   | 4 => 0xffffffff
   | _ => 0xffffffffffffffff
-/-- The carry result of `bt`: the indexed bit of the narrowed base. The index is
-masked to 63 for a 64-bit base and to 31 otherwise, which is exactly what the C
-macro `X86_SIM_L_EXEC_BT*` computes (`__x86_l_width == X86_WIDTH_64 ? 63 : 31`).
-This is *not* the width's bit count for the narrow widths: a sub-64-bit `bt` masks
-the offset to 31 regardless of the access width, so an 8-bit `bt` with offset 8
-tests bit 8 of the narrowed byte, which is always clear. -/
+/-- The carry result of BT uses an index modulo the operand bit width. -/
 def bt (base index : BitVec 64) (widthCode : Nat) : Bool :=
-  let bit := index &&& (if widthCode = 8 then 63 else 31)
+  let bit := index &&& BitVec.ofNat 64 (widthCode * 8 - 1)
   ((base &&& widthMask widthCode) >>> bit) &&& 1 != 0
 /-- The result of `bzhi`: the narrowed base with every bit at or above the
 byte-masked index cleared, or the whole base when the index reaches the width. -/

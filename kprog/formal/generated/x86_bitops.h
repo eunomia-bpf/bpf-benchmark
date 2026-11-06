@@ -11,7 +11,7 @@ static __always_inline __u8 kprog_x86_bt_value(__u64 base, __u64 index,
                                                 __u8 width)
 {
 	__u8 bit = (__u8)(index &
-		(width == X86_WIDTH_64 ? 63U : 31U));
+		(KPROG_X86_WIDTH_BITS(width) - 1U));
 
 	return (__u8)((KPROG_X86_APPLY_WIDTH(base, width) >> bit) & 1U);
 }

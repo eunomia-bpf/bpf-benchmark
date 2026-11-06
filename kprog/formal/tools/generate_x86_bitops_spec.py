@@ -7,7 +7,7 @@ bit-indexed operations the simulator's `X86_SIM_L_EXEC_BT*` and
 `X86_SIM_L_EXEC_BZHI*` handlers apply:
 
   - `bt`: the carry flag is the indexed bit of the narrowed base, where the index
-    is hardware-masked to the width's bit count (63 for 64-bit, 31 otherwise);
+    is hardware-masked to the width's bit count (operand size minus one);
   - `bzhi`: the base with every bit at or above the (byte-masked) index cleared,
     unless the index reaches the width, in which case the base is kept.
 
@@ -27,8 +27,8 @@ EXPECTED = {
     "schema_version": 1,
     "operation": "x86Bitops",
     "widths": [
-        {"name": "w8", "code": 1, "bits": 8, "index_mask": 31},
-        {"name": "w16", "code": 2, "bits": 16, "index_mask": 31},
+        {"name": "w8", "code": 1, "bits": 8, "index_mask": 7},
+        {"name": "w16", "code": 2, "bits": 16, "index_mask": 15},
         {"name": "w32", "code": 4, "bits": 32, "index_mask": 31},
         {"name": "w64", "code": 8, "bits": 64, "index_mask": 63},
     ],
@@ -42,7 +42,7 @@ def load() -> None:
     widths = EXPECTED["widths"]
     if [row["bits"] for row in widths] != [8, 16, 32, 64]:
         raise SystemExit(f"invalid x86 bitops widths: {widths!r}")
-    if [row["index_mask"] for row in widths] != [31, 31, 31, 63]:
+    if [row["index_mask"] for row in widths] != [7, 15, 31, 63]:
         raise SystemExit(f"invalid x86 bitops index masks: {widths!r}")
 
 
@@ -56,14 +56,9 @@ def widthMask (widthCode : Nat) : BitVec 64 :=
   | 2 => 0xffff
   | 4 => 0xffffffff
   | _ => 0xffffffffffffffff
-/-- The carry result of `bt`: the indexed bit of the narrowed base. The index is
-masked to 63 for a 64-bit base and to 31 otherwise, which is exactly what the C
-macro `X86_SIM_L_EXEC_BT*` computes (`__x86_l_width == X86_WIDTH_64 ? 63 : 31`).
-This is *not* the width's bit count for the narrow widths: a sub-64-bit `bt` masks
-the offset to 31 regardless of the access width, so an 8-bit `bt` with offset 8
-tests bit 8 of the narrowed byte, which is always clear. -/
+/-- The carry result of BT uses an index modulo the operand bit width. -/
 def bt (base index : BitVec 64) (widthCode : Nat) : Bool :=
-  let bit := index &&& (if widthCode = 8 then 63 else 31)
+  let bit := index &&& BitVec.ofNat 64 (widthCode * 8 - 1)
   ((base &&& widthMask widthCode) >>> bit) &&& 1 != 0
 /-- The result of `bzhi`: the narrowed base with every bit at or above the
 byte-masked index cleared, or the whole base when the index reaches the width. -/
@@ -92,7 +87,7 @@ static __always_inline __u8 kprog_x86_bt_value(__u64 base, __u64 index,
                                                 __u8 width)
 {
 \t__u8 bit = (__u8)(index &
-\t\t(width == X86_WIDTH_64 ? 63U : 31U));
+\t\t(KPROG_X86_WIDTH_BITS(width) - 1U));
 
 \treturn (__u8)((KPROG_X86_APPLY_WIDTH(base, width) >> bit) & 1U);
 }

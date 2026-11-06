@@ -156,8 +156,8 @@ theorem x86_bt_index_refines (op : X86BtOp) (indexReg rawImm : BitVec 64) :
 
 /-- **The binding index-width asymmetry.** `BT_MEM_IMM` widens its immediate to
 32 bits, while `BT`/`BT_IMM` consume the raw 64-bit field: an immediate with a
-high bit set selects a different bit through the two paths — the memory form
-drops the high bits, the immediate form does not. -/
+high bit set produces different decoded intermediate values. The final bit
+selection masks both to the operand size, so this difference is unobservable in CF. -/
 theorem x86_bt_imm32_drops_high_bits :
     x86BtIndexSpec .btMemImm 0 0x100000001 = 1 ∧
       x86BtIndexSpec .btImm 0 0x100000001 = 0x100000001 ∧
@@ -289,18 +289,16 @@ theorem x86_bt_w8_example :
         ⟨0xdead, .scalar⟩ false false false).dst = ⟨0xdead, .scalar⟩ := by
   refine ⟨?_, ?_⟩ <;> native_decide
 
-/-- An 8-bit `BT` with an index at or above the width tests a bit the byte does
-not have and never carries. -/
+/-- Index 8 wraps to bit zero; a zero low bit still does not carry. -/
 theorem x86_bt_handler_wide_index_false :
-    (x86BtStepSpec .bt .b8 0xff 8 0 (fun _ => 0)
+    (x86BtStepSpec .bt .b8 0xfe 8 0 (fun _ => 0)
       ⟨0, .scalar⟩ false false false).cf = false := by
   native_decide
 
-/-- The memory form narrows its loaded base to the resolved width before the
-test: a byte whose bit 8 is set does not carry a 32-bit `BT_MEM_IMM`, because
-the index 8 selects a bit the loaded word does not have under a 1-byte width. -/
+/-- The memory form also wraps index 8 to bit zero in the generalized byte
+primitive, with no carry when the loaded byte has a zero low bit. -/
 theorem x86_bt_mem_imm_w8_example :
-    (x86BtStepSpec .btMemImm .b8 0 0 8 (fun _ => 0xff)
+    (x86BtStepSpec .btMemImm .b8 0 0 8 (fun _ => 0xfe)
       ⟨0, .scalar⟩ false false false).cf = false := by
   native_decide
 end KProgFormal

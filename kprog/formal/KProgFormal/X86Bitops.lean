@@ -1,5 +1,6 @@
 import KProgFormal.Generated.GeneratedX86Bitops
 import KProgFormal.X86Width
+import KProgFormal.Reference.X86
 import Std.Tactic.BVDecide
 
 namespace KProgFormal
@@ -9,14 +10,9 @@ namespace KProgFormal
 def x86BitopsMaskCode (widthCode : Nat) : BitVec 64 :=
   BitVec.ofNat 64 (2 ^ (8 * widthCode)) - 1
 
-/-- Independent statement of `bt`'s carry result: test the indexed bit through a
-single-bit mask (a different expression tree than the generated
-shift-and-extract), with the index masked to the simulator's hardware `63 : 31`
-pair. -/
+/-- The sole ISA reference supplies the bit-selection rule. -/
 def x86BtSpec (base index : BitVec 64) (widthCode : Nat) : Bool :=
-  let bit := index &&& (if widthCode = 8 then 63 else 31)
-  let oneBit := (BitVec.ofNat 64 1 <<< bit) &&& x86BitopsMaskCode widthCode
-  (base &&& oneBit) != 0
+  Reference.X86.bitTest base index (widthCode * 8)
 
 /-- The generated `bt` equals the independent single-bit-mask test for all four
 width codes. -/
@@ -25,7 +21,7 @@ theorem x86_bt_refines (base index : BitVec 64) (widthCode : Nat)
     GeneratedX86Bitops.bt base index widthCode = x86BtSpec base index widthCode := by
   rcases h with rfl | rfl | rfl | rfl <;>
     simp only [GeneratedX86Bitops.bt, GeneratedX86Bitops.widthMask, x86BtSpec,
-      x86BitopsMaskCode] <;>
+      x86BitopsMaskCode, Reference.X86.bitTest, Reference.Word] <;>
     bv_decide
 
 /-- Independent statement of `bzhi`: keep the low `count` bits through the
@@ -98,12 +94,17 @@ theorem x86_bt_example :
     GeneratedX86Bitops.bt 0x8 2 8 = false := by
   refine ⟨?_, ?_⟩ <;> native_decide
 
-/-- Canonical example: an 8-bit `bt` with an offset at or above the width tests a
-bit the byte does not have, and always yields false. -/
+/-- Bits above the operand width cannot leak into CF when the index wraps. -/
 theorem x86_bt_wide_index_false :
-    GeneratedX86Bitops.bt 0xff 8 1 = false ∧
-    GeneratedX86Bitops.bt 0xff 31 1 = false := by
+    GeneratedX86Bitops.bt 0x100 8 1 = false ∧
+    GeneratedX86Bitops.bt 0x100 31 1 = false := by
   refine ⟨?_, ?_⟩ <;> native_decide
+
+/-- Regression: index 16 wraps to bit zero at operand size 16; index 31
+selects bit 15, not a nonexistent bit in the narrowed value. -/
+theorem x86_bt_w16_index_wraps :
+    GeneratedX86Bitops.bt 1 16 2 = true ∧
+    GeneratedX86Bitops.bt 0x8000 31 2 = true := by decide
 
 /-- Canonical example: `bzhi` keeps the low `count` bits. -/
 theorem x86_bzhi_example :

@@ -114,7 +114,7 @@ static __u64 model_load(const __u8 *p, unsigned width)
  * width-narrowed base. */
 static __u8 model_bt(__u64 base, __u64 index, unsigned width)
 {
-	__u8 bit = (__u8)(index & (width == X86_WIDTH_64 ? 63U : 31U));
+	__u8 bit = (__u8)(index & (width * 8U - 1U));
 
 	return (__u8)(((base & model_mask(width)) >> bit) & 1U);
 }
@@ -211,7 +211,7 @@ static void check_step(unsigned op, unsigned flags, unsigned aux_width,
 	if (op == 2U) {
 		__u64 pv = (__u64)(long)(mem + MEM_BASE_OFF);
 		__u64 idxh = imm & 0xffffffffULL;
-		__u8 bit = (__u8)(idxh & (w == X86_WIDTH_64 ? 63U : 31U));
+		__u8 bit = (__u8)(idxh & (w * 8U - 1U));
 		__u8 want = (__u8)(((pv & model_mask(w)) >> bit) & 1U);
 		__u64 loaded;
 

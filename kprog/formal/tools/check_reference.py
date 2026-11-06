@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regress native CMOV counterexamples and the executable reference wire ABI."""
+"""Regress native instruction counterexamples and the executable reference wire ABI."""
 import copy
 import importlib.util
 import json
@@ -55,7 +55,7 @@ def main():
     for i, (request, out) in enumerate(zip(requests, outputs)):
         before = request["state"]
         expected = copy.deepcopy(before)
-        expected.update(events=[], fault=None, pc=before["pc"] + len(request["native_bytes"]))
+        expected.update(events=[], fault=None, defined_flags=(1 << 64) - 1, pc=before["pc"] + len(request["native_bytes"]))
         if i == 0:
             expected["registers"][0] = 0x12345678  # false EAX write clears high half
         elif i == 1:
@@ -77,6 +77,50 @@ def main():
         elif i == 5:
             expected["registers"][8] = 0x55667788
         assert out == expected, (i, out, expected)
+    # BT regressions: operand-size wrapping, signed memory bit strings, and
+    # RIP-relative fall-through including the trailing immediate byte.
+    bt_cases = []
+    def bt_request(code, regs, cells=None, pc=0x1000):
+        request = copy.deepcopy(base)
+        request["native_bytes"] = code
+        request["state"]["registers"] = regs
+        request["state"]["memory"] = cells or []
+        request["state"]["pc"] = pc
+        return request
+    regs = list(range(16))
+    regs[0], regs[3] = 1, 16
+    bt_cases.append((bt_request([0x66, 0x0F, 0xA3, 0xD8], regs), True, None))
+    bt_cases.append((bt_request([0x0F, 0xBA, 0xE0, 32], regs), True, None))
+    mem = [{"address": 0x2000 + i, "value": b, "readable": True,
+            "writable": False, "initialized": False} for i, b in enumerate([0, 128])]
+    regs = regs.copy()
+    regs[7], regs[3] = 0x2000, (1 << 64) - 1
+    bt_cases.append((bt_request([0x66, 0x0F, 0xBA, 0x27, 255], regs, mem), True, 0x2000))
+    regs = regs.copy()
+    regs[7] = 0x2002
+    bt_cases.append((bt_request([0x66, 0x0F, 0xA3, 0x1F], regs, mem), True, 0x2000))
+    bt_cases.append((bt_request([0x66, 0x0F, 0xBA, 0x25, 0xF7, 15, 0, 0, 15],
+                               regs, mem), True, 0x2000))
+    bt_cases.append((bt_request([0x48, 0x0F, 0xBA, 0x27, 7], regs), None, None))
+    run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
+                         input="".join(json.dumps(r) + "\n" for r, _, _ in bt_cases),
+                         text=True, stdout=subprocess.PIPE, check=True)
+    outputs = [json.loads(line) for line in run.stdout.splitlines()]
+    assert len(outputs) == len(bt_cases)
+    for (request, carry, address), out in zip(bt_cases, outputs):
+        expected = copy.deepcopy(request["state"])
+        if carry is None:
+            fault = {"kind": "read", "address": 0x2002, "bytes": 8}
+            expected.update(defined_flags=(1 << 64) - 1, fault=fault,
+                            events=[{"kind": "fault", "fault": fault}])
+        else:
+            expected.update(pc=expected["pc"] + len(request["native_bytes"]),
+                            flags=(expected["flags"] & ~1) | carry,
+                            defined_flags=0xFFFFFFFFFFFFF76B, fault=None, events=[])
+            if address is not None:
+                expected["events"] = [{"kind": "read", "address": address,
+                                       "value": [0, 128], "initialized": False}]
+        assert out == expected, (request, out, expected)
     # Reject rather than truncate malformed wire words and duplicate mappings.
     malformed = copy.deepcopy(base)
     malformed["state"]["registers"][0] = 1 << 64
@@ -92,7 +136,7 @@ def main():
     truncated["native_bytes"] = [0x0F, 0x44]
     bad = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input=json.dumps(truncated) + "\n", text=True, capture_output=True)
-    assert bad.returncode == 1 and "truncated CMOV" in bad.stderr, bad
+    assert bad.returncode == 1 and "truncated native" in bad.stderr, bad
     # Pin the producer/consumer serialization bug found by lane F: a CMOV
     # memory source uses the checked contract's signed HIGH displacement half.
     directory = ROOT.parent / "x86/micro-prog"
@@ -110,7 +154,7 @@ def main():
         if got & 0x80000000:
             got -= 1 << 32
         assert got == disp, (insn, encoded, got)
-    print("executable reference: CMOV high-half clearing, eager reads/faults, arbitrary uninitialized values, frame/JSON ABI and signed displacement packing OK")
+    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
 
 
 if __name__ == "__main__":

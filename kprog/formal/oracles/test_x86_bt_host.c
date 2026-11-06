@@ -151,7 +151,7 @@ static __u64 oracle_load(__u64 addr, unsigned width)
  * base. Restated independently of the generated x86_bitops.h. */
 static __u8 oracle_bt(__u64 base, __u64 index, unsigned width)
 {
-	__u8 bit = (__u8)(index & (width == X86_WIDTH_64 ? 63U : 31U));
+	__u8 bit = (__u8)(index & (width * 8U - 1U));
 
 	return (__u8)(((base & oracle_mask(width)) >> bit) & 1U);
 }

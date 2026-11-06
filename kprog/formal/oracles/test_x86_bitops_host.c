@@ -51,13 +51,11 @@ static __u64 width_mask(unsigned width)
 	       0xffffffffffffffffULL;
 }
 
-/* BT oracle: test the indexed bit through a shifted one-bit mask. The index is
- * masked to 63 for a 64-bit base and to 31 otherwise, matching the simulator's
- * X86_SIM_L_EXEC_BT* (`width == X86_WIDTH_64 ? 63 : 31`); this is *not* the
- * width's bit count for the narrow widths. */
+/* BT oracle: select a bit through a shifted one-bit mask. Register and
+ * immediate indices wrap modulo the operand bit width, including 16 bits. */
 static __u8 bt_oracle(__u64 base, __u64 index, unsigned width)
 {
-	unsigned bit = (unsigned)(index & (width == X86_WIDTH_64 ? 63U : 31U));
+	unsigned bit = (unsigned)(index & (width * 8U - 1U));
 
 	return (__u8)(((base & width_mask(width)) & (1ULL << bit)) ? 1U : 0U);
 }

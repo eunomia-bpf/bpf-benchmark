@@ -95,7 +95,7 @@ static __u64 model_load(const __u8 *p, unsigned width)
  * width-narrowed base. */
 static __u8 model_bt(__u64 base, __u64 index, unsigned width)
 {
-	__u8 bit = (__u8)(index & (width == X86_WIDTH_64 ? 63U : 31U));
+	__u8 bit = (__u8)(index & (width * 8U - 1U));
 
 	return (__u8)(((base & model_mask(width)) >> bit) & 1U);
 }
@@ -183,7 +183,7 @@ static void check_step(unsigned flags, unsigned aux_width,
 	 * same complement holds at every width bit cap, so the pointer's low
 	 * bits can never alias the load's low bits at any tested index. */
 	loaded = model_load(mem + MEM_BASE_OFF + model_disp(imm), w);
-	bit = (__u8)(model_index(imm) & (w == X86_WIDTH_64 ? 63U : 31U));
+	bit = (__u8)(model_index(imm) & (w * 8U - 1U));
 	want = ((pv & model_mask(w)) >> bit) & 1U;
 	if (((loaded >> bit) & 1U) == want) {
 		__u8 *bp = mem + MEM_BASE_OFF + model_disp(imm) +

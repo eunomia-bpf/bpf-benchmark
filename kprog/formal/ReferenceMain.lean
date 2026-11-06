@@ -88,12 +88,14 @@ private def execute (request : Json) : Except String Json := do
   let cells ← parseCells (← state.getObjVal? "memory")
   let initial ← parseState state cells
   let bytes ← parseNativeBytes (← request.getObjVal? "native_bytes")
-  let instruction ← X86.decodeCmov bytes initial
+  let instruction ← X86.decode bytes initial
   let output := X86.step instruction initial
   let s := output.state
   pure <| Json.mkObj [
     ("registers", toJson ((List.finRange 16).map (fun r => (s.gpr r).toNat))),
-    ("flags", number s.rflags.toNat), ("pc", number s.pc.toNat), ("xmm0", number s.xmm0.toNat),
+    ("flags", number s.rflags.toNat),
+    ("defined_flags", number (if output.fault.isSome then 0xffffffffffffffff
+      else X86.definedFlags instruction).toNat), ("pc", number s.pc.toNat), ("xmm0", number s.xmm0.toNat),
     ("fs_base", number s.fsBase.toNat), ("gs_base", number s.gsBase.toNat),
     ("memory", Json.arr (cells.map fun c => Json.mkObj [
       ("address", number c.address.toNat), ("value", number (s.memory.value c.address).toNat),
