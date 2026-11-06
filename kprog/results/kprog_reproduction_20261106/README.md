@@ -116,24 +116,46 @@ rule only for `NATIVE_LAB_ARCH_ARM64`.
 
 ## Corpus (six applications)
 
-**Not yet measured.** Same two blockers: the corpus target needs both the
-host kernel and the generator. The reference `1.349x` is confirmed as the
-geometric mean of the six per-app `native/eBPF` ratios recorded in
-`kprog/docs/evaluation.md` (`1.005, 1.824, 2.358, 1.323, 1.102, 0.958`).
+**Not yet measured.** The corpus target builds the simulator proofs for the
+application programs, and that build currently stops on an entry-ABI
+question rather than a performance one:
 
-Planned measurements, following the 2026-05-29 recipe and
-`corpus/results/cilium_native_lab_20261009/artifacts.mk`:
+```
+ValueError: undefined native ABI register esi at 0x256: shl esi,0x10
+```
 
-- both arms (`9f3855f6fa1c` as that file builds it, and current), once each;
-- `SAMPLES=3 WORKLOAD_DURATION=180`, BPF stats on and off, plus the
-  no-eBPF baseline;
-- per app, the work counters, observed the way
-  `cilium_native_lab_20261009` did: Cilium forwarded/dropped/received
-  packets with drop reasons, OTel delivered samples and stack-delta maps,
-  Tetragon and Tracee events, Katran XDP actions and received packets, BCC
-  events.
+raised from `kprog/x86/micro-prog/x86_abi.py:88` via `check_definedness`.
 
-arm64 AWS (`1.056x`) is deferred: it costs money and waits for the operator.
+Diagnosis, settled against the production header rather than inferred:
+`X86_SIM_ENTRY_XDP` and `X86_SIM_ENTRY_SKB` (`x86_sim_local_bpf.h:353-375`)
+initialize exactly `__x86_rdi = &__x86_sim_abi` plus the stack in `rsp`.
+The analyzer's seed is the same two registers, so it is an exact model of
+the entry ABI and the error is correct: the program reads `esi` before
+anything defines it. This is a **coverage boundary** of the modeled entry
+ABI, not an analyzer bug and not something to widen silently — widening
+the seed would accept a premise the simulator never establishes.
+
+What remains is a named decision for lane C: whether that program takes a
+second entry argument outside the modeled ABI, or whether its preamble is
+meant to materialize `esi` from the ABI struct and does not. Either way the
+corpus arm is reported with that boundary stated, not hidden.
+
+Reference `1.349x` is confirmed as the geometric mean of the six per-app
+`native/eBPF` ratios recorded in `kprog/docs/evaluation.md`
+(`1.005, 1.824, 2.358, 1.323, 1.102, 0.958`).
+
+Planned measurements once the corpus programs generate, following the
+2026-05-29 recipe and `corpus/results/cilium_native_lab_20261009/
+artifacts.mk`: both arms (`9f3855f6fa1c` as that file builds it, and
+current), `SAMPLES=3 WORKLOAD_DURATION=180`, BPF stats on and off, plus
+the no-eBPF baseline; per app the work counters observed the way
+`cilium_native_lab_20261009` did — Cilium forwarded/dropped/received
+packets with drop reasons, OTel delivered samples and stack-delta maps,
+Tetragon and Tracee events, Katran XDP actions and received packets, BCC
+events.
+
+arm64 AWS (`1.056x`) is deferred: it costs money and waits for the
+operator.
 
 ## Timing requests served
 
