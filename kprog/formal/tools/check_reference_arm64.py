@@ -99,6 +99,49 @@ def main():
         expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
         expected["registers"][dst] = result
         cases.append((request, expected))
+    # Assembled register shifts, immediate aliases and shifted MVN/NEG.
+    # Fixed expectations catch ignored modifiers and host-width source reads.
+    for word, source, count, result, dst in [
+            (0x1AC22020, 0xABCD000080000001, 32, 0x80000001, 0),
+            (0x1AC22020, 0xABCD000080000001, 1, 2, 0),
+            (0x1AC22420, 0xABCD000080000001, 1, 0x40000000, 0),
+            (0x1AC22820, 0xABCD000080000001, 31, 0xFFFFFFFF, 0),
+            (0x1AC22C20, 0xABCD000080000001, 1, 0xC0000000, 0),
+            (0x9AC22020, 0x8000000000000001, 64, 0x8000000000000001, 0),
+            (0x9AC22420, 0x8000000000000001, 0x100000040, 0x8000000000000001, 0),
+            (0x9AC22820, 0x8000000000000001, 63, 0xFFFFFFFFFFFFFFFF, 0),
+            (0x9AC22C20, 0x8000000000000001, 0, 0x8000000000000001, 0),
+            (0x9AC22C20, 0x8000000000000001, 65, 0xC000000000000000, 0),
+            (0x1AC223E0, 0x80000001, 1, 0, 0),
+            (0x9ADF2C20, 0x8000000000000001, 99, 0x8000000000000001, 0),
+            (0x9AC2283F, 0x8000000000000001, 63, None, None),
+            (0x1AC22C21, 0xABCD000080000001, 1, 0xC0000000, 1),
+            (0x53010020, 3, 0, 0x80000000, 0),
+            (0xD37FFC20, 0x8000000000000001, 0, 1, 0),
+            (0x131F7C20, 0xABCD000080000001, 0, 0xFFFFFFFF, 0),
+            (0x13817C20, 0xABCD000080000001, 0, 3, 0),
+            (0x2A2107E0, 0xABCD000080000001, 0, 0xFFFFFFFD, 0),
+            (0x2A6107E0, 0xABCD000080000001, 0, 0xBFFFFFFF, 0),
+            (0x2AA17FE0, 0xABCD000080000001, 0, 0, 0),
+            (0x2AE107E0, 0xABCD000080000001, 0, 0x3FFFFFFF, 0),
+            (0xAAA1FFE0, 0x8000000000000001, 0, 0, 0),
+            (0xAAE1FFE0, 0x8000000000000001, 0, 0xFFFFFFFFFFFFFFFC, 0),
+            (0x4B0107E0, 0xABCD000080000001, 0, 0xFFFFFFFE, 0),
+            (0x4B4107E0, 0xABCD000080000001, 0, 0xC0000000, 0),
+            (0x4B817FE0, 0xABCD000080000001, 0, 1, 0),
+            (0xCB01FFE0, 1, 0, 0x8000000000000000, 0),
+            (0xCB81FFE0, 0x8000000000000001, 0, 1, 0),
+            (0x2AE17FFF, 0x80000001, 0, None, None),
+            (0xCB4107E1, 0x8000000000000001, 0, 0xC000000000000000, 1),
+            (0xAAFF03E0, 0xDEADBEEF, 0, 0xFFFFFFFFFFFFFFFF, 0)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["registers"][1:3] = [source, count]
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
+        if dst is not None:
+            expected["registers"][dst] = result
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -106,6 +149,13 @@ def main():
     assert len(outputs) == len(cases)
     for (request, expected), out in zip(cases, outputs):
         assert out == expected, (request, out, expected)
+    for word in (0x2A2183E0, 0x4BC107E0, 0x4B2107E0, 0x6B0107E0,
+                 0x1AE22020, 0x53207C20, 0x131FFC20):
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
+                                  input=json.dumps(request) + "\n", text=True, capture_output=True)
+        assert rejected.returncode == 1, (word, rejected)
     # Unknown ISA, short words, reserved opcode bits and bad state dimensions
     # must fail explicitly instead of truncating or changing architecture.
     malformed = copy.deepcopy(base)
@@ -131,7 +181,7 @@ def main():
     nv = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "nv"), "csel x0,x1,x2,nv")
     al = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "al"), "csel x0,x1,x2,al")
     assert encoder.encode(nv, {}, {}) == encoder.encode(al, {}, {})
-    print("AArch64 reference: multiply/divide/select/extract/reverse/extend, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":

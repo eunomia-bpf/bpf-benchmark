@@ -2,8 +2,11 @@ import KProgFormal.Reference.Memory
 
 /-!
 AArch64 reference semantics, from Arm DDI0602 A64 Base Instructions
-(MADD, MSUB, UMADDL, SMADDL, UMULH, UDIV) and shared X[] register access:
+(scalar multiply/divide, shifts, unary, select and byte/extract operations)
+and shared X[] register access:
 https://documentation-service.arm.com/static/67e40f3398aa3c3b6eea6a85
+Shifted MVN/NEG are also described by Arm 100076_0100 D2.114/D2.115:
+https://documentation-service.arm.com/static/6245c734b059dc5ff9a8bdab
 This module imports no simulator or generated implementation contract.
 -/
 namespace KProgFormal.Reference.AArch64
@@ -155,8 +158,51 @@ def extrevStep (i : ExtrevInstruction) (s : State) : Transition State :=
   let (dst, value) := extrevResult i s
   ⟨{ writeReg s dst value with pc := s.pc + 4 }, [], none⟩
 
+inductive ShiftKind | lsl | lsr | asr | ror
+  deriving DecidableEq, Repr
+
+/-- Shift the architectural source size, then zero-extend the result. Register
+counts are reduced modulo that size; immediate instructions carry a legal count.
+Rotation selects a window from two copies of the operand. -/
+def shiftValue (width : Width) (kind : ShiftKind) (value amount : Word) : Word :=
+  let amount := amount &&& BitVec.ofNat 64 (width.bits - 1)
+  let source := value.setWidth width.bits
+  match kind with
+  | .lsl => (source <<< amount).setWidth 64
+  | .lsr => (source >>> amount).setWidth 64
+  | .asr => (source.sshiftRight' amount).setWidth 64
+  | .ror => extractValue width.bits value value amount
+
+/-- NEG's register encoding admits LSL/LSR/ASR only. -/
+def arithmeticShift (code : Fin 3) : ShiftKind :=
+  match code.val with | 0 => .lsl | 1 => .lsr | _ => .asr
+
+inductive ShiftInstruction
+  | register (width : Width) (kind : ShiftKind) (dst src count : Register)
+  | immediate (width : Width) (kind : ShiftKind) (amount : Fin width.bits) (dst src : Register)
+  | invert (width : Width) (kind : ShiftKind) (amount : Fin width.bits) (dst src : Register)
+  | negate (width : Width) (kind : Fin 3) (amount : Fin width.bits) (dst src : Register)
+  deriving DecidableEq, Repr
+
+def shiftResult (i : ShiftInstruction) (s : State) : Register × Word :=
+  match i with
+  | .register width kind dst src count =>
+      (dst, shiftValue width kind (readReg s src) (readReg s count))
+  | .immediate width kind amount dst src =>
+      (dst, shiftValue width kind (readReg s src) (BitVec.ofNat 64 amount.val))
+  | .invert width kind amount dst src =>
+      (dst, narrow (~~~(shiftValue width kind (readReg s src) (BitVec.ofNat 64 amount.val))) width)
+  | .negate width kind amount dst src =>
+      (dst, narrow (-(shiftValue width (arithmeticShift kind) (readReg s src)
+        (BitVec.ofNat 64 amount.val))) width)
+
+def shiftStep (i : ShiftInstruction) (s : State) : Transition State :=
+  let (dst, value) := shiftResult i s
+  ⟨{ writeReg s dst value with pc := s.pc + 4 }, [], none⟩
+
 inductive Instruction
   | mul (instruction : MulInstruction)
+  | shift (instruction : ShiftInstruction)
   | extrev (instruction : ExtrevInstruction)
   | select (width : Width) (alternative : SelectElse) (dst lhs rhs : Register) (predicate : Fin 16)
   deriving DecidableEq, Repr
@@ -164,6 +210,7 @@ inductive Instruction
 def step (i : Instruction) (s : State) : Transition State :=
   match i with
   | .mul instruction => mulStep instruction s
+  | .shift instruction => shiftStep instruction s
   | .extrev instruction => extrevStep instruction s
   | .select width alternative dst lhs rhs predicate =>
       let value := selectValue width alternative (condition s.flags predicate) (readReg s lhs) (readReg s rhs)
@@ -184,6 +231,22 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   let lhs := register (word / 2^5)
   let rhs := register (word / 2^16)
   let addend := register (word / 2^10)
+  let shiftKind := match (word / 2^22) % 4 with
+    | 0 => ShiftKind.lsl | 1 => .lsr | 2 => .asr | _ => .ror
+  let amount := (word / 2^10) % 64
+  if word &&& 0x7fe0f000 = 0x1ac02000 then
+    let kind := match (word / 2^10) % 4 with
+      | 0 => ShiftKind.lsl | 1 => .lsr | 2 => .asr | _ => .ror
+    return .shift (.register width kind dst lhs rhs)
+  if word &&& 0x7f2003e0 = 0x2a2003e0 then
+    if h : amount < width.bits then return .shift (.invert width shiftKind ⟨amount, h⟩ dst rhs)
+    else throw "reserved MVN immediate"
+  if word &&& 0x7f2003e0 = 0x4b0003e0 then
+    let kind := (word / 2^22) % 4
+    if h : kind < 3 then
+      if k : amount < width.bits then return .shift (.negate width ⟨kind, h⟩ ⟨amount, k⟩ dst rhs)
+      else throw "reserved NEG immediate"
+    else throw "reserved NEG shift kind"
   if word &&& 0xffe00000 = 0x13800000 ∨ word &&& 0xffe00000 = 0x93c00000 then
     let amount := (word / 2^10) % 64
     if h : amount < width.bits then return .extrev (.extract width ⟨amount, h⟩ dst lhs rhs)
@@ -199,6 +262,19 @@ def decode (bytes : Array Byte) : Except String Instruction := do
       if sourceBits = 8 then return .extrev (.extend width .byte dst lhs)
       if sourceBits = 16 then return .extrev (.extend width .half dst lhs)
       if sourceBits = 32 then return .extrev (.extend width .word dst lhs)
+  -- Immediate shift aliases of UBFM/SBFM. Other bitfield encodings are
+  -- decoded by their own family, not silently reduced to a shift.
+  let unsignedBits := word &&& 0xffc00000 = 0x53000000 ∨ word &&& 0xffc00000 = 0xd3400000
+  let signedBits := word &&& 0xffc00000 = 0x13000000 ∨ word &&& 0xffc00000 = 0x93400000
+  if unsignedBits ∨ signedBits then
+    let rotate := (word / 2^16) % 64
+    let last := (word / 2^10) % 64
+    if r : rotate < width.bits then
+      if last + 1 = width.bits then
+        return .shift (.immediate width (if unsignedBits then .lsr else .asr) ⟨rotate, r⟩ dst lhs)
+      if unsignedBits ∧ last + 1 = rotate then
+        let shift := width.bits - rotate
+        if h : shift < width.bits then return .shift (.immediate width .lsl ⟨shift, h⟩ dst lhs)
   if word &&& 0x3fe00800 = 0x1a800000 then
     let alternative := if (word / 2^30) % 2 = 0 then
       (if (word / 2^10) % 2 = 0 then SelectElse.keep else .increment)

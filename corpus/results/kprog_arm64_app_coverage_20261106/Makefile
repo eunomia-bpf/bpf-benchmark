@@ -187,3 +187,7 @@ abi-positive-identity:
 abi-census-artifacts:
 	tar -C $(HERE)/defined-frozen -czf $(HERE)/defined-frozen/constructor-inputs.tar.gz constructor input commands.jsonl
 	tar -C $(ROOT) -czf $(HERE)/abi-bound-runtime.tar.gz kprog/tv/build-kernel-arm64/arch/arm64/boot/Image corpus/results/kprog_arm64_app_coverage_20261106/negative-bound.cpio kprog/fidelity/negative.py kprog/fidelity/negative_init.c kprog/fidelity/bound_probe.cpp kprog/fidelity/negative_companion.bpf.c
+
+.PHONY: runtime-preflight-capture
+runtime-preflight-capture:
+	python3 $(HERE)/runtime_preflight.py $(HERE)/$(PHASE)

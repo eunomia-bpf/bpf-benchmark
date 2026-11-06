@@ -418,3 +418,32 @@ make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile compile PHASE=
 
 The negative target exits nonzero while either accepted bug remains. For fresh
 attempts use fresh phase names; the existing snapshots and outcomes stay intact.
+
+## Real application QEMU runtime preflight
+
+The ARM application runtime image and exported QEMU root are built, including
+all six upstream applications and the current verified-runtime loader/shim.
+The first attempt exposed missing `katran_transport.bpf.o`; building the
+existing source fixed packaging. The next startup exposed old module symbol
+versions; rebuilding all11 ARM modules against the paired kernel fixed it.
+No module or program was skipped. The root Makefile also dropped
+`BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF` from QEMU's exported environment;
+the whitelist now forwards it. The guest's actual `native_loader_mode` event
+confirms that flag is saved for the native phase and cleared during baseline.
+
+BCC/set then completed baseline startup with the actual upstream tools. Its
+[raw startup inventory](runtime-preflight-2/startup-loads.csv) retains all74
+completed BPF load attempts, including probes. All23 named loads other than
+`libbpf_nametest` have a candidate in the existing native manifest; this name
+match does not certify bytecode/native equivalence or current attachment.
+[Exact load metadata](runtime-preflight-2/startup-loads.jsonl) retains PID/TID,
+program ID/type, attach-BTF fields and every attempted load. The QEMU guest's
+wall clock began in1970; host logs retain the actual2026UTC provenance.
+
+The host container was OOM-killed at12:15UTC after baseline_start returned OK
+and before workload measurement completed. This run supplies startup evidence,
+not same-work counters or verified native application success.
+[All preflight logs and interrupted result files](runtime-preflight-2/runtime-preflight.tar.gz)
+are preserved, including both earlier failures. A recovery run is active from
+the pinned kernel/module pair. App context/map/proof completion and both address
+findings remain required work; nothing is waived by this preflight.
