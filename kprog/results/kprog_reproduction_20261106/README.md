@@ -187,7 +187,19 @@ which is progress worth recording:
 So the proof now links and reaches the kernel; the kernel refuses it with
 EPERM rather than EINVAL. The blob is `prog_type=6 blob_bytes=10243
 reloc_records=90 chunks=81`, well under the 512-chunk bound, so the
-refusal is not a chunk-count limit. Reported to the kernel/module owner.
+refusal is not a chunk-count limit.
+
+The only `-EPERM` returns in `kinsn/module/x86/bpf_x86_native_lab.c` are
+five `if (!capable(CAP_SYS_ADMIN))` sites, and two facts place the failure
+among them rather than at the blob size: katran's stub context reports
+`proof_bound=1` where bcc's working loads report `proof_bound=0`, and
+katran's shim log stops after `loaded shared object` + `source-context`
+with **no** `blob_upload` line, while bcc's log carries them. The bound
+path is therefore the one that demands `CAP_SYS_ADMIN`, and the writing
+process does not have it in this guest — bcc is the control that proves
+the unbound path works in exactly this environment. Reported to the
+kernel/module owner with the question of whether the bound path should
+require `CAP_SYS_ADMIN` rather than `CAP_BPF`/`bpf_capable()`.
 
 ## otelcol: three packaging mismatches, each measured
 
