@@ -51,7 +51,10 @@ typedef signed int __s32;
 #define bpf_skb_load_bytes_relative bpf_skb_load_bytes_relative_defs
 #define bpf_fib_lookup bpf_fib_lookup_defs
 #define bpf_get_current_cgroup_id bpf_get_current_cgroup_id_defs
+#define bpf_sk_lookup_udp bpf_sk_lookup_udp_defs
+#define bpf_sk_release bpf_sk_release_defs
 #define bpf_map_push_elem bpf_map_push_elem_defs
+#define bpf_map_pop_elem bpf_map_pop_elem_defs
 #define bpf_sk_fullsock bpf_sk_fullsock_defs
 #define bpf_skc_lookup_tcp bpf_skc_lookup_tcp_defs
 #define bpf_send_signal bpf_send_signal_defs
@@ -61,6 +64,7 @@ typedef signed int __s32;
 #define bpf_probe_read_kernel_str bpf_probe_read_kernel_str_defs
 #define bpf_jiffies64 bpf_jiffies64_defs
 #define bpf_get_netns_cookie bpf_get_netns_cookie_defs
+#define bpf_sk_assign bpf_sk_assign_defs
 #define bpf_ktime_get_boot_ns bpf_ktime_get_boot_ns_defs
 #define bpf_seq_write bpf_seq_write_defs
 #define bpf_ringbuf_output bpf_ringbuf_output_defs
@@ -123,7 +127,10 @@ typedef signed int __s32;
 #undef bpf_skb_load_bytes_relative
 #undef bpf_fib_lookup
 #undef bpf_get_current_cgroup_id
+#undef bpf_sk_lookup_udp
+#undef bpf_sk_release
 #undef bpf_map_push_elem
+#undef bpf_map_pop_elem
 #undef bpf_sk_fullsock
 #undef bpf_skc_lookup_tcp
 #undef bpf_send_signal
@@ -133,6 +140,7 @@ typedef signed int __s32;
 #undef bpf_probe_read_kernel_str
 #undef bpf_jiffies64
 #undef bpf_get_netns_cookie
+#undef bpf_sk_assign
 #undef bpf_ktime_get_boot_ns
 #undef bpf_seq_write
 #undef bpf_ringbuf_output
@@ -559,12 +567,38 @@ static __u64 bpf_get_current_cgroup_id(void)
     return (__u64)(unsigned long)RETURN_BITS;
 }
 
+static struct bpf_sock * bpf_sk_lookup_udp(void * arg0, struct bpf_sock_tuple * arg1, __u32 arg2, __u64 arg3, __u64 arg4)
+{
+    seen_id = 85; calls++;
+    check_arg(0, (__u64)(unsigned long)arg0);
+    check_arg(1, (__u64)(unsigned long)arg1);
+    check_arg(2, (__u64)(unsigned long)arg2);
+    check_arg(3, (__u64)(unsigned long)arg3);
+    check_arg(4, (__u64)(unsigned long)arg4);
+    return (struct bpf_sock *)(unsigned long)RETURN_BITS;
+}
+
+static long bpf_sk_release(void * arg0)
+{
+    seen_id = 86; calls++;
+    check_arg(0, (__u64)(unsigned long)arg0);
+    return (long)(unsigned long)RETURN_BITS;
+}
+
 static long bpf_map_push_elem(void * arg0, const void * arg1, __u64 arg2)
 {
     seen_id = 87; calls++;
     check_arg(0, (__u64)(unsigned long)arg0);
     check_arg(1, (__u64)(unsigned long)arg1);
     check_arg(2, (__u64)(unsigned long)arg2);
+    return (long)(unsigned long)RETURN_BITS;
+}
+
+static long bpf_map_pop_elem(void * arg0, void * arg1)
+{
+    seen_id = 88; calls++;
+    check_arg(0, (__u64)(unsigned long)arg0);
+    check_arg(1, (__u64)(unsigned long)arg1);
     return (long)(unsigned long)RETURN_BITS;
 }
 
@@ -641,6 +675,15 @@ static __u64 bpf_get_netns_cookie(void * arg0)
     seen_id = 122; calls++;
     check_arg(0, (__u64)(unsigned long)arg0);
     return (__u64)(unsigned long)RETURN_BITS;
+}
+
+static long bpf_sk_assign(void * arg0, void * arg1, __u64 arg2)
+{
+    seen_id = 124; calls++;
+    check_arg(0, (__u64)(unsigned long)arg0);
+    check_arg(1, (__u64)(unsigned long)arg1);
+    check_arg(2, (__u64)(unsigned long)arg2);
+    return (long)(unsigned long)RETURN_BITS;
 }
 
 static __u64 bpf_ktime_get_boot_ns(void)
@@ -987,10 +1030,21 @@ static void run(unsigned stack_mode) {
         expected[3] = (__u64)(unsigned long)(__u32)value_for(3););
     helper_id=80; CHECK_HELPER(bpf_get_current_cgroup_id, __u64, 0, ARM64_SIM_TAG_SCALAR,
         );
+    helper_id=85; CHECK_HELPER(bpf_sk_lookup_udp, struct bpf_sock *, 3, ARM64_SIM_TAG_MAP_VALUE,
+        expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0);
+        expected[1] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(1);
+        expected[2] = (__u64)(unsigned long)(__u32)value_for(2);
+        expected[3] = (__u64)(unsigned long)(__u64)value_for(3);
+        expected[4] = (__u64)(unsigned long)(__u64)value_for(4););
+    helper_id=86; CHECK_HELPER(bpf_sk_release, long, 1, ARM64_SIM_TAG_SCALAR,
+        expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0););
     helper_id=87; CHECK_HELPER(bpf_map_push_elem, long, 3, ARM64_SIM_TAG_SCALAR,
         expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0);
         expected[1] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(1);
         expected[2] = (__u64)(unsigned long)(__u64)value_for(2););
+    helper_id=88; CHECK_HELPER(bpf_map_pop_elem, long, 3, ARM64_SIM_TAG_SCALAR,
+        expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0);
+        expected[1] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(1););
     helper_id=95; CHECK_HELPER(bpf_sk_fullsock, struct bpf_sock *, 1, ARM64_SIM_TAG_MAP_VALUE,
         expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0););
     helper_id=99; CHECK_HELPER(bpf_skc_lookup_tcp, struct bpf_sock *, 3, ARM64_SIM_TAG_MAP_VALUE,
@@ -1021,6 +1075,10 @@ static void run(unsigned stack_mode) {
         );
     helper_id=122; CHECK_HELPER(bpf_get_netns_cookie, __u64, 1, ARM64_SIM_TAG_SCALAR,
         expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0););
+    helper_id=124; CHECK_HELPER(bpf_sk_assign, long, 3, ARM64_SIM_TAG_SCALAR,
+        expected[0] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(0);
+        expected[1] = stack_mode ? (__u64)(unsigned long)&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for(1);
+        expected[2] = (__u64)(unsigned long)(__u64)value_for(2););
     helper_id=125; CHECK_HELPER(bpf_ktime_get_boot_ns, __u64, 0, ARM64_SIM_TAG_SCALAR,
         );
     helper_id=127; CHECK_HELPER(bpf_seq_write, long, 3, ARM64_SIM_TAG_SCALAR,

@@ -45,7 +45,10 @@ inductive Helper
   | bpf_skb_load_bytes_relative
   | bpf_fib_lookup
   | bpf_get_current_cgroup_id
+  | bpf_sk_lookup_udp
+  | bpf_sk_release
   | bpf_map_push_elem
+  | bpf_map_pop_elem
   | bpf_sk_fullsock
   | bpf_skc_lookup_tcp
   | bpf_send_signal
@@ -55,6 +58,7 @@ inductive Helper
   | bpf_probe_read_kernel_str
   | bpf_jiffies64
   | bpf_get_netns_cookie
+  | bpf_sk_assign
   | bpf_ktime_get_boot_ns
   | bpf_seq_write
   | bpf_ringbuf_output
@@ -118,7 +122,10 @@ def id : Helper -> Nat
   | .bpf_skb_load_bytes_relative => 68
   | .bpf_fib_lookup => 69
   | .bpf_get_current_cgroup_id => 80
+  | .bpf_sk_lookup_udp => 85
+  | .bpf_sk_release => 86
   | .bpf_map_push_elem => 87
+  | .bpf_map_pop_elem => 88
   | .bpf_sk_fullsock => 95
   | .bpf_skc_lookup_tcp => 99
   | .bpf_send_signal => 109
@@ -128,6 +135,7 @@ def id : Helper -> Nat
   | .bpf_probe_read_kernel_str => 115
   | .bpf_jiffies64 => 118
   | .bpf_get_netns_cookie => 122
+  | .bpf_sk_assign => 124
   | .bpf_ktime_get_boot_ns => 125
   | .bpf_seq_write => 127
   | .bpf_ringbuf_output => 130
@@ -190,7 +198,10 @@ def name : Helper -> String
   | .bpf_skb_load_bytes_relative => "bpf_skb_load_bytes_relative"
   | .bpf_fib_lookup => "bpf_fib_lookup"
   | .bpf_get_current_cgroup_id => "bpf_get_current_cgroup_id"
+  | .bpf_sk_lookup_udp => "bpf_sk_lookup_udp"
+  | .bpf_sk_release => "bpf_sk_release"
   | .bpf_map_push_elem => "bpf_map_push_elem"
+  | .bpf_map_pop_elem => "bpf_map_pop_elem"
   | .bpf_sk_fullsock => "bpf_sk_fullsock"
   | .bpf_skc_lookup_tcp => "bpf_skc_lookup_tcp"
   | .bpf_send_signal => "bpf_send_signal"
@@ -200,6 +211,7 @@ def name : Helper -> String
   | .bpf_probe_read_kernel_str => "bpf_probe_read_kernel_str"
   | .bpf_jiffies64 => "bpf_jiffies64"
   | .bpf_get_netns_cookie => "bpf_get_netns_cookie"
+  | .bpf_sk_assign => "bpf_sk_assign"
   | .bpf_ktime_get_boot_ns => "bpf_ktime_get_boot_ns"
   | .bpf_seq_write => "bpf_seq_write"
   | .bpf_ringbuf_output => "bpf_ringbuf_output"

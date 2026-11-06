@@ -1396,8 +1396,17 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_BPF_CALL_bpf_get_current_cgroup_id() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_cgroup_id())
 
+#define ARM64_SIM_BPF_CALL_bpf_sk_lookup_udp() \
+	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_sk_lookup_udp((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (struct bpf_sock_tuple *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
+
+#define ARM64_SIM_BPF_CALL_bpf_sk_release() \
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_sk_release((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
+
 #define ARM64_SIM_BPF_CALL_bpf_map_push_elem() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_map_push_elem((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
+
+#define ARM64_SIM_BPF_CALL_bpf_map_pop_elem() \
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_map_pop_elem((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_sk_fullsock() \
 	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_sk_fullsock((struct bpf_sock *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
@@ -1425,6 +1434,9 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 
 #define ARM64_SIM_BPF_CALL_bpf_get_netns_cookie() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_netns_cookie((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
+
+#define ARM64_SIM_BPF_CALL_bpf_sk_assign() \
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_sk_assign((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_ktime_get_boot_ns() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ktime_get_boot_ns())

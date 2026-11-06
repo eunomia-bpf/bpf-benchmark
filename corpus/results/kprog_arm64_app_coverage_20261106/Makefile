@@ -65,3 +65,7 @@ write-arm-generate:
 helper-abi-update:
 	python3 $(HERE)/generate_helpers.py
 	$(MAKE) -f $(HERE)/Makefile helper-contract-generate
+
+.PHONY: census
+census:
+	python3 $(HERE)/coverage.py census $(HERE)/complete $(HERE)/real-helpers $(HERE)/helper-complete-75

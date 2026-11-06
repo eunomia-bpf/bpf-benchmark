@@ -2,23 +2,24 @@
 import json
 from pathlib import Path
 import re
+import sys
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 FORMAL = ROOT/'kprog/formal'
 HEADER = ROOT/'kprog/arm64/arm64_sim_local_bpf.h'
+sys.path.insert(0, str(ROOT/'kprog'))
+from helper_abi import helper_prototypes
 
 
 def main():
-    definitions = (ROOT/'vendor/libbpf/src/bpf_helper_defs.h').read_text()
-    prototypes = {name: (result.strip(), args.strip(), int(number))
-                  for result, name, args, number in re.findall(
-        r'^static (.*?)\(\* const (bpf_\w+)\)\((.*?)\) = \(void \*\) (\d+);', definitions, re.M)}
+    prototypes = helper_prototypes()
     rows = json.loads((FORMAL/'contracts/arm64_helper_idents_spec.json').read_text())['rows']
     bodies, abi, stubs, tests = [], [], [], []
     for row in rows:
         name = row['name']
-        result, arguments, number = prototypes[name]
+        prototype = prototypes[name]
+        result, arguments, number = prototype.result, prototype.arguments, prototype.number
         if number != row['id']:
             raise ValueError(f'{name}: helper ID differs from libbpf')
         parameters, expressions, checks = [], [], []

@@ -16,6 +16,21 @@ def records(directory):
     return [json.loads(line) for line in (directory / 'programs.jsonl').read_text().splitlines()]
 
 
+def census(directory, phases):
+    selected = {}
+    history = []
+    for phase in phases:
+        for row in records(phase):
+            if row['stage'] == 'generate':
+                row = dict(row, attempt_dir=str(phase))
+                selected[row['name']] = row
+                history.append(row)
+    directory.mkdir(exist_ok=True)
+    for filename, rows in [('programs.jsonl', selected.values()), ('attempts.jsonl', history)]:
+        (directory / filename).write_text(''.join(json.dumps(row)+'\n' for row in rows))
+    return summarize(directory)
+
+
 def inventory(directory):
     root = ROOT / 'vendor/build/native-bpf/arm64/stage'
     rows = []
@@ -67,7 +82,7 @@ def compile_locked(row, directory, timeout):
     source.write_text(Path(row['source']).read_text().replace(
         '#include "../arm64_sim_local_bpf.h"',
         f'#include "{directory}/simulator/arm64_sim_local_bpf.h"'))
-    command = ['clang', '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm',
+    command = ['clang', '-g', '-O2', *row.get('compiler_flags', []), '-mcpu=v4', '-target', 'bpf', '-mllvm',
                '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64',
                '-I', str(ROOT / 'vendor/libbpf/include/uapi'),
                '-I', str(ROOT / 'vendor/libbpf/src'),
@@ -110,22 +125,23 @@ def summarize(directory):
         if row['stage'] != 'generate':
             continue
         name = row['name']
+        attempt = Path(row.get('attempt_dir', directory))
         app = Path(row['proof']).parent.name
         status, detail = 'generation_failed', row['note']
         if row['ok']:
             status, detail = 'compile_pending', ''
-            log = directory / 'compile' / (name + '.json')
+            log = attempt / 'compile' / (name + '.json')
             if log.exists():
                 compiled = json.loads(log.read_text())
                 status = 'compile_failed' if compiled['returncode'] else 'verify_pending'
                 detail = compiled['stderr']
-                rc = directory / 'verify' / (name + '.rc')
+                rc = attempt / 'verify' / (name + '.rc')
                 if not compiled['returncode'] and rc.exists():
                     accepted = int(rc.read_text()) == 0
-                    verifier = directory / 'verify' / (name + '.verifier.log')
+                    verifier = attempt / 'verify' / (name + '.verifier.log')
                     status = ('verifier_accepted' if accepted else 'verifier_rejected'
                               if verifier.exists() and verifier.stat().st_size else 'load_failed')
-                    detail = (directory / 'verify' / (name + '.stderr')).read_text()
+                    detail = (attempt / 'verify' / (name + '.stderr')).read_text()
                     if any(error in detail for error in ['bpf_prog_test_run_opts failed',
                                                         'retval mismatch', 'result mismatch']):
                         status = 'execution_failed'
@@ -145,11 +161,12 @@ def summarize(directory):
                       'only read from bpf_array is supported', 'invalid size of register fill',
                       '32-bit pointer arithmetic prohibited', 'BTF is required']
             cause = next((c for c in causes if c.lower() in detail.lower()), 'other (see raw log)')
-        rows.append(dict(app=app, name=name, proof=row['proof'], source=row['source'], status=status, cause=cause))
+        rows.append(dict(app=app, name=name, proof=row['proof'], source=row['source'],
+                         attempt_dir=str(attempt), status=status, cause=cause))
         counts.setdefault(app, {}).setdefault(status, 0)
         counts[app][status] += 1
     with (directory / 'coverage.csv').open('w') as out:
-        writer = csv.DictWriter(out, fieldnames=['app', 'name', 'proof', 'source', 'status', 'cause'], lineterminator='\n')
+        writer = csv.DictWriter(out, fieldnames=['app', 'name', 'proof', 'source', 'attempt_dir', 'status', 'cause'], lineterminator='\n')
         writer.writeheader()
         writer.writerows(rows)
     statuses = ['generation_failed', 'compile_pending', 'compile_failed', 'verify_pending',
@@ -256,6 +273,8 @@ if __name__ == '__main__':
         code = compile_all(directory, *map(int, rest))
     elif action == 'summarize':
         code = summarize(directory)
+    elif action == 'census':
+        code = census(directory, [Path(p).resolve() for p in rest])
     elif action == 'package':
         code = package(directory, *map(Path, rest))
     elif action == 'inventory':

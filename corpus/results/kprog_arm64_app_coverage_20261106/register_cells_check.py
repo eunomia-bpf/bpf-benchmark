@@ -19,7 +19,10 @@ def main():
     logs.mkdir(exist_ok=True)
     failed = False
     for name in CASES:
-        source = ROOT / 'kprog/formal/oracles' / (name + '.c')
+        source = PHASE / 'formal/oracles' / (name + '.c')
+        if not source.exists():
+            source.parent.mkdir(parents=True, exist_ok=True)
+            source.write_text((ROOT / 'kprog/formal/oracles' / source.name).read_text())
         frozen = BUILD / source.name
         frozen.write_text(source.read_text().replace(
             '../arm64/arm64_sim_local_bpf.h', str(PHASE / 'simulator/arm64_sim_local_bpf.h')))

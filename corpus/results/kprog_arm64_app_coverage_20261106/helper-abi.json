@@ -862,6 +862,50 @@
     "parameters": []
   },
   {
+    "id": 85,
+    "name": "bpf_sk_lookup_udp",
+    "result": "struct bpf_sock *",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      },
+      {
+        "type": "struct bpf_sock_tuple *",
+        "name": "tuple",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "tuple_size",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "netns",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 86,
+    "name": "bpf_sk_release",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "sock",
+        "pointer": true
+      }
+    ]
+  },
+  {
     "id": 87,
     "name": "bpf_map_push_elem",
     "result": "long",
@@ -880,6 +924,23 @@
         "type": "__u64",
         "name": "flags",
         "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 88,
+    "name": "bpf_map_pop_elem",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "map",
+        "pointer": true
+      },
+      {
+        "type": "void *",
+        "name": "value",
+        "pointer": true
       }
     ]
   },
@@ -1042,6 +1103,28 @@
         "type": "void *",
         "name": "ctx",
         "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 124,
+    "name": "bpf_sk_assign",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      },
+      {
+        "type": "void *",
+        "name": "sk",
+        "pointer": true
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
       }
     ]
   },

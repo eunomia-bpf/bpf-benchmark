@@ -250,3 +250,21 @@ every call. Callback handling, caller-clobber/entry definedness, actual context
 projection and map pairing remain active integration defects, not accepted
 cases. The fresh1136-artifact generation census exposes four further missing
 ID86/88 sites, which lane A is repairing next.
+
+## Complete source-generation census
+
+**1,136/1,136 staged artifacts now generate** across the full typed-helper scan
+and its repaired-site retry. The helper union is75 real Linux IDs, checked by
+Lean, independent libbpf declarations,77 table tests and150 argument/result
+cases. [The full census](complete/table.md) links each artifact to its actual
+attempt directory through [coverage.csv](complete/coverage.csv); attempts.jsonl
+retains both original and repaired generation attempts. The original1136
+entries remain present. [Helper validation](real-helper-abi-complete/README.md)
+contains the exact frozen inputs and raw logs.
+
+Compilation is continuing from checkpoints. Four repaired large artifacts
+reached900-second compiler deadlines; those failures remain visible. A
+mechanical constant-op dispatcher is being validated to reduce C front-end
+expansion, while preserving the canonical C bodies. This table is not an
+inventory of real application startup, verifier completion, bound execution or
+same-work workload counters. Those parts of lane A remain active.
