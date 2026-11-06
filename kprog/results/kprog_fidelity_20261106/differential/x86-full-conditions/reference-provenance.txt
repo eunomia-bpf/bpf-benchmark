@@ -1,0 +1,11 @@
+48e482753dda68d7de0ebea15f65c2a146d3bc3d
+ M kprog/formal/KProgFormal/Generated/GeneratedX86PtrWrite.lean
+ M kprog/formal/KProgFormal/Reference/X86.lean
+ M kprog/formal/KProgFormal/X86PtrWriteHandler.lean
+ M kprog/formal/Makefile
+ M kprog/formal/contracts/x86_ptr_write_spec.json
+ M kprog/formal/generated/x86_ptr_write.h
+ M kprog/formal/oracles/test_x86_mov_load_map_ptr_host.c
+ M kprog/formal/tools/generate_x86_ptr_write_spec.py
+?? kprog/formal/KProgFormal/Refinement/X86Logic.lean
+?? kprog/formal/tools/check_reference_x86_logic.py

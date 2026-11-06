@@ -12,7 +12,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def x86_forms():
+def x86_forms(cc_aux):
     forms = ["push rbx", "pop rax", "push bx", "pop ax", "nop", "cdqe", "movups xmm0, XMMWORD PTR [rdi]", "movups XMMWORD PTR [rdi], xmm0"]
     forms += ["mov rax, rsp", "mov eax, esp", "lea rax, [rsp+16]", "cmp rsp, 0",
               "mov rsp, rax", "mov esp, eax", "lea rsp, [rsp+16]", "add rsp, 16",
@@ -68,10 +68,11 @@ def x86_forms():
             for op in ["movzx", "movsx"]:
                 forms += [f"{op} {dst}, {src}", f"{op} {dst}, {mem} PTR [rdi+8]"]
     forms += ["movsxd rax, ebx", "movsxd rax, DWORD PTR [rdi+8]"]
-    for cc in ["b", "ae", "e", "ne", "be", "a", "s", "ns", "l", "ge", "le", "g"]:
-        forms += [f"set{cc} al", f"set{cc} ah", f"set{cc} BYTE PTR [rdi+8]"]
+    for mnemonic in (name for name in cc_aux if name.startswith("set")):
+        forms += [f"{mnemonic} al", f"{mnemonic} ah", f"{mnemonic} BYTE PTR [rdi+8]"]
+    for mnemonic in (name for name in cc_aux if name.startswith("cmov")):
         for a, b, m in [("ax", "bx", "WORD"), ("eax", "ebx", "DWORD"), ("rax", "rbx", "QWORD")]:
-            forms += [f"cmov{cc} {a}, {b}", f"cmov{cc} {a}, {m} PTR [rdi+8]"]
+            forms += [f"{mnemonic} {a}, {b}", f"{mnemonic} {a}, {m} PTR [rdi+8]"]
     return list(dict.fromkeys(forms))
 
 
@@ -180,7 +181,7 @@ def main():
     encoder = importlib.util.module_from_spec(spec)
     sys.modules["encoder"] = encoder
     spec.loader.exec_module(encoder)
-    forms = x86_forms() if arch == "x86" else arm64_forms()
+    forms = x86_forms(encoder.CC_AUX) if arch == "x86" else arm64_forms()
     out.mkdir(parents=True, exist_ok=True)
     snapshot = out.resolve()/'snapshot'
     for path in includes(ROOT/f'kprog/{arch}/{arch}_sim_local_bpf.h') | imports(Path(encoder.__file__)):
@@ -227,23 +228,25 @@ def main():
             regs = ["rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi"] + [f"r{j}" for j in range(8, 16)]
             c += [f"__x86_{reg}.ptr = (void *)(uintptr_t)s->r[{j}];" for j, reg in enumerate(regs)]
             c += ["for (unsigned k=0;k<64;k++) __x86_stack_mem.b[k]=s->stack[k];"]
-            c += ["__x86_cf = s->flags & 1; __x86_zf = (s->flags >> 6) & 1; __x86_sf = (s->flags >> 7) & 1; __x86_of = (s->flags >> 11) & 1;", "__x86_xmm0_lo = s->vec[0]; __x86_xmm0_hi = s->vec[1];"]
+            c += ["__x86_cf = s->flags & 1; __x86_pf = (s->flags >> 2) & 1; __x86_af = (s->flags >> 4) & 1; __x86_zf = (s->flags >> 6) & 1; __x86_sf = (s->flags >> 7) & 1; __x86_of = (s->flags >> 11) & 1;", "__x86_xmm0_lo = s->vec[0]; __x86_xmm0_hi = s->vec[1];"]
             step = special if special is not None else encoder.direct_step_statement(encoded)
             if step is None:
                 step = f"X86_SIM_RUN_OP({encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, {encoded.aux}, {encoded.imm});"
             c += [step + ";"]
             c += [f"s->r[{j}] = (uintptr_t)__x86_{reg}.ptr;" for j, reg in enumerate(regs)]
             c += ["for (unsigned k=0;k<64;k++) s->stack[k]=__x86_stack_mem.b[k];"]
-            c += ["s->flags = __x86_cf | ((uint64_t)__x86_zf << 6) | ((uint64_t)__x86_sf << 7) | ((uint64_t)__x86_of << 11);", "s->vec[0] = __x86_xmm0_lo; s->vec[1] = __x86_xmm0_hi;"]
+            c += ["s->flags = __x86_cf | ((uint64_t)__x86_pf << 2) | ((uint64_t)__x86_af << 4) | ((uint64_t)__x86_zf << 6) | ((uint64_t)__x86_sf << 7) | ((uint64_t)__x86_of << 11);", "s->vec[0] = __x86_xmm0_lo; s->vec[1] = __x86_xmm0_hi;"]
             width = next((bits for bits in [8, 16, 32, 64] if encoded.flags == f"X86_WIDTH_{bits}"), 64)
             op = assembly.split()[0]
-            mode, count, mask = 0, 0, 0x8c1
+            mode, count, mask = 0, 0, 0x8d5
             if encoded.op in ["X86_OP_PUSH", "X86_OP_POP"]:
                 mode, count = 5, (-width//8 if encoded.op == "X86_OP_POP" else 0)
             if op == "rep": mode = 4
             if op == "div": mode, mask = 1, 0
             if op == "imul": mask = 0x801
-            if op == "bt": mask = 1
+            if op == "bt": mask = 0x41
+            if op in ["and", "or", "xor", "test"]: mask &= ~0x10
+            if op in ["andn", "bzhi"]: mask = 0x8c1
             if op in ["shl", "shr", "sar", "rol", "ror", "shld", "shrd"]:
                 mode = 3 if op in ["rol", "ror"] else 2
                 count = 256 if assembly.endswith("cl") else int(assembly.rsplit(", ", 1)[1])

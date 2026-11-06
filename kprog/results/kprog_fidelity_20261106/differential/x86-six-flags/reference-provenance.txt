@@ -1,0 +1,22 @@
+27723a4e1a869bf14f0e7bb1d36a3e599861e276
+ M kprog/formal/KProgFormal/Generated/GeneratedX86PtrWrite.lean
+ M kprog/formal/KProgFormal/Reference/X86.lean
+ M kprog/formal/KProgFormal/X86ControlFlow.lean
+ M kprog/formal/KProgFormal/X86PtrWriteHandler.lean
+ M kprog/formal/Makefile
+ M kprog/formal/contracts/x86_ptr_write_spec.json
+ M kprog/formal/generated/x86_ptr_write.h
+ M kprog/formal/oracles/cmov_step_route_host.c
+ M kprog/formal/oracles/test_x86_cmov_route_host.c
+ M kprog/formal/oracles/test_x86_dispatch_singleton_route_host.c
+ M kprog/formal/oracles/test_x86_setcc_mem_route_host.c
+ M kprog/formal/oracles/test_x86_setcc_route_host.c
+ M kprog/formal/tools/generate_x86_ptr_write_spec.py
+?? kprog/formal/KProgFormal/Generated/GeneratedX86FullCondition.lean
+?? kprog/formal/KProgFormal/Refinement/X86Condition.lean
+?? kprog/formal/contracts/x86_full_condition_spec.json
+?? kprog/formal/generated/x86_full_condition.h
+?? kprog/formal/oracles/test_x86_full_condition_host.c
+?? kprog/formal/tools/check_reference_x86_condition.py
+?? kprog/formal/tools/check_x86_flag_definedness.py
+?? kprog/formal/tools/generate_x86_full_condition_spec.py

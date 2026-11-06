@@ -96,7 +96,7 @@ int main(int argc, char **argv)
             for (unsigned i = 0; i < sizeof(input.vec) / sizeof(input.vec[0]); i++)
                 input.vec[i] = random64();
 #ifdef __x86_64__
-            input.flags = 0x202 | ((c & 1) ? 1 : 0) | ((c & 2) ? 0x40 : 0) | ((c & 4) ? 0x80 : 0) | ((c & 8) ? 0x800 : 0);
+            input.flags = 0x202 | ((c & 1) ? 1 : 0) | ((c & 2) ? 0x40 : 0) | ((c & 4) ? 0x80 : 0) | ((c & 8) ? 0x800 : 0) | ((c & 16) ? 4 : 0) | ((c & 32) ? 0x10 : 0);
             input.r[4] = form->mode == 5 ? (int64_t)(int32_t)form->count : 0; /* abstract RSP */
             input.r[7] = (uintptr_t)(memory + 32);
             input.r[6] = (uintptr_t)(memory + 160);
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
             input.r[4] = (uintptr_t)(memory + 32);
             input.r[5] = 8; /* bounded address index */
 #endif
-            /* Boundary inputs precede fixed-seed random inputs; flags cycle all 16 combinations. */
+            /* Boundary inputs precede random inputs; all status-flag combinations cycle. */
             if (c < 128) {
                 static const uint64_t edge[] = {0, 1, 0x7f, 0x80, 0xff, 0x7fff, 0x8000, 0xffff, 0x7fffffff, 0x80000000, 0xffffffff, UINT64_C(0x7fffffffffffffff), UINT64_C(0x8000000000000000), UINT64_MAX, 0x5555555555555555, 0xaaaaaaaaaaaaaaaa};
                 input.r[0] = edge[c % 16];
@@ -130,6 +130,7 @@ int main(int argc, char **argv)
             if (form->mode == 2 || form->mode == 3) {
                 unsigned count = form->count == 256 ? input.r[1] : form->count;
                 count &= form->width == 64 ? 63 : 31;
+                if (form->mode == 2 && count) mask &= ~UINT64_C(0x10); /* AF undefined */
                 if (count > 1) mask &= ~UINT64_C(0x800); /* OF undefined */
                 if (form->mode == 2 && count >= form->width) mask &= ~UINT64_C(1); /* CF undefined */
             }

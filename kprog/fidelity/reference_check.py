@@ -53,6 +53,14 @@ def main():
         'ARM64_OP_CSEL','ARM64_OP_CSINC','ARM64_OP_CSINV','ARM64_OP_CSNEG','ARM64_OP_CINC','ARM64_OP_CINV','ARM64_OP_CNEG','ARM64_OP_CSET','ARM64_OP_CSETM',
         'ARM64_OP_EXTR','ARM64_OP_REV','ARM64_OP_REV16','ARM64_OP_SXTB','ARM64_OP_SXTH','ARM64_OP_SXTW',
     }
+    x86_without_memory = {
+        'X86_OP_ALU_IMM','X86_OP_ALU_REG','X86_OP_ANDN','X86_OP_BSWAP',
+        'X86_OP_BT','X86_OP_BT_IMM','X86_OP_BZHI','X86_OP_CMOV','X86_OP_CMP_IMM',
+        'X86_OP_CMP_REG','X86_OP_DIV','X86_OP_IMUL_IMM','X86_OP_MOVSX_REG',
+        'X86_OP_MOVZX_REG','X86_OP_MOV_IMM','X86_OP_MOV_REG','X86_OP_MULX',
+        'X86_OP_NOP','X86_OP_POPCNT','X86_OP_RORX','X86_OP_SETCC','X86_OP_SHIFTX',
+        'X86_OP_SHLD_IMM','X86_OP_SHRD_IMM','X86_OP_TEST_IMM','X86_OP_TEST_REG','X86_OP_XCHG',
+    }
     rows=[];bad=0;checked=0
     with trace.open('rb') as source,(args.out/'reference-mismatches.jsonl').open('w') as failures,(args.out/'reference-unavailable.jsonl').open('w') as unavailable:
         magic=source.read(8)
@@ -70,7 +78,8 @@ def main():
                 unavailable.write(json.dumps(dict(form=index,assembly=form['assembly'],error=reason))+'\n')
                 continue
             requests=[];records=[];rejection=None
-            omit_memory=args.arch=='arm64' and form['opcode'] in arm_without_memory
+            omit_memory=(args.arch=='arm64' and form['opcode'] in arm_without_memory) or (
+                args.arch=='x86' and form['opcode'] in x86_without_memory and '[' not in form['assembly'])
             assembly=form['assembly']
             for case in range(cases):
                 ident=struct.unpack('<2I',source.read(8))
@@ -93,10 +102,11 @@ def main():
                     # The admitted Arm multiply/select forms have no memory operands.
                     # Unexpected memory events/faults fail below; raw CPU memory is
                     # still compared in full, without serializing irrelevant cells.
-                    if omit_memory: cells=[]
                     architectural_state=dict(registers=registers,flags=initial['flags'],pc=native_code['forms'][index]['pc'],vector0=initial['vector'][0]+(initial['vector'][1]<<64),memory=cells)
                     if size==840:
                         architectural_state['vectors']=[initial['vector'][2*i]+(initial['vector'][2*i+1]<<64) for i in range(32)]
+                if omit_memory:
+                    architectural_state['memory']=[]
                 request=dict(isa='x86_64' if args.arch=='x86' else 'aarch64',state=architectural_state,native_bytes=native_code['forms'][index]['native_bytes'])
                 encoded_request=json.dumps(request,separators=(',',':'))
                 if case==0:
@@ -128,7 +138,7 @@ def main():
                 expected_bytes={cell['address']:cell['value'] for cell in response['memory']}
                 address=initial['registers'][7 if args.arch=='x86' else 4]-32
                 expected_memory=bytes(expected_bytes[address+i] for i in range(256)) if not omit_memory else before
-                expected_stack=bytes(expected_bytes[stack_base-64+i] for i in range(64)).hex() if args.arch=='x86' or (stack_base and not omit_memory) else initial['stack']
+                expected_stack=bytes(expected_bytes[stack_base-64+i] for i in range(64)).hex() if not omit_memory and (args.arch=='x86' or stack_base) else initial['stack']
                 reg_count=16 if args.arch=='x86' else 32
                 # Compare all six arithmetic flags, including PF/AF. Older
                 # simulator traces contain only four; a newly defined missing

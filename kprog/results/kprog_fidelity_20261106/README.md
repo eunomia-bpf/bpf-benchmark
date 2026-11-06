@@ -69,3 +69,12 @@ choices, conditional writes, faults and acquire/release effects. All 82 new
 wire cases, 10 precise rejections and the full 352-module formal check pass.
 See differential/arm64-exclusive/canonical/README.md; the four production
 exclusive failure-branch safety findings remain active.
+
+The expanded six-flag x86 replay covers 799 forms / 818176 hardware cases,
+including every active CMOV/SET/Jcc condition and alias. The saved-state
+canonical replay checks 452 forms / 462848 cases with zero CPU differences
+and 10240 existing simulator stack-address differences; 347 forms remain
+explicitly unhandled in this reference snapshot. Raw CPU replay has 11264
+stack-address observations. Exact per-form inputs, commands and frozen source
+are in differential/x86-full-conditions/README.md (or x86-full-conditions/
+relative to this directory); the preceding 745-form result is retained.

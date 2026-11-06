@@ -667,3 +667,12 @@ native status1/no-write versus C status0/write. All inputs and outputs remain
 in counterexamples; a static hardware handoff is supplied. Four corresponding
 unsafe failure branches are accepted by actual bound load-only tests. Monitor,
 ordering and admissible failure/success semantics remain active repair work.
+
+The expanded six-flag x86 replay covers 799 forms / 818176 hardware cases,
+including every active CMOV/SET/Jcc condition and alias. The saved-state
+canonical replay checks 452 forms / 462848 cases with zero CPU differences
+and 10240 existing simulator stack-address differences; 347 forms remain
+explicitly unhandled in this reference snapshot. Raw CPU replay has 11264
+stack-address observations. Exact per-form inputs, commands and frozen source
+are in differential/x86-full-conditions/README.md (or x86-full-conditions/
+relative to this directory); the preceding 745-form result is retained.
