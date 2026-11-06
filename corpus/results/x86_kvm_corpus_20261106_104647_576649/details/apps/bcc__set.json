@@ -1,0 +1,301 @@
+{
+  "app": "bcc/set",
+  "baseline": {
+    "bpf": {
+      "30": {
+        "bytes_jited": 1501,
+        "bytes_xlated": 2240,
+        "id": 30,
+        "name": "inet_sock_set_s",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "34": {
+        "bytes_jited": 141,
+        "bytes_xlated": 240,
+        "id": 34,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "36": {
+        "bytes_jited": 141,
+        "bytes_xlated": 240,
+        "id": 36,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 11823362,
+        "run_time_ns_delta": 890539086,
+        "type": "tracepoint"
+      },
+      "37": {
+        "bytes_jited": 602,
+        "bytes_xlated": 792,
+        "id": 37,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "38": {
+        "bytes_jited": 602,
+        "bytes_xlated": 792,
+        "id": 38,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 11823362,
+        "run_time_ns_delta": 14329348253,
+        "type": "tracepoint"
+      },
+      "44": {
+        "bytes_jited": 108,
+        "bytes_xlated": 168,
+        "id": 44,
+        "name": "sys_enter",
+        "run_cnt_delta": 342076966,
+        "run_time_ns_delta": 27735356330,
+        "type": "tracepoint"
+      },
+      "51": {
+        "bytes_jited": 143,
+        "bytes_xlated": 232,
+        "id": 51,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 13466590,
+        "run_time_ns_delta": 1020390050,
+        "type": "kprobe"
+      },
+      "52": {
+        "bytes_jited": 406,
+        "bytes_xlated": 656,
+        "id": 52,
+        "name": "sys_exit",
+        "run_cnt_delta": 342076970,
+        "run_time_ns_delta": 33182171291,
+        "type": "tracepoint"
+      },
+      "54": {
+        "bytes_jited": 40,
+        "bytes_xlated": 48,
+        "id": 54,
+        "name": "fentry_vfs_read",
+        "run_cnt_delta": 218368,
+        "run_time_ns_delta": 20977214,
+        "type": "tracing"
+      },
+      "57": {
+        "bytes_jited": 121,
+        "bytes_xlated": 200,
+        "id": 57,
+        "name": "blk_account_io_",
+        "run_cnt_delta": 52,
+        "run_time_ns_delta": 25023,
+        "type": "kprobe"
+      },
+      "58": {
+        "bytes_jited": 383,
+        "bytes_xlated": 616,
+        "id": 58,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 13466588,
+        "run_time_ns_delta": 4821654407,
+        "type": "kprobe"
+      },
+      "59": {
+        "bytes_jited": 121,
+        "bytes_xlated": 184,
+        "id": 59,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 9519273,
+        "run_time_ns_delta": 921910775,
+        "type": "tracing"
+      },
+      "60": {
+        "bytes_jited": 40,
+        "bytes_xlated": 48,
+        "id": 60,
+        "name": "fentry_vfs_writ",
+        "run_cnt_delta": 234598,
+        "run_time_ns_delta": 18739766,
+        "type": "tracing"
+      },
+      "62": {
+        "bytes_jited": 110,
+        "bytes_xlated": 184,
+        "id": 62,
+        "name": "tcp_v4_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "64": {
+        "bytes_jited": 40,
+        "bytes_xlated": 48,
+        "id": 64,
+        "name": "fentry_vfs_fsyn",
+        "run_cnt_delta": 16,
+        "run_time_ns_delta": 1177,
+        "type": "tracing"
+      },
+      "65": {
+        "bytes_jited": 40,
+        "bytes_xlated": 48,
+        "id": 65,
+        "name": "fentry_vfs_open",
+        "run_cnt_delta": 11823526,
+        "run_time_ns_delta": 443761049,
+        "type": "tracing"
+      },
+      "68": {
+        "bytes_jited": 354,
+        "bytes_xlated": 648,
+        "id": 68,
+        "name": "block_rq_insert",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "70": {
+        "bytes_jited": 121,
+        "bytes_xlated": 184,
+        "id": 70,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 39,
+        "run_time_ns_delta": 15207,
+        "type": "tracing"
+      },
+      "71": {
+        "bytes_jited": 493,
+        "bytes_xlated": 752,
+        "id": 71,
+        "name": "tcp_v4_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "72": {
+        "bytes_jited": 40,
+        "bytes_xlated": 48,
+        "id": 72,
+        "name": "fentry_vfs_crea",
+        "run_cnt_delta": 15,
+        "run_time_ns_delta": 1149,
+        "type": "tracing"
+      },
+      "73": {
+        "bytes_jited": 440,
+        "bytes_xlated": 824,
+        "id": 73,
+        "name": "block_rq_issue",
+        "run_cnt_delta": 99,
+        "run_time_ns_delta": 203656,
+        "type": "tracing"
+      },
+      "74": {
+        "bytes_jited": 110,
+        "bytes_xlated": 184,
+        "id": 74,
+        "name": "tcp_v6_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "75": {
+        "bytes_jited": 496,
+        "bytes_xlated": 752,
+        "id": 75,
+        "name": "tcp_v6_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "76": {
+        "bytes_jited": 437,
+        "bytes_xlated": 712,
+        "id": 76,
+        "name": "block_rq_comple",
+        "run_cnt_delta": 108,
+        "run_time_ns_delta": 323621,
+        "type": "tracing"
+      },
+      "77": {
+        "bytes_jited": 935,
+        "bytes_xlated": 1632,
+        "id": 77,
+        "name": "sched_switch",
+        "run_cnt_delta": 19017679,
+        "run_time_ns_delta": 2188486451,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockfd-port",
+          "14747",
+          "--timeout",
+          "60s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/e3c9d4ce"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 61.01899054500001,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [2039] setting to a 1 min, 0 secs run per stressor\nstress-ng: info:  [2039] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [2039] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [2040] syscall: using method 'fast75'\nstress-ng: info:  [2040] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [2040] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [2040] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [2040] syscall:                  pkey_get       56.0         52\nstress-ng: info:  [2040] syscall:                  pkey_set       61.0         60\nstress-ng: info:  [2040] syscall:              gettimeofday       80.0         74\nstress-ng: info:  [2040] syscall:                      time      382.0         85\nstress-ng: info:  [2040] syscall:                 pkey_free      419.5        415\nstress-ng: info:  [2040] syscall:                    getcpu      422.5        322\nstress-ng: info:  [2040] syscall:                       dup      497.0        489\nstress-ng: info:  [2040] syscall:              timer_delete      509.0        503\nstress-ng: info:  [2040] syscall:                    getpid      510.5        498\nstress-ng: info:  [2040] syscall:                epoll_wait      528.0        528\nstress-ng: metrc: [2039] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2039]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2039] syscall             514     61.00      0.01      0.02         8.43       17024.38\nstress-ng: metrc: [2039] cap            16334051     60.00      4.40     54.75    272234.14      276161.93\nstress-ng: metrc: [2039] set             1214607     60.00      3.05     55.31     20243.44       20814.12\nstress-ng: metrc: [2039] sockfd         11719769     60.00      3.70     78.84    195326.12      141987.70\nstress-ng: info:  [2039] skipped: 0\nstress-ng: info:  [2039] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [2039] failed: 0\nstress-ng: info:  [2039] metrics untrustworthy: 0\nstress-ng: info:  [2039] successful run completed in 1 min, 1.00 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      }
+    ]
+  },
+  "error": "BCC tool capable exited before BPF programs were tracked by shim\nstderr tail:\nf\n:\n \nf\na\ni\nl\ne\nd\n \nt\no\n \nl\no\na\nd\n \nB\nP\nF\n \ns\nk\ne\nl\ne\nt\no\nn\n \n'\nc\na\np\na\nb\nl\ne\n_\nb\np\nf\n'\n:\n \n-\n2\n2\n\n\nf\na\ni\nl\ne\nd\n \nt\no\n \nl\no\na\nd\n \nB\nP\nF\n \no\nb\nj\ne\nc\nt\n:\n \n-\n2\n2",
+  "post_rejit": null,
+  "rejit_result": {
+    "enabled_passes": [
+      "noop",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "wide_mem",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "noop",
+      "const_prop",
+      "dce",
+      "kinsn"
+    ],
+    "mode": "loadtime",
+    "plan_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261106_104647_576649/details/loadtime-plans/bcc__set.json",
+    "report_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261106_104647_576649/details/loadtime-reports/bcc__set.jsonl",
+    "status": "ok"
+  },
+  "runner": "bcc_set",
+  "runner_details": {
+    "command_used": [],
+    "process_output": {
+      "stderr_tail": "capable:\nlibbpf: Error in bpf_object__probe_loading():Invalid argument(22). Couldn't load trivial BPF program. Make sure your kernel supports BPF (CONFIG_BPF_SYSCALL=y) and/or that RLIMIT_MEMLOCK is set to big enough value.\nlibbpf: failed to load object 'capable_bpf'\nlibbpf: failed to load BPF skeleton 'capable_bpf': -22\nfailed to load BPF object: -22\nbiosnoop:\nlibbpf: Error in bpf_object__probe_loading():Invalid argument(22). Couldn't load trivial BPF program. Make sure your kernel supports BPF (CONFIG_BPF_SYSCALL=y) and/or that RLIMIT_MEMLOCK is set to big enough value.\nlibbpf: failed to load object 'biosnoop_bpf'\nlibbpf: failed to load BPF skeleton 'biosnoop_bpf': -22\nfailed to load BPF object: -22\nvfsstat:\nlibbpf: Error in bpf_object__probe_loading():Invalid argument(22). Couldn't load trivial BPF program. Make sure your kernel supports BPF (CONFIG_BPF_SYSCALL=y) and/or that RLIMIT_MEMLOCK is set to big enough value.\nlibbpf: failed to load object 'vfsstat_bpf'\nlibbpf: failed to load BPF skeleton 'vfsstat_bpf': -22\nfailed to load BPF skelect: -22\nopensnoop:\nlibbpf: Error in bpf_object__probe_loading():Invalid argument(22). Couldn't load trivial BPF program. Make sure your kernel supports BPF (CONFIG_BPF_SYSCALL=y) and/or that RLIMIT_MEMLOCK is set to big enough value.\nlibbpf: failed to load object 'opensnoop_bpf'\nlibbpf: failed to load BPF skeleton 'opensnoop_bpf': -22\nfailed to load BPF object: -22\nsyscount:\nlibbpf: Error in bpf_object__probe_loading():Invalid argument(22). Couldn't load trivial BPF program. Make sure your kernel supports BPF (CONFIG_BPF_SYSCALL=y) and/or that RLIMIT_MEMLOCK is set to big enough value.\nlibbpf: failed to load object 'syscount_bpf'\nlibbpf: failed to load BPF skeleton 'syscount_bpf': -22\nfailed to load BPF object: Invalid argument\ntcplife:\nlibbpf: Error in bpf_object__probe_loading():Invalid argument(22). Couldn't load trivial BPF program. Make sure your kernel supports BPF (CONFIG_BPF_SYSCALL=y) and/or that RLIMIT_MEMLOCK is set to big enough value.\nlibbpf: failed to load object 'tcplife_bpf'\nlibbpf: failed to load BPF skeleton 'tcplife_bpf': -22\nfailed to load BPF object: -22",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "stress_ng_bcc_hook_hot",
+  "status": "error"
+}
