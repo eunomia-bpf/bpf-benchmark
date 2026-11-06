@@ -14,6 +14,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from helper_abi import is_helper_symbol
+
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 X86_SIM_DIR = Path(__file__).resolve().parent
 GENERATOR = X86_SIM_DIR / "micro-prog" / "generate_micro_sim_proofs.py"
@@ -135,7 +139,7 @@ def undefined_symbols(proof: Path) -> list[str]:
         if not fields:
             continue
         symbol = fields[0]
-        if symbol.startswith("bpf_") or symbol in {"memcpy", "memset"}:
+        if is_helper_symbol(symbol) or symbol in {"memcpy", "memset"}:
             continue
         if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", symbol):
             symbols.append(symbol)

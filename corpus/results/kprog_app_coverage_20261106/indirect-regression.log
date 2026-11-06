@@ -1,0 +1,27 @@
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_indirect.py prepare
+cc -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/join.S -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/join.proof.o
+cc -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/cmov.S -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/cmov.proof.o
+cc -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/call.S -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/call.proof.o
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_indirect.py generate
+join {'0x26': [('code', 40), ('code', 46)]}
+cmov {'0x26': [('code', 40), ('code', 46)]}
+call {'0x26': [('code', 50), ('code', 56)], '0x3f': [('code', 50)]}
+stale/partial/implicit writes and unknown CFG join rejected; finite helper join preserved
+cc -O2 -Wno-c23-extensions -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/vendor/libbpf/include/uapi -DLICENSE=join_license -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/join.bpf.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/join.sim.o
+cc -O2 -Wno-c23-extensions -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/vendor/libbpf/include/uapi -DLICENSE=cmov_license -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/cmov.bpf.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/cmov.sim.o
+cc -O2 -Wno-c23-extensions -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/vendor/libbpf/include/uapi -DLICENSE=call_license -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/call.bpf.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/call.sim.o
+cc -no-pie -O2 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/main.c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/join.proof.o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/cmov.proof.o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/call.proof.o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/join.sim.o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/cmov.sim.o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/call.sim.o -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/check
+taskset -c 8-23 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/check
+join input=0 native=42 simulator=42 expected=42
+cmov input=0 native=42 simulator=42 expected=42
+call input=0 native=6 simulator=6 expected=6
+join input=1 native=17 simulator=17 expected=17
+cmov input=1 native=17 simulator=17 expected=17
+call input=1 native=14 simulator=14 expected=14
+clang -g -O2 -Wno-c23-extensions -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/join.bpf.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/join.bpf.o
+clang -g -O2 -Wno-c23-extensions -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/cmov.bpf.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/cmov.bpf.o
+clang -g -O2 -Wno-c23-extensions -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/call.bpf.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/call.bpf.o
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/call.bpf.c:110:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+  110 | }
+      | ^
+1 warning generated.

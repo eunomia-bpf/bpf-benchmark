@@ -1,0 +1,67 @@
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_helper_abi.py
+unknown Linux helper ID 0 rejected during compilation
+unknown Linux helper ID 999 rejected during compilation
+cc -O2 -Wno-c23-extensions -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/vendor/libbpf/include/uapi /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/helper-abi.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/helper-abi
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/helper-abi
+65 Linux helper signatures, 130 direct/ID routes: 0 failures
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_dispatch.py 
+unknown indirect jumps rejected; direct jump to zero preserved
+timeout retained complete stdout/stderr and propagated failure
+cc -O2 -Wno-c23-extensions -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/vendor/libbpf/include/uapi -DLICENSE=old_license -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/old.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/old.o
+cc -O2 -Wno-c23-extensions -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/vendor/libbpf/include/uapi -DLICENSE=current_license -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/current.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/current.o
+cc -O2 -Wno-c23-extensions -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/vendor/libbpf/include/uapi /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/main.c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/native.S /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/old.o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/current.o -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/check
+taskset -c 8-15 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/check
+old=0 current=10001 native=10001
+cc -Wall -Wextra -O2 -I/workspaces/repository/kprog/formal /workspaces/repository/kprog/formal/oracles/test_x86_cmov_host.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/test_x86_cmov_host
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/test_x86_cmov_host
+x86 cmov handler host cross-check: OK (484369 cases)
+cc -Wall -Wextra -O2 -I/workspaces/repository/kprog/formal -I/workspaces/repository/kprog/x86 -I/workspaces/repository/kprog -I/workspaces/repository/vendor/libbpf/src /workspaces/repository/kprog/formal/oracles/cmov_step_route_host.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/cmov_step_route_host
+In file included from /workspaces/repository/kprog/formal/oracles/cmov_step_route_host.c:20:
+/workspaces/repository/kprog/formal/oracles/cmov_step_route_host.c: In function ‘check_untaken_memory_fault’:
+/workspaces/repository/kprog/formal/../x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/formal/../x86/x86_sim_local_bpf.h:820:60: note: in definition of macro ‘X86_SIM_L_READ_MEM_VALUE’
+  820 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/formal/../x86/x86_sim_local_bpf.h:1784:41: note: in expansion of macro ‘KPROG_X86_CMOV_MEM_DISP’
+ 1784 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/../x86/x86_sim_local_bpf.h:1811:9: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_STEP’
+ 1811 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/oracles/cmov_step_route_host.c:406:17: note: in expansion of macro ‘X86_SIM_L_EXEC_CMOV_MEM’
+  406 |                 X86_SIM_L_EXEC_CMOV_MEM(X86_RAX, X86_RDX, width,
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/oracles/cmov_step_route_host.c:403:22: warning: unused variable ‘__x86_sim_abi_kind’ [-Wunused-variable]
+  403 |                 __u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;
+      |                      ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/oracles/cmov_step_route_host.c:402:35: warning: unused variable ‘__x86_sim_skb_ctx’ [-Wunused-variable]
+  402 |                 struct __sk_buff *__x86_sim_skb_ctx = NULL;
+      |                                   ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/oracles/cmov_step_route_host.c:401:40: warning: unused variable ‘__x86_sim_abi’ [-Wunused-variable]
+  401 |                 struct x86_sim_xdp_abi __x86_sim_abi = {};
+      |                                        ^~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/../x86/x86_sim_local_bpf.h:318:15: warning: unused variable ‘__x86_sim_ret_addr’ [-Wunused-variable]
+  318 |         __u64 __x86_sim_ret_addr = 0
+      |               ^~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/oracles/cmov_step_route_host.c:399:17: note: in expansion of macro ‘X86_SIM_L_DECLARE_STATE’
+  399 |                 X86_SIM_L_DECLARE_STATE();
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/../x86/x86_sim_local_bpf.h:317:15: warning: unused variable ‘__x86_xmm0_hi’ [-Wunused-variable]
+  317 |         __u64 __x86_xmm0_hi = 0;                                            \
+      |               ^~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/oracles/cmov_step_route_host.c:399:17: note: in expansion of macro ‘X86_SIM_L_DECLARE_STATE’
+  399 |                 X86_SIM_L_DECLARE_STATE();
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/../x86/x86_sim_local_bpf.h:316:15: warning: unused variable ‘__x86_xmm0_lo’ [-Wunused-variable]
+  316 |         __u64 __x86_xmm0_lo = 0;                                            \
+      |               ^~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/oracles/cmov_step_route_host.c:399:17: note: in expansion of macro ‘X86_SIM_L_DECLARE_STATE’
+  399 |                 X86_SIM_L_DECLARE_STATE();
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/cmov_step_route_host
+x86 cmov step route cross-check: OK (9585138 cases)
+cc -Wall -Wextra -O2 -I/workspaces/repository/kprog/formal -I/workspaces/repository/kprog/x86 -I/workspaces/repository/kprog -I/workspaces/repository/vendor/libbpf/src /workspaces/repository/kprog/formal/oracles/test_x86_cmov_route_host.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/test_x86_cmov_route_host
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/test_x86_cmov_route_host
+x86 cmov route host cross-check: OK (26526735 cases)

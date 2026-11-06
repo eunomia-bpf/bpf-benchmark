@@ -4,13 +4,18 @@
 from __future__ import annotations
 
 import argparse
+from collections import deque
 import re
 import subprocess
+import sys
 from dataclasses import replace
 from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from helper_abi import helper_idents, is_helper_symbol
 
 from generated_x86_alu_decode import ALU_AUX
 from generated_x86_cc_decode import CC_AUX
@@ -88,6 +93,7 @@ class NativeInsn:
     reloc_symbol: str | None = None
     reloc_target: int | None = None
     sim_imm: int | None = None
+    end_addr: int | None = None
 
 
 @dataclass(frozen=True)
@@ -144,7 +150,8 @@ def parse_asm_text(text: str) -> list[NativeInsn]:
         if match is None:
             continue
         insns.append(NativeInsn(int(addr_text, 16), asm, match.group("mnemonic"),
-                                split_operands(match.group("operands"))))
+                                split_operands(match.group("operands")),
+                                end_addr=int(addr_text, 16) + len(fields[1].split())))
     return insns
 
 
@@ -221,7 +228,7 @@ def parse_native_link_blob(
         raise RuntimeError(f"missing proof object for {name}: {proof_obj}")
     rodata16 = load_rodata16(proof_obj)
     disasm = subprocess.run(
-        ["objdump", "-dr", "-Mintel", str(proof_obj)], cwd=REPO_ROOT, check=True, text=True,
+        ["objdump", "-dr", "--insn-width=16", "-Mintel", str(proof_obj)], cwd=REPO_ROOT, check=True, text=True,
         stdout=subprocess.PIPE)
     symbols = text_symbol_addrs(proof_obj)
     insns = [
@@ -292,6 +299,11 @@ def parse_native_linked_program(
         and (insn.reloc_symbol is None or insn.reloc_target is not None)
         and (insn.reloc_target if insn.reloc_target is not None else branch_target(insn.operands[0])) in insn_addrs
         and (insn.reloc_target if insn.reloc_target is not None else branch_target(insn.operands[0])) != entry_addr
+    })
+    # Address-taken functions may be reached only through an indirect CALL.
+    sub_starts = sorted(set(sub_starts) | {
+        addr for addr in text_symbol_addrs(proof_object_dir / f"{name}.proof.o").values()
+        if addr in insn_addrs and addr != entry_addr
     })
     if not sub_starts:
         return insns, {}, exit_addr, rodata16
@@ -417,8 +429,11 @@ def enc(op: str, dst: str = "X86_REG_NONE", src: str = "X86_REG_NONE",
     return EncodedInsn(define, dst, src, flags, aux, imm)
 
 
-def is_helper_symbol(symbol: str | None) -> bool:
-    return bool(symbol and symbol.startswith("bpf_"))
+def is_indirect_branch(insn: NativeInsn) -> bool:
+    return (insn.mnemonic in {"jmp", "call"} and bool(insn.operands) and
+            not has_direct_branch_target(insn.operands[0]) and
+            not is_helper_symbol(insn.reloc_symbol) and
+            insn.reloc_symbol not in {"memcpy", "memset"})
 
 
 def rodata_ident_map(rodata16: dict[str, tuple[int, int]]) -> dict[str, str]:
@@ -969,6 +984,171 @@ def canonical_reg(reg: str) -> str | None:
     return info[0] if info is not None else None
 
 
+def code_address(insn: NativeInsn) -> int | None:
+    if insn.mnemonic != "lea" or "[rip" not in insn.raw.lower():
+        return None
+    if insn.reloc_target is not None:
+        return insn.reloc_target
+    if insn.reloc_symbol is None and insn.end_addr is not None:
+        return (insn.end_addr + mem_disp(insn.operands[1])) & 0xffffffffffffffff
+    return None
+
+
+def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
+                     function_starts: set[int] | None = None
+                     ) -> dict[int, frozenset[tuple[str, int]]]:
+    """Join finite reaching definitions on the native CFG, without execution fuel.
+
+    Only literal definitions, code addresses and exact register copies create
+    values. Other writes become unknown, so cycles terminate on a finite lattice
+    of source definitions rather than a guessed iteration bound. This analysis
+    selects dispatch cases; C still dispatches on the actual architectural value.
+    """
+    registers = tuple(dict.fromkeys(info[0] for info in REGS.values()))
+    indices = {reg: i for i, reg in enumerate(registers)}
+    helpers = helper_idents()
+    helper_numbers = {name: number for number, name in helpers.items()}
+    by_addr = {i.addr: i for i in insns}
+    following = {a.addr: b.addr for a, b in zip(insns, insns[1:])}
+    starts = sorted(function_starts or {insns[0].addr})
+    owners = {addr: max(start for start in starts if start <= addr) for addr in by_addr}
+    returns: dict[int, set[int]] = {}
+    states = {insns[0].addr: (None,) * len(registers)}
+    queue = deque(states)
+
+    def read(state, operand):
+        reg = reg_info(operand)
+        if reg is None:
+            return None
+        values = state[indices[reg[0]]]
+        if values is None or reg[1] == 64:
+            return values
+        if any(kind == "code" for kind, value in values):
+            return None
+        return frozenset((kind, (value >> reg[2]) & ((1 << reg[1]) - 1))
+                         for kind, value in values)
+
+    def joined(a, b):
+        return None if a is None or b is None else a | b
+
+    def push(target, state):
+        if target == exit_addr:
+            return
+        if target not in by_addr:
+            raise ValueError(f"native CFG target 0x{target:x} is not an instruction")
+        old = states.get(target)
+        merged = state if old is None else tuple(joined(a, b) for a, b in zip(old, state))
+        if merged != old:
+            states[target] = merged
+            queue.append(target)
+
+    def call_edge(target, addr, state):
+        push(target, state)
+        continuation = following[addr]
+        destinations = returns.setdefault(owners[target], set())
+        if continuation not in destinations:
+            destinations.add(continuation)
+            queue.extend(a for a in states if by_addr[a].mnemonic == "ret"
+                         and owners[a] == owners[target])
+
+    while queue:
+        addr = queue.popleft()
+        insn = by_addr[addr]
+        op, args = insn.mnemonic, insn.operands
+        incoming = states[addr]
+        outgoing = list(incoming)
+        dst = reg_info(args[0]) if args else None
+        if dst and op not in {"cmp", "test", "bt", "push", "jmp", "call"}:
+            outgoing[indices[dst[0]]] = None
+        implicit = []
+        if op in {"mul", "imul", "div", "idiv"} and len(args) == 1:
+            implicit = ["X86_RAX", "X86_RDX"]
+        elif op in {"cqo", "cdq", "cwd"}:
+            implicit = ["X86_RDX"]
+        elif op == "cdqe":
+            implicit = ["X86_RAX"]
+        elif op == "rep":
+            implicit = ["X86_RSI", "X86_RDI", "X86_RCX"]
+        elif op in {"xchg", "xadd", "mulx"}:
+            implicit = [canonical_reg(a) for a in args[:2]]
+        elif op == "cmpxchg":
+            implicit = ["X86_RAX"]
+        for reg in implicit:
+            if reg is not None:
+                outgoing[indices[reg]] = None
+        if dst and op in {"mov", "movabs"} and dst[1] in {32, 64}:
+            value = None
+            if is_int(args[1]):
+                value = frozenset({("scalar", parse_int(args[1]) & ((1 << dst[1]) - 1))})
+            elif reg_info(args[1]):
+                value = read(incoming, args[1])
+            elif insn.reloc_symbol in helper_numbers:
+                value = frozenset({("scalar", helper_numbers[insn.reloc_symbol])})
+            if dst[1] == 32 and value is not None:
+                value = None if any(k == "code" for k, v in value) else frozenset(
+                    (k, v & 0xffffffff) for k, v in value)
+            outgoing[indices[dst[0]]] = value
+        elif dst and op.startswith("cmov") and dst[1] == 64:
+            outgoing[indices[dst[0]]] = joined(read(incoming, args[0]), read(incoming, args[1]))
+        elif dst and code_address(insn) in by_addr and dst[1] == 64:
+            outgoing[indices[dst[0]]] = frozenset({("code", code_address(insn))})
+        outgoing = tuple(outgoing)
+        indirect = is_indirect_branch(insn)
+        if indirect:
+            values = read(incoming, args[0])
+            if values is not None:
+                for kind, target in values:
+                    if kind == "code":
+                        if op == "call":
+                            call_edge(target, addr, outgoing)
+                        else:
+                            push(target, outgoing)
+            helper_call = values is not None and any(k == "scalar" for k, v in values)
+        else:
+            helper_call = op == "call" and (is_helper_symbol(insn.reloc_symbol) or
+                                             insn.reloc_symbol in {"memcpy", "memset"})
+            if op in {"jmp", "call"} and not helper_call:
+                target = insn.reloc_target if insn.reloc_target is not None else branch_target(args[0])
+                if op == "call":
+                    call_edge(target, addr, outgoing)
+                else:
+                    push(target, outgoing)
+        if op == "ret":
+            # Join return contexts of this callee; don't assume ABI preservation.
+            for target in returns.get(owners[addr], set()):
+                push(target, outgoing)
+        elif helper_call:
+            clobbered = list(outgoing)
+            for reg in ("RAX", "RCX", "RDX", "RSI", "RDI", "R8", "R9", "R10", "R11"):
+                clobbered[indices["X86_" + reg]] = None
+            if addr in following:
+                push(following[addr], tuple(clobbered))
+        elif op not in {"jmp", "call"}:
+            if op in CC_AUX and op.startswith("j"):
+                push(insn.reloc_target if insn.reloc_target is not None
+                     else branch_target(args[0]), outgoing)
+            if addr in following:
+                push(following[addr], outgoing)
+
+    targets = {}
+    for insn in insns:
+        if not is_indirect_branch(insn):
+            continue
+        if insn.addr not in states:
+            continue
+        values = read(states[insn.addr], insn.operands[0])
+        if values is None:
+            raise ValueError(f"unresolved finite indirect target at 0x{insn.addr:x}: {insn.raw}")
+        for kind, target in values:
+            if kind == "code" and target in by_addr:
+                continue
+            if insn.mnemonic == "call" and kind == "scalar" and target in helpers:
+                continue
+            raise ValueError(f"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}")
+        targets[insn.addr] = values
+    return targets
+
+
 def annotated_fixed_count_ops(insns: list[NativeInsn]) -> list[NativeInsn]:
     values: dict[str, int] = {}
     out: list[NativeInsn] = []
@@ -1030,6 +1210,40 @@ def append_encoded_step(lines: list[str], encoded: EncodedInsn,
     )
 
 
+def append_indirect(lines: list[str], insn: NativeInsn,
+                    targets: frozenset[tuple[str, int]], next_addr: int | None,
+                    indent: str) -> None:
+    reg = reg_info(insn.operands[0])
+    if reg is None or reg[1] != 64:
+        raise ValueError(f"indirect target needs a 64-bit register: {insn.raw}")
+    helpers = helper_idents()
+    lines.extend([f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */",
+                  f"{indent}{{",
+                  f"{indent}\t__u64 __x86_target = X86_SIM_L_READ_REG({reg[0]});",
+                  f"{indent}\tswitch (X86_SIM_L_REG_TAG({reg[0]})) {{"])
+    for kind, tag in (("code", "X86_SIM_TAG_CODE"), ("scalar", "X86_SIM_TAG_SCALAR"),
+                      ("scalar", "X86_SIM_TAG_HELPER_ID")):
+        choices = sorted(target for k, target in targets if k == kind)
+        if not choices:
+            continue
+        lines.extend([f"{indent}\tcase {tag}:", f"{indent}\t\tswitch (__x86_target) {{"])
+        for target in choices:
+            if kind == "code":
+                if insn.mnemonic == "call":
+                    if next_addr is None:
+                        raise ValueError(f"missing CALL continuation: {insn.raw}")
+                    action = f"X86_SIM_X86_CALL(x86_l_{target:x}, 0x{next_addr:x}ULL);"
+                else:
+                    action = f"goto x86_l_{target:x};"
+            else:
+                action = f"X86_SIM_BPF_CALL_{helpers[target]}(); break;"
+            lines.append(f"{indent}\t\tcase 0x{target:x}ULL: {action}")
+        lines.extend([f"{indent}\t\tdefault: __x86_sim_unresolved_indirect_target();",
+                      f"{indent}\t\t}}", f"{indent}\t\tbreak;"])
+    lines.extend([f"{indent}\tdefault: __x86_sim_unresolved_indirect_target();",
+                  f"{indent}\t}}", f"{indent}}}"])
+
+
 def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
                          indent: str = "\t", next_addr: int | None = None,
                          call_functions: dict[int, str] | None = None,
@@ -1037,10 +1251,19 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
                          step_macro: str = "X86_SIM_RUN_OP",
                          ret_statement: str = "X86_SIM_X86_RET();",
                          return_targets: set[int] | None = None,
-                         rodata_idents: dict[str, str] | None = None) -> None:
+                         rodata_idents: dict[str, str] | None = None,
+                         targets: dict[int, frozenset[tuple[str, int]]] | None = None) -> None:
     branch_macro = "X86_SIM_X86_SUB_JCC" if subroutine else "X86_SIM_X86_JCC"
     jump_macro = "X86_SIM_X86_SUB_JMP" if subroutine else "X86_SIM_X86_JMP"
     return_targets = return_targets or set()
+    if is_indirect_branch(insn):
+        append_indirect(lines, insn, (targets or {}).get(insn.addr, frozenset()), next_addr, indent)
+        return
+    address = code_address(insn)
+    if address in addrs and reg_info(insn.operands[0])[1] == 64:
+        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+        lines.append(f"{indent}X86_SIM_X86_CODE_ADDRESS({reg_info(insn.operands[0])[0]}, 0x{address:x}ULL);")
+        return
     if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         target = (
@@ -1148,9 +1371,11 @@ def proof_kind_for_source(bench: Bench, source: Path) -> str:
 
 def render_x86_subroutine(symbol: str, insns: list[NativeInsn],
                           call_functions: dict[int, str],
-                          rodata_idents: dict[str, str] | None = None) -> str:
+                          rodata_idents: dict[str, str] | None = None,
+                          targets: dict[int, frozenset[tuple[str, int]]] | None = None,
+                          all_addrs: set[int] | None = None) -> str:
     insns = annotated_fixed_count_ops(insns)
-    addrs = {insn.addr for insn in insns}
+    addrs = all_addrs or {insn.addr for insn in insns}
     next_addrs = {
         insn.addr: insns[index + 1].addr
         for index, insn in enumerate(insns[:-1])
@@ -1165,7 +1390,7 @@ def render_x86_subroutine(symbol: str, insns: list[NativeInsn],
                              ret_statement=(
                                  "X86_SIM_X86_SUB_RET(x86_sim_ret_dispatch);"
                              ),
-                             rodata_idents=rodata_idents)
+                             rodata_idents=rodata_idents, targets=targets)
     lines.append("")
     return "\n".join(lines)
 
@@ -1182,6 +1407,11 @@ def render_program(name: str, insns: list[NativeInsn],
         symbol: annotated_fixed_count_ops(fn_insns)
         for symbol, fn_insns in (subfunctions or {}).items()
     }
+    all_insns = [*insns, *(i for fn in subfunctions.values() for i in fn)]
+    has_indirect = any(is_indirect_branch(i) for i in all_insns)
+    targets = indirect_targets(all_insns, exit_addr, {
+        insns[0].addr, *(fn[0].addr for fn in subfunctions.values() if fn)
+    }) if has_indirect else {}
     if kind == "tc":
         section = 'SEC("tc")'
         ctx_type = "struct __sk_buff *"
@@ -1194,7 +1424,7 @@ def render_program(name: str, insns: list[NativeInsn],
         section = 'SEC("xdp")'
         ctx_type = "struct xdp_md *"
         declare = "X86_SIM_ENTRY_XDP(ctx);"
-    addrs = {insn.addr for insn in insns}
+    addrs = {insn.addr for insn in all_insns}
     return_targets = {exit_addr} if exit_addr is not None else set()
     if exit_addr is not None:
         addrs.add(exit_addr)
@@ -1237,6 +1467,12 @@ def render_program(name: str, insns: list[NativeInsn],
         f'#include "{sim_header}"',
         "",
     ])
+    if has_indirect:
+        lines.extend([
+            'extern void __x86_sim_unresolved_indirect_target(void)',
+            '\t__attribute__((error("indirect target was not eliminated by specialization")));',
+            '',
+        ])
     if source_prelude:
         lines.append(source_prelude.rstrip())
         lines.append("")
@@ -1259,7 +1495,7 @@ def render_program(name: str, insns: list[NativeInsn],
                              call_functions=subroutine_label_by_addr,
                              ret_statement=ret_statement,
                              return_targets=return_targets,
-                             rodata_idents=rodata_idents)
+                             rodata_idents=rodata_idents, targets=targets)
     if exit_addr is not None:
         lines.append(f"x86_l_{exit_addr:x}:")
         lines.append("\t/* native-link entry fallthrough exit */")
@@ -1267,7 +1503,7 @@ def render_program(name: str, insns: list[NativeInsn],
     if subfunctions:
         for symbol, fn_insns in subfunctions.items():
             lines.append(render_x86_subroutine(
-                symbol, fn_insns, subroutine_label_by_addr, rodata_idents))
+                symbol, fn_insns, subroutine_label_by_addr, rodata_idents, targets, addrs))
         lines.extend([
             "x86_sim_ret_dispatch:",
             "\tswitch (__x86_sim_ret_addr) {",

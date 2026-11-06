@@ -1,0 +1,1260 @@
+[
+  {
+    "id": 1,
+    "name": "bpf_map_lookup_elem",
+    "result": "void *",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "map",
+        "pointer": true
+      },
+      {
+        "type": "const void *",
+        "name": "key",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "bpf_map_update_elem",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "map",
+        "pointer": true
+      },
+      {
+        "type": "const void *",
+        "name": "key",
+        "pointer": true
+      },
+      {
+        "type": "const void *",
+        "name": "value",
+        "pointer": true
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "bpf_map_delete_elem",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "map",
+        "pointer": true
+      },
+      {
+        "type": "const void *",
+        "name": "key",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "bpf_probe_read",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "dst",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "size",
+        "pointer": false
+      },
+      {
+        "type": "const void *",
+        "name": "unsafe_ptr",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "bpf_ktime_get_ns",
+    "result": "__u64",
+    "parameters": []
+  },
+  {
+    "id": 6,
+    "name": "bpf_trace_printk",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "const char *",
+        "name": "fmt",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "fmt_size",
+        "pointer": false
+      },
+      {
+        "variadic": true
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "bpf_get_prandom_u32",
+    "result": "__u32",
+    "parameters": []
+  },
+  {
+    "id": 8,
+    "name": "bpf_get_smp_processor_id",
+    "result": "__bpf_fastcall __u32",
+    "parameters": []
+  },
+  {
+    "id": 9,
+    "name": "bpf_skb_store_bytes",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct __sk_buff *",
+        "name": "skb",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "offset",
+        "pointer": false
+      },
+      {
+        "type": "const void *",
+        "name": "from",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "len",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "name": "bpf_l3_csum_replace",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct __sk_buff *",
+        "name": "skb",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "offset",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "from",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "to",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "size",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "name": "bpf_l4_csum_replace",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct __sk_buff *",
+        "name": "skb",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "offset",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "from",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "to",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "name": "bpf_tail_call",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      },
+      {
+        "type": "void *",
+        "name": "prog_array_map",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "index",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "name": "bpf_get_current_pid_tgid",
+    "result": "__u64",
+    "parameters": []
+  },
+  {
+    "id": 15,
+    "name": "bpf_get_current_uid_gid",
+    "result": "__u64",
+    "parameters": []
+  },
+  {
+    "id": 16,
+    "name": "bpf_get_current_comm",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "buf",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "size_of_buf",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 20,
+    "name": "bpf_skb_get_tunnel_key",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct __sk_buff *",
+        "name": "skb",
+        "pointer": true
+      },
+      {
+        "type": "struct bpf_tunnel_key *",
+        "name": "key",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "size",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 21,
+    "name": "bpf_skb_set_tunnel_key",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct __sk_buff *",
+        "name": "skb",
+        "pointer": true
+      },
+      {
+        "type": "struct bpf_tunnel_key *",
+        "name": "key",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "size",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 23,
+    "name": "bpf_redirect",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "__u32",
+        "name": "ifindex",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 25,
+    "name": "bpf_perf_event_output",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      },
+      {
+        "type": "void *",
+        "name": "map",
+        "pointer": true
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      },
+      {
+        "type": "void *",
+        "name": "data",
+        "pointer": true
+      },
+      {
+        "type": "__u64",
+        "name": "size",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 26,
+    "name": "bpf_skb_load_bytes",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "const void *",
+        "name": "skb",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "offset",
+        "pointer": false
+      },
+      {
+        "type": "void *",
+        "name": "to",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "len",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 27,
+    "name": "bpf_get_stackid",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      },
+      {
+        "type": "void *",
+        "name": "map",
+        "pointer": true
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 28,
+    "name": "bpf_csum_diff",
+    "result": "__s64",
+    "parameters": [
+      {
+        "type": "__be32 *",
+        "name": "from",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "from_size",
+        "pointer": false
+      },
+      {
+        "type": "__be32 *",
+        "name": "to",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "to_size",
+        "pointer": false
+      },
+      {
+        "type": "__wsum",
+        "name": "seed",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 32,
+    "name": "bpf_skb_change_type",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct __sk_buff *",
+        "name": "skb",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "type",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 35,
+    "name": "bpf_get_current_task",
+    "result": "__u64",
+    "parameters": []
+  },
+  {
+    "id": 36,
+    "name": "bpf_probe_write_user",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "dst",
+        "pointer": true
+      },
+      {
+        "type": "const void *",
+        "name": "src",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "len",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 37,
+    "name": "bpf_current_task_under_cgroup",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "map",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "index",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 38,
+    "name": "bpf_skb_change_tail",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct __sk_buff *",
+        "name": "skb",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "len",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 39,
+    "name": "bpf_skb_pull_data",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct __sk_buff *",
+        "name": "skb",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "len",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 43,
+    "name": "bpf_skb_change_head",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct __sk_buff *",
+        "name": "skb",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "len",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 44,
+    "name": "bpf_xdp_adjust_head",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct xdp_md *",
+        "name": "xdp_md",
+        "pointer": true
+      },
+      {
+        "type": "int",
+        "name": "delta",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 45,
+    "name": "bpf_probe_read_str",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "dst",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "size",
+        "pointer": false
+      },
+      {
+        "type": "const void *",
+        "name": "unsafe_ptr",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 46,
+    "name": "bpf_get_socket_cookie",
+    "result": "__u64",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 50,
+    "name": "bpf_skb_adjust_room",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct __sk_buff *",
+        "name": "skb",
+        "pointer": true
+      },
+      {
+        "type": "__s32",
+        "name": "len_diff",
+        "pointer": false
+      },
+      {
+        "type": "__u32",
+        "name": "mode",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 54,
+    "name": "bpf_xdp_adjust_meta",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct xdp_md *",
+        "name": "xdp_md",
+        "pointer": true
+      },
+      {
+        "type": "int",
+        "name": "delta",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 58,
+    "name": "bpf_override_return",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct pt_regs *",
+        "name": "regs",
+        "pointer": true
+      },
+      {
+        "type": "__u64",
+        "name": "rc",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 65,
+    "name": "bpf_xdp_adjust_tail",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct xdp_md *",
+        "name": "xdp_md",
+        "pointer": true
+      },
+      {
+        "type": "int",
+        "name": "delta",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 67,
+    "name": "bpf_get_stack",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      },
+      {
+        "type": "void *",
+        "name": "buf",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "size",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 68,
+    "name": "bpf_skb_load_bytes_relative",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "const void *",
+        "name": "skb",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "offset",
+        "pointer": false
+      },
+      {
+        "type": "void *",
+        "name": "to",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "len",
+        "pointer": false
+      },
+      {
+        "type": "__u32",
+        "name": "start_header",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 69,
+    "name": "bpf_fib_lookup",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      },
+      {
+        "type": "struct bpf_fib_lookup *",
+        "name": "params",
+        "pointer": true
+      },
+      {
+        "type": "int",
+        "name": "plen",
+        "pointer": false
+      },
+      {
+        "type": "__u32",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 80,
+    "name": "bpf_get_current_cgroup_id",
+    "result": "__u64",
+    "parameters": []
+  },
+  {
+    "id": 85,
+    "name": "bpf_sk_lookup_udp",
+    "result": "struct bpf_sock *",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      },
+      {
+        "type": "struct bpf_sock_tuple *",
+        "name": "tuple",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "tuple_size",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "netns",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 86,
+    "name": "bpf_sk_release",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "sock",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 87,
+    "name": "bpf_map_push_elem",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "map",
+        "pointer": true
+      },
+      {
+        "type": "const void *",
+        "name": "value",
+        "pointer": true
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 88,
+    "name": "bpf_map_pop_elem",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "map",
+        "pointer": true
+      },
+      {
+        "type": "void *",
+        "name": "value",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 95,
+    "name": "bpf_sk_fullsock",
+    "result": "struct bpf_sock *",
+    "parameters": [
+      {
+        "type": "struct bpf_sock *",
+        "name": "sk",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 99,
+    "name": "bpf_skc_lookup_tcp",
+    "result": "struct bpf_sock *",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      },
+      {
+        "type": "struct bpf_sock_tuple *",
+        "name": "tuple",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "tuple_size",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "netns",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 109,
+    "name": "bpf_send_signal",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "__u32",
+        "name": "sig",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 112,
+    "name": "bpf_probe_read_user",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "dst",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "size",
+        "pointer": false
+      },
+      {
+        "type": "const void *",
+        "name": "unsafe_ptr",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 113,
+    "name": "bpf_probe_read_kernel",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "dst",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "size",
+        "pointer": false
+      },
+      {
+        "type": "const void *",
+        "name": "unsafe_ptr",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 114,
+    "name": "bpf_probe_read_user_str",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "dst",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "size",
+        "pointer": false
+      },
+      {
+        "type": "const void *",
+        "name": "unsafe_ptr",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 115,
+    "name": "bpf_probe_read_kernel_str",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "dst",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "size",
+        "pointer": false
+      },
+      {
+        "type": "const void *",
+        "name": "unsafe_ptr",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 118,
+    "name": "bpf_jiffies64",
+    "result": "__u64",
+    "parameters": []
+  },
+  {
+    "id": 122,
+    "name": "bpf_get_netns_cookie",
+    "result": "__u64",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 124,
+    "name": "bpf_sk_assign",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      },
+      {
+        "type": "void *",
+        "name": "sk",
+        "pointer": true
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 125,
+    "name": "bpf_ktime_get_boot_ns",
+    "result": "__u64",
+    "parameters": []
+  },
+  {
+    "id": 130,
+    "name": "bpf_ringbuf_output",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ringbuf",
+        "pointer": true
+      },
+      {
+        "type": "void *",
+        "name": "data",
+        "pointer": true
+      },
+      {
+        "type": "__u64",
+        "name": "size",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 148,
+    "name": "bpf_copy_from_user",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "dst",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "size",
+        "pointer": false
+      },
+      {
+        "type": "const void *",
+        "name": "user_ptr",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 152,
+    "name": "bpf_redirect_neigh",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "__u32",
+        "name": "ifindex",
+        "pointer": false
+      },
+      {
+        "type": "struct bpf_redir_neigh *",
+        "name": "params",
+        "pointer": true
+      },
+      {
+        "type": "int",
+        "name": "plen",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 155,
+    "name": "bpf_redirect_peer",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "__u32",
+        "name": "ifindex",
+        "pointer": false
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 158,
+    "name": "bpf_get_current_task_btf",
+    "result": "struct task_struct *",
+    "parameters": []
+  },
+  {
+    "id": 174,
+    "name": "bpf_get_attach_cookie",
+    "result": "__u64",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 175,
+    "name": "bpf_task_pt_regs",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct task_struct *",
+        "name": "task",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 181,
+    "name": "bpf_loop",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "__u32",
+        "name": "nr_loops",
+        "pointer": false
+      },
+      {
+        "type": "void *",
+        "name": "callback_fn",
+        "pointer": true
+      },
+      {
+        "type": "void *",
+        "name": "callback_ctx",
+        "pointer": true
+      },
+      {
+        "type": "__u64",
+        "name": "flags",
+        "pointer": false
+      }
+    ]
+  },
+  {
+    "id": 184,
+    "name": "bpf_get_func_ret",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "void *",
+        "name": "ctx",
+        "pointer": true
+      },
+      {
+        "type": "__u64 *",
+        "name": "value",
+        "pointer": true
+      }
+    ]
+  },
+  {
+    "id": 193,
+    "name": "bpf_ima_file_hash",
+    "result": "long",
+    "parameters": [
+      {
+        "type": "struct file *",
+        "name": "file",
+        "pointer": true
+      },
+      {
+        "type": "void *",
+        "name": "dst",
+        "pointer": true
+      },
+      {
+        "type": "__u32",
+        "name": "size",
+        "pointer": false
+      }
+    ]
+  }
+]

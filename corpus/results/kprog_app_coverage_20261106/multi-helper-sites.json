@@ -1,0 +1,707 @@
+[
+  {
+    "name": "tetragon_bpf_generic_kprobe_v61.extract_arg_depth",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_kprobe_v61.extract_arg_depth.proof.o",
+    "site": "0x63",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_kprobe_v61.generic_kprobe_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_kprobe_v61.generic_kprobe_process_event.proof.o",
+    "site": "0x24e",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_uprobe_v61.extract_arg_depth",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_uprobe_v61.extract_arg_depth.proof.o",
+    "site": "0x63",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_retuprobe_v61.generic_retuprobe_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_retuprobe_v61.generic_retuprobe_event.proof.o",
+    "site": "0x1ebe",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_uprobe_v61.generic_uprobe_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_uprobe_v61.generic_uprobe_process_event.proof.o",
+    "site": "0x2c4",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_uprobe_v61.generic_uprobe_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_uprobe_v61.generic_uprobe_process_event.proof.o",
+    "site": "0x1ea5",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_rawtp_v61.generic_rawtp_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_rawtp_v61.generic_rawtp_process_event.proof.o",
+    "site": "0x1c6",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_rawtp_v61.generic_rawtp_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_rawtp_v61.generic_rawtp_process_event.proof.o",
+    "site": "0x1e6c",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_usdt_v53.generic_usdt_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_usdt_v53.generic_usdt_process_event.proof.o",
+    "site": "0x23a3",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_kprobe_v61.extract_arg_depth",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_kprobe_v61.extract_arg_depth.proof.o",
+    "site": "0x63",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_fexit_v53.generic_fexit_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_fexit_v53.generic_fexit_event.proof.o",
+    "site": "0x2096",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_kprobe_v61.generic_kprobe_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_kprobe_v61.generic_kprobe_process_event.proof.o",
+    "site": "0x24e",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_uprobe_v61.extract_arg_depth",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_uprobe_v61.extract_arg_depth.proof.o",
+    "site": "0x63",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_retkprobe_v511.generic_retkprobe_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_retkprobe_v511.generic_retkprobe_event.proof.o",
+    "site": "0x2265",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_tracepoint_v511.generic_tracepoint_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_tracepoint_v511.generic_tracepoint_process_event.proof.o",
+    "site": "0x27b2",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_retuprobe_v511.generic_retuprobe_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_retuprobe_v511.generic_retuprobe_event.proof.o",
+    "site": "0x2256",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_uprobe_v61.generic_uprobe_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_uprobe_v61.generic_uprobe_process_event.proof.o",
+    "site": "0x2c4",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_uprobe_v61.generic_uprobe_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_uprobe_v61.generic_uprobe_process_event.proof.o",
+    "site": "0x1ea5",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_retuprobe_v53.generic_retuprobe_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_retuprobe_v53.generic_retuprobe_event.proof.o",
+    "site": "0x24ba",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_retuprobe_v61.generic_retuprobe_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_retuprobe_v61.generic_retuprobe_event.proof.o",
+    "site": "0x1e24",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_lsm_core_v61.generic_lsm_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_lsm_core_v61.generic_lsm_process_event.proof.o",
+    "site": "0x1c6",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_lsm_core_v61.generic_lsm_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_lsm_core_v61.generic_lsm_process_event.proof.o",
+    "site": "0x1e6c",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_fentry_v61.extract_arg_depth",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_fentry_v61.extract_arg_depth.proof.o",
+    "site": "0x63",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_tracepoint_v61.extract_arg_depth",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_tracepoint_v61.extract_arg_depth.proof.o",
+    "site": "0x63",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_tracepoint_v53.generic_tracepoint_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_tracepoint_v53.generic_tracepoint_process_event.proof.o",
+    "site": "0x220e",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_fentry_v61.generic_fentry_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_fentry_v61.generic_fentry_process_event.proof.o",
+    "site": "0x1c6",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_fentry_v61.generic_fentry_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_fentry_v61.generic_fentry_process_event.proof.o",
+    "site": "0x1e6c",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_lsm_core_v61.extract_arg_depth",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_lsm_core_v61.extract_arg_depth.proof.o",
+    "site": "0x63",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_usdt_v61.generic_usdt_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.generic_usdt_process_event.proof.o",
+    "site": "0x1e6",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_usdt_v61.generic_usdt_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.generic_usdt_process_event.proof.o",
+    "site": "0x1e80",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_usdt_v61.extract_arg_depth",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_usdt_v61.extract_arg_depth.proof.o",
+    "site": "0x63",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_retuprobe_v511.generic_retuprobe_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_retuprobe_v511.generic_retuprobe_event.proof.o",
+    "site": "0x221e",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_usdt_v61.extract_arg_depth",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.extract_arg_depth.proof.o",
+    "site": "0x63",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_usdt_v61.generic_usdt_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_usdt_v61.generic_usdt_process_event.proof.o",
+    "site": "0x1e6",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_usdt_v61.generic_usdt_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_usdt_v61.generic_usdt_process_event.proof.o",
+    "site": "0x1e80",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_retkprobe_v53.generic_retkprobe_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_retkprobe_v53.generic_retkprobe_event.proof.o",
+    "site": "0x20e5",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_retkprobe_v61.generic_retkprobe_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_retkprobe_v61.generic_retkprobe_event.proof.o",
+    "site": "0x1dd6",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_rawtp_v61.extract_arg_depth",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_rawtp_v61.extract_arg_depth.proof.o",
+    "site": "0x63",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_usdt_v511.generic_usdt_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v511.generic_usdt_process_event.proof.o",
+    "site": "0x2898",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_fexit_v61.generic_fexit_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_fexit_v61.generic_fexit_event.proof.o",
+    "site": "0x1e25",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_fexit_v511.generic_fexit_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_fexit_v511.generic_fexit_event.proof.o",
+    "site": "0x2286",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_tracepoint_v61.generic_tracepoint_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_tracepoint_v61.generic_tracepoint_process_event.proof.o",
+    "site": "0x1b9",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        148
+      ]
+    ]
+  },
+  {
+    "name": "cilium_bpf_lxc.tail_ipv4_policy",
+    "object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/native-cilium/bpf_lxc.tail_ipv4_policy.proof.o",
+    "site": "0x16c1",
+    "targets": [
+      [
+        "scalar",
+        23
+      ],
+      [
+        "scalar",
+        155
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_retkprobe_v53.generic_retkprobe_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_retkprobe_v53.generic_retkprobe_event.proof.o",
+    "site": "0x20df",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_retkprobe_v61.generic_retkprobe_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_retkprobe_v61.generic_retkprobe_event.proof.o",
+    "site": "0x1ddc",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_generic_usdt_v511.generic_usdt_process_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_usdt_v511.generic_usdt_process_event.proof.o",
+    "site": "0x2898",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  },
+  {
+    "name": "tetragon_bpf_multi_retkprobe_v511.generic_retkprobe_event",
+    "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_retkprobe_v511.generic_retkprobe_event.proof.o",
+    "site": "0x226b",
+    "targets": [
+      [
+        "scalar",
+        4
+      ],
+      [
+        "scalar",
+        45
+      ]
+    ]
+  }
+]

@@ -1,0 +1,6 @@
+make: *** [/workspaces/repository/corpus/results/kprog_app_coverage_20261106/Makefile:89: indirect-bound-guest] Error 1
+og_app_coverage_20261106/check_indirect.py bound
+join bound returncode 1
+cmov bound returncode 1
+call bound returncode 1
+make: *** [corpus/results/kprog_app_coverage_20261106/Makefile:84: indirect-bound-kvm] Error 2

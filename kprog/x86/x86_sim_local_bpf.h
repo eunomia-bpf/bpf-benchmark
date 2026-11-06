@@ -109,6 +109,7 @@ union x86_sim_stack_mem {
 #define X86_SIM_TAG_MAP_PTR 5U
 #define X86_SIM_TAG_MAP_VALUE 6U
 #define X86_SIM_TAG_HELPER_ID 7U
+#define X86_SIM_TAG_CODE 8U
 
 /* The pointer-write provenance selector indexes the tag codes above, so this
  * generated contract is included after them rather than with the other
@@ -122,24 +123,68 @@ union x86_sim_stack_mem {
 #define X86_SIM_HELPER_bpf_map_lookup_elem 1ULL
 #define X86_SIM_HELPER_bpf_map_update_elem 2ULL
 #define X86_SIM_HELPER_bpf_map_delete_elem 3ULL
-#define X86_SIM_HELPER_bpf_get_current_uid_gid 4ULL
-#define X86_SIM_HELPER_bpf_get_current_pid_tgid 5ULL
-#define X86_SIM_HELPER_bpf_get_smp_processor_id 6ULL
-#define X86_SIM_HELPER_bpf_ktime_get_ns 7ULL
-#define X86_SIM_HELPER_bpf_current_task_under_cgroup 8ULL
-#define X86_SIM_HELPER_bpf_get_current_comm 9ULL
-#define X86_SIM_HELPER_bpf_get_current_cgroup_id 10ULL
-#define X86_SIM_HELPER_bpf_get_stackid 11ULL
-#define X86_SIM_HELPER_bpf_perf_event_output 12ULL
-#define X86_SIM_HELPER_bpf_probe_read_kernel 13ULL
-#define X86_SIM_HELPER_bpf_probe_read_kernel_str 14ULL
-#define X86_SIM_HELPER_bpf_probe_read_user_str 15ULL
-#define X86_SIM_HELPER_bpf_get_stack 16ULL
-#define X86_SIM_HELPER_bpf_copy_from_user_str 17ULL
-#define X86_SIM_HELPER_bpf_attach_map 18ULL
-#define X86_SIM_HELPER_bpf_attach_tmp_map 19ULL
-#define X86_SIM_HELPER_bpf_prog_load_map 20ULL
-#define X86_SIM_HELPER_bpf_get_current_task 21ULL
+#define X86_SIM_HELPER_bpf_probe_read 4ULL
+#define X86_SIM_HELPER_bpf_ktime_get_ns 5ULL
+#define X86_SIM_HELPER_bpf_trace_printk 6ULL
+#define X86_SIM_HELPER_bpf_get_prandom_u32 7ULL
+#define X86_SIM_HELPER_bpf_get_smp_processor_id 8ULL
+#define X86_SIM_HELPER_bpf_skb_store_bytes 9ULL
+#define X86_SIM_HELPER_bpf_l3_csum_replace 10ULL
+#define X86_SIM_HELPER_bpf_l4_csum_replace 11ULL
+#define X86_SIM_HELPER_bpf_tail_call 12ULL
+#define X86_SIM_HELPER_bpf_get_current_pid_tgid 14ULL
+#define X86_SIM_HELPER_bpf_get_current_uid_gid 15ULL
+#define X86_SIM_HELPER_bpf_get_current_comm 16ULL
+#define X86_SIM_HELPER_bpf_skb_get_tunnel_key 20ULL
+#define X86_SIM_HELPER_bpf_skb_set_tunnel_key 21ULL
+#define X86_SIM_HELPER_bpf_redirect 23ULL
+#define X86_SIM_HELPER_bpf_perf_event_output 25ULL
+#define X86_SIM_HELPER_bpf_skb_load_bytes 26ULL
+#define X86_SIM_HELPER_bpf_get_stackid 27ULL
+#define X86_SIM_HELPER_bpf_csum_diff 28ULL
+#define X86_SIM_HELPER_bpf_skb_change_type 32ULL
+#define X86_SIM_HELPER_bpf_get_current_task 35ULL
+#define X86_SIM_HELPER_bpf_probe_write_user 36ULL
+#define X86_SIM_HELPER_bpf_current_task_under_cgroup 37ULL
+#define X86_SIM_HELPER_bpf_skb_change_tail 38ULL
+#define X86_SIM_HELPER_bpf_skb_pull_data 39ULL
+#define X86_SIM_HELPER_bpf_skb_change_head 43ULL
+#define X86_SIM_HELPER_bpf_xdp_adjust_head 44ULL
+#define X86_SIM_HELPER_bpf_probe_read_str 45ULL
+#define X86_SIM_HELPER_bpf_get_socket_cookie 46ULL
+#define X86_SIM_HELPER_bpf_skb_adjust_room 50ULL
+#define X86_SIM_HELPER_bpf_xdp_adjust_meta 54ULL
+#define X86_SIM_HELPER_bpf_override_return 58ULL
+#define X86_SIM_HELPER_bpf_xdp_adjust_tail 65ULL
+#define X86_SIM_HELPER_bpf_get_stack 67ULL
+#define X86_SIM_HELPER_bpf_skb_load_bytes_relative 68ULL
+#define X86_SIM_HELPER_bpf_fib_lookup 69ULL
+#define X86_SIM_HELPER_bpf_get_current_cgroup_id 80ULL
+#define X86_SIM_HELPER_bpf_sk_lookup_udp 85ULL
+#define X86_SIM_HELPER_bpf_sk_release 86ULL
+#define X86_SIM_HELPER_bpf_map_push_elem 87ULL
+#define X86_SIM_HELPER_bpf_map_pop_elem 88ULL
+#define X86_SIM_HELPER_bpf_sk_fullsock 95ULL
+#define X86_SIM_HELPER_bpf_skc_lookup_tcp 99ULL
+#define X86_SIM_HELPER_bpf_send_signal 109ULL
+#define X86_SIM_HELPER_bpf_probe_read_user 112ULL
+#define X86_SIM_HELPER_bpf_probe_read_kernel 113ULL
+#define X86_SIM_HELPER_bpf_probe_read_user_str 114ULL
+#define X86_SIM_HELPER_bpf_probe_read_kernel_str 115ULL
+#define X86_SIM_HELPER_bpf_jiffies64 118ULL
+#define X86_SIM_HELPER_bpf_get_netns_cookie 122ULL
+#define X86_SIM_HELPER_bpf_sk_assign 124ULL
+#define X86_SIM_HELPER_bpf_ktime_get_boot_ns 125ULL
+#define X86_SIM_HELPER_bpf_ringbuf_output 130ULL
+#define X86_SIM_HELPER_bpf_copy_from_user 148ULL
+#define X86_SIM_HELPER_bpf_redirect_neigh 152ULL
+#define X86_SIM_HELPER_bpf_redirect_peer 155ULL
+#define X86_SIM_HELPER_bpf_get_current_task_btf 158ULL
+#define X86_SIM_HELPER_bpf_get_attach_cookie 174ULL
+#define X86_SIM_HELPER_bpf_task_pt_regs 175ULL
+#define X86_SIM_HELPER_bpf_loop 181ULL
+#define X86_SIM_HELPER_bpf_get_func_ret 184ULL
+#define X86_SIM_HELPER_bpf_ima_file_hash 193ULL
 
 /* The helper-id -> helper-body dispatch contract. Included here, after the
  * `X86_SIM_HELPER_bpf_*` id defines above, so its `_Static_assert`s see the id
@@ -1732,10 +1777,15 @@ struct x86_sim_state {
 		__u8 __x86_l_width = KPROG_X86_CMOV_WIDTH(FLAGS);         \
 		__u8 __x86_l_cmw = (RHS_IS_MEM) ?                         \
 			KPROG_X86_CMOV_MEM_WIDTH(AUX, FLAGS) : __x86_l_width; \
-		volatile __u64 __x86_l_value = (RHS_IS_MEM) ?              \
-			X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),                    \
-				KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0) :   \
-			X86_SIM_L_READ_REG(SRC);                                  \
+		__u64 __x86_l_value;                                      \
+		if (RHS_IS_MEM) {                                        \
+			volatile __u64 __x86_l_mem_value =                \
+				X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),    \
+					KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+			__x86_l_value = __x86_l_mem_value;                 \
+		} else {                                                \
+			__x86_l_value = X86_SIM_L_READ_REG(SRC);           \
+		}                                                       \
 		if (X86_SIM_L_EVAL_CC(__x86_l_cc)) {                      \
 			__u8 __x86_l_wb = KPROG_X86_CMOV_WRITEBACK(       \
 				__x86_l_width == X86_WIDTH_64);           \
@@ -2155,91 +2205,419 @@ struct x86_sim_state {
 #define X86_SIM_RUN_OP_SUB(OP, DST, SRC, FLAGS, AUX, IMM)                   \
 	X86_SIM_RUN_OP((OP), (DST), (SRC), (FLAGS), (AUX), (IMM))
 
-#define X86_SIM_BPF_CALL_bpf_map_lookup_elem()                              \
-	do {                                                               \
-		void *__x86_bpf_ret = bpf_map_lookup_elem(                \
-			X86_SIM_L_READ_REG_PTR(X86_RDI),                  \
-			X86_SIM_L_HELPER_ARG_PTR(X86_RSI));               \
-		X86_SIM_L_WRITE_REG_PTR_TAG(X86_RAX, __x86_bpf_ret,       \
-					    X86_SIM_TAG_MAP_VALUE);        \
-	} while (0)
+/* No machine code is emitted for an unresolved helper: specialization must
+ * eliminate this declaration's call before an artifact can compile. */
+extern void __x86_sim_unsupported_helper(void)
+    __attribute__((error("unresolved x86 helper ID")));
+#define X86_SIM_L_UNSUPPORTED_HELPER() __x86_sim_unsupported_helper()
 
-#define X86_SIM_BPF_CALL_bpf_map_update_elem()                              \
-	do {                                                               \
-		long __x86_bpf_ret = bpf_map_update_elem(                 \
-			X86_SIM_L_READ_REG_PTR(X86_RDI),                  \
-			X86_SIM_L_HELPER_ARG_PTR(X86_RSI),                \
-			X86_SIM_L_HELPER_ARG_PTR(X86_RDX),                \
-			X86_SIM_L_READ_REG(X86_RCX));                     \
-		X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, (__u64)__x86_bpf_ret,  \
-					  X86_WIDTH_64);                    \
-	} while (0)
+#define X86_SIM_L_HELPER_SCALAR_RESULT(EXPR) \
+    do { \
+        __u64 __x86_helper_result = (__u64)(EXPR); \
+        X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_helper_result, X86_WIDTH_64); \
+    } while (0)
 
-#define X86_SIM_BPF_CALL_bpf_map_delete_elem()                              \
-	do {                                                               \
-		long __x86_bpf_ret = bpf_map_delete_elem(                 \
-			X86_SIM_L_READ_REG_PTR(X86_RDI),                  \
-			X86_SIM_L_HELPER_ARG_PTR(X86_RSI));               \
-		X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, (__u64)__x86_bpf_ret,  \
-					  X86_WIDTH_64);                    \
-	} while (0)
+#define X86_SIM_L_HELPER_POINTER_RESULT(EXPR) \
+    do { \
+        void *__x86_helper_result = (void *)(EXPR); \
+        X86_SIM_L_WRITE_REG_PTR_TAG(X86_RAX, __x86_helper_result, X86_SIM_TAG_MAP_VALUE); \
+    } while (0)
 
-#define X86_SIM_BPF_CALL_bpf_get_current_uid_gid()                          \
-	do {                                                               \
-		X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, 0, X86_WIDTH_64);     \
-	} while (0)
+#define X86_SIM_BPF_CALL_bpf_map_lookup_elem() \
+	X86_SIM_L_HELPER_POINTER_RESULT(bpf_map_lookup_elem((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI)))
 
-#define X86_SIM_BPF_CALL_bpf_get_current_pid_tgid()                         \
-	do {                                                               \
-		X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, 0, X86_WIDTH_64);     \
-	} while (0)
+#define X86_SIM_BPF_CALL_bpf_map_update_elem() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_map_update_elem((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
 
-#define X86_SIM_BPF_CALL_bpf_get_smp_processor_id()                         \
-	do {                                                               \
-		X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, 0, X86_WIDTH_32);     \
-	} while (0)
+#define X86_SIM_BPF_CALL_bpf_map_delete_elem() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_map_delete_elem((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI)))
 
-#define X86_SIM_BPF_CALL_bpf_ktime_get_ns()                                 \
-	do {                                                               \
-		X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, bpf_ktime_get_ns(),    \
-					  X86_WIDTH_64);                    \
-	} while (0)
+#define X86_SIM_BPF_CALL_bpf_probe_read() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
 
-#define X86_SIM_BPF_CALL_ID(ID)                                             \
-	do {                                                               \
-		switch (KPROG_X86_HELPER_SLOT((__u64)(ID))) {              \
-		case KPROG_X86_HELPER_SLOT(                                \
-			X86_SIM_HELPER_bpf_map_lookup_elem):               \
-			X86_SIM_BPF_CALL_bpf_map_lookup_elem();           \
-			break;                                             \
-		case KPROG_X86_HELPER_SLOT(                                \
-			X86_SIM_HELPER_bpf_map_update_elem):               \
-			X86_SIM_BPF_CALL_bpf_map_update_elem();           \
-			break;                                             \
-		case KPROG_X86_HELPER_SLOT(                                \
-			X86_SIM_HELPER_bpf_map_delete_elem):               \
-			X86_SIM_BPF_CALL_bpf_map_delete_elem();           \
-			break;                                             \
-		case KPROG_X86_HELPER_SLOT(                                \
-			X86_SIM_HELPER_bpf_get_current_uid_gid):           \
-			X86_SIM_BPF_CALL_bpf_get_current_uid_gid();       \
-			break;                                             \
-		case KPROG_X86_HELPER_SLOT(                                \
-			X86_SIM_HELPER_bpf_get_current_pid_tgid):          \
-			X86_SIM_BPF_CALL_bpf_get_current_pid_tgid();      \
-			break;                                             \
-		case KPROG_X86_HELPER_SLOT(                                \
-			X86_SIM_HELPER_bpf_get_smp_processor_id):          \
-			X86_SIM_BPF_CALL_bpf_get_smp_processor_id();      \
-			break;                                             \
-		case KPROG_X86_HELPER_SLOT(                                \
-			X86_SIM_HELPER_bpf_ktime_get_ns):                  \
-			X86_SIM_BPF_CALL_bpf_ktime_get_ns();              \
-			break;                                             \
-		default:                                                   \
-			X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, 0, X86_WIDTH_64);\
-			break;                                             \
-		}                                                          \
+#define X86_SIM_BPF_CALL_bpf_ktime_get_ns() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ktime_get_ns())
+
+#define X86_SIM_BPF_CALL_bpf_trace_printk() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_trace_printk((const char *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), X86_SIM_L_READ_REG(X86_RDX), X86_SIM_L_READ_REG(X86_RCX), X86_SIM_L_READ_REG(X86_R8)))
+
+#define X86_SIM_BPF_CALL_bpf_get_prandom_u32() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_prandom_u32())
+
+#define X86_SIM_BPF_CALL_bpf_get_smp_processor_id() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_smp_processor_id())
+
+#define X86_SIM_BPF_CALL_bpf_skb_store_bytes() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_store_bytes((struct __sk_buff *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u32)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
+
+#define X86_SIM_BPF_CALL_bpf_l3_csum_replace() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_l3_csum_replace((struct __sk_buff *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
+
+#define X86_SIM_BPF_CALL_bpf_l4_csum_replace() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_l4_csum_replace((struct __sk_buff *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
+
+#define X86_SIM_BPF_CALL_bpf_tail_call() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_tail_call((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_get_current_pid_tgid() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_pid_tgid())
+
+#define X86_SIM_BPF_CALL_bpf_get_current_uid_gid() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_uid_gid())
+
+#define X86_SIM_BPF_CALL_bpf_get_current_comm() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_comm((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI)))
+
+#define X86_SIM_BPF_CALL_bpf_skb_get_tunnel_key() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_get_tunnel_key((struct __sk_buff *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (struct bpf_tunnel_key *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
+
+#define X86_SIM_BPF_CALL_bpf_skb_set_tunnel_key() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_set_tunnel_key((struct __sk_buff *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (struct bpf_tunnel_key *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
+
+#define X86_SIM_BPF_CALL_bpf_redirect() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_redirect((__u32)X86_SIM_L_READ_REG(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)))
+
+#define X86_SIM_BPF_CALL_bpf_perf_event_output() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_perf_event_output((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
+
+#define X86_SIM_BPF_CALL_bpf_skb_load_bytes() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_load_bytes((const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u32)X86_SIM_L_READ_REG(X86_RCX)))
+
+#define X86_SIM_BPF_CALL_bpf_get_stackid() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_stackid((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_csum_diff() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_csum_diff((__be32 *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (__be32 *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u32)X86_SIM_L_READ_REG(X86_RCX), (__wsum)X86_SIM_L_READ_REG(X86_R8)))
+
+#define X86_SIM_BPF_CALL_bpf_skb_change_type() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_type((struct __sk_buff *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI)))
+
+#define X86_SIM_BPF_CALL_bpf_get_current_task() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_task())
+
+#define X86_SIM_BPF_CALL_bpf_probe_write_user() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_write_user((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_current_task_under_cgroup() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_current_task_under_cgroup((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI)))
+
+#define X86_SIM_BPF_CALL_bpf_skb_change_tail() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_tail((struct __sk_buff *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_skb_pull_data() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_pull_data((struct __sk_buff *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI)))
+
+#define X86_SIM_BPF_CALL_bpf_skb_change_head() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_head((struct __sk_buff *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_xdp_adjust_head() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_head((struct xdp_md *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (int)X86_SIM_L_READ_REG(X86_RSI)))
+
+#define X86_SIM_BPF_CALL_bpf_probe_read_str() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_str((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_get_socket_cookie() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_socket_cookie((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI)))
+
+#define X86_SIM_BPF_CALL_bpf_skb_adjust_room() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_adjust_room((struct __sk_buff *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__s32)X86_SIM_L_READ_REG(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
+
+#define X86_SIM_BPF_CALL_bpf_xdp_adjust_meta() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_meta((struct xdp_md *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (int)X86_SIM_L_READ_REG(X86_RSI)))
+
+#define X86_SIM_BPF_CALL_bpf_override_return() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_override_return((struct pt_regs *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)))
+
+#define X86_SIM_BPF_CALL_bpf_xdp_adjust_tail() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_tail((struct xdp_md *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (int)X86_SIM_L_READ_REG(X86_RSI)))
+
+#define X86_SIM_BPF_CALL_bpf_get_stack() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_stack((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
+
+#define X86_SIM_BPF_CALL_bpf_skb_load_bytes_relative() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_load_bytes_relative((const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u32)X86_SIM_L_READ_REG(X86_RCX), (__u32)X86_SIM_L_READ_REG(X86_R8)))
+
+#define X86_SIM_BPF_CALL_bpf_fib_lookup() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_fib_lookup((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (struct bpf_fib_lookup *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (int)X86_SIM_L_READ_REG(X86_RDX), (__u32)X86_SIM_L_READ_REG(X86_RCX)))
+
+#define X86_SIM_BPF_CALL_bpf_get_current_cgroup_id() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_cgroup_id())
+
+#define X86_SIM_BPF_CALL_bpf_sk_lookup_udp() \
+	X86_SIM_L_HELPER_POINTER_RESULT(bpf_sk_lookup_udp((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (struct bpf_sock_tuple *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
+
+#define X86_SIM_BPF_CALL_bpf_sk_release() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_sk_release((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI)))
+
+#define X86_SIM_BPF_CALL_bpf_map_push_elem() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_map_push_elem((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_map_pop_elem() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_map_pop_elem((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI)))
+
+#define X86_SIM_BPF_CALL_bpf_sk_fullsock() \
+	X86_SIM_L_HELPER_POINTER_RESULT(bpf_sk_fullsock((struct bpf_sock *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI)))
+
+#define X86_SIM_BPF_CALL_bpf_skc_lookup_tcp() \
+	X86_SIM_L_HELPER_POINTER_RESULT(bpf_skc_lookup_tcp((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (struct bpf_sock_tuple *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
+
+#define X86_SIM_BPF_CALL_bpf_send_signal() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_send_signal((__u32)X86_SIM_L_READ_REG(X86_RDI)))
+
+#define X86_SIM_BPF_CALL_bpf_probe_read_user() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_user((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_probe_read_kernel() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_kernel((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_probe_read_user_str() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_user_str((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_probe_read_kernel_str() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_kernel_str((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_jiffies64() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_jiffies64())
+
+#define X86_SIM_BPF_CALL_bpf_get_netns_cookie() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_netns_cookie((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI)))
+
+#define X86_SIM_BPF_CALL_bpf_sk_assign() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_sk_assign((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_ktime_get_boot_ns() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ktime_get_boot_ns())
+
+#define X86_SIM_BPF_CALL_bpf_ringbuf_output() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ringbuf_output((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
+
+#define X86_SIM_BPF_CALL_bpf_copy_from_user() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_copy_from_user((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_bpf_redirect_neigh() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_redirect_neigh((__u32)X86_SIM_L_READ_REG(X86_RDI), (struct bpf_redir_neigh *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (int)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
+
+#define X86_SIM_BPF_CALL_bpf_redirect_peer() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_redirect_peer((__u32)X86_SIM_L_READ_REG(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)))
+
+#define X86_SIM_BPF_CALL_bpf_get_current_task_btf() \
+	X86_SIM_L_HELPER_POINTER_RESULT(bpf_get_current_task_btf())
+
+#define X86_SIM_BPF_CALL_bpf_get_attach_cookie() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_attach_cookie((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI)))
+
+#define X86_SIM_BPF_CALL_bpf_task_pt_regs() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_task_pt_regs((struct task_struct *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI)))
+
+#define X86_SIM_BPF_CALL_bpf_loop() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_loop((__u32)X86_SIM_L_READ_REG(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
+
+#define X86_SIM_BPF_CALL_bpf_get_func_ret() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ret((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64 *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI)))
+
+#define X86_SIM_BPF_CALL_bpf_ima_file_hash() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ima_file_hash((struct file *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX)))
+
+#define X86_SIM_BPF_CALL_ID(ID) \
+	do { \
+		switch (KPROG_X86_HELPER_SLOT((__u64)(ID))) { \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_map_lookup_elem): \
+			X86_SIM_BPF_CALL_bpf_map_lookup_elem(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_map_update_elem): \
+			X86_SIM_BPF_CALL_bpf_map_update_elem(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_map_delete_elem): \
+			X86_SIM_BPF_CALL_bpf_map_delete_elem(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read): \
+			X86_SIM_BPF_CALL_bpf_probe_read(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ktime_get_ns): \
+			X86_SIM_BPF_CALL_bpf_ktime_get_ns(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_trace_printk): \
+			X86_SIM_BPF_CALL_bpf_trace_printk(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_prandom_u32): \
+			X86_SIM_BPF_CALL_bpf_get_prandom_u32(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_smp_processor_id): \
+			X86_SIM_BPF_CALL_bpf_get_smp_processor_id(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_skb_store_bytes): \
+			X86_SIM_BPF_CALL_bpf_skb_store_bytes(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_l3_csum_replace): \
+			X86_SIM_BPF_CALL_bpf_l3_csum_replace(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_l4_csum_replace): \
+			X86_SIM_BPF_CALL_bpf_l4_csum_replace(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_tail_call): \
+			X86_SIM_BPF_CALL_bpf_tail_call(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_current_pid_tgid): \
+			X86_SIM_BPF_CALL_bpf_get_current_pid_tgid(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_current_uid_gid): \
+			X86_SIM_BPF_CALL_bpf_get_current_uid_gid(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_current_comm): \
+			X86_SIM_BPF_CALL_bpf_get_current_comm(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_skb_get_tunnel_key): \
+			X86_SIM_BPF_CALL_bpf_skb_get_tunnel_key(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_skb_set_tunnel_key): \
+			X86_SIM_BPF_CALL_bpf_skb_set_tunnel_key(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_redirect): \
+			X86_SIM_BPF_CALL_bpf_redirect(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_perf_event_output): \
+			X86_SIM_BPF_CALL_bpf_perf_event_output(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_skb_load_bytes): \
+			X86_SIM_BPF_CALL_bpf_skb_load_bytes(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_stackid): \
+			X86_SIM_BPF_CALL_bpf_get_stackid(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_csum_diff): \
+			X86_SIM_BPF_CALL_bpf_csum_diff(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_skb_change_type): \
+			X86_SIM_BPF_CALL_bpf_skb_change_type(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_current_task): \
+			X86_SIM_BPF_CALL_bpf_get_current_task(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_write_user): \
+			X86_SIM_BPF_CALL_bpf_probe_write_user(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_current_task_under_cgroup): \
+			X86_SIM_BPF_CALL_bpf_current_task_under_cgroup(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_skb_change_tail): \
+			X86_SIM_BPF_CALL_bpf_skb_change_tail(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_skb_pull_data): \
+			X86_SIM_BPF_CALL_bpf_skb_pull_data(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_skb_change_head): \
+			X86_SIM_BPF_CALL_bpf_skb_change_head(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_xdp_adjust_head): \
+			X86_SIM_BPF_CALL_bpf_xdp_adjust_head(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read_str): \
+			X86_SIM_BPF_CALL_bpf_probe_read_str(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_socket_cookie): \
+			X86_SIM_BPF_CALL_bpf_get_socket_cookie(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_skb_adjust_room): \
+			X86_SIM_BPF_CALL_bpf_skb_adjust_room(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_xdp_adjust_meta): \
+			X86_SIM_BPF_CALL_bpf_xdp_adjust_meta(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_override_return): \
+			X86_SIM_BPF_CALL_bpf_override_return(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_xdp_adjust_tail): \
+			X86_SIM_BPF_CALL_bpf_xdp_adjust_tail(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_stack): \
+			X86_SIM_BPF_CALL_bpf_get_stack(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_skb_load_bytes_relative): \
+			X86_SIM_BPF_CALL_bpf_skb_load_bytes_relative(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_fib_lookup): \
+			X86_SIM_BPF_CALL_bpf_fib_lookup(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_current_cgroup_id): \
+			X86_SIM_BPF_CALL_bpf_get_current_cgroup_id(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_sk_lookup_udp): \
+			X86_SIM_BPF_CALL_bpf_sk_lookup_udp(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_sk_release): \
+			X86_SIM_BPF_CALL_bpf_sk_release(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_map_push_elem): \
+			X86_SIM_BPF_CALL_bpf_map_push_elem(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_map_pop_elem): \
+			X86_SIM_BPF_CALL_bpf_map_pop_elem(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_sk_fullsock): \
+			X86_SIM_BPF_CALL_bpf_sk_fullsock(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_skc_lookup_tcp): \
+			X86_SIM_BPF_CALL_bpf_skc_lookup_tcp(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_send_signal): \
+			X86_SIM_BPF_CALL_bpf_send_signal(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read_user): \
+			X86_SIM_BPF_CALL_bpf_probe_read_user(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read_kernel): \
+			X86_SIM_BPF_CALL_bpf_probe_read_kernel(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read_user_str): \
+			X86_SIM_BPF_CALL_bpf_probe_read_user_str(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_probe_read_kernel_str): \
+			X86_SIM_BPF_CALL_bpf_probe_read_kernel_str(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_jiffies64): \
+			X86_SIM_BPF_CALL_bpf_jiffies64(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_netns_cookie): \
+			X86_SIM_BPF_CALL_bpf_get_netns_cookie(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_sk_assign): \
+			X86_SIM_BPF_CALL_bpf_sk_assign(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ktime_get_boot_ns): \
+			X86_SIM_BPF_CALL_bpf_ktime_get_boot_ns(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ringbuf_output): \
+			X86_SIM_BPF_CALL_bpf_ringbuf_output(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_copy_from_user): \
+			X86_SIM_BPF_CALL_bpf_copy_from_user(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_redirect_neigh): \
+			X86_SIM_BPF_CALL_bpf_redirect_neigh(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_redirect_peer): \
+			X86_SIM_BPF_CALL_bpf_redirect_peer(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_current_task_btf): \
+			X86_SIM_BPF_CALL_bpf_get_current_task_btf(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_attach_cookie): \
+			X86_SIM_BPF_CALL_bpf_get_attach_cookie(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_task_pt_regs): \
+			X86_SIM_BPF_CALL_bpf_task_pt_regs(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_loop): \
+			X86_SIM_BPF_CALL_bpf_loop(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_func_ret): \
+			X86_SIM_BPF_CALL_bpf_get_func_ret(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ima_file_hash): \
+			X86_SIM_BPF_CALL_bpf_ima_file_hash(); \
+			break; \
+		default: X86_SIM_L_UNSUPPORTED_HELPER(); break; \
+		} \
 	} while (0)
 
 #define X86_SIM_BPF_CALL_REG(REG)                                           \
@@ -2261,6 +2639,11 @@ struct x86_sim_state {
 				      (RETURN_ADDR));                     \
 		goto LABEL;                                               \
 	} while (0)
+
+/* Code addresses use linked-code offsets, in a namespace distinct from helper
+ * numbers. MOV/CMOV preserve this representation through ordinary 64-bit copies. */
+#define X86_SIM_X86_CODE_ADDRESS(DST, ADDRESS)                              \
+	X86_SIM_L_WRITE_REG_PTR_TAG((DST), (void *)(long)(ADDRESS), X86_SIM_TAG_CODE)
 
 #define X86_SIM_X86_SUB_RET(DISPATCH_LABEL)                                \
 	do {                                                               \

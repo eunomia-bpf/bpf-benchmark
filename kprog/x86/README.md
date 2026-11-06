@@ -50,8 +50,12 @@ Deleted old paths:
 5. Compile with `clang -O3 -target bpf`.
 6. Load and test-run the proof object with the ReverseSim loader.
 
-The Python generator does not choose typed helpers and does not rewrite control
-flow into a verifier workaround. Complexity belongs in the C simulator/spec.
+The Python generator resolves native control flow, joining finite reaching
+targets for indirect calls/jumps and dispatching on the actual register value.
+Helper selection follows the original Linux ID or ELF helper symbol; C macros
+implement its call ABI using the vendored libbpf declarations shared through
+`kprog/helper_abi.py`. Neither selection nor dispatch may depend on the
+benchmark name or weaken native control flow for the verifier.
 
 ## Semantics Notes
 

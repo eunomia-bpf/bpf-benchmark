@@ -266,3 +266,94 @@ Logs: [link/test](zero-address-call.log),
 [source generation](zero-address-sources.log). The
 [artifact archive](zero-address-call/artifacts.tar.gz) retains the replacement
 proof objects, generated C sources and per-program generation records.
+
+
+## Finite-target dispatch and real helper calls
+
+The native-CFG analysis resolves every indirect target in all 1,136 archived
+artifacts, with the two repaired `read_reg` inputs substituted explicitly.
+It joins reaching values across branches, invalidates overwritten/partial/
+implicit destinations, follows native calls/returns, and invalidates helper
+caller-saved registers. It has no native execution counter. Unknown targets
+fail generation. The emitter dispatches on the actual register value; code
+offsets and helper IDs have separate tags. A surviving unmatched dispatch
+fails compilation instead of producing a runtime default return.
+
+| Application | Artifacts analyzed | Finite target analysis succeeded |
+| --- | ---: | ---: |
+| bcc | 34 | 34 |
+| cilium | 82 | 82 |
+| katran | 6 | 6 |
+| otelcol-ebpf-profiler | 30 | 30 |
+| tetragon | 809 | 809 |
+| tracee | 175 | 175 |
+
+The inventory found register-indirect calls in 940 artifacts and no indirect
+JMPs. The new JMP support is exercised by assembled native fixtures. Exactly
+47 corpus call sites have multiple helper IDs; [multi-helper-sites.json](multi-helper-sites.json)
+retains their names, PCs and targets. These require native-link dispatch too:
+its previous last-seen helper tracking can select the wrong member of a CFG
+join. The proof-side analysis alone does not repair that native lowering.
+
+The 65 helpers observed in these artifacts now use Linux IDs and real typed
+calls, including PID14, UID15, CPU8 and time5. The previous default-zero and
+PID/UID/CPU zero bodies are removed. `bpf_attach_map`, `bpf_attach_tmp_map`
+and `bpf_prog_load_map` are data symbols, not helpers. The shared declaration
+reader and app extern handling now distinguish them. [helper-abi.json](helper-abi.json)
+records return/argument types from vendored libbpf; the same manifest was
+handed to A. C owns the simulator/header changes; V owns the corresponding
+65-row formal mirror and its host instantiations.
+
+Validation through the result Makefile:
+
+- `indirect-regression indirect-bpf`: actual native assembly and generated C
+  agree for both inputs to two-target JMP, CMOV and nested indirect CALL
+  fixtures (42/17, 42/17 and 6/14); all three BPF objects compile.
+- `indirect-kvm`: all six verifier/test-run checks return their exact expected
+  values. Raw JSON records include the commands and complete loader output.
+- `helper-abi-regression`: all 65 Linux IDs/signatures and 130 direct/ID routes
+  pass, with nonzero returns and high-bit argument canaries. IDs0/999 fail
+  compilation with the required unresolved-helper diagnostic.
+- `dispatch-regression cmov-regression`: the native 10,001-iteration loop still
+  returns10,001 (old fuel path returns0); unknown jumps fail; timeout logs
+  survive; all three retained CMOV host grids pass, including eager memory
+  faults and false32 upper clearing. The CMOV register-source temporary is
+  no longer volatile, so a finite register target remains visible to clang.
+- `micro-proofs-build MICRO_CONFIG=../../micro/config/micro_stage2.yaml` via
+  `make -C kprog/x86` builds all13 cases after fixing named-helper GOT call
+  classification. This was the pre-helper-transition build checkpoint;
+  helper65 and ABI changes require the subsequent fresh checks.
+
+The manifest generation-bound fixture attempt is retained in
+[indirect-bound-kvm.log](indirect-bound-kvm.log). It reaches correct original
+BPF results, then native-link rejects native indirect JMP/code CALL. No
+successful bound execution is claimed. T has supplied validated kind7 helper
+pointer literals for the required multi-helper native table lowering; C owns
+its finite CFG/linker implementation.
+
+Fresh phase `finite` generates **1,136/1,136** sources with these helpers and
+F's raw-stack/operand repairs. Its complete header/include/generator snapshot
+was frozen before compiling. The compiler queue and both interrupted historical
+`unbounded`/`label` queues are resumed, retaining every completed record.
+`make -f corpus/results/kprog_app_coverage_20261106/Makefile summarize` updates
+[tables.md](tables.md) and [coverage.csv](coverage.csv); pending rows remain
+explicit. These remain XDP artifact diagnostics until actual app ABI/maps and
+loaded-program inventory are paired.
+
+F's new generation-bound negatives exposed **three accepted ABI safety bugs**:
+undefined entry GPRs, undefined entry flags, and a helper-clobbered register can
+select an unsafe arm that current zero initializers hide. F retains the actual
+accepted sidecars under `kprog/results/kprog_fidelity_20261106/negative/`;
+unsafe programs were never executed. C owns the definedness/liveness repair,
+including opaque callee-save handling; these findings remain open. Actual
+context projection, callback helper ABI, code-address/base binding, native
+multi-target lowering and the six-app runtime arm also remain required work.
+Neither this target census nor its verifier acceptances certify an application
+or close the full operator goal.
+
+The [finite-target archive](finite-targets.tar.gz) contains every per-artifact
+CFG record; [indirect artifacts](indirect-artifacts.tar.gz) contains assembled
+fixtures, generated C/BPF, ABI test sources and complete KVM/compiler records.
+[Fresh generation archive](finite/generated-sources.tar.gz) retains all1,136
+source/input pairs and the frozen complete simulator/include snapshot.
+The complete disassembly-site inventory is in [indirect-sites.tar.gz](indirect-sites.tar.gz).

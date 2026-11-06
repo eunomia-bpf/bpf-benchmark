@@ -1,0 +1,51 @@
+make: Entering directory '/workspaces/repository/kprog/x86'
+make -C ../test \
+	OUTPUT_DIR="/workspaces/repository/kprog/x86/build/negative-native" \
+	KERNEL_OFFSETS="/workspaces/repository/micro/programs/build-x86/kernel_offsets.h" \
+	"/workspaces/repository/kprog/x86/build/negative-native/unchecked_packet_read.native.o"
+make[1]: Entering directory '/workspaces/repository/kprog/test'
+make[1]: '/workspaces/repository/kprog/x86/build/negative-native/unchecked_packet_read.native.o' is up to date.
+make[1]: Leaving directory '/workspaces/repository/kprog/test'
+python3 ../run_micro_sim_batch.py --arch x86 --build-only \
+	--build-dir "micro-prog/build/negative" \
+	--native-build-dir "build/negative-native" \
+	--config "../test/kprog_negative_stage2.yaml" \
+	--jobs 1
+unchecked_packet_read: ok: compile=0.060s proof_insns=17 direct_insns= verify=0.000s test=0.000s 
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `unchecked_packet_read` | ok | 0.060 | 17 |  | 0.000 | 0.000 |  |
+python3 ../run_micro_sim_batch.py --arch x86 --build-only \
+	--build-dir "micro-prog/build" \
+	--config "../../micro/config/micro_stage2.yaml" \
+	
+running 13 benchmarks with 8 jobs
+helper_only_uid_gid: ok: compile=0.092s proof_insns=34 direct_insns= verify=0.000s test=0.000s 
+map_hash_lookup: ok: compile=0.343s proof_insns=205 direct_insns= verify=0.000s test=0.000s 
+map_percpu_array: ok: compile=0.347s proof_insns=204 direct_insns= verify=0.000s test=0.000s 
+map_hash_str_key: ok: compile=0.354s proof_insns=321 direct_insns= verify=0.000s test=0.000s 
+map_array_lookup: ok: compile=0.365s proof_insns=203 direct_insns= verify=0.000s test=0.000s 
+map_array_index_packet: ok: compile=0.369s proof_insns=237 direct_insns= verify=0.000s test=0.000s 
+map_lru_hash_counter: ok: compile=0.372s proof_insns=224 direct_insns= verify=0.000s test=0.000s 
+map_percpu_hash_counter: ok: compile=0.355s proof_insns=221 direct_insns= verify=0.000s test=0.000s 
+helper_chain_simple: ok: compile=0.516s proof_insns=205 direct_insns= verify=0.000s test=0.000s 
+combined_helper_map: ok: compile=0.358s proof_insns=194 direct_insns= verify=0.000s test=0.000s 
+packet_5tuple_classify: ok: compile=0.473s proof_insns=287 direct_insns= verify=0.000s test=0.000s 
+stats_mixed_helpers: ok: compile=1.077s proof_insns=345 direct_insns= verify=0.000s test=0.000s 
+multi_map_policy: ok: compile=1.260s proof_insns=475 direct_insns= verify=0.000s test=0.000s 
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `helper_only_uid_gid` | ok | 0.092 | 34 |  | 0.000 | 0.000 |  |
+| `helper_chain_simple` | ok | 0.516 | 205 |  | 0.000 | 0.000 |  |
+| `map_array_lookup` | ok | 0.365 | 203 |  | 0.000 | 0.000 |  |
+| `map_array_index_packet` | ok | 0.369 | 237 |  | 0.000 | 0.000 |  |
+| `map_hash_lookup` | ok | 0.343 | 205 |  | 0.000 | 0.000 |  |
+| `map_hash_str_key` | ok | 0.354 | 321 |  | 0.000 | 0.000 |  |
+| `map_percpu_array` | ok | 0.347 | 204 |  | 0.000 | 0.000 |  |
+| `map_lru_hash_counter` | ok | 0.372 | 224 |  | 0.000 | 0.000 |  |
+| `map_percpu_hash_counter` | ok | 0.355 | 221 |  | 0.000 | 0.000 |  |
+| `combined_helper_map` | ok | 0.358 | 194 |  | 0.000 | 0.000 |  |
+| `multi_map_policy` | ok | 1.260 | 475 |  | 0.000 | 0.000 |  |
+| `packet_5tuple_classify` | ok | 0.473 | 287 |  | 0.000 | 0.000 |  |
+| `stats_mixed_helpers` | ok | 1.077 | 345 |  | 0.000 | 0.000 |  |
+make: Leaving directory '/workspaces/repository/kprog/x86'

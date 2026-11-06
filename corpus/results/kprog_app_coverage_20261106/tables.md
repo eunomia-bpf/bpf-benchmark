@@ -10,24 +10,31 @@
 | unbounded | cilium | 82 | 82 | 82 | 82 | 2 | 2 | 0 | 0 |
 | unbounded | katran | 6 | 6 | 6 | 6 | 3 | 0 | 0 | 0 |
 | unbounded | otelcol-ebpf-profiler | 30 | 30 | 30 | 30 | 3 | 0 | 0 | 0 |
-| unbounded | tetragon | 809 | 809 | 807 | 698 | 142 | 0 | 0 | 0 |
-| unbounded | tracee | 175 | 175 | 175 | 0 | 0 | 0 | 0 | 0 |
+| unbounded | tetragon | 809 | 809 | 807 | 807 | 165 | 0 | 0 | 0 |
+| unbounded | tracee | 175 | 175 | 175 | 90 | 6 | 0 | 0 | 0 |
 | label | bcc | 34 | 34 | 34 | 34 | 10 | 0 | 0 | 0 |
 | label | cilium | 82 | 82 | 82 | 82 | 2 | 2 | 0 | 0 |
 | label | katran | 6 | 6 | 6 | 6 | 3 | 0 | 0 | 0 |
 | label | otelcol-ebpf-profiler | 30 | 30 | 30 | 30 | 3 | 0 | 0 | 0 |
-| label | tetragon | 809 | 809 | 807 | 441 | 87 | 0 | 0 | 0 |
+| label | tetragon | 809 | 809 | 807 | 801 | 165 | 0 | 0 | 0 |
 | label | tracee | 175 | 175 | 175 | 0 | 0 | 0 | 0 | 0 |
+| finite | bcc | 34 | 34 | 34 | 34 | 34 | 0 | 0 | 0 |
+| finite | cilium | 82 | 82 | 82 | 82 | 62 | 0 | 0 | 0 |
+| finite | katran | 6 | 6 | 6 | 6 | 5 | 0 | 0 | 0 |
+| finite | otelcol-ebpf-profiler | 30 | 30 | 30 | 4 | 4 | 0 | 0 | 0 |
+| finite | tetragon | 809 | 809 | 809 | 0 | 0 | 0 | 0 | 0 |
+| finite | tracee | 175 | 175 | 175 | 0 | 0 | 0 | 0 | 0 |
 
 Failure causes at this checkpoint:
 
 - 808 × baseline/compile-failed: `A call to built-in function 'abort' is not supported.`
-- 571 × unbounded/compile-failed: `A call to built-in function 'abort' is not supported.`
-- 403 × label/compile-failed: `A call to built-in function 'abort' is not supported.`
+- 706 × unbounded/compile-failed: `A call to built-in function 'abort' is not supported.`
+- 648 × label/compile-failed: `A call to built-in function 'abort' is not supported.`
+- 146 × unbounded/compile-failed: `compiler exit 124`
 - 131 × baseline/compile-failed: `compiler exit 124`
 - 121 × baseline/verifier-rejected: `invalid size of register fill`
-- 111 × unbounded/compile-failed: `compiler exit 124`
-- 84 × label/compile-failed: `compiler exit 124`
+- 121 × label/compile-failed: `compiler exit 124`
+- 21 × finite/compile-failed: `compiler exit 124`
 - 10 × baseline/load-preparation-failed: `libbpf: failed to find BTF for extern 'stats': -3`
 - 10 × baseline/verifier-rejected: `R8 pointer arithmetic with <<= operator prohibited`
 - 3 × baseline/compile-failed: `clang frontend command failed with exit code 135 (use -v to see invocation)`

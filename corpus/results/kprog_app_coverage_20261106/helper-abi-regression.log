@@ -1,0 +1,4 @@
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_helper_abi.py
+cc -O2 -Wno-c23-extensions -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/vendor/libbpf/include/uapi /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/helper-abi.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/helper-abi
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/indirect-build/helper-abi
+65 Linux helper signatures, 130 direct/ID routes: 0 failures
