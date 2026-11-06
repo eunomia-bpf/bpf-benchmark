@@ -2615,6 +2615,10 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0958 found a line-reference class reading two of
+three forms; line ids 23 -> 46, unexplained 76 -> 59.
+
+
 Step 0957 extended the self-test to four cases, one
 per check function; a fifth had to be dropped because
 another checker owns it.

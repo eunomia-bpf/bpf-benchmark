@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0958 - a line reference has three forms, and two were read
+
+The line that reports the section's figures split the leftovers into classes,
+and one class read a line reference only in two of its three forms. A single
+identifier and the end of a range matched; the start of a range, as in a run of
+lines beginning at a number, did not, so twenty-three of the leftovers were
+references the class had missed.
+
+The pattern for a range's end already existed and the start's did not, which is
+why the gap survived: the set looked populated. With all three forms the count
+of line identifiers rises from twenty-three to forty-six, and the unexplained
+remainder falls from seventy-six to fifty-nine.
+
+Two escapes had to be corrected while writing it, both of the same kind as
+earlier in this sequence: a raw string with two backslashes matches a literal
+backslash and a letter, not a digit class, so the added pattern matched nothing
+until it was written with one.
+
+Census unchanged; one figure class now reads all three forms.
+
 ### Step 0957 - one self-test case per check function
 
 The self-test covered two claims; it now covers four, one for each check

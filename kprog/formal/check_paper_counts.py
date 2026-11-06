@@ -3745,8 +3745,11 @@ def figure_coverage(log: pathlib.Path) -> tuple[int, int, int, set[int]]:
     # module count, or a Lean line identifier is bound by the check that
     # binds its whole; the rest stand alone and are reported as such.
     left = figs - counts - held
+    # A line reference appears three ways: a single id (`L478`), the end
+    # of a range (`L470--478`), and the start of one (`L478--489`).
     line_ids = {v for v in left if re.search(r"\bL%d\b" % v, flat)
-                or re.search(r"\bL\\d+--%d\b" % v, flat)}
+                or re.search(r"\bL\d+--%d\b" % v, flat)
+                or re.search(r"\bL%d--\d+\b" % v, flat)}
     rows = {v for v in left - line_ids
             if re.search(r"\b%d-row\b|\b%d rows\b" % (v, v), flat)}
     catches = {v for v in left - line_ids - rows
