@@ -38,12 +38,9 @@
  *   - `MOVZX_REG`/`MOVSX_REG` are direct (`X86_SIM_L_EXEC_MOVX_REG`); the chain
  *     arm is inline but carries the same body, so they are still compared at
  *     every AUX.
- *   - `CALL_HELPER` has no chain arm at all (the chain no-op) yet is lowerable
- *     to `X86_SIM_BPF_CALL_ID`; the oracle plants RAX = 0 / SCALAR and drives
- *     only the helpers that write RAX = 0 (ids 4/5/6), which is exactly the
- *     state the chain's no-op leaves.
- *   - `CALL_REG`'s chain arm is `X86_SIM_BPF_CALL_REG((SRC))`, so the oracle
- *     plants SRC to a helper id in {4,5,6} (ids 1/2/3/7 call host functions).
+ *   - CALL_HELPER uses the standalone helper-dispatch path (outside the raw
+ *     opcode chain); compare real nonzero helper returns, never a no-op.
+ *   - CALL_REG uses real sparse Linux IDs and the typed host environment.
  */
 
 #define X86_SIM_ENABLE_STACK 1
@@ -56,7 +53,9 @@ typedef signed int __s32;
 
 #define __always_inline inline
 
+#include "x86_helper_environment_host.h"
 #include "../x86/x86_sim_local_bpf.h"
+#include "x86_helper_failure_host.h"
 #include "generated/x86_specialization.h"
 
 #include <stdio.h>
@@ -306,7 +305,7 @@ static int snap_eq(const struct snap *a, const struct snap *b)
 		else if ((OP) == X86_OP_ANDN_MEM)                         \
 			SETBASE(0U);                                      \
 		if ((OP) == X86_OP_CALL_REG)                              \
-			X86_SIM_L_WRITE_REG_WIDTH(SRC, 4, X86_WIDTH_64);  \
+			X86_SIM_L_WRITE_REG_WIDTH(SRC, 15, X86_WIDTH_64);  \
 		if ((OP) == X86_OP_CALL_HELPER)                           \
 			X86_SIM_L_WRITE_REG_PTR_TAG(X86_RAX, 0,           \
 						    X86_SIM_TAG_SCALAR);\
@@ -365,7 +364,7 @@ static __u64 imm_for(__u8 op)
 	case X86_OP_BT_MEM_IMM:
 		return 0x1234ULL;
 	case X86_OP_CALL_HELPER:
-		return 4ULL;
+		return 15ULL;
 	default:
 		return 0ULL;
 	}
@@ -397,7 +396,10 @@ static void check_token(__u8 op, unsigned dst, unsigned src, unsigned flags,
 
 	/* ---- side A: the real runtime dispatcher ---- */
 	PLANT(op, dst, src);
-	X86_SIM_RUN_OP(op, dst, src, flags, aux, imm);
+	if (op == X86_OP_CALL_HELPER)
+        X86_SIM_BPF_CALL_ID(imm);
+    else
+        X86_SIM_RUN_OP(op, dst, src, flags, aux, imm);
 	TAKE_SNAP(sa);
 
 	/* ---- side B: the encoder's emitted body, restated by hand ---- */
@@ -615,7 +617,7 @@ int main(void)
 				if (SPEC[i].op == X86_OP_CALL_HELPER) {
 					unsigned k;
 
-					for (k = 4U; k <= 6U; k++)
+					for (k = 14U; k <= 16U; k++)
 						check_token(
 							SPEC[i].op,
 							dst, src,

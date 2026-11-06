@@ -49,62 +49,22 @@ typedef signed int __s32;
  * sentinel-lane pointer reads inside the shared generated load/store byte
  * ladders; every other fact stays under the same -Werror wall. */
 #pragma GCC diagnostic ignored "-Warray-bounds"
+#include "x86_helper_environment_host.h"
 #include "../x86/x86_sim_local_bpf.h"
+#include "x86_helper_failure_host.h"
 #include <string.h>
 #include <stdio.h>
-/* Capturing native helper stubs. The CALL_ID dispatch at slot ids 1..7
- * routes lookup/update/delete/ktime to these; the static-zero shapes never
- * call a native. Value-only captures: each lane lands the pointer bit
- * pattern the stub actually received. */
-static __u64 last_val[4];
-static unsigned last_n;
-
+#define last_val ora_arguments
+#define last_n ora_argc
 static void capture_reset(void)
 {
-	unsigned i;
-	for (i = 0; i < 4; i++)
-		last_val[i] = 0xabcdefabcdefabcdULL;
-	last_n = 0;
+    unsigned i;
+    for (i = 0; i < 5; i++) last_val[i] = 0xabcdefabcdefabcdULL;
+    last_n = 0;
 }
-
-#define ORA_MAP_PTR 0x0000123400005678ULL
-#define ORA_UPD_RET (-7LL)
-#define ORA_DEL_RET 3LL
-
-static void *bpf_map_lookup_elem(void *map, const void *key)
-{
-	last_val[0] = (__u64)(unsigned long)map;
-	last_val[1] = (__u64)(unsigned long)key;
-	last_n = 2;
-	return (void *)(unsigned long)ORA_MAP_PTR;
-}
-
-static long bpf_map_update_elem(void *map, const void *key,
-				const void *value, __u64 flags)
-{
-	last_val[0] = (__u64)(unsigned long)map;
-	last_val[1] = (__u64)(unsigned long)key;
-	last_val[2] = (__u64)(unsigned long)value;
-	last_val[3] = (__u64)flags;
-	last_n = 4;
-	return ORA_UPD_RET;
-}
-
-static long bpf_map_delete_elem(void *map, const void *key)
-{
-	last_val[0] = (__u64)(unsigned long)map;
-	last_val[1] = (__u64)(unsigned long)key;
-	last_n = 2;
-	return ORA_DEL_RET;
-}
-
-#define ORA_KTIME 0xaabbccddeeff0011ULL
-
-static __u64 bpf_ktime_get_ns(void)
-{
-	last_n = 0;
-	return ORA_KTIME;
-}
+static unsigned helper_failures;
+#undef X86_SIM_L_UNSUPPORTED_HELPER
+#define X86_SIM_L_UNSUPPORTED_HELPER() do { helper_failures++; } while (0)
 
 static int failures_unused;
 static unsigned long cases;
@@ -719,8 +679,8 @@ static __u64 scene_run_ops(void)
 	X86_SIM_X86_RET();
 }
 
-/* Helper-dispatch scene: the CALL_ID slot ladder over armed ids 1..7, the
- * static-zero shapes, the lookup/update/delete natives and the default arm.
+/* Helper-dispatch scene: the sparse Linux-ID ladder, nonzero scalar
+ * results, lookup/update/delete calls and the explicit failure arm.
  * The model mirrors rax + rdi/rdi-tag side-effects and the capture lanes. */
 static const __u64 ORA_MAP = ORA_MAP_PTR;
 
@@ -809,53 +769,53 @@ static __u64 scene_helper_dispatch(void)
 	mreg[X86_RSI] = 0x2000ULL;
 	COMPARE_REGFILE("helper_id3", 0xDEAD0015ULL);
 
-	/* ids 4,5: static-zero wide write; id 6: 32-bit write; id 7: ktime */
+	/* UID/PID use Linux IDs 15/14; CPU ID 8 returns a 32-bit value. */
 	PLANT_REG(X86_RAX, 0x9000ULL, 0U);
-	X86_SIM_BPF_CALL_ID(4ULL);
-	mreg[X86_RAX] = 0ULL;
+	X86_SIM_BPF_CALL_ID(15ULL);
+	mreg[X86_RAX] = ora_expected_result(15);
 	mtag[X86_RAX] = 0U;
-	COMPARE_REGFILE("helper_id4", 0xDEAD0016ULL);
+	COMPARE_REGFILE("helper_uid15", 0xDEAD0016ULL);
 	PLANT_REG(X86_RAX, 0x9000ULL, 0U);
-	X86_SIM_BPF_CALL_ID(5ULL);
-	mreg[X86_RAX] = 0ULL;
+	X86_SIM_BPF_CALL_ID(14ULL);
+	mreg[X86_RAX] = ora_expected_result(14);
 	mtag[X86_RAX] = 0U;
-	COMPARE_REGFILE("helper_id5", 0xDEAD0017ULL);
+	COMPARE_REGFILE("helper_pid14", 0xDEAD0017ULL);
 	PLANT_REG(X86_RAX, 0x9000ULL, 0U);
-	X86_SIM_BPF_CALL_ID(6ULL);
-	mreg[X86_RAX] = 0ULL;
+	X86_SIM_BPF_CALL_ID(8ULL);
+	mreg[X86_RAX] = ora_expected_result(8);
 	mtag[X86_RAX] = 0U;
-	COMPARE_REGFILE("helper_id6", 0xDEAD0018ULL);
-	/* id 7 ktime: native capture, 64-bit rax */
+	COMPARE_REGFILE("helper_cpu8", 0xDEAD0018ULL);
+	/* ID 5 ktime: native capture, 64-bit rax. */
 	PLANT_REG(X86_RAX, 0x9000ULL, 0U);
 	capture_reset();
-	X86_SIM_BPF_CALL_ID(7ULL);
+	X86_SIM_BPF_CALL_ID(5ULL);
 	mreg[X86_RAX] = ORA_KTIME;
 	mtag[X86_RAX] = 0U;
 	cases = cases + 1U;
 	if (last_n != 0U) {
-		printf("MISMATCH helper id7 ktime capture\n");
+		printf("MISMATCH helper id5 ktime capture\n");
 		return 0xDEAD001CULL;
 	}
-	COMPARE_REGFILE("helper_id7", 0xDEAD001DULL);
-	/* id 8 named helper reaches the default zero arm */
+	COMPARE_REGFILE("helper_ktime5", 0xDEAD001DULL);
+	/* Gap ID 13 reaches the failure arm and preserves RAX. */
 	PLANT_REG(X86_RAX, 0x9000ULL, 0U);
-	X86_SIM_BPF_CALL_ID(8ULL);
-	mreg[X86_RAX] = 0ULL;
+	X86_SIM_BPF_CALL_ID(13ULL);
+	mreg[X86_RAX] = 0x9000ULL;
 	mtag[X86_RAX] = 0U;
-	COMPARE_REGFILE("helper_id8_default", 0xDEAD0019ULL);
+	COMPARE_REGFILE("helper_id13_default", 0xDEAD0019ULL);
 	/* id 0 reaches the default arm too */
 	PLANT_REG(X86_RAX, 0x9000ULL, 0U);
 	X86_SIM_BPF_CALL_ID(0ULL);
-	mreg[X86_RAX] = 0ULL;
+	mreg[X86_RAX] = 0x9000ULL;
 	mtag[X86_RAX] = 0U;
 	COMPARE_REGFILE("helper_id0_default", 0xDEAD001AULL);
-	/* CALL_REG routes rsi's value through the same slot ladder: rsi = id 6
-	 * (smp_processor_id, 32-bit zero write) */
-	PLANT_REG(X86_RSI, 6ULL, 0U);
+	if (helper_failures != 2U) return 0xDEAD001EULL;
+	/* CALL_REG routes RSI through the same ladder: Linux CPU ID 8. */
+	PLANT_REG(X86_RSI, 8ULL, 0U);
 	PLANT_REG(X86_RAX, 0x9000ULL, 0U);
 	X86_SIM_BPF_CALL_REG(X86_RSI);
-	mreg[X86_RSI] = 6ULL;
-	mreg[X86_RAX] = 0ULL;
+	mreg[X86_RSI] = 8ULL;
+	mreg[X86_RAX] = ora_expected_result(8);
 	mtag[X86_RAX] = 0U;
 	COMPARE_REGFILE("helper_call_reg", 0xDEAD001BULL);
 	(void)i;

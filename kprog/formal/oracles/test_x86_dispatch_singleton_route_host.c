@@ -43,7 +43,9 @@ typedef signed long long __s64;
 
 #define __always_inline inline
 
+#include "x86_helper_environment_host.h"
 #include "../x86/x86_sim_local_bpf.h"
+#include "x86_helper_failure_host.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -283,41 +285,9 @@ static int snap_eq(const struct snap *a, const struct snap *b, const char *what,
 	X86_SIM_L_WRITE_REG_PTR_TAG(X86_RSP, (void *)(long)-32LL,           \
 				    X86_SIM_TAG_SCALAR)
 
-/* ---- The host-calling helpers, stubbed with fixed returns -------------- */
-
-#define ORA_MAP_PTR ((void *)0x0000123400005678ULL)
-#define ORA_UPD_RET ((long)-7LL)
-#define ORA_DEL_RET ((long)3LL)
-#define ORA_KTIME 0xaabbccddeeff0011ULL
-
-static void *bpf_map_lookup_elem(void *map, const void *key)
-{
-	(void)map;
-	(void)key;
-	return ORA_MAP_PTR;
-}
-
-static long bpf_map_update_elem(void *map, const void *key,
-				const void *value, __u64 flags)
-{
-	(void)map;
-	(void)key;
-	(void)value;
-	(void)flags;
-	return ORA_UPD_RET;
-}
-
-static long bpf_map_delete_elem(void *map, const void *key)
-{
-	(void)map;
-	(void)key;
-	return ORA_DEL_RET;
-}
-
-static __u64 bpf_ktime_get_ns(void)
-{
-	return ORA_KTIME;
-}
+static unsigned helper_failures;
+#undef X86_SIM_L_UNSUPPORTED_HELPER
+#define X86_SIM_L_UNSUPPORTED_HELPER() do { helper_failures++; } while (0)
 
 /* ---- Per-singleton models ---------------------------------------------- */
 
@@ -906,50 +876,17 @@ static void model_callmem(int is_copy, int is_reg, __u64 imm, struct snap *b)
 	b->t[X86_RAX] = b->t[X86_RDI];
 }
 
-/* callReg: the whole helper-slot ladder, against the stubbed host returns.
- * The ids 2/3 write the long result through the 64-bit write; 4/5 write a
- * constant 64; 6 writes a constant 32; 7 the stubbed nanoseconds. */
+/* CALL_REG selects a public-ABI host callee by its sparse Linux ID. */
 static void model_callreg(unsigned src, struct snap *b)
 {
-	__u64 id = b->x[src];
-
-	switch (id) {
-	case 1ULL:
-		b->x[X86_RAX] = (__u64)(long)ORA_MAP_PTR;
-		b->t[X86_RAX] = X86_SIM_TAG_MAP_VALUE;
-		break;
-	case 2ULL:
-		b->x[X86_RAX] = model_partial_write(b->x[X86_RAX],
-			(__u64)(long)ORA_UPD_RET, X86_WIDTH_64);
-		b->t[X86_RAX] = X86_SIM_TAG_SCALAR;
-		break;
-	case 3ULL:
-		b->x[X86_RAX] = model_partial_write(b->x[X86_RAX],
-			(__u64)(long)ORA_DEL_RET, X86_WIDTH_64);
-		b->t[X86_RAX] = X86_SIM_TAG_SCALAR;
-		break;
-	case 4ULL:
-	case 5ULL:
-		b->x[X86_RAX] = model_partial_write(b->x[X86_RAX], 0ULL,
-						    X86_WIDTH_64);
-		b->t[X86_RAX] = X86_SIM_TAG_SCALAR;
-		break;
-	case 6ULL:
-		b->x[X86_RAX] = model_partial_write(b->x[X86_RAX], 0ULL,
-						    X86_WIDTH_32);
-		b->t[X86_RAX] = X86_SIM_TAG_SCALAR;
-		break;
-	case 7ULL:
-		b->x[X86_RAX] = model_partial_write(b->x[X86_RAX], ORA_KTIME,
-						    X86_WIDTH_64);
-		b->t[X86_RAX] = X86_SIM_TAG_SCALAR;
-		break;
-	default:
-		b->x[X86_RAX] = model_partial_write(b->x[X86_RAX], 0ULL,
-						    X86_WIDTH_64);
-		b->t[X86_RAX] = X86_SIM_TAG_SCALAR;
-		break;
-	}
+    __u64 id = b->x[src];
+    __u64 result = ora_expected_result(id);
+    /* Every armed stub returns nonzero; an unarmed route records failure
+     * and leaves the incoming register frame untouched. */
+    if (result != 0) {
+        b->x[X86_RAX] = result;
+        b->t[X86_RAX] = ora_pointer_result(id) ? X86_SIM_TAG_MAP_VALUE : X86_SIM_TAG_SCALAR;
+    }
 }
 
 /* movImm: FLAGS-width write of the immediate at the AUX-named lane. */
@@ -1884,6 +1821,7 @@ static void check_callreg(const char *what, __u64 id)
 {
 	struct snap seed, a;
 	struct snap b;
+    unsigned failed_before = helper_failures;
 
 	{
 		DECL_STATE();
@@ -1901,6 +1839,8 @@ static void check_callreg(const char *what, __u64 id)
 	model_callreg(X86_RAX, &b);
 
 	cases++;
+    if (helper_failures != failed_before + (ora_expected_result(id) == 0))
+        failures++;
 	if (!snap_eq(&a, &b, what, 0U))
 		failures++;
 	cases++;

@@ -1,33 +1,9 @@
 #!/usr/bin/env python3
-"""Generate the shared x86-64 helper-id -> helper-body dispatch contract.
+"""Generate the sparse Linux helper-ID/body dispatch contract.
 
-The hand-written `X86_SIM_BPF_CALL_ID(ID)` ladder in
-`kprog/x86/x86_sim_local_bpf.h` binds a 64-bit BPF helper id to one of seven
-`X86_SIM_BPF_CALL_bpf_*()` body macros, with a default arm that zeroes RAX:
-
-  * the seven armed helpers are `bpf_map_lookup_elem .. bpf_ktime_get_ns`, the
-    helper ids `1 .. 7` in that ladder order;
-  * every other id the simulator names -- `bpf_current_task_under_cgroup`
-    (8) .. `bpf_get_current_task` (21) and every id that names no helper at all
-    -- falls into the default zero-write arm, because those ids have no
-    `X86_SIM_BPF_CALL_bpf_*` body macro.
-
-The generated Lean tables `GeneratedX86HelperDispatch.helperIds` /
-`helperNames` / `helperBodies` and the C macros `KPROG_X86_HELPER_SLOT` /
-`KPROG_X86_HELPER_COUNT` bind each helper id to the ladder slot the hand-written
-ladder dispatches it to. The generated header's
-`_Static_assert(X86_SIM_HELPER_bpf_<name> == <id>ULL, ...)` drift checks pin the
-helper-id defines to the generated table, and `KProgFormal/X86HelperDispatch.lean`
-proves the generated tables equal an independent literal construction, that
-`slotOf` names exactly the seven armed helper ids, and that ids `8 .. 21` reach
-the default arm.
-
-The generator is independent of the ladder it describes: it holds its own
-literal enumeration and re-derives the live `X86_SIM_BPF_CALL_ID` ladder text
-from the simulator header, then requires the two to agree.
-
-The generated header is included by `x86_sim_local_bpf.h` after the
-`X86_SIM_HELPER_bpf_*` id defines, exactly as the register-dispatch mirror.
+IDs are independently checked against vendored libbpf's public declarations;
+the live production ladder must match every armed row and the compile-error
+default. Unarmed helpers never produce a synthetic return value.
 """
 import argparse
 import json
@@ -40,23 +16,80 @@ HEADER = ROOT.parent / "x86/x86_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedX86HelperDispatch.lean"
 CHEADER = ROOT / "generated/x86_helper_dispatch.h"
 
-# The independent enumeration of the seven armed ladder arms, in ladder order:
-# (name, helper id, body macro).
+# Linux helper identities in numeric order, independent of the production ladder.
 _ARMED = [
-    ("bpf_map_lookup_elem", 1, "X86_SIM_BPF_CALL_bpf_map_lookup_elem"),
-    ("bpf_map_update_elem", 2, "X86_SIM_BPF_CALL_bpf_map_update_elem"),
-    ("bpf_map_delete_elem", 3, "X86_SIM_BPF_CALL_bpf_map_delete_elem"),
-    ("bpf_get_current_uid_gid", 4, "X86_SIM_BPF_CALL_bpf_get_current_uid_gid"),
-    ("bpf_get_current_pid_tgid", 5, "X86_SIM_BPF_CALL_bpf_get_current_pid_tgid"),
-    ("bpf_get_smp_processor_id", 6, "X86_SIM_BPF_CALL_bpf_get_smp_processor_id"),
-    ("bpf_ktime_get_ns", 7, "X86_SIM_BPF_CALL_bpf_ktime_get_ns"),
+    ('bpf_map_lookup_elem', 1, 'X86_SIM_BPF_CALL_bpf_map_lookup_elem'),
+    ('bpf_map_update_elem', 2, 'X86_SIM_BPF_CALL_bpf_map_update_elem'),
+    ('bpf_map_delete_elem', 3, 'X86_SIM_BPF_CALL_bpf_map_delete_elem'),
+    ('bpf_probe_read', 4, 'X86_SIM_BPF_CALL_bpf_probe_read'),
+    ('bpf_ktime_get_ns', 5, 'X86_SIM_BPF_CALL_bpf_ktime_get_ns'),
+    ('bpf_trace_printk', 6, 'X86_SIM_BPF_CALL_bpf_trace_printk'),
+    ('bpf_get_prandom_u32', 7, 'X86_SIM_BPF_CALL_bpf_get_prandom_u32'),
+    ('bpf_get_smp_processor_id', 8, 'X86_SIM_BPF_CALL_bpf_get_smp_processor_id'),
+    ('bpf_skb_store_bytes', 9, 'X86_SIM_BPF_CALL_bpf_skb_store_bytes'),
+    ('bpf_l3_csum_replace', 10, 'X86_SIM_BPF_CALL_bpf_l3_csum_replace'),
+    ('bpf_l4_csum_replace', 11, 'X86_SIM_BPF_CALL_bpf_l4_csum_replace'),
+    ('bpf_tail_call', 12, 'X86_SIM_BPF_CALL_bpf_tail_call'),
+    ('bpf_get_current_pid_tgid', 14, 'X86_SIM_BPF_CALL_bpf_get_current_pid_tgid'),
+    ('bpf_get_current_uid_gid', 15, 'X86_SIM_BPF_CALL_bpf_get_current_uid_gid'),
+    ('bpf_get_current_comm', 16, 'X86_SIM_BPF_CALL_bpf_get_current_comm'),
+    ('bpf_skb_get_tunnel_key', 20, 'X86_SIM_BPF_CALL_bpf_skb_get_tunnel_key'),
+    ('bpf_skb_set_tunnel_key', 21, 'X86_SIM_BPF_CALL_bpf_skb_set_tunnel_key'),
+    ('bpf_redirect', 23, 'X86_SIM_BPF_CALL_bpf_redirect'),
+    ('bpf_perf_event_output', 25, 'X86_SIM_BPF_CALL_bpf_perf_event_output'),
+    ('bpf_skb_load_bytes', 26, 'X86_SIM_BPF_CALL_bpf_skb_load_bytes'),
+    ('bpf_get_stackid', 27, 'X86_SIM_BPF_CALL_bpf_get_stackid'),
+    ('bpf_csum_diff', 28, 'X86_SIM_BPF_CALL_bpf_csum_diff'),
+    ('bpf_skb_change_type', 32, 'X86_SIM_BPF_CALL_bpf_skb_change_type'),
+    ('bpf_get_current_task', 35, 'X86_SIM_BPF_CALL_bpf_get_current_task'),
+    ('bpf_probe_write_user', 36, 'X86_SIM_BPF_CALL_bpf_probe_write_user'),
+    ('bpf_current_task_under_cgroup', 37, 'X86_SIM_BPF_CALL_bpf_current_task_under_cgroup'),
+    ('bpf_skb_change_tail', 38, 'X86_SIM_BPF_CALL_bpf_skb_change_tail'),
+    ('bpf_skb_pull_data', 39, 'X86_SIM_BPF_CALL_bpf_skb_pull_data'),
+    ('bpf_skb_change_head', 43, 'X86_SIM_BPF_CALL_bpf_skb_change_head'),
+    ('bpf_xdp_adjust_head', 44, 'X86_SIM_BPF_CALL_bpf_xdp_adjust_head'),
+    ('bpf_probe_read_str', 45, 'X86_SIM_BPF_CALL_bpf_probe_read_str'),
+    ('bpf_get_socket_cookie', 46, 'X86_SIM_BPF_CALL_bpf_get_socket_cookie'),
+    ('bpf_skb_adjust_room', 50, 'X86_SIM_BPF_CALL_bpf_skb_adjust_room'),
+    ('bpf_xdp_adjust_meta', 54, 'X86_SIM_BPF_CALL_bpf_xdp_adjust_meta'),
+    ('bpf_override_return', 58, 'X86_SIM_BPF_CALL_bpf_override_return'),
+    ('bpf_xdp_adjust_tail', 65, 'X86_SIM_BPF_CALL_bpf_xdp_adjust_tail'),
+    ('bpf_get_stack', 67, 'X86_SIM_BPF_CALL_bpf_get_stack'),
+    ('bpf_skb_load_bytes_relative', 68, 'X86_SIM_BPF_CALL_bpf_skb_load_bytes_relative'),
+    ('bpf_fib_lookup', 69, 'X86_SIM_BPF_CALL_bpf_fib_lookup'),
+    ('bpf_get_current_cgroup_id', 80, 'X86_SIM_BPF_CALL_bpf_get_current_cgroup_id'),
+    ('bpf_sk_lookup_udp', 85, 'X86_SIM_BPF_CALL_bpf_sk_lookup_udp'),
+    ('bpf_sk_release', 86, 'X86_SIM_BPF_CALL_bpf_sk_release'),
+    ('bpf_map_push_elem', 87, 'X86_SIM_BPF_CALL_bpf_map_push_elem'),
+    ('bpf_map_pop_elem', 88, 'X86_SIM_BPF_CALL_bpf_map_pop_elem'),
+    ('bpf_sk_fullsock', 95, 'X86_SIM_BPF_CALL_bpf_sk_fullsock'),
+    ('bpf_skc_lookup_tcp', 99, 'X86_SIM_BPF_CALL_bpf_skc_lookup_tcp'),
+    ('bpf_send_signal', 109, 'X86_SIM_BPF_CALL_bpf_send_signal'),
+    ('bpf_probe_read_user', 112, 'X86_SIM_BPF_CALL_bpf_probe_read_user'),
+    ('bpf_probe_read_kernel', 113, 'X86_SIM_BPF_CALL_bpf_probe_read_kernel'),
+    ('bpf_probe_read_user_str', 114, 'X86_SIM_BPF_CALL_bpf_probe_read_user_str'),
+    ('bpf_probe_read_kernel_str', 115, 'X86_SIM_BPF_CALL_bpf_probe_read_kernel_str'),
+    ('bpf_jiffies64', 118, 'X86_SIM_BPF_CALL_bpf_jiffies64'),
+    ('bpf_get_netns_cookie', 122, 'X86_SIM_BPF_CALL_bpf_get_netns_cookie'),
+    ('bpf_sk_assign', 124, 'X86_SIM_BPF_CALL_bpf_sk_assign'),
+    ('bpf_ktime_get_boot_ns', 125, 'X86_SIM_BPF_CALL_bpf_ktime_get_boot_ns'),
+    ('bpf_ringbuf_output', 130, 'X86_SIM_BPF_CALL_bpf_ringbuf_output'),
+    ('bpf_copy_from_user', 148, 'X86_SIM_BPF_CALL_bpf_copy_from_user'),
+    ('bpf_redirect_neigh', 152, 'X86_SIM_BPF_CALL_bpf_redirect_neigh'),
+    ('bpf_redirect_peer', 155, 'X86_SIM_BPF_CALL_bpf_redirect_peer'),
+    ('bpf_get_current_task_btf', 158, 'X86_SIM_BPF_CALL_bpf_get_current_task_btf'),
+    ('bpf_get_attach_cookie', 174, 'X86_SIM_BPF_CALL_bpf_get_attach_cookie'),
+    ('bpf_task_pt_regs', 175, 'X86_SIM_BPF_CALL_bpf_task_pt_regs'),
+    ('bpf_loop', 181, 'X86_SIM_BPF_CALL_bpf_loop'),
+    ('bpf_get_func_ret', 184, 'X86_SIM_BPF_CALL_bpf_get_func_ret'),
+    ('bpf_ima_file_hash', 193, 'X86_SIM_BPF_CALL_bpf_ima_file_hash'),
 ]
 EXPECTED = {
     "schema_version": 1,
     "operation": "x86HelperDispatch",
     "id_bits": 64,
     "helper_count": len(_ARMED),
-    "default_body": "X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, 0, X86_WIDTH_64)",
+    "default_body": "X86_SIM_L_UNSUPPORTED_HELPER()",
     "helpers": [{"name": name, "define": "X86_SIM_HELPER_" + name,
                  "id": number, "body": body}
                 for name, number, body in _ARMED],
@@ -78,7 +111,7 @@ LADDER_ARM = re.compile(
     r"case\s+KPROG_X86_HELPER_SLOT\(\s*(X86_SIM_HELPER_bpf_[A-Za-z0-9_]+)\s*\)"
     r"\s*:\s*(X86_SIM_BPF_CALL_bpf_[A-Za-z0-9_]+)\s*\(\s*\)\s*;")
 LADDER_DEFAULT = re.compile(
-    r"default\s*:\s*(X86_SIM_L_WRITE_REG_WIDTH\s*\([^;]*?\))\s*;")
+    r"default\s*:\s*(X86_SIM_L_UNSUPPORTED_HELPER\s*\(\s*\))\s*;")
 # The hand-written inline id comparisons the routed ladder replaces.
 LADDER_HAND_TEST = re.compile(
     r"__x86_helper_id\s*==\s*X86_SIM_HELPER_bpf_")
@@ -167,6 +200,12 @@ def load() -> dict:
         raise SystemExit(f"invalid x86 helper-dispatch bodies: {helpers!r}")
     if len(helpers) != EXPECTED["helper_count"]:
         raise SystemExit("x86 helper count disagrees with helper list length")
+    public = {name: int(number) for name, number in re.findall(
+        r"\(\*\s*const\s+(bpf_\w+)\)[^;]*=\s*\(void\s*\*\)\s*(\d+)\s*;",
+        (ROOT.parent.parent / "vendor/libbpf/src/bpf_helper_defs.h").read_text())}
+    for name, number, _body in _ARMED:
+        if public.get(name) != number:
+            raise SystemExit(f"Linux helper declaration disagrees: {name}={number}")
     check_against_header()
     return EXPECTED
 
@@ -182,7 +221,7 @@ def render_lean(spec: dict) -> str:
 import Std
 namespace KProgFormal.GeneratedX86HelperDispatch
 /-- The number of helper ids the `X86_SIM_BPF_CALL_ID` ladder dispatches to a
-body macro (`bpf_map_lookup_elem .. bpf_ktime_get_ns`). -/
+body macro, in sparse Linux numeric order. -/
 def helperCount : Nat := {count}
 /-- The width in bits of a decoded BPF helper id. -/
 def idBits : Nat := {bits}
@@ -233,20 +272,9 @@ def render_c(spec: dict) -> str:
     return f'''/* Generated by generate_x86_helper_dispatch_spec.py from x86_helper_dispatch_spec.json. */
 #ifndef KPROG_FORMAL_GENERATED_X86_HELPER_DISPATCH_H
 #define KPROG_FORMAL_GENERATED_X86_HELPER_DISPATCH_H
-/*
- * x86-64 helper-id -> helper-body binding: the `X86_SIM_BPF_CALL_ID` ladder
- * dispatches the helper ids `{helpers[0]["id"]} .. {helpers[-1]["id"]}`, in
- * `bpf_map_lookup_elem .. bpf_ktime_get_ns` order, to the body macros
- * `X86_SIM_BPF_CALL_bpf_*`, so the ladder slot index equals `helper id - 1`
- * for exactly those ids. Every other id the simulator names
- * (`bpf_current_task_under_cgroup` (8) .. `bpf_get_current_task` (21)) and
- * every id that names no helper reaches the default zero-write arm.
- * `KProgFormal/X86HelperDispatch.lean` proves the generated `helperIds` /
- * `helperNames` / `helperBodies` tables equal an independent literal
- * construction and that `slotOf` names exactly the armed helper ids.
- * This header is included after the `X86_SIM_HELPER_bpf_*` id defines, so the
- * drift checks bind the hand-written defines to the generated table.
- */
+/* Sparse Linux helper IDs, checked against vendored libbpf declarations.
+ * Slots follow numeric ID order. An unarmed ID reaches a compile-time error;
+ * no default return value or helper substitution is permitted. */
 /* The number of helper ids the ladder dispatches to a body macro. */
 #define KPROG_X86_HELPER_COUNT {count}U
 /* The ladder slot no armed helper id names. */
@@ -254,8 +282,8 @@ def render_c(spec: dict) -> str:
 /*
  * The ladder slot a decoded helper id dispatches to, or
  * `KPROG_X86_HELPER_SLOT_NONE` when the id reaches the default arm. The
- * `X86_SIM_BPF_CALL_ID` order makes the slot index `helper id - 1`; evaluated
- * once.
+ * Slots are distinct from sparse Linux IDs. Arguments must be pure integer
+ * expressions because this constant-expression macro is also used in case labels.
  */
 #define KPROG_X86_HELPER_SLOT(ID) \\
 \t{slot} : \\
@@ -274,13 +302,81 @@ _Static_assert(KPROG_X86_HELPER_SLOT({helpers[0]["id"] - 1}U) ==
 '''
 
 
+def render_oracle(spec: dict) -> str:
+    """Typed host environment for the actual helper bodies, sourced from public ABI.
+
+    The stubs expose callee identity and normalized arguments; the host oracle
+    compares those with the pre-call register state and checks the result/frame.
+    """
+    api = (ROOT.parent.parent / "vendor/libbpf/src/bpf_helper_defs.h").read_text()
+    prototypes = {name: (result.strip(), args.strip())
+                  for result, name, args in re.findall(
+        r"^static\s+([^;\n]+?)\(\*\s*const\s+(bpf_\w+)\)\(([^;]*?)\)\s*=\s*\(void\s*\*\)\s*\d+\s*;", api, re.M)}
+    structs = set()
+    stubs, normalize, results, pointers = [], [], [], []
+    for row in spec["helpers"]:
+        result, args = prototypes[row["name"]]
+        result = result.replace("__bpf_fastcall", "").strip()
+        structs.update(re.findall(r"struct\s+(\w+)", result + " " + args))
+        parameters = [] if args == "void" else [a.strip() for a in args.split(",")]
+        variadic = parameters and parameters[-1] == "..."
+        if variadic:
+            parameters = parameters[:-1]
+        if len(parameters) + (3 if variadic else 0) > 5:
+            raise SystemExit(f"helper exceeds five-argument ABI: {row['name']}")
+        assignments, expected = [], []
+        for i, param in enumerate(parameters):
+            match = re.fullmatch(r"(.+?)([A-Za-z_]\w*)", param)
+            if not match:
+                raise SystemExit(f"cannot parse helper parameter: {param!r}")
+            typ, name = match.group(1).strip(), match.group(2)
+            assignments.append(f"  ora_arguments[{i}] = (__u64)(uintptr_t){name};")
+            expected.append(f"    out[{i}] = (__u64)(uintptr_t)(({typ})(uintptr_t)raw[{i}]);")
+        count = len(parameters) + (3 if variadic else 0)
+        if variadic:
+            assignments += ["  va_list extra;", "  va_start(extra, fmt_size);"]
+            for i in range(len(parameters), count):
+                assignments.append(f"  ora_arguments[{i}] = va_arg(extra, __u64);")
+                expected.append(f"    out[{i}] = raw[{i}];")
+            assignments.append("  va_end(extra);")
+        pointer = "*" in result
+        value = f"({result})(uintptr_t)ora_raw_result({row['id']}U)"
+        stubs.append(f"static inline {result} {row['name']}({args})\n{{\n"
+                     f"  ora_called = {row['id']}U;\n  ora_argc = {count}U;\n"
+                     + "\n".join(assignments) + f"\n  return {value};\n}}")
+        normalize.append(f"  case {row['id']}ULL:\n" + "\n".join(expected)
+                         + f"\n    return {count}U;")
+        results.append(f"  case {row['id']}ULL: return (__u64)(uintptr_t)({value});")
+        if pointer:
+            pointers.append(f"id == {row['id']}ULL")
+    return "\n".join([
+        "/* Generated by generate_x86_helper_dispatch_spec.py from public libbpf ABI. */",
+        "#ifndef KPROG_X86_HELPER_ORACLE_CALLS_H", "#define KPROG_X86_HELPER_ORACLE_CALLS_H",
+        "#include <stdint.h>", "#include <stdarg.h>", "#include <linux/bpf.h>",
+        *[f"struct {name};" for name in sorted(structs)],
+        "static unsigned ora_called, ora_argc;", "static __u64 ora_arguments[5];",
+        "static inline __u64 ora_raw_result(unsigned id)", "{", "  switch (id) {",
+        "  case 1: return (__u64)(uintptr_t)ORA_MAP_PTR;",
+        "  case 2: return (__u64)ORA_UPD_RET;", "  case 3: return (__u64)ORA_DEL_RET;",
+        "  case 5: return ORA_KTIME;", "  case 8: return 0x12345678ULL;",
+        "  case 14: return 0x1122334455667788ULL;", "  case 15: return 0x8877665544332211ULL;",
+        "  default: return 0x1122334400000000ULL | id;", "  }", "}", *stubs,
+        "static inline unsigned ora_expected_arguments(__u64 id, const __u64 raw[5], __u64 out[5])",
+        "{", "  switch (id) {", *normalize, "  default: return 0;", "  }", "}",
+        "static inline __u64 ora_expected_result(__u64 id)", "{", "  switch (id) {",
+        *results, "  default: return 0;", "  }", "}",
+        "static inline unsigned ora_pointer_result(__u64 id)", "{",
+        "  return " + " || ".join(pointers) + ";", "}", "#endif", ""])
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     spec = load()
     for path, expected in ((LEAN, render_lean(spec)),
-                           (CHEADER, render_c(spec))):
+                           (CHEADER, render_c(spec)),
+                           (ROOT / "oracles/generated_x86_helper_calls.h", render_oracle(spec))):
         if args.check:
             if not path.is_file() or path.read_text() != expected:
                 raise SystemExit(

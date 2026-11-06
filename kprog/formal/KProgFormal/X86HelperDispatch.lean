@@ -5,32 +5,88 @@ namespace KProgFormal
 open GeneratedX86HelperDispatch (helperCount idBits helperIds helperNames
   helperBodies defaultBody slotOf idOfSlot nameOfSlot slotOfName)
 
-/-- Independent statement of the armed helper ids, built from the literal
-`1 .. 7` range rather than the generated literal table. -/
+/-- Independent Linux IDs, in increasing order, checked against public libbpf declarations. -/
 def x86HelperDispatchIdsSpec : List Nat :=
-  (List.range 7).map (fun i => i + 1)
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 20, 21, 23, 25, 26, 27, 28, 32, 35, 36, 37, 38, 39, 43, 44, 45, 46, 50, 54, 58, 65, 67, 68, 69, 80, 85, 86, 87, 88, 95, 99, 109, 112, 113, 114, 115, 118, 122, 124, 125, 130, 148, 152, 155, 158, 174, 175, 181, 184, 193]
 
-/-- Independent statement of the armed helper names, built from the literal
-`bpf_map_lookup_elem .. bpf_ktime_get_ns` order rather than the generated
-literal table. -/
+/-- Independent names in Linux numeric ID order. -/
 def x86HelperDispatchNamesSpec : List String :=
-  ["bpf_map_lookup_elem", "bpf_map_update_elem", "bpf_map_delete_elem",
-   "bpf_get_current_uid_gid", "bpf_get_current_pid_tgid",
-   "bpf_get_smp_processor_id", "bpf_ktime_get_ns"]
+  ["bpf_map_lookup_elem",
+   "bpf_map_update_elem",
+   "bpf_map_delete_elem",
+   "bpf_probe_read",
+   "bpf_ktime_get_ns",
+   "bpf_trace_printk",
+   "bpf_get_prandom_u32",
+   "bpf_get_smp_processor_id",
+   "bpf_skb_store_bytes",
+   "bpf_l3_csum_replace",
+   "bpf_l4_csum_replace",
+   "bpf_tail_call",
+   "bpf_get_current_pid_tgid",
+   "bpf_get_current_uid_gid",
+   "bpf_get_current_comm",
+   "bpf_skb_get_tunnel_key",
+   "bpf_skb_set_tunnel_key",
+   "bpf_redirect",
+   "bpf_perf_event_output",
+   "bpf_skb_load_bytes",
+   "bpf_get_stackid",
+   "bpf_csum_diff",
+   "bpf_skb_change_type",
+   "bpf_get_current_task",
+   "bpf_probe_write_user",
+   "bpf_current_task_under_cgroup",
+   "bpf_skb_change_tail",
+   "bpf_skb_pull_data",
+   "bpf_skb_change_head",
+   "bpf_xdp_adjust_head",
+   "bpf_probe_read_str",
+   "bpf_get_socket_cookie",
+   "bpf_skb_adjust_room",
+   "bpf_xdp_adjust_meta",
+   "bpf_override_return",
+   "bpf_xdp_adjust_tail",
+   "bpf_get_stack",
+   "bpf_skb_load_bytes_relative",
+   "bpf_fib_lookup",
+   "bpf_get_current_cgroup_id",
+   "bpf_sk_lookup_udp",
+   "bpf_sk_release",
+   "bpf_map_push_elem",
+   "bpf_map_pop_elem",
+   "bpf_sk_fullsock",
+   "bpf_skc_lookup_tcp",
+   "bpf_send_signal",
+   "bpf_probe_read_user",
+   "bpf_probe_read_kernel",
+   "bpf_probe_read_user_str",
+   "bpf_probe_read_kernel_str",
+   "bpf_jiffies64",
+   "bpf_get_netns_cookie",
+   "bpf_sk_assign",
+   "bpf_ktime_get_boot_ns",
+   "bpf_ringbuf_output",
+   "bpf_copy_from_user",
+   "bpf_redirect_neigh",
+   "bpf_redirect_peer",
+   "bpf_get_current_task_btf",
+   "bpf_get_attach_cookie",
+   "bpf_task_pt_regs",
+   "bpf_loop",
+   "bpf_get_func_ret",
+   "bpf_ima_file_hash"]
 
 /-- Independent statement of the armed body macros, built from the literal
 `X86_SIM_BPF_CALL_` prefix rather than the generated literal table. -/
 def x86HelperDispatchBodiesSpec : List String :=
   x86HelperDispatchNamesSpec.map (fun n => "X86_SIM_BPF_CALL_" ++ n)
 
-/-- Independent statement of which decoded helper ids name an armed ladder arm:
-the lookup runs over the independently built `1 .. 7` id table, so an armed id
-`i + 1` names slot `i` and the zero id and every id `8 ..` name none. -/
+/-- The independent sparse ID-to-slot lookup. Unarmed IDs name no slot. -/
 def x86HelperDispatchSlotOfSpec (id : BitVec 64) : Option Nat :=
-  (x86HelperDispatchIdsSpec.zip (List.range 7)).lookup id.toNat
+  (x86HelperDispatchIdsSpec.zip (List.range x86HelperDispatchIdsSpec.length)).lookup id.toNat
 
-/-- The generated armed-id table equals the independent literal `1 .. 7`
-construction, so ladder slot `i` dispatches helper id `i + 1`. -/
+/-- Generated IDs equal the independent sparse Linux table. -/
 theorem x86_helper_dispatch_ids_refine :
     helperIds = x86HelperDispatchIdsSpec := by
   unfold helperIds x86HelperDispatchIdsSpec
@@ -77,12 +133,12 @@ theorem x86_helper_dispatch_ids_nodup : helperIds.Nodup := by
   unfold helperIds
   native_decide
 
-/-- The ladder selector equals the independent lookup over the `1 .. 7` id
-table for every decoded helper id. -/
+/-- Generated lookup agrees for every64-bit ID, including gaps. -/
 theorem x86_helper_dispatch_slotof_refines (id : BitVec 64) :
     slotOf id = x86HelperDispatchSlotOfSpec id := by
   unfold slotOf x86HelperDispatchSlotOfSpec helperCount
   rw [x86_helper_dispatch_ids_refine]
+  rfl
 
 /-- The helper-id width is the 64-bit width the sim decodes, pinned so the C
 `__u64` helper id and the generated `idBits` cannot drift apart. -/
@@ -92,21 +148,18 @@ theorem x86_helper_dispatch_bits_is_64 : idBits = 64 := rfl
 theorem x86_helper_dispatch_slot_lookup : slotOf (1 : BitVec 64) = some 0 := by
   native_decide
 
-/-- The last armed helper (`bpf_ktime_get_ns`) dispatches to slot `6`, so the
-armed id range is covered without a gap. -/
-theorem x86_helper_dispatch_slot_ktime : slotOf (7 : BitVec 64) = some 6 := by
+/-- Linux ktime helper5 has slot4, independently of its numeric ID. -/
+theorem x86_helper_dispatch_slot_ktime : slotOf (5 : BitVec 64) = some 4 := by
   native_decide
 
-/-- The first unarmed named helper id (`bpf_current_task_under_cgroup`, id `8`)
-names no armed slot, so the armed range ends exactly at `bpf_ktime_get_ns`. -/
+/-- Linux ID13 is outside the armed set and must not dispatch to another helper. -/
 theorem x86_helper_dispatch_first_unarmed_is_none :
-    slotOf (8 : BitVec 64) = none := by
+    slotOf (13 : BitVec 64) = none := by
   native_decide
 
-/-- The last named helper id (`bpf_get_current_task`, id `21`) names no armed
-slot, so it reaches the default arm like every unarmed id. -/
+/-- ID194 is outside the armed set and must reach the failure arm. -/
 theorem x86_helper_dispatch_last_named_is_none :
-    slotOf (21 : BitVec 64) = none := by
+    slotOf (194 : BitVec 64) = none := by
   native_decide
 
 /-- Helper id `0` names no armed slot, so the zero id also reaches the default
@@ -114,16 +167,13 @@ arm. -/
 theorem x86_helper_dispatch_zero_is_none : slotOf (0 : BitVec 64) = none := by
   native_decide
 
-/-- Every armed helper id `1 .. 7` names its own slot and the whole unarmed
-range (id `0`, the named ids `8 .. 21`, and an id beyond the whole named space)
-names none: the full-range round trip, so the dispatch is total on the armed
-range and routes the unarmed tail to the default arm. -/
+/-- Every armed ID round-trips to its own slot; zero, gaps and out-of-set IDs name none. -/
 theorem x86_helper_dispatch_full_range :
     ((List.range helperCount).all
-        (fun i => slotOf (BitVec.ofNat 64 (i + 1)) = some i)) = true ∧
+        (fun i => slotOf (BitVec.ofNat 64 (x86HelperDispatchIdsSpec.getD i 0)) = some i)) = true ∧
       (slotOf (0 : BitVec 64) = none) ∧
-      (slotOf (8 : BitVec 64) = none) ∧
-      (slotOf (21 : BitVec 64) = none) ∧
+      (slotOf (13 : BitVec 64) = none) ∧
+      (slotOf (194 : BitVec 64) = none) ∧
       (slotOf (22 : BitVec 64) = none) := by
   refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> native_decide
 
@@ -138,14 +188,12 @@ theorem x86_helper_dispatch_name_slot_roundtrip :
         (fun p => nameOfSlot p.2 = some p.1) = true := by
   refine ⟨rfl, ?_, ?_⟩ <;> native_decide
 
-/-- The armed count is the seven helper bodies the x86-64 sim implements
-(`bpf_map_lookup_elem .. bpf_ktime_get_ns`). -/
-theorem x86_helper_dispatch_count_is_7 : helperCount = 7 := rfl
+/-- The armed count is65. The legacy theorem name is retained for compatibility. -/
+theorem x86_helper_dispatch_count_is_7 : helperCount = 65 := rfl
 
-/-- The default arm body is the RAX zero-write the hand-written ladder's `else`
-branch runs, so every unarmed id writes RAX width 64 with the zero value. -/
+/-- The default is a compile-time error. The legacy theorem name is retained. -/
 theorem x86_helper_dispatch_default_is_rax_zero :
-    defaultBody = "X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, 0, X86_WIDTH_64)" := rfl
+    defaultBody = "X86_SIM_L_UNSUPPORTED_HELPER()" := rfl
 
 /-- Every armed slot's id is nonzero, so no armed id collides with the zero id
 that also reaches the default arm. -/
@@ -154,10 +202,9 @@ theorem x86_helper_dispatch_ids_nonzero :
   unfold helperIds
   native_decide
 
-/-- The armed ids `1 .. 7` are a strict subset of the helper ids `1 .. 21` the
-sim names, so the ids `8 .. 21` provably reach the default arm. -/
+/-- Armed IDs are a sparse subset of the Linux ID interval through193. -/
 theorem x86_helper_dispatch_armed_is_strict_subset :
-    helperIds.all (fun n => n < 22) = true ∧ helperCount < 21 := by
+    helperIds.all (fun n => n < 194) = true ∧ helperCount < 194 := by
   refine ⟨?_, ?_⟩ <;> native_decide
 
 /-- Slot `i` names a helper id that, read back, names slot `i`: the id and slot
@@ -171,30 +218,22 @@ theorem x86_helper_dispatch_id_slot_roundtrip :
   unfold idOfSlot helperIds helperCount
   native_decide
 
-/-- All the dispatch shapes are reachable: the first armed slot, the last armed
-slot, the zero id, the first unarmed named id, and the last named id, so no
-branch of the contract is dead. -/
+/-- Both armed and unarmed dispatch shapes are reachable at their real Linux IDs. -/
 theorem x86_helper_dispatch_case_dispatch :
     slotOf (1 : BitVec 64) = some 0 ∧
-      slotOf (7 : BitVec 64) = some 6 ∧
+      slotOf (5 : BitVec 64) = some 4 ∧
       slotOf (0 : BitVec 64) = none ∧
-      slotOf (8 : BitVec 64) = none ∧
-      slotOf (21 : BitVec 64) = none := by
+      slotOf (13 : BitVec 64) = none ∧
+      slotOf (194 : BitVec 64) = none := by
   refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> native_decide
 
-/-- Independent model of the routed `X86_SIM_BPF_CALL_ID` ladder: the body the
-switch selects for a decoded helper id. The switch keys on the generated slot
-selector, so slot `i` runs armed body `i` and every id that names no slot
-reaches the default zero-write arm. Built from the independent `1 .. 7` tables,
-not the generated ones. -/
+/-- Independent routed body selection over sparse IDs, with an error default. -/
 def x86HelperDispatchRoutedBodySpec (id : BitVec 64) : String :=
   match x86HelperDispatchSlotOfSpec id with
   | some i => x86HelperDispatchBodiesSpec.getD i defaultBody
   | none => defaultBody
 
-/-- The routed selector rolls the armed ids `1 .. 7` up to the distinct case
-labels `0 .. 6` in arm order, so no two arms share a `case` and the switch
-cannot fold two helpers onto one body. -/
+/-- Sparse IDs select distinct case labels, in table order. -/
 theorem x86_helper_dispatch_route_labels_distinct :
     (x86HelperDispatchIdsSpec.map
         (fun n => slotOf (BitVec.ofNat 64 n))) =
@@ -202,43 +241,34 @@ theorem x86_helper_dispatch_route_labels_distinct :
       (List.range helperCount).Nodup := by
   refine ⟨?_, ?_⟩ <;> native_decide
 
-/-- The routed selector's value for each armed id equals its arm index, so the
-`case KPROG_X86_HELPER_SLOT(<armed id>)` label the C ladder writes is exactly
-slot `i` for arm `i`. -/
+/-- Each armed ID selects its table slot, without assuming ID equals slot plus one. -/
 theorem x86_helper_dispatch_route_case_is_index :
     (List.range helperCount).all
-        (fun i => slotOf (BitVec.ofNat 64 (i + 1)) = some i) = true := by
+        (fun i => slotOf (BitVec.ofNat 64 (x86HelperDispatchIdsSpec.getD i 0)) = some i) = true := by
   native_decide
 
-/-- The routed selector never returns the `KPROG_X86_HELPER_SLOT_NONE` arm for
-an armed id, so every armed helper runs its own body and never falls through to
-the default arm. -/
+/-- No armed ID falls through to the failure default. -/
 theorem x86_helper_dispatch_route_armed_never_default :
     (List.range helperCount).all
-        (fun i => slotOf (BitVec.ofNat 64 (i + 1)) ≠ none) = true := by
+        (fun i => slotOf (BitVec.ofNat 64 (x86HelperDispatchIdsSpec.getD i 0)) ≠ none) = true := by
   native_decide
 
-/-- The routed ladder runs armed body `i` for armed id `i + 1` and the default
-zero-write arm for every id that names no slot, matching the independent routed
-body model over the whole armed range and the unarmed tail. -/
+/-- Each armed ID invokes its own body, while gaps and out-of-set IDs invoke the error default. -/
 theorem x86_helper_dispatch_route_body_refines :
     (List.range helperCount).all
-        (fun i => x86HelperDispatchRoutedBodySpec (BitVec.ofNat 64 (i + 1)) =
+        (fun i => x86HelperDispatchRoutedBodySpec (BitVec.ofNat 64 (x86HelperDispatchIdsSpec.getD i 0)) =
           x86HelperDispatchBodiesSpec.getD i defaultBody) = true ∧
       x86HelperDispatchRoutedBodySpec (0 : BitVec 64) = defaultBody ∧
-      x86HelperDispatchRoutedBodySpec (8 : BitVec 64) = defaultBody ∧
-      x86HelperDispatchRoutedBodySpec (21 : BitVec 64) = defaultBody ∧
+      x86HelperDispatchRoutedBodySpec (13 : BitVec 64) = defaultBody ∧
+      x86HelperDispatchRoutedBodySpec (194 : BitVec 64) = defaultBody ∧
       x86HelperDispatchRoutedBodySpec (22 : BitVec 64) = defaultBody := by
   refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> native_decide
 
-/-- The routed ladder's first and last armed slots invoke exactly the
-`X86_SIM_BPF_CALL_bpf_map_lookup_elem` and `X86_SIM_BPF_CALL_bpf_ktime_get_ns`
-body macros, so the C `case` bodies line up with the generated body table
-order. -/
+/-- Map lookup and ktime invoke their correct bodies at their sparse table slots. -/
 theorem x86_helper_dispatch_route_body_is_table :
     x86HelperDispatchBodiesSpec.getD 0 defaultBody =
         "X86_SIM_BPF_CALL_bpf_map_lookup_elem" ∧
-      x86HelperDispatchBodiesSpec.getD 6 defaultBody =
+      x86HelperDispatchBodiesSpec.getD 4 defaultBody =
         "X86_SIM_BPF_CALL_bpf_ktime_get_ns" := by
   refine ⟨?_, ?_⟩ <;> native_decide
 

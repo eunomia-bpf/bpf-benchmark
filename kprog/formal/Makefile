@@ -246,6 +246,7 @@ check:
 	./build/test_x86_helper_dispatch_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_helper_dispatch_route_host.c -o build/test_x86_helper_dispatch_route_host
 	./build/test_x86_helper_dispatch_route_host
+	python3 tools/check_helper_errors.py --cc "$(CC)"
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/x86_route_host.c -o build/x86_route_host
 	./build/x86_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/btmem_index_route_host.c -o build/btmem_index_route_host

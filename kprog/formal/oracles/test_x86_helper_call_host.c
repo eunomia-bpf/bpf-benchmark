@@ -1,30 +1,13 @@
 /*
  * Host cross-check for the x86 simulator's BPF *helper call* bodies.
  *
- * Why this host exists. Step 0533 found that none of the AArch64 helper-call
- * macros had ever been executed and built a host for all 61 of them. The x86
- * simulator has a much smaller helper surface -- seven macros -- and none of
- * those was executed either.
- *
- * The mechanism is the same as on the other side, and it is the reason these
- * bodies were never run: the toolchain declares each helper as a
- * `static ... const` function *pointer* initialised to the helper's id, not an
- * address, so a direct call jumps to a small integer and faults. The host
- * renames the seven pointers before including the simulator header and defines
- * them under the original names.
- *
- * What is checked: each macro is callable, and each leaves the accumulator in
- * the state its body intends -- a value for the four value-returning helpers,
- * and a pointer tagged as a map value for the three map helpers (a plain
- * address with the wrong tag would be just as wrong as a wrong address). The
- * map helpers must also reach their forwarding call exactly once.
- *
- * Build and run:
- *   cd kprog/formal &&
- *   cc -Wall -Wextra -O2 -I. -I../x86 -I../../kprog \
- *      -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf \
- *      test_x86_helper_call_host.c -o build/test_x86_helper_call_host &&
- *   ./build/test_x86_helper_call_host
+ * Checks the original seven direct call macros, including nonzero PID/UID/CPU
+ * returns. The full sparse Linux-ID ladder has its own typed ABI host.
+ * Toolchain helper pointers encode small integer IDs, so this host renames
+ * them before inclusion and supplies callable capture functions instead.
+ * Lookup returns a tagged pointer; update/delete and the four other helpers
+ * return scalars. Every forwarding call is counted and checked.
+ * Run through make -C kprog/formal check.
  */
 
 typedef unsigned char __u8;
@@ -127,6 +110,9 @@ static void xcpu_sim_unsupported_opcode(void)
 	unsupported_calls++;
 }
 
+#undef X86_SIM_L_UNSUPPORTED_HELPER
+#define X86_SIM_L_UNSUPPORTED_HELPER() xcpu_sim_unsupported_opcode()
+
 static int failures;
 static unsigned long cases;
 
@@ -165,14 +151,14 @@ int main(void)
 		}                                                          \
 	} while (0)
 
-	/* Measured: only ktime forwards to a toolchain call. The three get_*
-	 * helpers write a constant zero, matching what they return in the
-	 * model's kernel. Asserting a forward for them reported three
-	 * failures that were the tree being right. */
+	/* PID/UID/CPU must reach the real typed helper call, not return a fake
+	 * constant. Preserve the original return canary and count each call. */
 	TRY_VALUE(ktime_get_ns, calls_ktime);
+	TRY_VALUE(get_current_pid_tgid, calls_pid);
+	TRY_VALUE(get_current_uid_gid, calls_uid);
+	TRY_VALUE(get_smp_processor_id, calls_smp);
 
-	/* These write a constant instead of forwarding, so the observable is
-	 * that the accumulator is the constant rather than the sentinel. */
+	/* Also check the full return value, including CPU-ID32-bit widening. */
 #define TRY_CONST(NAME, WANT)                                              \
 	do {                                                               \
 		DECL_STATE();                                              \
@@ -188,14 +174,12 @@ int main(void)
 		}                                                          \
 	} while (0)
 
-	TRY_CONST(get_current_pid_tgid, 0);
-	TRY_CONST(get_current_uid_gid, 0);
-	TRY_CONST(get_smp_processor_id, 0);
+	TRY_CONST(get_current_pid_tgid, stub_value);
+	TRY_CONST(get_current_uid_gid, stub_value);
+	TRY_CONST(get_smp_processor_id, (__u32)stub_value);
 
-	/* The three map helpers return a pointer, and the body is what
-	 * attaches the map-value tag. A correct address with the wrong tag is
-	 * as wrong as a wrong address, so both are checked. */
-#define TRY_MAP(NAME, COUNTER)                                             \
+	/* Lookup returns a map pointer; update/delete return scalar status. */
+#define TRY_MAP(NAME, COUNTER, WANT_TAG)                                             \
 	do {                                                               \
 		DECL_STATE();                                              \
 		__x86_rax.ptr = (void *)(long)sentinel;                    \
@@ -211,6 +195,7 @@ int main(void)
 			       #NAME, COUNTER);                            \
 			failures++;                                        \
 		}                                                          \
+		if (__x86_rax_tag != (WANT_TAG)) { failures++; }           \
 		if (unsupported_calls) {                                   \
 			printf("%-28s reached the unsupported hook\n",      \
 			       #NAME);                                     \
@@ -219,9 +204,9 @@ int main(void)
 		}                                                          \
 	} while (0)
 
-	TRY_MAP(map_lookup_elem, calls_lookup);
-	TRY_MAP(map_update_elem, calls_update);
-	TRY_MAP(map_delete_elem, calls_delete);
+	TRY_MAP(map_lookup_elem, calls_lookup, X86_SIM_TAG_MAP_VALUE);
+	TRY_MAP(map_update_elem, calls_update, X86_SIM_TAG_SCALAR);
+	TRY_MAP(map_delete_elem, calls_delete, X86_SIM_TAG_SCALAR);
 
 	/* The lookup helper is the one that returns a pointer, so its tag is
 	 * observable; update and delete return a status. */
@@ -243,6 +228,19 @@ int main(void)
 			failures++;
 		}
 	}
+
+    /* The failure route records an error and preserves the accumulator;
+     * check_helper_errors.py separately checks real compilation rejection. */
+    {
+        DECL_STATE();
+        __x86_rax.ptr = (void *)(long)sentinel;
+        X86_SIM_BPF_CALL_ID(13ULL);
+        cases++;
+        if (unsupported_calls != 1 || (__u64)(long)__x86_rax.ptr != sentinel) {
+            printf("unarmed helper did not preserve the failure boundary\n");
+            failures++;
+        }
+    }
 
 	if (failures) {
 		printf("x86 helper call host cross-check: FAIL (%d/%lu)\n",

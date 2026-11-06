@@ -2,8 +2,8 @@
   "schema_version": 1,
   "operation": "x86HelperDispatch",
   "id_bits": 64,
-  "helper_count": 7,
-  "default_body": "X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, 0, X86_WIDTH_64)",
+  "helper_count": 65,
+  "default_body": "X86_SIM_L_UNSUPPORTED_HELPER()",
   "helpers": [
     {
       "name": "bpf_map_lookup_elem",
@@ -24,28 +24,376 @@
       "body": "X86_SIM_BPF_CALL_bpf_map_delete_elem"
     },
     {
-      "name": "bpf_get_current_uid_gid",
-      "define": "X86_SIM_HELPER_bpf_get_current_uid_gid",
+      "name": "bpf_probe_read",
+      "define": "X86_SIM_HELPER_bpf_probe_read",
       "id": 4,
-      "body": "X86_SIM_BPF_CALL_bpf_get_current_uid_gid"
-    },
-    {
-      "name": "bpf_get_current_pid_tgid",
-      "define": "X86_SIM_HELPER_bpf_get_current_pid_tgid",
-      "id": 5,
-      "body": "X86_SIM_BPF_CALL_bpf_get_current_pid_tgid"
-    },
-    {
-      "name": "bpf_get_smp_processor_id",
-      "define": "X86_SIM_HELPER_bpf_get_smp_processor_id",
-      "id": 6,
-      "body": "X86_SIM_BPF_CALL_bpf_get_smp_processor_id"
+      "body": "X86_SIM_BPF_CALL_bpf_probe_read"
     },
     {
       "name": "bpf_ktime_get_ns",
       "define": "X86_SIM_HELPER_bpf_ktime_get_ns",
-      "id": 7,
+      "id": 5,
       "body": "X86_SIM_BPF_CALL_bpf_ktime_get_ns"
+    },
+    {
+      "name": "bpf_trace_printk",
+      "define": "X86_SIM_HELPER_bpf_trace_printk",
+      "id": 6,
+      "body": "X86_SIM_BPF_CALL_bpf_trace_printk"
+    },
+    {
+      "name": "bpf_get_prandom_u32",
+      "define": "X86_SIM_HELPER_bpf_get_prandom_u32",
+      "id": 7,
+      "body": "X86_SIM_BPF_CALL_bpf_get_prandom_u32"
+    },
+    {
+      "name": "bpf_get_smp_processor_id",
+      "define": "X86_SIM_HELPER_bpf_get_smp_processor_id",
+      "id": 8,
+      "body": "X86_SIM_BPF_CALL_bpf_get_smp_processor_id"
+    },
+    {
+      "name": "bpf_skb_store_bytes",
+      "define": "X86_SIM_HELPER_bpf_skb_store_bytes",
+      "id": 9,
+      "body": "X86_SIM_BPF_CALL_bpf_skb_store_bytes"
+    },
+    {
+      "name": "bpf_l3_csum_replace",
+      "define": "X86_SIM_HELPER_bpf_l3_csum_replace",
+      "id": 10,
+      "body": "X86_SIM_BPF_CALL_bpf_l3_csum_replace"
+    },
+    {
+      "name": "bpf_l4_csum_replace",
+      "define": "X86_SIM_HELPER_bpf_l4_csum_replace",
+      "id": 11,
+      "body": "X86_SIM_BPF_CALL_bpf_l4_csum_replace"
+    },
+    {
+      "name": "bpf_tail_call",
+      "define": "X86_SIM_HELPER_bpf_tail_call",
+      "id": 12,
+      "body": "X86_SIM_BPF_CALL_bpf_tail_call"
+    },
+    {
+      "name": "bpf_get_current_pid_tgid",
+      "define": "X86_SIM_HELPER_bpf_get_current_pid_tgid",
+      "id": 14,
+      "body": "X86_SIM_BPF_CALL_bpf_get_current_pid_tgid"
+    },
+    {
+      "name": "bpf_get_current_uid_gid",
+      "define": "X86_SIM_HELPER_bpf_get_current_uid_gid",
+      "id": 15,
+      "body": "X86_SIM_BPF_CALL_bpf_get_current_uid_gid"
+    },
+    {
+      "name": "bpf_get_current_comm",
+      "define": "X86_SIM_HELPER_bpf_get_current_comm",
+      "id": 16,
+      "body": "X86_SIM_BPF_CALL_bpf_get_current_comm"
+    },
+    {
+      "name": "bpf_skb_get_tunnel_key",
+      "define": "X86_SIM_HELPER_bpf_skb_get_tunnel_key",
+      "id": 20,
+      "body": "X86_SIM_BPF_CALL_bpf_skb_get_tunnel_key"
+    },
+    {
+      "name": "bpf_skb_set_tunnel_key",
+      "define": "X86_SIM_HELPER_bpf_skb_set_tunnel_key",
+      "id": 21,
+      "body": "X86_SIM_BPF_CALL_bpf_skb_set_tunnel_key"
+    },
+    {
+      "name": "bpf_redirect",
+      "define": "X86_SIM_HELPER_bpf_redirect",
+      "id": 23,
+      "body": "X86_SIM_BPF_CALL_bpf_redirect"
+    },
+    {
+      "name": "bpf_perf_event_output",
+      "define": "X86_SIM_HELPER_bpf_perf_event_output",
+      "id": 25,
+      "body": "X86_SIM_BPF_CALL_bpf_perf_event_output"
+    },
+    {
+      "name": "bpf_skb_load_bytes",
+      "define": "X86_SIM_HELPER_bpf_skb_load_bytes",
+      "id": 26,
+      "body": "X86_SIM_BPF_CALL_bpf_skb_load_bytes"
+    },
+    {
+      "name": "bpf_get_stackid",
+      "define": "X86_SIM_HELPER_bpf_get_stackid",
+      "id": 27,
+      "body": "X86_SIM_BPF_CALL_bpf_get_stackid"
+    },
+    {
+      "name": "bpf_csum_diff",
+      "define": "X86_SIM_HELPER_bpf_csum_diff",
+      "id": 28,
+      "body": "X86_SIM_BPF_CALL_bpf_csum_diff"
+    },
+    {
+      "name": "bpf_skb_change_type",
+      "define": "X86_SIM_HELPER_bpf_skb_change_type",
+      "id": 32,
+      "body": "X86_SIM_BPF_CALL_bpf_skb_change_type"
+    },
+    {
+      "name": "bpf_get_current_task",
+      "define": "X86_SIM_HELPER_bpf_get_current_task",
+      "id": 35,
+      "body": "X86_SIM_BPF_CALL_bpf_get_current_task"
+    },
+    {
+      "name": "bpf_probe_write_user",
+      "define": "X86_SIM_HELPER_bpf_probe_write_user",
+      "id": 36,
+      "body": "X86_SIM_BPF_CALL_bpf_probe_write_user"
+    },
+    {
+      "name": "bpf_current_task_under_cgroup",
+      "define": "X86_SIM_HELPER_bpf_current_task_under_cgroup",
+      "id": 37,
+      "body": "X86_SIM_BPF_CALL_bpf_current_task_under_cgroup"
+    },
+    {
+      "name": "bpf_skb_change_tail",
+      "define": "X86_SIM_HELPER_bpf_skb_change_tail",
+      "id": 38,
+      "body": "X86_SIM_BPF_CALL_bpf_skb_change_tail"
+    },
+    {
+      "name": "bpf_skb_pull_data",
+      "define": "X86_SIM_HELPER_bpf_skb_pull_data",
+      "id": 39,
+      "body": "X86_SIM_BPF_CALL_bpf_skb_pull_data"
+    },
+    {
+      "name": "bpf_skb_change_head",
+      "define": "X86_SIM_HELPER_bpf_skb_change_head",
+      "id": 43,
+      "body": "X86_SIM_BPF_CALL_bpf_skb_change_head"
+    },
+    {
+      "name": "bpf_xdp_adjust_head",
+      "define": "X86_SIM_HELPER_bpf_xdp_adjust_head",
+      "id": 44,
+      "body": "X86_SIM_BPF_CALL_bpf_xdp_adjust_head"
+    },
+    {
+      "name": "bpf_probe_read_str",
+      "define": "X86_SIM_HELPER_bpf_probe_read_str",
+      "id": 45,
+      "body": "X86_SIM_BPF_CALL_bpf_probe_read_str"
+    },
+    {
+      "name": "bpf_get_socket_cookie",
+      "define": "X86_SIM_HELPER_bpf_get_socket_cookie",
+      "id": 46,
+      "body": "X86_SIM_BPF_CALL_bpf_get_socket_cookie"
+    },
+    {
+      "name": "bpf_skb_adjust_room",
+      "define": "X86_SIM_HELPER_bpf_skb_adjust_room",
+      "id": 50,
+      "body": "X86_SIM_BPF_CALL_bpf_skb_adjust_room"
+    },
+    {
+      "name": "bpf_xdp_adjust_meta",
+      "define": "X86_SIM_HELPER_bpf_xdp_adjust_meta",
+      "id": 54,
+      "body": "X86_SIM_BPF_CALL_bpf_xdp_adjust_meta"
+    },
+    {
+      "name": "bpf_override_return",
+      "define": "X86_SIM_HELPER_bpf_override_return",
+      "id": 58,
+      "body": "X86_SIM_BPF_CALL_bpf_override_return"
+    },
+    {
+      "name": "bpf_xdp_adjust_tail",
+      "define": "X86_SIM_HELPER_bpf_xdp_adjust_tail",
+      "id": 65,
+      "body": "X86_SIM_BPF_CALL_bpf_xdp_adjust_tail"
+    },
+    {
+      "name": "bpf_get_stack",
+      "define": "X86_SIM_HELPER_bpf_get_stack",
+      "id": 67,
+      "body": "X86_SIM_BPF_CALL_bpf_get_stack"
+    },
+    {
+      "name": "bpf_skb_load_bytes_relative",
+      "define": "X86_SIM_HELPER_bpf_skb_load_bytes_relative",
+      "id": 68,
+      "body": "X86_SIM_BPF_CALL_bpf_skb_load_bytes_relative"
+    },
+    {
+      "name": "bpf_fib_lookup",
+      "define": "X86_SIM_HELPER_bpf_fib_lookup",
+      "id": 69,
+      "body": "X86_SIM_BPF_CALL_bpf_fib_lookup"
+    },
+    {
+      "name": "bpf_get_current_cgroup_id",
+      "define": "X86_SIM_HELPER_bpf_get_current_cgroup_id",
+      "id": 80,
+      "body": "X86_SIM_BPF_CALL_bpf_get_current_cgroup_id"
+    },
+    {
+      "name": "bpf_sk_lookup_udp",
+      "define": "X86_SIM_HELPER_bpf_sk_lookup_udp",
+      "id": 85,
+      "body": "X86_SIM_BPF_CALL_bpf_sk_lookup_udp"
+    },
+    {
+      "name": "bpf_sk_release",
+      "define": "X86_SIM_HELPER_bpf_sk_release",
+      "id": 86,
+      "body": "X86_SIM_BPF_CALL_bpf_sk_release"
+    },
+    {
+      "name": "bpf_map_push_elem",
+      "define": "X86_SIM_HELPER_bpf_map_push_elem",
+      "id": 87,
+      "body": "X86_SIM_BPF_CALL_bpf_map_push_elem"
+    },
+    {
+      "name": "bpf_map_pop_elem",
+      "define": "X86_SIM_HELPER_bpf_map_pop_elem",
+      "id": 88,
+      "body": "X86_SIM_BPF_CALL_bpf_map_pop_elem"
+    },
+    {
+      "name": "bpf_sk_fullsock",
+      "define": "X86_SIM_HELPER_bpf_sk_fullsock",
+      "id": 95,
+      "body": "X86_SIM_BPF_CALL_bpf_sk_fullsock"
+    },
+    {
+      "name": "bpf_skc_lookup_tcp",
+      "define": "X86_SIM_HELPER_bpf_skc_lookup_tcp",
+      "id": 99,
+      "body": "X86_SIM_BPF_CALL_bpf_skc_lookup_tcp"
+    },
+    {
+      "name": "bpf_send_signal",
+      "define": "X86_SIM_HELPER_bpf_send_signal",
+      "id": 109,
+      "body": "X86_SIM_BPF_CALL_bpf_send_signal"
+    },
+    {
+      "name": "bpf_probe_read_user",
+      "define": "X86_SIM_HELPER_bpf_probe_read_user",
+      "id": 112,
+      "body": "X86_SIM_BPF_CALL_bpf_probe_read_user"
+    },
+    {
+      "name": "bpf_probe_read_kernel",
+      "define": "X86_SIM_HELPER_bpf_probe_read_kernel",
+      "id": 113,
+      "body": "X86_SIM_BPF_CALL_bpf_probe_read_kernel"
+    },
+    {
+      "name": "bpf_probe_read_user_str",
+      "define": "X86_SIM_HELPER_bpf_probe_read_user_str",
+      "id": 114,
+      "body": "X86_SIM_BPF_CALL_bpf_probe_read_user_str"
+    },
+    {
+      "name": "bpf_probe_read_kernel_str",
+      "define": "X86_SIM_HELPER_bpf_probe_read_kernel_str",
+      "id": 115,
+      "body": "X86_SIM_BPF_CALL_bpf_probe_read_kernel_str"
+    },
+    {
+      "name": "bpf_jiffies64",
+      "define": "X86_SIM_HELPER_bpf_jiffies64",
+      "id": 118,
+      "body": "X86_SIM_BPF_CALL_bpf_jiffies64"
+    },
+    {
+      "name": "bpf_get_netns_cookie",
+      "define": "X86_SIM_HELPER_bpf_get_netns_cookie",
+      "id": 122,
+      "body": "X86_SIM_BPF_CALL_bpf_get_netns_cookie"
+    },
+    {
+      "name": "bpf_sk_assign",
+      "define": "X86_SIM_HELPER_bpf_sk_assign",
+      "id": 124,
+      "body": "X86_SIM_BPF_CALL_bpf_sk_assign"
+    },
+    {
+      "name": "bpf_ktime_get_boot_ns",
+      "define": "X86_SIM_HELPER_bpf_ktime_get_boot_ns",
+      "id": 125,
+      "body": "X86_SIM_BPF_CALL_bpf_ktime_get_boot_ns"
+    },
+    {
+      "name": "bpf_ringbuf_output",
+      "define": "X86_SIM_HELPER_bpf_ringbuf_output",
+      "id": 130,
+      "body": "X86_SIM_BPF_CALL_bpf_ringbuf_output"
+    },
+    {
+      "name": "bpf_copy_from_user",
+      "define": "X86_SIM_HELPER_bpf_copy_from_user",
+      "id": 148,
+      "body": "X86_SIM_BPF_CALL_bpf_copy_from_user"
+    },
+    {
+      "name": "bpf_redirect_neigh",
+      "define": "X86_SIM_HELPER_bpf_redirect_neigh",
+      "id": 152,
+      "body": "X86_SIM_BPF_CALL_bpf_redirect_neigh"
+    },
+    {
+      "name": "bpf_redirect_peer",
+      "define": "X86_SIM_HELPER_bpf_redirect_peer",
+      "id": 155,
+      "body": "X86_SIM_BPF_CALL_bpf_redirect_peer"
+    },
+    {
+      "name": "bpf_get_current_task_btf",
+      "define": "X86_SIM_HELPER_bpf_get_current_task_btf",
+      "id": 158,
+      "body": "X86_SIM_BPF_CALL_bpf_get_current_task_btf"
+    },
+    {
+      "name": "bpf_get_attach_cookie",
+      "define": "X86_SIM_HELPER_bpf_get_attach_cookie",
+      "id": 174,
+      "body": "X86_SIM_BPF_CALL_bpf_get_attach_cookie"
+    },
+    {
+      "name": "bpf_task_pt_regs",
+      "define": "X86_SIM_HELPER_bpf_task_pt_regs",
+      "id": 175,
+      "body": "X86_SIM_BPF_CALL_bpf_task_pt_regs"
+    },
+    {
+      "name": "bpf_loop",
+      "define": "X86_SIM_HELPER_bpf_loop",
+      "id": 181,
+      "body": "X86_SIM_BPF_CALL_bpf_loop"
+    },
+    {
+      "name": "bpf_get_func_ret",
+      "define": "X86_SIM_HELPER_bpf_get_func_ret",
+      "id": 184,
+      "body": "X86_SIM_BPF_CALL_bpf_get_func_ret"
+    },
+    {
+      "name": "bpf_ima_file_hash",
+      "define": "X86_SIM_HELPER_bpf_ima_file_hash",
+      "id": 193,
+      "body": "X86_SIM_BPF_CALL_bpf_ima_file_hash"
     }
   ]
 }

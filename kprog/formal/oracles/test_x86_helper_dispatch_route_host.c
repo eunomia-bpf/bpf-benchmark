@@ -1,33 +1,9 @@
-/*
- * Host cross-check for the x86-64 simulator's routing of a decoded helper id
- * through the generated helper-dispatch contract (STEP 0113).
- *
- * The runtime body `X86_SIM_BPF_CALL_ID` dispatches a 64-bit helper id by
- * switching on the generated `KPROG_X86_HELPER_SLOT` selector (STEP 0132);
- * `X86_SIM_BPF_CALL_REG` reads the id out
- * of a register and calls it, and the chain's `X86_OP_CALL_REG` arm is exactly
- * `X86_SIM_BPF_CALL_REG((SRC))`. This oracle drives the real simulator state
- * over the whole named id space (the armed ids `1 .. 7`, the zero id, and the
- * named-but-unarmed ids `8 .. 21`) and compares the *whole* changed register
- * state against an independent hand-written id -> body model. A helper that
- * was inserted, dropped, or swapped on either side shows up as a differing
- * register value or tag. The generated header's `_Static_assert`s additionally
- * pin the hand-written id defines to the generated table at compile time.
- *
- * The four helpers that call into the host (`map_lookup_elem` (1),
- * `map_update_elem` (2), `map_delete_elem` (3), `ktime_get_ns` (7)) are served
- * by callable stubs defined here with fixed returns, so the oracle can predict
- * the register value the ladder leaves. `bpf_helpers.h` is skipped
- * (`__BPF_HELPERS__`) so its fake function-pointer consts are not used, and the
- * ids `4/5/6` write a constant without calling the host. Exit 1 on mismatch.
- *
- * Build/run:
- *   cd kprog/formal
- *   cc -Wall -Wextra -O2 -I. -I../x86 -I../../kprog \
- *      -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf \
- *      test_x86_helper_dispatch_route_host.c -o /tmp/t_xhdr
- *   /tmp/t_xhdr
- */
+/* Cross-check the actual sparse65 helper ladder and typed-call ABI.
+ * Preserve whole-register/tag framing and every original register-number case,
+ * now covering every armed ID plus gaps, zero and the full64-bit boundary.
+ * Typed public-ABI host stubs expose selected identity, normalized arguments,
+ * return value and pointer tags. Kernel helper behavior remains an external
+ * oracle; this test checks dispatch and SysV-to-helper argument plumbing. */
 
 #define __BPF_HELPERS__ 1
 #define X86_SIM_ENABLE_STACK
@@ -42,46 +18,24 @@ typedef signed long long __s64;
 
 #define __always_inline inline
 
-/* The host-calling helpers, stubbed with fixed returns. The update and delete
- * returns also give two distinct result values so a call that aliases its
- * planted seed is still caught. */
+/* Host environment returns retain the original lookup/update/delete/time
+ * vectors; typed stubs additionally expose every helper's forwarded ABI. */
 #define ORA_MAP_PTR ((void *)0x0000123400005678ULL)
 #define ORA_UPD_RET ((long)-7LL)
 #define ORA_DEL_RET ((long)3LL)
 #define ORA_KTIME 0xaabbccddeeff0011ULL
-
-static void *bpf_map_lookup_elem(void *map, const void *key)
-{
-	(void)map;
-	(void)key;
-	return ORA_MAP_PTR;
-}
-
-static long bpf_map_update_elem(void *map, const void *key,
-				const void *value, __u64 flags)
-{
-	(void)map;
-	(void)key;
-	(void)value;
-	(void)flags;
-	return ORA_UPD_RET;
-}
-
-static long bpf_map_delete_elem(void *map, const void *key)
-{
-	(void)map;
-	(void)key;
-	return ORA_DEL_RET;
-}
-
-static __u64 bpf_ktime_get_ns(void)
-{
-	return ORA_KTIME;
-}
+#include "generated_x86_helper_calls.h"
 
 #include "../x86/x86_sim_local_bpf.h"
 
 #include <stdio.h>
+/* Observe the failure route for dynamic IDs; a separate negative compilation
+ * below keeps the actual production error declaration and must fail. */
+#ifndef ORA_NEGATIVE_HELPER
+#undef X86_SIM_L_UNSUPPORTED_HELPER
+#define X86_SIM_L_UNSUPPORTED_HELPER() do { ora_called = 0; } while (0)
+#endif
+
 
 static int failures;
 static unsigned long cases;
@@ -130,61 +84,108 @@ static const char *gpr_names[16] = {
 		X86_SIM_L_FOR_EACH_GPR(ORA_SEED)                           \
 	} while (0)
 
-/* The independent id -> body classification: the seven armed `X86_SIM_BPF_CALL_*`
- * bodies in `bpf_map_lookup_elem .. bpf_ktime_get_ns` order, and the default
- * zero-write arm for every other id. */
-enum ora_body {
-	ORA_DEFAULT, ORA_LOOKUP, ORA_UPDATE, ORA_DELETE,
-	ORA_UID_GID, ORA_PID_TGID, ORA_SMP_ID, ORA_KTIME_ID,
-};
-
-static enum ora_body model_body(unsigned long long id)
+/* Public ABI table determines arguments/results independently of the C bodies. */
+static int armed(__u64 id)
 {
-	if (id == 1ULL)
-		return ORA_LOOKUP;
-	if (id == 2ULL)
-		return ORA_UPDATE;
-	if (id == 3ULL)
-		return ORA_DELETE;
-	if (id == 4ULL)
-		return ORA_UID_GID;
-	if (id == 5ULL)
-		return ORA_PID_TGID;
-	if (id == 6ULL)
-		return ORA_SMP_ID;
-	if (id == 7ULL)
-		return ORA_KTIME_ID;
-	return ORA_DEFAULT;
+    switch (id) {
+    case 1ULL:
+    case 2ULL:
+    case 3ULL:
+    case 4ULL:
+    case 5ULL:
+    case 6ULL:
+    case 7ULL:
+    case 8ULL:
+    case 9ULL:
+    case 10ULL:
+    case 11ULL:
+    case 12ULL:
+    case 14ULL:
+    case 15ULL:
+    case 16ULL:
+    case 20ULL:
+    case 21ULL:
+    case 23ULL:
+    case 25ULL:
+    case 26ULL:
+    case 27ULL:
+    case 28ULL:
+    case 32ULL:
+    case 35ULL:
+    case 36ULL:
+    case 37ULL:
+    case 38ULL:
+    case 39ULL:
+    case 43ULL:
+    case 44ULL:
+    case 45ULL:
+    case 46ULL:
+    case 50ULL:
+    case 54ULL:
+    case 58ULL:
+    case 65ULL:
+    case 67ULL:
+    case 68ULL:
+    case 69ULL:
+    case 80ULL:
+    case 85ULL:
+    case 86ULL:
+    case 87ULL:
+    case 88ULL:
+    case 95ULL:
+    case 99ULL:
+    case 109ULL:
+    case 112ULL:
+    case 113ULL:
+    case 114ULL:
+    case 115ULL:
+    case 118ULL:
+    case 122ULL:
+    case 124ULL:
+    case 125ULL:
+    case 130ULL:
+    case 148ULL:
+    case 152ULL:
+    case 155ULL:
+    case 158ULL:
+    case 174ULL:
+    case 175ULL:
+    case 181ULL:
+    case 184ULL:
+    case 193ULL:
+        return 1;
+    default: return 0;
+    }
 }
 
-/* The RAX value and tag each body leaves, from the fixed stub returns. */
-static void model_rax(enum ora_body b, __u64 *val, __u8 *tag)
+static void reset_call(void)
 {
-	switch (b) {
-	case ORA_LOOKUP:
-		*val = (__u64)(long)ORA_MAP_PTR;
-		*tag = X86_SIM_TAG_MAP_VALUE;
-		return;
-	case ORA_UPDATE:
-		*val = (__u64)ORA_UPD_RET;
-		*tag = X86_SIM_TAG_SCALAR;
-		return;
-	case ORA_DELETE:
-		*val = (__u64)ORA_DEL_RET;
-		*tag = X86_SIM_TAG_SCALAR;
-		return;
-	case ORA_UID_GID:
-	case ORA_PID_TGID:
-	case ORA_SMP_ID:
-	case ORA_DEFAULT:
-		*val = 0ULL;
-		*tag = X86_SIM_TAG_SCALAR;
-		return;
-	case ORA_KTIME_ID:
-		*val = ORA_KTIME;
-		*tag = X86_SIM_TAG_SCALAR;
-		return;
-	}
+    unsigned i;
+    ora_called = 0;
+    ora_argc = 0;
+    for (i = 0; i < 5; i++) ora_arguments[i] = 0;
+}
+
+static void check_arguments(__u64 id, void *before[16])
+{
+    static const unsigned registers[5] = {7, 6, 2, 1, 8};
+    __u64 raw[5], expected[5] = {0};
+    unsigned i, count;
+    for (i = 0; i < 5; i++) raw[i] = (__u64)(uintptr_t)before[registers[i]];
+    count = ora_expected_arguments(id, raw, expected);
+    if (ora_called != (armed(id) ? id : 0) || ora_argc != count) {
+        printf("MISMATCH helper identity/arity id=%llu called=%u argc=%u want=%u\n",
+               (unsigned long long)id, ora_called, ora_argc, count);
+        failures++;
+    }
+    for (i = 0; i < count; i++) {
+        if (ora_arguments[i] != expected[i]) {
+            printf("MISMATCH helper argument id=%llu arg=%u got=%llx want=%llx\n",
+                   (unsigned long long)id, i, (unsigned long long)ora_arguments[i],
+                   (unsigned long long)expected[i]);
+            failures++;
+        }
+    }
 }
 
 /* Drive `X86_SIM_BPF_CALL_ID(id)`, capture the whole register file, and check
@@ -215,7 +216,9 @@ static void check_id(unsigned long long id)
 		ORA_SEED_ALL();
 		ORA_SNAPSHOT(before, btag);
 
+		reset_call();
 		X86_SIM_BPF_CALL_ID((__u64)id);
+		check_arguments(id, before);
 		ORA_SNAPSHOT(after, atag);
 
 		for (j = 0; j < 16U; j++) {
@@ -230,7 +233,7 @@ static void check_id(unsigned long long id)
 			}
 		}
 
-		if (changed != 0) {
+		if (changed != (armed(id) ? 0 : -1)) {
 			printf("MISMATCH id=%llu changed cell got=%d (%s) "
 			       "want=0 (rax)\n", id, changed,
 			       changed >= 0 ? gpr_names[changed] : "none");
@@ -238,7 +241,8 @@ static void check_id(unsigned long long id)
 			return;
 		}
 
-		model_rax(model_body(id), &want_val, &want_tag);
+		want_val = armed(id) ? ora_expected_result(id) : (__u64)(uintptr_t)before[0];
+		want_tag = armed(id) ? (ora_pointer_result(id) ? X86_SIM_TAG_MAP_VALUE : X86_SIM_TAG_SCALAR) : btag[0];
 		if ((__u64)(long)after[0] != want_val || atag[0] != want_tag) {
 			printf("MISMATCH id=%llu rax=0x%llx tag=%u want=0x%llx "
 			       "tag=%u\n", id,
@@ -280,7 +284,9 @@ static void check_reg(unsigned reg, unsigned long long id)
 		X86_SIM_L_WRITE_REG_PTR_TAG(reg, (void *)(__u64)id,
 					    ORA_MARK_TAG);
 		ORA_SNAPSHOT(before, btag);
+		reset_call();
 		X86_SIM_BPF_CALL_REG(reg);
+		check_arguments(eff_id, before);
 		ORA_SNAPSHOT(after, atag);
 
 		for (j = 0; j < 16U; j++) {
@@ -297,14 +303,15 @@ static void check_reg(unsigned reg, unsigned long long id)
 
 		/* The plant set `reg`; the fresh snapshot already holds it, so
 		 * the call must change only RAX (cell 0). */
-		if (changed != 0) {
+		if (changed != (armed(eff_id) ? 0 : -1)) {
 			printf("MISMATCH reg=%u id=%llu changed cell got=%d "
 			       "want=0 (rax)\n", reg, id, changed);
 			failures++;
 			return;
 		}
 
-		model_rax(model_body(eff_id), &want_val, &want_tag);
+		want_val = armed(eff_id) ? ora_expected_result(eff_id) : (__u64)(uintptr_t)before[0];
+		want_tag = armed(eff_id) ? (ora_pointer_result(eff_id) ? X86_SIM_TAG_MAP_VALUE : X86_SIM_TAG_SCALAR) : btag[0];
 		if ((__u64)(long)after[0] != want_val || atag[0] != want_tag) {
 			printf("MISMATCH reg=%u id=%llu rax=0x%llx tag=%u "
 			       "want=0x%llx tag=%u\n", reg, id,
@@ -318,30 +325,35 @@ static void check_reg(unsigned reg, unsigned long long id)
 
 int main(void)
 {
+#ifdef ORA_NEGATIVE_HELPER
+    X86_SIM_L_DECLARE_STATE();
+    X86_SIM_L_DECLARE_STACK();
+    X86_SIM_BPF_CALL_ID(ORA_NEGATIVE_HELPER);
+    return 0;
+#else
 	unsigned long long id;
 	unsigned reg;
 
 	/* The generated count and the slot selector must line up with the
 	 * sim's hand-written ladder. */
 	cases++;
-	if (KPROG_X86_HELPER_COUNT != 7U ||
+	if (KPROG_X86_HELPER_COUNT != 65U ||
 	    KPROG_X86_HELPER_SLOT(1ULL) != 0U ||
-	    KPROG_X86_HELPER_SLOT(7ULL) != 6U ||
-	    KPROG_X86_HELPER_SLOT(8ULL) != KPROG_X86_HELPER_SLOT_NONE) {
+	    KPROG_X86_HELPER_SLOT(5ULL) != 4U ||
+	    KPROG_X86_HELPER_SLOT(13ULL) != KPROG_X86_HELPER_SLOT_NONE) {
 		printf("MISMATCH helper dispatch constant drift\n");
 		failures++;
 	}
 
 	/* Drive the ladder over the whole named id space and a way past it. */
-	for (id = 0; id <= 64ULL; id++)
+	for (id = 0; id <= 256ULL; id++)
 		check_id(id);
 
 	/* Drive the routed call-register body for every register number, each
 	 * planted to every armed id plus a default id. */
 	{
 		static const unsigned long long ids[] = {
-			0ULL, 1ULL, 2ULL, 3ULL, 4ULL, 5ULL, 6ULL, 7ULL,
-			8ULL, 21ULL, 22ULL,
+			0ULL, 1ULL, 2ULL, 3ULL, 4ULL, 5ULL, 6ULL, 7ULL, 8ULL, 9ULL, 10ULL, 11ULL, 12ULL, 13ULL, 14ULL, 15ULL, 16ULL, 20ULL, 21ULL, 22ULL, 23ULL, 25ULL, 26ULL, 27ULL, 28ULL, 32ULL, 35ULL, 36ULL, 37ULL, 38ULL, 39ULL, 43ULL, 44ULL, 45ULL, 46ULL, 50ULL, 54ULL, 58ULL, 65ULL, 67ULL, 68ULL, 69ULL, 80ULL, 85ULL, 86ULL, 87ULL, 88ULL, 95ULL, 99ULL, 109ULL, 112ULL, 113ULL, 114ULL, 115ULL, 118ULL, 122ULL, 124ULL, 125ULL, 130ULL, 148ULL, 152ULL, 155ULL, 158ULL, 174ULL, 175ULL, 181ULL, 184ULL, 193ULL, 194ULL, 18446744073709551615ULL
 		};
 		size_t ii;
 
@@ -358,4 +370,5 @@ int main(void)
 	printf("x86 helper dispatch route host cross-check: OK (%lu cases)\n",
 	       cases);
 	return 0;
+#endif
 }

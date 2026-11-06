@@ -54,6 +54,7 @@ typedef signed int __s32;
 #define __always_inline inline
 
 #include "../x86/x86_sim_local_bpf.h"
+#include "x86_no_helpers_host.h"
 
 #include <stdio.h>
 
