@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-x86/negative/nullable_map_dereference.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/negative/nullable_map_dereference.bpf.o",
+      "simulator_program": "nullable_map_dereference_x86_sim_xdp"
+    }
+  ]
+}

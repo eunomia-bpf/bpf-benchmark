@@ -1,12 +1,12 @@
 added	deleted	path
-126	16	arch/arm64/net/bpf_jit_comp.c
-97	3	arch/x86/net/bpf_jit_comp.c
-56	0	include/linux/bpf.h
+129	16	arch/arm64/net/bpf_jit_comp.c
+100	3	arch/x86/net/bpf_jit_comp.c
+72	0	include/linux/bpf.h
 19	2	include/linux/bpf_verifier.h
 2	0	include/linux/btf.h
 9	0	include/uapi/linux/bpf.h
 139	17	kernel/bpf/btf.c
 5	5	kernel/bpf/core.c
 2	0	kernel/bpf/disasm.c
-497	79	kernel/bpf/verifier.c
+521	79	kernel/bpf/verifier.c
 9	0	tools/include/uapi/linux/bpf.h

@@ -1,0 +1,21 @@
+libbpf: prog 'unbounded_loop_arm64_sim_xdp': BPF program load failed: -EINVAL
+libbpf: prog 'unbounded_loop_arm64_sim_xdp': -- BEGIN PROG LOAD LOG --
+0: R1=ctx() R10=fp0
+; ARM64_SIM_A64_JMP(0x0, 0x0, arm64_l_0); @ unbounded_loop.bpf.c:9
+0: (05) goto pc-1
+0: (05) goto pc-1
+0: (05) goto pc-1
+0: (05) goto pc-1
+0: (05) goto pc-1
+0: (05) goto pc-1
+0: (05) goto pc-1
+0: (05) goto pc-1
+infinite loop detected at insn 0
+cur state: R1=ctx() R10=fp0
+old state: R1=ctx() R10=fp0
+processed 9 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+-- END PROG LOAD LOG --
+libbpf: prog 'unbounded_loop_arm64_sim_xdp': failed to load: -EINVAL
+libbpf: failed to load object '/proofs/unbounded_loop.bpf.o'
+timing verify_s=0.027181 test_s=0.000000
+error: bpf_object__load failed: Invalid argument (os error 22)

@@ -125,3 +125,57 @@ presence in a shared contract is not executable coverage.
 4,492 mismatches in 72 forms. It predates the stack snapshots and control-flow
 composites; use the final `x86/` run for current counts. Raw preflight results
 are preserved, not substituted for the final run.
+
+
+## Recovery and fidelity fixes
+
+The original matrices above are preserved. The recovery runs use the production
+encoders and simulator headers, with no change to the workload or CPU oracle.
+The stack backing is now volatile and uninitialized, with direct accesses
+instead of synthetic window traps. Six host route tests preserve the in-range
+value/tag grids and test actual read/write SIGSEGV at protected-memory
+boundaries. Their case counts are 167480, 2754300, 3843515, 9084768, 60144
+and 789 (arm, arena, write lanes, write tags, read tags, helper pointers).
+IMUL/BT memory operands now extract the packed signed displacement once;
+TEST/ANDN memory displacement packing, negative immediate packing and MULX
+operand order are also corrected. The retained memory-route logs cover the
+actual C consumers, not only the generated arithmetic tables.
+
+A full AArch64 QEMU-user follow-up first exposed 1407 further mismatches in
+32-bit UDIV (621) and EXTR (786). The previous 16-state smoke missed them.
+The original six SIMD failures are fixed by preserving the 8b/16b arrangement,
+updating both vector halves and clearing scalar vector writeback upper bits.
+UDIV/EXTR now narrow W-register operands before using the existing canonical
+arithmetic primitives. The final `arm64-width-fix/forms.tsv` records **497
+forms x1024 states =508928 cases, zero mismatches**. This remains emulation,
+not AArch64 hardware fidelity evidence. The static hardware handoff now
+selects `cpu-differential-arm64-width-fix.gz`; the original baseline binary
+remains at its original path.
+
+The real x86 recovery matrix records 7145 mismatches after the BT correction.
+A later rebuild with V's BZHI correction records **5490 mismatches in seven
+forms** out of 714752 cases: PUSH16, POP16, SHRD16/32/64 count1 and SHLD/SHRD32
+count0. Those canonical corrections remain active work assigned to V.
+`x86-recovery/` and `x86-reference-bt-cmov/` retain both matrices and every
+counterexample. Their zero-mismatch families are sampled agreement only.
+
+The raw-byte adapter checks all 81 CMOV/BT forms against V's compiled Lean
+reference: **82944 cases, zero reference/CPU or reference/simulator
+mismatches**. It supplies the actual executed native bytes, PC and segment
+bases, checks full registers/vector/memory, and uses reference-provided
+`defined_flags`. The remaining 617 forms await the executable reference and
+are listed in `reference-forms.tsv`; the command exits nonzero rather than
+claiming a complete reference check. The full CPU matrix in that directory
+also still reports the seven x86 defects above.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity check-stack-memory check-memory-operands check-arm64-simd
+taskset -c 16-23 make -C kprog/fidelity ARCH=arm64 run-emulated CASES=1024 OUT=../results/kprog_fidelity_20261106/differential/arm64-width-fix
+taskset -c 16-23 make -C kprog/fidelity reference-check CASES=1024 OUT=../results/kprog_fidelity_20261106/differential/x86-reference-bt-cmov
+```
+
+`recovery-sources.tar.gz` preserves the source/header snapshot; raw matrices,
+compressed counterexamples and `restart-*.log.gz` preserve all outcomes.
+The checkout is shared and dirty; later lane changes are not retroactively
+part of these measurements. No paper files or git state were changed by F
+in this recovery turn.

@@ -1,0 +1,80 @@
+{
+  "arch": "arm64",
+  "cases": [
+    {
+      "name": "past_data_end_read",
+      "assembly": "ldr x1, [x0, #8]; ldrb w0, [x1]; ret",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'past_data_end_read_arm64_sim_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'past_data_end_read_arm64_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; ARM64_SIM_ENTRY_XDP(ctx); @ past_data_end_read.bpf.c:6\n0: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X0, ARM64_X1, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_8, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ past_data_end_read.bpf.c:12\n1: (71) r0 = *(u8 *)(r1 +0)\nR1 invalid mem access 'pkt_end'\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'past_data_end_read_arm64_sim_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/proofs/past_data_end_read.bpf.o'\ntiming verify_s=0.086009 test_s=0.000000\nerror: bpf_object__load failed: Permission denied (os error 13)\n",
+      "returncode": 1
+    },
+    {
+      "name": "past_data_end_write",
+      "assembly": "ldr x1, [x0, #8]; mov w2, #1; strb w2, [x1]; mov w0, #2; ret",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'past_data_end_write_arm64_sim_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'past_data_end_write_arm64_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; ARM64_SIM_ENTRY_XDP(ctx); @ past_data_end_write.bpf.c:6\n0: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n1: (b7) r2 = 1                        ; R2=1\n; ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_X1, ARM64_X2, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_8, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ past_data_end_write.bpf.c:15\n2: (73) *(u8 *)(r1 +0) = r2\nR1 invalid mem access 'pkt_end'\nprocessed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'past_data_end_write_arm64_sim_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/proofs/past_data_end_write.bpf.o'\ntiming verify_s=0.044646 test_s=0.000000\nerror: bpf_object__load failed: Permission denied (os error 13)\n",
+      "returncode": 1
+    },
+    {
+      "name": "missing_data_end_check",
+      "assembly": "ldr x1, [x0]; ldrb w0, [x1]; ret",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'missing_data_end_check_arm64_sim_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'missing_data_end_check_arm64_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; ARM64_SIM_ENTRY_XDP(ctx); @ missing_data_end_check.bpf.c:6\n0: (61) r1 = *(u32 *)(r1 +0)          ; R1=pkt(r=0)\n; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X0, ARM64_X1, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_8, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ missing_data_end_check.bpf.c:12\n1: (71) r0 = *(u8 *)(r1 +0)\ninvalid access to packet, off=0 size=1, R1(id=0,off=0,r=0)\nR1 offset is outside of the packet\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'missing_data_end_check_arm64_sim_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/proofs/missing_data_end_check.bpf.o'\ntiming verify_s=0.038780 test_s=0.000000\nerror: bpf_object__load failed: Permission denied (os error 13)\n",
+      "returncode": 1
+    },
+    {
+      "name": "map_value_oob",
+      "assembly": "ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; cbz x0, 1f; ldr x0, [x0, #8]; ret; 1: mov x0, #0; ret",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'map_value_oob_arm64_sim_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'map_value_oob_arm64_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; int map_value_oob_arm64_sim_xdp(struct xdp_md *ctx) @ map_value_oob.bpf.c:14\n0: (b7) r6 = 0                        ; R6=0\n; ARM64_SIM_ENTRY_XDP(ctx); @ map_value_oob.bpf.c:16\n1: (61) r3 = *(u32 *)(r1 +4)          ; R1=ctx() R3=pkt_end()\n2: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n; ARM64_SIM_RUN_OP3(ARM64_OP_ALU_IMM, ARM64_X3, ARM64_X1, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0), 4ULL); @ map_value_oob.bpf.c:25\n3: (bf) r1 = r2                       ; R1=pkt(r=0) R2=pkt(r=0)\n4: (07) r1 += 4                       ; R1=pkt(off=4,r=0)\n; ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x10, 0x2c, arm64_l_2c); @ map_value_oob.bpf.c:31\n5: (2d) if r1 > r3 goto pc+18         ; R1=pkt(off=4,r=4) R3=pkt_end()\n; ARM64_SIM_BPF_CALL_bpf_map_lookup_elem(); @ map_value_oob.bpf.c:40\n6: (18) r1 = 0xffff0000041d2000       ; R1=map_ptr(map=neg_map_0,ks=4,vs=8)\n8: (85) call bpf_map_lookup_elem#1    ; R0=map_value_or_null(id=1,map=neg_map_0,ks=4,vs=8)\n9: (15) if r0 == 0x0 goto pc+14       ; R0=map_value(map=neg_map_0,ks=4,vs=8)\n; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X0, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 8ULL); @ map_value_oob.bpf.c:46\n10: (71) r1 = *(u8 *)(r0 +8)\ninvalid access to map value, value_size=8 off=8 size=1\nR0 min value is outside of the allowed memory range\nprocessed 10 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'map_value_oob_arm64_sim_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/proofs/map_value_oob.bpf.o'\ntiming verify_s=0.197918 test_s=0.000000\nerror: bpf_object__load failed: Permission denied (os error 13)\n",
+      "returncode": 1
+    },
+    {
+      "name": "nullable_map_dereference",
+      "assembly": "ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; ldr x0, [x0]; ret; 1: mov x0, #0; ret",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'nullable_map_dereference_arm64_sim_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'nullable_map_dereference_arm64_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; int nullable_map_dereference_arm64_sim_xdp(struct xdp_md *ctx) @ nullable_map_dereference.bpf.c:14\n0: (b7) r0 = 0                        ; R0=0\n; ARM64_SIM_ENTRY_XDP(ctx); @ nullable_map_dereference.bpf.c:16\n1: (61) r3 = *(u32 *)(r1 +4)          ; R1=ctx() R3=pkt_end()\n2: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n; ARM64_SIM_RUN_OP3(ARM64_OP_ALU_IMM, ARM64_X3, ARM64_X1, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0), 4ULL); @ nullable_map_dereference.bpf.c:25\n3: (bf) r1 = r2                       ; R1=pkt(r=0) R2=pkt(r=0)\n4: (07) r1 += 4                       ; R1=pkt(off=4,r=0)\n; ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x10, 0x28, arm64_l_28); @ nullable_map_dereference.bpf.c:31\n5: (2d) if r1 > r3 goto pc+18         ; R1=pkt(off=4,r=4) R3=pkt_end()\n; ARM64_SIM_BPF_CALL_bpf_map_lookup_elem(); @ nullable_map_dereference.bpf.c:40\n6: (18) r1 = 0xffff0000041d3600       ; R1=map_ptr(map=neg_map_0,ks=4,vs=8)\n8: (85) call bpf_map_lookup_elem#1    ; R0=map_value_or_null(id=1,map=neg_map_0,ks=4,vs=8)\n9: (bf) r1 = r0                       ; R0=map_value_or_null(id=1,map=neg_map_0,ks=4,vs=8) R1=map_value_or_null(id=1,map=neg_map_0,ks=4,vs=8)\n; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X0, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ nullable_map_dereference.bpf.c:43\n10: (71) r2 = *(u8 *)(r1 +0)\nR1 invalid mem access 'map_value_or_null'\nprocessed 10 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'nullable_map_dereference_arm64_sim_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/proofs/nullable_map_dereference.bpf.o'\ntiming verify_s=0.075387 test_s=0.000000\nerror: bpf_object__load failed: Permission denied (os error 13)\n",
+      "returncode": 1
+    },
+    {
+      "name": "invalid_helper_argument",
+      "assembly": "mov x0, #1; mov x1, #0; bl bpf_map_lookup_elem; ret",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'invalid_helper_argument_arm64_sim_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'invalid_helper_argument_arm64_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; ARM64_SIM_BPF_CALL_bpf_map_lookup_elem(); @ invalid_helper_argument.bpf.c:18\n0: (b7) r1 = 1                        ; R1=1\n1: (b7) r2 = 0                        ; R2=0\n2: (85) call bpf_map_lookup_elem#1\nR1 type=scalar expected=map_ptr\nprocessed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'invalid_helper_argument_arm64_sim_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/proofs/invalid_helper_argument.bpf.o'\ntiming verify_s=0.103909 test_s=0.000000\nerror: bpf_object__load failed: Permission denied (os error 13)\n",
+      "returncode": 1
+    },
+    {
+      "name": "stack_oob",
+      "assembly": "ldr x0, [sp, #1024]; ret",
+      "stage": "linker_rejected",
+      "message": "libbpf: failed to find BTF for extern 'arm64_sim_unsupported_opcode' [9] section: -2\nerror: failed to open /proofs/stack_oob.bpf.o: No such file or directory (os error 2)\n",
+      "returncode": 1
+    },
+    {
+      "name": "uninitialized_stack",
+      "assembly": "ldur x0, [sp, #-8]; ret",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'uninitialized_stack_arm64_sim_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'uninitialized_stack_arm64_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; } @ uninitialized_stack.bpf.c:15\n0: (95) exit\nR0 !read_ok\nprocessed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'uninitialized_stack_arm64_sim_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/proofs/uninitialized_stack.bpf.o'\ntiming verify_s=0.077655 test_s=0.000000\nerror: bpf_object__load failed: Permission denied (os error 13)\n",
+      "returncode": 1
+    },
+    {
+      "name": "unbounded_loop",
+      "assembly": "1: b 1b",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'unbounded_loop_arm64_sim_xdp': BPF program load failed: -EINVAL\nlibbpf: prog 'unbounded_loop_arm64_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; ARM64_SIM_A64_JMP(0x0, 0x0, arm64_l_0); @ unbounded_loop.bpf.c:9\n0: (05) goto pc-1\n0: (05) goto pc-1\n0: (05) goto pc-1\n0: (05) goto pc-1\n0: (05) goto pc-1\n0: (05) goto pc-1\n0: (05) goto pc-1\n0: (05) goto pc-1\ninfinite loop detected at insn 0\ncur state: R1=ctx() R10=fp0\nold state: R1=ctx() R10=fp0\nprocessed 9 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'unbounded_loop_arm64_sim_xdp': failed to load: -EINVAL\nlibbpf: failed to load object '/proofs/unbounded_loop.bpf.o'\ntiming verify_s=0.027181 test_s=0.000000\nerror: bpf_object__load failed: Invalid argument (os error 22)\n",
+      "returncode": 1
+    },
+    {
+      "name": "unbounded_indirect_jump",
+      "assembly": "ldr x1, [x0]; br x1",
+      "stage": "specialization_rejected",
+      "message": "unsupported arm64 instruction: br x1"
+    },
+    {
+      "name": "unsupported_instruction",
+      "assembly": "brk #0; ret",
+      "stage": "specialization_rejected",
+      "message": "unsupported arm64 instruction: brk #0x0"
+    }
+  ]
+}

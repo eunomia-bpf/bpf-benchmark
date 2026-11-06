@@ -1,0 +1,28 @@
+libbpf: prog 'past_data_end_write_x86_sim_xdp': BPF program load failed: -EACCES
+libbpf: prog 'past_data_end_write_x86_sim_xdp': -- BEGIN PROG LOAD LOG --
+0: R1=ctx() R10=fp0
+; X86_SIM_ENTRY_XDP(ctx); @ past_data_end_write.bpf.c:6
+0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)
+1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)
+2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()
+3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()
+4: (b7) r1 = 0                        ; R1=0
+5: (7b) *(u64 *)(r10 -24) = r1        ; R1=0 R10=fp0 fp-24=0
+6: (7b) *(u64 *)(r10 -16) = r1        ; R1=0 R10=fp0 fp-16=0
+7: (63) *(u32 *)(r10 -8) = r1         ; R1=0 R10=fp0 fp-8=????0
+8: (b7) r2 = 8                        ; R2=8
+9: (bf) r3 = r10                      ; R3=fp0 R10=fp0
+;  @ past_data_end_write.bpf.c:0
+10: (07) r3 += -40                    ; R3=fp-40
+; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL); @ past_data_end_write.bpf.c:9
+11: (0f) r3 += r2                     ; R2=8 R3=fp-32
+12: (79) r2 = *(u64 *)(r3 +0)         ; R2=pkt_end() R3=fp-32 fp-32=pkt_end()
+; X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 1ULL); @ past_data_end_write.bpf.c:12
+13: (0f) r2 += r1
+R2 pointer arithmetic on pkt_end prohibited
+processed 14 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+-- END PROG LOAD LOG --
+libbpf: prog 'past_data_end_write_x86_sim_xdp': failed to load: -EACCES
+libbpf: failed to load object '/workspaces/repository/kprog/fidelity/build-x86/negative/past_data_end_write.bpf.o'
+timing verify_s=0.043839 test_s=0.000000
+error: bpf_object__load failed: Permission denied (os error 13)

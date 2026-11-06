@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "packet_5tuple_classify",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/packet_5tuple_classify.native.o",
+      "symbol": "packet_5tuple_classify",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/stage2/packet_5tuple_classify.bpf.o",
+      "simulator_program": "packet_5tuple_classify_x86_sim_xdp"
+    }
+  ]
+}

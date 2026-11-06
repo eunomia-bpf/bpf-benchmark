@@ -1,0 +1,13 @@
+{
+  "name": "helper_only_uid_gid",
+  "native_object": "/workspaces/repository/kprog/test/build-x86/helper_only_uid_gid.native.o",
+  "stage": "failed",
+  "returncode": 1,
+  "command": [
+    "/workspaces/repository/kprog/fidelity/build-x86/bound-probe",
+    "/workspaces/repository/kprog/test/build-x86/helper_only_uid_gid.bpf.o",
+    "/workspaces/repository/kprog/results/kprog_fidelity_20261106/helper-map/x86/helper_only_uid_gid.manifest.json",
+    "0",
+    "2"
+  ]
+}

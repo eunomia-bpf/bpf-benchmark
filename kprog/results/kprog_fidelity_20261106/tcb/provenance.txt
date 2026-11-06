@@ -1,60 +1,91 @@
-repository=8b36bf31f4b7a67cb324e3a973f3165366c7b3d8
+repository=3193e443fd9dc51fd8aa4fbc0b7983417859321b
 kernel=24cd6e63ce912a4e220ca1cae3137ab29706551b
 kernel_base=c23719abc3308df7ed3ad35650ad211fb2d2003d
 
-M corpus/results/kprog_app_coverage_20261106/.gitignore
- M corpus/results/kprog_app_coverage_20261106/Makefile
- M corpus/results/kprog_app_coverage_20261106/README.md
- M corpus/results/kprog_app_coverage_20261106/baseline/checkpoint-logs.tar.gz
- M corpus/results/kprog_app_coverage_20261106/baseline/simulator.tar.gz
- M corpus/results/kprog_app_coverage_20261106/cilium-baseline/checkpoint-logs.tar.gz
- M corpus/results/kprog_app_coverage_20261106/coverage.csv
- M corpus/results/kprog_app_coverage_20261106/coverage.py
- M corpus/results/kprog_app_coverage_20261106/summarize.py
- M corpus/results/kprog_app_coverage_20261106/tables.md
- M corpus/results/kprog_arm64_app_coverage_20261106/.gitignore
- M corpus/results/kprog_arm64_app_coverage_20261106/Makefile
- M corpus/results/kprog_arm64_app_coverage_20261106/README.md
+M corpus/results/kprog_app_coverage_20261106/Makefile
  M corpus/results/kprog_arm64_app_coverage_20261106/coverage.py
  ? docs/ebpf27-bpfoptbench
  ? docs/paper
+ M kinsn/module/arm64/bpf_arm64_native_lab.c
+ M kinsn/module/x86/bpf_x86_native_lab.c
  M kprog/arm64/arm64_sim_local_bpf.h
- M kprog/arm64/micro-prog/generated_arm64_helper_idents.py
+ M kprog/arm64/micro-prog/generate_micro_sim_proofs.py
  M kprog/fidelity/Makefile
- M kprog/formal/KProgFormal/Arm64HelperIdents.lean
- M kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean
- M kprog/formal/KProgFormal/X86CmovHandler.lean
+ M kprog/fidelity/driver.c
+ M kprog/fidelity/driver.h
+ M kprog/fidelity/generate.py
+ M kprog/fidelity/negative.py
+ M kprog/fidelity/tcb.py
+ M kprog/formal/KProgFormal/Generated/GeneratedX86Bitops.lean
+ M kprog/formal/KProgFormal/Reference/X86.lean
+ M kprog/formal/KProgFormal/X86Bitops.lean
  M kprog/formal/KProgFormal/X86MemAluHandler.lean
  M kprog/formal/KProgFormal/X86MemStoreAluHandler.lean
- M kprog/formal/contracts/arm64_helper_idents_spec.json
- M kprog/formal/generated/arm64_helper_idents.h
- M kprog/formal/oracles/cmov_step_route_host.c
- M kprog/formal/oracles/test_arm64_helper_call_host.c
- M kprog/formal/oracles/test_arm64_helper_idents_host.c
- M kprog/formal/oracles/test_x86_cmov_host.c
- M kprog/formal/oracles/test_x86_cmov_route_host.c
- M kprog/formal/oracles/test_x86_dispatch_singleton_route_host.c
- M kprog/formal/tools/generate_arm64_helper_idents_spec.py
- M kprog/results/kprog_fidelity_20261106/load-time/analyze.py
- M kprog/results/kprog_fidelity_20261106/load-time/samples.csv
+ M kprog/formal/ReferenceMain.lean
+ M kprog/formal/contracts/x86_bitops_spec.json
+ M kprog/formal/generated/x86_bitops.h
+ M kprog/formal/oracles/btmem_index_route_host.c
+ M kprog/formal/oracles/fmov_route_host.c
+ M kprog/formal/oracles/test_arm64_helper_arg_ptr_route_host.c
+ M kprog/formal/oracles/test_arm64_stack_arena_route_host.c
+ M kprog/formal/oracles/test_arm64_stack_arm_route_host.c
+ M kprog/formal/oracles/test_arm64_stack_read_tag_source_route_host.c
+ M kprog/formal/oracles/test_arm64_stack_write_lanes_route_host.c
+ M kprog/formal/oracles/test_arm64_stack_write_tag_action_route_host.c
+ M kprog/formal/oracles/test_x86_bitops_host.c
+ M kprog/formal/oracles/test_x86_bt_host.c
+ M kprog/formal/oracles/test_x86_bt_route_host.c
+ M kprog/formal/oracles/test_x86_imul_route_host.c
+ M kprog/formal/oracles/test_x86_mem_bit_handler_host.c
+ M kprog/formal/tools/check_reference.py
+ M kprog/formal/tools/generate_x86_bitops_spec.py
+ M kprog/libnativeloader/src/native_loader.cpp
+ M kprog/libnativeloader/src/native_loader_manifest.hpp
+ M kprog/results/kprog_fidelity_20261106/tcb/binding-functions.json
+ M kprog/results/kprog_fidelity_20261106/tcb/components.json
+ M kprog/results/kprog_fidelity_20261106/tcb/files.csv
+ M kprog/results/kprog_fidelity_20261106/tcb/kernel-changes.tsv
+ M kprog/tv/Composition.lean
+ M kprog/tv/Makefile
+ M kprog/tv/test_binding_kernel.c
+ M kprog/tv/test_loader.cpp
+ M kprog/tv/test_native_entry.c
  M kprog/x86/micro-prog/generate_micro_sim_proofs.py
+ M kprog/x86/native_lab/native_link/src/x86.rs
  M kprog/x86/x86_sim_local_bpf.h
+ M runner/mk/build.mk
  M vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h
  M vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h
- ? vendor/linux-framework
+ m vendor/linux-framework
 ?? corpus/results/cilium_native_lab_20261009/
-?? corpus/results/kprog_app_coverage_20261106/baseline-tail/
-?? corpus/results/kprog_app_coverage_20261106/check_dispatch.py
-?? corpus/results/kprog_app_coverage_20261106/cilium-label/
-?? corpus/results/kprog_app_coverage_20261106/cilium-unbounded/
-?? corpus/results/kprog_app_coverage_20261106/label/
-?? corpus/results/kprog_app_coverage_20261106/unbounded/
-?? corpus/results/kprog_arm64_app_coverage_20261106/DGX-SPARK.md
-?? corpus/results/kprog_arm64_app_coverage_20261106/Replay.mk
-?? corpus/results/kprog_arm64_app_coverage_20261106/helper-ids/
-?? corpus/results/kprog_arm64_app_coverage_20261106/inventory/pairing.csv
-?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/
-?? corpus/results/kprog_arm64_app_coverage_20261106/portable-replay/
+?? corpus/results/kprog_app_coverage_20261106/baseline-tail/compile
+?? corpus/results/kprog_app_coverage_20261106/baseline-tail/objects
+?? corpus/results/kprog_app_coverage_20261106/baseline-tail/verify
+?? corpus/results/kprog_app_coverage_20261106/cilium-label/compile
+?? corpus/results/kprog_app_coverage_20261106/cilium-label/objects
+?? corpus/results/kprog_app_coverage_20261106/cilium-label/verify
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v310_execve_rate.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v310_execve_send.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v511_event_execve.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v511_execve_send.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v53_event_execve.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v53_execve_rate.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v53_execve_send.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v61___do_bytes.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tetragon_bpf_execve_event_v61___do_str.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_arch_prctl.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_bpf_check.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_call_usermodehelper.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_cap_capable.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_check_helper_call.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_check_map_func_compatibility.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_chmod_common.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_commit_creds.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_do_init_module.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/compile/tracee_trace_do_mmap.json
+?? corpus/results/kprog_arm64_app_coverage_20261106/register-cells-long/
+?? corpus/results/kprog_arm64_app_coverage_20261106/register-cells-runlong/
+?? corpus/results/kprog_arm64_app_coverage_20261106/register-cells/
 ?? corpus/results/x86_kvm_corpus_20261009_155809_919194/
 ?? corpus/results/x86_kvm_corpus_20261009_160148_125322/
 ?? kprog/arm64/app-coverage-baseline-run-3607553/
@@ -62,14 +93,26 @@ M corpus/results/kprog_app_coverage_20261106/.gitignore
 ?? kprog/arm64/app-coverage-label-all-run-3659439/
 ?? kprog/arm64/app-coverage-label-pilot-run-3644785/
 ?? kprog/arm64/app-coverage-pilot-run-3607178/
-?? kprog/fidelity/tcb.py
-?? kprog/formal/KProgFormal/Reference/
-?? kprog/formal/KProgFormal/Refinement/
-?? kprog/formal/tools/axiom_census.py
-?? kprog/formal/tools/check_lean_claims.py
+?? kprog/fidelity/bound_probe.cpp
+?? kprog/fidelity/negative_companion.bpf.c
+?? kprog/fidelity/reference_check.py
+?? kprog/formal/oracles/guarded_memory_host.h
+?? kprog/results/kprog_fidelity_20261106/differential/x86-encoding-fix-rebuilt/
+?? kprog/results/kprog_fidelity_20261106/differential/x86-encoding-fix/
+?? kprog/results/kprog_fidelity_20261106/differential/x86-memory-fix/
+?? kprog/results/kprog_fidelity_20261106/differential/x86-reference-cmov-bytes/
+?? kprog/results/kprog_fidelity_20261106/negative/arm64-raw-stack/
 ?? kprog/results/kprog_fidelity_20261106/negative/arm64-stack-fix/
-?? kprog/results/kprog_fidelity_20261106/tcb/
+?? kprog/results/kprog_fidelity_20261106/negative/x86-bound/
+?? kprog/results/kprog_fidelity_20261106/negative/x86-raw-stack/
+?? kprog/results/kprog_tv_20261106/helper-map-final-arm64.status
+?? kprog/results/kprog_tv_20261106/helper-map-final-x86.status
+?? kprog/results/kprog_tv_20261106/map-pc32-jit-before.bin
 ?? kprog/results/kprog_tv_20261106/programs.jsonl
+?? kprog/tv/apply_kernel_patch.py
+?? kprog/tv/native-proof-regions.patch
+?? kprog/tv/test_kernel_patch.py
+?? kprog/tv/test_simulator.bpf.c
 ?? kprog/x86/app-coverage-baseline-run-3594374/
 ?? kprog/x86/app-coverage-cilium-baseline-run-3599863/
 ?? kprog/x86/app-coverage-cilium-label-run-3670160/
@@ -90,4 +133,9 @@ M corpus/results/kprog_app_coverage_20261106/.gitignore
 ?? tests/results/e81210f7/
 
 kernel status:
+M arch/arm64/net/bpf_jit_comp.c
+ M arch/x86/net/bpf_jit_comp.c
+ M include/linux/bpf.h
+ M include/linux/bpf_verifier.h
+ M kernel/bpf/verifier.c
 ?? drivers/net/veth.c.orig

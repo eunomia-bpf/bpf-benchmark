@@ -1,0 +1,13 @@
+{
+  "name": "map_lru_hash_counter",
+  "native_object": "/workspaces/repository/kprog/test/build-x86/map_lru_hash_counter.native.o",
+  "stage": "failed",
+  "returncode": 1,
+  "command": [
+    "/workspaces/repository/kprog/fidelity/build-x86/bound-probe",
+    "/workspaces/repository/kprog/test/build-x86/map_lru_hash_counter.bpf.o",
+    "/workspaces/repository/kprog/results/kprog_fidelity_20261106/helper-map/x86/map_lru_hash_counter.manifest.json",
+    "1",
+    "2"
+  ]
+}

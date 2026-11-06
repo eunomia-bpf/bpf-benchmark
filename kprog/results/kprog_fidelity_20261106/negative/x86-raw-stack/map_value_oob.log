@@ -1,0 +1,48 @@
+libbpf: prog 'map_value_oob_x86_sim_xdp': BPF program load failed: -EACCES
+libbpf: prog 'map_value_oob_x86_sim_xdp': -- BEGIN PROG LOAD LOG --
+0: R1=ctx() R10=fp0
+; X86_SIM_ENTRY_XDP(ctx); @ map_value_oob.bpf.c:8
+0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)
+1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)
+2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()
+3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()
+4: (b7) r6 = 0                        ; R6=0
+5: (7b) *(u64 *)(r10 -24) = r6        ; R6=0 R10=fp0 fp-24=0
+6: (7b) *(u64 *)(r10 -16) = r6        ; R6=0 R10=fp0 fp-16=0
+7: (63) *(u32 *)(r10 -8) = r6         ; R6=0 R10=fp0 fp-8=????0
+; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RSI, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ map_value_oob.bpf.c:11
+8: (b7) r1 = 0                        ; R1=0
+9: (bf) r3 = r10                      ; R3=fp0 R10=fp0
+;  @ map_value_oob.bpf.c:0
+10: (07) r3 += -40                    ; R3=fp-40
+; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RSI, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ map_value_oob.bpf.c:11
+11: (bf) r2 = r3                      ; R2=fp-40 R3=fp-40
+12: (0f) r2 += r1                     ; R1=0 R2=fp-40
+13: (79) r2 = *(u64 *)(r2 +0)         ; R2=pkt(r=0) fp-40=pkt(r=0)
+14: (b7) r1 = 8                       ; R1=8
+; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL); @ map_value_oob.bpf.c:14
+15: (0f) r3 += r1                     ; R1=8 R3=fp-32
+16: (79) r1 = *(u64 *)(r3 +0)         ; R1=pkt_end() R3=fp-32 fp-32=pkt_end()
+17: (b7) r3 = 4                       ; R3=4
+; X86_SIM_L_EXEC_LEA(X86_RDX, X86_RSI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 4ULL); @ map_value_oob.bpf.c:17
+18: (bf) r4 = r2                      ; R2=pkt(r=0) R4=pkt(r=0)
+19: (0f) r4 += r3                     ; R3=4 R4=pkt(off=4,r=0)
+; X86_SIM_X86_JCC(X86_CC_A, 0xe, 0x26, x86_l_26); @ map_value_oob.bpf.c:23
+20: (2d) if r4 > r1 goto pc+23        ; R1=pkt_end() R4=pkt(off=4,r=4)
+; X86_SIM_BPF_CALL_ID(X86_SIM_HELPER_bpf_map_lookup_elem); @ map_value_oob.bpf.c:29
+21: (18) r1 = 0xffff8f0907fbb000      ; R1=map_ptr(map=neg_map,ks=4,vs=8)
+23: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)
+; X86_SIM_X86_JCC(X86_CC_E, 0x1f, 0x26, x86_l_26); @ map_value_oob.bpf.c:35
+24: (15) if r0 == 0x0 goto pc+19      ; R0=map_value(map=neg_map,ks=4,vs=8)
+25: (b7) r1 = 8                       ; R1=8
+; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RAX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL); @ map_value_oob.bpf.c:38
+26: (0f) r0 += r1                     ; R0=map_value(map=neg_map,ks=4,vs=8,off=8) R1=8
+27: (71) r1 = *(u8 *)(r0 +0)
+invalid access to map value, value_size=8 off=8 size=1
+R0 min value is outside of the allowed memory range
+processed 27 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+-- END PROG LOAD LOG --
+libbpf: prog 'map_value_oob_x86_sim_xdp': failed to load: -EACCES
+libbpf: failed to load object '/workspaces/repository/kprog/fidelity/build-x86/negative/map_value_oob.bpf.o'
+timing verify_s=0.043702 test_s=0.000000
+error: bpf_object__load failed: Permission denied (os error 13)

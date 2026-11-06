@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "stats_mixed_helpers",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/stats_mixed_helpers.native.o",
+      "symbol": "stats_mixed_helpers",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/stage2/stats_mixed_helpers.bpf.o",
+      "simulator_program": "stats_mixed_helpers_x86_sim_xdp"
+    }
+  ]
+}

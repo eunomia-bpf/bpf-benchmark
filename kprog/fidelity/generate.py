@@ -118,7 +118,7 @@ def native_wrapper(arch, index, instruction):
         lines += ["mov r15, [r15+120]"]
         if before:
             lines += [f"lea rsp, [rsp{before:+d}]"]
-        lines += [instruction]
+        lines += [f".global native_pc_{index}", f"native_pc_{index}:", instruction, f".global native_next_{index}", f"native_next_{index}:"]
         if after:
             lines += [f"lea rsp, [rsp{-after:+d}]"]
         lines += [f"movdqu xmm{lane+1}, [rsp-{64-lane*16}]" for lane in range(4)]
@@ -133,7 +133,7 @@ def native_wrapper(arch, index, instruction):
         lines += [f"stp x{i}, x{i+1}, [sp, #{(i-19)*8}]" for i in range(19, 31, 2)]
         lines += ["str x0, [sp, #96]", "mov x30, x0", "ldr x1, [x30, #256]", "msr nzcv, x1", "add x1, x30, #264", "ldr q0, [x1]"]
         lines += [f"ldr x{i}, [x30, #{i*8}]" for i in range(30)]
-        lines += ["ldr x30, [x30, #240]", instruction, "stp x0, x30, [sp, #112]", "ldr x0, [sp, #96]"]
+        lines += ["ldr x30, [x30, #240]", f".global native_pc_{index}", f"native_pc_{index}:", instruction, f".global native_next_{index}", f"native_next_{index}:", "stp x0, x30, [sp, #112]", "ldr x0, [sp, #96]"]
         lines += [f"str x{i}, [x0, #{i*8}]" for i in range(1, 30)]
         lines += ["mrs x1, nzcv", "str x1, [x0, #256]", "add x1, x0, #264", "str q0, [x1]", "ldp x1, x2, [sp, #112]", "str x1, [x0]", "str x2, [x0, #240]"]
         lines += [f"ldp x{i}, x{i+1}, [sp, #{(i-19)*8}]" for i in range(19, 31, 2)]
@@ -188,19 +188,19 @@ def main():
             body = f"rep movs{suffix}"
             pairs.append((body, encoder.enc("X86_OP_REP_MOVS", flags=f"X86_WIDTH_{width}", imm="8"), None, body, body))
     for i, (assembly, encoded, special, native_body, decoded) in enumerate(pairs):
-        c += [f"extern void native_{i}(struct state *);", f"static void sim_{i}(struct state *s) {{"]
+        c += [f"extern unsigned char native_pc_{i}, native_next_{i};", f"extern void native_{i}(struct state *);", f"static void sim_{i}(struct state *s) {{"]
         if arch == "x86":
             c += ["X86_SIM_L_DECLARE_STATE(); X86_SIM_L_DECLARE_STACK(); __u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;"]
             regs = ["rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi"] + [f"r{j}" for j in range(8, 16)]
             c += [f"__x86_{reg}.ptr = (void *)(uintptr_t)s->r[{j}];" for j, reg in enumerate(regs)]
-            c += ["memcpy(__x86_stack_mem.b, s->stack, 64);"]
+            c += ["for (unsigned k=0;k<64;k++) __x86_stack_mem.b[k]=s->stack[k];"]
             c += ["__x86_cf = s->flags & 1; __x86_zf = (s->flags >> 6) & 1; __x86_sf = (s->flags >> 7) & 1; __x86_of = (s->flags >> 11) & 1;", "__x86_xmm0_lo = s->vec[0]; __x86_xmm0_hi = s->vec[1];"]
             step = special if special is not None else encoder.direct_step_statement(encoded)
             if step is None:
                 step = f"X86_SIM_RUN_OP({encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, {encoded.aux}, {encoded.imm});"
             c += [step + ";"]
             c += [f"s->r[{j}] = (uintptr_t)__x86_{reg}.ptr;" for j, reg in enumerate(regs)]
-            c += ["memcpy(s->stack, __x86_stack_mem.b, 64);"]
+            c += ["for (unsigned k=0;k<64;k++) s->stack[k]=__x86_stack_mem.b[k];"]
             c += ["s->flags = __x86_cf | ((uint64_t)__x86_zf << 6) | ((uint64_t)__x86_sf << 7) | ((uint64_t)__x86_of << 11);", "s->vec[0] = __x86_xmm0_lo; s->vec[1] = __x86_xmm0_hi;"]
             width = next((bits for bits in [8, 16, 32, 64] if encoded.flags == f"X86_WIDTH_{bits}"), 64)
             op = assembly.split()[0]
@@ -222,7 +222,7 @@ def main():
             c += ["s->flags = ((uint64_t)__a64_n << 31) | ((uint64_t)__a64_z << 30) | ((uint64_t)__a64_c << 29) | ((uint64_t)__a64_v << 28);", "s->vec[0] = __a64_v0; s->vec[1] = __a64_v0_hi;"]
             mode, count, mask, width = 0, 0, 0xf0000000, 64
         c += ["}"]
-        entries += [f"{{{json.dumps(assembly)}, {json.dumps(encoded.op)}, native_{i}, sim_{i}, {mask}U, {width}, {count}, {mode}}}"]
+        entries += [f"{{{json.dumps(assembly)}, {json.dumps(encoded.op)}, native_{i}, sim_{i}, {mask}U, {width}, {count}, {mode}, &native_pc_{i}, &native_next_{i}}}"]
         coverage += [{"assembly": assembly, "decoded": decoded, "opcode": encoded.op}]
     c += ["const struct form forms[] = {", ",\n".join(entries), "};", "const unsigned form_count = sizeof(forms) / sizeof(forms[0]);"]
     (out / "generated.c").write_text("\n".join(c) + "\n")

@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "map_hash_str_key",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/map_hash_str_key.native.o",
+      "symbol": "map_hash_str_key",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/stage2/map_hash_str_key.bpf.o",
+      "simulator_program": "map_hash_str_key_x86_sim_xdp"
+    }
+  ]
+}

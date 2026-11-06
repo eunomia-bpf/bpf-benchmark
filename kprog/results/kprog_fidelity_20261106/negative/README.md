@@ -72,3 +72,41 @@ The test loads verifier-facing simulator artifacts; it does not execute unsafe
 native programs. It does not test native-generation binding or claim that a
 proof rejection discharges whole-program fidelity. Binding is lane T's
 separate obligation. No benchmark launcher or common workload was changed.
+
+
+## Bound-path follow-up after the workspace restart
+
+The original accepted AArch64 stack read above is retained as the baseline.
+On the paired native-proof kernel/module, both fresh suites reject all eleven
+fixtures: eight verifier rejections, one loader rejection, two specialization
+rejections. There are no accepted cases or infrastructure errors.
+
+- x86 KVM: `x86-bound-recovery/outcomes.json` and per-case logs.
+- AArch64 full-system QEMU: `arm64-bound/outcomes.json`, per-case logs and
+  the entire `guest-console.log`.
+
+The eight verifier cases are packet read/write past data_end, absent packet
+bounds check, out-of-bounds map value, nullable map dereference, invalid helper
+argument, out-of-bounds stack and uninitialized stack. Both uninitialized
+reads now fail with the native-proof region's strict initialized-stack policy;
+privileged standalone simulator acceptance is not hidden or reinterpreted.
+The unbounded direct loop produces a proof with no EXIT and the production
+loader rejects it with `native_kernel bound proof contains no BPF exit`.
+The unbounded indirect jump and unsupported opcode reject during
+specialization. None of these rejection-stage outcomes counts as a successful
+native program execution or as an application coverage result.
+
+The static Arm probe uses the production manifest/loader, native-link, module
+and proof seals. Its simulator is the actual compiled fixture, paired through
+`simulator_object`/`simulator_program`; unsafe native programs are never run.
+No shared kernel, module or runtime image is replaced by these tests.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity bound-probe-build
+taskset -c 16-23 make -C kprog/fidelity negative-bound-kvm NEGATIVE_BOUND_OUT=../results/kprog_fidelity_20261106/negative/x86-bound-recovery
+taskset -c 16-23 make -C kprog/fidelity negative-bound-qemu
+```
+
+These commands consume T's paired `kprog/tv/build-kernel-{x86,arm64}` and
+`kprog/tv/build-{x86,arm64}` module outputs. Arm builds its loader/probe in
+`build-fidelity-arm64`/`build-arm64` and packages a separate initramfs.

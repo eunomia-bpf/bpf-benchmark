@@ -120,17 +120,12 @@ static __u8 model_bt(__u64 base, __u64 index, unsigned width)
 }
 
 /* The effective displacement the body applies to the memory base. The body
- * passes `x86_store_imm_disp(IMM)` to a load that itself applies
- * `x86_store_imm_disp`, so the displacement is the *double* application; the
+ * decodes the high 32-bit displacement exactly once; the
  * model restates the same unsigned semantics so it stays independent of the
  * sim's macros. */
 static __s64 model_bt_disp(__u64 imm)
 {
-	__s32 d1 = (__s32)(imm >> 32);
-	__u64 d1u = (__u64)d1;
-	__s32 d2 = (__s32)(d1u >> 32);
-
-	return (__s64)d2;
+    return (__s64)(__s32)(imm >> 32);
 }
 
 /* The index handle the body reads for the non-register forms: the raw 64-bit

@@ -652,13 +652,13 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        dst=mem_base_reg(ops[0]), src=src_reg[0],
                        flags=WIDTH_CONST[operand_width(ops[0], src_reg[1])],
                        aux=mem_aux(ops[0]),
-                       imm=c_u64(mem_disp(ops[0])))
+                       imm=c_u64((mem_disp(ops[0]) & 0xffffffff) << 32))
         if is_mem(ops[0]) and is_int(ops[1]):
             return enc("X86_OP_CMP_MEM_IMM" if op == "cmp" else "X86_OP_TEST_MEM_IMM",
                        dst=mem_base_reg(ops[0]),
                        flags=WIDTH_CONST[operand_width(ops[0], width)],
                        aux=mem_aux(ops[0]),
-                       imm=c_u64(parse_int(ops[1]) + (mem_disp(ops[0]) << 32)))
+                       imm=c_u64((parse_int(ops[1]) & 0xffffffff) | ((mem_disp(ops[0]) & 0xffffffff) << 32)))
         if is_mem(ops[0]) or is_mem(ops[1]):
             raise ValueError(f"unsupported memory compare/test form: {insn.raw}")
         raise ValueError(f"cannot encode {insn.raw}")
@@ -691,7 +691,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                            src=mem_base_reg(ops[1]),
                            flags=WIDTH_CONST[dst[1]],
                            aux=mem_aux(ops[1], width),
-                           imm=c_u64(parse_int(ops[2]) + (mem_disp(ops[1]) << 32)))
+                           imm=c_u64((parse_int(ops[2]) & 0xffffffff) | ((mem_disp(ops[1]) & 0xffffffff) << 32)))
             if dst is None or src is None or not is_int(ops[2]):
                 raise ValueError(f"cannot encode {insn.raw}")
             return enc("X86_OP_IMUL_IMM", dst=dst[0], src=src[0],
@@ -731,7 +731,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        dst=mem_base_reg(ops[0]),
                        flags=WIDTH_CONST[operand_width(ops[0], 64)],
                        aux=f"({mem_aux(ops[0])} | X86_MEM_AUX_ALU_OP({ALU_AUX[op]}))",
-                       imm=c_u64(parse_int(ops[1]) + (mem_disp(ops[0]) << 32)))
+                       imm=c_u64((parse_int(ops[1]) & 0xffffffff) | ((mem_disp(ops[0]) & 0xffffffff) << 32)))
         if is_mem(ops[0]) or is_mem(ops[1]):
             raise ValueError(f"unsupported memory ALU form: {insn.raw}")
         raise ValueError(f"cannot encode {insn.raw}")
@@ -750,7 +750,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
             return enc("X86_OP_BT_MEM_IMM", dst=mem_base_reg(ops[0]),
                        flags=WIDTH_CONST[width],
                        aux=mem_aux(ops[0], width),
-                       imm=c_u64(parse_int(ops[1]) + (mem_disp(ops[0]) << 32)))
+                       imm=c_u64((parse_int(ops[1]) & 0xffffffff) | ((mem_disp(ops[0]) & 0xffffffff) << 32)))
         if dst is None or src is None:
             raise ValueError(f"cannot encode {insn.raw}")
         return enc("X86_OP_BT", dst=dst[0], src=src[0],
@@ -759,8 +759,8 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
     if op == "mulx":
         if len(ops) != 3:
             raise ValueError(f"cannot encode {insn.raw}")
-        lo = reg_info(ops[0])
-        hi = reg_info(ops[1])
+        hi = reg_info(ops[0])
+        lo = reg_info(ops[1])
         src = reg_info(ops[2])
         if lo is None or hi is None or src is None:
             raise ValueError(f"cannot encode {insn.raw}")
@@ -778,7 +778,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
             return enc("X86_OP_ANDN_MEM", dst=dst[0], src=src1[0],
                        flags=WIDTH_CONST[dst[1]],
                        aux=f"({mem_aux(ops[2], width)} | X86_REG_AUX_SRC_SHIFT({mem_base_reg(ops[2])}))",
-                       imm=c_u64(mem_disp(ops[2])))
+                       imm=c_u64((mem_disp(ops[2]) & 0xffffffff) << 32))
         if dst is None or src1 is None or src2 is None:
             raise ValueError(f"cannot encode {insn.raw}")
         return enc("X86_OP_ANDN", dst=dst[0], src=src1[0],

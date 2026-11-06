@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "multi_map_policy",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/multi_map_policy.native.o",
+      "symbol": "multi_map_policy",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/stage2/multi_map_policy.bpf.o",
+      "simulator_program": "multi_map_policy_x86_sim_xdp"
+    }
+  ]
+}

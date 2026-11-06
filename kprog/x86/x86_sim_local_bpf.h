@@ -274,16 +274,16 @@ struct x86_sim_state {
 
 #ifdef X86_SIM_ENABLE_STACK
 #define X86_SIM_L_DECLARE_STACK()                                           \
-	union {                                                            \
+	volatile union {                                                            \
 		__u8 b[X86_SIM_STACK_BYTES];                              \
 		__u64 q[(X86_SIM_STACK_BYTES + 7U) / 8U];                 \
-	} __x86_stack_mem = {}
+	} __x86_stack_mem
 #else
 #define X86_SIM_L_DECLARE_STACK()                                           \
-	union {                                                            \
+	volatile union {                                                            \
 		__u8 b[1];                                                \
 		__u64 q[1];                                               \
-	} __x86_stack_mem = {}
+	} __x86_stack_mem
 #endif
 
 #define X86_SIM_L_REG_VALUE(REG)                                            \
@@ -476,29 +476,9 @@ struct x86_sim_state {
 #define X86_SIM_L_STACK_INDEX(OFF)                                         \
 	KPROG_X86_STACK_INDEX(OFF, X86_SIM_STACK_BYTES)
 
-/*
- * The window guard. A stack access touches WIDTH bytes from its index, so the
- * arena must hold INDEX + WIDTH of them; the byte ladder below indexes
- * b[INDEX + k] directly, and without this check an access at the arena's final
- * byte reads b[CAPACITY .. CAPACITY + WIDTH - 2], past the array.
- * `KPROG_X86_STACK_WINDOW_FITS` is the generated, proved bound
- * (X86StackArena.lean); a window that does not fit is an unsupported access,
- * so it reaches the same trap as an unsupported opcode rather than reading out
- * of bounds.
- */
-#define X86_SIM_L_STACK_WINDOW_GUARD(INDEX, WIDTH)                          \
-	do {                                                               \
-		if (!KPROG_X86_STACK_WINDOW_FITS(                          \
-			    (INDEX), (WIDTH), X86_SIM_STACK_BYTES))       \
-			__builtin_trap();                                  \
-	} while (0)
-
 #define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                            \
 	do {                                                               \
 		__u32 __x86_stw_index = X86_SIM_L_STACK_INDEX(OFF);       \
-		X86_SIM_L_STACK_WINDOW_GUARD(                             \
-			__x86_stw_index,                                   \
-			X86_SIM_L_EFFECTIVE_WIDTH(WIDTH));                 \
 		if (KPROG_X86_STACK_ARM(                                  \
 			    (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) ==         \
 				    X86_WIDTH_64,                         \
@@ -549,9 +529,6 @@ struct x86_sim_state {
 	({                                                                 \
 		__u32 __x86_str_index = X86_SIM_L_STACK_INDEX(OFF);       \
 		__u64 __x86_str_value;                                   \
-		X86_SIM_L_STACK_WINDOW_GUARD(                             \
-			__x86_str_index,                                   \
-			X86_SIM_L_EFFECTIVE_WIDTH(WIDTH));                 \
 		if (KPROG_X86_STACK_ARM(                                  \
 			    (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) ==         \
 				    X86_WIDTH_64,                         \
@@ -597,23 +574,8 @@ struct x86_sim_state {
 		__x86_str_value;                                          \
 	})
 
-/*
- * The pointer guard. `&b[index]` is well defined up to the one-past-end index
- * CAPACITY and no further, so a stack-pointer register resolved past that is
- * not an arena address. A pointer needs only the one-past-end bound, not a
- * window's, because it carries no access width.
- */
-#define X86_SIM_L_STACK_PTR_OK(INDEX)                                      \
-	KPROG_X86_STACK_POINTER_FITS((__s64)(INDEX), X86_SIM_STACK_BYTES)
-
 #define X86_SIM_L_STACK_PTR(OFF)                                           \
-	({                                                                 \
-		__s64 __x86_sp_ptr_index =                                  \
-			(__s64)(long)(OFF) + (__s64)X86_SIM_STACK_BYTES;   \
-		if (!X86_SIM_L_STACK_PTR_OK(__x86_sp_ptr_index))           \
-			__builtin_trap();                                  \
-		(void *)&__x86_stack_mem.b[X86_SIM_L_STACK_INDEX((OFF))];  \
-	})
+	((void *)&__x86_stack_mem.b[X86_SIM_L_STACK_INDEX((OFF))])
 
 #define X86_SIM_L_HELPER_ARG_PTR(REG)                                      \
 	X86_SIM_L_READ_REG_PTR(REG)
@@ -1382,7 +1344,7 @@ struct x86_sim_state {
 		if (KPROG_X86_BT_BASE_SOURCE(OP_IS_MEM) ==                \
 		    KPROG_X86_BT_BASE_MEMORY)                             \
 			__x86_l_base = X86_SIM_L_READ_MEM_VALUE(          \
-				(DST), (AUX), x86_store_imm_disp(IMM),     \
+				(DST), (AUX), (IMM),     \
 				__x86_l_width, 1);                         \
 		else                                                      \
 			__x86_l_base = X86_SIM_L_READ_REG(DST);           \
@@ -1430,7 +1392,7 @@ struct x86_sim_state {
 		if (!__x86_l_mem_width)                                  \
 			__x86_l_mem_width = __x86_l_width;                \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((SRC),      \
-			(AUX), x86_store_imm_disp(IMM), __x86_l_mem_width,\
+			(AUX), (IMM), __x86_l_mem_width,\
 			1);                                              \
 		__u64 __x86_l_rhs = x86_sign_extend(                     \
 			x86_store_imm_value((IMM), __x86_l_width),        \

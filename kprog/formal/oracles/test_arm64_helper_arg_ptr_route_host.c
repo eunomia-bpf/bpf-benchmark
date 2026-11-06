@@ -34,19 +34,22 @@ typedef signed int __s32;
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
+#include "guarded_memory_host.h"
 
-/* The simulator header's unsupported-access hook, reached when a stack
- * pointer resolves outside the arena; every swept pointer stays in range, so
- * a hit is a failure the banner reports. */
-static unsigned stack_guard_hits;
-static void arm64_sim_unsupported_opcode(void)
-{
-	stack_guard_hits++;
-}
-
-
+static __s64 __a64_sp;
 ARM64_SIM_L_DECLARE_STATE();
-ARM64_SIM_L_DECLARE_STACK();
+typedef union {
+    __u8 b[ARM64_SIM_STACK_BYTES];
+    __u64 q[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];
+} host_stack_arena;
+static volatile host_stack_arena *host_stack;
+#define __a64_stack (*host_stack)
+static void access_boundary(void *argument)
+{
+    (void)argument;
+    volatile unsigned char value=*(volatile unsigned char *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1);
+    (void)value;
+}
 
 static int failures;
 static unsigned long cases;
@@ -144,6 +147,8 @@ static void check_selector(void)
 
 int main(void)
 {
+    struct host_guarded_memory guarded=host_guarded_memory(ARM64_SIM_STACK_BYTES);
+    host_stack=(volatile host_stack_arena *)guarded.data;
 	/* The stack-tagged pointer values keep the biased arena index a valid
 	 * arena pointer: the biased index `BIAS + ptr` in
 	 * [0, STACK_BYTES], one-past-end included, which for the 96 bias and
@@ -208,38 +213,19 @@ int main(void)
 		drive(ARM64_SP);
 	}
 
-	if (stack_guard_hits) {
-		printf("MISMATCH stack pointer guard fired %u time(s)\n",
-		       stack_guard_hits);
-		failures += (int)stack_guard_hits;
-	}
-
-	/* The other direction: a stack-tagged pointer whose biased index runs
-	 * past the arena must reach the guard. The planted rows above stay in
-	 * range, so without this a simulator whose pointer guard was weakened to
-	 * always-true passes every one of them -- the counter is incremented
-	 * nowhere. Exactly one hit is required here. */
-	{
-		static const __s64 past_ptrs[] = { 64 + 8, 64 + 96, 4096 };
-		unsigned k;
-
-		for (k = 0; k < sizeof(past_ptrs) / sizeof(past_ptrs[0]); k++) {
-			unsigned before = stack_guard_hits;
-
-			plant(ARM64_X1, (void *)(long)past_ptrs[k],
-			      ARM64_SIM_TAG_STACK);
-			cases++;
-			(void)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1);
-			if (stack_guard_hits != before + 1U) {
-				printf("MISMATCH helper-arg-past-end ptr=%lld: "
-				       "guard fired %u time(s), want 1\n",
-				       (long long)past_ptrs[k],
-				       stack_guard_hits - before);
-				failures++;
-			}
-		}
-		stack_guard_hits = 0;
-	}
+    /* Address calculation remains faithful; the actual dereference faults. */
+    {
+        static const __s64 past_ptrs[]={64,72,160};
+        for (unsigned k=0;k<sizeof(past_ptrs)/sizeof(past_ptrs[0]);k++) {
+            plant(ARM64_X1,(void *)(long)past_ptrs[k],ARM64_SIM_TAG_STACK);
+            cases++;
+            if (!host_memory_fault(access_boundary,NULL)) {
+                printf("MISMATCH helper pointer dereference off=%lld did not fault\n",(long long)past_ptrs[k]);
+                failures++;
+            }
+        }
+    }
+    host_guarded_memory_free(guarded);
 
 	if (failures) {
 		printf("arm64 helper arg ptr route host cross-check: "

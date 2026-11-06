@@ -99,18 +99,14 @@ static __u8 pattern_tag(unsigned i)
 	} while (0)
 
 /* The independent models, written from the instruction definitions. */
-/* EXTR: exactly as the arm computes it -- the second source shifted right by
- * the masked amount, OR'd with the first source shifted up, then narrowed to
- * the access width at the register write. Arm64Extrev.lean proves this form
- * equivalent to the architectural concatenation at the destination width, so
- * taking the raw operands here is following the code, not weakening the check:
- * a fault in either operand or in the mask still shows. */
+/* EXTR concatenates the width-narrowed source registers before shifting.
+ * High bits of an X register are not part of its W-register operand. */
 static __u64 want_extr(__u64 src, __u64 src2, __u64 shift, unsigned width)
 {
 	unsigned bits = width == ARM64_WIDTH_32 ? 32U : 64U;
 	unsigned k = (unsigned)(shift & (bits - 1U));
 	__u64 widemask = width == ARM64_WIDTH_32 ? 0xffffffffULL : ~0ULL;
-	__u64 merged = (src2 >> k);
+	__u64 merged = ((src2 & widemask) >> k);
 
 	if (k)
 		merged |= (src << (bits - k));

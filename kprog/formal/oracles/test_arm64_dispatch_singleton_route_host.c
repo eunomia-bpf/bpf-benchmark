@@ -562,8 +562,10 @@ static void model_exec(unsigned op, unsigned dst, unsigned src, unsigned src2,
 		__u64 result = KPROG_ARM64_FMOV_VALUE(aux, m_v0, m_reg(src),
 						      model_unsupported());
 
-		if (KPROG_ARM64_FMOV_DEST_VECTOR(aux, model_unsupported()))
-			m_v0 = result;
+		if (KPROG_ARM64_FMOV_DEST_VECTOR(aux, model_unsupported())) {
+			m_v0 = aux == ARM64_FMOV_S_FROM_W ? (__u32)result : result;
+			m_v0_hi = 0;
+		}
 		else
 			model_write_reg_width(dst, result, width);
 		break;

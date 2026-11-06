@@ -6,18 +6,21 @@ BUILD := build-$(ARCH)
 CASES ?= 1024
 OUT ?= ../results/kprog_fidelity_20261106/differential
 HEADERS := $(wildcard ../$(ARCH)/*.h ../formal/generated/*.h)
+ENCODER_SOURCES := $(wildcard ../$(ARCH)/micro-prog/*.py)
 
 .PHONY: build run run-built run-emulated
 build: $(BUILD)/cpu-differential
 
-$(BUILD)/generated.c: generate.py
+$(BUILD)/generated.c $(BUILD)/native.S &: generate.py $(ENCODER_SOURCES)
 	install -d $(BUILD)
 	$(PYTHON) generate.py --arch $(ARCH) --out $(BUILD)
 
-$(BUILD)/cpu-differential: $(BUILD)/generated.c driver.c driver.h $(HEADERS)
-	$(CC_$(ARCH)) -O1 -g -std=gnu11 -Werror=implicit-function-declaration -static \
-		-I../../vendor/libbpf/src -I../../vendor/libbpf/include/uapi \
-		driver.c $(BUILD)/generated.c $(BUILD)/native.S -o $@
+$(BUILD)/generated.o: $(BUILD)/generated.c driver.h $(HEADERS)
+	$(CC_$(ARCH)) -O1 -g -std=gnu11 -Werror=implicit-function-declaration \
+		-I../../vendor/libbpf/src -I../../vendor/libbpf/include/uapi -c $< -o $@
+
+$(BUILD)/cpu-differential: $(BUILD)/generated.o $(BUILD)/native.S driver.c driver.h
+	$(CC_$(ARCH)) -O1 -g -std=gnu11 -static driver.c $(BUILD)/generated.o $(BUILD)/native.S -o $@
 
 run: build
 
@@ -31,9 +34,10 @@ run-emulated: build
 	qemu-aarch64-static ./$(BUILD)/cpu-differential $(CASES) $(OUT)
 
 .PHONY: run-handoff
+ARM64_HANDOFF ?= ../results/kprog_fidelity_20261106/differential/cpu-differential-arm64-width-fix.gz
 run-handoff:
 	install -d build-arm64 $(OUT)
-	gzip -dc ../results/kprog_fidelity_20261106/differential/cpu-differential-arm64.gz > build-arm64/cpu-differential-handoff
+	gzip -dc $(ARM64_HANDOFF) > build-arm64/cpu-differential-handoff
 	chmod +x build-arm64/cpu-differential-handoff
 	./build-arm64/cpu-differential-handoff $(CASES) $(OUT)
 
@@ -53,7 +57,7 @@ negative-kvm:
 	vng --run $(ROOT)/vendor/build/x86/linux/arch/x86/boot/bzImage \
 		--cwd $(ROOT) --disable-monitor --cpus 8 --mem 12G \
 		--rwdir $(ROOT) --overlay-rwdir /tmp \
-		--exec 'make -C $(ROOT)/kprog/fidelity negative-guest'
+		--exec 'make -C $(ROOT)/kprog/fidelity negative-guest NEGATIVE_OUT=$(NEGATIVE_OUT)'
 
 build-arm64/negative-init: negative_init.c
 	install -d build-arm64
@@ -62,13 +66,14 @@ build-arm64/negative-init: negative_init.c
 build-arm64/negative.cpio: build-arm64/negative-init build-arm64/negative/build.json negative.py
 	$(PYTHON) negative.py package --arch arm64 --build build-arm64/negative
 
+ARM_NEGATIVE_OUT ?= ../results/kprog_fidelity_20261106/negative/arm64
 negative-qemu: build-arm64/negative.cpio
-	install -d ../results/kprog_fidelity_20261106/negative/arm64
+	install -d $(ARM_NEGATIVE_OUT)
 	timeout 240 qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 2 -m 2048 \
 		-nographic -no-reboot -kernel $(ROOT)/vendor/build/arm64/linux/arch/arm64/boot/Image \
 		-initrd build-arm64/negative.cpio -append 'console=ttyAMA0 rdinit=/init panic=-1' \
-		> ../results/kprog_fidelity_20261106/negative/arm64/guest-console.log 2>&1
-	$(PYTHON) negative.py collect --arch arm64 --build build-arm64/negative --out ../results/kprog_fidelity_20261106/negative/arm64
+		> $(ARM_NEGATIVE_OUT)/guest-console.log 2>&1
+	$(PYTHON) negative.py collect --arch arm64 --build build-arm64/negative --out $(ARM_NEGATIVE_OUT)
 
 .PHONY: check-loader-kallsyms
 build-x86/test-kallsyms: test_kallsyms.cpp ../libnativeloader/src/native_loader.cpp
@@ -84,3 +89,108 @@ check-loader-kallsyms: build-x86/test-kallsyms
 .PHONY: tcb
 tcb:
 	$(PYTHON) tcb.py
+
+.PHONY: reference-build reference-check
+reference-build:
+	cd ../formal && lake build reference
+
+reference-check: build reference-build
+	$(PYTHON) reference_check.py --binary ./$(BUILD)/cpu-differential --arch $(ARCH) --cases $(CASES) --out $(OUT)
+
+.PHONY: check-stack-memory
+check-stack-memory:
+	install -d build-x86
+	set -e; for name in stack_arm stack_arena stack_write_lanes stack_write_tag_action stack_read_tag_source helper_arg_ptr; do \
+		$(CC) -Wall -Wextra -O2 -I../formal -I../arm64 -I.. -I../../vendor/libbpf/src ../formal/oracles/test_arm64_$${name}_route_host.c -o build-x86/$${name}-check; \
+		./build-x86/$${name}-check; \
+	done
+
+.PHONY: check-memory-operands
+check-memory-operands:
+	install -d build-x86
+	$(CC) -Wall -Wextra -O2 -I../formal -I../x86 -I.. -I../../vendor/libbpf/src ../formal/oracles/test_x86_imul_route_host.c -o build-x86/imul-memory-check
+	./build-x86/imul-memory-check
+	$(CC) -Wall -Wextra -O2 -I../formal -I../x86 -I.. -I../../vendor/libbpf/src ../formal/oracles/test_x86_bt_route_host.c -o build-x86/bt-memory-check
+	./build-x86/bt-memory-check
+	$(CC) -Wall -Wextra -O2 -I../formal -I../x86 -I.. -I../../vendor/libbpf/src ../formal/oracles/btmem_index_route_host.c -o build-x86/btmem-index-check
+	./build-x86/btmem-index-check
+
+.PHONY: bound-probe-build
+.PHONY: check-arm64-simd
+check-arm64-simd:
+	install -d build-x86
+	set -e; for name in fmov_route_host test_arm64_reduction_route_host test_arm64_extrev_route_host value_route_host mul_route_host test_arm64_dispatch_singleton_route_host; do \
+		$(CC) -Wall -Wextra -O2 -I../formal -I../arm64 -I.. -I../../vendor/libbpf/src ../formal/oracles/$$name.c -o build-x86/$$name; \
+		./build-x86/$$name; \
+	done
+
+bound-probe-build:
+	$(MAKE) -C ../libnativeloader BUILD_DIR=build-fidelity
+	install -d build-x86
+	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -D__EXPORTED_HEADERS__ \
+		-I../../vendor/linux-framework/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		bound_probe.cpp ../libnativeloader/build-fidelity/libnative_loader.a \
+		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -o build-x86/bound-probe
+	clang -O2 -g -target bpf -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src \
+		-I/usr/include/x86_64-linux-gnu -c negative_companion.bpf.c -o build-x86/negative-companion.bpf.o
+
+.PHONY: negative-bound-kvm negative-bound-guest
+NEGATIVE_BOUND_OUT ?= ../results/kprog_fidelity_20261106/negative/x86-bound
+negative-bound-kvm:
+	vng --run $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage \
+		--cwd $(ROOT) --disable-monitor --cpus 2 --mem 2G --rwdir $(ROOT) --overlay-rwdir /tmp \
+		--exec 'make -C $(ROOT)/kprog/fidelity negative-bound-guest NEGATIVE_BOUND_OUT=$(NEGATIVE_BOUND_OUT)'
+
+negative-bound-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod ../tv/build-x86/bpf_x86_native_lab.ko
+	$(PYTHON) negative.py bound --arch x86 --build build-x86/negative \
+		--out $(NEGATIVE_BOUND_OUT) \
+		--probe build-x86/bound-probe --companion build-x86/negative-companion.bpf.o
+
+.PHONY: bound-probe-build-arm64 negative-bound-qemu
+bound-probe-build-arm64:
+	CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ \
+		PKG_CONFIG_SYSROOT_DIR=$(ROOT)/.cache/aarch64-sysroot \
+		PKG_CONFIG_LIBDIR=$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu/pkgconfig \
+		$(MAKE) -C ../libnativeloader BUILD_DIR=build-fidelity-arm64 \
+		LIBBPF_PREFIX=$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix \
+		LIBBPF_LIBRARY=$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+		KERNEL_OFFSETS_INCLUDE=$(ROOT)/micro/programs/build-arm64
+	install -d build-arm64
+	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static \
+		-D__EXPORTED_HEADERS__ -DNATIVE_LINK_PATH='"/native-link"' \
+		-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+		bound_probe.cpp ../libnativeloader/build-fidelity-arm64/libnative_loader.a \
+		../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+		-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -pthread -o build-arm64/bound-probe
+	clang -O2 -g -target bpf -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src \
+		-I/usr/include/x86_64-linux-gnu -c negative_companion.bpf.c -o build-arm64/negative-companion.bpf.o
+	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
+		cargo build --release --target aarch64-unknown-linux-gnu --manifest-path ../x86/native_lab/native_link/Cargo.toml
+
+ARM_NEGATIVE_BOUND_OUT ?= ../results/kprog_fidelity_20261106/negative/arm64-bound
+negative-bound-qemu: bound-probe-build-arm64
+	$(MAKE) negative-build ARCH=arm64 NEGATIVE_BUILD=build-arm64/negative-bound
+	aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -static -DBOUND_NEGATIVE negative_init.c -o build-arm64/negative-bound-init
+	$(PYTHON) negative.py package-bound --arch arm64 --build build-arm64/negative-bound
+	install -d $(ARM_NEGATIVE_BOUND_OUT)
+	timeout 240 qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 2 -m 2048 \
+		-nographic -no-reboot -kernel $(ROOT)/kprog/tv/build-kernel-arm64/arch/arm64/boot/Image \
+		-initrd build-arm64/negative-bound.cpio -append 'console=ttyAMA0 rdinit=/init panic=-1' \
+		> $(ARM_NEGATIVE_BOUND_OUT)/guest-console.log 2>&1
+	$(PYTHON) negative.py collect-bound --arch arm64 --build build-arm64/negative-bound --out $(ARM_NEGATIVE_BOUND_OUT)
+
+.PHONY: stage2-build stage2-kvm stage2-guest
+stage2-build: bound-probe-build
+	$(PYTHON) stage2.py build --build build-x86/stage2
+
+stage2-kvm:
+	vng --run $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage \
+		--cwd $(ROOT) --disable-monitor --cpus 2 --mem 2G --rwdir $(ROOT) --overlay-rwdir /tmp \
+		--exec 'make -C $(ROOT)/kprog/fidelity stage2-guest'
+
+stage2-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod ../tv/build-x86/bpf_x86_native_lab.ko
+	$(PYTHON) stage2.py check --build build-x86/stage2 --out ../results/kprog_fidelity_20261106/helper-map/x86

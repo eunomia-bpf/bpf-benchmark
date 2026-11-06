@@ -1,0 +1,13 @@
+{
+  "name": "helper_chain_simple",
+  "native_object": "/workspaces/repository/kprog/test/build-x86/helper_chain_simple.native.o",
+  "stage": "passed",
+  "returncode": 0,
+  "command": [
+    "/workspaces/repository/kprog/fidelity/build-x86/bound-probe",
+    "/workspaces/repository/kprog/test/build-x86/helper_chain_simple.bpf.o",
+    "/workspaces/repository/kprog/results/kprog_fidelity_20261106/helper-map/x86/helper_chain_simple.manifest.json",
+    "0",
+    "2"
+  ]
+}

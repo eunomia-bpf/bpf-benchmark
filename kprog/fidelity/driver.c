@@ -6,6 +6,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/utsname.h>
+#include <unistd.h>
+#ifdef __x86_64__
+#include <asm/prctl.h>
+#include <sys/syscall.h>
+#endif
 static uint64_t seed = UINT64_C(0x6b70726f67460001);
 static uint64_t random64(void)
 {
@@ -37,11 +42,35 @@ static void memory_json(FILE *f, const unsigned char *p, size_t n)
 }
 int main(int argc, char **argv)
 {
-    if (argc != 3) { fprintf(stderr, "usage: %s CASES OUTPUT_DIRECTORY\n", argv[0]); return 1; }
+    if (argc != 3 && argc != 4) { fprintf(stderr, "usage: %s CASES OUTPUT_DIRECTORY [TRACE_BINARY]\n", argv[0]); return 1; }
     char *end;
     errno = 0;
     unsigned long cases = strtoul(argv[1], &end, 10);
     if (errno || *end || !cases || cases > 1000000) { fprintf(stderr, "invalid case count\n"); return 1; }
+    FILE *trace = argc == 4 ? fopen(argv[3], "wb") : NULL;
+    if (argc == 4 && !trace) { perror(argv[3]); return 1; }
+    if (trace) {
+        const uint32_t layout[] = {sizeof(struct state),256,form_count,(uint32_t)cases};
+        if (fwrite("KPFID001",1,8,trace)!=8 || fwrite(layout,sizeof(layout),1,trace)!=1) { perror("trace header"); return 1; }
+    }
+    if (trace) {
+        uint64_t fs_base=0,gs_base=0;
+#ifdef __x86_64__
+        if (syscall(SYS_arch_prctl,ARCH_GET_FS,&fs_base) || syscall(SYS_arch_prctl,ARCH_GET_GS,&gs_base)) { perror("read segment bases"); return 1; }
+#endif
+        FILE *metadata=open_output(argv[2],"native-code.json");
+        fprintf(metadata,"{\"fs_base\":%" PRIu64 ",\"gs_base\":%" PRIu64 ",\"forms\":[",fs_base,gs_base);
+        for (unsigned i=0;i<form_count;i++) {
+            fprintf(metadata,"%s{\"pc\":%" PRIuPTR ",\"next_pc\":%" PRIuPTR ",\"native_bytes\":[",i?",":"",(uintptr_t)forms[i].pc,(uintptr_t)forms[i].next_pc);
+            size_t bytes=(uintptr_t)forms[i].next_pc-(uintptr_t)forms[i].pc;
+            for (size_t b=0;b<bytes;b++) fprintf(metadata,"%s%u",b?",":"",forms[i].pc[b]);
+            fputs("]}",metadata);
+        }
+        fputs("]}\n",metadata);
+        int metadata_error=ferror(metadata);
+        if (fclose(metadata)) metadata_error=1;
+        if (metadata_error) { perror("native-code metadata"); return 1; }
+    }
     FILE *summary = open_output(argv[2], "forms.tsv");
     FILE *mismatches = open_output(argv[2], "mismatches.jsonl");
     FILE *meta = open_output(argv[2], "host.txt");
@@ -100,6 +129,14 @@ int main(int argc, char **argv)
                 if (form->mode == 2 && count >= form->width) mask &= ~UINT64_C(1); /* CF undefined */
             }
 #endif
+            if (trace) {
+                const uint32_t record[] = {j,(uint32_t)c};
+                if (fwrite(record,sizeof(record),1,trace)!=1 ||
+                    fwrite(&input,sizeof(input),1,trace)!=1 || fwrite(&native,sizeof(native),1,trace)!=1 || fwrite(&sim,sizeof(sim),1,trace)!=1 ||
+                    fwrite(before,sizeof(before),1,trace)!=1 || fwrite(native_memory,sizeof(native_memory),1,trace)!=1 || fwrite(memory,sizeof(memory),1,trace)!=1) {
+                    perror("trace record"); return 1;
+                }
+            }
             int differs = memcmp(native.r, sim.r, sizeof(input.r)) ||
                 memcmp(native.vec, sim.vec, sizeof(input.vec)) ||
                 memcmp(native.stack, sim.stack, sizeof(input.stack)) ||
@@ -121,6 +158,7 @@ int main(int argc, char **argv)
         total += cases; failures += bad;
     }
     int error = ferror(summary) || ferror(mismatches);
+    if (trace && fclose(trace)) error = 1;
     if (fclose(summary)) error = 1;
     if (fclose(mismatches)) error = 1;
     if (error) { fprintf(stderr, "writing results failed\n"); return 1; }

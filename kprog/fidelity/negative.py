@@ -52,7 +52,7 @@ def build(arch, out):
     out.mkdir(parents=True, exist_ok=True)
     rows = []
     for name, assembly in FIXTURES[arch].items():
-        source = ('.intel_syntax noprefix\n' if arch == 'x86' else '') + '.text\n.global entry\nentry:\n' + assembly.replace('; ', '\n') + '\n'
+        source = ('.intel_syntax noprefix\n' if arch == 'x86' else '') + '.text\n.global entry\n.type entry, %function\nentry:\n' + assembly.replace('; ', '\n') + '\n.size entry, .-entry\n'
         (out / f'{name}.S').write_text(source)
         compiler = 'cc' if arch == 'x86' else 'aarch64-linux-gnu-gcc'
         subprocess.run([compiler, '-c', str(out / f'{name}.S'), '-o', str(out / f'{name}.native.o')], check=True)
@@ -115,30 +115,73 @@ def run(arch, build_dir, out, loader):
     return 1 if accepted or any(r['stage']=='infrastructure_error' for r in manifest['cases']) else 0
 
 
-def package(build_dir):
+def run_bound(arch, build_dir, out, probe, companion):
+    manifest=json.loads((build_dir/'build.json').read_text())
+    out.mkdir(parents=True,exist_ok=True)
+    manifest['guest_uname']=list(os.uname())
+    for row in manifest['cases']:
+        if row['stage']!='generated':continue
+        plan={'objects':[dict(program='neg_source',native_object=str((build_dir/f"{row['name']}.native.o").resolve()),symbol='entry',simulator_object=str((build_dir/f"{row['name']}.bpf.o").resolve()),simulator_program=f"{row['name']}_{arch}_sim_xdp")]}
+        plan_path=out/f"{row['name']}.manifest.json"
+        plan_path.write_text(json.dumps(plan,indent=2)+'\n')
+        command=[str(probe.resolve()),str(companion.resolve()),str(plan_path.resolve())]
+        completed=subprocess.run(command,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=120)
+        message=completed.stdout
+        (out/f"{row['name']}.log").write_text(message)
+        stage=bound_outcome(message,completed.returncode)
+        row.update(stage=stage,command=command,returncode=completed.returncode,message=message)
+    (out/'outcomes.json').write_text(json.dumps(manifest,indent=2)+'\n')
+    print(json.dumps(dict(arch=arch,path='bound',stages={stage:sum(row['stage']==stage for row in manifest['cases']) for stage in sorted({row['stage'] for row in manifest['cases']})})))
+    return int(any(row['stage'] in ['accepted_finding','infrastructure_error'] for row in manifest['cases']))
+
+
+def bound_outcome(message, returncode):
+    if returncode == 0:
+        return 'accepted_finding'
+    if 'BPF_PROG_LOAD native_lab stub:' in message and 'processed ' in message:
+        return 'verifier_rejected'
+    if 'native_kernel bound proof contains no BPF exit' in message:
+        return 'loader_rejected'
+    return 'infrastructure_error'
+
+
+def package(build_dir, bound=False):
     manifest = json.loads((build_dir/'build.json').read_text())
     names = [r['name'] for r in manifest['cases'] if r['stage'] == 'generated']
     (build_dir/'cases').write_text(''.join(name+'\n' for name in names))
     lines = [f'dir /{name} 0755 0 0' for name in ['dev','proc','sys','lib','proofs']]
     lines += ['nod /dev/console 0600 0 0 c 5 1']
-    files = {'/init': build_dir.parent/'negative-init', '/loader': ROOT/'kprog/loader/target/aarch64-unknown-linux-gnu/debug/reversesim-loader', '/cases': build_dir/'cases'}
+    files = {'/init': build_dir.parent/('negative-bound-init' if bound else 'negative-init'), '/cases': build_dir/'cases'}
+    if bound:
+        files.update({'/bound-probe':build_dir.parent/'bound-probe',
+                      '/module.ko':ROOT/'kprog/tv/build-arm64/bpf_arm64_native_lab.ko',
+                      '/companion.bpf.o':build_dir.parent/'negative-companion.bpf.o',
+                      '/native-link':ROOT/'kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link'})
+    else:
+        files['/loader']=ROOT/'kprog/loader/target/aarch64-unknown-linux-gnu/debug/reversesim-loader'
     for name in ['libc.so.6','ld-linux-aarch64.so.1','libgcc_s.so.1']:
         files['/lib/'+name] = Path('/usr/aarch64-linux-gnu/lib')/name
     for name in ['libelf.so.1','libz.so.1','libzstd.so.1']:
         files['/lib/'+name] = ROOT/'.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu'/name
     for name in names:
         files[f'/proofs/{name}.bpf.o'] = build_dir/f'{name}.bpf.o'
+        if bound:
+            files[f'/proofs/{name}.native.o']=build_dir/f'{name}.native.o'
+            plan={'objects':[dict(program='neg_source',native_object=f'{name}.native.o',symbol='entry',simulator_object=f'{name}.bpf.o',simulator_program=f'{name}_arm64_sim_xdp')]}
+            manifest=build_dir/f'{name}.manifest.json'
+            manifest.write_text(json.dumps(plan,indent=2)+'\n')
+            files[f'/proofs/{name}.manifest.json']=manifest
     for dest, src in files.items():
         if not src.is_file():
             raise FileNotFoundError(src)
         lines.append(f'file {dest} {src.resolve()} 0755 0 0')
     spec = build_dir/'initramfs.spec'
     spec.write_text('\n'.join(lines)+'\n')
-    with (build_dir.parent/'negative.cpio').open('wb') as out:
+    with (build_dir.parent/('negative-bound.cpio' if bound else 'negative.cpio')).open('wb') as out:
         subprocess.run([str(ROOT/'vendor/build/arm64/linux/usr/gen_init_cpio'), str(spec)], stdout=out, check=True)
 
 
-def collect(build_dir, out):
+def collect(build_dir, out, bound=False):
     manifest = json.loads((build_dir/'build.json').read_text())
     log = (out/'guest-console.log').read_text().replace('\r','')
     matches = {name:(message,int(rc)) for name,message,rc in re.findall(r'LANE_F_CASE_BEGIN ([a-z_]+)\n(.*?)LANE_F_CASE_END \1 (\d+)', log, re.S)}
@@ -150,7 +193,7 @@ def collect(build_dir, out):
             continue
         message, rc = matches[row['name']]
         (out/f"{row['name']}.log").write_text(message)
-        stage = outcome(message,rc)
+        stage = bound_outcome(message,rc) if bound else outcome(message,rc)
         row.update(stage=stage, message=message, returncode=rc)
     (out/'outcomes.json').write_text(json.dumps(manifest, indent=2)+'\n')
     print(json.dumps(dict(arch=manifest['arch'], stages={stage:sum(r['stage']==stage for r in manifest['cases']) for stage in sorted({r['stage'] for r in manifest['cases']})})))
@@ -159,22 +202,27 @@ def collect(build_dir, out):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('mode', choices=['build', 'run', 'package', 'collect'])
+    parser.add_argument('mode', choices=['build', 'run', 'package', 'collect', 'bound', 'package-bound', 'collect-bound'])
     parser.add_argument('--arch', choices=['x86','arm64'], required=True)
     parser.add_argument('--build', type=Path, required=True)
     parser.add_argument('--out', type=Path)
     parser.add_argument('--loader', type=Path)
+    parser.add_argument('--probe',type=Path)
+    parser.add_argument('--companion',type=Path)
     args = parser.parse_args()
     if args.mode == 'build':
         build(args.arch, args.build)
         return 0
-    if args.mode == 'package':
-        package(args.build)
+    if args.mode in ['package', 'package-bound']:
+        package(args.build,bound=args.mode=='package-bound')
         return 0
     if args.out is None:
         parser.error('run/collect requires --out')
-    if args.mode == 'collect':
-        return collect(args.build,args.out)
+    if args.mode in ['collect', 'collect-bound']:
+        return collect(args.build,args.out,bound=args.mode=='collect-bound')
+    if args.mode == 'bound':
+        if args.probe is None or args.companion is None:parser.error('bound requires --probe and --companion')
+        return run_bound(args.arch,args.build,args.out,args.probe,args.companion)
     if args.loader is None:
         parser.error('run requires --loader')
     return run(args.arch, args.build, args.out, args.loader)

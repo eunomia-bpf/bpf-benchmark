@@ -13,9 +13,7 @@
  *     planted in the base register (a wrong alias would use the register's
  *     value bits instead of the loaded memory bytes, which are the complement
  *     of the pointer bits at the tested index at every width);
- *   - the displacement is `x86_store_imm_disp(IMM)` (the body's argument)
- *     passed to a load that itself applies `x86_store_imm_disp`, so the load
- *     happens at the quadruple application the model restates;
+ *   - the displacement is the signed high 32 bits of the packed immediate;
  *   - the index is the 32-bit truncation of the immediate;
  *   - the one resolved width is `KPROG_X86_BT_WRITE_WIDTH(FLAGS)`;
  *   - only CF is written (ZF/SF/OF must survive the step untouched);
@@ -108,22 +106,10 @@ static __u64 model_index(__u64 imm)
 	return imm & 0xffffffffULL;
 }
 
-/* The displacement the body applies to the memory base: its `imm` argument
- * sliced by `x86_store_imm_disp` and handed to a load that applies
- * `x86_store_imm_disp` again, then KPROG_X86_BT_MEM_SRC's preprocessing
- * slice, twice more through the byte-ladder's scaling — the same unsigned
- * semantics the model restates. */
+/* Decode the signed displacement exactly once from the packed high half. */
 static __s64 model_disp(__u64 imm)
 {
-	__s32 d1 = (__s32)(imm >> 32);
-	__u64 d1u = (__u64)d1;
-	__s32 d2 = (__s32)(d1u >> 32);
-	__u64 d2u = (__u64)d2;
-	__s32 d3 = (__s32)(d2u >> 32);
-	__u64 d3u = (__u64)d3;
-	__s32 d4 = (__s32)(d3u >> 32);
-
-	return (__s64)d4;
+    return (__s64)(__s32)(imm >> 32);
 }
 
 /* The immediate the body receives: the displacement in the top 32 bits (the

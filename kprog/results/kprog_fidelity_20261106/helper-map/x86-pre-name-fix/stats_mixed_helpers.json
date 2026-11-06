@@ -1,0 +1,13 @@
+{
+  "name": "stats_mixed_helpers",
+  "native_object": "/workspaces/repository/kprog/test/build-x86/stats_mixed_helpers.native.o",
+  "stage": "failed",
+  "returncode": 1,
+  "command": [
+    "/workspaces/repository/kprog/fidelity/build-x86/bound-probe",
+    "/workspaces/repository/kprog/test/build-x86/stats_mixed_helpers.bpf.o",
+    "/workspaces/repository/kprog/results/kprog_fidelity_20261106/helper-map/x86/stats_mixed_helpers.manifest.json",
+    "1",
+    "2"
+  ]
+}

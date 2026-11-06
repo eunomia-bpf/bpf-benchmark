@@ -191,18 +191,18 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 
 #ifdef ARM64_SIM_ENABLE_STACK
 #define ARM64_SIM_L_DECLARE_STACK()                                         \
-	union {                                                            \
+	volatile union {                                                            \
 		__u8 b[ARM64_SIM_STACK_BYTES];                            \
 		__u64 q[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];  \
-	} __a64_stack = {};                                            \
+	} __a64_stack;                                            \
 	__u8 __a64_stack_tag[KPROG_ARM64_STACK_TAG_SLOTS(ARM64_SIM_STACK_BYTES)] = {};\
 	__s64 __a64_sp = 0
 #else
 #define ARM64_SIM_L_DECLARE_STACK()                                         \
-	union {                                                            \
+	volatile union {                                                            \
 		__u8 b[1];                                                \
 		__u64 q[KPROG_ARM64_STACK_WORDS(1U)];                     \
-	} __a64_stack = {};                                            \
+	} __a64_stack;                                            \
 	__u8 __a64_stack_tag[KPROG_ARM64_STACK_TAG_SLOTS(1U)] = {};     \
 	__s64 __a64_sp = 0
 #endif
@@ -430,9 +430,11 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
  * evaluated exactly once per source, second source and accumulator operand. No
  * arm writes NZCV.
  */
-#define ARM64_SIM_L_MUL_VALUE(OP, SRC, SRC2, SRC3)                          \
-	KPROG_ARM64_MUL_VALUE((OP), ARM64_SIM_L_READ_REG(SRC),             \
-			      ARM64_SIM_L_READ_REG(SRC2),                  \
+#define ARM64_SIM_L_MUL_VALUE(OP, SRC, SRC2, SRC3, WIDTH)                   \
+	KPROG_ARM64_MUL_VALUE((OP), KPROG_ARM64_APPLY_WIDTH(              \
+		ARM64_SIM_L_READ_REG(SRC), (OP) == ARM64_OP_UDIV ? (WIDTH) : ARM64_WIDTH_64), \
+		KPROG_ARM64_APPLY_WIDTH(ARM64_SIM_L_READ_REG(SRC2),        \
+			(OP) == ARM64_OP_UDIV ? (WIDTH) : ARM64_WIDTH_64), \
 			      ARM64_SIM_L_READ_REG(SRC3),                  \
 			      ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
@@ -448,8 +450,10 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
  * arm writes NZCV.
  */
 #define ARM64_SIM_L_EXTREV_VALUE(OP, SRC, SRC2, SHIFT, WIDTH)               \
-	KPROG_ARM64_EXTREV_VALUE((OP), ARM64_SIM_L_READ_REG(SRC),          \
-				 ARM64_SIM_L_READ_REG(SRC2), (SHIFT),      \
+	KPROG_ARM64_EXTREV_VALUE((OP), KPROG_ARM64_APPLY_WIDTH(           \
+		ARM64_SIM_L_READ_REG(SRC), (OP) == ARM64_OP_EXTR ? (WIDTH) : ARM64_WIDTH_64), \
+		KPROG_ARM64_APPLY_WIDTH(ARM64_SIM_L_READ_REG(SRC2),        \
+			(OP) == ARM64_OP_EXTR ? (WIDTH) : ARM64_WIDTH_64), (SHIFT), \
 				 (WIDTH), ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 /*
@@ -557,47 +561,12 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_STACK_INDEX(OFF)                                       \
 	KPROG_ARM64_STACK_INDEX(OFF, ARM64_SIM_STACK_BIAS)
 
-/*
- * The window guard. A stack access touches WIDTH bytes from its index, so the
- * arena must hold INDEX + WIDTH of them; the per-access lanes below index
- * b[INDEX + k] directly, and without this check an access at the arena's final
- * byte reads b[CAPACITY .. CAPACITY + WIDTH - 2], past the array.
- * `KPROG_ARM64_STACK_WINDOW_FITS` is the generated, proved bound
- * (Arm64StackArena.lean); a window that does not fit is an unsupported
- * access, so it reaches the same failure hook as an unsupported opcode rather
- * than reading out of bounds.
- */
-#define ARM64_SIM_L_STACK_WINDOW_OK(INDEX, WIDTH)                           \
-	KPROG_ARM64_STACK_WINDOW_FITS((INDEX), (WIDTH), ARM64_SIM_STACK_BYTES)
-
-/*
- * Report an unfitting window through the unsupported-access hook. The hook
- * returns, so the caller must still skip the access: every use below tests
- * WINDOW_OK first and takes a zero value on the failing path.
- */
-#define ARM64_SIM_L_STACK_WINDOW_REPORT() ARM64_SIM_L_UNSUPPORTED_OPCODE()
-
-/*
- * The tag-array guard. `__a64_stack_tag[]` has one byte per word slot, so a
- * tag access is a slot index into an array of TAG_SLOTS entries rather than a
- * byte window; a byte index at or past the capacity reaches slot TAG_SLOTS,
- * one past the array. `KPROG_ARM64_STACK_TAG_SLOT_FITS` is the generated,
- * proved bound (Arm64StackArena.lean).
- */
-#define ARM64_SIM_L_STACK_TAG_SLOT_OK(INDEX)                                \
-	KPROG_ARM64_STACK_TAG_SLOT_FITS(                                  \
-		(INDEX), KPROG_ARM64_STACK_TAG_SLOTS(ARM64_SIM_STACK_BYTES))
-
 #define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
 	({                                                                 \
 		__u32 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		__u8 __a64_str_width = (WIDTH);                           \
 		__u64 __a64_str_value;                                    \
-		if (!ARM64_SIM_L_STACK_WINDOW_OK(__a64_str_index,         \
-						 __a64_str_width)) {       \
-			ARM64_SIM_L_STACK_WINDOW_REPORT();                \
-			__a64_str_value = 0;                               \
-		} else if (KPROG_ARM64_STACK_ARM(                         \
+		if (KPROG_ARM64_STACK_ARM(                         \
 			    __a64_str_width ==                            \
 				    ARM64_WIDTH_64,                       \
 			    KPROG_ARM64_STACK_WORD_ALIGNED(               \
@@ -623,13 +592,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__u8 __a64_srt_tag = ARM64_SIM_TAG_SCALAR;                \
 		if (__a64_srt_source ==                                   \
 		    KPROG_ARM64_STACK_READ_TAG_SOURCE_STACK_TAG_ARRAY) {  \
-			if (ARM64_SIM_L_STACK_TAG_SLOT_OK(__a64_srt_index)) \
-				__a64_srt_tag =                           \
-					__a64_stack_tag[                  \
-						KPROG_ARM64_STACK_WORD_INDEX(\
-							__a64_srt_index)];\
-			else                                               \
-				ARM64_SIM_L_STACK_WINDOW_REPORT();        \
+			__a64_srt_tag = __a64_stack_tag[                    \
+				KPROG_ARM64_STACK_WORD_INDEX(__a64_srt_index)];\
 		}                                                          \
 		__a64_srt_tag;                                             \
 	})
@@ -642,10 +606,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__u8 __a64_stw_action = KPROG_ARM64_STACK_WRITE_TAG_ACTION(\
 			__a64_stw_width == ARM64_WIDTH_64,                \
 			KPROG_ARM64_STACK_WORD_ALIGNED(__a64_stw_index));  \
-		if (!ARM64_SIM_L_STACK_WINDOW_OK(__a64_stw_index,         \
-						 __a64_stw_width)) {       \
-			ARM64_SIM_L_STACK_WINDOW_REPORT();                \
-		} else if (__a64_stw_action ==                              \
+		if (__a64_stw_action ==                              \
 		    KPROG_ARM64_STACK_WRITE_TAG_ACTION_WRITE_WORD_AND_TAG) {\
 			__a64_stack.q[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = __a64_stw_value;\
 			__a64_stack_tag[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = (TAG);\
@@ -690,22 +651,10 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                          \
 	ARM64_SIM_L_STACK_WRITE_TAG((OFF), (WIDTH), (VALUE), ARM64_SIM_TAG_SCALAR)
 
-/*
- * The pointer guard. `&b[index]` is well defined up to the one-past-end index
- * CAPACITY and no further, so a stack-pointer register resolved past that is
- * not an arena address; a helper receiving it would dereference outside the
- * array. A pointer needs only the one-past-end bound, not a window's, because
- * it carries no access width.
- */
-#define ARM64_SIM_L_STACK_PTR_OK(INDEX)                                     \
-	KPROG_ARM64_STACK_POINTER_FITS((__s64)(INDEX), ARM64_SIM_STACK_BYTES)
-
 #define ARM64_SIM_L_STACK_PTR(OFF)                                         \
 	({                                                                 \
 		__s64 __a64_sp_ptr_index =                                 \
 			KPROG_ARM64_STACK_PTR_INDEX((OFF), ARM64_SIM_STACK_BIAS);\
-		if (!ARM64_SIM_L_STACK_PTR_OK(__a64_sp_ptr_index))         \
-			ARM64_SIM_L_UNSUPPORTED_OPCODE();                 \
 		(void *)&__a64_stack.b[__a64_sp_ptr_index];                \
 	})
 
@@ -1151,7 +1100,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			__u64 __a64_l_result = ARM64_SIM_L_SHIFT_VALUE((AUX), ARM64_SIM_L_READ_REG(SRC), __a64_l_amount, __a64_l_width);\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_MUL_HANDLED(OP)) {                    \
-			__u64 __a64_l_result = ARM64_SIM_L_MUL_VALUE((OP), (SRC), (SRC2), (SRC3));\
+			__u64 __a64_l_result = ARM64_SIM_L_MUL_VALUE((OP), (SRC), (SRC2), (SRC3), __a64_l_width);\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_UNARY_HANDLED(OP)) {                 \
 			__u64 __a64_l_result =                              \
@@ -1351,13 +1300,24 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 					ARM64_SIM_L_READ_REG(SRC),         \
 					ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
 			if (KPROG_ARM64_FMOV_DEST_VECTOR((AUX),           \
-					ARM64_SIM_L_UNSUPPORTED_OPCODE()))   \
-				__a64_v0 = __a64_fmov_result;              \
+					ARM64_SIM_L_UNSUPPORTED_OPCODE())) { \
+				__a64_v0 = (AUX) == ARM64_FMOV_S_FROM_W ?   \
+					(__u32)__a64_fmov_result : __a64_fmov_result; \
+				__a64_v0_hi = 0;                          \
+			}                                                  \
 			else                                               \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST),         \
 					__a64_fmov_result, __a64_l_width); \
 		} else if (KPROG_ARM64_REDUCTION_HANDLED(OP)) {                \
+			__u64 __a64_red_hi = (AUX) == 16 ?                    \
+				ARM64_SIM_L_REDUCTION_VALUE((OP), __a64_v0_hi) : 0; \
 			__a64_v0 = ARM64_SIM_L_REDUCTION_VALUE((OP), __a64_v0);\
+			if ((OP) == ARM64_OP_CNT)                            \
+				__a64_v0_hi = __a64_red_hi;                    \
+			else {                                                      \
+				__a64_v0 += __a64_red_hi;                      \
+				__a64_v0_hi = 0;                              \
+			}                                                           \
 		} else {                                                       \
 			ARM64_SIM_L_UNSUPPORTED_OPCODE();                      \
 		}                                                            \

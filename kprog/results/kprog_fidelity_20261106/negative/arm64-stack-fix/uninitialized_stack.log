@@ -1,0 +1,12 @@
+libbpf: prog 'uninitialized_stack_arm64_sim_xdp': BPF program load failed: -EACCES
+libbpf: prog 'uninitialized_stack_arm64_sim_xdp': -- BEGIN PROG LOAD LOG --
+0: R1=ctx() R10=fp0
+; } @ uninitialized_stack.bpf.c:15
+0: (95) exit
+R0 !read_ok
+processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+-- END PROG LOAD LOG --
+libbpf: prog 'uninitialized_stack_arm64_sim_xdp': failed to load: -EACCES
+libbpf: failed to load object '/proofs/uninitialized_stack.bpf.o'
+timing verify_s=0.077655 test_s=0.000000
+error: bpf_object__load failed: Permission denied (os error 13)

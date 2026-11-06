@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "map_hash_lookup",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/map_hash_lookup.native.o",
+      "symbol": "map_hash_lookup",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/stage2/map_hash_lookup.bpf.o",
+      "simulator_program": "map_hash_lookup_x86_sim_xdp"
+    }
+  ]
+}

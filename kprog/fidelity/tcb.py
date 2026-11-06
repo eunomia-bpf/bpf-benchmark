@@ -79,6 +79,7 @@ def main():
     groups['formal contracts (JSON)'] = set((ROOT/'kprog/formal/contracts').glob('*.json'))
     groups['formal contract generators'] = set((ROOT/'kprog/formal/tools').glob('generate_*_spec.py'))
     groups['translation-validation composition theorem'] = {ROOT/'kprog/tv/Composition.lean'}
+    groups['native-proof kernel patch and application (patch text, not SLOC)'] = {ROOT/'kprog/tv/native-proof-regions.patch',ROOT/'kprog/tv/apply_kernel_patch.py'}
     groups['existing verifier context (not incremental kernel changes)'] = {ROOT/'vendor/linux-framework/kernel/bpf/verifier.c',ROOT/'vendor/linux-framework/include/linux/bpf_verifier.h'}
     rows=[]
     for component,paths in groups.items():
@@ -97,7 +98,7 @@ def main():
     binding=[]
     for arch in ['x86','arm64']:
         binding += function_spans(ROOT/f'kinsn/module/{arch}/bpf_{arch}_native_lab.c', ['decode_native_lab_payload','native_lab_advance_generation','instantiate_native_lab','blob_write','relocs_write','proof_write','binding_write','generation_read'])
-    binding += function_spans(ROOT/'kprog/libnativeloader/src/native_loader.cpp', ['bound_proof_sequence','upload_proof_chunk','read_blob_generation','seal_bound_chunk','upload_bound_proofs'])
+    binding += function_spans(ROOT/'kprog/libnativeloader/src/native_loader.cpp', ['bound_proof_sequence','upload_proof_chunk','read_blob_generation','seal_bound_chunk','upload_bound_proofs','prepare_simulator_proof'])
     (OUT/'binding-functions.json').write_text(json.dumps(binding,indent=2)+'\n')
     (OUT/'components.json').write_text(json.dumps(totals,indent=2)+'\n')
     kernel=ROOT/'vendor/linux-framework'

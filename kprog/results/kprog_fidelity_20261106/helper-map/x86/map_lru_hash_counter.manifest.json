@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "map_lru_hash_co",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/map_lru_hash_counter.native.o",
+      "symbol": "map_lru_hash_counter",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/stage2/map_lru_hash_counter.bpf.o",
+      "simulator_program": "map_lru_hash_counter_x86_sim_xdp"
+    }
+  ]
+}

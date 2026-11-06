@@ -1,0 +1,13 @@
+{
+  "name": "map_percpu_array",
+  "native_object": "/workspaces/repository/kprog/test/build-x86/map_percpu_array.native.o",
+  "stage": "passed",
+  "returncode": 0,
+  "command": [
+    "/workspaces/repository/kprog/fidelity/build-x86/bound-probe",
+    "/workspaces/repository/kprog/test/build-x86/map_percpu_array.bpf.o",
+    "/workspaces/repository/kprog/results/kprog_fidelity_20261106/helper-map/x86/map_percpu_array.manifest.json",
+    "18369614221190019774",
+    "2"
+  ]
+}

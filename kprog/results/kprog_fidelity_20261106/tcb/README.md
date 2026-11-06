@@ -72,3 +72,17 @@ Reproduce from the repository root:
 ```sh
 taskset -c 16-23 make -C kprog/fidelity tcb
 ```
+
+
+## Recovery snapshot
+
+`components.json`, `files.csv`, `binding-functions.json` and
+`kernel-changes.tsv` were refreshed through the same `make tcb` command after
+the restart; the table above retains the earlier snapshot. The inventory now
+also names `prepare_simulator_proof` explicitly and counts
+`kprog/tv/native-proof-regions.patch` plus its application script separately.
+The loader's counted manifest source includes `simulator_object` and
+`simulator_program`. Patch text counts are physical diff/script lines, not
+executable SLOC, and overlap the kernel-change inventory. Binding-function
+counts similarly overlap their full source components and are not summed
+again. `recovery.log.gz` retains the exact component counts for this snapshot.

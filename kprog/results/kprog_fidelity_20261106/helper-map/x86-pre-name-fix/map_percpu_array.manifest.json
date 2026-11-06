@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "map_percpu_array",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/map_percpu_array.native.o",
+      "symbol": "map_percpu_array",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/stage2/map_percpu_array.bpf.o",
+      "simulator_program": "map_percpu_array_x86_sim_xdp"
+    }
+  ]
+}

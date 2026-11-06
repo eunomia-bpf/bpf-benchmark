@@ -580,13 +580,17 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
         if dst.startswith("x") and src.startswith("d"):
             return Encoded("ARM64_OP_FMOV", reg_const(dst), width="ARM64_WIDTH_64", aux="ARM64_FMOV_X_FROM_D")
         if dst.startswith("s") and src.startswith("w"):
-            return Encoded("ARM64_OP_FMOV", src=reg_const(src), aux="ARM64_FMOV_S_FROM_W")
+            return Encoded("ARM64_OP_FMOV", src=reg_const(src), width="ARM64_WIDTH_32", aux="ARM64_FMOV_S_FROM_W")
         if dst.startswith("w") and src.startswith("s"):
             return Encoded("ARM64_OP_FMOV", reg_const(dst), width="ARM64_WIDTH_32", aux="ARM64_FMOV_W_FROM_S")
     if op == "cnt":
-        return Encoded("ARM64_OP_CNT")
+        if ops not in [("v0.8b", "v0.8b"), ("v0.16b", "v0.16b")]:
+            raise ValueError(f"unsupported CNT operands: {insn.raw}")
+        return Encoded("ARM64_OP_CNT", aux="16" if ops[0] == "v0.16b" else "8")
     if op == "uaddlv":
-        return Encoded("ARM64_OP_UADDLV")
+        if ops not in [("h0", "v0.8b"), ("h0", "v0.16b")]:
+            raise ValueError(f"unsupported UADDLV operands: {insn.raw}")
+        return Encoded("ARM64_OP_UADDLV", aux="16" if ops[1] == "v0.16b" else "8")
     raise ValueError(f"unsupported arm64 instruction: {insn.raw}")
 
 

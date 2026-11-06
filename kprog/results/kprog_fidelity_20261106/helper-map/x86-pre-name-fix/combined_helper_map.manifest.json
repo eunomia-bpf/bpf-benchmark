@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "combined_helper_map",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/combined_helper_map.native.o",
+      "symbol": "combined_helper_map",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/stage2/combined_helper_map.bpf.o",
+      "simulator_program": "combined_helper_map_x86_sim_xdp"
+    }
+  ]
+}

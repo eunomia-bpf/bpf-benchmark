@@ -107,7 +107,7 @@ static __u64 extr_oracle(__u64 hi, __u64 lo, __u64 amount, __u8 width)
 	if (k == 0U)
 		out = lo;
 	else
-		out = (lo >> k) | (hi << (bits - k));
+		out = ((lo & mask) >> k) | (hi << (bits - k));
 	return out & mask;
 }
 

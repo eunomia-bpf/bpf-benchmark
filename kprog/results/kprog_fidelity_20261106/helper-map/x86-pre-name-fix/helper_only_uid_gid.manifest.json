@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "helper_only_uid_gid",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/helper_only_uid_gid.native.o",
+      "symbol": "helper_only_uid_gid",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/stage2/helper_only_uid_gid.bpf.o",
+      "simulator_program": "helper_only_uid_gid_x86_sim_xdp"
+    }
+  ]
+}

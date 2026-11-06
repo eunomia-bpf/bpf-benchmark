@@ -16,9 +16,8 @@
  *   - the memory form resolves the AUX memory-width lane (the absent code
  *     falling back to the FLAGS-resolved width), reads the left operand from
  *     the addressed bytes through the real addressed-read body (the
- *     effective displacement (s32)((u64)(s32)(IMM >> 32) >> 32) -- the
- *     routed body passes the store-half displacement through the whole-
- *     immediate slot of the addressed-read body, which extracts it again --
+ *     effective displacement (s32)(IMM >> 32) -- the
+ *     routed body passes the packed immediate to the addressed-read body --
  *     offset), takes its right operand from the store-immediate value
  *     re-resolved through the `KPROG_X86_IMMEDIATE_VALUE` 32-bit shape, and
  *     multiplies it by the left operand SIGNED-EXTENDED AT THE MEMORY WIDTH;
@@ -224,14 +223,8 @@ static void model_imul_step(unsigned form, unsigned width_code,
 		product = lhs * rhs;
 	} else {
 		unsigned mw = aux_mem_width ? aux_mem_width : w;
-		/* The routed body passes its pre-extracted store-half
-		 * displacement through the whole-immediate slot of
-		 * `X86_SIM_L_READ_MEM_VALUE(..., STORE_DISP=1)`, whose
-		 * `STORE_DISP` branch applies `x86_store_imm_disp` a second
-		 * time: the effective displacement is
-		 * `(s32)((u64)(s32)(imm >> 32) >> 32)`, not
-		 * `(s32)(imm >> 32)`. Restate that exact two-step wrap. */
-		__s64 disp = (__s64)(__s32)(((__u64)(__s64)(__s32)(imm >> 32)) >> 32);
+        /* The high 32-bit displacement is independent of the low immediate. */
+        __s64 disp = (__s64)(__s32)(imm >> 32);
 		__u64 raw;
 
 		if (mode != 0U)

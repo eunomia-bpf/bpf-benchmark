@@ -97,6 +97,7 @@ static __u64 mreg[31];
 static __u8 mtag[31];
 static __s64 msp;
 static __u64 m_v0;
+static __u64 m_v0_hi;
 static unsigned long model_unsupported_calls;
 
 static __u64 pattern_reg(unsigned i)
@@ -166,8 +167,10 @@ static void model_fmov(unsigned op, unsigned dst, unsigned src, unsigned width,
 	__u64 srcval = (src == ARM64_SP) ? (__u64)msp : mreg[src];
 	__u64 result = model_value(dir, m_v0, srcval);
 
-	if (vector_destination(dir))
-		m_v0 = result;
+	if (vector_destination(dir)) {
+		m_v0 = dir == ARM64_FMOV_S_FROM_W ? (__u32)result : result;
+		m_v0_hi = 0;
+	}
 	else
 		model_write_reg_width(dst, result, width);
 }
@@ -257,7 +260,7 @@ static __u8 heap_img[HEAP_BYTES];
 			return;                                           \
 		}                                                         \
 		cases++;                                                  \
-		if (__a64_v0 != m_v0) {                                   \
+		if (__a64_v0 != m_v0 || __a64_v0_hi != m_v0_hi) {          \
 			printf("MISMATCH op=%#x via=%u v0: got %#llx "    \
 			       "want %#llx\n", (OP), (VIA),               \
 			       (unsigned long long)__a64_v0,              \
@@ -293,6 +296,7 @@ static void check_case(unsigned op, unsigned dst, unsigned src,
 
 	__a64_v0 = pattern_reg(40);
 	m_v0 = pattern_reg(40);
+	__a64_v0_hi = m_v0_hi = pattern_reg(41);
 
 	model_fmov(op, dst, src, width, aux);
 
@@ -309,8 +313,11 @@ static void check_case(unsigned op, unsigned dst, unsigned src,
 					ARM64_SIM_L_READ_REG(src), \
 					ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
 			if (KPROG_ARM64_FMOV_DEST_VECTOR(aux,      \
-					ARM64_SIM_L_UNSUPPORTED_OPCODE())) \
-				__a64_v0 = __a64_fmov_result;      \
+					ARM64_SIM_L_UNSUPPORTED_OPCODE())) { \
+				__a64_v0 = aux == ARM64_FMOV_S_FROM_W ? \
+					(__u32)__a64_fmov_result : __a64_fmov_result; \
+				__a64_v0_hi = 0;                  \
+			}                                          \
 			else                                       \
 				ARM64_SIM_L_WRITE_REG_WIDTH(dst,   \
 					__a64_fmov_result, width); \
