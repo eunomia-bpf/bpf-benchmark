@@ -107,7 +107,7 @@ linker-build:
 
 kernel-check: linker-build
 
-build/test-loader: test_loader.cpp build/native-entry.o build/simulator.bpf.o build/runtime-config/simulator.bpf.o build/wrong-capacity/simulator.bpf.o build/wrong-layout/simulator.bpf.o build/wrong-readonly/simulator.bpf.o ../libnativeloader/src/native_loader.cpp \
+build/test-loader: test_loader.cpp build/native-entry.o build/simulator.bpf.o build/runtime-config/simulator.bpf.o build/wrong-capacity/simulator.bpf.o build/wrong-layout/simulator.bpf.o build/wrong-readonly/simulator.bpf.o build/wrong-data-layout/simulator.bpf.o ../libnativeloader/src/native_loader.cpp \
 		$(wildcard ../libnativeloader/src/*.hpp ../libnativeloader/include/*.hpp)
 	$(MAKE) -C ../libnativeloader BUILD_DIR=build-tv-binding
 	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 \
@@ -124,6 +124,12 @@ build/wrong-layout/simulator.bpf.o: test_simulator.bpf.c
 build/wrong-readonly/simulator.bpf.o: test_simulator.bpf.c
 	install -d build/wrong-readonly
 	clang -O2 -g -target bpf -DTV_READONLY_WORD=0x1122334400000003ULL -I../../vendor/libbpf/include/uapi \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		-I/usr/include/x86_64-linux-gnu -c $< -o $@
+
+build/wrong-data-layout/simulator.bpf.o: test_simulator.bpf.c
+	install -d build/wrong-data-layout
+	clang -O2 -g -target bpf -Dtv_readonly_data=unrelated_readonly_data -I../../vendor/libbpf/include/uapi \
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		-I/usr/include/x86_64-linux-gnu -c $< -o $@
 

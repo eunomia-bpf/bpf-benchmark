@@ -290,3 +290,9 @@ Clang and the C/Python simulator generator can leave the semantic trusted base
 only once a byte-level TV certificate exists for their actual output. Until
 then their correctness remains an unresolved obligation, not a discharged O2
 or O3. Binding is necessary but cannot establish translation correctness.
+
+Internal simulator maps bind by canonical BTF DATASEC section and exact layout,
+independently of libbpf's object-name prefix. Both compiled-object and raw-proof
+paths retain the original application FD; duplicate matching original map IDs
+reject. Kernel regressions cover different object names for writable and
+readonly data, wrong same-sized BTF variables, and ambiguous original identities.

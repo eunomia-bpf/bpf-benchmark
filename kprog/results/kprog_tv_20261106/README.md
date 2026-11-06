@@ -329,3 +329,25 @@ libraries build; kernel/module wire ABI stays at version 2. Sources, both
 capacity variants and native/BPF artifacts are retained in the input archive.
 Updated libraries are separately snapshotted under the lane checkpoint's
 context-v2-map-capacity/ directory for use with the existing matched v2 pair.
+
+Internal DATASEC identity across object names
+-------------------------------------------
+
+libbpf prefixes default internal map names with the object name. Matching the
+entire proof name against the original therefore disabled vfsstat's real .bss
+map. Both compiled-object and separately loaded raw-proof paths now select the
+original FD by canonical BTF DATASEC section and exact variable names, offsets,
+and sizes. Kernel object prefixes are not section identities. Multiple matching
+original map IDs reject rather than choosing one.
+
+Actual x86 kernel tests pass for differently named original/proof objects, both
+.bss and .rodata, retaining the exact original map IDs and returning 2 through
+generation-bound native execution. The raw-proof path also relinks both data
+sections. Renamed same-sized BTF variables reject in both paths; two distinct
+original maps with identical BTF layouts reject as ambiguous. Existing capacity,
+context, helper/map, readonly, entry, ABI and generation regressions still pass.
+Host sanitizer checks and both architecture library builds pass. Raw logs and
+exact fixtures/libraries are retained alongside this file. Updated libraries
+are in the lane checkpoint's context-v2-datasec/ directory and use the existing
+6836f7d44 kernel/module pair without a wire or C ABI change. This fixes binding;
+it does not constitute a per-program translation certificate.

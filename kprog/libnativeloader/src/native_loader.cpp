@@ -4755,6 +4755,33 @@ void validate_data_map_layout(const btf *proof_btf, uint32_t proof_id,
     }
 }
 
+const MapMeta *find_original_data_map(const btf *proof_btf, uint32_t proof_id,
+    const CompanionLoad &companion, const std::string &name)
+{
+    const auto *type = proof_btf ? btf__type_by_id(proof_btf, proof_id) : nullptr;
+    if (!type || btf_kind(type) != BTF_KIND_DATASEC) return nullptr;
+    const char *section = btf__name_by_offset(proof_btf, type->name_off);
+    if (!section || !*section) fail("simulator internal map has no BTF section: " + name);
+    const MapMeta *selected = nullptr;
+    bool section_found = false;
+    for (const MapMeta &source : companion.maps) {
+        const auto source_btf = open_map_btf(source.btf_id, source.name);
+        const auto *source_type = source_btf ?
+            btf__type_by_id(source_btf.get(), source.btf_value_type_id) : nullptr;
+        if (!source_type || btf_kind(source_type) != BTF_KIND_DATASEC) continue;
+        const char *source_section = btf__name_by_offset(source_btf.get(), source_type->name_off);
+        if (!source_section || std::string_view(section) != source_section) continue;
+        section_found = true;
+        if (!same_data_layout(proof_btf, proof_id, source_btf.get(), source.btf_value_type_id)) continue;
+        if (selected && selected->kernel_id != source.kernel_id)
+            fail("simulator internal map has ambiguous source identities: " + name);
+        selected = &source;
+    }
+    if (section_found && !selected)
+        fail("simulator internal map BTF layout differs from original program: " + name);
+    return selected;
+}
+
 /* Raw proof callers may have loaded the compiler object separately. Its maps
  * are not the application's maps, even when names and shapes are identical.
  * Relink those FD operands to the original program before sealing the proof.
@@ -4803,6 +4830,13 @@ void bind_raw_proof_maps(std::vector<bpf_insn> &proof, const CompanionLoad &comp
                     fail("raw proof map name has ambiguous original identities: " + name);
                 selected = &source;
             }
+            const auto proof_btf = open_map_btf(actual.btf_id, name);
+            if (const auto *data = find_original_data_map(proof_btf.get(),
+                    actual.btf_value_type_id, companion, name)) {
+                if (selected && selected->kernel_id != data->kernel_id)
+                    fail("raw proof map has conflicting original identities: " + name);
+                selected = data;
+            }
             if (!selected) {
                 if (insn.src_reg != BPF_PSEUDO_MAP_VALUE)
                     fail("raw proof map has no original-program identity: " + name);
@@ -4826,7 +4860,6 @@ void bind_raw_proof_maps(std::vector<bpf_insn> &proof, const CompanionLoad &comp
                 fail("raw proof map layout differs from original program: " + name);
             if (actual.id != selected->kernel_id) {
                 if (checked_layouts.insert(actual.id).second) {
-                    const auto proof_btf = open_map_btf(actual.btf_id, name);
                     validate_data_map_layout(proof_btf.get(), actual.btf_value_type_id,
                         selected->btf_id, selected->btf_value_type_id, name, false);
                 }
@@ -4881,13 +4914,11 @@ SimulatorObject open_simulator_proof(
             identity = exact->second;
         }
         if (bpf_map__is_internal(map)) {
-            for (const MapMeta &source : companion.maps) {
-                if (source.name == name || ends_with(source.name, name)) {
-                    if (identity && *identity != source.kernel_id) {
-                        fail("simulator internal map has ambiguous source identities: " + name);
-                    }
-                    identity = source.kernel_id;
-                }
+            if (const auto *source = find_original_data_map(bpf_object__btf(raw),
+                    bpf_map__btf_value_type_id(map), companion, name)) {
+                if (identity && *identity != source->kernel_id)
+                    fail("simulator internal map has conflicting source identities: " + name);
+                identity = source->kernel_id;
             }
         }
         if (!identity) {
