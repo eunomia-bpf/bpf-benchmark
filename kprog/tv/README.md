@@ -518,3 +518,33 @@ the loader redirects clang EXITs, the module appends ABI clobbers, and the
 verifier interprets virtual context accesses before physical conversion.
 Those exact expanded bytes and platform rules must be included in the final
 certificate; the standalone physical capture is not that expanded artifact.
+
+Both native modules now offer opt-in `capture_checked=1`. After each
+successful bound load, `checked_proof` under that module's debugfs directory
+contains the exact expanded virtual program at `validate_native_proof`, before
+restoration/context conversion. Read it before the next upload: every blob,
+proof, relocation or binding mutation invalidates new opens. Each already-open
+FD retains its own immutable copy. Capture is disabled by default; enabled
+capture failures propagate. This read-only interface requires CAP_SYS_ADMIN.
+
+`native_lab_checked_wire.h` defines version1:120-byte header (six32-bit
+fields followed by binding96), program instructions,16-byte region records,
+40-byte map records and16-byte helper records. It preserves region payloads,
+source/context identity, actual map IDs/layouts/resolved pointers, and helper
+IDs/functions. A callback snapshot alone does not establish load acceptance.
+The per-program record must also retain the successful load result and exact
+native output/metadata. There is one latest snapshot, rather than a queue.
+
+`simple-checked-kernel-check-arm64` exercises the production loader against
+the actual clang/native objects and captures its complete29-instruction
+expanded proof. Both original and native programs return2, perform the exact
+eight-byte packet update and preserve120 other bytes. The capture includes
+the actual EXIT-to-JA rewrite and final stub EXIT; virtual context offsets
+remain0/4. `simple-checked-artifact-check` preserves every snapshot byte and
+checks its27-instruction clang prefix, redirected exit and stub exit in Lean.
+`checked-artifact-negative-check` rejects14 corrupted records and four actual
+instruction mutations. The prefix equality uses Lean.ofReduceBool explicitly.
+Whole-program context/state/effect simulation remains active; these byte
+identity checks do not replace that theorem. Both complete x86/Arm binding
+regressions also verify resolved map/helper facts, invalidation and stable FDs.
+The inputs archive includes the exact small guest runtime used by this test.

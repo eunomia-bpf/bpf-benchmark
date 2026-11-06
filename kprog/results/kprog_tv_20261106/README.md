@@ -807,3 +807,15 @@ output, ABI, relocation/environment files and generated Lean arrays are in
 in `simple-first-block-development.tar.gz`. This is a complete first-block
 certificate, with explicit private-frame/platform premises, not yet the
 whole generation-bound program certificate.
+
+Exact verifier-input capture: `checked-simple-arm64-first.log` retains the
+production loader's actual29-instruction expanded proof and successful exact
+original/native packet comparison. `checked-capture-artifact-final.log`
+retains the Arm binding/map/helper capture regression.
+`checked-capture-final-all.log` includes Lean byte identity,14 metadata
+corruptions, four byte-mutant rejections and the complete x86 regression.
+`checked-proof-inputs.tar.gz` preserves exact snapshots, mutation sources/logs,
+small guest runtime and both capture modules; development failures remain
+in `checked-proof-development.tar.gz`. Read-only API and ownership are
+documented in the TV README and wire header. No whole-program TV claim is
+made from capture or successful execution alone.
