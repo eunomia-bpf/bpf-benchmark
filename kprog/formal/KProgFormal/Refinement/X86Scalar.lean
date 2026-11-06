@@ -39,6 +39,12 @@ theorem load_value_refines (width : ScalarWidth) (memory : Memory) (address : Re
       GeneratedX86MemAccess.assemble, GeneratedX86Width.mask, wordAt, bytesAt,
       littleEndian, List.range_succ] <;> bv_decide
 
+theorem fixed_load_value_refines (width : ScalarWidth) (memory : Memory)
+    (base : Reference.Word) (displacement : BitVec 16) :
+    GeneratedX86MemAccess.loadFixed memory.value base displacement (handlerWidth width) =
+      wordAt memory (base + displacement.signExtend 64) width.bytes := by
+  exact load_value_refines width memory (base + displacement.signExtend 64)
+
 theorem store_byte_refines (width : ScalarWidth) (value : Reference.Word) (i : Nat) (h : i < width.bytes) :
     GeneratedX86MemAccess.store value (handlerWidth width) i = (value >>> (8 * i)).setWidth 8 := by
   have bound : i < 8 := by cases width <;> simp only [Reference.X86.ScalarWidth.bytes] at h <;> omega
@@ -65,6 +71,22 @@ theorem read_refines (s : Reference.X86.State) (width : ScalarWidth) (src : Scal
     simp [read, Reference.X86.scalarRead, Reference.X86.scalarRegisterValue,
       Reference.X86.readSource, readMemory, register_read_refines, load_value_refines]
   split <;> simp_all
+
+def readFixed (s : Reference.X86.State) (width : ScalarWidth) (base : Reference.Word)
+    (displacement : BitVec 16) : Except Fault (Reference.Word × List Event) :=
+  let address := GeneratedX86MemAccess.displacedAddress base displacement
+  if permitted s.memory.readable address width.bytes then
+    .ok (GeneratedX86MemAccess.loadFixed s.memory.value base displacement (handlerWidth width),
+      [.memory .read address (bytesAt s.memory address width.bytes) (initializedAt s.memory address width.bytes)])
+  else .error (.read address width.bytes)
+
+/-- The fixed-offset encoding changes neither the effective address nor
+permissions, initialization, ordered effects or faults of the scalar read. -/
+theorem fixed_read_refines (s : Reference.X86.State) (width : ScalarWidth) (base : Reference.Word)
+    (displacement : BitVec 16) :
+    readFixed s width base displacement =
+      Reference.X86.scalarRead s width (.memory (base + displacement.signExtend 64)) := by
+  exact read_refines s width (.memory (base + displacement.signExtend 64))
 
 def store (memory : Memory) (width : ScalarWidth) (address value : Reference.Word) : Memory :=
   { memory with

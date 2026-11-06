@@ -102,6 +102,9 @@ restatement of ISA semantics. `tools/check_reference_x86_scalar.py` adds concret
 MOV/prefix/byte-lane cases. `tools/check_x86_memory_widths.py` compiles the actual
 C memory contract to BPF and checks access kind, address, width and count;
 unaligned host accesses use alignment-one alias types and remain UBSan-checked.
+Its fixed-load API keeps the base register and signed16 displacement separate,
+so context reads retain a literal BPF offset. Nonconstant or out-of-range
+displacements fail compilation; the access remains one native-width read.
 
 For AArch64, send `isa: "aarch64"` to the same executable. Supply exactly four
 little-endian native bytes, `registers` as X0..X30 followed by SP (32 words),

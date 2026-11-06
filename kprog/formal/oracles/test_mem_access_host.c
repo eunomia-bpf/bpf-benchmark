@@ -90,6 +90,28 @@ static int check_store(__u64 value, unsigned width)
 	return 0;
 }
 
+static unsigned check_fixed_loads(unsigned *cases)
+{
+	static __u8 memory[65560];
+	static const long long offsets[] = {-32768, -3, -1, 0, 88, 32767};
+	static const unsigned widths[] = {0, 1, 2, 4, 8};
+	unsigned failures = 0;
+	for (unsigned i = 0; i < sizeof(memory); i++) memory[i] = (__u8)(i * 29 + i / 11);
+	for (unsigned alignment = 0; alignment < 8; alignment++)
+		for (unsigned d = 0; d < sizeof(offsets) / sizeof(offsets[0]); d++)
+			for (unsigned w = 0; w < sizeof(widths) / sizeof(widths[0]); w++) {
+				const __u8 *base = memory + 32768 + alignment;
+				__u64 got = KPROG_X86_MEM_LOAD_FIXED(base, offsets[d], widths[w]);
+				__u64 expected = oracle_load(base + offsets[d], widths[w]);
+				if (got != expected) {
+					printf("MISMATCH fixed load off=%lld width=%u alignment=%u\n", offsets[d], widths[w], alignment);
+					failures++;
+				}
+				(*cases)++;
+			}
+	return failures;
+}
+
 int main(void)
 {
 	static const __u8 vectors[][8] = {
@@ -124,6 +146,7 @@ int main(void)
 		cases += 2;
 	}
 
+	fails += check_fixed_loads(&cases);
 	if (fails) {
 		printf("x86 memory-access host cross-check: FAILED (%u mismatches)\n", fails);
 		return 1;

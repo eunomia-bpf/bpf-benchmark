@@ -18,7 +18,7 @@ def command(argv):
         raise SystemExit(f"memory widths: {argv[0]} failed: {error.stderr}") from error
 
 
-def accesses(instructions):
+def accesses(instructions, fixed_displacement=None):
     # Register1 starts at the guest pointer; track pointer copies and constant
     # additions. Every other value is scalar. Unexpected control flow fails.
     registers = [None] * 11
@@ -40,6 +40,8 @@ def accesses(instructions):
             width = {0: 4, 8: 2, 16: 1, 24: 8}[code & 24]
             if pointer is None:
                 raise SystemExit("memory widths: access lost its guest pointer")
+            if fixed_displacement is not None and (pointer != 0 or offset != fixed_displacement):
+                raise SystemExit("memory widths: fixed load modified its base or lost its literal displacement")
             events.append((kind, pointer + offset, width))
             if kind == "read":
                 registers[dst] = None
@@ -82,13 +84,24 @@ def main():
     expected = {f"{kind}_{name}": [("read" if kind == "load" else "write", 3, width)]
                 for name, width in [("b8", 1), ("b16", 2), ("b32", 4), ("b64", 8), ("default", 8)]
                 for kind in ("load", "store")}
+    fixed = {f"fixed_{name}_{suffix}": [("read", offset, width)]
+             for name, width in [("b8", 1), ("b16", 2), ("b32", 4), ("b64", 8), ("default", 8)]
+             for suffix, offset in [("context", 88), ("negative", -3), ("minimum", -32768), ("maximum", 32767)]}
+    expected.update(fixed)
     if functions.keys() != expected.keys():
         raise SystemExit(f"memory widths: function set mismatch: {functions.keys() ^ expected.keys()}")
     for name, wanted in expected.items():
-        actual = accesses(functions[name])
+        actual = accesses(functions[name], wanted[0][1] if name in fixed else None)
         if actual != wanted:
             raise SystemExit(f"memory widths: {name}: got {actual}, expected {wanted}")
-    print("x86 BPF memory widths: all ten primitives keep exact kind/address/width/count, including unaligned +3")
+    for mode in (1, 2, 3):
+        result = subprocess.run([args.clang, "-target", "bpfel", "-O2", "-I", str(args.include_dir),
+            "-I", str(ROOT), f"-DKPROG_TEST_BAD_FIXED={mode}", "-c", str(ROOT / "oracles/test_x86_memory_widths.c"),
+            "-o", str(args.build_dir / f"bad-fixed-{mode}.o")], text=True, capture_output=True)
+        (args.build_dir / f"bad-fixed-{mode}.log").write_text(result.stdout + result.stderr)
+        if result.returncode == 0 or "fixed load requires a constant signed16 displacement" not in result.stderr:
+            raise SystemExit(f"memory widths: bad fixed displacement mode{mode} did not fail precisely: {result.stderr}")
+    print("x86 BPF memory widths: ten generic + twenty fixed loads keep exact kind/address/width/count; fixed bases/displacements and three bad-offset rejections OK")
 
 
 if __name__ == "__main__":

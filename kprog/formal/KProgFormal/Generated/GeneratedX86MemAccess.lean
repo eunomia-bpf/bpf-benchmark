@@ -33,4 +33,11 @@ def storeByte (value : BitVec 64) (width : GeneratedX86Width.Width)
 def store (value : BitVec 64) (width : GeneratedX86Width.Width)
     (i : Nat) : BitVec 8 :=
   storeByte value width i
+/-- A fixed BPF displacement is signed16, added to the unchanged base. -/
+def displacedAddress (base : BitVec 64) (displacement : BitVec 16) : BitVec 64 :=
+  base + displacement.signExtend 64
+
+def loadFixed (memory : BitVec 64 → BitVec 8) (base : BitVec 64)
+    (displacement : BitVec 16) (width : GeneratedX86Width.Width) : BitVec 64 :=
+  load (fun i => memory (displacedAddress base displacement + BitVec.ofNat 64 i)) width
 end KProgFormal.GeneratedX86MemAccess

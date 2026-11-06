@@ -6,6 +6,7 @@
   "load": "assemble_width_bytes_little_endian_then_narrow",
   "store": "mask_value_then_write_width_bytes_little_endian",
   "byte_rule": "byte_i_is_bits_8i_to_8i_plus_8",
+  "fixed_load": {"displacement_bits": 16, "signed": true},
   "widths": [
     {"name": "w8", "bits": 8, "bytes": 1, "mask": "0xff"},
     {"name": "w16", "bits": 16, "bytes": 2, "mask": "0xffff"},

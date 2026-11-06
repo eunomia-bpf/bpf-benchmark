@@ -46,6 +46,50 @@ kprog_x86_mem_load(const void *address, __u8 width)
     default: __builtin_trap();
     }
 }
+#if defined(__bpf__) || defined(__BPF__)
+extern void kprog_x86_fixed_displacement_required(void)
+    __attribute__((error("x86 fixed load requires a constant signed16 displacement")));
+#endif
+/* Preserve the context register itself: the verifier distinguishes a fixed
+ * LDX offset from adding the same offset to a context pointer first. */
+static __attribute__((always_inline)) inline __u64
+kprog_x86_mem_load_fixed(const void *base, long long displacement, __u8 width)
+{
+#if defined(__bpf__) || defined(__BPF__)
+    if (!__builtin_constant_p(displacement) || displacement < -32768 || displacement > 32767)
+        kprog_x86_fixed_displacement_required();
+    __u64 value;
+    switch (width ? width : X86_WIDTH_64) {
+    case X86_WIDTH_8:
+        if (displacement < 0)
+            asm volatile("%0 = *(u8 *)(%1 - %2)" : "=r"(value) : "r"(base), "i"(-displacement) : "memory");
+        else
+            asm volatile("%0 = *(u8 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory");
+        return value;
+    case X86_WIDTH_16:
+        if (displacement < 0)
+            asm volatile("%0 = *(u16 *)(%1 - %2)" : "=r"(value) : "r"(base), "i"(-displacement) : "memory");
+        else
+            asm volatile("%0 = *(u16 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory");
+        return value;
+    case X86_WIDTH_32:
+        if (displacement < 0)
+            asm volatile("%0 = *(u32 *)(%1 - %2)" : "=r"(value) : "r"(base), "i"(-displacement) : "memory");
+        else
+            asm volatile("%0 = *(u32 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory");
+        return value;
+    case X86_WIDTH_64:
+        if (displacement < 0)
+            asm volatile("%0 = *(u64 *)(%1 - %2)" : "=r"(value) : "r"(base), "i"(-displacement) : "memory");
+        else
+            asm volatile("%0 = *(u64 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory");
+        return value;
+    default: __builtin_trap();
+    }
+#else
+    return kprog_x86_mem_load((const __u8 *)base + displacement, width);
+#endif
+}
 static __attribute__((always_inline)) inline void
 kprog_x86_mem_store(void *address, __u8 width, __u64 value)
 {
@@ -82,5 +126,6 @@ kprog_x86_mem_store(void *address, __u8 width, __u64 value)
     }
 }
 #define KPROG_X86_MEM_LOAD(ADDR, WIDTH) kprog_x86_mem_load((ADDR), (WIDTH))
+#define KPROG_X86_MEM_LOAD_FIXED(BASE, DISP, WIDTH) kprog_x86_mem_load_fixed((BASE), (DISP), (WIDTH))
 #define KPROG_X86_MEM_STORE(ADDR, WIDTH, VALUE) kprog_x86_mem_store((ADDR), (WIDTH), (VALUE))
 #endif
