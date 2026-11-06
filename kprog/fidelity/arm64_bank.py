@@ -29,7 +29,7 @@ def wrapper(index, instruction):
     lines += ['ldr x30, [x30, #240]', f'.global native_pc_{index}',
               f'native_pc_{index}:', instruction, f'.global native_next_{index}',
               f'native_next_{index}:']
-    # SP is unchanged by every generated FMOV. A writable user thread register
+    # SP is unchanged by every generated form. A writable user thread register
     # saves guest X0 without consuming a guest vector or general register.
     # Restore TLS before returning to C; no calls occur while it is displaced.
     lines += ['msr tpidr_el0, x0', 'ldr x0, [sp, #96]']
@@ -46,6 +46,7 @@ def wrapper(index, instruction):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--family', choices=['fmov','bitfield'], default='fmov')
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -55,10 +56,18 @@ def main():
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(path, target)
     forms = []
-    for bank in range(32):
-        register = bank % 31
-        forms += [f'fmov d{bank}, x{register}', f'fmov x{register}, d{bank}',
-                  f'fmov s{bank}, w{register}', f'fmov w{register}, s{bank}']
+    if args.family == 'fmov':
+        for bank in range(32):
+            register = bank % 31
+            forms += [f'fmov d{bank}, x{register}', f'fmov x{register}, d{bank}',
+                      f'fmov s{bank}, w{register}', f'fmov w{register}, s{bank}']
+    else:
+        for bits,prefix in [(32,'w'),(64,'x')]:
+            for op in ['ubfx','sbfx','ubfiz','bfxil','bfi']:
+                for lsb,count in [(7,13),(0,bits),(0,1),(bits-1,1),(1,bits-1)]:
+                    forms.append(f'{op} {prefix}0, {prefix}1, #{lsb}, #{count}')
+                forms += [f'{op} {prefix}1, {prefix}1, #7, #13',
+                          f'{op} {prefix}zr, {prefix}1, #7, #13']
     (out/'instructions.S').write_text('.text\n'+'\n'.join(forms)+'\n')
     subprocess.run(['aarch64-linux-gnu-gcc', '-c', out/'instructions.S', '-o', out/'instructions.o'], check=True)
     assembly = subprocess.check_output(['aarch64-linux-gnu-objdump', '-dr', out/'instructions.o'], text=True)
@@ -94,7 +103,8 @@ def main():
     (out/'generated.c').write_text('\n'.join(source)+'\n')
     (out/'native.S').write_text('.text\n'+'\n'.join(wrapper(i, form) for i, form in enumerate(forms))+'\n.section .note.GNU-stack,"",%progbits\n')
     (out/'coverage.json').write_text(json.dumps(coverage, indent=2)+'\n')
-    print(f'generated {len(forms)} FMOV forms, observing all 32 vectors')
+    (out/'family.txt').write_text(args.family+'\n')
+    print(f'generated {len(forms)} {args.family} forms, observing all 32 vectors')
 
 
 if __name__ == '__main__':

@@ -52,3 +52,8 @@ CPU/simulator/reference differences and a static hardware handoff.
 The canonical Arm memory/pair replay now checks543forms/556032cases on the
 identical saved CPU inputs: zero CPU differences,4096 unchanged model SP/WSP
 differences, and24 encoding forms still in the active canonical coverage queue.
+
+Canonical bitfield closure adds70 full-bank boundary/alias forms and71680
+QEMU/C/reference agreements, full formal check PASS. The original matrix now
+checks553/567 forms (566272 cases), CPU differences0, model SP differences4096,
+with14 memory encodings still active. Static bitfield hardware handoff included.

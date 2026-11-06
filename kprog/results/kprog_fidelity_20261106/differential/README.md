@@ -649,3 +649,12 @@ forms now decode, including scalar loads/stores and LDP/STP. All24 remaining
 encoding requests stay in the report and active coverage queue. The adapter
 reads the original trace directly and freezes the reference executable before
 the replay, avoiding another duplicate1GiB trace.
+
+## Canonical bitfield closure
+
+`arm64-bitfield/README.md` records the handed-off canonical bitfield increment:
+full formal check passes, and70 full-bank boundary/alias forms ×1024 QEMU
+states agree with C and the canonical reference. The same original matrix
+now checks553/567 forms (566272 cases), with zero CPU differences and the
+same4096 model SP/WSP differences. All14 remaining memory encodings stay
+in the active queue. A static full-bank bitfield hardware handoff is included.

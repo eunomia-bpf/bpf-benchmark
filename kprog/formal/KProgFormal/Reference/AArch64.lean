@@ -550,7 +550,46 @@ def bitBranch (nonzero : Bool) (value : Word) (bit : BitVec 6) : Bool :=
   let selected := (value >>> bit.setWidth 64).setWidth 1
   if nonzero then selected != 0 else selected == 0
 
+/-- The non-wrapping and wrapping aliases of UBFM/SBFM/BFM. -/
+inductive BitfieldKind | ubfx | sbfx | ubfiz | bfxil | bfi | sbfiz
+  deriving DecidableEq, Repr
+
+/-- An architectural bitfield is nonempty and wholly inside W or X. -/
+structure BitfieldInstruction where
+  width : Width
+  kind : BitfieldKind
+  dst : Register
+  src : Register
+  lsb : Fin width.bits
+  size : Fin (width.bits - lsb.val)
+  deriving DecidableEq, Repr
+
+def BitfieldInstruction.lsbByte (i : BitfieldInstruction) : Byte := BitVec.ofNat 8 i.lsb.val
+
+def BitfieldInstruction.countByte (i : BitfieldInstruction) : Byte := BitVec.ofNat 8 (i.size.val + 1)
+
+/-- DDI0602 bitfield aliases: a shift-pair extracts the source window;
+insertion preserves the complementary destination bits, and signed forms
+extend the selected sign bit. The enclosing W write zero-extends. -/
+def bitfieldValue (kind : BitfieldKind) (src dst : Word) (lsb count : Byte) : Word :=
+  let lsb := lsb.setWidth 64
+  let count := count.setWidth 64
+  let mask := ~~~((0xffffffffffffffff : Word) <<< count)
+  let field := (src <<< ((64 : Word) - lsb - count)) >>> ((64 : Word) - count)
+  match kind with
+  | .ubfx => field
+  | .sbfx => (src <<< ((64 : Word) - lsb - count)).sshiftRight' ((64 : Word) - count)
+  | .ubfiz => (src &&& mask) <<< lsb
+  | .bfxil => (dst &&& ~~~mask) ||| field
+  | .bfi => (dst &&& ~~~(mask <<< lsb)) ||| ((src &&& mask) <<< lsb)
+  | .sbfiz => ((src <<< ((64 : Word) - count)).sshiftRight' ((64 : Word) - count)) <<< lsb
+
+def bitfieldStep (i : BitfieldInstruction) (s : State) : Transition State :=
+  let value := bitfieldValue i.kind (readReg s i.src) (readReg s i.dst) i.lsbByte i.countByte
+  ⟨{ writeReg s i.dst (narrow value i.width) with pc := s.pc + 4 }, [], none⟩
+
 inductive Instruction
+  | bitfield (instruction : BitfieldInstruction)
   | memory (instruction : MemoryInstruction)
   | pairMemory (instruction : PairMemoryInstruction)
   | nop
@@ -580,6 +619,7 @@ inductive Instruction
 
 def step (i : Instruction) (s : State) : Transition State :=
   match i with
+  | .bitfield instruction => bitfieldStep instruction s
   | .memory instruction => memoryStep instruction s
   | .pairMemory instruction => pairMemoryStep instruction s
   | .nop => ⟨{ s with pc := s.pc + 4 }, [], none⟩
@@ -776,6 +816,23 @@ def decode (bytes : Array Byte) : Except String Instruction := do
       if unsignedBits ∧ last + 1 = rotate then
         let shift := width.bits - rotate
         if h : shift < width.bits then return .shift (.immediate width .lsl ⟨shift, h⟩ dst lhs)
+  -- General UBFM/SBFM/BFM fields after retaining existing shift/extend aliases.
+  if word &&& 0x1f800000 = 0x13000000 then
+    let opc := (word / 2^29) % 4
+    if opc = 3 then throw "reserved bitfield opcode"
+    if (word / 2^22) % 2 != word / 2^31 then throw "reserved bitfield N/sf combination"
+    let rotate := (word / 2^16) % 64
+    let last := (word / 2^10) % 64
+    if rotate >= width.bits || last >= width.bits then throw "reserved bitfield immediate width"
+    let wrapping := last < rotate
+    let lsb := if wrapping then width.bits - rotate else rotate
+    let count := if wrapping then last + 1 else last - rotate + 1
+    let kind := if wrapping then
+      (if opc = 0 then BitfieldKind.sbfiz else if opc = 1 then .bfi else .ubfiz)
+      else (if opc = 0 then BitfieldKind.sbfx else if opc = 1 then .bfxil else .ubfx)
+    if h : lsb < width.bits ∧ 0 < count ∧ count <= width.bits - lsb then
+      return .bitfield ⟨width, kind, dst, lhs, ⟨lsb, h.1⟩, ⟨count - 1, by change count - 1 < width.bits - lsb; omega⟩⟩
+    else throw "reserved bitfield field range"
   if word &&& 0x3fe00800 = 0x1a800000 then
     let alternative := if (word / 2^30) % 2 = 0 then
       (if (word / 2^10) % 2 = 0 then SelectElse.keep else .increment)

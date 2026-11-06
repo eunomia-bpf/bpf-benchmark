@@ -698,6 +698,44 @@ def main():
         fault = dict(kind="sp_alignment", address=0x6001)
         expected.update(defined_flags=(1 << 64) - 1, fault=fault, events=[dict(kind="fault", fault=fault)])
         cases.append((request, expected))
+    # Fixed primary-ISA boundary examples for bitfield extraction/insertion.
+    for word, source, old, result in [
+            (0x53074C20, 0xFEDCBA9889ABCDEF, 0xFEEDBEEF76543210, 0x179B),
+            (0x13074C20, 0xFEDCBA9889ABCDEF, 0xFEEDBEEF76543210, 0xFFFFF79B),
+            (0x53193020, 0xFEDCBA9889ABCDEF, 0xFEEDBEEF76543210, 0x6F780),
+            (0x33074C20, 0xFEDCBA9889ABCDEF, 0xFEEDBEEF76543210, 0x7654379B),
+            (0x33193020, 0xFEDCBA9889ABCDEF, 0xFEEDBEEF76543210, 0x7656F790),
+            (0xD3474C20, 0xFEDCBA9889ABCDEF, 0xFEEDBEEF76543210, 0x179B),
+            (0x93474C20, 0xFEDCBA9889ABCDEF, 0xFEEDBEEF76543210, 0xFFFFFFFFFFFFF79B),
+            (0xD3793020, 0xFEDCBA9889ABCDEF, 0xFEEDBEEF76543210, 0x6F780),
+            (0xB3474C20, 0xFEDCBA9889ABCDEF, 0xFEEDBEEF76543210, 0xFEEDBEEF7654379B),
+            (0xB3793020, 0xFEDCBA9889ABCDEF, 0xFEEDBEEF76543210, 0xFEEDBEEF7656F790),
+            (0x13193020, 0x1000, 0xFFFF000000000000, 0xFFF80000),
+            (0x93793020, 0x1000, 0xFFFF000000000000, 0xFFFFFFFFFFF80000),
+            (0x13193020, 0x800, 0xFFFF000000000000, 0x40000),
+            (0x93793020, 0x800, 0xFFFF000000000000, 0x40000)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["registers"][0:2] = [old, source]
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
+        expected["registers"][0] = result
+        cases.append((request, expected))
+    for word, source, destination, result in [
+            (0xB3793021, 0xFEDCBA9889ABCDEF, 1, 0xFEDCBA9889A6F7EF),
+            (0x33193021, 0xFEDCBA9889ABCDEF, 1, 0x89A6F7EF),
+            (0xB3474C3F, 0xFEDCBA9889ABCDEF, None, None),
+            (0x33074C3F, 0xFEDCBA9889ABCDEF, None, None),
+            (0xD3474FE0, 0, 0, 0),
+            (0x53074FE0, 0, 0, 0)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["registers"][1] = source
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
+        if destination is not None:
+            expected["registers"][destination] = result
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -705,7 +743,8 @@ def main():
     assert len(outputs) == len(cases)
     for (request, expected), out in zip(cases, outputs):
         assert out == expected, (request, out, expected)
-    for word in (0x2A2183E0, 0x4BC107E0,
+    for word in (0x53474C20, 0xD3074C20, 0x53204C20, 0x53078020, 0x73074C20, 0xF3474C20,
+                 0x2A2183E0, 0x4BC107E0,
                  0x1AE22020, 0x53207C20, 0x131FFC20, 0x0A028020, 0x6A228020,
                  0x72C24680, 0x72E24680, 0x72024680, 0x12C24680, 0x12E24680,
                  0x52C24680, 0x52E24680, 0x32824680,
