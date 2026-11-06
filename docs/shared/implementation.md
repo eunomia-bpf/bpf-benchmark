@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0987 verified the 'all 5 forms' claim: 7
+keywords in 5 classes, the count derived from the
+scanning patterns.
+
+
 Step 0986 bound the vacuity claim: 4 totality
 theorems carry 6 nonmember arms, both counted from
 the modules.

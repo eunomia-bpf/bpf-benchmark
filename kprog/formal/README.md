@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0987 - seven keywords in five classes
+
+The section says the gate checks all five forms that a build treats as ordinary,
+and names them: sorry or admit, axiom, and opaque, unsafe and partial
+definitions. That is six keywords in five classes, since the two placeholders
+are one check, and the checker derives the count from the scanning patterns
+rather than restating it.
+
+The scan covers a seventh keyword the sentence does not name: the axiom a sorry
+elaborates to, which the same placeholder pattern catches. So the enforcement is
+slightly wider than the sentence says, and the class count is right because that
+keyword belongs to the placeholder class.
+
+Verified by testing each keyword against the two patterns: all seven match, the
+declarations through the command-position pattern and the placeholders through
+the other. The count the checker reports and the number the sentence states
+agree at five.
+
+Census unchanged; one claim about what the gate enforces is read against the
+patterns that enforce it.
+
 ### Step 0986 - four theorems carry six vacuous arms
 
 The section makes a claim about the proof tree's shape rather than a count: the
