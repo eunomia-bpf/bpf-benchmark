@@ -1,0 +1,110 @@
+[
+  {
+    "component": "x86 simulator (including ISA-specific generated C)",
+    "files": 67,
+    "physical_lines": 5816,
+    "nonblank_lines": 5613
+  },
+  {
+    "component": "arm64 simulator (including ISA-specific generated C)",
+    "files": 68,
+    "physical_lines": 5439,
+    "nonblank_lines": 5243
+  },
+  {
+    "component": "shared simulator generated C",
+    "files": 2,
+    "physical_lines": 38,
+    "nonblank_lines": 33
+  },
+  {
+    "component": "x86 native-to-proof generator (including local imports)",
+    "files": 6,
+    "physical_lines": 1690,
+    "nonblank_lines": 1564
+  },
+  {
+    "component": "arm64 native-to-proof generator (including local imports)",
+    "files": 4,
+    "physical_lines": 972,
+    "nonblank_lines": 881
+  },
+  {
+    "component": "proof build/load orchestration",
+    "files": 1,
+    "physical_lines": 616,
+    "nonblank_lines": 549
+  },
+  {
+    "component": "native shared loader/linker integration",
+    "files": 9,
+    "physical_lines": 6632,
+    "nonblank_lines": 6229
+  },
+  {
+    "component": "native ELF linker (both ISAs)",
+    "files": 2,
+    "physical_lines": 9604,
+    "nonblank_lines": 9003
+  },
+  {
+    "component": "standalone proof loader",
+    "files": 1,
+    "physical_lines": 1290,
+    "nonblank_lines": 1196
+  },
+  {
+    "component": "application syscall shim",
+    "files": 11,
+    "physical_lines": 9888,
+    "nonblank_lines": 9365
+  },
+  {
+    "component": "x86 native kernel module",
+    "files": 1,
+    "physical_lines": 931,
+    "nonblank_lines": 832
+  },
+  {
+    "component": "arm64 native kernel module",
+    "files": 1,
+    "physical_lines": 1159,
+    "nonblank_lines": 1052
+  },
+  {
+    "component": "shared binding wire contract",
+    "files": 1,
+    "physical_lines": 115,
+    "nonblank_lines": 107
+  },
+  {
+    "component": "formal model and proofs (Lean, including generated)",
+    "files": 310,
+    "physical_lines": 34389,
+    "nonblank_lines": 30791
+  },
+  {
+    "component": "formal contracts (JSON)",
+    "files": 138,
+    "physical_lines": 2284,
+    "nonblank_lines": 2284
+  },
+  {
+    "component": "formal contract generators",
+    "files": 138,
+    "physical_lines": 28726,
+    "nonblank_lines": 26027
+  },
+  {
+    "component": "translation-validation composition theorem",
+    "files": 1,
+    "physical_lines": 109,
+    "nonblank_lines": 96
+  },
+  {
+    "component": "existing verifier context (not incremental kernel changes)",
+    "files": 2,
+    "physical_lines": 27732,
+    "nonblank_lines": 24619
+  }
+]

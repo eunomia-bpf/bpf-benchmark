@@ -1,0 +1,93 @@
+repository=8b36bf31f4b7a67cb324e3a973f3165366c7b3d8
+kernel=24cd6e63ce912a4e220ca1cae3137ab29706551b
+kernel_base=c23719abc3308df7ed3ad35650ad211fb2d2003d
+
+M corpus/results/kprog_app_coverage_20261106/.gitignore
+ M corpus/results/kprog_app_coverage_20261106/Makefile
+ M corpus/results/kprog_app_coverage_20261106/README.md
+ M corpus/results/kprog_app_coverage_20261106/baseline/checkpoint-logs.tar.gz
+ M corpus/results/kprog_app_coverage_20261106/baseline/simulator.tar.gz
+ M corpus/results/kprog_app_coverage_20261106/cilium-baseline/checkpoint-logs.tar.gz
+ M corpus/results/kprog_app_coverage_20261106/coverage.csv
+ M corpus/results/kprog_app_coverage_20261106/coverage.py
+ M corpus/results/kprog_app_coverage_20261106/summarize.py
+ M corpus/results/kprog_app_coverage_20261106/tables.md
+ M corpus/results/kprog_arm64_app_coverage_20261106/.gitignore
+ M corpus/results/kprog_arm64_app_coverage_20261106/Makefile
+ M corpus/results/kprog_arm64_app_coverage_20261106/README.md
+ M corpus/results/kprog_arm64_app_coverage_20261106/coverage.py
+ ? docs/ebpf27-bpfoptbench
+ ? docs/paper
+ M kprog/arm64/arm64_sim_local_bpf.h
+ M kprog/arm64/micro-prog/generated_arm64_helper_idents.py
+ M kprog/fidelity/Makefile
+ M kprog/formal/KProgFormal/Arm64HelperIdents.lean
+ M kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean
+ M kprog/formal/KProgFormal/X86CmovHandler.lean
+ M kprog/formal/KProgFormal/X86MemAluHandler.lean
+ M kprog/formal/KProgFormal/X86MemStoreAluHandler.lean
+ M kprog/formal/contracts/arm64_helper_idents_spec.json
+ M kprog/formal/generated/arm64_helper_idents.h
+ M kprog/formal/oracles/cmov_step_route_host.c
+ M kprog/formal/oracles/test_arm64_helper_call_host.c
+ M kprog/formal/oracles/test_arm64_helper_idents_host.c
+ M kprog/formal/oracles/test_x86_cmov_host.c
+ M kprog/formal/oracles/test_x86_cmov_route_host.c
+ M kprog/formal/oracles/test_x86_dispatch_singleton_route_host.c
+ M kprog/formal/tools/generate_arm64_helper_idents_spec.py
+ M kprog/results/kprog_fidelity_20261106/load-time/analyze.py
+ M kprog/results/kprog_fidelity_20261106/load-time/samples.csv
+ M kprog/x86/micro-prog/generate_micro_sim_proofs.py
+ M kprog/x86/x86_sim_local_bpf.h
+ M vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h
+ M vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h
+ ? vendor/linux-framework
+?? corpus/results/cilium_native_lab_20261009/
+?? corpus/results/kprog_app_coverage_20261106/baseline-tail/
+?? corpus/results/kprog_app_coverage_20261106/check_dispatch.py
+?? corpus/results/kprog_app_coverage_20261106/cilium-label/
+?? corpus/results/kprog_app_coverage_20261106/cilium-unbounded/
+?? corpus/results/kprog_app_coverage_20261106/label/
+?? corpus/results/kprog_app_coverage_20261106/unbounded/
+?? corpus/results/kprog_arm64_app_coverage_20261106/DGX-SPARK.md
+?? corpus/results/kprog_arm64_app_coverage_20261106/Replay.mk
+?? corpus/results/kprog_arm64_app_coverage_20261106/helper-ids/
+?? corpus/results/kprog_arm64_app_coverage_20261106/inventory/pairing.csv
+?? corpus/results/kprog_arm64_app_coverage_20261106/label-all/
+?? corpus/results/kprog_arm64_app_coverage_20261106/portable-replay/
+?? corpus/results/x86_kvm_corpus_20261009_155809_919194/
+?? corpus/results/x86_kvm_corpus_20261009_160148_125322/
+?? kprog/arm64/app-coverage-baseline-run-3607553/
+?? kprog/arm64/app-coverage-helper-ids-run-3723782/
+?? kprog/arm64/app-coverage-label-all-run-3659439/
+?? kprog/arm64/app-coverage-label-pilot-run-3644785/
+?? kprog/arm64/app-coverage-pilot-run-3607178/
+?? kprog/fidelity/tcb.py
+?? kprog/formal/KProgFormal/Reference/
+?? kprog/formal/KProgFormal/Refinement/
+?? kprog/formal/tools/axiom_census.py
+?? kprog/formal/tools/check_lean_claims.py
+?? kprog/results/kprog_fidelity_20261106/negative/arm64-stack-fix/
+?? kprog/results/kprog_fidelity_20261106/tcb/
+?? kprog/results/kprog_tv_20261106/programs.jsonl
+?? kprog/x86/app-coverage-baseline-run-3594374/
+?? kprog/x86/app-coverage-cilium-baseline-run-3599863/
+?? kprog/x86/app-coverage-cilium-label-run-3670160/
+?? kprog/x86/app-coverage-cilium-unbounded-run-3642134/
+?? kprog/x86/app-coverage-label-run-3670126/
+?? kprog/x86/app-coverage-pilot-run-3596819/
+?? kprog/x86/app-coverage-unbounded-run-3619651/
+?? tests/results/11ed5ed2/
+?? tests/results/2d93bbd5/
+?? tests/results/37246ee1/
+?? tests/results/47d2bc99/
+?? tests/results/57b89846/
+?? tests/results/843bd311/
+?? tests/results/ce321f56/
+?? tests/results/dda2eeac/
+?? tests/results/e084a44b/
+?? tests/results/e54648e4/
+?? tests/results/e81210f7/
+
+kernel status:
+?? drivers/net/veth.c.orig

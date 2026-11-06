@@ -80,3 +80,7 @@ build-x86/test-kallsyms: test_kallsyms.cpp ../libnativeloader/src/native_loader.
 
 check-loader-kallsyms: build-x86/test-kallsyms
 	./build-x86/test-kallsyms
+
+.PHONY: tcb
+tcb:
+	$(PYTHON) tcb.py
