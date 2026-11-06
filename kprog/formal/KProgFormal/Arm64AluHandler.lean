@@ -55,6 +55,19 @@ theorem arm64_alu_handler_path_refines (width : Width) (op : Alu)
       arm64AluUsePointerSpec width op dst srcTag := by
   cases width <;> cases op <;> cases dst <;> cases srcTag <;> decide
 
+def arm64StackSubUsePointerSpec (width : Width) (op : Alu)
+    (dst : Arm64Destination) (srcTag : Tag) : Bool :=
+  match width, op, dst, srcTag with
+  | .w64, .sub, .sp, .stack => false
+  | .w64, .sub, _, .stack => true
+  | _, _, _, _ => false
+
+theorem arm64_stack_sub_handler_path_refines (width : Width) (op : Alu)
+    (dst : Arm64Destination) (srcTag : Tag) :
+    GeneratedArm64AluHandler.useStackSub width op (arm64DestinationIsSp dst) (srcTag == .stack) =
+      arm64StackSubUsePointerSpec width op dst srcTag := by
+  cases width <;> cases op <;> cases dst <;> cases srcTag <;> decide
+
 /-- Generated scalar writeback: ordinary GPR writes replace the selected
 cell and scalarize its provenance; SP writes affect only SP; XZR and NONE
 discard the write. -/
@@ -116,6 +129,9 @@ def generatedArm64AluHandler (state : Arm64AluHandlerState)
   if GeneratedArm64AluHandler.usePointer width op
       (arm64DestinationIsSp dst) (arm64TagIsScalar src.tag) then
     generatedArm64PointerWrite state dst src rhs
+  else if GeneratedArm64AluHandler.useStackSub width op
+      (arm64DestinationIsSp dst) (src.tag == .stack) then
+    generatedArm64PointerWrite state dst src (-rhs)
   else
     generatedArm64ScalarWrite state dst result width
 
@@ -128,6 +144,8 @@ def arm64AluHandlerSpec (state : Arm64AluHandlerState)
   let result := arm64AluResultSpec op src.bits rhs
   if arm64AluUsePointerSpec width op dst src.tag then
     arm64PointerWriteSpec state dst src rhs
+  else if arm64StackSubUsePointerSpec width op dst src.tag then
+    arm64PointerWriteSpec state dst src (-rhs)
   else
     arm64ScalarWriteSpec state dst result width
 
@@ -137,11 +155,13 @@ theorem arm64_alu_handler_refines (state : Arm64AluHandlerState)
     generatedArm64AluHandler state dst src rhs width op =
       arm64AluHandlerSpec state dst src rhs width op := by
   simp only [generatedArm64AluHandler, arm64AluHandlerSpec]
-  rw [arm64_alu_handler_path_refines, arm64_alu_result_refines]
+  rw [arm64_alu_handler_path_refines, arm64_stack_sub_handler_path_refines, arm64_alu_result_refines]
   cases h : arm64AluUsePointerSpec width op dst src.tag <;>
     simp only [h, Bool.false_eq_true, ↓reduceIte]
-  · exact arm64_scalar_write_refines state dst
-      (arm64AluResultSpec op src.bits rhs) width
+  · cases hsub : arm64StackSubUsePointerSpec width op dst src.tag <;>
+      simp only [hsub, Bool.false_eq_true, ↓reduceIte]
+    · exact arm64_scalar_write_refines state dst (arm64AluResultSpec op src.bits rhs) width
+    · exact arm64_pointer_write_refines state dst src (-rhs)
   · exact arm64_pointer_write_refines state dst src rhs
 
 theorem arm64_tagged_add_uses_pointer_path :
@@ -156,6 +176,13 @@ theorem arm64_tagged_sub_scalarizes :
       { dst := { bits := 0x55, tag := .packet }, sp := 0x80 }
       .gpr { bits := 0x1000, tag := .packet } 0x20 .w64 .sub =
       { dst := { bits := 0xfe0, tag := .scalar }, sp := 0x80 } := by
+  native_decide
+
+theorem arm64_stack_sub_keeps_relative_pointer :
+    generatedArm64AluHandler
+      { dst := { bits := 0, tag := .scalar }, sp := 0 }
+      .gpr { bits := -8, tag := .stack } 7 .w64 .sub =
+      { dst := { bits := -15, tag := .stack }, sp := 0 } := by
   native_decide
 
 theorem arm64_sp_add_is_scalar_write :

@@ -10,7 +10,8 @@ sys.path.insert(0,str(ROOT/'kprog/arm64/micro-prog'))
 import generate_micro_sim_proofs as gen
 phase=Path(sys.argv[1]).resolve();phase.mkdir();(phase/'native').mkdir()
 tail_helpers=len(sys.argv)>2 and sys.argv[2]=='tail'
-if len(sys.argv)>2 and not tail_helpers:raise ValueError(sys.argv[2])
+stack_sub=len(sys.argv)>2 and sys.argv[2]=='sub'
+if len(sys.argv)>2 and not (tail_helpers or stack_sub):raise ValueError(sys.argv[2])
 body='''stp x19,x30,[sp,#-32]!
 ldr x19,[x0]
 ldr x2,[x0,#8]
@@ -30,10 +31,13 @@ ret
 '''
 rows=[]
 for preserve in [False,True]:
-    name=('tail_helper_'+('local' if preserve else 'direct') if tail_helpers else
-        'entry_abi_'+('preserved' if preserve else 'stripped'))
+    name=(('tail_helper_'+('local' if preserve else 'direct')) if tail_helpers else
+        ('stack_sub_' if stack_sub else 'entry_abi_')+('preserved' if preserve else 'stripped'))
     source=phase/'native'/(name+'.S');native=source.with_suffix('.native.o')
     text=body.replace('bl bpf_get_current_uid_gid','bl leaf') if tail_helpers else body
+    if stack_sub:
+        text=body.replace('bl bpf_get_current_uid_gid',
+            'add x8,sp,#24\nsub x0,x8,#8\nmov w1,#8\nmov x2,xzr\nbl bpf_probe_read_kernel')
     text='.text\n.global entry\n.type entry,%function\nentry:\n'+text+'.size entry,.-entry\n'
     if tail_helpers:
         text+='\n.global leaf\n.type leaf,%function\nleaf:\nb '+('leaf2' if preserve else 'bpf_get_current_uid_gid')+'\n.size leaf,.-leaf\n'
@@ -48,12 +52,14 @@ for preserve in [False,True]:
     shutil.copy2(proof,phase/'native'/(name+'.entry.proof.o'))
     functions,rodata=gen.parse_native_linked_program(gen.Bench(name,'entry','xdp'),phase/'native')
     (phase/(name+'.bpf.c')).write_text(gen.render_program(name,'entry',functions,'xdp',rodata16=rodata,linked_exit=True))
+    workload=('__u64 value=37; bpf_probe_read_kernel(&value,8,(void *)0); *(__u64 *)p=value;' if stack_sub else
+        'bpf_get_current_uid_gid(); *(__u64 *)p=37;')
     (phase/(name+'.source.bpf.c')).write_text('#include <linux/bpf.h>\n#include <bpf_helpers.h>\n'+
-        f'SEC("xdp") int {name}(struct xdp_md *ctx) {{ void *p=(void *)(long)ctx->data; void *e=(void *)(long)ctx->data_end; if (p+8>e) return 0; bpf_get_current_uid_gid(); *(__u64 *)p=37; return 2; }}\nchar LICENSE[] SEC("license")="GPL";\n')
+        f'SEC("xdp") int {name}(struct xdp_md *ctx) {{ void *p=(void *)(long)ctx->data; void *e=(void *)(long)ctx->data_end; if (p+8>e) return 0; {workload} return 2; }}\nchar LICENSE[] SEC("license")="GPL";\n')
     (phase/(name+'.manifest.json')).write_text(json.dumps({'objects':[dict(program=name[:15],source_btf_symbol=name,
         native_object='/cases/'+native.name,symbol='entry',simulator_object='/cases/'+name+'.bpf.o',
         simulator_program=name+'_arm64_sim_xdp')]},indent=2)+'\n')
-    rows.append(dict(name=name,expected=37,preserve_entry_abi=preserve))
+    rows.append(dict(name=name,expected=0 if stack_sub else 37,preserve_entry_abi=preserve))
 (phase/'cases.json').write_text(json.dumps(rows,indent=2)+'\n')
 coverage.freeze_simulator(phase)
 for source in phase.glob('*.bpf.c'):

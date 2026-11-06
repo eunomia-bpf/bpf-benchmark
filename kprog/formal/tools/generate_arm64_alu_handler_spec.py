@@ -22,6 +22,7 @@ EXPECTED = {
         "destination": "not_sp",
         "source_tag": "non_scalar",
     },
+    "stack_sub_path": {"width": "w64", "alu": "sub", "destination": "not_sp", "source_tag": "stack"},
 }
 
 
@@ -47,6 +48,10 @@ def usePointer (width : Width) (op : Alu)
     (dstIsSp srcIsScalar : Bool) : Bool :=
   width == .w64 && op == .add && !dstIsSp && !srcIsScalar
 
+/-- SUB preserves a private stack reference while subtracting its offset. -/
+def useStackSub (width : Width) (op : Alu) (dstIsSp srcIsStack : Bool) : Bool :=
+  width == .w64 && op == .sub && !dstIsSp && srcIsStack
+
 end KProgFormal.GeneratedArm64AluHandler
 '''
 
@@ -59,6 +64,10 @@ def render_c() -> str:
 #define KPROG_ARM64_ALU_USE_POINTER(WIDTH, OP, DST_IS_SP, SRC_IS_SCALAR) \\
 \t((WIDTH) == ARM64_WIDTH_64 && (OP) == ARM64_ALU_ADD &&             \\
 \t !(DST_IS_SP) && !(SRC_IS_SCALAR))
+
+#define KPROG_ARM64_ALU_USE_STACK_SUB(WIDTH, OP, DST_IS_SP, SRC_IS_STACK) \\
+\t((WIDTH) == ARM64_WIDTH_64 && (OP) == ARM64_ALU_SUB && \\
+\t !(DST_IS_SP) && (SRC_IS_STACK))
 
 #endif
 '''

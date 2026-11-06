@@ -1,0 +1,24 @@
+cd /workspaces/repository/kprog/formal && python3 tools/generate_arm64_alu_handler_spec.py
+cd /workspaces/repository/kprog/formal && taskset -c 16-19 lake build KProgFormal.Arm64AluHandler KProgFormal.Arm64AluOperandHandler KProgFormal.Arm64AluOperandSelect
+Build completed successfully.
+cd /workspaces/repository/kprog/formal && cc -Wall -Wextra -Werror -O2 -I. oracles/test_arm64_alu_handler_host.c -o build/test_arm64_alu_handler_host
+/workspaces/repository/kprog/formal/build/test_arm64_alu_handler_host
+arm64 ALU handler path host cross-check: OK (336 cases)
+cd /workspaces/repository/kprog/formal && cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_alu_operand_select_route_host.c -o build/test_arm64_alu_operand_select_route_host
+oracles/test_arm64_alu_operand_select_route_host.c: In function ‘run_case’:
+oracles/test_arm64_alu_operand_select_route_host.c:310:39: warning: passing argument 1 of ‘memcmp’ discards ‘volatile’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  310 |                     memcmp(__a64_stack.b, stk_exp, STACK_BYTES) != 0 ||   \
+      |                            ~~~~~~~~~~~^~
+oracles/test_arm64_alu_operand_select_route_host.c:372:9: note: in expansion of macro ‘COMPARE_STATE’
+  372 |         COMPARE_STATE(name, op, width, aux, imm);
+      |         ^~~~~~~~~~~~~
+In file included from oracles/test_arm64_alu_operand_select_route_host.c:48:
+/usr/include/string.h:64:32: note: expected ‘const void *’ but argument is of type ‘volatile __u8 *’ {aka ‘volatile unsigned char *’}
+   64 | extern int memcmp (const void *__s1, const void *__s2, size_t __n)
+      |                    ~~~~~~~~~~~~^~~~
+/workspaces/repository/kprog/formal/build/test_arm64_alu_operand_select_route_host
+arm64 alu operand select route host cross-check: OK (21688 cases)
+make -f /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/Makefile direct-header-generate
+make[1]: Entering directory '/workspaces/repository'
+python3 /workspaces/repository/kprog/arm64/generate_sim_dispatch.py
+make[1]: Leaving directory '/workspaces/repository'

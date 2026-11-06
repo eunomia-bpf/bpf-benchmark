@@ -537,9 +537,18 @@ source-map-arm64-check:
 source-map-arm64-install:
 	python3 $(HERE)/source_map_arm64.py $(HERE)/$(PHASE) install
 
-.PHONY: exclusive-layout-check
+.PHONY: exclusive-layout-check stack-sub-check
 exclusive-layout-check:
 	python3 $(HERE)/exclusive_layout.py $(HERE)/$(PHASE)
+
+stack-sub-check:
+	cd $(ROOT)/kprog/formal && python3 tools/generate_arm64_alu_handler_spec.py
+	cd $(ROOT)/kprog/formal && taskset -c 16-19 lake build KProgFormal.Arm64AluHandler KProgFormal.Arm64AluOperandHandler KProgFormal.Arm64AluOperandSelect
+	cd $(ROOT)/kprog/formal && cc -Wall -Wextra -Werror -O2 -I. oracles/test_arm64_alu_handler_host.c -o build/test_arm64_alu_handler_host
+	$(ROOT)/kprog/formal/build/test_arm64_alu_handler_host
+	cd $(ROOT)/kprog/formal && cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_alu_operand_select_route_host.c -o build/test_arm64_alu_operand_select_route_host
+	$(ROOT)/kprog/formal/build/test_arm64_alu_operand_select_route_host
+	$(MAKE) -f $(HERE)/Makefile direct-header-generate
 
 .PHONY: entry-abi-build
 entry-abi-build: direct-header-generate

@@ -834,3 +834,12 @@ startup attempts and23 baseline counter rows remain. Six helper113 proofs
 reject; native workload counters are absent. Their one-byte native frame and
 ARM stack-SUB provenance loss are identified defects under repair, with the
 exact packaged32-entry payload retained before further staging changes.
+
+## Stack-relative helper destination subtraction
+
+[The STACK-only SUB repair](stack-sub-result/README.md) preserves the relative
+pointer through the failing helper-address pattern. The shared full356-module
+check,336 predicate cases and21688 route cases pass. Both actual bound QEMU
+controls return0/retval2/generation1 through a sound32-byte native frame.
+The failed BCC helper artifact will be regenerated with this repair and the
+separate source-frame allocation fix; its prior rejection remains recorded.

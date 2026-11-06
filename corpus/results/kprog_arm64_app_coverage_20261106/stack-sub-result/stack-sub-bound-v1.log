@@ -1,0 +1,21 @@
+python3 /workspaces/repository/kprog/arm64/generate_sim_dispatch.py
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/entry_abi.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/stack-sub-bound-v1 sub
+native-link: arm64 entry=entry (80 bytes), 1 reachable symbol(s) total
+  - entry (vaddr 0x0, 80 bytes) [entry]
+native-link: wrote proof object 84 bytes, 1 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/stack-sub-bound-v1/native/stack_sub_stripped.proof.o
+native-link: arm64 entry=entry (80 bytes), 1 reachable symbol(s) total
+  - entry (vaddr 0x0, 80 bytes) [entry]
+native-link: wrote proof object 84 bytes, 1 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/stack-sub-bound-v1/native/stack_sub_preserved.proof.o
+for source in /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/stack-sub-bound-v1/*.bpf.c; do \
+	clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
+	-I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
+	-c $source -o ${source%.c}.o || exit 1; \
+done
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/fmov_bank.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/stack-sub-bound-v1 package /workspaces/.agent-state/bpf-benchmark-supervisor/kfunc-inline-claude-20261004/round5-arm64.cpio.gz
+install -d /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/stack-sub-bound-v1/verify
+taskset -c 12-15 timeout 600 qemu-system-aarch64 -M virt -cpu max -smp 2 -m 2048 -nographic -no-reboot \
+	-kernel /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/Image -initrd /workspaces/repository/kprog/arm64/build/app-coverage/stack-sub-bound-v1/initramfs.cpio.gz \
+	-fsdev local,id=results,path=/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/stack-sub-bound-v1/verify,security_model=none \
+	-device virtio-9p-device,fsdev=results,mount_tag=results \
+	-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/stack-sub-bound-v1/qemu.log 2>&1
+test "$(cat /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/stack-sub-bound-v1/verify/guest-status)" = 0

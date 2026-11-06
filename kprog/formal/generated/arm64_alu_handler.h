@@ -6,4 +6,8 @@
 	((WIDTH) == ARM64_WIDTH_64 && (OP) == ARM64_ALU_ADD &&             \
 	 !(DST_IS_SP) && !(SRC_IS_SCALAR))
 
+#define KPROG_ARM64_ALU_USE_STACK_SUB(WIDTH, OP, DST_IS_SP, SRC_IS_STACK) \
+	((WIDTH) == ARM64_WIDTH_64 && (OP) == ARM64_ALU_SUB && \
+	 !(DST_IS_SP) && (SRC_IS_STACK))
+
 #endif

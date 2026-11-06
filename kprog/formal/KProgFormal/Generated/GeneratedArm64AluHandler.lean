@@ -13,4 +13,8 @@ def usePointer (width : Width) (op : Alu)
     (dstIsSp srcIsScalar : Bool) : Bool :=
   width == .w64 && op == .add && !dstIsSp && !srcIsScalar
 
+/-- SUB preserves a private stack reference while subtracting its offset. -/
+def useStackSub (width : Width) (op : Alu) (dstIsSp srcIsStack : Bool) : Bool :=
+  width == .w64 && op == .sub && !dstIsSp && srcIsStack
+
 end KProgFormal.GeneratedArm64AluHandler

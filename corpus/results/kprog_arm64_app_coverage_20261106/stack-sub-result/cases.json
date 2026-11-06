@@ -1,0 +1,12 @@
+[
+  {
+    "name": "stack_sub_stripped",
+    "expected": 0,
+    "preserve_entry_abi": false
+  },
+  {
+    "name": "stack_sub_preserved",
+    "expected": 0,
+    "preserve_entry_abi": true
+  }
+]

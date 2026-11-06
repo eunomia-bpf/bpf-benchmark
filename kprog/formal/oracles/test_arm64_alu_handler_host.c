@@ -4,6 +4,7 @@
 
 #define ARM64_WIDTH_64 8U
 #define ARM64_ALU_ADD 0U
+#define ARM64_ALU_SUB 1U
 #include "generated/arm64_alu_handler.h"
 
 static bool oracle(uint8_t width, uint8_t op, bool dst_is_sp,
@@ -34,6 +35,10 @@ int main(void)
 							got, want);
 						return 1;
 					}
+					got = KPROG_ARM64_ALU_USE_STACK_SUB(widths[w],ops[op],sp,!scalar);
+					want = widths[w]==8 && ops[op]==1 && !sp && !scalar;
+					cases++;
+					if (got != want) return 1;
 				}
 			}
 		}

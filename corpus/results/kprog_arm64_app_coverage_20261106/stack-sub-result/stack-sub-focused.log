@@ -1,0 +1,13 @@
+cd /workspaces/repository/kprog/formal && python3 tools/generate_arm64_alu_handler_spec.py
+cd /workspaces/repository/kprog/formal && taskset -c 16-19 lake build KProgFormal.Arm64AluHandler KProgFormal.Arm64AluOperand KProgFormal.Arm64AluOperandSelect
+✖ [12/20] Running KProgFormal.Arm64AluOperand
+error: no such file or directory (error code: 2)
+  file: ././././KProgFormal/Arm64AluOperand.lean
+✔ [17/20] Built KProgFormal.Generated.GeneratedArm64AluHandler
+✔ [18/20] Built KProgFormal.Arm64AluHandler
+✔ [19/20] Built KProgFormal.Arm64AluOperandHandler
+✔ [20/20] Built KProgFormal.Arm64AluOperandSelect
+Some required builds logged failures:
+- KProgFormal.Arm64AluOperand
+error: build failed
+make: *** [corpus/results/kprog_arm64_app_coverage_20261106/Makefile:543: stack-sub-check] Error 1

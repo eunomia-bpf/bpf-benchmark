@@ -1025,6 +1025,13 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 					__a64_alu_rhs & ~(__u64)(long)ARM64_SIM_L_READ_REG_PTR(SRC)), \
 				ARM64_SIM_TAG_STACK); \
 		else \
+		if (KPROG_ARM64_ALU_USE_STACK_SUB(__a64_alu_width, \
+			__a64_alu_op, (DST) == ARM64_SP, \
+			__a64_alu_src_tag == ARM64_SIM_TAG_STACK)) \
+			ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), \
+				KPROG_PTR_ADD64_BITS(ARM64_SIM_L_READ_REG_PTR(SRC), -__a64_alu_rhs), \
+				ARM64_SIM_TAG_STACK); \
+		else \
 		if (KPROG_ARM64_ALU_USE_POINTER(__a64_alu_width,           \
 			__a64_alu_op, (DST) == ARM64_SP,                    \
 			__a64_alu_src_tag == ARM64_SIM_TAG_SCALAR))         \

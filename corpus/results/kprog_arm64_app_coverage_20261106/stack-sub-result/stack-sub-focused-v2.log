@@ -1,0 +1,10 @@
+cd /workspaces/repository/kprog/formal && python3 tools/generate_arm64_alu_handler_spec.py
+cd /workspaces/repository/kprog/formal && taskset -c 16-19 lake build KProgFormal.Arm64AluHandler KProgFormal.Arm64AluOperandHandler KProgFormal.Arm64AluOperandSelect
+Build completed successfully.
+cd /workspaces/repository/kprog/formal && cc -Wall -Wextra -Werror -O2 -I. oracles/test_arm64_alu_handler_host.c -o build/test_arm64_alu_handler_host
+/workspaces/repository/kprog/formal/build/test_arm64_alu_handler_host
+arm64 ALU handler path host cross-check: OK (336 cases)
+make -f /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/Makefile direct-header-generate
+make[1]: Entering directory '/workspaces/repository'
+python3 /workspaces/repository/kprog/arm64/generate_sim_dispatch.py
+make[1]: Leaving directory '/workspaces/repository'

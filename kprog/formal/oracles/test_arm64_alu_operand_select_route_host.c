@@ -194,6 +194,9 @@ static void model_exec(unsigned op, unsigned dst, unsigned src, unsigned src2,
 		if (width == ARM64_WIDTH_64 && alu_op == ARM64_ALU_ORR &&
 		    src_tag == ARM64_SIM_TAG_STACK && rhs < 16U)
 			model_write_reg_ptr_tag(dst, lhs | rhs, ARM64_SIM_TAG_STACK);
+		else if (width == ARM64_WIDTH_64 && alu_op == ARM64_ALU_SUB &&
+			 dst != ARM64_SP && src_tag == ARM64_SIM_TAG_STACK)
+			model_write_reg_ptr_tag(dst, result, ARM64_SIM_TAG_STACK);
 		else if (KPROG_ARM64_ALU_USE_POINTER(width, alu_op, dst == ARM64_SP,
 						src_tag == ARM64_SIM_TAG_SCALAR))
 			model_write_reg_ptr_tag(dst,
