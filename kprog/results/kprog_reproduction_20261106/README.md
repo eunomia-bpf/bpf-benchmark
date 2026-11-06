@@ -130,6 +130,31 @@ boundaries:
    `bpf_object__probe_loading(): -EINVAL`. That is a pass-path defect, not
    the native loader.
 
+### Boot blocker since ~11:00 (all corpus arms)
+
+Every corpus arm — native and baseline — is blocked by a deterministic
+module-insert failure introduced with a host-kernel rebuild:
+
+```
+insmod: ERROR: could not insert module .../bpf_x86_alu.ko: Invalid parameters
+distilled base BTF type 'bpf_prog' [4], size 96 has multiple candidates
+of the same size (ids [73772, 73771]) in base BTF
+```
+
+Verified as not staleness: kernel timestamp stable for 10 minutes, module
+built clean (`rm -f *.ko`, `touch` sources, 15 `.ko`, `vermagic
+7.0.0-rc2+ ... modversions` matching `kernel.release`), image rebuilt from
+those artifacts, same failure. Two *adjacent* base-BTF `bpf_prog` records
+of identical name and size means one type emitted twice, so
+`pahole --btf_gen_distilled` cannot choose and module BTF validation
+returns -22. `pahole -F btf -C bpf_prog` on the vmlinux shows a single
+definition, so the duplication is in the distilled base rather than the
+source. Fifteen modules loaded at 10:47; none since. Reported to lane T.
+
+This is why the corpus arms below are recorded at `SAMPLES=1`
+`WORKLOAD_DURATION=60` from before the regression, rather than at the
+operator's recipe.
+
 The native arm itself is selected with
 
 ```sh
