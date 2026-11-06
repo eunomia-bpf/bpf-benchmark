@@ -1,0 +1,9 @@
+make: Entering directory '/workspaces/repository/kprog/arm64'
+python3 run_app_sim_smoke.py --keep-going --limit 1 --output-dir /workspaces/repository/kprog/arm64/app-coverage-pilot
+fail bcc_biosnoop_blk_account_io_merge_bio: /workspaces/repository/kprog/arm64/app-coverage-pilot-run-3607178/bcc_biosnoop_blk_account_io_merge_bio.bpf.c:166:26: error: call to undeclared function 'arm64_apply_width'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+  166 |                         __u64 __a64_c_value = arm64_apply_width(ARM64_SIM_L_READ_REG(__a64_c_src), __a64_c_width);
+      |                                               ^
+1 error generated.
+app proof smoke failed: 1/1 failed
+make: *** [Makefile:88: app-proofs-build] Error 1
+make: Leaving directory '/workspaces/repository/kprog/arm64'
