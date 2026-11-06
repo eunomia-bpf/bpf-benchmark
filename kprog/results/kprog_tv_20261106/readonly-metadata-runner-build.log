@@ -1,0 +1,19 @@
+make: Entering directory '/workspaces/repository/runner/build-llvmbpf'
+make[1]: Entering directory '/workspaces/repository/runner/build-llvmbpf'
+make[2]: Entering directory '/workspaces/repository/runner/build-llvmbpf'
+make[3]: Entering directory '/workspaces/repository/runner/build-llvmbpf'
+make[3]: Leaving directory '/workspaces/repository/runner/build-llvmbpf'
+make[3]: Entering directory '/workspaces/repository/runner/build-llvmbpf'
+[  5%] Building CXX object native_loader/CMakeFiles/native_loader.dir/src/native_loader.cpp.o
+[ 11%] Linking CXX static library libnative_loader.a
+make[3]: Leaving directory '/workspaces/repository/runner/build-llvmbpf'
+[ 11%] Built target native_loader
+make[3]: Entering directory '/workspaces/repository/runner/build-llvmbpf'
+make[3]: Leaving directory '/workspaces/repository/runner/build-llvmbpf'
+make[3]: Entering directory '/workspaces/repository/runner/build-llvmbpf'
+[ 17%] Linking CXX executable micro_exec
+make[3]: Leaving directory '/workspaces/repository/runner/build-llvmbpf'
+[100%] Built target micro_exec
+make[2]: Leaving directory '/workspaces/repository/runner/build-llvmbpf'
+make[1]: Leaving directory '/workspaces/repository/runner/build-llvmbpf'
+make: Leaving directory '/workspaces/repository/runner/build-llvmbpf'

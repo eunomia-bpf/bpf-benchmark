@@ -58,6 +58,8 @@ struct FdLoadOptions {
     /* Optional verifier proof program. The loader redirects its EXITs past
      * the proof region and binds the instructions to the native blob snapshot. */
     std::vector<bpf_insn> proof_insns;
+    /* ELF specialization metadata for an already-loaded raw proof. */
+    std::filesystem::path proof_object_path;
     std::vector<int> source_fd_array;
     std::filesystem::path native_link_path;
     uint32_t source_btf_id = 0;

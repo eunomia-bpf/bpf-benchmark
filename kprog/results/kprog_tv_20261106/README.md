@@ -421,3 +421,38 @@ mutation failures and compiled inputs are archived. This discharges a platform
 component required by the real simple micro; native block state projection,
 private spills and full per-program certificates remain active work. Binding
 and the conditional composed theorem do not substitute for those certificates.
+
+Explicit readonly object identity
+--------------------------------
+
+The loader consumes C3b19ec714's exact canonical readonly object table and A/C's
+proof ELF metadata. Each private DATASEC has one complete BTF variable, its
+explicit native symbol and size, and a checked final native blob extent. The
+same mechanism serves manifest proofs and already-loaded raw proofs. Byte
+search is removed; identical bytes at different native addresses remain
+separate objects. The cache includes the exact native extent table. Kernel
+kind8 byte/identity/freeze/address/relocation checks remain unchanged.
+
+Actual x86 tests pass for two identical constants through both manifest and raw
+proof loading: bound native execution returns2 and the raw program retains two
+distinct private map IDs. Missing raw ELF metadata rejects. Changed data bytes
+reject, and existing binding, context, FENTRY, DATASEC, helper/map and capacity
+regressions pass. A handwritten fixture initially supplied a C source symbol
+while its native relocation used a canonical section symbol; exact lookup
+rejected it. The final fixture exports named objects to test the named-symbol
+contract; C's committed tests cover canonical section keys on both ISAs.
+
+Host ASAN/UBSAN checks reject duplicate/unknown fields, versions, fractional or
+overflowed integers, bad sizes/bounds, missing native symbols and malformed
+JSON. Both architecture libraries and the real micro runner build. The runner
+now forwards its actual proof ELF and source attach type/flags, preserving the
+same binding contract as application loads. Readonly DATASEC regressions query
+the actual original map count as private declarations are added, while checking
+every retained map ID against the original set.
+
+The new library requires a native-link with --output-data-layout and proof
+objects regenerated with explicit metadata; it does not change binding wire2
+or the C shim API. Compatible libraries are snapshotted separately under
+context-v2-rodata; frozen6836 kernel/module pairs remain intact. Actual Arm
+loader execution and all per-program translation certificates remain active;
+these x86 binding tests and cross builds do not claim those results.

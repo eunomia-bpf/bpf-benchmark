@@ -54,7 +54,7 @@ int tv_hash_entry(void *ctx)
 	return value ? *value : 0;
 }
 
-static const unsigned long tv_readonly_data[2] = {
+const unsigned long tv_readonly_data[2] = {
 	0x1122334400000002UL, 0xaabbccdd00000000UL,
 };
 int tv_readonly_entry(void *ctx)
@@ -62,4 +62,17 @@ int tv_readonly_entry(void *ctx)
 	(void)ctx;
 	const volatile unsigned long *data = tv_readonly_data;
 	return data[0] + data[1];
+}
+
+const unsigned long tv_readonly_a[2] __attribute__((section(".rodata.tv_a"))) = {
+	0x1122334400000002UL, 0xaabbccdd00000000UL,
+};
+const unsigned long tv_readonly_b[2] __attribute__((section(".rodata.tv_b"))) = {
+	0x1122334400000002UL, 0xaabbccdd00000000UL,
+};
+int tv_duplicate_readonly_entry(void *ctx)
+{
+	(void)ctx;
+	const volatile unsigned long *a = tv_readonly_a, *b = tv_readonly_b;
+	return ((unsigned)(a[0] + a[1]) + (unsigned)(b[0] + b[1])) >> 1;
 }

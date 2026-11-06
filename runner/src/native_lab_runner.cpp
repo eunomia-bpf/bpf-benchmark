@@ -66,6 +66,8 @@ struct LoadedCompanion {
     bpf_object_ptr object;
     int program_fd = -1;
     uint32_t prog_type = 0;
+    uint32_t expected_attach_type = 0;
+    uint32_t prog_flags = 0;
     std::vector<bpf_insn> source_insns;
     uint64_t open_ns = 0;
     uint64_t object_load_ns = 0;
@@ -114,6 +116,8 @@ LoadedCompanion load_native_companion_object(const std::filesystem::path &path)
              path.string());
     }
     out.prog_type = static_cast<uint32_t>(bpf_program__type(entry_prog));
+    out.expected_attach_type = bpf_program__expected_attach_type(entry_prog);
+    out.prog_flags = bpf_program__flags(entry_prog);
     const bpf_insn *insns = bpf_program__insns(entry_prog);
     const size_t insn_count = bpf_program__insn_cnt(entry_prog);
     if (insns == nullptr || insn_count == 0) {
@@ -185,8 +189,11 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
         .source_bpf_path = {},
         .source_insns = companion.source_insns,
         .proof_insns = proof.source_insns,
+        .proof_object_path = proof_path,
         .source_fd_array = {},
         .native_link_path = options.native_kernel_linker_path,
+        .prog_flags = companion.prog_flags,
+        .expected_attach_type = companion.expected_attach_type,
     };
     native_loader::LoadedProgram native_loaded =
         native_loader::load_from_fd(load_options);

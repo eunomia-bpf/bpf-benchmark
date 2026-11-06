@@ -130,9 +130,12 @@ build/test-loader: test_loader.cpp build/native-entry.o build/simulator.bpf.o bu
 		$(wildcard ../libnativeloader/src/*.hpp ../libnativeloader/include/*.hpp)
 	$(MAKE) -C ../libnativeloader BUILD_DIR=build-tv-binding
 	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 \
+		-DTV_NATIVE_LINK_PATH='"$(TV_NATIVE_LINK)"' \
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		$< ../libnativeloader/build-tv-binding/libnative_loader.a \
 		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $@
+
+TV_NATIVE_LINK ?= ../x86/native_lab/native_link/target/release/native-link
 
 build/wrong-layout/simulator.bpf.o: test_simulator.bpf.c
 	install -d build/wrong-layout
@@ -225,6 +228,14 @@ input-negative-check: input-check
 .PHONY: manifest-check
 manifest-check: build/test-manifest
 	./build/test-manifest
+
+.PHONY: rodata-metadata-check
+rodata-metadata-check: build/test-rodata-metadata
+	./build/test-rodata-metadata
+
+build/test-rodata-metadata: test_rodata_metadata.cpp ../libnativeloader/src/native_rodata_binding.hpp ../libnativeloader/src/native_loader_manifest.hpp
+	install -d build
+	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined $< -o $@
 
 build/test-manifest: test_manifest.cpp ../libnativeloader/src/native_loader_manifest.hpp
 	install -d build

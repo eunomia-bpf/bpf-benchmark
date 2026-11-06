@@ -5,6 +5,7 @@
 
 #include "native_loader_manifest.hpp"
 #include "native_data_layout.hpp"
+#include "native_rodata_binding.hpp"
 #include "native_loader_cache.hpp"
 #include "native_loader_fd_scan.hpp"
 
@@ -518,7 +519,7 @@ constexpr const char *kArm64BpfProgBpfFuncOffsetKey =
     "__native_arm64_bpf_prog_bpf_func_offset";
 constexpr const char *kArm64TailCallOffsetKey = "__native_arm64_tail_call_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v66";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v67";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
 constexpr size_t kInitialVerifierLogSize = 256 * 1024;
@@ -2857,6 +2858,7 @@ struct LinkerOutput {
     std::filesystem::path relocs;
     std::filesystem::path map_patches;
     std::filesystem::path abi;
+    std::filesystem::path data_layout;
     bool prebuilt_proof = false;
 };
 
@@ -2912,6 +2914,7 @@ struct LinkedBlob {
     uint32_t callee_saved_mask = 0;
     std::vector<uint32_t> relocated_map_ids;
     std::string native_link_summary;
+    std::vector<NativeReadonlyExtent> readonly_objects;
 };
 
 struct CompanionLoad {
@@ -4215,7 +4218,8 @@ bool linker_output_exists(const LinkerOutput &out)
            && std::filesystem::exists(out.blob, ec)
            && std::filesystem::exists(out.relocs, ec)
            && std::filesystem::exists(out.map_patches, ec)
-           && std::filesystem::exists(out.abi, ec);
+           && std::filesystem::exists(out.abi, ec)
+           && std::filesystem::exists(out.data_layout, ec);
 }
 
 bool env_bool_enabled(const char *name)
@@ -4291,6 +4295,7 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     out.relocs = base.string() + ".relocs.bin";
     out.map_patches = base.string() + ".map-patches.tsv";
     out.abi = base.string() + ".abi.tsv";
+    out.data_layout = base.string() + ".data-layout.json";
 
     std::optional<std::filesystem::path> prebuilt_proof =
         find_prebuilt_proof(elf_path, symbol_name);
@@ -4356,6 +4361,8 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     argv.push_back(out.map_patches.string());
     argv.push_back("--output-abi");
     argv.push_back(out.abi.string());
+    argv.push_back("--output-data-layout");
+    argv.push_back(out.data_layout.string());
     const std::filesystem::path link_plan =
         write_native_link_plan(link_args, base);
     argv.push_back("--link-plan");
@@ -4433,6 +4440,7 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     cache.relocs = cache_dir / (key + ".relocs.bin");
     cache.map_patches = cache_dir / (key + ".map-patches.tsv");
     cache.abi = cache_dir / (key + ".abi.tsv");
+    cache.data_layout = cache_dir / (key + ".data-layout.json");
     const bool cache_hit = linker_output_exists(cache);
     const auto cache_lookup_end = std::chrono::steady_clock::now();
 
@@ -4459,6 +4467,8 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
         linked.relocated_map_ids =
             collect_relocated_map_ids(map_patches, companion.map_addr_ids);
         linked.callee_saved_mask = read_link_abi_file(source.abi);
+        linked.readonly_objects = parse_native_readonly_layout(
+            read_text_file_required(source.data_layout), linked.blob.size());
         linked.prebuilt_proof = source.prebuilt_proof;
         linked.native_link_summary = native_link_plan_summary(link_args, linked);
         const auto read_end = std::chrono::steady_clock::now();
@@ -4467,6 +4477,7 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
         publish_cache_file(tmp.relocs, cache.relocs);
         publish_cache_file(tmp.map_patches, cache.map_patches);
         publish_cache_file(tmp.abi, cache.abi);
+        publish_cache_file(tmp.data_layout, cache.data_layout);
         const auto patch_start = std::chrono::steady_clock::now();
         bind_native_map_relocations(linked, map_patches, companion);
         const auto patch_end = std::chrono::steady_clock::now();
@@ -4486,6 +4497,8 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     linked.relocated_map_ids =
         collect_relocated_map_ids(map_patches, companion.map_addr_ids);
     linked.callee_saved_mask = read_link_abi_file(source.abi);
+    linked.readonly_objects = parse_native_readonly_layout(
+        read_text_file_required(source.data_layout), linked.blob.size());
     linked.cache_hit = true;
     linked.native_link_summary = native_link_plan_summary(link_args, linked);
     const auto read_end = std::chrono::steady_clock::now();
@@ -4786,23 +4799,63 @@ const MapMeta *find_original_data_map(const btf *proof_btf, uint32_t proof_id,
  * are not the application's maps, even when names and shapes are identical.
  * Relink those FD operands to the original program before sealing the proof.
  */
-void bind_readonly_data_map(int fd, LinkedBlob &linked)
+std::vector<ProofReadonlyBinding> read_proof_readonly_metadata(const std::filesystem::path &path)
+{
+    if (path.empty()) return {};
+    auto bytes = read_binary_file(path);
+    if (elf_version(EV_CURRENT) == EV_NONE) fail("libelf initialization failed");
+    std::unique_ptr<Elf, decltype(&elf_end)> elf(
+        elf_memory(reinterpret_cast<char *>(bytes.data()), bytes.size()), elf_end);
+    if (!elf) fail("read proof metadata ELF " + path.string() + ": " + elf_errmsg(-1));
+    size_t strings;
+    if (elf_getshdrstrndx(elf.get(), &strings)) fail("read proof metadata section names");
+    std::optional<std::string> metadata;
+    Elf_Scn *section = nullptr;
+    while ((section = elf_nextscn(elf.get(), section))) {
+        GElf_Shdr header{};
+        if (!gelf_getshdr(section, &header)) fail("read proof metadata section header");
+        const char *name = elf_strptr(elf.get(), strings, header.sh_name);
+        if (!name) fail("read proof metadata section name");
+        if (std::strcmp(name, ".native_lab.rodata")) continue;
+        if (metadata || header.sh_type != SHT_PROGBITS) fail("duplicate/invalid proof readonly metadata section");
+        Elf_Data *data = elf_getdata(section, nullptr);
+        if (!data || data->d_off || data->d_size != header.sh_size ||
+            elf_getdata(section, data)) fail("invalid proof readonly metadata extent");
+        metadata.emplace(static_cast<const char *>(data->d_buf), data->d_size);
+    }
+    return metadata ? parse_proof_readonly_bindings(*metadata) : std::vector<ProofReadonlyBinding>{};
+}
+
+void bind_readonly_data_map(int fd, LinkedBlob &linked,
+    const std::vector<ProofReadonlyBinding> &bindings)
 {
     const auto map = load_map_info(fd);
     if (map.type != BPF_MAP_TYPE_ARRAY || map.key_size != sizeof(uint32_t) ||
         map.max_entries != 1 || !map.value_size || map.value_size > linked.blob.size() ||
         !(map.map_flags & BPF_F_RDONLY_PROG))
         fail("new proof data map is not a read-only single-value ARRAY");
+    const auto types = open_map_btf(map.btf_id, "readonly proof data");
+    const auto *section = types ? btf__type_by_id(types.get(), map.btf_value_type_id) : nullptr;
+    if (!section || btf_kind(section) != BTF_KIND_DATASEC || btf_vlen(section) != 1 ||
+        section->size != map.value_size) fail("proof readonly map needs one complete BTF variable");
+    const char *section_name = btf__name_by_offset(types.get(), section->name_off);
+    if (!section_name) fail("proof readonly map has no BTF section name");
+    const auto binding = std::find_if(bindings.begin(), bindings.end(), [&](const auto &candidate) {
+        return candidate.proof_section == section_name;
+    });
+    if (binding == bindings.end()) fail("proof readonly map lacks explicit symbol metadata: " + std::string(section_name));
+    const auto variable = find_source_data_symbol_layout(types.get(), map.btf_value_type_id,
+        binding->proof_section, binding->proof_symbol);
+    if (!variable.found || variable.offset || variable.size != map.value_size)
+        fail("proof readonly BTF variable differs from metadata");
+    const auto &extent = resolve_readonly_extent(*binding, linked.readonly_objects, map.value_size);
     uint32_t key = 0;
     std::vector<uint8_t> bytes(map.value_size);
     if (bpf_map_lookup_elem(fd, &key, bytes.data()))
         fail("read proof data map: " + std::string(std::strerror(errno)));
-    const auto position = std::search(linked.blob.begin(), linked.blob.end(), bytes.begin(), bytes.end());
-    if (position == linked.blob.end())
+    if (!std::equal(bytes.begin(), bytes.end(), linked.blob.begin() + extent.offset))
         fail("readonly proof data does not match native bytes");
-    if (std::search(position + 1, linked.blob.end(), bytes.begin(), bytes.end()) != linked.blob.end())
-        fail("readonly proof data has ambiguous native address extents");
-    const auto offset = static_cast<uint64_t>(position - linked.blob.begin());
+    const auto offset = extent.offset;
     if (offset > UINT32_MAX) fail("readonly native data address exceeds binding format");
     append_u32_le(linked.relocs, 0);
     append_u32_le(linked.relocs, NATIVE_LAB_RELOC_READONLY_DATA);
@@ -4811,7 +4864,8 @@ void bind_readonly_data_map(int fd, LinkedBlob &linked)
 }
 
 void bind_raw_proof_maps(std::vector<bpf_insn> &proof, const CompanionLoad &companion,
-    std::vector<std::unique_ptr<ScopedFd>> &pins, LinkedBlob &linked)
+    std::vector<std::unique_ptr<ScopedFd>> &pins, LinkedBlob &linked,
+    const std::vector<ProofReadonlyBinding> &bindings)
 {
     std::unordered_map<uint32_t, int> replacements;
     std::unordered_set<uint32_t> checked_layouts;
@@ -4846,7 +4900,7 @@ void bind_raw_proof_maps(std::vector<bpf_insn> &proof, const CompanionLoad &comp
                 } else {
                     auto fd = std::make_unique<ScopedFd>(bpf_map_get_fd_by_id(actual.id));
                     if (fd->get() < 0) fail("pin readonly proof map: " + std::string(std::strerror(errno)));
-                    bind_readonly_data_map(fd->get(), linked);
+                    bind_readonly_data_map(fd->get(), linked, bindings);
                     insn.imm = fd->get();
                     replacements.emplace(actual.id, fd->get());
                     pins.push_back(std::move(fd));
@@ -4969,7 +5023,8 @@ SimulatorObject open_simulator_proof(
 }
 
 void finish_simulator_proof(bpf_object *raw, const std::string &entry,
-    std::vector<bpf_insn> &proof, LinkedBlob &linked)
+    std::vector<bpf_insn> &proof, LinkedBlob &linked,
+    const std::vector<ProofReadonlyBinding> &bindings)
 {
     std::unordered_set<uint32_t> reused_maps, new_data_maps;
     std::vector<bpf_map *> new_data;
@@ -5006,7 +5061,7 @@ void finish_simulator_proof(bpf_object *raw, const std::string &entry,
             if (!reused_maps.contains(identity)) {
                 if (!new_data_maps.contains(identity) || insn.src_reg != BPF_PSEUDO_MAP_VALUE)
                     fail("simulator map load lacks original-program identity: " + entry);
-                bind_readonly_data_map(insn.imm, linked);
+                bind_readonly_data_map(insn.imm, linked, bindings);
                 reused_maps.insert(identity);
             }
         }
@@ -5161,10 +5216,12 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         native_object_path,
         symbol_name,
         companion);
+    const auto readonly_bindings = read_proof_readonly_metadata(simulator_object ?
+        simulator_object_path : options.proof_object_path);
     if (simulator_object)
-        finish_simulator_proof(simulator_object.get(), simulator_program, proof_insns, linked);
+        finish_simulator_proof(simulator_object.get(), simulator_program, proof_insns, linked, readonly_bindings);
     else
-        bind_raw_proof_maps(proof_insns, companion, proof_map_fds, linked);
+        bind_raw_proof_maps(proof_insns, companion, proof_map_fds, linked, readonly_bindings);
     out.selected_native_object = native_object_path.string();
     out.selected_symbol = symbol_name;
 

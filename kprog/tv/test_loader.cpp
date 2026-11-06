@@ -11,6 +11,10 @@
 #include <memory>
 #include <unistd.h>
 
+#ifndef TV_NATIVE_LINK_PATH
+#define TV_NATIVE_LINK_PATH "../x86/native_lab/native_link/target/release/native-link"
+#endif
+
 struct ProofFixture {
     std::unique_ptr<bpf_object, decltype(&bpf_object__close)> object;
     bpf_program *program;
@@ -65,8 +69,7 @@ static void btf_manifest_regressions()
             options.manifest_path = std::filesystem::absolute("build/collision-manifest.json");
             options.source_insns.assign(bpf_program__insns(fixture.program),
                 bpf_program__insns(fixture.program) + bpf_program__insn_cnt(fixture.program));
-            options.native_link_path = std::filesystem::absolute(
-                "../x86/native_lab/native_link/target/release/native-link");
+            options.native_link_path = std::filesystem::absolute(TV_NATIVE_LINK_PATH);
             if (supplied) {
                 options.source_btf_id = info.btf_id;
                 options.source_func_info_rec_size = sizeof(bpf_func_info);
@@ -154,7 +157,7 @@ static void load_context_regressions()
     options.source_insns = options.proof_insns = body;
     options.native_object_path = std::filesystem::absolute("build/native-entry.o");
     options.symbol_name = "tv_short_entry";
-    options.native_link_path = std::filesystem::absolute("../x86/native_lab/native_link/target/release/native-link");
+    options.native_link_path = std::filesystem::absolute(TV_NATIVE_LINK_PATH);
     bool rejected = false;
     try {
         auto invalid = native_loader::load_from_fd(options);
@@ -234,7 +237,7 @@ static void tracing_context_regressions()
     options.source_insns = options.proof_insns = body;
     options.native_object_path = std::filesystem::absolute("build/native-entry.o");
     options.symbol_name = "tv_trace_entry";
-    options.native_link_path = std::filesystem::absolute("../x86/native_lab/native_link/target/release/native-link");
+    options.native_link_path = std::filesystem::absolute(TV_NATIVE_LINK_PATH);
     for (unsigned mismatch = 0; mismatch < 2; mismatch++) {
         auto wrong = options;
         if (mismatch) wrong.expected_attach_type = BPF_TRACE_FEXIT;
@@ -317,7 +320,7 @@ int main()
         load_context_regressions();
         tracing_context_regressions();
         btf_manifest_regressions();
-        for (const char *symbol : {"tv_short_entry", "tv_long_entry", "tv_helper_entry", "tv_map_entry", "tv_hash_entry", "tv_large_entry", "tv_readonly_entry"}) {
+        for (const char *symbol : {"tv_short_entry", "tv_long_entry", "tv_helper_entry", "tv_map_entry", "tv_hash_entry", "tv_large_entry", "tv_readonly_entry", "tv_duplicate_readonly_entry"}) {
             const auto &proof = std::string(symbol) == "tv_helper_entry" ? helper :
                 std::string(symbol) == "tv_large_entry" ? large :
                 std::string(symbol) == "tv_map_entry" ? map :
@@ -331,8 +334,7 @@ int main()
             options.symbol_name = symbol;
             options.source_insns = proof;
             options.proof_insns = proof;
-            options.native_link_path = std::filesystem::absolute(
-                "../x86/native_lab/native_link/target/release/native-link");
+            options.native_link_path = std::filesystem::absolute(TV_NATIVE_LINK_PATH);
             auto loaded = native_loader::load_from_fd(options);
             assert(loaded.prog_fd >= 0);
             assert(loaded.native_chunk_count > 0);
@@ -401,8 +403,10 @@ int main()
                 std::puts("separate proof map layout mismatch: PASS (rejected)");
             }
             if (std::string(symbol) == "tv_helper_entry" || std::string(symbol) == "tv_map_entry" ||
-                std::string(symbol) == "tv_hash_entry" || std::string(symbol) == "tv_readonly_entry") {
+                std::string(symbol) == "tv_hash_entry" || std::string(symbol) == "tv_readonly_entry" ||
+                std::string(symbol) == "tv_duplicate_readonly_entry") {
                 const char *entry = std::string(symbol) == "tv_map_entry" ? "tv_proof_map" :
+                    std::string(symbol) == "tv_duplicate_readonly_entry" ? "tv_proof_duplicate_readonly" :
                     std::string(symbol) == "tv_readonly_entry" ? "tv_proof_readonly" :
                     std::string(symbol) == "tv_hash_entry" ? "tv_proof_hash" : "tv_proof_helper";
                 std::ofstream manifest("build/fixture-manifest.json");
@@ -477,12 +481,43 @@ int main()
                     }
                 }
                 if (close(result.prog_fd)) return 1;
+                if (std::string(symbol) == "tv_duplicate_readonly_entry") {
+                    auto fixture = load_fixture("build/simulator.bpf.o", "tv_proof_duplicate_readonly");
+                    options.proof_insns.assign(bpf_program__insns(fixture.program),
+                        bpf_program__insns(fixture.program) + bpf_program__insn_cnt(fixture.program));
+                    options.proof_object_path = std::filesystem::absolute("build/simulator.bpf.o");
+                    auto paired = native_loader::load_from_fd(options);
+                    if (bpf_prog_test_run_opts(paired.prog_fd, &run)) return 1;
+                    assert(run.retval == 2);
+                    bpf_prog_info info{};
+                    uint32_t size = sizeof(info);
+                    if (bpf_obj_get_info_by_fd(paired.prog_fd, &info, &size)) return 1;
+                    assert(info.nr_map_ids == 2);
+                    native_loader::close_loaded_program(&paired);
+                    std::puts("identical readonly objects: PASS (two exact symbol bindings, raw native returned 2)");
+                }
                 if (std::string(symbol) == "tv_readonly_entry") {
                     for (bool wrong : {false, true}) {
                         auto fixture = load_fixture(wrong ? "build/wrong-readonly/simulator.bpf.o" :
                             "build/simulator.bpf.o", "tv_proof_readonly");
                         options.proof_insns.assign(bpf_program__insns(fixture.program),
                             bpf_program__insns(fixture.program) + bpf_program__insn_cnt(fixture.program));
+                        options.proof_object_path = std::filesystem::absolute(wrong ?
+                            "build/wrong-readonly/simulator.bpf.o" : "build/simulator.bpf.o");
+                        if (!wrong) {
+                            auto missing = options;
+                            missing.proof_object_path.clear();
+                            bool rejected = false;
+                            try {
+                                auto invalid = native_loader::load_from_fd(missing);
+                                native_loader::close_loaded_program(&invalid);
+                            } catch (const std::exception &error) {
+                                assert(std::string(error.what()).find("lacks explicit symbol metadata") != std::string::npos);
+                                rejected = true;
+                            }
+                            assert(rejected);
+                            std::puts("raw readonly proof without symbol metadata: PASS (rejected)");
+                        }
                         bool rejected = false;
                         try {
                             auto paired = native_loader::load_from_fd(options);
@@ -517,8 +552,8 @@ int main()
             if (close(original)) { std::perror("close original"); return 1; }
         }
         // Same-sized DATASEC maps must preserve the original variable identities.
-        for (const char *data_entry : {"tv_proof_private", "tv_proof_readonly"}) {
-            const bool readonly = std::string(data_entry) == "tv_proof_readonly";
+        for (const char *data_entry : {"tv_proof_private", "tv_proof_readonly_source"}) {
+            const bool readonly = std::string(data_entry) == "tv_proof_readonly_source";
             auto data_fixture = load_fixture("build/simulator.bpf.o", data_entry, "original");
             bpf_program *data_program = data_fixture.program;
             bpf_prog_info original_info{};
@@ -530,6 +565,7 @@ int main()
             bpf_object__for_each_map(data_map, data_fixture.object.get()) {
                 if (!bpf_map__is_internal(data_map) ||
                     !!(bpf_map__map_flags(data_map) & BPF_F_RDONLY_PROG) != readonly) continue;
+                if (readonly && !std::string(bpf_map__name(data_map)).ends_with(".rodata")) continue;
                 bpf_map_info map_info{};
                 info_size = sizeof(map_info);
                 if (bpf_obj_get_info_by_fd(bpf_map__fd(data_map), &map_info, &info_size))
@@ -554,29 +590,28 @@ int main()
                 options.source_insns.assign(bpf_program__insns(data_program),
                     bpf_program__insns(data_program) + bpf_program__insn_cnt(data_program));
                 options.manifest_path = std::filesystem::absolute("build/data-manifest.json");
-                options.native_link_path = std::filesystem::absolute(
-                    "../x86/native_lab/native_link/target/release/native-link");
+                options.native_link_path = std::filesystem::absolute(TV_NATIVE_LINK_PATH);
                 bool rejected = false;
                 try {
                     auto loaded = native_loader::load_from_fd(options);
                     assert(loaded.replaced && loaded.prog_fd >= 0);
-                    uint32_t original_ids[2]{}, loaded_ids[2]{};
+                    std::vector<uint32_t> original_ids(original_info.nr_map_ids), loaded_ids(original_info.nr_map_ids);
                     bpf_prog_info info{};
-                    info.nr_map_ids = 2; info.map_ids = reinterpret_cast<uintptr_t>(original_ids);
+                    info.nr_map_ids = original_ids.size(); info.map_ids = reinterpret_cast<uintptr_t>(original_ids.data());
                     info_size = sizeof(info);
                     if (bpf_obj_get_info_by_fd(options.original_prog_fd, &info, &info_size))
                         throw std::runtime_error("query original DATASEC map IDs");
-                    assert(info.nr_map_ids && info.nr_map_ids <= 2);
+                    assert(info.nr_map_ids && info.nr_map_ids == original_ids.size());
                     uint32_t original_count = info.nr_map_ids;
                     info = {};
-                    info.nr_map_ids = 2; info.map_ids = reinterpret_cast<uintptr_t>(loaded_ids);
+                    info.nr_map_ids = loaded_ids.size(); info.map_ids = reinterpret_cast<uintptr_t>(loaded_ids.data());
                     info_size = sizeof(info);
                     if (bpf_obj_get_info_by_fd(loaded.prog_fd, &info, &info_size))
                         throw std::runtime_error("query bound DATASEC map IDs");
-                    assert(info.nr_map_ids && info.nr_map_ids <= 2);
+                    assert(info.nr_map_ids && info.nr_map_ids <= loaded_ids.size());
                     bool retains_writable_data = false;
                     for (uint32_t index = 0; index < info.nr_map_ids; index++) {
-                        assert(std::find(original_ids, original_ids + original_count, loaded_ids[index]) != original_ids + original_count);
+                        assert(std::find(original_ids.begin(), original_ids.begin() + original_count, loaded_ids[index]) != original_ids.begin() + original_count);
                         retains_writable_data |= loaded_ids[index] == writable_data_id;
                     }
                     assert(retains_writable_data);

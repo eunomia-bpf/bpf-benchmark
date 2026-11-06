@@ -204,8 +204,14 @@ native chunks and their tails may have arbitrary byte lengths; only AArch64
 requires word alignment.
 
 An unmatched compiler readonly data map can represent immutable native data.
-The loader links native code before final proof preparation, then matches the
-actual frozen map value to a unique exact native-byte extent. Relocation
+The loader links native code before final proof preparation. The proof ELF's
+`.native_lab.rodata` version-1 JSON binds each `.rodata.native.N` DATASEC and its
+single complete BTF variable to an exact canonical native symbol and size.
+Native-link's version-1 `--output-data-layout` table gives that symbol's final
+blob offset and size; the loader checks the exact bytes at that extent.
+Identical constants at different native addresses remain distinct objects.
+Missing, duplicate, conflicting, malformed or unknown metadata rejects.
+Relocation
 metadata kind 8 records `offset=0` and
 `target=map_id | (global_native_byte_offset << 32)`. The kernel pins that exact
 single-entry ARRAY, requires `BPF_F_RDONLY_PROG` and a successful freeze,
@@ -214,8 +220,11 @@ rejects overlap with any JIT-patched relocation and checks that the proof
 actually loads the same map value. This record patches no native instruction.
 Both raw and manifest proof paths use it. Changed bytes, native address,
 map identity and unfrozen maps reject. Native-derived data should have its own
-`.rodata.native` section when the object also declares the application's
+`.rodata.native.N` sections when the object also declares the application's
 original `.rodata` variables, so their DATASEC layouts remain distinct.
+Raw-proof callers supply `FdLoadOptions.proof_object_path` for the same metadata;
+the micro runner forwards its actual proof ELF, expected attach type and flags.
+The link cache stores the exact native extent table alongside its blob and ABI.
 The TV relation must connect the recorded native address to the proof address
 and its actual ordered reads; this binding check does not prove that relation.
 
