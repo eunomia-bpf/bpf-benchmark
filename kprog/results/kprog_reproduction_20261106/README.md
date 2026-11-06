@@ -70,34 +70,49 @@ the module.
 
 ## Helper/map (13 programs)
 
-**Partially measured.** Two external blockers were hit and cleared — a
-non-idempotent kernel patch (lane T) and a generator failure on an
-unresolved finite indirect call (lane C) — plus a third that needed an
-image rebuild: `bpf_x86_alu.ko` copied from the runtime image failed BTF
-validation against T's kernel #48 (`bpf_map` size 288, duplicate candidate
-ids). `make x86-runner-runtime-image-tar` was rebuilt (digest
-`652e8b2eacf6` -> `fd4820b0ff6b`) and the module now inserts.
+| Run | Programs | Geomean |
+| --- | ---: | ---: |
+| Reference 2026-05-29 | 13 | **1.429x** |
+| Current 2026-11-06 | 13 | **1.403x** |
 
-The suite then ran and aborted after 2 of 13 programs on a **chunk
-alignment** defect in the native proof blob, reported to lane T:
+Command (current):
 
-```
-native_blob_diag: ... chunk_bytes=0:128,128:19
-  chunk_alignment_bad=1 first_unaligned_chunk=1
-  final_chunk_end=147 final_size_matches=1
-stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument
+```sh
+taskset -c 0-7 make micro PLATFORM=kvm ARCH=x86 \
+  SUITE=micro/config/micro_stage2.yaml \
+  RUNTIMES='kernel native_kernel' \
+  SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000
 ```
 
-The second chunk is 19 bytes, not a multiple of 8, so the kernel rejects
-the proof region. The two programs that did complete give `1.143x` on a
-single pair — far too small a sample to report as the suite figure, and
-recorded here only as the partial state.
+Artifact: `micro/results/x86_kvm_micro_20261106_102025_639020`.
 
-The program set is confirmed identical to the reference run (13 names,
-equal sets), so the suite is comparable once the chunker pads the tail.
+Recipe parity verified from both result files: `inner_repeat` 100000,
+3 samples per run, runtimes `kernel native_kernel`, and the program name
+sets are equal (13 names, set-identical).
 
-Reference `1.429x` is confirmed from its own artifact under the same ratio
-definition; only the current-code arm is outstanding.
+**Outcome: reproduces within 1.8%** (`1.403x` against `1.429x`).
+Correctness: 26 runtime comparisons (2 x 13) agree exactly on
+`(retval, result)`; zero disagreements.
+
+### Blockers cleared to get here
+
+1. `kprog/tv/apply_kernel_patch.py` was not idempotent for
+   `include/linux/bpf.h` (hunks 1 and 3 FAILED), breaking
+   `host-kernel-x86`. Fixed by lane T.
+2. The stage2 generator raised `unresolved finite indirect target at 0xf:
+   call QWORD PTR [rip+0x0]`. Fixed by lane C.
+3. `bpf_x86_alu.ko`, copied from the runtime image, failed BTF validation
+   against lane T's kernel #48 (`bpf_map` size 288, duplicate candidate
+   ids, `-22`). The image was rebuilt (digest `652e8b2eacf6` ->
+   `fd4820b0ff6b`) and the module now inserts.
+4. The native proof blob's tail chunk was rejected
+   (`BPF_PROG_LOAD native_lab stub: Invalid argument`) after lane T's
+   external-identity commit; fixed by lane C's follow-up
+   `Resolve finite x86 control flow and call real Linux helpers`.
+
+Note: a `chunk_alignment_bad=1` line in the loader diagnostic is a red
+herring for x86 — `native_lab_binding_validate` applies the 4-byte chunk
+rule only for `NATIVE_LAB_ARCH_ARM64`.
 
 ## Corpus (six applications)
 
