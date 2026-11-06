@@ -1,0 +1,3 @@
+app,run,status,baseline_counter_rows,post_counter_rows,error
+katran,arm64_qemu_corpus_19700101_000109_245314,error,1,0,Katran server did not expose an attached XDP program on katran0
+otelcol-ebpf-profiler/profiling,arm64_qemu_corpus_19700101_000008_240450,error,12,0,shim socket /var/run/bpfrejit/shim-746.sock request failed: [Errno 111] Connection refused

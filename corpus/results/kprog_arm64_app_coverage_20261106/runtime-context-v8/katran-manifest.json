@@ -1,0 +1,115 @@
+{
+  "app": "katran",
+  "objects": [
+    {
+      "native_object": "balancer.native.o",
+      "program": "balancer_ingres",
+      "symbol": "balancer_ingress"
+    },
+    {
+      "native_object": "healthchecking_ipip.native.o",
+      "program": "healthcheck_enc",
+      "symbol": "healthcheck_encap"
+    },
+    {
+      "program": "xdp_root",
+      "prog_type": 6,
+      "native_object": "xdp_root.native.o",
+      "symbol": "xdp_root",
+      "simulator_object": "katran_xdp_root.bpf.o",
+      "simulator_program": "katran_xdp_root_arm64_sim_xdp"
+    },
+    {
+      "program": "",
+      "source_bytecode_hex": "182100000000000000000000100000007a0100002a000000b7000000000000009500000000000000",
+      "native_object": "startup/source_map.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/source_map.bpf.o",
+      "simulator_program": "source_map_arm64_sim_xdp",
+      "source_map_fd_sites": [
+        0
+      ],
+      "source_map_bindings": [
+        {
+          "native_symbol": "__native_source_map_0",
+          "source_insn": 0
+        }
+      ],
+      "prog_type": 1
+    },
+    {
+      "program": "",
+      "prog_type": 1,
+      "source_bytecode_hex": "b7000000000000009500000000000000",
+      "native_object": "startup/startup_0.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/startup_0.bpf.o",
+      "simulator_program": "startup_0_arm64_sim_xdp"
+    },
+    {
+      "program": "libbpf_nametest",
+      "prog_type": 1,
+      "source_bytecode_hex": "b7000000000000009500000000000000",
+      "native_object": "startup/startup_1.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/startup_1.bpf.o",
+      "simulator_program": "startup_1_arm64_sim_xdp"
+    },
+    {
+      "program": "",
+      "prog_type": 1,
+      "source_bytecode_hex": "85000000a00000009500000000000000",
+      "native_object": "startup/startup_2.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/startup_2.bpf.o",
+      "simulator_program": "startup_2_arm64_sim_xdp"
+    },
+    {
+      "program": "det_arg_ctx",
+      "prog_type": 2,
+      "source_bytecode_hex": "8510000001000000950000000000000085000000ad0000009500000000000000",
+      "native_object": "startup/startup_3.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/startup_3.bpf.o",
+      "simulator_program": "startup_3_arm64_sim_xdp"
+    },
+    {
+      "program": "",
+      "prog_type": 9,
+      "source_bytecode_hex": "b7000000000000009500000000000000",
+      "native_object": "startup/startup_4.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/startup_4.bpf.o",
+      "simulator_program": "startup_4_arm64_sim_xdp"
+    },
+    {
+      "program": "",
+      "prog_type": 26,
+      "source_bytecode_hex": "b7000000000000009500000000000000",
+      "native_object": "startup/startup_5.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/startup_5.bpf.o",
+      "simulator_program": "startup_5_arm64_sim_xdp"
+    },
+    {
+      "program": "",
+      "prog_type": 5,
+      "source_bytecode_hex": "bfa100000000000007010000f8ffffffb702000008000000b70300000000000085000000710000009500000000000000",
+      "native_object": "startup/startup_6.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/startup_6.bpf.o",
+      "simulator_program": "startup_6_arm64_sim_xdp"
+    },
+    {
+      "program": "",
+      "prog_type": 5,
+      "source_bytecode_hex": "b7000000000000009500000000000000",
+      "native_object": "startup/startup_7.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/startup_7.bpf.o",
+      "simulator_program": "startup_7_arm64_sim_xdp"
+    }
+  ],
+  "status": "native-objects-proof-linked",
+  "version": 1
+}
