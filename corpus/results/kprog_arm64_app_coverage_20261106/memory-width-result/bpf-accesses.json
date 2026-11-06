@@ -1,0 +1,82 @@
+[
+  {
+    "function": "read8",
+    "accesses": [
+      {
+        "size": 1,
+        "load": true,
+        "displacement": 0
+      }
+    ]
+  },
+  {
+    "function": "write8",
+    "accesses": [
+      {
+        "size": 1,
+        "load": false,
+        "displacement": 0
+      }
+    ]
+  },
+  {
+    "function": "read16",
+    "accesses": [
+      {
+        "size": 2,
+        "load": true,
+        "displacement": 0
+      }
+    ]
+  },
+  {
+    "function": "write16",
+    "accesses": [
+      {
+        "size": 2,
+        "load": false,
+        "displacement": 0
+      }
+    ]
+  },
+  {
+    "function": "read32",
+    "accesses": [
+      {
+        "size": 4,
+        "load": true,
+        "displacement": 0
+      }
+    ]
+  },
+  {
+    "function": "write32",
+    "accesses": [
+      {
+        "size": 4,
+        "load": false,
+        "displacement": 0
+      }
+    ]
+  },
+  {
+    "function": "read64",
+    "accesses": [
+      {
+        "size": 8,
+        "load": true,
+        "displacement": 0
+      }
+    ]
+  },
+  {
+    "function": "write64",
+    "accesses": [
+      {
+        "size": 8,
+        "load": false,
+        "displacement": 0
+      }
+    ]
+  }
+]

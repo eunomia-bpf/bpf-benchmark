@@ -727,3 +727,23 @@ compiled inputs, exact outcomes and a matched portable kernel/initramfs under
 `runtime/`. Run `make -C runtime run` after extraction, or on Spark use
 `make -C runtime run ACCEL=kvm CPU=host`. Finite local CODE branches/calls and
 actual native address projection remain active integration work.
+
+## Exact architectural memory access width
+
+The ARM load/store byte-value generators now emit one actual BPF access of
+the native instruction's width, instead of splitting it into byte accesses.
+Volatile BPF inline assembly fixes the requested width; host-only aliases use
+`aligned(1),may_alias`, so valid unaligned native addresses do not cause C
+alignment undefined behavior. Lean value APIs and existing value oracles remain
+unchanged. No bounds guard or event normalization is added.
+
+[All eight compiled access fixtures](memory-width-result/bpf-accesses.json)
+contain exactly one requested 1/2/4/8-byte load or store at pointer+3. The 1,024
+unaligned ASan/UBSan cases and both 20,024-case existing load/store oracles pass.
+All 29 unchanged-input micro cases pass full-system QEMU; all 23 real BCC
+proofs recompile. [The full 345-module formal/C/Rust/wire check](memory-width-result/full-check.log)
+passes with these generated outputs. [Replay artifacts](memory-width-result/replay.tar.gz)
+retain sources, complete simulator snapshots, compiled BPF and raw outcomes.
+This closes the scalar access-width bridge finding; CPU-feature-dependent
+pair atomicity and complete per-application certificates continue as active
+implementation and validation work.

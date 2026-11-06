@@ -1,0 +1,16 @@
+cd /workspaces/repository/kprog/formal && python3 tools/generate_arm64_load_bytes_spec.py
+cd /workspaces/repository/kprog/formal && python3 tools/generate_arm64_store_bytes_spec.py
+install -d /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-width-initial
+cc -Wall -Wextra -Werror -O2 -g -fsanitize=address,undefined -fno-omit-frame-pointer \
+	/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory_width.c -o /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-width-initial/host
+/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-width-initial/host
+1024 unaligned load/store scenes pass ASan/UBSan with exact bytes and untouched neighbors
+clang -g -O2 -target bpf -c /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory_width.c -o /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-width-initial/width.bpf.o
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory_width.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-width-initial
+all8 compiled BPF functions perform exactly ONE requested-width access at pointer+3
+cd /workspaces/repository/kprog/formal && cc -Wall -Wextra -Werror -O2 -I. oracles/test_arm64_load_bytes_host.c -o /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-width-initial/load-oracle
+/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-width-initial/load-oracle
+arm64 load bytes host cross-check: OK (20024 cases)
+cd /workspaces/repository/kprog/formal && cc -Wall -Wextra -Werror -O2 -I. oracles/test_arm64_store_bytes_host.c -o /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-width-initial/store-oracle
+/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-width-initial/store-oracle
+arm64 store bytes host cross-check: OK (20024 cases)

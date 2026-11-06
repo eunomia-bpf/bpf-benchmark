@@ -11,9 +11,20 @@ _Static_assert(ARM64_WIDTH_8 == 1U, "arm64 load-bytes width code drift");
 _Static_assert(ARM64_WIDTH_16 == 2U, "arm64 load-bytes width code drift");
 _Static_assert(ARM64_WIDTH_32 == 4U, "arm64 load-bytes width code drift");
 _Static_assert(ARM64_WIDTH_64 == 8U, "arm64 load-bytes width code drift");
+#if defined(__bpf__) || defined(__BPF__)
+#define KPROG_ARM64_LOAD_ACCESS(BITS, ADDR, OUT) \
+	__asm__ __volatile__("%0 = *(u" #BITS " *)(%1 + 0)" : "=r"(OUT) : "r"(ADDR) : "memory")
+#else
+typedef __u8 kprog_arm64_load_u8_unaligned __attribute__((aligned(1),may_alias));
+typedef __u16 kprog_arm64_load_u16_unaligned __attribute__((aligned(1),may_alias));
+typedef __u32 kprog_arm64_load_u32_unaligned __attribute__((aligned(1),may_alias));
+typedef __u64 kprog_arm64_load_u64_unaligned __attribute__((aligned(1),may_alias));
+#define KPROG_ARM64_LOAD_ACCESS(BITS, ADDR, OUT) \
+	((OUT) = *(volatile const kprog_arm64_load_u##BITS##_unaligned *)(ADDR))
+#endif
 /*
  * ADDR is the (byte) source address; WIDTH is one of the four ARM64_WIDTH_*
- * codes. Each in-range byte is read exactly once and no NZCV is written. The
+ * codes. One access reads exactly that width; no NZCV is written. The
  * result is the raw 64-bit value; the caller applies the destination width to
  * the *value* separately for the sign-extending loads.
  */
@@ -22,21 +33,15 @@ _Static_assert(ARM64_WIDTH_64 == 8U, "arm64 load-bytes width code drift");
 		volatile const __u8 *__kprog_a64_lb_addr = \
 			(volatile const __u8 *)(ADDR); \
 		__u8 __kprog_a64_lb_width = (WIDTH); \
-		__u64 __kprog_a64_lb_value = __kprog_a64_lb_addr[0]; \
- \
-		if (__kprog_a64_lb_width >= ARM64_WIDTH_16) { \
-			__kprog_a64_lb_value |= (__u64)__kprog_a64_lb_addr[1] << 8; \
-		} \
-		if (__kprog_a64_lb_width >= ARM64_WIDTH_32) { \
-			__kprog_a64_lb_value |= (__u64)__kprog_a64_lb_addr[2] << 16; \
-			__kprog_a64_lb_value |= (__u64)__kprog_a64_lb_addr[3] << 24; \
-		} \
-		if (__kprog_a64_lb_width == ARM64_WIDTH_64) { \
-			__kprog_a64_lb_value |= (__u64)__kprog_a64_lb_addr[4] << 32; \
-			__kprog_a64_lb_value |= (__u64)__kprog_a64_lb_addr[5] << 40; \
-			__kprog_a64_lb_value |= (__u64)__kprog_a64_lb_addr[6] << 48; \
-			__kprog_a64_lb_value |= (__u64)__kprog_a64_lb_addr[7] << 56; \
-		} \
+		__u64 __kprog_a64_lb_value; \
+		if (__kprog_a64_lb_width == ARM64_WIDTH_64) \
+			KPROG_ARM64_LOAD_ACCESS(64, __kprog_a64_lb_addr, __kprog_a64_lb_value); \
+		else if (__kprog_a64_lb_width >= ARM64_WIDTH_32) \
+			KPROG_ARM64_LOAD_ACCESS(32, __kprog_a64_lb_addr, __kprog_a64_lb_value); \
+		else if (__kprog_a64_lb_width >= ARM64_WIDTH_16) \
+			KPROG_ARM64_LOAD_ACCESS(16, __kprog_a64_lb_addr, __kprog_a64_lb_value); \
+		else \
+			KPROG_ARM64_LOAD_ACCESS(8, __kprog_a64_lb_addr, __kprog_a64_lb_value); \
 		__kprog_a64_lb_value; \
 	})
 #endif

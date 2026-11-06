@@ -11,10 +11,21 @@ _Static_assert(ARM64_WIDTH_8 == 1U, "arm64 store-bytes width code drift");
 _Static_assert(ARM64_WIDTH_16 == 2U, "arm64 store-bytes width code drift");
 _Static_assert(ARM64_WIDTH_32 == 4U, "arm64 store-bytes width code drift");
 _Static_assert(ARM64_WIDTH_64 == 8U, "arm64 store-bytes width code drift");
+#if defined(__bpf__) || defined(__BPF__)
+#define KPROG_ARM64_STORE_ACCESS(BITS, ADDR, VALUE) \
+	__asm__ __volatile__("*(u" #BITS " *)(%0 + 0) = %1" : : "r"(ADDR), "r"(VALUE) : "memory")
+#else
+typedef __u8 kprog_arm64_store_u8_unaligned __attribute__((aligned(1),may_alias));
+typedef __u16 kprog_arm64_store_u16_unaligned __attribute__((aligned(1),may_alias));
+typedef __u32 kprog_arm64_store_u32_unaligned __attribute__((aligned(1),may_alias));
+typedef __u64 kprog_arm64_store_u64_unaligned __attribute__((aligned(1),may_alias));
+#define KPROG_ARM64_STORE_ACCESS(BITS, ADDR, VALUE) \
+	(*(volatile kprog_arm64_store_u##BITS##_unaligned *)(ADDR) = (__u##BITS)(VALUE))
+#endif
 /*
  * ADDR is the (byte) destination address; WIDTH is one of the four
  * ARM64_WIDTH_* codes; VALUE is the raw source value (masked to the width
- * here). Each in-range byte is written exactly once and no NZCV is written.
+ * here). One access writes exactly that width; no NZCV is written.
  */
 #define KPROG_ARM64_STORE_BYTES(ADDR, WIDTH, VALUE)                         \
 	do { \
@@ -23,20 +34,13 @@ _Static_assert(ARM64_WIDTH_64 == 8U, "arm64 store-bytes width code drift");
 		__u8 __kprog_a64_sb_width = (WIDTH); \
 		__u64 __kprog_a64_sb_value = \
 			KPROG_ARM64_APPLY_WIDTH((VALUE), __kprog_a64_sb_width); \
-		__kprog_a64_sb_addr[0] = (__u8)__kprog_a64_sb_value; \
- \
-		if (__kprog_a64_sb_width >= ARM64_WIDTH_16) { \
-			__kprog_a64_sb_addr[1] = (__u8)(__kprog_a64_sb_value >> 8); \
-		} \
-		if (__kprog_a64_sb_width >= ARM64_WIDTH_32) { \
-			__kprog_a64_sb_addr[2] = (__u8)(__kprog_a64_sb_value >> 16); \
-			__kprog_a64_sb_addr[3] = (__u8)(__kprog_a64_sb_value >> 24); \
-		} \
-		if (__kprog_a64_sb_width == ARM64_WIDTH_64) { \
-			__kprog_a64_sb_addr[4] = (__u8)(__kprog_a64_sb_value >> 32); \
-			__kprog_a64_sb_addr[5] = (__u8)(__kprog_a64_sb_value >> 40); \
-			__kprog_a64_sb_addr[6] = (__u8)(__kprog_a64_sb_value >> 48); \
-			__kprog_a64_sb_addr[7] = (__u8)(__kprog_a64_sb_value >> 56); \
-		} \
+		if (__kprog_a64_sb_width == ARM64_WIDTH_64) \
+			KPROG_ARM64_STORE_ACCESS(64, __kprog_a64_sb_addr, __kprog_a64_sb_value); \
+		else if (__kprog_a64_sb_width >= ARM64_WIDTH_32) \
+			KPROG_ARM64_STORE_ACCESS(32, __kprog_a64_sb_addr, __kprog_a64_sb_value); \
+		else if (__kprog_a64_sb_width >= ARM64_WIDTH_16) \
+			KPROG_ARM64_STORE_ACCESS(16, __kprog_a64_sb_addr, __kprog_a64_sb_value); \
+		else \
+			KPROG_ARM64_STORE_ACCESS(8, __kprog_a64_sb_addr, __kprog_a64_sb_value); \
 	} while (0)
 #endif

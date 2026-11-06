@@ -447,3 +447,21 @@ helper-dispatch-build: direct-header-generate
 		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
 		-c $$source -o $${source%.c}.o || exit 1; \
 	done
+
+.PHONY: memory-width-generate
+memory-width-generate:
+	cd $(ROOT)/kprog/formal && python3 tools/generate_arm64_load_bytes_spec.py
+	cd $(ROOT)/kprog/formal && python3 tools/generate_arm64_store_bytes_spec.py
+
+.PHONY: memory-width-check
+memory-width-check: memory-width-generate
+	install -d $(HERE)/$(PHASE)
+	cc -Wall -Wextra -Werror -O2 -g -fsanitize=address,undefined -fno-omit-frame-pointer \
+		$(HERE)/memory_width.c -o $(HERE)/$(PHASE)/host
+	$(HERE)/$(PHASE)/host
+	clang -g -O2 -target bpf -c $(HERE)/memory_width.c -o $(HERE)/$(PHASE)/width.bpf.o
+	python3 $(HERE)/memory_width.py $(HERE)/$(PHASE)
+	cd $(ROOT)/kprog/formal && cc -Wall -Wextra -Werror -O2 -I. oracles/test_arm64_load_bytes_host.c -o $(HERE)/$(PHASE)/load-oracle
+	$(HERE)/$(PHASE)/load-oracle
+	cd $(ROOT)/kprog/formal && cc -Wall -Wextra -Werror -O2 -I. oracles/test_arm64_store_bytes_host.c -o $(HERE)/$(PHASE)/store-oracle
+	$(HERE)/$(PHASE)/store-oracle

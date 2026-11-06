@@ -89,27 +89,30 @@ def render_c(widths: list[dict]) -> str:
         f"_Static_assert(ARM64_WIDTH_{row['name'][1:]} == {row['width_code']}U, "
         '"arm64 load-bytes width code drift");'
         for row in widths)
+    access = ["#if defined(__bpf__) || defined(__BPF__)",
+        "#define KPROG_ARM64_LOAD_ACCESS(BITS, ADDR, OUT) " + chr(92),
+        '\t__asm__ __volatile__("%0 = *(u" #BITS " *)(%1 + 0)" : "=r"(OUT) : "r"(ADDR) : "memory")',
+        "#else"]
+    for row in widths:
+        bits = row["bytes"] * 8
+        access.append(f"typedef __u{bits} kprog_arm64_load_u{bits}_unaligned __attribute__((aligned(1),may_alias));")
+    access += ["#define KPROG_ARM64_LOAD_ACCESS(BITS, ADDR, OUT) " + chr(92),
+        "\t((OUT) = *(volatile const kprog_arm64_load_u##BITS##_unaligned *)(ADDR))", "#endif"]
+    access_text = "\n".join(access)
     body = [
         "\t({",
         "\t\tvolatile const __u8 *__kprog_a64_lb_addr =",
         "\t\t\t(volatile const __u8 *)(ADDR);",
         "\t\t__u8 __kprog_a64_lb_width = (WIDTH);",
-        "\t\t__u64 __kprog_a64_lb_value = __kprog_a64_lb_addr[0];",
-        "",
-    ]
-    for row in widths:
-        n = row["bytes"]
-        if n == 1:
-            continue
-        gate = ("__kprog_a64_lb_width >= ARM64_WIDTH_16" if n == 2
-                else "__kprog_a64_lb_width >= ARM64_WIDTH_32" if n == 4
-                else "__kprog_a64_lb_width == ARM64_WIDTH_64")
-        body.append(f"\t\tif ({gate}) {{")
-        for i in range(n // 2, n):
-            body.append("\t\t\t__kprog_a64_lb_value |= "
-                        f"(__u64)__kprog_a64_lb_addr[{i}] << {8 * i};")
-        body.append("\t\t}")
-    body += [
+        "\t\t__u64 __kprog_a64_lb_value;",
+        "\t\tif (__kprog_a64_lb_width == ARM64_WIDTH_64)",
+        "\t\t\tKPROG_ARM64_LOAD_ACCESS(64, __kprog_a64_lb_addr, __kprog_a64_lb_value);",
+        "\t\telse if (__kprog_a64_lb_width >= ARM64_WIDTH_32)",
+        "\t\t\tKPROG_ARM64_LOAD_ACCESS(32, __kprog_a64_lb_addr, __kprog_a64_lb_value);",
+        "\t\telse if (__kprog_a64_lb_width >= ARM64_WIDTH_16)",
+        "\t\t\tKPROG_ARM64_LOAD_ACCESS(16, __kprog_a64_lb_addr, __kprog_a64_lb_value);",
+        "\t\telse",
+        "\t\t\tKPROG_ARM64_LOAD_ACCESS(8, __kprog_a64_lb_addr, __kprog_a64_lb_value);",
         "\t\t__kprog_a64_lb_value;",
         "\t})",
     ]
@@ -124,9 +127,10 @@ def render_c(widths: list[dict]) -> str:
  * arm.
  */
 {codes}
+{access_text}
 /*
  * ADDR is the (byte) source address; WIDTH is one of the four ARM64_WIDTH_*
- * codes. Each in-range byte is read exactly once and no NZCV is written. The
+ * codes. One access reads exactly that width; no NZCV is written. The
  * result is the raw 64-bit value; the caller applies the destination width to
  * the *value* separately for the sign-extending loads.
  */
