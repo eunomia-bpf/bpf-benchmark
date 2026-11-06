@@ -1,8 +1,11 @@
 """Expose the frozen pair's actual bytes; Lean supplies all ISA semantics."""
+import argparse
 from pathlib import Path
 from elftools.elf.elffile import ELFFile
 
-root = Path(__file__).resolve().parent / "build/simple-arm64"
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--directory", type=Path, default=Path(__file__).resolve().parent / "build/simple-arm64")
+root = parser.parse_args().directory
 
 
 def function_bytes(path, name, machine):

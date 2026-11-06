@@ -1,0 +1,10 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+python3 prepare_simple_arm64.py
+/workspaces/repository/kprog/tv/build/simple-arm64/simple.bpf.c
+clang -O2 -g -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_arm64 \
+	-I../../vendor/libbpf/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+	-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include/bpf \
+	-I/usr/include/x86_64-linux-gnu -c build/simple-arm64/simple.bpf.c -o build/simple-arm64/simple.bpf.o
+aarch64-linux-gnu-objdump -dr build/simple-arm64/native-link/simple.proof.o > build/simple-arm64/native.asm
+llvm-objdump-18 -d build/simple-arm64/simple.bpf.o > build/simple-arm64/proof.asm
+make: Leaving directory '/workspaces/repository/kprog/tv'

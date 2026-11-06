@@ -332,3 +332,14 @@ simple-arm64-counterexample: native-path-check
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
 		-o ../tv/build/simple-arm64/SimpleCompiled.olean ../tv/build/simple-arm64/SimpleCompiled.lean
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv ../tv/SimpleStoreCounterexample.lean
+
+SIMPLE_BLOCK_DIR ?= build/simple-arm64
+.PHONY: simple-arm64-certificate simple-arm64-negative-check
+simple-arm64-certificate: native-path-check
+	python3 extract_simple_arm64.py --directory $(SIMPLE_BLOCK_DIR)
+	cd ../formal && LEAN_PATH=../tv/build:../tv/$(SIMPLE_BLOCK_DIR) lake env lean -R ../tv/$(SIMPLE_BLOCK_DIR) \
+		-o ../tv/$(SIMPLE_BLOCK_DIR)/SimpleCompiled.olean ../tv/$(SIMPLE_BLOCK_DIR)/SimpleCompiled.lean
+	cd ../formal && LEAN_PATH=../tv/build:../tv/$(SIMPLE_BLOCK_DIR) lake env lean -R ../tv ../tv/SimpleStoreCertificate.lean
+
+simple-arm64-negative-check: simple-arm64-certificate
+	python3 test_simple_artifacts.py

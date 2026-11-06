@@ -130,11 +130,9 @@ def valueBytes (value : Word) (count : Nat) : List Byte :=
     (valueBytes value count).length = count := by simp [valueBytes]
 
 def store (s : State) (address value : Word) (count : Nat) : Transition State :=
-  if permitted s.memory.writable address count then
-    let bytes := valueBytes value count
-    ⟨{ s with memory := writeBytes s.memory address bytes },
-      [.memory .write address bytes true], none⟩
-  else ⟨s, [.fault (.write address count)], some (.write address count)⟩
+  match writeMemory s.memory address value count with
+  | .ok (memory, event) => ⟨{ s with memory }, [event], none⟩
+  | .error fault => ⟨s, [.fault fault], some fault⟩
 
 def load (s : State) (dst : Register) (address : Word) (count : Nat)
     (signed : Bool) : Transition State :=

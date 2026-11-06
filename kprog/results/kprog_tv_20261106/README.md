@@ -537,3 +537,35 @@ A's production width repair is separately pushed as1d260495a. This archived
 result preserves the before-repair bug; T continues on a newly compiled pair
 and does not weaken the strict trace requirement. Full micro/application
 translation validation and concrete end-to-end composition remain active.
+
+Universal validation of the repaired compiled store block
+-------------------------------------------------------
+
+The new 84-byte native/224-byte clang pair is frozen in
+`simple-arm64-after-width-inputs.tar.gz`. Decoder equations are checked by
+Lean reduction against these exact ELF entry bytes. Full successful-state
+theorems quantify over arbitrary architectural registers, flags, vector bank,
+SP, memory values/permissions/initialization and every64-bit packet pointer.
+They retain complete post-states and prove equality of guest memory and all
+four ordered width4/1/2/1 effects, with native exit80 corresponding to BPF27.
+Actual execution follows from the two generic checked-path soundness theorems.
+
+`including_faults` has no permission precondition: it proves both checked
+paths produce a successful transition certificate with identical memory,
+effects and faults, and corresponding exact fault PCs or successful exits.
+All16 permission combinations, including wrapping pointers and initially
+uninitialized/unreadable memory, are covered. No extra guard is inserted
+into either program. The successful post-state theorems cover all state
+fields; the fault theorem compares memory/effects/fault/PC. Their printed
+axioms are propext, Classical.choice and Quot.sound, without
+Lean.ofReduceBool or sorryAx. BPF scalar stores now use the canonical
+Reference.writeMemory instead of a separate byte-recursive update.
+
+The unchanged actual pair passes, while six actual-byte negatives reject in
+the same canonical decoder certificates: narrow store, wrong store address,
+erased store, native wrong width, native wrong successor, and the original
+before-width clang artifact. Raw per-case logs/artifacts are archived. The
+existing BPF/input/CMOV/context checks and all their mutation negatives pass.
+This is a universal certificate for the real store block. Full-program entry,
+context access, private spill, preceding CFG and composition obligations
+continue separately; no whole-program pass is inferred from this block.

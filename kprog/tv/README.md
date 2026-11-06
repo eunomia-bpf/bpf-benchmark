@@ -346,3 +346,18 @@ their trusted base; the generic path/composition theorems do not.
 `simple-arm64-artifacts` regenerates a fresh pair with the current producer;
 it must not be run over the archived before-repair input when replaying this
 counterexample.
+
+`make -C kprog/tv simple-arm64-artifacts simple-arm64-negative-check`
+checks the corrected clang/native success block. `SimpleStoreCertificate.lean`
+quantifies over every packet pointer and complete input states/memory. It
+proves both complete successful post-states, equal guest memory, all ordered
+effects and exact exit PCs. Without any permission premise, it proves both
+checked paths succeed as certificates and match memory, effects, faults and
+corresponding fault/exit locations. The certificate prefix ends at a real
+fault; it adds no executable guard. Scalar BPF stores reuse the canonical
+reference memory update. These universal results print only `propext`,
+`Classical.choice` and `Quot.sound`, without native reduction or solver axioms.
+Six actual-byte negatives cover narrow/erased/address-mutated stores, native
+width and successor changes, and the archived broken clang output. The whole
+program still needs entry/context/private-spill and preceding-block proofs;
+this result certifies its store block, not those additional obligations.

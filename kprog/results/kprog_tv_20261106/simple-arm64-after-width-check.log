@@ -1,0 +1,19 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+python3 extract_simple_arm64.py --directory build/simple-arm64
+exact ELF entry bytes: native=84 BPF=224
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
+	-o ../tv/build/simple-arm64/SimpleCompiled.olean ../tv/build/simple-arm64/SimpleCompiled.lean
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv ../tv/SimpleStoreCertificate.lean
+'KProgTV.SimpleStoreCertificate.native_full_state' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.proof_full_state' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.matching_executions' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.including_faults' depends on axioms: [propext, Classical.choice, Quot.sound]
+python3 test_simple_artifacts.py
+unchanged actual native/clang pair: PASS
+narrow-store: REJECTED by canonical byte-decoded semantics
+wrong-store-address: REJECTED by canonical byte-decoded semantics
+erased-store: REJECTED by canonical byte-decoded semantics
+native-wrong-width: REJECTED by canonical byte-decoded semantics
+native-wrong-successor: REJECTED by canonical byte-decoded semantics
+before-width: REJECTED by canonical byte-decoded semantics
+make: Leaving directory '/workspaces/repository/kprog/tv'
