@@ -30,13 +30,13 @@ static inline int native_lab_reloc_patch_size(__u32 kind)
 	}
 }
 
-#define NATIVE_LAB_BINDING_VERSION 1U
+#define NATIVE_LAB_BINDING_VERSION 2U
 #define NATIVE_LAB_ARCH_X86 1U
 #define NATIVE_LAB_ARCH_ARM64 2U
 /* Inline kinsn entry at byte zero; context in the architecture's BPF r1. */
 #define NATIVE_LAB_INLINE_ABI_VERSION 1U
 
-/* Native-endian, fixed 64-byte record, followed by exact native bytes,
+/* Native-endian, fixed 96-byte record, followed by exact native bytes,
  * relocation records (16 bytes each), then proof bpf_insns (8 bytes each).
  * The kernel compares all three against the snapshot before sealing it.
  */
@@ -57,6 +57,14 @@ struct native_lab_binding {
 	__u32 expected_attach_type;
 	__u32 snapshot_generation;
 	__u32 reserved;
+	__u32 prog_flags;
+	__u32 attach_btf_id;
+	__u32 attach_btf_obj_id;
+	__u32 attach_prog_id;
+	__u32 prog_ifindex;
+	__u32 source_prog_id;
+	__u32 gpl_compatible;
+	__u32 context_reserved;
 };
 
 static inline int native_lab_binding_validate(
@@ -66,7 +74,8 @@ static inline int native_lab_binding_validate(
 {
 	if (b->version != NATIVE_LAB_BINDING_VERSION || b->arch != arch ||
 	    b->abi_version != NATIVE_LAB_INLINE_ABI_VERSION ||
-	    b->entry_offset || b->reserved || (b->abi_mask & ~0xfU))
+	    b->entry_offset || b->reserved || (b->abi_mask & ~0xfU) ||
+	    b->context_reserved || !b->source_prog_id || b->gpl_compatible > 1)
 		return -EINVAL;
 	if (!b->chunk_count || b->chunk_count > 512 ||
 	    b->blob_id != blob_id || blob_id >= b->chunk_count ||

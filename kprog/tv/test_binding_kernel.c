@@ -31,6 +31,42 @@ static const struct bpf_insn proof = { .code = BPF_ALU64 | BPF_MOV | BPF_K, .imm
 static int module_fd, kfunc_id;
 static int retained_map_fd = -1;
 static unsigned test_slot;
+static struct native_lab_binding current_context;
+static unsigned stub_load_flags;
+static const char *stub_license = "GPL";
+
+static void fill_context(struct native_lab_binding *b)
+{
+	memcpy(&b->prog_flags, &current_context.prog_flags, 8 * sizeof(uint32_t));
+}
+
+static void use_context(int fd, unsigned flags)
+{
+	struct bpf_prog_info info = {0};
+	uint32_t size = sizeof(info);
+	if (bpf_obj_get_info_by_fd(fd, &info, &size)) {
+		perror("query original load context");
+		exit(1);
+	}
+	current_context = (struct native_lab_binding){
+		.prog_flags = flags, .prog_ifindex = info.ifindex,
+		.source_prog_id = info.id, .gpl_compatible = info.gpl_compatible,
+		.attach_btf_id = info.attach_btf_id, .attach_btf_obj_id = info.attach_btf_obj_id,
+	};
+}
+
+static int create_context(enum bpf_prog_type type, unsigned flags, const char *license)
+{
+	const struct bpf_insn body[] = {proof, { .code = BPF_JMP | BPF_EXIT }};
+	LIBBPF_OPTS(bpf_prog_load_opts, opts, .prog_flags = flags);
+	int fd = bpf_prog_load(type, "tv_context", license, body, 2, &opts);
+	if (fd < 0) {
+		perror("load original context program");
+		exit(1);
+	}
+	return fd;
+}
+
 
 static void fatal(const char *what)
 {
@@ -118,8 +154,9 @@ static void load_group(const uint32_t *order, const uint32_t *generations,
 	char log[65536] = {0};
 	int fds[] = {module_fd, module_fd, retained_map_fd};
 	LIBBPF_OPTS(bpf_prog_load_opts, opts, .fd_array = fds, .fd_array_cnt = retained_map_fd < 0 ? 2 : 3,
+		.prog_flags = stub_load_flags,
 		.log_buf = log, .log_size = sizeof(log), .log_level = reject ? 2 : 0);
-	int fd = bpf_prog_load(BPF_PROG_TYPE_XDP, "tv_binding", "GPL", insns, 2*count+1, &opts);
+	int fd = bpf_prog_load(BPF_PROG_TYPE_XDP, "tv_binding", stub_license, insns, 2*count+1, &opts);
 	if ((fd < 0) != reject) {
 		fprintf(stderr, "%s: fd=%d errno=%d\n%s", name, fd, errno, log);
 		exit(1);
@@ -183,12 +220,13 @@ static uint32_t seal_group_chunk(unsigned slot, const unsigned char *code,
 	upload(".relocs", NULL, 0, 0);
 	upload(".proof", &body, sizeof(body), 0);
 	struct native_lab_binding b = {
-		.version = 1, .arch = TV_ARCH, .abi_version = 1,
+		.version = NATIVE_LAB_BINDING_VERSION, .arch = TV_ARCH, .abi_version = 1,
 		.blob_id = slot, .chunk_offset = offset,
 		.chunk_count = 2, .native_size = size, .total_native_size = total,
 		.proof_insns = 1, .prog_type = BPF_PROG_TYPE_XDP,
 		.snapshot_generation = generation(),
 	};
+	fill_context(&b);
 	unsigned char envelope[sizeof(b) + sizeof(native) + sizeof(body)];
 	assert(size <= sizeof(native));
 	memcpy(envelope, &b, sizeof(b));
@@ -239,11 +277,12 @@ static uint32_t seal_chunk_artifact(unsigned slot, unsigned chunks, unsigned off
 	upload(".relocs", relocs, reloc_count * sizeof(*relocs), 0);
 	upload(".proof", body, count * sizeof(*body), 0);
 	struct native_lab_binding b = {
-		.version = 1, .arch = TV_ARCH, .abi_version = 1,
+		.version = NATIVE_LAB_BINDING_VERSION, .arch = TV_ARCH, .abi_version = 1,
 		.blob_id = slot, .chunk_count = chunks, .chunk_offset = offset, .native_size = size,
 		.total_native_size = total, .proof_insns = count, .reloc_count = reloc_count,
 		.prog_type = BPF_PROG_TYPE_XDP, .snapshot_generation = generation(),
 	};
+	fill_context(&b);
 	size_t reloc_bytes = reloc_count * sizeof(*relocs);
 	size_t length = sizeof(b) + size + reloc_bytes + count * sizeof(*body);
 	unsigned char *envelope = malloc(length);
@@ -529,6 +568,7 @@ static void helper_map_regressions(void)
 }
 
 #include "test_native_inputs.h"
+#include "test_context.h"
 
 int main(void)
 {
@@ -548,16 +588,19 @@ int main(void)
 	}
 	native_input_regressions();
 	native_input_blinding_regressions();
+	int source_context = create_context(BPF_PROG_TYPE_XDP, 0, "GPL");
+	use_context(source_context, 0);
 	discover();
 	upload("", native, sizeof(native), 0);
 	upload(".proof", &proof, sizeof(proof), 0);
 	uint32_t before = generation();
 	struct native_lab_binding good = {
-		.version = 1, .arch = TV_ARCH, .abi_version = 1,
+		.version = NATIVE_LAB_BINDING_VERSION, .arch = TV_ARCH, .abi_version = 1,
 		.chunk_count = 1, .native_size = sizeof(native),
 		.total_native_size = sizeof(native), .proof_insns = 1,
 		.prog_type = BPF_PROG_TYPE_XDP, .snapshot_generation = before,
 	};
+	fill_context(&good);
 	unsigned char envelope[sizeof(good) + sizeof(native) + sizeof(proof)];
 	memcpy(envelope, &good, sizeof(good));
 	memcpy(envelope + sizeof(good), native, sizeof(native));
@@ -592,10 +635,15 @@ int main(void)
 	/* Valid metadata at seal time, but inconsistent with the loading context.
 	 * Only the native emitter receives prog, so this exercises its check.
 	 */
+	int socket_context = create_context(BPF_PROG_TYPE_SOCKET_FILTER, 0, "GPL");
+	use_context(socket_context, 0);
 	b = good; b.snapshot_generation = generation(); b.prog_type = BPF_PROG_TYPE_SOCKET_FILTER;
+	fill_context(&b);
 	memcpy(envelope, &b, sizeof(b));
 	upload(".binding", envelope, sizeof(envelope), 0);
-	load(generation(), 0, 1, "program type mismatch at JIT");
+	load(generation(), 0, 1, "program type mismatch before proof lowering");
+	if (close(socket_context)) fatal("close socket context");
+	use_context(source_context, 0);
 	group_regressions();
 	helper_map_regressions();
 	external_identity_regressions();
@@ -603,6 +651,8 @@ int main(void)
 	readonly_data_regressions();
 	readonly_overlap_regression();
 	bound_native_input_regressions();
+	context_regressions(source_context);
+	if (close(source_context)) fatal("close original context");
 	if (close(module_fd))
 		fatal("close module BTF");
 	puts("kernel binding regression: PASS");

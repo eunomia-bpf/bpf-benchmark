@@ -64,7 +64,7 @@ build-$(ARCH)/bpf_$(ARCH)_native_lab.c: ../../kinsn/module/$(ARCH)/bpf_$(ARCH)_n
 	install -d build-$(ARCH)
 	cp $< $@
 
-build/test-binding-kernel: test_binding_kernel.c test_native_inputs.h ../../kinsn/module/include/native_lab_input.h ../../kinsn/module/include/native_lab_binding.h
+build/test-binding-kernel: test_binding_kernel.c test_native_inputs.h test_context.h ../../kinsn/module/include/native_lab_input.h ../../kinsn/module/include/native_lab_binding.h
 	install -d build
 	$(CC) -Wall -Wextra -Werror -O2 -g -D__EXPORTED_HEADERS__ \
 		-I../../vendor/linux-framework/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
@@ -127,7 +127,7 @@ build/wrong-readonly/simulator.bpf.o: test_simulator.bpf.c
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		-I/usr/include/x86_64-linux-gnu -c $< -o $@
 
-build-arm64/test-binding-kernel: test_binding_kernel.c test_native_inputs.h ../../kinsn/module/include/native_lab_input.h ../../kinsn/module/include/native_lab_binding.h
+build-arm64/test-binding-kernel: test_binding_kernel.c test_native_inputs.h test_context.h ../../kinsn/module/include/native_lab_input.h ../../kinsn/module/include/native_lab_binding.h
 	install -d build-arm64
 	aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -g -static -D__EXPORTED_HEADERS__ \
 		-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
@@ -204,3 +204,16 @@ manifest-check: build/test-manifest
 build/test-manifest: test_manifest.cpp ../libnativeloader/src/native_loader_manifest.hpp
 	install -d build
 	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined $< -o $@
+
+build-arm64/bound-probe: ../fidelity/bound_probe.cpp ../libnativeloader/include/native_loader.hpp ../libnativeloader/build-tv-context-v2-arm64/libnative_loader.a
+	install -d build-arm64
+	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static \
+		-D__EXPORTED_HEADERS__ -DNATIVE_LINK_PATH='"/native-link"' \
+		-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+		$< ../libnativeloader/build-tv-context-v2-arm64/libnative_loader.a \
+		../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+		-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -pthread -o $@
+
+build-arm64/stage2-init: ../fidelity/negative_init.c
+	install -d build-arm64
+	aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -static -DBOUND_STAGE2 $< -o $@

@@ -63,6 +63,8 @@ struct FdLoadOptions {
     uint32_t source_btf_id = 0;
     std::vector<uint8_t> source_func_info;
     uint32_t source_func_info_rec_size = 0;
+    uint32_t prog_flags = 0;
+    int prog_token_fd = -1;
     uint32_t expected_attach_type = 0;
     uint32_t attach_btf_id = 0;
     uint32_t attach_btf_obj_id = 0;
@@ -75,6 +77,16 @@ void close_loaded_program(LoadedProgram *program);
 } // namespace native_loader
 
 extern "C" {
+
+/* Original BPF_PROG_LOAD attributes that bpf_prog_info does not expose.
+ * NULL on legacy entry points means zero flags and no token FD.
+ */
+struct native_loader_source_load_context {
+    uint32_t version;
+    uint32_t prog_flags;
+    int32_t prog_token_fd;
+    uint32_t reserved;
+};
 
 /* Version 1 enforces REQUIRE_BOUND_PROOF before native upload. */
 unsigned native_loader_bound_proof_abi_version(void);
@@ -125,6 +137,23 @@ int native_loader_load_from_fd_with_manifest_path_and_attach(
     uint32_t attach_btf_id,
     uint32_t attach_btf_obj_id,
     uint32_t attach_prog_id,
+    struct native_loader_c_result *out);
+
+int native_loader_load_from_fd_with_manifest_path_btf_and_context(
+    int original_prog_fd,
+    const char *manifest_path,
+    const char *source_bpf_path,
+    const int *source_fd_array,
+    uint32_t source_fd_array_count,
+    uint32_t source_btf_id,
+    const void *source_func_info,
+    uint32_t source_func_info_count,
+    uint32_t source_func_info_rec_size,
+    uint32_t expected_attach_type,
+    uint32_t attach_btf_id,
+    uint32_t attach_btf_obj_id,
+    uint32_t attach_prog_id,
+    const struct native_loader_source_load_context *context,
     struct native_loader_c_result *out);
 
 int native_loader_load_from_fd_with_manifest_path_btf_and_attach(

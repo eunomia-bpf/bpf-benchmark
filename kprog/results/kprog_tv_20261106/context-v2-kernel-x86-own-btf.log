@@ -1,0 +1,40 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+make -C ../libnativeloader BUILD_DIR=build-tv-binding
+make[1]: Entering directory '/workspaces/repository/kprog/libnativeloader'
+cmake -S . -B "build-tv-binding" \
+	-DNATIVE_LOADER_REPO_ROOT="/workspaces/repository" \
+	-DNATIVE_LOADER_LIBBPF_PREFIX="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix" \
+	-DNATIVE_LOADER_LIBBPF_LIBRARY="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" \
+	-DNATIVE_LOADER_KERNEL_OFFSETS_INCLUDE="/workspaces/repository/micro/programs/build-x86"
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspaces/repository/kprog/libnativeloader/build-tv-binding
+cmake --build "build-tv-binding" --target native_loader native_loader_shared
+gmake[2]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[ 50%] Building CXX object CMakeFiles/native_loader.dir/src/native_loader.cpp.o
+/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp: In function ‘int {anonymous}::load_stub_prog(int, int, uint32_t, uint32_t, const std::vector<unsigned int>&, uint32_t, const StubLoadAttrs&, bool, const std::string&, const std::vector<int>&)’:
+/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp:1733:13: error: cannot convert ‘const std::string’ {aka ‘const std::__cxx11::basic_string<char>’} to ‘int’
+ 1733 |             prog_name, insns, fd_array, verifier_log, log_true_size);
+      |             ^~~~~~~~~
+      |             |
+      |             const std::string {aka const std::__cxx11::basic_string<char>}
+/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp:1486:39: note:   initializing argument 5 of ‘int {anonymous}::bpf_prog_load_native_stub_raw(uint32_t, const StubLoadAttrs&, int, int, int, const std::string&, const std::vector<bpf_insn>&, const std::vector<int>&, std::vector<char>&, uint32_t&)’
+ 1486 |                                   int source_btf_fd,
+      |                                   ~~~~^~~~~~~~~~~~~
+gmake[5]: *** [CMakeFiles/native_loader.dir/build.make:76: CMakeFiles/native_loader.dir/src/native_loader.cpp.o] Error 1
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: *** [CMakeFiles/Makefile2:85: CMakeFiles/native_loader.dir/all] Error 2
+gmake[4]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: *** [CMakeFiles/Makefile2:92: CMakeFiles/native_loader.dir/rule] Error 2
+gmake[3]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[2]: *** [Makefile:124: native_loader] Error 2
+gmake[2]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+make[1]: *** [Makefile:11: all] Error 2
+make[1]: Leaving directory '/workspaces/repository/kprog/libnativeloader'
+make: *** [Makefile:112: build/test-loader] Error 2
+make: Leaving directory '/workspaces/repository/kprog/tv'

@@ -58,6 +58,8 @@ int main(int argc,char **argv)
         bpf_program *p=program(original);
         native_loader::FdLoadOptions options{};
         options.original_prog_fd=bpf_program__fd(p);
+        options.expected_attach_type=bpf_program__expected_attach_type(p);
+        options.prog_flags=bpf_program__flags(p);
         options.manifest_path=std::filesystem::absolute(argv[2]);
         options.source_insns.assign(bpf_program__insns(p),bpf_program__insns(p)+bpf_program__insn_cnt(p));
         options.native_link_path=std::filesystem::absolute(NATIVE_LINK_PATH);

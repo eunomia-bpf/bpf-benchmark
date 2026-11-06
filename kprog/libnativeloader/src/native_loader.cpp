@@ -1103,11 +1103,25 @@ uint32_t read_blob_generation(uint32_t chunk_id)
     return static_cast<uint32_t>(generation);
 }
 
+struct StubLoadAttrs {
+    uint32_t expected_attach_type = 0;
+    uint32_t attach_btf_id = 0;
+    uint32_t attach_btf_obj_id = 0;
+    uint32_t attach_prog_id = 0;
+    uint32_t prog_flags = 0;
+    int prog_token_fd = -1;
+    uint32_t prog_ifindex = 0;
+    uint32_t source_prog_id = 0;
+    bool gpl_compatible = true;
+    uint32_t source_btf_id = 0;
+    bpf_func_info entry_func{};
+};
+
 void seal_bound_chunk(const std::vector<uint8_t> &blob,
                       const std::vector<NativeLabReloc> &relocs,
                       const NativeBlobChunk &chunk, uint32_t chunk_id,
                       uint32_t chunk_count, uint32_t abi_mask,
-                      uint32_t prog_type, uint32_t expected_attach_type,
+                      uint32_t prog_type, const StubLoadAttrs &attrs,
                       const std::vector<bpf_insn> &proof)
 {
     const auto reloc_bytes = chunk_reloc_bytes(relocs, chunk);
@@ -1129,9 +1143,17 @@ void seal_bound_chunk(const std::vector<uint8_t> &blob,
         .reloc_count = static_cast<uint32_t>(reloc_bytes.size() / kRelocRecordBytes),
         .proof_insns = static_cast<uint32_t>(proof.size()),
         .prog_type = prog_type,
-        .expected_attach_type = expected_attach_type,
+        .expected_attach_type = attrs.expected_attach_type,
         .snapshot_generation = read_blob_generation(chunk_id),
         .reserved = 0,
+        .prog_flags = attrs.prog_flags,
+        .attach_btf_id = attrs.attach_btf_id,
+        .attach_btf_obj_id = attrs.attach_btf_obj_id,
+        .attach_prog_id = attrs.attach_prog_id,
+        .prog_ifindex = attrs.prog_ifindex,
+        .source_prog_id = attrs.source_prog_id,
+        .gpl_compatible = attrs.gpl_compatible,
+        .context_reserved = 0,
     };
     const auto *header_bytes = reinterpret_cast<const uint8_t *>(&header);
     std::vector<uint8_t> envelope(header_bytes, header_bytes + sizeof(header));
@@ -1160,7 +1182,7 @@ std::vector<uint32_t> upload_bound_proofs(
     const std::vector<NativeBlobChunk> &chunks,
     const std::vector<uint8_t> &blob,
     const std::vector<NativeLabReloc> &relocs,
-    uint32_t abi_mask, uint32_t prog_type, uint32_t expected_attach_type)
+    uint32_t abi_mask, uint32_t prog_type, const StubLoadAttrs &attrs)
 {
     const std::vector<bpf_insn> proof = bound_proof_sequence(proof_program);
     const std::vector<bpf_insn> continuation{
@@ -1181,7 +1203,7 @@ std::vector<uint32_t> upload_bound_proofs(
         const auto &body = i + 1 == chunks.size() ? proof : continuation;
         upload_proof_chunk(body, i);
         seal_bound_chunk(blob, relocs, chunks[i], i, chunks.size(), abi_mask,
-                         prog_type, expected_attach_type, body);
+                         prog_type, attrs, body);
         generations.push_back(read_blob_generation(i));
     }
     return generations;
@@ -1279,13 +1301,6 @@ int find_kfunc_btf_id()
 struct NativeStubBtfIds {
     uint32_t module_btf_id = 0;
     int kfunc_btf_id = 0;
-};
-
-struct StubLoadAttrs {
-    uint32_t expected_attach_type = 0;
-    uint32_t attach_btf_id = 0;
-    uint32_t attach_btf_obj_id = 0;
-    uint32_t attach_prog_id = 0;
 };
 
 struct ScopedFd {
@@ -1468,6 +1483,7 @@ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
                                   const StubLoadAttrs &attrs,
                                   int attach_prog_fd,
                                   int attach_btf_obj_fd,
+                                  int source_btf_fd,
                                   const std::string &prog_name,
                                   const std::vector<bpf_insn> &insns,
                                   const std::vector<int> &fd_array,
@@ -1476,13 +1492,17 @@ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
 {
     union bpf_attr attr = {};
     constexpr const char kDefaultName[] = "native_lab_stub";
-    constexpr const char kLicense[] = "GPL";
+    const char *license = attrs.gpl_compatible ? "GPL" : "BSD";
     const char *name_data = prog_name.empty() ? kDefaultName : prog_name.data();
     const size_t name_size = prog_name.empty()
         ? strlen(kDefaultName)
         : prog_name.size();
 
     attr.prog_type = prog_type_value;
+    attr.prog_flags = attrs.prog_flags;
+    attr.prog_ifindex = attrs.prog_ifindex;
+    if (attrs.prog_flags & BPF_F_TOKEN_FD)
+        attr.prog_token_fd = static_cast<uint32_t>(attrs.prog_token_fd);
     attr.expected_attach_type = attrs.expected_attach_type;
     attr.attach_btf_id = attrs.attach_btf_id;
     if (attach_prog_fd >= 0) {
@@ -1493,7 +1513,13 @@ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
     std::memcpy(attr.prog_name,
                 name_data,
                 std::min(name_size, sizeof(attr.prog_name) - 1));
-    attr.license = ptr_to_u64(kLicense);
+    attr.license = ptr_to_u64(license);
+    if (source_btf_fd >= 0) {
+        attr.prog_btf_fd = static_cast<uint32_t>(source_btf_fd);
+        attr.func_info = ptr_to_u64(&attrs.entry_func);
+        attr.func_info_cnt = 1;
+        attr.func_info_rec_size = sizeof(attrs.entry_func);
+    }
     attr.insns = ptr_to_u64(insns.data());
     attr.insn_cnt = static_cast<uint32_t>(insns.size());
     attr.fd_array = ptr_to_u64(fd_array.data());
@@ -1554,6 +1580,12 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     }
     if (!generations.empty() && generations.size() != chunks) {
         fail("native_kernel bound generation count does not match native chunks");
+    }
+    ScopedFd source_btf_fd;
+    if (attrs.source_btf_id) {
+        source_btf_fd.fd = bpf_btf_get_fd_by_id(attrs.source_btf_id);
+        if (source_btf_fd.fd < 0)
+            fail("open original entry BTF: " + std::string(std::strerror(errno)));
     }
     const bool tail_call_probe = tail_call_reachable && generations.empty();
     ScopedFd tail_call_map_fd;
@@ -1690,13 +1722,13 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         native_loader_kmsg_line(msg.str());
     }
     int fd = bpf_prog_load_native_stub_raw(
-        prog_type_value, attrs, attach_prog_fd.get(), attach_btf_obj_fd.get(),
+        prog_type_value, attrs, attach_prog_fd.get(), attach_btf_obj_fd.get(), source_btf_fd.get(),
         prog_name, insns, fd_array, verifier_log, log_true_size);
     if (fd < 0) {
         const int primary_error = fd;
         verifier_log.assign(kInitialVerifierLogSize, '\0');
         const int diagnostic_error = bpf_prog_load_native_stub_raw(
-            prog_type_value, attrs, attach_prog_fd.get(), attach_btf_obj_fd.get(),
+            prog_type_value, attrs, attach_prog_fd.get(), attach_btf_obj_fd.get(), source_btf_fd.get(),
             prog_name, insns, fd_array, verifier_log, log_true_size);
         if (diagnostic_error >= 0) {
             return diagnostic_error;
@@ -4555,8 +4587,7 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
         upload_relocs(relocs, chunks);
         if (!proof_insns.empty()) {
             generations = upload_bound_proofs(proof_insns, chunks, linked.blob,
-                relocs, linked.callee_saved_mask, prog_type,
-                attrs.expected_attach_type);
+                relocs, linked.callee_saved_mask, prog_type, attrs);
         }
         upload_end = std::chrono::steady_clock::now();
         {
@@ -5099,7 +5130,27 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     out.selected_native_object = native_object_path.string();
     out.selected_symbol = symbol_name;
 
+    if ((options.prog_flags & BPF_F_TOKEN_FD) && options.prog_token_fd < 0)
+        fail("native_loader: source token flag requires its captured token FD");
     StubLoadAttrs stub_attrs{};
+    stub_attrs.prog_flags = options.prog_flags;
+    stub_attrs.prog_token_fd = options.prog_token_fd;
+    stub_attrs.prog_ifindex = prog_info.ifindex;
+    stub_attrs.source_prog_id = prog_info.id;
+    stub_attrs.gpl_compatible = prog_info.gpl_compatible;
+    if (prog_info.nr_func_info) {
+        bpf_prog_info detail{};
+        detail.nr_func_info = 1;
+        detail.func_info_rec_size = sizeof(stub_attrs.entry_func);
+        detail.func_info = ptr_to_u64(&stub_attrs.entry_func);
+        uint32_t size = sizeof(detail);
+        const int error = bpf_obj_get_info_by_fd(options.original_prog_fd, &detail, &size);
+        if (error) fail("query original entry ABI: " + libbpf_error_string(error));
+        if (!detail.nr_func_info || !detail.btf_id || stub_attrs.entry_func.insn_off ||
+            !stub_attrs.entry_func.type_id || detail.func_info_rec_size != sizeof(stub_attrs.entry_func))
+            fail("native_loader: original program has no exact entry BTF prototype");
+        stub_attrs.source_btf_id = detail.btf_id;
+    }
     stub_attrs.expected_attach_type = options.expected_attach_type;
     stub_attrs.attach_btf_id = options.attach_btf_id
         ? options.attach_btf_id
@@ -5283,6 +5334,31 @@ extern "C" int native_loader_load_from_fd_with_manifest_path_btf_and_attach(
     uint32_t attach_prog_id,
     struct native_loader_c_result *out)
 {
+    return native_loader_load_from_fd_with_manifest_path_btf_and_context(
+        original_prog_fd, manifest_path, source_bpf_path,
+        source_fd_array, source_fd_array_count, source_btf_id,
+        source_func_info, source_func_info_count, source_func_info_rec_size,
+        expected_attach_type, attach_btf_id, attach_btf_obj_id, attach_prog_id,
+        nullptr, out);
+}
+
+extern "C" int native_loader_load_from_fd_with_manifest_path_btf_and_context(
+    int original_prog_fd,
+    const char *manifest_path,
+    const char *source_bpf_path,
+    const int *source_fd_array,
+    uint32_t source_fd_array_count,
+    uint32_t source_btf_id,
+    const void *source_func_info,
+    uint32_t source_func_info_count,
+    uint32_t source_func_info_rec_size,
+    uint32_t expected_attach_type,
+    uint32_t attach_btf_id,
+    uint32_t attach_btf_obj_id,
+    uint32_t attach_prog_id,
+    const struct native_loader_source_load_context *context,
+    struct native_loader_c_result *out)
+{
     if (out) {
         out->prog_fd = -1;
         out->replaced = 0;
@@ -5298,9 +5374,20 @@ extern "C" int native_loader_load_from_fd_with_manifest_path_btf_and_attach(
         return -1;
     }
 
+    if (context && (context->version != 1 || context->reserved)) {
+        if (out) std::snprintf(out->error, sizeof(out->error),
+            "native_loader: invalid source load context version/reserved");
+        errno = EINVAL;
+        return -1;
+    }
+
     try {
         native_loader::FdLoadOptions options{};
         options.original_prog_fd = original_prog_fd;
+        if (context) {
+            options.prog_flags = context->prog_flags;
+            options.prog_token_fd = context->prog_token_fd;
+        }
         options.manifest_path = manifest_path;
         options.source_bpf_path = source_bpf_path;
         if (source_fd_array_count > 0) {

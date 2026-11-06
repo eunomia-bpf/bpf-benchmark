@@ -13,11 +13,85 @@ static void native_lab_put_maps(struct bpf_map **maps, u32 count)
 	kfree(maps);
 }
 
-static void native_lab_release_maps(struct native_blob *blob)
+static void native_lab_release_binding_objects(struct native_blob *blob)
 {
 	native_lab_put_maps(blob->bound_maps, blob->bound_map_count);
 	blob->bound_maps = NULL;
 	blob->bound_map_count = 0;
+	if (blob->bound_source)
+		bpf_prog_put(blob->bound_source);
+	if (blob->bound_target)
+		bpf_prog_put(blob->bound_target);
+	blob->bound_source = NULL;
+	blob->bound_target = NULL;
+}
+
+/* Pinned programs keep the original BTF/token/device context alive. Raw
+ * attributes are compared as well as resolved object identities, so FD/ID reuse
+ * and identical-looking contexts never replace the sealed objects.
+ */
+static int native_lab_context_matches(const struct native_lab_binding *b,
+		const struct bpf_prog *prog, const struct bpf_prog *source,
+		const struct bpf_prog *target)
+{
+	struct btf *actual_btf, *expected_btf;
+	int err = 0;
+
+	if (!prog || !source || b->source_prog_id != source->aux->id ||
+	    b->prog_type != prog->type ||
+	    b->expected_attach_type != prog->expected_attach_type ||
+	    b->prog_flags != prog->aux->native_load_flags ||
+	    b->prog_ifindex != prog->aux->native_load_ifindex ||
+	    b->gpl_compatible != prog->gpl_compatible ||
+	    b->attach_btf_id != prog->aux->attach_btf_id ||
+	    prog->aux->token != source->aux->token ||
+	    (b->prog_ifindex && !bpf_prog_dev_bound_match(prog, source)))
+		return -EINVAL;
+	if (!!prog->aux->func_info_cnt != !!source->aux->func_info_cnt ||
+	    (source->aux->func_info_cnt &&
+	     (prog->aux->btf != source->aux->btf ||
+	      prog->aux->func_info[0].insn_off || source->aux->func_info[0].insn_off ||
+	      prog->aux->func_info[0].type_id != source->aux->func_info[0].type_id)))
+		return -EINVAL;
+	mutex_lock(&prog->aux->dst_mutex);
+	actual_btf = prog->aux->dst_prog ? prog->aux->dst_prog->aux->btf : prog->aux->attach_btf;
+	expected_btf = target ? target->aux->btf : source->aux->attach_btf;
+	if (prog->aux->dst_prog != target || actual_btf != expected_btf ||
+	    b->attach_btf_obj_id != (actual_btf ? btf_obj_id(actual_btf) : 0) ||
+	    b->attach_prog_id != (target ? target->aux->id : 0))
+		err = -EINVAL;
+	mutex_unlock(&prog->aux->dst_mutex);
+	return err;
+}
+
+static int native_lab_pin_context(const struct native_lab_binding *b,
+		struct bpf_prog **source_out, struct bpf_prog **target_out)
+{
+	struct bpf_prog *source, *target = NULL;
+	int err;
+
+	source = bpf_prog_by_id(b->source_prog_id);
+	if (IS_ERR(source))
+		return PTR_ERR(source);
+	if (b->attach_prog_id) {
+		target = bpf_prog_by_id(b->attach_prog_id);
+		if (IS_ERR(target)) {
+			err = PTR_ERR(target);
+			target = NULL;
+			goto fail;
+		}
+	}
+	err = native_lab_context_matches(b, source, source, target);
+	if (err)
+		goto fail;
+	*source_out = source;
+	*target_out = target;
+	return 0;
+fail:
+	if (target)
+		bpf_prog_put(target);
+	bpf_prog_put(source);
+	return err;
 }
 
 static int native_lab_pin_maps(const struct native_blob *blob,
@@ -135,7 +209,8 @@ static int native_lab_group_metadata(const struct native_lab_binding *member,
 	    member->arch != root->arch || member->abi_version != root->abi_version ||
 	    member->abi_mask != root->abi_mask ||
 	    member->prog_type != root->prog_type ||
-	    member->expected_attach_type != root->expected_attach_type)
+	    member->expected_attach_type != root->expected_attach_type ||
+	    memcmp(&member->prog_flags, &root->prog_flags, 8 * sizeof(u32)))
 		return -EINVAL;
 	return 0;
 }
@@ -228,7 +303,11 @@ static int native_lab_group_program(const struct bpf_prog *prog, u32 blob_id)
 	const struct native_lab_binding *b = &blobs[blob_id].binding;
 	u32 first = 0, i;
 	const struct bpf_insn *call;
+	int context_err = native_lab_context_matches(b, prog,
+		blobs[blob_id].bound_source, blobs[blob_id].bound_target);
 
+	if (context_err)
+		return context_err;
 	if (prog->len != 2 * b->chunk_count + 1 ||
 	    prog->insnsi[prog->len - 1].code != (BPF_JMP | BPF_EXIT))
 		return -EINVAL;

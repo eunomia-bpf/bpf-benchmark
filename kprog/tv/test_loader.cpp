@@ -58,6 +58,7 @@ static void btf_manifest_regressions()
         for (bool supplied : {false, true}) {
             native_loader::FdLoadOptions options{};
             options.original_prog_fd = bpf_program__fd(fixture.program);
+            options.expected_attach_type = bpf_program__expected_attach_type(fixture.program);
             options.manifest_path = std::filesystem::absolute("build/collision-manifest.json");
             options.source_insns.assign(bpf_program__insns(fixture.program),
                 bpf_program__insns(fixture.program) + bpf_program__insn_cnt(fixture.program));
@@ -129,6 +130,86 @@ static void btf_manifest_regressions()
     std::puts("full BTF selector cannot use a truncated no-BTF program name: PASS (rejected)");
 }
 
+static void load_context_regressions()
+{
+    static_assert(sizeof(native_loader_source_load_context) == 16);
+    static_assert(offsetof(native_loader_source_load_context, version) == 0);
+    static_assert(offsetof(native_loader_source_load_context, prog_flags) == 4);
+    static_assert(offsetof(native_loader_source_load_context, prog_token_fd) == 8);
+    static_assert(offsetof(native_loader_source_load_context, reserved) == 12);
+    std::vector<bpf_insn> body(2);
+    body[0].code = BPF_ALU64 | BPF_MOV | BPF_K;
+    body[0].imm = 2;
+    body[1].code = BPF_JMP | BPF_EXIT;
+    bpf_prog_load_opts attrs{};
+    attrs.sz = sizeof(attrs);
+    attrs.prog_flags = BPF_F_TEST_STATE_FREQ;
+    int original = bpf_prog_load(BPF_PROG_TYPE_XDP, "tv_ctx_flags", "GPL", body.data(), body.size(), &attrs);
+    if (original < 0) throw std::runtime_error("load flagged original");
+    native_loader::FdLoadOptions options{};
+    options.original_prog_fd = original;
+    options.source_insns = options.proof_insns = body;
+    options.native_object_path = std::filesystem::absolute("build/native-entry.o");
+    options.symbol_name = "tv_short_entry";
+    options.native_link_path = std::filesystem::absolute("../x86/native_lab/native_link/target/release/native-link");
+    bool rejected = false;
+    try {
+        auto invalid = native_loader::load_from_fd(options);
+        native_loader::close_loaded_program(&invalid);
+    } catch (const std::exception &error) {
+        assert(std::string(error.what()).find("seal binding") != std::string::npos);
+        rejected = true;
+    }
+    assert(rejected);
+    std::puts("loader cannot silently omit original flags: PASS (rejected)");
+    std::ofstream manifest("build/context-manifest.json");
+    manifest << "{\"objects\":[{\"program\":\"tv_ctx_flags\",\"native_object\":\"native-entry.o\","
+        "\"symbol\":\"tv_short_entry\",\"simulator_object\":\"simulator.bpf.o\","
+        "\"simulator_program\":\"tv_collision_entry_alpha\"}]}";
+    manifest.close();
+    std::ofstream source("build/context-source.bin", std::ios::binary);
+    source.write(reinterpret_cast<const char *>(body.data()), body.size() * sizeof(body[0]));
+    source.close();
+    if (!manifest || !source) throw std::runtime_error("write context fixture");
+    if (setenv("BPFREJIT_NATIVE_LINK_BINARY", options.native_link_path.c_str(), 1))
+        throw std::runtime_error("set native link path");
+    native_loader_source_load_context context{1, BPF_F_TEST_STATE_FREQ, -1, 0};
+    for (unsigned invalid = 0; invalid < 3; invalid++) {
+        context.version = invalid == 1 ? 2 : 1;
+        context.reserved = invalid == 2 ? 1 : 0;
+        native_loader_c_result result{};
+        int status = native_loader_load_from_fd_with_manifest_path_btf_and_context(original,
+            "build/context-manifest.json", "build/context-source.bin", nullptr, 0,
+            0, nullptr, 0, 0, 0, 0, 0, 0, &context, &result);
+        if (invalid) {
+            assert(status == -1 && errno == EINVAL && result.prog_fd == -1);
+            assert(std::string(result.error).find("invalid source load context version/reserved") != std::string::npos);
+            std::puts("C source context rejects ABI/reserved mismatch: PASS");
+        } else {
+            if (status) throw std::runtime_error(result.error);
+            unsigned char packet[64]{};
+            bpf_test_run_opts run{};
+            run.sz = sizeof(run); run.data_in = packet; run.data_size_in = sizeof(packet);
+            if (bpf_prog_test_run_opts(result.prog_fd, &run)) throw std::runtime_error("run captured C context");
+            assert(run.retval == 2 && result.replaced);
+            if (close(result.prog_fd)) throw std::runtime_error("close C context result");
+            std::puts("C captured source flags survive sealing/verifier/native JIT: PASS");
+        }
+    }
+    if (close(original)) throw std::runtime_error("close flagged source");
+    original = bpf_prog_load(BPF_PROG_TYPE_XDP, "tv_ctx_bsd", "BSD", body.data(), body.size(), nullptr);
+    if (original < 0) throw std::runtime_error("load BSD original");
+    options.original_prog_fd = original;
+    auto loaded = native_loader::load_from_fd(options);
+    bpf_prog_info info{};
+    uint32_t size = sizeof(info);
+    if (bpf_obj_get_info_by_fd(loaded.prog_fd, &info, &size)) throw std::runtime_error("query native GPL status");
+    assert(!info.gpl_compatible);
+    native_loader::close_loaded_program(&loaded);
+    if (close(original)) throw std::runtime_error("close BSD original");
+    std::puts("loader preserves original non-GPL status: PASS");
+}
+
 int main()
 {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
@@ -176,6 +257,7 @@ int main()
         std::perror("separate simulator map"); return 1;
     }
     try {
+        load_context_regressions();
         btf_manifest_regressions();
         for (const char *symbol : {"tv_short_entry", "tv_long_entry", "tv_helper_entry", "tv_map_entry", "tv_hash_entry", "tv_large_entry", "tv_readonly_entry"}) {
             const auto &proof = std::string(symbol) == "tv_helper_entry" ? helper :
@@ -369,6 +451,7 @@ int main()
             if (!manifest) return 1;
             native_loader::FdLoadOptions options{};
             options.original_prog_fd = bpf_program__fd(data_program);
+            options.expected_attach_type = bpf_program__expected_attach_type(data_program);
             options.source_insns.assign(bpf_program__insns(data_program),
                 bpf_program__insns(data_program) + bpf_program__insn_cnt(data_program));
             options.manifest_path = std::filesystem::absolute("build/data-manifest.json");

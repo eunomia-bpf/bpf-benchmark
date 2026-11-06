@@ -173,7 +173,7 @@ index 41cddd5154b9..48c49d3cc874 100644
  				       dst_reg, imm32);
  			break;
 diff --git a/include/linux/bpf.h b/include/linux/bpf.h
-index 22ed55a5898c..3537c24fef03 100644
+index 22ed55a5898c..dabaa0f11f5f 100644
 --- a/include/linux/bpf.h
 +++ b/include/linux/bpf.h
 @@ -967,8 +967,13 @@ struct bpf_func_proto {
@@ -211,10 +211,12 @@ index 22ed55a5898c..3537c24fef03 100644
  static inline bool bpf_kinsn_has_native_emit(const struct bpf_kinsn *kinsn)
  {
  	if (!kinsn)
-@@ -1723,6 +1741,8 @@ struct bpf_prog_aux {
+@@ -1723,6 +1741,10 @@ struct bpf_prog_aux {
  	struct bpf_trampoline *dst_trampoline;
  	enum bpf_prog_type saved_dst_prog_type;
  	enum bpf_attach_type saved_dst_attach_type;
++	u32 native_load_flags; /* Exact original BPF_PROG_LOAD context. */
++	u32 native_load_ifindex;
 +	bool native_proof; /* Interpreter execution cannot replace native emission. */
 +	bool native_entry_inputs; /* Private proof inputs require a matching JIT. */
  	bool verifier_zext; /* Zero extensions has been inserted by verifier. */
@@ -236,6 +238,18 @@ index e4e6a4224914..327bd2b303ce 100644
  	struct bpf_insn orig[2];
  };
  
+diff --git a/kernel/bpf/btf.c b/kernel/bpf/btf.c
+index 64f592148971..7df21e0f4430 100644
+--- a/kernel/bpf/btf.c
++++ b/kernel/bpf/btf.c
+@@ -8290,6 +8290,7 @@ u32 btf_obj_id(const struct btf *btf)
+ {
+ 	return btf->id;
+ }
++EXPORT_SYMBOL_GPL(btf_obj_id);
+ 
+ bool btf_is_kernel(const struct btf *btf)
+ {
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
 index 4476b5075fbe..7797f82cec23 100644
 --- a/kernel/bpf/core.c
@@ -268,11 +282,32 @@ index 4476b5075fbe..7797f82cec23 100644
  		jit_needed = true;
  
  	if (!bpf_prog_select_interpreter(fp))
+diff --git a/kernel/bpf/offload.c b/kernel/bpf/offload.c
+index 0ad97d643bf4..db38115720fd 100644
+--- a/kernel/bpf/offload.c
++++ b/kernel/bpf/offload.c
+@@ -734,6 +734,7 @@ bool bpf_prog_dev_bound_match(const struct bpf_prog *lhs, const struct bpf_prog
+ 
+ 	return ret;
+ }
++EXPORT_SYMBOL_GPL(bpf_prog_dev_bound_match);
+ 
+ bool bpf_offload_prog_map_match(struct bpf_prog *prog, struct bpf_map *map)
+ {
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index 274039e36465..7a6c6ed06e4a 100644
+index 274039e36465..f0913a39e1d5 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
-@@ -4772,6 +4772,8 @@ struct bpf_map *bpf_map_get_curr_or_next(u32 *id)
+@@ -3000,6 +3000,8 @@ static int bpf_prog_load(union bpf_attr *attr, bpfptr_t uattr, u32 uattr_size)
+ 		goto put_token;
+ 	}
+ 
++	prog->aux->native_load_flags = attr->prog_flags;
++	prog->aux->native_load_ifindex = attr->prog_ifindex;
+ 	prog->expected_attach_type = attr->expected_attach_type;
+ 	prog->sleepable = !!(attr->prog_flags & BPF_F_SLEEPABLE);
+ 	prog->aux->attach_btf = attach_btf;
+@@ -4772,6 +4774,8 @@ struct bpf_map *bpf_map_get_curr_or_next(u32 *id)
  	return map;
  }
  
@@ -281,6 +316,14 @@ index 274039e36465..7a6c6ed06e4a 100644
  struct bpf_prog *bpf_prog_get_curr_or_next(u32 *id)
  {
  	struct bpf_prog *prog;
+@@ -4809,6 +4813,7 @@ struct bpf_prog *bpf_prog_by_id(u32 id)
+ 	spin_unlock_bh(&prog_idr_lock);
+ 	return prog;
+ }
++EXPORT_SYMBOL_GPL(bpf_prog_by_id);
+ 
+ static int bpf_prog_get_fd_by_id(const union bpf_attr *attr)
+ {
 diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
 index 97eb923617a4..d5adfa10d37f 100644
 --- a/kernel/bpf/verifier.c

@@ -27,6 +27,7 @@
 
 #include <linux/capability.h>
 #include <linux/bpf.h>
+#include <linux/btf.h>
 #include <linux/bpf_verifier.h>
 #include <linux/debugfs.h>
 #include <linux/err.h>
@@ -113,6 +114,8 @@ struct native_blob {
 	u32 *bound_generations;
 	struct bpf_map **bound_maps;
 	u32 bound_map_count;
+	struct bpf_prog *bound_source;
+	struct bpf_prog *bound_target;
 };
 
 static struct native_blob blobs[NATIVE_LAB_MAX_BLOBS];
@@ -159,7 +162,7 @@ static int native_lab_advance_generation(struct native_blob *blob)
 {
 	if (blob->generation == U32_MAX)
 		return -EOVERFLOW;
-	native_lab_release_maps(blob);
+	native_lab_release_binding_objects(blob);
 	blob->generation++;
 	kfree(blob->bound_generations);
 	blob->bound_generations = NULL;
@@ -308,10 +311,6 @@ static int emit_native_lab_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	}
 	if (generation) {
 		err = native_lab_group_use(blob_id, generation, abi_mask);
-		if (!err && (!prog || prog->type != blobs[blob_id].binding.prog_type ||
-		    prog->expected_attach_type !=
-			blobs[blob_id].binding.expected_attach_type))
-			err = -EINVAL;
 		if (!err)
 			err = native_lab_group_program(prog, blob_id);
 		if (err) {
@@ -790,6 +789,7 @@ static ssize_t binding_write(struct file *file, const char __user *ubuf,
 	u32 *group_generations = NULL;
 	struct bpf_map **pinned_maps = NULL;
 	u32 pinned_map_count = 0;
+	struct bpf_prog *source = NULL, *target = NULL;
 	int err;
 
 	if (!capable(CAP_SYS_ADMIN))
@@ -816,7 +816,7 @@ static ssize_t binding_write(struct file *file, const char __user *ubuf,
 		err = -EINVAL;
 		goto out;
 	}
-	BUILD_BUG_ON(sizeof(header) != 64);
+	BUILD_BUG_ON(sizeof(header) != 96);
 	BUILD_BUG_ON(sizeof(*blob->relocs) != 16);
 	BUILD_BUG_ON(sizeof(*blob->proof) != 8);
 	err = native_lab_binding_snapshot(&header, data, len, blob->bytes,
@@ -829,10 +829,17 @@ static ssize_t binding_write(struct file *file, const char __user *ubuf,
 	err = native_lab_pin_maps(blob, &pinned_maps, &pinned_map_count);
 	if (err)
 		goto out;
+	err = native_lab_pin_context(&header, &source, &target);
+	if (err)
+		goto out;
 	err = native_lab_advance_generation(blob);
 	if (err)
 		goto out;
 	blob->binding = header;
+	blob->bound_source = source;
+	blob->bound_target = target;
+	source = NULL;
+	target = NULL;
 	blob->bound_maps = pinned_maps;
 	blob->bound_map_count = pinned_map_count;
 	blob->bound_generations = group_generations;
@@ -840,6 +847,10 @@ static ssize_t binding_write(struct file *file, const char __user *ubuf,
 	pinned_map_count = 0;
 	group_generations = NULL;
 out:
+	if (source)
+		bpf_prog_put(source);
+	if (target)
+		bpf_prog_put(target);
 	kfree(group_generations);
 	native_lab_put_maps(pinned_maps, pinned_map_count);
 	mutex_unlock(&blobs_lock);
@@ -1142,7 +1153,7 @@ static void bpf_arm64_native_lab_debugfs_exit(void)
 		kfree(blobs[i].bytes);
 		kfree(blobs[i].relocs);
 		kvfree(blobs[i].proof);
-		native_lab_release_maps(&blobs[i]);
+		native_lab_release_binding_objects(&blobs[i]);
 		kfree(blobs[i].bound_generations);
 		blobs[i].bound_generations = NULL;
 		blobs[i].bytes = NULL;

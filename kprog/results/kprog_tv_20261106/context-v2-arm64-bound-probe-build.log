@@ -1,0 +1,10 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build-arm64
+aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static \
+	-D__EXPORTED_HEADERS__ -DNATIVE_LINK_PATH='"/native-link"' \
+	-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+	../fidelity/bound_probe.cpp ../libnativeloader/build-tv-context-v2-arm64/libnative_loader.a \
+	../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+	-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -pthread -o build-arm64/bound-probe
+make: 'build-arm64/stage2-init' is up to date.
+make: Leaving directory '/workspaces/repository/kprog/tv'

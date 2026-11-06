@@ -1,0 +1,23 @@
+make: Entering directory '/workspaces/repository/kprog/fidelity'
+aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -static -DBOUND_STAGE2 negative_init.c -o build-arm64/stage2-init
+python3 stage2.py package --arch arm64 --build ../tv/build-arm64/stage2-readonly
+install -d ../results/kprog_tv_20261106/helper-map-arm64-context-v2
+timeout 600 qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 2 -m 2048 \
+	-nographic -no-reboot -kernel /workspaces/repository/kprog/tv/build-kernel-arm64/arch/arm64/boot/Image \
+	-initrd ../tv/build-arm64/stage2-readonly/stage2.cpio -append 'console=ttyAMA0 rdinit=/init panic=-1' \
+	> ../results/kprog_tv_20261106/helper-map-arm64-context-v2/guest-console.log 2>&1
+python3 stage2.py collect --arch arm64 --build ../tv/build-arm64/stage2-readonly --out ../results/kprog_tv_20261106/helper-map-arm64-context-v2
+helper_only_uid_gid: passed
+helper_chain_simple: passed
+map_array_lookup: passed
+map_array_index_packet: passed
+map_hash_lookup: passed
+map_hash_str_key: passed
+map_percpu_array: passed
+map_lru_hash_counter: passed
+map_percpu_hash_counter: passed
+combined_helper_map: passed
+multi_map_policy: passed
+packet_5tuple_classify: passed
+stats_mixed_helpers: passed
+make: Leaving directory '/workspaces/repository/kprog/fidelity'

@@ -262,3 +262,51 @@ CALL. Its body SP does not point at the saved outer return address; seeding
 that word with a return token invents state. The producer's normalization of
 linked JMP-to-end into a fictitious RET has been reported to C for correction.
 This observation is not hidden by granting a guessed stack-base relation.
+
+Load-context binding version 2
+------------------------------
+
+The 96-byte version-2 envelope binds raw BPF_PROG_LOAD flags, interface, GPL
+status, attachment BTF/function and target, and the original source program ID.
+Sealing pins the source/target programs; verifier-side and JIT-side callbacks
+compare resolved BTF, token and device objects, as well as every serialized
+attribute. The original source BTF object and main function prototype are
+forwarded into the actual stub and checked against the pinned original.
+Mutation releases the pinned references. The kernel patch includes the small
+GPL exports used to pin/query those existing kernel objects.
+
+The new typed C context entry has a checked 16-byte layout (all four offsets,
+not just sizeof), version 1, raw flags, signed token FD and zero reserved word.
+The old C entry remains a zero-flags wrapper. Original flags that differ reject;
+the loader preserves actual non-GPL licensing. The bound-proof capability
+version stays 1; the private input marker ABI stays 2. The fidelity probe now
+copies libbpf's real expected attach type and flags.
+
+`make -C kprog/tv check`, x86 kernel/loader regression and Arm kernel regression
+pass. They reject all eight load-context metadata changes at seal, flags/GPL
+mismatches before proof lowering, and C-context ABI/reserved drift. Closing the
+original FD after sealing retains its pinned identity. Exact nonzero flags and
+non-GPL native execution pass. Existing BTF-name collisions, DATASEC, map/helper,
+immutable data, chunk ordering, generation and input-ABI regressions still pass.
+The real C API propagates nonzero flags through sealing, verification and native
+execution. The initial loader fixture omitted libbpf's actual XDP attach type;
+that rejection is retained and the fixture now copies the captured value.
+A development retry initially missed the diagnostic-call BTF-FD argument; its
+compile failure is retained and both calls now pass the same pinned BTF FD.
+
+All 13 original Arm helper/map programs also pass kernel and context-bound
+native execution via the new library. Their per-program raw outputs are in
+`helper-map-arm64-context-v2/`. The exact runtime initramfs, source and compiled
+inputs are in `context-v2-inputs.tar.gz`. No program is removed or relabeled a
+translation certificate by these functional checks. An additional loopback
+fixture failed during the original kernel load, before binding; its log/source
+are retained as a setup failure rather than a verifier rejection.
+
+Both stock module sets, all 15 x86/11 Arm kinsn modules, and the actual Arm EFI
+image were rebuilt. Modules_install and depmod succeeded. Immutable matched
+runtime bundles live in the lane checkpoint area under `paired-context-v2/`;
+the committed per-file manifests cover kernels, EFI, loaders and stock/kinsn
+module trees. Source/core outputs from other lanes were not replaced. Full
+per-program TV and its concrete entry witnesses remain active work; the
+conditional composition theorem is unchanged and its trusted kernel binding
+base now includes these context and BTF-prototype checks.
