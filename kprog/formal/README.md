@@ -1,6 +1,6 @@
 # Native simulator verification
 
-With Lean/Elan, Python 3, Rust/Cargo, a C compiler with UBSan, and the `vendor/libbpf` and `vendor/linux-framework` submodules
+With Lean/Elan, Python 3, Rust/Cargo, a C compiler with UBSan, clang18/LLVM18 tools, and the `vendor/libbpf` and `vendor/linux-framework` submodules
 available, run the complete local check:
 
 ```sh
@@ -17,8 +17,11 @@ AArch64. Dispatcher coverage and exclusivity theorems concern the modeled
 routing tables; they are **not yet a full simulator-step refinement theorem**.
 The ISA reference lives in `KProgFormal/Reference/`; it imports no simulator
 contracts. The step refinements in `Refinement/` connect CMOV, BT, BZHI,
-ANDN, BMI2 shifts/rotates, BSWAP/MOVBE and register/immediate/memory PUSH/POP handlers to that reference, including registers,
-flags, XMM0, memory, PC and ordered access/fault effects. The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary, logical-register, MOVK, move-immediate, register-move, all32 SIMD/GPR bit-transfer (FMOV), byte-vector reduction (CNT/UADDLV), conditional-compare (CCMP), ADD/SUB immediate/shifted-register/extended-register, NOP, ordinary-branch, scalar immediate-memory and LDP/STP signed-offset
+ANDN, BMI2 shifts/rotates, BSWAP/MOVBE, ordinary MOV and register/immediate/memory PUSH/POP handlers to that reference, including registers,
+flags, XMM0, memory, PC and ordered access/fault effects. MOV includes AL/AH,
+REX byte registers, partial/zero-extending writes, immediate/ModRM/moffs forms,
+prefix ordering and source/destination aliases. Its shared scalar primitives
+operate on materialized native register values. The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary, logical-register, MOVK, move-immediate, register-move, all32 SIMD/GPR bit-transfer (FMOV), byte-vector reduction (CNT/UADDLV), conditional-compare (CCMP), ADD/SUB immediate/shifted-register/extended-register, NOP, ordinary-branch, scalar immediate-memory and LDP/STP signed-offset
 families connect through their modules in `Refinement/`, including native
 aliases, all raw NZCV predicates, ZR/SP separation including MOV destinations, legal extract immediates,
 shifted source modifiers, exact NZCV updates and W zero-extension. Arithmetic NZCV uses width-sized operands
@@ -78,7 +81,10 @@ value, read/write permissions and initialization status; absent cells fault.
 `tools/check_reference.py` supplies concrete wire examples and checks the
 CPU counterexamples and the encoder's signed displacement packing. The binary
 executes the same Lean definitions used by the proofs, without a C/Python
-restatement of ISA semantics.
+restatement of ISA semantics. `tools/check_reference_x86_scalar.py` adds concrete
+MOV/prefix/byte-lane cases. `tools/check_x86_memory_widths.py` compiles the actual
+C memory contract to BPF and checks access kind, address, width and count;
+unaligned host accesses use alignment-one alias types and remain UBSan-checked.
 
 For AArch64, send `isa: "aarch64"` to the same executable. Supply exactly four
 little-endian native bytes, `registers` as X0..X30 followed by SP (32 words),

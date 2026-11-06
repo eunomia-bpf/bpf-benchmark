@@ -267,10 +267,83 @@ def pushTransfer (width : StackWidth) (value : Word) (reads : List Event)
       ⟨{ s with gpr := (fun r => if r = 4 then address else s.gpr r), memory := memory, pc := nextPc },
         reads ++ [event], none⟩
 
+/-- Scalar integer sizes, including byte-register lanes absent from CMOV. -/
+inductive ScalarWidth | w8 | w16 | w32 | w64
+  deriving DecidableEq, Repr
+
+def ScalarWidth.bytes : ScalarWidth → Nat
+  | .w8 => 1 | .w16 => 2 | .w32 => 4 | .w64 => 8
+
+def ScalarWidth.bits (width : ScalarWidth) : Nat := width.bytes * 8
+
+inductive RegisterSlice
+  | low (reg : Register)
+  | high (reg : Fin 4)
+  deriving DecidableEq, Repr
+
+def RegisterSlice.reg : RegisterSlice → Register
+  | .low reg => reg
+  | .high reg => ⟨reg.val, by omega⟩
+
+def RegisterSlice.shift (slice : RegisterSlice) (width : ScalarWidth) : Nat :=
+  match slice with
+  | .high _ => if width = .w8 then 8 else 0
+  | .low _ => 0
+
+inductive ScalarSource
+  | register (slice : RegisterSlice)
+  | memory (address : Word)
+  | immediate (value : Word)
+  deriving DecidableEq, Repr
+
+inductive ScalarDestination
+  | register (slice : RegisterSlice)
+  | memory (address : Word)
+  deriving DecidableEq, Repr
+
+def scalarRegisterValue (s : State) (width : ScalarWidth) (slice : RegisterSlice) : Word :=
+  (((s.gpr slice.reg) >>> slice.shift width).setWidth width.bits).setWidth 64
+
+def scalarWriteValue (old value : Word) (width : ScalarWidth) (slice : RegisterSlice) : Word :=
+  if width = .w32 then (value.setWidth 32).setWidth 64
+  else
+    let shift := slice.shift width
+    let mask := BitVec.ofNat 64 (2^width.bits - 1) <<< shift
+    (old &&& ~~~mask) ||| (((value.setWidth width.bits).setWidth 64) <<< shift)
+
+def scalarRead (s : State) (width : ScalarWidth) : ScalarSource → Except Fault (Word × List Event)
+  | .register slice => .ok (scalarRegisterValue s width slice, [])
+  | .immediate value => .ok (value, [])
+  | .memory address => readSource s (.memory address) width.bytes
+
+def scalarWrite (s : State) (width : ScalarWidth) (destination : ScalarDestination) (value : Word) :
+    Except Fault (State × List Event) :=
+  match destination with
+  | .register slice =>
+      .ok ({ s with gpr := fun r => if r = slice.reg then
+        scalarWriteValue (s.gpr r) value width slice else s.gpr r }, [])
+  | .memory address =>
+      match writeMemory s.memory address value width.bytes with
+      | .error fault => .error fault
+      | .ok (memory, event) => .ok ({ s with memory := memory }, [event])
+
+/-- Ordinary MOV reads its source before changing an aliased destination or
+address register. Byte/word writes preserve other bits, E writes zero-extend,
+and every flag and vector is preserved, including on a memory fault. -/
+def moveStep (width : ScalarWidth) (dst : ScalarDestination) (src : ScalarSource)
+    (nextPc : Word) (s : State) : Transition State :=
+  match scalarRead s width src with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (value, reads) =>
+      match scalarWrite s width dst value with
+      | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
+      | .ok (result, writes) => ⟨{ result with pc := nextPc }, reads ++ writes, none⟩
+
 /-- One architectural instruction with its decoded fall-through address.
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | move (width : ScalarWidth) (dst : ScalarDestination) (src : ScalarSource) (nextPc : Word)
   | push (width : StackWidth) (src : Register) (nextPc : Word)
   | pushImmediate (width : StackWidth) (value nextPc : Word)
   | pushMemory (width : StackWidth) (address nextPc : Word)
@@ -291,6 +364,7 @@ inductive Instruction
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .move width dst src nextPc => moveStep width dst src nextPc s
   | .byteSwap width dst nextPc => swapStep width dst nextPc s
   | .movbeLoad width dst address nextPc => movbeLoadStep width dst address nextPc s
   | .movbeStore width src address nextPc => movbeStoreStep width src address nextPc s
@@ -351,6 +425,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .move .. => 0xffffffffffffffff
   | .push .. | .pushImmediate .. | .pushMemory .. | .popMemory .. => 0xffffffffffffffff
   | .byteSwap .. | .movbeLoad .. | .movbeStore .. => 0xffffffffffffffff
   | .bmiShift .. => 0xffffffffffffffff
@@ -377,6 +452,7 @@ private structure Prefix where
   operand16 : Bool := false
   address32 : Bool := false
   rex : Nat := 0
+  rexPresent : Bool := false
   segment : Nat := 0
   vexInvalid : Bool := false
   mandatoryPrefix : Nat := 0
@@ -388,14 +464,14 @@ private def prefixes : List Byte → Prefix → Nat → Prefix × List Byte × N
   | [], p, n => (p, [], n)
   | b :: rest, p, n =>
       let v := b.toNat
-      if v = 0x66 then prefixes rest { p with operand16 := true, rex := 0, vexInvalid := true } (n + 1)
-      else if v = 0x67 then prefixes rest { p with address32 := true, rex := 0 } (n + 1)
+      if v = 0x66 then prefixes rest { p with operand16 := true, rex := 0, rexPresent := false, vexInvalid := true } (n + 1)
+      else if v = 0x67 then prefixes rest { p with address32 := true, rex := 0, rexPresent := false } (n + 1)
       else if v = 0x64 ∨ v = 0x65 then
-        prefixes rest { p with segment := v, rex := 0 } (n + 1)
+        prefixes rest { p with segment := v, rex := 0, rexPresent := false } (n + 1)
       else if v = 0x26 ∨ v = 0x2e ∨ v = 0x36 ∨ v = 0x3e then
-        prefixes rest { p with segment := 0, rex := 0 } (n + 1)
-      else if v = 0xf2 ∨ v = 0xf3 then prefixes rest { p with rex := 0, vexInvalid := true, mandatoryPrefix := v } (n + 1)
-      else if 0x40 ≤ v ∧ v ≤ 0x4f then prefixes rest { p with rex := v - 0x40, vexInvalid := true } (n + 1)
+        prefixes rest { p with segment := 0, rex := 0, rexPresent := false } (n + 1)
+      else if v = 0xf2 ∨ v = 0xf3 then prefixes rest { p with rex := 0, rexPresent := false, vexInvalid := true, mandatoryPrefix := v } (n + 1)
+      else if 0x40 ≤ v ∧ v ≤ 0x4f then prefixes rest { p with rex := v - 0x40, rexPresent := true, vexInvalid := true } (n + 1)
       else (p, b :: rest, n)
 
 private def byteAt (bytes : Array Byte) (position : Nat) : Except String Nat :=
@@ -465,12 +541,64 @@ private def operand (bytes : Array Byte) (s : State) (p : Prefix)
     let segment := if p.segment = 0x64 then s.fsBase else if p.segment = 0x65 then s.gsBase else 0
     pure (.memory (segment + offset), nextPc, afterDisp)
 
+private def scalarWidth (p : Prefix) (byte : Bool) : ScalarWidth :=
+  if byte then .w8 else if p.rex / 8 = 1 then .w64 else if p.operand16 then .w16 else .w32
+
+private def scalarSlice (p : Prefix) (width : ScalarWidth) (code : Nat) : RegisterSlice :=
+  if h : width = .w8 ∧ p.rexPresent = false ∧ 4 ≤ code ∧ code < 8 then
+    .high ⟨code - 4, by omega⟩
+  else .low (registerCode code)
+
+private def scalarSource (p : Prefix) (width : ScalarWidth) : Source → ScalarSource
+  | .register reg => .register (scalarSlice p width reg.val)
+  | .memory address => .memory address
+
+private def scalarDestination (p : Prefix) (width : ScalarWidth) : Source → ScalarDestination
+  | .register reg => .register (scalarSlice p width reg.val)
+  | .memory address => .memory address
+
+private def fallthrough (s : State) (length : Nat) : Except String Word :=
+  if length ≤ 15 then .ok (s.pc + BitVec.ofNat 64 length)
+  else .error "native encoding exceeds the architectural 15-byte limit"
+
 /-- Decode a native instruction. Operands, effective addresses and fall-through
 PC are obtained from bytes, including REX, operand/address size, segment bases,
 ModRM, SIB and signed displacement. No caller-supplied decode is trusted. -/
 def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   let (p, _, count) := prefixes bytes.toList {} 0
   let first ← byteAt bytes count
+  if 0xb0 ≤ first ∧ first ≤ 0xbf then
+    let width := scalarWidth p (decide (first < 0xb8))
+    let size := width.bytes
+    let immediate ← signedDisplacement bytes (count + 1) size
+    let nextPc ← fallthrough s (count + 1 + size)
+    let dst := scalarSlice p width (first % 8 + 8 * (p.rex % 2))
+    return .move width (.register dst) (.immediate immediate) nextPc
+  if 0x88 ≤ first ∧ first ≤ 0x8b then
+    let width := scalarWidth p (first % 2 == 0)
+    let modrm ← byteAt bytes (count + 1)
+    let reg := scalarSlice p width ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
+    let (rm, nextPc, _) ← operand bytes s p modrm (count + 2) 0
+    if first < 0x8a then
+      return .move width (scalarDestination p width rm) (.register reg) nextPc
+    else return .move width (.register reg) (scalarSource p width rm) nextPc
+  if first = 0xc6 ∨ first = 0xc7 then
+    let width := scalarWidth p (first == 0xc6)
+    let modrm ← byteAt bytes (count + 1)
+    if (modrm / 8) % 8 ≠ 0 then throw "invalid MOV immediate opcode extension"
+    let size := if width = .w64 then 4 else width.bytes
+    let (rm, nextPc, cursor) ← operand bytes s p modrm (count + 2) size
+    let immediate ← signedDisplacement bytes cursor size
+    return .move width (scalarDestination p width rm) (.immediate immediate) nextPc
+  if 0xa0 ≤ first ∧ first ≤ 0xa3 then
+    let width := scalarWidth p (first % 2 == 0)
+    let size := if p.address32 then 4 else 8
+    let raw ← signedDisplacement bytes (count + 1) size
+    let offset := if p.address32 then (raw.setWidth 32).setWidth 64 else raw
+    let segment := if p.segment = 0x64 then s.fsBase else if p.segment = 0x65 then s.gsBase else 0
+    let nextPc ← fallthrough s (count + 1 + size)
+    if first < 0xa2 then return .move width (.register (.low 0)) (.memory (segment + offset)) nextPc
+    else return .move width (.memory (segment + offset)) (.register (.low 0)) nextPc
   if 0x50 ≤ first ∧ first ≤ 0x57 then
     let length := count + 1
     if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"

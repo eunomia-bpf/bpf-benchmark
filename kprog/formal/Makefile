@@ -152,6 +152,8 @@ check:
 	python3 tools/generate_helper_oracle.py --check
 	lake build
 	python3 tools/check_reference.py
+	python3 tools/check_reference_x86_scalar.py
+	python3 tools/check_x86_memory_widths.py
 	python3 tools/check_reference_arm64.py
 	python3 tools/check_no_sorry.py --check
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_cond_host.c -o build/test_arm64_cond_host
