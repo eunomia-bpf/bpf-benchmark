@@ -7606,6 +7606,21 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0972 - the noun was inside a macro, after its brace
+
+One of the last two counts a set whose name is written in a macro, so the noun
+sits after the macro's closing brace rather than after the number. The separator
+class now crosses that group, which classifies it.
+
+The remaining figure has no noun after it at all: a parenthetical count followed
+by a semicolon and a clause about what changed. Nothing in the sentence says
+what the number counts, so it stays unclassified, and the line reports one.
+
+The remainder has gone from seventy-six to one across this sequence, and each
+reduction named the form it found: four line-reference forms, splits beside
+their whole, bucket totals, and the separators and nouns a count is written
+with. Census unchanged; the report names nine classes and states one unreached.
+
 ### Step 0971 - six separators and the nouns they introduce
 
 The last six figures needed four more separators and four more nouns. A figure

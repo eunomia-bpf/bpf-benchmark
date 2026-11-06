@@ -3799,7 +3799,8 @@ def figure_coverage(log: pathlib.Path) -> tuple[int, int, int, set[int]]:
         r"modeled|grid|"
         r"parameters|distinct|routed|LCG|fixed-seed|theorems|modules|"
         r"mutations|specifications|axioms|rows|name|use|aggregate|"
-        r"refinement|and|up\b|carry\b)"
+        r"refinement|and|up\b|carry\b|\\texttt\{[^}]*\}s?\b|"
+        r"\\texttt\{[^}]*\})"
         % (re.escape("{:,}".format(v)), v), flat)}
     return len(figs), bound, len(held), (
         left, line_ids, rows, catches, padded, inside, sibling, split,
