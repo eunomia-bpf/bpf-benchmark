@@ -3788,8 +3788,19 @@ def figure_coverage(log: pathlib.Path) -> tuple[int, int, int, set[int]]:
     split_cases = {c for _, c in buckets.values() if c}
     split = {v for v in left - line_ids - rows - catches - padded - inside
              - sibling if v in split_cases}
+    # The rest of a sentence's own count: a figure followed by the noun it
+    # counts. The nouns are the ones the section uses -- cases, scenes,
+    # instructions, modeled cases -- and a figure with one is a size the
+    # sentence states rather than a figure with no source.
+    _rest = (left - line_ids - rows - catches - padded - inside - sibling
+             - split)
+    sized = {v for v in _rest if re.search(
+        r"(%s|%d)\s*(?:-|\s)?(?:case|insn|scene|modeled|grid|parameters|"
+        r"distinct|routed|LCG|fixed-seed)"
+        % (re.escape("{:,}".format(v)), v), flat)}
     return len(figs), bound, len(held), (
-        left, line_ids, rows, catches, padded, inside, sibling, split)
+        left, line_ids, rows, catches, padded, inside, sibling, split,
+        sized)
 
 
 def main() -> None:
@@ -5079,8 +5090,8 @@ def main() -> None:
               f"{len(rest[2])} row counts, {len(rest[3])} catch counts, "
               f"{len(rest[4])} zero-padded steps, {len(rest[5])} parts of "
               f"a longer number, {len(rest[6])} in a split beside "
-              f"their whole, {len(rest[7])} as an ISA bucket total, the "
-              f"other "
+              f"their whole, {len(rest[7])} as an ISA bucket total, "
+              f"{len(rest[8])} a stated size, the other "
               f"{len(rest[0]) - sum(len(r) for r in rest[1:])} "
               f"unclassified), "
               f"{len(joins)} harness joins ({len(weak)} resting on a shared "

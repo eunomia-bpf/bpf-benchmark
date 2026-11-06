@@ -7606,6 +7606,21 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0968 - fourteen figures are followed by the noun they count
+
+Fourteen of the remaining figures are followed by the noun they count: cases,
+scenes, instructions, modeled cases, grid rows, parameters. Those are sizes the
+section states about a host it names, so they are now counted as their own class
+rather than as figures with no source.
+
+The nouns are a fixed list read from the section, and a figure with one of them
+is classified; anything else stays unclassified. That is the same choice the
+class names have made throughout: name what the text says about the figure, and
+report the rest as unreached.
+
+The remainder falls from thirty-one to seventeen. Census unchanged; the report
+names nine classes.
+
 ### Step 0967 - only two of the twenty-two are case counts
 
 The previous step said the twenty-two figures outside the classifier were sizes
