@@ -1,0 +1,4 @@
+libbpf: prog 'bcc_biosnoop_block_rq_insert_arm64_sim_xdp': BPF program load failed: -EACCES
+libbpf: prog 'bcc_biosnoop_block_rq_insert_arm64_sim_xdp': failed to load: -EACCES
+libbpf: failed to load object '/objects/bcc_biosnoop_block_rq_insert.bpf.o'
+error: bpf_object__load failed: Permission denied (os error 13); verifier log: /results/bcc_biosnoop_block_rq_insert.verifier.log

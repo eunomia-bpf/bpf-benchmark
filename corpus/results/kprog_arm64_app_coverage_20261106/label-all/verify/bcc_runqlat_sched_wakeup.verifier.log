@@ -1,0 +1,32 @@
+0: R1=ctx() R10=fp0
+; ARM64_SIM_ENTRY_XDP(ctx); @ bcc_runqlat_sched_wakeup.bpf.c:43
+0: (61) r5 = *(u32 *)(r1 +0)          ; R1=ctx() R5=pkt(r=0)
+1: (7a) *(u64 *)(r10 -8) = 0          ; R10=fp0 fp-8=0
+2: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0
+3: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0
+4: (7a) *(u64 *)(r10 -32) = 0         ; R10=fp0 fp-32=0
+5: (7a) *(u64 *)(r10 -40) = 0         ; R10=fp0 fp-40=0
+6: (7a) *(u64 *)(r10 -48) = 0         ; R10=fp0 fp-48=0
+7: (7a) *(u64 *)(r10 -56) = 0         ; R10=fp0 fp-56=0
+8: (7a) *(u64 *)(r10 -64) = 0         ; R10=fp0 fp-64=0
+9: (7a) *(u64 *)(r10 -72) = 0         ; R10=fp0 fp-72=0
+10: (7a) *(u64 *)(r10 -80) = 0        ; R10=fp0 fp-80=0
+11: (7a) *(u64 *)(r10 -88) = 0        ; R10=fp0 fp-88=0
+12: (7a) *(u64 *)(r10 -96) = 0        ; R10=fp0 fp-96=0
+13: (7a) *(u64 *)(r10 -104) = 0       ; R10=fp0 fp-104=0
+14: (7a) *(u64 *)(r10 -112) = 0       ; R10=fp0 fp-112=0
+15: (7a) *(u64 *)(r10 -120) = 0       ; R10=fp0 fp-120=0
+16: (7a) *(u64 *)(r10 -128) = 0       ; R10=fp0 fp-128=0
+17: (7a) *(u64 *)(r10 -136) = 0       ; R10=fp0 fp-136=0
+18: (7a) *(u64 *)(r10 -144) = 0       ; R10=fp0 fp-144=0
+19: (7a) *(u64 *)(r10 -152) = 0       ; R10=fp0 fp-152=0
+20: (7a) *(u64 *)(r10 -160) = 0       ; R10=fp0 fp-160=0
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_8, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_runqlat_sched_wakeup.bpf.c:61
+21: (18) r1 = 0xffff00000638c000      ; R1=map_ptr(map=filter_cg_1,ks=4,vs=8)
+23: (71) r1 = *(u8 *)(r1 +0)          ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+24: (56) if w1 != 0x0 goto pc+60      ; R1=0
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X19, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 2260ULL); @ bcc_runqlat_sched_wakeup.bpf.c:82
+25: (71) r4 = *(u8 *)(r5 +2260)
+invalid access to packet, off=2260 size=1, R5(id=0,off=2260,r=0)
+R5 offset is outside of the packet
+processed 25 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0

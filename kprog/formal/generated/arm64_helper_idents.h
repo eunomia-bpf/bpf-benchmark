@@ -2,15 +2,15 @@
 #ifndef KPROG_FORMAL_GENERATED_ARM64_HELPER_IDENTS_H
 #define KPROG_FORMAL_GENERATED_ARM64_HELPER_IDENTS_H
 /*
- * The AArch64 artifact encoder's BPF helper-ident table: the 61 kernel
+ * The AArch64 artifact encoder's BPF helper-ident table: the 66 kernel
  * ids the AArch64 simulator recognizes, in id-sorted order.
  * KPROG_ARM64_HELPER_ROW maps a kernel id to its 1-based position in that
  * order, 0 outside. KPROG_ARM64_HELPER_DELEGATE_* pins the 1-based
  * lexicographic rank of a sim-header forwarding target over the full
- * 61-name table: the compact per-program slot the encoder's renumbering
+ * 66-name table: the compact per-program slot the encoder's renumbering
  * assigns the target when a program uses every helper.
  */
-#define KPROG_ARM64_HELPER_IDENTS_COUNT 61U
+#define KPROG_ARM64_HELPER_IDENTS_COUNT 66U
 #define KPROG_ARM64_HELPER_DELEGATE_COUNT 5U
 /*
  * The 1-based position of a kernel id in the id-sorted table. The input is
@@ -43,43 +43,48 @@
 	 (KERNEL_ID) == 32 ? 24U : \
 	 (KERNEL_ID) == 33 ? 25U : \
 	 (KERNEL_ID) == 35 ? 26U : \
-	 (KERNEL_ID) == 37 ? 27U : \
-	 (KERNEL_ID) == 38 ? 28U : \
-	 (KERNEL_ID) == 39 ? 29U : \
-	 (KERNEL_ID) == 43 ? 30U : \
-	 (KERNEL_ID) == 44 ? 31U : \
-	 (KERNEL_ID) == 45 ? 32U : \
-	 (KERNEL_ID) == 46 ? 33U : \
-	 (KERNEL_ID) == 50 ? 34U : \
-	 (KERNEL_ID) == 65 ? 35U : \
-	 (KERNEL_ID) == 67 ? 36U : \
-	 (KERNEL_ID) == 68 ? 37U : \
-	 (KERNEL_ID) == 69 ? 38U : \
-	 (KERNEL_ID) == 80 ? 39U : \
-	 (KERNEL_ID) == 95 ? 40U : \
-	 (KERNEL_ID) == 112 ? 41U : \
-	 (KERNEL_ID) == 113 ? 42U : \
-	 (KERNEL_ID) == 114 ? 43U : \
-	 (KERNEL_ID) == 115 ? 44U : \
-	 (KERNEL_ID) == 118 ? 45U : \
-	 (KERNEL_ID) == 122 ? 46U : \
-	 (KERNEL_ID) == 125 ? 47U : \
-	 (KERNEL_ID) == 127 ? 48U : \
-	 (KERNEL_ID) == 148 ? 49U : \
-	 (KERNEL_ID) == 152 ? 50U : \
-	 (KERNEL_ID) == 158 ? 51U : \
-	 (KERNEL_ID) == 161 ? 52U : \
-	 (KERNEL_ID) == 174 ? 53U : \
-	 (KERNEL_ID) == 175 ? 54U : \
-	 (KERNEL_ID) == 183 ? 55U : \
-	 (KERNEL_ID) == 184 ? 56U : \
-	 (KERNEL_ID) == 185 ? 57U : \
-	 (KERNEL_ID) == 186 ? 58U : \
-	 (KERNEL_ID) == 191 ? 59U : \
-	 (KERNEL_ID) == 193 ? 60U : \
-	 (KERNEL_ID) == 195 ? 61U : \
+	 (KERNEL_ID) == 36 ? 27U : \
+	 (KERNEL_ID) == 37 ? 28U : \
+	 (KERNEL_ID) == 38 ? 29U : \
+	 (KERNEL_ID) == 39 ? 30U : \
+	 (KERNEL_ID) == 43 ? 31U : \
+	 (KERNEL_ID) == 44 ? 32U : \
+	 (KERNEL_ID) == 45 ? 33U : \
+	 (KERNEL_ID) == 46 ? 34U : \
+	 (KERNEL_ID) == 50 ? 35U : \
+	 (KERNEL_ID) == 58 ? 36U : \
+	 (KERNEL_ID) == 65 ? 37U : \
+	 (KERNEL_ID) == 67 ? 38U : \
+	 (KERNEL_ID) == 68 ? 39U : \
+	 (KERNEL_ID) == 69 ? 40U : \
+	 (KERNEL_ID) == 80 ? 41U : \
+	 (KERNEL_ID) == 95 ? 42U : \
+	 (KERNEL_ID) == 109 ? 43U : \
+	 (KERNEL_ID) == 112 ? 44U : \
+	 (KERNEL_ID) == 113 ? 45U : \
+	 (KERNEL_ID) == 114 ? 46U : \
+	 (KERNEL_ID) == 115 ? 47U : \
+	 (KERNEL_ID) == 118 ? 48U : \
+	 (KERNEL_ID) == 122 ? 49U : \
+	 (KERNEL_ID) == 125 ? 50U : \
+	 (KERNEL_ID) == 127 ? 51U : \
+	 (KERNEL_ID) == 130 ? 52U : \
+	 (KERNEL_ID) == 148 ? 53U : \
+	 (KERNEL_ID) == 152 ? 54U : \
+	 (KERNEL_ID) == 158 ? 55U : \
+	 (KERNEL_ID) == 161 ? 56U : \
+	 (KERNEL_ID) == 174 ? 57U : \
+	 (KERNEL_ID) == 175 ? 58U : \
+	 (KERNEL_ID) == 181 ? 59U : \
+	 (KERNEL_ID) == 183 ? 60U : \
+	 (KERNEL_ID) == 184 ? 61U : \
+	 (KERNEL_ID) == 185 ? 62U : \
+	 (KERNEL_ID) == 186 ? 63U : \
+	 (KERNEL_ID) == 191 ? 64U : \
+	 (KERNEL_ID) == 193 ? 65U : \
+	 (KERNEL_ID) == 195 ? 66U : \
 	 0)
-_Static_assert(KPROG_ARM64_HELPER_IDENTS_COUNT == 61U,
+_Static_assert(KPROG_ARM64_HELPER_IDENTS_COUNT == 66U,
 	       "AArch64 helper idents count drift");
 _Static_assert(KPROG_ARM64_HELPER_DELEGATE_COUNT == 5U,
 	       "AArch64 helper idents delegate count drift");
@@ -109,41 +114,46 @@ _Static_assert(KPROG_ARM64_HELPER_ROW(31) == 23U, "AArch64 helper idents row sel
 _Static_assert(KPROG_ARM64_HELPER_ROW(32) == 24U, "AArch64 helper idents row selection drift");
 _Static_assert(KPROG_ARM64_HELPER_ROW(33) == 25U, "AArch64 helper idents row selection drift");
 _Static_assert(KPROG_ARM64_HELPER_ROW(35) == 26U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(37) == 27U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(38) == 28U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(39) == 29U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(43) == 30U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(44) == 31U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(45) == 32U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(46) == 33U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(50) == 34U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(65) == 35U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(67) == 36U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(68) == 37U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(69) == 38U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(80) == 39U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(95) == 40U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(112) == 41U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(113) == 42U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(114) == 43U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(115) == 44U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(118) == 45U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(122) == 46U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(125) == 47U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(127) == 48U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(148) == 49U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(152) == 50U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(158) == 51U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(161) == 52U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(174) == 53U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(175) == 54U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(183) == 55U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(184) == 56U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(185) == 57U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(186) == 58U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(191) == 59U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(193) == 60U, "AArch64 helper idents row selection drift");
-_Static_assert(KPROG_ARM64_HELPER_ROW(195) == 61U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(36) == 27U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(37) == 28U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(38) == 29U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(39) == 30U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(43) == 31U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(44) == 32U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(45) == 33U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(46) == 34U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(50) == 35U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(58) == 36U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(65) == 37U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(67) == 38U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(68) == 39U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(69) == 40U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(80) == 41U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(95) == 42U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(109) == 43U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(112) == 44U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(113) == 45U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(114) == 46U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(115) == 47U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(118) == 48U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(122) == 49U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(125) == 50U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(127) == 51U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(130) == 52U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(148) == 53U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(152) == 54U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(158) == 55U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(161) == 56U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(174) == 57U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(175) == 58U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(181) == 59U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(183) == 60U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(184) == 61U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(185) == 62U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(186) == 63U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(191) == 64U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(193) == 65U, "AArch64 helper idents row selection drift");
+_Static_assert(KPROG_ARM64_HELPER_ROW(195) == 66U, "AArch64 helper idents row selection drift");
 /* The selector is total: a kernel id past the table reaches the default. */
 _Static_assert(KPROG_ARM64_HELPER_ROW(0x100) == 0U,
 	       "AArch64 helper idents out-of-range id must reach the default arm");
@@ -152,5 +162,5 @@ _Static_assert(KPROG_ARM64_HELPER_ROW(0x100) == 0U,
 #define KPROG_ARM64_HELPER_DELEGATE_BPF_TASK_PT_REGS 11U
 #define KPROG_ARM64_HELPER_DELEGATE_BPF_COPY_FROM_USER_TASK 2U
 #define KPROG_ARM64_HELPER_DELEGATE_BPF_IMA_FILE_HASH 25U
-#define KPROG_ARM64_HELPER_DELEGATE_BPF_MAP_LOOKUP_PERCPU_ELEM 32U
+#define KPROG_ARM64_HELPER_DELEGATE_BPF_MAP_LOOKUP_PERCPU_ELEM 33U
 #endif

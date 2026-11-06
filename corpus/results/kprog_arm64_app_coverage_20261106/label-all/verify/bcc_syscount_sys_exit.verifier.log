@@ -1,0 +1,212 @@
+0: R1=ctx() R10=fp0
+; ARM64_SIM_ENTRY_XDP(ctx); @ bcc_syscount_sys_exit.bpf.c:92
+0: (61) r8 = *(u32 *)(r1 +4)          ; R1=ctx() R8=pkt_end()
+1: (7a) *(u64 *)(r10 -8) = 0          ; R10=fp0 fp-8=0
+2: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0
+3: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0
+4: (7a) *(u64 *)(r10 -32) = 0         ; R10=fp0 fp-32=0
+5: (7a) *(u64 *)(r10 -40) = 0         ; R10=fp0 fp-40=0
+6: (7a) *(u64 *)(r10 -48) = 0         ; R10=fp0 fp-48=0
+7: (7a) *(u64 *)(r10 -56) = 0         ; R10=fp0 fp-56=0
+8: (7a) *(u64 *)(r10 -64) = 0         ; R10=fp0 fp-64=0
+9: (7a) *(u64 *)(r10 -72) = 0         ; R10=fp0 fp-72=0
+10: (7a) *(u64 *)(r10 -80) = 0        ; R10=fp0 fp-80=0
+11: (7a) *(u64 *)(r10 -88) = 0        ; R10=fp0 fp-88=0
+12: (7a) *(u64 *)(r10 -96) = 0        ; R10=fp0 fp-96=0
+13: (7a) *(u64 *)(r10 -104) = 0       ; R10=fp0 fp-104=0
+14: (7a) *(u64 *)(r10 -112) = 0       ; R10=fp0 fp-112=0
+15: (7a) *(u64 *)(r10 -120) = 0       ; R10=fp0 fp-120=0
+16: (7a) *(u64 *)(r10 -128) = 0       ; R10=fp0 fp-128=0
+17: (7a) *(u64 *)(r10 -136) = 0       ; R10=fp0 fp-136=0
+18: (7a) *(u64 *)(r10 -144) = 0       ; R10=fp0 fp-144=0
+19: (7a) *(u64 *)(r10 -152) = 0       ; R10=fp0 fp-152=0
+20: (7a) *(u64 *)(r10 -160) = 0       ; R10=fp0 fp-160=0
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_8, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_syscount_sys_exit.bpf.c:117
+21: (18) r1 = 0xffff000004406800      ; R1=map_ptr(map=filter_cg_3,ks=4,vs=8)
+23: (71) r1 = *(u8 *)(r1 +0)          ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+24: (56) if w1 != 0x0 goto pc+235     ; R1=0
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X9, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_syscount_sys_exit.bpf.c:159
+25: (18) r1 = 0xffff00000638ca00      ; R1=map_ptr(map=filter_pid_6,ks=4,vs=8)
+27: (71) r2 = *(u8 *)(r1 +0)          ; R1=map_ptr(map=filter_pid_6,ks=4,vs=8) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+28: (71) r3 = *(u8 *)(r1 +1)          ; R1=map_ptr(map=filter_pid_6,ks=4,vs=8) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+29: (67) r3 <<= 8                     ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff00,var_off=(0x0; 0xff00))
+30: (4f) r3 |= r2                     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))
+31: (71) r2 = *(u8 *)(r1 +2)          ; R1=map_ptr(map=filter_pid_6,ks=4,vs=8) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+32: (67) r2 <<= 16                    ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff0000,var_off=(0x0; 0xff0000))
+33: (4f) r3 |= r2                     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff0000,var_off=(0x0; 0xff0000)) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff))
+34: (71) r2 = *(u8 *)(r1 +3)          ; R1=map_ptr(map=filter_pid_6,ks=4,vs=8) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+35: (67) r2 <<= 24                    ; R2=scalar(smin=0,smax=umax=umax32=0xff000000,smax32=0x7f000000,var_off=(0x0; 0xff000000))
+36: (4f) r3 |= r2                     ; R2=scalar(smin=0,smax=umax=umax32=0xff000000,smax32=0x7f000000,var_off=(0x0; 0xff000000)) R3=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+; ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_SP, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 12ULL); @ bcc_syscount_sys_exit.bpf.c:144
+37: (62) *(u32 *)(r10 -116) = 0       ; R10=fp0 fp-120=0000mmmm
+38: (15) if r3 == 0x0 goto pc+11      ; R3=scalar(smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_syscount_sys_exit.bpf.c:165
+39: (71) r2 = *(u8 *)(r1 +0)          ; R1=map_ptr(map=filter_pid_6,ks=4,vs=8) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+40: (71) r3 = *(u8 *)(r1 +1)          ; R1=map_ptr(map=filter_pid_6,ks=4,vs=8) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+41: (67) r3 <<= 8                     ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff00,var_off=(0x0; 0xff00))
+42: (4f) r3 |= r2                     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))
+43: (71) r2 = *(u8 *)(r1 +2)          ; R1=map_ptr(map=filter_pid_6,ks=4,vs=8) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+44: (67) r2 <<= 16                    ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff0000,var_off=(0x0; 0xff0000))
+45: (4f) r3 |= r2                     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff0000,var_off=(0x0; 0xff0000)) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff))
+46: (71) r1 = *(u8 *)(r1 +3)          ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+47: (67) r1 <<= 24                    ; R1=scalar(smin=0,smax=umax=umax32=0xff000000,smax32=0x7f000000,var_off=(0x0; 0xff000000))
+48: (4f) r3 |= r1                     ; R1=scalar(smin=0,smax=umax=umax32=0xff000000,smax32=0x7f000000,var_off=(0x0; 0xff000000)) R3=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+; ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x68, 0x1f4, arm64_l_1f4); @ bcc_syscount_sys_exit.bpf.c:174
+49: (55) if r3 != 0x0 goto pc+210     ; R3=0
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_8, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_syscount_sys_exit.bpf.c:183
+50: (18) r1 = 0xffff000004406c00      ; R1=map_ptr(map=filter_failed_5,ks=4,vs=8)
+52: (71) r1 = *(u8 *)(r1 +0)          ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+53: (56) if w1 != 0x0 goto pc+206     ; R1=0
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X9, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_syscount_sys_exit.bpf.c:201
+54: (18) r1 = 0xffff00000638b800      ; R1=map_ptr(map=filter_errno_4,ks=4,vs=8)
+56: (71) r2 = *(u8 *)(r1 +0)          ; R1=map_ptr(map=filter_errno_4,ks=4,vs=8) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+57: (71) r3 = *(u8 *)(r1 +1)          ; R1=map_ptr(map=filter_errno_4,ks=4,vs=8) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+58: (67) r3 <<= 8                     ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff00,var_off=(0x0; 0xff00))
+59: (4f) r3 |= r2                     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))
+60: (71) r2 = *(u8 *)(r1 +2)          ; R1=map_ptr(map=filter_errno_4,ks=4,vs=8) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+61: (67) r2 <<= 16                    ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff0000,var_off=(0x0; 0xff0000))
+62: (4f) r3 |= r2                     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff0000,var_off=(0x0; 0xff0000)) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff))
+63: (71) r2 = *(u8 *)(r1 +3)          ; R1=map_ptr(map=filter_errno_4,ks=4,vs=8) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+64: (67) r2 <<= 24                    ; R2=scalar(smin=0,smax=umax=umax32=0xff000000,smax32=0x7f000000,var_off=(0x0; 0xff000000))
+65: (4f) r3 |= r2                     ; R2=scalar(smin=0,smax=umax=umax32=0xff000000,smax32=0x7f000000,var_off=(0x0; 0xff000000)) R3=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+66: (15) if r3 == 0x0 goto pc+12      ; R3=scalar(smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+; ARM64_SIM_RUN_OP3(ARM64_OP_LDRSW, ARM64_X8, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_syscount_sys_exit.bpf.c:210
+67: (71) r2 = *(u8 *)(r1 +0)          ; R1=map_ptr(map=filter_errno_4,ks=4,vs=8) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+68: (67) r2 <<= 32                    ; R2=scalar(smin=smin32=0,smax=umax=0xff00000000,smax32=umax32=0,var_off=(0x0; 0xff00000000))
+69: (71) r3 = *(u8 *)(r1 +1)          ; R1=map_ptr(map=filter_errno_4,ks=4,vs=8) R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+70: (67) r3 <<= 40                    ; R3=scalar(smin=smin32=0,smax=umax=0xff0000000000,smax32=umax32=0,var_off=(0x0; 0xff0000000000))
+71: (4f) r3 |= r2                     ; R2=scalar(smin=smin32=0,smax=umax=0xff00000000,smax32=umax32=0,var_off=(0x0; 0xff00000000)) R3=scalar(smin=smin32=0,smax=umax=0xffff00000000,smax32=umax32=0,var_off=(0x0; 0xffff00000000))
+72: (71) r2 = *(u8 *)(r1 +2)          ; R1=map_ptr(map=filter_errno_4,ks=4,vs=8) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+73: (67) r2 <<= 48                    ; R2=scalar(smin=smin32=0,smax=umax=0xff000000000000,smax32=umax32=0,var_off=(0x0; 0xff000000000000))
+74: (4f) r3 |= r2                     ; R2=scalar(smin=smin32=0,smax=umax=0xff000000000000,smax32=umax32=0,var_off=(0x0; 0xff000000000000)) R3=scalar(smin=smin32=0,smax=umax=0xffffff00000000,smax32=umax32=0,var_off=(0x0; 0xffffff00000000))
+75: (71) r1 = *(u8 *)(r1 +3)          ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+76: (67) r1 <<= 56                    ; R1=scalar(smax=0x7f00000000000000,umax=0xff00000000000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xff00000000000000))
+77: (4f) r3 |= r1                     ; R1=scalar(smax=0x7f00000000000000,umax=0xff00000000000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xff00000000000000)) R3=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))
+; ARM64_SIM_A64_JCC(ARM64_COND_NE, 0xa0, 0x1f4, arm64_l_1f4); @ bcc_syscount_sys_exit.bpf.c:216
+78: (55) if r3 != 0x0 goto pc+181     ; R3=0
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X21, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_8, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_syscount_sys_exit.bpf.c:225
+79: (18) r1 = 0xffff000006383a00      ; R1=map_ptr(map=measure_latency,ks=4,vs=8)
+81: (71) r1 = *(u8 *)(r1 +0)          ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+82: (16) if w1 == 0x0 goto pc+38      ; R1=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+;  @ bcc_syscount_sys_exit.bpf.c:0
+83: (bf) r2 = r10                     ; R2=fp0 R10=fp0
+84: (07) r2 += -116                   ; R2=fp-116
+; ARM64_SIM_BPF_CALL_bpf_map_lookup_elem(); @ bcc_syscount_sys_exit.bpf.c:246
+85: (18) r1 = 0xffff000004411c00      ; R1=map_ptr(map=start_8,ks=4,vs=8)
+87: (85) call bpf_map_lookup_elem#1   ; R0=map_value(map=start_8,ks=4,vs=8)
+88: (bf) r7 = r0                      ; R0=map_value(map=start_8,ks=4,vs=8) R7=map_value(map=start_8,ks=4,vs=8)
+89: (15) if r7 == 0x0 goto pc+170     ; R7=map_value(map=start_8,ks=4,vs=8)
+; ARM64_SIM_BPF_CALL_bpf_ktime_get_ns(); @ bcc_syscount_sys_exit.bpf.c:255
+90: (85) call bpf_ktime_get_ns#5      ; R0=scalar()
+91: (bf) r6 = r0                      ; R0=scalar(id=1) R6=scalar(id=1)
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X9, ARM64_X20, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_syscount_sys_exit.bpf.c:258
+92: (71) r2 = *(u8 *)(r7 +0)          ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=start_8,ks=4,vs=8)
+93: (71) r1 = *(u8 *)(r7 +1)          ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=start_8,ks=4,vs=8)
+94: (67) r1 <<= 8                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff00,var_off=(0x0; 0xff00))
+95: (4f) r1 |= r2                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+96: (71) r2 = *(u8 *)(r7 +2)          ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=start_8,ks=4,vs=8)
+97: (67) r2 <<= 16                    ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff0000,var_off=(0x0; 0xff0000))
+98: (4f) r1 |= r2                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff)) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff0000,var_off=(0x0; 0xff0000))
+99: (71) r2 = *(u8 *)(r7 +3)          ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=start_8,ks=4,vs=8)
+100: (67) r2 <<= 24                   ; R2=scalar(smin=0,smax=umax=umax32=0xff000000,smax32=0x7f000000,var_off=(0x0; 0xff000000))
+101: (4f) r1 |= r2                    ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(smin=0,smax=umax=umax32=0xff000000,smax32=0x7f000000,var_off=(0x0; 0xff000000))
+102: (71) r2 = *(u8 *)(r7 +4)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=start_8,ks=4,vs=8)
+103: (67) r2 <<= 32                   ; R2=scalar(smin=smin32=0,smax=umax=0xff00000000,smax32=umax32=0,var_off=(0x0; 0xff00000000))
+104: (4f) r1 |= r2                    ; R1=scalar(smin=0,smax=umax=0xffffffffff,var_off=(0x0; 0xffffffffff)) R2=scalar(smin=smin32=0,smax=umax=0xff00000000,smax32=umax32=0,var_off=(0x0; 0xff00000000))
+105: (71) r2 = *(u8 *)(r7 +5)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=start_8,ks=4,vs=8)
+106: (67) r2 <<= 40                   ; R2=scalar(smin=smin32=0,smax=umax=0xff0000000000,smax32=umax32=0,var_off=(0x0; 0xff0000000000))
+107: (4f) r1 |= r2                    ; R1=scalar(smin=0,smax=umax=0xffffffffffff,var_off=(0x0; 0xffffffffffff)) R2=scalar(smin=smin32=0,smax=umax=0xff0000000000,smax32=umax32=0,var_off=(0x0; 0xff0000000000))
+108: (71) r2 = *(u8 *)(r7 +6)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=start_8,ks=4,vs=8)
+109: (67) r2 <<= 48                   ; R2=scalar(smin=smin32=0,smax=umax=0xff000000000000,smax32=umax32=0,var_off=(0x0; 0xff000000000000))
+110: (4f) r1 |= r2                    ; R1=scalar(smin=0,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff)) R2=scalar(smin=smin32=0,smax=umax=0xff000000000000,smax32=umax32=0,var_off=(0x0; 0xff000000000000))
+111: (71) r2 = *(u8 *)(r7 +7)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=start_8,ks=4,vs=8)
+112: (67) r2 <<= 56                   ; R2=scalar(smax=0x7f00000000000000,umax=0xff00000000000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xff00000000000000))
+113: (4f) r1 |= r2                    ; R1=scalar() R2=scalar(smax=0x7f00000000000000,umax=0xff00000000000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xff00000000000000))
+; ARM64_SIM_RUN_OP3(ARM64_OP_ALU_REG, ARM64_X20, ARM64_X8, ARM64_X9, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_SUB, ARM64_MOD_NONE, 0), 0); @ bcc_syscount_sys_exit.bpf.c:267
+114: (1f) r6 -= r1                    ; R1=scalar() R6=scalar()
+115: (b7) r1 = 0                      ; R1=0
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X22, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_8, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_syscount_sys_exit.bpf.c:276
+116: (18) r2 = 0xffff00000638a800     ; R2=map_ptr(map=count_by_proces,ks=4,vs=8)
+118: (71) r2 = *(u8 *)(r2 +0)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+119: (16) if w2 == 0x0 goto pc+7      ; R2=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+120: (05) goto pc+7
+; ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_SP, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 8ULL); @ bcc_syscount_sys_exit.bpf.c:306
+128: (63) *(u32 *)(r10 -120) = r1     ; R1=0 R10=fp0 fp-120=00000
+129: (bf) r8 = r10                    ; R8=fp0 R10=fp0
+130: (07) r8 += -120                  ; R8=fp-120
+; ARM64_SIM_BPF_CALL_bpf_map_lookup_elem(); @ bcc_syscount_sys_exit.bpf.c:318
+131: (18) r1 = 0xffff00000638ac00     ; R1=map_ptr(map=data_2,ks=4,vs=8)
+133: (bf) r2 = r8                     ; R2=fp-120 R8=fp-120
+134: (85) call bpf_map_lookup_elem#1          ; R0=map_value(map=data_2,ks=4,vs=8)
+135: (bf) r7 = r0                     ; R0=map_value(map=data_2,ks=4,vs=8) R7=map_value(map=data_2,ks=4,vs=8)
+136: (15) if r7 == 0x0 goto pc+108    ; R7=map_value(map=data_2,ks=4,vs=8)
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X19, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_syscount_sys_exit.bpf.c:336
+137: (71) r2 = *(u8 *)(r7 +0)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=data_2,ks=4,vs=8)
+138: (71) r1 = *(u8 *)(r7 +1)         ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=data_2,ks=4,vs=8)
+139: (67) r1 <<= 8                    ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff00,var_off=(0x0; 0xff00))
+140: (4f) r1 |= r2                    ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+141: (71) r2 = *(u8 *)(r7 +2)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=data_2,ks=4,vs=8)
+142: (67) r2 <<= 16                   ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff0000,var_off=(0x0; 0xff0000))
+143: (4f) r1 |= r2                    ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff)) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff0000,var_off=(0x0; 0xff0000))
+144: (71) r2 = *(u8 *)(r7 +3)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=data_2,ks=4,vs=8)
+145: (67) r2 <<= 24                   ; R2=scalar(smin=0,smax=umax=umax32=0xff000000,smax32=0x7f000000,var_off=(0x0; 0xff000000))
+146: (4f) r1 |= r2                    ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(smin=0,smax=umax=umax32=0xff000000,smax32=0x7f000000,var_off=(0x0; 0xff000000))
+147: (71) r2 = *(u8 *)(r7 +4)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=data_2,ks=4,vs=8)
+148: (67) r2 <<= 32                   ; R2=scalar(smin=smin32=0,smax=umax=0xff00000000,smax32=umax32=0,var_off=(0x0; 0xff00000000))
+149: (4f) r1 |= r2                    ; R1=scalar(smin=0,smax=umax=0xffffffffff,var_off=(0x0; 0xffffffffff)) R2=scalar(smin=smin32=0,smax=umax=0xff00000000,smax32=umax32=0,var_off=(0x0; 0xff00000000))
+150: (71) r2 = *(u8 *)(r7 +5)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=data_2,ks=4,vs=8)
+151: (67) r2 <<= 40                   ; R2=scalar(smin=smin32=0,smax=umax=0xff0000000000,smax32=umax32=0,var_off=(0x0; 0xff0000000000))
+152: (4f) r1 |= r2                    ; R1=scalar(smin=0,smax=umax=0xffffffffffff,var_off=(0x0; 0xffffffffffff)) R2=scalar(smin=smin32=0,smax=umax=0xff0000000000,smax32=umax32=0,var_off=(0x0; 0xff0000000000))
+153: (71) r2 = *(u8 *)(r7 +6)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=data_2,ks=4,vs=8)
+154: (67) r2 <<= 48                   ; R2=scalar(smin=smin32=0,smax=umax=0xff000000000000,smax32=umax32=0,var_off=(0x0; 0xff000000000000))
+155: (4f) r1 |= r2                    ; R1=scalar(smin=0,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff)) R2=scalar(smin=smin32=0,smax=umax=0xff000000000000,smax32=umax32=0,var_off=(0x0; 0xff000000000000))
+156: (71) r2 = *(u8 *)(r7 +7)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=data_2,ks=4,vs=8)
+157: (67) r2 <<= 56                   ; R2=scalar(smax=0x7f00000000000000,umax=0xff00000000000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xff00000000000000))
+158: (4f) r1 |= r2                    ; R1=scalar() R2=scalar(smax=0x7f00000000000000,umax=0xff00000000000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xff00000000000000))
+; ARM64_SIM_RUN_OP3(ARM64_OP_ALU_IMM, ARM64_X8, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0), 1ULL); @ bcc_syscount_sys_exit.bpf.c:339
+159: (07) r1 += 1                     ; R1=scalar()
+; ARM64_SIM_RUN_OP3(ARM64_OP_STLXR, ARM64_X9, ARM64_X8, ARM64_X19, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0); @ bcc_syscount_sys_exit.bpf.c:342
+160: (73) *(u8 *)(r7 +0) = r1         ; R1=scalar() R7=map_value(map=data_2,ks=4,vs=8)
+161: (bf) r2 = r1                     ; R1=scalar(id=2) R2=scalar(id=2)
+162: (77) r2 >>= 8                    ; R2=scalar(smin=0,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff))
+163: (73) *(u8 *)(r7 +1) = r2         ; R2=scalar(smin=0,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff)) R7=map_value(map=data_2,ks=4,vs=8)
+164: (bf) r2 = r1                     ; R1=scalar(id=2) R2=scalar(id=2)
+165: (77) r2 >>= 16                   ; R2=scalar(smin=0,smax=umax=0xffffffffffff,var_off=(0x0; 0xffffffffffff))
+166: (73) *(u8 *)(r7 +2) = r2         ; R2=scalar(smin=0,smax=umax=0xffffffffffff,var_off=(0x0; 0xffffffffffff)) R7=map_value(map=data_2,ks=4,vs=8)
+167: (bf) r2 = r1                     ; R1=scalar(id=2) R2=scalar(id=2)
+168: (77) r2 >>= 24                   ; R2=scalar(smin=0,smax=umax=0xffffffffff,var_off=(0x0; 0xffffffffff))
+169: (73) *(u8 *)(r7 +3) = r2         ; R2=scalar(smin=0,smax=umax=0xffffffffff,var_off=(0x0; 0xffffffffff)) R7=map_value(map=data_2,ks=4,vs=8)
+170: (bf) r2 = r1                     ; R1=scalar(id=2) R2=scalar(id=2)
+171: (77) r2 >>= 32                   ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+172: (73) *(u8 *)(r7 +4) = r2         ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=map_value(map=data_2,ks=4,vs=8)
+173: (bf) r2 = r1                     ; R1=scalar(id=2) R2=scalar(id=2)
+174: (77) r2 >>= 40                   ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff))
+175: (73) *(u8 *)(r7 +5) = r2         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff)) R7=map_value(map=data_2,ks=4,vs=8)
+176: (bf) r2 = r1                     ; R1=scalar(id=2) R2=scalar(id=2)
+177: (77) r2 >>= 48                   ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))
+178: (73) *(u8 *)(r7 +6) = r2         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R7=map_value(map=data_2,ks=4,vs=8)
+179: (77) r1 >>= 56                   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+180: (73) *(u8 *)(r7 +7) = r1         ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=map_value(map=data_2,ks=4,vs=8)
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X22, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_8, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_syscount_sys_exit.bpf.c:348
+181: (18) r1 = 0xffff00000638a800     ; R1=map_ptr(map=count_by_proces,ks=4,vs=8)
+183: (71) r1 = *(u8 *)(r1 +0)         ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+184: (16) if w1 == 0x0 goto pc+11     ; R1=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+; ARM64_SIM_BPF_CALL_bpf_probe_read_kernel_str(); @ bcc_syscount_sys_exit.bpf.c:369
+185: (bf) r1 = r10                    ; R1=fp0 R10=fp0
+186: (07) r1 += -104                  ; R1=fp-104
+187: (b4) w2 = 8                      ; R2=8
+188: (b7) r3 = 2320                   ; R3=2320
+189: (85) call bpf_probe_read_kernel_str#115          ; R0=scalar(smin=smin32=-4095,smax=smax32=8) fp-104=mmmmmmmm
+; ARM64_SIM_RUN_OP3(ARM64_OP_ALU_IMM, ARM64_X0, ARM64_X19, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0), 16ULL); @ bcc_syscount_sys_exit.bpf.c:375
+190: (bf) r1 = r7                     ; R1=map_value(map=data_2,ks=4,vs=8) R7=map_value(map=data_2,ks=4,vs=8)
+191: (07) r1 += 16                    ; R1=map_value(map=data_2,ks=4,vs=8,off=16)
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_SP, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 24ULL); @ bcc_syscount_sys_exit.bpf.c:372
+192: (79) r3 = *(u64 *)(r10 -104)     ; R3=scalar() R10=fp0 fp-104=mmmmmmmm
+; ARM64_SIM_RUN_OP3(ARM64_OP_ALU_IMM, ARM64_X2, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0), 2800ULL); @ bcc_syscount_sys_exit.bpf.c:381
+193: (07) r3 += 2800                  ; R3=scalar()
+; ARM64_SIM_BPF_CALL_bpf_probe_read_kernel_str(); @ bcc_syscount_sys_exit.bpf.c:384
+194: (b4) w2 = 16                     ; R2=16
+195: (85) call bpf_probe_read_kernel_str#115
+invalid access to map value, value_size=8 off=16 size=16
+R1 min value is outside of the allowed memory range
+processed 180 insns (limit 1000000) max_states_per_insn 0 total_states 7 peak_states 7 mark_read 0

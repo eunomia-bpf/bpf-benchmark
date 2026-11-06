@@ -1,0 +1,6 @@
+0: R1=ctx() R10=fp0
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X9, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_vfsstat_fentry_vfs_create.bpf.c:26
+0: (18) r1 = 0xffff00000638a000       ; R1=map_ptr(map=stats_0,ks=4,vs=8)
+2: (71) r3 = *(u8 *)(r1 +32)
+cannot access ptr member ops with moff 32 in struct bpf_map with off 32 size 1
+processed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0

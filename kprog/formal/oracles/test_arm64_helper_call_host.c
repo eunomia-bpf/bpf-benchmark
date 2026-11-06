@@ -1,7 +1,7 @@
 /*
  * Host cross-check for the AArch64 simulator's BPF *helper call* bodies.
  *
- * Why this host exists. The simulator defines 61 helper-call macros, one per
+ * Why this host exists. The simulator defines 66 helper-call macros, one per
  * helper it recognises, and none of them had ever been executed: no host in
  * the tree mentions ARM64_SIM_BPF_CALL_bpf_* at all. That is the largest
  * unexecuted surface in the simulator, and it is where the model meets the
@@ -15,8 +15,8 @@
  * original name. Measured: without the rename the first call is a SIGSEGV at
  * address 5; with it the body runs and writes x0.
  *
- * What is checked, for all 61 macros: that each is callable, that it writes
- * x0 (a body doing nothing leaves the sentinel), and that the eighteen which
+ * What is checked, for all 66 macros: that each is callable, that it writes
+ * x0 (a body doing nothing leaves the sentinel), and that the twenty-three which
  * forward to a real `bpf_*` call reach it exactly once -- so the forwarding
  * arms are exercised rather than merely well-formed.
  *
@@ -58,6 +58,12 @@ typedef signed long long __s64;
 #define bpf_skb_load_bytes_relative bpf_skb_load_bytes_relative_defs
 #define bpf_skb_store_bytes bpf_skb_store_bytes_defs
 
+#define bpf_probe_write_user bpf_probe_write_user_defs
+#define bpf_override_return bpf_override_return_defs
+#define bpf_send_signal bpf_send_signal_defs
+#define bpf_ringbuf_output bpf_ringbuf_output_defs
+#define bpf_loop bpf_loop_defs
+
 #define ARM64_SIM_ENABLE_STACK 1
 #include "../arm64/arm64_sim_local_bpf.h"
 #undef bpf_ktime_get_boot_ns
@@ -78,6 +84,12 @@ typedef signed long long __s64;
 #undef bpf_skb_load_bytes
 #undef bpf_skb_load_bytes_relative
 #undef bpf_skb_store_bytes
+
+#undef bpf_probe_write_user
+#undef bpf_override_return
+#undef bpf_send_signal
+#undef bpf_ringbuf_output
+#undef bpf_loop
 
 #include <stdio.h>
 
@@ -127,6 +139,28 @@ static long bpf_skb_load_bytes(const void *skb, __u32 offset, void *to, __u32 le
 static long bpf_skb_load_bytes_relative(const void *skb, __u32 offset, void *to, __u32 len, __u32 start_header) { host_calls_skb_load_bytes_relative++; return stub_return; }
 static long bpf_skb_store_bytes(struct __sk_buff *skb, __u32 offset, const void *from, __u32 len, __u64 flags) { host_calls_skb_store_bytes++; return stub_return; }
 
+/* Distinct argument lanes catch pointer/value swaps and missing u32 narrowing
+ * in the app helper ABI bridge; the negative return catches sign loss. */
+static unsigned app_helper_id, app_calls;
+static __u64 app_args[4];
+static long capture_app_helper(unsigned id, __u64 a, __u64 b, __u64 c, __u64 d)
+{
+	app_helper_id = id;
+	app_calls++;
+	app_args[0] = a; app_args[1] = b; app_args[2] = c; app_args[3] = d;
+	return -37;
+}
+static long bpf_probe_write_user(void *dst, const void *src, __u32 len)
+{ return capture_app_helper(36, (__u64)(long)dst, (__u64)(long)src, len, 0); }
+static long bpf_override_return(void *ctx, __u64 rc)
+{ return capture_app_helper(58, (__u64)(long)ctx, rc, 0, 0); }
+static long bpf_send_signal(__u32 sig)
+{ return capture_app_helper(109, sig, 0, 0, 0); }
+static long bpf_ringbuf_output(void *ringbuf, void *data, __u64 size, __u64 flags)
+{ return capture_app_helper(130, (__u64)(long)ringbuf, (__u64)(long)data, size, flags); }
+static long bpf_loop(__u32 nr, void *fn, void *ctx, __u64 flags)
+{ return capture_app_helper(181, nr, (__u64)(long)fn, (__u64)(long)ctx, flags); }
+
 static unsigned long unsupported_calls;
 static void arm64_sim_unsupported_opcode(void)
 {
@@ -161,6 +195,25 @@ static unsigned long cases;
 			       #NAME);                                     \
 			failures++;                                        \
 			unsupported_calls = 0;                             \
+		}                                                          \
+	} while (0)
+
+#define CHECK_APP_HELPER(NAME, ID, A, B, C, D)                         \
+	do {                                                               \
+		DECL_STATE();                                              \
+		__a64_x0.x = 0x123456789abcdef0ULL;                         \
+		__a64_x1.x = 0x23456789abcdef01ULL;                         \
+		__a64_x2.x = 0x3456789abcdef012ULL;                         \
+		__a64_x3.x = 0x456789abcdef0123ULL;                         \
+		app_calls = 0;                                              \
+		ARM64_SIM_BPF_CALL_bpf_##NAME();                           \
+		cases++;                                                   \
+		if (app_calls != 1 || app_helper_id != (ID) ||              \
+		    app_args[0] != (A) || app_args[1] != (B) ||             \
+		    app_args[2] != (C) || app_args[3] != (D) ||             \
+		    __a64_x0.x != (__u64)(long)-37) {                       \
+			printf("%s helper ABI/return mismatch\n", #NAME);    \
+			failures++;                                        \
 		}                                                          \
 	} while (0)
 
@@ -262,12 +315,22 @@ int main(void)
 	CHECK_FWD(skb_load_bytes_relative);
 	CHECK_FWD(skb_store_bytes);
 
+	CHECK_APP_HELPER(probe_write_user, 36, 0x123456789abcdef0ULL,
+		0x23456789abcdef01ULL, 0xbcdef012ULL, 0);
+	CHECK_APP_HELPER(override_return, 58, 0x123456789abcdef0ULL,
+		0x23456789abcdef01ULL, 0, 0);
+	CHECK_APP_HELPER(send_signal, 109, 0x9abcdef0ULL, 0, 0, 0);
+	CHECK_APP_HELPER(ringbuf_output, 130, 0x123456789abcdef0ULL,
+		0x23456789abcdef01ULL, 0x3456789abcdef012ULL, 0x456789abcdef0123ULL);
+	CHECK_APP_HELPER(loop, 181, 0x9abcdef0ULL,
+		0x23456789abcdef01ULL, 0x3456789abcdef012ULL, 0x456789abcdef0123ULL);
+
 	if (failures) {
 		printf("arm64 helper call host cross-check: FAIL (%d/%lu)\n",
 		       failures, cases);
 		return 1;
 	}
-	printf("arm64 helper call host cross-check: OK (%lu cases, 61 helpers)\n",
+	printf("arm64 helper call host cross-check: OK (%lu cases, 66 helpers)\n",
 	       cases);
 	return 0;
 }

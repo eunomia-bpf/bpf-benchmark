@@ -3,16 +3,14 @@
 
 The AArch64 artifact encoder
 (`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`) recognizes BPF
-helper calls by kernel id: 61 ids cover the helpers the AArch64 simulator
+helper calls by kernel id: 66 ids cover the helpers the AArch64 simulator
 implements. Five sim-header macros forward to another helper (e.g.
 `bpf_map_lookup_percpu_elem` runs `bpf_map_lookup_elem`'s body), so the
 forwarding pairs are re-read from the sim header on every run rather than
 pinned here; the table, the Lean model, and the C header regenerate
-together with it. When a program uses a helper subset, the encoder
-renumbers the used names into a compact 1-based `ARM64_SIM_C_<name>` slot
-in lexicographic order, so a forwarding target's slot is its 1-based
-lexicographic rank over the used names; over the full 61-name table that
-rank is what the delegate constants pin.
+together with it. The active label renderer uses the kernel ids directly. The table also
+retains the 1-based lexicographic ranks of forwarding targets as a
+machine-checked property of the declared helper names.
 
 Three outputs share one source:
   * `generated/arm64_helper_idents.h` — the C row table and its
@@ -35,7 +33,7 @@ LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64HelperIdents.lean"
 C_HEADER = ROOT / "generated/arm64_helper_idents.h"
 PYTHON = ROOT.parent / "arm64/micro-prog/generated_arm64_helper_idents.py"
 
-# The encoder's 61 helper ids in the specification's id-sorted order, as the
+# The encoder's 66 helper ids in the specification's id-sorted order, as the
 # encoder's `HELPER_IDENTS` table defines them.
 EXPECTED: list[tuple[int, str]] = [
     (1, "bpf_map_lookup_elem"),
@@ -64,6 +62,7 @@ EXPECTED: list[tuple[int, str]] = [
     (32, "bpf_skb_change_type"),
     (33, "bpf_skb_under_cgroup"),
     (35, "bpf_get_current_task"),
+    (36, "bpf_probe_write_user"),
     (37, "bpf_current_task_under_cgroup"),
     (38, "bpf_skb_change_tail"),
     (39, "bpf_skb_pull_data"),
@@ -72,12 +71,14 @@ EXPECTED: list[tuple[int, str]] = [
     (45, "bpf_probe_read_str"),
     (46, "bpf_get_socket_cookie"),
     (50, "bpf_skb_adjust_room"),
+    (58, "bpf_override_return"),
     (65, "bpf_xdp_adjust_tail"),
     (67, "bpf_get_stack"),
     (68, "bpf_skb_load_bytes_relative"),
     (69, "bpf_fib_lookup"),
     (80, "bpf_get_current_cgroup_id"),
     (95, "bpf_sk_fullsock"),
+    (109, "bpf_send_signal"),
     (112, "bpf_probe_read_user"),
     (113, "bpf_probe_read_kernel"),
     (114, "bpf_probe_read_user_str"),
@@ -86,12 +87,14 @@ EXPECTED: list[tuple[int, str]] = [
     (122, "bpf_get_netns_cookie"),
     (125, "bpf_ktime_get_boot_ns"),
     (127, "bpf_seq_write"),
+    (130, "bpf_ringbuf_output"),
     (148, "bpf_copy_from_user"),
     (152, "bpf_redirect_neigh"),
     (158, "bpf_get_current_task_btf"),
     (161, "bpf_ima_inode_hash"),
     (174, "bpf_get_attach_cookie"),
     (175, "bpf_task_pt_regs"),
+    (181, "bpf_loop"),
     (183, "bpf_get_func_arg"),
     (184, "bpf_get_func_ret"),
     (185, "bpf_get_func_arg_cnt"),
@@ -207,7 +210,7 @@ def render_c(rows: list[dict[str, object]],
  * KPROG_ARM64_HELPER_ROW maps a kernel id to its 1-based position in that
  * order, 0 outside. KPROG_ARM64_HELPER_DELEGATE_* pins the 1-based
  * lexicographic rank of a sim-header forwarding target over the full
- * 61-name table: the compact per-program slot the encoder's renumbering
+ * 66-name table: the compact per-program slot the encoder's renumbering
  * assigns the target when a program uses every helper.
  */
 #define KPROG_ARM64_HELPER_IDENTS_COUNT {len(rows)}U

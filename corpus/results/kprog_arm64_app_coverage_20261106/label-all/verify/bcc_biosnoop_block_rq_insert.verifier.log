@@ -1,0 +1,62 @@
+0: R1=ctx() R10=fp0
+; ARM64_SIM_ENTRY_XDP(ctx); @ bcc_biosnoop_block_rq_insert.bpf.c:63
+0: (61) r2 = *(u32 *)(r1 +4)          ; R1=ctx() R2=pkt_end()
+1: (61) r1 = *(u32 *)(r1 +0)          ; R1=pkt(r=0)
+2: (7a) *(u64 *)(r10 -8) = 0          ; R10=fp0 fp-8=0
+3: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0
+4: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0
+5: (7a) *(u64 *)(r10 -32) = 0         ; R10=fp0 fp-32=0
+6: (7a) *(u64 *)(r10 -40) = 0         ; R10=fp0 fp-40=0
+7: (7a) *(u64 *)(r10 -48) = 0         ; R10=fp0 fp-48=0
+8: (7a) *(u64 *)(r10 -56) = 0         ; R10=fp0 fp-56=0
+9: (7a) *(u64 *)(r10 -64) = 0         ; R10=fp0 fp-64=0
+10: (7a) *(u64 *)(r10 -72) = 0        ; R10=fp0 fp-72=0
+11: (7a) *(u64 *)(r10 -80) = 0        ; R10=fp0 fp-80=0
+12: (7a) *(u64 *)(r10 -88) = 0        ; R10=fp0 fp-88=0
+13: (7a) *(u64 *)(r10 -96) = 0        ; R10=fp0 fp-96=0
+14: (7a) *(u64 *)(r10 -104) = 0       ; R10=fp0 fp-104=0
+15: (7a) *(u64 *)(r10 -112) = 0       ; R10=fp0 fp-112=0
+16: (7a) *(u64 *)(r10 -120) = 0       ; R10=fp0 fp-120=0
+17: (7a) *(u64 *)(r10 -128) = 0       ; R10=fp0 fp-128=0
+18: (7a) *(u64 *)(r10 -136) = 0       ; R10=fp0 fp-136=0
+19: (7a) *(u64 *)(r10 -144) = 0       ; R10=fp0 fp-144=0
+20: (7a) *(u64 *)(r10 -152) = 0       ; R10=fp0 fp-152=0
+21: (7a) *(u64 *)(r10 -160) = 0       ; R10=fp0 fp-160=0
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_8, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_biosnoop_block_rq_insert.bpf.c:84
+22: (18) r3 = 0xffff000005f92e00      ; R3=map_ptr(map=filter_cg_2,ks=4,vs=8)
+24: (71) r3 = *(u8 *)(r3 +0)          ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+25: (56) if w3 != 0x0 goto pc+127     ; R3=0
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ bcc_biosnoop_block_rq_insert.bpf.c:111
+26: (18) r3 = 0xffff000006383e00      ; R3=map_ptr(map=LINUX_KERNEL_VE,ks=4,vs=8)
+28: (71) r4 = *(u8 *)(r3 +0)          ; R3=map_ptr(map=LINUX_KERNEL_VE,ks=4,vs=8) R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+29: (71) r4 = *(u8 *)(r3 +1)          ; R3=map_ptr(map=LINUX_KERNEL_VE,ks=4,vs=8) R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+30: (71) r5 = *(u8 *)(r3 +2)          ; R3=map_ptr(map=LINUX_KERNEL_VE,ks=4,vs=8) R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+31: (67) r5 <<= 8                     ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff00,var_off=(0x0; 0xff00))
+32: (4f) r5 |= r4                     ; R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))
+33: (71) r3 = *(u8 *)(r3 +3)          ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+34: (67) r3 <<= 16                    ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff0000,var_off=(0x0; 0xff0000))
+35: (4f) r5 |= r3                     ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff0000,var_off=(0x0; 0xff0000)) R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff))
+; ARM64_SIM_A64_JCC(ARM64_COND_CC, 0x48, 0x54, arm64_l_54); @ bcc_biosnoop_block_rq_insert.bpf.c:120
+36: (a5) if r5 < 0x50b goto pc+1 38: R1=pkt(r=0) R2=pkt_end() R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff0000,var_off=(0x0; 0xff0000)) R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=1290,var_off=(0x0; 0x7ff)) R10=fp0 fp-8=0 fp-16=0 fp-24=0 fp-32=0 fp-40=0 fp-48=0 fp-56=0 fp-64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=0 fp-104=0 fp-112=0 fp-120=0 fp-128=0 fp-136=0 fp-144=0 fp-152=0 fp-160=0
+; ARM64_SIM_RUN_OP3(ARM64_OP_STP, ARM64_SP, ARM64_XZR, ARM64_X8, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 24ULL); @ bcc_biosnoop_block_rq_insert.bpf.c:135
+38: (7b) *(u64 *)(r10 -112) = r2      ; R2=pkt_end() R10=fp0 fp-112=pkt_end()
+; ARM64_SIM_RUN_OP3(ARM64_OP_STP, ARM64_SP, ARM64_XZR, ARM64_XZR, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 8ULL); @ bcc_biosnoop_block_rq_insert.bpf.c:132
+39: (7a) *(u64 *)(r10 -136) = 0       ; R10=fp0 fp-136=0
+40: (7a) *(u64 *)(r10 -128) = 0       ; R10=fp0 fp-128=0
+41: (7a) *(u64 *)(r10 -120) = 0       ; R10=fp0 fp-120=0
+; ARM64_SIM_BPF_CALL_bpf_ktime_get_ns(); @ bcc_biosnoop_block_rq_insert.bpf.c:138
+42: (85) call bpf_ktime_get_ns#5      ; R0=scalar()
+43: (bf) r7 = r0                      ; R0=scalar(id=13) R7=scalar(id=13)
+; ARM64_SIM_RUN_OP3(ARM64_OP_STP, ARM64_SP, ARM64_XZR, ARM64_X8, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 24ULL); @ bcc_biosnoop_block_rq_insert.bpf.c:135
+44: (bf) r6 = r10                     ; R6=fp0 R10=fp0
+45: (07) r6 += -112                   ; R6=fp-112
+; ARM64_SIM_BPF_CALL_bpf_map_lookup_elem(); @ bcc_biosnoop_block_rq_insert.bpf.c:153
+46: (18) r1 = 0xffff000006383800      ; R1=map_ptr(map=start_4,ks=4,vs=8)
+48: (bf) r2 = r6                      ; R2=fp-112 R6=fp-112
+49: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=14,map=start_4,ks=4,vs=8)
+50: (15) if r0 == 0x0 goto pc+23 74: R0=0 R6=fp-112 R7=scalar() R10=fp0 fp-8=0 fp-16=0 fp-24=0 fp-32=0 fp-40=0 fp-48=0 fp-56=0 fp-64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=0 fp-104=0 fp-112=pkt_end() fp-120=0 fp-128=0 fp-136=0 fp-144=0 fp-152=0 fp-160=0
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_SP, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 32ULL); @ bcc_biosnoop_block_rq_insert.bpf.c:174
+74: (79) r3 = *(u64 *)(r10 -112)      ; R3=pkt_end() R10=fp0 fp-112=pkt_end()
+75: (07) r3 += 8
+R3 pointer arithmetic on pkt_end prohibited
+processed 212 insns (limit 1000000) max_states_per_insn 1 total_states 10 peak_states 10 mark_read 0

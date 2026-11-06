@@ -2,13 +2,13 @@
  * Host cross-check for the AArch64 artifact encoder's BPF helper-ident
  * table contract (`generated/arm64_helper_idents.h`).
  *
- * The module under test fixes the 61 kernel ids the AArch64 simulator
+ * The module under test fixes the 66 kernel ids the AArch64 simulator
  * recognizes (`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`,
  * `HELPER_IDENTS`), maps each id to its 1-based position in the id-sorted
  * table, and pins the five sim-header forwarding targets to the 1-based
- * lexicographic rank their target occupies over the full 61-name table.
+ * lexicographic rank their target occupies over the full 66-name table.
  *
- * This oracle restates the 61 row ids, names, and ordinals, the out-of-range
+ * This oracle restates the 66 row ids, names, and ordinals, the out-of-range
  * default, the counts, and the five delegate ranks by hand and drives the
  * generated macros and `_Static_assert`s against them. The generated
  * `_Static_assert`s run at compile time; this oracle is the value-level
@@ -27,19 +27,19 @@
 static int failures;
 static unsigned long cases;
 
-/* The 61 row kernel ids, in the specification's id-sorted order. */
-static const int row_ids[61] = {
+/* The 66 row kernel ids, in the specification's id-sorted order. */
+static const int row_ids[66] = {
 	1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 	11, 12, 13, 14, 15, 16, 21, 23, 25, 26,
-	27, 28, 31, 32, 33, 35, 37, 38, 39, 43,
-	44, 45, 46, 50, 65, 67, 68, 69, 80, 95,
-	112, 113, 114, 115, 118, 122, 125, 127, 148, 152,
-	158, 161, 174, 175, 183, 184, 185, 186, 191, 193,
+	27, 28, 31, 32, 33, 35, 36, 37, 38, 39, 43,
+	44, 45, 46, 50, 58, 65, 67, 68, 69, 80, 95, 109,
+	112, 113, 114, 115, 118, 122, 125, 127, 130, 148, 152,
+	158, 161, 174, 175, 181, 183, 184, 185, 186, 191, 193,
 	195,
 };
 
 /* The helper name each row kernel id denotes, in specification order. */
-static const char *const row_names[61] = {
+static const char *const row_names[66] = {
 	"bpf_map_lookup_elem", "bpf_map_update_elem",
 	"bpf_map_delete_elem", "bpf_probe_read",
 	"bpf_ktime_get_ns", "bpf_trace_printk",
@@ -52,21 +52,21 @@ static const char *const row_names[61] = {
 	"bpf_perf_event_output", "bpf_skb_load_bytes",
 	"bpf_get_stackid", "bpf_csum_diff",
 	"bpf_skb_change_proto", "bpf_skb_change_type",
-	"bpf_skb_under_cgroup", "bpf_get_current_task",
+	"bpf_skb_under_cgroup", "bpf_get_current_task", "bpf_probe_write_user",
 	"bpf_current_task_under_cgroup", "bpf_skb_change_tail",
 	"bpf_skb_pull_data", "bpf_skb_change_head",
 	"bpf_xdp_adjust_head", "bpf_probe_read_str",
-	"bpf_get_socket_cookie", "bpf_skb_adjust_room",
+	"bpf_get_socket_cookie", "bpf_skb_adjust_room", "bpf_override_return",
 	"bpf_xdp_adjust_tail", "bpf_get_stack",
 	"bpf_skb_load_bytes_relative", "bpf_fib_lookup",
-	"bpf_get_current_cgroup_id", "bpf_sk_fullsock",
+	"bpf_get_current_cgroup_id", "bpf_sk_fullsock", "bpf_send_signal",
 	"bpf_probe_read_user", "bpf_probe_read_kernel",
 	"bpf_probe_read_user_str", "bpf_probe_read_kernel_str",
 	"bpf_jiffies64", "bpf_get_netns_cookie",
-	"bpf_ktime_get_boot_ns", "bpf_seq_write",
+	"bpf_ktime_get_boot_ns", "bpf_seq_write", "bpf_ringbuf_output",
 	"bpf_copy_from_user", "bpf_redirect_neigh",
 	"bpf_get_current_task_btf", "bpf_ima_inode_hash",
-	"bpf_get_attach_cookie", "bpf_task_pt_regs",
+	"bpf_get_attach_cookie", "bpf_task_pt_regs", "bpf_loop",
 	"bpf_get_func_arg", "bpf_get_func_ret",
 	"bpf_get_func_arg_cnt", "bpf_get_retval",
 	"bpf_copy_from_user_task", "bpf_ima_file_hash",
@@ -74,20 +74,20 @@ static const char *const row_names[61] = {
 };
 
 /* The 1-based by-ID ordinal each row kernel id must select. */
-static const unsigned row_ordinals[61] = {
+static const unsigned row_ordinals[66] = {
 	1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U,
 	11U, 12U, 13U, 14U, 15U, 16U, 17U, 18U, 19U, 20U,
 	21U, 22U, 23U, 24U, 25U, 26U, 27U, 28U, 29U, 30U,
 	31U, 32U, 33U, 34U, 35U, 36U, 37U, 38U, 39U, 40U,
 	41U, 42U, 43U, 44U, 45U, 46U, 47U, 48U, 49U, 50U,
 	51U, 52U, 53U, 54U, 55U, 56U, 57U, 58U, 59U, 60U,
-	61U,
+	61U, 62U, 63U, 64U, 65U, 66U,
 };
-#define ROW_COUNT 61U
+#define ROW_COUNT 66U
 
 /* The five forwarding macros, by source kernel id, with the target helper
  * each one runs and the target's 1-based lexicographic rank over the full
- * 61-name table. */
+ * 66-name table. */
 static const int delegate_ids[5] = {
 	158, 175, 191, 193, 195,
 };
@@ -97,7 +97,7 @@ static const char *const delegate_targets[5] = {
 	"bpf_map_lookup_elem",
 };
 static const unsigned delegate_ranks[5] = {
-	11U, 11U, 2U, 25U, 32U,
+	11U, 11U, 2U, 25U, 33U,
 };
 #define DELEGATE_COUNT 5U
 

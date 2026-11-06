@@ -15,7 +15,7 @@ of programs loaded during application startup.
 | Cilium | 82 | 89 |
 | Katran | 6 | 3 |
 | OTel | 30 | 26 |
-| Tetragon | 809 | 235 |
+| Tetragon | 809 | 236 |
 | Tracee | 175 | 114 |
 
 Inputs: `vendor/build/native-bpf/arm64/stage/`, dated September 30 in this
@@ -104,3 +104,47 @@ that premise to `env->allow_uninit_stack`. The root guest uses that privileged
 verifier contract. Removing simulator initialization alone cannot establish
 the stricter negative-suite property. F owns the production stack correction;
 this additional verifier premise was reported to F/T in coordination.
+
+## Subsequent checkpoints
+
+The label-rendered census also completed all 1,136 inputs: 1,090 generated and
+46 Tetragon helper-identification failures. Extending the shared helper table
+with IDs 36, 58, 109, 130 and 181 makes **all 46 failures generate**, as recorded
+in [helper-ids/](helper-ids/). Together the two label-rendered checkpoints cover
+all 1,136 staged inputs at generation. This closes the observed missing-helper
+identification failures, not callback semantics, map/ABI fidelity, verification,
+or application execution. The new macros call the actual helpers; their ABI
+oracle checks distinct argument lanes, pointer order, u32 narrowing and negative
+return values.
+
+The [label-all table](label-all/table.md) and [per-artifact CSV](label-all/coverage.csv)
+record compile/load outcomes including pending work. The first 29 completed
+BCC load checks yielded 9 acceptances, 15 verifier rejections and 5 load
+preparation failures. Cilium also has a diagnostic acceptance. Most large
+compiles have reached the 120-second diagnostic deadline under concurrent
+lane work; they remain timeout errors, not claims of unsupported instructions.
+The initial compile invocation enumerated only 326 generated inputs while
+generation was still running; rerun `compile PHASE=label-all` after it exits to
+cover the rest. Compiler and verifier outcomes checkpoint independently.
+
+[Manifest pairing](inventory/pairing.csv) covers all 497 manifest entries:
+466 pair uniquely and 31 have ambiguous truncated names; no entry lacks a
+candidate after applying both native-loader filename conventions. These
+remain manifest entries, not a measured startup inventory. Do not resolve an
+ambiguous program by choosing an arbitrary candidate.
+
+The portable diagnostic kernel/initramfs is built and its standalone Makefile
+has passed QEMU TCG locally. [DGX-SPARK.md](DGX-SPARK.md) gives the concrete
+transfer and hardware replay commands and distinguishes them from the still
+unavailable six-app generation-bound workload command.
+
+Helper validation: `helper-contract-check` passed the affected Lean theorem,
+generated-file freshness, the vendored libbpf ID check, 74 identity-table cases
+and 84 helper-call/ABI cases. The full `make -C kprog/formal check` retry
+stopped at a concurrently changed x86 CMOV route oracle (96,848 failures),
+before the Arm helper tests; its complete log is retained under `helper-ids/`.
+The first requested Arm negative + 29-case build completed nine positive
+compiles before A interrupted it to avoid a second lane writing the shared
+output directory. A restarted with isolated output paths and `--no-generate`;
+that build is still running. The retained progress log is a checkpoint, not a
+completed pass. Both invocations and the collision are recorded in coordination. No new helper macro is substituted with a zero return.

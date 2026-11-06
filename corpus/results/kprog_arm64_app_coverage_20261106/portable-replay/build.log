@@ -1,0 +1,7 @@
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/coverage.py package /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/label-pilot /workspaces/repository/kprog/arm64/build/app-coverage/label-pilot /workspaces/.agent-state/bpf-benchmark-supervisor/kfunc-inline-claude-20261004/round5-arm64.cpio.gz
+packaged 1 diagnostic artifacts in /workspaces/repository/kprog/arm64/build/app-coverage/label-pilot
+install -d /workspaces/repository/kprog/arm64/build/app-coverage/label-pilot/replay
+cp /workspaces/repository/vendor/build/arm64/linux/arch/arm64/boot/Image /workspaces/repository/kprog/arm64/build/app-coverage/label-pilot/replay/Image
+cp /workspaces/repository/kprog/arm64/build/app-coverage/label-pilot/initramfs.cpio.gz /workspaces/repository/kprog/arm64/build/app-coverage/label-pilot/replay/initramfs.cpio.gz
+cp /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/Replay.mk /workspaces/repository/kprog/arm64/build/app-coverage/label-pilot/replay/Makefile
+tar -C /workspaces/repository/kprog/arm64/build/app-coverage/label-pilot/replay -czf /workspaces/repository/kprog/arm64/build/app-coverage/label-pilot/replay.tar.gz Image initramfs.cpio.gz Makefile

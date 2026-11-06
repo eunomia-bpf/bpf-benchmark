@@ -2,7 +2,7 @@ import KProgFormal.Generated.GeneratedArm64HelperIdents
 
 namespace KProgFormal
 
-/-- Independent enumeration of the encoder's 61 BPF helper ids with the
+/-- Independent enumeration of the encoder's 66 BPF helper ids with the
 helper name each one denotes, in id-sorted order. Written out by hand so it
 shares no structure with the generated table. -/
 def helperIdentsSpec : List (Nat × String) := [
@@ -19,20 +19,25 @@ def helperIdentsSpec : List (Nat × String) := [
   (27, "bpf_get_stackid"), (28, "bpf_csum_diff"),
   (31, "bpf_skb_change_proto"), (32, "bpf_skb_change_type"),
   (33, "bpf_skb_under_cgroup"), (35, "bpf_get_current_task"),
+  (36, "bpf_probe_write_user"),
   (37, "bpf_current_task_under_cgroup"), (38, "bpf_skb_change_tail"),
   (39, "bpf_skb_pull_data"), (43, "bpf_skb_change_head"),
   (44, "bpf_xdp_adjust_head"), (45, "bpf_probe_read_str"),
   (46, "bpf_get_socket_cookie"), (50, "bpf_skb_adjust_room"),
+  (58, "bpf_override_return"),
   (65, "bpf_xdp_adjust_tail"), (67, "bpf_get_stack"),
   (68, "bpf_skb_load_bytes_relative"), (69, "bpf_fib_lookup"),
   (80, "bpf_get_current_cgroup_id"), (95, "bpf_sk_fullsock"),
+  (109, "bpf_send_signal"),
   (112, "bpf_probe_read_user"), (113, "bpf_probe_read_kernel"),
   (114, "bpf_probe_read_user_str"), (115, "bpf_probe_read_kernel_str"),
   (118, "bpf_jiffies64"), (122, "bpf_get_netns_cookie"),
   (125, "bpf_ktime_get_boot_ns"), (127, "bpf_seq_write"),
+  (130, "bpf_ringbuf_output"),
   (148, "bpf_copy_from_user"), (152, "bpf_redirect_neigh"),
   (158, "bpf_get_current_task_btf"), (161, "bpf_ima_inode_hash"),
   (174, "bpf_get_attach_cookie"), (175, "bpf_task_pt_regs"),
+  (181, "bpf_loop"),
   (183, "bpf_get_func_arg"), (184, "bpf_get_func_ret"),
   (185, "bpf_get_func_arg_cnt"), (186, "bpf_get_retval"),
   (191, "bpf_copy_from_user_task"), (193, "bpf_ima_file_hash"),
@@ -55,20 +60,25 @@ def allHelperIdents : List GeneratedArm64HelperIdents.Helper := [
   .bpf_get_stackid, .bpf_csum_diff,
   .bpf_skb_change_proto, .bpf_skb_change_type,
   .bpf_skb_under_cgroup, .bpf_get_current_task,
+  .bpf_probe_write_user,
   .bpf_current_task_under_cgroup, .bpf_skb_change_tail,
   .bpf_skb_pull_data, .bpf_skb_change_head,
   .bpf_xdp_adjust_head, .bpf_probe_read_str,
   .bpf_get_socket_cookie, .bpf_skb_adjust_room,
+  .bpf_override_return,
   .bpf_xdp_adjust_tail, .bpf_get_stack,
   .bpf_skb_load_bytes_relative, .bpf_fib_lookup,
   .bpf_get_current_cgroup_id, .bpf_sk_fullsock,
+  .bpf_send_signal,
   .bpf_probe_read_user, .bpf_probe_read_kernel,
   .bpf_probe_read_user_str, .bpf_probe_read_kernel_str,
   .bpf_jiffies64, .bpf_get_netns_cookie,
   .bpf_ktime_get_boot_ns, .bpf_seq_write,
+  .bpf_ringbuf_output,
   .bpf_copy_from_user, .bpf_redirect_neigh,
   .bpf_get_current_task_btf, .bpf_ima_inode_hash,
   .bpf_get_attach_cookie, .bpf_task_pt_regs,
+  .bpf_loop,
   .bpf_get_func_arg, .bpf_get_func_ret,
   .bpf_get_func_arg_cnt, .bpf_get_retval,
   .bpf_copy_from_user_task, .bpf_ima_file_hash,
@@ -101,24 +111,22 @@ theorem helper_idents_ids_strictly_increasing :
   native_decide
 
 /-- Each forwarding macro's target helper and the 1-based lexicographic
-rank that target occupies over the full 61-name table, by source kernel id.
+rank that target occupies over the full 66-name table, by source kernel id.
 -/
 def helperDelegateSpec : List (String × String × Nat) := [
   ("bpf_get_current_task_btf", "bpf_get_current_task", 11),
   ("bpf_task_pt_regs", "bpf_get_current_task", 11),
   ("bpf_copy_from_user_task", "bpf_copy_from_user", 2),
   ("bpf_ima_file_hash", "bpf_ima_inode_hash", 25),
-  ("bpf_map_lookup_percpu_elem", "bpf_map_lookup_elem", 32),
+  ("bpf_map_lookup_percpu_elem", "bpf_map_lookup_elem", 33),
 ]
 
-/-- The compact per-program slot the encoder assigns `name`: 1-based
-lexicographic rank over the used names. The encoder's
-`compact_helper_defines` enumerates `sorted(helper_names)` from 1, which is
-exactly this count of names lexicographically below `name`, plus one. -/
+/-- The 1-based lexicographic rank over the used names. The active label
+renderer uses kernel helper IDs directly rather than compact slots. -/
 def helperSlot (used : List String) (name : String) : Nat :=
     1 + used.countP (fun x => if x < name then true else false)
 
-/-- Over the full 61-name table, each forwarding target's pinned slot
+/-- Over the full 66-name table, each forwarding target's pinned slot
 agrees with `helperSlot`. A retarget, a rank drift, or a `helperSlot`
 change breaks this. -/
 theorem helper_delegate_ranks :
@@ -126,18 +134,19 @@ theorem helper_delegate_ranks :
       (fun t => helperSlot allHelperNames t.2.1 == t.2.2) = true := by
   native_decide
 
-/-- Over the full 61-name table, each name's own slot is its lexicographic
+/-- Over the full 66-name table, each name's own slot is its lexicographic
 rank, in specification order. -/
 theorem helper_slot_ranks :
     allHelperNames.map (fun n => helperSlot allHelperNames n) =
-      [32, 34, 31, 36, 28, 59, 18, 20,
-       55, 29, 30, 57, 1, 10, 13, 9,
-       54, 42, 35, 51, 23, 4, 48, 50,
-       56, 11, 5, 49, 53, 47, 60, 39,
-       21, 46, 61, 22, 52, 6, 8, 45,
-       40, 37, 41, 38, 26, 17, 27, 44,
-       2, 43, 12, 25, 7, 58, 14, 16,
-       15, 19, 3, 24, 33] := by
+      [33, 35, 32, 38, 28, 64, 18, 20,
+       60, 29, 30, 62, 1, 10, 13, 9,
+       59, 45, 37, 56, 23, 4, 53, 55,
+       61, 11, 44, 5, 54, 58, 52, 65,
+       41, 21, 51, 36, 66, 22, 57, 6,
+       8, 50, 48, 42, 39, 43, 40, 26,
+       17, 27, 49, 47, 2, 46, 12, 25,
+       7, 63, 31, 14, 16, 15, 19, 3,
+       24, 34] := by
   native_decide
 
 end KProgFormal

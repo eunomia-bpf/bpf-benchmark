@@ -1,0 +1,35 @@
+make: Entering directory '/workspaces/repository/kprog/arm64'
+make -C ../test \
+	OUTPUT_DIR="/workspaces/repository/kprog/arm64/build/negative-native" \
+	KERNEL_OFFSETS_DIR="/workspaces/repository/micro/programs/build-arm64" \
+	NATIVE_TARGET=aarch64-linux-gnu \
+	NATIVE_ARCH=arm64 \
+	SYS_INCLUDE_FLAGS="-I/usr/aarch64-linux-gnu/include -I../../.cache/aarch64-sysroot/usr/include -I../../.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu" \
+	"/workspaces/repository/kprog/arm64/build/negative-native/unchecked_packet_read.native.o"
+make[1]: Entering directory '/workspaces/repository/kprog/test'
+make[1]: '/workspaces/repository/kprog/arm64/build/negative-native/unchecked_packet_read.native.o' is up to date.
+make[1]: Leaving directory '/workspaces/repository/kprog/test'
+python3 ../run_micro_sim_batch.py --arch arm64 --build-only \
+	--build-dir "micro-prog/build/negative" \
+	--native-build-dir "build/negative-native" \
+	--config "../test/kprog_negative_stage2.yaml" \
+	--jobs 1
+unchecked_packet_read: ok: compile=1.862s proof_insns=3 direct_insns= verify=0.000s test=0.000s 
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `unchecked_packet_read` | ok | 1.862 | 3 |  | 0.000 | 0.000 |  |
+python3 ../run_micro_sim_batch.py --arch arm64 --build-only \
+	--build-dir "micro-prog/build" \
+	--config "../../micro/config/micro_pure_jit.yaml" \
+	--jobs 2
+running 29 benchmarks with 2 jobs
+simple_packet: ok: compile=7.350s proof_insns=21 direct_insns= verify=0.000s test=0.000s 
+simple: ok: compile=9.371s proof_insns=24 direct_insns= verify=0.000s test=0.000s 
+bitmap_popcount_scan: ok: compile=18.907s proof_insns=113 direct_insns= verify=0.000s test=0.000s 
+sorted_rule_binary_search: ok: compile=56.446s proof_insns=180 direct_insns= verify=0.000s test=0.000s 
+bcc_runqlat_log2_histogram_bucket: ok: compile=50.018s proof_insns=176 direct_insns= verify=0.000s test=0.000s 
+packet_checksum_fold: ok: compile=20.692s proof_insns=101 direct_insns= verify=0.000s test=0.000s 
+payload_prefix_memcmp_scan: ok: compile=153.792s proof_insns=142 direct_insns= verify=0.000s test=0.000s 
+packet_vlan_tcpopt_parser: ok: compile=385.936s proof_insns=258 direct_insns= verify=0.000s test=0.000s 
+trace_event_type_switch_dispatch: ok: compile=768.505s proof_insns=705 direct_insns= verify=0.000s test=0.000s 
+Lane A interrupted this invocation after 9 successful compile cases because a second lane was writing the same micro-prog/build directory. A restarted the required build in its own output directory with --no-generate; no other lane process was stopped.

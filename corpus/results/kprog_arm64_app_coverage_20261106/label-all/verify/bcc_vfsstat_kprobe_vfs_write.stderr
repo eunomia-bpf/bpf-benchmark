@@ -1,0 +1,4 @@
+libbpf: prog 'bcc_vfsstat_kprobe_vfs_write_arm64_sim_xdp': BPF program load failed: -EACCES
+libbpf: prog 'bcc_vfsstat_kprobe_vfs_write_arm64_sim_xdp': failed to load: -EACCES
+libbpf: failed to load object '/objects/bcc_vfsstat_kprobe_vfs_write.bpf.o'
+error: bpf_object__load failed: Permission denied (os error 13); verifier log: /results/bcc_vfsstat_kprobe_vfs_write.verifier.log

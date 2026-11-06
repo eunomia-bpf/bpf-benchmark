@@ -1,0 +1,9 @@
+make: Entering directory '/workspaces/repository/kprog/arm64/build/app-coverage/label-pilot/replay'
+install -d results
+timeout 7200 qemu-system-aarch64 -M virt -accel tcg -cpu max -smp 2 -m 2048 -nographic -no-reboot \
+	-kernel Image -initrd initramfs.cpio.gz \
+	-fsdev local,id=results,path=/workspaces/repository/kprog/arm64/build/app-coverage/label-pilot/replay/results,security_model=none \
+	-device virtio-9p-device,fsdev=results,mount_tag=results \
+	-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >qemu.log 2>&1
+test "$(cat results/guest-status)" = 0
+make: Leaving directory '/workspaces/repository/kprog/arm64/build/app-coverage/label-pilot/replay'

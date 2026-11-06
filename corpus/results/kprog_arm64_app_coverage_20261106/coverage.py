@@ -15,6 +15,34 @@ def records(directory):
     return [json.loads(line) for line in (directory / 'programs.jsonl').read_text().splitlines()]
 
 
+def inventory(directory):
+    root = ROOT / 'vendor/build/native-bpf/arm64/stage'
+    rows = []
+    for manifest in sorted(directory.glob('*.json')):
+        data = json.loads(manifest.read_text())
+        app = data['app']
+        for entry in data['objects']:
+            stem = Path(entry['native_object']).name.removesuffix('.native.o')
+            symbol = entry.get('symbol', entry['program'])
+            exact = root / app / f'{stem}.{symbol}.proof.o'
+            short = root / app / f'{symbol}.proof.o'
+            candidates = ([exact] if exact.exists() else [short] if short.exists() else
+                          sorted(set((root / app).glob(f'{stem}.{symbol}*.proof.o')) |
+                                 set((root / app).glob(f'{symbol}*.proof.o'))))
+            rows.append(dict(app=app, program=entry['program'], native_object=entry['native_object'],
+                             symbol=entry.get('symbol', ''),
+                             pairing='unique' if len(candidates) == 1 else 'missing' if not candidates else 'ambiguous',
+                             candidates=';'.join(p.name for p in candidates)))
+    with (directory / 'pairing.csv').open('w') as out:
+        writer = csv.DictWriter(out, fieldnames=['app', 'program', 'native_object', 'symbol',
+                                                'pairing', 'candidates'], lineterminator='\n')
+        writer.writeheader()
+        writer.writerows(rows)
+    print(f'{len(rows)} manifest entries; ' + ', '.join(
+        f"{sum(row['pairing'] == status for row in rows)} {status}" for status in ['unique', 'ambiguous', 'missing']))
+    return 0
+
+
 def freeze_simulator(directory):
     snapshot = directory / 'simulator'
     if not snapshot.exists():
@@ -190,6 +218,8 @@ if __name__ == '__main__':
         code = summarize(directory)
     elif action == 'package':
         code = package(directory, *map(Path, rest))
+    elif action == 'inventory':
+        code = inventory(directory)
     else:
         raise ValueError(action)
     raise SystemExit(code)

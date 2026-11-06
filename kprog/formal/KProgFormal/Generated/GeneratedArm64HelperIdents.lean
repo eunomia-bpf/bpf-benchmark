@@ -28,6 +28,7 @@ inductive Helper
   | bpf_skb_change_type
   | bpf_skb_under_cgroup
   | bpf_get_current_task
+  | bpf_probe_write_user
   | bpf_current_task_under_cgroup
   | bpf_skb_change_tail
   | bpf_skb_pull_data
@@ -36,12 +37,14 @@ inductive Helper
   | bpf_probe_read_str
   | bpf_get_socket_cookie
   | bpf_skb_adjust_room
+  | bpf_override_return
   | bpf_xdp_adjust_tail
   | bpf_get_stack
   | bpf_skb_load_bytes_relative
   | bpf_fib_lookup
   | bpf_get_current_cgroup_id
   | bpf_sk_fullsock
+  | bpf_send_signal
   | bpf_probe_read_user
   | bpf_probe_read_kernel
   | bpf_probe_read_user_str
@@ -50,12 +53,14 @@ inductive Helper
   | bpf_get_netns_cookie
   | bpf_ktime_get_boot_ns
   | bpf_seq_write
+  | bpf_ringbuf_output
   | bpf_copy_from_user
   | bpf_redirect_neigh
   | bpf_get_current_task_btf
   | bpf_ima_inode_hash
   | bpf_get_attach_cookie
   | bpf_task_pt_regs
+  | bpf_loop
   | bpf_get_func_arg
   | bpf_get_func_ret
   | bpf_get_func_arg_cnt
@@ -91,6 +96,7 @@ def id : Helper -> Nat
   | .bpf_skb_change_type => 32
   | .bpf_skb_under_cgroup => 33
   | .bpf_get_current_task => 35
+  | .bpf_probe_write_user => 36
   | .bpf_current_task_under_cgroup => 37
   | .bpf_skb_change_tail => 38
   | .bpf_skb_pull_data => 39
@@ -99,12 +105,14 @@ def id : Helper -> Nat
   | .bpf_probe_read_str => 45
   | .bpf_get_socket_cookie => 46
   | .bpf_skb_adjust_room => 50
+  | .bpf_override_return => 58
   | .bpf_xdp_adjust_tail => 65
   | .bpf_get_stack => 67
   | .bpf_skb_load_bytes_relative => 68
   | .bpf_fib_lookup => 69
   | .bpf_get_current_cgroup_id => 80
   | .bpf_sk_fullsock => 95
+  | .bpf_send_signal => 109
   | .bpf_probe_read_user => 112
   | .bpf_probe_read_kernel => 113
   | .bpf_probe_read_user_str => 114
@@ -113,12 +121,14 @@ def id : Helper -> Nat
   | .bpf_get_netns_cookie => 122
   | .bpf_ktime_get_boot_ns => 125
   | .bpf_seq_write => 127
+  | .bpf_ringbuf_output => 130
   | .bpf_copy_from_user => 148
   | .bpf_redirect_neigh => 152
   | .bpf_get_current_task_btf => 158
   | .bpf_ima_inode_hash => 161
   | .bpf_get_attach_cookie => 174
   | .bpf_task_pt_regs => 175
+  | .bpf_loop => 181
   | .bpf_get_func_arg => 183
   | .bpf_get_func_ret => 184
   | .bpf_get_func_arg_cnt => 185
@@ -153,6 +163,7 @@ def name : Helper -> String
   | .bpf_skb_change_type => "bpf_skb_change_type"
   | .bpf_skb_under_cgroup => "bpf_skb_under_cgroup"
   | .bpf_get_current_task => "bpf_get_current_task"
+  | .bpf_probe_write_user => "bpf_probe_write_user"
   | .bpf_current_task_under_cgroup => "bpf_current_task_under_cgroup"
   | .bpf_skb_change_tail => "bpf_skb_change_tail"
   | .bpf_skb_pull_data => "bpf_skb_pull_data"
@@ -161,12 +172,14 @@ def name : Helper -> String
   | .bpf_probe_read_str => "bpf_probe_read_str"
   | .bpf_get_socket_cookie => "bpf_get_socket_cookie"
   | .bpf_skb_adjust_room => "bpf_skb_adjust_room"
+  | .bpf_override_return => "bpf_override_return"
   | .bpf_xdp_adjust_tail => "bpf_xdp_adjust_tail"
   | .bpf_get_stack => "bpf_get_stack"
   | .bpf_skb_load_bytes_relative => "bpf_skb_load_bytes_relative"
   | .bpf_fib_lookup => "bpf_fib_lookup"
   | .bpf_get_current_cgroup_id => "bpf_get_current_cgroup_id"
   | .bpf_sk_fullsock => "bpf_sk_fullsock"
+  | .bpf_send_signal => "bpf_send_signal"
   | .bpf_probe_read_user => "bpf_probe_read_user"
   | .bpf_probe_read_kernel => "bpf_probe_read_kernel"
   | .bpf_probe_read_user_str => "bpf_probe_read_user_str"
@@ -175,12 +188,14 @@ def name : Helper -> String
   | .bpf_get_netns_cookie => "bpf_get_netns_cookie"
   | .bpf_ktime_get_boot_ns => "bpf_ktime_get_boot_ns"
   | .bpf_seq_write => "bpf_seq_write"
+  | .bpf_ringbuf_output => "bpf_ringbuf_output"
   | .bpf_copy_from_user => "bpf_copy_from_user"
   | .bpf_redirect_neigh => "bpf_redirect_neigh"
   | .bpf_get_current_task_btf => "bpf_get_current_task_btf"
   | .bpf_ima_inode_hash => "bpf_ima_inode_hash"
   | .bpf_get_attach_cookie => "bpf_get_attach_cookie"
   | .bpf_task_pt_regs => "bpf_task_pt_regs"
+  | .bpf_loop => "bpf_loop"
   | .bpf_get_func_arg => "bpf_get_func_arg"
   | .bpf_get_func_ret => "bpf_get_func_ret"
   | .bpf_get_func_arg_cnt => "bpf_get_func_arg_cnt"
