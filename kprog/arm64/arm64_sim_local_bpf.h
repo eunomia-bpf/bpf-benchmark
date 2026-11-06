@@ -132,6 +132,8 @@ union arm64_sim_gpr {
 #define ARM64_SIM_TAG_MAP_VALUE 6U
 #define ARM64_SIM_TAG_RELOC_ADDR 7U
 #define ARM64_SIM_TAG_RODATA_ADDR 8U
+#define ARM64_SIM_TAG_CODE 9U
+#define ARM64_SIM_TAG_RETURN 10U
 #include "../formal/generated/arm64_mem_write_arm.h"
 #include "../formal/generated/arm64_adrp.h"
 #include "../formal/generated/arm64_stlxr.h"
@@ -234,6 +236,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	ARM64_SIM_L_DECLARE_STATE();                                      \
 	ARM64_SIM_L_DECLARE_STACK();                                      \
 	__a64_x0.ptr = &__a64_sim_abi;                                    \
+	__a64_x30_tag = ARM64_SIM_TAG_RETURN;                           \
 	__a64_x0_tag = ARM64_SIM_TAG_ABI
 
 #define ARM64_SIM_ENTRY_SKB(CTX)                                            \
@@ -246,6 +249,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	ARM64_SIM_L_DECLARE_STATE();                                      \
 	ARM64_SIM_L_DECLARE_STACK();                                      \
 	__a64_x0.ptr = &__a64_sim_abi;                                    \
+	__a64_x30_tag = ARM64_SIM_TAG_RETURN;                           \
 	__a64_x0_tag = ARM64_SIM_TAG_ABI
 
 #define ARM64_SIM_L_READ_REG(REG) \
@@ -969,6 +973,16 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		arm64_sim_unsupported_opcode();                           \
 	} while (0)
 
+/* A reachable unknown PC must fail verification, including when clang cannot
+ * fold a volatile saved LR. An invalid helper ID cannot execute in a loaded
+ * BPF program. Keep the actual target test; this supplies no range assumption. */
+#if defined(__BPF__) || defined(__bpf__)
+#define ARM64_SIM_L_REJECT_PC()                                           \
+    do { asm volatile("call -1" ::: "r0", "r1", "r2", "r3", "r4", "r5", "memory"); } while (0)
+#else
+#define ARM64_SIM_L_REJECT_PC() ARM64_SIM_L_UNSUPPORTED_OPCODE()
+#endif
+
 #define ARM64_SIM_L_EXEC_ALU(OP, DST, SRC, SRC2, FLAGS, AUX, IMM)           \
 	do {                                                               \
 		__u8 __a64_alu_width = (FLAGS);                           \
@@ -1603,23 +1617,37 @@ ARM64_SIM_CONCAT(__a64_sim_tb_fallthrough_, ID):                             \
 #define ARM64_SIM_A64_TBNZ(REG, BIT, CURRENT, TARGET, LABEL)                \
 	ARM64_SIM_A64_TBZ_IMPL((REG), (BIT), KPROG_ARM64_BRANCH_TBNZ, (CURRENT), (TARGET), LABEL, __LINE__)
 
-#define ARM64_SIM_A64_CALL(LABEL, RETURN_ADDR)                              \
+#define ARM64_SIM_A64_ADR(REG, ADDRESS)                                    \
+	ARM64_SIM_L_WRITE_REG_PTR_TAG((REG), (void *)(long)(ADDRESS), ARM64_SIM_TAG_CODE)
+
+#define ARM64_SIM_A64_LINK(RETURN_ADDR)                                     \
 	do {                                                               \
 		__a64_lr = (RETURN_ADDR);                                  \
-		__a64_x30.x = __a64_lr;                                   \
+		ARM64_SIM_A64_ADR(ARM64_X30, __a64_lr);                  \
+	} while (0)
+
+#define ARM64_SIM_A64_CALL(LABEL, RETURN_ADDR)                              \
+	do {                                                               \
+		ARM64_SIM_A64_LINK(RETURN_ADDR);                           \
 		goto LABEL;                                                \
 	} while (0)
 
-#define ARM64_SIM_A64_RET()                                                 \
+#define ARM64_SIM_A64_RET_TO(REG, CASES)                                    \
 	do {                                                               \
-		if (__a64_lr) {                                           \
-			switch (__a64_lr) {                               \
-			ARM64_SIM_RETURN_CASES                           \
-			default: ARM64_SIM_L_UNSUPPORTED_OPCODE(); break;\
+		__a64_lr = ARM64_SIM_L_READ_REG(REG);                      \
+		if (__a64_lr || ARM64_SIM_L_REG_TAG(REG) != ARM64_SIM_TAG_RETURN) {\
+			if (ARM64_SIM_L_REG_TAG(REG) != ARM64_SIM_TAG_CODE) { \
+				ARM64_SIM_L_REJECT_PC();                         \
+			} else switch (__a64_lr) {                               \
+			CASES                                                   \
+			default: ARM64_SIM_L_REJECT_PC(); break;          \
 			}                                                 \
 		}                                                          \
 		ARM64_SIM_RET();                                          \
 	} while (0)
+
+#define ARM64_SIM_A64_RET_REG(REG) ARM64_SIM_A64_RET_TO((REG), ARM64_SIM_RETURN_CASES)
+#define ARM64_SIM_A64_RET() ARM64_SIM_A64_RET_REG(ARM64_X30)
 
 #define ARM64_SIM_LICENSE() char LICENSE[] SEC("license") = "GPL"
 

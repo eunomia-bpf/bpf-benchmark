@@ -111,3 +111,34 @@ unary-check:
 .PHONY: unary-artifacts
 unary-artifacts:
 	tar -C $(ROOT)/kprog/fidelity -czf $(HERE)/$(PHASE)/replay.tar.gz driver.c driver.h generate.py tcb.py build-arm64-a-unary/generated.c build-arm64-a-unary/native.S build-arm64-a-unary/native.o build-arm64-a-unary/instructions.S build-arm64-a-unary/instructions.asm build-arm64-a-unary/coverage.json build-arm64-a-unary/cpu-differential build-arm64-a-unary/snapshot
+
+.PHONY: bounded-check
+bounded-check:
+	taskset -c 16-23 python3 $(HERE)/bounded_check.py $(HERE)/$(PHASE)
+
+.PHONY: control-host-check
+control-host-check:
+	taskset -c 16-23 python3 $(HERE)/register_cells_check.py $(HERE)/$(PHASE) a64_route_host test_arm64_call_ret_route_host
+
+
+.PHONY: bounded-negative-check
+bounded-negative-check:
+	python3 $(HERE)/bounded_negative.py $(HERE)/$(PHASE) generate
+	$(MAKE) -f $(HERE)/Makefile compile PHASE=$(PHASE) COMPILE_ARGS='0 1 900'
+	! $(MAKE) -f $(HERE)/Makefile verify PHASE=$(PHASE)
+	python3 $(HERE)/bounded_negative.py $(HERE)/$(PHASE) check
+	$(MAKE) -f $(HERE)/Makefile summarize PHASE=$(PHASE)
+
+
+.PHONY: return-negative-check
+return-negative-check:
+	python3 $(HERE)/return_negative.py $(HERE)/$(PHASE) generate
+	$(MAKE) -f $(HERE)/Makefile compile PHASE=$(PHASE) COMPILE_ARGS='0 2 900'
+	! $(MAKE) -f $(HERE)/Makefile verify PHASE=$(PHASE)
+	python3 $(HERE)/return_negative.py $(HERE)/$(PHASE) check
+	$(MAKE) -f $(HERE)/Makefile summarize PHASE=$(PHASE)
+
+.PHONY: control-artifacts
+control-artifacts:
+	tar -C $(ROOT)/kprog/arm64/build/bounded-dispatch -czf $(HERE)/bounded-return-v2/native-fixtures.tar.gz native bounded_branch.proof.o bounded_dispatch.proof.o
+	tar -C $(HERE)/return-forgery -czf $(HERE)/return-forgery/native-fixtures.tar.gz outer_scalar_zero.S outer_scalar_zero.asm outer_scalar_zero.proof.o local_scalar_pc.S local_scalar_pc.asm local_scalar_pc.proof.o

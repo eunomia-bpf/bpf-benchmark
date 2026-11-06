@@ -39,8 +39,8 @@
 
 #define __BPF_HELPERS__ 1
 #define ARM64_SIM_RETURN_CASES \
-	case 0x40ULL: __a64_lr = 0; goto arm64_l_40; \
-	case 0x80ULL: __a64_lr = 0; goto arm64_l_80;
+	case 0x40ULL: goto arm64_l_40; \
+	case 0x80ULL: goto arm64_l_80;
 #define ARM64_SIM_ENABLE_STACK 1
 typedef unsigned char __u8;
 typedef unsigned short __u16;
@@ -93,6 +93,7 @@ static void model_reset(void)
 	 * the model lane uses the pointer identity, not a replayed constant). */
 	model_abi_live = 1;
 	model_stack_reset();
+	mtag[30] = 10U; /* Entry return capability, distinct from scalar zero. */
 }
 
 static void model_flags(unsigned n, unsigned z, unsigned c, unsigned v)
@@ -744,7 +745,7 @@ static __u64 scene_call(void)
 	model_reset();
 	mlr = 0;
 	mreg[30] = 0;
-	mtag[30] = 0U;
+	mtag[30] = 10U;
 	ARM64_SIM_ENTRY_XDP(&xdp_ctx);
 	(void)__a64_lr;
 	(void)__a64_v0;
@@ -765,7 +766,7 @@ arm64_l_c4:
 	/* call leaf; return address 0x80 (model mirrors lr and the x30 cell) */
 	mlr = 0x80ULL;
 	mreg[30] = 0x80ULL;
-	mtag[30] = 0U;
+	mtag[30] = 9U;
 	ARM64_SIM_A64_CALL(arm64_l_40, 0x80ULL);
 arm64_l_80:
 	mark(1);
@@ -814,17 +815,17 @@ arm64_l_40:
 	mark(2);
 	/* leaf body: bump pattern-cell 9 then return to 0x80 */
 	PLANT_REG(9U, pattern_reg(9U), 0U);
-	mlr = 0; /* the leaf's A64_RET consumed lr */
+	/* RET reads X30 without consuming the architectural link register. */
 	ARM64_SIM_A64_RET();
 }
 
 /* RETURN_CASES ladder scene: plant x0 and walk the two mapped return cases with
  * the sim; assert both. This is exactly what the generator emits inside real
- * local-call programs (case <addr>: __a64_lr = 0; goto <label>;) — the battery
+ * local-call programs (case <addr>: goto <label>;) — the battery
  * repaints the DEFAULT define gate and the A64_RET switch arms; this scene
  * guards the battery-side override expansion used by the call ladder. */
 
-/* RET default-arm scene: set lr to an unmapped return address so the
+/* RET default-arm scene: set X30 to an unmapped return address so the
  * A64_RET default arm fires ARM64_SIM_L_UNSUPPORTED_OPCODE (counted by the
  * shared unsupported_hits monitor). */
 static __u64 scene_ret_default(void)
@@ -846,7 +847,8 @@ static __u64 scene_ret_default(void)
 	(void)__a64_c;
 	(void)__a64_v;
 	marks_reset();
-	__a64_lr = 0x99ULL;
+	__a64_lr = 0; /* A stale mirror must not hide an invalid actual X30. */
+	PLANT_REG(30U, 0x99ULL, 9U);
 	X0_SET(0x42ULL);
 	ARM64_SIM_A64_RET();
 	for (i = 0; i < 31U; i++) {
@@ -897,14 +899,16 @@ static __u64 scene_return_cases(void)
 	__a64_x9.x = 0xAAAAULL;
 	mreg[9] = 0xAAAAULL;
 	mlr = 0x40ULL;
-	__a64_lr = 0x40ULL;
+	__a64_lr = 0x99ULL; /* RET must use the restored register, not this mirror. */
+	PLANT_REG(30U, 0x40ULL, 9U);
 	ARM64_SIM_A64_RET();
 arm64_l_40:
 	mark(1);
 	__a64_x9.x = 0xBBBBULL;
 	mreg[9] = 0xBBBBULL;
 	mlr = 0x80ULL;
-	__a64_lr = 0x80ULL;
+	__a64_lr = 0x99ULL;
+	PLANT_REG(30U, 0x80ULL, 9U);
 	ARM64_SIM_A64_RET();
 arm64_l_80:
 	mark(2);
@@ -930,10 +934,10 @@ arm64_l_80:
 		printf("MISMATCH retcases marks: got %u want 768\n", marks_word());
 		return 0xDEAD0004ULL;
 	}
-	/* lr must be zero after the mapped-lane repaints */
+	/* RET preserves the architectural link register at the selected PC. */
 	cases = cases + 1U;
-	if (__a64_lr != 0ULL) {
-		printf("MISMATCH retcases lr: got 0x%llx want 0\n",
+	if (__a64_lr != 0x80ULL) {
+		printf("MISMATCH retcases lr: got 0x%llx want 0x80\n",
 		       (unsigned long long)__a64_lr);
 		return 0xDEAD0005ULL;
 	}

@@ -8,8 +8,8 @@
  *
  * They are worth more than symmetry, because CALL performs *two* writes that
  * must agree. It sets the modelled link register `__a64_lr` and the architectural
- * `x30` from the same value, and RET dispatches on `__a64_lr` while the return
- * address the callee would actually use is the one in `x30`. A call that set one
+ * `x30` from the same value, and RET dispatches on the actual restored `x30`.
+ * A call that set one
  * and not the other would pass any check that looked at a single register, and
  * would return to the wrong place -- or to nothing -- at run time.
  *
@@ -116,14 +116,18 @@ dispatch:
 }
 
 /* Drive RET once with a given link register; report which arm ran. */
-static int probe_ret(unsigned long long lr)
+static int probe_ret(unsigned long long lr, unsigned code)
 {
 	DECL_STATE();
 
 	/* ARM64_SIM_A64_RET() ends in ARM64_SIM_RET(), which returns from the
 	 * *calling function*; so the result is recorded in a file-scope global
 	 * that the caller reads after the call completes. */
-	__a64_lr = (__s64)lr;
+	/* A stale mirror must not override the architectural return register. */
+	__a64_lr = 0xdeadULL;
+	__a64_x30.x = lr;
+	__a64_x30_tag = code == 1 ? ARM64_SIM_TAG_CODE :
+		code == 0 ? ARM64_SIM_TAG_RETURN : ARM64_SIM_TAG_SCALAR;
 	g_ret_arm = 0;
 	ARM64_SIM_A64_RET();
 	g_fell_through = 1;   /* unreachable unless RET does not return */
@@ -178,7 +182,7 @@ int main(void)
 		unsigned long before = unsupported_calls;
 		int arm;
 
-		probe_ret(A64_TEST_RET_A);
+		probe_ret(A64_TEST_RET_A, 1);
 		arm = g_ret_arm;
 		cases++;
 		if (arm != 1) {
@@ -187,7 +191,7 @@ int main(void)
 			failures++;
 		}
 
-		probe_ret(A64_TEST_RET_B);
+		probe_ret(A64_TEST_RET_B, 1);
 		arm = g_ret_arm;
 		cases++;
 		if (arm != 2) {
@@ -198,7 +202,7 @@ int main(void)
 
 		/* A value that is not an installed target must reach the
 		 * unsupported hook, so the dispatch is not vacuous. */
-		probe_ret(0x9999ULL);
+		probe_ret(0x9999ULL, 1);
 		arm = g_ret_arm;
 		cases++;
 		if (arm != 0) {
@@ -211,6 +215,26 @@ int main(void)
 			       "the unsupported hook\n");
 			failures++;
 		}
+	}
+	/* Outer return zero and local code offset zero are distinct. */
+	{
+		unsigned long before = unsupported_calls;
+		probe_ret(0, 0);
+		cases++;
+		if (g_ret_arm != 0 || unsupported_calls != before)
+			failures++;
+		probe_ret(0, 1);
+		cases++;
+		if (g_ret_arm != 0 || unsupported_calls != before + 1)
+			failures++;
+		probe_ret(0, 2); /* MOV X30,0 cannot forge the outer-return token. */
+		cases++;
+		if (g_ret_arm != 0 || unsupported_calls != before + 2)
+			failures++;
+		probe_ret(A64_TEST_RET_A, 2); /* A matching scalar is not a code pointer. */
+		cases++;
+		if (g_ret_arm != 0 || unsupported_calls != before + 3)
+			failures++;
 	}
 
 	if (failures) {

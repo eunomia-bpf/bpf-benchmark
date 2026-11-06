@@ -54,6 +54,13 @@ owning Makefile regenerates it, and the formal check verifies that it still
 matches the canonical source. The dynamic dispatcher remains the source used
 by the existing semantic hosts. No instruction semantics move into Python.
 
+The producer resolves BR/BLR to finite CFG-joined target sets and emits actual
+value switches. Calls write X30; returns dispatch on the real restored operand.
+CODE and outer RETURN provenance distinguish local offsets from forged scalar
+return values. Any reachable unknown-PC default fails verification. The
+recorded control regressions and current native-address integration work are in
+`../../corpus/results/kprog_arm64_app_coverage_20261106/README.md`.
+
 ## Smoke
 
 ```bash

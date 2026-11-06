@@ -339,3 +339,35 @@ binary are archived in `unary-shifts/replay.tar.gz`; raw per-form counts are in
 ```sh
 make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile direct-header-generate unary-check unary-artifacts PHASE=unary-shifts
 ```
+
+## Bounded indirect control and real LR restored
+
+The generator joins finite target definitions over the actual CFG, invalidates
+stale/caller-clobbered targets, and emits runtime target switches for BR/BLR.
+Each RET reads its actual operand (including restored X30), with per-site legal
+continuations. Separate CODE and outer RETURN tags prevent scalar zero or a
+matching scalar offset from impersonating a return address. A CMP-derived fact
+requires every incoming edge to execute that CMP.
+
+[bounded-return-v2/table.md](bounded-return-v2/table.md) records four native-matched
+full-system QEMU passes: both BR alternatives and both nested BLR/saved-LR
+alternatives return2 and write41/42, exactly as the unchanged native fixtures.
+Six CFG join/stale/clobber/narrowing/bypass regressions,4470 scene checks and13
+CALL/RET cases pass. [The omitted reachable target](bounded-return-negative/table.md)
+and [two scalar return forgeries](return-forgery/table.md) are rejected by the
+verifier. Their unsafe native objects are never executed. Reachable unknown-PC
+defaults contain an invalid-helper instruction, so they cannot occur in any
+accepted verifier program; they introduce no native guard, trap, fuel or
+assumption about which branch executes. All sources and raw logs are retained.
+
+```sh
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile bounded-check control-host-check compile verify summarize PHASE=bounded-return-v2 COMPILE_ARGS='0 4 900'
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile bounded-negative-check PHASE=bounded-return-negative
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile return-negative-check PHASE=return-forgery
+```
+
+These checks establish control dispatch for the recorded fixtures. The native
+absolute code/stack-address relation, every app's real entry context and
+original map bindings still require integration and artifact TV; neither
+logical offsets nor these tests establish that relation. This is active repair
+work, with no exemption for a failing program or accepted negative.

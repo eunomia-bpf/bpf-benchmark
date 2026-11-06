@@ -1,0 +1,32 @@
+[
+  {
+    "name": "join",
+    "passed": true,
+    "detail": "{20: frozenset({('scalar', 8), ('scalar', 5)})}"
+  },
+  {
+    "name": "bypass-cmp",
+    "passed": true,
+    "detail": "unbounded indirect target at 0x10: blr x8"
+  },
+  {
+    "name": "stale",
+    "passed": true,
+    "detail": "unbounded indirect target at 0x8: blr x8"
+  },
+  {
+    "name": "caller-clobber",
+    "passed": true,
+    "detail": "unbounded indirect target at 0xc: blr x8"
+  },
+  {
+    "name": "invalid-id",
+    "passed": true,
+    "detail": "invalid indirect target scalar:0xffff at 0x4"
+  },
+  {
+    "name": "narrow-move",
+    "passed": true,
+    "detail": "{8: frozenset({('scalar', 5)})}"
+  }
+]

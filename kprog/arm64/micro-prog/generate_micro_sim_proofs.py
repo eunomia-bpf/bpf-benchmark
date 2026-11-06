@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import re
 import subprocess
-from collections import OrderedDict
+from collections import OrderedDict, deque
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -33,13 +33,13 @@ WIDTH_CONST = {1: "ARM64_WIDTH_8", 2: "ARM64_WIDTH_16", 4: "ARM64_WIDTH_32", 8: 
 # top.
 GPR_WRITE_OPS = {
     "add", "sub", "and", "bic", "eor", "orr", "orn",
-    "adds", "subs",
+    "adds", "subs", "ands", "bics", "adrp",
     "mov", "movk", "lsl", "lsr", "asr", "ror",
     "madd", "msub", "mul", "umull", "umulh", "umaddl", "smaddl", "udiv",
     "mvn", "neg", "cneg", "extr", "ubfx", "sbfx", "ubfiz", "bfxil", "bfi",
     "rev", "rev16", "sxtb", "sxth", "sxtw", "ldr", "ldur", "ldaxr", "ldxr", "ldrb", "ldurb", "ldrh", "ldurh",
     "ldrsb", "ldrsh", "ldrsw",
-    "ldp", "stlxr", "stxr", "csel", "cinc", "cinv", "csinc", "csinv", "csneg", "cset", "fmov",
+    "ldp", "stlxr", "stxr", "csel", "cinc", "cinv", "csinc", "csinv", "csneg", "cset", "csetm", "fmov",
 }
 
 
@@ -600,81 +600,215 @@ def label(addr: int) -> str:
     return f"arm64_l_{addr:x}"
 
 
-def blr_target_reg(insn: NativeInsn) -> str | None:
-    if insn.mnemonic != "blr" or len(insn.operands) != 1:
-        return None
-    target = insn.operands[0]
-    if not re.fullmatch(r"x([0-9]+)", target):
-        return None
-    return target[1:]
+def target_register(reg: str) -> int | None:
+    match = re.fullmatch(r"[xw]([0-9]|[12][0-9]|30)", reg)
+    return int(match.group(1)) if match else None
 
 
-def written_gpr(insn: NativeInsn) -> str | None:
-    if insn.mnemonic not in GPR_WRITE_OPS:
-        return None
-    if not insn.operands:
-        return None
-    dst = insn.operands[0]
-    if re.fullmatch(r"[wx]([0-9]+)", dst):
-        return dst[1:]
-    return None
+def indirect_targets(insns: list[NativeInsn]) -> dict[int, frozenset[tuple[str, int]]]:
+    """Finite reaching constants, joined over the native CFG, never last-seen guesses.
 
+    This is specialization analysis, not an executable ISA reference. Unknown
+    values stay unknown; every emitted dispatch also checks the actual value.
+    Code pointers are offsets in the same local code space as call/ret labels.
+    """
+    by_addr = {i.addr: i for i in insns}
+    next_addr = {a.addr: b.addr for a, b in zip(insns, insns[1:])}
+    # An adjacent CMP fact is usable only if every edge executes that CMP.
+    entries = {branch_target(i.operands[-1]) for i in insns
+               if i.mnemonic in {"b", "cbz", "cbnz", "tbz", "tbnz"}
+               or i.mnemonic.startswith("b.")}
+    entries |= {branch_target(i.operands[1]) for i in insns if i.mnemonic == "adr"}
+    entries |= {branch_target(i.operands[0]) for i in insns
+                if i.mnemonic == "bl" and not i.reloc_symbol}
+    entries |= {next_addr[i.addr] for i in insns if i.mnemonic in {"bl", "blr"}}
+    states = {insns[0].addr: (None,) * 31}
+    queue = deque([insns[0].addr])
+    # Scalars come only from literal definitions; arithmetic is not guessed.
+    def read(state, reg):
+        index = target_register(reg)
+        if reg in {"xzr", "wzr"}:
+            return frozenset({("scalar", 0)})
+        return state[index] if index is not None else None
 
-def mov_immediate(insn: NativeInsn) -> int | None:
-    if insn.mnemonic != "mov" or len(insn.operands) != 2:
-        return None
-    if not insn.operands[1].startswith("#"):
-        return None
-    try:
-        return parse_imm(insn.operands[1])
-    except ValueError:
-        return None
+    def joined(left, right):
+        return None if left is None or right is None else left | right
 
+    def push(addr, state):
+        if addr not in by_addr:
+            raise ValueError(f"branch target 0x{addr:x} is outside the linked program")
+        old = states.get(addr)
+        merged = state if old is None else tuple(joined(a, b) for a, b in zip(old, state))
+        if old != merged:
+            states[addr] = merged
+            queue.append(addr)
 
-def mov_source_gpr(insn: NativeInsn) -> str | None:
-    if insn.mnemonic != "mov" or len(insn.operands) != 2:
-        return None
-    src = insn.operands[1]
-    if re.fullmatch(r"[wx]([0-9]+)", src):
-        return src[1:]
-    return None
+    while queue:
+        addr = queue.popleft()
+        insn = by_addr[addr]
+        op, args = insn.mnemonic, insn.operands
+        incoming = states[addr]
+        outgoing = list(incoming)
+        if op in GPR_WRITE_OPS or op == "adr":
+            written = [args[0]]
+            if op == "ldp":
+                written.append(args[1])
+            for reg in written:
+                index = target_register(reg)
+                if index is not None:
+                    outgoing[index] = None
+        if op == "mov":
+            index = target_register(args[0])
+            if index is not None:
+                if args[1].startswith("#"):
+                    value = parse_shifted_imm(args, 1) & ((1 << (reg_width(args[0]) * 8)) - 1)
+                    outgoing[index] = frozenset({("scalar", value)})
+                else:
+                    values = read(incoming, args[1])
+                    if reg_width(args[0]) == 8:
+                        outgoing[index] = values
+                    elif values is not None and all(k == "scalar" for k, v in values):
+                        outgoing[index] = frozenset((k, v & 0xffffffff) for k, v in values)
+        elif op == "adr":
+            index = target_register(args[0])
+            if index is not None:
+                outgoing[index] = frozenset({("code", branch_target(args[1]))})
+        elif op == "csel" and reg_width(args[0]) == 8:
+            index = target_register(args[0])
+            if index is not None:
+                outgoing[index] = joined(read(incoming, args[1]), read(incoming, args[2]))
+        # Pre/post-index loads and stores also write their address register.
+        for position, arg in enumerate(args):
+            if arg.startswith("[") and (arg.endswith("!") or position + 1 < len(args)):
+                base = split_operands(arg.removeprefix("[").split("]", 1)[0])[0]
+                index = target_register(base)
+                if index is not None:
+                    outgoing[index] = None
+        if op in {"bl", "blr"}:
+            # AAPCS caller-saved registers cannot retain an old helper ID.
+            outgoing[:19] = [None] * 19
+            outgoing[30] = None
+            if op == "bl" and not insn.reloc_symbol:
+                callee = list(incoming)
+                callee[30] = frozenset({("code", next_addr[addr])})
+                push(branch_target(args[0]), tuple(callee))
+        if op == "b":
+            push(branch_target(args[0]), tuple(outgoing))
+        elif op.startswith("b.") or op in {"cbz", "cbnz", "tbz", "tbnz"}:
+            taken, fallthrough = tuple(outgoing), tuple(outgoing)
+            previous = by_addr.get(addr - 4)
+            # This fact comes from the actual hardware CMP/branch pair. In
+            # particular, Cilium reuses a map value proven ==1 as helper ID1.
+            if (op in {'b.eq', 'b.ne'} and addr not in entries and previous is not None
+                    and previous.mnemonic == 'cmp' and reg_width(previous.operands[0]) == 8
+                    and previous.operands[1].startswith('#')):
+                index = target_register(previous.operands[0])
+                if index is not None:
+                    equal = list(outgoing)
+                    equal[index] = frozenset({('scalar', parse_shifted_imm(previous.operands, 1))})
+                    if op == 'b.eq':
+                        taken = tuple(equal)
+                    else:
+                        fallthrough = tuple(equal)
+            push(branch_target(args[-1]), taken)
+            if addr in next_addr:
+                push(next_addr[addr], fallthrough)
+        elif op in {"br", "blr"}:
+            values = read(incoming, args[0])
+            if values is not None:
+                for kind, target in values:
+                    if kind == "code":
+                        callee = list(incoming)
+                        if op == "blr":
+                            callee[30] = frozenset({("code", next_addr[addr])})
+                        push(target, tuple(callee))
+            if op == "blr" and addr in next_addr:
+                push(next_addr[addr], tuple(outgoing))
+        elif op != "ret" and addr in next_addr:
+            push(next_addr[addr], tuple(outgoing))
 
-
-def helper_calls_by_addr(insns: list[NativeInsn]) -> dict[int, str]:
-    reg_imms: dict[str, int] = {}
-    last_helper_imms: dict[str, int] = {}
-    helpers: dict[int, str] = {}
+    targets = {}
     for insn in insns:
-        target = blr_target_reg(insn)
-        if target is not None:
-            helper = HELPER_IDENTS.get(reg_imms.get(target, -1))
-            if helper is None:
-                helper = HELPER_IDENTS.get(last_helper_imms.get(target, -1))
-            if helper is not None:
-                helpers[insn.addr] = helper
+        if insn.mnemonic not in {"br", "blr"}:
+            continue
+        if insn.addr not in states:
+            # The instructions remain emitted; LLVM removes unreachable labels.
+            continue
+        values = read(states[insn.addr], insn.operands[0])
+        if values is None:
+            raise ValueError(f"unbounded indirect target at 0x{insn.addr:x}: {insn.raw}")
+        for kind, target in values:
+            if kind == "code" and target in by_addr:
+                continue
+            if kind == "scalar" and target in HELPER_IDENTS:
+                continue
+            raise ValueError(f"invalid indirect target {kind}:0x{target:x} at 0x{insn.addr:x}")
+        targets[insn.addr] = values
+    return targets
 
-        dst = written_gpr(insn)
-        if dst is None:
-            continue
-        imm = mov_immediate(insn)
-        if imm is not None:
-            reg_imms[dst] = imm
-            if imm in HELPER_IDENTS:
-                last_helper_imms[dst] = imm
-            continue
-        src = mov_source_gpr(insn)
-        if src is not None and src in reg_imms:
-            reg_imms[dst] = reg_imms[src]
-            if reg_imms[src] in HELPER_IDENTS:
-                last_helper_imms[dst] = reg_imms[src]
-            continue
-        reg_imms.pop(dst, None)
-    return helpers
+
+def return_targets(insns, indirect):
+    """Call-site continuations reaching each return, excluding callee CFGs.
+
+    Each emitted return still tests actual LR. This removes impossible
+    cross-subroutine edges from the global return ladder, not value checks.
+    """
+    by_addr = {i.addr: i for i in insns}
+    following = {a.addr: b.addr for a, b in zip(insns, insns[1:])}
+    callers = {insns[0].addr: set()}
+    for i in insns:
+        targets = ({branch_target(i.operands[0])} if i.mnemonic == 'bl' and not i.reloc_symbol
+                   else {v for k, v in indirect.get(i.addr, ()) if k == 'code'}
+                   if i.mnemonic == 'blr' else set())
+        for target in targets:
+            callers.setdefault(target, set()).add(following[i.addr])
+    returns = {i.addr: set() for i in insns if i.mnemonic in {'ret', 'br'}}
+    for entry, continuations in callers.items():
+        pending, seen = [entry], set()
+        while pending:
+            addr = pending.pop()
+            if addr in seen:
+                continue
+            seen.add(addr)
+            i = by_addr[addr]
+            op = i.mnemonic
+            if op in {'ret', 'br'}:
+                returns.setdefault(addr, set()).update(continuations)
+            if op == 'ret':
+                continue
+            if op == 'br':
+                pending.extend(v for k, v in indirect.get(addr, ()) if k == 'code')
+                continue
+            if op == 'b' or op.startswith('b.') or op in {'cbz', 'cbnz', 'tbz', 'tbnz'}:
+                pending.append(branch_target(i.operands[-1]))
+            if op != 'b' and addr in following:
+                pending.append(following[addr])
+    return returns
+
+
+def append_indirect(lines, insn, targets, next_addr):
+    register = reg_const(insn.operands[0])
+    lines.extend(["\t{", f"\t\t__u64 __a64_target = ARM64_SIM_L_READ_REG({register});",
+                  f"\t\tif (ARM64_SIM_L_REG_TAG({register}) == ARM64_SIM_TAG_CODE) {{",
+                  "\t\t\tswitch (__a64_target) {"])
+    for kind, target in sorted(targets):
+        if kind == "code":
+            action = (f"ARM64_SIM_A64_CALL({label(target)}, 0x{next_addr:x}ULL);"
+                      if insn.mnemonic == "blr" else f"goto {label(target)};")
+            lines.append(f"\t\t\tcase 0x{target:x}ULL: {action} break;")
+    lines.extend(["\t\t\tdefault: ARM64_SIM_L_REJECT_PC(); break;", "\t\t\t}",
+                  "\t\t} else {", "\t\t\tswitch (__a64_target) {"])
+    for kind, target in sorted(targets):
+        if kind == "scalar":
+            link = f"ARM64_SIM_A64_LINK(0x{next_addr:x}ULL); " if insn.mnemonic == "blr" else ""
+            tail = " ARM64_SIM_A64_RET();" if insn.mnemonic == "br" else ""
+            lines.append(f"\t\t\tcase {target}ULL: {link}ARM64_SIM_BPF_CALL_{HELPER_IDENTS[target]}();{tail} break;")
+    lines.extend(["\t\t\tdefault: ARM64_SIM_L_REJECT_PC(); break;", "\t\t\t}", "\t\t}", "\t}"])
 
 
 def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
                 next_addr: int | None,
-                helper_call: str | None,
+                targets: frozenset[tuple[str, int]] | None,
                 rodata_idents: dict[str, str],
                 reloc_idents: dict[str, str]) -> None:
     lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
@@ -701,6 +835,7 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
         return
     if op == "bl":
         if is_helper_symbol(insn.reloc_symbol):
+            lines.append(f"\tARM64_SIM_A64_LINK(0x{next_addr:x}ULL);")
             lines.append(f"\tARM64_SIM_BPF_CALL_{insn.reloc_symbol}();")
             return
         target = branch_target(insn.operands[0])
@@ -708,12 +843,15 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
             raise ValueError(f"unsupported call target in {insn.raw}")
         lines.append(f"\tARM64_SIM_A64_CALL({label(target)}, 0x{next_addr:x}ULL);")
         return
-    if op == "blr":
-        if helper_call is not None:
-            lines.append(f"\tARM64_SIM_BPF_CALL_{helper_call}();")
-            return
+    if op == "adr":
+        lines.append(f"\tARM64_SIM_A64_ADR({reg_const(insn.operands[0])}, 0x{branch_target(insn.operands[1]):x}ULL);")
+        return
+    if op in {"br", "blr"}:
+        append_indirect(lines, insn, targets or frozenset(), next_addr)
+        return
     if op == "ret":
-        lines.append("\tARM64_SIM_A64_RET();")
+        register = reg_const(insn.operands[0]) if insn.operands else "ARM64_X30"
+        lines.append(f"\tARM64_SIM_A64_RET_TO({register}, ARM64_SIM_RET_CASES_{insn.addr:x});")
         return
     enc = encode(insn, rodata_idents, reloc_idents)
     lines.append(
@@ -734,12 +872,13 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         for insns in functions.values()
         for index in range(len(insns) - 1)
     }
-    helper_by_addr = {
-        addr: helper
-        for insns in functions.values()
-        for addr, helper in helper_calls_by_addr(insns).items()
-    }
-    return_addrs = sorted(next_by_addr[insn.addr] for insn in all_insns if insn.mnemonic == "bl")
+    targets_by_addr = indirect_targets(all_insns)
+    returns_by_addr = return_targets(all_insns, targets_by_addr)
+    return_addrs = sorted(next_by_addr[insn.addr] for insn in all_insns
+                          if insn.mnemonic in {"bl", "blr"})
+    return_addrs = sorted(set(return_addrs) |
+                         {branch_target(i.operands[1]) for i in all_insns if i.mnemonic == "adr"} |
+                         {v for values in targets_by_addr.values() for k, v in values if k == "code"})
     uses_stack = bool(return_addrs) or any("[sp" in insn.raw.lower() for insn in all_insns)
     section, ctx, entry = {
         "xdp": ('SEC("xdp")', "struct xdp_md *", "ARM64_SIM_ENTRY_XDP(ctx);"),
@@ -747,13 +886,16 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         "cgroup_skb": ('SEC("cgroup_skb/egress")', "struct __sk_buff *", "ARM64_SIM_ENTRY_SKB(ctx);"),
     }[kind]
     lines: list[str] = []
+    for addr, targets in sorted(returns_by_addr.items()):
+        cases = ' '.join(f'case 0x{target:x}ULL: goto {label(target)};' for target in sorted(targets))
+        lines.append(f'#define ARM64_SIM_RET_CASES_{addr:x} {cases}')
     if uses_stack:
         lines.append("#define ARM64_SIM_ENABLE_STACK 1")
     if return_addrs:
         lines.append("#define ARM64_SIM_RETURN_CASES \\")
         for idx, addr in enumerate(return_addrs):
             tail = " \\" if idx + 1 < len(return_addrs) else ""
-            lines.append(f"\tcase 0x{addr:x}ULL: __a64_lr = 0; goto {label(addr)};{tail}")
+            lines.append(f"\tcase 0x{addr:x}ULL: goto {label(addr)};{tail}")
     lines.extend([
         '#include "../arm64_sim_local_bpf.h"',
         "",
@@ -826,7 +968,7 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
                     fused.add(branch.addr)
                     continue
             append_insn(lines, insn, all_addrs, next_by_addr.get(insn.addr),
-                        helper_by_addr.get(insn.addr),
+                        targets_by_addr.get(insn.addr),
                         rodata_idents, reloc_idents)
     if linked_exit:
         lines.extend([
