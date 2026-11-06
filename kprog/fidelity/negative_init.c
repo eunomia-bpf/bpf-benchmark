@@ -1,4 +1,4 @@
-/* Minimal initramfs driver: load generated proofs, never execute native code. */
+/* Initramfs driver: load-only unsafe fixtures; execute valid stage2 workloads. */
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>

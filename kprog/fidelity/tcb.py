@@ -81,7 +81,9 @@ def main():
     groups['formal model and proofs (Lean, including generated)'] = set((ROOT/'kprog/formal/KProgFormal').rglob('*.lean')) | {ROOT/'kprog/formal/KProgFormal.lean'}
     groups['formal contracts (JSON)'] = set((ROOT/'kprog/formal/contracts').glob('*.json'))
     groups['formal contract generators'] = set((ROOT/'kprog/formal/tools').glob('generate_*_spec.py'))
-    groups['translation-validation composition theorem'] = {ROOT/'kprog/tv/Composition.lean'}
+    groups['translation-validation model, checker and proofs (Lean)'] = set((ROOT/'kprog/tv').glob('*.lean'))
+    groups['translation-validation ELF extraction'] = {ROOT/'kprog/tv/extract_blocks.py'}
+    groups['constant-op dispatch generator'] = {ROOT/'kprog/arm64/generate_sim_dispatch.py'}
     groups['native-proof kernel patch and application (patch text, not SLOC)'] = {ROOT/'kprog/tv/native-proof-regions.patch',ROOT/'kprog/tv/apply_kernel_patch.py'}
     groups['existing verifier context (not incremental kernel changes)'] = {ROOT/'vendor/linux-framework/kernel/bpf/verifier.c',ROOT/'vendor/linux-framework/include/linux/bpf_verifier.h'}
     rows=[]

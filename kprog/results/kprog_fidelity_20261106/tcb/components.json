@@ -7,9 +7,9 @@
   },
   {
     "component": "arm64 simulator (including ISA-specific generated C)",
-    "files": 68,
-    "physical_lines": 5162,
-    "nonblank_lines": 4959
+    "files": 69,
+    "physical_lines": 5713,
+    "nonblank_lines": 5507
   },
   {
     "component": "shared simulator generated C",
@@ -20,14 +20,14 @@
   {
     "component": "x86 native-to-proof generator (including local imports)",
     "files": 8,
-    "physical_lines": 2288,
-    "nonblank_lines": 2117
+    "physical_lines": 2324,
+    "nonblank_lines": 2153
   },
   {
     "component": "arm64 native-to-proof generator (including local imports)",
     "files": 4,
-    "physical_lines": 1139,
-    "nonblank_lines": 1045
+    "physical_lines": 1146,
+    "nonblank_lines": 1052
   },
   {
     "component": "proof build/load orchestration",
@@ -38,8 +38,8 @@
   {
     "component": "native shared loader/linker integration",
     "files": 9,
-    "physical_lines": 6856,
-    "nonblank_lines": 6449
+    "physical_lines": 6906,
+    "nonblank_lines": 6498
   },
   {
     "component": "native ELF linker (both ISAs)",
@@ -85,9 +85,9 @@
   },
   {
     "component": "formal model and proofs (Lean, including generated)",
-    "files": 314,
-    "physical_lines": 35033,
-    "nonblank_lines": 31353
+    "files": 319,
+    "physical_lines": 35533,
+    "nonblank_lines": 31786
   },
   {
     "component": "formal contracts (JSON)",
@@ -98,14 +98,26 @@
   {
     "component": "formal contract generators",
     "files": 138,
-    "physical_lines": 28721,
-    "nonblank_lines": 26031
+    "physical_lines": 28653,
+    "nonblank_lines": 25966
   },
   {
-    "component": "translation-validation composition theorem",
+    "component": "translation-validation model, checker and proofs (Lean)",
+    "files": 5,
+    "physical_lines": 610,
+    "nonblank_lines": 536
+  },
+  {
+    "component": "translation-validation ELF extraction",
+    "files": 1,
+    "physical_lines": 55,
+    "nonblank_lines": 53
+  },
+  {
+    "component": "constant-op dispatch generator",
     "files": 1,
     "physical_lines": 97,
-    "nonblank_lines": 86
+    "nonblank_lines": 90
   },
   {
     "component": "native-proof kernel patch and application (patch text, not SLOC)",

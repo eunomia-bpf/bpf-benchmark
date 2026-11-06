@@ -123,3 +123,15 @@ snapshot, including ongoing producer fixes; the earlier table stays historical.
 | existing verifier context (not incremental kernel changes) | 2 | 27796 | 24679 |
 
 The 22 named binding functions occupy 846 physical lines, overlapping their full source rows. Kernel changes span12 files with1053 added/123 deleted lines. No overlapping counts are summed into a TCB total. `helper-refresh.log.gz` records this `make tcb` run.
+
+## Executable translation-validation surface
+
+The latest inventory counts all five `kprog/tv/*.lean` model/checker/proof files
+(610physical/536nonblank lines), instead of only the composition theorem.
+The55-line ELF extractor is separate. A's97-line mechanical constant-op
+dispatch generator is also explicit; generated C remains in the simulator
+include closure. The loader row includes the new DATASEC-layout helper.
+`tv-refresh.log.gz`, `components.json` and `files.csv` give the exact current
+snapshot. These proof-source counts do not measure Lean's trusted kernel;
+T's use of native reduction remains an external compiler/runtime trust
+assumption, not erased by these line counts.
