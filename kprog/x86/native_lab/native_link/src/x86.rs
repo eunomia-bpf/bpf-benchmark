@@ -471,7 +471,7 @@ fn find_symbol_in_section_at_address(
         ) {
             continue;
         }
-        if sym.section_index()? != section_index {
+        if sym.section_index() != Some(section_index) {
             continue;
         }
         let addr = sym.address();
@@ -509,7 +509,7 @@ fn find_text_symbol_in_section_at_address(
         if sym.kind() != object::SymbolKind::Text {
             continue;
         }
-        if sym.section_index()? != section_index {
+        if sym.section_index() != Some(section_index) {
             continue;
         }
         let addr = sym.address();
@@ -4394,6 +4394,13 @@ mod tests {
         // leaves a stale call displacement pointing into the relocated entry.
         let mut object = WriteObject::new(
             BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
+        // Undefined external symbols can precede a later local definition.
+        // Scanning one must continue rather than return None for the whole ELF.
+        object.add_symbol(WriteSymbol {
+            name: b"external_before_callee".to_vec(), value: 0, size: 0,
+            kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+            section: WriteSymbolSection::Undefined, flags: SymbolFlags::None,
+        });
         let text = object.section_id(StandardSection::Text);
         object.append_section_data(text, &[
             0xb8, 42, 0, 0, 0, 0xc3,       // read_reg: mov eax,42; ret

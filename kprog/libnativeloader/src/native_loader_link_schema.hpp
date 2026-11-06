@@ -206,7 +206,15 @@ NativeLinkArgs build_native_link_args(
         });
     }
     for (size_t i = 0; i < companion.update_sites.size(); i++) {
-        out.update_sites.push_back(make_link_update_site(companion.update_sites[i]));
+        auto site = make_link_update_site(companion.update_sites[i]);
+        // LLVM can merge proof calls from different maps. The verifier then
+        // poisons map_ptr_state, so bind the public helper identity rather than
+        // a map-specific ops function on the required-bound path.
+        if (site.kind == "call" &&
+            native_loader_env_truthy("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF")) {
+            site.target_addr = helper_kernel_addr(BPF_FUNC_map_update_elem);
+        }
+        out.update_sites.push_back(site);
     }
 #if defined(__aarch64__)
     /*

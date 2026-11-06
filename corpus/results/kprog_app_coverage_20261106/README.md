@@ -949,3 +949,29 @@ with AArch64; native source lifting is architecture independent.
 All completed attempt disks, image tars and scratch roots are deleted after
 exit. The current attempt16 is running with a private helper-binding diagnostic;
 its raw results will remain after its disposable image and disks are removed.
+
+
+## Bound map-update call identity (attempt16)
+
+The required-bound loader uses the public `bpf_map_update_elem` identity for
+call-based map updates. LLVM may merge calls from distinct maps into one proof
+call, whose verifier `map_ptr_state` is then poisoned; the original map-specific
+`htab_map_update_elem` reference cannot match that call. The public helper
+retains the exact operation and passes the existing kernel identity check.
+Unbound native map-specific optimization stays unchanged.
+
+Attempt16 accepts23 of25 actual resident BCC programs, closing the capable-exit,
+tcpconnect-return and biosnoop-completion admission errors. The remaining two
+opensnoop programs fail the existing reference check for native `memset`, whose
+proof contains expanded stores. The raw result records startup error and no
+native workload timing. Shutdown also records a separate 9p/netfs loop-disk
+NULL-call panic after the application failure; it is preserved verbatim.
+[Raw attempt16 evidence](bound-helper-artifacts.tar.gz) includes full logs,
+captures, exact package and raw corpus result. Disposable disk, image tar and
+scratch roots were removed after exit.
+
+Embedding an exact SysV byte-loop memset in the paired native ELF exposed a
+separate linker defect: an undefined symbol before a local callee caused symbol
+lookup to return immediately. Both x86 symbol scans now continue past undefined
+symbols. The existing local-call relocation regression now includes that ordering;
+all76 native-link tests pass. No kernel reference check is relaxed.
