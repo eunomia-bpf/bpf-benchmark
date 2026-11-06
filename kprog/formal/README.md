@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0992 - four of the nine plot outputs have no file
+
+The paper's plotting scripts name nine figure files between them, and four of
+the names have no file in the directory. Both missing ones come from the script
+that plots the evaluation, and its names carry a date the committed figures do
+not.
+
+The scripts also cannot run here: none of the three finds matplotlib, so a name
+that has drifted from its output cannot be regenerated to check which is right.
+The four that do exist are committed artefacts, so the figures a reader sees are
+real even where the script that made them no longer points at them.
+
+This matters for the shape the previous step measured: the paper includes no
+figure, and the material for several is present but not reproducible from this
+environment. Census unchanged; the script-to-output mapping is measured.
+
 ### Step 0991 - the compiled paper has no figures
 
 The paper's measurement section reports execution ratios, code sizes, site
