@@ -360,3 +360,18 @@ The optional hardware counterexample replay is
 with `ARM64_CONTROL_HANDOFF` set to that file. It is expected to return nonzero
 for the1024 mismatches until the address relation is fixed. The original74-form
 zero replay remains separate; neither is broadened to an all-pointer-state claim.
+
+## Refreshed hardware replay, 11:25–11:38 UTC
+
+The coordinator replayed both unchanged static binaries on Spark CPU19
+(Cortex-X925) and CPU10 (Cortex-A725). The reference handoff reports
+**497 forms/508928 cases/zero mismatches on each core**; the control handoff
+reports **74 forms/75776 cases/zero mismatches on each core**.
+`arm64-reference-hardware/` and `arm64-control-hardware/` retain the supplied
+RUN.txt, complete logs, host identification and per-form counts unchanged.
+Their compressed binary SHA256 values are respectively
+`c8d203b1131648ef43b41b4f2c375e85e5eca517b30c1989df50662ad5e3a0c6`
+and `2459ff8618ca7cd3cffec5fe45ded0a9ef1fda482e59609dd6a5ad5e0d8c4ea2`.
+These hardware results close replay of those frozen matrices, including the
+branch/call/stack composite handoff. They do not cover the later SP-flags
+counterexample or establish complete reference coverage.

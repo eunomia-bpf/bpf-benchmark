@@ -1,0 +1,9 @@
+Coordinator run on DGX Spark spark-d5fe, 2026-11-06 11:25 UTC.
+Binary: kprog/results/kprog_fidelity_20261106/differential/cpu-differential-arm64-reference.gz
+  sha256 c8d203b1131648ef43b41b4f2c375e85e5eca517b30c1989df50662ad5e3a0c6 (copied unchanged)
+Commands: mkdir -p out-cpuN; taskset -c N nice ./cpu-differential 1024 out-cpuN, N=19 (Cortex-X925) and N=10 (Cortex-A725)
+results:
+forms=497 cases=508928 mismatches=0
+rc=0
+forms=497 cases=508928 mismatches=0
+rc=0

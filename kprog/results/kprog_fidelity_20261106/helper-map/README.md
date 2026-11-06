@@ -81,3 +81,22 @@ taskset -c 16-23 make -C kprog/fidelity stage2-arm64-qemu
 The initramfs uses T's paired Arm kernel/module and the production manifest,
 loader and linker. Twelve successful native executions are emulation evidence;
 they are neither hardware timing nor an application-program coverage claim.
+
+## Readonly-data binding repair: all13 Arm cases pass
+
+After T's immutable native-data binding repair `f272b2b02`, the same frozen
+13 proof/native inputs pass the actual bound full-system QEMU path in
+`arm64-readonly-bound/`. Every original expected64-bit result and retval2
+matches; every case records a nonzero generation. In particular,
+`map_hash_str_key` now returns **18369614221520256751**, with retval2 and
+one bound chunk. The previous12/13 outcome remains above and in `arm64/`.
+No workload or proof source changed to obtain this pass.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity bound-probe-build-arm64
+taskset -c 16-23 make -C kprog/fidelity stage2-arm64-qemu ARM_STAGE2_OUT=../results/kprog_fidelity_20261106/helper-map/arm64-readonly-bound
+```
+
+The complete guest console and13 individual JSON/log pairs retain all checks.
+This is correctness evidence under emulation; lane R's timing request remains
+separate, and no per-program translation-validation certificate is inferred.

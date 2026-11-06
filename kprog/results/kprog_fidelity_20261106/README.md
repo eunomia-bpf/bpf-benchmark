@@ -7,8 +7,9 @@
   ISAs; original14x86reject, but the15th stack-base flag case accepts on both
   ISAs. Arm also retains three ABI acceptances. These are open safety bugs.
   Exact diagnostics and repair ownership are retained.
-- `helper-map/README.md`: all13 x86 cases pass bound execution; Arm QEMU12pass,
-  1open readonly-data binding failure.
+- `helper-map/README.md`: all13 x86 cases pass bound execution; after immutable
+  readonly-data binding repair, all13 Arm QEMU cases also pass exact results,
+  return values and nonzero-generation checks. The earlier12/13 is retained.
 - Generation-bound load time and helper/map timing: exact requests entered
   under "Timing requests" in `/workspaces/.agent-state/kprog-lanes/COORDINATION.md`
   for lane R, which owns timing.
