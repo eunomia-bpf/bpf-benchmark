@@ -40,6 +40,7 @@ def forms():
         ('BLR saved LR stack', 'bl 1f\nb finish\n1: str x30,[sp,#-16]!\nadr x10,2f\nblr x10\nldr x30,[sp],#16\nret\n2: add x0,x0,x2\nret'),
         ('stack pair pre/post', 'stp x1,x2,[sp,#-16]!\nldp x0,x3,[sp],#16\nb finish'),
         ('stack scalar pre/post', 'str x1,[sp,#-16]!\nldr x0,[sp],#16\nb finish'),
+        ('SP compare flags', 'cmp sp,#0\n'+branch('b.eq', False)),
     ]
     return out
 

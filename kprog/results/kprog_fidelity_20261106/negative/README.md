@@ -183,3 +183,35 @@ taskset -c 16-23 make -C kprog/fidelity negative-build ARCH=x86 NEGATIVE_BUILD=b
 taskset -c 16-23 make -C kprog/fidelity negative-bound-kvm NEGATIVE_BUILD=build-x86/negative-definedness-frozen NEGATIVE_BOUND_OUT=../results/kprog_fidelity_20261106/negative/x86-definedness-frozen
 taskset -c 16-23 make -C kprog/fidelity negative-bound-qemu ARM_NEGATIVE_BOUND_BUILD=build-arm64/negative-saved-lr-frozen ARM_NEGATIVE_BOUND_OUT=../results/kprog_fidelity_20261106/negative/arm64-saved-lr-frozen
 ```
+
+## Stack-base flag noninterference: new accepted unsafe arm
+
+V found a distinct address-abstraction defect after the14-case ABI repair.
+The native CPU's absolute stack address is nonzero; the simulator starts its
+stack offset at0. Balanced SUB/ADD on x86 therefore leaves actual ZF=0 but
+simulated ZF=1. `check-stack-base-flags` reproduces this harmless SETE result
+and exits nonzero. The copied V reproducer is now a permanent F regression.
+
+A new15th fixture defines its return value, balances SP, then places a null
+read behind that flag-dependent branch. On **x86 KVM it is accepted** with
+nonzero-generation sidecars while all previous14reject. On **Arm full-system
+QEMU the analogous CMP SP,#0 branch is also accepted**, in addition to the
+three prior ABI accepts:4accepted total,8verifier/1loader/2specializer rejects.
+Both final suites have zero infrastructure failures. The null address is formed
+in a supported GPR, so an unsupported absolute-memory encoding cannot hide the
+finding. Unsafe native code is never executed.
+
+This is a native-address/state-relation safety defect, not an undefined-entry
+liveness failure. C/A/T must preserve observable pointer arithmetic/flags under
+a real base binding; the fix cannot be a fabricated fixed address or rejection
+of all valid stack/pointer arithmetic. The15-case suites remain nonzero and
+the defect is OPEN. `x86-stack-base/` and `arm64-stack-base/` retain exact logs,
+all original-case outcomes, and the accepted program's nonzero-generation ID.
+`stack-base-artifacts.tar.gz` retains both complete frozen source/object builds.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity check-stack-base-flags
+taskset -c 16-23 make -C kprog/fidelity negative-build NEGATIVE_BUILD=build-x86/negative-stack-base
+taskset -c 16-23 make -C kprog/fidelity negative-bound-kvm NEGATIVE_BUILD=build-x86/negative-stack-base NEGATIVE_BOUND_OUT=../results/kprog_fidelity_20261106/negative/x86-stack-base
+taskset -c 16-23 make -C kprog/fidelity negative-bound-qemu ARM_NEGATIVE_BOUND_BUILD=build-arm64/negative-stack-base ARM_NEGATIVE_BOUND_OUT=../results/kprog_fidelity_20261106/negative/arm64-stack-base
+```

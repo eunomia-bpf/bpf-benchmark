@@ -258,3 +258,9 @@ stage2-arm64-qemu:
 		-initrd $(ARM_STAGE2_BUILD)/stage2.cpio -append 'console=ttyAMA0 rdinit=/init panic=-1' \
 		> $(ARM_STAGE2_OUT)/guest-console.log 2>&1
 	$(PYTHON) stage2.py collect --arch arm64 --build $(ARM_STAGE2_BUILD) --out $(ARM_STAGE2_OUT)
+
+.PHONY: check-stack-base-flags
+check-stack-base-flags:
+	install -d build-x86
+	$(CC) -O2 -I../formal -I../../vendor/libbpf/src test_stack_base_flags.c -o build-x86/stack-base-flags
+	./build-x86/stack-base-flags

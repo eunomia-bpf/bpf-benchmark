@@ -1,0 +1,33 @@
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=1017
+stub fd_array_cnt=3 fd_array=0:11,1:11,2:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=20;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 0                        ; R0=0
+1: (61) r3 = *(u32 *)(r1 +4)          ; R1=ctx() R3=pkt_end()
+2: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)
+3: (bf) r1 = r2                       ; R1=pkt(r=0) R2=pkt(r=0)
+4: (07) r1 += 4                       ; R1=pkt(off=4,r=0)
+5: (2d) if r1 > r3 goto pc+25         ; R1=pkt(off=4,r=4) R3=pkt_end()
+6: (b7) r1 = 0                        ; R1=0
+7: (7b) *(u64 *)(r10 -8) = r1         ; R1=0 R10=fp0 fp-8=0
+8: (18) r1 = 0xffff0000061eca00       ; R1=map_ptr(map=neg_map,ks=4,vs=8)
+10: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)
+11: (bf) r1 = r0                      ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8) R1=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)
+12: (79) r2 = *(u64 *)(r10 -8)        ; R2=0 R10=fp0 fp-8=0
+13: (71) r3 = *(u8 *)(r1 +0)
+R1 invalid mem access 'map_value_or_null'
+processed 13 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+
+kernel log tail:
+4,197,4302576,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+5,198,4302920,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+
+native_lab stub context: prog_type=6 blob_bytes=92 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374
+retained_map_info=9:id=5:type=2:name=neg_map
+native_blob_diag: fnv64=67c938b210766f03 word_count=23 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=80 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=92 final_size_matches=1
+chunk_bytes=0:92
+reloc_targets=80:0x5
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied

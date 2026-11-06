@@ -338,3 +338,25 @@ per form: full CPU698forms/11168cases/zero, reference93forms/1488cases/zero.
 `x86-reference-isa-adapter/` retains its per-form records and complete log;
 its nonzero status still reports the605 unavailable x86 reference forms.
 This small integration regression does not replace the full1024-state result.
+
+## Safe SP-flags counterexample after the74-form pass
+
+The additional75th control composite compares SP with0 and has two harmless
+arithmetic arms. `arm64-control-stack-base/` reports75forms/76800cases, with
+**all1024 SP-compare cases mismatching** and all original74forms still agreeing.
+The CPU's SP is nonzero while the model computes flags from offset0. Every
+mismatch's full state and memory input/output is retained losslessly. This is
+independent benign CPU/QEMU evidence for the actual accepted unsafe branch in
+`../negative/arm64-stack-base/`; no unsafe native is executed to demonstrate it.
+The earlier74-form green result did not exercise address-sensitive SP flags.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity arm64-control-build ARM64_CONTROL_BUILD=build-arm64-control-stack-base
+taskset -c 16-23 make -C kprog/fidelity arm64-control-qemu ARM64_CONTROL_BUILD=build-arm64-control-stack-base ARM64_CONTROL_OUT=../results/kprog_fidelity_20261106/differential/arm64-control-stack-base
+```
+
+The optional hardware counterexample replay is
+`cpu-differential-arm64-control-stack-base.gz`, via `arm64-control-handoff`
+with `ARM64_CONTROL_HANDOFF` set to that file. It is expected to return nonzero
+for the1024 mismatches until the address relation is fixed. The original74-form
+zero replay remains separate; neither is broadened to an all-pointer-state claim.

@@ -4,7 +4,8 @@
   AArch64 harness delivered. Both Spark core types pass the width-fix matrix
   on hardware; both also pass the newer register-cell replay.
 - `negative/README.md`: baseline findings and fresh bound-path sweeps on both
-  ISAs; all14 x86 cases now reject; three Arm ABI acceptances remain open.
+  ISAs; original14x86reject, but the15th stack-base flag case accepts on both
+  ISAs. Arm also retains three ABI acceptances. These are open safety bugs.
   Exact diagnostics and repair ownership are retained.
 - `helper-map/README.md`: all13 x86 cases pass bound execution; Arm QEMU12pass,
   1open readonly-data binding failure.
