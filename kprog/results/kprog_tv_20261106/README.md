@@ -127,3 +127,14 @@ assumption. Wrong successors and execution after return/fault reject. This
 establishes checker machinery; native block/entry relations remain to be
 instantiated for each micro/application artifact. No program is relabelled
 validated by this component theorem.
+
+`cmov-certificate-check.log` records `make -C kprog/tv cmov-negative-check`:
+the actual clang ELF's production CMOVE scalar handlers pass for all inputs at
+16/32/64 bits, with native byte decoding and BPF execution checked against V's
+reference. An unchanged ELF copy passes; condition-mask, branch-successor and
+source-register mutations reject. `cmov-block.bpf.o`, `cmov-CompiledBlocks.lean`
+and `cmov-clang-version.txt` retain the exact positive input; the three
+`cmov-wrong-*.log` files retain semantic rejection diagnostics. This scalar
+component is not a full architectural-state or application certificate.
+Its printed logical dependencies include `Lean.ofReduceBool` for native
+certificate checking as well as `propext`, `Classical.choice` and `Quot.sound`.

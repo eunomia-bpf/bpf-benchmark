@@ -10,13 +10,28 @@ check: binding-check
 	cd ../formal && lake env lean ../tv/Composition.lean
 	$(MAKE) bpf-check
 
-.PHONY: bpf-check
+.PHONY: bpf-check cmov-check cmov-certificate cmov-negative-check
 bpf-check:
 	install -d build
 	cd ../formal && lake env lean -R ../tv -o ../tv/build/Composition.olean ../tv/Composition.lean
 	cd ../formal && lake env lean -R ../tv -o ../tv/build/BPF.olean ../tv/BPF.lean
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv -o ../tv/build/BPFPath.olean ../tv/BPFPath.lean
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv ../tv/BPFChecks.lean
+
+build/CompiledBlocks.lean: build/cmov-block.bpf.o extract_blocks.py
+	python3 extract_blocks.py $< $@
+
+CMOV_BLOCK_DIR ?= build
+cmov-check: bpf-check build/CompiledBlocks.lean
+	$(MAKE) cmov-certificate
+
+cmov-certificate:
+	cd ../formal && LEAN_PATH=../tv/$(CMOV_BLOCK_DIR):../tv/build lake env lean -R ../tv/$(CMOV_BLOCK_DIR) \
+		-o ../tv/$(CMOV_BLOCK_DIR)/CompiledBlocks.olean ../tv/$(CMOV_BLOCK_DIR)/CompiledBlocks.lean
+	cd ../formal && LEAN_PATH=../tv/$(CMOV_BLOCK_DIR):../tv/build lake env lean -R ../tv ../tv/CmovCertificate.lean
+
+cmov-negative-check: cmov-check
+	python3 test_compiled_blocks.py
 
 binding-check: build/test-binding
 	./build/test-binding
@@ -68,6 +83,12 @@ build/simulator.bpf.o: test_simulator.bpf.c
 	install -d build
 	clang -O2 -g -target bpf -I../../vendor/libbpf/include/uapi \
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		-I/usr/include/x86_64-linux-gnu -c $< -o $@
+
+build/cmov-block.bpf.o: cmov_block.bpf.c $(wildcard ../x86/*.h ../formal/generated/*.h)
+	install -d build
+	clang -O3 -target bpf -I../../vendor/libbpf/include/uapi \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include/bpf \
 		-I/usr/include/x86_64-linux-gnu -c $< -o $@
 
 .PHONY: linker-build

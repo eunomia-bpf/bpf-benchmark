@@ -1,0 +1,16 @@
+cd ../formal && LEAN_PATH=../tv/build/cmov-mutations/wrong-successor:../tv/build lake env lean -R ../tv/build/cmov-mutations/wrong-successor \
+	-o ../tv/build/cmov-mutations/wrong-successor/CompiledBlocks.olean ../tv/build/cmov-mutations/wrong-successor/CompiledBlocks.lean
+cd ../formal && LEAN_PATH=../tv/build/cmov-mutations/wrong-successor:../tv/build lake env lean -R ../tv ../tv/CmovCertificate.lean
+../tv/CmovCertificate.lean:71:72: error: The prover found a counterexample, consider the following assignment:
+rflags✝ = 18446744073709551488#64
+'KProgTV.CmovCertificate.compiled_value' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.CmovCertificate.compiled_execution' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+make[1]: *** [Makefile:30: cmov-certificate] Error 1

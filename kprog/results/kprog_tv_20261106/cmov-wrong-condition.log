@@ -1,0 +1,22 @@
+cd ../formal && LEAN_PATH=../tv/build/cmov-mutations/wrong-condition:../tv/build lake env lean -R ../tv/build/cmov-mutations/wrong-condition \
+	-o ../tv/build/cmov-mutations/wrong-condition/CompiledBlocks.olean ../tv/build/cmov-mutations/wrong-condition/CompiledBlocks.lean
+cd ../formal && LEAN_PATH=../tv/build/cmov-mutations/wrong-condition:../tv/build lake env lean -R ../tv ../tv/CmovCertificate.lean
+../tv/CmovCertificate.lean:71:72: error: The prover found a potentially spurious counterexample:
+- The following potentially relevant hypotheses could not be used: [a✝]
+Consider the following assignment:
+rflags✝ = 18446744073709551488#64
+../tv/CmovCertificate.lean:71:72: error: The prover found a potentially spurious counterexample:
+- The following potentially relevant hypotheses could not be used: [a✝]
+Consider the following assignment:
+rflags✝ = 18446744073709551552#64
+'KProgTV.CmovCertificate.compiled_value' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.CmovCertificate.compiled_execution' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+make[1]: *** [Makefile:30: cmov-certificate] Error 1
