@@ -67,6 +67,25 @@ def main():
             check(prefix + [("movzx", ("eax", "ax")), ("ret", ())], "undefined native ABI register eax")
             check(prefix + finish)
         check(initialize + [(op, ("ax", "bx", "16")), ("setp", ("al",))] + finish)
+    low = [("mov", ("dx", "WORD PTR [rdi]"))]
+    for op, immediate in (("and", "0xffff"), ("or", "0xffff0000")):
+        for register in (False, True):
+            prefix = low + ([("mov", ("ecx", immediate))] if register else [])
+            check(prefix + [(op, ("edx", "ecx" if register else immediate)),
+                            ("mov", ("eax", "edx")), ("ret", ())])
+    for op, immediate in (("and", "0x1ffff"), ("or", "0xfffe0000"), ("xor", "1")):
+        prefix = low + [(op, ("edx", immediate))]
+        check(prefix + [("mov", ("eax", "edx")), ("ret", ())], "undefined native ABI register eax")
+        check(prefix + [("movzx", ("eax", "dx")), ("ret", ())])
+    check([("and", ("edx", "0xffffff00")), ("setp", ("al",))] + finish)
+    check([("and", ("edx", "0xffffff00")), ("sete", ("al",))] + finish, "undefined native ABI flags")
+    for op, immediate in (("and", "0"), ("or", "0xffffffff"), ("xor", "rax")):
+        check([(op, ("rax", immediate)), ("ret", ())])
+    # Native 64-bit logical immediates sign-extend from32; treating the raw
+    # positive spelling as zero-extended would invent a known sign flag.
+    check([("test", ("rbx", "0xffffffff")), ("sets", ("al",))] + finish, "undefined native ABI flags")
+    check([("test", ("rbx", "0x80000000")), ("setp", ("al",))] + finish)
+    check([("test", ("rbx", "0x80000000")), ("sets", ("al",))] + finish, "undefined native ABI flags")
     print(f"x86 flag definedness: {cases} encoder/ABI condition and undefined-result cases OK")
     check_compiled_counts()
 

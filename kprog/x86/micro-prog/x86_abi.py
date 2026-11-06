@@ -316,39 +316,65 @@ def check_definedness(insns, targets, exit_addr, decode):
             if not decode.is_int(args[-1]): need(incoming,args[-1],where)
             write(args[0],0)
             flags = 0
-        elif op in {'add','sub','adc','sbb','cmp','test'}:
+        elif op in {'and','or','xor','test'}:
+            width = ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0])
+            full = (1 << width)-1
+            operands = []
+            for arg in args:
+                if decode.is_mem(arg):
+                    operands.append((read_memory(arg,width)[0],None))
+                elif ri(arg):
+                    reg, rw, shift = ri(arg)
+                    constant = incoming.constants[reg]
+                    operands.append((mask(incoming,arg),None if constant is None else (constant >> shift) & ((1 << rw)-1)))
+                else:
+                    constant = decode.parse_int(arg) & ((1 << min(width,32))-1)
+                    if width == 64 and constant & (1 << 31): constant |= FULL ^ 0xffffffff
+                    operands.append((full,constant))
+            known = operands[0][0] & operands[1][0] & full
+            zero = op == 'xor' and args[0] == args[1] and ri(args[0])
+            if zero: known = full
+            for _,constant in operands:
+                if constant is not None:
+                    if op in {'and','test'}: known |= ~constant & full
+                    elif op == 'or': known |= constant & full
+            flags = CF | OF | (SF if known & (1 << (width-1)) else 0)
+            if known == full: flags |= ZF
+            if known & 255 == 255: flags |= PF
+            if op != 'test':
+                constant = 0 if zero else None
+                left,right = operands[0][1],operands[1][1]
+                if left is not None and right is not None:
+                    constant = left & right if op == 'and' else left | right if op == 'or' else left ^ right
+                elif op == 'and' and (left == 0 or right == 0): constant = 0
+                elif op == 'or' and (left == full or right == full): constant = full
+                if ri(args[0]): write(args[0],known,constant=constant)
+                else: store(args[0],width,known)
+        elif op in {'add','sub','adc','sbb','cmp'}:
             width = ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0])
             full = (1 << width)-1
             values = [read_memory(arg,width)[0] if decode.is_mem(arg) else mask(incoming,arg)
                       for arg in args]
             zero = op in {'sub','cmp'} and args[0]==args[1] and ri(args[0])
             known = full if zero else values[0] & values[1] & full
-            if op=='test':
-                # TEST always clears CF/OF, even with unspecified data bits.
-                for arg in args:
-                    if decode.is_int(arg): known |= ~decode.parse_int(arg) & full
-                flags = CF | OF | (SF if known & (1 << (width-1)) else 0)
-                if known==full: flags |= ZF
-                if known & 255 == 255: flags |= PF
-            else:
-                # An unknown input bit may carry/borrow into every higher bit.
-                # Lower known bits survive and may be the only lanes observed.
-                unknown = full ^ known
-                result = full if not unknown else (unknown & -unknown)-1
-                flags = (CF | ZF | SF | OF) if result==full else 0
-                if result & 255 == 255: flags |= PF
-                if result & 15 == 15: flags |= AF
-                if op!='cmp':
-                    old = alias[ri(args[0])[0]] if ri(args[0]) else False
-                    if ri(args[0]): write(args[0],result,constant=0 if zero else None)
-                    else: store(args[0],width,result)
-                    if width==64 and type(old) is int and decode.is_int(args[1]):
-                        delta = decode.parse_int(args[1])
-                        if delta >= 1 << 63: delta -= 1 << 64
-                        if op in {'add','sub'}:
-                            alias[ri(args[0])[0]] = old + (delta if op=='add' else -delta)
+            # An unknown input bit may carry/borrow into every higher bit.
+            # Lower known bits survive and may be the only lanes observed.
+            unknown = full ^ known
+            result = full if not unknown else (unknown & -unknown)-1
+            flags = (CF | ZF | SF | OF) if result==full else 0
+            if result & 255 == 255: flags |= PF
+            if result & 15 == 15: flags |= AF
+            if op!='cmp':
+                old = alias[ri(args[0])[0]] if ri(args[0]) else False
+                if ri(args[0]): write(args[0],result,constant=0 if zero else None)
+                else: store(args[0],width,result)
+                if width==64 and type(old) is int and decode.is_int(args[1]):
+                    delta = decode.parse_int(args[1])
+                    if delta >= 1 << 63: delta -= 1 << 64
+                    if op in {'add','sub'}:
+                        alias[ri(args[0])[0]] = old + (delta if op=='add' else -delta)
         elif op not in {'call','ret','jmp','nop','data16','cs'} and not op.startswith('j'):
-            zero = op in {'xor','pxor','xorps'} and len(args)==2 and args[0]==args[1] and ri(args[0])
+            zero = op in {'pxor','xorps'} and len(args)==2 and args[0]==args[1] and ri(args[0])
             pure = op in {'andn','bzhi','mulx','popcnt','movbe','shlx','shrx','sarx','rorx'} or (op=='imul' and len(args)==3)
             for n,arg in enumerate(args):
                 if ri(arg) and not zero and not ((n==0 and pure) or (op=='mulx' and n==1)):
@@ -378,7 +404,6 @@ def check_definedness(insns, targets, exit_addr, decode):
                 store(args[0],decode.operand_width(args[0]))
             if op in {'neg','xadd','popcnt'}:
                 flags = ALL_FLAGS
-            elif op in {'xor','and','or'}: flags = CF | ZF | SF | OF | PF
             elif op in {'bzhi','andn'}: flags = CF | ZF | SF | OF
             elif op in {'inc','dec'}: flags = (flags & CF) | ZF | SF | OF | PF | AF
             elif op in {'mul','imul'}: flags = CF | OF

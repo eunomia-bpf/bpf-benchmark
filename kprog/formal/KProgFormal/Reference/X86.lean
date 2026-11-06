@@ -325,6 +325,19 @@ def arithmeticFlags (width : ScalarWidth) (subtract carry : Bool) (left right ol
   (old &&& 0xfffffffffffff72a) ||| (if cf then 1 else 0) ||| (if pf then 4 else 0) |||
     (if af then 16 else 0) ||| (if zf then 64 else 0) ||| (if sf then 128 else 0) ||| (if of then 2048 else 0)
 
+inductive LogicKind | and | or | xor | test
+  deriving DecidableEq, Repr
+
+def logicalValue (width : ScalarWidth) (kind : LogicKind) (left right : Reference.Word) : Reference.Word :=
+  let a := left.setWidth width.bits
+  let b := right.setWidth width.bits
+  ((match kind with | .and | .test => a &&& b | .or => a ||| b | .xor => a ^^^ b).setWidth 64)
+
+def logicalFlags (width : ScalarWidth) (kind : LogicKind) (left right old : Reference.Word) : Reference.Word :=
+  let result := logicalValue width kind left right
+  (old &&& 0xfffffffffffff73a) ||| (if evenParity result then 4 else 0) |||
+    (if result = 0 then 64 else 0) ||| (if result.getLsbD (width.bits - 1) then 128 else 0)
+
 inductive RegisterSlice
   | low (reg : Register)
   | high (reg : Fin 4)
@@ -410,10 +423,28 @@ def moveStep (width : ScalarWidth) (dst : ScalarDestination) (src : ScalarSource
       | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
       | .ok (result, writes) => ⟨{ result with pc := nextPc }, reads ++ writes, none⟩
 
+
+def logicalStep (width : ScalarWidth) (kind : LogicKind) (dst : ScalarDestination)
+    (src : ScalarSource) (nextPc : Reference.Word) (s : State) : Transition State :=
+  match scalarRead s width dst.source with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (left, firstReads) =>
+      match scalarRead s width src with
+      | .error fault => ⟨s, firstReads ++ [.fault fault], some fault⟩
+      | .ok (right, secondReads) =>
+          let flags := logicalFlags width kind left right s.rflags
+          let reads := firstReads ++ secondReads
+          if kind = .test then ⟨{ s with rflags := flags, pc := nextPc }, reads, none⟩
+          else
+            match scalarWrite s width dst (logicalValue width kind left right) with
+            | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
+            | .ok (result, writes) => ⟨{ result with rflags := flags, pc := nextPc }, reads ++ writes, none⟩
+
 /-- One architectural instruction with its decoded fall-through address.
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | logic (width : ScalarWidth) (kind : LogicKind) (dst : ScalarDestination) (src : ScalarSource) (nextPc : Word)
   | nop (nextPc : Word)
   | branch (condition : Option (Fin 16)) (target nextPc : Word)
   | setcc (condition : Fin 16) (dst : ScalarDestination) (nextPc : Word)
@@ -440,6 +471,7 @@ inductive Instruction
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .logic width kind dst src nextPc => logicalStep width kind dst src nextPc s
   | .nop nextPc => ⟨{ s with pc := nextPc }, [], none⟩
   | .branch cc target nextPc =>
       let taken := match cc with | none => true | some code => condition s.rflags code
@@ -510,6 +542,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .logic .. => 0xffffffffffffffef
   | .nop .. | .branch .. | .setcc .. => 0xffffffffffffffff
   | .arithmetic .. => 0xffffffffffffffff
   | .move .. => 0xffffffffffffffff
@@ -636,8 +669,19 @@ private def scalarSlice (p : Prefix) (width : ScalarWidth) (code : Nat) : Regist
     .high ⟨code - 4, by omega⟩
   else .low (registerCode code)
 
-private def arithmeticKind : Nat → Option ArithmeticKind
-  | 0 => some .add | 2 => some .adc | 3 => some .sbb | 5 => some .sub | 7 => some .compare | _ => none
+/-- The native integer opcode group, shared by direct and immediate forms. -/
+private def integerBinary (group : Nat) (width : ScalarWidth) (dst : ScalarDestination)
+    (src : ScalarSource) (nextPc : Word) : Except String Instruction :=
+  match group with
+  | 0 => .ok (.arithmetic width .add dst src nextPc)
+  | 1 => .ok (.logic width .or dst src nextPc)
+  | 2 => .ok (.arithmetic width .adc dst src nextPc)
+  | 3 => .ok (.arithmetic width .sbb dst src nextPc)
+  | 4 => .ok (.logic width .and dst src nextPc)
+  | 5 => .ok (.arithmetic width .sub dst src nextPc)
+  | 6 => .ok (.logic width .xor dst src nextPc)
+  | 7 => .ok (.arithmetic width .compare dst src nextPc)
+  | _ => .error "invalid native integer group"
 
 private def scalarSource (p : Prefix) (width : ScalarWidth) : Source → ScalarSource
   | .register reg => .register (scalarSlice p width reg.val)
@@ -682,28 +726,46 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
       let (destination, nextPc, _) ← operand bytes s p modrm (count + 3) 0
       return .setcc ⟨opcode % 16, Nat.mod_lt _ (by decide)⟩ (scalarDestination p .w8 destination) nextPc
   if first < 0x40 ∧ first % 8 < 6 then
-    if let some kind := arithmeticKind (first / 8) then
-      let form := first % 8
-      let width := scalarWidth p (form % 2 == 0)
-      if form < 4 then
-        let modrm ← byteAt bytes (count + 1)
-        let reg := scalarSlice p width ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
-        let (rm, nextPc, _) ← operand bytes s p modrm (count + 2) 0
-        if form < 2 then return .arithmetic width kind (scalarDestination p width rm) (.register reg) nextPc
-        else return .arithmetic width kind (.register reg) (scalarSource p width rm) nextPc
-      else
-        let size := if width = .w64 then 4 else width.bytes
-        let immediate ← signedDisplacement bytes (count + 1) size
-        let nextPc ← fallthrough s (count + 1 + size)
-        return .arithmetic width kind (.register (.low 0)) (.immediate immediate) nextPc
+    let form := first % 8
+    let width := scalarWidth p (form % 2 == 0)
+    if form < 4 then
+      let modrm ← byteAt bytes (count + 1)
+      let reg := scalarSlice p width ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
+      let (rm, nextPc, _) ← operand bytes s p modrm (count + 2) 0
+      if form < 2 then return ← integerBinary (first / 8) width (scalarDestination p width rm) (.register reg) nextPc
+      else return ← integerBinary (first / 8) width (.register reg) (scalarSource p width rm) nextPc
+    else
+      let size := if width = .w64 then 4 else width.bytes
+      let immediate ← signedDisplacement bytes (count + 1) size
+      let nextPc ← fallthrough s (count + 1 + size)
+      return ← integerBinary (first / 8) width (.register (.low 0)) (.immediate immediate) nextPc
   if first = 0x80 ∨ first = 0x81 ∨ first = 0x83 then
     let modrm ← byteAt bytes (count + 1)
-    if let some kind := arithmeticKind ((modrm / 8) % 8) then
-      let width := scalarWidth p (first == 0x80)
-      let size := if first = 0x83 then 1 else if width = .w64 then 4 else width.bytes
+    let width := scalarWidth p (first == 0x80)
+    let size := if first = 0x83 then 1 else if width = .w64 then 4 else width.bytes
+    let (rm, nextPc, cursor) ← operand bytes s p modrm (count + 2) size
+    let immediate ← signedDisplacement bytes cursor size
+    return ← integerBinary ((modrm / 8) % 8) width (scalarDestination p width rm) (.immediate immediate) nextPc
+  if first = 0x84 ∨ first = 0x85 then
+    let width := scalarWidth p (first == 0x84)
+    let modrm ← byteAt bytes (count + 1)
+    let reg := scalarSlice p width ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
+    let (rm, nextPc, _) ← operand bytes s p modrm (count + 2) 0
+    return .logic width .test (scalarDestination p width rm) (.register reg) nextPc
+  if first = 0xa8 ∨ first = 0xa9 then
+    let width := scalarWidth p (first == 0xa8)
+    let size := if width = .w64 then 4 else width.bytes
+    let immediate ← signedDisplacement bytes (count + 1) size
+    let nextPc ← fallthrough s (count + 1 + size)
+    return .logic width .test (.register (.low 0)) (.immediate immediate) nextPc
+  if first = 0xf6 ∨ first = 0xf7 then
+    let modrm ← byteAt bytes (count + 1)
+    if (modrm / 8) % 8 = 0 then
+      let width := scalarWidth p (first == 0xf6)
+      let size := if width = .w64 then 4 else width.bytes
       let (rm, nextPc, cursor) ← operand bytes s p modrm (count + 2) size
       let immediate ← signedDisplacement bytes cursor size
-      return .arithmetic width kind (scalarDestination p width rm) (.immediate immediate) nextPc
+      return .logic width .test (scalarDestination p width rm) (.immediate immediate) nextPc
   if 0xb0 ≤ first ∧ first ≤ 0xbf then
     let width := scalarWidth p (decide (first < 0xb8))
     let size := width.bytes
