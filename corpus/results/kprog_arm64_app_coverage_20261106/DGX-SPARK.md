@@ -47,12 +47,15 @@ sequence. The packaging command includes all successfully compiled artifacts
 present at packaging time; pending or failed artifacts remain in the host
 coverage table and are not counted as passed by the archive.
 
-The requested six-app workload replay is not ready yet. The app shim's C
-entrypoint does not provide `FdLoadOptions.proof_insns`, and the artifact scan
-still uses XDP ABI and synthetic map declarations rather than the application
-program's context and live maps. T owns the proof/binding API; A owns the
-AArch64 app proof generation/integration and remaining compile failures. A
-`.proof.o` native-link input is insufficient to enable that path. No existing
-`make corpus` command can honestly be presented as six-app verified execution
-at this checkpoint. The app runtime image and bound app proof lookup must be
-built before that command sequence can replace this diagnostic replay.
+The requested six-app workload replay is not ready yet. T's new manifest
+entrypoint accepts `simulator_object` and `simulator_program` and has passed
+a helper-proof fixture. Its original-map fixture still returns `0xCCCCCCCC`
+instead of the initialized value `2` at the 07:52 UTC checkpoint. A's app
+artifacts still use the diagnostic XDP ABI and synthetic map declarations;
+real app context/map generation and complete verifier coverage remain open.
+A `.proof.o` native-link input is insufficient to enable verified execution.
+No existing six-app manifest selects validated simulator artifacts with the
+correct original maps and ABI, so no `make corpus` command can honestly be
+presented as the requested verified six-app run yet. The real app runtime
+image and matching proof manifests must be built before this diagnostic
+replay can be replaced with application workload runs.

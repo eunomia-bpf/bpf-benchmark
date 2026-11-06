@@ -1,0 +1,4 @@
+libbpf: elf: skipping section(3) xdp (size 0)
+libbpf: Error loading ELF section .BTF.ext: -EINVAL. Ignored and continue.
+libbpf: BTF is required, but is missing or corrupted.
+error: failed to open /objects/cilium_bpf_wireguard_tail_handle_snat_fwd_ipv4.bpf.o: Invalid argument (os error 22)

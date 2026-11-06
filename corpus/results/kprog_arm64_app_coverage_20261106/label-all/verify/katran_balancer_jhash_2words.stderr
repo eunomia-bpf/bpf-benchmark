@@ -1,0 +1,4 @@
+libbpf: prog 'katran_balancer_jhash_2words_arm64_sim_xdp': BPF program load failed: -EACCES
+libbpf: prog 'katran_balancer_jhash_2words_arm64_sim_xdp': failed to load: -EACCES
+libbpf: failed to load object '/objects/katran_balancer_jhash_2words.bpf.o'
+error: bpf_object__load failed: Permission denied (os error 13); verifier log: /results/katran_balancer_jhash_2words.verifier.log

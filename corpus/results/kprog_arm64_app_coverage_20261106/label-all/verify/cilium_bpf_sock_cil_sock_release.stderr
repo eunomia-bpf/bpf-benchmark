@@ -1,0 +1,4 @@
+libbpf: prog 'cilium_bpf_sock_cil_sock_release_arm64_sim_xdp': BPF program load failed: -EACCES
+libbpf: prog 'cilium_bpf_sock_cil_sock_release_arm64_sim_xdp': failed to load: -EACCES
+libbpf: failed to load object '/objects/cilium_bpf_sock_cil_sock_release.bpf.o'
+error: bpf_object__load failed: Permission denied (os error 13); verifier log: /results/cilium_bpf_sock_cil_sock_release.verifier.log

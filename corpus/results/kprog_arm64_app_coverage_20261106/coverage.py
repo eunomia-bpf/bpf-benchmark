@@ -1,6 +1,7 @@
 """Diagnostic artifact census; no workload, ratio, or native-binding claims."""
 import concurrent.futures
 import csv
+import fcntl
 import json
 from pathlib import Path
 import shutil
@@ -53,6 +54,12 @@ def freeze_simulator(directory):
 
 
 def compile_one(row, directory):
+    with (directory / 'compile-locks' / (row['name'] + '.lock')).open('w') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        return compile_locked(row, directory)
+
+
+def compile_locked(row, directory):
     log = directory / 'compile' / (row['name'] + '.json')
     if log.exists():
         return json.loads(log.read_text())
@@ -79,10 +86,11 @@ def compile_one(row, directory):
     return record
 
 
-def compile_all(directory):
-    for name in ['compile', 'objects', 'compile-sources']:
+def compile_all(directory, offset=0, stop=None):
+    for name in ['compile', 'objects', 'compile-sources', 'compile-locks']:
         (directory / name).mkdir(exist_ok=True)
     rows = [row for row in records(directory) if row['stage'] == 'generate' and row['ok']]
+    rows = rows[offset:stop]
     freeze_simulator(directory)
     failures = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
@@ -118,13 +126,21 @@ def summarize(directory):
                     status = ('verifier_accepted' if accepted else 'verifier_rejected'
                               if verifier.exists() and verifier.stat().st_size else 'load_failed')
                     detail = (directory / 'verify' / (name + '.stderr')).read_text()
+                    if verifier.exists():
+                        detail += '\n' + verifier.read_text()
         cause = ''
         if status.endswith('_failed') or status == 'verifier_rejected':
             causes = ['unsupported arm64 instruction', 'unsupported indirect call', 'undeclared function',
                       'unsupported opcode', 'arm64_sim_unsupported_opcode', 'stack limit',
                       'stack frame', 'compile timeout', 'unknown func', 'invalid mem access',
                       'BPF program is too large', 'infinite loop', 'loop is not bounded',
-                      'unresolved extern', 'unrecognized extern']
+                      'unresolved extern', 'unrecognized extern',
+                      'program of this type cannot use helper', 'invalid access to map value',
+                      'negative offset ctx ptr', 'dereference of modified ctx ptr',
+                      'misaligned', '!read_ok', 'pointer arithmetic on pkt_end prohibited',
+                      'offset is outside of the packet', 'cannot access ptr member',
+                      'only read from bpf_array is supported', 'invalid size of register fill',
+                      '32-bit pointer arithmetic prohibited', 'BTF is required']
             cause = next((c for c in causes if c.lower() in detail.lower()), 'other (see raw log)')
         rows.append(dict(app=app, name=name, proof=row['proof'], source=row['source'], status=status, cause=cause))
         counts.setdefault(app, {}).setdefault(status, 0)
@@ -190,13 +206,15 @@ def package(directory, build, base):
               'busybox mount -t 9p -o trans=virtio results /results || exit 1',
               'ulimit -l unlimited || exit 1', 'status=0']
     for name in names:
-        script.extend([f'echo load {name}',
+        script.extend([f'if [ -f /results/{name}.rc ]; then',
+                       f'  if [ "$(busybox cat /results/{name}.rc)" != 0 ]; then status=1; fi',
+                       'else', f'echo load {name}',
                        f'busybox timeout 60 /loader --object /objects/{name}.bpf.o '
                        f'--program {name}_arm64_sim_xdp --load-only '
                        f'--verifier-log /results/{name}.verifier.log '
                        f'>/results/{name}.stdout 2>/results/{name}.stderr',
                        'rc=$?', f'echo "$rc" >/results/{name}.rc',
-                       'if [ "$rc" != 0 ]; then status=1; fi'])
+                       'if [ "$rc" != 0 ]; then status=1; fi', 'fi'])
     script.extend(['echo "$status" >/results/guest-status', 'busybox sync', 'busybox poweroff -f'])
     (root / 'init').write_text('\n'.join(script) + '\n')
     (root / 'init').chmod(0o755)
@@ -213,7 +231,7 @@ if __name__ == '__main__':
     action, path, *rest = sys.argv[1:]
     directory = Path(path).resolve()
     if action == 'compile':
-        code = compile_all(directory)
+        code = compile_all(directory, *map(int, rest))
     elif action == 'summarize':
         code = summarize(directory)
     elif action == 'package':

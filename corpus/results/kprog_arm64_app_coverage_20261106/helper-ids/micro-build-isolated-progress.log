@@ -1,0 +1,31 @@
+make: Entering directory '/workspaces/repository/kprog/arm64'
+make -C ../test \
+	OUTPUT_DIR="/workspaces/repository/kprog/arm64/build/app-helper-negative-native" \
+	KERNEL_OFFSETS_DIR="/workspaces/repository/micro/programs/build-arm64" \
+	NATIVE_TARGET=aarch64-linux-gnu \
+	NATIVE_ARCH=arm64 \
+	SYS_INCLUDE_FLAGS="-I/usr/aarch64-linux-gnu/include -I../../.cache/aarch64-sysroot/usr/include -I../../.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu" \
+	"/workspaces/repository/kprog/arm64/build/app-helper-negative-native/unchecked_packet_read.native.o"
+make[1]: Entering directory '/workspaces/repository/kprog/test'
+install -d "/workspaces/repository/kprog/arm64/build/app-helper-negative-native"
+clang --target=aarch64-linux-gnu -Wall -Wextra -O3 -g -fPIC -c -fno-plt -DMICRO_NATIVE -fomit-frame-pointer  -mtune=neoverse-n1 -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -mllvm -switch-to-lookup=false -I/usr/aarch64-linux-gnu/include -I../../.cache/aarch64-sysroot/usr/include -I../../.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu -MMD -MP -I"/workspaces/repository/micro/programs" -I"/workspaces/repository/micro/programs/build-arm64/" \
+    -MF "/workspaces/repository/kprog/arm64/build/app-helper-negative-native/unchecked_packet_read.native.d" -MT "/workspaces/repository/kprog/arm64/build/app-helper-negative-native/unchecked_packet_read.native.o" -o "/workspaces/repository/kprog/arm64/build/app-helper-negative-native/unchecked_packet_read.native.o" "unchecked_packet_read.bpf.c"
+make[1]: Leaving directory '/workspaces/repository/kprog/test'
+python3 ../run_micro_sim_batch.py --arch arm64 --build-only \
+	--build-dir "/workspaces/repository/kprog/arm64/build/app-helper-micro/negative" \
+	--native-build-dir "/workspaces/repository/kprog/arm64/build/app-helper-negative-native" \
+	--config "../test/kprog_negative_stage2.yaml" \
+	--jobs 1
+unchecked_packet_read: ok: compile=1.958s proof_insns=3 direct_insns= verify=0.000s test=0.000s 
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `unchecked_packet_read` | ok | 1.958 | 3 |  | 0.000 | 0.000 |  |
+python3 ../run_micro_sim_batch.py --arch arm64 --build-only \
+	--build-dir "/workspaces/repository/kprog/arm64/build/app-helper-micro" \
+	--config "../../micro/config/micro_pure_jit.yaml" \
+	--jobs 2 --no-generate --markdown /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/helper-ids/micro-build.md
+running 29 benchmarks with 2 jobs
+simple_packet: ok: compile=8.628s proof_insns=21 direct_insns= verify=0.000s test=0.000s 
+simple: ok: compile=9.814s proof_insns=24 direct_insns= verify=0.000s test=0.000s 
+bitmap_popcount_scan: ok: compile=30.987s proof_insns=113 direct_insns= verify=0.000s test=0.000s 
+sorted_rule_binary_search: ok: compile=82.602s proof_insns=180 direct_insns= verify=0.000s test=0.000s 

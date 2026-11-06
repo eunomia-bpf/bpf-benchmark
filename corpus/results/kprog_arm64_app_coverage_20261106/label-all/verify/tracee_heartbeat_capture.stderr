@@ -1,0 +1,4 @@
+libbpf: prog 'tracee_heartbeat_capture_arm64_sim_xdp': BPF program load failed: -EACCES
+libbpf: prog 'tracee_heartbeat_capture_arm64_sim_xdp': failed to load: -EACCES
+libbpf: failed to load object '/objects/tracee_heartbeat_capture.bpf.o'
+error: bpf_object__load failed: Permission denied (os error 13); verifier log: /results/tracee_heartbeat_capture.verifier.log

@@ -148,3 +148,49 @@ compiles before A interrupted it to avoid a second lane writing the shared
 output directory. A restarted with isolated output paths and `--no-generate`;
 that build is still running. The retained progress log is a checkpoint, not a
 completed pass. Both invocations and the collision are recorded in coordination. No new helper macro is substituted with a zero return.
+
+The missing-helper retry compile/load batch has now completed: **46 generated,
+11 compiled, 35 compiler timeouts; all 11 compiled artifacts were rejected by
+the diagnostic XDP verifier**. Their helper calls are now visible instead of
+being unidentified during generation. Full raw compiler and verifier logs and
+the [updated table](helper-ids/table.md) are retained. They require the actual
+application program types/contexts and map bindings for an app-path result.
+
+To resume the existing census without replacing completed records:
+
+```sh
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile compile PHASE=label-all
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile verify PHASE=label-all
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile summarize PHASE=label-all
+```
+
+The result-local compiler also accepts disjoint index slices through
+`COMPILE_ARGS='start stop'` over successfully generated records. Active slices
+116:152 cover Katran/OTel and 915:1090 cover Tracee, while the initial 326-case
+queue advances through the earlier records. This changes scheduling only;
+the full table includes every object and all unfinished cases. Completed
+verifier records are reused with their original raw logs and failure status.
+
+The next QEMU checkpoint adds diagnostic load outcomes from Katran, OTel and
+Tracee as well as BCC/Cilium. Across `label-all` and `helper-ids`, each of the
+six applications now has generated-artifact verifier outcomes; these still
+are not startup/application coverage or bound execution. Rejection classes in
+the CSVs are derived from the complete verifier logs, including unavailable
+helpers for the XDP type, packet-end arithmetic, packet offsets, synthetic-map
+member accesses, map-value bounds, register fills and 32-bit pointer arithmetic.
+
+Scheduling checkpoint: the original compile queues were stopped with their
+completed records retained, then restarted using per-artifact file locks.
+This prevents two overlapping resume invocations from writing the same object
+or JSON record simultaneously. The complete default queue and the Tracee tail
+queue now share those locks; they retain and reuse every completed success or
+failure. The earlier progress logs remain alongside the current logs.
+
+Binding update, 07:54 UTC: T has now implemented optional simulator-object
+lookup through the manifest C entrypoint (`simulator_object`,
+`simulator_program`) and passed a helper-proof fixture. The original-map
+fixture still mismatches (`0xCCCCCCCC` observed, `2` expected). The earlier
+entrypoint description records the baseline; A app ABI/map generation, real
+startup inventory, complete verifier closure, bound QEMU workloads and their
+same-work counters remain unfinished. The portable archive is a diagnostic
+artifact replay, not a six-app performance bundle.

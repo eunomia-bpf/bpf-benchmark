@@ -1,0 +1,47 @@
+0: R1=ctx() R10=fp0
+; ARM64_SIM_ENTRY_XDP(ctx); @ tetragon_bpf_multi_kprobe_v61_generic_kprobe_override.bpf.c:15
+0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)
+1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)
+2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()
+3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()
+4: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0
+5: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0
+6: (62) *(u32 *)(r10 -8) = 0          ; R10=fp0 fp-8=????0
+; ARM64_SIM_RUN_OP3(ARM64_OP_STP, ARM64_SP, ARM64_X20, ARM64_X19, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 16ULL); @ tetragon_bpf_multi_kprobe_v61_generic_kprobe_override.bpf.c:21
+7: (7a) *(u64 *)(r10 -112) = 0        ; R10=fp0 fp-112=0
+8: (7a) *(u64 *)(r10 -120) = 0        ; R10=fp0 fp-120=0
+9: (7a) *(u64 *)(r10 -128) = 0        ; R10=fp0 fp-128=0
+10: (7a) *(u64 *)(r10 -136) = 0       ; R10=fp0 fp-136=0
+; ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_SP, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 8ULL); @ tetragon_bpf_multi_kprobe_v61_generic_kprobe_override.bpf.c:33
+11: (bf) r6 = r10                     ; R6=fp0 R10=fp0
+12: (07) r6 += -128                   ; R6=fp-128
+; ARM64_SIM_BPF_CALL_bpf_map_lookup_elem(); @ tetragon_bpf_multi_kprobe_v61_generic_kprobe_override.bpf.c:54
+13: (18) r1 = 0xffff00000763fc00      ; R1=map_ptr(map=override_tasks_,ks=4,vs=8)
+15: (bf) r2 = r6                      ; R2=fp-128 R6=fp-128
+16: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=1,map=override_tasks_,ks=4,vs=8)
+17: (15) if r0 == 0x0 goto pc+23      ; R0=map_value(map=override_tasks_,ks=4,vs=8)
+; ARM64_SIM_RUN_OP3(ARM64_OP_LDRSW, ARM64_X8, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ tetragon_bpf_multi_kprobe_v61_generic_kprobe_override.bpf.c:60
+18: (71) r1 = *(u8 *)(r0 +0)          ; R0=map_value(map=override_tasks_,ks=4,vs=8) R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+19: (71) r1 = *(u8 *)(r0 +1)          ; R0=map_value(map=override_tasks_,ks=4,vs=8) R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+20: (71) r1 = *(u8 *)(r0 +2)          ; R0=map_value(map=override_tasks_,ks=4,vs=8) R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+21: (71) r1 = *(u8 *)(r0 +3)          ; R0=map_value(map=override_tasks_,ks=4,vs=8) R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+; ARM64_SIM_RUN_OP3(ARM64_OP_LDRSW, ARM64_X1, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ tetragon_bpf_multi_kprobe_v61_generic_kprobe_override.bpf.c:66
+22: (71) r1 = *(u8 *)(r0 +0)          ; R0=map_value(map=override_tasks_,ks=4,vs=8) R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+23: (67) r1 <<= 32                    ; R1=scalar(smin=smin32=0,smax=umax=0xff00000000,smax32=umax32=0,var_off=(0x0; 0xff00000000))
+24: (71) r2 = *(u8 *)(r0 +1)          ; R0=map_value(map=override_tasks_,ks=4,vs=8) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+25: (67) r2 <<= 40                    ; R2=scalar(smin=smin32=0,smax=umax=0xff0000000000,smax32=umax32=0,var_off=(0x0; 0xff0000000000))
+26: (4f) r2 |= r1                     ; R1=scalar(smin=smin32=0,smax=umax=0xff00000000,smax32=umax32=0,var_off=(0x0; 0xff00000000)) R2=scalar(smin=smin32=0,smax=umax=0xffff00000000,smax32=umax32=0,var_off=(0x0; 0xffff00000000))
+27: (71) r1 = *(u8 *)(r0 +2)          ; R0=map_value(map=override_tasks_,ks=4,vs=8) R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+28: (67) r1 <<= 48                    ; R1=scalar(smin=smin32=0,smax=umax=0xff000000000000,smax32=umax32=0,var_off=(0x0; 0xff000000000000))
+29: (4f) r2 |= r1                     ; R1=scalar(smin=smin32=0,smax=umax=0xff000000000000,smax32=umax32=0,var_off=(0x0; 0xff000000000000)) R2=scalar(smin=smin32=0,smax=umax=0xffffff00000000,smax32=umax32=0,var_off=(0x0; 0xffffff00000000))
+30: (71) r1 = *(u8 *)(r0 +3)          ; R0=map_value(map=override_tasks_,ks=4,vs=8) R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+31: (67) r1 <<= 56                    ; R1=scalar(smax=0x7f00000000000000,umax=0xff00000000000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xff00000000000000))
+32: (4f) r2 |= r1                     ; R1=scalar(smax=0x7f00000000000000,umax=0xff00000000000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xff00000000000000)) R2=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))
+33: (c7) r2 s>>= 32                   ; R2=scalar(smin=0xffffffff80000000,smax=0x7fffffff)
+34: (bf) r1 = r10                     ; R1=fp0 R10=fp0
+;  @ tetragon_bpf_multi_kprobe_v61_generic_kprobe_override.bpf.c:0
+35: (07) r1 += -40                    ; R1=fp-40
+; ARM64_SIM_BPF_CALL_bpf_override_return(); @ tetragon_bpf_multi_kprobe_v61_generic_kprobe_override.bpf.c:72
+36: (85) call bpf_override_return#58
+program of this type cannot use helper bpf_override_return#58
+processed 36 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0

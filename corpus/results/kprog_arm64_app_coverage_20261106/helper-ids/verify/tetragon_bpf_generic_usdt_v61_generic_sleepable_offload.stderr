@@ -1,0 +1,4 @@
+libbpf: prog 'tetragon_bpf_generic_usdt_v61_generic_sleepable_offload_arm64_sim_xdp': BPF program load failed: -EINVAL
+libbpf: prog 'tetragon_bpf_generic_usdt_v61_generic_sleepable_offload_arm64_sim_xdp': failed to load: -EINVAL
+libbpf: failed to load object '/objects/tetragon_bpf_generic_usdt_v61_generic_sleepable_offload.bpf.o'
+error: bpf_object__load failed: Invalid argument (os error 22); verifier log: /results/tetragon_bpf_generic_usdt_v61_generic_sleepable_offload.verifier.log

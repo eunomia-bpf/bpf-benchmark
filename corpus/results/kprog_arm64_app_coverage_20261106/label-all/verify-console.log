@@ -1,5 +1,5 @@
 python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/coverage.py package /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/label-all /workspaces/repository/kprog/arm64/build/app-coverage/label-all /workspaces/.agent-state/bpf-benchmark-supervisor/kfunc-inline-claude-20261004/round5-arm64.cpio.gz
-packaged 30 diagnostic artifacts in /workspaces/repository/kprog/arm64/build/app-coverage/label-all
+packaged 45 diagnostic artifacts in /workspaces/repository/kprog/arm64/build/app-coverage/label-all
 install -d /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/label-all/verify
 taskset -c 16-19 timeout 7200 qemu-system-aarch64 -M virt -cpu max -smp 2 -m 2048 -nographic -no-reboot \
 	-kernel /workspaces/repository/vendor/build/arm64/linux/arch/arm64/boot/Image -initrd /workspaces/repository/kprog/arm64/build/app-coverage/label-all/initramfs.cpio.gz \

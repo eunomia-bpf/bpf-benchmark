@@ -18,3 +18,32 @@ compile 16/46 tetragon_bpf_generic_rawtp_v61_generic_rawtp_process_event: 124
 compile 17/46 tetragon_bpf_generic_retkprobe_v61_do_action: 124
 compile 18/46 tetragon_bpf_generic_retuprobe_v61_do_action: 124
 compile 19/46 tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_actions: 124
+compile 20/46 tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_actions: 124
+compile 21/46 tetragon_bpf_generic_tracepoint_v61_do_action: 124
+compile 22/46 tetragon_bpf_generic_uprobe_v511_generic_uprobe_actions: 124
+compile 23/46 tetragon_bpf_generic_uprobe_v53_generic_uprobe_actions: 124
+compile 24/46 tetragon_bpf_generic_usdt_v511_generic_sleepable_offload: 0
+compile 25/46 tetragon_bpf_generic_usdt_v53_generic_sleepable_offload: 0
+compile 26/46 tetragon_bpf_generic_uprobe_v61_generic_sleepable_preload: 124
+compile 27/46 tetragon_bpf_generic_uprobe_v61_do_action: 124
+compile 28/46 tetragon_bpf_generic_usdt_v61_generic_sleepable_offload: 0
+compile 29/46 tetragon_bpf_generic_usdt_v511_generic_usdt_actions: 124
+compile 30/46 tetragon_bpf_multi_kprobe_v511_generic_kprobe_override: 0
+compile 31/46 tetragon_bpf_generic_usdt_v53_generic_usdt_actions: 124
+compile 32/46 tetragon_bpf_multi_kprobe_v53_generic_kprobe_override: 0
+compile 33/46 tetragon_bpf_multi_kprobe_v61_generic_kprobe_override: 0
+compile 34/46 tetragon_bpf_generic_usdt_v61_do_action: 124
+compile 35/46 tetragon_bpf_generic_usdt_v61_generic_sleepable_preload: 124
+compile 36/46 tetragon_bpf_multi_kprobe_v61_do_action: 124
+compile 37/46 tetragon_bpf_multi_retkprobe_v61_do_action: 124
+compile 38/46 tetragon_bpf_multi_retuprobe_v61_do_action: 124
+compile 39/46 tetragon_bpf_multi_usdt_v511_generic_sleepable_offload: 0
+compile 40/46 tetragon_bpf_multi_uprobe_v511_generic_uprobe_actions: 124
+compile 41/46 tetragon_bpf_multi_uprobe_v61_do_action: 124
+compile 42/46 tetragon_bpf_multi_usdt_v61_generic_sleepable_offload: 0
+compile 43/46 tetragon_bpf_multi_uprobe_v61_generic_sleepable_preload: 124
+compile 44/46 tetragon_bpf_multi_usdt_v511_generic_usdt_actions: 124
+compile 45/46 tetragon_bpf_multi_usdt_v61_do_action: 124
+compile 46/46 tetragon_bpf_multi_usdt_v61_generic_sleepable_preload: 124
+compile: 35/46 failures
+make: *** [corpus/results/kprog_arm64_app_coverage_20261106/Makefile:14: compile] Error 1
