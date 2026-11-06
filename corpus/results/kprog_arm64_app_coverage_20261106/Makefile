@@ -410,7 +410,13 @@ app-replay-run:
 app-replay-collect:
 	cp -a $(RUNTIME_BASE)/root/workspaces/repository/corpus/results/. $(ROOT)/corpus/results/
 
-.PHONY: katran-root-build
+.PHONY: katran-root-build katran-real-install katran-real-generate
+katran-real-install:
+	python3 $(HERE)/katran_real.py $(HERE)/$(PHASE) install
+
+katran-real-generate: direct-header-generate
+	python3 $(HERE)/katran_real.py $(HERE)/$(PHASE)
+
 katran-root-build: direct-header-generate
 	python3 $(HERE)/katran_root.py $(HERE)/$(PHASE)
 	clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \

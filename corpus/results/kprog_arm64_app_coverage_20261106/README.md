@@ -886,3 +886,12 @@ proofs. Their baseline counters contain one and12 rows respectively; neither
 returns native counters. All31 startup attempts and the exact packaged inputs
 remain. The new actual Katran balancer proof has compiled and is running in
 runtimev9 with T's fully matched kernel/module/loader bundle.
+
+## Actual ARM balancer proof integration
+
+[Runtimev9](runtime-context-v9/README.md) generates and compiles the actual
+Katran balancer against its original map declarations. Its unchanged baseline
+records250179 runs; native startup reaches proof relocation and fails on a
+full/truncated map-name resolution order defect. The exact proof build,
+packaged inputs and all12 startup attempts remain. The existing alias-resolution
+step is being moved before proof-map reuse for the next application retry.

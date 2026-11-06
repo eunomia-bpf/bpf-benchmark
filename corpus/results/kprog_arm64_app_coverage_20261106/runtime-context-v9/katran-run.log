@@ -1,0 +1,259 @@
+taskset -c 8-11 timeout 7200 make -C /workspaces/repository PLATFORM=qemu ARCH=arm64 corpus \
+	-o /workspaces/repository/kprog/arm64/build/app-runtime-v9/root/qemu-init \
+	ARM64_QEMU_ROOT=/workspaces/repository/kprog/arm64/build/app-runtime-v9/root \
+	ARM64_QEMU_KERNEL_IMAGE=/workspaces/repository/kprog/arm64/build/app-runtime-v9/kernel/arch/arm64/boot/Image \
+	ARM64_RUNNER_RUNTIME_IMAGE=bpf-benchmark/runner-runtime:arm64-a-context-v9 \
+	ARM64_RUNNER_RUNTIME_IMAGE_TAR=/workspaces/repository/kprog/arm64/build/app-runtime-v9/image.tar \
+	VM_CPUS=8 VM_MEM=4096 SAMPLES=1 WORKLOAD_DURATION=2 KEEP_WORKDIRS=1 \
+	BPFREJIT_CORPUS_APP_TIMEOUT=7200 \
+	BPFREJIT_KEEP_ALL_WORKDIRS=1 BPFREJIT_CORPUS_BPF_STATS=1 \
+	BPFREJIT_CORPUS_APPS=katran BPFREJIT_SHIM_NATIVE_LOADER=post \
+	BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1
+make[1]: Entering directory '/workspaces/repository'
+printf '%s\n' "#!/bin/sh" "set -eu" "export BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 HOME=/root TARGET='arm64-qemu' RUN_TARGET_NAME='arm64-qemu' RUN_TARGET_ARCH='arm64' RUN_EXECUTOR='kvm' RUNTIME_CONTAINER_IMAGE='bpf-benchmark/runner-runtime:arm64-a-context-v9' RUNTIME_IMAGE_TAR='/workspaces/repository/kprog/arm64/build/app-runtime-v9/image.tar' RUN_REMOTE_PYTHON_BIN='python3' RUN_RUNTIME_PYTHON_BIN='python3' RUN_BPFTOOL_BIN='bpftool' RUN_NATIVE_REPOS_CSV='bcc,katran,tracee,tetragon' RUN_TOKEN='08c3ac16' SAMPLES='1'      FUZZ_ROUNDS='1000'  WORKLOAD_DURATION='2' KEEP_WORKDIRS='1'  BPFREJIT_CORPUS_APPS='katran'           MERLIN_COMPILETIME_MODE='none' BPFREJIT_CORPUS_APP_TIMEOUT='7200'   BPFREJIT_CORPUS_BPF_STATS='1'  BPFREJIT_SHIM_NATIVE_LOADER='post'      BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1'         CILIUM_PROFILE_ARM='all'   " "exec python3 -m corpus.driver" >"/workspaces/repository/kprog/arm64/build/app-runtime-v9/root/qemu-run.sh"
+chmod +x "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root/qemu-run.sh"
+rm -f "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root/qemu-status"
+"/usr/bin/qemu-system-aarch64" -M virt -cpu cortex-a57 -smp "8" -m "4096" -nographic -no-reboot \
+	-kernel "/workspaces/repository/kprog/arm64/build/app-runtime-v9/kernel/arch/arm64/boot/Image" \
+	-fsdev local,id=rootfs,path="/workspaces/repository/kprog/arm64/build/app-runtime-v9/root",security_model=none,multidevs=remap \
+	-device virtio-9p-device,fsdev=rootfs,mount_tag=/dev/root \
+	-append "console=ttyAMA0 root=/dev/root rootfstype=9p rootflags=trans=virtio,version=9p2000.L,access=any rw init=/qemu-init loglevel=7 panic=30 oops=panic raid=noautodetect"
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x411fd070]
+[    0.000000] Linux version 7.0.0-rc2+ (root@coder-22123351-d4a5-40fc-bc3b-1b853af74a7e-c7ccfb766-mpvhz) (aarch64-linux-gnu-gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #25 SMP PREEMPT Fri Nov  6 18:58:28 UTC 2026
+[    0.000000] random: crng init done
+[    0.000000] Machine model: linux,dummy-virt
+[    0.000000] efi: UEFI not found.
+[    0.000000] OF: reserved mem: Reserved memory: No reserved-memory node in the DT
+[    0.000000] NUMA: Faking a node at [mem 0x0000000040000000-0x000000013fffffff]
+[    0.000000] NODE_DATA(0) allocated [mem 0x13f7f6dc0-0x13f7f9dbf]
+[    0.000000] cma: Reserved 64 MiB at 0x00000000fc000000
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: PSCIv1.1 detected in firmware.
+[    0.000000] psci: Using standard PSCI v0.2 function IDs
+[    0.000000] psci: Trusted OS migration not required
+[    0.000000] psci: SMC Calling Convention v1.0
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000000040000000-0x00000000ffffffff]
+[    0.000000]   DMA32    empty
+[    0.000000]   Normal   [mem 0x0000000100000000-0x000000013fffffff]
+[    0.000000]   Device   empty
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000040000000-0x000000013fffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x000000013fffffff]
+[    0.000000] percpu: Embedded 34 pages/cpu s101400 r8192 d29672 u139264
+[    0.000000] Detected PIPT I-cache on CPU0
+[    0.000000] CPU features: detected: Spectre-v2
+[    0.000000] CPU features: detected: Spectre-v4
+[    0.000000] CPU features: detected: Spectre-BHB
+[    0.000000] CPU features: detected: ARM erratum 834220
+[    0.000000] CPU features: detected: ARM erratum 1742098
+[    0.000000] CPU features: detected: ARM erratum 832075
+[    0.000000] CPU features: detected: ARM errata 1165522, 1319367, or 1530923
+[    0.000000] alternatives: applying boot alternatives
+[    0.000000] Kernel command line: console=ttyAMA0 root=/dev/root rootfstype=9p rootflags=trans=virtio,version=9p2000.L,access=any rw init=/qemu-init loglevel=7 panic=30 oops=panic raid=noautodetect
+[    0.000000] printk: log buffer data + meta data: 2097152 + 7340032 = 9437184 bytes
+[    0.000000] Dentry cache hash table entries: 524288 (order: 10, 4194304 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.000000] software IO TLB: area num 8.
+[    0.000000] software IO TLB: mapped [mem 0x00000000f8000000-0x00000000fc000000] (64MB)
+[    0.000000] Fallback order for Node 0: 0 
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 1048576
+[    0.000000] Policy zone: Normal
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=8, Nodes=1
+[    0.000000] ftrace: allocating 49525 entries in 194 pages
+[    0.000000] ftrace: allocated 194 pages with 3 groups
+[    0.000000] rcu: Hierarchical RCU implementation.
+[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=4096 to nr_cpu_ids=8.
+[    0.000000] 	Trampoline variant of Tasks RCU enabled.
+[    0.000000] 	Rude variant of Tasks RCU enabled.
+[    0.000000] 	Tracing variant of Tasks RCU enabled.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 10 jiffies.
+[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=8
+[    0.000000] RCU Tasks: Setting shift to 3 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=8.
+[    0.000000] RCU Tasks Rude: Setting shift to 3 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=8.
+[    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+[    0.000000] Root IRQ handler: gic_handle_irq
+[    0.000000] GICv2m: range[mem 0x08020000-0x08020fff], SPI[80:143]
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] arch_timer: cp15 timer running at 62.50MHz (virt).
+[    0.000000] clocksource: arch_sys_counter: mask: 0x1ffffffffffffff max_cycles: 0x1cd42e208c, max_idle_ns: 881590405314 ns
+[    0.000073] sched_clock: 57 bits at 63MHz, resolution 16ns, wraps every 4398046511096ns
+[    0.006467] Console: colour dummy device 80x25
+[    0.009030] Calibrating delay loop (skipped), value calculated using timer frequency.. 125.00 BogoMIPS (lpj=625000)
+[    0.012079] pid_max: default: 32768 minimum: 301
+[    0.015461] landlock: Up and running.
+[    0.015488] Yama: becoming mindful.
+[    0.015703] SELinux:  Initializing.
+[    0.024180] LSM support for eBPF active
+[    0.026680] Mount-cache hash table entries: 8192 (order: 4, 65536 bytes, linear)
+[    0.026745] Mountpoint-cache hash table entries: 8192 (order: 4, 65536 bytes, linear)
+[    0.035487] VFS: Finished mounting rootfs on nullfs
+[    0.060371] cacheinfo: Unable to detect cache hierarchy for CPU 0
+[    0.075470] rcu: Hierarchical SRCU implementation.
+[    0.075524] rcu: 	Max phase no-delay instances is 1000.
+[    0.077135] Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[    0.081524] EFI services will not be available.
+[    0.083790] smp: Bringing up secondary CPUs ...
+[    0.087812] Detected PIPT I-cache on CPU1
+[    0.089224] CPU1: Booted secondary processor 0x0000000001 [0x411fd070]
+[    0.096893] Detected PIPT I-cache on CPU2
+[    0.097254] CPU2: Booted secondary processor 0x0000000002 [0x411fd070]
+[    0.099441] Detected PIPT I-cache on CPU3
+[    0.099708] CPU3: Booted secondary processor 0x0000000003 [0x411fd070]
+[    0.102215] Detected PIPT I-cache on CPU4
+[    0.102492] CPU4: Booted secondary processor 0x0000000004 [0x411fd070]
+[    0.104680] Detected PIPT I-cache on CPU5
+[    0.104952] CPU5: Booted secondary processor 0x0000000005 [0x411fd070]
+[    0.107443] Detected PIPT I-cache on CPU6
+[    0.107745] CPU6: Booted secondary processor 0x0000000006 [0x411fd070]
+[    0.109636] Detected PIPT I-cache on CPU7
+[    0.109972] CPU7: Booted secondary processor 0x0000000007 [0x411fd070]
+[    0.110842] smp: Brought up 1 node, 8 CPUs
+[    0.110878] SMP: Total of 8 processors activated.
+[    0.110909] CPU: All CPU(s) started at EL1
+[    0.111132] CPU features: detected: 32-bit EL0 Support
+[    0.111145] CPU features: detected: 32-bit EL1 Support
+[    0.111206] CPU features: detected: CRC32 instructions
+[    0.111500] CPU features: detected: PMUv3
+[    0.166728] alternatives: applying system-wide alternatives
+[    0.192535] CPU features: emulated: Privileged Access Never (PAN) using TTBR0_EL1 switching
+[    0.211565] Memory: 3918928K/4194304K available (15552K kernel code, 9226K rwdata, 10696K rodata, 5952K init, 11680K bss, 201852K reserved, 65536K cma-reserved)
+[    0.245475] devtmpfs: initialized
+[    0.273214] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.274049] posixtimers hash table entries: 4096 (order: 4, 65536 bytes, linear)
+[    0.274376] futex hash table entries: 2048 (131072 bytes on 1 NUMA nodes, total 128 KiB, linear).
+[    0.277642] 19408 pages in range for non-PLT usage
+[    0.277702] 510928 pages in range for PLT usage
+[    0.283659] DMI not present or invalid.
+[    0.302994] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.315046] DMA: preallocated 512 KiB GFP_KERNEL pool for atomic allocations
+[    0.315714] DMA: preallocated 512 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.316052] audit: initializing netlink subsys (disabled)
+[    0.318230] audit: type=2000 audit(0.250:1): state=initialized audit_enabled=0 res=1
+[    0.320768] thermal_sys: Registered thermal governor 'fair_share'
+[    0.320805] thermal_sys: Registered thermal governor 'step_wise'
+[    0.320814] thermal_sys: Registered thermal governor 'user_space'
+[    0.321193] cpuidle: using governor ladder
+[    0.321366] cpuidle: using governor menu
+[    0.322477] hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.
+[    0.323579] ASID allocator initialised with 65536 entries
+[    0.324668] Serial: AMBA PL011 UART driver
+[    0.354236] 9000000.pl011: ttyAMA0 at MMIO 0x9000000 (irq = 13, base_baud = 0) is a PL011 rev1
+[    0.358449] printk: console [ttyAMA0] enabled
+[    0.377199] HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.377275] HugeTLB: 0 KiB vmemmap can be freed for a 1.00 GiB page
+[    0.377322] HugeTLB: registered 32.0 MiB page size, pre-allocated 0 pages
+[    0.377346] HugeTLB: 0 KiB vmemmap can be freed for a 32.0 MiB page
+[    0.377362] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.377371] HugeTLB: 0 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.377379] HugeTLB: registered 64.0 KiB page size, pre-allocated 0 pages
+[    0.377387] HugeTLB: 0 KiB vmemmap can be freed for a 64.0 KiB page
+[    0.389717] ACPI: Interpreter disabled.
+[    0.391102] iommu: Default domain type: Translated
+[    0.391345] iommu: DMA domain TLB invalidation policy: lazy mode
+[    0.397273] pps_core: LinuxPPS API ver. 1 registered
+[    0.397336] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.397409] PTP clock support registered
+[    0.399207] EDAC MC: Ver: 3.0.0
+[    0.412135] NetLabel: Initializing
+[    0.412213] NetLabel:  domain hash size = 128
+[    0.412238] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.413327] NetLabel:  unlabeled traffic allowed by default
+[    0.414473] vgaarb: loaded
+[    0.440560] clocksource: Switched to clocksource arch_sys_counter
+[    0.445499] VFS: Disk quotas dquot_6.6.0
+[    0.445709] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.461134] netfs: FS-Cache loaded
+[    0.463015] pnp: PnP ACPI: disabled
+[    0.498832] NET: Registered PF_INET protocol family
+[    0.501100] IP idents hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.569940] tcp_listen_portaddr_hash hash table entries: 2048 (order: 3, 32768 bytes, linear)
+[    0.570150] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.570259] TCP established hash table entries: 32768 (order: 6, 262144 bytes, linear)
+[    0.570683] TCP bind hash table entries: 32768 (order: 8, 1048576 bytes, linear)
+[    0.571137] TCP: Hash tables configured (established 32768 bind 32768)
+[    0.573262] MPTCP token hash table entries: 4096 (order: 5, 98304 bytes, linear)
+[    0.573793] UDP hash table entries: 2048 (order: 5, 131072 bytes, linear)
+[    0.574116] UDP-Lite hash table entries: 2048 (order: 5, 131072 bytes, linear)
+[    0.576013] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.576625] NET: Registered PF_XDP protocol family
+[    0.576909] PCI: CLS 0 bytes, default 64
+[    0.586904] kvm [1]: HYP mode not available
+[    0.597437] Initialise system trusted keyrings
+[    0.598577] Key type blacklist registered
+[    0.667448] workingset: timestamp_bits=44 max_order=20 bucket_order=0
+[    0.674689] SGI XFS with ACLs, security attributes, quota, no debug enabled
+[    0.679005] 9p: Installing v9fs 9p2000 file system support
+[    0.703622] integrity: Platform Keyring initialized
+[    0.743444] Key type asymmetric registered
+[    0.743693] Asymmetric key parser 'x509' registered
+[    0.744226] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 247)
+[    0.745846] io scheduler mq-deadline registered
+[    0.745946] io scheduler kyber registered
+[    0.746216] io scheduler bfq registered
+[    0.754790] pl061_gpio 9030000.pl061: PL061 GPIO chip registered
+[    0.767241] Serial: 8250/16550 driver, 4 ports, IRQ sharing disabled
+[    0.824479] loop: module loaded
+[    0.831548] hid: raw HID events driver (C) Jiri Kosina
+[    0.844868] hw perfevents: enabled with armv8_pmuv3 PMU driver, 7 (0,8000003f) counters available
+[    0.846754] watchdog: NMI not fully supported
+[    0.846843] watchdog: Hard watchdog permanently disabled
+[    0.848879] NET: Registered PF_INET6 protocol family
+[    0.858584] Segment Routing with IPv6
+[    0.858882] In-situ OAM (IOAM) with IPv6
+[    0.859595] NET: Registered PF_PACKET protocol family
+[    0.860794] 9pnet: Installing 9P2000 support
+[    1.087560] registered taskstats version 1
+[    1.093744] Loading compiled-in X.509 certificates
+[    1.126653] hrtimer: interrupt took 20492336 ns
+[    1.131401] Loaded X.509 cert 'Build time autogenerated kernel key: 9f0cac519e1b43b7aed7b285e97f1d9691777458'
+[    1.154858] Demotion targets for Node 0: null
+[    1.155769] Key type .fscrypt registered
+[    1.155822] Key type fscrypt-provisioning registered
+[    1.157746] ima: No TPM chip found, activating TPM-bypass!
+[    1.157933] ima: Allocated hash algorithm: sha256
+[    1.160441] ima: No architecture policies found
+[    1.169867] clk: Disabling unused clocks
+[    1.170109] PM: genpd: Disabling unused power domains
+[    1.176171] md: Skipping autodetection of RAID arrays. (raid=autodetect will force)
+[    1.185978] VFS: Mounted root (9p filesystem) on device 0:25.
+[    1.188570] devtmpfs: mounted
+[    1.190895] VFS: Pivoted into new rootfs
+[    1.302873] Freeing unused kernel memory: 5952K
+[    1.304720] Run /qemu-init as init process
+{"active_env_keys": [], "event": "native_loader_mode", "phase": "post", "saved_env_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", "BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO", "BPFREJIT_SHIM_NATIVE_LOADER"]}
+[    8.291880] bpf_arm64_ccmp: loading out-of-tree module taints kernel.
+[    8.292142] bpf_arm64_ccmp: module verification failed: signature and/or required key missing - tainting kernel
+{"app": "katran", "event": "app_start", "runner": "katran", "workload": "xdp_pktgen"}
+{"app": "katran", "event": "phase_start", "phase": "baseline_start", "runner": "katran", "workload": "xdp_pktgen"}
+{"active_env_keys": [], "app": "katran", "event": "native_loader_phase_env", "phase": "baseline_start", "runner": "katran", "temporary_set_keys": ["BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG"], "temporary_unset_keys": []}
+[   14.121326] ipip: IPv4 and MPLS over IPv4 tunneling driver
+[   22.414506] NET: Registered PF_ALG protocol family
+{"app": "katran", "event": "phase_done", "phase": "baseline_start", "runner": "katran", "status": "ok"}
+{"app": "katran", "event": "measurement_start", "phase": "baseline", "runner": "katran", "samples": 1, "workload": "xdp_pktgen"}
+[  196.994465] pktgen: Packet Generator for packet performance testing. Version: 2.75
+{"app": "katran", "event": "measurement_done", "phase": "baseline", "runner": "katran", "status": "ok"}
+{"app": "katran", "event": "phase_start", "phase": "baseline_stop", "runner": "katran"}
+{"app": "katran", "event": "phase_step", "phase": "baseline_stop", "runner": "katran", "step": "runner_stop_done"}
+{"app": "katran", "event": "phase_step", "phase": "baseline_stop", "runner": "katran", "step": "quiesce_start"}
+{"app": "katran", "event": "phase_step", "phase": "baseline_stop", "runner": "katran", "step": "quiesce_done"}
+{"app": "katran", "event": "phase_step", "phase": "baseline_stop", "runner": "katran", "step": "bpf_stats_disabled"}
+{"app": "katran", "event": "phase_done", "phase": "baseline_stop", "runner": "katran", "status": "ok"}
+{"active_env_keys": [], "app": "katran", "event": "native_loader_phase_env", "phase": "post_rejit_start", "runner": "katran", "temporary_set_keys": ["BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", "BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", "BPFREJIT_NATIVE_LOADER_SO", "BPFREJIT_REPO_ROOT", "BPFREJIT_SHIM_LOADTIME_PLAN", "BPFREJIT_SHIM_LOG", "BPFREJIT_SHIM_NATIVE_LOADER"], "temporary_unset_keys": ["BPFREJIT_NATIVE_DISABLE_MAP_LOWERING", "BPFREJIT_NATIVE_LINK_BINARY", "BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT", "BPFREJIT_SHIM_NATIVE_KMSG_PROGRESS", "BPFREJIT_SHIM_NATIVE_MANIFEST"]}
+{"app": "katran", "event": "loadtime_plan_done", "runner": "katran", "status": "verified_native_loader"}
+{"app": "katran", "event": "phase_start", "phase": "post_rejit_start", "runner": "katran", "workload": "xdp_pktgen"}
+{"app": "katran", "error": "Katran server did not expose an attached XDP program on katran0", "event": "phase_error", "phase": "post_rejit_start", "runner": "katran"}
+{"app": "katran", "error": "Katran server did not expose an attached XDP program on katran0", "event": "app_done", "status": "error"}
+{
+  "status": "error",
+  "artifact_run_dir": "/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000007_814845",
+  "artifact_metadata": "/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000007_814845/metadata.json"
+}
+[  426.493029] sysrq: Power Off
+[  426.498739] reboot: Power down
+test "$(cat "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root/qemu-status")" = "0"
+install -d "/workspaces/repository/corpus/results"
+cp -a "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root/workspaces/repository/corpus/results/." "/workspaces/repository/corpus/results/"
+make[1]: Leaving directory '/workspaces/repository'
