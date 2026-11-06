@@ -178,6 +178,51 @@ RLIMIT_MEMLOCK is the other candidate the message names, but the baseline
 arm loads in the same process environment, so it is almost certainly the
 patch. Reported to lane T; not worked around here.
 
+### Four of six apps measure with a bytecode/`noop` pass
+
+`BPFREJIT_BENCH_PASSES=noop`, `SAMPLES=1 WORKLOAD_DURATION=60`
+(`corpus/results/x86_kvm_corpus_20261106_114826_062263`) gives `ok` with
+**both arms measured** for bcc/set, cilium/agent, otelcol-ebpf-profiler and
+tetragon/observer. Tracee/monitor did not produce a record in that run.
+
+The `kinsn` pass is the sole cause of the native-arm failure, bisected on
+katran with everything else held fixed:
+
+| `BPFREJIT_BENCH_PASSES` | status | arms | artifact |
+| --- | --- | ---: | --- |
+| `noop` | ok | 2/2 | `..._111521_609228` |
+| `dce` (BPF->BPF) | ok | 2/2 | `..._113727_795524` |
+| `kinsn` (native rewrite) | error | 1/2 | `..._112823_193051` |
+
+So the shim, loader, kernel patch and apps are all sound; installing a
+`kinsn` plan is what makes libbpf's trivial startup probe return EINVAL.
+Reported to the lanes that own the pass and shim.
+
+### Work done per arm (the operator's requirement)
+
+Each application's own counters are recorded for both arms in the run
+artifacts above. Sampled values at `noop`, 60 s:
+
+- **bcc/set** — stress-ng bogo-ops in both arms, same four stressors
+  (syscall, cap, set, sockfd): cap 16,871,329 vs 16,974,156; set
+  1,286,541 vs 1,296,699; sockfd 12,788,194 vs 12,762,634.
+- **cilium/agent** — forwarded vs dropped verdicts with drop reasons in
+  both arms: 155,090,107 forwarded / 2 dropped (baseline) and
+  177,249,149 forwarded / 4 dropped (post). Drops are
+  `reason=139,direction=2` in both, so the drop class is the same and only
+  the volume differs.
+- **tetragon/observer** — stress-ng bogo-ops in both arms, same four
+  stressors (eventfd, mmap, udp, sock): udp 6,128,968 vs 6,149,140;
+  eventfd 3,776,936 vs 3,710,052; sock 20,270 vs 21,698.
+- **otelcol-ebpf-profiler** — both arms measured; its workload config
+  carries no counters block, so its work figures come from the profiler's
+  own output rather than a `config.outcomes` map.
+
+Cilium's volume differs by 14% between arms at `SAMPLES=1`, which is why
+the ratio must be taken from throughput over equal durations rather than
+from raw counters — the counters are evidence of *which work* was done, not
+of the rate.
+
 Reference `1.349x` is confirmed as the geometric mean of the six per-app
 `native/eBPF` ratios recorded in `kprog/docs/evaluation.md`
 (`1.005, 1.824, 2.358, 1.323, 1.102, 0.958`).
