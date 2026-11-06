@@ -55,7 +55,7 @@ use object::{
     RelocationTarget, SectionKind, SymbolFlags, SymbolKind, SymbolScope,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet, VecDeque};
 use std::fs;
 use std::path::PathBuf;
 
@@ -2794,34 +2794,14 @@ fn arm64_symbol_has_tail_call(
     relocs: &HashMap<Arm64RelocKey, Arm64RelocInfo>,
 ) -> bool {
     let sym_key = (sym.section_index, sym.address);
-    let mut helper_imm_registers: [Option<u64>; 32] = std::array::from_fn(|_| None);
-    for (word_index, word) in bytes.chunks_exact(4).enumerate() {
-        let off = (word_index * 4) as u64;
-        if relocs.get(&(sym_key, off)).is_some_and(|reloc| {
-            reloc.r_type == R_AARCH64_CALL26 && reloc.target_name == "bpf_tail_call"
-        }) {
-            return true;
-        }
-
+    let flow = arm64_helper_flow(bytes, sym, relocs);
+    for (index, word) in bytes.chunks_exact(4).enumerate() {
+        if relocs.get(&(sym_key, (index * 4) as u64)).is_some_and(|r|
+            r.r_type == R_AARCH64_CALL26 && r.target_name == "bpf_tail_call") { return true; }
         let insn = u32::from_le_bytes(word.try_into().unwrap());
-        let helper_imm_load_reg = if let Some((reg, helper_id)) = a64_known_helper_id_load(insn) {
-            helper_imm_registers[reg] = Some(helper_id);
-            Some(reg)
-        } else {
-            None
-        };
         if let Some(reg) = a64_blr_reg(insn) {
-            if helper_imm_registers[reg] == Some(12) {
-                return true;
-            }
-            for slot in helper_imm_registers.iter_mut().take(19) {
-                *slot = None;
-            }
-        }
-        for reg in a64_written_gprs(insn).into_iter().flatten() {
-            if helper_imm_load_reg != Some(reg) {
-                helper_imm_registers[reg] = None;
-            }
+            if flow.get(&index).and_then(|s| s[reg].as_ref())
+                .is_some_and(|ids| ids.contains(&12)) { return true; }
         }
     }
     false
@@ -2867,91 +2847,91 @@ fn arm64_branch_word_target(sym: &SymInfo, word_index: usize, insn: u32) -> Opti
     Some((local / 4) as usize)
 }
 
-fn arm64_successors_for_helper_reachability(
-    sym: &SymInfo,
-    word_count: usize,
-    word_index: usize,
-    insn: u32,
-    tracked_reg: usize,
+fn arm64_helper_successors(
+    sym: &SymInfo, count: usize, index: usize, insn: u32,
 ) -> Vec<usize> {
-    if a64_is_ret(insn) {
-        return Vec::new();
+    if a64_is_ret(insn) || a64_br_reg(insn).is_some() { return Vec::new(); }
+    if !a64_is_bl(insn) && a64_is_uncond_b(insn) {
+        return arm64_branch_word_target(sym, index, insn)
+            .filter(|&target| target < count).into_iter().collect();
     }
-    if a64_is_bl(insn) || a64_blr_reg(insn).is_some() {
-        return if tracked_reg < 19 && word_index + 1 < word_count {
-            Vec::new()
-        } else if word_index + 1 < word_count {
-            vec![word_index + 1]
-        } else {
-            Vec::new()
-        };
-    }
-    if a64_is_uncond_b(insn) {
-        return arm64_branch_word_target(sym, word_index, insn)
-            .filter(|&target| target < word_count)
-            .into_iter()
-            .collect();
-    }
+    let mut out = Vec::new();
     if a64_is_b_cond(insn) || a64_is_cbz_cbnz(insn) || a64_is_tbz_tbnz(insn) {
-        let mut out = Vec::new();
-        if let Some(target) = arm64_branch_word_target(sym, word_index, insn) {
-            if target < word_count {
-                out.push(target);
-            }
+        if let Some(target) = arm64_branch_word_target(sym, index, insn) {
+            if target < count { out.push(target); }
         }
-        if word_index + 1 < word_count {
-            out.push(word_index + 1);
-        }
-        out.sort_unstable();
-        out.dedup();
-        return out;
     }
-    if word_index + 1 < word_count {
-        vec![word_index + 1]
-    } else {
-        Vec::new()
-    }
+    if index + 1 < count { out.push(index + 1); }
+    out.sort_unstable(); out.dedup(); out
 }
 
-fn arm64_reachable_helper_id_for_blr(
-    bytes: &[u8],
-    sym: &SymInfo,
+// None denotes an unknown value, not an empty set. In particular a constant
+// on ONE incoming path cannot specialize a call reached through other paths.
+type Arm64HelperState = [Option<BTreeSet<u64>>; 32];
+fn arm64_helper_flow(
+    bytes: &[u8], sym: &SymInfo,
     relocs: &HashMap<Arm64RelocKey, Arm64RelocInfo>,
-    call_word_index: usize,
-    reg: usize,
-) -> Option<u64> {
-    let word_count = bytes.len() / 4;
-    for candidate in (0..call_word_index).rev() {
-        let insn = arm64_word_at(bytes, candidate)?;
-        let Some((candidate_reg, helper_id)) = a64_known_helper_id_load(insn) else {
-            continue;
-        };
-        if candidate_reg != reg {
-            continue;
+) -> HashMap<usize, Arm64HelperState> {
+    let count = bytes.len() / 4;
+    let initial: Arm64HelperState = std::array::from_fn(|_| None);
+    let mut states = HashMap::from([(0usize, initial)]);
+    let mut pending = VecDeque::from([0usize]);
+    while let Some(index) = pending.pop_front() {
+        let Some(insn) = arm64_word_at(bytes, index) else { continue; };
+        let incoming = states[&index].clone();
+        let mut next = incoming.clone();
+        let reloc = relocs.get(&((sym.section_index, sym.address), (index * 4) as u64));
+        let writes = a64_written_gprs(insn);
+        for reg in 0..31 {
+            if arm64_insn_writes_reg(insn, reloc, reg) { next[reg] = None; }
         }
-        let mut stack = Vec::new();
-        let mut seen = HashSet::new();
-        if candidate + 1 < word_count {
-            stack.push(candidate + 1);
+        // Unrecognized instruction families cannot retain stale target facts.
+        let known_no_write = insn == A64_NOP || a64_is_ret(insn) ||
+            a64_is_bl(insn) || a64_blr_reg(insn).is_some() || a64_br_reg(insn).is_some() ||
+            a64_is_uncond_b(insn) || a64_is_b_cond(insn) ||
+            a64_is_cbz_cbnz(insn) || a64_is_tbz_tbnz(insn) ||
+            matches!(insn & 0x1f00_0000, 0x1100_0000 | 0x0a00_0000 | 0x0b00_0000) ||
+            (insn & 0x3a00_0000) == 0x2800_0000 ||
+            matches!(insn & 0x3b00_0000, 0x3800_0000 | 0x3900_0000) ||
+            matches!(insn & 0xffff_fc00, 0x9e67_0000 | 0x1e27_0000);
+        if !known_no_write && writes.iter().all(Option::is_none) && reloc.is_none() {
+            next.fill(None);
         }
-        while let Some(word_index) = stack.pop() {
-            if word_index == call_word_index {
-                return Some(helper_id);
-            }
-            if !seen.insert(word_index) {
-                continue;
-            }
-            let insn = arm64_word_at(bytes, word_index)?;
-            let reloc = relocs.get(&((sym.section_index, sym.address), (word_index * 4) as u64));
-            if arm64_insn_writes_reg(insn, reloc, reg) {
-                continue;
-            }
-            stack.extend(arm64_successors_for_helper_reachability(
-                sym, word_count, word_index, insn, reg,
-            ));
+        if let Some((reg, id)) = a64_known_helper_id_load(insn) {
+            next[reg] = Some(BTreeSet::from([id]));
+        } else if let Some((dst, src)) = a64_mov_reg64(insn | 0x8000_0000) {
+            next[dst] = incoming[src].clone();
+        } else if (insn & 0xffe0_0c00) == 0x9a80_0000 {
+            let dst = (insn & 31) as usize;
+            let lhs = ((insn >> 5) & 31) as usize;
+            let rhs = ((insn >> 16) & 31) as usize;
+            next[dst] = match (&incoming[lhs], &incoming[rhs]) {
+                (Some(a), Some(b)) => Some(a.union(b).copied().collect()),
+                _ => None,
+            };
+        }
+        if a64_is_bl(insn) || a64_blr_reg(insn).is_some() {
+            let named_helper = reloc.is_some_and(|r| r.target_name.starts_with("bpf_"));
+            let indirect_helper = a64_blr_reg(insn).is_some_and(|r| incoming[r].is_some());
+            let clobbered = if named_helper || indirect_helper { 19 } else { 31 };
+            next[..clobbered].fill(None); next[30] = None;
+        }
+        for successor in arm64_helper_successors(sym, count, index, insn) {
+            let changed = if let Some(old) = states.get_mut(&successor) {
+                let mut changed = false;
+                for reg in 0..32 {
+                    let joined = match (&old[reg], &next[reg]) {
+                        (Some(a), Some(b)) => Some(a.union(b).copied().collect()),
+                        _ => None,
+                    };
+                    if old[reg] != joined { old[reg] = joined; changed = true; }
+                }
+                changed
+            } else { states.insert(successor, next.clone()); true };
+            if changed { pending.push_back(successor); }
         }
     }
-    None
+    states
 }
 
 fn plan_arm64_tail_call_cleanup_from_terminators(
@@ -3585,6 +3565,7 @@ fn rewrite_arm64(
                 sym.name
             );
         }
+        let helper_flow = arm64_helper_flow(&bytes, sym, &relocs);
         let mut helper_imm_registers: [Option<u64>; 32] = std::array::from_fn(|_| None);
         let mut helper_imm_word_indices: [Option<usize>; 32] = std::array::from_fn(|_| None);
         let mut helper_imm_read_since_load: [bool; 32] = [false; 32];
@@ -3637,14 +3618,7 @@ fn rewrite_arm64(
                 helper_imm_word_indices[reg] = Some(emit_word_index);
                 helper_imm_read_since_load[reg] = false;
                 helper_imm_load_reg = Some(reg);
-                let next_is_call = bytes.get(off + 4..off + 8).and_then(|next| {
-                    let next = u32::from_le_bytes(next.try_into().ok()?);
-                    a64_blr_reg(next)
-                }) == Some(reg);
-                if !proof_mode && next_is_call {
-                    insn = A64_NOP;
-                    helper_imm_word_indices[reg] = None;
-                }
+
             }
             let mut map_name_write_handled = false;
             if !proof_mode {
@@ -3837,10 +3811,8 @@ fn rewrite_arm64(
 
             if let Some(reg) = a64_blr_reg(insn) {
                 let direct_helper_id = helper_imm_registers[reg];
-                let helper_id = direct_helper_id.or_else(|| {
-                    arm64_reachable_helper_id_for_blr(&bytes, sym, &relocs, local_word_index, reg)
-                });
-                let Some(helper_id) = helper_id else {
+                let helper_ids = helper_flow.get(&local_word_index).and_then(|s| s[reg].as_ref());
+                let Some(helper_ids) = helper_ids else {
                     if !proof_mode {
                         bail!(
                             "arm64 unresolved register-indirect call in {} at byte offset {off:#x} through x{reg}; helper calls must be rewritten before kernel load",
@@ -3850,13 +3822,6 @@ fn rewrite_arm64(
                     blob.extend_from_slice(&insn.to_le_bytes());
                     continue;
                 };
-                let helper_name = x86::bpf_helper_name_from_id(helper_id).ok_or_else(|| {
-                    anyhow!(
-                        "arm64 immediate BPF helper id {} in {} at byte offset {off:#x} is unsupported",
-                        helper_id,
-                        sym.name
-                    )
-                })?;
                 if proof_mode {
                     clear_arm64_call_clobbered_helper_imm_registers(
                         &mut helper_imm_registers,
@@ -3866,7 +3831,11 @@ fn rewrite_arm64(
                     blob.extend_from_slice(&insn.to_le_bytes());
                     continue;
                 }
-                if direct_helper_id.is_some() && !helper_imm_read_since_load[reg] {
+                // X0..X4 are real helper arguments; X19..X29 retain their
+                // values across the call. Only an unread caller-clobbered
+                // nonargument register can lose its now-redundant ID load.
+                if helper_ids.len() == 1 && (5..19).contains(&reg)
+                    && direct_helper_id.is_some() && !helper_imm_read_since_load[reg] {
                     if let Some(word_index) = helper_imm_word_indices[reg] {
                         patches.push(Arm64Patch {
                             word_index,
@@ -3879,30 +3848,58 @@ fn rewrite_arm64(
                     &mut helper_imm_word_indices,
                     &mut helper_imm_read_since_load,
                 );
-                for word in build_arm64_helper_call(
-                    helper_name,
-                    &sym.name,
-                    off,
-                    blob.len(),
-                    is_entry,
-                    helper_addrs,
-                    tail_call_maps,
-                    lookup_sites,
-                    lookup_maps,
-                    update_sites,
-                    callee_saved_mask,
-                    &entry_abi_strip.tail_call_cleanup_words,
-                    entry_abi_strip.tail_call_cnt_ptr_stack_offset,
-                    &mut lookup_call_counter,
-                    &mut update_call_counter,
-                    &mut reg_map_names,
-                    &mut lookup_site_used,
-                    &mut update_site_by_map,
-                    &mut helper_literal_loads,
-                    &mut native_relocs,
-                    helper_call_slot,
-                )? {
-                    append_u32(&mut blob, word);
+                let initial_map_names = reg_map_names.clone();
+                let mut exits = Vec::new();
+                for (case, helper_id) in helper_ids.iter().enumerate() {
+                    let helper_name = x86::bpf_helper_name_from_id(*helper_id)
+                        .ok_or_else(|| anyhow!("unknown arm64 BPF helper ID {helper_id}"))?;
+                    reg_map_names = initial_map_names.clone();
+                    let conditional = case + 1 < helper_ids.len();
+                    let branch = if conditional {
+                        if *helper_id > 4095 { bail!("arm64 helper ID does not fit comparison immediate"); }
+                        append_u32(&mut blob, 0xf100_001f | ((*helper_id as u32) << 10) | ((reg as u32) << 5));
+                        let branch = blob.len() / 4;
+                        append_u32(&mut blob, A64_NOP);
+                        Some(branch)
+                    } else { None };
+                    for word in build_arm64_helper_call(
+                        helper_name,
+                        &sym.name,
+                        off,
+                        blob.len(),
+                        is_entry,
+                        helper_addrs,
+                        tail_call_maps,
+                        lookup_sites,
+                        lookup_maps,
+                        update_sites,
+                        callee_saved_mask,
+                        &entry_abi_strip.tail_call_cleanup_words,
+                        entry_abi_strip.tail_call_cnt_ptr_stack_offset,
+                        &mut lookup_call_counter,
+                        &mut update_call_counter,
+                        &mut reg_map_names,
+                        &mut lookup_site_used,
+                        &mut update_site_by_map,
+                        &mut helper_literal_loads,
+                        &mut native_relocs,
+                        helper_call_slot,
+                    )? {
+                        append_u32(&mut blob, word);
+                    }
+                    if let Some(branch) = branch {
+                        let exit = blob.len() / 4;
+                        append_u32(&mut blob, A64_NOP);
+                        exits.push(exit);
+                        let next_case = blob.len() / 4;
+                        let patched = a64_patch_b_cond(0x5400_0001, branch, next_case)?;
+                        blob[branch * 4..branch * 4 + 4].copy_from_slice(&patched.to_le_bytes());
+                    }
+                }
+                let continuation = blob.len() / 4;
+                for exit in exits {
+                    let branch = a64_patch_b(exit, continuation)?;
+                    blob[exit * 4..exit * 4 + 4].copy_from_slice(&branch.to_le_bytes());
                 }
                 continue;
             }
@@ -4920,7 +4917,7 @@ mod tests {
     }
 
     #[test]
-    fn arm64_reachable_helper_id_survives_branch_around_map_load() {
+    fn arm64_helper_flow_does_not_invent_a_target_on_the_map_load_path() {
         let branch_to_call = a64_patch_b_cond(0x5400_0000, 1, 4).unwrap();
         let mut bytes = Vec::new();
         for word in [
@@ -4958,9 +4955,38 @@ mod tests {
         }
 
         assert_eq!(
-            arm64_reachable_helper_id_for_blr(&bytes, &sym, &relocs, 4, 24),
-            Some(1)
+            arm64_helper_flow(&bytes, &sym, &relocs)[&4][24],
+            None
         );
+    }
+
+    #[test]
+    fn arm64_helper_flow_joins_both_ids_and_tracks_narrow_register_copies() {
+        let words = [
+            a64_patch_cbz_cbnz(a64_cbz64(0).unwrap(), 0, 3).unwrap(),
+            a64_movz(8, 5, 0).unwrap(), a64_patch_b(2, 4).unwrap(),
+            a64_movz(8, 8, 0).unwrap(), 0x2a08_03e9, // mov w9,w8
+            0xd63f_0120, // blr x9
+        ];
+        let bytes: Vec<u8> = words.into_iter().flat_map(u32::to_le_bytes).collect();
+        let sym = SymInfo { name: "join".into(), address: 0, size: bytes.len() as u64,
+            section_index: object::SectionIndex(1) };
+        let flow = arm64_helper_flow(&bytes, &sym, &HashMap::new());
+        assert_eq!(flow[&5][9], Some(BTreeSet::from([5,8])));
+        let mut bypass = bytes.clone();
+        bypass[12..16].copy_from_slice(&A64_NOP.to_le_bytes());
+        assert_eq!(arm64_helper_flow(&bypass, &sym, &HashMap::new())[&5][9], None);
+    }
+
+    #[test]
+    fn arm64_helper_flow_kills_fmov_writes_and_caller_clobbered_ids() {
+        for overwrite in [0x9e66_0008, 0xd63f_0120] { // fmov x8,d0; blr x9
+            let words = [a64_movz(8,5,0).unwrap(),a64_movz(9,8,0).unwrap(),overwrite,0xd63f_0100];
+            let bytes: Vec<u8> = words.into_iter().flat_map(u32::to_le_bytes).collect();
+            let sym = SymInfo { name: "clobber".into(), address: 0, size: bytes.len() as u64,
+                section_index: object::SectionIndex(1) };
+            assert_eq!(arm64_helper_flow(&bytes,&sym,&HashMap::new())[&3][8],None);
+        }
     }
 
     #[test]

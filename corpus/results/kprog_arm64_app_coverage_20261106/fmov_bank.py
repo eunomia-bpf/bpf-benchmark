@@ -61,9 +61,16 @@ elif sys.argv[2]=='package':
         'busybox insmod /native_lab.ko || exit 1','ulimit -l unlimited || exit 1','status=0']
     for row in json.loads((phase/'cases.json').read_text()):
         name,expected=row['name'],row['expected']
-        for kind,command in [('proof',f'/loader --object /cases/{name}.bpf.o --program {name}_arm64_sim_xdp --input /input.mem --expected-result {expected} --expect-retval 2 --result-channel packet'),
-            ('native',f'/bound-probe /cases/{name}.source.bpf.o /cases/{name}.manifest.json {expected} 2')]:
-            script += [command+f' >/results/{name}.{kind}.log 2>&1','rc=$?',f'echo "$rc" >/results/{name}.{kind}.rc','if [ "$rc" != 0 ]; then status=1; fi']
+        if row.get('reject'):
+            commands=[('proof',f'/loader --object /cases/{name}.bpf.o --program {name}_arm64_sim_xdp --load-only'),
+                ('native',f'/bound-probe /cases/{name}.source.bpf.o /cases/{name}.manifest.json')]
+            expected_rc=1
+        else:
+            commands=[('proof',f'/loader --object /cases/{name}.bpf.o --program {name}_arm64_sim_xdp --input /input.mem --expected-result {expected} --expect-retval 2 --result-channel packet'),
+                ('native',f'/bound-probe /cases/{name}.source.bpf.o /cases/{name}.manifest.json {expected} 2')]
+            expected_rc=0
+        for kind,command in commands:
+            script += [command+f' >/results/{name}.{kind}.log 2>&1','rc=$?',f'echo "$rc" >/results/{name}.{kind}.rc',f'if [ "$rc" != {expected_rc} ]; then status=1; fi']
     script+=['echo "$status" >/results/guest-status','busybox sync','busybox poweroff -f']
     (root/'init').write_text('\n'.join(script)+'\n');(root/'init').chmod(0o755)
     files='\n'.join(['.']+sorted(str(p.relative_to(root)) for p in root.rglob('*')))+'\n'

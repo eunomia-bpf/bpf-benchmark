@@ -1,0 +1,27 @@
+[
+  {
+    "name": "helper_dispatch_0",
+    "expected": 0,
+    "proof_rc": 0,
+    "native_rc": 0
+  },
+  {
+    "name": "helper_dispatch_1",
+    "expected": 1,
+    "proof_rc": 0,
+    "native_rc": 0
+  },
+  {
+    "name": "helper_dispatch_2",
+    "expected": 15,
+    "proof_rc": 0,
+    "native_rc": 0
+  },
+  {
+    "name": "helper_dispatch_bad",
+    "expected": 0,
+    "reject": true,
+    "proof_rc": 1,
+    "native_rc": 1
+  }
+]

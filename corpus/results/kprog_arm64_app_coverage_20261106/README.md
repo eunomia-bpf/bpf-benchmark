@@ -701,3 +701,29 @@ retain inherited and correctly paired SYS_EXIT/RUNQLAT extents.
 [The replay archive](bcc-native-proof-pairing/replay.tar.gz) includes native,
 native-proof and simulator artifacts together. Runtime binder checks remain
 strict; the following startup retry uses the complete matched triple.
+
+## Native finite helper dispatch and complete CFG joins
+
+ARM native linking now propagates all known helper IDs through the CFG, joins
+both incoming paths, preserves register copies and conditional selections,
+and kills facts on writes and call clobbers. A known ID on one path no longer
+licenses a call reached through an unknown map-load path. The old regression
+that accepted that case now requires rejection. Finite multi-helper calls
+emit real native comparison/call arms with a common continuation, matching
+the simulator's verifier-visible dispatch. There is no native runtime guard.
+
+Helper-ID loads used as arguments or held in callee-saved registers remain.
+The initial real native test exposed a dropped X24 assignment; its wrong
+packet value and full logs are retained alongside the repaired result.
+[Three final bound QEMU comparisons](helper-dispatch-result/outcomes.json)
+produce matching 0/1/15 results with return value 2 and generation 1. The
+joined dispatch pre-seeds the helper register with the alternate ID so a
+removed assignment cannot pass by chance. A proof that omits helper14 rejects
+both standalone and through actual generation-bound loading, without executing
+the invalid candidate. All 69 Rust tests and both release builds pass.
+
+[The replay archive](helper-dispatch-result/replay.tar.gz) retains all attempts,
+compiled inputs, exact outcomes and a matched portable kernel/initramfs under
+`runtime/`. Run `make -C runtime run` after extraction, or on Spark use
+`make -C runtime run ACCEL=kvm CPU=host`. Finite local CODE branches/calls and
+actual native address projection remain active integration work.

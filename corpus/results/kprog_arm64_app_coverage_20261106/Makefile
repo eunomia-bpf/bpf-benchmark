@@ -438,3 +438,12 @@ cilium-native-arch-check: $(CILIUM_TEST_PYTHON)
 .PHONY: cilium-native-arch-replay
 cilium-native-arch-replay:
 	python3 $(HERE)/cilium_arch_replay.py $(HERE)/$(PHASE)
+
+.PHONY: helper-dispatch-build
+helper-dispatch-build: direct-header-generate
+	python3 $(HERE)/helper_dispatch.py $(HERE)/$(PHASE)
+	for source in $(HERE)/$(PHASE)/*.bpf.c; do \
+		clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
+		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
+		-c $$source -o $${source%.c}.o || exit 1; \
+	done
