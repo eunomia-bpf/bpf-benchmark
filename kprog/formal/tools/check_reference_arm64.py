@@ -348,6 +348,43 @@ def main():
         if nzcv is not None:
             expected["flags"] = 0xA5A50000000ABCDE | (nzcv << 28)
         cases.append((request, expected))
+    # Shifted register arithmetic includes NONE versus LSL0 temporaries,
+    # sign-extended W ASR intermediates, maximum shifts and NEGS aliases.
+    for word, lhs, rhs, dst, result, nzcv in [
+            (0x0B027C20, 0, 1, 0, 0x80000000, None),
+            (0x8B02FC20, 0, 1, 0, 0x8000000000000000, None),
+            (0x4B427C20, 1, 0xABCD000080000000, 0, 0, None),
+            (0xCB42FC20, 2, 0x8000000000000000, 0, 1, None),
+            (0x2B821020, 0, 0xABCD000080000000, 0, 0xF8000000, 8),
+            (0xAB82FC20, 0, 0x8000000000000000, 0, 0xFFFFFFFFFFFFFFFF, 8),
+            (0x6B027C20, 0, 1, 0, 0x80000000, 9),
+            (0xEB02FC20, 0, 1, 0, 0x8000000000000000, 9),
+            (0x6B82103F, 0, 0xABCD000080000000, None, None, 0),
+            (0xEB42FC3F, 1, 0x8000000000000000, None, None, 6),
+            (0x2B027C3F, 0x80000000, 1, None, None, 7),
+            (0xAB02FC3F, 0x8000000000000000, 1, None, None, 7),
+            (0x0B020020, 0xABCD000000000002, 0xDEAD0000FFFFFFFF, 0, 1, None),
+            (0xCB020020, 0, 0xFFFFFFFFFFFFFFFF, 0, 1, None),
+            (0x2B020020, 1, 0xDEAD0000FFFFFFFF, 0, 0, 6),
+            (0xEB1F0020, 1, 99, 0, 1, 2),
+            (0x8B0203FF, 99, 0xFFFFFFFFFFFFFFFF, None, None, None),
+            (0x0B4207E0, 99, 0x80000000, 0, 0x40000000, None),
+            (0x6B8113E0, 0x80000000, 99, 0, 0x08000000, 0),
+            (0x6B0107E0, 1, 99, 0, 0xFFFFFFFE, 8),
+            (0xEB01FFE0, 1, 99, 0, 0x8000000000000000, 9),
+            (0x0B010021, 3, 99, 1, 6, None),
+            (0x2B1F03FF, 99, 99, None, None, 4)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["registers"][1:3] = [lhs, rhs]
+        request["state"]["flags"] = 0xA5A50000F00ABCDE
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
+        if dst is not None:
+            expected["registers"][dst] = result
+        if nzcv is not None:
+            expected["flags"] = 0xA5A50000000ABCDE | (nzcv << 28)
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -355,7 +392,7 @@ def main():
     assert len(outputs) == len(cases)
     for (request, expected), out in zip(cases, outputs):
         assert out == expected, (request, out, expected)
-    for word in (0x2A2183E0, 0x4BC107E0, 0x4B2107E0, 0x6B0107E0,
+    for word in (0x2A2183E0, 0x4BC107E0, 0x4B2107E0,
                  0x1AE22020, 0x53207C20, 0x131FFC20, 0x0A028020, 0x6A228020,
                  0x72C24680, 0x72E24680, 0x72024680, 0x12C24680, 0x12E24680,
                  0x52C24680, 0x52E24680, 0x32824680,
@@ -363,7 +400,8 @@ def main():
                  0x1EE70020, 0x9EAE0001, 0x0E205801, 0x4E205820,
                  0x2E303801, 0x6E303820, 0x2E703800, 0x6EB03800,
                  0x7A5F0835, 0x7A5F0C25, 0x5A5F0825, 0x3A5F0825,
-                 0x91800420, 0xD1800420, 0x31800420, 0xF1800420):
+                 0x91800420, 0xD1800420, 0x31800420, 0xF1800420,
+                 0x0BC20020, 0x8BC20020, 0x0B028020, 0x0B828020, 0x6BC20020):
         request = copy.deepcopy(base)
         request["native_bytes"] = list(word.to_bytes(4, "little"))
         rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
@@ -394,7 +432,7 @@ def main():
     nv = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "nv"), "csel x0,x1,x2,nv")
     al = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "al"), "csel x0,x1,x2,al")
     assert encoder.encode(nv, {}, {}) == encoder.encode(al, {}, {})
-    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV/CNT/UADDLV/CCMP/ADD-SUB-immediate, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV/CNT/UADDLV/CCMP/ADD-SUB-immediate/shifted-register, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":

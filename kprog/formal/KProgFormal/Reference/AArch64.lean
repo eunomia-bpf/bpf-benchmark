@@ -363,10 +363,18 @@ def arithmeticImmediateStep (width : Width) (subtract setFlags : Bool)
   let flags := if setFlags then arithmeticFlags width subtract lhs rhs s.flags else s.flags
   ⟨{ writeData s dst value width with flags := flags, pc := s.pc + 4 }, [], none⟩
 
+def arithmeticRegisterStep (width : Width) (subtract setFlags : Bool)
+    (dst src : RegisterRef) (rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
+    (s : State) : Transition State :=
+  arithmeticImmediateStep width subtract setFlags dst src
+    (shiftValue width (arithmeticShift kind) (readReg s rhs) (BitVec.ofNat 64 amount.val)) s
+
 inductive Instruction
   | mul (instruction : MulInstruction)
   | fmov (instruction : FmovInstruction)
   | reduction (op : ReductionOp) (wide : Bool)
+  | arithmeticRegister (width : Width) (subtract setFlags : Bool) (dst src : RegisterRef)
+      (rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
   | arithmeticImmediate (width : Width) (subtract setFlags : Bool) (dst src : RegisterRef) (rhs : Word)
   | compare (width : Width) (lhs : Register) (rhs : CompareOperand)
       (predicate : Fin 16) (fallback : BitVec 4)
@@ -384,6 +392,8 @@ def step (i : Instruction) (s : State) : Transition State :=
   | .mul instruction => mulStep instruction s
   | .fmov instruction => fmovStep instruction s
   | .reduction op wide => reductionStep op wide s
+  | .arithmeticRegister width subtract setFlags dst src rhs kind amount =>
+      arithmeticRegisterStep width subtract setFlags dst src rhs kind amount s
   | .arithmeticImmediate width subtract setFlags dst src rhs => arithmeticImmediateStep width subtract setFlags dst src rhs s
   | .compare width lhs rhs predicate fallback => compareStep width lhs rhs predicate fallback s
   | .shift instruction => shiftStep instruction s
@@ -484,6 +494,14 @@ def decode (bytes : Array Byte) : Except String Instruction := do
       if k : amount < width.bits then return .shift (.negate width ⟨kind, h⟩ ⟨amount, k⟩ dst rhs)
       else throw "reserved NEG immediate"
     else throw "reserved NEG shift kind"
+  if word &&& 0x1f200000 = 0x0b000000 then
+    let kind := (word / 2^22) % 4
+    if h : kind < 3 then
+      if k : amount < width.bits then
+        return .arithmeticRegister width ((word / 2^30) % 2 == 1) ((word / 2^29) % 2 == 1)
+          (dataRegister dst false) (dataRegister lhs false) rhs ⟨kind, h⟩ ⟨amount, k⟩
+      else throw "reserved ADD/SUB register shift immediate"
+    else throw "reserved ADD/SUB register shift kind"
   if word &&& 0xffe00000 = 0x13800000 ∨ word &&& 0xffe00000 = 0x93c00000 then
     let amount := (word / 2^10) % 64
     if h : amount < width.bits then return .extrev (.extract width ⟨amount, h⟩ dst lhs rhs)
