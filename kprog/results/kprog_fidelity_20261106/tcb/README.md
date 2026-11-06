@@ -175,3 +175,44 @@ claim that all changes were already committed or validated together.
 | existing verifier context (not incremental kernel changes) | 2 | 27796 | 24679 |
 
 The 23 named binding functions contain 875 physical lines, overlapping their loader/module rows. Kernel changes span 12 files, with 1053 additions and 123 deletions against the recorded base. No overlapping rows are added into a TCB total.
+
+## Scale-completion source snapshot
+
+The same inventory command was rerun after the LEA/parser, context-v2,
+map-capacity and arithmetic-reference increments. This is a dirty shared-source
+snapshot, including other lanes' in-progress edits; provenance records that
+state. Earlier tables remain historical. Function counts overlap component
+counts, and allocation/trust dependencies are unchanged.
+
+| Component | Files | Physical | Nonblank |
+| --- | ---: | ---: | ---: |
+| x86 simulator (including ISA-specific generated C) | 67 | 6357 | 6089 |
+| arm64 simulator (including ISA-specific generated C) | 69 | 5798 | 5588 |
+| shared simulator generated C | 2 | 40 | 35 |
+| x86 native-to-proof generator (including local imports) | 8 | 2544 | 2367 |
+| arm64 native-to-proof generator (including local imports) | 6 | 1663 | 1535 |
+| proof build/load orchestration | 1 | 616 | 549 |
+| native shared loader/linker integration | 9 | 7218 | 6798 |
+| native ELF linker (both ISAs) | 2 | 10151 | 9528 |
+| standalone proof loader | 1 | 1290 | 1196 |
+| application syscall shim | 11 | 9941 | 9415 |
+| x86 native kernel module | 1 | 978 | 877 |
+| arm64 native kernel module | 1 | 1205 | 1096 |
+| shared binding wire contract | 2 | 689 | 635 |
+| vendored helper declarations (ABI input, not project-owned) | 1 | 4785 | 4570 |
+| formal model and proofs (Lean, including generated) | 333 | 37616 | 33592 |
+| formal contracts (JSON) | 138 | 2648 | 2648 |
+| formal contract generators | 138 | 28660 | 25972 |
+| translation-validation model, checker and proofs (Lean) | 6 | 847 | 740 |
+| translation-validation ELF extraction | 1 | 55 | 53 |
+| constant-op dispatch generator | 1 | 97 | 90 |
+| native-proof kernel patch and application (patch text, not SLOC) | 2 | 636 | 591 |
+| existing verifier context (not incremental kernel changes) | 2 | 27843 | 24724 |
+
+```sh
+taskset -c 16-19 make -C kprog/fidelity tcb
+```
+
+`scale-completion-inventory.log.gz` retains the exact command output.
+
+This snapshot identifies 23 binding functions (912 overlapping physical lines). Kernel changes span 13 files, with 1167 added and 123 deleted lines against the recorded kernel base.
