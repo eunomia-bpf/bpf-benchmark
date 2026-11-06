@@ -1,0 +1,84 @@
+make: Entering directory '/workspaces/repository/kprog/x86'
+make -C ../test \
+	OUTPUT_DIR="/workspaces/repository/kprog/x86/build/negative-native" \
+	KERNEL_OFFSETS="/workspaces/repository/micro/programs/build-x86/kernel_offsets.h" \
+	"/workspaces/repository/kprog/x86/build/negative-native/unchecked_packet_read.native.o"
+make[1]: Entering directory '/workspaces/repository/kprog/test'
+make[1]: '/workspaces/repository/kprog/x86/build/negative-native/unchecked_packet_read.native.o' is up to date.
+make[1]: Leaving directory '/workspaces/repository/kprog/test'
+python3 ../run_micro_sim_batch.py --arch x86 --build-only \
+	--build-dir "micro-prog/build/negative" \
+	--native-build-dir "build/negative-native" \
+	--config "../test/kprog_negative_stage2.yaml" \
+	--jobs 1
+unchecked_packet_read: ok: compile=0.154s proof_insns=17 direct_insns= verify=0.000s test=0.000s 
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `unchecked_packet_read` | ok | 0.154 | 17 |  | 0.000 | 0.000 |  |
+python3 ../run_micro_sim_batch.py --arch x86 --build-only \
+	--build-dir "micro-prog/build" \
+	--config "../../micro/config/micro_pure_jit.yaml" \
+	--jobs 2
+running 29 benchmarks with 2 jobs
+simple_packet: ok: compile=0.259s proof_insns=46 direct_insns= verify=0.000s test=0.000s 
+simple: ok: compile=0.328s proof_insns=50 direct_insns= verify=0.000s test=0.000s 
+sorted_rule_binary_search: ok: compile=0.641s proof_insns=240 direct_insns= verify=0.000s test=0.000s 
+bitmap_popcount_scan: ok: compile=2.024s proof_insns=208 direct_insns= verify=0.000s test=0.000s 
+bcc_runqlat_log2_histogram_bucket: ok: compile=2.555s proof_insns=210 direct_insns= verify=0.000s test=0.000s 
+trace_event_type_switch_dispatch: ok: compile=2.011s proof_insns=752 direct_insns= verify=0.000s test=0.000s 
+packet_checksum_fold: ok: compile=1.074s proof_insns=175 direct_insns= verify=0.000s test=0.000s 
+payload_prefix_memcmp_scan: ok: compile=4.346s proof_insns=399 direct_insns= verify=0.000s test=0.000s 
+packet_vlan_tcpopt_parser: ok: compile=5.678s proof_insns=382 direct_insns= verify=0.000s test=0.000s 
+bpf_local_call_fanout_dispatch: compile-fail: compile=9.048s proof_insns= direct_insns= verify=0.000s test=0.000s /workspaces/repository/kprog/x86/micro-prog/bpf_local_call_fanout_dispatch.bpf.c:176:2: error: A call to built-in function 'abort' is not supported. | /workspaces/repository/kprog/x86/micro-prog/bpf_local_call_fanout_dispatch.bpf.c:212:2: error: A call to built-in function 'abort' is not supported.
+flow_5tuple_rss_hash: ok: compile=9.255s proof_insns=375 direct_insns= verify=0.000s test=0.000s 
+cilium_policy_guard_tree_filter: ok: compile=2.122s proof_insns=226 direct_insns= verify=0.000s test=0.000s 
+katran_lb_consistent_hash_select: compile-fail: compile=21.600s proof_insns= direct_insns= verify=0.000s test=0.000s /workspaces/repository/kprog/x86/micro-prog/katran_lb_consistent_hash_select.bpf.c:392:2: error: A call to built-in function 'abort' is not supported. | /workspaces/repository/kprog/x86/micro-prog/katran_lb_consistent_hash_select.bpf.c:293:2: error: A call to built-in function 'abort' is not supported.
+packet_record_bounds_window: ok: compile=2.281s proof_insns=239 direct_insns= verify=0.000s test=0.000s 
+flow_record_field_scan: ok: compile=2.974s proof_insns=298 direct_insns= verify=0.000s test=0.000s 
+packed_header_bitfield_decode: compile-fail: compile=6.514s proof_insns= direct_insns= verify=0.000s test=0.000s /workspaces/repository/kprog/x86/micro-prog/packed_header_bitfield_decode.bpf.c:488:2: error: A call to built-in function 'abort' is not supported. | /workspaces/repository/kprog/x86/micro-prog/packed_header_bitfield_decode.bpf.c:491:2: error: A call to built-in function 'abort' is not supported.
+bpftrace_string_search_prefix_scan: ok: compile=1.866s proof_insns=363 direct_insns= verify=0.000s test=0.000s 
+tracee_syscall_name_table_lookup: ok: compile=3.034s proof_insns=324 direct_insns= verify=0.000s test=0.000s 
+tracee_http_method_prefix_detect: ok: compile=2.743s proof_insns=337 direct_insns= verify=0.000s test=0.000s 
+cilium_socket_lb_service_select: ok: compile=3.125s proof_insns=351 direct_insns= verify=0.000s test=0.000s 
+bcc_tcpconnect_ipv4_tuple_filter: ok: compile=4.390s proof_insns=413 direct_insns= verify=0.000s test=0.000s 
+siphash_rotate64_mixer: ok: compile=47.202s proof_insns=1013 direct_insns= verify=0.000s test=0.000s 
+otel_stack_frame_unwind_scan: ok: compile=1.860s proof_insns=303 direct_insns= verify=0.000s test=0.000s 
+tetragon_process_event_arg_filter: compile-fail: compile=5.668s proof_insns= direct_insns= verify=0.000s test=0.000s /workspaces/repository/kprog/x86/micro-prog/tetragon_process_event_arg_filter.bpf.c:395:2: error: A call to built-in function 'abort' is not supported. | /workspaces/repository/kprog/x86/micro-prog/tetragon_process_event_arg_filter.bpf.c:587:2: error: A call to built-in function 'abort' is not supported.
+cilium_ct_nat_tuple_rewrite: ok: compile=2.886s proof_insns=310 direct_insns= verify=0.000s test=0.000s 
+packet_toeplitz_rss_hash: ok: compile=4.578s proof_insns=347 direct_insns= verify=0.000s test=0.000s 
+tc_packet_checksum_fold: ok: compile=1.551s proof_insns=235 direct_insns= verify=0.000s test=0.000s 
+bpftrace_comm_key_fnv_hash: compile-fail: compile=7.425s proof_insns= direct_insns= verify=0.000s test=0.000s /workspaces/repository/kprog/x86/micro-prog/bpftrace_comm_key_fnv_hash.bpf.c:482:2: error: A call to built-in function 'abort' is not supported. | fatal error: too many errors emitted, stopping now [-ferror-limit=]
+cgroup_skb_hash_chain: ok: compile=3.032s proof_insns=585 direct_insns= verify=0.000s test=0.000s 
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `simple` | ok | 0.328 | 50 |  | 0.000 | 0.000 |  |
+| `simple_packet` | ok | 0.259 | 46 |  | 0.000 | 0.000 |  |
+| `bitmap_popcount_scan` | ok | 2.024 | 208 |  | 0.000 | 0.000 |  |
+| `sorted_rule_binary_search` | ok | 0.641 | 240 |  | 0.000 | 0.000 |  |
+| `bcc_runqlat_log2_histogram_bucket` | ok | 2.555 | 210 |  | 0.000 | 0.000 |  |
+| `trace_event_type_switch_dispatch` | ok | 2.011 | 752 |  | 0.000 | 0.000 |  |
+| `packet_checksum_fold` | ok | 1.074 | 175 |  | 0.000 | 0.000 |  |
+| `payload_prefix_memcmp_scan` | ok | 4.346 | 399 |  | 0.000 | 0.000 |  |
+| `packet_vlan_tcpopt_parser` | ok | 5.678 | 382 |  | 0.000 | 0.000 |  |
+| `bpf_local_call_fanout_dispatch` | compile-fail | 9.048 |  |  | 0.000 | 0.000 | /workspaces/repository/kprog/x86/micro-prog/bpf_local_call_fanout_dispatch.bpf.c:176:2: error: A call to built-in function 'abort' is not supported. \| /workspaces/repository/kprog/x86/micro-prog/bpf_local_call_fanout_dispatch.bpf.c:212:2: error: A call to built-in function 'abort' is not supported. |
+| `flow_5tuple_rss_hash` | ok | 9.255 | 375 |  | 0.000 | 0.000 |  |
+| `katran_lb_consistent_hash_select` | compile-fail | 21.600 |  |  | 0.000 | 0.000 | /workspaces/repository/kprog/x86/micro-prog/katran_lb_consistent_hash_select.bpf.c:392:2: error: A call to built-in function 'abort' is not supported. \| /workspaces/repository/kprog/x86/micro-prog/katran_lb_consistent_hash_select.bpf.c:293:2: error: A call to built-in function 'abort' is not supported. |
+| `cilium_policy_guard_tree_filter` | ok | 2.122 | 226 |  | 0.000 | 0.000 |  |
+| `siphash_rotate64_mixer` | ok | 47.202 | 1013 |  | 0.000 | 0.000 |  |
+| `packet_record_bounds_window` | ok | 2.281 | 239 |  | 0.000 | 0.000 |  |
+| `flow_record_field_scan` | ok | 2.974 | 298 |  | 0.000 | 0.000 |  |
+| `packed_header_bitfield_decode` | compile-fail | 6.514 |  |  | 0.000 | 0.000 | /workspaces/repository/kprog/x86/micro-prog/packed_header_bitfield_decode.bpf.c:488:2: error: A call to built-in function 'abort' is not supported. \| /workspaces/repository/kprog/x86/micro-prog/packed_header_bitfield_decode.bpf.c:491:2: error: A call to built-in function 'abort' is not supported. |
+| `bpftrace_string_search_prefix_scan` | ok | 1.866 | 363 |  | 0.000 | 0.000 |  |
+| `tracee_syscall_name_table_lookup` | ok | 3.034 | 324 |  | 0.000 | 0.000 |  |
+| `tracee_http_method_prefix_detect` | ok | 2.743 | 337 |  | 0.000 | 0.000 |  |
+| `cilium_socket_lb_service_select` | ok | 3.125 | 351 |  | 0.000 | 0.000 |  |
+| `bcc_tcpconnect_ipv4_tuple_filter` | ok | 4.390 | 413 |  | 0.000 | 0.000 |  |
+| `tetragon_process_event_arg_filter` | compile-fail | 5.668 |  |  | 0.000 | 0.000 | /workspaces/repository/kprog/x86/micro-prog/tetragon_process_event_arg_filter.bpf.c:395:2: error: A call to built-in function 'abort' is not supported. \| /workspaces/repository/kprog/x86/micro-prog/tetragon_process_event_arg_filter.bpf.c:587:2: error: A call to built-in function 'abort' is not supported. |
+| `otel_stack_frame_unwind_scan` | ok | 1.860 | 303 |  | 0.000 | 0.000 |  |
+| `cilium_ct_nat_tuple_rewrite` | ok | 2.886 | 310 |  | 0.000 | 0.000 |  |
+| `packet_toeplitz_rss_hash` | ok | 4.578 | 347 |  | 0.000 | 0.000 |  |
+| `bpftrace_comm_key_fnv_hash` | compile-fail | 7.425 |  |  | 0.000 | 0.000 | /workspaces/repository/kprog/x86/micro-prog/bpftrace_comm_key_fnv_hash.bpf.c:482:2: error: A call to built-in function 'abort' is not supported. \| fatal error: too many errors emitted, stopping now [-ferror-limit=] |
+| `tc_packet_checksum_fold` | ok | 1.551 | 235 |  | 0.000 | 0.000 |  |
+| `cgroup_skb_hash_chain` | ok | 3.032 | 585 |  | 0.000 | 0.000 |  |
+make: *** [Makefile:36: micro-proofs-build] Error 1
+make: Leaving directory '/workspaces/repository/kprog/x86'

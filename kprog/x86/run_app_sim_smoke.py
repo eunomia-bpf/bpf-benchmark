@@ -31,15 +31,25 @@ class AppProof:
 
 def run(cmd: list[str], *, cwd: Path = REPO_ROOT,
         timeout_s: int | None = None) -> subprocess.CompletedProcess[str]:
-    result = subprocess.run(
-        cmd,
-        cwd=cwd,
-        check=False,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        timeout=timeout_s,
-    )
+    try:
+        result = subprocess.run(
+            cmd,
+            cwd=cwd,
+            check=False,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=timeout_s,
+        )
+    except subprocess.TimeoutExpired as error:
+        if REPORT_DIR is not None:
+            captured = [part.decode(errors="replace") if isinstance(part, bytes) else part or ""
+                        for part in (error.stdout, error.stderr)]
+            with (REPORT_DIR / "commands.jsonl").open("a", encoding="utf-8") as log:
+                log.write(json.dumps({"command": cmd, "cwd": str(cwd), "returncode": 124,
+                                      "timeout_s": timeout_s,
+                                      "stdout": captured[0], "stderr": captured[1]}) + "\n")
+        raise
     if REPORT_DIR is not None:
         with (REPORT_DIR / "commands.jsonl").open("a", encoding="utf-8") as log:
             log.write(json.dumps({"command": cmd, "cwd": str(cwd),

@@ -1,0 +1,9 @@
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_dispatch.py
+unchanged micro proof sources: 29
+register/memory indirect jumps rejected; direct jump to zero preserved
+timeout retained complete stdout/stderr and propagated failure
+cc -O2 -Wno-c23-extensions -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/vendor/libbpf/include/uapi -DLICENSE=old_license -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/old.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/old.o
+cc -O2 -Wno-c23-extensions -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/vendor/libbpf/include/uapi -DLICENSE=current_license -c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/current.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/current.o
+cc -O2 -Wno-c23-extensions -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/vendor/libbpf/include/uapi /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/main.c /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/native.S /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/old.o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/current.o -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/check
+taskset -c 8-15 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/dispatch-build/check
+old=0 current=10001 native=10001

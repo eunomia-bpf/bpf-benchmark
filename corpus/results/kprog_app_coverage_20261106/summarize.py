@@ -9,14 +9,15 @@ ROOT = Path(__file__).resolve().parent
 totals = collections.defaultdict(collections.Counter)
 causes = collections.Counter()
 rows = []
-for phase in ("baseline", "cilium-baseline"):
+for phase in ("baseline", "cilium-baseline", "unbounded", "cilium-unbounded", "label", "cilium-label"):
     directory = ROOT / phase
+    group = phase.removeprefix("cilium-")
     for line in (directory / "programs.jsonl").read_text().splitlines():
         record = json.loads(line)
         if record["stage"] != "generate":
             continue
         app = Path(record["proof"]).parent.name
-        counts = totals[app]
+        counts = totals[(group, app)]
         counts["total"] += 1
         counts["generated"] += record["ok"]
         status, cause = "generation-failed", record["note"]
@@ -63,18 +64,22 @@ for phase in ("baseline", "cilium-baseline"):
                                 cause = result["stderr"].strip().splitlines()[0]
         counts[status] += 1
         if cause:
-            causes[(status, cause)] += 1
+            causes[(group, status, cause)] += 1
         rows.append((app, record["name"], phase, status, cause))
 with (ROOT / "coverage.csv").open("w") as output:
-    writer = csv.writer(output)
+    writer = csv.writer(output, lineterminator="\n")
     writer.writerow(("app", "artifact", "phase", "status", "cause"))
     writer.writerows(rows)
-lines = ["| Application | Native artifacts | Generated | Compile done | Compiled | Artifact accepted | Verifier rejected | Load preparation failed |",
-         "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
-for app, c in sorted(totals.items()):
-    lines.append(f"| {app} | " + " | ".join(str(c[k]) for k in
-                 ("total", "generated", "compile-done", "compiled", "accepted", "rejected", "load-failed")) + " |")
+lines = ["| Phase | Application | Available artifacts | Generation attempted | Generated | Compile done | Compiled | Artifact accepted | Verifier rejected | Load preparation failed |",
+         "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
+apps = sorted(app for group, app in totals if group == "baseline")
+for group in ("baseline", "unbounded", "label"):
+    for app in apps:
+        c = totals[(group, app)]
+        available = totals[("baseline", app)]["total"]
+        lines.append(f"| {group} | {app} | {available} | " + " | ".join(str(c[k]) for k in
+                     ("total", "generated", "compile-done", "compiled", "accepted", "rejected", "load-failed")) + " |")
 lines.extend(("", "Failure causes at this checkpoint:", ""))
-for (stage, cause), count in causes.most_common():
-    lines.append(f"- {count} × {stage}: `{cause}`")
+for (group, stage, cause), count in causes.most_common():
+    lines.append(f"- {count} × {group}/{stage}: `{cause}`")
 (ROOT / "tables.md").write_text("\n".join(lines) + "\n")

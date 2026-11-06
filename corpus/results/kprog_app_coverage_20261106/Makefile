@@ -1,8 +1,16 @@
 ROOT := /workspaces/repository
 HERE := $(ROOT)/corpus/results/kprog_app_coverage_20261106
 PHASE ?= baseline
+DISPATCH := $(HERE)/dispatch-build
+HOST_FLAGS := -O2 -Wno-c23-extensions -I$(ROOT)/vendor/libbpf/src -I$(ROOT)/vendor/libbpf/include/uapi
 
-.PHONY: compile verify guest-verify summarize
+.PHONY: compile verify guest-verify summarize dispatch-regression
+dispatch-regression:
+	python3 $(HERE)/check_dispatch.py $(GENERATOR)
+	cc $(HOST_FLAGS) -DLICENSE=old_license -c $(DISPATCH)/old.c -o $(DISPATCH)/old.o
+	cc $(HOST_FLAGS) -DLICENSE=current_license -c $(DISPATCH)/current.c -o $(DISPATCH)/current.o
+	cc $(HOST_FLAGS) $(DISPATCH)/main.c $(DISPATCH)/native.S $(DISPATCH)/old.o $(DISPATCH)/current.o -o $(DISPATCH)/check
+	taskset -c 8-15 $(DISPATCH)/check
 summarize:
 	python3 $(HERE)/summarize.py
 

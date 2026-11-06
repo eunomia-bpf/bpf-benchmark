@@ -1,0 +1,6 @@
+{
+  "identical_generated_sources": 82,
+  "evidence_from": "cilium-unbounded",
+  "new_loads": 0,
+  "reason": "All 82 generated C sources match exactly; all earlier Cilium compilation/loading finished before the later shared CMOV edit. The compiled artifacts and raw logs are reused, not presented as repeated execution."
+}

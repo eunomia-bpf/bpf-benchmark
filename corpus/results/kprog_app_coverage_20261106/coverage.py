@@ -2,17 +2,26 @@
 import concurrent.futures
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[3]
 
 
+def returncode(path):
+    with path.open() as stream:
+        match = re.search(r'"returncode": (-?\d+)', stream.read(16384))
+    if match is None:
+        raise ValueError(f"missing command returncode: {path}")
+    return int(match[1])
+
+
 def compile_one(row, directory):
     source = Path(row["source"])
     build = directory / "objects"
     build.mkdir(exist_ok=True)
-    command = ["clang", "-O2", "-target", "bpf", "-mllvm", "-bpf-stack-size=4096",
+    command = ["clang", "-O2", "-Wno-c23-extensions", "-target", "bpf", "-mllvm", "-bpf-stack-size=4096",
                "-D__TARGET_ARCH_x86", "-I", str(ROOT / "vendor/libbpf/include/uapi"),
                "-I", str(ROOT / "vendor/libbpf/src"), "-I", "/usr/include/x86_64-linux-gnu",
                "-I", str(ROOT / "kprog/x86/micro-prog"), "-c", str(source),
@@ -23,7 +32,7 @@ def compile_one(row, directory):
 def execute(row, directory, stage, command, timeout):
     log = directory / stage / (row["name"] + ".json")
     if log.exists():
-        return json.loads(log.read_text())
+        return {"name": row["name"], "returncode": returncode(log)}
     try:
         result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True,
                                 timeout=timeout, check=False)
@@ -62,11 +71,11 @@ def main():
         worker, jobs = compile_one, 6
     elif stage == "verify":
         worker, jobs = verify_one, 2
-        completed = {p.stem: json.loads(p.read_text())
+        completed = {p.stem: returncode(p)
                      for p in (directory / "compile").glob("*.json")}
         print(f"compile pending: {len(rows) - len(completed)}", flush=True)
         rows = [row for row in rows if row["name"] in completed
-                and completed[row["name"]]["returncode"] == 0]
+                and completed[row["name"]] == 0]
     else:
         raise ValueError(stage)
     failures = 0
