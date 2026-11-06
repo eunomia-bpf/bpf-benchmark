@@ -18,7 +18,7 @@ routing tables; they are **not yet a full simulator-step refinement theorem**.
 The ISA reference lives in `KProgFormal/Reference/`; it imports no simulator
 contracts. The step refinements in `Refinement/` connect CMOV, BT, BZHI,
 ANDN and register/immediate/memory PUSH/POP handlers to that reference, including registers,
-flags, XMM0, memory, PC and ordered access/fault effects. The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary and logical-register
+flags, XMM0, memory, PC and ordered access/fault effects. The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary, logical-register and MOVK
 families connect through their modules in `Refinement/`, including native
 aliases, all raw NZCV predicates, ZR/SP separation, legal extract immediates,
 shifted source modifiers, exact NZCV updates and W zero-extension.

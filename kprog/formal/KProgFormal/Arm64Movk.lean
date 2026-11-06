@@ -1,4 +1,5 @@
 import KProgFormal.Generated.GeneratedArm64Movk
+import KProgFormal.Reference.AArch64
 import KProgFormal.Generated.GeneratedArm64Width
 import Std.Tactic.BVDecide
 
@@ -11,16 +12,14 @@ every bit outside the 16-bit column and takes the low 16 bits of the immediate
 at that column. The inserted term is stated as the narrowed immediate shifted
 into place, structurally separate from the generated masked-shift term. -/
 def arm64MovkValueSpec (shift : MovkShift) (dst imm : BitVec 64) : BitVec 64 :=
-  let s := column shift
-  (dst &&& ~~~((0xffff : BitVec 64) <<< s)) |||
-    (((imm &&& 0xffff) : BitVec 64) <<< s)
+  Reference.AArch64.moveKeepRaw (column shift) dst imm
 
 /-- The generated MOVK contract agrees with the independent insertion statement
 for all four architectural columns. -/
 theorem arm64_movk_refines (shift : MovkShift) (dst imm : BitVec 64) :
     value shift dst imm = arm64MovkValueSpec shift dst imm := by
   cases shift <;>
-    simp only [value, arm64MovkValueSpec, column] <;>
+    simp only [value, arm64MovkValueSpec, Reference.AArch64.moveKeepRaw, column] <;>
     bv_decide
 
 /-- C hands the MOVK result to the width-narrowing register write; narrowing

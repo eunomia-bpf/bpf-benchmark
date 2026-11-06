@@ -177,6 +177,26 @@ def main():
         if nzcv is not None:
             expected["flags"] = (expected["flags"] & ~0xF0000000) | nzcv
         cases.append((request, expected))
+    # MOVK retains every other halfword; W writes additionally clear high32.
+    for word, dst, result in [
+            (0x72824680, 0, 0x76541234),
+            (0x72A24680, 0, 0x12343210),
+            (0xF2824680, 0, 0xFEDCBA9876541234),
+            (0xF2A24680, 0, 0xFEDCBA9812343210),
+            (0xF2C24680, 0, 0xFEDC123476543210),
+            (0xF2E24680, 0, 0x1234BA9876543210),
+            (0xF2E00000, 0, 0xBA9876543210),
+            (0x72BFFFE0, 0, 0xFFFF3210),
+            (0xF2FFFFFF, None, None),
+            (0xF2C2469E, 30, 0xFEDC123476543210)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["registers"][0 if dst is None else dst] = 0xFEDCBA9876543210
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
+        if dst is not None:
+            expected["registers"][dst] = result
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -185,7 +205,8 @@ def main():
     for (request, expected), out in zip(cases, outputs):
         assert out == expected, (request, out, expected)
     for word in (0x2A2183E0, 0x4BC107E0, 0x4B2107E0, 0x6B0107E0,
-                 0x1AE22020, 0x53207C20, 0x131FFC20, 0x0A028020, 0x6A228020):
+                 0x1AE22020, 0x53207C20, 0x131FFC20, 0x0A028020, 0x6A228020,
+                 0x72C24680, 0x72E24680, 0x72024680):
         request = copy.deepcopy(base)
         request["native_bytes"] = list(word.to_bytes(4, "little"))
         rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
@@ -216,7 +237,7 @@ def main():
     nv = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "nv"), "csel x0,x1,x2,nv")
     al = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "al"), "csel x0,x1,x2,al")
     assert encoder.encode(nv, {}, {}) == encoder.encode(al, {}, {})
-    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":

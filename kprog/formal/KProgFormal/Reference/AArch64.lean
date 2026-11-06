@@ -241,10 +241,29 @@ def logicStep (i : LogicInstruction) (s : State) : Transition State :=
   let flags := if i.op.setFlags then logicFlags i.width result s.flags else s.flags
   ⟨{ writeReg s i.dst result with flags := flags, pc := s.pc + 4 }, [], none⟩
 
+/-- Replace one halfword, using a library truncation for the immediate. This
+raw primitive also gives the pre-existing wider-immediate contracts a common
+specification; native decoding restricts both the column and immediate. -/
+def moveKeepRaw (column : Nat) (dst immediate : Word) : Word :=
+  let mask : Word := 0xffff <<< column
+  (dst &&& ~~~mask) ||| ((immediate.setWidth 16).setWidth 64 <<< column)
+
+structure KeepInstruction where
+  width : Width
+  column : Fin (width.bits / 16)
+  immediate : BitVec 16
+  dst : Register
+  deriving DecidableEq, Repr
+
+def keepStep (i : KeepInstruction) (s : State) : Transition State :=
+  let result := moveKeepRaw (16 * i.column.val) (readReg s i.dst) (i.immediate.setWidth 64)
+  ⟨{ writeReg s i.dst (narrow result i.width) with pc := s.pc + 4 }, [], none⟩
+
 inductive Instruction
   | mul (instruction : MulInstruction)
   | shift (instruction : ShiftInstruction)
   | logic (instruction : LogicInstruction)
+  | keep (instruction : KeepInstruction)
   | extrev (instruction : ExtrevInstruction)
   | select (width : Width) (alternative : SelectElse) (dst lhs rhs : Register) (predicate : Fin 16)
   deriving DecidableEq, Repr
@@ -254,6 +273,7 @@ def step (i : Instruction) (s : State) : Transition State :=
   | .mul instruction => mulStep instruction s
   | .shift instruction => shiftStep instruction s
   | .logic instruction => logicStep instruction s
+  | .keep instruction => keepStep instruction s
   | .extrev instruction => extrevStep instruction s
   | .select width alternative dst lhs rhs predicate =>
       let value := selectValue width alternative (condition s.flags predicate) (readReg s lhs) (readReg s rhs)
@@ -274,6 +294,11 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   let lhs := register (word / 2^5)
   let rhs := register (word / 2^16)
   let addend := register (word / 2^10)
+  if word &&& 0x7f800000 = 0x72800000 then
+    let column := (word / 2^21) % 4
+    if h : column < width.bits / 16 then
+      return .keep ⟨width, ⟨column, h⟩, BitVec.ofNat 16 (word / 2^5), dst⟩
+    else throw "reserved MOVK halfword column"
   let shiftKind := match (word / 2^22) % 4 with
     | 0 => ShiftKind.lsl | 1 => .lsr | 2 => .asr | _ => .ror
   let amount := (word / 2^10) % 64
