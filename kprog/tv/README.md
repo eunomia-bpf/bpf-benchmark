@@ -85,6 +85,14 @@ The object keeps map FDs alive through the bound load. Supplying both raw proof
 instructions and a manifest proof fails. Substituting original app BPF for the
 simulator would not meet the translation-validation obligation.
 
+Raw proof instructions from a separately loaded object also have their map FD
+operands linked to original-program identities before sealing. Names and map
+type/key/value/entry-count must match unambiguously; imported FDs are retained
+through the bound load and shared across repeated references. A second object
+with identical declarations cannot authorize a second map's state. On x86,
+native chunks and their tails may have arbitrary byte lengths; only AArch64
+requires word alignment.
+
 Bound programs must contain exactly their ordered native group followed by
 EXIT. The kernel checks this before proof expansion and again at JIT emission;
 surrounding BPF spills, helpers or subprograms cannot share native scratch.

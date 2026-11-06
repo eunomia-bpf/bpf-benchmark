@@ -109,3 +109,12 @@ valid helper or changing its zero literal rejects the load. The full existing
 identity, frame, helper/map and large-proof suites also pass. C/A can use this
 interface for bounded helper tables; matching table selection to native control
 flow remains part of the per-program translation certificate.
+
+`raw-proof-map-relink-final-x86.status` is 0. The runner's separate proof load
+previously created different maps from the original/native program. The shared
+loader now links raw proof FD operands to the original maps. A regression uses
+an identically named second map holding 13 and an original holding 2: native
+execution returns 2 and the bound program retains only the original map ID.
+A wrong value-size declaration rejects at the loader. This corrects the map
+identity failure behind R's stage2 rejections; the reported odd x86 chunk tail
+was legal, and the diagnostic now limits word-alignment checks to AArch64.

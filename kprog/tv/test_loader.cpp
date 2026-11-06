@@ -47,6 +47,11 @@ int main()
     };
     auto hash = map;
     hash[0].imm = hash_fd;
+    int separate_map = bpf_map_create(BPF_MAP_TYPE_ARRAY, "tv_map", 4, 4, 1, nullptr);
+    int separate_value = 13;
+    if (separate_map < 0 || bpf_map_update_elem(separate_map, &key, &separate_value, BPF_ANY)) {
+        std::perror("separate simulator map"); return 1;
+    }
     try {
         for (const char *symbol : {"tv_short_entry", "tv_long_entry", "tv_helper_entry", "tv_map_entry", "tv_hash_entry", "tv_large_entry"}) {
             const auto &proof = std::string(symbol) == "tv_helper_entry" ? helper :
@@ -99,6 +104,37 @@ int main()
                 }
                 assert(rejected);
                 std::puts("different valid kernel helper target: PASS (rejected)");
+            }
+            if (std::string(symbol) == "tv_map_entry") {
+                options.proof_insns[0].imm = separate_map;
+                auto paired = native_loader::load_from_fd(options);
+                if (bpf_prog_test_run_opts(paired.prog_fd, &run)) return 1;
+                assert(run.retval == 2);
+                uint32_t ids[2]{};
+                bpf_prog_info info{};
+                info.nr_map_ids = 2; info.map_ids = reinterpret_cast<uintptr_t>(ids);
+                uint32_t length = sizeof(info);
+                if (bpf_obj_get_info_by_fd(paired.prog_fd, &info, &length)) return 1;
+                bpf_map_info original_map{};
+                length = sizeof(original_map);
+                if (bpf_obj_get_info_by_fd(map_fd, &original_map, &length)) return 1;
+                assert(info.nr_map_ids == 1 && ids[0] == original_map.id);
+                native_loader::close_loaded_program(&paired);
+                std::puts("separately loaded proof map relinked to original: PASS");
+                int wrong_shape = bpf_map_create(BPF_MAP_TYPE_ARRAY, "tv_map", 4, 8, 1, nullptr);
+                if (wrong_shape < 0) return 1;
+                options.proof_insns[0].imm = wrong_shape;
+                bool rejected = false;
+                try {
+                    auto wrong = native_loader::load_from_fd(options);
+                    native_loader::close_loaded_program(&wrong);
+                } catch (const std::exception &error) {
+                    assert(std::string(error.what()).find("raw proof map layout differs from original program:") != std::string::npos);
+                    rejected = true;
+                }
+                assert(rejected);
+                if (close(wrong_shape)) return 1;
+                std::puts("separate proof map layout mismatch: PASS (rejected)");
             }
             if (std::string(symbol) == "tv_helper_entry" || std::string(symbol) == "tv_map_entry" || std::string(symbol) == "tv_hash_entry") {
                 const char *entry = std::string(symbol) == "tv_map_entry" ? "tv_proof_map" :
@@ -159,7 +195,7 @@ int main()
         std::fprintf(stderr, "shared loader: %s\n", error.what());
         return 1;
     }
-    if (close(map_fd) || close(hash_fd)) {
+    if (close(map_fd) || close(hash_fd) || close(separate_map)) {
         std::perror("close fixture map");
         return 1;
     }

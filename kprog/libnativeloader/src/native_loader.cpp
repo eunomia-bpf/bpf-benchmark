@@ -816,6 +816,7 @@ std::string native_blob_diagnostics(const std::vector<uint8_t> &blob,
             }
             chunk_range_bad++;
         }
+#if defined(__aarch64__)
         if ((chunk.offset % sizeof(uint32_t)) != 0 ||
             (chunk.len % sizeof(uint32_t)) != 0) {
             if (first_unaligned_chunk == std::numeric_limits<size_t>::max()) {
@@ -823,6 +824,7 @@ std::string native_blob_diagnostics(const std::vector<uint8_t> &blob,
             }
             chunk_alignment_bad++;
         }
+#endif
         if (chunk.len == 0 || chunk.len > kNativeLabTarget.chunk_bytes) {
             if (first_bad_length_chunk == std::numeric_limits<size_t>::max()) {
                 first_bad_length_chunk = i;
@@ -4673,6 +4675,53 @@ std::vector<int> reopen_relocated_map_fds(const std::vector<uint32_t> &map_ids)
 
 using SimulatorObject = std::unique_ptr<bpf_object, decltype(&bpf_object__close)>;
 
+/* Raw proof callers may have loaded the compiler object separately. Its maps
+ * are not the application's maps, even when names and shapes are identical.
+ * Relink those FD operands to the original program before sealing the proof.
+ */
+void bind_raw_proof_maps(std::vector<bpf_insn> &proof, const CompanionLoad &companion,
+    std::vector<std::unique_ptr<ScopedFd>> &pins)
+{
+    std::unordered_map<uint32_t, int> replacements;
+    for (size_t index = 0; index < proof.size(); index++) {
+        bpf_insn &insn = proof[index];
+        if (insn.code != (BPF_LD | BPF_DW | BPF_IMM)) continue;
+        if (index + 1 >= proof.size()) fail("raw proof has a truncated wide immediate");
+        if (insn.src_reg == BPF_PSEUDO_MAP_FD || insn.src_reg == BPF_PSEUDO_MAP_VALUE) {
+            const bpf_map_info actual = load_map_info(insn.imm);
+            const std::string name(actual.name, strnlen(actual.name, sizeof(actual.name)));
+            const MapMeta *selected = nullptr;
+            for (const MapMeta &source : companion.maps) {
+                if (source.kernel_id == actual.id) { selected = &source; break; }
+                if (source.name != name) continue;
+                if (selected && selected->kernel_id != source.kernel_id)
+                    fail("raw proof map name has ambiguous original identities: " + name);
+                selected = &source;
+            }
+            if (!selected)
+                fail("raw proof map has no original-program identity: " + name);
+            if (actual.type != static_cast<uint32_t>(selected->type) ||
+                actual.key_size != selected->key_size || actual.value_size != selected->value_size ||
+                actual.max_entries != selected->max_entries)
+                fail("raw proof map layout differs from original program: " + name);
+            if (actual.id != selected->kernel_id) {
+                const auto existing = replacements.find(selected->kernel_id);
+                if (existing != replacements.end()) {
+                    insn.imm = existing->second;
+                    index++;
+                    continue;
+                }
+                auto fd = std::make_unique<ScopedFd>(bpf_map_get_fd_by_id(selected->kernel_id));
+                if (fd->get() < 0) fail("open original proof map " + name + ": " + std::strerror(errno));
+                insn.imm = fd->get();
+                replacements.emplace(selected->kernel_id, fd->get());
+                pins.push_back(std::move(fd));
+            }
+        }
+        index++;
+    }
+}
+
 SimulatorObject prepare_simulator_proof(
     const std::filesystem::path &path, const std::string &entry,
     const bpf_prog_info &original, const CompanionLoad &companion,
@@ -4884,12 +4933,15 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             source_insns.size(),
             std::move(map_rules));
     SimulatorObject simulator_object(nullptr, bpf_object__close);
+    std::vector<std::unique_ptr<ScopedFd>> proof_map_fds;
     if (!simulator_object_path.empty()) {
         if (!proof_insns.empty()) {
             fail("simulator proof supplied both as raw instructions and manifest object");
         }
         simulator_object = prepare_simulator_proof(simulator_object_path,
             simulator_program, prog_info, companion, proof_insns);
+    } else {
+        bind_raw_proof_maps(proof_insns, companion, proof_map_fds);
     }
     const auto native_data_symbols_start = std::chrono::steady_clock::now();
     {
