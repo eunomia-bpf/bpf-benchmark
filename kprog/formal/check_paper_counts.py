@@ -5144,9 +5144,12 @@ def oracle_sizes(text: str) -> list[str]:
             cwd=str(here), capture_output=True)
         if rc.returncode != 0:
             continue
-        run = subprocess.run([str(out)], cwd=str(here), capture_output=True,
-                             text=True, timeout=120)
-        out.unlink(missing_ok=True)
+        try:
+            run = subprocess.run([str(out)], cwd=str(here),
+                                 capture_output=True, text=True, timeout=120)
+        finally:
+            # A host that hangs or crashes must not leave its probe behind.
+            out.unlink(missing_ok=True)
         for m in re.findall(r"\((\d+) cases\)", run.stdout):
             printed.add(int(m))
     out = []

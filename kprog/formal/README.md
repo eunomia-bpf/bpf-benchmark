@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0990 - a check left its own artefact in the tree
+
+The check that builds every host to read its case count left one probe binary
+behind. A host that hangs or exits abnormally skips the line that removes its
+binary, and the file then sits in the tree as an untracked artefact of a check
+rather than of the code.
+
+The removal is in a finally block now, so it happens however the run ends.
+Verified by re-running the check and finding no probe left.
+
+This is the same class as the core files an earlier step added to the ignore
+list: a check that runs a program leaves what the program leaves. The difference
+is that a probe is written by the check and can be removed by it, where a core
+is written by the kernel.
+
+Census unchanged; one leak in a check is closed.
+
 ### Step 0989 - the binding was a pattern, not a literal
 
 The section states that seventy-seven theorems close over a generated table and
