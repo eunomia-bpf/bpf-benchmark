@@ -188,7 +188,7 @@ static unsigned long stack_arena_base;
 			(MO)->lanes[DST] = (IMM);                     \
 			(MO)->tags[DST] = X86_SIM_TAG_SCALAR;         \
 		} else if (__mo_w == X86_WIDTH_64 &&                   \
-			   __mo_src == X86_RSP) {                      \
+			   __mo_src == X86_RSP && (DST) != X86_RSP) {                      \
 			unsigned long __mo_idx =                      \
 				(unsigned long)(unsigned int)(        \
 					(long)__mo_src_v +            \
@@ -472,7 +472,7 @@ int main(void)
 		0x0000000000000000ULL, 0x0000000000000020ULL,
 		0xffffffffffffffe8ULL, 0xfffffff000000000ULL,
 	};
-	static const unsigned dst_regs[2] = { X86_R9, X86_R10 };
+	static const unsigned dst_regs[3] = { X86_R9, X86_R10, X86_RSP };
 	unsigned s;
 	unsigned w;
 	unsigned m;
@@ -485,7 +485,7 @@ int main(void)
 	for (s = 0; s < 3U; s++)
 		for (w = 0; w < 5U; w++)
 			for (m = 0; m < 4U; m++)
-				for (d = 0; d < 2U; d++)
+				for (d = 0; d < 3U; d++)
 					for (f = 0; f < 2U; f++)
 						for (i = 0; i < 4U; i++) {
 							/* The stack arm's arena index
@@ -526,16 +526,16 @@ int main(void)
 	 * the whole window inside the frame at every mode and width. */
 	for (w = 0; w < 5U; w++)
 		for (m = 0; m < 4U; m++)
-			for (d = 0; d < 2U; d++)
+			for (d = 0; d < 3U; d++)
 				for (f = 0; f < 2U; f++)
 					for (i = 0; i < sizeof(stack_imms) /
 							    sizeof(stack_imms[0]); i++)
 						check_lea(1U, width_codes[w], modes[m],
 							  stack_imms[i], dst_regs[d], f);
 
-	if (cases != 32369UL) {
+	if (cases != 48553UL) {
 		printf("x86 lea route host cross-check: case-count drift "
-		       "(got %lu want %lu)\n", cases, 32369UL);
+		       "(got %lu want %lu)\n", cases, 48553UL);
 		return 1;
 	}
 	if (failures == 0)

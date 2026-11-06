@@ -9,5 +9,9 @@
   "tag": {
     "op": "copy",
     "source": "src"
+  },
+  "stack_reference": {
+    "source_rsp": true,
+    "destination_rsp": false
   }
 }

@@ -776,3 +776,61 @@ and their generated source/proof objects. The
 [formal input and complete logs](raw-formal-artifacts.tar.gz) preserve both
 formal outcomes. The actual upstream BCC startup on an isolated runtime image
 is the next test; no application timing request has been added.
+
+## LEA stack-pointer destination
+
+`LEA RSP,[RSP+offset]` now preserves the relative RSP representation consumed
+by stack memory operations. The previous source-RSP arm materialized a private
+arena pointer for every destination, including RSP itself; the next stack
+operation interpreted that pointer as an offset. The existing pointer-add
+JSON contract now generates the destination-sensitive selector for both C and
+Lean. The full LEA refinement covers both destination classes, and a theorem
+shows the RSP result is independent of the private arena base. This repairs
+that representation bug; numeric entry-SP, flags and source/body frame
+correspondence remain active work.
+
+The retained before/after host case reports the old arena pointer versus the
+required offset-16, then checks a stack store/load and balanced final RSP.
+Actual native and generation-bound KVM execution both return42, generation1.
+The readonly/frame positives and actual unsafe-frame verifier rejection still
+pass. The LEA route oracle now covers48,553 cases, retaining its original
+32,369 cases and adding RSP destinations.
+
+The isolated full formal check passes on revision178e6e84e plus the seven LEA
+contract/implementation/oracle files. All29 workload-derived micro proofs and
+the negative artifact compile against copied source and the changed header,
+including siphash. Initial missing-header snapshot failures are retained.
+The shared generated micro files and caches were not modified by these checks.
+The fresh BCC phase8 again generates/compiles25/25, accepts23, and retains the
+same two loader-configured map preparation failures, with no verifier rejects.
+The complete1136-artifact census remains429 generated/707 recorded failures;
+coverage readers now also consume the raw JSON records compressed during
+coordinated disk cleanup, preserving their previous outcomes.
+
+Reproduce the focused checks with `make -f
+corpus/results/kprog_app_coverage_20261106/Makefile sp-lea-prepare sp-lea-host
+raw-context-kvm`. The full-check export, original native assembly, before/after
+observations, all compiler/verifier logs and raw proof/native objects are in
+[LEA evidence](sp-lea-artifacts.tar.gz).
+
+## Frozen runtime packaging
+
+The separate `paired-runtime` image target packages lane T's immutable
+context-v2 x86 kernel, stock module tree and15 custom modules, plus the
+context-aware shim/loader. All15 modules pass actual KVM insertion together;
+this avoids the duplicate-BTF failure observed when shared kernel/module
+outputs moved during other builds. The `verified-bcc` final image stage adds
+the BCC proof manifest while preserving the existing upstream app binaries.
+
+Three attempted BCC corpus setups retain their full raw logs. The first filled
+the guest's Docker scratch tmpfs; the second ingested the image but exhausted
+`/tmp` while extracting the stock module tree. The third used private
+disk-backed `/var/tmp`, `/tmp` and `/lib/modules`, then was stopped during
+installation to release virtme's shared QMP3636 port for lane R. The caller
+now uses taskset without `--pin`, so it does not reserve that port. No BCC
+workload began in these attempts; no app success or timing request follows.
+Only C's interrupted scratch disk was removed; logs and the image are retained.
+[Installation evidence](runtime-install-artifacts.tar.gz) preserves the commands,
+errors, package manifests, file hashes and successful15-module insertion log.
+The paired image can be built with `make -f
+corpus/results/kprog_app_coverage_20261106/Makefile paired-runtime-image`.

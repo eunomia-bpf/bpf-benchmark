@@ -1,6 +1,7 @@
 """Summarize raw artifact records; this is experiment analysis, not runner code."""
 import collections
 import csv
+import gzip
 import json
 from pathlib import Path
 import re
@@ -9,7 +10,7 @@ ROOT = Path(__file__).resolve().parent
 totals = collections.defaultdict(collections.Counter)
 causes = collections.Counter()
 rows = []
-for phase in ("baseline", "cilium-baseline", "unbounded", "cilium-unbounded", "label", "cilium-label", "finite", "defined-final", "helper-effects", "arithmetic", "raw-entry-census"):
+for phase in ("baseline", "cilium-baseline", "unbounded", "cilium-unbounded", "label", "cilium-label", "finite", "defined-final", "helper-effects", "arithmetic", "raw-entry-census", "sp-lea-census"):
     directory = ROOT / phase
     group = phase.removeprefix("cilium-")
     for line in (directory / "programs.jsonl").read_text().splitlines():
@@ -24,11 +25,13 @@ for phase in ("baseline", "cilium-baseline", "unbounded", "cilium-unbounded", "l
         if record["ok"]:
             compiled = directory / "compile" / (record["name"] + ".json")
             status, cause = "compile-pending", ""
+            if not compiled.exists() and compiled.with_suffix(".json.gz").exists():
+                compiled = compiled.with_suffix(".json.gz")
             if compiled.exists():
                 # Early compiler records contain hundreds of MB of repeated
                 # label warnings. Read the status prefix and diagnostic tail;
                 # the complete JSON remains archived as raw evidence.
-                with compiled.open() as stream:
+                with (gzip.open(compiled,"rt") if compiled.suffix==".gz" else compiled.open()) as stream:
                     prefix = stream.read(16384)
                     stream.seek(0, 2)
                     stream.seek(max(0, stream.tell() - 16384))
@@ -76,7 +79,7 @@ with (ROOT / "coverage.csv").open("w") as output:
 lines = ["| Phase | Application | Available artifacts | Generation attempted | Generated | Compile done | Compiled | Artifact accepted | Verifier rejected | Load preparation failed |",
          "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
 apps = sorted(app for group, app in totals if group == "baseline")
-for group in ("baseline", "unbounded", "label", "finite", "defined-final", "helper-effects", "arithmetic", "raw-entry-census"):
+for group in ("baseline", "unbounded", "label", "finite", "defined-final", "helper-effects", "arithmetic", "raw-entry-census", "sp-lea-census"):
     for app in apps:
         c = totals[(group, app)]
         available = totals[("baseline", app)]["total"]

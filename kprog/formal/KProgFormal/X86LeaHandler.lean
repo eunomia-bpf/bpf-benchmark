@@ -57,13 +57,14 @@ narrower paths truncate the summed pointer through the partial-register
 writeback. -/
 def generatedX86LeaStep (state : X86LeaState) (src : X86LeaSrc)
     (rawImm : BitVec 64) (isRodata : Bool) (width : X86Width)
-    (hasIndex : Bool) (scale index stackBase : BitVec 64) : X86LeaState :=
+    (hasIndex : Bool) (scale index stackBase : BitVec 64)
+    (dstIsRsp : Bool := false) : X86LeaState :=
   let off := GeneratedX86MemOffset.value hasIndex scale rawImm index
   match width with
   | .w64 =>
       if src.isNone && isRodata then
         { dst := generatedX86RegWrite state.dst rawImm .w64 }
-      else if src.isRsp then
+      else if GeneratedPtrAdd.stackReference src.isRsp dstIsRsp then
         generatedX86LeaPointerWrite state (stackBase + src.bits) off
           Tag.stack
       else
@@ -76,13 +77,14 @@ def generatedX86LeaStep (state : X86LeaState) (src : X86LeaSrc)
 the shared dedicated contract, and the three exits are stated separately. -/
 def x86LeaStepSpec (state : X86LeaState) (src : X86LeaSrc)
     (rawImm : BitVec 64) (isRodata : Bool) (width : X86Width)
-    (hasIndex : Bool) (scale index stackBase : BitVec 64) : X86LeaState :=
+    (hasIndex : Bool) (scale index stackBase : BitVec 64)
+    (dstIsRsp : Bool := false) : X86LeaState :=
   let off := GeneratedX86MemOffset.valueSpec hasIndex scale rawImm index
   match width with
   | .w64 =>
       if src.isNone && isRodata then
         { dst := x86RegWriteSpec state.dst rawImm .w64 }
-      else if src.isRsp then
+      else if src.isRsp && !dstIsRsp then
         x86LeaPointerWriteSpec state (stackBase + src.bits) off Tag.stack
       else
         x86LeaPointerWriteSpec state src.bits off src.tag
@@ -96,13 +98,14 @@ narrow-width exit both scalarize through the partial-register writeback; only
 the 64-bit pointer exits carry provenance. -/
 theorem x86_lea_step_refines (state : X86LeaState) (src : X86LeaSrc)
     (rawImm : BitVec 64) (isRodata : Bool) (width : X86Width)
-    (hasIndex : Bool) (scale index stackBase : BitVec 64) :
+    (hasIndex : Bool) (scale index stackBase : BitVec 64) (dstIsRsp : Bool := false) :
     generatedX86LeaStep state src rawImm isRodata width hasIndex scale index
-        stackBase =
+        stackBase dstIsRsp =
       x86LeaStepSpec state src rawImm isRodata width hasIndex scale index
-        stackBase := by
+        stackBase dstIsRsp := by
   unfold generatedX86LeaStep x86LeaStepSpec
-  cases width <;> cases src.isNone <;> cases isRodata <;> cases src.isRsp <;>
+  unfold GeneratedPtrAdd.stackReference
+  cases dstIsRsp <;> cases width <;> cases src.isNone <;> cases isRodata <;> cases src.isRsp <;>
     simp only [GeneratedPtrAdd.bits, GeneratedPtrAdd.tag,
       x86_mem_offset_refines, x86_lea_pointer_write_refines,
       x86_reg_write_refines]
@@ -200,5 +203,17 @@ theorem x86_lea_w32_example :
       0x0000000000000010 false .w32 false 0 0 0 =
       { dst := { bits := 0x0000000000001010, tag := .scalar } } := by
   native_decide
+
+/-- An RSP destination retains its relative-frame offset rather than acquiring
+an arena reference. This is invariant under the chosen private arena base. -/
+theorem x86_lea_rsp_destination (state : X86LeaState)
+    (offset disp stackBase : BitVec 64) :
+    generatedX86LeaStep state
+      { bits := offset, tag := .scalar, isNone := false, isRsp := true }
+      disp false .w64 false 0 0 stackBase true =
+      { dst := { bits := offset + disp, tag := .scalar } } := by
+  simp [generatedX86LeaStep, GeneratedPtrAdd.stackReference,
+    GeneratedX86MemOffset.value, generatedX86LeaPointerWrite,
+    GeneratedPtrAdd.bits, GeneratedPtrAdd.tag]
 
 end KProgFormal

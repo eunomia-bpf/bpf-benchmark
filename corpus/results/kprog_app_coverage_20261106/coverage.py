@@ -1,6 +1,7 @@
 """Reproduce this coverage experiment; each case retains its complete log."""
 import concurrent.futures
 import json
+import gzip
 import os
 from pathlib import Path
 import re
@@ -10,8 +11,16 @@ import sys
 ROOT = Path(__file__).resolve().parents[3]
 
 
+def record_path(path):
+    if path.exists() or path.suffix=='.gz':
+        return path
+    compressed=path.with_suffix('.json.gz')
+    return compressed if compressed.exists() else path
+
+
 def returncode(path):
-    with path.open() as stream:
+    path=record_path(path)
+    with (gzip.open(path,'rt') if path.suffix=='.gz' else path.open()) as stream:
         match = re.search(r'"returncode": (-?\d+)', stream.read(16384))
     if match is None:
         raise ValueError(f"missing command returncode: {path}")
@@ -32,7 +41,7 @@ def compile_one(row, directory):
 
 def execute(row, directory, stage, command, timeout):
     log = directory / stage / (row["name"] + ".json")
-    if log.exists():
+    if record_path(log).exists():
         return {"name": row["name"], "returncode": returncode(log)}
     try:
         result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True,
@@ -77,8 +86,9 @@ def main():
         worker, jobs = compile_one, int(os.environ.get("KPROG_COMPILE_WORKERS","6"))
     elif stage == "verify":
         worker, jobs = verify_one, 2
-        completed = {p.stem: returncode(p)
-                     for p in (directory / "compile").glob("*.json")}
+        completed = {p.name.removesuffix('.gz').removesuffix('.json'): returncode(p)
+                     for pattern in ('*.json','*.json.gz')
+                     for p in (directory / "compile").glob(pattern)}
         print(f"compile pending: {len(rows) - len(completed)}", flush=True)
         rows = [row for row in rows if row["name"] in completed
                 and completed[row["name"]] == 0]

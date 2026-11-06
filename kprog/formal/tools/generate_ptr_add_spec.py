@@ -16,7 +16,7 @@ C_PATH = ROOT / "generated" / "ptr_add.h"
 
 def load_spec() -> dict[str, object]:
     spec = json.loads(SPEC_PATH.read_text())
-    if set(spec) != {"schema_version", "operation", "bits", "tag"}:
+    if set(spec) != {"schema_version", "operation", "bits", "tag", "stack_reference"}:
         raise SystemExit(f"invalid pointer-add specification fields: {spec!r}")
     if spec["schema_version"] != 1 or spec["operation"] != "ptrAdd64":
         raise SystemExit(f"unsupported pointer-add specification: {spec!r}")
@@ -30,6 +30,8 @@ def load_spec() -> dict[str, object]:
     if not isinstance(tag, dict) or tag.get("op") != "copy" or \
             set(tag) != {"op", "source"} or tag.get("source") != "src":
         raise SystemExit(f"unsupported pointer-add specification: {spec!r}")
+    if spec["stack_reference"] != {"source_rsp": True, "destination_rsp": False}:
+        raise SystemExit("invalid LEA stack-reference selector")
     return spec
 
 
@@ -45,6 +47,8 @@ def bits {{α : Type}} [Add α] (src rhs : α) : α := {bits['lhs']} + {bits['rh
 
 def tag {{α : Type}} (src : α) : α := src
 
+def stackReference (srcIsRsp dstIsRsp : Bool) : Bool := srcIsRsp && !dstIsRsp
+
 end KProgFormal.GeneratedPtrAdd
 """
 
@@ -59,6 +63,8 @@ def render_c(spec: dict[str, object]) -> str:
 
 #define KPROG_PTR_ADD64_BITS(SRC_PTR, RHS) ({operands[bits['lhs']]} + {operands[bits['rhs']]})
 #define KPROG_PTR_ADD64_TAG(SRC_TAG) (SRC_TAG)
+#define KPROG_X86_LEA_STACK_REFERENCE(SRC_IS_RSP, DST_IS_RSP) \\
+    ((SRC_IS_RSP) && !(DST_IS_RSP))
 
 #endif
 """

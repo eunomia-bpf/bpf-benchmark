@@ -309,15 +309,16 @@ bcc-real-compile:
 
 raw-context-build:
 	python3 $(HERE)/check_raw_context.py prepare
-	for name in tail_word tail_signed frame_slot outside_frame; do cc -c $(HERE)/raw-context/$$name.S -o $(HERE)/raw-context/$$name.native.o || exit 1; done
+	for name in tail_word tail_signed frame_slot lea_frame outside_frame; do cc -c $(HERE)/raw-context/$$name.S -o $(HERE)/raw-context/$$name.native.o || exit 1; done
 	python3 $(HERE)/check_raw_context.py generate
 	cc -no-pie -O2 $(HERE)/raw-context/host.c $(HERE)/raw-context/*.native.o -o $(HERE)/raw-context/host-check
 	$(HERE)/raw-context/host-check
-	for name in tail_word tail_signed frame_slot outside_frame; do clang -g -O2 -Wno-c23-extensions -target bpf -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/raw-context/$$name.bpf.c -o $(HERE)/raw-context/$$name.bpf.o || exit 1; done
+	for name in tail_word tail_signed frame_slot lea_frame outside_frame; do clang -g -O2 -Wno-c23-extensions -target bpf -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/raw-context/$$name.bpf.c -o $(HERE)/raw-context/$$name.bpf.o || exit 1; done
 	clang -g -O2 -target bpf -DEXPECTED=0x84332211u -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/raw-context/source.bpf.c -o $(HERE)/raw-context/tail_word.source.bpf.o
 	clang -g -O2 -target bpf -DEXPECTED=0xffffff84u -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/raw-context/source.bpf.c -o $(HERE)/raw-context/tail_signed.source.bpf.o
 
 	for name in frame_slot outside_frame; do clang -g -O2 -target bpf -DEXPECTED=1 -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/raw-context/source.bpf.c -o $(HERE)/raw-context/$$name.source.bpf.o || exit 1; done
+	clang -g -O2 -target bpf -DEXPECTED=42 -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/raw-context/source.bpf.c -o $(HERE)/raw-context/lea_frame.source.bpf.o
 
 raw-context-kvm: raw-context-build bcc-real-verify-build
 	$(MAKE) -C $(ROOT)/kprog/libnativeloader BUILD_DIR=build-ccontext
@@ -377,8 +378,8 @@ bcc-runtime-image:
 	docker save -o $(HERE)/$(BCC_RUNTIME_PACKAGE).image.tar $(BCC_RUNTIME_IMAGE)
 
 bcc-runtime-corpus:
-	install -d /workspaces/.agent-state/kprog-lanes/C/var-tmp-bcc-7
-	BPFREJIT_CORPUS_APPS=bcc BPFREJIT_BENCH_PASSES=noop BPFREJIT_SHIM_NATIVE_LOADER=post BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1 $(MAKE) -C $(ROOT) -o runtime-kernel-image corpus RUNTIME_CONTAINER_IMAGE=$(BCC_RUNTIME_IMAGE) RUNTIME_IMAGE_TAR=$(HERE)/$(BCC_RUNTIME_PACKAGE).image.tar BZIMAGE=$(PAIRED_CONTEXT)/bzImage VNG='vng --run $(PAIRED_CONTEXT)/bzImage --cwd $(ROOT) --disable-monitor --verbose --cpus 2 --pin 12-15 --memory 2G --rwdir $(ROOT) --rwdir /var/tmp=/workspaces/.agent-state/kprog-lanes/C/var-tmp-bcc-7 --overlay-rwdir /tmp --append "loglevel=4 panic=30 oops=panic"' VM_CPU_PIN=12-15 VM_CPUS=2 VM_MEM=2G SAMPLES=1 WORKLOAD_DURATION=5 TIMEOUT=900
+	install -d /workspaces/.agent-state/kprog-lanes/C/var-tmp-bcc-7 /workspaces/.agent-state/kprog-lanes/C/tmp-bcc-7 /workspaces/.agent-state/kprog-lanes/C/modules-bcc-7
+	BPFREJIT_CORPUS_APPS=bcc BPFREJIT_BENCH_PASSES=noop BPFREJIT_SHIM_NATIVE_LOADER=post BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1 $(MAKE) -C $(ROOT) -o runtime-kernel-image corpus RUNTIME_CONTAINER_IMAGE=$(BCC_RUNTIME_IMAGE) RUNTIME_IMAGE_TAR=$(HERE)/$(BCC_RUNTIME_PACKAGE).image.tar BZIMAGE=$(PAIRED_CONTEXT)/bzImage VNG='taskset -c 12-15 vng --run $(PAIRED_CONTEXT)/bzImage --cwd $(ROOT) --disable-monitor --verbose --cpus 2 --memory 2G --rwdir $(ROOT) --rwdir /var/tmp=/workspaces/.agent-state/kprog-lanes/C/var-tmp-bcc-7 --rwdir /tmp=/workspaces/.agent-state/kprog-lanes/C/tmp-bcc-7 --rwdir /lib/modules=/workspaces/.agent-state/kprog-lanes/C/modules-bcc-7 --append "loglevel=4 panic=30 oops=panic"' VM_CPU_PIN=12-15 VM_CPUS=2 VM_MEM=2G SAMPLES=1 WORKLOAD_DURATION=5 TIMEOUT=900
 
 siphash-compile:
 	install -d $(HERE)/siphash-compile
@@ -387,3 +388,46 @@ siphash-compile:
 raw-entry-artifacts:
 	python3 $(HERE)/archive_raw_entry.py
 	tar -czf $(HERE)/raw-formal-artifacts.tar.gz --exclude=.lake --exclude=target --exclude=build -C /workspaces/.agent-state/kprog-lanes/C raw-check-source -C $(HERE) raw-formal-export.log raw-formal-first-failure.log raw-source-revision.txt
+
+sp-lea-prepare:
+	python3 $(HERE)/check_sp_lea.py prepare
+
+sp-lea-host:
+	cc -O2 -I$(ROOT)/vendor/libbpf/src -DHEADER='"$(HERE)/sp-lea/before/kprog/x86/x86_sim_local_bpf.h"' $(HERE)/sp-lea/host.c $(HERE)/sp-lea/native.S -o $(HERE)/sp-lea/before-host
+	cc -O2 -I$(ROOT)/vendor/libbpf/src -DHEADER='"$(HERE)/sp-lea/after/kprog/x86/x86_sim_local_bpf.h"' $(HERE)/sp-lea/host.c $(HERE)/sp-lea/native.S -o $(HERE)/sp-lea/after-host
+	python3 $(HERE)/check_sp_lea.py check
+
+sp-lea-contract:
+	python3 $(ROOT)/kprog/formal/tools/generate_ptr_add_spec.py
+
+SP_SOURCE := /workspaces/.agent-state/kprog-lanes/C/sp-check-source
+sp-lea-focused:
+	cd $(SP_SOURCE)/kprog/formal && lake build KProgFormal.X86LeaHandler
+	cc -O2 -I$(SP_SOURCE)/kprog/formal -I$(SP_SOURCE)/kprog/x86 -I$(SP_SOURCE)/kprog -I$(SP_SOURCE)/vendor/libbpf/src $(SP_SOURCE)/kprog/formal/oracles/test_x86_lea_route_host.c -o $(HERE)/sp-lea/route-host
+	$(HERE)/sp-lea/route-host
+
+sp-lea-micro:
+	taskset -c 12-15 prlimit --as=8589934592 --core=0 -- $(MAKE) -C $(SP_SOURCE)/kprog/x86 -o kprog-negative-proof-build micro-proofs-build MICRO_CONFIG=../test/kprog_negative_stage2.yaml PROOF_BUILD_DIR=$(HERE)/sp-lea/micro-negative MICRO_SIM_PROOF_ARGS='--no-generate --jobs 1'
+	taskset -c 12-15 prlimit --as=8589934592 --core=0 -- $(MAKE) -C $(SP_SOURCE)/kprog/x86 -o kprog-negative-proof-build micro-proofs-build PROOF_BUILD_DIR=$(HERE)/sp-lea/micro MICRO_SIM_PROOF_ARGS='--no-generate --jobs 1'
+
+sp-lea-census:
+	python3 $(HERE)/prepare_finite.py prepare sp-lea-census
+	$(MAKE) -C $(ROOT)/kprog/x86 app-proofs-build APP_SIM_PROOF_ARGS='--generate-only --proof-root $(HERE)/sp-lea-census/input --report-dir $(HERE)/sp-lea-census --output-dir $(ROOT)/kprog/x86/app-coverage-sp-lea --generator $(HERE)/sp-lea-census/simulator/kprog/x86/micro-prog/generate_micro_sim_proofs.py'
+
+paired-modules-kvm:
+	taskset -c 12-15 vng --run $(PAIRED_CONTEXT)/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile paired-modules-guest'
+
+paired-modules-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	for module in $(PAIRED_CONTEXT)/*.ko; do insmod "$$module" || { dmesg; exit 1; }; done
+	cat /proc/modules
+
+PAIRED_RUNTIME_IMAGE ?= bpf-benchmark/kprog-paired-context:c-20261106
+PAIRED_RUNTIME_TAR ?= /tmp/kprog-c-paired-runtime-20261106.image.tar
+paired-runtime-image:
+	docker tag 4e0cc5f9ddf0 $(BCC_RUNTIME_BASE)
+	docker build --target paired-runtime --build-context paired-context=$(PAIRED_CONTEXT) --build-context bcc-verified=$(HERE)/$(BCC_RUNTIME_PACKAGE) --build-arg BASE_IMAGE=$(BCC_RUNTIME_BASE) -f $(HERE)/bcc-runtime.Dockerfile -t $(PAIRED_RUNTIME_IMAGE) $(HERE)/$(BCC_RUNTIME_PACKAGE)
+	docker save -o $(PAIRED_RUNTIME_TAR) $(PAIRED_RUNTIME_IMAGE)
+
+sp-lea-artifacts:
+	python3 $(HERE)/archive_sp_lea.py

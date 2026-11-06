@@ -1086,7 +1086,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			if (__x86_l_width == X86_WIDTH_64) {              \
 				__u8 __x86_l_dst_tag =                 \
 					KPROG_PTR_ADD64_TAG(__x86_l_src_tag);\
-				if ((SRC) == X86_RSP) {                  \
+				if (KPROG_X86_LEA_STACK_REFERENCE((SRC) == X86_RSP, (DST) == X86_RSP)) {                  \
 					__s64 __x86_l_stack_off =          \
 						(__s64)(long)__x86_l_src_ptr + __x86_l_off;\
 					__x86_l_result =                  \

@@ -4,5 +4,7 @@
 
 #define KPROG_PTR_ADD64_BITS(SRC_PTR, RHS) ((__u8 *)(SRC_PTR) + (RHS))
 #define KPROG_PTR_ADD64_TAG(SRC_TAG) (SRC_TAG)
+#define KPROG_X86_LEA_STACK_REFERENCE(SRC_IS_RSP, DST_IS_RSP) \
+    ((SRC_IS_RSP) && !(DST_IS_RSP))
 
 #endif

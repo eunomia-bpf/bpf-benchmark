@@ -10,6 +10,7 @@ LINK=HERE/'native-dispatch-link/release/native-link'
 CASES={'tail_word':('mov eax,DWORD PTR [rip+native_tail_word+20]',0x84332211),
        'tail_signed':('movsx eax,BYTE PTR [rip+native_tail_signed+23]',0xffffff84),
        'frame_slot':('sub rsp,256; mov QWORD PTR [rsp],1; mov eax,DWORD PTR [rsp]; add rsp,256',1),
+       'lea_frame':('sub rsp,32; lea rsp,[rsp+16]; mov QWORD PTR [rsp-8],42; mov rax,QWORD PTR [rsp-8]; lea rsp,[rsp-16]; add rsp,32',42),
        'outside_frame':('mov QWORD PTR [rsp-1024],1; mov eax,DWORD PTR [rsp-1024]',None)}
 def run(args):
  result=subprocess.run([str(a) for a in args],text=True,capture_output=True,timeout=120)
@@ -42,12 +43,12 @@ char LICENSE[] SEC("license")="GPL";
  (OUT/'host.c').write_text('''#include <stdint.h>
 #include <stdio.h>
 extern uint32_t tail_word_native(void *),tail_signed_native(void *);
-extern uint32_t frame_slot_native(void *);
+extern uint32_t frame_slot_native(void *),lea_frame_native(void *);
 int main(void) {
  unsigned word=tail_word_native(0),sign=tail_signed_native(0);
- unsigned frame=frame_slot_native(0);
- printf("word=%u signed=%u frame=%u\\n",word,sign,frame);
- return word!=0x84332211u || sign!=0xffffff84u || frame!=1;
+ unsigned frame=frame_slot_native(0),lea=lea_frame_native(0);
+ printf("word=%u signed=%u frame=%u lea=%u\\n",word,sign,frame,lea);
+ return word!=0x84332211u || sign!=0xffffff84u || frame!=1 || lea!=42;
 }
 ''')
 elif sys.argv[1]=='generate':

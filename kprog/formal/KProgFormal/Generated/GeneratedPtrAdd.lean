@@ -7,4 +7,6 @@ def bits {α : Type} [Add α] (src rhs : α) : α := src + rhs
 
 def tag {α : Type} (src : α) : α := src
 
+def stackReference (srcIsRsp dstIsRsp : Bool) : Bool := srcIsRsp && !dstIsRsp
+
 end KProgFormal.GeneratedPtrAdd
