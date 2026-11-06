@@ -51,6 +51,10 @@ fidelity, verifier acceptance, helper behavior, and artifact binding require
 separate evidence; these local proofs do not establish them by themselves.
 The lifts take architectural register values; connecting virtual stack/code/helper
 encodings to those values is part of the ongoing dispatcher proof.
+`Refinement/EntryEnvironment.lean` states the same-invocation SP/code/return
+relation with explicit source/body biases and argument/return witnesses. Its
+address arithmetic and partial-write proofs require materializing native bits;
+the kernel/JIT and per-program ABI certificates must establish the witnesses.
 
 The checked reference also builds as `.lake/build/bin/reference`: JSON lines
 on stdin, one JSON transition per line on stdout. Inputs contain `state`
