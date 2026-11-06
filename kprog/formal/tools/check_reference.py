@@ -444,6 +444,87 @@ def main():
         rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                                   input=json.dumps(request) + "\n", text=True, capture_output=True)
         assert rejected.returncode == 1, (raw, rejected)
+    # BSWAP/MOVBE share the byte permutation, but only MOVBE accesses memory.
+    # MOVBE stores initialize exactly their width and precheck every permission.
+    endian_cases = []
+    reversed_words = {2: 0xEFCD, 4: 0xEFCDAB89, 8: 0xEFCDAB8967452301}
+    for width in (4, 8):
+        for dst in (0, 7, 8, 15):
+            request = copy.deepcopy(base)
+            rex = (0x48 if width == 8 else 0x40) | (dst // 8)
+            request["native_bytes"] = ([rex] if rex != 0x40 else []) + [0x0F, 0xC8 + dst % 8]
+            request["state"]["registers"][dst] = 0x0123456789ABCDEF
+            request["state"]["flags"] = 0xAD7
+            expected = copy.deepcopy(request["state"])
+            expected["registers"][dst] = reversed_words[width]
+            expected.update(pc=expected["pc"] + len(request["native_bytes"]),
+                            defined_flags=(1 << 64) - 1, events=[], fault=None)
+            endian_cases.append((request, expected))
+    for width in (2, 4, 8):
+        for load in (False, True):
+            for fault in (False, True):
+                request = copy.deepcopy(base)
+                request["native_bytes"] = ([0x66] if width == 2 else [0x48] if width == 8 else []) + [
+                    0x0F, 0x38, 0xF0 if load else 0xF1, 0x47, 8]
+                request["state"]["registers"][0] = 0x0123456789ABCDEF
+                request["state"]["registers"][7] = 0x1FF8
+                request["state"]["flags"] = 0xAD7
+                data = list(bytes.fromhex("efcdab8967452301")[:width])
+                request["state"]["memory"] = [dict(address=0x2000 + i,
+                    value=data[i] if load and i < width else 0xAA,
+                    readable=not (load and fault and i == width - 1),
+                    writable=not (fault and i == width - 1), initialized=i != 0)
+                    for i in range(width + 1)]
+                expected = copy.deepcopy(request["state"])
+                expected.update(defined_flags=(1 << 64) - 1, events=[], fault=None)
+                if fault:
+                    reason = dict(kind="read" if load else "write", address=0x2000, bytes=width)
+                    expected.update(fault=reason, events=[dict(kind="fault", fault=reason)])
+                else:
+                    expected["pc"] += len(request["native_bytes"])
+                    if load:
+                        old = expected["registers"][0]
+                        expected["registers"][0] = ((old & ~0xFFFF) | reversed_words[2]) if width == 2 else reversed_words[width]
+                        expected["events"] = [dict(kind="read", address=0x2000, value=data, initialized=False)]
+                    else:
+                        written = list(bytes.fromhex({2: "cdef", 4: "89abcdef", 8: "0123456789abcdef"}[width]))
+                        for cell, byte in zip(expected["memory"], written):
+                            cell.update(value=byte, initialized=True)
+                        expected["events"] = [dict(kind="write", address=0x2000, value=written, initialized=True)]
+                endian_cases.append((request, expected))
+    # Destination-addressed, extended-register, RIP, FS and 32-bit EAs.
+    for raw, dst, address, rdi, fs in [
+            ("0f38f07f08", 7, 0x2000, 0x1FF8, 0),
+            ("440f38f04708", 8, 0x2000, 0x1FF8, 0),
+            ("0f38f005f80f0000", 0, 0x2000, 0x1FF8, 0),
+            ("640f38f04708", 0, 0x6000, 0x1FF8, 0x4000),
+            ("670f38f04708", 0, 0x2000, 0x100001FF8, 0)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(bytes.fromhex(raw))
+        request["state"]["registers"][7] = rdi
+        request["state"]["fs_base"] = fs
+        data = list(bytes.fromhex("efcdab89"))
+        request["state"]["memory"] = [dict(address=address + i, value=byte,
+            readable=True, writable=False, initialized=False) for i, byte in enumerate(data)]
+        expected = copy.deepcopy(request["state"])
+        expected["registers"][dst] = 0xEFCDAB89
+        expected.update(pc=expected["pc"] + len(request["native_bytes"]), defined_flags=(1 << 64) - 1,
+                        events=[dict(kind="read", address=address, value=data, initialized=False)], fault=None)
+        endian_cases.append((request, expected))
+    run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
+                         input="".join(json.dumps(r) + "\n" for r, _ in endian_cases),
+                         text=True, stdout=subprocess.PIPE, check=True)
+    outputs = [json.loads(line) for line in run.stdout.splitlines()]
+    assert len(outputs) == len(endian_cases)
+    for (request, expected), out in zip(endian_cases, outputs):
+        assert out == expected, (request, out, expected)
+    # F2 selects CRC32, whose shared opcode must never decode as MOVBE.
+    for raw in ("f20f38f04708", "f2480f38f14708", "0f38f0c1", "0f38f1c1"):
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(bytes.fromhex(raw))
+        rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
+                                  input=json.dumps(request) + "\n", text=True, capture_output=True)
+        assert rejected.returncode == 1, (raw, rejected)
     # Reject rather than truncate malformed wire words and duplicate mappings.
     malformed = copy.deepcopy(base)
     malformed["state"]["registers"][0] = 1 << 64
@@ -477,7 +558,7 @@ def main():
         if got & 0x80000000:
             got -= 1 << 32
         assert got == disp, (insn, encoded, got)
-    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, BZHI/ANDN VEX/result flags, flagless BMI2 shifts/rotates, PUSH immediate/memory and POP memory ordering, stack aliases, exact writes and faults, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
+    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, BZHI/ANDN VEX/result flags, flagless BMI2 shifts/rotates, BSWAP/MOVBE byte order, PUSH immediate/memory and POP memory ordering, stack aliases, exact writes and faults, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
 
 
 if __name__ == "__main__":

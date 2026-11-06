@@ -227,6 +227,34 @@ def bmiShiftStep (width : BzhiWidth) (kind : BmiShift) (dst : Register) (source 
       let result := bmiShiftValue width kind value (countValue s count)
       ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), pc := nextPc }, events, none⟩
 
+/-- Reverse only the architectural operand bytes, stated by a byte-list
+permutation rather than the implementation's mask-and-shift ladder. -/
+def reverseBytes (value : Word) (bytes : Nat) : Word :=
+  littleEndian 64 (valueBytes value bytes).reverse
+
+def writeValue (width : CmovWidth) (old value : Word) : Word :=
+  match width with
+  | .w16 => (old &&& 0xffffffffffff0000) ||| (value &&& 0xffff)
+  | .w32 => (value.setWidth 32).setWidth 64
+  | .w64 => value
+
+def swapStep (width : BzhiWidth) (dst : Register) (nextPc : Word) (s : State) : Transition State :=
+  let value := reverseBytes (s.gpr dst) width.bytes
+  ⟨{ s with gpr := fun r => if r = dst then value else s.gpr r, pc := nextPc }, [], none⟩
+
+def movbeLoadStep (width : CmovWidth) (dst : Register) (address nextPc : Word) (s : State) : Transition State :=
+  match readSource s (.memory address) width.bytes with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (source, events) =>
+      let value := writeValue width (s.gpr dst) (reverseBytes source width.bytes)
+      ⟨{ s with gpr := fun r => if r = dst then value else s.gpr r, pc := nextPc }, events, none⟩
+
+def movbeStoreStep (width : CmovWidth) (src : Register) (address nextPc : Word) (s : State) : Transition State :=
+  let value := reverseBytes (s.gpr src) width.bytes
+  match writeMemory s.memory address value width.bytes with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (memory, event) => ⟨{ s with memory := memory, pc := nextPc }, [event], none⟩
+
 /-- Commit a PUSH transfer only after its read (if any) and whole-width
 write permission check. Memory faults preserve every architectural component;
 ordered reads preceding a write fault remain observable events. -/
@@ -251,6 +279,9 @@ inductive Instruction
   | cmov (width : CmovWidth) (cc : Fin 16) (dst : Register)
       (source : Source) (nextPc : Word)
   | andn (width : BzhiWidth) (dst first : Register) (second : Source) (nextPc : Word)
+  | byteSwap (width : BzhiWidth) (dst : Register) (nextPc : Word)
+  | movbeLoad (width : CmovWidth) (dst : Register) (address nextPc : Word)
+  | movbeStore (width : CmovWidth) (src : Register) (address nextPc : Word)
   | bmiShift (width : BzhiWidth) (kind : BmiShift) (dst : Register) (source : Source)
       (count : ShiftCount) (nextPc : Word)
   | bzhi (width : BzhiWidth) (dst : Register) (source : Source)
@@ -260,6 +291,9 @@ inductive Instruction
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .byteSwap width dst nextPc => swapStep width dst nextPc s
+  | .movbeLoad width dst address nextPc => movbeLoadStep width dst address nextPc s
+  | .movbeStore width src address nextPc => movbeStoreStep width src address nextPc s
   | .bmiShift width kind dst source count nextPc => bmiShiftStep width kind dst source count nextPc s
   | .push width src nextPc => pushTransfer width (s.gpr src) [] nextPc s
   | .pushImmediate width value nextPc => pushTransfer width value [] nextPc s
@@ -318,6 +352,7 @@ are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardwar
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
   | .push .. | .pushImmediate .. | .pushMemory .. | .popMemory .. => 0xffffffffffffffff
+  | .byteSwap .. | .movbeLoad .. | .movbeStore .. => 0xffffffffffffffff
   | .bmiShift .. => 0xffffffffffffffff
   | .pop .. => 0xffffffffffffffff
   | .cmov .. => 0xffffffffffffffff
@@ -344,6 +379,7 @@ private structure Prefix where
   rex : Nat := 0
   segment : Nat := 0
   vexInvalid : Bool := false
+  mandatoryPrefix : Nat := 0
 
 private def stackWidth (p : Prefix) : StackWidth :=
   if p.rex / 8 = 1 then .w64 else if p.operand16 then .w16 else .w64
@@ -358,7 +394,7 @@ private def prefixes : List Byte → Prefix → Nat → Prefix × List Byte × N
         prefixes rest { p with segment := v, rex := 0 } (n + 1)
       else if v = 0x26 ∨ v = 0x2e ∨ v = 0x36 ∨ v = 0x3e then
         prefixes rest { p with segment := 0, rex := 0 } (n + 1)
-      else if v = 0xf2 ∨ v = 0xf3 then prefixes rest { p with rex := 0, vexInvalid := true } (n + 1)
+      else if v = 0xf2 ∨ v = 0xf3 then prefixes rest { p with rex := 0, vexInvalid := true, mandatoryPrefix := v } (n + 1)
       else if 0x40 ≤ v ∧ v ≤ 0x4f then prefixes rest { p with rex := v - 0x40, vexInvalid := true } (n + 1)
       else (p, b :: rest, n)
 
@@ -501,6 +537,26 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     return .bzhi width dst source index nextPc
   let opcode ← byteAt bytes (count + 1)
   if first ≠ 0x0f then throw "expected two-byte native opcode"
+  if 0xc8 ≤ opcode ∧ opcode ≤ 0xcf then
+    let length := count + 2
+    if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
+    if p.operand16 ∧ p.rex / 8 = 0 then throw "BSWAP has no defined 16-bit result"
+    let dst := registerCode (opcode % 8 + 8 * (p.rex % 2))
+    return .byteSwap (if p.rex / 8 = 1 then .w64 else .w32) dst (s.pc + BitVec.ofNat 64 length)
+  if opcode = 0x38 then
+    let third ← byteAt bytes (count + 2)
+    if p.mandatoryPrefix = 0xf2 ∨ (third ≠ 0xf0 ∧ third ≠ 0xf1) then
+      throw "unrecognized three-byte native opcode"
+    let modrm ← byteAt bytes (count + 3)
+    if modrm / 64 = 3 then throw "MOVBE requires a memory operand"
+    let reg := registerCode ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
+    let width := if p.rex / 8 = 1 then CmovWidth.w64 else if p.operand16 then .w16 else .w32
+    let (source, nextPc, _) ← operand bytes s p modrm (count + 4) 0
+    match source with
+    | .register _ => throw "MOVBE requires a memory operand"
+    | .memory address =>
+        if third = 0xf0 then return .movbeLoad width reg address nextPc
+        else return .movbeStore width reg address nextPc
   let modrm ← byteAt bytes (count + 2)
   let reg := registerCode ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
   let width := if p.rex / 8 = 1 then CmovWidth.w64
