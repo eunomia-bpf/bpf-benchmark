@@ -75,6 +75,7 @@ _NATIVE_LOADER_ENV_NAMES = (
     "BPFREJIT_SHIM_NATIVE_KMSG_PROGRESS",
     "BPFREJIT_NATIVE_LOADER_SO",
     "BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF",
+    "BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF",
     "BPFREJIT_NATIVE_LINK_BINARY",
     "BPFREJIT_NATIVE_DISABLE_MAP_LOWERING",
 )
@@ -1033,7 +1034,10 @@ def run_suite(
                         lifecycle.rejit_result = {
                             "status": "ok",
                             "mode": (
-                                "native_loader" if native_loader_phase == "post"
+                                ("verified_native_loader" if str(phase_native_env.get(
+                                    "BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", ""
+                                )).lower() in {"1", "true", "yes", "on"} else "native_loader")
+                                if native_loader_phase == "post"
                                 else "jit_restart_after_native"
                             ),
                             "enabled_passes": [],

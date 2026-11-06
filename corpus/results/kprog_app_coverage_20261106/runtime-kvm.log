@@ -1,0 +1,12 @@
+insmod /workspaces/repository/kprog/tv/build-x86/bpf_x86_native_lab.ko
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_runtime.py
+bound returncode 0
+missing-proof returncode 97
+missing-entry returncode 97
+old-abi returncode 97
+python3 -m unittest discover -s /workspaces/repository/tests/python -p test_corpus_incremental.py
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 0.021s
+
+OK

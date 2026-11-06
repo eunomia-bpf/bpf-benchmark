@@ -64,15 +64,36 @@ static int shim_native_loader_enabled(void) {
     return e && strcmp(e, "1") == 0;
 }
 
+static int shim_native_loader_requires_bound_proof(void) {
+    const char *value = getenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF");
+    return value && (strcmp(value, "1") == 0 || strcmp(value, "true") == 0 ||
+                     strcmp(value, "yes") == 0 || strcmp(value, "on") == 0);
+}
+
 static void shim_native_loader_fatal(void) {
     fflush(NULL);
     _exit(97);
+}
+
+static void shim_native_loader_check_bound_abi(void *handle) {
+    if (!shim_native_loader_requires_bound_proof())
+        return;
+    dlerror();
+    unsigned (*version)(void) = (unsigned (*)(void))dlsym(
+        handle, "native_loader_bound_proof_abi_version");
+    const char *error = dlerror();
+    if (error || !version || version() != 1) {
+        log_line("verified native runtime requires native-loader bound-proof ABI version 1: %s",
+                 error ? error : "incompatible version");
+        shim_native_loader_fatal();
+    }
 }
 
 static native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn
 shim_native_loader_resolve_load_fn(const char *so_path) {
     pthread_mutex_lock(&shim_native_loader_handle_lock);
     if (shim_native_loader_load_fn) {
+        shim_native_loader_check_bound_abi(shim_native_loader_handle);
         if (strcmp(shim_native_loader_handle_path, so_path) != 0) {
             log_line("native-loader refusing to switch shared object from %s to %s",
                      shim_native_loader_handle_path, so_path);
@@ -91,6 +112,7 @@ shim_native_loader_resolve_load_fn(const char *so_path) {
         pthread_mutex_unlock(&shim_native_loader_handle_lock);
         shim_native_loader_fatal();
     }
+    shim_native_loader_check_bound_abi(handle);
 
     dlerror();
     native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn load =
@@ -427,7 +449,8 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
                   prog_name ? prog_name : "");
         shim_native_loader_fatal();
     }
-    if (shim_native_loader_is_runtime_helper(prog, manifest)) {
+    if (!shim_native_loader_requires_bound_proof() &&
+        shim_native_loader_is_runtime_helper(prog, manifest)) {
         log_line("native-loader skipped runtime helper program name=%s insn_cnt=%u",
                  prog_name ? prog_name : "", prog ? prog->insn_cnt : 0);
         kmsg_line("native skip-runtime-helper name=%s fd=%ld",
@@ -481,6 +504,11 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     if (!result.replaced) {
         if (result.prog_fd >= 0)
             real_close(result.prog_fd);
+        if (shim_native_loader_requires_bound_proof()) {
+            log_line("verified native runtime has no manifest entry for prog=%s manifest=%s source=%s",
+                     prog_name ? prog_name : "", manifest, prog->bytecode_path);
+            shim_native_loader_fatal();
+        }
         log_line("native-loader no manifest match pass-through for prog=%s "
                  "manifest=%s source=%s",
                  prog_name ? prog_name : "", manifest, prog->bytecode_path);
@@ -501,6 +529,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     shim_native_loader_log_jit_dump("original", (int)original_fd);
     shim_native_loader_log_jit_dump("native", result.prog_fd);
     log_line("native-loader timings prog=%s cache_hit=%d prebuilt_proof=%d "
+             "bound_required=%d "
              "original_id=%u native_id=%u symbol=%s native_object=%s "
              "bpf_bytes=%llu native_bytes=%llu "
              "total_ns=%llu manifest_resolve_ns=%llu native_data_symbols_ns=%llu "
@@ -510,6 +539,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
              "upload_ns=%llu prog_load_ns=%llu",
              prog_name ? prog_name : "", result.cache_hit,
              result.prebuilt_proof,
+             shim_native_loader_requires_bound_proof(),
              result.original_prog_id, result.native_prog_id,
              result.selected_symbol, result.selected_native_object,
              (unsigned long long)result.bpf_bytecode_bytes,

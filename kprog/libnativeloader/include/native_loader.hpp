@@ -76,6 +76,9 @@ void close_loaded_program(LoadedProgram *program);
 
 extern "C" {
 
+/* Version 1 enforces REQUIRE_BOUND_PROOF before native upload. */
+unsigned native_loader_bound_proof_abi_version(void);
+
 struct native_loader_c_result {
     int prog_fd;
     int replaced;

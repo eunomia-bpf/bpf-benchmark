@@ -4479,6 +4479,8 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
                                 const std::string &prog_name,
                                 const std::vector<int> &map_ref_fds)
 {
+    if (env_bool_enabled("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF") && proof_insns.empty())
+        fail("verified native runtime requires a generation-bound simulator proof for " + prog_name);
     LoadedStub out{};
     std::vector<NativeLabReloc> relocs;
     std::vector<NativeBlobChunk> chunks;
@@ -5213,6 +5215,11 @@ void transfer_loaded_program_to_c_result(native_loader::LoadedProgram &loaded,
 }
 
 } // namespace
+
+extern "C" unsigned native_loader_bound_proof_abi_version(void)
+{
+    return 1;
+}
 
 extern "C" int native_loader_load_from_fd_with_manifest_path_and_attach(
     int original_prog_fd,

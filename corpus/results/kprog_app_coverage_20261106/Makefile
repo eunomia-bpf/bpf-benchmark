@@ -183,3 +183,21 @@ pushpop-formal:
 	$(HERE)/pushpop-build/specialization-host
 	cc -Wall -Wextra -O2 -I$(ROOT)/kprog/formal -I$(ROOT)/kprog/x86 -I$(ROOT)/kprog -I$(ROOT)/vendor/libbpf/src $(ROOT)/kprog/formal/oracles/test_x86_pushpop_route_host.c -o $(HERE)/pushpop-build/register-route-host
 	$(HERE)/pushpop-build/register-route-host
+
+runtime-build: pushpop-bpf
+	$(MAKE) -C $(ROOT)/kprog/libnativeloader BUILD_DIR=build-capplication
+	$(MAKE) -C $(ROOT)/bpfopt/shim SHIM_SO=$(HERE)/verified-runtime-shim.so $(HERE)/verified-runtime-shim.so
+	install -d $(HERE)/verified-runtime
+	clang -g -O2 -target bpf -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/runtime_source.bpf.c -o $(HERE)/verified-runtime/source.bpf.o
+	c++ -O2 -I$(ROOT)/vendor/linux-framework/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include $(HERE)/runtime_startup.cpp $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $(HERE)/verified-runtime/startup
+
+runtime-kvm: runtime-build
+	taskset -c 8-23 vng --run $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile runtime-guest'
+
+runtime-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod $(ROOT)/kprog/tv/build-x86/bpf_x86_native_lab.ko
+	python3 $(HERE)/check_runtime.py
+
+runtime-python:
+	python3 -m unittest discover -s $(ROOT)/tests/python -p test_corpus_incremental.py

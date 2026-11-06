@@ -94,6 +94,19 @@ def _read_app_result(session: ArtifactSession, app_name: str) -> dict:
 # ---------------------------------------------------------------------------
 
 class TestNativeLoaderConfigValidation(unittest.TestCase):
+    def test_bound_proof_requirement_follows_native_phase_only(self) -> None:
+        # Catch a verified arm losing its requirement, or leaking it into JIT.
+        flag = "BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF"
+        with mock.patch.dict(os.environ, {
+            "BPFREJIT_SHIM_NATIVE_LOADER": "post", flag: "1"
+        }, clear=True):
+            saved = driver._current_native_loader_env()
+            disabled = driver._disable_native_loader_env()
+            self.assertIsNone(disabled[flag])
+            enabled = driver._enable_native_loader_env(saved)
+            self.assertEqual(enabled[flag], "1")
+            self.assertEqual(enabled["BPFREJIT_SHIM_NATIVE_LOADER"], "1")
+
     def test_native_loader_phase_accepts_counterbalanced_orders(self) -> None:
         with mock.patch.dict(
             os.environ, {"BPFREJIT_SHIM_NATIVE_LOADER": "post"}, clear=True

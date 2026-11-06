@@ -450,3 +450,43 @@ retain all commands and verifier logs. [Bound rejection](pushpop-after-kvm.log),
 This closes the concrete PUSH/POP producer defect; full helper memory effects,
 base/address fidelity and six-application verified runtime integration remain
 active required work.
+
+
+## Verified corpus runtime selection
+
+The existing two-start framework now distinguishes the generation-bound native
+arm through `BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1`, alongside
+`BPFREJIT_SHIM_NATIVE_LOADER=post` and an application manifest containing
+`simulator_object`/`simulator_program` for every native entry. The baseline
+starts with native controls cleared; the second startup restores the exact
+manifest and bound-proof requirement. Workload launch, sample collection,
+raw tool output and per-program run count/time collection use the existing
+identical `measure_app_phase` path. No extra throughput assertion or filtering
+was introduced. Lifecycle mode is `verified_native_loader`; without the
+requirement the existing unbound native arm remains available.
+
+The loader refuses an empty proof before native upload. The shim refuses an
+unmatched application program and subjects Tetragon's runtime-generated stats
+helper to the verified manifest path. It negotiates bound-proof ABI version1
+before calling the shared loader, so an older library cannot silently ignore
+the requirement. Successful replacement logs `bound_required=1` and the actual
+original/native program IDs. Existing libbpf feature-probe handling is retained.
+
+`make -f corpus/results/kprog_app_coverage_20261106/Makefile runtime-kvm`
+uses normal libbpf startup intercepted by the production shim. It executes the
+installed native program, independently inspects its actual translated image
+through a fresh descriptor, and finds a nonzero-generation sidecar with
+retval127. Missing proof, missing manifest entry and incompatible loader ABI
+all terminate startup with97. This small integration fixture is not a substitute
+loader for corpus applications and is not six-app timing data.
+`runtime-python` passes13 lifecycle tests, including clearing/restoring the
+bound requirement across phases. Library/shim builds and raw KVM startup logs
+are retained in [runtime artifacts](verified-runtime-artifacts.tar.gz).
+
+The application command shape is `BPFREJIT_SHIM_NATIVE_LOADER=post
+BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1
+BPFREJIT_SHIM_NATIVE_MANIFEST=<complete-app-manifest> make corpus` with the
+normal app/sample controls. Complete manifests and actual program ABI/map
+pairing are still being built; no application is handed to R as a successful
+verified timing run at this checkpoint. App event/sample/action/drop counters
+must be paired with actual startup results before a same-work timing claim.
