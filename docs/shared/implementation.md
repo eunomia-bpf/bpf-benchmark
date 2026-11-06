@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0985 found the oracle-size check read 5 of 33
+(missing brace and math forms); fixed, it reads 28
+and all resolve.
+
+
 Step 0984 bound 33 oracle sizes by building every
 host and reading what it prints; the one miss was a
 missing include path.

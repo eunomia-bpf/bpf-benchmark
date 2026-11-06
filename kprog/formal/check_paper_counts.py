@@ -5120,7 +5120,11 @@ def oracle_sizes(text: str) -> list[str]:
     """
     import subprocess
     here = pathlib.Path(__file__).parent
+    # A size may be written plain, comma-grouped, brace-grouped, or inside
+    # inline math; a pattern for one form reads a fifth of them.
     flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    flat = flat.replace("{,}", ",")
+    flat = re.sub(r"\\\((\d[\d,]*)\\\)", r"\1", flat)
     stated = {int(m.replace(",", "")) for m in
               re.findall(r"([\d,]{4,})-case (?:routed )?oracle", flat)}
     if not stated:

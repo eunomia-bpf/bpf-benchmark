@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0985 - the new check read a fifth of its subject
+
+The check that reads oracle sizes was reading five of them. A size may be
+written plain, grouped with braces, or inside inline math, and the extraction
+recognised only the plain form, so twenty-three of the thirty-three sentences
+were never compared with a host.
+
+With all three forms normalised first, twenty-eight distinct sizes are read and
+every one is printed by a host in the tree. The check was written to catch
+exactly this failure in the paper and had it in itself.
+
+The pattern is the same one that the line references, the figure separators and
+the noun class each needed: a form the text uses was absent from the pattern,
+and the set looked populated because it held the forms that were.
+
+Census unchanged; one check now reads its whole subject.
+
 ### Step 0984 - the oracle sizes are read from the hosts
 
 Thirty-three sentences state how many cases an oracle drives, and not one names
