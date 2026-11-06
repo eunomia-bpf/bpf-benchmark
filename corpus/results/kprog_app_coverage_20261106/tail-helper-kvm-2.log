@@ -1,0 +1,30 @@
+insmod /workspaces/repository/corpus/results/kprog_app_coverage_20261106/strict-runtime-input/bpf_x86_native_lab.ko
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_tail_helpers.py bound
+direct zero 0 program_id=21 nonzero_generations=1 invocations=1 retval=127
+ 
+zero all 6 actual successful startup loads replaced with bound native programs
+freq 0 program_id=42 nonzero_generations=1 invocations=1 retval=127
+ 
+freq all 6 actual successful startup loads replaced with bound native programs
+
+got zero 0 program_id=63 nonzero_generations=1 invocations=1 retval=127
+ 
+zero all 6 actual successful startup loads replaced with bound native programs
+freq 0 program_id=84 nonzero_generations=1 invocations=1 retval=127
+ 
+freq all 6 actual successful startup loads replaced with bound native programs
+
+numeric zero 0 program_id=105 nonzero_generations=1 invocations=1 retval=127
+ 
+zero all 6 actual successful startup loads replaced with bound native programs
+freq 0 program_id=126 nonzero_generations=1 invocations=1 retval=127
+ 
+freq all 6 actual successful startup loads replaced with bound native programs
+
+subprogram zero 0 program_id=147 nonzero_generations=1 invocations=1 retval=127
+ 
+zero all 6 actual successful startup loads replaced with bound native programs
+freq 0 program_id=168 nonzero_generations=1 invocations=1 retval=127
+ 
+freq all 6 actual successful startup loads replaced with bound native programs
+

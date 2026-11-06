@@ -23,3 +23,27 @@ guest:
 
 artifacts:
 	tar -czf $(HERE)/strict-runtime-artifacts.tar.gz --exclude='sockets' -C $(HERE) strict-runtime-input object-startup-published
+
+LINK_TARGET := $(ROOT)/kprog/x86/native_lab/native_link/target-c-tail
+link-build:
+	taskset -c 12-15 cargo build -j2 --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml --target-dir $(LINK_TARGET)
+
+test-link:
+	taskset -c 12-15 cargo test -j2 --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml --target-dir $(LINK_TARGET)
+
+tail-build:
+	python3 $(HERE)/check_tail_helpers.py build
+
+tail-kvm:
+	taskset -c 12-15 vng --run $(INPUT)/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /workspaces/.agent-state/kprog-lanes/C --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/strict-runtime.mk tail-guest'
+
+tail-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod $(INPUT)/bpf_x86_native_lab.ko
+	python3 $(HERE)/check_tail_helpers.py bound
+
+tail-negative:
+	python3 $(HERE)/check_tail_helpers.py negative
+
+tail-artifacts:
+	tar -czf $(HERE)/tail-helper-artifacts.tar.gz --exclude='sockets' --exclude='target' -C $(HERE) tail-helper tail-object-direct tail-object-got tail-object-numeric tail-object-subprogram -C /workspaces/.agent-state/kprog-lanes/C/tail-check-source kprog/x86/native_lab/native_link

@@ -1,5 +1,9 @@
 # Lane C: application proof-artifact coverage, 2026-11-06
 
+[External helper tail-jump repair](tail-helpers.md) preserves direct, GOT,
+numeric-ID and subprogram tail-helper operations through proof/kernel linking.
+All four forms pass actual bound startup controls; unknown targets reject.
+
 [Production strict startup](strict-runtime.md) replaces all six successful
 programs of the tested libbpf object startup with generation-bound native
 programs, with source load flags0 and8. Complete corpus-app coverage remains

@@ -106,6 +106,12 @@ fn x86_callee_flow(
                         }
                     }
                 }
+                Some(values) if !values.is_empty() && values.iter()
+                    .all(|value| !matches!(value, X86Callee::Code(..))) => {
+                    // A finite external-helper tail jump has no local successor.
+                    // Broadcasting an unknown local jump would erase its own
+                    // reaching helper identity before canonicalization.
+                }
                 _ => { next.clear(); successors.extend(0..instructions.len()); }
             }
         } else if !matches!(flow, FlowControl::Return | FlowControl::UnconditionalBranch |
@@ -413,6 +419,7 @@ pub(super) fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
         152 => Some("bpf_redirect_neigh"),
         155 => Some("bpf_redirect_peer"),
         158 => Some("bpf_get_current_task_btf"),
+        160 => Some("bpf_ktime_get_coarse_ns"),
         161 => Some("bpf_ima_inode_hash"),
         164 => Some("bpf_for_each_map_elem"),
         173 => Some("bpf_get_func_ip"),
@@ -1391,6 +1398,42 @@ pub(super) fn rewrite_x86(
             }
             if is_entry {
                 remap_x86_entry_registers(&mut insn, &entry_abi_strip.register_renames)?;
+            }
+
+            // An external tail jump must return through the native fragment's
+            // epilogue. Canonicalize it before branch encoding can shrink its
+            // unresolved ELF displacement and destroy the relocation field.
+            let helper_tail = proof_mode && matches!(insn.flow_control(),
+                FlowControl::UnconditionalBranch | FlowControl::IndirectBranch)
+                && (helper_call_sites.contains_key(&site_key)
+                    || helper_targets.get(&(sym.address + local_ip))
+                        .map(|targets| !targets.is_empty() && targets.iter().all(|target|
+                            matches!(target, X86Callee::Id(_) | X86Callee::Symbol(_))))
+                        .unwrap_or(false));
+            if helper_tail {
+                if insn.flow_control() == FlowControl::UnconditionalBranch {
+                    insn.set_code(Code::Call_rel32_64);
+                    insn.set_near_branch64(local_ip + 5);
+                } else {
+                    insn.set_code(Code::Call_rm64);
+                }
+                insn.set_ip(local_ip);
+                local.push(insn);
+                kinds.push(None);
+                insn_local_ip.push(local_ip);
+                let mut return_insn = Instruction::default();
+                if is_entry {
+                    return_insn.set_code(Code::Jmp_rel32_64);
+                    return_insn.set_op0_kind(OpKind::NearBranch64);
+                    return_insn.set_near_branch64(X86_JMP_END_PLACEHOLDER_TARGET);
+                } else {
+                    return_insn.set_code(Code::Retnq);
+                }
+                push_x86_synthetic(&mut local, &mut kinds, &mut insn_local_ip,
+                    &mut next_synthetic_ip, return_insn)?;
+                if is_entry { *kinds.last_mut().expect("tail return pushed") = Some(PatchKind::JmpEnd); }
+                clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                continue;
             }
 
             if insn.mnemonic() == Mnemonic::Mov

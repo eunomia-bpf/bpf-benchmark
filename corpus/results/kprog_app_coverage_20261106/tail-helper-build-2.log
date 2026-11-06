@@ -1,0 +1,9 @@
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_tail_helpers.py build
+direct canonical helper CALL + fragment return, valid ELF fields, proof compile PASS
+got canonical helper CALL + fragment return, valid ELF fields, proof compile PASS
+Traceback (most recent call last):
+  File "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_tail_helpers.py", line 33, in <module>
+    if len(calls)!=(2 if name=='subprogram' else 1):raise RuntimeError(calls)
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: []
+make: *** [corpus/results/kprog_app_coverage_20261106/strict-runtime.mk:35: tail-build] Error 1

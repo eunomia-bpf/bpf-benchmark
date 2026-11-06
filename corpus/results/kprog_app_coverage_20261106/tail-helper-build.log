@@ -1,0 +1,7 @@
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_tail_helpers.py build
+Traceback (most recent call last):
+  File "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_tail_helpers.py", line 32, in <module>
+    calls=[insn for insn in all_insns if insn.op=='call']
+                                         ^^^^^^^
+AttributeError: 'NativeInsn' object has no attribute 'op'
+make: *** [corpus/results/kprog_app_coverage_20261106/strict-runtime.mk:35: tail-build] Error 1

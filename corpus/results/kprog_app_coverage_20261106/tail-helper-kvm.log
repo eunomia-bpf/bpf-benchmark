@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_tail_helpers.py", line 56, in <module>
+    result=run([sys.executable,HERE/'check_object_startup.py','tail-object-'+name],env=env)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: run() got an unexpected keyword argument 'env'
+make: *** [/workspaces/repository/corpus/results/kprog_app_coverage_20261106/strict-runtime.mk:43: tail-guest] Error 1
+make: *** [corpus/results/kprog_app_coverage_20261106/strict-runtime.mk:38: tail-kvm] Error 2

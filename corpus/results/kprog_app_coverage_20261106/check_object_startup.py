@@ -14,6 +14,9 @@ zero=dict(program='',prog_type=1,source_bytecode_hex=raw,
 entries=[zero,dict(zero,program='libbpf_nametest')]
 for name,program,kind in [('object_coarse','',1),('object_arg_ctx','det_arg_ctx',2),('object_sock','',9)]:
     entry=json.loads((HERE/'startup-lift'/name/'manifest-entry.json').read_text())
+    if name=='object_coarse' and 'KPROG_TEST_COARSE_NATIVE' in os.environ:
+        entry.update(native_object=os.environ['KPROG_TEST_COARSE_NATIVE'],symbol=os.environ['KPROG_TEST_COARSE_SYMBOL'],
+                     simulator_object=os.environ['KPROG_TEST_COARSE_SIM'],simulator_program=os.environ['KPROG_TEST_COARSE_PROGRAM'])
     entries.append(dict(entry,program=program,prog_type=kind))
 entries.append(dict(program='runtime_source',prog_type=6,
     native_object=str(HERE/'pushpop-build/imm8_positive.proof.o'),symbol='imm8_positive_native',
@@ -25,7 +28,7 @@ for name,flags in [('zero',0),('freq',8)]:
     command=[str(HERE/'context-runtime/startup'),str(HERE/'context-runtime/source.bpf.o'),str(flags)]
     env=dict(os.environ,LD_PRELOAD=os.environ.get('KPROG_TEST_SHIM',str(SOURCE/'shim-after.so')),BPFREJIT_SHIM_NATIVE_LOADER='1',
         BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1',BPFREJIT_SHIM_NATIVE_MANIFEST=str(manifest),
-        BPFREJIT_NATIVE_LINK_BINARY=str(ROOT/'kprog/x86/native_lab/native_link/target-c-readonly/release/native-link'),
+        BPFREJIT_NATIVE_LINK_BINARY=os.environ.get('KPROG_TEST_LINK',str(ROOT/'kprog/x86/native_lab/native_link/target-c-readonly/release/native-link')),
         BPFREJIT_NATIVE_LOADER_SO=os.environ.get('KPROG_TEST_LOADER',str(SOURCE/'build/libnative_loader.so')),
         BPFREJIT_SHIM_DIR=str(directory),BPFREJIT_SHIM_LOG=str(directory/'shim.log'),
         BPFREJIT_SHIM_SOCK_DIR=str(directory/'sockets'))
