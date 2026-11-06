@@ -170,48 +170,44 @@ cc .../vendor/build/x86/linux/vmlinux.o -o .../vendor/build/x86/linux/vmlinux
 That fails `host-micro-programs-x86` and blocks both `make micro` and
 `make corpus`. Reported; not worked around here.
 
-### Native arm state at 16:34
+### Native arm state, latest
 
-Blockers cleared in order (each was a real, reproducible failure):
+Blockers cleared in order (each reproducible, each named with evidence):
 
 1. module/kernel BTF mismatch — rebuilt the module against the current
    kernel and repackaged the image;
-2. `vmlinux` relinked with the host `cc` because `vmlinux.o` sat beside it
+2. `vmlinux` relinked with the host `cc` because `vmlinux.o` sits beside it
    and make's builtin `%: %.o` rule applied;
-3. `native-link` did not compile (`missing field readonly_objects`);
-4. `siphash_rotate64_mixer` hit `error in backend: IO failure on output
+3. `native-link` did not compile (`missing field readonly_objects`, twice);
+4. `siphash_rotate64_mixer`: `error in backend: IO failure on output
    stream: Bad address` under concurrent load;
-5. the image shipped a **stale prebuilt loader** from an earlier state of
-   the dirty `native_loader.cpp`, which reported
-   `manifest native object is unreadable` — a check absent from the
-   current source. Cleared by removing
-   `runner/build-llvmbpf/native_loader` and
-   `runner/build-host-docker-llvmbpf/native_loader` before packaging.
+5. a **stale prebuilt shim/loader** shipped in the image — `host-shim-x86`
+   has no prerequisites and misses the header dependency, so a header-only
+   change never reaches the `.so`. Removing
+   `bpfopt/shim/build-x86/libbpfrejit_shim.so` (and the two
+   `runner/build-*/native_loader` dirs) before packaging fixes it, and the
+   image then reports the string that proves which shim it carries.
 
-The native arm then fails on `verified native runtime has no manifest
-entry for prog= ...`, and the logs name the cause exactly. Every failing
-load is the **same two-instruction program**:
+**Current stopping point** (`corpus/results/
+x86_kvm_corpus_20261106_180719_356323`): the verified arm dies at startup
+with `rc=97`, and the shim log pins it to libbpf's own probe —
 
 ```
 BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2
-  hash=39f82ae52884c235 ...      (x6, from capable/biosnoop/vfsstat/opensnoop)
+  hash=39f82ae52884c235
+source=/tmp/bpfrejit_<pid>_39f82ae52884c235.bpf
+verified native runtime has no manifest entry for prog= ...
 ```
 
-That is libbpf's startup **feature probe**, not any application program.
-`bpfopt/shim/shim_native_loader.h:429` exempts probe programs only when
-the bound requirement is *off*:
+`shim_native_loader.h` exempts probe programs only when the bound
+requirement is **off**; commit `dd3707caf` made that deliberate ("The
+verified arm binds startup probes as well as resident programs"). Under
+that design the application manifest must therefore carry a probe entry,
+or no application can start on the verified arm. Reported to the shim
+owner with both options; the measurement is one manifest field or one
+guard away.
 
-```c
-if (!shim_native_loader_requires_bound_proof() &&
-    shim_native_loader_is_libbpf_probe(prog)) { /* skip */ }
-```
-
-so on the verified arm (`REQUIRE_BOUND_PROOF=1`) the probe reaches the
-fatal `!result.replaced` path and the application dies before loading a
-single real program. A probe's bytecode is libbpf's, not the app's, so it
-can never appear in a manifest. The log's zero "skipped feature probe"
-lines against five fatal lines on one probe hash confirm the branch is
-never taken. Reported to the shim owner as a one-line ordering defect.
+### Work done per arm
 
 The native arm itself is selected with
 
