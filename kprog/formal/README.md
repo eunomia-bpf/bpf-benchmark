@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0989 - the binding was a pattern, not a literal
+
+The section states that seventy-seven theorems close over a generated table and
+that all of them fall in one of four classes. The second half is guarded: a
+theorem that named a table and matched no class would make the enumeration read
+as exhaustive when it had stopped being, and the check exits on one.
+
+The first half is bound too, by a pattern that reads the figure and compares it
+with the counted population. Perturbing it reports the stated number beside the
+tree's, which is what a bound figure should do.
+
+Finding that took a second look: a search of the checker for the number found
+only the comment that explains it, because the binding is the other way round, a
+pattern holding the digits and the count arriving from the scan. The claim was
+bound and the search was wrong.
+
+Census unchanged; one claim about the table-closing population is verified in
+both halves.
+
 ### Step 0988 - the count explained, and the guard that caught a word
 
 The sentence names six keywords and then says the gate checks five forms,
