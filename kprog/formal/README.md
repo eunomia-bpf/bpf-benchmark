@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0955 - every numeral form the checker reads
+
+A perturbation that fails to apply reads like a checker missing a claim, so the
+numeral forms were audited. The paper groups thousands with braces inside math
+mode, and a search for the plain digits finds nothing; the checker therefore
+either normalises the text or matches the braces in its pattern, and every
+extraction that captures a numeral was checked for one of the two.
+
+Three capture numerals without normalising nearby, and all three are covered by
+their patterns: one admits braces in the character class, and two capture file
+names and identifiers rather than counts. A claim stated with braces was then
+perturbed, and the run reported it with the log's value beside it.
+
+So the earlier no-op was a searching mistake rather than a checker gap, and the
+audit says which forms the checker reads. Census unchanged; the numeral forms
+are verified.
+
 ### Step 0954 - the two checkers own disjoint figures
 
 The two checkers were tested together rather than one at a time: two figures
