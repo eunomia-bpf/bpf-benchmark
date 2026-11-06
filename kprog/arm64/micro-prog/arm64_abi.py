@@ -178,6 +178,13 @@ def check_definedness(insns, targets, linked_exit, decode):
             # overwrite does not make the native instruction safe to admit.
             if op == 'ldp' and args[0] == args[1]:
                 raise ValueError(f'constrained-unpredictable native LDP destination overlap at {where}')
+            # GPR base/data overlap with writeback can also decode as UNDEF.
+            # SP and ZR share an encoding number but are distinct registers.
+            if mem.flags and mem.base != 'ARM64_SP':
+                base = ri(raw(mem.base))[0]
+                data = args[:2] if op in {'ldp', 'stp'} else args[:1]
+                if any(ri(operand)[0] == base for operand in data):
+                    raise ValueError(f'constrained-unpredictable native writeback/base register overlap at {where}')
             # Kernel entry SP is 16-byte aligned and SCTLR_EL1.SA is enabled.
             # CheckSPAlignment uses the old SP, before address/writeback.
             if mem.base == 'ARM64_SP':

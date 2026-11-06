@@ -1,0 +1,119 @@
+[
+  {
+    "name": "ldr_x_alias_post",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;ldr x1,[x1],#8;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "specialization_rejected",
+    "message": "constrained-unpredictable native writeback/base register overlap at 0x18: ldr x1, [x1], #8",
+    "positive_control": false
+  },
+  {
+    "name": "ldr_w_alias_post",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;ldr w1,[x1],#4;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "specialization_rejected",
+    "message": "constrained-unpredictable native writeback/base register overlap at 0x18: ldr w1, [x1], #4",
+    "positive_control": false
+  },
+  {
+    "name": "ldrb_alias_post",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;ldrb w1,[x1],#1;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "specialization_rejected",
+    "message": "constrained-unpredictable native writeback/base register overlap at 0x18: ldrb w1, [x1], #1",
+    "positive_control": false
+  },
+  {
+    "name": "ldrh_alias_post",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;ldrh w1,[x1],#2;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "specialization_rejected",
+    "message": "constrained-unpredictable native writeback/base register overlap at 0x18: ldrh w1, [x1], #2",
+    "positive_control": false
+  },
+  {
+    "name": "ldr_x_alias_pre",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;ldr x1,[x1,#8]!;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "specialization_rejected",
+    "message": "constrained-unpredictable native writeback/base register overlap at 0x18: ldr x1, [x1, #8]!",
+    "positive_control": false
+  },
+  {
+    "name": "ldp_first_alias_post",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;ldp x1,x2,[x1],#16;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "specialization_rejected",
+    "message": "constrained-unpredictable native writeback/base register overlap at 0x18: ldp x1, x2, [x1], #16",
+    "positive_control": false
+  },
+  {
+    "name": "ldp_second_alias_pre",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;ldp x2,x1,[x1,#16]!;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "specialization_rejected",
+    "message": "constrained-unpredictable native writeback/base register overlap at 0x18: ldp x2, x1, [x1, #16]!",
+    "positive_control": false
+  },
+  {
+    "name": "str_x_alias_post",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;str x1,[x1],#8;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "specialization_rejected",
+    "message": "constrained-unpredictable native writeback/base register overlap at 0x18: str x1, [x1], #8",
+    "positive_control": false
+  },
+  {
+    "name": "str_w_alias_post",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;str w1,[x1],#4;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "specialization_rejected",
+    "message": "constrained-unpredictable native writeback/base register overlap at 0x18: str w1, [x1], #4",
+    "positive_control": false
+  },
+  {
+    "name": "stp_first_alias_post",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;stp x1,x2,[x1],#16;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "specialization_rejected",
+    "message": "constrained-unpredictable native writeback/base register overlap at 0x18: stp x1, x2, [x1], #16",
+    "positive_control": false
+  },
+  {
+    "name": "stp_second_alias_pre",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;stp x2,x1,[x1,#16]!;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "specialization_rejected",
+    "message": "constrained-unpredictable native writeback/base register overlap at 0x18: stp x2, x1, [x1, #16]!",
+    "positive_control": false
+  },
+  {
+    "name": "ldr_distinct_control",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;ldr x2,[x1],#8;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=8 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": true
+  },
+  {
+    "name": "str_distinct_control",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;str x3,[x1],#8;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=16 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": true
+  },
+  {
+    "name": "ldp_distinct_control",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;ldp x2,x3,[x1],#16;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=24 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": true
+  },
+  {
+    "name": "stp_distinct_control",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;stp x2,x3,[x1],#16;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=32 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": true
+  },
+  {
+    "name": "sp_zr_control",
+    "assembly": "sub sp,sp,#32;mov x3,#2;stp x3,x3,[sp];stp x3,x3,[sp,#16];mov x1,sp;mov x2,#2;str xzr,[sp,#-16]!;add sp,sp,#16;add sp,sp,#32;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=40 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": true
+  }
+]

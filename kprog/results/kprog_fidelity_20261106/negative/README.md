@@ -279,3 +279,13 @@ all29 positive proof builds pass. `x86-post-ldp-matched/README.md` repeats all17
 x86 cases with a matched current binding tuple:16 reject, one stack-base-flags
 finding remains, zero infrastructure errors. The earlier mixed-tuple attempt
 is retained as infrastructure evidence rather than counted as rejection.
+
+## Writeback/base overlap repaired
+
+`arm64-writeback-overlap/README.md` records11 additional generation-bound
+acceptances of constrained-unpredictable load/store writeback encodings.
+All11 now reject during specialization; five legitimate writeback controls
+remain bound-load accepted. The permanent21-case Arm suite rejects19 and
+retains the same two numeric-address findings. All40 ABI regressions and
+all29 positive proof builds pass; exact before/after inputs and messages remain
+in the dated result directory.
