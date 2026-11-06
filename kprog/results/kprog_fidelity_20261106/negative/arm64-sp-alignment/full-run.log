@@ -1,0 +1,9 @@
+make: Entering directory '/workspaces/repository/kprog/results/kprog_fidelity_20261106/negative/arm64-sp-alignment'
+python3 prepare_full.py /workspaces/repository/kprog/fidelity/build-arm64/sp-alignment-bound
+python3 package.py /workspaces/repository/kprog/fidelity/build-arm64/sp-alignment-bound/full-run
+install -d full-after
+timeout 240 qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 2 -m 2048 -nographic -no-reboot -kernel /workspaces/repository/kprog/fidelity/build-arm64/sp-alignment-bound/Image -initrd /workspaces/repository/kprog/fidelity/build-arm64/sp-alignment-bound/full-run/init.cpio -append 'console=ttyAMA0 rdinit=/init panic=-1' > full-after/guest-console.log 2>&1
+cd /workspaces/repository/kprog/fidelity && python3 negative.py collect-bound --arch arm64 --build /workspaces/repository/kprog/fidelity/build-arm64/sp-alignment-bound/full-suite --out /workspaces/repository/kprog/results/kprog_fidelity_20261106/negative/arm64-sp-alignment/full-after
+{"arch": "arm64", "stages": {"accepted_finding": 2, "loader_rejected": 1, "specialization_rejected": 6, "verifier_rejected": 9}}
+make: *** [Makefile:24: full-run] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/kprog_fidelity_20261106/negative/arm64-sp-alignment'

@@ -1,0 +1,7 @@
+make: Entering directory '/workspaces/repository/kprog/results/kprog_fidelity_20261106/negative/arm64-sp-alignment'
+timeout 240 qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 2 -m 2048 -nographic -no-reboot -kernel /workspaces/repository/kprog/fidelity/build-arm64/sp-alignment-bound/Image -initrd /workspaces/repository/kprog/fidelity/build-arm64/sp-alignment-bound/init.cpio -append 'console=ttyAMA0 rdinit=/init panic=-1' > guest-console.log 2>&1
+python3 collect.py
+misaligned_sp 0 reject
+unaligned_address 0 accept
+make: *** [Makefile:10: run] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/kprog_fidelity_20261106/negative/arm64-sp-alignment'

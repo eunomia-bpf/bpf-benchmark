@@ -1,0 +1,88 @@
+make: Entering directory '/workspaces/repository/kprog/arm64'
+python3 generate_sim_dispatch.py
+make -C ../test \
+	OUTPUT_DIR="/workspaces/repository/kprog/arm64/build/fidelity-sp-alignment/negative-native" \
+	KERNEL_OFFSETS_DIR="/workspaces/repository/micro/programs/build-arm64" \
+	NATIVE_TARGET=aarch64-linux-gnu \
+	NATIVE_ARCH=arm64 \
+	SYS_INCLUDE_FLAGS="-I/usr/aarch64-linux-gnu/include -I../../.cache/aarch64-sysroot/usr/include -I../../.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu" \
+	"/workspaces/repository/kprog/arm64/build/fidelity-sp-alignment/negative-native/unchecked_packet_read.native.o"
+make[1]: Entering directory '/workspaces/repository/kprog/test'
+install -d "/workspaces/repository/kprog/arm64/build/fidelity-sp-alignment/negative-native"
+clang --target=aarch64-linux-gnu -Wall -Wextra -O3 -g -fPIC -c -fno-plt -DMICRO_NATIVE -fomit-frame-pointer  -mtune=neoverse-n1 -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -mllvm -switch-to-lookup=false -I/usr/aarch64-linux-gnu/include -I../../.cache/aarch64-sysroot/usr/include -I../../.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu -MMD -MP -I"/workspaces/repository/micro/programs" -I"/workspaces/repository/micro/programs/build-arm64/" \
+    -MF "/workspaces/repository/kprog/arm64/build/fidelity-sp-alignment/negative-native/unchecked_packet_read.native.d" -MT "/workspaces/repository/kprog/arm64/build/fidelity-sp-alignment/negative-native/unchecked_packet_read.native.o" -o "/workspaces/repository/kprog/arm64/build/fidelity-sp-alignment/negative-native/unchecked_packet_read.native.o" "unchecked_packet_read.bpf.c"
+make[1]: Leaving directory '/workspaces/repository/kprog/test'
+python3 ../run_micro_sim_batch.py --arch arm64 --build-only \
+	--build-dir "build/fidelity-sp-alignment/micro-proofs/negative" \
+	--native-build-dir "build/fidelity-sp-alignment/negative-native" \
+	--config "../test/kprog_negative_stage2.yaml" \
+	--jobs 1
+unchecked_packet_read: ok: compile=0.069s proof_insns=5 direct_insns= verify=0.000s test=0.000s 
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `unchecked_packet_read` | ok | 0.069 | 5 |  | 0.000 | 0.000 |  |
+python3 ../run_micro_sim_batch.py --arch arm64 --build-only \
+	--build-dir "build/fidelity-sp-alignment/micro-proofs" \
+	--config "../../micro/config/micro_pure_jit.yaml" \
+	--jobs 1
+simple: ok: compile=0.154s proof_insns=28 direct_insns= verify=0.000s test=0.000s 
+simple_packet: ok: compile=0.144s proof_insns=25 direct_insns= verify=0.000s test=0.000s 
+bitmap_popcount_scan: ok: compile=0.241s proof_insns=117 direct_insns= verify=0.000s test=0.000s 
+sorted_rule_binary_search: ok: compile=0.504s proof_insns=184 direct_insns= verify=0.000s test=0.000s 
+bcc_runqlat_log2_histogram_bucket: ok: compile=0.490s proof_insns=180 direct_insns= verify=0.000s test=0.000s 
+trace_event_type_switch_dispatch: ok: compile=0.811s proof_insns=295 direct_insns= verify=0.000s test=0.000s 
+packet_checksum_fold: ok: compile=0.261s proof_insns=105 direct_insns= verify=0.000s test=0.000s 
+payload_prefix_memcmp_scan: ok: compile=0.545s proof_insns=145 direct_insns= verify=0.000s test=0.000s 
+packet_vlan_tcpopt_parser: ok: compile=1.095s proof_insns=262 direct_insns= verify=0.000s test=0.000s 
+bpf_local_call_fanout_dispatch: ok: compile=2.180s proof_insns=533 direct_insns= verify=0.000s test=0.000s 
+flow_5tuple_rss_hash: ok: compile=0.947s proof_insns=271 direct_insns= verify=0.000s test=0.000s 
+katran_lb_consistent_hash_select: ok: compile=2.856s proof_insns=842 direct_insns= verify=0.000s test=0.000s 
+cilium_policy_guard_tree_filter: ok: compile=0.600s proof_insns=157 direct_insns= verify=0.000s test=0.000s 
+siphash_rotate64_mixer: ok: compile=2.445s proof_insns=1024 direct_insns= verify=0.000s test=0.000s 
+packet_record_bounds_window: ok: compile=0.514s proof_insns=163 direct_insns= verify=0.000s test=0.000s 
+flow_record_field_scan: ok: compile=0.567s proof_insns=198 direct_insns= verify=0.000s test=0.000s 
+packed_header_bitfield_decode: ok: compile=2.033s proof_insns=294 direct_insns= verify=0.000s test=0.000s 
+bpftrace_string_search_prefix_scan: ok: compile=0.810s proof_insns=174 direct_insns= verify=0.000s test=0.000s 
+tracee_syscall_name_table_lookup: ok: compile=1.053s proof_insns=240 direct_insns= verify=0.000s test=0.000s 
+tracee_http_method_prefix_detect: ok: compile=0.959s proof_insns=167 direct_insns= verify=0.000s test=0.000s 
+cilium_socket_lb_service_select: ok: compile=0.619s proof_insns=254 direct_insns= verify=0.000s test=0.000s 
+bcc_tcpconnect_ipv4_tuple_filter: ok: compile=0.723s proof_insns=280 direct_insns= verify=0.000s test=0.000s 
+tetragon_process_event_arg_filter: ok: compile=1.799s proof_insns=375 direct_insns= verify=0.000s test=0.000s 
+otel_stack_frame_unwind_scan: ok: compile=0.481s proof_insns=235 direct_insns= verify=0.000s test=0.000s 
+cilium_ct_nat_tuple_rewrite: ok: compile=0.606s proof_insns=229 direct_insns= verify=0.000s test=0.000s 
+packet_toeplitz_rss_hash: ok: compile=0.720s proof_insns=263 direct_insns= verify=0.000s test=0.000s 
+bpftrace_comm_key_fnv_hash: ok: compile=1.697s proof_insns=256 direct_insns= verify=0.000s test=0.000s 
+tc_packet_checksum_fold: ok: compile=0.351s proof_insns=132 direct_insns= verify=0.000s test=0.000s 
+cgroup_skb_hash_chain: ok: compile=1.553s proof_insns=551 direct_insns= verify=0.000s test=0.000s 
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `simple` | ok | 0.154 | 28 |  | 0.000 | 0.000 |  |
+| `simple_packet` | ok | 0.144 | 25 |  | 0.000 | 0.000 |  |
+| `bitmap_popcount_scan` | ok | 0.241 | 117 |  | 0.000 | 0.000 |  |
+| `sorted_rule_binary_search` | ok | 0.504 | 184 |  | 0.000 | 0.000 |  |
+| `bcc_runqlat_log2_histogram_bucket` | ok | 0.490 | 180 |  | 0.000 | 0.000 |  |
+| `trace_event_type_switch_dispatch` | ok | 0.811 | 295 |  | 0.000 | 0.000 |  |
+| `packet_checksum_fold` | ok | 0.261 | 105 |  | 0.000 | 0.000 |  |
+| `payload_prefix_memcmp_scan` | ok | 0.545 | 145 |  | 0.000 | 0.000 |  |
+| `packet_vlan_tcpopt_parser` | ok | 1.095 | 262 |  | 0.000 | 0.000 |  |
+| `bpf_local_call_fanout_dispatch` | ok | 2.180 | 533 |  | 0.000 | 0.000 |  |
+| `flow_5tuple_rss_hash` | ok | 0.947 | 271 |  | 0.000 | 0.000 |  |
+| `katran_lb_consistent_hash_select` | ok | 2.856 | 842 |  | 0.000 | 0.000 |  |
+| `cilium_policy_guard_tree_filter` | ok | 0.600 | 157 |  | 0.000 | 0.000 |  |
+| `siphash_rotate64_mixer` | ok | 2.445 | 1024 |  | 0.000 | 0.000 |  |
+| `packet_record_bounds_window` | ok | 0.514 | 163 |  | 0.000 | 0.000 |  |
+| `flow_record_field_scan` | ok | 0.567 | 198 |  | 0.000 | 0.000 |  |
+| `packed_header_bitfield_decode` | ok | 2.033 | 294 |  | 0.000 | 0.000 |  |
+| `bpftrace_string_search_prefix_scan` | ok | 0.810 | 174 |  | 0.000 | 0.000 |  |
+| `tracee_syscall_name_table_lookup` | ok | 1.053 | 240 |  | 0.000 | 0.000 |  |
+| `tracee_http_method_prefix_detect` | ok | 0.959 | 167 |  | 0.000 | 0.000 |  |
+| `cilium_socket_lb_service_select` | ok | 0.619 | 254 |  | 0.000 | 0.000 |  |
+| `bcc_tcpconnect_ipv4_tuple_filter` | ok | 0.723 | 280 |  | 0.000 | 0.000 |  |
+| `tetragon_process_event_arg_filter` | ok | 1.799 | 375 |  | 0.000 | 0.000 |  |
+| `otel_stack_frame_unwind_scan` | ok | 0.481 | 235 |  | 0.000 | 0.000 |  |
+| `cilium_ct_nat_tuple_rewrite` | ok | 0.606 | 229 |  | 0.000 | 0.000 |  |
+| `packet_toeplitz_rss_hash` | ok | 0.720 | 263 |  | 0.000 | 0.000 |  |
+| `bpftrace_comm_key_fnv_hash` | ok | 1.697 | 256 |  | 0.000 | 0.000 |  |
+| `tc_packet_checksum_fold` | ok | 0.351 | 132 |  | 0.000 | 0.000 |  |
+| `cgroup_skb_hash_chain` | ok | 1.553 | 551 |  | 0.000 | 0.000 |  |
+make: Leaving directory '/workspaces/repository/kprog/arm64'

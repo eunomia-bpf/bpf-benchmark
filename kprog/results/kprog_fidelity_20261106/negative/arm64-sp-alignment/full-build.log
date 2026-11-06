@@ -1,0 +1,7 @@
+make: Entering directory '/workspaces/repository/kprog/results/kprog_fidelity_20261106/negative/arm64-sp-alignment'
+make -C /workspaces/repository/kprog/fidelity negative-build ARCH=arm64 NEGATIVE_BUILD=build-arm64/sp-alignment-bound/full-suite
+make[1]: Entering directory '/workspaces/repository/kprog/fidelity'
+python3 negative.py build --arch arm64 --build build-arm64/sp-alignment-bound/full-suite
+{"arch": "arm64", "cases": 18, "stages": {"generated": 12, "specialization_rejected": 6}}
+make[1]: Leaving directory '/workspaces/repository/kprog/fidelity'
+make: Leaving directory '/workspaces/repository/kprog/results/kprog_fidelity_20261106/negative/arm64-sp-alignment'

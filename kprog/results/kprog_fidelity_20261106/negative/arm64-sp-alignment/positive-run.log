@@ -1,0 +1,10 @@
+make: Entering directory '/workspaces/repository/kprog/results/kprog_fidelity_20261106/negative/arm64-sp-alignment'
+python3 prepare_positive.py /workspaces/repository/kprog/fidelity/build-arm64/sp-alignment-bound
+python3 package.py /workspaces/repository/kprog/fidelity/build-arm64/sp-alignment-bound/positive-run
+install -d positive-after
+timeout 240 qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 2 -m 2048 -nographic -no-reboot -kernel /workspaces/repository/kprog/fidelity/build-arm64/sp-alignment-bound/Image -initrd /workspaces/repository/kprog/fidelity/build-arm64/sp-alignment-bound/positive-run/init.cpio -append 'console=ttyAMA0 rdinit=/init panic=-1' > positive-after/guest-console.log 2>&1
+python3 collect_positive.py
+unaligned_effective_address 0
+preindex_old_sp_aligned 0
+postindex_old_sp_aligned 0
+make: Leaving directory '/workspaces/repository/kprog/results/kprog_fidelity_20261106/negative/arm64-sp-alignment'

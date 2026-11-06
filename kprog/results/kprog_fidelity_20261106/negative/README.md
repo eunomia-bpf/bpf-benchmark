@@ -257,3 +257,13 @@ Each VM has2vCPUs/2GiB and runs only on host CPUs16–23. Both suite commands
 return nonzero for the retained findings, with zero infrastructure failures.
 `current-negative-artifacts.tar.gz` preserves native/proof inputs, compiler
 diagnostics and the exact production include/import snapshots for both ISAs.
+
+## Arm SP alignment acceptance repaired
+
+`arm64-sp-alignment/README.md` records a newly confirmed generation-bound
+acceptance of a native SP-alignment fault and its production specializer fix.
+The current18-case Arm rerun rejects16 cases, retaining only the two earlier
+numeric-address findings. All11 original cases still reject. Five alignment
+regressions and all40 real-encoding ABI checks pass; three legitimate
+unaligned-address/preindex/postindex controls remain bound-load accepted.
+The negative proof and all29 workload-derived positive proofs rebuild.

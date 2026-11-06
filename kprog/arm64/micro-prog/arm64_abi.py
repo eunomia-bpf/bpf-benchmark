@@ -174,6 +174,14 @@ def check_definedness(insns, targets, linked_exit, decode):
         memory_index = next((i for i, arg in enumerate(args) if arg.startswith('[')), None)
         if memory_index is not None:
             mem = decode.parse_mem(args, memory_index)
+            # Kernel entry SP is 16-byte aligned and SCTLR_EL1.SA is enabled.
+            # CheckSPAlignment uses the old SP, before address/writeback.
+            if mem.base == 'ARM64_SP':
+                sp = incoming.aliases[31]
+                if type(sp) is not int:
+                    raise ValueError(f'native SP alignment unresolved at {where}')
+                if sp % 16:
+                    raise ValueError(f'native SP alignment fault at {where}')
             location = address(mem)
             loads = op.startswith('ld')
             pair = op in {'ldp', 'stp'}
