@@ -447,3 +447,18 @@ not same-work counters or verified native application success.
 are preserved, including both earlier failures. A recovery run is active from
 the pinned kernel/module pair. App context/map/proof completion and both address
 findings remain required work; nothing is waived by this preflight.
+
+## MOV-to-SP destination fixed
+
+The pointer-write path formerly ignored SP destinations, so a valid
+`mov sp,x3` could silently drop a saved-SP restore. It now writes the SP cell.
+The balanced native regression subtracts32, savesSP, adds16, restoresSP fromX3,
+subtracts the saved address and restores the entry stack. Real AArch64 execution
+returns0; the generated proof also verifies and returns0 under full-system
+QEMU. [Raw verifier/run result](sp-write/table.md), exact source/header and
+native fixtures are archived in `sp-write/`. This fixes the destination write;
+the separate absoluteSP/LR address-state findings remain active.
+
+```sh
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile sp-write-check compile verify summarize PHASE=sp-write COMPILE_ARGS='0 1 180 1 1024' KERNEL=/workspaces/repository/kprog/arm64/build/app-qemu-paired/Image
+```

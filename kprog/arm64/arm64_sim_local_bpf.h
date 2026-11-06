@@ -291,7 +291,9 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	do { __u64 __a64_l_reg = (REG); \
 	     void *__a64_l_next_ptr = (void *)(VALUE); \
 	     __u8 __a64_l_next_tag = (TAG); \
-	     if (__a64_l_reg < KPROG_ARM64_GPR_COUNT && KPROG_ARM64_REG_WRITABLE(__a64_l_reg)) { \
+	     if (__a64_l_reg == ARM64_SP) { \
+	       __a64_sp = (__s64)(long)__a64_l_next_ptr; \
+	     } else if (__a64_l_reg < KPROG_ARM64_GPR_COUNT && KPROG_ARM64_REG_WRITABLE(__a64_l_reg)) { \
 	       __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->ptr = __a64_l_next_ptr; \
 	       *__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)] = __a64_l_next_tag; \
 	     } \

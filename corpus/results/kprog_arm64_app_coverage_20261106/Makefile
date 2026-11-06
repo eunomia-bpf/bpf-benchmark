@@ -191,3 +191,11 @@ abi-census-artifacts:
 .PHONY: runtime-preflight-capture
 runtime-preflight-capture:
 	python3 $(HERE)/runtime_preflight.py $(HERE)/$(PHASE)
+
+.PHONY: sp-write-check
+sp-write-check:
+	python3 $(HERE)/sp_write_check.py $(HERE)/$(PHASE)
+
+.PHONY: sp-write-artifacts
+sp-write-artifacts:
+	tar -C $(HERE)/$(PHASE) -czf $(HERE)/$(PHASE)/native-fixtures.tar.gz main.c sp_restore.S sp_restore.asm sp_restore.proof.o native native.json
