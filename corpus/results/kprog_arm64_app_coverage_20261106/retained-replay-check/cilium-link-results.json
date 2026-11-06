@@ -1,0 +1,146 @@
+[
+  {
+    "symbol": "__check_cluster_id_bits",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/bpf_xdp.native.o",
+      "--symbol",
+      "__check_cluster_id_bits",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/__check_cluster_id_bits.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=__check_cluster_id_bits (16 bytes), 1 reachable symbol(s) total\n  - __check_cluster_id_bits (vaddr 0x0, 16 bytes) [entry]\nnative-link: wrote proof object 20 bytes, 2 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/__check_cluster_id_bits.proof.o\n"
+  },
+  {
+    "symbol": "__check_device_mtu",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/bpf_xdp.native.o",
+      "--symbol",
+      "__check_device_mtu",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/__check_device_mtu.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=__check_device_mtu (16 bytes), 1 reachable symbol(s) total\n  - __check_device_mtu (vaddr 0x10, 16 bytes) [entry]\nnative-link: wrote proof object 20 bytes, 2 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/__check_device_mtu.proof.o\n"
+  },
+  {
+    "symbol": "cil_xdp_entry",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/bpf_xdp.native.o",
+      "--symbol",
+      "cil_xdp_entry",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/cil_xdp_entry.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=cil_xdp_entry (972 bytes), 1 reachable symbol(s) total\n  - cil_xdp_entry (vaddr 0x0, 972 bytes) [entry]\nnative-link: wrote proof object 980 bytes, 18 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/cil_xdp_entry.proof.o\n"
+  },
+  {
+    "symbol": "tail_drop_notify",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/bpf_xdp.native.o",
+      "--symbol",
+      "tail_drop_notify",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/tail_drop_notify.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=tail_drop_notify (904 bytes), 1 reachable symbol(s) total\n  - tail_drop_notify (vaddr 0x0, 904 bytes) [entry]\nnative-link: wrote proof object 908 bytes, 34 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/tail_drop_notify.proof.o\n"
+  },
+  {
+    "symbol": "tail_no_service_ipv4",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/bpf_xdp.native.o",
+      "--symbol",
+      "tail_no_service_ipv4",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/tail_no_service_ipv4.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=tail_no_service_ipv4 (2068 bytes), 1 reachable symbol(s) total\n  - tail_no_service_ipv4 (vaddr 0x390, 2068 bytes) [entry]\nnative-link: wrote proof object 2076 bytes, 18 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/tail_no_service_ipv4.proof.o\n"
+  },
+  {
+    "symbol": "tail_nodeport_nat_egress_ipv4",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/bpf_xdp.native.o",
+      "--symbol",
+      "tail_nodeport_nat_egress_ipv4",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/tail_nodeport_nat_egress_ipv4.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=tail_nodeport_nat_egress_ipv4 (5276 bytes), 1 reachable symbol(s) total\n  - tail_nodeport_nat_egress_ipv4 (vaddr 0x37f0, 5276 bytes) [entry]\nnative-link: wrote proof object 5284 bytes, 132 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/tail_nodeport_nat_egress_ipv4.proof.o\n"
+  },
+  {
+    "symbol": "tail_nodeport_nat_ingress_ipv4",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/bpf_xdp.native.o",
+      "--symbol",
+      "tail_nodeport_nat_ingress_ipv4",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/tail_nodeport_nat_ingress_ipv4.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=tail_nodeport_nat_ingress_ipv4 (7764 bytes), 1 reachable symbol(s) total\n  - tail_nodeport_nat_ingress_ipv4 (vaddr 0x1990, 7764 bytes) [entry]\nnative-link: wrote proof object 7772 bytes, 170 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/tail_nodeport_nat_ingress_ipv4.proof.o\n"
+  },
+  {
+    "symbol": "tail_nodeport_rev_dnat_ipv4",
+    "command": [
+      "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+      "--input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/bpf_xdp.native.o",
+      "--symbol",
+      "tail_nodeport_rev_dnat_ipv4",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/tail_nodeport_rev_dnat_ipv4.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=tail_nodeport_rev_dnat_ipv4 (3548 bytes), 1 reachable symbol(s) total\n  - tail_nodeport_rev_dnat_ipv4 (vaddr 0xbb0, 3548 bytes) [entry]\nnative-link: wrote proof object 3556 bytes, 80 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/cilium-replay-retained-v2/tail_nodeport_rev_dnat_ipv4.proof.o\n"
+  }
+]

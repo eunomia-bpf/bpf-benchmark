@@ -789,3 +789,11 @@ attempts, including the nested native crash, are retained in the matched
 portable replay archive. No probe/name bypass is used. The five startup
 selectors and complete artifact triples are installed in each app manifest
 for the next strict corpus run.
+
+## Retained replays after runtime cleanup
+
+[Cilium replay now uses its committed input archive](retained-replay-check/README.md)
+and again compiles AArch64 plus all eight native functions after the oldv2
+runtime was removed. Lane-A superseded runtime/proof-build cleanup inventories
+are recorded there; all raw results and portable result archives remain.
+Only the currentv5 application runtime root/image are retained for execution.

@@ -1,28 +1,22 @@
 """Recompile the actual QEMU Cilium configuration with the ARM backend flags."""
 import json
 from pathlib import Path
-import shutil
 import subprocess
 import sys
+import tarfile
 from elftools.elf.elffile import ELFFile
 ROOT=Path(__file__).resolve().parents[3]
 sys.path.insert(0,str(ROOT))
 from runner.libs import cilium_native_build as build
 
 phase=Path(sys.argv[1]).resolve();phase.mkdir()
-guest=ROOT/'kprog/arm64/build/app-runtime-v2/root'
-run=guest/'workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516'
-captures=list((run/'details/cilium-native-config/parity').rglob('parity.json'))
-if len(captures)!=1:raise RuntimeError('expected the exact captured failing Cilium configuration')
-capture=captures[0];parity=json.loads(capture.read_text())
-shutil.copy2(capture,phase/'original-parity.json')
+with tarfile.open(Path(__file__).with_name('cilium-native-arch')/'replay.tar.gz') as archive:
+    members=[entry for entry in archive.getmembers() if entry.name.startswith(('config/','native-abi-overlay/'))
+        or entry.name in {'original-parity.json','native_compat.h'}]
+    archive.extractall(phase,members=members,filter='data')
+parity=json.loads((phase/'original-parity.json').read_text())
 native_root=phase/'native-abi-overlay'
-shutil.copytree(capture.parent/'native-abi-overlay',native_root,symlinks=True)
 config=phase/'config'
-for row in parity['headers']:
-    destination=config/row['source'].lstrip('/')
-    destination.parent.mkdir(parents=True,exist_ok=True)
-    shutil.copy2(capture.parent/row['archive'],destination)
 original=ROOT/'vendor/repos/cilium/bpf'
 args=[]
 for arg in parity['bpf_command'][1:]:
@@ -36,7 +30,6 @@ for arg in parity['bpf_command'][1:]:
         arg=str(original/Path(arg).name)
     args.append(arg)
 compat=phase/'native_compat.h'
-shutil.copy2(guest/'usr/local/lib/bpfrejit/native/native_compat.h',compat)
 native=phase/'bpf_xdp.native.o'
 # The real capture ran in an AArch64 guest. Cross-compile that same target on
 # this x86 build host; the ELF machine check below detects target drift.
