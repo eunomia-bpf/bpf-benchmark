@@ -301,6 +301,80 @@ def main():
     assert len(outputs) == len(push_cases)
     for (request, expected), out in zip(push_cases, outputs):
         assert out == expected, (request, out, expected)
+    # Full-field stack routes: signed immediates, source-before-decrement PUSH,
+    # destination-after-increment POP, aliasing and read-before-write faults.
+    stack_cases = []
+    for code, operation, width, value, address, failure in [
+            ([0x6A, 0xFF], "immediate", 8, (1 << 64) - 1, None, None),
+            ([0x68, 0, 0, 0, 0x80], "immediate", 8, 0xFFFFFFFF80000000, None, None),
+            ([0x66, 0x68, 0, 0x80], "immediate", 2, 0x8000, None, None),
+            ([0x66, 0x6A, 0x80], "immediate", 2, 0xFF80, None, None),
+            ([0x66, 0x48, 0x68, 0, 0, 0, 0x80], "immediate", 8, 0xFFFFFFFF80000000, None, None),
+            ([0x6A, 1], "immediate", 8, 1, None, "write"),
+            ([0xFF, 0x34, 0x24], "push", 8, 0xFEDCBA9876543210, 0x2000, None),
+            ([0x66, 0xFF, 0x34, 0x24], "push", 2, 0xABCD, 0x2000, None),
+            ([0xFF, 0x77, 8], "push", 8, 0xFEDCBA9876543210, 0x3000, None),
+            ([0x43, 0xFF, 0x74, 0x8C, 0xF8], "push", 8, 0xFEDCBA9876543210, 0x3000, None),
+            ([0xFF, 0x35, 0xFA, 0x1F, 0, 0], "push", 8, 0xFEDCBA9876543210, 0x3000, None),
+            ([0x64, 0xFF, 0x37], "push", 8, 0xFEDCBA9876543210, 0x3FF8, None),
+            ([0x67, 0xFF, 0x77, 8], "push", 8, 0xFEDCBA9876543210, 0x3000, None),
+            ([0xFF, 0x34, 0x24], "push", 8, 0xFEDCBA9876543210, 0x2000, "read"),
+            ([0xFF, 0x34, 0x24], "push", 8, 0xFEDCBA9876543210, 0x2000, "write"),
+            ([0x8F, 0x04, 0x24], "pop", 8, 0xFEDCBA9876543210, 0x2008, None),
+            ([0x66, 0x8F, 0x04, 0x24], "pop", 2, 0xABCD, 0x2002, None),
+            ([0x8F, 0x44, 0x24, 0xF8], "pop", 8, 0xFEDCBA9876543210, 0x2000, None),
+            ([0x8F, 0x47, 8], "pop", 8, 0xFEDCBA9876543210, 0x3000, None),
+            ([0x8F, 0x05, 0xFA, 0x1F, 0, 0], "pop", 8, 0xFEDCBA9876543210, 0x3000, None),
+            ([0x64, 0x8F, 0x07], "pop", 8, 0xFEDCBA9876543210, 0x3FF8, None),
+            ([0x8F, 0x04, 0x24], "pop", 8, 0xFEDCBA9876543210, 0x2008, "read"),
+            ([0x8F, 0x04, 0x24], "pop", 8, 0xFEDCBA9876543210, 0x2008, "write")]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = code
+        before = request["state"]
+        before["registers"][4] = 0x2000
+        before["registers"][7] = 0x100002FF8 if code[0] == 0x67 else 0x2FF8
+        before["registers"][9], before["registers"][12] = 2, 0x3000
+        before["fs_base"] = 0x1000
+        read_address = 0x2000 if operation == "pop" else address
+        write_address = address if operation == "pop" else 0x2000 - width
+        written = list(value.to_bytes(width, "little"))
+        mapped = {write_address + i: dict(address=write_address + i, value=0xAA,
+                  readable=True, writable=not (failure in ("read", "write") and i == width - 1),
+                  initialized=False) for i in range(width + 1)}
+        if read_address is not None:
+            for i, byte in enumerate(written):
+                cell = mapped.setdefault(read_address + i, dict(address=read_address + i,
+                    writable=True))
+                cell.update(value=byte, readable=not (failure == "read" and i == width - 1),
+                            initialized=i != 0)
+        before["memory"] = sorted(mapped.values(), key=lambda cell: cell["address"])
+        expected = copy.deepcopy(before)
+        expected.update(defined_flags=(1 << 64) - 1, fault=None, events=[])
+        if read_address is not None and failure != "read":
+            expected["events"].append(dict(kind="read", address=read_address,
+                                            value=written, initialized=False))
+        if failure:
+            reason = dict(kind=failure, address=read_address if failure == "read" else write_address,
+                          bytes=width)
+            expected["fault"] = reason
+            expected["events"].append(dict(kind="fault", fault=reason))
+        else:
+            expected["pc"] += len(code)
+            expected["registers"][4] = 0x2000 + width if operation == "pop" else write_address
+            for cell in expected["memory"]:
+                index = cell["address"] - write_address
+                if 0 <= index < width:
+                    cell.update(value=written[index], initialized=True)
+            expected["events"].append(dict(kind="write", address=write_address,
+                                            value=written, initialized=True))
+        stack_cases.append((request, expected))
+    run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
+                         input="".join(json.dumps(r) + "\n" for r, _ in stack_cases),
+                         text=True, stdout=subprocess.PIPE, check=True)
+    outputs = [json.loads(line) for line in run.stdout.splitlines()]
+    assert len(outputs) == len(stack_cases)
+    for (request, expected), out in zip(stack_cases, outputs):
+        assert out == expected, (request, out, expected)
     # Reject rather than truncate malformed wire words and duplicate mappings.
     malformed = copy.deepcopy(base)
     malformed["state"]["registers"][0] = 1 << 64
@@ -334,7 +408,7 @@ def main():
         if got & 0x80000000:
             got -= 1 << 32
         assert got == disp, (insn, encoded, got)
-    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, BZHI/ANDN VEX/result flags, PUSH/POP stack aliases, exact writes and faults, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
+    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, BZHI/ANDN VEX/result flags, PUSH immediate/memory and POP memory ordering, stack aliases, exact writes and faults, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
 
 
 if __name__ == "__main__":

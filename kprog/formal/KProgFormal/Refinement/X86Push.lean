@@ -47,27 +47,36 @@ theorem store_refines (width : StackWidth) (m : Memory) (address value : Referen
   · exact store_byte_refines width value _ h
   · rfl
 
-def handlerStep (width : StackWidth) (src : Register) (nextPc : Reference.Word)
-    (s : Reference.X86.State) : Transition Reference.X86.State :=
+def transferStep (width : StackWidth) (value : Reference.Word) (reads : List Event)
+    (nextPc : Reference.Word) (s : Reference.X86.State) : Transition Reference.X86.State :=
   let address := generatedX86PushPopAccessAt .push (s.gpr 4) (widthCode width)
   if permitted s.memory.writable address width.bytes then
-    let memory := store width s.memory address (s.gpr src)
+    let memory := store width s.memory address value
     let advanced := generatedX86PushPopRspAt .push (s.gpr 4) (widthCode width)
     ⟨{ s with gpr := (fun r => if r = 4 then advanced else s.gpr r), memory := memory, pc := nextPc },
-      [.memory .write address (valueBytes (s.gpr src) width.bytes) true], none⟩
-  else ⟨s, [.fault (.write address width.bytes)], some (.write address width.bytes)⟩
+      reads ++ [.memory .write address (valueBytes value width.bytes) true], none⟩
+  else ⟨s, reads ++ [.fault (.write address width.bytes)], some (.write address width.bytes)⟩
+
+theorem transfer_refines (width : StackWidth) (value : Reference.Word) (reads : List Event)
+    (nextPc : Reference.Word) (s : Reference.X86.State) :
+    transferStep width value reads nextPc s = Reference.X86.pushTransfer width value reads nextPc s := by
+  cases width <;>
+    simp only [transferStep, Reference.X86.pushTransfer, widthCode, generatedX86PushPopAccessAt,
+      generatedX86PushPopRspAt, GeneratedX86PushPop.stepDirection, x86PushPopToOp,
+      GeneratedX86PushPop.stepBytes, GeneratedX86PushPop.resolveWidth, GeneratedX86PushPop.stackStep,
+      Reference.X86.StackWidth.bytes, writeMemory, store_refines] <;>
+    split <;> rename_i h <;> simp only [h, ↓reduceIte]
+
+def handlerStep (width : StackWidth) (src : Register) (nextPc : Reference.Word)
+    (s : Reference.X86.State) : Transition Reference.X86.State :=
+  transferStep width (s.gpr src) [] nextPc s
 
 /-- Source RSP is captured before decrement, every other register/flag/vector
 is unchanged, and a write fault leaves both registers and memory unchanged. -/
 theorem step_refines (width : StackWidth) (src : Register) (nextPc : Reference.Word)
     (s : Reference.X86.State) :
     handlerStep width src nextPc s = Reference.X86.step (.push width src nextPc) s := by
-  cases width <;>
-    simp only [handlerStep, Reference.X86.step, widthCode, generatedX86PushPopAccessAt,
-      generatedX86PushPopRspAt, GeneratedX86PushPop.stepDirection, x86PushPopToOp,
-      GeneratedX86PushPop.stepBytes, GeneratedX86PushPop.resolveWidth, GeneratedX86PushPop.stackStep,
-      Reference.X86.StackWidth.bytes, writeMemory, store_refines] <;>
-    split <;> rename_i h <;> simp only [h, ↓reduceIte]
+  exact transfer_refines width (s.gpr src) [] nextPc s
 
 theorem handler_refines (width : StackWidth) (src : Register) (nextPc : Reference.Word)
     (s : Reference.X86.State) :

@@ -195,11 +195,26 @@ def bitBaseSource (width : CmovWidth) (source : Source) (index : BitIndex)
       .memory (address + BitVec.ofInt 64 (value / width.bits * width.bytes))
   | _, _ => source
 
+/-- Commit a PUSH transfer only after its read (if any) and whole-width
+write permission check. Memory faults preserve every architectural component;
+ordered reads preceding a write fault remain observable events. -/
+def pushTransfer (width : StackWidth) (value : Word) (reads : List Event)
+    (nextPc : Word) (s : State) : Transition State :=
+  let address := s.gpr 4 - BitVec.ofNat 64 width.bytes
+  match writeMemory s.memory address value width.bytes with
+  | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
+  | .ok (memory, event) =>
+      ⟨{ s with gpr := (fun r => if r = 4 then address else s.gpr r), memory := memory, pc := nextPc },
+        reads ++ [event], none⟩
+
 /-- One architectural instruction with its decoded fall-through address.
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
   | push (width : StackWidth) (src : Register) (nextPc : Word)
+  | pushImmediate (width : StackWidth) (value nextPc : Word)
+  | pushMemory (width : StackWidth) (address nextPc : Word)
+  | popMemory (width : StackWidth) (address nextPc : Word)
   | pop (width : StackWidth) (dst : Register) (nextPc : Word)
   | cmov (width : CmovWidth) (cc : Fin 16) (dst : Register)
       (source : Source) (nextPc : Word)
@@ -211,12 +226,22 @@ inductive Instruction
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
-  | .push width src nextPc =>
-      let address := s.gpr 4 - BitVec.ofNat 64 width.bytes
-      match writeMemory s.memory address (s.gpr src) width.bytes with
+  | .push width src nextPc => pushTransfer width (s.gpr src) [] nextPc s
+  | .pushImmediate width value nextPc => pushTransfer width value [] nextPc s
+  | .pushMemory width address nextPc =>
+      match readSource s (.memory address) width.bytes with
       | .error fault => ⟨s, [.fault fault], some fault⟩
-      | .ok (memory, event) =>
-          ⟨{ s with gpr := (fun r => if r = 4 then address else s.gpr r), memory := memory, pc := nextPc }, [event], none⟩
+      | .ok (value, events) => pushTransfer width value events nextPc s
+  | .popMemory width address nextPc =>
+      match readSource s (.memory (s.gpr 4)) width.bytes with
+      | .error fault => ⟨s, [.fault fault], some fault⟩
+      | .ok (value, events) =>
+          match writeMemory s.memory address value width.bytes with
+          | .error fault => ⟨s, events ++ [.fault fault], some fault⟩
+          | .ok (memory, event) =>
+              let advanced := s.gpr 4 + BitVec.ofNat 64 width.bytes
+              ⟨{ s with gpr := (fun r => if r = 4 then advanced else s.gpr r), memory := memory, pc := nextPc },
+                events ++ [event], none⟩
   | .pop width dst nextPc =>
       match readSource s (.memory (s.gpr 4)) width.bytes with
       | .error fault => ⟨s, [.fault fault], some fault⟩
@@ -257,7 +282,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
-  | .push .. => 0xffffffffffffffff
+  | .push .. | .pushImmediate .. | .pushMemory .. | .popMemory .. => 0xffffffffffffffff
   | .pop .. => 0xffffffffffffffff
   | .cmov .. => 0xffffffffffffffff
   | .bt .. => 0xfffffffffffff76b
@@ -386,22 +411,30 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     let dst := registerCode (first % 8 + 8 * (p.rex % 2))
     let width := stackWidth p
     return .pop width dst (s.pc + BitVec.ofNat 64 length)
+  if first = 0x68 ∨ first = 0x6a then
+    let width := stackWidth p
+    let immediateBytes := if first = 0x6a then 1 else if width = .w16 then 2 else 4
+    let value ← signedDisplacement bytes (count + 1) immediateBytes
+    let length := count + 1 + immediateBytes
+    if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
+    return .pushImmediate width value (s.pc + BitVec.ofNat 64 length)
   if first = 0xff then
     let modrm ← byteAt bytes (count + 1)
-    if modrm / 64 = 3 ∧ (modrm / 8) % 8 = 6 then
-      let length := count + 2
-      if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
-      let src := registerCode (modrm % 8 + 8 * (p.rex % 2))
-      return .push (stackWidth p) src (s.pc + BitVec.ofNat 64 length)
+    if (modrm / 8) % 8 = 6 then
+      let (source, nextPc, _) ← operand bytes s p modrm (count + 2) 0
+      match source with
+      | .register src => return .push (stackWidth p) src nextPc
+      | .memory address => return .pushMemory (stackWidth p) address nextPc
   if first = 0x8f then
     let modrm ← byteAt bytes (count + 1)
-    if modrm / 64 ≠ 3 ∨ (modrm / 8) % 8 ≠ 0 then
-      throw "expected POP register encoding"
-    let length := count + 2
-    if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
-    let dst := registerCode (modrm % 8 + 8 * (p.rex % 2))
+    if (modrm / 8) % 8 ≠ 0 then throw "invalid POP opcode extension"
     let width := stackWidth p
-    return .pop width dst (s.pc + BitVec.ofNat 64 length)
+    let advanced := s.gpr 4 + BitVec.ofNat 64 width.bytes
+    let updated := { s with gpr := fun r => if r = 4 then advanced else s.gpr r }
+    let (destination, nextPc, _) ← operand bytes updated p modrm (count + 2) 0
+    match destination with
+    | .register dst => return .pop width dst nextPc
+    | .memory address => return .popMemory width address nextPc
   if first = 0xc4 then
     let vex1 ← byteAt bytes (count + 1)
     let vex2 ← byteAt bytes (count + 2)
