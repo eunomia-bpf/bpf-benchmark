@@ -294,6 +294,20 @@ operator.
 
 ## Timing requests served
 
+### Lane F: stage2 helper/map, three runtimes
+
+`RUNTIMES="native_kernel kernel native_proof" SAMPLES=3 WARMUPS=1
+INNER_REPEAT=100000` -> RC=0, artifact
+`micro/results/x86_kvm_micro_20261106_181845_426714`. All 13 cases ran on
+all three runtimes, and **return values and results agree in all 26
+runtime comparisons** — the arms did equal work.
+
+Geomeans (computed, not claimed): `kernel/native_kernel` 1.380x,
+`kernel/native_proof` 0.871x, `native_kernel/native_proof` 0.631x.
+`native_proof` is the proof-verifier arm, expected to be slower than
+plain native; per-program medians sit in the single-digit-to-hundreds of
+nanoseconds, where `exec_ns` granularity dominates.
+
 Lane F's load-time request (2026-11-06) ran to completion on the current
 tree — `BENCH=simple RUNTIMES='native_kernel kernel native_proof'
 SAMPLES=15 WARMUPS=1 INNER_REPEAT=1` -> `micro/results/
