@@ -220,6 +220,8 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 	__s64 __a64_sp = 0
 #endif
 
+#define __a64_v0 (__a64_vectors[0].lo)
+#define __a64_v0_hi (__a64_vectors[0].hi)
 #define ARM64_SIM_L_DECLARE_STATE()                                         \
 	ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_DECLARE_REG)                  \
 	union arm64_sim_gpr *const __a64_cells[KPROG_ARM64_GPR_COUNT] = { \
@@ -231,8 +233,7 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 	__u8 __a64_c = 0;                                                  \
 	__u8 __a64_v = 0;                                                  \
 	__u64 __a64_lr = 0;                                                \
-	__u64 __a64_v0 = 0;                                                \
-	__u64 __a64_v0_hi = 0
+	struct { __u64 lo, hi; } __a64_vectors[32] = {}
 
 #define ARM64_SIM_ENTRY_XDP(CTX)                                            \
 	struct arm64_sim_xdp_abi __a64_sim_abi = {                         \
@@ -1265,19 +1266,24 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 		} else if (KPROG_ARM64_DISP_STORE_Q0_HANDLED(OP)) {            \
 			ARM64_SIM_L_STORE_Q0_MEM((DST), (SRC2), (AUX), (IMM)); \
 		} else if (KPROG_ARM64_DISP_FMOV_HANDLED(OP)) {                \
+			unsigned __a64_fmov_index = (SRC2) == ARM64_REG_NONE ? 0U : (SRC2); \
+			if (__a64_fmov_index >= 32U) {                     \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE();           \
+			} else {                                           \
 			__u64 __a64_fmov_result =                          \
-				KPROG_ARM64_FMOV_VALUE((AUX), __a64_v0,     \
+				KPROG_ARM64_FMOV_VALUE((AUX), __a64_vectors[__a64_fmov_index].lo, \
 					ARM64_SIM_L_READ_REG(SRC),         \
 					ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
 			if (KPROG_ARM64_FMOV_DEST_VECTOR((AUX),           \
 					ARM64_SIM_L_UNSUPPORTED_OPCODE())) { \
-				__a64_v0 = (AUX) == ARM64_FMOV_S_FROM_W ?   \
+				__a64_vectors[__a64_fmov_index].lo = (AUX) == ARM64_FMOV_S_FROM_W ? \
 					(__u32)__a64_fmov_result : __a64_fmov_result; \
-				__a64_v0_hi = 0;                          \
+				__a64_vectors[__a64_fmov_index].hi = 0;     \
 			}                                                  \
 			else                                               \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST),         \
 					__a64_fmov_result, __a64_l_width); \
+			}                                                  \
 		} else if (KPROG_ARM64_REDUCTION_HANDLED(OP)) {                \
 			__u64 __a64_red_hi = (AUX) == 16 ?                    \
 				ARM64_SIM_L_REDUCTION_VALUE((OP), __a64_v0_hi) : 0; \

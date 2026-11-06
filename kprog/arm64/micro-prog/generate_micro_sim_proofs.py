@@ -626,14 +626,16 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
                        width=width_const(reg_width(ops[0])), aux=COND[ops[3]])
     if op == "fmov":
         dst, src = ops
-        if dst.startswith("d") and src.startswith("x"):
-            return Encoded("ARM64_OP_FMOV", src=reg_const(src), aux="ARM64_FMOV_D_FROM_X")
-        if dst.startswith("x") and src.startswith("d"):
-            return Encoded("ARM64_OP_FMOV", reg_const(dst), width="ARM64_WIDTH_64", aux="ARM64_FMOV_X_FROM_D")
-        if dst.startswith("s") and src.startswith("w"):
-            return Encoded("ARM64_OP_FMOV", src=reg_const(src), width="ARM64_WIDTH_32", aux="ARM64_FMOV_S_FROM_W")
-        if dst.startswith("w") and src.startswith("s"):
-            return Encoded("ARM64_OP_FMOV", reg_const(dst), width="ARM64_WIDTH_32", aux="ARM64_FMOV_W_FROM_S")
+        vector = re.fullmatch(r"([ds])([0-9]|[12][0-9]|3[01])", dst)
+        if vector and src.startswith("x" if vector[1] == "d" else "w"):
+            return Encoded("ARM64_OP_FMOV", src=reg_const(src), src2=vector[2],
+                           width="ARM64_WIDTH_64" if vector[1] == "d" else "ARM64_WIDTH_32",
+                           aux="ARM64_FMOV_D_FROM_X" if vector[1] == "d" else "ARM64_FMOV_S_FROM_W")
+        vector = re.fullmatch(r"([ds])([0-9]|[12][0-9]|3[01])", src)
+        if vector and dst.startswith("x" if vector[1] == "d" else "w"):
+            return Encoded("ARM64_OP_FMOV", reg_const(dst), src2=vector[2],
+                           width="ARM64_WIDTH_64" if vector[1] == "d" else "ARM64_WIDTH_32",
+                           aux="ARM64_FMOV_X_FROM_D" if vector[1] == "d" else "ARM64_FMOV_W_FROM_S")
     if op == "cnt":
         if ops not in [("v0.8b", "v0.8b"), ("v0.16b", "v0.16b")]:
             raise ValueError(f"unsupported CNT operands: {insn.raw}")

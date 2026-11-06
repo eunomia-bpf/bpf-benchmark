@@ -45,6 +45,13 @@ cases=[
  ('memset-opaque-suffix', 'stp x19,x30,[sp,#-32]!;str x1,[sp,#16];add x0,sp,#16;mov w1,#0;mov x2,#1;bl memset;ldr x0,[sp,#16];ldp x19,x30,[sp],#32;ret', 'undefined native ABI register'),
  ('memcpy-opaque-copy', 'stp x19,x30,[sp,#-32]!;str x1,[sp,#16];add x0,sp,#24;add x1,sp,#16;mov x2,#8;bl memcpy;ldr x0,[sp,#24];ldp x19,x30,[sp],#32;ret', 'undefined native ABI register'),
 ]
+for vector in range(32):
+ cases.extend([
+  (f'vector-{vector}-roundtrip',f'mov x1,#2;fmov d{vector},x1;fmov x0,d{vector};ret',None),
+  (f'vector-{vector}-zero-upper',f'mov w1,#2;fmov s{vector},w1;fmov x0,d{vector};ret',None),
+  (f'vector-{vector}-distinct',f'mov x1,#2;fmov d{vector},x1;fmov x0,d{(vector+1)%32};ret','undefined native ABI register'),
+  (f'vector-{vector}-helper-clobber',f'str x30,[sp,#-16]!;fmov d{vector},x0;bl bpf_get_current_uid_gid;fmov x0,d{vector};ldr x30,[sp],#16;ret','undefined native ABI register'),
+ ])
 rows=[]
 for name,body,error in cases:
  src=phase/(name+'.S');obj=phase/(name+'.proof.o')

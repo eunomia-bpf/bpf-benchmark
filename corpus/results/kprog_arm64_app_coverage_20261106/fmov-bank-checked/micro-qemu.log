@@ -1,0 +1,42 @@
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/generate_micro_cases.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/fmov-bank-micro
+29 unchanged native artifacts and original input/golden contracts generated
+taskset -c 16-23 python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/coverage.py compile /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/fmov-bank-micro 0 29 180 1 2048
+compile 1/29 simple: 0
+compile 2/29 simple_packet: 0
+compile 3/29 bitmap_popcount_scan: 0
+compile 4/29 sorted_rule_binary_search: 0
+compile 5/29 bcc_runqlat_log2_histogram_bucket: 0
+compile 6/29 trace_event_type_switch_dispatch: 0
+compile 7/29 packet_checksum_fold: 0
+compile 8/29 payload_prefix_memcmp_scan: 0
+compile 9/29 packet_vlan_tcpopt_parser: 0
+compile 10/29 bpf_local_call_fanout_dispatch: 0
+compile 11/29 flow_5tuple_rss_hash: 0
+compile 12/29 katran_lb_consistent_hash_select: 0
+compile 13/29 cilium_policy_guard_tree_filter: 0
+compile 14/29 siphash_rotate64_mixer: 0
+compile 15/29 packet_record_bounds_window: 0
+compile 16/29 flow_record_field_scan: 0
+compile 17/29 packed_header_bitfield_decode: 0
+compile 18/29 bpftrace_string_search_prefix_scan: 0
+compile 19/29 tracee_syscall_name_table_lookup: 0
+compile 20/29 tracee_http_method_prefix_detect: 0
+compile 21/29 cilium_socket_lb_service_select: 0
+compile 22/29 bcc_tcpconnect_ipv4_tuple_filter: 0
+compile 23/29 tetragon_process_event_arg_filter: 0
+compile 24/29 otel_stack_frame_unwind_scan: 0
+compile 25/29 cilium_ct_nat_tuple_rewrite: 0
+compile 26/29 packet_toeplitz_rss_hash: 0
+compile 27/29 bpftrace_comm_key_fnv_hash: 0
+compile 28/29 tc_packet_checksum_fold: 0
+compile 29/29 cgroup_skb_hash_chain: 0
+compile: 0/29 failures
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/coverage.py package /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/fmov-bank-micro /workspaces/repository/kprog/arm64/build/app-coverage/fmov-bank-micro /workspaces/.agent-state/bpf-benchmark-supervisor/kfunc-inline-claude-20261004/round5-arm64.cpio.gz
+packaged 29 diagnostic artifacts in /workspaces/repository/kprog/arm64/build/app-coverage/fmov-bank-micro
+install -d /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/fmov-bank-micro/verify
+taskset -c 16-19 timeout 7200 qemu-system-aarch64 -M virt -cpu max -smp 2 -m 2048 -nographic -no-reboot \
+	-kernel /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/Image -initrd /workspaces/repository/kprog/arm64/build/app-coverage/fmov-bank-micro/initramfs.cpio.gz \
+	-fsdev local,id=results,path=/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/fmov-bank-micro/verify,security_model=none \
+	-device virtio-9p-device,fsdev=results,mount_tag=results \
+	-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/fmov-bank-micro/qemu.log 2>&1
+test "$(cat /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/fmov-bank-micro/verify/guest-status)" = 0

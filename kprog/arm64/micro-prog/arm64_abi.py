@@ -36,10 +36,10 @@ def check_definedness(insns, targets, linked_exit, decode):
             return 31, 32 if operand == 'wsp' else 64
         if operand in {'xzr', 'wzr'}:
             return None, 32 if operand == 'wzr' else 64
-        if operand in {'q0', 'v0.16b'}: return 32, 128
-        if operand in {'d0', 'v0.8b'}: return 32, 64
-        if operand == 's0': return 32, 32
-        if operand == 'h0': return 32, 16
+        vector = re.fullmatch(r'([qdshb])([0-9]|[12][0-9]|3[01])', operand)
+        if vector: return 32 + int(vector[2]), {'q':128, 'd':64, 's':32, 'h':16, 'b':8}[vector[1]]
+        vector = re.fullmatch(r'v([0-9]|[12][0-9]|3[01])\.(8b|16b)', operand)
+        if vector: return 32 + int(vector[1]), 64 if vector[2] == '8b' else 128
         match = re.fullmatch(r'([xw])([0-9]|[12][0-9]|30)', operand)
         return (int(match[2]), 32 if match[1] == 'w' else 64) if match else None
 
@@ -75,10 +75,10 @@ def check_definedness(insns, targets, linked_exit, decode):
 
     by_addr = {i.addr: i for i in insns}
     following = {a.addr: b.addr for a, b in zip(insns, insns[1:])}
-    bits, aliases = [0] * 33, [None] * 33
+    bits, aliases = [0] * 64, [None] * 64
     for register in [0, 30, 31]: bits[register] = FULL
     aliases[0], aliases[30], aliases[31] = False, False, 0
-    initial = State(tuple(bits), tuple(aliases), 0, {}, {}, (None,)*33)
+    initial = State(tuple(bits), tuple(aliases), 0, {}, {}, (None,)*64)
     states = {((), insns[0].addr): initial}
     queue = deque(states)
     returns = {}
@@ -117,7 +117,7 @@ def check_definedness(insns, targets, linked_exit, decode):
             register, width = parsed
             if value is None: value = (1 << width) - 1
             bits[register] = value & ((1 << width) - 1)
-            if register == 32:
+            if register >= 32:
                 bits[register] |= ((1 << 128)-1) ^ ((1 << width)-1)
             elif width == 32:
                 bits[register] |= FULL ^ 0xffffffff
@@ -329,9 +329,9 @@ def check_definedness(insns, targets, linked_exit, decode):
                 opaque,pointers=effect.opaque,effect.pointers
                 for register in range(19):
                     bits[register], aliases[register], constants[register] = 0, None, None
-                bits[32], aliases[32] = 0, None
+                for register in range(32,64):
+                    bits[register], aliases[register], constants[register] = 0, None, None
                 bits[0], aliases[0] = FULL, False
-                constants[32]=None
                 if len(names)==1 and names[0] in {'memcpy','memset'}:
                     aliases[0]=incoming.aliases[0]
                 if op != 'br':

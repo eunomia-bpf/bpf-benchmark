@@ -11,8 +11,9 @@ Current scope:
 - No memory safety guards, no fallback/trap path, no synthetic proof facts.
 
 The simulator stores architectural general-purpose registers and NZCV flags,
-plus proof-side provenance tags used to select verifier-visible pointer
-operations. `../formal` machine-checks the shared width/narrowing contract, the
+plus all 32 architectural 128-bit SIMD registers and proof-side provenance
+tags used to select verifier-visible pointer operations. Scalar FMOV selects
+its encoded SIMD register; writes of S/D lanes clear the upper bits. `../formal` machine-checks the shared width/narrowing contract, the
 NZCV flag transitions for the ADD/SUB/logical families, the six-operation ALU
 op-step result contract, the eleven-arm source-modifier (shift/rotate/extend)
 value contract, the five-kind bitfield (UBFX/SBFX/UBFIZ/BFXIL/BFI) value

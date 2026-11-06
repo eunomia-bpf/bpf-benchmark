@@ -613,3 +613,27 @@ and compile; all 35 ABI cases pass. [Replay inputs and compiled artifacts](reado
 retain the actual pairs, sources, objects and logs. The loader's consumption of
 this exact metadata and native layout is the next binding integration step;
 these producer checks alone do not establish application execution.
+
+## Complete scalar FMOV register bank
+
+The four scalar FMOV directions now select the actual V0–V31 register through
+SRC2; the previous decoder accepted nonzero operands while the C handler
+always accessed V0. The C state retains every 128-bit vector independently.
+Scalar vector writes clear their upper lanes, and ABI analysis tracks all
+32 cells separately, including helper clobbers and undefined cross-bank reads.
+
+[Three QEMU comparisons](fmov-bank-checked/outcomes.json) each write and read
+all 32 cells. Source BPF, simulator proof and generation-bound native code agree
+on 137438954000, 528 and 528 with return value 2 and generation 1. The initial
+fixture omitted its packet bounds check and correctly failed verification;
+that raw attempt is retained. The repaired native fixture includes its real
+packet bounds check. No proof-only packet constraint was added.
+
+All 29 original micro programs compile and pass full-system QEMU. The 163 ABI
+cases and 1,024 sanitizer value/state checks pass. Lane V's full 342-module
+formal/C/Rust/wire check passes with its independent 32-bank reference and
+expanded existing FMOV oracle; its original V0 theorems and cases remain.
+[The replay archive](fmov-bank-checked/replay.tar.gz) includes both attempts,
+compiled artifacts, frozen simulator headers, logs and a portable matched
+kernel/initramfs under `runtime/`. Run `make -C runtime run` after extraction;
+on DGX Spark use `make -C runtime run ACCEL=kvm CPU=host`.

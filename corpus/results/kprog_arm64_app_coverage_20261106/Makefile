@@ -387,3 +387,31 @@ qemu-context-v2-app:
 .PHONY: runtime-results
 runtime-results:
 	python3 $(HERE)/runtime_results.py
+
+.PHONY: fmov-bank-build
+fmov-bank-build: direct-header-generate
+	python3 $(HERE)/fmov_bank.py $(HERE)/$(PHASE) prepare
+	for source in $(HERE)/$(PHASE)/*.bpf.c; do \
+		clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
+		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
+		-c $$source -o $${source%.c}.o || exit 1; \
+	done
+	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static -D__EXPORTED_HEADERS__ -DNATIVE_LINK_PATH='"/native-link"' \
+		-I$(ROOT)/vendor/linux-framework/include/uapi -I$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+		$(ROOT)/kprog/fidelity/bound_probe.cpp /workspaces/.agent-state/kprog-lanes/T/context-v2-datasec/arm64/libnative_loader.a \
+		$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+		-L$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -o $(HERE)/$(PHASE)/bound-probe
+
+.PHONY: fmov-bank-package
+fmov-bank-package:
+	python3 $(HERE)/fmov_bank.py $(HERE)/$(PHASE) package $(BASE_INITRAMFS)
+
+.PHONY: fmov-bank-check
+fmov-bank-check: fmov-bank-package
+	install -d $(HERE)/$(PHASE)/verify
+	taskset -c 12-15 timeout 600 qemu-system-aarch64 -M virt -cpu max -smp 2 -m 2048 -nographic -no-reboot \
+		-kernel /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/Image -initrd $(BUILD)/initramfs.cpio.gz \
+		-fsdev local,id=results,path=$(HERE)/$(PHASE)/verify,security_model=none \
+		-device virtio-9p-device,fsdev=results,mount_tag=results \
+		-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >$(HERE)/$(PHASE)/qemu.log 2>&1
+	test "$$(cat $(HERE)/$(PHASE)/verify/guest-status)" = 0

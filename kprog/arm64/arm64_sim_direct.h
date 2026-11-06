@@ -362,19 +362,24 @@ ARM64_SIM_L_STORE_Q0_MEM((DST), (SRC2), (AUX), (IMM)); \
 do { \
 __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
-__u64 __a64_fmov_result = \
-				KPROG_ARM64_FMOV_VALUE((AUX), __a64_v0, \
+unsigned __a64_fmov_index = (SRC2) == ARM64_REG_NONE ? 0U : (SRC2); \
+			if (__a64_fmov_index >= 32U) { \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE(); \
+			} else { \
+			__u64 __a64_fmov_result = \
+				KPROG_ARM64_FMOV_VALUE((AUX), __a64_vectors[__a64_fmov_index].lo, \
 					ARM64_SIM_L_READ_REG(SRC), \
 					ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
 			if (KPROG_ARM64_FMOV_DEST_VECTOR((AUX), \
 					ARM64_SIM_L_UNSUPPORTED_OPCODE())) { \
-				__a64_v0 = (AUX) == ARM64_FMOV_S_FROM_W ? \
+				__a64_vectors[__a64_fmov_index].lo = (AUX) == ARM64_FMOV_S_FROM_W ? \
 					(__u32)__a64_fmov_result : __a64_fmov_result; \
-				__a64_v0_hi = 0; \
+				__a64_vectors[__a64_fmov_index].hi = 0; \
 			} \
 			else \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), \
 					__a64_fmov_result, __a64_l_width); \
+			} \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_34(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
