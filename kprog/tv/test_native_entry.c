@@ -95,3 +95,27 @@ __attribute__((noinline)) int tv_source_value_entry(void *ctx)
     __asm__ volatile("" : "+r"(address));
     return address[0];
 }
+
+/* TRACING uses the kernel's raw-tracepoint helper variants, including fentry. */
+__attribute__((section(".maps"))) unsigned char tv_context_map;
+extern long bpf_perf_event_output(void *ctx, void *map, unsigned long flags,
+                                 const void *data, unsigned long size);
+extern long bpf_get_stackid(void *ctx, void *map, unsigned long flags);
+extern long bpf_get_stack(void *ctx, void *buffer, unsigned long size, unsigned long flags);
+int tv_perf_entry(void *ctx)
+{
+    unsigned long value = 0;
+    (void)bpf_perf_event_output(ctx, &tv_context_map, 0xffffffffUL, &value, sizeof(value));
+    return 0;
+}
+int tv_stackid_entry(void *ctx)
+{
+    (void)bpf_get_stackid(ctx, &tv_context_map, 0);
+    return 0;
+}
+int tv_stack_entry(void *ctx)
+{
+    unsigned long stack[2];
+    (void)bpf_get_stack(ctx, stack, sizeof(stack), 0);
+    return 0;
+}

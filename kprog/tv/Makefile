@@ -144,7 +144,7 @@ linker-build:
 
 kernel-check: linker-build
 
-build/test-loader: test_loader.cpp build/bcc-map-probe/manifest.json build/source-value.bpf.o build/source-value-wrong-site.bpf.o build/native-entry.o build/simulator.bpf.o build/runtime-config/simulator.bpf.o build/wrong-capacity/simulator.bpf.o build/wrong-value-size/simulator.bpf.o build/wrong-layout/simulator.bpf.o build/wrong-readonly/simulator.bpf.o build/wrong-data-layout/simulator.bpf.o ../libnativeloader/src/native_loader.cpp \
+build/test-loader: test_loader.cpp build/context-helper-25.bpf.o build/context-helper-27.bpf.o build/context-helper-67.bpf.o build/bcc-map-probe/manifest.json build/source-value.bpf.o build/source-value-wrong-site.bpf.o build/native-entry.o build/simulator.bpf.o build/runtime-config/simulator.bpf.o build/wrong-capacity/simulator.bpf.o build/wrong-value-size/simulator.bpf.o build/wrong-layout/simulator.bpf.o build/wrong-readonly/simulator.bpf.o build/wrong-data-layout/simulator.bpf.o ../libnativeloader/src/native_loader.cpp \
 		$(wildcard ../libnativeloader/src/*.hpp ../libnativeloader/include/*.hpp)
 	$(MAKE) -C ../libnativeloader BUILD_DIR=build-tv-binding
 	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 \
@@ -416,3 +416,10 @@ simple-platform-check: native-path-check
 		-o ../tv/build/simple-arm64/SimpleCompiled.olean ../tv/build/simple-arm64/SimpleCompiled.lean
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-arm64 \
 		-o ../tv/build/simple-arm64/SimplePlatform.olean ../tv/build/simple-arm64/SimplePlatform.lean
+
+
+build/context-helper-%.bpf.o: test_contextual_helpers.bpf.c
+	install -d build
+	clang -O2 -g -target bpf -DTV_CONTEXT_HELPER=$* -I../../vendor/libbpf/include/uapi \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		-I/usr/include/x86_64-linux-gnu -c $< -o $@

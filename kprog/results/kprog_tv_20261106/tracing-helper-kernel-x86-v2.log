@@ -1,0 +1,261 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+make -C ../libnativeloader BUILD_DIR=build-tv-binding
+make[1]: Entering directory '/workspaces/repository/kprog/libnativeloader'
+cmake -S . -B "build-tv-binding" \
+	-DNATIVE_LOADER_REPO_ROOT="/workspaces/repository" \
+	-DNATIVE_LOADER_LIBBPF_PREFIX="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix" \
+	-DNATIVE_LOADER_LIBBPF_LIBRARY="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" \
+	-DNATIVE_LOADER_KERNEL_OFFSETS_INCLUDE="/workspaces/repository/micro/programs/build-x86"
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspaces/repository/kprog/libnativeloader/build-tv-binding
+cmake --build "build-tv-binding" --target native_loader native_loader_shared
+gmake[2]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[100%] Built target native_loader
+gmake[4]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[100%] Built target native_loader_shared
+gmake[4]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[2]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+make[1]: Leaving directory '/workspaces/repository/kprog/libnativeloader'
+g++ -std=c++20 -Wall -Wextra -Werror -O2 \
+	-DTV_NATIVE_LINK_PATH='"/workspaces/repository/kprog/x86/native_lab/native_link/target-c-tail/release/native-link"' \
+	-I../../vendor/libbpf/include/uapi \
+	-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+	test_loader.cpp ../libnativeloader/build-tv-binding/libnative_loader.a \
+	../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o build/test-loader
+cargo build --release --manifest-path ../x86/native_lab/native_link/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.07s
+test "x86" = x86
+make module-check KDIR=/workspaces/repository/kprog/tv/build-kernel-x86
+make[1]: Entering directory '/workspaces/repository/kprog/tv'
+make -C /workspaces/repository/kprog/tv/build-kernel-x86 M=/workspaces/repository/kprog/tv/build-x86 ARCH=x86 \
+	TV_ARCH=x86 CROSS_COMPILE= modules
+make[2]: Entering directory '/workspaces/repository/kprog/tv/build-kernel-x86'
+make[3]: Entering directory '/workspaces/repository/kprog/tv/build-x86'
+  CC [M]  bpf_x86_native_lab.o
+  MODPOST Module.symvers
+  LD [M]  bpf_x86_native_lab.ko
+  BTF [M] bpf_x86_native_lab.ko
+make[3]: Leaving directory '/workspaces/repository/kprog/tv/build-x86'
+make[2]: Leaving directory '/workspaces/repository/kprog/tv/build-kernel-x86'
+make[1]: Leaving directory '/workspaces/repository/kprog/tv'
+taskset -c 8-23 vng --run /workspaces/repository/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage \
+	--cwd /workspaces/repository --rwdir /workspaces/repository --overlay-rwdir /tmp \
+	--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+	--exec 'make -C kprog/tv guest-kernel-check'
+make: Entering directory '/workspaces/repository/kprog/tv'
+insmod build-x86/bpf_x86_native_lab.ko || { dmesg; exit 1; }
+./build/test-binding-kernel
+native input 1 stable across reads: PASS (JIT execution)
+native input 1 actual nonzero address: PASS (JIT execution)
+native input 1 cannot prune unsafe branch as ABI constant: PASS (rejected)
+native input 2 stable across reads: PASS (JIT execution)
+native input 2 actual nonzero address: PASS (JIT execution)
+native input 2 cannot prune unsafe branch as ABI constant: PASS (rejected)
+native input 3 stable across reads: PASS (JIT execution)
+native input 3 actual nonzero address: PASS (JIT execution)
+native input 3 cannot prune unsafe branch as ABI constant: PASS (rejected)
+numeric input preserves all 64 source bits: PASS (JIT execution)
+numeric input cannot read helper-clobbered R1: PASS (rejected)
+native input rejects kind zero: PASS (rejected)
+native input rejects unknown kind: PASS (rejected)
+exclusive choice rejects standalone execution: PASS (rejected)
+native input rejects old ABI: PASS (rejected)
+native input rejects unknown ABI: PASS (rejected)
+native input rejects destination mismatch: PASS (rejected)
+native inputs with forced constant blinding:
+native input 1 stable across reads: PASS (JIT execution)
+native input 1 actual nonzero address: PASS (JIT execution)
+native input 1 cannot prune unsafe branch as ABI constant: PASS (rejected)
+native input 2 stable across reads: PASS (JIT execution)
+native input 2 actual nonzero address: PASS (JIT execution)
+native input 2 cannot prune unsafe branch as ABI constant: PASS (rejected)
+native input 3 stable across reads: PASS (JIT execution)
+native input 3 actual nonzero address: PASS (JIT execution)
+native input 3 cannot prune unsafe branch as ABI constant: PASS (rejected)
+numeric input preserves all 64 source bits: PASS (JIT execution)
+numeric input cannot read helper-clobbered R1: PASS (rejected)
+native input rejects kind zero: PASS (rejected)
+native input rejects unknown kind: PASS (rejected)
+exclusive choice rejects standalone execution: PASS (rejected)
+native input rejects old ABI: PASS (rejected)
+native input rejects unknown ABI: PASS (rejected)
+native input rejects destination mismatch: PASS (rejected)
+unsealed proof: PASS (load rejected)
+entry mismatch: PASS (seal rejected)
+ABI version mismatch: PASS (seal rejected)
+architecture mismatch: PASS (seal rejected)
+specialization length mismatch: PASS (seal rejected)
+unknown metadata: PASS (seal rejected)
+native/proof byte mismatch: PASS (every changed byte rejected)
+exact binding: PASS (native execution returned 2)
+native group rejects surrounding stack and helper code: PASS
+ABI mask mismatch at instantiation: PASS (load rejected)
+proof mutation after sealing: PASS (load rejected)
+new generation without resealing: PASS (load rejected)
+program type mismatch before proof lowering: PASS (load rejected)
+incomplete program group: PASS (load rejected)
+exact ordered program group: PASS (native execution returned 2)
+reordered native chunks: PASS (load rejected)
+missing native chunk/changed entry: PASS (load rejected)
+duplicated native chunk: PASS (load rejected)
+prefix must not initialize native stack: PASS (load rejected)
+peer mutation invalidates whole group: PASS (load rejected)
+verifier-visible helper call: PASS (native execution returned 2)
+privileged uninitialized stack negative: PASS (load rejected)
+helper with uninitialized arguments: PASS (load rejected)
+verifier-visible map load and lookup: PASS (native execution returned 2)
+map value out-of-bounds negative: PASS (load rejected)
+70000-instruction proof restored to native code: PASS (native execution returned 2)
+native helper target absent from verified proof: PASS (load rejected)
+kernel-resolved map identity: PASS (native execution returned 2)
+two-map swap despite fd-array retention: PASS (load rejected)
+map pointer/value kind mismatch: PASS (load rejected)
+kernel-resolved map value identity and offset: PASS (native execution returned 2)
+map value offset differs from verified proof: PASS (load rejected)
+exact proof map value base plus compiled constant offset: PASS (native execution returned 2)
+compiled value offset differs from native relocation: PASS (load rejected)
+sealed proof FD rebound to another map: PASS (load rejected)
+verified helper-pointer indirect call: PASS (native execution returned 2)
+helper pointer names a different valid helper: PASS (load rejected)
+helper pointer literal must be an exact zero slot: PASS (load rejected)
+unfrozen proof readonly data: PASS (seal rejected)
+frozen exact native readonly data: PASS (native execution returned 2)
+readonly native extent crosses chunk boundary: PASS (native execution returned 2)
+readonly data mismatch in a different chunk: PASS (load rejected)
+readonly data differs from native bytes: PASS (load rejected)
+readonly native address mismatch: PASS (load rejected)
+readonly map identity swap with identical values: PASS (load rejected)
+readonly native extent overlaps a JIT relocation: PASS (load rejected)
+bound native proof input 1: PASS (native execution returned 2)
+bound native proof input 2: PASS (native execution returned 2)
+bound native proof input 3: PASS (native execution returned 2)
+bound native proof input 4: PASS (native execution returned 2)
+x86 binding rejects ARM exclusive descriptors: PASS (load rejected)
+exclusive marker without site descriptor: PASS (load rejected)
+duplicate exclusive descriptor: PASS (load rejected)
+exclusive source PC mismatch: PASS (load rejected)
+exclusive compiled marker position mismatch: PASS (load rejected)
+exclusive descriptor points to CLREX opcode: PASS (load rejected)
+load context field 0 mismatch at sealing: PASS (rejected)
+load context field 1 mismatch at sealing: PASS (rejected)
+load context field 2 mismatch at sealing: PASS (rejected)
+load context field 3 mismatch at sealing: PASS (rejected)
+load context field 4 mismatch at sealing: PASS (rejected)
+load context field 5 mismatch at sealing: PASS (rejected)
+load context field 6 mismatch at sealing: PASS (rejected)
+load context field 7 mismatch at sealing: PASS (rejected)
+load flags differ before proof lowering: PASS (load rejected)
+exact raw flags and pinned original context: PASS (native execution returned 2)
+GPL status differs before proof lowering: PASS (load rejected)
+exact non-GPL original context: PASS (native execution returned 2)
+kernel binding regression: PASS
+./build/test-loader
+libbpf: elf: skipping unrecognized data section(5) .native_lab.source_maps
+actual captured BCC global-data probe: PASS (exact source, generated clang proof, native writes42 at16, neighboring bytes and original map preserved)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+source LDDW unnamed object binding: PASS (compiled proof, native2, exact original ID, wrong site/foreign ID rejected)
+libbpf: elf: skipping unrecognized data section(6) .native_lab.source_maps
+libbpf: elf: skipping unrecognized data section(6) .native_lab.source_maps
+source LDDW unnamed value+offset binding: PASS (clang extern proof, native2, exact original ID, unsafe offsets/foreign IDs/metadata rejected)
+loader cannot silently omit original flags: PASS (rejected)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+C captured source flags survive sealing/verifier/native JIT: PASS
+C source context rejects ABI/reserved mismatch: PASS
+C source context rejects ABI/reserved mismatch: PASS
+loader preserves original non-GPL status: PASS
+tracing BTF target swap: PASS (rejected)
+tracing attach type swap: PASS (rejected)
+exact fentry BTF/type context: PASS (attached native target executed)
+get_func_ip KPROBE attach 0: PASS (exact contextual helper, load-only)
+get_func_ip KPROBE attach 42: PASS (exact contextual helper, load-only)
+get_func_ip KPROBE attach 56: PASS (exact contextual helper, load-only)
+get_func_ip KPROBE attach 48: PASS (exact contextual helper, load-only)
+get_func_ip KPROBE attach 57: PASS (exact contextual helper, load-only)
+TRACING helper 25 exact raw-TP target: PASS (actual clang proof, bound native fentry executed)
+TRACING helper 27 exact raw-TP target: PASS (actual clang proof, bound native fentry executed)
+TRACING helper 67 exact raw-TP target: PASS (actual clang proof, bound native fentry executed)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+full BTF tv_collision_entry_alpha (original FD): PASS (exact native entry, bound execution)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+full BTF tv_collision_entry_alpha (captured metadata): PASS (exact native entry, bound execution)
+caller BTF full-entry swap despite identical short name: PASS (rejected)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+full BTF tv_collision_entry_beta (original FD): PASS (exact native entry, bound execution)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+full BTF tv_collision_entry_beta (captured metadata): PASS (exact native entry, bound execution)
+caller BTF full-entry swap despite identical short name: PASS (rejected)
+full BTF selector cannot use a truncated no-BTF program name: PASS (rejected)
+shared loader tv_short_entry: PASS (1 chunks, native returned 2)
+shared loader tv_long_entry: PASS (3 chunks, native returned 2)
+shared loader tv_helper_entry: PASS (1 chunks, native returned 2)
+different valid kernel helper target: PASS (rejected)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+manifest simulator tv_proof_helper: PASS (clang proof, original maps, bound native)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+manifest invented internal-map state: PASS (rejected)
+shared loader tv_coarse_helper_entry: PASS (1 chunks, native returned 2)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+manifest simulator tv_proof_coarse_helper: PASS (clang proof, original maps, bound native)
+shared loader tv_map_entry: PASS (1 chunks, native returned 2)
+separately loaded proof map relinked to original: PASS
+separate proof map layout mismatch: PASS (rejected)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+manifest simulator tv_proof_map: PASS (clang proof, original maps, bound native)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+runtime-configured simulator map capacity/value size: PASS (original identity, native returned 2)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+nonzero simulator map capacity mismatch: PASS (rejected)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+nonzero simulator map value size mismatch: PASS (rejected)
+shared loader tv_hash_entry: PASS (1 chunks, native returned 2)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+manifest simulator tv_proof_hash: PASS (clang proof, original maps, bound native)
+shared loader tv_large_entry: PASS (1 chunks, native returned 2)
+shared loader tv_readonly_entry: PASS (1 chunks, native returned 2)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+manifest simulator tv_proof_readonly: PASS (clang proof, original maps, bound native)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+raw readonly proof without symbol metadata: PASS (rejected)
+raw readonly data: PASS (bound native returned 2)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+raw readonly data mutation: PASS (rejected)
+shared loader tv_duplicate_readonly_entry: PASS (1 chunks, native returned 2)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+manifest simulator tv_proof_duplicate_readonly: PASS (clang proof, original maps, bound native)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+identical readonly objects: PASS (two exact symbol bindings, raw native returned 2)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+manifest writable DATASEC across object names: PASS (original map ID, native returned 2)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+raw writable DATASEC across object names: PASS (original identity relinked)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+identical BTF DATASEC in two original maps: PASS (ambiguous identity rejected)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+manifest writable DATASEC across object names: PASS (wrong BTF variable rejected)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+raw writable DATASEC across object names: PASS (wrong BTF variable rejected)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+manifest readonly DATASEC across object names: PASS (original map ID, native returned 2)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+raw readonly DATASEC across object names: PASS (original identity relinked)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+manifest readonly DATASEC across object names: PASS (wrong BTF variable rejected)
+libbpf: elf: skipping unrecognized data section(12) .native_lab.rodata
+raw readonly DATASEC across object names: PASS (wrong BTF variable rejected)
+make: Leaving directory '/workspaces/repository/kprog/tv'
+make: Leaving directory '/workspaces/repository/kprog/tv'

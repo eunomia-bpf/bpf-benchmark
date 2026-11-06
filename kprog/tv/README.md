@@ -440,3 +440,12 @@ Arm-only descriptors reject on x86. This input mechanism does not by itself
 prove the production simulator’s conditional write, exclusive monitor,
 alignment, atomicity or acquire/release correspondence. Those are checked
 against the canonical exclusive semantics and actual compiled programs.
+
+TRACING programs use the kernel’s raw-tracepoint variants of perf output,
+stack ID and stack capture, including fentry programs. The loader now selects
+those exact symbols, matching `tracing_prog_func_proto`’s delegation to
+`raw_tp_prog_func_proto`. The regression loads each actual clang artifact,
+binds the original maps/context, attaches the native fentry replacement and
+triggers its real target; all three native programs execute. Both libraries
+build and the complete x86 binding/loader regression passes. No kernel helper
+identity comparison is relaxed.

@@ -717,3 +717,22 @@ relabel the earlier accepted unsafe exclusive programs as rejected. Kernel
 verifier range handling, descriptor matching and restoration join the
 explicitly trusted binding code. The canonical ISA remains V/F’s single
 reference, and the finite path/composition proofs retain their listed axioms.
+
+Tracing perf/stack helper identity repair
+----------------------------------------
+
+The loader previously chose generic helper symbols for TRACING26. The kernel
+delegates perf output25, stack ID27 and stack capture67 to raw-tracepoint
+helper prototypes for these programs, across tracing attach types. This
+explains a post-verifier exact-helper binding mismatch rather than a stock
+verifier rejection. The selector now names those exact raw-TP functions.
+
+Three actual clang-compiled fentry proofs and native inputs pass original
+loading, generation binding, attachment and real target execution (positive
+native run counters). Perf/stack-ID cases use original retained map identities.
+The entire previous x86 loader/kernel suite also passes; both architecture
+libraries build. The initial test used nonexistent C++ option fields and
+failed compilation; its raw log is retained before the corrected public
+proof-insns/proof-object interface run. Full application replay is performed
+by C/A with their real startup captures; these controls alone make no claim
+that every application now executes.

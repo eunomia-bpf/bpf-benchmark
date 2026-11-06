@@ -2239,7 +2239,8 @@ HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type, uint32_t ex
                                "bpf_perf_event_output_tp"};
         }
         if (prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT ||
-            prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE) {
+            prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE ||
+            prog_type == BPF_PROG_TYPE_TRACING) {
             return HelperAlias{helper_id, "bpf_perf_event_output",
                                "bpf_perf_event_output_raw_tp"};
         }
@@ -2256,7 +2257,8 @@ HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type, uint32_t ex
                                "bpf_get_stackid_pe"};
         }
         if (prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT ||
-            prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE) {
+            prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE ||
+            prog_type == BPF_PROG_TYPE_TRACING) {
             return HelperAlias{helper_id, "bpf_get_stackid",
                                "bpf_get_stackid_raw_tp"};
         }
@@ -2270,7 +2272,8 @@ HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type, uint32_t ex
             return HelperAlias{helper_id, "bpf_get_stack", "bpf_get_stack_pe"};
         }
         if (prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT ||
-            prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE) {
+            prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE ||
+            prog_type == BPF_PROG_TYPE_TRACING) {
             return HelperAlias{helper_id, "bpf_get_stack",
                                "bpf_get_stack_raw_tp"};
         }

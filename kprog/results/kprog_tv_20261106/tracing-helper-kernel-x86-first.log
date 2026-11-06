@@ -1,0 +1,71 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build
+cc -Wall -Wextra -Werror -O2 -g -D__EXPORTED_HEADERS__ \
+	-I../../vendor/linux-framework/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+	test_binding_kernel.c ../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o build/test-binding-kernel
+install -d build
+clang -O2 -g -target bpf -DTV_CONTEXT_HELPER=25 -I../../vendor/libbpf/include/uapi \
+	-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+	-I/usr/include/x86_64-linux-gnu -c test_contextual_helpers.bpf.c -o build/context-helper-25.bpf.o
+install -d build
+clang -O2 -g -target bpf -DTV_CONTEXT_HELPER=27 -I../../vendor/libbpf/include/uapi \
+	-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+	-I/usr/include/x86_64-linux-gnu -c test_contextual_helpers.bpf.c -o build/context-helper-27.bpf.o
+install -d build
+clang -O2 -g -target bpf -DTV_CONTEXT_HELPER=67 -I../../vendor/libbpf/include/uapi \
+	-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+	-I/usr/include/x86_64-linux-gnu -c test_contextual_helpers.bpf.c -o build/context-helper-67.bpf.o
+install -d build
+cc -O2 -c -fno-stack-protector -fno-asynchronous-unwind-tables \
+	-fno-unwind-tables -fomit-frame-pointer -mno-red-zone -fno-plt test_native_entry.c -o build/native-entry.o
+make -C ../libnativeloader BUILD_DIR=build-tv-binding
+make[1]: Entering directory '/workspaces/repository/kprog/libnativeloader'
+cmake -S . -B "build-tv-binding" \
+	-DNATIVE_LOADER_REPO_ROOT="/workspaces/repository" \
+	-DNATIVE_LOADER_LIBBPF_PREFIX="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix" \
+	-DNATIVE_LOADER_LIBBPF_LIBRARY="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" \
+	-DNATIVE_LOADER_KERNEL_OFFSETS_INCLUDE="/workspaces/repository/micro/programs/build-x86"
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspaces/repository/kprog/libnativeloader/build-tv-binding
+cmake --build "build-tv-binding" --target native_loader native_loader_shared
+gmake[2]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[ 50%] Building CXX object CMakeFiles/native_loader.dir/src/native_loader.cpp.o
+[100%] Linking CXX static library libnative_loader.a
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[100%] Built target native_loader
+gmake[4]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[ 50%] Building CXX object CMakeFiles/native_loader_shared.dir/src/native_loader.cpp.o
+[100%] Linking CXX shared library libnative_loader.so
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[100%] Built target native_loader_shared
+gmake[4]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[2]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+make[1]: Leaving directory '/workspaces/repository/kprog/libnativeloader'
+g++ -std=c++20 -Wall -Wextra -Werror -O2 \
+	-DTV_NATIVE_LINK_PATH='"/workspaces/repository/kprog/x86/native_lab/native_link/target-c-tail/release/native-link"' \
+	-I../../vendor/libbpf/include/uapi \
+	-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+	test_loader.cpp ../libnativeloader/build-tv-binding/libnative_loader.a \
+	../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o build/test-loader
+test_loader.cpp: In function ‘void contextual_helpers_regressions()’:
+test_loader.cpp:439:17: error: ‘struct native_loader::FdLoadOptions’ has no member named ‘simulator_object_path’
+  439 |         options.simulator_object_path = std::filesystem::absolute(path);
+      |                 ^~~~~~~~~~~~~~~~~~~~~
+test_loader.cpp:440:17: error: ‘struct native_loader::FdLoadOptions’ has no member named ‘simulator_program’
+  440 |         options.simulator_program = "tv_proof_contextual";
+      |                 ^~~~~~~~~~~~~~~~~
+make: *** [Makefile:150: build/test-loader] Error 1
+make: Leaving directory '/workspaces/repository/kprog/tv'

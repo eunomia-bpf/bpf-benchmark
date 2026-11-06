@@ -422,6 +422,44 @@ static void captured_bcc_map_probe_regression()
     std::puts("actual captured BCC global-data probe: PASS (exact source, generated clang proof, native writes42 at16, neighboring bytes and original map preserved)");
 }
 
+
+static void contextual_helpers_regressions()
+{
+    for (const auto &[helper, symbol] : {std::pair{25, "tv_perf_entry"},
+            std::pair{27, "tv_stackid_entry"}, std::pair{67, "tv_stack_entry"}}) {
+        const std::string path = "build/context-helper-" + std::to_string(helper) + ".bpf.o";
+        auto fixture = load_fixture(path.c_str(), "tv_proof_contextual");
+        native_loader::FdLoadOptions options{};
+        options.original_prog_fd = bpf_program__fd(fixture.program);
+        options.expected_attach_type = BPF_TRACE_FENTRY;
+        options.source_insns.assign(bpf_program__insns(fixture.program),
+            bpf_program__insns(fixture.program) + bpf_program__insn_cnt(fixture.program));
+        options.native_object_path = std::filesystem::absolute("build/native-entry.o");
+        options.symbol_name = symbol;
+        options.proof_insns = options.source_insns;
+        options.proof_object_path = std::filesystem::absolute(path);
+        options.native_link_path = std::filesystem::absolute(TV_NATIVE_LINK_PATH);
+        auto loaded = native_loader::load_from_fd(options);
+        assert(loaded.replaced && loaded.prog_fd >= 0);
+        int stats = bpf_enable_stats(BPF_STATS_RUN_TIME);
+        if (stats < 0) throw std::runtime_error("enable contextual helper execution stats");
+        int link = bpf_link_create(loaded.prog_fd, 0, BPF_TRACE_FENTRY, nullptr);
+        if (link < 0) throw std::runtime_error("attach contextual native fentry");
+        bpf_test_run_opts run{};
+        run.sz = sizeof(run);
+        if (bpf_prog_test_run_opts(options.original_prog_fd, &run))
+            throw std::runtime_error("trigger contextual helper target");
+        bpf_prog_info info{};
+        uint32_t size = sizeof(info);
+        if (bpf_obj_get_info_by_fd(loaded.prog_fd, &info, &size))
+            throw std::runtime_error("query contextual native execution");
+        assert(run.retval == 0 && info.run_cnt > 0);
+        if (close(link) || close(stats)) throw std::runtime_error("close contextual helper link");
+        native_loader::close_loaded_program(&loaded);
+        std::printf("TRACING helper %d exact raw-TP target: PASS (actual clang proof, bound native fentry executed)\n", helper);
+    }
+}
+
 int main()
 {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
@@ -475,6 +513,7 @@ int main()
         source_map_binding_regressions(map);
         load_context_regressions();
         tracing_context_regressions();
+        contextual_helpers_regressions();
         btf_manifest_regressions();
         for (const char *symbol : {"tv_short_entry", "tv_long_entry", "tv_helper_entry", "tv_coarse_helper_entry", "tv_map_entry", "tv_hash_entry", "tv_large_entry", "tv_readonly_entry", "tv_duplicate_readonly_entry"}) {
             const auto &proof = std::string(symbol) == "tv_helper_entry" ? helper :
