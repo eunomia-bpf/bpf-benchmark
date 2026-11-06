@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0979 measured 10em (20 overfull / 39754
+underfull) and kept 6em as the curve's turn; the 55
+left have median 6.3pt.
+
+
 Step 0978 tested a paragraph split (no effect) then
 doubled the stretch: overfull 447 -> 55, worst 81 ->
 29pt.

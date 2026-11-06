@@ -7606,6 +7606,21 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0979 - the stretch stops helping at six ems
+
+The stretch was measured once more to see where it stops helping. At ten ems the
+paper sets twenty overfull boxes rather than fifty-five, but thirty-nine
+thousand loose lines rather than thirty-three thousand, so the last thirty-five
+boxes cost six thousand loose ones.
+
+The fifty-five that remain are small: a median of six points and a minimum of
+one, against a text width of four hundred and fifty-eight. None is past
+twenty-nine points, and the one that is past twenty had already been reduced by
+the break added earlier.
+
+Six ems is where the curve turns, so that is where the setting stays. Census
+unchanged; the curve has four points and the choice is stated.
+
 ### Step 0978 - the paragraph split changed nothing; the stretch did
 
 Splitting a paragraph was tested before the setting was changed again, and it
