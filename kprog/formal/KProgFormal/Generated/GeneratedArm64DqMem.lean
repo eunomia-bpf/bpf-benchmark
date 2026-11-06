@@ -30,6 +30,12 @@ def lanes : Op -> Lanes
   | .loadQ0 => .two
   | .storeD0 => .one
   | .storeQ0 => .two
+/-- A scalar D load clears V[127:64]; a store does not alter its source. -/
+def clearHigh : Op → Bool
+  | .loadD0 => true
+  | .loadQ0 => false
+  | .storeD0 => false
+  | .storeQ0 => false
 /-- The arm index of the opcode in the four-way dispatch chain, decoded from the
 opcode code, so the chain order is a checked fact. -/
 def armIndex : Op -> Nat

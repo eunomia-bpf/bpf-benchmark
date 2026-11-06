@@ -39,6 +39,8 @@ _Static_assert(KPROG_ARM64_DQ_MEM_LANE_STRIDE == 8U,
 #define KPROG_ARM64_DQ_MEM_OP_LOAD_Q0_LANES 2U
 #define KPROG_ARM64_DQ_MEM_OP_STORE_D0_LANES 1U
 #define KPROG_ARM64_DQ_MEM_OP_STORE_Q0_LANES 2U
+/* The scalar load zeroes the upper vector half after its one lane read. */
+#define KPROG_ARM64_DQ_MEM_CLEAR_HIGH(OP) (((OP) == ARM64_OP_LOAD_D0))
 /*
  * The arm index of each opcode in the four-way `OP == LOAD_D0 / LOAD_Q0 /
  * STORE_D0 / STORE_Q0` chain, decoded from the opcode code so the chain order is

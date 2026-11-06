@@ -502,6 +502,105 @@ def memoryStep (i : MemoryInstruction) (s : State) : Transition State :=
           | .error fault => ⟨s, [.fault fault], some fault⟩
           | .ok (memory, event) => ⟨{ s with memory := memory, pc := s.pc + 4 }, [event], none⟩
 
+inductive MemoryExtend | uxtw | lsl | sxtw | sxtx
+  deriving DecidableEq, Repr
+
+inductive MemoryOffset
+  | immediate (value : Word)
+  | register (index : Register) (extend : MemoryExtend) (scaled : Bool)
+  deriving DecidableEq, Repr
+
+inductive Writeback | none | pre | post
+  deriving DecidableEq, Repr
+
+def memoryOffset (s : State) (scale : Nat) : MemoryOffset → Word
+  | .immediate value => value
+  | .register index extend scaled =>
+      let raw := readReg s index
+      let value : Word := match extend with
+        | .uxtw => (raw.setWidth 32).setWidth 64
+        | .sxtw => (raw.setWidth 32).signExtend 64
+        | .lsl | .sxtx => raw
+      value <<< (if scaled then scale else 0)
+
+def writeMemoryBase (s : State) (base : Register) (value : Word) : State :=
+  if base.val = 31 then { s with sp := value } else writeReg s base value
+
+def MemoryWidth.scale : MemoryWidth → Nat
+  | .byte => 0 | .half => 1 | .word => 2 | .double => 3
+
+def MemoryTransfer.register : MemoryTransfer → Register
+  | .load dst _ => dst | .store src => src
+
+structure AddressedMemoryInstruction where
+  width : MemoryWidth
+  transfer : MemoryTransfer
+  base : Register
+  offset : MemoryOffset
+  writeback : Writeback
+  noOverlap : writeback ≠ .none → base.val ≠ 31 → transfer.register ≠ base
+  deriving DecidableEq, Repr
+
+/-- Compute the offset and old base before any transfer. A fault suppresses
+writeback; both pre/post writeback commit only after the transfer succeeds. -/
+def addressedMemoryStep (i : AddressedMemoryInstruction) (s : State) : Transition State :=
+  let offset := memoryOffset s i.width.scale i.offset
+  let result := memoryStep ⟨i.width, i.transfer, i.base,
+    if i.writeback = .post then 0 else offset⟩ s
+  if result.fault.isSome || i.writeback = .none then result
+  else { result with state := writeMemoryBase result.state i.base (memoryBase s i.base + offset) }
+
+inductive VectorMemoryWidth | byte | half | word | double | quad
+  deriving DecidableEq, Repr
+
+def VectorMemoryWidth.scale : VectorMemoryWidth → Nat
+  | .byte => 0 | .half => 1 | .word => 2 | .double => 3 | .quad => 4
+
+def VectorMemoryWidth.bytes (width : VectorMemoryWidth) : Nat := 2 ^ width.scale
+
+structure VectorMemoryInstruction where
+  width : VectorMemoryWidth
+  load : Bool
+  bank : Register
+  base : Register
+  offset : MemoryOffset
+  writeback : Writeback
+  deriving DecidableEq, Repr
+
+/-- SIMD/FP transfers use the selected vector bank; small loads clear upper
+bits. One architectural access carries exactly the transferred bytes. These
+ordinary accesses make no single-copy atomicity or ordering claim. -/
+def vectorMemoryStep (i : VectorMemoryInstruction) (s : State) : Transition State :=
+  match spAlignmentFault s i.base with
+  | some fault => ⟨s, [.fault fault], some fault⟩
+  | none =>
+      let offset := memoryOffset s i.width.scale i.offset
+      let updated := memoryBase s i.base + offset
+      let address := if i.writeback = .post then memoryBase s i.base else updated
+      let finish := fun result event =>
+        (⟨{ (if i.writeback = .none then result else writeMemoryBase result i.base updated)
+          with pc := s.pc + 4 }, [event], none⟩ : Transition State)
+      if i.load then
+        if permitted s.memory.readable address i.width.bytes then
+          let data := bytesAt s.memory address i.width.bytes
+          finish (writeVector s i.bank (littleEndian 128 data))
+            (.memory .read address data (initializedAt s.memory address i.width.bytes))
+        else
+          let fault := Fault.read address i.width.bytes
+          ⟨s, [.fault fault], some fault⟩
+      else
+        if permitted s.memory.writable address i.width.bytes then
+          let value := readVector s i.bank
+          let data := (List.range i.width.bytes).map (fun n => (value >>> (8 * n)).setWidth 8)
+          let memory := if i.width = .quad then
+              storeMemory (storeMemory s.memory address (value.setWidth 64) 8)
+                (address + 8) ((value >>> 64).setWidth 64) 8
+            else storeMemory s.memory address (value.setWidth 64) i.width.bytes
+          finish { s with memory := memory } (.memory .write address data true)
+        else
+          let fault := Fault.write address i.width.bytes
+          ⟨s, [.fault fault], some fault⟩
+
 /-- A pair load with duplicate destinations is constrained-unpredictable,
 including permitted UNDEF/NOP outcomes. Defined native programs carry this
 source-validity witness; stores may use the same source twice. -/
@@ -566,6 +665,19 @@ def pairMemoryStep (i : PairMemoryInstruction) (s : State) : Transition State :=
               | .error fault => ⟨{ s with memory := memory }, [event, .fault fault], some fault⟩
               | .ok (memory, secondEvent) =>
                   ⟨{ s with memory := memory, pc := s.pc + 4 }, [event, secondEvent], none⟩
+
+structure AddressedPairMemoryInstruction where
+  instruction : PairMemoryInstruction
+  writeback : Writeback
+  noOverlap : writeback ≠ .none → instruction.base.val ≠ 31 →
+    instruction.first ≠ instruction.base ∧ instruction.second ≠ instruction.base
+  deriving DecidableEq, Repr
+
+def addressedPairMemoryStep (i : AddressedPairMemoryInstruction) (s : State) : Transition State :=
+  let transfer := if i.writeback = .post then { i.instruction with offset := 0 } else i.instruction
+  let result := pairMemoryStep transfer s
+  if result.fault.isSome || i.writeback = .none then result
+  else { result with state := writeMemoryBase result.state i.instruction.base (memoryBase s i.instruction.base + i.instruction.offset) }
 
 /-- Branch offsets are signed native BYTE displacements relative to the
 branch instruction, with wrapping64-bit PC arithmetic. -/
@@ -702,7 +814,10 @@ inductive Instruction
   | exclusive (instruction : ExclusiveInstruction)
   | bitfield (instruction : BitfieldInstruction)
   | memory (instruction : MemoryInstruction)
+  | addressedMemory (instruction : AddressedMemoryInstruction)
+  | vectorMemory (instruction : VectorMemoryInstruction)
   | pairMemory (instruction : PairMemoryInstruction)
+  | addressedPairMemory (instruction : AddressedPairMemoryInstruction)
   | nop
   | branch (displacement : Word)
   | branchConditional (predicate : Fin 16) (displacement : Word)
@@ -733,7 +848,10 @@ def step (i : Instruction) (s : State) : Transition State :=
   | .exclusive instruction => exclusiveStep instruction s
   | .bitfield instruction => bitfieldStep instruction s
   | .memory instruction => memoryStep instruction s
+  | .addressedMemory instruction => addressedMemoryStep instruction s
+  | .vectorMemory instruction => vectorMemoryStep instruction s
   | .pairMemory instruction => pairMemoryStep instruction s
+  | .addressedPairMemory instruction => addressedPairMemoryStep instruction s
   | .nop => ⟨{ s with pc := s.pc + 4 }, [], none⟩
   | .branch displacement => branchStep true displacement s
   | .branchConditional predicate displacement => branchStep (condition s.flags predicate) displacement s
@@ -787,31 +905,62 @@ def decode (bytes : Array Byte) : Except String Instruction := do
     if rhs = dst then throw "constrained-unpredictable exclusive status/data overlap"
     if lhs.val != 31 && rhs = lhs then throw "constrained-unpredictable exclusive status/base overlap"
     return .exclusive (.store exclusiveWidth ((word / 2^15) % 2 == 1) rhs dst lhs)
-  -- Integer pair signed-offset encodings: opc00=W, opc10=X, V=0.
-  if word &&& 0x7f800000 = 0x29000000 then
+  -- Integer pair signed-offset and pre/post-indexed encodings, V=0.
+  let pairClass := word &&& 0x7f800000
+  if pairClass = 0x29000000 ∨ pairClass = 0x28800000 ∨ pairClass = 0x29800000 then
     let load := (word / 2^22) % 2 == 1
     let second : Register := ⟨(word / 2^10) % 32, Nat.mod_lt _ (by decide)⟩
     if distinct : load = true → dst ≠ second then
       let width := if word / 2^31 = 1 then Width.w64 else .w32
-      return .pairMemory ⟨width, load, dst, second, lhs,
+      let instruction : PairMemoryInstruction := ⟨width, load, dst, second, lhs,
         (BitVec.ofNat 7 (word / 2^15)).signExtend 64 * BitVec.ofNat 64 width.bytes, distinct⟩
+      if pairClass = 0x29000000 then return .pairMemory instruction
+      let writeback := if pairClass = 0x28800000 then Writeback.post else .pre
+      if noOverlap : writeback ≠ .none → instruction.base.val ≠ 31 →
+          instruction.first ≠ instruction.base ∧ instruction.second ≠ instruction.base then
+        return .addressedPairMemory ⟨instruction, writeback, noOverlap⟩
+      else throw "constrained-unpredictable pair writeback overlap"
     else throw "constrained-unpredictable LDP duplicate destinations"
-  -- Scalar unsigned-scaled and signed-unscaled immediate memory encodings.
-  -- V=0 selects GPR transfers; pre/post/register modes have distinct classes.
-  let scaled := word &&& 0x3f000000 == 0x39000000
-  let unscaled := word &&& 0x3f200c00 == 0x38000000
-  if scaled || unscaled then
+  -- Scalar/SIMD immediate, pre/post writeback and register-offset classes.
+  let scaled := word &&& 0x3b000000 == 0x39000000
+  let modeClass := word &&& 0x3b200c00
+  let unscaled := modeClass == 0x38000000
+  let post := modeClass == 0x38000400
+  let pre := modeClass == 0x38000c00
+  let indexed := modeClass == 0x38200800
+  if scaled || unscaled || post || pre || indexed then
     let size := word / 2^30
-    let accessWidth := match size with | 0 => MemoryWidth.byte | 1 => .half | 2 => .word | _ => .double
     let opc := (word / 2^22) % 4
-    let transfer ← match opc with
-      | 0 => pure (MemoryTransfer.store dst)
-      | 1 => pure (.load dst none)
-      | 2 => if size < 3 then pure (.load dst (some .w64)) else throw "prefetch encoding is not a scalar load/store"
-      | _ => if size < 2 then pure (.load dst (some .w32)) else throw "reserved signed-load size"
-    let offset := if scaled then BitVec.ofNat 64 (((word / 2^10) % 2^12) * accessWidth.bytes)
+    let vector := (word / 2^26) % 2 == 1
+    if vector && opc ≥ 2 && size != 0 then throw "reserved SIMD load/store size"
+    let scale := if vector && opc ≥ 2 then 4 else size
+    let immediate := if scaled then BitVec.ofNat 64 (((word / 2^10) % 2^12) * 2^scale)
       else (BitVec.ofNat 9 (word / 2^12)).signExtend 64
-    return .memory ⟨accessWidth, transfer, lhs, offset⟩
+    let offset ← if indexed then do
+        let option := (word / 2^13) % 8
+        let extend ← match option with
+          | 2 => pure MemoryExtend.uxtw | 3 => pure .lsl
+          | 6 => pure .sxtw | 7 => pure .sxtx
+          | _ => throw "reserved load/store index extension"
+        pure (MemoryOffset.register rhs extend ((word / 2^12) % 2 == 1))
+      else pure (.immediate immediate)
+    let writeback := if post then Writeback.post else if pre then .pre else .none
+    if vector then
+      let accessWidth := match scale with
+        | 0 => VectorMemoryWidth.byte | 1 => .half | 2 => .word | 3 => .double | _ => .quad
+      return .vectorMemory ⟨accessWidth, opc % 2 == 1, dst, lhs, offset, writeback⟩
+    else
+      let accessWidth := match size with | 0 => MemoryWidth.byte | 1 => .half | 2 => .word | _ => .double
+      let transfer ← match opc with
+        | 0 => pure (MemoryTransfer.store dst)
+        | 1 => pure (.load dst none)
+        | 2 => if size < 3 then pure (.load dst (some .w64)) else throw "prefetch encoding is not a scalar load/store"
+        | _ => if size < 2 then pure (.load dst (some .w32)) else throw "reserved signed-load size"
+      if scaled || unscaled then
+        return .memory ⟨accessWidth, transfer, lhs, immediate⟩
+      if noOverlap : writeback ≠ .none → lhs.val ≠ 31 → transfer.register ≠ lhs then
+        return .addressedMemory ⟨accessWidth, transfer, lhs, offset, writeback, noOverlap⟩
+      else throw "constrained-unpredictable load/store writeback overlap"
   if word = 0xd503201f then return .nop
   if word &&& 0xfc000000 = 0x14000000 then
     return .branch ((BitVec.ofNat 26 word).signExtend 64 <<< 2)

@@ -1,0 +1,7 @@
+import KProgFormal.Refinement.Arm64AddressedMemory
+import KProgFormal.Refinement.Arm64VectorMemory
+#print axioms KProgFormal.Refinement.Arm64AddressedMemory.index_refines
+#print axioms KProgFormal.Refinement.Arm64AddressedMemory.step_refines
+#print axioms KProgFormal.Refinement.Arm64AddressedMemory.pair_step_refines
+#print axioms KProgFormal.Refinement.Arm64VectorMemory.d_load_refines
+#print axioms KProgFormal.Refinement.Arm64VectorMemory.q_load_refines

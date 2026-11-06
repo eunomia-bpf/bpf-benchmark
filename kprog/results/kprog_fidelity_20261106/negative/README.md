@@ -309,3 +309,11 @@ regressions and all29 positive proof builds pass. The permanent29-case Arm
 suite rejects23 and retains the same six safety findings, with zero
 infrastructure errors. Its map fixtures now use the actual original source
 prelude and reach the intended verifier checks; the stale adapter run is retained.
+
+Latest permanent Arm run:30 cases,28 rejections(14 verifier/13 specialization/
+1 loader) and2 existing numericSP/entryLR safety accepts. All4 exclusive
+failure branches now reject on the actualnew#24 choice-capable kernel/module.
+The new D0high-clear program wasGEN1accepted before the fidelity repair and
+now rejects exactscalarNULLmemoryaccess. Per-case full messages, original
+findings and matched artifacts are retained under arm64-current-choice/ and
+arm64-vector-clear/. These do not count as application-program negatives.

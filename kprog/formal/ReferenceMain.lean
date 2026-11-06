@@ -205,6 +205,9 @@ private def executeArm (request : Json) : Except String Json := do
         | .store .. =>
             if !(state.getObjVal? "exclusive_inputs").isOk then
               throw "exclusive store requires explicit physical/environment inputs"
+    | .vectorMemory i =>
+        if i.bank.val ≠ 0 ∧ !(state.getObjVal? "vectors").isOk then
+          throw "nonzero SIMD register requires explicit vectors V0..V31"
     | .fmovBank bank _ =>
         if bank.val ≠ 0 ∧ !(state.getObjVal? "vectors").isOk then
           throw "nonzero SIMD register requires explicit vectors V0..V31"

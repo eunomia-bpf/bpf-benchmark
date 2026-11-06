@@ -180,6 +180,8 @@ static void run_lanes(unsigned base, unsigned index, unsigned flags, __s64 imm,
 {
 	unsigned i;
 
+	e->v0 = v0;
+	e->v0_hi = v0_hi;
 	for (i = 0; i < lanes; i++) {
 		__s64 off = (__s64)KPROG_ARM64_MEM_OFFSET(
 				    flags & (ARM64_MEM_PRE | ARM64_MEM_POST),
@@ -237,6 +239,8 @@ static struct dq_effect contract_step(unsigned op, unsigned base, unsigned index
 	run_lanes(base, index, flags, imm,
 		  e.access == KPROG_ARM64_DQ_MEM_ACCESS_LOAD, e.lanes,
 		  KPROG_ARM64_DQ_MEM_LANE_STRIDE, v0, v0_hi, &e);
+	if (KPROG_ARM64_DQ_MEM_CLEAR_HIGH(op))
+		e.v0_hi = 0;
 	if (flags & ARM64_MEM_POST)
 		model_writeback(base, imm);
 
@@ -265,6 +269,8 @@ static struct dq_effect model_step(unsigned op, unsigned base, unsigned index,
 	if (flags & ARM64_MEM_PRE)
 		model_writeback(base, imm);
 	run_lanes(base, index, flags, imm, is_load, lanes, 8U, v0, v0_hi, &e);
+	if (op == ARM64_OP_LOAD_D0)
+		e.v0_hi = 0;
 	if (flags & ARM64_MEM_POST)
 		model_writeback(base, imm);
 

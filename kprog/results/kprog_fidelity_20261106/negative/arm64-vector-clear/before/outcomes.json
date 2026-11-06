@@ -1,0 +1,12 @@
+{
+  "arch": "arm64",
+  "cases": [
+    {
+      "name": "scalar_vector_load_clear_high",
+      "assembly": "sub sp, sp, #32; mov x1, #1; str xzr, [sp]; str x1, [sp, #8]; ldr q0, [sp]; ldr d0, [sp]; str q0, [sp, #16]; ldr x1, [sp, #24]; cbnz x1, 1f; mov x0, #0; ldr x0, [x0]; 1: add sp, sp, #32; mov w0, #2; ret",
+      "stage": "accepted_finding",
+      "message": "bound program id=8 chunks=1 nonzero_generations=1\n",
+      "returncode": 0
+    }
+  ]
+}

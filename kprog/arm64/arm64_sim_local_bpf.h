@@ -890,6 +890,8 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 					__a64_v0, ARM64_SIM_TAG_SCALAR);\
 			}                                             \
 		}                                                     \
+		if (KPROG_ARM64_DQ_MEM_CLEAR_HIGH(OP))                    \
+			__a64_v0_hi = 0;                                  \
 		ARM64_SIM_L_MEM_POST((BASE), (AUX), (IMM));                \
 	} while (0)
 

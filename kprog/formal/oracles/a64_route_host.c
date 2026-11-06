@@ -2175,10 +2175,10 @@ static __u64 scene_vector_lanes(void)
 arm64_l_vl:
 	for (i = 0; i < 4U; i++) {
 		switch (VOPS[i]) {
-		case ARM64_OP_LOAD_D0: /* 1 lane: low only, extra 0 */
+		case ARM64_OP_LOAD_D0: /* one lane read; upper SIMD bits clear */
 			ARM64_SIM_L_LOAD_D0_MEM(ARM64_X10, 0xffU, 0ULL, 0ULL);
 			cases = cases + 2U;
-			if (__a64_v0 != LO || __a64_v0_hi != pattern_reg(65U)) {
+			if (__a64_v0 != LO || __a64_v0_hi != 0) {
 				printf("MISMATCH vl ld0 vreg: got 0x%llx/0x%llx\n",
 				       (unsigned long long)__a64_v0,
 				       (unsigned long long)__a64_v0_hi);

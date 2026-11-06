@@ -276,6 +276,8 @@ static void model_dq(unsigned op, unsigned base, unsigned index, unsigned aux,
 			*v0_hi = model_mem_read(base, index, aux, imm,
 				KPROG_ARM64_DQ_MEM_HIGH_LANE_STRIDE,
 				KPROG_ARM64_DQ_MEM_LANE_STRIDE);
+		else
+			*v0_hi = 0; /* Native scalar D load clears the upper half. */
 	} else {
 		model_mem_write(base, index, aux, imm, 0,
 				KPROG_ARM64_DQ_MEM_LANE_STRIDE, *v0,

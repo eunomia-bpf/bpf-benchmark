@@ -51,6 +51,7 @@ FIXTURES = {
         'overlapping_load_pair': 'sub sp, sp, #16; mov x1, #2; stp x1, x1, [sp]; ldp x1, x1, [sp]; add sp, sp, #16; mov w0, w1; ret',
         'writeback_load_overlap': 'sub sp, sp, #16; mov x2, #2; stp x2, x2, [sp]; mov x1, sp; ldr x1, [x1], #8; add sp, sp, #16; mov w0, #2; ret',
         'writeback_store_overlap': 'sub sp, sp, #16; mov x2, #2; stp x2, x2, [sp]; mov x1, sp; str x1, [x1], #8; add sp, sp, #16; mov w0, #2; ret',
+        'scalar_vector_load_clear_high': 'sub sp, sp, #32; mov x1, #1; str xzr, [sp]; str x1, [sp, #8]; ldr q0, [sp]; ldr d0, [sp]; str q0, [sp, #16]; ldr x1, [sp, #24]; cbnz x1, 1f; mov x0, #0; ldr x0, [x0]; 1: add sp, sp, #32; mov w0, #2; ret',
         'unpaired_stxr_failure': 'sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret',
         'unpaired_stlxr_failure': 'sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stlxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret',
         'paired_stxr_failure': 'sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; ldxr x1, [x2]; stxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret',
@@ -69,7 +70,10 @@ FIXTURES = {
 }
 
 
-def build(arch, out):
+def build(arch, out, names=None):
+    selected = set(FIXTURES[arch] if names is None else names)
+    if not selected or selected - FIXTURES[arch].keys():
+        raise ValueError(f'unknown or empty negative fixture selection: {selected}')
     sys.path.insert(0, str(ROOT / 'kprog' / arch / 'micro-prog'))
     spec = importlib.util.spec_from_file_location('encoder', ROOT / 'kprog' / arch / 'micro-prog/generate_micro_sim_proofs.py')
     enc = importlib.util.module_from_spec(spec)
@@ -83,6 +87,8 @@ def build(arch, out):
         shutil.copyfile(path, target)
     rows = []
     for name, assembly in FIXTURES[arch].items():
+        if name not in selected:
+            continue
         source = ('.intel_syntax noprefix\n' if arch == 'x86' else '') + '.text\n.global entry\n.type entry, %function\nentry:\n' + assembly.replace('; ', '\n') + '\n.size entry, .-entry\n'
         (out / f'{name}.S').write_text(source)
         compiler = 'cc' if arch == 'x86' else 'aarch64-linux-gnu-gcc'

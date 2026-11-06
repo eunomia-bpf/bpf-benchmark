@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate full-bank CPU observers around the production FMOV emitter."""
+"""Generate full-bank CPU observers around the production instruction emitter."""
 import argparse
 import json
 from pathlib import Path
@@ -49,7 +49,7 @@ def wrapper(index, instruction, clear_monitor=False):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--family', choices=['fmov','bitfield','exclusive'], default='fmov')
+    parser.add_argument('--family', choices=['fmov','bitfield','exclusive','memory'], default='fmov')
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -71,10 +71,34 @@ def main():
                     forms.append(f'{op} {prefix}0, {prefix}1, #{lsb}, #{count}')
                 forms += [f'{op} {prefix}1, {prefix}1, #7, #13',
                           f'{op} {prefix}zr, {prefix}1, #7, #13']
-    else:
+    elif args.family == 'exclusive':
         for prefix in ['w','x']:
             forms += [f'{op} {prefix}0, [x4]' for op in ['ldxr','ldaxr']]
             forms += [f'{op} w0, {prefix}1, [x4]' for op in ['stxr','stlxr']]
+    else:
+        transfers = [('ldr','w0',2),('ldr','x0',3),('str','w0',2),('str','x0',3),
+            ('ldrb','w0',0),('ldrh','w0',1),('strb','w0',0),('strh','w0',1),
+            ('ldrsb','w0',0),('ldrsb','x0',0),('ldrsh','w0',1),('ldrsh','x0',1),
+            ('ldrsw','x0',2),('ldr','d0',3),('ldr','q0',4),('str','d0',3),('str','q0',4)]
+        for op,reg,scale in transfers:
+            forms += [f'{op} {reg}, [x4, #16]']
+            for delta in [-16,16]:
+                forms += [f'{op} {reg}, [x4, #{delta}]!', f'{op} {reg}, [x4], #{delta}']
+            for extension,index in [('lsl','x5'),('uxtw','w5'),('sxtw','w5'),('sxtx','x5')]:
+                for amount in sorted({0,scale}):
+                    forms += [f'{op} {reg}, [x4, {index}, {extension} #{amount}]']
+        for op,reg in [('ldur','w0'),('ldur','x0'),('stur','w0'),('stur','x0'),
+                ('ldurb','w0'),('ldurh','w0'),('sturb','w0'),('sturh','w0')]:
+            forms += [f'{op} {reg}, [x4, #-8]', f'{op} {reg}, [x4, #8]']
+        for reg in ['w4','x4','w5','x5','wzr','xzr']:
+            forms += [f'ldr {reg}, [x4, x5]',f'str {reg}, [x4, x5]']
+        forms += ['ldr x0, [x4, xzr]', 'str x0, [x4, xzr]']
+        for reg in ['w','x']:
+            for op in ['ldp','stp']:
+                forms += [f'{op} {reg}0, {reg}1, [x4, #16]']
+                for delta in [-16,16]:
+                    forms += [f'{op} {reg}0, {reg}1, [x4, #{delta}]!',
+                              f'{op} {reg}0, {reg}1, [x4], #{delta}']
     (out/'instructions.S').write_text('.text\n'+'\n'.join(forms)+'\n')
     subprocess.run(['aarch64-linux-gnu-gcc', '-c', out/'instructions.S', '-o', out/'instructions.o'], check=True)
     assembly = subprocess.check_output(['aarch64-linux-gnu-objdump', '-dr', out/'instructions.o'], text=True)
@@ -85,6 +109,16 @@ def main():
     source = ['#include "../driver.h"', '#include <stdlib.h>',
               f'#include "{snapshot}/kprog/arm64/arm64_sim_local_bpf.h"',
               'static void arm64_sim_unsupported_opcode(void) { abort(); }']
+    if args.family == 'exclusive':
+        # Every observed store has CLREX immediately before native_pc. This
+        # fixture supplies that explicit environment; arbitrary entry monitors
+        # and paired attempts must never inherit a constant failure outcome.
+        source += ['unsigned long native_lab_exclusive_failure_choice(unsigned int site) {',
+                   'switch (site) {']
+        source += [f'case {insn.addr}U: return 1;' for insn in instructions
+                   if insn.mnemonic in {'stxr','stlxr'}]
+        source += ['default: fputs("unknown exclusive observer site\\n", stderr); exit(1);',
+                   '}', '}']
     entries, coverage = [], []
     for index, (form, instruction) in enumerate(zip(forms, instructions)):
         encoded = gen.encode(instruction, {}, {})

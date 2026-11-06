@@ -166,6 +166,7 @@ check:
 	python3 tools/check_reference_x86_path.py
 	python3 tools/check_x86_memory_widths.py
 	python3 tools/check_reference_arm64.py
+	python3 tools/check_reference_arm64_addressed_memory.py
 	python3 tools/check_reference_exclusive.py
 	python3 tools/check_no_sorry.py --check
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I. -I../x86 -I../../vendor/libbpf/src oracles/test_x86_six_flags_host.c -o build/test_x86_six_flags_host

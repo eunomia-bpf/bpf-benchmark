@@ -11,7 +11,7 @@
  * is numerically distinguishable:
  *
  *   - The half count (`KPROG_ARM64_VREG_*_HALVES`): a `.D0` transfer touches
- *     one state field, a `.Q0` transfer two. The high state field is planted
+ *     one memory lane and clears the high field; a `.Q0` transfer moves two. The high state field is planted
  *     with a different register pattern than the low one, so a dropped or
  *     doubled half changes `__a64_v0_hi` (and the upper memory lane).
  *   - The half plan (`KPROG_ARM64_VREG_*_SELECT(N)` and
@@ -323,6 +323,9 @@ static void model_vreg(unsigned op, unsigned base, unsigned index,
 					ARM64_SIM_TAG_SCALAR);
 		}
 	}
+
+	if (op == ARM64_OP_LOAD_D0)
+		*v0_hi = 0; /* A memory D load clears V0[127:64]. */
 
 	if (ARM64_SIM_L_MEM_FLAGS(aux) & ARM64_MEM_POST)
 		model_writeback(base, imm);

@@ -1,0 +1,236 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+0	ldr w0, [x4, #16]	256	256	0	0	checked	none
+1	ldr w0, [x4, #-16]!	256	256	0	0	checked	none
+2	ldr w0, [x4], #-16	256	256	0	0	checked	none
+3	ldr w0, [x4, #16]!	256	256	0	0	checked	none
+4	ldr w0, [x4], #16	256	256	0	0	checked	none
+5	ldr w0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+6	ldr w0, [x4, x5, lsl #2]	256	256	0	0	checked	none
+7	ldr w0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+8	ldr w0, [x4, w5, uxtw #2]	256	256	0	0	checked	none
+9	ldr w0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+10	ldr w0, [x4, w5, sxtw #2]	256	256	0	0	checked	none
+11	ldr w0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+12	ldr w0, [x4, x5, sxtx #2]	256	256	0	0	checked	none
+13	ldr x0, [x4, #16]	256	256	0	0	checked	none
+14	ldr x0, [x4, #-16]!	256	256	0	0	checked	none
+15	ldr x0, [x4], #-16	256	256	0	0	checked	none
+16	ldr x0, [x4, #16]!	256	256	0	0	checked	none
+17	ldr x0, [x4], #16	256	256	0	0	checked	none
+18	ldr x0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+19	ldr x0, [x4, x5, lsl #3]	256	256	0	0	checked	none
+20	ldr x0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+21	ldr x0, [x4, w5, uxtw #3]	256	256	0	0	checked	none
+22	ldr x0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+23	ldr x0, [x4, w5, sxtw #3]	256	256	0	0	checked	none
+24	ldr x0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+25	ldr x0, [x4, x5, sxtx #3]	256	256	0	0	checked	none
+26	str w0, [x4, #16]	256	256	0	0	checked	none
+27	str w0, [x4, #-16]!	256	256	0	0	checked	none
+28	str w0, [x4], #-16	256	256	0	0	checked	none
+29	str w0, [x4, #16]!	256	256	0	0	checked	none
+30	str w0, [x4], #16	256	256	0	0	checked	none
+31	str w0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+32	str w0, [x4, x5, lsl #2]	256	256	0	0	checked	none
+33	str w0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+34	str w0, [x4, w5, uxtw #2]	256	256	0	0	checked	none
+35	str w0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+36	str w0, [x4, w5, sxtw #2]	256	256	0	0	checked	none
+37	str w0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+38	str w0, [x4, x5, sxtx #2]	256	256	0	0	checked	none
+39	str x0, [x4, #16]	256	256	0	0	checked	none
+40	str x0, [x4, #-16]!	256	256	0	0	checked	none
+41	str x0, [x4], #-16	256	256	0	0	checked	none
+42	str x0, [x4, #16]!	256	256	0	0	checked	none
+43	str x0, [x4], #16	256	256	0	0	checked	none
+44	str x0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+45	str x0, [x4, x5, lsl #3]	256	256	0	0	checked	none
+46	str x0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+47	str x0, [x4, w5, uxtw #3]	256	256	0	0	checked	none
+48	str x0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+49	str x0, [x4, w5, sxtw #3]	256	256	0	0	checked	none
+50	str x0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+51	str x0, [x4, x5, sxtx #3]	256	256	0	0	checked	none
+52	ldrb w0, [x4, #16]	256	256	0	0	checked	none
+53	ldrb w0, [x4, #-16]!	256	256	0	0	checked	none
+54	ldrb w0, [x4], #-16	256	256	0	0	checked	none
+55	ldrb w0, [x4, #16]!	256	256	0	0	checked	none
+56	ldrb w0, [x4], #16	256	256	0	0	checked	none
+57	ldrb w0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+58	ldrb w0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+59	ldrb w0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+60	ldrb w0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+61	ldrh w0, [x4, #16]	256	256	0	0	checked	none
+62	ldrh w0, [x4, #-16]!	256	256	0	0	checked	none
+63	ldrh w0, [x4], #-16	256	256	0	0	checked	none
+64	ldrh w0, [x4, #16]!	256	256	0	0	checked	none
+65	ldrh w0, [x4], #16	256	256	0	0	checked	none
+66	ldrh w0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+67	ldrh w0, [x4, x5, lsl #1]	256	256	0	0	checked	none
+68	ldrh w0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+69	ldrh w0, [x4, w5, uxtw #1]	256	256	0	0	checked	none
+70	ldrh w0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+71	ldrh w0, [x4, w5, sxtw #1]	256	256	0	0	checked	none
+72	ldrh w0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+73	ldrh w0, [x4, x5, sxtx #1]	256	256	0	0	checked	none
+74	strb w0, [x4, #16]	256	256	0	0	checked	none
+75	strb w0, [x4, #-16]!	256	256	0	0	checked	none
+76	strb w0, [x4], #-16	256	256	0	0	checked	none
+77	strb w0, [x4, #16]!	256	256	0	0	checked	none
+78	strb w0, [x4], #16	256	256	0	0	checked	none
+79	strb w0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+80	strb w0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+81	strb w0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+82	strb w0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+83	strh w0, [x4, #16]	256	256	0	0	checked	none
+84	strh w0, [x4, #-16]!	256	256	0	0	checked	none
+85	strh w0, [x4], #-16	256	256	0	0	checked	none
+86	strh w0, [x4, #16]!	256	256	0	0	checked	none
+87	strh w0, [x4], #16	256	256	0	0	checked	none
+88	strh w0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+89	strh w0, [x4, x5, lsl #1]	256	256	0	0	checked	none
+90	strh w0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+91	strh w0, [x4, w5, uxtw #1]	256	256	0	0	checked	none
+92	strh w0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+93	strh w0, [x4, w5, sxtw #1]	256	256	0	0	checked	none
+94	strh w0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+95	strh w0, [x4, x5, sxtx #1]	256	256	0	0	checked	none
+96	ldrsb w0, [x4, #16]	256	256	0	0	checked	none
+97	ldrsb w0, [x4, #-16]!	256	256	0	0	checked	none
+98	ldrsb w0, [x4], #-16	256	256	0	0	checked	none
+99	ldrsb w0, [x4, #16]!	256	256	0	0	checked	none
+100	ldrsb w0, [x4], #16	256	256	0	0	checked	none
+101	ldrsb w0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+102	ldrsb w0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+103	ldrsb w0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+104	ldrsb w0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+105	ldrsb x0, [x4, #16]	256	256	0	0	checked	none
+106	ldrsb x0, [x4, #-16]!	256	256	0	0	checked	none
+107	ldrsb x0, [x4], #-16	256	256	0	0	checked	none
+108	ldrsb x0, [x4, #16]!	256	256	0	0	checked	none
+109	ldrsb x0, [x4], #16	256	256	0	0	checked	none
+110	ldrsb x0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+111	ldrsb x0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+112	ldrsb x0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+113	ldrsb x0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+114	ldrsh w0, [x4, #16]	256	256	0	0	checked	none
+115	ldrsh w0, [x4, #-16]!	256	256	0	0	checked	none
+116	ldrsh w0, [x4], #-16	256	256	0	0	checked	none
+117	ldrsh w0, [x4, #16]!	256	256	0	0	checked	none
+118	ldrsh w0, [x4], #16	256	256	0	0	checked	none
+119	ldrsh w0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+120	ldrsh w0, [x4, x5, lsl #1]	256	256	0	0	checked	none
+121	ldrsh w0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+122	ldrsh w0, [x4, w5, uxtw #1]	256	256	0	0	checked	none
+123	ldrsh w0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+124	ldrsh w0, [x4, w5, sxtw #1]	256	256	0	0	checked	none
+125	ldrsh w0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+126	ldrsh w0, [x4, x5, sxtx #1]	256	256	0	0	checked	none
+127	ldrsh x0, [x4, #16]	256	256	0	0	checked	none
+128	ldrsh x0, [x4, #-16]!	256	256	0	0	checked	none
+129	ldrsh x0, [x4], #-16	256	256	0	0	checked	none
+130	ldrsh x0, [x4, #16]!	256	256	0	0	checked	none
+131	ldrsh x0, [x4], #16	256	256	0	0	checked	none
+132	ldrsh x0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+133	ldrsh x0, [x4, x5, lsl #1]	256	256	0	0	checked	none
+134	ldrsh x0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+135	ldrsh x0, [x4, w5, uxtw #1]	256	256	0	0	checked	none
+136	ldrsh x0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+137	ldrsh x0, [x4, w5, sxtw #1]	256	256	0	0	checked	none
+138	ldrsh x0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+139	ldrsh x0, [x4, x5, sxtx #1]	256	256	0	0	checked	none
+140	ldrsw x0, [x4, #16]	256	256	0	0	checked	none
+141	ldrsw x0, [x4, #-16]!	256	256	0	0	checked	none
+142	ldrsw x0, [x4], #-16	256	256	0	0	checked	none
+143	ldrsw x0, [x4, #16]!	256	256	0	0	checked	none
+144	ldrsw x0, [x4], #16	256	256	0	0	checked	none
+145	ldrsw x0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+146	ldrsw x0, [x4, x5, lsl #2]	256	256	0	0	checked	none
+147	ldrsw x0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+148	ldrsw x0, [x4, w5, uxtw #2]	256	256	0	0	checked	none
+149	ldrsw x0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+150	ldrsw x0, [x4, w5, sxtw #2]	256	256	0	0	checked	none
+151	ldrsw x0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+152	ldrsw x0, [x4, x5, sxtx #2]	256	256	0	0	checked	none
+153	ldr d0, [x4, #16]	256	256	0	256	checked	none
+154	ldr d0, [x4, #-16]!	256	256	0	256	checked	none
+155	ldr d0, [x4], #-16	256	256	0	256	checked	none
+156	ldr d0, [x4, #16]!	256	256	0	256	checked	none
+157	ldr d0, [x4], #16	256	256	0	256	checked	none
+158	ldr d0, [x4, x5, lsl #0]	256	256	0	256	checked	none
+159	ldr d0, [x4, x5, lsl #3]	256	256	0	256	checked	none
+160	ldr d0, [x4, w5, uxtw #0]	256	256	0	256	checked	none
+161	ldr d0, [x4, w5, uxtw #3]	256	256	0	256	checked	none
+162	ldr d0, [x4, w5, sxtw #0]	256	256	0	256	checked	none
+163	ldr d0, [x4, w5, sxtw #3]	256	256	0	256	checked	none
+164	ldr d0, [x4, x5, sxtx #0]	256	256	0	256	checked	none
+165	ldr d0, [x4, x5, sxtx #3]	256	256	0	256	checked	none
+166	ldr q0, [x4, #16]	256	256	0	0	checked	none
+167	ldr q0, [x4, #-16]!	256	256	0	0	checked	none
+168	ldr q0, [x4], #-16	256	256	0	0	checked	none
+169	ldr q0, [x4, #16]!	256	256	0	0	checked	none
+170	ldr q0, [x4], #16	256	256	0	0	checked	none
+171	ldr q0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+172	ldr q0, [x4, x5, lsl #4]	256	256	0	0	checked	none
+173	ldr q0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+174	ldr q0, [x4, w5, uxtw #4]	256	256	0	0	checked	none
+175	ldr q0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+176	ldr q0, [x4, w5, sxtw #4]	256	256	0	0	checked	none
+177	ldr q0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+178	ldr q0, [x4, x5, sxtx #4]	256	256	0	0	checked	none
+179	str d0, [x4, #16]	256	256	0	0	checked	none
+180	str d0, [x4, #-16]!	256	256	0	0	checked	none
+181	str d0, [x4], #-16	256	256	0	0	checked	none
+182	str d0, [x4, #16]!	256	256	0	0	checked	none
+183	str d0, [x4], #16	256	256	0	0	checked	none
+184	str d0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+185	str d0, [x4, x5, lsl #3]	256	256	0	0	checked	none
+186	str d0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+187	str d0, [x4, w5, uxtw #3]	256	256	0	0	checked	none
+188	str d0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+189	str d0, [x4, w5, sxtw #3]	256	256	0	0	checked	none
+190	str d0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+191	str d0, [x4, x5, sxtx #3]	256	256	0	0	checked	none
+192	str q0, [x4, #16]	256	256	0	0	checked	none
+193	str q0, [x4, #-16]!	256	256	0	0	checked	none
+194	str q0, [x4], #-16	256	256	0	0	checked	none
+195	str q0, [x4, #16]!	256	256	0	0	checked	none
+196	str q0, [x4], #16	256	256	0	0	checked	none
+197	str q0, [x4, x5, lsl #0]	256	256	0	0	checked	none
+198	str q0, [x4, x5, lsl #4]	256	256	0	0	checked	none
+199	str q0, [x4, w5, uxtw #0]	256	256	0	0	checked	none
+200	str q0, [x4, w5, uxtw #4]	256	256	0	0	checked	none
+201	str q0, [x4, w5, sxtw #0]	256	256	0	0	checked	none
+202	str q0, [x4, w5, sxtw #4]	256	256	0	0	checked	none
+203	str q0, [x4, x5, sxtx #0]	256	256	0	0	checked	none
+204	str q0, [x4, x5, sxtx #4]	256	256	0	0	checked	none
+205	ldur w0, [x4, #-8]	256	256	0	0	checked	none
+206	ldur w0, [x4, #8]	256	256	0	0	checked	none
+207	ldur x0, [x4, #-8]	256	256	0	0	checked	none
+208	ldur x0, [x4, #8]	256	256	0	0	checked	none
+209	stur w0, [x4, #-8]	256	256	0	0	checked	none
+210	stur w0, [x4, #8]	256	256	0	0	checked	none
+211	stur x0, [x4, #-8]	256	256	0	0	checked	none
+212	stur x0, [x4, #8]	256	256	0	0	checked	none
+213	ldurb w0, [x4, #-8]	256	256	0	0	checked	none
+214	ldurb w0, [x4, #8]	256	256	0	0	checked	none
+215	ldurh w0, [x4, #-8]	256	256	0	0	checked	none
+216	ldurh w0, [x4, #8]	256	256	0	0	checked	none
+217	sturb w0, [x4, #-8]	256	256	0	0	checked	none
+218	sturb w0, [x4, #8]	256	256	0	0	checked	none
+219	sturh w0, [x4, #-8]	256	256	0	0	checked	none
+220	sturh w0, [x4, #8]	256	256	0	0	checked	none
+221	ldr w4, [x4, x5]	256	256	0	0	checked	none
+222	str w4, [x4, x5]	256	256	0	0	checked	none
+223	ldr x4, [x4, x5]	256	256	0	0	checked	none
+224	str x4, [x4, x5]	256	256	0	0	checked	none
+225	ldr w5, [x4, x5]	256	256	0	0	checked	none
+226	str w5, [x4, x5]	256	256	0	0	checked	none
+227	ldr x5, [x4, x5]	256	256	0	0	checked	none
+228	str x5, [x4, x5]	256	256	0	0	checked	none
+229	ldr wzr, [x4, x5]	256	256	0	0	checked	none
+230	str wzr, [x4, x5]	256	256	0	0	checked	none
+231	ldr xzr, [x4, x5]	256	256	0	0	checked	none
+232	str xzr, [x4, x5]	256	256	0	0	checked	none
+233	ldr x0, [x4, xzr]	256	256	0	0	checked	none
+234	str x0, [x4, xzr]	256	256	0	0	checked	none

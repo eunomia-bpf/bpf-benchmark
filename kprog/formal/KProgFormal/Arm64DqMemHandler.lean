@@ -94,4 +94,13 @@ theorem arm64_dq_mem_high_lane_example :
     GeneratedArm64DqMem.transfer .storeQ0 1 = 8 := by
   refine ⟨rfl, rfl⟩
 
+/-- The native scalar vector load zeros the upper half; lane counts alone do
+not specify this architectural register effect. -/
+theorem arm64_dq_mem_clear_high_dispatch :
+    GeneratedArm64DqMem.clearHigh .loadD0 = true ∧
+    GeneratedArm64DqMem.clearHigh .loadQ0 = false ∧
+    GeneratedArm64DqMem.clearHigh .storeD0 = false ∧
+    GeneratedArm64DqMem.clearHigh .storeQ0 = false := by
+  exact ⟨rfl, rfl, rfl, rfl⟩
+
 end KProgFormal

@@ -1,0 +1,9 @@
+assembly	opcode	cases	mismatches
+ldxr w0, [x4]	ARM64_OP_LOAD	1024	0
+ldaxr w0, [x4]	ARM64_OP_LOAD	1024	0
+stxr w0, w1, [x4]	ARM64_OP_STLXR	1024	0
+stlxr w0, w1, [x4]	ARM64_OP_STLXR	1024	0
+ldxr x0, [x4]	ARM64_OP_LOAD	1024	0
+ldaxr x0, [x4]	ARM64_OP_LOAD	1024	0
+stxr w0, x1, [x4]	ARM64_OP_STLXR	1024	0
+stlxr w0, x1, [x4]	ARM64_OP_STLXR	1024	0

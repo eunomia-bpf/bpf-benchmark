@@ -85,3 +85,11 @@ and36 unary forms newly agree in all cases;274 encodings remain explicit.
 The checked finite-path interface validates real decode extents and every
 successor, with2053 full-state/40 rejection cases and full formal check PASS.
 See differential/x86-control-reference/README.md (x86-control-reference/ here).
+
+Arm memory closure: original567 forms/580608 savedCPU states nowALLcanonical
+checked(CPU0/modelSP4096/no missingdecoder). New255 full-bank memoryforms/65280
+QEMU/C/reference cases agreeafterfixingD0upper64clear; itsunsafeGEN1baseline
+nowverifierrejects. All359Lean/allC/Rust/wires passincombinedrootcheck.
+ExclusiveCLREX8forms/8192observedcases nowagreewithexplicitfailurefixture.
+The30-caseArm bound suite rejects28, retainingonlynumericSP/entryLRaccepts.
+See differential/arm64-memory-complete/ and negative/arm64-current-choice/.

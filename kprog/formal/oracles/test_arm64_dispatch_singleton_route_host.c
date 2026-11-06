@@ -378,6 +378,7 @@ static void model_dq(unsigned op, unsigned base, unsigned index, unsigned aux,
 	if (access == KPROG_ARM64_DQ_MEM_ACCESS_LOAD) {
 		*v0 = model_mem_read(base, index, aux, imm, 0,
 				     KPROG_ARM64_DQ_MEM_LANE_STRIDE);
+		if (lanes == 1U) *v0_hi = 0;
 		if (lanes > 1U)
 			*v0_hi = model_mem_read(base, index, aux, imm,
 				KPROG_ARM64_DQ_MEM_HIGH_LANE_STRIDE,

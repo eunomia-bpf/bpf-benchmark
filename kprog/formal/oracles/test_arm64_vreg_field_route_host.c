@@ -317,6 +317,8 @@ static void model_dq(unsigned op, unsigned base, unsigned index, unsigned aux,
 					ARM64_SIM_TAG_SCALAR);
 		}
 	}
+	if (access == KPROG_ARM64_DQ_MEM_ACCESS_LOAD && lanes == 1U)
+		*v0_hi = 0;
 	if (ARM64_SIM_L_MEM_FLAGS(aux) & ARM64_MEM_POST)
 		model_writeback(base, imm);
 }
