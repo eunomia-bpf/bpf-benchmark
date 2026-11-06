@@ -1,0 +1,32 @@
+assembly	opcode	cases	mismatches
+lea rsp, [rsp+16]	X86_OP_LEA	1024	0
+ja forward	X86_OP_JCC	1024	0
+ja backward	X86_OP_JCC	1024	0
+jae forward	X86_OP_JCC	1024	0
+jae backward	X86_OP_JCC	1024	0
+jb forward	X86_OP_JCC	1024	0
+jb backward	X86_OP_JCC	1024	0
+jbe forward	X86_OP_JCC	1024	0
+jbe backward	X86_OP_JCC	1024	0
+je forward	X86_OP_JCC	1024	0
+je backward	X86_OP_JCC	1024	0
+jne forward	X86_OP_JCC	1024	0
+jne backward	X86_OP_JCC	1024	0
+jg forward	X86_OP_JCC	1024	0
+jg backward	X86_OP_JCC	1024	0
+jge forward	X86_OP_JCC	1024	0
+jge backward	X86_OP_JCC	1024	0
+jl forward	X86_OP_JCC	1024	0
+jl backward	X86_OP_JCC	1024	0
+jle forward	X86_OP_JCC	1024	0
+jle backward	X86_OP_JCC	1024	0
+js forward	X86_OP_JCC	1024	0
+js backward	X86_OP_JCC	1024	0
+jns forward	X86_OP_JCC	1024	0
+jns backward	X86_OP_JCC	1024	0
+jmp forward	X86_OP_JMP	1024	0
+call and ret (stack return address)	X86_OP_CALL	1024	0
+rep movsb	X86_OP_REP_MOVS	1024	0
+rep movsw	X86_OP_REP_MOVS	1024	0
+rep movsd	X86_OP_REP_MOVS	1024	0
+rep movsq	X86_OP_REP_MOVS	1024	0

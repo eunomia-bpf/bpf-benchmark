@@ -564,3 +564,20 @@ Expected current exit status is1, with4096 ordinary and1024 control differences.
 The earlier successful hardware matrices remain separate and unchanged.
 
 The preliminary76-form Arm MOV-to-SP run remains in `arm64-control-movsp/`; it predates final-SP capture. `sp-observer-preliminary-artifacts.tar.gz` retains its exact source/binary and the preliminary732-form x86 harness.
+
+
+## LEA-to-RSP repair replay
+
+C's one-condition repair, published in `7123cfddd`, keeps LEA-to-RSP in the
+relative-SP representation consumed by the stack-memory path. The focused
+production-encoder replay in `x86-lea-sp-after/` now agrees for all1024 states
+of `lea rsp,[rsp+16]`; the same form previously disagreed in all1024 states.
+The generator also retains its30 branch/call control composites, so the whole
+focused run reports31 forms /31744 cases /zero mismatches. Its exact headers,
+generated C/native code and static binary are archived there. The broader
+733-form pre-repair matrix remains unchanged; other numeric-base, flags,
+narrow-value and stored-pointer observations remain active shared work.
+
+```sh
+taskset -c 16-19 make -C kprog/results/kprog_fidelity_20261106/differential/x86-lea-sp-after check
+```
