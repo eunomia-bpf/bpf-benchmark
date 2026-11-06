@@ -2280,7 +2280,8 @@ std::string btf_symbol_name_from_func_info(uint32_t btf_id,
                                            const uint8_t *func_info_data,
                                            uint32_t nr_func_info,
                                            uint32_t func_info_rec_size,
-                                           const char *inferred_name)
+                                           const char *inferred_name,
+                                           bool exact_entry = false)
 {
     const size_t inferred_len =
         inferred_name ? strnlen(inferred_name, BPF_OBJ_NAME_LEN) : 0;
@@ -2289,6 +2290,7 @@ std::string btf_symbol_name_from_func_info(uint32_t btf_id,
 
     if (btf_id == 0 || nr_func_info == 0 ||
         func_info_rec_size < sizeof(bpf_func_info)) {
+        if (exact_entry) return {};
         if (inferred.empty()) {
             fail("loaded BPF program has no name and no BTF func_info");
         }
@@ -2312,6 +2314,7 @@ std::string btf_symbol_name_from_func_info(uint32_t btf_id,
         const uint8_t *record = func_info_data +
             static_cast<size_t>(i) * func_info_rec_size;
         std::memcpy(&rec, record, sizeof(rec));
+        if (exact_entry && rec.insn_off != 0) continue;
         if (rec.type_id == 0) {
             continue;
         }
@@ -2344,6 +2347,10 @@ std::string btf_symbol_name_from_func_info(uint32_t btf_id,
         }
     }
 
+    if (exact_entry) {
+        btf__free(btf_obj);
+        fail("loaded BPF func_info has no named entry at instruction zero");
+    }
     if (!matched_symbol.empty()) {
         btf__free(btf_obj);
         return matched_symbol;
@@ -2365,13 +2372,15 @@ std::string btf_symbol_name_from_func_info(uint32_t btf_id,
 }
 
 std::string load_prog_btf_symbol_name(int program_fd,
-                                      const bpf_prog_info &base_info)
+                                      const bpf_prog_info &base_info,
+                                      bool exact_entry = false)
 {
     char inferred_name[sizeof(base_info.name) + 1] = {};
     std::memcpy(inferred_name, base_info.name, sizeof(base_info.name));
 
     if (base_info.btf_id == 0 || base_info.nr_func_info == 0 ||
         base_info.func_info_rec_size < sizeof(bpf_func_info)) {
+        if (exact_entry) return {};
         if (inferred_name[0] == '\0') {
             fail("loaded BPF program has no name and no BTF func_info");
         }
@@ -2396,6 +2405,7 @@ std::string load_prog_btf_symbol_name(int program_fd,
         fail("bpf_obj_get_info_by_fd (func_info) failed: " + libbpf_error_string(err));
     }
     if (info.nr_func_info == 0) {
+        if (exact_entry) return {};
         if (inferred_name[0] == '\0') {
             fail("loaded BPF program has empty func_info and no name");
         }
@@ -2405,7 +2415,7 @@ std::string load_prog_btf_symbol_name(int program_fd,
                                           func_info.data(),
                                           info.nr_func_info,
                                           info.func_info_rec_size,
-                                          inferred_name);
+                                          inferred_name, exact_entry);
 }
 
 std::vector<uint32_t> load_prog_map_ids(int program_fd, uint32_t count)
@@ -4976,8 +4986,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     std::filesystem::path native_object_path = options.native_object_path;
     std::string symbol_name = options.symbol_name;
     std::string source_btf_symbol_name;
-    if (symbol_name.empty() && options.source_btf_id != 0 &&
-        !options.source_func_info.empty()) {
+    if (options.source_btf_id != 0 && !options.source_func_info.empty()) {
         if (options.source_func_info_rec_size < sizeof(bpf_func_info) ||
             options.source_func_info.size() %
                 options.source_func_info_rec_size != 0) {
@@ -4992,7 +5001,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
                 options.source_func_info.size() /
                 options.source_func_info_rec_size),
             options.source_func_info_rec_size,
-            inferred_name);
+            inferred_name, true);
     }
     std::vector<std::filesystem::path> native_data_object_paths;
     std::vector<NativeMapRule> map_rules;
@@ -5005,11 +5014,19 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             fail("native_loader: manifest resolution requires source BPF bytecode");
         }
         const auto manifest_start = std::chrono::steady_clock::now();
+        const std::string loaded_entry = load_prog_btf_symbol_name(
+            options.original_prog_fd, prog_info, true);
+        if (!source_btf_symbol_name.empty() && !loaded_entry.empty() &&
+            source_btf_symbol_name != loaded_entry) {
+            fail("native_loader: source BTF entry differs from original program");
+        }
+        if (source_btf_symbol_name.empty()) source_btf_symbol_name = loaded_entry;
         std::optional<ManifestResolution> resolution =
             resolve_native_manifest(options.manifest_path,
                                     prog_info,
                                     source_insns,
-                                    load_map_info);
+                                    load_map_info,
+                                    source_btf_symbol_name);
         const auto manifest_end = std::chrono::steady_clock::now();
         manifest_resolve_ns = elapsed_ns(manifest_start, manifest_end);
         if (!resolution) {

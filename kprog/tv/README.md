@@ -151,8 +151,14 @@ manifest fields `simulator_object` and `simulator_program` in the selected
 `objects` entry. For example, add
 `"simulator_object":"proof.bpf.o","simulator_program":"proof_entry"`
 alongside the existing `program`, `native_object` and `symbol` fields. Paths
-resolve relative to the manifest. The explicit BPF entry must have the original
-program type. `bpf_object__prepare` performs real ELF/CO-RE relocations; referenced
+resolve relative to the manifest. Optional `source_btf_symbol` selects the exact
+full source entry name independently of the native `symbol`. The loader uses
+captured BTF function metadata or queries the original program FD, requires the
+named function at instruction zero, and rejects conflicting captured/loaded
+entry names. A truncated kernel name cannot satisfy this selector. Empty or
+missing-BTF selectors fail; a different full name does not match. This resolves
+real application entries sharing the same 15-byte name, type and bytecode size.
+The explicit BPF entry must have the original program type. `bpf_object__prepare` performs real ELF/CO-RE relocations; referenced
 maps reuse original-program identities with matching layouts, including internal
 maps. Unmatched writable declarations are disabled; referencing one fails.
 Internal maps also require the same BTF DATASEC section, byte extent and

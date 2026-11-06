@@ -216,3 +216,29 @@ per-program TV, the same-invocation native/source ABI relation, and closing the
 production SP/LR counterexamples require the remaining C/A/V/T integration;
 none is certified by these component runs. The marker verifier/JIT semantics
 are explicitly part of the kernel ABI trusted base.
+
+Exact full source BTF manifest identity
+-------------------------------------
+
+The manifest now supports `source_btf_symbol`, independently of the native
+`symbol`. The source entry must be a named BTF function at instruction zero;
+its full name comes from captured source metadata or the original program FD.
+Conflicting captured/loaded full names reject before native upload. Truncated
+kernel names cannot satisfy this selector. Empty selectors or missing BTF fail;
+unknown full names do not match, and ambiguous candidates still fail.
+
+`make -C kprog/tv manifest-check` passes ASan/UBSan host cases for two distinct
+full names sharing the real BCC `tracepoint__sys` kernel-name pattern, missing
+BTF, truncated/unknown full names, empty selectors and ambiguous entries.
+The first host compile's missing-field-initializer failure is retained; the
+fixture now initializes every BPF instruction field correctly.
+
+The final x86 kernel run passes two actual loaded BPF functions sharing all
+15 kernel-name bytes, type and bytecode size. Each selects its distinct native
+entry through both FD-derived and captured full BTF metadata and completes
+sealed native execution with retval 2. Swapping the full captured function
+while retaining the identical short name rejects, as does using an original
+program with no BTF. All prior loader/binding/input regressions also pass.
+`full-btf-manifest-inputs.tar.gz` retains production/test sources, actual
+compiled BPF/native objects, manifests and executables. This is source-to-native
+selection/binding evidence; it does not replace their per-program TV proof.

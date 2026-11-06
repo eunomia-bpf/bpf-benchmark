@@ -57,3 +57,16 @@ SEC("xdp") int tv_proof_readonly(struct xdp_md *ctx)
     const volatile __u64 *data = tv_readonly_data;
     return (__u32)(data[0] + data[1]);
 }
+
+/* Same 15-byte name, type and bytecode; full BTF entry identifies the source. */
+SEC("xdp") int tv_collision_entry_alpha(struct xdp_md *ctx)
+{
+    (void)ctx;
+    return 2;
+}
+
+SEC("xdp") int tv_collision_entry_beta(struct xdp_md *ctx)
+{
+    (void)ctx;
+    return 2;
+}

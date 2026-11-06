@@ -1,0 +1,13 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build
+g++ -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined test_manifest.cpp -o build/test-manifest
+test_manifest.cpp: In function ‘int main()’:
+test_manifest.cpp:12:67: error: missing initializer for member ‘bpf_insn::dst_reg’ [-Werror=missing-field-initializers]
+   12 |     const std::vector<bpf_insn> insns{{.code = BPF_JMP | BPF_EXIT}};
+      |                                                                   ^
+test_manifest.cpp:12:67: error: missing initializer for member ‘bpf_insn::src_reg’ [-Werror=missing-field-initializers]
+test_manifest.cpp:12:67: error: missing initializer for member ‘bpf_insn::off’ [-Werror=missing-field-initializers]
+test_manifest.cpp:12:67: error: missing initializer for member ‘bpf_insn::imm’ [-Werror=missing-field-initializers]
+cc1plus: all warnings being treated as errors
+make: *** [Makefile:206: build/test-manifest] Error 1
+make: Leaving directory '/workspaces/repository/kprog/tv'

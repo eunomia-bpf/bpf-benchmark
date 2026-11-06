@@ -1,9 +1,11 @@
 #include "../libnativeloader/include/native_loader.hpp"
 #include <bpf/bpf.h>
+#include <bpf/btf.h>
 #include <bpf/libbpf.h>
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
+#include <cstring>
 #include <exception>
 #include <fstream>
 #include <memory>
@@ -28,6 +30,103 @@ static ProofFixture load_fixture(const char *path, const char *entry)
     if (int error = bpf_object__load(object.get()))
         throw std::runtime_error("load proof fixture: " + std::to_string(error));
     return {std::move(object), selected};
+}
+
+static void btf_manifest_regressions()
+{
+    const char *entries[] = {"tv_collision_entry_alpha", "tv_collision_entry_beta"};
+    for (unsigned which = 0; which < 2; which++) {
+        auto fixture = load_fixture("build/simulator.bpf.o", entries[which]);
+        bpf_prog_info info{};
+        uint32_t length = sizeof(info);
+        if (bpf_obj_get_info_by_fd(bpf_program__fd(fixture.program), &info, &length))
+            throw std::runtime_error("query collision program");
+        assert(info.btf_id && info.nr_func_info);
+        assert(std::string(info.name) == std::string(entries[0]).substr(0, BPF_OBJ_NAME_LEN - 1));
+        std::ofstream manifest("build/collision-manifest.json");
+        manifest << "{\"objects\":[";
+        for (unsigned i = 0; i < 2; i++) {
+            if (i) manifest << ',';
+            manifest << "{\"program\":\"" << info.name << "\",\"native_object\":\"native-entry.o\","
+                "\"source_btf_symbol\":\"" << entries[i] << "\",\"symbol\":\""
+                << (i ? "tv_long_entry" : "tv_short_entry") << "\",\"simulator_object\":\"simulator.bpf.o\","
+                "\"simulator_program\":\"" << entries[i] << "\"}";
+        }
+        manifest << "]}";
+        manifest.close();
+        if (!manifest) throw std::runtime_error("write collision manifest");
+        for (bool supplied : {false, true}) {
+            native_loader::FdLoadOptions options{};
+            options.original_prog_fd = bpf_program__fd(fixture.program);
+            options.manifest_path = std::filesystem::absolute("build/collision-manifest.json");
+            options.source_insns.assign(bpf_program__insns(fixture.program),
+                bpf_program__insns(fixture.program) + bpf_program__insn_cnt(fixture.program));
+            options.native_link_path = std::filesystem::absolute(
+                "../x86/native_lab/native_link/target/release/native-link");
+            if (supplied) {
+                options.source_btf_id = info.btf_id;
+                options.source_func_info_rec_size = sizeof(bpf_func_info);
+                const auto *records = reinterpret_cast<const uint8_t *>(bpf_program__func_info(fixture.program));
+                options.source_func_info.assign(records, records +
+                    sizeof(bpf_func_info) * bpf_program__func_info_cnt(fixture.program));
+            }
+            auto loaded = native_loader::load_from_fd(options);
+            assert(loaded.replaced && loaded.prog_fd >= 0);
+            assert(loaded.selected_symbol == (which ? "tv_long_entry" : "tv_short_entry"));
+            unsigned char packet[64]{};
+            bpf_test_run_opts run{};
+            run.sz = sizeof(run);
+            run.data_in = packet;
+            run.data_size_in = sizeof(packet);
+            if (bpf_prog_test_run_opts(loaded.prog_fd, &run))
+                throw std::runtime_error("run full BTF selected native program");
+            assert(run.retval == 2);
+            native_loader::close_loaded_program(&loaded);
+            std::printf("full BTF %s (%s): PASS (exact native entry, bound execution)\n",
+                entries[which], supplied ? "captured metadata" : "original FD");
+            if (supplied) {
+                bpf_func_info wrong{};
+                std::memcpy(&wrong, options.source_func_info.data(), sizeof(wrong));
+                int type = btf__find_by_name_kind(bpf_object__btf(fixture.object.get()),
+                    entries[1 - which], BTF_KIND_FUNC);
+                assert(type > 0);
+                wrong.type_id = type;
+                std::memcpy(options.source_func_info.data(), &wrong, sizeof(wrong));
+                bool rejected = false;
+                try {
+                    auto mismatched = native_loader::load_from_fd(options);
+                    native_loader::close_loaded_program(&mismatched);
+                } catch (const std::exception &error) {
+                    assert(std::string(error.what()).find("source BTF entry differs from original") != std::string::npos);
+                    rejected = true;
+                }
+                assert(rejected);
+                std::puts("caller BTF full-entry swap despite identical short name: PASS (rejected)");
+            }
+        }
+    }
+    std::vector<bpf_insn> no_btf(2);
+    no_btf[0].code = BPF_ALU64 | BPF_MOV | BPF_K;
+    no_btf[0].imm = 2;
+    no_btf[1].code = BPF_JMP | BPF_EXIT;
+    int fd = bpf_prog_load(BPF_PROG_TYPE_XDP, "tv_collision_en", "GPL",
+        no_btf.data(), no_btf.size(), nullptr);
+    if (fd < 0) throw std::runtime_error("load no-BTF collision program");
+    native_loader::FdLoadOptions options{};
+    options.original_prog_fd = fd;
+    options.source_insns = no_btf;
+    options.manifest_path = std::filesystem::absolute("build/collision-manifest.json");
+    bool rejected = false;
+    try {
+        auto invalid = native_loader::load_from_fd(options);
+        native_loader::close_loaded_program(&invalid);
+    } catch (const std::exception &error) {
+        assert(std::string(error.what()).find("source_btf_symbol requires source entry BTF") != std::string::npos);
+        rejected = true;
+    }
+    if (close(fd)) throw std::runtime_error("close no-BTF collision program");
+    assert(rejected);
+    std::puts("full BTF selector cannot use a truncated no-BTF program name: PASS (rejected)");
 }
 
 int main()
@@ -77,6 +176,7 @@ int main()
         std::perror("separate simulator map"); return 1;
     }
     try {
+        btf_manifest_regressions();
         for (const char *symbol : {"tv_short_entry", "tv_long_entry", "tv_helper_entry", "tv_map_entry", "tv_hash_entry", "tv_large_entry", "tv_readonly_entry"}) {
             const auto &proof = std::string(symbol) == "tv_helper_entry" ? helper :
                 std::string(symbol) == "tv_large_entry" ? large :

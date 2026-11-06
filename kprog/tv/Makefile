@@ -4,7 +4,7 @@ CROSS_arm64 := aarch64-linux-gnu-
 
 .PHONY: check binding-check module-check kernel-check guest-kernel-check kernel-check-arm64 inventory
 
-check: binding-check data-layout-check
+check: binding-check data-layout-check manifest-check
 	python3 test_kernel_patch.py
 	cd ../formal && lake build KProgFormal.Reference.Memory
 	cd ../formal && lake env lean ../tv/Composition.lean
@@ -196,3 +196,11 @@ input-certificate:
 
 input-negative-check: input-check
 	python3 test_compiled_blocks.py input
+
+.PHONY: manifest-check
+manifest-check: build/test-manifest
+	./build/test-manifest
+
+build/test-manifest: test_manifest.cpp ../libnativeloader/src/native_loader_manifest.hpp
+	install -d build
+	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined $< -o $@

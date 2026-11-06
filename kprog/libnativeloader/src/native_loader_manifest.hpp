@@ -654,7 +654,8 @@ std::optional<ManifestResolution> resolve_native_manifest(
     const std::filesystem::path &manifest_path,
     const bpf_prog_info &prog_info,
     const std::vector<bpf_insn> &source_insns,
-    LoadMapInfo load_map_info)
+    LoadMapInfo load_map_info,
+    const std::string &source_btf_symbol = {})
 {
     const std::string manifest = read_text_file_required(manifest_path);
     std::vector<std::string> objects = json_array_objects(manifest, "objects");
@@ -686,6 +687,17 @@ std::optional<ManifestResolution> resolve_native_manifest(
         if (source_bytecode_len &&
             *source_bytecode_len != source_insns.size() * sizeof(bpf_insn)) {
             continue;
+        }
+        if (const auto selector = json_object_string(entry, "source_btf_symbol")) {
+            if (selector->empty()) {
+                manifest_fail("native_loader: empty source_btf_symbol selector");
+            }
+            if (source_btf_symbol.empty()) {
+                manifest_fail("native_loader: source_btf_symbol requires source entry BTF");
+            }
+            if (*selector != source_btf_symbol) {
+                continue;
+            }
         }
         std::optional<std::string> map_prefix =
             json_object_string(entry, "source_map_prefix");
