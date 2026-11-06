@@ -102,6 +102,13 @@ and generated lookup calls for the verifier-recorded map. This binds external
 identities; per-block TV must additionally establish argument values, ordering,
 accesses and control-flow correspondence.
 
+Relocation kind 7 is an eight-byte helper-address literal for bounded indirect
+dispatch. Its slot must be zero, and its target must equal an actual proof
+helper's `get_func_proto(...)->func`. It does not admit internal map-generator
+targets. Both architectures execute an indirect helper-pointer fixture and
+reject a different valid helper address and a nonzero literal. Standard helper
+text lifetime is the same premise used by ordinary verifier/JIT helper calls.
+
 `native-proof-regions.patch` is applied idempotently by the existing host kernel
 build recipes. Rebuild the kernel and module together: native-proof descriptors
 now admit standard resolved helper calls and map FD/value loads, enforce

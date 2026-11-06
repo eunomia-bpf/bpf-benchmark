@@ -102,3 +102,10 @@ Only T's rebuildable object/dependency file was removed; make rebuilt it with
 correct dependencies. The failed module diagnostics and corrupted dependency
 file are retained. AArch64 needed its development libraries reinstalled after
 the container restart. Neither issue changed verifier policy or bypassed BTF.
+
+`helper-pointer-{x86,arm64}.status` are both 0. Relocation kind 7 executes a
+verified indirect helper call on both architectures; changing it to a different
+valid helper or changing its zero literal rejects the load. The full existing
+identity, frame, helper/map and large-proof suites also pass. C/A can use this
+interface for bounded helper tables; matching table selection to native control
+flow remains part of the per-program translation certificate.

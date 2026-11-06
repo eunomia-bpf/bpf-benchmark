@@ -375,7 +375,8 @@ static int emit_native_lab_arm64(u32 *image, int *idx, bool emit, u64 payload,
 			switch (r->kind) {
 			case NATIVE_LAB_RELOC_MAP_POINTER:
 			case NATIVE_LAB_RELOC_MAP_VALUE:
-				err = native_lab_emit_map_literal(r,
+			case NATIVE_LAB_RELOC_HELPER_POINTER:
+				err = native_lab_emit_literal(r,
 					snapshot, snapshot_len, (u8 *)&image[start_idx], prog);
 				break;
 

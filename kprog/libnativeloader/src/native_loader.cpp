@@ -715,7 +715,8 @@ void append_u64_le(std::vector<uint8_t> &out, uint64_t v)
 
 bool native_lab_reloc_kind_supported(uint32_t kind)
 {
-    if (kind == NATIVE_LAB_RELOC_MAP_POINTER || kind == NATIVE_LAB_RELOC_MAP_VALUE) return true;
+    if (kind == NATIVE_LAB_RELOC_MAP_POINTER || kind == NATIVE_LAB_RELOC_MAP_VALUE ||
+        kind == NATIVE_LAB_RELOC_HELPER_POINTER) return true;
 #if defined(__aarch64__)
     return kind == kNativeLabRelocHelperCallArm64 ||
            kind == kNativeLabRelocHelperCallArm64Bl26 ||
@@ -730,6 +731,7 @@ size_t native_lab_reloc_slot_bytes(uint32_t kind)
     switch (kind) {
     case NATIVE_LAB_RELOC_MAP_POINTER:
     case NATIVE_LAB_RELOC_MAP_VALUE:
+    case NATIVE_LAB_RELOC_HELPER_POINTER:
         return sizeof(uint64_t);
     case kNativeLabRelocHelperCallRel32:
         return kNativeLabRelocHelperCallRel32Bytes;

@@ -324,6 +324,61 @@ static void external_identity_regressions(void)
 	retained_map_fd = -1;
 }
 
+static uint64_t helper_address(const char *wanted)
+{
+	FILE *file = fopen("/proc/kallsyms", "r");
+	if (!file)
+		fatal("read helper identity");
+	char line[512], name[256], kind;
+	unsigned long long address;
+	uint64_t found = 0;
+	while (fgets(line, sizeof(line), file))
+		if (sscanf(line, "%llx %c %255s", &address, &kind, name) == 3 &&
+		    !strcmp(name, wanted)) {
+			found = address;
+			break;
+		}
+	if (ferror(file) || fclose(file))
+		fatal("close helper identity");
+	if (!found) {
+		fprintf(stderr, "missing kernel helper address: %s\n", wanted);
+		exit(1);
+	}
+	return found;
+}
+
+static void helper_pointer_regressions(void)
+{
+	const struct bpf_insn body[] = {
+		{ .code = BPF_JMP | BPF_CALL, .imm = BPF_FUNC_get_prandom_u32 }, proof,
+	};
+#if defined(__aarch64__)
+	/* ldr x10,literal; blr x10; mov x7,2; b end; nop; nop; literal */
+	unsigned char code[] = {
+		0xca,0,0,0x58, 0x40,1,0x3f,0xd6, 0x47,0,0x80,0xd2,
+		5,0,0,0x14, 0x1f,0x20,3,0xd5, 0x1f,0x20,3,0xd5, 0,0,0,0,0,0,0,0,
+	};
+	const uint32_t literal = 24;
+#else
+	/* call [rip+7]; mov eax,2; jmp end; literal */
+	unsigned char code[] = {0xff,0x15,7,0,0,0, 0xb8,2,0,0,0, 0xeb,8, 0,0,0,0,0,0,0,0};
+	const uint32_t literal = 13;
+#endif
+	struct test_reloc reloc = {
+		.offset = literal, .kind = NATIVE_LAB_RELOC_HELPER_POINTER,
+		.target = helper_address("bpf_user_rnd_u32"),
+	};
+	seal_single_artifact(code, sizeof(code), body, 2, &reloc, 1);
+	load(generation(), 0, 0, "verified helper-pointer indirect call");
+	reloc.target = helper_address("bpf_ktime_get_ns");
+	seal_single_artifact(code, sizeof(code), body, 2, &reloc, 1);
+	load(generation(), 0, 1, "helper pointer names a different valid helper");
+	reloc.target = helper_address("bpf_user_rnd_u32");
+	code[literal] = 1;
+	seal_single_artifact(code, sizeof(code), body, 2, &reloc, 1);
+	load(generation(), 0, 1, "helper pointer literal must be an exact zero slot");
+}
+
 static void helper_map_regressions(void)
 {
 	const struct bpf_insn helper[] = {
@@ -436,6 +491,7 @@ int main(void)
 	group_regressions();
 	helper_map_regressions();
 	external_identity_regressions();
+	helper_pointer_regressions();
 	if (close(module_fd))
 		fatal("close module BTF");
 	puts("kernel binding regression: PASS");

@@ -230,7 +230,7 @@ static int native_lab_map_target(const struct native_lab_reloc_record *reloc,
 	return -ENOENT;
 }
 
-static int native_lab_emit_map_literal(const struct native_lab_reloc_record *reloc,
+static int native_lab_emit_literal(const struct native_lab_reloc_record *reloc,
 		const u8 *blob, size_t length, u8 *destination, const struct bpf_prog *prog)
 {
 	u64 target;
@@ -240,8 +240,13 @@ static int native_lab_emit_map_literal(const struct native_lab_reloc_record *rel
 		return -ERANGE;
 	if (memchr_inv(blob + reloc->offset, 0, sizeof(target)))
 		return -EINVAL;
-	err = native_lab_map_target(reloc, prog->aux->used_maps,
-				    prog->aux->used_map_cnt, &target);
+	if (reloc->kind == NATIVE_LAB_RELOC_HELPER_POINTER) {
+		target = reloc->target;
+		err = 0;
+	} else {
+		err = native_lab_map_target(reloc, prog->aux->used_maps,
+					    prog->aux->used_map_cnt, &target);
+	}
 	if (!err)
 		memcpy(destination + reloc->offset, &target, sizeof(target));
 	return err;
@@ -334,7 +339,8 @@ static int native_lab_validate_proof(u64 payload, const struct bpf_verifier_env 
 						found = true;
 					i++;
 				}
-			} else if (reloc->kind >= 1 && reloc->kind <= 3) {
+			} else if ((reloc->kind >= 1 && reloc->kind <= 3) ||
+				   reloc->kind == NATIVE_LAB_RELOC_HELPER_POINTER) {
 				for (i = 0; i < env->prog->len; i++) {
 					const struct bpf_insn *insn = &env->prog->insnsi[i];
 					const struct bpf_func_proto *proto;
@@ -346,6 +352,8 @@ static int native_lab_validate_proof(u64 payload, const struct bpf_verifier_env 
 						found = true;
 						break;
 					}
+					if (reloc->kind == NATIVE_LAB_RELOC_HELPER_POINTER)
+						continue;
 					err = native_lab_map_helper_target(env, i, reloc->target);
 					if (err < 0)
 						goto out;

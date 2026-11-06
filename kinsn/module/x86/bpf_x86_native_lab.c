@@ -300,7 +300,8 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 				switch (r->kind) {
 				case NATIVE_LAB_RELOC_MAP_POINTER:
 				case NATIVE_LAB_RELOC_MAP_VALUE:
-					err = native_lab_emit_map_literal(r,
+				case NATIVE_LAB_RELOC_HELPER_POINTER:
+					err = native_lab_emit_literal(r,
 						blobs[blob_id].bytes, snapshot_len, emit_at, prog);
 					break;
 
