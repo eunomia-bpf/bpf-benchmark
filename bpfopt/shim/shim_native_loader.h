@@ -435,9 +435,8 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     }
     if (shim_native_loader_active)
         return original_fd;
-    /* The verified arm binds startup probes as well as resident programs. */
-    if (!shim_native_loader_requires_bound_proof() &&
-        shim_native_loader_is_libbpf_probe(prog)) {
+    /* libbpf feature probes are not application programs; they load unchanged. */
+    if (shim_native_loader_is_libbpf_probe(prog)) {
         log_line("native-loader skipped feature probe program name=%s insn_cnt=%u",
                  prog_name ? prog_name : "", prog ? prog->insn_cnt : 0);
         kmsg_line("native skip-feature-probe name=%s fd=%ld",
