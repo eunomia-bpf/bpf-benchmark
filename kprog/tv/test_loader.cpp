@@ -445,11 +445,14 @@ int main()
                 }
                 std::printf("manifest simulator %s: PASS (clang proof, original maps, bound native)\n", entry);
                 if (std::string(symbol) == "tv_map_entry") {
-                    for (bool wrong : {false, true}) {
+                    for (unsigned variant = 0; variant < 3; variant++) {
+                        const bool wrong = variant != 0;
+                        const char *directory = variant == 0 ? "runtime-config/" :
+                            (variant == 1 ? "wrong-capacity/" : "wrong-value-size/");
                         std::ofstream configured("build/configured-map-manifest.json");
                         configured << "{\"objects\":[{\"program\":\"tv_loader\",\"native_object\":\"native-entry.o\","
                             "\"symbol\":\"tv_map_entry\",\"simulator_program\":\"tv_proof_map\","
-                            "\"simulator_object\":\"" << (wrong ? "wrong-capacity/" : "runtime-config/")
+                            "\"simulator_object\":\"" << directory
                             << "simulator.bpf.o\"}]}";
                         configured.close();
                         if (!configured) return 1;
@@ -460,7 +463,8 @@ int main()
                         if (wrong) {
                             assert(status == -1 && candidate.prog_fd == -1);
                             assert(std::string(candidate.error).find("simulator proof map layout does not match source map") != std::string::npos);
-                            std::puts("nonzero simulator map capacity mismatch: PASS (rejected)");
+                            std::puts(variant == 1 ? "nonzero simulator map capacity mismatch: PASS (rejected)" :
+                                "nonzero simulator map value size mismatch: PASS (rejected)");
                         } else {
                             if (status) throw std::runtime_error(candidate.error);
                             if (bpf_prog_test_run_opts(candidate.prog_fd, &run)) return 1;
@@ -476,7 +480,7 @@ int main()
                             if (bpf_obj_get_info_by_fd(map_fd, &original_map, &size)) return 1;
                             assert(configured_info.nr_map_ids == 1 && id == original_map.id);
                             if (close(candidate.prog_fd)) return 1;
-                            std::puts("runtime-configured simulator map capacity: PASS (original identity, native returned 2)");
+                            std::puts("runtime-configured simulator map capacity/value size: PASS (original identity, native returned 2)");
                         }
                     }
                 }

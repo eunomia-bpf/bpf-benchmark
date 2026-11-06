@@ -5000,6 +5000,10 @@ SimulatorObject open_simulator_proof(
             const int err = bpf_map__set_max_entries(map, shape.max_entries);
             if (err) fail("configure simulator map capacity " + name + ": " + libbpf_error_string(err));
         }
+        if (!bpf_map__is_internal(map) && !bpf_map__value_size(map)) {
+            const int err = bpf_map__set_value_size(map, shape.value_size);
+            if (err) fail("configure simulator map value size " + name + ": " + libbpf_error_string(err));
+        }
         if (shape.type != static_cast<uint32_t>(bpf_map__type(map)) ||
             shape.key_size != bpf_map__key_size(map) ||
             shape.value_size != bpf_map__value_size(map) ||

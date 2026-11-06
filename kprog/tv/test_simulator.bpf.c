@@ -4,11 +4,14 @@
 #ifndef TV_MAP_MAX_ENTRIES
 #define TV_MAP_MAX_ENTRIES 1
 #endif
+#ifndef TV_MAP_VALUE_SIZE
+#define TV_MAP_VALUE_SIZE 4
+#endif
 struct {
     __uint(type, BPF_MAP_TYPE_ARRAY);
     __uint(max_entries, TV_MAP_MAX_ENTRIES);
-    __type(key, int);
-    __type(value, int);
+    __uint(key_size, 4);
+    __uint(value_size, TV_MAP_VALUE_SIZE);
 } tv_map SEC(".maps");
 
 struct {

@@ -456,3 +456,20 @@ or the C shim API. Compatible libraries are snapshotted separately under
 context-v2-rodata; frozen6836 kernel/module pairs remain intact. Actual Arm
 loader execution and all per-program translation certificates remain active;
 these x86 binding tests and cross builds do not claim those results.
+
+Application-configured map value size
+------------------------------------
+
+The real BCC capable stack-trace map declares both value_size=0 and
+max_entries=0; its application configures the actual values. The proof binder
+now adopts an undeclared noninternal value size from the exact original FD,
+alongside the existing capacity adoption, before strict shape validation and
+reuse. An explicit nonzero declaration remains strict. Internal DATASEC maps
+are unchanged. The actual x86 kernel/C API regression accepts a proof declaring
+both fields zero, retains the original map ID and returns2 through native
+execution. Explicit size8 versus original4 rejects, as does the existing
+capacity mismatch. All earlier regressions pass; the Arm library builds.
+The fixture uses explicit key_size/value_size declarations like capable, so it
+does not depend on libbpf retrying a partially typed map without BTF. Updated
+compatible libraries are separately snapshotted under context-v2-map-value;
+the new readonly native-link interface remains required.
