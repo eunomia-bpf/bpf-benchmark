@@ -15,6 +15,8 @@ cases=[
  ('opaque-reload', 'str x1,[sp,#-16]!;ldr x0,[sp],#16;ret','undefined native ABI register'),
  ('opaque-escape', 'str x1,[x0];mov w0,#2;ret','escapes private stack'),
  ('opaque-private-alias', 'sub sp,sp,#16;mov x2,sp;str x1,[x2];mov w0,#2;add sp,sp,#16;ret',None),
+ ('opaque-selected-stack', 'sub sp,sp,#32;str x1,[sp];str x2,[sp,#8];mov x3,sp;add x4,sp,#8;cmp x0,#0;csel x5,x3,x4,eq;ldr x0,[x5];add sp,sp,#32;ret','undefined native ABI register'),
+ ('opaque-selected-low-or', 'sub sp,sp,#32;str x1,[sp,#8];str x2,[sp,#24];mov x3,sp;add x4,sp,#16;cmp x0,#0;csel x5,x3,x4,eq;orr x5,x5,#8;ldr x0,[x5];add sp,sp,#32;ret','undefined native ABI register'),
  ('partial-movk-low-return', 'movk x0,#2;ret',None),
  ('partial-movk-unknown-high', 'movk x1,#2;cmp x1,#2;mov w0,#2;ret','undefined native ABI register'),
  ('partial-movk-low-shift', 'movk x1,#2;lsl x0,x1,#48;ret',None),
@@ -36,6 +38,12 @@ cases=[
  ('tbz-defined-bit', 'movk x1,#2;tbz x1,#0,1f;1:mov w0,#2;ret',None),
  ('tbz-unknown-bit', 'movk x1,#2;tbz x1,#32,1f;1:mov w0,#2;ret','undefined native ABI register'),
  ('mask-defined-bits','movk x1,#2;and x0,x1,#0xffff;ret',None),
+ ('helper-defined-output', 'stp x19,x30,[sp,#-32]!;str x1,[sp,#16];add x0,sp,#16;mov x1,#8;bl bpf_get_current_comm;ldr x0,[sp,#16];ldp x19,x30,[sp],#32;ret', None),
+ ('helper-opaque-copy', 'stp x19,x30,[sp,#-32]!;str x1,[sp,#16];add x0,sp,#24;mov x1,#8;add x2,sp,#16;bl bpf_probe_read_kernel;ldr x0,[sp,#24];ldp x19,x30,[sp],#32;ret', 'undefined native ABI register'),
+ ('helper-string-suffix', 'stp x19,x30,[sp,#-32]!;str x1,[sp,#16];add x0,sp,#16;mov x1,#8;mov x2,#0;bl bpf_probe_read_kernel_str;ldr x0,[sp,#16];ldp x19,x30,[sp],#32;ret', 'undefined native ABI register'),
+ ('memset-defined-output', 'stp x19,x30,[sp,#-32]!;str x1,[sp,#16];add x0,sp,#16;mov w1,#0;mov x2,#8;bl memset;ldr x0,[sp,#16];ldp x19,x30,[sp],#32;ret', None),
+ ('memset-opaque-suffix', 'stp x19,x30,[sp,#-32]!;str x1,[sp,#16];add x0,sp,#16;mov w1,#0;mov x2,#1;bl memset;ldr x0,[sp,#16];ldp x19,x30,[sp],#32;ret', 'undefined native ABI register'),
+ ('memcpy-opaque-copy', 'stp x19,x30,[sp,#-32]!;str x1,[sp,#16];add x0,sp,#24;add x1,sp,#16;mov x2,#8;bl memcpy;ldr x0,[sp,#24];ldp x19,x30,[sp],#32;ret', 'undefined native ABI register'),
 ]
 rows=[]
 for name,body,error in cases:

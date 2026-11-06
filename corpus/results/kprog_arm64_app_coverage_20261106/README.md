@@ -501,3 +501,42 @@ before/after verifier evidence](readonly-link/replay.tar.gz) preserve both
 original native objects and old/new proof outputs. Run `make -f
 corpus/results/kprog_arm64_app_coverage_20261106/Makefile native-link-check
 native-link-build` to repeat the component checks.
+
+## Real BCC entries, raw contexts and stack memory effects
+
+All 23 resident BCC entries now generate and compile with their original BPF
+sections, source map/DATASEC declarations, full BTF entry names and complete
+native readonly extents. [Every selected-proof attempt](memory-extension/bcc-proof-attempts.csv)
+and [the phase table](memory-extension/bcc-table.md) retain all 23 entries in
+every phase. The final compact-tag diagnostic accepts 21 proofs; the other two
+stop before verification because capable's source declaration has zero stack-map
+capacity, which the real app sets at startup. There are zero verifier rejections
+in that phase. These counts describe resident baseline entries; startup probes
+and transient loads remain in the separate raw startup census.
+
+The simulator now uses the real tracing context, preserves verifier pointer
+typing on native 64-bit loads, sizes private arenas from reachable SP allocation,
+and tracks opaque ABI bytes across helpers, libc copies and joins. Every partial
+store invalidates all overlapped pointer tags. Memory helpers update tags using
+actual arguments and lengths; string helpers forget pointer provenance without
+claiming that untouched suffix bytes were initialized. Packed 64-bit tag-word
+updates preserve verifier-known fields within the 512-byte BPF stack limit.
+A branch-local empty assembly constraint prevents LLVM from speculating an
+invalid stack-arena address for a kernel pointer. Restricted stack-pointer ORR
+uses the proved 16-byte entry-alignment relation and retains its actual ORR bits.
+
+Validation: 35 ABI assembly cases, 11,200 ASan/UBSan memory cases, 64 complete
+store byte/tag cases, 150 typed helper cases, all 29 unchanged-input full-system
+QEMU micro runs, 13 helper/map compilations, and the full 340-module formal gate
+with both instruction wires and all retained C/Rust checks passed. Six forged
+return proofs reject in load-only QEMU checks; unsafe native code never executes.
+The [replay archive](memory-extension/replay.tar.gz) retains sources, snapshots,
+objects and failed attempts, including the oversized full-width tag experiment.
+[Validation logs](memory-extension/) retain the original failures and final checks.
+
+The actual application comparison still has an error after its 23-program
+baseline: generation-bound startup exposed map configuration, readonly binding
+and tracing relocation failures. SP/initial-LR numeric-address findings also
+remain active defects. This increment does not claim a complete native safety
+certificate, successful BCC treatment, or matching work. The native binder and
+numeric/reference representation fixes continue from these recorded failures.

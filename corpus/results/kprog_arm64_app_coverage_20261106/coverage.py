@@ -69,13 +69,13 @@ def freeze_simulator(directory):
         shutil.copytree(ROOT / 'kprog/formal/generated', directory / 'formal/generated')
 
 
-def compile_one(row, directory, timeout):
+def compile_one(row, directory, timeout, memory_mb):
     with (directory / 'compile-locks' / (row['name'] + '.lock')).open('w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        return compile_locked(row, directory, timeout)
+        return compile_locked(row, directory, timeout, memory_mb)
 
 
-def compile_locked(row, directory, timeout):
+def compile_locked(row, directory, timeout, memory_mb):
     log = directory / 'compile' / (row['name'] + '.json')
     if log.exists():
         return json.loads(log.read_text())
@@ -83,7 +83,7 @@ def compile_locked(row, directory, timeout):
     source.write_text(Path(row['source']).read_text().replace(
         '#include "../arm64_sim_local_bpf.h"',
         f'#include "{directory}/simulator/arm64_sim_local_bpf.h"'))
-    command = ['clang', '-g', '-O2', *row.get('compiler_flags', []), '-mcpu=v4', '-target', 'bpf', '-mllvm',
+    command = ['prlimit', f'--as={memory_mb * 1024 * 1024}', '--core=0', '--', 'clang', '-g', '-O2', *row.get('compiler_flags', []), '-mcpu=v4', '-target', 'bpf', '-mllvm',
                '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64',
                '-I', str(ROOT / 'vendor/libbpf/include/uapi'),
                '-I', str(ROOT / 'vendor/libbpf/src'),
@@ -102,15 +102,17 @@ def compile_locked(row, directory, timeout):
     return record
 
 
-def compile_all(directory, offset=0, stop=None, timeout=120):
+def compile_all(directory, offset=0, stop=None, timeout=120, jobs=1, memory_mb=8192):
+    if jobs < 1 or memory_mb < 1:
+        raise ValueError("compiler jobs and memory_mb must be positive")
     for name in ['compile', 'objects', 'compile-sources', 'compile-locks']:
         (directory / name).mkdir(exist_ok=True)
     rows = [row for row in records(directory) if row['stage'] == 'generate' and row['ok']]
     rows = rows[offset:stop]
     freeze_simulator(directory)
     failures = 0
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        futures = [pool.submit(compile_one, row, directory, timeout) for row in rows]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
+        futures = [pool.submit(compile_one, row, directory, timeout, memory_mb) for row in rows]
         for count, future in enumerate(concurrent.futures.as_completed(futures), 1):
             row = future.result()
             failures += row['returncode'] != 0

@@ -1,0 +1,36 @@
+taskset -c 16-23 python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/abi_check.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/abi-memory-final-v2
+tail-helper-args: PASS: undefined native ABI register x1 at 0x4: br x8
+helper-vector-clobber: PASS: undefined native ABI register w0 at 0x14: ret
+blind-save: PASS: generated
+opaque-reload: PASS: undefined native ABI register w0 at 0x8: ret
+opaque-escape: PASS: undefined native ABI value escapes private stack at 0x0: str x1, [x0]
+opaque-private-alias: PASS: generated
+opaque-selected-stack: PASS: undefined native ABI register w0 at 0x24: ret
+opaque-selected-low-or: PASS: undefined native ABI register w0 at 0x28: ret
+partial-movk-low-return: PASS: generated
+partial-movk-unknown-high: PASS: undefined native ABI register x1 at 0x4: cmp x1, #0x2
+partial-movk-low-shift: PASS: generated
+partial-movk-high-shift: PASS: generated
+partial-movk-shift-survivor: PASS: undefined native ABI register w0 at 0x8: ret
+partial-four-lanes: PASS: generated
+w-zero-extension: PASS: generated
+flag-entry: PASS: undefined native ABI flags at 0x0: b.eq 8 <entry+0x8>
+unused-nv-flags: PASS: generated
+self-compare: PASS: generated
+join-missing-write: PASS: undefined native ABI register w0 at 0xc: ret
+join-both-writes: PASS: generated
+helper-clobber: PASS: undefined native ABI register x1 at 0xc: cbz x1, 10 <entry+0x10>
+helper-flags: PASS: undefined native ABI flags at 0xc: b.eq 10 <entry+0x10>
+callee-save-across-helper: PASS: generated
+return-sp-unbalanced: PASS: native ABI return has an unbalanced stack pointer at 0x8: ret
+local-call-context: PASS: generated
+local-call-bad-context: PASS: undefined native ABI register w0 at 0x8: cbz w0, c <entry+0xc>
+tbz-defined-bit: PASS: generated
+tbz-unknown-bit: PASS: undefined native ABI register x1 at 0x4: tbz x1, #32, 8 <entry+0x8>
+mask-defined-bits: PASS: generated
+helper-defined-output: PASS: generated
+helper-opaque-copy: PASS: undefined native ABI register w0 at 0x20: ret
+helper-string-suffix: PASS: undefined native ABI register w0 at 0x20: ret
+memset-defined-output: PASS: generated
+memset-opaque-suffix: PASS: undefined native ABI register w0 at 0x20: ret
+memcpy-opaque-copy: PASS: undefined native ABI register w0 at 0x20: ret

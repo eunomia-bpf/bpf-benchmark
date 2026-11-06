@@ -168,7 +168,11 @@ static inline __attribute__((always_inline)) __u8 arm64_width_effective(__u8 cod
 #define ARM64_SKB_CB_OFF 0x30LL
 #define ARM64_SKB_DATA_END_OFF 0x50LL
 #define ARM64_SKB_DATA_OFF 0xd0LL
+#ifndef ARM64_SIM_STACK_BIAS
 #define ARM64_SIM_STACK_BIAS 96LL
+#endif
+#ifndef ARM64_SIM_STACK_BYTES
 #define ARM64_SIM_STACK_BYTES 160U
+#endif
 
 #endif

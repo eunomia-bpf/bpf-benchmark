@@ -1,0 +1,61 @@
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/stack_store_check.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/stack-store-packed
+before: FAIL at=65 bytes=1
+FAIL at=65 bytes=2
+FAIL at=65 bytes=4
+FAIL at=65 bytes=8
+FAIL at=66 bytes=1
+FAIL at=66 bytes=2
+FAIL at=66 bytes=4
+FAIL at=66 bytes=8
+FAIL at=67 bytes=1
+FAIL at=67 bytes=2
+FAIL at=67 bytes=4
+FAIL at=67 bytes=8
+FAIL at=68 bytes=1
+FAIL at=68 bytes=2
+FAIL at=68 bytes=4
+FAIL at=68 bytes=8
+FAIL at=69 bytes=1
+FAIL at=69 bytes=2
+FAIL at=69 bytes=4
+FAIL at=69 bytes=8
+FAIL at=70 bytes=1
+FAIL at=70 bytes=2
+FAIL at=70 bytes=4
+FAIL at=70 bytes=8
+FAIL at=71 bytes=1
+FAIL at=71 bytes=2
+FAIL at=71 bytes=4
+FAIL at=71 bytes=8
+FAIL at=73 bytes=1
+FAIL at=73 bytes=2
+FAIL at=73 bytes=4
+FAIL at=73 bytes=8
+FAIL at=74 bytes=1
+FAIL at=74 bytes=2
+FAIL at=74 bytes=4
+FAIL at=74 bytes=8
+FAIL at=75 bytes=1
+FAIL at=75 bytes=2
+FAIL at=75 bytes=4
+FAIL at=75 bytes=8
+FAIL at=76 bytes=1
+FAIL at=76 bytes=2
+FAIL at=76 bytes=4
+FAIL at=76 bytes=8
+FAIL at=77 bytes=1
+FAIL at=77 bytes=2
+FAIL at=77 bytes=4
+FAIL at=77 bytes=8
+FAIL at=78 bytes=1
+FAIL at=78 bytes=2
+FAIL at=78 bytes=4
+FAIL at=78 bytes=8
+FAIL at=79 bytes=1
+FAIL at=79 bytes=2
+FAIL at=79 bytes=4
+FAIL at=79 bytes=8
+stack store byte/tag checks: 64 cases, 56 failures
+
+after: stack store byte/tag checks: 64 cases, 0 failures
+

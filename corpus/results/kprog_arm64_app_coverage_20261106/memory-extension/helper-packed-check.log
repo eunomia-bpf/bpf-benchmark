@@ -1,0 +1,11 @@
+cd /workspaces/repository/kprog/formal && lake build KProgFormal.Arm64HelperIdents
+Build completed successfully.
+cd /workspaces/repository/kprog/formal && python3 tools/generate_arm64_helper_idents_spec.py --check
+cd /workspaces/repository/kprog/formal && python3 tools/check_helper_idents.py
+check_helper_idents: 75 helpers, all ids match the kernel enum, and the name set matches what the simulator forwards to
+cd /workspaces/repository/kprog/formal && cc -Wall -Wextra -O2 -I. oracles/test_arm64_helper_idents_host.c -o build/test_arm64_helper_idents_host
+/workspaces/repository/kprog/formal/build/test_arm64_helper_idents_host
+arm64 helper idents host cross-check: OK (77 cases)
+cd /workspaces/repository/kprog/formal && cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_helper_call_host.c -o build/test_arm64_helper_call_host
+/workspaces/repository/kprog/formal/build/test_arm64_helper_call_host
+arm64 real helper ABI: 150 cases, 0 failures

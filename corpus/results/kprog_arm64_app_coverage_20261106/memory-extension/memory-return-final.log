@@ -1,0 +1,45 @@
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/return_negative.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-return-final generate
+make -f /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/Makefile compile PHASE=memory-return-final COMPILE_ARGS='0 6 900 1 2048'
+make[1]: Entering directory '/workspaces/repository'
+taskset -c 16-23 python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/coverage.py compile /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-return-final 0 6 900 1 2048
+compile 1/6 outer_scalar_zero: 0
+compile 2/6 local_scalar_pc: 0
+compile 3/6 partial_saved_lr: 0
+compile 4/6 crossword_saved_lr: 0
+compile 5/6 memset_saved_lr: 0
+compile 6/6 helper_saved_lr: 0
+compile: 0/6 failures
+make[1]: Leaving directory '/workspaces/repository'
+! make -f /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/Makefile verify PHASE=memory-return-final
+make[1]: Entering directory '/workspaces/repository'
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/coverage.py package /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-return-final /workspaces/repository/kprog/arm64/build/app-coverage/memory-return-final /workspaces/.agent-state/bpf-benchmark-supervisor/kfunc-inline-claude-20261004/round5-arm64.cpio.gz
+packaged 6 diagnostic artifacts in /workspaces/repository/kprog/arm64/build/app-coverage/memory-return-final
+install -d /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-return-final/verify
+taskset -c 16-19 timeout 7200 qemu-system-aarch64 -M virt -cpu max -smp 2 -m 2048 -nographic -no-reboot \
+	-kernel /workspaces/repository/vendor/build/arm64/linux/arch/arm64/boot/Image -initrd /workspaces/repository/kprog/arm64/build/app-coverage/memory-return-final/initramfs.cpio.gz \
+	-fsdev local,id=results,path=/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-return-final/verify,security_model=none \
+	-device virtio-9p-device,fsdev=results,mount_tag=results \
+	-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-return-final/qemu.log 2>&1
+test "$(cat /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-return-final/verify/guest-status)" = 0
+make[1]: *** [/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/Makefile:26: verify] Error 1
+make[1]: Leaving directory '/workspaces/repository'
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/return_negative.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-return-final check
+outer_scalar_zero: forged RET rejects; unsafe native object never executed
+local_scalar_pc: forged RET rejects; unsafe native object never executed
+partial_saved_lr: forged RET rejects; unsafe native object never executed
+crossword_saved_lr: forged RET rejects; unsafe native object never executed
+memset_saved_lr: forged RET rejects; unsafe native object never executed
+helper_saved_lr: forged RET rejects; unsafe native object never executed
+make -f /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/Makefile summarize PHASE=memory-return-final
+make[1]: Entering directory '/workspaces/repository'
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/coverage.py summarize /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-return-final
+Artifact census (all entries use the harness XDP ABI; no app execution is implied).
+
+| App | Objects | generation_failed | compile_pending | compile_failed | verify_pending | verifier_accepted | verifier_rejected | load_failed | execution_failed |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| memory-return-final | 6 | 0 | 0 | 0 | 0 | 0 | 6 | 0 | 0 |
+
+| App | Stage | Error class | Artifacts |
+| --- | --- | --- | ---: |
+| memory-return-final | verifier_rejected | other (see raw log) | 6 |
+make[1]: Leaving directory '/workspaces/repository'

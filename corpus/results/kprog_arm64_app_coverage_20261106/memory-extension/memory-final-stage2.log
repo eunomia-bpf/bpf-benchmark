@@ -1,0 +1,14 @@
+taskset -c 16-23 python3 /workspaces/repository/kprog/fidelity/stage2.py build --arch arm64 --build /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/memory-final-stage2
+helper_only_uid_gid: compiled rc=0
+helper_chain_simple: compiled rc=0
+map_array_lookup: compiled rc=0
+map_array_index_packet: compiled rc=0
+map_hash_lookup: compiled rc=0
+map_hash_str_key: compiled rc=0
+map_percpu_array: compiled rc=0
+map_lru_hash_counter: compiled rc=0
+map_percpu_hash_counter: compiled rc=0
+combined_helper_map: compiled rc=0
+multi_map_policy: compiled rc=0
+packet_5tuple_classify: compiled rc=0
+stats_mixed_helpers: compiled rc=0

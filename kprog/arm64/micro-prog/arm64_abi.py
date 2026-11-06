@@ -8,7 +8,7 @@ from collections import deque
 from dataclasses import dataclass
 import re
 
-from helper_abi import helper_idents, helper_prototypes
+from helper_abi import HELPER_COPY_SOURCES, HELPER_FULL_WRITES, helper_idents, helper_prototypes
 
 FULL = (1 << 64) - 1
 N, Z, C, V = 1, 2, 4, 8
@@ -26,6 +26,7 @@ class State:
     flags: int
     opaque: dict[int, int]
     pointers: dict[int, int | bool | None]
+    constants: tuple[int | None, ...]
 
 
 def check_definedness(insns, targets, linked_exit, decode):
@@ -58,7 +59,8 @@ def check_definedness(insns, targets, linked_exit, decode):
                      a.flags & b.flags, {p: v for p, v in opaque.items() if v != 255},
                      {p: a.pointers[p] if p in a.pointers and p in b.pointers and
                       same(a.pointers[p], b.pointers[p]) else None
-                      for p in a.pointers.keys() | b.pointers.keys()})
+                      for p in a.pointers.keys() | b.pointers.keys()},
+                     tuple(x if x == y else None for x,y in zip(a.constants,b.constants)))
 
     def mask(state, operand):
         parsed = ri(operand)
@@ -76,11 +78,12 @@ def check_definedness(insns, targets, linked_exit, decode):
     bits, aliases = [0] * 33, [None] * 33
     for register in [0, 30, 31]: bits[register] = FULL
     aliases[0], aliases[30], aliases[31] = False, False, 0
-    initial = State(tuple(bits), tuple(aliases), 0, {}, {})
+    initial = State(tuple(bits), tuple(aliases), 0, {}, {}, (None,)*33)
     states = {((), insns[0].addr): initial}
     queue = deque(states)
     returns = {}
     entry_sp = {(): {0}}
+    stack_min = stack_max = 0
 
     def push(context, addr, state):
         if addr is None:
@@ -106,8 +109,9 @@ def check_definedness(insns, targets, linked_exit, decode):
         bits, aliases = list(incoming.defined), list(incoming.aliases)
         opaque, pointers = dict(incoming.opaque), dict(incoming.pointers)
         flags = incoming.flags
+        constants = list(incoming.constants)
 
-        def write(operand, value=None, pointer=False):
+        def write(operand, value=None, pointer=False, constant=None):
             parsed = ri(operand)
             if parsed is None or parsed[0] is None: return
             register, width = parsed
@@ -118,6 +122,7 @@ def check_definedness(insns, targets, linked_exit, decode):
             elif width == 32:
                 bits[register] |= FULL ^ 0xffffffff
             aliases[register] = pointer if width == 64 else False
+            constants[register] = constant & ((1 << width)-1) if constant is not None else None
 
         def address(mem):
             base, index = raw(mem.base), raw(mem.index)
@@ -127,7 +132,8 @@ def check_definedness(insns, targets, linked_exit, decode):
             if index is not None:
                 return False if origin is False else None
             offset = 0 if mem.flags & 2 else mem.offset
-            return origin + offset if type(origin) is int else origin
+            location = origin + offset if type(origin) is int else origin
+            return location
 
         def load(location, width):
             if type(location) is int:
@@ -199,7 +205,10 @@ def check_definedness(insns, targets, linked_exit, decode):
             pointer = incoming.aliases[source[0]] if source and source[0] is not None else False
             value = mask(incoming, args[1])
             if source and source[1] < ri(args[0])[1]: value |= FULL ^ ((1 << source[1])-1)
-            write(args[0], value, pointer)
+            literal = (decode.parse_shifted_imm(args,1) if args[1].startswith('#') else
+                       incoming.constants[source[0]] if source and source[0] is not None else
+                       0 if args[1] in {'xzr','wzr'} else None)
+            write(args[0], value, pointer, literal)
         elif op in {'adr', 'adrp', 'cset', 'csetm'}:
             write(args[0])
         elif op == 'movk':
@@ -233,7 +242,12 @@ def check_definedness(insns, targets, linked_exit, decode):
             value = mask(incoming, args[1])
             if op in {'and','ands'}: value |= ~immediate
             elif op in {'bic','bics','orr'}: value |= immediate
-            write(args[0], value)
+            source = ri(args[1])
+            origin = incoming.aliases[source[0]] if source and source[0] is not None else False
+            pointer = False
+            if op == 'orr' and width == 64 and immediate < 16:
+                pointer = origin | immediate if type(origin) is int else origin
+            write(args[0], value, pointer)
             if op in {'ands','bics'}:
                 # C and V are defined zero; Z needs every result bit, N only MSB.
                 flags = C | V
@@ -244,7 +258,7 @@ def check_definedness(insns, targets, linked_exit, decode):
             left, right = ri(args[1]), ri(args[2])
             a = incoming.aliases[left[0]] if left and left[0] is not None else False
             b = incoming.aliases[right[0]] if right and right[0] is not None else False
-            write(args[0], pointer=a if op == 'csel' and same(a,b) else False)
+            write(args[0], pointer=a if op == 'csel' and same(a,b) else None)
         elif op not in {'bl', 'blr', 'br', 'ret', 'b', 'nop'} and not op.startswith('b.') and op not in {'cbz','cbnz','tbz','tbnz'}:
             reads = args if op in {'cmp','cmn','tst','ccmp'} else args[1:]
             zero = op in {'eor','sub','subs','cmp'} and len(args)>1 and args[-1] == args[-2] and ri(args[-1])
@@ -259,32 +273,68 @@ def check_definedness(insns, targets, linked_exit, decode):
                     delta = decode.parse_shifted_imm(args,2)
                     aliases[ri(args[0])[0]] = origin + (delta if op=='add' else -delta) if type(origin) is int else origin
 
-        state = State(tuple(bits), tuple(aliases), flags, opaque, pointers)
+        if type(aliases[31]) is int:
+            stack_min = min(stack_min, aliases[31])
+            stack_max = max(stack_max, aliases[31])
+        state = State(tuple(bits), tuple(aliases), flags, opaque, pointers, tuple(constants))
         next_pc = following.get(addr)
         if op in {'bl','blr'} or (op == 'br' and any(k == 'scalar' for k,v in targets.get(addr,()))):
             choices = targets.get(addr, ())
             names = [helper_idents()[value] for kind,value in choices if kind == 'scalar']
             if decode.is_helper_symbol(insn.reloc_symbol): names.append(insn.reloc_symbol)
+            if insn.reloc_symbol in {'memcpy','memset'}: names.append(insn.reloc_symbol)
             if insn.reloc_symbol and not names:
                 raise ValueError(f'unresolved native ABI external call {insn.reloc_symbol} at {where}')
             for name in names:
+                if name in {'memcpy','memset'}:
+                    for reg in ['x0','x2','x1' if name=='memcpy' else 'w1']: need(incoming,reg,where)
+                    continue
                 parameters = helper_prototypes()[name].arguments
                 for index, parameter in enumerate([] if parameters=='void' else parameters.split(',')):
                     if parameter.strip() == '...': break
                     narrow = '*' not in parameter and any(t in parameter.split() for t in ('__u32','__s32','int'))
                     need(incoming, ('w' if narrow else 'x')+str(index), where)
             if names:
-                for register in range(19): bits[register], aliases[register] = 0, None
+                effects=[]
+                for name in names:
+                    written,saved=dict(state.opaque),dict(state.pointers)
+                    effect=(0,2) if name in {'memcpy','memset'} else HELPER_FULL_WRITES.get(name)
+                    if effect is not None:
+                        dst,size=effect
+                        start,length=incoming.aliases[dst],incoming.constants[size]
+                        if type(start) is int and length is not None:
+                            if name not in {'memcpy','memset'}: length &= 0xffffffff
+                            end=start+length
+                            written={p:v for p,v in written.items() if not start<=p<end}
+                            saved={p:v for p,v in saved.items() if not (p<end and p+8>start)}
+                            source_arg=1 if name=='memcpy' else HELPER_COPY_SOURCES.get(name)
+                            if source_arg is not None:
+                                source=incoming.aliases[source_arg]
+                                if source is None:
+                                    raise ValueError(f'native helper source stack relation unresolved at {where}')
+                                if type(source) is int:
+                                    written.update({start+p-source:v for p,v in state.opaque.items() if source<=p<source+length})
+                                    saved.update({start+p-source:v for p,v in state.pointers.items() if source<=p and p+8<=source+length})
+                    effects.append(State(state.defined,state.aliases,state.flags,written,saved,state.constants))
+                effect=effects[0]
+                for branch in effects[1:]: effect=joined(effect,branch)
+                opaque,pointers=effect.opaque,effect.pointers
+                for register in range(19):
+                    bits[register], aliases[register], constants[register] = 0, None, None
                 bits[32], aliases[32] = 0, None
                 bits[0], aliases[0] = FULL, False
+                constants[32]=None
+                if len(names)==1 and names[0] in {'memcpy','memset'}:
+                    aliases[0]=incoming.aliases[0]
                 if op != 'br':
                     bits[30], aliases[30] = FULL, False
-                    push(context, next_pc, State(tuple(bits),tuple(aliases),0,opaque,pointers))
+                    constants[30]=None
+                    push(context, next_pc, State(tuple(bits),tuple(aliases),0,opaque,pointers,tuple(constants)))
                 else:
                     if type(state.aliases[31]) is not int or state.aliases[31] not in entry_sp[context]:
                         raise ValueError(f'native ABI tail return has an unbalanced stack pointer at {where}')
                     need(state,'x30',where)
-                    result = State(tuple(bits),tuple(aliases),0,opaque,pointers)
+                    result = State(tuple(bits),tuple(aliases),0,opaque,pointers,tuple(constants))
                     if context:
                         for parent, continuation in returns.get(context,set()): push(parent,continuation,result)
                     else: need(result,'w0',where)
@@ -301,7 +351,7 @@ def check_definedness(insns, targets, linked_exit, decode):
                 if edge not in returns.setdefault(child,set()):
                     returns[child].add(edge)
                     queue.extend(key for key in states if key[0]==child and by_addr[key[1]].mnemonic=='ret')
-                push(child,target,State(tuple(bits),tuple(aliases),flags,opaque,pointers))
+                push(child,target,State(tuple(bits),tuple(aliases),flags,opaque,pointers,state.constants))
         elif op == 'ret':
             if type(state.aliases[31]) is not int or state.aliases[31] not in entry_sp[context]:
                 raise ValueError(f'native ABI return has an unbalanced stack pointer at {where}')
@@ -318,3 +368,4 @@ def check_definedness(insns, targets, linked_exit, decode):
             if op.startswith('b.') or op in {'cbz','cbnz','tbz','tbnz'}:
                 push(context,decode.branch_target(args[-1]),state)
             push(context,next_pc,state)
+    return stack_min, stack_max

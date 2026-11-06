@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import subprocess
 import sys
@@ -104,14 +105,14 @@ def rodata_bytes(obj: Path) -> bytes:
     return bytes(out)
 
 
-def load_rodata16(obj: Path) -> dict[str, tuple[int, int]]:
+def load_rodata_blobs(obj: Path) -> dict[str, bytes]:
     data = rodata_bytes(obj)
     if not data:
         return {}
     result = subprocess.run(["aarch64-linux-gnu-objdump", "-t", str(obj)],
                             cwd=REPO_ROOT, check=True, text=True,
                             stdout=subprocess.PIPE)
-    out: dict[str, tuple[int, int]] = {}
+    out: dict[str, bytes] = {}
     for line in result.stdout.splitlines():
         fields = line.split()
         if ".native_link_rodata" not in fields:
@@ -122,11 +123,9 @@ def load_rodata16(obj: Path) -> dict[str, tuple[int, int]]:
         offset = int(fields[0], 16)
         size = int(fields[idx + 1], 16)
         name = fields[-1]
-        if size >= 16 and offset + 16 <= len(data):
-            out[name] = (
-                int.from_bytes(data[offset:offset + 8], "little"),
-                int.from_bytes(data[offset + 8:offset + 16], "little"),
-            )
+        if size <= 0 or offset + size > len(data):
+            raise ValueError(f"native readonly extent exceeds its section: {name} offset={offset} size={size}")
+        out[name] = data[offset:offset+size]
     return out
 
 
@@ -177,12 +176,12 @@ def parse_flat_instructions(text: str) -> list[NativeInsn]:
 def parse_native_linked_program(
     bench: Bench,
     proof_object_dir: Path,
-) -> tuple[OrderedDict[str, list[NativeInsn]], dict[str, tuple[int, int]]]:
+) -> tuple[OrderedDict[str, list[NativeInsn]], dict[str, bytes | tuple[int, int]]]:
     symbol = bench.symbol
     proof_obj = proof_object_dir / f"{bench.name}.proof.o"
     if not proof_obj.is_file():
         raise RuntimeError(f"missing proof object for {bench.name}: {proof_obj}")
-    rodata16 = load_rodata16(proof_obj)
+    rodata16 = load_rodata_blobs(proof_obj)
     disasm = subprocess.run(
         ["aarch64-linux-gnu-objdump", "-dr", str(proof_obj)],
         cwd=REPO_ROOT, check=True, text=True, stdout=subprocess.PIPE,
@@ -344,7 +343,7 @@ def reg_or_imm(text: str) -> bool:
     return text.strip().startswith("#")
 
 
-def rodata_ident_map(rodata16: dict[str, tuple[int, int]]) -> dict[str, str]:
+def rodata_ident_map(rodata16: dict[str, bytes | tuple[int, int]]) -> dict[str, str]:
     return {symbol: f"__arm64_rodata_{index}" for index, symbol in enumerate(rodata16)}
 
 
@@ -837,6 +836,10 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
         lines.append(f"\t{macro}({reg_const(insn.operands[0])}, {parse_imm(insn.operands[1])}, 0x{insn.addr:x}, 0x{target:x}, {label(target)});")
         return
     if op == "bl":
+        if insn.reloc_symbol in {"memcpy", "memset"}:
+            lines.append(f"\tARM64_SIM_A64_LINK(0x{next_addr:x}ULL);")
+            lines.append(f"\tARM64_SIM_LIBC_{insn.reloc_symbol.upper()}();")
+            return
         if is_helper_symbol(insn.reloc_symbol):
             lines.append(f"\tARM64_SIM_A64_LINK(0x{next_addr:x}ULL);")
             lines.append(f"\tARM64_SIM_BPF_CALL_{insn.reloc_symbol}();")
@@ -865,9 +868,14 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
 
 def render_program(name: str, symbol: str, functions: OrderedDict[str, list[NativeInsn]],
                    kind: str, prelude: str = "",
-                   rodata16: dict[str, tuple[int, int]] | None = None,
-                   linked_exit: bool = False) -> str:
-    rodata16 = rodata16 or {}
+                   rodata16: dict[str, bytes | tuple[int, int]] | None = None,
+                   linked_exit: bool = False, program_section: str | None = None,
+                   original_source: Path | None = None,
+                   original_symbols: set[str] | None = None) -> str:
+    if (original_source is None) != (original_symbols is None):
+        raise ValueError("original source and ELF-defined symbol set must be supplied together")
+    rodata16 = {symbol: value for symbol, value in (rodata16 or {}).items()
+                if original_symbols is None or symbol not in original_symbols}
     all_insns = [insn for fn in functions.values() for insn in fn]
     all_addrs = {insn.addr for insn in all_insns}
     next_by_addr = {
@@ -876,7 +884,7 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         for index in range(len(insns) - 1)
     }
     targets_by_addr = indirect_targets(all_insns)
-    check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])
+    stack_min, stack_max = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])
     returns_by_addr = return_targets(all_insns, targets_by_addr)
     return_addrs = sorted(next_by_addr[insn.addr] for insn in all_insns
                           if insn.mnemonic in {"bl", "blr"})
@@ -884,22 +892,35 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
                          {branch_target(i.operands[1]) for i in all_insns if i.mnemonic == "adr"} |
                          {v for values in targets_by_addr.values() for k, v in values if k == "code"})
     uses_stack = bool(return_addrs) or any("[sp" in insn.raw.lower() for insn in all_insns)
-    section, ctx, entry = {
-        "xdp": ('SEC("xdp")', "struct xdp_md *", "ARM64_SIM_ENTRY_XDP(ctx);"),
-        "tc": ('SEC("tc")', "struct __sk_buff *", "ARM64_SIM_ENTRY_SKB(ctx);"),
-        "cgroup_skb": ('SEC("cgroup_skb/egress")', "struct __sk_buff *", "ARM64_SIM_ENTRY_SKB(ctx);"),
-    }[kind]
+    if kind == "raw":
+        if not program_section:
+            raise ValueError("raw context requires its real BPF program section")
+        section, ctx, entry = f'SEC({json.dumps(program_section)})', 'void *', 'ARM64_SIM_ENTRY_RAW(ctx);'
+    else:
+        section, ctx, entry = {
+            "xdp": ('SEC("xdp")', "struct xdp_md *", "ARM64_SIM_ENTRY_XDP(ctx);"),
+            "tc": ('SEC("tc")', "struct __sk_buff *", "ARM64_SIM_ENTRY_SKB(ctx);"),
+            "cgroup_skb": ('SEC("cgroup_skb/egress")', "struct __sk_buff *", "ARM64_SIM_ENTRY_SKB(ctx);"),
+        }[kind]
     lines: list[str] = []
     for addr, targets in sorted(returns_by_addr.items()):
         cases = ' '.join(f'case 0x{target:x}ULL: goto {label(target)};' for target in sorted(targets))
         lines.append(f'#define ARM64_SIM_RET_CASES_{addr:x} {cases}')
     if uses_stack:
-        lines.append("#define ARM64_SIM_ENABLE_STACK 1")
+        stack_bias = ((-min(0, stack_min) + 7) // 8) * 8
+        stack_bytes = max(8, ((stack_bias + max(0, stack_max) + 7) // 8) * 8)
+        lines.extend(["#define ARM64_SIM_ENABLE_STACK 1",
+                      f"#define ARM64_SIM_STACK_BIAS {stack_bias}LL",
+                      f"#define ARM64_SIM_STACK_BYTES {stack_bytes}U"])
     if return_addrs:
         lines.append("#define ARM64_SIM_RETURN_CASES \\")
         for idx, addr in enumerate(return_addrs):
             tail = " \\" if idx + 1 < len(return_addrs) else ""
             lines.append(f"\tcase 0x{addr:x}ULL: goto {label(addr)};{tail}")
+    if original_source is not None:
+        lines.extend(['#define LICENSE __arm64_original_license',
+                      f'#include {json.dumps(str(original_source.resolve()))}',
+                      '#undef LICENSE'])
     lines.extend([
         '#include "../arm64_sim_local_bpf.h"',
         "",
@@ -909,8 +930,15 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         lines.append("")
     rodata_idents = rodata_ident_map(rodata16)
     for symbol, ident in rodata_idents.items():
-        lo, hi = rodata16[symbol]
-        lines.append(f"static const __u64 {ident}[2] = {{{c_u64(lo)}, {c_u64(hi)}}};")
+        value = rodata16[symbol]
+        if isinstance(value, bytes):
+            if not value:
+                raise ValueError(f"empty native readonly extent: {symbol}")
+            values = ", ".join(f"0x{byte:02x}" for byte in value)
+            lines.append(f'static const __u8 {ident}[{len(value)}] SEC(".rodata.native") __attribute__((aligned(16))) = {{{values}}};')
+        else:
+            lo, hi = value
+            lines.append(f"static const __u64 {ident}[2] = {{{c_u64(lo)}, {c_u64(hi)}}};")
     if rodata_idents:
         lines.append("")
     map_symbols = sorted({
@@ -919,9 +947,10 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         if insn.reloc_symbol
         and insn.reloc_symbol not in rodata_idents
         and not is_helper_symbol(insn.reloc_symbol)
+        and insn.reloc_symbol not in {"memcpy", "memset"}
     })
-    source_maps = set(re.findall(r'\b([A-Za-z_]\w*)\s+SEC\(\s*"\.maps"\s*\)', prelude))
-    if prelude and set(map_symbols) - source_maps:
+    source_maps = set(original_symbols or ()) | set(re.findall(r'\b([A-Za-z_]\w*)\s+SEC\(\s*"\.maps"\s*\)', prelude))
+    if (prelude or original_source is not None) and set(map_symbols) - source_maps:
         raise ValueError(f"native relocation lacks an original map declaration: {sorted(set(map_symbols) - source_maps)}")
     reloc_idents = {
         symbol: symbol if symbol in source_maps else c_ident("__arm64_reloc", symbol, index)

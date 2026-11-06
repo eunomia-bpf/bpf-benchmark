@@ -133,7 +133,7 @@ bounded-negative-check:
 .PHONY: return-negative-check
 return-negative-check:
 	python3 $(HERE)/return_negative.py $(HERE)/$(PHASE) generate
-	$(MAKE) -f $(HERE)/Makefile compile PHASE=$(PHASE) COMPILE_ARGS='0 2 900'
+	$(MAKE) -f $(HERE)/Makefile compile PHASE=$(PHASE) COMPILE_ARGS='0 6 900 1 2048'
 	! $(MAKE) -f $(HERE)/Makefile verify PHASE=$(PHASE)
 	python3 $(HERE)/return_negative.py $(HERE)/$(PHASE) check
 	$(MAKE) -f $(HERE)/Makefile summarize PHASE=$(PHASE)
@@ -213,3 +213,71 @@ native-link-build:
 
 native-link-ro-artifacts:
 	tar -C $(ROOT) -czf $(HERE)/readonly-link/replay.tar.gz -T $(HERE)/readonly-link/replay-files.txt
+
+.PHONY: bcc-real-generate
+bcc-real-generate: native-link-build
+	python3 $(HERE)/bcc_real.py $(HERE)/$(PHASE) $(ROOT)/kprog/arm64/build/app-native-link/release/native-link
+
+.PHONY: bcc-real-manifest
+bcc-real-manifest:
+	python3 $(HERE)/bcc_manifest.py $(HERE)/$(PHASE)
+
+.PHONY: stack-store-check
+stack-store-check:
+	python3 $(HERE)/stack_store_check.py $(HERE)/$(PHASE)
+
+.PHONY: memory-tags-check
+memory-tags-check:
+	python3 $(HERE)/memory_tags_check.py $(HERE)/$(PHASE)
+
+.PHONY: return-byte-before
+return-byte-before:
+	python3 $(HERE)/return_byte_before.py $(HERE)/$(PHASE)
+	$(MAKE) -f $(HERE)/Makefile compile PHASE=$(PHASE) COMPILE_ARGS='0 2 900 1 2048'
+	! $(MAKE) -f $(HERE)/Makefile verify PHASE=$(PHASE)
+
+.PHONY: bcc-real-verify-build
+bcc-real-verify-build:
+	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static \
+		-I$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+		$(ROOT)/corpus/results/kprog_app_coverage_20261106/verify_proof.cpp \
+		$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+		-L$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd \
+		-o $(HERE)/verify-proof
+
+.PHONY: bcc-real-verify-package
+bcc-real-verify-package:
+	python3 $(HERE)/bcc_verify_package.py $(HERE)/$(PHASE) $(BASE_INITRAMFS)
+
+.PHONY: bcc-real-verify
+bcc-real-verify: bcc-real-verify-package
+	install -d $(HERE)/$(PHASE)/verify
+	taskset -c 12-15 timeout 7200 qemu-system-aarch64 -M virt -cpu max -smp 2 -m 2048 -nographic -no-reboot \
+		-kernel /workspaces/.agent-state/kprog-lanes/T/paired-input-abi2/arm64/Image -initrd $(BUILD)/initramfs.cpio.gz \
+		-fsdev local,id=results,path=$(HERE)/$(PHASE)/verify,security_model=none \
+		-device virtio-9p-device,fsdev=results,mount_tag=results \
+		-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >$(HERE)/$(PHASE)/qemu.log 2>&1
+	test "$$(cat $(HERE)/$(PHASE)/verify/guest-status)" = 0
+
+.PHONY: bcc-tag-words
+bcc-tag-words:
+	python3 $(HERE)/bcc_tag_words.py $(HERE)/$(PHASE)
+	$(MAKE) -f $(HERE)/Makefile compile PHASE=$(PHASE) COMPILE_ARGS='0 23 900 1 2048'
+	$(MAKE) -f $(HERE)/Makefile bcc-real-verify PHASE=$(PHASE)
+
+.PHONY: bcc-packed-tags
+bcc-packed-tags:
+	python3 $(HERE)/bcc_tag_words.py $(HERE)/$(PHASE) packed
+	$(MAKE) -f $(HERE)/Makefile compile PHASE=$(PHASE) COMPILE_ARGS='0 23 900 1 2048'
+	$(MAKE) -f $(HERE)/Makefile bcc-real-verify PHASE=$(PHASE)
+
+.PHONY: memory-results
+memory-results:
+	python3 $(HERE)/memory_results.py
+
+.PHONY: memory-artifacts
+memory-artifacts:
+	tar -C $(HERE) -czf $(HERE)/memory-extension/replay.tar.gz \
+		abi-memory-final-v2 memory-tags-packed stack-store-packed memory-final-micro memory-final-stage2 \
+		bcc-real-entries-v8 bcc-real-entries-v9 bcc-tag-word bcc-packed-tags bcc-packed-tags-v2 \
+		memory-return-final return-byte-before

@@ -9,7 +9,12 @@ ROOT = HERE.parents[2]
 FORMAL = ROOT/'kprog/formal'
 HEADER = ROOT/'kprog/arm64/arm64_sim_local_bpf.h'
 sys.path.insert(0, str(ROOT/'kprog'))
-from helper_abi import helper_prototypes
+from helper_abi import HELPER_COPY_SOURCES, HELPER_FULL_WRITES, helper_prototypes
+
+# String helpers may touch a prefix; forget pointer provenance throughout their
+# possible destination extent without claiming that the suffix was initialized.
+WRITE_DESTINATIONS = dict(HELPER_FULL_WRITES, **{name: (0, 1) for name in
+    ['bpf_probe_read_str', 'bpf_probe_read_user_str', 'bpf_probe_read_kernel_str']})
 
 
 def main():
@@ -45,7 +50,22 @@ def main():
             declarations.append(f'{typ} arg{index}')
             checks.append(f'check_arg({index}, (__u64)(unsigned long)arg{index});')
         result_body = 'ARM64_SIM_L_HELPER_POINTER_RESULT' if '*' in result else 'ARM64_SIM_L_HELPER_SCALAR_RESULT'
-        bodies.append(f'#define ARM64_SIM_BPF_CALL_{name}() \\\n\t{result_body}({name}({", ".join(expressions)}))\n')
+        call = f'{result_body}({name}({", ".join(expressions)}))'
+        if name in WRITE_DESTINATIONS:
+            dst, size = WRITE_DESTINATIONS[name]
+            src = HELPER_COPY_SOURCES.get(name)
+            lines = [f'__s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X{dst});',
+                     f'__u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X{dst});',
+                     f'__u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X{size});']
+            source, source_tag, copied = '0', 'ARM64_SIM_TAG_SCALAR', '0'
+            if src is not None:
+                lines += [f'__s64 __a64_hw_src = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X{src});',
+                          f'__u8 __a64_hw_stag = ARM64_SIM_L_REG_TAG(ARM64_X{src});']
+                source, source_tag = '__a64_hw_src', '__a64_hw_stag'
+                copied = '(ARM64_SIM_L_READ_REG(ARM64_X0) == 0)'
+            lines += [call+';', f'ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, {source}, {source_tag}, __a64_hw_len, {copied});']
+            call = 'do { ' + ' '.join(lines) + ' } while (0)'
+        bodies.append(f'#define ARM64_SIM_BPF_CALL_{name}() ' + chr(92) + '\n\t' + call + '\n')
         abi.append(dict(id=number, name=name, result=result, parameters=parameters))
         stubs.append(f'static {result} {name}({", ".join(declarations) or "void"})\n{{\n'
                      + f'    seen_id = {number}; calls++;\n    ' + '\n    '.join(checks)
@@ -59,10 +79,13 @@ def main():
                                 f'&__a64_stack.b[ARM64_SIM_STACK_BIAS-8] : value_for({index});')
             else:
                 expected.append(f'expected[{index}] = (__u64)(unsigned long)({parameter["type"]})value_for({index});')
+        size_arg = WRITE_DESTINATIONS[name][1] if name in WRITE_DESTINATIONS else -1
+        if size_arg >= 0:
+            expected.append(f'if (stack_mode) {{ ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X{size_arg}, 8, ARM64_WIDTH_64); expected[{size_arg}]=8; }}')
         pointer = '*' in result
         mask = sum(1 << i for i, p in enumerate(parameters) if p.get('pointer'))
         tests.append(f'    helper_id={number}; CHECK_HELPER({name}, {result}, {mask}, '
-                     f'{"ARM64_SIM_TAG_MAP_VALUE" if pointer else "ARM64_SIM_TAG_SCALAR"},\n'
+                     f'{"ARM64_SIM_TAG_MAP_VALUE" if pointer else "ARM64_SIM_TAG_SCALAR"}, {size_arg},\n'
                      + '        ' + '\n        '.join(expected) + ');\n')
     text = HEADER.read_text()
     marker = '#define ARM64_SIM_L_HELPER_SCALAR_RESULT(EXPR)'
@@ -113,7 +136,7 @@ static void check_arg(unsigned index, __u64 got) {
     structs = sorted(set(re.findall(r'struct (\w+)', ' '.join(r['result']+' '+str(r['parameters']) for r in abi))))
     host += ''.join(f'struct {name};\n' for name in structs)
     host += '\n'.join(stubs)
-    host += r'''#define CHECK_HELPER(NAME, RESULT, MASK, TAG, ...) \
+    host += r'''#define CHECK_HELPER(NAME, RESULT, MASK, TAG, SIZE_ARG, ...) \
     do { \
         ARM64_SIM_ENTRY_XDP(&ctx); \
         for (unsigned i=0; i<31; i++) { \
@@ -129,6 +152,7 @@ static void check_arg(unsigned index, __u64 got) {
             || __a64_x0_tag!=(TAG) || __a64_n!=0 || __a64_z!=1 || __a64_c!=1 || __a64_v!=0) failures++; \
         for (unsigned i=1; i<31; i++) { \
             __u64 want = stack_mode && ((MASK) & (1ULL<<i)) ? (__u64)-8LL : value_for(i); \
+            if (stack_mode && (int)i==(SIZE_ARG)) want=8; \
             __u8 tag = stack_mode && ((MASK) & (1ULL<<i)) ? ARM64_SIM_TAG_STACK : ARM64_SIM_TAG_SCALAR; \
             if (ARM64_SIM_L_READ_REG(i)!=want || ARM64_SIM_L_REG_TAG(i)!=tag) failures++; \
         } \

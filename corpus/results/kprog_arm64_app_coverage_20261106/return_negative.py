@@ -13,7 +13,11 @@ if sys.argv[2]=='generate':
  phase.mkdir();(phase/'sources').mkdir();(phase/'inputs').mkdir()
  rows=[]
  for name,body in [('outer_scalar_zero','mov w0,#2;mov x30,#0;ret'),
-   ('local_scalar_pc','str x30,[sp,#-16]!;bl 1f;ldr x30,[sp],#16;mov w0,#2;ret;1:mov x30,#8;ret')]:
+   ('local_scalar_pc','str x30,[sp,#-16]!;bl 1f;ldr x30,[sp],#16;mov w0,#2;ret;1:mov x30,#8;ret'),
+   ('partial_saved_lr','str x30,[sp,#-16]!;strb wzr,[sp,#1];ldr x30,[sp],#16;mov w0,#2;ret'),
+   ('crossword_saved_lr','sub sp,sp,#32;str x30,[sp,#8];strh wzr,[sp,#7];ldr x30,[sp,#8];add sp,sp,#32;mov w0,#2;ret'),
+   ('memset_saved_lr','str x30,[sp,#-16]!;mov x0,sp;mov x1,#0;mov x2,#8;bl memset;ldr x30,[sp],#16;mov w0,#2;ret'),
+   ('helper_saved_lr','str x30,[sp,#-16]!;mov x0,sp;mov x1,#8;bl bpf_get_current_comm;ldr x30,[sp],#16;mov w0,#2;ret')]:
   src=phase/(name+'.S');obj=phase/(name+'.proof.o')
   src.write_text('.text\n.global entry\n.type entry,%function\nentry:\n'+body.replace(';','\n')+'\n.size entry,.-entry\n')
   subprocess.run(['aarch64-linux-gnu-gcc','-c',src,'-o',obj],check=True)
@@ -25,8 +29,7 @@ if sys.argv[2]=='generate':
   data=phase/'inputs'/(name+'.mem');data.write_bytes(bytes(64))
   rows.append(dict(name=name,proof=str(obj),source=str(out),stage='generate',ok=True,
    note='unsafe native RET forgery, load-only negative; native code is never executed',
-   input_file=str(data),expected_result=0,expected_retval=2,result_channel='packet',
-   cgroup_skb_input=False,load_timeout_s=600))
+   load_timeout_s=600))
  (phase/'programs.jsonl').write_text(''.join(json.dumps(r)+'\n' for r in rows))
  coverage.freeze_simulator(phase)
 else:
