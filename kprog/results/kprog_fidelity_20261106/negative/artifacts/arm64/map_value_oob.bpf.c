@@ -1,0 +1,59 @@
+#define ARM64_SIM_ENABLE_STACK 1
+#define ARM64_SIM_RETURN_CASES \
+	case 0x20ULL: __a64_lr = 0; goto arm64_l_20;
+#include "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h"
+
+struct {
+	__uint(type, BPF_MAP_TYPE_ARRAY);
+	__uint(max_entries, 1);
+	__type(key, __u32);
+	__type(value, __u64);
+} neg_map_0 SEC(".maps");
+
+SEC("xdp")
+int map_value_oob_arm64_sim_xdp(struct xdp_md *ctx)
+{
+	ARM64_SIM_ENTRY_XDP(ctx);
+arm64_l_0:
+	/* 0x0: ldr x1, [x0] */
+	ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X1, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL);
+arm64_l_4:
+	/* 0x4: ldr x2, [x0, #8] */
+	ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X2, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 8ULL);
+arm64_l_8:
+	/* 0x8: add x3, x1, #0x4 */
+	ARM64_SIM_RUN_OP3(ARM64_OP_ALU_IMM, ARM64_X3, ARM64_X1, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0), 4ULL);
+arm64_l_c:
+	/* 0xc: cmp x3, x2 */
+	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X3, ARM64_X2, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
+arm64_l_10:
+	/* 0x10: b.hi 2c <entry+0x2c> */
+	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x10, 0x2c, arm64_l_2c);
+arm64_l_14:
+	/* 0x14: adrp x0, 0 <neg_map> */
+	ARM64_SIM_RUN_OP3(ARM64_OP_ADRP_GOT, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, ((__u64)(long)&neg_map_0));
+arm64_l_18:
+	/* 0x18: ldr x0, [x0] */
+	ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X0, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL);
+arm64_l_1c:
+	/* 0x1c: bl 0 <bpf_map_lookup_elem> */
+	ARM64_SIM_BPF_CALL_bpf_map_lookup_elem();
+arm64_l_20:
+	/* 0x20: cbz x0, 2c <entry+0x2c> */
+	ARM64_SIM_A64_CBZ(ARM64_X0, 0x20, 0x2c, arm64_l_2c);
+arm64_l_24:
+	/* 0x24: ldr x0, [x0, #8] */
+	ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X0, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 8ULL);
+arm64_l_28:
+	/* 0x28: ret */
+	ARM64_SIM_A64_RET();
+arm64_l_2c:
+	/* 0x2c: mov x0, #0x0 */
+	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_IMM, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, 0ULL);
+arm64_l_30:
+	/* 0x30: ret */
+	ARM64_SIM_A64_RET();
+	return 0;
+}
+
+ARM64_SIM_LICENSE();

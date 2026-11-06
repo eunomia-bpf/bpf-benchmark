@@ -1,0 +1,71 @@
+{
+  "arch": "arm64",
+  "cases": [
+    {
+      "name": "past_data_end_read",
+      "assembly": "ldr x1, [x0, #8]; ldrb w0, [x1]; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "past_data_end_write",
+      "assembly": "ldr x1, [x0, #8]; mov w2, #1; strb w2, [x1]; mov w0, #2; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "missing_data_end_check",
+      "assembly": "ldr x1, [x0]; ldrb w0, [x1]; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "map_value_oob",
+      "assembly": "ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; cbz x0, 1f; ldr x0, [x0, #8]; ret; 1: mov x0, #0; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "nullable_map_dereference",
+      "assembly": "ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; ldr x0, [x0]; ret; 1: mov x0, #0; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "invalid_helper_argument",
+      "assembly": "mov x0, #1; mov x1, #0; bl bpf_map_lookup_elem; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "stack_oob",
+      "assembly": "ldr x0, [sp, #1024]; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "uninitialized_stack",
+      "assembly": "ldur x0, [sp, #-8]; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "unbounded_loop",
+      "assembly": "1: b 1b",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "unbounded_indirect_jump",
+      "assembly": "ldr x1, [x0]; br x1",
+      "stage": "specialization_rejected",
+      "message": "unsupported arm64 instruction: br x1"
+    },
+    {
+      "name": "unsupported_instruction",
+      "assembly": "brk #0; ret",
+      "stage": "specialization_rejected",
+      "message": "unsupported arm64 instruction: brk #0x0"
+    }
+  ]
+}

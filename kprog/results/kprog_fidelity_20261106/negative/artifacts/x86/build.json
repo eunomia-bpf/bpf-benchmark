@@ -1,0 +1,71 @@
+{
+  "arch": "x86",
+  "cases": [
+    {
+      "name": "past_data_end_read",
+      "assembly": "mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "past_data_end_write",
+      "assembly": "mov rax, QWORD PTR [rdi+8]; mov BYTE PTR [rax], 1; mov eax, 2; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "missing_data_end_check",
+      "assembly": "mov rax, QWORD PTR [rdi]; movzx eax, BYTE PTR [rax]; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "map_value_oob",
+      "assembly": "mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; test rax, rax; je 1f; mov rax, QWORD PTR [rax+8]; ret; 1: mov eax, 0; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "nullable_map_dereference",
+      "assembly": "mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; mov rax, QWORD PTR [rax]; ret; 1: mov eax, 0; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "invalid_helper_argument",
+      "assembly": "mov rdi, 1; mov rsi, 0; call bpf_map_lookup_elem; ret",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "stack_oob",
+      "assembly": "mov rax, QWORD PTR [rsp-1024]; ret",
+      "stage": "compiler_rejected",
+      "message": "build-x86/negative/stack_oob.bpf.c:11:2: error: A call to built-in function 'abort' is not supported.\n   11 |         X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RSP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709550592ULL);\n      |         ^\n1 error generated.\n"
+    },
+    {
+      "name": "uninitialized_stack",
+      "assembly": "mov rax, QWORD PTR [rsp-8]; ret",
+      "stage": "compiler_rejected",
+      "message": "build-x86/negative/uninitialized_stack.bpf.c:11:2: error: A call to built-in function 'abort' is not supported.\n   11 |         X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RSP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551608ULL);\n      |         ^\n1 error generated.\n"
+    },
+    {
+      "name": "unbounded_loop",
+      "assembly": "1: jmp 1b",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "unbounded_indirect_jump",
+      "assembly": "mov rax, QWORD PTR [rdi]; jmp rax",
+      "stage": "generated",
+      "message": ""
+    },
+    {
+      "name": "unsupported_instruction",
+      "assembly": "ud2; ret",
+      "stage": "specialization_rejected",
+      "message": "unsupported mnemonic: ud2"
+    }
+  ]
+}

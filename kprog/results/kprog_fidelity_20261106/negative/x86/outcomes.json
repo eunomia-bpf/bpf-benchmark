@@ -1,0 +1,150 @@
+{
+  "arch": "x86",
+  "cases": [
+    {
+      "name": "past_data_end_read",
+      "assembly": "mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'past_data_end_read_x86_sim_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'past_data_end_read_x86_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; X86_SIM_ENTRY_XDP(ctx); @ past_data_end_read.bpf.c:6\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (b7) r1 = 0                        ; R1=0\n5: (7b) *(u64 *)(r10 -24) = r1        ; R1=0 R10=fp0 fp-24=0\n6: (7b) *(u64 *)(r10 -16) = r1        ; R1=0 R10=fp0 fp-16=0\n7: (63) *(u32 *)(r10 -8) = r1         ; R1=0 R10=fp0 fp-8=????0\n8: (b7) r2 = 8                        ; R2=8\n9: (bf) r3 = r10                      ; R3=fp0 R10=fp0\n;  @ past_data_end_read.bpf.c:0\n10: (07) r3 += -40                    ; R3=fp-40\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL); @ past_data_end_read.bpf.c:9\n11: (0f) r3 += r2                     ; R2=8 R3=fp-32\n12: (79) r2 = *(u64 *)(r3 +0)         ; R2=pkt_end() R3=fp-32 fp-32=pkt_end()\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RAX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 0ULL); @ past_data_end_read.bpf.c:12\n13: (0f) r2 += r1\nR2 pointer arithmetic on pkt_end prohibited\nprocessed 14 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'past_data_end_read_x86_sim_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/fidelity/build-x86/negative/past_data_end_read.bpf.o'\ntiming verify_s=0.003399 test_s=0.000000\nerror: bpf_object__load failed: Permission denied (os error 13)\n",
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative/past_data_end_read.bpf.o",
+        "--program",
+        "past_data_end_read_x86_sim_xdp",
+        "--load-only"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "past_data_end_write",
+      "assembly": "mov rax, QWORD PTR [rdi+8]; mov BYTE PTR [rax], 1; mov eax, 2; ret",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'past_data_end_write_x86_sim_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'past_data_end_write_x86_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; X86_SIM_ENTRY_XDP(ctx); @ past_data_end_write.bpf.c:6\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (b7) r1 = 0                        ; R1=0\n5: (7b) *(u64 *)(r10 -24) = r1        ; R1=0 R10=fp0 fp-24=0\n6: (7b) *(u64 *)(r10 -16) = r1        ; R1=0 R10=fp0 fp-16=0\n7: (63) *(u32 *)(r10 -8) = r1         ; R1=0 R10=fp0 fp-8=????0\n8: (b7) r2 = 8                        ; R2=8\n9: (bf) r3 = r10                      ; R3=fp0 R10=fp0\n;  @ past_data_end_write.bpf.c:0\n10: (07) r3 += -40                    ; R3=fp-40\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL); @ past_data_end_write.bpf.c:9\n11: (0f) r3 += r2                     ; R2=8 R3=fp-32\n12: (79) r2 = *(u64 *)(r3 +0)         ; R2=pkt_end() R3=fp-32 fp-32=pkt_end()\n; X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 1ULL); @ past_data_end_write.bpf.c:12\n13: (0f) r2 += r1\nR2 pointer arithmetic on pkt_end prohibited\nprocessed 14 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'past_data_end_write_x86_sim_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/fidelity/build-x86/negative/past_data_end_write.bpf.o'\ntiming verify_s=0.003719 test_s=0.000000\nerror: bpf_object__load failed: Permission denied (os error 13)\n",
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative/past_data_end_write.bpf.o",
+        "--program",
+        "past_data_end_write_x86_sim_xdp",
+        "--load-only"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "missing_data_end_check",
+      "assembly": "mov rax, QWORD PTR [rdi]; movzx eax, BYTE PTR [rax]; ret",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'missing_data_end_check_x86_sim_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'missing_data_end_check_x86_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; X86_SIM_ENTRY_XDP(ctx); @ missing_data_end_check.bpf.c:6\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (b7) r1 = 0                        ; R1=0\n5: (7b) *(u64 *)(r10 -24) = r1        ; R1=0 R10=fp0 fp-24=0\n6: (7b) *(u64 *)(r10 -16) = r1        ; R1=0 R10=fp0 fp-16=0\n7: (63) *(u32 *)(r10 -8) = r1         ; R1=0 R10=fp0 fp-8=????0\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ missing_data_end_check.bpf.c:9\n8: (b7) r2 = 0                        ; R2=0\n9: (bf) r3 = r10                      ; R3=fp0 R10=fp0\n;  @ missing_data_end_check.bpf.c:0\n10: (07) r3 += -40                    ; R3=fp-40\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ missing_data_end_check.bpf.c:9\n11: (0f) r3 += r2                     ; R2=0 R3=fp-40\n12: (79) r2 = *(u64 *)(r3 +0)         ; R2=pkt(r=0) R3=fp-40 fp-40=pkt(r=0)\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RAX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 0ULL); @ missing_data_end_check.bpf.c:12\n13: (0f) r2 += r1                     ; R1=0 R2=pkt(r=0)\n14: (71) r1 = *(u8 *)(r2 +0)\ninvalid access to packet, off=0 size=1, R2(id=0,off=0,r=0)\nR2 offset is outside of the packet\nprocessed 15 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'missing_data_end_check_x86_sim_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/fidelity/build-x86/negative/missing_data_end_check.bpf.o'\ntiming verify_s=0.003951 test_s=0.000000\nerror: bpf_object__load failed: Permission denied (os error 13)\n",
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative/missing_data_end_check.bpf.o",
+        "--program",
+        "missing_data_end_check_x86_sim_xdp",
+        "--load-only"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "map_value_oob",
+      "assembly": "mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; test rax, rax; je 1f; mov rax, QWORD PTR [rax+8]; ret; 1: mov eax, 0; ret",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'map_value_oob_x86_sim_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'map_value_oob_x86_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; X86_SIM_ENTRY_XDP(ctx); @ map_value_oob.bpf.c:8\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (b7) r6 = 0                        ; R6=0\n5: (7b) *(u64 *)(r10 -24) = r6        ; R6=0 R10=fp0 fp-24=0\n6: (7b) *(u64 *)(r10 -16) = r6        ; R6=0 R10=fp0 fp-16=0\n7: (63) *(u32 *)(r10 -8) = r6         ; R6=0 R10=fp0 fp-8=????0\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RSI, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ map_value_oob.bpf.c:11\n8: (b7) r1 = 0                        ; R1=0\n9: (bf) r3 = r10                      ; R3=fp0 R10=fp0\n;  @ map_value_oob.bpf.c:0\n10: (07) r3 += -40                    ; R3=fp-40\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RSI, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ map_value_oob.bpf.c:11\n11: (bf) r2 = r3                      ; R2=fp-40 R3=fp-40\n12: (0f) r2 += r1                     ; R1=0 R2=fp-40\n13: (79) r2 = *(u64 *)(r2 +0)         ; R2=pkt(r=0) fp-40=pkt(r=0)\n14: (b7) r1 = 8                       ; R1=8\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL); @ map_value_oob.bpf.c:14\n15: (0f) r3 += r1                     ; R1=8 R3=fp-32\n16: (79) r1 = *(u64 *)(r3 +0)         ; R1=pkt_end() R3=fp-32 fp-32=pkt_end()\n17: (b7) r3 = 4                       ; R3=4\n; X86_SIM_L_EXEC_LEA(X86_RDX, X86_RSI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 4ULL); @ map_value_oob.bpf.c:17\n18: (bf) r4 = r2                      ; R2=pkt(r=0) R4=pkt(r=0)\n19: (0f) r4 += r3                     ; R3=4 R4=pkt(off=4,r=0)\n; X86_SIM_X86_JCC(X86_CC_A, 0xe, 0x26, x86_l_26); @ map_value_oob.bpf.c:23\n20: (2d) if r4 > r1 goto pc+23        ; R1=pkt_end() R4=pkt(off=4,r=4)\n; X86_SIM_BPF_CALL_ID(X86_SIM_HELPER_bpf_map_lookup_elem); @ map_value_oob.bpf.c:29\n21: (18) r1 = 0xffff8e24a040e400      ; R1=map_ptr(map=neg_map,ks=4,vs=8)\n23: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)\n; X86_SIM_X86_JCC(X86_CC_E, 0x1f, 0x26, x86_l_26); @ map_value_oob.bpf.c:35\n24: (15) if r0 == 0x0 goto pc+19      ; R0=map_value(map=neg_map,ks=4,vs=8)\n25: (b7) r1 = 8                       ; R1=8\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RAX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL); @ map_value_oob.bpf.c:38\n26: (0f) r0 += r1                     ; R0=map_value(map=neg_map,ks=4,vs=8,off=8) R1=8\n27: (71) r1 = *(u8 *)(r0 +0)\ninvalid access to map value, value_size=8 off=8 size=1\nR0 min value is outside of the allowed memory range\nprocessed 27 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'map_value_oob_x86_sim_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/fidelity/build-x86/negative/map_value_oob.bpf.o'\ntiming verify_s=0.004089 test_s=0.000000\nerror: bpf_object__load failed: Permission denied (os error 13)\n",
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative/map_value_oob.bpf.o",
+        "--program",
+        "map_value_oob_x86_sim_xdp",
+        "--load-only"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "nullable_map_dereference",
+      "assembly": "mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; mov rax, QWORD PTR [rax]; ret; 1: mov eax, 0; ret",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'nullable_map_dereference_x86_sim_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'nullable_map_dereference_x86_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; X86_SIM_ENTRY_XDP(ctx); @ nullable_map_dereference.bpf.c:8\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (b7) r0 = 0                        ; R0=0\n5: (7b) *(u64 *)(r10 -24) = r0        ; R0=0 R10=fp0 fp-24=0\n6: (7b) *(u64 *)(r10 -16) = r0        ; R0=0 R10=fp0 fp-16=0\n7: (63) *(u32 *)(r10 -8) = r0         ; R0=0 R10=fp0 fp-8=????0\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RSI, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ nullable_map_dereference.bpf.c:11\n8: (b7) r1 = 0                        ; R1=0\n9: (bf) r3 = r10                      ; R3=fp0 R10=fp0\n;  @ nullable_map_dereference.bpf.c:0\n10: (07) r3 += -40                    ; R3=fp-40\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RSI, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ nullable_map_dereference.bpf.c:11\n11: (bf) r2 = r3                      ; R2=fp-40 R3=fp-40\n12: (0f) r2 += r1                     ; R1=0 R2=fp-40\n13: (79) r2 = *(u64 *)(r2 +0)         ; R2=pkt(r=0) fp-40=pkt(r=0)\n14: (b7) r1 = 8                       ; R1=8\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL); @ nullable_map_dereference.bpf.c:14\n15: (0f) r3 += r1                     ; R1=8 R3=fp-32\n16: (79) r1 = *(u64 *)(r3 +0)         ; R1=pkt_end() R3=fp-32 fp-32=pkt_end()\n17: (b7) r3 = 4                       ; R3=4\n; X86_SIM_L_EXEC_LEA(X86_RDX, X86_RSI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 4ULL); @ nullable_map_dereference.bpf.c:17\n18: (bf) r4 = r2                      ; R2=pkt(r=0) R4=pkt(r=0)\n19: (0f) r4 += r3                     ; R3=4 R4=pkt(off=4,r=0)\n; X86_SIM_X86_JCC(X86_CC_A, 0xe, 0x20, x86_l_20); @ nullable_map_dereference.bpf.c:23\n20: (2d) if r4 > r1 goto pc+23        ; R1=pkt_end() R4=pkt(off=4,r=4)\n; X86_SIM_BPF_CALL_ID(X86_SIM_HELPER_bpf_map_lookup_elem); @ nullable_map_dereference.bpf.c:29\n21: (18) r1 = 0xffff8e2480c6ca00      ; R1=map_ptr(map=neg_map,ks=4,vs=8)\n23: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)\n24: (bf) r1 = r0                      ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8) R1=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)\n25: (b7) r2 = 0                       ; R2=0\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RAX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ nullable_map_dereference.bpf.c:32\n26: (0f) r1 += r2\nR1 pointer arithmetic on map_value_or_null prohibited, null-check it first\nprocessed 26 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'nullable_map_dereference_x86_sim_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/fidelity/build-x86/negative/nullable_map_dereference.bpf.o'\ntiming verify_s=0.003183 test_s=0.000000\nerror: bpf_object__load failed: Permission denied (os error 13)\n",
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative/nullable_map_dereference.bpf.o",
+        "--program",
+        "nullable_map_dereference_x86_sim_xdp",
+        "--load-only"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "invalid_helper_argument",
+      "assembly": "mov rdi, 1; mov rsi, 0; call bpf_map_lookup_elem; ret",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'invalid_helper_argument_x86_sim_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'invalid_helper_argument_x86_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; X86_SIM_BPF_CALL_ID(X86_SIM_HELPER_bpf_map_lookup_elem); @ invalid_helper_argument.bpf.c:15\n0: (b7) r1 = 1                        ; R1=1\n1: (b7) r2 = 0                        ; R2=0\n2: (85) call bpf_map_lookup_elem#1\nR1 type=scalar expected=map_ptr\nprocessed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'invalid_helper_argument_x86_sim_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/workspaces/repository/kprog/fidelity/build-x86/negative/invalid_helper_argument.bpf.o'\ntiming verify_s=0.004716 test_s=0.000000\nerror: bpf_object__load failed: Permission denied (os error 13)\n",
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative/invalid_helper_argument.bpf.o",
+        "--program",
+        "invalid_helper_argument_x86_sim_xdp",
+        "--load-only"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "stack_oob",
+      "assembly": "mov rax, QWORD PTR [rsp-1024]; ret",
+      "stage": "compiler_rejected",
+      "message": "build-x86/negative/stack_oob.bpf.c:11:2: error: A call to built-in function 'abort' is not supported.\n   11 |         X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RSP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709550592ULL);\n      |         ^\n1 error generated.\n"
+    },
+    {
+      "name": "uninitialized_stack",
+      "assembly": "mov rax, QWORD PTR [rsp-8]; ret",
+      "stage": "compiler_rejected",
+      "message": "build-x86/negative/uninitialized_stack.bpf.c:11:2: error: A call to built-in function 'abort' is not supported.\n   11 |         X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RSP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551608ULL);\n      |         ^\n1 error generated.\n"
+    },
+    {
+      "name": "unbounded_loop",
+      "assembly": "1: jmp 1b",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'unbounded_loop_x86_sim_xdp': BPF program load failed: -EINVAL\nlibbpf: prog 'unbounded_loop_x86_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; X86_SIM_X86_JMP(0x0, 0x0, x86_l_0); @ unbounded_loop.bpf.c:9\n0: (05) goto pc-1\n0: (05) goto pc-1\n0: (05) goto pc-1\n0: (05) goto pc-1\n0: (05) goto pc-1\n0: (05) goto pc-1\n0: (05) goto pc-1\n0: (05) goto pc-1\ninfinite loop detected at insn 0\ncur state: R1=ctx() R10=fp0\nold state: R1=ctx() R10=fp0\nprocessed 9 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'unbounded_loop_x86_sim_xdp': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/fidelity/build-x86/negative/unbounded_loop.bpf.o'\ntiming verify_s=0.003685 test_s=0.000000\nerror: bpf_object__load failed: Invalid argument (os error 22)\n",
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative/unbounded_loop.bpf.o",
+        "--program",
+        "unbounded_loop_x86_sim_xdp",
+        "--load-only"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "unbounded_indirect_jump",
+      "assembly": "mov rax, QWORD PTR [rdi]; jmp rax",
+      "stage": "verifier_rejected",
+      "message": "libbpf: prog 'unbounded_indirect_jump_x86_sim_xdp': BPF program load failed: -EINVAL\nlibbpf: prog 'unbounded_indirect_jump_x86_sim_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ unbounded_indirect_jump.bpf.c:9\n0: (b7) r1 = 0                        ; R1=0\n; X86_SIM_X86_JMP(0x3, 0x0, x86_l_0); @ unbounded_indirect_jump.bpf.c:12\n1: (05) goto pc-2\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ unbounded_indirect_jump.bpf.c:9\n0: (b7) r1 = 0                        ; R1=0\n; X86_SIM_X86_JMP(0x3, 0x0, x86_l_0); @ unbounded_indirect_jump.bpf.c:12\n1: (05) goto pc-2\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ unbounded_indirect_jump.bpf.c:9\n0: (b7) r1 = 0                        ; R1=0\n; X86_SIM_X86_JMP(0x3, 0x0, x86_l_0); @ unbounded_indirect_jump.bpf.c:12\n1: (05) goto pc-2\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ unbounded_indirect_jump.bpf.c:9\n0: (b7) r1 = 0                        ; R1=0\n; X86_SIM_X86_JMP(0x3, 0x0, x86_l_0); @ unbounded_indirect_jump.bpf.c:12\n1: (05) goto pc-2\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ unbounded_indirect_jump.bpf.c:9\n0: (b7) r1 = 0                        ; R1=0\n; X86_SIM_X86_JMP(0x3, 0x0, x86_l_0); @ unbounded_indirect_jump.bpf.c:12\n1: (05) goto pc-2\n; X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL); @ unbounded_indirect_jump.bpf.c:9\ninfinite loop detected at insn 0\ncur state: R1=0 R10=fp0\nold state: R1=0 R10=fp0\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'unbounded_indirect_jump_x86_sim_xdp': failed to load: -EINVAL\nlibbpf: failed to load object '/workspaces/repository/kprog/fidelity/build-x86/negative/unbounded_indirect_jump.bpf.o'\ntiming verify_s=0.003369 test_s=0.000000\nerror: bpf_object__load failed: Invalid argument (os error 22)\n",
+      "command": [
+        "/workspaces/repository/kprog/loader/target/debug/reversesim-loader",
+        "--object",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative/unbounded_indirect_jump.bpf.o",
+        "--program",
+        "unbounded_indirect_jump_x86_sim_xdp",
+        "--load-only"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "unsupported_instruction",
+      "assembly": "ud2; ret",
+      "stage": "specialization_rejected",
+      "message": "unsupported mnemonic: ud2"
+    }
+  ],
+  "guest_uname": [
+    "Linux",
+    "virtme-ng",
+    "7.0.0-rc2+",
+    "#44 SMP PREEMPT_DYNAMIC Tue Oct 27 14:16:57 UTC 2026",
+    "x86_64"
+  ]
+}
