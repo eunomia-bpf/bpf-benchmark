@@ -1010,49 +1010,49 @@ tracee,tracee_trace_security_socket_listen,baseline,compile-failed,A call to bui
 tracee,tracee_trace_security_socket_recvmsg,baseline,compile-failed,A call to built-in function 'abort' is not supported.
 tracee,tracee_trace_security_socket_sendmsg,baseline,compile-failed,A call to built-in function 'abort' is not supported.
 tracee,tracee_trace_security_socket_setsockopt,baseline,compile-failed,A call to built-in function 'abort' is not supported.
-tracee,tracee_trace_security_task_prctl,baseline,compile-pending,
-tracee,tracee_trace_security_task_setrlimit,baseline,compile-pending,
-tracee,tracee_trace_set_fs_pwd,baseline,compile-pending,
+tracee,tracee_trace_security_task_prctl,baseline,compile-failed,compiler exit 124
+tracee,tracee_trace_security_task_setrlimit,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_trace_set_fs_pwd,baseline,compile-failed,A call to built-in function 'abort' is not supported.
 tracee,tracee_trace_sock_alloc_file,baseline,compile-failed,A call to built-in function 'abort' is not supported.
-tracee,tracee_trace_switch_task_namespaces,baseline,compile-pending,
-tracee,tracee_trace_sys_enter,baseline,compile-pending,
-tracee,tracee_trace_sys_exit,baseline,compile-pending,
-tracee,tracee_trace_tracepoint_probe_register_prio_may_exist,baseline,compile-pending,
-tracee,tracee_trace_utimes_common,baseline,compile-pending,
-tracee,tracee_trace_vfs_read,baseline,compile-pending,
-tracee,tracee_trace_vfs_readv,baseline,compile-pending,
-tracee,tracee_trace_vfs_utimes,baseline,compile-pending,
-tracee,tracee_trace_vfs_write,baseline,compile-pending,
-tracee,tracee_trace_vfs_writev,baseline,compile-pending,
-tracee,tracee_tracepoint__cgroup__cgroup_attach_task,baseline,compile-pending,
-tracee,tracee_tracepoint__cgroup__cgroup_mkdir,baseline,compile-pending,
-tracee,tracee_tracepoint__cgroup__cgroup_rmdir,baseline,compile-pending,
-tracee,tracee_tracepoint__exec_test,baseline,compile-pending,
-tracee,tracee_tracepoint__module__module_free,baseline,compile-pending,
-tracee,tracee_tracepoint__module__module_load,baseline,compile-pending,
-tracee,tracee_tracepoint__raw_syscalls__sys_enter,baseline,compile-pending,
-tracee,tracee_tracepoint__raw_syscalls__sys_exit,baseline,compile-pending,
-tracee,tracee_tracepoint__sched__sched_process_exec,baseline,compile-pending,
-tracee,tracee_tracepoint__sched__sched_process_exit,baseline,compile-pending,
-tracee,tracee_tracepoint__sched__sched_process_fork,baseline,compile-pending,
-tracee,tracee_tracepoint__sched__sched_process_free,baseline,compile-pending,
-tracee,tracee_tracepoint__sched__sched_switch,baseline,compile-pending,
-tracee,tracee_tracepoint__task__task_rename,baseline,compile-pending,
-tracee,tracee_uprobe__features_fallback_arena,baseline,compile-pending,
-tracee,tracee_uprobe__features_fallback_arena_tailcall,baseline,compile-pending,
-tracee,tracee_uprobe__features_fallback_helper,baseline,compile-pending,
-tracee,tracee_uprobe__features_fallback_helper_tailcall,baseline,compile-pending,
-tracee,tracee_uprobe__features_fallback_minimal,baseline,compile-pending,
-tracee,tracee_uprobe__features_fallback_minimal_tailcall,baseline,compile-pending,
-tracee,tracee_uprobe_lkm_seeker,baseline,compile-pending,
-tracee,tracee_uprobe_lkm_seeker_submitter,baseline,compile-pending,
-tracee,tracee_uprobe_mem_dump_trigger,baseline,compile-pending,
-tracee,tracee_uprobe_seq_ops_trigger,baseline,compile-pending,
-tracee,tracee_uprobe_syscall_table_check,baseline,compile-pending,
-tracee,tracee_vfs_write_magic_enter,baseline,compile-pending,
-tracee,tracee_vfs_write_magic_return,baseline,compile-pending,
-tracee,tracee_vfs_writev_magic_enter,baseline,compile-pending,
-tracee,tracee_vfs_writev_magic_return,baseline,compile-pending,
+tracee,tracee_trace_switch_task_namespaces,baseline,compile-failed,compiler exit 124
+tracee,tracee_trace_sys_enter,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_trace_sys_exit,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_trace_tracepoint_probe_register_prio_may_exist,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_trace_utimes_common,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_trace_vfs_read,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_trace_vfs_readv,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_trace_vfs_utimes,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_trace_vfs_write,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_trace_vfs_writev,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_tracepoint__cgroup__cgroup_attach_task,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_tracepoint__cgroup__cgroup_mkdir,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_tracepoint__cgroup__cgroup_rmdir,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_tracepoint__exec_test,baseline,compile-failed,compiler exit 124
+tracee,tracee_tracepoint__module__module_free,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_tracepoint__module__module_load,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_tracepoint__raw_syscalls__sys_enter,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_tracepoint__raw_syscalls__sys_exit,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_tracepoint__sched__sched_process_exec,baseline,compile-failed,compiler exit 124
+tracee,tracee_tracepoint__sched__sched_process_exit,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_tracepoint__sched__sched_process_fork,baseline,compile-failed,compiler exit 124
+tracee,tracee_tracepoint__sched__sched_process_free,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_tracepoint__sched__sched_switch,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_tracepoint__task__task_rename,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_uprobe__features_fallback_arena,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_uprobe__features_fallback_arena_tailcall,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_uprobe__features_fallback_helper,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_uprobe__features_fallback_helper_tailcall,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_uprobe__features_fallback_minimal,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_uprobe__features_fallback_minimal_tailcall,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_uprobe_lkm_seeker,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_uprobe_lkm_seeker_submitter,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_uprobe_mem_dump_trigger,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_uprobe_seq_ops_trigger,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_uprobe_syscall_table_check,baseline,compile-failed,compiler exit 124
+tracee,tracee_vfs_write_magic_enter,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_vfs_write_magic_return,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_vfs_writev_magic_enter,baseline,compile-failed,A call to built-in function 'abort' is not supported.
+tracee,tracee_vfs_writev_magic_return,baseline,compile-failed,A call to built-in function 'abort' is not supported.
 cilium,cilium_bpf_alignchecker_tail_icmp6_handle_ns,cilium-baseline,compile-failed,A call to built-in function 'abort' is not supported.
 cilium,cilium_bpf_alignchecker_tail_icmp6_send_time_exceeded,cilium-baseline,compile-failed,A call to built-in function 'abort' is not supported.
 cilium,cilium_bpf_host_cil_from_host,cilium-baseline,compile-failed,A call to built-in function 'abort' is not supported.
@@ -1725,204 +1725,204 @@ tetragon,tetragon_bpf_generic_usdt_v511_generic_usdt_process_filter,unbounded,co
 tetragon,tetragon_bpf_generic_usdt_v511_generic_usdt_setup_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
 tetragon,tetragon_bpf_generic_usdt_v511_native_bpf_strncasestr,unbounded,verify-pending,
 tetragon,tetragon_bpf_generic_usdt_v53_generic_sleepable_offload,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
-tetragon,tetragon_bpf_generic_usdt_v53_generic_sleepable_preload,unbounded,compile-pending,
+tetragon,tetragon_bpf_generic_usdt_v53_generic_sleepable_preload,unbounded,compile-failed,compiler exit 124
 tetragon,tetragon_bpf_generic_usdt_v53_generic_sleepable_preload_cleanup,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
 tetragon,tetragon_bpf_generic_usdt_v53_generic_usdt_actions,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
 tetragon,tetragon_bpf_generic_usdt_v53_generic_usdt_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
-tetragon,tetragon_bpf_generic_usdt_v53_generic_usdt_filter_arg,unbounded,compile-pending,
+tetragon,tetragon_bpf_generic_usdt_v53_generic_usdt_filter_arg,unbounded,compile-failed,compiler exit 124
 tetragon,tetragon_bpf_generic_usdt_v53_generic_usdt_output,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
-tetragon,tetragon_bpf_generic_usdt_v53_generic_usdt_path,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v53_generic_usdt_process_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v53_generic_usdt_process_filter,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v53_generic_usdt_setup_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v53_native_bpf_strncasestr,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61___do_bytes,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_cwd_read_v61,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_data_event_bytes,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_do_action,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_do_bytes,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_extract_arg_depth,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_16ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_16ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_16ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_16ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_32ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_32ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_32ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_32ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_64ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_64ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_64ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_64ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_8ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_8ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_8ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_8ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_char_buf,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_char_buf_equal,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_char_buf_postfix,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_char_buf_prefix,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_char_substring,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_file_buf,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_file_type,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_inet,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_filter_sockaddr_un,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_generic_sleepable_offload,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_generic_sleepable_preload,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_generic_sleepable_preload_cleanup,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_actions,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_filter_arg,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_output,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_process_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_process_filter,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_setup_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_read_reg,unbounded,compile-pending,
-tetragon,tetragon_bpf_generic_usdt_v61_try_preload_arg,unbounded,compile-pending,
-tetragon,tetragon_bpf_loader_v511_loader_kprobe,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v511_generic_fmodret_override,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_actions,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_filter_arg,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_output,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_override,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_path,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_process_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_process_filter,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_setup_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v511_native_bpf_strncasestr,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v53_generic_fmodret_override,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_actions,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_filter_arg,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_output,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_override,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_path,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_process_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_process_filter,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_setup_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v53_native_bpf_strncasestr,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61___do_bytes,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_cwd_read_v61,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_data_event_bytes,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_do_action,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_do_bytes,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_extract_arg_depth,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_16ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_16ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_16ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_16ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_32ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_32ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_32ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_32ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_64ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_64ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_64ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_64ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_8ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_8ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_8ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_8ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_char_buf,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_char_buf_equal,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_char_buf_postfix,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_char_buf_prefix,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_char_substring,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_file_buf,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_file_type,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_inet,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_filter_sockaddr_un,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_generic_fmodret_override,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_actions,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_filter_arg,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_output,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_override,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_process_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_process_filter,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_setup_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_kprobe_v61_read_reg,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v511_generic_retkprobe_actions,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v511_generic_retkprobe_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v511_generic_retkprobe_filter_arg,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v511_generic_retkprobe_output,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v511_native_bpf_strncasestr,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v53_generic_retkprobe_actions,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v53_generic_retkprobe_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v53_generic_retkprobe_filter_arg,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v53_generic_retkprobe_output,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v53_native_bpf_strncasestr,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_cwd_read_v61,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_do_action,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_16ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_16ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_16ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_16ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_32ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_32ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_32ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_32ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_64ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_64ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_64ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_64ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_8ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_8ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_8ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_8ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_char_buf,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_char_buf_equal,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_char_buf_postfix,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_char_buf_prefix,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_char_substring,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_file_buf,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_file_type,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_inet,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_filter_sockaddr_un,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_generic_retkprobe_actions,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_generic_retkprobe_event,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_generic_retkprobe_filter_arg,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retkprobe_v61_generic_retkprobe_output,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v511_generic_retuprobe_actions,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v511_generic_retuprobe_event,unbounded,compile-pending,
+tetragon,tetragon_bpf_generic_usdt_v53_generic_usdt_path,unbounded,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_usdt_v53_generic_usdt_process_event,unbounded,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_usdt_v53_generic_usdt_process_filter,unbounded,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_usdt_v53_generic_usdt_setup_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v53_native_bpf_strncasestr,unbounded,verify-pending,
+tetragon,tetragon_bpf_generic_usdt_v61___do_bytes,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_cwd_read_v61,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_data_event_bytes,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_do_action,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_do_bytes,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_extract_arg_depth,unbounded,verify-pending,
+tetragon,tetragon_bpf_generic_usdt_v61_filter_16ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_16ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_16ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_generic_usdt_v61_filter_16ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_generic_usdt_v61_filter_32ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_32ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_32ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_generic_usdt_v61_filter_32ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_generic_usdt_v61_filter_64ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_64ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_64ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_generic_usdt_v61_filter_64ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_generic_usdt_v61_filter_8ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_8ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_8ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_generic_usdt_v61_filter_8ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_generic_usdt_v61_filter_char_buf,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_char_buf_equal,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_char_buf_postfix,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_char_buf_prefix,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_char_substring,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_file_buf,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_file_type,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_inet,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_filter_sockaddr_un,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_generic_sleepable_offload,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_generic_sleepable_preload,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_generic_sleepable_preload_cleanup,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_actions,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_filter_arg,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_output,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_process_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_process_filter,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_generic_usdt_setup_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_usdt_v61_read_reg,unbounded,verify-pending,
+tetragon,tetragon_bpf_generic_usdt_v61_try_preload_arg,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_loader_v511_loader_kprobe,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v511_generic_fmodret_override,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_actions,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_filter_arg,unbounded,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_output,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_override,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_path,unbounded,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_process_event,unbounded,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_process_filter,unbounded,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_multi_kprobe_v511_generic_kprobe_setup_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v511_native_bpf_strncasestr,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_kprobe_v53_generic_fmodret_override,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_actions,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_filter_arg,unbounded,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_output,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_override,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_path,unbounded,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_process_event,unbounded,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_process_filter,unbounded,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_multi_kprobe_v53_generic_kprobe_setup_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v53_native_bpf_strncasestr,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_kprobe_v61___do_bytes,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_cwd_read_v61,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_data_event_bytes,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_do_action,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_do_bytes,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_extract_arg_depth,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_16ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_16ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_16ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_16ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_32ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_32ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_32ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_32ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_64ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_64ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_64ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_64ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_8ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_8ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_8ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_8ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_char_buf,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_char_buf_equal,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_char_buf_postfix,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_char_buf_prefix,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_char_substring,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_file_buf,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_file_type,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_inet,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_filter_sockaddr_un,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_generic_fmodret_override,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_actions,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_filter_arg,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_output,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_override,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_process_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_process_filter,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_generic_kprobe_setup_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_kprobe_v61_read_reg,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retkprobe_v511_generic_retkprobe_actions,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v511_generic_retkprobe_event,unbounded,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_multi_retkprobe_v511_generic_retkprobe_filter_arg,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v511_generic_retkprobe_output,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v511_native_bpf_strncasestr,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retkprobe_v53_generic_retkprobe_actions,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v53_generic_retkprobe_event,unbounded,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_multi_retkprobe_v53_generic_retkprobe_filter_arg,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v53_generic_retkprobe_output,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v53_native_bpf_strncasestr,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retkprobe_v61_cwd_read_v61,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_do_action,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_16ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_16ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_16ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_16ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_32ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_32ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_32ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_32ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_64ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_64ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_64ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_64ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_8ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_8ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_8ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_8ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_char_buf,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_char_buf_equal,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_char_buf_postfix,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_char_buf_prefix,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_char_substring,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_file_buf,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_file_type,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_inet,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_filter_sockaddr_un,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_generic_retkprobe_actions,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_generic_retkprobe_event,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_generic_retkprobe_filter_arg,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retkprobe_v61_generic_retkprobe_output,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v511_generic_retuprobe_actions,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v511_generic_retuprobe_event,unbounded,compile-failed,compiler exit 124
 tetragon,tetragon_bpf_multi_retuprobe_v511_generic_retuprobe_filter_arg,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v511_generic_retuprobe_output,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v511_native_bpf_strncasestr,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_cwd_read_v61,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_do_action,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_16ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_16ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_16ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_16ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_32ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_32ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_32ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_32ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_64ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_64ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_64ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_64ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_8ty,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_8ty_map,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_8ty_range,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_8ty_selector_val,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_char_buf,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_char_buf_equal,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_char_buf_postfix,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_char_buf_prefix,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_char_substring,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_file_buf,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_file_type,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_inet,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_filter_sockaddr_un,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_generic_retuprobe_actions,unbounded,compile-pending,
+tetragon,tetragon_bpf_multi_retuprobe_v511_generic_retuprobe_output,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v511_native_bpf_strncasestr,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retuprobe_v61_cwd_read_v61,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_do_action,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_16ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_16ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_16ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_16ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_32ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_32ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_32ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_32ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_64ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_64ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_64ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_64ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_8ty,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_8ty_map,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_8ty_range,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_8ty_selector_val,unbounded,verify-pending,
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_char_buf,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_char_buf_equal,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_char_buf_postfix,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_char_buf_prefix,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_char_substring,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_file_buf,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_file_type,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_inet,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_filter_sockaddr_un,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_multi_retuprobe_v61_generic_retuprobe_actions,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
 tetragon,tetragon_bpf_multi_retuprobe_v61_generic_retuprobe_event,unbounded,compile-pending,
 tetragon,tetragon_bpf_multi_retuprobe_v61_generic_retuprobe_filter_arg,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_retuprobe_v61_generic_retuprobe_output,unbounded,compile-pending,
+tetragon,tetragon_bpf_multi_retuprobe_v61_generic_retuprobe_output,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
 tetragon,tetragon_bpf_multi_uprobe_v511_generic_sleepable_offload,unbounded,compile-pending,
 tetragon,tetragon_bpf_multi_uprobe_v511_generic_sleepable_preload,unbounded,compile-pending,
-tetragon,tetragon_bpf_multi_uprobe_v511_generic_sleepable_preload_cleanup,unbounded,compile-pending,
+tetragon,tetragon_bpf_multi_uprobe_v511_generic_sleepable_preload_cleanup,unbounded,compile-failed,A call to built-in function 'abort' is not supported.
 tetragon,tetragon_bpf_multi_uprobe_v511_generic_uprobe_actions,unbounded,compile-pending,
 tetragon,tetragon_bpf_multi_uprobe_v511_generic_uprobe_event,unbounded,compile-pending,
 tetragon,tetragon_bpf_multi_uprobe_v511_generic_uprobe_filter_arg,unbounded,compile-pending,
@@ -2664,156 +2664,156 @@ tetragon,tetragon_bpf_generic_rawtp_v61_generic_rawtp_actions,label,compile-fail
 tetragon,tetragon_bpf_generic_rawtp_v61_generic_rawtp_event,label,compile-failed,A call to built-in function 'abort' is not supported.
 tetragon,tetragon_bpf_generic_rawtp_v61_generic_rawtp_filter_arg,label,compile-failed,A call to built-in function 'abort' is not supported.
 tetragon,tetragon_bpf_generic_rawtp_v61_generic_rawtp_output,label,compile-failed,A call to built-in function 'abort' is not supported.
-tetragon,tetragon_bpf_generic_rawtp_v61_generic_rawtp_process_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_rawtp_v61_generic_rawtp_process_filter,label,compile-pending,
+tetragon,tetragon_bpf_generic_rawtp_v61_generic_rawtp_process_event,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_rawtp_v61_generic_rawtp_process_filter,label,compile-failed,compiler exit 124
 tetragon,tetragon_bpf_generic_rawtp_v61_generic_rawtp_setup_event,label,compile-failed,A call to built-in function 'abort' is not supported.
 tetragon,tetragon_bpf_generic_retkprobe_v511_generic_retkprobe_actions,label,compile-failed,A call to built-in function 'abort' is not supported.
-tetragon,tetragon_bpf_generic_retkprobe_v511_generic_retkprobe_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v511_generic_retkprobe_filter_arg,label,compile-pending,
+tetragon,tetragon_bpf_generic_retkprobe_v511_generic_retkprobe_event,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_retkprobe_v511_generic_retkprobe_filter_arg,label,compile-failed,compiler exit 124
 tetragon,tetragon_bpf_generic_retkprobe_v511_generic_retkprobe_output,label,compile-failed,A call to built-in function 'abort' is not supported.
 tetragon,tetragon_bpf_generic_retkprobe_v511_native_bpf_strncasestr,label,verify-pending,
 tetragon,tetragon_bpf_generic_retkprobe_v53_generic_retkprobe_actions,label,compile-failed,A call to built-in function 'abort' is not supported.
-tetragon,tetragon_bpf_generic_retkprobe_v53_generic_retkprobe_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v53_generic_retkprobe_filter_arg,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v53_generic_retkprobe_output,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v53_native_bpf_strncasestr,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_cwd_read_v61,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_do_action,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_16ty,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_16ty_map,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_16ty_range,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_16ty_selector_val,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_32ty,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_32ty_map,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_32ty_range,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_32ty_selector_val,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_64ty,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_64ty_map,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_64ty_range,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_64ty_selector_val,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_8ty,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_8ty_map,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_8ty_range,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_8ty_selector_val,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_char_buf,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_char_buf_equal,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_char_buf_postfix,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_char_buf_prefix,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_char_substring,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_file_buf,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_file_type,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_inet,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_filter_sockaddr_un,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_generic_retkprobe_actions,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_generic_retkprobe_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_generic_retkprobe_filter_arg,label,compile-pending,
-tetragon,tetragon_bpf_generic_retkprobe_v61_generic_retkprobe_output,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v511_generic_retuprobe_actions,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v511_generic_retuprobe_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v511_generic_retuprobe_filter_arg,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v511_generic_retuprobe_output,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v511_native_bpf_strncasestr,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v53_generic_retuprobe_actions,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v53_generic_retuprobe_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v53_generic_retuprobe_filter_arg,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v53_generic_retuprobe_output,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v53_native_bpf_strncasestr,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_cwd_read_v61,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_do_action,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_16ty,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_16ty_map,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_16ty_range,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_16ty_selector_val,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_32ty,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_32ty_map,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_32ty_range,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_32ty_selector_val,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_64ty,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_64ty_map,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_64ty_range,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_64ty_selector_val,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_8ty,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_8ty_map,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_8ty_range,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_8ty_selector_val,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_char_buf,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_char_buf_equal,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_char_buf_postfix,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_char_buf_prefix,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_char_substring,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_file_buf,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_file_type,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_inet,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_filter_sockaddr_un,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_generic_retuprobe_actions,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_generic_retuprobe_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_generic_retuprobe_filter_arg,label,compile-pending,
-tetragon,tetragon_bpf_generic_retuprobe_v61_generic_retuprobe_output,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_actions,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_arg,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_filter,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_output,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_process_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v511_native_bpf_strncasestr,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_actions,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_arg,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_filter,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_output,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_process_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v53_native_bpf_strncasestr,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_cwd_read_v61,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_do_action,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_extract_arg_depth,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_16ty,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_16ty_map,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_16ty_range,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_16ty_selector_val,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_32ty,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_32ty_map,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_32ty_range,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_32ty_selector_val,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_64ty,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_64ty_map,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_64ty_range,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_64ty_selector_val,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_8ty,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_8ty_map,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_8ty_range,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_8ty_selector_val,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_char_buf,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_char_buf_equal,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_char_buf_postfix,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_char_buf_prefix,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_char_substring,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_file_buf,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_file_type,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_inet,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_filter_sockaddr_un,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_actions,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_arg,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_filter,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_output,label,compile-pending,
-tetragon,tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_process_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_uprobe_v511_generic_sleepable_offload,label,compile-pending,
-tetragon,tetragon_bpf_generic_uprobe_v511_generic_sleepable_preload,label,compile-pending,
-tetragon,tetragon_bpf_generic_uprobe_v511_generic_sleepable_preload_cleanup,label,compile-pending,
-tetragon,tetragon_bpf_generic_uprobe_v511_generic_uprobe_actions,label,compile-pending,
-tetragon,tetragon_bpf_generic_uprobe_v511_generic_uprobe_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_uprobe_v511_generic_uprobe_filter_arg,label,compile-pending,
-tetragon,tetragon_bpf_generic_uprobe_v511_generic_uprobe_output,label,compile-pending,
+tetragon,tetragon_bpf_generic_retkprobe_v53_generic_retkprobe_event,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_retkprobe_v53_generic_retkprobe_filter_arg,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_retkprobe_v53_generic_retkprobe_output,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v53_native_bpf_strncasestr,label,verify-pending,
+tetragon,tetragon_bpf_generic_retkprobe_v61_cwd_read_v61,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_do_action,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_16ty,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_16ty_map,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_16ty_range,label,verify-pending,
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_16ty_selector_val,label,verify-pending,
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_32ty,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_32ty_map,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_32ty_range,label,verify-pending,
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_32ty_selector_val,label,verify-pending,
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_64ty,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_64ty_map,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_64ty_range,label,verify-pending,
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_64ty_selector_val,label,verify-pending,
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_8ty,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_8ty_map,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_8ty_range,label,verify-pending,
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_8ty_selector_val,label,verify-pending,
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_char_buf,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_char_buf_equal,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_char_buf_postfix,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_char_buf_prefix,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_char_substring,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_file_buf,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_file_type,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_inet,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_filter_sockaddr_un,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_generic_retkprobe_actions,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_generic_retkprobe_event,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_generic_retkprobe_filter_arg,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retkprobe_v61_generic_retkprobe_output,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v511_generic_retuprobe_actions,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v511_generic_retuprobe_event,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_retuprobe_v511_generic_retuprobe_filter_arg,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_retuprobe_v511_generic_retuprobe_output,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v511_native_bpf_strncasestr,label,verify-pending,
+tetragon,tetragon_bpf_generic_retuprobe_v53_generic_retuprobe_actions,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v53_generic_retuprobe_event,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_retuprobe_v53_generic_retuprobe_filter_arg,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v53_generic_retuprobe_output,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v53_native_bpf_strncasestr,label,verify-pending,
+tetragon,tetragon_bpf_generic_retuprobe_v61_cwd_read_v61,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_do_action,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_16ty,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_16ty_map,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_16ty_range,label,verify-pending,
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_16ty_selector_val,label,verify-pending,
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_32ty,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_32ty_map,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_32ty_range,label,verify-pending,
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_32ty_selector_val,label,verify-pending,
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_64ty,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_64ty_map,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_64ty_range,label,verify-pending,
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_64ty_selector_val,label,verify-pending,
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_8ty,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_8ty_map,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_8ty_range,label,verify-pending,
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_8ty_selector_val,label,verify-pending,
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_char_buf,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_char_buf_equal,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_char_buf_postfix,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_char_buf_prefix,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_char_substring,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_file_buf,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_file_type,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_inet,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_filter_sockaddr_un,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_generic_retuprobe_actions,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_generic_retuprobe_event,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_generic_retuprobe_filter_arg,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_retuprobe_v61_generic_retuprobe_output,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_actions,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_arg,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_event,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_filter,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_output,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_process_event,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_tracepoint_v511_native_bpf_strncasestr,label,verify-pending,
+tetragon,tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_actions,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_arg,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_event,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_filter,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_output,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_process_event,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_tracepoint_v53_native_bpf_strncasestr,label,verify-pending,
+tetragon,tetragon_bpf_generic_tracepoint_v61_cwd_read_v61,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_do_action,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_extract_arg_depth,label,verify-pending,
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_16ty,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_16ty_map,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_16ty_range,label,verify-pending,
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_16ty_selector_val,label,verify-pending,
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_32ty,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_32ty_map,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_32ty_range,label,verify-pending,
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_32ty_selector_val,label,verify-pending,
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_64ty,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_64ty_map,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_64ty_range,label,verify-pending,
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_64ty_selector_val,label,verify-pending,
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_8ty,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_8ty_map,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_8ty_range,label,verify-pending,
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_8ty_selector_val,label,verify-pending,
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_char_buf,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_char_buf_equal,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_char_buf_postfix,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_char_buf_prefix,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_char_substring,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_file_buf,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_file_type,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_inet,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_filter_sockaddr_un,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_actions,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_arg,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_event,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_filter,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_output,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_process_event,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_uprobe_v511_generic_sleepable_offload,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_uprobe_v511_generic_sleepable_preload,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_uprobe_v511_generic_sleepable_preload_cleanup,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_uprobe_v511_generic_uprobe_actions,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_uprobe_v511_generic_uprobe_event,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_uprobe_v511_generic_uprobe_filter_arg,label,compile-failed,compiler exit 124
+tetragon,tetragon_bpf_generic_uprobe_v511_generic_uprobe_output,label,compile-failed,A call to built-in function 'abort' is not supported.
 tetragon,tetragon_bpf_generic_uprobe_v511_generic_uprobe_path,label,compile-pending,
 tetragon,tetragon_bpf_generic_uprobe_v511_generic_uprobe_process_event,label,compile-pending,
 tetragon,tetragon_bpf_generic_uprobe_v511_generic_uprobe_process_filter,label,compile-pending,
-tetragon,tetragon_bpf_generic_uprobe_v511_generic_uprobe_setup_event,label,compile-pending,
-tetragon,tetragon_bpf_generic_uprobe_v511_native_bpf_strncasestr,label,compile-pending,
-tetragon,tetragon_bpf_generic_uprobe_v53_generic_sleepable_offload,label,compile-pending,
+tetragon,tetragon_bpf_generic_uprobe_v511_generic_uprobe_setup_event,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_uprobe_v511_native_bpf_strncasestr,label,verify-pending,
+tetragon,tetragon_bpf_generic_uprobe_v53_generic_sleepable_offload,label,compile-failed,A call to built-in function 'abort' is not supported.
 tetragon,tetragon_bpf_generic_uprobe_v53_generic_sleepable_preload,label,compile-pending,
-tetragon,tetragon_bpf_generic_uprobe_v53_generic_sleepable_preload_cleanup,label,compile-pending,
-tetragon,tetragon_bpf_generic_uprobe_v53_generic_uprobe_actions,label,compile-pending,
-tetragon,tetragon_bpf_generic_uprobe_v53_generic_uprobe_event,label,compile-pending,
+tetragon,tetragon_bpf_generic_uprobe_v53_generic_sleepable_preload_cleanup,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_uprobe_v53_generic_uprobe_actions,label,compile-failed,A call to built-in function 'abort' is not supported.
+tetragon,tetragon_bpf_generic_uprobe_v53_generic_uprobe_event,label,compile-failed,A call to built-in function 'abort' is not supported.
 tetragon,tetragon_bpf_generic_uprobe_v53_generic_uprobe_filter_arg,label,compile-pending,
 tetragon,tetragon_bpf_generic_uprobe_v53_generic_uprobe_output,label,compile-pending,
 tetragon,tetragon_bpf_generic_uprobe_v53_generic_uprobe_path,label,compile-pending,

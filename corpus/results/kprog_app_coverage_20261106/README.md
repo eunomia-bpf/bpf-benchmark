@@ -212,3 +212,28 @@ limitations above. The running queues and the table can advance beyond this
 checkpoint. The shared coordination file now requests R's public `make corpus`
 stock-control inventory for all six applications, to obtain current loaded
 program names/types/IDs without introducing a new launcher.
+
+## Completed baseline artifact census
+
+All 1,136 baseline artifact attempts are complete: 187 compiled; 45 were
+accepted by the stock verifier, 132 rejected by it, and 10 failed during
+libbpf load preparation. The other 949 failed compilation, including 137
+compiler timeouts. No baseline case remains pending. These are available
+native artifact counts, not a current loaded-program denominator.
+
+| Application | Native artifacts/generated | Compiled | Accepted | Verifier rejected | Load preparation failed | Compile failed |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| bcc | 34 | 10 | 0 | 0 | 10 | 24 |
+| cilium | 82 | 2 | 2 | 0 | 0 | 80 |
+| katran | 6 | 3 | 1 | 2 | 0 | 3 |
+| otelcol-ebpf-profiler | 30 | 3 | 3 | 0 | 0 | 27 |
+| tetragon | 809 | 165 | 35 | 130 | 0 | 644 |
+| tracee | 175 | 4 | 4 | 0 | 0 | 171 |
+
+The 45 accepted artifact names are in [accepted-artifacts.csv](accepted-artifacts.csv).
+They have not been presented as generation-bound app executions. The final
+verification command resumed recorded cases (no duplicate loads were needed):
+`make -f corpus/results/kprog_app_coverage_20261106/Makefile verify`.
+See `baseline/verify-final.make.log`. The unbounded and label queues remain
+active; take their next checkpoint after completion rather than relaunching
+active workers.
