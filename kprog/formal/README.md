@@ -1,6 +1,6 @@
 # Native simulator verification
 
-With Lean/Elan, Python 3, a C compiler with UBSan, and the `vendor/libbpf` submodule
+With Lean/Elan, Python 3, a C compiler with UBSan, and the `vendor/libbpf` and `vendor/linux-framework` submodules
 available, run the complete local check:
 
 ```sh
