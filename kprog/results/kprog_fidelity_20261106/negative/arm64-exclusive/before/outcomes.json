@@ -1,0 +1,50 @@
+[
+  {
+    "name": "unpaired_stxr_failure",
+    "assembly": "sub sp,sp,#16;mov x1,#2;str x1,[sp];mov x2,sp;stxr w0,x1,[x2];cbz w0,1f;mov x3,#0;ldr w0,[x3];1:add sp,sp,#16;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=8 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": false
+  },
+  {
+    "name": "unpaired_stlxr_failure",
+    "assembly": "sub sp,sp,#16;mov x1,#2;str x1,[sp];mov x2,sp;stlxr w0,x1,[x2];cbz w0,1f;mov x3,#0;ldr w0,[x3];1:add sp,sp,#16;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=16 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": false
+  },
+  {
+    "name": "paired_stxr_failure",
+    "assembly": "sub sp,sp,#16;mov x1,#2;str x1,[sp];mov x2,sp;ldxr x1,[x2];stxr w0,x1,[x2];cbz w0,1f;mov x3,#0;ldr w0,[x3];1:add sp,sp,#16;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=24 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": false
+  },
+  {
+    "name": "paired_stlxr_failure",
+    "assembly": "sub sp,sp,#16;mov x1,#2;str x1,[sp];mov x2,sp;ldaxr x1,[x2];stlxr w0,x1,[x2];cbz w0,1f;mov x3,#0;ldr w0,[x3];1:add sp,sp,#16;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=32 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": false
+  },
+  {
+    "name": "unpaired_stxr_control",
+    "assembly": "sub sp,sp,#16;mov x1,#2;str x1,[sp];mov x2,sp;stxr w0,x1,[x2];add sp,sp,#16;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=40 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": true
+  },
+  {
+    "name": "paired_stxr_control",
+    "assembly": "sub sp,sp,#16;mov x1,#2;str x1,[sp];mov x2,sp;ldxr x1,[x2];stxr w0,x1,[x2];add sp,sp,#16;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=48 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": true
+  }
+]

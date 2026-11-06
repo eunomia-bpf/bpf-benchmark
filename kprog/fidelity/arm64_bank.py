@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT / 'kprog/arm64/micro-prog'))
 import generate_micro_sim_proofs as gen
 
 
-def wrapper(index, instruction):
+def wrapper(index, instruction, clear_monitor=False):
     lines = [f'.global native_{index}', f'.type native_{index}, %function',
              f'native_{index}:', 'sub sp, sp, #176']
     lines += [f'stp x{i}, x{i+1}, [sp, #{(i-19)*8}]' for i in range(19, 31, 2)]
@@ -26,7 +26,10 @@ def wrapper(index, instruction):
     lines += ['adrp x1, native_stack_base', 'mov x2, sp',
               'str x2, [x1, :lo12:native_stack_base]']
     lines += [f'ldr x{i}, [x30, #{i*8}]' for i in range(30)]
-    lines += ['ldr x30, [x30, #240]', f'.global native_pc_{index}',
+    lines += ['ldr x30, [x30, #240]']
+    if clear_monitor:
+        lines += ['clrex']
+    lines += [f'.global native_pc_{index}',
               f'native_pc_{index}:', instruction, f'.global native_next_{index}',
               f'native_next_{index}:']
     # SP is unchanged by every generated form. A writable user thread register
@@ -46,7 +49,7 @@ def wrapper(index, instruction):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--family', choices=['fmov','bitfield'], default='fmov')
+    parser.add_argument('--family', choices=['fmov','bitfield','exclusive'], default='fmov')
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -61,13 +64,17 @@ def main():
             register = bank % 31
             forms += [f'fmov d{bank}, x{register}', f'fmov x{register}, d{bank}',
                       f'fmov s{bank}, w{register}', f'fmov w{register}, s{bank}']
-    else:
+    elif args.family == 'bitfield':
         for bits,prefix in [(32,'w'),(64,'x')]:
             for op in ['ubfx','sbfx','ubfiz','bfxil','bfi']:
                 for lsb,count in [(7,13),(0,bits),(0,1),(bits-1,1),(1,bits-1)]:
                     forms.append(f'{op} {prefix}0, {prefix}1, #{lsb}, #{count}')
                 forms += [f'{op} {prefix}1, {prefix}1, #7, #13',
                           f'{op} {prefix}zr, {prefix}1, #7, #13']
+    else:
+        for prefix in ['w','x']:
+            forms += [f'{op} {prefix}0, [x4]' for op in ['ldxr','ldaxr']]
+            forms += [f'{op} w0, {prefix}1, [x4]' for op in ['stxr','stlxr']]
     (out/'instructions.S').write_text('.text\n'+'\n'.join(forms)+'\n')
     subprocess.run(['aarch64-linux-gnu-gcc', '-c', out/'instructions.S', '-o', out/'instructions.o'], check=True)
     assembly = subprocess.check_output(['aarch64-linux-gnu-objdump', '-dr', out/'instructions.o'], text=True)
@@ -97,11 +104,14 @@ def main():
         source += [f's->vec[{2*i}]=__a64_vectors[{i}].lo; s->vec[{2*i+1}]=__a64_vectors[{i}].hi;' for i in range(32)]
         source += ['}']
         entries += [f'{{{json.dumps(form)}, {json.dumps(encoded.op)}, native_{index}, sim_{index}, 0xf0000000U, 64, 0, 0, &native_pc_{index}, &native_next_{index}}}']
-        coverage += [dict(assembly=form, decoded=instruction.raw, opcode=encoded.op)]
+        record = dict(assembly=form, decoded=instruction.raw, opcode=encoded.op)
+        if args.family == 'exclusive':
+            record['exclusive_monitor_initial'] = 'cleared by CLREX before native_pc'
+        coverage += [record]
     source += ['const struct form forms[] = {', ',\n'.join(entries), '};',
                'const unsigned form_count = sizeof(forms) / sizeof(forms[0]);']
     (out/'generated.c').write_text('\n'.join(source)+'\n')
-    (out/'native.S').write_text('.text\n'+'\n'.join(wrapper(i, form) for i, form in enumerate(forms))+'\n.section .note.GNU-stack,"",%progbits\n')
+    (out/'native.S').write_text('.text\n'+'\n'.join(wrapper(i, form, args.family == 'exclusive') for i, form in enumerate(forms))+'\n.section .note.GNU-stack,"",%progbits\n')
     (out/'coverage.json').write_text(json.dumps(coverage, indent=2)+'\n')
     (out/'family.txt').write_text(args.family+'\n')
     print(f'generated {len(forms)} {args.family} forms, observing all 32 vectors')

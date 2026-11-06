@@ -3,8 +3,9 @@
 - `differential/README.md`: real x86 CPU matrix and counterexamples; static
   AArch64 harness delivered. Both Spark core types pass the width-fix matrix
   on hardware; both also pass the newer register-cell replay.
-- `negative/README.md`: current bound suites reject16/17 on x86 and19/21 on
-  Arm, including repaired SP alignment, LDP and writeback overlap. All11 original negatives
+- `negative/README.md`: current bound suites reject16/17 on x86 and19/25 on
+  Arm, including repaired SP alignment, LDP and writeback overlap. Four new
+  exclusive-store failure branches are accepted safety findings. All11 original negatives
   reject on both; stack-base flags still accept
   on both, and Arm entry return-address flags also accept. These remain open
   safety bugs. Earlier ABI/return findings and their repairs stay recorded.
@@ -57,3 +58,8 @@ Canonical bitfield closure adds70 full-bank boundary/alias forms and71680
 QEMU/C/reference agreements, full formal check PASS. The original matrix now
 checks553/567 forms (566272 cases), CPU differences0, model SP differences4096,
 with14 memory encodings still active. Static bitfield hardware handoff included.
+
+The instruction-family audit adds8 exclusive forms/8192QEMUcases:4096
+STXR/STLXR mismatches after explicitCLREX (CPU failure/no-write versus model
+success/write). Four corresponding unsafe bound-load failure branches are
+accepted; exact counterexamples and all25 permanent Arm outcomes are retained.

@@ -289,3 +289,13 @@ remain bound-load accepted. The permanent21-case Arm suite rejects19 and
 retains the same two numeric-address findings. All40 ABI regressions and
 all29 positive proof builds pass; exact before/after inputs and messages remain
 in the dated result directory.
+
+## Exclusive-store failure branches: four accepted safety findings
+
+`arm64-exclusive/README.md` records four newly accepted generation-bound
+programs with NULL reads on STXR/STLXR failure, both unpaired and paired with
+exclusive loads. Two safe controls bind as well. The permanent25-case Arm
+suite retains19 rejections and6 findings, with zero infrastructure errors.
+The four new findings arise from constant-success store-exclusive semantics;
+the independent CPU matrix records4096 actual failure/no-write differences.
+Canonical monitor/environment semantics and the production repair are active.

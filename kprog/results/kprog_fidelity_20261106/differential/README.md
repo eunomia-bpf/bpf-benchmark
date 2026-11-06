@@ -658,3 +658,12 @@ states agree with C and the canonical reference. The same original matrix
 now checks553/567 forms (566272 cases), with zero CPU differences and the
 same4096 model SP/WSP differences. All14 remaining memory encodings stay
 in the active queue. A static full-bank bitfield hardware handoff is included.
+
+## Exclusive-family audit
+
+`arm64-exclusive/README.md` adds8 production-supported exclusive forms absent
+from the old matrix. All4096 W/X STXR/STLXR cases after explicitCLREX disagree:
+native status1/no-write versus C status0/write. All inputs and outputs remain
+in counterexamples; a static hardware handoff is supplied. Four corresponding
+unsafe failure branches are accepted by actual bound load-only tests. Monitor,
+ordering and admissible failure/success semantics remain active repair work.
