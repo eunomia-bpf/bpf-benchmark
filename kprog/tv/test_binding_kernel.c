@@ -373,73 +373,6 @@ static void seal_single_proof(const struct bpf_insn *body, size_t count)
 	seal_single_artifact(native, sizeof(native), body, count, NULL, 0);
 }
 
-static void exclusive_environment_regressions(void)
-{
-	/* CLREX; STXR w3,x2,[sp]; MOV x7,#2. The cleared monitor prevents
-	 * a store. This fixture exercises binding/choice admission, not TV.
-	 */
-	const unsigned char code[] = {
-		0x5f,0x3f,0x03,0xd5, 0xe2,0x7f,0x03,0xc8, 0x47,0x00,0x80,0xd2,
-	};
-	struct bpf_insn body[] = {
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_K, .src_reg = 9, .off = 5, .imm = 16 }, proof,
-	};
-	struct test_reloc reloc = { .offset = 4, .kind = NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE,
-		.target = (uint64_t)16 << 32 };
-#if defined(__aarch64__)
-	seal_single_artifact(code, sizeof(code), body, 2, &reloc, 1);
-	load(generation(), 0, 0, "bound exclusive fresh boolean choice restored before JIT");
-	/* An unsafe branch on either choice must remain visible to the verifier. */
-	for (int outcome = 0; outcome <= 1; outcome++) {
-		struct bpf_insn unsafe[] = { body[0],
-			{ .code = BPF_JMP | BPF_JEQ | BPF_K, .imm = outcome, .off = 1 },
-			{ .code = BPF_JMP | BPF_JA, .off = 2 },
-			{ .code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = 1 },
-			{ .code = BPF_LDX | BPF_DW | BPF_MEM, .src_reg = 1 }, proof,
-		};
-		seal_single_artifact(code, sizeof(code), unsafe, 6, &reloc, 1);
-		load(generation(), 0, 1, outcome ? "exclusive failure branch cannot be pruned" :
-			"exclusive success branch cannot be pruned");
-	}
-	/* Two occurrences of the same source site must not share scalar IDs. */
-	struct bpf_insn retry[] = { body[0],
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_X, .dst_reg = 6 }, body[0],
-		{ .code = BPF_JMP | BPF_JEQ | BPF_X, .src_reg = 6, .off = 2 },
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = 1 },
-		{ .code = BPF_LDX | BPF_DW | BPF_MEM, .src_reg = 1 }, proof,
-	};
-	struct test_reloc copies[] = { reloc, reloc };
-	copies[1].target |= 2;
-	seal_single_artifact(code, sizeof(code), retry, 7, copies, 2);
-	load(generation(), 0, 1, "same-site exclusive visits have independent choices");
-	const struct bpf_insn continuation = { .code = BPF_ALU64 | BPF_MOV | BPF_K };
-	const uint32_t order[] = {0,1};
-	uint32_t generations[2];
-	generations[0] = seal_chunk_artifact(0, 2, 0, sizeof(code), code, 8,
-		&continuation, 1, &reloc, 1, 0);
-	generations[1] = seal_chunk_artifact(1, 2, 8, sizeof(code), code + 8, 4,
-		body, 2, NULL, 0, 0);
-	load_group(order, generations, 2, 0, 0, "exclusive descriptor binds final proof across chunks");
-#else
-	seal_single_artifact(code, sizeof(code), body, 2, &reloc, 1);
-	load(generation(), 0, 1, "x86 binding rejects ARM exclusive descriptors");
-#endif
-	seal_single_artifact(code, sizeof(code), body, 2, NULL, 0);
-	load(generation(), 0, 1, "exclusive marker without site descriptor");
-	struct test_reloc duplicate[] = { reloc, reloc };
-	seal_single_artifact(code, sizeof(code), body, 2, duplicate, 2);
-	load(generation(), 0, 1, "duplicate exclusive descriptor");
-	reloc.target = (uint64_t)20 << 32;
-	seal_single_artifact(code, sizeof(code), body, 2, &reloc, 1);
-	load(generation(), 0, 1, "exclusive source PC mismatch");
-	reloc.target = ((uint64_t)16 << 32) | 1;
-	seal_single_artifact(code, sizeof(code), body, 2, &reloc, 1);
-	load(generation(), 0, 1, "exclusive compiled marker position mismatch");
-	reloc.target = (uint64_t)16 << 32; reloc.offset = 0;
-	seal_single_artifact(code, sizeof(code), body, 2, &reloc, 1);
-	load(generation(), 0, 1, "exclusive descriptor points to CLREX opcode");
-}
-
 static void external_identity_regressions(void)
 {
 	const struct bpf_insn helper_body[] = {
@@ -729,7 +662,6 @@ int main(void)
 	readonly_data_regressions();
 	readonly_overlap_regression();
 	bound_native_input_regressions();
-	exclusive_environment_regressions();
 	context_regressions(source_context);
 	if (close(source_context)) fatal("close original context");
 	if (close(module_fd))

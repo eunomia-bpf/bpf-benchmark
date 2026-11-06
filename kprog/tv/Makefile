@@ -10,24 +10,6 @@ check: binding-check data-layout-check manifest-check
 	cd ../formal && lake env lean ../tv/Composition.lean
 	$(MAKE) bpf-check
 
-.PHONY: environment-check
-environment-check: build/test-environment-binding build/exclusive-input.bpf.o build/test-exclusive-host
-	./build/test-environment-binding
-	python3 test_exclusive_wire.py
-	python3 test_kernel_patch.py
-
-build/exclusive-input.bpf.o: exclusive_input.bpf.c ../../kinsn/module/include/native_lab_input.h
-	install -d build
-	clang -O2 -target bpf -c $< -o $@
-
-build/test-exclusive-host: test_exclusive_host.c ../../kinsn/module/include/native_lab_input.h
-	install -d build
-	$(CC) -std=gnu11 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined $< -o $@
-
-build/test-environment-binding: test_environment_binding.cpp ../libnativeloader/src/native_environment_binding.hpp ../libnativeloader/src/native_loader_manifest.hpp ../../kinsn/module/include/native_lab_exclusive.h ../../kinsn/module/include/native_lab_input.h
-	install -d build
-	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined $< -o $@
-
 .PHONY: bpf-check cmov-check cmov-certificate cmov-negative-check
 bpf-check:
 	install -d build

@@ -50,7 +50,6 @@ typedef unsigned long long __u64;
 #define X86_OP_SETCC_MEM 0x3eU
 #define X86_OP_BSWAP 0x17U
 #define X86_OP_POPCNT 0x18U
-#define X86_OP_POPCNT_MEM 0x47U
 #define X86_OP_SHIFTX 0x26U
 #define X86_OP_SHIFTX_MEM 0x2aU
 #define X86_OP_RORX 0x27U
@@ -339,14 +338,6 @@ int main(void)
 			}
 		}
 	}
-
-	/* Keep all original 43-singleton checks and cover the numeric extension. */
-	for (op = 0; op < 256; op++) {
-		cases++;
-		if (KPROG_X86_DISP_POPCNT_MEM_HANDLED(op) != (op == 71)) fails++;
-	}
-	cases++;
-	if (KPROG_X86_DISP_POPCNT_MEM_HANDLED(~0U)) fails++;
 
 	if (fails) {
 		printf("x86 dispatch singleton host cross-check: FAILED "

@@ -220,24 +220,4 @@ theorem x86_specialization_no_insertion :
          GeneratedX86Specialization.auxMacro op)) := by
   native_decide
 
-/-- Extended table; the original 72-row refinement remains available unchanged. -/
-def allSpecOpsExtended : List GeneratedX86Specialization.Op := allSpecOps ++ [.popcntMem]
-
-def x86SpecSpecExtended : List (String × Dispatch × String × String × String) :=
-  x86SpecSpec ++ [("X86_OP_POPCNT_MEM", .genericRunOp, "", "", "")]
-
-theorem x86_specialization_extended_complete (op : GeneratedX86Specialization.Op) :
-    op ∈ allSpecOpsExtended := by cases op <;> decide
-
-theorem x86_specialization_extended_refines :
-    x86SpecSpecExtended = allSpecOpsExtended.map (fun op =>
-      (x86SpecToken op, GeneratedX86Specialization.dispatch op,
-       GeneratedX86Specialization.chainMacro op, GeneratedX86Specialization.directMacro op,
-       GeneratedX86Specialization.auxMacro op)) := by native_decide
-
-theorem x86_specialization_extended_total :
-    allSpecOpsExtended.length = 73 ∧ allSpecOpsExtended.Nodup ∧
-    (x86SpecSpecExtended.map (fun row => row.1)).Nodup ∧ noInsertion x86SpecSpecExtended = true := by
-  native_decide
-
 end KProgFormal

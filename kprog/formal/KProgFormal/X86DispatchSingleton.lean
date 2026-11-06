@@ -885,17 +885,4 @@ theorem x86_disp_singleton_pop_example :
     x86DispPopSpec .pop = true := by
   decide
 
-/-- The memory POPCNT extension is tested on the actual numeric opcode. -/
-theorem x86_popcnt_mem_handled (op : Nat) :
-    GeneratedX86DispatchSingleton.popcntMemHandled op = true ↔ op = 71 := by
-  simp [GeneratedX86DispatchSingleton.popcntMemHandled]
-
-theorem x86_popcnt_mem_disjoint_singletons (op : SingletonOp) :
-    GeneratedX86DispatchSingleton.popcntMemHandled (code op) = false := by
-  cases op <;> rfl
-
-theorem x86_popcnt_mem_disjoint_families (op : GeneratedX86DispatchFamily.DispatchOp) :
-    GeneratedX86DispatchSingleton.popcntMemHandled (GeneratedX86DispatchFamily.code op) = false := by
-  cases op <;> rfl
-
 end KProgFormal

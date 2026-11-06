@@ -5,7 +5,6 @@
 
 #include "native_loader_manifest.hpp"
 #include "native_source_map_binding.hpp"
-#include "native_environment_binding.hpp"
 #include "native_data_layout.hpp"
 #include "native_rodata_binding.hpp"
 #include "native_loader_cache.hpp"
@@ -727,7 +726,6 @@ bool native_lab_reloc_kind_supported(uint32_t kind)
         kind == NATIVE_LAB_RELOC_HELPER_POINTER || kind == NATIVE_LAB_RELOC_READONLY_DATA) return true;
 #if defined(__aarch64__)
     return kind == kNativeLabRelocHelperCallArm64 ||
-           kind == NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE ||
            kind == kNativeLabRelocHelperCallArm64Bl26 ||
            kind == kNativeLabRelocArm64PercpuMrs;
 #else
@@ -738,8 +736,6 @@ bool native_lab_reloc_kind_supported(uint32_t kind)
 size_t native_lab_reloc_slot_bytes(uint32_t kind)
 {
     switch (kind) {
-    case NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE:
-        return 4; // Exact ARM instruction anchor, with no byte patch.
     case NATIVE_LAB_RELOC_READONLY_DATA:
         return 1; // Placement anchor in chunk zero; metadata does not patch it.
     case NATIVE_LAB_RELOC_MAP_POINTER:
@@ -2883,9 +2879,6 @@ struct LinkerOutput {
     std::filesystem::path map_patches;
     std::filesystem::path abi;
     std::filesystem::path data_layout;
-#if defined(__aarch64__)
-    std::filesystem::path environment_layout;
-#endif
     bool prebuilt_proof = false;
 };
 
@@ -2942,17 +2935,7 @@ struct LinkedBlob {
     std::vector<uint32_t> relocated_map_ids;
     std::string native_link_summary;
     std::vector<NativeReadonlyExtent> readonly_objects;
-    std::vector<NativeExclusiveSite> exclusive_sites;
 };
-
-bool proof_needs_kernel_symbols(const std::vector<bpf_insn> &proof)
-{
-    return proof.empty() || std::any_of(proof.begin(), proof.end(),
-        [](const bpf_insn &insn) {
-            return insn.code == (BPF_JMP | BPF_CALL) &&
-                insn.src_reg != BPF_PSEUDO_CALL;
-        });
-}
 
 struct CompanionLoad {
     uint64_t map_ptr_extract_ns = 0;
@@ -4282,9 +4265,6 @@ bool linker_output_exists(const LinkerOutput &out)
            && std::filesystem::exists(out.relocs, ec)
            && std::filesystem::exists(out.map_patches, ec)
            && std::filesystem::exists(out.abi, ec)
-#if defined(__aarch64__)
-           && std::filesystem::exists(out.environment_layout, ec)
-#endif
            && std::filesystem::exists(out.data_layout, ec);
 }
 
@@ -4362,9 +4342,6 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     out.map_patches = base.string() + ".map-patches.tsv";
     out.abi = base.string() + ".abi.tsv";
     out.data_layout = base.string() + ".data-layout.json";
-#if defined(__aarch64__)
-    out.environment_layout = base.string() + ".environment-layout.json";
-#endif
 
     std::optional<std::filesystem::path> prebuilt_proof =
         find_prebuilt_proof(elf_path, symbol_name);
@@ -4432,10 +4409,6 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     argv.push_back(out.abi.string());
     argv.push_back("--output-data-layout");
     argv.push_back(out.data_layout.string());
-#if defined(__aarch64__)
-    argv.push_back("--output-environment-layout");
-    argv.push_back(out.environment_layout.string());
-#endif
     const std::filesystem::path link_plan =
         write_native_link_plan(link_args, base);
     argv.push_back("--link-plan");
@@ -4514,9 +4487,6 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     cache.map_patches = cache_dir / (key + ".map-patches.tsv");
     cache.abi = cache_dir / (key + ".abi.tsv");
     cache.data_layout = cache_dir / (key + ".data-layout.json");
-#if defined(__aarch64__)
-    cache.environment_layout = cache_dir / (key + ".environment-layout.json");
-#endif
     const bool cache_hit = linker_output_exists(cache);
     const auto cache_lookup_end = std::chrono::steady_clock::now();
 
@@ -4546,10 +4516,6 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
         linked.readonly_objects = parse_native_readonly_layout(
             read_text_file_required(source.data_layout), linked.blob.size());
         linked.prebuilt_proof = source.prebuilt_proof;
-#if defined(__aarch64__)
-        linked.exclusive_sites = parse_native_environment_layout(
-            read_text_file_required(source.environment_layout), linked.blob);
-#endif
         linked.native_link_summary = native_link_plan_summary(link_args, linked);
         const auto read_end = std::chrono::steady_clock::now();
         publish_cache_file(tmp.proof, cache.proof);
@@ -4558,9 +4524,6 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
         publish_cache_file(tmp.map_patches, cache.map_patches);
         publish_cache_file(tmp.abi, cache.abi);
         publish_cache_file(tmp.data_layout, cache.data_layout);
-#if defined(__aarch64__)
-        publish_cache_file(tmp.environment_layout, cache.environment_layout);
-#endif
         const auto patch_start = std::chrono::steady_clock::now();
         bind_native_map_relocations(linked, map_patches, companion);
         const auto patch_end = std::chrono::steady_clock::now();
@@ -4583,10 +4546,6 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     linked.readonly_objects = parse_native_readonly_layout(
         read_text_file_required(source.data_layout), linked.blob.size());
     linked.cache_hit = true;
-#if defined(__aarch64__)
-    linked.exclusive_sites = parse_native_environment_layout(
-        read_text_file_required(source.environment_layout), linked.blob);
-#endif
     linked.native_link_summary = native_link_plan_summary(link_args, linked);
     const auto read_end = std::chrono::steady_clock::now();
     const auto patch_start = std::chrono::steady_clock::now();
@@ -5428,7 +5387,11 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     }
     const auto native_data_symbols_end = std::chrono::steady_clock::now();
 
-    companion.needs_kernel_symbols |= proof_needs_kernel_symbols(proof_insns);
+    companion.needs_kernel_symbols |= proof_insns.empty() ||
+        std::any_of(proof_insns.begin(), proof_insns.end(),
+            [](const bpf_insn &insn) {
+                return insn.code == (BPF_JMP | BPF_CALL);
+            });
     LinkedBlob linked = load_or_link_native_blob(
         options.native_link_path,
         native_object_path,
@@ -5440,14 +5403,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         finish_simulator_proof(simulator_object.get(), simulator_program, proof_insns, linked, readonly_bindings);
     else
         bind_raw_proof_maps(proof_insns, companion, proof_map_fds, linked, readonly_bindings);
-    if (!proof_insns.empty()) {
-        for (const auto &[offset, target] : bind_exclusive_environment(
-                 linked.exclusive_sites, linked.blob, proof_insns)) {
-            append_u32_le(linked.relocs, offset);
-            append_u32_le(linked.relocs, NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE);
-            append_u64_le(linked.relocs, target);
-        }
-    }
     out.selected_native_object = native_object_path.string();
     out.selected_symbol = symbol_name;
 

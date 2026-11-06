@@ -5,7 +5,7 @@
  * The generated header pins each `X86_OP_*` token to its numeric code with a
  * `_Static_assert`, so a renumbered token fails the build. This oracle adds the
  * checks a compile-time assert cannot make: it re-parses `../x86/x86_sim.h` at
- * run time and confirms the header defines *exactly* the 73 canonical tokens in
+ * run time and confirms the header defines *exactly* the 72 canonical tokens in
  * the independent table below — so an *added*, renamed, or dropped token is
  * caught, not only a changed value — that the five width-suffixed aliases
  * resolve to their targets, and that no two canonical tokens share a code.
@@ -123,7 +123,6 @@ static const struct op OPCODE_OPS[] = {
 	{ "X86_OP_ANDN_MEM", 68 },
 	{ "X86_OP_CALL_MEMSET_REG", 69 },
 	{ "X86_OP_CALL_MEMCPY_REG", 70 },
-	{ "X86_OP_POPCNT_MEM", 71 },
 	{ "X86_OP_RET", 255 },
 };
 
@@ -252,7 +251,7 @@ int main(void)
 	expect_eq("X86_OP_ADD_IMM64", X86_OP_ADD_IMM64, X86_OP_ADD_IMM);
 	expect_eq("X86_OP_ADD_REG64", X86_OP_ADD_REG64, X86_OP_ADD_REG);
 	expect_eq("X86_OP_XOR_REG32", X86_OP_XOR_REG32, X86_OP_XOR_REG);
-	expect_eq("alias-count", KPROG_X86_OPCODE_COUNT, 73);
+	expect_eq("alias-count", KPROG_X86_OPCODE_COUNT, 72);
 
 	free(text);
 	if (failures == 0)

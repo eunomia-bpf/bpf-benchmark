@@ -84,7 +84,6 @@ inductive Op where
   | andnMem
   | callMemsetReg
   | callMemcpyReg
-  | popcntMem
   | ret
   deriving DecidableEq, Repr
 
@@ -161,7 +160,6 @@ def dispatch : Op -> Dispatch
   | .andnMem => .directMacro
   | .callMemsetReg => .directMacro
   | .callMemcpyReg => .directMacro
-  | .popcntMem => .genericRunOp
   | .ret => .branchHandler
 /-- The `X86_OP_*` spelling of the token, as `kprog/x86/x86_sim.h`
 defines it. -/
@@ -237,7 +235,6 @@ def tokenName : Op -> String
   | .andnMem => "X86_OP_ANDN_MEM"
   | .callMemsetReg => "X86_OP_CALL_MEMSET_REG"
   | .callMemcpyReg => "X86_OP_CALL_MEMCPY_REG"
-  | .popcntMem => "X86_OP_POPCNT_MEM"
   | .ret => "X86_OP_RET"
 
 /-- The `X86_SIM_L_EXEC` handler the token's chain arm calls, or "". -/
@@ -313,7 +310,6 @@ def chainMacro : Op -> String
   | .andnMem => "X86_SIM_L_EXEC_ANDN_MEM"
   | .callMemsetReg => "X86_SIM_L_EXEC_CALL_MEMSET_REG"
   | .callMemcpyReg => "X86_SIM_L_EXEC_CALL_MEMCPY_REG"
-  | .popcntMem => ""
   | .ret => ""
 
 /-- The specialized macro the encoder emits at aux 0, or "". -/
@@ -389,7 +385,6 @@ def directMacro : Op -> String
   | .andnMem => "X86_SIM_L_EXEC_ANDN_MEM"
   | .callMemsetReg => "X86_SIM_L_EXEC_CALL_MEMSET_REG"
   | .callMemcpyReg => "X86_SIM_L_EXEC_CALL_MEMCPY_REG"
-  | .popcntMem => ""
   | .ret => ""
 
 /-- The aux-gated macro the encoder emits for nonzero aux, or "". -/
@@ -465,7 +460,6 @@ def auxMacro : Op -> String
   | .andnMem => ""
   | .callMemsetReg => ""
   | .callMemcpyReg => ""
-  | .popcntMem => ""
   | .ret => ""
 
 end KProgFormal.GeneratedX86Specialization

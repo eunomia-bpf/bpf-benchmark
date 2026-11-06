@@ -853,18 +853,3 @@ retval2/generation1; three unknown/clobbered target controls reject before
 native output. All76 Rust tests and both release builds pass. The complete
 built replay and exact final-target checks are retained; remaining address
 and control-flow forms continue through implementation and validation.
-
-## BCC corrected helper-frame runtime
-
-[Runtimev7](runtime-context-v7/README.md) closes the helper113 startup failure
-and reaches63 bound replacements. All141 load attempts,23 baseline rows and
-the exact32-entry payload remain. Four later EINVAL loads and the measurement
-socket failure are under repair; no native counter comparison is claimed.
-
-## Actual Katran root program
-
-[Katran xdp_root](katran-root-result/README.md) now uses its original three-slot
-program array and real opaque context on the bound ARM path. Source, simulator
-and native returnXDP_PASS/packet0/generation1; the initial mirror-context
-rejection is retained. The paired triple is installed without removing other
-programs, and the real application workload is running in runtimev8.

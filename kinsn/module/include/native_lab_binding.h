@@ -17,10 +17,6 @@
  * The entire frozen read-only map value must equal that native byte extent.
  */
 #define NATIVE_LAB_RELOC_READONLY_DATA 8U
-/* Metadata only: offset is the actual ARM STXR/STLXR byte position in the
- * chunk; target = (source byte PC << 32) | final chunk's proof instruction.
- */
-#define NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE 9U
 
 static inline int native_lab_reloc_patch_size(__u32 kind)
 {
@@ -29,7 +25,7 @@ static inline int native_lab_reloc_patch_size(__u32 kind)
 	case 2: return 16;
 	case 3: case 4: return 4;
 	case 5: case 6: case 7: return 8;
-	case 8: case 9: return 0;
+	case 8: return 0;
 	default: return -EINVAL;
 	}
 }

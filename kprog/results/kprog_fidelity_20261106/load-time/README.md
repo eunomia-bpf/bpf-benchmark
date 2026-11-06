@@ -81,9 +81,3 @@ helper/map proofs pass the actual bound KVM path again (see
 `loader-symbol-guard-build.log.gz` and `pure-symbol-regression.log.gz`.
 Lane R has the same15-sample root command for measurement after rebuilding
 from this second fix; no after-second-fix timing is inferred yet.
-
-Proof-call classification follow-up: local BPF subprogram calls no longer
-request the optional kernel catalogue; actual helper/kfunc calls and empty
-proofs retain it. Five boundary regressions, pure-link regression and independent
-114-symbol name/address comparison pass. See local-proof-calls/README.md.
-This fix has no timing claim; the pending pure simple15 repeat remains separate.

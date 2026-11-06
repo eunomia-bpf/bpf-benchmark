@@ -676,10 +676,3 @@ explicitly unhandled in this reference snapshot. Raw CPU replay has 11264
 stack-address observations. Exact per-form inputs, commands and frozen source
 are in differential/x86-full-conditions/README.md (or x86-full-conditions/
 relative to this directory); the preceding 745-form result is retained.
-
-Canonical x86 path closure:525 forms/537600 savedCPU cases now checked,
-CPU differences0, model stack-address differences10240. The37 Jcc/JMP sequences
-and36 unary forms newly agree in all cases;274 encodings remain explicit.
-The checked finite-path interface validates real decode extents and every
-successor, with2053 full-state/40 rejection cases and full formal check PASS.
-See differential/x86-control-reference/README.md (x86-control-reference/ here).

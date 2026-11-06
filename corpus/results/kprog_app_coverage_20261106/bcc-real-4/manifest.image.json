@@ -1,0 +1,254 @@
+{
+ "objects": [
+  {
+   "program": "kprobe__cap_cap",
+   "source_btf_symbol": "kprobe__cap_capable_entry",
+   "prog_type": 2,
+   "source_bytecode_len": 304,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/capable.native.o",
+   "symbol": "kprobe__cap_capable_entry",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_capable_kprobe__cap_capable_entry.bpf.o",
+   "simulator_program": "bcc_capable_kprobe__cap_capable_entry_x86_sim_xdp"
+  },
+  {
+   "program": "kprobe__cap_cap",
+   "source_btf_symbol": "kprobe__cap_capable_exit",
+   "prog_type": 2,
+   "source_bytecode_len": 1136,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/capable.native.o",
+   "symbol": "kprobe__cap_capable_exit",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_capable_kprobe__cap_capable_exit.bpf.o",
+   "simulator_program": "bcc_capable_kprobe__cap_capable_exit_x86_sim_xdp"
+  },
+  {
+   "program": "tracepoint__sys",
+   "source_btf_symbol": "tracepoint__syscalls__sys_enter_open",
+   "prog_type": 5,
+   "source_bytecode_len": 368,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/opensnoop.native.o",
+   "symbol": "tracepoint__syscalls__sys_enter_open",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_opensnoop_tracepoint__syscalls__sys_enter_open.bpf.o",
+   "simulator_program": "bcc_opensnoop_tracepoint__syscalls__sys_enter_open_x86_sim_xdp"
+  },
+  {
+   "program": "fentry_vfs_read",
+   "source_btf_symbol": "fentry_vfs_read",
+   "prog_type": 26,
+   "source_bytecode_len": 48,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/vfsstat.native.o",
+   "symbol": "fentry_vfs_read",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_vfsstat_fentry_vfs_read.bpf.o",
+   "simulator_program": "bcc_vfsstat_fentry_vfs_read_x86_sim_xdp"
+  },
+  {
+   "program": "tracepoint__sys",
+   "source_btf_symbol": "tracepoint__syscalls__sys_enter_openat",
+   "prog_type": 5,
+   "source_bytecode_len": 368,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/opensnoop.native.o",
+   "symbol": "tracepoint__syscalls__sys_enter_openat",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_opensnoop_tracepoint__syscalls__sys_enter_openat.bpf.o",
+   "simulator_program": "bcc_opensnoop_tracepoint__syscalls__sys_enter_openat_x86_sim_xdp"
+  },
+  {
+   "program": "tracepoint__sys",
+   "source_btf_symbol": "tracepoint__syscalls__sys_exit_open",
+   "prog_type": 5,
+   "source_bytecode_len": 816,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/opensnoop.native.o",
+   "symbol": "tracepoint__syscalls__sys_exit_open",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_opensnoop_tracepoint__syscalls__sys_exit_open.bpf.o",
+   "simulator_program": "bcc_opensnoop_tracepoint__syscalls__sys_exit_open_x86_sim_xdp"
+  },
+  {
+   "program": "fentry_vfs_writ",
+   "source_btf_symbol": "fentry_vfs_write",
+   "prog_type": 26,
+   "source_bytecode_len": 48,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/vfsstat.native.o",
+   "symbol": "fentry_vfs_write",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_vfsstat_fentry_vfs_write.bpf.o",
+   "simulator_program": "bcc_vfsstat_fentry_vfs_write_x86_sim_xdp"
+  },
+  {
+   "program": "tracepoint__sys",
+   "source_btf_symbol": "tracepoint__syscalls__sys_exit_openat",
+   "prog_type": 5,
+   "source_bytecode_len": 816,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/opensnoop.native.o",
+   "symbol": "tracepoint__syscalls__sys_exit_openat",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_opensnoop_tracepoint__syscalls__sys_exit_openat.bpf.o",
+   "simulator_program": "bcc_opensnoop_tracepoint__syscalls__sys_exit_openat_x86_sim_xdp"
+  },
+  {
+   "program": "fentry_vfs_fsyn",
+   "source_btf_symbol": "fentry_vfs_fsync",
+   "prog_type": 26,
+   "source_bytecode_len": 48,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/vfsstat.native.o",
+   "symbol": "fentry_vfs_fsync",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_vfsstat_fentry_vfs_fsync.bpf.o",
+   "simulator_program": "bcc_vfsstat_fentry_vfs_fsync_x86_sim_xdp"
+  },
+  {
+   "program": "sys_enter",
+   "source_btf_symbol": "sys_enter",
+   "prog_type": 5,
+   "source_bytecode_len": 248,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/syscount.native.o",
+   "symbol": "sys_enter",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_syscount_sys_enter.bpf.o",
+   "simulator_program": "bcc_syscount_sys_enter_x86_sim_xdp"
+  },
+  {
+   "program": "fentry_vfs_open",
+   "source_btf_symbol": "fentry_vfs_open",
+   "prog_type": 26,
+   "source_bytecode_len": 48,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/vfsstat.native.o",
+   "symbol": "fentry_vfs_open",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_vfsstat_fentry_vfs_open.bpf.o",
+   "simulator_program": "bcc_vfsstat_fentry_vfs_open_x86_sim_xdp"
+  },
+  {
+   "program": "sys_exit",
+   "source_btf_symbol": "sys_exit",
+   "prog_type": 5,
+   "source_bytecode_len": 928,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/syscount.native.o",
+   "symbol": "sys_exit",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_syscount_sys_exit.bpf.o",
+   "simulator_program": "bcc_syscount_sys_exit_x86_sim_xdp"
+  },
+  {
+   "program": "tcp_v4_connect",
+   "source_btf_symbol": "tcp_v4_connect",
+   "prog_type": 2,
+   "source_bytecode_len": 256,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/tcpconnect.native.o",
+   "symbol": "tcp_v4_connect",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_tcpconnect_tcp_v4_connect.bpf.o",
+   "simulator_program": "bcc_tcpconnect_tcp_v4_connect_x86_sim_xdp"
+  },
+  {
+   "program": "blk_account_io_",
+   "source_btf_symbol": "blk_account_io_merge_bio",
+   "prog_type": 2,
+   "source_bytecode_len": 248,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/biosnoop.native.o",
+   "symbol": "blk_account_io_merge_bio",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_biosnoop_blk_account_io_merge_bio.bpf.o",
+   "simulator_program": "bcc_biosnoop_blk_account_io_merge_bio_x86_sim_xdp"
+  },
+  {
+   "program": "inet_sock_set_s",
+   "source_btf_symbol": "inet_sock_set_state",
+   "prog_type": 5,
+   "source_bytecode_len": 2472,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/tcplife.native.o",
+   "symbol": "inet_sock_set_state",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_tcplife_inet_sock_set_state.bpf.o",
+   "simulator_program": "bcc_tcplife_inet_sock_set_state_x86_sim_xdp"
+  },
+  {
+   "program": "fentry_vfs_crea",
+   "source_btf_symbol": "fentry_vfs_create",
+   "prog_type": 26,
+   "source_bytecode_len": 48,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/vfsstat.native.o",
+   "symbol": "fentry_vfs_create",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_vfsstat_fentry_vfs_create.bpf.o",
+   "simulator_program": "bcc_vfsstat_fentry_vfs_create_x86_sim_xdp"
+  },
+  {
+   "program": "tcp_v4_connect_",
+   "source_btf_symbol": "tcp_v4_connect_ret",
+   "prog_type": 2,
+   "source_bytecode_len": 1336,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/tcpconnect.native.o",
+   "symbol": "tcp_v4_connect_ret",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_tcpconnect_tcp_v4_connect_ret.bpf.o",
+   "simulator_program": "bcc_tcpconnect_tcp_v4_connect_ret_x86_sim_xdp"
+  },
+  {
+   "program": "tcp_v6_connect",
+   "source_btf_symbol": "tcp_v6_connect",
+   "prog_type": 2,
+   "source_bytecode_len": 256,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/tcpconnect.native.o",
+   "symbol": "tcp_v6_connect",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_tcpconnect_tcp_v6_connect.bpf.o",
+   "simulator_program": "bcc_tcpconnect_tcp_v6_connect_x86_sim_xdp"
+  },
+  {
+   "program": "block_rq_insert",
+   "source_btf_symbol": "block_rq_insert",
+   "prog_type": 26,
+   "source_bytecode_len": 1320,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/biosnoop.native.o",
+   "symbol": "block_rq_insert",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_biosnoop_block_rq_insert.bpf.o",
+   "simulator_program": "bcc_biosnoop_block_rq_insert_x86_sim_xdp"
+  },
+  {
+   "program": "tcp_v6_connect_",
+   "source_btf_symbol": "tcp_v6_connect_ret",
+   "prog_type": 2,
+   "source_bytecode_len": 1360,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/tcpconnect.native.o",
+   "symbol": "tcp_v6_connect_ret",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_tcpconnect_tcp_v6_connect_ret.bpf.o",
+   "simulator_program": "bcc_tcpconnect_tcp_v6_connect_ret_x86_sim_xdp"
+  },
+  {
+   "program": "block_rq_issue",
+   "source_btf_symbol": "block_rq_issue",
+   "prog_type": 26,
+   "source_bytecode_len": 936,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/biosnoop.native.o",
+   "symbol": "block_rq_issue",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_biosnoop_block_rq_issue.bpf.o",
+   "simulator_program": "bcc_biosnoop_block_rq_issue_x86_sim_xdp"
+  },
+  {
+   "program": "sched_wakeup",
+   "source_btf_symbol": "sched_wakeup",
+   "prog_type": 26,
+   "source_bytecode_len": 256,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/runqlat.native.o",
+   "symbol": "sched_wakeup",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_runqlat_sched_wakeup.bpf.o",
+   "simulator_program": "bcc_runqlat_sched_wakeup_x86_sim_xdp"
+  },
+  {
+   "program": "block_rq_comple",
+   "source_btf_symbol": "block_rq_complete",
+   "prog_type": 26,
+   "source_bytecode_len": 912,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/biosnoop.native.o",
+   "symbol": "block_rq_complete",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_biosnoop_block_rq_complete.bpf.o",
+   "simulator_program": "bcc_biosnoop_block_rq_complete_x86_sim_xdp"
+  },
+  {
+   "program": "sched_wakeup_ne",
+   "source_btf_symbol": "sched_wakeup_new",
+   "prog_type": 26,
+   "source_bytecode_len": 256,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/runqlat.native.o",
+   "symbol": "sched_wakeup_new",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_runqlat_sched_wakeup_new.bpf.o",
+   "simulator_program": "bcc_runqlat_sched_wakeup_new_x86_sim_xdp"
+  },
+  {
+   "program": "sched_switch",
+   "source_btf_symbol": "sched_switch",
+   "prog_type": 26,
+   "source_bytecode_len": 2056,
+   "native_object": "/artifacts/user/native-bpf/x86_64/bcc/runqlat.native.o",
+   "symbol": "sched_switch",
+   "simulator_object": "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bcc-real-4/objects/bcc_runqlat_sched_switch.bpf.o",
+   "simulator_program": "bcc_runqlat_sched_switch_x86_sim_xdp"
+  }
+ ]
+}

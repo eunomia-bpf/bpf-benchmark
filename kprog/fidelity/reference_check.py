@@ -5,54 +5,10 @@ import csv
 import json
 from pathlib import Path
 import platform
-import re
 import struct
 import subprocess
 
 ROOT=Path(__file__).resolve().parents[2]
-
-
-def control_extents(binary, metadata, forms):
-    """Read extents only; canonical decode checks every byte and successor."""
-    text=subprocess.check_output(['objdump','-d','-Mintel','--insn-width=16',str(binary)],text=True)
-    extents={}
-    for line in text.splitlines():
-        match=re.match(r'^\s*([0-9a-f]+):\s*((?:[0-9a-f]{2} )+)',line)
-        if match:
-            extents[int(match[1],16)]=len(match[2].split())
-    result={}
-    for index,form in enumerate(forms):
-        if form['opcode'] not in {'X86_OP_JCC','X86_OP_JMP'}:
-            continue
-        code=metadata['forms'][index]
-        pc=code['pc'];entries=[]
-        while pc<code['next_pc']:
-            length=extents[pc]
-            if pc+length>code['next_pc']:
-                raise RuntimeError('control instruction crosses observed byte span')
-            entries.append(dict(offset=pc-code['pc'],length=length))
-            pc+=length
-        expected=5 if form['assembly'].endswith('backward') else 4 if form['opcode']=='X86_OP_JCC' else 3
-        if len(entries)!=expected:
-            raise RuntimeError('unexpected generated control observer shape')
-        result[index]=entries
-    return result
-
-
-def control_witness(form, extents, native):
-    """The CPU's final 0/1 selects the generated observer's taken path.
-    No flags/condition are interpreted here. Canonical execution must validate
-    the entire selected witness and end at the actual observed final PC.
-    """
-    if native['registers'][0] not in {0,1}:
-        raise RuntimeError('control observer did not produce a 0/1 outcome')
-    if form['opcode']=='X86_OP_JMP':
-        indices=[0,2]
-    elif form['assembly'].endswith('backward'):
-        indices=[0,3,4]+([1,2] if native['registers'][0] else [])
-    else:
-        indices=[0]+([3] if native['registers'][0] else [1,2])
-    return [extents[index] for index in indices]
 
 
 def state(data):
@@ -69,7 +25,6 @@ def main():
     parser.add_argument('--reuse-trace',action='store_true')
     parser.add_argument('--trace',type=Path)
     parser.add_argument('--reference',type=Path,default=ROOT/'kprog/formal/.lake/build/bin/reference')
-    parser.add_argument('--control-paths',action='store_true',help='use the canonical finite-path interface for generated Jcc/JMP observers')
     args=parser.parse_args()
     if args.trace and not args.reuse_trace:
         parser.error('--trace requires --reuse-trace')
@@ -83,7 +38,6 @@ def main():
         command=(['qemu-aarch64-static'] if args.arch=='arm64' and platform.machine()!='aarch64' else [])
         cpu_failed=subprocess.run(command+[str(args.binary.resolve()),str(args.cases),str(args.out),str(trace)]).returncode != 0
     native_code=json.loads((args.out/'native-code.json').read_text())
-    paths=control_extents(args.binary,native_code,forms) if args.control_paths and args.arch=='x86' else {}
     reference=args.reference
     # Only a serialization optimization: every non-composite encoding is
     # probed against the reference, including opcodes absent from this set.
@@ -117,7 +71,7 @@ def main():
         if trace.stat().st_size!=24+count*cases*record_bytes:
             raise RuntimeError('incomplete CPU state trace')
         for index,form in enumerate(forms):
-            if args.arch=='x86' and form['opcode'] in {'X86_OP_JCC','X86_OP_JMP','X86_OP_CALL'} and index not in paths:
+            if args.arch=='x86' and form['opcode'] in {'X86_OP_JCC','X86_OP_JMP','X86_OP_CALL'}:
                 source.seek(cases*record_bytes,1)
                 reason='control composite requires a reference block-step interface'
                 rows.append(dict(form=index,assembly=form['assembly'],cases=cases,reference_cases=0,cpu_mismatches=0,simulator_mismatches=0,status='awaiting_reference_block',reference_error=reason))
@@ -125,7 +79,7 @@ def main():
                 continue
             requests=[];records=[];rejection=None
             omit_memory=(args.arch=='arm64' and form['opcode'] in arm_without_memory) or (
-                args.arch=='x86' and form['opcode'] in x86_without_memory and '[' not in form['assembly']) or index in paths
+                args.arch=='x86' and form['opcode'] in x86_without_memory and '[' not in form['assembly'])
             assembly=form['assembly']
             for case in range(cases):
                 ident=struct.unpack('<2I',source.read(8))
@@ -154,9 +108,6 @@ def main():
                 if omit_memory:
                     architectural_state['memory']=[]
                 request=dict(isa='x86_64' if args.arch=='x86' else 'aarch64',state=architectural_state,native_bytes=native_code['forms'][index]['native_bytes'])
-                if index in paths:
-                    request.update(native_base=native_code['forms'][index]['pc'],
-                        native_path=control_witness(form,paths[index],native))
                 encoded_request=json.dumps(request,separators=(',',':'))
                 if case==0:
                     probe=subprocess.run([str(reference)],input=encoded_request+'\n',text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)

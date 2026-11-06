@@ -188,7 +188,6 @@ static const struct spec_row SPEC[] = {
 	{ X86_OP_ANDN_MEM, D },
 	{ X86_OP_CALL_MEMSET_REG, D },
 	{ X86_OP_CALL_MEMCPY_REG, D },
-	{ X86_OP_POPCNT_MEM, G },
 	{ X86_OP_RET, B },
 };
 

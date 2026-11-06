@@ -682,38 +682,3 @@ status changes solely from these component results.
 The original six-field capture regression also passes after the optional
 whole-object capture arguments were added, including all four context-byte
 mutation rejections (`simple-capture-default-regression.log`).
-
-Fresh exclusive environment choices and generation binding
----------------------------------------------------------
-
-The private kind5 marker carries the complete unsigned source PC, with
-fresh0/1 failure status at each dynamic visit. Existing entry inputs retain
-ABI2. Host hook values are explicit and checked. BPF proofs retain all other
-registers, memory and effects and increment a ghost visit counter; an unbound
-environment is an error. Actual clang markers for16 and0xfffffffc are checked.
-
-The loader consumes A’s environment-layout API and matches actual native
-opcode/width/release/PC to compiled marker positions. Kind9 descriptors are
-sealed with the exact code, proof and other metadata. The kernel checks every
-marker has exactly one matching descriptor against the final chunk’s proof,
-including cross-chunk native sites, before instantiation and emission.
-
-The complete new Arm kernel binding regression passes. Bound fresh choice
-executes native code; unsafe success and failure branches both reject. An
-unsafe path requiring unequal repeated choices rejects, detecting accidental
-choice correlation. Cross-chunk positive executes. Missing/duplicate/wrong-PC/
-wrong-proof-index/wrong-opcode descriptors reject. Standalone markers reject
-with normal and forced constant blinding. All prior helper/map/readonly/
-entry/ABI/context tests remain passing. The complete x86 loader/kernel suite
-also passes and rejects Arm-only descriptors. Both loader libraries build;
-all ten unchanged simple-program byte-mutation rejections still pass after
-the BPF state extension. The failed initial bounded-run test (which omitted
-EXIT) is retained alongside corrected finite-path results.
-
-This result supplies the environment/binding mechanism. A’s production
-conditional-store bridge and F’s canonical monitor/ordering/atomicity checks
-remain part of the continuing whole-program work; this result does not
-relabel the earlier accepted unsafe exclusive programs as rejected. Kernel
-verifier range handling, descriptor matching and restoration join the
-explicitly trusted binding code. The canonical ISA remains V/F’s single
-reference, and the finite path/composition proofs retain their listed axioms.

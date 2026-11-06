@@ -352,32 +352,6 @@ def unaryFlags (width : ScalarWidth) (kind : UnaryKind) (value old : Reference.W
   | .neg => arithmeticFlags width true false 0 value old
   | .not => old
 
-private def populationLane (x : BitVec 64) (i : Nat) : BitVec 8 :=
-  ((x >>> (8 * i)) &&& 0xff).setWidth 8
-
-/-- Independent per-byte population count: an explicit eight-bit walk, sharing no
-constant with the generated SWAR reduction. -/
-private def populationByte (b : BitVec 8) : BitVec 8 :=
-  (b.extractLsb' 0 1).setWidth 8 + (b.extractLsb' 1 1).setWidth 8 +
-  (b.extractLsb' 2 1).setWidth 8 + (b.extractLsb' 3 1).setWidth 8 +
-  (b.extractLsb' 4 1).setWidth 8 + (b.extractLsb' 5 1).setWidth 8 +
-  (b.extractLsb' 6 1).setWidth 8 + (b.extractLsb' 7 1).setWidth 8
-
-/-- Independent statement of the 64-bit population count: the sum of the eight
-byte lanes' bit walks, each lane narrowed before counting. -/
-def populationCount (x : BitVec 64) : BitVec 64 :=
-  (populationByte (populationLane x 0)).setWidth 64 + (populationByte (populationLane x 1)).setWidth 64 +
-  (populationByte (populationLane x 2)).setWidth 64 + (populationByte (populationLane x 3)).setWidth 64 +
-  (populationByte (populationLane x 4)).setWidth 64 + (populationByte (populationLane x 5)).setWidth 64 +
-  (populationByte (populationLane x 6)).setWidth 64 + (populationByte (populationLane x 7)).setWidth 64
-
-
-def popcountValue (width : CmovWidth) (source : Reference.Word) : Reference.Word :=
-  populationCount ((source.setWidth (width.bytes * 8)).setWidth 64)
-
-def popcountFlags (width : CmovWidth) (source old : Reference.Word) : Reference.Word :=
-  (old &&& 0xfffffffffffff72a) ||| (if source.setWidth (width.bytes * 8) = 0 then 64 else 0)
-
 inductive RegisterSlice
   | low (reg : Register)
   | high (reg : Fin 4)
@@ -495,7 +469,6 @@ def unaryStep (width : ScalarWidth) (kind : UnaryKind) (dst : ScalarDestination)
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
-  | popcount (width : CmovWidth) (dst : Register) (source : Source) (nextPc : Word)
   | unary (width : ScalarWidth) (kind : UnaryKind) (dst : ScalarDestination) (nextPc : Word)
   | logic (width : ScalarWidth) (kind : LogicKind) (dst : ScalarDestination) (src : ScalarSource) (nextPc : Word)
   | nop (nextPc : Word)
@@ -525,7 +498,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -535,12 +508,6 @@ def Instruction.fallthrough : Instruction → Word
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
-  | .popcount width dst source nextPc =>
-      match readSource s source width.bytes with
-      | .error fault => ⟨s, [.fault fault], some fault⟩
-      | .ok (value, events) =>
-          let result := cmovValue width true (s.gpr dst) (popcountValue width value)
-          ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), rflags := popcountFlags width value s.rflags, pc := nextPc }, events, none⟩
   | .unary width kind dst nextPc => unaryStep width kind dst nextPc s
   | .logic width kind dst src nextPc => logicalStep width kind dst src nextPc s
   | .nop nextPc => ⟨{ s with pc := nextPc }, [], none⟩
@@ -613,7 +580,6 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
-  | .popcount .. => 0xffffffffffffffff
   | .unary .. => 0xffffffffffffffff
   | .logic .. => 0xffffffffffffffef
   | .nop .. | .branch .. | .setcc .. => 0xffffffffffffffff
@@ -973,9 +939,6 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   let reg := registerCode ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
   let width := if p.rex / 8 = 1 then CmovWidth.w64
     else if p.operand16 then .w16 else .w32
-  if opcode = 0xb8 ∧ p.mandatoryPrefix = 0xf3 then
-    let (source, nextPc, _) ← operand bytes s p modrm (count + 3) 0
-    return .popcount width reg source nextPc
   if 0x40 ≤ opcode ∧ opcode ≤ 0x4f then
     let (source, nextPc, _) ← operand bytes s p modrm (count + 3) 0
     let cc : Fin 16 := ⟨opcode % 16, Nat.mod_lt _ (by decide)⟩

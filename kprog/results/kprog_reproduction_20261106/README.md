@@ -170,42 +170,64 @@ cc .../vendor/build/x86/linux/vmlinux.o -o .../vendor/build/x86/linux/vmlinux
 That fails `host-micro-programs-x86` and blocks both `make micro` and
 `make corpus`. Reported; not worked around here.
 
-### Native arm state, latest
+### Native arm: first real measurement
 
-Blockers cleared in order (each reproducible, each named with evidence):
+**The native arm now measures.** The blocker was not the shim at all — it
+was the manifest's paths. `bcc-real-4/manifest.json` names host paths
+(`/workspaces/repository/vendor/build/native-bpf/x86/stage/...`), but the
+corpus run executes inside the runtime image, which carries the same
+objects at `/artifacts/user/native-bpf/x86_64/...` (note `x86_64`, not
+`x86`). The loader runs in the image, so every entry read as unreadable.
 
-1. module/kernel BTF mismatch — rebuilt the module against the current
-   kernel and repackaged the image;
-2. `vmlinux` relinked with the host `cc` because `vmlinux.o` sits beside it
-   and make's builtin `%: %.o` rule applied;
-3. `native-link` did not compile (`missing field readonly_objects`, twice);
+`manifest.image.json` is the same 25 entries with the prefix rewritten to
+the in-image location. With it, unbound native
+(`BPFREJIT_SHIM_NATIVE_LOADER=post`, no proof requirement):
+
+```
+corpus/results/x86_kvm_corpus_20261106_185154_331422   status ok
+```
+
+| | bcc/set |
+| --- | ---: |
+| stress-ng bogo-ops, baseline eBPF | 30,794,165 |
+| stress-ng bogo-ops, native | 30,926,894 |
+| **native/eBPF** | **1.004x** |
+| reference (2026-05-29) | 1.005x |
+
+Per-stressor, both arms ran the same work (syscall 514/514, cap
+17,126,810/17,184,093, set 1,292,235/1,309,932, sockfd
+12,374,606/12,432,355), so the ratio is a like-for-like comparison.
+
+**Programs that ran native (17):** `blk_account_io_*`, `block_rq_insert`,
+`block_rq_issue`, `fentry_vfs_{creat,fsyn,open,read,writ}`,
+`inet_sock_set_*`, `kprobe__cap_cap`, `sched_wakeup`,
+`sched_wakeup_new`, `sys_enter`, `tcp_v4_connect`, `tcp_v6_connect`,
+`tracepoint__sys*`.
+
+**Programs that stayed eBPF (8), with the reason from the log** — these
+pass through and do not stop the run (lane's `9962aec5e`):
+
+- `BPF_PROG_LOAD native_lab stub: Invalid argument` ×4
+  (`tracepoint__sys`, `kprobe__cap_cap`, `block_rq_complete`, others)
+- `proof readonly map lacks explicit symbol metadata: .rodata.n...` ×4
+  (`tcp_v4_connect`, `tcp_v6_connect`, `sys_exit`, `sched_switch`)
+
+### Blockers cleared to get here
+
+1. module/kernel BTF mismatch — module rebuilt against the current kernel;
+2. `vmlinux` relinked with the host `cc` (make's builtin `%: %.o` rule,
+   because `vmlinux.o` sits beside it);
+3. `native-link` failed to compile (`missing field readonly_objects`,
+   twice);
 4. `siphash_rotate64_mixer`: `error in backend: IO failure on output
    stream: Bad address` under concurrent load;
-5. a **stale prebuilt shim/loader** shipped in the image — `host-shim-x86`
-   has no prerequisites and misses the header dependency, so a header-only
-   change never reaches the `.so`. Removing
-   `bpfopt/shim/build-x86/libbpfrejit_shim.so` (and the two
-   `runner/build-*/native_loader` dirs) before packaging fixes it, and the
-   image then reports the string that proves which shim it carries.
-
-**Current stopping point** (`corpus/results/
-x86_kvm_corpus_20261106_180719_356323`): the verified arm dies at startup
-with `rc=97`, and the shim log pins it to libbpf's own probe —
-
-```
-BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2
-  hash=39f82ae52884c235
-source=/tmp/bpfrejit_<pid>_39f82ae52884c235.bpf
-verified native runtime has no manifest entry for prog= ...
-```
-
-`shim_native_loader.h` exempts probe programs only when the bound
-requirement is **off**; commit `dd3707caf` made that deliberate ("The
-verified arm binds startup probes as well as resident programs"). Under
-that design the application manifest must therefore carry a probe entry,
-or no application can start on the verified arm. Reported to the shim
-owner with both options; the measurement is one manifest field or one
-guard away.
+5. a **stale shim/loader in the image** — `host-shim-x86` has no
+   prerequisites and misses its header dependency, so a header-only change
+   never reaches the `.so`; remove `bpfopt/shim/build-x86/
+   libbpfrejit_shim.so` (and the two `runner/build-*/native_loader` dirs)
+   before packaging;
+6. libbpf's probe was fatal on the verified arm (fixed upstream in
+   `20aae50eb` after `dd3707caf` had made it deliberate).
 
 ### Work done per arm
 

@@ -869,9 +869,8 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		if (KPROG_X86_REG_PRESENT(BASE_REG))                     \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(BASE_REG);\
 		__u64 __x86_l_value;                                     \
-		void *__x86_l_addr = KPROG_X86_REG_PRESENT(BASE_REG) ?    \
-			(__u8 *)__x86_l_base_ptr + __x86_l_disp :         \
-			(void *)(unsigned long)__x86_l_disp;              \
+		void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +           \
+				     __x86_l_disp;                       \
 		switch (X86_SIM_L_MEM_READ_SRC(BASE_REG,                 \
 					       __x86_l_read_mem_width)) {\
 		case KPROG_X86_MEM_SRC_STACK:                            \
@@ -2148,15 +2147,6 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 							  __x86_l_width);        \
 				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
 							  __x86_l_width);        \
-			} else if (KPROG_X86_DISP_POPCNT_MEM_HANDLED(OP)) {       \
-				__u64 __x86_l_src = X86_SIM_L_READ_MEM_VALUE(     \
-					(SRC), (AUX), (IMM), (FLAGS), 0);         \
-				__u64 __x86_l_result = x86_popcount64(            \
-					x86_apply_width(__x86_l_src, __x86_l_width)); \
-				X86_SIM_L_SET_POPCNT_FLAGS(__x86_l_src,           \
-					__x86_l_width);                          \
-				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
-					__x86_l_width);                          \
 			} else if (KPROG_X86_DISP_SHIFTX_HANDLED(OP)) {         \
 				__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);      \
 				__u64 __x86_l_count = X86_SIM_L_READ_REG(AUX);    \

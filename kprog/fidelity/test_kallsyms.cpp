@@ -4,20 +4,6 @@
 int main(int argc, char **argv)
 {
     if (argc != 2) throw std::runtime_error("expected native-link path");
-    const bpf_insn exit = { .code = BPF_JMP | BPF_EXIT };
-    const bpf_insn local = { .code = BPF_JMP | BPF_CALL,
-                            .src_reg = BPF_PSEUDO_CALL, .imm = 1 };
-    const bpf_insn helper = { .code = BPF_JMP | BPF_CALL,
-                             .imm = BPF_FUNC_get_current_uid_gid };
-    const bpf_insn kfunc = { .code = BPF_JMP | BPF_CALL,
-                            .src_reg = BPF_PSEUDO_KFUNC_CALL, .imm = 1 };
-    if (!proof_needs_kernel_symbols({}) ||
-        proof_needs_kernel_symbols({exit}) ||
-        proof_needs_kernel_symbols({local,exit}) ||
-        !proof_needs_kernel_symbols({local,helper,exit}) ||
-        !proof_needs_kernel_symbols({kfunc,exit})) {
-        throw std::runtime_error("proof call classification lost local/helper/kfunc distinction");
-    }
     CompanionLoad pure{};
     pure.prog_type = BPF_PROG_TYPE_XDP;
     const NativeLinkArgs args = build_native_link_args(argv[1], {}, pure);
