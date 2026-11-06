@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0963 - every figure has an occurrence, verified
+
+The removal of a false figure was verified by the same direction that found it:
+every figure in the population now has an occurrence in the text. Nine appeared
+not to, and all nine were gaps in the checking pattern rather than artifacts:
+six are step numbers written with a leading zero, and the rest are comma-grouped
+forms with a trailing comma that the lookahead rejected.
+
+Two other checks were needed to reach zero. A figure may be written plain,
+comma-grouped, or zero-padded, and a pattern for one form reports the others as
+absent. That is the same lesson the line-reference class taught three times,
+applied this time to the verification of the verification.
+
+With all three forms, no figure lacks an occurrence, so the population contains
+no more macro names. Census unchanged; the figure set is verified to consist of
+figures.
+
 ### Step 0962 - a macro name was being read as a figure
 
 One of the leftover figures was not a figure. A macro name lists its widths
