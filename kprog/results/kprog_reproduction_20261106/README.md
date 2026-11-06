@@ -155,6 +155,21 @@ This is why the corpus arms below are recorded at `SAMPLES=1`
 `WORKLOAD_DURATION=60` from before the regression, rather than at the
 operator's recipe.
 
+### Second build blocker: vmlinux relinked with the host compiler
+
+`micro/programs/Makefile` uses the kernel image only as a *prerequisite*
+of a generated offsets header, but because `vmlinux.o` sits beside it,
+GNU make's builtin `%: %.o` rule relinks `vmlinux` with plain `cc`:
+
+```
+cc .../vendor/build/x86/linux/vmlinux.o -o .../vendor/build/x86/linux/vmlinux
+/usr/bin/ld: ...vmlinux.o: relocation R_X86_64_32S against
+`.rodata.str1.8' can not be used when making a PIE object
+```
+
+That fails `host-micro-programs-x86` and blocks both `make micro` and
+`make corpus`. Reported; not worked around here.
+
 The native arm itself is selected with
 
 ```sh
