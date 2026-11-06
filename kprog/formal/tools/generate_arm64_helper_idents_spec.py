@@ -3,18 +3,12 @@
 
 The AArch64 artifact encoder
 (`kprog/arm64/micro-prog/generate_micro_sim_proofs.py`) recognizes BPF
-helper calls by kernel id: 66 ids cover the helpers the AArch64 simulator
-implements. Five sim-header macros forward to another helper (e.g.
-`bpf_map_lookup_percpu_elem` runs `bpf_map_lookup_elem`'s body), so the
-forwarding pairs are re-read from the sim header on every run rather than
-pinned here; the table, the Lean model, and the C header regenerate
-together with it. The active label renderer uses the kernel ids directly. The table also
-retains the 1-based lexicographic ranks of forwarding targets as a
-machine-checked property of the declared helper names.
+helper calls by kernel id. Every recognized name invokes that exact Linux
+helper; aliases to other helper bodies are rejected.
 
 Three outputs share one source:
   * `generated/arm64_helper_idents.h` — the C row table and its
-    `_Static_assert`s, plus the delegate-slot constants
+    `_Static_assert`s
   * `KProgFormal/Generated/GeneratedArm64HelperIdents.lean` — the Lean table
   * `kprog/arm64/micro-prog/generated_arm64_helper_idents.py` — the
     encoder's `HELPER_IDENTS`
@@ -33,7 +27,7 @@ LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64HelperIdents.lean"
 C_HEADER = ROOT / "generated/arm64_helper_idents.h"
 PYTHON = ROOT.parent / "arm64/micro-prog/generated_arm64_helper_idents.py"
 
-# The encoder's 66 helper ids in the specification's id-sorted order, as the
+# The encoder's 71 helper ids in the specification's id-sorted order, as the
 # encoder's `HELPER_IDENTS` table defines them.
 EXPECTED: list[tuple[int, str]] = [
     (1, "bpf_map_lookup_elem"),
@@ -52,6 +46,7 @@ EXPECTED: list[tuple[int, str]] = [
     (14, "bpf_get_current_pid_tgid"),
     (15, "bpf_get_current_uid_gid"),
     (16, "bpf_get_current_comm"),
+    (20, "bpf_skb_get_tunnel_key"),
     (21, "bpf_skb_set_tunnel_key"),
     (23, "bpf_redirect"),
     (25, "bpf_perf_event_output"),
@@ -71,13 +66,16 @@ EXPECTED: list[tuple[int, str]] = [
     (45, "bpf_probe_read_str"),
     (46, "bpf_get_socket_cookie"),
     (50, "bpf_skb_adjust_room"),
+    (54, "bpf_xdp_adjust_meta"),
     (58, "bpf_override_return"),
     (65, "bpf_xdp_adjust_tail"),
     (67, "bpf_get_stack"),
     (68, "bpf_skb_load_bytes_relative"),
     (69, "bpf_fib_lookup"),
     (80, "bpf_get_current_cgroup_id"),
+    (87, "bpf_map_push_elem"),
     (95, "bpf_sk_fullsock"),
+    (99, "bpf_skc_lookup_tcp"),
     (109, "bpf_send_signal"),
     (112, "bpf_probe_read_user"),
     (113, "bpf_probe_read_kernel"),
@@ -90,6 +88,7 @@ EXPECTED: list[tuple[int, str]] = [
     (130, "bpf_ringbuf_output"),
     (148, "bpf_copy_from_user"),
     (152, "bpf_redirect_neigh"),
+    (155, "bpf_redirect_peer"),
     (158, "bpf_get_current_task_btf"),
     (161, "bpf_ima_inode_hash"),
     (174, "bpf_get_attach_cookie"),
@@ -115,7 +114,7 @@ FORWARDING_PAIR = (
 )
 
 
-def load() -> tuple[list[dict[str, object]], list[tuple[int, str, str]]]:
+def load() -> list[dict[str, object]]:
     data = json.loads(SPEC.read_text())
     if set(data) != {"schema_version", "operation", "rows"}:
         raise SystemExit(f"invalid arm64 helper idents spec: {data!r}")
@@ -148,16 +147,9 @@ def load() -> tuple[list[dict[str, object]], list[tuple[int, str, str]]]:
             f"sim-only {sorted(bodies - names)}, spec-only {sorted(names - bodies)}")
     joined = sim.replace("\\\n", " ")
     pairs = re.findall(FORWARDING_PAIR, joined, re.M)
-    name_to_id = {str(row["name"]): row["id"] for row in rows}
-    delegates: list[tuple[int, str, str]] = []
-    for source, target in pairs:
-        if source not in name_to_id or target not in name_to_id:
-            raise SystemExit(
-                f"sim header forwards ARM64_SIM_BPF_CALL_{source} to "
-                f"ARM64_SIM_BPF_CALL_{target}, which is not in the spec")
-        delegates.append((name_to_id[source], source, target))
-    delegates.sort(key=lambda delegate: delegate[0])
-    return rows, delegates
+    if pairs:
+        raise SystemExit(f"helper macros must invoke their exact Linux helper, not aliases: {pairs}")
+    return rows
 
 
 def render_lean(rows: list[dict[str, object]]) -> str:
@@ -179,8 +171,7 @@ end KProgFormal.GeneratedArm64HelperIdents
 '''
 
 
-def render_c(rows: list[dict[str, object]],
-             delegates: list[tuple[int, str, str]]) -> str:
+def render_c(rows: list[dict[str, object]]) -> str:
     head = "#define KPROG_ARM64_HELPER_ROW(KERNEL_ID)"
     arms = []
     for index, row in enumerate(rows):
@@ -196,11 +187,6 @@ def render_c(rows: list[dict[str, object]],
         f"_Static_assert(KPROG_ARM64_HELPER_ROW({row['id']}) == "
         f"{index + 1}U, \"AArch64 helper idents row selection drift\");"
         for index, row in enumerate(rows))
-    sorted_names = sorted(str(row["name"]) for row in rows)
-    delegate_rows = "\n".join(
-        f"#define KPROG_ARM64_HELPER_DELEGATE_{source.upper()} "
-        f"{sorted_names.index(target) + 1}U"
-        for _source_id, source, target in delegates)
     return f'''/* Generated by generate_arm64_helper_idents_spec.py from arm64_helper_idents_spec.json. */
 #ifndef KPROG_FORMAL_GENERATED_ARM64_HELPER_IDENTS_H
 #define KPROG_FORMAL_GENERATED_ARM64_HELPER_IDENTS_H
@@ -208,13 +194,9 @@ def render_c(rows: list[dict[str, object]],
  * The AArch64 artifact encoder's BPF helper-ident table: the {len(rows)} kernel
  * ids the AArch64 simulator recognizes, in id-sorted order.
  * KPROG_ARM64_HELPER_ROW maps a kernel id to its 1-based position in that
- * order, 0 outside. KPROG_ARM64_HELPER_DELEGATE_* pins the 1-based
- * lexicographic rank of a sim-header forwarding target over the full
- * 66-name table: the compact per-program slot the encoder's renumbering
- * assigns the target when a program uses every helper.
+ * order, 0 outside. Each name invokes its actual Linux helper ID.
  */
 #define KPROG_ARM64_HELPER_IDENTS_COUNT {len(rows)}U
-#define KPROG_ARM64_HELPER_DELEGATE_COUNT {len(delegates)}U
 /*
  * The 1-based position of a kernel id in the id-sorted table. The input is
  * evaluated once; an id outside the table reaches the 0 default.
@@ -222,14 +204,10 @@ def render_c(rows: list[dict[str, object]],
 {selector_block}
 _Static_assert(KPROG_ARM64_HELPER_IDENTS_COUNT == {len(rows)}U,
 	       "AArch64 helper idents count drift");
-_Static_assert(KPROG_ARM64_HELPER_DELEGATE_COUNT == {len(delegates)}U,
-	       "AArch64 helper idents delegate count drift");
 {per_row}
 /* The selector is total: a kernel id past the table reaches the default. */
 _Static_assert(KPROG_ARM64_HELPER_ROW(0x100) == 0U,
 	       "AArch64 helper idents out-of-range id must reach the default arm");
-/* The compact slots the forwarding targets occupy, by source kernel id. */
-{delegate_rows}
 #endif
 '''
 
@@ -248,10 +226,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    rows, delegates = load()
+    rows = load()
     outputs = (
         (LEAN, render_lean(rows)),
-        (C_HEADER, render_c(rows, delegates)),
+        (C_HEADER, render_c(rows)),
         (PYTHON, render_python(rows)),
     )
     for path, expected in outputs:

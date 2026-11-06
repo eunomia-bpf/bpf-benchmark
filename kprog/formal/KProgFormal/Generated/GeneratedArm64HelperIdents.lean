@@ -18,6 +18,7 @@ inductive Helper
   | bpf_get_current_pid_tgid
   | bpf_get_current_uid_gid
   | bpf_get_current_comm
+  | bpf_skb_get_tunnel_key
   | bpf_skb_set_tunnel_key
   | bpf_redirect
   | bpf_perf_event_output
@@ -37,13 +38,16 @@ inductive Helper
   | bpf_probe_read_str
   | bpf_get_socket_cookie
   | bpf_skb_adjust_room
+  | bpf_xdp_adjust_meta
   | bpf_override_return
   | bpf_xdp_adjust_tail
   | bpf_get_stack
   | bpf_skb_load_bytes_relative
   | bpf_fib_lookup
   | bpf_get_current_cgroup_id
+  | bpf_map_push_elem
   | bpf_sk_fullsock
+  | bpf_skc_lookup_tcp
   | bpf_send_signal
   | bpf_probe_read_user
   | bpf_probe_read_kernel
@@ -56,6 +60,7 @@ inductive Helper
   | bpf_ringbuf_output
   | bpf_copy_from_user
   | bpf_redirect_neigh
+  | bpf_redirect_peer
   | bpf_get_current_task_btf
   | bpf_ima_inode_hash
   | bpf_get_attach_cookie
@@ -86,6 +91,7 @@ def id : Helper -> Nat
   | .bpf_get_current_pid_tgid => 14
   | .bpf_get_current_uid_gid => 15
   | .bpf_get_current_comm => 16
+  | .bpf_skb_get_tunnel_key => 20
   | .bpf_skb_set_tunnel_key => 21
   | .bpf_redirect => 23
   | .bpf_perf_event_output => 25
@@ -105,13 +111,16 @@ def id : Helper -> Nat
   | .bpf_probe_read_str => 45
   | .bpf_get_socket_cookie => 46
   | .bpf_skb_adjust_room => 50
+  | .bpf_xdp_adjust_meta => 54
   | .bpf_override_return => 58
   | .bpf_xdp_adjust_tail => 65
   | .bpf_get_stack => 67
   | .bpf_skb_load_bytes_relative => 68
   | .bpf_fib_lookup => 69
   | .bpf_get_current_cgroup_id => 80
+  | .bpf_map_push_elem => 87
   | .bpf_sk_fullsock => 95
+  | .bpf_skc_lookup_tcp => 99
   | .bpf_send_signal => 109
   | .bpf_probe_read_user => 112
   | .bpf_probe_read_kernel => 113
@@ -124,6 +133,7 @@ def id : Helper -> Nat
   | .bpf_ringbuf_output => 130
   | .bpf_copy_from_user => 148
   | .bpf_redirect_neigh => 152
+  | .bpf_redirect_peer => 155
   | .bpf_get_current_task_btf => 158
   | .bpf_ima_inode_hash => 161
   | .bpf_get_attach_cookie => 174
@@ -153,6 +163,7 @@ def name : Helper -> String
   | .bpf_get_current_pid_tgid => "bpf_get_current_pid_tgid"
   | .bpf_get_current_uid_gid => "bpf_get_current_uid_gid"
   | .bpf_get_current_comm => "bpf_get_current_comm"
+  | .bpf_skb_get_tunnel_key => "bpf_skb_get_tunnel_key"
   | .bpf_skb_set_tunnel_key => "bpf_skb_set_tunnel_key"
   | .bpf_redirect => "bpf_redirect"
   | .bpf_perf_event_output => "bpf_perf_event_output"
@@ -172,13 +183,16 @@ def name : Helper -> String
   | .bpf_probe_read_str => "bpf_probe_read_str"
   | .bpf_get_socket_cookie => "bpf_get_socket_cookie"
   | .bpf_skb_adjust_room => "bpf_skb_adjust_room"
+  | .bpf_xdp_adjust_meta => "bpf_xdp_adjust_meta"
   | .bpf_override_return => "bpf_override_return"
   | .bpf_xdp_adjust_tail => "bpf_xdp_adjust_tail"
   | .bpf_get_stack => "bpf_get_stack"
   | .bpf_skb_load_bytes_relative => "bpf_skb_load_bytes_relative"
   | .bpf_fib_lookup => "bpf_fib_lookup"
   | .bpf_get_current_cgroup_id => "bpf_get_current_cgroup_id"
+  | .bpf_map_push_elem => "bpf_map_push_elem"
   | .bpf_sk_fullsock => "bpf_sk_fullsock"
+  | .bpf_skc_lookup_tcp => "bpf_skc_lookup_tcp"
   | .bpf_send_signal => "bpf_send_signal"
   | .bpf_probe_read_user => "bpf_probe_read_user"
   | .bpf_probe_read_kernel => "bpf_probe_read_kernel"
@@ -191,6 +205,7 @@ def name : Helper -> String
   | .bpf_ringbuf_output => "bpf_ringbuf_output"
   | .bpf_copy_from_user => "bpf_copy_from_user"
   | .bpf_redirect_neigh => "bpf_redirect_neigh"
+  | .bpf_redirect_peer => "bpf_redirect_peer"
   | .bpf_get_current_task_btf => "bpf_get_current_task_btf"
   | .bpf_ima_inode_hash => "bpf_ima_inode_hash"
   | .bpf_get_attach_cookie => "bpf_get_attach_cookie"

@@ -236,3 +236,17 @@ logs were preserved under `register-cells/verify/interrupted-0834/`; the two
 in `register-cells-long/`. Seven of eight resumed result checks pass in
 `register-cells-runlong/`; the eighth is the same event-type verifier complexity
 failure. The original 60-second deadlines remain in `register-cells/`.
+
+## Real helper calls
+
+The 71-helper ABI increment replaces every existing zero-return body and every
+incorrect helper alias with an actual typed Linux helper call. It adds the five
+missing IDs20/54/87/99/155 seen by CFG target analysis. Lean table identity,
+unique names/increasing IDs, independent libbpf IDs,73 table checks and142
+argument/result checks pass. Frozen sources and logs are retained under
+[real-helper-abi/](real-helper-abi/README.md). The old delegate-rank checks are
+removed with the incorrect aliases; exact helper identity is now checked for
+every call. Callback handling, caller-clobber/entry definedness, actual context
+projection and map pairing remain active integration defects, not accepted
+cases. The fresh1136-artifact generation census exposes four further missing
+ID86/88 sites, which lane A is repairing next.

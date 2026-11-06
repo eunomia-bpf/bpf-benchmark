@@ -60,3 +60,8 @@ register-cell-host-check:
 
 write-arm-generate:
 	cd $(ROOT)/kprog/formal && python3 tools/generate_arm64_write_arm_spec.py
+
+.PHONY: helper-abi-update
+helper-abi-update:
+	python3 $(HERE)/generate_helpers.py
+	$(MAKE) -f $(HERE)/Makefile helper-contract-generate
