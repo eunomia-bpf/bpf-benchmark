@@ -280,8 +280,23 @@ def writeData (s : State) (dst : RegisterRef) (value : Word) (width : Width) : S
 def moveRegStep (width : Width) (dst src : RegisterRef) (s : State) : Transition State :=
   ⟨{ writeData s dst (readData s src) width with pc := s.pc + 4 }, [], none⟩
 
+/-- FMOV general transfers bits without floating-point conversion. Vpart part0
+writes zero-extend across all128 vector bits; W destinations zero-extend in X.
+Arm DDI0602 FMOV (general) and shared Vpart/V register-access pseudocode. -/
+inductive FmovInstruction
+  | toVector (width : Width) (src : Register)
+  | fromVector (width : Width) (dst : Register)
+  deriving DecidableEq, Repr
+
+def fmovStep (i : FmovInstruction) (s : State) : Transition State :=
+  let result := match i with
+    | .toVector width src => { s with vector0 := (narrow (readReg s src) width).setWidth 128 }
+    | .fromVector width dst => writeReg s dst (narrow (s.vector0.setWidth 64) width)
+  ⟨{ result with pc := s.pc + 4 }, [], none⟩
+
 inductive Instruction
   | mul (instruction : MulInstruction)
+  | fmov (instruction : FmovInstruction)
   | shift (instruction : ShiftInstruction)
   | logic (instruction : LogicInstruction)
   | keep (instruction : KeepInstruction)
@@ -294,6 +309,7 @@ inductive Instruction
 def step (i : Instruction) (s : State) : Transition State :=
   match i with
   | .mul instruction => mulStep instruction s
+  | .fmov instruction => fmovStep instruction s
   | .shift instruction => shiftStep instruction s
   | .logic instruction => logicStep instruction s
   | .keep instruction => keepStep instruction s
@@ -323,6 +339,15 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   let lhs := register (word / 2^5)
   let rhs := register (word / 2^16)
   let addend := register (word / 2^10)
+  -- FMOV's floating register field is explicit: this state models V0.
+  -- Other vector-register fields must never silently alias V0.
+  let transfer := word &&& 0xfffffc00
+  if transfer = 0x9e670000 ∨ transfer = 0x1e270000 then
+    if dst.val ≠ 0 then throw "FMOV vector destination is not V0"
+    return .fmov (.toVector (if transfer = 0x9e670000 then .w64 else .w32) lhs)
+  if transfer = 0x9e660000 ∨ transfer = 0x1e260000 then
+    if lhs.val ≠ 0 then throw "FMOV vector source is not V0"
+    return .fmov (.fromVector (if transfer = 0x9e660000 then .w64 else .w32) dst)
   -- MOV register is ORR with Rn=ZR and no shift. MOV involving SP is
   -- the ADD-immediate-zero alias, whose field31 denotes SP rather than ZR.
   if word &&& 0x7fe0ffe0 = 0x2a0003e0 then

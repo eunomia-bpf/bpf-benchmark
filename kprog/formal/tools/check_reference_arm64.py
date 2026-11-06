@@ -238,6 +238,32 @@ def main():
         if dst is not None:
             expected["registers"][dst] = result
         cases.append((request, expected))
+    # FMOV must copy raw NaN/sign bits, clear the upper vector lanes on a
+    # scalar vector write, and discard ZR without touching SP or vector state.
+    for word, source, dst, vector_result in [
+            (0x9E670020, 1, None, 0xFFF8000000000001),
+            (0x9E6703E0, 31, None, 0),
+            (0x9E6703C0, 30, None, 0xFFF8000000000001),
+            (0x1E270020, 1, None, 1),
+            (0x1E2703E0, 31, None, 0),
+            (0x9E660000, None, 0, None),
+            (0x9E66001F, None, 31, None),
+            (0x9E66001E, None, 30, None),
+            (0x1E260000, None, 0, None),
+            (0x1E26001F, None, 31, None),
+            (0x1E26001E, None, 30, None)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["vector0"] = 0xFEDCBA98765432107FF8000080000001
+        if source is not None and source != 31:
+            request["state"]["registers"][source] = 0xFFF8000000000001
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
+        if vector_result is not None:
+            expected["vector0"] = vector_result
+        elif dst != 31:
+            expected["registers"][dst] = 0x80000001 if word < (1 << 31) else 0x7FF8000080000001
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -248,7 +274,9 @@ def main():
     for word in (0x2A2183E0, 0x4BC107E0, 0x4B2107E0, 0x6B0107E0,
                  0x1AE22020, 0x53207C20, 0x131FFC20, 0x0A028020, 0x6A228020,
                  0x72C24680, 0x72E24680, 0x72024680, 0x12C24680, 0x12E24680,
-                 0x52C24680, 0x52E24680, 0x32824680):
+                 0x52C24680, 0x52E24680, 0x32824680,
+                 0x9E670021, 0x9E660021, 0x1E270021, 0x1E260021,
+                 0x1EE70020, 0x9EAE0001):
         request = copy.deepcopy(base)
         request["native_bytes"] = list(word.to_bytes(4, "little"))
         rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
@@ -279,7 +307,7 @@ def main():
     nv = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "nv"), "csel x0,x1,x2,nv")
     al = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "al"), "csel x0,x1,x2,al")
     assert encoder.encode(nv, {}, {}) == encoder.encode(al, {}, {})
-    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":
