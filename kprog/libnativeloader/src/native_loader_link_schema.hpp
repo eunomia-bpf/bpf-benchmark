@@ -144,10 +144,11 @@ NativeLinkArgs build_native_link_args(
             BPF_FUNC_redirect_map,
             BPF_FUNC_skc_lookup_tcp,
             BPF_FUNC_sk_lookup_udp,
+            BPF_FUNC_get_func_ip,
         };
         for (int helper_id : kContextualHelperIds) {
             std::optional<std::pair<std::string, uint64_t>> alias =
-                contextual_helper_alias_if_available(helper_id, companion.prog_type);
+                contextual_helper_alias_if_available(helper_id, companion.prog_type, companion.expected_attach_type);
             if (!alias) {
                 continue;
             }

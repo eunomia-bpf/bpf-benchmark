@@ -500,6 +500,10 @@ constexpr const char *kTypedHelperSymbols[] = {
     "bpf_xdp_sk_lookup_udp",
     "bpf_sock_addr_sk_lookup_udp",
     "bpf_sk_lookup_udp",
+    "bpf_get_func_ip_tracing",
+    "bpf_get_func_ip_kprobe",
+    "bpf_get_func_ip_kprobe_multi",
+    "bpf_get_func_ip_uprobe_multi",
 };
 
 constexpr const char *kX86CpuNumberHelperKey = "__native_x86_cpu_number";
@@ -2204,8 +2208,21 @@ const char *helper_symbol_for_id(int helper_id)
     return nullptr;
 }
 
-HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type)
+HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type, uint32_t expected_attach_type)
 {
+    if (helper_id == BPF_FUNC_get_func_ip) {
+        const char *symbol = "bpf_get_func_ip_tracing";
+        if (prog_type == BPF_PROG_TYPE_KPROBE) {
+            if (expected_attach_type == BPF_TRACE_KPROBE_MULTI ||
+                expected_attach_type == BPF_TRACE_KPROBE_SESSION)
+                symbol = "bpf_get_func_ip_kprobe_multi";
+            else if (expected_attach_type == BPF_TRACE_UPROBE_MULTI ||
+                expected_attach_type == BPF_TRACE_UPROBE_SESSION)
+                symbol = "bpf_get_func_ip_uprobe_multi";
+            else symbol = "bpf_get_func_ip_kprobe";
+        }
+        return HelperAlias{helper_id, "bpf_get_func_ip", symbol};
+    }
     if (helper_id == BPF_FUNC_perf_event_output) {
         if (prog_type == BPF_PROG_TYPE_TRACEPOINT ||
             prog_type == BPF_PROG_TYPE_PERF_EVENT) {
@@ -2297,9 +2314,9 @@ HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type)
 }
 
 std::optional<std::pair<std::string, uint64_t>>
-contextual_helper_alias_if_available(int helper_id, uint32_t prog_type)
+contextual_helper_alias_if_available(int helper_id, uint32_t prog_type, uint32_t expected_attach_type)
 {
-    const HelperAlias alias = helper_alias_for_call(helper_id, prog_type);
+    const HelperAlias alias = helper_alias_for_call(helper_id, prog_type, expected_attach_type);
     if (!alias.link_name || !alias.kernel_symbol) {
         return std::nullopt;
     }
@@ -2930,6 +2947,7 @@ struct CompanionLoad {
     std::unordered_map<std::string, MapMeta> exact_map_addrs;
     std::unordered_set<std::string> ambiguous_exact_maps;
     uint32_t prog_type = 0;
+    uint32_t expected_attach_type = 0;
     std::vector<MapMeta> maps;
     std::vector<NativeMapRule> map_rules;
     std::vector<MapMeta> source_tail_call_maps;
@@ -5192,6 +5210,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             source_insns.empty() ? nullptr : source_insns.data(),
             source_insns.size(),
             std::move(map_rules));
+    companion.expected_attach_type = options.expected_attach_type;
     SimulatorObject simulator_object(nullptr, bpf_object__close);
     std::vector<std::unique_ptr<ScopedFd>> proof_map_fds;
     if (!simulator_object_path.empty()) {

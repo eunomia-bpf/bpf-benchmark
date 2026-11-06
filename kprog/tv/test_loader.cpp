@@ -223,9 +223,10 @@ static void tracing_context_regressions()
     int target = btf__find_by_name_kind(types.get(), "bpf_fentry_test1", BTF_KIND_FUNC);
     int other = btf__find_by_name_kind(types.get(), "bpf_fentry_test2", BTF_KIND_FUNC);
     if (target <= 0 || other <= 0) throw std::runtime_error("find tracing targets");
-    std::vector<bpf_insn> body(2);
-    body[0].code = BPF_ALU64 | BPF_MOV | BPF_K;
-    body[1].code = BPF_JMP | BPF_EXIT;
+    std::vector<bpf_insn> body(3);
+    body[0].code = BPF_JMP | BPF_CALL; body[0].imm = BPF_FUNC_get_func_ip;
+    body[1].code = BPF_ALU64 | BPF_MOV | BPF_K;
+    body[2].code = BPF_JMP | BPF_EXIT;
     bpf_prog_load_opts attrs{};
     attrs.sz = sizeof(attrs); attrs.expected_attach_type = BPF_TRACE_FENTRY;
     attrs.attach_btf_id = target;
@@ -236,7 +237,7 @@ static void tracing_context_regressions()
     options.expected_attach_type = BPF_TRACE_FENTRY;
     options.source_insns = options.proof_insns = body;
     options.native_object_path = std::filesystem::absolute("build/native-entry.o");
-    options.symbol_name = "tv_trace_entry";
+    options.symbol_name = "tv_func_ip_entry";
     options.native_link_path = std::filesystem::absolute(TV_NATIVE_LINK_PATH);
     for (unsigned mismatch = 0; mismatch < 2; mismatch++) {
         auto wrong = options;
@@ -268,6 +269,21 @@ static void tracing_context_regressions()
     if (close(link) || close(stats) || close(original)) throw std::runtime_error("close tracing fixture");
     native_loader::close_loaded_program(&loaded);
     std::puts("exact fentry BTF/type context: PASS (attached native target executed)");
+    for (uint32_t attach : {0U, static_cast<uint32_t>(BPF_TRACE_KPROBE_MULTI),
+            static_cast<uint32_t>(BPF_TRACE_KPROBE_SESSION), static_cast<uint32_t>(BPF_TRACE_UPROBE_MULTI),
+            static_cast<uint32_t>(BPF_TRACE_UPROBE_SESSION)}) {
+        attrs.attach_btf_id = 0;
+        attrs.expected_attach_type = static_cast<bpf_attach_type>(attach);
+        int probe = bpf_prog_load(BPF_PROG_TYPE_KPROBE, "tv_func_ip", "GPL", body.data(), body.size(), &attrs);
+        if (probe < 0) throw std::runtime_error("load original probe IP context: " + std::string(std::strerror(errno)));
+        options.original_prog_fd = probe;
+        options.expected_attach_type = attach;
+        auto paired = native_loader::load_from_fd(options);
+        assert(paired.replaced && paired.prog_fd >= 0);
+        native_loader::close_loaded_program(&paired);
+        if (close(probe)) throw std::runtime_error("close probe IP context");
+        std::printf("get_func_ip KPROBE attach %u: PASS (exact contextual helper, load-only)\n", attach);
+    }
 }
 
 int main()

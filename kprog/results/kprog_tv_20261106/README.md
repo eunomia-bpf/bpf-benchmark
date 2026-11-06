@@ -490,3 +490,22 @@ The existing compiled input and CMOV component proofs, context-expansion
 proofs and all their byte-mutation negatives also pass against V's updated
 memory reference. Their raw combined log is retained; these are component
 proofs, and no whole-program TV status is inferred from their success.
+
+Attachment-specific get_func_ip helpers
+--------------------------------------
+
+Kernel helper173 has distinct tracing, ordinary kprobe, kprobe-multi/session
+and uprobe-multi/session implementations. The generic public helper name has
+no kallsyms address. The loader now carries the captured expected attach type
+into its contextual helper selection and wanted-symbol set, including the
+closed link-plan helper list. It selects the same implementation as the
+kernel's actual get_func_proto callback, with no address guess.
+
+Actual x86 tests pass for all five probe attachment profiles (0/42/56/48/57)
+through generation-bound load/JIT admission; these probe cases are load-only.
+The fentry positive now calls helper173 in the bound native body and executes
+attached to the real bpf_fentry_test1 target. Its original kernel program also
+calls the same helper. Wrong tracing target/type negatives and all existing
+binding regressions pass. Both architecture libraries build. Latest compatible
+libraries are under context-v2-func-ip; binding wire2, C shim ABI and the required
+readonly native-link interface are unchanged.

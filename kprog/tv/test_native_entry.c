@@ -5,12 +5,6 @@ int tv_short_entry(void *ctx)
 	return 2;
 }
 
-int tv_trace_entry(void *ctx)
-{
-	(void)ctx;
-	return 0;
-}
-
 int tv_long_entry(void *ctx)
 {
 	(void)ctx;
@@ -20,6 +14,13 @@ int tv_long_entry(void *ctx)
 
 extern unsigned long bpf_get_prandom_u32(void);
 extern unsigned long bpf_ktime_get_coarse_ns(void);
+extern unsigned long bpf_get_func_ip(void *ctx);
+
+int tv_func_ip_entry(void *ctx)
+{
+	(void)bpf_get_func_ip(ctx);
+	return 0;
+}
 
 int tv_coarse_helper_entry(void *ctx)
 {

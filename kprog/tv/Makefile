@@ -131,6 +131,7 @@ build/test-loader: test_loader.cpp build/native-entry.o build/simulator.bpf.o bu
 	$(MAKE) -C ../libnativeloader BUILD_DIR=build-tv-binding
 	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 \
 		-DTV_NATIVE_LINK_PATH='"$(TV_NATIVE_LINK)"' \
+		-I../../vendor/libbpf/include/uapi \
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		$< ../libnativeloader/build-tv-binding/libnative_loader.a \
 		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $@
