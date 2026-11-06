@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import shutil
@@ -19,6 +20,7 @@ GENERATOR = ARM64_SIM_DIR / "micro-prog" / "generate_micro_sim_proofs.py"
 DEFAULT_PROOF_ROOT = REPO_ROOT / "vendor" / "build" / "native-bpf" / "arm64" / "stage"
 DEFAULT_OUTPUT_DIR = ARM64_SIM_DIR / "app-prog"
 DEFAULT_BUILD_DIR = DEFAULT_OUTPUT_DIR / "build"
+REPORT_DIR: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -29,7 +31,7 @@ class AppProof:
 
 def run(cmd: list[str], *, cwd: Path = REPO_ROOT,
         timeout_s: int | None = None) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
+    result = subprocess.run(
         cmd,
         cwd=cwd,
         check=False,
@@ -38,6 +40,12 @@ def run(cmd: list[str], *, cwd: Path = REPO_ROOT,
         stderr=subprocess.PIPE,
         timeout=timeout_s,
     )
+    if REPORT_DIR is not None:
+        with (REPORT_DIR / "commands.jsonl").open("a", encoding="utf-8") as log:
+            log.write(json.dumps({"command": cmd, "cwd": str(cwd),
+                                  "returncode": result.returncode,
+                                  "stdout": result.stdout, "stderr": result.stderr}) + "\n")
+    return result
 
 
 def compact(text: str, limit: int = 1200) -> str:
@@ -183,6 +191,8 @@ def compile_source(source: Path, build_dir: Path, timeout_s: int) -> tuple[bool,
         str(REPO_ROOT / "vendor" / "libbpf" / "src"),
         "-I",
         "/usr/include/x86_64-linux-gnu",
+        "-I",
+        str(ARM64_SIM_DIR / "micro-prog"),
         "-c",
         str(source),
         "-o",
@@ -206,6 +216,7 @@ def compile_source(source: Path, build_dir: Path, timeout_s: int) -> tuple[bool,
 
 
 def main(argv: list[str]) -> int:
+    global REPORT_DIR
     parser = argparse.ArgumentParser()
     parser.add_argument("--proof-root", type=Path, default=DEFAULT_PROOF_ROOT)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
@@ -216,7 +227,12 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--limit", type=int)
     parser.add_argument("--compile-timeout-s", type=int, default=120)
     parser.add_argument("--keep-going", action="store_true")
+    parser.add_argument("--report-dir", type=Path)
+    parser.add_argument("--generate-only", action="store_true")
     args = parser.parse_args(argv)
+    if args.report_dir is not None:
+        REPORT_DIR = args.report_dir.resolve()
+        REPORT_DIR.mkdir(parents=True, exist_ok=True)
 
     if args.offset < 0:
         raise SystemExit("--offset must be >= 0")
@@ -238,16 +254,28 @@ def main(argv: list[str]) -> int:
     prepare_generator_inputs(proofs, proof_dir, config_path)
 
     failures: list[str] = []
+    def record(proof: AppProof, stage: str, ok: bool, note: str) -> None:
+        if REPORT_DIR is not None:
+            with (REPORT_DIR / "programs.jsonl").open("a", encoding="utf-8") as log:
+                log.write(json.dumps({"name": proof.name, "proof": str(proof.source),
+                                      "stage": stage, "ok": ok, "note": note,
+                                      "source": str(source_dir / f"{proof.name}.bpf.c"),
+                                      "object": str(build_dir / f"{proof.name}.bpf.bpf.o")}) + "\n")
     for proof in proofs:
         ok, note = generate_source(config_path, proof_dir, source_dir, proof)
+        record(proof, "generate", ok, note)
         if not ok:
             print(f"fail {proof.name}: {note}", flush=True)
             failures.append(proof.name)
             if not args.keep_going:
                 break
             continue
+        if args.generate_only:
+            print(f"generated {proof.name}", flush=True)
+            continue
         source = source_dir / f"{proof.name}.bpf.c"
         ok, note = compile_source(source, build_dir, args.compile_timeout_s)
+        record(proof, "compile", ok, note)
         if ok:
             print(f"ok {proof.name}", flush=True)
             continue
@@ -259,7 +287,8 @@ def main(argv: list[str]) -> int:
     if failures:
         print(f"app proof smoke failed: {len(failures)}/{len(proofs)} failed", file=sys.stderr)
         return 1
-    print(f"app proof smoke passed: {len(proofs)} generated and compiled")
+    action = "generated" if args.generate_only else "generated and compiled"
+    print(f"app proof smoke passed: {len(proofs)} {action}")
     return 0
 
 
