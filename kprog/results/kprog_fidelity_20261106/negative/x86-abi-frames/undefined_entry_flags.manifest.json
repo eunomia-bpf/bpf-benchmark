@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-x86/negative-abi-frames/undefined_entry_flags.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/negative-abi-frames/undefined_entry_flags.bpf.o",
+      "simulator_program": "undefined_entry_flags_x86_sim_xdp"
+    }
+  ]
+}

@@ -139,12 +139,12 @@ NEGATIVE_BOUND_OUT ?= ../results/kprog_fidelity_20261106/negative/x86-bound
 negative-bound-kvm:
 	vng --run $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage \
 		--cwd $(ROOT) --disable-monitor --cpus 2 --mem 2G --rwdir $(ROOT) --overlay-rwdir /tmp \
-		--exec 'make -C $(ROOT)/kprog/fidelity negative-bound-guest NEGATIVE_BOUND_OUT=$(NEGATIVE_BOUND_OUT)'
+		--exec 'make -C $(ROOT)/kprog/fidelity negative-bound-guest NEGATIVE_BOUND_OUT=$(NEGATIVE_BOUND_OUT) NEGATIVE_BUILD=$(NEGATIVE_BUILD)'
 
 negative-bound-guest:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod ../tv/build-x86/bpf_x86_native_lab.ko
-	$(PYTHON) negative.py bound --arch x86 --build build-x86/negative \
+	$(PYTHON) negative.py bound --arch x86 --build $(NEGATIVE_BUILD) \
 		--out $(NEGATIVE_BOUND_OUT) \
 		--probe build-x86/bound-probe --companion build-x86/negative-companion.bpf.o
 
@@ -170,16 +170,17 @@ bound-probe-build-arm64:
 		cargo build --release --target aarch64-unknown-linux-gnu --manifest-path ../x86/native_lab/native_link/Cargo.toml
 
 ARM_NEGATIVE_BOUND_OUT ?= ../results/kprog_fidelity_20261106/negative/arm64-bound
+ARM_NEGATIVE_BOUND_BUILD ?= build-arm64/negative-bound
 negative-bound-qemu: bound-probe-build-arm64
-	$(MAKE) negative-build ARCH=arm64 NEGATIVE_BUILD=build-arm64/negative-bound
+	$(MAKE) negative-build ARCH=arm64 NEGATIVE_BUILD=$(ARM_NEGATIVE_BOUND_BUILD)
 	aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -static -DBOUND_NEGATIVE negative_init.c -o build-arm64/negative-bound-init
-	$(PYTHON) negative.py package-bound --arch arm64 --build build-arm64/negative-bound
+	$(PYTHON) negative.py package-bound --arch arm64 --build $(ARM_NEGATIVE_BOUND_BUILD)
 	install -d $(ARM_NEGATIVE_BOUND_OUT)
 	timeout 240 qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 2 -m 2048 \
 		-nographic -no-reboot -kernel $(ROOT)/kprog/tv/build-kernel-arm64/arch/arm64/boot/Image \
 		-initrd build-arm64/negative-bound.cpio -append 'console=ttyAMA0 rdinit=/init panic=-1' \
 		> $(ARM_NEGATIVE_BOUND_OUT)/guest-console.log 2>&1
-	$(PYTHON) negative.py collect-bound --arch arm64 --build build-arm64/negative-bound --out $(ARM_NEGATIVE_BOUND_OUT)
+	$(PYTHON) negative.py collect-bound --arch arm64 --build $(ARM_NEGATIVE_BOUND_BUILD) --out $(ARM_NEGATIVE_BOUND_OUT)
 
 .PHONY: stage2-build stage2-kvm stage2-guest
 stage2-build: bound-probe-build

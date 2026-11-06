@@ -1,0 +1,101 @@
+{
+  "arch": "arm64",
+  "cases": [
+    {
+      "name": "past_data_end_read",
+      "assembly": "ldr x1, [x0, #8]; ldrb w0, [x1]; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=231\nstub fd_array_cnt=2 fd_array=0:9,1:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=4;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n1: (71) r0 = *(u8 *)(r1 +0)\nR1 invalid mem access 'pkt_end'\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,197,1809618,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,1809972,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374\nnative_blob_diag: fnv64=8390e88279162497 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1\nchunk_bytes=0:20\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "returncode": 1
+    },
+    {
+      "name": "past_data_end_write",
+      "assembly": "ldr x1, [x0, #8]; mov w2, #1; strb w2, [x1]; mov w0, #2; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=276\nstub fd_array_cnt=2 fd_array=0:9,1:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=8;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n1: (b7) r2 = 1                        ; R2=1\n2: (73) *(u8 *)(r1 +0) = r2\nR1 invalid mem access 'pkt_end'\nprocessed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,197,1809618,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,1809972,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=28 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374\nnative_blob_diag: fnv64=0330b138d1d15997 word_count=7 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=28 final_size_matches=1\nchunk_bytes=0:28\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "returncode": 1
+    },
+    {
+      "name": "missing_data_end_check",
+      "assembly": "ldr x1, [x0]; ldrb w0, [x1]; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=292\nstub fd_array_cnt=2 fd_array=0:9,1:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=12;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (61) r1 = *(u32 *)(r1 +0)          ; R1=pkt(r=0)\n1: (71) r0 = *(u8 *)(r1 +0)\ninvalid access to packet, off=0 size=1, R1(id=0,off=0,r=0)\nR1 offset is outside of the packet\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,197,1809618,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,1809972,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374\nnative_blob_diag: fnv64=7c32214a9a3e17f3 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1\nchunk_bytes=0:20\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "returncode": 1
+    },
+    {
+      "name": "map_value_oob",
+      "assembly": "ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; cbz x0, 1f; ldr x0, [x0, #8]; ret; 1: mov x0, #0; ret",
+      "stage": "linker_rejected",
+      "message": "libbpf: failed to find BTF for extern 'arm64_sim_unsupported_opcode' [20] section: -2\nbound-probe: open simulator proof /proofs/map_value_oob.bpf.o: No such file or directory\n",
+      "returncode": 1
+    },
+    {
+      "name": "nullable_map_dereference",
+      "assembly": "ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; ldr x0, [x0]; ret; 1: mov x0, #0; ret",
+      "stage": "linker_rejected",
+      "message": "libbpf: failed to find BTF for extern 'arm64_sim_unsupported_opcode' [20] section: -2\nbound-probe: open simulator proof /proofs/nullable_map_dereference.bpf.o: No such file or directory\n",
+      "returncode": 1
+    },
+    {
+      "name": "invalid_helper_argument",
+      "assembly": "mov x0, #1; mov x1, #0; bl bpf_map_lookup_elem; ret",
+      "stage": "linker_rejected",
+      "message": "libbpf: failed to find BTF for extern 'arm64_sim_unsupported_opcode' [9] section: -2\nbound-probe: open simulator proof /proofs/invalid_helper_argument.bpf.o: No such file or directory\n",
+      "returncode": 1
+    },
+    {
+      "name": "stack_oob",
+      "assembly": "ldr x0, [sp, #1024]; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=161\nstub fd_array_cnt=2 fd_array=0:9,1:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=16;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (05) goto pc+0\n1: (95) exit\nR0 !read_ok\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,197,1809618,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,1809972,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374\nnative_blob_diag: fnv64=04e9cefe01762702 word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1\nchunk_bytes=0:12\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "returncode": 1
+    },
+    {
+      "name": "uninitialized_stack",
+      "assembly": "ldur x0, [sp, #-8]; ret",
+      "stage": "verifier_rejected",
+      "message": "bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=190\nstub fd_array_cnt=2 fd_array=0:9,1:9\nstub insns=0:code=183,dst=0,src=3,off=0,imm=20;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log tail:\n0: R1=ctx() R10=fp0\n0: (79) r0 = *(u64 *)(r10 -8)\ninvalid read from stack R10 off=-8 size=8\nprocessed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,197,1809618,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,198,1809972,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374\nnative_blob_diag: fnv64=ed7a608bbfe6da68 word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1\nchunk_bytes=0:12\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n",
+      "returncode": 1
+    },
+    {
+      "name": "unbounded_loop",
+      "assembly": "1: b 1b",
+      "stage": "loader_rejected",
+      "message": "bound-probe: native_kernel bound proof contains no BPF exit\n",
+      "returncode": 1
+    },
+    {
+      "name": "unbounded_indirect_jump",
+      "assembly": "ldr x1, [x0]; br x1",
+      "stage": "specialization_rejected",
+      "message": "unbounded indirect target at 0x4: br x1"
+    },
+    {
+      "name": "unsupported_instruction",
+      "assembly": "brk #0; ret",
+      "stage": "specialization_rejected",
+      "message": "unsupported arm64 instruction: brk #0x0"
+    },
+    {
+      "name": "undefined_entry_register",
+      "assembly": "cbz x1, 1f; ldr x1, [x0, #8]; ldrb w0, [x1]; ret; 1: mov w0, #2; ret",
+      "stage": "accepted_finding",
+      "message": "bound program id=68 chunks=1 nonzero_generations=1\n",
+      "returncode": 0
+    },
+    {
+      "name": "undefined_entry_flags",
+      "assembly": "b.cc 1f; ldr x1, [x0, #8]; ldrb w0, [x1]; ret; 1: mov w0, #2; ret",
+      "stage": "accepted_finding",
+      "message": "bound program id=76 chunks=1 nonzero_generations=1\n",
+      "returncode": 0
+    },
+    {
+      "name": "helper_clobbered_register",
+      "assembly": "stp x19, x30, [sp, #-16]!; mov x19, x0; mov x1, #0; bl bpf_get_current_uid_gid; cbz x1, 1f; ldr x1, [x19, #8]; ldrb w0, [x1]; b 2f; 1: mov w0, #2; 2: ldp x19, x30, [sp], #16; ret",
+      "stage": "linker_rejected",
+      "message": "libbpf: failed to find BTF for extern 'arm64_sim_unsupported_opcode' [9] section: -2\nbound-probe: open simulator proof /proofs/helper_clobbered_register.bpf.o: No such file or directory\n",
+      "returncode": 1
+    }
+  ]
+}

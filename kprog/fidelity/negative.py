@@ -26,6 +26,9 @@ FIXTURES = {
         'unbounded_loop': '1: jmp 1b',
         'unbounded_indirect_jump': 'mov rax, QWORD PTR [rdi]; jmp rax',
         'unsupported_instruction': 'ud2; ret',
+        'undefined_entry_register': 'test rax, rax; je 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret',
+        'undefined_entry_flags': 'jnc 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret',
+        'helper_clobbered_register': 'push rbx; mov rbx, rdi; xor esi, esi; call bpf_get_current_uid_gid; test rsi, rsi; je 1f; mov rax, QWORD PTR [rbx+8]; movzx eax, BYTE PTR [rax]; jmp 2f; 1: mov eax, 2; 2: pop rbx; ret',
     },
     'arm64': {
         'past_data_end_read': 'ldr x1, [x0, #8]; ldrb w0, [x1]; ret',
@@ -39,6 +42,9 @@ FIXTURES = {
         'unbounded_loop': '1: b 1b',
         'unbounded_indirect_jump': 'ldr x1, [x0]; br x1',
         'unsupported_instruction': 'brk #0; ret',
+        'undefined_entry_register': 'cbz x1, 1f; ldr x1, [x0, #8]; ldrb w0, [x1]; ret; 1: mov w0, #2; ret',
+        'undefined_entry_flags': 'b.cc 1f; ldr x1, [x0, #8]; ldrb w0, [x1]; ret; 1: mov w0, #2; ret',
+        'helper_clobbered_register': 'stp x19, x30, [sp, #-16]!; mov x19, x0; mov x1, #0; bl bpf_get_current_uid_gid; cbz x1, 1f; ldr x1, [x19, #8]; ldrb w0, [x1]; b 2f; 1: mov w0, #2; 2: ldp x19, x30, [sp], #16; ret',
     },
 }
 
@@ -142,6 +148,8 @@ def bound_outcome(message, returncode):
         return 'verifier_rejected'
     if 'native_kernel bound proof contains no BPF exit' in message:
         return 'loader_rejected'
+    if "failed to find BTF for extern 'arm64_sim_unsupported_opcode'" in message:
+        return 'linker_rejected'
     return 'infrastructure_error'
 
 

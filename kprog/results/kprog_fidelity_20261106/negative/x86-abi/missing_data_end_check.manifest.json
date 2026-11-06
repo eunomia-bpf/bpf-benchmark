@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-x86/negative-abi/missing_data_end_check.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/negative-abi/missing_data_end_check.bpf.o",
+      "simulator_program": "missing_data_end_check_x86_sim_xdp"
+    }
+  ]
+}

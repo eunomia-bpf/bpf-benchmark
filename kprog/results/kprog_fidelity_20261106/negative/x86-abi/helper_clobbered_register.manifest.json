@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-x86/negative-abi/helper_clobbered_register.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/negative-abi/helper_clobbered_register.bpf.o",
+      "simulator_program": "helper_clobbered_register_x86_sim_xdp"
+    }
+  ]
+}

@@ -110,3 +110,42 @@ taskset -c 16-23 make -C kprog/fidelity negative-bound-qemu
 These commands consume T's paired `kprog/tv/build-kernel-{x86,arm64}` and
 `kprog/tv/build-{x86,arm64}` module outputs. Arm builds its loader/probe in
 `build-fidelity-arm64`/`build-arm64` and packages a separate initramfs.
+
+
+## Expanded ABI negatives: open findings
+
+The original eleven-case result is preserved. Three additional unsafe-arm
+fixtures test an unspecified entry GPR, unspecified entry condition flags,
+and a caller-clobbered GPR after a helper. On x86 KVM, **all three are
+accepted on the real bound path**, including the refined helper fixture that
+saves/restores RBX. Nonzero-generation sidecars are checked; unsafe native
+code is never executed. The expanded 14-case suite exits nonzero for these
+findings. `x86-abi/` preserves the initial attempt; `x86-abi-frames/` preserves
+the refined fixture and every original rejection.
+
+On Arm full-system QEMU, both entry GPR/flags candidates are also accepted.
+The four helper-containing fixtures (including three old map/helper cases)
+currently reject at link preparation with the surviving
+`arm64_sim_unsupported_opcode` extern, after the actual-LR return changes.
+This is a recorded linker rejection, not an infrastructure failure or evidence
+that helper-clobber liveness has been fixed. `arm64-abi-frames/` retains the
+exact messages. The helper candidate preserves X19/LR on its own stack frame.
+The original pre-transition eleven-case verifier evidence remains separate.
+
+These findings test the declared entry/call ABI: zero-initialized simulator
+locals or a presumed preserved caller-saved register can hide an unsafe
+native arm. C/A own the entry/helper-definedness fixes; condition flags must
+be included. Any concrete stronger kernel entry/helper premise must be stated
+and bound rather than inferred from the sampled arithmetic matrix. F will
+rerun the complete suite against their repairs. Valid blind callee-save
+traffic must continue to work for compiled applications.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity negative-build NEGATIVE_BUILD=build-x86/negative-abi-frames
+taskset -c 16-23 make -C kprog/fidelity negative-bound-kvm NEGATIVE_BUILD=build-x86/negative-abi-frames NEGATIVE_BOUND_OUT=../results/kprog_fidelity_20261106/negative/x86-abi-frames
+taskset -c 16-23 make -C kprog/fidelity negative-bound-qemu ARM_NEGATIVE_BOUND_BUILD=build-arm64/negative-abi-frames ARM_NEGATIVE_BOUND_OUT=../results/kprog_fidelity_20261106/negative/arm64-abi-frames
+```
+
+`abi-baseline-artifacts.tar.gz` and `abi-frame-artifacts.tar.gz` preserve all
+native/proof source, objects and build logs. No program or failed case is
+excluded, and no synthetic check was added to make these programs reject.
