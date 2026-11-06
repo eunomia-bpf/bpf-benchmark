@@ -103,7 +103,7 @@ def main():
     binding=[]
     for arch in ['x86','arm64']:
         binding += function_spans(ROOT/f'kinsn/module/{arch}/bpf_{arch}_native_lab.c', ['decode_native_lab_payload','native_lab_advance_generation','instantiate_native_lab','blob_write','relocs_write','proof_write','binding_write','generation_read'])
-    binding += function_spans(ROOT/'kprog/libnativeloader/src/native_loader.cpp', ['bound_proof_sequence','upload_proof_chunk','read_blob_generation','seal_bound_chunk','upload_bound_proofs','prepare_simulator_proof'])
+    binding += function_spans(ROOT/'kprog/libnativeloader/src/native_loader.cpp', ['bound_proof_sequence','upload_proof_chunk','read_blob_generation','seal_bound_chunk','upload_bound_proofs','open_simulator_proof','finish_simulator_proof'])
     (OUT/'binding-functions.json').write_text(json.dumps(binding,indent=2)+'\n')
     (OUT/'components.json').write_text(json.dumps(totals,indent=2)+'\n')
     kernel=ROOT/'vendor/linux-framework'

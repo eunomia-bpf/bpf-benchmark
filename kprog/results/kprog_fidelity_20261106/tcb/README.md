@@ -135,3 +135,43 @@ include closure. The loader row includes the new DATASEC-layout helper.
 snapshot. These proof-source counts do not measure Lean's trusted kernel;
 T's use of native reduction remains an external compiler/runtime trust
 assumption, not erased by these line counts.
+
+
+## Current proof preparation and ABI snapshot
+
+The inventory command exposed a stale function list after proof preparation
+split into `open_simulator_proof` and `finish_simulator_proof`. The old name
+caused an explicit failure rather than silently omitting binding code.
+The inventory now names both current functions; a fresh `make tcb` completes
+and records every span in `binding-functions.json`. The initial failed run
+is retained in `current-prefix-refresh.log.gz`; `current-proof-refresh.log.gz`
+is the successful rerun. This is a dirty shared-source snapshot, including
+T's in-progress version2 context wire and other lanes' source changes, not a
+claim that all changes were already committed or validated together.
+
+| Component | Files | Physical lines | Nonblank lines |
+| --- | ---: | ---: | ---: |
+| x86 simulator (including ISA-specific generated C) | 67 | 6339 | 6073 |
+| arm64 simulator (including ISA-specific generated C) | 69 | 5724 | 5518 |
+| shared simulator generated C | 2 | 38 | 33 |
+| x86 native-to-proof generator (including local imports) | 8 | 2493 | 2318 |
+| arm64 native-to-proof generator (including local imports) | 6 | 1536 | 1410 |
+| proof build/load orchestration | 1 | 616 | 549 |
+| native shared loader/linker integration | 9 | 7006 | 6592 |
+| native ELF linker (both ISAs) | 2 | 9955 | 9342 |
+| standalone proof loader | 1 | 1290 | 1196 |
+| application syscall shim | 11 | 9918 | 9393 |
+| x86 native kernel module | 1 | 967 | 866 |
+| arm64 native kernel module | 1 | 1194 | 1085 |
+| shared binding wire contract | 2 | 601 | 551 |
+| vendored helper declarations (ABI input, not project-owned) | 1 | 4785 | 4570 |
+| formal model and proofs (Lean, including generated) | 324 | 36196 | 32361 |
+| formal contracts (JSON) | 138 | 2644 | 2644 |
+| formal contract generators | 138 | 28654 | 25967 |
+| translation-validation model, checker and proofs (Lean) | 5 | 706 | 620 |
+| translation-validation ELF extraction | 1 | 55 | 53 |
+| constant-op dispatch generator | 1 | 97 | 90 |
+| native-proof kernel patch and application (patch text, not SLOC) | 2 | 342 | 311 |
+| existing verifier context (not incremental kernel changes) | 2 | 27796 | 24679 |
+
+The 23 named binding functions contain 875 physical lines, overlapping their loader/module rows. Kernel changes span 12 files, with 1053 additions and 123 deletions against the recorded base. No overlapping rows are added into a TCB total.
