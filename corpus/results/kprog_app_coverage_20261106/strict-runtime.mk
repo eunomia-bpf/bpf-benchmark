@@ -126,3 +126,45 @@ guard-guest:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod $(INPUT)/bpf_x86_native_lab.ko
 	KPROG_TEST_SHIM=$(INPUT)/libbpfrejit_shim.so KPROG_TEST_LOADER=$(INPUT)/libnative_loader.so python3 $(HERE)/check_object_startup.py strict-guard-return
+
+source-frame-proof:
+	python3 $(HERE)/lift_startup_proofs.py bcc_trace_frame512 $(HERE)/bcc-capture-12/bpfrejit_1716_7e4864ff1af3e9d4.bpf tracepoint/native/startup
+	objdump -dr -Mintel $(HERE)/startup-lift/bcc_trace_frame512/entry.native.o
+
+source-frame-minimized-proof:
+	python3 $(HERE)/lift_startup_proofs.py bcc_trace_frame8 $(HERE)/bcc-capture-12/bpfrejit_1716_7e4864ff1af3e9d4.bpf tracepoint/native/startup
+	objdump -dr -Mintel $(HERE)/startup-lift/bcc_trace_frame8/entry.native.o
+
+source-frame-cfg-proof:
+	python3 $(HERE)/lift_startup_proofs.py bcc_trace_frame_cfg $(HERE)/bcc-capture-12/bpfrejit_1716_7e4864ff1af3e9d4.bpf tracepoint/native/startup
+	objdump -dr -Mintel $(HERE)/startup-lift/bcc_trace_frame_cfg/entry.native.o
+
+source-frame-cpu:
+	python3 $(HERE)/check_source_frames.py
+
+source-frame-bound-build:
+	install -d $(HERE)/source-frame-bound
+	clang -g -O2 -target bpf -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/source_frame_source.bpf.c -o $(HERE)/source-frame-bound/source.bpf.o
+	python3 -c 'import json; from pathlib import Path; p=Path("$(HERE)/startup-lift/bcc_trace_frame_cfg/manifest-entry.json"); e=json.loads(p.read_text()); e["program"]="frame_source"; e["prog_type"]=5; Path("$(HERE)/source-frame-bound/manifest.json").write_text(json.dumps({"objects":[e]},indent=2)+"\n")'
+	c++ -std=c++20 -Wall -Wextra -Werror -O2 -D__EXPORTED_HEADERS__ -DNATIVE_LINK_PATH='"$(LINK_TARGET)/release/native-link"' -I$(ROOT)/vendor/linux-framework/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include $(ROOT)/kprog/fidelity/bound_probe.cpp $(LOADER)/libnative_loader.a $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -o $(HERE)/source-frame-bound/bound-probe
+
+source-frame-kvm:
+	taskset -c 12-15 vng --run $(INPUT)/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /workspaces/.agent-state/kprog-lanes/C --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/strict-runtime.mk source-frame-guest'
+
+source-frame-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod $(INPUT)/bpf_x86_native_lab.ko
+	BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1 $(HERE)/source-frame-bound/bound-probe $(HERE)/source-frame-bound/source.bpf.o $(HERE)/source-frame-bound/manifest.json
+
+fixed-load-prepare:
+	python3 $(HERE)/fixed_load_consumer.py prepare
+
+fixed-load-bcc-compile:
+	KPROG_COMPILE_WORKERS=1 taskset -c 12-15 prlimit --as=8589934592 --core=0 -- $(MAKE) -f $(HERE)/Makefile compile PHASE=bcc-real-14
+
+source-frame-call-proofs:
+	for name in five_args saved_r6 backwards; do python3 $(HERE)/lift_startup_proofs.py frame_$$name $(HERE)/source-call-inputs/$$name.bpf.bin socket; done
+	python3 $(HERE)/check_source_calls.py cpu frame_
+
+fixed-load-integrate:
+	python3 $(HERE)/fixed_load_consumer.py integrate

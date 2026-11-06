@@ -894,3 +894,58 @@ make -f corpus/results/kprog_app_coverage_20261106/bcc-strict.mk corpus \
 Only the current application image tar is kept. Completed guest Docker disks,
 module extraction roots and temporary directories are removed after the guest
 exits; raw results and the shared paired base image remain available.
+
+
+## Source-frame and literal context-load repairs (19:00 UTC checkpoint)
+
+The BPF lifter now derives the frame extent through register copies, joins,
+back edges and spilled pointers, and updates both the LLVM allocation and its
+frame-top GEP. It does not initialize source stack bytes. The captured six-
+instruction helper113 program previously allocated one byte while its helper
+wrote eight bytes, corrupting the native return address. The exact old native
+program faults on the CPU; the repaired program returns -14 after one eight-byte
+helper write. Derived24-byte and joined frames retain24 bytes; a loop or spilled
+pointer conservatively retains the architectural512-byte frame. The generated
+proof also loads on the generation-bound path (one chunk, nonzero generation).
+Three source local-call regressions still return165,177,165 on the CPU.
+
+Raw context reads now use the existing proved exact-width, literal-displacement
+primitive. This preserves the original u32 loads at context offsets88 and96,
+closing the BCC capability-entry verifier failure. All25 paired resident BCC
+proofs generate and compile. Real application startup attempt14 accepts18
+application replacements; four native-reference admission failures remain and
+three entries are not reached because their tools stop. Attempt15, with current
+feature-probe pass-through, reproduces those four failures. These EINVALs occur
+after proof verification reaches EXIT and must not be counted as stock-verifier
+rejections. Two missing native references identify `htab_map_update_elem`;
+the remaining helper identities are being diagnosed. No full bound BCC workload
+or timing result is claimed.
+
+| Application | Successful startup loads in retained inventory | Resident programs | Paired proofs generated/compiled | Bound application replacements in latest attempt | Outstanding in that attempt |
+|---|---:|---:|---:|---:|---|
+| BCC |77|25|25/25|18|4 native-reference admission errors;3 not reached|
+| OTel |16|13|pending actual-pair rebuild|not attempted|actual-pair rebuild|
+| Cilium |210|92|pending actual-pair rebuild|not attempted|actual-pair rebuild|
+| Tetragon |308|81|pending actual-pair rebuild|not attempted|actual-pair rebuild|
+| Katran |6|1|1/1 (phase4)|not attempted|stock verifier: expanded stack context passed to XDP helper|
+| Tracee |162|151|pending actual-pair rebuild|not attempted|actual-pair rebuild|
+
+Startup-load counts include libbpf feature probes; they are preserved as raw
+inventory, not counted as resident application programs. Per operator instruction
+those probes pass through unchanged. The historical artifact tables above remain
+diagnostic populations, not application coverage denominators. All outstanding
+entries stay in scope.
+
+[Source-frame evidence](source-frame-artifacts.tar.gz) retains native/proof
+objects, LLVM IR, CPU observations, full phase14 compiler records, captured source
+loads and attempts14/15 raw corpus results. Reproduction uses
+`make -f corpus/results/kprog_app_coverage_20261106/strict-runtime.mk`
+with targets `source-frame-cpu`, `source-frame-cfg-proof`,
+`source-frame-call-proofs`, `source-frame-bound-build`, `source-frame-kvm`,
+`fixed-load-prepare` and `fixed-load-bcc-compile` (the prepare target creates a
+new phase and must run before compilation). The source-frame repair is shared
+with AArch64; native source lifting is architecture independent.
+
+All completed attempt disks, image tars and scratch roots are deleted after
+exit. The current attempt16 is running with a private helper-binding diagnostic;
+its raw results will remain after its disposable image and disks are removed.

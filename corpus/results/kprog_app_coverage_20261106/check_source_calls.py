@@ -7,8 +7,9 @@ import subprocess
 import sys
 ROOT=Path(__file__).resolve().parents[3];HERE=Path(__file__).resolve().parent
 SOURCE=Path('/workspaces/.agent-state/kprog-lanes/C/anonymous-source')
-OUT=HERE/'source-call-results';OUT.mkdir(exist_ok=True)
-CASES={'five_args':165,'saved_r6':177,'backwards':165}
+PREFIX=sys.argv[2] if len(sys.argv)==3 else ''
+OUT=HERE/(PREFIX+'source-call-results');OUT.mkdir(exist_ok=True)
+CASES={PREFIX+name:expected for name,expected in {'five_args':165,'saved_r6':177,'backwards':165}.items()}
 
 def run(args,**kwargs):
     result=subprocess.run(list(map(str,args)),capture_output=True,text=True,timeout=120,**kwargs)
@@ -41,7 +42,7 @@ elif sys.argv[1]=='bound':
             BPFREJIT_NATIVE_LOADER_SO=str(SOURCE/'build/libnative_loader.so'),
             BPFREJIT_SHIM_DIR=str(directory),BPFREJIT_SHIM_LOG=str(directory/'shim.log'),
             BPFREJIT_SHIM_SOCK_DIR=str(directory/'sockets'))
-        result=run([HERE/'anonymous-startup',HERE/'source-call-inputs'/(name+'.bpf.bin'),expected],env=env)
+        result=run([HERE/'anonymous-startup',HERE/'source-call-inputs'/(name.removeprefix(PREFIX)+'.bpf.bin'),expected],env=env)
         if 'nonzero_generations=1' not in result.stdout:raise RuntimeError(result.stdout)
         print(name,result.stdout.strip(),'PASS',flush=True)
 else:raise SystemExit('expected cpu or bound')

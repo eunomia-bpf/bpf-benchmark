@@ -12,3 +12,6 @@ struct LiftFunction {
 int lift_bpf_module(const std::vector<LiftFunction> &functions,
     const std::set<unsigned> &helpers, const std::map<unsigned,std::string> &calls,
     const char *output_path);
+
+unsigned source_stack_extent(const LiftFunction &function,
+    const std::map<unsigned,std::string> &calls, unsigned frame_capacity);

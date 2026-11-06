@@ -40,6 +40,23 @@ int lift_bpf_module(const std::vector<LiftFunction> &functions,
         llvm::SMDiagnostic diagnostic;
         auto module=llvm::parseAssemblyString(ir,diagnostic,common);
         if(!module){diagnostic.print("lift-bpf-ir",llvm::errs());return 1;}
+        // A source helper may access the BPF frame through a derived register.
+        // The upstream direct-R10-only estimate misses those accesses. Update
+        // allocation and top together from the source CFG, without initialization.
+        auto *entry=module->getFunction(function.symbol);
+        llvm::AllocaInst *stack=nullptr;
+        llvm::GetElementPtrInst *top=nullptr;
+        if(entry && !entry->empty()) for(auto &instruction:entry->getEntryBlock()) {
+            if(instruction.getName()=="stackBegin")stack=llvm::dyn_cast<llvm::AllocaInst>(&instruction);
+            if(instruction.getName()=="stackEnd")top=llvm::dyn_cast<llvm::GetElementPtrInst>(&instruction);
+        }
+        if(!stack || !top || top->getPointerOperand()!=stack || top->getNumIndices()!=1 ||
+           !llvm::isa<llvm::ConstantInt>(stack->getArraySize()) ||
+           top->getOperand(1)!=stack->getArraySize()) {
+            std::cerr<<"source BPF frame allocation/top contract missing\n";return 1;
+        }
+        auto *extent=llvm::ConstantInt::get(stack->getArraySize()->getType(),source_stack_extent(function,calls,EBPF_STACK_SIZE));
+        stack->setOperand(0,extent);top->setOperand(1,extent);
         for(const auto &[id,name]:calls) {
             auto *decl=module->getFunction(external(id));
             if(!decl)continue;
