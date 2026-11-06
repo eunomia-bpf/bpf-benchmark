@@ -87,8 +87,10 @@ static void native_input_regressions(void)
 	input_program("numeric input cannot read helper-clobbered R1", uninitialized, 3, 1, 0);
 	struct bpf_insn invalid[] = { native_input(0), exit };
 	input_program("native input rejects kind zero", invalid, 2, 1, 0);
-	invalid[0].off = 5;
+	invalid[0].off = 6;
 	input_program("native input rejects unknown kind", invalid, 2, 1, 0);
+	invalid[0].off = NATIVE_LAB_INPUT_EXCLUSIVE_FAILURE; invalid[0].imm = 16;
+	input_program("exclusive choice rejects standalone execution", invalid, 2, 1, 0);
 	invalid[0] = native_input(1); invalid[0].imm = 1;
 	input_program("native input rejects old ABI", invalid, 2, 1, 0);
 	invalid[0].imm = 3;

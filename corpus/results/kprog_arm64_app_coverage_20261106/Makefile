@@ -396,6 +396,20 @@ qemu-context-v2-app:
 runtime-results:
 	python3 $(HERE)/runtime_results.py $(RUNTIME_RESULTS_ARGS)
 
+.PHONY: katran-root-build
+katran-root-build: direct-header-generate
+	python3 $(HERE)/katran_root.py $(HERE)/$(PHASE)
+	clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
+		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
+		-c $(HERE)/$(PHASE)/katran_xdp_root.bpf.c -o $(HERE)/$(PHASE)/katran_xdp_root.bpf.o
+	clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
+		-I$(ROOT)/vendor/bpf/katran/katran/lib/linux_includes -I/usr/include/x86_64-linux-gnu \
+		-c $(HERE)/$(PHASE)/original-source.c -o $(HERE)/$(PHASE)/katran_xdp_root.source.bpf.o
+
+.PHONY: katran-root-install
+katran-root-install:
+	python3 $(HERE)/katran_root.py $(HERE)/$(PHASE) install
+
 .PHONY: tetragon-objects
 tetragon-objects:
 	install -d $(TETRAGON_ALIGN_BUILD)/objs $(TETRAGON_ALIGN_BUILD)/deps

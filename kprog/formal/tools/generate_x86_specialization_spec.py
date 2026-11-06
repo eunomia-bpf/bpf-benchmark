@@ -137,6 +137,7 @@ EXPECTED = [
     ("X86_OP_ANDN_MEM", "directMacro", "X86_SIM_L_EXEC_ANDN_MEM", "X86_SIM_L_EXEC_ANDN_MEM({dst}, {src}, {flags}, {aux}, {imm})", ""),
     ("X86_OP_CALL_MEMSET_REG", "directMacro", "X86_SIM_L_EXEC_CALL_MEMSET_REG", "X86_SIM_L_EXEC_CALL_MEMSET_REG({imm})", ""),
     ("X86_OP_CALL_MEMCPY_REG", "directMacro", "X86_SIM_L_EXEC_CALL_MEMCPY_REG", "X86_SIM_L_EXEC_CALL_MEMCPY_REG({imm})", ""),
+    ("X86_OP_POPCNT_MEM", "genericRunOp", "", "", ""),
     ("X86_OP_RET", "branchHandler", "", "", ""),
 ]
 COLUMNS = ("token", "dispatch", "chain_macro", "direct_call", "aux_call")

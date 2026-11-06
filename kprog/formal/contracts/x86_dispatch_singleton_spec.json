@@ -45,5 +45,8 @@
     {"name": "div", "code": 26, "op_macro": "X86_OP_DIV", "gate_macro": "KPROG_X86_DISP_DIV_HANDLED"},
     {"name": "push", "code": 18, "op_macro": "X86_OP_PUSH", "gate_macro": "KPROG_X86_DISP_PUSH_HANDLED"},
     {"name": "pop", "code": 19, "op_macro": "X86_OP_POP", "gate_macro": "KPROG_X86_DISP_POP_HANDLED"}
+  ],
+  "extensions": [
+    {"name": "popcntMem", "code": 71, "op_macro": "X86_OP_POPCNT_MEM", "gate_macro": "KPROG_X86_DISP_POPCNT_MEM_HANDLED"}
   ]
 }

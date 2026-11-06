@@ -372,6 +372,7 @@ static int emit_native_lab_arm64(u32 *image, int *idx, bool emit, u64 payload,
 			const struct native_lab_reloc_record *r = &snapshot_relocs[i];
 
 			switch (r->kind) {
+			case NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE:
 			case NATIVE_LAB_RELOC_READONLY_DATA:
 				/* Immutable-data binding metadata; emits no patch. */
 				break;

@@ -1,0 +1,7 @@
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup_arm64.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/startup-stack-frame-v9 install
+bcc: installed all8 exact startup probe selectors and native/proof/simulator triples
+cilium: installed all8 exact startup probe selectors and native/proof/simulator triples
+katran: installed all8 exact startup probe selectors and native/proof/simulator triples
+otelcol-ebpf-profiler: installed all8 exact startup probe selectors and native/proof/simulator triples
+tetragon: installed all8 exact startup probe selectors and native/proof/simulator triples
+tracee: installed all8 exact startup probe selectors and native/proof/simulator triples

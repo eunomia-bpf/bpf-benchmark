@@ -36,7 +36,7 @@ LEAN = ROOT / "KProgFormal/Generated/GeneratedX86Opcode.lean"
 C_HEADER = ROOT / "generated/x86_opcode.h"
 PYTHON = ROOT.parent / "x86/micro-prog/generated_x86_opcode.py"
 
-# The independent enumeration of the 72 canonical opcodes, in the order
+# The independent enumeration of the 73 canonical opcodes, in the order
 # `kprog/x86/x86_sim.h` defines them: (name, define, code).
 EXPECTED = [
     ("nop", "X86_OP_NOP", 0x00),
@@ -110,6 +110,7 @@ EXPECTED = [
     ("andnMem", "X86_OP_ANDN_MEM", 0x44),
     ("callMemsetReg", "X86_OP_CALL_MEMSET_REG", 0x45),
     ("callMemcpyReg", "X86_OP_CALL_MEMCPY_REG", 0x46),
+    ("popcntMem", "X86_OP_POPCNT_MEM", 0x47),
     ("ret", "X86_OP_RET", 0xff),
 ]
 ALIAS_EXPECTED = [

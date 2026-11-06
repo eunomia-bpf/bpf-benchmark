@@ -412,3 +412,31 @@ at0/4. This capture is explicit platform input; its kernel/specification
 agreement remains trusted. Entry, private-spill and return composition,
 and target CPU feature/profile binding, remain active implementation work
 before a whole-program native-safety certificate can be claimed.
+
+Exclusive-store proofs use `NATIVE_LAB_EXCLUSIVE_FAILURE(source_pc)` as a
+private proof-only input: MOV64K dst0/src9/off5/imm=unsigned source byte PC.
+Kinds1–4 retain ABI2. The verifier gives each dynamic visit a fresh scalar
+0 or1; the BPF model indexes choices by source PC and visit ordinal. The
+default environment rejects an unbound choice. Host simulators supply an
+explicit hook, and values outside0/1 fail with a diagnostic. No helper or
+constant-success implementation substitutes for this input.
+
+The Arm linker’s version1 environment layout names the actual STXR/STLXR
+source PC, final native offset, width and release bit. The loader checks all
+fields against native bytes and every compiled marker; compiler clones get
+separate descriptors. Binding relocation kind9 records the final native
+instruction and source-PC/proof-index pair without patching code. The kernel
+checks it against the final chunk’s actual sealed proof, including markers
+whose native instruction belongs to another chunk. Both instantiation and
+emission recheck the immutable group. Standalone markers reject and have no
+JIT implementation; bound proof regions are restored before native emission.
+
+`environment-check bpf-check` checks the host hook, actual clang encoding,
+metadata/opcode/width/order/source-PC/continuation/alias rejections, full-state
+preservation and fresh retry choices. The new Arm kernel passes the complete
+binding suite, both unsafe choice-branch rejections, independent repeated
+visits and cross-chunk matching. The x86 binding/loader regressions also pass;
+Arm-only descriptors reject on x86. This input mechanism does not by itself
+prove the production simulator’s conditional write, exclusive monitor,
+alignment, atomicity or acquire/release correspondence. Those are checked
+against the canonical exclusive semantics and actual compiled programs.

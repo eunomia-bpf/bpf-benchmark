@@ -1,0 +1,8 @@
+python3 /workspaces/repository/kprog/arm64/generate_sim_dispatch.py
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/katran_root.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/katran-root-v1
+native-link: arm64 entry=xdp_root (84 bytes), 1 reachable symbol(s) total
+  - xdp_root (vaddr 0x0, 84 bytes) [entry]
+native-link: wrote proof object 92 bytes, 2 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/katran-root-v1/native/katran_xdp_root.proof.o
+clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
+	-I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
+	-c /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/katran-root-v1/katran_xdp_root.bpf.c -o /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/katran-root-v1/katran_xdp_root.bpf.o

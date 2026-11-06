@@ -1,5 +1,6 @@
 import Lean.Data.Json
 import KProgFormal.Reference.X86
+import KProgFormal.Reference.X86Path
 import KProgFormal.Reference.AArch64
 
 open Lean KProgFormal.Reference
@@ -96,14 +97,22 @@ private def executeX86 (request : Json) : Except String Json := do
   let cells ← parseCells (← state.getObjVal? "memory")
   let initial ← parseState state cells
   let bytes ← parseNativeBytes (← request.getObjVal? "native_bytes")
-  let instruction ← X86.decode bytes initial
-  let output := X86.step instruction initial
+  let (output, mask) ← match request.getObjVal? "native_path" with
+    | .error _ => do
+        let instruction ← X86.decode bytes initial
+        let output := X86.step instruction initial
+        pure (output, if output.fault.isSome then 0xffffffffffffffff else X86.definedFlags instruction)
+    | .ok path => do
+        let base ← fieldWord request "native_base"
+        let entries ← (← path.getArr?).toList.mapM fun row => do
+          pure (⟨← fieldNat row "offset", ← fieldNat row "length"⟩ : X86Path.Entry)
+        let result ← X86Path.evaluate base bytes entries initial
+        pure (result.effect, result.definedFlags)
   let s := output.state
   pure <| Json.mkObj [
     ("registers", toJson ((List.finRange 16).map (fun r => (s.gpr r).toNat))),
     ("flags", number s.rflags.toNat),
-    ("defined_flags", number (if output.fault.isSome then 0xffffffffffffffff
-      else X86.definedFlags instruction).toNat), ("pc", number s.pc.toNat), ("xmm0", number s.xmm0.toNat),
+    ("defined_flags", number mask.toNat), ("pc", number s.pc.toNat), ("xmm0", number s.xmm0.toNat),
     ("fs_base", number s.fsBase.toNat), ("gs_base", number s.gsBase.toNat),
     ("memory", Json.arr (cells.map fun c => Json.mkObj [
       ("address", number c.address.toNat), ("value", number (s.memory.value c.address).toNat),

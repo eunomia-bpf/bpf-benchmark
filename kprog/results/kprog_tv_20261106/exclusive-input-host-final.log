@@ -1,0 +1,26 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build
+g++ -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined test_environment_binding.cpp -o build/test-environment-binding
+install -d build
+clang -O2 -target bpf -c exclusive_input.bpf.c -o build/exclusive-input.bpf.o
+install -d build
+cc -std=gnu11 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined test_exclusive_host.c -o build/test-exclusive-host
+./build/test-environment-binding
+exclusive native bytes/source PC/width/order/marker binding regressions: PASS
+python3 test_exclusive_wire.py
+explicit host exclusive outcomes differ per visit: PASS
+actual clang kind5 marker: complete source PCs16/0xfffffffc, no helper/default value: PASS
+python3 test_kernel_patch.py
+patching file arch/arm64/net/bpf_jit_comp.c
+patching file arch/x86/net/bpf_jit_comp.c
+patching file include/linux/bpf.h
+patching file include/linux/bpf_verifier.h
+patching file kernel/bpf/btf.c
+patching file kernel/bpf/core.c
+patching file kernel/bpf/offload.c
+patching file kernel/bpf/syscall.c
+patching file kernel/bpf/verifier.c
+patching file include/linux/bpf_native_input.h
+native proof-region kernel patch already applied
+kernel patch idempotence/conflict regressions: PASS
+make: Leaving directory '/workspaces/repository/kprog/tv'

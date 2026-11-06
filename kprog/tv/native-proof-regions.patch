@@ -325,7 +325,7 @@ index 274039e36465..f0913a39e1d5 100644
  static int bpf_prog_get_fd_by_id(const union bpf_attr *attr)
  {
 diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
-index 97eb923617a4..d5adfa10d37f 100644
+index 97eb923617a4..fcfede3d4884 100644
 --- a/kernel/bpf/verifier.c
 +++ b/kernel/bpf/verifier.c
 @@ -9,6 +9,7 @@
@@ -463,18 +463,20 @@ index 97eb923617a4..d5adfa10d37f 100644
  	for (i = 0; i < env->kinsn_region_cnt; i++) {
  		struct bpf_insn_aux_data *aux;
  		struct bpf_prog *new_prog;
-@@ -21358,6 +21417,48 @@ static int check_kinsn_sidecar_insn(struct bpf_verifier_env *env,
+@@ -21358,6 +21417,78 @@ static int check_kinsn_sidecar_insn(struct bpf_verifier_env *env,
  	return 0;
  }
  
 +static int check_native_input(struct bpf_verifier_env *env,
 +			      const struct bpf_insn *insn)
 +{
++	bool exclusive = insn->off == NATIVE_LAB_INPUT_EXCLUSIVE_FAILURE;
++	u32 i;
 +	int err;
 +
-+	if (insn->dst_reg != BPF_REG_0 || insn->imm != NATIVE_LAB_INPUT_ABI ||
++	if (insn->dst_reg != BPF_REG_0 || (!exclusive && insn->imm != NATIVE_LAB_INPUT_ABI) ||
 +	    insn->off < NATIVE_LAB_INPUT_SP ||
-+	    insn->off > NATIVE_LAB_INPUT_NUMERIC) {
++	    insn->off > NATIVE_LAB_INPUT_EXCLUSIVE_FAILURE) {
 +		verbose(env, "invalid native proof input ABI/kind/register\n");
 +		return -EINVAL;
 +	}
@@ -487,7 +489,25 @@ index 97eb923617a4..d5adfa10d37f 100644
 +		verbose(env, "native proof inputs require pointer-leak privilege\n");
 +		return -EPERM;
 +	}
-+	if (insn->off == NATIVE_LAB_INPUT_NUMERIC) {
++	if (exclusive) {
++		/* Native callbacks validate the sealed program before lowering.
++		 * A standalone marker has no host JIT implementation.
++		 */
++		for (i = 0; i < env->kinsn_region_cnt; i++) {
++			const struct bpf_kinsn_region *region = &env->kinsn_regions[i];
++
++			if (region->kinsn->native_proof &&
++			    region->kinsn->validate_native_program &&
++			    region->kinsn->validate_native_proof &&
++			    env->insn_idx >= region->start &&
++			    env->insn_idx - region->start < region->proof_len)
++				break;
++		}
++		if (i == env->kinsn_region_cnt) {
++			verbose(env, "exclusive choice requires a bound native proof region\n");
++			return -EINVAL;
++		}
++	} else if (insn->off == NATIVE_LAB_INPUT_NUMERIC) {
 +		err = check_reg_arg(env, BPF_REG_1, SRC_OP);
 +		if (err)
 +			return err;
@@ -504,6 +524,16 @@ index 97eb923617a4..d5adfa10d37f 100644
 +	 */
 +	mark_reg_unknown(env, cur_regs(env), BPF_REG_0);
 +	cur_regs(env)[BPF_REG_0].subreg_def = DEF_NOT_SUBREG;
++	if (exclusive) {
++		struct bpf_reg_state *reg = &cur_regs(env)[BPF_REG_0];
++
++		/* Fresh scalar, no ID shared with another site or loop visit. */
++		reg->var_off = tnum_range(0, 1);
++		reg->umin_value = reg->smin_value = 0;
++		reg->umax_value = reg->smax_value = 1;
++		reg->u32_min_value = reg->s32_min_value = 0;
++		reg->u32_max_value = reg->s32_max_value = 1;
++	}
 +	env->prog->aux->native_entry_inputs = true;
 +	env->insn_idx++;
 +	return 0;
@@ -512,7 +542,7 @@ index 97eb923617a4..d5adfa10d37f 100644
  static int do_check_insn(struct bpf_verifier_env *env, bool *do_print_state)
  {
  	int err;
-@@ -21366,6 +21467,8 @@ static int do_check_insn(struct bpf_verifier_env *env, bool *do_print_state)
+@@ -21366,6 +21497,8 @@ static int do_check_insn(struct bpf_verifier_env *env, bool *do_print_state)
  
  	if (bpf_kinsn_is_sidecar_insn(insn))
  		return check_kinsn_sidecar_insn(env, insn);
@@ -521,7 +551,7 @@ index 97eb923617a4..d5adfa10d37f 100644
  
  	if (class == BPF_ALU || class == BPF_ALU64) {
  		err = check_alu_op(env, insn);
-@@ -23743,6 +23846,7 @@ static int do_misc_fixups(struct bpf_verifier_env *env)
+@@ -23743,6 +23876,7 @@ static int do_misc_fixups(struct bpf_verifier_env *env)
  			const struct bpf_kinsn *kinsn;
  			const struct bpf_insn *call = insn + 1;
  			struct bpf_insn *kinsn_proof;
@@ -529,7 +559,7 @@ index 97eb923617a4..d5adfa10d37f 100644
  
  			if (i + 1 >= insn_cnt || !bpf_pseudo_kinsn_call(call))
  				goto next_insn;
-@@ -23751,14 +23855,17 @@ static int do_misc_fixups(struct bpf_verifier_env *env)
+@@ -23751,14 +23885,17 @@ static int do_misc_fixups(struct bpf_verifier_env *env)
  			if (ret)
  				return ret;
  
@@ -550,7 +580,7 @@ index 97eb923617a4..d5adfa10d37f 100644
  				goto free_kinsn_proof;
  			}
  
-@@ -25987,7 +26094,9 @@ static void compute_insn_live_regs(struct bpf_verifier_env *env,
+@@ -25987,7 +26124,9 @@ static void compute_insn_live_regs(struct bpf_verifier_env *env,
  			break;
  		case BPF_MOV:
  			def = dst;
@@ -565,7 +595,7 @@ diff --git a/include/linux/bpf_native_input.h b/include/linux/bpf_native_input.h
 new file mode 100644
 --- /dev/null
 +++ b/include/linux/bpf_native_input.h
-@@ -0,0 +1,39 @@
+@@ -0,0 +1,61 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef NATIVE_LAB_INPUT_H
 +#define NATIVE_LAB_INPUT_H
@@ -580,6 +610,7 @@ new file mode 100644
 +#define NATIVE_LAB_INPUT_CODE 2
 +#define NATIVE_LAB_INPUT_RETURN 3
 +#define NATIVE_LAB_INPUT_NUMERIC 4
++#define NATIVE_LAB_INPUT_EXCLUSIVE_FAILURE 5
 +
 +#ifdef __KERNEL__
 +static inline bool bpf_native_input_candidate(const struct bpf_insn *insn)
@@ -602,6 +633,27 @@ new file mode 100644
 +	asm volatile(".8byte 0x00000002000490b7" : "=r"(__native_value) : \
 +		"r"(__native_pointer)); \
 +	__native_value; \
++})
++#define NATIVE_LAB_EXCLUSIVE_FAILURE(site) ({ \
++	register unsigned long __native_value asm("r0"); \
++	asm volatile(".8byte %c1" : "=r"(__native_value) : \
++		"i"(0x00000000000590b7UL | ((unsigned long)(unsigned int)(site) << 32))); \
++	__native_value; \
++})
++#elif !defined(__KERNEL__)
++#include <stdio.h>
++#include <stdlib.h>
++/* Host simulators must supply an explicit outcome for each dynamic visit.
++ * There is deliberately no constant-success or random fallback.
++ */
++extern unsigned long native_lab_exclusive_failure_choice(unsigned int site);
++#define NATIVE_LAB_EXCLUSIVE_FAILURE(site) ({ \
++	unsigned long __native_failure = native_lab_exclusive_failure_choice(site); \
++	if (__native_failure > 1) { \
++		fputs("native exclusive failure choice must be 0 or 1\n", stderr); \
++		exit(1); \
++	} \
++	__native_failure; \
 +})
 +#endif
 +#endif
