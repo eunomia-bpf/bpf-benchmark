@@ -5043,6 +5043,9 @@ def main() -> None:
     _flat = _flat.replace("\\brk", "").replace("{,}", ",")
     _flat = re.sub(r"\\\{\d[\d,]*(?:,\d[\d,]*)*\\\}", "", _flat)
     problems.extend(population_check(_flat, rest[0]))
+    # Oracle sizes are host outputs rather than gate banners, so the
+    # hosts are built and read rather than trusted.
+    problems.extend(oracle_sizes(text))
     seen = percent_census(text)
     # The four shares are computed above; their floored sum is what the
     # sentence about "the four add to" states, so it is derived rather than
@@ -5105,6 +5108,47 @@ def main() -> None:
               f"{len(ISA)}-way split over "
               f"{sum(n for n, _ in buckets.values())} banners, and the "
               "section's own figures against each other")
+
+
+def oracle_sizes(text: str) -> list[str]:
+    """Oracle case counts the section states that no host prints.
+
+    The section states how many cases many of its oracles drive, and those
+    are sizes of C programs rather than gate banners, so no log holds them.
+    Each is checked by building the hosts once and reading what each prints:
+    a size that no host reports is a claim with no source.
+    """
+    import subprocess
+    here = pathlib.Path(__file__).parent
+    flat = re.sub(r"\s+", " ", text).replace("\\brk", "")
+    stated = {int(m.replace(",", "")) for m in
+              re.findall(r"([\d,]{4,})-case (?:routed )?oracle", flat)}
+    if not stated:
+        return ["the section states no oracle case count, so the sizes "
+                "went unread"]
+    printed = set()
+    for src in sorted(here.glob("test_*_host.c")):
+        out = src.with_suffix(".probe")
+        # The same include order the recipe uses, including the libbpf
+        # prefix: a host that includes the simulator header needs it, and
+        # without it the build fails and its size looks absent.
+        rc = subprocess.run(
+            ["cc", "-O2", "-I.", "-I../x86", "-I../../kprog",
+             "-I../../runner/build-host-docker-llvmbpf/vendor/libbpf"
+             "/prefix/include/bpf", "-Ibuild", str(src), "-o", str(out)],
+            cwd=str(here), capture_output=True)
+        if rc.returncode != 0:
+            continue
+        run = subprocess.run([str(out)], cwd=str(here), capture_output=True,
+                             text=True, timeout=120)
+        out.unlink(missing_ok=True)
+        for m in re.findall(r"\((\d+) cases\)", run.stdout):
+            printed.add(int(m))
+    out = []
+    for v in sorted(stated - printed):
+        out.append("the section states a %d-case oracle and no host in the "
+                   "tree prints that count" % v)
+    return out
 
 
 def population_check(flat: str, figs: set) -> list[str]:

@@ -7606,6 +7606,26 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0984 - the oracle sizes are read from the hosts
+
+Thirty-three sentences state how many cases an oracle drives, and not one names
+the host that produces the number. They are sizes of C programs rather than gate
+banners, so no log holds them and no count check could reach them.
+
+The check builds every host in the tree and reads what each prints, then
+requires every stated size to be one of those. Thirty sizes resolve; the one
+that did not turned out to be a build failure in the check rather than a missing
+host, since a host that includes the simulator header needs the libbpf prefix
+the recipe passes and the check did not.
+
+The first run of the check reported one unresolvable size for that reason, and
+the number was correct once the include order matched the recipe. A check that
+fails to build its subject reports every size as missing, which is the failure
+mode the earlier steps kept finding in other forms.
+
+Census unchanged; thirty-scale oracle sizes are now read from the hosts that
+print them.
+
 ### Step 0983 - three relations, two exact and one partial by design
 
 Three arithmetic relations were checked after the three-kind sum turned out to

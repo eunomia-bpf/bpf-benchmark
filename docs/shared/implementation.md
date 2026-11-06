@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0984 bound 33 oracle sizes by building every
+host and reading what it prints; the one miss was a
+missing include path.
+
+
 Step 0983 surveyed the three arithmetic relations:
 partition and three-kind sum are exact, row splits
 allow a partial sum by design.
