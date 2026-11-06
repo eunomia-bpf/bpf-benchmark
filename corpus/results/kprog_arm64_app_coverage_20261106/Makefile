@@ -199,3 +199,7 @@ sp-write-check:
 .PHONY: sp-write-artifacts
 sp-write-artifacts:
 	tar -C $(HERE)/$(PHASE) -czf $(HERE)/$(PHASE)/native-fixtures.tar.gz main.c sp_restore.S sp_restore.asm sp_restore.proof.o native native.json
+
+.PHONY: runtime-complete-capture
+runtime-complete-capture:
+	python3 $(HERE)/runtime_complete.py $(HERE)/$(PHASE)

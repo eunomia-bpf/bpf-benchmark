@@ -462,3 +462,22 @@ the separate absoluteSP/LR address-state findings remain active.
 ```sh
 make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile sp-write-check compile verify summarize PHASE=sp-write COMPILE_ARGS='0 1 180 1 1024' KERNEL=/workspaces/repository/kprog/arm64/build/app-qemu-paired/Image
 ```
+
+## Recovered real BCC baseline and native-start failure
+
+The post-restart `qemu-verified-app APP=bcc/set` run completed the real upstream
+BCC baseline with 23 resident programs. [Resident counters](bcc-baseline-recovery/resident-counters.csv)
+retain each full BTF entry name, ID, type, run count, run time and code sizes.
+The [app record](bcc-baseline-recovery/bcc__set.json) retains the unchanged two-second
+stress-ng workload output. [The full raw run](bcc-baseline-recovery/raw-run.tar.gz)
+includes both shim logs, BTF program/map inventories and translated/JIT bytecode;
+[host console](bcc-baseline-recovery/host-console.log) records the authoritative
+`PLATFORM=qemu ARCH=arm64 make corpus` invocation. Guest dates start at the Unix
+epoch; this run happened on 2026-11-06 UTC and QEMU timing is functional only.
+
+The app has `status: error`: native startup lacked generation-bound simulator
+proofs in the packaged manifest, and opensnoop exited before registration. The
+baseline counters are real; no post-native counters or same-work comparison was
+produced. This completed run supplements the earlier interrupted startup census,
+whose feature probes, retries and 74 load attempts remain intact. Capture again
+with `make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile runtime-complete-capture PHASE=<new-directory>`.

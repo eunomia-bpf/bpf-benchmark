@@ -1,0 +1,465 @@
+[
+  {
+    "btf_id": 21,
+    "bytes_jited": 224,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 240,
+    "gpl_compatible": true,
+    "id": 14,
+    "jited": true,
+    "loaded_at": 11,
+    "map_ids": [
+      5,
+      2
+    ],
+    "name": "tracepoint__syscalls__sys_enter_openat",
+    "orphaned": false,
+    "tag": "faeb442ee60dc635",
+    "type": "tracepoint",
+    "uid": 0
+  },
+  {
+    "btf_id": 21,
+    "bytes_jited": 552,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 792,
+    "gpl_compatible": true,
+    "id": 20,
+    "jited": true,
+    "loaded_at": 11,
+    "map_ids": [
+      2,
+      5,
+      3
+    ],
+    "name": "tracepoint__syscalls__sys_exit_openat",
+    "orphaned": false,
+    "tag": "ae739a47b4daed15",
+    "type": "tracepoint",
+    "uid": 0
+  },
+  {
+    "btf_id": 31,
+    "bytes_jited": 224,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 232,
+    "gpl_compatible": true,
+    "id": 28,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      22,
+      9,
+      8
+    ],
+    "name": "kprobe__cap_capable_entry",
+    "orphaned": false,
+    "tag": "847f8f82e396f0ac",
+    "type": "kprobe",
+    "uid": 0
+  },
+  {
+    "btf_id": 31,
+    "bytes_jited": 464,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 616,
+    "gpl_compatible": true,
+    "id": 31,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      8,
+      24,
+      22,
+      15,
+      12,
+      14,
+      10
+    ],
+    "name": "kprobe__cap_capable_exit",
+    "orphaned": false,
+    "tag": "9c4de5389bc4f20c",
+    "type": "kprobe",
+    "uid": 0
+  },
+  {
+    "btf_id": 48,
+    "bytes_jited": 1448,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 2240,
+    "gpl_compatible": true,
+    "id": 32,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      28,
+      17,
+      20,
+      23
+    ],
+    "name": "inet_sock_set_state",
+    "orphaned": false,
+    "tag": "7cdf701b320f8e4e",
+    "type": "tracepoint",
+    "uid": 0
+  },
+  {
+    "btf_id": 46,
+    "bytes_jited": 192,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 200,
+    "gpl_compatible": true,
+    "id": 36,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      29,
+      16,
+      19
+    ],
+    "name": "blk_account_io_merge_bio",
+    "orphaned": false,
+    "tag": "320f9ff613eee326",
+    "type": "kprobe",
+    "uid": 0
+  },
+  {
+    "btf_id": 46,
+    "bytes_jited": 472,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 648,
+    "gpl_compatible": true,
+    "id": 39,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      29,
+      16,
+      30,
+      21
+    ],
+    "name": "block_rq_insert",
+    "orphaned": false,
+    "tag": "05b8822023cd42b7",
+    "type": "tracing",
+    "uid": 0
+  },
+  {
+    "btf_id": 46,
+    "bytes_jited": 584,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 824,
+    "gpl_compatible": true,
+    "id": 43,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      29,
+      16,
+      30,
+      19,
+      21
+    ],
+    "name": "block_rq_issue",
+    "orphaned": false,
+    "tag": "89355e738c3e8a16",
+    "type": "tracing",
+    "uid": 0
+  },
+  {
+    "btf_id": 46,
+    "bytes_jited": 528,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 712,
+    "gpl_compatible": true,
+    "id": 45,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      29,
+      16,
+      21,
+      19,
+      25
+    ],
+    "name": "block_rq_complete",
+    "orphaned": false,
+    "tag": "94563ffd43a60f7b",
+    "type": "tracing",
+    "uid": 0
+  },
+  {
+    "btf_id": 57,
+    "bytes_jited": 184,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 184,
+    "gpl_compatible": true,
+    "id": 47,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      40,
+      34
+    ],
+    "name": "tcp_v4_connect",
+    "orphaned": false,
+    "tag": "b0191210a7681449",
+    "type": "kprobe",
+    "uid": 0
+  },
+  {
+    "btf_id": 57,
+    "bytes_jited": 552,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 752,
+    "gpl_compatible": true,
+    "id": 49,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      34,
+      40,
+      36,
+      41,
+      38
+    ],
+    "name": "tcp_v4_connect_ret",
+    "orphaned": false,
+    "tag": "031117d210db70ba",
+    "type": "kprobe",
+    "uid": 0
+  },
+  {
+    "btf_id": 57,
+    "bytes_jited": 184,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 184,
+    "gpl_compatible": true,
+    "id": 50,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      40,
+      34
+    ],
+    "name": "tcp_v6_connect",
+    "orphaned": false,
+    "tag": "b0191210a7681449",
+    "type": "kprobe",
+    "uid": 0
+  },
+  {
+    "btf_id": 57,
+    "bytes_jited": 552,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 752,
+    "gpl_compatible": true,
+    "id": 51,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      34,
+      40,
+      37,
+      38
+    ],
+    "name": "tcp_v6_connect_ret",
+    "orphaned": false,
+    "tag": "85996673ee94640a",
+    "type": "kprobe",
+    "uid": 0
+  },
+  {
+    "btf_id": 66,
+    "bytes_jited": 96,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 48,
+    "gpl_compatible": true,
+    "id": 56,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      46
+    ],
+    "name": "fentry_vfs_read",
+    "orphaned": false,
+    "tag": "8aac7fd4c2e97bf7",
+    "type": "tracing",
+    "uid": 0
+  },
+  {
+    "btf_id": 66,
+    "bytes_jited": 96,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 48,
+    "gpl_compatible": true,
+    "id": 58,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      46
+    ],
+    "name": "fentry_vfs_write",
+    "orphaned": false,
+    "tag": "ce6b1d10515738d0",
+    "type": "tracing",
+    "uid": 0
+  },
+  {
+    "btf_id": 66,
+    "bytes_jited": 96,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 48,
+    "gpl_compatible": true,
+    "id": 59,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      46
+    ],
+    "name": "fentry_vfs_fsync",
+    "orphaned": false,
+    "tag": "4153521805e1f9e0",
+    "type": "tracing",
+    "uid": 0
+  },
+  {
+    "btf_id": 66,
+    "bytes_jited": 96,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 48,
+    "gpl_compatible": true,
+    "id": 60,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      46
+    ],
+    "name": "fentry_vfs_open",
+    "orphaned": false,
+    "tag": "88848b4f70304f6c",
+    "type": "tracing",
+    "uid": 0
+  },
+  {
+    "btf_id": 75,
+    "bytes_jited": 184,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 168,
+    "gpl_compatible": true,
+    "id": 62,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      51,
+      47,
+      48
+    ],
+    "name": "sys_enter",
+    "orphaned": false,
+    "tag": "b384d88950b7bbb9",
+    "type": "tracepoint",
+    "uid": 0
+  },
+  {
+    "btf_id": 66,
+    "bytes_jited": 96,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 48,
+    "gpl_compatible": true,
+    "id": 63,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      46
+    ],
+    "name": "fentry_vfs_create",
+    "orphaned": false,
+    "tag": "31fa7fcc5d9b6166",
+    "type": "tracing",
+    "uid": 0
+  },
+  {
+    "btf_id": 75,
+    "bytes_jited": 568,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 656,
+    "gpl_compatible": true,
+    "id": 65,
+    "jited": true,
+    "loaded_at": 12,
+    "map_ids": [
+      51,
+      47,
+      48,
+      49
+    ],
+    "name": "sys_exit",
+    "orphaned": false,
+    "tag": "0704c0b615b10245",
+    "type": "tracepoint",
+    "uid": 0
+  },
+  {
+    "btf_id": 84,
+    "bytes_jited": 192,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 184,
+    "gpl_compatible": true,
+    "id": 70,
+    "jited": true,
+    "loaded_at": 13,
+    "map_ids": [
+      58,
+      54,
+      55
+    ],
+    "name": "sched_wakeup",
+    "orphaned": false,
+    "tag": "ee6ac51a86a93ae8",
+    "type": "tracing",
+    "uid": 0
+  },
+  {
+    "btf_id": 84,
+    "bytes_jited": 192,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 184,
+    "gpl_compatible": true,
+    "id": 72,
+    "jited": true,
+    "loaded_at": 13,
+    "map_ids": [
+      58,
+      54,
+      55
+    ],
+    "name": "sched_wakeup_new",
+    "orphaned": false,
+    "tag": "ee6ac51a86a93ae8",
+    "type": "tracing",
+    "uid": 0
+  },
+  {
+    "btf_id": 84,
+    "bytes_jited": 1168,
+    "bytes_memlock": 4096,
+    "bytes_xlated": 1632,
+    "gpl_compatible": true,
+    "id": 73,
+    "jited": true,
+    "loaded_at": 13,
+    "map_ids": [
+      58,
+      54,
+      55,
+      56,
+      59
+    ],
+    "name": "sched_switch",
+    "orphaned": false,
+    "tag": "045c6cb182381f25",
+    "type": "tracing",
+    "uid": 0
+  }
+]
