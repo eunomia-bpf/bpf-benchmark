@@ -55,6 +55,19 @@ direction is preserved; the shortfall is a ratio-size difference, not a
 reversal. No claim is made here about which side moved without a paired
 re-run of the 05-29 binary.
 
+### Kernel provenance of this arm
+
+The 09:05 run loaded `bpf_x86_alu.ko` successfully and did not print a
+kernel banner, so it ran the image the runner had already built at that
+time. Lane T then rebuilt the host kernel (kernel #48, 09:23) with the
+native proof-region patch, and from 09:23 the same `insmod` fails BTF
+validation (`distilled base BTF type 'bpf_map' [4], size 288 has multiple
+candidates of the same size (ids [72830, 72829])`; `failed to validate
+module [bpf_x86_alu] BTF: -22`). The 1.446x figure is therefore a
+pre-patch-kernel measurement. The kernel is a shared build owned by lane T;
+the failure is reported there and no re-run is claimed until it boots with
+the module.
+
 ## Helper/map (13 programs)
 
 **Not yet measured.** Two blockers, both external to lane R:
