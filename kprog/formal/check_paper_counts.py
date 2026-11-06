@@ -42,6 +42,7 @@ component it reflects.
 Usage: check_paper_counts.py --section <tex> --log <make check log> [--check]
 """
 import subprocess
+import sys
 import argparse
 import pathlib
 import re
@@ -3766,10 +3767,16 @@ def figure_coverage(log: pathlib.Path) -> tuple[int, int, int, set[int]]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--section", default="sections/4-safety.tex")
-    parser.add_argument("--log", required=True)
+    parser.add_argument("--log")
+    parser.add_argument("--self-test", action="store_true",
+                        help="perturb bound claims and require a report")
     parser.add_argument("--check", action="store_true",
                         help="exit 1 when a claim matches no banner")
     args = parser.parse_args()
+    if args.self_test:
+        raise SystemExit(self_test())
+    if not args.log:
+        parser.error("--log is required unless --self-test is given")
 
     text = masked(pathlib.Path(args.section))
     claimed = paper_counts(text)
@@ -5046,6 +5053,69 @@ def main() -> None:
               f"{len(ISA)}-way split over "
               f"{sum(n for n, _ in buckets.values())} banners, and the "
               "section's own figures against each other")
+
+
+def self_test() -> int:
+    """Perturb bound claims and require the run to report each one.
+
+    Every binding in this checker was verified by hand once, by editing the
+    section and re-running it. This makes that permanent: each case edits a
+    claim the checker owns, requires a non-zero exit, and restores the file.
+    A binding that stopped firing would then fail here rather than passing
+    silently.
+    """
+    import shutil
+    import tempfile
+    here = pathlib.Path(__file__).parent
+    section = (here / ".." / ".." / "docs" / "kprog-simulator-in-ebpf"
+               / "sections" / "4-safety.tex")
+    log = pathlib.Path("/tmp/gCK902.log")
+    if not section.exists() or not log.exists():
+        print("self_test: the section or the gate log is missing")
+        return 2
+    cases = [
+        ("124{,}531{,}802", "124{,}531{,}803", "gate case total"),
+        # Only claims this checker owns: the proof-tree counts belong to
+        # `check_lean_claims`, which runs inside the gate, so perturbing one
+        # here would leave this run green and read as a missing binding.
+        ("248 independent oracle banners",
+         "249 independent oracle banners", "banner count"),
+    ]
+    # Two concurrent runs would clobber each other's edits and could leave a
+    # perturbed value behind, so a second run waits for the first.
+    import fcntl
+    lock = pathlib.Path(tempfile.gettempdir()) / "check_paper_counts.selftest"
+    handle = open(lock, "w")
+    fcntl.flock(handle, fcntl.LOCK_EX)
+    backup = pathlib.Path(tempfile.mkdtemp()) / "4-safety.tex"
+    shutil.copy2(section, backup)
+    failures = 0
+    try:
+        for old, new, what in cases:
+            text = section.read_text()
+            if text.count(old) != 1:
+                print("self_test: %s appears %d times, expected 1"
+                      % (old, text.count(old)))
+                failures += 1
+                continue
+            section.write_text(text.replace(old, new, 1))
+            rc = subprocess.run(
+                [sys.executable, str(here / "check_paper_counts.py"),
+                 "--section", str(section), "--log", str(log), "--check"],
+                capture_output=True).returncode
+            if rc == 0:
+                print("self_test: %s did not fail after perturbing %s"
+                      % (what, old))
+                failures += 1
+            else:
+                print("self_test: %s reported" % what)
+            shutil.copy2(backup, section)
+    finally:
+        shutil.copy2(backup, section)
+        shutil.rmtree(backup.parent, ignore_errors=True)
+        fcntl.flock(handle, fcntl.LOCK_UN)
+        handle.close()
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":

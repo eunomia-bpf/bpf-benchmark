@@ -7606,6 +7606,29 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0956 - the bindings now verify themselves
+
+Every binding in this checker was verified by hand once, by editing the section
+and re-running it, and none of those verifications survived the step that made
+them. A binding can stop firing and the run would still print its success line,
+so the checks now verify themselves: a self-test perturbs two claims the checker
+owns and requires it to report each.
+
+The cases have to be claims this checker owns. A first attempt perturbed a
+proof-tree count, which belongs to the claims checker that runs inside the gate,
+so this run stayed green and the case read as a missing binding. A second
+attempt named a string that is in the success line rather than in the section,
+and reported that it appeared zero times. Both are the checker doing its job on
+a badly chosen case.
+
+The test needs a lock. Two concurrent runs edit the same file, and one that is
+interrupted mid-case leaves its perturbation behind: that happened, leaving a
+banner count one higher than the tree, and the section was restored by hand. The
+test now holds an exclusive lock while it runs.
+
+Census unchanged; two bindings are now checked on every self-test rather than
+once by hand.
+
 ### Step 0955 - every numeral form the checker reads
 
 A perturbation that fails to apply reads like a checker missing a claim, so the

@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0956 added --self-test: it perturbs two owned
+claims and requires a report, under a lock (a
+concurrent run had left a value behind).
+
+
 Step 0955 audited numeral forms: every extraction
 handles brace-grouped thousands, and a braced
 perturbation is caught.
