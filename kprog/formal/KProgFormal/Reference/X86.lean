@@ -195,6 +195,38 @@ def bitBaseSource (width : CmovWidth) (source : Source) (index : BitIndex)
       .memory (address + BitVec.ofInt 64 (value / width.bits * width.bytes))
   | _, _ => source
 
+inductive BmiShift | left | right | arithmetic | rotate
+  deriving DecidableEq, Repr
+
+inductive ShiftCount
+  | register (reg : Register)
+  | immediate (value : BitVec 8)
+  deriving DecidableEq, Repr
+
+def countValue (s : State) : ShiftCount → Word
+  | .register r => s.gpr r | .immediate value => value.setWidth 64
+
+/-- BMI2 shifts read width-sized operands, mask counts to five/six bits,
+and leave every flag unchanged. Rotate selects a window in a doubled source. -/
+def bmiShiftValue (width : BzhiWidth) (kind : BmiShift) (value amount : Word) : Word :=
+  let source := value.setWidth width.bits
+  let count := amount &&& BitVec.ofNat 64 (width.bits - 1)
+  match kind with
+  | .left => (source <<< count).setWidth 64
+  | .right => (source >>> count).setWidth 64
+  | .arithmetic => (source.sshiftRight' count).setWidth 64
+  | .rotate =>
+      let pair := (source.setWidth 128 <<< width.bits) ||| source.setWidth 128
+      ((pair >>> count.setWidth 128).setWidth width.bits).setWidth 64
+
+def bmiShiftStep (width : BzhiWidth) (kind : BmiShift) (dst : Register) (source : Source)
+    (count : ShiftCount) (nextPc : Word) (s : State) : Transition State :=
+  match readSource s source width.bytes with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (value, events) =>
+      let result := bmiShiftValue width kind value (countValue s count)
+      ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), pc := nextPc }, events, none⟩
+
 /-- Commit a PUSH transfer only after its read (if any) and whole-width
 write permission check. Memory faults preserve every architectural component;
 ordered reads preceding a write fault remain observable events. -/
@@ -219,6 +251,8 @@ inductive Instruction
   | cmov (width : CmovWidth) (cc : Fin 16) (dst : Register)
       (source : Source) (nextPc : Word)
   | andn (width : BzhiWidth) (dst first : Register) (second : Source) (nextPc : Word)
+  | bmiShift (width : BzhiWidth) (kind : BmiShift) (dst : Register) (source : Source)
+      (count : ShiftCount) (nextPc : Word)
   | bzhi (width : BzhiWidth) (dst : Register) (source : Source)
       (count : Register) (nextPc : Word)
   | bt (width : CmovWidth) (source : Source) (index : BitIndex) (nextPc : Word)
@@ -226,6 +260,7 @@ inductive Instruction
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .bmiShift width kind dst source count nextPc => bmiShiftStep width kind dst source count nextPc s
   | .push width src nextPc => pushTransfer width (s.gpr src) [] nextPc s
   | .pushImmediate width value nextPc => pushTransfer width value [] nextPc s
   | .pushMemory width address nextPc =>
@@ -283,6 +318,7 @@ are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardwar
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
   | .push .. | .pushImmediate .. | .pushMemory .. | .popMemory .. => 0xffffffffffffffff
+  | .bmiShift .. => 0xffffffffffffffff
   | .pop .. => 0xffffffffffffffff
   | .cmov .. => 0xffffffffffffffff
   | .bt .. => 0xfffffffffffff76b
@@ -439,7 +475,12 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     let vex1 ← byteAt bytes (count + 1)
     let vex2 ← byteAt bytes (count + 2)
     let opcode ← byteAt bytes (count + 3)
-    if p.vexInvalid ∨ vex1 % 32 ≠ 2 ∨ vex2 % 8 ≠ 0 ∨ (opcode ≠ 0xf5 ∧ opcode ≠ 0xf2) then
+    let map := vex1 % 32
+    let vexPrefix := vex2 % 8
+    let isBit := map == 2 && vexPrefix == 0 && (opcode == 0xf5 || opcode == 0xf2)
+    let isShift := map == 2 && opcode == 0xf7 && (vexPrefix == 1 || vexPrefix == 2 || vexPrefix == 3)
+    let isRotate := map == 3 && opcode == 0xf0 && vexPrefix == 3 && (vex2 / 8) % 16 == 15
+    if p.vexInvalid || !(isBit || isShift || isRotate) then
       throw "invalid BMI VEX encoding"
     let rex := (if vex1 / 128 = 0 then 4 else 0) +
       (if (vex1 / 64) % 2 = 0 then 2 else 0) +
@@ -449,7 +490,13 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     let dst := registerCode ((modrm / 8) % 8 + 8 * ((rex / 4) % 2))
     let index := registerCode (15 - (vex2 / 8) % 16)
     let width := if vex2 / 128 = 0 then BzhiWidth.w32 else .w64
-    let (source, nextPc, _) ← operand bytes s p modrm (count + 5) 0
+    let (source, nextPc, cursor) ← operand bytes s p modrm (count + 5) (if isRotate then 1 else 0)
+    if isRotate then
+      let immediate ← byteAt bytes cursor
+      return .bmiShift width .rotate dst source (.immediate (BitVec.ofNat 8 immediate)) nextPc
+    if isShift then
+      let kind := if vexPrefix = 1 then BmiShift.left else if vexPrefix = 2 then .arithmetic else .right
+      return .bmiShift width kind dst source (.register index) nextPc
     if opcode = 0xf2 then return .andn width dst index source nextPc
     return .bzhi width dst source index nextPc
   let opcode ← byteAt bytes (count + 1)

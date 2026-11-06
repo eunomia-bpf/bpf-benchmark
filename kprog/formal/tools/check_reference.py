@@ -375,6 +375,75 @@ def main():
     assert len(outputs) == len(stack_cases)
     for (request, expected), out in zip(stack_cases, outputs):
         assert out == expected, (request, out, expected)
+    # Flagless BMI2 shifts/rotates. Count masking and read/write aliasing must
+    # preserve all RFLAGS even when the result is zero or has its sign set.
+    bmi_cases = []
+    for raw, dst, src, counter, source, amount, result in [
+            ("c4e261f7c1", 0, 1, 3, 0xDEAD000080000001, 32, 0x80000001),
+            ("c4e261f7c1", 0, 1, 3, 0xDEAD000080000001, 33, 2),
+            ("c4e2e1f7c1", 0, 1, 3, 0x8000000000000001, 64, 0x8000000000000001),
+            ("c4e263f7c1", 0, 1, 3, 0xDEAD000080000001, 1, 0x40000000),
+            ("c4e2e3f7c1", 0, 1, 3, 0x8000000000000001, 63, 1),
+            ("c4e262f7c1", 0, 1, 3, 0xDEAD000080000001, 31, 0xFFFFFFFF),
+            ("c4e262f7c1", 0, 1, 3, 0xDEAD000080000001, 0, 0x80000001),
+            ("c4e2e2f7c1", 0, 1, 3, 0x8000000000000001, 63, 0xFFFFFFFFFFFFFFFF),
+            ("c4e37bf0c101", 0, 1, None, 0xDEAD000080000001, 0, 0xC0000000),
+            ("c4e3fbf0c101", 0, 1, None, 0x8000000000000001, 0, 0xC000000000000000),
+            ("c44231f7c2", 8, 10, 9, 0xDEAD000080000001, 1, 2),
+            ("c442b2f7c2", 8, 10, 9, 0x8000000000000001, 63, 0xFFFFFFFFFFFFFFFF),
+            ("c443fbf0c23f", 8, 10, None, 0x8000000000000001, 0, 3),
+            ("c4e261f7c9", 1, 1, 3, 0xDEAD000080000001, 1, 2),
+            ("c4e2e3f7d9", 3, 1, 3, 0x8000000000000001, 63, 1)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(bytes.fromhex(raw))
+        request["state"]["flags"] = 0xAD7
+        request["state"]["registers"][src] = source
+        if counter is not None:
+            request["state"]["registers"][counter] = amount
+        expected = copy.deepcopy(request["state"])
+        expected["registers"][dst] = result
+        expected.update(pc=expected["pc"] + len(request["native_bytes"]),
+                        defined_flags=(1 << 64) - 1, events=[], fault=None)
+        bmi_cases.append((request, expected))
+    for raw, width, amount, result, fault in [
+            ("c4e261f74708", 4, 1, 2, False),
+            ("c4e2e3f74708", 8, 63, 1, False),
+            ("c4e262f74708", 4, 31, 0xFFFFFFFF, False),
+            ("c4e3fbf04708ff", 8, 0, 3, False),
+            ("c4e37bf005f61f000020", 4, 0, 0x80000001, False),
+            ("c4e261f74708", 4, 1, None, True),
+            ("c4e3fbf04708ff", 8, 0, None, True)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(bytes.fromhex(raw))
+        request["state"]["flags"] = 0xAD7
+        request["state"]["registers"][3] = amount
+        request["state"]["registers"][7] = 0x2FF8
+        data = list((0x80000001 if width == 4 else 0x8000000000000001).to_bytes(width, "little"))
+        request["state"]["memory"] = [dict(address=0x3000 + i, value=byte,
+            readable=not fault, writable=False, initialized=i != 0) for i, byte in enumerate(data)]
+        expected = copy.deepcopy(request["state"])
+        expected.update(defined_flags=(1 << 64) - 1, fault=None, events=[])
+        if fault:
+            reason = dict(kind="read", address=0x3000, bytes=width)
+            expected.update(fault=reason, events=[dict(kind="fault", fault=reason)])
+        else:
+            expected["registers"][0] = result
+            expected["pc"] += len(request["native_bytes"])
+            expected["events"] = [dict(kind="read", address=0x3000, value=data, initialized=False)]
+        bmi_cases.append((request, expected))
+    run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
+                         input="".join(json.dumps(r) + "\n" for r, _ in bmi_cases),
+                         text=True, stdout=subprocess.PIPE, check=True)
+    outputs = [json.loads(line) for line in run.stdout.splitlines()]
+    assert len(outputs) == len(bmi_cases)
+    for (request, expected), out in zip(bmi_cases, outputs):
+        assert out == expected, (request, out, expected)
+    for raw in ("c4e260f7c1", "c4e265f7c1", "c4e373f0c101", "c4e37ff0c101"):
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(bytes.fromhex(raw))
+        rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
+                                  input=json.dumps(request) + "\n", text=True, capture_output=True)
+        assert rejected.returncode == 1, (raw, rejected)
     # Reject rather than truncate malformed wire words and duplicate mappings.
     malformed = copy.deepcopy(base)
     malformed["state"]["registers"][0] = 1 << 64
@@ -408,7 +477,7 @@ def main():
         if got & 0x80000000:
             got -= 1 << 32
         assert got == disp, (insn, encoded, got)
-    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, BZHI/ANDN VEX/result flags, PUSH immediate/memory and POP memory ordering, stack aliases, exact writes and faults, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
+    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, BZHI/ANDN VEX/result flags, flagless BMI2 shifts/rotates, PUSH immediate/memory and POP memory ordering, stack aliases, exact writes and faults, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
 
 
 if __name__ == "__main__":
