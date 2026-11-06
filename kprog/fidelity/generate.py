@@ -14,6 +14,9 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def x86_forms():
     forms = ["push rbx", "pop rax", "push bx", "pop ax", "nop", "cdqe", "movups xmm0, XMMWORD PTR [rdi]", "movups XMMWORD PTR [rdi], xmm0"]
+    forms += ["mov rax, rsp", "mov eax, esp", "lea rax, [rsp+16]", "cmp rsp, 0",
+              "mov rsp, rax", "mov esp, eax", "lea rsp, [rsp+16]", "add rsp, 16",
+              "push rsp", "pop rsp", "push sp", "pop sp"]
     forms += [f"push {n}" for n in [-2147483648, -128, -1, 0, 1, 127, 128, 0x12345678]]
     forms += ["pushw -7", "push QWORD PTR [rdi+8]", "push WORD PTR [rdi+8]",
               "pop QWORD PTR [rdi+8]", "pop WORD PTR [rdi+8]",
@@ -83,6 +86,8 @@ def arm64_forms():
         for op in ["cmp", "cmn", "tst"]:
             forms += [f"{op} {b}, {c}", f"{op} {b}, {c}, lsl #3"]
         forms += [f"mov {a}, {b}", f"mov {a}, #127", f"movk {a}, #0xdead, lsl #16"]
+        stack_register = "wsp" if width == "w" else "sp"
+        forms += [f"mov {a}, {stack_register}", f"mov {stack_register}, {a}"]
         for op in ["mvn", "neg", "rev", "rev16", "sxtb", "sxth"]:
             forms += [f"{op} {a}, {'w1' if op in ['sxtb', 'sxth'] else b}"]
         for op in ["mvn", "neg"]:
@@ -131,26 +136,32 @@ def native_wrapper(arch, index, instruction, stack_kind=None, stack_bytes=0):
         lines += ["push QWORD PTR [r15+256]", "popfq", "movdqu [rsp-16], xmm4", "movdqu xmm0, [r15+264]"]
         lines += [f"mov {r}, [r15+{i*8}]" for i, r in enumerate(regs) if r not in ["rsp", "r15"]]
         before = -stack_bytes if stack_kind == "X86_OP_POP" else 0
-        after = -stack_bytes if stack_kind == "X86_OP_PUSH" else 0
         lines += ["mov r15, [r15+120]", "mov QWORD PTR [rip+native_stack_base], rsp"]
         if before:
             lines += [f"lea rsp, [rsp{before:+d}]"]
         lines += [f".global native_pc_{index}", f"native_pc_{index}:", instruction, f".global native_next_{index}", f"native_next_{index}:"]
-        if after:
-            lines += [f"lea rsp, [rsp{-after:+d}]"]
+        lines += ["movq xmm5, rsp", "mov rsp, QWORD PTR [rip+native_stack_base]"]
         lines += [f"movdqu xmm{lane+1}, [rsp-{64-lane*16}]" for lane in range(4)]
-        lines += ["push r15", "pushfq", "push rax", "mov rax, [rsp+24]", f"mov QWORD PTR [rax+32], {after}"]
+        lines += ["push r15", "pushfq", "push rax", "mov rax, [rsp+24]"]
         lines += [f"movdqu [rax+{280+lane*16}], xmm{lane+1}" for lane in range(4)]
         lines += [f"mov [rax+{i*8}], {r}" for i, r in enumerate(regs) if r not in ["rsp", "rax", "r15"]]
-        lines += ["mov rdx, [rsp]", "mov [rax], rdx", "mov rdx, [rsp+8]", "mov [rax+256], rdx", "mov rdx, [rsp+16]", "mov [rax+120], rdx", "movdqu [rax+264], xmm0", "add rsp, 24", "pop rdi"]
+        lines += ["movq rdx, xmm5", "sub rdx, QWORD PTR [rip+native_stack_base]", "mov [rax+32], rdx",
+                  "mov rdx, [rsp]", "mov [rax], rdx", "mov rdx, [rsp+8]", "mov [rax+256], rdx", "mov rdx, [rsp+16]", "mov [rax+120], rdx", "movdqu [rax+264], xmm0", "add rsp, 24", "pop rdi"]
         lines += [f"pop {r}" for r in ["r15", "r14", "r13", "r12", "rbp", "rbx"]]
         lines += ["ret"]
     else:
         lines += ["sub sp, sp, #128"]
         lines += [f"stp x{i}, x{i+1}, [sp, #{(i-19)*8}]" for i in range(19, 31, 2)]
         lines += ["str x0, [sp, #96]", "mov x30, x0", "ldr x1, [x30, #256]", "msr nzcv, x1", "add x1, x30, #264", "ldr q0, [x1]"]
+        lines += ["adrp x1, native_stack_base", "mov x2, sp", "str x2, [x1, :lo12:native_stack_base]"]
         lines += [f"ldr x{i}, [x30, #{i*8}]" for i in range(30)]
-        lines += ["ldr x30, [x30, #240]", f".global native_pc_{index}", f"native_pc_{index}:", instruction, f".global native_next_{index}", f"native_next_{index}:", "stp x0, x30, [sp, #112]", "ldr x0, [sp, #96]"]
+        lines += ["ldr x30, [x30, #240]", f".global native_pc_{index}", f"native_pc_{index}:", instruction, f".global native_next_{index}", f"native_next_{index}:"]
+        # D1/D2 are observer temporaries outside the modeled V0. Capture the
+        # real SP before restoring the wrapper's frame or dereferencing it.
+        lines += ["fmov d1, x0", "fmov d2, x30", "adrp x0, native_stack_base",
+                  "ldr x0, [x0, :lo12:native_stack_base]", "mov x30, sp", "sub x30, x30, x0",
+                  "mov sp, x0", "ldr x0, [sp, #96]", "str x30, [x0, #248]",
+                  "fmov x30, d2", "fmov x0, d1", "stp x0, x30, [sp, #112]", "ldr x0, [sp, #96]"]
         lines += [f"str x{i}, [x0, #{i*8}]" for i in range(1, 30)]
         lines += ["mrs x1, nzcv", "str x1, [x0, #256]", "add x1, x0, #264", "str q0, [x1]", "ldp x1, x2, [sp, #112]", "str x1, [x0]", "str x2, [x0, #240]"]
         lines += [f"ldp x{i}, x{i+1}, [sp, #{(i-19)*8}]" for i in range(19, 31, 2)]

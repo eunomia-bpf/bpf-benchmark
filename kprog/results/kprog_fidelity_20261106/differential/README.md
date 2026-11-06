@@ -470,3 +470,97 @@ and `host.txt` from `arm64-production-reference-current/`; only the canonical
 reference outputs differ. Exact new per-form counts, decoder diagnostics and
 empty mismatch record are published alongside the log. The563-form static
 hardware handoff is unchanged.
+
+
+## Actual final-SP observers and address-state counterexamples
+
+Both CPU wrappers now capture the actual final stack pointer before restoring
+their private observer frame. x86 uses XMM5 without changing flags or modeled
+XMM0; Arm uses D1/D2, preserving NZCV and modeled V0. Stack bytes are captured
+before observer spills. This replaces x86's preset PUSH/POP delta and Arm's
+unchanged input SP field. The `add rsp,16` and Arm `sub sp,sp,#16` controls
+both agree in1024 cases with actual nonzero final-SP displacements.
+Restoration happens after the native instruction/composite boundary, before
+the observer dereferences its own stack. No safety guard is inserted into an
+application instruction stream.
+
+| Matrix | Forms | Cases | Raw CPU/simulator disagreements |
+| --- | ---: | ---: | ---: |
+| x86 real CPU, actual-SP observer | 733 | 750592 | 11264 |
+| Arm QEMU, actual-SP observer | 567 | 580608 | 4096 |
+| Arm controls, current MOV-to-SP implementation | 77 | 78848 | 1024 |
+| Same Arm controls, frozen pre-repair header | 77 | 78848 | 2048 |
+
+All721 earlier x86 forms and563 earlier Arm forms still agree. The new x86
+rows that disagree are `mov rax,rsp`, `mov eax,esp`, `lea rax,[rsp+16]`,
+`cmp rsp,0`, `mov rsp,rax`, `mov esp,eax`, `lea rsp,[rsp+16]`, and16/64-bit
+PUSH/POP of SP. Each has1024 disagreements. The new `add rsp,16` control agrees.
+Arm's four new SP/WSP-to/from-GPR forms each disagree in1024 cases.
+The balanced MOV-to-SP round trip changes from1024 disagreements with the
+old header to zero with A's repair; the existing SP-comparison control remains
+at1024. Its companion unbalanced-SP observation control also agrees.
+
+These are address-state differences at the missing frame/projection boundary,
+not eleven independent unsafe-program claims. Some pointer copies may admit
+an explicit frame projection; flags, narrow values and stored bytes require
+actual-address materialization before their observations. The harness records
+the raw state and does not invent a pointer normalization to turn rows green.
+The known load-only negative findings still require the shared numeric-base
+and state-relation repair.
+
+The independent canonical replay checks144 x86 forms/147456 cases: CPU versus
+reference has zero disagreements; simulator versus reference has4096, all in
+16/64-bit PUSH/POP of SP. The589 remaining forms have explicit decoder/block
+interface diagnostics. Arm checks419 forms/429056 cases: CPU versus reference
+has zero disagreements; simulator versus reference has4096, exactly the four
+SP/WSP moves. Its148 remaining forms have explicit diagnostics. Both reference
+commands exit1 and preserve every unavailable encoding and counterexample.
+
+Mismatch records now include `native_stack_base`, the real observer-frame
+anchor. The architectural SP is that anchor plus the record's SP displacement,
+modulo2^64. Input stack bytes occupy anchor-64 through anchor-1. The reference
+adapter supplies the real initial SP and private stack cells and normalizes
+only the final SP for comparison. Other recorded register words remain raw.
+The x86 POP fixtures begin at displacement-2/-8; ordinary Arm fixtures begin
+at displacement0. `reference-mismatches.jsonl.gz` additionally retains canonical results,
+CPU/simulator states and all input bytes; `native-code.json` supplies bytes/PCs.
+
+The new matrix initially exposed `unsupported register: wsp` in the Arm
+parser. Its register alias now maps both SP spellings to ARM64_SP; width
+selection and the ABI checker already distinguish WSP32. All29 original Arm
+positive artifacts plus the negative proof artifact compile with one worker.
+The focused real-assembly `wsp-return-negative/` fixture confirms that decoding
+WSP does not accept an ABI-breaking return: specialization rejects it with
+`native ABI return has an unbalanced stack pointer at 0xc: ret`.
+That unsafe whole program is never executed.
+
+Commands as executed:
+
+```sh
+taskset -c 16-23 prlimit --as=12884901888 -- make -C kprog/fidelity run BUILD=build-x86-sp-observer-control OUT=../results/kprog_fidelity_20261106/differential/x86-sp-observer-control
+taskset -c 16-19 make -C kprog/fidelity -o build reference-check BUILD=build-x86-sp-observer-control OUT=../results/kprog_fidelity_20261106/differential/x86-sp-reference CASES=1024
+taskset -c 16-19 make -C kprog/fidelity run-emulated ARCH=arm64 BUILD=build-arm64-sp-observer OUT=../results/kprog_fidelity_20261106/differential/arm64-sp-observer
+taskset -c 16-19 make -C kprog/fidelity -o build reference-check ARCH=arm64 BUILD=build-arm64-sp-observer OUT=../results/kprog_fidelity_20261106/differential/arm64-sp-reference CASES=1024
+taskset -c 16-19 make -C kprog/fidelity arm64-control-build ARM64_CONTROL_BUILD=build-arm64-control-sp-observer
+taskset -c 16-19 make -C kprog/fidelity arm64-control-qemu ARM64_CONTROL_BUILD=build-arm64-control-sp-observer ARM64_CONTROL_OUT=../results/kprog_fidelity_20261106/differential/arm64-control-sp-observer
+taskset -c 16-19 make -C kprog/arm64 micro-proofs-build PROOF_BUILD_DIR=build/fidelity-wsp/micro-proofs NEGATIVE_NATIVE_BUILD_DIR=build/fidelity-wsp/negative-native MICRO_SIM_PROOF_ARGS='--jobs 1'
+taskset -c 16-23 make -C kprog/results/kprog_fidelity_20261106/differential/wsp-return-negative check
+```
+
+`-o build` reuses the already built, frozen CPU harness when replaying it;
+it does not omit any instruction form. The initial732-form x86 observer run
+is retained in `x86-sp-observer/`; the final733-form matrix adds the positive
+ADD-to-SP observer control. `sp-observer-harness-artifacts.tar.gz` retains exact
+headers/imports, generated C/native assembly, binaries, driver sources, the
+old Arm header closure used for the paired test, and the WSP negative object.
+The old-header test compiles the same generated control C/native object with
+only its simulator include changed to that archived old header.
+
+The two new static Arm handoffs are
+`cpu-differential-arm64-sp-observer.gz` and
+`cpu-differential-arm64-control-sp-observer.gz`. The existing hardware scripts
+accept them through `ARM64_HANDOFF` and `ARM64_CONTROL_HANDOFF` respectively.
+Expected current exit status is1, with4096 ordinary and1024 control differences.
+The earlier successful hardware matrices remain separate and unchanged.
+
+The preliminary76-form Arm MOV-to-SP run remains in `arm64-control-movsp/`; it predates final-SP capture. `sp-observer-preliminary-artifacts.tar.gz` retains its exact source/binary and the preliminary732-form x86 harness.

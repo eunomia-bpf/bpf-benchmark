@@ -22,3 +22,5 @@
 Latest replay: x86721forms/738304realCPUcases/zero; Arm563forms/576512QEMUcases/zero. Canonicalreference116x86forms/118784cases and300Armforms/307200cases agree, with605/263 missing-reference forms explicitly retained. Current75Arm controls retain1024SPflag mismatches. See differential/README.md for scope and static hardware handoffs.
 
 Scale follow-up: the unchanged10036-instruction pointer-direct fixture now passes in a frozen experimental compiler/representation path (30055BPF instructions, result5015, retval2). Exactsourceandtracearchives are under scale/. Original production-header compile repair remains active; experimental headers are not promoted.
+
+Actual-SP observer follow-up: x86733forms/750592cases retain11264 address-state differences; Arm567forms/580608cases retain4096. All earlier721/563forms still agree. Canonical CPU comparisons are zero for144x86/419Arm forms; rawmodeldifferences and missingreferenceencodings are retained. Arm77controls confirm MOVSP repair and realnonzeroSP capture while retaining1024SP-flag counterexamples. See differential/README.md.

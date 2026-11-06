@@ -145,7 +145,7 @@ int main(int argc, char **argv)
                 memcmp(native_memory, memory, sizeof(memory));
             if (differs) {
                 bad++;
-                fprintf(mismatches, "{\"form\":%u,\"assembly\":\"%s\",\"case\":%lu,\"flag_mask\":\"%016" PRIx64 "\",\"input\":", j, form->assembly, c, mask);
+                fprintf(mismatches, "{\"form\":%u,\"assembly\":\"%s\",\"case\":%lu,\"flag_mask\":\"%016" PRIx64 "\",\"native_stack_base\":\"%016" PRIx64 "\",\"input\":", j, form->assembly, c, mask, native_stack_base);
                 state_json(mismatches, &input);
                 fputs(",\"native\":", mismatches); state_json(mismatches, &native);
                 fputs(",\"simulator\":", mismatches); state_json(mismatches, &sim);

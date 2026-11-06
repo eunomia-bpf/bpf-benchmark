@@ -39,6 +39,8 @@ def forms():
         ('BLR saved LR stack', 'bl 1f\nb finish\n1: str x30,[sp,#-16]!\nadr x10,2f\nblr x10\nldr x30,[sp],#16\nret\n2: add x0,x0,x2\nret'),
         ('stack pair pre/post', 'stp x1,x2,[sp,#-16]!\nldp x0,x3,[sp],#16\nb finish'),
         ('stack scalar pre/post', 'str x1,[sp,#-16]!\nldr x0,[sp],#16\nb finish'),
+        ('MOV SP register round-trip', 'sub sp,sp,#16\nmov x0,sp\nadd x0,x0,#16\nmov sp,x0\nmov x0,#37\nb finish'),
+        ('SP observation offset', 'sub sp,sp,#16\nmov x0,#37\nb finish'),
         ('SP compare flags', 'cmp sp,#0\n'+branch('b.eq', False)),
     ]
     return out
@@ -75,7 +77,10 @@ def main():
         before = 'add x1,x30,#280\n'+'\n'.join(f'ldr q{j+1}, [x1, #{j*16}]\nstur q{j+1}, [sp, #-{64-j*16}]' for j in range(4))
         wrapper = wrapper.replace('ldr x1, [x30, #256]', before+'\nldr x1, [x30, #256]')
         after = 'add x30,x0,#280\n'+'\n'.join(f'ldur q{j+1}, [sp, #-{64-j*16}]\nstr q{j+1}, [x30, #{j*16}]' for j in range(4))
-        wrapper = wrapper.replace('ldr x0, [sp, #96]', 'ldr x0, [sp, #96]\n'+after)
+        observer = 'stp x0, x30, [sp, #112]\nldr x0, [sp, #96]'
+        if wrapper.count(observer) != 1:
+            raise RuntimeError('ambiguous ARM stack observer insertion')
+        wrapper = wrapper.replace(observer, observer+'\n'+after)
         assembly += [f'.org {i*4096}', wrapper]
     assembly += ['.section .note.GNU-stack,"",%progbits']
     source = out/'native.S'

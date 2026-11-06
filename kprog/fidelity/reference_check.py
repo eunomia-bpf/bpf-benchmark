@@ -76,11 +76,15 @@ def main():
                     registers[4]=(registers[4]+stack_base)&((1<<64)-1)
                     architectural_state=dict(registers=registers,flags=initial['flags'],pc=native_code['forms'][index]['pc'],xmm0=initial['vector'][0]+(initial['vector'][1]<<64),fs_base=native_code['fs_base'],gs_base=native_code['gs_base'],memory=cells)
                 else:
+                    registers=initial['registers'].copy()
+                    registers[31]=(registers[31]+stack_base)&((1<<64)-1)
+                    if stack_base:
+                        cells += [dict(address=stack_base-64+i,value=byte,readable=True,writable=True,initialized=True) for i,byte in enumerate(bytes.fromhex(initial['stack']))]
                     # The admitted Arm multiply/select forms have no memory operands.
                     # Unexpected memory events/faults fail below; raw CPU memory is
                     # still compared in full, without serializing irrelevant cells.
                     if omit_memory: cells=[]
-                    architectural_state=dict(registers=initial['registers'],flags=initial['flags'],pc=native_code['forms'][index]['pc'],vector0=initial['vector'][0]+(initial['vector'][1]<<64),memory=cells)
+                    architectural_state=dict(registers=registers,flags=initial['flags'],pc=native_code['forms'][index]['pc'],vector0=initial['vector'][0]+(initial['vector'][1]<<64),memory=cells)
                 request=dict(isa='x86_64' if args.arch=='x86' else 'aarch64',state=architectural_state,native_bytes=native_code['forms'][index]['native_bytes'])
                 encoded_request=json.dumps(request,separators=(',',':'))
                 if case==0:
@@ -104,12 +108,13 @@ def main():
                 initial,native,simulator,before,native_mem,sim_mem,cells,stack_base=record
                 registers=response['registers'].copy()
                 if args.arch=='x86': registers[4]=(registers[4]-stack_base)&((1<<64)-1)
+                else: registers[31]=(registers[31]-stack_base)&((1<<64)-1)
                 vector_word=response['xmm0' if args.arch=='x86' else 'vector0']
                 vector=[vector_word&((1<<64)-1),vector_word>>64]
                 expected_bytes={cell['address']:cell['value'] for cell in response['memory']}
                 address=initial['registers'][7 if args.arch=='x86' else 4]-32
                 expected_memory=bytes(expected_bytes[address+i] for i in range(256)) if not omit_memory else before
-                expected_stack=bytes(expected_bytes[stack_base-64+i] for i in range(64)).hex() if args.arch=='x86' else initial['stack']
+                expected_stack=bytes(expected_bytes[stack_base-64+i] for i in range(64)).hex() if args.arch=='x86' or (stack_base and not omit_memory) else initial['stack']
                 reg_count=16 if args.arch=='x86' else 32
                 flag_mask=0x8c1 if args.arch=='x86' else 0xf0000000
                 def differs(actual,actual_mem):

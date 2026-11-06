@@ -273,7 +273,7 @@ def reg_const(reg: str) -> str:
     reg = reg.strip().lower()
     if reg in {"xzr", "wzr"}:
         return "ARM64_XZR"
-    if reg == "sp":
+    if reg in {"sp", "wsp"}:
         return "ARM64_SP"
     m = re.fullmatch(r"[xw]([0-9]|[12][0-9]|30)", reg)
     if not m:
