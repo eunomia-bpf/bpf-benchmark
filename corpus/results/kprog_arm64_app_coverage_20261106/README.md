@@ -588,3 +588,11 @@ that package reached the native binder and exposed map-layout, readonly identity
 and tracing relocation errors; its raw result is archived here. The subsequent
 retry uses the compatible runtime-capacity library and the existing lifecycle
 timeout knob, preserving the two-start workload and counter collection.
+
+## Immutable BCC native/proof pairs
+
+[The frozen-pairing result](bcc-frozen-pairing/README.md) retains all 23 regenerated
+and compiled proofs with the exact copied native ELFs used to link them. The
+runtime manifest now installs both halves from that phase, so later native-stage
+changes cannot silently invalidate the pairing. Application binder failures
+remain active; this result establishes pairing and compilation only.

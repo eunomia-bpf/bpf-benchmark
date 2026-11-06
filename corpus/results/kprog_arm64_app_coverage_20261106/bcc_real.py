@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 import subprocess
+import shutil
 import sys
 from elftools.elf.elffile import ELFFile
 import coverage
@@ -30,8 +31,10 @@ for program in programs:
   if len(target)!=1: raise ValueError(f'original ELF entry {symbol} is not unique')
   section=elf.get_section(target[0]['st_shndx']).name
  name='bcc_'+stem+'_'+symbol
+ native=phase/'native'/(stem+'.native.o')
+ if not native.exists(): shutil.copy2(ROOT/f'vendor/build/native-bpf/arm64/stage/bcc/{stem}.native.o',native)
  local=phase/'native'/(name+'.proof.o')
- command=[str(linker),'--input',str(ROOT/f'vendor/build/native-bpf/arm64/stage/bcc/{stem}.native.o'),'--symbol',symbol,'--output',str(local),'--mode','proof']
+ command=[str(linker),'--input',str(native),'--symbol',symbol,'--output',str(local),'--mode','proof']
  result=subprocess.run(command,text=True,capture_output=True)
  (phase/'native'/(name+'.link.json')).write_text(json.dumps(dict(command=command,returncode=result.returncode,stdout=result.stdout,stderr=result.stderr),indent=2)+'\n')
  if result.returncode: raise RuntimeError(result.stderr)
@@ -50,7 +53,7 @@ for program in programs:
   source.write_text(text);row['ok']=True
  except ValueError as error: row['note']=str(error)
  paired.append(dict(original_id=program['id'],original_name=symbol,original_object=str(original),
-    program_section=section,native_object=str(ROOT/f'vendor/build/native-bpf/arm64/stage/bcc/{stem}.native.o'),
+    program_section=section,native_object=str(native),
     symbol=symbol,simulator_object=str(phase/'objects'/(name+'.bpf.o')),
     simulator_program=name+'_arm64_sim_xdp'))
  rows.append(row)
