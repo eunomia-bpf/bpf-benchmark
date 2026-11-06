@@ -188,3 +188,13 @@ Enabling the BZHI register/memory decoder extends the reference comparison to
 mismatches. 613 forms still await the executable reference; the command exits
 nonzero for that incompleteness and the two CPU findings. Exact command:
 `taskset -c 16-23 make -C kprog/fidelity reference-check CASES=1024 OUT=../results/kprog_fidelity_20261106/differential/x86-reference-bzhi`.
+
+
+After V's PUSH/POP correction, the independent F rebuild at
+`x86-cpu-fixed/` reports **698 forms, 714752 cases, zero CPU/simulator
+mismatches**. The same run checks 87040 CMOV/BT/BZHI cases against the
+executable reference with zero mismatches. The remaining 613 forms still need
+their canonical raw-byte reference interface; this does not change the green
+CPU matrix. The overall reference-check command exits 1 for that explicit
+coverage gap. Native raw bytes, per-form records, empty mismatch files and the
+complete Make log are retained in that directory.
