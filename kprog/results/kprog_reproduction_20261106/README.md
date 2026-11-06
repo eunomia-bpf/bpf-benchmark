@@ -120,6 +120,35 @@ Planned measurements, following the 2026-05-29 recipe and
 
 arm64 AWS (`1.056x`) is deferred: it costs money and waits for the operator.
 
+## Timing requests served
+
+Lane F's load-time request (2026-11-06) ran to completion on the current
+tree — `BENCH=simple RUNTIMES='native_kernel kernel native_proof'
+SAMPLES=15 WARMUPS=1 INNER_REPEAT=1` -> `micro/results/
+x86_kvm_micro_20261106_101146_092448`. It uses the pure suite, so the
+stage2 chunk defect does not affect it.
+
+`native_kernel`, median over 15 samples (min-max):
+
+| Phase | Median (ms) | Range (ms) |
+| --- | ---: | ---: |
+| `native_load_ns` | 46.076 | 45.656-49.000 |
+| `companion_lookup_spec_ns` | 45.240 | 44.798-48.094 |
+| `companion_load_ns` | 0.326 | — |
+| `companion_object_load_ns` | 0.222 | — |
+| `proof_verifier_load_ns` | 0.058 | 0.053-0.065 |
+| `prog_load_ns` | 0.111 | — |
+| `blob_upload_ns` | 0.052 | — |
+| `proof_open_ns` | 0.030 | — |
+
+`kernel`: `object_load_ns` 0.216 ms. `native_proof`: `proof_compile_ns`
+121.598 ms.
+
+`companion_lookup_spec_ns` is 45.24 ms — 98% of the whole load — which is
+neither the ~107 ms F reported patching out nor the sub-millisecond a hash
+lookup implies. Reported to F; the figure is recorded as measured, not as
+evidence that the patch works.
+
 ## Not claimed
 
 - Nothing here is generation-bound path evidence; these are the micro and
