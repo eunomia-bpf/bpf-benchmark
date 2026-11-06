@@ -17,6 +17,7 @@ bpf-check:
 	cd ../formal && lake env lean -R ../tv -o ../tv/build/BPF.olean ../tv/BPF.lean
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv -o ../tv/build/BPFPath.olean ../tv/BPFPath.lean
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv ../tv/BPFChecks.lean
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv -o ../tv/build/BPFPlatform.olean ../tv/BPFPlatform.lean
 
 build/CompiledBlocks.lean: build/cmov-block.bpf.o extract_blocks.py
 	python3 extract_blocks.py $< $@
@@ -253,3 +254,41 @@ build/wrong-capacity/simulator.bpf.o: test_simulator.bpf.c
 	clang -O2 -g -target bpf -DTV_MAP_MAX_ENTRIES=2 -I../../vendor/libbpf/include/uapi \
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		-I/usr/include/x86_64-linux-gnu -c $< -o $@
+
+.PHONY: context-kernel-check guest-context-kernel-check
+context-kernel-check: build/capture-context build/context-fields.bpf.o
+	taskset -c 8-23 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
+		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/tv guest-context-kernel-check'
+
+guest-context-kernel-check:
+	install -d build/context-access
+	./build/capture-context
+
+.PHONY: context-check
+context-check: bpf-check
+	python3 extract_context.py
+	$(MAKE) context-certificate
+
+CONTEXT_BLOCK_DIR ?= build
+.PHONY: context-certificate context-negative-check
+context-certificate:
+	cd ../formal && LEAN_PATH=../tv/$(CONTEXT_BLOCK_DIR):../tv/build lake env lean -R ../tv/$(CONTEXT_BLOCK_DIR) \
+		-o ../tv/$(CONTEXT_BLOCK_DIR)/KernelContexts.olean ../tv/$(CONTEXT_BLOCK_DIR)/KernelContexts.lean
+	cd ../formal && LEAN_PATH=../tv/$(CONTEXT_BLOCK_DIR):../tv/build lake env lean -R ../tv ../tv/ContextChecks.lean
+
+context-negative-check: context-check
+	python3 test_context_artifacts.py
+
+build/context-fields.bpf.o: context_fields.bpf.c
+	install -d build
+	clang -O2 -g -target bpf -I../../vendor/libbpf/include/uapi \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		-I/usr/include/x86_64-linux-gnu -c $< -o $@
+
+build/capture-context: capture_context.cpp
+	install -d build
+	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include $< \
+		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $@

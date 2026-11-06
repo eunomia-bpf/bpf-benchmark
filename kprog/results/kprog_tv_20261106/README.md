@@ -392,3 +392,32 @@ kernel. This is a diagnostic correctness target, outside benchmark launchers.
 The exact repaired bzImage, modules, config, symbol versions, before/after
 layouts and exhaustive pre-repair DWARF evidence are retained. Frozen 6836f7d44
 runtime pairs were neither modified nor replaced. Full TV remains active.
+
+Actual kernel context expansions
+--------------------------------
+
+BPFPlatform.lean adds an explicit platform layer over the existing byte BPF
+interpreter, without another native ISA. Its universal expansion theorem gives
+real physical BPF execution, full state and identical ordered effects; success
+reaches the complete conversion boundary or faults. Missing conversion,
+original-instruction drift, premature boundary, forced successor, early return
+and zero-length expansion reject. Faults preserve the virtual PC and pointer,
+rather than inventing a zero load. Axioms remain propext and Quot.sound.
+
+Actual clang-produced field fixtures were loaded under the paired x86 kernel
+and their raw and translated byte streams captured. The six fields produce
+1/1/1/3/2/3 physical loads: data/end/meta retain all 64 pointer bits, while
+interface and queue lookups retain every ordered access and scalar width.
+The egress program uses BPF_XDP_DEVMAP explicitly; the kernel rejects it under
+ordinary XDP. The initial masked-pointer fixture also correctly rejected and
+was replaced with a field read that preserves the pointer. Raw setup rejection
+logs are retained. No native program is executed by these capture fixtures.
+
+Lean checks the actual captured bytes and rejects four mutations (pointer
+width, physical end offset, nested-load order, erased access); an unchanged
+copy passes through the same extractor and semantic checker. Logs, all six
+per-program raw/translated/context records, generated Lean definitions,
+mutation failures and compiled inputs are archived. This discharges a platform
+component required by the real simple micro; native block state projection,
+private spills and full per-program certificates remain active work. Binding
+and the conditional composed theorem do not substitute for those certificates.

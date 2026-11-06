@@ -296,3 +296,24 @@ independently of libbpf's object-name prefix. Both compiled-object and raw-proof
 paths retain the original application FD; duplicate matching original map IDs
 reject. Kernel regressions cover different object names for writable and
 readonly data, wrong same-sized BTF variables, and ambiguous original identities.
+
+`BPFPlatform.lean` handles verifier context conversion explicitly. A platform
+instance classifies each instruction at its actual PC; a context rule binds the
+original decoded instruction to the kernel-produced physical BPF expansion.
+Missing context metadata rejects. The existing byte interpreter and
+`BPFPath.evaluate` execute every physical operation and check every successor.
+A successful expansion must reach its exact boundary or fault; it cannot return
+early, erase a load, or force a successor. `expand_sound` proves actual physical
+BPF execution with the same full registers, memory and ordered effects, with
+only the local physical PC projected to the virtual instruction's successor.
+Its axioms are `propext` and `Quot.sound`. Agreement of the captured conversions
+and classifier with the bound kernel/type/attach context remains in the
+explicit platform trusted base; it is not a second native ISA specification.
+
+`make -C kprog/tv context-kernel-check context-negative-check` captures actual
+clang and kernel bytes for all six XDP context fields, including DEVMAP's
+required egress attach type. Lean checks 64-bit packet pointers despite the
+virtual LDXW opcode, physical offsets and all ordered nested loads. Changed
+pointer width, end-pointer offset, load ordering, and an erased nested access
+fail the same semantic checks that the unchanged captured copy passes.
+These platform fixtures do not certify the micro or application native blocks.

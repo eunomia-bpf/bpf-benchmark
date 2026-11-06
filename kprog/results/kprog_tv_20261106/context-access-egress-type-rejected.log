@@ -1,0 +1,27 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build
+clang -O2 -g -target bpf -I../../vendor/libbpf/include/uapi \
+	-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+	-I/usr/include/x86_64-linux-gnu -c context_fields.bpf.c -o build/context-fields.bpf.o
+taskset -c 8-23 vng --run /workspaces/repository/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage \
+	--cwd /workspaces/repository --rwdir /workspaces/repository --overlay-rwdir /tmp \
+	--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+	--exec 'make -C kprog/tv guest-context-kernel-check'
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build/context-access
+./build/capture-context
+libbpf: prog 'tv_ctx_egress_ifindex': BPF program load failed: -EACCES
+libbpf: prog 'tv_ctx_egress_ifindex': -- BEGIN PROG LOAD LOG --
+0: R1=ctx() R10=fp0
+; FIELD(egress_ifindex) @ context_fields.bpf.c:18
+0: (61) r1 = *(u32 *)(r1 +20)
+invalid bpf_context access off=20 size=4
+processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+-- END PROG LOAD LOG --
+libbpf: prog 'tv_ctx_egress_ifindex': failed to load: -EACCES
+libbpf: failed to load object 'build/context-fields.bpf.o'
+load context artifact
+make: *** [Makefile:267: guest-context-kernel-check] Error 1
+make: Leaving directory '/workspaces/repository/kprog/tv'
+make: *** [Makefile:260: context-kernel-check] Error 2
+make: Leaving directory '/workspaces/repository/kprog/tv'
