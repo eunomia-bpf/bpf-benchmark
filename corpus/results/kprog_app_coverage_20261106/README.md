@@ -631,3 +631,65 @@ commands, full logs, production source inputs, native/proof objects, zero-slot
 relocations, manifests, the isolated linker/probe, and the copied VM pair.
 Native code-target dispatch and actual app entry/map pairing remain active
 work; no application timing command is added from these fixture results.
+
+## Native code-target dispatch and relocation
+
+Finite native register jumps and calls now retain their actual code targets.
+The linker discovers address-taken functions, follows same-section CFG edges,
+and re-anchors every LEA to the target instruction's new encoded offset after
+RET/helper expansion and ABI edits. PC32 references likewise use instruction
+offsets rather than stale source byte offsets, including an interior target
+following a removed NOP. Unknown/mixed targets remain explicit errors; the
+verifier-visible proof dispatch uses the existing finite native target sets.
+No runtime assertion, guard, fallback or instruction substitution was added.
+
+`native-dispatch-test` passes66 Rust tests. `code-dispatch-kvm` passes four
+production generation-bound cases: two-target JMP, CMOV-selected JMP, nested
+indirect CALL and a cross-section PC32 interior target. All four native return
+values match BPF (42/42/6/42), with one nonzero-generation chunk each. Eight
+actual CPU observations cover both inputs. All four BPF proofs compile.
+The actual emitted native stream contains its register-indirect transfer;
+its code-pointer LEAs target the corresponding relocated instructions.
+
+The first shared-worktree formal attempt encountered lane V's in-progress
+BMI2 parser change; its failure is retained. The final check ran from an
+immutable committed-source export plus only this pending Rust change:
+`make -C /workspaces/.agent-state/kprog-lanes/C/code-check-source/kprog/formal check`
+passes335 Lean jobs, both wire suites, all retained C oracles and12 map Rust
+regressions. The export's source revision is recorded in
+[code-dispatch-source-revision.txt](code-dispatch-source-revision.txt).
+[Raw code-dispatch evidence](code-dispatch-artifacts.tar.gz) preserves producer
+source, commands, logs, objects, manifests, emitted blobs, CPU observations,
+bound results and that isolated formal input/output. Reproduce via
+`make -f corpus/results/kprog_app_coverage_20261106/Makefile
+native-dispatch-test code-dispatch-kvm`.
+
+## Actual six-application x86 startup inventory
+
+The retained lane R runs now supply actual startup loads: the five-app run
+`x86_kvm_corpus_20261106_114826_062263` and Katran run
+`x86_kvm_corpus_20261106_113727_795524`. Every attempt is paired by PID/TID with
+its syscall outcome. Resident counts match that application's actual load IDs
+to the captured global inventory; other applications' IDs do not enter the
+count. All probes, transient programs, retries and failed attempts remain in
+the raw records. A resident snapshot is not the total number loaded over time.
+
+| Application | Load attempts | Successful loads | Failed loads | Resident load IDs | Actual generation-bound app coverage |
+| --- | ---: | ---: | ---: | ---: | --- |
+| BCC | 77 | 77 | 0 | 25 | pairing in progress |
+| OTel | 17 | 16 | 1 | 13 | pairing in progress |
+| Cilium | 221 | 210 | 11 | 92 | pairing in progress |
+| Tetragon | 311 | 308 | 3 | 81 | pairing in progress |
+| Tracee | 162 | 162 | 0 | 151 | pairing in progress |
+| Katran | 6 | 6 | 0 | 1 | pairing in progress |
+
+These are stock application startup results, not verified-native success.
+Proof-generation/verifier outcomes for these actual programs will be recorded
+as their full-context/map pairs are constructed, independently of the1136
+staged-artifact diagnostics. No application timing request follows from a
+fixture or a name-only pairing. Run `make -f
+corpus/results/kprog_app_coverage_20261106/Makefile startup-inventory` once to
+capture this snapshot. [Startup records](startup-x86-artifacts.tar.gz) contain
+all794 attempts, full raw logs, original inventories, names/types/IDs, attach
+metadata, per-load errors and the extraction command. There are no unpaired
+load outcomes or unfinished attempts in this snapshot.

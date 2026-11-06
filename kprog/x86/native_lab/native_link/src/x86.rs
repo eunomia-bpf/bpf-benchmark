@@ -26,6 +26,7 @@ type LocalSiteKey = (object::SectionIndex, u64, u64);
 enum X86Callee {
     Id(u64),
     Symbol(String),
+    Code(usize, u64),
 }
 
 /// Finite reaching definitions, independent of byte order at CFG joins.
@@ -33,8 +34,9 @@ enum X86Callee {
 /// by a later-known predecessor. Values come only from literal/GOT definitions.
 fn x86_callee_flow(
     instructions: &[Instruction],
-    got: &HashMap<u64, String>,
+    definitions: &HashMap<u64, X86Callee>,
     external_calls: &HashSet<u64>,
+    section: usize,
 ) -> Result<HashMap<u64, BTreeSet<X86Callee>>> {
     type Values = HashMap<Register, BTreeSet<X86Callee>>;
     if instructions.is_empty() { bail!("empty x86 callee-flow input"); }
@@ -67,14 +69,16 @@ fn x86_callee_flow(
                         }).collect::<Option<BTreeSet<_>>>()
                     }).flatten()
                 } else if insn.op0_register().size()==8 {
-                    got.get(&insn.ip()).map(|name| BTreeSet::from([X86Callee::Symbol(name.clone())]))
+                    definitions.get(&insn.ip()).map(|value| BTreeSet::from([value.clone()]))
                 } else { None }
+            } else if insn.mnemonic()==Mnemonic::Lea && insn.op0_register().size()==8 {
+                definitions.get(&insn.ip()).map(|value| BTreeSet::from([value.clone()]))
             } else if insn.condition_code()!=ConditionCode::None && insn.op0_register().size()==8 {
                 // CMOV selects either reaching value; flags are not guessed.
                 dst.and_then(|d| incoming.get(&d)).and_then(|a| {
                     let b = if insn.op1_kind()==OpKind::Register {
                         x86_gpr64_family(insn.op1_register()).and_then(|r| incoming.get(&r)).cloned()
-                    } else { got.get(&insn.ip()).map(|n| BTreeSet::from([X86Callee::Symbol(n.clone())])) };
+                    } else { definitions.get(&insn.ip()).map(|value| BTreeSet::from([value.clone()])) };
                     b.map(|b| a.union(&b).cloned().collect())
                 })
             } else { None };
@@ -83,7 +87,8 @@ fn x86_callee_flow(
         let flow = insn.flow_control();
         if matches!(flow, FlowControl::Call | FlowControl::IndirectCall) {
             let canonical_helper = external_calls.contains(&insn.ip()) ||
-                x86_indirect_call_register(insn).and_then(|r| incoming.get(&r)).is_some();
+                x86_indirect_call_register(insn).and_then(|r| incoming.get(&r))
+                    .is_some_and(|values| values.iter().all(|v| !matches!(v,X86Callee::Code(..))));
             if canonical_helper { clear_x86_call_clobbered_registers(&mut next); }
             else { next.clear(); } // A native code callee may write any GPR.
         }
@@ -92,10 +97,17 @@ fn x86_callee_flow(
             if let Some(target) = indices.get(&insn.near_branch_target()) { successors.push(*target); }
         }
         if flow == FlowControl::IndirectBranch {
-            // Until its finite code targets are resolved, it may enter any
-            // instruction with unknown registers. Never choose the last ID.
-            next.clear();
-            successors.extend(0..instructions.len());
+            match x86_indirect_target_register(insn).and_then(|r| incoming.get(&r)) {
+                Some(values) if values.iter().all(|v| matches!(v,X86Callee::Code(..))) => {
+                    for value in values {
+                        let X86Callee::Code(target_section,addr) = value else { unreachable!() };
+                        if *target_section==section {
+                            if let Some(target) = indices.get(addr) { successors.push(*target); }
+                        }
+                    }
+                }
+                _ => { next.clear(); successors.extend(0..instructions.len()); }
+            }
         } else if !matches!(flow, FlowControl::Return | FlowControl::UnconditionalBranch |
                             FlowControl::Interrupt | FlowControl::Exception) && i+1 < instructions.len() {
             successors.push(i+1);
@@ -113,7 +125,7 @@ fn x86_callee_flow(
         }
     }
     Ok(instructions.iter().zip(states).filter_map(|(insn,state)| {
-        let reg = x86_indirect_call_register(insn)?;
+        let reg = x86_indirect_target_register(insn)?;
         state?.remove(&reg).map(|values| (insn.ip(),values))
     }).collect())
 }
@@ -564,7 +576,7 @@ fn resolve_x86_plt32_defined_target(
 fn resolve_x86_pc32_defined_text_target(
     elf: &object::File,
     reloc: &object::Relocation,
-) -> Result<Option<SymInfo>> {
+) -> Result<Option<(SymInfo,u64)>> {
     let target_sym_idx = match reloc.target() {
         RelocationTarget::Symbol(idx) => idx,
         _ => return Ok(None),
@@ -595,7 +607,7 @@ fn resolve_x86_pc32_defined_text_target(
         elf,
         section_index,
         target_addr as u64,
-    ))
+    ).map(|symbol| (symbol,target_addr as u64)))
 }
 
 fn discover_reloc_reachable(
@@ -628,7 +640,7 @@ fn discover_reloc_reachable(
                 }
                 resolve_x86_plt32_defined_target(elf, &reloc)?
             }
-            2 => resolve_x86_pc32_defined_text_target(elf, &reloc)?,
+            2 => resolve_x86_pc32_defined_text_target(elf, &reloc)?.map(|(symbol,_)| symbol),
             _ => None,
         };
         let Some(target) = target else {
@@ -684,6 +696,14 @@ pub(super) fn discover_reachable(elf: &object::File, entry: &SymInfo) -> Result<
             if insn.is_invalid() {
                 bail!("iced bailed decoding {} at IP {:#x}", sym.name, insn.ip());
             }
+            if insn.code()==Code::Lea_r64_m && insn.is_ip_rel_memory_operand() {
+                if let Some(target) = find_text_symbol_in_section_at_address(
+                    elf,sym.section_index,insn.ip_rel_memory_address()) {
+                    if seen.insert(symbol_key(&target)) {
+                        included.push(target.clone()); queue.push(target);
+                    }
+                }
+            }
             if matches!(insn.flow_control(), FlowControl::Call) {
                 if call_relocation_opcode_offsets.contains(&(insn.ip() - sym.address)) {
                     continue;
@@ -722,6 +742,7 @@ enum PatchKind {
     HelperCallRel32 { target_addr: u64 },
     HelperPointer { target_addr: u64 },
     HelperDispatch { targets: Vec<(u64, u64)> },
+    CodeAddress { section: usize, address: u64 },
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
     /// patches the immediate field with the live kernel map pointer.
     MapImmediate { name: String, imm_offset: usize },
@@ -1207,6 +1228,38 @@ fn scan_x86_pc_relative_relocations(
     Ok(out)
 }
 
+fn x86_code_definitions(
+    elf: &object::File,
+    sym: &SymInfo,
+    instructions: &[Instruction],
+    included: &[SymInfo],
+    relocated: &HashSet<LocalSiteKey>,
+) -> Result<HashMap<u64,X86Callee>> {
+    let mut definitions = HashMap::new();
+    for insn in instructions {
+        if insn.code()!=Code::Lea_r64_m || !insn.is_ip_rel_memory_operand() { continue; }
+        let offset = insn.ip()-sym.address + insn.len() as u64-4;
+        if relocated.contains(&local_site_key(sym,offset)) { continue; }
+        let target = insn.ip_rel_memory_address();
+        if included.iter().any(|s| s.section_index==sym.section_index &&
+            target>=s.address && target<s.address+s.size) {
+            definitions.insert(insn.ip(),X86Callee::Code(sym.section_index.0,target));
+        }
+    }
+    for (offset,reloc) in elf.section_by_index(sym.section_index)?.relocations() {
+        if offset<sym.address || offset>=sym.address+sym.size { continue; }
+        if !matches!(reloc.flags(),RelocationFlags::Elf { r_type:2 }) { continue; }
+        if let Some((target,address)) = resolve_x86_pc32_defined_text_target(elf,&reloc)? {
+            let insn = instructions.iter().find(|i| i.ip()+i.len() as u64==offset+4)
+                .ok_or_else(|| anyhow!("PC32 code address does not end at a displacement"))?;
+            if insn.code()==Code::Lea_r64_m {
+                definitions.insert(insn.ip(),X86Callee::Code(target.section_index.0,address));
+            }
+        }
+    }
+    Ok(definitions)
+}
+
 pub(super) fn rewrite_x86(
     elf: &object::File,
     entry: &SymInfo,
@@ -1295,16 +1348,18 @@ pub(super) fn rewrite_x86(
         // to a per-symbol IP=0 layout before encoding.
         let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
         let decoded: Vec<_> = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE).into_iter().collect();
-        let got_defs = decoded.iter().filter_map(|insn| {
+        let code_defs = x86_code_definitions(elf,sym,&decoded,included,&pc_relative_relocations)?;
+        let mut definitions = code_defs.clone();
+        definitions.extend(decoded.iter().filter_map(|insn| {
             if insn.is_ip_rel_memory_operand() {
                 let patch = insn.ip() - sym.address + insn.len() as u64 - 4;
                 got_relocations.get(&local_site_key(sym,patch))
-                    .map(|name| (insn.ip(),name.clone()))
+                    .map(|name| (insn.ip(),X86Callee::Symbol(name.clone())))
             } else { None }
-        }).collect();
+        }));
         let external_calls = helper_call_sites.keys().filter_map(|key|
             (key.0==sym.section_index && key.1==sym.address).then_some(sym.address+key.2)).collect();
-        let helper_targets = x86_callee_flow(&decoded,&got_defs,&external_calls)?;
+        let helper_targets = x86_callee_flow(&decoded,&definitions,&external_calls,sym.section_index.0)?;
         let mut map_symbol_registers: HashMap<Register, String> = HashMap::new();
 
         // Side table: per-entry patch kind, paired with each kept Instruction
@@ -1398,6 +1453,12 @@ pub(super) fn rewrite_x86(
                 }
             }
 
+            let code_dispatch = x86_indirect_target_register(&insn).is_some() &&
+                helper_targets.get(&(sym.address+local_ip)).is_some_and(|values|
+                    values.iter().all(|v| matches!(v,X86Callee::Code(..))));
+            if !proof_mode && insn.flow_control()==FlowControl::IndirectBranch && !code_dispatch {
+                bail!("unresolved finite native indirect branch in {} at {local_ip:#x}",sym.name);
+            }
             if !proof_mode {
                 validate_no_external_refs(&insn, &included_ranges, |off| {
                     pc_relative_relocations.contains(&local_site_key(sym, local_ip + off))
@@ -1514,6 +1575,11 @@ pub(super) fn rewrite_x86(
                 insn.flow_control(),
                 FlowControl::Call | FlowControl::IndirectCall
             ) {
+                if code_dispatch {
+                    local.push(insn); kinds.push(None); insn_local_ip.push(local_ip);
+                    map_symbol_registers.clear();
+                    continue;
+                }
                 let call_reg = x86_indirect_call_register(&insn);
                 let mut helper_call_name = helper_call_sites.get(&site_key).cloned();
                 if helper_call_name.is_none() {
@@ -1542,6 +1608,7 @@ pub(super) fn rewrite_x86(
                                 Some(X86Callee::Id(id)) => Some(bpf_helper_name_from_id(*id)
                                     .ok_or_else(|| anyhow!("unknown helper ID {id} in {} at {local_ip:#x}",sym.name))?.to_string()),
                                 Some(X86Callee::Symbol(name)) => Some(name.clone()),
+                                Some(X86Callee::Code(..)) => bail!("mixed native code/helper target"),
                                 None => None,
                             };
                         }
@@ -1772,7 +1839,10 @@ pub(super) fn rewrite_x86(
             });
             let written_reg = x86_written_gpr_family(&insn);
             local.push(insn);
-            kinds.push(None);
+            kinds.push(code_defs.get(&(sym.address+local_ip)).map(|value| {
+                let X86Callee::Code(section,address) = value else { unreachable!() };
+                PatchKind::CodeAddress { section:*section,address:*address }
+            }));
             insn_local_ip.push(local_ip);
 
             // Track lookup callsite consumption after the call. The native C
@@ -1913,7 +1983,7 @@ pub(super) fn rewrite_x86(
                     target: *target_addr,
                 });
             }
-            PatchKind::JmpEnd | PatchKind::Call { .. } => {}
+            PatchKind::JmpEnd | PatchKind::Call { .. } | PatchKind::CodeAddress { .. } => {}
         }
     }
 
@@ -1936,6 +2006,22 @@ pub(super) fn rewrite_x86(
         )?);
         Vec::new()
     };
+
+    // Re-anchor address-taken instruction labels after all instruction sizes
+    // are final. Raw byte offsets do not survive RET/helper expansion.
+    for patch in &patches {
+        if let PatchKind::CodeAddress { section,address } = patch.kind {
+            let target = x86_relocated_code_address(&layouts,section,address)?;
+            let off = patch.global_offset;
+            let insn = Decoder::with_ip(64,&blob[off..],off as u64,DecoderOptions::NONE).decode();
+            if insn.code()!=Code::Lea_r64_m || !insn.is_ip_rel_memory_operand() {
+                bail!("native code-address patch no longer names LEA at {off:#x}");
+            }
+            let end = off+insn.len();
+            let disp = i32::try_from(target as i64-end as i64)?;
+            blob[end-4..end].copy_from_slice(&disp.to_le_bytes());
+        }
+    }
 
     // Patch JmpEnd disps LAST so they target the byte AFTER any
     // trampolines we just appended -- i.e., where the BPF JIT will emit
@@ -2012,6 +2098,19 @@ fn x86_layout_insn_global_offset(layout: &SymbolLayout, local_patch_off: u64) ->
             )
         })?;
     Ok(layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize)
+}
+
+fn x86_relocated_code_address(layouts: &[SymbolLayout], section: usize, address: u64) -> Result<usize> {
+    let layout = layouts.iter().find(|l| l.sym.section_index.0==section &&
+        address>=l.sym.address && address<l.sym.address+l.sym.size)
+        .ok_or_else(|| anyhow!("code target section{section}+{address:#x} was not included"))?;
+    // Code targets must name instruction boundaries, never a nearby opcode.
+    let local = address-layout.sym.address;
+    let index = layout.insn_local_ip.iter().position(|p| *p==local)
+        .ok_or_else(|| anyhow!("code target {}+{local:#x} is not a retained instruction",layout.sym.name))?;
+    let offset = layout.new_offset_in_sym[index];
+    if offset==u32::MAX { bail!("code target has no encoded instruction offset"); }
+    Ok(layout.base_in_blob+offset as usize)
 }
 
 fn proof_symbols_from_x86_layouts(
@@ -2189,8 +2288,11 @@ fn collect_x86_proof_relocs(
                                         target_addr
                                     )
                                 })?;
-                        let adjusted = i128::from(target_addr)
-                            .checked_sub(i128::from(local_target.address))
+                        let target_layout = layouts.iter().find(|l| symbol_key(&l.sym)==symbol_key(&local_target))
+                            .ok_or_else(|| anyhow!("PC32 proof code target is not included"))?;
+                        let adjusted = i128::try_from(x86_relocated_code_address(
+                            layouts,target_section_idx.0,target_addr)?)?
+                            .checked_sub(target_layout.base_in_blob as i128)
                             .and_then(|v| v.checked_sub(4))
                             .ok_or_else(|| anyhow!("PC32 proof text addend overflow"))?;
                         let proof_addend = i64::try_from(adjusted).map_err(|_| {
@@ -2662,29 +2764,7 @@ fn apply_elf_relocations(
                             bail!("PC32 text target address out of range: {target_addr}");
                         }
                         let target_addr = target_addr as u64;
-                        let local_target =
-                            find_symbol_in_section_at_address(elf, target_section_idx, target_addr)
-                                .ok_or_else(|| {
-                                    anyhow!(
-                                        "PC32 text reloc in {} at {:#x} targets {:#x}, \
-                                         but no symbol covers that address",
-                                        layout.sym.name,
-                                        local_patch_off,
-                                        target_addr
-                                    )
-                                })?;
-                        let target_global = *layout_base_by_symbol
-                            .get(&symbol_key(&local_target))
-                            .ok_or_else(|| {
-                                anyhow!(
-                                    "PC32 text target from {} to {} was not included as reachable",
-                                    layout.sym.name,
-                                    local_target.name
-                                )
-                            })?;
-                        let rel_off = target_addr
-                            .checked_sub(local_target.address)
-                            .ok_or_else(|| anyhow!("PC32 text target below symbol base"))?;
+                        let target_global = x86_relocated_code_address(layouts,target_section_idx.0,target_addr)?;
                         let insn_idx = layout
                             .insn_local_ip
                             .iter()
@@ -2706,8 +2786,7 @@ fn apply_elf_relocations(
                         let disp32_off = new_insn_off + off_within_insn;
                         let target = i128::try_from(target_global)
                             .map_err(|_| anyhow!("PC32 text target global offset overflow"))?
-                            .checked_add(i128::from(rel_off))
-                            .and_then(|v| v.checked_sub(4))
+                            .checked_sub(4)
                             .ok_or_else(|| anyhow!("PC32 text target addend overflow"))?;
                         let disp = target
                             .checked_sub(
@@ -3558,6 +3637,13 @@ fn x86_indirect_call_register(insn: &Instruction) -> Option<Register> {
     if !matches!(insn.flow_control(), FlowControl::IndirectCall) {
         return None;
     }
+    x86_indirect_target_register(insn)
+}
+
+fn x86_indirect_target_register(insn: &Instruction) -> Option<Register> {
+    if !matches!(insn.flow_control(), FlowControl::IndirectCall | FlowControl::IndirectBranch) {
+        return None;
+    }
     if insn.op_count() == 0 || insn.op0_kind() != OpKind::Register {
         return None;
     }
@@ -3686,20 +3772,8 @@ where
             );
         }
     }
-    /* Indirect branches (jump tables) are still rejected: clang's
-     * `-fno-jump-tables` flag eliminates them, so any that show up
-     * here are something else and likely unsafe to splat.
-     *
-     * Indirect calls are ALLOWED -- with `-fno-plt`, clang emits
-     * `call *[rip+disp32]` against a R_X86_64_GOTPCREL reloc for every
-     * external function call. The relocation handler points the disp32
-     * at an in-blob literal pool entry holding the kernel address. */
-    if matches!(fc, FlowControl::IndirectBranch) {
-        bail!(
-            "instruction at IP {:#x} is an indirect branch; rebuild with -fno-jump-tables",
-            insn.ip()
-        );
-    }
+    // Register-indirect branches are admitted by finite code-target analysis
+    // in rewrite_x86. Relocated GOT calls retain their bound external identity.
     for op_i in 0..insn.op_count() {
         if insn.op_kind(op_i) == OpKind::Memory && insn.is_ip_rel_memory_operand() {
             let t = insn.ip_rel_memory_address();
@@ -4428,7 +4502,7 @@ mod tests {
         ])?;
 
         assert_eq!(
-            x86_callee_flow(&insns,&HashMap::new(),&HashSet::new())?.get(&5),
+            x86_callee_flow(&insns,&HashMap::new(),&HashSet::new(),0)?.get(&5),
             Some(&BTreeSet::from([X86Callee::Id(112)]))
         );
         assert_eq!(x86_indirect_call_register(&insns[1]), Some(Register::RBX));
@@ -4444,7 +4518,7 @@ mod tests {
         ])?;
 
         assert_eq!(
-            x86_callee_flow(&insns,&HashMap::new(),&HashSet::new())?.get(&8),
+            x86_callee_flow(&insns,&HashMap::new(),&HashSet::new(),0)?.get(&8),
             Some(&BTreeSet::from([X86Callee::Id(45)]))
         );
         assert_eq!(
@@ -4458,13 +4532,13 @@ mod tests {
     fn helper_join_keeps_both_ids_and_unknown_predecessor() -> Result<()> {
         let joined = decode_x86(&[0x85,0xff,0x74,7,0xb8,4,0,0,0,0xeb,5,
                                  0xb8,148,0,0,0,0xff,0xd0,0xc3])?;
-        assert_eq!(x86_callee_flow(&joined,&HashMap::new(),&HashSet::new())?.get(&16),
+        assert_eq!(x86_callee_flow(&joined,&HashMap::new(),&HashSet::new(),0)?.get(&16),
                    Some(&BTreeSet::from([X86Callee::Id(4),X86Callee::Id(148)])));
         let unknown = decode_x86(&[0x85,0xff,0x74,5,0xb8,4,0,0,0,0xff,0xd0,0xc3])?;
-        assert!(!x86_callee_flow(&unknown,&HashMap::new(),&HashSet::new())?.contains_key(&9));
+        assert!(!x86_callee_flow(&unknown,&HashMap::new(),&HashSet::new(),0)?.contains_key(&9));
         let cmov = decode_x86(&[0xb8,4,0,0,0,0xb9,148,0,0,0,0x85,0xff,
                                0x48,0x0f,0x45,0xc1,0xff,0xd0,0xc3])?;
-        assert_eq!(x86_callee_flow(&cmov,&HashMap::new(),&HashSet::new())?.get(&16),
+        assert_eq!(x86_callee_flow(&cmov,&HashMap::new(),&HashSet::new(),0)?.get(&16),
                    Some(&BTreeSet::from([X86Callee::Id(4),X86Callee::Id(148)])));
         Ok(())
     }
@@ -4473,15 +4547,29 @@ mod tests {
     fn helper_got_join_keeps_both_symbol_definitions() -> Result<()> {
         let insns = decode_x86(&[0x85,0xff,0x74,9,0x48,0x8b,0x05,0,0,0,0,
                                  0xeb,7,0x48,0x8b,0x05,0,0,0,0,0xff,0xd0,0xc3])?;
-        let got = HashMap::from([(4,"bpf_get_current_pid_tgid".to_string()),
-                                 (13,"bpf_get_current_uid_gid".to_string())]);
-        assert_eq!(x86_callee_flow(&insns,&got,&HashSet::new())?.get(&20),
-                   Some(&got.values().cloned().map(X86Callee::Symbol).collect()));
+        let got = HashMap::from([(4,X86Callee::Symbol("bpf_get_current_pid_tgid".to_string())),
+                                 (13,X86Callee::Symbol("bpf_get_current_uid_gid".to_string()))]);
+        assert_eq!(x86_callee_flow(&insns,&got,&HashSet::new(),0)?.get(&20),
+                   Some(&got.values().cloned().collect()));
         // Truncating a joined pointer/literal cannot discard the pointer arm.
         let mixed = decode_x86(&[0x85,0xff,0x74,7,0xb8,14,0,0,0,0xeb,7,
                                  0x48,0x8b,0x05,0,0,0,0,0x89,0xc1,0xff,0xd1,0xc3])?;
-        let got = HashMap::from([(11,"bpf_get_current_uid_gid".to_string())]);
-        assert!(!x86_callee_flow(&mixed,&got,&HashSet::new())?.contains_key(&20));
+        let got = HashMap::from([(11,X86Callee::Symbol("bpf_get_current_uid_gid".to_string()))]);
+        assert!(!x86_callee_flow(&mixed,&got,&HashSet::new(),0)?.contains_key(&20));
+        Ok(())
+    }
+
+    #[test]
+    fn indirect_code_edge_visits_exact_target_in_its_section() -> Result<()> {
+        let insns = decode_x86(&[0x48,0x8d,0x05,8,0,0,0,0xff,0xe0,
+                                 0xb8,99,0,0,0,0xc3,0xbb,14,0,0,0,0xff,0xd3,0xc3])?;
+        let definitions = HashMap::from([(0,X86Callee::Code(0,15))]);
+        let flow = x86_callee_flow(&insns,&definitions,&HashSet::new(),0)?;
+        assert_eq!(flow.get(&7),Some(&BTreeSet::from([X86Callee::Code(0,15)])));
+        assert_eq!(flow.get(&20),Some(&BTreeSet::from([X86Callee::Id(14)])));
+        // Equal offsets in different ELF sections are different code targets.
+        let definitions = HashMap::from([(0,X86Callee::Code(1,15))]);
+        assert!(!x86_callee_flow(&insns,&definitions,&HashSet::new(),0)?.contains_key(&20));
         Ok(())
     }
 
@@ -4495,7 +4583,7 @@ mod tests {
             let at = bytes.len() as u64;
             bytes.extend_from_slice(call);
             bytes.push(0xc3);
-            assert!(!x86_callee_flow(&decode_x86(&bytes)?,&HashMap::new(),&HashSet::new())?.contains_key(&at));
+            assert!(!x86_callee_flow(&decode_x86(&bytes)?,&HashMap::new(),&HashSet::new(),0)?.contains_key(&at));
         }
         Ok(())
     }
@@ -4506,8 +4594,8 @@ mod tests {
         // premise: it may overwrite RBX before the later indirect call.
         let insns = decode_x86(&[0xbb,14,0,0,0,0xe8,3,0,0,0,0xff,0xd3,0xc3,
                                  0xbb,15,0,0,0,0xc3])?;
-        assert!(!x86_callee_flow(&insns,&HashMap::new(),&HashSet::new())?.contains_key(&10));
-        assert_eq!(x86_callee_flow(&insns,&HashMap::new(),&HashSet::from([5]))?.get(&10),
+        assert!(!x86_callee_flow(&insns,&HashMap::new(),&HashSet::new(),0)?.contains_key(&10));
+        assert_eq!(x86_callee_flow(&insns,&HashMap::new(),&HashSet::from([5]),0)?.get(&10),
                    Some(&BTreeSet::from([X86Callee::Id(14)])));
         Ok(())
     }
