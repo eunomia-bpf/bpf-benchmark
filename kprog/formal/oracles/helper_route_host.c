@@ -7,13 +7,9 @@
  * (`ARM64_SIM_L_READ_REG_PTR` raw, `ARM64_SIM_L_HELPER_ARG_PTR` with the
  * stack-arena redirect, `ARM64_SIM_L_READ_REG` scalar) and one X0 commit
  * (`ARM64_SIM_L_WRITE_REG_WIDTH` 64/32-bit, or `ARM64_SIM_L_WRITE_REG_PTR_TAG`
- * with a provenance tag). The 61 macros span: the map lookup/update/delete
- * shapes (update carries a 4th scalar lane), 42 static-zero shapes (40 wide
- * + 2 narrow 32-bit) sharing the boilerplate `WRITE_REG_WIDTH(X0, 0, W)`,
- * the task pointer-tag shape (+2 aliases), the two native ktime shapes, the
- * 3-lane probe-read chain (+4 str variants + user/copy aliases), the 5-lane
- * perf/skb-store/csum shapes, the 4- and 5-lane skb-load shapes, and the
- * sk_fullsock pointer-return shape.
+ * with a provenance tag). All61 original body scenes remain, now using real
+ * typed calls and nonzero returns. Per-CPU lookup and copy-from-task check their
+ * distinct public ABIs, including their additional arguments.
  *
  * This oracle defines each native `bpf_*` helper as a capturing stub (the
  * `__BPF_HELPERS__` guard kills libbpf's fake helper consts), plants the
@@ -26,10 +22,9 @@
  * misnaming the native, widening or narrowing the commit, or painting the
  * wrong tag falls out as a capture, value, or tag difference.
  *
- * Stack-arena convention (both sides agree by construction): every
- * stack-tagged argument is planted at offset 12, so its redirected pointer
- * reads `&__a64_stack.b[ARM64_SIM_STACK_BIAS + 12]` — one deterministic
- * byte (`arena_val()`), never dependant on planted contents beyond that.
+ * Stack-arena convention (both sides agree by construction): each
+ * stack-tagged argument is planted at a valid distinct arena offset, so its redirected pointer
+ * points into `__a64_stack.b` at that offset, independently of its contents.
  * Raw-pointer lanes pass the register value through unchanged. A body that
  * reads the wrong lane gets a peripheral byte (or reg pattern) and fails
  * the compare.
@@ -62,6 +57,17 @@ typedef signed int __s32;
  * register sentinel that no reachable helper arm dereferences). Every other
  * fact stays under the same -Werror wall. */
 #pragma GCC diagnostic ignored "-Warray-bounds"
+#define ORA_MAP_PTR 0x0000123400005678ULL
+#define ORA_UPD_RET (-7LL)
+#define ORA_DEL_RET 3LL
+#define ORA_KTIME 0xaabbccddeeff0011ULL
+#define ORA_KTIME_BOOT 0x1122334455667788ULL
+#define ORA_PROBE (-9LL)
+#define ORA_PERF 5LL
+#define ORA_SKB (-3LL)
+#define ORA_CSUM 11LL
+
+#include "generated_helper_calls.h"
 #include "../arm64/arm64_sim_local_bpf.h"
 
 #include <stdio.h>
@@ -74,116 +80,15 @@ static unsigned long cases;
  * a pointer lane lands the pointer bit pattern the stub actually
  * received (raw register value, or the arena byte address after the
  * redirect), a value lane lands the register bit pattern. */
-static __u64 last_val[6];
-static unsigned last_n;
+#define last_val ora_arguments
+#define last_n ora_argc
 
 static void capture_reset(void)
 {
 	unsigned i;
-
-	for (i = 0; i < 6; i++) {
-		last_val[i] = 0xabcdefabcdefabcdULL;
-	}
+	for (i = 0; i < 5; i++) last_val[i] = 0xabcdefabcdefabcdULL;
 	last_n = 0;
-}
-
-/* Capturing native stubs. The macro builders stamp one lane per parameter
- * into `last_val`, in declaration order; the per-body capture row then
- * names exactly those lanes' expected values. All fixed returns are
- * numerically distinct so a misnamed native shows in both the X0 compare
- * and the capture row. */
-#define NATIVE0V(NAME, RET, RV)                                            \
-	static RET NAME(void)                                              \
-	{                                                                  \
-		last_n = 0;                                                \
-		return (RET)(ORA_##RV);                                    \
-	}
-#define NATIVE1V(NAME, RET, T0, RV)                                        \
-	static RET NAME(T0 a0)                                             \
-	{                                                                  \
-		last_val[0] = (__u64)(unsigned long)a0;                    \
-		last_n = 1;                                                \
-		return (RET)(long)(ORA_##RV);                              \
-	}
-#define NATIVE2V(NAME, RET, T0, T1, RV)                                    \
-	static RET NAME(T0 a0, T1 a1)                                      \
-	{                                                                  \
-		last_val[0] = (__u64)(unsigned long)a0;                    \
-		last_val[1] = (__u64)(unsigned long)a1;                    \
-		last_n = 2;                                                \
-		return (RET)(long)(ORA_##RV);                              \
-	}
-#define NATIVE3V(NAME, RET, T0, T1, T2, RV)                                \
-	static RET NAME(T0 a0, T1 a1, T2 a2)                               \
-	{                                                                  \
-		last_val[0] = (__u64)(unsigned long)a0;                    \
-		last_val[1] = (__u64)(unsigned long)a1;                    \
-		last_val[2] = (__u64)(unsigned long)a2;                    \
-		last_n = 3;                                                \
-		return (RET)(long)(ORA_##RV);                              \
-	}
-#define NATIVE4V(NAME, RET, T0, T1, T2, T3, RV)                            \
-	static RET NAME(T0 a0, T1 a1, T2 a2, T3 a3)                        \
-	{                                                                  \
-		last_val[0] = (__u64)(unsigned long)a0;                    \
-		last_val[1] = (__u64)(unsigned long)a1;                    \
-		last_val[2] = (__u64)(unsigned long)a2;                    \
-		last_val[3] = (__u64)(unsigned long)a3;                    \
-		last_n = 4;                                                \
-		return (RET)(long)(ORA_##RV);                              \
-	}
-#define NATIVE5V(NAME, RET, T0, T1, T2, T3, T4, RV)                        \
-	static RET NAME(T0 a0, T1 a1, T2 a2, T3 a3, T4 a4)                 \
-	{                                                                  \
-		last_val[0] = (__u64)(unsigned long)a0;                    \
-		last_val[1] = (__u64)(unsigned long)a1;                    \
-		last_val[2] = (__u64)(unsigned long)a2;                    \
-		last_val[3] = (__u64)(unsigned long)a3;                    \
-		last_val[4] = (__u64)(unsigned long)a4;                    \
-		last_n = 5;                                                \
-		return (RET)(long)(ORA_##RV);                              \
-	}
-
-#define ORA_MAP_PTR 0x0000123400005678ULL
-#define ORA_UPD_RET (-7LL)
-#define ORA_DEL_RET 3LL
-#define ORA_KTIME 0xaabbccddeeff0011ULL
-#define ORA_KTIME_BOOT 0x1122334455667788ULL
-#define ORA_PROBE (-9LL)
-#define ORA_PERF 5LL
-#define ORA_SKB (-3LL)
-#define ORA_CSUM 11LL
-
-NATIVE2V(bpf_map_lookup_elem, void *, void *, const void *, MAP_PTR)
-NATIVE4V(bpf_map_update_elem, long, void *, const void *, const void *,
-	 __u64, UPD_RET)
-NATIVE2V(bpf_map_delete_elem, long, void *, const void *, DEL_RET)
-NATIVE0V(bpf_ktime_get_ns, __u64, KTIME)
-NATIVE0V(bpf_ktime_get_boot_ns, __u64, KTIME_BOOT)
-NATIVE3V(bpf_probe_read_kernel, long, void *, __u32, const void *, PROBE)
-NATIVE3V(bpf_probe_read, long, void *, __u32, const void *, PROBE)
-NATIVE3V(bpf_probe_read_user, long, void *, __u32, const void *, PROBE)
-NATIVE3V(bpf_probe_read_str, long, void *, __u32, const void *, PROBE)
-NATIVE3V(bpf_probe_read_user_str, long, void *, __u32, const void *, PROBE)
-NATIVE3V(bpf_probe_read_kernel_str, long, void *, __u32, const void *,
-	 PROBE)
-NATIVE5V(bpf_perf_event_output, long, void *, void *, __u64, void *, __u64,
-	 PERF)
-NATIVE5V(bpf_skb_store_bytes, long, struct __sk_buff *, __u32, const void *,
-	 __u32, __u64, SKB)
-NATIVE5V(bpf_l3_csum_replace, long, struct __sk_buff *, __u32, __u64, __u64,
-	 __u64, CSUM + 0)
-NATIVE5V(bpf_l4_csum_replace, long, struct __sk_buff *, __u32, __u64, __u64,
-	 __u64, CSUM + 1)
-NATIVE4V(bpf_skb_load_bytes, long, const struct __sk_buff *, __u32, void *,
-	 __u32, SKB + 1)
-NATIVE5V(bpf_skb_load_bytes_relative, long, const struct __sk_buff *, __u32,
-	 void *, __u32, __u32, SKB + 2)
-static struct bpf_sock *bpf_sk_fullsock(struct bpf_sock *sk)
-{
-	last_val[0] = (__u64)(unsigned long)sk;
-	last_n = 1;
-	return sk;
+	ora_called = 0;
 }
 
 /* ------------------------------------------------------------ */
@@ -244,8 +149,6 @@ static __u8 pattern_tag(unsigned i)
 	__u8 __a64_sim_abi_kind = KPROG_ABI_KIND_XDP;                      \
 	(void)__a64_sim_abi_kind;                                          \
 	ARM64_SIM_L_DECLARE_STACK();                                       \
-	(void)__a64_stack.b[0];                                            \
-	(void)__a64_stack_tag[0];                                          \
 	(void)__a64_sp;                                                    \
 	ARM64_SIM_L_FOR_EACH_GPR(QUIET_GPR);                               \
 	(void)__a64_lr;                                                    \
@@ -377,11 +280,16 @@ static void expect_commit(__u64 val, __u8 tag)
 
 /* Capture-layer compare: the stub must have recorded exactly the lane
  * values the model names, in order, with exactly `n` lanes. */
-static void compare_capture(const char *via, const __u64 *v, unsigned n)
+static void compare_capture(const char *via, const __u64 *v, unsigned n, unsigned identity)
 {
 	unsigned i;
 
 	cases++;
+	if (ora_called != identity) {
+		printf("MISMATCH %s helper identity: got %u want %u\n", via, ora_called, identity);
+		failures++;
+		return;
+	}
 	if (last_n != n) {
 		printf("MISMATCH %s capture lanes: got %u want %u\n", via,
 		       last_n, n);
@@ -439,10 +347,38 @@ static void compare_capture(const char *via, const __u64 *v, unsigned n)
 	((__u64)(unsigned long)(void *)&__a64_stack.b[                     \
 		KPROG_ARM64_STACK_PTR_INDEX((OFF), ARM64_SIM_STACK_BIAS)])
 
+#define PREPARE_TYPED_HELPER(ID)                                           \
+	__u64 typed_raw[5], typed_want[5];                                 \
+	unsigned typed_n, typed_j;                                        \
+	for (typed_j = 0; typed_j < 5; typed_j++) {                         \
+		if ((ora_pointer_arguments(ID) & (1U << typed_j)) &&       \
+		    mtag[typed_j] == 4U) {                                \
+			void *__a64_plant_ptr = (void *)(long)(12 + typed_j * 8); \
+			__u8 __a64_plant_tag = 4U;                         \
+			mreg[typed_j] = 12 + typed_j * 8;                  \
+			switch (typed_j) { ARM64_SIM_L_FOR_EACH_GPR(PLANT_WRITE) } \
+		}                                                        \
+		typed_raw[typed_j] =                                      \
+			((ora_pointer_arguments(ID) & (1U << typed_j)) &&  \
+			 mtag[typed_j] == 4U) ?                            \
+			ARG_LANE_VALUE((__s64)mreg[typed_j]) : mreg[typed_j]; \
+	}                                                                 \
+	typed_n = ora_expected_arguments((ID), typed_raw, typed_want);      \
+	expect_commit(ora_expected_result(ID), ora_pointer_result(ID) ? 6U : 0U); \
+	mreg[0] = ora_expected_result(ID);                                 \
+	mtag[0] = ora_pointer_result(ID) ? 6U : 0U;                         \
+	capture_reset()
+
+#define CHECK_TYPED_HELPER(VIA, ID) do {                                 \
+	compare_capture((VIA), typed_want, typed_n, (ID));                  \
+	COMPARE_X0(VIA);                                                  \
+	COMPARE_REG_STATE(VIA);                                           \
+} while (0)
+
 /* --- map lookup (X0 raw REG, X1 stack ARG) : PTR_TAG MAP_VALUE --- */
 static void scene_lookup(const char *via, unsigned percpu)
 {
-	__u64 v[2];
+	__u64 v[3];
 
 	DECL_STATE();
 	PLANT_STATE();
@@ -452,6 +388,7 @@ static void scene_lookup(const char *via, unsigned percpu)
 	PLANT_STACK_TAGGED(ARM64_X1, x1, 12);
 	v[0] = mreg[0];
 	v[1] = ARG_LANE_VALUE(12);
+	if (percpu) { PLANT_VAL(ARM64_X2, x2, 37); v[2] = 37; }
 	expect_commit(ORA_MAP_PTR, 6U);
 
 	capture_reset();
@@ -463,7 +400,7 @@ static void scene_lookup(const char *via, unsigned percpu)
 	mreg[0] = ORA_MAP_PTR;
 	mtag[0] = 6U;
 
-	compare_capture(via, v, 2);
+	compare_capture(via, v, percpu ? 3 : 2, percpu ? 195 : 1);
 	COMPARE_X0(via);
 	COMPARE_REG_STATE(via);
 }
@@ -492,7 +429,7 @@ static void scene_update(void)
 	mreg[0] = (__u64)(long)ORA_UPD_RET;
 	mtag[0] = 0U;
 
-	compare_capture("map_update", v, 4);
+	compare_capture("map_update", v, 4, 2);
 	COMPARE_X0("map_update");
 	COMPARE_REG_STATE("map_update");
 }
@@ -518,33 +455,29 @@ static void scene_delete(void)
 	mreg[0] = (__u64)(long)ORA_DEL_RET;
 	mtag[0] = 0U;
 
-	compare_capture("map_delete", v, 2);
+	compare_capture("map_delete", v, 2, 3);
 	COMPARE_X0("map_delete");
 	COMPARE_REG_STATE("map_delete");
 }
 
-/* --- the static-zero wide shape, driven over 4 distinct body names so a
- * per-name repaint on any of them is caught; no lanes read, no capture. */
-static void scene_zero(const char *via, unsigned which)
+/* --- Tail call and scalar identity helpers, all forwarding real arguments. */
+static void scene_identity(const char *via, unsigned which)
 {
+	static const unsigned ids[] = {12, 15, 8, 80};
+	unsigned identity = ids[which];
+
 	DECL_STATE();
 	PLANT_STATE();
 	INIT_ARENA();
 
-	/* Seed X0 with a nonzero non-scalar-tag value so the zero-commit and
-	 * its tag repaint are both observable. */
+	/* Seed X0 so both return bits and the scalar tag write are observable. */
 	__a64_x0.ptr = (void *)0xfeedfacefeedfaceULL;
 	__a64_x0_tag = 6U;
 	mreg[0] = 0xfeedfacefeedfaceULL;
 	mtag[0] = 6U;
 
-	/* Both zero shapes mask any seed to zero under KPROG_ARM64_APPLY_WIDTH
-	 * and repaint the X0 tag SCALAR: X0 0, SCALAR. */
-	expect_commit(0, 0U);
-	mreg[0] = 0;
-	mtag[0] = 0U;
-
-	capture_reset();
+	/* Model the public argument conversions and actual nonzero return. */
+	PREPARE_TYPED_HELPER(identity);
 	switch (which) {
 	case 0:
 		ARM64_SIM_BPF_CALL_bpf_tail_call();
@@ -560,20 +493,14 @@ static void scene_zero(const char *via, unsigned which)
 		break;
 	}
 
-	if (last_n != 0U) {
-		printf("MISMATCH %s captured %u lanes, want 0\n", via,
-		       last_n);
-		failures++;
-		return;
-	}
-	COMPARE_X0(via);
-	COMPARE_REG_STATE(via);
+	CHECK_TYPED_HELPER(via, identity);
 }
 
-/* --- jiffies64: wide zero shape with a distinct native name, so a
- * per-name repaint inside the jiffies body is observable. */
+/* --- Jiffies64 has its own callee identity and nonzero return. */
 static void scene_jiffies(void)
 {
+	unsigned identity = 118U;
+
 	DECL_STATE();
 	PLANT_STATE();
 	INIT_ARENA();
@@ -583,48 +510,30 @@ static void scene_jiffies(void)
 	mreg[0] = 0xfeedfacefeedfaceULL;
 	mtag[0] = 6U;
 
-	expect_commit(0, 0U);
-	mreg[0] = 0;
-	mtag[0] = 0U;
-
-	capture_reset();
+	PREPARE_TYPED_HELPER(identity);
 	ARM64_SIM_BPF_CALL_bpf_jiffies64();
 
-	if (last_n != 0U) {
-		printf("MISMATCH jiffies captured %u lanes, want 0\n", last_n);
-		failures++;
-		return;
-	}
-	COMPARE_X0("jiffies64");
-	COMPARE_REG_STATE("jiffies64");
+	CHECK_TYPED_HELPER("jiffies64", identity);
 }
 
-/* --- task pointer-tag shape (X0 => 0 SCALAR) + its aliases --- */
+/* --- Current-task returns the public integer address type. --- */
 static void scene_task(const char *via)
 {
+	unsigned identity = 35U;
+
 	DECL_STATE();
 	PLANT_STATE();
 	INIT_ARENA();
 
 	__a64_x0.ptr = (void *)0x5600000000000000ULL;
 	__a64_x0_tag = 6U;
+	mreg[0] = 0x5600000000000000ULL;
 	mtag[0] = 6U;
 
-	expect_commit(0, 0U);
-	mreg[0] = 0;
-	mtag[0] = 0U;
-
-	capture_reset();
+	PREPARE_TYPED_HELPER(identity);
 	ARM64_SIM_BPF_CALL_bpf_get_current_task();
 
-	if (last_n != 0U) {
-		printf("MISMATCH %s captured %u lanes, want 0\n", via,
-		       last_n);
-		failures++;
-		return;
-	}
-	COMPARE_X0(via);
-	COMPARE_REG_STATE(via);
+	CHECK_TYPED_HELPER(via, identity);
 }
 
 /* --- ktime natives (no lanes, X0 = the native value, SCALAR) --- */
@@ -652,7 +561,7 @@ static void scene_ktime(const char *via, unsigned boot)
 	else
 		ARM64_SIM_BPF_CALL_bpf_ktime_get_ns();
 
-	if (last_n != 0U) {
+	if (last_n != 0U || ora_called != (boot ? 125U : 5U)) {
 		printf("MISMATCH %s captured %u lanes, want 0\n", via,
 		       last_n);
 		failures++;
@@ -666,6 +575,7 @@ static void scene_ktime(const char *via, unsigned boot)
 static void scene_probe(const char *via, unsigned which)
 {
 	__u64 v[3];
+	static const unsigned ids[] = {113, 4, 112, 148, 45, 114, 115};
 
 	DECL_STATE();
 	PLANT_STATE();
@@ -707,17 +617,15 @@ static void scene_probe(const char *via, unsigned which)
 	mreg[0] = (__u64)(long)ORA_PROBE;
 	mtag[0] = 0U;
 
-	compare_capture(via, v, 3);
+	compare_capture(via, v, 3, ids[which]);
 	COMPARE_X0(via);
 	COMPARE_REG_STATE(via);
 }
 
-/* --- copy_from_user_task: the alias body forwards to the
- * copy_from_user body (native bpf_probe_read_user); driving the alias
- * name pins the forward arrow, not just the underlying shape. */
+/* --- Copy-from-task forwards all five arguments to its own callee. --- */
 static void scene_cfu_task(void)
 {
-	__u64 v[3];
+	__u64 v[5];
 
 	DECL_STATE();
 	PLANT_STATE();
@@ -729,6 +637,9 @@ static void scene_cfu_task(void)
 	v[0] = ARG_LANE_VALUE(16);
 	v[1] = 28;
 	v[2] = mreg[2];
+	PLANT_RAW(ARM64_X3, x3, 0x5959595959595959ULL);
+	PLANT_VAL(ARM64_X4, x4, 9);
+	v[3] = mreg[3]; v[4] = 9;
 	expect_commit(ORA_PROBE, 0U);
 	mreg[0] = (__u64)(long)ORA_PROBE;
 	mtag[0] = 0U;
@@ -736,7 +647,7 @@ static void scene_cfu_task(void)
 	capture_reset();
 	ARM64_SIM_BPF_CALL_bpf_copy_from_user_task();
 
-	compare_capture("copy_from_user_task", v, 3);
+	compare_capture("copy_from_user_task", v, 5, 191);
 	COMPARE_X0("copy_from_user_task");
 	COMPARE_REG_STATE("copy_from_user_task");
 }
@@ -768,7 +679,7 @@ static void scene_perf(void)
 	mreg[0] = (__u64)(long)ORA_PERF;
 	mtag[0] = 0U;
 
-	compare_capture("perf_event", v, 5);
+	compare_capture("perf_event", v, 5, 25);
 	COMPARE_X0("perf_event");
 	COMPARE_REG_STATE("perf_event");
 }
@@ -801,7 +712,7 @@ static void scene_skb_store(void)
 	mreg[0] = (__u64)(long)ORA_SKB;
 	mtag[0] = 0U;
 
-	compare_capture("skb_store", v, 5);
+	compare_capture("skb_store", v, 5, 9);
 	COMPARE_X0("skb_store");
 	COMPARE_REG_STATE("skb_store");
 }
@@ -836,7 +747,7 @@ static void scene_csum(const char *via, unsigned which)
 	mreg[0] = (__u64)(long)(ORA_CSUM + which);
 	mtag[0] = 0U;
 
-	compare_capture(via, v, 5);
+	compare_capture(via, v, 5, 10 + which);
 	COMPARE_X0(via);
 	COMPARE_REG_STATE(via);
 }
@@ -872,12 +783,12 @@ static void scene_skb_load(const char *via, unsigned relative)
 	mreg[0] = (__u64)(long)(ORA_SKB + relative + 1);
 	mtag[0] = 0U;
 
-	compare_capture(via, v, relative ? 5 : 4);
+	compare_capture(via, v, relative ? 5 : 4, relative ? 68 : 26);
 	COMPARE_X0(via);
 	COMPARE_REG_STATE(via);
 }
 
-/* --- sk fullsock (X0 raw sock REG -> PTR_TAG SCALAR, same pointer) --- */
+/* --- Fullsock returns a tagged helper pointer distinct from its input. --- */
 static void scene_fullsock(void)
 {
 	__u64 v[1];
@@ -889,25 +800,25 @@ static void scene_fullsock(void)
 
 	PLANT_RAW(ARM64_X0, x0, (__u64)(long)&sockobj);
 	v[0] = mreg[0];
-	expect_commit(mreg[0], 0U);
+	expect_commit(ora_expected_result(95), 6U);
 
 	capture_reset();
 	ARM64_SIM_BPF_CALL_bpf_sk_fullsock();
 
-	mreg[0] = (__u64)(long)&sockobj;
-	mtag[0] = 0U;
+	mreg[0] = ora_expected_result(95);
+	mtag[0] = 6U;
 
-	compare_capture("sk_fullsock", v, 1);
+	compare_capture("sk_fullsock", v, 1, 95);
 	COMPARE_X0("sk_fullsock");
 	COMPARE_REG_STATE("sk_fullsock");
 }
 
-/* --- 0462: the static-zero 64-bit family (30 undriven helper names,
- * all body text ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64))
- * drives the same zero-write shape per name; a per-name body repaint
- * must move the X0 commit away from 0 or flip the width tag. --- */
-static void scene_zero64(const char *via, unsigned which)
+/* --- All30 original wide-result scenes now check typed calls and framing. --- */
+static void scene_wide(const char *via, unsigned which)
 {
+	static const unsigned ids[] = {14, 16, 183, 184, 185, 186, 174, 161, 127, 6, 23, 13, 21, 28, 33, 31, 32, 38, 39, 43, 44, 65, 46, 50, 69, 152, 122, 37, 27, 67};
+	unsigned identity = ids[which];
+
 	DECL_STATE();
 	PLANT_STATE();
 	INIT_ARENA();
@@ -917,11 +828,7 @@ static void scene_zero64(const char *via, unsigned which)
 	mreg[0] = 0xfeedfacefeedfaceULL;
 	mtag[0] = 6U;
 
-	expect_commit(0, 0U);
-	mreg[0] = 0;
-	mtag[0] = 0U;
-
-	capture_reset();
+	PREPARE_TYPED_HELPER(identity);
 	switch (which) {
 	case 0: ARM64_SIM_BPF_CALL_bpf_get_current_pid_tgid(); break;
 	case 1: ARM64_SIM_BPF_CALL_bpf_get_current_comm(); break;
@@ -957,18 +864,13 @@ static void scene_zero64(const char *via, unsigned which)
 		break;
 	}
 
-	if (last_n != 0U) {
-		printf("MISMATCH %s captured %u lanes, want 0\n", via,
-		       last_n);
-		failures++;
-		return;
-	}
-	COMPARE_X0(via);
-	COMPARE_REG_STATE(via);
+	CHECK_TYPED_HELPER(via, identity);
 }
 
 static void scene_prand(void)
 {
+	unsigned identity = 7U;
+
 	DECL_STATE();
 	PLANT_STATE();
 	INIT_ARENA();
@@ -978,37 +880,27 @@ static void scene_prand(void)
 	mreg[0] = 0xfeedfacefeedfaceULL;
 	mtag[0] = 6U;
 
-	expect_commit(0, 0U);
-	mreg[0] = 0;
-	mtag[0] = 0U;
-
-	capture_reset();
+	PREPARE_TYPED_HELPER(identity);
 	ARM64_SIM_BPF_CALL_bpf_get_prandom_u32();
 
-	if (last_n != 0U) {
-		printf("MISMATCH prand captured %u lanes, want 0\n", last_n);
-		failures++;
-		return;
-	}
-	COMPARE_X0("get_prandom_u32");
-	COMPARE_REG_STATE("get_prandom_u32");
+	CHECK_TYPED_HELPER("get_prandom_u32", identity);
 }
 
-static void scene_alias(const char *via, unsigned which)
+static void scene_task_file(const char *via, unsigned which)
 {
+	static const unsigned ids[] = {158, 175, 193};
+	unsigned identity = ids[which];
+
 	DECL_STATE();
 	PLANT_STATE();
 	INIT_ARENA();
 
 	__a64_x0.ptr = (void *)0x5600000000000000ULL;
 	__a64_x0_tag = 6U;
+	mreg[0] = 0x5600000000000000ULL;
 	mtag[0] = 6U;
 
-	expect_commit(0, 0U);
-	mreg[0] = 0;
-	mtag[0] = 0U;
-
-	capture_reset();
+	PREPARE_TYPED_HELPER(identity);
 	switch (which) {
 	case 0: ARM64_SIM_BPF_CALL_bpf_get_current_task_btf(); break;
 	case 1: ARM64_SIM_BPF_CALL_bpf_task_pt_regs(); break;
@@ -1017,14 +909,7 @@ static void scene_alias(const char *via, unsigned which)
 		break;
 	}
 
-	if (last_n != 0U) {
-		printf("MISMATCH %s captured %u lanes, want 0\n", via,
-		       last_n);
-		failures++;
-		return;
-	}
-	COMPARE_X0(via);
-	COMPARE_REG_STATE(via);
+	CHECK_TYPED_HELPER(via, identity);
 }
 
 int main(void)
@@ -1045,17 +930,15 @@ int main(void)
 	scene_update();
 	scene_delete();
 
-	/* --- the static-zero shapes: four distinct body names for per-name
-	 * repaint coverage (the 42-name family shares 2 body texts) --- */
-	scene_zero("zero_tail_call", 0U);
-	scene_zero("zero_uid_gid", 1U);
-	scene_zero("zero_smp_processor_id", 2U);
-	scene_zero("zero_cgroup_id", 3U);
+	/* --- Original four identity/tail-call scenes. --- */
+	scene_identity("zero_tail_call", 0U);
+	scene_identity("zero_uid_gid", 1U);
+	scene_identity("zero_smp_processor_id", 2U);
+	scene_identity("zero_cgroup_id", 3U);
 
 	scene_jiffies();
 
-	/* --- task pointer-tag shape (aliases share the body text of
-	 * get_current_task, so one drive + the alias rows below) --- */
+	/* --- Task identity, with pointer-returning helpers checked below. --- */
 	scene_task("get_current_task");
 
 	/* --- ktime natives --- */
@@ -1085,45 +968,45 @@ int main(void)
 
 	/* --- socket pointer-return shape --- */
 	scene_fullsock();
-	/* --- 0462: the undriven static-zero 64-bit family (30 names) --- */
-	scene_zero64("z64_get_current_pid_tgid", 0U);
-	scene_zero64("z64_get_current_comm", 1U);
-	scene_zero64("z64_get_func_arg", 2U);
-	scene_zero64("z64_get_func_ret", 3U);
-	scene_zero64("z64_get_func_arg_cnt", 4U);
-	scene_zero64("z64_get_retval", 5U);
-	scene_zero64("z64_get_attach_cookie", 6U);
-	scene_zero64("z64_ima_inode_hash", 7U);
-	scene_zero64("z64_seq_write", 8U);
-	scene_zero64("z64_trace_printk", 9U);
-	scene_zero64("z64_redirect", 10U);
-	scene_zero64("z64_clone_redirect", 11U);
-	scene_zero64("z64_skb_set_tunnel_key", 12U);
-	scene_zero64("z64_csum_diff", 13U);
-	scene_zero64("z64_skb_under_cgroup", 14U);
-	scene_zero64("z64_skb_change_proto", 15U);
-	scene_zero64("z64_skb_change_type", 16U);
-	scene_zero64("z64_skb_change_tail", 17U);
-	scene_zero64("z64_skb_pull_data", 18U);
-	scene_zero64("z64_skb_change_head", 19U);
-	scene_zero64("z64_xdp_adjust_head", 20U);
-	scene_zero64("z64_xdp_adjust_tail", 21U);
-	scene_zero64("z64_get_socket_cookie", 22U);
-	scene_zero64("z64_skb_adjust_room", 23U);
-	scene_zero64("z64_fib_lookup", 24U);
-	scene_zero64("z64_redirect_neigh", 25U);
-	scene_zero64("z64_get_netns_cookie", 26U);
-	scene_zero64("z64_current_task_under_cgroup", 27U);
-	scene_zero64("z64_get_stackid", 28U);
-	scene_zero64("z64_get_stack", 29U);
+	/* --- Original30 wide-result helper scenes. --- */
+	scene_wide("z64_get_current_pid_tgid", 0U);
+	scene_wide("z64_get_current_comm", 1U);
+	scene_wide("z64_get_func_arg", 2U);
+	scene_wide("z64_get_func_ret", 3U);
+	scene_wide("z64_get_func_arg_cnt", 4U);
+	scene_wide("z64_get_retval", 5U);
+	scene_wide("z64_get_attach_cookie", 6U);
+	scene_wide("z64_ima_inode_hash", 7U);
+	scene_wide("z64_seq_write", 8U);
+	scene_wide("z64_trace_printk", 9U);
+	scene_wide("z64_redirect", 10U);
+	scene_wide("z64_clone_redirect", 11U);
+	scene_wide("z64_skb_set_tunnel_key", 12U);
+	scene_wide("z64_csum_diff", 13U);
+	scene_wide("z64_skb_under_cgroup", 14U);
+	scene_wide("z64_skb_change_proto", 15U);
+	scene_wide("z64_skb_change_type", 16U);
+	scene_wide("z64_skb_change_tail", 17U);
+	scene_wide("z64_skb_pull_data", 18U);
+	scene_wide("z64_skb_change_head", 19U);
+	scene_wide("z64_xdp_adjust_head", 20U);
+	scene_wide("z64_xdp_adjust_tail", 21U);
+	scene_wide("z64_get_socket_cookie", 22U);
+	scene_wide("z64_skb_adjust_room", 23U);
+	scene_wide("z64_fib_lookup", 24U);
+	scene_wide("z64_redirect_neigh", 25U);
+	scene_wide("z64_get_netns_cookie", 26U);
+	scene_wide("z64_current_task_under_cgroup", 27U);
+	scene_wide("z64_get_stackid", 28U);
+	scene_wide("z64_get_stack", 29U);
 
-	/* --- 0462: the single 32-bit zero body --- */
+	/* --- Random-u32 result narrowing. --- */
 	scene_prand();
 
-	/* --- 0462: the three one-line alias bodies --- */
-	scene_alias("alias_get_current_task_btf", 0U);
-	scene_alias("alias_task_pt_regs", 1U);
-	scene_alias("alias_ima_file_hash", 2U);
+	/* --- Three distinct typed task/file helpers. --- */
+	scene_task_file("alias_get_current_task_btf", 0U);
+	scene_task_file("alias_task_pt_regs", 1U);
+	scene_task_file("alias_ima_file_hash", 2U);
 
 	if (failures != 0) {
 		printf("arm64 helper route host cross-check: FAIL (%d)\n",

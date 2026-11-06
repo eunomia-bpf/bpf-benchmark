@@ -20,11 +20,7 @@ typedef signed long long __s64;
 
 /* Host environment returns retain the original lookup/update/delete/time
  * vectors; typed stubs additionally expose every helper's forwarded ABI. */
-#define ORA_MAP_PTR ((void *)0x0000123400005678ULL)
-#define ORA_UPD_RET ((long)-7LL)
-#define ORA_DEL_RET ((long)3LL)
-#define ORA_KTIME 0xaabbccddeeff0011ULL
-#include "generated_x86_helper_calls.h"
+#include "x86_helper_environment_host.h"
 
 #include "../x86/x86_sim_local_bpf.h"
 
@@ -85,78 +81,6 @@ static const char *gpr_names[16] = {
 	} while (0)
 
 /* Public ABI table determines arguments/results independently of the C bodies. */
-static int armed(__u64 id)
-{
-    switch (id) {
-    case 1ULL:
-    case 2ULL:
-    case 3ULL:
-    case 4ULL:
-    case 5ULL:
-    case 6ULL:
-    case 7ULL:
-    case 8ULL:
-    case 9ULL:
-    case 10ULL:
-    case 11ULL:
-    case 12ULL:
-    case 14ULL:
-    case 15ULL:
-    case 16ULL:
-    case 20ULL:
-    case 21ULL:
-    case 23ULL:
-    case 25ULL:
-    case 26ULL:
-    case 27ULL:
-    case 28ULL:
-    case 32ULL:
-    case 35ULL:
-    case 36ULL:
-    case 37ULL:
-    case 38ULL:
-    case 39ULL:
-    case 43ULL:
-    case 44ULL:
-    case 45ULL:
-    case 46ULL:
-    case 50ULL:
-    case 54ULL:
-    case 58ULL:
-    case 65ULL:
-    case 67ULL:
-    case 68ULL:
-    case 69ULL:
-    case 80ULL:
-    case 85ULL:
-    case 86ULL:
-    case 87ULL:
-    case 88ULL:
-    case 95ULL:
-    case 99ULL:
-    case 109ULL:
-    case 112ULL:
-    case 113ULL:
-    case 114ULL:
-    case 115ULL:
-    case 118ULL:
-    case 122ULL:
-    case 124ULL:
-    case 125ULL:
-    case 130ULL:
-    case 148ULL:
-    case 152ULL:
-    case 155ULL:
-    case 158ULL:
-    case 174ULL:
-    case 175ULL:
-    case 181ULL:
-    case 184ULL:
-    case 193ULL:
-        return 1;
-    default: return 0;
-    }
-}
 
 static void reset_call(void)
 {
@@ -172,8 +96,8 @@ static void check_arguments(__u64 id, void *before[16])
     __u64 raw[5], expected[5] = {0};
     unsigned i, count;
     for (i = 0; i < 5; i++) raw[i] = (__u64)(uintptr_t)before[registers[i]];
-    count = ora_expected_arguments(id, raw, expected);
-    if (ora_called != (armed(id) ? id : 0) || ora_argc != count) {
+    count = ora_x86_armed(id) ? ora_expected_arguments(id, raw, expected) : 0;
+    if (ora_called != (ora_x86_armed(id) ? id : 0) || ora_argc != count) {
         printf("MISMATCH helper identity/arity id=%llu called=%u argc=%u want=%u\n",
                (unsigned long long)id, ora_called, ora_argc, count);
         failures++;
@@ -233,7 +157,7 @@ static void check_id(unsigned long long id)
 			}
 		}
 
-		if (changed != (armed(id) ? 0 : -1)) {
+		if (changed != (ora_x86_armed(id) ? 0 : -1)) {
 			printf("MISMATCH id=%llu changed cell got=%d (%s) "
 			       "want=0 (rax)\n", id, changed,
 			       changed >= 0 ? gpr_names[changed] : "none");
@@ -241,8 +165,8 @@ static void check_id(unsigned long long id)
 			return;
 		}
 
-		want_val = armed(id) ? ora_expected_result(id) : (__u64)(uintptr_t)before[0];
-		want_tag = armed(id) ? (ora_pointer_result(id) ? X86_SIM_TAG_MAP_VALUE : X86_SIM_TAG_SCALAR) : btag[0];
+		want_val = ora_x86_armed(id) ? ora_expected_result(id) : (__u64)(uintptr_t)before[0];
+		want_tag = ora_x86_armed(id) ? (ora_pointer_result(id) ? X86_SIM_TAG_MAP_VALUE : X86_SIM_TAG_SCALAR) : btag[0];
 		if ((__u64)(long)after[0] != want_val || atag[0] != want_tag) {
 			printf("MISMATCH id=%llu rax=0x%llx tag=%u want=0x%llx "
 			       "tag=%u\n", id,
@@ -303,15 +227,15 @@ static void check_reg(unsigned reg, unsigned long long id)
 
 		/* The plant set `reg`; the fresh snapshot already holds it, so
 		 * the call must change only RAX (cell 0). */
-		if (changed != (armed(eff_id) ? 0 : -1)) {
+		if (changed != (ora_x86_armed(eff_id) ? 0 : -1)) {
 			printf("MISMATCH reg=%u id=%llu changed cell got=%d "
 			       "want=0 (rax)\n", reg, id, changed);
 			failures++;
 			return;
 		}
 
-		want_val = armed(eff_id) ? ora_expected_result(eff_id) : (__u64)(uintptr_t)before[0];
-		want_tag = armed(eff_id) ? (ora_pointer_result(eff_id) ? X86_SIM_TAG_MAP_VALUE : X86_SIM_TAG_SCALAR) : btag[0];
+		want_val = ora_x86_armed(eff_id) ? ora_expected_result(eff_id) : (__u64)(uintptr_t)before[0];
+		want_tag = ora_x86_armed(eff_id) ? (ora_pointer_result(eff_id) ? X86_SIM_TAG_MAP_VALUE : X86_SIM_TAG_SCALAR) : btag[0];
 		if ((__u64)(long)after[0] != want_val || atag[0] != want_tag) {
 			printf("MISMATCH reg=%u id=%llu rax=0x%llx tag=%u "
 			       "want=0x%llx tag=%u\n", reg, id,

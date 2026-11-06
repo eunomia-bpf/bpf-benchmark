@@ -149,6 +149,7 @@ check:
 	python3 tools/generate_x86_alu_flag_arm_spec.py --check
 	python3 tools/generate_x86_dispatch_family_spec.py --check
 	python3 tools/generate_x86_dispatch_singleton_spec.py --check
+	python3 tools/generate_helper_oracle.py --check
 	lake build
 	python3 tools/check_reference.py
 	python3 tools/check_reference_arm64.py

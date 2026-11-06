@@ -881,9 +881,9 @@ static void model_callreg(unsigned src, struct snap *b)
 {
     __u64 id = b->x[src];
     __u64 result = ora_expected_result(id);
-    /* Every armed stub returns nonzero; an unarmed route records failure
-     * and leaves the incoming register frame untouched. */
-    if (result != 0) {
+    /* Arming is architecture-specific; the shared callable environment also
+     * contains helpers that only AArch64 currently dispatches. */
+    if (ora_x86_armed(id)) {
         b->x[X86_RAX] = result;
         b->t[X86_RAX] = ora_pointer_result(id) ? X86_SIM_TAG_MAP_VALUE : X86_SIM_TAG_SCALAR;
     }
@@ -1839,7 +1839,7 @@ static void check_callreg(const char *what, __u64 id)
 	model_callreg(X86_RAX, &b);
 
 	cases++;
-    if (helper_failures != failed_before + (ora_expected_result(id) == 0))
+    if (helper_failures != failed_before + (!ora_x86_armed(id)))
         failures++;
 	if (!snap_eq(&a, &b, what, 0U))
 		failures++;
