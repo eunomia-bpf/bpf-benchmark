@@ -473,6 +473,59 @@ def main():
     nv = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "nv"), "csel x0,x1,x2,nv")
     al = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "al"), "csel x0,x1,x2,al")
     assert encoder.encode(nv, {}, {}) == encoder.encode(al, {}, {})
+    # GNU objdump sometimes preserves MOVZ/MOVN rather than printing MOV.
+    # Check decoded constants, legal halfword columns, and real operation fields.
+    for mnemonic, operands, width, value in [
+            ("movz", ("w0", "#0xffff", "lsl #16"), 32, 0xFFFF0000),
+            ("movz", ("x0", "#0x8000", "lsl #48"), 64, 0x8000000000000000),
+            ("movz", ("x0", "#2", "lsl #16"), 64, 0x20000),
+            ("movn", ("w0", "#0xffff", "lsl #16"), 32, 0xFFFF),
+            ("movn", ("w0", "#0"), 32, 0xFFFFFFFF),
+            ("movn", ("x0", "#0x8000", "lsl #48"), 64, 0x7FFFFFFFFFFFFFFF)]:
+        insn = encoder.NativeInsn(32, mnemonic, operands, mnemonic + " " + ", ".join(operands), "target", 7)
+        expected = encoder.Encoded("ARM64_OP_MOV_IMM", "ARM64_X0",
+                                   width=f"ARM64_WIDTH_{width}", imm=f"{value}ULL")
+        assert encoder.encode(insn, {}, {}) == expected, insn
+        normalized = encoder.normalize_alias(insn)
+        assert (normalized.addr, normalized.raw, normalized.reloc_symbol, normalized.reloc_addend) == (32, insn.raw, "target", 7)
+    for operands, width, modifier, shift in [
+            (("w0", "w1"), 32, "NONE", 0),
+            (("w0", "w1", "asr #4"), 32, "ASR", 4),
+            (("x0", "x1", "lsl #63"), 64, "LSL", 63)]:
+        insn = encoder.NativeInsn(0, "negs", operands, "negs " + ", ".join(operands))
+        expected = encoder.Encoded("ARM64_OP_SUBS_REG", "ARM64_X0", "ARM64_XZR", "ARM64_X1",
+                                   width=f"ARM64_WIDTH_{width}", aux=f"ARM64_AUX_ALU(0, ARM64_MOD_{modifier}, {shift})")
+        assert encoder.encode(insn, {}, {}) == expected, insn
+    for width, prefix in [(32, "w"), (64, "x")]:
+        for extension in ("uxtx", "sxtx"):
+            insn = encoder.NativeInsn(0, "add", (prefix+"0", prefix+"1", prefix+"2", extension+" #4"), "add extend")
+            expected = encoder.Encoded("ARM64_OP_ALU_REG", "ARM64_X0", "ARM64_X1", "ARM64_X2",
+                                       width=f"ARM64_WIDTH_{width}", aux="ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_LSL, 4)")
+            assert encoder.encode(insn, {}, {}) == expected, insn
+    # Normalization must precede ABI/CFG analysis, not only final encoding.
+    # Otherwise MOVZ fails to define a register and NEGS retains a stale CODE tag.
+    positive = encoder.parse_flat_instructions("0: d2800021 \tmovz x1, #1\n4: eb0103e0 \tnegs x0, x1\n8: d65f03c0 \tret\n")
+    encoder.render_program("wide_alias", "entry", encoder.OrderedDict(entry=positive), "xdp")
+    clobber = encoder.parse_flat_instructions("0: 10000081 \tadr x1, 10\n4: d2800022 \tmovz x2, #1\n8: eb0203e1 \tnegs x1, x2\nc: d61f0020 \tbr x1\n10: 52800040 \tmov w0, #2\n14: d65f03c0 \tret\n")
+    try:
+        encoder.indirect_targets(clobber)
+    except ValueError as error:
+        assert "unbounded indirect target at 0xc" in str(error), error
+    else:
+        raise AssertionError("NEGS retained a stale code target")
+    for mnemonic, operands in [
+            ("movz", ("w0", "#1", "lsl #32")), ("movz", ("x0", "#1", "lsl #8")),
+            ("movn", ("x0", "#0x10000")), ("movn", ("wsp", "#1")),
+            ("negs", ("w0", "w1", "ror #1")), ("negs", ("w0", "w1", "lsl #32")),
+            ("negs", ("x0", "x1", "sxtx #4")),
+            ("negs", ("w0", "x1")), ("negs", ("sp", "x1")),
+            ("add", ("x0", "x1", "x2", "sxtx #5"))]:
+        try:
+            encoder.encode(encoder.NativeInsn(0, mnemonic, operands, "invalid alias"), {}, {})
+        except ValueError as error:
+            assert str(error).startswith(("invalid move-wide", "invalid NEGS", "invalid AArch64 extend")), error
+            continue
+        raise AssertionError((mnemonic, operands, "invalid alias was accepted"))
     print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV/CNT/UADDLV/CCMP/ADD-SUB-immediate/shifted-register/extended-register, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 

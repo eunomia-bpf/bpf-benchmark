@@ -9,7 +9,7 @@ import re
 import subprocess
 import sys
 from collections import OrderedDict, deque
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import yaml
@@ -175,7 +175,7 @@ def parse_flat_instructions(text: str) -> list[NativeInsn]:
         asm = f"{m_insn.group(2)} {operands}".strip()
         addr = int(m_insn.group(1), 16)
         insns.append(NativeInsn(addr, m_insn.group(2), split_operands(operands), asm))
-    return insns
+    return [normalize_alias(insn) for insn in insns]
 
 
 def parse_native_linked_program(
@@ -300,9 +300,14 @@ def parse_modifier(parts: tuple[str, ...], index: int) -> tuple[str, int]:
     m_shift = re.fullmatch(r"(lsl|lsr|asr|ror)\s+#(0x[0-9a-f]+|[0-9]+)", text)
     if m_shift:
         return MOD[m_shift.group(1)], int(m_shift.group(2), 0)
-    m_ext = re.fullmatch(r"(uxtw|sxtw|uxth|sxth|uxtb|sxtb)(?:\s+#(0x[0-9a-f]+|[0-9]+))?", text)
+    m_ext = re.fullmatch(r"(uxtw|sxtw|uxth|sxth|uxtb|sxtb|uxtx|sxtx)(?:\s+#(0x[0-9a-f]+|[0-9]+))?", text)
     if m_ext:
-        return MOD[m_ext.group(1)], int(m_ext.group(2) or "0", 0)
+        extension, shift = m_ext.group(1), int(m_ext.group(2) or "0", 0)
+        if shift > 4:
+            raise ValueError(f"invalid AArch64 extend shift: {text}")
+        # ExtendReg takes min(source-size, operand-size); full-size extensions
+        # have the same active bits as LSL, including W-form truncation.
+        return MOD["lsl" if extension in {"uxtx", "sxtx"} else extension], shift
     raise ValueError(f"unsupported operand modifier: {text}")
 
 
@@ -360,7 +365,43 @@ def c_ident(prefix: str, value: str, index: int) -> str:
     return f"{ident}_{index}"
 
 
+def normalize_alias(insn: NativeInsn) -> NativeInsn:
+    """Normalize aliases before both ABI/CFG analysis and operation encoding."""
+    op, ops = insn.mnemonic, insn.operands
+    if op in {"movz", "movn"}:
+        if len(ops) not in {2, 3} or ops[0].lower() in {"sp", "wsp"}:
+            raise ValueError(f"invalid move-wide operands: {insn.raw}")
+        reg_const(ops[0])
+        bits = 8 * reg_width(ops[0])
+        immediate, shift = parse_imm(ops[1]), 0
+        if len(ops) == 3:
+            suffix = re.fullmatch(r"lsl\s+#(0x[0-9a-f]+|[0-9]+)", ops[2].lower())
+            if not suffix:
+                raise ValueError(f"invalid move-wide shift: {insn.raw}")
+            shift = int(suffix[1], 0)
+        if not 0 <= immediate <= 0xffff or shift % 16 or not 0 <= shift < bits:
+            raise ValueError(f"invalid move-wide immediate or column: {insn.raw}")
+        value = immediate << shift
+        if op == "movn":
+            value = ~value
+        value &= (1 << bits) - 1
+        return replace(insn, mnemonic="mov", operands=(ops[0], f"#{value:#x}"))
+    if op == "negs":
+        if len(ops) not in {2, 3} or any(reg.lower() in {"sp", "wsp"} for reg in ops[:2]):
+            raise ValueError(f"invalid NEGS operands: {insn.raw}")
+        if len(ops) == 3 and not re.fullmatch(r"(?:lsl|lsr|asr)\s+#(?:0x[0-9a-f]+|[0-9]+)", ops[2].lower()):
+            raise ValueError(f"invalid NEGS modifier: {insn.raw}")
+        mod, shift = parse_modifier(ops, 2)
+        if (mod not in {"ARM64_MOD_NONE", "ARM64_MOD_LSL", "ARM64_MOD_LSR", "ARM64_MOD_ASR"}
+                or reg_width(ops[0]) != reg_width(ops[1]) or shift >= 8 * reg_width(ops[0])):
+            raise ValueError(f"invalid NEGS shift or register width: {insn.raw}")
+        zero = "wzr" if reg_width(ops[0]) == 4 else "xzr"
+        return replace(insn, mnemonic="subs", operands=(ops[0], zero, *ops[1:]))
+    return insn
+
+
 def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[str, str]) -> Encoded:
+    insn = normalize_alias(insn)
     op = insn.mnemonic
     ops = insn.operands
     if op == "nop":
