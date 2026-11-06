@@ -59,3 +59,65 @@ correct original maps and ABI, so no `make corpus` command can honestly be
 presented as the requested verified six-app run yet. The real app runtime
 image and matching proof manifests must be built before this diagnostic
 replay can be replaced with application workload runs.
+
+## Built application image replay, 2026-11-06
+
+The preceding pilot description records the earlier checkpoint. The current
+runtimev9 image contains all six upstream applications, their existing Python
+runners and workloads, the kernel modules, loader/linker and current manifests.
+Katran's root triple passes bound QEMU execution; the actual balancer proof
+has compiled and is running through application startup. The previousv8
+Katran/OTel runs retained one/twelve baseline counter rows and missing-proof
+failures, now recorded in runtime-context-v8/. BCC's v7 retry reached63 bound replacements, then four native-load
+errors and a measurement socket failure. These commands run and retain those
+actual application outcomes while the remaining defects are repaired.
+
+On the build host, prepare the portable launcher from the current built image:
+
+```sh
+BASE="$PWD/kprog/arm64/build/app-runtime-v9"
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile app-replay-build \
+  RUNTIME_BASE="$BASE" RUNTIME_IMAGE=bpf-benchmark/runner-runtime:arm64-a-context-v9
+scp -r "$BASE/spark" "$SPARK:kprog-arm64-app"
+scp "$BASE/image.tar" "$SPARK:kprog-arm64-app/image.tar"
+```
+
+The transferred directory contains the built matching kernel, unchanged guest
+init, exact existing launch environment and standalone Makefile. Docker loads
+and exports the image layers on Spark; no host workspace is mounted. Spark
+needs Docker, Python3, GNU make, QEMU AArch64 and access to KVM. In its shell:
+
+```sh
+cd kprog-arm64-app
+sudo make run ACCEL=kvm CPU=host APP=katran SAMPLES=1 WORKLOAD_DURATION=2
+```
+
+Run every application through the same two-start workload. Preserve the make
+status and serial log for each attempt, including failures:
+
+```sh
+install -d runs
+for stats in 0 1; do
+  for app in bcc/set otelcol-ebpf-profiler/profiling cilium/agent tetragon/observer katran tracee/monitor; do
+    label=$(printf '%s' "$app" | tr / _)-stats$stats
+    if sudo make run ACCEL=kvm CPU=host APP="$app" BPF_STATS="$stats" \
+      SAMPLES=3 WORKLOAD_DURATION=30 >"runs/$label.make.log" 2>&1; then
+      rc=0
+    else
+      rc=$?
+    fi
+    printf '%s\n' "$rc" >"runs/$label.rc"
+    if test -f qemu.log; then cp qemu.log "runs/$label.qemu.log"; fi
+  done
+done
+```
+
+Raw driver results, lifecycle logs and per-phase program/work counters stay in
+`root/workspaces/repository/corpus/results/`; host identity is `host.txt`.
+Feature probes use the operator-requested unchanged load path. Every resident
+native replacement still requires a generation-bound proof, and a failed
+verified replacement remains an error. The portable image export/prepare was
+exercised on this build host; actual Spark hardware execution has not occurred.
+The four component replay archives for entry ABI, source maps, code dispatch
+and exclusive outcomes also contain their built matching kernel/initrd and
+accept `make -C runtime run ACCEL=kvm CPU=host` after extraction.

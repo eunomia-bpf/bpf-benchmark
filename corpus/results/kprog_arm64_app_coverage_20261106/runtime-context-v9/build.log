@@ -1,0 +1,416 @@
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/katran_real.py /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/katran-real-v1 install
+actual Katran balancer triple installed; every other entry retained
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/pin_runtime.py /workspaces/repository/kprog/arm64/build/app-runtime-v9
+matched kernel/EFI/7.0.0-rc2+ stock modules/all11 kinsn/library copied into /workspaces/repository/kprog/arm64/build/app-runtime-v9
+taskset -c 16-23 make -C /workspaces/repository PLATFORM=qemu ARCH=arm64 arm64-qemu-root \
+	-o host-kernel-arm64 -o host-kinsn-arm64 -o host-rust-arm64 -o host-shim-arm64 \
+	-o host-source-apps-arm64 -o host-runner-arm64 -o host-micro-programs-arm64 \
+	-o host-stage2-programs-arm64 -o host-arm64-sim-proofs -o host-bpfopt-llvm-arm64 \
+	-o host-native-bpf-arm64 -o host-merlin-runtime-context \
+	RUNNER_DIR=/workspaces/repository/kprog/arm64/build/app-runtime-v9/runner \
+	HOST_KERNEL_BUILD_DIR_ARM64=/workspaces/repository/kprog/arm64/build/app-runtime-v9/kernel \
+	HOST_KINSN_DIR_ARM64=/workspaces/repository/kprog/arm64/build/app-runtime-v9/kinsn \
+	BPFOPT_SHIM_BUILD_ARM64=/workspaces/repository/bpfopt/shim/build-arm64-a-context-v8 \
+	NATIVE_BPF_ARTIFACTS_ARM64=/workspaces/repository/kprog/arm64/build/app-verified-stage \
+	ARM64_RUNNER_RUNTIME_IMAGE=bpf-benchmark/runner-runtime:arm64-a-context-v9 \
+	ARM64_RUNNER_RUNTIME_IMAGE_TAR=/workspaces/repository/kprog/arm64/build/app-runtime-v9/image.tar \
+	ARM64_QEMU_ROOT=/workspaces/repository/kprog/arm64/build/app-runtime-v9/root
+make[1]: Entering directory '/workspaces/repository'
+install -d "/workspaces/repository/.cache/container-images"
+install -d "/workspaces/repository/kprog/arm64/build/app-runtime-v9/kernel/bpf-benchmark-kernel-config-context"
+cp "/workspaces/repository/kprog/arm64/build/app-runtime-v9/kernel/.config" "/workspaces/repository/kprog/arm64/build/app-runtime-v9/kernel/bpf-benchmark-kernel-config-context/config"
+kernel_release="$(cat "/workspaces/repository/kprog/arm64/build/app-runtime-v9/kernel/include/config/kernel.release")"; \
+	test -n "${kernel_release}"; \
+	printf '{"kernel_release":"%s","target_arch":"arm64","kernel_image":"vmlinuz.efi"}\n' "${kernel_release}" > "/workspaces/repository/kprog/arm64/build/app-runtime-v9/kernel/bpf-benchmark-kernel-config-context/manifest.json"
+docker build --platform linux/arm64 \
+	--target runner-runtime \
+	--build-context runner-runtime-host-runner-build="/workspaces/repository/kprog/arm64/build/app-runtime-v9/runner/build-arm64-llvmbpf" \
+	--build-context runner-runtime-host-micro-programs="/workspaces/repository/micro/programs/build-arm64" \
+	--build-context runner-runtime-host-stage2-programs="/workspaces/repository/kprog/test/build-arm64" \
+	--build-context runner-runtime-host-kernel-image="/workspaces/repository/kprog/arm64/build/app-runtime-v9/kernel/arch/arm64/boot" \
+	--build-context runner-runtime-host-kernel-config="/workspaces/repository/kprog/arm64/build/app-runtime-v9/kernel/bpf-benchmark-kernel-config-context" \
+	--build-context runner-runtime-host-kernel-offsets="/workspaces/repository/micro/programs/build-arm64" \
+	--build-context runner-runtime-host-kernel-modules="/workspaces/repository/kprog/arm64/build/app-runtime-v9/kernel/modules-install/lib/modules" \
+		--build-context runner-runtime-host-kinsn-artifacts="/workspaces/repository/kprog/arm64/build/app-runtime-v9/kinsn" \
+		--build-context runner-runtime-host-shim="/workspaces/repository/bpfopt/shim/build-arm64-a-context-v8" \
+		--build-context runner-runtime-host-native-bpf="/workspaces/repository/kprog/arm64/build/app-verified-stage" \
+		--build-context runner-runtime-host-merlin="/workspaces/repository/vendor/build/merlin-runtime-context" \
+	--build-arg IMAGE_WORKSPACE="/workspaces/repository" \
+	--build-arg RUN_TARGET_ARCH=arm64 \
+	--build-arg VENDOR_BUILD_ARCH=arm64 \
+	--build-arg RUNNER_BUILD_DIR_NAME=build-arm64-llvmbpf \
+	--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
+	--build-arg BPFOPT_HOST_BIN="bpfopt/llvm/build-kinsn-arm64/bpfopt" \
+	--build-arg KINSNPROBER_HOST_BIN="bpfopt/target/aarch64-unknown-linux-gnu/release/kinsnprober" \
+	--build-arg BPFPROF_HOST_BIN="runner/assets/bpfprof-arm64-unavailable" \
+	--build-arg NATIVE_LINK_HOST_BIN="kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link" \
+	-t "bpf-benchmark/runner-runtime:arm64-a-context-v9" -f "/workspaces/repository/kprog/arm64/build/app-runtime-v9/runner/containers/runner-runtime.Dockerfile" "/workspaces/repository"
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from runner-runtime.Dockerfile
+#1 transferring dockerfile: 10.03kB done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1.6
+#2 DONE 0.9s
+
+#3 docker-image://docker.io/docker/dockerfile:1.6@sha256:ac85f380a63b13dfcefa89046420e1781752bab202122f8f50032edf31be0021
+#3 resolve docker.io/docker/dockerfile:1.6@sha256:ac85f380a63b13dfcefa89046420e1781752bab202122f8f50032edf31be0021 0.0s done
+#3 CACHED
+
+#4 [internal] load metadata for docker.io/library/ubuntu:24.04
+#4 ...
+
+#5 [context runner-runtime-host-kernel-offsets] load .dockerignore
+#5 transferring runner-runtime-host-kernel-offsets: 2B done
+#5 DONE 0.0s
+
+#6 [context runner-runtime-host-micro-programs] load .dockerignore
+#6 transferring runner-runtime-host-micro-programs: 2B done
+#6 DONE 0.0s
+
+#7 [context runner-runtime-host-stage2-programs] load .dockerignore
+#7 transferring runner-runtime-host-stage2-programs: 2B done
+#7 DONE 0.1s
+
+#8 [context runner-runtime-host-runner-build] load .dockerignore
+#8 transferring runner-runtime-host-runner-build: 2B done
+#8 DONE 0.1s
+
+#9 [context runner-runtime-host-kinsn-artifacts] load .dockerignore
+#9 transferring runner-runtime-host-kinsn-artifacts: 2B done
+#9 DONE 0.1s
+
+#10 [context runner-runtime-host-kernel-image] load .dockerignore
+#10 transferring runner-runtime-host-kernel-image: 2B done
+#10 DONE 0.1s
+
+#11 [context runner-runtime-host-shim] load .dockerignore
+#11 transferring runner-runtime-host-shim: 2B done
+#11 DONE 0.1s
+
+#12 [context runner-runtime-host-kernel-config] load .dockerignore
+#12 transferring runner-runtime-host-kernel-config: 2B done
+#12 DONE 0.1s
+
+#13 [context runner-runtime-host-kernel-modules] load .dockerignore
+#13 transferring runner-runtime-host-kernel-modules: 2B done
+#13 DONE 0.1s
+
+#14 [context runner-runtime-host-merlin] load .dockerignore
+#14 transferring runner-runtime-host-merlin: 2B done
+#14 DONE 0.1s
+
+#15 [context runner-runtime-host-native-bpf] load .dockerignore
+#15 transferring runner-runtime-host-native-bpf: 2B done
+#15 DONE 0.1s
+
+#4 [internal] load metadata for docker.io/library/ubuntu:24.04
+#4 DONE 0.5s
+
+#16 [internal] load .dockerignore
+#16 transferring context: 5.09kB done
+#16 DONE 0.0s
+
+#17 [runner-runtime-runtime-base 1/4] FROM docker.io/library/ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
+#17 resolve docker.io/library/ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852 0.0s done
+#17 DONE 0.0s
+
+#18 [context runner-runtime-host-merlin] load from client
+#18 transferring runner-runtime-host-merlin: 104B done
+#18 DONE 0.0s
+
+#19 [context runner-runtime-host-kernel-config] load from client
+#19 transferring runner-runtime-host-kernel-config: 163.22kB 0.0s done
+#19 DONE 0.0s
+
+#20 [context runner-runtime-host-shim] load from client
+#20 transferring runner-runtime-host-shim: 562.15kB 0.0s done
+#20 DONE 0.0s
+
+#21 [internal] load build context
+#21 ...
+
+#22 [context runner-runtime-host-kinsn-artifacts] load from client
+#22 transferring runner-runtime-host-kinsn-artifacts: 6.99MB 0.1s done
+#22 DONE 0.1s
+
+#23 [context runner-runtime-host-kernel-offsets] load from client
+#23 transferring runner-runtime-host-kernel-offsets: 2.71MB 0.1s done
+#23 DONE 0.1s
+
+#24 [context runner-runtime-host-micro-programs] load from client
+#24 transferring runner-runtime-host-micro-programs: 2.71MB 0.1s done
+#24 DONE 0.1s
+
+#21 [internal] load build context
+#21 ...
+
+#25 [context runner-runtime-host-stage2-programs] load from client
+#25 transferring runner-runtime-host-stage2-programs: 3.04MB 0.1s done
+#25 DONE 0.2s
+
+#21 [internal] load build context
+#21 ...
+
+#26 [context runner-runtime-host-kernel-image] load from client
+#26 transferring runner-runtime-host-kernel-image: 55.38MB 0.4s done
+#26 DONE 0.4s
+
+#21 [internal] load build context
+#21 ...
+
+#27 [context runner-runtime-host-runner-build] load from client
+#27 transferring runner-runtime-host-runner-build: 78.52MB 0.5s done
+#27 DONE 0.5s
+
+#28 [context runner-runtime-host-native-bpf] load from client
+#28 transferring runner-runtime-host-native-bpf: 129.93MB 0.9s done
+#28 DONE 0.9s
+
+#29 [context runner-runtime-host-kernel-modules] load from client
+#29 transferring runner-runtime-host-kernel-modules: 1.43GB 2.9s done
+#29 DONE 3.0s
+
+#21 [internal] load build context
+#21 transferring context: 151.24MB 5.1s
+#21 transferring context: 625.10MB 7.4s done
+#21 DONE 7.4s
+
+#30 [runner-runtime-artifacts  3/17] COPY --link --chmod=0755 vendor/binary/katran/arm64/bin/katran_server_grpc /artifacts/user/repo-artifacts/arm64/katran/bin/katran_server_grpc
+#30 CACHED
+
+#31 [runner-runtime-artifacts  4/17] COPY --link vendor/build/arm64/katran/bpf/*.bpf.o /artifacts/user/repo-artifacts/arm64/katran/bpf/
+#31 CACHED
+
+#32 [runner-runtime-artifacts  2/17] COPY --link vendor/build/arm64/tetragon/ /artifacts/tetragon/
+#32 CACHED
+
+#33 [runner-runtime-artifacts  7/17] COPY --link --chmod=0755     vendor/build/arm64/bcc/bin/capable     vendor/build/arm64/bcc/bin/biosnoop     vendor/build/arm64/bcc/bin/vfsstat     vendor/build/arm64/bcc/bin/opensnoop     vendor/build/arm64/bcc/bin/syscount     vendor/build/arm64/bcc/bin/tcpconnect     vendor/build/arm64/bcc/bin/tcplife     vendor/build/arm64/bcc/bin/runqlat     vendor/build/arm64/cilium/bin/cilium-agent     vendor/build/arm64/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler     vendor/build/arm64/bpftool/bin/bpftool     /usr/local/bin/
+#33 CACHED
+
+#34 [runner-runtime-artifacts  1/17] COPY --link --chmod=0755 vendor/build/arm64/tracee/bin/tracee /artifacts/tracee/bin/tracee
+#34 CACHED
+
+#35 [runner-runtime-artifacts  5/17] COPY --link --from=runner-runtime-host-runner-build /katran_transport.bpf.o /artifacts/user/repo-artifacts/arm64/katran/bpf/katran_transport.bpf.o
+#35 CACHED
+
+#36 [runner-runtime-runtime-base 4/4] WORKDIR /workspaces/repository
+#36 CACHED
+
+#37 [runner-runtime-runtime-base 3/4] RUN mkdir -p "/workspaces/repository"
+#37 CACHED
+
+#38 [runner-runtime-artifacts  6/17] COPY --link vendor/repos/cilium/bpf/ /var/lib/cilium/bpf/
+#38 CACHED
+
+#39 [runner-runtime-runtime-base 2/4] RUN apt-get update     && apt-get install -y --no-install-recommends         auditd         bash         binutils         bzip2         ca-certificates         clang         curl         debianutils         diffutils         elfutils         etcd-server         file         findutils         fio         ipset         iptables         iproute2         jq         kmod         libaio1t64         libboost-atomic1.83.0         libboost-context1.83.0         libboost-filesystem1.83.0         libboost-program-options1.83.0         libboost-regex1.83.0         libbpf1         libbz2-1.0         libcap2         libcurl4t64         libdouble-conversion3         libdw1t64         libdwarf1         libelf1t64         libevent-2.1-7t64         libfmt9         libgflags2.2         libgoogle-glog0v6t64         libgrpc++1.51t64         liblz4-1         libmnl0         libpcap0.8t64         libprotobuf32t64         libre2-10         libsodium23         libsnappy1v5         libspdlog1.12         libssl3t64         libunwind8         libyaml-cpp0.8         llvm-18         libzstd1         lz4         nftables         openssl         nodejs         perl         php-cli         procps         python3         python3-pyelftools         python3-yaml         ruby         stress-ng         tar         util-linux         wrk         xz-utils         zlib1g         zstd     && rm -rf /var/lib/apt/lists/*
+#39 CACHED
+
+#40 [runner-runtime-artifacts  8/17] RUN set -eux;     repo_artifact_root="/artifacts/user/repo-artifacts/arm64";     mkdir -p         "${repo_artifact_root}"         "${repo_artifact_root}/cilium/bin"         "${repo_artifact_root}/otelcol-ebpf-profiler/bin";     ln -sfn /artifacts/tracee "${repo_artifact_root}/tracee";     ln -sfn /artifacts/tetragon "${repo_artifact_root}/tetragon";     ln -sfn /artifacts/tracee/bin/tracee /usr/local/bin/tracee;     ln -sfn /artifacts/tetragon/bin/tetragon /usr/local/bin/tetragon;     ln -sfn /usr/local/bin/cilium-agent "${repo_artifact_root}/cilium/bin/cilium-agent";     ln -sfn /usr/local/bin/otelcol-ebpf-profiler "${repo_artifact_root}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
+#40 CACHED
+
+#41 [runner-runtime-artifacts  9/17] COPY --link --from=runner-runtime-host-kernel-image /vmlinuz.efi /artifacts/kernel/vmlinuz.efi
+#41 DONE 0.0s
+
+#42 [runner-runtime-artifacts 10/17] COPY --link --from=runner-runtime-host-kernel-config /config /artifacts/kernel/config
+#42 DONE 0.0s
+
+#43 [runner-runtime-artifacts 11/17] COPY --link --from=runner-runtime-host-kernel-config /manifest.json /artifacts/manifest.json
+#43 DONE 0.0s
+
+#44 [runner-runtime-artifacts 12/17] COPY --link --from=runner-runtime-host-kernel-offsets /kernel_offsets.h /artifacts/kernel/kernel_offsets.h
+#44 DONE 0.0s
+
+#45 [runner-runtime-artifacts 13/17] COPY --link --from=runner-runtime-host-kernel-modules / /artifacts/lib/modules
+#45 merging
+#45 merging 0.2s done
+#45 DONE 0.7s
+
+#46 [runner-runtime-artifacts 14/17] RUN set -eux;     kernel_release="$(python3 -c 'import json; print(json.load(open("/artifacts/manifest.json"))["kernel_release"])')";     mkdir -p /artifacts/boot /boot;     cp /artifacts/kernel/config "/artifacts/boot/config-${kernel_release}";     cp /artifacts/kernel/config "/boot/config-${kernel_release}";     depmod -b /artifacts "$kernel_release"
+#46 0.148 + python3 -c import json; print(json.load(open("/artifacts/manifest.json"))["kernel_release"])
+#46 1.627 + kernel_release=7.0.0-rc2+
+#46 1.628 + mkdir -p /artifacts/boot /boot
+#46 1.652 + cp /artifacts/kernel/config /artifacts/boot/config-7.0.0-rc2+
+#46 1.679 + cp /artifacts/kernel/config /boot/config-7.0.0-rc2+
+#46 1.704 + depmod -b /artifacts 7.0.0-rc2+
+#46 DONE 5.1s
+
+#47 [runner-runtime-artifacts 15/17] COPY --link --from=runner-runtime-host-runner-build /micro_exec /workspaces/repository/runner/build-arm64-llvmbpf/micro_exec
+#47 DONE 0.0s
+
+#48 [runner-runtime-artifacts 16/17] COPY --link --from=runner-runtime-host-micro-programs / /artifacts/user/micro-programs/arm64/
+#48 DONE 0.0s
+
+#49 [runner-runtime-artifacts 17/17] COPY --link --from=runner-runtime-host-stage2-programs / /artifacts/user/stage2-programs/arm64/
+#49 merging
+#49 merging 0.2s done
+#49 DONE 0.2s
+
+#50 [runner-runtime  2/42] COPY --link --from=runner-runtime-artifacts /artifacts/tetragon /artifacts/tetragon
+#50 CACHED
+
+#51 [runner-runtime  3/42] COPY --link --from=runner-runtime-artifacts /artifacts/user/repo-artifacts /artifacts/user/repo-artifacts
+#51 CACHED
+
+#52 [runner-runtime  4/42] COPY --link --from=runner-runtime-artifacts /usr/local/bin/ /usr/local/bin/
+#52 CACHED
+
+#53 [runner-runtime  1/42] COPY --link --from=runner-runtime-artifacts /artifacts/tracee /artifacts/tracee
+#53 CACHED
+
+#54 [runner-runtime  5/42] COPY --link --from=runner-runtime-artifacts /var/lib/cilium /var/lib/cilium
+#54 CACHED
+
+#55 [runner-runtime  6/42] COPY --link --from=runner-runtime-artifacts /artifacts/kernel /artifacts/kernel
+#55 DONE 0.1s
+
+#56 [runner-runtime  7/42] COPY --link --from=runner-runtime-artifacts /artifacts/boot /artifacts/boot
+#56 DONE 0.0s
+
+#57 [runner-runtime  8/42] COPY --link --from=runner-runtime-artifacts /boot /boot
+#57 DONE 0.0s
+
+#58 [runner-runtime  9/42] COPY --link --from=runner-runtime-artifacts /artifacts/lib/modules /artifacts/lib/modules
+#58 DONE 0.6s
+
+#59 [runner-runtime 10/42] COPY --link --from=runner-runtime-artifacts /artifacts/manifest.json /artifacts/manifest.json
+#59 DONE 0.0s
+
+#60 [runner-runtime 11/42] COPY --link --from=runner-runtime-artifacts /workspaces/repository/runner /workspaces/repository/runner
+#60 DONE 0.0s
+
+#61 [runner-runtime 12/42] COPY --link --from=runner-runtime-artifacts /artifacts/user/micro-programs /artifacts/user/micro-programs
+#61 DONE 0.0s
+
+#62 [runner-runtime 13/42] COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /artifacts/user/stage2-programs
+#62 DONE 0.0s
+
+#63 [runner-runtime 14/42] COPY --link --from=runner-runtime-host-native-bpf / /artifacts/user/native-bpf/arm64/
+#63 DONE 0.1s
+
+#64 [runner-runtime 15/42] COPY --link vendor/linux-framework/tools/net/ynl/pyynl /usr/local/lib/bpfrejit/linux/tools/net/ynl/pyynl
+#64 DONE 0.0s
+
+#65 [runner-runtime 16/42] COPY --link vendor/linux-framework/Documentation/netlink /usr/share/ynl
+#65 DONE 0.0s
+
+#66 [runner-runtime 17/42] COPY --link tests /workspaces/repository/tests
+#66 merging 0.3s done
+#66 DONE 0.3s
+
+#67 [runner-runtime 18/42] COPY --link --chmod=0755 bpfopt/llvm/build-kinsn-arm64/bpfopt /usr/local/bin/bpfopt
+#67 DONE 0.7s
+
+#68 [runner-runtime 19/42] COPY --link --chmod=0755     bpfopt/target/aarch64-unknown-linux-gnu/release/kinsnprober     runner/assets/bpfprof-arm64-unavailable     kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link     /usr/local/bin/
+#68 DONE 0.1s
+
+#69 [runner-runtime 20/42] COPY --link vendor/merlin_bpf_clang.py /usr/local/lib/bpfrejit/merlin/merlin_bpf_clang.py
+#69 DONE 0.0s
+
+#70 [runner-runtime 21/42] COPY --link --from=runner-runtime-host-merlin / /usr/local/lib/bpfrejit/merlin/
+#70 DONE 0.0s
+
+#70 [runner-runtime 21/42] COPY --link --from=runner-runtime-host-merlin / /usr/local/lib/bpfrejit/merlin/
+#70 merging 0.3s done
+#70 DONE 0.3s
+
+#71 [runner-runtime 22/42] COPY --chmod=0755 runner/scripts/merlin-bpf-clang /usr/local/bin/merlin-bpf-clang
+#71 DONE 0.0s
+
+#72 [runner-runtime 23/42] RUN set -eux;     mkdir -p /opt;     ln -sfn /artifacts/user /opt/bpf-benchmark;     ln -sfn /usr/local/bin/merlin-bpf-clang /usr/local/bin/clang;     ln -sfn /usr/local/bin/merlin-bpf-clang /usr/local/bin/clang-18;     ldconfig
+#72 0.159 + mkdir -p /opt
+#72 0.184 + ln -sfn /artifacts/user /opt/bpf-benchmark
+#72 0.204 + ln -sfn /usr/local/bin/merlin-bpf-clang /usr/local/bin/clang
+#72 0.223 + ln -sfn /usr/local/bin/merlin-bpf-clang /usr/local/bin/clang-18
+#72 0.242 + ldconfig
+#72 DONE 0.4s
+
+#73 [runner-runtime 24/42] COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
+#73 DONE 0.1s
+
+#74 [runner-runtime 25/42] COPY --link --from=runner-runtime-host-shim /libbpfrejit_shim.so /usr/local/lib/bpfrejit/libbpfrejit_shim.so
+#74 DONE 0.0s
+
+#75 [runner-runtime 26/42] COPY --link --from=runner-runtime-host-runner-build /native_loader/libnative_loader.so /usr/local/lib/bpfrejit/libnative_loader.so
+#75 merging 0.4s done
+#75 DONE 0.4s
+
+#76 [runner-runtime 27/42] COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
+#76 DONE 0.0s
+
+#77 [runner-runtime 28/42] COPY --chmod=0644 vendor/bpf/native_compat.h /usr/local/lib/bpfrejit/native/native_compat.h
+#77 DONE 0.0s
+
+#78 [runner-runtime 29/42] COPY --chmod=0755 vendor/bpf/write_native_manifest.py /usr/local/lib/bpfrejit/native/write_native_manifest.py
+#78 DONE 0.0s
+
+#79 [runner-runtime 30/42] COPY vendor/bpf/cilium/bpf /usr/local/lib/bpfrejit/native/cilium-bpf
+#79 DONE 0.1s
+
+#80 [runner-runtime 31/42] COPY vendor/repos/cilium/bpf /usr/local/lib/bpfrejit/native/cilium-bpf-original
+#80 DONE 0.1s
+
+#81 [runner-runtime 32/42] COPY runner/__init__.py ./runner/
+#81 DONE 0.0s
+
+#82 [runner-runtime 33/42] COPY runner/config ./runner/config
+#82 DONE 0.1s
+
+#83 [runner-runtime 34/42] COPY runner/libs ./runner/libs
+#83 DONE 0.0s
+
+#84 [runner-runtime 35/42] COPY runner/suites ./runner/suites
+#84 DONE 0.0s
+
+#85 [runner-runtime 36/42] COPY micro/*.py ./micro/
+#85 DONE 0.0s
+
+#86 [runner-runtime 37/42] COPY micro/config ./micro/config
+#86 DONE 0.2s
+
+#87 [runner-runtime 38/42] COPY corpus/*.py ./corpus/
+#87 DONE 0.0s
+
+#88 [runner-runtime 39/42] COPY corpus/config ./corpus/config
+#88 DONE 0.0s
+
+#89 [runner-runtime 40/42] COPY corpus/inputs ./corpus/inputs
+#89 DONE 0.0s
+
+#90 [runner-runtime 41/42] COPY --link runner/assets ./runner/assets
+#90 merging 0.6s done
+#90 DONE 0.7s
+
+#91 [runner-runtime 42/42] RUN mkdir -p micro/results corpus/results tests/results /var/tmp/bpfrejit-runtime
+#91 DONE 0.2s
+
+#92 exporting to image
+#92 exporting layers
+#92 exporting layers 49.7s done
+#92 exporting manifest sha256:6f1b5da00013c1ac18a47f66244ad561a7d899c12cea32353b35f03bd2b31d64 0.0s done
+#92 exporting config sha256:767fdb11c550ff7b3756730272a47b5095fd722f0e17aed66d95bd4233d54440 0.0s done
+#92 exporting attestation manifest sha256:929fbb5977946d21631e408fa79f26877daa3da75902ad06c9dffef783a8c2ff 0.0s done
+#92 exporting manifest list sha256:47b9ffac5dd6d58ef1edbd930317a1a031fb6572f11b77d5acdcecf0787f4ba3 0.0s done
+#92 naming to docker.io/bpf-benchmark/runner-runtime:arm64-a-context-v9
+#92 naming to docker.io/bpf-benchmark/runner-runtime:arm64-a-context-v9 done
+#92 DONE 49.9s
+docker save -o "/workspaces/repository/kprog/arm64/build/app-runtime-v9/image.tar.tmp" "bpf-benchmark/runner-runtime:arm64-a-context-v9"
+mv -f "/workspaces/repository/kprog/arm64/build/app-runtime-v9/image.tar.tmp" "/workspaces/repository/kprog/arm64/build/app-runtime-v9/image.tar"
+test -n "/usr/bin/qemu-system-aarch64"
+install -d "/workspaces/repository/.cache"
+rm -rf "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root.tmp"
+install -d "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root.tmp"
+docker load -i "/workspaces/repository/kprog/arm64/build/app-runtime-v9/image.tar" >/dev/null
+cid=$(docker create --platform linux/arm64 "bpf-benchmark/runner-runtime:arm64-a-context-v9" /bin/true); \
+	trap 'docker rm -f '"$cid"' >/dev/null 2>&1 || true; rm -rf "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root.tmp"' EXIT; \
+	docker export "$cid" | tar -C "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root.tmp" -xf -; \
+	docker rm "$cid" >/dev/null; \
+	trap - EXIT; \
+		rm -rf "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root"; \
+		mv "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root.tmp" "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root"
+sed "s|__BPFREJIT_IMAGE_WORKSPACE__|/workspaces/repository|g" "/workspaces/repository/kprog/arm64/build/app-runtime-v9/runner/scripts/qemu-arm64-init" \
+	>"/workspaces/repository/kprog/arm64/build/app-runtime-v9/root/qemu-init.tmp"
+install -m 0755 "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root/qemu-init.tmp" "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root/qemu-init"
+rm -f "/workspaces/repository/kprog/arm64/build/app-runtime-v9/root/qemu-init.tmp"
+make[1]: Leaving directory '/workspaces/repository'

@@ -1,0 +1,6 @@
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/runtime_results.py corpus/results/kprog_arm64_app_coverage_20261106/runtime-context-v8 arm64_qemu_corpus_19700101_000109_245314 arm64_qemu_corpus_19700101_000008_240450
+All31 startup load attempts retained: {'loaded': 27, 'unfinished': 2, 'failed': 2}
+| Application | Baseline counter rows | Native counter rows | App status |
+| --- | ---: | ---: | --- |
+| katran | 1 | 0 | error |
+| otelcol-ebpf-profiler/profiling | 12 | 0 | error |

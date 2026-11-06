@@ -2,11 +2,10 @@
 """Exercise actual encoded POPCNT memory steps, aliases, displacements and BPF."""
 import importlib.util
 from pathlib import Path
-import re
 import subprocess
 import sys
 
-from check_x86_memory_widths import accesses
+from check_x86_memory_widths import accesses, instructions_by_function
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT.parent / "x86/micro-prog"))
@@ -101,19 +100,9 @@ def main():
             "-I/usr/include/x86_64-linux-gnu", "-c", str(probe), "-o", str(probe.with_suffix(".o"))], check=True)
         assembly = subprocess.check_output(["llvm-objdump-18", "-d", str(probe.with_suffix(".o"))], text=True)
         probe.with_suffix(".asm").write_text(assembly)
-        instructions = []
-        for line in assembly.splitlines():
-            match = re.match(r"\s*\d+:((?:\s+[0-9a-f]{2}){8}(?:(?:\s+[0-9a-f]{2}){8})?)\s", line)
-            if not match: continue
-            raw = bytes.fromhex(match[1])
-            if raw[0] == 0x18:
-                # A scalar64 literal kills the same pointer provenance as a
-                # scalar32 MOV. Validate both slots; erase no memory/jumps.
-                assert len(raw) == 16 and raw[1] >> 4 == 0 and raw[8:12] == bytes(4)
-                instructions.append(bytes([0xB7, raw[1]]) + bytes(6))
-            else:
-                assert len(raw) == 8
-                instructions.append(raw)
+        functions = instructions_by_function(assembly)
+        assert len(functions) == 1, assembly
+        instructions = next(iter(functions.values()))
         assert accesses(instructions) == [("read", 0, width)], assembly
     readonly = g.NativeInsn(0, "popcnt rax,QWORD PTR [rip+0]", "popcnt", ("rax", "QWORD PTR [rip+0]"),
         reloc_symbol="datum", reloc_type="R_X86_64_PC32", symbol_offset=17)
