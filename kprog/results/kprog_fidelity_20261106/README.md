@@ -3,8 +3,9 @@
 - `differential/README.md`: real x86 CPU matrix and counterexamples; static
   AArch64 harness delivered. Both Spark core types pass the width-fix matrix
   on hardware; both also pass the newer register-cell replay.
-- `negative/README.md`: current17-case bound suites reject16 on x86 and15 on
-  Arm. All11 original negatives reject on both; stack-base flags still accept
+- `negative/README.md`: current bound suites reject16/17 on x86 and17/19 on
+  Arm, including repaired SP alignment and LDP overlap. All11 original negatives
+  reject on both; stack-base flags still accept
   on both, and Arm entry return-address flags also accept. These remain open
   safety bugs. Earlier ABI/return findings and their repairs stay recorded.
 - `helper-map/README.md`: all13 x86 cases pass bound execution; after immutable

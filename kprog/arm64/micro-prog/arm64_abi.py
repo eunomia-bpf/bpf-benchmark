@@ -174,6 +174,10 @@ def check_definedness(insns, targets, linked_exit, decode):
         memory_index = next((i for i, arg in enumerate(args) if arg.startswith('[')), None)
         if memory_index is not None:
             mem = decode.parse_mem(args, memory_index)
+            # LDPOVERLAP permits UNDEF/NOP as well as unknown data. A later
+            # overwrite does not make the native instruction safe to admit.
+            if op == 'ldp' and args[0] == args[1]:
+                raise ValueError(f'constrained-unpredictable native LDP destination overlap at {where}')
             # Kernel entry SP is 16-byte aligned and SCTLR_EL1.SA is enabled.
             # CheckSPAlignment uses the old SP, before address/writeback.
             if mem.base == 'ARM64_SP':

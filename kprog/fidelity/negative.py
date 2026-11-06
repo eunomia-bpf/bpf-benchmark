@@ -48,6 +48,7 @@ FIXTURES = {
         'unbounded_indirect_jump': 'ldr x1, [x0]; br x1',
         'unsupported_instruction': 'brk #0; ret',
         'misaligned_sp': 'sub sp, sp, #16; mov w1, #0x2222; str x1, [sp]; add sp, sp, #1; ldrb w0, [sp]; sub sp, sp, #1; add sp, sp, #16; ret',
+        'overlapping_load_pair': 'sub sp, sp, #16; mov x1, #2; stp x1, x1, [sp]; ldp x1, x1, [sp]; add sp, sp, #16; mov w0, w1; ret',
         'entry_return_address_flags': 'mov w0, #2; cmp x30, #0; b.eq 1f; mov x1, #0; ldr w0, [x1]; 1: ret',
         'return_register_overwrite': 'mov x30, #0; mov w0, #2; ret',
         'stack_base_flags': 'mov w0, #2; sub sp, sp, #16; add sp, sp, #16; cmp sp, #0; b.eq 1f; mov x1, #0; ldr w0, [x1]; 1: ret',

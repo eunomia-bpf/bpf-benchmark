@@ -1,0 +1,37 @@
+[
+  {
+    "name": "ldp_same_x_used",
+    "assembly": "sub sp,sp,#16;mov x1,#2;stp x1,x1,[sp];ldp x1,x1,[sp];mov w0,w1;add sp,sp,#16;ret",
+    "stage": "bound_load_accepted",
+    "message": "bound program id=8 chunks=1 nonzero_generations=1\n",
+    "returncode": 0
+  },
+  {
+    "name": "ldp_same_x_overwritten",
+    "assembly": "sub sp,sp,#16;mov x1,#2;stp x1,x1,[sp];ldp x1,x1,[sp];mov x1,#2;mov w0,#2;add sp,sp,#16;ret",
+    "stage": "bound_load_accepted",
+    "message": "bound program id=16 chunks=1 nonzero_generations=1\n",
+    "returncode": 0
+  },
+  {
+    "name": "ldp_same_w_used",
+    "assembly": "sub sp,sp,#16;mov x1,#2;stp x1,x1,[sp];ldp w1,w1,[sp];mov w0,w1;add sp,sp,#16;ret",
+    "stage": "bound_load_accepted",
+    "message": "bound program id=24 chunks=1 nonzero_generations=1\n",
+    "returncode": 0
+  },
+  {
+    "name": "ldp_same_zr",
+    "assembly": "sub sp,sp,#16;mov x1,#2;stp x1,x1,[sp];ldp xzr,xzr,[sp];mov w0,#2;add sp,sp,#16;ret",
+    "stage": "bound_load_accepted",
+    "message": "bound program id=32 chunks=1 nonzero_generations=1\n",
+    "returncode": 0
+  },
+  {
+    "name": "ldp_distinct_control",
+    "assembly": "sub sp,sp,#16;mov x1,#2;stp x1,x1,[sp];ldp x1,x2,[sp];mov w0,w2;add sp,sp,#16;ret",
+    "stage": "bound_load_accepted",
+    "message": "bound program id=40 chunks=1 nonzero_generations=1\n",
+    "returncode": 0
+  }
+]

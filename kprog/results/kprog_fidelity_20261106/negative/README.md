@@ -267,3 +267,15 @@ numeric-address findings. All11 original cases still reject. Five alignment
 regressions and all40 real-encoding ABI checks pass; three legitimate
 unaligned-address/preindex/postindex controls remain bound-load accepted.
 The negative proof and all29 workload-derived positive proofs rebuild.
+
+## LDP overlap repaired; both-ISA current negative replays
+
+`arm64-ldp-overlap/README.md` records four generation-bound acceptances of
+constrained-unpredictable duplicate-destination LDP encodings and their exact
+specialization rejections after the source-validity repair. A distinct-register
+LDP control remains bound-load accepted. The19-case Arm suite rejects17,
+retaining the two earlier numeric-address findings. All40 ABI regressions and
+all29 positive proof builds pass. `x86-post-ldp-matched/README.md` repeats all17
+x86 cases with a matched current binding tuple:16 reject, one stack-base-flags
+finding remains, zero infrastructure errors. The earlier mixed-tuple attempt
+is retained as infrastructure evidence rather than counted as rejection.
