@@ -32,3 +32,21 @@ Current layout:
 Build and smoke targets, plus the raw result locations, are listed in the
 [kprog entry point](docs/README.md). The framework stores raw benchmark
 results under `micro/results/` and `corpus/results/`.
+
+### Readonly object identity at the proof/native boundary
+
+Native-link kernel mode accepts `--output-data-layout PATH` and writes
+`{"version":1,"objects":[{"native_symbol":"…","offset":0,"size":120}]}`.
+Offsets address the final linked native blob; sizes describe complete objects,
+without instruction relocation addends. Repeated references share one entry.
+Distinct objects retain distinct identities even when their bytes are equal.
+Proof mode carries canonical object keys in ELF symbols and rejects this
+kernel-only output option.
+
+Both proof generators emit one `.rodata.native.N` DATASEC/map per private
+readonly object and a `.native_lab.rodata` JSON section (version1). Each record
+contains `proof_section`, `proof_symbol`, `native_symbol` and `size`. The BTF
+variable starts at offset0 and spans the map value. This metadata connects the
+proof object to the canonical native object; byte searching cannot establish
+that identity. See the dated application coverage results for the paired
+x86/AArch64 relocation regressions.

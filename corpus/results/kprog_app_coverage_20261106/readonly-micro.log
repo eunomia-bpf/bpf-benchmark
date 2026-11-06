@@ -1,0 +1,78 @@
+taskset -c 12-15 prlimit --as=8589934592 --core=0 -- make -C /workspaces/.agent-state/kprog-lanes/C/readonly-check-source/kprog/x86 -o kprog-negative-proof-build micro-proofs-build MICRO_CONFIG=../test/kprog_negative_stage2.yaml PROOF_BUILD_DIR=/workspaces/repository/corpus/results/kprog_app_coverage_20261106/readonly-layout/micro-negative MICRO_SIM_PROOF_ARGS='--no-generate --jobs 1'
+make[1]: Entering directory '/workspaces/.agent-state/kprog-lanes/C/readonly-check-source/kprog/x86'
+python3 ../run_micro_sim_batch.py --arch x86 --build-only \
+	--build-dir "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/readonly-layout/micro-negative" \
+	--config "../test/kprog_negative_stage2.yaml" \
+	--no-generate --jobs 1
+unchecked_packet_read: ok: compile=0.086s proof_insns=8 direct_insns= verify=0.000s test=0.000s 
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `unchecked_packet_read` | ok | 0.086 | 8 |  | 0.000 | 0.000 |  |
+make[1]: Leaving directory '/workspaces/.agent-state/kprog-lanes/C/readonly-check-source/kprog/x86'
+taskset -c 12-15 prlimit --as=8589934592 --core=0 -- make -C /workspaces/.agent-state/kprog-lanes/C/readonly-check-source/kprog/x86 -o kprog-negative-proof-build micro-proofs-build PROOF_BUILD_DIR=/workspaces/repository/corpus/results/kprog_app_coverage_20261106/readonly-layout/micro MICRO_SIM_PROOF_ARGS='--no-generate --jobs 1'
+make[1]: Entering directory '/workspaces/.agent-state/kprog-lanes/C/readonly-check-source/kprog/x86'
+python3 ../run_micro_sim_batch.py --arch x86 --build-only \
+	--build-dir "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/readonly-layout/micro" \
+	--config "../../micro/config/micro_pure_jit.yaml" \
+	--no-generate --jobs 1
+simple: ok: compile=0.164s proof_insns=40 direct_insns= verify=0.000s test=0.000s 
+simple_packet: ok: compile=0.151s proof_insns=36 direct_insns= verify=0.000s test=0.000s 
+bitmap_popcount_scan: ok: compile=2.101s proof_insns=198 direct_insns= verify=0.000s test=0.000s 
+sorted_rule_binary_search: ok: compile=1.360s proof_insns=232 direct_insns= verify=0.000s test=0.000s 
+bcc_runqlat_log2_histogram_bucket: ok: compile=3.129s proof_insns=201 direct_insns= verify=0.000s test=0.000s 
+trace_event_type_switch_dispatch: ok: compile=2.057s proof_insns=744 direct_insns= verify=0.000s test=0.000s 
+packet_checksum_fold: ok: compile=1.091s proof_insns=165 direct_insns= verify=0.000s test=0.000s 
+payload_prefix_memcmp_scan: ok: compile=4.021s proof_insns=389 direct_insns= verify=0.000s test=0.000s 
+packet_vlan_tcpopt_parser: ok: compile=9.388s proof_insns=380 direct_insns= verify=0.000s test=0.000s 
+bpf_local_call_fanout_dispatch: ok: compile=11.718s proof_insns=1209 direct_insns= verify=0.000s test=0.000s 
+flow_5tuple_rss_hash: ok: compile=14.048s proof_insns=378 direct_insns= verify=0.000s test=0.000s 
+katran_lb_consistent_hash_select: ok: compile=24.395s proof_insns=1305 direct_insns= verify=0.000s test=0.000s 
+cilium_policy_guard_tree_filter: ok: compile=3.371s proof_insns=219 direct_insns= verify=0.000s test=0.000s 
+siphash_rotate64_mixer: ok: compile=59.128s proof_insns=1011 direct_insns= verify=0.000s test=0.000s 
+packet_record_bounds_window: ok: compile=4.150s proof_insns=233 direct_insns= verify=0.000s test=0.000s 
+flow_record_field_scan: ok: compile=4.351s proof_insns=292 direct_insns= verify=0.000s test=0.000s 
+packed_header_bitfield_decode: ok: compile=10.353s proof_insns=1109 direct_insns= verify=0.000s test=0.000s 
+bpftrace_string_search_prefix_scan: ok: compile=3.321s proof_insns=357 direct_insns= verify=0.000s test=0.000s 
+tracee_syscall_name_table_lookup: ok: compile=7.882s proof_insns=326 direct_insns= verify=0.000s test=0.000s 
+tracee_http_method_prefix_detect: ok: compile=3.524s proof_insns=331 direct_insns= verify=0.000s test=0.000s 
+cilium_socket_lb_service_select: ok: compile=6.908s proof_insns=355 direct_insns= verify=0.000s test=0.000s 
+bcc_tcpconnect_ipv4_tuple_filter: ok: compile=5.983s proof_insns=411 direct_insns= verify=0.000s test=0.000s 
+tetragon_process_event_arg_filter: ok: compile=9.311s proof_insns=1527 direct_insns= verify=0.000s test=0.000s 
+otel_stack_frame_unwind_scan: ok: compile=6.018s proof_insns=303 direct_insns= verify=0.000s test=0.000s 
+cilium_ct_nat_tuple_rewrite: ok: compile=6.738s proof_insns=310 direct_insns= verify=0.000s test=0.000s 
+packet_toeplitz_rss_hash: ok: compile=5.044s proof_insns=339 direct_insns= verify=0.000s test=0.000s 
+bpftrace_comm_key_fnv_hash: ok: compile=14.408s proof_insns=1927 direct_insns= verify=0.000s test=0.000s 
+tc_packet_checksum_fold: ok: compile=1.320s proof_insns=228 direct_insns= verify=0.000s test=0.000s 
+cgroup_skb_hash_chain: ok: compile=7.037s proof_insns=591 direct_insns= verify=0.000s test=0.000s 
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `simple` | ok | 0.164 | 40 |  | 0.000 | 0.000 |  |
+| `simple_packet` | ok | 0.151 | 36 |  | 0.000 | 0.000 |  |
+| `bitmap_popcount_scan` | ok | 2.101 | 198 |  | 0.000 | 0.000 |  |
+| `sorted_rule_binary_search` | ok | 1.360 | 232 |  | 0.000 | 0.000 |  |
+| `bcc_runqlat_log2_histogram_bucket` | ok | 3.129 | 201 |  | 0.000 | 0.000 |  |
+| `trace_event_type_switch_dispatch` | ok | 2.057 | 744 |  | 0.000 | 0.000 |  |
+| `packet_checksum_fold` | ok | 1.091 | 165 |  | 0.000 | 0.000 |  |
+| `payload_prefix_memcmp_scan` | ok | 4.021 | 389 |  | 0.000 | 0.000 |  |
+| `packet_vlan_tcpopt_parser` | ok | 9.388 | 380 |  | 0.000 | 0.000 |  |
+| `bpf_local_call_fanout_dispatch` | ok | 11.718 | 1209 |  | 0.000 | 0.000 |  |
+| `flow_5tuple_rss_hash` | ok | 14.048 | 378 |  | 0.000 | 0.000 |  |
+| `katran_lb_consistent_hash_select` | ok | 24.395 | 1305 |  | 0.000 | 0.000 |  |
+| `cilium_policy_guard_tree_filter` | ok | 3.371 | 219 |  | 0.000 | 0.000 |  |
+| `siphash_rotate64_mixer` | ok | 59.128 | 1011 |  | 0.000 | 0.000 |  |
+| `packet_record_bounds_window` | ok | 4.150 | 233 |  | 0.000 | 0.000 |  |
+| `flow_record_field_scan` | ok | 4.351 | 292 |  | 0.000 | 0.000 |  |
+| `packed_header_bitfield_decode` | ok | 10.353 | 1109 |  | 0.000 | 0.000 |  |
+| `bpftrace_string_search_prefix_scan` | ok | 3.321 | 357 |  | 0.000 | 0.000 |  |
+| `tracee_syscall_name_table_lookup` | ok | 7.882 | 326 |  | 0.000 | 0.000 |  |
+| `tracee_http_method_prefix_detect` | ok | 3.524 | 331 |  | 0.000 | 0.000 |  |
+| `cilium_socket_lb_service_select` | ok | 6.908 | 355 |  | 0.000 | 0.000 |  |
+| `bcc_tcpconnect_ipv4_tuple_filter` | ok | 5.983 | 411 |  | 0.000 | 0.000 |  |
+| `tetragon_process_event_arg_filter` | ok | 9.311 | 1527 |  | 0.000 | 0.000 |  |
+| `otel_stack_frame_unwind_scan` | ok | 6.018 | 303 |  | 0.000 | 0.000 |  |
+| `cilium_ct_nat_tuple_rewrite` | ok | 6.738 | 310 |  | 0.000 | 0.000 |  |
+| `packet_toeplitz_rss_hash` | ok | 5.044 | 339 |  | 0.000 | 0.000 |  |
+| `bpftrace_comm_key_fnv_hash` | ok | 14.408 | 1927 |  | 0.000 | 0.000 |  |
+| `tc_packet_checksum_fold` | ok | 1.320 | 228 |  | 0.000 | 0.000 |  |
+| `cgroup_skb_hash_chain` | ok | 7.037 | 591 |  | 0.000 | 0.000 |  |
+make[1]: Leaving directory '/workspaces/.agent-state/kprog-lanes/C/readonly-check-source/kprog/x86'

@@ -1,5 +1,11 @@
 # Lane C: application proof-artifact coverage, 2026-11-06
 
+Current application coverage is incomplete. The latest [readonly identity
+checkpoint](readonly-layout.md) records actual-load denominators, BCC25/25
+proof generation/compilation,23 verifier acceptances and two map-preparation
+failures. Transient startup loads remain required; no six-app verified timing
+claim follows. Earlier checkpoints below are retained chronologically.
+
 Generation checkpoint: **1,136/1,136 native proof objects generated C**:
 1,054 staged objects from five applications plus 82 archived Cilium objects.
 No encoding/specialization error was reported. Compilation and KVM load scans

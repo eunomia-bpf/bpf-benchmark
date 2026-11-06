@@ -54,7 +54,7 @@ use object::{
     BinaryFormat, Endianness, Object, ObjectSection, ObjectSymbol, RelocationFlags,
     RelocationTarget, SectionKind, SymbolFlags, SymbolKind, SymbolScope,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::PathBuf;
@@ -109,6 +109,10 @@ struct Args {
     /// Output path for native_lab ABI sideband metadata consumed by the runner.
     #[arg(long)]
     output_abi: Option<PathBuf>,
+
+    /// Exact canonical readonly objects and their final kernel blob offsets.
+    #[arg(long)]
+    output_data_layout: Option<PathBuf>,
 
     /// Versioned structured link plan containing helper/map/callsite facts.
     /// This is the stable loader/native-link boundary for kernel mode.
@@ -508,6 +512,7 @@ fn main() -> Result<()> {
         callee_saved_mask,
         proof_relocs,
         proof_symbols,
+        mut readonly_objects,
     } = match elf.architecture() {
         object::Architecture::X86_64 => {
             let entry = find_symbol_by_name(&elf, &args.symbol)?;
@@ -591,6 +596,7 @@ fn main() -> Result<()> {
         if args.output_relocs.is_some()
             || args.output_map_patches.is_some()
             || args.output_abi.is_some()
+            || args.output_data_layout.is_some()
         {
             bail!("proof mode writes a single .proof.o; do not pass kernel sideband outputs");
         }
@@ -666,6 +672,19 @@ fn main() -> Result<()> {
         );
         fs::write(path, text).with_context(|| format!("write {}", path.display()))?;
         eprintln!("native-link: wrote ABI metadata -> {}", path.display());
+    }
+    if let Some(path) = &args.output_data_layout {
+        readonly_objects.sort_by(|a, b| (a.offset, &a.native_symbol).cmp(&(b.offset, &b.native_symbol)));
+        for object in &readonly_objects {
+            let end = object.offset.checked_add(object.size)
+                .ok_or_else(|| anyhow!("readonly object extent overflows"))?;
+            if object.size == 0 || end > blob.len() as u64 {
+                bail!("readonly object {} lies outside the final blob", object.native_symbol);
+            }
+        }
+        let layout = serde_json::json!({"version": 1, "objects": readonly_objects});
+        fs::write(path, serde_json::to_vec(&layout)?)
+            .with_context(|| format!("write {}", path.display()))?;
     }
     Ok(())
 }
@@ -976,6 +995,27 @@ struct RewriteResult {
     callee_saved_mask: u8,
     proof_relocs: Vec<ProofReloc>,
     proof_symbols: Vec<ProofSymbol>,
+    readonly_objects: Vec<ReadonlyObject>,
+}
+
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+struct ReadonlyObject {
+    native_symbol: String,
+    offset: u64,
+    size: u64,
+}
+
+fn record_readonly_object(objects: &mut Vec<ReadonlyObject>, name: &str,
+    offset: u64, size: u64) -> Result<()> {
+    let object = ReadonlyObject { native_symbol: name.to_string(), offset, size };
+    if let Some(existing) = objects.iter().find(|entry| entry.native_symbol == name) {
+        if existing != &object {
+            bail!("conflicting canonical readonly object: {name}");
+        }
+    } else {
+        objects.push(object);
+    }
+    Ok(())
 }
 
 #[derive(Clone, Debug)]
@@ -3996,6 +4036,7 @@ fn rewrite_arm64(
     let mut map_literals: HashMap<String, usize> = HashMap::new();
     let mut map_patches = Vec::new();
     let mut local_data: HashMap<object::SectionIndex, usize> = HashMap::new();
+    let mut readonly_objects = Vec::new();
 
     for patch in patches.iter().filter(|p| {
         matches!(
@@ -4043,6 +4084,22 @@ fn rewrite_arm64(
                     .with_context(|| format!("arm64 local data section {section_index:?}"))?;
                 let section_len = usize::try_from(section.size())
                     .context("arm64 local data section size does not fit usize")?;
+                if section.kind() == SectionKind::ReadOnlyData {
+                    let object = find_symbol_by_name(elf, target_name)?;
+                    if object.section_index != *section_index {
+                        bail!("readonly object {target_name} has a conflicting section");
+                    }
+                    let start = object.address.checked_sub(section.address())
+                        .ok_or_else(|| anyhow!("readonly object lies below its section"))?;
+                    let end = start.checked_add(object.size)
+                        .ok_or_else(|| anyhow!("readonly object extent overflows"))?;
+                    if end > section_len as u64 {
+                        bail!("readonly object {target_name} exceeds its section");
+                    }
+                    record_readonly_object(&mut readonly_objects, target_name,
+                        (section_offset as u64).checked_add(start)
+                            .ok_or_else(|| anyhow!("readonly blob offset overflows"))?, object.size)?;
+                }
                 if *addend as usize > section_len {
                     bail!(
                         "arm64 local data relocation {target_name} addend {} exceeds section size {}",
@@ -4188,6 +4245,7 @@ fn rewrite_arm64(
         callee_saved_mask,
         proof_relocs,
         proof_symbols,
+        readonly_objects,
     })
 }
 

@@ -1990,6 +1990,7 @@ pub(super) fn rewrite_x86(
     // Stage 2: resolve ELF relocations. GOT helper calls keep their original
     // RIP-relative indirect-call form and point at in-blob literal-pool entries;
     // PLT32 helper calls use in-blob absolute trampolines.
+    let mut readonly_objects = Vec::new();
     let proof_relocs = if proof_mode {
         collect_x86_proof_relocs(elf, &layouts)?
     } else {
@@ -2003,6 +2004,7 @@ pub(super) fn rewrite_x86(
             &resolved_got_relocations,
             &mut blob,
             &mut map_patches,
+            &mut readonly_objects,
         )?);
         Vec::new()
     };
@@ -2080,6 +2082,7 @@ pub(super) fn rewrite_x86(
         callee_saved_mask,
         proof_relocs,
         proof_symbols,
+        readonly_objects,
     })
 }
 fn x86_layout_insn_global_offset(layout: &SymbolLayout, local_patch_off: u64) -> Result<usize> {
@@ -2416,6 +2419,7 @@ fn apply_elf_relocations(
     resolved_got_relocations: &HashSet<LocalSiteKey>,
     blob: &mut Vec<u8>,
     map_patches: &mut Vec<MapPatch>,
+    readonly_objects: &mut Vec<ReadonlyObject>,
 ) -> Result<Vec<RelocRecord>> {
     if layouts.is_empty() {
         return Ok(Vec::new());
@@ -2839,9 +2843,16 @@ fn apply_elf_relocations(
                     } else {
                         let off = blob.len();
                         blob.extend_from_slice(&sym_bytes);
-                        local_data_embed.insert(data_symbol_name, off);
+                        local_data_embed.insert(data_symbol_name.clone(), off);
                         off
                     };
+                    if blob.get(embed_off..embed_off + sym_bytes.len()) != Some(sym_bytes.as_slice()) {
+                        bail!("conflicting bytes for canonical data object: {data_symbol_name}");
+                    }
+                    if target_section.kind() == object::SectionKind::ReadOnlyData {
+                        record_readonly_object(readonly_objects, &data_symbol_name,
+                            embed_off as u64, sym_bytes.len() as u64)?;
+                    }
 
                     // Find the decoded instruction whose byte range
                     // covers `local_patch_off`. Same scheme as the

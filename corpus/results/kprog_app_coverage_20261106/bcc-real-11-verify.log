@@ -1,0 +1,30 @@
+make: *** [/workspaces/repository/corpus/results/kprog_app_coverage_20261106/Makefile:40: guest-verify] Error 1
+ory/corpus/results/kprog_app_coverage_20261106/bcc-real-11
+compile pending: 0
+verify 1/25 bcc_capable_kprobe__cap_capable_exit: 1
+verify 2/25 bcc_capable_kprobe__cap_capable_entry: 1
+verify 3/25 bcc_vfsstat_fentry_vfs_read: 0
+verify 4/25 bcc_opensnoop_tracepoint__syscalls__sys_enter_open: 0
+verify 5/25 bcc_opensnoop_tracepoint__syscalls__sys_enter_openat: 0
+verify 6/25 bcc_opensnoop_tracepoint__syscalls__sys_exit_open: 0
+verify 7/25 bcc_vfsstat_fentry_vfs_write: 0
+verify 8/25 bcc_opensnoop_tracepoint__syscalls__sys_exit_openat: 0
+verify 9/25 bcc_vfsstat_fentry_vfs_fsync: 0
+verify 10/25 bcc_syscount_sys_enter: 0
+verify 11/25 bcc_vfsstat_fentry_vfs_open: 0
+verify 12/25 bcc_syscount_sys_exit: 0
+verify 13/25 bcc_tcpconnect_tcp_v4_connect: 0
+verify 14/25 bcc_biosnoop_blk_account_io_merge_bio: 0
+verify 15/25 bcc_tcplife_inet_sock_set_state: 0
+verify 16/25 bcc_vfsstat_fentry_vfs_create: 0
+verify 17/25 bcc_tcpconnect_tcp_v4_connect_ret: 0
+verify 18/25 bcc_tcpconnect_tcp_v6_connect: 0
+verify 19/25 bcc_biosnoop_block_rq_insert: 0
+verify 20/25 bcc_tcpconnect_tcp_v6_connect_ret: 0
+verify 21/25 bcc_biosnoop_block_rq_issue: 0
+verify 22/25 bcc_runqlat_sched_wakeup: 0
+verify 23/25 bcc_biosnoop_block_rq_complete: 0
+verify 24/25 bcc_runqlat_sched_wakeup_new: 0
+verify 25/25 bcc_runqlat_sched_switch: 0
+verify: 2/25 failures
+make: *** [corpus/results/kprog_app_coverage_20261106/readonly-layout.mk:25: bcc-verify] Error 2
