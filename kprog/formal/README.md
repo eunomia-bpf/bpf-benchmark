@@ -39,12 +39,6 @@ POPCNT register and memory handlers refine an independent bit walk at
 writes, exact-width memory reads and faults. The encoder also handles scaled
 indexes, signed displacements, virtual-stack reads and relocated readonly data.
 The extended opcode/dispatch proofs retain every original enumeration theorem.
-MOVZX/MOVSX/MOVSXD and CBW/CWDE/CDQE refine independent sign/zero extension,
-including high-byte sources, aliases, distinct read/write widths and memory
-faults. Every status flag is preserved. The shared MOVX body serves both
-specialized and dispatcher calls; its source encoding respects REX constraints.
-Implicit accumulator extensions propagate known bits without inventing unknown
-source bits or requiring unrelated upper register bits.
 All sixteen native conditions refine the reference, including PF, through
 CMOV, SETcc and direct branches. SETcc includes high-byte/REX destinations,
 exact one-byte stores and write faults; CMOV retains eager read faults.

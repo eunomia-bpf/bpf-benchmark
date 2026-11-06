@@ -1,0 +1,14 @@
+{
+ "objects": [
+  {
+   "program": "balancer_ingres",
+   "source_btf_symbol": "balancer_ingress",
+   "prog_type": 6,
+   "source_bytecode_len": 20336,
+   "native_object": "/artifacts/user/native-bpf/x86_64/katran/balancer.native.o",
+   "symbol": "balancer_ingress",
+   "simulator_object": "/artifacts/user/native-bpf/x86_64/katran/katran_balancer_ingress.bpf.o",
+   "simulator_program": "katran_balancer_ingress_x86_sim_xdp"
+  }
+ ]
+}

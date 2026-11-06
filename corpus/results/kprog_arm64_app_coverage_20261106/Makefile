@@ -396,27 +396,7 @@ qemu-context-v2-app:
 runtime-results:
 	python3 $(HERE)/runtime_results.py $(RUNTIME_RESULTS_ARGS)
 
-.PHONY: app-replay-build
-app-replay-build:
-	python3 $(HERE)/app_replay.py build $(RUNTIME_BASE) $(RUNTIME_IMAGE)
-
-.PHONY: app-replay-run app-replay-collect
-app-replay-run:
-	taskset -c 8-11 $(MAKE) -C $(RUNTIME_BASE)/spark run \
-		ROOTFS=$(RUNTIME_BASE)/root IMAGE_TAR=$(RUNTIME_BASE)/image.tar APP=$(APP) \
-		SAMPLES=1 WORKLOAD_DURATION=2
-	$(MAKE) -f $(HERE)/Makefile app-replay-collect RUNTIME_BASE=$(RUNTIME_BASE)
-
-app-replay-collect:
-	cp -a $(RUNTIME_BASE)/root/workspaces/repository/corpus/results/. $(ROOT)/corpus/results/
-
-.PHONY: katran-root-build katran-real-install katran-real-generate
-katran-real-install:
-	python3 $(HERE)/katran_real.py $(HERE)/$(PHASE) install
-
-katran-real-generate: direct-header-generate
-	python3 $(HERE)/katran_real.py $(HERE)/$(PHASE)
-
+.PHONY: katran-root-build
 katran-root-build: direct-header-generate
 	python3 $(HERE)/katran_root.py $(HERE)/$(PHASE)
 	clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \

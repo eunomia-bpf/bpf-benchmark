@@ -499,22 +499,3 @@ are propext/Quot.sound; the composed spill results additionally use
 Classical.choice/Lean.ofReduceBool. No passing result contains sorryAx.
 This entry-prefix certificate is now available for composition with the
 existing guard/store certificates and the real return path.
-
-`simple-blocks-check` now proves the complete first native basic block
-(LDP/MOV/CMP/BHI) against all eight actual physical proof instructions.
-`SimpleBlocks.first_block` composes actual executions, complete resulting
-states, guest-memory agreement, ordered projected reads, both real branch
-successors and a proof that every erased effect touches only private bytes.
-The body transport lemma checks decoded instructions against both complete
-captured streams; it does not introduce another instruction semantics.
-The real kernel-mode linker output is exactly the complete84-byte native
-stream in the certificate, with ABI mask0 and no relocation/environment sites.
-All eight entry mutations still reject. The composed theorem uses propext,
-Classical.choice, Lean.ofReduceBool and Quot.sound, without sorryAx.
-
-This result covers BB0 of the physical-context capture. Whole-program
-validation is continuing with the actual generation-bound expanded proof:
-the loader redirects clang EXITs, the module appends ABI clobbers, and the
-verifier interprets virtual context accesses before physical conversion.
-Those exact expanded bytes and platform rules must be included in the final
-certificate; the standalone physical capture is not that expanded artifact.

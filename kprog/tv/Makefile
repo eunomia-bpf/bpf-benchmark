@@ -478,7 +478,7 @@ kernel-check-arm64-all: build-arm64/all-modules-init build-arm64/test-binding-ke
 	rg -q '^kernel binding regression: PASS' build-arm64/all-kernel.log
 
 .PHONY: simple-entry-check simple-entry-certificate
-simple-entry-check: simple-platform-check simple-kernel-artifact-check
+simple-entry-check: simple-platform-check
 	$(MAKE) simple-entry-certificate
 
 SIMPLE_ENTRY_DIR ?= build/simple-arm64
@@ -496,26 +496,3 @@ simple-entry-negative-check: simple-entry-check
 .PHONY: private-spills-check
 private-spills-check:
 	cd ../formal && lake env lean -R ../tv -o ../tv/build/PrivateSpills.olean ../tv/PrivateSpills.lean
-
-
-.PHONY: simple-kernel-artifact-check
-simple-kernel-artifact-check:
-	../arm64/build/app-native-link/release/native-link --input build/simple-arm64/native-link/simple.proof.o \
-		--symbol simple_xdp --mode kernel --output build/simple-arm64/simple.kernel.bin \
-		--output-relocs build/simple-arm64/simple.kernel.relocs \
-		--output-abi build/simple-arm64/simple.kernel.abi \
-		--output-environment-layout build/simple-arm64/simple.kernel.environment.json
-	test ! -s build/simple-arm64/simple.kernel.relocs
-	python3 extract_simple_arm64.py --native-blob build/simple-arm64/simple.kernel.bin
-
-.PHONY: simple-blocks-check
-simple-blocks-check: simple-entry-check
-	$(MAKE) simple-blocks-certificate
-
-.PHONY: simple-blocks-certificate
-simple-blocks-certificate:
-	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv \
-		-o ../tv/build/SimpleEntryCertificate.olean ../tv/SimpleEntryCertificate.lean
-	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv \
-		-o ../tv/build/SimpleGuardCertificate.olean ../tv/SimpleGuardCertificate.lean
-	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv ../tv/SimpleBlocks.lean

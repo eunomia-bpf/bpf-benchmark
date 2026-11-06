@@ -71,7 +71,6 @@ EXPECTED = {
     "selector": "opcode_then_arm",
     "opcode_bits": OPCODE_BITS,
     "source_width": dict(_SOURCE_WIDTH),
-    "source_lane": {"high_base": 128, "high_count": 4, "high_shift": 8},
     "arms": [{"arm": arm, "arm_define": define, "opcode": opcode,
               "opcode_define": opcode_define, "result": result,
               "effect": effect}
@@ -146,13 +145,11 @@ def check_region(region, exactly_one_arm):
 
 
 def check_against_header():
-    expected = "} else if (KPROG_X86_MOVX_REG_HANDLED(OP)) { X86_SIM_L_EXEC_MOVX_REG((OP), (DST), (SRC), (FLAGS), (AUX));"
-    if arm_region().strip() != expected:
-        raise SystemExit("x86 MOVX chain must call exactly the shared MOVX body")
-    region = macro_region()
-    check_region(region, exactly_one_arm=False)
-    if "KPROG_X86_MOVX_SOURCE_REG(SRC)" not in region or "KPROG_X86_MOVX_SOURCE_SHIFT(SRC)" not in region:
-        raise SystemExit("x86 MOVX body must use the generated source register/lane decoder")
+    """Both live MOVX bodies (the standalone shared macro and the routed arm)
+    must route their extension-function choice through the generated opcode
+    selector."""
+    check_region(arm_region(), exactly_one_arm=True)
+    check_region(macro_region(), exactly_one_arm=False)
 
 
 def load_width_codes():
@@ -270,13 +267,6 @@ falls back to its effective (FLAGS-resolved) width. The fallback is a separate
 resolution (`effective_width`, the width kernel), not a width code. -/
 def srcWidth (aux : Nat) (effective : Nat) : Nat :=
   if aux = srcWidthAbsentCode then effective else aux
-/-- MOVX-only source codes for AH/CH/DH/BH; legacy register codes are unchanged. -/
-def sourceHighBase : Nat := {spec["source_lane"]["high_base"]}
-def sourceHighCount : Nat := {spec["source_lane"]["high_count"]}
-def sourceHighShift : Nat := {spec["source_lane"]["high_shift"]}
-def sourceHigh (source : Nat) : Bool := decide (sourceHighBase ≤ source ∧ source < sourceHighBase + sourceHighCount)
-def sourceRegister (source : Nat) : Nat := if sourceHigh source then source - sourceHighBase else source
-def sourceShift (source : Nat) : Nat := if sourceHigh source then sourceHighShift else 0
 '''
 
 
@@ -357,11 +347,6 @@ _Static_assert(KPROG_X86_MOVX_SHAPE(0) == {last["arm_define"]},
 \t       "x86 movx shape absent opcode must reach the default arm");
 /* The decoded source-width code that means "absent": a MOVX body that leaves
  * its `aux` field empty falls back to its effective width. */
-/* MOVX-only high-byte source codes; AUX retains its legacy width semantics. */
-#define KPROG_X86_MOVX_HIGH_SOURCE(REG) ({spec["source_lane"]["high_base"]}U + (__u8)(REG))
-#define KPROG_X86_MOVX_SOURCE_HIGH(SRC) ((__u8)(SRC) >= {spec["source_lane"]["high_base"]}U && (__u8)(SRC) < {spec["source_lane"]["high_base"]+spec["source_lane"]["high_count"]}U)
-#define KPROG_X86_MOVX_SOURCE_REG(SRC) (KPROG_X86_MOVX_SOURCE_HIGH(SRC) ? (__u8)(SRC) - {spec["source_lane"]["high_base"]}U : (__u8)(SRC))
-#define KPROG_X86_MOVX_SOURCE_SHIFT(SRC) (KPROG_X86_MOVX_SOURCE_HIGH(SRC) ? {spec["source_lane"]["high_shift"]}U : 0U)
 #define KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE {absent}U
 /*
  * Resolve the source width a MOVX body operates at: the decoded `aux` code

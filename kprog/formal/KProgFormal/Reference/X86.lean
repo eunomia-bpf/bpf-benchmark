@@ -491,16 +491,10 @@ def unaryStep (width : ScalarWidth) (kind : UnaryKind) (dst : ScalarDestination)
       | .ok (result, writes) =>
           ⟨{ result with rflags := unaryFlags width kind value s.rflags, pc := nextPc }, reads ++ writes, none⟩
 
-/-- Widen the operand from its access width, independently of generated masks. -/
-def extendValue (sourceWidth : ScalarWidth) (signed : Bool) (source : Word) : Word :=
-  if signed then (source.setWidth sourceWidth.bits).signExtend 64
-  else (source.setWidth sourceWidth.bits).setWidth 64
-
 /-- One architectural instruction with its decoded fall-through address.
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
-  | extend (sourceWidth targetWidth : ScalarWidth) (signed : Bool) (dst : Register) (source : ScalarSource) (nextPc : Word)
   | popcount (width : CmovWidth) (dst : Register) (source : Source) (nextPc : Word)
   | unary (width : ScalarWidth) (kind : UnaryKind) (dst : ScalarDestination) (nextPc : Word)
   | logic (width : ScalarWidth) (kind : LogicKind) (dst : ScalarDestination) (src : ScalarSource) (nextPc : Word)
@@ -531,7 +525,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -541,12 +535,6 @@ def Instruction.fallthrough : Instruction → Word
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
-  | .extend sourceWidth targetWidth signed dst source nextPc =>
-      match scalarRead s sourceWidth source with
-      | .error fault => ⟨s, [.fault fault], some fault⟩
-      | .ok (value, events) =>
-          let result := scalarWriteValue (s.gpr dst) (extendValue sourceWidth signed value) targetWidth (.low dst)
-          ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), pc := nextPc }, events, none⟩
   | .popcount width dst source nextPc =>
       match readSource s source width.bytes with
       | .error fault => ⟨s, [.fault fault], some fault⟩
@@ -625,7 +613,6 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
-  | .extend .. => 0xffffffffffffffff
   | .popcount .. => 0xffffffffffffffff
   | .unary .. => 0xffffffffffffffff
   | .logic .. => 0xffffffffffffffef
@@ -857,18 +844,6 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
       let (rm, nextPc, cursor) ← operand bytes s p modrm (count + 2) size
       let immediate ← signedDisplacement bytes cursor size
       return .logic width .test (scalarDestination p width rm) (.immediate immediate) nextPc
-  if first = 0x63 then
-    let modrm ← byteAt bytes (count + 1)
-    let targetWidth := scalarWidth p false
-    let sourceWidth := if p.rex / 8 = 1 then ScalarWidth.w32 else targetWidth
-    let dst := registerCode ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
-    let (source, nextPc, _) ← operand bytes s p modrm (count + 2) 0
-    return .extend sourceWidth targetWidth true dst (scalarSource p sourceWidth source) nextPc
-  if first = 0x98 then
-    let targetWidth := scalarWidth p false
-    let sourceWidth := if targetWidth = .w64 then ScalarWidth.w32
-      else if targetWidth = .w32 then .w16 else .w8
-    return .extend sourceWidth targetWidth true 0 (.register (.low 0)) (← fallthrough s (count + 1))
   if first = 0xfe ∨ first = 0xff then
     let modrm ← byteAt bytes (count + 1)
     let group := (modrm / 8) % 8
@@ -998,12 +973,6 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   let reg := registerCode ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
   let width := if p.rex / 8 = 1 then CmovWidth.w64
     else if p.operand16 then .w16 else .w32
-  if opcode = 0xb6 ∨ opcode = 0xb7 ∨ opcode = 0xbe ∨ opcode = 0xbf then
-    let sourceWidth := if opcode % 2 = 0 then ScalarWidth.w8 else .w16
-    let targetWidth := scalarWidth p false
-    let (source, nextPc, _) ← operand bytes s p modrm (count + 3) 0
-    return .extend sourceWidth targetWidth (decide (opcode ≥ 0xbe)) reg
-      (scalarSource p sourceWidth source) nextPc
   if opcode = 0xb8 ∧ p.mandatoryPrefix = 0xf3 then
     let (source, nextPc, _) ← operand bytes s p modrm (count + 3) 0
     return .popcount width reg source nextPc

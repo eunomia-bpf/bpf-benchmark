@@ -246,6 +246,19 @@ through**.
 Both arms ran the same four stressors for the same 180 s, so the ratio is
 like-for-like. **bcc reproduces.**
 
+### A ratio counts only with replacements verified
+
+katran's first run (`corpus/results/x86_kvm_corpus_20261106_194816_
+572919`) returned `status ok` with both arms and 1.128x — but its shim log
+has **zero** `native-loader replaced prog` lines: the single program,
+`balancer_ingress`, failed with `simulator proof contains an unresolved
+map/kfunc relocation` and passed through, so both arms ran eBPF and 1.128x
+is run-to-run variance.
+
+Every ratio below therefore carries the replaced/failed split from its own
+shim log. A ratio with zero replacements is variance, not a native
+measurement.
+
 ### Work done per arm
 
 The native arm itself is selected with

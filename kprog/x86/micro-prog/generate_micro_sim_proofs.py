@@ -525,8 +525,6 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         (op in {"cmp", "test"} and len(ops) == 2 and
          reg_info(ops[0]) is not None and
          (is_int(ops[1]) or reg_info(ops[1]) is not None)) or
-        (op in {"movzx", "movsx"} and len(ops) == 2 and
-         reg_info(ops[0]) is not None and reg_info(ops[1]) is not None) or
         (op in {"dec", "inc", "neg", "not"} and len(ops) == 1 and
          reg_info(ops[0]) is not None) or
         (op.startswith("set") and op in CC_AUX and len(ops) == 1 and
@@ -692,35 +690,28 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
     if op in {"movzx", "movsx", "movsxd"}:
         if len(ops) != 2:
             raise ValueError(f"cannot encode {insn.raw}")
-        dst_reg, src_reg = reg_info(ops[0]), reg_info(ops[1])
-        if dst_reg is None or dst_reg[1] not in (16, 32, 64):
+        dst_reg = reg_info(ops[0])
+        src_reg = reg_info(ops[1])
+        if dst_reg is None:
             raise ValueError(f"cannot encode {insn.raw}")
-        source_width = src_reg[1] if src_reg else operand_width(ops[1], 0)
-        legal = (source_width, dst_reg[1]) in {(16,16),(32,32),(32,64)} if op == "movsxd" else \
-            source_width in (8,16) and source_width <= dst_reg[1]
-        if not legal:
-            raise ValueError(f"invalid widening-move widths: {insn.raw}")
         if src_reg:
-            if src_reg[2] and (dst_reg[1] == 64 or dst_reg[0] not in {
-                    "X86_RAX", "X86_RCX", "X86_RDX", "X86_RBX", "X86_RSP", "X86_RBP", "X86_RSI", "X86_RDI"}):
-                raise ValueError(f"high-byte source cannot use a REX prefix: {insn.raw}")
-            src = f"KPROG_X86_MOVX_HIGH_SOURCE({src_reg[0]})" if src_reg[2] else src_reg[0]
             return enc("X86_OP_MOVSX_REG" if op in {"movsx", "movsxd"} else "X86_OP_MOVZX_REG",
-                       dst=dst_reg[0], src=src, flags=WIDTH_CONST[dst_reg[1]], aux=WIDTH_CONST[source_width])
+                       dst=dst_reg[0], src=src_reg[0],
+                       flags=WIDTH_CONST[dst_reg[1]], aux=WIDTH_CONST[src_reg[1]])
         if is_mem(ops[1]):
+            mem_width = operand_width(ops[1], 32 if op == "movsxd" else dst_reg[1])
             return enc("X86_OP_MOVSX_LOAD" if op in {"movsx", "movsxd"} else "X86_OP_MOV_LOAD",
                        dst=dst_reg[0], src=mem_base_reg(ops[1]),
-                       flags=WIDTH_CONST[dst_reg[1]], aux=mem_aux(ops[1], source_width),
+                       flags=WIDTH_CONST[dst_reg[1]], aux=mem_aux(ops[1], mem_width),
                        imm=relocated_data_address(insn,rodata_idents)
                            if insn.reloc_type=="R_X86_64_PC32" else c_u64(mem_disp(ops[1])))
         raise ValueError(f"cannot encode {insn.raw}")
 
-    if op in {"cbw", "cwde", "cdqe"}:
+    if op == "cdqe":
         if ops:
             raise ValueError(f"cannot encode {insn.raw}")
-        target, source = {"cbw": (16,8), "cwde": (32,16), "cdqe": (64,32)}[op]
         return enc("X86_OP_MOVSX_REG", dst="X86_RAX", src="X86_RAX",
-                   flags=WIDTH_CONST[target], aux=WIDTH_CONST[source])
+                   flags="X86_WIDTH_64", aux="X86_WIDTH_32")
 
     if op == "lea":
         if len(ops) != 2:
