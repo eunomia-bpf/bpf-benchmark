@@ -18,7 +18,7 @@ routing tables; they are **not yet a full simulator-step refinement theorem**.
 The ISA reference lives in `KProgFormal/Reference/`; it imports no simulator
 contracts. The step refinements in `Refinement/` connect CMOV, BT, BZHI,
 ANDN, BMI2 shifts/rotates, BSWAP/MOVBE and register/immediate/memory PUSH/POP handlers to that reference, including registers,
-flags, XMM0, memory, PC and ordered access/fault effects. The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary, logical-register, MOVK, move-immediate, register-move, all32 SIMD/GPR bit-transfer (FMOV), byte-vector reduction (CNT/UADDLV), conditional-compare (CCMP), ADD/SUB immediate/shifted-register/extended-register, NOP, ordinary-branch and scalar immediate-memory
+flags, XMM0, memory, PC and ordered access/fault effects. The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary, logical-register, MOVK, move-immediate, register-move, all32 SIMD/GPR bit-transfer (FMOV), byte-vector reduction (CNT/UADDLV), conditional-compare (CCMP), ADD/SUB immediate/shifted-register/extended-register, NOP, ordinary-branch, scalar immediate-memory and LDP/STP signed-offset
 families connect through their modules in `Refinement/`, including native
 aliases, all raw NZCV predicates, ZR/SP separation including MOV destinations, legal extract immediates,
 shifted source modifiers, exact NZCV updates and W zero-extension. Arithmetic NZCV uses width-sized operands
@@ -30,6 +30,10 @@ Scalar memory includes all unsigned and signed load widths, stores, signed
 unscaled and unsigned scaled offsets, exact byte permissions/initialization,
 ordered accesses and faults. Its handler theorem takes the admission witness
 that SP alignment is valid; it does not insert a runtime alignment guard.
+LDP/STP captures both load values before register writes and uses a4/8-byte
+stride at W/X width. Pair events follow the selected architectural profile;
+a second separate-store fault retains the first store. Duplicate LDP destinations
+are constrained-unpredictable (including UNDEF/NOP) and fail source validation.
 
 Layout:
 
@@ -87,5 +91,8 @@ requests remain valid, but cannot access an omitted SIMD register. Arithmetic fi
 `sp_alignment_check` selects the effective SCTLR.SA/SA0 setting and defaults
 to Linux's enabled setting. When enabled, an SP-base transfer tests the incoming
 SP's16-byte alignment, independently of its effective address; faults use
-`sp_alignment`. The setting is preserved in outputs when supplied.
+`sp_alignment`. `pair_single_access` selects FEAT_LSE2's one double-sized
+architectural pair access; its default is false, matching Cortex-A72. Both
+profile settings are preserved in outputs when supplied. The memory model is
+sequential, with architectural events grouping the handler's byte operations.
 The default ISA remains x86-64; `isa: "x86_64"` is also explicit.

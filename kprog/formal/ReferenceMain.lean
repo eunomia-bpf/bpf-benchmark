@@ -136,9 +136,12 @@ private def parseArmState (j : Json) (cells : Array InputCell) : Except String A
     let spAlignmentCheck ← match j.getObjVal? "sp_alignment_check" with
       | .error _ => pure true
       | .ok value => value.getBool?
+    let pairSingleAccess ← match j.getObjVal? "pair_single_access" with
+      | .error _ => pure false
+      | .ok value => value.getBool?
     pure { gpr := fun r => regs[r.val]'(by omega)
            sp := regs[31]'(by omega), flags := flags, vector0 := BitVec.ofNat 128 vector,
-           vectorTail := vectorTail, spAlignmentCheck := spAlignmentCheck,
+           vectorTail := vectorTail, spAlignmentCheck := spAlignmentCheck, pairSingleAccess := pairSingleAccess,
            memory := memoryOfCells cells, pc := pc }
   else throw "AArch64 registers must contain X0..X30 followed by SP (32 words)"
 
@@ -160,7 +163,9 @@ private def executeArm (request : Json) : Except String Json := do
     else []
   let alignmentFields := if (state.getObjVal? "sp_alignment_check").isOk then
       [("sp_alignment_check", toJson s.spAlignmentCheck)] else []
-  pure <| Json.mkObj (vectorFields ++ alignmentFields ++ [
+  let pairFields := if (state.getObjVal? "pair_single_access").isOk then
+      [("pair_single_access", toJson s.pairSingleAccess)] else []
+  pure <| Json.mkObj (vectorFields ++ alignmentFields ++ pairFields ++ [
     ("registers", toJson (((List.finRange 31).map (fun r => (s.gpr r).toNat)) ++ [s.sp.toNat])),
     ("flags", number s.flags.toNat), ("defined_flags", number (2^64 - 1)),
     ("pc", number s.pc.toNat), ("vector0", number s.vector0.toNat),

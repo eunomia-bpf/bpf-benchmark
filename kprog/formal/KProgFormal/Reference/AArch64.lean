@@ -35,6 +35,8 @@ structure State where
   pc : Word
   /-- Effective SCTLR.SA/SA0 for the executing exception level. Linux enables it. -/
   spAlignmentCheck : Bool := true
+  /-- FEAT_LSE2 makes a pair one architectural memory access. Cortex-A72 has none. -/
+  pairSingleAccess : Bool := false
 
 /-- Full architectural SIMD bank. The separate V0 field preserves the earlier
 reference interface; index31 is V31, unrelated to integer ZR/SP. -/
@@ -471,6 +473,71 @@ def memoryStep (i : MemoryInstruction) (s : State) : Transition State :=
           | .error fault => ⟨s, [.fault fault], some fault⟩
           | .ok (memory, event) => ⟨{ s with memory := memory, pc := s.pc + 4 }, [event], none⟩
 
+/-- A pair load with duplicate destinations is constrained-unpredictable,
+including permitted UNDEF/NOP outcomes. Defined native programs carry this
+source-validity witness; stores may use the same source twice. -/
+structure PairMemoryInstruction where
+  width : Width
+  load : Bool
+  first : Register
+  second : Register
+  base : Register
+  offset : Word
+  distinct : load = true → first ≠ second
+  deriving DecidableEq, Repr
+
+def pairRegisters (i : PairMemoryInstruction) (s : State) (first second : Word) : State :=
+  writeReg (writeReg s i.first (narrow first i.width)) i.second (narrow second i.width)
+
+/-- LDP/STP signed-offset form. Values and base addresses are captured before
+register writes. Without FEAT_LSE2 there are two ordered element accesses; a
+second-store fault retains the first store. With FEAT_LSE2 the architecture
+uses one double-sized access. The memory model is sequential and little-endian. -/
+def pairMemoryStep (i : PairMemoryInstruction) (s : State) : Transition State :=
+  match spAlignmentFault s i.base with
+  | some fault => ⟨s, [.fault fault], some fault⟩
+  | none =>
+      let address := memoryBase s i.base + i.offset
+      let secondAddress := address + BitVec.ofNat 64 i.width.bytes
+      let finish := fun first second events =>
+        (⟨{ pairRegisters i s first second with pc := s.pc + 4 }, events, none⟩ : Transition State)
+      if i.load then
+        if s.pairSingleAccess then
+          if permitted s.memory.readable address (2 * i.width.bytes) then
+            finish (wordAt s.memory address i.width.bytes) (wordAt s.memory secondAddress i.width.bytes)
+              [.memory .read address (bytesAt s.memory address (2 * i.width.bytes))
+                (initializedAt s.memory address (2 * i.width.bytes))]
+          else
+            let fault := Fault.read address (2 * i.width.bytes)
+            ⟨s, [.fault fault], some fault⟩
+        else
+          match readMemory s.memory address i.width.bytes with
+          | .error fault => ⟨s, [.fault fault], some fault⟩
+          | .ok (first, event) =>
+              match readMemory s.memory secondAddress i.width.bytes with
+              | .error fault => ⟨s, [event, .fault fault], some fault⟩
+              | .ok (second, secondEvent) => finish first second [event, secondEvent]
+      else
+        let first := readReg s i.first
+        let second := readReg s i.second
+        if s.pairSingleAccess then
+          if permitted s.memory.writable address (2 * i.width.bytes) then
+            let memory := storeMemory (storeMemory s.memory address first i.width.bytes)
+              secondAddress second i.width.bytes
+            ⟨{ s with memory := memory, pc := s.pc + 4 },
+              [.memory .write address (valueBytes first i.width.bytes ++ valueBytes second i.width.bytes) true], none⟩
+          else
+            let fault := Fault.write address (2 * i.width.bytes)
+            ⟨s, [.fault fault], some fault⟩
+        else
+          match writeMemory s.memory address first i.width.bytes with
+          | .error fault => ⟨s, [.fault fault], some fault⟩
+          | .ok (memory, event) =>
+              match writeMemory memory secondAddress second i.width.bytes with
+              | .error fault => ⟨{ s with memory := memory }, [event, .fault fault], some fault⟩
+              | .ok (memory, secondEvent) =>
+                  ⟨{ s with memory := memory, pc := s.pc + 4 }, [event, secondEvent], none⟩
+
 /-- Branch offsets are signed native BYTE displacements relative to the
 branch instruction, with wrapping64-bit PC arithmetic. -/
 def branchStep (taken : Bool) (displacement : Word) (s : State) : Transition State :=
@@ -485,6 +552,7 @@ def bitBranch (nonzero : Bool) (value : Word) (bit : BitVec 6) : Bool :=
 
 inductive Instruction
   | memory (instruction : MemoryInstruction)
+  | pairMemory (instruction : PairMemoryInstruction)
   | nop
   | branch (displacement : Word)
   | branchConditional (predicate : Fin 16) (displacement : Word)
@@ -513,6 +581,7 @@ inductive Instruction
 def step (i : Instruction) (s : State) : Transition State :=
   match i with
   | .memory instruction => memoryStep instruction s
+  | .pairMemory instruction => pairMemoryStep instruction s
   | .nop => ⟨{ s with pc := s.pc + 4 }, [], none⟩
   | .branch displacement => branchStep true displacement s
   | .branchConditional predicate displacement => branchStep (condition s.flags predicate) displacement s
@@ -557,6 +626,15 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   let lhs := register (word / 2^5)
   let rhs := register (word / 2^16)
   let addend := register (word / 2^10)
+  -- Integer pair signed-offset encodings: opc00=W, opc10=X, V=0.
+  if word &&& 0x7f800000 = 0x29000000 then
+    let load := (word / 2^22) % 2 == 1
+    let second : Register := ⟨(word / 2^10) % 32, Nat.mod_lt _ (by decide)⟩
+    if distinct : load = true → dst ≠ second then
+      let width := if word / 2^31 = 1 then Width.w64 else .w32
+      return .pairMemory ⟨width, load, dst, second, lhs,
+        (BitVec.ofNat 7 (word / 2^15)).signExtend 64 * BitVec.ofNat 64 width.bytes, distinct⟩
+    else throw "constrained-unpredictable LDP duplicate destinations"
   -- Scalar unsigned-scaled and signed-unscaled immediate memory encodings.
   -- V=0 selects GPR transfers; pre/post/register modes have distinct classes.
   let scaled := word &&& 0x3f000000 == 0x39000000

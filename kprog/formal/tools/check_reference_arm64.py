@@ -612,6 +612,92 @@ def main():
         else:
             expected["registers"][0] = 0xCDAB45678023FE81
         cases.append((request, expected))
+    # Assembled LDP/STP signed-offset forms. Each input supplies its complete
+    # byte image; profile choices distinguish one architectural pair access
+    # from two ordered element accesses, including a second-store fault.
+    def pair_example(word, count, load, first, second, address_base, offset, single,
+                     target=None, pc=0x1000, alignment_check=True):
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        target = (0x6000 + offset if address_base == 31 else 0x6000) if target is None else target
+        request["state"].update(pair_single_access=single, pc=pc)
+        if not alignment_check:
+            request["state"]["sp_alignment_check"] = False
+        request["state"]["registers"][8:10] = [0x123456789ABCDEF0, 0xFEDCBA9876543210]
+        request["state"]["registers"][address_base] = (target - offset) % (1 << 64)
+        low = 0x80000001 if count == 4 else 0x8000000000000001
+        high = 0xEEFF0011 if count == 4 else 0xAABBCCDDEEFF0011
+        contents = list(low.to_bytes(count, "little") + high.to_bytes(count, "little"))
+        request["state"]["memory"] = [dict(address=(target + i - 1) % (1 << 64), value=byte,
+            readable=True, writable=True, initialized=i != count + 1)
+            for i, byte in enumerate([0x5A] + contents + [0xA5])]
+        expected = copy.deepcopy(request["state"])
+        if load:
+            if first != 31:
+                expected["registers"][first] = low
+            if second != 31:
+                expected["registers"][second] = high
+        else:
+            values = [0 if reg == 31 else request["state"]["registers"][reg] for reg in (first, second)]
+            contents = list(values[0].to_bytes(8, "little")[:count] + values[1].to_bytes(8, "little")[:count])
+            for cell, byte in zip(expected["memory"][1:1 + 2 * count], contents):
+                cell.update(value=byte, initialized=True)
+        events = [dict(kind="read" if load else "write", address=target, value=contents,
+                       initialized=not load)] if single else [
+            dict(kind="read" if load else "write", address=(target + i * count) % (1 << 64),
+                 value=contents[i * count:(i + 1) * count], initialized=not load or i == 0)
+            for i in range(2)]
+        expected.update(pc=(pc + 4) % (1 << 64), defined_flags=(1 << 64) - 1, events=events, fault=None)
+        cases.append((request, expected))
+
+    for word, count, load, first, second, address_base, offset in [
+            (0xA9402408, 8, True, 8, 9, 0, 0), (0x29402408, 4, True, 8, 9, 0, 0),
+            (0xA9012408, 8, False, 8, 9, 0, 16), (0x29012408, 4, False, 8, 9, 0, 8),
+            (0xA9400400, 8, True, 0, 1, 0, 0), (0xA9400001, 8, True, 1, 0, 0, 0),
+            (0xA94127FF, 8, True, 31, 9, 31, 16), (0xA97F7FE8, 8, True, 8, 31, 31, -16),
+            (0xA9007FFF, 8, False, 31, 31, 31, 0), (0xA9002008, 8, False, 8, 8, 0, 0),
+            (0xA9602408, 8, True, 8, 9, 0, -512), (0x29602408, 4, True, 8, 9, 0, -256),
+            (0xA91FA408, 8, False, 8, 9, 0, 504), (0x291FA408, 4, False, 8, 9, 0, 252),
+            (0xA940A7E8, 8, True, 8, 9, 31, 8), (0xA94027E8, 8, True, 8, 9, 31, 0)]:
+        for single in (False, True):
+            pair_example(word, count, load, first, second, address_base, offset, single)
+    for single in (False, True):
+        for word, count, load in [(0xA9402408, 8, True), (0x29402408, 4, True),
+                                   (0xA9002408, 8, False), (0x29002408, 4, False)]:
+            pair_example(word, count, load, 8, 9, 0, 0, single,
+                         target=(1 << 64) - 4, pc=(1 << 64) - 4)
+        pair_example(0xA94027E8, 8, True, 8, 9, 31, 0, single, target=0x6001, alignment_check=False)
+        for word, load in [(0xA9402408, True), (0xA9002408, False)]:
+            for failed_slot in (0, 1):
+                request = copy.deepcopy(base)
+                request["native_bytes"] = list(word.to_bytes(4, "little"))
+                request["state"]["pair_single_access"] = single
+                request["state"]["registers"][0] = 0x6000
+                request["state"]["registers"][8:10] = [0x0123456789ABCDEF, 0xFEDCBA9876543210]
+                image = list(bytes(range(16)))
+                request["state"]["memory"] = [dict(address=0x6000 + i, value=byte,
+                    readable=True, writable=True, initialized=True) for i, byte in enumerate(image)]
+                request["state"]["memory"][failed_slot * 8 + 7]["readable" if load else "writable"] = False
+                expected = copy.deepcopy(request["state"])
+                fault = dict(kind="read" if load else "write", address=0x6000 if single else 0x6000 + failed_slot * 8,
+                             bytes=16 if single else 8)
+                events = []
+                if failed_slot == 1 and not single:
+                    contents = image[:8] if load else [0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01]
+                    events.append(dict(kind="read" if load else "write", address=0x6000, value=contents, initialized=True))
+                    if not load:
+                        for cell, byte in zip(expected["memory"], contents):
+                            cell["value"] = byte
+                expected.update(defined_flags=(1 << 64) - 1, fault=fault, events=events + [dict(kind="fault", fault=fault)])
+                cases.append((request, expected))
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list((0xA94027E8).to_bytes(4, "little"))
+        request["state"]["registers"][31] = 0x6001
+        request["state"]["pair_single_access"] = single
+        expected = copy.deepcopy(request["state"])
+        fault = dict(kind="sp_alignment", address=0x6001)
+        expected.update(defined_flags=(1 << 64) - 1, fault=fault, events=[dict(kind="fault", fault=fault)])
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -630,7 +716,8 @@ def main():
                  0x0BC20020, 0x8BC20020, 0x0B028020, 0x0B828020, 0x6BC20020,
                  0x8B221420, 0x0B221820, 0x6B22FC20, 0xEB2277FF, 0x4B2117E0,
                  0x54000118, 0xD4000108, 0xD503203F,
-                 0xB9C00020, 0xF9C00020, 0xB8C00020, 0xF8C00020):
+                 0xB9C00020, 0xF9C00020, 0xB8C00020, 0xF8C00020,
+                 0xA9402008, 0x29402008, 0xA9407C1F):
         request = copy.deepcopy(base)
         request["native_bytes"] = list(word.to_bytes(4, "little"))
         rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
@@ -654,6 +741,10 @@ def main():
         wrong_vectors = copy.deepcopy(bank_request)
         wrong_vectors["state"]["vectors"] = vectors
         bad.append(wrong_vectors)
+    for key in ("sp_alignment_check", "pair_single_access"):
+        wrong_profile = copy.deepcopy(malformed)
+        wrong_profile["state"][key] = 1
+        bad.append(wrong_profile)
     for request in bad:
         run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                              input=json.dumps(request) + "\n", text=True, capture_output=True)
@@ -722,7 +813,7 @@ def main():
             assert str(error).startswith(("invalid move-wide", "invalid NEGS", "invalid AArch64 extend")), error
             continue
         raise AssertionError((mnemonic, operands, "invalid alias was accepted"))
-    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV-all32/CNT/UADDLV/CCMP/ADD-SUB-immediate/shifted-register/extended-register/NOP/branches/scalar-memory, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV-all32/CNT/UADDLV/CCMP/ADD-SUB-immediate/shifted-register/extended-register/NOP/branches/scalar-memory/LDP-STP, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":
