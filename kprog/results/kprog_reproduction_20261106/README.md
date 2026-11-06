@@ -159,6 +159,25 @@ only, not app startup and not a general corpus regression. The
 `native/eBPF` ratio the reference quotes needs that arm; the baseline arm
 is available today. Reported to lanes T/F.
 
+`katran` reproduces the same shape (`corpus/results/
+x86_kvm_corpus_20261106_110130_339829`: baseline one workload, post_rejit
+none) and pins the cause to the native path itself rather than to any app's
+bytecode:
+
+```
+libbpf: Error in bpf_object__probe_loading(): -EINVAL. Couldn't load
+trivial BPF program. ... RLIMIT_MEMLOCK ...
+BpfLoader.cpp:326 error while trying to load bpf object: .../balancer.bpf.o
+terminate called after throwing an instance of 'std::invalid_argument'
+```
+
+`bpf_object__probe_loading` loads a two-instruction `r0=0; exit`. A trivial
+program failing with EINVAL means a precondition the patched native path
+imposes on every load in that phase, not a property of the six apps.
+RLIMIT_MEMLOCK is the other candidate the message names, but the baseline
+arm loads in the same process environment, so it is almost certainly the
+patch. Reported to lane T; not worked around here.
+
 Reference `1.349x` is confirmed as the geometric mean of the six per-app
 `native/eBPF` ratios recorded in `kprog/docs/evaluation.md`
 (`1.005, 1.824, 2.358, 1.323, 1.102, 0.958`).
