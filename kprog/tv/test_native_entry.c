@@ -38,3 +38,12 @@ int tv_map_entry(void *ctx)
 	int *value = bpf_map_lookup_elem(&tv_map, &key);
 	return value ? *value : 0;
 }
+
+__attribute__((section(".maps"))) unsigned char tv_hash_map;
+int tv_hash_entry(void *ctx)
+{
+	int key = 0;
+	(void)ctx;
+	int *value = bpf_map_lookup_elem(&tv_hash_map, &key);
+	return value ? *value : 0;
+}

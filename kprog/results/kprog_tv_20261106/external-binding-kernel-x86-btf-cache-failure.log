@@ -1,0 +1,1672 @@
+insmod: ERROR: could not insert module build-x86/bpf_x86_native_lab.ko: Invalid parameters
+make: *** [Makefile:63: guest-kernel-check] Error 1
+rsion 7.0.0-rc2+ (root@coder-22123351-d4a5-40fc-bc3b-1b853af74a7e-c7ccfb766-mpvhz) (gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #51 SMP PREEMPT_DYNAMIC Fri Nov  6 09:17:04 UTC 2026
+[    0.000000] Command line: virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/workspaces/repository/kprog/tv/build-kernel-x86/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=workspaces/repository virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_console=ttyS0 console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`bWFrZSAtQyBrcHJvZy90diBndWVzdC1rZXJuZWwtY2hlY2s=` virtme_chdir=workspaces/repository virtme_root_user=1 quiet loglevel=1 loglevel=4 panic=30 oops=panic init=/opt/virtme-ng/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init
+[    0.000000] x86/split lock detection: #DB: warning on user-space bus_locks
+[    0.000000] BIOS-provided physical RAM map:
+[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff]  System RAM
+[    0.000000] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff]  device reserved
+[    0.000000] BIOS-e820: [gap 0x00000000000a0000-0x00000000000effff]
+[    0.000000] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff]  device reserved
+[    0.000000] BIOS-e820: [mem 0x0000000000100000-0x000000007ffdffff]  System RAM
+[    0.000000] BIOS-e820: [mem 0x000000007ffe0000-0x000000007fffffff]  device reserved
+[    0.000000] BIOS-e820: [gap 0x0000000080000000-0x00000000feffbfff]
+[    0.000000] BIOS-e820: [mem 0x00000000feffc000-0x00000000feffffff]  device reserved
+[    0.000000] BIOS-e820: [gap 0x00000000ff000000-0x00000000fffbffff]
+[    0.000000] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff]  device reserved
+[    0.000000] printk: legacy bootconsole [earlyser0] enabled
+[    0.000000] NX (Execute Disable) protection: active
+[    0.000000] APIC: Static calls initialized
+[    0.000000] SMBIOS 3.0.0 present.
+[    0.000000] DMI: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[    0.000000] DMI: Memory slots populated: 1/1
+[    0.000000] Hypervisor detected: KVM
+[    0.000000] last_pfn = 0x7ffe0 max_arch_pfn = 0x400000000
+[    0.000000] kvm-clock: Using msrs 4b564d01 and 4b564d00
+[    0.000001] kvm-clock: using sched offset of 273864799 cycles
+[    0.000004] clocksource: kvm-clock: mask: 0xffffffffffffffff max_cycles: 0x1cd42e4dffb, max_idle_ns: 881590591483 ns
+[    0.000008] tsc: Detected 3686.400 MHz processor
+[    0.000347] e820: update [mem 0x00000000-0x00000fff] System RAM ==> device reserved
+[    0.000352] e820: remove [mem 0x000a0000-0x000fffff] System RAM
+[    0.000358] last_pfn = 0x7ffe0 max_arch_pfn = 0x400000000
+[    0.000395] MTRR map: 4 entries (3 fixed + 1 variable; max 19), built from 8 variable MTRRs
+[    0.000398] x86/PAT: Configuration [0-7]: WB  WC  UC- UC  WB  WP  UC- WT  
+[    0.003149] found SMP MP-table at [mem 0x000f5440-0x000f544f]
+[    0.003176] Using GB pages for direct mapping
+[    0.003294] RAMDISK: [mem 0x7f37b000-0x7ffdffff]
+[    0.003326] ACPI: Early table checksum verification disabled
+[    0.003331] ACPI: RSDP 0x00000000000F5250 000014 (v00 BOCHS )
+[    0.003336] ACPI: RSDT 0x000000007FFE1CE7 000034 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003343] ACPI: FACP 0x000000007FFE1B93 000074 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003348] ACPI: DSDT 0x000000007FFE0040 001B53 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003350] ACPI: FACS 0x000000007FFE0000 000040
+[    0.003353] ACPI: APIC 0x000000007FFE1C07 000080 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003355] ACPI: HPET 0x000000007FFE1C87 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003357] ACPI: WAET 0x000000007FFE1CBF 000028 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.003360] ACPI: Reserving FACP table memory at [mem 0x7ffe1b93-0x7ffe1c06]
+[    0.003361] ACPI: Reserving DSDT table memory at [mem 0x7ffe0040-0x7ffe1b92]
+[    0.003362] ACPI: Reserving FACS table memory at [mem 0x7ffe0000-0x7ffe003f]
+[    0.003363] ACPI: Reserving APIC table memory at [mem 0x7ffe1c07-0x7ffe1c86]
+[    0.003364] ACPI: Reserving HPET table memory at [mem 0x7ffe1c87-0x7ffe1cbe]
+[    0.003365] ACPI: Reserving WAET table memory at [mem 0x7ffe1cbf-0x7ffe1ce6]
+[    0.003894] No NUMA configuration found
+[    0.003897] Faking a node at [mem 0x0000000000000000-0x000000007ffdffff]
+[    0.003904] NODE_DATA(0) allocated [mem 0x7f350500-0x7f37afff]
+[    0.005013] ACPI: PM-Timer IO Port: 0x608
+[    0.005026] ACPI: LAPIC_NMI (acpi_id[0xff] dfl dfl lint[0x1])
+[    0.005068] IOAPIC[0]: apic_id 0, version 17, address 0xfec00000, GSI 0-23
+[    0.005071] ACPI: INT_SRC_OVR (bus 0 bus_irq 0 global_irq 2 dfl dfl)
+[    0.005074] ACPI: INT_SRC_OVR (bus 0 bus_irq 5 global_irq 5 high level)
+[    0.005075] ACPI: INT_SRC_OVR (bus 0 bus_irq 9 global_irq 9 high level)
+[    0.005076] ACPI: INT_SRC_OVR (bus 0 bus_irq 10 global_irq 10 high level)
+[    0.005078] ACPI: INT_SRC_OVR (bus 0 bus_irq 11 global_irq 11 high level)
+[    0.005080] ACPI: Using ACPI (MADT) for SMP configuration information
+[    0.005082] ACPI: HPET id: 0x8086a201 base: 0xfed00000
+[    0.005085] TSC deadline timer available
+[    0.005088] CPU topo: Max. logical packages:   1
+[    0.005089] CPU topo: Max. logical nodes:      1
+[    0.005090] CPU topo: Num. nodes per package:  1
+[    0.005092] CPU topo: Max. logical dies:       1
+[    0.005093] CPU topo: Max. dies per package:   1
+[    0.005096] CPU topo: Max. threads per core:   1
+[    0.005097] CPU topo: Num. cores per package:     2
+[    0.005098] CPU topo: Num. threads per package:   2
+[    0.005098] CPU topo: Allowing 2 present CPUs plus 0 hotplug CPUs
+[    0.005119] kvm-guest: APIC: eoi() replaced with kvm_guest_apic_eoi_write()
+[    0.005137] kvm-guest: KVM setup pv remote TLB flush
+[    0.005141] kvm-guest: setup PV sched yield
+[    0.005148] PM: hibernation: Registered nosave memory: [mem 0x00000000-0x00000fff]
+[    0.005150] PM: hibernation: Registered nosave memory: [mem 0x0009f000-0x000fffff]
+[    0.005152] [gap 0x80000000-0xfeffbfff] available for PCI devices
+[    0.005154] Booting paravirtualized kernel on KVM
+[    0.005156] clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.010020] Zone ranges:
+[    0.010023]   DMA      [mem 0x0000000000001000-0x0000000000ffffff]
+[    0.010026]   DMA32    [mem 0x0000000001000000-0x000000007ffdffff]
+[    0.010028]   Normal   empty
+[    0.010030]   Device   empty
+[    0.010031] Movable zone start for each node
+[    0.010033] Early memory node ranges
+[    0.010033]   node   0: [mem 0x0000000000001000-0x000000000009efff]
+[    0.010035]   node   0: [mem 0x0000000000100000-0x000000007ffdffff]
+[    0.010037] Initmem setup node 0 [mem 0x0000000000001000-0x000000007ffdffff]
+[    0.010230] On node 0, zone DMA: 1 pages in unavailable ranges
+[    0.010245] On node 0, zone DMA: 97 pages in unavailable ranges
+[    0.010807] On node 0, zone DMA32: 32 pages in unavailable ranges
+[    0.010819] setup_percpu: NR_CPUS:8192 nr_cpumask_bits:2 nr_cpu_ids:2 nr_node_ids:1
+[    0.011100] percpu: Embedded 61 pages/cpu s212992 r8192 d28672 u1048576
+[    0.011105] pcpu-alloc: s212992 r8192 d28672 u1048576 alloc=1*2097152
+[    0.011108] pcpu-alloc: [0] 0 1 
+[    0.011144] kvm-guest: PV spinlocks enabled
+[    0.011146] PV qspinlock hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.011150] Kernel command line: virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/workspaces/repository/kprog/tv/build-kernel-x86/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=workspaces/repository virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_console=ttyS0 console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`bWFrZSAtQyBrcHJvZy90diBndWVzdC1rZXJuZWwtY2hlY2s=` virtme_chdir=workspaces/repository virtme_root_user=1 quiet loglevel=1 loglevel=4 panic=30 oops=panic init=/opt/virtme-ng/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init
+[    0.011346] Unknown kernel command line parameters "virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/workspaces/repository/kprog/tv/build-kernel-x86/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=workspaces/repository virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_console=ttyS0 virtme_chdir=workspaces/repository virtme_root_user=1", will be passed to user space.
+[    0.011362] random: crng init done
+[    0.011363] printk: log buffer data + meta data: 2097152 + 7340032 = 9437184 bytes
+[    0.011613] Dentry cache hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.011708] Inode-cache hash table entries: 131072 (order: 8, 1048576 bytes, linear)
+[    0.011748] Fallback order for Node 0: 0 
+[    0.011752] Built 1 zonelists, mobility grouping on.  Total pages: 524158
+[    0.011753] Policy zone: DMA32
+[    0.011755] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.012846] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
+[    0.019338] ftrace: allocating 51964 entries in 204 pages
+[    0.019344] ftrace: allocated 204 pages with 4 groups
+[    0.019767] Dynamic Preempt: lazy
+[    0.019976] rcu: Preemptible hierarchical RCU implementation.
+[    0.019978] rcu: 	RCU restricting CPUs from NR_CPUS=8192 to nr_cpu_ids=2.
+[    0.019980] 	Trampoline variant of Tasks RCU enabled.
+[    0.019981] 	Rude variant of Tasks RCU enabled.
+[    0.019981] 	Tracing variant of Tasks RCU enabled.
+[    0.019982] rcu: RCU calculated value of scheduler-enlistment delay is 10 jiffies.
+[    0.019983] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=2
+[    0.019991] RCU Tasks: Setting shift to 1 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=2.
+[    0.019993] RCU Tasks Rude: Setting shift to 1 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=2.
+[    0.023539] NR_IRQS: 524544, nr_irqs: 440, preallocated irqs: 16
+[    0.023764] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.024001] Console: colour *CGA 80x25
+[    0.024071] printk: legacy console [ttyS0] enabled
+[    0.024073] printk: legacy bootconsole [earlyser0] disabled
+[    0.024100] ACPI: Core revision 20251212
+[    0.024347] clocksource: hpet: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604467 ns
+[    0.024531] APIC: Switch to symmetric I/O mode setup
+[    0.024719] x2apic enabled
+[    0.024952] APIC: Switched APIC routing to: physical x2apic
+[    0.024956] kvm-guest: APIC: send_IPI_mask() replaced with kvm_send_ipi_mask()
+[    0.024963] kvm-guest: APIC: send_IPI_mask_allbutself() replaced with kvm_send_ipi_mask_allbutself()
+[    0.024965] kvm-guest: setup PV IPIs
+[    0.025814] ..TIMER: vector=0x30 apic1=0 pin1=2 apic2=-1 pin2=-1
+[    0.025838] clocksource: tsc-early: mask: 0xffffffffffffffff max_cycles: 0x6a464ae9873, max_idle_ns: 881590529744 ns
+[    0.025845] Calibrating delay loop (skipped) preset value.. 7372.80 BogoMIPS (lpj=36864000)
+[    0.025999] x86/cpu: User Mode Instruction Prevention (UMIP) activated
+[    0.026074] Last level iTLB entries: 4KB 0, 2MB 0, 4MB 0
+[    0.026075] Last level dTLB entries: 4KB 0, 2MB 0, 4MB 0, 1GB 0
+[    0.026083] mitigations: Enabled attack vectors: user_kernel, user_user, guest_host, guest_guest, SMT mitigations: auto
+[    0.026088] Speculative Store Bypass: Mitigation: Speculative Store Bypass disabled via prctl
+[    0.026090] Spectre V2 : Mitigation: Enhanced / Automatic IBRS
+[    0.026090] ITS: Mitigation: Aligned branch/return thunks
+[    0.026091] Spectre V1 : Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+[    0.026095] Spectre V2 : mitigation: Enabling conditional Indirect Branch Prediction Barrier
+[    0.026097] active return thunk: its_return_thunk
+[    0.026102] Spectre V2 : Spectre BHI mitigation: SW BHB clearing on syscall and VM exit
+[    0.026123] x86/fpu: Supporting XSAVE feature 0x001: 'x87 floating point registers'
+[    0.026124] x86/fpu: Supporting XSAVE feature 0x002: 'SSE registers'
+[    0.026125] x86/fpu: Supporting XSAVE feature 0x004: 'AVX registers'
+[    0.026126] x86/fpu: Supporting XSAVE feature 0x200: 'Protection Keys User registers'
+[    0.026127] x86/fpu: xstate_offset[2]:  576, xstate_sizes[2]:  256
+[    0.026128] x86/fpu: xstate_offset[9]:  832, xstate_sizes[9]:    8
+[    0.026129] x86/fpu: Enabled xstate features 0x207, context size is 840 bytes, using 'compacted' format.
+[    0.040713] Freeing SMP alternatives memory: 48K
+[    0.040720] pid_max: default: 32768 minimum: 301
+[    0.040862] landlock: Up and running.
+[    0.040863] Yama: becoming mindful.
+[    0.040872] SELinux:  Initializing.
+[    0.041122] LSM support for eBPF active
+[    0.041182] Mount-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    0.041190] Mountpoint-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    0.041297] VFS: Finished mounting rootfs on nullfs
+[    0.041699] smpboot: CPU0: Intel(R) Core(TM) Ultra 9 285K (family: 0x6, model: 0xc6, stepping: 0x2)
+[    0.041892] Performance Events: unsupported CPU family 6 model 198 no PMU driver, software events only.
+[    0.041936] signal: max sigframe size: 3632
+[    0.041965] rcu: Hierarchical SRCU implementation.
+[    0.041967] rcu: 	Max phase no-delay instances is 1000.
+[    0.042016] Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[    0.044154] smp: Bringing up secondary CPUs ...
+[    0.044265] smpboot: x86: Booting SMP configuration:
+[    0.044266] .... node  #0, CPUs:      #1
+[    0.044407] smp: Brought up 1 node, 2 CPUs
+[    0.044407] smpboot: Total of 2 processors activated (14745.60 BogoMIPS)
+[    0.044407] node 0 deferred pages initialised in 0ms
+[    0.044407] Memory: 1980880K/2096632K available (16491K kernel code, 9695K rwdata, 12660K rodata, 4024K init, 7316K bss, 109300K reserved, 0K cma-reserved)
+[    0.044407] devtmpfs: initialized
+[    0.044407] x86/mm: Memory block size: 128MB
+[    0.044407] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.044407] posixtimers hash table entries: 1024 (order: 2, 16384 bytes, linear)
+[    0.044407] futex hash table entries: 512 (32768 bytes on 1 NUMA nodes, total 32 KiB, linear).
+[    0.044407] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.044407] DMA: preallocated 256 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.044407] DMA: preallocated 256 KiB GFP_KERNEL|GFP_DMA32 pool for atomic allocations
+[    0.044407] audit: initializing netlink subsys (disabled)
+[    0.044407] audit: type=2000 audit(1793956658.249:1): state=initialized audit_enabled=0 res=1
+[    0.044407] thermal_sys: Registered thermal governor 'fair_share'
+[    0.044407] thermal_sys: Registered thermal governor 'step_wise'
+[    0.044407] thermal_sys: Registered thermal governor 'user_space'
+[    0.044407] cpuidle: using governor ladder
+[    0.044407] cpuidle: using governor menu
+[    0.044407] acpiphp: ACPI Hot Plug PCI Controller Driver version: 0.5
+[    0.044407] PCI: Using configuration type 1 for base access
+[    0.044407] kprobes: kprobe jump-optimization is enabled. All kprobes are optimized if possible.
+[    0.055901] HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.055906] HugeTLB: 16380 KiB vmemmap can be freed for a 1.00 GiB page
+[    0.055908] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.055909] HugeTLB: 28 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.069804] ACPI: Added _OSI(Module Device)
+[    0.069809] ACPI: Added _OSI(Processor Device)
+[    0.069810] ACPI: Added _OSI(Processor Aggregator Device)
+[    0.070116] ACPI: 1 ACPI AML tables successfully acquired and loaded
+[    0.092415] ACPI: \_SB_: platform _OSC: OS support mask [00227eff]
+[    0.092415] ACPI: Interpreter enabled
+[    0.092415] ACPI: PM: (supports S0 S4 S5)
+[    0.092415] ACPI: Using IOAPIC for interrupt routing
+[    0.092415] PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
+[    0.092415] PCI: Using E820 reservations for host bridge windows
+[    0.092415] ACPI: Enabled 2 GPEs in block 00 to 0F
+[    0.097788] ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-ff])
+[    0.097795] acpi PNP0A03:00: _OSC: OS supports [ASPM ClockPM Segments MSI HPX-Type3]
+[    0.097797] acpi PNP0A03:00: _OSC: not requesting OS control; OS requires [ExtendedConfig ASPM ClockPM MSI]
+[    0.097801] acpi PNP0A03:00: _OSC: platform retains control of PCIe features (AE_ERROR)
+[    0.097806] acpi PNP0A03:00: fail to add MMCONFIG information, can't access extended configuration space under this bridge
+[    0.098150] acpiphp: Slot [2] registered
+[    0.098178] acpiphp: Slot [3] registered
+[    0.098205] acpiphp: Slot [4] registered
+[    0.098234] acpiphp: Slot [5] registered
+[    0.098261] acpiphp: Slot [6] registered
+[    0.098288] acpiphp: Slot [7] registered
+[    0.098314] acpiphp: Slot [8] registered
+[    0.098343] acpiphp: Slot [9] registered
+[    0.098369] acpiphp: Slot [10] registered
+[    0.098396] acpiphp: Slot [11] registered
+[    0.098422] acpiphp: Slot [12] registered
+[    0.098448] acpiphp: Slot [13] registered
+[    0.098474] acpiphp: Slot [14] registered
+[    0.098500] acpiphp: Slot [15] registered
+[    0.098533] acpiphp: Slot [16] registered
+[    0.098560] acpiphp: Slot [17] registered
+[    0.098586] acpiphp: Slot [18] registered
+[    0.098612] acpiphp: Slot [19] registered
+[    0.098638] acpiphp: Slot [20] registered
+[    0.098664] acpiphp: Slot [21] registered
+[    0.098690] acpiphp: Slot [22] registered
+[    0.098716] acpiphp: Slot [23] registered
+[    0.098743] acpiphp: Slot [24] registered
+[    0.098770] acpiphp: Slot [25] registered
+[    0.098796] acpiphp: Slot [26] registered
+[    0.098822] acpiphp: Slot [27] registered
+[    0.098848] acpiphp: Slot [28] registered
+[    0.098874] acpiphp: Slot [29] registered
+[    0.098900] acpiphp: Slot [30] registered
+[    0.098926] acpiphp: Slot [31] registered
+[    0.098945] PCI host bridge to bus 0000:00
+[    0.098949] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
+[    0.098951] pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
+[    0.098953] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
+[    0.098954] pci_bus 0000:00: root bus resource [mem 0x80000000-0xfebfffff window]
+[    0.098955] pci_bus 0000:00: root bus resource [mem 0x100000000-0x17fffffff window]
+[    0.098956] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    0.099031] pci 0000:00:00.0: [8086:1237] type 00 class 0x060000 conventional PCI endpoint
+[    0.099921] pci 0000:00:01.0: [8086:7000] type 00 class 0x060100 conventional PCI endpoint
+[    0.100820] pci 0000:00:01.1: [8086:7010] type 00 class 0x010180 conventional PCI endpoint
+[    0.101890] pci 0000:00:01.1: BAR 4 [io  0xc200-0xc20f]
+[    0.101964] pci 0000:00:01.1: BAR 0 [io  0x01f0-0x01f7]: legacy IDE quirk
+[    0.101967] pci 0000:00:01.1: BAR 1 [io  0x03f6]: legacy IDE quirk
+[    0.101968] pci 0000:00:01.1: BAR 2 [io  0x0170-0x0177]: legacy IDE quirk
+[    0.101969] pci 0000:00:01.1: BAR 3 [io  0x0376]: legacy IDE quirk
+[    0.102243] pci 0000:00:01.3: [8086:7113] type 00 class 0x068000 conventional PCI endpoint
+[    0.102918] pci 0000:00:01.3: quirk: [io  0x0600-0x063f] claimed by PIIX4 ACPI
+[    0.102937] pci 0000:00:01.3: quirk: [io  0x0700-0x070f] claimed by PIIX4 SMB
+[    0.103508] pci 0000:00:02.0: [1af4:1009] type 00 class 0x000200 conventional PCI endpoint
+[    0.105183] pci 0000:00:02.0: BAR 0 [io  0xc000-0xc03f]
+[    0.105202] pci 0000:00:02.0: BAR 1 [mem 0xfebf7000-0xfebf7fff]
+[    0.105263] pci 0000:00:02.0: BAR 4 [mem 0xfebd4000-0xfebd7fff 64bit pref]
+[    0.106877] pci 0000:00:03.0: [1af4:1009] type 00 class 0x000200 conventional PCI endpoint
+[    0.108856] pci 0000:00:03.0: BAR 0 [io  0xc040-0xc07f]
+[    0.108874] pci 0000:00:03.0: BAR 1 [mem 0xfebf8000-0xfebf8fff]
+[    0.108934] pci 0000:00:03.0: BAR 4 [mem 0xfebd8000-0xfebdbfff 64bit pref]
+[    0.110320] pci 0000:00:04.0: [8086:25ab] type 00 class 0x088000 conventional PCI endpoint
+[    0.111885] pci 0000:00:04.0: BAR 0 [mem 0xfebf9000-0xfebf900f]
+[    0.112854] pci 0000:00:05.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.114240] pci 0000:00:05.0: BAR 0 [io  0xc080-0xc0bf]
+[    0.114263] pci 0000:00:05.0: BAR 1 [mem 0xfebfa000-0xfebfafff]
+[    0.114325] pci 0000:00:05.0: BAR 4 [mem 0xfebdc000-0xfebdffff 64bit pref]
+[    0.116137] pci 0000:00:06.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.117421] pci 0000:00:06.0: BAR 0 [io  0xc0c0-0xc0ff]
+[    0.117440] pci 0000:00:06.0: BAR 1 [mem 0xfebfb000-0xfebfbfff]
+[    0.117499] pci 0000:00:06.0: BAR 4 [mem 0xfebe0000-0xfebe3fff 64bit pref]
+[    0.119053] pci 0000:00:07.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.120504] pci 0000:00:07.0: BAR 0 [io  0xc100-0xc13f]
+[    0.120523] pci 0000:00:07.0: BAR 1 [mem 0xfebfc000-0xfebfcfff]
+[    0.120585] pci 0000:00:07.0: BAR 4 [mem 0xfebe4000-0xfebe7fff 64bit pref]
+[    0.122679] pci 0000:00:08.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.123822] pci 0000:00:08.0: BAR 0 [io  0xc140-0xc17f]
+[    0.123840] pci 0000:00:08.0: BAR 1 [mem 0xfebfd000-0xfebfdfff]
+[    0.123900] pci 0000:00:08.0: BAR 4 [mem 0xfebe8000-0xfebebfff 64bit pref]
+[    0.125428] pci 0000:00:09.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.126515] pci 0000:00:09.0: BAR 0 [io  0xc180-0xc1bf]
+[    0.126533] pci 0000:00:09.0: BAR 1 [mem 0xfebfe000-0xfebfefff]
+[    0.126594] pci 0000:00:09.0: BAR 4 [mem 0xfebec000-0xfebeffff 64bit pref]
+[    0.128144] pci 0000:00:0a.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.129262] pci 0000:00:0a.0: BAR 0 [io  0xc1c0-0xc1ff]
+[    0.129280] pci 0000:00:0a.0: BAR 1 [mem 0xfebff000-0xfebfffff]
+[    0.129342] pci 0000:00:0a.0: BAR 4 [mem 0xfebf0000-0xfebf3fff 64bit pref]
+[    0.135636] ACPI: PCI: Interrupt link LNKA configured for IRQ 10
+[    0.135771] ACPI: PCI: Interrupt link LNKB configured for IRQ 10
+[    0.135896] ACPI: PCI: Interrupt link LNKC configured for IRQ 11
+[    0.136018] ACPI: PCI: Interrupt link LNKD configured for IRQ 11
+[    0.136082] ACPI: PCI: Interrupt link LNKS configured for IRQ 9
+[    0.136374] iommu: Default domain type: Translated
+[    0.136374] iommu: DMA domain TLB invalidation policy: lazy mode
+[    0.136374] pps_core: LinuxPPS API ver. 1 registered
+[    0.136374] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.136374] PTP clock support registered
+[    0.136374] EDAC MC: Ver: 3.0.0
+[    0.136374] NetLabel: Initializing
+[    0.136374] NetLabel:  domain hash size = 128
+[    0.136374] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.136374] NetLabel:  unlabeled traffic allowed by default
+[    0.136374] PCI: Using ACPI for IRQ routing
+[    0.136374] PCI: pci_cache_line_size set to 64 bytes
+[    0.136460] e820: register RAM buffer resource [mem 0x0009fc00-0x0009ffff]
+[    0.136464] e820: register RAM buffer resource [mem 0x7ffe0000-0x7fffffff]
+[    0.136475] hpet0: at MMIO 0xfed00000, IRQs 2, 8, 0
+[    0.136475] hpet0: 3 comparators, 64-bit 100.000000 MHz counter
+[    0.139037] clocksource: Switched to clocksource kvm-clock
+[    0.139177] VFS: Disk quotas dquot_6.6.0
+[    0.139186] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.139502] netfs: FS-Cache loaded
+[    0.139564] pnp: PnP ACPI init
+[    0.139665] pnp 00:02: [dma 2]
+[    0.139955] pnp: PnP ACPI: found 5 devices
+[    0.142477] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
+[    0.142535] NET: Registered PF_INET protocol family
+[    0.142582] IP idents hash table entries: 32768 (order: 6, 262144 bytes, linear)
+[    0.152312] tcp_listen_portaddr_hash hash table entries: 1024 (order: 2, 16384 bytes, linear)
+[    0.152319] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.152332] TCP established hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.152345] TCP bind hash table entries: 16384 (order: 7, 524288 bytes, linear)
+[    0.152378] TCP: Hash tables configured (established 16384 bind 16384)
+[    0.152435] MPTCP token hash table entries: 2048 (order: 4, 49152 bytes, linear)
+[    0.152446] UDP hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[    0.152453] UDP-Lite hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[    0.152486] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.152492] NET: Registered PF_XDP protocol family
+[    0.152504] pci_bus 0000:00: resource 4 [io  0x0000-0x0cf7 window]
+[    0.152508] pci_bus 0000:00: resource 5 [io  0x0d00-0xffff window]
+[    0.152509] pci_bus 0000:00: resource 6 [mem 0x000a0000-0x000bffff window]
+[    0.152511] pci_bus 0000:00: resource 7 [mem 0x80000000-0xfebfffff window]
+[    0.152512] pci_bus 0000:00: resource 8 [mem 0x100000000-0x17fffffff window]
+[    0.152588] pci 0000:00:01.0: PIIX3: Enabling Passive Release
+[    0.152611] pci 0000:00:00.0: Limiting direct PCI/PCI transfers
+[    0.152815] PCI: CLS 0 bytes, default 64
+[    0.152979] Trying to unpack rootfs image as initramfs...
+[    0.152987] clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x6a464ae9873, max_idle_ns: 881590529744 ns
+[    0.157553] Freeing initrd memory: 12692K
+[    0.158181] Initialise system trusted keyrings
+[    0.158188] Key type blacklist registered
+[    0.158254] workingset: timestamp_bits=36 max_order=19 bucket_order=0
+[    0.158564] SGI XFS with ACLs, security attributes, quota, no debug enabled
+[    0.158712] 9p: Installing v9fs 9p2000 file system support
+[    0.158882] integrity: Platform Keyring initialized
+[    0.159161] cryptd: max_cpu_qlen set to 1000
+[    0.165844] Key type asymmetric registered
+[    0.165845] Asymmetric key parser 'x509' registered
+[    0.165868] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 248)
+[    0.165908] io scheduler mq-deadline registered
+[    0.165909] io scheduler kyber registered
+[    0.165928] io scheduler bfq registered
+[    0.175475] ACPI: \_SB_.LNKB: Enabled at IRQ 10
+[    0.186474] ACPI: \_SB_.LNKC: Enabled at IRQ 11
+[    0.197465] ACPI: \_SB_.LNKA: Enabled at IRQ 10
+[    0.229893] ACPI: \_SB_.LNKD: Enabled at IRQ 11
+[    0.252736] Serial: 8250/16550 driver, 4 ports, IRQ sharing disabled
+[    0.252957] 00:03: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
+[    0.370629] loop: module loaded
+[    0.370786] tun: Universal TUN/TAP device driver, 1.6
+[    0.370862] rtc_cmos 00:04: RTC can wake from S4
+[    0.371613] rtc_cmos 00:04: registered as rtc0
+[    0.371726] rtc_cmos 00:04: setting system clock to 2026-11-06T09:17:37 UTC (1793956657)
+[    0.371805] rtc_cmos 00:04: alarms up to one day, y3k, 242 bytes nvram, hpet irqs
+[    0.371834] intel_pstate: CPU model not supported
+[    0.371858] hid: raw HID events driver (C) Jiri Kosina
+[    0.372117] NET: Registered PF_INET6 protocol family
+[    0.372385] Segment Routing with IPv6
+[    0.372392] In-situ OAM (IOAM) with IPv6
+[    0.372412] NET: Registered PF_PACKET protocol family
+[    0.372421] bridge: filtering via arp/ip/ip6tables is no longer available by default. Update your scripts to load br_netfilter if you need this.
+[    0.372463] 9pnet: Installing 9P2000 support
+[    0.375422] IPI shorthand broadcast: enabled
+[    0.376993] sched_clock: Marking stable (383212978, -7935939)->(386633968, -11356929)
+[    0.377111] registered taskstats version 1
+[    0.377212] Loading compiled-in X.509 certificates
+[    0.377683] Loaded X.509 cert 'Build time autogenerated kernel key: d1424aba97e5b78a90400dcad095464dbcbd105a'
+[    0.379453] Demotion targets for Node 0: null
+[    0.380337] Key type .fscrypt registered
+[    0.380339] Key type fscrypt-provisioning registered
+[    0.380362] ima: No TPM chip found, activating TPM-bypass!
+[    0.380370] ima: Allocated hash algorithm: sha256
+[    0.380380] ima: No architecture policies found
+[    0.380808] clk: Disabling unused clocks
+[    0.382186] Freeing unused decrypted memory: 2036K
+[    0.382703] Freeing unused kernel image (initmem) memory: 4024K
+[    0.382719] Write protecting the kernel read-only data: 32768k
+[    0.383082] Freeing unused kernel image (text/rodata gap) memory: 1940K
+[    0.383343] Freeing unused kernel image (rodata/data gap) memory: 1676K
+[    0.383350] Run /init as init process
+[    0.383352]   with arguments:
+[    0.383353]     /init
+[    0.383354]   with environment:
+[    0.383355]     HOME=/
+[    0.383355]     TERM=linux
+[    0.383356]     virtme_hostname=virtme-ng
+[    0.383357]     nr_open=1048576
+[    0.383357]     virtme_link_mods=/workspaces/repository/kprog/tv/build-kernel-x86/.virtme_mods/lib/modules/0.0.0
+[    0.383358]     virtme_initmount0=workspaces/repository
+[    0.383359]     virtme_rw_overlay0=/etc
+[    0.383359]     virtme_rw_overlay1=/lib
+[    0.383360]     virtme_rw_overlay2=/home
+[    0.383361]     virtme_rw_overlay3=/opt
+[    0.383361]     virtme_rw_overlay4=/srv
+[    0.383362]     virtme_rw_overlay5=/usr
+[    0.383362]     virtme_rw_overlay6=/var
+[    0.383363]     virtme_rw_overlay7=/tmp
+[    0.383364]     virtme_console=ttyS0
+[    0.383364]     virtme_chdir=workspaces/repository
+[    0.383365]     virtme_root_user=1
+[    0.383789] virtme initramfs: loading fuse.ko...
+[    0.385355] fuse: module verification failed: signature and/or required key missing - tainting kernel
+[    0.385375] fuse: disagrees about version of symbol super_setup_bdi_name
+[    0.385377] fuse: Unknown symbol super_setup_bdi_name (err -22)
+[    0.385380] fuse: disagrees about version of symbol posix_test_lock
+[    0.385380] fuse: Unknown symbol posix_test_lock (err -22)
+[    0.385383] fuse: disagrees about version of symbol truncate_inode_pages
+[    0.385384] fuse: Unknown symbol truncate_inode_pages (err -22)
+[    0.385393] fuse: disagrees about version of symbol pipe_lock
+[    0.385393] fuse: Unknown symbol pipe_lock (err -22)
+[    0.385396] fuse: disagrees about version of symbol generic_fillattr
+[    0.385396] fuse: Unknown symbol generic_fillattr (err -22)
+[    0.385401] fuse: disagrees about version of symbol setattr_prepare
+[    0.385402] fuse: Unknown symbol setattr_prepare (err -22)
+[    0.385404] fuse: disagrees about version of symbol vfs_fsync_range
+[    0.385405] fuse: Unknown symbol vfs_fsync_range (err -22)
+[    0.385409] fuse: disagrees about version of symbol filemap_migrate_folio
+[    0.385409] fuse: Unknown symbol filemap_migrate_folio (err -22)
+[    0.385413] fuse: disagrees about version of symbol clear_nlink
+[    0.385413] fuse: Unknown symbol clear_nlink (err -22)
+[    0.385417] fuse: disagrees about version of symbol file_check_and_advance_wb_err
+[    0.385418] fuse: Unknown symbol file_check_and_advance_wb_err (err -22)
+[    0.385423] fuse: disagrees about version of symbol d_alloc_parallel
+[    0.385423] fuse: Unknown symbol d_alloc_parallel (err -22)
+[    0.385430] fuse: disagrees about version of symbol d_instantiate
+[    0.385431] fuse: Unknown symbol d_instantiate (err -22)
+[    0.385439] fuse: disagrees about version of symbol clear_inode
+[    0.385440] fuse: Unknown symbol clear_inode (err -22)
+[    0.385443] fuse: disagrees about version of symbol find_pid_ns
+[    0.385443] fuse: Unknown symbol find_pid_ns (err -22)
+[    0.385449] fuse: disagrees about version of symbol dax_break_layout
+[    0.385449] fuse: Unknown symbol dax_break_layout (err -22)
+[    0.385455] fuse: disagrees about version of symbol simple_dir_inode_operations
+[    0.385456] fuse: Unknown symbol simple_dir_inode_operations (err -22)
+[    0.385457] fuse: disagrees about version of symbol d_dispose_if_unused
+[    0.385458] fuse: Unknown symbol d_dispose_if_unused (err -22)
+[    0.385463] fuse: disagrees about version of symbol pipe_unlock
+[    0.385464] fuse: Unknown symbol pipe_unlock (err -22)
+[    0.385467] fuse: disagrees about version of symbol unpin_folio
+[    0.385468] fuse: Unknown symbol unpin_folio (err -22)
+[    0.385470] fuse: disagrees about version of symbol fs_param_is_string
+[    0.385471] fuse: Unknown symbol fs_param_is_string (err -22)
+[    0.385475] fuse: disagrees about version of symbol folio_unlock
+[    0.385475] fuse: Unknown symbol folio_unlock (err -22)
+[    0.385478] fuse: disagrees about version of symbol new_inode
+[    0.385478] fuse: Unknown symbol new_inode (err -22)
+[    0.385482] fuse: disagrees about version of symbol filemap_map_pages
+[    0.385483] fuse: Unknown symbol filemap_map_pages (err -22)
+[    0.385486] fuse: disagrees about version of symbol filemap_flush_range
+[    0.385487] fuse: Unknown symbol filemap_flush_range (err -22)
+[    0.385490] fuse: disagrees about version of symbol dump_page
+[    0.385491] fuse: Unknown symbol dump_page (err -22)
+[    0.385493] fuse: disagrees about version of symbol trace_raw_output_prep
+[    0.385493] fuse: Unknown symbol trace_raw_output_prep (err -22)
+[    0.385496] fuse: disagrees about version of symbol forget_all_cached_acls
+[    0.385496] fuse: Unknown symbol forget_all_cached_acls (err -22)
+[    0.385498] fuse: disagrees about version of symbol init_special_inode
+[    0.385499] fuse: Unknown symbol init_special_inode (err -22)
+[    0.385501] fuse: disagrees about version of symbol unregister_filesystem
+[    0.385501] fuse: Unknown symbol unregister_filesystem (err -22)
+[    0.385507] fuse: disagrees about version of symbol task_active_pid_ns
+[    0.385508] fuse: Unknown symbol task_active_pid_ns (err -22)
+[    0.385511] fuse: disagrees about version of symbol retire_super
+[    0.385512] fuse: Unknown symbol retire_super (err -22)
+[    0.385519] fuse: disagrees about version of symbol __trace_trigger_soft_disabled
+[    0.385520] fuse: Unknown symbol __trace_trigger_soft_disabled (err -22)
+[    0.385521] fuse: disagrees about version of symbol filemap_fdatawrite_range
+[    0.385522] fuse: Unknown symbol filemap_fdatawrite_range (err -22)
+[    0.385525] fuse: disagrees about version of symbol d_alloc_name
+[    0.385526] fuse: Unknown symbol d_alloc_name (err -22)
+[    0.385529] fuse: disagrees about version of symbol replace_page_cache_folio
+[    0.385530] fuse: Unknown symbol replace_page_cache_folio (err -22)
+[    0.385533] fuse: disagrees about version of symbol inode_query_iversion
+[    0.385534] fuse: Unknown symbol inode_query_iversion (err -22)
+[    0.385536] fuse: disagrees about version of symbol kill_fasync
+[    0.385537] fuse: Unknown symbol kill_fasync (err -22)
+[    0.385538] fuse: disagrees about version of symbol d_make_root
+[    0.385539] fuse: Unknown symbol d_make_root (err -22)
+[    0.385541] fuse: disagrees about version of symbol d_same_name
+[    0.385542] fuse: Unknown symbol d_same_name (err -22)
+[    0.385544] fuse: disagrees about version of symbol trace_event_printf
+[    0.385544] fuse: Unknown symbol trace_event_printf (err -22)
+[    0.385550] fuse: disagrees about version of symbol sb_set_blocksize
+[    0.385551] fuse: Unknown symbol sb_set_blocksize (err -22)
+[    0.385553] fuse: disagrees about version of symbol fget
+[    0.385553] fuse: Unknown symbol fget (err -22)
+[    0.385555] fuse: disagrees about version of symbol simple_fill_super
+[    0.385556] fuse: Unknown symbol simple_fill_super (err -22)
+[    0.385557] fuse: disagrees about version of symbol end_dirop
+[    0.385558] fuse: Unknown symbol end_dirop (err -22)
+[    0.385560] fuse: disagrees about version of symbol sync_filesystem
+[    0.385561] fuse: Unknown symbol sync_filesystem (err -22)
+[    0.385563] fuse: disagrees about version of symbol noop_dirty_folio
+[    0.385563] fuse: Unknown symbol noop_dirty_folio (err -22)
+[    0.385565] fuse: disagrees about version of symbol sget_fc
+[    0.385566] fuse: Unknown symbol sget_fc (err -22)
+[    0.385568] fuse: disagrees about version of symbol param_set_uint
+[    0.385568] fuse: Unknown symbol param_set_uint (err -22)
+[    0.385570] fuse: disagrees about version of symbol d_splice_alias
+[    0.385571] fuse: Unknown symbol d_splice_alias (err -22)
+[    0.385575] fuse: disagrees about version of symbol direct_write_fallback
+[    0.385576] fuse: Unknown symbol direct_write_fallback (err -22)
+[    0.385578] fuse: disagrees about version of symbol trace_event_raw_init
+[    0.385579] fuse: Unknown symbol trace_event_raw_init (err -22)
+[    0.385586] fuse: disagrees about version of symbol generic_permission
+[    0.385586] fuse: Unknown symbol generic_permission (err -22)
+[    0.385590] fuse: disagrees about version of symbol truncate_pagecache_range
+[    0.385590] fuse: Unknown symbol truncate_pagecache_range (err -22)
+[    0.385594] fuse: disagrees about version of symbol invalidate_inode_pages2_range
+[    0.385595] fuse: Unknown symbol invalidate_inode_pages2_range (err -22)
+[    0.385597] fuse: disagrees about version of symbol posix_lock_file
+[    0.385597] fuse: Unknown symbol posix_lock_file (err -22)
+[    0.385600] fuse: disagrees about version of symbol inode_just_drop
+[    0.385600] fuse: Unknown symbol inode_just_drop (err -22)
+[    0.385602] fuse: disagrees about version of symbol finish_open
+[    0.385603] fuse: Unknown symbol finish_open (err -22)
+[    0.385605] fuse: disagrees about version of symbol dax_iomap_rw
+[    0.385606] fuse: Unknown symbol dax_iomap_rw (err -22)
+[    0.385608] fuse: disagrees about version of symbol iput
+[    0.385609] fuse: Unknown symbol iput (err -22)
+[    0.385611] fuse: disagrees about version of symbol filemap_range_has_writeback
+[    0.385612] fuse: Unknown symbol filemap_range_has_writeback (err -22)
+[    0.385614] fuse: disagrees about version of symbol kiocb_modified
+[    0.385615] fuse: Unknown symbol kiocb_modified (err -22)
+[    0.385617] fuse: disagrees about version of symbol logfc
+[    0.385617] fuse: Unknown symbol logfc (err -22)
+[    0.385621] fuse: disagrees about version of symbol iter_file_splice_write
+[    0.385622] fuse: Unknown symbol iter_file_splice_write (err -22)
+[    0.385625] fuse: disagrees about version of symbol folio_mark_dirty_lock
+[    0.385626] fuse: Unknown symbol folio_mark_dirty_lock (err -22)
+[    0.385628] fuse: disagrees about version of symbol init_pid_ns
+[    0.385629] fuse: Unknown symbol init_pid_ns (err -22)
+[    0.385631] fuse: disagrees about version of symbol dax_iomap_fault
+[    0.385632] fuse: Unknown symbol dax_iomap_fault (err -22)
+[    0.385635] fuse: disagrees about version of symbol d_lookup
+[    0.385636] fuse: Unknown symbol d_lookup (err -22)
+[    0.385646] fuse: disagrees about version of symbol register_filesystem
+[    0.385647] fuse: Unknown symbol register_filesystem (err -22)
+[    0.385649] fuse: disagrees about version of symbol folio_add_lru
+[    0.385649] fuse: Unknown symbol folio_add_lru (err -22)
+[    0.385653] fuse: disagrees about version of symbol folio_clear_dirty_for_io
+[    0.385654] fuse: Unknown symbol folio_clear_dirty_for_io (err -22)
+[    0.385657] fuse: disagrees about version of symbol sync_inode_metadata
+[    0.385657] fuse: Unknown symbol sync_inode_metadata (err -22)
+[    0.385659] fuse: disagrees about version of symbol simple_empty
+[    0.385660] fuse: Unknown symbol simple_empty (err -22)
+[    0.385670] fuse: disagrees about version of symbol vfs_setpos
+[    0.385670] fuse: Unknown symbol vfs_setpos (err -22)
+[    0.385676] fuse: disagrees about version of symbol shrink_dcache_parent
+[    0.385676] fuse: Unknown symbol shrink_dcache_parent (err -22)
+[    0.385682] fuse: disagrees about version of symbol d_prune_aliases
+[    0.385682] fuse: Unknown symbol d_prune_aliases (err -22)
+[    0.385684] fuse: disagrees about version of symbol __put_cred
+[    0.385685] fuse: Unknown symbol __put_cred (err -22)
+[    0.385690] fuse: disagrees about version of symbol get_tree_nodev
+[    0.385691] fuse: Unknown symbol get_tree_nodev (err -22)
+[    0.385693] fuse: disagrees about version of symbol splice_file_range
+[    0.385694] fuse: Unknown symbol splice_file_range (err -22)
+[    0.385696] fuse: disagrees about version of symbol trace_event_buffer_commit
+[    0.385697] fuse: Unknown symbol trace_event_buffer_commit (err -22)
+[    0.385699] fuse: disagrees about version of symbol simple_inode_init_ts
+[    0.385700] fuse: Unknown symbol simple_inode_init_ts (err -22)
+[    0.385703] fuse: disagrees about version of symbol d_mark_dontcache
+[    0.385704] fuse: Unknown symbol d_mark_dontcache (err -22)
+[    0.385707] fuse: disagrees about version of symbol locks_lock_inode_wait
+[    0.385708] fuse: Unknown symbol locks_lock_inode_wait (err -22)
+[    0.385711] fuse: disagrees about version of symbol fs_param_is_u32
+[    0.385711] fuse: Unknown symbol fs_param_is_u32 (err -22)
+[    0.385714] fuse: disagrees about version of symbol inode_newsize_ok
+[    0.385714] fuse: Unknown symbol inode_newsize_ok (err -22)
+[    0.385717] fuse: disagrees about version of symbol d_drop
+[    0.385717] fuse: Unknown symbol d_drop (err -22)
+[    0.385721] fuse: disagrees about version of symbol kill_block_super
+[    0.385721] fuse: Unknown symbol kill_block_super (err -22)
+[    0.385723] fuse: disagrees about version of symbol unlock_new_inode
+[    0.385724] fuse: Unknown symbol unlock_new_inode (err -22)
+[    0.385730] fuse: disagrees about version of symbol posix_acl_from_xattr
+[    0.385731] fuse: Unknown symbol posix_acl_from_xattr (err -22)
+[    0.385736] fuse: disagrees about version of symbol simple_remove_by_name
+[    0.385736] fuse: Unknown symbol simple_remove_by_name (err -22)
+[    0.385739] fuse: disagrees about version of symbol param_get_uint
+[    0.385739] fuse: Unknown symbol param_get_uint (err -22)
+[    0.385748] fuse: disagrees about version of symbol make_kuid
+[    0.385749] fuse: Unknown symbol make_kuid (err -22)
+[    0.385751] fuse: disagrees about version of symbol truncate_inode_pages_final
+[    0.385752] fuse: Unknown symbol truncate_inode_pages_final (err -22)
+[    0.385754] fuse: disagrees about version of symbol generic_setlease
+[    0.385754] fuse: Unknown symbol generic_setlease (err -22)
+[    0.385757] fuse: disagrees about version of symbol fs_kobj
+[    0.385757] fuse: Unknown symbol fs_kobj (err -22)
+[    0.385760] fuse: disagrees about version of symbol __filemap_set_wb_err
+[    0.385760] fuse: Unknown symbol __filemap_set_wb_err (err -22)
+[    0.385763] fuse: disagrees about version of symbol generic_file_mmap
+[    0.385763] fuse: Unknown symbol generic_file_mmap (err -22)
+[    0.385766] fuse: disagrees about version of symbol simple_dir_operations
+[    0.385766] fuse: Unknown symbol simple_dir_operations (err -22)
+[    0.385774] fuse: disagrees about version of symbol put_pid_ns
+[    0.385774] fuse: Unknown symbol put_pid_ns (err -22)
+[    0.385775] fuse: disagrees about version of symbol setattr_should_drop_suidgid
+[    0.385776] fuse: Unknown symbol setattr_should_drop_suidgid (err -22)
+[    0.385780] fuse: disagrees about version of symbol fs_param_is_gid
+[    0.385781] fuse: Unknown symbol fs_param_is_gid (err -22)
+[    0.385783] fuse: disagrees about version of symbol fs_context_for_submount
+[    0.385783] fuse: Unknown symbol fs_context_for_submount (err -22)
+[    0.385784] fuse: disagrees about version of symbol inode_init_once
+[    0.385785] fuse: Unknown symbol inode_init_once (err -22)
+[    0.385786] fuse: disagrees about version of symbol file_write_and_wait_range
+[    0.385787] fuse: Unknown symbol file_write_and_wait_range (err -22)
+[    0.385788] fuse: disagrees about version of symbol compat_ptr_ioctl
+[    0.385788] fuse: Unknown symbol compat_ptr_ioctl (err -22)
+[    0.385790] fuse: disagrees about version of symbol nosteal_pipe_buf_ops
+[    0.385791] fuse: Unknown symbol nosteal_pipe_buf_ops (err -22)
+[    0.385792] fuse: disagrees about version of symbol ilookup5
+[    0.385792] fuse: Unknown symbol ilookup5 (err -22)
+[    0.385794] fuse: disagrees about version of symbol prepare_creds
+[    0.385794] fuse: Unknown symbol prepare_creds (err -22)
+[    0.385795] fuse: disagrees about version of symbol inode_nohighmem
+[    0.385796] fuse: Unknown symbol inode_nohighmem (err -22)
+[    0.385798] fuse: disagrees about version of symbol release_pages
+[    0.385799] fuse: Unknown symbol release_pages (err -22)
+[    0.385801] fuse: disagrees about version of symbol page_get_link_raw
+[    0.385801] fuse: Unknown symbol page_get_link_raw (err -22)
+[    0.385802] fuse: disagrees about version of symbol perf_trace_run_bpf_submit
+[    0.385803] fuse: Unknown symbol perf_trace_run_bpf_submit (err -22)
+[    0.385804] fuse: disagrees about version of symbol generic_file_direct_write
+[    0.385805] fuse: Unknown symbol generic_file_direct_write (err -22)
+[    0.385806] fuse: disagrees about version of symbol fput
+[    0.385806] fuse: Unknown symbol fput (err -22)
+[    0.385808] fuse: disagrees about version of symbol shrink_dcache_sb
+[    0.385808] fuse: Unknown symbol shrink_dcache_sb (err -22)
+[    0.385810] fuse: disagrees about version of symbol generic_file_read_iter
+[    0.385810] fuse: Unknown symbol generic_file_read_iter (err -22)
+[    0.385811] fuse: disagrees about version of symbol inode_maybe_inc_iversion
+[    0.385812] fuse: Unknown symbol inode_maybe_inc_iversion (err -22)
+[    0.385814] fuse: disagrees about version of symbol thp_get_unmapped_area
+[    0.385814] fuse: Unknown symbol thp_get_unmapped_area (err -22)
+[    0.385816] fuse: disagrees about version of symbol truncate_pagecache
+[    0.385816] fuse: Unknown symbol truncate_pagecache (err -22)
+[    0.385818] fuse: disagrees about version of symbol put_fs_context
+[    0.385819] fuse: Unknown symbol put_fs_context (err -22)
+[    0.385823] fuse: disagrees about version of symbol file_update_time
+[    0.385823] fuse: Unknown symbol file_update_time (err -22)
+[    0.385825] fuse: disagrees about version of symbol set_nlink
+[    0.385825] fuse: Unknown symbol set_nlink (err -22)
+[    0.385827] fuse: disagrees about version of symbol fget_raw
+[    0.385828] fuse: Unknown symbol fget_raw (err -22)
+[    0.385830] fuse: disagrees about version of symbol from_kgid
+[    0.385830] fuse: Unknown symbol from_kgid (err -22)
+[    0.385832] fuse: disagrees about version of symbol const_current_task
+[    0.385832] fuse: Unknown symbol const_current_task (err -22)
+[    0.385833] fuse: disagrees about version of symbol fasync_helper
+[    0.385834] fuse: Unknown symbol fasync_helper (err -22)
+[    0.385835] fuse: disagrees about version of symbol trace_event_reg
+[    0.385836] fuse: Unknown symbol trace_event_reg (err -22)
+[    0.385839] fuse: disagrees about version of symbol folio_wait_writeback
+[    0.385839] fuse: Unknown symbol folio_wait_writeback (err -22)
+[    0.385841] fuse: disagrees about version of symbol __io_uring_cmd_do_in_task
+[    0.385842] fuse: Unknown symbol __io_uring_cmd_do_in_task (err -22)
+[    0.385843] fuse: disagrees about version of symbol file_remove_privs
+[    0.385843] fuse: Unknown symbol file_remove_privs (err -22)
+[    0.385846] fuse: disagrees about version of symbol write_inode_now
+[    0.385847] fuse: Unknown symbol write_inode_now (err -22)
+[    0.385848] fuse: disagrees about version of symbol start_removing_dentry
+[    0.385849] fuse: Unknown symbol start_removing_dentry (err -22)
+[    0.385850] fuse: disagrees about version of symbol d_obtain_alias
+[    0.385851] fuse: Unknown symbol d_obtain_alias (err -22)
+[    0.385852] fuse: disagrees about version of symbol file_modified
+[    0.385852] fuse: Unknown symbol file_modified (err -22)
+[    0.385855] fuse: disagrees about version of symbol finish_no_open
+[    0.385856] fuse: Unknown symbol finish_no_open (err -22)
+[    0.385858] fuse: disagrees about version of symbol bpf_trace_run1
+[    0.385859] fuse: Unknown symbol bpf_trace_run1 (err -22)
+[    0.385860] fuse: disagrees about version of symbol folio_alloc_noprof
+[    0.385861] fuse: Unknown symbol folio_alloc_noprof (err -22)
+[    0.385862] fuse: disagrees about version of symbol from_kuid
+[    0.385863] fuse: Unknown symbol from_kuid (err -22)
+[    0.385864] fuse: disagrees about version of symbol current_in_userns
+[    0.385865] fuse: Unknown symbol current_in_userns (err -22)
+[    0.385866] fuse: disagrees about version of symbol fc_mount
+[    0.385867] fuse: Unknown symbol fc_mount (err -22)
+[    0.385871] fuse: disagrees about version of symbol dax_break_layout_final
+[    0.385872] fuse: Unknown symbol dax_break_layout_final (err -22)
+[    0.385877] fuse: disagrees about version of symbol in_group_or_capable
+[    0.385878] fuse: Unknown symbol in_group_or_capable (err -22)
+[    0.385879] fuse: disagrees about version of symbol make_kgid
+[    0.385879] fuse: Unknown symbol make_kgid (err -22)
+[    0.385881] fuse: disagrees about version of symbol d_delete
+[    0.385881] fuse: Unknown symbol d_delete (err -22)
+[    0.385883] fuse: disagrees about version of symbol set_default_d_op
+[    0.385883] fuse: Unknown symbol set_default_d_op (err -22)
+[    0.385885] fuse: disagrees about version of symbol __kmem_cache_create_args
+[    0.385885] fuse: Unknown symbol __kmem_cache_create_args (err -22)
+[    0.385886] fuse: disagrees about version of symbol from_kgid_munged
+[    0.385887] fuse: Unknown symbol from_kgid_munged (err -22)
+[    0.385892] fuse: disagrees about version of symbol nonseekable_open
+[    0.385892] fuse: Unknown symbol nonseekable_open (err -22)
+[    0.385894] fuse: disagrees about version of symbol dax_finish_sync_fault
+[    0.385894] fuse: Unknown symbol dax_finish_sync_fault (err -22)
+[    0.385901] fuse: disagrees about version of symbol noop_direct_IO
+[    0.385901] fuse: Unknown symbol noop_direct_IO (err -22)
+[    0.385904] fuse: disagrees about version of symbol __filemap_get_folio_mpol
+[    0.385905] fuse: Unknown symbol __filemap_get_folio_mpol (err -22)
+[    0.385907] fuse: disagrees about version of symbol igrab
+[    0.385907] fuse: Unknown symbol igrab (err -22)
+[    0.385910] fuse: disagrees about version of symbol generic_read_dir
+[    0.385910] fuse: Unknown symbol generic_read_dir (err -22)
+[    0.385912] fuse: disagrees about version of symbol trace_event_buffer_reserve
+[    0.385913] fuse: Unknown symbol trace_event_buffer_reserve (err -22)
+[    0.385916] fuse: disagrees about version of symbol param_ops_bool
+[    0.385917] fuse: Unknown symbol param_ops_bool (err -22)
+[    0.385919] fuse: disagrees about version of symbol try_lookup_noperm
+[    0.385920] fuse: Unknown symbol try_lookup_noperm (err -22)
+[    0.385921] fuse: disagrees about version of symbol d_find_alias
+[    0.385922] fuse: Unknown symbol d_find_alias (err -22)
+[    0.385923] fuse: disagrees about version of symbol invalidate_inode_pages2
+[    0.385924] fuse: Unknown symbol invalidate_inode_pages2 (err -22)
+[    0.385926] fuse: disagrees about version of symbol inode_set_ctime_current
+[    0.385927] fuse: Unknown symbol inode_set_ctime_current (err -22)
+[    0.385928] fuse: disagrees about version of symbol inc_nlink
+[    0.385928] fuse: Unknown symbol inc_nlink (err -22)
+[    0.385931] fuse: disagrees about version of symbol __folio_put
+[    0.385931] fuse: Unknown symbol __folio_put (err -22)
+[    0.385935] fuse: disagrees about version of symbol get_tree_bdev
+[    0.385935] fuse: Unknown symbol get_tree_bdev (err -22)
+[    0.385938] fuse: disagrees about version of symbol set_anon_super_fc
+[    0.385938] fuse: Unknown symbol set_anon_super_fc (err -22)
+[    0.385941] fuse: disagrees about version of symbol dput
+[    0.385942] fuse: Unknown symbol dput (err -22)
+[    0.385943] fuse: disagrees about version of symbol d_make_persistent
+[    0.385944] fuse: Unknown symbol d_make_persistent (err -22)
+[    0.385947] fuse: disagrees about version of symbol deactivate_locked_super
+[    0.385948] fuse: Unknown symbol deactivate_locked_super (err -22)
+[    0.385949] fuse: disagrees about version of symbol touch_atime
+[    0.385950] fuse: Unknown symbol touch_atime (err -22)
+[    0.385952] fuse: disagrees about version of symbol __d_lookup_unhash_wake
+[    0.385953] fuse: Unknown symbol __d_lookup_unhash_wake (err -22)
+[    0.385955] fuse: disagrees about version of symbol pid_nr_ns
+[    0.385956] fuse: Unknown symbol pid_nr_ns (err -22)
+[    0.385958] fuse: disagrees about version of symbol generic_file_open
+[    0.385959] fuse: Unknown symbol generic_file_open (err -22)
+[    0.385960] fuse: disagrees about version of symbol truncate_inode_pages_range
+[    0.385961] fuse: Unknown symbol truncate_inode_pages_range (err -22)
+[    0.385963] fuse: disagrees about version of symbol __io_uring_cmd_done
+[    0.385963] fuse: Unknown symbol __io_uring_cmd_done (err -22)
+[    0.385965] fuse: disagrees about version of symbol __put_user_ns
+[    0.385965] fuse: Unknown symbol __put_user_ns (err -22)
+[    0.385967] fuse: disagrees about version of symbol alloc_pages_noprof
+[    0.385967] fuse: Unknown symbol alloc_pages_noprof (err -22)
+[    0.385969] fuse: disagrees about version of symbol __folio_lock
+[    0.385969] fuse: Unknown symbol __folio_lock (err -22)
+[    0.385971] fuse: disagrees about version of symbol stream_open
+[    0.385972] fuse: Unknown symbol stream_open (err -22)
+[    0.385974] fuse: disagrees about version of symbol rcuwait_wake_up
+[    0.385974] fuse: Unknown symbol rcuwait_wake_up (err -22)
+[    0.385981] fuse: disagrees about version of symbol add_to_pipe
+[    0.385982] fuse: Unknown symbol add_to_pipe (err -22)
+[    0.385983] fuse: disagrees about version of symbol __fs_parse
+[    0.385984] fuse: Unknown symbol __fs_parse (err -22)
+[    0.385985] fuse: disagrees about version of symbol filemap_splice_read
+[    0.385986] fuse: Unknown symbol filemap_splice_read (err -22)
+[    0.385987] fuse: disagrees about version of symbol posix_acl_to_xattr
+[    0.385988] fuse: Unknown symbol posix_acl_to_xattr (err -22)
+[    0.385989] fuse: disagrees about version of symbol kill_anon_super
+[    0.385990] fuse: Unknown symbol kill_anon_super (err -22)
+[    0.385991] fuse: disagrees about version of symbol from_kuid_munged
+[    0.385992] fuse: Unknown symbol from_kuid_munged (err -22)
+[    0.385994] fuse: disagrees about version of symbol iget5_locked
+[    0.385995] fuse: Unknown symbol iget5_locked (err -22)
+[    0.385997] fuse: disagrees about version of symbol security_dentry_init_security
+[    0.385998] fuse: Unknown symbol security_dentry_init_security (err -22)
+[    0.385999] fuse: disagrees about version of symbol filemap_write_and_wait_range
+[    0.386000] fuse: Unknown symbol filemap_write_and_wait_range (err -22)
+[    0.386002] fuse: disagrees about version of symbol get_tree_single
+[    0.386003] fuse: Unknown symbol get_tree_single (err -22)
+[    0.386005] fuse: disagrees about version of symbol generic_write_checks
+[    0.386006] fuse: Unknown symbol generic_write_checks (err -22)
+[    0.386008] fuse: disagrees about version of symbol __remove_inode_hash
+[    0.386009] fuse: Unknown symbol __remove_inode_hash (err -22)
+[    0.386012] fuse: disagrees about version of symbol __vma_start_write
+[    0.386012] fuse: Unknown symbol __vma_start_write (err -22)
+[    0.386015] fuse: disagrees about version of symbol filemap_fault
+[    0.386015] fuse: Unknown symbol filemap_fault (err -22)
+[    0.386017] fuse: disagrees about version of symbol d_invalidate
+[    0.386017] fuse: Unknown symbol d_invalidate (err -22)
+[    0.386019] fuse: disagrees about version of symbol __mark_inode_dirty
+[    0.386019] fuse: Unknown symbol __mark_inode_dirty (err -22)
+[    0.386022] fuse: disagrees about version of symbol generic_file_llseek
+[    0.386022] fuse: Unknown symbol generic_file_llseek (err -22)
+[    0.386030] fuse: disagrees about version of symbol io_uring_cmd_mark_cancelable
+[    0.386030] fuse: Unknown symbol io_uring_cmd_mark_cancelable (err -22)
+[    0.386034] fuse: disagrees about version of symbol drop_nlink
+[    0.386035] fuse: Unknown symbol drop_nlink (err -22)
+[    0.386037] fuse: disagrees about version of symbol filemap_check_errors
+[    0.386038] fuse: Unknown symbol filemap_check_errors (err -22)
+[    0.386040] fuse: disagrees about version of symbol kmalloc_caches
+[    0.386041] fuse: Unknown symbol kmalloc_caches (err -22)
+[    0.386043] fuse: disagrees about version of symbol inode_set_ctime_to_ts
+[    0.386043] fuse: Unknown symbol inode_set_ctime_to_ts (err -22)
+[    0.386045] fuse: disagrees about version of symbol fs_param_is_uid
+[    0.386046] fuse: Unknown symbol fs_param_is_uid (err -22)
+[    0.386047] fuse: disagrees about version of symbol bdi_set_max_ratio
+[    0.386048] fuse: Unknown symbol bdi_set_max_ratio (err -22)
+[    0.386049] fuse: disagrees about version of symbol kmem_cache_destroy
+[    0.386050] fuse: Unknown symbol kmem_cache_destroy (err -22)
+[    0.416393] fuse: disagrees about version of symbol super_setup_bdi_name
+[    0.416399] fuse: Unknown symbol super_setup_bdi_name (err -22)
+[    0.416403] fuse: disagrees about version of symbol posix_test_lock
+[    0.416404] fuse: Unknown symbol posix_test_lock (err -22)
+[    0.416407] fuse: disagrees about version of symbol truncate_inode_pages
+[    0.416408] fuse: Unknown symbol truncate_inode_pages (err -22)
+[    0.416416] fuse: disagrees about version of symbol pipe_lock
+[    0.416417] fuse: Unknown symbol pipe_lock (err -22)
+[    0.416419] fuse: disagrees about version of symbol generic_fillattr
+[    0.416420] fuse: Unknown symbol generic_fillattr (err -22)
+[    0.416425] fuse: disagrees about version of symbol setattr_prepare
+[    0.416426] fuse: Unknown symbol setattr_prepare (err -22)
+[    0.416427] fuse: disagrees about version of symbol vfs_fsync_range
+[    0.416428] fuse: Unknown symbol vfs_fsync_range (err -22)
+[    0.416431] fuse: disagrees about version of symbol filemap_migrate_folio
+[    0.416432] fuse: Unknown symbol filemap_migrate_folio (err -22)
+[    0.416434] fuse: disagrees about version of symbol clear_nlink
+[    0.416435] fuse: Unknown symbol clear_nlink (err -22)
+[    0.416439] fuse: disagrees about version of symbol file_check_and_advance_wb_err
+[    0.416439] fuse: Unknown symbol file_check_and_advance_wb_err (err -22)
+[    0.416444] fuse: disagrees about version of symbol d_alloc_parallel
+[    0.416445] fuse: Unknown symbol d_alloc_parallel (err -22)
+[    0.416451] fuse: disagrees about version of symbol d_instantiate
+[    0.416452] fuse: Unknown symbol d_instantiate (err -22)
+[    0.416460] fuse: disagrees about version of symbol clear_inode
+[    0.416461] fuse: Unknown symbol clear_inode (err -22)
+[    0.416463] fuse: disagrees about version of symbol find_pid_ns
+[    0.416464] fuse: Unknown symbol find_pid_ns (err -22)
+[    0.416470] fuse: disagrees about version of symbol dax_break_layout
+[    0.416470] fuse: Unknown symbol dax_break_layout (err -22)
+[    0.416476] fuse: disagrees about version of symbol simple_dir_inode_operations
+[    0.416477] fuse: Unknown symbol simple_dir_inode_operations (err -22)
+[    0.416479] fuse: disagrees about version of symbol d_dispose_if_unused
+[    0.416479] fuse: Unknown symbol d_dispose_if_unused (err -22)
+[    0.416484] fuse: disagrees about version of symbol pipe_unlock
+[    0.416485] fuse: Unknown symbol pipe_unlock (err -22)
+[    0.416489] fuse: disagrees about version of symbol unpin_folio
+[    0.416489] fuse: Unknown symbol unpin_folio (err -22)
+[    0.416491] fuse: disagrees about version of symbol fs_param_is_string
+[    0.416492] fuse: Unknown symbol fs_param_is_string (err -22)
+[    0.416496] fuse: disagrees about version of symbol folio_unlock
+[    0.416497] fuse: Unknown symbol folio_unlock (err -22)
+[    0.416500] fuse: disagrees about version of symbol new_inode
+[    0.416500] fuse: Unknown symbol new_inode (err -22)
+[    0.416504] fuse: disagrees about version of symbol filemap_map_pages
+[    0.416505] fuse: Unknown symbol filemap_map_pages (err -22)
+[    0.416509] fuse: disagrees about version of symbol filemap_flush_range
+[    0.416509] fuse: Unknown symbol filemap_flush_range (err -22)
+[    0.416513] fuse: disagrees about version of symbol dump_page
+[    0.416514] fuse: Unknown symbol dump_page (err -22)
+[    0.416516] fuse: disagrees about version of symbol trace_raw_output_prep
+[    0.416516] fuse: Unknown symbol trace_raw_output_prep (err -22)
+[    0.416518] fuse: disagrees about version of symbol forget_all_cached_acls
+[    0.416519] fuse: Unknown symbol forget_all_cached_acls (err -22)
+[    0.416521] fuse: disagrees about version of symbol init_special_inode
+[    0.416522] fuse: Unknown symbol init_special_inode (err -22)
+[    0.416524] fuse: disagrees about version of symbol unregister_filesystem
+[    0.416524] fuse: Unknown symbol unregister_filesystem (err -22)
+[    0.416530] fuse: disagrees about version of symbol task_active_pid_ns
+[    0.416531] fuse: Unknown symbol task_active_pid_ns (err -22)
+[    0.416535] fuse: disagrees about version of symbol retire_super
+[    0.416535] fuse: Unknown symbol retire_super (err -22)
+[    0.416542] fuse: disagrees about version of symbol __trace_trigger_soft_disabled
+[    0.416542] fuse: Unknown symbol __trace_trigger_soft_disabled (err -22)
+[    0.416544] fuse: disagrees about version of symbol filemap_fdatawrite_range
+[    0.416545] fuse: Unknown symbol filemap_fdatawrite_range (err -22)
+[    0.416548] fuse: disagrees about version of symbol d_alloc_name
+[    0.416549] fuse: Unknown symbol d_alloc_name (err -22)
+[    0.416552] fuse: disagrees about version of symbol replace_page_cache_folio
+[    0.416553] fuse: Unknown symbol replace_page_cache_folio (err -22)
+[    0.416556] fuse: disagrees about version of symbol inode_query_iversion
+[    0.416557] fuse: Unknown symbol inode_query_iversion (err -22)
+[    0.416559] fuse: disagrees about version of symbol kill_fasync
+[    0.416559] fuse: Unknown symbol kill_fasync (err -22)
+[    0.416561] fuse: disagrees about version of symbol d_make_root
+[    0.416562] fuse: Unknown symbol d_make_root (err -22)
+[    0.416564] fuse: disagrees about version of symbol d_same_name
+[    0.416565] fuse: Unknown symbol d_same_name (err -22)
+[    0.416567] fuse: disagrees about version of symbol trace_event_printf
+[    0.416568] fuse: Unknown symbol trace_event_printf (err -22)
+[    0.416573] fuse: disagrees about version of symbol sb_set_blocksize
+[    0.416574] fuse: Unknown symbol sb_set_blocksize (err -22)
+[    0.416576] fuse: disagrees about version of symbol fget
+[    0.416576] fuse: Unknown symbol fget (err -22)
+[    0.416578] fuse: disagrees about version of symbol simple_fill_super
+[    0.416579] fuse: Unknown symbol simple_fill_super (err -22)
+[    0.416581] fuse: disagrees about version of symbol end_dirop
+[    0.416581] fuse: Unknown symbol end_dirop (err -22)
+[    0.416583] fuse: disagrees about version of symbol sync_filesystem
+[    0.416584] fuse: Unknown symbol sync_filesystem (err -22)
+[    0.416586] fuse: disagrees about version of symbol noop_dirty_folio
+[    0.416586] fuse: Unknown symbol noop_dirty_folio (err -22)
+[    0.416588] fuse: disagrees about version of symbol sget_fc
+[    0.416589] fuse: Unknown symbol sget_fc (err -22)
+[    0.416592] fuse: disagrees about version of symbol param_set_uint
+[    0.416592] fuse: Unknown symbol param_set_uint (err -22)
+[    0.416594] fuse: disagrees about version of symbol d_splice_alias
+[    0.416595] fuse: Unknown symbol d_splice_alias (err -22)
+[    0.416599] fuse: disagrees about version of symbol direct_write_fallback
+[    0.416600] fuse: Unknown symbol direct_write_fallback (err -22)
+[    0.416602] fuse: disagrees about version of symbol trace_event_raw_init
+[    0.416603] fuse: Unknown symbol trace_event_raw_init (err -22)
+[    0.416609] fuse: disagrees about version of symbol generic_permission
+[    0.416610] fuse: Unknown symbol generic_permission (err -22)
+[    0.416613] fuse: disagrees about version of symbol truncate_pagecache_range
+[    0.416614] fuse: Unknown symbol truncate_pagecache_range (err -22)
+[    0.416618] fuse: disagrees about version of symbol invalidate_inode_pages2_range
+[    0.416619] fuse: Unknown symbol invalidate_inode_pages2_range (err -22)
+[    0.416620] fuse: disagrees about version of symbol posix_lock_file
+[    0.416621] fuse: Unknown symbol posix_lock_file (err -22)
+[    0.416623] fuse: disagrees about version of symbol inode_just_drop
+[    0.416624] fuse: Unknown symbol inode_just_drop (err -22)
+[    0.416626] fuse: disagrees about version of symbol finish_open
+[    0.416627] fuse: Unknown symbol finish_open (err -22)
+[    0.416629] fuse: disagrees about version of symbol dax_iomap_rw
+[    0.416630] fuse: Unknown symbol dax_iomap_rw (err -22)
+[    0.416632] fuse: disagrees about version of symbol iput
+[    0.416632] fuse: Unknown symbol iput (err -22)
+[    0.416635] fuse: disagrees about version of symbol filemap_range_has_writeback
+[    0.416635] fuse: Unknown symbol filemap_range_has_writeback (err -22)
+[    0.416637] fuse: disagrees about version of symbol kiocb_modified
+[    0.416638] fuse: Unknown symbol kiocb_modified (err -22)
+[    0.416640] fuse: disagrees about version of symbol logfc
+[    0.416641] fuse: Unknown symbol logfc (err -22)
+[    0.416644] fuse: disagrees about version of symbol iter_file_splice_write
+[    0.416645] fuse: Unknown symbol iter_file_splice_write (err -22)
+[    0.416648] fuse: disagrees about version of symbol folio_mark_dirty_lock
+[    0.416649] fuse: Unknown symbol folio_mark_dirty_lock (err -22)
+[    0.416652] fuse: disagrees about version of symbol init_pid_ns
+[    0.416652] fuse: Unknown symbol init_pid_ns (err -22)
+[    0.416654] fuse: disagrees about version of symbol dax_iomap_fault
+[    0.416655] fuse: Unknown symbol dax_iomap_fault (err -22)
+[    0.416658] fuse: disagrees about version of symbol d_lookup
+[    0.416659] fuse: Unknown symbol d_lookup (err -22)
+[    0.416669] fuse: disagrees about version of symbol register_filesystem
+[    0.416670] fuse: Unknown symbol register_filesystem (err -22)
+[    0.416672] fuse: disagrees about version of symbol folio_add_lru
+[    0.416673] fuse: Unknown symbol folio_add_lru (err -22)
+[    0.416677] fuse: disagrees about version of symbol folio_clear_dirty_for_io
+[    0.416677] fuse: Unknown symbol folio_clear_dirty_for_io (err -22)
+[    0.416680] fuse: disagrees about version of symbol sync_inode_metadata
+[    0.416681] fuse: Unknown symbol sync_inode_metadata (err -22)
+[    0.416683] fuse: disagrees about version of symbol simple_empty
+[    0.416684] fuse: Unknown symbol simple_empty (err -22)
+[    0.416692] fuse: disagrees about version of symbol vfs_setpos
+[    0.416693] fuse: Unknown symbol vfs_setpos (err -22)
+[    0.416698] fuse: disagrees about version of symbol shrink_dcache_parent
+[    0.416699] fuse: Unknown symbol shrink_dcache_parent (err -22)
+[    0.416704] fuse: disagrees about version of symbol d_prune_aliases
+[    0.416705] fuse: Unknown symbol d_prune_aliases (err -22)
+[    0.416707] fuse: disagrees about version of symbol __put_cred
+[    0.416708] fuse: Unknown symbol __put_cred (err -22)
+[    0.416713] fuse: disagrees about version of symbol get_tree_nodev
+[    0.416713] fuse: Unknown symbol get_tree_nodev (err -22)
+[    0.416715] fuse: disagrees about version of symbol splice_file_range
+[    0.416716] fuse: Unknown symbol splice_file_range (err -22)
+[    0.416719] fuse: disagrees about version of symbol trace_event_buffer_commit
+[    0.416719] fuse: Unknown symbol trace_event_buffer_commit (err -22)
+[    0.416722] fuse: disagrees about version of symbol simple_inode_init_ts
+[    0.416722] fuse: Unknown symbol simple_inode_init_ts (err -22)
+[    0.416726] fuse: disagrees about version of symbol d_mark_dontcache
+[    0.416727] fuse: Unknown symbol d_mark_dontcache (err -22)
+[    0.416730] fuse: disagrees about version of symbol locks_lock_inode_wait
+[    0.416731] fuse: Unknown symbol locks_lock_inode_wait (err -22)
+[    0.416733] fuse: disagrees about version of symbol fs_param_is_u32
+[    0.416734] fuse: Unknown symbol fs_param_is_u32 (err -22)
+[    0.416736] fuse: disagrees about version of symbol inode_newsize_ok
+[    0.416737] fuse: Unknown symbol inode_newsize_ok (err -22)
+[    0.416739] fuse: disagrees about version of symbol d_drop
+[    0.416740] fuse: Unknown symbol d_drop (err -22)
+[    0.416743] fuse: disagrees about version of symbol kill_block_super
+[    0.416744] fuse: Unknown symbol kill_block_super (err -22)
+[    0.416746] fuse: disagrees about version of symbol unlock_new_inode
+[    0.416746] fuse: Unknown symbol unlock_new_inode (err -22)
+[    0.416753] fuse: disagrees about version of symbol posix_acl_from_xattr
+[    0.416754] fuse: Unknown symbol posix_acl_from_xattr (err -22)
+[    0.416759] fuse: disagrees about version of symbol simple_remove_by_name
+[    0.416759] fuse: Unknown symbol simple_remove_by_name (err -22)
+[    0.416762] fuse: disagrees about version of symbol param_get_uint
+[    0.416762] fuse: Unknown symbol param_get_uint (err -22)
+[    0.416771] fuse: disagrees about version of symbol make_kuid
+[    0.416772] fuse: Unknown symbol make_kuid (err -22)
+[    0.416774] fuse: disagrees about version of symbol truncate_inode_pages_final
+[    0.416775] fuse: Unknown symbol truncate_inode_pages_final (err -22)
+[    0.416777] fuse: disagrees about version of symbol generic_setlease
+[    0.416777] fuse: Unknown symbol generic_setlease (err -22)
+[    0.416780] fuse: disagrees about version of symbol fs_kobj
+[    0.416780] fuse: Unknown symbol fs_kobj (err -22)
+[    0.416783] fuse: disagrees about version of symbol __filemap_set_wb_err
+[    0.416783] fuse: Unknown symbol __filemap_set_wb_err (err -22)
+[    0.416786] fuse: disagrees about version of symbol generic_file_mmap
+[    0.416786] fuse: Unknown symbol generic_file_mmap (err -22)
+[    0.416788] fuse: disagrees about version of symbol simple_dir_operations
+[    0.416789] fuse: Unknown symbol simple_dir_operations (err -22)
+[    0.416796] fuse: disagrees about version of symbol put_pid_ns
+[    0.416797] fuse: Unknown symbol put_pid_ns (err -22)
+[    0.416798] fuse: disagrees about version of symbol setattr_should_drop_suidgid
+[    0.416799] fuse: Unknown symbol setattr_should_drop_suidgid (err -22)
+[    0.416803] fuse: disagrees about version of symbol fs_param_is_gid
+[    0.416803] fuse: Unknown symbol fs_param_is_gid (err -22)
+[    0.416805] fuse: disagrees about version of symbol fs_context_for_submount
+[    0.416806] fuse: Unknown symbol fs_context_for_submount (err -22)
+[    0.416807] fuse: disagrees about version of symbol inode_init_once
+[    0.416807] fuse: Unknown symbol inode_init_once (err -22)
+[    0.416808] fuse: disagrees about version of symbol file_write_and_wait_range
+[    0.416809] fuse: Unknown symbol file_write_and_wait_range (err -22)
+[    0.416810] fuse: disagrees about version of symbol compat_ptr_ioctl
+[    0.416811] fuse: Unknown symbol compat_ptr_ioctl (err -22)
+[    0.416813] fuse: disagrees about version of symbol nosteal_pipe_buf_ops
+[    0.416813] fuse: Unknown symbol nosteal_pipe_buf_ops (err -22)
+[    0.416814] fuse: disagrees about version of symbol ilookup5
+[    0.416815] fuse: Unknown symbol ilookup5 (err -22)
+[    0.416816] fuse: disagrees about version of symbol prepare_creds
+[    0.416817] fuse: Unknown symbol prepare_creds (err -22)
+[    0.416818] fuse: disagrees about version of symbol inode_nohighmem
+[    0.416819] fuse: Unknown symbol inode_nohighmem (err -22)
+[    0.416821] fuse: disagrees about version of symbol release_pages
+[    0.416822] fuse: Unknown symbol release_pages (err -22)
+[    0.416823] fuse: disagrees about version of symbol page_get_link_raw
+[    0.416824] fuse: Unknown symbol page_get_link_raw (err -22)
+[    0.416825] fuse: disagrees about version of symbol perf_trace_run_bpf_submit
+[    0.416826] fuse: Unknown symbol perf_trace_run_bpf_submit (err -22)
+[    0.416827] fuse: disagrees about version of symbol generic_file_direct_write
+[    0.416828] fuse: Unknown symbol generic_file_direct_write (err -22)
+[    0.416829] fuse: disagrees about version of symbol fput
+[    0.416829] fuse: Unknown symbol fput (err -22)
+[    0.416831] fuse: disagrees about version of symbol shrink_dcache_sb
+[    0.416831] fuse: Unknown symbol shrink_dcache_sb (err -22)
+[    0.416832] fuse: disagrees about version of symbol generic_file_read_iter
+[    0.416833] fuse: Unknown symbol generic_file_read_iter (err -22)
+[    0.416834] fuse: disagrees about version of symbol inode_maybe_inc_iversion
+[    0.416835] fuse: Unknown symbol inode_maybe_inc_iversion (err -22)
+[    0.416837] fuse: disagrees about version of symbol thp_get_unmapped_area
+[    0.416838] fuse: Unknown symbol thp_get_unmapped_area (err -22)
+[    0.416839] fuse: disagrees about version of symbol truncate_pagecache
+[    0.416840] fuse: Unknown symbol truncate_pagecache (err -22)
+[    0.416841] fuse: disagrees about version of symbol put_fs_context
+[    0.416842] fuse: Unknown symbol put_fs_context (err -22)
+[    0.416846] fuse: disagrees about version of symbol file_update_time
+[    0.416846] fuse: Unknown symbol file_update_time (err -22)
+[    0.416848] fuse: disagrees about version of symbol set_nlink
+[    0.416849] fuse: Unknown symbol set_nlink (err -22)
+[    0.416851] fuse: disagrees about version of symbol fget_raw
+[    0.416851] fuse: Unknown symbol fget_raw (err -22)
+[    0.416853] fuse: disagrees about version of symbol from_kgid
+[    0.416854] fuse: Unknown symbol from_kgid (err -22)
+[    0.416855] fuse: disagrees about version of symbol const_current_task
+[    0.416855] fuse: Unknown symbol const_current_task (err -22)
+[    0.416856] fuse: disagrees about version of symbol fasync_helper
+[    0.416857] fuse: Unknown symbol fasync_helper (err -22)
+[    0.416858] fuse: disagrees about version of symbol trace_event_reg
+[    0.416859] fuse: Unknown symbol trace_event_reg (err -22)
+[    0.416862] fuse: disagrees about version of symbol folio_wait_writeback
+[    0.416862] fuse: Unknown symbol folio_wait_writeback (err -22)
+[    0.416864] fuse: disagrees about version of symbol __io_uring_cmd_do_in_task
+[    0.416865] fuse: Unknown symbol __io_uring_cmd_do_in_task (err -22)
+[    0.416866] fuse: disagrees about version of symbol file_remove_privs
+[    0.416866] fuse: Unknown symbol file_remove_privs (err -22)
+[    0.416869] fuse: disagrees about version of symbol write_inode_now
+[    0.416870] fuse: Unknown symbol write_inode_now (err -22)
+[    0.416871] fuse: disagrees about version of symbol start_removing_dentry
+[    0.416872] fuse: Unknown symbol start_removing_dentry (err -22)
+[    0.416873] fuse: disagrees about version of symbol d_obtain_alias
+[    0.416874] fuse: Unknown symbol d_obtain_alias (err -22)
+[    0.416875] fuse: disagrees about version of symbol file_modified
+[    0.416875] fuse: Unknown symbol file_modified (err -22)
+[    0.416878] fuse: disagrees about version of symbol finish_no_open
+[    0.416879] fuse: Unknown symbol finish_no_open (err -22)
+[    0.416882] fuse: disagrees about version of symbol bpf_trace_run1
+[    0.416882] fuse: Unknown symbol bpf_trace_run1 (err -22)
+[    0.416884] fuse: disagrees about version of symbol folio_alloc_noprof
+[    0.416884] fuse: Unknown symbol folio_alloc_noprof (err -22)
+[    0.416886] fuse: disagrees about version of symbol from_kuid
+[    0.416886] fuse: Unknown symbol from_kuid (err -22)
+[    0.416888] fuse: disagrees about version of symbol current_in_userns
+[    0.416889] fuse: Unknown symbol current_in_userns (err -22)
+[    0.416890] fuse: disagrees about version of symbol fc_mount
+[    0.416891] fuse: Unknown symbol fc_mount (err -22)
+[    0.416895] fuse: disagrees about version of symbol dax_break_layout_final
+[    0.416896] fuse: Unknown symbol dax_break_layout_final (err -22)
+[    0.416901] fuse: disagrees about version of symbol in_group_or_capable
+[    0.416902] fuse: Unknown symbol in_group_or_capable (err -22)
+[    0.416903] fuse: disagrees about version of symbol make_kgid
+[    0.416904] fuse: Unknown symbol make_kgid (err -22)
+[    0.416905] fuse: disagrees about version of symbol d_delete
+[    0.416905] fuse: Unknown symbol d_delete (err -22)
+[    0.416907] fuse: disagrees about version of symbol set_default_d_op
+[    0.416908] fuse: Unknown symbol set_default_d_op (err -22)
+[    0.416909] fuse: disagrees about version of symbol __kmem_cache_create_args
+[    0.416910] fuse: Unknown symbol __kmem_cache_create_args (err -22)
+[    0.416911] fuse: disagrees about version of symbol from_kgid_munged
+[    0.416912] fuse: Unknown symbol from_kgid_munged (err -22)
+[    0.416916] fuse: disagrees about version of symbol nonseekable_open
+[    0.416917] fuse: Unknown symbol nonseekable_open (err -22)
+[    0.416918] fuse: disagrees about version of symbol dax_finish_sync_fault
+[    0.416919] fuse: Unknown symbol dax_finish_sync_fault (err -22)
+[    0.416925] fuse: disagrees about version of symbol noop_direct_IO
+[    0.416926] fuse: Unknown symbol noop_direct_IO (err -22)
+[    0.416929] fuse: disagrees about version of symbol __filemap_get_folio_mpol
+[    0.416929] fuse: Unknown symbol __filemap_get_folio_mpol (err -22)
+[    0.416931] fuse: disagrees about version of symbol igrab
+[    0.416932] fuse: Unknown symbol igrab (err -22)
+[    0.416934] fuse: disagrees about version of symbol generic_read_dir
+[    0.416935] fuse: Unknown symbol generic_read_dir (err -22)
+[    0.416936] fuse: disagrees about version of symbol trace_event_buffer_reserve
+[    0.416937] fuse: Unknown symbol trace_event_buffer_reserve (err -22)
+[    0.416940] fuse: disagrees about version of symbol param_ops_bool
+[    0.416941] fuse: Unknown symbol param_ops_bool (err -22)
+[    0.416943] fuse: disagrees about version of symbol try_lookup_noperm
+[    0.416944] fuse: Unknown symbol try_lookup_noperm (err -22)
+[    0.416945] fuse: disagrees about version of symbol d_find_alias
+[    0.416946] fuse: Unknown symbol d_find_alias (err -22)
+[    0.416947] fuse: disagrees about version of symbol invalidate_inode_pages2
+[    0.416948] fuse: Unknown symbol invalidate_inode_pages2 (err -22)
+[    0.416950] fuse: disagrees about version of symbol inode_set_ctime_current
+[    0.416951] fuse: Unknown symbol inode_set_ctime_current (err -22)
+[    0.416952] fuse: disagrees about version of symbol inc_nlink
+[    0.416953] fuse: Unknown symbol inc_nlink (err -22)
+[    0.416955] fuse: disagrees about version of symbol __folio_put
+[    0.416956] fuse: Unknown symbol __folio_put (err -22)
+[    0.416959] fuse: disagrees about version of symbol get_tree_bdev
+[    0.416959] fuse: Unknown symbol get_tree_bdev (err -22)
+[    0.416962] fuse: disagrees about version of symbol set_anon_super_fc
+[    0.416962] fuse: Unknown symbol set_anon_super_fc (err -22)
+[    0.416965] fuse: disagrees about version of symbol dput
+[    0.416966] fuse: Unknown symbol dput (err -22)
+[    0.416967] fuse: disagrees about version of symbol d_make_persistent
+[    0.416968] fuse: Unknown symbol d_make_persistent (err -22)
+[    0.416971] fuse: disagrees about version of symbol deactivate_locked_super
+[    0.416972] fuse: Unknown symbol deactivate_locked_super (err -22)
+[    0.416973] fuse: disagrees about version of symbol touch_atime
+[    0.416974] fuse: Unknown symbol touch_atime (err -22)
+[    0.416976] fuse: disagrees about version of symbol __d_lookup_unhash_wake
+[    0.416977] fuse: Unknown symbol __d_lookup_unhash_wake (err -22)
+[    0.416980] fuse: disagrees about version of symbol pid_nr_ns
+[    0.416980] fuse: Unknown symbol pid_nr_ns (err -22)
+[    0.416982] fuse: disagrees about version of symbol generic_file_open
+[    0.416983] fuse: Unknown symbol generic_file_open (err -22)
+[    0.416984] fuse: disagrees about version of symbol truncate_inode_pages_range
+[    0.416985] fuse: Unknown symbol truncate_inode_pages_range (err -22)
+[    0.416987] fuse: disagrees about version of symbol __io_uring_cmd_done
+[    0.416988] fuse: Unknown symbol __io_uring_cmd_done (err -22)
+[    0.416989] fuse: disagrees about version of symbol __put_user_ns
+[    0.416990] fuse: Unknown symbol __put_user_ns (err -22)
+[    0.416991] fuse: disagrees about version of symbol alloc_pages_noprof
+[    0.416992] fuse: Unknown symbol alloc_pages_noprof (err -22)
+[    0.416993] fuse: disagrees about version of symbol __folio_lock
+[    0.416994] fuse: Unknown symbol __folio_lock (err -22)
+[    0.416996] fuse: disagrees about version of symbol stream_open
+[    0.416997] fuse: Unknown symbol stream_open (err -22)
+[    0.416998] fuse: disagrees about version of symbol rcuwait_wake_up
+[    0.416999] fuse: Unknown symbol rcuwait_wake_up (err -22)
+[    0.417005] fuse: disagrees about version of symbol add_to_pipe
+[    0.417006] fuse: Unknown symbol add_to_pipe (err -22)
+[    0.417007] fuse: disagrees about version of symbol __fs_parse
+[    0.417008] fuse: Unknown symbol __fs_parse (err -22)
+[    0.417009] fuse: disagrees about version of symbol filemap_splice_read
+[    0.417010] fuse: Unknown symbol filemap_splice_read (err -22)
+[    0.417011] fuse: disagrees about version of symbol posix_acl_to_xattr
+[    0.417012] fuse: Unknown symbol posix_acl_to_xattr (err -22)
+[    0.417013] fuse: disagrees about version of symbol kill_anon_super
+[    0.417014] fuse: Unknown symbol kill_anon_super (err -22)
+[    0.417015] fuse: disagrees about version of symbol from_kuid_munged
+[    0.417016] fuse: Unknown symbol from_kuid_munged (err -22)
+[    0.417018] fuse: disagrees about version of symbol iget5_locked
+[    0.417019] fuse: Unknown symbol iget5_locked (err -22)
+[    0.417021] fuse: disagrees about version of symbol security_dentry_init_security
+[    0.417021] fuse: Unknown symbol security_dentry_init_security (err -22)
+[    0.417023] fuse: disagrees about version of symbol filemap_write_and_wait_range
+[    0.417024] fuse: Unknown symbol filemap_write_and_wait_range (err -22)
+[    0.417026] fuse: disagrees about version of symbol get_tree_single
+[    0.417027] fuse: Unknown symbol get_tree_single (err -22)
+[    0.417029] fuse: disagrees about version of symbol generic_write_checks
+[    0.417030] fuse: Unknown symbol generic_write_checks (err -22)
+[    0.417032] fuse: disagrees about version of symbol __remove_inode_hash
+[    0.417033] fuse: Unknown symbol __remove_inode_hash (err -22)
+[    0.417035] fuse: disagrees about version of symbol __vma_start_write
+[    0.417036] fuse: Unknown symbol __vma_start_write (err -22)
+[    0.417038] fuse: disagrees about version of symbol filemap_fault
+[    0.417039] fuse: Unknown symbol filemap_fault (err -22)
+[    0.417040] fuse: disagrees about version of symbol d_invalidate
+[    0.417041] fuse: Unknown symbol d_invalidate (err -22)
+[    0.417042] fuse: disagrees about version of symbol __mark_inode_dirty
+[    0.417043] fuse: Unknown symbol __mark_inode_dirty (err -22)
+[    0.417045] fuse: disagrees about version of symbol generic_file_llseek
+[    0.417046] fuse: Unknown symbol generic_file_llseek (err -22)
+[    0.417053] fuse: disagrees about version of symbol io_uring_cmd_mark_cancelable
+[    0.417054] fuse: Unknown symbol io_uring_cmd_mark_cancelable (err -22)
+[    0.417058] fuse: disagrees about version of symbol drop_nlink
+[    0.417059] fuse: Unknown symbol drop_nlink (err -22)
+[    0.417061] fuse: disagrees about version of symbol filemap_check_errors
+[    0.417062] fuse: Unknown symbol filemap_check_errors (err -22)
+[    0.417064] fuse: disagrees about version of symbol kmalloc_caches
+[    0.417065] fuse: Unknown symbol kmalloc_caches (err -22)
+[    0.417066] fuse: disagrees about version of symbol inode_set_ctime_to_ts
+[    0.417067] fuse: Unknown symbol inode_set_ctime_to_ts (err -22)
+[    0.417069] fuse: disagrees about version of symbol fs_param_is_uid
+[    0.417069] fuse: Unknown symbol fs_param_is_uid (err -22)
+[    0.417071] fuse: disagrees about version of symbol bdi_set_max_ratio
+[    0.417072] fuse: Unknown symbol bdi_set_max_ratio (err -22)
+[    0.417073] fuse: disagrees about version of symbol kmem_cache_destroy
+[    0.417074] fuse: Unknown symbol kmem_cache_destroy (err -22)
+[    0.423877] virtme initramfs: loading virtiofs.ko...
+[    0.424423] virtiofs: Unknown symbol fuse_mount_destroy (err -2)
+[    0.424427] virtiofs: Unknown symbol fuse_dax_cancel_work (err -2)
+[    0.424428] virtiofs: Unknown symbol fuse_len_args (err -2)
+[    0.424435] virtiofs: Unknown symbol fuse_req_hash (err -2)
+[    0.424441] virtiofs: disagrees about version of symbol unregister_filesystem
+[    0.424442] virtiofs: Unknown symbol unregister_filesystem (err -22)
+[    0.424447] virtiofs: disagrees about version of symbol sget_fc
+[    0.424448] virtiofs: Unknown symbol sget_fc (err -22)
+[    0.424452] virtiofs: disagrees about version of symbol fs_param_is_enum
+[    0.424453] virtiofs: Unknown symbol fs_param_is_enum (err -22)
+[    0.424455] virtiofs: disagrees about version of symbol logfc
+[    0.424455] virtiofs: Unknown symbol logfc (err -22)
+[    0.424457] virtiofs: disagrees about version of symbol register_filesystem
+[    0.424458] virtiofs: Unknown symbol register_filesystem (err -22)
+[    0.424460] virtiofs: disagrees about version of symbol __dynamic_dev_dbg
+[    0.424460] virtiofs: Unknown symbol __dynamic_dev_dbg (err -22)
+[    0.424464] virtiofs: disagrees about version of symbol alloc_dax
+[    0.424464] virtiofs: Unknown symbol alloc_dax (err -22)
+[    0.424474] virtiofs: disagrees about version of symbol __devm_request_region
+[    0.424475] virtiofs: Unknown symbol __devm_request_region (err -22)
+[    0.424484] virtiofs: disagrees about version of symbol fs_kobj
+[    0.424484] virtiofs: Unknown symbol fs_kobj (err -22)
+[    0.424486] virtiofs: Unknown symbol fuse_mount_remove (err -2)
+[    0.424488] virtiofs: disagrees about version of symbol _dev_info
+[    0.424488] virtiofs: Unknown symbol _dev_info (err -22)
+[    0.424491] virtiofs: disagrees about version of symbol sysfs_create_link
+[    0.424491] virtiofs: Unknown symbol sysfs_create_link (err -22)
+[    0.424494] virtiofs: Unknown symbol fuse_dev_alloc (err -2)
+[    0.424495] virtiofs: Unknown symbol fuse_dev_free (err -2)
+[    0.424496] virtiofs: Unknown symbol fuse_dev_install (err -2)
+[    0.424497] virtiofs: disagrees about version of symbol sysfs_remove_link
+[    0.424498] virtiofs: Unknown symbol sysfs_remove_link (err -22)
+[    0.424501] virtiofs: Unknown symbol fuse_init_fs_context_submount (err -2)
+[    0.424503] virtiofs: disagrees about version of symbol const_current_task
+[    0.424503] virtiofs: Unknown symbol const_current_task (err -22)
+[    0.424508] virtiofs: disagrees about version of symbol _dev_warn
+[    0.424508] virtiofs: Unknown symbol _dev_warn (err -22)
+[    0.424511] virtiofs: Unknown symbol fuse_send_init (err -2)
+[    0.424516] virtiofs: disagrees about version of symbol _dev_notice
+[    0.424517] virtiofs: Unknown symbol _dev_notice (err -22)
+[    0.424518] virtiofs: Unknown symbol fuse_conn_init (err -2)
+[    0.424522] virtiofs: disagrees about version of symbol set_anon_super_fc
+[    0.424523] virtiofs: Unknown symbol set_anon_super_fc (err -22)
+[    0.424525] virtiofs: disagrees about version of symbol deactivate_locked_super
+[    0.424526] virtiofs: Unknown symbol deactivate_locked_super (err -22)
+[    0.424527] virtiofs: disagrees about version of symbol kobject_uevent
+[    0.424528] virtiofs: Unknown symbol kobject_uevent (err -22)
+[    0.424529] virtiofs: Unknown symbol fuse_get_unique (err -2)
+[    0.424532] virtiofs: disagrees about version of symbol __fs_parse
+[    0.424533] virtiofs: Unknown symbol __fs_parse (err -22)
+[    0.424534] virtiofs: Unknown symbol fuse_request_end (err -2)
+[    0.424535] virtiofs: disagrees about version of symbol kill_anon_super
+[    0.424535] virtiofs: Unknown symbol kill_anon_super (err -22)
+[    0.424537] virtiofs: Unknown symbol fuse_fill_super_common (err -2)
+[    0.424541] virtiofs: Unknown symbol fuse_conn_destroy (err -2)
+[    0.424541] virtiofs: Unknown symbol fuse_free_conn (err -2)
+[    0.424544] virtiofs: disagrees about version of symbol kmalloc_caches
+[    0.424545] virtiofs: Unknown symbol kmalloc_caches (err -22)
+[    0.424546] virtiofs: Unknown symbol fuse_request_assign_unique (err -2)
+[    0.462773] virtiofs: Unknown symbol fuse_mount_destroy (err -2)
+[    0.462780] virtiofs: Unknown symbol fuse_dax_cancel_work (err -2)
+[    0.462781] virtiofs: Unknown symbol fuse_len_args (err -2)
+[    0.462788] virtiofs: Unknown symbol fuse_req_hash (err -2)
+[    0.462795] virtiofs: disagrees about version of symbol unregister_filesystem
+[    0.462796] virtiofs: Unknown symbol unregister_filesystem (err -22)
+[    0.462801] virtiofs: disagrees about version of symbol sget_fc
+[    0.462802] virtiofs: Unknown symbol sget_fc (err -22)
+[    0.462806] virtiofs: disagrees about version of symbol fs_param_is_enum
+[    0.462807] virtiofs: Unknown symbol fs_param_is_enum (err -22)
+[    0.462809] virtiofs: disagrees about version of symbol logfc
+[    0.462810] virtiofs: Unknown symbol logfc (err -22)
+[    0.462811] virtiofs: disagrees about version of symbol register_filesystem
+[    0.462812] virtiofs: Unknown symbol register_filesystem (err -22)
+[    0.462814] virtiofs: disagrees about version of symbol __dynamic_dev_dbg
+[    0.462815] virtiofs: Unknown symbol __dynamic_dev_dbg (err -22)
+[    0.462818] virtiofs: disagrees about version of symbol alloc_dax
+[    0.462819] virtiofs: Unknown symbol alloc_dax (err -22)
+[    0.462828] virtiofs: disagrees about version of symbol __devm_request_region
+[    0.462829] virtiofs: Unknown symbol __devm_request_region (err -22)
+[    0.462838] virtiofs: disagrees about version of symbol fs_kobj
+[    0.462839] virtiofs: Unknown symbol fs_kobj (err -22)
+[    0.462841] virtiofs: Unknown symbol fuse_mount_remove (err -2)
+[    0.462842] virtiofs: disagrees about version of symbol _dev_info
+[    0.462843] virtiofs: Unknown symbol _dev_info (err -22)
+[    0.462845] virtiofs: disagrees about version of symbol sysfs_create_link
+[    0.462846] virtiofs: Unknown symbol sysfs_create_link (err -22)
+[    0.462848] virtiofs: Unknown symbol fuse_dev_alloc (err -2)
+[    0.462849] virtiofs: Unknown symbol fuse_dev_free (err -2)
+[    0.462850] virtiofs: Unknown symbol fuse_dev_install (err -2)
+[    0.462852] virtiofs: disagrees about version of symbol sysfs_remove_link
+[    0.462852] virtiofs: Unknown symbol sysfs_remove_link (err -22)
+[    0.462855] virtiofs: Unknown symbol fuse_init_fs_context_submount (err -2)
+[    0.462857] virtiofs: disagrees about version of symbol const_current_task
+[    0.462858] virtiofs: Unknown symbol const_current_task (err -22)
+[    0.462862] virtiofs: disagrees about version of symbol _dev_warn
+[    0.462862] virtiofs: Unknown symbol _dev_warn (err -22)
+[    0.462865] virtiofs: Unknown symbol fuse_send_init (err -2)
+[    0.462870] virtiofs: disagrees about version of symbol _dev_notice
+[    0.462871] virtiofs: Unknown symbol _dev_notice (err -22)
+[    0.462872] virtiofs: Unknown symbol fuse_conn_init (err -2)
+[    0.462876] virtiofs: disagrees about version of symbol set_anon_super_fc
+[    0.462877] virtiofs: Unknown symbol set_anon_super_fc (err -22)
+[    0.462879] virtiofs: disagrees about version of symbol deactivate_locked_super
+[    0.462880] virtiofs: Unknown symbol deactivate_locked_super (err -22)
+[    0.462881] virtiofs: disagrees about version of symbol kobject_uevent
+[    0.462882] virtiofs: Unknown symbol kobject_uevent (err -22)
+[    0.462883] virtiofs: Unknown symbol fuse_get_unique (err -2)
+[    0.462886] virtiofs: disagrees about version of symbol __fs_parse
+[    0.462886] virtiofs: Unknown symbol __fs_parse (err -22)
+[    0.462887] virtiofs: Unknown symbol fuse_request_end (err -2)
+[    0.462888] virtiofs: disagrees about version of symbol kill_anon_super
+[    0.462889] virtiofs: Unknown symbol kill_anon_super (err -22)
+[    0.462891] virtiofs: Unknown symbol fuse_fill_super_common (err -2)
+[    0.462893] virtiofs: Unknown symbol fuse_conn_destroy (err -2)
+[    0.462894] virtiofs: Unknown symbol fuse_free_conn (err -2)
+[    0.462897] virtiofs: disagrees about version of symbol kmalloc_caches
+[    0.462898] virtiofs: Unknown symbol kmalloc_caches (err -22)
+[    0.462899] virtiofs: Unknown symbol fuse_request_assign_unique (err -2)
+[    0.503852] virtme initramfs: loading virtio_mmio.ko...
+[    0.504152] virtio_mmio: disagrees about version of symbol device_unregister
+[    0.504154] virtio_mmio: Unknown symbol device_unregister (err -22)
+[    0.504159] virtio_mmio: disagrees about version of symbol device_for_each_child
+[    0.504160] virtio_mmio: Unknown symbol device_for_each_child (err -22)
+[    0.504169] virtio_mmio: disagrees about version of symbol put_device
+[    0.504170] virtio_mmio: Unknown symbol put_device (err -22)
+[    0.504176] virtio_mmio: disagrees about version of symbol _dev_err
+[    0.504177] virtio_mmio: Unknown symbol _dev_err (err -22)
+[    0.504181] virtio_mmio: disagrees about version of symbol device_register
+[    0.504181] virtio_mmio: Unknown symbol device_register (err -22)
+[    0.504182] virtio_mmio: disagrees about version of symbol _dev_warn
+[    0.504183] virtio_mmio: Unknown symbol _dev_warn (err -22)
+[    0.504187] virtio_mmio: disagrees about version of symbol dma_set_coherent_mask
+[    0.504187] virtio_mmio: Unknown symbol dma_set_coherent_mask (err -22)
+[    0.504192] virtio_mmio: disagrees about version of symbol dma_set_mask
+[    0.504192] virtio_mmio: Unknown symbol dma_set_mask (err -22)
+[    0.504195] virtio_mmio: disagrees about version of symbol kmalloc_caches
+[    0.504196] virtio_mmio: Unknown symbol kmalloc_caches (err -22)
+[    0.522903] virtio_mmio: disagrees about version of symbol device_unregister
+[    0.522910] virtio_mmio: Unknown symbol device_unregister (err -22)
+[    0.522914] virtio_mmio: disagrees about version of symbol device_for_each_child
+[    0.522915] virtio_mmio: Unknown symbol device_for_each_child (err -22)
+[    0.522924] virtio_mmio: disagrees about version of symbol put_device
+[    0.522924] virtio_mmio: Unknown symbol put_device (err -22)
+[    0.522930] virtio_mmio: disagrees about version of symbol _dev_err
+[    0.522930] virtio_mmio: Unknown symbol _dev_err (err -22)
+[    0.522934] virtio_mmio: disagrees about version of symbol device_register
+[    0.522935] virtio_mmio: Unknown symbol device_register (err -22)
+[    0.522936] virtio_mmio: disagrees about version of symbol _dev_warn
+[    0.522936] virtio_mmio: Unknown symbol _dev_warn (err -22)
+[    0.522941] virtio_mmio: disagrees about version of symbol dma_set_coherent_mask
+[    0.522942] virtio_mmio: Unknown symbol dma_set_coherent_mask (err -22)
+[    0.522945] virtio_mmio: disagrees about version of symbol dma_set_mask
+[    0.522946] virtio_mmio: Unknown symbol dma_set_mask (err -22)
+[    0.522949] virtio_mmio: disagrees about version of symbol kmalloc_caches
+[    0.522949] virtio_mmio: Unknown symbol kmalloc_caches (err -22)
+[    0.563458] virtme initramfs: loading serio.ko...
+[    0.563776] serio: disagrees about version of symbol try_module_get
+[    0.563779] serio: Unknown symbol try_module_get (err -22)
+[    0.563788] serio: disagrees about version of symbol dev_set_name
+[    0.563788] serio: Unknown symbol dev_set_name (err -22)
+[    0.563792] serio: disagrees about version of symbol device_initialize
+[    0.563793] serio: Unknown symbol device_initialize (err -22)
+[    0.563794] serio: disagrees about version of symbol __module_get
+[    0.563795] serio: Unknown symbol __module_get (err -22)
+[    0.563802] serio: disagrees about version of symbol put_device
+[    0.563803] serio: Unknown symbol put_device (err -22)
+[    0.563804] serio: disagrees about version of symbol module_put
+[    0.563804] serio: Unknown symbol module_put (err -22)
+[    0.563807] serio: disagrees about version of symbol _dev_err
+[    0.563808] serio: Unknown symbol _dev_err (err -22)
+[    0.563809] serio: disagrees about version of symbol device_add
+[    0.563810] serio: Unknown symbol device_add (err -22)
+[    0.563815] serio: disagrees about version of symbol device_del
+[    0.563816] serio: Unknown symbol device_del (err -22)
+[    0.563817] serio: disagrees about version of symbol _dev_warn
+[    0.563818] serio: Unknown symbol _dev_warn (err -22)
+[    0.563825] serio: disagrees about version of symbol kmalloc_caches
+[    0.563825] serio: Unknown symbol kmalloc_caches (err -22)
+[    0.602785] serio: disagrees about version of symbol try_module_get
+[    0.602791] serio: Unknown symbol try_module_get (err -22)
+[    0.602797] serio: disagrees about version of symbol dev_set_name
+[    0.602797] serio: Unknown symbol dev_set_name (err -22)
+[    0.602801] serio: disagrees about version of symbol device_initialize
+[    0.602802] serio: Unknown symbol device_initialize (err -22)
+[    0.602803] serio: disagrees about version of symbol __module_get
+[    0.602804] serio: Unknown symbol __module_get (err -22)
+[    0.602809] serio: disagrees about version of symbol put_device
+[    0.602810] serio: Unknown symbol put_device (err -22)
+[    0.602811] serio: disagrees about version of symbol module_put
+[    0.602811] serio: Unknown symbol module_put (err -22)
+[    0.602814] serio: disagrees about version of symbol _dev_err
+[    0.602815] serio: Unknown symbol _dev_err (err -22)
+[    0.602816] serio: disagrees about version of symbol device_add
+[    0.602816] serio: Unknown symbol device_add (err -22)
+[    0.602821] serio: disagrees about version of symbol device_del
+[    0.602822] serio: Unknown symbol device_del (err -22)
+[    0.602823] serio: disagrees about version of symbol _dev_warn
+[    0.602823] serio: Unknown symbol _dev_warn (err -22)
+[    0.602829] serio: disagrees about version of symbol kmalloc_caches
+[    0.602829] serio: Unknown symbol kmalloc_caches (err -22)
+[    0.643391] virtme initramfs: loading i8042.ko...
+[    0.643959] i8042: disagrees about version of symbol device_set_wakeup_enable
+[    0.643963] i8042: Unknown symbol device_set_wakeup_enable (err -22)
+[    0.643968] i8042: disagrees about version of symbol device_set_wakeup_capable
+[    0.643969] i8042: Unknown symbol device_set_wakeup_capable (err -22)
+[    0.643980] i8042: Unknown symbol __serio_register_port (err -2)
+[    0.643998] i8042: Unknown symbol serio_bus (err -2)
+[    0.644002] i8042: Unknown symbol serio_unregister_port (err -2)
+[    0.644007] i8042: Unknown symbol serio_interrupt (err -2)
+[    0.644009] i8042: disagrees about version of symbol param_ops_bool
+[    0.644010] i8042: Unknown symbol param_ops_bool (err -22)
+[    0.644014] i8042: disagrees about version of symbol set_primary_fwnode
+[    0.644015] i8042: Unknown symbol set_primary_fwnode (err -22)
+[    0.644017] i8042: disagrees about version of symbol __dev_fwnode
+[    0.644018] i8042: Unknown symbol __dev_fwnode (err -22)
+[    0.644019] i8042: disagrees about version of symbol kmalloc_caches
+[    0.644020] i8042: Unknown symbol kmalloc_caches (err -22)
+[    0.662776] i8042: disagrees about version of symbol device_set_wakeup_enable
+[    0.662781] i8042: Unknown symbol device_set_wakeup_enable (err -22)
+[    0.662786] i8042: disagrees about version of symbol device_set_wakeup_capable
+[    0.662787] i8042: Unknown symbol device_set_wakeup_capable (err -22)
+[    0.662797] i8042: Unknown symbol __serio_register_port (err -2)
+[    0.662810] i8042: Unknown symbol serio_bus (err -2)
+[    0.662812] i8042: Unknown symbol serio_unregister_port (err -2)
+[    0.662818] i8042: Unknown symbol serio_interrupt (err -2)
+[    0.662820] i8042: disagrees about version of symbol param_ops_bool
+[    0.662820] i8042: Unknown symbol param_ops_bool (err -22)
+[    0.662824] i8042: disagrees about version of symbol set_primary_fwnode
+[    0.662824] i8042: Unknown symbol set_primary_fwnode (err -22)
+[    0.662827] i8042: disagrees about version of symbol __dev_fwnode
+[    0.662827] i8042: Unknown symbol __dev_fwnode (err -22)
+[    0.662828] i8042: disagrees about version of symbol kmalloc_caches
+[    0.662829] i8042: Unknown symbol kmalloc_caches (err -22)
+[    0.703719] virtme initramfs: loading libps2.ko...
+[    0.704041] libps2: disagrees about version of symbol __dynamic_dev_dbg
+[    0.704043] libps2: Unknown symbol __dynamic_dev_dbg (err -22)
+[    0.742696] libps2: disagrees about version of symbol __dynamic_dev_dbg
+[    0.742702] libps2: Unknown symbol __dynamic_dev_dbg (err -22)
+[    0.783424] virtme initramfs: loading vivaldi-fmap.ko...
+[    0.784581] virtme initramfs: loading atkbd.ko...
+[    0.785059] atkbd: Unknown symbol serio_reconnect (err -2)
+[    0.785064] atkbd: disagrees about version of symbol __dynamic_dev_dbg
+[    0.785065] atkbd: Unknown symbol __dynamic_dev_dbg (err -22)
+[    0.785068] atkbd: Unknown symbol ps2_init (err -2)
+[    0.785075] atkbd: disagrees about version of symbol pm_wakeup_dev_event
+[    0.785076] atkbd: Unknown symbol pm_wakeup_dev_event (err -22)
+[    0.785080] atkbd: Unknown symbol ps2_command (err -2)
+[    0.785082] atkbd: disagrees about version of symbol device_property_read_u32_array
+[    0.785083] atkbd: Unknown symbol device_property_read_u32_array (err -22)
+[    0.785084] atkbd: disagrees about version of symbol _dev_err
+[    0.785085] atkbd: Unknown symbol _dev_err (err -22)
+[    0.785086] atkbd: Unknown symbol serio_open (err -2)
+[    0.785087] atkbd: Unknown symbol serio_close (err -2)
+[    0.785090] atkbd: Unknown symbol ps2_interrupt (err -2)
+[    0.785092] atkbd: Unknown symbol ps2_is_keyboard_id (err -2)
+[    0.785094] atkbd: Unknown symbol __serio_register_driver (err -2)
+[    0.785095] atkbd: disagrees about version of symbol _dev_warn
+[    0.785096] atkbd: Unknown symbol _dev_warn (err -22)
+[    0.785103] atkbd: disagrees about version of symbol param_ops_bool
+[    0.785104] atkbd: Unknown symbol param_ops_bool (err -22)
+[    0.785106] atkbd: Unknown symbol serio_unregister_driver (err -2)
+[    0.785108] atkbd: disagrees about version of symbol param_ops_int
+[    0.785108] atkbd: Unknown symbol param_ops_int (err -22)
+[    0.785109] atkbd: disagrees about version of symbol kmalloc_caches
+[    0.785110] atkbd: Unknown symbol kmalloc_caches (err -22)
+[    0.822755] atkbd: Unknown symbol serio_reconnect (err -2)
+[    0.822763] atkbd: disagrees about version of symbol __dynamic_dev_dbg
+[    0.822764] atkbd: Unknown symbol __dynamic_dev_dbg (err -22)
+[    0.822768] atkbd: Unknown symbol ps2_init (err -2)
+[    0.822775] atkbd: disagrees about version of symbol pm_wakeup_dev_event
+[    0.822776] atkbd: Unknown symbol pm_wakeup_dev_event (err -22)
+[    0.822779] atkbd: Unknown symbol ps2_command (err -2)
+[    0.822781] atkbd: disagrees about version of symbol device_property_read_u32_array
+[    0.822782] atkbd: Unknown symbol device_property_read_u32_array (err -22)
+[    0.822783] atkbd: disagrees about version of symbol _dev_err
+[    0.822784] atkbd: Unknown symbol _dev_err (err -22)
+[    0.822785] atkbd: Unknown symbol serio_open (err -2)
+[    0.822786] atkbd: Unknown symbol serio_close (err -2)
+[    0.822789] atkbd: Unknown symbol ps2_interrupt (err -2)
+[    0.822790] atkbd: Unknown symbol ps2_is_keyboard_id (err -2)
+[    0.822792] atkbd: Unknown symbol __serio_register_driver (err -2)
+[    0.822793] atkbd: disagrees about version of symbol _dev_warn
+[    0.822794] atkbd: Unknown symbol _dev_warn (err -22)
+[    0.822801] atkbd: disagrees about version of symbol param_ops_bool
+[    0.822802] atkbd: Unknown symbol param_ops_bool (err -22)
+[    0.822803] atkbd: Unknown symbol serio_unregister_driver (err -2)
+[    0.822805] atkbd: disagrees about version of symbol param_ops_int
+[    0.822806] atkbd: Unknown symbol param_ops_int (err -22)
+[    0.822807] atkbd: disagrees about version of symbol kmalloc_caches
+[    0.822808] atkbd: Unknown symbol kmalloc_caches (err -22)
+[    0.843406] virtme initramfs: mounting hostfs...
+[    0.844079] virtme initramfs: initramfs does not have module fs-virtiofs
+[    0.844491] 9pnet: Limiting 'msize' to 512000 as this is the maximum supported by transport virtio
+[    0.846711] virtme initramfs: done; switching to real root
+[    0.865494] virtme-ng-init: Setting hostname to virtme-ng...
+[    0.909097] virtme-ng-init: running systemd-tmpfiles
+[    1.098851] virtme-ng-init: basic initialization done
+[    1.100359] virtme-ng-init: you have CONFIG_UEVENT_HELPER on; turn it off
+[    1.101093] 9pnet: Limiting 'msize' to 512000 as this is the maximum supported by transport virtio
+[    1.122243] virtme-ng-init: Starting systemd-udevd version 255.4-1ubuntu8.18
+[    1.122253] virtme-ng-init: triggering udev coldplug
+[    1.515279] virtme-ng-init: waiting for udev to settle
+[    1.523530] button: disagrees about version of symbol device_set_wakeup_capable
+[    1.523535] button: Unknown symbol device_set_wakeup_capable (err -22)
+[    1.523538] button: disagrees about version of symbol param_ops_ulong
+[    1.523539] button: Unknown symbol param_ops_ulong (err -22)
+[    1.523555] button: disagrees about version of symbol device_wakeup_disable
+[    1.523556] button: Unknown symbol device_wakeup_disable (err -22)
+[    1.523557] button: disagrees about version of symbol device_wakeup_enable
+[    1.523558] button: Unknown symbol device_wakeup_enable (err -22)
+[    1.523576] button: disagrees about version of symbol kmalloc_caches
+[    1.523576] button: Unknown symbol kmalloc_caches (err -22)
+[    1.542588] i2c_core: disagrees about version of symbol device_property_present
+[    1.542593] i2c_core: Unknown symbol device_property_present (err -22)
+[    1.542597] i2c_core: disagrees about version of symbol try_module_get
+[    1.542597] i2c_core: Unknown symbol try_module_get (err -22)
+[    1.542602] i2c_core: disagrees about version of symbol device_set_wakeup_capable
+[    1.542603] i2c_core: Unknown symbol device_set_wakeup_capable (err -22)
+[    1.542606] i2c_core: disagrees about version of symbol device_property_match_string
+[    1.542607] i2c_core: Unknown symbol device_property_match_string (err -22)
+[    1.542620] i2c_core: disagrees about version of symbol dev_set_name
+[    1.542621] i2c_core: Unknown symbol dev_set_name (err -22)
+[    1.542624] i2c_core: disagrees about version of symbol trace_raw_output_prep
+[    1.542625] i2c_core: Unknown symbol trace_raw_output_prep (err -22)
+[    1.542628] i2c_core: disagrees about version of symbol bpf_trace_run6
+[    1.542629] i2c_core: Unknown symbol bpf_trace_run6 (err -22)
+[    1.542632] i2c_core: disagrees about version of symbol device_unregister
+[    1.542633] i2c_core: Unknown symbol device_unregister (err -22)
+[    1.542638] i2c_core: disagrees about version of symbol __trace_trigger_soft_disabled
+[    1.542639] i2c_core: Unknown symbol __trace_trigger_soft_disabled (err -22)
+[    1.542644] i2c_core: disagrees about version of symbol trace_event_printf
+[    1.542645] i2c_core: Unknown symbol trace_event_printf (err -22)
+[    1.542651] i2c_core: disagrees about version of symbol device_initialize
+[    1.542651] i2c_core: Unknown symbol device_initialize (err -22)
+[    1.542657] i2c_core: disagrees about version of symbol trace_event_raw_init
+[    1.542658] i2c_core: Unknown symbol trace_event_raw_init (err -22)
+[    1.542664] i2c_core: disagrees about version of symbol device_for_each_child
+[    1.542665] i2c_core: Unknown symbol device_for_each_child (err -22)
+[    1.542674] i2c_core: disagrees about version of symbol get_device
+[    1.542675] i2c_core: Unknown symbol get_device (err -22)
+[    1.542677] i2c_core: disagrees about version of symbol bpf_trace_run8
+[    1.542677] i2c_core: Unknown symbol bpf_trace_run8 (err -22)
+[    1.542681] i2c_core: disagrees about version of symbol __dynamic_dev_dbg
+[    1.542682] i2c_core: Unknown symbol __dynamic_dev_dbg (err -22)
+[    1.542686] i2c_core: disagrees about version of symbol dev_driver_string
+[    1.542687] i2c_core: Unknown symbol dev_driver_string (err -22)
+[    1.542689] i2c_core: disagrees about version of symbol trace_event_buffer_commit
+[    1.542690] i2c_core: Unknown symbol trace_event_buffer_commit (err -22)
+[    1.542692] i2c_core: disagrees about version of symbol fwnode_irq_get_byname
+[    1.542693] i2c_core: Unknown symbol fwnode_irq_get_byname (err -22)
+[    1.542695] i2c_core: disagrees about version of symbol device_match_fwnode
+[    1.542696] i2c_core: Unknown symbol device_match_fwnode (err -22)
+[    1.542698] i2c_core: disagrees about version of symbol device_set_node
+[    1.542699] i2c_core: Unknown symbol device_set_node (err -22)
+[    1.542709] i2c_core: disagrees about version of symbol put_device
+[    1.542710] i2c_core: Unknown symbol put_device (err -22)
+[    1.542714] i2c_core: disagrees about version of symbol device_property_read_u32_array
+[    1.542715] i2c_core: Unknown symbol device_property_read_u32_array (err -22)
+[    1.542719] i2c_core: disagrees about version of symbol _dev_info
+[    1.542720] i2c_core: Unknown symbol _dev_info (err -22)
+[    1.542722] i2c_core: disagrees about version of symbol module_put
+[    1.542722] i2c_core: Unknown symbol module_put (err -22)
+[    1.542724] i2c_core: disagrees about version of symbol device_wakeup_disable
+[    1.542725] i2c_core: Unknown symbol device_wakeup_disable (err -22)
+[    1.542729] i2c_core: disagrees about version of symbol perf_trace_run_bpf_submit
+[    1.542730] i2c_core: Unknown symbol perf_trace_run_bpf_submit (err -22)
+[    1.542732] i2c_core: disagrees about version of symbol _dev_err
+[    1.542733] i2c_core: Unknown symbol _dev_err (err -22)
+[    1.542734] i2c_core: disagrees about version of symbol device_wakeup_enable
+[    1.542735] i2c_core: Unknown symbol device_wakeup_enable (err -22)
+[    1.542737] i2c_core: disagrees about version of symbol device_add
+[    1.542738] i2c_core: Unknown symbol device_add (err -22)
+[    1.542747] i2c_core: disagrees about version of symbol debugfs_remove
+[    1.542747] i2c_core: Unknown symbol debugfs_remove (err -22)
+[    1.542748] i2c_core: disagrees about version of symbol trace_event_reg
+[    1.542749] i2c_core: Unknown symbol trace_event_reg (err -22)
+[    1.542756] i2c_core: disagrees about version of symbol device_register
+[    1.542757] i2c_core: Unknown symbol device_register (err -22)
+[    1.542761] i2c_core: disagrees about version of symbol _dev_warn
+[    1.542762] i2c_core: Unknown symbol _dev_warn (err -22)
+[    1.542763] i2c_core: disagrees about version of symbol device_get_match_data
+[    1.542764] i2c_core: Unknown symbol device_get_match_data (err -22)
+[    1.542772] i2c_core: disagrees about version of symbol fwnode_handle_get
+[    1.542773] i2c_core: Unknown symbol fwnode_handle_get (err -22)
+[    1.542779] i2c_core: disagrees about version of symbol bpf_trace_run3
+[    1.542779] i2c_core: Unknown symbol bpf_trace_run3 (err -22)
+[    1.542783] i2c_core: disagrees about version of symbol trace_event_buffer_reserve
+[    1.542783] i2c_core: Unknown symbol trace_event_buffer_reserve (err -22)
+[    1.542795] i2c_core: disagrees about version of symbol dev_err_probe
+[    1.542796] i2c_core: Unknown symbol dev_err_probe (err -22)
+[    1.542800] i2c_core: disagrees about version of symbol bpf_trace_run7
+[    1.542801] i2c_core: Unknown symbol bpf_trace_run7 (err -22)
+[    1.542805] i2c_core: disagrees about version of symbol debugfs_create_dir
+[    1.542806] i2c_core: Unknown symbol debugfs_create_dir (err -22)
+[    1.542808] i2c_core: disagrees about version of symbol device_match_acpi_handle
+[    1.542809] i2c_core: Unknown symbol device_match_acpi_handle (err -22)
+[    1.542814] i2c_core: disagrees about version of symbol __dev_fwnode
+[    1.542815] i2c_core: Unknown symbol __dev_fwnode (err -22)
+[    1.542816] i2c_core: disagrees about version of symbol kmalloc_caches
+[    1.542816] i2c_core: Unknown symbol kmalloc_caches (err -22)
+[    1.552469] BPF: [131503] FUNC  
+[    1.552970] BPF: type_id=128126
+[    1.553405] BPF:  
+[    1.553428] serio: disagrees about version of symbol try_module_get
+[    1.553695] BPF: Invalid name
+[    1.553695] serio: Unknown symbol try_module_get (err -22)
+[    1.553702] serio: disagrees about version of symbol dev_set_name
+[    1.554101] serio: Unknown symbol dev_set_name (err -22)
+[    1.554101] BPF: 
+[    1.554106] serio: disagrees about version of symbol device_initialize
+[    1.554391] serio: Unknown symbol device_initialize (err -22)
+[    1.554391] failed to validate module [scsi_common] BTF: -22
+[    1.554393] serio: disagrees about version of symbol __module_get
+[    1.554394] serio: Unknown symbol __module_get (err -22)
+[    1.554402] serio: disagrees about version of symbol put_device
+[    1.554402] serio: Unknown symbol put_device (err -22)
+[    1.554404] serio: disagrees about version of symbol module_put
+[    1.554404] serio: Unknown symbol module_put (err -22)
+[    1.554407] serio: disagrees about version of symbol _dev_err
+[    1.554408] serio: Unknown symbol _dev_err (err -22)
+[    1.554410] serio: disagrees about version of symbol device_add
+[    1.554411] serio: Unknown symbol device_add (err -22)
+[    1.554417] serio: disagrees about version of symbol device_del
+[    1.554417] serio: Unknown symbol device_del (err -22)
+[    1.554419] serio: disagrees about version of symbol _dev_warn
+[    1.554420] serio: Unknown symbol _dev_warn (err -22)
+[    1.554426] serio: disagrees about version of symbol kmalloc_caches
+[    1.554427] serio: Unknown symbol kmalloc_caches (err -22)
+[    1.562365] irqbypass: disagrees about version of symbol const_current_task
+[    1.562369] irqbypass: Unknown symbol const_current_task (err -22)
+[    1.615966] ghash_clmulni_intel: disagrees about version of symbol crypto_register_shash
+[    1.615972] ghash_clmulni_intel: Unknown symbol crypto_register_shash (err -22)
+[    1.615975] ghash_clmulni_intel: disagrees about version of symbol crypto_unregister_shash
+[    1.615975] ghash_clmulni_intel: Unknown symbol crypto_unregister_shash (err -22)
+[    1.696925] virtme-ng-init: udev is done
+[    1.697752] virtme-ng-init: starting script
+[    1.762347] bpf_x86_native_lab: loading out-of-tree module taints kernel.
+[    1.763927] distilled base BTF type 'bpf_map' [4], size 288 has multiple candidates of the same size (ids [72960, 72959]) in base BTF
+[    1.763941] failed to validate module [bpf_x86_native_lab] BTF: -22
+make: Leaving directory '/workspaces/repository/kprog/tv'
+make: *** [Makefile:56: kernel-check] Error 2
+make: Leaving directory '/workspaces/repository/kprog/tv'

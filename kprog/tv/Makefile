@@ -46,7 +46,7 @@ kernel-check: kernel-build-x86 build/test-binding-kernel build/test-loader
 
 guest-kernel-check:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
-	insmod build-x86/bpf_x86_native_lab.ko
+	insmod build-x86/bpf_x86_native_lab.ko || { dmesg; exit 1; }
 	./build/test-binding-kernel
 	./build/test-loader
 

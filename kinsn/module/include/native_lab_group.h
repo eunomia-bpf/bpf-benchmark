@@ -6,6 +6,56 @@
  * module. The final chunk owns a generation vector for the entire program.
  * All callers hold blobs_lock.
  */
+static void native_lab_put_maps(struct bpf_map **maps, u32 count)
+{
+	while (count)
+		bpf_map_put(maps[--count]);
+	kfree(maps);
+}
+
+static void native_lab_release_maps(struct native_blob *blob)
+{
+	native_lab_put_maps(blob->bound_maps, blob->bound_map_count);
+	blob->bound_maps = NULL;
+	blob->bound_map_count = 0;
+}
+
+static int native_lab_pin_maps(const struct native_blob *blob,
+			       struct bpf_map ***maps_out, u32 *count_out)
+{
+	struct bpf_map **maps;
+	u32 count = 0;
+	size_t i;
+
+	*maps_out = NULL;
+	*count_out = 0;
+	if (!blob->reloc_count)
+		return 0;
+	maps = kmalloc_array(blob->reloc_count, sizeof(*maps), GFP_KERNEL);
+	if (!maps)
+		return -ENOMEM;
+	for (i = 0; i < blob->reloc_count; i++) {
+		const struct native_lab_reloc_record *reloc = &blob->relocs[i];
+		struct bpf_map *map;
+		u32 id = (u32)reloc->target;
+
+		if (reloc->kind != NATIVE_LAB_RELOC_MAP_POINTER &&
+		    reloc->kind != NATIVE_LAB_RELOC_MAP_VALUE)
+			continue;
+		map = bpf_map_get_curr_or_next(&id);
+		if (!map || id != (u32)reloc->target) {
+			if (map)
+				bpf_map_put(map);
+			native_lab_put_maps(maps, count);
+			return -ENOENT;
+		}
+		maps[count++] = map;
+	}
+	*maps_out = maps;
+	*count_out = count;
+	return 0;
+}
+
 static int native_lab_group_metadata(const struct native_lab_binding *member,
 				     const struct native_lab_binding *root,
 				     u32 offset)
@@ -99,23 +149,18 @@ static int native_lab_group_use(u32 blob_id, u32 generation, u32 abi_mask)
 }
 
 /* Check the JIT's actual restored BPF stream: exactly one consecutive ordered
- * group, identical call identity, and no BPF edge into a proper suffix. This
+ * group plus EXIT, with identical call identity and no surrounding code. This
  * prevents a proof for [chunk0,chunk1] authorizing [chunk1,chunk0] or [chunk1].
  */
 static int native_lab_group_program(const struct bpf_prog *prog, u32 blob_id)
 {
 	const struct native_lab_binding *b = &blobs[blob_id].binding;
-	u32 first = prog->len, end, i;
+	u32 first = 0, i;
 	const struct bpf_insn *call;
 
-	for (i = 0; i < prog->len; i++)
-		if (bpf_kinsn_is_sidecar_insn(&prog->insnsi[i])) {
-			first = i;
-			break;
-		}
-	if (first == prog->len || b->chunk_count > (prog->len - first) / 2)
+	if (prog->len != 2 * b->chunk_count + 1 ||
+	    prog->insnsi[prog->len - 1].code != (BPF_JMP | BPF_EXIT))
 		return -EINVAL;
-	end = first + 2 * b->chunk_count;
 	call = &prog->insnsi[first + 1];
 	for (i = 0; i < b->chunk_count; i++) {
 		const struct bpf_insn *sidecar = &prog->insnsi[first + 2 * i];
@@ -135,24 +180,194 @@ static int native_lab_group_program(const struct bpf_prog *prog, u32 blob_id)
 		if (id != i || abi != b->abi_mask || gen != blobs[i].generation)
 			return -ESTALE;
 	}
-	for (i = 0; i < prog->len; i++) {
-		const struct bpf_insn *insn = &prog->insnsi[i];
-		u8 cls = BPF_CLASS(insn->code), op = BPF_OP(insn->code);
-		s64 target;
-
-		if (i >= first && i < end)
-			continue;
-		if (bpf_kinsn_is_sidecar_insn(insn))
-			return -EINVAL;
-		if ((cls != BPF_JMP && cls != BPF_JMP32) ||
-		    op == BPF_CALL || op == BPF_EXIT)
-			continue;
-		target = (s64)i + 1 +
-			(cls == BPF_JMP32 && op == BPF_JA ? insn->imm : insn->off);
-		if (target > first && target < end)
-			return -EINVAL;
-	}
 	return 0;
+}
+
+
+/* Run before proof lowering as well as checking the restored JIT stream.
+ * Generation-zero explicitly unbound experiments retain their legacy ABI.
+ */
+static int native_lab_validate_program(u64 payload, const struct bpf_prog *prog)
+{
+	u32 blob_id, abi_mask, generation;
+	int err = decode_native_lab_payload(payload, &blob_id, &abi_mask, &generation);
+
+	if (err || !generation)
+		return err;
+	mutex_lock(&blobs_lock);
+	err = native_lab_group_use(blob_id, generation, abi_mask);
+	if (!err)
+		err = native_lab_group_program(prog, blob_id);
+	mutex_unlock(&blobs_lock);
+	return err;
+}
+
+/* Stable kernel map ID and optional value offset, never a userspace FD. */
+static int native_lab_map_target(const struct native_lab_reloc_record *reloc,
+				struct bpf_map *const *maps, u32 count, u64 *target)
+{
+	u32 id = (u32)reloc->target, offset = reloc->target >> 32, i;
+
+	for (i = 0; i < count; i++) {
+		struct bpf_map *map = maps[i];
+		int err;
+
+		if (map->id != id)
+			continue;
+		if (reloc->kind == NATIVE_LAB_RELOC_MAP_POINTER) {
+			if (offset)
+				return -EINVAL;
+			*target = (unsigned long)map;
+			return 0;
+		}
+		if (!map->ops->map_direct_value_addr || offset >= map->value_size)
+			return -EINVAL;
+		err = map->ops->map_direct_value_addr(map, target, offset);
+		if (!err)
+			*target += offset;
+		return err;
+	}
+	return -ENOENT;
+}
+
+static int native_lab_emit_map_literal(const struct native_lab_reloc_record *reloc,
+		const u8 *blob, size_t length, u8 *destination, const struct bpf_prog *prog)
+{
+	u64 target;
+	int err;
+
+	if ((size_t)reloc->offset + sizeof(target) > length)
+		return -ERANGE;
+	if (memchr_inv(blob + reloc->offset, 0, sizeof(target)))
+		return -EINVAL;
+	err = native_lab_map_target(reloc, prog->aux->used_maps,
+				    prog->aux->used_map_cnt, &target);
+	if (!err)
+		memcpy(destination + reloc->offset, &target, sizeof(target));
+	return err;
+}
+
+/* Use the same map operations/generator as verifier do_misc_fixups, including
+ * its generated internal hash lookup call. No second specialization table. */
+static int native_lab_map_helper_target(const struct bpf_verifier_env *env,
+					u32 index, u64 target)
+{
+	const struct bpf_insn_aux_data *aux = &env->insn_aux_data[index];
+	const struct bpf_insn *call = &env->prog->insnsi[index];
+	struct bpf_map *map = aux->map_ptr_state.map_ptr;
+	struct bpf_insn *generated;
+	bool found = false;
+	int count, i;
+
+	if (aux->map_ptr_state.poison || !map)
+		return false;
+	if (call->imm == BPF_FUNC_map_update_elem)
+		return (unsigned long)map->ops->map_update_elem == target;
+	if (call->imm != BPF_FUNC_map_lookup_elem)
+		return false;
+	if ((unsigned long)map->ops->map_lookup_elem == target)
+		return true;
+	if (!map->ops->map_gen_lookup)
+		return false;
+	generated = kcalloc(INSN_BUF_SIZE, sizeof(*generated), GFP_KERNEL);
+	if (!generated)
+		return -ENOMEM;
+	count = map->ops->map_gen_lookup(map, generated);
+	if (count > 0 && count < INSN_BUF_SIZE)
+		for (i = 0; i < count; i++)
+			if (generated[i].code == (BPF_JMP | BPF_CALL) &&
+			    !generated[i].src_reg &&
+			    (u64)((s64)(unsigned long)__bpf_call_base + generated[i].imm) == target)
+				found = true;
+	kfree(generated);
+	if (count < 0 && count != -EOPNOTSUPP)
+		return count;
+	if (count != -EOPNOTSUPP && (count <= 0 || count >= INSN_BUF_SIZE))
+		return -EFAULT;
+	return found;
+}
+
+/* Called once for the final generation while all expanded proofs and resolved
+ * map identities remain present. fd_array retention alone is insufficient.
+ */
+static int native_lab_validate_proof(u64 payload, const struct bpf_verifier_env *env)
+{
+	u32 blob_id, abi_mask, generation, chunk;
+	int err = decode_native_lab_payload(payload, &blob_id, &abi_mask, &generation);
+
+	if (err || !generation)
+		return err;
+	mutex_lock(&blobs_lock);
+	err = native_lab_group_use(blob_id, generation, abi_mask);
+	if (err || blob_id + 1 != blobs[blob_id].binding.chunk_count)
+		goto out;
+	for (chunk = 0; chunk <= blob_id; chunk++) {
+		const struct native_blob *blob = &blobs[chunk];
+		size_t r;
+
+		for (r = 0; r < blob->reloc_count; r++) {
+			const struct native_lab_reloc_record *reloc = &blob->relocs[r];
+			bool found = false;
+			u32 i;
+
+			if (reloc->kind == NATIVE_LAB_RELOC_MAP_POINTER ||
+			    reloc->kind == NATIVE_LAB_RELOC_MAP_VALUE) {
+				u64 target;
+
+				err = native_lab_map_target(reloc, env->used_maps,
+							    env->used_map_cnt, &target);
+				if (err)
+					goto out;
+				for (i = 0; i + 1 < env->prog->len; i++) {
+					const struct bpf_insn *insn = &env->prog->insnsi[i];
+					u32 index;
+
+					if (insn->code != (BPF_LD | BPF_DW | BPF_IMM) ||
+					    (reloc->kind == NATIVE_LAB_RELOC_MAP_POINTER ?
+					     insn->src_reg != BPF_PSEUDO_MAP_FD :
+					     insn->src_reg != BPF_PSEUDO_MAP_VALUE ||
+					     env->insn_aux_data[i].map_off != reloc->target >> 32))
+						continue;
+					index = env->insn_aux_data[i].map_index;
+					if (index < env->used_map_cnt &&
+					    env->used_maps[index]->id == (u32)reloc->target)
+						found = true;
+					i++;
+				}
+			} else if (reloc->kind >= 1 && reloc->kind <= 3) {
+				for (i = 0; i < env->prog->len; i++) {
+					const struct bpf_insn *insn = &env->prog->insnsi[i];
+					const struct bpf_func_proto *proto;
+
+					if (insn->code != (BPF_JMP | BPF_CALL) || insn->src_reg)
+						continue;
+					proto = env->ops->get_func_proto(insn->imm, env->prog);
+					if (proto && (unsigned long)proto->func == reloc->target) {
+						found = true;
+						break;
+					}
+					err = native_lab_map_helper_target(env, i, reloc->target);
+					if (err < 0)
+						goto out;
+					if (err) {
+						found = true;
+						err = 0;
+						break;
+					}
+				}
+			} else if (reloc->kind == 4) {
+				/* Architecture-owned per-CPU MRS encoding, not a helper. */
+				continue;
+			}
+			if (!found) {
+				err = -EINVAL;
+				goto out;
+			}
+		}
+	}
+out:
+	mutex_unlock(&blobs_lock);
+	return err;
 }
 
 #endif

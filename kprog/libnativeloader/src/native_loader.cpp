@@ -715,6 +715,7 @@ void append_u64_le(std::vector<uint8_t> &out, uint64_t v)
 
 bool native_lab_reloc_kind_supported(uint32_t kind)
 {
+    if (kind == NATIVE_LAB_RELOC_MAP_POINTER || kind == NATIVE_LAB_RELOC_MAP_VALUE) return true;
 #if defined(__aarch64__)
     return kind == kNativeLabRelocHelperCallArm64 ||
            kind == kNativeLabRelocHelperCallArm64Bl26 ||
@@ -727,6 +728,9 @@ bool native_lab_reloc_kind_supported(uint32_t kind)
 size_t native_lab_reloc_slot_bytes(uint32_t kind)
 {
     switch (kind) {
+    case NATIVE_LAB_RELOC_MAP_POINTER:
+    case NATIVE_LAB_RELOC_MAP_VALUE:
+        return sizeof(uint64_t);
     case kNativeLabRelocHelperCallRel32:
         return kNativeLabRelocHelperCallRel32Bytes;
     case kNativeLabRelocHelperCallArm64:
@@ -1545,8 +1549,9 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     if (!generations.empty() && generations.size() != chunks) {
         fail("native_kernel bound generation count does not match native chunks");
     }
+    const bool tail_call_probe = tail_call_reachable && generations.empty();
     ScopedFd tail_call_map_fd;
-    if (tail_call_reachable) {
+    if (tail_call_probe) {
         LIBBPF_OPTS(bpf_map_create_opts, map_opts);
         int fd = bpf_map_create(BPF_MAP_TYPE_PROG_ARRAY,
                                 "native_tail_call_probe",
@@ -1563,8 +1568,8 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
 
     std::vector<bpf_insn> insns;
     insns.reserve(static_cast<size_t>(2) * chunks +
-                  (tail_call_reachable ? 8 : 1));
-    if (tail_call_reachable) {
+                  (tail_call_probe ? 8 : 1));
+    if (tail_call_probe) {
         const size_t probe_off = 1 + static_cast<size_t>(2) * chunks;
         if (probe_off > static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
             fail("native_kernel tail-call probe jump offset exceeds int16");
@@ -1606,7 +1611,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     insns.push_back(bpf_insn{
         .code = BPF_JMP | BPF_EXIT, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
     });
-    if (tail_call_reachable) {
+    if (tail_call_probe) {
         insns.push_back(bpf_insn{
             .code = BPF_LD | BPF_DW | BPF_IMM,
             .dst_reg = BPF_REG_2,
@@ -1921,24 +1926,6 @@ uint32_t read_link_abi_file(const std::filesystem::path &path)
     return static_cast<uint32_t>(mask);
 }
 
-void patch_map_literals(std::vector<uint8_t> &blob,
-                        const std::vector<MapPatchSite> &patches,
-                        const std::unordered_map<std::string, uint64_t> &map_addrs)
-{
-    for (const auto &patch : patches) {
-        if (patch.offset + sizeof(uint64_t) > blob.size()) {
-            fail("native map patch offset exceeds blob bounds for " + patch.name);
-        }
-        auto it = map_addrs.find(patch.name);
-        if (it == map_addrs.end()) {
-            fail("native map patch references unknown map " + patch.name);
-        }
-        uint64_t value = it->second;
-        for (unsigned i = 0; i < 8; i++) {
-            blob[patch.offset + i] = static_cast<uint8_t>((value >> (i * 8)) & 0xff);
-        }
-    }
-}
 
 std::vector<uint32_t> collect_relocated_map_ids(
     const std::vector<MapPatchSite> &patches,
@@ -4332,6 +4319,38 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     return out;
 }
 
+void bind_native_map_relocations(LinkedBlob &linked,
+    const std::vector<MapPatchSite> &patches, const CompanionLoad &companion)
+{
+    for (const auto &site : patches) {
+        const auto identity = companion.map_addr_ids.find(site.name);
+        const auto address = companion.map_addrs.find(site.name);
+        if (identity == companion.map_addr_ids.end() || address == companion.map_addrs.end())
+            fail("native map relocation lacks original map identity: " + site.name);
+        const auto map = std::find_if(companion.maps.begin(), companion.maps.end(),
+            [&](const MapMeta &m) { return m.kernel_id == identity->second; });
+        if (map == companion.maps.end())
+            fail("native map relocation has no original map layout: " + site.name);
+        uint32_t kind = NATIVE_LAB_RELOC_MAP_POINTER;
+        uint64_t offset = 0;
+        if (address->second != map->kernel_addr) {
+            kind = NATIVE_LAB_RELOC_MAP_VALUE;
+            if (!map->value_addr || address->second < map->value_addr ||
+                address->second - map->value_addr >= map->value_size)
+                fail("native map relocation exceeds original value: " + site.name);
+            offset = address->second - map->value_addr;
+        }
+        if (site.offset > std::numeric_limits<uint32_t>::max())
+            fail("native map relocation offset exceeds wire format");
+        if (site.offset > linked.blob.size() || sizeof(uint64_t) > linked.blob.size() - site.offset)
+            fail("native map literal exceeds linked bytes: " + site.name);
+        std::fill_n(linked.blob.begin() + site.offset, sizeof(uint64_t), 0);
+        append_u32_le(linked.relocs, static_cast<uint32_t>(site.offset));
+        append_u32_le(linked.relocs, kind);
+        append_u64_le(linked.relocs, identity->second | (offset << 32));
+    }
+}
+
 LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_path,
                                     const std::filesystem::path &elf_path,
                                     const std::string &symbol_name,
@@ -4390,7 +4409,7 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
         publish_cache_file(tmp.map_patches, cache.map_patches);
         publish_cache_file(tmp.abi, cache.abi);
         const auto patch_start = std::chrono::steady_clock::now();
-        patch_map_literals(linked.blob, map_patches, companion.map_addrs);
+        bind_native_map_relocations(linked, map_patches, companion);
         const auto patch_end = std::chrono::steady_clock::now();
         linked.native_link_read_ns = elapsed_ns(read_start, read_end);
         linked.map_patch_ns = elapsed_ns(patch_start, patch_end);
@@ -4412,7 +4431,7 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     linked.native_link_summary = native_link_plan_summary(link_args, linked);
     const auto read_end = std::chrono::steady_clock::now();
     const auto patch_start = std::chrono::steady_clock::now();
-    patch_map_literals(linked.blob, map_patches, companion.map_addrs);
+    bind_native_map_relocations(linked, map_patches, companion);
     const auto patch_end = std::chrono::steady_clock::now();
     linked.native_link_read_ns = elapsed_ns(read_start, read_end);
     linked.map_patch_ns = elapsed_ns(patch_start, patch_end);
@@ -4678,6 +4697,7 @@ SimulatorObject prepare_simulator_proof(
             fail("set simulator proof entry: " + libbpf_error_string(err));
         }
     }
+    std::unordered_set<uint32_t> reused_maps;
     bpf_map *map;
     bpf_object__for_each_map(map, raw) {
         const std::string name = bpf_map__name(map);
@@ -4721,6 +4741,7 @@ SimulatorObject prepare_simulator_proof(
         if (err) {
             fail("reuse simulator proof map " + name + ": " + libbpf_error_string(err));
         }
+        reused_maps.insert(*identity);
     }
     const int err = bpf_object__prepare(raw);
     if (err) {
@@ -4732,12 +4753,19 @@ SimulatorObject prepare_simulator_proof(
         fail("relocated simulator proof is empty: " + entry);
     }
     proof.assign(instructions, instructions + count);
-    for (const bpf_insn &insn : proof) {
-        if (insn.code == (BPF_LD | BPF_DW | BPF_IMM) &&
-            (insn.src_reg == BPF_PSEUDO_MAP_FD || insn.src_reg == BPF_PSEUDO_MAP_VALUE) &&
-            insn.imm < 0) {
-            fail("simulator proof references a map without source-program identity: " + entry);
+    for (size_t index = 0; index < proof.size(); index++) {
+        const bpf_insn &insn = proof[index];
+        // libbpf poisons missing map/kfunc relocations rather than failing prepare.
+        if (insn.code == (BPF_JMP | BPF_CALL) && insn.imm >= 2001000000)
+            fail("simulator proof contains an unresolved map/kfunc relocation: " + entry);
+        if (insn.code != (BPF_LD | BPF_DW | BPF_IMM)) continue;
+        if (index + 1 >= proof.size()) fail("truncated simulator wide immediate: " + entry);
+        if (insn.src_reg == BPF_PSEUDO_MAP_FD || insn.src_reg == BPF_PSEUDO_MAP_VALUE) {
+            const auto identity = load_map_info(insn.imm).id;
+            if (!reused_maps.contains(identity))
+                fail("simulator map load lacks original-program identity: " + entry);
         }
+        index++;
     }
     return object;
 }

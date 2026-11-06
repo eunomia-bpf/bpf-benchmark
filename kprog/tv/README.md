@@ -85,6 +85,23 @@ The object keeps map FDs alive through the bound load. Supplying both raw proof
 instructions and a manifest proof fails. Substituting original app BPF for the
 simulator would not meet the translation-validation obligation.
 
+Bound programs must contain exactly their ordered native group followed by
+EXIT. The kernel checks this before proof expansion and again at JIT emission;
+surrounding BPF spills, helpers or subprograms cannot share native scratch.
+Stack reservation survives fastcall cleanup, and native proof loads require
+successful JIT emission independently of the kernel's interpreter configuration.
+
+Map literal relocation kinds 5/6 identify a map pointer/value by kernel map ID
+and value offset (`target = id | offset << 32`), in a zero eight-byte literal.
+Sealing pins those map objects until mutation/module exit. Before removing any
+proof region, the kernel matches each relocation to a resolved proof map load,
+including pointer/value kind and value offset; mere fd_array retention does not
+qualify. Emission resolves the pointer from the program's retained kernel maps.
+Helper targets must match proof helper prototypes or the kernel's operations
+and generated lookup calls for the verifier-recorded map. This binds external
+identities; per-block TV must additionally establish argument values, ordering,
+accesses and control-flow correspondence.
+
 `native-proof-regions.patch` is applied idempotently by the existing host kernel
 build recipes. Rebuild the kernel and module together: native-proof descriptors
 now admit standard resolved helper calls and map FD/value loads, enforce

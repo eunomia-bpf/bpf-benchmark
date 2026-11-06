@@ -19,7 +19,7 @@ with tempfile.TemporaryDirectory() as directory:
     header.parent.mkdir(parents=True)
     header.write_bytes(subprocess.run(["git", "show", "HEAD:include/linux/bpf.h"],
         cwd=here.parents[1] / "vendor/linux-framework", check=True, capture_output=True).stdout)
-    for name in ("include/linux/bpf_verifier.h", "arch/x86/net/bpf_jit_comp.c",
+    for name in ("include/linux/bpf_verifier.h", "kernel/bpf/core.c", "kernel/bpf/syscall.c", "arch/x86/net/bpf_jit_comp.c",
                  "arch/arm64/net/bpf_jit_comp.c"):
         target = kernel / name
         target.parent.mkdir(parents=True, exist_ok=True)

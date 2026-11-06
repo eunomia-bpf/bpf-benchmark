@@ -30,6 +30,10 @@ int main()
     if (bpf_map_update_elem(map_fd, &key, &value, BPF_ANY)) {
         std::perror("initialize fixture map"); return 1;
     }
+    int hash_fd = bpf_map_create(BPF_MAP_TYPE_HASH, "tv_hash_map", 4, 4, 1, nullptr);
+    if (hash_fd < 0 || bpf_map_update_elem(hash_fd, &key, &value, BPF_ANY)) {
+        std::perror("initialize hash fixture map"); return 1;
+    }
     const std::vector<bpf_insn> map{
         {.code = BPF_LD | BPF_DW | BPF_IMM, .dst_reg = 1, .src_reg = BPF_PSEUDO_MAP_FD,
          .off = 0, .imm = map_fd}, {},
@@ -41,11 +45,14 @@ int main()
         {.code = BPF_LDX | BPF_W | BPF_MEM, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0},
         constant[1],
     };
+    auto hash = map;
+    hash[0].imm = hash_fd;
     try {
-        for (const char *symbol : {"tv_short_entry", "tv_long_entry", "tv_helper_entry", "tv_map_entry", "tv_large_entry"}) {
+        for (const char *symbol : {"tv_short_entry", "tv_long_entry", "tv_helper_entry", "tv_map_entry", "tv_hash_entry", "tv_large_entry"}) {
             const auto &proof = std::string(symbol) == "tv_helper_entry" ? helper :
                 std::string(symbol) == "tv_large_entry" ? large :
-                std::string(symbol) == "tv_map_entry" ? map : constant;
+                std::string(symbol) == "tv_map_entry" ? map :
+                std::string(symbol) == "tv_hash_entry" ? hash : constant;
             int original = bpf_prog_load(BPF_PROG_TYPE_XDP, "tv_loader", "GPL",
                                          proof.data(), proof.size(), nullptr);
             if (original < 0) { std::perror("original BPF load"); return 1; }
@@ -80,8 +87,22 @@ int main()
             std::printf("shared loader %s: PASS (%u chunks, native returned 2)\n",
                         symbol, loaded.native_chunk_count);
             native_loader::close_loaded_program(&loaded);
-            if (std::string(symbol) == "tv_helper_entry" || std::string(symbol) == "tv_map_entry") {
-                const char *entry = std::string(symbol) == "tv_map_entry" ? "tv_proof_map" : "tv_proof_helper";
+            if (std::string(symbol) == "tv_helper_entry") {
+                options.proof_insns[0].imm = BPF_FUNC_ktime_get_ns;
+                bool rejected = false;
+                try {
+                    auto wrong = native_loader::load_from_fd(options);
+                    native_loader::close_loaded_program(&wrong);
+                } catch (const std::exception &error) {
+                    assert(std::string(error.what()).find("BPF_PROG_LOAD native_lab stub:") != std::string::npos);
+                    rejected = true;
+                }
+                assert(rejected);
+                std::puts("different valid kernel helper target: PASS (rejected)");
+            }
+            if (std::string(symbol) == "tv_helper_entry" || std::string(symbol) == "tv_map_entry" || std::string(symbol) == "tv_hash_entry") {
+                const char *entry = std::string(symbol) == "tv_map_entry" ? "tv_proof_map" :
+                    std::string(symbol) == "tv_hash_entry" ? "tv_proof_hash" : "tv_proof_helper";
                 std::ofstream manifest("build/fixture-manifest.json");
                 manifest << "{\"objects\":[{\"program\":\"tv_loader\",\"native_object\":\"native-entry.o\","
                     "\"symbol\":\"" << symbol << "\",\"simulator_object\":\"simulator.bpf.o\","
@@ -105,7 +126,7 @@ int main()
                     std::perror("manifest simulator test run"); return 1;
                 }
                 assert(run.retval == 2);
-                if (std::string(symbol) == "tv_map_entry") {
+                if (std::string(symbol) == "tv_map_entry" || std::string(symbol) == "tv_hash_entry") {
                     uint32_t ids[2]{};
                     bpf_prog_info info{};
                     info.nr_map_ids = 2; info.map_ids = reinterpret_cast<uintptr_t>(ids);
@@ -113,7 +134,7 @@ int main()
                     if (bpf_obj_get_info_by_fd(result.prog_fd, &info, &length)) return 1;
                     bpf_map_info map_info{};
                     length = sizeof(map_info);
-                    if (bpf_obj_get_info_by_fd(map_fd, &map_info, &length)) return 1;
+                    if (bpf_obj_get_info_by_fd(std::string(symbol) == "tv_hash_entry" ? hash_fd : map_fd, &map_info, &length)) return 1;
                     assert(info.nr_map_ids == 1 && ids[0] == map_info.id);
                 }
                 std::printf("manifest simulator %s: PASS (clang proof, original maps, bound native)\n", entry);
@@ -138,7 +159,7 @@ int main()
         std::fprintf(stderr, "shared loader: %s\n", error.what());
         return 1;
     }
-    if (close(map_fd)) {
+    if (close(map_fd) || close(hash_fd)) {
         std::perror("close fixture map");
         return 1;
     }

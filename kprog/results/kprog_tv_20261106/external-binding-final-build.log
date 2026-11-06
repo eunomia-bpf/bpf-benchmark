@@ -1,0 +1,60 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+./build/test-binding
+binding entry/ABI/metadata/generation and exact-byte rejection tests: PASS
+install -d build
+cc -O2 -c -fno-stack-protector -fno-asynchronous-unwind-tables \
+	-fno-unwind-tables -fomit-frame-pointer -mno-red-zone -fno-plt test_native_entry.c -o build/native-entry.o
+install -d build
+clang -O2 -g -target bpf -I../../vendor/libbpf/include/uapi \
+	-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+	-I/usr/include/x86_64-linux-gnu -c test_simulator.bpf.c -o build/simulator.bpf.o
+make -C ../libnativeloader BUILD_DIR=build-tv-binding
+make[1]: Entering directory '/workspaces/repository/kprog/libnativeloader'
+cmake -S . -B "build-tv-binding" \
+	-DNATIVE_LOADER_REPO_ROOT="/workspaces/repository" \
+	-DNATIVE_LOADER_LIBBPF_PREFIX="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix" \
+	-DNATIVE_LOADER_LIBBPF_LIBRARY="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" \
+	-DNATIVE_LOADER_KERNEL_OFFSETS_INCLUDE="/workspaces/repository/micro/programs/build-x86"
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspaces/repository/kprog/libnativeloader/build-tv-binding
+cmake --build "build-tv-binding" --target native_loader native_loader_shared
+gmake[2]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[ 50%] Building CXX object CMakeFiles/native_loader.dir/src/native_loader.cpp.o
+[100%] Linking CXX static library libnative_loader.a
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[100%] Built target native_loader
+gmake[4]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[ 50%] Building CXX object CMakeFiles/native_loader_shared.dir/src/native_loader.cpp.o
+[100%] Linking CXX shared library libnative_loader.so
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[100%] Built target native_loader_shared
+gmake[4]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[2]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+make[1]: Leaving directory '/workspaces/repository/kprog/libnativeloader'
+g++ -std=c++20 -Wall -Wextra -Werror -O2 \
+	-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+	test_loader.cpp ../libnativeloader/build-tv-binding/libnative_loader.a \
+	../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o build/test-loader
+install -d build
+cc -Wall -Wextra -Werror -O2 -g -D__EXPORTED_HEADERS__ \
+	-I../../vendor/linux-framework/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+	test_binding_kernel.c ../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o build/test-binding-kernel
+install -d build-arm64
+aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -g -static -D__EXPORTED_HEADERS__ \
+	-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+	test_binding_kernel.c ../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+	-lelf -lz -lzstd -o build-arm64/test-binding-kernel
+make: Leaving directory '/workspaces/repository/kprog/tv'

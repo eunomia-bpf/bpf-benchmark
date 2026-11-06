@@ -8,6 +8,13 @@ struct {
     __type(value, int);
 } tv_map SEC(".maps");
 
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(max_entries, 1);
+    __type(key, int);
+    __type(value, int);
+} tv_hash_map SEC(".maps");
+
 SEC("xdp") int tv_proof_helper(struct xdp_md *ctx)
 {
     (void)ctx;
@@ -20,6 +27,14 @@ SEC("xdp") int tv_proof_map(struct xdp_md *ctx)
     int key = 0;
     (void)ctx;
     int *value = bpf_map_lookup_elem(&tv_map, &key);
+    return value ? *value : 0;
+}
+
+SEC("xdp") int tv_proof_hash(struct xdp_md *ctx)
+{
+    int key = 0;
+    (void)ctx;
+    int *value = bpf_map_lookup_elem(&tv_hash_map, &key);
     return value ? *value : 0;
 }
 

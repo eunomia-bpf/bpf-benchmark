@@ -83,3 +83,22 @@ Two accepted-wrong behaviors were fixed, retaining their evidence:
 Earlier stale-symbol-version module-load failures and verbose-log ENOSPC
 failures are retained. Paired kernel/module exports and quiet successful-load
 logs correct the harness; verifier rejection cases retain verbose diagnostics.
+
+The external-identity/frame follow-up also passes on both ISAs
+(`external-binding-final-{x86,arm64}.status`: 0). Both reject surrounding stack
+and helper code, a two-map swap despite retaining both maps, a post-seal FD
+rebind, a map pointer/value kind swap and a mismatched value offset. Matching
+map pointer and value relocations execute native code returning 2. The x86
+shared-loader tests additionally pass actual array and hash lookup paths through
+the manifest C ABI, preserving original map IDs, and reject a real kernel
+helper target different from the proof's helper. Specialized hash targets are
+matched using the kernel's own map lookup generator rather than a second
+userspace/kernel lookup table.
+
+The x86 recovery exposed a truncated copied `kernel/.freezer.o.cmd` ending at
+`/wo`. Its stale object carried a 1344-byte `bpf_prog_aux` beside the new
+1352-byte type, causing ambiguous base BTF and module registration failure.
+Only T's rebuildable object/dependency file was removed; make rebuilt it with
+correct dependencies. The failed module diagnostics and corrupted dependency
+file are retained. AArch64 needed its development libraries reinstalled after
+the container restart. Neither issue changed verifier policy or bypassed BTF.

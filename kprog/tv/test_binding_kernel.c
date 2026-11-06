@@ -29,6 +29,7 @@ static const unsigned char native[] = {0xb8, 2, 0, 0, 0}; /* mov eax, 2 */
 
 static const struct bpf_insn proof = { .code = BPF_ALU64 | BPF_MOV | BPF_K, .imm = 2 };
 static int module_fd, kfunc_id;
+static int retained_map_fd = -1;
 static unsigned test_slot;
 
 static void fatal(const char *what)
@@ -115,8 +116,8 @@ static void load_group(const uint32_t *order, const uint32_t *generations,
 	}
 	insns[2*count].code = BPF_JMP | BPF_EXIT;
 	char log[65536] = {0};
-	int fds[] = {module_fd, module_fd};
-	LIBBPF_OPTS(bpf_prog_load_opts, opts, .fd_array = fds, .fd_array_cnt = 2,
+	int fds[] = {module_fd, module_fd, retained_map_fd};
+	LIBBPF_OPTS(bpf_prog_load_opts, opts, .fd_array = fds, .fd_array_cnt = retained_map_fd < 0 ? 2 : 3,
 		.log_buf = log, .log_size = sizeof(log), .log_level = reject ? 2 : 0);
 	int fd = bpf_prog_load(BPF_PROG_TYPE_XDP, "tv_binding", "GPL", insns, 2*count+1, &opts);
 	if ((fd < 0) != reject) {
@@ -144,6 +145,33 @@ static void load(uint32_t gen, unsigned abi, int reject, const char *name)
 {
 	const uint32_t order[] = {0};
 	load_group(order, &gen, 1, abi, reject, name);
+}
+
+/* Native scratch must never coexist with a caller's verifier-tracked spill. */
+static void reject_surrounding_stack(uint32_t gen)
+{
+	for (int helper = 0; helper < 2; helper++) {
+		struct bpf_insn insns[] = {
+			{ .code = BPF_STX | BPF_DW | BPF_MEM, .dst_reg = 10, .src_reg = 1, .off = -8 },
+			{ .code = BPF_JMP | BPF_CALL, .imm = BPF_FUNC_get_smp_processor_id },
+			{ .code = BPF_ALU64 | BPF_MOV | BPF_K, .src_reg = BPF_PSEUDO_KINSN_SIDECAR, .imm = gen },
+			{ .code = BPF_JMP | BPF_CALL, .src_reg = BPF_PSEUDO_KINSN_CALL, .off = 1, .imm = kfunc_id },
+			{ .code = BPF_LDX | BPF_DW | BPF_MEM, .dst_reg = 1, .src_reg = 10, .off = -8 },
+			{ .code = BPF_JMP | BPF_EXIT },
+		};
+		if (!helper)
+			insns[1] = (struct bpf_insn){ .code = BPF_ALU64 | BPF_MOV | BPF_K };
+		char log[8192] = {0};
+		int fds[] = {module_fd, module_fd};
+		LIBBPF_OPTS(bpf_prog_load_opts, opts, .fd_array = fds, .fd_array_cnt = 2,
+			.log_buf = log, .log_size = sizeof(log), .log_level = 2);
+		int fd = bpf_prog_load(BPF_PROG_TYPE_XDP, "tv_frame", "GPL", insns, 6, &opts);
+		if (fd >= 0) {
+			fprintf(stderr, "native group admitted caller spill/helper=%d\n", helper);
+			exit(1);
+		}
+	}
+	puts("native group rejects surrounding stack and helper code: PASS");
 }
 
 static uint32_t seal_group_chunk(unsigned slot, const unsigned char *code,
@@ -199,25 +227,101 @@ static void group_regressions(void)
 	load_group(missing, generations, 1, 0, 1, "peer mutation invalidates whole group");
 }
 
-static void seal_single_proof(const struct bpf_insn *body, size_t count)
+struct test_reloc { uint32_t offset, kind; uint64_t target; };
+
+static void seal_single_artifact(const unsigned char *code, size_t size,
+		const struct bpf_insn *body, size_t count,
+		const struct test_reloc *relocs, size_t reloc_count)
 {
 	test_slot = 0;
-	upload("", native, sizeof(native), 0);
+	upload("", code, size, 0);
+	upload(".relocs", relocs, reloc_count * sizeof(*relocs), 0);
 	upload(".proof", body, count * sizeof(*body), 0);
 	struct native_lab_binding b = {
 		.version = 1, .arch = TV_ARCH, .abi_version = 1,
-		.chunk_count = 1, .native_size = sizeof(native),
-		.total_native_size = sizeof(native), .proof_insns = count,
+		.chunk_count = 1, .native_size = size,
+		.total_native_size = size, .proof_insns = count, .reloc_count = reloc_count,
 		.prog_type = BPF_PROG_TYPE_XDP, .snapshot_generation = generation(),
 	};
-	size_t length = sizeof(b) + sizeof(native) + count * sizeof(*body);
+	size_t reloc_bytes = reloc_count * sizeof(*relocs);
+	size_t length = sizeof(b) + size + reloc_bytes + count * sizeof(*body);
 	unsigned char *envelope = malloc(length);
 	assert(envelope);
 	memcpy(envelope, &b, sizeof(b));
-	memcpy(envelope + sizeof(b), native, sizeof(native));
-	memcpy(envelope + sizeof(b) + sizeof(native), body, count * sizeof(*body));
+	memcpy(envelope + sizeof(b), code, size);
+	if (reloc_bytes)
+		memcpy(envelope + sizeof(b) + size, relocs, reloc_bytes);
+	memcpy(envelope + sizeof(b) + size + reloc_bytes, body, count * sizeof(*body));
 	upload(".binding", envelope, length, 0);
 	free(envelope);
+}
+
+static void seal_single_proof(const struct bpf_insn *body, size_t count)
+{
+	seal_single_artifact(native, sizeof(native), body, count, NULL, 0);
+}
+
+static void external_identity_regressions(void)
+{
+	const struct bpf_insn helper_body[] = {
+		{ .code = BPF_JMP | BPF_CALL, .imm = BPF_FUNC_get_prandom_u32 }, proof,
+	};
+#if defined(__aarch64__)
+	const unsigned char helper_code[] = {0,0,0,0x94, 0x47,0,0x80,0xd2};
+	struct test_reloc helper_reloc = { .kind = 3, .target = 1 };
+#else
+	const unsigned char helper_code[] = {0xe8,0,0,0,0, 0xb8,2,0,0,0};
+	struct test_reloc helper_reloc = { .kind = 1, .target = 1 };
+#endif
+	seal_single_artifact(helper_code, sizeof(helper_code), helper_body, 2, &helper_reloc, 1);
+	load(generation(), 0, 1, "native helper target absent from verified proof");
+	int a = bpf_map_create(BPF_MAP_TYPE_ARRAY, "tv_identity_a", 4, 4, 1, NULL);
+	int b = bpf_map_create(BPF_MAP_TYPE_ARRAY, "tv_identity_b", 4, 4, 1, NULL);
+	if (a < 0 || b < 0)
+		fatal("identity maps");
+	struct bpf_map_info info_a = {0}, info_b = {0};
+	uint32_t length = sizeof(info_a);
+	if (bpf_obj_get_info_by_fd(a, &info_a, &length) || bpf_obj_get_info_by_fd(b, &info_b, &length))
+		fatal("identity map IDs");
+	const struct bpf_insn body[] = {
+		{ .code = BPF_LD | BPF_DW | BPF_IMM, .dst_reg = 1, .src_reg = BPF_PSEUDO_MAP_FD, .imm = a }, {}, proof,
+	};
+#if defined(__aarch64__)
+	/* mov x7,2; b past the eight-byte map literal */
+	const unsigned char code[] = {0x47,0,0x80,0xd2, 3,0,0,0x14, 0,0,0,0,0,0,0,0};
+	const uint32_t literal = 8;
+#else
+	const unsigned char code[] = {0xb8,2,0,0,0, 0xeb,8, 0,0,0,0,0,0,0,0};
+	const uint32_t literal = 7;
+#endif
+	struct test_reloc reloc = { .offset = literal, .kind = NATIVE_LAB_RELOC_MAP_POINTER, .target = info_a.id };
+	retained_map_fd = b;
+	seal_single_artifact(code, sizeof(code), body, 3, &reloc, 1);
+	load(generation(), 0, 0, "kernel-resolved map identity");
+	reloc.target = info_b.id;
+	seal_single_artifact(code, sizeof(code), body, 3, &reloc, 1);
+	load(generation(), 0, 1, "two-map swap despite fd-array retention");
+	reloc.target = info_a.id;
+	reloc.kind = NATIVE_LAB_RELOC_MAP_VALUE;
+	seal_single_artifact(code, sizeof(code), body, 3, &reloc, 1);
+	load(generation(), 0, 1, "map pointer/value kind mismatch");
+	struct bpf_insn value_body[] = {body[0], {}, proof};
+	value_body[0].src_reg = BPF_PSEUDO_MAP_VALUE;
+	seal_single_artifact(code, sizeof(code), value_body, 3, &reloc, 1);
+	load(generation(), 0, 0, "kernel-resolved map value identity and offset");
+	reloc.target |= (uint64_t)1 << 32;
+	seal_single_artifact(code, sizeof(code), value_body, 3, &reloc, 1);
+	load(generation(), 0, 1, "map value offset differs from verified proof");
+	reloc = (struct test_reloc){ .offset = literal, .kind = NATIVE_LAB_RELOC_MAP_POINTER, .target = info_a.id };
+	seal_single_artifact(code, sizeof(code), body, 3, &reloc, 1);
+	int pinned_a = dup(a);
+	if (pinned_a < 0 || dup2(b, a) < 0)
+		fatal("rebind proof map FD");
+	retained_map_fd = pinned_a;
+	load(generation(), 0, 1, "sealed proof FD rebound to another map");
+	if (dup2(pinned_a, a) < 0 || close(pinned_a) || close(a) || close(b))
+		fatal("close identity maps");
+	retained_map_fd = -1;
 }
 
 static void helper_map_regressions(void)
@@ -317,6 +421,7 @@ int main(void)
 	uint32_t sealed = generation();
 	assert(sealed == before + 1);
 	load(sealed, 0, 0, "exact binding");
+	reject_surrounding_stack(sealed);
 	load(sealed, 1, 1, "ABI mask mismatch at instantiation");
 	upload(".proof", &proof, sizeof(proof), 0);
 	load(sealed, 0, 1, "proof mutation after sealing");
@@ -330,6 +435,7 @@ int main(void)
 	load(generation(), 0, 1, "program type mismatch at JIT");
 	group_regressions();
 	helper_map_regressions();
+	external_identity_regressions();
 	if (close(module_fd))
 		fatal("close module BTF");
 	puts("kernel binding regression: PASS");

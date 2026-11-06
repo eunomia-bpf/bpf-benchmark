@@ -36,6 +36,7 @@
  */
 
 #include <linux/bpf.h>
+#include <linux/bpf_verifier.h>
 #include <linux/debugfs.h>
 #include <linux/err.h>
 #include <linux/fs.h>
@@ -100,6 +101,8 @@ struct native_blob {
 	u32 generation;
 	struct native_lab_binding binding;
 	u32 *bound_generations;
+	struct bpf_map **bound_maps;
+	u32 bound_map_count;
 };
 
 static struct native_blob blobs[NATIVE_LAB_MAX_BLOBS];
@@ -152,6 +155,7 @@ static int native_lab_advance_generation(struct native_blob *blob)
 {
 	if (blob->generation == U32_MAX)
 		return -EOVERFLOW;
+	native_lab_release_maps(blob);
 	blob->generation++;
 	kfree(blob->bound_generations);
 	blob->bound_generations = NULL;
@@ -294,6 +298,12 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 				const struct native_lab_reloc_record *r =
 					&blobs[blob_id].relocs[i];
 				switch (r->kind) {
+				case NATIVE_LAB_RELOC_MAP_POINTER:
+				case NATIVE_LAB_RELOC_MAP_VALUE:
+					err = native_lab_emit_map_literal(r,
+						blobs[blob_id].bytes, snapshot_len, emit_at, prog);
+					break;
+
 				case NATIVE_LAB_RELOC_HELPER_CALL_REL32: {
 					static const u8 rel32_slot[5] = {
 						0xe8, 0, 0, 0, 0
@@ -390,6 +400,8 @@ const struct bpf_kinsn bpf_x86_native_lab_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = NATIVE_LAB_MAX_PROOF_INSNS,
 	.native_proof = true,
+	.validate_native_program = native_lab_validate_program,
+	.validate_native_proof = native_lab_validate_proof,
 	.max_emit_bytes = NATIVE_LAB_MAX_BLOB_BYTES,
 	.instantiate_insn = instantiate_native_lab,
 	.emit_x86 = emit_native_lab_x86,
@@ -559,6 +571,8 @@ static ssize_t binding_write(struct file *file, const char __user *ubuf,
 	struct native_blob *blob = &blobs[priv->id];
 	u8 *data;
 	u32 *group_generations = NULL;
+	struct bpf_map **pinned_maps = NULL;
+	u32 pinned_map_count = 0;
 	int err;
 
 	if (!capable(CAP_SYS_ADMIN))
@@ -595,14 +609,22 @@ static ssize_t binding_write(struct file *file, const char __user *ubuf,
 	err = native_lab_group_prepare(&header, &group_generations);
 	if (err)
 		goto out;
+	err = native_lab_pin_maps(blob, &pinned_maps, &pinned_map_count);
+	if (err)
+		goto out;
 	err = native_lab_advance_generation(blob);
-	if (!err) {
-		blob->binding = header;
-		blob->bound_generations = group_generations;
-	} else {
-		kfree(group_generations);
-	}
+	if (err)
+		goto out;
+	blob->binding = header;
+	blob->bound_maps = pinned_maps;
+	blob->bound_map_count = pinned_map_count;
+	blob->bound_generations = group_generations;
+	pinned_maps = NULL;
+	pinned_map_count = 0;
+	group_generations = NULL;
 out:
+	kfree(group_generations);
+	native_lab_put_maps(pinned_maps, pinned_map_count);
 	mutex_unlock(&blobs_lock);
 	kvfree(data);
 	if (err)
@@ -889,6 +911,7 @@ static void bpf_x86_native_lab_debugfs_exit(void)
 		kfree(blobs[i].bytes);
 		kfree(blobs[i].relocs);
 		kvfree(blobs[i].proof);
+		native_lab_release_maps(&blobs[i]);
 		kfree(blobs[i].bound_generations);
 		blobs[i].bound_generations = NULL;
 		blobs[i].bytes = NULL;
