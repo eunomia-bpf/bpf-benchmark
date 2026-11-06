@@ -15,7 +15,7 @@ for bench in data['benchmarks']:
             rows.append(dict(benchmark=bench['name'],runtime=run['runtime'],sample_index=sample['sample_index'],compile_ns=sample['compile_ns'],**sample.get('phases_ns',{})))
 fields=['benchmark','runtime','sample_index','compile_ns']+sorted(set().union(*(set(row) for row in rows))-{'benchmark','runtime','sample_index','compile_ns'})
 with (OUT/'samples.csv').open('w') as file:
-    writer=csv.DictWriter(file,fieldnames=fields);writer.writeheader();writer.writerows(rows)
+    writer=csv.DictWriter(file,fieldnames=fields,lineterminator="\n");writer.writeheader();writer.writerows(rows)
 medians=[]
 for runtime in ['kernel','native_kernel']:
     selected=[row for row in rows if row['runtime']==runtime]
