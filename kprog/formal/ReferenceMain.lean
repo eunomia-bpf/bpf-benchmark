@@ -74,8 +74,14 @@ private def faultJson : Fault → Json
   | .write a n => Json.mkObj [("kind", toJson "write"), ("address", number a.toNat), ("bytes", number n)]
   | .divide => Json.mkObj [("kind", toJson "divide")]
   | .spAlignment address => Json.mkObj [("kind", toJson "sp_alignment"), ("address", number address.toNat)]
+  | .alignment address bytes => Json.mkObj [("kind", toJson "alignment"), ("address", number address.toNat), ("bytes", number bytes)]
 
 private def eventJson : Event → Json
+  | .exclusive action address bytes acquire release success => Json.mkObj [
+      ("kind", toJson "exclusive"),
+      ("action", toJson (match action with | .reserve => "reserve" | .attempt => "attempt" | .clear => "clear")),
+      ("address", number address.toNat), ("bytes", number bytes),
+      ("acquire", toJson acquire), ("release", toJson release), ("success", toJson success)]
   | .fault f => Json.mkObj [("kind", toJson "fault"), ("fault", faultJson f)]
   | .helper identity args result => Json.mkObj [
       ("kind", toJson "helper"), ("identity", number identity.toNat),
@@ -122,6 +128,24 @@ private def parseVectorTail (j : Json) (vector0 : BitVec 128) : Except String (F
           pure (fun r => values[r.val + 1]'(by omega))
         else throw "vectors must contain V0..V31 (32 words)"
 
+private def parseExclusiveMonitor (j : Json) : Except String (Option AArch64.ExclusiveMonitor) := do
+  if j == Json.null then return none
+  let address ← fieldWord j "physical_start"
+  let bytes ← fieldNat j "bytes"
+  if bytes = 0 || bytes > 2^64 then throw "exclusive reservation byte count is outside [1,2^64]"
+  pure (some ⟨address, bytes⟩)
+
+private def parseExclusiveInputs (j : Json) : Except String AArch64.ExclusiveInputs := do
+  let physical ← fieldWord j "physical_address"
+  let reservation ← parseExclusiveMonitor (← j.getObjVal? "reservation")
+  let reserve := reservation.getD ⟨0,0⟩
+  pure ⟨physical, reserve, ← fieldBool j "retain_local", ← fieldBool j "virtual_pass",
+    ← fieldBool j "global_pass", ← fieldBool j "commit_pass", ← fieldBool j "abort_on_failure"⟩
+
+private def monitorJson : Option AArch64.ExclusiveMonitor → Json
+  | none => Json.null
+  | some monitor => Json.mkObj [("physical_start", number monitor.physicalStart.toNat), ("bytes", number monitor.bytes)]
+
 private def parseArmState (j : Json) (cells : Array InputCell) : Except String AArch64.State := do
   let rows ← (← j.getObjVal? "registers").getArr?
   let regs ← rows.mapM fun r => do
@@ -139,9 +163,16 @@ private def parseArmState (j : Json) (cells : Array InputCell) : Except String A
     let pairSingleAccess ← match j.getObjVal? "pair_single_access" with
       | .error _ => pure false
       | .ok value => value.getBool?
+    let exclusiveMonitor ← match j.getObjVal? "exclusive_monitor" with
+      | .error _ => pure none
+      | .ok value => parseExclusiveMonitor value
+    let exclusiveInputs ← match j.getObjVal? "exclusive_inputs" with
+      | .error _ => pure AArch64.emptyExclusiveInputs
+      | .ok value => parseExclusiveInputs value
     pure { gpr := fun r => regs[r.val]'(by omega)
            sp := regs[31]'(by omega), flags := flags, vector0 := BitVec.ofNat 128 vector,
            vectorTail := vectorTail, spAlignmentCheck := spAlignmentCheck, pairSingleAccess := pairSingleAccess,
+           exclusiveMonitor := exclusiveMonitor, exclusiveInputs := exclusiveInputs,
            memory := memoryOfCells cells, pc := pc }
   else throw "AArch64 registers must contain X0..X30 followed by SP (32 words)"
 
@@ -152,12 +183,27 @@ private def executeArm (request : Json) : Except String Json := do
   let bytes ← parseNativeBytes (← request.getObjVal? "native_bytes")
   let instruction ← AArch64.decode bytes
   match instruction with
+    | .exclusive operation =>
+        if !(state.getObjVal? "exclusive_monitor").isOk then
+          throw "exclusive instruction requires explicit monitor state"
+        match operation with
+        | .clear => pure ()
+        | .load width _ _ _ =>
+            if !(state.getObjVal? "exclusive_inputs").isOk then
+              throw "exclusive load requires explicit physical/granule/environment inputs"
+            if !AArch64.exclusiveCovers initial.exclusiveInputs.reservation initial.exclusiveInputs.physicalAddress width.bytes then
+              throw "exclusive load reservation does not cover the translated physical access"
+        | .store .. =>
+            if !(state.getObjVal? "exclusive_inputs").isOk then
+              throw "exclusive store requires explicit physical/environment inputs"
     | .fmovBank bank _ =>
         if bank.val ≠ 0 ∧ !(state.getObjVal? "vectors").isOk then
           throw "nonzero SIMD register requires explicit vectors V0..V31"
     | _ => pure ()
   let output := AArch64.step instruction initial
   let s := output.state
+  let exclusiveFields := if (state.getObjVal? "exclusive_monitor").isOk then
+      [("exclusive_monitor", monitorJson s.exclusiveMonitor)] else []
   let vectorFields := if (state.getObjVal? "vectors").isOk then
       [("vectors", toJson ((List.finRange 32).map fun index => (AArch64.readVector s index).toNat))]
     else []
@@ -165,7 +211,7 @@ private def executeArm (request : Json) : Except String Json := do
       [("sp_alignment_check", toJson s.spAlignmentCheck)] else []
   let pairFields := if (state.getObjVal? "pair_single_access").isOk then
       [("pair_single_access", toJson s.pairSingleAccess)] else []
-  pure <| Json.mkObj (vectorFields ++ alignmentFields ++ pairFields ++ [
+  pure <| Json.mkObj (exclusiveFields ++ vectorFields ++ alignmentFields ++ pairFields ++ [
     ("registers", toJson (((List.finRange 31).map (fun r => (s.gpr r).toNat)) ++ [s.sp.toNat])),
     ("flags", number s.flags.toNat), ("defined_flags", number (2^64 - 1)),
     ("pc", number s.pc.toNat), ("vector0", number s.vector0.toNat),

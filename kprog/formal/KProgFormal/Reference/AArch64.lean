@@ -24,6 +24,31 @@ def Width.bytes : Width → Nat | .w32 => 4 | .w64 => 8
 def narrow (value : Word) (width : Width) : Word :=
   (value.setWidth width.bits).setWidth 64
 
+/-- Actual physical reservation range, supplied by platform address translation
+and the implementation's reservation granule, not inferred from pointer bits. -/
+structure ExclusiveMonitor where
+  physicalStart : Word
+  bytes : Nat
+  deriving DecidableEq, Repr
+
+/-- Per-instruction platform/environment inputs. They are not cached entry
+values: another PE or exception can change a later dynamic attempt's outcome. -/
+structure ExclusiveInputs where
+  physicalAddress : Word
+  reservation : ExclusiveMonitor
+  retainLocal : Bool
+  virtualPass : Bool
+  globalPass : Bool
+  commitPass : Bool
+  abortOnFailure : Bool
+  deriving DecidableEq, Repr
+
+def emptyExclusiveInputs : ExclusiveInputs :=
+  ⟨0, ⟨0, 0⟩, false, false, false, false, false⟩
+
+def exclusiveCovers (monitor : ExclusiveMonitor) (physical : Word) (bytes : Nat) : Bool :=
+  (physical - monitor.physicalStart).toNat + bytes ≤ monitor.bytes
+
 structure State where
   gpr : Gpr → Word
   sp : Word
@@ -37,6 +62,10 @@ structure State where
   spAlignmentCheck : Bool := true
   /-- FEAT_LSE2 makes a pair one architectural memory access. Cortex-A72 has none. -/
   pairSingleAccess : Bool := false
+  exclusiveMonitor : Option ExclusiveMonitor := none
+  /-- A default only preserves ordinary-instruction constructor compatibility.
+  The wire interface requires explicit inputs before any exclusive instruction. -/
+  exclusiveInputs : ExclusiveInputs := emptyExclusiveInputs
 
 /-- Full architectural SIMD bank. The separate V0 field preserves the earlier
 reference interface; index31 is V31, unrelated to integer ZR/SP. -/
@@ -588,7 +617,89 @@ def bitfieldStep (i : BitfieldInstruction) (s : State) : Transition State :=
   let value := bitfieldValue i.kind (readReg s i.src) (readReg s i.dst) i.lsbByte i.countByte
   ⟨{ writeReg s i.dst (narrow value i.width) with pc := s.pc + 4 }, [], none⟩
 
+inductive ExclusiveInstruction
+  | load (width : Width) (acquire : Bool) (dst base : Register)
+  | store (width : Width) (release : Bool) (status src base : Register)
+  | clear
+  deriving DecidableEq, Repr
+
+def exclusiveFailure (s : State) (fault : Fault) (events : List Event := []) : Transition State :=
+  ⟨s, events ++ [.fault fault], some fault⟩
+
+def exclusiveNaturalFault (address : Word) (bytes : Nat) : Option Fault :=
+  if address.toNat % bytes = 0 then none else some (.alignment address bytes)
+
+def exclusiveMonitorPass (s : State) (bytes : Nat) : Bool :=
+  s.exclusiveInputs.retainLocal && s.exclusiveInputs.virtualPass &&
+  s.exclusiveInputs.globalPass &&
+  match s.exclusiveMonitor with
+  | none => false
+  | some region => exclusiveCovers region s.exclusiveInputs.physicalAddress bytes
+
+def exclusiveStorePass (s : State) (bytes : Nat) : Bool :=
+  exclusiveMonitorPass s bytes && s.exclusiveInputs.commitPass
+
+/-- Memory effects occur once at native width. Failure performs no write;
+the implementation may check faults even when its monitor would fail.
+The committed memory event contains written bytes, not an RMW's old bytes.
+The exclusive event retains conditional commit and acquire/release attributes;
+projection to a proof store still requires target atomicity/order evidence. -/
+def exclusiveStep (i : ExclusiveInstruction) (s : State) : Transition State :=
+  match i with
+  | .clear => ⟨{ s with exclusiveMonitor := none, pc := s.pc + 4 },
+      [.exclusive .clear 0 0 false false true], none⟩
+  | .load width acquire dst base =>
+      let address := memoryBase s base
+      match spAlignmentFault s base with
+      | some fault => exclusiveFailure s fault
+      | none =>
+          match exclusiveNaturalFault address width.bytes with
+          | some fault => exclusiveFailure s fault
+          | none =>
+              match readMemory s.memory address width.bytes with
+              | .error fault => exclusiveFailure s fault
+              | .ok (value, event) =>
+                  let loaded := writeReg s dst (narrow value width)
+                  ⟨{ loaded with exclusiveMonitor := some s.exclusiveInputs.reservation, pc := s.pc + 4 },
+                   [event, .exclusive .reserve address width.bytes acquire false true], none⟩
+  | .store width release status src base =>
+      let address := memoryBase s base
+      let monitorPassed := exclusiveMonitorPass s width.bytes
+      let passed := exclusiveStorePass s width.bytes
+      let checked := if !s.exclusiveInputs.retainLocal || s.exclusiveInputs.virtualPass then { s with exclusiveMonitor := none }
+                     else s
+      let attempted := [.exclusive .attempt address width.bytes false release passed]
+      match spAlignmentFault s base with
+      | some fault => exclusiveFailure s fault
+      | none =>
+          let naturalFault := if monitorPassed || s.exclusiveInputs.abortOnFailure then
+              exclusiveNaturalFault address width.bytes else none
+          let fault := if naturalFault.isSome then naturalFault
+            else if (monitorPassed || s.exclusiveInputs.abortOnFailure) &&
+                    !permitted s.memory.writable address width.bytes then some (.write address width.bytes)
+            else none
+          match fault with
+          | some reason => if naturalFault.isSome then exclusiveFailure s reason
+                           else exclusiveFailure checked reason attempted
+          | none =>
+              if passed then
+                let stored := { checked with memory := storeMemory s.memory address (readReg s src) width.bytes }
+                ⟨{ writeReg stored status 0 with pc := s.pc + 4 },
+                 attempted ++ [.memory .write address (valueBytes (readReg s src) width.bytes) true], none⟩
+              else
+                ⟨{ writeReg checked status 1 with pc := s.pc + 4 }, attempted, none⟩
+
+/-- Environment choices are existential for a concrete hardware execution.
+Verifier certification must cover every admissible choice, not pick success. -/
+def ExclusiveStep (i : ExclusiveInstruction) (before : State) (after : Transition State) : Prop :=
+  ∃ inputs : ExclusiveInputs,
+    (match i with
+     | .load width .. => exclusiveCovers inputs.reservation inputs.physicalAddress width.bytes = true ∧ inputs.reservation.bytes ≤ 2^64
+     | _ => True) ∧
+    exclusiveStep i { before with exclusiveInputs := inputs } = after
+
 inductive Instruction
+  | exclusive (instruction : ExclusiveInstruction)
   | bitfield (instruction : BitfieldInstruction)
   | memory (instruction : MemoryInstruction)
   | pairMemory (instruction : PairMemoryInstruction)
@@ -619,6 +730,7 @@ inductive Instruction
 
 def step (i : Instruction) (s : State) : Transition State :=
   match i with
+  | .exclusive instruction => exclusiveStep instruction s
   | .bitfield instruction => bitfieldStep instruction s
   | .memory instruction => memoryStep instruction s
   | .pairMemory instruction => pairMemoryStep instruction s
@@ -666,6 +778,15 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   let lhs := register (word / 2^5)
   let rhs := register (word / 2^16)
   let addend := register (word / 2^10)
+  if word &&& 0xfffff0ff = 0xd503305f then return .exclusive .clear
+  -- Exclusive width is size[0] (bit30), not the arithmetic sf field.
+  let exclusiveWidth := if (word / 2^30) % 2 = 1 then Width.w64 else .w32
+  if word &&& 0xbfff7c00 = 0x885f7c00 then
+    return .exclusive (.load exclusiveWidth ((word / 2^15) % 2 == 1) dst lhs)
+  if word &&& 0xbfe07c00 = 0x88007c00 then
+    if rhs = dst then throw "constrained-unpredictable exclusive status/data overlap"
+    if lhs.val != 31 && rhs = lhs then throw "constrained-unpredictable exclusive status/base overlap"
+    return .exclusive (.store exclusiveWidth ((word / 2^15) % 2 == 1) rhs dst lhs)
   -- Integer pair signed-offset encodings: opc00=W, opc10=X, V=0.
   if word &&& 0x7f800000 = 0x29000000 then
     let load := (word / 2^22) % 2 == 1

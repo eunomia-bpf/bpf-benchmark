@@ -59,3 +59,11 @@ by this evidence increment. The static hardware handoff is
 `../cpu-differential-arm64-exclusive.gz`, using `ARM64_HANDOFF` with the existing
 `kprog/fidelity/run-arm64.sh`. Hardware execution is a separate required replay;
 this result is functional QEMU evidence and makes no timing claim.
+
+Canonical exclusive semantics are now implemented and checked in
+[`canonical/README.md`](canonical/README.md): 82 full-state/event/fault
+examples, 10 input/encoding rejections, reference properties and the complete
+352-module formal check pass. The explicit physical-monitor/environment API
+closes the reference-definition gap. The production constant-success defect
+and four bound safety findings above remain open; this reference result does
+not count them as repaired.

@@ -63,3 +63,9 @@ The instruction-family audit adds8 exclusive forms/8192QEMUcases:4096
 STXR/STLXR mismatches after explicitCLREX (CPU failure/no-write versus model
 success/write). Four corresponding unsafe bound-load failure branches are
 accepted; exact counterexamples and all25 permanent Arm outcomes are retained.
+
+Canonical exclusive semantics now cover reservation ranges, fresh failure
+choices, conditional writes, faults and acquire/release effects. All 82 new
+wire cases, 10 precise rejections and the full 352-module formal check pass.
+See differential/arm64-exclusive/canonical/README.md; the four production
+exclusive failure-branch safety findings remain active.

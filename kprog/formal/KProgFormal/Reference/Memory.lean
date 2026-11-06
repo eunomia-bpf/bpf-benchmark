@@ -23,16 +23,22 @@ inductive Fault
   | write (address : Word) (bytes : Nat)
   | divide
   | spAlignment (address : Word)
+  | alignment (address : Word) (bytes : Nat)
   deriving DecidableEq, Repr
 
 /-- Guest effects only. Simulator spills are private implementation state.
 Read values retain their initialization status so an uninitialized native read
 cannot be confused with a read of initialized zero. -/
+inductive ExclusiveAction | reserve | attempt | clear
+  deriving DecidableEq, Repr
+
 inductive Event
   | memory (kind : AccessKind) (address : Word) (value : List Byte)
       (initialized : Bool)
   | helper (identity : Word) (arguments : List Word) (result : Word)
   | fault (reason : Fault)
+  | exclusive (action : ExclusiveAction) (address : Word) (bytes : Nat)
+      (acquire release success : Bool)
   deriving DecidableEq, Repr
 
 structure Transition (State : Type) where
