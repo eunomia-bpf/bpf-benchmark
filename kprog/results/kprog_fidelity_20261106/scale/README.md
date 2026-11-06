@@ -95,3 +95,60 @@ saved encoder/header source; it does not overwrite completed results after
 a container restart. An isolated register-cell representation experiment is
 active against the exact native CPU matrix and100K compile failure; no
 production optimization or100K acceptance is claimed from it yet.
+
+
+## Delayed-promotion prototype: the10K pointer fixture passes
+
+The previously timed-out direct pointer fixture now compiles in an isolated
+F-only representation/compiler experiment and passes the actual KVM verifier
+and result check. Its native source and expected result are unchanged.
+The100-instruction pointer control also passes. Both traces lose zero events.
+
+| Case | Native instructions | BPF instructions | Result / retval | Verifier us | Slab peak bytes | Vmap reserved bytes |
+| --- | ---: | ---: | --- | ---: | ---: | ---: |
+| n100_ptr_direct | 115 | 345 | 56 / 2 | 131 | 75640 | 49152 |
+| n10000_ptr_direct | 10036 | 30055 | 5015 / 2 | 7890 | 2305488 | 3149824 |
+
+The large program records120245 JIT bytes,241664 program memlock bytes,
+2196KiB loader maximum RSS and peak verifier states1. Allocation metrics use
+the same separately named trace intervals as the baseline. These instrumented
+verifier measurements belong to this scale diagnosis; workload timing remains
+with lane R. Native-bound large-program execution has not been exercised here.
+
+GDB confirms that the long10K compiles spend time in
+`SROAPass -> PromoteMemToReg -> IDFCalculatorBase::calculate`, before the
+verifier. Changing only register storage or adding const selectors did not
+remove this promotion cost. Prepending ordinary CSE/CFG simplification also
+still reached SROA with3739180 IR instructions and stalled. The successful
+prototype defers promotion, simplifies first, explicitly promotes later, then
+runs the normal O2 pipeline. Its exact opt invocation is in the archived
+Makefile/log. An initial InstCombine one-iteration failure is retained; the
+successful command explicitly allows100 compiler optimization iterations.
+This bound affects compiler optimization, not native execution or loop safety.
+
+The prototype also uses F-only pointers to the existing named register/tag
+cells, readonly decode selectors, a smaller equivalent MOV-load width
+expression, and removes only unreferenced C labels. These header changes have
+not been installed in the production simulator. The two successful fixture
+results do not establish full-state ISA agreement for the prototype.
+A separate original-header trial is active to isolate whether compiler-pass
+ordering suffices; it retains the original C and all original native inputs.
+The baseline16 terminal records and all earlier failures remain unchanged.
+
+Commands as executed:
+
+```sh
+taskset -c 20-21 timeout 900 make -C /workspaces/.agent-state/kprog-lanes/F/scale-regref-width n100_ptr_direct.late.bpf.o n10000_ptr_direct.pruned.late.bpf.o
+taskset -c 16-19 make -C kprog/fidelity scale-kvm SCALE_BUILD=build-x86/scale-late-regref SCALE_OUT=../results/kprog_fidelity_20261106/scale/late-regref-kvm
+```
+
+`late-regref-kvm/` publishes both full JSON outcomes and guest provenance.
+`late-promotion-prototype-traces.tar.gz` retains every raw trace, trace report,
+verifier log and loader log for these two passes.
+`late-promotion-prototype-artifacts.tar.gz` retains exact experimental headers,
+C sources, Makefiles, all preceding representation/ordering diagnostic logs,
+the unchanged native assembly/objects/disassembly, and both accepted BPF
+objects with their build records. Its `lane-F/` subtree restores under
+`/workspaces/.agent-state/kprog-lanes/F/`; `accepted-artifacts/` contains the
+files used as `SCALE_BUILD`. The original frozen baseline source closure
+remains in `full-scale-build-artifacts.tar.gz` above.

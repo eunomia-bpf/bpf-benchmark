@@ -20,3 +20,5 @@
   3 compile deadlines and4 Clang source-location exhaustion failures.
 
 Latest replay: x86721forms/738304realCPUcases/zero; Arm563forms/576512QEMUcases/zero. Canonicalreference116x86forms/118784cases and300Armforms/307200cases agree, with605/263 missing-reference forms explicitly retained. Current75Arm controls retain1024SPflag mismatches. See differential/README.md for scope and static hardware handoffs.
+
+Scale follow-up: the unchanged10036-instruction pointer-direct fixture now passes in a frozen experimental compiler/representation path (30055BPF instructions, result5015, retval2). Exactsourceandtracearchives are under scale/. Original production-header compile repair remains active; experimental headers are not promoted.
