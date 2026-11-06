@@ -9,13 +9,11 @@ import struct
 import subprocess
 
 ROOT=Path(__file__).resolve().parents[2]
-STATE=struct.Struct('<35Q64s')
-RECORD_BYTES=16+3*STATE.size+3*256
 
 
 def state(data):
-    words=STATE.unpack(data)
-    return dict(registers=list(words[:32]),flags=words[32],vector=list(words[33:35]),stack=words[35].hex())
+    words=struct.unpack(f'<{(len(data)-64)//8}Q64s',data)
+    return dict(registers=list(words[:32]),flags=words[32],vector=list(words[33:-1]),stack=words[-1].hex())
 
 
 def main():
@@ -48,13 +46,14 @@ def main():
     with trace.open('rb') as source,(args.out/'reference-mismatches.jsonl').open('w') as failures,(args.out/'reference-unavailable.jsonl').open('w') as unavailable:
         magic=source.read(8)
         size,memory,count,cases=struct.unpack('<4I',source.read(16))
-        if magic!=b'KPFID002' or size!=STATE.size or memory!=256 or count!=len(forms) or cases!=args.cases:
+        if magic!=b'KPFID002' or size not in {344,840} or (args.arch=='x86' and size!=344) or memory!=256 or count!=len(forms) or cases!=args.cases:
             raise RuntimeError('trace layout/header mismatch')
-        if trace.stat().st_size!=24+count*cases*RECORD_BYTES:
+        record_bytes=16+3*size+3*256
+        if trace.stat().st_size!=24+count*cases*record_bytes:
             raise RuntimeError('incomplete CPU state trace')
         for index,form in enumerate(forms):
             if args.arch=='x86' and form['opcode'] in {'X86_OP_JCC','X86_OP_JMP','X86_OP_CALL'}:
-                source.seek(cases*RECORD_BYTES,1)
+                source.seek(cases*record_bytes,1)
                 reason='control composite requires a reference block-step interface'
                 rows.append(dict(form=index,assembly=form['assembly'],cases=cases,reference_cases=0,cpu_mismatches=0,simulator_mismatches=0,status='awaiting_reference_block',reference_error=reason))
                 unavailable.write(json.dumps(dict(form=index,assembly=form['assembly'],error=reason))+'\n')
@@ -66,7 +65,7 @@ def main():
                 ident=struct.unpack('<2I',source.read(8))
                 if ident!=(index,case):raise RuntimeError('trace record order mismatch')
                 stack_base=struct.unpack('<Q',source.read(8))[0]
-                initial,native,simulator=[state(source.read(STATE.size)) for _ in range(3)]
+                initial,native,simulator=[state(source.read(size)) for _ in range(3)]
                 before,native_mem,sim_mem=[source.read(256) for _ in range(3)]
                 address=initial['registers'][7 if args.arch=='x86' else 4]-32
                 cells=[dict(address=address+i,value=byte,readable=True,writable=True,initialized=True) for i,byte in enumerate(before)]
@@ -85,6 +84,8 @@ def main():
                     # still compared in full, without serializing irrelevant cells.
                     if omit_memory: cells=[]
                     architectural_state=dict(registers=registers,flags=initial['flags'],pc=native_code['forms'][index]['pc'],vector0=initial['vector'][0]+(initial['vector'][1]<<64),memory=cells)
+                    if size==840:
+                        architectural_state['vectors']=[initial['vector'][2*i]+(initial['vector'][2*i+1]<<64) for i in range(32)]
                 request=dict(isa='x86_64' if args.arch=='x86' else 'aarch64',state=architectural_state,native_bytes=native_code['forms'][index]['native_bytes'])
                 encoded_request=json.dumps(request,separators=(',',':'))
                 if case==0:
@@ -93,7 +94,7 @@ def main():
                         rejection=probe.stderr.strip()
                         if not rejection:raise RuntimeError('reference failed without a diagnostic')
                         unavailable.write(json.dumps(dict(form=index,assembly=assembly,error=rejection,returncode=probe.returncode,request=request))+'\n')
-                        source.seek((cases-1)*RECORD_BYTES,1)
+                        source.seek((cases-1)*record_bytes,1)
                         break
                 requests.append(encoded_request)
                 records.append((initial,native,simulator,before,native_mem,sim_mem,cells,stack_base))
@@ -111,6 +112,8 @@ def main():
                 else: registers[31]=(registers[31]-stack_base)&((1<<64)-1)
                 vector_word=response['xmm0' if args.arch=='x86' else 'vector0']
                 vector=[vector_word&((1<<64)-1),vector_word>>64]
+                if size==840:
+                    vector=[half for word in response['vectors'] for half in [word&((1<<64)-1),word>>64]]
                 expected_bytes={cell['address']:cell['value'] for cell in response['memory']}
                 address=initial['registers'][7 if args.arch=='x86' else 4]-32
                 expected_memory=bytes(expected_bytes[address+i] for i in range(256)) if not omit_memory else before

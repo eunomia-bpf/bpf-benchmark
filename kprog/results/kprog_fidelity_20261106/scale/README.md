@@ -233,8 +233,9 @@ source-location limit through chunked preprocessing, then exhausted the12GiB
 process address-space cap: one with debug metadata and one without it. The
 chunker preserves source line numbers (including branch macro `__LINE__`)
 and its1K control produced exactly the same13623470 C tokens as monolithic
-preprocessing. The full1.7GiB expanded100K C remains in the owning build dir;
-its generator, original C and logs are archived. These failures are retained,
+preprocessing. The full1.7GiB expanded100K C was retained until the sweep
+completed, then removed during disk recovery; its generator, original C,
+Makefile and logs remain archived. These failures are retained,
 not silently replaced by the successful path.
 
 The successful experimental path factors repeated **existing** arithmetic

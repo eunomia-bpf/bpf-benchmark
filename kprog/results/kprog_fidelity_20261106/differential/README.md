@@ -628,3 +628,14 @@ No native unsafe negative is executed by this instruction-level harness.
 ```sh
 taskset -c 16-23 prlimit --as=12884901888 -- timeout 900 make -C kprog/fidelity run BUILD=build-x86-after-lea-complete OUT=../results/kprog_fidelity_20261106/differential/x86-after-lea-complete
 ```
+
+## Full32-vector Arm FMOV observer
+
+`arm64-bank32/README.md` records128 forms /131072 QEMU cases with zero
+native/simulator differences while checking every vector register. All128
+forms also agree with V's canonical reference for every state, with zero
+missing encodings. A new static full-bank hardware handoff is
+`cpu-differential-arm64-bank32.gz`; the existing hardware script accepts it
+through `ARM64_HANDOFF`. A733-form/16-state x86 compatibility run retains
+exactly the previous per-form agreement status after the shared observer
+layout extension. Earlier SP and address-state findings remain unchanged.

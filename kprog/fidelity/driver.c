@@ -31,7 +31,10 @@ static void state_json(FILE *f, const struct state *s)
 {
     fputs("{\"registers\":[", f);
     for (unsigned i = 0; i < 32; i++) fprintf(f, "%s\"%016" PRIx64 "\"", i ? "," : "", s->r[i]);
-    fprintf(f, "],\"flags\":\"%016" PRIx64 "\",\"vector\":[\"%016" PRIx64 "\",\"%016" PRIx64 "\"],\"stack\":\"", s->flags, s->vec[0], s->vec[1]);
+    fprintf(f, "],\"flags\":\"%016" PRIx64 "\",\"vector\":[", s->flags);
+    for (unsigned i = 0; i < sizeof(s->vec) / sizeof(s->vec[0]); i++)
+        fprintf(f, "%s\"%016" PRIx64 "\"", i ? "," : "", s->vec[i]);
+    fputs("],\"stack\":\"", f);
     for (unsigned i = 0; i < 64; i++) fprintf(f, "%02x", s->stack[i]);
     fputs("\"}", f);
 }
@@ -90,7 +93,8 @@ int main(int argc, char **argv)
             for (unsigned i = 0; i < 32; i++) input.r[i] = random64();
             for (unsigned i = 0; i < sizeof(memory); i++) memory[i] = random64();
             for (unsigned i = 0; i < sizeof(input.stack); i++) input.stack[i] = random64();
-            input.vec[0] = random64(); input.vec[1] = random64();
+            for (unsigned i = 0; i < sizeof(input.vec) / sizeof(input.vec[0]); i++)
+                input.vec[i] = random64();
 #ifdef __x86_64__
             input.flags = 0x202 | ((c & 1) ? 1 : 0) | ((c & 2) ? 0x40 : 0) | ((c & 4) ? 0x80 : 0) | ((c & 8) ? 0x800 : 0);
             input.r[4] = form->mode == 5 ? (int64_t)(int32_t)form->count : 0; /* abstract RSP */
