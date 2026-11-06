@@ -106,6 +106,21 @@ private def executeX86 (request : Json) : Except String Json := do
     ("events", toJson (output.events.map eventJson)),
     ("fault", match output.fault with | none => Json.null | some f => faultJson f)]
 
+/-- Legacy V0-only requests never access another SIMD cell. A complete bank is
+mandatory before decoding a nonzero SIMD operand. -/
+private def parseVectorTail (j : Json) (vector0 : BitVec 128) : Except String (Fin 31 → BitVec 128) := do
+  match j.getObjVal? "vectors" with
+    | .error _ => pure (fun _ => 0)
+    | .ok value =>
+        let rows ← value.getArr?
+        let values ← rows.mapM fun row => do
+          let n ← row.getNat?
+          if n < 2^128 then pure (BitVec.ofNat 128 n) else throw "vector is outside the 128-bit range"
+        if h : values.size = 32 then
+          if values[0]'(by omega) ≠ vector0 then throw "vectors[0] must equal vector0"
+          pure (fun r => values[r.val + 1]'(by omega))
+        else throw "vectors must contain V0..V31 (32 words)"
+
 private def parseArmState (j : Json) (cells : Array InputCell) : Except String AArch64.State := do
   let rows ← (← j.getObjVal? "registers").getArr?
   let regs ← rows.mapM fun r => do
@@ -116,8 +131,10 @@ private def parseArmState (j : Json) (cells : Array InputCell) : Except String A
     let pc ← fieldWord j "pc"
     let vector ← fieldNat j "vector0"
     if vector ≥ 2^128 then throw "vector0 is outside the 128-bit range"
+    let vectorTail ← parseVectorTail j (BitVec.ofNat 128 vector)
     pure { gpr := fun r => regs[r.val]'(by omega)
            sp := regs[31]'(by omega), flags := flags, vector0 := BitVec.ofNat 128 vector,
+           vectorTail := vectorTail,
            memory := memoryOfCells cells, pc := pc }
   else throw "AArch64 registers must contain X0..X30 followed by SP (32 words)"
 
@@ -127,9 +144,17 @@ private def executeArm (request : Json) : Except String Json := do
   let initial ← parseArmState state cells
   let bytes ← parseNativeBytes (← request.getObjVal? "native_bytes")
   let instruction ← AArch64.decode bytes
+  match instruction with
+    | .fmovBank bank _ =>
+        if bank.val ≠ 0 ∧ !(state.getObjVal? "vectors").isOk then
+          throw "nonzero SIMD register requires explicit vectors V0..V31"
+    | _ => pure ()
   let output := AArch64.step instruction initial
   let s := output.state
-  pure <| Json.mkObj [
+  let vectorFields := if (state.getObjVal? "vectors").isOk then
+      [("vectors", toJson ((List.finRange 32).map fun index => (AArch64.readVector s index).toNat))]
+    else []
+  pure <| Json.mkObj (vectorFields ++ [
     ("registers", toJson (((List.finRange 31).map (fun r => (s.gpr r).toNat)) ++ [s.sp.toNat])),
     ("flags", number s.flags.toNat), ("defined_flags", number (2^64 - 1)),
     ("pc", number s.pc.toNat), ("vector0", number s.vector0.toNat),
@@ -139,7 +164,7 @@ private def executeArm (request : Json) : Except String Json := do
       ("writable", toJson (s.memory.writable c.address)),
       ("initialized", toJson (s.memory.initialized c.address))])),
     ("events", toJson (output.events.map eventJson)),
-    ("fault", match output.fault with | none => Json.null | some f => faultJson f)]
+    ("fault", match output.fault with | none => Json.null | some f => faultJson f)])
 
 private def execute (request : Json) : Except String Json := do
   match request.getObjVal? "isa" with

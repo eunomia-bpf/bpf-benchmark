@@ -427,6 +427,56 @@ static void check_selectors(void)
 	}
 }
 
+/* A bank-selection bug must be visible even when V0 happens to agree with
+ * the source. Compare every vector half and every GPR/tag after each real
+ * dispatch, including integer ZR, legacy NONE and invalid vector indices. */
+static void check_bank(unsigned raw_index, unsigned dir, unsigned zero)
+{
+	DECL_STATE();
+	__u64 want[32][2];
+	unsigned bank = raw_index == ARM64_REG_NONE ? 0 : raw_index;
+	unsigned src = zero ? ARM64_XZR : ARM64_X1;
+	unsigned dst = zero ? ARM64_XZR : ARM64_X2;
+	unsigned width = dir < 2 ? ARM64_WIDTH_64 : ARM64_WIDTH_32;
+	unsigned long before = unsupported_calls;
+	unsigned i;
+
+	PLANT_STATE(ARM64_X1);
+	SEED_FLAGS();
+	for (i = 0; i < 32; i++) {
+		__a64_vectors[i].lo = want[i][0] = pattern_reg(40 + i);
+		__a64_vectors[i].hi = want[i][1] = pattern_reg(80 + i);
+	}
+	if (bank < 32) {
+		if (dir == ARM64_FMOV_D_FROM_X || dir == ARM64_FMOV_S_FROM_W) {
+			__u64 value = zero ? 0 : mreg[src];
+			want[bank][0] = dir == ARM64_FMOV_S_FROM_W ? (__u32)value : value;
+			want[bank][1] = 0;
+		} else {
+			model_write_reg_width(dst, want[bank][0], width);
+		}
+	}
+	m_v0 = want[0][0];
+	m_v0_hi = want[0][1];
+	ARM64_SIM_L_EXEC(ARM64_OP_FMOV, dst, src, raw_index, ARM64_REG_NONE,
+			width, dir, 0);
+	COMPARE_STATE(ARM64_OP_FMOV, dst, src, width, dir, 1);
+	for (i = 0; i < 32; i++) {
+		cases++;
+		if (__a64_vectors[i].lo != want[i][0] || __a64_vectors[i].hi != want[i][1]) {
+			printf("MISMATCH fmov bank index=%u dir=%u vector=%u\n", raw_index, dir, i);
+			failures++;
+			return;
+		}
+	}
+	cases++;
+	if (unsupported_calls != before + (bank >= 32) ||
+	    __a64_n != 1 || __a64_z != 0 || __a64_c != 1 || __a64_v != 0) {
+		printf("MISMATCH fmov bank index=%u dir=%u flags/hook\n", raw_index, dir);
+		failures++;
+	}
+}
+
 int main(void)
 {
 	static const unsigned ops[2] = { ARM64_OP_FMOV, ARM64_OP_RET };
@@ -468,6 +518,10 @@ int main(void)
 								dir_aux[a],
 								via);
 
+	for (i = 0; i < 35; i++)
+		for (a = 0; a < 4; a++)
+			for (s = 0; s < 2; s++)
+				check_bank(i < 32 ? i : (i == 32 ? ARM64_REG_NONE : i == 33 ? 32 : 254), a, s);
 	check_selectors();
 
 	if (failures != 0) {

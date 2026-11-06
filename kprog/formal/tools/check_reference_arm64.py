@@ -264,6 +264,26 @@ def main():
         elif dst != 31:
             expected["registers"][dst] = 0x80000001 if word < (1 << 31) else 0x7FF8000080000001
         cases.append((request, expected))
+    # All32 SIMD fields are distinct, including V31 (never integer ZR).
+    # A patterned complete input bank detects writes to the wrong cell and
+    # accidental corruption of inactive upper bits or unrelated vectors.
+    for bank in range(32):
+        for opcode, to_vector, wide in [(0x9E670000, True, True), (0x1E270000, True, False),
+                                        (0x9E660000, False, True), (0x1E260000, False, False)]:
+            request = copy.deepcopy(base)
+            vectors = [(0xFEDCBA9876543200 + i) << 64 | (0xFFF8000080000001 + i) for i in range(32)]
+            request["state"].update(vectors=vectors, vector0=vectors[0])
+            request["state"]["registers"][1] = 0xFFF8000080000042
+            word = opcode | ((1 << 5) | bank if to_vector else (bank << 5) | 1)
+            request["native_bytes"] = list(word.to_bytes(4, "little"))
+            expected = copy.deepcopy(request["state"])
+            expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
+            if to_vector:
+                expected["vectors"][bank] = 0xFFF8000080000042 if wide else 0x80000042
+                expected["vector0"] = expected["vectors"][0]
+            else:
+                expected["registers"][1] = (0xFFF8000080000001 + bank) if wide else (0x80000001 + bank)
+            cases.append((request, expected))
     # CNT's inactive upper half clears even when it held data; UADDLV
     # sums unsigned lanes into H0 and clears the rest of the vector.
     for word, vector, result in [
@@ -487,7 +507,6 @@ def main():
                  0x1AE22020, 0x53207C20, 0x131FFC20, 0x0A028020, 0x6A228020,
                  0x72C24680, 0x72E24680, 0x72024680, 0x12C24680, 0x12E24680,
                  0x52C24680, 0x52E24680, 0x32824680,
-                 0x9E670021, 0x9E660021, 0x1E270021, 0x1E260021,
                  0x1EE70020, 0x9EAE0001, 0x0E205801, 0x4E205820,
                  0x2E303801, 0x6E303820, 0x2E703800, 0x6EB03800,
                  0x7A5F0835, 0x7A5F0C25, 0x5A5F0825, 0x3A5F0825,
@@ -510,6 +529,14 @@ def main():
     wrong_registers = copy.deepcopy(malformed)
     wrong_registers["state"]["registers"].pop()
     bad.append(wrong_registers)
+    bank_request = copy.deepcopy(base)
+    bank_request["native_bytes"] = list((0x9E670021).to_bytes(4, "little"))
+    bad.append(bank_request)  # Missing complete bank must not imply zero.
+    for vectors in ([0] * 31, [0] * 33, [0] * 32,
+                    [base["state"]["vector0"]] + [0] * 30 + [1 << 128]):
+        wrong_vectors = copy.deepcopy(bank_request)
+        wrong_vectors["state"]["vectors"] = vectors
+        bad.append(wrong_vectors)
     for request in bad:
         run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                              input=json.dumps(request) + "\n", text=True, capture_output=True)
@@ -578,7 +605,7 @@ def main():
             assert str(error).startswith(("invalid move-wide", "invalid NEGS", "invalid AArch64 extend")), error
             continue
         raise AssertionError((mnemonic, operands, "invalid alias was accepted"))
-    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV/CNT/UADDLV/CCMP/ADD-SUB-immediate/shifted-register/extended-register/NOP/branches, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV-all32/CNT/UADDLV/CCMP/ADD-SUB-immediate/shifted-register/extended-register/NOP/branches, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":

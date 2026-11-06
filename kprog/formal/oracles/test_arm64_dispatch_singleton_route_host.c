@@ -887,7 +887,7 @@ int main(void)
 		/* FMOV: all four directions. AUX carries the raw direction
 		 * code, exactly as the dispatcher passes it. */
 		for (i = 0; i < 4U; i++)
-			run_case(ARM64_OP_FMOV, ARM64_X2, ARM64_X1, ARM64_X3,
+			run_case(ARM64_OP_FMOV, ARM64_X2, ARM64_X1, ARM64_REG_NONE,
 				 ARM64_X4, width, fmov_dirs[i], 0, 1, "fmov");
 
 		/* The memory family: every opcode across the base register,

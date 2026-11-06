@@ -18,7 +18,7 @@ routing tables; they are **not yet a full simulator-step refinement theorem**.
 The ISA reference lives in `KProgFormal/Reference/`; it imports no simulator
 contracts. The step refinements in `Refinement/` connect CMOV, BT, BZHI,
 ANDN, BMI2 shifts/rotates, BSWAP/MOVBE and register/immediate/memory PUSH/POP handlers to that reference, including registers,
-flags, XMM0, memory, PC and ordered access/fault effects. The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary, logical-register, MOVK, move-immediate, register-move, V0/GPR bit-transfer (FMOV), byte-vector reduction (CNT/UADDLV), conditional-compare (CCMP), ADD/SUB immediate/shifted-register/extended-register, NOP and ordinary-branch
+flags, XMM0, memory, PC and ordered access/fault effects. The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary, logical-register, MOVK, move-immediate, register-move, all32 SIMD/GPR bit-transfer (FMOV), byte-vector reduction (CNT/UADDLV), conditional-compare (CCMP), ADD/SUB immediate/shifted-register/extended-register, NOP and ordinary-branch
 families connect through their modules in `Refinement/`, including native
 aliases, all raw NZCV predicates, ZR/SP separation including MOV destinations, legal extract immediates,
 shifted source modifiers, exact NZCV updates and W zero-extension. Arithmetic NZCV uses width-sized operands
@@ -76,5 +76,8 @@ For AArch64, send `isa: "aarch64"` to the same executable. Supply exactly four
 little-endian native bytes, `registers` as X0..X30 followed by SP (32 words),
 `flags` with NZCV in bits31..28, `vector0` as an unsigned128-bit word, `pc`
 and the same explicit `memory` cells. Outputs use `vector0` in place of `xmm0`
-and omit x86 segment bases. Arithmetic field31 denotes ZR, independently of SP.
+and omit x86 segment bases. To access nonzero SIMD registers, also supply
+`vectors` as exactly32 unsigned128-bit words V0..V31, with `vectors[0]` equal
+to `vector0`; outputs preserve and return that complete bank. V0-only legacy
+requests remain valid, but cannot access an omitted SIMD register. Arithmetic field31 denotes ZR, independently of SP.
 The default ISA remains x86-64; `isa: "x86_64"` is also explicit.

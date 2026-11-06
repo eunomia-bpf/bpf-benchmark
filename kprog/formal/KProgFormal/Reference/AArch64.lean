@@ -29,8 +29,25 @@ structure State where
   sp : Word
   flags : Word
   vector0 : BitVec 128
+  /-- V1..V31, distinct from the retained V0 field. -/
+  vectorTail : Fin 31 → BitVec 128 := fun _ => 0
   memory : Memory
   pc : Word
+
+/-- Full architectural SIMD bank. The separate V0 field preserves the earlier
+reference interface; index31 is V31, unrelated to integer ZR/SP. -/
+def readVector (s : State) (index : Register) : BitVec 128 :=
+  if h : index.val = 0 then s.vector0 else s.vectorTail ⟨index.val - 1, by omega⟩
+
+def writeVector (s : State) (index : Register) (value : BitVec 128) : State :=
+  if index.val = 0 then { s with vector0 := value }
+  else { s with vectorTail := fun i => if i.val + 1 = index.val then value else s.vectorTail i }
+
+@[simp] theorem readVector_zero (s : State) : readVector s 0 = s.vector0 := by
+  simp [readVector]
+
+@[simp] theorem writeVector_zero (s : State) (value : BitVec 128) :
+    writeVector s 0 value = { s with vector0 := value } := by simp [writeVector]
 
 /-- Arm ConditionHolds for all sixteen raw encoding values. AL and NV both
 hold; inversion is suppressed for NV in the architectural pseudocode. -/
@@ -288,11 +305,14 @@ inductive FmovInstruction
   | fromVector (width : Width) (dst : Register)
   deriving DecidableEq, Repr
 
-def fmovStep (i : FmovInstruction) (s : State) : Transition State :=
+def fmovBankStep (bank : Register) (i : FmovInstruction) (s : State) : Transition State :=
   let result := match i with
-    | .toVector width src => { s with vector0 := (narrow (readReg s src) width).setWidth 128 }
-    | .fromVector width dst => writeReg s dst (narrow (s.vector0.setWidth 64) width)
+    | .toVector width src => writeVector s bank ((narrow (readReg s src) width).setWidth 128)
+    | .fromVector width dst => writeReg s dst (narrow ((readVector s bank).setWidth 64) width)
   ⟨{ result with pc := s.pc + 4 }, [], none⟩
+
+/-- The original V0 instruction interface is the bank-zero specialization. -/
+def fmovStep (i : FmovInstruction) (s : State) : Transition State := fmovBankStep 0 i s
 
 inductive ReductionOp | count | unsignedSum
   deriving DecidableEq, Repr
@@ -412,6 +432,7 @@ inductive Instruction
   | branchBit (nonzero : Bool) (src : Register) (bit : BitVec 6) (displacement : Word)
   | mul (instruction : MulInstruction)
   | fmov (instruction : FmovInstruction)
+  | fmovBank (bank : Register) (instruction : FmovInstruction)
   | reduction (op : ReductionOp) (wide : Bool)
   | arithmeticExtended (width : Width) (subtract setFlags : Bool) (dst src : RegisterRef)
       (rhs : Register) (kind : RegisterExtend) (amount : Fin 5)
@@ -438,6 +459,7 @@ def step (i : Instruction) (s : State) : Transition State :=
   | .branchBit nonzero src bit displacement => branchStep (bitBranch nonzero (readReg s src) bit) displacement s
   | .mul instruction => mulStep instruction s
   | .fmov instruction => fmovStep instruction s
+  | .fmovBank bank instruction => fmovBankStep bank instruction s
   | .reduction op wide => reductionStep op wide s
   | .arithmeticExtended width subtract setFlags dst src rhs kind amount =>
       arithmeticExtendedStep width subtract setFlags dst src rhs kind amount s
@@ -497,15 +519,12 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   if reduction = 0x0e205800 ∨ reduction = 0x2e303800 then
     if dst.val ≠ 0 ∨ lhs.val ≠ 0 then throw "byte reduction vector register is not V0"
     return .reduction (if reduction = 0x0e205800 then .count else .unsignedSum) ((word / 2^30) % 2 == 1)
-  -- FMOV's floating register field is explicit: this state models V0.
-  -- Other vector-register fields must never silently alias V0.
+  -- FMOV's floating register field selects one of all32 architectural cells.
   let transfer := word &&& 0xfffffc00
   if transfer = 0x9e670000 ∨ transfer = 0x1e270000 then
-    if dst.val ≠ 0 then throw "FMOV vector destination is not V0"
-    return .fmov (.toVector (if transfer = 0x9e670000 then .w64 else .w32) lhs)
+    return .fmovBank dst (.toVector (if transfer = 0x9e670000 then .w64 else .w32) lhs)
   if transfer = 0x9e660000 ∨ transfer = 0x1e260000 then
-    if lhs.val ≠ 0 then throw "FMOV vector source is not V0"
-    return .fmov (.fromVector (if transfer = 0x9e660000 then .w64 else .w32) dst)
+    return .fmovBank lhs (.fromVector (if transfer = 0x9e660000 then .w64 else .w32) dst)
   -- MOV register is ORR with Rn=ZR and no shift. MOV involving SP is
   -- the ADD-immediate-zero alias, whose field31 denotes SP rather than ZR.
   if word &&& 0x7fe0ffe0 = 0x2a0003e0 then

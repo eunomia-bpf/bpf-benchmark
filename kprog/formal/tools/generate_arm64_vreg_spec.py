@@ -92,11 +92,14 @@ def load() -> dict:
     if data["low_offset"] == data["high_offset"]:
         raise SystemExit(f"arm64 vector-register halves alias: {data!r}")
     text = STATE_HEADER.read_text()
-    for field in (LOW_FIELD, HIGH_FIELD):
-        if f"__u64 {field} = 0" not in text:
+    for declaration in (
+            "struct { __u64 lo, hi; } __a64_vectors[32] = {}",
+            f"#define {LOW_FIELD} (__a64_vectors[0].lo)",
+            f"#define {HIGH_FIELD} (__a64_vectors[0].hi)"):
+        if declaration not in text:
             raise SystemExit(
                 f"arm64 vector-register state drift from "
-                f"kprog/arm64/arm64_sim_local_bpf.h: {field}")
+                f"kprog/arm64/arm64_sim_local_bpf.h: {declaration}")
     return data
 
 
