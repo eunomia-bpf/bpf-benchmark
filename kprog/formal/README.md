@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0961 - a group's middle member is a member
+
+The slash-separated form needed one more correction. An identifier group can
+hold three or four members, as in a run naming four adjacent tokens, and the
+pattern for pairs read only the first and last: a figure naming a middle member
+matched neither side.
+
+The pattern now admits digits and slashes on both sides of the figure, so any
+member of a group is read. Two forms were corrected before it: the pair pattern
+matched a figure at either end and missed the middle, and the range patterns had
+to be joined rather than replaced.
+
+With the group form the class reads sixty-one identifiers, and the unexplained
+remainder falls from thirty-nine to thirty-six. Three corrections in one class,
+each found by reading a member the pattern did not match. Census unchanged; the
+class reads a group of any length.
+
 ### Step 0960 - the fourth form of a line reference
 
 The line class read three forms and needed a fourth. Two identifiers can be

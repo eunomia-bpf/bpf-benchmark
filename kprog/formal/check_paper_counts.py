@@ -3750,10 +3750,12 @@ def figure_coverage(log: pathlib.Path) -> tuple[int, int, int, set[int]]:
     line_ids = {v for v in left if re.search(r"\bL%d\b" % v, flat)
                 or re.search(r"\bL\d+--%d\b" % v, flat)
                 or re.search(r"\bL%d--\d+\b" % v, flat)
-                # Two ids may be written side by side with a slash, as in
-                # a macro and the line after it.
-                or re.search(r"\bL\d+/%d\b" % v, flat)
-                or re.search(r"\bL%d/\d+\b" % v, flat)}
+                # Ids may be written in a slash-separated group, as in
+                # `L721/725/732/738`. Any member can be the one a figure
+                # names, so the pattern admits digits and slashes on both
+                # sides; patterns for the first and last members alone left
+                # the middle ones unread.
+                or re.search(r"\bL(?:\d+/)*%d(?:/\d+)*\b" % v, flat)}
     rows = {v for v in left - line_ids
             if re.search(r"\b%d-row\b|\b%d rows\b" % (v, v), flat)}
     catches = {v for v in left - line_ids - rows

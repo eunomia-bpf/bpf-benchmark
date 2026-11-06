@@ -2615,6 +2615,10 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0961 fixed the slash-group form to read middle
+members: line ids 57 -> 61, unexplained 39 -> 36.
+
+
 Step 0960 found a fourth line-reference form (Lx/N
 slash pairs): line ids 46 -> 57, unexplained 49 ->
 39.
