@@ -1,6 +1,6 @@
 # Native simulator verification
 
-With Lean/Elan, Python 3, a C compiler, and the `vendor/libbpf` submodule
+With Lean/Elan, Python 3, a C compiler with UBSan, and the `vendor/libbpf` submodule
 available, run the complete local check:
 
 ```sh
@@ -18,7 +18,10 @@ routing tables; they are **not yet a full simulator-step refinement theorem**.
 The ISA reference lives in `KProgFormal/Reference/`; it imports no simulator
 contracts. The step refinements in `Refinement/` connect CMOV, BT, BZHI,
 ANDN and register PUSH/POP handlers to that reference, including registers,
-flags, XMM0, memory, PC and ordered access/fault effects.
+flags, XMM0, memory, PC and ordered access/fault effects. The AArch64
+multiply/divide family (MADD, MSUB, MUL, UMULL, UMADDL, SMADDL, UMULH and
+UDIV) connects through `Refinement/Arm64Mul.lean`, including generated GPR
+selection, ZR discard, W writeback and preservation of SP/NZCV/vector/memory.
 
 Layout:
 
@@ -58,3 +61,10 @@ value, read/write permissions and initialization status; absent cells fault.
 CPU counterexamples and the encoder's signed displacement packing. The binary
 executes the same Lean definitions used by the proofs, without a C/Python
 restatement of ISA semantics.
+
+For AArch64, send `isa: "aarch64"` to the same executable. Supply exactly four
+little-endian native bytes, `registers` as X0..X30 followed by SP (32 words),
+`flags` with NZCV in bits31..28, `vector0` as an unsigned128-bit word, `pc`
+and the same explicit `memory` cells. Outputs use `vector0` in place of `xmm0`
+and omit x86 segment bases. Arithmetic field31 denotes ZR, independently of SP.
+The default ISA remains x86-64; `isa: "x86_64"` is also explicit.

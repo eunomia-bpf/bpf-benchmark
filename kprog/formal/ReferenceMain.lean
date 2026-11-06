@@ -1,5 +1,6 @@
 import Lean.Data.Json
 import KProgFormal.Reference.X86
+import KProgFormal.Reference.AArch64
 
 open Lean KProgFormal.Reference
 
@@ -83,7 +84,7 @@ private def eventJson : Event → Json
       ("address", number address.toNat), ("value", toJson (value.map BitVec.toNat)),
       ("initialized", toJson initialized)]
 
-private def execute (request : Json) : Except String Json := do
+private def executeX86 (request : Json) : Except String Json := do
   let state ← request.getObjVal? "state"
   let cells ← parseCells (← state.getObjVal? "memory")
   let initial ← parseState state cells
@@ -104,6 +105,50 @@ private def execute (request : Json) : Except String Json := do
       ("initialized", toJson (s.memory.initialized c.address))])),
     ("events", toJson (output.events.map eventJson)),
     ("fault", match output.fault with | none => Json.null | some f => faultJson f)]
+
+private def parseArmState (j : Json) (cells : Array InputCell) : Except String AArch64.State := do
+  let rows ← (← j.getObjVal? "registers").getArr?
+  let regs ← rows.mapM fun r => do
+    let n ← r.getNat?
+    if n < 2^64 then pure (BitVec.ofNat 64 n) else throw "register is outside the 64-bit range"
+  if h : regs.size = 32 then
+    let flags ← fieldWord j "flags"
+    let pc ← fieldWord j "pc"
+    let vector ← fieldNat j "vector0"
+    if vector ≥ 2^128 then throw "vector0 is outside the 128-bit range"
+    pure { gpr := fun r => regs[r.val]'(by omega)
+           sp := regs[31]'(by omega), flags := flags, vector0 := BitVec.ofNat 128 vector,
+           memory := memoryOfCells cells, pc := pc }
+  else throw "AArch64 registers must contain X0..X30 followed by SP (32 words)"
+
+private def executeArm (request : Json) : Except String Json := do
+  let state ← request.getObjVal? "state"
+  let cells ← parseCells (← state.getObjVal? "memory")
+  let initial ← parseArmState state cells
+  let bytes ← parseNativeBytes (← request.getObjVal? "native_bytes")
+  let instruction ← AArch64.decode bytes
+  let output := AArch64.step instruction initial
+  let s := output.state
+  pure <| Json.mkObj [
+    ("registers", toJson (((List.finRange 31).map (fun r => (s.gpr r).toNat)) ++ [s.sp.toNat])),
+    ("flags", number s.flags.toNat), ("defined_flags", number (2^64 - 1)),
+    ("pc", number s.pc.toNat), ("vector0", number s.vector0.toNat),
+    ("memory", Json.arr (cells.map fun c => Json.mkObj [
+      ("address", number c.address.toNat), ("value", number (s.memory.value c.address).toNat),
+      ("readable", toJson (s.memory.readable c.address)),
+      ("writable", toJson (s.memory.writable c.address)),
+      ("initialized", toJson (s.memory.initialized c.address))])),
+    ("events", toJson (output.events.map eventJson)),
+    ("fault", match output.fault with | none => Json.null | some f => faultJson f)]
+
+private def execute (request : Json) : Except String Json := do
+  match request.getObjVal? "isa" with
+  | .error _ => executeX86 request
+  | .ok value =>
+      match ← value.getStr? with
+      | "x86_64" => executeX86 request
+      | "aarch64" => executeArm request
+      | _ => throw "unknown reference ISA"
 
 def main : IO UInt32 := do
   let input ← IO.getStdin

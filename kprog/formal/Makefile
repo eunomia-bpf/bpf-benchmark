@@ -3,6 +3,7 @@
 check:
 	install -d build
 	python3 tools/check_macro_hygiene.py
+	python3 ../arm64/generate_sim_dispatch.py --check
 	python3 tools/check_helper_idents.py
 	python3 tools/check_jcc_opcodes.py
 	python3 tools/check_lookup_ambiguity.py
@@ -150,6 +151,7 @@ check:
 	python3 tools/generate_x86_dispatch_singleton_spec.py --check
 	lake build
 	python3 tools/check_reference.py
+	python3 tools/check_reference_arm64.py
 	python3 tools/check_no_sorry.py --check
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_cond_host.c -o build/test_arm64_cond_host
 	./build/test_arm64_cond_host

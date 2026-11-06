@@ -1,4 +1,5 @@
 import Init.Data.BitVec
+import KProgFormal.Reference.AArch64
 import KProgFormal.Generated.GeneratedArm64Mul
 import KProgFormal.Generated.GeneratedArm64Flags
 import KProgFormal.Generated.GeneratedArm64Width
@@ -233,21 +234,15 @@ theorem arm64MulSignExt32SpecEq (v : BitVec 64) :
   unfold arm64MulSignExt32Spec
   by_cases h : v &&& 0x80000000 = 0 <;> bv_decide
 
-/-- Independent statement of the eight AArch64 multiply-family value formulas.
-The long arms widen the low 32 bits of both operands; UDIV states the
-architectural divide-by-zero result; MSUB is the two's-complement addend plus
-complement of the product; UMULH is the exact 128-bit product's high word. -/
+/-- Bind the generated operation names to the sole AArch64 ISA reference. -/
+def arm64MulToReference : Mul → Reference.AArch64.MulOp
+  | .madd => .madd | .msub => .msub | .mul => .mul | .umull => .umull
+  | .udiv => .udiv | .umulh => .umulh | .umaddl => .umaddl | .smaddl => .smaddl
+
+/-- Legacy bounded-spec entry point, now an alias of the canonical ISA
+primitives. Existing theorem names and their arbitrary-input coverage remain. -/
 def arm64MulValueSpec (op : Mul) (lhs rhs addend : BitVec 64) : BitVec 64 :=
-  match op with
-  | .madd => lhs * rhs + addend
-  | .msub => addend + ~~~(lhs * rhs) + 1
-  | .mul => lhs * rhs
-  | .umull => (lhs.setWidth 32).setWidth 64 * (rhs.setWidth 32).setWidth 64
-  | .udiv => if rhs = 0 then 0 else lhs / rhs
-  | .umulh => BitVec.setWidth 64 (((lhs.setWidth 128) * (rhs.setWidth 128)) >>> 64)
-  | .umaddl =>
-      (lhs.setWidth 32).setWidth 64 * (rhs.setWidth 32).setWidth 64 + addend
-  | .smaddl => arm64MulSignExt32Spec lhs * arm64MulSignExt32Spec rhs + addend
+  Reference.AArch64.mulValue (arm64MulToReference op) lhs rhs addend
 
 /-- The generated multiply contract agrees with the independent statement for all
 eight operations and all operand values. -/
@@ -255,18 +250,18 @@ theorem arm64_mul_refines (op : Mul) (lhs rhs addend : BitVec 64) :
     GeneratedArm64Mul.value op lhs rhs addend =
       arm64MulValueSpec op lhs rhs addend := by
   cases op
-  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec]
-  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec]
+  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec, arm64MulToReference, Reference.AArch64.mulValue]
+  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec, arm64MulToReference, Reference.AArch64.mulValue]
     bv_decide
-  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec]
-  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec]
+  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec, arm64MulToReference, Reference.AArch64.mulValue]
+  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec, arm64MulToReference, Reference.AArch64.mulValue]
     bv_decide
-  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec]
-  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec, arm64MulUmulhAlg]
+  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec, arm64MulToReference, Reference.AArch64.mulValue]
+  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec, arm64MulToReference, Reference.AArch64.mulValue, arm64MulUmulhAlg]
     exact arm64MulUmulhLadderEqHighWord lhs rhs
-  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec]
+  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec, arm64MulToReference, Reference.AArch64.mulValue]
     bv_decide
-  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec,
+  · simp only [GeneratedArm64Mul.value, arm64MulValueSpec, arm64MulToReference, Reference.AArch64.mulValue,
       arm64MulSignExt32SpecEq]
 
 /-- C hands the multiply result to the width-narrowing register write. Narrowing
