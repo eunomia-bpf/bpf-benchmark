@@ -1,0 +1,6 @@
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift_startup_proofs.py object_coarse /workspaces/repository/corpus/results/kprog_app_coverage_20261106/context-runtime/flags-zero/bpfrejit_1038_39f82ae52884c235.bpf socket
+object_coarse exact captured bytes → LLVM → native ELF → canonical proof → simulator BPF PASS
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift_startup_proofs.py object_arg_ctx /workspaces/repository/corpus/results/kprog_app_coverage_20261106/context-runtime/flags-zero/bpfrejit_1038_3ae725ddb7d69e19.bpf kprobe
+object_arg_ctx exact captured bytes → LLVM → native ELF → canonical proof → simulator BPF PASS
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift_startup_proofs.py object_sock /workspaces/repository/corpus/results/kprog_app_coverage_20261106/context-runtime/flags-zero/bpfrejit_1038_58255400910d7827.bpf cgroup/sock
+object_sock exact captured bytes → LLVM → native ELF → canonical proof → simulator BPF PASS

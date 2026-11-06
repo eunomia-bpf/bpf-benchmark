@@ -1,0 +1,16 @@
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift_startup_proofs.py coarse /workspaces/repository/corpus/results/kprog_app_coverage_20261106/context-runtime/flags-zero/bpfrejit_1038_39f82ae52884c235.bpf socket
+Traceback (most recent call last):
+  File "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift_startup_proofs.py", line 42, in <module>
+    text=gen.render_program(name,insns,subs,'raw',exit_addr=end,rodata16=rodata,program_section=section)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py", line 1508, in render_program
+    stack_bytes = check_definedness(all_insns, targets, exit_addr, sys.modules[__name__])
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 455, in check_definedness
+    push(context,target,state)
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 89, in push
+    need(state, 'eax', 'native entry return')
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 110, in need
+    raise ValueError(f'undefined native ABI register {operand} at {reason}')
+ValueError: undefined native ABI register eax at native entry return
+make: *** [corpus/results/kprog_app_coverage_20261106/anonymous.mk:40: coarse-proof] Error 1

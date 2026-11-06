@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_object_startup.py", line 35, in <module>
+    if result.returncode:raise RuntimeError(row)
+                         ^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: {'command': ['/workspaces/repository/corpus/results/kprog_app_coverage_20261106/context-runtime/startup', '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/context-runtime/source.bpf.o', '0'], 'returncode': 97, 'stdout': '', 'stderr': ''}
+make: *** [/workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous.mk:58: object-guest] Error 1
+make: *** [corpus/results/kprog_app_coverage_20261106/anonymous.mk:53: object-kvm] Error 2

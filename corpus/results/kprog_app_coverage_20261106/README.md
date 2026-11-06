@@ -1,5 +1,9 @@
 # Lane C: application proof-artifact coverage, 2026-11-06
 
+[Startup helper checkpoint](startup-helpers.md): typed helpers160/173,
+exact anonymous-bytecode selection, and private strict-shim startup regressions
+pass. Full six-application coverage and matching-work timing remain incomplete.
+
 Current application coverage is incomplete. The latest [readonly identity
 checkpoint](readonly-layout.md) records actual-load denominators, BCC25/25
 proof generation/compilation,23 verifier acceptances and two map-preparation

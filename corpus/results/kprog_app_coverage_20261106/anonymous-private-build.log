@@ -1,0 +1,80 @@
+cmake -S /workspaces/.agent-state/kprog-lanes/C/anonymous-source/kprog/libnativeloader -B /workspaces/.agent-state/kprog-lanes/C/anonymous-source/build -DNATIVE_LOADER_REPO_ROOT=/workspaces/repository -DNATIVE_LOADER_LIBBPF_PREFIX=/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix -DNATIVE_LOADER_LIBBPF_LIBRARY=/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -DNATIVE_LOADER_KERNEL_OFFSETS_INCLUDE=/workspaces/repository/micro/programs/build-x86
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1") 
+-- Checking for module 'libelf'
+--   Found libelf, version 0.190
+-- Checking for module 'zlib'
+--   Found zlib, version 1.3
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspaces/.agent-state/kprog-lanes/C/anonymous-source/build
+taskset -c 12-15 cmake --build /workspaces/.agent-state/kprog-lanes/C/anonymous-source/build -j2 --target native_loader native_loader_shared
+gmake[1]: Entering directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+gmake[2]: Entering directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+gmake[3]: Entering directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+[ 50%] Building CXX object CMakeFiles/native_loader.dir/src/native_loader.cpp.o
+[100%] Linking CXX static library libnative_loader.a
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+[100%] Built target native_loader
+gmake[3]: Leaving directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+gmake[2]: Leaving directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+gmake[2]: Entering directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+gmake[3]: Entering directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+[ 50%] Building CXX object CMakeFiles/native_loader_shared.dir/src/native_loader.cpp.o
+[100%] Linking CXX shared library libnative_loader.so
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+[100%] Built target native_loader_shared
+gmake[3]: Leaving directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+gmake[2]: Leaving directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+gmake[1]: Leaving directory '/workspaces/.agent-state/kprog-lanes/C/anonymous-source/build'
+cc -O2 -g -Wall -Wextra -fPIC -D_GNU_SOURCE -I/workspaces/repository/vendor/libbpf/include/uapi -shared /workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim-before/libbpfrejit_shim.c -o /workspaces/.agent-state/kprog-lanes/C/anonymous-source/shim-before.so -ldl -lpthread
+In file included from /workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim-before/libbpfrejit_shim.c:1729:
+/workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim-before/shim_reload.h: In function ‘run_step’:
+/workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim-before/shim_reload.h:1426:42: warning: ‘%s’ directive output may be truncated writing up to 255 bytes into a region of size 241 [-Wformat-truncation=]
+ 1426 |                          "/sys/class/net/%s/ifindex", de->d_name);
+      |                                          ^~
+In file included from /usr/include/stdio.h:980,
+                 from /workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim-before/libbpfrejit_shim.c:41:
+In function ‘snprintf’,
+    inlined from ‘reload_and_reattach’ at /workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim-before/shim_reload.h:1425:17,
+    inlined from ‘run_step’ at /workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim-before/shim_execute_plan.h:539:29:
+/usr/include/x86_64-linux-gnu/bits/stdio2.h:54:10: note: ‘__builtin___snprintf_chk’ output between 24 and 279 bytes into a destination of size 256
+   54 |   return __builtin___snprintf_chk (__s, __n, __USE_FORTIFY_LEVEL - 1,
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   55 |                                    __glibc_objsize (__s), __fmt,
+      |                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   56 |                                    __va_arg_pack ());
+      |                                    ~~~~~~~~~~~~~~~~~
+cc -O2 -g -Wall -Wextra -fPIC -D_GNU_SOURCE -I/workspaces/repository/vendor/libbpf/include/uapi -shared /workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim/libbpfrejit_shim.c -o /workspaces/.agent-state/kprog-lanes/C/anonymous-source/shim-after.so -ldl -lpthread
+In file included from /workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim/libbpfrejit_shim.c:1729:
+/workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim/shim_reload.h: In function ‘run_step’:
+/workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim/shim_reload.h:1426:42: warning: ‘%s’ directive output may be truncated writing up to 255 bytes into a region of size 241 [-Wformat-truncation=]
+ 1426 |                          "/sys/class/net/%s/ifindex", de->d_name);
+      |                                          ^~
+In file included from /usr/include/stdio.h:980,
+                 from /workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim/libbpfrejit_shim.c:41:
+In function ‘snprintf’,
+    inlined from ‘reload_and_reattach’ at /workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim/shim_reload.h:1425:17,
+    inlined from ‘run_step’ at /workspaces/.agent-state/kprog-lanes/C/anonymous-source/bpfopt/shim/shim_execute_plan.h:539:29:
+/usr/include/x86_64-linux-gnu/bits/stdio2.h:54:10: note: ‘__builtin___snprintf_chk’ output between 24 and 279 bytes into a destination of size 256
+   54 |   return __builtin___snprintf_chk (__s, __n, __USE_FORTIFY_LEVEL - 1,
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   55 |                                    __glibc_objsize (__s), __fmt,
+      |                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   56 |                                    __va_arg_pack ());
+      |                                    ~~~~~~~~~~~~~~~~~
+make -f /workspaces/repository/corpus/results/kprog_app_coverage_20261106/Makefile anonymous-startup-build
+make[1]: Entering directory '/workspaces/repository'
+c++ -std=c++20 -O2 -D__EXPORTED_HEADERS__ -I/workspaces/repository/vendor/linux-framework/include/uapi -I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include /workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous_startup.cpp /workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous-startup
+make[1]: Leaving directory '/workspaces/repository'

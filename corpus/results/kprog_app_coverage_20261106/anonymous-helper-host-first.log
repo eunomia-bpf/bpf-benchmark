@@ -1,0 +1,38 @@
+python3 /workspaces/repository/kprog/formal/tools/generate_x86_helper_dispatch_spec.py
+cc -Wall -Wextra -O2 -I/workspaces/repository/kprog/formal /workspaces/repository/kprog/formal/oracles/test_x86_helper_dispatch_host.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous-helper-host
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous-helper-host
+x86 helper dispatch host cross-check: OK (4100 cases)
+cc -Wall -Wextra -O2 -I/workspaces/repository/kprog/formal -I/workspaces/repository/kprog/x86 -I/workspaces/repository/kprog -I/workspaces/repository/vendor/libbpf/src /workspaces/repository/kprog/formal/oracles/test_x86_helper_dispatch_route_host.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous-helper-route-host
+In file included from /workspaces/repository/kprog/formal/oracles/test_x86_helper_dispatch_route_host.c:25:
+/workspaces/repository/kprog/formal/oracles/test_x86_helper_dispatch_route_host.c: In function ‘check_id’:
+/workspaces/repository/kprog/formal/../x86/x86_sim_local_bpf.h:2466:40: warning: implicit declaration of function ‘bpf_ktime_get_coarse_ns’; did you mean ‘bpf_ktime_get_boot_ns’? [-Wimplicit-function-declaration]
+ 2466 |         X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ktime_get_coarse_ns())
+      |                                        ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/../x86/x86_sim_local_bpf.h:2275:45: note: in definition of macro ‘X86_SIM_L_HELPER_SCALAR_RESULT’
+ 2275 |         __u64 __x86_helper_result = (__u64)(EXPR); \
+      |                                             ^~~~
+/workspaces/repository/kprog/formal/../x86/x86_sim_local_bpf.h:2670:25: note: in expansion of macro ‘X86_SIM_BPF_CALL_bpf_ktime_get_coarse_ns’
+ 2670 |                         X86_SIM_BPF_CALL_bpf_ktime_get_coarse_ns(); \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/oracles/test_x86_helper_dispatch_route_host.c:144:17: note: in expansion of macro ‘X86_SIM_BPF_CALL_ID’
+  144 |                 X86_SIM_BPF_CALL_ID((__u64)id);
+      |                 ^~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/../x86/x86_sim_local_bpf.h:2469:40: warning: implicit declaration of function ‘bpf_get_func_ip’; did you mean ‘bpf_get_func_ret’? [-Wimplicit-function-declaration]
+ 2469 |         X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ip((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI)))
+      |                                        ^~~~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/../x86/x86_sim_local_bpf.h:2275:45: note: in definition of macro ‘X86_SIM_L_HELPER_SCALAR_RESULT’
+ 2275 |         __u64 __x86_helper_result = (__u64)(EXPR); \
+      |                                             ^~~~
+/workspaces/repository/kprog/formal/../x86/x86_sim_local_bpf.h:2673:25: note: in expansion of macro ‘X86_SIM_BPF_CALL_bpf_get_func_ip’
+ 2673 |                         X86_SIM_BPF_CALL_bpf_get_func_ip(); \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/formal/oracles/test_x86_helper_dispatch_route_host.c:144:17: note: in expansion of macro ‘X86_SIM_BPF_CALL_ID’
+  144 |                 X86_SIM_BPF_CALL_ID((__u64)id);
+      |                 ^~~~~~~~~~~~~~~~~~~
+/usr/bin/ld: /tmp/ccMg1nkD.o: in function `main':
+test_x86_helper_dispatch_route_host.c:(.text.startup+0xcd6): undefined reference to `bpf_get_func_ip'
+/usr/bin/ld: test_x86_helper_dispatch_route_host.c:(.text.startup+0xd3c): undefined reference to `bpf_ktime_get_coarse_ns'
+/usr/bin/ld: test_x86_helper_dispatch_route_host.c:(.text.startup+0x3375): undefined reference to `bpf_get_func_ip'
+/usr/bin/ld: test_x86_helper_dispatch_route_host.c:(.text.startup+0x3387): undefined reference to `bpf_ktime_get_coarse_ns'
+collect2: error: ld returned 1 exit status
+make: *** [corpus/results/kprog_app_coverage_20261106/anonymous.mk:33: helper-host] Error 1

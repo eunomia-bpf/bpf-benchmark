@@ -1,0 +1,11 @@
+readonly-check-source immutable validated base plus only C helper dispatch 160/173 overlays:
+kprog/x86/x86_sim_local_bpf.h
+kprog/formal/contracts/x86_helper_dispatch_spec.json
+kprog/formal/tools/generate_x86_helper_dispatch_spec.py
+kprog/formal/generated/x86_helper_dispatch.h
+kprog/formal/KProgFormal/Generated/GeneratedX86HelperDispatch.lean
+kprog/formal/KProgFormal/X86HelperDispatch.lean
+kprog/formal/oracles/generated_helper_calls.h
+kprog/formal/oracles/x86_helper_environment_host.h
+kprog/formal/oracles/test_x86_helper_dispatch_host.c
+kprog/formal/oracles/test_x86_helper_dispatch_route_host.c

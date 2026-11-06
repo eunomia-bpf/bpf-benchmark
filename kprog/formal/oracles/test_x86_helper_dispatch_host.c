@@ -1,5 +1,5 @@
 /* Independent public Linux helper-ID-to-slot oracle. All4097 original IDs
- * remain covered, including the gaps in the sparse65 table. The production
+ * remain covered, including the gaps in the sparse67 table. The production
  * switch is checked separately with actual typed helper-call host stubs. */
 typedef unsigned char __u8;
 typedef unsigned short __u16;
@@ -67,6 +67,8 @@ typedef unsigned long long __u64;
 #define X86_SIM_HELPER_bpf_redirect_neigh 152ULL
 #define X86_SIM_HELPER_bpf_redirect_peer 155ULL
 #define X86_SIM_HELPER_bpf_get_current_task_btf 158ULL
+#define X86_SIM_HELPER_bpf_ktime_get_coarse_ns 160ULL
+#define X86_SIM_HELPER_bpf_get_func_ip 173ULL
 #define X86_SIM_HELPER_bpf_get_attach_cookie 174ULL
 #define X86_SIM_HELPER_bpf_task_pt_regs 175ULL
 #define X86_SIM_HELPER_bpf_loop 181ULL
@@ -83,7 +85,7 @@ static unsigned long cases;
 /* Independent ordered Linux IDs; gaps must never alias another slot. */
 static long model_slot(unsigned long long id)
 {
-    static const unsigned long long ids[] = {1ULL, 2ULL, 3ULL, 4ULL, 5ULL, 6ULL, 7ULL, 8ULL, 9ULL, 10ULL, 11ULL, 12ULL, 14ULL, 15ULL, 16ULL, 20ULL, 21ULL, 23ULL, 25ULL, 26ULL, 27ULL, 28ULL, 32ULL, 35ULL, 36ULL, 37ULL, 38ULL, 39ULL, 43ULL, 44ULL, 45ULL, 46ULL, 50ULL, 54ULL, 58ULL, 65ULL, 67ULL, 68ULL, 69ULL, 80ULL, 85ULL, 86ULL, 87ULL, 88ULL, 95ULL, 99ULL, 109ULL, 112ULL, 113ULL, 114ULL, 115ULL, 118ULL, 122ULL, 124ULL, 125ULL, 130ULL, 148ULL, 152ULL, 155ULL, 158ULL, 174ULL, 175ULL, 181ULL, 184ULL, 193ULL};
+    static const unsigned long long ids[] = {1ULL, 2ULL, 3ULL, 4ULL, 5ULL, 6ULL, 7ULL, 8ULL, 9ULL, 10ULL, 11ULL, 12ULL, 14ULL, 15ULL, 16ULL, 20ULL, 21ULL, 23ULL, 25ULL, 26ULL, 27ULL, 28ULL, 32ULL, 35ULL, 36ULL, 37ULL, 38ULL, 39ULL, 43ULL, 44ULL, 45ULL, 46ULL, 50ULL, 54ULL, 58ULL, 65ULL, 67ULL, 68ULL, 69ULL, 80ULL, 85ULL, 86ULL, 87ULL, 88ULL, 95ULL, 99ULL, 109ULL, 112ULL, 113ULL, 114ULL, 115ULL, 118ULL, 122ULL, 124ULL, 125ULL, 130ULL, 148ULL, 152ULL, 155ULL, 158ULL, 160ULL, 173ULL, 174ULL, 175ULL, 181ULL, 184ULL, 193ULL};
     unsigned i;
     for (i = 0; i < sizeof(ids) / sizeof(ids[0]); i++)
         if (id == ids[i]) return (long)i;
@@ -95,8 +97,8 @@ int main(void)
 	unsigned long long id;
 
 	cases++;
-	if (KPROG_X86_HELPER_COUNT != 65U) {
-		printf("MISMATCH count got=%u want=65\n",
+	if (KPROG_X86_HELPER_COUNT != 67U) {
+		printf("MISMATCH count got=%u want=67\n",
 		       (unsigned)KPROG_X86_HELPER_COUNT);
 		failures++;
 	}

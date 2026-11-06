@@ -1,0 +1,7 @@
+c++ -std=c++20 -Wall -Wextra -Werror -O2 -I/workspaces/repository/vendor/libbpf/include/uapi /workspaces/repository/corpus/results/kprog_app_coverage_20261106/source_call_fixtures.cpp -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/source-call-fixtures
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/source-call-fixtures /workspaces/repository/corpus/results/kprog_app_coverage_20261106/source-call-inputs
+wrote three source-call ABI regression inputs
+for name in five_args saved_r6 backwards; do python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift_startup_proofs.py $name /workspaces/repository/corpus/results/kprog_app_coverage_20261106/source-call-inputs/$name.bpf.bin socket; done
+five_args exact captured bytes → LLVM → native ELF → canonical proof → simulator BPF PASS
+saved_r6 exact captured bytes → LLVM → native ELF → canonical proof → simulator BPF PASS
+backwards exact captured bytes → LLVM → native ELF → canonical proof → simulator BPF PASS

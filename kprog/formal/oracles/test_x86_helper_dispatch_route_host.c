@@ -1,4 +1,4 @@
-/* Cross-check the actual sparse65 helper ladder and typed-call ABI.
+/* Cross-check the actual sparse67 helper ladder and typed-call ABI.
  * Preserve whole-register/tag framing and every original register-number case,
  * now covering every armed ID plus gaps, zero and the full64-bit boundary.
  * Typed public-ABI host stubs expose selected identity, normalized arguments,
@@ -261,7 +261,7 @@ int main(void)
 	/* The generated count and the slot selector must line up with the
 	 * sim's hand-written ladder. */
 	cases++;
-	if (KPROG_X86_HELPER_COUNT != 65U ||
+	if (KPROG_X86_HELPER_COUNT != 67U ||
 	    KPROG_X86_HELPER_SLOT(1ULL) != 0U ||
 	    KPROG_X86_HELPER_SLOT(5ULL) != 4U ||
 	    KPROG_X86_HELPER_SLOT(13ULL) != KPROG_X86_HELPER_SLOT_NONE) {
@@ -277,7 +277,7 @@ int main(void)
 	 * planted to every armed id plus a default id. */
 	{
 		static const unsigned long long ids[] = {
-			0ULL, 1ULL, 2ULL, 3ULL, 4ULL, 5ULL, 6ULL, 7ULL, 8ULL, 9ULL, 10ULL, 11ULL, 12ULL, 13ULL, 14ULL, 15ULL, 16ULL, 20ULL, 21ULL, 22ULL, 23ULL, 25ULL, 26ULL, 27ULL, 28ULL, 32ULL, 35ULL, 36ULL, 37ULL, 38ULL, 39ULL, 43ULL, 44ULL, 45ULL, 46ULL, 50ULL, 54ULL, 58ULL, 65ULL, 67ULL, 68ULL, 69ULL, 80ULL, 85ULL, 86ULL, 87ULL, 88ULL, 95ULL, 99ULL, 109ULL, 112ULL, 113ULL, 114ULL, 115ULL, 118ULL, 122ULL, 124ULL, 125ULL, 130ULL, 148ULL, 152ULL, 155ULL, 158ULL, 174ULL, 175ULL, 181ULL, 184ULL, 193ULL, 194ULL, 18446744073709551615ULL
+			0ULL, 1ULL, 2ULL, 3ULL, 4ULL, 5ULL, 6ULL, 7ULL, 8ULL, 9ULL, 10ULL, 11ULL, 12ULL, 13ULL, 14ULL, 15ULL, 16ULL, 20ULL, 21ULL, 22ULL, 23ULL, 25ULL, 26ULL, 27ULL, 28ULL, 32ULL, 35ULL, 36ULL, 37ULL, 38ULL, 39ULL, 43ULL, 44ULL, 45ULL, 46ULL, 50ULL, 54ULL, 58ULL, 65ULL, 67ULL, 68ULL, 69ULL, 80ULL, 85ULL, 86ULL, 87ULL, 88ULL, 95ULL, 99ULL, 109ULL, 112ULL, 113ULL, 114ULL, 115ULL, 118ULL, 122ULL, 124ULL, 125ULL, 130ULL, 148ULL, 152ULL, 155ULL, 158ULL, 160ULL, 173ULL, 174ULL, 175ULL, 181ULL, 184ULL, 193ULL, 194ULL, 18446744073709551615ULL
 		};
 		size_t ii;
 

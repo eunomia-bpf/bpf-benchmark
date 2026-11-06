@@ -78,6 +78,8 @@ _ARMED = [
     ('bpf_redirect_neigh', 152, 'X86_SIM_BPF_CALL_bpf_redirect_neigh'),
     ('bpf_redirect_peer', 155, 'X86_SIM_BPF_CALL_bpf_redirect_peer'),
     ('bpf_get_current_task_btf', 158, 'X86_SIM_BPF_CALL_bpf_get_current_task_btf'),
+    ('bpf_ktime_get_coarse_ns', 160, 'X86_SIM_BPF_CALL_bpf_ktime_get_coarse_ns'),
+    ('bpf_get_func_ip', 173, 'X86_SIM_BPF_CALL_bpf_get_func_ip'),
     ('bpf_get_attach_cookie', 174, 'X86_SIM_BPF_CALL_bpf_get_attach_cookie'),
     ('bpf_task_pt_regs', 175, 'X86_SIM_BPF_CALL_bpf_task_pt_regs'),
     ('bpf_loop', 181, 'X86_SIM_BPF_CALL_bpf_loop'),

@@ -182,6 +182,8 @@ union x86_sim_stack_mem {
 #define X86_SIM_HELPER_bpf_redirect_neigh 152ULL
 #define X86_SIM_HELPER_bpf_redirect_peer 155ULL
 #define X86_SIM_HELPER_bpf_get_current_task_btf 158ULL
+#define X86_SIM_HELPER_bpf_ktime_get_coarse_ns 160ULL
+#define X86_SIM_HELPER_bpf_get_func_ip 173ULL
 #define X86_SIM_HELPER_bpf_get_attach_cookie 174ULL
 #define X86_SIM_HELPER_bpf_task_pt_regs 175ULL
 #define X86_SIM_HELPER_bpf_loop 181ULL
@@ -2460,6 +2462,12 @@ extern void __x86_sim_unsupported_helper(void)
 #define X86_SIM_BPF_CALL_bpf_get_current_task_btf() \
 	X86_SIM_L_HELPER_POINTER_RESULT(bpf_get_current_task_btf())
 
+#define X86_SIM_BPF_CALL_bpf_ktime_get_coarse_ns() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_ktime_get_coarse_ns())
+
+#define X86_SIM_BPF_CALL_bpf_get_func_ip() \
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ip((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI)))
+
 #define X86_SIM_BPF_CALL_bpf_get_attach_cookie() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_attach_cookie((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI)))
 
@@ -2657,6 +2665,12 @@ extern void __x86_sim_unsupported_helper(void)
 			break; \
 		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_current_task_btf): \
 			X86_SIM_BPF_CALL_bpf_get_current_task_btf(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_ktime_get_coarse_ns): \
+			X86_SIM_BPF_CALL_bpf_ktime_get_coarse_ns(); \
+			break; \
+		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_func_ip): \
+			X86_SIM_BPF_CALL_bpf_get_func_ip(); \
 			break; \
 		case KPROG_X86_HELPER_SLOT(X86_SIM_HELPER_bpf_get_attach_cookie): \
 			X86_SIM_BPF_CALL_bpf_get_attach_cookie(); \

@@ -1,0 +1,10 @@
+c++ -std=c++20 -O2 -Wall -Wextra -Werror -I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/kprog/libnativeloader/src /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_anonymous_manifest.cpp -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous-manifest-host
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_anonymous_manifest.cpp: In lambda function:
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_anonymous_manifest.cpp:35:9: error: this ‘if’ clause does not guard... [-Werror=misleading-indentation]
+   35 |         if(std::string(error.what()).find(message)==std::string::npos)throw; ++checks;return;}
+      |         ^~
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_anonymous_manifest.cpp:35:78: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+   35 |         if(std::string(error.what()).find(message)==std::string::npos)throw; ++checks;return;}
+      |                                                                              ^~
+cc1plus: all warnings being treated as errors
+make: *** [corpus/results/kprog_app_coverage_20261106/Makefile:458: anonymous-manifest-host] Error 1

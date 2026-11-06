@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_anonymous_startup.py", line 19, in <module>
+    coarse=json.loads((HERE/'startup-lift/coarse-call/manifest-entry.json').read_text())
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1029, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/startup-lift/coarse-call/manifest-entry.json'
+make: *** [/workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous.mk:25: guest] Error 1
+make: *** [corpus/results/kprog_app_coverage_20261106/anonymous.mk:20: kvm] Error 2

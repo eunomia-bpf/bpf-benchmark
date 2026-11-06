@@ -1,0 +1,2 @@
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift_startup_proofs.py coarse_call /workspaces/repository/corpus/results/kprog_app_coverage_20261106/context-runtime/flags-zero/bpfrejit_1038_39f82ae52884c235.bpf socket
+coarse_call exact captured bytes → LLVM → native ELF → canonical proof → simulator BPF PASS

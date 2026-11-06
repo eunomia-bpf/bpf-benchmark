@@ -547,6 +547,27 @@ inline bool source_has_helper(const std::vector<bpf_insn> &source_insns,
     return false;
 }
 
+inline bool manifest_source_bytecode_matches(
+    const std::string &hex, const std::vector<bpf_insn> &source)
+{
+    if (hex.empty() || hex.size() % (2 * sizeof(bpf_insn))) {
+        json_fail("source_bytecode_hex must encode complete BPF instructions");
+    }
+    const auto digit = [](char ch) -> unsigned {
+        if (ch >= '0' && ch <= '9') return static_cast<unsigned>(ch - '0');
+        if (ch >= 'a' && ch <= 'f') return static_cast<unsigned>(ch - 'a' + 10);
+        if (ch >= 'A' && ch <= 'F') return static_cast<unsigned>(ch - 'A' + 10);
+        json_fail("source_bytecode_hex contains a non-hexadecimal digit");
+    };
+    const auto *bytes = reinterpret_cast<const unsigned char *>(source.data());
+    bool equal = hex.size() / 2 == source.size() * sizeof(bpf_insn);
+    for (size_t index = 0; index < hex.size() / 2; ++index) {
+        const unsigned value = (digit(hex[2 * index]) << 4) | digit(hex[2 * index + 1]);
+        equal = equal && bytes[index] == value;
+    }
+    return equal;
+}
+
 template <typename LoadMapInfo>
 bool source_has_map_prefix(const std::vector<bpf_insn> &source_insns,
                            const std::string &prefix,
@@ -669,8 +690,16 @@ std::optional<ManifestResolution> resolve_native_manifest(
 
     std::optional<ManifestResolution> selected;
     for (const std::string &entry : objects) {
-        const std::string entry_program = json_required_string(entry, "program");
-        if (entry_program != prog_name) {
+        const auto entry_program = json_object_string(entry, "program");
+        if (!entry_program) json_fail("object missing required string key program");
+        if (*entry_program != prog_name) {
+            continue;
+        }
+        const auto source_hex = json_object_string(entry, "source_bytecode_hex");
+        if (entry_program->empty() && !source_hex) {
+            manifest_fail("native_loader: anonymous program entry requires source_bytecode_hex");
+        }
+        if (source_hex && !manifest_source_bytecode_matches(*source_hex, source_insns)) {
             continue;
         }
         std::optional<uint64_t> prog_type = json_object_u64(entry, "prog_type");

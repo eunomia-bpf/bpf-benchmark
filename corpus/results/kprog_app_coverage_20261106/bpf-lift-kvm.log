@@ -1,0 +1,14 @@
+insmod /workspaces/repository/corpus/results/kprog_app_coverage_20261106/entry-input/bpf_x86_native_lab.ko
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_bpf_lift.py bound
+zero kernel result=0 retval=0 expected_result=0 expected_retval=0
+bound program id=10 chunks=1 nonzero_generations=1
+native_bound result=0 retval=0 expected_result=0 expected_retval=0
+ 
+one kernel result=0 retval=1 expected_result=0 expected_retval=1
+bound program id=20 chunks=1 nonzero_generations=1
+native_bound result=0 retval=1 expected_result=0 expected_retval=1
+ 
+clock kernel result=0 retval=1 expected_result=0 expected_retval=1
+bound program id=30 chunks=1 nonzero_generations=1
+native_bound result=0 retval=1 expected_result=0 expected_retval=1
+ 

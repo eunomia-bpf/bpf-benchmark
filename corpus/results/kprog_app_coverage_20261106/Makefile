@@ -423,7 +423,7 @@ paired-modules-guest:
 	cat /proc/modules
 
 PAIRED_RUNTIME_IMAGE ?= bpf-benchmark/kprog-paired-context:c-20261106
-PAIRED_RUNTIME_TAR ?= /tmp/kprog-c-paired-runtime-20261106.image.tar
+PAIRED_RUNTIME_TAR ?= /workspaces/.agent-state/kprog-lanes/C/paired-context-v2-runtime.image.tar
 paired-runtime-image:
 	docker tag 4e0cc5f9ddf0 $(BCC_RUNTIME_BASE)
 	docker build --target paired-runtime --build-context paired-context=$(PAIRED_CONTEXT) --build-context bcc-verified=$(HERE)/$(BCC_RUNTIME_PACKAGE) --build-arg BASE_IMAGE=$(BCC_RUNTIME_BASE) -f $(HERE)/bcc-runtime.Dockerfile -t $(PAIRED_RUNTIME_IMAGE) $(HERE)/$(BCC_RUNTIME_PACKAGE)
@@ -431,3 +431,29 @@ paired-runtime-image:
 
 sp-lea-artifacts:
 	python3 $(HERE)/archive_sp_lea.py
+
+LLVMBPF_OBJECTS := $(addprefix $(ROOT)/runner/build-llvmbpf/CMakeFiles/micro_exec.dir/workspaces/repository/vendor/llvmbpf/src/,$(addsuffix .cpp.o,compiler compiler_utils llvm_jit_context vm))
+lift-bpf-ir-build:
+	c++ -std=c++20 -O2 -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/llvmbpf/include -I$(ROOT)/vendor/llvmbpf/src -I/usr/lib/llvm-18/include $(HERE)/lift_bpf_ir.cpp $(HERE)/lift_bpf_ir_backend.cpp $(LLVMBPF_OBJECTS) -lLLVM-18 -lspdlog -lfmt -lpthread -ldl -lz -lzstd -o $(HERE)/lift-bpf-ir
+
+bpf-lift-build: lift-bpf-ir-build
+	python3 $(HERE)/check_bpf_lift.py prepare
+	for item in zero:0 one:1 clock:CLOCK; do name=$${item%:*}; value=$${item#*:}; if test "$$value" = CLOCK; then define=-DCLOCK; else define=-DVALUE=$$value; fi; clang -g -O2 -target bpf "$$define" -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/bpf-lift/source.bpf.c -o $(HERE)/bpf-lift/$$name.source.bpf.o; done
+	python3 $(HERE)/check_bpf_lift.py generate
+	for name in zero one clock; do for kind in "" .socket; do clang -g -O2 -Wno-c23-extensions -target bpf -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c $(HERE)/bpf-lift/$$name$$kind.bpf.c -o $(HERE)/bpf-lift/$$name$$kind.bpf.o; done; done
+
+bpf-lift-kvm: bpf-lift-build
+	taskset -c 12-15 vng --run $(HERE)/entry-input/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile bpf-lift-guest'
+
+bpf-lift-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod $(HERE)/entry-input/bpf_x86_native_lab.ko
+	python3 $(HERE)/check_bpf_lift.py bound
+
+anonymous-startup-build:
+	c++ -std=c++20 -O2 -D__EXPORTED_HEADERS__ -I$(ROOT)/vendor/linux-framework/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include $(HERE)/anonymous_startup.cpp $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $(HERE)/anonymous-startup
+
+
+anonymous-manifest-host:
+	c++ -std=c++20 -O2 -Wall -Wextra -Werror -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/kprog/libnativeloader/src $(HERE)/check_anonymous_manifest.cpp -o $(HERE)/anonymous-manifest-host
+	$(HERE)/anonymous-manifest-host $(HERE)/anonymous-manifest-host-cases

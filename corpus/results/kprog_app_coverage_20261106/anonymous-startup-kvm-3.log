@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_anonymous_startup.py", line 49, in <module>
+    run('after-name-collision','zero',program='native_lab_stub')
+  File "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_anonymous_startup.py", line 40, in run
+    if result.returncode!=expected_status:raise RuntimeError(row)
+                                          ^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: {'command': ['/workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous-startup', '/workspaces/repository/corpus/results/kprog_app_coverage_20261106/bpf-lift/zero.bpf.bin', '0', 'native_lab_stub'], 'returncode': 97, 'expected_status': 0, 'stdout': '', 'stderr': ''}
+make: *** [/workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous.mk:25: guest] Error 1
+make: *** [corpus/results/kprog_app_coverage_20261106/anonymous.mk:20: kvm] Error 2

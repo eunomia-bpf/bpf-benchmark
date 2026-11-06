@@ -1,0 +1,5 @@
+insmod /workspaces/.agent-state/kprog-lanes/T/paired-context-v2/x86/bpf_x86_native_lab.ko
+python3 /workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_source_calls.py bound
+five_args id=9 type=1 nonzero_generations=1 invocations=1 retval=165 expected=165 PASS
+saved_r6 id=18 type=1 nonzero_generations=1 invocations=1 retval=177 expected=177 PASS
+backwards id=27 type=1 nonzero_generations=1 invocations=1 retval=165 expected=165 PASS

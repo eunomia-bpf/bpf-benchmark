@@ -1,0 +1,7 @@
+python3 /workspaces/repository/kprog/formal/tools/generate_helper_oracle.py
+cc -Wall -Wextra -O2 -I/workspaces/repository/kprog/formal /workspaces/repository/kprog/formal/oracles/test_x86_helper_dispatch_host.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous-helper-host
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous-helper-host
+x86 helper dispatch host cross-check: OK (4100 cases)
+cc -Wall -Wextra -O2 -I/workspaces/repository/kprog/formal -I/workspaces/repository/kprog/x86 -I/workspaces/repository/kprog -I/workspaces/repository/vendor/libbpf/src /workspaces/repository/kprog/formal/oracles/test_x86_helper_dispatch_route_host.c -o /workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous-helper-route-host
+/workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous-helper-route-host
+x86 helper dispatch route host cross-check: OK (18690 cases)

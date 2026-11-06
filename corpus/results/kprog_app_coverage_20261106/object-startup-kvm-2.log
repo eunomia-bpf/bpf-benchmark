@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/check_object_startup.py", line 40, in <module>
+    if replaced!=loads or replaced!=6:raise RuntimeError((replaced,loads))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: (9, 10)
+make: *** [/workspaces/repository/corpus/results/kprog_app_coverage_20261106/anonymous.mk:58: object-guest] Error 1
+make: *** [corpus/results/kprog_app_coverage_20261106/anonymous.mk:53: object-kvm] Error 2
