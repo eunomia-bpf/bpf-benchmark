@@ -93,7 +93,7 @@ X86_SPECIALIZATION_DIRECT_CALL = {
     "X86_OP_CMP_REG": "X86_SIM_L_EXEC_CMP_REG_OP({op}, {dst}, {src}, {flags})",
     "X86_OP_TEST_IMM": "X86_SIM_L_EXEC_CMP_IMM_OP({op}, {dst}, {flags}, {imm})",
     "X86_OP_TEST_REG": "X86_SIM_L_EXEC_CMP_REG_OP({op}, {dst}, {src}, {flags})",
-    "X86_OP_PUSH": "X86_SIM_L_EXEC_PUSH({src})",
+    "X86_OP_PUSH": "X86_SIM_L_EXEC_PUSH({src}, {flags})",
     "X86_OP_POP": "X86_SIM_L_EXEC_POP({dst}, {flags})",
     "X86_OP_CMOV": "X86_SIM_L_EXEC_CMOV({dst}, {src}, {flags}, {aux})",
     "X86_OP_SETCC": "X86_SIM_L_EXEC_SETCC({dst}, {aux})",

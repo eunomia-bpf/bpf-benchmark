@@ -133,7 +133,7 @@ static void check_step(const char *what, unsigned op_is_pop, unsigned flags,
 	__u8 mframe[FRAME];
 	__s64 mrsp = rsp;
 	unsigned i;
-	unsigned w = op_is_pop ? (flags ? flags : X86_WIDTH_64) : X86_WIDTH_64;
+	unsigned w = flags ? flags : X86_WIDTH_64;
 
 	X86_SIM_L_DECLARE_STATE();
 	struct x86_sim_xdp_abi __x86_sim_abi = {};
@@ -181,25 +181,26 @@ static void check_step(const char *what, unsigned op_is_pop, unsigned flags,
 	if (!op_is_pop) {
 		__u64 value = mreg[src];
 
-		mreg[X86_RSP] = (__u64)((__s64)mreg[X86_RSP] - 8);
-		model_store(mframe, (__s64)mreg[X86_RSP], X86_WIDTH_64,
+		mreg[X86_RSP] = (__u64)((__s64)mreg[X86_RSP] - w);
+		model_store(mframe, (__s64)mreg[X86_RSP], w,
 			    value);
 	} else {
 		__u64 value = model_load(mframe, (__s64)mreg[X86_RSP], w);
 
+		mreg[X86_RSP] = (__u64)((__s64)mreg[X86_RSP] + w);
 		mreg[dst] = model_write(mreg[dst], value, w);
 		mtag[dst] = X86_SIM_TAG_SCALAR;
-		mreg[X86_RSP] = (__u64)((__s64)mreg[X86_RSP] + 8);
+
 	}
 	mrsp = (__s64)mreg[X86_RSP];
 
 	/* ---- run the real body ---- */
 	if (!op_is_pop) {
 		if (via_dispatch)
-			X86_SIM_L_EXEC(X86_OP_PUSH, X86_REG_NONE, src, 0U, 0U,
+			X86_SIM_L_EXEC(X86_OP_PUSH, X86_REG_NONE, src, flags, 0U,
 				       0ULL);
 		else
-			X86_SIM_L_EXEC_PUSH(src);
+			X86_SIM_L_EXEC_PUSH(src, flags);
 	} else {
 		if (via_dispatch)
 			X86_SIM_L_EXEC(X86_OP_POP, dst, X86_REG_NONE, flags,
@@ -279,7 +280,7 @@ static void check_selectors(void)
 	}
 	cases++;
 	if (KPROG_X86_PUSH_WIDTH_SOURCE(0U) !=
-		    KPROG_X86_PUSH_WIDTH_HARDCODED_64 ||
+		    KPROG_X86_PUSH_WIDTH_FLAGS_OR_64 ||
 	    KPROG_X86_PUSH_WIDTH_SOURCE(1U) !=
 		    KPROG_X86_PUSH_WIDTH_FLAGS_OR_64) {
 		printf("MISMATCH width source\n");

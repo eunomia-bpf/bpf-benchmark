@@ -10,8 +10,8 @@ inductive Op where
   | pop
 deriving DecidableEq, Repr
 /-- The direction the stack pointer steps around the body's single memory
-access: `PUSH` decrements first and then stores, `POP` loads and writes its
-destination and then increments. -/
+access: PUSH decrements before storing; POP loads, increments old RSP,
+then writes its destination. -/
 inductive StepDirection where
   | preDecrement
   | postIncrement
@@ -20,20 +20,16 @@ deriving DecidableEq, Repr
 def stepDirection : Op -> StepDirection
   | .push => .preDecrement
   | .pop => .postIncrement
-/-- The width each body honours. `PUSH` hardcodes the 64-bit step width and
-never consults the opcode's FLAGS code; `POP` resolves the FLAGS code with a
-64-bit fallback and uses that one width for both its stack read and its
-destination-register write. -/
+/-- Both bodies use FLAGS, defaulting an absent code to64 bits. -/
 inductive WidthSource where
-  | hardcoded64
   | flagsOr64
 deriving DecidableEq, Repr
 /-- The width source each opcode uses. -/
 def widthSource : Op -> WidthSource
-  | .push => .hardcoded64
+  | .push => .flagsOr64
   | .pop => .flagsOr64
 /-- Whether an opcode's FLAGS code carries a width, or is the `absent` code 0
-that `POP` defaults to 64 bits. Only `POP` consults this; `PUSH` hardcodes 64. -/
+that both bodies default to64 bits. -/
 inductive FlagsWidth where
   | resolved
   | absent
@@ -54,7 +50,13 @@ def resolveWidth : Code -> Code
   | .b16 => .b16
   | .b32 => .b32
   | .b64 => .b64
-/-- The byte amount both bodies step the stack pointer by, whatever width they
-honour. -/
+/-- The default64-bit stack-step byte count. -/
 def stackStep : Nat := 8
+/-- Operand-sized transfer and stack adjustment. -/
+def stepBytes (flags : Code) : Nat :=
+  match resolveWidth flags with
+  | .b8 => 1
+  | .b16 => 2
+  | .b32 => 4
+  | _ => stackStep
 end KProgFormal.GeneratedX86PushPop

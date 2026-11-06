@@ -1610,27 +1610,29 @@ static void model_div(unsigned src, unsigned flags, const struct snap *seed,
 /* push: the PUSH body reads the whole-64 source, pre-decrements the stack
  * pointer by the 8-byte step, then stores the value through the arena
  * window at the stepped pointer (the hardcoded 64-bit write width). */
-static void model_push(unsigned src, const struct snap *seed, struct snap *b)
+static void model_push(unsigned src, unsigned flags, const struct snap *seed, struct snap *b)
 {
+	unsigned w = flags ? flags : X86_WIDTH_64;
 	b->x[X86_RSP] =
-		(unsigned long)(__u64)(long)((long)b->x[X86_RSP] - 8L);
+		(unsigned long)(__u64)(long)((long)b->x[X86_RSP] - w);
 	model_store_b(seed, b, X86_RSP,
 		      arena_index((long)b->x[X86_RSP], 0L),
-		      X86_WIDTH_64, seed->x[src]);
+		      w, seed->x[src]);
 }
 
-/* pop: whole-width load from the arena, width write into the destination,
- * then the stack pointer's 8-byte bump. */
+/* POP loads, advances old RSP by the operand width, then writes dst. */
 static void model_pop(unsigned dst, unsigned flags, const struct snap *seed,
 		      struct snap *b)
 {
+	(void)seed;
 	unsigned w = flags ? flags : X86_WIDTH_64;
 	unsigned long wi = arena_index((long)b->x[X86_RSP], 0L);
 	__u64 v = arena_read(b, wi, w);
 
-	b->x[dst] = model_partial_write(seed->x[dst], v, w);
+	b->x[X86_RSP] = (unsigned long)(__u64)(long)((long)b->x[X86_RSP] + w);
+	b->x[dst] = model_partial_write(b->x[dst], v, w);
 	b->t[dst] = X86_SIM_TAG_SCALAR;
-	b->x[X86_RSP] = (unsigned long)(__u64)(long)((long)b->x[X86_RSP] + 8L);
+
 }
 
 /* ---- The dispatcher restatement ---------------------------------------- */
@@ -1783,7 +1785,7 @@ static void apply_model(unsigned op, unsigned dst, unsigned src,
 		model_div(src, flags, seed, b);
 		break;
 	case X86_OP_PUSH:
-		model_push(src, seed, b);
+		model_push(src, flags, seed, b);
 		break;
 	case X86_OP_POP:
 		model_pop(dst, flags, seed, b);

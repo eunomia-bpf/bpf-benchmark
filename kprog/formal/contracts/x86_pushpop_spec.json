@@ -3,13 +3,14 @@
     "operation": "x86PushPopHandler",
     "selector": "opcode_step_direction_then_width_source",
     "stack_step": 8,
+    "step_policy": "resolved_width_bytes",
     "opcode_rows": [
         {
             "op": "push",
             "op_define": "X86_OP_PUSH",
             "op_code": "0x12",
             "step_direction": "preDecrement",
-            "width_source": "hardcoded64"
+            "width_source": "flagsOr64"
         },
         {
             "op": "pop",
@@ -28,8 +29,6 @@
          "step_phase": "load"}
     ],
     "width_source_rows": [
-        {"width_source": "hardcoded64",
-         "width_define": "KPROG_X86_PUSH_WIDTH_HARDCODED_64"},
         {"width_source": "flagsOr64",
          "width_define": "KPROG_X86_PUSH_WIDTH_FLAGS_OR_64"}
     ],

@@ -135,6 +135,14 @@ preserved representative at other counts imposes no ISA-defined flag value. -/
 def doubleShiftOverflow (original result count : Word) (operandBits : Nat) (old : Bool) : Bool :=
   if count = 1 then resultSign original operandBits != resultSign result operandBits else old
 
+/-- POP into SP/RSP increments the incoming stack pointer before writing
+its destination. The16-bit write retains the incremented pointer's high bits. -/
+def popRsp (rsp value : Word) (operandBits : Nat) : Word :=
+  let advanced := rsp + BitVec.ofNat 64 (operandBits / 8)
+  let mask := BitVec.ofNat 64 (2 ^ operandBits) - 1
+  if operandBits = 32 then value &&& mask
+  else (advanced &&& ~~~mask) ||| (value &&& mask)
+
 inductive BzhiWidth
   | w32 | w64
   deriving DecidableEq, Repr

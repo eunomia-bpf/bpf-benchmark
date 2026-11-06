@@ -453,7 +453,7 @@ static void check_token(__u8 op, unsigned dst, unsigned src, unsigned flags,
 			X86_SIM_L_EXEC_CMP_REG_OP(op, dst, src, flags);
 		break;
 	case X86_OP_PUSH:
-		X86_SIM_L_EXEC_PUSH(src);
+		X86_SIM_L_EXEC_PUSH(src, flags);
 		break;
 	case X86_OP_POP:
 		X86_SIM_L_EXEC_POP(dst, flags);

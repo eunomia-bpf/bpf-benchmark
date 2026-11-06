@@ -196,8 +196,7 @@ static unsigned part1(void)
 	for (op = 0; op < 2U; op++) {
 		unsigned want_dir = op ? KPROG_X86_PUSH_STEP_POST_INCREMENT
 				       : KPROG_X86_PUSH_STEP_PRE_DECREMENT;
-		unsigned want_ws = op ? KPROG_X86_PUSH_WIDTH_FLAGS_OR_64
-				      : KPROG_X86_PUSH_WIDTH_HARDCODED_64;
+		unsigned want_ws = KPROG_X86_PUSH_WIDTH_FLAGS_OR_64;
 		unsigned got_dir = KPROG_X86_PUSH_STEP_DIRECTION(op);
 		unsigned got_ws = KPROG_X86_PUSH_WIDTH_SOURCE(op);
 
@@ -211,29 +210,20 @@ static unsigned part1(void)
 					"want=%u\n", op, got_ws, want_ws);
 			return 0;
 		}
-		/* The two facts are one selection: the body that pre-decrements
-		 * is the body that hardcodes 64, and the body that
-		 * post-increments is the body that resolves the FLAGS code. In
-		 * codes the two selections coincide, so only this reading
-		 * separates them — a collapsed table loses it. */
-		if ((got_dir == KPROG_X86_PUSH_STEP_POST_INCREMENT) !=
-		    (got_ws == KPROG_X86_PUSH_WIDTH_FLAGS_OR_64)) {
-			fprintf(stderr,
-				"step direction and width source collapsed op=%u\n",
-				op);
+		/* Direction changes; both bodies use the opcode's width. */
+		if (got_ws != KPROG_X86_PUSH_WIDTH_FLAGS_OR_64)
 			return 0;
-		}
 		cases++;
 	}
 
-	/* The two directions and the two width sources are distinct. */
+	/* Direction differs; the width rule is shared. */
 	if (KPROG_X86_PUSH_STEP_DIRECTION(1U) ==
 	    KPROG_X86_PUSH_STEP_DIRECTION(0U))
 		return 0;
-	if (KPROG_X86_PUSH_WIDTH_SOURCE(1U) == KPROG_X86_PUSH_WIDTH_SOURCE(0U))
+	if (KPROG_X86_PUSH_WIDTH_SOURCE(1U) != KPROG_X86_PUSH_WIDTH_SOURCE(0U))
 		return 0;
 
-	/* Both directions step the same amount: the literal 8. */
+	/* Default64-bit transfers step by eight. */
 	if (KPROG_X86_PUSH_STACK_STEP != 8U) {
 		fprintf(stderr, "stack step is %u, want 8\n",
 			KPROG_X86_PUSH_STACK_STEP);
@@ -288,7 +278,6 @@ static struct pushpop_effect contract_step(unsigned op_is_pop, unsigned flags,
 {
 	unsigned direction = KPROG_X86_PUSH_STEP_DIRECTION(op_is_pop);
 	unsigned width_source = KPROG_X86_PUSH_WIDTH_SOURCE(op_is_pop);
-	unsigned step = KPROG_X86_PUSH_STACK_STEP;
 	unsigned flags_code =
 		KPROG_X86_PUSH_FLAGS_WIDTH(flags == KPROG_X86_PUSH_WIDTH_ABSENT);
 	unsigned width = width_source == KPROG_X86_PUSH_WIDTH_FLAGS_OR_64
@@ -296,6 +285,7 @@ static struct pushpop_effect contract_step(unsigned op_is_pop, unsigned flags,
 			   ? X86_WIDTH_64
 			   : flags)
 		: X86_WIDTH_64;
+	unsigned step = KPROG_X86_PUSH_STEP_BYTES(width);
 	__u64 rsp = oracle_reg_value(X86_RSP);
 	__u64 value;
 	struct pushpop_effect r;
@@ -307,15 +297,16 @@ static struct pushpop_effect contract_step(unsigned op_is_pop, unsigned flags,
 	r.rsp_before = rsp;
 
 	if (direction == KPROG_X86_PUSH_STEP_PRE_DECREMENT) {
-		/* PUSH: read the source, step down, then store 64 bits. */
+		/* PUSH: read the source, step down, then store the selected width. */
 		value = oracle_reg_value(src_reg);
 		rsp -= step;
 		oracle_regs[X86_RSP].u.ptr = (void *)(long)rsp;
-		oracle_stack_store((__s64)rsp, X86_WIDTH_64, value);
+		oracle_stack_store((__s64)rsp, width, value);
 	} else {
-		/* POP: read at the resolved width, write the destination,
-		 * then step up. */
+		/* POP: read, increment old RSP, then write the destination. */
 		value = oracle_stack_load((__s64)rsp, width);
+		rsp = oracle_reg_value(X86_RSP) + step;
+		oracle_regs[X86_RSP].u.ptr = (void *)(long)rsp;
 		if (width == X86_WIDTH_8)
 			KPROG_X86_WRITE_REG8(oracle_regs[dst_reg].u,
 					     oracle_regs[dst_reg].tag, value, 0U,
@@ -332,8 +323,8 @@ static struct pushpop_effect contract_step(unsigned op_is_pop, unsigned flags,
 			KPROG_X86_WRITE_REG64(oracle_regs[dst_reg].u,
 					      oracle_regs[dst_reg].tag, value,
 					      X86_SIM_TAG_SCALAR);
-		rsp = oracle_reg_value(X86_RSP) + step;
-		oracle_regs[X86_RSP].u.ptr = (void *)(long)rsp;
+		rsp = oracle_reg_value(X86_RSP);
+
 	}
 
 	r.value = value;
@@ -353,25 +344,26 @@ static struct pushpop_effect model_step(unsigned op_is_pop, unsigned flags,
 
 	r.direction = op_is_pop ? KPROG_X86_PUSH_STEP_POST_INCREMENT
 				: KPROG_X86_PUSH_STEP_PRE_DECREMENT;
-	r.width_source = op_is_pop ? KPROG_X86_PUSH_WIDTH_FLAGS_OR_64
-				   : KPROG_X86_PUSH_WIDTH_HARDCODED_64;
-	r.width = op_is_pop ? width : X86_WIDTH_64;
-	r.step = 8U;
+	r.width_source = KPROG_X86_PUSH_WIDTH_FLAGS_OR_64;
+	r.width = width;
+	r.step = width;
 	r.rsp_before = rsp;
 
 	if (!op_is_pop) {
 		value = oracle_reg_value(src_reg);
-		rsp -= 8U;
+		rsp -= width;
 		oracle_regs[X86_RSP].u.ptr = (void *)(long)rsp;
-		oracle_stack_store((__s64)rsp, X86_WIDTH_64, value);
+		oracle_stack_store((__s64)rsp, width, value);
 	} else {
 		value = oracle_stack_load((__s64)rsp, width);
+		rsp = oracle_reg_value(X86_RSP) + width;
+		oracle_regs[X86_RSP].u.ptr = (void *)(long)rsp;
 		oracle_regs[dst_reg].u.ptr =
 			(void *)(long)oracle_write(oracle_reg_value(dst_reg),
 						   value, width);
 		oracle_regs[dst_reg].tag = X86_SIM_TAG_SCALAR;
-		rsp = oracle_reg_value(X86_RSP) + 8U;
-		oracle_regs[X86_RSP].u.ptr = (void *)(long)rsp;
+		rsp = oracle_reg_value(X86_RSP);
+
 	}
 
 	r.value = value;
@@ -464,8 +456,8 @@ static unsigned part3(void)
 {
 	unsigned cases = 0;
 
-	/* Pin 1: PUSH ignores a narrow FLAGS code — it always stores eight
-	 * bytes and steps by eight — and the whole eight-byte value lands. */
+	/* Pin 1: narrow PUSH changes only its operand bytes; absent FLAGS
+	 * still selects the complete eight-byte transfer. */
 	{
 		static const __u64 pushed = 0x1122334455667788ULL;
 		struct pushpop_effect narrow;
@@ -484,17 +476,20 @@ static unsigned part3(void)
 		oracle_regs[X86_RAX].u.ptr = (void *)(long)pushed;
 		absent = contract_step(0U, 0U, X86_RAX, X86_RCX);
 
-		if (narrow.width != X86_WIDTH_64)
+		if (narrow.width != X86_WIDTH_8)
 			return 0;
 		if (absent.width != X86_WIDTH_64)
 			return 0;
-		if (narrow.rsp_after != absent.rsp_after)
+		if (narrow.rsp_after != absent.rsp_after + 7U)
 			return 0;
-		if (memcmp(result_stack, oracle_stack, ORACLE_STACK_BYTES))
-			return 0;
+		for (i = 0; i < ORACLE_STACK_BYTES; i++) {
+			__u8 expected = i == 55U ? (__u8)pushed : pristine_stack[i];
+			if (result_stack[i] != expected)
+				return 0;
+		}
 		/* The pushed value sits at index -8 - 8 + 64 = 48. */
 		for (i = 0; i < 8U; i++)
-			wrong += result_stack[48U + i] !=
+			wrong += oracle_stack[48U + i] !=
 				 (__u8)((pushed >> (8U * i)) & 0xffULL);
 		if (wrong != 0)
 			return 0;

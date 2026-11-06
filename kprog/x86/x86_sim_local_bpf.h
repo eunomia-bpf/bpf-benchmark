@@ -1820,29 +1820,20 @@ struct x86_sim_state {
 				__x86_l_scm_value);                          \
 	} while (0)
 
-/* The two stack-transfer bodies compose the machine-checked
- * KPROG_X86_PUSH_* contract: the step direction, the width source, and the
- * absent-FLAGS default select when the stack pointer steps, which body
- * honours the FLAGS code, and what an absent code resolves to, while the
- * shared stack-step literal fixes the byte amount both step by; the bodies
- * and the Lean refinement share one stack-transfer composition rather than
- * two restated step sequences. */
+/* Operand-sized transfers. POP increments old RSP before destination write,
+ * so POP RSP/SP does not add the step to the value just popped. */
 #define X86_SIM_L_EXEC_PUSH_POP_STEP(IS_POP, DST, SRC, FLAGS)               \
 	do {                                                                \
 		__u8 __x86_l_pp_dir = KPROG_X86_PUSH_STEP_DIRECTION(IS_POP); \
-		__u8 __x86_l_pp_wsrc = KPROG_X86_PUSH_WIDTH_SOURCE(IS_POP);  \
 		__u8 __x86_l_pp_flags_width =                             \
 			KPROG_X86_PUSH_FLAGS_WIDTH(                       \
 				(FLAGS) == KPROG_X86_PUSH_WIDTH_ABSENT);  \
 		__u8 __x86_l_pp_width =                                   \
-			(__x86_l_pp_wsrc ==                               \
-			 KPROG_X86_PUSH_WIDTH_HARDCODED_64) ?             \
-				X86_WIDTH_64 :                            \
 			(__x86_l_pp_flags_width ==                        \
 			 KPROG_X86_PUSH_FLAGS_ABSENT) ?                   \
 				X86_WIDTH_64 : (FLAGS);                   \
 		__u64 __x86_l_pp_step =                                   \
-			(__u64)KPROG_X86_PUSH_STACK_STEP;                 \
+			(__u64)KPROG_X86_PUSH_STEP_BYTES(__x86_l_pp_width);\
 		if (__x86_l_pp_dir ==                                     \
 		    KPROG_X86_PUSH_STEP_PRE_DECREMENT) {                  \
 			__u64 __x86_l_pp_value = X86_SIM_L_READ_REG(SRC); \
@@ -1855,15 +1846,15 @@ struct x86_sim_state {
 			__u64 __x86_l_pp_value = X86_SIM_L_STACK_READ(    \
 				(__s64)(long)__x86_rsp.ptr,               \
 				__x86_l_pp_width);                        \
-			X86_SIM_L_WRITE_REG_WIDTH((DST),                  \
-				__x86_l_pp_value, __x86_l_pp_width);      \
 			__x86_rsp.ptr =                                   \
 				(__u8 *)__x86_rsp.ptr + __x86_l_pp_step;  \
+			X86_SIM_L_WRITE_REG_WIDTH((DST),                  \
+				__x86_l_pp_value, __x86_l_pp_width);      \
 		}                                                         \
 	} while (0)
 
-#define X86_SIM_L_EXEC_PUSH(SRC)                                             \
-	X86_SIM_L_EXEC_PUSH_POP_STEP(0U, X86_REG_NONE, (SRC), 0U)
+#define X86_SIM_L_EXEC_PUSH(SRC, FLAGS)                                             \
+	X86_SIM_L_EXEC_PUSH_POP_STEP(0U, X86_REG_NONE, (SRC), (FLAGS))
 
 #define X86_SIM_L_EXEC_POP(DST, FLAGS)                                       \
 	X86_SIM_L_EXEC_PUSH_POP_STEP(1U, (DST), X86_REG_NONE, (FLAGS))
@@ -2150,7 +2141,7 @@ struct x86_sim_state {
 				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_dst, X86_WIDTH_32);\
 			}                                                   \
 		} else if (KPROG_X86_DISP_PUSH_HANDLED(OP)) {            \
-			X86_SIM_L_EXEC_PUSH((SRC));                       \
+			X86_SIM_L_EXEC_PUSH((SRC), (FLAGS));                       \
 		} else if (KPROG_X86_DISP_POP_HANDLED(OP)) {             \
 			X86_SIM_L_EXEC_POP((DST), (FLAGS));               \
 		}                                                         \

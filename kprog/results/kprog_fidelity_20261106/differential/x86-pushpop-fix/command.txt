@@ -1,0 +1,3 @@
+taskset -c 8-15 make -C kprog/fidelity ARCH=x86 BUILD=build-x86-v-doubleshift OUT=/workspaces/.agent-state/kprog-lanes/V/pushpop-cpu-results CASES=1024 run
+Base commit: a607bc0ae, plus source inputs retained in source-inputs.tar.gz.
+Exit0, all698 forms/714752 cases, zero mismatches.
