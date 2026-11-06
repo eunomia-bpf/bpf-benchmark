@@ -4685,6 +4685,30 @@ std::vector<int> reopen_relocated_map_fds(const std::vector<uint32_t> &map_ids)
 }
 
 using SimulatorObject = std::unique_ptr<bpf_object, decltype(&bpf_object__close)>;
+using MapBtf = std::unique_ptr<btf, decltype(&btf__free)>;
+
+MapBtf open_map_btf(uint32_t id, const std::string &name)
+{
+    if (!id) return {nullptr, btf__free};
+    btf *raw = btf__load_from_kernel_by_id(id);
+    const long error = libbpf_get_error(raw);
+    if (error || !raw)
+        fail("load proof map BTF " + name + ": " + libbpf_error_string(error ? error : -errno));
+    return {raw, btf__free};
+}
+
+void validate_data_map_layout(const btf *proof_btf, uint32_t proof_id,
+    uint32_t source_btf_id, uint32_t source_id, const std::string &name, bool internal)
+{
+    const auto source_btf = open_map_btf(source_btf_id, name);
+    const auto *proof_type = proof_btf ? btf__type_by_id(proof_btf, proof_id) : nullptr;
+    const auto *source_type = source_btf ? btf__type_by_id(source_btf.get(), source_id) : nullptr;
+    if (internal || (proof_type && btf_kind(proof_type) == BTF_KIND_DATASEC) ||
+        (source_type && btf_kind(source_type) == BTF_KIND_DATASEC)) {
+        if (!same_data_layout(proof_btf, proof_id, source_btf.get(), source_id))
+            fail("simulator internal map BTF layout differs from original program: " + name);
+    }
+}
 
 /* Raw proof callers may have loaded the compiler object separately. Its maps
  * are not the application's maps, even when names and shapes are identical.
@@ -4694,6 +4718,7 @@ void bind_raw_proof_maps(std::vector<bpf_insn> &proof, const CompanionLoad &comp
     std::vector<std::unique_ptr<ScopedFd>> &pins)
 {
     std::unordered_map<uint32_t, int> replacements;
+    std::unordered_set<uint32_t> checked_layouts;
     for (size_t index = 0; index < proof.size(); index++) {
         bpf_insn &insn = proof[index];
         if (insn.code != (BPF_LD | BPF_DW | BPF_IMM)) continue;
@@ -4716,6 +4741,11 @@ void bind_raw_proof_maps(std::vector<bpf_insn> &proof, const CompanionLoad &comp
                 actual.max_entries != selected->max_entries)
                 fail("raw proof map layout differs from original program: " + name);
             if (actual.id != selected->kernel_id) {
+                if (checked_layouts.insert(actual.id).second) {
+                    const auto proof_btf = open_map_btf(actual.btf_id, name);
+                    validate_data_map_layout(proof_btf.get(), actual.btf_value_type_id,
+                        selected->btf_id, selected->btf_value_type_id, name, false);
+                }
                 const auto existing = replacements.find(selected->kernel_id);
                 if (existing != replacements.end()) {
                     insn.imm = existing->second;
@@ -4798,6 +4828,10 @@ SimulatorObject prepare_simulator_proof(
             shape.value_size != bpf_map__value_size(map) ||
             shape.max_entries != bpf_map__max_entries(map)) {
             fail("simulator proof map layout does not match source map: " + name);
+        }
+        if (bpf_map__is_internal(map)) {
+            validate_data_map_layout(bpf_object__btf(raw), bpf_map__btf_value_type_id(map),
+                shape.btf_id, shape.btf_value_type_id, name, true);
         }
         const int err = bpf_map__reuse_fd(map, fd.get());
         if (err) {

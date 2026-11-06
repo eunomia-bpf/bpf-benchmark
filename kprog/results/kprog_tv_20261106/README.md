@@ -138,3 +138,13 @@ and `cmov-clang-version.txt` retain the exact positive input; the three
 component is not a full architectural-state or application certificate.
 Its printed logical dependencies include `Lean.ofReduceBool` for native
 certificate checking as well as `propext`, `Classical.choice` and `Quot.sound`.
+
+`data-layout-host-check.log` passes the host binding/Lean checks and the
+ASan/UBSan DATASEC name/offset/size/section rejection matrix.
+`data-layout-kernel-x86-final.log` passes the existing kernel/helper/map suite
+plus actual manifest and raw-proof internal-map reuse and same-sized wrong-BTF
+variable rejection. Both loader entry paths check the original DATASEC layout
+before replacing proof map identities. The manifest positive verifies the
+original map ID is retained. The initial fixture attempts exposed a test-side
+`bpf_prog_info` reuse error; the query is now zeroed before each syscall.
+These remain binding checks, not per-program translation certificates.

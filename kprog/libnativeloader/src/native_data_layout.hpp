@@ -87,3 +87,40 @@ inline NativeDataSymbolLayout find_source_data_symbol_layout(
     }
     return result;
 }
+
+/* DATASEC layout is part of the simulator's specialization input. Equal map
+ * sizes do not make differently named, placed or sized globals interchangeable.
+ */
+inline bool same_data_layout(const btf *proof_btf, uint32_t proof_id,
+                             const btf *source_btf, uint32_t source_id)
+{
+    if (!proof_btf || !source_btf) return false;
+    const btf_type *proof = btf__type_by_id(proof_btf, proof_id);
+    const btf_type *source = btf__type_by_id(source_btf, source_id);
+    if (!proof || !source || btf_kind(proof) != BTF_KIND_DATASEC ||
+        btf_kind(source) != BTF_KIND_DATASEC || proof->size != source->size ||
+        btf_vlen(proof) != btf_vlen(source))
+        return false;
+    const char *section = btf__name_by_offset(proof_btf, proof->name_off);
+    const char *source_section = btf__name_by_offset(source_btf, source->name_off);
+    if (!section || !*section || !source_section || std::string_view(section) != source_section)
+        return false;
+    const btf_var_secinfo *vars = btf_var_secinfos(proof);
+    const btf_var_secinfo *source_vars = btf_var_secinfos(source);
+    for (uint16_t index = 0; index < btf_vlen(proof); ++index) {
+        const btf_type *var = btf__type_by_id(proof_btf, vars[index].type);
+        const btf_type *source_var = btf__type_by_id(source_btf, source_vars[index].type);
+        if (!var || btf_kind(var) != BTF_KIND_VAR || !source_var ||
+            btf_kind(source_var) != BTF_KIND_VAR)
+            return false;
+        const char *name = btf__name_by_offset(proof_btf, var->name_off);
+        const char *source_name = btf__name_by_offset(source_btf, source_var->name_off);
+        if (!name || !*name || vars[index].offset > proof->size ||
+            vars[index].size > proof->size - vars[index].offset ||
+            !source_name || std::string_view(name) != source_name ||
+            vars[index].offset != source_vars[index].offset ||
+            vars[index].size != source_vars[index].size)
+            return false;
+    }
+    return true;
+}

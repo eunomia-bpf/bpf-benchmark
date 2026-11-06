@@ -4,7 +4,7 @@ CROSS_arm64 := aarch64-linux-gnu-
 
 .PHONY: check binding-check module-check kernel-check guest-kernel-check kernel-check-arm64 inventory
 
-check: binding-check
+check: binding-check data-layout-check
 	python3 test_kernel_patch.py
 	cd ../formal && lake build KProgFormal.Reference.Memory
 	cd ../formal && lake env lean ../tv/Composition.lean
@@ -35,6 +35,16 @@ cmov-negative-check: cmov-check
 
 binding-check: build/test-binding
 	./build/test-binding
+
+.PHONY: data-layout-check
+data-layout-check: build/test-data-layout
+	./build/test-data-layout
+
+build/test-data-layout: test_data_layout.cpp ../libnativeloader/src/native_data_layout.hpp
+	install -d build
+	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include $< \
+		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $@
 
 build/test-binding: test_binding.c ../../kinsn/module/include/native_lab_binding.h
 	install -d build
@@ -97,13 +107,19 @@ linker-build:
 
 kernel-check: linker-build
 
-build/test-loader: test_loader.cpp build/native-entry.o build/simulator.bpf.o ../libnativeloader/src/native_loader.cpp \
+build/test-loader: test_loader.cpp build/native-entry.o build/simulator.bpf.o build/wrong-layout/simulator.bpf.o ../libnativeloader/src/native_loader.cpp \
 		$(wildcard ../libnativeloader/src/*.hpp ../libnativeloader/include/*.hpp)
 	$(MAKE) -C ../libnativeloader BUILD_DIR=build-tv-binding
 	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 \
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		$< ../libnativeloader/build-tv-binding/libnative_loader.a \
 		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $@
+
+build/wrong-layout/simulator.bpf.o: test_simulator.bpf.c
+	install -d build/wrong-layout
+	clang -O2 -g -target bpf -Dprivate_zero=unrelated_zero -I../../vendor/libbpf/include/uapi \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		-I/usr/include/x86_64-linux-gnu -c $< -o $@
 
 build-arm64/test-binding-kernel: test_binding_kernel.c ../../kinsn/module/include/native_lab_binding.h
 	install -d build-arm64

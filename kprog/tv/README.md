@@ -120,6 +120,10 @@ resolve relative to the manifest. The explicit BPF entry must have the original
 program type. `bpf_object__prepare` performs real ELF/CO-RE relocations; referenced
 maps reuse original-program identities with matching layouts, including internal
 maps. Missing referenced maps fail; unused declarations do not create maps.
+Internal maps also require the same BTF DATASEC section, byte extent and
+ordered variable names, offsets and sizes. This is checked before
+`bpf_map__reuse_fd` replaces the simulator's map metadata. Raw proof maps from
+another loaded object receive the same DATASEC check before FD relinking.
 The object keeps map FDs alive through the bound load. Supplying both raw proof
 instructions and a manifest proof fails. Substituting original app BPF for the
 simulator would not meet the translation-validation obligation.
@@ -185,6 +189,10 @@ The trusted base of an instantiated proof consists of:
 - Lane V's reference ISA specification and its connection to the hardware,
   checked independently by lane F. ISA decoding, ABI entry conditions and the
   trace projection must either be proved or explicitly added to this base.
+- The byte-decoded BPF specification and its platform instantiation must agree
+  with the instantiated kernel program, including relocated immediates,
+  context accesses and helper effects. Path soundness is relative to this
+  specification; it does not prove that kernel/specification agreement.
 - Kernel binding and native emission: the accepted proof, bytes, entry, ABI,
   specialization metadata, relocations and chunk order describe the same
   immutable artifact through verification and JIT emission. Debugfs writers

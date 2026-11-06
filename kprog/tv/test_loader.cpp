@@ -1,9 +1,11 @@
 #include "../libnativeloader/include/native_loader.hpp"
 #include <bpf/bpf.h>
+#include <bpf/libbpf.h>
 #include <cassert>
 #include <cstdio>
 #include <exception>
 #include <fstream>
+#include <memory>
 #include <unistd.h>
 
 int main()
@@ -190,6 +192,92 @@ int main()
                 }
             }
             if (close(original)) { std::perror("close original"); return 1; }
+        }
+        // Same-sized DATASEC maps must preserve the original variable identities.
+        std::unique_ptr<bpf_object, decltype(&bpf_object__close)> data_object(
+            bpf_object__open_file("build/simulator.bpf.o", nullptr), bpf_object__close);
+        if (libbpf_get_error(data_object.get()) || !data_object)
+            throw std::runtime_error("open original DATASEC object");
+        bpf_program *data_program = bpf_object__find_program_by_name(data_object.get(), "tv_proof_private");
+        if (!data_program) throw std::runtime_error("find original DATASEC entry");
+        bpf_program *program;
+        bpf_object__for_each_program(program, data_object.get())
+            if (bpf_program__set_autoload(program, program == data_program))
+                throw std::runtime_error("select original DATASEC entry");
+        if (int error = bpf_object__load(data_object.get()))
+            throw std::runtime_error("load original DATASEC object: " + std::to_string(error));
+        bpf_prog_info original_info{};
+        uint32_t info_size = sizeof(original_info);
+        if (bpf_obj_get_info_by_fd(bpf_program__fd(data_program), &original_info, &info_size))
+            throw std::runtime_error("query original DATASEC program");
+        for (bool wrong_layout : {false, true}) {
+            std::ofstream manifest("build/data-manifest.json");
+            manifest << "{\"objects\":[{\"program\":\"" << original_info.name
+                << "\",\"native_object\":\"native-entry.o\",\"symbol\":\"tv_short_entry\","
+                "\"simulator_program\":\"tv_proof_private\",\"simulator_object\":\""
+                << (wrong_layout ? "wrong-layout/" : "") << "simulator.bpf.o\"}]}";
+            manifest.close();
+            if (!manifest) return 1;
+            native_loader::FdLoadOptions options{};
+            options.original_prog_fd = bpf_program__fd(data_program);
+            options.source_insns.assign(bpf_program__insns(data_program),
+                bpf_program__insns(data_program) + bpf_program__insn_cnt(data_program));
+            options.manifest_path = std::filesystem::absolute("build/data-manifest.json");
+            options.native_link_path = std::filesystem::absolute(
+                "../x86/native_lab/native_link/target/release/native-link");
+            bool rejected = false;
+            try {
+                auto loaded = native_loader::load_from_fd(options);
+                assert(loaded.replaced && loaded.prog_fd >= 0);
+                uint32_t original_ids[2]{}, loaded_ids[2]{};
+                bpf_prog_info info{};
+                info.nr_map_ids = 2; info.map_ids = reinterpret_cast<uintptr_t>(original_ids);
+                info_size = sizeof(info);
+                if (bpf_obj_get_info_by_fd(options.original_prog_fd, &info, &info_size))
+                    throw std::runtime_error("query original DATASEC map IDs");
+                assert(info.nr_map_ids == 1);
+                info = {};
+                info.nr_map_ids = 2; info.map_ids = reinterpret_cast<uintptr_t>(loaded_ids);
+                info_size = sizeof(info);
+                if (bpf_obj_get_info_by_fd(loaded.prog_fd, &info, &info_size))
+                    throw std::runtime_error("query bound DATASEC map IDs");
+                assert(info.nr_map_ids == 1 && original_ids[0] == loaded_ids[0]);
+                native_loader::close_loaded_program(&loaded);
+            } catch (const std::exception &error) {
+                if (!wrong_layout) throw;
+                assert(std::string(error.what()).find("simulator internal map BTF layout differs") != std::string::npos);
+                rejected = true;
+            }
+            assert(rejected == wrong_layout);
+            std::puts(wrong_layout ? "same-sized wrong BTF variable: PASS (rejected)" :
+                "manifest internal DATASEC: PASS (original map ID retained)");
+            std::unique_ptr<bpf_object, decltype(&bpf_object__close)> raw_object(
+                bpf_object__open_file(wrong_layout ? "build/wrong-layout/simulator.bpf.o" :
+                    "build/simulator.bpf.o", nullptr), bpf_object__close);
+            if (libbpf_get_error(raw_object.get()) || !raw_object)
+                throw std::runtime_error("open raw DATASEC object");
+            bpf_program *raw_program = bpf_object__find_program_by_name(raw_object.get(), "tv_proof_private");
+            if (!raw_program) throw std::runtime_error("find raw DATASEC entry");
+            bpf_object__for_each_program(program, raw_object.get())
+                if (bpf_program__set_autoload(program, program == raw_program))
+                    throw std::runtime_error("select raw DATASEC entry");
+            if (bpf_object__load(raw_object.get())) throw std::runtime_error("load raw DATASEC object");
+            options.native_object_path = std::filesystem::absolute("build/native-entry.o");
+            options.symbol_name = "tv_short_entry";
+            options.proof_insns.assign(bpf_program__insns(raw_program),
+                bpf_program__insns(raw_program) + bpf_program__insn_cnt(raw_program));
+            rejected = false;
+            try {
+                auto loaded = native_loader::load_from_fd(options);
+                native_loader::close_loaded_program(&loaded);
+            } catch (const std::exception &error) {
+                if (!wrong_layout) throw;
+                assert(std::string(error.what()).find("simulator internal map BTF layout differs") != std::string::npos);
+                rejected = true;
+            }
+            assert(rejected == wrong_layout);
+            std::puts(wrong_layout ? "raw proof wrong BTF variable: PASS (rejected)" :
+                "raw proof matching DATASEC: PASS (relinked)");
         }
     } catch (const std::exception &error) {
         std::fprintf(stderr, "shared loader: %s\n", error.what());
