@@ -71,7 +71,7 @@ def main():
     sim = {arch:includes(ROOT/f'kprog/{arch}/{arch}_sim_local_bpf.h') for arch in ['x86','arm64']}
     shared = sim['x86'] & sim['arm64']
     groups = {f'{arch} simulator (including ISA-specific generated C)':paths-shared for arch,paths in sim.items()}
-    groups['shared simulator generated C'] = shared
+    groups['shared simulator headers'] = shared
     for arch in ['x86','arm64']:
         groups[f'{arch} native-to-proof generator (including local imports)'] = imports(ROOT/f'kprog/{arch}/micro-prog/generate_micro_sim_proofs.py')
     groups['proof build/load orchestration'] = {ROOT/'kprog/run_micro_sim_batch.py'}
@@ -81,13 +81,22 @@ def main():
     groups['application syscall shim'] = {p for p in (ROOT/'bpfopt/shim').glob('*.c') if not p.name.startswith('selftest')} | set((ROOT/'bpfopt/shim').glob('*.h'))
     for arch in ['x86','arm64']:
         groups[f'{arch} native kernel module'] = {ROOT/f'kinsn/module/{arch}/bpf_{arch}_native_lab.c'}
-    groups['shared binding wire contract'] = {ROOT/'kinsn/module/include/native_lab_binding.h',ROOT/'kinsn/module/include/native_lab_group.h'}
+    groups['shared native module support'] = {ROOT/'kinsn/module/include/kinsn_common.h'}
+    groups['x86 native module emitter support'] = {ROOT/'kinsn/module/include/kinsn_x86_emit.h'}
+    groups['shared binding and proof-input contracts'] = {
+        ROOT/'kinsn/module/include'/name for name in [
+            'native_lab_binding.h','native_lab_group.h','native_lab_input.h',
+            'native_lab_map_offset.h','native_lab_exclusive.h']}
+    groups['loader artifact-binding headers (overlap with loader)'] = {
+        ROOT/'kprog/libnativeloader/src'/name for name in [
+            'native_data_layout.hpp','native_rodata_binding.hpp',
+            'native_source_map_binding.hpp','native_environment_binding.hpp']}
     groups['vendored helper declarations (ABI input, not project-owned)'] = {ROOT/'vendor/libbpf/src/bpf_helper_defs.h'}
-    groups['formal model and proofs (Lean, including generated)'] = set((ROOT/'kprog/formal/KProgFormal').rglob('*.lean')) | {ROOT/'kprog/formal/KProgFormal.lean'}
+    groups['formal model, reference API and proofs (Lean, including generated)'] = set((ROOT/'kprog/formal/KProgFormal').rglob('*.lean')) | {ROOT/'kprog/formal/KProgFormal.lean',ROOT/'kprog/formal/ReferenceMain.lean'}
     groups['formal contracts (JSON)'] = set((ROOT/'kprog/formal/contracts').glob('*.json'))
     groups['formal contract generators'] = set((ROOT/'kprog/formal/tools').glob('generate_*_spec.py'))
     groups['translation-validation model, checker and proofs (Lean)'] = set((ROOT/'kprog/tv').glob('*.lean'))
-    groups['translation-validation ELF extraction'] = {ROOT/'kprog/tv/extract_blocks.py'}
+    groups['translation-validation source and ELF extraction'] = set((ROOT/'kprog/tv').glob('extract_*.py')) | {ROOT/'kprog/tv/capture_context.cpp',ROOT/'kprog/tv/capture_context_init.cpp'}
     groups['constant-op dispatch generator'] = {ROOT/'kprog/arm64/generate_sim_dispatch.py'}
     groups['native-proof kernel patch and application (patch text, not SLOC)'] = {ROOT/'kprog/tv/native-proof-regions.patch',ROOT/'kprog/tv/apply_kernel_patch.py'}
     groups['existing verifier context (not incremental kernel changes)'] = {ROOT/'vendor/linux-framework/kernel/bpf/verifier.c',ROOT/'vendor/linux-framework/include/linux/bpf_verifier.h'}

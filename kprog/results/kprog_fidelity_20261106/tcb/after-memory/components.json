@@ -1,0 +1,152 @@
+[
+  {
+    "component": "x86 simulator (including ISA-specific generated C)",
+    "files": 69,
+    "physical_lines": 6549,
+    "nonblank_lines": 6276
+  },
+  {
+    "component": "arm64 simulator (including ISA-specific generated C)",
+    "files": 70,
+    "physical_lines": 5937,
+    "nonblank_lines": 5719
+  },
+  {
+    "component": "shared simulator headers",
+    "files": 2,
+    "physical_lines": 43,
+    "nonblank_lines": 37
+  },
+  {
+    "component": "x86 native-to-proof generator (including local imports)",
+    "files": 9,
+    "physical_lines": 2735,
+    "nonblank_lines": 2557
+  },
+  {
+    "component": "arm64 native-to-proof generator (including local imports)",
+    "files": 6,
+    "physical_lines": 1725,
+    "nonblank_lines": 1597
+  },
+  {
+    "component": "proof build/load orchestration",
+    "files": 1,
+    "physical_lines": 616,
+    "nonblank_lines": 549
+  },
+  {
+    "component": "native shared loader/linker integration",
+    "files": 12,
+    "physical_lines": 7914,
+    "nonblank_lines": 7463
+  },
+  {
+    "component": "native ELF linker (both ISAs)",
+    "files": 2,
+    "physical_lines": 10733,
+    "nonblank_lines": 10091
+  },
+  {
+    "component": "standalone proof loader",
+    "files": 1,
+    "physical_lines": 1290,
+    "nonblank_lines": 1196
+  },
+  {
+    "component": "application syscall shim",
+    "files": 11,
+    "physical_lines": 9953,
+    "nonblank_lines": 9427
+  },
+  {
+    "component": "x86 native kernel module",
+    "files": 1,
+    "physical_lines": 978,
+    "nonblank_lines": 877
+  },
+  {
+    "component": "arm64 native kernel module",
+    "files": 1,
+    "physical_lines": 1206,
+    "nonblank_lines": 1097
+  },
+  {
+    "component": "shared native module support",
+    "files": 1,
+    "physical_lines": 204,
+    "nonblank_lines": 185
+  },
+  {
+    "component": "x86 native module emitter support",
+    "files": 1,
+    "physical_lines": 206,
+    "nonblank_lines": 177
+  },
+  {
+    "component": "shared binding and proof-input contracts",
+    "files": 5,
+    "physical_lines": 940,
+    "nonblank_lines": 869
+  },
+  {
+    "component": "loader artifact-binding headers (overlap with loader)",
+    "files": 4,
+    "physical_lines": 345,
+    "nonblank_lines": 319
+  },
+  {
+    "component": "vendored helper declarations (ABI input, not project-owned)",
+    "files": 1,
+    "physical_lines": 4785,
+    "nonblank_lines": 4570
+  },
+  {
+    "component": "formal model, reference API and proofs (Lean, including generated)",
+    "files": 352,
+    "physical_lines": 40475,
+    "nonblank_lines": 36097
+  },
+  {
+    "component": "formal contracts (JSON)",
+    "files": 140,
+    "physical_lines": 2690,
+    "nonblank_lines": 2690
+  },
+  {
+    "component": "formal contract generators",
+    "files": 140,
+    "physical_lines": 28886,
+    "nonblank_lines": 26179
+  },
+  {
+    "component": "translation-validation model, checker and proofs (Lean)",
+    "files": 14,
+    "physical_lines": 2066,
+    "nonblank_lines": 1771
+  },
+  {
+    "component": "translation-validation source and ELF extraction",
+    "files": 7,
+    "physical_lines": 313,
+    "nonblank_lines": 294
+  },
+  {
+    "component": "constant-op dispatch generator",
+    "files": 1,
+    "physical_lines": 97,
+    "nonblank_lines": 90
+  },
+  {
+    "component": "native-proof kernel patch and application (patch text, not SLOC)",
+    "files": 2,
+    "physical_lines": 688,
+    "nonblank_lines": 643
+  },
+  {
+    "component": "existing verifier context (not incremental kernel changes)",
+    "files": 2,
+    "physical_lines": 27873,
+    "nonblank_lines": 24752
+  }
+]

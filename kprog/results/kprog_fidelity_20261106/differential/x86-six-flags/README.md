@@ -77,3 +77,8 @@ The archived generated C/assembly and snapshot are the actual 745-form inputs.
 The accompanying generator/replay scripts were captured at publication after
 the 799-form table/serialization update; regeneration with that generator gives
 the expanded matrix. Rebuilding the archived generated C preserves this run.
+
+Cleanup after publication: this superseded745-form raw CPU trace was removed
+after all per-form reports and counterexamples were pushed. The current799-form
+trace remains; regenerate this older trace from its archived binary/Make command
+before using --reuse-trace. All input counterexamples remain compressed here.

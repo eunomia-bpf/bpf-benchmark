@@ -93,3 +93,8 @@ nowverifierrejects. All359Lean/allC/Rust/wires passincombinedrootcheck.
 ExclusiveCLREX8forms/8192observedcases nowagreewithexplicitfailurefixture.
 The30-caseArm bound suite rejects28, retainingonlynumericSP/entryLRaccepts.
 See differential/arm64-memory-complete/ and negative/arm64-current-choice/.
+
+The requested helper/map timing replay is recorded in helper-map/timed-x86/:
+all117 samples match expected results/retval2. TCB after-memory/ now inventories
+shared input/metadata contracts and loader/module support explicitly, with
+exact counted-source bytes. Pure simple15 load-time confirmation remains open.

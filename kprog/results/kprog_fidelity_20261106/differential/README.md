@@ -691,3 +691,10 @@ nowverifierrejects. All359Lean/allC/Rust/wires passincombinedrootcheck.
 ExclusiveCLREX8forms/8192observedcases nowagreewithexplicitfailurefixture.
 The30-caseArm bound suite rejects28, retainingonlynumericSP/entryLRaccepts.
 See differential/arm64-memory-complete/ and negative/arm64-current-choice/.
+
+After per-form reports and all counterexample inputs were pushed, the superseded
+733/745-form x86 CPU traces were removed. Current799-form input remains.
+Byte-identical uncompressed copies of the newly committed JSONL gzip archives
+were also removed, reclaiming 3794016972 bytes in total. No active trace reader
+held a deleted file. Restore/regenerate a superseded trace before an explicit
+--reuse-trace command; archived matrix binaries/commands regenerate it.

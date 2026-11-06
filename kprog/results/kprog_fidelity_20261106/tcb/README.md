@@ -225,3 +225,10 @@ It includes the full32-vector simulator, LDP/SP source validation, readonly
 binding integration and current generators. The binding subset is23 functions,
 917 overlapping physical lines; incremental kernel changes remain1167 added
 and123 deleted across13 files. Full file/provenance records accompany the table.
+
+`after-memory/README.md` adds a new exact-source inventory after memory and
+exclusive-choice binding changes. Shared input/map-offset/exclusive contracts,
+loader binding headers, module support, reference API and context extractors
+now have explicit scopes. Earlier counts remain historical; scope additions
+are not presented as measured code growth. Every captured file/component row
+is reproducible from the counted-source archive.
