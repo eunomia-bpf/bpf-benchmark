@@ -581,3 +581,28 @@ narrow-value and stored-pointer observations remain active shared work.
 ```sh
 taskset -c 16-19 make -C kprog/results/kprog_fidelity_20261106/differential/x86-lea-sp-after check
 ```
+
+## Expanded independent Arm reference on the identical CPU trace
+
+After V's arithmetic/extension and earlier scalar/vector reference additions,
+the **same567-form SP-observer trace** now checks523 forms /535552 cases.
+CPU versus canonical reference:zero differences. Simulator versus reference:
+4096 differences, unchanged and confined to the same four SP/WSP transfers.
+The replay adds104 checked forms (ADD/ADDS/SUB/SUBS/CMP/CMN/CCMP,
+CNT/UADDLV and FMOV families) relative to the previous419-form comparison.
+It does not regenerate the native/simulator trace or erase any prior result.
+
+The remaining44 forms have exact diagnostics in
+`arm64-extend-reference/reference-unavailable.jsonl.gz`: NOP, ten bitfield
+aliases, integer loads/stores/addressing variants, LDP/STP and Q loads/stores.
+The full567-form per-form TSV includes every checked/missing row. The command
+exits1 because of these missing encodings and the preserved SP differences.
+No second reference ISA was introduced. `reference-snapshot.tar.gz` freezes
+the actual executable, its captured Arm source/provenance, the replay adapter,
+and the unchanged static CPU harness/coverage. The original CPU-state trace
+is `arm64-sp-reference/cpu-states.bin`; archived mismatch records additionally
+include every failing input, real SP anchor, memory and canonical output.
+
+```sh
+taskset -c 16-19 make -C kprog/results/kprog_fidelity_20261106/differential/arm64-extend-reference replay
+```
