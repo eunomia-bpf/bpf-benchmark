@@ -3,6 +3,7 @@
 #define NATIVE_LAB_GROUP_H
 
 #include "native_lab_map_offset.h"
+#include "native_lab_exclusive.h"
 
 /* Included after native_blob/blobs and decode_native_lab_payload in each
  * module. The final chunk owns a generation vector for the entire program.
@@ -260,6 +261,52 @@ fail:
 	return err;
 }
 
+/* A descriptor belongs to its native chunk but names the final chunk's real
+ * proof. Earlier chunks contain only the continuation proof, never this one.
+ */
+static int native_lab_exclusive_environment(const struct native_blob *root)
+{
+	u32 chunk, i;
+	size_t r;
+
+	for (chunk = 0; chunk < root->binding.chunk_count; chunk++) {
+		const struct native_blob *owner = &blobs[chunk];
+
+		for (r = 0; r < owner->reloc_count; r++) {
+			const struct native_lab_reloc_record *reloc = &owner->relocs[r];
+
+			if (reloc->kind != NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE)
+				continue;
+			if (root->binding.arch != NATIVE_LAB_ARCH_ARM64 ||
+			    !native_lab_exclusive_match(owner->bytes, owner->len,
+				reloc->offset, root->proof, root->proof_len,
+				(u32)reloc->target, reloc->target >> 32))
+				return -EINVAL;
+		}
+	}
+	for (i = 0; i < root->proof_len; i++) {
+		u32 matches = 0;
+
+		if (root->proof[i].code == (BPF_LD | BPF_DW | BPF_IMM)) {
+			i++;
+			continue;
+		}
+		if (!native_lab_exclusive_marker(&root->proof[i]))
+			continue;
+		for (chunk = 0; chunk < root->binding.chunk_count; chunk++) {
+			const struct native_blob *owner = &blobs[chunk];
+
+			for (r = 0; r < owner->reloc_count; r++)
+				if (owner->relocs[r].kind == NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE &&
+				    (u32)owner->relocs[r].target == i)
+					matches++;
+		}
+		if (matches != 1)
+			return -EINVAL;
+	}
+	return 0;
+}
+
 static int native_lab_group_use(u32 blob_id, u32 generation, u32 abi_mask)
 {
 	const struct native_blob *blob = &blobs[blob_id], *root;
@@ -293,6 +340,9 @@ static int native_lab_group_use(u32 blob_id, u32 generation, u32 abi_mask)
 	}
 	if (offset != root->binding.total_native_size)
 		return -EINVAL;
+	err = native_lab_exclusive_environment(root);
+	if (err)
+		return err;
 	return native_lab_readonly_data(root);
 }
 
@@ -530,6 +580,9 @@ static int native_lab_validate_proof(u64 payload, const struct bpf_verifier_env 
 						break;
 					}
 				}
+			} else if (reloc->kind == NATIVE_LAB_RELOC_EXCLUSIVE_FAILURE) {
+				/* Actual code/marker match was checked across the sealed group. */
+				continue;
 			} else if (reloc->kind == 4) {
 				/* Architecture-owned per-CPU MRS encoding, not a helper. */
 				continue;

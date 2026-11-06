@@ -70,8 +70,30 @@ theorem native_input_rejects_wrong_destination :
       .error "invalid native proof input ABI/kind/register" := by rfl
 
 theorem native_input_rejects_unknown_kind :
-    step inputExternals #[0xb7,0x90,5,0,2,0,0,0] initial =
+    step inputExternals #[0xb7,0x90,6,0,2,0,0,0] initial =
       .error "invalid native proof input ABI/kind/register" := by rfl
+
+theorem unbound_exclusive_choice_rejected :
+    step externals #[0xb7,0x90,5,0,16,0,0,0] initial =
+      .error "unbound exclusive environment choice" := by rfl
+
+-- Reusing a source PC must not correlate retry outcomes with the first visit.
+def retryExternals : Environment := { externals with
+  exclusiveFailure := fun pc visit =>
+    if pc = 16 then .ok (visit = 0) else .error "wrong exclusive source PC" }
+
+theorem exclusive_retry_is_fresh :
+    (BPFPath.evaluate retryExternals #[0xb7,0x90,5,0,16,0,0,0,
+        0xb7,0x90,5,0,16,0,0,0] [0,1] initial).map
+      (fun r => (r.state.regs 0, r.state.exclusiveVisit, r.events, r.fault)) =
+      .ok (0, 2, [], none) := by rfl
+
+theorem exclusive_choice_preserves_complete_state (s : State) (pc : BitVec 32)
+    (outcome : Bool) :
+    execute { externals with exclusiveFailure := fun _ _ => .ok outcome } #[] s
+      ⟨0xb7, 0, 9, 5, pc⟩ =
+      .ok ⟨setReg { s with pc := s.pc + 1, exclusiveVisit := s.exclusiveVisit + 1 } 0
+        (if outcome then 1 else 0), [], none⟩ := by rfl
 
 -- JMP32 JA takes imm32, not off16. This catches the long-EXIT bug directly.
 theorem gotol_uses_signed_imm32 :
