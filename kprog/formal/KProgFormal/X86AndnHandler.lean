@@ -5,6 +5,7 @@ import KProgFormal.X86MemAccess
 import KProgFormal.X86RegWrite
 import KProgFormal.X86Width
 import Std.Tactic.BVDecide
+import KProgFormal.Reference.X86
 
 namespace KProgFormal
 
@@ -146,7 +147,7 @@ theorem x86_andn_mem_width_fallback_is_resolved_write_width :
 /-- Independent statement of the `ANDN` result: the bitwise complement of the
 first operand, and-ed with the second operand. -/
 def x86AndnResultSpec (src1 src2 : BitVec 64) : BitVec 64 :=
-  BitVec.and (BitVec.not src1) src2
+  Reference.X86.andNot src1 src2
 
 /-- The result the generated body computes, restated. -/
 def generatedX86AndnResult (src1 src2 : BitVec 64) : BitVec 64 :=
@@ -285,9 +286,9 @@ theorem x86_andn_step_refines (op : X86AndnOp) (flagsCode auxCode : Code)
       x86AndnWriteWidthSpec, x86AndnCodeWidthSpec, generatedX86AndnCodeWidth,
       generatedX86AndnMemWidth, memWidthArm, x86AndnMemWidthSpec,
       generatedX86AndnSecond, x86AndnSecondSpec, generatedX86AndnResult,
-      x86AndnResultSpec, generatedX86AndnFlags, x86AndnFlagsSpec,
+      x86AndnResultSpec, Reference.X86.andNot, generatedX86AndnFlags, x86AndnFlagsSpec,
       x86_mem_load_refines, x86_logic_flags_refine, x86_zero_refines,
-      x86_sign_refines, x86_reg_write_refines]
+      x86_sign_refines, x86_reg_write_refines] <;> rfl
 
 /-- The destination write width is the `FLAGS`-resolved width, for both bodies. -/
 theorem x86_andn_write_width_is_flags_resolved (op : X86AndnOp)
@@ -336,7 +337,7 @@ theorem x86_andn_example :
       x86AndnWriteWidthSpec, x86AndnCodeWidthSpec, x86AndnResultSpec]
     decide
   · simp only [x86AndnStepSpec, x86AndnSourceSpec, x86AndnSecondSpec,
-      x86AndnWriteWidthSpec, x86AndnCodeWidthSpec, x86AndnResultSpec,
+      x86AndnWriteWidthSpec, x86AndnCodeWidthSpec, x86AndnResultSpec, Reference.X86.andNot,
       x86AndnFlagsSpec, x86LogicFlagsSpec, x86ZeroSpec, x86SignSpec,
       x86NarrowSpec, x86WidthMaskSpec, x86WidthBitsSpec]
     decide

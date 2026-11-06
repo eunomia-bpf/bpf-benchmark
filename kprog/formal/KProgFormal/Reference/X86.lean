@@ -123,6 +123,15 @@ def bzhiFlags (flags normalizedCount result : Word) (operandBits : Nat) : Word :
   setFlag (setFlag (setFlag (setFlag flags 0 (bzhiCarry normalizedCount operandBits))
     6 (resultZero result)) 7 (resultSign result operandBits)) 11 false
 
+/-- BMI1 ANDN inverts its first source, not the memory/register second source. -/
+def andNot (first second : Word) : Word := ~~~first &&& second
+
+/-- CF/OF are zero and ZF/SF follow the operand-sized result. AF/PF are
+undefined, represented by preservation and unconstrained in the step relation. -/
+def andnFlags (flags result : Word) (operandBits : Nat) : Word :=
+  setFlag (setFlag (setFlag (setFlag flags 0 false) 6 (resultZero result))
+    7 (resultSign result operandBits)) 11 false
+
 /-- Double shifts use five count bits, or six at operand size 64. -/
 def doubleShiftCount (count : Word) (operandBits : Nat) : Word :=
   count &&& (if operandBits = 64 then 63 else 31)
@@ -194,6 +203,7 @@ inductive Instruction
   | pop (width : StackWidth) (dst : Register) (nextPc : Word)
   | cmov (width : CmovWidth) (cc : Fin 16) (dst : Register)
       (source : Source) (nextPc : Word)
+  | andn (width : BzhiWidth) (dst first : Register) (second : Source) (nextPc : Word)
   | bzhi (width : BzhiWidth) (dst : Register) (source : Source)
       (count : Register) (nextPc : Word)
   | bt (width : CmovWidth) (source : Source) (index : BitIndex) (nextPc : Word)
@@ -228,6 +238,13 @@ def step (instruction : Instruction) (s : State) : Transition State :=
           ⟨{ s with rflags := setFlag s.rflags 0 (bitTest value (bitIndexValue s index) width.bits), pc := nextPc },
             events, none⟩
 
+  | .andn width dst first second nextPc =>
+      match readSource s second width.bytes with
+      | .error fault => ⟨s, [.fault fault], some fault⟩
+      | .ok (value, events) =>
+          let mask := BitVec.ofNat 64 (2 ^ width.bits) - 1
+          let result := andNot (s.gpr first) value &&& mask
+          ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), rflags := andnFlags s.rflags result width.bits, pc := nextPc }, events, none⟩
   | .bzhi width dst source count nextPc =>
       match readSource s source width.bytes with
       | .error fault => ⟨s, [.fault fault], some fault⟩
@@ -244,6 +261,7 @@ def definedFlags : Instruction → Word
   | .pop .. => 0xffffffffffffffff
   | .cmov .. => 0xffffffffffffffff
   | .bt .. => 0xfffffffffffff76b
+  | .andn .. => 0xffffffffffffffeb
   | .bzhi .. => 0xffffffffffffffeb
 
 /-- The executable gives a representative for undefined flags. The relational
@@ -378,8 +396,8 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     let vex1 ← byteAt bytes (count + 1)
     let vex2 ← byteAt bytes (count + 2)
     let opcode ← byteAt bytes (count + 3)
-    if p.vexInvalid ∨ vex1 % 32 ≠ 2 ∨ vex2 % 8 ≠ 0 ∨ opcode ≠ 0xf5 then
-      throw "invalid BZHI VEX encoding"
+    if p.vexInvalid ∨ vex1 % 32 ≠ 2 ∨ vex2 % 8 ≠ 0 ∨ (opcode ≠ 0xf5 ∧ opcode ≠ 0xf2) then
+      throw "invalid BMI VEX encoding"
     let rex := (if vex1 / 128 = 0 then 4 else 0) +
       (if (vex1 / 64) % 2 = 0 then 2 else 0) +
       (if (vex1 / 32) % 2 = 0 then 1 else 0)
@@ -389,6 +407,7 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     let index := registerCode (15 - (vex2 / 8) % 16)
     let width := if vex2 / 128 = 0 then BzhiWidth.w32 else .w64
     let (source, nextPc, _) ← operand bytes s p modrm (count + 5) 0
+    if opcode = 0xf2 then return .andn width dst index source nextPc
     return .bzhi width dst source index nextPc
   let opcode ← byteAt bytes (count + 1)
   if first ≠ 0x0f then throw "expected two-byte native opcode"

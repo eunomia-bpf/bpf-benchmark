@@ -158,6 +158,51 @@ def main():
                                    "value": list(bytes.fromhex("efcdab8967452381")),
                                    "initialized": True}]
         assert out == expected, (request, out, expected)
+    # ANDN differs from ordinary AND: inversion applies to the first source,
+    # while AF/PF are undefined. Include zero/sign, 32-bit upper clearing,
+    # extended registers, aliasing and a destination-addressed memory source.
+    andn_cases = []
+    for code, dst, first, second, a_value, b_value, result, bits in [
+            ([0xC4, 0xE2, 0xE0, 0xF2, 0xC1], 0, 3, 1, 0xF0, 0xFF, 15, 0),
+            ([0xC4, 0xE2, 0x60, 0xF2, 0xC1], 0, 3, 1, 0, 0xDEADBEEF00000000, 0, 0x40),
+            ([0xC4, 0xE2, 0x60, 0xF2, 0xC1], 0, 3, 1, 0, 0xFFFFFFFF80000000, 1 << 31, 0x80),
+            ([0xC4, 0x42, 0x30, 0xF2, 0xC2], 8, 9, 10, 0xF0, 0xFF, 15, 0),
+            ([0xC4, 0xE2, 0xF8, 0xF2, 0xC1], 0, 0, 1, 0xF0, 0xFF, 15, 0),
+            ([0xC4, 0xE2, 0xE0, 0xF2, 0x40, 8], 0, 3, None, 0xF0, 0xFF, 15, 0),
+            ([0xC4, 0xE2, 0xE0, 0xF2, 0x40, 8], 0, 3, None, 0xF0, None, None, None)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = code
+        request["state"]["flags"] = 0xAD7
+        request["state"]["registers"][first] = a_value
+        if second is None:
+            request["state"]["registers"][0] = 0x1FF8
+            if b_value is not None:
+                request["state"]["memory"] = [
+                    dict(address=0x2000 + i, value=b, readable=True, writable=False,
+                         initialized=True) for i, b in enumerate(b_value.to_bytes(8, "little"))]
+        else:
+            request["state"]["registers"][second] = b_value
+        expected = copy.deepcopy(request["state"])
+        expected.update(defined_flags=0xFFFFFFFFFFFFFFEB, fault=None, events=[])
+        if result is None:
+            reason = dict(kind="read", address=0x2000, bytes=8)
+            expected.update(defined_flags=(1 << 64) - 1, fault=reason,
+                            events=[dict(kind="fault", fault=reason)])
+        else:
+            expected["pc"] += len(code)
+            expected["registers"][dst] = result
+            expected["flags"] = (expected["flags"] & ~0x8C1) | bits
+            if second is None:
+                expected["events"] = [dict(kind="read", address=0x2000,
+                                           value=list(b_value.to_bytes(8, "little")), initialized=True)]
+        andn_cases.append((request, expected))
+    run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
+                         input="".join(json.dumps(r) + "\n" for r, _ in andn_cases),
+                         text=True, stdout=subprocess.PIPE, check=True)
+    outputs = [json.loads(line) for line in run.stdout.splitlines()]
+    assert len(outputs) == len(andn_cases)
+    for (request, expected), out in zip(andn_cases, outputs):
+        assert out == expected, (request, out, expected)
     # POP reads the old stack, advances it, then writes the destination. Include
     # aliasing SP with a low16 carry, full RSP replacement, REX.B and faults.
     pop_cases = []
@@ -268,7 +313,7 @@ def main():
         if got & 0x80000000:
             got -= 1 << 32
         assert got == disp, (insn, encoded, got)
-    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, BZHI VEX/result flags, PUSH/POP stack aliases, exact writes and faults, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
+    print("executable reference: CMOV writeback/eager faults, BT width/index/addressing, BZHI/ANDN VEX/result flags, PUSH/POP stack aliases, exact writes and faults, undefined flags, arbitrary uninitialized bytes and signed displacement packing OK")
 
 
 if __name__ == "__main__":

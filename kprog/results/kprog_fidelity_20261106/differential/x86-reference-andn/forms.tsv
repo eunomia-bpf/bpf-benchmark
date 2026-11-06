@@ -1,0 +1,5 @@
+form	assembly	cases	cpu_mismatches	simulator_mismatches
+366	andn eax, ebx, ecx	1024	0	0
+367	andn eax, ebx, DWORD PTR [rdi+8]	1024	0	0
+506	andn rax, rbx, rcx	1024	0	0
+507	andn rax, rbx, QWORD PTR [rdi+8]	1024	0	0

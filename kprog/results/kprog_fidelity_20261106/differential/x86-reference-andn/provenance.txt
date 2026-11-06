@@ -1,0 +1,10 @@
+Canonical ANDN replay: 4 forms, 4096 retained real-CPU observations.
+CPU/simulator mismatches against the canonical executable: zero.
+Input: sibling x86-reference-bzhi/cpu-states.bin and native-code.json,
+previously captured by the fidelity CPU wrapper (KPFID001, 1024 cases/form).
+No native instruction was re-executed for this replay. observations.jsonl.gz
+contains each exact input/CPU/simulator/reference output; flags are compared
+on stored CF/ZF/SF/OF, intersected with the reference-defined flag mask.
+ANDN AF/PF are undefined. All registers/vector/stack/memory compare exactly.
+The runner only formats states and compares results; ISA execution is solely
+kprog/formal/.lake/build/bin/reference (Reference/X86.lean).
