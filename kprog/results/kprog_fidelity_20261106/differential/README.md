@@ -303,3 +303,38 @@ as `reference-forms.tsv.pop-first.gz`. `x86-reference-stack-artifacts.tar.gz`
 contains the test executable and generated native/C sources. The1.3GiB
 `cpu-states.bin` remains in the workspace for subsequent reference replay;
 it is not committed to git. All mismatches would still be committed losslessly.
+
+## First canonical AArch64 replay
+
+With V's canonical AArch64 register/multiply/divide reference at9b99b7166,
+`arm64-reference/` records **12 forms/12288 cases** with no CPU-or-simulator
+reference disagreement. The full independently executed QEMU matrix remains
+497forms/508928cases/zero mismatches. The485 remaining forms stay explicitly
+`awaiting_reference_instruction`, and the overall command exits1 for that gap.
+
+The adapter supplies actual native instruction bytes and all32 X0..X30/SP
+words, NZCV, PC, V0 and mapped memory to the existing `reference` executable
+with `isa=aarch64`. It implements no arithmetic/decoder semantics. The exported
+forms are W/X multiply, MADD/MSUB, UDIV and the long/high multiply variants.
+Canonical handling of divide-by-zero and narrowing is exercised by the same
+boundary and fixed-seed random states as the CPU comparison. This is emulated
+Arm reference evidence, distinct from the earlier Spark CPU matrices.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity reference-check ARCH=arm64 BUILD=build-arm64-reference CASES=1024 OUT=../results/kprog_fidelity_20261106/differential/arm64-reference
+# Refreshed ordinary-form binary after the SMADDL unsigned-wrap correction:
+taskset -c 19 make -C kprog/fidelity run-handoff ARM64_HANDOFF=../results/kprog_fidelity_20261106/differential/cpu-differential-arm64-reference.gz OUT=../results/kprog_fidelity_20261106/differential/arm64-reference-hardware-cpu19
+```
+
+`cpu-differential-arm64-reference.gz` is the refreshed static ordinary-form
+hardware replay; the74-control binary remains separate. Per-form tables, exact
+native bytes/PCs, empty mismatch files and full build/reference log are retained.
+The generated source/executable archive permits replay; the raw complete CPU
+state trace stays in the workspace. Neither missing reference coverage nor
+real hardware execution of this refreshed binary is inferred from QEMU.
+
+The generalized ISA adapter was also regression-checked on x86 using16states
+per form: full CPU698forms/11168cases/zero, reference93forms/1488cases/zero.
+`x86-reference-isa-adapter/` retains its per-form records and complete log;
+its nonzero status still reports the605 unavailable x86 reference forms.
+This small integration regression does not replace the full1024-state result.

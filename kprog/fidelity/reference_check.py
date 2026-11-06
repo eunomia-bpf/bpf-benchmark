@@ -4,6 +4,7 @@ import argparse
 import csv
 import json
 from pathlib import Path
+import platform
 import struct
 import subprocess
 
@@ -25,7 +26,6 @@ def main():
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--reuse-trace',action='store_true')
     args=parser.parse_args()
-    if args.arch!='x86':raise RuntimeError("lane V's AArch64 executable interface is required before this adapter can run it")
     args.out.mkdir(parents=True,exist_ok=True)
     forms=json.loads((args.binary.parent/'coverage.json').read_text())
     trace=args.out/'cpu-states.bin'
@@ -33,9 +33,14 @@ def main():
         with (args.out/'forms.tsv').open() as source:
             cpu_failed=any(int(row['mismatches']) for row in csv.DictReader(source,delimiter='\t'))
     else:
-        cpu_failed=subprocess.run([str(args.binary.resolve()),str(args.cases),str(args.out),str(trace)]).returncode != 0
+        command=(['qemu-aarch64-static'] if args.arch=='arm64' and platform.machine()!='aarch64' else [])
+        cpu_failed=subprocess.run(command+[str(args.binary.resolve()),str(args.cases),str(args.out),str(trace)]).returncode != 0
     native_code=json.loads((args.out/'native-code.json').read_text())
     reference=ROOT/'kprog/formal/.lake/build/bin/reference'
+    supported = {
+        'x86': {'X86_OP_CMOV','X86_OP_CMOV_MEM','X86_OP_BT','X86_OP_BT_IMM','X86_OP_BT_MEM_IMM','X86_OP_BZHI','X86_OP_BZHI_MEM','X86_OP_POP','X86_OP_PUSH','X86_OP_ANDN','X86_OP_ANDN_MEM'},
+        'arm64': {'ARM64_OP_MUL','ARM64_OP_MADD','ARM64_OP_MSUB','ARM64_OP_UDIV','ARM64_OP_UMULH','ARM64_OP_UMULL','ARM64_OP_UMADDL','ARM64_OP_SMADDL'},
+    }
     rows=[];bad=0;checked=0
     with trace.open('rb') as source,(args.out/'reference-mismatches.jsonl').open('w') as failures:
         magic=source.read(8)
@@ -45,7 +50,7 @@ def main():
         if trace.stat().st_size!=24+count*cases*RECORD_BYTES:
             raise RuntimeError('incomplete CPU state trace')
         for index,form in enumerate(forms):
-            if form['opcode'] not in ['X86_OP_CMOV','X86_OP_CMOV_MEM','X86_OP_BT','X86_OP_BT_IMM','X86_OP_BT_MEM_IMM','X86_OP_BZHI','X86_OP_BZHI_MEM','X86_OP_POP','X86_OP_PUSH','X86_OP_ANDN','X86_OP_ANDN_MEM']:
+            if form['opcode'] not in supported[args.arch]:
                 source.seek(cases*RECORD_BYTES,1)
                 rows.append(dict(form=index,assembly=form['assembly'],cases=cases,reference_cases=0,cpu_mismatches=0,simulator_mismatches=0,status='awaiting_reference_instruction'))
                 continue
@@ -57,12 +62,16 @@ def main():
                 stack_base=struct.unpack('<Q',source.read(8))[0]
                 initial,native,simulator=[state(source.read(STATE.size)) for _ in range(3)]
                 before,native_mem,sim_mem=[source.read(256) for _ in range(3)]
-                address=initial['registers'][7]-32
+                address=initial['registers'][7 if args.arch=='x86' else 4]-32
                 cells=[dict(address=address+i,value=byte,readable=True,writable=True,initialized=True) for i,byte in enumerate(before)]
-                cells += [dict(address=stack_base-64+i,value=byte,readable=True,writable=True,initialized=True) for i,byte in enumerate(bytes.fromhex(initial['stack']))]
-                registers=initial['registers'][:16].copy()
-                registers[4]=(registers[4]+stack_base)&((1<<64)-1)
-                request=dict(state=dict(registers=registers,flags=initial['flags'],pc=native_code['forms'][index]['pc'],xmm0=initial['vector'][0]+(initial['vector'][1]<<64),fs_base=native_code['fs_base'],gs_base=native_code['gs_base'],memory=cells),native_bytes=native_code['forms'][index]['native_bytes'])
+                if args.arch=='x86':
+                    cells += [dict(address=stack_base-64+i,value=byte,readable=True,writable=True,initialized=True) for i,byte in enumerate(bytes.fromhex(initial['stack']))]
+                    registers=initial['registers'][:16].copy()
+                    registers[4]=(registers[4]+stack_base)&((1<<64)-1)
+                    architectural_state=dict(registers=registers,flags=initial['flags'],pc=native_code['forms'][index]['pc'],xmm0=initial['vector'][0]+(initial['vector'][1]<<64),fs_base=native_code['fs_base'],gs_base=native_code['gs_base'],memory=cells)
+                else:
+                    architectural_state=dict(registers=initial['registers'],flags=initial['flags'],pc=native_code['forms'][index]['pc'],vector0=initial['vector'][0]+(initial['vector'][1]<<64),memory=cells)
+                request=dict(isa='x86_64' if args.arch=='x86' else 'aarch64',state=architectural_state,native_bytes=native_code['forms'][index]['native_bytes'])
                 requests.append(json.dumps(request,separators=(',',':')))
                 records.append((initial,native,simulator,before,native_mem,sim_mem,cells,stack_base))
             completed=subprocess.run([str(reference)],input='\n'.join(requests)+'\n',text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=True)
@@ -72,14 +81,17 @@ def main():
             for case,(record,response) in enumerate(zip(records,responses)):
                 initial,native,simulator,before,native_mem,sim_mem,cells,stack_base=record
                 registers=response['registers'].copy()
-                registers[4]=(registers[4]-stack_base)&((1<<64)-1)
-                vector=[response['xmm0']&((1<<64)-1),response['xmm0']>>64]
+                if args.arch=='x86': registers[4]=(registers[4]-stack_base)&((1<<64)-1)
+                vector_word=response['xmm0' if args.arch=='x86' else 'vector0']
+                vector=[vector_word&((1<<64)-1),vector_word>>64]
                 expected_bytes={cell['address']:cell['value'] for cell in response['memory']}
-                address=initial['registers'][7]-32
+                address=initial['registers'][7 if args.arch=='x86' else 4]-32
                 expected_memory=bytes(expected_bytes[address+i] for i in range(256))
-                expected_stack=bytes(expected_bytes[stack_base-64+i] for i in range(64)).hex()
+                expected_stack=bytes(expected_bytes[stack_base-64+i] for i in range(64)).hex() if args.arch=='x86' else initial['stack']
+                reg_count=16 if args.arch=='x86' else 32
+                flag_mask=0x8c1 if args.arch=='x86' else 0xf0000000
                 def differs(actual,actual_mem):
-                    return (response['fault'] is not None or response['pc']!=native_code['forms'][index]['next_pc'] or actual['registers'][:16]!=registers or ((actual['flags']^response['flags'])&response['defined_flags']&0x8c1)!=0 or actual['vector']!=vector or actual['stack']!=expected_stack or actual_mem!=expected_memory)
+                    return (response['fault'] is not None or response['pc']!=native_code['forms'][index]['next_pc'] or actual['registers'][:reg_count]!=registers or ((actual['flags']^response['flags'])&response['defined_flags']&flag_mask)!=0 or actual['vector']!=vector or actual['stack']!=expected_stack or actual_mem!=expected_memory)
                 c=differs(native,native_mem);s=differs(simulator,sim_mem)
                 cpu_bad+=c;sim_bad+=s
                 if c or s:
