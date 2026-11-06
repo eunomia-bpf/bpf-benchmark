@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0959 - ten of the remainder are parts of a bound split
+
+The remainder after the line-reference fix was fifty-nine figures, and ten of
+them are parts of a split whose whole is a banner-bound figure in the same
+sentence. Those are held by that sentence rather than by a class of their own,
+so they are now counted as their own line on the report.
+
+The other forty-nine do not have a bound sibling. They are counts stated as a
+sentence's own subject, as in the number of modules that use either of two
+constructs, and the smaller figures of a three-way partition, so they remain
+unclassified and the line says so rather than implying the remainder is empty.
+
+Both additions were measured before being stated: the ten were found by looking
+for a banner-bound figure within the same sentence, and the forty-nine by
+excluding exactly that. Census unchanged; the report names seven classes instead
+of six.
+
 ### Step 0958 - a line reference has three forms, and two were read
 
 The line that reports the section's figures split the leftovers into classes,

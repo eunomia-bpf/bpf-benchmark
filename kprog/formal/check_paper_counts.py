@@ -3763,8 +3763,16 @@ def figure_coverage(log: pathlib.Path) -> tuple[int, int, int, set[int]]:
     inside = {v for v in left - line_ids - rows - catches - padded
               if re.search(r"[A-Za-z_\d]%d\b" % v, flat)
               or re.search(r"\b%d[A-Za-z_]" % v, flat)}
+    # A figure that is a part of a split is held by the whole beside it,
+    # so a leftover in a sentence with a banner-bound figure is held by
+    # that sentence rather than by a class of its own.
+    sibling = {v for v in left - line_ids - rows - catches - padded - inside
+               if any({int(x.replace(",", "")) for x in
+                       re.findall(r"\b(\d[\d,]{2,})\b", m.group(0))} & counts
+                      for m in re.finditer(r"[^.]{0,120}\b%d\b[^.]{0,120}"
+                                           % v, flat))}
     return len(figs), bound, len(held), (
-        left, line_ids, rows, catches, padded, inside)
+        left, line_ids, rows, catches, padded, inside, sibling)
 
 
 def main() -> None:
@@ -5046,7 +5054,8 @@ def main() -> None:
               f"check ({len(rest[0])} others: {len(rest[1])} line ids, "
               f"{len(rest[2])} row counts, {len(rest[3])} catch counts, "
               f"{len(rest[4])} zero-padded steps, {len(rest[5])} parts of "
-              f"a longer number, the other "
+              f"a longer number, {len(rest[6])} in a split beside "
+              f"their whole, the other "
               f"{len(rest[0]) - sum(len(r) for r in rest[1:])} "
               f"unclassified), "
               f"{len(joins)} harness joins ({len(weak)} resting on a shared "

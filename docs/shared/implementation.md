@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0959 classified 10 more leftovers as split parts
+beside their whole; unexplained 76 -> 59 -> 49, the
+report names 7 classes.
+
+
 Step 0958 found a line-reference class reading two of
 three forms; line ids 23 -> 46, unexplained 76 -> 59.
 
