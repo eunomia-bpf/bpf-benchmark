@@ -7606,6 +7606,20 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0981 - ragged bottoms are not the lever
+
+The class file sets pages flush, so every page is the same height and the last
+line of a page stretches to reach the bottom. That is a plausible cause for the
+loose lines the stretch leaves, and testing it was cheap.
+
+Ragged bottoms change the count by a hundred and thirty-three, from thirty-three
+thousand three hundred and seven to thirty-three thousand one hundred and
+seventy-four, and leave the overfull boxes exactly where they were. So the
+looseness is inside the paragraphs rather than at the page boundaries, and the
+setting is not the lever.
+
+It stays out. Census unchanged; one more setting is tested rather than assumed.
+
 ### Step 0980 - the geometry, at both ends of the thread
 
 The typographic work began because the compile's exit code was the only signal
