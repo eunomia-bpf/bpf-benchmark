@@ -100,3 +100,9 @@ taskset -c 16-23 make -C kprog/fidelity stage2-arm64-qemu ARM_STAGE2_OUT=../resu
 The complete guest console and13 individual JSON/log pairs retain all checks.
 This is correctness evidence under emulation; lane R's timing request remains
 separate, and no per-program translation-validation certificate is inferred.
+
+The requested R timed replay is complete: all13 programs on allthree
+runtimes,117 raw samples, exact expected64-bit results and retval2 throughout.
+Per-program execution/load medians and the unmodified raw result are in
+`timed-x86/README.md`; timing resolution and missing guest git/generation-count
+fields remain explicit. The separate pure simple15 load-time repeat is pending.
