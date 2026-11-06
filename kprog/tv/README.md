@@ -361,3 +361,34 @@ Six actual-byte negatives cover narrow/erased/address-mutated stores, native
 width and successor changes, and the archived broken clang output. The whole
 program still needs entry/context/private-spill and preceding-block proofs;
 this result certifies its store block, not those additional obligations.
+
+Source-map symbols bind by actual original LDDW instruction sites. A manifest
+entry can declare `source_map_bindings:[{native_symbol,source_insn}]`; the
+consumer checks instruction boundaries, map-object/value kind, continuation,
+FD and original retained kernel map ID. Value aliases include the original
+second-LDDW offset within the real map extent. Unnamed maps retain their
+actual identity and layout. `source_map_fd_sites:[0]` allows an exact source
+byte template to normalize only the declared LDDW's FD word to zero. All other
+bytes, including kind and value offset, remain exact; unrelated templates
+are skipped before interpreting source operands.
+
+Compiled proofs can import strong incomplete-array externs through
+`.native_lab.source_maps` version1 JSON objects with `native_symbol`,
+`source_insn` and `proof_symbol`. The ELF entry bytes/extent and each declared
+R_BPF_64_64 relocation are checked explicitly, and map FDs are pinned by the
+original kernel ID. Value externs denote the map base; clang's actual
+addend/arithmetic supplies the displacement. No map is allocated, guessed
+from a name or initialized from a proof object. Other unresolved relocation
+identities fail. Kernel binding recognizes exact constant pointer arithmetic,
+including a register constant whose definition cannot be bypassed by a CFG
+edge; it still rejects a different native value offset. This small derivation
+checker belongs to the explicitly trusted kernel binding implementation.
+
+The real captured BCC global-data probe, both unnamed-map paths, rejection
+cases and earlier loader regressions pass in x86 KVM. Both architecture
+libraries build, and both binding-kernel suites pass including the new exact
+offset positive/negative. New source-map fixtures have not yet been executed
+through the Arm userspace loader. Consume the updated loader **and**
+native_lab module from the immutable source-map handoff; wire2 and the
+existing paired kernel image remain compatible. Whole-program ISA TV remains
+a separate obligation from these binding/runtime checks.

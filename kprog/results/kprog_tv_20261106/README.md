@@ -601,3 +601,47 @@ and exported module trees remain. Both current paired-context-v2 runtime
 bundles used by C/A/R, and the small complete shared-btf-fixed and older
 paired-input-abi2 snapshots, remain intact. Shared vendor outputs, committed
 evidence and unfinished source changes were not removed.
+
+Original source-map sites and actual BCC probe
+--------------------------------------------
+
+The manifest now binds each imported native map symbol to an actual original
+LDDW instruction index. The original program must retain the resolved kernel
+map ID. Object/value kind and value offset come from source bytes, never
+symbol spelling or a process-wide name search. Unnamed maps work. Exact
+source templates may normalize only declared map-FD words; nonmatching
+startup-program templates remain nonmatches. Duplicate/unknown metadata,
+fractional/overflowed indices, continuation sites, invalid kinds and foreign
+FD identities reject. Readonly/source metadata share one strict field parser.
+
+Strong proof externs use the agreed version1 `.native_lab.source_maps`
+section. The consumer checks actual ELF entry bytes and relocations, then
+patches original map-object/value-base FDs while retaining clang's ADDs and
+addends. It does not prepare a synthetic data map or reset live app values.
+Kernel binding checks the exact derived value offset, including actual
+MOV-constant/register-ADD sequences with CFG-bypass rejection. Existing
+different-offset, kind, map-swap, frozen-data and context negatives still reject.
+
+`source-map-bcc-probe-inputs.tar.gz` freezes C's real five-instruction BCC
+global-data probe and its generated native/proof artifacts. The x86 KVM
+regression substitutes only its runtime FD, checks exact source matching,
+loads the original socket filter, binds the generated clang artifact and
+executes original/native programs. Both write42 at offset16 in the original
+32-byte map; all other bytes remain0xa5. Binding itself changes no map byte.
+Unnamed object and value+offset1 cases also execute with the exact original
+map ID. Wrong sites, foreign same-shaped maps, out-of-range values and proof
+metadata mismatches reject. The complete earlier x86 kernel/loader regression
+suite passes. ASan/UBSan host tests pass. Both libraries build, and the Arm
+module passes the complete actual QEMU binding suite including exact derived
+offset checks. New source-map userspace cases still need Arm execution.
+
+Raw earlier failures are retained: unsupported native direct-PC32 data read,
+then C's LEA-only fix against that folded read, then the real BCC proof's
+register-zero ADD exposing the missing exact offset derivation. The completed
+run uses the actual producer pair and checks that derivation. The own native
+byte-read fixture materializes its pointer explicitly; C owns the additional
+direct-PC32 memory-import repair, which remains active. A recursive Arm
+kernel-build invocation after object cleanup was stopped; the final run uses
+the retained exported Image through an explicit Make prerequisite override.
+No shared image or current runtime pair was overwritten. These results
+establish binding/runtime behavior, not whole-program translation validation.

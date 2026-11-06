@@ -47,7 +47,7 @@ build/test-data-layout: test_data_layout.cpp ../libnativeloader/src/native_data_
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include $< \
 		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $@
 
-build/test-binding: test_binding.c ../../kinsn/module/include/native_lab_binding.h
+build/test-binding: test_binding.c ../../kinsn/module/include/native_lab_binding.h ../../kinsn/module/include/native_lab_map_offset.h
 	install -d build
 	$(CC) -std=c11 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined $< -o $@
 
@@ -126,7 +126,7 @@ linker-build:
 
 kernel-check: linker-build
 
-build/test-loader: test_loader.cpp build/native-entry.o build/simulator.bpf.o build/runtime-config/simulator.bpf.o build/wrong-capacity/simulator.bpf.o build/wrong-value-size/simulator.bpf.o build/wrong-layout/simulator.bpf.o build/wrong-readonly/simulator.bpf.o build/wrong-data-layout/simulator.bpf.o ../libnativeloader/src/native_loader.cpp \
+build/test-loader: test_loader.cpp build/bcc-map-probe/manifest.json build/source-value.bpf.o build/source-value-wrong-site.bpf.o build/native-entry.o build/simulator.bpf.o build/runtime-config/simulator.bpf.o build/wrong-capacity/simulator.bpf.o build/wrong-value-size/simulator.bpf.o build/wrong-layout/simulator.bpf.o build/wrong-readonly/simulator.bpf.o build/wrong-data-layout/simulator.bpf.o ../libnativeloader/src/native_loader.cpp \
 		$(wildcard ../libnativeloader/src/*.hpp ../libnativeloader/include/*.hpp)
 	$(MAKE) -C ../libnativeloader BUILD_DIR=build-tv-binding
 	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 \
@@ -163,8 +163,9 @@ build-arm64/test-binding-kernel: test_binding_kernel.c test_native_inputs.h test
 		$< ../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
 		-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -o $@
 
+TV_ARM64_KERNEL_PREREQUISITE ?= kernel-build-arm64
 kernel-check-arm64: build-arm64/test-binding-kernel
-	$(MAKE) kernel-build-arm64
+	$(MAKE) $(TV_ARM64_KERNEL_PREREQUISITE)
 	$(MAKE) module-check ARCH=arm64 KDIR=$(CURDIR)/build-kernel-arm64
 	install -d build-arm64/initramfs/sys build-arm64/initramfs/proc build-arm64/initramfs/dev
 	cp build-arm64/test-binding-kernel build-arm64/initramfs/init
@@ -343,3 +344,28 @@ simple-arm64-certificate: native-path-check
 
 simple-arm64-negative-check: simple-arm64-certificate
 	python3 test_simple_artifacts.py
+
+.PHONY: source-map-check
+source-map-check: build/test-source-maps
+	./build/test-source-maps
+
+build/test-source-maps: test_source_maps.cpp ../libnativeloader/src/native_source_map_binding.hpp ../libnativeloader/src/native_loader_manifest.hpp
+	install -d build
+	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined $< -o $@
+
+build/source-value.bpf.o: test_source_value.bpf.c
+	install -d build
+	clang -O2 -g -target bpf -I../../vendor/libbpf/include/uapi \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		-I/usr/include/x86_64-linux-gnu -c $< -o $@
+
+build/source-value-wrong-site.bpf.o: test_source_value.bpf.c
+	install -d build
+	clang -O2 -g -target bpf -DTV_SOURCE_SITE='"1"' -I../../vendor/libbpf/include/uapi \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		-I/usr/include/x86_64-linux-gnu -c $< -o $@
+
+build/bcc-map-probe/manifest.json: ../results/kprog_tv_20261106/source-map-bcc-probe-inputs.tar.gz
+	install -d build/bcc-map-probe
+	tar -xzf $< -C build/bcc-map-probe
+	touch $@

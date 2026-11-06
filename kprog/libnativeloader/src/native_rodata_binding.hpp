@@ -22,26 +22,7 @@ struct ProofReadonlyBinding {
  */
 inline void readonly_json_fields(const std::string &text, std::set<std::string> required)
 {
-    size_t pos = json_skip_ws(text, 0);
-    if (pos == text.size() || text[pos++] != '{') json_fail("readonly record is not an object");
-    for (;;) {
-        pos = json_skip_ws(text, pos);
-        if (pos == text.size()) json_fail("unterminated readonly object");
-        if (text[pos] == '}') {
-            if (!required.empty()) json_fail("missing readonly metadata field: " + *required.begin());
-            if (json_skip_ws(text, pos + 1) != text.size()) json_fail("trailing readonly metadata");
-            return;
-        }
-        const std::string key = json_parse_string_value(text, pos);
-        if (!required.erase(key)) json_fail("duplicate/unknown readonly metadata field: " + key);
-        pos = json_skip_ws(text, pos);
-        if (pos == text.size() || text[pos++] != ':') json_fail("missing readonly metadata colon");
-        pos = json_skip_ws(text, json_skip_value(text, pos));
-        if (pos < text.size() && text[pos] == '}') continue;
-        if (pos == text.size() || text[pos++] != ',') json_fail("missing readonly metadata separator");
-        pos = json_skip_ws(text, pos);
-        if (pos == text.size() || text[pos] == '}') json_fail("trailing readonly metadata comma");
-    }
+    json_require_object_fields(text, std::move(required), "readonly");
 }
 
 inline uint64_t readonly_json_integer(const std::string &text, const std::string &key)

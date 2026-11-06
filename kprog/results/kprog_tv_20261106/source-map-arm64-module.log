@@ -1,0 +1,12 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+make -C /workspaces/repository/kprog/tv/build-kernel-arm64 M=/workspaces/repository/kprog/tv/build-arm64 ARCH=arm64 \
+	TV_ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules
+make[1]: Entering directory '/workspaces/repository/kprog/tv/build-kernel-arm64'
+make[2]: Entering directory '/workspaces/repository/kprog/tv/build-arm64'
+  CC [M]  bpf_arm64_native_lab.o
+  MODPOST Module.symvers
+  LD [M]  bpf_arm64_native_lab.ko
+  BTF [M] bpf_arm64_native_lab.ko
+make[2]: Leaving directory '/workspaces/repository/kprog/tv/build-arm64'
+make[1]: Leaving directory '/workspaces/repository/kprog/tv/build-kernel-arm64'
+make: Leaving directory '/workspaces/repository/kprog/tv'

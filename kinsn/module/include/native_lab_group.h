@@ -2,6 +2,8 @@
 #ifndef NATIVE_LAB_GROUP_H
 #define NATIVE_LAB_GROUP_H
 
+#include "native_lab_map_offset.h"
+
 /* Included after native_blob/blobs and decode_native_lab_payload in each
  * module. The final chunk owns a generation vector for the entire program.
  * All callers hold blobs_lock.
@@ -495,7 +497,8 @@ static int native_lab_validate_proof(u64 payload, const struct bpf_verifier_env 
 					    (reloc->kind == NATIVE_LAB_RELOC_MAP_POINTER ?
 					     insn->src_reg != BPF_PSEUDO_MAP_FD :
 					     insn->src_reg != BPF_PSEUDO_MAP_VALUE ||
-					     env->insn_aux_data[i].map_off != reloc->target >> 32))
+					     !native_lab_map_offset_matches(env->prog->insnsi, env->prog->len, i,
+						env->insn_aux_data[i].map_off, reloc->target >> 32)))
 						continue;
 					index = env->insn_aux_data[i].map_index;
 					if (index < env->used_map_cnt &&

@@ -286,6 +286,142 @@ static void tracing_context_regressions()
     }
 }
 
+static void source_map_binding_regressions(const std::vector<bpf_insn> &map_source)
+{
+    int fd = bpf_map_create(BPF_MAP_TYPE_ARRAY, nullptr, 4, 4, 1, nullptr);
+    if (fd < 0) throw std::runtime_error("create unnamed source map");
+    uint32_t key = 0, value = 2;
+    if (bpf_map_update_elem(fd, &key, &value, BPF_ANY)) throw std::runtime_error("initialize unnamed map");
+    bpf_map_info map_info{};
+    uint32_t size = sizeof(map_info);
+    if (bpf_obj_get_info_by_fd(fd, &map_info, &size)) throw std::runtime_error("query unnamed map");
+    assert(map_info.name[0] == 0);
+    auto source = map_source;
+    source[0].imm = fd;
+    const auto run_case = [&](bool direct) {
+        if (direct) {
+            value = 0x20d;
+            if (bpf_map_update_elem(fd, &key, &value, BPF_ANY)) throw std::runtime_error("set offset value");
+            source = {
+                {.code = BPF_LD | BPF_DW | BPF_IMM, .dst_reg = 0, .src_reg = BPF_PSEUDO_MAP_VALUE, .off = 0, .imm = fd},
+                {.code = 0, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 1},
+                {.code = BPF_LDX | BPF_B | BPF_MEM, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0},
+                {.code = BPF_JMP | BPF_EXIT, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0},
+            };
+        }
+        int original = bpf_prog_load(BPF_PROG_TYPE_XDP, "tv_src_bind", "GPL", source.data(), source.size(), nullptr);
+        if (original < 0) throw std::runtime_error("load unnamed source map program");
+        const auto write_manifest = [&](unsigned site, bool wrong_proof = false) {
+            std::ofstream output("build/source-map-manifest.json");
+            output << "{\"objects\":[{\"program\":\"tv_src_bind\",\"native_object\":\"native-entry.o\","
+                "\"symbol\":\"" << (direct ? "tv_source_value_entry" : "tv_map_entry") << "\","
+                "\"source_map_bindings\":[{\"native_symbol\":\"" << (direct ? "tv_source_value" : "tv_map")
+                << "\",\"source_insn\":" << site << "}]";
+            output << ",\"simulator_object\":\"" << (direct ? (wrong_proof ? "source-value-wrong-site.bpf.o" : "source-value.bpf.o") : "simulator.bpf.o")
+                << "\",\"simulator_program\":\"" << (direct ? "tv_proof_source_value" : "tv_proof_map") << "\"";
+            output << "}]}";
+            output.close();
+            if (!output) throw std::runtime_error("write source map manifest");
+        };
+        write_manifest(0);
+        native_loader::FdLoadOptions options{};
+        options.original_prog_fd = original;
+        options.source_insns = source;
+        options.manifest_path = std::filesystem::absolute("build/source-map-manifest.json");
+        options.native_link_path = std::filesystem::absolute(TV_NATIVE_LINK_PATH);
+        auto loaded = native_loader::load_from_fd(options);
+        assert(loaded.replaced && loaded.prog_fd >= 0);
+        unsigned char packet[64]{};
+        bpf_test_run_opts run{};
+        run.sz = sizeof(run);
+        run.data_in = packet;
+        run.data_size_in = sizeof(packet);
+        if (bpf_prog_test_run_opts(loaded.prog_fd, &run)) throw std::runtime_error("execute source map native");
+        assert(run.retval == 2);
+        uint32_t identity{};
+        bpf_prog_info info{};
+        info.nr_map_ids = 1;
+        info.map_ids = reinterpret_cast<uintptr_t>(&identity);
+        size = sizeof(info);
+        if (bpf_obj_get_info_by_fd(loaded.prog_fd, &info, &size)) throw std::runtime_error("query source map identity");
+        assert(info.nr_map_ids == 1 && identity == map_info.id);
+        native_loader::close_loaded_program(&loaded);
+        const auto rejects = [&](const char *message) {
+            try { auto invalid = native_loader::load_from_fd(options); native_loader::close_loaded_program(&invalid); }
+            catch (const std::runtime_error &error) {
+                assert(std::string(error.what()).find(message) != std::string::npos);
+                return;
+            }
+            throw std::runtime_error("invalid source map binding accepted");
+        };
+        write_manifest(1);
+        rejects("instruction site");
+        write_manifest(0);
+        int foreign = bpf_map_create(BPF_MAP_TYPE_ARRAY, nullptr, 4, 4, 1, nullptr);
+        if (foreign < 0) throw std::runtime_error("create unrelated unnamed map");
+        options.source_insns[0].imm = foreign;
+        rejects("not retained by the original program");
+        if (close(foreign)) throw std::runtime_error("close unrelated map");
+        options.source_insns = source;
+        if (direct) {
+            options.source_insns[1].imm = 4;
+            rejects("exceeds the original direct map value");
+            options.source_insns = source;
+            write_manifest(0, true);
+            rejects("proof source map metadata differs from manifest source binding");
+        }
+        if (close(original)) throw std::runtime_error("close unnamed map program");
+        std::puts(direct ? "source LDDW unnamed value+offset binding: PASS (clang extern proof, native2, exact original ID, unsafe offsets/foreign IDs/metadata rejected)" :
+            "source LDDW unnamed object binding: PASS (compiled proof, native2, exact original ID, wrong site/foreign ID rejected)");
+    };
+    run_case(false);
+    run_case(true);
+    if (close(fd)) throw std::runtime_error("close unnamed source map");
+}
+
+static void captured_bcc_map_probe_regression()
+{
+    std::ifstream input("build/bcc-map-probe/source.bpf.bin", std::ios::binary);
+    std::vector<bpf_insn> source(5);
+    input.read(reinterpret_cast<char *>(source.data()), source.size() * sizeof(bpf_insn));
+    if (!input || input.peek() != std::char_traits<char>::eof())
+        throw std::runtime_error("read exact captured BCC map probe");
+    int fd = bpf_map_create(BPF_MAP_TYPE_ARRAY, "libbpf_global", 4, 32, 1, nullptr);
+    if (fd < 0) throw std::runtime_error("create captured BCC map shape");
+    uint32_t key = 0;
+    unsigned char before[32], actual[32], expected[32];
+    std::memset(before, 0xa5, sizeof(before));
+    std::memcpy(expected, before, sizeof(expected));
+    const uint64_t written = 42;
+    std::memcpy(expected + 16, &written, sizeof(written));
+    if (bpf_map_update_elem(fd, &key, before, BPF_ANY)) throw std::runtime_error("initialize captured BCC map");
+    source[0].imm = fd;
+    int original = bpf_prog_load(BPF_PROG_TYPE_SOCKET_FILTER, nullptr, "GPL", source.data(), source.size(), nullptr);
+    if (original < 0) throw std::runtime_error("load captured BCC map probe");
+    native_loader::FdLoadOptions options{};
+    options.original_prog_fd = original;
+    options.source_insns = source;
+    options.manifest_path = std::filesystem::absolute("build/bcc-map-probe/manifest.json");
+    options.native_link_path = std::filesystem::absolute(TV_NATIVE_LINK_PATH);
+    auto loaded = native_loader::load_from_fd(options);
+    assert(loaded.replaced && loaded.prog_fd >= 0);
+    if (bpf_map_lookup_elem(fd, &key, actual)) throw std::runtime_error("read source map after binding");
+    assert(!std::memcmp(actual, before, sizeof(before))); // Preparing a proof must never reset app data.
+    unsigned char packet[64]{};
+    bpf_test_run_opts run{};
+    run.sz = sizeof(run); run.data_in = packet; run.data_size_in = sizeof(packet);
+    for (int program : {original, loaded.prog_fd}) {
+        if (bpf_map_update_elem(fd, &key, before, BPF_ANY)) throw std::runtime_error("reset captured BCC input");
+        if (bpf_prog_test_run_opts(program, &run)) throw std::runtime_error("execute captured BCC map probe");
+        assert(run.retval == 0);
+        if (bpf_map_lookup_elem(fd, &key, actual)) throw std::runtime_error("read captured BCC output");
+        assert(!std::memcmp(actual, expected, sizeof(expected)));
+    }
+    native_loader::close_loaded_program(&loaded);
+    if (close(original) || close(fd)) throw std::runtime_error("close captured BCC fixture");
+    std::puts("actual captured BCC global-data probe: PASS (exact source, generated clang proof, native writes42 at16, neighboring bytes and original map preserved)");
+}
+
 int main()
 {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
@@ -335,6 +471,8 @@ int main()
         std::perror("separate simulator map"); return 1;
     }
     try {
+        captured_bcc_map_probe_regression();
+        source_map_binding_regressions(map);
         load_context_regressions();
         tracing_context_regressions();
         btf_manifest_regressions();

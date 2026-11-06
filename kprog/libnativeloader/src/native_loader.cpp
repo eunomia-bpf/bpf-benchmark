@@ -4,6 +4,7 @@
 #include "kernel_offsets.h"
 
 #include "native_loader_manifest.hpp"
+#include "native_source_map_binding.hpp"
 #include "native_data_layout.hpp"
 #include "native_rodata_binding.hpp"
 #include "native_loader_cache.hpp"
@@ -1074,7 +1075,11 @@ std::vector<bpf_insn> bound_proof_sequence(const std::vector<bpf_insn> &program)
         }
     }
     if (exit_count == 0) {
-        fail("native_kernel bound proof contains no BPF exit");
+        std::ostringstream message;
+        message << "native_kernel bound proof contains no BPF exit; insns=" << program.size();
+        for (size_t i = 0; i < std::min<size_t>(program.size(), 16); i++)
+            message << " " << i << ":0x" << std::hex << static_cast<unsigned>(program[i].code);
+        fail(message.str());
     }
     return proof;
 }
@@ -2554,9 +2559,6 @@ MapMeta load_map_meta_from_fd(int map_fd)
     bpf_map_info info = load_map_info(map_fd);
     char name[sizeof(info.name) + 1] = {};
     std::memcpy(name, info.name, sizeof(info.name));
-    if (name[0] == '\0') {
-        fail("loaded BPF program references unnamed map fd " + std::to_string(map_fd));
-    }
     return MapMeta{
         std::string(name),
         map_fd,
@@ -2943,6 +2945,8 @@ struct CompanionLoad {
     bool needs_kernel_symbols = false;
     std::unordered_map<std::string, uint64_t> map_addrs;
     std::unordered_map<std::string, uint32_t> map_addr_ids;
+    std::unordered_set<uint32_t> original_map_ids;
+    std::unordered_set<std::string> source_map_symbols;
     std::unordered_map<std::string, std::string> native_map_symbols;
     std::unordered_map<std::string, MapMeta> exact_map_addrs;
     std::unordered_set<std::string> ambiguous_exact_maps;
@@ -3068,6 +3072,8 @@ void add_map_meta(CompanionLoad &load, const MapMeta &meta)
     if (!duplicate) {
         load.maps.push_back(meta);
     }
+    // Unnamed maps retain their original ID/layout, without a fabricated name.
+    if (meta.name.empty()) return;
 
     bool have = false;
     bool ambiguous = false;
@@ -3120,6 +3126,25 @@ void add_map_symbol_alias_meta(CompanionLoad &load,
     load.map_addrs[alias] = meta.kernel_addr;
     load.map_addr_ids[alias] = meta.kernel_id;
     load.native_map_symbols[alias] = alias;
+}
+
+void bind_source_map_symbols(CompanionLoad &load,
+    const std::vector<NativeSourceMapBinding> &bindings, const std::vector<bpf_insn> &source)
+{
+    for (const auto &binding : bindings) {
+        const auto reference = source_map_reference(source, binding.source_insn);
+        const MapMeta meta = load_map_meta_from_fd(reference.fd);
+        if (!load.original_map_ids.contains(meta.kernel_id))
+            fail("source map binding FD is not retained by the original program: " + binding.native_symbol);
+        if (reference.value && (!meta.value_addr || reference.offset >= meta.value_size))
+            fail("source map binding exceeds the original direct map value: " + binding.native_symbol);
+        add_map_symbol_alias_meta(load, binding.native_symbol, meta);
+        if (reference.value) {
+            load.map_addrs[binding.native_symbol] = meta.value_addr + reference.offset;
+            load.native_map_symbols.erase(binding.native_symbol);
+        }
+        load.source_map_symbols.insert(binding.native_symbol);
+    }
 }
 
 const MapMeta *source_tail_call_map_for_native_symbol(const CompanionLoad &load,
@@ -3410,6 +3435,7 @@ std::string bpf_obj_name_truncation(const std::string &name)
 
 void add_native_map_symbol_alias(CompanionLoad &load, const std::string &name)
 {
+    if (load.source_map_symbols.contains(name)) return;
     if (const MapMeta *exact = find_exact_map_meta(load, name)) {
         add_native_map_symbol_alias_meta(load, name, *exact);
         return;
@@ -3890,6 +3916,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
                  std::strerror(errno));
         }
         MapMeta meta = load_map_meta_from_fd(map_fd);
+        out.original_map_ids.insert(meta.kernel_id);
         add_map_meta(out, meta);
         add_exact_map_meta(out, meta);
         close(map_fd);
@@ -4818,7 +4845,7 @@ const MapMeta *find_original_data_map(const btf *proof_btf, uint32_t proof_id,
  * are not the application's maps, even when names and shapes are identical.
  * Relink those FD operands to the original program before sealing the proof.
  */
-std::vector<ProofReadonlyBinding> read_proof_readonly_metadata(const std::filesystem::path &path)
+std::optional<std::string> read_proof_metadata(const std::filesystem::path &path, const char *metadata_section)
 {
     if (path.empty()) return {};
     auto bytes = read_binary_file(path);
@@ -4835,13 +4862,19 @@ std::vector<ProofReadonlyBinding> read_proof_readonly_metadata(const std::filesy
         if (!gelf_getshdr(section, &header)) fail("read proof metadata section header");
         const char *name = elf_strptr(elf.get(), strings, header.sh_name);
         if (!name) fail("read proof metadata section name");
-        if (std::strcmp(name, ".native_lab.rodata")) continue;
+        if (std::strcmp(name, metadata_section)) continue;
         if (metadata || header.sh_type != SHT_PROGBITS) fail("duplicate/invalid proof readonly metadata section");
         Elf_Data *data = elf_getdata(section, nullptr);
         if (!data || data->d_off || data->d_size != header.sh_size ||
             elf_getdata(section, data)) fail("invalid proof readonly metadata extent");
         metadata.emplace(static_cast<const char *>(data->d_buf), data->d_size);
     }
+    return metadata;
+}
+
+std::vector<ProofReadonlyBinding> read_proof_readonly_metadata(const std::filesystem::path &path)
+{
+    const auto metadata = read_proof_metadata(path, ".native_lab.rodata");
     return metadata ? parse_proof_readonly_bindings(*metadata) : std::vector<ProofReadonlyBinding>{};
 }
 
@@ -5045,6 +5078,122 @@ SimulatorObject open_simulator_proof(
     return object;
 }
 
+void relocate_source_map_proof(const std::filesystem::path &path, const std::string &entry,
+    const std::vector<ProofSourceMapBinding> &bindings,
+    const std::vector<NativeSourceMapBinding> &manifest_bindings,
+    const std::vector<bpf_insn> &source, const CompanionLoad &companion,
+    std::vector<bpf_insn> &proof, std::vector<std::unique_ptr<ScopedFd>> &pins)
+{
+    for (const auto &binding : bindings)
+        if (std::find(manifest_bindings.begin(), manifest_bindings.end(), binding.source) == manifest_bindings.end())
+            fail("proof source map metadata differs from manifest source binding: " + binding.proof_symbol);
+    auto bytes = read_binary_file(path);
+    std::unique_ptr<Elf, decltype(&elf_end)> elf(
+        elf_memory(reinterpret_cast<char *>(bytes.data()), bytes.size()), elf_end);
+    GElf_Ehdr header{};
+    if (!elf || !gelf_getehdr(elf.get(), &header) || header.e_machine != EM_BPF ||
+        header.e_type != ET_REL || header.e_ident[EI_DATA] != ELFDATA2LSB)
+        fail("proof source maps require a little-endian relocatable BPF ELF");
+    std::optional<GElf_Sym> selected;
+    Elf_Scn *section = nullptr;
+    while ((section = elf_nextscn(elf.get(), section))) {
+        GElf_Shdr table{};
+        if (!gelf_getshdr(section, &table)) fail("read source proof symbol table");
+        if (table.sh_type != SHT_SYMTAB) continue;
+        Elf_Data *data = elf_getdata(section, nullptr);
+        if (!data || !table.sh_entsize) fail("empty source proof symbol table");
+        for (size_t i = 0; i < table.sh_size / table.sh_entsize; i++) {
+            GElf_Sym symbol{};
+            if (!gelf_getsym(data, i, &symbol)) fail("read source proof symbol");
+            const char *name = elf_strptr(elf.get(), table.sh_link, symbol.st_name);
+            if (!name) fail("read source proof symbol name");
+            if (entry != name) continue;
+            if (selected || GELF_ST_TYPE(symbol.st_info) != STT_FUNC || !symbol.st_size ||
+                symbol.st_shndx == SHN_UNDEF || symbol.st_shndx >= SHN_LORESERVE)
+                fail("ambiguous/invalid source proof entry: " + entry);
+            selected = symbol;
+        }
+    }
+    if (!selected) fail("source proof entry absent: " + entry);
+    GElf_Shdr code{};
+    Elf_Scn *code_section = elf_getscn(elf.get(), selected->st_shndx);
+    if (!code_section || !gelf_getshdr(code_section, &code) || !(code.sh_flags & SHF_EXECINSTR) ||
+        selected->st_value < code.sh_addr || selected->st_size != proof.size() * sizeof(bpf_insn))
+        fail("source proof entry extent differs from selected BPF program");
+    const uint64_t begin = selected->st_value - code.sh_addr;
+    Elf_Data *code_data = elf_getdata(code_section, nullptr);
+    if (!code_data || code_data->d_off || begin > code_data->d_size ||
+        selected->st_size > code_data->d_size - begin ||
+        std::memcmp(proof.data(), static_cast<const char *>(code_data->d_buf) + begin, selected->st_size))
+        fail("source proof entry bytes differ from selected BPF program");
+    std::set<uint64_t> patched;
+    std::unordered_map<uint32_t, int> map_fds;
+    section = nullptr;
+    while ((section = elf_nextscn(elf.get(), section))) {
+        GElf_Shdr relocations{};
+        if (!gelf_getshdr(section, &relocations)) fail("read source proof relocations");
+        if ((relocations.sh_type != SHT_REL && relocations.sh_type != SHT_RELA) ||
+            relocations.sh_info != selected->st_shndx) continue;
+        Elf_Data *data = elf_getdata(section, nullptr);
+        Elf_Scn *symbols = elf_getscn(elf.get(), relocations.sh_link);
+        GElf_Shdr symbol_table{};
+        if (!data || !relocations.sh_entsize || !symbols || !gelf_getshdr(symbols, &symbol_table))
+            fail("invalid source proof relocation table");
+        Elf_Data *symbol_data = elf_getdata(symbols, nullptr);
+        if (!symbol_data) fail("source proof relocation symbols absent");
+        for (size_t i = 0; i < relocations.sh_size / relocations.sh_entsize; i++) {
+            GElf_Rela relocation{};
+            if (relocations.sh_type == SHT_RELA) {
+                if (!gelf_getrela(data, i, &relocation)) fail("read source proof RELA");
+            } else {
+                GElf_Rel rel{};
+                if (!gelf_getrel(data, i, &rel)) fail("read source proof REL");
+                relocation.r_offset = rel.r_offset; relocation.r_info = rel.r_info;
+            }
+            if (relocation.r_offset < begin || relocation.r_offset - begin >= selected->st_size) continue;
+            const uint64_t offset = relocation.r_offset - begin;
+            if (GELF_R_TYPE(relocation.r_info) != R_BPF_64_64 || offset % sizeof(bpf_insn) ||
+                offset / sizeof(bpf_insn) + 1 >= proof.size() || !patched.insert(offset).second)
+                fail("invalid source proof map relocation site/type");
+            GElf_Sym symbol{};
+            if (!gelf_getsym(symbol_data, GELF_R_SYM(relocation.r_info), &symbol)) fail("read source proof relocation symbol");
+            const char *name = elf_strptr(elf.get(), symbol_table.sh_link, symbol.st_name);
+            if (!name || symbol.st_shndx != SHN_UNDEF || GELF_ST_BIND(symbol.st_info) != STB_GLOBAL)
+                fail("source map relocation is not a strong explicit extern");
+            const auto binding = std::find_if(bindings.begin(), bindings.end(),
+                [&](const auto &item) { return item.proof_symbol == name; });
+            if (binding == bindings.end()) fail("unbound proof extern: " + std::string(name));
+            const auto reference = source_map_reference(source, binding->source.source_insn);
+            const auto identity = companion.map_addr_ids.find(binding->source.native_symbol);
+            if (identity == companion.map_addr_ids.end()) fail("source proof map lacks bound original identity");
+            const uint32_t id = identity->second;
+            const auto map = std::find_if(companion.maps.begin(), companion.maps.end(),
+                [&](const MapMeta &meta) { return meta.kernel_id == id; });
+            if (map == companion.maps.end()) fail("source proof map identity has no original layout");
+            bpf_insn &low = proof[offset / sizeof(bpf_insn)], &high = proof[offset / sizeof(bpf_insn) + 1];
+            if (low.code != (BPF_LD | BPF_DW | BPF_IMM) || low.src_reg || low.off ||
+                high.code || high.dst_reg || high.src_reg || high.off)
+                fail("source proof map relocation does not target a plain LDDW");
+            const uint64_t immediate = static_cast<uint32_t>(low.imm) |
+                (static_cast<uint64_t>(static_cast<uint32_t>(high.imm)) << 32);
+            if (relocation.r_addend < 0 || static_cast<uint64_t>(relocation.r_addend) > UINT32_MAX ||
+                immediate > UINT32_MAX - static_cast<uint64_t>(relocation.r_addend))
+                fail("source proof map addend exceeds wire format");
+            const uint64_t addend = immediate + relocation.r_addend;
+            if ((!reference.value && addend) || (reference.value && addend >= map->value_size))
+                fail("source proof map addend exceeds original object/value");
+            if (!map_fds.contains(id)) {
+                auto fd = std::make_unique<ScopedFd>(bpf_map_get_fd_by_id(id));
+                if (fd->get() < 0) fail("pin original source proof map: " + std::string(std::strerror(errno)));
+                map_fds.emplace(id, fd->get()); pins.push_back(std::move(fd));
+            }
+            low.src_reg = reference.value ? BPF_PSEUDO_MAP_VALUE : BPF_PSEUDO_MAP_FD;
+            low.imm = map_fds.at(id);
+            high.imm = static_cast<int32_t>(addend);
+        }
+    }
+}
+
 void finish_simulator_proof(bpf_object *raw, const std::string &entry,
     std::vector<bpf_insn> &proof, LinkedBlob &linked,
     const std::vector<ProofReadonlyBinding> &bindings)
@@ -5152,6 +5301,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     }
     std::vector<std::filesystem::path> native_data_object_paths;
     std::vector<NativeMapRule> map_rules;
+    std::vector<NativeSourceMapBinding> source_map_bindings;
     std::filesystem::path simulator_object_path;
     std::string simulator_program;
     std::vector<bpf_insn> proof_insns = options.proof_insns;
@@ -5190,6 +5340,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         }
         native_data_object_paths = std::move(resolution->native_data_object_paths);
         map_rules = std::move(resolution->map_rules);
+        source_map_bindings = std::move(resolution->source_map_bindings);
         simulator_object_path = std::move(resolution->simulator_object_path);
         simulator_program = std::move(resolution->simulator_program);
     }
@@ -5211,14 +5362,20 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             source_insns.size(),
             std::move(map_rules));
     companion.expected_attach_type = options.expected_attach_type;
+    bind_source_map_symbols(companion, source_map_bindings, source_insns);
     SimulatorObject simulator_object(nullptr, bpf_object__close);
     std::vector<std::unique_ptr<ScopedFd>> proof_map_fds;
+    const auto source_proof_metadata = read_proof_metadata(simulator_object_path, ".native_lab.source_maps");
     if (!simulator_object_path.empty()) {
         if (!proof_insns.empty()) {
             fail("simulator proof supplied both as raw instructions and manifest object");
         }
         simulator_object = open_simulator_proof(simulator_object_path,
             simulator_program, prog_info, companion, proof_insns);
+        if (source_proof_metadata)
+            relocate_source_map_proof(simulator_object_path, simulator_program,
+                parse_proof_source_maps(*source_proof_metadata), source_map_bindings,
+                source_insns, companion, proof_insns, proof_map_fds);
     }
     const auto native_data_symbols_start = std::chrono::steady_clock::now();
     {
@@ -5242,7 +5399,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         companion);
     const auto readonly_bindings = read_proof_readonly_metadata(simulator_object ?
         simulator_object_path : options.proof_object_path);
-    if (simulator_object)
+    if (simulator_object && !source_proof_metadata)
         finish_simulator_proof(simulator_object.get(), simulator_program, proof_insns, linked, readonly_bindings);
     else
         bind_raw_proof_maps(proof_insns, companion, proof_map_fds, linked, readonly_bindings);

@@ -1,0 +1,16 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build
+cc -std=c11 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined test_binding.c -o build/test-binding
+./build/test-binding
+binding entry/ABI/metadata/generation and exact-byte rejection tests: PASS
+make -C /workspaces/repository/kprog/tv/build-kernel-x86 M=/workspaces/repository/kprog/tv/build-x86 ARCH=x86 \
+	TV_ARCH=x86 CROSS_COMPILE= modules
+make[1]: Entering directory '/workspaces/repository/kprog/tv/build-kernel-x86'
+make[2]: Entering directory '/workspaces/repository/kprog/tv/build-x86'
+  CC [M]  bpf_x86_native_lab.o
+  MODPOST Module.symvers
+  LD [M]  bpf_x86_native_lab.ko
+  BTF [M] bpf_x86_native_lab.ko
+make[2]: Leaving directory '/workspaces/repository/kprog/tv/build-x86'
+make[1]: Leaving directory '/workspaces/repository/kprog/tv/build-kernel-x86'
+make: Leaving directory '/workspaces/repository/kprog/tv'

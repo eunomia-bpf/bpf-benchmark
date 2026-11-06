@@ -1,0 +1,6 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build
+cc -std=c11 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined test_binding.c -o build/test-binding
+./build/test-binding
+binding entry/ABI/metadata/generation and exact-byte rejection tests: PASS
+make: Leaving directory '/workspaces/repository/kprog/tv'

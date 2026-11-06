@@ -85,3 +85,13 @@ int tv_duplicate_readonly_entry(void *ctx)
 	const volatile unsigned long *a = tv_readonly_a, *b = tv_readonly_b;
 	return ((unsigned)(a[0] + a[1]) + (unsigned)(b[0] + b[1])) >> 1;
 }
+
+/* Relocated to the exact source LDDW map-value site, including its offset. */
+extern const unsigned char tv_source_value[];
+__attribute__((noinline)) int tv_source_value_entry(void *ctx)
+{
+    (void)ctx;
+    const unsigned char *address = tv_source_value;
+    __asm__ volatile("" : "+r"(address));
+    return address[0];
+}

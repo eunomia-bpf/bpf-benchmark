@@ -1,0 +1,14 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build
+g++ -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined test_source_maps.cpp -o build/test-source-maps
+./build/test-source-maps
+source map exact site/kind/continuation/FD/offset/metadata rejection: PASS
+install -d build
+g++ -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined test_manifest.cpp -o build/test-manifest
+./build/test-manifest
+full BTF selector collision/missing/truncated/unknown/empty/ambiguous regressions: PASS
+install -d build
+g++ -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined test_rodata_metadata.cpp -o build/test-rodata-metadata
+./build/test-rodata-metadata
+readonly symbol identity/size/overflow/version/duplicate/unknown/JSON rejection: PASS
+make: Leaving directory '/workspaces/repository/kprog/tv'

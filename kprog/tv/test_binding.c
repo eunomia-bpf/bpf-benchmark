@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include "../../kinsn/module/include/native_lab_binding.h"
+#include "../../kinsn/module/include/native_lab_map_offset.h"
 
 static void layout(void)
 {
@@ -103,8 +104,56 @@ static void reject_bytes(void)
 	assert(native_lab_binding_snapshot(&b, data, sizeof(data)+1, native, relocs, proof) == -EINVAL);
 }
 
+static void map_offset_derivation(void)
+{
+    struct bpf_insn proof[] = {
+        {.code = BPF_LD | BPF_DW | BPF_IMM, .dst_reg = 1, .src_reg = BPF_PSEUDO_MAP_VALUE}, {},
+        {.code = BPF_ALU64 | BPF_ADD | BPF_K, .dst_reg = 1, .imm = 16},
+        {.code = BPF_ALU64 | BPF_SUB | BPF_K, .dst_reg = 1, .imm = 8},
+        {.code = BPF_JMP | BPF_EXIT},
+    };
+    assert(native_lab_map_offset_matches(proof, 5, 0, 0, 16));
+    assert(native_lab_map_offset_matches(proof, 5, 0, 0, 8));
+    assert(native_lab_map_offset_matches(proof, 5, 0, 3, 19));
+    assert(!native_lab_map_offset_matches(proof, 5, 0, 0, 17));
+    assert(!native_lab_map_offset_matches(proof, 1, 0, 0, 0));
+    assert(!native_lab_map_offset_matches(proof, 5, 5, 0, 0));
+    proof[2].code = BPF_ALU | BPF_ADD | BPF_K;
+    assert(!native_lab_map_offset_matches(proof, 5, 0, 0, 16));
+    proof[2].code = BPF_ALU64 | BPF_ADD | BPF_K; proof[2].dst_reg = 2;
+    assert(!native_lab_map_offset_matches(proof, 5, 0, 0, 16));
+    proof[2].dst_reg = 1; proof[2].src_reg = 1;
+    assert(!native_lab_map_offset_matches(proof, 5, 0, 0, 16));
+    proof[2].src_reg = 0; proof[2].code = BPF_JMP | BPF_JA;
+    assert(!native_lab_map_offset_matches(proof, 5, 0, 0, 16));
+    proof[2].code = BPF_ALU64 | BPF_ADD | BPF_K; proof[2].imm = -1;
+    assert(!native_lab_map_offset_matches(proof, 5, 0, 0, 16));
+    assert(native_lab_map_offset_matches(proof, 5, 0, 17, 16));
+
+    struct bpf_insn scalar[] = {
+        {.code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = 1, .imm = 0},
+        {.code = BPF_LD | BPF_DW | BPF_IMM, .dst_reg = 2, .src_reg = BPF_PSEUDO_MAP_VALUE}, {},
+        {.code = BPF_ALU64 | BPF_ADD | BPF_X, .dst_reg = 2, .src_reg = 1},
+        {.code = BPF_ALU64 | BPF_ADD | BPF_K, .dst_reg = 2, .imm = 16},
+        {.code = BPF_JMP | BPF_EXIT},
+        {.code = BPF_JMP | BPF_JA, .off = 0},
+    };
+    assert(native_lab_map_offset_matches(scalar, 7, 1, 0, 16));
+    scalar[0].imm = 2;
+    assert(!native_lab_map_offset_matches(scalar, 7, 1, 0, 16));
+    assert(native_lab_map_offset_matches(scalar, 7, 1, 0, 18));
+    scalar[6].off = -6; // Back edge bypasses the constant definition at0.
+    assert(!native_lab_map_offset_matches(scalar, 7, 1, 0, 18));
+    scalar[6].off = -7; // Reexecuting the definition preserves its value.
+    assert(native_lab_map_offset_matches(scalar, 7, 1, 0, 18));
+    scalar[0].code = BPF_ALU64 | BPF_ADD | BPF_K;
+    assert(!native_lab_map_offset_matches(scalar, 7, 1, 0, 18));
+
+}
+
 int main(void)
 {
+	map_offset_derivation();
 	layout();
 	reject_drift(NATIVE_LAB_ARCH_X86);
 	reject_drift(NATIVE_LAB_ARCH_ARM64);

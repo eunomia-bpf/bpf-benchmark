@@ -1,0 +1,85 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build-arm64
+aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -g -static -D__EXPORTED_HEADERS__ \
+	-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+	test_binding_kernel.c ../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+	-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -o build-arm64/test-binding-kernel
+make kernel-build-arm64
+make[1]: Entering directory '/workspaces/repository/kprog/tv'
+python3 apply_kernel_patch.py
+native proof-region kernel patch already applied
+make -C ../../vendor/linux-framework O=/workspaces/repository/kprog/tv/build-kernel-arm64 \
+	ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j8 Image
+make[2]: Entering directory '/workspaces/repository/vendor/linux-framework'
+make[3]: Entering directory '/workspaces/repository/kprog/tv/build-kernel-arm64'
+  GEN     Makefile
+  DESCEND bpf/resolve_btfids
+  INSTALL libsubcmd_headers
+  CALL    /workspaces/repository/vendor/linux-framework/scripts/checksyscalls.sh
+  CC      arch/arm64/kernel/vdso/vgettimeofday.o
+  AS      arch/arm64/kernel/vdso/note.o
+  AS      arch/arm64/kernel/vdso/sigreturn.o
+  CC      arch/arm64/kernel/vdso/vgetrandom.o
+  AS      arch/arm64/kernel/vdso/vgetrandom-chacha.o
+  LD      arch/arm64/kernel/vdso/vdso.so.dbg
+  VDSOSYM include/generated/vdso-offsets.h
+  OBJCOPY arch/arm64/kernel/vdso/vdso.so
+  AS      usr/initramfs_data.o
+  CC      ipc/compat.o
+  CC      init/main.o
+  CC      mm/damon/core.o
+  CC      fs/notify/dnotify/dnotify.o
+  CC      certs/system_keyring.o
+  CC      arch/arm64/kernel/pi/idreg-override.o
+  AR      usr/built-in.a
+  CC      security/keys/gc.o
+  CC      kernel/sched/core.o
+  AS      certs/system_certificates.o
+  CC      certs/blacklist.o
+  CC      arch/arm64/kernel/pi/map_kernel.o
+  CC      ipc/util.o
+  AR      fs/notify/dnotify/built-in.a
+  CC      fs/notify/inotify/inotify_fsnotify.o
+  CC      security/keys/key.o
+  CC      arch/arm64/kernel/pi/map_range.o
+  CC      certs/blacklist_hashes.o
+  AR      certs/built-in.a
+  CC      fs/notify/inotify/inotify_user.o
+  CC      crypto/asymmetric_keys/asymmetric_type.o
+  CC      arch/arm64/kernel/pi/lib-fdt.o
+  CC      arch/arm64/kernel/pi/lib-fdt_ro.o
+  CC      init/version.o
+  CC      ipc/msgutil.o
+  CC      arch/arm64/kernel/pi/relocate.o
+  CC      crypto/asymmetric_keys/restrict.o
+  CC      mm/damon/ops-common.o
+  OBJCOPY arch/arm64/kernel/pi/idreg-override.pi.o
+  OBJCOPY arch/arm64/kernel/pi/map_kernel.pi.o
+  OBJCOPY arch/arm64/kernel/pi/map_range.pi.o
+  OBJCOPY arch/arm64/kernel/pi/lib-fdt.pi.o
+  OBJCOPY arch/arm64/kernel/pi/lib-fdt_ro.pi.o
+  OBJCOPY arch/arm64/kernel/pi/relocate.pi.o
+  AR      arch/arm64/kernel/pi/built-in.a
+  CC      arch/arm64/kernel/probes/kprobes.o
+  CC      security/keys/keyring.o
+  AR      fs/notify/inotify/built-in.a
+  CC      crypto/asymmetric_keys/signature.o
+  CC      fs/notify/fanotify/fanotify.o
+  CC      ipc/msg.o
+  CC      init/do_mounts.o
+  CC      arch/arm64/kernel/probes/decode-insn.o
+  CC      crypto/asymmetric_keys/public_key.o
+  CC      mm/damon/vaddr.o
+  CC      ipc/sem.o
+  AS      arch/arm64/kernel/probes/kprobes_trampoline.o
+  CC      init/do_mounts_initrd.o
+  CC      fs/notify/fanotify/fanotify_user.o
+  CC      arch/arm64/kernel/probes/simulate-insn.o
+  CC      security/keys/keyctl.o
+  CC      crypto/asymmetric_keys/x509.asn1.o
+  CC      crypto/asymmetric_keys/x509_akid.asn1.o
+  CC      crypto/asymmetric_keys/x509_cert_parser.o
+  CC      mm/damon/paddr.o
+  CC      arch/arm64/kernel/probes/uprobes.o
+  CC      init/initramfs.o
+  CC      crypto/asymmetric_keys/x509_loader.o

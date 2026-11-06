@@ -424,6 +424,17 @@ static void external_identity_regressions(void)
 	reloc.target |= (uint64_t)1 << 32;
 	seal_single_artifact(code, sizeof(code), value_body, 3, &reloc, 1);
 	load(generation(), 0, 1, "map value offset differs from verified proof");
+
+	struct bpf_insn derived_body[] = {
+		value_body[0], {},
+		{ .code = BPF_ALU64 | BPF_ADD | BPF_K, .dst_reg = 1, .imm = 1 }, proof,
+	};
+	seal_single_artifact(code, sizeof(code), derived_body, 4, &reloc, 1);
+	load(generation(), 0, 0, "exact proof map value base plus compiled constant offset");
+	derived_body[2].imm = 2;
+	seal_single_artifact(code, sizeof(code), derived_body, 4, &reloc, 1);
+	load(generation(), 0, 1, "compiled value offset differs from native relocation");
+
 	reloc = (struct test_reloc){ .offset = literal, .kind = NATIVE_LAB_RELOC_MAP_POINTER, .target = info_a.id };
 	seal_single_artifact(code, sizeof(code), body, 3, &reloc, 1);
 	int pinned_a = dup(a);
