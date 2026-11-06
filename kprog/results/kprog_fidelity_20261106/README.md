@@ -35,3 +35,8 @@ focused post-repair replay is31forms/31744cases with zero mismatches; the
 remaining broader SP/address observations stay open.
 
 Scale completion: all16 requested x86 size/shape cells now have accepted, correct artifacts, including allfour100K shapes. All32 additional100K nativeCPU/proof inputpairs match. Pointer/direct and pointer/indirect retain300054/300047BPF instructions and verify in90.264/133.029ms. Exact experimental compiler paths, earlier failures and separate allocation peaks remain in scale/README.md. The newer independent Arm replay checks523forms/535552cases against the sameCPUtrace, CPUdifferences0, modelSPdifferences4096, remainingdecoderforms44.
+
+Latest complete x86 CPU replay after the LEA repair:733forms/750592cases,
+723forms zero differences and ten SP-related rows with10240 raw differences.
+Only the repaired LEA-to-RSP row changed from the preceding full run; all
+remaining counterexample inputs are retained. See differential/README.md.

@@ -606,3 +606,25 @@ include every failing input, real SP anchor, memory and canonical output.
 ```sh
 taskset -c 16-19 make -C kprog/results/kprog_fidelity_20261106/differential/arm64-extend-reference replay
 ```
+
+## Complete x86 replay after the LEA repair
+
+A fresh frozen-header build now reports733 forms /750592 real CPU cases /
+10240 raw state differences:723 forms agree in every case; ten SP-observing
+forms differ in all1024 states each. The previously failing `lea rsp,[rsp+16]`
+row now agrees in all1024 cases. No other row changed its mismatch count.
+The remaining rows are MOV RAX/RSP, MOV EAX/ESP, LEA RAX/[RSP+16], CMP RSP/0,
+MOV RSP/RAX, MOV ESP/EAX, PUSH/POP RSP and PUSH/POP SP. These retain the
+numeric-base/frame-projection obligations explained above; they are not
+silently normalized or counted as ten independent unsafe programs.
+
+`x86-after-lea-complete/forms.tsv` reports every form and count;
+`mismatches.jsonl.gz` retains all10240 input/output/memory/SP-anchor records.
+`harness-artifacts.tar.gz` retains exact native/generated source, static binary,
+header/import snapshot, coverage and driver/build sources. `host.txt` and
+`run.log.gz` retain host provenance, warnings and the expected nonzero exit.
+No native unsafe negative is executed by this instruction-level harness.
+
+```sh
+taskset -c 16-23 prlimit --as=12884901888 -- timeout 900 make -C kprog/fidelity run BUILD=build-x86-after-lea-complete OUT=../results/kprog_fidelity_20261106/differential/x86-after-lea-complete
+```
