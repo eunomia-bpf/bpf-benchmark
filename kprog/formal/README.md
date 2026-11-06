@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0973 - the whole sequence verified together
+
+The sequence that reduced the unexplained figure count from seventy-six to one
+touched one checker, one section, and two records. This step re-ran everything
+those edits could have affected, rather than trusting the last run of each.
+
+Twelve checks pass against the log the gate produced: the nine that run inside
+the gate, the record's own check against the log, the paper checker against the
+section, and the mutation harness. The paper compiles with no errors and no
+unresolved references, which is what the retitled section and the added
+cross-references risked.
+
+The repository is ahead of neither remote by any commit, and the only modified
+files are the ones that were modified before this sequence began: the benchmark
+submodule, the paper repository's own working tree, the two Lean modules another
+agent is editing, and the vendor headers.
+
+Census unchanged; the state is verified rather than assumed.
+
 ### Step 0972 - the noun was inside a macro, after its brace
 
 One of the last two counts a set whose name is written in a macro, so the noun

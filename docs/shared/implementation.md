@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0973 re-ran all twelve checks and the compile
+after the sequence: all green, both repos synced,
+only pre-existing dirty files.
+
+
 Step 0972 crossed a macro group to reach its noun:
 unexplained 2 -> 1 (from 76 at step 0888).
 
