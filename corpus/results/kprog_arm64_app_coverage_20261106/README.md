@@ -559,3 +559,32 @@ then run `make -C runtime run`; on an ARM KVM host, use
 `make -C runtime run ACCEL=kvm CPU=host`. These are functional checks. The
 [full build/run log](readonly-interior-checked/build-and-qemu.log) preserves the
 exact commands and library/kernel pairing.
+
+## Actual six-app startup census and matched runtime preparation
+
+[The runtime phase table](runtime-context-v2/table.md) and
+[app records](runtime-context-v2/app-outcomes.csv) describe completed attempts of
+all six applications. [All 302 startup load attempts](runtime-context-v2/all-startup-loads.jsonl)
+include 291 successful loads, two syscall failures and nine unfinished attempts;
+feature probes and transient loads are retained. These load counts differ from
+resident snapshots and measured BPF-counter rows. The original run archives,
+shim logs, stdout/stderr, lifecycle records, bytecode and partial captures remain
+in [runtime-context-v2/](runtime-context-v2/).
+
+BCC recorded 23 baseline counter rows; OTel recorded 12. No native treatment
+completed. Cilium/Katran stopped at missing veth support in the old image,
+Tetragon lacked its alignment-check object, OTel's shim socket refused a request,
+and Tracee reached the existing 1,800-second lifecycle timeout. The latter's
+partial evidence was retained. These are failures to close, not exclusions.
+
+The new lane-owned runtime uses the matched context-v2 Image/EFI image, full
+stock module tree, all 11 ARM kinsn modules and the compatible source-context
+loader. Tetragon's missing alignment checker is now built from unchanged
+upstream source with its own compiler flags. The package lives under
+`kprog/arm64/build/app-runtime-v2/`; its image is
+`bpf-benchmark/runner-runtime:arm64-a-context-v2`. The BCC manifest carries all
+23 exact source BTF selectors and simulator objects. The first real startup with
+that package reached the native binder and exposed map-layout, readonly identity
+and tracing relocation errors; its raw result is archived here. The subsequent
+retry uses the compatible runtime-capacity library and the existing lifecycle
+timeout knob, preserving the two-start workload and counter collection.

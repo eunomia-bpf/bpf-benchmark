@@ -1,0 +1,34 @@
+{
+  "app": "tracee/monitor",
+  "baseline": null,
+  "error": "tracee/monitor app lifecycle timed out after 1800.0s",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "tracee",
+  "runner_details": {
+    "command_used": [
+      "/artifacts/tracee/bin/tracee",
+      "--events",
+      "*",
+      "--events",
+      "-net_packet_raw,-print_mem_dump,-net_packet_ipv4,-net_packet_ipv6,-net_packet_tcp,-net_packet_udp,-net_packet_icmp,-net_packet_icmpv6,-net_packet_dns,-net_packet_dns_request,-net_packet_dns_response,-net_packet_http,-net_packet_http_request,-net_packet_http_response,-anti_debugging,-aslr_inspection,-cgroup_notify_on_release,-cgroup_release_agent,-core_pattern_modification,-default_loader_mod,-disk_mount,-docker_abuse,-dropped_executable,-dynamic_code_loading,-file_modification,-fileless_execution,-hidden_file_created,-hooked_seq_ops_detector,-hooked_syscall_detector,-illegitimate_shell,-k8s_service_account_token,-kernel_module_loading,-k8s_api_connection,-k8s_cert_theft,-ld_preload,-lsm_test,-proc_fops_hooking,-proc_kcore_read,-proc_mem_access,-proc_mem_code_injection,-process_vm_write_inject,-ptrace_code_injection,-rcd_modification,-sched_debug_recon,-scheduled_task_mod,-stack_pivot,-bpf_attach,-security_bpf,-security_bpf_map,-security_bpf_prog,-stdio_over_socket,-sudoers_modification,-syscall_hooking,-system_request_key_mod",
+      "--output",
+      "none",
+      "--server",
+      "healthz",
+      "--server",
+      "http-address=:3366",
+      "--signatures-dir",
+      "/var/tmp/bpfrejit-runtime/f079d2a4/tracee/signatures",
+      "--capabilities",
+      "bypass=true"
+    ],
+    "process_output": {
+      "returncode": -9,
+      "stderr_tail": "{\"level\":\"warn\",\"ts\":184.65220368,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"missing_ksymbol\"}\n{\"level\":\"warn\",\"ts\":184.695472976,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"multiple_fallbacks_test\"}\n{\"level\":\"error\",\"ts\":185.0255648,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-1013\",\"error\":\"detector TRC-1013 requires enrichment \\\"environment\\\" which is not enabled\"}\n{\"level\":\"error\",\"ts\":185.033041424,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-107\",\"error\":\"detector TRC-107 requires enrichment \\\"environment\\\" which is not enabled\"}\n{\"level\":\"warn\",\"ts\":232.467606224,\"msg\":\"Finding VMAs is not supported in this kernel\",\"id\":9,\"type\":\"BPF_LOG_FIND_VMA_UNSUPPORTED\",\"ret\":0,\"cpu\":0,\"file\":\"./pkg/ebpf/c/common/memory.h\",\"line\":98,\"count\":1}\n{\"level\":\"warn\",\"ts\":237.915689456,\"msg\":\"Lost 21789 events\"}\n{\"level\":\"warn\",\"ts\":237.973017616,\"msg\":\"Lost 25736 events\"}\n{\"level\":\"warn\",\"ts\":518.059127152,\"msg\":\"Lost 8800 events\"}\n{\"level\":\"warn\",\"ts\":543.593671232,\"msg\":\"Lost 736 events\"}\n{\"level\":\"warn\",\"ts\":547.301741792,\"msg\":\"Lost 7263 events\"}\n{\"level\":\"warn\",\"ts\":561.768484112,\"msg\":\"Lost 5753 events\"}\n{\"level\":\"warn\",\"ts\":654.774866784,\"msg\":\"Lost 2189 events\"}\n{\"level\":\"warn\",\"ts\":654.90193024,\"msg\":\"Lost 43958 events\"}\n{\"level\":\"warn\",\"ts\":712.008758608,\"msg\":\"Lost 1392 events\"}\n{\"level\":\"warn\",\"ts\":714.226374368,\"msg\":\"Lost 53427 events\"}\n{\"level\":\"warn\",\"ts\":741.39041648,\"msg\":\"Lost 2835 events\"}\n{\"level\":\"warn\",\"ts\":934.179029024,\"msg\":\"Lost 2846 events\"}\n{\"level\":\"warn\",\"ts\":934.85723256,\"msg\":\"Lost 389 events\"}\n{\"level\":\"warn\",\"ts\":938.164963824,\"msg\":\"Lost 7058 events\"}\n{\"level\":\"warn\",\"ts\":1341.164916032,\"msg\":\"Lost 11390 events\"}\n{\"level\":\"warn\",\"ts\":1391.77601664,\"msg\":\"Lost 22615 events\"}\n{\"level\":\"warn\",\"ts\":1403.890224544,\"msg\":\"Lost 7914 events\"}\n{\"level\":\"warn\",\"ts\":1473.096306432,\"msg\":\"Lost 7344 events\"}\n{\"level\":\"warn\",\"ts\":1579.143754208,\"msg\":\"Lost 545 events\"}\n{\"level\":\"warn\",\"ts\":1593.712258144,\"msg\":\"Lost 13435 events\"}\n{\"level\":\"warn\",\"ts\":1594.11277456,\"msg\":\"Lost 12262 events\"}\n{\"level\":\"warn\",\"ts\":1749.953220384,\"msg\":\"Lost 3831 events\"}\n{\"level\":\"warn\",\"ts\":1749.954737232,\"msg\":\"Lost 10418 events\"}\n{\"level\":\"warn\",\"ts\":1791.612618368,\"msg\":\"Lost 670 events\"}\n{\"level\":\"warn\",\"ts\":1843.544242608,\"msg\":\"Lost 283 events\"}\n{\"level\":\"warn\",\"ts\":1857.074605792,\"msg\":\"Lost 4908 events\"}\n{\"level\":\"warn\",\"ts\":1857.18543128,\"msg\":\"Lost 3604 events\"}\n{\"level\":\"warn\",\"ts\":1879.982230992,\"msg\":\"Lost 6948 events\"}",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "stress_ng_tracee_syscall_hot",
+  "status": "error"
+}

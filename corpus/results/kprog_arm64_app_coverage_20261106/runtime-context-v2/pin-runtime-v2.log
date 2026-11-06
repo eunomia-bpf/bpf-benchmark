@@ -1,0 +1,62 @@
+python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/pin_runtime.py
+matched kernel/EFI/7.0.0-rc2+ stock modules/all11 kinsn/library copied into /workspaces/repository/kprog/arm64/build/app-runtime-v2
+taskset -c 16-23 make -C /workspaces/repository host-shim-arm64 BPFOPT_SHIM_BUILD_ARM64=/workspaces/repository/bpfopt/shim/build-arm64-a-context-v2
+make[1]: Entering directory '/workspaces/repository'
+install -d "/workspaces/repository/bpfopt/shim/build-arm64-a-context-v2"
+make -C "/workspaces/repository/bpfopt/shim" CC=aarch64-linux-gnu-gcc SHIM_SO="/workspaces/repository/bpfopt/shim/build-arm64-a-context-v2/libbpfrejit_shim.so" "/workspaces/repository/bpfopt/shim/build-arm64-a-context-v2/libbpfrejit_shim.so"
+make[2]: Entering directory '/workspaces/repository/bpfopt/shim'
+aarch64-linux-gnu-gcc -O2 -g -Wall -Wextra -fPIC -D_GNU_SOURCE -I../../vendor/libbpf/include/uapi -shared libbpfrejit_shim.c -o /workspaces/repository/bpfopt/shim/build-arm64-a-context-v2/libbpfrejit_shim.so -ldl -lpthread
+In file included from libbpfrejit_shim.c:1729:
+shim_reload.h: In function ‘run_step’:
+shim_reload.h:1426:42: warning: ‘%s’ directive output may be truncated writing up to 255 bytes into a region of size 241 [-Wformat-truncation=]
+ 1426 |                          "/sys/class/net/%s/ifindex", de->d_name);
+      |                                          ^~
+In file included from /usr/aarch64-linux-gnu/include/stdio.h:980,
+                 from libbpfrejit_shim.c:41:
+In function ‘snprintf’,
+    inlined from ‘reload_and_reattach’ at shim_reload.h:1425:17,
+    inlined from ‘run_step’ at shim_execute_plan.h:539:29:
+/usr/aarch64-linux-gnu/include/bits/stdio2.h:54:10: note: ‘__builtin___snprintf_chk’ output between 24 and 279 bytes into a destination of size 256
+   54 |   return __builtin___snprintf_chk (__s, __n, __USE_FORTIFY_LEVEL - 1,
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   55 |                                    __glibc_objsize (__s), __fmt,
+      |                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   56 |                                    __va_arg_pack ());
+      |                                    ~~~~~~~~~~~~~~~~~
+make[2]: Leaving directory '/workspaces/repository/bpfopt/shim'
+make[1]: Leaving directory '/workspaces/repository'
+CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
+	taskset -c 16-23 cargo build --release --target aarch64-unknown-linux-gnu \
+	--manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml --target-dir /workspaces/repository/kprog/arm64/build/app-native-link
+   Compiling utf8parse v0.2.2
+   Compiling anstyle-query v1.1.5
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling anstyle v1.0.14
+   Compiling serde_core v1.0.228
+   Compiling colorchoice v1.0.5
+   Compiling crc32fast v1.5.0
+   Compiling zmij v1.0.21
+   Compiling foldhash v0.1.5
+   Compiling strsim v0.11.1
+   Compiling anstyle-parse v1.0.0
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.2
+   Compiling clap_lex v1.1.0
+   Compiling memchr v2.8.0
+   Compiling anstream v1.0.0
+   Compiling cfg-if v1.0.4
+   Compiling hashbrown v0.15.5
+   Compiling object v0.36.7
+   Compiling serde v1.0.228
+   Compiling anyhow v1.0.102
+   Compiling clap_builder v4.6.0
+   Compiling serde_json v1.0.150
+   Compiling itoa v1.0.18
+   Compiling lazy_static v1.5.0
+   Compiling iced-x86 v1.21.0
+   Compiling indexmap v2.14.0
+   Compiling clap v4.6.1
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 24.63s
+install -m 0755 /workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link \
+	/workspaces/repository/kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link
