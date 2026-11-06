@@ -51,3 +51,38 @@ The app binding dependency was reported in the shared lane coordination file:
 unbound native code. A native-link `.proof.o` is native ELF input, not the
 simulator BPF proof required by the generation-bound path. Lane T owns that
 binding API; acceptance of separate XDP artifacts cannot close that gap.
+
+## Compact-path removal and first QEMU load
+
+The compact interpreter has been deleted, including its step table, fuel
+limit, unknown-PC exit, and zero-return completion. App generation now uses
+the same instruction-by-instruction label renderer as micro generation. The
+first BCC artifact (`biosnoop.blk_account_io_merge_bio`) now compiles and loads
+in full-system AArch64 QEMU. Its [raw loader output](label-pilot/verify/bcc_biosnoop_blk_account_io_merge_bio.stdout)
+and [table](label-pilot/table.md) record **1/1 diagnostic XDP acceptance**.
+The map/ABI/helper caveats above still apply; no app workload ran in this check.
+
+Reproduce the isolated diagnostic using the result-local Makefile:
+
+```sh
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile compile PHASE=label-pilot
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile verify PHASE=label-pilot
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile summarize PHASE=label-pilot
+```
+
+The load harness packages an existing AArch64 BusyBox/libc initramfs, the
+AArch64 reversesim loader, and compiled artifacts into image layers, exposing
+only the result directory to the guest. It uses two vCPUs, 2 GiB RAM, host CPUs
+16-19, the framework AArch64 `Image`, and QEMU TCG (`-cpu max`). It does not
+rebuild a shared kernel, module, or runtime image. `BASE_INITRAMFS` and `KERNEL`
+can be supplied to the Makefile. The default base is a local supervisor
+artifact named explicitly in that Makefile, not an application runtime image.
+Each completed compiler/loader attempt has its own raw record; rerunning
+compilation reuses completed outcomes. The compiler deadline is 120 seconds
+per case and loader deadline is 60 seconds. Failures stay in the table.
+
+Validation: Python syntax checks, the BCC generation/compile regression, and
+the QEMU load all passed. The concurrent shared formal check currently fails
+in lane V's layout migration at `KProgFormal.CrossIsaRev`: duplicate
+`GeneratedArm64Width.Width.enumToBitVec` imports. No formal file was changed
+by this compact-removal increment; lane V is resolving the migration.

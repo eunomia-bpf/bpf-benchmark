@@ -1,0 +1,3 @@
+taskset -c 16-19 python3 /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/coverage.py compile /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/label-pilot
+compile 1/1 bcc_biosnoop_blk_account_io_merge_bio: 0
+compile: 0/1 failures

@@ -153,7 +153,6 @@ def generate_source(config_path: Path, proof_dir: Path, source_dir: Path, proof:
         str(proof_dir),
         "--output-dir",
         str(source_dir),
-        "--compact",
         "--only",
         proof.name,
     ])

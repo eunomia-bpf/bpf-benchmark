@@ -1,0 +1,5 @@
+make: Entering directory '/workspaces/repository/kprog/arm64'
+python3 run_app_sim_smoke.py --keep-going --limit 1 --report-dir /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/label-pilot --output-dir /workspaces/repository/kprog/arm64/app-coverage-label-pilot
+ok bcc_biosnoop_blk_account_io_merge_bio
+app proof smoke passed: 1 generated and compiled
+make: Leaving directory '/workspaces/repository/kprog/arm64'
