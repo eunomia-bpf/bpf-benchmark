@@ -588,3 +588,16 @@ The input archive retains old/new headers, the actual negative, regression
 source and Makefile; no unfinished source-map consumer code is needed to
 reproduce this result. This fixes an accepted metadata negative; it does not
 add a whole-program TV claim.
+
+Coordinator-requested disk cleanup
+----------------------------------
+
+Removed13,398 rebuildable object/archive files and unstripped intermediate
+kernels only from T's two private kernel build directories:11.40GiB logical.
+Filesystem free space increased from24GiB to36GiB (91% to86% used). The
+compressed inventory records each removed path, size and reason. Final
+bzImage/Image, vmlinux BTF, Module.symvers, generated headers, scripts/tools
+and exported module trees remain. Both current paired-context-v2 runtime
+bundles used by C/A/R, and the small complete shared-btf-fixed and older
+paired-input-abi2 snapshots, remain intact. Shared vendor outputs, committed
+evidence and unfinished source changes were not removed.
