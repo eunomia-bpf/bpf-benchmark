@@ -292,8 +292,34 @@ def check_definedness(insns, targets, exit_addr, decode):
             else: result=value
             if ri(args[0]): write(args[0],result)
             else: store(args[0],width,result)
+        elif op in {'add','sub','adc','sbb','cmp','test'}:
+            width = ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0])
+            full = (1 << width)-1
+            values = [read_memory(arg,width)[0] if decode.is_mem(arg) else mask(incoming,arg)
+                      for arg in args]
+            zero = op in {'sub','cmp'} and args[0]==args[1] and ri(args[0])
+            known = full if zero else values[0] & values[1] & full
+            if op=='test':
+                # TEST always clears CF/OF, even with unspecified data bits.
+                flags = CF | OF | (SF if known & (1 << (width-1)) else 0)
+                if known==full: flags |= ZF
+            else:
+                # An unknown input bit may carry/borrow into every higher bit.
+                # Lower known bits survive and may be the only lanes observed.
+                unknown = full ^ known
+                result = full if not unknown else (unknown & -unknown)-1
+                flags = ALL_FLAGS if result==full else 0
+                if op!='cmp':
+                    old = alias[ri(args[0])[0]] if ri(args[0]) else False
+                    if ri(args[0]): write(args[0],result,constant=0 if zero else None)
+                    else: store(args[0],width,result)
+                    if width==64 and type(old) is int and decode.is_int(args[1]):
+                        delta = decode.parse_int(args[1])
+                        if delta >= 1 << 63: delta -= 1 << 64
+                        if op in {'add','sub'}:
+                            alias[ri(args[0])[0]] = old + (delta if op=='add' else -delta)
         elif op not in {'call','ret','jmp','nop','data16','cs'} and not op.startswith('j'):
-            zero = op in {'xor','sub','cmp','pxor','xorps'} and len(args)==2 and args[0]==args[1] and ri(args[0])
+            zero = op in {'xor','pxor','xorps'} and len(args)==2 and args[0]==args[1] and ri(args[0])
             pure = op in {'andn','bzhi','mulx','popcnt','movbe','shlx','shrx','sarx','rorx'} or (op=='imul' and len(args)==3)
             for n,arg in enumerate(args):
                 if ri(arg) and not zero and not ((n==0 and pure) or (op=='mulx' and n==1)):
@@ -317,16 +343,11 @@ def check_definedness(insns, targets, exit_addr, decode):
             elif op=='xadd':
                 for arg in args:
                     if ri(arg): write(arg)
-            elif args and ri(args[0]) and op not in {'cmp','test','bt'}:
-                old = alias[ri(args[0])[0]]
+            elif args and ri(args[0]) and op!='bt':
                 write(args[0],constant=0 if zero else None)
-                if op in {'add','sub'} and len(args)==2 and decode.is_int(args[1]) and type(old) is int:
-                    delta = decode.parse_int(args[1])
-                    if delta >= 1 << 63: delta -= 1 << 64
-                    alias[ri(args[0])[0]] = old + (delta if op=='add' else -delta)
-            if args and decode.is_mem(args[0]) and op not in {'cmp','test','bt','call'}:
+            if args and decode.is_mem(args[0]) and op!='bt':
                 store(args[0],decode.operand_width(args[0]))
-            if op in {'add','sub','adc','sbb','cmp','test','xor','and','or','neg','xadd','bzhi','popcnt','andn'}:
+            if op in {'xor','and','or','neg','xadd','bzhi','popcnt','andn'}:
                 flags = ALL_FLAGS
             elif op in {'inc','dec'}: flags = (flags & CF) | ZF | SF | OF
             elif op in {'mul','imul'}: flags = CF | OF

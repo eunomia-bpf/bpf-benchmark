@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parent
 totals = collections.defaultdict(collections.Counter)
 causes = collections.Counter()
 rows = []
-for phase in ("baseline", "cilium-baseline", "unbounded", "cilium-unbounded", "label", "cilium-label", "finite", "defined-final", "helper-effects"):
+for phase in ("baseline", "cilium-baseline", "unbounded", "cilium-unbounded", "label", "cilium-label", "finite", "defined-final", "helper-effects", "arithmetic"):
     directory = ROOT / phase
     group = phase.removeprefix("cilium-")
     for line in (directory / "programs.jsonl").read_text().splitlines():
@@ -76,7 +76,7 @@ with (ROOT / "coverage.csv").open("w") as output:
 lines = ["| Phase | Application | Available artifacts | Generation attempted | Generated | Compile done | Compiled | Artifact accepted | Verifier rejected | Load preparation failed |",
          "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
 apps = sorted(app for group, app in totals if group == "baseline")
-for group in ("baseline", "unbounded", "label", "finite", "defined-final", "helper-effects"):
+for group in ("baseline", "unbounded", "label", "finite", "defined-final", "helper-effects", "arithmetic"):
     for app in apps:
         c = totals[(group, app)]
         available = totals[("baseline", app)]["total"]

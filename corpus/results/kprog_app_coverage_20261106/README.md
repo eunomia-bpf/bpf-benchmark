@@ -551,3 +551,37 @@ All42 existing sources generate/compile and all23 helper-effect regressions pass
 proof, bound load logs and regression records. Absolute native code/stack-address
 observation and general return-target translation remain active fidelity work;
 this constructor result alone does not discharge those obligations.
+
+## Partial-width arithmetic dependency repair
+
+ADD/SUB/ADC/SBB now propagate the defined low-bit prefix instead of requiring
+all source bits to be defined before an instruction whose upper output may be
+discarded. An unknown bit can carry/borrow into every higher bit. CMP/TEST may
+produce unobserved unspecified flags; observing those flags still rejects.
+TEST's CF/OF are independently defined by the instruction. This changes only
+constructor dependency analysis; native instruction semantics remain in C.
+
+All20 arithmetic regressions pass, including low16 results, unknown high-bit
+observations, carry dependencies and private-stack arithmetic. Existing23
+helper-effect and11 return-provenance regressions pass, and all42 existing
+micro/helper-map sources generate and compile. The two opaque-value tests now
+actually observe TEST flags through a branch rather than discard them.
+
+The frozen `arithmetic` census completes1136/1136:429 generated,707 constructor
+failures retained. It newly generates Katran `balancer_ingress` and seven
+Cilium artifacts, with no previously generated artifact rejected. Generated
+counts are BCC33/34, OTel28/30, Cilium58/82, Tetragon193/809, Katran5/6 and
+Tracee112/175. These remain staged-artifact counts, not actual loaded-program
+coverage or verified application runs. The updated full table and cause rows
+are in [tables.md](tables.md) and [coverage.csv](coverage.csv).
+
+Commands: `make -f corpus/results/kprog_app_coverage_20261106/Makefile
+arithmetic-regression helper-effects-regression ret-regression`,
+`abi-positive-compile`, and `arithmetic-census`. The interrupted census resumed
+through `make -C kprog/x86 app-proofs-build` with `--offset 352` and the same
+frozen generator/proof root, preserving all earlier records. The final command
+exits1 for the retained constructor failures. Full formal checking is owned by
+lane V under the shared one-check rule; C stopped its duplicate invocation and
+does not report that invocation as a pass. [Raw arithmetic evidence](arithmetic-artifacts.tar.gz)
+contains all1136 outcomes/commands, frozen constructor/header inputs, generated
+sources,42-case compilation records and focused regression output.

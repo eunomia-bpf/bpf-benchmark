@@ -187,6 +187,13 @@ pushpop-formal:
 helper-effects-regression:
 	python3 $(HERE)/check_helper_effects.py
 
+arithmetic-regression:
+	python3 $(HERE)/check_abi_arithmetic.py
+
+arithmetic-census:
+	python3 $(HERE)/prepare_finite.py prepare arithmetic
+	$(MAKE) -C $(ROOT)/kprog/x86 app-proofs-build APP_SIM_PROOF_ARGS='--generate-only --proof-root $(HERE)/arithmetic/input --report-dir $(HERE)/arithmetic --output-dir $(ROOT)/kprog/x86/app-coverage-arithmetic --generator $(HERE)/arithmetic/simulator/kprog/x86/micro-prog/generate_micro_sim_proofs.py'
+
 helper-effects-census:
 	python3 $(HERE)/prepare_finite.py prepare helper-effects
 	$(MAKE) -C $(ROOT)/kprog/x86 app-proofs-build APP_SIM_PROOF_ARGS='--generate-only --proof-root $(HERE)/helper-effects/input --report-dir $(HERE)/helper-effects --output-dir $(ROOT)/kprog/x86/app-coverage-helper-effects --generator $(HERE)/helper-effects/simulator/kprog/x86/micro-prog/generate_micro_sim_proofs.py'

@@ -41,10 +41,10 @@ g.render_program('blind_save',blind)
 # Copying the same opaque bits into an observed value must not initialize them.
 for pair in [('push',('rbx',)),('mov',('QWORD PTR [rsp-8]','rbx'))]:
  if pair[0]=='push':
-  instructions=[pair,('pop',('rax',)),('test',('rax','rax')),('mov',('eax','2')),('ret',())]
+  instructions=[pair,('pop',('rax',)),('test',('rax','rax')),('je',('5',)),('mov',('eax','2')),('ret',())]
  else:
   instructions=[pair,('mov',('rax','QWORD PTR [rsp-8]')),('test',('rax','rax')),
-                ('mov',('eax','2')),('ret',())]
+                ('je',('5',)),('mov',('eax','2')),('ret',())]
  try:g.render_program('opaque_observed',code(instructions))
  except ValueError as error: assert 'undefined native ABI' in str(error),error
  else:raise AssertionError('opaque callee save manufactured a defined value')

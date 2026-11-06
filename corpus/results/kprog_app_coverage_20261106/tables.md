@@ -36,6 +36,12 @@
 | helper-effects | otelcol-ebpf-profiler | 30 | 30 | 28 | 0 | 0 | 0 | 0 | 0 |
 | helper-effects | tetragon | 809 | 809 | 193 | 0 | 0 | 0 | 0 | 0 |
 | helper-effects | tracee | 175 | 175 | 112 | 0 | 0 | 0 | 0 | 0 |
+| arithmetic | bcc | 34 | 34 | 33 | 0 | 0 | 0 | 0 | 0 |
+| arithmetic | cilium | 82 | 82 | 58 | 0 | 0 | 0 | 0 | 0 |
+| arithmetic | katran | 6 | 6 | 5 | 0 | 0 | 0 | 0 | 0 |
+| arithmetic | otelcol-ebpf-profiler | 30 | 30 | 28 | 0 | 0 | 0 | 0 | 0 |
+| arithmetic | tetragon | 809 | 809 | 193 | 0 | 0 | 0 | 0 | 0 |
+| arithmetic | tracee | 175 | 175 | 112 | 0 | 0 | 0 | 0 | 0 |
 
 Failure causes at this checkpoint:
 
@@ -44,18 +50,22 @@ Failure causes at this checkpoint:
 - 761 × unbounded/compile-failed: `A call to built-in function 'abort' is not supported.`
 - 288 × defined-final/generation-failed: `ValueError: undefined native ABI register rsi`
 - 288 × helper-effects/generation-failed: `ValueError: undefined native ABI register rsi`
+- 273 × arithmetic/generation-failed: `ValueError: undefined native ABI register rsi`
 - 183 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'process_call_heap': -3`
 - 176 × unbounded/compile-failed: `compiler exit 124`
 - 176 × label/compile-failed: `compiler exit 124`
+- 153 × arithmetic/generation-failed: `ValueError: undefined native ABI flags`
 - 135 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'argfilter_maps': -3`
 - 131 × baseline/compile-failed: `compiler exit 124`
 - 129 × helper-effects/generation-failed: `ValueError: native helper source stack relation unresolved`
+- 129 × arithmetic/generation-failed: `ValueError: native helper source stack relation unresolved`
 - 123 × finite/compile-failed: `compiler exit 124`
 - 121 × baseline/verifier-rejected: `invalid size of register fill`
 - 121 × finite/verifier-rejected: `invalid size of register fill`
 - 64 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'sys_32_to_64_map': -3`
 - 60 × defined-final/generation-failed: `ValueError: undefined native ABI register r14`
 - 60 × helper-effects/generation-failed: `ValueError: undefined native ABI register r14`
+- 60 × arithmetic/generation-failed: `ValueError: undefined native ABI register r14`
 - 53 × finite/compile-failed: `error in backend: Branch target out of insn range`
 - 46 × defined-final/generation-failed: `ValueError: undefined native ABI register rdx`
 - 46 × helper-effects/generation-failed: `ValueError: undefined native ABI register rdx`
@@ -64,6 +74,7 @@ Failure causes at this checkpoint:
 - 30 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'string_postfix_maps': -3`
 - 30 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'string_prefix_maps': -3`
 - 23 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'args_map': -3`
+- 23 × arithmetic/generation-failed: `ValueError: undefined native ABI register rdx`
 - 20 × finite/compile-failed: `call to '__x86_sim_unresolved_indirect_target' declared with 'error' attribute: indirect target was not eliminated by specialization`
 - 19 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'tg_conf_map': -3`
 - 19 × defined-final/generation-failed: `ValueError: undefined native ABI register rcx`
@@ -81,12 +92,14 @@ Failure causes at this checkpoint:
 - 15 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'substring_map': -3`
 - 15 × finite/verifier-rejected: `R3 invalid mem access 'scalar'`
 - 15 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'addr4lpm_maps': -3`
+- 15 × arithmetic/generation-failed: `ValueError: undefined native ABI register rcx`
 - 14 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'filter_cg': -3`
 - 13 × defined-final/generation-failed: `ValueError: undefined native ABI register esi`
 - 13 × defined-final/generation-failed: `ValueError: undefined native ABI stack value`
 - 13 × defined-final/generation-failed: `ValueError: undefined native ABI value escapes private stack`
 - 13 × helper-effects/generation-failed: `ValueError: undefined native ABI register esi`
 - 13 × helper-effects/generation-failed: `ValueError: undefined native ABI value escapes private stack`
+- 13 × arithmetic/generation-failed: `ValueError: undefined native ABI value escapes private stack`
 - 12 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'override_tasks': -3`
 - 11 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern '__config_tracing_ip_option_type': -3`
 - 11 × helper-effects/generation-failed: `ValueError: undefined native ABI stack value`
@@ -98,7 +111,10 @@ Failure causes at this checkpoint:
 - 10 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'event_data_map': -3`
 - 10 × defined-final/generation-failed: `ValueError: undefined native ABI register rbx`
 - 10 × helper-effects/generation-failed: `ValueError: undefined native ABI register rbx`
+- 10 × arithmetic/generation-failed: `ValueError: undefined native ABI register rbx`
+- 10 × arithmetic/generation-failed: `ValueError: undefined native ABI register esi`
 - 9 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'data_heap': -3`
+- 9 × arithmetic/generation-failed: `ValueError: undefined native ABI stack value`
 - 8 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern '__config_router_ipv6': -3`
 - 8 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'task_info_map': -3`
 - 6 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'execve_msg_heap_map': -3`
@@ -113,6 +129,7 @@ Failure causes at this checkpoint:
 - 4 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'CONFIG_ITER_NUM': -3`
 - 4 × defined-final/generation-failed: `ValueError: undefined native ABI register r8d`
 - 4 × helper-effects/generation-failed: `ValueError: undefined native ABI register r8d`
+- 4 × arithmetic/generation-failed: `ValueError: undefined native ABI register r8d`
 - 3 × baseline/compile-failed: `clang frontend command failed with exit code 135 (use -v to see invocation)`
 - 3 × unbounded/compile-failed: `clang frontend command failed with exit code 135 (use -v to see invocation)`
 - 3 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'start': -3`
@@ -153,6 +170,9 @@ Failure causes at this checkpoint:
 - 2 × helper-effects/generation-failed: `ValueError: undefined native ABI register r15d`
 - 2 × helper-effects/generation-failed: `ValueError: undefined native ABI register r14d`
 - 2 × helper-effects/generation-failed: `ValueError: undefined native ABI register rax`
+- 2 × arithmetic/generation-failed: `ValueError: undefined native ABI register edi`
+- 2 × arithmetic/generation-failed: `ValueError: undefined native ABI carry`
+- 2 × arithmetic/generation-failed: `ValueError: undefined native ABI register eax`
 - 1 × baseline/verifier-rejected: `math between fp pointer and 3769483511 is not allowed`
 - 1 × baseline/compile-failed: `expected identifier or '('`
 - 1 × baseline/compile-failed: `expected ';' after do/while statement`
@@ -179,3 +199,5 @@ Failure causes at this checkpoint:
 - 1 × finite/load-preparation-failed: `libbpf: failed to find BTF for extern 'proc_info_map': -3`
 - 1 × defined-final/generation-failed: `ValueError: undefined native ABI register r9d`
 - 1 × helper-effects/generation-failed: `ValueError: undefined native ABI register r9d`
+- 1 × arithmetic/generation-failed: `ValueError: undefined native ABI register r9d`
+- 1 × arithmetic/generation-failed: `ValueError: undefined native ABI register edx`

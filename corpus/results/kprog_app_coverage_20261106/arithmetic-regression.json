@@ -1,0 +1,94 @@
+[
+  {
+    "name": "add_low16",
+    "outcome": "generated"
+  },
+  {
+    "name": "add_upper_observed",
+    "outcome": "rejected",
+    "error": "undefined native ABI register eax at 0x3: ret "
+  },
+  {
+    "name": "add_carry_observed",
+    "outcome": "rejected",
+    "error": "undefined native ABI flags at 0x2: jb 3"
+  },
+  {
+    "name": "sub_low16",
+    "outcome": "generated"
+  },
+  {
+    "name": "sub_upper_observed",
+    "outcome": "rejected",
+    "error": "undefined native ABI register eax at 0x3: ret "
+  },
+  {
+    "name": "sub_carry_observed",
+    "outcome": "rejected",
+    "error": "undefined native ABI flags at 0x2: jb 3"
+  },
+  {
+    "name": "adc_low16",
+    "outcome": "generated"
+  },
+  {
+    "name": "adc_upper_observed",
+    "outcome": "rejected",
+    "error": "undefined native ABI register eax at 0x4: ret "
+  },
+  {
+    "name": "adc_carry_observed",
+    "outcome": "rejected",
+    "error": "undefined native ABI flags at 0x3: jb 4"
+  },
+  {
+    "name": "sbb_low16",
+    "outcome": "generated"
+  },
+  {
+    "name": "sbb_upper_observed",
+    "outcome": "rejected",
+    "error": "undefined native ABI register eax at 0x4: ret "
+  },
+  {
+    "name": "sbb_carry_observed",
+    "outcome": "rejected",
+    "error": "undefined native ABI flags at 0x3: jb 4"
+  },
+  {
+    "name": "memory_low16",
+    "outcome": "generated"
+  },
+  {
+    "name": "borrow_unknown_low",
+    "outcome": "rejected",
+    "error": "undefined native ABI register eax at 0x3: ret "
+  },
+  {
+    "name": "adc_unknown_carry",
+    "outcome": "rejected",
+    "error": "undefined native ABI carry at 0x1: adc edx,1"
+  },
+  {
+    "name": "cmp_discarded",
+    "outcome": "generated"
+  },
+  {
+    "name": "cmp_observed",
+    "outcome": "rejected",
+    "error": "undefined native ABI flags at 0x1: je 2"
+  },
+  {
+    "name": "cmp_self",
+    "outcome": "generated"
+  },
+  {
+    "name": "test_fixed_carry",
+    "outcome": "generated"
+  },
+  {
+    "name": "test_unknown_zero",
+    "outcome": "rejected",
+    "error": "undefined native ABI flags at 0x1: je 2"
+  }
+]
