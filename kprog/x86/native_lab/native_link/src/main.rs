@@ -3226,7 +3226,7 @@ fn arm64_select_lookup_site(
         if let Some((idx, spec)) = lookup_sites
             .iter()
             .enumerate()
-            .find(|(idx, spec)| !used[*idx] && arm64_lookup_site_matches_native_map(spec, map_name))
+            .find(|(idx, spec)| !used[*idx] && spec.map_name.as_deref() == Some(map_name))
         {
             used[idx] = true;
             return Ok((idx.to_string(), Some(idx), spec.clone()));
@@ -3234,6 +3234,23 @@ fn arm64_select_lookup_site(
 
         if let Some(spec) = arm64_lookup_map_spec(lookup_maps, map_name)? {
             return Ok((format!("map:{map_name}"), None, spec));
+        }
+
+        let mut trunc_match: Option<(usize, &LookupSiteSpec)> = None;
+        for (idx, spec) in lookup_sites.iter().enumerate() {
+            if used[idx] || !arm64_lookup_site_matches_native_map(spec, map_name) {
+                continue;
+            }
+            if let Some((existing_idx, _)) = trunc_match {
+                bail!(
+                    "arm64 bpf_map_lookup_elem native call {native_call_index} in {sym_name} uses map {map_name:?}, which truncation-matches multiple lookup_sites entries: {existing_idx} and {idx}"
+                );
+            }
+            trunc_match = Some((idx, spec));
+        }
+        if let Some((idx, spec)) = trunc_match {
+            used[idx] = true;
+            return Ok((idx.to_string(), Some(idx), spec.clone()));
         }
 
         if let Some(spec) = arm64_generic_lookup_site(generic_target_addr, Some(map_name)) {
@@ -3260,18 +3277,46 @@ fn arm64_select_lookup_site(
 }
 
 fn arm64_select_map_call_site(
-    sites_len: usize,
+    sites: &[UpdateSiteSpec],
     ordinal: usize,
     map_name: Option<&String>,
     seen_by_map: &mut HashMap<String, usize>,
-) -> Option<usize> {
-    if ordinal < sites_len {
-        if let Some(name) = map_name {
-            seen_by_map.entry(name.clone()).or_insert(ordinal);
-        }
-        return Some(ordinal);
+) -> Result<Option<usize>> {
+    let Some(name) = map_name else {
+        return Ok((ordinal < sites.len()).then_some(ordinal));
+    };
+    // A matching ordinal preserves distinct per-call metadata for one map.
+    let exact = if ordinal < sites.len() && sites[ordinal].map_name.as_ref() == Some(name) {
+        Some(ordinal)
+    } else {
+        sites.iter().position(|site| site.map_name.as_ref() == Some(name))
+    };
+    if let Some(index) = exact {
+        seen_by_map.entry(name.clone()).or_insert(index);
+        return Ok(Some(index));
     }
-    map_name.and_then(|name| seen_by_map.get(name).copied())
+    let mut selected = None;
+    for (index, site) in sites.iter().enumerate() {
+        if site.map_name.as_deref().is_some_and(|source|
+            arm64_truncate_bpf_obj_name(source) == arm64_truncate_bpf_obj_name(name))
+        {
+            if selected.is_some() {
+                bail!(
+                    "arm64 bpf_map_update_elem native call {ordinal} uses map {name:?}, which truncation-matches multiple update_sites entries"
+                );
+            }
+            selected = Some(index);
+        }
+    }
+    if let Some(index) = selected {
+        seen_by_map.entry(name.clone()).or_insert(index);
+        return Ok(Some(index));
+    }
+    if ordinal < sites.len() && sites[ordinal].map_name.is_none() {
+        seen_by_map.entry(name.clone()).or_insert(ordinal);
+        return Ok(Some(ordinal));
+    }
+    Ok(seen_by_map.get(name).copied())
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -3371,7 +3416,7 @@ fn build_arm64_helper_call(
         let ordinal = *update_call_counter;
         let map_name = reg_map_names[0].as_ref();
         let site_index =
-            arm64_select_map_call_site(update_sites.len(), ordinal, map_name, update_site_by_map);
+            arm64_select_map_call_site(update_sites, ordinal, map_name, update_site_by_map)?;
         *update_call_counter += 1;
         if let Some(site_index) = site_index {
             let spec = &update_sites[site_index];
@@ -5228,6 +5273,90 @@ mod tests {
         assert_eq!(site_index, None);
         assert!(matches!(spec.kind, LookupKind::PerCpuArray));
         assert_eq!(spec.max_entries, 4);
+    }
+
+    #[test]
+    fn arm64_lookup_selection_exact_name_beats_earlier_truncation() {
+        let sites = vec![
+            arm64_test_lookup_spec(LookupKind::Hash, "abcdefghijklmno_other"),
+            arm64_test_lookup_spec(LookupKind::Array, "abcdefghijklmno_exact"),
+        ];
+        let mut used = vec![false; 2];
+        let (_, index, _) = arm64_select_lookup_site(&sites, &HashMap::new(), &mut used,
+            0, Some("abcdefghijklmno_exact"), "entry", 0xfeed).unwrap();
+        assert_eq!(index, Some(1));
+        assert_eq!(used, [false, true]);
+    }
+
+    #[test]
+    fn arm64_lookup_selection_rejects_ambiguous_truncation_without_consuming() {
+        let sites = vec![
+            arm64_test_lookup_spec(LookupKind::Hash, "abcdefghijklmno_first"),
+            arm64_test_lookup_spec(LookupKind::Array, "abcdefghijklmno_second"),
+        ];
+        let mut used = vec![false; 2];
+        let err = arm64_select_lookup_site(&sites, &HashMap::new(), &mut used,
+            0, Some("abcdefghijklmno"), "entry", 0xfeed).unwrap_err();
+        assert!(err.to_string().contains("truncation-matches multiple"));
+        assert_eq!(used, [false, false]);
+        used[0] = true;
+        let (_, index, _) = arm64_select_lookup_site(&sites, &HashMap::new(), &mut used,
+            0, Some("abcdefghijklmno"), "entry", 0xfeed).unwrap();
+        assert_eq!(index, Some(1));
+        assert_eq!(used, [true, true]);
+    }
+
+    fn arm64_test_update_spec(map_name: Option<&str>) -> UpdateSiteSpec {
+        UpdateSiteSpec {
+            kind: UpdateKind::Call, target_addr: 0x1234, value_size: 8,
+            value_offset: 0, max_entries: 0, elem_size: 0,
+            percpu_base_addr: 0, map_name: map_name.map(str::to_owned),
+        }
+    }
+
+    #[test]
+    fn arm64_update_selection_exact_name_beats_ordinal_and_truncation() {
+        let sites = vec![arm64_test_update_spec(Some("abcdefghijklmno_other")),
+            arm64_test_update_spec(Some("abcdefghijklmno_exact"))];
+        let name = "abcdefghijklmno_exact".to_string();
+        let mut seen = HashMap::new();
+        assert_eq!(arm64_select_map_call_site(&sites, 0, Some(&name), &mut seen).unwrap(), Some(1));
+        assert_eq!(arm64_select_map_call_site(&sites, 3, Some(&name), &mut seen).unwrap(), Some(1));
+        assert_eq!(seen[&name], 1);
+    }
+
+    #[test]
+    fn arm64_update_selection_preserves_distinct_calls_for_the_same_map() {
+        let sites = vec![arm64_test_update_spec(Some("same")),
+            arm64_test_update_spec(Some("same"))];
+        let name = "same".to_string();
+        let mut seen = HashMap::new();
+        assert_eq!(arm64_select_map_call_site(&sites, 1, Some(&name), &mut seen).unwrap(), Some(1));
+    }
+
+    #[test]
+    fn arm64_update_selection_rejects_ambiguous_truncation_without_consuming() {
+        let sites = vec![arm64_test_update_spec(Some("abcdefghijklmno_first")),
+            arm64_test_update_spec(Some("abcdefghijklmno_second"))];
+        let name = "abcdefghijklmno".to_string();
+        let mut seen = HashMap::new();
+        let err = arm64_select_map_call_site(&sites, 0, Some(&name), &mut seen).unwrap_err();
+        assert!(err.to_string().contains("truncation-matches multiple"));
+        assert!(seen.is_empty());
+        assert_eq!(arm64_select_map_call_site(&sites[..1], 3, Some(&name), &mut seen).unwrap(), Some(0));
+    }
+
+    #[test]
+    fn arm64_update_selection_does_not_use_a_different_named_map() {
+        let sites = vec![arm64_test_update_spec(Some("other"))];
+        let name = "actual".to_string();
+        let mut seen = HashMap::new();
+        assert_eq!(arm64_select_map_call_site(&sites, 0, Some(&name), &mut seen).unwrap(), None);
+        assert!(seen.is_empty());
+        let unnamed = vec![arm64_test_update_spec(None)];
+        assert_eq!(arm64_select_map_call_site(&unnamed, 0, Some(&name), &mut seen).unwrap(), Some(0));
+        assert_eq!(arm64_select_map_call_site(&unnamed, 3, Some(&name), &mut seen).unwrap(), Some(0));
+        assert_eq!(arm64_select_map_call_site(&sites, 0, None, &mut seen).unwrap(), Some(0));
     }
 
     #[test]
