@@ -1,0 +1,24 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+cd ../formal && lake env lean -R ../tv -o ../tv/build/PrivateSpills.olean ../tv/PrivateSpills.lean
+'KProgTV.PrivateSpills.two_spills_preserve_guest' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.PrivateSpills.guest_bytes_preserved' depends on axioms: [propext, Quot.sound]
+'KProgTV.PrivateSpills.guest_reads_preserved' depends on axioms: [propext, Quot.sound]
+'KProgTV.PrivateSpills.spill_word' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+'KProgTV.PrivateSpills.upper_spill_reload' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+'KProgTV.PrivateSpills.erased_event_private' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv ../tv/SimpleEntryCertificate.lean
+'KProgTV.SimpleEntryCertificate.native_full_state' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleEntryCertificate.proof_first_load_spill' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleEntryCertificate.proof_second_load_spill' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleEntryCertificate.proof_prefix_full_state' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEntryCertificate.entry_guest_trace' depends on axioms: [propext, Quot.sound]
+make: Leaving directory '/workspaces/repository/kprog/tv'

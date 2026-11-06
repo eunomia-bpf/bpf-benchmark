@@ -476,3 +476,23 @@ kernel-check-arm64-all: build-arm64/all-modules-init build-arm64/test-binding-ke
 		> build-arm64/all-kernel.log 2>&1
 	cat build-arm64/all-kernel.log
 	rg -q '^kernel binding regression: PASS' build-arm64/all-kernel.log
+
+.PHONY: simple-entry-check simple-entry-certificate
+simple-entry-check: simple-platform-check
+	$(MAKE) simple-entry-certificate
+
+SIMPLE_ENTRY_DIR ?= build/simple-arm64
+simple-entry-certificate: private-spills-check
+	cd ../formal && LEAN_PATH=../tv/build:../tv/$(SIMPLE_ENTRY_DIR) lake env lean -R ../tv/$(SIMPLE_ENTRY_DIR) \
+		-o ../tv/$(SIMPLE_ENTRY_DIR)/SimpleCompiled.olean ../tv/$(SIMPLE_ENTRY_DIR)/SimpleCompiled.lean
+	cd ../formal && LEAN_PATH=../tv/build:../tv/$(SIMPLE_ENTRY_DIR) lake env lean -R ../tv/$(SIMPLE_ENTRY_DIR) \
+		-o ../tv/$(SIMPLE_ENTRY_DIR)/SimplePlatform.olean ../tv/$(SIMPLE_ENTRY_DIR)/SimplePlatform.lean
+	cd ../formal && LEAN_PATH=../tv/build:../tv/$(SIMPLE_ENTRY_DIR) lake env lean -R ../tv ../tv/SimpleEntryCertificate.lean
+
+.PHONY: simple-entry-negative-check
+simple-entry-negative-check: simple-entry-check
+	python3 test_entry_artifacts.py
+
+.PHONY: private-spills-check
+private-spills-check:
+	cd ../formal && lake env lean -R ../tv -o ../tv/build/PrivateSpills.olean ../tv/PrivateSpills.lean

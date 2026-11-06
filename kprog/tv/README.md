@@ -470,3 +470,32 @@ handoff was complete; final images, vmlinux/BTF, symvers, generated headers,
 tools and the earlier runtime pairs remain. A later kernel rebuild after
 that cleanup requires recompilation. These runtime checks and captures do not
 substitute for the continuing whole-program translation-validation proof.
+
+`simple-entry-negative-check` validates the actual simple-program entry
+instruction and the entire seven-instruction compiled entry prefix. The
+native theorem retains every architectural field and both possible read
+faults. The compiled theorem quantifies over every BPF environment and
+complete input state; it preserves all registers except the actual three
+outputs, checks the real two spills and reloads, and records all six ordered
+physical memory effects. Reloaded values follow from the stores.
+
+`PrivateSpills.lean` proves the two eight-byte slots preserve every guest
+byte, initialization bit, permission and read outside their16-byte private
+frame, including wraparound. The projection erases only complete reads/writes
+to those exact slots; every erased byte is proved private. Atomic, helper,
+exclusive/order and fault effects remain. `entry_translation` composes real
+native/BPF executions with complete resulting states, equal guest memory and
+exactly equal projected guest reads, and includes the private-effect proof.
+
+Its explicit premises describe a mapped XDP context, the kernel’s private BPF
+frame and their disjointness, plus the same entry memory. They insert no
+executable guard or initialization. The platform/ABI relation must establish
+them. The native entry profile is explicitly Cortex-A72’s two-access LDP;
+CPU-profile metadata binding remains part of the continuing composition work.
+Eight mutations of the actual extracted streams reject, covering native pair
+width/register/access and physical pointer width/end offset/spill slot/reload
+register/access. The unchanged streams pass. Entry/read/fault slice axioms
+are propext/Quot.sound; the composed spill results additionally use
+Classical.choice/Lean.ofReduceBool. No passing result contains sorryAx.
+This entry-prefix certificate is now available for composition with the
+existing guard/store certificates and the real return path.

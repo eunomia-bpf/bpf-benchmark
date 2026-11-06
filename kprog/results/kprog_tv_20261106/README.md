@@ -770,3 +770,31 @@ reported earlier as pending have independently passed in A’s source-map
 result, along with all29 micro programs. The whole-program ISA translation
 validation and explicit CPU-profile binding continue separately from these
 source-map/runtime/capture checks.
+
+Actual entry prefix with justified private spills
+------------------------------------------------
+
+The actual LDP at native PC0 and complete physical BPF prefix0–6 now have
+universal full-state execution certificates. The native result covers either
+read fault, retaining the first ordered read when the second faults. For
+valid mapped context/private-frame inputs, the BPF result contains both
+actual context reads, two spills and two reloads, with exact registers,
+memory and PC7. Every BPF environment is covered because this prefix uses
+no external operation. Native entry uses the explicit Cortex-A72 pair profile.
+
+The private-frame proof derives reload values and proves all guest bytes,
+initialization bits, permissions and reads remain unchanged, including
+wrapping addresses. Every erased effect is an exact eight-byte read/write
+inside one of the two actual slots. Faults, helpers, atomics and exclusive
+ordering effects cannot be erased. The final `entry_translation` theorem
+includes real executions, complete post-states, guest-memory agreement,
+ordered guest-trace equality and the privacy proof for every hidden effect.
+
+The unchanged actual streams pass; all eight changed native/physical byte
+streams reject through the same canonical decode assertions. Final logical
+axioms are propext/Classical.choice/Lean.ofReduceBool/Quot.sound, without
+sorryAx. Earlier syntax, reduction and proof-development failures are kept
+in the development archive. Platform mapped-context/frame/disjointness and
+entry-memory facts remain explicit premises to be established by the kernel
+ABI relation. Guard/store/return composition and explicit CPU-profile binding
+continue before this becomes a whole-program certificate.
