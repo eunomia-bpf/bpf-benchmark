@@ -298,6 +298,9 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 				const struct native_lab_reloc_record *r =
 					&blobs[blob_id].relocs[i];
 				switch (r->kind) {
+				case NATIVE_LAB_RELOC_READONLY_DATA:
+					/* Immutable-data binding metadata; emits no patch. */
+					break;
 				case NATIVE_LAB_RELOC_MAP_POINTER:
 				case NATIVE_LAB_RELOC_MAP_VALUE:
 				case NATIVE_LAB_RELOC_HELPER_POINTER:

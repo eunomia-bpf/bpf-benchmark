@@ -46,3 +46,14 @@ SEC("xdp") int tv_proof_private(struct xdp_md *ctx)
     (void)ctx;
     return private_zero == 0 ? 2 : 0;
 }
+
+#ifndef TV_READONLY_WORD
+#define TV_READONLY_WORD 0x1122334400000002ULL
+#endif
+static const __u64 tv_readonly_data[2] = {TV_READONLY_WORD, 0xaabbccdd00000000ULL};
+SEC("xdp") int tv_proof_readonly(struct xdp_md *ctx)
+{
+    (void)ctx;
+    const volatile __u64 *data = tv_readonly_data;
+    return (__u32)(data[0] + data[1]);
+}

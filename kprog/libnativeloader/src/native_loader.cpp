@@ -716,7 +716,7 @@ void append_u64_le(std::vector<uint8_t> &out, uint64_t v)
 bool native_lab_reloc_kind_supported(uint32_t kind)
 {
     if (kind == NATIVE_LAB_RELOC_MAP_POINTER || kind == NATIVE_LAB_RELOC_MAP_VALUE ||
-        kind == NATIVE_LAB_RELOC_HELPER_POINTER) return true;
+        kind == NATIVE_LAB_RELOC_HELPER_POINTER || kind == NATIVE_LAB_RELOC_READONLY_DATA) return true;
 #if defined(__aarch64__)
     return kind == kNativeLabRelocHelperCallArm64 ||
            kind == kNativeLabRelocHelperCallArm64Bl26 ||
@@ -729,6 +729,8 @@ bool native_lab_reloc_kind_supported(uint32_t kind)
 size_t native_lab_reloc_slot_bytes(uint32_t kind)
 {
     switch (kind) {
+    case NATIVE_LAB_RELOC_READONLY_DATA:
+        return 1; // Placement anchor in chunk zero; metadata does not patch it.
     case NATIVE_LAB_RELOC_MAP_POINTER:
     case NATIVE_LAB_RELOC_MAP_VALUE:
     case NATIVE_LAB_RELOC_HELPER_POINTER:
@@ -4714,8 +4716,32 @@ void validate_data_map_layout(const btf *proof_btf, uint32_t proof_id,
  * are not the application's maps, even when names and shapes are identical.
  * Relink those FD operands to the original program before sealing the proof.
  */
+void bind_readonly_data_map(int fd, LinkedBlob &linked)
+{
+    const auto map = load_map_info(fd);
+    if (map.type != BPF_MAP_TYPE_ARRAY || map.key_size != sizeof(uint32_t) ||
+        map.max_entries != 1 || !map.value_size || map.value_size > linked.blob.size() ||
+        !(map.map_flags & BPF_F_RDONLY_PROG))
+        fail("new proof data map is not a read-only single-value ARRAY");
+    uint32_t key = 0;
+    std::vector<uint8_t> bytes(map.value_size);
+    if (bpf_map_lookup_elem(fd, &key, bytes.data()))
+        fail("read proof data map: " + std::string(std::strerror(errno)));
+    const auto position = std::search(linked.blob.begin(), linked.blob.end(), bytes.begin(), bytes.end());
+    if (position == linked.blob.end())
+        fail("readonly proof data does not match native bytes");
+    if (std::search(position + 1, linked.blob.end(), bytes.begin(), bytes.end()) != linked.blob.end())
+        fail("readonly proof data has ambiguous native address extents");
+    const auto offset = static_cast<uint64_t>(position - linked.blob.begin());
+    if (offset > UINT32_MAX) fail("readonly native data address exceeds binding format");
+    append_u32_le(linked.relocs, 0);
+    append_u32_le(linked.relocs, NATIVE_LAB_RELOC_READONLY_DATA);
+    append_u64_le(linked.relocs, map.id | (offset << 32));
+    linked.relocated_map_ids.push_back(map.id);
+}
+
 void bind_raw_proof_maps(std::vector<bpf_insn> &proof, const CompanionLoad &companion,
-    std::vector<std::unique_ptr<ScopedFd>> &pins)
+    std::vector<std::unique_ptr<ScopedFd>> &pins, LinkedBlob &linked)
 {
     std::unordered_map<uint32_t, int> replacements;
     std::unordered_set<uint32_t> checked_layouts;
@@ -4734,8 +4760,23 @@ void bind_raw_proof_maps(std::vector<bpf_insn> &proof, const CompanionLoad &comp
                     fail("raw proof map name has ambiguous original identities: " + name);
                 selected = &source;
             }
-            if (!selected)
-                fail("raw proof map has no original-program identity: " + name);
+            if (!selected) {
+                if (insn.src_reg != BPF_PSEUDO_MAP_VALUE)
+                    fail("raw proof map has no original-program identity: " + name);
+                const auto existing = replacements.find(actual.id);
+                if (existing != replacements.end()) {
+                    insn.imm = existing->second;
+                } else {
+                    auto fd = std::make_unique<ScopedFd>(bpf_map_get_fd_by_id(actual.id));
+                    if (fd->get() < 0) fail("pin readonly proof map: " + std::string(std::strerror(errno)));
+                    bind_readonly_data_map(fd->get(), linked);
+                    insn.imm = fd->get();
+                    replacements.emplace(actual.id, fd->get());
+                    pins.push_back(std::move(fd));
+                }
+                index++;
+                continue;
+            }
             if (actual.type != static_cast<uint32_t>(selected->type) ||
                 actual.key_size != selected->key_size || actual.value_size != selected->value_size ||
                 actual.max_entries != selected->max_entries)
@@ -4763,7 +4804,7 @@ void bind_raw_proof_maps(std::vector<bpf_insn> &proof, const CompanionLoad &comp
     }
 }
 
-SimulatorObject prepare_simulator_proof(
+SimulatorObject open_simulator_proof(
     const std::filesystem::path &path, const std::string &entry,
     const bpf_prog_info &original, const CompanionLoad &companion,
     std::vector<bpf_insn> &proof)
@@ -4789,7 +4830,6 @@ SimulatorObject prepare_simulator_proof(
             fail("set simulator proof entry: " + libbpf_error_string(err));
         }
     }
-    std::unordered_set<uint32_t> reused_maps;
     bpf_map *map;
     bpf_object__for_each_map(map, raw) {
         const std::string name = bpf_map__name(map);
@@ -4808,6 +4848,8 @@ SimulatorObject prepare_simulator_proof(
             }
         }
         if (!identity) {
+            if (bpf_map__is_internal(map) && (bpf_map__map_flags(map) & BPF_F_RDONLY_PROG))
+                continue; // Native byte/address and frozen-map binding follows native linking.
             /* Objects can declare maps unused by the selected entry. Never
              * create a replacement app map; a referenced missing map makes
              * prepare fail instead of supplying invented specialization data.
@@ -4837,12 +4879,34 @@ SimulatorObject prepare_simulator_proof(
         if (err) {
             fail("reuse simulator proof map " + name + ": " + libbpf_error_string(err));
         }
-        reused_maps.insert(*identity);
+    }
+    const auto *instructions = bpf_program__insns(selected);
+    const auto count = bpf_program__insn_cnt(selected);
+    if (!instructions || !count) fail("simulator proof is empty: " + entry);
+    proof.assign(instructions, instructions + count);
+    return object;
+}
+
+void finish_simulator_proof(bpf_object *raw, const std::string &entry,
+    std::vector<bpf_insn> &proof, LinkedBlob &linked)
+{
+    std::unordered_set<uint32_t> reused_maps, new_data_maps;
+    std::vector<bpf_map *> new_data;
+    bpf_map *map;
+    bpf_object__for_each_map(map, raw) {
+        if (bpf_map__fd(map) >= 0) reused_maps.insert(load_map_info(bpf_map__fd(map)).id);
+        else if (bpf_map__is_internal(map) && (bpf_map__map_flags(map) & BPF_F_RDONLY_PROG))
+            new_data.push_back(map);
     }
     const int err = bpf_object__prepare(raw);
     if (err) {
-        fail("relocate simulator proof " + path.string() + ": " + libbpf_error_string(err));
+        fail("relocate simulator proof " + entry + ": " + libbpf_error_string(err));
     }
+    for (bpf_map *data : new_data) {
+        if (bpf_map__fd(data) < 0) fail("readonly proof map was not prepared");
+        new_data_maps.insert(load_map_info(bpf_map__fd(data)).id);
+    }
+    bpf_program *selected = bpf_object__find_program_by_name(raw, entry.c_str());
     const auto *instructions = bpf_program__insns(selected);
     const size_t count = bpf_program__insn_cnt(selected);
     if (!instructions || !count) {
@@ -4858,12 +4922,15 @@ SimulatorObject prepare_simulator_proof(
         if (index + 1 >= proof.size()) fail("truncated simulator wide immediate: " + entry);
         if (insn.src_reg == BPF_PSEUDO_MAP_FD || insn.src_reg == BPF_PSEUDO_MAP_VALUE) {
             const auto identity = load_map_info(insn.imm).id;
-            if (!reused_maps.contains(identity))
-                fail("simulator map load lacks original-program identity: " + entry);
+            if (!reused_maps.contains(identity)) {
+                if (!new_data_maps.contains(identity) || insn.src_reg != BPF_PSEUDO_MAP_VALUE)
+                    fail("simulator map load lacks original-program identity: " + entry);
+                bind_readonly_data_map(insn.imm, linked);
+                reused_maps.insert(identity);
+            }
         }
         index++;
     }
-    return object;
 }
 
 void close_fd_vector(std::vector<int> &fds)
@@ -4983,10 +5050,8 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         if (!proof_insns.empty()) {
             fail("simulator proof supplied both as raw instructions and manifest object");
         }
-        simulator_object = prepare_simulator_proof(simulator_object_path,
+        simulator_object = open_simulator_proof(simulator_object_path,
             simulator_program, prog_info, companion, proof_insns);
-    } else {
-        bind_raw_proof_maps(proof_insns, companion, proof_map_fds);
     }
     const auto native_data_symbols_start = std::chrono::steady_clock::now();
     {
@@ -5008,6 +5073,10 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         native_object_path,
         symbol_name,
         companion);
+    if (simulator_object)
+        finish_simulator_proof(simulator_object.get(), simulator_program, proof_insns, linked);
+    else
+        bind_raw_proof_maps(proof_insns, companion, proof_map_fds, linked);
     out.selected_native_object = native_object_path.string();
     out.selected_symbol = symbol_name;
 

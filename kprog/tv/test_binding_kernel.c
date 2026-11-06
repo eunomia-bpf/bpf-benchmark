@@ -229,18 +229,19 @@ static void group_regressions(void)
 
 struct test_reloc { uint32_t offset, kind; uint64_t target; };
 
-static void seal_single_artifact(const unsigned char *code, size_t size,
+static uint32_t seal_chunk_artifact(unsigned slot, unsigned chunks, unsigned offset,
+		unsigned total, const unsigned char *code, size_t size,
 		const struct bpf_insn *body, size_t count,
-		const struct test_reloc *relocs, size_t reloc_count)
+		const struct test_reloc *relocs, size_t reloc_count, int error)
 {
-	test_slot = 0;
+	test_slot = slot;
 	upload("", code, size, 0);
 	upload(".relocs", relocs, reloc_count * sizeof(*relocs), 0);
 	upload(".proof", body, count * sizeof(*body), 0);
 	struct native_lab_binding b = {
 		.version = 1, .arch = TV_ARCH, .abi_version = 1,
-		.chunk_count = 1, .native_size = size,
-		.total_native_size = size, .proof_insns = count, .reloc_count = reloc_count,
+		.blob_id = slot, .chunk_count = chunks, .chunk_offset = offset, .native_size = size,
+		.total_native_size = total, .proof_insns = count, .reloc_count = reloc_count,
 		.prog_type = BPF_PROG_TYPE_XDP, .snapshot_generation = generation(),
 	};
 	size_t reloc_bytes = reloc_count * sizeof(*relocs);
@@ -252,8 +253,80 @@ static void seal_single_artifact(const unsigned char *code, size_t size,
 	if (reloc_bytes)
 		memcpy(envelope + sizeof(b) + size, relocs, reloc_bytes);
 	memcpy(envelope + sizeof(b) + size + reloc_bytes, body, count * sizeof(*body));
-	upload(".binding", envelope, length, 0);
+	upload(".binding", envelope, length, error);
 	free(envelope);
+	return generation();
+}
+
+static void seal_artifact_expect(const unsigned char *code, size_t size,
+		const struct bpf_insn *body, size_t count,
+		const struct test_reloc *relocs, size_t reloc_count, int error)
+{
+	seal_chunk_artifact(0, 1, 0, size, code, size, body, count, relocs, reloc_count, error);
+}
+
+static void seal_single_artifact(const unsigned char *code, size_t size,
+		const struct bpf_insn *body, size_t count,
+		const struct test_reloc *relocs, size_t reloc_count)
+{
+	seal_artifact_expect(code, size, body, count, relocs, reloc_count, 0);
+}
+
+static void readonly_data_regressions(void)
+{
+	LIBBPF_OPTS(bpf_map_create_opts, options, .map_flags = BPF_F_RDONLY_PROG);
+	int fd = bpf_map_create(BPF_MAP_TYPE_ARRAY, "tv_readonly", 4, 8, 1, &options);
+	int peer = bpf_map_create(BPF_MAP_TYPE_ARRAY, "tv_readonly", 4, 8, 1, &options);
+	uint32_t key = 0;
+	const unsigned char value[] = {2,0,0,0,0x91,0x72,0x53,0x34};
+	if (fd < 0 || peer < 0 || bpf_map_update_elem(fd, &key, value, BPF_ANY) ||
+	    bpf_map_update_elem(peer, &key, value, BPF_ANY))
+		fatal("create native readonly data maps");
+	struct bpf_map_info info = {0}, peer_info = {0};
+	uint32_t length = sizeof(info);
+	if (bpf_obj_get_info_by_fd(fd, &info, &length) ||
+	    bpf_obj_get_info_by_fd(peer, &peer_info, &length))
+		fatal("readonly map IDs");
+#if defined(__aarch64__)
+	/* ldr w7,[pc+8]; b pc+12; eight exact immutable data bytes */
+	unsigned char code[] = {0x47,0,0,0x18, 3,0,0,0x14, 2,0,0,0,0x91,0x72,0x53,0x34};
+#else
+	/* mov eax,[rip+2]; jmp +8; eight exact immutable data bytes */
+	unsigned char code[] = {0x8b,5,2,0,0,0, 0xeb,8, 2,0,0,0,0x91,0x72,0x53,0x34};
+#endif
+	struct bpf_insn body[] = {
+		{ .code = BPF_LD | BPF_DW | BPF_IMM, .dst_reg = 1,
+		  .src_reg = BPF_PSEUDO_MAP_VALUE, .imm = fd }, {},
+		{ .code = BPF_LDX | BPF_W | BPF_MEM, .src_reg = 1 },
+	};
+	struct test_reloc reloc = { .kind = NATIVE_LAB_RELOC_READONLY_DATA,
+		.target = info.id | ((uint64_t)8 << 32) };
+	seal_artifact_expect(code, sizeof(code), body, 3, &reloc, 1, EINVAL);
+	puts("unfrozen proof readonly data: PASS (seal rejected)");
+	if (bpf_map_freeze(fd) || bpf_map_freeze(peer)) fatal("freeze proof readonly data");
+	seal_single_artifact(code, sizeof(code), body, 3, &reloc, 1);
+	load(generation(), 0, 0, "frozen exact native readonly data");
+	const struct bpf_insn prefix = { .code = BPF_ALU64 | BPF_MOV | BPF_K };
+	const uint32_t order[] = {0, 1};
+	uint32_t generations[2];
+	generations[0] = seal_chunk_artifact(0, 2, 0, sizeof(code), code, 12, &prefix, 1, &reloc, 1, 0);
+	generations[1] = seal_chunk_artifact(1, 2, 12, sizeof(code), code + 12, 4, body, 3, NULL, 0, 0);
+	load_group(order, generations, 2, 0, 0, "readonly native extent crosses chunk boundary");
+	code[12] ^= 1;
+	generations[1] = seal_chunk_artifact(1, 2, 12, sizeof(code), code + 12, 4, body, 3, NULL, 0, 0);
+	load_group(order, generations, 2, 0, 1, "readonly data mismatch in a different chunk");
+	code[12] ^= 1;
+	code[8] ^= 1;
+	seal_single_artifact(code, sizeof(code), body, 3, &reloc, 1);
+	load(generation(), 0, 1, "readonly data differs from native bytes");
+	code[8] ^= 1;
+	reloc.target = info.id | ((uint64_t)7 << 32);
+	seal_single_artifact(code, sizeof(code), body, 3, &reloc, 1);
+	load(generation(), 0, 1, "readonly native address mismatch");
+	reloc.target = peer_info.id | ((uint64_t)8 << 32);
+	seal_single_artifact(code, sizeof(code), body, 3, &reloc, 1);
+	load(generation(), 0, 1, "readonly map identity swap with identical values");
+	if (close(fd) || close(peer)) fatal("close proof readonly data maps");
 }
 
 static void seal_single_proof(const struct bpf_insn *body, size_t count)
@@ -379,6 +452,37 @@ static void helper_pointer_regressions(void)
 	load(generation(), 0, 1, "helper pointer literal must be an exact zero slot");
 }
 
+static void readonly_overlap_regression(void)
+{
+	LIBBPF_OPTS(bpf_map_create_opts, options, .map_flags = BPF_F_RDONLY_PROG);
+	int fd = bpf_map_create(BPF_MAP_TYPE_ARRAY, "tv_ro_overlap", 4, 8, 1, &options);
+	uint32_t key = 0;
+	uint64_t zero = 0;
+	if (fd < 0 || bpf_map_update_elem(fd, &key, &zero, BPF_ANY) || bpf_map_freeze(fd))
+		fatal("create overlapping readonly fixture");
+	struct bpf_map_info info = {0};
+	uint32_t length = sizeof(info);
+	if (bpf_obj_get_info_by_fd(fd, &info, &length)) fatal("overlap map ID");
+#if defined(__aarch64__)
+	const unsigned char code[] = {0x47,0,0x80,0xd2, 3,0,0,0x14, 0,0,0,0,0,0,0,0};
+#else
+	const unsigned char code[] = {0xb8,2,0,0,0, 0xeb,9,0x90, 0,0,0,0,0,0,0,0};
+#endif
+	const struct test_reloc relocs[] = {
+		{ .kind = NATIVE_LAB_RELOC_READONLY_DATA, .target = info.id | ((uint64_t)8 << 32) },
+		{ .offset = 8, .kind = NATIVE_LAB_RELOC_HELPER_POINTER,
+		  .target = helper_address("bpf_user_rnd_u32") },
+	};
+	const struct bpf_insn body[] = {
+		{ .code = BPF_LD | BPF_DW | BPF_IMM, .dst_reg = 1,
+		  .src_reg = BPF_PSEUDO_MAP_VALUE, .imm = fd }, {},
+		{ .code = BPF_JMP | BPF_CALL, .imm = BPF_FUNC_get_prandom_u32 }, proof,
+	};
+	seal_single_artifact(code, sizeof(code), body, 4, relocs, 2);
+	load(generation(), 0, 1, "readonly native extent overlaps a JIT relocation");
+	if (close(fd)) fatal("close overlapping readonly map");
+}
+
 static void helper_map_regressions(void)
 {
 	const struct bpf_insn helper[] = {
@@ -492,6 +596,8 @@ int main(void)
 	helper_map_regressions();
 	external_identity_regressions();
 	helper_pointer_regressions();
+	readonly_data_regressions();
+	readonly_overlap_regression();
 	if (close(module_fd))
 		fatal("close module BTF");
 	puts("kernel binding regression: PASS");

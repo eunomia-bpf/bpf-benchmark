@@ -119,7 +119,7 @@ alongside the existing `program`, `native_object` and `symbol` fields. Paths
 resolve relative to the manifest. The explicit BPF entry must have the original
 program type. `bpf_object__prepare` performs real ELF/CO-RE relocations; referenced
 maps reuse original-program identities with matching layouts, including internal
-maps. Missing referenced maps fail; unused declarations do not create maps.
+maps. Unmatched writable declarations are disabled; referencing one fails.
 Internal maps also require the same BTF DATASEC section, byte extent and
 ordered variable names, offsets and sizes. This is checked before
 `bpf_map__reuse_fd` replaces the simulator's map metadata. Raw proof maps from
@@ -135,6 +135,22 @@ through the bound load and shared across repeated references. A second object
 with identical declarations cannot authorize a second map's state. On x86,
 native chunks and their tails may have arbitrary byte lengths; only AArch64
 requires word alignment.
+
+An unmatched compiler readonly data map can represent immutable native data.
+The loader links native code before final proof preparation, then matches the
+actual frozen map value to a unique exact native-byte extent. Relocation
+metadata kind 8 records `offset=0` and
+`target=map_id | (global_native_byte_offset << 32)`. The kernel pins that exact
+single-entry ARRAY, requires `BPF_F_RDONLY_PROG` and a successful freeze,
+compares every value byte against the sealed native group (across chunks),
+rejects overlap with any JIT-patched relocation and checks that the proof
+actually loads the same map value. This record patches no native instruction.
+Both raw and manifest proof paths use it. Changed bytes, native address,
+map identity and unfrozen maps reject. Native-derived data should have its own
+`.rodata.native` section when the object also declares the application's
+original `.rodata` variables, so their DATASEC layouts remain distinct.
+The TV relation must connect the recorded native address to the proof address
+and its actual ordered reads; this binding check does not prove that relation.
 
 Bound programs must contain exactly their ordered native group followed by
 EXIT. The kernel checks this before proof expansion and again at JIT emission;

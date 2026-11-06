@@ -148,3 +148,14 @@ before replacing proof map identities. The manifest positive verifies the
 original map ID is retained. The initial fixture attempts exposed a test-side
 `bpf_prog_info` reuse error; the query is now zeroed before each syscall.
 These remain binding checks, not per-program translation certificates.
+
+`readonly-data-final2-{x86,arm64}.log` pass exact frozen readonly-data binding,
+including a real native load from embedded data spanning two chunks. They
+reject unfrozen maps, changed native bytes, wrong native offsets, a swapped map
+with identical values, a different chunk's data mutation and overlap with a
+JIT helper-pointer relocation. The x86 log also passes both actual clang
+manifest and raw-proof loader paths and rejects mutated compiler data.
+Relocation metadata kind 8 pins the proof map and records the complete native
+address extent without patching native code. No original writable application
+map is synthesized. These checks establish immutable specialization binding;
+the reference-ISA address/state/trace relation is still a TV obligation.

@@ -47,3 +47,13 @@ int tv_hash_entry(void *ctx)
 	int *value = bpf_map_lookup_elem(&tv_hash_map, &key);
 	return value ? *value : 0;
 }
+
+static const unsigned long tv_readonly_data[2] = {
+	0x1122334400000002UL, 0xaabbccdd00000000UL,
+};
+int tv_readonly_entry(void *ctx)
+{
+	(void)ctx;
+	const volatile unsigned long *data = tv_readonly_data;
+	return data[0] + data[1];
+}

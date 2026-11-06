@@ -1,0 +1,93 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build
+cc -Wall -Wextra -Werror -O2 -g -D__EXPORTED_HEADERS__ \
+	-I../../vendor/linux-framework/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+	test_binding_kernel.c ../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o build/test-binding-kernel
+cargo build --release --manifest-path ../x86/native_lab/native_link/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.02s
+test "x86" = x86
+make module-check KDIR=/workspaces/repository/kprog/tv/build-kernel-x86
+make[1]: Entering directory '/workspaces/repository/kprog/tv'
+make -C /workspaces/repository/kprog/tv/build-kernel-x86 M=/workspaces/repository/kprog/tv/build-x86 ARCH=x86 \
+	TV_ARCH=x86 CROSS_COMPILE= modules
+make[2]: Entering directory '/workspaces/repository/kprog/tv/build-kernel-x86'
+make[3]: Entering directory '/workspaces/repository/kprog/tv/build-x86'
+make[3]: Leaving directory '/workspaces/repository/kprog/tv/build-x86'
+make[2]: Leaving directory '/workspaces/repository/kprog/tv/build-kernel-x86'
+make[1]: Leaving directory '/workspaces/repository/kprog/tv'
+taskset -c 8-23 vng --run /workspaces/repository/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage \
+	--cwd /workspaces/repository --rwdir /workspaces/repository --overlay-rwdir /tmp \
+	--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+	--exec 'make -C kprog/tv guest-kernel-check'
+make: Entering directory '/workspaces/repository/kprog/tv'
+insmod build-x86/bpf_x86_native_lab.ko || { dmesg; exit 1; }
+./build/test-binding-kernel
+unsealed proof: PASS (load rejected)
+entry mismatch: PASS (seal rejected)
+ABI version mismatch: PASS (seal rejected)
+architecture mismatch: PASS (seal rejected)
+specialization length mismatch: PASS (seal rejected)
+unknown metadata: PASS (seal rejected)
+native/proof byte mismatch: PASS (every changed byte rejected)
+exact binding: PASS (native execution returned 2)
+native group rejects surrounding stack and helper code: PASS
+ABI mask mismatch at instantiation: PASS (load rejected)
+proof mutation after sealing: PASS (load rejected)
+new generation without resealing: PASS (load rejected)
+program type mismatch at JIT: PASS (load rejected)
+incomplete program group: PASS (load rejected)
+exact ordered program group: PASS (native execution returned 2)
+reordered native chunks: PASS (load rejected)
+missing native chunk/changed entry: PASS (load rejected)
+duplicated native chunk: PASS (load rejected)
+prefix must not initialize native stack: PASS (load rejected)
+peer mutation invalidates whole group: PASS (load rejected)
+verifier-visible helper call: PASS (native execution returned 2)
+privileged uninitialized stack negative: PASS (load rejected)
+helper with uninitialized arguments: PASS (load rejected)
+verifier-visible map load and lookup: PASS (native execution returned 2)
+map value out-of-bounds negative: PASS (load rejected)
+70000-instruction proof restored to native code: PASS (native execution returned 2)
+native helper target absent from verified proof: PASS (load rejected)
+kernel-resolved map identity: PASS (native execution returned 2)
+two-map swap despite fd-array retention: PASS (load rejected)
+map pointer/value kind mismatch: PASS (load rejected)
+kernel-resolved map value identity and offset: PASS (native execution returned 2)
+map value offset differs from verified proof: PASS (load rejected)
+sealed proof FD rebound to another map: PASS (load rejected)
+verified helper-pointer indirect call: PASS (native execution returned 2)
+helper pointer names a different valid helper: PASS (load rejected)
+helper pointer literal must be an exact zero slot: PASS (load rejected)
+unfrozen proof readonly data: PASS (seal rejected)
+frozen exact native readonly data: PASS (native execution returned 2)
+readonly native extent crosses chunk boundary: PASS (native execution returned 2)
+readonly data mismatch in a different chunk: PASS (load rejected)
+readonly data differs from native bytes: PASS (load rejected)
+readonly native address mismatch: PASS (load rejected)
+readonly map identity swap with identical values: PASS (load rejected)
+readonly native extent overlaps a JIT relocation: PASS (load rejected)
+kernel binding regression: PASS
+./build/test-loader
+shared loader tv_short_entry: PASS (1 chunks, native returned 2)
+shared loader tv_long_entry: PASS (3 chunks, native returned 2)
+shared loader tv_helper_entry: PASS (1 chunks, native returned 2)
+different valid kernel helper target: PASS (rejected)
+manifest simulator tv_proof_helper: PASS (clang proof, original maps, bound native)
+manifest invented internal-map state: PASS (rejected)
+shared loader tv_map_entry: PASS (1 chunks, native returned 2)
+separately loaded proof map relinked to original: PASS
+separate proof map layout mismatch: PASS (rejected)
+manifest simulator tv_proof_map: PASS (clang proof, original maps, bound native)
+shared loader tv_hash_entry: PASS (1 chunks, native returned 2)
+manifest simulator tv_proof_hash: PASS (clang proof, original maps, bound native)
+shared loader tv_large_entry: PASS (1 chunks, native returned 2)
+shared loader tv_readonly_entry: PASS (1 chunks, native returned 2)
+manifest simulator tv_proof_readonly: PASS (clang proof, original maps, bound native)
+raw readonly data: PASS (bound native returned 2)
+raw readonly data mutation: PASS (rejected)
+manifest internal DATASEC: PASS (original map ID retained)
+raw proof matching DATASEC: PASS (relinked)
+same-sized wrong BTF variable: PASS (rejected)
+raw proof wrong BTF variable: PASS (rejected)
+make: Leaving directory '/workspaces/repository/kprog/tv'
+make: Leaving directory '/workspaces/repository/kprog/tv'

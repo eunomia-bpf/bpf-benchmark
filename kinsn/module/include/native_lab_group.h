@@ -40,7 +40,8 @@ static int native_lab_pin_maps(const struct native_blob *blob,
 		u32 id = (u32)reloc->target;
 
 		if (reloc->kind != NATIVE_LAB_RELOC_MAP_POINTER &&
-		    reloc->kind != NATIVE_LAB_RELOC_MAP_VALUE)
+		    reloc->kind != NATIVE_LAB_RELOC_MAP_VALUE &&
+		    reloc->kind != NATIVE_LAB_RELOC_READONLY_DATA)
 			continue;
 		map = bpf_map_get_curr_or_next(&id);
 		if (!map || id != (u32)reloc->target) {
@@ -49,10 +50,78 @@ static int native_lab_pin_maps(const struct native_blob *blob,
 			native_lab_put_maps(maps, count);
 			return -ENOENT;
 		}
+		if (reloc->kind == NATIVE_LAB_RELOC_READONLY_DATA &&
+		    (reloc->offset || map->map_type != BPF_MAP_TYPE_ARRAY ||
+		     map->key_size != sizeof(u32) || map->max_entries != 1 ||
+		     !(map->map_flags & BPF_F_RDONLY_PROG) || !READ_ONCE(map->frozen))) {
+			bpf_map_put(map);
+			native_lab_put_maps(maps, count);
+			return -EINVAL;
+		}
 		maps[count++] = map;
 	}
 	*maps_out = maps;
 	*count_out = count;
+	return 0;
+}
+
+/* Called only after checking every group member's immutable generation. A data
+ * extent can cross chunk boundaries; its address is relative to the complete
+ * consecutive native group, not to a proof-map address or an ELF file offset.
+ */
+static int native_lab_readonly_data(const struct native_blob *root)
+{
+	u32 chunk;
+
+	for (chunk = 0; chunk < root->binding.chunk_count; chunk++) {
+		const struct native_blob *owner = &blobs[chunk];
+		size_t r;
+
+		for (r = 0; r < owner->reloc_count; r++) {
+			const struct native_lab_reloc_record *reloc = &owner->relocs[r];
+			struct bpf_map *map = NULL;
+			const u8 *value;
+			u32 key = 0, i, done = 0;
+			u64 offset = reloc->target >> 32;
+
+			if (reloc->kind != NATIVE_LAB_RELOC_READONLY_DATA)
+				continue;
+			for (i = 0; i < owner->bound_map_count; i++)
+				if (owner->bound_maps[i]->id == (u32)reloc->target)
+					map = owner->bound_maps[i];
+			if (!map || offset > root->binding.total_native_size ||
+			    map->value_size > root->binding.total_native_size - offset)
+				return -EINVAL;
+			value = map->ops->map_lookup_elem(map, &key);
+			if (!value)
+				return -EINVAL;
+			for (i = 0; i < root->binding.chunk_count && done < map->value_size; i++) {
+				const struct native_blob *part = &blobs[i];
+				u32 begin = part->binding.chunk_offset;
+				u32 within, count;
+				size_t p;
+
+				if (offset < begin || offset >= (u64)begin + part->len)
+					continue;
+				within = offset - begin;
+				count = min_t(u32, part->len - within, map->value_size - done);
+				for (p = 0; p < part->reloc_count; p++) {
+					const struct native_lab_reloc_record *patch = &part->relocs[p];
+					int size = native_lab_reloc_patch_size(patch->kind);
+
+					if (size < 0 || (size && patch->offset < (u64)within + count &&
+					    within < (u64)patch->offset + size))
+						return -EINVAL;
+				}
+				if (memcmp(part->bytes + within, value + done, count))
+					return -EINVAL;
+				done += count;
+				offset += count;
+			}
+			if (done != map->value_size)
+				return -EINVAL;
+		}
+	}
 	return 0;
 }
 
@@ -145,7 +214,9 @@ static int native_lab_group_use(u32 blob_id, u32 generation, u32 abi_mask)
 			return err;
 		offset += member->binding.native_size;
 	}
-	return offset == root->binding.total_native_size ? 0 : -EINVAL;
+	if (offset != root->binding.total_native_size)
+		return -EINVAL;
+	return native_lab_readonly_data(root);
 }
 
 /* Check the JIT's actual restored BPF stream: exactly one consecutive ordered
@@ -315,7 +386,21 @@ static int native_lab_validate_proof(u64 payload, const struct bpf_verifier_env 
 			bool found = false;
 			u32 i;
 
-			if (reloc->kind == NATIVE_LAB_RELOC_MAP_POINTER ||
+			if (reloc->kind == NATIVE_LAB_RELOC_READONLY_DATA) {
+				for (i = 0; i + 1 < env->prog->len; i++) {
+					const struct bpf_insn *insn = &env->prog->insnsi[i];
+					u32 index;
+
+					if (insn->code != (BPF_LD | BPF_DW | BPF_IMM) ||
+					    insn->src_reg != BPF_PSEUDO_MAP_VALUE)
+						continue;
+					index = env->insn_aux_data[i].map_index;
+					if (index < env->used_map_cnt &&
+					    env->used_maps[index]->id == (u32)reloc->target)
+						found = true;
+					i++;
+				}
+			} else if (reloc->kind == NATIVE_LAB_RELOC_MAP_POINTER ||
 			    reloc->kind == NATIVE_LAB_RELOC_MAP_VALUE) {
 				u64 target;
 
