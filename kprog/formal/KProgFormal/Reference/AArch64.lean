@@ -16,6 +16,8 @@ inductive Width | w32 | w64
 
 def Width.bits : Width → Nat | .w32 => 32 | .w64 => 64
 
+def Width.bytes : Width → Nat | .w32 => 4 | .w64 => 8
+
 def narrow (value : Word) (width : Width) : Word :=
   (value.setWidth width.bits).setWidth 64
 
@@ -105,14 +107,64 @@ def selectValue (width : Width) (alternative : SelectElse) (taken : Bool)
   narrow (if taken then lhs else match alternative with
     | .keep => rhs | .increment => rhs + 1 | .invert => ~~~rhs | .negate => -rhs) width
 
+/-- Architectural byte permutations, stated as byte lists rather than the
+implementation's shift-and-mask ladders. -/
+def reverseBytes (value : Word) (bytes : Nat) : Word :=
+  littleEndian 64 (valueBytes value bytes).reverse
+
+def reverseHalfwordBytes (value : Word) (bytes : Nat) : Word :=
+  littleEndian 64 ((List.range bytes).map (fun i => (value >>> (8 * (i ^^^ 1))).setWidth 8))
+
+def signExtendValue (value : Word) (sourceBits : Nat) : Word :=
+  (value.setWidth sourceBits).signExtend 64
+
+/-- Extract a width-sized window from the concatenated, width-sized sources.
+The instruction carries a legal immediate; the generalized primitive also
+serves the old bounded contracts, including their masked-count domains. -/
+def extractRawWindow (sourceBits : Nat) (lhs rhs shift : Word) : Word :=
+  let amount := shift &&& BitVec.ofNat 64 (sourceBits - 1)
+  let pair := (lhs.setWidth 128 <<< sourceBits) ||| rhs.setWidth 128
+  (pair >>> amount.setWidth 128).setWidth 64 &&& BitVec.ofNat 64 (2^sourceBits - 1)
+
+def extractValue (sourceBits : Nat) (lhs rhs shift : Word) : Word :=
+  extractRawWindow sourceBits ((lhs.setWidth sourceBits).setWidth 64)
+    ((rhs.setWidth sourceBits).setWidth 64) shift
+
+inductive ExtendBits | byte | half | word
+  deriving DecidableEq, Repr
+
+def ExtendBits.bits : ExtendBits → Nat | .byte => 8 | .half => 16 | .word => 32
+
+inductive ExtrevInstruction
+  | extract (width : Width) (amount : Fin width.bits) (dst lhs rhs : Register)
+  | reverse (width : Width) (halfwords : Bool) (dst src : Register)
+  | extend (width : Width) (source : ExtendBits) (dst src : Register)
+  deriving DecidableEq, Repr
+
+def extrevResult (i : ExtrevInstruction) (s : State) : Register × Word :=
+  match i with
+  | .extract width amount dst lhs rhs =>
+      (dst, extractValue width.bits (readReg s lhs) (readReg s rhs) (BitVec.ofNat 64 amount.val))
+  | .reverse width halfwords dst src =>
+      (dst, if halfwords then reverseHalfwordBytes (readReg s src) width.bytes
+        else reverseBytes (readReg s src) width.bytes)
+  | .extend width source dst src =>
+      (dst, narrow (signExtendValue (readReg s src) source.bits) width)
+
+def extrevStep (i : ExtrevInstruction) (s : State) : Transition State :=
+  let (dst, value) := extrevResult i s
+  ⟨{ writeReg s dst value with pc := s.pc + 4 }, [], none⟩
+
 inductive Instruction
   | mul (instruction : MulInstruction)
+  | extrev (instruction : ExtrevInstruction)
   | select (width : Width) (alternative : SelectElse) (dst lhs rhs : Register) (predicate : Fin 16)
   deriving DecidableEq, Repr
 
 def step (i : Instruction) (s : State) : Transition State :=
   match i with
   | .mul instruction => mulStep instruction s
+  | .extrev instruction => extrevStep instruction s
   | .select width alternative dst lhs rhs predicate =>
       let value := selectValue width alternative (condition s.flags predicate) (readReg s lhs) (readReg s rhs)
       ⟨{ writeReg s dst value with pc := s.pc + 4 }, [], none⟩
@@ -132,6 +184,21 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   let lhs := register (word / 2^5)
   let rhs := register (word / 2^16)
   let addend := register (word / 2^10)
+  if word &&& 0xffe00000 = 0x13800000 ∨ word &&& 0xffe00000 = 0x93c00000 then
+    let amount := (word / 2^10) % 64
+    if h : amount < width.bits then return .extrev (.extract width ⟨amount, h⟩ dst lhs rhs)
+    else throw "reserved EXTR immediate"
+  let unary := word &&& 0xfffffc00
+  if unary = 0x5ac00800 ∨ unary = 0xdac00c00 then
+    return .extrev (.reverse width false dst lhs)
+  if unary = 0x5ac00400 ∨ unary = 0xdac00400 then
+    return .extrev (.reverse width true dst lhs)
+  if word &&& 0xffc00000 = 0x13000000 ∨ word &&& 0xffc00000 = 0x93400000 then
+    if (word / 2^16) % 64 = 0 then
+      let sourceBits := (word / 2^10) % 64 + 1
+      if sourceBits = 8 then return .extrev (.extend width .byte dst lhs)
+      if sourceBits = 16 then return .extrev (.extend width .half dst lhs)
+      if sourceBits = 32 then return .extrev (.extend width .word dst lhs)
   if word &&& 0x3fe00800 = 0x1a800000 then
     let alternative := if (word / 2^30) % 2 = 0 then
       (if (word / 2^10) % 2 = 0 then SelectElse.keep else .increment)

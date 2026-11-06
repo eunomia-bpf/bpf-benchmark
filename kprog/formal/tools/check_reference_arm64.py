@@ -75,6 +75,30 @@ def main():
         if dst is not None:
             expected["registers"][dst] = result
         cases.append((request, expected))
+    for word, lhs, rhs, result, dst in [
+            (0x13821020, 0x1111222233334444, 0x5555666677778888, 0x47777888, 0),
+            (0x93C21020, 0x0123456789ABCDEF, 0xFEDCBA9876543210, 0xFFEDCBA987654321, 0),
+            (0x13827C20, 0xA5A5000000000001, 0xDEAD000080000000, 3, 0),
+            (0x93C2FC20, 0x0123456789ABCDEF, 0xFEDCBA9876543210, 0x02468ACF13579BDF, 0),
+            (0x93C20020, 0x0123456789ABCDEF, 0xFEDCBA9876543210, 0xFEDCBA9876543210, 0),
+            (0x5AC00820, 0x0123456789ABCDEF, 0, 0xEFCDAB89, 0),
+            (0xDAC00C20, 0x0123456789ABCDEF, 0, 0xEFCDAB8967452301, 0),
+            (0x5AC00420, 0x0123456789ABCDEF, 0, 0xAB89EFCD, 0),
+            (0xDAC00420, 0x0123456789ABCDEF, 0, 0x23016745AB89EFCD, 0),
+            (0x13001C20, 0xFFFFFFFFFFFFFF80, 0, 0xFFFFFF80, 0),
+            (0x93401C20, 0xFFFFFFFFFFFFFF80, 0, 0xFFFFFFFFFFFFFF80, 0),
+            (0x13003C20, 0x8001, 0, 0xFFFF8001, 0),
+            (0x93403C20, 0x8001, 0, 0xFFFFFFFFFFFF8001, 0),
+            (0x93407C20, 0x80000000, 0, 0xFFFFFFFF80000000, 0),
+            (0x138213E0, 0xFFFFFFFFFFFFFFFF, 0x77778888, 0x07777888, 0),
+            (0x93C21021, 0x0123456789ABCDEF, 0xFEDCBA9876543210, 0xFFEDCBA987654321, 1)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["registers"][1:3] = [lhs, rhs]
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
+        expected["registers"][dst] = result
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -87,7 +111,8 @@ def main():
     malformed = copy.deepcopy(base)
     malformed["native_bytes"] = [0x20, 0x0C, 0x02, 0x9B]
     bad = [dict(malformed, isa="unknown"), dict(malformed, native_bytes=[0x20]),
-           dict(malformed, native_bytes=list((0x9B420C20).to_bytes(4, "little")))]
+           dict(malformed, native_bytes=list((0x9B420C20).to_bytes(4, "little"))),
+           dict(malformed, native_bytes=list((0x13828020).to_bytes(4, "little")))]
     wrong_registers = copy.deepcopy(malformed)
     wrong_registers["state"]["registers"].pop()
     bad.append(wrong_registers)
@@ -106,7 +131,7 @@ def main():
     nv = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "nv"), "csel x0,x1,x2,nv")
     al = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "al"), "csel x0,x1,x2,al")
     assert encoder.encode(nv, {}, {}) == encoder.encode(al, {}, {})
-    print("AArch64 reference: multiply/divide/select, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":

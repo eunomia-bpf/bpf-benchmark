@@ -2,6 +2,7 @@ import KProgFormal.Generated.GeneratedArm64Extrev
 import KProgFormal.Generated.GeneratedArm64Flags
 import KProgFormal.Generated.GeneratedArm64Width
 import Std.Tactic.BVDecide
+import KProgFormal.Reference.AArch64
 
 namespace KProgFormal
 
@@ -9,46 +10,36 @@ open KProgFormal.GeneratedArm64Extrev (Extrev value rev rev16 signExtend)
 open KProgFormal.GeneratedArm64Width (Width bits mask narrow)
 
 /-- Independent statement of the AArch64 EXTR value at a concrete bit width:
-the low `nb` of the rotate-left of the `src : src2` concatenation, stated over
+the low `nb` bits after right-shifting the `src : src2` concatenation, stated over
 the 128-bit concatenation so it is structurally separate from the C shift pair.
 The shift is the hardware-masked low `nb - 1` bits of the immediate. -/
 def arm64ExtrevExtrSpec (src src2 shift : BitVec 64) (nb : Nat) : BitVec 64 :=
-  let k := shift &&& BitVec.ofNat 64 (nb - 1)
-  let concat : BitVec 128 := (src.setWidth 128 <<< nb) ||| src2.setWidth 128
-  (concat >>> k.setWidth 128).setWidth 64 &&& BitVec.ofNat 64 (2^nb - 1)
+  Reference.AArch64.extractRawWindow nb src src2 shift
 
 /-- Independent statement of a four-byte reversal: one shift-and-or term per
 architectural byte of the low word, most significant byte first. -/
 def arm64ExtrevRev32Spec (v : BitVec 64) : BitVec 64 :=
-  (((v &&& 0xff) <<< 24) ||| (((v >>> 8) &&& 0xff) <<< 16) |||
-   (((v >>> 16) &&& 0xff) <<< 8) ||| ((v >>> 24) &&& 0xff))
+  Reference.AArch64.reverseBytes v 4
 
 /-- Independent statement of an eight-byte reversal: one shift-and-or term per
 architectural byte, most significant byte first. -/
 def arm64ExtrevRev64Spec (v : BitVec 64) : BitVec 64 :=
-  (((v &&& 0xff) <<< 56) ||| (((v >>> 8) &&& 0xff) <<< 48) |||
-   (((v >>> 16) &&& 0xff) <<< 40) ||| (((v >>> 24) &&& 0xff) <<< 32) |||
-   (((v >>> 32) &&& 0xff) <<< 24) ||| (((v >>> 40) &&& 0xff) <<< 16) |||
-   (((v >>> 48) &&& 0xff) <<< 8) ||| ((v >>> 56) &&& 0xff))
+  Reference.AArch64.reverseBytes v 8
 
 /-- Independent statement of a within-16-bit-unit byte swap over the low word:
 swap the two bytes of each of the two units and keep the units in place. -/
 def arm64ExtrevRev16W32Spec (v : BitVec 64) : BitVec 64 :=
-  (((v &&& 0xff) <<< 8) ||| ((v >>> 8) &&& 0xff)) |||
-  (((((v >>> 16) &&& 0xff) <<< 8) ||| ((v >>> 24) &&& 0xff)) <<< 16)
+  Reference.AArch64.reverseHalfwordBytes v 4
 
 /-- Independent statement of a within-16-bit-unit byte swap over the whole
 operand: swap the two bytes of each of the four units. -/
 def arm64ExtrevRev16W64Spec (v : BitVec 64) : BitVec 64 :=
-  (((v &&& 0xff) <<< 8) ||| ((v >>> 8) &&& 0xff)) |||
-  (((((v >>> 16) &&& 0xff) <<< 8) ||| ((v >>> 24) &&& 0xff)) <<< 16) |||
-  (((((v >>> 32) &&& 0xff) <<< 8) ||| ((v >>> 40) &&& 0xff)) <<< 32) |||
-  (((((v >>> 48) &&& 0xff) <<< 8) ||| ((v >>> 56) &&& 0xff)) <<< 48)
+  Reference.AArch64.reverseHalfwordBytes v 8
 
 /-- Independent statement of the AArch64 SXTB/SXTH/SXTW value: the library sign
 extension of the low `nb` bits. -/
 def arm64ExtrevSignExtSpec (v : BitVec 64) (nb : Nat) : BitVec 64 :=
-  BitVec.signExtend 64 (v.setWidth nb)
+  Reference.AArch64.signExtendValue v nb
 
 /-- The generated REV arm at word width agrees with the independent four-byte
 reversal. C's `width == ARM64_WIDTH_32` test is resolved before the bit-blaster
@@ -57,6 +48,11 @@ theorem arm64_extrev_rev_w32_refines (v : BitVec 64) :
     rev v .w32 = arm64ExtrevRev32Spec v := by
   unfold rev arm64ExtrevRev32Spec
   rw [if_pos rfl]
+  simp only [Reference.AArch64.reverseBytes, Reference.AArch64.reverseHalfwordBytes,
+    Reference.valueBytes, Reference.littleEndian, Reference.Word, List.range_succ, List.range_zero,
+    List.map_append, List.map_cons, List.map_nil, List.reverse_append, List.reverse_cons,
+    List.reverse_nil, List.nil_append, List.cons_append, List.append_nil]
+  bv_decide
 
 /-- The generated REV arm at doubleword width agrees with the independent
 eight-byte reversal, which is also the arm every non-word width takes. -/
@@ -64,6 +60,11 @@ theorem arm64_extrev_rev_w64_refines (v : BitVec 64) :
     rev v .w64 = arm64ExtrevRev64Spec v := by
   unfold rev arm64ExtrevRev64Spec
   rw [if_neg (by decide : ¬ (Width.w64 = Width.w32))]
+  simp only [Reference.AArch64.reverseBytes, Reference.AArch64.reverseHalfwordBytes,
+    Reference.valueBytes, Reference.littleEndian, Reference.Word, List.range_succ, List.range_zero,
+    List.map_append, List.map_cons, List.map_nil, List.reverse_append, List.reverse_cons,
+    List.reverse_nil, List.nil_append, List.cons_append, List.append_nil]
+  bv_decide
 
 /-- The generated REV16 arm at word width agrees with the independent swap of
 the two 16-bit units of the low word. -/
@@ -71,6 +72,9 @@ theorem arm64_extrev_rev16_w32_refines (v : BitVec 64) :
     rev16 v .w32 = arm64ExtrevRev16W32Spec v := by
   unfold rev16 arm64ExtrevRev16W32Spec
   rw [if_pos rfl]
+  simp only [Reference.AArch64.reverseHalfwordBytes, Reference.littleEndian, Reference.Word,
+    List.range_succ, List.range_zero, List.map_append, List.map_cons, List.map_nil, List.nil_append,
+    List.cons_append, List.append_nil]
   bv_decide
 
 /-- The generated REV16 arm at doubleword width agrees with the independent
@@ -80,6 +84,10 @@ theorem arm64_extrev_rev16_w64_refines (v : BitVec 64) :
     rev16 v .w64 = arm64ExtrevRev16W64Spec v := by
   unfold rev16 arm64ExtrevRev16W64Spec
   rw [if_neg (by decide : ¬ (Width.w64 = Width.w32))]
+  simp only [Reference.AArch64.reverseBytes, Reference.AArch64.reverseHalfwordBytes,
+    Reference.valueBytes, Reference.littleEndian, Reference.Word, List.range_succ, List.range_zero,
+    List.map_append, List.map_cons, List.map_nil, List.reverse_append, List.reverse_cons,
+    List.reverse_nil, List.nil_append, List.cons_append, List.append_nil]
   bv_decide
 
 /-- The generated EXTR arm agrees with the independent concatenation statement
@@ -90,83 +98,74 @@ theorem arm64_extrev_extr_w8_refines (src src2 shift : BitVec 64)
     (hs : narrow src .w8 = src) (ht : narrow src2 .w8 = src2) :
     narrow (value .extr src src2 shift .w8) .w8 =
       arm64ExtrevExtrSpec src src2 shift 8 := by
-  simp only [value, arm64ExtrevExtrSpec, narrow, bits, mask] <;> bv_decide
+  simp only [value, arm64ExtrevExtrSpec, Reference.AArch64.extractRawWindow, narrow, bits, mask] <;> bv_decide
 
 /-- The 16-bit case of `arm64_extrev_extr_w8_refines`. -/
 theorem arm64_extrev_extr_w16_refines (src src2 shift : BitVec 64)
     (hs : narrow src .w16 = src) (ht : narrow src2 .w16 = src2) :
     narrow (value .extr src src2 shift .w16) .w16 =
       arm64ExtrevExtrSpec src src2 shift 16 := by
-  simp only [value, arm64ExtrevExtrSpec, narrow, bits, mask] <;> bv_decide
+  simp only [value, arm64ExtrevExtrSpec, Reference.AArch64.extractRawWindow, narrow, bits, mask] <;> bv_decide
 
 /-- The 32-bit case of `arm64_extrev_extr_w8_refines`. -/
 theorem arm64_extrev_extr_w32_refines (src src2 shift : BitVec 64)
     (hs : narrow src .w32 = src) (ht : narrow src2 .w32 = src2) :
     narrow (value .extr src src2 shift .w32) .w32 =
       arm64ExtrevExtrSpec src src2 shift 32 := by
-  simp only [value, arm64ExtrevExtrSpec, narrow, bits, mask] <;> bv_decide
+  simp only [value, arm64ExtrevExtrSpec, Reference.AArch64.extractRawWindow, narrow, bits, mask] <;> bv_decide
 
 /-- The 64-bit case of `arm64_extrev_extr_w8_refines`; both operands already
 fill the width, so no narrowing hypothesis is needed. -/
 theorem arm64_extrev_extr_w64_refines (src src2 shift : BitVec 64) :
     narrow (value .extr src src2 shift .w64) .w64 =
       arm64ExtrevExtrSpec src src2 shift 64 := by
-  simp only [value, arm64ExtrevExtrSpec, narrow, bits, mask] <;> bv_decide
+  simp only [value, arm64ExtrevExtrSpec, Reference.AArch64.extractRawWindow, narrow, bits, mask] <;> bv_decide
 
-/-- The EXTR refinements above carry a hypothesis that the operands are already
-narrowed to the destination width, which the dispatcher does not discharge: it
-passes raw 64-bit registers. The hypothesis is stronger than needed. Because
-both the generated arm and the independent statement are narrowed to the
-destination width at the end -- which is exactly what the C register write
-does -- the refinement holds without it. Stated for the three widths that
-carry the hypothesis; the 64-bit case already needed none.
-
-This is worth recording rather than silently tightening the old theorem: the
-raw-operand form really does differ from the narrowed one *before* the final
-narrowing (`0xffffffffffffffff` against `0x1ffffffff` at `w32`), so the
-hypothesis was doing work at the wrong point in the pipeline. -/
+/-- Preserve the original arbitrary-input raw-helper identities. The current
+runtime EXTR path narrows both sources before this helper; these lemmas alone
+are not native W-instruction refinements for unmodified64-bit source values.
+The canonical instruction performs operand-sized reads, and
+`Refinement/Arm64Extrev` proves that full handler path. -/
 theorem arm64_extrev_extr_w8_refines_raw (src src2 shift : BitVec 64) :
     narrow (value .extr src src2 shift .w8) .w8 =
       narrow (arm64ExtrevExtrSpec src src2 shift 8) .w8 := by
-  simp only [value, arm64ExtrevExtrSpec, narrow, bits, mask] <;> bv_decide
+  simp only [value, arm64ExtrevExtrSpec, Reference.AArch64.extractRawWindow, narrow, bits, mask] <;> bv_decide
 
 /-- The 16-bit case of `arm64_extrev_extr_w8_refines_raw`. -/
 theorem arm64_extrev_extr_w16_refines_raw (src src2 shift : BitVec 64) :
     narrow (value .extr src src2 shift .w16) .w16 =
       narrow (arm64ExtrevExtrSpec src src2 shift 16) .w16 := by
-  simp only [value, arm64ExtrevExtrSpec, narrow, bits, mask] <;> bv_decide
+  simp only [value, arm64ExtrevExtrSpec, Reference.AArch64.extractRawWindow, narrow, bits, mask] <;> bv_decide
 
 /-- The 32-bit case of `arm64_extrev_extr_w8_refines_raw`, which is the width
 the dispatcher reaches most often. -/
 theorem arm64_extrev_extr_w32_refines_raw (src src2 shift : BitVec 64) :
     narrow (value .extr src src2 shift .w32) .w32 =
       narrow (arm64ExtrevExtrSpec src src2 shift 32) .w32 := by
-  simp only [value, arm64ExtrevExtrSpec, narrow, bits, mask] <;> bv_decide
+  simp only [value, arm64ExtrevExtrSpec, Reference.AArch64.extractRawWindow, narrow, bits, mask] <;> bv_decide
 
 /-- The generated SXTB arm agrees with the independent 8-bit sign extension. -/
 theorem arm64_extrev_sxtb_refines (v : BitVec 64) :
     signExtend v 8 = arm64ExtrevSignExtSpec v 8 := by
-  unfold signExtend arm64ExtrevSignExtSpec
+  unfold signExtend arm64ExtrevSignExtSpec Reference.AArch64.signExtendValue
   by_cases h : v &&& 0x80 = 0 <;> bv_decide
 
 /-- The generated SXTH arm agrees with the independent 16-bit sign extension. -/
 theorem arm64_extrev_sxth_refines (v : BitVec 64) :
     signExtend v 16 = arm64ExtrevSignExtSpec v 16 := by
-  unfold signExtend arm64ExtrevSignExtSpec
+  unfold signExtend arm64ExtrevSignExtSpec Reference.AArch64.signExtendValue
   by_cases h : v &&& 0x8000 = 0 <;> bv_decide
 
 /-- The generated SXTW arm agrees with the independent 32-bit sign extension. -/
 theorem arm64_extrev_sxtw_refines (v : BitVec 64) :
     signExtend v 32 = arm64ExtrevSignExtSpec v 32 := by
-  unfold signExtend arm64ExtrevSignExtSpec
+  unfold signExtend arm64ExtrevSignExtSpec Reference.AArch64.signExtendValue
   by_cases h : v &&& 0x80000000 = 0 <;> bv_decide
 
-/-- The family-level refinement: each generated arm equals the corresponding
-independent statement. The EXTR conjuncts are at the narrowed result and take
-*raw* operands -- the earlier form carried two operand-narrowing hypotheses,
-which the dispatcher does not discharge, so they are replaced by the raw forms
-proved above. The REV and REV16 conjuncts cover the word and doubleword arms
-the shared C macro selects; the SXT conjuncts are the three sign extensions. -/
+/-- The retained family-level identity for all generalized raw helpers. EXTR
+uses the raw concatenation helper here; its canonical native step additionally
+narrows both sources. The byte-reversal and sign-extension conjuncts directly
+use the sole reference primitives. -/
 theorem arm64_extrev_family_refines_raw (src src2 shift : BitVec 64) :
     narrow (value .extr src src2 shift .w8) .w8 =
         narrow (arm64ExtrevExtrSpec src src2 shift 8) .w8 ∧
