@@ -7606,6 +7606,24 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0976 - the stretch was chosen, so its cost was measured
+
+The stretch was chosen without measuring its cost, so the cost was measured: at
+one em the paper sets twenty-six hundred overfull boxes, at two em nine hundred
+and twenty-four with twelve thousand underfull, and at three em four hundred and
+fifty-four with nineteen thousand underfull.
+
+The three are different defects. An overfull box puts words past the margin,
+which a reader sees as text running into the edge; an underfull box leaves a
+line loose, which a reader sees as spacing. Both are visible, and the choice is
+which to prefer.
+
+Three em minimises the overfull count, which is the louder of the two and the
+one the earlier steps measured, so it stays. The numbers are recorded here so
+the choice is a decision rather than a default.
+
+Census unchanged; the trade-off is measured at three settings.
+
 ### Step 0975 - thirteen thousand boxes became four hundred
 
 The remaining overfull boxes were not unbreakable tokens. The break hints are
