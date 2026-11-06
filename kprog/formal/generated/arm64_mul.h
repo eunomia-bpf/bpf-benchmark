@@ -97,7 +97,7 @@ _Static_assert(KPROG_ARM64_MUL_HANDLED(ARM64_OP_SMADDL), "arm64 multiply coverag
 			__kprog_a64_mul_result = (__u64)(__u32)__kprog_a64_mul_lhs * (__u64)(__u32)__kprog_a64_mul_rhs + __kprog_a64_mul_addend; \
 			break; \
 		case 64U:                           \
-			__kprog_a64_mul_result = (__u64)((__s64)(__s32)__kprog_a64_mul_lhs * (__s64)(__s32)__kprog_a64_mul_rhs + (__s64)__kprog_a64_mul_addend); \
+			__kprog_a64_mul_result = (__u64)((__s64)(__s32)__kprog_a64_mul_lhs * (__s64)(__s32)__kprog_a64_mul_rhs) + __kprog_a64_mul_addend; \
 			break; \
 		default: \
 			UNSUPPORTED; \

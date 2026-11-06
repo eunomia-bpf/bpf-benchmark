@@ -114,8 +114,8 @@ EXPECTED = {
          "lean": "(BitVec.signExtend 64 (lhs.setWidth 32)) * "
                  "(BitVec.signExtend 64 (rhs.setWidth 32)) + addend",
          "c": "(__u64)((__s64)(__s32)__kprog_a64_mul_lhs * "
-              "(__s64)(__s32)__kprog_a64_mul_rhs + "
-              "(__s64)__kprog_a64_mul_addend)"},
+              "(__s64)(__s32)__kprog_a64_mul_rhs) + "
+              "__kprog_a64_mul_addend"},
     ],
 }
 

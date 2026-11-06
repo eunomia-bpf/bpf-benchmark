@@ -68,7 +68,7 @@ static __u64 mul_oracle(unsigned op, __u64 a, __u64 b, __u64 c)
 	case ARM64_OP_UMADDL:
 		return (__u64)(__u32)a * (__u64)(__u32)b + c;
 	case ARM64_OP_SMADDL:
-		return (__u64)((__s64)(__s32)a * (__s64)(__s32)b + (__s64)c);
+		return (__u64)((__int128)(__s32)a * (__int128)(__s32)b + (__int128)c);
 	}
 	return 0;
 }

@@ -444,7 +444,7 @@ check:
 	./build/test_arm64_mod_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_bitfield_host.c -o build/test_arm64_bitfield_host
 	./build/test_arm64_bitfield_host
-	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mul_host.c -o build/test_arm64_mul_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I. oracles/test_arm64_mul_host.c -o build/test_arm64_mul_host
 	./build/test_arm64_mul_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mul_route_host.c -o build/test_arm64_mul_route_host
 	./build/test_arm64_mul_route_host
