@@ -596,3 +596,20 @@ and compiled proofs with the exact copied native ELFs used to link them. The
 runtime manifest now installs both halves from that phase, so later native-stage
 changes cannot silently invalidate the pairing. Application binder failures
 remain active; this result establishes pairing and compilation only.
+
+## Exact readonly object identity
+
+The ARM producer now emits one `.rodata.native.N` DATASEC per native object,
+plus ignored ELF section `.native_lab.rodata` with version-1 JSON containing
+the exact canonical native symbol, proof section, proof variable and whole
+object size. Instruction interior addends remain separate. This prevents
+multiple independently placed constants from sharing one affine map binding.
+
+[The metadata checks](readonly-object-metadata/checks.json) inspect all 23 real
+BCC proof ELFs and a compiled fixture with two identical 120-byte constants
+at distinct canonical identities. Every private map has one complete variable
+at offset zero and exactly one metadata record. All 23 programs regenerate
+and compile; all 35 ABI cases pass. [Replay inputs and compiled artifacts](readonly-object-metadata/replay.tar.gz)
+retain the actual pairs, sources, objects and logs. The loader's consumption of
+this exact metadata and native layout is the next binding integration step;
+these producer checks alone do not establish application execution.

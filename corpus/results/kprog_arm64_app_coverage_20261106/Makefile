@@ -342,6 +342,10 @@ tetragon-alignchecker:
 		$(TETRAGON_ALIGN_BUILD)/objs/bpf_alignchecker.o
 	install -m 0644 $(TETRAGON_ALIGN_BUILD)/objs/bpf_alignchecker.o $(ROOT)/vendor/build/arm64/tetragon/bpf_alignchecker.o
 
+.PHONY: readonly-metadata-check
+readonly-metadata-check:
+	python3 $(HERE)/readonly_metadata.py $(HERE)/$(PHASE)
+
 .PHONY: pin-runtime-v2
 pin-runtime-v2:
 	python3 $(HERE)/pin_runtime.py

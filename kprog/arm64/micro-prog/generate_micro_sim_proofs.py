@@ -976,17 +976,23 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         lines.append(prelude.rstrip())
         lines.append("")
     rodata_idents = rodata_ident_map(rodata16)
-    for symbol, ident in rodata_idents.items():
+    rodata_objects = []
+    for index, (symbol, ident) in enumerate(rodata_idents.items()):
         value = rodata16[symbol]
-        if isinstance(value, bytes):
-            if not value:
-                raise ValueError(f"empty native readonly extent: {symbol}")
-            values = ", ".join(f"0x{byte:02x}" for byte in value)
-            lines.append(f'static const __u8 {ident}[{len(value)}] SEC(".rodata.native") __attribute__((aligned(16))) = {{{values}}};')
-        else:
+        if not isinstance(value, bytes):
             lo, hi = value
-            lines.append(f"static const __u64 {ident}[2] = {{{c_u64(lo)}, {c_u64(hi)}}};")
+            value = lo.to_bytes(8, "little") + hi.to_bytes(8, "little")
+        if not value:
+            raise ValueError(f"empty native readonly extent: {symbol}")
+        section_name = f".rodata.native.{index}"
+        values = ", ".join(f"0x{byte:02x}" for byte in value)
+        lines.append(f'static const __u8 {ident}[{len(value)}] SEC("{section_name}") __attribute__((aligned(16))) = {{{values}}};')
+        rodata_objects.append(dict(proof_section=section_name, proof_symbol=ident,
+                                   native_symbol=symbol, size=len(value)))
     if rodata_idents:
+        metadata = json.dumps(dict(version=1, objects=rodata_objects), separators=(",", ":"))
+        lines.append('static const char __arm64_rodata_metadata[] SEC(".native_lab.rodata") = '
+                     + json.dumps(metadata) + ';')
         lines.append("")
     map_symbols = sorted({
         insn.reloc_symbol
