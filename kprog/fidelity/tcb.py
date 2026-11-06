@@ -38,9 +38,11 @@ def imports(path, seen=None):
     for node in ast.walk(ast.parse(path.read_text())):
         names = [node.module] if isinstance(node, ast.ImportFrom) and node.module else [x.name for x in node.names] if isinstance(node, ast.Import) else []
         for name in names:
-            child = path.parent/(name.replace('.', '/')+'.py')
-            if child.is_file():
-                imports(child,seen)
+            for base in [path.parent, ROOT/'kprog', ROOT]:
+                child = base/(name.replace('.', '/')+'.py')
+                if child.is_file():
+                    imports(child,seen)
+                    break
     return seen
 
 
@@ -74,7 +76,8 @@ def main():
     groups['application syscall shim'] = {p for p in (ROOT/'bpfopt/shim').glob('*.c') if not p.name.startswith('selftest')} | set((ROOT/'bpfopt/shim').glob('*.h'))
     for arch in ['x86','arm64']:
         groups[f'{arch} native kernel module'] = {ROOT/f'kinsn/module/{arch}/bpf_{arch}_native_lab.c'}
-    groups['shared binding wire contract'] = {ROOT/'kinsn/module/include/native_lab_binding.h'}
+    groups['shared binding wire contract'] = {ROOT/'kinsn/module/include/native_lab_binding.h',ROOT/'kinsn/module/include/native_lab_group.h'}
+    groups['vendored helper declarations (ABI input, not project-owned)'] = {ROOT/'vendor/libbpf/src/bpf_helper_defs.h'}
     groups['formal model and proofs (Lean, including generated)'] = set((ROOT/'kprog/formal/KProgFormal').rglob('*.lean')) | {ROOT/'kprog/formal/KProgFormal.lean'}
     groups['formal contracts (JSON)'] = set((ROOT/'kprog/formal/contracts').glob('*.json'))
     groups['formal contract generators'] = set((ROOT/'kprog/formal/tools').glob('generate_*_spec.py'))

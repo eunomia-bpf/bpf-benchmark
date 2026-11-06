@@ -86,3 +86,40 @@ The loader's counted manifest source includes `simulator_object` and
 executable SLOC, and overlap the kernel-change inventory. Binding-function
 counts similarly overlap their full source components and are not summed
 again. `recovery.log.gz` retains the exact component counts for this snapshot.
+
+## Shared helper ABI and binding-group refresh
+
+The current inventory also follows Python imports through `kprog/` and the
+repository root, so the x86 generator includes the shared helper prototype
+reader instead of hiding that dependency. The Arm runtime generator imports
+its generated ID table; its helper contract generator is counted separately
+with the formal generators. The shared reader's real input,
+`vendor/libbpf/src/bpf_helper_defs.h`, is counted in a separate upstream row;
+it is not project-owned code. The binding wire row includes both the original
+header and `native_lab_group.h`. Counts below are this later dirty-worktree
+snapshot, including ongoing producer fixes; the earlier table stays historical.
+
+| Component | Files | Physical | Nonblank |
+| --- | ---: | ---: | ---: |
+| x86 simulator (including ISA-specific generated C) | 67 | 6295 | 6032 |
+| arm64 simulator (including ISA-specific generated C) | 68 | 5162 | 4959 |
+| shared simulator generated C | 2 | 38 | 33 |
+| x86 native-to-proof generator (including local imports) | 8 | 2288 | 2117 |
+| arm64 native-to-proof generator (including local imports) | 4 | 1139 | 1045 |
+| proof build/load orchestration | 1 | 616 | 549 |
+| native shared loader/linker integration | 9 | 6856 | 6449 |
+| native ELF linker (both ISAs) | 2 | 9679 | 9077 |
+| standalone proof loader | 1 | 1290 | 1196 |
+| application syscall shim | 11 | 9888 | 9365 |
+| x86 native kernel module | 1 | 964 | 863 |
+| arm64 native kernel module | 1 | 1191 | 1082 |
+| shared binding wire contract | 2 | 500 | 458 |
+| vendored helper declarations (ABI input, not project-owned) | 1 | 4785 | 4570 |
+| formal model and proofs (Lean, including generated) | 314 | 35033 | 31353 |
+| formal contracts (JSON) | 138 | 2643 | 2643 |
+| formal contract generators | 138 | 28721 | 26031 |
+| translation-validation composition theorem | 1 | 97 | 86 |
+| native-proof kernel patch and application (patch text, not SLOC) | 2 | 342 | 311 |
+| existing verifier context (not incremental kernel changes) | 2 | 27796 | 24679 |
+
+The 22 named binding functions occupy 846 physical lines, overlapping their full source rows. Kernel changes span12 files with1053 added/123 deleted lines. No overlapping counts are summed into a TCB total. `helper-refresh.log.gz` records this `make tcb` run.

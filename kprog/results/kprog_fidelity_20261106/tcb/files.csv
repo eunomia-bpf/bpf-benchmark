@@ -10,7 +10,7 @@ x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_br
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_bswap.h,29,27
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_bt.h,58,58
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_bzhi.h,56,56
-x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_bzhi_flags.h,23,23
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_bzhi_flags.h,16,16
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_callmem.h,51,50
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_cmov.h,79,79
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_cmpop.h,106,106
@@ -19,8 +19,8 @@ x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_di
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_dispatch_singleton.h,195,195
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_div.h,60,60
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_doubleshift.h,44,41
-x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_doubleshift_arm.h,71,71
-x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_helper_dispatch.h,59,59
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_doubleshift_arm.h,69,69
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_helper_dispatch.h,222,222
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_immediate.h,9,9
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_imul_flags.h,11,11
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_logic_flags.h,11,11
@@ -39,7 +39,7 @@ x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_op
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_popcnt_flags.h,20,20
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_popcount.h,17,17
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_ptr_write.h,56,56
-x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_pushpop.h,57,56
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_pushpop.h,44,43
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_reg_dispatch.h,45,45
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_reg_lane_aux.h,12,12
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_reg_presence.h,37,37
@@ -65,9 +65,9 @@ x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_wr
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_xchg.h,54,54
 x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_xmm0.h,89,88
 x86 simulator (including ISA-specific generated C),kprog/x86/x86_sim.h,284,255
-x86 simulator (including ISA-specific generated C),kprog/x86/x86_sim_local_bpf.h,2317,2173
+x86 simulator (including ISA-specific generated C),kprog/x86/x86_sim_local_bpf.h,2693,2487
 arm64 simulator (including ISA-specific generated C),kprog/arm64/arm64_sim.h,174,162
-arm64 simulator (including ISA-specific generated C),kprog/arm64/arm64_sim_local_bpf.h,1870,1712
+arm64 simulator (including ISA-specific generated C),kprog/arm64/arm64_sim_local_bpf.h,1637,1468
 arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_adrp.h,45,45
 arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_alu_handler.h,9,7
 arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_alu_operand.h,9,7
@@ -136,25 +136,27 @@ arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm6
 arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_write_arm.h,56,56
 shared simulator generated C,kprog/formal/generated/abi_load.h,30,27
 shared simulator generated C,kprog/formal/generated/ptr_add.h,8,6
-x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generate_micro_sim_proofs.py,1327,1203
+x86 native-to-proof generator (including local imports),kprog/helper_abi.py,31,23
+x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generate_micro_sim_proofs.py,1566,1427
 x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generated_x86_alu_decode.py,19,19
 x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generated_x86_cc_decode.py,39,39
 x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generated_x86_opcode.py,152,152
 x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generated_x86_reg_lane_aux.py,12,10
 x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generated_x86_specialization.py,141,141
-arm64 native-to-proof generator (including local imports),kprog/arm64/micro-prog/generate_micro_sim_proofs.py,852,761
+x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/x86_abi.py,328,306
+arm64 native-to-proof generator (including local imports),kprog/arm64/micro-prog/generate_micro_sim_proofs.py,1006,912
 arm64 native-to-proof generator (including local imports),kprog/arm64/micro-prog/generated_arm64_cc_decode.py,20,20
 arm64 native-to-proof generator (including local imports),kprog/arm64/micro-prog/generated_arm64_decode.py,35,35
-arm64 native-to-proof generator (including local imports),kprog/arm64/micro-prog/generated_arm64_helper_idents.py,69,69
+arm64 native-to-proof generator (including local imports),kprog/arm64/micro-prog/generated_arm64_helper_idents.py,78,78
 proof build/load orchestration,kprog/run_micro_sim_batch.py,616,549
 native shared loader/linker integration,kprog/libnativeloader/include/native_loader.hpp,145,132
 native shared loader/linker integration,kprog/libnativeloader/src/native_data_layout.hpp,89,80
-native shared loader/linker integration,kprog/libnativeloader/src/native_loader.cpp,5129,4824
+native shared loader/linker integration,kprog/libnativeloader/src/native_loader.cpp,5227,4920
 native shared loader/linker integration,kprog/libnativeloader/src/native_loader_bytecode.hpp,213,203
 native shared loader/linker integration,kprog/libnativeloader/src/native_loader_cache.hpp,17,14
 native shared loader/linker integration,kprog/libnativeloader/src/native_loader_fd_scan.hpp,17,13
 native shared loader/linker integration,kprog/libnativeloader/src/native_loader_link_plan.hpp,158,149
-native shared loader/linker integration,kprog/libnativeloader/src/native_loader_link_schema.hpp,217,207
+native shared loader/linker integration,kprog/libnativeloader/src/native_loader_link_schema.hpp,221,211
 native shared loader/linker integration,kprog/libnativeloader/src/native_loader_manifest.hpp,769,727
 native ELF linker (both ISAs),kprog/x86/native_lab/native_link/src/main.rs,5254,4882
 native ELF linker (both ISAs),kprog/x86/native_lab/native_link/src/x86.rs,4425,4195
@@ -170,9 +172,11 @@ application syscall shim,bpfopt/shim/shim_netlink.h,240,221
 application syscall shim,bpfopt/shim/shim_reload.h,1627,1579
 application syscall shim,bpfopt/shim/shim_snapshot.h,590,566
 application syscall shim,bpfopt/shim/shim_state.h,1406,1314
-x86 native kernel module,kinsn/module/x86/bpf_x86_native_lab.c,940,840
-arm64 native kernel module,kinsn/module/arm64/bpf_arm64_native_lab.c,1167,1059
-shared binding wire contract,kinsn/module/include/native_lab_binding.h,115,107
+x86 native kernel module,kinsn/module/x86/bpf_x86_native_lab.c,964,863
+arm64 native kernel module,kinsn/module/arm64/bpf_arm64_native_lab.c,1191,1082
+shared binding wire contract,kinsn/module/include/native_lab_binding.h,119,110
+shared binding wire contract,kinsn/module/include/native_lab_group.h,381,348
+"vendored helper declarations (ABI input, not project-owned)",vendor/libbpf/src/bpf_helper_defs.h,4785,4570
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Adrp.lean,44,35
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64AluHandler.lean,175,152
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64AluOperandHandler.lean,86,74
@@ -187,6 +191,7 @@ shared binding wire contract,kinsn/module/include/native_lab_binding.h,115,107
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64CcmpDecode.lean,72,61
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64CcmpHandler.lean,113,97
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Cneg.lean,89,74
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64CompareCond.lean,28,23
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Cond.lean,100,88
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64ControlFlow.lean,16,12
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Csel.lean,137,118
@@ -204,7 +209,7 @@ shared binding wire contract,kinsn/module/include/native_lab_binding.h,115,107
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Fmov.lean,83,72
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64FmovDest.lean,65,53
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64HelperArgPtrShape.lean,122,102
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64HelperIdents.lean,152,140
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64HelperIdents.lean,127,120
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64ImmOperand.lean,88,71
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64LdrSx.lean,94,78
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64LdrsxOp.lean,120,101
@@ -284,7 +289,7 @@ shared binding wire contract,kinsn/module/include/native_lab_binding.h,115,107
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Fmov.lean,40,40
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64FmovDest.lean,16,16
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64HelperArgPtr.lean,64,64
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean,206,206
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean,233,233
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64ImmOperand.lean,28,28
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64LdrSx.lean,35,35
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64LdrsxOp.lean,28,28
@@ -336,7 +341,7 @@ shared binding wire contract,kinsn/module/include/native_lab_binding.h,115,107
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Bswap.lean,31,31
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Bt.lean,47,47
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Bzhi.lean,43,43
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86BzhiFlags.lean,27,27
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86BzhiFlags.lean,26,26
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86CallMem.lean,52,52
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86CcDecode.lean,236,236
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Cmov.lean,133,133
@@ -346,7 +351,7 @@ shared binding wire contract,kinsn/module/include/native_lab_binding.h,115,107
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86DispatchSingleton.lean,267,225
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Div.lean,77,77
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86DoubleShift.lean,62,62
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86DoubleShiftArm.lean,52,52
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86DoubleShiftArm.lean,56,56
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86HelperDispatch.lean,33,33
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Immediate.lean,13,10
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86ImulFlags.lean,24,24
@@ -366,7 +371,7 @@ shared binding wire contract,kinsn/module/include/native_lab_binding.h,115,107
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86PopcntFlags.lean,22,22
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Popcount.lean,11,11
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86PtrWrite.lean,49,49
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86PushPop.lean,60,60
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86PushPop.lean,62,62
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86RegDispatch.lean,27,27
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86RegLaneAux.lean,11,11
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86RegPresence.lean,27,27
@@ -393,8 +398,11 @@ shared binding wire contract,kinsn/module/include/native_lab_binding.h,115,107
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Xchg.lean,43,43
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Xmm0.lean,68,68
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Reference/Memory.lean,69,55
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Reference/X86.lean,272,242
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Reference/X86.lean,389,343
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Bt.lean,107,92
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Bzhi.lean,76,64
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Cmov.lean,120,105
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Pop.lean,71,60
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/TagErasure.lean,240,207
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Adc.lean,33,33
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86AddFlags.lean,15,15
@@ -404,12 +412,12 @@ shared binding wire contract,kinsn/module/include/native_lab_binding.h,115,107
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86AluResultSpec.lean,71,65
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86AluWriteback.lean,1178,1060
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86AndnHandler.lean,355,314
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Bitops.lean,113,97
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Bitops.lean,107,91
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86BranchEmit.lean,56,47
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Bswap.lean,63,52
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86BtHandler.lean,306,271
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86BzhiFlags.lean,165,139
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86BzhiHandler.lean,379,334
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86BtHandler.lean,304,269
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86BzhiFlags.lean,164,137
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86BzhiHandler.lean,372,327
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86CallMemHandler.lean,306,271
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86CcDecode.lean,108,95
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86CmovHandler.lean,527,473
@@ -419,9 +427,9 @@ shared binding wire contract,kinsn/module/include/native_lab_binding.h,115,107
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86DispatchSingleton.lean,888,746
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86DispatchTotality.lean,115,94
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86DivHandler.lean,240,206
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86DoubleShift.lean,85,72
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86DoubleShiftArmHandler.lean,239,205
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86HelperDispatch.lean,246,209
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86DoubleShift.lean,57,48
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86DoubleShiftArmHandler.lean,262,226
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86HelperDispatch.lean,276,239
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Immediate.lean,31,25
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86ImulFlags.lean,77,67
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86ImulRegImmHandler.lean,123,111
@@ -431,7 +439,7 @@ shared binding wire contract,kinsn/module/include/native_lab_binding.h,115,107
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemAccess.lean,92,80
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemAluHandler.lean,83,73
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemAux.lean,112,98
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemBitHandler.lean,146,134
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemBitHandler.lean,150,138
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemCompareHandler.lean,342,314
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemDispatch.lean,56,47
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemImulHandler.lean,175,161
@@ -454,7 +462,7 @@ shared binding wire contract,kinsn/module/include/native_lab_binding.h,115,107
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86PopcntFlags.lean,118,98
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Popcount.lean,53,42
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86PtrWriteHandler.lean,310,275
-"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86PushPopHandler.lean,435,389
+"formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86PushPopHandler.lean,455,401
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86RegDispatch.lean,163,137
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86RegLaneAux.lean,85,74
 "formal model and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86RegPresence.lean,100,84
@@ -513,7 +521,7 @@ formal contracts (JSON),kprog/formal/contracts/arm64_flags_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/arm64_fmov_dest_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/arm64_fmov_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/arm64_helper_arg_ptr_spec.json,1,1
-formal contracts (JSON),kprog/formal/contracts/arm64_helper_idents_spec.json,72,72
+formal contracts (JSON),kprog/formal/contracts/arm64_helper_idents_spec.json,81,81
 formal contracts (JSON),kprog/formal/contracts/arm64_imm_operand_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/arm64_ldrsx_op_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/arm64_ldrsx_spec.json,1,1
@@ -564,7 +572,7 @@ formal contracts (JSON),kprog/formal/contracts/x86_bitops_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/x86_branch_emit_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/x86_bswap_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/x86_bt_spec.json,1,1
-formal contracts (JSON),kprog/formal/contracts/x86_bzhi_flags_spec.json,16,16
+formal contracts (JSON),kprog/formal/contracts/x86_bzhi_flags_spec.json,17,17
 formal contracts (JSON),kprog/formal/contracts/x86_bzhi_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/x86_callmem_spec.json,52,52
 formal contracts (JSON),kprog/formal/contracts/x86_cc_decode_spec.json,44,44
@@ -574,9 +582,9 @@ formal contracts (JSON),kprog/formal/contracts/x86_cond_spec.json,20,20
 formal contracts (JSON),kprog/formal/contracts/x86_dispatch_family_spec.json,40,40
 formal contracts (JSON),kprog/formal/contracts/x86_dispatch_singleton_spec.json,49,49
 formal contracts (JSON),kprog/formal/contracts/x86_div_spec.json,50,50
-formal contracts (JSON),kprog/formal/contracts/x86_doubleshift_arm_spec.json,28,28
+formal contracts (JSON),kprog/formal/contracts/x86_doubleshift_arm_spec.json,30,30
 formal contracts (JSON),kprog/formal/contracts/x86_doubleshift_spec.json,1,1
-formal contracts (JSON),kprog/formal/contracts/x86_helper_dispatch_spec.json,51,51
+formal contracts (JSON),kprog/formal/contracts/x86_helper_dispatch_spec.json,399,399
 formal contracts (JSON),kprog/formal/contracts/x86_immediate_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/x86_imul_flags_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/x86_logic_flags_spec.json,1,1
@@ -595,7 +603,7 @@ formal contracts (JSON),kprog/formal/contracts/x86_opcode_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/x86_popcnt_flags_spec.json,13,13
 formal contracts (JSON),kprog/formal/contracts/x86_popcount_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/x86_ptr_write_spec.json,41,41
-formal contracts (JSON),kprog/formal/contracts/x86_pushpop_spec.json,40,40
+formal contracts (JSON),kprog/formal/contracts/x86_pushpop_spec.json,39,39
 formal contracts (JSON),kprog/formal/contracts/x86_reg_dispatch_spec.json,25,25
 formal contracts (JSON),kprog/formal/contracts/x86_reg_lane_aux_spec.json,1,1
 formal contracts (JSON),kprog/formal/contracts/x86_reg_presence_spec.json,10,10
@@ -651,7 +659,7 @@ formal contract generators,kprog/formal/tools/generate_arm64_flags_spec.py,163,1
 formal contract generators,kprog/formal/tools/generate_arm64_fmov_dest_spec.py,169,154
 formal contract generators,kprog/formal/tools/generate_arm64_fmov_spec.py,186,170
 formal contract generators,kprog/formal/tools/generate_arm64_helper_arg_ptr_spec.py,317,290
-formal contract generators,kprog/formal/tools/generate_arm64_helper_idents_spec.py,268,248
+formal contract generators,kprog/formal/tools/generate_arm64_helper_idents_spec.py,250,230
 formal contract generators,kprog/formal/tools/generate_arm64_imm_operand_spec.py,211,187
 formal contract generators,kprog/formal/tools/generate_arm64_ldrsx_op_spec.py,232,208
 formal contract generators,kprog/formal/tools/generate_arm64_ldrsx_spec.py,190,174
@@ -689,7 +697,7 @@ formal contract generators,kprog/formal/tools/generate_arm64_unary_spec.py,208,1
 formal contract generators,kprog/formal/tools/generate_arm64_vreg_field_spec.py,321,293
 formal contract generators,kprog/formal/tools/generate_arm64_vreg_spec.py,291,269
 formal contract generators,kprog/formal/tools/generate_arm64_width_spec.py,146,134
-formal contract generators,kprog/formal/tools/generate_arm64_write_arm_spec.py,364,334
+formal contract generators,kprog/formal/tools/generate_arm64_write_arm_spec.py,358,328
 formal contract generators,kprog/formal/tools/generate_control_flow_trace_spec.py,128,113
 formal contract generators,kprog/formal/tools/generate_ptr_add_spec.py,88,66
 formal contract generators,kprog/formal/tools/generate_x86_adc_spec.py,76,76
@@ -702,7 +710,7 @@ formal contract generators,kprog/formal/tools/generate_x86_bitops_spec.py,126,10
 formal contract generators,kprog/formal/tools/generate_x86_branch_emit_spec.py,117,102
 formal contract generators,kprog/formal/tools/generate_x86_bswap_spec.py,129,113
 formal contract generators,kprog/formal/tools/generate_x86_bt_spec.py,238,218
-formal contract generators,kprog/formal/tools/generate_x86_bzhi_flags_spec.py,235,206
+formal contract generators,kprog/formal/tools/generate_x86_bzhi_flags_spec.py,201,176
 formal contract generators,kprog/formal/tools/generate_x86_bzhi_spec.py,227,209
 formal contract generators,kprog/formal/tools/generate_x86_callmem_spec.py,300,276
 formal contract generators,kprog/formal/tools/generate_x86_cc_decode_spec.py,263,240
@@ -712,9 +720,9 @@ formal contract generators,kprog/formal/tools/generate_x86_cond_spec.py,138,112
 formal contract generators,kprog/formal/tools/generate_x86_dispatch_family_spec.py,279,252
 formal contract generators,kprog/formal/tools/generate_x86_dispatch_singleton_spec.py,312,287
 formal contract generators,kprog/formal/tools/generate_x86_div_spec.py,326,300
-formal contract generators,kprog/formal/tools/generate_x86_doubleshift_arm_spec.py,329,304
+formal contract generators,kprog/formal/tools/generate_x86_doubleshift_arm_spec.py,335,310
 formal contract generators,kprog/formal/tools/generate_x86_doubleshift_spec.py,163,144
-formal contract generators,kprog/formal/tools/generate_x86_helper_dispatch_spec.py,294,264
+formal contract generators,kprog/formal/tools/generate_x86_helper_dispatch_spec.py,390,361
 formal contract generators,kprog/formal/tools/generate_x86_immediate_spec.py,71,57
 formal contract generators,kprog/formal/tools/generate_x86_imul_flags_spec.py,90,77
 formal contract generators,kprog/formal/tools/generate_x86_logic_flags_spec.py,60,54
@@ -733,7 +741,7 @@ formal contract generators,kprog/formal/tools/generate_x86_opcode_spec.py,287,26
 formal contract generators,kprog/formal/tools/generate_x86_popcnt_flags_spec.py,197,171
 formal contract generators,kprog/formal/tools/generate_x86_popcount_spec.py,89,75
 formal contract generators,kprog/formal/tools/generate_x86_ptr_write_spec.py,282,266
-formal contract generators,kprog/formal/tools/generate_x86_pushpop_spec.py,311,288
+formal contract generators,kprog/formal/tools/generate_x86_pushpop_spec.py,267,248
 formal contract generators,kprog/formal/tools/generate_x86_reg_dispatch_spec.py,169,153
 formal contract generators,kprog/formal/tools/generate_x86_reg_lane_aux_spec.py,100,83
 formal contract generators,kprog/formal/tools/generate_x86_reg_presence_spec.py,165,149
@@ -761,6 +769,6 @@ formal contract generators,kprog/formal/tools/generate_x86_xchg_spec.py,275,251
 formal contract generators,kprog/formal/tools/generate_x86_xmm0_spec.py,387,363
 translation-validation composition theorem,kprog/tv/Composition.lean,97,86
 "native-proof kernel patch and application (patch text, not SLOC)",kprog/tv/apply_kernel_patch.py,29,25
-"native-proof kernel patch and application (patch text, not SLOC)",kprog/tv/native-proof-regions.patch,215,194
-existing verifier context (not incremental kernel changes),vendor/linux-framework/include/linux/bpf_verifier.h,1115,1008
-existing verifier context (not incremental kernel changes),vendor/linux-framework/kernel/bpf/verifier.c,26641,23635
+"native-proof kernel patch and application (patch text, not SLOC)",kprog/tv/native-proof-regions.patch,313,286
+existing verifier context (not incremental kernel changes),vendor/linux-framework/include/linux/bpf_verifier.h,1117,1010
+existing verifier context (not incremental kernel changes),vendor/linux-framework/kernel/bpf/verifier.c,26679,23669

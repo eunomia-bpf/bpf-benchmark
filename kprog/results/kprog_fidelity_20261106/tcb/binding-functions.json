@@ -2,155 +2,155 @@
   {
     "path": "kinsn/module/x86/bpf_x86_native_lab.c",
     "function": "decode_native_lab_payload",
-    "first_line": 126,
-    "last_line": 147,
+    "first_line": 129,
+    "last_line": 150,
     "physical_lines": 22
   },
   {
     "path": "kinsn/module/x86/bpf_x86_native_lab.c",
     "function": "native_lab_advance_generation",
-    "first_line": 151,
-    "last_line": 159,
-    "physical_lines": 9
+    "first_line": 154,
+    "last_line": 163,
+    "physical_lines": 10
   },
   {
     "path": "kinsn/module/x86/bpf_x86_native_lab.c",
     "function": "instantiate_native_lab",
-    "first_line": 179,
-    "last_line": 233,
+    "first_line": 183,
+    "last_line": 237,
     "physical_lines": 55
   },
   {
     "path": "kinsn/module/x86/bpf_x86_native_lab.c",
     "function": "blob_write",
-    "first_line": 418,
-    "last_line": 465,
+    "first_line": 431,
+    "last_line": 478,
     "physical_lines": 48
   },
   {
     "path": "kinsn/module/x86/bpf_x86_native_lab.c",
     "function": "relocs_write",
-    "first_line": 471,
-    "last_line": 513,
+    "first_line": 484,
+    "last_line": 526,
     "physical_lines": 43
   },
   {
     "path": "kinsn/module/x86/bpf_x86_native_lab.c",
     "function": "proof_write",
-    "first_line": 515,
-    "last_line": 549,
+    "first_line": 528,
+    "last_line": 562,
     "physical_lines": 35
   },
   {
     "path": "kinsn/module/x86/bpf_x86_native_lab.c",
     "function": "binding_write",
-    "first_line": 554,
-    "last_line": 612,
-    "physical_lines": 59
+    "first_line": 567,
+    "last_line": 635,
+    "physical_lines": 69
   },
   {
     "path": "kinsn/module/x86/bpf_x86_native_lab.c",
     "function": "generation_read",
-    "first_line": 614,
-    "last_line": 627,
+    "first_line": 637,
+    "last_line": 650,
     "physical_lines": 14
   },
   {
     "path": "kinsn/module/arm64/bpf_arm64_native_lab.c",
     "function": "decode_native_lab_payload",
-    "first_line": 130,
-    "last_line": 151,
+    "first_line": 133,
+    "last_line": 154,
     "physical_lines": 22
   },
   {
     "path": "kinsn/module/arm64/bpf_arm64_native_lab.c",
     "function": "native_lab_advance_generation",
-    "first_line": 155,
-    "last_line": 163,
-    "physical_lines": 9
+    "first_line": 158,
+    "last_line": 167,
+    "physical_lines": 10
   },
   {
     "path": "kinsn/module/arm64/bpf_arm64_native_lab.c",
     "function": "instantiate_native_lab",
-    "first_line": 217,
-    "last_line": 271,
+    "first_line": 221,
+    "last_line": 275,
     "physical_lines": 55
   },
   {
     "path": "kinsn/module/arm64/bpf_arm64_native_lab.c",
     "function": "blob_write",
-    "first_line": 636,
-    "last_line": 682,
+    "first_line": 649,
+    "last_line": 695,
     "physical_lines": 47
   },
   {
     "path": "kinsn/module/arm64/bpf_arm64_native_lab.c",
     "function": "relocs_write",
-    "first_line": 684,
-    "last_line": 726,
+    "first_line": 697,
+    "last_line": 739,
     "physical_lines": 43
   },
   {
     "path": "kinsn/module/arm64/bpf_arm64_native_lab.c",
     "function": "proof_write",
-    "first_line": 728,
-    "last_line": 762,
+    "first_line": 741,
+    "last_line": 775,
     "physical_lines": 35
   },
   {
     "path": "kinsn/module/arm64/bpf_arm64_native_lab.c",
     "function": "binding_write",
-    "first_line": 767,
-    "last_line": 825,
-    "physical_lines": 59
+    "first_line": 780,
+    "last_line": 848,
+    "physical_lines": 69
   },
   {
     "path": "kinsn/module/arm64/bpf_arm64_native_lab.c",
     "function": "generation_read",
-    "first_line": 827,
-    "last_line": 840,
+    "first_line": 850,
+    "last_line": 863,
     "physical_lines": 14
   },
   {
     "path": "kprog/libnativeloader/src/native_loader.cpp",
     "function": "bound_proof_sequence",
-    "first_line": 1018,
-    "last_line": 1064,
+    "first_line": 1026,
+    "last_line": 1072,
     "physical_lines": 47
   },
   {
     "path": "kprog/libnativeloader/src/native_loader.cpp",
     "function": "upload_proof_chunk",
-    "first_line": 1066,
-    "last_line": 1081,
+    "first_line": 1074,
+    "last_line": 1089,
     "physical_lines": 16
   },
   {
     "path": "kprog/libnativeloader/src/native_loader.cpp",
     "function": "read_blob_generation",
-    "first_line": 1083,
-    "last_line": 1094,
+    "first_line": 1091,
+    "last_line": 1102,
     "physical_lines": 12
   },
   {
     "path": "kprog/libnativeloader/src/native_loader.cpp",
     "function": "seal_bound_chunk",
-    "first_line": 1096,
-    "last_line": 1146,
+    "first_line": 1104,
+    "last_line": 1154,
     "physical_lines": 51
   },
   {
     "path": "kprog/libnativeloader/src/native_loader.cpp",
     "function": "upload_bound_proofs",
-    "first_line": 1148,
-    "last_line": 1178,
+    "first_line": 1156,
+    "last_line": 1186,
     "physical_lines": 31
   },
   {
     "path": "kprog/libnativeloader/src/native_loader.cpp",
     "function": "prepare_simulator_proof",
-    "first_line": 4655,
-    "last_line": 4743,
-    "physical_lines": 89
+    "first_line": 4736,
+    "last_line": 4833,
+    "physical_lines": 98
   }
 ]
