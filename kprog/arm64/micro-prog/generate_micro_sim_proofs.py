@@ -715,7 +715,7 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
         return
     enc = encode(insn, rodata_idents, reloc_idents)
     lines.append(
-        f"\tARM64_SIM_RUN_OP3({enc.op}, {enc.dst}, {enc.src}, {enc.src2}, {enc.src3}, "
+        f"\tARM64_SIM_RUN_KNOWN_OP3({enc.op}, {enc.dst}, {enc.src}, {enc.src2}, {enc.src3}, "
         f"{enc.width}, {enc.aux}, {enc.imm});"
     )
 

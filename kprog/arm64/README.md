@@ -46,6 +46,14 @@ instruction macros. Helper/map/rodata sites stay represented by ELF
 relocations in the proof object; the generator does not parse the original
 native object relocation frontend.
 
+Literal decoded opcodes use `ARM64_SIM_RUN_KNOWN_OP3`. The generated
+`arm64_sim_direct.h` copies the selected bodies from the canonical C dispatcher;
+its own existing C predicates select the body, including the rejection arm.
+This avoids expanding every opcode handler at every native instruction. The
+owning Makefile regenerates it, and the formal check verifies that it still
+matches the canonical source. The dynamic dispatcher remains the source used
+by the existing semantic hosts. No instruction semantics move into Python.
+
 ## Smoke
 
 ```bash

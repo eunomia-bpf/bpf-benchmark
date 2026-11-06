@@ -1,6 +1,7 @@
 ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../../..)
 HERE := $(ROOT)/corpus/results/kprog_arm64_app_coverage_20261106
 PHASE ?= exact
+SOURCE_PHASE ?= compare-gt
 BUILD := $(ROOT)/kprog/arm64/build/app-coverage/$(PHASE)
 BASE_INITRAMFS ?= /workspaces/.agent-state/bpf-benchmark-supervisor/kfunc-inline-claude-20261004/round5-arm64.cpio.gz
 KERNEL ?= $(ROOT)/vendor/build/arm64/linux/arch/arm64/boot/Image
@@ -79,3 +80,24 @@ compare-cond-generate:
 
 compare-cond-host:
 	taskset -c 16-23 python3 $(HERE)/register_cells_check.py $(HERE)/$(PHASE) test_arm64_compare_cond_host
+
+.PHONY: specialize-constant-dispatch
+specialize-constant-dispatch:
+	python3 $(HERE)/specialize.py $(HERE)/$(PHASE) $(HERE)/$(SOURCE_PHASE)
+
+.PHONY: direct-differential
+direct-differential:
+	$(MAKE) -C $(ROOT)/kprog/fidelity ARCH=arm64 BUILD=build-arm64-a-direct build-arm64-a-direct/generated.c
+	python3 $(HERE)/direct_differential.py $(HERE)/$(PHASE)
+	taskset -c 16-23 $(MAKE) -C $(ROOT)/kprog/fidelity ARCH=arm64 BUILD=build-arm64-a-direct OUT=$(HERE)/$(PHASE)/differential CASES=1024 run-emulated
+
+.PHONY: generate-micro-cases
+generate-micro-cases:
+	python3 $(HERE)/generate_micro_cases.py $(HERE)/$(PHASE)
+
+.PHONY: direct-header-generate direct-header-check
+direct-header-generate:
+	python3 $(ROOT)/kprog/arm64/generate_sim_dispatch.py
+
+direct-header-check:
+	python3 $(ROOT)/kprog/arm64/generate_sim_dispatch.py --check

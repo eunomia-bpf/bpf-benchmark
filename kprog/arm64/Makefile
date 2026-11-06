@@ -25,7 +25,10 @@ SYS_INCLUDE_FLAGS ?= -I/usr/aarch64-linux-gnu/include -I$(ROOT_DIR)/.cache/aarch
 build: $(BPF_OBJ)
 	$(CARGO) build --manifest-path $(LOADER_MANIFEST)
 
-$(BPF_OBJ): arm64_sim_hardcoded.bpf.c arm64_sim_local_bpf.h arm64_sim.h
+arm64_sim_direct.h: arm64_sim_local_bpf.h arm64_sim.h generate_sim_dispatch.py $(wildcard ../formal/generated/*.h)
+	$(PYTHON) generate_sim_dispatch.py
+
+$(BPF_OBJ): arm64_sim_hardcoded.bpf.c arm64_sim_local_bpf.h arm64_sim.h arm64_sim_direct.h
 	install -d $(BUILD_DIR)
 	$(CLANG) -g -O2 -target bpf -mllvm -bpf-stack-size=$(BPF_STACK_SIZE) \
 		-D__TARGET_ARCH_arm64 \
@@ -37,7 +40,7 @@ $(BPF_OBJ): arm64_sim_hardcoded.bpf.c arm64_sim_local_bpf.h arm64_sim.h
 run: build
 	$(LOADER_BIN) --object $(BPF_OBJ) --program arm64_sim_hardcoded_xdp --case simple --load-only
 
-micro-proofs-generate:
+micro-proofs-generate: arm64_sim_direct.h
 	$(PYTHON) ../run_micro_sim_batch.py --arch arm64 --generate-only \
 		--build-dir "$(PROOF_BUILD_DIR)" \
 		--config "$(MICRO_CONFIG)" \
@@ -46,7 +49,7 @@ micro-proofs-generate:
 $(PROOF_BUILD_DIR):
 	install -d "$@"
 
-$(PROOF_BUILD_DIR)/%.bpf.o: $(MICRO_PROG_DIR)/%.bpf.c arm64_sim_local_bpf.h arm64_sim.h | $(PROOF_BUILD_DIR)
+$(PROOF_BUILD_DIR)/%.bpf.o: $(MICRO_PROG_DIR)/%.bpf.c arm64_sim_local_bpf.h arm64_sim.h arm64_sim_direct.h | $(PROOF_BUILD_DIR)
 	$(CLANG) -g -O2 -target bpf -mllvm -bpf-stack-size=$(BPF_STACK_SIZE) \
 		-D__TARGET_ARCH_arm64 \
 		-I. \
@@ -58,13 +61,13 @@ $(PROOF_BUILD_DIR)/%.bpf.o: $(MICRO_PROG_DIR)/%.bpf.c arm64_sim_local_bpf.h arm6
 $(SIMPLE_INPUT): | $(PROOF_BUILD_DIR)
 	dd if=/dev/zero of="$@" bs=64 count=1 status=none
 
-micro-proofs-build: kprog-negative-proof-build
+micro-proofs-build: arm64_sim_direct.h kprog-negative-proof-build
 	$(PYTHON) ../run_micro_sim_batch.py --arch arm64 --build-only \
 		--build-dir "$(PROOF_BUILD_DIR)" \
 		--config "$(MICRO_CONFIG)" \
 		$(MICRO_SIM_PROOF_ARGS)
 
-kprog-negative-proof-build:
+kprog-negative-proof-build: arm64_sim_direct.h
 	$(MAKE) -C ../test \
 		OUTPUT_DIR="$(abspath $(NEGATIVE_NATIVE_BUILD_DIR))" \
 		KERNEL_OFFSETS_DIR="$(abspath $(ROOT_DIR)/micro/programs/build-arm64)" \
@@ -78,13 +81,13 @@ kprog-negative-proof-build:
 		--config "$(NEGATIVE_CONFIG)" \
 		--jobs 1
 
-micro-proofs-run:
+micro-proofs-run: arm64_sim_direct.h
 	$(PYTHON) ../run_micro_sim_batch.py --arch arm64 \
 		--build-dir "$(PROOF_BUILD_DIR)" \
 		--config "$(MICRO_CONFIG)" \
 		$(MICRO_SIM_PROOF_ARGS)
 
-app-proofs-build:
+app-proofs-build: arm64_sim_direct.h
 	$(PYTHON) run_app_sim_smoke.py --keep-going $(APP_SIM_PROOF_ARGS)
 
 simple-proof-build: $(SIMPLE_OBJ) $(SIMPLE_INPUT)

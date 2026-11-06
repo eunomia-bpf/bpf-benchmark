@@ -293,3 +293,33 @@ make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile compare-cond-p
 make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile compare-cond-generate compare-cond-host compile PHASE=compare-gt COMPILE_ARGS='0 1 900'
 make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile verify PHASE=compare-gt
 ```
+
+## Constant-opcode expansion completed
+
+The mechanical dispatcher now compiles all four repaired large artifacts that
+previously exceeded the900-second limit: three Cilium functions and Tracee's
+`lkm_seeker_modtree_loop`. [known-helper-complete/table.md](known-helper-complete/table.md)
+keeps the exact compiler commands and original native artifacts. All29 original
+micro inputs/goldens compile and pass full-system QEMU again in
+[known-micro/table.md](known-micro/table.md), with raw verification logs archived.
+The unchanged497-form native CPU matrix also matches508,928 states with zero
+mismatches in `direct-dispatch-v3/differential/host.txt`.
+
+`generate_sim_dispatch.py` runs the canonical C predicates to classify71 literal
+opcodes into36 C arms (including the rejection arm), then copies those bodies.
+It adds no Python instruction semantics. The formal check verifies generated
+source identity. These are compiler/functional checks, not app startup counts,
+generation-bound application execution or throughput measurements.
+
+```sh
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile direct-header-check
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile generate-micro-cases PHASE=known-micro-source
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile specialize-constant-dispatch PHASE=known-micro SOURCE_PHASE=known-micro-source
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile compile verify summarize PHASE=known-micro COMPILE_ARGS='0 29 900'
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile direct-differential PHASE=direct-dispatch-v3
+```
+
+Use fresh phase names for new attempts; the committed archives preserve this
+run's source/header versions and outputs. Entry/clobber definedness, native
+stack-address observations, modified unary operations and real app integration
+are active repair work, and no accepted negative case is waived by these results.

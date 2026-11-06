@@ -1620,4 +1620,6 @@ ARM64_SIM_CONCAT(__a64_sim_tb_fallthrough_, ID):                             \
 
 #define ARM64_SIM_LICENSE() char LICENSE[] SEC("license") = "GPL"
 
+#include "arm64_sim_direct.h"
+
 #endif
