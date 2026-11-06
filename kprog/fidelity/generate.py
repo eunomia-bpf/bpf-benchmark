@@ -115,7 +115,7 @@ def native_wrapper(arch, index, instruction):
         lines += [f"mov {r}, [r15+{i*8}]" for i, r in enumerate(regs) if r not in ["rsp", "r15"]]
         before = -2 if instruction == "pop ax" else -8 if instruction == "pop rax" else 0
         after = -2 if instruction == "push bx" else -8 if instruction == "push rbx" else 0
-        lines += ["mov r15, [r15+120]"]
+        lines += ["mov r15, [r15+120]", "mov QWORD PTR [rip+native_stack_base], rsp"]
         if before:
             lines += [f"lea rsp, [rsp{before:+d}]"]
         lines += [f".global native_pc_{index}", f"native_pc_{index}:", instruction, f".global native_next_{index}", f"native_next_{index}:"]

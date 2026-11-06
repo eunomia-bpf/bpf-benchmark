@@ -11,6 +11,7 @@
 #include <asm/prctl.h>
 #include <sys/syscall.h>
 #endif
+uint64_t native_stack_base;
 static uint64_t seed = UINT64_C(0x6b70726f67460001);
 static uint64_t random64(void)
 {
@@ -51,7 +52,7 @@ int main(int argc, char **argv)
     if (argc == 4 && !trace) { perror(argv[3]); return 1; }
     if (trace) {
         const uint32_t layout[] = {sizeof(struct state),256,form_count,(uint32_t)cases};
-        if (fwrite("KPFID001",1,8,trace)!=8 || fwrite(layout,sizeof(layout),1,trace)!=1) { perror("trace header"); return 1; }
+        if (fwrite("KPFID002",1,8,trace)!=8 || fwrite(layout,sizeof(layout),1,trace)!=1) { perror("trace header"); return 1; }
     }
     if (trace) {
         uint64_t fs_base=0,gs_base=0;
@@ -100,6 +101,7 @@ int main(int argc, char **argv)
 #else
             input.flags = (uint64_t)(c & 15) << 28;
             input.r[31] = 0; /* SP is the wrapper's private stack. */
+            if (form->mode == 6) input.r[20] = 0; /* outer control observation return */
             input.r[4] = (uintptr_t)(memory + 32);
             input.r[5] = 8; /* bounded address index */
 #endif
@@ -131,7 +133,7 @@ int main(int argc, char **argv)
 #endif
             if (trace) {
                 const uint32_t record[] = {j,(uint32_t)c};
-                if (fwrite(record,sizeof(record),1,trace)!=1 ||
+                if (fwrite(record,sizeof(record),1,trace)!=1 || fwrite(&native_stack_base,sizeof(native_stack_base),1,trace)!=1 ||
                     fwrite(&input,sizeof(input),1,trace)!=1 || fwrite(&native,sizeof(native),1,trace)!=1 || fwrite(&sim,sizeof(sim),1,trace)!=1 ||
                     fwrite(before,sizeof(before),1,trace)!=1 || fwrite(native_memory,sizeof(native_memory),1,trace)!=1 || fwrite(memory,sizeof(memory),1,trace)!=1) {
                     perror("trace record"); return 1;

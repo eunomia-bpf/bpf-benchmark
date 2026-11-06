@@ -1546,9 +1546,9 @@ ARM64_SIM_CONCAT(__a64_sim_jcc_fallthrough_, ID):                            \
         } else { ARM64_SIM_L_UNSUPPORTED_OPCODE(); }                    \
     } while (0)
 
-#define ARM64_SIM_A64_CBZ_IMPL(REG, KIND, CURRENT, TARGET, LABEL, ID)        \
+#define ARM64_SIM_A64_CBZ_VALUE_IMPL(VALUE, KIND, CURRENT, TARGET, LABEL, ID)        \
 	do {                                                               \
-		__u64 __a64_l_value = ARM64_SIM_L_READ_REG(REG);          \
+		__u64 __a64_l_value = (VALUE);          \
 		int __a64_l_taken =                                        \
 			KPROG_ARM64_BRANCH_TEST((KIND), __a64_l_value, 0ULL);\
 		if (KPROG_ARM64_BRANCH_BACKWARD((CURRENT), (TARGET))) {                              \
@@ -1562,6 +1562,15 @@ ARM64_SIM_CONCAT(__a64_sim_cb_fallthrough_, ID):                             \
 			goto LABEL;                                      \
 		}                                                         \
 	} while (0)
+
+#define ARM64_SIM_A64_CBZ_IMPL(REG, KIND, CURRENT, TARGET, LABEL, ID)       \
+    ARM64_SIM_A64_CBZ_VALUE_IMPL(ARM64_SIM_L_READ_REG(REG), (KIND), (CURRENT), (TARGET), LABEL, ID)
+
+/* W-form tests consume the low32 bits without writing the source register. */
+#define ARM64_SIM_A64_CBZ_W(REG, CURRENT, TARGET, LABEL)                   \
+    ARM64_SIM_A64_CBZ_VALUE_IMPL((__u32)ARM64_SIM_L_READ_REG(REG), KPROG_ARM64_BRANCH_CBZ, (CURRENT), (TARGET), LABEL, __LINE__)
+#define ARM64_SIM_A64_CBNZ_W(REG, CURRENT, TARGET, LABEL)                  \
+    ARM64_SIM_A64_CBZ_VALUE_IMPL((__u32)ARM64_SIM_L_READ_REG(REG), KPROG_ARM64_BRANCH_CBNZ, (CURRENT), (TARGET), LABEL, __LINE__)
 
 #define ARM64_SIM_A64_CBZ(REG, CURRENT, TARGET, LABEL)                      \
 	ARM64_SIM_A64_CBZ_IMPL((REG), KPROG_ARM64_BRANCH_CBZ, (CURRENT), (TARGET), LABEL, __LINE__)

@@ -197,3 +197,28 @@ stage2-guest:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod ../tv/build-x86/bpf_x86_native_lab.ko
 	$(PYTHON) stage2.py check --build $(STAGE2_BUILD) --out $(STAGE2_OUT)
+
+.PHONY: arm64-control-build arm64-control-qemu
+ARM64_CONTROL_BUILD ?= build-arm64-control
+ARM64_CONTROL_OUT ?= ../results/kprog_fidelity_20261106/differential/arm64-control-qemu
+arm64-control-build:
+	$(PYTHON) arm64_control.py $(ARM64_CONTROL_BUILD)
+	aarch64-linux-gnu-gcc -O1 -g -std=gnu11 -static -I../../vendor/libbpf/src \
+		driver.c $(ARM64_CONTROL_BUILD)/generated.c $(ARM64_CONTROL_BUILD)/native.o \
+		-Wl,--section-start=.kprog_native=0x1000000 -o $(ARM64_CONTROL_BUILD)/cpu-differential
+
+arm64-control-qemu:
+	install -d $(ARM64_CONTROL_OUT)
+	qemu-aarch64-static $(ARM64_CONTROL_BUILD)/cpu-differential $(CASES) $(ARM64_CONTROL_OUT)
+
+.PHONY: reference-replay
+reference-replay: reference-build
+	$(PYTHON) reference_check.py --reuse-trace --binary ./$(BUILD)/cpu-differential --arch $(ARCH) --cases $(CASES) --out $(OUT)
+
+.PHONY: arm64-control-handoff
+ARM64_CONTROL_HANDOFF ?= ../results/kprog_fidelity_20261106/differential/cpu-differential-arm64-control.gz
+arm64-control-handoff:
+	install -d $(ARM64_CONTROL_BUILD) $(ARM64_CONTROL_OUT)
+	gzip -dc $(ARM64_CONTROL_HANDOFF) > $(ARM64_CONTROL_BUILD)/cpu-differential-handoff
+	chmod +x $(ARM64_CONTROL_BUILD)/cpu-differential-handoff
+	./$(ARM64_CONTROL_BUILD)/cpu-differential-handoff $(CASES) $(ARM64_CONTROL_OUT)

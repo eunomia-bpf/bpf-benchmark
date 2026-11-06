@@ -1,0 +1,699 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status
+0	push rbx	1024	1024	0	0	checked
+1	pop rax	1024	1024	0	0	checked
+2	push bx	1024	1024	0	0	checked
+3	pop ax	1024	1024	0	0	checked
+4	nop	1024	0	0	0	awaiting_reference_instruction
+5	cdqe	1024	0	0	0	awaiting_reference_instruction
+6	movups xmm0, XMMWORD PTR [rdi]	1024	0	0	0	awaiting_reference_instruction
+7	movups XMMWORD PTR [rdi], xmm0	1024	0	0	0	awaiting_reference_instruction
+8	mov al, bl	1024	0	0	0	awaiting_reference_instruction
+9	mov al, 0x7f	1024	0	0	0	awaiting_reference_instruction
+10	mov BYTE PTR [rdi+8], al	1024	0	0	0	awaiting_reference_instruction
+11	mov al, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+12	mov BYTE PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+13	add al, bl	1024	0	0	0	awaiting_reference_instruction
+14	add al, 0x7f	1024	0	0	0	awaiting_reference_instruction
+15	add BYTE PTR [rdi+8], al	1024	0	0	0	awaiting_reference_instruction
+16	add BYTE PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+17	add al, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+18	adc al, bl	1024	0	0	0	awaiting_reference_instruction
+19	adc al, 0x7f	1024	0	0	0	awaiting_reference_instruction
+20	adc BYTE PTR [rdi+8], al	1024	0	0	0	awaiting_reference_instruction
+21	adc BYTE PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+22	adc al, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+23	sub al, bl	1024	0	0	0	awaiting_reference_instruction
+24	sub al, 0x7f	1024	0	0	0	awaiting_reference_instruction
+25	sub BYTE PTR [rdi+8], al	1024	0	0	0	awaiting_reference_instruction
+26	sub BYTE PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+27	sub al, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+28	sbb al, bl	1024	0	0	0	awaiting_reference_instruction
+29	sbb al, 0x7f	1024	0	0	0	awaiting_reference_instruction
+30	sbb BYTE PTR [rdi+8], al	1024	0	0	0	awaiting_reference_instruction
+31	sbb BYTE PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+32	sbb al, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+33	cmp al, bl	1024	0	0	0	awaiting_reference_instruction
+34	cmp al, 0x7f	1024	0	0	0	awaiting_reference_instruction
+35	cmp BYTE PTR [rdi+8], al	1024	0	0	0	awaiting_reference_instruction
+36	cmp BYTE PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+37	cmp al, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+38	test al, bl	1024	0	0	0	awaiting_reference_instruction
+39	test al, 0x7f	1024	0	0	0	awaiting_reference_instruction
+40	test BYTE PTR [rdi+8], al	1024	0	0	0	awaiting_reference_instruction
+41	test BYTE PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+42	and al, bl	1024	0	0	0	awaiting_reference_instruction
+43	and al, 0x7f	1024	0	0	0	awaiting_reference_instruction
+44	and al, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+45	and BYTE PTR [rdi+8], al	1024	0	0	0	awaiting_reference_instruction
+46	and BYTE PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+47	or al, bl	1024	0	0	0	awaiting_reference_instruction
+48	or al, 0x7f	1024	0	0	0	awaiting_reference_instruction
+49	or al, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+50	or BYTE PTR [rdi+8], al	1024	0	0	0	awaiting_reference_instruction
+51	or BYTE PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+52	xor al, bl	1024	0	0	0	awaiting_reference_instruction
+53	xor al, 0x7f	1024	0	0	0	awaiting_reference_instruction
+54	xor al, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+55	xor BYTE PTR [rdi+8], al	1024	0	0	0	awaiting_reference_instruction
+56	xor BYTE PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+57	inc al	1024	0	0	0	awaiting_reference_instruction
+58	inc BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+59	dec al	1024	0	0	0	awaiting_reference_instruction
+60	dec BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+61	neg al	1024	0	0	0	awaiting_reference_instruction
+62	neg BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+63	not al	1024	0	0	0	awaiting_reference_instruction
+64	not BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+65	xchg al, bl	1024	0	0	0	awaiting_reference_instruction
+66	shl al, 0	1024	0	0	0	awaiting_reference_instruction
+67	shl al, 1	1024	0	0	0	awaiting_reference_instruction
+68	shl al, 7	1024	0	0	0	awaiting_reference_instruction
+69	shl al, 8	1024	0	0	0	awaiting_reference_instruction
+70	shl al, 15	1024	0	0	0	awaiting_reference_instruction
+71	shl al, 16	1024	0	0	0	awaiting_reference_instruction
+72	shl al, 31	1024	0	0	0	awaiting_reference_instruction
+73	shl al, 32	1024	0	0	0	awaiting_reference_instruction
+74	shl al, 63	1024	0	0	0	awaiting_reference_instruction
+75	shl al, 64	1024	0	0	0	awaiting_reference_instruction
+76	shl al, 255	1024	0	0	0	awaiting_reference_instruction
+77	shl al, cl	1024	0	0	0	awaiting_reference_instruction
+78	shr al, 0	1024	0	0	0	awaiting_reference_instruction
+79	shr al, 1	1024	0	0	0	awaiting_reference_instruction
+80	shr al, 7	1024	0	0	0	awaiting_reference_instruction
+81	shr al, 8	1024	0	0	0	awaiting_reference_instruction
+82	shr al, 15	1024	0	0	0	awaiting_reference_instruction
+83	shr al, 16	1024	0	0	0	awaiting_reference_instruction
+84	shr al, 31	1024	0	0	0	awaiting_reference_instruction
+85	shr al, 32	1024	0	0	0	awaiting_reference_instruction
+86	shr al, 63	1024	0	0	0	awaiting_reference_instruction
+87	shr al, 64	1024	0	0	0	awaiting_reference_instruction
+88	shr al, 255	1024	0	0	0	awaiting_reference_instruction
+89	shr al, cl	1024	0	0	0	awaiting_reference_instruction
+90	sar al, 0	1024	0	0	0	awaiting_reference_instruction
+91	sar al, 1	1024	0	0	0	awaiting_reference_instruction
+92	sar al, 7	1024	0	0	0	awaiting_reference_instruction
+93	sar al, 8	1024	0	0	0	awaiting_reference_instruction
+94	sar al, 15	1024	0	0	0	awaiting_reference_instruction
+95	sar al, 16	1024	0	0	0	awaiting_reference_instruction
+96	sar al, 31	1024	0	0	0	awaiting_reference_instruction
+97	sar al, 32	1024	0	0	0	awaiting_reference_instruction
+98	sar al, 63	1024	0	0	0	awaiting_reference_instruction
+99	sar al, 64	1024	0	0	0	awaiting_reference_instruction
+100	sar al, 255	1024	0	0	0	awaiting_reference_instruction
+101	sar al, cl	1024	0	0	0	awaiting_reference_instruction
+102	rol al, 0	1024	0	0	0	awaiting_reference_instruction
+103	rol al, 1	1024	0	0	0	awaiting_reference_instruction
+104	rol al, 7	1024	0	0	0	awaiting_reference_instruction
+105	rol al, 8	1024	0	0	0	awaiting_reference_instruction
+106	rol al, 15	1024	0	0	0	awaiting_reference_instruction
+107	rol al, 16	1024	0	0	0	awaiting_reference_instruction
+108	rol al, 31	1024	0	0	0	awaiting_reference_instruction
+109	rol al, 32	1024	0	0	0	awaiting_reference_instruction
+110	rol al, 63	1024	0	0	0	awaiting_reference_instruction
+111	rol al, 64	1024	0	0	0	awaiting_reference_instruction
+112	rol al, 255	1024	0	0	0	awaiting_reference_instruction
+113	rol al, cl	1024	0	0	0	awaiting_reference_instruction
+114	mov ax, bx	1024	0	0	0	awaiting_reference_instruction
+115	mov ax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+116	mov WORD PTR [rdi+8], ax	1024	0	0	0	awaiting_reference_instruction
+117	mov ax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+118	mov WORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+119	add ax, bx	1024	0	0	0	awaiting_reference_instruction
+120	add ax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+121	add WORD PTR [rdi+8], ax	1024	0	0	0	awaiting_reference_instruction
+122	add WORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+123	add ax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+124	adc ax, bx	1024	0	0	0	awaiting_reference_instruction
+125	adc ax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+126	adc WORD PTR [rdi+8], ax	1024	0	0	0	awaiting_reference_instruction
+127	adc WORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+128	adc ax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+129	sub ax, bx	1024	0	0	0	awaiting_reference_instruction
+130	sub ax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+131	sub WORD PTR [rdi+8], ax	1024	0	0	0	awaiting_reference_instruction
+132	sub WORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+133	sub ax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+134	sbb ax, bx	1024	0	0	0	awaiting_reference_instruction
+135	sbb ax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+136	sbb WORD PTR [rdi+8], ax	1024	0	0	0	awaiting_reference_instruction
+137	sbb WORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+138	sbb ax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+139	cmp ax, bx	1024	0	0	0	awaiting_reference_instruction
+140	cmp ax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+141	cmp WORD PTR [rdi+8], ax	1024	0	0	0	awaiting_reference_instruction
+142	cmp WORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+143	cmp ax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+144	test ax, bx	1024	0	0	0	awaiting_reference_instruction
+145	test ax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+146	test WORD PTR [rdi+8], ax	1024	0	0	0	awaiting_reference_instruction
+147	test WORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+148	and ax, bx	1024	0	0	0	awaiting_reference_instruction
+149	and ax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+150	and ax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+151	and WORD PTR [rdi+8], ax	1024	0	0	0	awaiting_reference_instruction
+152	and WORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+153	or ax, bx	1024	0	0	0	awaiting_reference_instruction
+154	or ax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+155	or ax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+156	or WORD PTR [rdi+8], ax	1024	0	0	0	awaiting_reference_instruction
+157	or WORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+158	xor ax, bx	1024	0	0	0	awaiting_reference_instruction
+159	xor ax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+160	xor ax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+161	xor WORD PTR [rdi+8], ax	1024	0	0	0	awaiting_reference_instruction
+162	xor WORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+163	inc ax	1024	0	0	0	awaiting_reference_instruction
+164	inc WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+165	dec ax	1024	0	0	0	awaiting_reference_instruction
+166	dec WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+167	neg ax	1024	0	0	0	awaiting_reference_instruction
+168	neg WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+169	not ax	1024	0	0	0	awaiting_reference_instruction
+170	not WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+171	xchg ax, bx	1024	0	0	0	awaiting_reference_instruction
+172	shl ax, 0	1024	0	0	0	awaiting_reference_instruction
+173	shl ax, 1	1024	0	0	0	awaiting_reference_instruction
+174	shl ax, 7	1024	0	0	0	awaiting_reference_instruction
+175	shl ax, 8	1024	0	0	0	awaiting_reference_instruction
+176	shl ax, 15	1024	0	0	0	awaiting_reference_instruction
+177	shl ax, 16	1024	0	0	0	awaiting_reference_instruction
+178	shl ax, 31	1024	0	0	0	awaiting_reference_instruction
+179	shl ax, 32	1024	0	0	0	awaiting_reference_instruction
+180	shl ax, 63	1024	0	0	0	awaiting_reference_instruction
+181	shl ax, 64	1024	0	0	0	awaiting_reference_instruction
+182	shl ax, 255	1024	0	0	0	awaiting_reference_instruction
+183	shl ax, cl	1024	0	0	0	awaiting_reference_instruction
+184	shr ax, 0	1024	0	0	0	awaiting_reference_instruction
+185	shr ax, 1	1024	0	0	0	awaiting_reference_instruction
+186	shr ax, 7	1024	0	0	0	awaiting_reference_instruction
+187	shr ax, 8	1024	0	0	0	awaiting_reference_instruction
+188	shr ax, 15	1024	0	0	0	awaiting_reference_instruction
+189	shr ax, 16	1024	0	0	0	awaiting_reference_instruction
+190	shr ax, 31	1024	0	0	0	awaiting_reference_instruction
+191	shr ax, 32	1024	0	0	0	awaiting_reference_instruction
+192	shr ax, 63	1024	0	0	0	awaiting_reference_instruction
+193	shr ax, 64	1024	0	0	0	awaiting_reference_instruction
+194	shr ax, 255	1024	0	0	0	awaiting_reference_instruction
+195	shr ax, cl	1024	0	0	0	awaiting_reference_instruction
+196	sar ax, 0	1024	0	0	0	awaiting_reference_instruction
+197	sar ax, 1	1024	0	0	0	awaiting_reference_instruction
+198	sar ax, 7	1024	0	0	0	awaiting_reference_instruction
+199	sar ax, 8	1024	0	0	0	awaiting_reference_instruction
+200	sar ax, 15	1024	0	0	0	awaiting_reference_instruction
+201	sar ax, 16	1024	0	0	0	awaiting_reference_instruction
+202	sar ax, 31	1024	0	0	0	awaiting_reference_instruction
+203	sar ax, 32	1024	0	0	0	awaiting_reference_instruction
+204	sar ax, 63	1024	0	0	0	awaiting_reference_instruction
+205	sar ax, 64	1024	0	0	0	awaiting_reference_instruction
+206	sar ax, 255	1024	0	0	0	awaiting_reference_instruction
+207	sar ax, cl	1024	0	0	0	awaiting_reference_instruction
+208	rol ax, 0	1024	0	0	0	awaiting_reference_instruction
+209	rol ax, 1	1024	0	0	0	awaiting_reference_instruction
+210	rol ax, 7	1024	0	0	0	awaiting_reference_instruction
+211	rol ax, 8	1024	0	0	0	awaiting_reference_instruction
+212	rol ax, 15	1024	0	0	0	awaiting_reference_instruction
+213	rol ax, 16	1024	0	0	0	awaiting_reference_instruction
+214	rol ax, 31	1024	0	0	0	awaiting_reference_instruction
+215	rol ax, 32	1024	0	0	0	awaiting_reference_instruction
+216	rol ax, 63	1024	0	0	0	awaiting_reference_instruction
+217	rol ax, 64	1024	0	0	0	awaiting_reference_instruction
+218	rol ax, 255	1024	0	0	0	awaiting_reference_instruction
+219	rol ax, cl	1024	0	0	0	awaiting_reference_instruction
+220	imul ax, bx	1024	0	0	0	awaiting_reference_instruction
+221	imul ax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+222	imul ax, bx, -7	1024	0	0	0	awaiting_reference_instruction
+223	imul ax, WORD PTR [rdi+8], -7	1024	0	0	0	awaiting_reference_instruction
+224	popcnt ax, bx	1024	0	0	0	awaiting_reference_instruction
+225	div bx	1024	0	0	0	awaiting_reference_instruction
+226	bt ax, bx	1024	1024	0	0	checked
+227	bt ax, 7	1024	1024	0	0	checked
+228	bt WORD PTR [rdi+8], 7	1024	1024	0	0	checked
+229	movbe ax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+230	movbe WORD PTR [rdi+8], ax	1024	0	0	0	awaiting_reference_instruction
+231	shld ax, bx, 0	1024	0	0	0	awaiting_reference_instruction
+232	shld ax, bx, 1	1024	0	0	0	awaiting_reference_instruction
+233	shld ax, bx, 7	1024	0	0	0	awaiting_reference_instruction
+234	shld ax, bx, 15	1024	0	0	0	awaiting_reference_instruction
+235	shrd ax, bx, 0	1024	0	0	0	awaiting_reference_instruction
+236	shrd ax, bx, 1	1024	0	0	0	awaiting_reference_instruction
+237	shrd ax, bx, 7	1024	0	0	0	awaiting_reference_instruction
+238	shrd ax, bx, 15	1024	0	0	0	awaiting_reference_instruction
+239	mov eax, ebx	1024	0	0	0	awaiting_reference_instruction
+240	mov eax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+241	mov DWORD PTR [rdi+8], eax	1024	0	0	0	awaiting_reference_instruction
+242	mov eax, DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+243	mov DWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+244	add eax, ebx	1024	0	0	0	awaiting_reference_instruction
+245	add eax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+246	add DWORD PTR [rdi+8], eax	1024	0	0	0	awaiting_reference_instruction
+247	add DWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+248	add eax, DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+249	adc eax, ebx	1024	0	0	0	awaiting_reference_instruction
+250	adc eax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+251	adc DWORD PTR [rdi+8], eax	1024	0	0	0	awaiting_reference_instruction
+252	adc DWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+253	adc eax, DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+254	sub eax, ebx	1024	0	0	0	awaiting_reference_instruction
+255	sub eax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+256	sub DWORD PTR [rdi+8], eax	1024	0	0	0	awaiting_reference_instruction
+257	sub DWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+258	sub eax, DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+259	sbb eax, ebx	1024	0	0	0	awaiting_reference_instruction
+260	sbb eax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+261	sbb DWORD PTR [rdi+8], eax	1024	0	0	0	awaiting_reference_instruction
+262	sbb DWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+263	sbb eax, DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+264	cmp eax, ebx	1024	0	0	0	awaiting_reference_instruction
+265	cmp eax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+266	cmp DWORD PTR [rdi+8], eax	1024	0	0	0	awaiting_reference_instruction
+267	cmp DWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+268	cmp eax, DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+269	test eax, ebx	1024	0	0	0	awaiting_reference_instruction
+270	test eax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+271	test DWORD PTR [rdi+8], eax	1024	0	0	0	awaiting_reference_instruction
+272	test DWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+273	and eax, ebx	1024	0	0	0	awaiting_reference_instruction
+274	and eax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+275	and eax, DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+276	and DWORD PTR [rdi+8], eax	1024	0	0	0	awaiting_reference_instruction
+277	and DWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+278	or eax, ebx	1024	0	0	0	awaiting_reference_instruction
+279	or eax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+280	or eax, DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+281	or DWORD PTR [rdi+8], eax	1024	0	0	0	awaiting_reference_instruction
+282	or DWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+283	xor eax, ebx	1024	0	0	0	awaiting_reference_instruction
+284	xor eax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+285	xor eax, DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+286	xor DWORD PTR [rdi+8], eax	1024	0	0	0	awaiting_reference_instruction
+287	xor DWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+288	inc eax	1024	0	0	0	awaiting_reference_instruction
+289	inc DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+290	dec eax	1024	0	0	0	awaiting_reference_instruction
+291	dec DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+292	neg eax	1024	0	0	0	awaiting_reference_instruction
+293	neg DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+294	not eax	1024	0	0	0	awaiting_reference_instruction
+295	not DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+296	xchg eax, ebx	1024	0	0	0	awaiting_reference_instruction
+297	shl eax, 0	1024	0	0	0	awaiting_reference_instruction
+298	shl eax, 1	1024	0	0	0	awaiting_reference_instruction
+299	shl eax, 7	1024	0	0	0	awaiting_reference_instruction
+300	shl eax, 8	1024	0	0	0	awaiting_reference_instruction
+301	shl eax, 15	1024	0	0	0	awaiting_reference_instruction
+302	shl eax, 16	1024	0	0	0	awaiting_reference_instruction
+303	shl eax, 31	1024	0	0	0	awaiting_reference_instruction
+304	shl eax, 32	1024	0	0	0	awaiting_reference_instruction
+305	shl eax, 63	1024	0	0	0	awaiting_reference_instruction
+306	shl eax, 64	1024	0	0	0	awaiting_reference_instruction
+307	shl eax, 255	1024	0	0	0	awaiting_reference_instruction
+308	shl eax, cl	1024	0	0	0	awaiting_reference_instruction
+309	shr eax, 0	1024	0	0	0	awaiting_reference_instruction
+310	shr eax, 1	1024	0	0	0	awaiting_reference_instruction
+311	shr eax, 7	1024	0	0	0	awaiting_reference_instruction
+312	shr eax, 8	1024	0	0	0	awaiting_reference_instruction
+313	shr eax, 15	1024	0	0	0	awaiting_reference_instruction
+314	shr eax, 16	1024	0	0	0	awaiting_reference_instruction
+315	shr eax, 31	1024	0	0	0	awaiting_reference_instruction
+316	shr eax, 32	1024	0	0	0	awaiting_reference_instruction
+317	shr eax, 63	1024	0	0	0	awaiting_reference_instruction
+318	shr eax, 64	1024	0	0	0	awaiting_reference_instruction
+319	shr eax, 255	1024	0	0	0	awaiting_reference_instruction
+320	shr eax, cl	1024	0	0	0	awaiting_reference_instruction
+321	sar eax, 0	1024	0	0	0	awaiting_reference_instruction
+322	sar eax, 1	1024	0	0	0	awaiting_reference_instruction
+323	sar eax, 7	1024	0	0	0	awaiting_reference_instruction
+324	sar eax, 8	1024	0	0	0	awaiting_reference_instruction
+325	sar eax, 15	1024	0	0	0	awaiting_reference_instruction
+326	sar eax, 16	1024	0	0	0	awaiting_reference_instruction
+327	sar eax, 31	1024	0	0	0	awaiting_reference_instruction
+328	sar eax, 32	1024	0	0	0	awaiting_reference_instruction
+329	sar eax, 63	1024	0	0	0	awaiting_reference_instruction
+330	sar eax, 64	1024	0	0	0	awaiting_reference_instruction
+331	sar eax, 255	1024	0	0	0	awaiting_reference_instruction
+332	sar eax, cl	1024	0	0	0	awaiting_reference_instruction
+333	rol eax, 0	1024	0	0	0	awaiting_reference_instruction
+334	rol eax, 1	1024	0	0	0	awaiting_reference_instruction
+335	rol eax, 7	1024	0	0	0	awaiting_reference_instruction
+336	rol eax, 8	1024	0	0	0	awaiting_reference_instruction
+337	rol eax, 15	1024	0	0	0	awaiting_reference_instruction
+338	rol eax, 16	1024	0	0	0	awaiting_reference_instruction
+339	rol eax, 31	1024	0	0	0	awaiting_reference_instruction
+340	rol eax, 32	1024	0	0	0	awaiting_reference_instruction
+341	rol eax, 63	1024	0	0	0	awaiting_reference_instruction
+342	rol eax, 64	1024	0	0	0	awaiting_reference_instruction
+343	rol eax, 255	1024	0	0	0	awaiting_reference_instruction
+344	rol eax, cl	1024	0	0	0	awaiting_reference_instruction
+345	imul eax, ebx	1024	0	0	0	awaiting_reference_instruction
+346	imul eax, DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+347	imul eax, ebx, -7	1024	0	0	0	awaiting_reference_instruction
+348	imul eax, DWORD PTR [rdi+8], -7	1024	0	0	0	awaiting_reference_instruction
+349	popcnt eax, ebx	1024	0	0	0	awaiting_reference_instruction
+350	div ebx	1024	0	0	0	awaiting_reference_instruction
+351	bt eax, ebx	1024	1024	0	0	checked
+352	bt eax, 7	1024	1024	0	0	checked
+353	bt DWORD PTR [rdi+8], 7	1024	1024	0	0	checked
+354	movbe eax, DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+355	movbe DWORD PTR [rdi+8], eax	1024	0	0	0	awaiting_reference_instruction
+356	shld eax, ebx, 0	1024	0	0	0	awaiting_reference_instruction
+357	shld eax, ebx, 1	1024	0	0	0	awaiting_reference_instruction
+358	shld eax, ebx, 7	1024	0	0	0	awaiting_reference_instruction
+359	shld eax, ebx, 15	1024	0	0	0	awaiting_reference_instruction
+360	shrd eax, ebx, 0	1024	0	0	0	awaiting_reference_instruction
+361	shrd eax, ebx, 1	1024	0	0	0	awaiting_reference_instruction
+362	shrd eax, ebx, 7	1024	0	0	0	awaiting_reference_instruction
+363	shrd eax, ebx, 15	1024	0	0	0	awaiting_reference_instruction
+364	lea eax, [rdi+rbx*4-7]	1024	0	0	0	awaiting_reference_instruction
+365	bswap eax	1024	0	0	0	awaiting_reference_instruction
+366	andn eax, ebx, ecx	1024	1024	0	0	checked
+367	andn eax, ebx, DWORD PTR [rdi+8]	1024	1024	0	0	checked
+368	bzhi eax, ebx, ecx	1024	1024	0	0	checked
+369	bzhi eax, DWORD PTR [rdi+8], ecx	1024	1024	0	0	checked
+370	mulx eax, ebx, ecx	1024	0	0	0	awaiting_reference_instruction
+371	shlx eax, ebx, ecx	1024	0	0	0	awaiting_reference_instruction
+372	shlx eax, DWORD PTR [rdi+8], ecx	1024	0	0	0	awaiting_reference_instruction
+373	shrx eax, ebx, ecx	1024	0	0	0	awaiting_reference_instruction
+374	shrx eax, DWORD PTR [rdi+8], ecx	1024	0	0	0	awaiting_reference_instruction
+375	sarx eax, ebx, ecx	1024	0	0	0	awaiting_reference_instruction
+376	sarx eax, DWORD PTR [rdi+8], ecx	1024	0	0	0	awaiting_reference_instruction
+377	rorx eax, ebx, 7	1024	0	0	0	awaiting_reference_instruction
+378	rorx eax, DWORD PTR [rdi+8], 7	1024	0	0	0	awaiting_reference_instruction
+379	mov rax, rbx	1024	0	0	0	awaiting_reference_instruction
+380	mov rax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+381	mov QWORD PTR [rdi+8], rax	1024	0	0	0	awaiting_reference_instruction
+382	mov rax, QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+383	mov QWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+384	add rax, rbx	1024	0	0	0	awaiting_reference_instruction
+385	add rax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+386	add QWORD PTR [rdi+8], rax	1024	0	0	0	awaiting_reference_instruction
+387	add QWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+388	add rax, QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+389	adc rax, rbx	1024	0	0	0	awaiting_reference_instruction
+390	adc rax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+391	adc QWORD PTR [rdi+8], rax	1024	0	0	0	awaiting_reference_instruction
+392	adc QWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+393	adc rax, QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+394	sub rax, rbx	1024	0	0	0	awaiting_reference_instruction
+395	sub rax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+396	sub QWORD PTR [rdi+8], rax	1024	0	0	0	awaiting_reference_instruction
+397	sub QWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+398	sub rax, QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+399	sbb rax, rbx	1024	0	0	0	awaiting_reference_instruction
+400	sbb rax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+401	sbb QWORD PTR [rdi+8], rax	1024	0	0	0	awaiting_reference_instruction
+402	sbb QWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+403	sbb rax, QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+404	cmp rax, rbx	1024	0	0	0	awaiting_reference_instruction
+405	cmp rax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+406	cmp QWORD PTR [rdi+8], rax	1024	0	0	0	awaiting_reference_instruction
+407	cmp QWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+408	cmp rax, QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+409	test rax, rbx	1024	0	0	0	awaiting_reference_instruction
+410	test rax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+411	test QWORD PTR [rdi+8], rax	1024	0	0	0	awaiting_reference_instruction
+412	test QWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+413	and rax, rbx	1024	0	0	0	awaiting_reference_instruction
+414	and rax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+415	and rax, QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+416	and QWORD PTR [rdi+8], rax	1024	0	0	0	awaiting_reference_instruction
+417	and QWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+418	or rax, rbx	1024	0	0	0	awaiting_reference_instruction
+419	or rax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+420	or rax, QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+421	or QWORD PTR [rdi+8], rax	1024	0	0	0	awaiting_reference_instruction
+422	or QWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+423	xor rax, rbx	1024	0	0	0	awaiting_reference_instruction
+424	xor rax, 0x7f	1024	0	0	0	awaiting_reference_instruction
+425	xor rax, QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+426	xor QWORD PTR [rdi+8], rax	1024	0	0	0	awaiting_reference_instruction
+427	xor QWORD PTR [rdi+8], 0x7f	1024	0	0	0	awaiting_reference_instruction
+428	inc rax	1024	0	0	0	awaiting_reference_instruction
+429	inc QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+430	dec rax	1024	0	0	0	awaiting_reference_instruction
+431	dec QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+432	neg rax	1024	0	0	0	awaiting_reference_instruction
+433	neg QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+434	not rax	1024	0	0	0	awaiting_reference_instruction
+435	not QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+436	xchg rax, rbx	1024	0	0	0	awaiting_reference_instruction
+437	shl rax, 0	1024	0	0	0	awaiting_reference_instruction
+438	shl rax, 1	1024	0	0	0	awaiting_reference_instruction
+439	shl rax, 7	1024	0	0	0	awaiting_reference_instruction
+440	shl rax, 8	1024	0	0	0	awaiting_reference_instruction
+441	shl rax, 15	1024	0	0	0	awaiting_reference_instruction
+442	shl rax, 16	1024	0	0	0	awaiting_reference_instruction
+443	shl rax, 31	1024	0	0	0	awaiting_reference_instruction
+444	shl rax, 32	1024	0	0	0	awaiting_reference_instruction
+445	shl rax, 63	1024	0	0	0	awaiting_reference_instruction
+446	shl rax, 64	1024	0	0	0	awaiting_reference_instruction
+447	shl rax, 255	1024	0	0	0	awaiting_reference_instruction
+448	shl rax, cl	1024	0	0	0	awaiting_reference_instruction
+449	shr rax, 0	1024	0	0	0	awaiting_reference_instruction
+450	shr rax, 1	1024	0	0	0	awaiting_reference_instruction
+451	shr rax, 7	1024	0	0	0	awaiting_reference_instruction
+452	shr rax, 8	1024	0	0	0	awaiting_reference_instruction
+453	shr rax, 15	1024	0	0	0	awaiting_reference_instruction
+454	shr rax, 16	1024	0	0	0	awaiting_reference_instruction
+455	shr rax, 31	1024	0	0	0	awaiting_reference_instruction
+456	shr rax, 32	1024	0	0	0	awaiting_reference_instruction
+457	shr rax, 63	1024	0	0	0	awaiting_reference_instruction
+458	shr rax, 64	1024	0	0	0	awaiting_reference_instruction
+459	shr rax, 255	1024	0	0	0	awaiting_reference_instruction
+460	shr rax, cl	1024	0	0	0	awaiting_reference_instruction
+461	sar rax, 0	1024	0	0	0	awaiting_reference_instruction
+462	sar rax, 1	1024	0	0	0	awaiting_reference_instruction
+463	sar rax, 7	1024	0	0	0	awaiting_reference_instruction
+464	sar rax, 8	1024	0	0	0	awaiting_reference_instruction
+465	sar rax, 15	1024	0	0	0	awaiting_reference_instruction
+466	sar rax, 16	1024	0	0	0	awaiting_reference_instruction
+467	sar rax, 31	1024	0	0	0	awaiting_reference_instruction
+468	sar rax, 32	1024	0	0	0	awaiting_reference_instruction
+469	sar rax, 63	1024	0	0	0	awaiting_reference_instruction
+470	sar rax, 64	1024	0	0	0	awaiting_reference_instruction
+471	sar rax, 255	1024	0	0	0	awaiting_reference_instruction
+472	sar rax, cl	1024	0	0	0	awaiting_reference_instruction
+473	rol rax, 0	1024	0	0	0	awaiting_reference_instruction
+474	rol rax, 1	1024	0	0	0	awaiting_reference_instruction
+475	rol rax, 7	1024	0	0	0	awaiting_reference_instruction
+476	rol rax, 8	1024	0	0	0	awaiting_reference_instruction
+477	rol rax, 15	1024	0	0	0	awaiting_reference_instruction
+478	rol rax, 16	1024	0	0	0	awaiting_reference_instruction
+479	rol rax, 31	1024	0	0	0	awaiting_reference_instruction
+480	rol rax, 32	1024	0	0	0	awaiting_reference_instruction
+481	rol rax, 63	1024	0	0	0	awaiting_reference_instruction
+482	rol rax, 64	1024	0	0	0	awaiting_reference_instruction
+483	rol rax, 255	1024	0	0	0	awaiting_reference_instruction
+484	rol rax, cl	1024	0	0	0	awaiting_reference_instruction
+485	imul rax, rbx	1024	0	0	0	awaiting_reference_instruction
+486	imul rax, QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+487	imul rax, rbx, -7	1024	0	0	0	awaiting_reference_instruction
+488	imul rax, QWORD PTR [rdi+8], -7	1024	0	0	0	awaiting_reference_instruction
+489	popcnt rax, rbx	1024	0	0	0	awaiting_reference_instruction
+490	div rbx	1024	0	0	0	awaiting_reference_instruction
+491	bt rax, rbx	1024	1024	0	0	checked
+492	bt rax, 7	1024	1024	0	0	checked
+493	bt QWORD PTR [rdi+8], 7	1024	1024	0	0	checked
+494	movbe rax, QWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+495	movbe QWORD PTR [rdi+8], rax	1024	0	0	0	awaiting_reference_instruction
+496	shld rax, rbx, 0	1024	0	0	0	awaiting_reference_instruction
+497	shld rax, rbx, 1	1024	0	0	0	awaiting_reference_instruction
+498	shld rax, rbx, 7	1024	0	0	0	awaiting_reference_instruction
+499	shld rax, rbx, 15	1024	0	0	0	awaiting_reference_instruction
+500	shrd rax, rbx, 0	1024	0	0	0	awaiting_reference_instruction
+501	shrd rax, rbx, 1	1024	0	0	0	awaiting_reference_instruction
+502	shrd rax, rbx, 7	1024	0	0	0	awaiting_reference_instruction
+503	shrd rax, rbx, 15	1024	0	0	0	awaiting_reference_instruction
+504	lea rax, [rdi+rbx*4-7]	1024	0	0	0	awaiting_reference_instruction
+505	bswap rax	1024	0	0	0	awaiting_reference_instruction
+506	andn rax, rbx, rcx	1024	1024	0	0	checked
+507	andn rax, rbx, QWORD PTR [rdi+8]	1024	1024	0	0	checked
+508	bzhi rax, rbx, rcx	1024	1024	0	0	checked
+509	bzhi rax, QWORD PTR [rdi+8], rcx	1024	1024	0	0	checked
+510	mulx rax, rbx, rcx	1024	0	0	0	awaiting_reference_instruction
+511	shlx rax, rbx, rcx	1024	0	0	0	awaiting_reference_instruction
+512	shlx rax, QWORD PTR [rdi+8], rcx	1024	0	0	0	awaiting_reference_instruction
+513	shrx rax, rbx, rcx	1024	0	0	0	awaiting_reference_instruction
+514	shrx rax, QWORD PTR [rdi+8], rcx	1024	0	0	0	awaiting_reference_instruction
+515	sarx rax, rbx, rcx	1024	0	0	0	awaiting_reference_instruction
+516	sarx rax, QWORD PTR [rdi+8], rcx	1024	0	0	0	awaiting_reference_instruction
+517	rorx rax, rbx, 7	1024	0	0	0	awaiting_reference_instruction
+518	rorx rax, QWORD PTR [rdi+8], 7	1024	0	0	0	awaiting_reference_instruction
+519	mov ah, bh	1024	0	0	0	awaiting_reference_instruction
+520	mov ah, 0x7f	1024	0	0	0	awaiting_reference_instruction
+521	mov BYTE PTR [rdi+8], ah	1024	0	0	0	awaiting_reference_instruction
+522	add ah, bh	1024	0	0	0	awaiting_reference_instruction
+523	add ah, 0x7f	1024	0	0	0	awaiting_reference_instruction
+524	adc ah, bh	1024	0	0	0	awaiting_reference_instruction
+525	adc ah, 0x7f	1024	0	0	0	awaiting_reference_instruction
+526	sub ah, bh	1024	0	0	0	awaiting_reference_instruction
+527	sub ah, 0x7f	1024	0	0	0	awaiting_reference_instruction
+528	sbb ah, bh	1024	0	0	0	awaiting_reference_instruction
+529	sbb ah, 0x7f	1024	0	0	0	awaiting_reference_instruction
+530	cmp ah, bh	1024	0	0	0	awaiting_reference_instruction
+531	cmp ah, 0x7f	1024	0	0	0	awaiting_reference_instruction
+532	test ah, bh	1024	0	0	0	awaiting_reference_instruction
+533	test ah, 0x7f	1024	0	0	0	awaiting_reference_instruction
+534	inc ah	1024	0	0	0	awaiting_reference_instruction
+535	dec ah	1024	0	0	0	awaiting_reference_instruction
+536	neg ah	1024	0	0	0	awaiting_reference_instruction
+537	not ah	1024	0	0	0	awaiting_reference_instruction
+538	movzx ax, bl	1024	0	0	0	awaiting_reference_instruction
+539	movzx ax, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+540	movsx ax, bl	1024	0	0	0	awaiting_reference_instruction
+541	movsx ax, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+542	movzx eax, bl	1024	0	0	0	awaiting_reference_instruction
+543	movzx eax, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+544	movsx eax, bl	1024	0	0	0	awaiting_reference_instruction
+545	movsx eax, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+546	movzx eax, bx	1024	0	0	0	awaiting_reference_instruction
+547	movzx eax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+548	movsx eax, bx	1024	0	0	0	awaiting_reference_instruction
+549	movsx eax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+550	movzx rax, bl	1024	0	0	0	awaiting_reference_instruction
+551	movzx rax, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+552	movsx rax, bl	1024	0	0	0	awaiting_reference_instruction
+553	movsx rax, BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+554	movzx rax, bx	1024	0	0	0	awaiting_reference_instruction
+555	movzx rax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+556	movsx rax, bx	1024	0	0	0	awaiting_reference_instruction
+557	movsx rax, WORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+558	movsxd rax, ebx	1024	0	0	0	awaiting_reference_instruction
+559	movsxd rax, DWORD PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+560	setb al	1024	0	0	0	awaiting_reference_instruction
+561	setb ah	1024	0	0	0	awaiting_reference_instruction
+562	setb BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+563	cmovb ax, bx	1024	1024	0	0	checked
+564	cmovb ax, WORD PTR [rdi+8]	1024	1024	0	0	checked
+565	cmovb eax, ebx	1024	1024	0	0	checked
+566	cmovb eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked
+567	cmovb rax, rbx	1024	1024	0	0	checked
+568	cmovb rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked
+569	setae al	1024	0	0	0	awaiting_reference_instruction
+570	setae ah	1024	0	0	0	awaiting_reference_instruction
+571	setae BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+572	cmovae ax, bx	1024	1024	0	0	checked
+573	cmovae ax, WORD PTR [rdi+8]	1024	1024	0	0	checked
+574	cmovae eax, ebx	1024	1024	0	0	checked
+575	cmovae eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked
+576	cmovae rax, rbx	1024	1024	0	0	checked
+577	cmovae rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked
+578	sete al	1024	0	0	0	awaiting_reference_instruction
+579	sete ah	1024	0	0	0	awaiting_reference_instruction
+580	sete BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+581	cmove ax, bx	1024	1024	0	0	checked
+582	cmove ax, WORD PTR [rdi+8]	1024	1024	0	0	checked
+583	cmove eax, ebx	1024	1024	0	0	checked
+584	cmove eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked
+585	cmove rax, rbx	1024	1024	0	0	checked
+586	cmove rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked
+587	setne al	1024	0	0	0	awaiting_reference_instruction
+588	setne ah	1024	0	0	0	awaiting_reference_instruction
+589	setne BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+590	cmovne ax, bx	1024	1024	0	0	checked
+591	cmovne ax, WORD PTR [rdi+8]	1024	1024	0	0	checked
+592	cmovne eax, ebx	1024	1024	0	0	checked
+593	cmovne eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked
+594	cmovne rax, rbx	1024	1024	0	0	checked
+595	cmovne rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked
+596	setbe al	1024	0	0	0	awaiting_reference_instruction
+597	setbe ah	1024	0	0	0	awaiting_reference_instruction
+598	setbe BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+599	cmovbe ax, bx	1024	1024	0	0	checked
+600	cmovbe ax, WORD PTR [rdi+8]	1024	1024	0	0	checked
+601	cmovbe eax, ebx	1024	1024	0	0	checked
+602	cmovbe eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked
+603	cmovbe rax, rbx	1024	1024	0	0	checked
+604	cmovbe rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked
+605	seta al	1024	0	0	0	awaiting_reference_instruction
+606	seta ah	1024	0	0	0	awaiting_reference_instruction
+607	seta BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+608	cmova ax, bx	1024	1024	0	0	checked
+609	cmova ax, WORD PTR [rdi+8]	1024	1024	0	0	checked
+610	cmova eax, ebx	1024	1024	0	0	checked
+611	cmova eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked
+612	cmova rax, rbx	1024	1024	0	0	checked
+613	cmova rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked
+614	sets al	1024	0	0	0	awaiting_reference_instruction
+615	sets ah	1024	0	0	0	awaiting_reference_instruction
+616	sets BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+617	cmovs ax, bx	1024	1024	0	0	checked
+618	cmovs ax, WORD PTR [rdi+8]	1024	1024	0	0	checked
+619	cmovs eax, ebx	1024	1024	0	0	checked
+620	cmovs eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked
+621	cmovs rax, rbx	1024	1024	0	0	checked
+622	cmovs rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked
+623	setns al	1024	0	0	0	awaiting_reference_instruction
+624	setns ah	1024	0	0	0	awaiting_reference_instruction
+625	setns BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+626	cmovns ax, bx	1024	1024	0	0	checked
+627	cmovns ax, WORD PTR [rdi+8]	1024	1024	0	0	checked
+628	cmovns eax, ebx	1024	1024	0	0	checked
+629	cmovns eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked
+630	cmovns rax, rbx	1024	1024	0	0	checked
+631	cmovns rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked
+632	setl al	1024	0	0	0	awaiting_reference_instruction
+633	setl ah	1024	0	0	0	awaiting_reference_instruction
+634	setl BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+635	cmovl ax, bx	1024	1024	0	0	checked
+636	cmovl ax, WORD PTR [rdi+8]	1024	1024	0	0	checked
+637	cmovl eax, ebx	1024	1024	0	0	checked
+638	cmovl eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked
+639	cmovl rax, rbx	1024	1024	0	0	checked
+640	cmovl rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked
+641	setge al	1024	0	0	0	awaiting_reference_instruction
+642	setge ah	1024	0	0	0	awaiting_reference_instruction
+643	setge BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+644	cmovge ax, bx	1024	1024	0	0	checked
+645	cmovge ax, WORD PTR [rdi+8]	1024	1024	0	0	checked
+646	cmovge eax, ebx	1024	1024	0	0	checked
+647	cmovge eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked
+648	cmovge rax, rbx	1024	1024	0	0	checked
+649	cmovge rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked
+650	setle al	1024	0	0	0	awaiting_reference_instruction
+651	setle ah	1024	0	0	0	awaiting_reference_instruction
+652	setle BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+653	cmovle ax, bx	1024	1024	0	0	checked
+654	cmovle ax, WORD PTR [rdi+8]	1024	1024	0	0	checked
+655	cmovle eax, ebx	1024	1024	0	0	checked
+656	cmovle eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked
+657	cmovle rax, rbx	1024	1024	0	0	checked
+658	cmovle rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked
+659	setg al	1024	0	0	0	awaiting_reference_instruction
+660	setg ah	1024	0	0	0	awaiting_reference_instruction
+661	setg BYTE PTR [rdi+8]	1024	0	0	0	awaiting_reference_instruction
+662	cmovg ax, bx	1024	1024	0	0	checked
+663	cmovg ax, WORD PTR [rdi+8]	1024	1024	0	0	checked
+664	cmovg eax, ebx	1024	1024	0	0	checked
+665	cmovg eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked
+666	cmovg rax, rbx	1024	1024	0	0	checked
+667	cmovg rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked
+668	ja forward	1024	0	0	0	awaiting_reference_instruction
+669	ja backward	1024	0	0	0	awaiting_reference_instruction
+670	jae forward	1024	0	0	0	awaiting_reference_instruction
+671	jae backward	1024	0	0	0	awaiting_reference_instruction
+672	jb forward	1024	0	0	0	awaiting_reference_instruction
+673	jb backward	1024	0	0	0	awaiting_reference_instruction
+674	jbe forward	1024	0	0	0	awaiting_reference_instruction
+675	jbe backward	1024	0	0	0	awaiting_reference_instruction
+676	je forward	1024	0	0	0	awaiting_reference_instruction
+677	je backward	1024	0	0	0	awaiting_reference_instruction
+678	jne forward	1024	0	0	0	awaiting_reference_instruction
+679	jne backward	1024	0	0	0	awaiting_reference_instruction
+680	jg forward	1024	0	0	0	awaiting_reference_instruction
+681	jg backward	1024	0	0	0	awaiting_reference_instruction
+682	jge forward	1024	0	0	0	awaiting_reference_instruction
+683	jge backward	1024	0	0	0	awaiting_reference_instruction
+684	jl forward	1024	0	0	0	awaiting_reference_instruction
+685	jl backward	1024	0	0	0	awaiting_reference_instruction
+686	jle forward	1024	0	0	0	awaiting_reference_instruction
+687	jle backward	1024	0	0	0	awaiting_reference_instruction
+688	js forward	1024	0	0	0	awaiting_reference_instruction
+689	js backward	1024	0	0	0	awaiting_reference_instruction
+690	jns forward	1024	0	0	0	awaiting_reference_instruction
+691	jns backward	1024	0	0	0	awaiting_reference_instruction
+692	jmp forward	1024	0	0	0	awaiting_reference_instruction
+693	call and ret (stack return address)	1024	0	0	0	awaiting_reference_instruction
+694	rep movsb	1024	0	0	0	awaiting_reference_instruction
+695	rep movsw	1024	0	0	0	awaiting_reference_instruction
+696	rep movsd	1024	0	0	0	awaiting_reference_instruction
+697	rep movsq	1024	0	0	0	awaiting_reference_instruction

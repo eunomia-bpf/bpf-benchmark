@@ -233,3 +233,73 @@ unchanged commands, host metadata, logs and per-form results are retained in
 `arm64-hardware-register-cells/` and its `RUN.txt`. This confirms the same
 ordinary-form matrix after the register representation change; it does not
 extend coverage to BR/BLR, stack composites or helper bodies.
+
+## Arm control-flow and stack replay
+
+The additional74-form composite matrix initially found12 real W-CBZ/CBNZ
+mismatches, plus4096 observations affected by a test stack-offset bug. The
+production decoder selected the64-bit register test for W operands. It now
+narrows only the tested value before the unchanged generated branch predicate;
+it never writes the architectural source register. Existing X-form macro
+callers retain their behavior. The observer now uses the declared stack bias,
+rather than the end of its larger backing array. Both original outputs and
+all mismatch inputs remain in `arm64-control-qemu/`; the observer defects are
+not attributed to the simulator.
+
+After both corrections, `arm64-control-fixed/` reports **74 forms,75776 cases,
+zero mismatches under QEMU-user**. It covers all14 conditions in both edge
+directions, W/X CBZ/CBNZ, TBZ/TBNZ boundary bits, CMP/GT composition, finite
+BR/BLR code choices, local BL, RET X30/alternate register, nested saved-LR
+calls and raw stack stores/loads. Every case compares all31 GPRs, restored SP,
+NZCV, V0, all64 observed stack bytes and256 external memory bytes.
+The outer ABI return is the observation boundary; inner calls/returns run
+the production whole-program encoder and return dispatcher. A fixed ELF code
+section makes the CPU's real PCs equal the simulator's numeric code addresses.
+X20=0 is the explicit observer return sentinel. No helper body is in this matrix.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity arm64-control-build ARM64_CONTROL_BUILD=build-arm64-control-fixed
+taskset -c 16-23 make -C kprog/fidelity arm64-control-qemu ARM64_CONTROL_BUILD=build-arm64-control-fixed ARM64_CONTROL_OUT=../results/kprog_fidelity_20261106/differential/arm64-control-fixed CASES=1024
+# On Spark, pinned once to each core class:
+taskset -c 19 env OUT=../results/kprog_fidelity_20261106/differential/arm64-control-hardware-cpu19 kprog/fidelity/run-arm64-control.sh
+taskset -c 10 env OUT=../results/kprog_fidelity_20261106/differential/arm64-control-hardware-cpu10 kprog/fidelity/run-arm64-control.sh
+```
+
+`cpu-differential-arm64-control.gz` is the new static stripped hardware replay;
+`arm64-control-artifacts.tar.gz` preserves both exact encoder/header snapshots,
+assembly, C and binaries. This also exercises A's current uncommitted finite
+BR/BLR/CODE/RET changes; it is not a claim that those source changes have
+already published independently. The supplied74-form replay is self-contained.
+Real CPU replay remains a coordinator-owned active requirement until received.
+
+## Absolute-stack reference and ANDN extension
+
+`x86-reference-pop/` repeats the full698-form real-CPU matrix:
+714752 cases, zero simulator mismatches. The extended lane-V reference check
+covers **93 forms/95232 cases**, also with zero CPU or simulator disagreement.
+It adds the four register PUSH/POP forms and four ANDN register/memory forms
+to the previous85. Remaining605 forms are explicitly `awaiting_reference_instruction`;
+the command exits1 for that gap. This is not whole-ISA reference closure.
+
+CPU trace version2 records the wrapper's real stack base for every state.
+The reference receives absolute architectural RSP and all64 actual stack
+bytes at their real addresses. Only the comparison boundary rebases returned
+RSP to the simulator's offset representation; the canonical ISA arithmetic,
+stack accesses and read/write effects are not changed. Stack writes from
+PUSH are compared as bytes, not assumed unchanged. The adapter also maps all256
+external memory bytes, compares all16 GPRs, V0/XMM0, defined flags and final PC.
+No effect-order refinement theorem is inferred from sampled final states.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity reference-check BUILD=build-x86-reference-stack CASES=1024 OUT=../results/kprog_fidelity_20261106/differential/x86-reference-pop
+taskset -c 16-23 make -C kprog/fidelity reference-replay BUILD=build-x86-reference-stack CASES=1024 OUT=../results/kprog_fidelity_20261106/differential/x86-reference-pop
+```
+
+The second command reuses the unchanged recorded CPU states when the canonical
+reference gains an operation; it does not rerun hardware or generate another
+ISA. Both complete logs, per-form tables, raw code addresses/bytes and empty
+mismatch files are retained. The first89-form result is separately preserved
+as `reference-forms.tsv.pop-first.gz`. `x86-reference-stack-artifacts.tar.gz`
+contains the test executable and generated native/C sources. The1.3GiB
+`cpu-states.bin` remains in the workspace for subsequent reference replay;
+it is not committed to git. All mismatches would still be committed losslessly.

@@ -688,6 +688,8 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
     if op in {"cbz", "cbnz"}:
         target = branch_target(insn.operands[1])
         macro = "ARM64_SIM_A64_CBZ" if op == "cbz" else "ARM64_SIM_A64_CBNZ"
+        if insn.operands[0].lower().startswith("w"):
+            macro += "_W"
         lines.append(f"\t{macro}({reg_const(insn.operands[0])}, 0x{insn.addr:x}, 0x{target:x}, {label(target)});")
         return
     if op in {"tbz", "tbnz"}:
