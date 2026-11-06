@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0988 - the count explained, and the guard that caught a word
+
+The sentence names six keywords and then says the gate checks five forms,
+leaving a reader to work out that the two placeholders count as one. It now says
+so, and adds the keyword the sentence never named: the axiom a sorry elaborates
+to, which the same pattern catches.
+
+Changing the wording broke a non-vacuity guard, which is what it is for: the
+pattern that binds the figure to the count expects the digits, so writing the
+number as a word made it match nothing and the checker reported the figure as
+unread rather than passing. The sentence keeps the digits and gains the
+explanation.
+
+So the count is stated with its arithmetic and the scan's reach, and the guard
+that binds it still fires. Census unchanged; one claim is explained rather than
+left to the reader.
+
 ### Step 0987 - seven keywords in five classes
 
 The section says the gate checks all five forms that a build treats as ordinary,

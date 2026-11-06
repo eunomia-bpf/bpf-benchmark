@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0988 explained the 5-of-6 count and named
+sorryAx; a non-vacuity guard caught the
+word-for-digit substitution.
+
+
 Step 0987 verified the 'all 5 forms' claim: 7
 keywords in 5 classes, the count derived from the
 scanning patterns.
