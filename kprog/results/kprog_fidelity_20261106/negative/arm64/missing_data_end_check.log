@@ -1,0 +1,15 @@
+libbpf: prog 'missing_data_end_check_arm64_sim_xdp': BPF program load failed: -EACCES
+libbpf: prog 'missing_data_end_check_arm64_sim_xdp': -- BEGIN PROG LOAD LOG --
+0: R1=ctx() R10=fp0
+; ARM64_SIM_ENTRY_XDP(ctx); @ missing_data_end_check.bpf.c:6
+0: (61) r1 = *(u32 *)(r1 +0)          ; R1=pkt(r=0)
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X0, ARM64_X1, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_8, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL); @ missing_data_end_check.bpf.c:12
+1: (71) r0 = *(u8 *)(r1 +0)
+invalid access to packet, off=0 size=1, R1(id=0,off=0,r=0)
+R1 offset is outside of the packet
+processed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+-- END PROG LOAD LOG --
+libbpf: prog 'missing_data_end_check_arm64_sim_xdp': failed to load: -EACCES
+libbpf: failed to load object '/proofs/missing_data_end_check.bpf.o'
+timing verify_s=0.021785 test_s=0.000000
+error: bpf_object__load failed: Permission denied (os error 13)

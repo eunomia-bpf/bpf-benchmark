@@ -1,0 +1,14 @@
+libbpf: prog 'invalid_helper_argument_arm64_sim_xdp': BPF program load failed: -EACCES
+libbpf: prog 'invalid_helper_argument_arm64_sim_xdp': -- BEGIN PROG LOAD LOG --
+0: R1=ctx() R10=fp0
+; ARM64_SIM_BPF_CALL_bpf_map_lookup_elem(); @ invalid_helper_argument.bpf.c:18
+0: (b7) r1 = 1                        ; R1=1
+1: (b7) r2 = 0                        ; R2=0
+2: (85) call bpf_map_lookup_elem#1
+R1 type=scalar expected=map_ptr
+processed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+-- END PROG LOAD LOG --
+libbpf: prog 'invalid_helper_argument_arm64_sim_xdp': failed to load: -EACCES
+libbpf: failed to load object '/proofs/invalid_helper_argument.bpf.o'
+timing verify_s=0.020557 test_s=0.000000
+error: bpf_object__load failed: Permission denied (os error 13)

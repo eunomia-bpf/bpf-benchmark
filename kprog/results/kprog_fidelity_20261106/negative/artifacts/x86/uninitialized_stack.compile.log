@@ -1,0 +1,4 @@
+build-x86/negative/uninitialized_stack.bpf.c:11:2: error: A call to built-in function 'abort' is not supported.
+   11 |         X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RAX, X86_RSP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551608ULL);
+      |         ^
+1 error generated.

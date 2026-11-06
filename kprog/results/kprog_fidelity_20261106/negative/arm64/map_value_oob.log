@@ -1,0 +1,27 @@
+libbpf: prog 'map_value_oob_arm64_sim_xdp': BPF program load failed: -EACCES
+libbpf: prog 'map_value_oob_arm64_sim_xdp': -- BEGIN PROG LOAD LOG --
+0: R1=ctx() R10=fp0
+; int map_value_oob_arm64_sim_xdp(struct xdp_md *ctx) @ map_value_oob.bpf.c:14
+0: (b7) r6 = 0                        ; R6=0
+; ARM64_SIM_ENTRY_XDP(ctx); @ map_value_oob.bpf.c:16
+1: (61) r3 = *(u32 *)(r1 +4)          ; R1=ctx() R3=pkt_end()
+2: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)
+; ARM64_SIM_RUN_OP3(ARM64_OP_ALU_IMM, ARM64_X3, ARM64_X1, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0), 4ULL); @ map_value_oob.bpf.c:25
+3: (bf) r1 = r2                       ; R1=pkt(r=0) R2=pkt(r=0)
+4: (07) r1 += 4                       ; R1=pkt(off=4,r=0)
+; ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x10, 0x2c, arm64_l_2c); @ map_value_oob.bpf.c:31
+5: (2d) if r1 > r3 goto pc+18         ; R1=pkt(off=4,r=4) R3=pkt_end()
+; ARM64_SIM_BPF_CALL_bpf_map_lookup_elem(); @ map_value_oob.bpf.c:40
+6: (18) r1 = 0xffff000004622c00       ; R1=map_ptr(map=neg_map_0,ks=4,vs=8)
+8: (85) call bpf_map_lookup_elem#1    ; R0=map_value_or_null(id=1,map=neg_map_0,ks=4,vs=8)
+9: (15) if r0 == 0x0 goto pc+14       ; R0=map_value(map=neg_map_0,ks=4,vs=8)
+; ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X0, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 8ULL); @ map_value_oob.bpf.c:46
+10: (71) r1 = *(u8 *)(r0 +8)
+invalid access to map value, value_size=8 off=8 size=1
+R0 min value is outside of the allowed memory range
+processed 10 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+-- END PROG LOAD LOG --
+libbpf: prog 'map_value_oob_arm64_sim_xdp': failed to load: -EACCES
+libbpf: failed to load object '/proofs/map_value_oob.bpf.o'
+timing verify_s=0.033670 test_s=0.000000
+error: bpf_object__load failed: Permission denied (os error 13)

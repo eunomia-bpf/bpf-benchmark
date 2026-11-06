@@ -1,0 +1,23 @@
+build-x86/negative/map_value_oob.bpf.c:26:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]
+   26 |         X86_SIM_RUN_OP(X86_OP_MOV_LOAD_MAP_PTR, X86_RDI, X86_REG_NONE, X86_WIDTH_64, 0, ((__u64)(long)&neg_map));
+      |         ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2192:3: note: expanded from macro 'X86_SIM_RUN_OP'
+ 2192 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2003:5: note: expanded from macro 'X86_SIM_L_EXEC'
+ 2003 |                                 X86_SIM_L_EXEC_STORE((OP), (DST), (SRC), (FLAGS),  \
+      |                                 ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:928:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'
+  928 |                         void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
+      |                         ^
+build-x86/negative/map_value_oob.bpf.c:26:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2192:3: note: expanded from macro 'X86_SIM_RUN_OP'
+ 2192 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:2006:4: note: expanded from macro 'X86_SIM_L_EXEC'
+ 2006 |                         X86_SIM_L_EXEC_MOVBE_STORE((DST), (SRC), (FLAGS),\
+      |                         ^
+/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:963:4: note: expanded from macro 'X86_SIM_L_EXEC_MOVBE_STORE'
+  963 |                         void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
+      |                         ^
+2 warnings generated.
