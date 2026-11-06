@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0975 added a 3em emergency stretch: overfull
+boxes 13139 -> 454, none over 81pt, at a cost of 5
+pages.
+
+
 Step 0974 set the cited run paths as breakable paths:
 the worst line was 223pt over, and that section is
 now clean (paper 13139 -> 13098).

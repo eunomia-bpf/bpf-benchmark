@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0975 - thirteen thousand boxes became four hundred
+
+The remaining overfull boxes were not unbreakable tokens. The break hints are
+already in the text, as a zero-width discretionary at every separator inside a
+macro name, and what was missing was the third option TeX has between a loose
+line and an overflowing one: an emergency stretch it may use when nothing else
+fits.
+
+Setting one of three em reduces the count from thirteen thousand and
+ninety-eight to four hundred and fifty-four, and removes every box more than a
+hundred points wide. The worst remaining is eighty-one points, against a hundred
+and forty-four before.
+
+It costs five pages, from a hundred and fifteen to a hundred and twenty, because
+the stretch is used wherever a line would otherwise overflow. For a paper
+already dominated by one dense section, that is the right trade: the boxes are
+visible defects and the pages are not.
+
+Census unchanged; both counters pass and the geometry is measured before and
+after.
+
 ### Step 0974 - the cited paths could not break
 
 The paper compiled without errors but with thirteen thousand overfull boxes, and
