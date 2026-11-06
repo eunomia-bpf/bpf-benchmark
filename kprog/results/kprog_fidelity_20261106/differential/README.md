@@ -198,3 +198,11 @@ their canonical raw-byte reference interface; this does not change the green
 CPU matrix. The overall reference-check command exits 1 for that explicit
 coverage gap. Native raw bytes, per-form records, empty mismatch files and the
 complete Make log are retained in that directory.
+
+
+The AArch64 register-cell representation published by A was independently
+rebuilt and retested in `arm64-register-cells/`: all 497 forms/508928 QEMU-user
+cases agree, with no mismatches. `make.log.gz` retains compilation and outcome.
+The hardware replay default now selects
+`cpu-differential-arm64-register-cells.gz`; both earlier handoff binaries are
+retained. No real Arm hardware result is inferred from this emulation run.
