@@ -259,12 +259,34 @@ def keepStep (i : KeepInstruction) (s : State) : Transition State :=
   let result := moveKeepRaw (16 * i.column.val) (readReg s i.dst) (i.immediate.setWidth 64)
   ⟨{ writeReg s i.dst (narrow result i.width) with pc := s.pc + 4 }, [], none⟩
 
+/-- Normalized operand identities: field31 is decoded as SP or ZR by its
+instruction class; the two architectural registers are never conflated. -/
+inductive RegisterRef
+  | general (reg : Gpr)
+  | zero
+  | stack
+  deriving DecidableEq, Repr
+
+def readData (s : State) : RegisterRef → Word
+  | .general r => s.gpr r | .zero => 0 | .stack => s.sp
+
+def writeData (s : State) (dst : RegisterRef) (value : Word) (width : Width) : State :=
+  let value := narrow value width
+  match dst with
+  | .general r => { s with gpr := fun i => if i.val = r.val then value else s.gpr i }
+  | .zero => s
+  | .stack => { s with sp := value }
+
+def moveRegStep (width : Width) (dst src : RegisterRef) (s : State) : Transition State :=
+  ⟨{ writeData s dst (readData s src) width with pc := s.pc + 4 }, [], none⟩
+
 inductive Instruction
   | mul (instruction : MulInstruction)
   | shift (instruction : ShiftInstruction)
   | logic (instruction : LogicInstruction)
   | keep (instruction : KeepInstruction)
   | moveImmediate (width : Width) (dst : Register) (value : Word)
+  | moveRegister (width : Width) (dst src : RegisterRef)
   | extrev (instruction : ExtrevInstruction)
   | select (width : Width) (alternative : SelectElse) (dst lhs rhs : Register) (predicate : Fin 16)
   deriving DecidableEq, Repr
@@ -275,6 +297,7 @@ def step (i : Instruction) (s : State) : Transition State :=
   | .shift instruction => shiftStep instruction s
   | .logic instruction => logicStep instruction s
   | .keep instruction => keepStep instruction s
+  | .moveRegister width dst src => moveRegStep width dst src s
   | .moveImmediate width dst value =>
       ⟨{ writeReg s dst (narrow value width) with pc := s.pc + 4 }, [], none⟩
   | .extrev instruction => extrevStep instruction s
@@ -287,6 +310,9 @@ def Step (i : Instruction) (before : State) (after : Transition State) : Prop :=
 
 private def register (n : Nat) : Register := ⟨n % 32, Nat.mod_lt _ (by decide)⟩
 
+private def dataRegister (r : Register) (sp : Bool) : RegisterRef :=
+  if h : r.val < 31 then .general ⟨r.val, h⟩ else if sp then .stack else .zero
+
 /-- Decode an actual little-endian A64 instruction word. The opcode masks
 include fixed and reserved bits, and long/high multiplies require their X form. -/
 def decode (bytes : Array Byte) : Except String Instruction := do
@@ -297,6 +323,12 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   let lhs := register (word / 2^5)
   let rhs := register (word / 2^16)
   let addend := register (word / 2^10)
+  -- MOV register is ORR with Rn=ZR and no shift. MOV involving SP is
+  -- the ADD-immediate-zero alias, whose field31 denotes SP rather than ZR.
+  if word &&& 0x7fe0ffe0 = 0x2a0003e0 then
+    return .moveRegister width (dataRegister dst false) (dataRegister rhs false)
+  if word &&& 0x7ffffc00 = 0x11000000 ∧ (dst.val = 31 ∨ lhs.val = 31) then
+    return .moveRegister width (dataRegister dst true) (dataRegister lhs true)
   if word &&& 0x7f800000 = 0x72800000 then
     let column := (word / 2^21) % 4
     if h : column < width.bits / 16 then

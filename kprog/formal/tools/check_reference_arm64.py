@@ -217,6 +217,27 @@ def main():
         if dst is not None:
             expected["registers"][dst] = result
         cases.append((request, expected))
+    # Register MOV uses ORR/ZR or ADD-zero/SP encodings. Both sides of the
+    # SP/ZR distinction and WSP zero-extension must survive normalization.
+    for word, dst, result in [
+            (0xAA0103E0, 0, 0xDEAD000012345678), (0x2A0103E0, 0, 0x12345678),
+            (0xAA1F03E0, 0, 0), (0x2A1F03E0, 0, 0),
+            (0xAA0103FF, None, None), (0x2A0103FF, None, None),
+            (0x9100003F, 31, 0xDEAD000012345678), (0x910003E0, 0, 0xFFFF123456788000),
+            (0x910003FF, 31, 0xFFFF123456788000), (0x1100003F, 31, 0x12345678),
+            (0x110003E0, 0, 0x56788000), (0x110003FF, 31, 0x56788000),
+            (0x910003FE, 30, 0xFFFF123456788000), (0x910003DF, 31, 0xBEEF000087654321),
+            (0xAA1F03FF, None, None)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["registers"][1] = 0xDEAD000012345678
+        request["state"]["registers"][30] = 0xBEEF000087654321
+        request["state"]["registers"][31] = 0xFFFF123456788000
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
+        if dst is not None:
+            expected["registers"][dst] = result
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -258,7 +279,7 @@ def main():
     nv = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "nv"), "csel x0,x1,x2,nv")
     al = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "al"), "csel x0,x1,x2,al")
     assert encoder.encode(nv, {}, {}) == encoder.encode(al, {}, {})
-    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":
