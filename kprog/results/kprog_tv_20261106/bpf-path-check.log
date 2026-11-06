@@ -1,0 +1,30 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+./build/test-binding
+binding entry/ABI/metadata/generation and exact-byte rejection tests: PASS
+python3 test_kernel_patch.py
+patching file arch/arm64/net/bpf_jit_comp.c
+patching file arch/x86/net/bpf_jit_comp.c
+patching file include/linux/bpf.h
+patching file include/linux/bpf_verifier.h
+patching file kernel/bpf/core.c
+patching file kernel/bpf/syscall.c
+patching file kernel/bpf/verifier.c
+native proof-region kernel patch already applied
+kernel patch idempotence/conflict regressions: PASS
+cd ../formal && lake build KProgFormal.Reference.Memory
+Build completed successfully.
+cd ../formal && lake env lean ../tv/Composition.lean
+'KProgTV.validated_execution' depends on axioms: [propext]
+'KProgTV.native_effects_checked' depends on axioms: [propext]
+make bpf-check
+make[1]: Entering directory '/workspaces/repository/kprog/tv'
+install -d build
+cd ../formal && lake env lean -R ../tv -o ../tv/build/Composition.olean ../tv/Composition.lean
+'KProgTV.validated_execution' depends on axioms: [propext]
+'KProgTV.native_effects_checked' depends on axioms: [propext]
+cd ../formal && lake env lean -R ../tv -o ../tv/build/BPF.olean ../tv/BPF.lean
+cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv -o ../tv/build/BPFPath.olean ../tv/BPFPath.lean
+'KProgTV.BPFPath.evaluate_sound' depends on axioms: [propext, Quot.sound]
+cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv ../tv/BPFChecks.lean
+make[1]: Leaving directory '/workspaces/repository/kprog/tv'
+make: Leaving directory '/workspaces/repository/kprog/tv'

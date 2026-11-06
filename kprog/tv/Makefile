@@ -8,6 +8,15 @@ check: binding-check
 	python3 test_kernel_patch.py
 	cd ../formal && lake build KProgFormal.Reference.Memory
 	cd ../formal && lake env lean ../tv/Composition.lean
+	$(MAKE) bpf-check
+
+.PHONY: bpf-check
+bpf-check:
+	install -d build
+	cd ../formal && lake env lean -R ../tv -o ../tv/build/Composition.olean ../tv/Composition.lean
+	cd ../formal && lake env lean -R ../tv -o ../tv/build/BPF.olean ../tv/BPF.lean
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv -o ../tv/build/BPFPath.olean ../tv/BPFPath.lean
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv ../tv/BPFChecks.lean
 
 binding-check: build/test-binding
 	./build/test-binding

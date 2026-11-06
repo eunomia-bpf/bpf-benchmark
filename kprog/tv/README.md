@@ -15,8 +15,26 @@ spills can be erased only after proving they are private. Helper results and
 arguments remain observable.
 
 This is a conditional composition theorem, not a per-program validation result.
-There is currently no compiled-BPF execution semantics or per-program block
-checker. Lane V now exports byte-decoded, whole-state CMOV transitions and
+`BPF.lean` provides byte-decoded BPF arithmetic, branches, wide immediates,
+ordinary memory operations and platform-bound helper calls. Its registers,
+memory and ordered events use lane V's canonical types. The PC is a signed
+instruction index; an invalid negative index fails. Helper arguments come from
+the actual argument registers, while identity, prototype arity, effects and
+caller clobbers are explicit platform inputs. Instruction offsets, BTF selectors
+and PC are available to that binding rather than silently discarded.
+
+`BPFPath.evaluate` checks a finite instruction-position witness against every
+actual successor, with no forced branch or PC update. `evaluate_sound` proves
+that success gives a real execution prefix with exactly the same full BPF state
+and ordered effects. It rejects continued execution after return or fault.
+This finite witness is a certificate component; block composition imposes no
+native execution fuel limit. `BPFChecks.lean` checks wire layout, arithmetic
+boundaries, memory initialization/faults, helper arguments/clobbers and invalid
+path witnesses.
+
+The per-program native-to-proof block relation, its kernel context/helper
+instantiation and architectural-state projection are still being implemented.
+Lane V exports byte-decoded, whole-state CMOV transitions and
 canonical memory/helper events in `KProgFormal.Reference`; the remaining
 reference operations are under construction. The composition uses those
 canonical event types. This directory must not introduce a second native ISA
@@ -153,6 +171,8 @@ The trusted base of an instantiated proof consists of:
   module lifetimes while a verification/JIT operation remains in progress.
 - Lean's kernel and the logical axioms printed by the check command. This file
   adds no axioms, `sorry`, unchecked certificates or solver-success assumptions.
+  The BPF path soundness theorem prints `propext` and `Quot.sound`; composition
+  prints `propext`. Neither theorem supplies a native block certificate.
 
 Clang and the C/Python simulator generator can leave the semantic trusted base
 only once a byte-level TV certificate exists for their actual output. Until

@@ -118,3 +118,12 @@ execution returns 2 and the bound program retains only the original map ID.
 A wrong value-size declaration rejects at the loader. This corrects the map
 identity failure behind R's stage2 rejections; the reported odd x86 chunk tail
 was legal, and the diagnostic now limits word-alignment checks to AArch64.
+
+`bpf-path-check.log` checks the byte-decoded BPF model and its boundary cases.
+`KProgTV.BPFPath.evaluate_sound` proves that a successful path witness has the
+same full BPF state and exact ordered events as actual BPF execution. The proof
+depends only on `propext` and `Quot.sound`; no `sorry` or solver result is an
+assumption. Wrong successors and execution after return/fault reject. This
+establishes checker machinery; native block/entry relations remain to be
+instantiated for each micro/application artifact. No program is relabelled
+validated by this component theorem.
