@@ -895,3 +895,12 @@ records250179 runs; native startup reaches proof relocation and fails on a
 full/truncated map-name resolution order defect. The exact proof build,
 packaged inputs and all12 startup attempts remain. The existing alias-resolution
 step is being moved before proof-map reuse for the next application retry.
+
+## First complete actual Katran ARM workload
+
+[Runtimev10](runtime-context-v10/README.md) replaces the actual balancer
+1/1 resident programs with a prebuilt generation-bound proof. Both workload
+arms finish: JIT250388 and bound268634 program runs, matching their packet
+counts and zero pktgen errors. XDP/map/receiver/drop counters are retained.
+OTel records12 baseline programs and0 native replacements; mixed extern/private
+readonly relocation handling is under repair. QEMU timing is functional only.

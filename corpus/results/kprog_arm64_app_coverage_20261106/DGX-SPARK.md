@@ -63,7 +63,7 @@ replay can be replaced with application workload runs.
 ## Built application image replay, 2026-11-06
 
 The preceding pilot description records the earlier checkpoint. The current
-runtimev9 image contains all six upstream applications, their existing Python
+runtimev10 image contains all six upstream applications, their existing Python
 runners and workloads, the kernel modules, loader/linker and current manifests.
 Katran's root triple passes bound QEMU execution; the actual balancer proof
 has compiled and is running through application startup. The previousv8
@@ -75,9 +75,9 @@ actual application outcomes while the remaining defects are repaired.
 On the build host, prepare the portable launcher from the current built image:
 
 ```sh
-BASE="$PWD/kprog/arm64/build/app-runtime-v9"
+BASE="$PWD/kprog/arm64/build/app-runtime-v10"
 make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile app-replay-build \
-  RUNTIME_BASE="$BASE" RUNTIME_IMAGE=bpf-benchmark/runner-runtime:arm64-a-context-v9
+  RUNTIME_BASE="$BASE" RUNTIME_IMAGE=bpf-benchmark/runner-runtime:arm64-a-context-v10
 scp -r "$BASE/spark" "$SPARK:kprog-arm64-app"
 scp "$BASE/image.tar" "$SPARK:kprog-arm64-app/image.tar"
 ```

@@ -1,0 +1,15 @@
+run,app,phase,id,name,type,run_cnt_delta,run_time_ns_delta,bytes_jited,bytes_xlated
+arm64_qemu_corpus_19700101_000007_687191,katran,baseline,34,balancer_ingres,xdp,250388,544899840,14448,23808
+arm64_qemu_corpus_19700101_000007_687191,katran,post_rejit,53,balancer_ingres,xdp,268634,601506480,10352,24
+arm64_qemu_corpus_19700101_000007_687191,otelcol-ebpf-profiler/profiling,baseline,10,perf_unwind_php,perf_event,0,0,15168,24768
+arm64_qemu_corpus_19700101_000007_687191,otelcol-ebpf-profiler/profiling,baseline,11,perf_unwind_pyt,perf_event,0,0,18776,33192
+arm64_qemu_corpus_19700101_000007_687191,otelcol-ebpf-profiler/profiling,baseline,12,perf_unwind_rub,perf_event,0,0,18496,30264
+arm64_qemu_corpus_19700101_000007_687191,otelcol-ebpf-profiler/profiling,baseline,13,perf_unwind_v8,perf_event,0,0,20496,34040
+arm64_qemu_corpus_19700101_000007_687191,otelcol-ebpf-profiler/profiling,baseline,14,perf_go_labels,perf_event,0,0,1640,2504
+arm64_qemu_corpus_19700101_000007_687191,otelcol-ebpf-profiler/profiling,baseline,15,tracepoint__sch,tracepoint,29,8420032,928,1320
+arm64_qemu_corpus_19700101_000007_687191,otelcol-ebpf-profiler/profiling,baseline,16,native_tracer_e,perf_event,112473,6426918672,4112,6000
+arm64_qemu_corpus_19700101_000007_687191,otelcol-ebpf-profiler/profiling,baseline,17,custom__generic,kprobe,0,0,3928,5848
+arm64_qemu_corpus_19700101_000007_687191,otelcol-ebpf-profiler/profiling,baseline,6,perf_unwind_sto,perf_event,0,0,3880,6136
+arm64_qemu_corpus_19700101_000007_687191,otelcol-ebpf-profiler/profiling,baseline,7,perf_unwind_nat,perf_event,0,0,21952,36624
+arm64_qemu_corpus_19700101_000007_687191,otelcol-ebpf-profiler/profiling,baseline,8,perf_unwind_hot,perf_event,0,0,14888,24472
+arm64_qemu_corpus_19700101_000007_687191,otelcol-ebpf-profiler/profiling,baseline,9,perf_unwind_per,perf_event,0,0,18272,29624

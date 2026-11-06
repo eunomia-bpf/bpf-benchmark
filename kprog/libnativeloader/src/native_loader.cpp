@@ -5410,6 +5410,18 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     SimulatorObject simulator_object(nullptr, bpf_object__close);
     std::vector<std::unique_ptr<ScopedFd>> proof_map_fds;
     const auto source_proof_metadata = read_proof_metadata(simulator_object_path, ".native_lab.source_maps");
+    const auto native_data_symbols_start = std::chrono::steady_clock::now();
+    {
+        OpenProcessMapsCache open_maps_cache;
+        OpenProcessMapsCacheScope open_maps_scope(open_maps_cache);
+        for (const std::filesystem::path &path : native_data_object_paths) {
+            add_native_data_symbol_addrs(path, companion);
+        }
+    }
+    const auto native_data_symbols_end = std::chrono::steady_clock::now();
+
+    // Native data resolution supplies full ELF map names for truncated kernel
+    // names. Resolve those identities before deciding which proof maps to reuse.
     if (!simulator_object_path.empty()) {
         if (!proof_insns.empty()) {
             fail("simulator proof supplied both as raw instructions and manifest object");
@@ -5421,16 +5433,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
                 parse_proof_source_maps(*source_proof_metadata), source_map_bindings,
                 source_insns, companion, proof_insns, proof_map_fds);
     }
-    const auto native_data_symbols_start = std::chrono::steady_clock::now();
-    {
-        OpenProcessMapsCache open_maps_cache;
-        OpenProcessMapsCacheScope open_maps_scope(open_maps_cache);
-        for (const std::filesystem::path &path : native_data_object_paths) {
-            add_native_data_symbol_addrs(path, companion);
-        }
-    }
-    const auto native_data_symbols_end = std::chrono::steady_clock::now();
-
     companion.needs_kernel_symbols |= proof_needs_kernel_symbols(proof_insns);
     LinkedBlob linked = load_or_link_native_blob(
         options.native_link_path,
