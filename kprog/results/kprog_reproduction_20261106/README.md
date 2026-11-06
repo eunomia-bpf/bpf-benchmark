@@ -229,10 +229,43 @@ dir, but in a different schema (`data_objects: [{native_object:
 points; bcc proves the schema itself is settled, so this is otel's
 packaging only.
 
-## tetragon, cilium, tracee
+## tetragon: measures, and the ratio does not reproduce
 
-No complete app manifest existed at the time of writing; tetragon (62
-staged native objects), cilium (0) and tracee (3) are lane C's to package.
+Tetragon turned out to need no manifest work: the build already writes a
+235-object `manifest.json` into the staged directory
+(`vendor/build/native-bpf/x86/stage/tetragon/manifest.json`), the image
+carries it at `/artifacts/user/native-bpf/x86_64/tetragon/manifest.json`,
+and the loader resolves `native_object` **relative to the manifest's own
+directory** (`manifest_relative_path`, `native_loader_manifest.hpp:772`).
+Pointing `BPFREJIT_SHIM_NATIVE_MANIFEST` at that file works directly.
+
+```
+corpus/results/x86_kvm_corpus_20261106_224210_710691   status ok
+118 programs replaced natively, 0 failed
+```
+
+| | tetragon/observer |
+| --- | ---: |
+| bogo-ops, baseline eBPF | 10,332,387 |
+| bogo-ops, native | 10,378,073 |
+| **native/eBPF** | **1.004x** |
+| reference (2026-05-29) | **1.323x** |
+
+Per-stressor, both arms did the same work (eventfd 3,549,487/3,694,894,
+mmap 1,554/1,538, udp 6,762,074/6,661,641, sock 19,272/20,000), and both
+ran the same 60 s with `rc=0`, so the comparison is valid.
+
+**This is a genuine non-reproduction**: 1.004x against 1.323x. The
+reference's Tetragon advantage came from its own native path, and 118 of
+its programs now replace natively here, so the difference is in what the
+native code does, not in whether it ran. It is recorded as measured and
+left for a paired re-run against the 2026-05-29 tree rather than
+explained away.
+
+## cilium, tracee
+
+No usable manifest existed at the time of writing: cilium has 0 staged
+native objects, tracee 3. Both are lane C's to package.
 
 # Blockers cleared to reach the native arm
 
