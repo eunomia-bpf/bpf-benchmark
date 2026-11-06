@@ -1,6 +1,6 @@
-import KProgFormal.GeneratedArm64AluResult
-import KProgFormal.GeneratedX86AluResult
-import KProgFormal.GeneratedX86Andn
+import KProgFormal.Generated.GeneratedArm64AluResult
+import KProgFormal.Generated.GeneratedX86AluResult
+import KProgFormal.Generated.GeneratedX86Andn
 import KProgFormal.X86AndnHandler
 
 /-!

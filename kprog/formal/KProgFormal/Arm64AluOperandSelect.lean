@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64AluOperandSelect
-import KProgFormal.GeneratedArm64AluOperand
+import KProgFormal.Generated.GeneratedArm64AluOperandSelect
+import KProgFormal.Generated.GeneratedArm64AluOperand
 import KProgFormal.Arm64AluOperandHandler
 import Std.Tactic.BVDecide
 

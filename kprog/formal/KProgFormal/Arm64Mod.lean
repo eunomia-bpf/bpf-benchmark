@@ -1,7 +1,7 @@
-import KProgFormal.GeneratedArm64Mod
-import KProgFormal.GeneratedArm64Decode
-import KProgFormal.GeneratedArm64Width
-import KProgFormal.GeneratedArm64AluResult
+import KProgFormal.Generated.GeneratedArm64Mod
+import KProgFormal.Generated.GeneratedArm64Decode
+import KProgFormal.Generated.GeneratedArm64Width
+import KProgFormal.Generated.GeneratedArm64AluResult
 import KProgFormal.Arm64AluResult
 
 namespace KProgFormal

@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64DispatchSingleton
+import KProgFormal.Generated.GeneratedArm64DispatchSingleton
 import KProgFormal.Arm64DispatchFamily
 import Std.Tactic.BVDecide
 

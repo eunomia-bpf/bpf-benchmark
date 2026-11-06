@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Width
+import KProgFormal.Generated.GeneratedX86Width
 namespace KProgFormal
 abbrev X86Width := GeneratedX86Width.Width
 abbrev X86Word := BitVec 64

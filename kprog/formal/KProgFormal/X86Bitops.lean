@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Bitops
+import KProgFormal.Generated.GeneratedX86Bitops
 import KProgFormal.X86Width
 import Std.Tactic.BVDecide
 

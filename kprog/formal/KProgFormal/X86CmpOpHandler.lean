@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86CmpOp
+import KProgFormal.Generated.GeneratedX86CmpOp
 import KProgFormal.X86AluWriteback
 import KProgFormal.X86Immediate
 import KProgFormal.X86LogicFlags

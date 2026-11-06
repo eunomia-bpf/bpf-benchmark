@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64Reduction
+import KProgFormal.Generated.GeneratedArm64Reduction
 import Std.Tactic.BVDecide
 
 namespace KProgFormal
@@ -42,7 +42,7 @@ theorem arm64_reduction_refines (op : Reduction) (value : BitVec 64) :
   cases op <;>
     simp only [GeneratedArm64Reduction.value, arm64ReductionSpec,
       GeneratedArm64Reduction.popCountBits] <;>
-    bv_decide
+    bv_decide (config := { acNf := true, timeout := 60 })
 
 /-- Both reductions are inside the numeric case-label range `36..37` used by the
 shared C macro. -/

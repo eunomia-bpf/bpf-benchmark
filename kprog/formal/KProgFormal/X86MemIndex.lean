@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedX86MemIndex
-import KProgFormal.GeneratedX86MemOffset
+import KProgFormal.Generated.GeneratedX86MemIndex
+import KProgFormal.Generated.GeneratedX86MemOffset
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

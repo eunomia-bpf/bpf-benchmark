@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86RepMovs
+import KProgFormal.Generated.GeneratedX86RepMovs
 import KProgFormal.TagErasure
 import KProgFormal.X86MemAccess
 import KProgFormal.X86RegWrite

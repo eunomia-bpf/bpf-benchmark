@@ -1,6 +1,6 @@
-import KProgFormal.GeneratedArm64StackArm
+import KProgFormal.Generated.GeneratedArm64StackArm
 import KProgFormal.Arm64Width
-import KProgFormal.GeneratedArm64StackArena
+import KProgFormal.Generated.GeneratedArm64StackArena
 import KProgFormal.Arm64StackArena
 
 namespace KProgFormal

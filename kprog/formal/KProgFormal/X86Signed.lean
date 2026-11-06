@@ -1,6 +1,6 @@
-import KProgFormal.GeneratedX86Signed
-import KProgFormal.GeneratedX86ImulFlags
-import KProgFormal.GeneratedX86Width
+import KProgFormal.Generated.GeneratedX86Signed
+import KProgFormal.Generated.GeneratedX86ImulFlags
+import KProgFormal.Generated.GeneratedX86Width
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

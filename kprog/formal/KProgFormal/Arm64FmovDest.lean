@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64FmovDest
+import KProgFormal.Generated.GeneratedArm64FmovDest
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

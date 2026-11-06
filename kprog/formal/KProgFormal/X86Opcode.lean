@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Opcode
+import KProgFormal.Generated.GeneratedX86Opcode
 
 namespace KProgFormal
 

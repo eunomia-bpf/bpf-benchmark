@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86LogicFlags
+import KProgFormal.Generated.GeneratedX86LogicFlags
 import KProgFormal.X86ControlFlow
 namespace KProgFormal
 def x86LogicFlagsSpec (zero sign : Bool) : X86Flags :=

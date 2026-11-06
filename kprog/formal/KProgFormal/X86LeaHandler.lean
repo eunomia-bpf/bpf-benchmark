@@ -1,7 +1,7 @@
 import KProgFormal.X86RegWrite
 import KProgFormal.X86MemOffset
 import KProgFormal.TagErasure
-import KProgFormal.GeneratedPtrAdd
+import KProgFormal.Generated.GeneratedPtrAdd
 
 namespace KProgFormal
 

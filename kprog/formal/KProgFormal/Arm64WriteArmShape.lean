@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64WriteArm
+import KProgFormal.Generated.GeneratedArm64WriteArm
 import KProgFormal.Arm64Width
 
 namespace KProgFormal

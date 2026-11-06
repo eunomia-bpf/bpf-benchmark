@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Bt
+import KProgFormal.Generated.GeneratedX86Bt
 import KProgFormal.X86Bitops
 import KProgFormal.X86Immediate
 import KProgFormal.X86MemAccess

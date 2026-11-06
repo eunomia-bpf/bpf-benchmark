@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86DispatchSingleton
+import KProgFormal.Generated.GeneratedX86DispatchSingleton
 import KProgFormal.X86DispatchFamily
 import Std.Tactic.BVDecide
 

@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64StackIndex
+import KProgFormal.Generated.GeneratedArm64StackIndex
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

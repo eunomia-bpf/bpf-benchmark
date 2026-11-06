@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedControlFlowTrace
+import KProgFormal.Generated.GeneratedControlFlowTrace
 import KProgFormal.X86BranchEmit
 import KProgFormal.Arm64BranchEmit
 

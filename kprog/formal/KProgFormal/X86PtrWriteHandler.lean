@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedX86PtrWrite
-import KProgFormal.GeneratedPtrAdd
+import KProgFormal.Generated.GeneratedX86PtrWrite
+import KProgFormal.Generated.GeneratedPtrAdd
 import KProgFormal.TagErasure
 import KProgFormal.X86MovHandler
 import KProgFormal.X86RegWrite

@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86StackIndex
+import KProgFormal.Generated.GeneratedX86StackIndex
 
 namespace KProgFormal
 

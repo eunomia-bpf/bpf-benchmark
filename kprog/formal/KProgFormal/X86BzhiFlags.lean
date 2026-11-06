@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86BzhiFlags
+import KProgFormal.Generated.GeneratedX86BzhiFlags
 import KProgFormal.X86Width
 import KProgFormal.X86Opcode
 import KProgFormal.X86ControlFlow

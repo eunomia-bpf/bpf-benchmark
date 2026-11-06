@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64Flags
-import KProgFormal.GeneratedX86SubFlags
+import KProgFormal.Generated.GeneratedArm64Flags
+import KProgFormal.Generated.GeneratedX86SubFlags
 
 /-!
 The two architectures disagree about what the carry flag means after a

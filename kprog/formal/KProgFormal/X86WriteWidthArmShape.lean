@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86WriteWidthArm
+import KProgFormal.Generated.GeneratedX86WriteWidthArm
 import KProgFormal.X86Width
 
 namespace KProgFormal

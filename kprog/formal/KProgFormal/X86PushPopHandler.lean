@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86PushPop
+import KProgFormal.Generated.GeneratedX86PushPop
 import KProgFormal.TagErasure
 import KProgFormal.X86MemAccess
 import KProgFormal.X86RegWrite

@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86ShiftResult
+import KProgFormal.Generated.GeneratedX86ShiftResult
 import KProgFormal.X86ShiftCount
 
 namespace KProgFormal

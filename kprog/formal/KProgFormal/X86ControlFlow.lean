@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Cond
+import KProgFormal.Generated.GeneratedX86Cond
 import KProgFormal.Arm64ControlFlow
 
 namespace KProgFormal

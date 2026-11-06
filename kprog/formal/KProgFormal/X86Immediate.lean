@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Immediate
+import KProgFormal.Generated.GeneratedX86Immediate
 import KProgFormal.X86Width
 
 namespace KProgFormal

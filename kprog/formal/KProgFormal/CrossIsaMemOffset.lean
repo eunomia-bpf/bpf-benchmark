@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64MemOffset
-import KProgFormal.GeneratedX86MemOffset
+import KProgFormal.Generated.GeneratedArm64MemOffset
+import KProgFormal.Generated.GeneratedX86MemOffset
 
 /-!
 Both architectures compute a load/store address offset by the same shape --

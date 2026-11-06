@@ -1,6 +1,6 @@
-import KProgFormal.GeneratedX86StackArm
+import KProgFormal.Generated.GeneratedX86StackArm
 import KProgFormal.X86Width
-import KProgFormal.GeneratedX86StackArena
+import KProgFormal.Generated.GeneratedX86StackArena
 import KProgFormal.X86StackArena
 
 namespace KProgFormal

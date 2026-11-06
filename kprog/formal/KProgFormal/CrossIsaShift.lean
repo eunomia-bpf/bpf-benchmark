@@ -1,6 +1,6 @@
-import KProgFormal.GeneratedArm64Shift
-import KProgFormal.GeneratedX86ShiftCount
-import KProgFormal.GeneratedX86ShiftResult
+import KProgFormal.Generated.GeneratedArm64Shift
+import KProgFormal.Generated.GeneratedX86ShiftCount
+import KProgFormal.Generated.GeneratedX86ShiftResult
 
 /-!
 The two architectures mask a shift amount differently.

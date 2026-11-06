@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64CcmpDecode
-import KProgFormal.GeneratedArm64Aux
+import KProgFormal.Generated.GeneratedArm64CcmpDecode
+import KProgFormal.Generated.GeneratedArm64Aux
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

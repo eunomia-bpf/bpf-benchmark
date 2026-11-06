@@ -1,6 +1,6 @@
-import KProgFormal.GeneratedArm64DqMemExtra
-import KProgFormal.GeneratedArm64DqMem
-import KProgFormal.GeneratedArm64Vreg
+import KProgFormal.Generated.GeneratedArm64DqMemExtra
+import KProgFormal.Generated.GeneratedArm64DqMem
+import KProgFormal.Generated.GeneratedArm64Vreg
 
 namespace KProgFormal
 

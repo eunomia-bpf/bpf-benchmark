@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedX86SetccMem
-import KProgFormal.GeneratedX86RegLaneAux
+import KProgFormal.Generated.GeneratedX86SetccMem
+import KProgFormal.Generated.GeneratedX86RegLaneAux
 import KProgFormal.X86ControlFlow
 import KProgFormal.X86MemOffset
 import KProgFormal.X86SetccHandler

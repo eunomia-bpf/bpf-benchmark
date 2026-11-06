@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86MovxShape
+import KProgFormal.Generated.GeneratedX86MovxShape
 import KProgFormal.X86Opcode
 import KProgFormal.X86Width
 import KProgFormal.X86Signed

@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Andn
+import KProgFormal.Generated.GeneratedX86Andn
 import KProgFormal.TagErasure
 import KProgFormal.X86LogicFlags
 import KProgFormal.X86MemAccess

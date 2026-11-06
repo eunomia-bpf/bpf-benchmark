@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64Extrev
-import KProgFormal.GeneratedX86Signed
+import KProgFormal.Generated.GeneratedArm64Extrev
+import KProgFormal.Generated.GeneratedX86Signed
 
 /-!
 Both architectures sign-extend a narrow value into a 64-bit register, and they

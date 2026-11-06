@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86RegRead
+import KProgFormal.Generated.GeneratedX86RegRead
 import KProgFormal.X86RegWrite
 
 namespace KProgFormal

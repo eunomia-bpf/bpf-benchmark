@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64Adrp
+import KProgFormal.Generated.GeneratedArm64Adrp
 
 namespace KProgFormal
 

@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64Decode
+import KProgFormal.Generated.GeneratedArm64Decode
 
 namespace KProgFormal
 

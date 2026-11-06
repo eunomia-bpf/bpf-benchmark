@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64StackArena
-import KProgFormal.GeneratedX86StackArena
+import KProgFormal.Generated.GeneratedArm64StackArena
+import KProgFormal.Generated.GeneratedX86StackArena
 
 /-!
 The two ISAs render independent stack-arena contracts from independent

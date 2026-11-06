@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86ImulFlags
+import KProgFormal.Generated.GeneratedX86ImulFlags
 import KProgFormal.X86Width
 import KProgFormal.X86ControlFlow
 

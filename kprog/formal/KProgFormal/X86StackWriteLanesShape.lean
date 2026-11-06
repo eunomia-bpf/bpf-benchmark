@@ -1,7 +1,7 @@
-import KProgFormal.GeneratedX86StackWriteLanes
-import KProgFormal.GeneratedX86Width
-import KProgFormal.GeneratedX86StackArena
-import KProgFormal.GeneratedX86MemAccess
+import KProgFormal.Generated.GeneratedX86StackWriteLanes
+import KProgFormal.Generated.GeneratedX86Width
+import KProgFormal.Generated.GeneratedX86StackArena
+import KProgFormal.Generated.GeneratedX86MemAccess
 import KProgFormal.X86Width
 
 namespace KProgFormal

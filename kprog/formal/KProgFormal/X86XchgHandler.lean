@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Xchg
+import KProgFormal.Generated.GeneratedX86Xchg
 import KProgFormal.X86RegWrite
 import KProgFormal.X86Width
 import Std.Tactic.BVDecide

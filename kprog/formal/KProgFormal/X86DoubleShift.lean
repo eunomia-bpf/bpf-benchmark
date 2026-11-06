@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86DoubleShift
+import KProgFormal.Generated.GeneratedX86DoubleShift
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

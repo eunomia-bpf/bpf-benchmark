@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64CcmpHandler
+import KProgFormal.Generated.GeneratedArm64CcmpHandler
 import KProgFormal.Arm64FlagHandler
 import KProgFormal.Arm64Cond
 

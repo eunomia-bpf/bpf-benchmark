@@ -1,7 +1,7 @@
-import KProgFormal.GeneratedArm64StackWriteLanes
-import KProgFormal.GeneratedArm64Width
-import KProgFormal.GeneratedArm64ByteLane
-import KProgFormal.GeneratedArm64StoreBytes
+import KProgFormal.Generated.GeneratedArm64StackWriteLanes
+import KProgFormal.Generated.GeneratedArm64Width
+import KProgFormal.Generated.GeneratedArm64ByteLane
+import KProgFormal.Generated.GeneratedArm64StoreBytes
 import KProgFormal.Arm64Width
 
 namespace KProgFormal

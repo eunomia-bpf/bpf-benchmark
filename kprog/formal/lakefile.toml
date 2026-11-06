@@ -4,3 +4,4 @@ defaultTargets = ["KProgFormal"]
 
 [[lean_lib]]
 name = "KProgFormal"
+globs = ["KProgFormal.*"]

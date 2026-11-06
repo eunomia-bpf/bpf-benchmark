@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86AluResult
+import KProgFormal.Generated.GeneratedX86AluResult
 import KProgFormal.X86AluDecode
 import KProgFormal.X86AddResult
 import KProgFormal.X86SubResult

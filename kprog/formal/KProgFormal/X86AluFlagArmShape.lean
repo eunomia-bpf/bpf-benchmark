@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86AluFlagArm
+import KProgFormal.Generated.GeneratedX86AluFlagArm
 import KProgFormal.X86AluDecode
 
 namespace KProgFormal

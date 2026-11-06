@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Popcount
+import KProgFormal.Generated.GeneratedX86Popcount
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

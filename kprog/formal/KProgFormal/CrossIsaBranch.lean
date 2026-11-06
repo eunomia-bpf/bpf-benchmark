@@ -1,7 +1,7 @@
-import KProgFormal.GeneratedArm64BranchEmit
-import KProgFormal.GeneratedX86BranchEmit
-import KProgFormal.GeneratedArm64Cond
-import KProgFormal.GeneratedX86Cond
+import KProgFormal.Generated.GeneratedArm64BranchEmit
+import KProgFormal.Generated.GeneratedX86BranchEmit
+import KProgFormal.Generated.GeneratedArm64Cond
+import KProgFormal.Generated.GeneratedX86Cond
 import KProgFormal.Arm64ControlFlow
 import KProgFormal.X86ControlFlow
 import KProgFormal.CrossIsaCond

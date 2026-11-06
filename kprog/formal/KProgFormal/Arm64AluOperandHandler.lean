@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64AluOperand
+import KProgFormal.Generated.GeneratedArm64AluOperand
 import KProgFormal.Arm64AluHandler
 import KProgFormal.Arm64Mod
 

@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86MemDispatch
+import KProgFormal.Generated.GeneratedX86MemDispatch
 
 namespace KProgFormal
 

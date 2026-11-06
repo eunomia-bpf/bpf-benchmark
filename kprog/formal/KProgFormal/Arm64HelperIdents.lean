@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64HelperIdents
+import KProgFormal.Generated.GeneratedArm64HelperIdents
 
 namespace KProgFormal
 

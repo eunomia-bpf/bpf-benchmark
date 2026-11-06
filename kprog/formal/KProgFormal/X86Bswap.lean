@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedX86Bswap
-import KProgFormal.GeneratedX86Width
+import KProgFormal.Generated.GeneratedX86Bswap
+import KProgFormal.Generated.GeneratedX86Width
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

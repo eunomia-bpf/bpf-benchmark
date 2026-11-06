@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64MemOffset
+import KProgFormal.Generated.GeneratedArm64MemOffset
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

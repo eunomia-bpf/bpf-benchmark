@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86PopcntFlags
+import KProgFormal.Generated.GeneratedX86PopcntFlags
 import KProgFormal.X86Width
 import KProgFormal.X86Opcode
 import KProgFormal.X86ControlFlow

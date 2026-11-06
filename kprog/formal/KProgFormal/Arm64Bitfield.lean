@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64Bitfield
-import KProgFormal.GeneratedArm64Decode
+import KProgFormal.Generated.GeneratedArm64Bitfield
+import KProgFormal.Generated.GeneratedArm64Decode
 
 namespace KProgFormal
 
@@ -52,7 +52,7 @@ theorem arm64_bitfield_refines (kind : Bitfield) (src dst : BitVec 64)
     simp only [GeneratedArm64Bitfield.value, arm64BitfieldValueSpec,
       GeneratedArm64Bitfield.mask, GeneratedArm64Bitfield.signExtend,
       arm64BitfieldMaskSpec, arm64BitfieldFieldOfByte] <;>
-    bv_decide
+    bv_decide (config := { timeout := 60 })
 
 /-- The generated mask agrees with the independent complement-form mask. -/
 theorem arm64_bitfield_mask_refines (bits : BitVec 8)

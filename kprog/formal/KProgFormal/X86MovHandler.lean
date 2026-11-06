@@ -1,9 +1,9 @@
 import KProgFormal.X86RegWrite
 import KProgFormal.X86RegRead
 import KProgFormal.X86RegLaneAux
-import KProgFormal.GeneratedX86RegRead
+import KProgFormal.Generated.GeneratedX86RegRead
 import KProgFormal.TagErasure
-import KProgFormal.GeneratedPtrAdd
+import KProgFormal.Generated.GeneratedPtrAdd
 
 namespace KProgFormal
 

@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86SbbFlags
+import KProgFormal.Generated.GeneratedX86SbbFlags
 import KProgFormal.X86SbbResult
 import KProgFormal.X86ControlFlow
 namespace KProgFormal

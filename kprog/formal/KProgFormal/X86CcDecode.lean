@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedX86CcDecode
-import KProgFormal.GeneratedX86Cond
+import KProgFormal.Generated.GeneratedX86CcDecode
+import KProgFormal.Generated.GeneratedX86Cond
 
 namespace KProgFormal
 

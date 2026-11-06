@@ -1,6 +1,6 @@
 import KProgFormal.Arm64DispatchSingleton
 import KProgFormal.Arm64DispatchFamily
-import KProgFormal.GeneratedArm64Decode
+import KProgFormal.Generated.GeneratedArm64Decode
 
 /-!
 The dispatcher chain's *coverage*, as distinct from its exclusivity.

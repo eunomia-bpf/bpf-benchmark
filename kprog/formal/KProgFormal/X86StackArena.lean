@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86StackArena
+import KProgFormal.Generated.GeneratedX86StackArena
 
 namespace KProgFormal
 

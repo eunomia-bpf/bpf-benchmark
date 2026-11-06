@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64Width
+import KProgFormal.Generated.GeneratedArm64Width
 namespace KProgFormal
 abbrev Arm64Width := GeneratedArm64Width.Width
 abbrev Arm64Word := BitVec 64

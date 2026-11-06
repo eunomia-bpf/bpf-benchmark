@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64Flags
-import KProgFormal.GeneratedArm64Width
+import KProgFormal.Generated.GeneratedArm64Flags
+import KProgFormal.Generated.GeneratedArm64Width
 
 namespace KProgFormal
 

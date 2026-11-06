@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64StackArena
-import KProgFormal.GeneratedArm64ByteLane
+import KProgFormal.Generated.GeneratedArm64StackArena
+import KProgFormal.Generated.GeneratedArm64ByteLane
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

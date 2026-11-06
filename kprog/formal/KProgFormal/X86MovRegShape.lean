@@ -1,7 +1,7 @@
-import KProgFormal.GeneratedX86MovRegArm
+import KProgFormal.Generated.GeneratedX86MovRegArm
 import KProgFormal.X86Opcode
 import KProgFormal.X86Width
-import KProgFormal.GeneratedX86RegDispatch
+import KProgFormal.Generated.GeneratedX86RegDispatch
 import KProgFormal.X86MovHandler
 
 namespace KProgFormal

@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64StoreBytes
-import KProgFormal.GeneratedArm64Width
+import KProgFormal.Generated.GeneratedArm64StoreBytes
+import KProgFormal.Generated.GeneratedArm64Width
 import KProgFormal.Arm64LoadBytes
 import Std.Tactic.BVDecide
 

@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedX86Movbe
-import KProgFormal.GeneratedX86MemDispatch
+import KProgFormal.Generated.GeneratedX86Movbe
+import KProgFormal.Generated.GeneratedX86MemDispatch
 import KProgFormal.X86Bswap
 import KProgFormal.X86MemAccess
 import KProgFormal.X86MemDispatch

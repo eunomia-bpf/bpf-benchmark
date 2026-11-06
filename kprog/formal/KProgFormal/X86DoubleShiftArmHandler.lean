@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86DoubleShiftArm
+import KProgFormal.Generated.GeneratedX86DoubleShiftArm
 import KProgFormal.X86DoubleShift
 import KProgFormal.X86Opcode
 import KProgFormal.X86AluDecode

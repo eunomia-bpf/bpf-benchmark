@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86MulxArm
+import KProgFormal.Generated.GeneratedX86MulxArm
 import KProgFormal.X86Width
 import KProgFormal.X86MulxHandler
 import Std.Tactic.BVDecide

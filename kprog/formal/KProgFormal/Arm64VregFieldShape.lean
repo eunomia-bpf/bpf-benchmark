@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64VregField
-import KProgFormal.GeneratedArm64Vreg
+import KProgFormal.Generated.GeneratedArm64VregField
+import KProgFormal.Generated.GeneratedArm64Vreg
 
 namespace KProgFormal
 

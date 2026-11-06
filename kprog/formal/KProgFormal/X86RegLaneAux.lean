@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86RegLaneAux
+import KProgFormal.Generated.GeneratedX86RegLaneAux
 import KProgFormal.X86RegWrite
 
 namespace KProgFormal

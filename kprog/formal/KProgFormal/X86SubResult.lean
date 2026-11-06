@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86SbbResult
+import KProgFormal.Generated.GeneratedX86SbbResult
 import KProgFormal.X86SubFlags
 import KProgFormal.X86Width
 

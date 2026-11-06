@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86RegWrite
+import KProgFormal.Generated.GeneratedX86RegWrite
 import KProgFormal.TagErasure
 import KProgFormal.X86Width
 

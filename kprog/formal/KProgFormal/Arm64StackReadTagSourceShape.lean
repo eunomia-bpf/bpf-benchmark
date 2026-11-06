@@ -1,6 +1,6 @@
-import KProgFormal.GeneratedArm64StackReadTagSource
-import KProgFormal.GeneratedArm64StackTag
-import KProgFormal.GeneratedArm64StackWriteTagAction
+import KProgFormal.Generated.GeneratedArm64StackReadTagSource
+import KProgFormal.Generated.GeneratedArm64StackTag
+import KProgFormal.Generated.GeneratedArm64StackWriteTagAction
 
 namespace KProgFormal
 

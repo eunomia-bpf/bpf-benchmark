@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86MemAccess
+import KProgFormal.Generated.GeneratedX86MemAccess
 import KProgFormal.X86Width
 
 namespace KProgFormal

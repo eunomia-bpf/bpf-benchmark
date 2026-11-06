@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64Extrev
-import KProgFormal.GeneratedX86Bswap
+import KProgFormal.Generated.GeneratedArm64Extrev
+import KProgFormal.Generated.GeneratedX86Bswap
 
 /-!
 Byte reversal is the one cross-ISA operation here where both sides do the same

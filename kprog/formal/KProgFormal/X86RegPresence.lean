@@ -1,6 +1,6 @@
-import KProgFormal.GeneratedX86RegPresence
-import KProgFormal.GeneratedX86MemIndex
-import KProgFormal.GeneratedX86MemAux
+import KProgFormal.Generated.GeneratedX86RegPresence
+import KProgFormal.Generated.GeneratedX86MemIndex
+import KProgFormal.Generated.GeneratedX86MemAux
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

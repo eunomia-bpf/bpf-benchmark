@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedAbiLoad
-import KProgFormal.GeneratedPtrAdd
+import KProgFormal.Generated.GeneratedAbiLoad
+import KProgFormal.Generated.GeneratedPtrAdd
 
 namespace KProgFormal
 

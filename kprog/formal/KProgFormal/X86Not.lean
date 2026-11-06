@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Not
+import KProgFormal.Generated.GeneratedX86Not
 import KProgFormal.X86Width
 import KProgFormal.X86ControlFlow
 

@@ -1,7 +1,7 @@
-import KProgFormal.GeneratedX86Cmov
-import KProgFormal.GeneratedX86MemDispatch
-import KProgFormal.GeneratedX86Setcc
-import KProgFormal.GeneratedX86Store
+import KProgFormal.Generated.GeneratedX86Cmov
+import KProgFormal.Generated.GeneratedX86MemDispatch
+import KProgFormal.Generated.GeneratedX86Setcc
+import KProgFormal.Generated.GeneratedX86Store
 import KProgFormal.X86ControlFlow
 import KProgFormal.X86MemAccess
 import KProgFormal.X86MemDispatch

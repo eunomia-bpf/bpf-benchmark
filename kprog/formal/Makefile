@@ -2,929 +2,647 @@
 
 check:
 	install -d build
-	python3 check_macro_hygiene.py
-	python3 check_lean_claims.py
-	python3 check_helper_idents.py
-	python3 check_jcc_opcodes.py
-	python3 check_lookup_ambiguity.py
-	python3 check_oracle_composition.py
-	python3 check_dual_emit_coverage.py
-	python3 mutate_contracts.py --check
-	python3 check_dispatch_model.py
-	python3 generate_ptr_add_spec.py --check
-	python3 generate_abi_load_spec.py --check
-	python3 generate_arm64_width_spec.py --check
-	python3 generate_arm64_flags_spec.py --check
-	python3 generate_arm64_decode_spec.py --check
-	python3 generate_arm64_alu_result_spec.py --check
-	python3 generate_arm64_alu_handler_spec.py --check
-	python3 generate_arm64_alu_operand_spec.py --check
-	python3 generate_arm64_alu_operand_select_spec.py --check
-	python3 generate_arm64_flag_operand_spec.py --check
-	python3 generate_arm64_flag_handler_spec.py --check
-	python3 generate_arm64_logic_flag_handler_spec.py --check
-	python3 generate_arm64_ccmp_handler_spec.py --check
-	python3 generate_arm64_ccmp_decode_spec.py --check
-	python3 generate_arm64_dispatch_family_spec.py --check
-	python3 generate_arm64_dispatch_singleton_spec.py --check
-	python3 generate_arm64_imm_operand_spec.py --check
-	python3 generate_arm64_mod_spec.py --check
-	python3 generate_arm64_bitfield_spec.py --check
-	python3 generate_arm64_mul_spec.py --check
-	python3 generate_arm64_extrev_spec.py --check
-	python3 generate_arm64_csel_spec.py --check
-	python3 generate_arm64_csel_ptr_spec.py --check
-	python3 generate_arm64_movk_spec.py --check
-	python3 generate_arm64_shift_spec.py --check
-	python3 generate_arm64_reduction_spec.py --check
-	python3 generate_arm64_unary_spec.py --check
-	python3 generate_arm64_cneg_spec.py --check
-	python3 generate_arm64_orn_spec.py --check
-	python3 generate_arm64_adrp_spec.py --check
-	python3 generate_arm64_stlxr_spec.py --check
-	python3 generate_arm64_mov_spec.py --check
-	python3 generate_arm64_ldrsx_spec.py --check
-	python3 generate_arm64_ldrsx_op_spec.py --check
-	python3 generate_arm64_load_tag_spec.py --check
-	python3 generate_arm64_pair_load_tag_spec.py --check
-	python3 generate_arm64_mem_offset_spec.py --check
-	python3 generate_arm64_mem_index_spec.py --check
-	python3 generate_arm64_reg_presence_spec.py --check
-	python3 generate_arm64_reg_dispatch_spec.py --check
-	python3 generate_control_flow_trace_spec.py --check
-	python3 generate_arm64_fmov_spec.py --check
-	python3 generate_arm64_fmov_dest_spec.py --check
-	python3 generate_arm64_load_bytes_spec.py --check
-	python3 generate_arm64_store_bytes_spec.py --check
-	python3 generate_arm64_byte_lane_spec.py --check
-	python3 generate_arm64_mem_dispatch_spec.py --check
-	python3 generate_arm64_stack_tag_spec.py --check
-	python3 generate_arm64_stack_arm_spec.py --check
-	python3 generate_arm64_dq_mem_spec.py --check
-	python3 generate_arm64_pair_mem_spec.py --check
-	python3 generate_arm64_mem_prepost_spec.py --check
-	python3 generate_arm64_vreg_spec.py --check
-	python3 generate_arm64_stack_arena_spec.py --check
-	python3 generate_arm64_stack_index_spec.py --check
-	python3 generate_arm64_aux_spec.py --check
-	python3 generate_arm64_branch_spec.py --check
-	python3 generate_arm64_branch_emit_spec.py --check
-	python3 generate_arm64_cond_spec.py --check
-	python3 generate_arm64_cc_decode_spec.py --check
-	python3 generate_arm64_helper_idents_spec.py --check
-	python3 generate_arm64_mem_write_arm_spec.py --check
-	python3 generate_arm64_stack_write_lanes_spec.py --check
-	python3 generate_arm64_stack_write_tag_action_spec.py --check
-	python3 generate_arm64_stack_read_tag_source_spec.py --check
-	python3 generate_arm64_helper_arg_ptr_spec.py --check
-	python3 generate_arm64_mem_base_src_spec.py --check
-	python3 generate_arm64_mem_index_value_spec.py --check
-	python3 generate_arm64_dq_mem_extra_spec.py --check
-	python3 generate_arm64_vreg_field_spec.py --check
-	python3 generate_arm64_write_arm_spec.py --check
-	python3 generate_x86_cond_spec.py --check
-	python3 generate_x86_cc_decode_spec.py --check
-	python3 generate_x86_logic_flags_spec.py --check
-	python3 generate_x86_width_spec.py --check
-	python3 generate_x86_immediate_spec.py --check
-	python3 generate_x86_alu_decode_spec.py --check
-	python3 generate_x86_not_spec.py --check
-	python3 generate_x86_shift_count_spec.py --check
-	python3 generate_x86_stack_index_spec.py --check
-	python3 generate_x86_stack_arena_spec.py --check
-	python3 generate_x86_shift_result_spec.py --check
-	python3 generate_x86_alu_result_spec.py --check
-	python3 generate_x86_bswap_spec.py --check
-	python3 generate_x86_signed_spec.py --check
-	python3 generate_x86_popcount_spec.py --check
-	python3 generate_x86_bitops_spec.py --check
-	python3 generate_x86_doubleshift_spec.py --check
-	python3 generate_x86_shift_flags_spec.py --check
-	python3 generate_x86_reg_write_spec.py --check
-	python3 generate_x86_mem_offset_spec.py --check
-	python3 generate_x86_reg_read_spec.py --check
-	python3 generate_x86_reg_lane_aux_spec.py --check
-	python3 generate_x86_sub_flags_spec.py --check
-	python3 generate_x86_add_flags_spec.py --check
-	python3 generate_x86_sbb_result_spec.py --check
-	python3 generate_x86_sbb_flags_spec.py --check
-	python3 generate_x86_adc_spec.py --check
-	python3 generate_x86_imul_flags_spec.py --check
-	python3 generate_x86_mem_access_spec.py --check
-	python3 generate_x86_mem_dispatch_spec.py --check
-	python3 generate_x86_mov_load_spec.py --check
-	python3 generate_x86_store_spec.py --check
-	python3 generate_x86_setcc_spec.py --check
-	python3 generate_x86_setcc_mem_spec.py --check
-	python3 generate_x86_cmov_spec.py --check
-	python3 generate_x86_movbe_spec.py --check
-	python3 generate_x86_ptr_write_spec.py --check
-	python3 generate_x86_xmm0_spec.py --check
-	python3 generate_x86_branch_emit_spec.py --check
-	python3 generate_x86_callmem_spec.py --check
-	python3 generate_x86_pushpop_spec.py --check
-	python3 generate_x86_rep_movs_spec.py --check
-	python3 generate_x86_andn_spec.py --check
-	python3 generate_x86_bzhi_spec.py --check
-	python3 generate_x86_bt_spec.py --check
-	python3 generate_x86_cmpop_spec.py --check
-	python3 generate_x86_mem_aux_spec.py --check
-	python3 generate_x86_mem_index_spec.py --check
-	python3 generate_x86_reg_presence_spec.py --check
-	python3 generate_x86_reg_dispatch_spec.py --check
-	python3 generate_x86_helper_dispatch_spec.py --check
-	python3 generate_x86_xchg_spec.py --check
-	python3 generate_x86_div_spec.py --check
-	python3 generate_x86_doubleshift_arm_spec.py --check
-	python3 generate_x86_popcnt_flags_spec.py --check
-	python3 generate_x86_bzhi_flags_spec.py --check
-	python3 generate_x86_movx_shape_spec.py --check
-	python3 generate_x86_mov_reg_arm_spec.py --check
-	python3 generate_x86_stack_arm_spec.py --check
-	python3 generate_x86_write_width_arm_spec.py --check
-	python3 generate_x86_stack_write_lanes_spec.py --check
-	python3 generate_x86_mulx_arm_spec.py --check
-	python3 generate_x86_opcode_spec.py --check
-	python3 generate_x86_specialization_spec.py --check
-	python3 generate_x86_alu_flag_arm_spec.py --check
-	python3 generate_x86_dispatch_family_spec.py --check
-	python3 generate_x86_dispatch_singleton_spec.py --check
+	python3 tools/check_macro_hygiene.py
+	python3 tools/check_helper_idents.py
+	python3 tools/check_jcc_opcodes.py
+	python3 tools/check_lookup_ambiguity.py
+	python3 tools/check_oracle_composition.py
+	python3 tools/check_dual_emit_coverage.py
+	python3 tools/mutate_contracts.py --check
+	python3 tools/check_dispatch_model.py
+	python3 tools/generate_ptr_add_spec.py --check
+	python3 tools/generate_abi_load_spec.py --check
+	python3 tools/generate_arm64_width_spec.py --check
+	python3 tools/generate_arm64_flags_spec.py --check
+	python3 tools/generate_arm64_decode_spec.py --check
+	python3 tools/generate_arm64_alu_result_spec.py --check
+	python3 tools/generate_arm64_alu_handler_spec.py --check
+	python3 tools/generate_arm64_alu_operand_spec.py --check
+	python3 tools/generate_arm64_alu_operand_select_spec.py --check
+	python3 tools/generate_arm64_flag_operand_spec.py --check
+	python3 tools/generate_arm64_flag_handler_spec.py --check
+	python3 tools/generate_arm64_logic_flag_handler_spec.py --check
+	python3 tools/generate_arm64_ccmp_handler_spec.py --check
+	python3 tools/generate_arm64_ccmp_decode_spec.py --check
+	python3 tools/generate_arm64_dispatch_family_spec.py --check
+	python3 tools/generate_arm64_dispatch_singleton_spec.py --check
+	python3 tools/generate_arm64_imm_operand_spec.py --check
+	python3 tools/generate_arm64_mod_spec.py --check
+	python3 tools/generate_arm64_bitfield_spec.py --check
+	python3 tools/generate_arm64_mul_spec.py --check
+	python3 tools/generate_arm64_extrev_spec.py --check
+	python3 tools/generate_arm64_csel_spec.py --check
+	python3 tools/generate_arm64_csel_ptr_spec.py --check
+	python3 tools/generate_arm64_movk_spec.py --check
+	python3 tools/generate_arm64_shift_spec.py --check
+	python3 tools/generate_arm64_reduction_spec.py --check
+	python3 tools/generate_arm64_unary_spec.py --check
+	python3 tools/generate_arm64_cneg_spec.py --check
+	python3 tools/generate_arm64_orn_spec.py --check
+	python3 tools/generate_arm64_adrp_spec.py --check
+	python3 tools/generate_arm64_stlxr_spec.py --check
+	python3 tools/generate_arm64_mov_spec.py --check
+	python3 tools/generate_arm64_ldrsx_spec.py --check
+	python3 tools/generate_arm64_ldrsx_op_spec.py --check
+	python3 tools/generate_arm64_load_tag_spec.py --check
+	python3 tools/generate_arm64_pair_load_tag_spec.py --check
+	python3 tools/generate_arm64_mem_offset_spec.py --check
+	python3 tools/generate_arm64_mem_index_spec.py --check
+	python3 tools/generate_arm64_reg_presence_spec.py --check
+	python3 tools/generate_arm64_reg_dispatch_spec.py --check
+	python3 tools/generate_control_flow_trace_spec.py --check
+	python3 tools/generate_arm64_fmov_spec.py --check
+	python3 tools/generate_arm64_fmov_dest_spec.py --check
+	python3 tools/generate_arm64_load_bytes_spec.py --check
+	python3 tools/generate_arm64_store_bytes_spec.py --check
+	python3 tools/generate_arm64_byte_lane_spec.py --check
+	python3 tools/generate_arm64_mem_dispatch_spec.py --check
+	python3 tools/generate_arm64_stack_tag_spec.py --check
+	python3 tools/generate_arm64_stack_arm_spec.py --check
+	python3 tools/generate_arm64_dq_mem_spec.py --check
+	python3 tools/generate_arm64_pair_mem_spec.py --check
+	python3 tools/generate_arm64_mem_prepost_spec.py --check
+	python3 tools/generate_arm64_vreg_spec.py --check
+	python3 tools/generate_arm64_stack_arena_spec.py --check
+	python3 tools/generate_arm64_stack_index_spec.py --check
+	python3 tools/generate_arm64_aux_spec.py --check
+	python3 tools/generate_arm64_branch_spec.py --check
+	python3 tools/generate_arm64_branch_emit_spec.py --check
+	python3 tools/generate_arm64_cond_spec.py --check
+	python3 tools/generate_arm64_cc_decode_spec.py --check
+	python3 tools/generate_arm64_helper_idents_spec.py --check
+	python3 tools/generate_arm64_mem_write_arm_spec.py --check
+	python3 tools/generate_arm64_stack_write_lanes_spec.py --check
+	python3 tools/generate_arm64_stack_write_tag_action_spec.py --check
+	python3 tools/generate_arm64_stack_read_tag_source_spec.py --check
+	python3 tools/generate_arm64_helper_arg_ptr_spec.py --check
+	python3 tools/generate_arm64_mem_base_src_spec.py --check
+	python3 tools/generate_arm64_mem_index_value_spec.py --check
+	python3 tools/generate_arm64_dq_mem_extra_spec.py --check
+	python3 tools/generate_arm64_vreg_field_spec.py --check
+	python3 tools/generate_arm64_write_arm_spec.py --check
+	python3 tools/generate_x86_cond_spec.py --check
+	python3 tools/generate_x86_cc_decode_spec.py --check
+	python3 tools/generate_x86_logic_flags_spec.py --check
+	python3 tools/generate_x86_width_spec.py --check
+	python3 tools/generate_x86_immediate_spec.py --check
+	python3 tools/generate_x86_alu_decode_spec.py --check
+	python3 tools/generate_x86_not_spec.py --check
+	python3 tools/generate_x86_shift_count_spec.py --check
+	python3 tools/generate_x86_stack_index_spec.py --check
+	python3 tools/generate_x86_stack_arena_spec.py --check
+	python3 tools/generate_x86_shift_result_spec.py --check
+	python3 tools/generate_x86_alu_result_spec.py --check
+	python3 tools/generate_x86_bswap_spec.py --check
+	python3 tools/generate_x86_signed_spec.py --check
+	python3 tools/generate_x86_popcount_spec.py --check
+	python3 tools/generate_x86_bitops_spec.py --check
+	python3 tools/generate_x86_doubleshift_spec.py --check
+	python3 tools/generate_x86_shift_flags_spec.py --check
+	python3 tools/generate_x86_reg_write_spec.py --check
+	python3 tools/generate_x86_mem_offset_spec.py --check
+	python3 tools/generate_x86_reg_read_spec.py --check
+	python3 tools/generate_x86_reg_lane_aux_spec.py --check
+	python3 tools/generate_x86_sub_flags_spec.py --check
+	python3 tools/generate_x86_add_flags_spec.py --check
+	python3 tools/generate_x86_sbb_result_spec.py --check
+	python3 tools/generate_x86_sbb_flags_spec.py --check
+	python3 tools/generate_x86_adc_spec.py --check
+	python3 tools/generate_x86_imul_flags_spec.py --check
+	python3 tools/generate_x86_mem_access_spec.py --check
+	python3 tools/generate_x86_mem_dispatch_spec.py --check
+	python3 tools/generate_x86_mov_load_spec.py --check
+	python3 tools/generate_x86_store_spec.py --check
+	python3 tools/generate_x86_setcc_spec.py --check
+	python3 tools/generate_x86_setcc_mem_spec.py --check
+	python3 tools/generate_x86_cmov_spec.py --check
+	python3 tools/generate_x86_movbe_spec.py --check
+	python3 tools/generate_x86_ptr_write_spec.py --check
+	python3 tools/generate_x86_xmm0_spec.py --check
+	python3 tools/generate_x86_branch_emit_spec.py --check
+	python3 tools/generate_x86_callmem_spec.py --check
+	python3 tools/generate_x86_pushpop_spec.py --check
+	python3 tools/generate_x86_rep_movs_spec.py --check
+	python3 tools/generate_x86_andn_spec.py --check
+	python3 tools/generate_x86_bzhi_spec.py --check
+	python3 tools/generate_x86_bt_spec.py --check
+	python3 tools/generate_x86_cmpop_spec.py --check
+	python3 tools/generate_x86_mem_aux_spec.py --check
+	python3 tools/generate_x86_mem_index_spec.py --check
+	python3 tools/generate_x86_reg_presence_spec.py --check
+	python3 tools/generate_x86_reg_dispatch_spec.py --check
+	python3 tools/generate_x86_helper_dispatch_spec.py --check
+	python3 tools/generate_x86_xchg_spec.py --check
+	python3 tools/generate_x86_div_spec.py --check
+	python3 tools/generate_x86_doubleshift_arm_spec.py --check
+	python3 tools/generate_x86_popcnt_flags_spec.py --check
+	python3 tools/generate_x86_bzhi_flags_spec.py --check
+	python3 tools/generate_x86_movx_shape_spec.py --check
+	python3 tools/generate_x86_mov_reg_arm_spec.py --check
+	python3 tools/generate_x86_stack_arm_spec.py --check
+	python3 tools/generate_x86_write_width_arm_spec.py --check
+	python3 tools/generate_x86_stack_write_lanes_spec.py --check
+	python3 tools/generate_x86_mulx_arm_spec.py --check
+	python3 tools/generate_x86_opcode_spec.py --check
+	python3 tools/generate_x86_specialization_spec.py --check
+	python3 tools/generate_x86_alu_flag_arm_spec.py --check
+	python3 tools/generate_x86_dispatch_family_spec.py --check
+	python3 tools/generate_x86_dispatch_singleton_spec.py --check
 	lake build
-	python3 check_no_sorry.py --check
-	lake env lean KProgFormal/TagErasure.lean
-	lake env lean KProgFormal/Arm64ControlFlow.lean
-	lake env lean KProgFormal/Arm64Cond.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_cond_host.c -o build/test_arm64_cond_host
+	python3 tools/check_no_sorry.py --check
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_cond_host.c -o build/test_arm64_cond_host
 	./build/test_arm64_cond_host
-	lake env lean KProgFormal/X86ControlFlow.lean
-	lake env lean KProgFormal/GeneratedX86BranchEmit.lean
-	lake env lean KProgFormal/X86BranchEmit.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_branch_emit_host.c -o build/test_x86_branch_emit_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_branch_emit_host.c -o build/test_x86_branch_emit_host
 	./build/test_x86_branch_emit_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_branch_emit_route_host.c -o build/test_x86_branch_emit_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_branch_emit_route_host.c -o build/test_x86_branch_emit_route_host
 	./build/test_x86_branch_emit_route_host
-	lake env lean KProgFormal/X86LogicFlags.lean
-	lake env lean KProgFormal/GeneratedX86Width.lean
-	lake env lean KProgFormal/X86Width.lean
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf width_fallback_host.c -o build/width_fallback_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/width_fallback_host.c -o build/width_fallback_host
 	./build/width_fallback_host
-	lake env lean KProgFormal/X86Immediate.lean
-	lake env lean KProgFormal/X86SubFlags.lean
-	lake env lean KProgFormal/X86AddFlags.lean
-	lake env lean KProgFormal/X86SbbResult.lean
-	lake env lean KProgFormal/X86SbbFlags.lean
-	lake env lean KProgFormal/X86Adc.lean
-	lake env lean KProgFormal/X86AddResult.lean
-	lake env lean KProgFormal/X86SubResult.lean
-	lake env lean KProgFormal/X86AluDecode.lean
-	lake env lean KProgFormal/GeneratedX86AluResult.lean
-	lake env lean KProgFormal/X86AluResultSpec.lean
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_alu_result_arm_host.c -o build/test_x86_alu_result_arm_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 oracles/test_x86_alu_result_arm_host.c -o build/test_x86_alu_result_arm_host
 	./build/test_x86_alu_result_arm_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_alu_result_route_host.c -o build/test_x86_alu_result_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_alu_result_route_host.c -o build/test_x86_alu_result_route_host
 	./build/test_x86_alu_result_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_alu_mem_result_route_host.c -o build/test_x86_alu_mem_result_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_alu_mem_result_route_host.c -o build/test_x86_alu_mem_result_route_host
 	./build/test_x86_alu_mem_result_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_shiftx_rorx_route_host.c -o build/test_x86_shiftx_rorx_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_shiftx_rorx_route_host.c -o build/test_x86_shiftx_rorx_route_host
 	./build/test_x86_shiftx_rorx_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_movx_route_host.c -o build/test_x86_movx_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_movx_route_host.c -o build/test_x86_movx_route_host
 	./build/test_x86_movx_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_imul_route_host.c -o build/test_x86_imul_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_imul_route_host.c -o build/test_x86_imul_route_host
 	./build/test_x86_imul_route_host
-	$(CC) -Wall -Wextra -O2 -I. test_imul_flags_host.c -o build/test_imul_flags_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_imul_flags_host.c -o build/test_imul_flags_host
 	./build/test_imul_flags_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_lea_route_host.c -o build/test_x86_lea_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_lea_route_host.c -o build/test_x86_lea_route_host
 	./build/test_x86_lea_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_mov_route_host.c -o build/test_x86_mov_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_mov_route_host.c -o build/test_x86_mov_route_host
 	./build/test_x86_mov_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_bswap_route_host.c -o build/test_x86_bswap_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_bswap_route_host.c -o build/test_x86_bswap_route_host
 	./build/test_x86_bswap_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_alu_decode_host.c -o build/test_x86_alu_decode_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 oracles/test_x86_alu_decode_host.c -o build/test_x86_alu_decode_host
 	./build/test_x86_alu_decode_host
-	lake env lean KProgFormal/GeneratedX86Opcode.lean
-	lake env lean KProgFormal/X86Opcode.lean
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_opcode_host.c -o build/test_x86_opcode_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 oracles/test_x86_opcode_host.c -o build/test_x86_opcode_host
 	./build/test_x86_opcode_host
-	lake env lean KProgFormal/GeneratedX86Specialization.lean
-	lake env lean KProgFormal/X86Specialization.lean
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_specialization_chain_host.c -o build/test_x86_specialization_chain_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 oracles/test_x86_specialization_chain_host.c -o build/test_x86_specialization_chain_host
 	./build/test_x86_specialization_chain_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_specialization_host.c -o build/test_x86_specialization_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_specialization_host.c -o build/test_x86_specialization_host
 	./build/test_x86_specialization_host
-	lake env lean KProgFormal/X86IncDec.lean
-	lake env lean KProgFormal/X86Not.lean
-	lake env lean KProgFormal/X86ShiftCount.lean
-	lake env lean KProgFormal/GeneratedX86StackIndex.lean
-	lake env lean KProgFormal/X86StackIndex.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_stack_index_host.c -o build/test_x86_stack_index_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_stack_index_host.c -o build/test_x86_stack_index_host
 	./build/test_x86_stack_index_host
-	lake env lean KProgFormal/GeneratedX86StackArena.lean
-	lake env lean KProgFormal/X86StackArena.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_stack_arena_host.c -o build/test_x86_stack_arena_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_stack_arena_host.c -o build/test_x86_stack_arena_host
 	./build/test_x86_stack_arena_host
-	lake env lean KProgFormal/X86ShiftResult.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_ror_result_host.c -o build/test_x86_ror_result_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_ror_result_host.c -o build/test_x86_ror_result_host
 	./build/test_x86_ror_result_host
-	lake env lean KProgFormal/GeneratedX86Bswap.lean
-	lake env lean KProgFormal/X86Bswap.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_bswap_host.c -o build/test_x86_bswap_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_bswap_host.c -o build/test_x86_bswap_host
 	./build/test_x86_bswap_host
-	lake env lean KProgFormal/GeneratedX86Signed.lean
-	lake env lean KProgFormal/X86Signed.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_signed_host.c -o build/test_x86_signed_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_signed_host.c -o build/test_x86_signed_host
 	./build/test_x86_signed_host
-	lake env lean KProgFormal/GeneratedX86Popcount.lean
-	lake env lean KProgFormal/X86Popcount.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_popcount_host.c -o build/test_x86_popcount_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_popcount_host.c -o build/test_x86_popcount_host
 	./build/test_x86_popcount_host
-	lake env lean KProgFormal/GeneratedX86Bitops.lean
-	lake env lean KProgFormal/X86Bitops.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_bitops_host.c -o build/test_x86_bitops_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_bitops_host.c -o build/test_x86_bitops_host
 	./build/test_x86_bitops_host
-	lake env lean KProgFormal/GeneratedX86DoubleShift.lean
-	lake env lean KProgFormal/X86DoubleShift.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_doubleshift_host.c -o build/test_x86_doubleshift_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_doubleshift_host.c -o build/test_x86_doubleshift_host
 	./build/test_x86_doubleshift_host
-	lake env lean KProgFormal/GeneratedX86ShiftFlags.lean
-	lake env lean KProgFormal/X86ShiftFlags.lean
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_shift_flags_host.c -o build/test_x86_shift_flags_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_shift_flags_host.c -o build/test_x86_shift_flags_host
 	./build/test_x86_shift_flags_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_shift_flags_route_host.c -o build/test_x86_shift_flags_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_shift_flags_route_host.c -o build/test_x86_shift_flags_route_host
 	./build/test_x86_shift_flags_route_host
-	lake env lean KProgFormal/X86ImulFlags.lean
-	lake env lean KProgFormal/X86RegWrite.lean
-	lake env lean KProgFormal/X86AluWriteback.lean
-	lake env lean KProgFormal/X86RegRead.lean
-	lake env lean KProgFormal/X86RegLaneAux.lean
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_reg_lane_aux_host.c -o build/test_x86_reg_lane_aux_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 oracles/test_x86_reg_lane_aux_host.c -o build/test_x86_reg_lane_aux_host
 	./build/test_x86_reg_lane_aux_host
-	lake env lean KProgFormal/X86MemAux.lean
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 test_x86_mem_aux_host.c -o build/test_x86_mem_aux_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 oracles/test_x86_mem_aux_host.c -o build/test_x86_mem_aux_host
 	./build/test_x86_mem_aux_host
-	lake env lean KProgFormal/X86UnaryWriteback.lean
-	lake env lean KProgFormal/X86MemAccess.lean
-	$(CC) -Wall -Wextra -O2 -I. test_mem_access_host.c -o build/test_mem_access_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_mem_access_host.c -o build/test_mem_access_host
 	./build/test_mem_access_host
-	lake env lean KProgFormal/X86MemAluHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mem_alu_handler_host.c -o build/test_x86_mem_alu_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mem_alu_handler_host.c -o build/test_x86_mem_alu_handler_host
 	./build/test_x86_mem_alu_handler_host
-	lake env lean KProgFormal/X86MemStoreAluHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mem_store_alu_handler_host.c -o build/test_x86_mem_store_alu_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mem_store_alu_handler_host.c -o build/test_x86_mem_store_alu_handler_host
 	./build/test_x86_mem_store_alu_handler_host
-	lake env lean KProgFormal/X86MemUnaryHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mem_unary_handler_host.c -o build/test_x86_mem_unary_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mem_unary_handler_host.c -o build/test_x86_mem_unary_handler_host
 	./build/test_x86_mem_unary_handler_host
-	lake env lean KProgFormal/X86MemLogicHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mem_logic_handler_host.c -o build/test_x86_mem_logic_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mem_logic_handler_host.c -o build/test_x86_mem_logic_handler_host
 	./build/test_x86_mem_logic_handler_host
-	lake env lean KProgFormal/X86MemShiftHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mem_shift_handler_host.c -o build/test_x86_mem_shift_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mem_shift_handler_host.c -o build/test_x86_mem_shift_handler_host
 	./build/test_x86_mem_shift_handler_host
-	lake env lean KProgFormal/X86MemBitHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mem_bit_handler_host.c -o build/test_x86_mem_bit_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mem_bit_handler_host.c -o build/test_x86_mem_bit_handler_host
 	./build/test_x86_mem_bit_handler_host
-	lake env lean KProgFormal/X86MemImulHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mem_imul_handler_host.c -o build/test_x86_mem_imul_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mem_imul_handler_host.c -o build/test_x86_mem_imul_handler_host
 	./build/test_x86_mem_imul_handler_host
-	lake env lean KProgFormal/X86MemCompareHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mem_compare_handler_host.c -o build/test_x86_mem_compare_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mem_compare_handler_host.c -o build/test_x86_mem_compare_handler_host
 	./build/test_x86_mem_compare_handler_host
-	lake env lean KProgFormal/X86MulxHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mulx_handler_host.c -o build/test_x86_mulx_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mulx_handler_host.c -o build/test_x86_mulx_handler_host
 	./build/test_x86_mulx_handler_host
-	lake env lean KProgFormal/X86ImulRegImmHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_imul_reg_imm_handler_host.c -o build/test_x86_imul_reg_imm_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_imul_reg_imm_handler_host.c -o build/test_x86_imul_reg_imm_handler_host
 	./build/test_x86_imul_reg_imm_handler_host
-	lake env lean KProgFormal/GeneratedX86MemOffset.lean
-	lake env lean KProgFormal/X86MemOffset.lean
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_mem_offset_route_host.c -o build/test_x86_mem_offset_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_mem_offset_route_host.c -o build/test_x86_mem_offset_route_host
 	./build/test_x86_mem_offset_route_host
-	lake env lean KProgFormal/GeneratedX86MemIndex.lean
-	lake env lean KProgFormal/X86MemIndex.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mem_index_host.c -o build/test_x86_mem_index_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mem_index_host.c -o build/test_x86_mem_index_host
 	./build/test_x86_mem_index_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_mem_index_route_host.c -o build/test_x86_mem_index_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_mem_index_route_host.c -o build/test_x86_mem_index_route_host
 	./build/test_x86_mem_index_route_host
-	lake env lean KProgFormal/GeneratedX86RegPresence.lean
-	lake env lean KProgFormal/X86RegPresence.lean
-	lake env lean KProgFormal/GeneratedX86RegDispatch.lean
-	lake env lean KProgFormal/X86RegDispatch.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_reg_dispatch_host.c -o build/test_x86_reg_dispatch_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_reg_dispatch_host.c -o build/test_x86_reg_dispatch_host
 	./build/test_x86_reg_dispatch_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_reg_dispatch_route_host.c -o build/test_x86_reg_dispatch_route_host
-	lake env lean KProgFormal/GeneratedX86HelperDispatch.lean
-	lake env lean KProgFormal/X86HelperDispatch.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_helper_dispatch_host.c -o build/test_x86_helper_dispatch_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_reg_dispatch_route_host.c -o build/test_x86_reg_dispatch_route_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_helper_dispatch_host.c -o build/test_x86_helper_dispatch_host
 	./build/test_x86_helper_dispatch_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_helper_dispatch_route_host.c -o build/test_x86_helper_dispatch_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_helper_dispatch_route_host.c -o build/test_x86_helper_dispatch_route_host
 	./build/test_x86_helper_dispatch_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/x86_route_host.c -o build/x86_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/x86_route_host.c -o build/x86_route_host
 	./build/x86_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/btmem_index_route_host.c -o build/btmem_index_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/btmem_index_route_host.c -o build/btmem_index_route_host
 	./build/btmem_index_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/value_route_host.c -o build/value_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/value_route_host.c -o build/value_route_host
 	./build/value_route_host
-	lake env lean KProgFormal/GeneratedX86Xchg.lean
-	lake env lean KProgFormal/X86XchgHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_xchg_host.c -o build/test_x86_xchg_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_xchg_host.c -o build/test_x86_xchg_host
 	./build/test_x86_xchg_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_xchg_route_host.c -o build/test_x86_xchg_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_xchg_route_host.c -o build/test_x86_xchg_route_host
 	./build/test_x86_xchg_route_host
-	lake env lean KProgFormal/GeneratedX86MulxArm.lean
-	lake env lean KProgFormal/X86MulxArmHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mulx_arm_host.c -o build/test_x86_mulx_arm_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mulx_arm_host.c -o build/test_x86_mulx_arm_host
 	./build/test_x86_mulx_arm_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_mulx_arm_route_host.c -o build/test_x86_mulx_arm_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_mulx_arm_route_host.c -o build/test_x86_mulx_arm_route_host
 	./build/test_x86_mulx_arm_route_host
-	lake env lean KProgFormal/GeneratedX86Div.lean
-	lake env lean KProgFormal/X86DivHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_div_host.c -o build/test_x86_div_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_div_host.c -o build/test_x86_div_host
 	./build/test_x86_div_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_div_route_host.c -o build/test_x86_div_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_div_route_host.c -o build/test_x86_div_route_host
 	./build/test_x86_div_route_host
-	lake env lean KProgFormal/GeneratedX86DoubleShiftArm.lean
-	lake env lean KProgFormal/X86DoubleShiftArmHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_doubleshift_arm_host.c -o build/test_x86_doubleshift_arm_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_doubleshift_arm_host.c -o build/test_x86_doubleshift_arm_host
 	./build/test_x86_doubleshift_arm_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_doubleshift_arm_route_host.c -o build/test_x86_doubleshift_arm_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_doubleshift_arm_route_host.c -o build/test_x86_doubleshift_arm_route_host
 	./build/test_x86_doubleshift_arm_route_host
-	lake env lean KProgFormal/GeneratedX86PopcntFlags.lean
-	lake env lean KProgFormal/X86PopcntFlags.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_popcnt_flags_host.c -o build/test_x86_popcnt_flags_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_popcnt_flags_host.c -o build/test_x86_popcnt_flags_host
 	./build/test_x86_popcnt_flags_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_popcnt_flags_route_host.c -o build/test_x86_popcnt_flags_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_popcnt_flags_route_host.c -o build/test_x86_popcnt_flags_route_host
 	./build/test_x86_popcnt_flags_route_host
-	lake env lean KProgFormal/GeneratedX86BzhiFlags.lean
-	lake env lean KProgFormal/X86BzhiFlags.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_bzhi_flags_host.c -o build/test_x86_bzhi_flags_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_bzhi_flags_host.c -o build/test_x86_bzhi_flags_host
 	./build/test_x86_bzhi_flags_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_bzhi_flags_route_host.c -o build/test_x86_bzhi_flags_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_bzhi_flags_route_host.c -o build/test_x86_bzhi_flags_route_host
 	./build/test_x86_bzhi_flags_route_host
-	lake env lean KProgFormal/GeneratedX86MovxShape.lean
-	lake env lean KProgFormal/X86MovxShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_movx_shape_host.c -o build/test_x86_movx_shape_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_movx_shape_host.c -o build/test_x86_movx_shape_host
 	./build/test_x86_movx_shape_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_movx_shape_route_host.c -o build/test_x86_movx_shape_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_movx_shape_route_host.c -o build/test_x86_movx_shape_route_host
 	./build/test_x86_movx_shape_route_host
-	lake env lean KProgFormal/GeneratedX86MovRegArm.lean
-	lake env lean KProgFormal/X86MovRegShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mov_reg_arm_host.c -o build/test_x86_mov_reg_arm_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mov_reg_arm_host.c -o build/test_x86_mov_reg_arm_host
 	./build/test_x86_mov_reg_arm_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_mov_reg_arm_route_host.c -o build/test_x86_mov_reg_arm_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_mov_reg_arm_route_host.c -o build/test_x86_mov_reg_arm_route_host
 	./build/test_x86_mov_reg_arm_route_host
-	lake env lean KProgFormal/GeneratedX86StackArm.lean
-	lake env lean KProgFormal/X86StackArmShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_stack_arm_host.c -o build/test_x86_stack_arm_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_stack_arm_host.c -o build/test_x86_stack_arm_host
 	./build/test_x86_stack_arm_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_stack_arm_route_host.c -o build/test_x86_stack_arm_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_stack_arm_route_host.c -o build/test_x86_stack_arm_route_host
 	./build/test_x86_stack_arm_route_host
-	lake env lean KProgFormal/GeneratedX86WriteWidthArm.lean
-	lake env lean KProgFormal/X86WriteWidthArmShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_write_width_arm_host.c -o build/test_x86_write_width_arm_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_write_width_arm_host.c -o build/test_x86_write_width_arm_host
 	./build/test_x86_write_width_arm_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_write_width_arm_route_host.c -o build/test_x86_write_width_arm_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_write_width_arm_route_host.c -o build/test_x86_write_width_arm_route_host
 	./build/test_x86_write_width_arm_route_host
-	lake env lean KProgFormal/GeneratedX86StackWriteLanes.lean
-	lake env lean KProgFormal/X86StackWriteLanesShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_stack_write_lanes_host.c -o build/test_x86_stack_write_lanes_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_stack_write_lanes_host.c -o build/test_x86_stack_write_lanes_host
 	./build/test_x86_stack_write_lanes_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_stack_write_lanes_route_host.c -o build/test_x86_stack_write_lanes_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_stack_write_lanes_route_host.c -o build/test_x86_stack_write_lanes_route_host
 	./build/test_x86_stack_write_lanes_route_host
-	lake env lean KProgFormal/GeneratedX86AluFlagArm.lean
-	lake env lean KProgFormal/X86AluFlagArmShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_alu_flag_arm_host.c -o build/test_x86_alu_flag_arm_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_alu_flag_arm_host.c -o build/test_x86_alu_flag_arm_host
 	./build/test_x86_alu_flag_arm_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_alu_flag_arm_route_host.c -o build/test_x86_alu_flag_arm_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_alu_flag_arm_route_host.c -o build/test_x86_alu_flag_arm_route_host
 	./build/test_x86_alu_flag_arm_route_host
-	lake env lean KProgFormal/GeneratedX86DispatchFamily.lean
-	lake env lean KProgFormal/X86DispatchFamily.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_dispatch_family_host.c -o build/test_x86_dispatch_family_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_dispatch_family_host.c -o build/test_x86_dispatch_family_host
 	./build/test_x86_dispatch_family_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_dispatch_family_route_host.c -o build/test_x86_dispatch_family_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_dispatch_family_route_host.c -o build/test_x86_dispatch_family_route_host
 	./build/test_x86_dispatch_family_route_host
-	lake env lean KProgFormal/GeneratedX86DispatchSingleton.lean
-	lake env lean KProgFormal/X86DispatchSingleton.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_dispatch_singleton_host.c -o build/test_x86_dispatch_singleton_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_dispatch_singleton_host.c -o build/test_x86_dispatch_singleton_host
 	./build/test_x86_dispatch_singleton_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_dispatch_singleton_route_host.c -o build/test_x86_dispatch_singleton_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_dispatch_singleton_route_host.c -o build/test_x86_dispatch_singleton_route_host
 	./build/test_x86_dispatch_singleton_route_host
 	./build/test_x86_reg_dispatch_route_host
-	$(CC) -Wall -Wextra -O2 -I. test_x86_reg_presence_host.c -o build/test_x86_reg_presence_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_reg_presence_host.c -o build/test_x86_reg_presence_host
 	./build/test_x86_reg_presence_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_reg_presence_route_host.c -o build/test_x86_reg_presence_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_reg_presence_route_host.c -o build/test_x86_reg_presence_route_host
 	./build/test_x86_reg_presence_route_host
-	$(CC) -Wall -Wextra -O2 -I. test_x86_width_effective_host.c -o build/test_x86_width_effective_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_width_effective_host.c -o build/test_x86_width_effective_host
 	./build/test_x86_width_effective_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_width_effective_route_host.c -o build/test_x86_width_effective_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_width_effective_route_host.c -o build/test_x86_width_effective_route_host
 	./build/test_x86_width_effective_route_host
-	lake env lean KProgFormal/X86LeaHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_lea_handler_host.c -o build/test_x86_lea_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_lea_handler_host.c -o build/test_x86_lea_handler_host
 	./build/test_x86_lea_handler_host
-	lake env lean KProgFormal/X86MovHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mov_handler_host.c -o build/test_x86_mov_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mov_handler_host.c -o build/test_x86_mov_handler_host
 	./build/test_x86_mov_handler_host
-	lake env lean KProgFormal/X86MovxRegHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_movx_reg_host.c -o build/test_x86_movx_reg_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_movx_reg_host.c -o build/test_x86_movx_reg_host
 	./build/test_x86_movx_reg_host
-	lake env lean KProgFormal/GeneratedX86MemDispatch.lean
-	lake env lean KProgFormal/X86MemDispatch.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mem_read_dispatch_host.c -o build/test_x86_mem_read_dispatch_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mem_read_dispatch_host.c -o build/test_x86_mem_read_dispatch_host
 	./build/test_x86_mem_read_dispatch_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_mem_dispatch_route_host.c -o build/test_x86_mem_dispatch_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_mem_dispatch_route_host.c -o build/test_x86_mem_dispatch_route_host
 	./build/test_x86_mem_dispatch_route_host
-	lake env lean KProgFormal/GeneratedX86MovLoad.lean
-	lake env lean KProgFormal/X86MovLoadHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mov_load_host.c -o build/test_x86_mov_load_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mov_load_host.c -o build/test_x86_mov_load_host
 	./build/test_x86_mov_load_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_mov_load_route_host.c -o build/test_x86_mov_load_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_mov_load_route_host.c -o build/test_x86_mov_load_route_host
 	./build/test_x86_mov_load_route_host
-	lake env lean KProgFormal/GeneratedX86Store.lean
-	lake env lean KProgFormal/X86StoreHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_store_host.c -o build/test_x86_store_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_store_host.c -o build/test_x86_store_host
 	./build/test_x86_store_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_store_route_host.c -o build/test_x86_store_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_store_route_host.c -o build/test_x86_store_route_host
 	./build/test_x86_store_route_host
-	lake env lean KProgFormal/GeneratedX86Setcc.lean
-	lake env lean KProgFormal/X86SetccHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_setcc_host.c -o build/test_x86_setcc_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_setcc_host.c -o build/test_x86_setcc_host
 	./build/test_x86_setcc_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_setcc_route_host.c -o build/test_x86_setcc_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_setcc_route_host.c -o build/test_x86_setcc_route_host
 	./build/test_x86_setcc_route_host
-	lake env lean KProgFormal/GeneratedX86CcDecode.lean
-	lake env lean KProgFormal/X86CcDecode.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_cc_decode_host.c -o build/test_x86_cc_decode_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_cc_decode_host.c -o build/test_x86_cc_decode_host
 	./build/test_x86_cc_decode_host
-	lake env lean KProgFormal/GeneratedArm64CcDecode.lean
-	lake env lean KProgFormal/Arm64CcDecode.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_cc_decode_host.c -o build/test_arm64_cc_decode_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_cc_decode_host.c -o build/test_arm64_cc_decode_host
 	./build/test_arm64_cc_decode_host
-	lake build KProgFormal.GeneratedArm64HelperIdents
-	lake env lean KProgFormal/Arm64HelperIdents.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_helper_idents_host.c -o build/test_arm64_helper_idents_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_helper_idents_host.c -o build/test_arm64_helper_idents_host
 	./build/test_arm64_helper_idents_host
-	lake env lean KProgFormal/GeneratedX86SetccMem.lean
-	lake env lean KProgFormal/X86SetccMemHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_setcc_mem_host.c -o build/test_x86_setcc_mem_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_setcc_mem_host.c -o build/test_x86_setcc_mem_host
 	./build/test_x86_setcc_mem_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_setcc_mem_route_host.c -o build/test_x86_setcc_mem_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_setcc_mem_route_host.c -o build/test_x86_setcc_mem_route_host
 	./build/test_x86_setcc_mem_route_host
-	lake env lean KProgFormal/GeneratedX86Cmov.lean
-	lake env lean KProgFormal/X86CmovHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_cmov_host.c -o build/test_x86_cmov_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_cmov_host.c -o build/test_x86_cmov_host
 	./build/test_x86_cmov_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/cmov_step_route_host.c -o build/cmov_step_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/cmov_step_route_host.c -o build/cmov_step_route_host
 	./build/cmov_step_route_host
-	lake env lean KProgFormal/GeneratedX86Movbe.lean
-	lake env lean KProgFormal/X86MovbeHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_movbe_host.c -o build/test_x86_movbe_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_movbe_host.c -o build/test_x86_movbe_host
 	./build/test_x86_movbe_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_movbe_route_host.c -o build/test_x86_movbe_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_movbe_route_host.c -o build/test_x86_movbe_route_host
 	./build/test_x86_movbe_route_host
-	lake env lean KProgFormal/GeneratedX86PtrWrite.lean
-	lake env lean KProgFormal/X86PtrWriteHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_mov_load_map_ptr_host.c -o build/test_x86_mov_load_map_ptr_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_mov_load_map_ptr_host.c -o build/test_x86_mov_load_map_ptr_host
 	./build/test_x86_mov_load_map_ptr_host
-	lake env lean KProgFormal/GeneratedX86Xmm0.lean
-	lake env lean KProgFormal/X86Xmm0Handler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_xmm0_host.c -o build/test_x86_xmm0_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_xmm0_host.c -o build/test_x86_xmm0_host
 	./build/test_x86_xmm0_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_xmm0_route_host.c -o build/test_x86_xmm0_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_xmm0_route_host.c -o build/test_x86_xmm0_route_host
 	./build/test_x86_xmm0_route_host
-	lake env lean KProgFormal/GeneratedX86CallMem.lean
-	lake env lean KProgFormal/X86CallMemHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_callmem_host.c -o build/test_x86_callmem_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_callmem_host.c -o build/test_x86_callmem_host
 	./build/test_x86_callmem_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_callmem_route_host.c -o build/test_x86_callmem_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_callmem_route_host.c -o build/test_x86_callmem_route_host
 	./build/test_x86_callmem_route_host
-	lake env lean KProgFormal/GeneratedX86PushPop.lean
-	lake env lean KProgFormal/X86PushPopHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_pushpop_host.c -o build/test_x86_pushpop_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_pushpop_host.c -o build/test_x86_pushpop_host
 	./build/test_x86_pushpop_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_pushpop_route_host.c -o build/test_x86_pushpop_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_pushpop_route_host.c -o build/test_x86_pushpop_route_host
 	./build/test_x86_pushpop_route_host
-	lake env lean KProgFormal/GeneratedX86RepMovs.lean
-	lake env lean KProgFormal/X86RepMovsHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_rep_movs_host.c -o build/test_x86_rep_movs_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_rep_movs_host.c -o build/test_x86_rep_movs_host
 	./build/test_x86_rep_movs_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_rep_movs_route_host.c -o build/test_x86_rep_movs_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_rep_movs_route_host.c -o build/test_x86_rep_movs_route_host
 	./build/test_x86_rep_movs_route_host
-	lake env lean KProgFormal/GeneratedX86Andn.lean
-	lake env lean KProgFormal/X86AndnHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_andn_host.c -o build/test_x86_andn_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_andn_host.c -o build/test_x86_andn_host
 	./build/test_x86_andn_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_andn_route_host.c -o build/test_x86_andn_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_andn_route_host.c -o build/test_x86_andn_route_host
 	./build/test_x86_andn_route_host
-	lake env lean KProgFormal/GeneratedX86Bzhi.lean
-	lake env lean KProgFormal/X86BzhiHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_bzhi_host.c -o build/test_x86_bzhi_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_bzhi_host.c -o build/test_x86_bzhi_host
 	./build/test_x86_bzhi_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_bzhi_route_host.c -o build/test_x86_bzhi_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_bzhi_route_host.c -o build/test_x86_bzhi_route_host
 	./build/test_x86_bzhi_route_host
-	lake env lean KProgFormal/GeneratedX86Bt.lean
-	lake env lean KProgFormal/X86BtHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_bt_host.c -o build/test_x86_bt_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_bt_host.c -o build/test_x86_bt_host
 	./build/test_x86_bt_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_bt_route_host.c -o build/test_x86_bt_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_bt_route_host.c -o build/test_x86_bt_route_host
 	./build/test_x86_bt_route_host
-	lake env lean KProgFormal/GeneratedX86CmpOp.lean
-	lake env lean KProgFormal/X86CmpOpHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_x86_cmpop_host.c -o build/test_x86_cmpop_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_x86_cmpop_host.c -o build/test_x86_cmpop_host
 	./build/test_x86_cmpop_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_cmpop_route_host.c -o build/test_x86_cmpop_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_cmpop_route_host.c -o build/test_x86_cmpop_route_host
 	./build/test_x86_cmpop_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_cmp_mem_route_host.c -o build/test_x86_cmp_mem_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_cmp_mem_route_host.c -o build/test_x86_cmp_mem_route_host
 	./build/test_x86_cmp_mem_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_cmov_route_host.c -o build/test_x86_cmov_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_cmov_route_host.c -o build/test_x86_cmov_route_host
 	./build/test_x86_cmov_route_host
-	lake env lean KProgFormal/GeneratedArm64Width.lean
-	lake env lean KProgFormal/Arm64Width.lean
-	lake env lean KProgFormal/CrossIsaWidth.lean
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf cross_isa_tag_host.c -o build/cross_isa_tag_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/cross_isa_tag_host.c -o build/cross_isa_tag_host
 	./build/cross_isa_tag_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf cross_isa_differential_host.c -o build/cross_isa_differential_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/cross_isa_differential_host.c -o build/cross_isa_differential_host
 	./build/cross_isa_differential_host
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_width_host.c -o build/test_arm64_width_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_width_host.c -o build/test_arm64_width_host
 	./build/test_arm64_width_host
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_width_effective_host.c -o build/test_arm64_width_effective_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_width_effective_host.c -o build/test_arm64_width_effective_host
 	./build/test_arm64_width_effective_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_width_effective_route_host.c -o build/test_arm64_width_effective_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_width_effective_route_host.c -o build/test_arm64_width_effective_route_host
 	./build/test_arm64_width_effective_route_host
-	lake env lean KProgFormal/Arm64Flags.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_flags_host.c -o build/test_arm64_flags_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_flags_host.c -o build/test_arm64_flags_host
 	./build/test_arm64_flags_host
-	lake env lean KProgFormal/Arm64AluResult.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_alu_result_host.c -o build/test_arm64_alu_result_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_alu_result_host.c -o build/test_arm64_alu_result_host
 	./build/test_arm64_alu_result_host
-	lake env lean KProgFormal/GeneratedArm64AluHandler.lean
-	lake env lean KProgFormal/Arm64AluHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_alu_handler_host.c -o build/test_arm64_alu_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_alu_handler_host.c -o build/test_arm64_alu_handler_host
 	./build/test_arm64_alu_handler_host
-	lake env lean KProgFormal/GeneratedArm64AluOperand.lean
-	lake env lean KProgFormal/Arm64AluOperandHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_alu_operand_host.c -o build/test_arm64_alu_operand_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_alu_operand_host.c -o build/test_arm64_alu_operand_host
 	./build/test_arm64_alu_operand_host
-	lake env lean KProgFormal/GeneratedArm64FlagOperand.lean
-	lake env lean KProgFormal/Arm64FlagOperand.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_flag_operand_host.c -o build/test_arm64_flag_operand_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_flag_operand_host.c -o build/test_arm64_flag_operand_host
 	./build/test_arm64_flag_operand_host
-	lake env lean KProgFormal/GeneratedArm64ImmOperand.lean
-	lake env lean KProgFormal/Arm64ImmOperand.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_imm_operand_host.c -o build/test_arm64_imm_operand_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_imm_operand_host.c -o build/test_arm64_imm_operand_host
 	./build/test_arm64_imm_operand_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_imm_operand_route_host.c -o build/test_arm64_imm_operand_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_imm_operand_route_host.c -o build/test_arm64_imm_operand_route_host
 	./build/test_arm64_imm_operand_route_host
-	lake env lean KProgFormal/GeneratedArm64AluOperandSelect.lean
-	lake env lean KProgFormal/Arm64AluOperandSelect.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_alu_operand_select_host.c -o build/test_arm64_alu_operand_select_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_alu_operand_select_host.c -o build/test_arm64_alu_operand_select_host
 	./build/test_arm64_alu_operand_select_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_alu_operand_select_route_host.c -o build/test_arm64_alu_operand_select_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_alu_operand_select_route_host.c -o build/test_arm64_alu_operand_select_route_host
 	./build/test_arm64_alu_operand_select_route_host
-	lake env lean KProgFormal/GeneratedArm64FlagHandler.lean
-	lake env lean KProgFormal/Arm64FlagHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_flag_handler_host.c -o build/test_arm64_flag_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_flag_handler_host.c -o build/test_arm64_flag_handler_host
 	./build/test_arm64_flag_handler_host
-	lake env lean KProgFormal/GeneratedArm64LogicFlagHandler.lean
-	lake env lean KProgFormal/Arm64LogicFlagHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_logic_flag_handler_host.c -o build/test_arm64_logic_flag_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_logic_flag_handler_host.c -o build/test_arm64_logic_flag_handler_host
 	./build/test_arm64_logic_flag_handler_host
-	lake env lean KProgFormal/GeneratedArm64CcmpHandler.lean
-	lake env lean KProgFormal/Arm64CcmpHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_ccmp_handler_host.c -o build/test_arm64_ccmp_handler_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_ccmp_handler_host.c -o build/test_arm64_ccmp_handler_host
 	./build/test_arm64_ccmp_handler_host
-	lake env lean KProgFormal/GeneratedArm64CcmpDecode.lean
-	lake env lean KProgFormal/Arm64CcmpDecode.lean
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_ccmp_decode_host.c -o build/test_arm64_ccmp_decode_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_ccmp_decode_host.c -o build/test_arm64_ccmp_decode_host
 	./build/test_arm64_ccmp_decode_host
-	lake env lean KProgFormal/GeneratedArm64DispatchFamily.lean
-	lake env lean KProgFormal/Arm64DispatchFamily.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_dispatch_family_host.c -o build/test_arm64_dispatch_family_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_dispatch_family_host.c -o build/test_arm64_dispatch_family_host
 	./build/test_arm64_dispatch_family_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_dispatch_family_route_host.c -o build/test_arm64_dispatch_family_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dispatch_family_route_host.c -o build/test_arm64_dispatch_family_route_host
 	./build/test_arm64_dispatch_family_route_host
-	lake env lean KProgFormal/GeneratedArm64DispatchSingleton.lean
-	lake env lean KProgFormal/Arm64DispatchSingleton.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_dispatch_singleton_host.c -o build/test_arm64_dispatch_singleton_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_dispatch_singleton_host.c -o build/test_arm64_dispatch_singleton_host
 	./build/test_arm64_dispatch_singleton_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_dispatch_singleton_route_host.c -o build/test_arm64_dispatch_singleton_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dispatch_singleton_route_host.c -o build/test_arm64_dispatch_singleton_route_host
 	./build/test_arm64_dispatch_singleton_route_host
-	lake env lean KProgFormal/Arm64Mod.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_mod_host.c -o build/test_arm64_mod_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mod_host.c -o build/test_arm64_mod_host
 	./build/test_arm64_mod_host
-	lake env lean KProgFormal/GeneratedArm64Bitfield.lean
-	lake env lean KProgFormal/Arm64Bitfield.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_bitfield_host.c -o build/test_arm64_bitfield_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_bitfield_host.c -o build/test_arm64_bitfield_host
 	./build/test_arm64_bitfield_host
-	lake env lean KProgFormal/GeneratedArm64Mul.lean
-	lake env lean KProgFormal/Arm64Mul.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_mul_host.c -o build/test_arm64_mul_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mul_host.c -o build/test_arm64_mul_host
 	./build/test_arm64_mul_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_mul_route_host.c -o build/test_arm64_mul_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mul_route_host.c -o build/test_arm64_mul_route_host
 	./build/test_arm64_mul_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_flag_route_host.c -o build/test_arm64_flag_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_flag_route_host.c -o build/test_arm64_flag_route_host
 	./build/test_arm64_flag_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_csel_route_host.c -o build/test_arm64_csel_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_csel_route_host.c -o build/test_arm64_csel_route_host
 	./build/test_arm64_csel_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_mul_wide_host.c -o build/test_arm64_mul_wide_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mul_wide_host.c -o build/test_arm64_mul_wide_host
 	./build/test_arm64_mul_wide_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_imul_flags_wide_host.c -o build/test_x86_imul_flags_wide_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_imul_flags_wide_host.c -o build/test_x86_imul_flags_wide_host
 	./build/test_x86_imul_flags_wide_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/mul_route_host.c -o build/mut_mulroute
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/mul_route_host.c -o build/mut_mulroute
 	./build/mut_mulroute
-	lake env lean KProgFormal/GeneratedArm64Extrev.lean
-	lake env lean KProgFormal/Arm64Extrev.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_extrev_host.c -o build/test_arm64_extrev_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_extrev_host.c -o build/test_arm64_extrev_host
 	./build/test_arm64_extrev_host
-	lake env lean KProgFormal/GeneratedArm64Csel.lean
-	lake env lean KProgFormal/Arm64Csel.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_csel_host.c -o build/test_arm64_csel_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_csel_host.c -o build/test_arm64_csel_host
 	./build/test_arm64_csel_host
-	lake env lean KProgFormal/GeneratedArm64CselPtr.lean
-	lake env lean KProgFormal/Arm64CselPtr.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_csel_ptr_host.c -o build/test_arm64_csel_ptr_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_csel_ptr_host.c -o build/test_arm64_csel_ptr_host
 	./build/test_arm64_csel_ptr_host
-	lake env lean KProgFormal/GeneratedArm64Branch.lean
-	lake env lean KProgFormal/Arm64Branch.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_branch_host.c -o build/test_arm64_branch_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_branch_host.c -o build/test_arm64_branch_host
 	./build/test_arm64_branch_host
-	lake env lean KProgFormal/GeneratedArm64BranchEmit.lean
-	lake env lean KProgFormal/Arm64BranchEmit.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_branch_emit_host.c -o build/test_arm64_branch_emit_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_branch_emit_host.c -o build/test_arm64_branch_emit_host
 	./build/test_arm64_branch_emit_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/a64_route_host.c -o build/a64_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/a64_route_host.c -o build/a64_route_host
 	./build/a64_route_host
-	lake env lean KProgFormal/GeneratedControlFlowTrace.lean
-	lake env lean KProgFormal/ControlFlowTrace.lean
-	$(CC) -Wall -Wextra -O2 -I. test_control_flow_trace_host.c -o build/test_control_flow_trace_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_control_flow_trace_host.c -o build/test_control_flow_trace_host
 	./build/test_control_flow_trace_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_control_flow_trace_route_host.c -o build/test_control_flow_trace_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_control_flow_trace_route_host.c -o build/test_control_flow_trace_route_host
 	./build/test_control_flow_trace_route_host
-	lake env lean KProgFormal/GeneratedArm64Movk.lean
-	lake env lean KProgFormal/Arm64Movk.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_movk_host.c -o build/test_arm64_movk_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_movk_host.c -o build/test_arm64_movk_host
 	./build/test_arm64_movk_host
-	lake env lean KProgFormal/GeneratedArm64Shift.lean
-	lake env lean KProgFormal/Arm64Shift.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_shift_host.c -o build/test_arm64_shift_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_shift_host.c -o build/test_arm64_shift_host
 	./build/test_arm64_shift_host
-	lake env lean KProgFormal/GeneratedArm64Reduction.lean
-	lake env lean KProgFormal/Arm64Reduction.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_reduction_host.c -o build/test_arm64_reduction_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_reduction_host.c -o build/test_arm64_reduction_host
 	./build/test_arm64_reduction_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/reduction_route_host.c -o build/reduction_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/reduction_route_host.c -o build/reduction_route_host
 	./build/reduction_route_host
-	lake env lean KProgFormal/GeneratedArm64Unary.lean
-	lake env lean KProgFormal/Arm64Unary.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_unary_host.c -o build/test_arm64_unary_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_unary_host.c -o build/test_arm64_unary_host
 	./build/test_arm64_unary_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_unary_route_host.c -o build/test_arm64_unary_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_unary_route_host.c -o build/test_arm64_unary_route_host
 	./build/test_arm64_unary_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_cneg_route_host.c -o build/test_arm64_cneg_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_cneg_route_host.c -o build/test_arm64_cneg_route_host
 	./build/test_arm64_cneg_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_stlxr_route_host.c -o build/test_arm64_stlxr_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stlxr_route_host.c -o build/test_arm64_stlxr_route_host
 	./build/test_arm64_stlxr_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_reduction_route_host.c -o build/test_arm64_reduction_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_reduction_route_host.c -o build/test_arm64_reduction_route_host
 	./build/test_arm64_reduction_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_adrp_route_host.c -o build/test_arm64_adrp_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_adrp_route_host.c -o build/test_arm64_adrp_route_host
 	./build/test_arm64_adrp_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_extrev_route_host.c -o build/test_arm64_extrev_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_extrev_route_host.c -o build/test_arm64_extrev_route_host
 	./build/test_arm64_extrev_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_orn_route_host.c -o build/test_arm64_orn_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_orn_route_host.c -o build/test_arm64_orn_route_host
 	./build/test_arm64_orn_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_branch_emit_route_host.c -o build/test_arm64_branch_emit_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_branch_emit_route_host.c -o build/test_arm64_branch_emit_route_host
 	./build/test_arm64_branch_emit_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_cbz_tbz_route_host.c -o build/test_arm64_cbz_tbz_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_cbz_tbz_route_host.c -o build/test_arm64_cbz_tbz_route_host
 	./build/test_arm64_cbz_tbz_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_call_ret_route_host.c -o build/test_arm64_call_ret_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_call_ret_route_host.c -o build/test_arm64_call_ret_route_host
 	./build/test_arm64_call_ret_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_call_ret_route_host.c -o build/test_x86_call_ret_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_call_ret_route_host.c -o build/test_x86_call_ret_route_host
 	./build/test_x86_call_ret_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_helper_call_host.c -o build/test_arm64_helper_call_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_helper_call_host.c -o build/test_arm64_helper_call_host
 	./build/test_arm64_helper_call_host
-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_x86_helper_call_host.c -o build/test_x86_helper_call_host
+	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_helper_call_host.c -o build/test_x86_helper_call_host
 	./build/test_x86_helper_call_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_entry_context_host.c -o build/test_arm64_entry_context_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_entry_context_host.c -o build/test_arm64_entry_context_host
 	./build/test_arm64_entry_context_host
-	lake env lean KProgFormal/GeneratedArm64Cneg.lean
-	lake env lean KProgFormal/Arm64Cneg.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_cneg_host.c -o build/test_arm64_cneg_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_cneg_host.c -o build/test_arm64_cneg_host
 	./build/test_arm64_cneg_host
-	lake env lean KProgFormal/GeneratedArm64Orn.lean
-	lake env lean KProgFormal/Arm64Orn.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_orn_host.c -o build/test_arm64_orn_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_orn_host.c -o build/test_arm64_orn_host
 	./build/test_arm64_orn_host
-	lake env lean KProgFormal/GeneratedArm64Adrp.lean
-	lake env lean KProgFormal/Arm64Adrp.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_adrp_host.c -o build/test_arm64_adrp_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_adrp_host.c -o build/test_arm64_adrp_host
 	./build/test_arm64_adrp_host
-	lake env lean KProgFormal/GeneratedArm64Stlxr.lean
-	lake env lean KProgFormal/Arm64Stlxr.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_stlxr_host.c -o build/test_arm64_stlxr_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stlxr_host.c -o build/test_arm64_stlxr_host
 	./build/test_arm64_stlxr_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/stlxr_route_host.c -o build/stlxr_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/stlxr_route_host.c -o build/stlxr_route_host
 	./build/stlxr_route_host
-	lake env lean KProgFormal/GeneratedArm64Mov.lean
-	lake env lean KProgFormal/Arm64Mov.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_mov_host.c -o build/test_arm64_mov_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mov_host.c -o build/test_arm64_mov_host
 	./build/test_arm64_mov_host
-	lake env lean KProgFormal/GeneratedArm64LdrSx.lean
-	lake env lean KProgFormal/Arm64LdrSx.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_ldrsx_host.c -o build/test_arm64_ldrsx_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_ldrsx_host.c -o build/test_arm64_ldrsx_host
 	./build/test_arm64_ldrsx_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/ldrsx_route_host.c -o build/ldrsx_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/ldrsx_route_host.c -o build/ldrsx_route_host
 	./build/ldrsx_route_host
-	lake env lean KProgFormal/GeneratedArm64LdrsxOp.lean
-	lake env lean KProgFormal/Arm64LdrsxOp.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_ldrsx_op_host.c -o build/test_arm64_ldrsx_op_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_ldrsx_op_host.c -o build/test_arm64_ldrsx_op_host
 	./build/test_arm64_ldrsx_op_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_ldrsx_op_route_host.c -o build/test_arm64_ldrsx_op_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_ldrsx_op_route_host.c -o build/test_arm64_ldrsx_op_route_host
 	./build/test_arm64_ldrsx_op_route_host
-	lake env lean KProgFormal/GeneratedArm64LoadTag.lean
-	lake env lean KProgFormal/Arm64LoadTag.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_load_tag_host.c -o build/test_arm64_load_tag_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_load_tag_host.c -o build/test_arm64_load_tag_host
 	./build/test_arm64_load_tag_host
-	lake env lean KProgFormal/GeneratedArm64PairLoadTag.lean
-	lake env lean KProgFormal/Arm64PairLoadTag.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_pair_load_tag_host.c -o build/test_arm64_pair_load_tag_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_pair_load_tag_host.c -o build/test_arm64_pair_load_tag_host
 	./build/test_arm64_pair_load_tag_host
-	lake env lean KProgFormal/GeneratedArm64MemOffset.lean
-	lake env lean KProgFormal/Arm64MemOffset.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_offset_host.c -o build/test_arm64_mem_offset_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mem_offset_host.c -o build/test_arm64_mem_offset_host
 	./build/test_arm64_mem_offset_host
-	lake env lean KProgFormal/GeneratedArm64MemIndex.lean
-	lake env lean KProgFormal/Arm64MemIndex.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_index_host.c -o build/test_arm64_mem_index_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mem_index_host.c -o build/test_arm64_mem_index_host
 	./build/test_arm64_mem_index_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_mem_index_route_host.c -o build/test_arm64_mem_index_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_index_route_host.c -o build/test_arm64_mem_index_route_host
 	./build/test_arm64_mem_index_route_host
-	lake env lean KProgFormal/GeneratedArm64Fmov.lean
-	lake env lean KProgFormal/GeneratedArm64RegPresence.lean
-	lake env lean KProgFormal/Arm64RegPresence.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_reg_presence_host.c -o build/test_arm64_reg_presence_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_reg_presence_host.c -o build/test_arm64_reg_presence_host
 	./build/test_arm64_reg_presence_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_reg_presence_route_host.c -o build/test_arm64_reg_presence_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_reg_presence_route_host.c -o build/test_arm64_reg_presence_route_host
 	./build/test_arm64_reg_presence_route_host
-	lake env lean KProgFormal/GeneratedArm64RegDispatch.lean
-	lake env lean KProgFormal/Arm64RegDispatch.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_reg_dispatch_host.c -o build/test_arm64_reg_dispatch_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_reg_dispatch_host.c -o build/test_arm64_reg_dispatch_host
 	./build/test_arm64_reg_dispatch_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_reg_dispatch_route_host.c -o build/test_arm64_reg_dispatch_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_reg_dispatch_route_host.c -o build/test_arm64_reg_dispatch_route_host
 	./build/test_arm64_reg_dispatch_route_host
-	lake env lean KProgFormal/Arm64Fmov.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_fmov_host.c -o build/test_arm64_fmov_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_fmov_host.c -o build/test_arm64_fmov_host
 	./build/test_arm64_fmov_host
-	lake env lean KProgFormal/GeneratedArm64FmovDest.lean
-	lake env lean KProgFormal/Arm64FmovDest.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_fmov_dest_host.c -o build/test_arm64_fmov_dest_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_fmov_dest_host.c -o build/test_arm64_fmov_dest_host
 	./build/test_arm64_fmov_dest_host
-	lake env lean KProgFormal/GeneratedArm64LoadBytes.lean
-	lake env lean KProgFormal/Arm64LoadBytes.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_load_bytes_host.c -o build/test_arm64_load_bytes_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_load_bytes_host.c -o build/test_arm64_load_bytes_host
 	./build/test_arm64_load_bytes_host
-	lake env lean KProgFormal/GeneratedArm64StoreBytes.lean
-	lake env lean KProgFormal/Arm64StoreBytes.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_store_bytes_host.c -o build/test_arm64_store_bytes_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_store_bytes_host.c -o build/test_arm64_store_bytes_host
 	./build/test_arm64_store_bytes_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_store_bytes_route_host.c -o build/test_arm64_store_bytes_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_store_bytes_route_host.c -o build/test_arm64_store_bytes_route_host
 	./build/test_arm64_store_bytes_route_host
-	lake env lean KProgFormal/GeneratedArm64ByteLane.lean
-	lake env lean KProgFormal/Arm64ByteLane.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_byte_lane_host.c -o build/test_arm64_byte_lane_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_byte_lane_host.c -o build/test_arm64_byte_lane_host
 	./build/test_arm64_byte_lane_host
-	lake env lean KProgFormal/GeneratedArm64MemDispatch.lean
-	lake env lean KProgFormal/Arm64MemDispatch.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_dispatch_host.c -o build/test_arm64_mem_dispatch_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mem_dispatch_host.c -o build/test_arm64_mem_dispatch_host
 	./build/test_arm64_mem_dispatch_host
-	lake env lean KProgFormal/GeneratedArm64MemWriteArm.lean
-	lake env lean KProgFormal/Arm64MemWriteArmShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_write_arm_host.c -o build/test_arm64_mem_write_arm_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mem_write_arm_host.c -o build/test_arm64_mem_write_arm_host
 	./build/test_arm64_mem_write_arm_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_mem_write_arm_route_host.c -o build/test_arm64_mem_write_arm_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_write_arm_route_host.c -o build/test_arm64_mem_write_arm_route_host
 	./build/test_arm64_mem_write_arm_route_host
-	lake env lean KProgFormal/GeneratedArm64StackTag.lean
-	lake env lean KProgFormal/Arm64StackTag.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_stack_tag_host.c -o build/test_arm64_stack_tag_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_tag_host.c -o build/test_arm64_stack_tag_host
 	./build/test_arm64_stack_tag_host
-	lake env lean KProgFormal/GeneratedArm64StackArm.lean
-	lake env lean KProgFormal/Arm64StackArmShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_stack_arm_host.c -o build/test_arm64_stack_arm_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_arm_host.c -o build/test_arm64_stack_arm_host
 	./build/test_arm64_stack_arm_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_stack_arm_route_host.c -o build/test_arm64_stack_arm_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_arm_route_host.c -o build/test_arm64_stack_arm_route_host
 	./build/test_arm64_stack_arm_route_host
-	lake env lean KProgFormal/GeneratedArm64StackWriteLanes.lean
-	lake env lean KProgFormal/Arm64StackWriteLanesShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_stack_write_lanes_host.c -o build/test_arm64_stack_write_lanes_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_write_lanes_host.c -o build/test_arm64_stack_write_lanes_host
 	./build/test_arm64_stack_write_lanes_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_stack_write_lanes_route_host.c -o build/test_arm64_stack_write_lanes_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_write_lanes_route_host.c -o build/test_arm64_stack_write_lanes_route_host
 	./build/test_arm64_stack_write_lanes_route_host
-	lake env lean KProgFormal/GeneratedArm64StackWriteTagAction.lean
-	lake env lean KProgFormal/Arm64StackWriteTagActionShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_stack_write_tag_action_host.c -o build/test_arm64_stack_write_tag_action_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_write_tag_action_host.c -o build/test_arm64_stack_write_tag_action_host
 	./build/test_arm64_stack_write_tag_action_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_stack_write_tag_action_route_host.c -o build/test_arm64_stack_write_tag_action_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_write_tag_action_route_host.c -o build/test_arm64_stack_write_tag_action_route_host
 	./build/test_arm64_stack_write_tag_action_route_host
-	lake env lean KProgFormal/GeneratedArm64StackReadTagSource.lean
-	lake env lean KProgFormal/Arm64StackReadTagSourceShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_stack_read_tag_source_host.c -o build/test_arm64_stack_read_tag_source_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_read_tag_source_host.c -o build/test_arm64_stack_read_tag_source_host
 	./build/test_arm64_stack_read_tag_source_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_stack_read_tag_source_route_host.c -o build/test_arm64_stack_read_tag_source_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_read_tag_source_route_host.c -o build/test_arm64_stack_read_tag_source_route_host
 	./build/test_arm64_stack_read_tag_source_route_host
-	lake env lean KProgFormal/GeneratedArm64HelperArgPtr.lean
-	lake env lean KProgFormal/Arm64HelperArgPtrShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_helper_arg_ptr_host.c -o build/test_arm64_helper_arg_ptr_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_helper_arg_ptr_host.c -o build/test_arm64_helper_arg_ptr_host
 	./build/test_arm64_helper_arg_ptr_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_helper_arg_ptr_route_host.c -o build/test_arm64_helper_arg_ptr_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_helper_arg_ptr_route_host.c -o build/test_arm64_helper_arg_ptr_route_host
 	./build/test_arm64_helper_arg_ptr_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/helper_route_host.c -o build/helper_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/helper_route_host.c -o build/helper_route_host
 	./build/helper_route_host
-	lake env lean KProgFormal/GeneratedArm64MemBaseSrc.lean
-	lake env lean KProgFormal/Arm64MemBaseSrcShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_base_src_host.c -o build/test_arm64_mem_base_src_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mem_base_src_host.c -o build/test_arm64_mem_base_src_host
 	./build/test_arm64_mem_base_src_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_mem_base_src_route_host.c -o build/test_arm64_mem_base_src_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_base_src_route_host.c -o build/test_arm64_mem_base_src_route_host
 	./build/test_arm64_mem_base_src_route_host
-	lake env lean KProgFormal/GeneratedArm64MemIndexValue.lean
-	lake env lean KProgFormal/Arm64MemIndexValueShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_index_value_host.c -o build/test_arm64_mem_index_value_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mem_index_value_host.c -o build/test_arm64_mem_index_value_host
 	./build/test_arm64_mem_index_value_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_mem_index_value_route_host.c -o build/test_arm64_mem_index_value_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_index_value_route_host.c -o build/test_arm64_mem_index_value_route_host
 	./build/test_arm64_mem_index_value_route_host
-	lake env lean KProgFormal/GeneratedArm64DqMemExtra.lean
-	lake env lean KProgFormal/Arm64DqMemExtraShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_dq_mem_extra_host.c -o build/test_arm64_dq_mem_extra_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_dq_mem_extra_host.c -o build/test_arm64_dq_mem_extra_host
 	./build/test_arm64_dq_mem_extra_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_dq_mem_extra_route_host.c -o build/test_arm64_dq_mem_extra_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dq_mem_extra_route_host.c -o build/test_arm64_dq_mem_extra_route_host
 	./build/test_arm64_dq_mem_extra_route_host
-	lake env lean KProgFormal/GeneratedArm64VregField.lean
-	lake env lean KProgFormal/Arm64VregFieldShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_vreg_field_host.c -o build/test_arm64_vreg_field_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_vreg_field_host.c -o build/test_arm64_vreg_field_host
 	./build/test_arm64_vreg_field_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_vreg_field_route_host.c -o build/test_arm64_vreg_field_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_vreg_field_route_host.c -o build/test_arm64_vreg_field_route_host
 	./build/test_arm64_vreg_field_route_host
-	lake env lean KProgFormal/GeneratedArm64WriteArm.lean
-	lake env lean KProgFormal/Arm64WriteArmShape.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_write_arm_host.c -o build/test_arm64_write_arm_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_write_arm_host.c -o build/test_arm64_write_arm_host
 	./build/test_arm64_write_arm_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_write_arm_route_host.c -o build/test_arm64_write_arm_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_write_arm_route_host.c -o build/test_arm64_write_arm_route_host
 	./build/test_arm64_write_arm_route_host
-	lake env lean KProgFormal/GeneratedArm64DqMem.lean
-	lake env lean KProgFormal/Arm64DqMemHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_dq_mem_host.c -o build/test_arm64_dq_mem_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_dq_mem_host.c -o build/test_arm64_dq_mem_host
 	./build/test_arm64_dq_mem_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_dq_mem_route_host.c -o build/test_arm64_dq_mem_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dq_mem_route_host.c -o build/test_arm64_dq_mem_route_host
 	./build/test_arm64_dq_mem_route_host
-	lake env lean KProgFormal/GeneratedArm64PairMem.lean
-	lake env lean KProgFormal/Arm64PairMemHandler.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_pair_mem_host.c -o build/test_arm64_pair_mem_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_pair_mem_host.c -o build/test_arm64_pair_mem_host
 	./build/test_arm64_pair_mem_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_pair_mem_route_host.c -o build/test_arm64_pair_mem_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_pair_mem_route_host.c -o build/test_arm64_pair_mem_route_host
 	./build/test_arm64_pair_mem_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/pair_route_host.c -o build/pair_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/pair_route_host.c -o build/pair_route_host
 	./build/pair_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/fmov_route_host.c -o build/fmov_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/fmov_route_host.c -o build/fmov_route_host
 	./build/fmov_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/ccmp_decode_route_host.c -o build/ccmp_decode_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/ccmp_decode_route_host.c -o build/ccmp_decode_route_host
 	./build/ccmp_decode_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf build/flag_route_host.c -o build/flag_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/flag_route_host.c -o build/flag_route_host
 	./build/flag_route_host
-	lake env lean KProgFormal/GeneratedArm64MemPrepost.lean
-	lake env lean KProgFormal/Arm64MemPrepost.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_prepost_host.c -o build/test_arm64_mem_prepost_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mem_prepost_host.c -o build/test_arm64_mem_prepost_host
 	./build/test_arm64_mem_prepost_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_mem_prepost_route_host.c -o build/test_arm64_mem_prepost_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_mem_prepost_route_host.c -o build/test_arm64_mem_prepost_route_host
 	./build/test_arm64_mem_prepost_route_host
-	lake env lean KProgFormal/GeneratedArm64Vreg.lean
-	lake env lean KProgFormal/Arm64Vreg.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_vreg_host.c -o build/test_arm64_vreg_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_vreg_host.c -o build/test_arm64_vreg_host
 	./build/test_arm64_vreg_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_vreg_route_host.c -o build/test_arm64_vreg_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_vreg_route_host.c -o build/test_arm64_vreg_route_host
 	./build/test_arm64_vreg_route_host
-	lake env lean KProgFormal/GeneratedArm64Aux.lean
-	lake env lean KProgFormal/Arm64Aux.lean
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 test_arm64_aux_host.c -o build/test_arm64_aux_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 oracles/test_arm64_aux_host.c -o build/test_arm64_aux_host
 	./build/test_arm64_aux_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_aux_route_host.c -o build/test_arm64_aux_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_aux_route_host.c -o build/test_arm64_aux_route_host
 	./build/test_arm64_aux_route_host
-	lake env lean KProgFormal/GeneratedArm64StackArena.lean
-	lake env lean KProgFormal/Arm64StackArena.lean
-	lake env lean KProgFormal/CrossIsaStackArena.lean
-	lake env lean KProgFormal/CrossIsaFlags.lean
-	lake env lean KProgFormal/CrossIsaCond.lean
-	lake env lean KProgFormal/CrossIsaShift.lean
-	lake env lean KProgFormal/CrossIsaSignExtend.lean
-	lake env lean KProgFormal/CrossIsaRev.lean
-	lake env lean KProgFormal/CrossIsaMemOffset.lean
-	lake env lean KProgFormal/CrossIsaAlu.lean
-	lake env lean KProgFormal/CrossIsaBranch.lean
-	lake env lean KProgFormal/Arm64DispatchTotality.lean
-	lake env lean KProgFormal/X86DispatchTotality.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_stack_arena_host.c -o build/test_arm64_stack_arena_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_arena_host.c -o build/test_arm64_stack_arena_host
 	./build/test_arm64_stack_arena_host
-	lake env lean KProgFormal/GeneratedArm64StackIndex.lean
-	lake env lean KProgFormal/Arm64StackIndex.lean
-	$(CC) -Wall -Wextra -O2 -I. test_arm64_stack_index_host.c -o build/test_arm64_stack_index_host
+	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stack_index_host.c -o build/test_arm64_stack_index_host
 	./build/test_arm64_stack_index_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../runner/build-host-docker-llvmbpf/vendor/libbpf/prefix/include/bpf test_arm64_stack_arena_route_host.c -o build/test_arm64_stack_arena_route_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stack_arena_route_host.c -o build/test_arm64_stack_arena_route_host
 	./build/test_arm64_stack_arena_route_host
-	lake env lean KProgFormal/Arm64Decode.lean
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 test_arm64_decode_host.c -o build/test_arm64_decode_host
+	$(CC) -Wall -Wextra -O2 -I. -I../arm64 oracles/test_arm64_decode_host.c -o build/test_arm64_decode_host
 	./build/test_arm64_decode_host

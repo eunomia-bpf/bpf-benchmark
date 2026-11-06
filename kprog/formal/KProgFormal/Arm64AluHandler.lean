@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64AluHandler
-import KProgFormal.GeneratedPtrAdd
+import KProgFormal.Generated.GeneratedArm64AluHandler
+import KProgFormal.Generated.GeneratedPtrAdd
 import KProgFormal.Arm64AluResult
 import KProgFormal.TagErasure
 

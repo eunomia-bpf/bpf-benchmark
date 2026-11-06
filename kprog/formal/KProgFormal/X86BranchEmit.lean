@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86BranchEmit
+import KProgFormal.Generated.GeneratedX86BranchEmit
 import KProgFormal.X86ControlFlow
 import Std.Tactic.BVDecide
 

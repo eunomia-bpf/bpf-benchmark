@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86ShiftFlags
+import KProgFormal.Generated.GeneratedX86ShiftFlags
 import KProgFormal.X86ShiftResult
 import KProgFormal.X86ControlFlow
 

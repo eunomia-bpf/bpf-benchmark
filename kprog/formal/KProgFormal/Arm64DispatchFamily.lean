@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64DispatchFamily
+import KProgFormal.Generated.GeneratedArm64DispatchFamily
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

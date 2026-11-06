@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Specialization
+import KProgFormal.Generated.GeneratedX86Specialization
 
 namespace KProgFormal
 

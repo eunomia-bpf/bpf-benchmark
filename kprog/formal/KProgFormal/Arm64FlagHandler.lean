@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64FlagHandler
+import KProgFormal.Generated.GeneratedArm64FlagHandler
 import KProgFormal.Arm64AluHandler
 import KProgFormal.Arm64Flags
 

@@ -1,7 +1,7 @@
 import Init.Data.BitVec
-import KProgFormal.GeneratedArm64Mul
-import KProgFormal.GeneratedArm64Flags
-import KProgFormal.GeneratedArm64Width
+import KProgFormal.Generated.GeneratedArm64Mul
+import KProgFormal.Generated.GeneratedArm64Flags
+import KProgFormal.Generated.GeneratedArm64Width
 
 namespace KProgFormal
 

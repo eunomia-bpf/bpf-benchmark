@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64HelperArgPtr
+import KProgFormal.Generated.GeneratedArm64HelperArgPtr
 import KProgFormal.Arm64StackIndex
 
 namespace KProgFormal

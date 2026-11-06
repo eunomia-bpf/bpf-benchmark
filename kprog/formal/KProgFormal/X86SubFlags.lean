@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86SubFlags
+import KProgFormal.Generated.GeneratedX86SubFlags
 import KProgFormal.X86ControlFlow
 namespace KProgFormal
 def x86SubFlagsSpec (a b r sign : BitVec 64) : X86Flags :=

@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86CallMem
+import KProgFormal.Generated.GeneratedX86CallMem
 import KProgFormal.X86MemAccess
 import KProgFormal.TagErasure
 import Std.Tactic.BVDecide

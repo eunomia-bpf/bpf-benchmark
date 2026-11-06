@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Xmm0
+import KProgFormal.Generated.GeneratedX86Xmm0
 import KProgFormal.X86MemAccess
 import KProgFormal.X86MemOffset
 import KProgFormal.X86StoreHandler

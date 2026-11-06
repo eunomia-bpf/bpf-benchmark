@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64Width
-import KProgFormal.GeneratedX86Width
+import KProgFormal.Generated.GeneratedArm64Width
+import KProgFormal.Generated.GeneratedX86Width
 
 /-!
 The two ISAs share one width vocabulary, and both generated width contracts

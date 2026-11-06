@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64Cond
-import KProgFormal.GeneratedX86Cond
+import KProgFormal.Generated.GeneratedArm64Cond
+import KProgFormal.Generated.GeneratedX86Cond
 
 /-!
 The two architectures name their branch conditions differently and derive them

@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Setcc
+import KProgFormal.Generated.GeneratedX86Setcc
 import KProgFormal.X86ControlFlow
 import KProgFormal.X86RegLaneAux
 import KProgFormal.X86RegWrite

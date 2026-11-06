@@ -1,5 +1,5 @@
-import KProgFormal.GeneratedArm64Orn
-import KProgFormal.GeneratedArm64Width
+import KProgFormal.Generated.GeneratedArm64Orn
+import KProgFormal.Generated.GeneratedArm64Width
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

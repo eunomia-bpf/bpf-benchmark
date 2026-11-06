@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86MemAux
+import KProgFormal.Generated.GeneratedX86MemAux
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

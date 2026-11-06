@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64BranchEmit
+import KProgFormal.Generated.GeneratedArm64BranchEmit
 import KProgFormal.Arm64ControlFlow
 import Std.Tactic.BVDecide
 

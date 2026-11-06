@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Bzhi
+import KProgFormal.Generated.GeneratedX86Bzhi
 import KProgFormal.X86LogicFlags
 import KProgFormal.X86Bitops
 import KProgFormal.TagErasure

@@ -1,7 +1,7 @@
-import KProgFormal.GeneratedArm64AluResult
-import KProgFormal.GeneratedArm64Decode
-import KProgFormal.GeneratedArm64Flags
-import KProgFormal.GeneratedArm64Width
+import KProgFormal.Generated.GeneratedArm64AluResult
+import KProgFormal.Generated.GeneratedArm64Decode
+import KProgFormal.Generated.GeneratedArm64Flags
+import KProgFormal.Generated.GeneratedArm64Width
 import KProgFormal.Arm64Width
 import KProgFormal.Arm64Flags
 

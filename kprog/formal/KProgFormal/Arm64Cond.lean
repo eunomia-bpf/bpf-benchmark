@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64Cond
+import KProgFormal.Generated.GeneratedArm64Cond
 
 namespace KProgFormal
 

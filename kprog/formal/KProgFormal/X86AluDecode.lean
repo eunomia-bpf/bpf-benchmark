@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86AluDecode
+import KProgFormal.Generated.GeneratedX86AluDecode
 import KProgFormal.X86RegLaneAux
 
 namespace KProgFormal

@@ -1,6 +1,6 @@
 import KProgFormal.X86DispatchSingleton
 import KProgFormal.X86DispatchFamily
-import KProgFormal.GeneratedX86Opcode
+import KProgFormal.Generated.GeneratedX86Opcode
 
 /-!
 The x86 dispatcher's *coverage*, mirroring `Arm64DispatchTotality`.

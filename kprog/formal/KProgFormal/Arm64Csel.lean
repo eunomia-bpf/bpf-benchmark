@@ -1,6 +1,6 @@
-import KProgFormal.GeneratedArm64Csel
-import KProgFormal.GeneratedArm64Cond
-import KProgFormal.GeneratedArm64Flags
+import KProgFormal.Generated.GeneratedArm64Csel
+import KProgFormal.Generated.GeneratedArm64Cond
+import KProgFormal.Generated.GeneratedArm64Flags
 
 namespace KProgFormal
 

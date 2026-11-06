@@ -1,6 +1,6 @@
-import KProgFormal.GeneratedArm64MemBaseSrc
-import KProgFormal.GeneratedArm64MemWriteArm
-import KProgFormal.GeneratedArm64MemDispatch
+import KProgFormal.Generated.GeneratedArm64MemBaseSrc
+import KProgFormal.Generated.GeneratedArm64MemWriteArm
+import KProgFormal.Generated.GeneratedArm64MemDispatch
 import KProgFormal.Arm64MemWriteArmShape
 
 namespace KProgFormal

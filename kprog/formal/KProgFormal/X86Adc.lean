@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedX86Adc
+import KProgFormal.Generated.GeneratedX86Adc
 import KProgFormal.X86Width
 import KProgFormal.X86ControlFlow
 namespace KProgFormal

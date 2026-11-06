@@ -1,4 +1,4 @@
-import KProgFormal.GeneratedArm64MemDispatch
+import KProgFormal.Generated.GeneratedArm64MemDispatch
 import Std.Tactic.BVDecide
 
 namespace KProgFormal

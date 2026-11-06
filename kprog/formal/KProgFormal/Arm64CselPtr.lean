@@ -1,6 +1,6 @@
-import KProgFormal.GeneratedArm64CselPtr
-import KProgFormal.GeneratedArm64Csel
-import KProgFormal.GeneratedArm64Width
+import KProgFormal.Generated.GeneratedArm64CselPtr
+import KProgFormal.Generated.GeneratedArm64Csel
+import KProgFormal.Generated.GeneratedArm64Width
 import Std.Tactic.BVDecide
 
 namespace KProgFormal
