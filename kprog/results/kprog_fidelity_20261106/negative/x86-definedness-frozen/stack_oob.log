@@ -1,0 +1,28 @@
+bound-probe: BPF_PROG_LOAD native_lab stub: Invalid argument
+diagnostic BPF_PROG_LOAD: Invalid argument
+stub verifier_log_size=262144 log_true_size=715
+stub fd_array_cnt=2 fd_array=0:8,1:8
+stub insns=0:code=183,dst=0,src=3,off=0,imm=28;1:code=133,dst=0,src=4,off=1,imm=129913;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (b7) r1 = -1024                    ; R1=-1024
+1: (bf) r2 = r1                       ; R1=-1024 R2=-1024
+2: (07) r2 += 128                     ; R2=-896
+3: (bf) r3 = r1                       ; R1=-1024 R3=-1024
+4: (57) r3 &= 7                       ; R3=0
+5: (55) if r3 != 0x0 goto pc+7        ; R3=0
+6: (67) r2 <<= 32                     ; R2=0xfffffc8000000000
+7: (77) r2 >>= 32                     ; R2=0xfffffc80
+8: (bf) r1 = r10                      ; R1=fp0 R10=fp0
+9: (07) r1 += -128                    ; R1=fp-128
+10: (0f) r1 += r2
+math between fp pointer and 4294966400 is not allowed
+processed 11 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1710,7987774,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=8 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=129913
+native_blob_diag: fnv64=26644872a66eaf68 word_count=2 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=8 final_size_matches=1
+chunk_bytes=0:8
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument

@@ -1,0 +1,412 @@
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x411fd070]
+[    0.000000] Linux version 7.0.0-rc2+ (root@coder-22123351-d4a5-40fc-bc3b-1b853af74a7e-c7ccfb766-mpvhz) (aarch64-linux-gnu-gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #21 SMP PREEMPT Fri Nov  6 09:15:49 UTC 2026
+[    0.000000] random: crng init done
+[    0.000000] Machine model: linux,dummy-virt
+[    0.000000] efi: UEFI not found.
+[    0.000000] OF: reserved mem: Reserved memory: No reserved-memory node in the DT
+[    0.000000] NUMA: Faking a node at [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000] NODE_DATA(0) allocated [mem 0xbfbfac80-0xbfbfdc7f]
+[    0.000000] cma: Reserved 64 MiB at 0x00000000bba00000
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: PSCIv1.1 detected in firmware.
+[    0.000000] psci: Using standard PSCI v0.2 function IDs
+[    0.000000] psci: Trusted OS migration not required
+[    0.000000] psci: SMC Calling Convention v1.0
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000]   DMA32    empty
+[    0.000000]   Normal   empty
+[    0.000000]   Device   empty
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000] percpu: Embedded 34 pages/cpu s101400 r8192 d29672 u139264
+[    0.000000] Detected PIPT I-cache on CPU0
+[    0.000000] CPU features: detected: Spectre-v2
+[    0.000000] CPU features: detected: Spectre-v4
+[    0.000000] CPU features: detected: Spectre-BHB
+[    0.000000] CPU features: detected: ARM erratum 834220
+[    0.000000] CPU features: detected: ARM erratum 1742098
+[    0.000000] CPU features: detected: ARM erratum 832075
+[    0.000000] CPU features: detected: ARM errata 1165522, 1319367, or 1530923
+[    0.000000] alternatives: applying boot alternatives
+[    0.000000] Kernel command line: console=ttyAMA0 rdinit=/init panic=-1
+[    0.000000] printk: log buffer data + meta data: 2097152 + 7340032 = 9437184 bytes
+[    0.000000] Dentry cache hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 131072 (order: 8, 1048576 bytes, linear)
+[    0.000000] software IO TLB: SWIOTLB bounce buffer size adjusted to 2MB
+[    0.000000] software IO TLB: area num 2.
+[    0.000000] software IO TLB: mapped [mem 0x00000000b9600000-0x00000000b9800000] (2MB)
+[    0.000000] Fallback order for Node 0: 0 
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 524288
+[    0.000000] Policy zone: DMA
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
+[    0.000000] ftrace: allocating 49524 entries in 194 pages
+[    0.000000] ftrace: allocated 194 pages with 3 groups
+[    0.000000] rcu: Hierarchical RCU implementation.
+[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=4096 to nr_cpu_ids=2.
+[    0.000000] 	Trampoline variant of Tasks RCU enabled.
+[    0.000000] 	Rude variant of Tasks RCU enabled.
+[    0.000000] 	Tracing variant of Tasks RCU enabled.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 10 jiffies.
+[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=2
+[    0.000000] RCU Tasks: Setting shift to 1 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=2.
+[    0.000000] RCU Tasks Rude: Setting shift to 1 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=2.
+[    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+[    0.000000] Root IRQ handler: gic_handle_irq
+[    0.000000] GICv2m: range[mem 0x08020000-0x08020fff], SPI[80:143]
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] arch_timer: cp15 timer running at 62.50MHz (virt).
+[    0.000000] clocksource: arch_sys_counter: mask: 0x1ffffffffffffff max_cycles: 0x1cd42e208c, max_idle_ns: 881590405314 ns
+[    0.000076] sched_clock: 57 bits at 63MHz, resolution 16ns, wraps every 4398046511096ns
+[    0.009106] Console: colour dummy device 80x25
+[    0.020230] Calibrating delay loop (skipped), value calculated using timer frequency.. 125.00 BogoMIPS (lpj=625000)
+[    0.020444] pid_max: default: 32768 minimum: 301
+[    0.029714] landlock: Up and running.
+[    0.029761] Yama: becoming mindful.
+[    0.029933] SELinux:  Initializing.
+[    0.035426] LSM support for eBPF active
+[    0.037835] Mount-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    0.037900] Mountpoint-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    0.054756] VFS: Finished mounting rootfs on nullfs
+[    0.105025] cacheinfo: Unable to detect cache hierarchy for CPU 0
+[    0.138204] rcu: Hierarchical SRCU implementation.
+[    0.138272] rcu: 	Max phase no-delay instances is 1000.
+[    0.139832] Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[    0.144020] EFI services will not be available.
+[    0.145543] smp: Bringing up secondary CPUs ...
+[    0.149830] Detected PIPT I-cache on CPU1
+[    0.150980] CPU1: Booted secondary processor 0x0000000001 [0x411fd070]
+[    0.160509] smp: Brought up 1 node, 2 CPUs
+[    0.160565] SMP: Total of 2 processors activated.
+[    0.160592] CPU: All CPU(s) started at EL1
+[    0.160803] CPU features: detected: 32-bit EL0 Support
+[    0.160816] CPU features: detected: 32-bit EL1 Support
+[    0.161136] CPU features: detected: CRC32 instructions
+[    0.161343] CPU features: detected: PMUv3
+[    0.192701] alternatives: applying system-wide alternatives
+[    0.208857] CPU features: emulated: Privileged Access Never (PAN) using TTBR0_EL1 switching
+[    0.229500] Memory: 1917508K/2097152K available (15552K kernel code, 9226K rwdata, 10696K rodata, 5952K init, 11680K bss, 109252K reserved, 65536K cma-reserved)
+[    0.278820] devtmpfs: initialized
+[    0.308441] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.309067] posixtimers hash table entries: 1024 (order: 2, 16384 bytes, linear)
+[    0.310208] futex hash table entries: 512 (32768 bytes on 1 NUMA nodes, total 32 KiB, linear).
+[    0.313750] 19408 pages in range for non-PLT usage
+[    0.313814] 510928 pages in range for PLT usage
+[    0.319544] DMI not present or invalid.
+[    0.340386] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.358294] DMA: preallocated 256 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.358833] audit: initializing netlink subsys (disabled)
+[    0.363057] audit: type=2000 audit(0.320:1): state=initialized audit_enabled=0 res=1
+[    0.366306] thermal_sys: Registered thermal governor 'fair_share'
+[    0.366350] thermal_sys: Registered thermal governor 'step_wise'
+[    0.366361] thermal_sys: Registered thermal governor 'user_space'
+[    0.372560] cpuidle: using governor ladder
+[    0.378711] cpuidle: using governor menu
+[    0.379980] hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.
+[    0.380605] ASID allocator initialised with 65536 entries
+[    0.382186] Serial: AMBA PL011 UART driver
+[    0.422861] 9000000.pl011: ttyAMA0 at MMIO 0x9000000 (irq = 13, base_baud = 0) is a PL011 rev1
+[    0.433512] printk: console [ttyAMA0] enabled
+[    0.499351] HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.499705] HugeTLB: 0 KiB vmemmap can be freed for a 1.00 GiB page
+[    0.499762] HugeTLB: registered 32.0 MiB page size, pre-allocated 0 pages
+[    0.499777] HugeTLB: 0 KiB vmemmap can be freed for a 32.0 MiB page
+[    0.499791] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.499807] HugeTLB: 0 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.499821] HugeTLB: registered 64.0 KiB page size, pre-allocated 0 pages
+[    0.499831] HugeTLB: 0 KiB vmemmap can be freed for a 64.0 KiB page
+[    0.535232] ACPI: Interpreter disabled.
+[    0.541480] iommu: Default domain type: Translated
+[    0.541587] iommu: DMA domain TLB invalidation policy: lazy mode
+[    0.548553] pps_core: LinuxPPS API ver. 1 registered
+[    0.548656] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.548753] PTP clock support registered
+[    0.564599] EDAC MC: Ver: 3.0.0
+[    0.596174] NetLabel: Initializing
+[    0.596335] NetLabel:  domain hash size = 128
+[    0.596363] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.597247] NetLabel:  unlabeled traffic allowed by default
+[    0.601337] vgaarb: loaded
+[    0.612336] clocksource: Switched to clocksource arch_sys_counter
+[    0.621648] VFS: Disk quotas dquot_6.6.0
+[    0.621882] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.643232] netfs: FS-Cache loaded
+[    0.648262] pnp: PnP ACPI: disabled
+[    0.699774] NET: Registered PF_INET protocol family
+[    0.707550] IP idents hash table entries: 32768 (order: 6, 262144 bytes, linear)
+[    0.847319] tcp_listen_portaddr_hash hash table entries: 1024 (order: 2, 16384 bytes, linear)
+[    0.847586] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.847688] TCP established hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.847926] TCP bind hash table entries: 16384 (order: 7, 524288 bytes, linear)
+[    0.848217] TCP: Hash tables configured (established 16384 bind 16384)
+[    0.855011] MPTCP token hash table entries: 2048 (order: 4, 49152 bytes, linear)
+[    0.855590] UDP hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[    0.857903] UDP-Lite hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[    0.859687] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.860130] NET: Registered PF_XDP protocol family
+[    0.860314] PCI: CLS 0 bytes, default 64
+[    0.880912] Trying to unpack rootfs image as initramfs...
+[    0.899782] kvm [1]: HYP mode not available
+[    0.913760] Initialise system trusted keyrings
+[    0.917823] Key type blacklist registered
+[    0.928952] workingset: timestamp_bits=44 max_order=19 bucket_order=0
+[    0.956474] SGI XFS with ACLs, security attributes, quota, no debug enabled
+[    0.984289] 9p: Installing v9fs 9p2000 file system support
+[    0.998386] Freeing initrd memory: 12400K
+[    1.021181] integrity: Platform Keyring initialized
+[    1.110088] Key type asymmetric registered
+[    1.110343] Asymmetric key parser 'x509' registered
+[    1.110948] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 247)
+[    1.115654] io scheduler mq-deadline registered
+[    1.115780] io scheduler kyber registered
+[    1.116053] io scheduler bfq registered
+[    1.149440] pl061_gpio 9030000.pl061: PL061 GPIO chip registered
+[    1.172975] Serial: 8250/16550 driver, 4 ports, IRQ sharing disabled
+[    1.254847] loop: module loaded
+[    1.269135] hid: raw HID events driver (C) Jiri Kosina
+[    1.278065] hw perfevents: enabled with armv8_pmuv3 PMU driver, 7 (0,8000003f) counters available
+[    1.284907] watchdog: NMI not fully supported
+[    1.285838] watchdog: Hard watchdog permanently disabled
+[    1.287119] NET: Registered PF_INET6 protocol family
+[    1.304247] Segment Routing with IPv6
+[    1.304543] In-situ OAM (IOAM) with IPv6
+[    1.305166] NET: Registered PF_PACKET protocol family
+[    1.308697] 9pnet: Installing 9P2000 support
+[    1.426614] registered taskstats version 1
+[    1.439078] Loading compiled-in X.509 certificates
+[    1.471732] Loaded X.509 cert 'Build time autogenerated kernel key: 9f0cac519e1b43b7aed7b285e97f1d9691777458'
+[    1.527350] Demotion targets for Node 0: null
+[    1.528414] Key type .fscrypt registered
+[    1.528476] Key type fscrypt-provisioning registered
+[    1.537176] ima: No TPM chip found, activating TPM-bypass!
+[    1.537437] ima: Allocated hash algorithm: sha256
+[    1.542848] ima: No architecture policies found
+[    1.576695] clk: Disabling unused clocks
+[    1.576971] PM: genpd: Disabling unused power domains
+[    1.645229] Freeing unused kernel memory: 5952K
+[    1.646847] Run /init as init process
+[    1.758466] bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+[    1.759330] bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+LANE_F_CASE_BEGIN past_data_end_read
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=231
+stub fd_array_cnt=2 fd_array=0:9,1:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=4;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()
+1: (71) r0 = *(u8 *)(r1 +0)
+R1 invalid mem access 'pkt_end'
+processed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,197,1758466,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+5,198,1759330,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+
+native_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374
+native_blob_diag: fnv64=8390e88279162497 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1
+chunk_bytes=0:20
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+LANE_F_CASE_END past_data_end_read 1
+LANE_F_CASE_BEGIN past_data_end_write
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=276
+stub fd_array_cnt=2 fd_array=0:9,1:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=8;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()
+1: (b7) r2 = 1                        ; R2=1
+2: (73) *(u8 *)(r1 +0) = r2
+R1 invalid mem access 'pkt_end'
+processed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,197,1758466,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+5,198,1759330,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+
+native_lab stub context: prog_type=6 blob_bytes=28 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374
+native_blob_diag: fnv64=0330b138d1d15997 word_count=7 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=28 final_size_matches=1
+chunk_bytes=0:28
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+LANE_F_CASE_END past_data_end_write 1
+LANE_F_CASE_BEGIN missing_data_end_check
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=292
+stub fd_array_cnt=2 fd_array=0:9,1:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=12;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (61) r1 = *(u32 *)(r1 +0)          ; R1=pkt(r=0)
+1: (71) r0 = *(u8 *)(r1 +0)
+invalid access to packet, off=0 size=1, R1(id=0,off=0,r=0)
+R1 offset is outside of the packet
+processed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,197,1758466,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+5,198,1759330,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+
+native_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374
+native_blob_diag: fnv64=7c32214a9a3e17f3 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1
+chunk_bytes=0:20
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+LANE_F_CASE_END missing_data_end_check 1
+LANE_F_CASE_BEGIN map_value_oob
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=975
+stub fd_array_cnt=3 fd_array=0:11,1:11,2:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=16;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (b7) r6 = 0                        ; R6=0
+1: (61) r3 = *(u32 *)(r1 +4)          ; R1=ctx() R3=pkt_end()
+2: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)
+3: (bf) r1 = r2                       ; R1=pkt(r=0) R2=pkt(r=0)
+4: (07) r1 += 4                       ; R1=pkt(off=4,r=0)
+5: (2d) if r1 > r3 goto pc+25         ; R1=pkt(off=4,r=4) R3=pkt_end()
+6: (7b) *(u64 *)(r10 -8) = r6         ; R6=0 R10=fp0 fp-8=0
+7: (18) r1 = 0xffff000003834200       ; R1=map_ptr(map=neg_map,ks=4,vs=8)
+9: (85) call bpf_map_lookup_elem#1    ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)
+10: (79) r1 = *(u64 *)(r10 -8)        ; R1=0 R10=fp0 fp-8=0
+11: (15) if r0 == 0x0 goto pc+17      ; R0=map_value(map=neg_map,ks=4,vs=8)
+12: (71) r2 = *(u8 *)(r0 +8)
+invalid access to map value, value_size=8 off=8 size=1
+R0 min value is outside of the allowed memory range
+processed 12 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+
+kernel log tail:
+4,197,1758466,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+5,198,1759330,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+
+native_lab stub context: prog_type=6 blob_bytes=100 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374
+retained_map_info=9:id=4:type=2:name=neg_map
+native_blob_diag: fnv64=d92060ee0a3a10bd word_count=25 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=88 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=100 final_size_matches=1
+chunk_bytes=0:100
+reloc_targets=88:0x4
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+LANE_F_CASE_END map_value_oob 1
+LANE_F_CASE_BEGIN nullable_map_dereference
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=1017
+stub fd_array_cnt=3 fd_array=0:11,1:11,2:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=20;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 0                        ; R0=0
+1: (61) r3 = *(u32 *)(r1 +4)          ; R1=ctx() R3=pkt_end()
+2: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)
+3: (bf) r1 = r2                       ; R1=pkt(r=0) R2=pkt(r=0)
+4: (07) r1 += 4                       ; R1=pkt(off=4,r=0)
+5: (2d) if r1 > r3 goto pc+25         ; R1=pkt(off=4,r=4) R3=pkt_end()
+6: (b7) r1 = 0                        ; R1=0
+7: (7b) *(u64 *)(r10 -8) = r1         ; R1=0 R10=fp0 fp-8=0
+8: (18) r1 = 0xffff000004ba3000       ; R1=map_ptr(map=neg_map,ks=4,vs=8)
+10: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)
+11: (bf) r1 = r0                      ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8) R1=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)
+12: (79) r2 = *(u64 *)(r10 -8)        ; R2=0 R10=fp0 fp-8=0
+13: (71) r3 = *(u8 *)(r1 +0)
+R1 invalid mem access 'map_value_or_null'
+processed 13 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+
+kernel log tail:
+4,197,1758466,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+5,198,1759330,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+
+native_lab stub context: prog_type=6 blob_bytes=92 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374
+retained_map_info=9:id=5:type=2:name=neg_map
+native_blob_diag: fnv64=67c938b210766f03 word_count=23 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=80 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=92 final_size_matches=1
+chunk_bytes=0:92
+reloc_targets=80:0x5
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+LANE_F_CASE_END nullable_map_dereference 1
+LANE_F_CASE_BEGIN invalid_helper_argument
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=380
+stub fd_array_cnt=2 fd_array=0:9,1:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=24;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (b7) r1 = 0                        ; R1=0
+1: (7b) *(u64 *)(r10 -8) = r1         ; R1=0 R10=fp0 fp-8=0
+2: (b7) r1 = 1                        ; R1=1
+3: (b7) r2 = 0                        ; R2=0
+4: (85) call bpf_map_lookup_elem#1
+R1 type=scalar expected=map_ptr
+processed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,197,1758466,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+5,198,1759330,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+
+native_lab stub context: prog_type=6 blob_bytes=52 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374
+native_blob_diag: fnv64=29c8727fed9e3df0 word_count=13 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=52 final_size_matches=1
+chunk_bytes=0:52
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+LANE_F_CASE_END invalid_helper_argument 1
+LANE_F_CASE_BEGIN stack_oob
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=161
+stub fd_array_cnt=2 fd_array=0:9,1:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=28;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (05) goto pc+0
+1: (95) exit
+R0 !read_ok
+processed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,197,1758466,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+5,198,1759330,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+
+native_lab stub context: prog_type=6 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374
+native_blob_diag: fnv64=04e9cefe01762702 word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1
+chunk_bytes=0:12
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+LANE_F_CASE_END stack_oob 1
+LANE_F_CASE_BEGIN uninitialized_stack
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=190
+stub fd_array_cnt=2 fd_array=0:9,1:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=32;1:code=133,dst=0,src=4,off=1,imm=126374;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (79) r0 = *(u64 *)(r10 -8)
+invalid read from stack R10 off=-8 size=8
+processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,197,1758466,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+5,198,1759330,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+
+native_lab stub context: prog_type=6 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126374
+native_blob_diag: fnv64=ed7a608bbfe6da68 word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1
+chunk_bytes=0:12
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+LANE_F_CASE_END uninitialized_stack 1
+LANE_F_CASE_BEGIN unbounded_loop
+bound-probe: native_kernel bound proof contains no BPF exit
+LANE_F_CASE_END unbounded_loop 1
+LANE_F_CASE_BEGIN undefined_entry_register
+bound program id=71 chunks=1 nonzero_generations=1
+LANE_F_CASE_END undefined_entry_register 0
+LANE_F_CASE_BEGIN undefined_entry_flags
+bound program id=79 chunks=1 nonzero_generations=1
+LANE_F_CASE_END undefined_entry_flags 0
+LANE_F_CASE_BEGIN helper_clobbered_register
+bound program id=87 chunks=1 nonzero_generations=1
+LANE_F_CASE_END helper_clobbered_register 0
+LANE_F_SUITE_COMPLETE
+[   32.498204] reboot: Power down

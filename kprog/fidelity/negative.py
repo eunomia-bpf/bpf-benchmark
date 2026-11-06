@@ -6,13 +6,15 @@ import importlib.util
 import json
 import os
 import re
+import shutil
 from pathlib import Path
 import subprocess
 import sys
+from tcb import includes, imports
 
 ROOT = Path(__file__).resolve().parents[2]
 X86_MAP = 'mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; '
-ARM_MAP = 'ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; '
+ARM_MAP = 'ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; str x30, [sp, #-16]!; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; ldr x30, [sp], #16; '
 FIXTURES = {
     'x86': {
         'past_data_end_read': 'mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret',
@@ -25,7 +27,7 @@ FIXTURES = {
         'uninitialized_stack': 'mov rax, QWORD PTR [rsp-8]; ret',
         'unbounded_loop': '1: jmp 1b',
         'unbounded_indirect_jump': 'mov rax, QWORD PTR [rdi]; jmp rax',
-        'unsupported_instruction': 'ud2; ret',
+        'unsupported_instruction': 'ud2; mov eax, 2; ret',
         'undefined_entry_register': 'test rax, rax; je 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret',
         'undefined_entry_flags': 'jnc 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret',
         'helper_clobbered_register': 'push rbx; mov rbx, rdi; xor esi, esi; call bpf_get_current_uid_gid; test rsi, rsi; je 1f; mov rax, QWORD PTR [rbx+8]; movzx eax, BYTE PTR [rax]; jmp 2f; 1: mov eax, 2; 2: pop rbx; ret',
@@ -36,7 +38,7 @@ FIXTURES = {
         'missing_data_end_check': 'ldr x1, [x0]; ldrb w0, [x1]; ret',
         'map_value_oob': ARM_MAP + 'cbz x0, 1f; ldr x0, [x0, #8]; ret; 1: mov x0, #0; ret',
         'nullable_map_dereference': ARM_MAP + 'ldr x0, [x0]; ret; 1: mov x0, #0; ret',
-        'invalid_helper_argument': 'mov x0, #1; mov x1, #0; bl bpf_map_lookup_elem; ret',
+        'invalid_helper_argument': 'str x30, [sp, #-16]!; mov x0, #1; mov x1, #0; bl bpf_map_lookup_elem; ldr x30, [sp], #16; ret',
         'stack_oob': 'ldr x0, [sp, #1024]; ret',
         'uninitialized_stack': 'ldur x0, [sp, #-8]; ret',
         'unbounded_loop': '1: b 1b',
@@ -56,6 +58,11 @@ def build(arch, out):
     sys.modules['encoder'] = enc
     spec.loader.exec_module(enc)
     out.mkdir(parents=True, exist_ok=True)
+    snapshot = out.resolve()/'snapshot'
+    for path in includes(ROOT/f'kprog/{arch}/{arch}_sim_local_bpf.h') | imports(Path(enc.__file__)):
+        target = snapshot/path.relative_to(ROOT)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, target)
     rows = []
     for name, assembly in FIXTURES[arch].items():
         source = ('.intel_syntax noprefix\n' if arch == 'x86' else '') + '.text\n.global entry\n.type entry, %function\nentry:\n' + assembly.replace('; ', '\n') + '\n.size entry, .-entry\n'
@@ -75,11 +82,17 @@ def build(arch, out):
                 proof = enc.render_program(name, insns, source_prelude=prelude)
             else:
                 proof = enc.render_program(name, 'entry', OrderedDict(entry=insns), 'xdp')
+                if 'neg_map' in assembly:
+                    # Pair the generated declaration with the actual original
+                    # map identity, as the x86 prelude already does.
+                    if proof.count('} neg_map_0 SEC(".maps");') != 1:
+                        raise RuntimeError('expected original neg_map declaration')
+                    proof = proof.replace('neg_map_0', 'neg_map')
         except ValueError as error:
             row.update(stage='specialization_rejected', message=str(error))
             rows.append(row)
             continue
-        proof = proof.replace(f'#include "../{arch}_sim_local_bpf.h"', f'#include "{ROOT}/kprog/{arch}/{arch}_sim_local_bpf.h"')
+        proof = proof.replace(f'#include "../{arch}_sim_local_bpf.h"', f'#include "{snapshot}/kprog/{arch}/{arch}_sim_local_bpf.h"')
         path = out / f'{name}.bpf.c'
         path.write_text(proof)
         command = ['clang', '-g', '-O2', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', f'-D__TARGET_ARCH_{arch}', '-I'+str(ROOT/'vendor/libbpf/include/uapi'), '-I'+str(ROOT/'vendor/libbpf/src'), '-I/usr/include/x86_64-linux-gnu', '-c', str(path), '-o', str(out/f'{name}.bpf.o')]

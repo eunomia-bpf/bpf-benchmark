@@ -149,3 +149,37 @@ taskset -c 16-23 make -C kprog/fidelity negative-bound-qemu ARM_NEGATIVE_BOUND_B
 `abi-baseline-artifacts.tar.gz` and `abi-frame-artifacts.tar.gz` preserve all
 native/proof source, objects and build logs. No program or failed case is
 excluded, and no synthetic check was added to make these programs reject.
+
+## Actual ABI rerun after effect analysis
+
+`x86-definedness-frozen/` rejects **all14** cases:8 verifier,5 specialization,
+1 loader (no BPF EXIT). The three previously accepted ABI fixtures now reject
+for the exact undefined entry register/flags or helper-clobbered register.
+This uses C's current generation-time effect analysis, whose exact source is
+in `definedness-saved-lr-artifacts.tar.gz`; no runtime safety check or zeroed
+native value was added. The UD2 fixture defines its later return value, so
+its rejection specifically names the unsupported instruction. Intermediate
+`x86-definedness/` and `x86-definedness-ud2/` runs are retained separately.
+
+The corrected Arm fixtures save/restore real LR across helper calls, and
+pair their map declaration name/layout with the original `neg_map` instead
+of creating an invented map. `arm64-saved-lr-frozen/` gives **8 verifier,
+1 loader,2 specialization rejections and3 accepted ABI findings**. There are
+no infrastructure or unresolved-map failures in that final run. The three
+accepted fixtures are the entry register, entry flags and helper-clobbered
+register. A owns their generation-time definedness repair; this remains an
+open safety defect. The earlier `arm64-saved-lr/` unresolved map outcomes and
+successful `arm64-saved-lr-maps/` adapter correction are retained honestly.
+Unsafe native code was never executed in any accepted finding.
+
+Each frozen build copies its production include/import closure before
+compilation; all generated proofs use that saved header snapshot. The artifact
+archive contains sources, native/proof objects, checker sources and compile
+logs for both ISAs. Each outcomes JSON retains exact rejection text and
+per-case execution command; the compressed Make logs retain the full guest runs.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity negative-build ARCH=x86 NEGATIVE_BUILD=build-x86/negative-definedness-frozen
+taskset -c 16-23 make -C kprog/fidelity negative-bound-kvm NEGATIVE_BUILD=build-x86/negative-definedness-frozen NEGATIVE_BOUND_OUT=../results/kprog_fidelity_20261106/negative/x86-definedness-frozen
+taskset -c 16-23 make -C kprog/fidelity negative-bound-qemu ARM_NEGATIVE_BOUND_BUILD=build-arm64/negative-saved-lr-frozen ARM_NEGATIVE_BOUND_OUT=../results/kprog_fidelity_20261106/negative/arm64-saved-lr-frozen
+```

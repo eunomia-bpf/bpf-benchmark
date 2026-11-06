@@ -1,0 +1,20 @@
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=275
+stub fd_array_cnt=2 fd_array=0:8,1:8
+stub insns=0:code=183,dst=0,src=3,off=0,imm=24;1:code=133,dst=0,src=4,off=1,imm=129913;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (b7) r1 = 1                        ; R1=1
+1: (b7) r2 = 0                        ; R2=0
+2: (85) call bpf_map_lookup_elem#1
+R1 type=scalar expected=map_ptr
+processed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1714,8561939,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=33 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=129913
+native_blob_diag: fnv64=3f16c319a52b7534 word_count=8 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=33 final_size_matches=1
+chunk_bytes=0:33
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied

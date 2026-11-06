@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-x86/negative-definedness/stack_oob.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/negative-definedness/stack_oob.bpf.o",
+      "simulator_program": "stack_oob_x86_sim_xdp"
+    }
+  ]
+}
