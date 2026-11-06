@@ -34,7 +34,7 @@ build/test-binding-kernel: test_binding_kernel.c ../../kinsn/module/include/nati
 		-I../../vendor/linux-framework/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		$< ../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $@
 
-kernel-check: module-check build/test-binding-kernel
+kernel-check: module-check build/test-binding-kernel build/test-loader
 	test "$(ARCH)" = x86
 	taskset -c 8-23 vng --run ../../vendor/build/x86/linux/arch/x86/boot/bzImage \
 		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
@@ -45,6 +45,20 @@ guest-kernel-check:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod build-x86/bpf_x86_native_lab.ko
 	./build/test-binding-kernel
+	./build/test-loader
+
+build/native-entry.o: test_native_entry.c
+	install -d build
+	$(CC) -O2 -c -fno-stack-protector -fno-asynchronous-unwind-tables \
+		-fno-unwind-tables -fomit-frame-pointer -mno-red-zone $< -o $@
+
+build/test-loader: test_loader.cpp build/native-entry.o ../libnativeloader/src/native_loader.cpp \
+		$(wildcard ../libnativeloader/src/*.hpp ../libnativeloader/include/*.hpp)
+	$(MAKE) -C ../libnativeloader BUILD_DIR=build-tv-binding
+	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		$< ../libnativeloader/build-tv-binding/libnative_loader.a \
+		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $@
 
 build-arm64/test-binding-kernel: test_binding_kernel.c ../../kinsn/module/include/native_lab_binding.h
 	install -d build-arm64

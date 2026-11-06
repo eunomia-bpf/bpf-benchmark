@@ -60,6 +60,11 @@ runtime artifacts. The host test checks relocation-byte mismatches, all wire
 offsets, generation boundaries and the shared production validation functions
 with ASan/UBSan. Results are in `../results/kprog_tv_20261106/`.
 
+The x86 guest also exercises the real shared loader's `FdLoadOptions` path.
+It native-links one short and one long test entry, uploads the proof and seal,
+and runs the resulting one-chunk and three-chunk native programs. These are
+binding regression fixtures, not simulator translation-validation certificates.
+
 The group seal identifies byte zero and the ordered immutable upload. The TV
 certificate must still establish source-entry correspondence, reference-ISA
 ABI compatibility and specialization fidelity. The
