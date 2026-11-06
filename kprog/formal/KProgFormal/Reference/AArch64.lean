@@ -200,9 +200,51 @@ def shiftStep (i : ShiftInstruction) (s : State) : Transition State :=
   let (dst, value) := shiftResult i s
   ⟨{ writeReg s dst value with pc := s.pc + 4 }, [], none⟩
 
+inductive LogicOp
+  | conjunction (invert setFlags : Bool)
+  | disjunction (invert : Bool)
+  | exclusive
+  deriving DecidableEq, Repr
+
+def LogicOp.setFlags : LogicOp → Bool
+  | .conjunction _ flags => flags | _ => false
+
+/-- Logical operands are architectural-width bit strings. Complement is
+applied after the shift and before the logical operation. -/
+def logicValue (width : Width) (op : LogicOp) (lhs rhs : Word) : Word :=
+  let lhs := lhs.setWidth width.bits
+  let rhs := rhs.setWidth width.bits
+  (match op with
+    | .conjunction invert _ => lhs &&& (if invert then ~~~rhs else rhs)
+    | .disjunction invert => lhs ||| (if invert then ~~~rhs else rhs)
+    | .exclusive => lhs ^^^ rhs).setWidth 64
+
+/-- Logical flag writes replace NZCV only; C and V are zero. -/
+def logicFlags (width : Width) (result old : Word) : Word :=
+  (old &&& 0xffffffff0fffffff) |||
+    (if result.getLsbD (width.bits - 1) then 0x80000000 else 0) |||
+    (if narrow result width = 0 then 0x40000000 else 0)
+
+structure LogicInstruction where
+  width : Width
+  op : LogicOp
+  kind : ShiftKind
+  amount : Fin width.bits
+  dst : Register
+  lhs : Register
+  rhs : Register
+  deriving DecidableEq, Repr
+
+def logicStep (i : LogicInstruction) (s : State) : Transition State :=
+  let rhs := shiftValue i.width i.kind (readReg s i.rhs) (BitVec.ofNat 64 i.amount.val)
+  let result := logicValue i.width i.op (readReg s i.lhs) rhs
+  let flags := if i.op.setFlags then logicFlags i.width result s.flags else s.flags
+  ⟨{ writeReg s i.dst result with flags := flags, pc := s.pc + 4 }, [], none⟩
+
 inductive Instruction
   | mul (instruction : MulInstruction)
   | shift (instruction : ShiftInstruction)
+  | logic (instruction : LogicInstruction)
   | extrev (instruction : ExtrevInstruction)
   | select (width : Width) (alternative : SelectElse) (dst lhs rhs : Register) (predicate : Fin 16)
   deriving DecidableEq, Repr
@@ -211,6 +253,7 @@ def step (i : Instruction) (s : State) : Transition State :=
   match i with
   | .mul instruction => mulStep instruction s
   | .shift instruction => shiftStep instruction s
+  | .logic instruction => logicStep instruction s
   | .extrev instruction => extrevStep instruction s
   | .select width alternative dst lhs rhs predicate =>
       let value := selectValue width alternative (condition s.flags predicate) (readReg s lhs) (readReg s rhs)
@@ -241,6 +284,17 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   if word &&& 0x7f2003e0 = 0x2a2003e0 then
     if h : amount < width.bits then return .shift (.invert width shiftKind ⟨amount, h⟩ dst rhs)
     else throw "reserved MVN immediate"
+  if word &&& 0x1f000000 = 0x0a000000 then
+    let opcode := (word / 2^29) % 4
+    let invert := (word / 2^21) % 2 == 1
+    let op ← if opcode = 0 then pure (LogicOp.conjunction invert false)
+      else if opcode = 1 then pure (.disjunction invert)
+      else if opcode = 2 ∧ !invert then pure .exclusive
+      else if opcode = 3 then pure (.conjunction invert true)
+      else throw "unrecognized logical register opcode"
+    if h : amount < width.bits then
+      return .logic ⟨width, op, shiftKind, ⟨amount, h⟩, dst, lhs, rhs⟩
+    else throw "reserved logical register shift immediate"
   if word &&& 0x7f2003e0 = 0x4b0003e0 then
     let kind := (word / 2^22) % 4
     if h : kind < 3 then

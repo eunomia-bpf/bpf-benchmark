@@ -142,6 +142,41 @@ def main():
         if dst is not None:
             expected["registers"][dst] = result
         cases.append((request, expected))
+    # Logical shifted-register forms, including NZCV replacement, TST/MOV
+    # aliases, a complemented shifted source, and discarded/aliased writes.
+    for word, lhs, rhs, result, dst, nzcv in [
+            (0x0A420420, 0xFFFFFFFF000000F0, 0xFFFF0000000000FF, 0x70, 0, None),
+            (0x8AA2FC20, 0xFFFFFFFFFFFFFFFF, 0x8000000000000000, 0, 0, None),
+            (0xAA021020, 0x100, 1, 0x110, 0, None),
+            (0xAA621020, 0xF0, 0xFF, 0xFFFFFFFFFFFFFFF0, 0, None),
+            (0x4AC20420, 0xFFFFFFFF00000001, 3, 0x80000000, 0, None),
+            (0x6A020020, 0xFFFFFFFF80000000, 0xFFFFFFFF, 0x80000000, 0, 0x80000000),
+            (0x6A020020, 1, 1, 1, 0, 0),
+            (0xEA020020, 0, 0xFFFFFFFFFFFFFFFF, 0, 0, 0x40000000),
+            (0x6A227C20, 0xFFFFFFFF, 1, 0x7FFFFFFF, 0, 0),
+            (0xEAE2FC20, 0xFFFFFFFFFFFFFFFF, 0x8000000000000001,
+             0xFFFFFFFFFFFFFFFC, 0, 0x80000000),
+            (0xEA82043F, 1, 0x8000000000000000, None, None, 0x40000000),
+            (0xEA62FC3F, 1, 0x8000000000000000, None, None, 0x40000000),
+            (0x8A02003F, 0xFFFFFFFFFFFFFFFF, 0xDEADBEEF, None, None, None),
+            (0xAA0203E0, 0x1234, 0xFFFFFFFF80000001, 0xFFFFFFFF80000001, 0, None),
+            (0x2A0203E0, 0x1234, 0xFFFFFFFF80000001, 0x80000001, 0, None),
+            (0x0A0203E0, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0, 0, None),
+            (0xCA020021, 0x8000000000000001, 1, 0x8000000000000000, 1, None),
+            (0xAAFFFC20, 0x1234, 0xDEADBEEF, 0xFFFFFFFFFFFFFFFF, 0, None),
+            (0x6A2203E0, 0xFFFFFFFFFFFFFFFF, 0xDEADBEEF, 0, 0, 0x40000000),
+            (0x6A1F003F, 0xFFFFFFFFFFFFFFFF, 0xDEADBEEF, None, None, 0x40000000)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["registers"][1:3] = [lhs, rhs]
+        request["state"]["flags"] = 0xABCDE000F1234567
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
+        if dst is not None:
+            expected["registers"][dst] = result
+        if nzcv is not None:
+            expected["flags"] = (expected["flags"] & ~0xF0000000) | nzcv
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -150,7 +185,7 @@ def main():
     for (request, expected), out in zip(cases, outputs):
         assert out == expected, (request, out, expected)
     for word in (0x2A2183E0, 0x4BC107E0, 0x4B2107E0, 0x6B0107E0,
-                 0x1AE22020, 0x53207C20, 0x131FFC20):
+                 0x1AE22020, 0x53207C20, 0x131FFC20, 0x0A028020, 0x6A228020):
         request = copy.deepcopy(base)
         request["native_bytes"] = list(word.to_bytes(4, "little"))
         rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
@@ -181,7 +216,7 @@ def main():
     nv = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "nv"), "csel x0,x1,x2,nv")
     al = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "al"), "csel x0,x1,x2,al")
     assert encoder.encode(nv, {}, {}) == encoder.encode(al, {}, {})
-    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":
