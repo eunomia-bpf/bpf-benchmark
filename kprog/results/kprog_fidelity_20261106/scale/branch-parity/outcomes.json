@@ -1,0 +1,802 @@
+[
+  {
+    "name": "n10000_ptr_direct",
+    "input_byte": 0,
+    "native_returncode": 0,
+    "native": {
+      "result": 4375,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 6,
+        "proof_bpf_instructions": 30055,
+        "verified_instructions": 30056,
+        "bytes_jited": 120245,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9444,
+        "result": 4375,
+        "expected_result": 4375,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_direct",
+    "input_byte": 1,
+    "native_returncode": 0,
+    "native": {
+      "result": 5015,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 12,
+        "proof_bpf_instructions": 30055,
+        "verified_instructions": 30056,
+        "bytes_jited": 120245,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9444,
+        "result": 5015,
+        "expected_result": 5015,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_direct",
+    "input_byte": 2,
+    "native_returncode": 0,
+    "native": {
+      "result": 5639,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 18,
+        "proof_bpf_instructions": 30055,
+        "verified_instructions": 30056,
+        "bytes_jited": 120245,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9444,
+        "result": 5639,
+        "expected_result": 5639,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_direct",
+    "input_byte": 3,
+    "native_returncode": 0,
+    "native": {
+      "result": 6279,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 24,
+        "proof_bpf_instructions": 30055,
+        "verified_instructions": 30056,
+        "bytes_jited": 120245,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9444,
+        "result": 6279,
+        "expected_result": 6279,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_direct",
+    "input_byte": 127,
+    "native_returncode": 0,
+    "native": {
+      "result": 84647,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 30,
+        "proof_bpf_instructions": 30055,
+        "verified_instructions": 30056,
+        "bytes_jited": 120245,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9444,
+        "result": 84647,
+        "expected_result": 84647,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_direct",
+    "input_byte": 128,
+    "native_returncode": 0,
+    "native": {
+      "result": 85271,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 36,
+        "proof_bpf_instructions": 30055,
+        "verified_instructions": 30056,
+        "bytes_jited": 120245,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9444,
+        "result": 85271,
+        "expected_result": 85271,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_direct",
+    "input_byte": 254,
+    "native_returncode": 0,
+    "native": {
+      "result": 164903,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 42,
+        "proof_bpf_instructions": 30055,
+        "verified_instructions": 30056,
+        "bytes_jited": 120245,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9444,
+        "result": 164903,
+        "expected_result": 164903,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_direct",
+    "input_byte": 255,
+    "native_returncode": 0,
+    "native": {
+      "result": 165543,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 48,
+        "proof_bpf_instructions": 30055,
+        "verified_instructions": 30056,
+        "bytes_jited": 120245,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9444,
+        "result": 165543,
+        "expected_result": 165543,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_indirect",
+    "input_byte": 0,
+    "native_returncode": 0,
+    "native": {
+      "result": 4383,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 54,
+        "proof_bpf_instructions": 30047,
+        "verified_instructions": 30049,
+        "bytes_jited": 120225,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9444,
+        "result": 4383,
+        "expected_result": 4383,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_indirect",
+    "input_byte": 1,
+    "native_returncode": 0,
+    "native": {
+      "result": 5023,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 60,
+        "proof_bpf_instructions": 30047,
+        "verified_instructions": 30049,
+        "bytes_jited": 120225,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9444,
+        "result": 5023,
+        "expected_result": 5023,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_indirect",
+    "input_byte": 2,
+    "native_returncode": 0,
+    "native": {
+      "result": 5647,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 66,
+        "proof_bpf_instructions": 30047,
+        "verified_instructions": 30049,
+        "bytes_jited": 120225,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9444,
+        "result": 5647,
+        "expected_result": 5647,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_indirect",
+    "input_byte": 3,
+    "native_returncode": 0,
+    "native": {
+      "result": 6287,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 72,
+        "proof_bpf_instructions": 30047,
+        "verified_instructions": 30049,
+        "bytes_jited": 120225,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9444,
+        "result": 6287,
+        "expected_result": 6287,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_indirect",
+    "input_byte": 127,
+    "native_returncode": 0,
+    "native": {
+      "result": 84655,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 78,
+        "proof_bpf_instructions": 30047,
+        "verified_instructions": 30049,
+        "bytes_jited": 120225,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9444,
+        "result": 84655,
+        "expected_result": 84655,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_indirect",
+    "input_byte": 128,
+    "native_returncode": 0,
+    "native": {
+      "result": 85279,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 84,
+        "proof_bpf_instructions": 30047,
+        "verified_instructions": 30049,
+        "bytes_jited": 120225,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9572,
+        "result": 85279,
+        "expected_result": 85279,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_indirect",
+    "input_byte": 254,
+    "native_returncode": 0,
+    "native": {
+      "result": 164911,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 90,
+        "proof_bpf_instructions": 30047,
+        "verified_instructions": 30049,
+        "bytes_jited": 120225,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9572,
+        "result": 164911,
+        "expected_result": 164911,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_ptr_indirect",
+    "input_byte": 255,
+    "native_returncode": 0,
+    "native": {
+      "result": 165551,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 96,
+        "proof_bpf_instructions": 30047,
+        "verified_instructions": 30049,
+        "bytes_jited": 120225,
+        "program_memlock_bytes": 241664,
+        "loader_maxrss_kib": 9572,
+        "result": 165551,
+        "expected_result": 165551,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_direct",
+    "input_byte": 0,
+    "native_returncode": 0,
+    "native": {
+      "result": 17759421198158611767,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 102,
+        "proof_bpf_instructions": 80,
+        "verified_instructions": 78,
+        "bytes_jited": 319,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9572,
+        "result": 17759421198158611767,
+        "expected_result": 17759421198158611767,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_direct",
+    "input_byte": 1,
+    "native_returncode": 0,
+    "native": {
+      "result": 15318568609386021639,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 108,
+        "proof_bpf_instructions": 80,
+        "verified_instructions": 78,
+        "bytes_jited": 319,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9572,
+        "result": 15318568609386021639,
+        "expected_result": 15318568609386021639,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_direct",
+    "input_byte": 2,
+    "native_returncode": 0,
+    "native": {
+      "result": 17759421198158611767,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 114,
+        "proof_bpf_instructions": 80,
+        "verified_instructions": 78,
+        "bytes_jited": 319,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9572,
+        "result": 17759421198158611767,
+        "expected_result": 17759421198158611767,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_direct",
+    "input_byte": 3,
+    "native_returncode": 0,
+    "native": {
+      "result": 15318568609386021639,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 120,
+        "proof_bpf_instructions": 80,
+        "verified_instructions": 78,
+        "bytes_jited": 319,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9572,
+        "result": 15318568609386021639,
+        "expected_result": 15318568609386021639,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_direct",
+    "input_byte": 127,
+    "native_returncode": 0,
+    "native": {
+      "result": 15318568609386021639,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 126,
+        "proof_bpf_instructions": 80,
+        "verified_instructions": 78,
+        "bytes_jited": 319,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9572,
+        "result": 15318568609386021639,
+        "expected_result": 15318568609386021639,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_direct",
+    "input_byte": 128,
+    "native_returncode": 0,
+    "native": {
+      "result": 17759421198158611767,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 132,
+        "proof_bpf_instructions": 80,
+        "verified_instructions": 78,
+        "bytes_jited": 319,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9572,
+        "result": 17759421198158611767,
+        "expected_result": 17759421198158611767,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_direct",
+    "input_byte": 254,
+    "native_returncode": 0,
+    "native": {
+      "result": 17759421198158611767,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 138,
+        "proof_bpf_instructions": 80,
+        "verified_instructions": 78,
+        "bytes_jited": 319,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9572,
+        "result": 17759421198158611767,
+        "expected_result": 17759421198158611767,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_direct",
+    "input_byte": 255,
+    "native_returncode": 0,
+    "native": {
+      "result": 15318568609386021639,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 144,
+        "proof_bpf_instructions": 80,
+        "verified_instructions": 78,
+        "bytes_jited": 319,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9572,
+        "result": 15318568609386021639,
+        "expected_result": 15318568609386021639,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_indirect",
+    "input_byte": 0,
+    "native_returncode": 0,
+    "native": {
+      "result": 15318568609386021639,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 150,
+        "proof_bpf_instructions": 104,
+        "verified_instructions": 155,
+        "bytes_jited": 418,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9572,
+        "result": 15318568609386021639,
+        "expected_result": 15318568609386021639,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_indirect",
+    "input_byte": 1,
+    "native_returncode": 0,
+    "native": {
+      "result": 12877716020613431511,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 156,
+        "proof_bpf_instructions": 104,
+        "verified_instructions": 155,
+        "bytes_jited": 418,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9700,
+        "result": 12877716020613431511,
+        "expected_result": 12877716020613431511,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_indirect",
+    "input_byte": 2,
+    "native_returncode": 0,
+    "native": {
+      "result": 15318568609386021639,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 162,
+        "proof_bpf_instructions": 104,
+        "verified_instructions": 155,
+        "bytes_jited": 418,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9700,
+        "result": 15318568609386021639,
+        "expected_result": 15318568609386021639,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_indirect",
+    "input_byte": 3,
+    "native_returncode": 0,
+    "native": {
+      "result": 12877716020613431511,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 168,
+        "proof_bpf_instructions": 104,
+        "verified_instructions": 155,
+        "bytes_jited": 418,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9700,
+        "result": 12877716020613431511,
+        "expected_result": 12877716020613431511,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_indirect",
+    "input_byte": 127,
+    "native_returncode": 0,
+    "native": {
+      "result": 12877716020613431511,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 174,
+        "proof_bpf_instructions": 104,
+        "verified_instructions": 155,
+        "bytes_jited": 418,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9700,
+        "result": 12877716020613431511,
+        "expected_result": 12877716020613431511,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_indirect",
+    "input_byte": 128,
+    "native_returncode": 0,
+    "native": {
+      "result": 15318568609386021639,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 180,
+        "proof_bpf_instructions": 104,
+        "verified_instructions": 155,
+        "bytes_jited": 418,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9700,
+        "result": 15318568609386021639,
+        "expected_result": 15318568609386021639,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_indirect",
+    "input_byte": 254,
+    "native_returncode": 0,
+    "native": {
+      "result": 15318568609386021639,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 186,
+        "proof_bpf_instructions": 104,
+        "verified_instructions": 155,
+        "bytes_jited": 418,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9700,
+        "result": 15318568609386021639,
+        "expected_result": 15318568609386021639,
+        "retval": 2
+      }
+    ]
+  },
+  {
+    "name": "n10000_scalar_indirect",
+    "input_byte": 255,
+    "native_returncode": 0,
+    "native": {
+      "result": 12877716020613431511,
+      "retval": 2
+    },
+    "stage": "passed",
+    "probe_returncode": 0,
+    "error": "",
+    "probe_counters": [
+      {
+        "program_id": 192,
+        "proof_bpf_instructions": 104,
+        "verified_instructions": 155,
+        "bytes_jited": 418,
+        "program_memlock_bytes": 4096,
+        "loader_maxrss_kib": 9700,
+        "result": 12877716020613431511,
+        "expected_result": 12877716020613431511,
+        "retval": 2
+      }
+    ]
+  }
+]

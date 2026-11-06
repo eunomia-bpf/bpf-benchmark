@@ -152,3 +152,67 @@ objects with their build records. Its `lane-F/` subtree restores under
 `/workspaces/.agent-state/kprog-lanes/F/`; `accepted-artifacts/` contains the
 files used as `SCALE_BUILD`. The original frozen baseline source closure
 remains in `full-scale-build-artifacts.tar.gz` above.
+
+
+## Both10K indirect fixtures now pass
+
+The unchanged pointer-heavy indirect program now compiles through the same
+frozen experimental delayed-promotion path and passes KVM. The scalar-heavy
+indirect program exposed a second compiler bottleneck: the later default O2
+InstCombine pass stalled for15minutes on21937 IR instructions. An explicit
+ADCE/SCCP/CFG cleanup after promotion avoids that pass and produces the
+correct scalar result. The failed optimizer log/backtrace remains archived;
+this is a separately selected compiler pipeline, with no automatic fallback.
+
+| Case | Native instructions | BPF instructions | Result / retval | Verifier us | Slab peak bytes | Vmap reserved bytes |
+| --- | ---: | ---: | --- | ---: | ---: | ---: |
+| n10000_ptr_indirect | 10084 | 30047 | 5023 /2 | 9213 | 2312112 | 3149824 |
+| n10000_scalar_indirect | 10084 | 104 | 12877716020613431511 /2 | 99 | 78584 | 24576 |
+
+Both traces report zero lost events. Pointer indirect records120225 JIT bytes,
+241664 program memlock bytes and2272KiB loader maximum RSS. Scalar indirect
+records418 JIT bytes,4096 memlock bytes,1248KiB maximum RSS and peak verifier
+states9. Scalar constants fold extensively; its104 BPF instructions are not a
+claim that arbitrary10K scalar programs verify at that size. Across the original
+and experimental records, all four10K shapes now have accepted, correct
+artifacts. The original baseline failures and all100K frontend failures remain
+recorded; no experimental header optimization is silently promoted to production.
+
+```sh
+taskset -c 20-23 prlimit --as=12884901888 -- timeout 1800 make -C /workspaces/.agent-state/kprog-lanes/F/scale-regref-width n10000_ptr_indirect.pruned.late.bpf.o n10000_scalar_indirect.pruned.late.bpf.o
+taskset -c 20-23 prlimit --as=12884901888 -- timeout 900 make -C /workspaces/.agent-state/kprog-lanes/F/scale-regref-width n10000_scalar_indirect.pruned.dce.bpf.o
+taskset -c 16-19 make -C kprog/fidelity scale-kvm SCALE_BUILD=build-x86/scale-late-indirect SCALE_OUT=../results/kprog_fidelity_20261106/scale/late-indirect-kvm
+taskset -c 16-19 make -C kprog/fidelity scale-kvm SCALE_BUILD=build-x86/scale-late-scalar-indirect SCALE_OUT=../results/kprog_fidelity_20261106/scale/late-scalar-indirect-kvm
+```
+
+The first command compiles the pointer fixture, then stalls on the scalar
+fixture; its log explicitly records that stopped diagnostic. The second is the
+successful scalar command. `indirect-scale-artifacts.tar.gz` retains exact
+native assembly/objects, generated C/header closure, Makefile, accepted BPF
+objects, and both optimizer diagnostics. `indirect-scale-traces.tar.gz` retains
+both full trace/report/verifier/loader sets. The per-case JSON outcomes and
+provenance are also published directly.
+
+## Native CPU versus kernel proof across both branch outcomes
+
+`branch-parity/` checks all four10K artifacts against their unchanged native
+assembly executed as ordinary static user binaries on this x86 CPU. For each
+program it tests packet byte8 at0,1,2,3,127,128,254,255, with the same64-byte
+packet and guard length as the proof probe. Every one of the32 cases agrees
+on the64-bit result and retval2. This catches bounded-dispatch or scalar-folding
+mistakes that could pass the original all-ones input. It executes only these
+controlled, bounds-checked helper-free native fixtures; unsafe negatives are
+never executed. The native driver supplies expected outputs, adding no ISA
+interpreter. The original probe still defaults to byte8=1; the optional byte
+argument changes only this focused test input.
+
+```sh
+taskset -c 16-23 make -C kprog/results/kprog_fidelity_20261106/scale/branch-parity build
+taskset -c 16-19 make -C kprog/results/kprog_fidelity_20261106/scale/branch-parity kvm
+```
+
+`branch-parity/outcomes.json` retains all32 native/proof result pairs and errors;
+`raw-evidence.tar.gz` includes every native/probe/verifier log, guest console,
+exact native binaries and the probe sources/binary. This is correctness
+validation, not workload timing. A chunked-preprocessing100K trial is active
+under the same12GiB process cap; its outcome will be recorded separately.

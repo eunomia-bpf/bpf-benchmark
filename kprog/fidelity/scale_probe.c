@@ -17,14 +17,20 @@ static void die(const char *what)
 
 int main(int argc, char **argv)
 {
-    if (argc != 4) {
-        fprintf(stderr,"usage: scale-probe OBJECT VERIFIER_LOG EXPECTED_RESULT\n");
+    if (argc != 4 && argc != 5) {
+        fprintf(stderr,"usage: scale-probe OBJECT VERIFIER_LOG EXPECTED_RESULT [INPUT_BYTE]\n");
         return 1;
     }
     char *end;
     errno=0;
     uint64_t expected=strtoull(argv[3],&end,10);
-    if (errno || *end) { fprintf(stderr,"invalid expected result\n"); return 1; }
+    if (errno || end==argv[3] || *end) { fprintf(stderr,"invalid expected result\n"); return 1; }
+    unsigned long input_byte=1;
+    if (argc==5) {
+        errno=0;
+        input_byte=strtoul(argv[4],&end,10);
+        if (errno || end==argv[4] || *end || input_byte>255) { fprintf(stderr,"invalid input byte\n"); return 1; }
+    }
     const size_t capacity=128U*1024U*1024U;
     char *log=calloc(1,capacity);
     if (!log) die("allocate verifier log");
@@ -64,6 +70,7 @@ int main(int argc, char **argv)
     unsigned char input[64],output[64];
     memset(input,1,sizeof(input));
     memset(input,0,8);
+    input[8]=(unsigned char)input_byte;
     LIBBPF_OPTS(bpf_test_run_opts, run, .data_in=input, .data_size_in=sizeof(input),
         .data_out=output, .data_size_out=sizeof(output), .repeat=1);
     if (bpf_prog_test_run_opts(fd,&run)) die("execute simulator proof");
