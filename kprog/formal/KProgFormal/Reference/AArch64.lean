@@ -264,6 +264,7 @@ inductive Instruction
   | shift (instruction : ShiftInstruction)
   | logic (instruction : LogicInstruction)
   | keep (instruction : KeepInstruction)
+  | moveImmediate (width : Width) (dst : Register) (value : Word)
   | extrev (instruction : ExtrevInstruction)
   | select (width : Width) (alternative : SelectElse) (dst lhs rhs : Register) (predicate : Fin 16)
   deriving DecidableEq, Repr
@@ -274,6 +275,8 @@ def step (i : Instruction) (s : State) : Transition State :=
   | .shift instruction => shiftStep instruction s
   | .logic instruction => logicStep instruction s
   | .keep instruction => keepStep instruction s
+  | .moveImmediate width dst value =>
+      ⟨{ writeReg s dst (narrow value width) with pc := s.pc + 4 }, [], none⟩
   | .extrev instruction => extrevStep instruction s
   | .select width alternative dst lhs rhs predicate =>
       let value := selectValue width alternative (condition s.flags predicate) (readReg s lhs) (readReg s rhs)
@@ -299,6 +302,12 @@ def decode (bytes : Array Byte) : Except String Instruction := do
     if h : column < width.bits / 16 then
       return .keep ⟨width, ⟨column, h⟩, BitVec.ofNat 16 (word / 2^5), dst⟩
     else throw "reserved MOVK halfword column"
+  if word &&& 0x7f800000 = 0x12800000 ∨ word &&& 0x7f800000 = 0x52800000 then
+    let column := (word / 2^21) % 4
+    if column ≥ width.bits / 16 then throw "reserved move-wide halfword column"
+    let field := BitVec.ofNat 64 ((word / 2^5) % 2^16) <<< (16 * column)
+    let value := if (word / 2^30) % 2 = 0 then ~~~field else field
+    return .moveImmediate width dst value
   let shiftKind := match (word / 2^22) % 4 with
     | 0 => ShiftKind.lsl | 1 => .lsr | 2 => .asr | _ => .ror
   let amount := (word / 2^10) % 64

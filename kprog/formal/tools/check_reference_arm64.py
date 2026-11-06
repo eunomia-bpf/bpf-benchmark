@@ -197,6 +197,26 @@ def main():
         if dst is not None:
             expected["registers"][dst] = result
         cases.append((request, expected))
+    # MOVZ/MOVN native halfword encodings feed MOV_IMM's scalar write path.
+    # Include a legal MOVN that objdump does not print as a plain MOV alias.
+    for word, dst, result in [
+            (0x52824680, 0, 0x1234), (0x52A24680, 0, 0x12340000),
+            (0xD2824680, 0, 0x1234), (0xD2A24680, 0, 0x12340000),
+            (0xD2C24680, 0, 0x123400000000), (0xD2E24680, 0, 0x1234000000000000),
+            (0x12824680, 0, 0xFFFFEDCB), (0x12A24680, 0, 0xEDCBFFFF),
+            (0x92824680, 0, 0xFFFFFFFFFFFFEDCB), (0x92A24680, 0, 0xFFFFFFFFEDCBFFFF),
+            (0x92C24680, 0, 0xFFFFEDCBFFFFFFFF), (0x92E24680, 0, 0xEDCBFFFFFFFFFFFF),
+            (0x92FFFFFF, None, None), (0x12800000, 0, 0xFFFFFFFF),
+            (0xD2800000, 0, 0), (0x12BFFFE0, 0, 0xFFFF),
+            (0x92FFFFE0, 0, 0xFFFFFFFFFFFF), (0x52BFFFFF, None, None),
+            (0xD2C2469E, 30, 0x123400000000)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
+        if dst is not None:
+            expected["registers"][dst] = result
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -206,7 +226,8 @@ def main():
         assert out == expected, (request, out, expected)
     for word in (0x2A2183E0, 0x4BC107E0, 0x4B2107E0, 0x6B0107E0,
                  0x1AE22020, 0x53207C20, 0x131FFC20, 0x0A028020, 0x6A228020,
-                 0x72C24680, 0x72E24680, 0x72024680):
+                 0x72C24680, 0x72E24680, 0x72024680, 0x12C24680, 0x12E24680,
+                 0x52C24680, 0x52E24680, 0x32824680):
         request = copy.deepcopy(base)
         request["native_bytes"] = list(word.to_bytes(4, "little"))
         rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
@@ -237,7 +258,7 @@ def main():
     nv = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "nv"), "csel x0,x1,x2,nv")
     al = encoder.NativeInsn(0, "csel", ("x0", "x1", "x2", "al"), "csel x0,x1,x2,al")
     assert encoder.encode(nv, {}, {}) == encoder.encode(al, {}, {})
-    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":
