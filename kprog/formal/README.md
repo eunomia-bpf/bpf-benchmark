@@ -18,7 +18,7 @@ routing tables; they are **not yet a full simulator-step refinement theorem**.
 The ISA reference lives in `KProgFormal/Reference/`; it imports no simulator
 contracts. The step refinements in `Refinement/` connect CMOV, BT, BZHI,
 ANDN, BMI2 shifts/rotates, BSWAP/MOVBE and register/immediate/memory PUSH/POP handlers to that reference, including registers,
-flags, XMM0, memory, PC and ordered access/fault effects. The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary, logical-register, MOVK, move-immediate, register-move, all32 SIMD/GPR bit-transfer (FMOV), byte-vector reduction (CNT/UADDLV), conditional-compare (CCMP), ADD/SUB immediate/shifted-register/extended-register, NOP and ordinary-branch
+flags, XMM0, memory, PC and ordered access/fault effects. The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary, logical-register, MOVK, move-immediate, register-move, all32 SIMD/GPR bit-transfer (FMOV), byte-vector reduction (CNT/UADDLV), conditional-compare (CCMP), ADD/SUB immediate/shifted-register/extended-register, NOP, ordinary-branch and scalar immediate-memory
 families connect through their modules in `Refinement/`, including native
 aliases, all raw NZCV predicates, ZR/SP separation including MOV destinations, legal extract immediates,
 shifted source modifiers, exact NZCV updates and W zero-extension. Arithmetic NZCV uses width-sized operands
@@ -26,6 +26,10 @@ with independent signed/unsigned widened sums for overflow and carry. All eight
 register extensions narrow at the operand size before extending and shifting.
 Branch offsets are signed native bytes; both generated goto shapes preserve
 the same PC choice, with W/ZR and tested-bit widths handled explicitly.
+Scalar memory includes all unsigned and signed load widths, stores, signed
+unscaled and unsigned scaled offsets, exact byte permissions/initialization,
+ordered accesses and faults. Its handler theorem takes the admission witness
+that SP alignment is valid; it does not insert a runtime alignment guard.
 
 Layout:
 
@@ -80,4 +84,8 @@ and omit x86 segment bases. To access nonzero SIMD registers, also supply
 `vectors` as exactly32 unsigned128-bit words V0..V31, with `vectors[0]` equal
 to `vector0`; outputs preserve and return that complete bank. V0-only legacy
 requests remain valid, but cannot access an omitted SIMD register. Arithmetic field31 denotes ZR, independently of SP.
+`sp_alignment_check` selects the effective SCTLR.SA/SA0 setting and defaults
+to Linux's enabled setting. When enabled, an SP-base transfer tests the incoming
+SP's16-byte alignment, independently of its effective address; faults use
+`sp_alignment`. The setting is preserved in outputs when supplied.
 The default ISA remains x86-64; `isa: "x86_64"` is also explicit.

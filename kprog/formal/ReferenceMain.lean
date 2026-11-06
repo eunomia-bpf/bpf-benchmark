@@ -73,6 +73,7 @@ private def faultJson : Fault → Json
   | .read a n => Json.mkObj [("kind", toJson "read"), ("address", number a.toNat), ("bytes", number n)]
   | .write a n => Json.mkObj [("kind", toJson "write"), ("address", number a.toNat), ("bytes", number n)]
   | .divide => Json.mkObj [("kind", toJson "divide")]
+  | .spAlignment address => Json.mkObj [("kind", toJson "sp_alignment"), ("address", number address.toNat)]
 
 private def eventJson : Event → Json
   | .fault f => Json.mkObj [("kind", toJson "fault"), ("fault", faultJson f)]
@@ -132,9 +133,12 @@ private def parseArmState (j : Json) (cells : Array InputCell) : Except String A
     let vector ← fieldNat j "vector0"
     if vector ≥ 2^128 then throw "vector0 is outside the 128-bit range"
     let vectorTail ← parseVectorTail j (BitVec.ofNat 128 vector)
+    let spAlignmentCheck ← match j.getObjVal? "sp_alignment_check" with
+      | .error _ => pure true
+      | .ok value => value.getBool?
     pure { gpr := fun r => regs[r.val]'(by omega)
            sp := regs[31]'(by omega), flags := flags, vector0 := BitVec.ofNat 128 vector,
-           vectorTail := vectorTail,
+           vectorTail := vectorTail, spAlignmentCheck := spAlignmentCheck,
            memory := memoryOfCells cells, pc := pc }
   else throw "AArch64 registers must contain X0..X30 followed by SP (32 words)"
 
@@ -154,7 +158,9 @@ private def executeArm (request : Json) : Except String Json := do
   let vectorFields := if (state.getObjVal? "vectors").isOk then
       [("vectors", toJson ((List.finRange 32).map fun index => (AArch64.readVector s index).toNat))]
     else []
-  pure <| Json.mkObj (vectorFields ++ [
+  let alignmentFields := if (state.getObjVal? "sp_alignment_check").isOk then
+      [("sp_alignment_check", toJson s.spAlignmentCheck)] else []
+  pure <| Json.mkObj (vectorFields ++ alignmentFields ++ [
     ("registers", toJson (((List.finRange 31).map (fun r => (s.gpr r).toNat)) ++ [s.sp.toNat])),
     ("flags", number s.flags.toNat), ("defined_flags", number (2^64 - 1)),
     ("pc", number s.pc.toNat), ("vector0", number s.vector0.toNat),

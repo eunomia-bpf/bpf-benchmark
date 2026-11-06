@@ -22,6 +22,7 @@ inductive Fault
   | read (address : Word) (bytes : Nat)
   | write (address : Word) (bytes : Nat)
   | divide
+  | spAlignment (address : Word)
   deriving DecidableEq, Repr
 
 /-- Guest effects only. Simulator spills are private implementation state.

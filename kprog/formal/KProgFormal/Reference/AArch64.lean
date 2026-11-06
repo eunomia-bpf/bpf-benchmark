@@ -33,6 +33,8 @@ structure State where
   vectorTail : Fin 31 → BitVec 128 := fun _ => 0
   memory : Memory
   pc : Word
+  /-- Effective SCTLR.SA/SA0 for the executing exception level. Linux enables it. -/
+  spAlignmentCheck : Bool := true
 
 /-- Full architectural SIMD bank. The separate V0 field preserves the earlier
 reference interface; index31 is V31, unrelated to integer ZR/SP. -/
@@ -412,6 +414,63 @@ def arithmeticExtendedStep (width : Width) (subtract setFlags : Bool)
   arithmeticImmediateStep width subtract setFlags dst src
     (extendValue width kind (readReg s rhs) (BitVec.ofNat 64 amount.val)) s
 
+/-- Scalar memory access sizes. Integer register writes remain64 bits, with
+load-width truncation and signed-load destination narrowing stated separately. -/
+inductive MemoryWidth | byte | half | word | double
+  deriving DecidableEq, Repr
+
+def MemoryWidth.bytes : MemoryWidth → Nat
+  | .byte => 1 | .half => 2 | .word => 4 | .double => 8
+
+def MemoryWidth.bits (width : MemoryWidth) : Nat := width.bytes * 8
+
+inductive MemoryTransfer
+  | load (dst : Register) (signedTo : Option Width)
+  | store (src : Register)
+  deriving DecidableEq, Repr
+
+structure MemoryInstruction where
+  width : MemoryWidth
+  transfer : MemoryTransfer
+  base : Register
+  offset : Word
+  deriving DecidableEq, Repr
+
+/-- Memory field31 is SP. This is distinct from a load/store data field31,
+which denotes ZR. Address arithmetic wraps at64 bits. -/
+def memoryBase (s : State) (base : Register) : Word :=
+  if h : base.val < 31 then s.gpr ⟨base.val, h⟩ else s.sp
+
+/-- CheckSPAlignment tests the incoming SP itself before offset addition or
+any pre-index writeback, never an unaligned effective address through a GPR. -/
+def spAlignmentFault (s : State) (base : Register) : Option Fault :=
+  if s.spAlignmentCheck && (base.val == 31) && (s.sp &&& 15 != 0) then
+    some (.spAlignment s.sp) else none
+
+def memoryLoadValue (width : MemoryWidth) (signedTo : Option Width) (value : Word) : Word :=
+  match signedTo with
+  | none => (value.setWidth width.bits).setWidth 64
+  | some destination => narrow ((value.setWidth width.bits).signExtend 64) destination
+
+/-- Ordinary scalar memory transfer, including signed loads, exact byte
+permissions/initialization and ordered fault effects. No source register or
+memory value is synthesized on a fault. -/
+def memoryStep (i : MemoryInstruction) (s : State) : Transition State :=
+  match spAlignmentFault s i.base with
+  | some fault => ⟨s, [.fault fault], some fault⟩
+  | none =>
+      let address := memoryBase s i.base + i.offset
+      match i.transfer with
+      | .load dst signedTo =>
+          match readMemory s.memory address i.width.bytes with
+          | .error fault => ⟨s, [.fault fault], some fault⟩
+          | .ok (value, event) =>
+              ⟨{ writeReg s dst (memoryLoadValue i.width signedTo value) with pc := s.pc + 4 }, [event], none⟩
+      | .store src =>
+          match writeMemory s.memory address (readReg s src) i.width.bytes with
+          | .error fault => ⟨s, [.fault fault], some fault⟩
+          | .ok (memory, event) => ⟨{ s with memory := memory, pc := s.pc + 4 }, [event], none⟩
+
 /-- Branch offsets are signed native BYTE displacements relative to the
 branch instruction, with wrapping64-bit PC arithmetic. -/
 def branchStep (taken : Bool) (displacement : Word) (s : State) : Transition State :=
@@ -425,6 +484,7 @@ def bitBranch (nonzero : Bool) (value : Word) (bit : BitVec 6) : Bool :=
   if nonzero then selected != 0 else selected == 0
 
 inductive Instruction
+  | memory (instruction : MemoryInstruction)
   | nop
   | branch (displacement : Word)
   | branchConditional (predicate : Fin 16) (displacement : Word)
@@ -452,6 +512,7 @@ inductive Instruction
 
 def step (i : Instruction) (s : State) : Transition State :=
   match i with
+  | .memory instruction => memoryStep instruction s
   | .nop => ⟨{ s with pc := s.pc + 4 }, [], none⟩
   | .branch displacement => branchStep true displacement s
   | .branchConditional predicate displacement => branchStep (condition s.flags predicate) displacement s
@@ -496,6 +557,22 @@ def decode (bytes : Array Byte) : Except String Instruction := do
   let lhs := register (word / 2^5)
   let rhs := register (word / 2^16)
   let addend := register (word / 2^10)
+  -- Scalar unsigned-scaled and signed-unscaled immediate memory encodings.
+  -- V=0 selects GPR transfers; pre/post/register modes have distinct classes.
+  let scaled := word &&& 0x3f000000 == 0x39000000
+  let unscaled := word &&& 0x3f200c00 == 0x38000000
+  if scaled || unscaled then
+    let size := word / 2^30
+    let accessWidth := match size with | 0 => MemoryWidth.byte | 1 => .half | 2 => .word | _ => .double
+    let opc := (word / 2^22) % 4
+    let transfer ← match opc with
+      | 0 => pure (MemoryTransfer.store dst)
+      | 1 => pure (.load dst none)
+      | 2 => if size < 3 then pure (.load dst (some .w64)) else throw "prefetch encoding is not a scalar load/store"
+      | _ => if size < 2 then pure (.load dst (some .w32)) else throw "reserved signed-load size"
+    let offset := if scaled then BitVec.ofNat 64 (((word / 2^10) % 2^12) * accessWidth.bytes)
+      else (BitVec.ofNat 9 (word / 2^12)).signExtend 64
+    return .memory ⟨accessWidth, transfer, lhs, offset⟩
   if word = 0xd503201f then return .nop
   if word &&& 0xfc000000 = 0x14000000 then
     return .branch ((BitVec.ofNat 26 word).signExtend 64 <<< 2)

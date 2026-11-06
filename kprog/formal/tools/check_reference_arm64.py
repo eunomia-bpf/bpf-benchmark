@@ -496,6 +496,122 @@ def main():
         expected = copy.deepcopy(request["state"])
         expected.update(pc=target, defined_flags=(1 << 64) - 1, events=[], fault=None)
         cases.append((request, expected))
+    # Independent GNU-as encodings: unsigned and sign-extending loads, all
+    # store widths, negative unscaled and maximum positive scaled offsets.
+    # Fixed byte/value examples also check byte confinement and initialized bits.
+    memory_forms = [
+        (0xF9400020, 8, 0, 0, 0xCDAB45678023FE81),
+        (0x39400420, 1, 1, 0, 0x81), (0x79400420, 2, 2, 0, 0xFE81),
+        (0xB9400420, 4, 4, 0, 0x8023FE81), (0xF9400420, 8, 8, 0, 0xCDAB45678023FE81),
+        (0x39000422, 1, 1, None, 0x0123456789ABCDEF),
+        (0x79000422, 2, 2, None, 0x0123456789ABCDEF),
+        (0xB9000422, 4, 4, None, 0x0123456789ABCDEF),
+        (0xF9000422, 8, 8, None, 0x0123456789ABCDEF),
+        (0xF8500020, 8, -256, 0, 0xCDAB45678023FE81),
+        (0x384FF020, 1, 255, 0, 0x81), (0x785FE020, 2, -2, 0, 0xFE81),
+        (0xB85FC020, 4, -4, 0, 0x8023FE81),
+        (0x380FF022, 1, 255, None, 0x0123456789ABCDEF),
+        (0x781FE022, 2, -2, None, 0x0123456789ABCDEF),
+        (0xB81FC022, 4, -4, None, 0x0123456789ABCDEF),
+        (0xF81F8022, 8, -8, None, 0x0123456789ABCDEF),
+        (0x39800420, 1, 1, 0, 0xFFFFFFFFFFFFFF81), (0x39C00420, 1, 1, 0, 0xFFFFFF81),
+        (0x79800420, 2, 2, 0, 0xFFFFFFFFFFFFFE81), (0x79C00420, 2, 2, 0, 0xFFFFFE81),
+        (0xB9800420, 4, 4, 0, 0xFFFFFFFF8023FE81),
+        (0x389FF020, 1, -1, 0, 0xFFFFFFFFFFFFFF81), (0x38DFF020, 1, -1, 0, 0xFFFFFF81),
+        (0x789FE020, 2, -2, 0, 0xFFFFFFFFFFFFFE81), (0x78DFE020, 2, -2, 0, 0xFFFFFE81),
+        (0xB89FC020, 4, -4, 0, 0xFFFFFFFF8023FE81),
+        (0xF9400021, 8, 0, 1, 0xCDAB45678023FE81),
+        (0xF9000021, 8, 0, None, 0x5001),  # store source aliases address base
+        (0x397FFC20, 1, 4095, 0, 0x81), (0x797FFC20, 2, 8190, 0, 0xFE81),
+        (0xB97FFC20, 4, 16380, 0, 0x8023FE81), (0xF97FFC20, 8, 32760, 0, 0xCDAB45678023FE81),
+        (0x393FFC22, 1, 4095, None, 0x0123456789ABCDEF),
+        (0x793FFC22, 2, 8190, None, 0x0123456789ABCDEF),
+        (0xB93FFC22, 4, 16380, None, 0x0123456789ABCDEF),
+        (0xF93FFC22, 8, 32760, None, 0x0123456789ABCDEF)]
+    contents = [0x81, 0xFE, 0x23, 0x80, 0x67, 0x45, 0xAB, 0xCD]
+    for word, count, offset, dst, value in memory_forms:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["registers"][1:3] = [(0x5001 - offset) % (1 << 64), 0x0123456789ABCDEF]
+        request["state"]["memory"] = [dict(address=0x5000 + i, value=byte,
+            readable=True, writable=True, initialized=i != 2)
+            for i, byte in enumerate([0xA5] + contents + [0x5A])]
+        expected = copy.deepcopy(request["state"])
+        event = dict(kind="read" if dst is not None else "write", address=0x5001,
+                     value=contents[:count] if dst is not None else list(value.to_bytes(8, "little")[:count]),
+                     initialized=(count == 1) if dst is not None else True)
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[event], fault=None)
+        if dst is not None:
+            expected["registers"][dst] = value
+        else:
+            for cell, byte in zip(expected["memory"][1:1 + count], event["value"]):
+                cell.update(value=byte, initialized=True)
+        cases.append((request, expected))
+    # Base31 is SP; data31 is ZR. An unaligned effective address through a
+    # GPR is already exercised above. These SP offsets are legal too.
+    for word, count, offset, store in [(0x394007FF, 1, 1, False), (0xF90007FF, 8, 8, True)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["registers"][31] = 0x5000
+        request["state"]["memory"] = [dict(address=0x5000 + offset + i, value=0x81,
+            readable=True, writable=True, initialized=False) for i in range(count)]
+        expected = copy.deepcopy(request["state"])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, fault=None,
+            events=[dict(kind="write" if store else "read", address=0x5000 + offset,
+                         value=[0 if store else 0x81] * count, initialized=store)])
+        if store:
+            for cell in expected["memory"]:
+                cell.update(value=0, initialized=True)
+        cases.append((request, expected))
+    for word, sp, check in [(0x394003E0, 0x5001, True), (0x39403FE0, 0x4FF1, True),
+                             (0xF90007FF, 0x5001, True), (0x394003E0, 0x5001, False)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"].update(sp_alignment_check=check,
+            memory=[dict(address=0x5001, value=0x81, readable=True, writable=True, initialized=False)])
+        request["state"]["registers"][31] = sp
+        expected = copy.deepcopy(request["state"])
+        if check:
+            fault = dict(kind="sp_alignment", address=sp)
+            expected.update(defined_flags=(1 << 64) - 1, events=[dict(kind="fault", fault=fault)], fault=fault)
+        else:
+            expected["registers"][0] = 0x81
+            expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, fault=None,
+                events=[dict(kind="read", address=0x5001, value=[0x81], initialized=False)])
+        cases.append((request, expected))
+    # Each fault checks the whole width, including its last byte; a failed
+    # store must preserve every previously writable byte and initialized bit.
+    for word, kind in [(0xF9400020, "read"), (0xF9000022, "write"), (0xF940003F, "read")]:
+        for mapped in (False, True):
+            request = copy.deepcopy(base)
+            request["native_bytes"] = list(word.to_bytes(4, "little"))
+            request["state"]["registers"][1] = 0x5001
+            request["state"]["memory"] = [dict(address=0x5001 + i, value=byte,
+                readable=True, writable=True, initialized=False) for i, byte in enumerate(contents)] if mapped else []
+            if mapped:
+                request["state"]["memory"][-1]["readable" if kind == "read" else "writable"] = False
+            expected = copy.deepcopy(request["state"])
+            fault = dict(kind=kind, address=0x5001, bytes=8)
+            expected.update(defined_flags=(1 << 64) - 1, events=[dict(kind="fault", fault=fault)], fault=fault)
+            cases.append((request, expected))
+    for word, target, store in [(0xF9400420, 4, False),
+            (0xF9400020, (1 << 64) - 4, False), (0xF9000022, (1 << 64) - 4, True)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = list(word.to_bytes(4, "little"))
+        request["state"]["registers"][1:3] = [(1 << 64) - 4, 0x0123456789ABCDEF]
+        request["state"]["pc"] = (1 << 64) - 4
+        request["state"]["memory"] = [dict(address=(target + i) % (1 << 64), value=byte,
+            readable=True, writable=True, initialized=True) for i, byte in enumerate(contents)]
+        expected = copy.deepcopy(request["state"])
+        event_bytes = [0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01] if store else contents
+        expected.update(pc=0, defined_flags=(1 << 64) - 1, fault=None,
+            events=[dict(kind="write" if store else "read", address=target, value=event_bytes, initialized=True)])
+        if store:
+            for cell, byte in zip(expected["memory"], event_bytes):
+                cell["value"] = byte
+        else:
+            expected["registers"][0] = 0xCDAB45678023FE81
+        cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -513,7 +629,8 @@ def main():
                  0x91800420, 0xD1800420, 0x31800420, 0xF1800420,
                  0x0BC20020, 0x8BC20020, 0x0B028020, 0x0B828020, 0x6BC20020,
                  0x8B221420, 0x0B221820, 0x6B22FC20, 0xEB2277FF, 0x4B2117E0,
-                 0x54000118, 0xD4000108, 0xD503203F):
+                 0x54000118, 0xD4000108, 0xD503203F,
+                 0xB9C00020, 0xF9C00020, 0xB8C00020, 0xF8C00020):
         request = copy.deepcopy(base)
         request["native_bytes"] = list(word.to_bytes(4, "little"))
         rejected = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
@@ -605,7 +722,7 @@ def main():
             assert str(error).startswith(("invalid move-wide", "invalid NEGS", "invalid AArch64 extend")), error
             continue
         raise AssertionError((mnemonic, operands, "invalid alias was accepted"))
-    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV-all32/CNT/UADDLV/CCMP/ADD-SUB-immediate/shifted-register/extended-register/NOP/branches, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
+    print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV-all32/CNT/UADDLV/CCMP/ADD-SUB-immediate/shifted-register/extended-register/NOP/branches/scalar-memory, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 
 if __name__ == "__main__":
