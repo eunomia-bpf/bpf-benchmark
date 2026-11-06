@@ -202,3 +202,37 @@ continues the remaining cases; see `helper-ids/micro-build-isolated-progress.log
 The production stack header changed during that compile, so its cause has not
 been isolated. No architecture-wide build success is claimed. This is separate
 from the passing helper identity/ABI checks and the retained app artifact scan.
+
+## Register representation and restart recovery
+
+The corrected register-cell representation compiles all 29 unchanged micro
+artifacts. In full-system QEMU, **28/29 original-input result checks pass**;
+`trace_event_type_switch_dispatch` reaches the verifier limit of 1,000,001
+processed instructions. Its full verifier rejection is retained in
+[register-cells-v2/](register-cells-v2/table.md). The earlier candidate's
+invalid-register write bug was caught by the existing host oracles and fixed
+before promotion. The six register, writeback, operand, flag, select and helper
+host oracles pass (6,401 / 6,401 / 21,688 / 1,152 / 192 / 84 cases).
+
+Each register and tag remains the same named local. A single table of pointers
+to those locals replaces repeated 31-arm accessor expansion. SP, XZR, absent
+and invalid register behavior and the generated width selector are preserved.
+No workload or native instruction was changed. Longer compiler retries and
+loader deadlines are explicit command arguments; completed failures are kept.
+Sources, original inputs, compiled objects and frozen simulator/contracts are
+archived beside each table. These are simulator result checks on stock QEMU,
+not generation-bound application workload counters.
+
+```sh
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile register-cell-host-check PHASE=register-cells-v2
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile compile PHASE=register-cells-v2 COMPILE_ARGS='0 29 900'
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile verify PHASE=register-cells-v2
+make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile summarize PHASE=register-cells-v2
+```
+
+After the container restart, completed records were reused. Interrupted guest
+logs were preserved under `register-cells/verify/interrupted-0834/`; the two
+900-second compiler retries both compile and pass their unchanged QEMU results
+in `register-cells-long/`. Seven of eight resumed result checks pass in
+`register-cells-runlong/`; the eighth is the same event-type verifier complexity
+failure. The original 60-second deadlines remain in `register-cells/`.

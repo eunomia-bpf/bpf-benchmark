@@ -189,6 +189,9 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	union arm64_sim_gpr __a64_##NAME = { .x = 0 };                    \
 	__u8 __a64_##NAME##_tag = ARM64_SIM_TAG_SCALAR;
 
+#define ARM64_SIM_L_REG_CELL(REG, NAME) [KPROG_ARM64_GPR_CELL(REG)] = &__a64_##NAME,
+#define ARM64_SIM_L_TAG_CELL(REG, NAME) [KPROG_ARM64_GPR_CELL(REG)] = &__a64_##NAME##_tag,
+
 #ifdef ARM64_SIM_ENABLE_STACK
 #define ARM64_SIM_L_DECLARE_STACK()                                         \
 	volatile union {                                                            \
@@ -209,6 +212,10 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 
 #define ARM64_SIM_L_DECLARE_STATE()                                         \
 	ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_DECLARE_REG)                  \
+	union arm64_sim_gpr *const __a64_cells[KPROG_ARM64_GPR_COUNT] = { \
+		ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_REG_CELL) };           \
+	__u8 *const __a64_tag_cells[KPROG_ARM64_GPR_COUNT] = {            \
+		ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_TAG_CELL) };           \
 	__u8 __a64_n = 0;                                                  \
 	__u8 __a64_z = 0;                                                  \
 	__u8 __a64_c = 0;                                                  \
@@ -241,130 +248,49 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	__a64_x0.ptr = &__a64_sim_abi;                                    \
 	__a64_x0_tag = ARM64_SIM_TAG_ABI
 
-#define ARM64_SIM_L_READ_REG_CASE(REG, NAME)                                \
-	case REG:                                                          \
-		__a64_l_value = __a64_##NAME.x;                          \
-		break;
+#define ARM64_SIM_L_READ_REG(REG) \
+	({ __u64 __a64_l_reg = (REG); \
+	   __a64_l_reg == ARM64_SP ? (__u64)__a64_sp : \
+	   __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
+	     __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->x : 0ULL; })
 
-#define ARM64_SIM_L_READ_REG(REG)                                           \
-	({                                                                 \
-		__u64 __a64_l_value = 0;                                  \
-		if ((REG) == ARM64_SP) {                                  \
-			__a64_l_value = (__u64)__a64_sp;                  \
-		} else {                                                   \
-			switch (REG) {                                    \
-			ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_READ_REG_CASE)\
-			case ARM64_XZR:                                   \
-			default:                                          \
-				__a64_l_value = 0;                        \
-				break;                                    \
-			}                                                 \
-		}                                                         \
-		__a64_l_value;                                            \
-	})
+#define ARM64_SIM_L_READ_REG_PTR(REG) \
+	({ __u64 __a64_l_reg = (REG); \
+	   __a64_l_reg == ARM64_SP ? (void *)(long)__a64_sp : \
+	   __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
+	     __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->ptr : (void *)0; })
 
-#define ARM64_SIM_L_REG_PTR_CASE(REG, NAME)                                 \
-	case REG:                                                          \
-		__a64_l_ptr = __a64_##NAME.ptr;                         \
-		break;
+#define ARM64_SIM_L_REG_TAG(REG) \
+	({ __u64 __a64_l_reg = (REG); \
+	   __a64_l_reg == ARM64_SP ? ARM64_SIM_TAG_STACK : \
+	   __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
+	     *__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)] : ARM64_SIM_TAG_SCALAR; })
 
-#define ARM64_SIM_L_READ_REG_PTR(REG)                                       \
-	({                                                                 \
-		void *__a64_l_ptr = (void *)0;                            \
-		if ((REG) == ARM64_SP) {                                  \
-			__a64_l_ptr = (void *)(long)__a64_sp;             \
-		} else {                                                   \
-			switch (REG) {                                    \
-			ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_REG_PTR_CASE)\
-			default:                                          \
-				__a64_l_ptr = (void *)0;                  \
-				break;                                    \
-			}                                                 \
-		}                                                         \
-		__a64_l_ptr;                                              \
-	})
-
-#define ARM64_SIM_L_REG_TAG_CASE(REG, NAME)                                 \
-	case REG:                                                          \
-		__a64_l_tag = __a64_##NAME##_tag;                       \
-		break;
-
-#define ARM64_SIM_L_REG_TAG(REG)                                            \
-	({                                                                 \
-		__u8 __a64_l_tag = ARM64_SIM_TAG_SCALAR;                 \
-		if ((REG) == ARM64_SP) {                                  \
-			__a64_l_tag = ARM64_SIM_TAG_STACK;                \
-		} else {                                                   \
-			switch (REG) {                                    \
-			ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_REG_TAG_CASE)\
-			default:                                          \
-				break;                                    \
-			}                                                 \
-		}                                                         \
-		__a64_l_tag;                                              \
-	})
-
-#define ARM64_SIM_L_WRITE_REG64_CASE(REG, NAME)                             \
-	case REG:                                                          \
-		__a64_##NAME.x = __a64_l_next;                          \
-		__a64_##NAME##_tag = ARM64_SIM_TAG_SCALAR;              \
-		break;
-
-#define ARM64_SIM_L_WRITE_REG32_CASE(REG, NAME)                             \
-	case REG:                                                          \
-		__a64_##NAME.x = (__u32)__a64_l_next;                   \
-		__a64_##NAME##_tag = ARM64_SIM_TAG_SCALAR;              \
-		break;
-
-#define ARM64_SIM_L_WRITE_REG_PTR_CASE(REG, NAME)                           \
-	case REG:                                                          \
-		__a64_##NAME.ptr = __a64_l_next_ptr;                    \
-		__a64_##NAME##_tag = __a64_l_next_tag;                 \
-		break;
-
-#define ARM64_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH)                      \
-	do {                                                               \
-		__u64 __a64_l_next = KPROG_ARM64_APPLY_WIDTH((VALUE), (WIDTH)); \
-		if ((REG) == ARM64_SP) {                                  \
-			__a64_sp = (__s64)__a64_l_next;                   \
-		} else if (KPROG_ARM64_REG_WRITABLE(REG)) {                \
-		if (KPROG_ARM64_WRITE_ARM((WIDTH) == ARM64_WIDTH_32) == \
-		    KPROG_ARM64_WRITE_ARM_NARROW) {                \
-				switch (REG) {                            \
-				ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_WRITE_REG32_CASE)\
-				default: break;                           \
-				}                                         \
-			} else {                                            \
-				switch (REG) {                            \
-				ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_WRITE_REG64_CASE)\
-				default: break;                           \
-				}                                         \
-			}                                                   \
-		}                                                          \
+#define ARM64_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH) \
+	do { __u64 __a64_l_reg = (REG); \
+	     __u64 __a64_l_next = KPROG_ARM64_APPLY_WIDTH((VALUE), (WIDTH)); \
+	     if (__a64_l_reg == ARM64_SP) { \
+	       __a64_sp = (__s64)__a64_l_next; \
+	     } else if (__a64_l_reg < KPROG_ARM64_GPR_COUNT && KPROG_ARM64_REG_WRITABLE(__a64_l_reg)) { \
+	       if (KPROG_ARM64_WRITE_ARM((WIDTH) == ARM64_WIDTH_32) == KPROG_ARM64_WRITE_ARM_NARROW) \
+	         __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->x = (__u32)__a64_l_next; \
+	       else \
+	         __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->x = __a64_l_next; \
+	       *__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)] = ARM64_SIM_TAG_SCALAR; \
+	     } \
 	} while (0)
 
-#define ARM64_SIM_L_WRITE_REG_PTR(REG, VALUE)                               \
-	do {                                                               \
-		void *__a64_l_next_ptr = (void *)(VALUE);                \
-		__u8 __a64_l_next_tag = ARM64_SIM_TAG_SCALAR;            \
-		if (KPROG_ARM64_REG_WRITABLE(REG)) {                      \
-			switch (REG) {                                    \
-			ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_WRITE_REG_PTR_CASE)\
-			default: break;                                   \
-			}                                                 \
-		}                                                          \
-	} while (0)
+#define ARM64_SIM_L_WRITE_REG_PTR(REG, VALUE) \
+	ARM64_SIM_L_WRITE_REG_PTR_TAG((REG), (VALUE), ARM64_SIM_TAG_SCALAR)
 
-#define ARM64_SIM_L_WRITE_REG_PTR_TAG(REG, VALUE, TAG)                       \
-	do {                                                               \
-		void *__a64_l_next_ptr = (void *)(VALUE);                \
-		__u8 __a64_l_next_tag = (TAG);                           \
-		if (KPROG_ARM64_REG_WRITABLE(REG)) {                      \
-			switch (REG) {                                    \
-			ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_WRITE_REG_PTR_CASE)\
-			default: break;                                   \
-			}                                                 \
-		}                                                          \
+#define ARM64_SIM_L_WRITE_REG_PTR_TAG(REG, VALUE, TAG) \
+	do { __u64 __a64_l_reg = (REG); \
+	     void *__a64_l_next_ptr = (void *)(VALUE); \
+	     __u8 __a64_l_next_tag = (TAG); \
+	     if (__a64_l_reg < KPROG_ARM64_GPR_COUNT && KPROG_ARM64_REG_WRITABLE(__a64_l_reg)) { \
+	       __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->ptr = __a64_l_next_ptr; \
+	       *__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)] = __a64_l_next_tag; \
+	     } \
 	} while (0)
 
 #define ARM64_SIM_L_WRITE_REG_MAP_PTR(REG, VALUE)                            \

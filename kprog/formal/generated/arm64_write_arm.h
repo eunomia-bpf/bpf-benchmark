@@ -6,9 +6,9 @@
  * `ARM64_SIM_L_WRITE_REG_WIDTH` first masks its value to the access width
  * (`KPROG_ARM64_APPLY_WIDTH`, owned by `generated/arm64_width.h`) and then
  * selects the writeback body from a single closed fact: whether the access
- * width code is the 32-bit code 4. The narrow body
- * `ARM64_SIM_L_WRITE_REG32_CASE` stores `(__u32)__a64_l_next`; the full body
- * `ARM64_SIM_L_WRITE_REG64_CASE` stores `__a64_l_next`. Because the value is
+ * width code is the 32-bit code 4. The narrow cell store writes
+ * `(__u32)__a64_l_next`; the full cell store writes `__a64_l_next`.
+ * Because the value is
  * masked to the width before the choice, the two bodies are observationally
  * equal for every width the simulator reaches, so only a wrong selector code
  * or a swapped body assignment is observable.

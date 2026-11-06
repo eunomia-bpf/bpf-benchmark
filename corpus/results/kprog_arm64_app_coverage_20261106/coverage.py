@@ -53,13 +53,13 @@ def freeze_simulator(directory):
         shutil.copytree(ROOT / 'kprog/formal/generated', directory / 'formal/generated')
 
 
-def compile_one(row, directory):
+def compile_one(row, directory, timeout):
     with (directory / 'compile-locks' / (row['name'] + '.lock')).open('w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        return compile_locked(row, directory)
+        return compile_locked(row, directory, timeout)
 
 
-def compile_locked(row, directory):
+def compile_locked(row, directory, timeout):
     log = directory / 'compile' / (row['name'] + '.json')
     if log.exists():
         return json.loads(log.read_text())
@@ -75,18 +75,18 @@ def compile_locked(row, directory):
                '-I', str(ROOT / 'kprog/arm64/micro-prog'), '-c', str(source),
                '-o', str(directory / 'objects' / (row['name'] + '.bpf.o'))]
     try:
-        result = subprocess.run(command, text=True, capture_output=True, timeout=120)
+        result = subprocess.run(command, text=True, capture_output=True, timeout=timeout)
         code, stdout, stderr = result.returncode, result.stdout, result.stderr
     except subprocess.TimeoutExpired as error:
         code = 124
         stdout = (error.stdout or b'').decode(errors='replace')
-        stderr = (error.stderr or b'').decode(errors='replace') + '\ncompile timeout after 120s\n'
+        stderr = (error.stderr or b'').decode(errors='replace') + f'\ncompile timeout after {timeout}s\n'
     record = dict(row, command=command, returncode=code, stdout=stdout, stderr=stderr)
     log.write_text(json.dumps(record) + '\n')
     return record
 
 
-def compile_all(directory, offset=0, stop=None):
+def compile_all(directory, offset=0, stop=None, timeout=120):
     for name in ['compile', 'objects', 'compile-sources', 'compile-locks']:
         (directory / name).mkdir(exist_ok=True)
     rows = [row for row in records(directory) if row['stage'] == 'generate' and row['ok']]
@@ -94,7 +94,7 @@ def compile_all(directory, offset=0, stop=None):
     freeze_simulator(directory)
     failures = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        futures = [pool.submit(compile_one, row, directory) for row in rows]
+        futures = [pool.submit(compile_one, row, directory, timeout) for row in rows]
         for count, future in enumerate(concurrent.futures.as_completed(futures), 1):
             row = future.result()
             failures += row['returncode'] != 0
@@ -126,6 +126,9 @@ def summarize(directory):
                     status = ('verifier_accepted' if accepted else 'verifier_rejected'
                               if verifier.exists() and verifier.stat().st_size else 'load_failed')
                     detail = (directory / 'verify' / (name + '.stderr')).read_text()
+                    if any(error in detail for error in ['bpf_prog_test_run_opts failed',
+                                                        'retval mismatch', 'result mismatch']):
+                        status = 'execution_failed'
                     if verifier.exists():
                         detail += '\n' + verifier.read_text()
         cause = ''
@@ -150,7 +153,7 @@ def summarize(directory):
         writer.writeheader()
         writer.writerows(rows)
     statuses = ['generation_failed', 'compile_pending', 'compile_failed', 'verify_pending',
-                'verifier_accepted', 'verifier_rejected', 'load_failed']
+                'verifier_accepted', 'verifier_rejected', 'load_failed', 'execution_failed']
     lines = ['Artifact census (all entries use the harness XDP ABI; no app execution is implied).', '',
              '| App | Objects | ' + ' | '.join(statuses) + ' |',
              '| --- | ---: | ' + ' | '.join(['---:'] * len(statuses)) + ' |']
@@ -164,6 +167,8 @@ def summarize(directory):
             archive.add(run_dir, arcname=run_dir.name)
         if (directory / 'compile-sources').exists():
             archive.add(directory / 'compile-sources', arcname='compile-sources')
+        if (directory / 'inputs').exists():
+            archive.add(directory / 'inputs', arcname='inputs')
     if (directory / 'simulator').exists():
         with tarfile.open(directory / 'simulator-snapshot.tar.gz', 'w:gz') as archive:
             for name in ['simulator', 'formal']:
@@ -175,6 +180,11 @@ def summarize(directory):
                 if row['returncode'] == 0:
                     obj = directory / 'objects' / (row['name'] + '.bpf.o')
                     archive.add(obj, arcname=obj.name)
+    if (directory / 'verify').exists():
+        with tarfile.open(directory / 'verification-logs.tar.gz', 'w:gz') as archive:
+            archive.add(directory / 'verify', arcname='verify')
+            if (directory / 'qemu.log').exists():
+                archive.add(directory / 'qemu.log', arcname='qemu.log')
     return 0
 
 
@@ -187,30 +197,42 @@ def package(directory, build, base):
         unpack = subprocess.run(['gzip', '-dc'], stdin=source, capture_output=True, check=True)
     subprocess.run(['cpio', '-id', '--quiet', '--no-absolute-filenames',
                     'bin/busybox', 'lib/*', 'dev/console'], cwd=root, input=unpack.stdout, check=True)
-    for name in ['proc', 'sys', 'results', 'objects', 'tmp']:
+    for name in ['proc', 'sys', 'results', 'objects', 'inputs', 'tmp']:
         (root / name).mkdir(exist_ok=True)
     (root / 'bin/sh').symlink_to('busybox')
     shutil.copy2(ROOT / 'kprog/loader/target/aarch64-unknown-linux-gnu/debug/reversesim-loader', root / 'loader')
     shutil.copy2('/usr/aarch64-linux-gnu/lib/libgcc_s.so.1', root / 'lib/libgcc_s.so.1')
-    names = []
+    cases = []
     for log in sorted((directory / 'compile').glob('*.json')):
         row = json.loads(log.read_text())
         if row['returncode'] == 0:
             name = row['name']
             shutil.copy2(directory / 'objects' / (name + '.bpf.o'), root / 'objects')
-            names.append(name)
-    if not names:
+            if 'input_file' in row:
+                shutil.copy2(row['input_file'], root / 'inputs' / (name + '.mem'))
+            cases.append(row)
+    if not cases:
         raise RuntimeError('no compiled artifacts to load')
     script = ['#!/bin/sh', 'export PATH=/bin', 'busybox mount -t proc proc /proc || exit 1',
               'busybox mount -t sysfs sysfs /sys || exit 1',
               'busybox mount -t 9p -o trans=virtio results /results || exit 1',
               'ulimit -l unlimited || exit 1', 'status=0']
-    for name in names:
+    for row in cases:
+        name = row['name']
+        timeout = int(row.get('load_timeout_s', 60))
+        if timeout <= 0:
+            raise ValueError(f'{name}: load timeout must be positive')
+        mode = '--load-only'
+        if 'input_file' in row:
+            mode = (f"--input /inputs/{name}.mem --expected-result {row['expected_result']} "
+                    f"--expect-retval {row['expected_retval']} --result-channel {row['result_channel']}")
+            if row['cgroup_skb_input']:
+                mode += ' --cgroup-skb-input'
         script.extend([f'if [ -f /results/{name}.rc ]; then',
                        f'  if [ "$(busybox cat /results/{name}.rc)" != 0 ]; then status=1; fi',
                        'else', f'echo load {name}',
-                       f'busybox timeout 60 /loader --object /objects/{name}.bpf.o '
-                       f'--program {name}_arm64_sim_xdp --load-only '
+                       f'busybox timeout {timeout} /loader --object /objects/{name}.bpf.o '
+                       f'--program {name}_arm64_sim_xdp {mode} '
                        f'--verifier-log /results/{name}.verifier.log '
                        f'>/results/{name}.stdout 2>/results/{name}.stderr',
                        'rc=$?', f'echo "$rc" >/results/{name}.rc',
@@ -223,7 +245,7 @@ def package(directory, build, base):
                              input=files.encode(), capture_output=True, check=True)
     with (build / 'initramfs.cpio.gz').open('wb') as out:
         subprocess.run(['gzip', '-c'], input=archive.stdout, stdout=out, check=True)
-    print(f'packaged {len(names)} diagnostic artifacts in {build}')
+    print(f'packaged {len(cases)} diagnostic artifacts in {build}')
     return 0
 
 

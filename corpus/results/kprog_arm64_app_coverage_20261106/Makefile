@@ -53,3 +53,10 @@ helper-contract-check:
 	$(ROOT)/kprog/formal/build/test_arm64_helper_idents_host
 	cd $(ROOT)/kprog/formal && cc -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_helper_call_host.c -o build/test_arm64_helper_call_host
 	$(ROOT)/kprog/formal/build/test_arm64_helper_call_host
+
+.PHONY: register-cell-host-check write-arm-generate
+register-cell-host-check:
+	taskset -c 16-23 python3 $(HERE)/register_cells_check.py $(HERE)/$(PHASE)
+
+write-arm-generate:
+	cd $(ROOT)/kprog/formal && python3 tools/generate_arm64_write_arm_spec.py

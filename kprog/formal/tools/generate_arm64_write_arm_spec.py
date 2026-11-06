@@ -5,28 +5,22 @@ The hand-written AArch64 writeback body of `kprog/arm64/arm64_sim_local_bpf.h`
 -- `ARM64_SIM_L_WRITE_REG_WIDTH`, which every GPR write in the simulator routes
 through -- first masks the value to the access width
 (`KPROG_ARM64_APPLY_WIDTH`, owned by the `arm64_width.h` contract) and then
-picks the writeback body by hand from a *single closed fact*: whether the
+selects the writeback body from a *single closed fact*: whether the
 access width code is the 32-bit code:
 
-    if ((WIDTH) == ARM64_WIDTH_32) {
-            switch (REG) {
-            ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_WRITE_REG32_CASE)
-            default: break;
-            }
-    } else {
-            switch (REG) {
-            ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_WRITE_REG64_CASE)
-            default: break;
-            }
-    }
+    if (KPROG_ARM64_WRITE_ARM((WIDTH) == ARM64_WIDTH_32) ==
+        KPROG_ARM64_WRITE_ARM_NARROW)
+            cell->x = (__u32)__a64_l_next;
+    else
+            cell->x = __a64_l_next;
 
 The body is selected from that single closed fact -- whether the access width
 code is 4, the 32-bit code:
 
-  * the **narrow** body (`ARM64_SIM_L_WRITE_REG32_CASE`, storing
+  * the **narrow** body (narrow cell store, storing
     `(__u32)__a64_l_next`): the access width code is the 32-bit code, so the
     writeback truncates the already-masked value to 32 bits;
-  * the **full** body (`ARM64_SIM_L_WRITE_REG64_CASE`, storing
+  * the **full** body (full cell store, storing
     `__a64_l_next`): every other width code -- the 8/16-bit codes as well as
     the 64-bit code and any code above it -- so the already-masked value is
     written back whole.
@@ -105,8 +99,8 @@ WRITE_ARM_END = "#define ARM64_SIM_L_WRITE_REG_PTR("
 WRITE_ARM_SELECTOR = "KPROG_ARM64_WRITE_ARM("
 # The two writeback bodies the routed helper must keep, so the selection routes
 # between the real truncating and full cases rather than replacing them.
-FULL_CASE = "ARM64_SIM_L_WRITE_REG64_CASE)"
-NARROW_CASE = "ARM64_SIM_L_WRITE_REG32_CASE)"
+FULL_CASE = "->x = __a64_l_next;"
+NARROW_CASE = "->x = (__u32)__a64_l_next;"
 # The hand-written width test the routed body must no longer contain: the width
 # code deciding the writeback body by hand. The body legitimately keeps the
 # width code as the selector's argument, so the `if (`-led test is the safe
@@ -294,9 +288,9 @@ def render_c(spec: dict) -> str:
  * `ARM64_SIM_L_WRITE_REG_WIDTH` first masks its value to the access width
  * (`KPROG_ARM64_APPLY_WIDTH`, owned by `generated/arm64_width.h`) and then
  * selects the writeback body from a single closed fact: whether the access
- * width code is the 32-bit code {w32}. The narrow body
- * `ARM64_SIM_L_WRITE_REG32_CASE` stores `(__u32)__a64_l_next`; the full body
- * `ARM64_SIM_L_WRITE_REG64_CASE` stores `__a64_l_next`. Because the value is
+ * width code is the 32-bit code {w32}. The narrow cell store writes
+ * `(__u32)__a64_l_next`; the full cell store writes `__a64_l_next`.
+ * Because the value is
  * masked to the width before the choice, the two bodies are observationally
  * equal for every width the simulator reaches, so only a wrong selector code
  * or a swapped body assignment is observable.
