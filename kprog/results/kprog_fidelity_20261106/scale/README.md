@@ -272,3 +272,81 @@ allocation traces; `factored-parity/raw-evidence.tar.gz` retains every native,
 probe and verifier log plus exact native binaries and the probe source/binary.
 Per-case JSON and guest provenance remain directly readable. The100K scalar
 indirect and pointer variants continue as separate attempts.
+
+## All four100K shapes accepted; full x86 sweep now has16 useful artifacts
+
+Every requested x86 size/shape cell now has a verifier-accepted artifact with
+its expected result and retval2:100/1K/10K/100K native instructions, scalar or
+pointer heavy, direct or bounded indirect dispatch. The frozen baseline16
+outcomes remain unchanged; later records identify the exact compiler/header
+prototype that repairs each failed cell.
+
+|100K shape|Native instructions|BPF instructions|Verified instructions|Verifier us|Slab peak B|Vmap reserved B|Result / retval|
+|---|---:|---:|---:|---:|---:|---:|---|
+|scalar direct|100036|88|132|92|77528|24576|10713441450579470919 /2|
+|scalar indirect|100084|104|155|99|77544|24576|1685323454157403831 /2|
+|pointer direct|100036|300054|300055|90264|10523696|45699072|50007 /2|
+|pointer indirect|100084|300047|600063|133029|10523696|45699072|50023 /2|
+
+All four100K traces report zero lost events. Scalar proofs fold heavily;
+pointer proofs retain about300K BPF instructions. The bounded pointer-dispatch
+proof processes600063 instructions, below the kernel's recorded1M limit;
+peak verifier states are3. Pointer direct/indirect JIT sizes are1200259/1200233B,
+program memlock2404352B each, loader maximum RSS5868/5768KiB. Slab and
+reserved-vmap peaks describe different allocation classes and are not added.
+These are verifier-facing proof measurements; this scale run does not claim a
+100K native-generation binding or application throughput measurement.
+
+The pointer prototype factors the original MOV-load and ADD macro bodies into
+literal-form-specific always-inline functions with their actual referenced
+register/tag/flag cells. XDP ABI kind is the same constant as the original
+entry. No native instruction, memory access, bound or dispatch target is
+removed. The standard O2 cleanup is retained to eliminate finite target checks;
+a shorter cleanup initially left an unresolved-target diagnostic.
+
+Code generation exposed separate LLVM18 limits. The default scheduler spent
+its time in SelectionDAG SUnit height updates; the explicit fast scheduler
+compiles pointer/direct. Fast and linear schedules spill too much for
+pointer/indirect. Linear scheduling also exceeded LLVM's host call stack;
+raising only that compiler call stack within the12GiB cap avoided its crash
+but still failed the BPF stack limit. Disabling reassociation alone also failed.
+The register-pressure scheduler (`-pre-RA-sched=list-burr`) then compiles the
+same successful optimized IR without spill-stack errors. BPF v4 permits the
+long branch distances. No BPF stack limit was raised, and every failed/stopped
+compiler diagnostic remains archived with its actual stage and reason.
+
+The32/32 total100K native/proof input pairs agree: all four unchanged native
+programs execute on the real CPU for byte8=0,1,2,3,127,128,254,255, with the
+same64-byte packet as the kernel proof. `factored-followup-parity/` adds the
+100K scalar/indirect case plus the10K pointer/indirect control (16/16PASS),
+and `100k-pointer-parity/` adds both100K pointer shapes (16/16PASS). The earlier
+100K scalar/direct eight pairs remain in `factored-parity/`. Unsafe negatives
+are never executed.
+
+Successful commands, after restoring the frozen source artifacts:
+
+```sh
+taskset -c 20-23 prlimit --as=12884901888 -- timeout 1800 make -C kprog/fidelity/build-x86/scale-factored-cells/n100000_scalar_indirect
+taskset -c 20-23 prlimit --as=12884901888 -- timeout 900 make -C kprog/fidelity/build-x86/scale-factored-pointer/n100000_ptr_direct fast
+taskset -c 20-23 prlimit --as=12884901888 -- timeout 900 make -C kprog/fidelity/build-x86/scale-factored-pointer/n100000_ptr_indirect burr
+taskset -c 16-19 make -C kprog/fidelity scale-kvm SCALE_BUILD=build-x86/scale-factored-followup-accepted SCALE_OUT=../results/kprog_fidelity_20261106/scale/factored-followup-kvm
+taskset -c 16-19 make -C kprog/fidelity scale-kvm SCALE_BUILD=build-x86/scale-100k-pointer-direct SCALE_OUT=../results/kprog_fidelity_20261106/scale/100k-pointer-direct-kvm
+taskset -c 16-19 make -C kprog/fidelity scale-kvm SCALE_BUILD=build-x86/scale-100k-pointer-indirect SCALE_OUT=../results/kprog_fidelity_20261106/scale/100k-pointer-indirect-kvm
+taskset -c 16-19 make -C kprog/results/kprog_fidelity_20261106/scale/factored-followup-parity build kvm
+taskset -c 16-19 make -C kprog/results/kprog_fidelity_20261106/scale/100k-pointer-parity build kvm
+```
+
+The archived per-case JSON objects used by `SCALE_BUILD` are copied from the
+original build records with stage=`compiled`, returncode=0 and the newly
+compiled object; original expected values and instruction counts are retained.
+`100k-remaining-artifacts.tar.gz` preserves exact sources, frozen headers,
+intermediate optimized IR, accepted objects, Makefiles, native assembly/objects,
+compiler logs and both scheduler backtraces. `100k-remaining-traces.tar.gz`
+preserves every verifier/allocation trace for the three new100K passes and the
+10K control. Both new parity directories retain all outcomes and raw-evidence
+archives with exact native binaries, probe source/binary and every log.
+The standalone factoring script for scalar programs is also in the earlier
+`100k-scalar-direct-artifacts.tar.gz`; this remains an experimental artifact
+path, with no unreviewed production generator/header optimization promoted.
+
+`100k-build-handoff.tar.gz` additionally preserves the exact three accepted `SCALE_BUILD` directories (input metadata plus proof objects), the scalar factoring script, its Makefile and unchanged scalar-indirect generated input.

@@ -33,3 +33,5 @@ matching. Verifier timing and allocation traces, all earlier failures, and the
 experimental factoring path are documented in scale/README.md. LEA-to-RSP's
 focused post-repair replay is31forms/31744cases with zero mismatches; the
 remaining broader SP/address observations stay open.
+
+Scale completion: all16 requested x86 size/shape cells now have accepted, correct artifacts, including allfour100K shapes. All32 additional100K nativeCPU/proof inputpairs match. Pointer/direct and pointer/indirect retain300054/300047BPF instructions and verify in90.264/133.029ms. Exact experimental compiler paths, earlier failures and separate allocation peaks remain in scale/README.md. The newer independent Arm replay checks523forms/535552cases against the sameCPUtrace, CPUdifferences0, modelSPdifferences4096, remainingdecoderforms44.

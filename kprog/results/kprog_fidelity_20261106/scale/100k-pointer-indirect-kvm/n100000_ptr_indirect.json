@@ -1,0 +1,48 @@
+{
+  "name": "n100000_ptr_indirect",
+  "target_native_instructions": 100000,
+  "expected_result": 50023,
+  "stage": "passed",
+  "native_instructions": 100084,
+  "returncode": 0,
+  "probe_counters": [
+    {
+      "program_id": 5,
+      "proof_bpf_instructions": 300047,
+      "verified_instructions": 600063,
+      "bytes_jited": 1200233,
+      "program_memlock_bytes": 2404352,
+      "loader_maxrss_kib": 5768,
+      "result": 50023,
+      "expected_result": 50023,
+      "retval": 2
+    }
+  ],
+  "verifier_allocation_intervals": [
+    {
+      "slab_peak_bytes": 39632,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 10523696,
+      "vmap_reserved_peak_bytes": 45699072
+    }
+  ],
+  "verifier_slab_peak_bytes": 10523696,
+  "verifier_vmap_reserved_peak_bytes": 45699072,
+  "trace_lost_events": 0,
+  "verification_time_us": 133029,
+  "peak_states": 3
+}
