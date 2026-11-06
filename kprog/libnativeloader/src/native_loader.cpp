@@ -1,4 +1,5 @@
 #include "native_loader.hpp"
+#include "../../../kinsn/module/include/native_lab_binding.h"
 
 #include "kernel_offsets.h"
 
@@ -283,6 +284,7 @@ struct NativeLabTarget {
     const char *relocs_path_fmt;
     const char *proof_path_fmt;
     const char *generation_path_fmt;
+    const char *binding_path_fmt;
     const char *map_ptr_path;
     const char *map_value_ptr_path;
     const char *map_update_elem_path;
@@ -299,6 +301,7 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .relocs_path_fmt = "/sys/kernel/debug/bpf_arm64_native_lab/blob%u.relocs",
     .proof_path_fmt = "/sys/kernel/debug/bpf_arm64_native_lab/blob%u.proof",
     .generation_path_fmt = "/sys/kernel/debug/bpf_arm64_native_lab/blob%u.generation",
+    .binding_path_fmt = "/sys/kernel/debug/bpf_arm64_native_lab/blob%u.binding",
     .map_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_ptr",
     .map_value_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_value_ptr",
     .map_update_elem_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_update_elem",
@@ -314,6 +317,7 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .relocs_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u.relocs",
     .proof_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u.proof",
     .generation_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u.generation",
+    .binding_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u.binding",
     .map_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_ptr",
     .map_value_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_value_ptr",
     .map_update_elem_path = "/sys/kernel/debug/bpf_x86_native_lab/map_update_elem",
@@ -929,6 +933,22 @@ void upload_reloc_chunk(const std::vector<uint8_t> &relocs, uint32_t chunk_id)
     }
 }
 
+std::vector<uint8_t> chunk_reloc_bytes(
+    const std::vector<NativeLabReloc> &relocs, const NativeBlobChunk &chunk)
+{
+    std::vector<uint8_t> bytes;
+    for (const NativeLabReloc &reloc : relocs) {
+        const size_t start = reloc.global_offset;
+        const size_t end = start + native_lab_reloc_slot_bytes(reloc.kind);
+        if (start >= chunk.offset && end <= chunk.offset + chunk.len) {
+            append_u32_le(bytes, static_cast<uint32_t>(start - chunk.offset));
+            append_u32_le(bytes, reloc.kind);
+            append_u64_le(bytes, reloc.target);
+        }
+    }
+    return bytes;
+}
+
 void upload_relocs(const std::vector<NativeLabReloc> &relocs,
                    const std::vector<NativeBlobChunk> &chunks)
 {
@@ -940,7 +960,6 @@ void upload_relocs(const std::vector<NativeLabReloc> &relocs,
              + kNativeLabTarget.module_name);
     }
 
-    std::vector<std::vector<uint8_t>> by_chunk(chunks.size());
     for (const NativeLabReloc &reloc : relocs) {
         bool assigned = false;
         for (size_t chunk_id = 0; chunk_id < chunks.size(); chunk_id++) {
@@ -951,11 +970,6 @@ void upload_relocs(const std::vector<NativeLabReloc> &relocs,
             if (reloc_start < chunk.offset || reloc_end > chunk_end) {
                 continue;
             }
-            const uint32_t local_offset =
-                static_cast<uint32_t>(reloc_start - chunk.offset);
-            append_u32_le(by_chunk[chunk_id], local_offset);
-            append_u32_le(by_chunk[chunk_id], reloc.kind);
-            append_u64_le(by_chunk[chunk_id], reloc.target);
             assigned = true;
             break;
         }
@@ -967,7 +981,7 @@ void upload_relocs(const std::vector<NativeLabReloc> &relocs,
     }
 
     for (uint32_t i = 0; i < chunks.size(); i++) {
-        upload_reloc_chunk(by_chunk[i], i);
+        upload_reloc_chunk(chunk_reloc_bytes(relocs, chunks[i]), i);
     }
 }
 
@@ -1074,9 +1088,64 @@ uint32_t read_blob_generation(uint32_t chunk_id)
     return static_cast<uint32_t>(generation);
 }
 
+void seal_bound_chunk(const std::vector<uint8_t> &blob,
+                      const std::vector<NativeLabReloc> &relocs,
+                      const NativeBlobChunk &chunk, uint32_t chunk_id,
+                      uint32_t chunk_count, uint32_t abi_mask,
+                      uint32_t prog_type, uint32_t expected_attach_type,
+                      const std::vector<bpf_insn> &proof)
+{
+    const auto reloc_bytes = chunk_reloc_bytes(relocs, chunk);
+    const native_lab_binding header{
+        .version = NATIVE_LAB_BINDING_VERSION,
+#if defined(__aarch64__)
+        .arch = NATIVE_LAB_ARCH_ARM64,
+#else
+        .arch = NATIVE_LAB_ARCH_X86,
+#endif
+        .entry_offset = 0,
+        .abi_version = NATIVE_LAB_INLINE_ABI_VERSION,
+        .abi_mask = abi_mask,
+        .blob_id = chunk_id,
+        .chunk_offset = static_cast<uint32_t>(chunk.offset),
+        .total_native_size = static_cast<uint32_t>(blob.size()),
+        .chunk_count = chunk_count,
+        .native_size = static_cast<uint32_t>(chunk.len),
+        .reloc_count = static_cast<uint32_t>(reloc_bytes.size() / kRelocRecordBytes),
+        .proof_insns = static_cast<uint32_t>(proof.size()),
+        .prog_type = prog_type,
+        .expected_attach_type = expected_attach_type,
+        .snapshot_generation = read_blob_generation(chunk_id),
+        .reserved = 0,
+    };
+    const auto *header_bytes = reinterpret_cast<const uint8_t *>(&header);
+    std::vector<uint8_t> envelope(header_bytes, header_bytes + sizeof(header));
+    envelope.insert(envelope.end(), blob.begin() + chunk.offset,
+                    blob.begin() + chunk.offset + chunk.len);
+    envelope.insert(envelope.end(), reloc_bytes.begin(), reloc_bytes.end());
+    const auto *proof_bytes = reinterpret_cast<const uint8_t *>(proof.data());
+    envelope.insert(envelope.end(), proof_bytes,
+                    proof_bytes + proof.size() * sizeof(proof[0]));
+    char path[160];
+    snprintf(path, sizeof(path), kNativeLabTarget.binding_path_fmt, chunk_id);
+    int fd = open(path, O_WRONLY | O_TRUNC);
+    if (fd < 0) {
+        fail(std::string("open binding ") + path + ": " + std::strerror(errno));
+    }
+    const ssize_t written = write(fd, envelope.data(), envelope.size());
+    const int saved_errno = errno;
+    close(fd);
+    if (written != static_cast<ssize_t>(envelope.size())) {
+        fail(std::string("seal binding ") + path + ": " + std::strerror(saved_errno));
+    }
+}
+
 std::vector<uint32_t> upload_bound_proofs(
     const std::vector<bpf_insn> &proof_program,
-    const std::vector<NativeBlobChunk> &chunks)
+    const std::vector<NativeBlobChunk> &chunks,
+    const std::vector<uint8_t> &blob,
+    const std::vector<NativeLabReloc> &relocs,
+    uint32_t abi_mask, uint32_t prog_type, uint32_t expected_attach_type)
 {
     const std::vector<bpf_insn> proof = bound_proof_sequence(proof_program);
     const std::vector<bpf_insn> continuation{
@@ -1094,7 +1163,10 @@ std::vector<uint32_t> upload_bound_proofs(
         /* Put the real proof on the final KINSN. Every redirected proof EXIT
          * then reaches the stub's real EXIT without traversing another KINSN;
          * doing the inverse multiplies verifier states for loop-heavy CFGs. */
-        upload_proof_chunk(i + 1 == chunks.size() ? proof : continuation, i);
+        const auto &body = i + 1 == chunks.size() ? proof : continuation;
+        upload_proof_chunk(body, i);
+        seal_bound_chunk(blob, relocs, chunks[i], i, chunks.size(), abi_mask,
+                         prog_type, expected_attach_type, body);
         generations.push_back(read_blob_generation(i));
     }
     return generations;
@@ -4425,7 +4497,9 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
         upload_blob(linked.blob, chunks);
         upload_relocs(relocs, chunks);
         if (!proof_insns.empty()) {
-            generations = upload_bound_proofs(proof_insns, chunks);
+            generations = upload_bound_proofs(proof_insns, chunks, linked.blob,
+                relocs, linked.callee_saved_mask, prog_type,
+                attrs.expected_attach_type);
         }
         upload_end = std::chrono::steady_clock::now();
         {

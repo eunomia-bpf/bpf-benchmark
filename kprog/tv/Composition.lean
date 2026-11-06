@@ -87,9 +87,9 @@ theorem native_effects_checked
     (related : Artifact → Native → Proof → Prop)
     (accepted : Artifact → Prop)
     (proofEntry : Artifact → Proof → Prop)
-    (checked : Artifact → List Event → Prop)
+    (checked : Artifact → Event → Prop)
     (verifierSound : ∀ a, accepted a → ∀ p trace p', proofEntry a p →
-      Execution (proof a) p trace p' → checked a trace)
+      Execution (proof a) p trace p' → ∀ event ∈ trace, checked a event)
     (validated executed : Artifact)
     (binding : executed = validated)
     (acceptance : accepted validated)
@@ -98,7 +98,7 @@ theorem native_effects_checked
     {n p trace n'} (entry : related validated n p)
     (admittedEntry : proofEntry validated p)
     (run : Execution (native executed) n trace n') :
-    checked validated trace := by
+    ∀ event ∈ trace, checked validated event := by
   subst executed
   obtain ⟨last, matching, _⟩ := validated_execution tv entry run
   exact verifierSound validated acceptance p trace last admittedEntry matching

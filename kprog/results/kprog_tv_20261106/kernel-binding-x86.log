@@ -1,0 +1,18 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+insmod build-x86/bpf_x86_native_lab.ko
+./build/test-binding-kernel
+unsealed proof: PASS (load rejected)
+entry mismatch: PASS (seal rejected)
+ABI version mismatch: PASS (seal rejected)
+architecture mismatch: PASS (seal rejected)
+specialization length mismatch: PASS (seal rejected)
+unknown metadata: PASS (seal rejected)
+native/proof byte mismatch: PASS (every changed byte rejected)
+exact binding: PASS (native execution returned 2)
+ABI mask mismatch at instantiation: PASS (load rejected)
+proof mutation after sealing: PASS (load rejected)
+new generation without resealing: PASS (load rejected)
+program type mismatch at JIT: PASS (load rejected)
+kernel binding regression: PASS
+make: Leaving directory '/workspaces/repository/kprog/tv'
+make: Leaving directory '/workspaces/repository/kprog/tv'

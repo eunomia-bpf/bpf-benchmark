@@ -1,0 +1,18 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build-x86
+cp module.mk build-x86/Makefile
+install -d build-x86
+cp ../../kinsn/module/x86/bpf_x86_native_lab.c build-x86/bpf_x86_native_lab.c
+make -C /workspaces/repository/vendor/build/x86/linux M=/workspaces/repository/kprog/tv/build-x86 ARCH=x86 \
+	TV_ARCH=x86 CROSS_COMPILE= modules
+make[1]: Entering directory '/workspaces/repository/vendor/build/x86/linux'
+make[2]: Entering directory '/workspaces/repository/kprog/tv/build-x86'
+  CC [M]  bpf_x86_native_lab.o
+  MODPOST Module.symvers
+  CC [M]  bpf_x86_native_lab.mod.o
+  CC [M]  .module-common.o
+  LD [M]  bpf_x86_native_lab.ko
+  BTF [M] bpf_x86_native_lab.ko
+make[2]: Leaving directory '/workspaces/repository/kprog/tv/build-x86'
+make[1]: Leaving directory '/workspaces/repository/vendor/build/x86/linux'
+make: Leaving directory '/workspaces/repository/kprog/tv'

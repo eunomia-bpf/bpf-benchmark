@@ -40,6 +40,8 @@
 
 #include "kinsn_common.h"
 
+#include "native_lab_binding.h"
+
 #define NATIVE_LAB_MAX_BLOBS		512
 #define NATIVE_LAB_ABI_X19		(1U << 0)
 #define NATIVE_LAB_ABI_X20		(1U << 1)
@@ -105,6 +107,7 @@ struct native_blob {
 	struct bpf_insn *proof;
 	size_t proof_len;
 	u32 generation;
+	struct native_lab_binding binding;
 };
 
 static struct native_blob blobs[NATIVE_LAB_MAX_BLOBS];
@@ -224,6 +227,14 @@ static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 			mutex_unlock(&blobs_lock);
 			return -ESTALE;
 		}
+		err = native_lab_binding_use(&blobs[blob_id].binding,
+			NATIVE_LAB_ARCH_ARM64, blob_id, blobs[blob_id].len,
+			blobs[blob_id].reloc_count, blobs[blob_id].proof_len,
+			generation, abi_mask);
+		if (err) {
+			mutex_unlock(&blobs_lock);
+			return err;
+		}
 		if (blobs[blob_id].proof_len + hweight32(abi_mask) + 1 >
 		    NATIVE_LAB_MAX_PROOF_INSNS) {
 			mutex_unlock(&blobs_lock);
@@ -259,14 +270,14 @@ static int emit_native_lab_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	size_t snapshot_len = 0;
 	u8 *snapshot = NULL;
 	int start_idx;
+	u32 abi_mask = 0;
 	u32 generation = 0;
 	u32 blob_id;
 	size_t i;
 	int err;
 
-	(void)prog;
 
-	err = decode_native_lab_payload(payload, &blob_id, NULL, &generation);
+	err = decode_native_lab_payload(payload, &blob_id, &abi_mask, &generation);
 	if (err)
 		return err;
 	if (!idx)
@@ -281,6 +292,20 @@ static int emit_native_lab_arm64(u32 *image, int *idx, bool emit, u64 payload,
 		native_lab_emit_error("stale_generation", -ESTALE, payload,
 				      blob_id, 0, 0, 0, 0, 0, 0);
 		return -ESTALE;
+	}
+	if (generation) {
+		err = native_lab_binding_use(&blobs[blob_id].binding,
+			NATIVE_LAB_ARCH_ARM64, blob_id, blobs[blob_id].len,
+			blobs[blob_id].reloc_count, blobs[blob_id].proof_len,
+			generation, abi_mask);
+		if (!err && (!prog || prog->type != blobs[blob_id].binding.prog_type ||
+		    prog->expected_attach_type !=
+			blobs[blob_id].binding.expected_attach_type))
+			err = -EINVAL;
+		if (err) {
+			mutex_unlock(&blobs_lock);
+			return err;
+		}
 	}
 	if (blobs[blob_id].bytes && blobs[blob_id].len) {
 		snapshot_len = blobs[blob_id].len;
@@ -726,6 +751,61 @@ static ssize_t proof_write(struct file *file, const char __user *ubuf,
 	return len;
 }
 
+/* Seal only an exact snapshot. All writes, including this seal, advance the
+ * generation, so a stale or partially reuploaded artifact cannot be reused.
+ */
+static ssize_t binding_write(struct file *file, const char __user *ubuf,
+			     size_t len, loff_t *ppos)
+{
+	struct blob_file_priv *priv = file->private_data;
+	struct native_lab_binding header;
+	struct native_blob *blob = &blobs[priv->id];
+	u8 *data;
+	int err;
+
+	if (!capable(CAP_SYS_ADMIN))
+		return -EPERM;
+	if (*ppos || len < sizeof(header))
+		return -EINVAL;
+	if (len > sizeof(header) + NATIVE_LAB_MAX_BLOB_BYTES +
+	    NATIVE_LAB_MAX_RELOCS * sizeof(struct native_lab_reloc_record) +
+	    NATIVE_LAB_MAX_PROOF_INSNS * sizeof(struct bpf_insn))
+		return -E2BIG;
+	data = memdup_user(ubuf, len);
+	if (IS_ERR(data))
+		return PTR_ERR(data);
+	memcpy(&header, data, sizeof(header));
+
+	mutex_lock(&blobs_lock);
+	err = native_lab_binding_validate(&header, NATIVE_LAB_ARCH_ARM64,
+		priv->id, blob->len, blob->reloc_count, blob->proof_len,
+		blob->generation);
+	if (err)
+		goto out;
+	if (header.prog_type >= __MAX_BPF_PROG_TYPE ||
+	    header.expected_attach_type >= __MAX_BPF_ATTACH_TYPE) {
+		err = -EINVAL;
+		goto out;
+	}
+	BUILD_BUG_ON(sizeof(header) != 64);
+	BUILD_BUG_ON(sizeof(*blob->relocs) != 16);
+	BUILD_BUG_ON(sizeof(*blob->proof) != 8);
+	err = native_lab_binding_snapshot(&header, data, len, blob->bytes,
+					  blob->relocs, blob->proof);
+	if (err)
+		goto out;
+	err = native_lab_advance_generation(blob);
+	if (!err)
+		blob->binding = header;
+out:
+	mutex_unlock(&blobs_lock);
+	kfree(data);
+	if (err)
+		return err;
+	*ppos = len;
+	return len;
+}
+
 static ssize_t generation_read(struct file *file, char __user *ubuf,
 			       size_t len, loff_t *ppos)
 {
@@ -819,6 +899,14 @@ static const struct file_operations proof_fops = {
 	.open = blob_open,
 	.release = blob_release,
 	.write = proof_write,
+	.llseek = default_llseek,
+};
+
+static const struct file_operations binding_fops = {
+	.owner = THIS_MODULE,
+	.open = blob_open,
+	.release = blob_release,
+	.write = binding_write,
 	.llseek = default_llseek,
 };
 
@@ -988,6 +1076,9 @@ static int __init bpf_arm64_native_lab_debugfs_init(void)
 		scnprintf(name, sizeof(name), "blob%ld.proof", i);
 		debugfs_create_file(name, 0600, debugfs_root, (void *)i,
 				    &proof_fops);
+		scnprintf(name, sizeof(name), "blob%ld.binding", i);
+		debugfs_create_file(name, 0600, debugfs_root, (void *)i,
+				    &binding_fops);
 		scnprintf(name, sizeof(name), "blob%ld.generation", i);
 		debugfs_create_file(name, 0400, debugfs_root, (void *)i,
 				    &generation_fops);

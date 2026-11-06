@@ -22,6 +22,44 @@ must consume lane V's reference semantics when those interfaces exist; this
 directory must not introduce a second native ISA semantics. No micro program
 or application artifact is certified by `Composition.lean` alone.
 
+The native-lab modules now require a seal for nonzero-generation calls.
+`blob<N>.binding` accepts a 64-byte `native_lab_binding` record followed by
+the exact native bytes, relocation records and proof instructions. It checks
+these against the current upload under the blob mutex, then advances the
+generation. Entry is explicitly byte zero of an inline chunk; ABI version 1
+uses the architecture's BPF register mapping and the declared callee-save
+mask. Architecture, chunk offset/extent/count, program type and expected attach
+type are recorded. Both instantiation and JIT reject an unsealed snapshot,
+subsequent mutation or a different ABI mask; JIT also checks the loading
+program's type and expected attach type. Generation-zero remains the existing
+explicitly unbound experiment. The shared loader seals its supplied proofs.
+
+Checks, all from the repository root:
+
+```sh
+taskset -c 8-23 make -C kprog/tv check
+taskset -c 8-23 make -C kprog/tv kernel-check
+taskset -c 8-23 make -C kprog/tv kernel-check-arm64
+```
+
+The kernel tests load the real modules, reject entry/ABI/metadata and byte
+mismatches, run an exact bound artifact returning 2, reject post-seal mutation,
+and reject a program-type mismatch during JIT. x86 uses KVM; AArch64 uses
+full-system QEMU with a static test as PID 1 in a minimal initramfs. Their
+module builds are isolated under this directory and do not replace shared
+runtime artifacts. The host test checks relocation-byte mismatches, all wire
+offsets, generation boundaries and the shared production validation functions
+with ASan/UBSan. Results are in `../results/kprog_tv_20261106/`.
+
+The seal is per chunk. It does **not** establish cross-chunk order, global
+entry correspondence, reference-semantics ABI compatibility or that the
+specialization is faithful. These remain part of O4/the TV certificate. The
+application C loader entry point currently supplies no simulator proof, and
+the kernel proof-region interface forbids helper calls and pseudo map loads.
+Consequently neither application binding nor helper/map program validation is
+completed by this change. Substituting the original application's BPF for
+the simulator proof would not meet the translation-validation obligation.
+
 The trusted base of an instantiated proof consists of:
 
 - Kernel verifier soundness for the **instantiated** BPF program, including its

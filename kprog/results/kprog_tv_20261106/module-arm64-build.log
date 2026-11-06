@@ -1,0 +1,21 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+install -d build-arm64
+cp module.mk build-arm64/Makefile
+install -d build-arm64
+cp ../../kinsn/module/arm64/bpf_arm64_native_lab.c build-arm64/bpf_arm64_native_lab.c
+make -C /workspaces/repository/vendor/build/arm64/linux M=/workspaces/repository/kprog/tv/build-arm64 ARCH=arm64 \
+	TV_ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules
+make[1]: Entering directory '/workspaces/repository/vendor/build/arm64/linux'
+make[2]: Entering directory '/workspaces/repository/kprog/tv/build-arm64'
+warning: pahole version differs from the one used to build the kernel
+  The kernel was built with: 125
+  You are using:             132
+  CC [M]  bpf_arm64_native_lab.o
+  MODPOST Module.symvers
+  CC [M]  bpf_arm64_native_lab.mod.o
+  CC [M]  .module-common.o
+  LD [M]  bpf_arm64_native_lab.ko
+  BTF [M] bpf_arm64_native_lab.ko
+make[2]: Leaving directory '/workspaces/repository/kprog/tv/build-arm64'
+make[1]: Leaving directory '/workspaces/repository/vendor/build/arm64/linux'
+make: Leaving directory '/workspaces/repository/kprog/tv'
