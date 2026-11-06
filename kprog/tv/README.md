@@ -34,6 +34,13 @@ subsequent mutation or a different ABI mask; JIT also checks the loading
 program's type and expected attach type. Generation-zero remains the existing
 explicitly unbound experiment. The shared loader seals its supplied proofs.
 
+Sealing the final chunk captures every chunk's generation and checks contiguous
+native extents and matching ABI/context metadata. Both callbacks validate that
+whole-program snapshot. The JIT checks its restored BPF stream contains exactly
+one consecutive group of sidecar/call pairs in order, with the same call
+identity and no BPF edge into a proper suffix. Omitting, duplicating, reordering
+or mutating a peer chunk cannot reuse the accepted final proof.
+
 Checks, all from the repository root:
 
 ```sh
@@ -44,16 +51,18 @@ taskset -c 8-23 make -C kprog/tv kernel-check-arm64
 
 The kernel tests load the real modules, reject entry/ABI/metadata and byte
 mismatches, run an exact bound artifact returning 2, reject post-seal mutation,
-and reject a program-type mismatch during JIT. x86 uses KVM; AArch64 uses
+and reject a program-type mismatch during JIT. They also run an ordered
+two-chunk program and reject incomplete, reordered, missing and duplicated
+chunks, plus a peer mutation. x86 uses KVM; AArch64 uses
 full-system QEMU with a static test as PID 1 in a minimal initramfs. Their
 module builds are isolated under this directory and do not replace shared
 runtime artifacts. The host test checks relocation-byte mismatches, all wire
 offsets, generation boundaries and the shared production validation functions
 with ASan/UBSan. Results are in `../results/kprog_tv_20261106/`.
 
-The seal is per chunk. It does **not** establish cross-chunk order, global
-entry correspondence, reference-semantics ABI compatibility or that the
-specialization is faithful. These remain part of O4/the TV certificate. The
+The group seal identifies byte zero and the ordered immutable upload. The TV
+certificate must still establish source-entry correspondence, reference-ISA
+ABI compatibility and specialization fidelity. The
 application C loader entry point currently supplies no simulator proof, and
 the kernel proof-region interface forbids helper calls and pseudo map loads.
 Consequently neither application binding nor helper/map program validation is
@@ -64,6 +73,9 @@ The trusted base of an instantiated proof consists of:
 
 - Kernel verifier soundness for the **instantiated** BPF program, including its
   helpers, context conversion, maps, verifier rewrites and execution environment.
+  This must name the actual privilege-dependent policy: this kernel permits
+  uninitialized stack reads with CAP_PERFMON. Acceptance cannot establish
+  stack-initialization safety or any property stronger than that policy.
 - Lane V's reference ISA specification and its connection to the hardware,
   checked independently by lane F. ISA decoding, ABI entry conditions and the
   trace projection must either be proved or explicitly added to this base.

@@ -49,6 +49,7 @@
 #include "kinsn_x86_emit.h"
 
 #include "native_lab_binding.h"
+#define NATIVE_LAB_BINDING_ARCH NATIVE_LAB_ARCH_X86
 
 #define NATIVE_LAB_MAX_BLOBS	512
 /*
@@ -98,6 +99,7 @@ struct native_blob {
 	size_t proof_len;
 	u32 generation;
 	struct native_lab_binding binding;
+	u32 *bound_generations;
 };
 
 static struct native_blob blobs[NATIVE_LAB_MAX_BLOBS];
@@ -144,11 +146,15 @@ static int decode_native_lab_payload(u64 payload, u32 *blob_id, u32 *abi_mask,
 	return 0;
 }
 
+#include "native_lab_group.h"
+
 static int native_lab_advance_generation(struct native_blob *blob)
 {
 	if (blob->generation == U32_MAX)
 		return -EOVERFLOW;
 	blob->generation++;
+	kfree(blob->bound_generations);
+	blob->bound_generations = NULL;
 	return 0;
 }
 
@@ -189,10 +195,7 @@ static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 			mutex_unlock(&blobs_lock);
 			return -ESTALE;
 		}
-		err = native_lab_binding_use(&blobs[blob_id].binding,
-			NATIVE_LAB_ARCH_X86, blob_id, blobs[blob_id].len,
-			blobs[blob_id].reloc_count, blobs[blob_id].proof_len,
-			generation, abi_mask);
+		err = native_lab_group_use(blob_id, generation, abi_mask);
 		if (err) {
 			mutex_unlock(&blobs_lock);
 			return err;
@@ -247,14 +250,13 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		return -ESTALE;
 	}
 	if (generation) {
-		err = native_lab_binding_use(&blobs[blob_id].binding,
-			NATIVE_LAB_ARCH_X86, blob_id, blobs[blob_id].len,
-			blobs[blob_id].reloc_count, blobs[blob_id].proof_len,
-			generation, abi_mask);
+		err = native_lab_group_use(blob_id, generation, abi_mask);
 		if (!err && (!prog || prog->type != blobs[blob_id].binding.prog_type ||
 		    prog->expected_attach_type !=
 			blobs[blob_id].binding.expected_attach_type))
 			err = -EINVAL;
+		if (!err)
+			err = native_lab_group_program(prog, blob_id);
 		if (err) {
 			mutex_unlock(&blobs_lock);
 			return err;
@@ -547,6 +549,7 @@ static ssize_t binding_write(struct file *file, const char __user *ubuf,
 	struct native_lab_binding header;
 	struct native_blob *blob = &blobs[priv->id];
 	u8 *data;
+	u32 *group_generations = NULL;
 	int err;
 
 	if (!capable(CAP_SYS_ADMIN))
@@ -580,9 +583,16 @@ static ssize_t binding_write(struct file *file, const char __user *ubuf,
 					  blob->relocs, blob->proof);
 	if (err)
 		goto out;
+	err = native_lab_group_prepare(&header, &group_generations);
+	if (err)
+		goto out;
 	err = native_lab_advance_generation(blob);
-	if (!err)
+	if (!err) {
 		blob->binding = header;
+		blob->bound_generations = group_generations;
+	} else {
+		kfree(group_generations);
+	}
 out:
 	mutex_unlock(&blobs_lock);
 	kfree(data);
@@ -870,6 +880,8 @@ static void bpf_x86_native_lab_debugfs_exit(void)
 		kfree(blobs[i].bytes);
 		kfree(blobs[i].relocs);
 		kfree(blobs[i].proof);
+		kfree(blobs[i].bound_generations);
+		blobs[i].bound_generations = NULL;
 		blobs[i].bytes = NULL;
 		blobs[i].len = 0;
 		blobs[i].relocs = NULL;

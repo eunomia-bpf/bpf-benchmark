@@ -29,6 +29,7 @@ static const unsigned char native[] = {0xb8, 2, 0, 0, 0}; /* mov eax, 2 */
 
 static const struct bpf_insn proof = { .code = BPF_ALU64 | BPF_MOV | BPF_K, .imm = 2 };
 static int module_fd, kfunc_id;
+static unsigned test_slot;
 
 static void fatal(const char *what)
 {
@@ -39,7 +40,7 @@ static void fatal(const char *what)
 static void upload(const char *suffix, const void *bytes, size_t size, int error)
 {
 	char path[192];
-	snprintf(path, sizeof(path), "/sys/kernel/debug/" MODULE "/blob0%s", suffix);
+	snprintf(path, sizeof(path), "/sys/kernel/debug/" MODULE "/blob%u%s", test_slot, suffix);
 	int fd = open(path, O_WRONLY);
 	if (fd < 0)
 		fatal(path);
@@ -55,7 +56,9 @@ static void upload(const char *suffix, const void *bytes, size_t size, int error
 
 static uint32_t generation(void)
 {
-	FILE *file = fopen("/sys/kernel/debug/" MODULE "/blob0.generation", "r");
+	char path[192];
+	snprintf(path, sizeof(path), "/sys/kernel/debug/" MODULE "/blob%u.generation", test_slot);
+	FILE *file = fopen(path, "r");
 	uint32_t value;
 	if (!file || fscanf(file, "%u", &value) != 1 || !value)
 		fatal("read generation");
@@ -94,20 +97,28 @@ static void discover(void)
 	fatal("find module BTF");
 }
 
-static void load(uint32_t gen, unsigned abi, int reject, const char *name)
+static void load_group(const uint32_t *order, const uint32_t *generations,
+		       size_t count, unsigned abi, int reject, const char *name)
 {
-	struct bpf_insn insns[] = {
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_K, .src_reg = BPF_PSEUDO_KINSN_SIDECAR,
-		  .off = abi, .imm = gen },
-		{ .code = BPF_JMP | BPF_CALL, .src_reg = BPF_PSEUDO_KINSN_CALL,
-		  .off = 1, .imm = kfunc_id },
-		{ .code = BPF_JMP | BPF_EXIT },
-	};
+	assert(count && count <= 3);
+	struct bpf_insn insns[7] = {0};
+	for (size_t i = 0; i < count; i++) {
+		insns[2*i] = (struct bpf_insn){
+			.code = BPF_ALU64 | BPF_MOV | BPF_K,
+			.src_reg = BPF_PSEUDO_KINSN_SIDECAR,
+			.off = abi | (order[i] << 4), .imm = generations[order[i]],
+		};
+		insns[2*i+1] = (struct bpf_insn){
+			.code = BPF_JMP | BPF_CALL, .src_reg = BPF_PSEUDO_KINSN_CALL,
+			.off = 1, .imm = kfunc_id,
+		};
+	}
+	insns[2*count].code = BPF_JMP | BPF_EXIT;
 	char log[65536] = {0};
 	int fds[] = {module_fd, module_fd};
 	LIBBPF_OPTS(bpf_prog_load_opts, opts, .fd_array = fds, .fd_array_cnt = 2,
 		.log_buf = log, .log_size = sizeof(log), .log_level = 2);
-	int fd = bpf_prog_load(BPF_PROG_TYPE_XDP, "tv_binding", "GPL", insns, 3, &opts);
+	int fd = bpf_prog_load(BPF_PROG_TYPE_XDP, "tv_binding", "GPL", insns, 2*count+1, &opts);
 	if ((fd < 0) != reject) {
 		fprintf(stderr, "%s: fd=%d errno=%d\n%s", name, fd, errno, log);
 		exit(1);
@@ -122,6 +133,60 @@ static void load(uint32_t gen, unsigned abi, int reject, const char *name)
 			fatal("close program");
 	}
 	printf("%s: PASS (%s)\n", name, reject ? "load rejected" : "native execution returned 2");
+}
+
+static void load(uint32_t gen, unsigned abi, int reject, const char *name)
+{
+	const uint32_t order[] = {0};
+	load_group(order, &gen, 1, abi, reject, name);
+}
+
+static uint32_t seal_group_chunk(unsigned slot, const unsigned char *code,
+				size_t size, struct bpf_insn body,
+				uint32_t offset, uint32_t total)
+{
+	test_slot = slot;
+	upload("", code, size, 0);
+	upload(".relocs", NULL, 0, 0);
+	upload(".proof", &body, sizeof(body), 0);
+	struct native_lab_binding b = {
+		.version = 1, .arch = TV_ARCH, .abi_version = 1,
+		.blob_id = slot, .chunk_offset = offset,
+		.chunk_count = 2, .native_size = size, .total_native_size = total,
+		.proof_insns = 1, .prog_type = BPF_PROG_TYPE_XDP,
+		.snapshot_generation = generation(),
+	};
+	unsigned char envelope[sizeof(b) + sizeof(native) + sizeof(body)];
+	assert(size <= sizeof(native));
+	memcpy(envelope, &b, sizeof(b));
+	memcpy(envelope + sizeof(b), code, size);
+	memcpy(envelope + sizeof(b) + size, &body, sizeof(body));
+	upload(".binding", envelope, sizeof(b) + size + sizeof(body), 0);
+	return generation();
+}
+
+static void group_regressions(void)
+{
+#if defined(__aarch64__)
+	const unsigned char nop[] = {0x1f, 0x20, 0x03, 0xd5};
+#else
+	const unsigned char nop[] = {0x90};
+#endif
+	const struct bpf_insn continuation = { .code = BPF_ALU64 | BPF_MOV | BPF_K };
+	const uint32_t total = sizeof(native) + sizeof(nop);
+	uint32_t generations[2];
+	const uint32_t ordered[] = {0, 1}, reversed[] = {1, 0};
+	const uint32_t missing[] = {1}, duplicated[] = {0, 0, 1};
+	generations[0] = seal_group_chunk(0, native, sizeof(native), continuation, 0, total);
+	load(generations[0], 0, 1, "incomplete program group");
+	generations[1] = seal_group_chunk(1, nop, sizeof(nop), proof, sizeof(native), total);
+	load_group(ordered, generations, 2, 0, 0, "exact ordered program group");
+	load_group(reversed, generations, 2, 0, 1, "reordered native chunks");
+	load_group(missing, generations, 1, 0, 1, "missing native chunk/changed entry");
+	load_group(duplicated, generations, 3, 0, 1, "duplicated native chunk");
+	test_slot = 0;
+	upload("", native, sizeof(native), 0);
+	load_group(missing, generations, 1, 0, 1, "peer mutation invalidates whole group");
 }
 
 int main(void)
@@ -187,6 +252,7 @@ int main(void)
 	memcpy(envelope, &b, sizeof(b));
 	upload(".binding", envelope, sizeof(envelope), 0);
 	load(generation(), 0, 1, "program type mismatch at JIT");
+	group_regressions();
 	if (close(module_fd))
 		fatal("close module BTF");
 	puts("kernel binding regression: PASS");

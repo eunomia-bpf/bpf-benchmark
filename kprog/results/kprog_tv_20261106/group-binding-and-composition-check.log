@@ -1,0 +1,7 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+./build/test-binding
+binding entry/ABI/metadata/generation and exact-byte rejection tests: PASS
+cd ../formal && lake env lean ../tv/Composition.lean
+'KProgTV.validated_execution' depends on axioms: [propext]
+'KProgTV.native_effects_checked' depends on axioms: [propext]
+make: Leaving directory '/workspaces/repository/kprog/tv'
