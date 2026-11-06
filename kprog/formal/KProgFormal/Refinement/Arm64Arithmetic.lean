@@ -267,6 +267,13 @@ theorem register_handler_refines (width : Width) (subtract setFlags sourceIsScal
       (registerHandlerStep width subtract setFlags sourceIsScalar dst src rhs kind amount s) :=
   (register_step_refines width subtract setFlags sourceIsScalar dst src rhs kind amount s).symm
 
+theorem normalized_compare_refines (width : Width) (subtract : Bool)
+    (src : Reference.AArch64.RegisterRef) (rhs : Reference.Word) (s : Reference.AArch64.State) :
+    Reference.AArch64.arithmeticImmediateStep width subtract true .zero src
+      (Reference.AArch64.narrow rhs width) s = compareArithmeticHandlerStep width subtract false src 0 rhs s :=
+  (step_rhs_normalization width subtract true .zero src rhs s).symm.trans
+    (compare_arithmetic_refines width subtract false src 0 rhs s)
+
 def compareRegisterHandlerStep (width : Width) (subtract : Bool)
     (src : Reference.AArch64.RegisterRef) (rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
     (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
@@ -279,17 +286,109 @@ theorem register_compare_alias_refines (width : Width) (subtract : Bool)
     (s : Reference.AArch64.State) :
     Reference.AArch64.Step (.arithmeticRegister width subtract true .zero src rhs kind amount) s
       (compareRegisterHandlerStep width subtract src rhs kind amount s) := by
-  have h := compare_arithmetic_refines width subtract false src 0
-    (GeneratedArm64Mod.value (registerModifier width kind amount)
-      (Arm64Register.readReg s rhs) (BitVec.ofNat 64 amount.val) (Arm64Register.handlerWidth width)) s
-  simp only [Bool.false_eq_true, ↓reduceIte] at h
-  unfold Reference.AArch64.Step at *
-  unfold compareRegisterHandlerStep
-  rw [← h]
-  simp only [Reference.AArch64.step, Reference.AArch64.arithmeticRegisterStep]
-  symm
-  calc
-    _ = _ := step_rhs_normalization width subtract true .zero src _ s
-    _ = _ := by rw [Arm64Register.read_refines, register_modifier_refines]
+  unfold Reference.AArch64.Step compareRegisterHandlerStep
+  rw [← normalized_compare_refines]
+  rw [Arm64Register.read_refines, register_modifier_refines]
+  rfl
+
+def extensionModifier : Reference.AArch64.RegisterExtend → GeneratedArm64ModDecode.Mod
+  | .uxtb => .uxtb | .uxth => .uxth | .uxtw => .uxtw | .uxtx => .lsl
+  | .sxtb => .sxtb | .sxth => .sxth | .sxtw => .sxtw | .sxtx => .lsl
+
+set_option maxHeartbeats 4000000 in
+theorem extension_value_refines (width : Width) (kind : Reference.AArch64.RegisterExtend) (value amount : Reference.Word)
+    (bounded : amount < 5) :
+    Reference.AArch64.narrow
+      (GeneratedArm64Mod.value (extensionModifier kind) value amount (Arm64Register.handlerWidth width)) width =
+      Reference.AArch64.extendValue width kind value amount := by
+  cases width <;> cases kind <;>
+    simp only [GeneratedArm64Mod.value, extensionModifier, Arm64Register.handlerWidth,
+      GeneratedArm64Width.mask, Reference.AArch64.narrow, Reference.AArch64.Width.bits,
+      Reference.AArch64.extendValue, Reference.AArch64.RegisterExtend.bits, Reference.AArch64.RegisterExtend.signed, Reference.Word, Bool.false_eq_true, if_true, if_false] <;>
+    (simp only [Nat.min_def, Nat.reduceLeDiff, if_true, if_false]; bv_decide (config := { timeout := 60 }))
+
+theorem amount_bound (amount : Fin 5) : (BitVec.ofNat 64 amount.val : Reference.Word) < 5 := by
+  change amount.val % 2^64 < 5
+  omega
+
+/-- A full-operand-size extension can print as LSL or a bare register.
+Explicit extensions and both shift aliases use their actual generated selectors. -/
+def extendedModifier (width : Width) (kind : Reference.AArch64.RegisterExtend) (amount : Reference.Word) (plainSource : Bool) :
+    GeneratedArm64ModDecode.Mod :=
+  if plainSource ∧ width.bits ≤ kind.bits then
+    if amount = 0 then .none else .lsl
+  else extensionModifier kind
+
+theorem extended_modifier_refines (width : Width) (kind : Reference.AArch64.RegisterExtend)
+    (value amount : Reference.Word) (plainSource : Bool) (bounded : amount < 5) :
+    Reference.AArch64.narrow
+      (GeneratedArm64Mod.value (extendedModifier width kind amount plainSource) value amount
+        (Arm64Register.handlerWidth width)) width = Reference.AArch64.extendValue width kind value amount := by
+  cases plainSource with
+  | false =>
+    simpa only [extendedModifier, Bool.false_eq_true, false_and, ↓reduceIte] using
+      extension_value_refines width kind value amount bounded
+  | true =>
+    by_cases zero : amount = 0
+    · subst amount
+      cases width <;> cases kind <;>
+        simp only [extendedModifier, extensionModifier, GeneratedArm64Mod.value, Arm64Register.handlerWidth,
+          GeneratedArm64Width.mask, Reference.AArch64.narrow, Reference.AArch64.Width.bits,
+          Reference.AArch64.extendValue, Reference.AArch64.RegisterExtend.bits, Reference.AArch64.RegisterExtend.signed,
+          Reference.Word, Bool.false_eq_true, reduceCtorEq, false_and, true_and, and_false, and_true,
+          false_or, true_or, or_false, or_true, ↓reduceIte, Nat.min_def, Nat.reduceLeDiff] <;>
+        bv_decide
+    · cases width <;> cases kind <;>
+        simp only [extendedModifier, extensionModifier, zero, GeneratedArm64Mod.value, Arm64Register.handlerWidth,
+          GeneratedArm64Width.mask, Reference.AArch64.narrow, Reference.AArch64.Width.bits,
+          Reference.AArch64.extendValue, Reference.AArch64.RegisterExtend.bits, Reference.AArch64.RegisterExtend.signed,
+          Reference.Word, Bool.false_eq_true, reduceCtorEq, false_and, true_and, and_false, and_true,
+          false_or, true_or, or_false, or_true, ↓reduceIte, Nat.min_def, Nat.reduceLeDiff] <;>
+        bv_decide (config := { timeout := 60 })
+
+def extendedHandlerStep (width : Width) (subtract setFlags sourceIsScalar plainSource : Bool)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (kind : Reference.AArch64.RegisterExtend)
+    (amount : Fin 5) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let value := GeneratedArm64Mod.value (extendedModifier width kind (BitVec.ofNat 64 amount.val) plainSource)
+    (Arm64Register.readReg s rhs) (BitVec.ofNat 64 amount.val) (Arm64Register.handlerWidth width)
+  arithmeticHandlerStep width subtract setFlags sourceIsScalar false dst src 0 value s
+
+theorem extended_step_refines (width : Width) (subtract setFlags sourceIsScalar plainSource : Bool)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (kind : Reference.AArch64.RegisterExtend)
+    (amount : Fin 5) (s : Reference.AArch64.State) :
+    extendedHandlerStep width subtract setFlags sourceIsScalar plainSource dst src rhs kind amount s =
+      Reference.AArch64.step (.arithmeticExtended width subtract setFlags dst src rhs kind amount) s := by
+  unfold extendedHandlerStep
+  rw [arithmetic_step_refines]
+  simp only [Bool.false_eq_true, ↓reduceIte]
+  conv =>
+    lhs
+    rw [step_rhs_normalization]
+  simp only [Arm64Register.read_refines, extended_modifier_refines _ _ _ _ _ (amount_bound amount)]
+  rfl
+
+theorem extended_handler_refines (width : Width) (subtract setFlags sourceIsScalar plainSource : Bool)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (kind : Reference.AArch64.RegisterExtend)
+    (amount : Fin 5) (s : Reference.AArch64.State) :
+    Reference.AArch64.Step (.arithmeticExtended width subtract setFlags dst src rhs kind amount) s
+      (extendedHandlerStep width subtract setFlags sourceIsScalar plainSource dst src rhs kind amount s) :=
+  (extended_step_refines width subtract setFlags sourceIsScalar plainSource dst src rhs kind amount s).symm
+
+def compareExtendedHandlerStep (width : Width) (subtract plainSource : Bool)
+    (src : Reference.AArch64.RegisterRef) (rhs : Register) (kind : Reference.AArch64.RegisterExtend)
+    (amount : Fin 5) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let value := GeneratedArm64Mod.value (extendedModifier width kind (BitVec.ofNat 64 amount.val) plainSource)
+    (Arm64Register.readReg s rhs) (BitVec.ofNat 64 amount.val) (Arm64Register.handlerWidth width)
+  compareArithmeticHandlerStep width subtract false src 0 value s
+
+theorem extended_compare_alias_refines (width : Width) (subtract plainSource : Bool)
+    (src : Reference.AArch64.RegisterRef) (rhs : Register) (kind : Reference.AArch64.RegisterExtend)
+    (amount : Fin 5) (s : Reference.AArch64.State) :
+    Reference.AArch64.Step (.arithmeticExtended width subtract true .zero src rhs kind amount) s
+      (compareExtendedHandlerStep width subtract plainSource src rhs kind amount s) := by
+  unfold Reference.AArch64.Step compareExtendedHandlerStep
+  rw [← normalized_compare_refines]
+  simp only [Arm64Register.read_refines, extended_modifier_refines _ _ _ _ _ (amount_bound amount)]
+  rfl
 
 end KProgFormal.Refinement.Arm64Arithmetic

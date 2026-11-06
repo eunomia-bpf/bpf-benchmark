@@ -363,16 +363,41 @@ def arithmeticImmediateStep (width : Width) (subtract setFlags : Bool)
   let flags := if setFlags then arithmeticFlags width subtract lhs rhs s.flags else s.flags
   ⟨{ writeData s dst value width with flags := flags, pc := s.pc + 4 }, [], none⟩
 
+/-- A64 ExtendReg first selects min(source-size, operand-size) bits, then
+sign/zero extends to the operand size and shifts by a legal0..4 amount. -/
+inductive RegisterExtend | uxtb | uxth | uxtw | uxtx | sxtb | sxth | sxtw | sxtx
+  deriving DecidableEq, Repr
+
+def RegisterExtend.bits : RegisterExtend → Nat
+  | .uxtb | .sxtb => 8 | .uxth | .sxth => 16 | .uxtw | .sxtw => 32 | .uxtx | .sxtx => 64
+
+def RegisterExtend.signed : RegisterExtend → Bool
+  | .sxtb | .sxth | .sxtw | .sxtx => true | _ => false
+
+def extendValue (width : Width) (kind : RegisterExtend) (value amount : Reference.Word) : Reference.Word :=
+  let bits := min kind.bits width.bits
+  let operand := if kind.signed then (value.setWidth bits).signExtend width.bits
+    else (value.setWidth bits).setWidth width.bits
+  (operand <<< amount).setWidth 64
+
 def arithmeticRegisterStep (width : Width) (subtract setFlags : Bool)
     (dst src : RegisterRef) (rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
     (s : State) : Transition State :=
   arithmeticImmediateStep width subtract setFlags dst src
     (shiftValue width (arithmeticShift kind) (readReg s rhs) (BitVec.ofNat 64 amount.val)) s
 
+def arithmeticExtendedStep (width : Width) (subtract setFlags : Bool)
+    (dst src : RegisterRef) (rhs : Register) (kind : RegisterExtend) (amount : Fin 5)
+    (s : State) : Transition State :=
+  arithmeticImmediateStep width subtract setFlags dst src
+    (extendValue width kind (readReg s rhs) (BitVec.ofNat 64 amount.val)) s
+
 inductive Instruction
   | mul (instruction : MulInstruction)
   | fmov (instruction : FmovInstruction)
   | reduction (op : ReductionOp) (wide : Bool)
+  | arithmeticExtended (width : Width) (subtract setFlags : Bool) (dst src : RegisterRef)
+      (rhs : Register) (kind : RegisterExtend) (amount : Fin 5)
   | arithmeticRegister (width : Width) (subtract setFlags : Bool) (dst src : RegisterRef)
       (rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
   | arithmeticImmediate (width : Width) (subtract setFlags : Bool) (dst src : RegisterRef) (rhs : Word)
@@ -392,6 +417,8 @@ def step (i : Instruction) (s : State) : Transition State :=
   | .mul instruction => mulStep instruction s
   | .fmov instruction => fmovStep instruction s
   | .reduction op wide => reductionStep op wide s
+  | .arithmeticExtended width subtract setFlags dst src rhs kind amount =>
+      arithmeticExtendedStep width subtract setFlags dst src rhs kind amount s
   | .arithmeticRegister width subtract setFlags dst src rhs kind amount =>
       arithmeticRegisterStep width subtract setFlags dst src rhs kind amount s
   | .arithmeticImmediate width subtract setFlags dst src rhs => arithmeticImmediateStep width subtract setFlags dst src rhs s
@@ -494,6 +521,16 @@ def decode (bytes : Array Byte) : Except String Instruction := do
       if k : amount < width.bits then return .shift (.negate width ⟨kind, h⟩ ⟨amount, k⟩ dst rhs)
       else throw "reserved NEG immediate"
     else throw "reserved NEG shift kind"
+  if word &&& 0x1fe00000 = 0x0b200000 then
+    let amount := (word / 2^10) % 8
+    if h : amount < 5 then
+      let kind := match (word / 2^13) % 8 with
+        | 0 => RegisterExtend.uxtb | 1 => .uxth | 2 => .uxtw | 3 => .uxtx
+        | 4 => .sxtb | 5 => .sxth | 6 => .sxtw | _ => .sxtx
+      let setFlags := (word / 2^29) % 2 == 1
+      return .arithmeticExtended width ((word / 2^30) % 2 == 1) setFlags
+        (dataRegister dst (!setFlags)) (dataRegister lhs true) rhs kind ⟨amount, h⟩
+    else throw "reserved ADD/SUB register extend amount"
   if word &&& 0x1f200000 = 0x0b000000 then
     let kind := (word / 2^22) % 4
     if h : kind < 3 then
