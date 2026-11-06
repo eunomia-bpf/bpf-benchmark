@@ -1,0 +1,281 @@
+{
+  "version": 1,
+  "app": "bcc",
+  "objects": [
+    {
+      "prog_type": 5,
+      "program": "tracepoint__sys",
+      "source_bytecode_len": 368,
+      "source_btf_symbol": "tracepoint__syscalls__sys_enter_openat",
+      "native_object": "opensnoop.native.o",
+      "symbol": "tracepoint__syscalls__sys_enter_openat",
+      "simulator_object": "simulator/bcc_opensnoop_tracepoint__syscalls__sys_enter_openat.bpf.o",
+      "simulator_program": "bcc_opensnoop_tracepoint__syscalls__sys_enter_openat_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 5,
+      "program": "tracepoint__sys",
+      "source_bytecode_len": 816,
+      "source_btf_symbol": "tracepoint__syscalls__sys_exit_openat",
+      "native_object": "opensnoop.native.o",
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "simulator_object": "simulator/bcc_opensnoop_tracepoint__syscalls__sys_exit_openat.bpf.o",
+      "simulator_program": "bcc_opensnoop_tracepoint__syscalls__sys_exit_openat_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 2,
+      "program": "kprobe__cap_cap",
+      "source_bytecode_len": 304,
+      "source_btf_symbol": "kprobe__cap_capable_entry",
+      "native_object": "capable.native.o",
+      "symbol": "kprobe__cap_capable_entry",
+      "simulator_object": "simulator/bcc_capable_kprobe__cap_capable_entry.bpf.o",
+      "simulator_program": "bcc_capable_kprobe__cap_capable_entry_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 2,
+      "program": "kprobe__cap_cap",
+      "source_bytecode_len": 1136,
+      "source_btf_symbol": "kprobe__cap_capable_exit",
+      "native_object": "capable.native.o",
+      "symbol": "kprobe__cap_capable_exit",
+      "simulator_object": "simulator/bcc_capable_kprobe__cap_capable_exit.bpf.o",
+      "simulator_program": "bcc_capable_kprobe__cap_capable_exit_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 5,
+      "program": "inet_sock_set_s",
+      "source_bytecode_len": 2472,
+      "source_btf_symbol": "inet_sock_set_state",
+      "native_object": "tcplife.native.o",
+      "symbol": "inet_sock_set_state",
+      "simulator_object": "simulator/bcc_tcplife_inet_sock_set_state.bpf.o",
+      "simulator_program": "bcc_tcplife_inet_sock_set_state_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 2,
+      "program": "blk_account_io_",
+      "source_bytecode_len": 248,
+      "source_btf_symbol": "blk_account_io_merge_bio",
+      "native_object": "biosnoop.native.o",
+      "symbol": "blk_account_io_merge_bio",
+      "simulator_object": "simulator/bcc_biosnoop_blk_account_io_merge_bio.bpf.o",
+      "simulator_program": "bcc_biosnoop_blk_account_io_merge_bio_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 26,
+      "program": "block_rq_insert",
+      "source_bytecode_len": 1320,
+      "source_btf_symbol": "block_rq_insert",
+      "native_object": "biosnoop.native.o",
+      "symbol": "block_rq_insert",
+      "simulator_object": "simulator/bcc_biosnoop_block_rq_insert.bpf.o",
+      "simulator_program": "bcc_biosnoop_block_rq_insert_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 26,
+      "program": "block_rq_issue",
+      "source_bytecode_len": 936,
+      "source_btf_symbol": "block_rq_issue",
+      "native_object": "biosnoop.native.o",
+      "symbol": "block_rq_issue",
+      "simulator_object": "simulator/bcc_biosnoop_block_rq_issue.bpf.o",
+      "simulator_program": "bcc_biosnoop_block_rq_issue_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 26,
+      "program": "block_rq_comple",
+      "source_bytecode_len": 912,
+      "source_btf_symbol": "block_rq_complete",
+      "native_object": "biosnoop.native.o",
+      "symbol": "block_rq_complete",
+      "simulator_object": "simulator/bcc_biosnoop_block_rq_complete.bpf.o",
+      "simulator_program": "bcc_biosnoop_block_rq_complete_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 2,
+      "program": "tcp_v4_connect",
+      "source_bytecode_len": 256,
+      "source_btf_symbol": "tcp_v4_connect",
+      "native_object": "tcpconnect.native.o",
+      "symbol": "tcp_v4_connect",
+      "simulator_object": "simulator/bcc_tcpconnect_tcp_v4_connect.bpf.o",
+      "simulator_program": "bcc_tcpconnect_tcp_v4_connect_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 2,
+      "program": "tcp_v4_connect_",
+      "source_bytecode_len": 1336,
+      "source_btf_symbol": "tcp_v4_connect_ret",
+      "native_object": "tcpconnect.native.o",
+      "symbol": "tcp_v4_connect_ret",
+      "simulator_object": "simulator/bcc_tcpconnect_tcp_v4_connect_ret.bpf.o",
+      "simulator_program": "bcc_tcpconnect_tcp_v4_connect_ret_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 2,
+      "program": "tcp_v6_connect",
+      "source_bytecode_len": 256,
+      "source_btf_symbol": "tcp_v6_connect",
+      "native_object": "tcpconnect.native.o",
+      "symbol": "tcp_v6_connect",
+      "simulator_object": "simulator/bcc_tcpconnect_tcp_v6_connect.bpf.o",
+      "simulator_program": "bcc_tcpconnect_tcp_v6_connect_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 2,
+      "program": "tcp_v6_connect_",
+      "source_bytecode_len": 1360,
+      "source_btf_symbol": "tcp_v6_connect_ret",
+      "native_object": "tcpconnect.native.o",
+      "symbol": "tcp_v6_connect_ret",
+      "simulator_object": "simulator/bcc_tcpconnect_tcp_v6_connect_ret.bpf.o",
+      "simulator_program": "bcc_tcpconnect_tcp_v6_connect_ret_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 26,
+      "program": "fentry_vfs_read",
+      "source_bytecode_len": 48,
+      "source_btf_symbol": "fentry_vfs_read",
+      "native_object": "vfsstat.native.o",
+      "symbol": "fentry_vfs_read",
+      "simulator_object": "simulator/bcc_vfsstat_fentry_vfs_read.bpf.o",
+      "simulator_program": "bcc_vfsstat_fentry_vfs_read_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 26,
+      "program": "fentry_vfs_writ",
+      "source_bytecode_len": 48,
+      "source_btf_symbol": "fentry_vfs_write",
+      "native_object": "vfsstat.native.o",
+      "symbol": "fentry_vfs_write",
+      "simulator_object": "simulator/bcc_vfsstat_fentry_vfs_write.bpf.o",
+      "simulator_program": "bcc_vfsstat_fentry_vfs_write_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 26,
+      "program": "fentry_vfs_fsyn",
+      "source_bytecode_len": 48,
+      "source_btf_symbol": "fentry_vfs_fsync",
+      "native_object": "vfsstat.native.o",
+      "symbol": "fentry_vfs_fsync",
+      "simulator_object": "simulator/bcc_vfsstat_fentry_vfs_fsync.bpf.o",
+      "simulator_program": "bcc_vfsstat_fentry_vfs_fsync_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 26,
+      "program": "fentry_vfs_open",
+      "source_bytecode_len": 48,
+      "source_btf_symbol": "fentry_vfs_open",
+      "native_object": "vfsstat.native.o",
+      "symbol": "fentry_vfs_open",
+      "simulator_object": "simulator/bcc_vfsstat_fentry_vfs_open.bpf.o",
+      "simulator_program": "bcc_vfsstat_fentry_vfs_open_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 5,
+      "program": "sys_enter",
+      "source_bytecode_len": 248,
+      "source_btf_symbol": "sys_enter",
+      "native_object": "syscount.native.o",
+      "symbol": "sys_enter",
+      "simulator_object": "simulator/bcc_syscount_sys_enter.bpf.o",
+      "simulator_program": "bcc_syscount_sys_enter_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 26,
+      "program": "fentry_vfs_crea",
+      "source_bytecode_len": 48,
+      "source_btf_symbol": "fentry_vfs_create",
+      "native_object": "vfsstat.native.o",
+      "symbol": "fentry_vfs_create",
+      "simulator_object": "simulator/bcc_vfsstat_fentry_vfs_create.bpf.o",
+      "simulator_program": "bcc_vfsstat_fentry_vfs_create_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 5,
+      "program": "sys_exit",
+      "source_bytecode_len": 928,
+      "source_btf_symbol": "sys_exit",
+      "native_object": "syscount.native.o",
+      "symbol": "sys_exit",
+      "simulator_object": "simulator/bcc_syscount_sys_exit.bpf.o",
+      "simulator_program": "bcc_syscount_sys_exit_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 26,
+      "program": "sched_wakeup",
+      "source_bytecode_len": 256,
+      "source_btf_symbol": "sched_wakeup",
+      "native_object": "runqlat.native.o",
+      "symbol": "sched_wakeup",
+      "simulator_object": "simulator/bcc_runqlat_sched_wakeup.bpf.o",
+      "simulator_program": "bcc_runqlat_sched_wakeup_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 26,
+      "program": "sched_wakeup_ne",
+      "source_bytecode_len": 256,
+      "source_btf_symbol": "sched_wakeup_new",
+      "native_object": "runqlat.native.o",
+      "symbol": "sched_wakeup_new",
+      "simulator_object": "simulator/bcc_runqlat_sched_wakeup_new.bpf.o",
+      "simulator_program": "bcc_runqlat_sched_wakeup_new_arm64_sim_xdp"
+    },
+    {
+      "prog_type": 26,
+      "program": "sched_switch",
+      "source_bytecode_len": 2056,
+      "source_btf_symbol": "sched_switch",
+      "native_object": "runqlat.native.o",
+      "symbol": "sched_switch",
+      "simulator_object": "simulator/bcc_runqlat_sched_switch.bpf.o",
+      "simulator_program": "bcc_runqlat_sched_switch_arm64_sim_xdp"
+    },
+    {
+      "program": "",
+      "prog_type": 1,
+      "source_bytecode_hex": "b7000000000000009500000000000000",
+      "native_object": "startup/startup_0.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/startup_0.bpf.o",
+      "simulator_program": "startup_0_arm64_sim_xdp"
+    },
+    {
+      "program": "libbpf_nametest",
+      "prog_type": 1,
+      "source_bytecode_hex": "b7000000000000009500000000000000",
+      "native_object": "startup/startup_1.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/startup_1.bpf.o",
+      "simulator_program": "startup_1_arm64_sim_xdp"
+    },
+    {
+      "program": "",
+      "prog_type": 1,
+      "source_bytecode_hex": "85000000a00000009500000000000000",
+      "native_object": "startup/startup_2.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/startup_2.bpf.o",
+      "simulator_program": "startup_2_arm64_sim_xdp"
+    },
+    {
+      "program": "det_arg_ctx",
+      "prog_type": 2,
+      "source_bytecode_hex": "8510000001000000950000000000000085000000ad0000009500000000000000",
+      "native_object": "startup/startup_3.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/startup_3.bpf.o",
+      "simulator_program": "startup_3_arm64_sim_xdp"
+    },
+    {
+      "program": "",
+      "prog_type": 9,
+      "source_bytecode_hex": "b7000000000000009500000000000000",
+      "native_object": "startup/startup_4.native.o",
+      "symbol": "bpf_main",
+      "simulator_object": "startup/startup_4.bpf.o",
+      "simulator_program": "startup_4_arm64_sim_xdp"
+    }
+  ]
+}

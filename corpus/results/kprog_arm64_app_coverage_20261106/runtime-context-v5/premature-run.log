@@ -1,0 +1,17 @@
+taskset -c 8-11 timeout 7200 make -C /workspaces/repository PLATFORM=qemu ARCH=arm64 corpus \
+	-o /workspaces/repository/kprog/arm64/build/app-runtime-v5/root/qemu-init \
+	ARM64_QEMU_ROOT=/workspaces/repository/kprog/arm64/build/app-runtime-v5/root \
+	ARM64_QEMU_KERNEL_IMAGE=/workspaces/repository/kprog/arm64/build/app-runtime-v5/kernel/arch/arm64/boot/Image \
+	ARM64_RUNNER_RUNTIME_IMAGE=bpf-benchmark/runner-runtime:arm64-a-context-v5 \
+	ARM64_RUNNER_RUNTIME_IMAGE_TAR=/workspaces/repository/kprog/arm64/build/app-runtime-v5/image.tar \
+	VM_CPUS=8 VM_MEM=4096 SAMPLES=1 WORKLOAD_DURATION=2 KEEP_WORKDIRS=1 \
+	BPFREJIT_CORPUS_APP_TIMEOUT=7200 \
+	BPFREJIT_KEEP_ALL_WORKDIRS=1 BPFREJIT_CORPUS_BPF_STATS=1 \
+	BPFREJIT_CORPUS_APPS=bcc/set BPFREJIT_SHIM_NATIVE_LOADER=post \
+	BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1
+make[1]: Entering directory '/workspaces/repository'
+printf '%s\n' "#!/bin/sh" "set -eu" "export BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 HOME=/root TARGET='arm64-qemu' RUN_TARGET_NAME='arm64-qemu' RUN_TARGET_ARCH='arm64' RUN_EXECUTOR='kvm' RUNTIME_CONTAINER_IMAGE='bpf-benchmark/runner-runtime:arm64-a-context-v5' RUNTIME_IMAGE_TAR='/workspaces/repository/kprog/arm64/build/app-runtime-v5/image.tar' RUN_REMOTE_PYTHON_BIN='python3' RUN_RUNTIME_PYTHON_BIN='python3' RUN_BPFTOOL_BIN='bpftool' RUN_NATIVE_REPOS_CSV='bcc,katran,tracee,tetragon' RUN_TOKEN='3e0e72a5' SAMPLES='1'      FUZZ_ROUNDS='1000'  WORKLOAD_DURATION='2' KEEP_WORKDIRS='1'  BPFREJIT_CORPUS_APPS='bcc/set'           MERLIN_COMPILETIME_MODE='none' BPFREJIT_CORPUS_APP_TIMEOUT='7200'   BPFREJIT_CORPUS_BPF_STATS='1'  BPFREJIT_SHIM_NATIVE_LOADER='post'      BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1'         CILIUM_PROFILE_ARM='all'   " "exec python3 -m corpus.driver" >"/workspaces/repository/kprog/arm64/build/app-runtime-v5/root/qemu-run.sh"
+/bin/bash: line 1: /workspaces/repository/kprog/arm64/build/app-runtime-v5/root/qemu-run.sh: No such file or directory
+make[1]: *** [Makefile:308: corpus-qemu-arm64] Error 1
+make[1]: Leaving directory '/workspaces/repository'
+make: *** [corpus/results/kprog_arm64_app_coverage_20261106/Makefile:382: qemu-context-v2-app] Error 2

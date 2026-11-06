@@ -797,3 +797,12 @@ and again compiles AArch64 plus all eight native functions after the oldv2
 runtime was removed. Lane-A superseded runtime/proof-build cleanup inventories
 are recorded there; all raw results and portable result archives remain.
 Only the currentv5 application runtime root/image are retained for execution.
+
+## Strict BCC corpus retry
+
+[Runtimev5](runtime-context-v5/README.md) completed the baseline workload with
+23 raw program counters, then recorded22 generation-bound startup replacements
+before an additional tracing probe and seven runtime-FD map-value probes
+failed. All104 startup attempts and exact packaged inputs are retained. These
+additional source-map/startup artifacts are being integrated into the next
+runtime; no native workload counter comparison is claimed for this run.
