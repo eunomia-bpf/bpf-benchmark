@@ -81,7 +81,9 @@ theorem same_base_difference (env : Environment) (frame : Frame) (origin : Base)
     materialize env frame (.relative origin left) - materialize env frame (.relative origin right) =
       left - right := by
   simp only [materialize, Reference.Word]
-  bv_decide
+  apply BitVec.sub_eq_iff_eq_add.mpr
+  rw [BitVec.add_comm (base env frame origin) left,
+    BitVec.add_comm (base env frame origin) right, ← BitVec.add_assoc, BitVec.sub_add_cancel]
 
 theorem write32_after_add (env : Environment) (frame : Frame) (value : Value) (delta : Reference.Word) :
     materialize env frame (write32 env frame (add value delta)) =
