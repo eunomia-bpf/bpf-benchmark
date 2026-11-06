@@ -246,6 +246,22 @@ through**.
 Both arms ran the same four stressors for the same 180 s, so the ratio is
 like-for-like. **bcc reproduces.**
 
+Stats-off arm (`BPFREJIT_CORPUS_BPF_STATS=0`, same samples and duration,
+`corpus/results/x86_kvm_corpus_20261106_204653_590159`, `bpf_stats:
+False`, 18 replacements):
+
+| | bcc/set |
+| --- | ---: |
+| stress-ng bogo-ops, baseline eBPF | 359,778,402 |
+| stress-ng bogo-ops, native | 359,881,404 |
+| **native/eBPF** | **1.000x** |
+
+Three independent bcc runs at the operator recipe — 1.002x (stats on),
+1.001x (stats on, second run), 1.000x (stats off) — all with 18 programs
+replacing natively, against a 1.005x reference. The workload is
+dominated by `set` and `cap` syscalls rather than the traced path, which
+is why the ratio sits at unity in both references too.
+
 ### A ratio counts only with replacements verified
 
 katran's first run (`corpus/results/x86_kvm_corpus_20261106_194816_
