@@ -12,3 +12,6 @@
   for lane R, which owns timing.
 - `tcb/README.md`: component line counts, including the simulator-proof
   preparation function and native-proof kernel patch in the recovery snapshot.
+
+- `scale/README.md`: all16 native-size cells attempted;9 accepted/correct,
+  3 compile deadlines and4 Clang source-location exhaustion failures.

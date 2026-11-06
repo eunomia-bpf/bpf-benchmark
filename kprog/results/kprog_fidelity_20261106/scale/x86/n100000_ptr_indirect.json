@@ -1,0 +1,8 @@
+{
+  "name": "n100000_ptr_indirect",
+  "target_native_instructions": 100000,
+  "expected_result": 50023,
+  "stage": "proof_compile",
+  "native_instructions": 100084,
+  "returncode": 1
+}

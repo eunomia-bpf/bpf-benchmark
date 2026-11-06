@@ -1,0 +1,52 @@
+{
+  "name": "n10000_scalar_direct",
+  "target_native_instructions": 10000,
+  "expected_result": 15318568609386021639,
+  "stage": "passed",
+  "native_instructions": 10036,
+  "returncode": 0,
+  "probe_counters": [
+    {
+      "program_id": 6,
+      "proof_bpf_instructions": 80,
+      "verified_instructions": 78,
+      "bytes_jited": 319,
+      "program_memlock_bytes": 4096,
+      "loader_maxrss_kib": 1284,
+      "result": 15318568609386021639,
+      "expected_result": 15318568609386021639,
+      "retval": 2
+    }
+  ],
+  "verifier_allocation_intervals": [
+    {
+      "slab_peak_bytes": 39632,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 42472,
+      "vmap_reserved_peak_bytes": 32768
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 58728,
+      "vmap_reserved_peak_bytes": 20480
+    }
+  ],
+  "verifier_slab_peak_bytes": 58728,
+  "verifier_vmap_reserved_peak_bytes": 20480,
+  "trace_lost_events": 0,
+  "verification_time_us": 79,
+  "peak_states": 1
+}

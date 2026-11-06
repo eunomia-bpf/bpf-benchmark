@@ -198,6 +198,26 @@ stage2-guest:
 	insmod ../tv/build-x86/bpf_x86_native_lab.ko
 	$(PYTHON) stage2.py check --build $(STAGE2_BUILD) --out $(STAGE2_OUT)
 
+.PHONY: scale-build scale-kvm scale-guest
+SCALE_BUILD ?= build-x86/scale
+SCALE_SIZES ?= 100 1000 10000 100000
+SCALE_OUT ?= ../results/kprog_fidelity_20261106/scale/x86
+scale-build:
+	install -d build-x86
+	$(CC) -Wall -Wextra -Werror -O2 -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		scale_probe.c ../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o build-x86/scale-probe
+	$(PYTHON) scale.py build --build $(SCALE_BUILD) --sizes $(SCALE_SIZES)
+
+scale-kvm:
+	vng --run $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage \
+		--cwd $(ROOT) --disable-monitor --cpus 2 --mem 2G --rwdir $(ROOT) --overlay-rwdir /tmp \
+		--exec 'make -C $(ROOT)/kprog/fidelity scale-guest SCALE_BUILD=$(SCALE_BUILD) SCALE_OUT=$(SCALE_OUT)'
+
+scale-guest:
+	@mountpoint -q /sys/kernel/tracing || mount -t tracefs tracefs /sys/kernel/tracing
+	printf '%s\n' 'p:kprog_f_check bpf_check' 'r:kprog_f_check_ret bpf_check' >> /sys/kernel/tracing/kprobe_events
+	$(PYTHON) scale.py check --build $(SCALE_BUILD) --out $(SCALE_OUT)
+
 .PHONY: arm64-control-build arm64-control-qemu
 ARM64_CONTROL_BUILD ?= build-arm64-control
 ARM64_CONTROL_OUT ?= ../results/kprog_fidelity_20261106/differential/arm64-control-qemu
