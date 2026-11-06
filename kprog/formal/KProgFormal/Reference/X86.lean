@@ -22,7 +22,7 @@ def CmovWidth.bytes : CmovWidth → Nat
   | .w64 => 8
 
 /-- Long-mode stack transfers have 16- or 64-bit operands; 32-bit stack
-operands cannot be encoded. REX.W does not override the operand-size prefix. -/
+operands cannot be encoded. An active REX.W overrides the operand-size prefix. -/
 inductive StackWidth
   | w16 | w64
   deriving DecidableEq, Repr
@@ -284,6 +284,9 @@ private structure Prefix where
   segment : Nat := 0
   vexInvalid : Bool := false
 
+private def stackWidth (p : Prefix) : StackWidth :=
+  if p.rex / 8 = 1 then .w64 else if p.operand16 then .w16 else .w64
+
 private def prefixes : List Byte → Prefix → Nat → Prefix × List Byte × Nat
   | [], p, n => (p, [], n)
   | b :: rest, p, n =>
@@ -375,14 +378,21 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     let length := count + 1
     if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
     let src := registerCode (first % 8 + 8 * (p.rex % 2))
-    let width := if p.operand16 then StackWidth.w16 else .w64
+    let width := stackWidth p
     return .push width src (s.pc + BitVec.ofNat 64 length)
   if 0x58 ≤ first ∧ first ≤ 0x5f then
     let length := count + 1
     if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
     let dst := registerCode (first % 8 + 8 * (p.rex % 2))
-    let width := if p.operand16 then StackWidth.w16 else .w64
+    let width := stackWidth p
     return .pop width dst (s.pc + BitVec.ofNat 64 length)
+  if first = 0xff then
+    let modrm ← byteAt bytes (count + 1)
+    if modrm / 64 = 3 ∧ (modrm / 8) % 8 = 6 then
+      let length := count + 2
+      if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
+      let src := registerCode (modrm % 8 + 8 * (p.rex % 2))
+      return .push (stackWidth p) src (s.pc + BitVec.ofNat 64 length)
   if first = 0x8f then
     let modrm ← byteAt bytes (count + 1)
     if modrm / 64 ≠ 3 ∨ (modrm / 8) % 8 ≠ 0 then
@@ -390,7 +400,7 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     let length := count + 2
     if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"
     let dst := registerCode (modrm % 8 + 8 * (p.rex % 2))
-    let width := if p.operand16 then StackWidth.w16 else .w64
+    let width := stackWidth p
     return .pop width dst (s.pc + BitVec.ofNat 64 length)
   if first = 0xc4 then
     let vex1 ← byteAt bytes (count + 1)

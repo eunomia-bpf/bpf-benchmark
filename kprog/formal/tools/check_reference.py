@@ -209,6 +209,9 @@ def main():
     for code, dst, width, rsp, value, fault in [
             ([0x5C], 4, 8, 0x2000, 0x3000, False),
             ([0x66, 0x5C], 4, 2, 0xFFFF, 0x1234, False),
+            ([0x66, 0x48, 0x5C], 4, 8, 0x2000, 0x3000, False),
+            ([0x48, 0x66, 0x5C], 4, 2, 0xFFFF, 0x1234, False),
+            ([0x66, 0x48, 0x8F, 0xC4], 4, 8, 0x2000, 0x3000, False),
             ([0x41, 0x5C], 12, 8, 0x2000, 0xFEDCBA9876543210, False),
             ([0x66, 0x41, 0x5C], 12, 2, 0x2000, 0x1234, False),
             ([0x8F, 0xC4], 4, 8, 0x2000, 0x3000, False),
@@ -273,6 +276,24 @@ def main():
                     expected["events"] = [dict(kind="write", address=address,
                                                value=written, initialized=True)]
                 push_cases.append((request, expected))
+    # REX.W overrides66; a later legacy prefix invalidates an earlier REX.
+    for code, width in [([0x66, 0x48, 0x53], 8), ([0x48, 0x66, 0x53], 2),
+                        ([0x66, 0x48, 0xFF, 0xF3], 8), ([0x48, 0x66, 0xFF, 0xF3], 2)]:
+        request = copy.deepcopy(base)
+        request["native_bytes"] = code
+        request["state"]["registers"][4] = 0x2000
+        request["state"]["registers"][3] = 0xFEDCBA9876543210
+        address = 0x2000 - width
+        request["state"]["memory"] = [dict(address=address + i, value=0xAA,
+            readable=True, writable=True, initialized=False) for i in range(width)]
+        expected = copy.deepcopy(request["state"])
+        written = list((0xFEDCBA9876543210 & ((1 << (8 * width)) - 1)).to_bytes(width, "little"))
+        for cell, byte in zip(expected["memory"], written):
+            cell.update(value=byte, initialized=True)
+        expected["registers"][4] = address
+        expected.update(pc=expected["pc"] + len(code), defined_flags=(1 << 64) - 1,
+                        fault=None, events=[dict(kind="write", address=address, value=written, initialized=True)])
+        push_cases.append((request, expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(r) + "\n" for r, _ in push_cases),
                          text=True, stdout=subprocess.PIPE, check=True)

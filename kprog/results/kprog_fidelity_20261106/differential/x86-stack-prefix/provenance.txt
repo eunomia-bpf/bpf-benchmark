@@ -1,0 +1,5 @@
+Real x86-64 CPU stack-pointer deltas for both prefix orders and both opcode
+encodings. Run make check here on x86-64. No emulator/reference computes these
+outputs; inline assembly captures actual RSP before/after and restores it.
+The canonical-reference wire suite checks the same byte encodings, including
+64-bit REX.W precedence and legacy-prefix invalidation of an earlier REX.
