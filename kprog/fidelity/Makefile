@@ -11,7 +11,7 @@ ENCODER_SOURCES := $(wildcard ../$(ARCH)/micro-prog/*.py)
 .PHONY: build run run-built run-emulated
 build: $(BUILD)/cpu-differential
 
-$(BUILD)/generated.c $(BUILD)/native.S &: generate.py $(ENCODER_SOURCES)
+$(BUILD)/generated.c $(BUILD)/native.S &: generate.py $(ENCODER_SOURCES) $(HEADERS) ../helper_abi.py
 	install -d $(BUILD)
 	$(PYTHON) generate.py --arch $(ARCH) --out $(BUILD)
 

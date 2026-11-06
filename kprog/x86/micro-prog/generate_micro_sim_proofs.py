@@ -129,6 +129,7 @@ def split_operands(text: str) -> tuple[str, ...]:
 
 def parse_asm_text(text: str) -> list[NativeInsn]:
     insns: list[NativeInsn] = []
+    pending_prefix: tuple[int, list[int]] | None = None
     for line in text.splitlines():
         reloc = re.search(r"\bR_X86_64_[A-Z0-9_]+\s+(\S+)", line)
         if reloc is not None and insns:
@@ -147,6 +148,21 @@ def parse_asm_text(text: str) -> list[NativeInsn]:
         asm = fields[-1].split("#", 1)[0].strip()
         if not asm or asm.startswith("<"):
             continue
+        addr = int(addr_text, 16)
+        octets = [int(byte, 16) for byte in fields[1].split()]
+        end_addr = addr + len(octets)
+        # Objdump prints an inactive REX before a legacy prefix separately,
+        # although the CPU consumes both prefixes as one instruction.
+        if pending_prefix is not None:
+            start, previous = pending_prefix
+            if start + len(previous) != addr:
+                raise ValueError(f"discontinuous x86 prefix at 0x{start:x}")
+            addr, octets = start, previous + octets
+            pending_prefix = None
+        if re.fullmatch(r"rex(?:\.[WRXB]+)?", asm):
+            pending_prefix = (addr, octets)
+            continue
+        asm = re.sub(r"^(?:(?:data16|rex(?:\.[WRXB]+)?)\s+)+", "", asm)
         if asm.startswith("lock "):
             asm = asm.removeprefix("lock ").strip()
         match = re.match(r"(?P<mnemonic>[a-z][a-z0-9]*)\s*(?P<operands>.*)$", asm)
@@ -155,10 +171,23 @@ def parse_asm_text(text: str) -> list[NativeInsn]:
         mnemonic = match.group("mnemonic")
         stack_width = 16 if mnemonic in {"pushw", "popw"} else None
         if stack_width: mnemonic = mnemonic[:-1]
-        insns.append(NativeInsn(int(addr_text, 16), asm, mnemonic,
+        if mnemonic in {"push", "pop"}:
+            operand16, rex = False, 0
+            for byte in octets:
+                if byte in {0x66, 0x67, 0xf0, 0xf2, 0xf3, 0x2e, 0x36, 0x3e, 0x26, 0x64, 0x65}:
+                    operand16 |= byte == 0x66
+                    rex = 0
+                elif 0x40 <= byte <= 0x4f:
+                    rex = byte
+                else:
+                    break
+            stack_width = 64 if rex & 8 or not operand16 else 16
+        insns.append(NativeInsn(addr, asm, mnemonic,
                                 split_operands(match.group("operands")),
-                                end_addr=int(addr_text, 16) + len(fields[1].split()),
+                                end_addr=end_addr,
                                 stack_width=stack_width))
+    if pending_prefix is not None:
+        raise ValueError(f"incomplete x86 prefix at 0x{pending_prefix[0]:x}")
     return insns
 
 

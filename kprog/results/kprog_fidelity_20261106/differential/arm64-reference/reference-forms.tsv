@@ -71,158 +71,158 @@ form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status
 69	ubfiz w0, w1, #7, #13	1024	0	0	0	awaiting_reference_instruction
 70	bfxil w0, w1, #7, #13	1024	0	0	0	awaiting_reference_instruction
 71	bfi w0, w1, #7, #13	1024	0	0	0	awaiting_reference_instruction
-72	csel w0, w1, w2, eq	1024	0	0	0	awaiting_reference_instruction
-73	csinc w0, w1, w2, eq	1024	0	0	0	awaiting_reference_instruction
-74	csinv w0, w1, w2, eq	1024	0	0	0	awaiting_reference_instruction
-75	csneg w0, w1, w2, eq	1024	0	0	0	awaiting_reference_instruction
-76	cinc w0, w1, eq	1024	0	0	0	awaiting_reference_instruction
-77	cinv w0, w1, eq	1024	0	0	0	awaiting_reference_instruction
-78	cneg w0, w1, eq	1024	0	0	0	awaiting_reference_instruction
-79	cset w0, eq	1024	0	0	0	awaiting_reference_instruction
-80	csetm w0, eq	1024	0	0	0	awaiting_reference_instruction
+72	csel w0, w1, w2, eq	1024	1024	0	0	checked
+73	csinc w0, w1, w2, eq	1024	1024	0	0	checked
+74	csinv w0, w1, w2, eq	1024	1024	0	0	checked
+75	csneg w0, w1, w2, eq	1024	1024	0	0	checked
+76	cinc w0, w1, eq	1024	1024	0	0	checked
+77	cinv w0, w1, eq	1024	1024	0	0	checked
+78	cneg w0, w1, eq	1024	1024	0	0	checked
+79	cset w0, eq	1024	1024	0	0	checked
+80	csetm w0, eq	1024	1024	0	0	checked
 81	ccmp w1, w2, #5, eq	1024	0	0	0	awaiting_reference_instruction
 82	ccmp w1, #7, #10, eq	1024	0	0	0	awaiting_reference_instruction
-83	csel w0, w1, w2, ne	1024	0	0	0	awaiting_reference_instruction
-84	csinc w0, w1, w2, ne	1024	0	0	0	awaiting_reference_instruction
-85	csinv w0, w1, w2, ne	1024	0	0	0	awaiting_reference_instruction
-86	csneg w0, w1, w2, ne	1024	0	0	0	awaiting_reference_instruction
-87	cinc w0, w1, ne	1024	0	0	0	awaiting_reference_instruction
-88	cinv w0, w1, ne	1024	0	0	0	awaiting_reference_instruction
-89	cneg w0, w1, ne	1024	0	0	0	awaiting_reference_instruction
-90	cset w0, ne	1024	0	0	0	awaiting_reference_instruction
-91	csetm w0, ne	1024	0	0	0	awaiting_reference_instruction
+83	csel w0, w1, w2, ne	1024	1024	0	0	checked
+84	csinc w0, w1, w2, ne	1024	1024	0	0	checked
+85	csinv w0, w1, w2, ne	1024	1024	0	0	checked
+86	csneg w0, w1, w2, ne	1024	1024	0	0	checked
+87	cinc w0, w1, ne	1024	1024	0	0	checked
+88	cinv w0, w1, ne	1024	1024	0	0	checked
+89	cneg w0, w1, ne	1024	1024	0	0	checked
+90	cset w0, ne	1024	1024	0	0	checked
+91	csetm w0, ne	1024	1024	0	0	checked
 92	ccmp w1, w2, #5, ne	1024	0	0	0	awaiting_reference_instruction
 93	ccmp w1, #7, #10, ne	1024	0	0	0	awaiting_reference_instruction
-94	csel w0, w1, w2, cs	1024	0	0	0	awaiting_reference_instruction
-95	csinc w0, w1, w2, cs	1024	0	0	0	awaiting_reference_instruction
-96	csinv w0, w1, w2, cs	1024	0	0	0	awaiting_reference_instruction
-97	csneg w0, w1, w2, cs	1024	0	0	0	awaiting_reference_instruction
-98	cinc w0, w1, cs	1024	0	0	0	awaiting_reference_instruction
-99	cinv w0, w1, cs	1024	0	0	0	awaiting_reference_instruction
-100	cneg w0, w1, cs	1024	0	0	0	awaiting_reference_instruction
-101	cset w0, cs	1024	0	0	0	awaiting_reference_instruction
-102	csetm w0, cs	1024	0	0	0	awaiting_reference_instruction
+94	csel w0, w1, w2, cs	1024	1024	0	0	checked
+95	csinc w0, w1, w2, cs	1024	1024	0	0	checked
+96	csinv w0, w1, w2, cs	1024	1024	0	0	checked
+97	csneg w0, w1, w2, cs	1024	1024	0	0	checked
+98	cinc w0, w1, cs	1024	1024	0	0	checked
+99	cinv w0, w1, cs	1024	1024	0	0	checked
+100	cneg w0, w1, cs	1024	1024	0	0	checked
+101	cset w0, cs	1024	1024	0	0	checked
+102	csetm w0, cs	1024	1024	0	0	checked
 103	ccmp w1, w2, #5, cs	1024	0	0	0	awaiting_reference_instruction
 104	ccmp w1, #7, #10, cs	1024	0	0	0	awaiting_reference_instruction
-105	csel w0, w1, w2, cc	1024	0	0	0	awaiting_reference_instruction
-106	csinc w0, w1, w2, cc	1024	0	0	0	awaiting_reference_instruction
-107	csinv w0, w1, w2, cc	1024	0	0	0	awaiting_reference_instruction
-108	csneg w0, w1, w2, cc	1024	0	0	0	awaiting_reference_instruction
-109	cinc w0, w1, cc	1024	0	0	0	awaiting_reference_instruction
-110	cinv w0, w1, cc	1024	0	0	0	awaiting_reference_instruction
-111	cneg w0, w1, cc	1024	0	0	0	awaiting_reference_instruction
-112	cset w0, cc	1024	0	0	0	awaiting_reference_instruction
-113	csetm w0, cc	1024	0	0	0	awaiting_reference_instruction
+105	csel w0, w1, w2, cc	1024	1024	0	0	checked
+106	csinc w0, w1, w2, cc	1024	1024	0	0	checked
+107	csinv w0, w1, w2, cc	1024	1024	0	0	checked
+108	csneg w0, w1, w2, cc	1024	1024	0	0	checked
+109	cinc w0, w1, cc	1024	1024	0	0	checked
+110	cinv w0, w1, cc	1024	1024	0	0	checked
+111	cneg w0, w1, cc	1024	1024	0	0	checked
+112	cset w0, cc	1024	1024	0	0	checked
+113	csetm w0, cc	1024	1024	0	0	checked
 114	ccmp w1, w2, #5, cc	1024	0	0	0	awaiting_reference_instruction
 115	ccmp w1, #7, #10, cc	1024	0	0	0	awaiting_reference_instruction
-116	csel w0, w1, w2, mi	1024	0	0	0	awaiting_reference_instruction
-117	csinc w0, w1, w2, mi	1024	0	0	0	awaiting_reference_instruction
-118	csinv w0, w1, w2, mi	1024	0	0	0	awaiting_reference_instruction
-119	csneg w0, w1, w2, mi	1024	0	0	0	awaiting_reference_instruction
-120	cinc w0, w1, mi	1024	0	0	0	awaiting_reference_instruction
-121	cinv w0, w1, mi	1024	0	0	0	awaiting_reference_instruction
-122	cneg w0, w1, mi	1024	0	0	0	awaiting_reference_instruction
-123	cset w0, mi	1024	0	0	0	awaiting_reference_instruction
-124	csetm w0, mi	1024	0	0	0	awaiting_reference_instruction
+116	csel w0, w1, w2, mi	1024	1024	0	0	checked
+117	csinc w0, w1, w2, mi	1024	1024	0	0	checked
+118	csinv w0, w1, w2, mi	1024	1024	0	0	checked
+119	csneg w0, w1, w2, mi	1024	1024	0	0	checked
+120	cinc w0, w1, mi	1024	1024	0	0	checked
+121	cinv w0, w1, mi	1024	1024	0	0	checked
+122	cneg w0, w1, mi	1024	1024	0	0	checked
+123	cset w0, mi	1024	1024	0	0	checked
+124	csetm w0, mi	1024	1024	0	0	checked
 125	ccmp w1, w2, #5, mi	1024	0	0	0	awaiting_reference_instruction
 126	ccmp w1, #7, #10, mi	1024	0	0	0	awaiting_reference_instruction
-127	csel w0, w1, w2, pl	1024	0	0	0	awaiting_reference_instruction
-128	csinc w0, w1, w2, pl	1024	0	0	0	awaiting_reference_instruction
-129	csinv w0, w1, w2, pl	1024	0	0	0	awaiting_reference_instruction
-130	csneg w0, w1, w2, pl	1024	0	0	0	awaiting_reference_instruction
-131	cinc w0, w1, pl	1024	0	0	0	awaiting_reference_instruction
-132	cinv w0, w1, pl	1024	0	0	0	awaiting_reference_instruction
-133	cneg w0, w1, pl	1024	0	0	0	awaiting_reference_instruction
-134	cset w0, pl	1024	0	0	0	awaiting_reference_instruction
-135	csetm w0, pl	1024	0	0	0	awaiting_reference_instruction
+127	csel w0, w1, w2, pl	1024	1024	0	0	checked
+128	csinc w0, w1, w2, pl	1024	1024	0	0	checked
+129	csinv w0, w1, w2, pl	1024	1024	0	0	checked
+130	csneg w0, w1, w2, pl	1024	1024	0	0	checked
+131	cinc w0, w1, pl	1024	1024	0	0	checked
+132	cinv w0, w1, pl	1024	1024	0	0	checked
+133	cneg w0, w1, pl	1024	1024	0	0	checked
+134	cset w0, pl	1024	1024	0	0	checked
+135	csetm w0, pl	1024	1024	0	0	checked
 136	ccmp w1, w2, #5, pl	1024	0	0	0	awaiting_reference_instruction
 137	ccmp w1, #7, #10, pl	1024	0	0	0	awaiting_reference_instruction
-138	csel w0, w1, w2, vs	1024	0	0	0	awaiting_reference_instruction
-139	csinc w0, w1, w2, vs	1024	0	0	0	awaiting_reference_instruction
-140	csinv w0, w1, w2, vs	1024	0	0	0	awaiting_reference_instruction
-141	csneg w0, w1, w2, vs	1024	0	0	0	awaiting_reference_instruction
-142	cinc w0, w1, vs	1024	0	0	0	awaiting_reference_instruction
-143	cinv w0, w1, vs	1024	0	0	0	awaiting_reference_instruction
-144	cneg w0, w1, vs	1024	0	0	0	awaiting_reference_instruction
-145	cset w0, vs	1024	0	0	0	awaiting_reference_instruction
-146	csetm w0, vs	1024	0	0	0	awaiting_reference_instruction
+138	csel w0, w1, w2, vs	1024	1024	0	0	checked
+139	csinc w0, w1, w2, vs	1024	1024	0	0	checked
+140	csinv w0, w1, w2, vs	1024	1024	0	0	checked
+141	csneg w0, w1, w2, vs	1024	1024	0	0	checked
+142	cinc w0, w1, vs	1024	1024	0	0	checked
+143	cinv w0, w1, vs	1024	1024	0	0	checked
+144	cneg w0, w1, vs	1024	1024	0	0	checked
+145	cset w0, vs	1024	1024	0	0	checked
+146	csetm w0, vs	1024	1024	0	0	checked
 147	ccmp w1, w2, #5, vs	1024	0	0	0	awaiting_reference_instruction
 148	ccmp w1, #7, #10, vs	1024	0	0	0	awaiting_reference_instruction
-149	csel w0, w1, w2, vc	1024	0	0	0	awaiting_reference_instruction
-150	csinc w0, w1, w2, vc	1024	0	0	0	awaiting_reference_instruction
-151	csinv w0, w1, w2, vc	1024	0	0	0	awaiting_reference_instruction
-152	csneg w0, w1, w2, vc	1024	0	0	0	awaiting_reference_instruction
-153	cinc w0, w1, vc	1024	0	0	0	awaiting_reference_instruction
-154	cinv w0, w1, vc	1024	0	0	0	awaiting_reference_instruction
-155	cneg w0, w1, vc	1024	0	0	0	awaiting_reference_instruction
-156	cset w0, vc	1024	0	0	0	awaiting_reference_instruction
-157	csetm w0, vc	1024	0	0	0	awaiting_reference_instruction
+149	csel w0, w1, w2, vc	1024	1024	0	0	checked
+150	csinc w0, w1, w2, vc	1024	1024	0	0	checked
+151	csinv w0, w1, w2, vc	1024	1024	0	0	checked
+152	csneg w0, w1, w2, vc	1024	1024	0	0	checked
+153	cinc w0, w1, vc	1024	1024	0	0	checked
+154	cinv w0, w1, vc	1024	1024	0	0	checked
+155	cneg w0, w1, vc	1024	1024	0	0	checked
+156	cset w0, vc	1024	1024	0	0	checked
+157	csetm w0, vc	1024	1024	0	0	checked
 158	ccmp w1, w2, #5, vc	1024	0	0	0	awaiting_reference_instruction
 159	ccmp w1, #7, #10, vc	1024	0	0	0	awaiting_reference_instruction
-160	csel w0, w1, w2, hi	1024	0	0	0	awaiting_reference_instruction
-161	csinc w0, w1, w2, hi	1024	0	0	0	awaiting_reference_instruction
-162	csinv w0, w1, w2, hi	1024	0	0	0	awaiting_reference_instruction
-163	csneg w0, w1, w2, hi	1024	0	0	0	awaiting_reference_instruction
-164	cinc w0, w1, hi	1024	0	0	0	awaiting_reference_instruction
-165	cinv w0, w1, hi	1024	0	0	0	awaiting_reference_instruction
-166	cneg w0, w1, hi	1024	0	0	0	awaiting_reference_instruction
-167	cset w0, hi	1024	0	0	0	awaiting_reference_instruction
-168	csetm w0, hi	1024	0	0	0	awaiting_reference_instruction
+160	csel w0, w1, w2, hi	1024	1024	0	0	checked
+161	csinc w0, w1, w2, hi	1024	1024	0	0	checked
+162	csinv w0, w1, w2, hi	1024	1024	0	0	checked
+163	csneg w0, w1, w2, hi	1024	1024	0	0	checked
+164	cinc w0, w1, hi	1024	1024	0	0	checked
+165	cinv w0, w1, hi	1024	1024	0	0	checked
+166	cneg w0, w1, hi	1024	1024	0	0	checked
+167	cset w0, hi	1024	1024	0	0	checked
+168	csetm w0, hi	1024	1024	0	0	checked
 169	ccmp w1, w2, #5, hi	1024	0	0	0	awaiting_reference_instruction
 170	ccmp w1, #7, #10, hi	1024	0	0	0	awaiting_reference_instruction
-171	csel w0, w1, w2, ls	1024	0	0	0	awaiting_reference_instruction
-172	csinc w0, w1, w2, ls	1024	0	0	0	awaiting_reference_instruction
-173	csinv w0, w1, w2, ls	1024	0	0	0	awaiting_reference_instruction
-174	csneg w0, w1, w2, ls	1024	0	0	0	awaiting_reference_instruction
-175	cinc w0, w1, ls	1024	0	0	0	awaiting_reference_instruction
-176	cinv w0, w1, ls	1024	0	0	0	awaiting_reference_instruction
-177	cneg w0, w1, ls	1024	0	0	0	awaiting_reference_instruction
-178	cset w0, ls	1024	0	0	0	awaiting_reference_instruction
-179	csetm w0, ls	1024	0	0	0	awaiting_reference_instruction
+171	csel w0, w1, w2, ls	1024	1024	0	0	checked
+172	csinc w0, w1, w2, ls	1024	1024	0	0	checked
+173	csinv w0, w1, w2, ls	1024	1024	0	0	checked
+174	csneg w0, w1, w2, ls	1024	1024	0	0	checked
+175	cinc w0, w1, ls	1024	1024	0	0	checked
+176	cinv w0, w1, ls	1024	1024	0	0	checked
+177	cneg w0, w1, ls	1024	1024	0	0	checked
+178	cset w0, ls	1024	1024	0	0	checked
+179	csetm w0, ls	1024	1024	0	0	checked
 180	ccmp w1, w2, #5, ls	1024	0	0	0	awaiting_reference_instruction
 181	ccmp w1, #7, #10, ls	1024	0	0	0	awaiting_reference_instruction
-182	csel w0, w1, w2, ge	1024	0	0	0	awaiting_reference_instruction
-183	csinc w0, w1, w2, ge	1024	0	0	0	awaiting_reference_instruction
-184	csinv w0, w1, w2, ge	1024	0	0	0	awaiting_reference_instruction
-185	csneg w0, w1, w2, ge	1024	0	0	0	awaiting_reference_instruction
-186	cinc w0, w1, ge	1024	0	0	0	awaiting_reference_instruction
-187	cinv w0, w1, ge	1024	0	0	0	awaiting_reference_instruction
-188	cneg w0, w1, ge	1024	0	0	0	awaiting_reference_instruction
-189	cset w0, ge	1024	0	0	0	awaiting_reference_instruction
-190	csetm w0, ge	1024	0	0	0	awaiting_reference_instruction
+182	csel w0, w1, w2, ge	1024	1024	0	0	checked
+183	csinc w0, w1, w2, ge	1024	1024	0	0	checked
+184	csinv w0, w1, w2, ge	1024	1024	0	0	checked
+185	csneg w0, w1, w2, ge	1024	1024	0	0	checked
+186	cinc w0, w1, ge	1024	1024	0	0	checked
+187	cinv w0, w1, ge	1024	1024	0	0	checked
+188	cneg w0, w1, ge	1024	1024	0	0	checked
+189	cset w0, ge	1024	1024	0	0	checked
+190	csetm w0, ge	1024	1024	0	0	checked
 191	ccmp w1, w2, #5, ge	1024	0	0	0	awaiting_reference_instruction
 192	ccmp w1, #7, #10, ge	1024	0	0	0	awaiting_reference_instruction
-193	csel w0, w1, w2, lt	1024	0	0	0	awaiting_reference_instruction
-194	csinc w0, w1, w2, lt	1024	0	0	0	awaiting_reference_instruction
-195	csinv w0, w1, w2, lt	1024	0	0	0	awaiting_reference_instruction
-196	csneg w0, w1, w2, lt	1024	0	0	0	awaiting_reference_instruction
-197	cinc w0, w1, lt	1024	0	0	0	awaiting_reference_instruction
-198	cinv w0, w1, lt	1024	0	0	0	awaiting_reference_instruction
-199	cneg w0, w1, lt	1024	0	0	0	awaiting_reference_instruction
-200	cset w0, lt	1024	0	0	0	awaiting_reference_instruction
-201	csetm w0, lt	1024	0	0	0	awaiting_reference_instruction
+193	csel w0, w1, w2, lt	1024	1024	0	0	checked
+194	csinc w0, w1, w2, lt	1024	1024	0	0	checked
+195	csinv w0, w1, w2, lt	1024	1024	0	0	checked
+196	csneg w0, w1, w2, lt	1024	1024	0	0	checked
+197	cinc w0, w1, lt	1024	1024	0	0	checked
+198	cinv w0, w1, lt	1024	1024	0	0	checked
+199	cneg w0, w1, lt	1024	1024	0	0	checked
+200	cset w0, lt	1024	1024	0	0	checked
+201	csetm w0, lt	1024	1024	0	0	checked
 202	ccmp w1, w2, #5, lt	1024	0	0	0	awaiting_reference_instruction
 203	ccmp w1, #7, #10, lt	1024	0	0	0	awaiting_reference_instruction
-204	csel w0, w1, w2, gt	1024	0	0	0	awaiting_reference_instruction
-205	csinc w0, w1, w2, gt	1024	0	0	0	awaiting_reference_instruction
-206	csinv w0, w1, w2, gt	1024	0	0	0	awaiting_reference_instruction
-207	csneg w0, w1, w2, gt	1024	0	0	0	awaiting_reference_instruction
-208	cinc w0, w1, gt	1024	0	0	0	awaiting_reference_instruction
-209	cinv w0, w1, gt	1024	0	0	0	awaiting_reference_instruction
-210	cneg w0, w1, gt	1024	0	0	0	awaiting_reference_instruction
-211	cset w0, gt	1024	0	0	0	awaiting_reference_instruction
-212	csetm w0, gt	1024	0	0	0	awaiting_reference_instruction
+204	csel w0, w1, w2, gt	1024	1024	0	0	checked
+205	csinc w0, w1, w2, gt	1024	1024	0	0	checked
+206	csinv w0, w1, w2, gt	1024	1024	0	0	checked
+207	csneg w0, w1, w2, gt	1024	1024	0	0	checked
+208	cinc w0, w1, gt	1024	1024	0	0	checked
+209	cinv w0, w1, gt	1024	1024	0	0	checked
+210	cneg w0, w1, gt	1024	1024	0	0	checked
+211	cset w0, gt	1024	1024	0	0	checked
+212	csetm w0, gt	1024	1024	0	0	checked
 213	ccmp w1, w2, #5, gt	1024	0	0	0	awaiting_reference_instruction
 214	ccmp w1, #7, #10, gt	1024	0	0	0	awaiting_reference_instruction
-215	csel w0, w1, w2, le	1024	0	0	0	awaiting_reference_instruction
-216	csinc w0, w1, w2, le	1024	0	0	0	awaiting_reference_instruction
-217	csinv w0, w1, w2, le	1024	0	0	0	awaiting_reference_instruction
-218	csneg w0, w1, w2, le	1024	0	0	0	awaiting_reference_instruction
-219	cinc w0, w1, le	1024	0	0	0	awaiting_reference_instruction
-220	cinv w0, w1, le	1024	0	0	0	awaiting_reference_instruction
-221	cneg w0, w1, le	1024	0	0	0	awaiting_reference_instruction
-222	cset w0, le	1024	0	0	0	awaiting_reference_instruction
-223	csetm w0, le	1024	0	0	0	awaiting_reference_instruction
+215	csel w0, w1, w2, le	1024	1024	0	0	checked
+216	csinc w0, w1, w2, le	1024	1024	0	0	checked
+217	csinv w0, w1, w2, le	1024	1024	0	0	checked
+218	csneg w0, w1, w2, le	1024	1024	0	0	checked
+219	cinc w0, w1, le	1024	1024	0	0	checked
+220	cinv w0, w1, le	1024	1024	0	0	checked
+221	cneg w0, w1, le	1024	1024	0	0	checked
+222	cset w0, le	1024	1024	0	0	checked
+223	csetm w0, le	1024	1024	0	0	checked
 224	ccmp w1, w2, #5, le	1024	0	0	0	awaiting_reference_instruction
 225	ccmp w1, #7, #10, le	1024	0	0	0	awaiting_reference_instruction
 226	ldr w0, [x4, #8]	1024	0	0	0	awaiting_reference_instruction
@@ -312,158 +312,158 @@ form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status
 310	ubfiz x0, x1, #7, #13	1024	0	0	0	awaiting_reference_instruction
 311	bfxil x0, x1, #7, #13	1024	0	0	0	awaiting_reference_instruction
 312	bfi x0, x1, #7, #13	1024	0	0	0	awaiting_reference_instruction
-313	csel x0, x1, x2, eq	1024	0	0	0	awaiting_reference_instruction
-314	csinc x0, x1, x2, eq	1024	0	0	0	awaiting_reference_instruction
-315	csinv x0, x1, x2, eq	1024	0	0	0	awaiting_reference_instruction
-316	csneg x0, x1, x2, eq	1024	0	0	0	awaiting_reference_instruction
-317	cinc x0, x1, eq	1024	0	0	0	awaiting_reference_instruction
-318	cinv x0, x1, eq	1024	0	0	0	awaiting_reference_instruction
-319	cneg x0, x1, eq	1024	0	0	0	awaiting_reference_instruction
-320	cset x0, eq	1024	0	0	0	awaiting_reference_instruction
-321	csetm x0, eq	1024	0	0	0	awaiting_reference_instruction
+313	csel x0, x1, x2, eq	1024	1024	0	0	checked
+314	csinc x0, x1, x2, eq	1024	1024	0	0	checked
+315	csinv x0, x1, x2, eq	1024	1024	0	0	checked
+316	csneg x0, x1, x2, eq	1024	1024	0	0	checked
+317	cinc x0, x1, eq	1024	1024	0	0	checked
+318	cinv x0, x1, eq	1024	1024	0	0	checked
+319	cneg x0, x1, eq	1024	1024	0	0	checked
+320	cset x0, eq	1024	1024	0	0	checked
+321	csetm x0, eq	1024	1024	0	0	checked
 322	ccmp x1, x2, #5, eq	1024	0	0	0	awaiting_reference_instruction
 323	ccmp x1, #7, #10, eq	1024	0	0	0	awaiting_reference_instruction
-324	csel x0, x1, x2, ne	1024	0	0	0	awaiting_reference_instruction
-325	csinc x0, x1, x2, ne	1024	0	0	0	awaiting_reference_instruction
-326	csinv x0, x1, x2, ne	1024	0	0	0	awaiting_reference_instruction
-327	csneg x0, x1, x2, ne	1024	0	0	0	awaiting_reference_instruction
-328	cinc x0, x1, ne	1024	0	0	0	awaiting_reference_instruction
-329	cinv x0, x1, ne	1024	0	0	0	awaiting_reference_instruction
-330	cneg x0, x1, ne	1024	0	0	0	awaiting_reference_instruction
-331	cset x0, ne	1024	0	0	0	awaiting_reference_instruction
-332	csetm x0, ne	1024	0	0	0	awaiting_reference_instruction
+324	csel x0, x1, x2, ne	1024	1024	0	0	checked
+325	csinc x0, x1, x2, ne	1024	1024	0	0	checked
+326	csinv x0, x1, x2, ne	1024	1024	0	0	checked
+327	csneg x0, x1, x2, ne	1024	1024	0	0	checked
+328	cinc x0, x1, ne	1024	1024	0	0	checked
+329	cinv x0, x1, ne	1024	1024	0	0	checked
+330	cneg x0, x1, ne	1024	1024	0	0	checked
+331	cset x0, ne	1024	1024	0	0	checked
+332	csetm x0, ne	1024	1024	0	0	checked
 333	ccmp x1, x2, #5, ne	1024	0	0	0	awaiting_reference_instruction
 334	ccmp x1, #7, #10, ne	1024	0	0	0	awaiting_reference_instruction
-335	csel x0, x1, x2, cs	1024	0	0	0	awaiting_reference_instruction
-336	csinc x0, x1, x2, cs	1024	0	0	0	awaiting_reference_instruction
-337	csinv x0, x1, x2, cs	1024	0	0	0	awaiting_reference_instruction
-338	csneg x0, x1, x2, cs	1024	0	0	0	awaiting_reference_instruction
-339	cinc x0, x1, cs	1024	0	0	0	awaiting_reference_instruction
-340	cinv x0, x1, cs	1024	0	0	0	awaiting_reference_instruction
-341	cneg x0, x1, cs	1024	0	0	0	awaiting_reference_instruction
-342	cset x0, cs	1024	0	0	0	awaiting_reference_instruction
-343	csetm x0, cs	1024	0	0	0	awaiting_reference_instruction
+335	csel x0, x1, x2, cs	1024	1024	0	0	checked
+336	csinc x0, x1, x2, cs	1024	1024	0	0	checked
+337	csinv x0, x1, x2, cs	1024	1024	0	0	checked
+338	csneg x0, x1, x2, cs	1024	1024	0	0	checked
+339	cinc x0, x1, cs	1024	1024	0	0	checked
+340	cinv x0, x1, cs	1024	1024	0	0	checked
+341	cneg x0, x1, cs	1024	1024	0	0	checked
+342	cset x0, cs	1024	1024	0	0	checked
+343	csetm x0, cs	1024	1024	0	0	checked
 344	ccmp x1, x2, #5, cs	1024	0	0	0	awaiting_reference_instruction
 345	ccmp x1, #7, #10, cs	1024	0	0	0	awaiting_reference_instruction
-346	csel x0, x1, x2, cc	1024	0	0	0	awaiting_reference_instruction
-347	csinc x0, x1, x2, cc	1024	0	0	0	awaiting_reference_instruction
-348	csinv x0, x1, x2, cc	1024	0	0	0	awaiting_reference_instruction
-349	csneg x0, x1, x2, cc	1024	0	0	0	awaiting_reference_instruction
-350	cinc x0, x1, cc	1024	0	0	0	awaiting_reference_instruction
-351	cinv x0, x1, cc	1024	0	0	0	awaiting_reference_instruction
-352	cneg x0, x1, cc	1024	0	0	0	awaiting_reference_instruction
-353	cset x0, cc	1024	0	0	0	awaiting_reference_instruction
-354	csetm x0, cc	1024	0	0	0	awaiting_reference_instruction
+346	csel x0, x1, x2, cc	1024	1024	0	0	checked
+347	csinc x0, x1, x2, cc	1024	1024	0	0	checked
+348	csinv x0, x1, x2, cc	1024	1024	0	0	checked
+349	csneg x0, x1, x2, cc	1024	1024	0	0	checked
+350	cinc x0, x1, cc	1024	1024	0	0	checked
+351	cinv x0, x1, cc	1024	1024	0	0	checked
+352	cneg x0, x1, cc	1024	1024	0	0	checked
+353	cset x0, cc	1024	1024	0	0	checked
+354	csetm x0, cc	1024	1024	0	0	checked
 355	ccmp x1, x2, #5, cc	1024	0	0	0	awaiting_reference_instruction
 356	ccmp x1, #7, #10, cc	1024	0	0	0	awaiting_reference_instruction
-357	csel x0, x1, x2, mi	1024	0	0	0	awaiting_reference_instruction
-358	csinc x0, x1, x2, mi	1024	0	0	0	awaiting_reference_instruction
-359	csinv x0, x1, x2, mi	1024	0	0	0	awaiting_reference_instruction
-360	csneg x0, x1, x2, mi	1024	0	0	0	awaiting_reference_instruction
-361	cinc x0, x1, mi	1024	0	0	0	awaiting_reference_instruction
-362	cinv x0, x1, mi	1024	0	0	0	awaiting_reference_instruction
-363	cneg x0, x1, mi	1024	0	0	0	awaiting_reference_instruction
-364	cset x0, mi	1024	0	0	0	awaiting_reference_instruction
-365	csetm x0, mi	1024	0	0	0	awaiting_reference_instruction
+357	csel x0, x1, x2, mi	1024	1024	0	0	checked
+358	csinc x0, x1, x2, mi	1024	1024	0	0	checked
+359	csinv x0, x1, x2, mi	1024	1024	0	0	checked
+360	csneg x0, x1, x2, mi	1024	1024	0	0	checked
+361	cinc x0, x1, mi	1024	1024	0	0	checked
+362	cinv x0, x1, mi	1024	1024	0	0	checked
+363	cneg x0, x1, mi	1024	1024	0	0	checked
+364	cset x0, mi	1024	1024	0	0	checked
+365	csetm x0, mi	1024	1024	0	0	checked
 366	ccmp x1, x2, #5, mi	1024	0	0	0	awaiting_reference_instruction
 367	ccmp x1, #7, #10, mi	1024	0	0	0	awaiting_reference_instruction
-368	csel x0, x1, x2, pl	1024	0	0	0	awaiting_reference_instruction
-369	csinc x0, x1, x2, pl	1024	0	0	0	awaiting_reference_instruction
-370	csinv x0, x1, x2, pl	1024	0	0	0	awaiting_reference_instruction
-371	csneg x0, x1, x2, pl	1024	0	0	0	awaiting_reference_instruction
-372	cinc x0, x1, pl	1024	0	0	0	awaiting_reference_instruction
-373	cinv x0, x1, pl	1024	0	0	0	awaiting_reference_instruction
-374	cneg x0, x1, pl	1024	0	0	0	awaiting_reference_instruction
-375	cset x0, pl	1024	0	0	0	awaiting_reference_instruction
-376	csetm x0, pl	1024	0	0	0	awaiting_reference_instruction
+368	csel x0, x1, x2, pl	1024	1024	0	0	checked
+369	csinc x0, x1, x2, pl	1024	1024	0	0	checked
+370	csinv x0, x1, x2, pl	1024	1024	0	0	checked
+371	csneg x0, x1, x2, pl	1024	1024	0	0	checked
+372	cinc x0, x1, pl	1024	1024	0	0	checked
+373	cinv x0, x1, pl	1024	1024	0	0	checked
+374	cneg x0, x1, pl	1024	1024	0	0	checked
+375	cset x0, pl	1024	1024	0	0	checked
+376	csetm x0, pl	1024	1024	0	0	checked
 377	ccmp x1, x2, #5, pl	1024	0	0	0	awaiting_reference_instruction
 378	ccmp x1, #7, #10, pl	1024	0	0	0	awaiting_reference_instruction
-379	csel x0, x1, x2, vs	1024	0	0	0	awaiting_reference_instruction
-380	csinc x0, x1, x2, vs	1024	0	0	0	awaiting_reference_instruction
-381	csinv x0, x1, x2, vs	1024	0	0	0	awaiting_reference_instruction
-382	csneg x0, x1, x2, vs	1024	0	0	0	awaiting_reference_instruction
-383	cinc x0, x1, vs	1024	0	0	0	awaiting_reference_instruction
-384	cinv x0, x1, vs	1024	0	0	0	awaiting_reference_instruction
-385	cneg x0, x1, vs	1024	0	0	0	awaiting_reference_instruction
-386	cset x0, vs	1024	0	0	0	awaiting_reference_instruction
-387	csetm x0, vs	1024	0	0	0	awaiting_reference_instruction
+379	csel x0, x1, x2, vs	1024	1024	0	0	checked
+380	csinc x0, x1, x2, vs	1024	1024	0	0	checked
+381	csinv x0, x1, x2, vs	1024	1024	0	0	checked
+382	csneg x0, x1, x2, vs	1024	1024	0	0	checked
+383	cinc x0, x1, vs	1024	1024	0	0	checked
+384	cinv x0, x1, vs	1024	1024	0	0	checked
+385	cneg x0, x1, vs	1024	1024	0	0	checked
+386	cset x0, vs	1024	1024	0	0	checked
+387	csetm x0, vs	1024	1024	0	0	checked
 388	ccmp x1, x2, #5, vs	1024	0	0	0	awaiting_reference_instruction
 389	ccmp x1, #7, #10, vs	1024	0	0	0	awaiting_reference_instruction
-390	csel x0, x1, x2, vc	1024	0	0	0	awaiting_reference_instruction
-391	csinc x0, x1, x2, vc	1024	0	0	0	awaiting_reference_instruction
-392	csinv x0, x1, x2, vc	1024	0	0	0	awaiting_reference_instruction
-393	csneg x0, x1, x2, vc	1024	0	0	0	awaiting_reference_instruction
-394	cinc x0, x1, vc	1024	0	0	0	awaiting_reference_instruction
-395	cinv x0, x1, vc	1024	0	0	0	awaiting_reference_instruction
-396	cneg x0, x1, vc	1024	0	0	0	awaiting_reference_instruction
-397	cset x0, vc	1024	0	0	0	awaiting_reference_instruction
-398	csetm x0, vc	1024	0	0	0	awaiting_reference_instruction
+390	csel x0, x1, x2, vc	1024	1024	0	0	checked
+391	csinc x0, x1, x2, vc	1024	1024	0	0	checked
+392	csinv x0, x1, x2, vc	1024	1024	0	0	checked
+393	csneg x0, x1, x2, vc	1024	1024	0	0	checked
+394	cinc x0, x1, vc	1024	1024	0	0	checked
+395	cinv x0, x1, vc	1024	1024	0	0	checked
+396	cneg x0, x1, vc	1024	1024	0	0	checked
+397	cset x0, vc	1024	1024	0	0	checked
+398	csetm x0, vc	1024	1024	0	0	checked
 399	ccmp x1, x2, #5, vc	1024	0	0	0	awaiting_reference_instruction
 400	ccmp x1, #7, #10, vc	1024	0	0	0	awaiting_reference_instruction
-401	csel x0, x1, x2, hi	1024	0	0	0	awaiting_reference_instruction
-402	csinc x0, x1, x2, hi	1024	0	0	0	awaiting_reference_instruction
-403	csinv x0, x1, x2, hi	1024	0	0	0	awaiting_reference_instruction
-404	csneg x0, x1, x2, hi	1024	0	0	0	awaiting_reference_instruction
-405	cinc x0, x1, hi	1024	0	0	0	awaiting_reference_instruction
-406	cinv x0, x1, hi	1024	0	0	0	awaiting_reference_instruction
-407	cneg x0, x1, hi	1024	0	0	0	awaiting_reference_instruction
-408	cset x0, hi	1024	0	0	0	awaiting_reference_instruction
-409	csetm x0, hi	1024	0	0	0	awaiting_reference_instruction
+401	csel x0, x1, x2, hi	1024	1024	0	0	checked
+402	csinc x0, x1, x2, hi	1024	1024	0	0	checked
+403	csinv x0, x1, x2, hi	1024	1024	0	0	checked
+404	csneg x0, x1, x2, hi	1024	1024	0	0	checked
+405	cinc x0, x1, hi	1024	1024	0	0	checked
+406	cinv x0, x1, hi	1024	1024	0	0	checked
+407	cneg x0, x1, hi	1024	1024	0	0	checked
+408	cset x0, hi	1024	1024	0	0	checked
+409	csetm x0, hi	1024	1024	0	0	checked
 410	ccmp x1, x2, #5, hi	1024	0	0	0	awaiting_reference_instruction
 411	ccmp x1, #7, #10, hi	1024	0	0	0	awaiting_reference_instruction
-412	csel x0, x1, x2, ls	1024	0	0	0	awaiting_reference_instruction
-413	csinc x0, x1, x2, ls	1024	0	0	0	awaiting_reference_instruction
-414	csinv x0, x1, x2, ls	1024	0	0	0	awaiting_reference_instruction
-415	csneg x0, x1, x2, ls	1024	0	0	0	awaiting_reference_instruction
-416	cinc x0, x1, ls	1024	0	0	0	awaiting_reference_instruction
-417	cinv x0, x1, ls	1024	0	0	0	awaiting_reference_instruction
-418	cneg x0, x1, ls	1024	0	0	0	awaiting_reference_instruction
-419	cset x0, ls	1024	0	0	0	awaiting_reference_instruction
-420	csetm x0, ls	1024	0	0	0	awaiting_reference_instruction
+412	csel x0, x1, x2, ls	1024	1024	0	0	checked
+413	csinc x0, x1, x2, ls	1024	1024	0	0	checked
+414	csinv x0, x1, x2, ls	1024	1024	0	0	checked
+415	csneg x0, x1, x2, ls	1024	1024	0	0	checked
+416	cinc x0, x1, ls	1024	1024	0	0	checked
+417	cinv x0, x1, ls	1024	1024	0	0	checked
+418	cneg x0, x1, ls	1024	1024	0	0	checked
+419	cset x0, ls	1024	1024	0	0	checked
+420	csetm x0, ls	1024	1024	0	0	checked
 421	ccmp x1, x2, #5, ls	1024	0	0	0	awaiting_reference_instruction
 422	ccmp x1, #7, #10, ls	1024	0	0	0	awaiting_reference_instruction
-423	csel x0, x1, x2, ge	1024	0	0	0	awaiting_reference_instruction
-424	csinc x0, x1, x2, ge	1024	0	0	0	awaiting_reference_instruction
-425	csinv x0, x1, x2, ge	1024	0	0	0	awaiting_reference_instruction
-426	csneg x0, x1, x2, ge	1024	0	0	0	awaiting_reference_instruction
-427	cinc x0, x1, ge	1024	0	0	0	awaiting_reference_instruction
-428	cinv x0, x1, ge	1024	0	0	0	awaiting_reference_instruction
-429	cneg x0, x1, ge	1024	0	0	0	awaiting_reference_instruction
-430	cset x0, ge	1024	0	0	0	awaiting_reference_instruction
-431	csetm x0, ge	1024	0	0	0	awaiting_reference_instruction
+423	csel x0, x1, x2, ge	1024	1024	0	0	checked
+424	csinc x0, x1, x2, ge	1024	1024	0	0	checked
+425	csinv x0, x1, x2, ge	1024	1024	0	0	checked
+426	csneg x0, x1, x2, ge	1024	1024	0	0	checked
+427	cinc x0, x1, ge	1024	1024	0	0	checked
+428	cinv x0, x1, ge	1024	1024	0	0	checked
+429	cneg x0, x1, ge	1024	1024	0	0	checked
+430	cset x0, ge	1024	1024	0	0	checked
+431	csetm x0, ge	1024	1024	0	0	checked
 432	ccmp x1, x2, #5, ge	1024	0	0	0	awaiting_reference_instruction
 433	ccmp x1, #7, #10, ge	1024	0	0	0	awaiting_reference_instruction
-434	csel x0, x1, x2, lt	1024	0	0	0	awaiting_reference_instruction
-435	csinc x0, x1, x2, lt	1024	0	0	0	awaiting_reference_instruction
-436	csinv x0, x1, x2, lt	1024	0	0	0	awaiting_reference_instruction
-437	csneg x0, x1, x2, lt	1024	0	0	0	awaiting_reference_instruction
-438	cinc x0, x1, lt	1024	0	0	0	awaiting_reference_instruction
-439	cinv x0, x1, lt	1024	0	0	0	awaiting_reference_instruction
-440	cneg x0, x1, lt	1024	0	0	0	awaiting_reference_instruction
-441	cset x0, lt	1024	0	0	0	awaiting_reference_instruction
-442	csetm x0, lt	1024	0	0	0	awaiting_reference_instruction
+434	csel x0, x1, x2, lt	1024	1024	0	0	checked
+435	csinc x0, x1, x2, lt	1024	1024	0	0	checked
+436	csinv x0, x1, x2, lt	1024	1024	0	0	checked
+437	csneg x0, x1, x2, lt	1024	1024	0	0	checked
+438	cinc x0, x1, lt	1024	1024	0	0	checked
+439	cinv x0, x1, lt	1024	1024	0	0	checked
+440	cneg x0, x1, lt	1024	1024	0	0	checked
+441	cset x0, lt	1024	1024	0	0	checked
+442	csetm x0, lt	1024	1024	0	0	checked
 443	ccmp x1, x2, #5, lt	1024	0	0	0	awaiting_reference_instruction
 444	ccmp x1, #7, #10, lt	1024	0	0	0	awaiting_reference_instruction
-445	csel x0, x1, x2, gt	1024	0	0	0	awaiting_reference_instruction
-446	csinc x0, x1, x2, gt	1024	0	0	0	awaiting_reference_instruction
-447	csinv x0, x1, x2, gt	1024	0	0	0	awaiting_reference_instruction
-448	csneg x0, x1, x2, gt	1024	0	0	0	awaiting_reference_instruction
-449	cinc x0, x1, gt	1024	0	0	0	awaiting_reference_instruction
-450	cinv x0, x1, gt	1024	0	0	0	awaiting_reference_instruction
-451	cneg x0, x1, gt	1024	0	0	0	awaiting_reference_instruction
-452	cset x0, gt	1024	0	0	0	awaiting_reference_instruction
-453	csetm x0, gt	1024	0	0	0	awaiting_reference_instruction
+445	csel x0, x1, x2, gt	1024	1024	0	0	checked
+446	csinc x0, x1, x2, gt	1024	1024	0	0	checked
+447	csinv x0, x1, x2, gt	1024	1024	0	0	checked
+448	csneg x0, x1, x2, gt	1024	1024	0	0	checked
+449	cinc x0, x1, gt	1024	1024	0	0	checked
+450	cinv x0, x1, gt	1024	1024	0	0	checked
+451	cneg x0, x1, gt	1024	1024	0	0	checked
+452	cset x0, gt	1024	1024	0	0	checked
+453	csetm x0, gt	1024	1024	0	0	checked
 454	ccmp x1, x2, #5, gt	1024	0	0	0	awaiting_reference_instruction
 455	ccmp x1, #7, #10, gt	1024	0	0	0	awaiting_reference_instruction
-456	csel x0, x1, x2, le	1024	0	0	0	awaiting_reference_instruction
-457	csinc x0, x1, x2, le	1024	0	0	0	awaiting_reference_instruction
-458	csinv x0, x1, x2, le	1024	0	0	0	awaiting_reference_instruction
-459	csneg x0, x1, x2, le	1024	0	0	0	awaiting_reference_instruction
-460	cinc x0, x1, le	1024	0	0	0	awaiting_reference_instruction
-461	cinv x0, x1, le	1024	0	0	0	awaiting_reference_instruction
-462	cneg x0, x1, le	1024	0	0	0	awaiting_reference_instruction
-463	cset x0, le	1024	0	0	0	awaiting_reference_instruction
-464	csetm x0, le	1024	0	0	0	awaiting_reference_instruction
+456	csel x0, x1, x2, le	1024	1024	0	0	checked
+457	csinc x0, x1, x2, le	1024	1024	0	0	checked
+458	csinv x0, x1, x2, le	1024	1024	0	0	checked
+459	csneg x0, x1, x2, le	1024	1024	0	0	checked
+460	cinc x0, x1, le	1024	1024	0	0	checked
+461	cinv x0, x1, le	1024	1024	0	0	checked
+462	cneg x0, x1, le	1024	1024	0	0	checked
+463	cset x0, le	1024	1024	0	0	checked
+464	csetm x0, le	1024	1024	0	0	checked
 465	ccmp x1, x2, #5, le	1024	0	0	0	awaiting_reference_instruction
 466	ccmp x1, #7, #10, le	1024	0	0	0	awaiting_reference_instruction
 467	ldr x0, [x4, #8]	1024	0	0	0	awaiting_reference_instruction

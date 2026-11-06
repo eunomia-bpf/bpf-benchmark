@@ -375,3 +375,78 @@ and `2459ff8618ca7cd3cffec5fe45ded0a9ef1fda482e59609dd6a5ad5e0d8c4ea2`.
 These hardware results close replay of those frozen matrices, including the
 branch/call/stack composite handoff. They do not cover the later SP-flags
 counterexample or establish complete reference coverage.
+
+
+## Current production emitters and redundant stack prefixes
+
+The refreshed x86 matrix in `x86-current-stack/` passes **721 forms / 738304
+real-CPU cases / zero mismatches**. The 23 additions cover eight immediate
+PUSH values, 16-bit immediate PUSH, memory PUSH/POP at both widths, RSP-relative
+source/destination addressing, and eight raw redundant-prefix encodings.
+Each form runs 1024 states. Both orders of `66` and REX.W are retained for
+register PUSH/POP and their FF/6 and 8F/0 aliases. The production parser now
+folds objdump's prefix-only records and obtains stack width from active
+prefixes. Previously valid instructions were parsed as `data16`/`rex.W` or
+split into two instructions. Architectural semantics are unchanged.
+
+All 29 workload-derived x86 positive proof artifacts and the negative artifact
+compile through `make -C kprog/x86 micro-proofs-build`; this is compilation
+validation, not a claim that the negative artifact verifies. Lane V's sole
+workspace full check passed all331 Lean jobs, canonical wire checks and C
+oracles (`V/check-stack-memory-full-3.log`, published with `5bd74ac0b`).
+F stopped its duplicate check when the coordinator introduced the single-full-
+check memory rule; the interrupted log is retained and is not counted as a pass.
+
+The Arm data matrix now uses the production `append_insn` emitter, including
+its literal opcode dispatch, rather than a separate generic-op invocation.
+`arm64-production-current/` passes **563 forms / 576512 QEMU cases / zero
+mismatches**, including shifted MVN/NEG and AL/NV conditional forms. Its
+independent-reference replay checks **300 forms / 307200 cases / zero
+mismatches**. The remaining263 forms produce explicit decoder diagnostics in
+`arm64-production-reference-current/reference-unavailable.jsonl.gz`; the
+reference command exits1 for that incomplete coverage. No ISA interpreter was
+added to the harness. The earlier `arm64-reference/reference-forms.tsv` refresh
+likewise broadens the old handoff's reference replay; its CPU inputs remain
+unchanged.
+
+`arm64-control-current/` uses production control emission and real return tags,
+with the observation boundary outside the simulated application return. It
+requires no artificial entry register or return token. The original74 controls
+still pass; the additional SP-flags composite retains all1024 mismatches among
+75 forms / 76800 cases. Every mismatch includes initial registers, flags, stack
+and memory and both resulting states in `mismatches.jsonl.gz`. This remains a
+real accepted-negative finding, not an observer artifact.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity run BUILD=build-x86-current-stack OUT=../results/kprog_fidelity_20261106/differential/x86-current-stack
+taskset -c 16-23 make -C kprog/fidelity reference-check BUILD=build-x86-current-stack OUT=../results/kprog_fidelity_20261106/differential/x86-current-stack-reference
+taskset -c 16-23 make -C kprog/x86 micro-proofs-build
+taskset -c 16-23 make -C kprog/fidelity run-emulated ARCH=arm64 BUILD=build-arm64-production-current OUT=../results/kprog_fidelity_20261106/differential/arm64-production-current
+taskset -c 16-23 make -C kprog/fidelity reference-check ARCH=arm64 BUILD=build-arm64-production-current OUT=../results/kprog_fidelity_20261106/differential/arm64-production-reference-current
+taskset -c 16-23 make -C kprog/fidelity arm64-control-build ARM64_CONTROL_BUILD=build-arm64-control-current
+taskset -c 16-23 make -C kprog/fidelity arm64-control-qemu ARM64_CONTROL_BUILD=build-arm64-control-current ARM64_CONTROL_OUT=../results/kprog_fidelity_20261106/differential/arm64-control-current
+```
+
+The last command intentionally exits1 while SP semantics differ. Updated
+static hardware handoffs are `cpu-differential-arm64-production-current.gz`
+and `cpu-differential-arm64-control-current.gz`. On a real Arm host, use the
+existing scripts with these environment overrides:
+
+```sh
+ARM64_HANDOFF=../results/kprog_fidelity_20261106/differential/cpu-differential-arm64-production-current.gz OUT=../results/kprog_fidelity_20261106/differential/arm64-production-current-hardware sh kprog/fidelity/run-arm64.sh
+ARM64_CONTROL_HANDOFF=../results/kprog_fidelity_20261106/differential/cpu-differential-arm64-control-current.gz OUT=../results/kprog_fidelity_20261106/differential/arm64-control-current-hardware sh kprog/fidelity/run-arm64-control.sh
+```
+
+`current-production-harness-artifacts.tar.gz` retains all three generated
+harnesses, exact production include/import snapshots, native assembly and
+static binaries. Passing CPU-state traces remain in the local result
+directories for reference replay; per-form counts and all mismatch inputs are
+published. These snapshots include other lanes' concurrent source changes;
+they are not asserted to be a clean committed-source export.
+
+The current x86 independent-reference replay is complete: **116 forms /
+118784 cases / zero mismatches**, including all23 newly added stack encodings.
+The605 remaining forms have explicit decoder/block-interface diagnostics;
+`reference-check` exits1. Full721-form CPU/simulator agreement is distinct from
+this incomplete canonical-reference coverage. Both sets of per-form results
+and the exact diagnostics are retained in `x86-current-stack-reference/`.

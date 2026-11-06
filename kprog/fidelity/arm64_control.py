@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Real ARM control/stack composites paired with the production whole-program encoder."""
-from collections import OrderedDict
 from dataclasses import replace
 import importlib.util
 import json
@@ -98,25 +97,38 @@ def main():
         # The outer ABI return is our observation boundary. Inner RETs remain
         # real RETs in both the CPU and canonical production return dispatcher.
         code = [replace(x,mnemonic='ret',operands=('x20',),raw='ret x20 (outer observation)') if x.addr == symbols[f'outer_done_{i}'] else x for x in code]
-        rendered = enc.render_program(f'control_{i}', 'entry', OrderedDict(entry=code), 'xdp')
-        start = rendered.index('SEC("xdp")')
-        active = False
-        for line in rendered[:rendered.index('#include')].splitlines():
-            if line.startswith('#define '): active = line.startswith('#define ARM64_SIM_RET_CASES_')
-            if active: definitions.append(line)
-            if not line.endswith('\\'): active = False
-        body = rendered[start:].replace('SEC("xdp")\n','').replace(f'int control_{i}_arm64_sim_xdp(struct xdp_md *ctx)',f'static void sim_{i}(struct state *s)')
+        targets = enc.indirect_targets(code)
+        returns = enc.return_targets(code, targets)
+        for addr, destinations in sorted(returns.items()):
+            cases=' '.join(f'case 0x{target:x}ULL: goto {enc.label(target)};' for target in sorted(destinations))
+            definitions.append(f'#define ARM64_SIM_RET_CASES_{addr:x} {cases}')
+        emitted=[]
+        skip=set()
+        for j, instruction in enumerate(code):
+            if instruction.addr in skip: continue
+            emitted.append(f'{enc.label(instruction.addr)}:;')
+            if instruction.addr == symbols[f'outer_done_{i}']:
+                # Both sides stop at the observer boundary, without forging
+                # an application ABI return token or an extra entry argument.
+                emitted.append('goto observed;')
+                continue
+            if name.endswith('/ b.gt') and j==0:
+                selected=enc.encode(instruction,{},{}); following=code[j+1]
+                emitted += [f'{enc.label(following.addr)}:;',
+                    f'ARM64_SIM_A64_CMP_GT({selected.op}, {selected.dst}, {selected.src}, {selected.width}, {selected.aux}, {selected.imm}, {enc.label(enc.branch_target(following.operands[0]))});']
+                skip.add(following.addr)
+                continue
+            enc.append_insn(emitted,instruction,{x.addr for x in code},code[j+1].addr if j+1<len(code) else None,
+                            targets.get(instruction.addr),{}, {})
         init = ['ARM64_SIM_L_DECLARE_STATE(); ARM64_SIM_L_DECLARE_STACK(); __u8 __a64_sim_abi_kind=KPROG_ABI_KIND_XDP;']
         init += [f'__a64_x{j}.x=s->r[{j}];' for j in range(31)]
         init += ['for (unsigned k=0;k<64;k++) __a64_stack.b[ARM64_SIM_STACK_BIAS-64+k]=s->stack[k];',
                  '__a64_n=(s->flags>>31)&1; __a64_z=(s->flags>>30)&1; __a64_c=(s->flags>>29)&1; __a64_v=(s->flags>>28)&1;',
                  '__a64_v0=s->vec[0]; __a64_v0_hi=s->vec[1];']
-        body = body.replace('ARM64_SIM_ENTRY_XDP(ctx);','\n'.join(init)).replace('\treturn 0;','\tgoto observed;').replace('ARM64_SIM_LICENSE();','')
         finish = ['observed:;']+[f's->r[{j}]=__a64_x{j}.x;' for j in range(31)]
         finish += ['s->r[31]=__a64_sp;', 's->flags=((uint64_t)__a64_n<<31)|((uint64_t)__a64_z<<30)|((uint64_t)__a64_c<<29)|((uint64_t)__a64_v<<28);',
                    's->vec[0]=__a64_v0; s->vec[1]=__a64_v0_hi;', 'for (unsigned k=0;k<64;k++) s->stack[k]=__a64_stack.b[ARM64_SIM_STACK_BIAS-64+k];']
-        end = body.rindex('}')
-        body = body[:end]+'\n'.join(finish)+'\n'+body[end:]
+        body='\n'.join([f'static void sim_{i}(struct state *s) {{',*init,*emitted,'goto observed;',*finish,'}'])
         functions += [f'extern void native_{i}(struct state *);',f'extern unsigned char native_pc_{i},native_next_{i};', body]
         entries.append(f'{{{json.dumps(name)},"ARM64_CONTROL",native_{i},sim_{i},0xf0000000U,64,0,6,&native_pc_{i},&native_next_{i}}}')
         coverage.append(dict(assembly=name,native_instructions=len(code),opcode='ARM64_CONTROL'))

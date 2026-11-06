@@ -101,7 +101,6 @@ int main(int argc, char **argv)
 #else
             input.flags = (uint64_t)(c & 15) << 28;
             input.r[31] = 0; /* SP is the wrapper's private stack. */
-            if (form->mode == 6) input.r[20] = 0; /* outer control observation return */
             input.r[4] = (uintptr_t)(memory + 32);
             input.r[5] = 8; /* bounded address index */
 #endif

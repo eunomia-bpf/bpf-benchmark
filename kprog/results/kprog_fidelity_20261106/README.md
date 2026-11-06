@@ -18,3 +18,5 @@
 
 - `scale/README.md`: all16 native-size cells attempted;9 accepted/correct,
   3 compile deadlines and4 Clang source-location exhaustion failures.
+
+Latest replay: x86721forms/738304realCPUcases/zero; Arm563forms/576512QEMUcases/zero. Canonicalreference116x86forms/118784cases and300Armforms/307200cases agree, with605/263 missing-reference forms explicitly retained. Current75Arm controls retain1024SPflag mismatches. See differential/README.md for scope and static hardware handoffs.

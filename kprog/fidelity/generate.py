@@ -5,6 +5,8 @@ import importlib.util
 import json
 from pathlib import Path
 import subprocess
+import shutil
+from tcb import includes, imports
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -12,6 +14,15 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def x86_forms():
     forms = ["push rbx", "pop rax", "push bx", "pop ax", "nop", "cdqe", "movups xmm0, XMMWORD PTR [rdi]", "movups XMMWORD PTR [rdi], xmm0"]
+    forms += [f"push {n}" for n in [-2147483648, -128, -1, 0, 1, 127, 128, 0x12345678]]
+    forms += ["pushw -7", "push QWORD PTR [rdi+8]", "push WORD PTR [rdi+8]",
+              "pop QWORD PTR [rdi+8]", "pop WORD PTR [rdi+8]",
+              "push QWORD PTR [rsp-16]", "pop QWORD PTR [rsp-16]"]
+    # Active REX.W overrides 66; a later 66 invalidates the preceding REX.
+    forms += [".byte "+", ".join(f"0x{x:02x}" for x in sequence)
+              for opcode in [[0x53], [0xff,0xf3], [0x58], [0x8f,0xc0]]
+              for prefix in [[0x66,0x48], [0x48,0x66]]
+              for sequence in [prefix+opcode]]
     for width, a, b, mem in [(8, "al", "bl", "BYTE"), (16, "ax", "bx", "WORD"), (32, "eax", "ebx", "DWORD"), (64, "rax", "rbx", "QWORD"), (8, "ah", "bh", "BYTE")]:
         m = f"{mem} PTR [rdi+8]"
         forms += [f"mov {a}, {b}", f"mov {a}, 0x7f", f"mov {m}, {a}"]
@@ -74,6 +85,10 @@ def arm64_forms():
         forms += [f"mov {a}, {b}", f"mov {a}, #127", f"movk {a}, #0xdead, lsl #16"]
         for op in ["mvn", "neg", "rev", "rev16", "sxtb", "sxth"]:
             forms += [f"{op} {a}, {'w1' if op in ['sxtb', 'sxth'] else b}"]
+        for op in ["mvn", "neg"]:
+            for modifier in (["lsl", "lsr", "asr", "ror"] if op=="mvn" else ["lsl", "lsr", "asr"]):
+                for amount in [0,1,31 if width=="w" else 63]:
+                    forms += [f"{op} {a}, {b}, {modifier} #{amount}"]
         for op in ["mul", "udiv"]:
             forms += [f"{op} {a}, {b}, {c}"]
         for op in ["madd", "msub"]:
@@ -84,12 +99,14 @@ def arm64_forms():
         forms += [f"extr {a}, {b}, {c}, #7"]
         for op in ["ubfx", "sbfx", "ubfiz", "bfxil", "bfi"]:
             forms += [f"{op} {a}, {b}, #7, #13"]
-        for cc in ["eq", "ne", "cs", "cc", "mi", "pl", "vs", "vc", "hi", "ls", "ge", "lt", "gt", "le"]:
+        for cc in ["eq", "ne", "cs", "cc", "mi", "pl", "vs", "vc", "hi", "ls", "ge", "lt", "gt", "le", "al", "nv"]:
             for op in ["csel", "csinc", "csinv", "csneg"]:
                 forms += [f"{op} {a}, {b}, {c}, {cc}"]
-            for op in ["cinc", "cinv", "cneg"]:
-                forms += [f"{op} {a}, {b}, {cc}"]
-            forms += [f"cset {a}, {cc}", f"csetm {a}, {cc}", f"ccmp {b}, {c}, #5, {cc}", f"ccmp {b}, #7, #10, {cc}"]
+            if cc not in ["al", "nv"]:
+                for op in ["cinc", "cinv", "cneg"]:
+                    forms += [f"{op} {a}, {b}, {cc}"]
+                forms += [f"cset {a}, {cc}", f"csetm {a}, {cc}"]
+            forms += [f"ccmp {b}, {c}, #5, {cc}", f"ccmp {b}, #7, #10, {cc}"]
         for op in ["ldr", "str", "ldur", "stur"]:
             forms += [f"{op} {a}, [x4, #8]"]
         for op in ["ldr", "str"]:
@@ -102,7 +119,7 @@ def arm64_forms():
     return list(dict.fromkeys(forms))
 
 
-def native_wrapper(arch, index, instruction):
+def native_wrapper(arch, index, instruction, stack_kind=None, stack_bytes=0):
     name = f"native_{index}"
     lines = [f".global {name}", f".type {name}, %function", f"{name}:"]
     if arch == "x86":
@@ -113,8 +130,8 @@ def native_wrapper(arch, index, instruction):
             lines += [f"movdqu xmm{lane+1}, [r15+{280+lane*16}]", f"movdqu [rsp-{64-lane*16}], xmm{lane+1}"]
         lines += ["push QWORD PTR [r15+256]", "popfq", "movdqu [rsp-16], xmm4", "movdqu xmm0, [r15+264]"]
         lines += [f"mov {r}, [r15+{i*8}]" for i, r in enumerate(regs) if r not in ["rsp", "r15"]]
-        before = -2 if instruction == "pop ax" else -8 if instruction == "pop rax" else 0
-        after = -2 if instruction == "push bx" else -8 if instruction == "push rbx" else 0
+        before = -stack_bytes if stack_kind == "X86_OP_POP" else 0
+        after = -stack_bytes if stack_kind == "X86_OP_PUSH" else 0
         lines += ["mov r15, [r15+120]", "mov QWORD PTR [rip+native_stack_base], rsp"]
         if before:
             lines += [f"lea rsp, [rsp{before:+d}]"]
@@ -154,6 +171,11 @@ def main():
     spec.loader.exec_module(encoder)
     forms = x86_forms() if arch == "x86" else arm64_forms()
     out.mkdir(parents=True, exist_ok=True)
+    snapshot = out.resolve()/'snapshot'
+    for path in includes(ROOT/f'kprog/{arch}/{arch}_sim_local_bpf.h') | imports(Path(encoder.__file__)):
+        target = snapshot/path.relative_to(ROOT)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path,target)
     # One object is decoded in bulk; the wrapper assembly is assembled separately.
     source = (".intel_syntax noprefix\n" if arch == "x86" else "") + ".text\n" + "\n".join(forms) + "\n"
     (out / "instructions.S").write_text(source)
@@ -165,7 +187,7 @@ def main():
     insns = encoder.parse_asm_text(disassembly) if arch == "x86" else encoder.parse_flat_instructions(disassembly)
     if len(insns) != len(forms):
         raise RuntimeError(f"decoded {len(insns)} instructions for {len(forms)} forms")
-    c = ['#include "../driver.h"', '#include <stdlib.h>', '#include <string.h>', '#define X86_SIM_ENABLE_STACK 1', f'#include "../../{arch}/{arch}_sim_local_bpf.h"']
+    c = ['#include "../driver.h"', '#include <stdlib.h>', '#include <string.h>', '#define X86_SIM_ENABLE_STACK 1', f'#include "{snapshot}/kprog/{arch}/{arch}_sim_local_bpf.h"']
     if arch == "arm64":
         c += ['static void arm64_sim_unsupported_opcode(void) { abort(); }']
     entries, coverage = [], []
@@ -205,7 +227,8 @@ def main():
             width = next((bits for bits in [8, 16, 32, 64] if encoded.flags == f"X86_WIDTH_{bits}"), 64)
             op = assembly.split()[0]
             mode, count, mask = 0, 0, 0x8c1
-            if op in ["push", "pop"]: mode, count = 5, (-2 if assembly == "pop ax" else -8 if assembly == "pop rax" else 0)
+            if encoded.op in ["X86_OP_PUSH", "X86_OP_POP"]:
+                mode, count = 5, (-width//8 if encoded.op == "X86_OP_POP" else 0)
             if op == "rep": mode = 4
             if op == "div": mode, mask = 1, 0
             if op == "imul": mask = 0x801
@@ -217,7 +240,10 @@ def main():
             c += ["ARM64_SIM_L_DECLARE_STATE(); ARM64_SIM_L_DECLARE_STACK(); __u8 __a64_sim_abi_kind = KPROG_ABI_KIND_XDP;"]
             c += [f"__a64_x{j}.x = s->r[{j}];" for j in range(31)]
             c += ["__a64_n = (s->flags >> 31) & 1; __a64_z = (s->flags >> 30) & 1; __a64_c = (s->flags >> 29) & 1; __a64_v = (s->flags >> 28) & 1;", "__a64_v0 = s->vec[0]; __a64_v0_hi = s->vec[1];"]
-            c += [f"ARM64_SIM_RUN_OP3({encoded.op}, {encoded.dst}, {encoded.src}, {encoded.src2}, {encoded.src3}, {encoded.width}, {encoded.aux}, {encoded.imm});"]
+            emitted = []
+            encoder.append_insn(emitted, insns[i], {insns[i].addr}, insns[i].addr+4,
+                                frozenset(), {}, {})
+            c += emitted
             c += [f"s->r[{j}] = __a64_x{j}.x;" for j in range(31)]
             c += ["s->flags = ((uint64_t)__a64_n << 31) | ((uint64_t)__a64_z << 30) | ((uint64_t)__a64_c << 29) | ((uint64_t)__a64_v << 28);", "s->vec[0] = __a64_v0; s->vec[1] = __a64_v0_hi;"]
             mode, count, mask, width = 0, 0, 0xf0000000, 64
@@ -227,7 +253,9 @@ def main():
     c += ["const struct form forms[] = {", ",\n".join(entries), "};", "const unsigned form_count = sizeof(forms) / sizeof(forms[0]);"]
     (out / "generated.c").write_text("\n".join(c) + "\n")
     native = (".intel_syntax noprefix\n" if arch == "x86" else "") + ".text\n"
-    native += "\n".join(native_wrapper(arch, i, pair[3]) for i, pair in enumerate(pairs))
+    native += "\n".join(native_wrapper(arch, i, pair[3], pair[1].op,
+                         next((bits//8 for bits in [16,64] if pair[1].flags == f"X86_WIDTH_{bits}"), 0)
+                         if arch == "x86" else 0) for i, pair in enumerate(pairs))
     native += '\n.section .note.GNU-stack,"",%progbits\n'
     (out / "native.S").write_text(native)
     (out / "coverage.json").write_text(json.dumps(coverage, indent=2) + "\n")
