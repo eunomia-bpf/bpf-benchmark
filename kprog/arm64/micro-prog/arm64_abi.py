@@ -174,6 +174,11 @@ def check_definedness(insns, targets, linked_exit, decode):
         memory_index = next((i for i, arg in enumerate(args) if arg.startswith('[')), None)
         if memory_index is not None:
             mem = decode.parse_mem(args, memory_index)
+            if op in {'stxr', 'stlxr'}:
+                status, source = ri(args[0])[0], ri(args[1])[0]
+                base = ri(raw(mem.base))[0]
+                if status == source or (mem.base != 'ARM64_SP' and status == base):
+                    raise ValueError(f'constrained-unpredictable native exclusive status register overlap at {where}')
             # LDPOVERLAP permits UNDEF/NOP as well as unknown data. A later
             # overwrite does not make the native instruction safe to admit.
             if op == 'ldp' and args[0] == args[1]:

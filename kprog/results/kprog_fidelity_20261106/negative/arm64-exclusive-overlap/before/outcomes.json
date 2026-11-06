@@ -1,0 +1,50 @@
+[
+  {
+    "name": "stxr_status_data",
+    "assembly": "sub sp,sp,#16;mov x1,#2;str x1,[sp];mov x2,sp;stxr w1,x1,[x2];add sp,sp,#16;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=8 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": false
+  },
+  {
+    "name": "stlxr_status_data",
+    "assembly": "sub sp,sp,#16;mov x1,#2;str x1,[sp];mov x2,sp;stlxr w1,w1,[x2];add sp,sp,#16;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=16 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": false
+  },
+  {
+    "name": "stxr_status_base",
+    "assembly": "sub sp,sp,#16;mov x1,#2;str x1,[sp];mov x2,sp;stxr w2,x1,[x2];add sp,sp,#16;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=24 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": false
+  },
+  {
+    "name": "stlxr_status_base",
+    "assembly": "sub sp,sp,#16;mov x1,#2;str x1,[sp];mov x2,sp;stlxr w2,w1,[x2];add sp,sp,#16;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=32 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": false
+  },
+  {
+    "name": "status_zr_control",
+    "assembly": "sub sp,sp,#16;mov x1,#2;str x1,[sp];mov x2,sp;stxr wzr,x1,[x2];add sp,sp,#16;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=40 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": true
+  },
+  {
+    "name": "data_zr_control",
+    "assembly": "sub sp,sp,#16;mov x1,#2;str x1,[sp];mov x2,sp;stlxr w0,xzr,[sp];add sp,sp,#16;mov w0,#2;ret",
+    "stage": "accepted_finding",
+    "message": "bound program id=48 chunks=1 nonzero_generations=1\n",
+    "returncode": 0,
+    "positive_control": true
+  }
+]

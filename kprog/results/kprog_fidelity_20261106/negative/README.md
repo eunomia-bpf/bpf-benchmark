@@ -299,3 +299,13 @@ suite retains19 rejections and6 findings, with zero infrastructure errors.
 The four new findings arise from constant-success store-exclusive semantics;
 the independent CPU matrix records4096 actual failure/no-write differences.
 Canonical monitor/environment semantics and the production repair are active.
+
+## Exclusive status-register overlap repaired
+
+`arm64-exclusive-overlap/README.md` records four generation-bound acceptances
+of constrained-unpredictable status/data or status/base aliases, now rejected
+by the production ABI checker. Two valid ZR/SP controls still bind. All40 ABI
+regressions and all29 positive proof builds pass. The permanent29-case Arm
+suite rejects23 and retains the same six safety findings, with zero
+infrastructure errors. Its map fixtures now use the actual original source
+prelude and reach the intended verifier checks; the stale adapter run is retained.

@@ -55,6 +55,10 @@ FIXTURES = {
         'unpaired_stlxr_failure': 'sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stlxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret',
         'paired_stxr_failure': 'sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; ldxr x1, [x2]; stxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret',
         'paired_stlxr_failure': 'sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; ldaxr x1, [x2]; stlxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret',
+        'stxr_status_data_overlap': 'sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stxr w1, x1, [x2]; add sp, sp, #16; mov w0, #2; ret',
+        'stlxr_status_data_overlap': 'sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stlxr w1, w1, [x2]; add sp, sp, #16; mov w0, #2; ret',
+        'stxr_status_base_overlap': 'sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stxr w2, x1, [x2]; add sp, sp, #16; mov w0, #2; ret',
+        'stlxr_status_base_overlap': 'sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stlxr w2, w1, [x2]; add sp, sp, #16; mov w0, #2; ret',
         'entry_return_address_flags': 'mov w0, #2; cmp x30, #0; b.eq 1f; mov x1, #0; ldr w0, [x1]; 1: ret',
         'return_register_overwrite': 'mov x30, #0; mov w0, #2; ret',
         'stack_base_flags': 'mov w0, #2; sub sp, sp, #16; add sp, sp, #16; cmp sp, #0; b.eq 1f; mov x1, #0; ldr w0, [x1]; 1: ret',
@@ -95,13 +99,8 @@ def build(arch, out):
                 prelude = 'struct { __uint(type, BPF_MAP_TYPE_ARRAY); __uint(max_entries, 1); __type(key, __u32); __type(value, __u64); } neg_map SEC(".maps");' if 'neg_map' in assembly else ''
                 proof = enc.render_program(name, insns, source_prelude=prelude)
             else:
-                proof = enc.render_program(name, 'entry', OrderedDict(entry=insns), 'xdp')
-                if 'neg_map' in assembly:
-                    # Pair the generated declaration with the actual original
-                    # map identity, as the x86 prelude already does.
-                    if proof.count('} neg_map_0 SEC(".maps");') != 1:
-                        raise RuntimeError('expected original neg_map declaration')
-                    proof = proof.replace('neg_map_0', 'neg_map')
+                prelude = enc.source_prelude(ROOT/'kprog/fidelity/negative_companion.bpf.c') if 'neg_map' in assembly else ''
+                proof = enc.render_program(name, 'entry', OrderedDict(entry=insns), 'xdp', prelude=prelude)
         except ValueError as error:
             row.update(stage='specialization_rejected', message=str(error))
             rows.append(row)
