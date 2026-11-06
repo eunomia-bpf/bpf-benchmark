@@ -853,3 +853,39 @@ Only C's interrupted scratch disk was removed; logs and the image are retained.
 errors, package manifests, file hashes and successful15-module insertion log.
 The paired image can be built with `make -f
 corpus/results/kprog_app_coverage_20261106/Makefile paired-runtime-image`.
+
+
+## Strict BCC application startup capture
+
+The real upstream BCC corpus run `x86_kvm_corpus_20261106_165952_867436`
+uses the required-bound native loader arm. It replaces24 startup loads before
+missing manifests stop eight five-instruction global-data probes. Those probes
+load the application's `libbpf_global` map-value pointer at offset16 and store42.
+This is a startup failure, with no native workload result or timing request.
+The completed baseline retains its raw per-program work counters and stress-ng
+output. The earlier77 successful-load BCC inventory remains the full startup
+denominator;24 replacements are progress in this attempt, not full coverage.
+
+The package now places the canonical native proof at the loader's first sibling
+lookup path and checks exact readonly object identities and contents against
+the simulator ELF. An inherited stale proof sibling can no longer take
+precedence. All25 resident entries and five known startup probe definitions are
+packaged; the captured map probes and later transient types are being added.
+
+[Raw startup evidence](bcc-strict-startup-artifacts.tar.gz) includes all75 captured
+bytecode files, all three corpus records, complete caller logs, package manifest
+and original program pairing. It also preserves failed setup attempts: an
+incorrect app selector selected no app; an explicit noop override attempted a
+load-time bytecode plan. The corrected command uses `bcc/set` and the native
+loader without that pass override:
+
+```bash
+make -f corpus/results/kprog_app_coverage_20261106/bcc-strict.mk package image capture-image
+make -f corpus/results/kprog_app_coverage_20261106/bcc-strict.mk corpus \
+  IMAGE=bpf-benchmark/kprog-bcc:c-20261106-12 \
+  IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/bcc-runtime-12.image.tar
+```
+
+Only the current application image tar is kept. Completed guest Docker disks,
+module extraction roots and temporary directories are removed after the guest
+exits; raw results and the shared paired base image remain available.
