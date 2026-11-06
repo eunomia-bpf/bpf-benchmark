@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0993 installed matplotlib, found
+plot_evaluation_kinsn.py wrote stale names (wrappers
+use -27-20260608), and fixed the script.
+
+
 Step 0992 measured the plot scripts: 4 of 9 named
 outputs exist, 2 missing, and matplotlib is absent so
 none can be re-run.

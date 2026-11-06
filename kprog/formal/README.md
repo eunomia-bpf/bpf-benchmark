@@ -7606,6 +7606,25 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0993 - the plotting script wrote names nothing includes
+
+The plotting scripts could not run for want of matplotlib, and installing it
+showed what the environment had been hiding: one script wrote two files dated
+the sixth of June while both wrappers include names carrying twenty-seven and
+the eighth, so running it produced files nothing includes and left the included
+ones untouched.
+
+A rename commit had moved the artifacts to the names the wrappers use and did
+not move the script with them. The script now writes those names, and a run
+produces the two files the wrappers include.
+
+The other two scripts write names that match what their wrappers include, so
+they needed nothing. The figure files themselves were regenerated while checking
+and restored, since only their metadata changed and the committed ones are the
+artefacts.
+
+Census unchanged; one name drift between a script and its consumer is closed.
+
 ### Step 0992 - four of the nine plot outputs have no file
 
 The paper's plotting scripts name nine figure files between them, and four of
