@@ -213,6 +213,60 @@ static void load_context_regressions()
     std::puts("loader preserves original non-GPL status: PASS");
 }
 
+static void tracing_context_regressions()
+{
+    std::unique_ptr<btf, decltype(&btf__free)> types(btf__load_vmlinux_btf(), btf__free);
+    if (!types || libbpf_get_error(types.get())) throw std::runtime_error("load tracing target BTF");
+    int target = btf__find_by_name_kind(types.get(), "bpf_fentry_test1", BTF_KIND_FUNC);
+    int other = btf__find_by_name_kind(types.get(), "bpf_fentry_test2", BTF_KIND_FUNC);
+    if (target <= 0 || other <= 0) throw std::runtime_error("find tracing targets");
+    std::vector<bpf_insn> body(2);
+    body[0].code = BPF_ALU64 | BPF_MOV | BPF_K;
+    body[1].code = BPF_JMP | BPF_EXIT;
+    bpf_prog_load_opts attrs{};
+    attrs.sz = sizeof(attrs); attrs.expected_attach_type = BPF_TRACE_FENTRY;
+    attrs.attach_btf_id = target;
+    int original = bpf_prog_load(BPF_PROG_TYPE_TRACING, "tv_fentry", "GPL", body.data(), body.size(), &attrs);
+    if (original < 0) throw std::runtime_error("load original fentry context");
+    native_loader::FdLoadOptions options{};
+    options.original_prog_fd = original;
+    options.expected_attach_type = BPF_TRACE_FENTRY;
+    options.source_insns = options.proof_insns = body;
+    options.native_object_path = std::filesystem::absolute("build/native-entry.o");
+    options.symbol_name = "tv_trace_entry";
+    options.native_link_path = std::filesystem::absolute("../x86/native_lab/native_link/target/release/native-link");
+    for (unsigned mismatch = 0; mismatch < 2; mismatch++) {
+        auto wrong = options;
+        if (mismatch) wrong.expected_attach_type = BPF_TRACE_FEXIT;
+        else wrong.attach_btf_id = other;
+        bool rejected = false;
+        try {
+            auto loaded = native_loader::load_from_fd(wrong);
+            native_loader::close_loaded_program(&loaded);
+        } catch (const std::exception &error) {
+            assert(std::string(error.what()).find("seal binding") != std::string::npos);
+            rejected = true;
+        }
+        assert(rejected);
+        std::puts(mismatch ? "tracing attach type swap: PASS (rejected)" : "tracing BTF target swap: PASS (rejected)");
+    }
+    auto loaded = native_loader::load_from_fd(options);
+    int stats = bpf_enable_stats(BPF_STATS_RUN_TIME);
+    if (stats < 0) throw std::runtime_error("enable tracing execution stats");
+    int link = bpf_link_create(loaded.prog_fd, 0, BPF_TRACE_FENTRY, nullptr);
+    if (link < 0) throw std::runtime_error("attach bound native fentry");
+    bpf_test_run_opts run{};
+    run.sz = sizeof(run);
+    if (bpf_prog_test_run_opts(original, &run)) throw std::runtime_error("trigger real fentry target");
+    bpf_prog_info info{};
+    uint32_t size = sizeof(info);
+    if (bpf_obj_get_info_by_fd(loaded.prog_fd, &info, &size)) throw std::runtime_error("query native fentry execution");
+    assert(run.retval == 0 && info.run_cnt > 0 && info.attach_btf_id == static_cast<unsigned>(target));
+    if (close(link) || close(stats) || close(original)) throw std::runtime_error("close tracing fixture");
+    native_loader::close_loaded_program(&loaded);
+    std::puts("exact fentry BTF/type context: PASS (attached native target executed)");
+}
+
 int main()
 {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
@@ -261,6 +315,7 @@ int main()
     }
     try {
         load_context_regressions();
+        tracing_context_regressions();
         btf_manifest_regressions();
         for (const char *symbol : {"tv_short_entry", "tv_long_entry", "tv_helper_entry", "tv_map_entry", "tv_hash_entry", "tv_large_entry", "tv_readonly_entry"}) {
             const auto &proof = std::string(symbol) == "tv_helper_entry" ? helper :

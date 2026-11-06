@@ -351,3 +351,16 @@ exact fixtures/libraries are retained alongside this file. Updated libraries
 are in the lane checkpoint's context-v2-datasec/ directory and use the existing
 6836f7d44 kernel/module pair without a wire or C ABI change. This fixes binding;
 it does not constitute a per-program translation certificate.
+
+Actual tracing attachment context
+---------------------------------
+
+The real x86 loader now has an fentry regression attached to the kernel's
+bpf_fentry_test1 target. Replacing its BTF target with bpf_fentry_test2 or its
+expected attach type with FEXIT rejects at sealing. The exact context seals,
+loads and attaches a generation-bound native return-zero body. The kernel's
+tracing test-run invokes the actual target and the attached native program's
+run_cnt increases. This checks attachment execution, rather than merely opening
+a tracing FD. All previous kernel/loader regressions pass. The retained binary
+archive includes the exact manifest header used, which contained lane C's
+concurrent anonymous-selector work; that header is not part of this commit.

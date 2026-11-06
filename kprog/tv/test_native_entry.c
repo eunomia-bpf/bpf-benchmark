@@ -5,6 +5,12 @@ int tv_short_entry(void *ctx)
 	return 2;
 }
 
+int tv_trace_entry(void *ctx)
+{
+	(void)ctx;
+	return 0;
+}
+
 int tv_long_entry(void *ctx)
 {
 	(void)ctx;
