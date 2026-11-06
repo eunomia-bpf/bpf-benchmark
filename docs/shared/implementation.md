@@ -2615,6 +2615,11 @@ Step 0715 widened the distinctness check to both key fields and made the readme 
 
 Step 0717 made the readme checker report a step the summary records and the README does not, restoring step 0469 (census 585 -> 586).
 
+Step 0978 tested a paragraph split (no effect) then
+doubled the stretch: overfull 447 -> 55, worst 81 ->
+29pt.
+
+
 Step 0977 found 7 paragraphs hold 52% of the
 section's words; broke one unbreakable macro name
 (worst 81 -> 69pt, 454 -> 447).

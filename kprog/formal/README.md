@@ -7606,6 +7606,23 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0978 - the paragraph split changed nothing; the stretch did
+
+Splitting a paragraph was tested before the setting was changed again, and it
+moved the overfull count not at all: four hundred and forty-seven before, four
+hundred and forty-seven after. The length of the blocks was not what the boxes
+needed.
+
+More stretch was. At six ems the count is fifty-five, none of them past
+twenty-nine points, against four hundred and forty-seven with seventy past
+forty. The cost is two pages and fourteen thousand more loose lines, which is
+the same trade the earlier step made and the same reason for making it: an
+overfull line puts text past the margin and a loose one only spaces it out.
+
+Both measurements are recorded so the setting is a choice between two visible
+defects rather than a default. Census unchanged; the geometry and the paragraph
+split are both measured.
+
 ### Step 0977 - seven paragraphs hold half the section
 
 The overfull boxes that remain are not spread across the text. Four hundred and
