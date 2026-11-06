@@ -7606,6 +7606,27 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0980 - the geometry, at both ends of the thread
+
+The typographic work began because the compile's exit code was the only signal
+any earlier step read, and it was zero throughout a run that set thirteen
+thousand overfull boxes. It ends with fifty-five, none past twenty-nine points
+against a text width of four hundred and fifty-eight.
+
+Three changes did it. The cited run paths were set as paths so they could break
+at their separators, which cleared one section entirely. One macro name gained
+breaks at its joins rather than only inside its argument. And the emergency
+stretch was raised from nothing to six ems, measured at four settings and left
+where the curve turns.
+
+One hypothesis was tested and rejected on the way: that the six-thousand-word
+paragraphs caused the boxes. Splitting one changed the count by nothing, so the
+boxes came from justification rather than block length, and the stretch is what
+addressed them.
+
+Census unchanged; the paper's geometry is measured at both ends and the checks
+that run against it all pass.
+
 ### Step 0979 - the stretch stops helping at six ems
 
 The stretch was measured once more to see where it stops helping. At ten ems the
