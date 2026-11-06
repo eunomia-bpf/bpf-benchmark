@@ -54,7 +54,7 @@ elif sys.argv[2]=='package':
     shutil.copy2(ROOT/'kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link',root/'native-link')
     shutil.copy2('/usr/aarch64-linux-gnu/lib/libgcc_s.so.1',root/'lib/libgcc_s.so.1')
     shutil.copy2('/workspaces/.agent-state/kprog-lanes/T/paired-context-v2/arm64/bpf_arm64_native_lab.ko',root/'native_lab.ko')
-    for source in list(phase.glob('*.bpf.o'))+list(phase.glob('*.manifest.json'))+list((phase/'native').glob('*.native.o')):
+    for source in list(phase.glob('*.bpf.o'))+list(phase.glob('*.manifest.json'))+list((phase/'native').glob('*.native.o'))+list((phase/'native').glob('*.entry.proof.o')):
         shutil.copy2(source,root/'cases'/source.name)
     script=['#!/bin/sh','export PATH=/bin','busybox mount -t proc proc /proc || exit 1',
         'busybox mount -t sysfs sysfs /sys || exit 1','busybox mount -t 9p -o trans=virtio results /results || exit 1',

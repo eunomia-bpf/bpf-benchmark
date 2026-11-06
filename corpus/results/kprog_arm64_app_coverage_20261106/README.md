@@ -767,3 +767,13 @@ coarse-time and function-IP calls (IDs160/173), preserving all75 existing
 helpers. The154 ABI cases,79 identity cases and unchanged full345-module
 formal/C/Rust/wire retry pass. All six captured ARM startup pairs compile;
 the separate loader startup failure remains under active repair.
+
+## Preserve entry ABI and indexed frame allocation
+
+[The ARM entry-ABI repair](entry-abi-result/README.md) honors the existing
+preserve-entry option and keeps SP writeback when stripping paired saves,
+including tail-call cleanup. All71 Rust cases and both release builds pass.
+Two source/simulator/bound QEMU cases retain a real helper call and a local
+slot in an indexed32-byte frame; both produce37, return2 and generation1.
+The exact native proof is packaged with each paired simulator. Portable
+kernel/initrd replay and Spark KVM commands are included in its archive.

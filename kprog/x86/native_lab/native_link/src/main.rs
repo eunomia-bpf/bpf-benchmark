@@ -587,6 +587,7 @@ fn main() -> Result<()> {
                 &update_sites,
                 arm64_helper_call_slot,
                 proof_mode,
+                args.preserve_entry_abi,
                 args.show,
             )?
         }
@@ -2961,9 +2962,9 @@ fn plan_arm64_tail_call_cleanup_from_terminators(
         }
         let mut candidate = Vec::new();
         for idx in start..terminator {
-            let word = u32::from_le_bytes(bytes[idx * 4..idx * 4 + 4].try_into().unwrap());
+            let mut word = u32::from_le_bytes(bytes[idx * 4..idx * 4 + 4].try_into().unwrap());
             if nop_word_indices.contains(&idx) {
-                continue;
+                word = arm64_stripped_save_instruction(word);
             }
             if arm64_tail_cleanup_skip_word(word) {
                 continue;
@@ -3036,6 +3037,17 @@ fn arm64_stp_ldp_pair(insn: u32) -> Option<(bool, i32, u32, u32)> {
     }
     let offset = if has_writeback { 0 } else { imm7 * 8 };
     Some((is_load, offset, insn & 0x1f, (insn >> 10) & 0x1f))
+}
+
+fn arm64_stripped_save_instruction(insn: u32) -> u32 {
+    if arm64_stp_ldp_pair(insn).is_some() &&
+        matches!(insn & 0xffc0_0000, 0xa980_0000 | 0xa880_0000 | 0xa9c0_0000 | 0xa8c0_0000) {
+        let offset = (((insn >> 15) & 0x7f) as i32 -
+            if insn & (1 << 21) != 0 { 128 } else { 0 }) * 8;
+        return (if offset < 0 { 0xd100_03ff } else { 0x9100_03ff }) |
+            (offset.unsigned_abs() << 10);
+    }
+    A64_NOP
 }
 
 fn arm64_ldr_str_unsigned64_sp(insn: u32) -> Option<(bool, u32, u32)> {
@@ -3532,6 +3544,7 @@ fn rewrite_arm64(
     update_sites: &[UpdateSiteSpec],
     helper_call_slot: Arm64HelperCallSlot,
     proof_mode: bool,
+    preserve_entry_abi: bool,
     show: bool,
 ) -> Result<RewriteResult> {
     let mut blob = Vec::new();
@@ -3569,10 +3582,15 @@ fn rewrite_arm64(
         let mut helper_imm_registers: [Option<u64>; 32] = std::array::from_fn(|_| None);
         let mut helper_imm_word_indices: [Option<usize>; 32] = std::array::from_fn(|_| None);
         let mut helper_imm_read_since_load: [bool; 32] = [false; 32];
-        let mut entry_abi_strip = if is_entry {
+        let keep_entry_abi = (proof_mode && preserve_entry_abi) ||
+            (!proof_mode && proof_callee_saved_mask.is_some());
+        let mut entry_abi_strip = if is_entry && !keep_entry_abi {
             plan_arm64_entry_abi_strip(&bytes)?
         } else {
-            Arm64EntryAbiStrip::default()
+            Arm64EntryAbiStrip {
+                tail_call_cnt_ptr_stack_offset: arm64_saved_reg_stack_offset(&bytes, 26),
+                ..Arm64EntryAbiStrip::default()
+            }
         };
         let entry_has_tail_call =
             is_entry && !proof_mode && arm64_symbol_has_tail_call(&bytes, sym, &relocs);
@@ -3602,7 +3620,7 @@ fn rewrite_arm64(
                 emit_word_index,
             );
             if is_entry && entry_abi_strip.nop_word_indices.contains(&local_word_index) {
-                insn = A64_NOP;
+                insn = arm64_stripped_save_instruction(insn);
                 blob.extend_from_slice(&insn.to_le_bytes());
                 continue;
             }
@@ -4314,6 +4332,47 @@ mod tests {
     use super::*;
 
     #[test]
+    fn arm64_entry_save_removal_keeps_stack_writeback() {
+        for opcode in [0xa980_0000u32, 0xa880_0000, 0xa9c0_0000, 0xa8c0_0000] {
+            for offset in [-512i32, -32, -16, 0, 16, 32, 504] {
+                let pair = opcode | (((offset / 8) as u32 & 127) << 15) |
+                    (30 << 10) | (31 << 5) | 19;
+                let adjusted = arm64_stripped_save_instruction(pair);
+                let sign = if adjusted & (1 << 30) != 0 { -1 } else { 1 };
+                assert_eq!(sign * ((adjusted >> 10) & 4095) as i32, offset);
+                assert_eq!(adjusted & 0x3ff, 0x3ff); // Only SP is read/written.
+            }
+        }
+        assert_eq!(arm64_stripped_save_instruction(0xa900_7bf3), A64_NOP);
+    }
+
+    #[test]
+    fn arm64_preserve_entry_abi_keeps_paired_save_and_restore() {
+        let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::Aarch64, Endianness::Little);
+        let section = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
+        let words = [0xa9be_7bf3u32, 0xf900_0bff, 0xd280_0040, 0xa8c2_7bf3, 0xd65f_03c0];
+        object.append_section_data(section, &words.iter().flat_map(|w| w.to_le_bytes()).collect::<Vec<_>>(), 4);
+        object.add_symbol(WriteSymbol { name: b"entry".to_vec(), value: 0, size: 20,
+            kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+            section: WriteSymbolSection::Section(section), flags: SymbolFlags::None });
+        let encoded = object.write().unwrap();
+        let elf = object::File::parse(encoded.as_slice()).unwrap();
+        let entry = find_symbol_by_name(&elf, "entry").unwrap();
+        for preserve in [false, true] {
+            let linked = rewrite_arm64(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
+                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, true, preserve, false).unwrap();
+            let output = linked.blob.chunks_exact(4).map(|w| u32::from_le_bytes(w.try_into().unwrap())).collect::<Vec<_>>();
+            assert_eq!(output[0], if preserve { words[0] } else { 0xd100_83ff });
+            assert_eq!(output[3], if preserve { words[3] } else { 0x9100_83ff });
+            assert_eq!(&output[1..3], &words[1..3]);
+        }
+        let bytes = words.iter().flat_map(|w| w.to_le_bytes()).collect::<Vec<_>>();
+        let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();
+        assert_eq!(plan_arm64_tail_call_cleanup_from_terminators(&bytes, &[4],
+            &strip.nop_word_indices).unwrap(), vec![0x9100_83ff]);
+    }
+
+    #[test]
     fn arm64_readonly_relocations_preserve_symbol_base_extent_and_addend() {
         for (size, declared, offset) in [(8usize, 8u64, 0i64), (32, 32, 7), (120, 120, 48), (32, 80, 0)] {
             let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::Aarch64, Endianness::Little);
@@ -4352,7 +4411,7 @@ mod tests {
             assert_eq!(arm64_proof_reloc_addend(&reloc), offset);
             let entry = find_symbol_by_name(&elf, "entry").unwrap();
             let linked = rewrite_arm64(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
-                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, false, false).unwrap();
+                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, false, false, false).unwrap();
             let instruction = u32::from_le_bytes(linked.blob[..4].try_into().unwrap());
             assert_eq!(instruction & 0x9f00001f, 0x10000000); // ADR x0, actual data address
             let displacement = ((instruction >> 29) & 3) | (((instruction >> 5) & 0x7ffff) << 2);

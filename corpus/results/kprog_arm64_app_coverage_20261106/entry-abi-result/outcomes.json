@@ -1,0 +1,16 @@
+[
+  {
+    "name": "entry_abi_stripped",
+    "expected": 37,
+    "preserve_entry_abi": false,
+    "native_log": "kernel result=37 retval=2 expected_result=37 expected_retval=2\nbound program id=16 chunks=1 nonzero_generations=1\nnative_bound result=37 retval=2 expected_result=37 expected_retval=2\n",
+    "proof_log": "case=simple retval=2 result=37 repeat=1 data_size_out=72\ntiming verify_s=0.046951 test_s=0.003304\n"
+  },
+  {
+    "name": "entry_abi_preserved",
+    "expected": 37,
+    "preserve_entry_abi": true,
+    "native_log": "kernel result=37 retval=2 expected_result=37 expected_retval=2\nbound program id=32 chunks=1 nonzero_generations=1\nnative_bound result=37 retval=2 expected_result=37 expected_retval=2\n",
+    "proof_log": "case=simple retval=2 result=37 repeat=1 data_size_out=72\ntiming verify_s=0.018317 test_s=0.000537\n"
+  }
+]

@@ -465,3 +465,12 @@ memory-width-check: memory-width-generate
 	$(HERE)/$(PHASE)/load-oracle
 	cd $(ROOT)/kprog/formal && cc -Wall -Wextra -Werror -O2 -I. oracles/test_arm64_store_bytes_host.c -o $(HERE)/$(PHASE)/store-oracle
 	$(HERE)/$(PHASE)/store-oracle
+
+.PHONY: entry-abi-build
+entry-abi-build: direct-header-generate
+	python3 $(HERE)/entry_abi.py $(HERE)/$(PHASE)
+	for source in $(HERE)/$(PHASE)/*.bpf.c; do \
+		clang -g -O2 -target bpf -D__TARGET_ARCH_arm64 \
+		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
+		-c $$source -o $${source%.c}.o || exit 1; \
+	done
