@@ -112,4 +112,14 @@ theorem unrouted_are_control_transfer : unrouted.length = 5 ∧
     unrouted.contains 0xff = true := by
   refine ⟨rfl, ?_, ?_, ?_, ?_, ?_⟩ <;> decide
 
+/-- All production chain codes, including the memory POPCNT extension. -/
+def routedExtended : List Nat := routed ++ [71]
+
+theorem extended_dispatch_total (op : GeneratedX86Opcode.Op) :
+    GeneratedX86Opcode.code op ∈ routedExtended ∨ GeneratedX86Opcode.code op ∈ unrouted := by
+  cases op <;> decide
+
+theorem extended_dispatch_partition :
+    (routedExtended ++ unrouted).Nodup := by decide
+
 end KProgFormal.X86DispatchTotality

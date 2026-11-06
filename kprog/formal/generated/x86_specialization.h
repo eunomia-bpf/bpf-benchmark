@@ -11,7 +11,7 @@
 #define KPROG_X86_SPEC_DIRECT_MACRO 0U
 #define KPROG_X86_SPEC_BRANCH_HANDLER 1U
 #define KPROG_X86_SPEC_GENERIC_RUN_OP 2U
-#define KPROG_X86_SPEC_COUNT 72U
+#define KPROG_X86_SPEC_COUNT 73U
 static inline __u8 kprog_x86_spec_dispatch(__u8 op)
 {
 	switch (op) {
@@ -86,6 +86,7 @@ static inline __u8 kprog_x86_spec_dispatch(__u8 op)
 	case X86_OP_ANDN_MEM: return KPROG_X86_SPEC_DIRECT_MACRO;
 	case X86_OP_CALL_MEMSET_REG: return KPROG_X86_SPEC_DIRECT_MACRO;
 	case X86_OP_CALL_MEMCPY_REG: return KPROG_X86_SPEC_DIRECT_MACRO;
+	case X86_OP_POPCNT_MEM: return KPROG_X86_SPEC_GENERIC_RUN_OP;
 	case X86_OP_RET: return KPROG_X86_SPEC_BRANCH_HANDLER;
 	default: return KPROG_X86_SPEC_GENERIC_RUN_OP;
 	}

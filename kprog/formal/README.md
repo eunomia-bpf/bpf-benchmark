@@ -34,9 +34,11 @@ zero/one bits so a mask may discard unspecified register bits before use.
 INC/DEC/NEG/NOT use all scalar widths, byte lanes and register/memory
 destinations. INC/DEC preserve CF, NOT preserves every flag, and RMW write
 faults preserve data/flags while retaining the completed read event.
-POPCNT register handlers refine an independent bit walk at16/32/64-bit widths,
-including all six flags, aliases and partial/zero-extending writes. Its native
-decoder also checks memory reads and faults.
+POPCNT register and memory handlers refine an independent bit walk at
+16/32/64-bit widths, including all six flags, aliases, partial/zero-extending
+writes, exact-width memory reads and faults. The encoder also handles scaled
+indexes, signed displacements, virtual-stack reads and relocated readonly data.
+The extended opcode/dispatch proofs retain every original enumeration theorem.
 All sixteen native conditions refine the reference, including PF, through
 CMOV, SETcc and direct branches. SETcc includes high-byte/REX destinations,
 exact one-byte stores and write faults; CMOV retains eager read faults.

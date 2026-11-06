@@ -505,7 +505,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                    aux="X86_MAP_PTR_AUX_VALUE" if is_value else "0",
                    imm=c_ptr_u64(expression))
     if insn.reloc_type=="R_X86_64_PC32" and op not in {
-        "mov","movabs","movzx","movsx","movsxd","lea"
+        "mov","movabs","movzx","movsx","movsxd","lea","popcnt"
     }:
         raise ValueError(f"unresolved PC-relative data instruction: {insn.raw}")
     if insn.reloc_type and "GOTPCREL" in insn.reloc_type and insn.symbol_offset:
@@ -933,9 +933,16 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
     if op == "popcnt":
         dst = reg_info(ops[0]) if len(ops) > 0 else None
         src = reg_info(ops[1]) if len(ops) > 1 else None
-        if dst is None or src is None:
+        if dst is None or dst[1] not in (16, 32, 64) or len(ops) != 2:
             raise ValueError(f"cannot encode {insn.raw}")
-        return enc("X86_OP_POPCNT", dst=dst[0], src=src[0], flags=WIDTH_CONST[dst[1]])
+        if src is not None and src[1] == dst[1]:
+            return enc("X86_OP_POPCNT", dst=dst[0], src=src[0], flags=WIDTH_CONST[dst[1]])
+        if is_mem(ops[1]) and operand_width(ops[1], dst[1]) == dst[1]:
+            return enc("X86_OP_POPCNT_MEM", dst=dst[0], src=mem_base_reg(ops[1]),
+                       flags=WIDTH_CONST[dst[1]], aux=mem_aux(ops[1]),
+                       imm=relocated_data_address(insn, rodata_idents)
+                           if insn.reloc_type == "R_X86_64_PC32" else c_u64(mem_disp(ops[1])))
+        raise ValueError(f"cannot encode {insn.raw}")
     if op == "xchg":
         dst = reg_info(ops[0]) if len(ops) > 0 else None
         src = reg_info(ops[1]) if len(ops) > 1 else None

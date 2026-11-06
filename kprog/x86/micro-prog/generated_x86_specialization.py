@@ -73,6 +73,7 @@ X86_SPECIALIZATION_DISPATCH = {
     "X86_OP_ANDN_MEM": "directMacro",
     "X86_OP_CALL_MEMSET_REG": "directMacro",
     "X86_OP_CALL_MEMCPY_REG": "directMacro",
+    "X86_OP_POPCNT_MEM": "genericRunOp",
     "X86_OP_RET": "branchHandler",
 }
 # The specialized call the encoder emits at aux 0, as a `str.format` template

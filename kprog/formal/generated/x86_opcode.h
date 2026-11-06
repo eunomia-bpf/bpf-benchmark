@@ -80,11 +80,12 @@ _Static_assert(X86_OP_BT_MEM_IMM == 0x43U, "x86 opcode btMemImm drift");
 _Static_assert(X86_OP_ANDN_MEM == 0x44U, "x86 opcode andnMem drift");
 _Static_assert(X86_OP_CALL_MEMSET_REG == 0x45U, "x86 opcode callMemsetReg drift");
 _Static_assert(X86_OP_CALL_MEMCPY_REG == 0x46U, "x86 opcode callMemcpyReg drift");
+_Static_assert(X86_OP_POPCNT_MEM == 0x47U, "x86 opcode popcntMem drift");
 _Static_assert(X86_OP_RET == 0xffU, "x86 opcode ret drift");
 _Static_assert(X86_OP_MOV_IMM64 == X86_OP_MOV_IMM, "x86 opcode movImm64 alias drift");
 _Static_assert(X86_OP_MOV_REG64 == X86_OP_MOV_REG, "x86 opcode movReg64 alias drift");
 _Static_assert(X86_OP_ADD_IMM64 == X86_OP_ADD_IMM, "x86 opcode addImm64 alias drift");
 _Static_assert(X86_OP_ADD_REG64 == X86_OP_ADD_REG, "x86 opcode addReg64 alias drift");
 _Static_assert(X86_OP_XOR_REG32 == X86_OP_XOR_REG, "x86 opcode xorReg32 alias drift");
-#define KPROG_X86_OPCODE_COUNT 72U
+#define KPROG_X86_OPCODE_COUNT 73U
 #endif
