@@ -107,4 +107,59 @@ theorem path_cannot_continue_after_fault :
       { initial with memory := { memory with readable := fun _ => false } }).map
       (fun r => r.state.pc) = .error "certificate continues after BPF fault" := by rfl
 
+def counter : State :=
+  { initial with
+    regs := fun r => if r = 1 then 0x1004 else if r = 2 then 0xaabbccdd00000001 else initial.regs r
+    memory := writeBytes memory 0x1000 (BPF.valueBytes 0x11223344ffffffff 8) }
+
+-- FETCH returns the old low word, not the updated word, and clears its high32.
+theorem atomic_fetch_add32_preserves_neighbor_bytes :
+    (step externals #[0xc3,0x21,0xfc,0xff,1,0,0,0] counter).map
+      (fun r => (r.state.regs 2, wordAt r.state.memory 0x1000 8, r.state.pc, r.events)) =
+      .ok (0xffffffff, 0x1122334400000000, 1,
+        [.memory .atomic 0x1000 [0xff,0xff,0xff,0xff] true]) := by rfl
+
+theorem atomic_nonfetch_keeps_full_source_register :
+    (step externals #[0xc3,0x21,0xfc,0xff,0,0,0,0] counter).map
+      (fun r => (r.state.regs 2, wordAt r.state.memory 0x1000 8)) =
+      .ok (0xaabbccdd00000001, 0x1122334400000000) := by rfl
+
+theorem atomic_cmpxchg32_compares_low_word_and_returns_old :
+    (step externals #[0xc3,0x21,0xfc,0xff,0xf1,0,0,0]
+      { counter with regs := fun r => if r = 0 then 0xdeadbeefffffffff else counter.regs r }).map
+      (fun r => (r.state.regs 0, r.state.regs 2, wordAt r.state.memory 0x1000 8)) =
+      .ok (0xffffffff, 0xaabbccdd00000001, 0x1122334400000001) := by rfl
+
+theorem failed_atomic_compare_does_not_write_or_initialize :
+    (step externals #[0xc3,0x21,0xfc,0xff,0xf1,0,0,0]
+      { counter with memory := { counter.memory with initialized := fun _ => false } }).map
+      (fun r => (r.state.regs 0, wordAt r.state.memory 0x1000 8,
+        initializedAt r.state.memory 0x1000 4, r.events)) =
+      .ok (0xffffffff, 0x11223344ffffffff, false,
+        [.memory .atomic 0x1000 [0xff,0xff,0xff,0xff] false]) := by rfl
+
+theorem atomic_exchange64_returns_full_old_value :
+    (step externals #[0xdb,0x21,0xfc,0xff,0xe1,0,0,0] counter).map
+      (fun r => (r.state.regs 2, wordAt r.state.memory 0x1000 8)) =
+      .ok (0x11223344ffffffff, 0xaabbccdd00000001) := by rfl
+
+theorem atomic_logic_encodings_and_fetch_bit :
+    (atomicValue 64 0x40 0xf0 0x0f 0, atomicValue 64 0x51 0xf0 0x3c 0,
+      atomicValue 32 0xa1 0xf0 0xff 0) =
+      (.ok (0xff, true), .ok (0x30, true), .ok (0x0f, true)) := by rfl
+
+theorem atomic_write_fault_preserves_state_and_has_no_partial_read_event :
+    (step externals #[0xc3,0x21,0xfc,0xff,1,0,0,0]
+      { counter with memory := { counter.memory with writable := fun _ => false } }).map
+      (fun r => (r.state.pc, r.state.regs 2, wordAt r.state.memory 0x1000 8, r.events)) =
+      .ok (0, 0xaabbccdd00000001, 0x11223344ffffffff, [.fault (.write 0x1000 4)]) := by rfl
+
+theorem atomic_fetch_cannot_overwrite_frame_pointer :
+    (step externals #[0xc3,0xa1,0,0,1,0,0,0] counter).map (fun r => r.state.pc) =
+      .error "BPF atomic fetch overwrites frame pointer" := by rfl
+
+theorem atomic_rmw16_is_not_a_valid_width :
+    (step externals #[0xcb,0x21,0,0,0,0,0,0] counter).map (fun r => r.state.pc) =
+      .error "invalid BPF atomic read-modify-write width" := by rfl
+
 end KProgTV.BPFChecks

@@ -137,6 +137,42 @@ def load (s : State) (dst : Register) (address : Word) (count : Nat)
       let result := if signed then (value.setWidth (8 * count)).signExtend 64 else value
       ⟨setReg s dst result, [event], none⟩
 
+def atomicValue (width : Nat) (operation : Nat) (old src expected : BitVec width) :
+    Except String (BitVec width × Bool) :=
+  match operation with
+  | 0 | 1 => .ok (old + src, true)
+  | 0x40 | 0x41 => .ok (old ||| src, true)
+  | 0x50 | 0x51 => .ok (old &&& src, true)
+  | 0xa0 | 0xa1 => .ok (old ^^^ src, true)
+  | 0xe1 => .ok (src, true)
+  | 0xf1 => .ok (src, old == expected)
+  | _ => .error "invalid BPF atomic read-modify-write operation"
+
+/-- One indivisible read-modify-write event records its pre-access bytes.
+The full post-state records the replacement bytes. A failed compare exchanges
+no memory and cannot initialize previously unwritten bytes. -/
+def atomic (s : State) (dst src : Register) (offset : BitVec 16)
+    (count operation : Nat) : Except String (Transition State) := do
+  if count ≠ 4 ∧ count ≠ 8 then throw "invalid BPF atomic read-modify-write width"
+  let address := s.regs dst + offset.signExtend 64
+  let old := wordAt s.memory address count
+  let (value, written) ← if count = 4 then
+      (atomicValue 32 operation (old.setWidth 32) ((s.regs src).setWidth 32)
+        ((s.regs 0).setWidth 32)).map fun (value, written) => (value.setWidth 64, written)
+    else atomicValue 64 operation old (s.regs src) (s.regs 0)
+  if operation % 2 = 1 ∧ operation ≠ 0xf1 ∧ src = 10 then
+    throw "BPF atomic fetch overwrites frame pointer"
+  if !permitted s.memory.readable address count then
+    return ⟨s, [.fault (.read address count)], some (.read address count)⟩
+  if !permitted s.memory.writable address count then
+    return ⟨s, [.fault (.write address count)], some (.write address count)⟩
+  let memory := if written then writeBytes s.memory address (valueBytes value count) else s.memory
+  let next := { s with memory }
+  let next := if operation = 0xf1 then setReg next 0 old
+    else if operation % 2 = 1 then setReg next src old else next
+  pure ⟨next, [.memory .atomic address (bytesAt s.memory address count)
+    (initializedAt s.memory address count)], none⟩
+
 def execute (env : Environment) (program : Array Byte) (s : State) (i : Instruction) :
     Except String (Transition State) := do
   let cls := i.code % 8
@@ -188,7 +224,12 @@ def execute (env : Environment) (program : Array Byte) (s : State) (i : Instruct
   else if cls = 1 ∨ cls = 2 ∨ cls = 3 then
     let mode := i.code / 32
     let count := match i.code / 8 % 4 with | 0 => 4 | 1 => 2 | 2 => 1 | _ => 8
-    if cls = 1 ∧ (mode = 3 ∨ mode = 4) then
+    if cls = 3 ∧ mode = 6 then
+      if h : i.src < 11 then
+        let effect ← atomic s i.dst ⟨i.src, h⟩ i.offset count i.imm.toNat
+        pure { effect with state := if effect.fault.isSome then effect.state else { effect.state with pc := next.pc } }
+      else throw "BPF atomic source outside r0-r10"
+    else if cls = 1 ∧ (mode = 3 ∨ mode = 4) then
       if i.dst = 10 then throw "BPF load overwrites frame pointer"
       if h : i.src < 11 then
         let address := s.regs ⟨i.src, h⟩ + i.offset.signExtend 64

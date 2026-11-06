@@ -159,3 +159,12 @@ Relocation metadata kind 8 pins the proof map and records the complete native
 address extent without patching native code. No original writable application
 map is synthesized. These checks establish immutable specialization binding;
 the reference-ISA address/state/trace relation is still a TV obligation.
+
+`bpf-atomic-check.log` passes the byte-decoded BPF path theorem plus atomic
+read-modify-write regressions: 32-bit fetch returns the old zero-extended word,
+non-fetch preserves the full source, signed offsets select the actual memory,
+neighbor bytes survive a narrow update, compare/exchange narrows its comparison
+and preserves memory/initialization on mismatch, 64-bit exchange returns the
+full old value, and permission faults change neither state nor event prefix.
+Atomic operations use the existing canonical atomic-event kind. These are
+checker semantics checks; they do not relabel any micro or app TV record.

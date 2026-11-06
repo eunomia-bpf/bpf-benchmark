@@ -22,6 +22,10 @@ instruction index; an invalid negative index fails. Helper arguments come from
 the actual argument registers, while identity, prototype arity, effects and
 caller clobbers are explicit platform inputs. Instruction offsets, BTF selectors
 and PC are available to that binding rather than silently discarded.
+Atomic read-modify-write instructions model 32/64-bit ADD/OR/AND/XOR, FETCH,
+exchange and compare/exchange. One indivisible atomic event contains the old
+bytes; the complete resulting memory and returned registers contain the update.
+Failed compare/exchange preserves both byte values and initialization state.
 
 `BPFPath.evaluate` checks a finite instruction-position witness against every
 actual successor, with no forced branch or PC update. `evaluate_sound` proves
