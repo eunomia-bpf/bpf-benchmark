@@ -7606,6 +7606,22 @@ the 0456 x86 control-flow battery
 equivalences) re-ran ALL AS
 EXPECTED. Census 332 -> 333.
 
+### Step 0965 - four of the remainder are the split's own totals
+
+The four figures that are the instruction-set split's case totals were counted
+as unclassified, though the split check recomputes and asserts each of them from
+the log. They are now their own class on the report: sixty million on x86 alone,
+fifty-seven on AArch64, five on neither and one on both.
+
+The classification calls the split directly rather than reading its output, so
+the four totals it excludes are the ones the split check will assert; a bucket
+whose total moved would move both together.
+
+The unexplained remainder falls from thirty-five to thirty-one. Those are prose
+counts, as in the number of theorems that use either tactic or the number of
+parameters a generator emits, and each is stated as its sentence's subject with
+no whole beside it. Census unchanged; the report names eight classes.
+
 ### Step 0964 - the population check runs with the run
 
 The check that every figure occurs in the text was written by hand once, in the
