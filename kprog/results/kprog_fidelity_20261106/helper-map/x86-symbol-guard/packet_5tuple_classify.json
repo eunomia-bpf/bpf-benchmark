@@ -1,0 +1,13 @@
+{
+  "name": "packet_5tuple_classify",
+  "native_object": "/workspaces/repository/kprog/test/build-x86/packet_5tuple_classify.native.o",
+  "stage": "passed",
+  "returncode": 0,
+  "command": [
+    "/workspaces/repository/kprog/fidelity/build-x86/bound-probe",
+    "/workspaces/repository/kprog/test/build-x86/packet_5tuple_classify.bpf.o",
+    "/workspaces/repository/kprog/results/kprog_fidelity_20261106/helper-map/x86-symbol-guard/packet_5tuple_classify.manifest.json",
+    "3405691582",
+    "2"
+  ]
+}

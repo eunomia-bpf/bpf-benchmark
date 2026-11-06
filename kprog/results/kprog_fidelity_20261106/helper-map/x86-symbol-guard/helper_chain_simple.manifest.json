@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "helper_chain_si",
+      "native_object": "/workspaces/repository/kprog/test/build-x86/helper_chain_simple.native.o",
+      "symbol": "helper_chain_simple",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-x86/stage2-symbol-guard/helper_chain_simple.bpf.o",
+      "simulator_program": "helper_chain_simple_x86_sim_xdp"
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 # Lane F fidelity and safety evidence
 
 - `differential/README.md`: real x86 CPU matrix and counterexamples; static
-  AArch64 harness delivered, with a QEMU-user execution smoke. Real Arm
-  hardware execution belongs to the coordinator and remains pending.
+  AArch64 harness delivered. Both Spark core types pass the width-fix matrix
+  on hardware; both also pass the newer register-cell replay.
 - `negative/README.md`: baseline findings and fresh bound-path sweeps on both
   ISAs; the original 11 reject, while expanded ABI cases expose open accepted
   findings on both architectures. Exact diagnostics and repair ownership are retained.

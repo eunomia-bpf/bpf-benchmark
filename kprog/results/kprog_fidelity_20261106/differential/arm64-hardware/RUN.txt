@@ -1,0 +1,8 @@
+Coordinator run on DGX Spark hardware, 2026-11-06 ~09:35 UTC.
+Host: spark-d5fe, aarch64, 10x Cortex-X925 + 10x Cortex-A725 (see out-cpu*/lscpu.txt, uname.txt).
+Binary: kprog/results/kprog_fidelity_20261106/differential/cpu-differential-arm64-width-fix.gz
+  sha256 71980286b427c4fff6fae845287cc381dc1f2ca59ec8e91fb36a13a9169f378f (same file, copied unchanged)
+Commands: gzip -dc cpu-differential.gz > cpu-differential
+  mkdir -p out-cpu19 && taskset -c 19 nice ./cpu-differential 1024 out-cpu19   (Cortex-X925)
+  mkdir -p out-cpu10 && taskset -c 10 nice ./cpu-differential 1024 out-cpu10   (Cortex-A725)
+Results: both "forms=497 cases=508928 mismatches=0" (run-cpu*.log).

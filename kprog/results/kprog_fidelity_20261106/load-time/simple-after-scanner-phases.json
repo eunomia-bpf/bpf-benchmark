@@ -1,0 +1,266 @@
+[
+  {
+    "runtime": "kernel",
+    "phase": "compile_ns",
+    "samples": 15,
+    "median_ns": 325141,
+    "min_ns": 307487,
+    "max_ns": 360941
+  },
+  {
+    "runtime": "kernel",
+    "phase": "input_stage_ns",
+    "samples": 15,
+    "median_ns": 796,
+    "min_ns": 558,
+    "max_ns": 1054
+  },
+  {
+    "runtime": "kernel",
+    "phase": "memory_prepare_ns",
+    "samples": 15,
+    "median_ns": 27498,
+    "min_ns": 24744,
+    "max_ns": 30856
+  },
+  {
+    "runtime": "kernel",
+    "phase": "object_load_ns",
+    "samples": 15,
+    "median_ns": 215660,
+    "min_ns": 197189,
+    "max_ns": 249504
+  },
+  {
+    "runtime": "kernel",
+    "phase": "object_open_ns",
+    "samples": 15,
+    "median_ns": 110298,
+    "min_ns": 104961,
+    "max_ns": 118984
+  },
+  {
+    "runtime": "kernel",
+    "phase": "prog_run_wall_ns",
+    "samples": 15,
+    "median_ns": 521,
+    "min_ns": 466,
+    "max_ns": 981
+  },
+  {
+    "runtime": "kernel",
+    "phase": "result_extract_ns",
+    "samples": 15,
+    "median_ns": 119,
+    "min_ns": 57,
+    "max_ns": 200
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "compile_ns",
+    "samples": 15,
+    "median_ns": 46076196,
+    "min_ns": 45656100,
+    "max_ns": 49000250
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "blob_upload_ns",
+    "samples": 15,
+    "median_ns": 52119,
+    "min_ns": 46130,
+    "max_ns": 54213
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "companion_load_ns",
+    "samples": 15,
+    "median_ns": 326396,
+    "min_ns": 302955,
+    "max_ns": 347050
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "companion_lookup_spec_ns",
+    "samples": 15,
+    "median_ns": 45240120,
+    "min_ns": 44797510,
+    "max_ns": 48093842
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "companion_map_ptr_extract_ns",
+    "samples": 15,
+    "median_ns": 351,
+    "min_ns": 201,
+    "max_ns": 1807
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "companion_object_load_ns",
+    "samples": 15,
+    "median_ns": 222041,
+    "min_ns": 205969,
+    "max_ns": 238491
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "companion_open_ns",
+    "samples": 15,
+    "median_ns": 8689,
+    "min_ns": 8364,
+    "max_ns": 9232
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "memory_prepare_ns",
+    "samples": 15,
+    "median_ns": 29305,
+    "min_ns": 25236,
+    "max_ns": 37371
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "native_link_cache_lookup_ns",
+    "samples": 15,
+    "median_ns": 100081,
+    "min_ns": 93631,
+    "max_ns": 181461
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "native_link_exec_ns",
+    "samples": 15,
+    "median_ns": 0,
+    "min_ns": 0,
+    "max_ns": 0
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "native_link_map_patch_ns",
+    "samples": 15,
+    "median_ns": 244,
+    "min_ns": 128,
+    "max_ns": 402
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "native_link_read_ns",
+    "samples": 15,
+    "median_ns": 25984,
+    "min_ns": 21918,
+    "max_ns": 43331
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "native_load_ns",
+    "samples": 15,
+    "median_ns": 46076196,
+    "min_ns": 45656100,
+    "max_ns": 49000250
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "packet_prepare_ns",
+    "samples": 15,
+    "median_ns": 658,
+    "min_ns": 497,
+    "max_ns": 2450
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "prog_load_ns",
+    "samples": 15,
+    "median_ns": 111242,
+    "min_ns": 102631,
+    "max_ns": 133386
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "prog_run_wall_ns",
+    "samples": 15,
+    "median_ns": 576,
+    "min_ns": 500,
+    "max_ns": 767
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "proof_open_ns",
+    "samples": 15,
+    "median_ns": 30322,
+    "min_ns": 24886,
+    "max_ns": 33367
+  },
+  {
+    "runtime": "native_kernel",
+    "phase": "proof_verifier_load_ns",
+    "samples": 15,
+    "median_ns": 57850,
+    "min_ns": 53352,
+    "max_ns": 64603
+  },
+  {
+    "runtime": "native_proof",
+    "phase": "compile_ns",
+    "samples": 15,
+    "median_ns": 357071,
+    "min_ns": 328013,
+    "max_ns": 385834
+  },
+  {
+    "runtime": "native_proof",
+    "phase": "input_stage_ns",
+    "samples": 15,
+    "median_ns": 840,
+    "min_ns": 556,
+    "max_ns": 1164
+  },
+  {
+    "runtime": "native_proof",
+    "phase": "memory_prepare_ns",
+    "samples": 15,
+    "median_ns": 29205,
+    "min_ns": 25061,
+    "max_ns": 35422
+  },
+  {
+    "runtime": "native_proof",
+    "phase": "object_load_ns",
+    "samples": 15,
+    "median_ns": 239430,
+    "min_ns": 214523,
+    "max_ns": 265270
+  },
+  {
+    "runtime": "native_proof",
+    "phase": "object_open_ns",
+    "samples": 15,
+    "median_ns": 117641,
+    "min_ns": 112634,
+    "max_ns": 127279
+  },
+  {
+    "runtime": "native_proof",
+    "phase": "prog_run_wall_ns",
+    "samples": 15,
+    "median_ns": 586,
+    "min_ns": 446,
+    "max_ns": 992
+  },
+  {
+    "runtime": "native_proof",
+    "phase": "proof_compile_ns",
+    "samples": 15,
+    "median_ns": 121598374,
+    "min_ns": 121598374,
+    "max_ns": 121598374
+  },
+  {
+    "runtime": "native_proof",
+    "phase": "result_extract_ns",
+    "samples": 15,
+    "median_ns": 112,
+    "min_ns": 58,
+    "max_ns": 207
+  }
+]

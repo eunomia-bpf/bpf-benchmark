@@ -78,13 +78,13 @@ negative-qemu: build-arm64/negative.cpio
 .PHONY: check-loader-kallsyms
 build-x86/test-kallsyms: test_kallsyms.cpp ../libnativeloader/src/native_loader.cpp
 	install -d build-x86
-	$(CXX) -O2 -std=c++17 -I../libnativeloader/include -I../../micro/programs/build-x86 \
+	$(CXX) -O2 -std=c++20 -I../libnativeloader/include -I../../micro/programs/build-x86 \
 		-I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/include \
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		$< ../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -o $@
 
 check-loader-kallsyms: build-x86/test-kallsyms
-	./build-x86/test-kallsyms
+	./build-x86/test-kallsyms ../x86/native_lab/native_link/target/release/native-link
 
 .PHONY: tcb
 tcb:
@@ -183,15 +183,17 @@ negative-bound-qemu: bound-probe-build-arm64
 	$(PYTHON) negative.py collect-bound --arch arm64 --build $(ARM_NEGATIVE_BOUND_BUILD) --out $(ARM_NEGATIVE_BOUND_OUT)
 
 .PHONY: stage2-build stage2-kvm stage2-guest
+STAGE2_BUILD ?= build-x86/stage2
+STAGE2_OUT ?= ../results/kprog_fidelity_20261106/helper-map/x86
 stage2-build: bound-probe-build
-	$(PYTHON) stage2.py build --build build-x86/stage2
+	$(PYTHON) stage2.py build --build $(STAGE2_BUILD)
 
 stage2-kvm:
 	vng --run $(ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage \
 		--cwd $(ROOT) --disable-monitor --cpus 2 --mem 2G --rwdir $(ROOT) --overlay-rwdir /tmp \
-		--exec 'make -C $(ROOT)/kprog/fidelity stage2-guest'
+		--exec 'make -C $(ROOT)/kprog/fidelity stage2-guest STAGE2_BUILD=$(STAGE2_BUILD) STAGE2_OUT=$(STAGE2_OUT)'
 
 stage2-guest:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod ../tv/build-x86/bpf_x86_native_lab.ko
-	$(PYTHON) stage2.py check --build build-x86/stage2 --out ../results/kprog_fidelity_20261106/helper-map/x86
+	$(PYTHON) stage2.py check --build $(STAGE2_BUILD) --out $(STAGE2_OUT)

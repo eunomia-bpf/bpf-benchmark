@@ -98,8 +98,8 @@ CASES=1024 OUT=../results/kprog_fidelity_20261106/differential/arm64-hardware kp
 
 The script checks the host ISA and invokes `make run-handoff`, which unpacks
 the shipped static executable and runs it. The coordinator must record the
-hardware identity and commit its output. **Real AArch64 hardware has not run
-here.**
+hardware identity and commit its output. At this initial handoff, hardware execution was still pending; the
+coordinator's hardware follow-up is recorded below.
 
 A QEMU-user smoke completed all 497 forms × 16 states = 7,952 cases, with 96
 mismatches in six SIMD forms: FMOV to D0/S0, CNT at 8/16 lanes, and UADDLV at
@@ -206,3 +206,30 @@ cases agree, with no mismatches. `make.log.gz` retains compilation and outcome.
 The hardware replay default now selects
 `cpu-differential-arm64-register-cells.gz`; both earlier handoff binaries are
 retained. No real Arm hardware result is inferred from this emulation run.
+
+
+## DGX Spark hardware follow-up
+
+The coordinator ran the unchanged width-fix static handoff on `spark-d5fe`,
+pinned separately to Cortex-X925 CPU 19 and Cortex-A725 CPU 10. **Each core
+reports 497 forms, 508928 cases, zero mismatches.** This is real AArch64 CPU
+evidence for that matrix. `arm64-hardware/RUN.txt` records the exact commands;
+`out-cpu19/` and `out-cpu10/` retain per-form outcomes, raw mismatch files,
+`lscpu.txt` and `uname.txt`. `run-cpu*.log` retain both complete status lines.
+The supplied provenance files are preserved unchanged.
+
+That binary predates A's register-cell/BR/BLR and real-helper updates. The
+new register-cell handoff is `cpu-differential-arm64-register-cells.gz`, with
+its independent 497-form QEMU comparison at zero mismatches; the coordinator
+replayed it on both cores as recorded below. The current 497-form matrix
+tests ordinary arithmetic/data/vector operations, not kernel-helper bodies or
+Arm branch/call/stack composites. Those require their own CPU/ABI evidence;
+the hardware result is not broadened to untested operations.
+
+The coordinator also ran the newer register-cell handoff on both Spark core
+classes at approximately 10:29 UTC. **CPU19/X925 and CPU10/A725 each report
+497 forms, 508928 cases and zero mismatches.** The second independent replay's
+unchanged commands, host metadata, logs and per-form results are retained in
+`arm64-hardware-register-cells/` and its `RUN.txt`. This confirms the same
+ordinary-form matrix after the register representation change; it does not
+extend coverage to BR/BLR, stack composites or helper bodies.

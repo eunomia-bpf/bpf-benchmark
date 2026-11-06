@@ -96,11 +96,13 @@ NativeLinkArgs build_native_link_args(
     uint64_t this_cpu_off_addr = 0;
 #if defined(__x86_64__)
     {
-        uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
-        this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
-        if (cpu_number_addr != 0 && this_cpu_off_addr != 0) {
-            add_name_addr(out.helpers, kX86CpuNumberHelperKey, cpu_number_addr);
-            add_name_addr(out.helpers, kX86ThisCpuOffHelperKey, this_cpu_off_addr);
+        if (companion.needs_kernel_symbols) {
+            uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
+            this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
+            if (cpu_number_addr != 0 && this_cpu_off_addr != 0) {
+                add_name_addr(out.helpers, kX86CpuNumberHelperKey, cpu_number_addr);
+                add_name_addr(out.helpers, kX86ThisCpuOffHelperKey, this_cpu_off_addr);
+            }
         }
         add_name_addr(out.helpers, kX86BpfMapMaxEntriesOffsetKey,
                       K_BPF_MAP_MAX_ENTRIES_OFFSET);
@@ -126,34 +128,36 @@ NativeLinkArgs build_native_link_args(
     }
 #endif
 
-    for (const auto &helper : kSupportedHelpers) {
-        uint64_t addr = kallsyms_lookup(helper.symbol);
-        if (addr != 0) {
-            add_name_addr(out.helpers, helper.symbol, addr);
+    if (companion.needs_kernel_symbols) {
+        for (const auto &helper : kSupportedHelpers) {
+            uint64_t addr = kallsyms_lookup(helper.symbol);
+            if (addr != 0) {
+                add_name_addr(out.helpers, helper.symbol, addr);
+            }
         }
-    }
-    static constexpr int kContextualHelperIds[] = {
-        BPF_FUNC_perf_event_output,
-        BPF_FUNC_get_stackid,
-        BPF_FUNC_get_stack,
-        BPF_FUNC_get_prandom_u32,
-        BPF_FUNC_fib_lookup,
-        BPF_FUNC_redirect_map,
-        BPF_FUNC_skc_lookup_tcp,
-        BPF_FUNC_sk_lookup_udp,
-    };
-    for (int helper_id : kContextualHelperIds) {
-        std::optional<std::pair<std::string, uint64_t>> alias =
-            contextual_helper_alias_if_available(helper_id, companion.prog_type);
-        if (!alias) {
-            continue;
+        static constexpr int kContextualHelperIds[] = {
+            BPF_FUNC_perf_event_output,
+            BPF_FUNC_get_stackid,
+            BPF_FUNC_get_stack,
+            BPF_FUNC_get_prandom_u32,
+            BPF_FUNC_fib_lookup,
+            BPF_FUNC_redirect_map,
+            BPF_FUNC_skc_lookup_tcp,
+            BPF_FUNC_sk_lookup_udp,
+        };
+        for (int helper_id : kContextualHelperIds) {
+            std::optional<std::pair<std::string, uint64_t>> alias =
+                contextual_helper_alias_if_available(helper_id, companion.prog_type);
+            if (!alias) {
+                continue;
+            }
+            add_name_addr(out.helpers, alias->first, alias->second);
         }
-        add_name_addr(out.helpers, alias->first, alias->second);
-    }
-    for (const char *symbol : kRuntimeCallSymbols) {
-        uint64_t addr = kallsyms_lookup(symbol);
-        if (addr != 0) {
-            add_name_addr(out.helpers, symbol, addr);
+        for (const char *symbol : kRuntimeCallSymbols) {
+            uint64_t addr = kallsyms_lookup(symbol);
+            if (addr != 0) {
+                add_name_addr(out.helpers, symbol, addr);
+            }
         }
     }
 

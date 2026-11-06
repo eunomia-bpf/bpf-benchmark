@@ -2875,6 +2875,7 @@ struct CompanionLoad {
     uint64_t lookup_spec_ns = 0;
     uint64_t source_bytecode_bytes = 0;
     bool has_tail_call = false;
+    bool needs_kernel_symbols = false;
     std::unordered_map<std::string, uint64_t> map_addrs;
     std::unordered_map<std::string, uint32_t> map_addr_ids;
     std::unordered_map<std::string, std::string> native_map_symbols;
@@ -3728,6 +3729,7 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 continue;
             }
             if (sym.st_shndx == SHN_UNDEF) {
+                load.needs_kernel_symbols = true;
                 add_native_map_symbol_alias(load, name);
                 continue;
             }
@@ -3858,6 +3860,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
     std::vector<SourceHelperCall> source_calls =
         collect_source_helper_calls(insns, insn_cnt, &meta_by_source_fd,
                                     &out.map_rules);
+    out.needs_kernel_symbols = !source_calls.empty();
 
     BpfArrayOffsets array_offsets{
         K_BPF_ARRAY_VALUE_OFFSET,
@@ -3868,7 +3871,15 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
         K_HTAB_ELEM_LRU_REF_OFFSET,
     };
 #if defined(__x86_64__)
-    uint64_t this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
+    const bool has_percpu_map = std::any_of(out.maps.begin(), out.maps.end(),
+        [](const MapMeta &map) {
+            return map.type == BPF_MAP_TYPE_PERCPU_ARRAY ||
+                   map.type == BPF_MAP_TYPE_PERCPU_HASH ||
+                   map.type == BPF_MAP_TYPE_LRU_PERCPU_HASH;
+        });
+    out.needs_kernel_symbols |= has_percpu_map;
+    uint64_t this_cpu_off_addr = has_percpu_map
+        ? kallsyms_lookup("this_cpu_off") : 0;
 #else
     uint64_t this_cpu_off_addr = 0;
 #endif
@@ -4096,9 +4107,9 @@ std::string native_link_plan_summary(const NativeLinkArgs &link_args,
     const uint64_t perf_addr =
         native_link_name_addr(link_args.helpers, "bpf_perf_event_output");
     const uint64_t perf_raw_tp_addr =
-        kallsyms_lookup("bpf_perf_event_output_raw_tp");
+        perf_addr ? kallsyms_lookup("bpf_perf_event_output_raw_tp") : 0;
     const uint64_t perf_generic_addr =
-        kallsyms_lookup("bpf_perf_event_output");
+        perf_addr ? kallsyms_lookup("bpf_perf_event_output") : 0;
     const char *perf_alias = "missing";
     if (perf_addr != 0 && perf_addr == perf_raw_tp_addr) {
         perf_alias = "raw_tp";
@@ -4953,6 +4964,11 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     }
     const auto native_data_symbols_end = std::chrono::steady_clock::now();
 
+    companion.needs_kernel_symbols |= proof_insns.empty() ||
+        std::any_of(proof_insns.begin(), proof_insns.end(),
+            [](const bpf_insn &insn) {
+                return insn.code == (BPF_JMP | BPF_CALL);
+            });
     LinkedBlob linked = load_or_link_native_blob(
         options.native_link_path,
         native_object_path,

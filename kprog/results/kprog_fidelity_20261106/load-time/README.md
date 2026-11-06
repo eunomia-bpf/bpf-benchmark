@@ -53,3 +53,31 @@ Lane R owns timing; the exact root `make micro` reproduction command is under
 and runtime image from the fixed loader. The performance confirmation remains
 an active item until that result arrives; it must not use an old statically
 linked runner or claim the old result measured this patch.
+
+## Repeat and elimination of the remaining pure-program scan
+
+Lane R completed the same15-sample simple workload with the faster scanner:
+`micro/results/x86_kvm_micro_20261106_101146_092448/metadata.json`.
+Native load is46.076ms median (45.656–49.000), including45.240ms in
+`companion_lookup_spec_ns`; proof verifier load is0.058ms. Kernel object load
+is0.216ms. This is a single workload and must not be ratio-compared with the
+older29-benchmark median. `simple-after-scanner-samples.csv` retains every
+phase; `simple-after-scanner-phases.json` gives medians/ranges from those15
+samples. These analyses are outside framework raw result generation.
+
+The scanner fix preserves symbols but still eagerly scans the entire table
+for the optional helper catalogue. The second fix classifies actual needs:
+source helper calls, proof CALLs, undefined native symbols and perCPU maps
+retain the resolver; unbound loads retain their existing behavior. Pure bound
+programs without these requirements skip the catalogue, and the diagnostic
+link summary no longer triggers a new scan for an absent perf-event helper.
+Fixed ABI offsets and map/link handling remain active.
+
+The isolated loader build and updated real-kallsyms regression pass. The new
+pure-link test rejects any callable or CPU-address catalogue entry, catching
+accidental restoration of the eager resolver. All13 freshly compiled
+helper/map proofs pass the actual bound KVM path again (see
+`../helper-map/x86-symbol-guard/`), including perCPU cases. Full logs are
+`loader-symbol-guard-build.log.gz` and `pure-symbol-regression.log.gz`.
+Lane R has the same15-sample root command for measurement after rebuilding
+from this second fix; no after-second-fix timing is inferred yet.

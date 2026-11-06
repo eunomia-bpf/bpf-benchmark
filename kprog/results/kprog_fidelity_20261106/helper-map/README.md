@@ -30,3 +30,18 @@ used names longer than the kernel's 15-byte name, and the second program-info
 query reused returned JIT/map lengths without destination buffers. The driver
 now uses the actual kernel name and requests only the translated instructions.
 The final pass checks nonzero-generation native execution explicitly.
+
+## Optional-symbol loader regression
+
+`x86-symbol-guard/` independently repeats all13 configured cases after the
+loader stopped resolving the optional kernel helper catalogue for pure bound
+programs. All13 pass the original expected result, retval2 and nonzero-generation
+checks. Helper/perCPU inputs continue through their required resolver. The
+fresh proof build uses the current typed helper dispatch; it does not reuse
+an earlier BPF object. `symbol-guard-build.log.gz` and
+`symbol-guard-kvm.log.gz` retain complete build/guest output.
+
+```sh
+taskset -c 16-23 make -C kprog/fidelity stage2-build STAGE2_BUILD=build-x86/stage2-symbol-guard
+taskset -c 16-23 make -C kprog/fidelity stage2-kvm STAGE2_BUILD=build-x86/stage2-symbol-guard STAGE2_OUT=../results/kprog_fidelity_20261106/helper-map/x86-symbol-guard
+```
