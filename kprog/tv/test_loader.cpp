@@ -283,6 +283,8 @@ int main()
         {.code = BPF_JMP | BPF_CALL, .dst_reg = 0, .src_reg = 0,
          .off = 0, .imm = BPF_FUNC_get_prandom_u32}, constant[0], constant[1],
     };
+    auto coarse = helper;
+    coarse[0].imm = BPF_FUNC_ktime_get_coarse_ns;
     std::vector<bpf_insn> large{helper[0],
         {.code = BPF_JMP | BPF_JNE | BPF_K, .dst_reg = 0, .src_reg = 0, .off = 2, .imm = 0},
         constant[0], constant[1]};
@@ -320,8 +322,9 @@ int main()
         load_context_regressions();
         tracing_context_regressions();
         btf_manifest_regressions();
-        for (const char *symbol : {"tv_short_entry", "tv_long_entry", "tv_helper_entry", "tv_map_entry", "tv_hash_entry", "tv_large_entry", "tv_readonly_entry", "tv_duplicate_readonly_entry"}) {
+        for (const char *symbol : {"tv_short_entry", "tv_long_entry", "tv_helper_entry", "tv_coarse_helper_entry", "tv_map_entry", "tv_hash_entry", "tv_large_entry", "tv_readonly_entry", "tv_duplicate_readonly_entry"}) {
             const auto &proof = std::string(symbol) == "tv_helper_entry" ? helper :
+                std::string(symbol) == "tv_coarse_helper_entry" ? coarse :
                 std::string(symbol) == "tv_large_entry" ? large :
                 std::string(symbol) == "tv_map_entry" ? map :
                 std::string(symbol) == "tv_hash_entry" ? hash : constant;
@@ -402,10 +405,11 @@ int main()
                 if (close(wrong_shape)) return 1;
                 std::puts("separate proof map layout mismatch: PASS (rejected)");
             }
-            if (std::string(symbol) == "tv_helper_entry" || std::string(symbol) == "tv_map_entry" ||
+            if (std::string(symbol) == "tv_helper_entry" || std::string(symbol) == "tv_coarse_helper_entry" || std::string(symbol) == "tv_map_entry" ||
                 std::string(symbol) == "tv_hash_entry" || std::string(symbol) == "tv_readonly_entry" ||
                 std::string(symbol) == "tv_duplicate_readonly_entry") {
                 const char *entry = std::string(symbol) == "tv_map_entry" ? "tv_proof_map" :
+                    std::string(symbol) == "tv_coarse_helper_entry" ? "tv_proof_coarse_helper" :
                     std::string(symbol) == "tv_duplicate_readonly_entry" ? "tv_proof_duplicate_readonly" :
                     std::string(symbol) == "tv_readonly_entry" ? "tv_proof_readonly" :
                     std::string(symbol) == "tv_hash_entry" ? "tv_proof_hash" : "tv_proof_helper";

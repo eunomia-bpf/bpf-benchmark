@@ -457,6 +457,7 @@ constexpr SupportedHelper kSupportedHelpers[] = {
     {BPF_FUNC_seq_write, "bpf_seq_write"},
     {BPF_FUNC_copy_from_user, "bpf_copy_from_user"},
     {BPF_FUNC_jiffies64, "bpf_jiffies64"},
+    {BPF_FUNC_ktime_get_coarse_ns, "bpf_ktime_get_coarse_ns"},
     {BPF_FUNC_sk_assign, "bpf_sk_assign"},
     {BPF_FUNC_get_current_task_btf, "bpf_get_current_task_btf"},
     {BPF_FUNC_ima_inode_hash, "bpf_ima_inode_hash"},

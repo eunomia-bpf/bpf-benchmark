@@ -28,6 +28,13 @@ SEC("xdp") int tv_proof_helper(struct xdp_md *ctx)
     return 2;
 }
 
+SEC("xdp") int tv_proof_coarse_helper(struct xdp_md *ctx)
+{
+    (void)ctx;
+    (void)bpf_ktime_get_coarse_ns();
+    return 2;
+}
+
 SEC("xdp") int tv_proof_map(struct xdp_md *ctx)
 {
     int key = 0;

@@ -473,3 +473,20 @@ The fixture uses explicit key_size/value_size declarations like capable, so it
 does not depend on libbpf retrying a partially typed map without BTF. Updated
 compatible libraries are separately snapshotted under context-v2-map-value;
 the new readonly native-link interface remains required.
+
+Coarse-clock helper identity
+---------------------------
+
+The loader's public helper-symbol table now includes helper160,
+bpf_ktime_get_coarse_ns, needed by a real startup probe reported by C. Actual
+x86 tests exercise the real helper through raw proof and clang-compiled proof
+loading, sealing and native execution. Both return the expected fixture result;
+existing different-helper identity negatives and all prior regressions pass.
+The Arm library builds. This adds symbol resolution rather than another ISA
+model or a fabricated helper result. C owns the typed simulator dispatch and
+its formal contract for the startup probe itself.
+
+The existing compiled input and CMOV component proofs, context-expansion
+proofs and all their byte-mutation negatives also pass against V's updated
+memory reference. Their raw combined log is retained; these are component
+proofs, and no whole-program TV status is inferred from their success.

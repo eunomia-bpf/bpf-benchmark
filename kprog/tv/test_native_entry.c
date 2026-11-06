@@ -19,6 +19,14 @@ int tv_long_entry(void *ctx)
 }
 
 extern unsigned long bpf_get_prandom_u32(void);
+extern unsigned long bpf_ktime_get_coarse_ns(void);
+
+int tv_coarse_helper_entry(void *ctx)
+{
+	(void)ctx;
+	(void)bpf_ktime_get_coarse_ns();
+	return 2;
+}
 
 int tv_helper_entry(void *ctx)
 {
