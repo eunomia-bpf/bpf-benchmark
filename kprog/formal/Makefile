@@ -160,6 +160,7 @@ check:
 	python3 tools/check_reference_x86_unary.py
 	python3 tools/check_x86_flag_definedness.py
 	python3 tools/check_reference_x86_condition.py
+	python3 tools/check_reference_x86_path.py
 	python3 tools/check_x86_memory_widths.py
 	python3 tools/check_reference_arm64.py
 	python3 tools/check_reference_exclusive.py
