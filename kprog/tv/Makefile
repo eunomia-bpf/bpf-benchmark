@@ -84,6 +84,24 @@ guest-kernel-check:
 	./build/test-binding-kernel
 	./build/test-loader
 
+# Diagnose the shared build's stale-header BTF failure without replacing the
+# immutable per-lane runtime pairs or adding a benchmark admission gate.
+.PHONY: shared-kernel-check guest-shared-kernel-check
+shared-kernel-check: build/test-binding-kernel build/test-loader
+	$(MAKE) -C ../../vendor/build/x86/linux ARCH=x86 \
+		M=$(abspath ../../kinsn/module/x86) MO=$(CURDIR)/build-x86/all-shared-btf modules
+	taskset -c 8-23 vng --run $(abspath ../../vendor/build/x86/linux/arch/x86/boot/bzImage) \
+		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/tv guest-shared-kernel-check'
+
+guest-shared-kernel-check:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	for module in build-x86/all-shared-btf/*.ko; do insmod "$$module" || { dmesg; exit 1; }; done
+	cat /proc/modules
+	./build/test-binding-kernel
+	./build/test-loader
+
 build/native-entry.o: test_native_entry.c
 	install -d build
 	$(CC) -O2 -c -fno-stack-protector -fno-asynchronous-unwind-tables \

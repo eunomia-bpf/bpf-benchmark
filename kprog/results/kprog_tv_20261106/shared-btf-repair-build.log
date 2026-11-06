@@ -1,0 +1,100 @@
+make: Entering directory '/workspaces/repository/vendor/linux-framework'
+make[1]: Entering directory '/workspaces/repository/vendor/build/x86/linux'
+  SYNC    include/config/auto.conf.cmd
+  GEN     Makefile
+  GEN     Makefile
+  DESCEND bpf/resolve_btfids
+  DESCEND objtool
+  INSTALL libsubcmd_headers
+  INSTALL libsubcmd_headers
+  CALL    /workspaces/repository/vendor/linux-framework/scripts/checksyscalls.sh
+  LDS     arch/x86/entry/vdso/vdso64/vdso64.lds
+  LDS     arch/x86/entry/vdso/vdso32/vdso32.lds
+  VDSO    arch/x86/entry/vdso/vdso64/vdso64.so.dbg
+  VDSO    arch/x86/entry/vdso/vdso32/vdso32.so.dbg
+  OBJCOPY arch/x86/entry/vdso/vdso64/vdso64.so
+  VDSO2C  arch/x86/entry/vdso/vdso64/vdso64-image.c
+  OBJCOPY arch/x86/entry/vdso/vdso32/vdso32.so
+  VDSO2C  arch/x86/entry/vdso/vdso32/vdso32-image.c
+  CC      arch/x86/entry/vdso/vdso64/vdso64-image.o
+  CC      arch/x86/entry/vdso/vdso32/vdso32-image.o
+  LDS     arch/x86/realmode/rm/realmode.lds
+  LD      arch/x86/realmode/rm/realmode.elf
+  AR      arch/x86/entry/vdso/vdso64/built-in.a
+  AR      arch/x86/entry/vdso/vdso32/built-in.a
+  AR      arch/x86/entry/vdso/built-in.a
+  AR      arch/x86/entry/built-in.a
+  RELOCS  arch/x86/realmode/rm/realmode.relocs
+  OBJCOPY arch/x86/realmode/rm/realmode.bin
+  AS      arch/x86/realmode/rmpiggy.o
+  AR      arch/x86/realmode/built-in.a
+  LDS     arch/x86/kernel/vmlinux.lds
+  AR      arch/x86/built-in.a
+  CC      drivers/net/veth.o
+  AR      drivers/net/built-in.a
+  AR      drivers/built-in.a
+  AR      built-in.a
+  AR      vmlinux.a
+  LD      vmlinux.o
+  GEN     .vmlinux.objs
+  MODPOST vmlinux.symvers
+  UPD     include/generated/utsversion.h
+  CC      init/version-timestamp.o
+  KSYMS   .tmp_vmlinux0.kallsyms.S
+  AS      .tmp_vmlinux0.kallsyms.o
+  LD      .tmp_vmlinux1
+  BTF     .tmp_vmlinux1
+WARN: multiple IDs found for 'Qdisc': 58315, 58316 - using 58315
+WARN: multiple IDs found for 'bpf_link': 72931, 72932 - using 72931
+WARN: multiple IDs found for 'bpf_map': 73305, 73306 - using 73305
+WARN: multiple IDs found for 'bpf_prog': 73553, 73554 - using 73553
+WARN: multiple IDs found for 'bpf_prog_aux': 73578, 73579 - using 73578
+WARN: multiple IDs found for 'cgroup': 77365, 77366 - using 77365
+WARN: multiple IDs found for 'fib6_info': 87926, 87927 - using 87926
+WARN: multiple IDs found for 'file': 88167, 88168 - using 88167
+WARN: multiple IDs found for 'inode': 93423, 93424 - using 93423
+WARN: multiple IDs found for 'module': 100590, 100591 - using 100590
+WARN: multiple IDs found for 'nf_conn': 102863, 102864 - using 102863
+WARN: multiple IDs found for 'path': 105398, 105399 - using 105398
+WARN: multiple IDs found for 'request_sock': 111810, 111811 - using 111810
+WARN: multiple IDs found for 'seq_file': 114521, 114522 - using 114521
+WARN: multiple IDs found for 'sk_buff': 116044, 116045 - using 116044
+WARN: multiple IDs found for 'sock': 116679, 116680 - using 116679
+WARN: multiple IDs found for 'sock_common': 116696, 116697 - using 116696
+WARN: multiple IDs found for 'socket': 116898, 116899 - using 116898
+WARN: multiple IDs found for 'task_struct': 118396, 118397 - using 118396
+WARN: multiple IDs found for 'vm_area_struct': 126359, 126360 - using 126359
+  NM      .tmp_vmlinux1.syms
+  KSYMS   .tmp_vmlinux1.kallsyms.S
+  AS      .tmp_vmlinux1.kallsyms.o
+  LD      .tmp_vmlinux2
+  NM      .tmp_vmlinux2.syms
+  KSYMS   .tmp_vmlinux2.kallsyms.S
+  AS      .tmp_vmlinux2.kallsyms.o
+  LD      vmlinux.unstripped
+  BTFIDS  vmlinux.unstripped
+  NM      System.map
+  SORTTAB vmlinux.unstripped
+  OBJCOPY vmlinux
+  GEN     modules.builtin.modinfo
+  GEN     modules.builtin
+  CC      arch/x86/boot/version.o
+  LDS     arch/x86/boot/compressed/vmlinux.lds
+  VOFFSET arch/x86/boot/compressed/../voffset.h
+  OBJCOPY arch/x86/boot/compressed/vmlinux.bin
+  RELOCS  arch/x86/boot/compressed/vmlinux.relocs
+  CC      arch/x86/boot/compressed/kaslr.o
+  CC      arch/x86/boot/compressed/misc.o
+  GZIP    arch/x86/boot/compressed/vmlinux.bin.gz
+  MKPIGGY arch/x86/boot/compressed/piggy.S
+  AS      arch/x86/boot/compressed/piggy.o
+  LD      arch/x86/boot/compressed/vmlinux
+  ZOFFSET arch/x86/boot/zoffset.h
+  OBJCOPY arch/x86/boot/vmlinux.bin
+  AS      arch/x86/boot/header.o
+  LD      arch/x86/boot/setup.elf
+  OBJCOPY arch/x86/boot/setup.bin
+  BUILD   arch/x86/boot/bzImage
+Kernel: arch/x86/boot/bzImage is ready  (#79)
+make[1]: Leaving directory '/workspaces/repository/vendor/build/x86/linux'
+make: Leaving directory '/workspaces/repository/vendor/linux-framework'

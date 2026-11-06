@@ -364,3 +364,31 @@ run_cnt increases. This checks attachment execution, rather than merely opening
 a tracing FD. All previous kernel/loader regressions pass. The retained binary
 archive includes the exact manifest header used, which contained lane C's
 concurrent anonymous-selector work; that header is not part of this commit.
+
+Shared kernel stale BTF repair
+-----------------------------
+
+The coordinator reported all custom module loads failing on the moving shared
+kernel with duplicate bpf_prog BTF candidates. The kernel's BTF contained two
+bpf_prog_aux layouts: current 1360 bytes/90 members and old 1352 bytes/88 members,
+missing native_load_flags and native_load_ifindex. All 2502 recorded objects
+that depend on bpf.h had newer mtimes than the header. An exhaustive DWARF name
+scan found 958 current-layout compilation units and exactly one old-layout
+unit: net/ipv6/netfilter/nf_defrag_ipv6_hooks.c. Its object mtime was only eight
+milliseconds after the header edit, consistent with an overlapping compile
+that read the old header before writing the object. The individual object's
+DWARF independently confirmed the stale definition. No duplicate C declaration
+or reference semantics defect caused this failure.
+
+A top-level make -W attempt did not reach the recursive Kbuild compilation;
+that failed repair log is retained. Touching only that source's mtime, then
+ordinary make bzImage, actually rebuilt the object. No source content changed.
+The resulting shared kernel has exactly one bpf_map, bpf_prog and bpf_prog_aux
+BTF record. All 15 fresh kinsn modules insert together in actual KVM; all T
+binding/loader regressions, including real fentry execution, pass on this
+shared kernel. Reproduce the module load and regressions with
+`taskset -c 8-23 make -C kprog/tv shared-kernel-check` after rebuilding the
+kernel. This is a diagnostic correctness target, outside benchmark launchers.
+The exact repaired bzImage, modules, config, symbol versions, before/after
+layouts and exhaustive pre-repair DWARF evidence are retained. Frozen 6836f7d44
+runtime pairs were neither modified nor replaced. Full TV remains active.
