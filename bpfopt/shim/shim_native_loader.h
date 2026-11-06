@@ -84,9 +84,18 @@ static int shim_native_loader_requires_bound_proof(void) {
                      strcmp(value, "yes") == 0 || strcmp(value, "on") == 0);
 }
 
-static void shim_native_loader_fatal(void) {
+/* The reason is written to kmsg as well as the log: the log is one file
+ * appended by several processes at once, so a line emitted by the process
+ * that exits can be interleaved away and the exit code alone then says
+ * only "some fatal", not which. kmsg is a per-call write and survives. */
+static void shim_native_loader_fatal_reason(const char *reason) {
+    kmsg_line("native fatal reason=%s", reason ? reason : "?");
     fflush(NULL);
     _exit(97);
+}
+
+static void shim_native_loader_fatal(void) {
+    shim_native_loader_fatal_reason("unspecified");
 }
 
 static void shim_native_loader_check_bound_abi(void *handle) {
@@ -99,7 +108,7 @@ static void shim_native_loader_check_bound_abi(void *handle) {
     if (error || !version || version() != 1) {
         log_line("verified native runtime requires native-loader bound-proof ABI version 1: %s",
                  error ? error : "incompatible version");
-        shim_native_loader_fatal();
+        shim_native_loader_fatal_reason("bound-proof-abi");
     }
 }
 
@@ -112,7 +121,7 @@ shim_native_loader_resolve_load_fn(const char *so_path) {
             log_line("native-loader refusing to switch shared object from %s to %s",
                      shim_native_loader_handle_path, so_path);
             pthread_mutex_unlock(&shim_native_loader_handle_lock);
-            shim_native_loader_fatal();
+            shim_native_loader_fatal_reason("so-switch");
         }
         native_loader_load_from_fd_with_manifest_path_btf_and_context_fn load =
             shim_native_loader_load_fn;
@@ -124,7 +133,7 @@ shim_native_loader_resolve_load_fn(const char *so_path) {
     if (!handle) {
         log_line("native-loader dlopen %s failed: %s", so_path, dlerror());
         pthread_mutex_unlock(&shim_native_loader_handle_lock);
-        shim_native_loader_fatal();
+        shim_native_loader_fatal_reason("dlopen");
     }
     shim_native_loader_check_bound_abi(handle);
 
@@ -137,7 +146,7 @@ shim_native_loader_resolve_load_fn(const char *so_path) {
         log_line("native-loader dlsym failed: %s", sym_err ? sym_err : "null");
         dlclose(handle);
         pthread_mutex_unlock(&shim_native_loader_handle_lock);
-        shim_native_loader_fatal();
+        shim_native_loader_fatal_reason("dlsym");
     }
 
     char *path_copy = strdup(so_path);
@@ -146,7 +155,7 @@ shim_native_loader_resolve_load_fn(const char *so_path) {
                  so_path, errno ? errno : ENOMEM);
         dlclose(handle);
         pthread_mutex_unlock(&shim_native_loader_handle_lock);
-        shim_native_loader_fatal();
+        shim_native_loader_fatal_reason("missing-bytecode");
     }
 
     shim_native_loader_handle = handle;
@@ -439,14 +448,14 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
                  prog_name ? prog_name : "");
         kmsg_line("native fatal-missing-bytecode name=%s",
                   prog_name ? prog_name : "");
-        shim_native_loader_fatal();
+        shim_native_loader_fatal_reason("unreadable-bytecode");
     }
     if (access(prog->bytecode_path, R_OK) != 0) {
         log_line("native-loader source bytecode unreadable prog=%s path=%s errno=%d",
                  prog_name ? prog_name : "", prog->bytecode_path, errno);
         kmsg_line("native fatal-unreadable-bytecode name=%s path=%s errno=%d",
                   prog_name ? prog_name : "", prog->bytecode_path, errno);
-        shim_native_loader_fatal();
+        shim_native_loader_fatal_reason("missing-manifest");
     }
     const char *manifest = getenv("BPFREJIT_SHIM_NATIVE_MANIFEST");
     if (!manifest || !manifest[0]) {
@@ -454,7 +463,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
                  prog_name ? prog_name : "");
         kmsg_line("native fatal-missing-manifest name=%s",
                   prog_name ? prog_name : "");
-        shim_native_loader_fatal();
+        shim_native_loader_fatal_reason("missing-loader-so");
     }
     if (!shim_native_loader_requires_bound_proof() &&
         shim_native_loader_is_runtime_helper(prog, manifest)) {
@@ -501,7 +510,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
                  prog->bytecode_path, result.error);
         kmsg_line("native load-failed name=%s fd=%ld error=%s",
                   prog_name ? prog_name : "", original_fd, result.error);
-        shim_native_loader_fatal();
+        shim_native_loader_fatal_reason("manifest-entry");
     }
     kmsg_line("native load-done name=%s fd=%ld replaced=%d native_fd=%d "
               "cache_hit=%d native_bytes=%llu link_exec_ns=%llu "
@@ -526,7 +535,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
         if (shim_native_loader_requires_bound_proof()) {
             log_line("verified native runtime has no manifest entry for prog=%s manifest=%s source=%s",
                      prog_name ? prog_name : "", manifest, prog->bytecode_path);
-            shim_native_loader_fatal();
+            shim_native_loader_fatal_reason("no-manifest-entry");
         }
         log_line("native-loader no manifest match pass-through for prog=%s "
                  "manifest=%s source=%s",
@@ -540,7 +549,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
                  prog_name ? prog_name : "");
         kmsg_line("native invalid-native-fd name=%s fd=%ld native_fd=%d",
                   prog_name ? prog_name : "", original_fd, result.prog_fd);
-        shim_native_loader_fatal();
+        shim_native_loader_fatal_reason("replace-failed");
     }
 
     shim_native_loader_log_jit_info("original", (int)original_fd);
@@ -587,7 +596,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
         log_line("native-loader failed to dup original fd=%ld errno=%d",
                  original_fd, errno);
         real_close(result.prog_fd);
-        shim_native_loader_fatal();
+        shim_native_loader_fatal_reason("native-fd");
     }
     if (prog->native_loader_original_fd >= 0)
         real_close(prog->native_loader_original_fd);
@@ -601,7 +610,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
         real_close(result.prog_fd);
         real_close(shadow_original_fd);
         prog->native_loader_original_fd = -1;
-        shim_native_loader_fatal();
+        shim_native_loader_fatal_reason("load-error");
     }
     log_line("native-loader replaced prog=%s original_fd=%ld native_fd=%d "
              "original_id=%u native_id=%u symbol=%s native_object=%s "
