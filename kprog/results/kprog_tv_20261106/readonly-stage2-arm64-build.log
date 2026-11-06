@@ -1,0 +1,62 @@
+make: Entering directory '/workspaces/repository/kprog/fidelity'
+CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ \
+	PKG_CONFIG_SYSROOT_DIR=/workspaces/repository/.cache/aarch64-sysroot \
+	PKG_CONFIG_LIBDIR=/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu/pkgconfig \
+	make -C ../libnativeloader BUILD_DIR=build-fidelity-arm64 \
+	LIBBPF_PREFIX=/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/prefix \
+	LIBBPF_LIBRARY=/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+	KERNEL_OFFSETS_INCLUDE=/workspaces/repository/micro/programs/build-arm64
+make[1]: Entering directory '/workspaces/repository/kprog/libnativeloader'
+cmake -S . -B "build-fidelity-arm64" \
+	-DNATIVE_LOADER_REPO_ROOT="/workspaces/repository" \
+	-DNATIVE_LOADER_LIBBPF_PREFIX="/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/prefix" \
+	-DNATIVE_LOADER_LIBBPF_LIBRARY="/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" \
+	-DNATIVE_LOADER_KERNEL_OFFSETS_INCLUDE="/workspaces/repository/micro/programs/build-arm64"
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspaces/repository/kprog/libnativeloader/build-fidelity-arm64
+cmake --build "build-fidelity-arm64" --target native_loader native_loader_shared
+gmake[2]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+gmake[3]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+gmake[4]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+[100%] Built target native_loader
+gmake[4]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+gmake[3]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+gmake[3]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+gmake[4]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+gmake[5]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+gmake[5]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+[100%] Built target native_loader_shared
+gmake[4]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+gmake[3]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+gmake[2]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-fidelity-arm64'
+make[1]: Leaving directory '/workspaces/repository/kprog/libnativeloader'
+install -d build-arm64
+aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static \
+	-D__EXPORTED_HEADERS__ -DNATIVE_LINK_PATH='"/native-link"' \
+	-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+	bound_probe.cpp ../libnativeloader/build-fidelity-arm64/libnative_loader.a \
+	../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+	-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -pthread -o build-arm64/bound-probe
+clang -O2 -g -target bpf -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src \
+	-I/usr/include/x86_64-linux-gnu -c negative_companion.bpf.c -o build-arm64/negative-companion.bpf.o
+CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
+	cargo build --release --target aarch64-unknown-linux-gnu --manifest-path ../x86/native_lab/native_link/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.04s
+python3 stage2.py build --arch arm64 --build ../tv/build-arm64/stage2-readonly
+helper_only_uid_gid: compiled rc=0
+helper_chain_simple: compiled rc=0
+map_array_lookup: compiled rc=0
+map_array_index_packet: compiled rc=0
+map_hash_lookup: compiled rc=0
+map_hash_str_key: compiled rc=0
+map_percpu_array: compiled rc=0
+map_lru_hash_counter: compiled rc=0
+map_percpu_hash_counter: compiled rc=0
+combined_helper_map: compiled rc=0
+multi_map_policy: compiled rc=0
+packet_5tuple_classify: compiled rc=0
+stats_mixed_helpers: compiled rc=0
+make: Leaving directory '/workspaces/repository/kprog/fidelity'

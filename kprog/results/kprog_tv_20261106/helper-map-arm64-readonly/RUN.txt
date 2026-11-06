@@ -1,0 +1,21 @@
+All thirteen original micro_stage2.yaml programs, no selection filter.
+
+Recorded build:
+  taskset -c 8-23 make -C kprog/fidelity stage2-arm64-build ARM_STAGE2_BUILD=../tv/build-arm64/stage2-readonly
+
+The existing package command expects the support executables in the build parent.
+The first packaging attempt built stage2-init but stopped because this isolated
+parent did not contain it. Its failure is retained in readonly-stage2-arm64-run.log.
+Staged the actual make-built executables without changing their sources:
+  cp kprog/fidelity/build-arm64/stage2-init kprog/tv/build-arm64/stage2-init
+  cp kprog/fidelity/build-arm64/bound-probe kprog/tv/build-arm64/bound-probe
+
+Recorded successful run:
+  taskset -c 8-23 make -C kprog/fidelity stage2-arm64-qemu ARM_STAGE2_BUILD=../tv/build-arm64/stage2-readonly ARM_STAGE2_OUT=../results/kprog_tv_20261106/helper-map-arm64-readonly
+
+All thirteen kernel and bound-native outputs match the configured result and
+return value. Every native load reports a nonzero generation. This is actual
+bound-path execution evidence, not a translation-validation certificate.
+The input archive preserves the complete runtime initramfs (including the exact
+loader probe, native linker, native module, compiled proofs and original objects),
+its specification, the generated C/proof ELFs and the generator/header snapshot.

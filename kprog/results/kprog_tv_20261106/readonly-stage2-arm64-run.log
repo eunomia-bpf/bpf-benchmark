@@ -1,0 +1,15 @@
+make: Entering directory '/workspaces/repository/kprog/fidelity'
+aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -static -DBOUND_STAGE2 negative_init.c -o build-arm64/stage2-init
+python3 stage2.py package --arch arm64 --build ../tv/build-arm64/stage2-readonly
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/fidelity/stage2.py", line 182, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/repository/kprog/fidelity/stage2.py", line 174, in main
+    package(args.build.resolve())
+  File "/workspaces/repository/kprog/fidelity/stage2.py", line 130, in package
+    if not path.is_file(): raise FileNotFoundError(path)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: /workspaces/repository/kprog/tv/build-arm64/stage2-init
+make: *** [Makefile:254: stage2-arm64-qemu] Error 1
+make: Leaving directory '/workspaces/repository/kprog/fidelity'

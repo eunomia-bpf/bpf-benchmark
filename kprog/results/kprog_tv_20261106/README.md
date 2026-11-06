@@ -168,3 +168,12 @@ and preserves memory/initialization on mismatch, 64-bit exchange returns the
 full old value, and permission faults change neither state nor event prefix.
 Atomic operations use the existing canonical atomic-event kind. These are
 checker semantics checks; they do not relabel any micro or app TV record.
+
+`helper-map-arm64-readonly/` contains the complete 13-program Arm helper/map
+rerun: every original program passes kernel and bound-native result/return
+checks with nonzero generations, including `map_hash_str_key` after kind-8
+readonly-data binding. `RUN.txt` records the exact make commands and support
+artifact staging; `readonly-stage2-arm64-inputs.tar.gz` preserves the actual
+runtime initramfs, compiled/generated inputs and source snapshot. This closes
+the previously recorded readonly-data load failure. It does not discharge the
+per-program reference-state/trace proof.
