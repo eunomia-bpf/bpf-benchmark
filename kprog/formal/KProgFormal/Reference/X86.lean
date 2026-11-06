@@ -495,6 +495,17 @@ inductive Instruction
   | bt (width : CmovWidth) (source : Source) (index : BitIndex) (nextPc : Word)
   deriving DecidableEq, Repr
 
+/-- The encoded instruction's fall-through, independently of its chosen
+successor. Path certificates use this to check the consumed byte extent. -/
+def Instruction.fallthrough : Instruction → Word
+  | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
+  | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
+  | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
+  | .cmov _ _ _ _ next | .andn _ _ _ _ next | .byteSwap _ _ next
+  | .movbeLoad _ _ _ next | .movbeStore _ _ _ next
+  | .bmiShift _ _ _ _ _ next | .bzhi _ _ _ _ next | .bt _ _ _ next => next
+
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
   | .unary width kind dst nextPc => unaryStep width kind dst nextPc s
