@@ -70,7 +70,8 @@ and Entry/O4 must bind the typed operands, bank, direction and width flags.
 BITFIELD, MOVK and SHIFT compose packed AUX extraction with generated value
 operations, typed native bounds and dispatcher gates, independently of unused
 AUX bytes. SHIFT also binds immediate/register count selection and the two
-generated tables' numeric operation codes.
+generated tables' numeric operation codes. MVN/NEG also compose AUX modifier/count
+selection, including the identity modifier and its unused shift byte.
 Individual module statements define their
 exact scope. Dispatcher coverage/exclusivity is
 **not yet a full simulator-step refinement theorem**; completing the remaining

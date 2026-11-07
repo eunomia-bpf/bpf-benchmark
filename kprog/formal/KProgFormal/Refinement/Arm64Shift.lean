@@ -189,4 +189,137 @@ theorem dispatch_other (opcode : Nat) (aux : BitVec 32) (width : Width)
     dispatch opcode aux width dst src count immediate s = none := by
   simp [dispatch, decodeOpcode, notImmediate, notRegister]
 
+
+namespace Unary
+
+/-- Numeric labels of the actual two-member unary family. -/
+def decodeOpcode (opcode : Nat) : Option GeneratedArm64Unary.Unary :=
+  if opcode = GeneratedArm64Unary.code .mvn then some .mvn
+  else if opcode = GeneratedArm64Unary.code .neg then some .neg else none
+
+/-- Certified native MVN/NEG operands use identity or a shift modifier.
+The generated primitive also implements extensions for other families; None
+here means outside this native-form lift, not a new C rejection rule. -/
+def decodeModifier (code : Nat) : Option GeneratedArm64ModDecode.Mod :=
+  if code = GeneratedArm64ModDecode.code .none then some .none
+  else if code = GeneratedArm64ModDecode.code .lsl then some .lsl
+  else if code = GeneratedArm64ModDecode.code .lsr then some .lsr
+  else if code = GeneratedArm64ModDecode.code .asr then some .asr
+  else if code = GeneratedArm64ModDecode.code .ror then some .ror else none
+
+def packedAux (mod : GeneratedArm64ModDecode.Mod) (amount lane0 lane3 : Byte) : BitVec 32 :=
+  GeneratedArm64Aux.pack (lane0.setWidth 32)
+    (BitVec.ofNat 32 (GeneratedArm64ModDecode.code mod))
+    (amount.setWidth 32) (lane3.setWidth 32)
+
+theorem packed_shift (kind : ShiftKind) (amount lane0 lane3 : Byte) :
+    decodeModifier (GeneratedArm64Aux.b1 (packedAux (modifier kind) amount lane0 lane3)).toNat =
+      some (modifier kind) := by
+  simp only [packedAux, arm64_aux_b1_roundtrip]
+  cases kind <;> rfl
+
+theorem packed_none (amount lane0 lane3 : Byte) :
+    decodeModifier (GeneratedArm64Aux.b1 (packedAux .none amount lane0 lane3)).toNat = some .none := by
+  simp only [packedAux, arm64_aux_b1_roundtrip]
+  rfl
+
+theorem packed_amount (mod : GeneratedArm64ModDecode.Mod) (amount lane0 lane3 : Byte) :
+    (GeneratedArm64Aux.b2 (packedAux mod amount lane0 lane3)).setWidth 64 = amount.setWidth 64 := by
+  simp only [packedAux, arm64_aux_b2_roundtrip]
+  bv_decide
+
+theorem native_amount (width : Width) (amount : Fin width.bits) :
+    (BitVec.ofNat 8 amount.val).setWidth 64 = BitVec.ofNat 64 amount.val := by
+  have bound : amount.val < 256 := by
+    have := amount.isLt
+    cases width <;> simp only [Reference.AArch64.Width.bits] at * <;> omega
+  apply BitVec.eq_of_toNat_eq
+  simp only [BitVec.toNat_setWidth, BitVec.toNat_ofNat, Nat.mod_eq_of_lt bound]
+
+/-- C body order: incoming source, AUX byte1 modifier, AUX byte2 amount,
+then generated unary operation and width write. No flag or memory update. -/
+def rawStep (op : GeneratedArm64Unary.Unary) (mod : GeneratedArm64ModDecode.Mod)
+    (amount : Word) (width : Width) (dst src : Reference.AArch64.Register)
+    (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let value := GeneratedArm64Mod.value mod (readReg s src) amount (handlerWidth width)
+  let result := GeneratedArm64Unary.value op value (handlerWidth width)
+  ⟨{ writeReg s dst result width with pc := s.pc + 4 }, [], none⟩
+
+def dispatch (opcode : Nat) (aux : BitVec 32) (width : Width)
+    (dst src : Reference.AArch64.Register) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  (decodeOpcode opcode).bind (fun op =>
+    (decodeModifier (GeneratedArm64Aux.b1 aux).toNat).map (fun mod =>
+      rawStep op mod ((GeneratedArm64Aux.b2 aux).setWidth 64) width dst src s))
+
+theorem dispatch_invert_refines (width : Width) (kind : ShiftKind) (amount : Fin width.bits)
+    (dst src : Reference.AArch64.Register) (lane0 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Unary.code .mvn)
+      (packedAux (modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3) width dst src s =
+      some (Reference.AArch64.step (.shift (.invert width kind amount dst src)) s) := by
+  simp only [dispatch, decodeOpcode, ↓reduceIte, Option.bind_some, packed_shift, Option.map_some,
+    packed_amount, native_amount]
+  change some (handlerStep (.invert width kind amount dst src) s) = _
+  rw [step_refines]
+
+/-- NEG admits only the architectural LSL/LSR/ASR selectors; the typed
+reference does not invent a NEG-with-ROR native instruction. -/
+theorem dispatch_negate_refines (width : Width) (kind : Fin 3) (amount : Fin width.bits)
+    (dst src : Reference.AArch64.Register) (lane0 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Unary.code .neg)
+      (packedAux (modifier (Reference.AArch64.arithmeticShift kind))
+        (BitVec.ofNat 8 amount.val) lane0 lane3) width dst src s =
+      some (Reference.AArch64.step (.shift (.negate width kind amount dst src)) s) := by
+  simp only [dispatch, decodeOpcode, GeneratedArm64Unary.code, Nat.reduceEqDiff, ↓reduceIte,
+    Option.bind_some, packed_shift, Option.map_some, packed_amount, native_amount]
+  change some (handlerStep (.negate width kind amount dst src) s) = _
+  rw [step_refines]
+
+theorem identity_value (op : GeneratedArm64Unary.Unary) (width : Width) (value amount : Word) :
+    GeneratedArm64Unary.value op (GeneratedArm64Mod.value .none value amount (handlerWidth width))
+      (handlerWidth width) =
+    GeneratedArm64Unary.value op (GeneratedArm64Mod.value .lsl value 0 (handlerWidth width))
+      (handlerWidth width) := by
+  cases op <;> cases width <;>
+    simp only [GeneratedArm64Unary.value, GeneratedArm64Mod.value, handlerWidth,
+      GeneratedArm64Width.narrow, GeneratedArm64Width.mask] <;> bv_decide
+
+/-- Omitted modifiers ignore byte2, including arbitrary unused shift bits. -/
+theorem dispatch_unmodified (op : GeneratedArm64Unary.Unary) (width : Width)
+    (dst src : Reference.AArch64.Register) (amount lane0 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Unary.code op) (packedAux .none amount lane0 lane3) width dst src s =
+      dispatch (GeneratedArm64Unary.code op) (packedAux .lsl 0 lane0 lane3) width dst src s := by
+  have zero : decodeModifier (GeneratedArm64Aux.b1 (packedAux .lsl 0 lane0 lane3)).toNat = some .lsl :=
+    packed_shift .lsl 0 lane0 lane3
+  cases op <;>
+    simp only [dispatch, decodeOpcode, GeneratedArm64Unary.code, Nat.reduceEqDiff, ↓reduceIte,
+      packed_none, zero, packed_amount]
+  all_goals
+    change some (rawStep _ .none (amount.setWidth 64) width dst src s) =
+      some (rawStep _ .lsl 0 width dst src s)
+    simp only [rawStep, identity_value]
+
+theorem dispatch_unmodified_invert_refines (width : Width) (dst src : Reference.AArch64.Register)
+    (amount lane0 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Unary.code .mvn) (packedAux .none amount lane0 lane3) width dst src s =
+      some (Reference.AArch64.step
+        (.shift (.invert width .lsl ⟨0, by cases width <;> decide⟩ dst src)) s) := by
+  rw [dispatch_unmodified]
+  exact dispatch_invert_refines width .lsl ⟨0, by cases width <;> decide⟩ dst src lane0 lane3 s
+
+theorem dispatch_unmodified_negate_refines (width : Width) (dst src : Reference.AArch64.Register)
+    (amount lane0 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Unary.code .neg) (packedAux .none amount lane0 lane3) width dst src s =
+      some (Reference.AArch64.step
+        (.shift (.negate width 0 ⟨0, by cases width <;> decide⟩ dst src)) s) := by
+  rw [dispatch_unmodified]
+  exact dispatch_negate_refines width 0 ⟨0, by cases width <;> decide⟩ dst src lane0 lane3 s
+
+theorem dispatch_other (opcode : Nat) (aux : BitVec 32) (width : Width)
+    (dst src : Reference.AArch64.Register) (s : Reference.AArch64.State)
+    (notMvn : opcode ≠ GeneratedArm64Unary.code .mvn) (notNeg : opcode ≠ GeneratedArm64Unary.code .neg) :
+    dispatch opcode aux width dst src s = none := by simp [dispatch, decodeOpcode, notMvn, notNeg]
+
+end Unary
+
 end KProgFormal.Refinement.Arm64Shift

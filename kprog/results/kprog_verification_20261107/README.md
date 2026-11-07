@@ -398,3 +398,32 @@ AUX route hosts checked 3,804, 136 and 1,115,374 cases. There were no proof/test
 failures or input filtering. Runtime, oracle, test and ISA source are unchanged;
 T's appended public x86 decode lemma was preserved. A new immutable full check
 follows publication; exactdb3066318's successful full result precedes this work.
+
+## MVN/NEG packed modifiers and dispatcher
+
+`Arm64Shift.Unary` connects actual numeric15/16 labels, AUX byte1 source
+modifier, byte2 count, generated unary value and width write to the existing
+canonical full-state MVN/NEG steps. MVN covers four shift kinds; NEG retains
+the architectural three-kind restriction. Native amount bounds, W/X widths,
+GPR/ZR and source/destination aliases remain explicit. The identity modifier
+composes to the same canonical zero-shift instruction for any unused count
+byte. Both other AUX bytes are independent, and unrelated opcodes stay outside
+this slice. No flags, memory or extra effects are introduced; PC advances once.
+
+This native-form lift does not reclassify generated extension modifiers as C
+rejections: those modifiers remain implemented by the shared primitive for other
+families, outside these MVN/NEG native forms. No runtime, oracle, test, compiler
+policy or ISA specification changed. Native decoding, typed operand/width and
+Entry/O4 transport remain separate; this is not the complete72 dispatcher or a
+compiled-artifact certificate. All earlier theorem source remains unchanged.
+
+Validation: 28 Lean dependency jobs passed, followed by the focused reference
+build and existing reference regressions, including 3860 AArch64 control/PC
+complete states. Four contract freshness checks passed. Existing unary/modifier
+semantic hosts passed 40,081 and 225,292 cases; actual unary/AUX/decode hosts
+passed 313, 1,115,374 and 1410 cases. Two final identity-to-canonical composition
+lemmas also passed the 28-job build. Initial proof attempts exposed parsing,
+rewrite and redundant-tactic errors, corrected without weakening premises.
+C route builds retain their existing __always_inline redefinition warnings.
+Exact1c4a46960 full checking remains queued behind the shared full-check slot;
+this increment requires its own full check after publication.
