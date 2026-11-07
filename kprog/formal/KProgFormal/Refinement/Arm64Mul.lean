@@ -118,4 +118,123 @@ theorem umull_refines (dst lhs rhs : Reference.AArch64.Register)
     simp only [Reference.Word]; bv_decide
   simp only [hz, hadd]
 
+
+/-- The actual multiply-family gate, with no alias to a neighbouring opcode. -/
+def decodeOpcode (opcode : Nat) : Option GeneratedArm64Mul.Mul :=
+  if opcode = GeneratedArm64Mul.code .madd then some .madd
+  else if opcode = GeneratedArm64Mul.code .msub then some .msub
+  else if opcode = GeneratedArm64Mul.code .mul then some .mul
+  else if opcode = GeneratedArm64Mul.code .umull then some .umull
+  else if opcode = GeneratedArm64Mul.code .udiv then some .udiv
+  else if opcode = GeneratedArm64Mul.code .umulh then some .umulh
+  else if opcode = GeneratedArm64Mul.code .umaddl then some .umaddl
+  else if opcode = GeneratedArm64Mul.code .smaddl then some .smaddl else none
+
+theorem decode_code (op : GeneratedArm64Mul.Mul) :
+    decodeOpcode (GeneratedArm64Mul.code op) = some op := by cases op <;> rfl
+
+/-- Native long/high multiplies have X destinations. This is a decoded-source
+condition, not a new width guard in the C handler. -/
+def nativeWidth (op : GeneratedArm64Mul.Mul) (width : Width) : Prop :=
+  match op with
+  | .umull | .umulh | .umaddl | .smaddl => width = .w64
+  | _ => True
+
+def instruction (op : GeneratedArm64Mul.Mul) (width : Width)
+    (dst lhs rhs addend : Reference.AArch64.Register) : MulInstruction :=
+  match op with
+  | .madd => .multiply width false dst lhs rhs addend
+  | .msub => .multiply width true dst lhs rhs addend
+  | .mul => .multiply width false dst lhs rhs 31
+  | .umull => .longMultiply false dst lhs rhs 31
+  | .udiv => .unsignedDivide width dst lhs rhs
+  | .umulh => .unsignedHigh dst lhs rhs
+  | .umaddl => .longMultiply false dst lhs rhs addend
+  | .smaddl => .longMultiply true dst lhs rhs addend
+
+/-- C applies WIDTH to both inputs only for numeric UDIV, and applies full
+width otherwise. The accumulator is read from the incoming state even when
+its value is unused by MUL/UMULL/UDIV/UMULH. -/
+def rawStep (op : GeneratedArm64Mul.Mul) (width : Width)
+    (dst lhs rhs addend : Reference.AArch64.Register) (s : Reference.AArch64.State) :
+    Transition Reference.AArch64.State :=
+  let inputWidth := if GeneratedArm64Mul.code op = GeneratedArm64Mul.code .udiv
+    then handlerWidth width else .w64
+  let lhsValue := GeneratedArm64Width.narrow (readReg s lhs) inputWidth
+  let rhsValue := GeneratedArm64Width.narrow (readReg s rhs) inputWidth
+  let value := GeneratedArm64Mul.value op lhsValue rhsValue (readReg s addend)
+  ⟨{ writeReg s dst value width with pc := s.pc + 4 }, [], none⟩
+
+theorem input_full (value : Word) : GeneratedArm64Width.narrow value .w64 = value := by
+  exact (input_width_refines value .w64).trans (narrow_full value)
+
+theorem raw_step_refines (op : GeneratedArm64Mul.Mul) (width : Width)
+    (dst lhs rhs addend : Reference.AArch64.Register) (s : Reference.AArch64.State)
+    (valid : nativeWidth op width) :
+    rawStep op width dst lhs rhs addend s =
+      Reference.AArch64.step (.mul (instruction op width dst lhs rhs addend)) s := by
+  cases op with
+  | madd =>
+      simpa only [rawStep, GeneratedArm64Mul.code, Nat.reduceEqDiff, ↓reduceIte, input_full,
+        instruction, handlerStep, handlerState, Bool.false_eq_true]
+        using step_refines (.multiply width false dst lhs rhs addend) s
+  | msub =>
+      simpa only [rawStep, GeneratedArm64Mul.code, Nat.reduceEqDiff, ↓reduceIte, input_full,
+        instruction, handlerStep, handlerState, Bool.true_eq]
+        using step_refines (.multiply width true dst lhs rhs addend) s
+  | mul =>
+      simpa only [rawStep, GeneratedArm64Mul.code, Nat.reduceEqDiff, ↓reduceIte, input_full,
+        instruction, aliasStep, GeneratedArm64Mul.value]
+        using (mul_refines width dst lhs rhs s).symm
+  | umull =>
+      have width64 := valid
+      change width = .w64 at width64
+      subst width
+      simpa only [rawStep, GeneratedArm64Mul.code, Nat.reduceEqDiff, ↓reduceIte, input_full,
+        instruction, aliasStep, GeneratedArm64Mul.value]
+        using (umull_refines dst lhs rhs s).symm
+  | udiv =>
+      simpa only [rawStep, GeneratedArm64Mul.code, ↓reduceIte, instruction, handlerStep,
+        handlerState, GeneratedArm64Mul.value]
+        using step_refines (.unsignedDivide width dst lhs rhs) s
+  | umulh =>
+      have width64 := valid
+      change width = .w64 at width64
+      subst width
+      simpa only [rawStep, GeneratedArm64Mul.code, Nat.reduceEqDiff, ↓reduceIte, input_full,
+        instruction, handlerStep, handlerState, GeneratedArm64Mul.value]
+        using step_refines (.unsignedHigh dst lhs rhs) s
+  | umaddl =>
+      have width64 := valid
+      change width = .w64 at width64
+      subst width
+      simpa only [rawStep, GeneratedArm64Mul.code, Nat.reduceEqDiff, ↓reduceIte, input_full,
+        instruction, handlerStep, handlerState, Bool.false_eq_true]
+        using step_refines (.longMultiply false dst lhs rhs addend) s
+  | smaddl =>
+      have width64 := valid
+      change width = .w64 at width64
+      subst width
+      simpa only [rawStep, GeneratedArm64Mul.code, Nat.reduceEqDiff, ↓reduceIte, input_full,
+        instruction, handlerStep, handlerState, Bool.true_eq]
+        using step_refines (.longMultiply true dst lhs rhs addend) s
+
+def dispatch (opcode : Nat) (width : Width) (dst lhs rhs addend : Reference.AArch64.Register)
+    (s : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  (decodeOpcode opcode).map (fun op => rawStep op width dst lhs rhs addend s)
+
+theorem dispatch_refines (op : GeneratedArm64Mul.Mul) (width : Width)
+    (dst lhs rhs addend : Reference.AArch64.Register) (s : Reference.AArch64.State)
+    (valid : nativeWidth op width) :
+    dispatch (GeneratedArm64Mul.code op) width dst lhs rhs addend s =
+      some (Reference.AArch64.step (.mul (instruction op width dst lhs rhs addend)) s) := by
+  simp only [dispatch, decode_code]
+  change some (rawStep op width dst lhs rhs addend s) = _
+  rw [raw_step_refines op width dst lhs rhs addend s valid]
+
+theorem dispatch_other (opcode : Nat) (width : Width) (dst lhs rhs addend : Reference.AArch64.Register)
+    (s : Reference.AArch64.State) (other : ∀ op, opcode ≠ GeneratedArm64Mul.code op) :
+    dispatch opcode width dst lhs rhs addend s = none := by
+  simp [dispatch, decodeOpcode, other]
+
 end KProgFormal.Refinement.Arm64Mul

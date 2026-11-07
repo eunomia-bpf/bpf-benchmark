@@ -464,3 +464,30 @@ and semantic hosts. The immutable source/cache export was deleted automatically;
 compressed CALL CPU observations retain this successful 440-case full run.
 Subsequent MVN/NEG, MOV and multiply-family increments need their own full check.
 This result is distinct from the mutable shared-tree CMOV failure owned by F.
+
+## Multiply-family actual input widths and dispatcher
+
+`Arm64Mul.decodeOpcode` now binds all eight actual numeric case labels to the
+same generated operations. `rawStep` follows the production body: both inputs
+are narrowed to the decoded width only for UDIV; other operations read full
+inputs, all read the incoming accumulator, and the result uses the generated
+destination-width write. The MUL/UMULL aliases ignore the actual accumulator,
+while MADD/MSUB/UMADDL/SMADDL retain it. UMULH retains the full high product;
+UDIV retains zero division and W input truncation before division.
+
+`raw_step_refines` and `dispatch_refines` connect every member to the same
+canonical full-state step, including source/destination aliases and ZR.
+The four long/high members explicitly require their valid native X destination;
+this is a decoded-source premise, not an invented C rejection or runtime guard.
+Other opcodes remain outside this slice. Registers, flags, vectors, memory,
+SP and empty effects are retained, with one PC advance. All old theorem source
+is unchanged; no runtime, oracle, test, configuration or ISA source changed.
+Native decoding, width/operand identity and Entry/O4 transport remain separate.
+
+Validation: 16 Lean dependency jobs, focused reference build and existing
+reference regressions passed, including 3860 AArch64 control/PC complete states.
+Both related freshness checks passed. Existing UBSan multiply semantics,
+actual multiply route, wide-input and additional multiply route hosts passed
+160,161, 1296, 27,648 and 150 cases. No proof/test failure or input filtering;
+existing C inline redefinition warnings remain visible. The exact1c4a46960 full
+pass precedes this increment; new combined full validation follows publication.

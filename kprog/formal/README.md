@@ -73,7 +73,9 @@ AUX bytes. SHIFT also binds immediate/register count selection and the two
 generated tables' numeric operation codes. MVN/NEG also compose AUX modifier/count
 selection, including the identity modifier and its unused shift byte. MOV binds the two
 operand-source tables and the full-width pointer/narrowing branch order;
-immediate field31 remains ZR, while register operands distinguish SP and ZR.
+immediate field31 remains ZR, while register operands distinguish SP and ZR. The eight-member
+multiply dispatcher includes UDIV input narrowing, unused alias operands and
+explicit X-width validity for long/high multiplies.
 Individual module statements define their
 exact scope. Dispatcher coverage/exclusivity is
 **not yet a full simulator-step refinement theorem**; completing the remaining
