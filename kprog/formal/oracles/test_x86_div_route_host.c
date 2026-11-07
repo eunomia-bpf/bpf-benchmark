@@ -57,6 +57,7 @@ static unsigned fault_flags;
 #include <stdio.h>
 
 static int failures;
+static __u64 model_arena_top;
 static unsigned long cases;
 
 /* The register file the model tracks, kept parallel to the simulator's own
@@ -108,8 +109,8 @@ static int model_div(unsigned srcreg, unsigned flags)
     unsigned w = resolve_width(flags);
     unsigned bits = w == X86_WIDTH_8 ? 8 : w == X86_WIDTH_16 ? 16 : w == X86_WIDTH_32 ? 32 : 64;
     __u64 mask = bits == 64 ? ~0ULL : (1ULL << bits)-1;
-    __u64 divisor = mreg[srcreg] & mask;
-    __u64 rax = mreg[X86_RAX], rdx = mreg[X86_RDX];
+    __u64 divisor = X86_HOST_NATIVE_REG(srcreg) & mask;
+    __u64 rax = X86_HOST_NATIVE_REG(X86_RAX), rdx = X86_HOST_NATIVE_REG(X86_RDX);
     __uint128_t dividend = bits == 8 ? (__u16)rax :
         ((__uint128_t)(rdx & mask) << bits) | (rax & mask);
     if (divisor == 0 || dividend / divisor > mask)
@@ -188,6 +189,7 @@ static void check_div(unsigned srcreg, unsigned flags, __u64 rax, __u64 rdx,
 	(void)__x86_sim_skb_ctx;
 	(void)__x86_sim_abi_kind;
 	X86_SIM_L_DECLARE_STACK();
+    model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 	(void)__x86_cf;
 	(void)__x86_zf;
 	(void)__x86_sf;

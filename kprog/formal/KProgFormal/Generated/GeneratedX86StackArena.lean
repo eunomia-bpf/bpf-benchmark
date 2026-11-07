@@ -3,11 +3,11 @@ import Std
 namespace KProgFormal.GeneratedX86StackArena
 /-- Word-arena slot for a byte index: the index shifted right 3, the C
 `INDEX >> 3`. Sound as a slot only when the index is 8-aligned. -/
-def wordIndex (index : BitVec 32) : BitVec 32 := index >>> 3
+def wordIndex (index : BitVec 64) : BitVec 64 := index >>> 3
 
 /-- The 64-bit fast-path guard: the index is 8-aligned (its low 3
 bits clear), the C `(INDEX & 7U) == 0U`. -/
-def wordAligned (index : BitVec 32) : Bool := (index &&& 7) == 0
+def wordAligned (index : BitVec 64) : Bool := (index &&& 7) == 0
 
 /-- Byte `k` of a 64-bit word, little-endian, the C `(WORD >> (8U * K))`. -/
 def byteAt (word : BitVec 64) (k : Nat) : BitVec 8 :=
@@ -20,24 +20,24 @@ def assembleByte (byte : BitVec 8) (k : Nat) : BitVec 64 :=
 
 /-- Number of word slots the byte arena requires: the capacity rounded up to a
 multiple of 8, the C `((CAPACITY + 7U) / 8U)`. -/
-def words (capacity : BitVec 32) : BitVec 32 :=
+def words (capacity : BitVec 64) : BitVec 64 :=
   (capacity + 7) / 8
 
 /-- The first index past a `WIDTH`-byte access starting at `index`, the C
 `(__u64)(INDEX) + (__u64)(WIDTH)`. Stated as a `Nat` sum because the C
-comparison is widened to 64 bits, so an access near the top of the 32-bit
+comparison is widened to 64 bits, so an access near the top of the 64-bit
 index space is measured exactly rather than wrapping. -/
-def windowEnd (index width : BitVec 32) : Nat := index.toNat + width.toNat
+def windowEnd (index width : BitVec 64) : Nat := index.toNat + width.toNat
 
 /-- An access of `WIDTH` bytes at `index` stays inside an arena of `capacity`
 bytes: its end index is at most the capacity, the C
 `(__u64)(INDEX) + (__u64)(WIDTH) <= (__u64)(CAPACITY)`. -/
-def windowFits (index width capacity : BitVec 32) : Bool :=
+def windowFits (index width capacity : BitVec 64) : Bool :=
   decide (windowEnd index width ≤ capacity.toNat)
 
 /-- An arena pointer index is well defined: `&b[index]` names an arena address
 for `index <= CAPACITY`, including the one-past-end index. Conservative over a
 window of any width, which needs `index + width <= CAPACITY`. -/
-def pointerFits (index capacity : BitVec 32) : Bool :=
+def pointerFits (index capacity : BitVec 64) : Bool :=
   decide (index.toNat ≤ capacity.toNat)
 end KProgFormal.GeneratedX86StackArena

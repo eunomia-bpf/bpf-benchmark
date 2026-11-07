@@ -80,21 +80,31 @@ static __u64 model_partial_write(__u64 old, __u64 v, unsigned width)
 /* Restate the routed arm's effect on the modeled register file. The pointer
  * arm exchanges whole 64-bit cells; the subword arm exchanges the low-lane
  * windows at the resolved width. Both scalarize both tags. */
+static __u64 model_arena_top;
+static __u64 model_native_value(unsigned reg)
+{
+    if (reg != X86_RSP && mtag[reg] == X86_SIM_TAG_STACK)
+        return mreg[reg] - model_arena_top;
+    return mreg[reg];
+}
 static void model_xchg(unsigned dst, unsigned src, unsigned flags)
 {
-	unsigned w = resolve_width(flags);
-	__u64 dv = mreg[dst];
-	__u64 sv = mreg[src];
-
-	if (w == X86_WIDTH_64) {
-		mreg[dst] = sv;
-		mreg[src] = dv;
-	} else {
-		mreg[dst] = model_partial_write(dv, sv, w);
-		mreg[src] = model_partial_write(sv, dv, w);
-	}
-	mtag[dst] = X86_SIM_TAG_SCALAR;
-	mtag[src] = X86_SIM_TAG_SCALAR;
+    unsigned w = resolve_width(flags);
+    __u64 dv = model_native_value(dst), sv = model_native_value(src);
+    __u64 dr = dst == X86_RSP ? model_arena_top + mreg[dst] : mreg[dst];
+    __u64 sr = src == X86_RSP ? model_arena_top + mreg[src] : mreg[src];
+    __u8 dt = dst == X86_RSP ? X86_SIM_TAG_STACK : mtag[dst];
+    __u8 st = src == X86_RSP ? X86_SIM_TAG_STACK : mtag[src];
+    if (w == X86_WIDTH_64) {
+        mreg[dst] = dst == X86_RSP ? sv : sr;
+        mtag[dst] = dst == X86_RSP ? X86_SIM_TAG_SCALAR : st;
+        mreg[src] = src == X86_RSP ? dv : dr;
+        mtag[src] = src == X86_RSP ? X86_SIM_TAG_SCALAR : dt;
+    } else {
+        mreg[dst] = model_partial_write(dv, sv, w);
+        mreg[src] = model_partial_write(sv, dv, w);
+        mtag[dst] = mtag[src] = X86_SIM_TAG_SCALAR;
+    }
 }
 
 /* Plant the pristine register file (pattern values and tags) in the simulator
@@ -178,6 +188,7 @@ static void check_xchg(unsigned dst, unsigned src, unsigned flags)
 	(void)__x86_sim_ret_addr;
 	(void)__x86_stack_mem;
 
+	model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 	PLANT_REGS();
 
 	/* ---- independent model ---- */

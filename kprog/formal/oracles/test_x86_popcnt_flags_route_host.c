@@ -34,6 +34,7 @@ typedef signed int __s32;
 #include <stdio.h>
 
 static int failures;
+static __u64 model_arena_top;
 static unsigned long cases;
 
 /* The register file the model tracks, kept parallel to the simulator's own
@@ -96,7 +97,7 @@ static __u64 model_partial_write(__u64 old, __u64 v, unsigned width)
 static void model_popcnt(unsigned dst, unsigned src, unsigned flags)
 {
 	unsigned w = resolve_width(flags);
-	__u64 srcv = mreg[src];
+	__u64 srcv = X86_HOST_NATIVE_REG(src);
 	__u64 narrowed = srcv & width_mask(w);
 	__u64 result = popcount_oracle(narrowed);
 
@@ -106,7 +107,7 @@ static void model_popcnt(unsigned dst, unsigned src, unsigned flags)
 	msf = 0U;
 	mof = 0U;
 
-	mreg[dst] = model_partial_write(mreg[dst], result, w);
+	mreg[dst] = model_partial_write(X86_HOST_NATIVE_REG(dst), result, w);
 	mtag[dst] = X86_SIM_TAG_SCALAR;
 }
 
@@ -161,6 +162,7 @@ static void check_popcnt(unsigned dst, unsigned src, unsigned flags,
 	(void)__x86_sim_skb_ctx;
 	(void)__x86_sim_abi_kind;
 	X86_SIM_L_DECLARE_STACK();
+    model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 	(void)__x86_xmm0_lo;
 	(void)__x86_xmm0_hi;
 	(void)__x86_sim_ret_addr;

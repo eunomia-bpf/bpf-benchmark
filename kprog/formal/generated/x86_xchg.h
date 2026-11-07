@@ -6,7 +6,7 @@
  * `X86_SIM_L_EXEC` selects between two bodies on the resolved operand width.
  * At the full 8 (64-bit) width code it swaps the two register cells as
  * raw pointer cells (`X86_SIM_L_READ_REG_PTR` / `X86_SIM_L_WRITE_REG_PTR`),
- * moving the whole 64-bit cell and scalarizing both tags; at every other code
+ * moving the whole 64-bit cell and origin-preserving both tags; at every other code
  * it reads both cells as 64-bit values and writes each with
  * `X86_SIM_L_WRITE_REG_WIDTH`, the partial-register writeback (8/16-bit
  * preserve the old upper bits, 32-bit zero-extends, 64-bit replaces). The two
@@ -14,7 +14,7 @@
  * below it, which is exactly what the selector distinguishes.
  * `KProgFormal/X86XchgHandler.lean` proves the generated `armOf` equals an
  * independent construction, that the pointer arm swaps the whole cells while
- * scalarizing, and that the subword arm's width-window writeback exchanges the
+ * origin-preserving, and that the subword arm's width-window writeback exchanges the
  * two values at the access width.
  * This header is included after the `X86_OP_XCHG` / `X86_WIDTH_*` decodes, so
  * the drift checks bind the hand-written constants to the generated table.

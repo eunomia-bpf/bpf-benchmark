@@ -43,6 +43,7 @@ typedef signed int __s32;
 #include <stdio.h>
 
 static int failures;
+static __u64 model_arena_top;
 static unsigned long cases;
 
 /* The register file the model tracks, kept parallel to the simulator's own
@@ -163,6 +164,7 @@ static void check_mov_reg(unsigned dst, unsigned src, unsigned flags,
 	(void)__x86_sim_skb_ctx;
 	(void)__x86_sim_abi_kind;
 	X86_SIM_L_DECLARE_STACK();
+    model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 	(void)__x86_xmm0_lo;
 	(void)__x86_xmm0_hi;
 	(void)__x86_sim_ret_addr;
@@ -187,14 +189,14 @@ static void check_mov_reg(unsigned dst, unsigned src, unsigned flags,
 		unsigned w = resolve_width(flags);
 
 		if (w == X86_WIDTH_64) {
-			if (src == X86_RSP) {
+            if (dst == X86_RSP) {
+                mreg[dst] = X86_HOST_NATIVE_REG(src);
+                mtag[dst] = X86_SIM_TAG_SCALAR;
+            } else if (src == X86_RSP) {
 				/* The stack-base write: the address of the
 				 * modeled stack cell at the capacity-shifted
 				 * source offset, tagged stack provenance. */
-				__u32 idx = (__u32)((__s64)(long)srcv +
-						    (__s64)X86_SIM_STACK_BYTES);
-				mreg[dst] = (__u64)(unsigned long)
-					&__x86_stack_mem.b[idx];
+                mreg[dst] = model_arena_top + srcv;
 				mtag[dst] = X86_SIM_TAG_STACK;
 			} else {
 				mreg[dst] = srcv;
@@ -206,10 +208,10 @@ static void check_mov_reg(unsigned dst, unsigned src, unsigned flags,
 			 * `src` coincide the destination's prior value is
 			 * whatever the source plant left in the model. */
 			__u64 value = model_read_reg_at(
-				srcv, w, aux_src_shift(aux));
+				X86_HOST_NATIVE_REG(src), w, aux_src_shift(aux));
 
 			mreg[dst] = model_partial_write(
-				mreg[dst], value, w, aux_dst_shift(aux));
+				X86_HOST_NATIVE_REG(dst), value, w, aux_dst_shift(aux));
 			mtag[dst] = X86_SIM_TAG_SCALAR;
 		}
 	}

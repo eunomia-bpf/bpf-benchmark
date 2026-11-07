@@ -430,6 +430,11 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 #define X86_SIM_L_READ_REG_PTR(REG)                                         \
 	X86_SIM_L_REG_VALUE(REG)
 
+/* Pointer addressing uses the private arena; scalar reads expose native bits. */
+#define X86_SIM_L_STACK_NUMERIC_BITS(VALUE)                                 \
+	((__u64)(long)(VALUE) - (__u64)(long)X86_SIM_L_STACK_PTR(0) +       \
+	 __x86_native_stack_base)
+
 #define X86_SIM_L_READ_REG_WIDTH_SHIFT(REG, WIDTH, SRC_SHIFT)               \
 	({                                                                 \
 		__u8 __x86_rd_reg = (REG);                                  \
@@ -437,9 +442,12 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		__u8 __x86_rd_width =                                       \
 			X86_SIM_L_EFFECTIVE_WIDTH(__x86_rd_raw_width);             \
 		__u8 __x86_rd_shift = (SRC_SHIFT);                          \
-		__u64 __x86_rd_value =                                    \
-			(__u64)(long)X86_SIM_L_READ_REG_PTR(__x86_rd_reg) + \
-			(__x86_rd_reg == X86_RSP ? __x86_native_stack_base : 0);  \
+		void *__x86_rd_ptr = X86_SIM_L_READ_REG_PTR(__x86_rd_reg); \
+		__u64 __x86_rd_value = (__u64)(long)__x86_rd_ptr;           \
+		if (__x86_rd_reg == X86_RSP)                              \
+			__x86_rd_value += __x86_native_stack_base;          \
+		else if (X86_SIM_L_REG_TAG(__x86_rd_reg) == X86_SIM_TAG_STACK) \
+			__x86_rd_value = X86_SIM_L_STACK_NUMERIC_BITS(__x86_rd_ptr); \
 		KPROG_X86_READ_REG_AT(__x86_rd_value, __x86_rd_width,      \
 			__x86_rd_shift);                                    \
 	})
@@ -473,6 +481,8 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 #define X86_SIM_L_WRITE_REG8_VALUE_CASE(REG, NAME)                          \
 	case REG:                                                          \
 		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr + __x86_native_stack_base); \
+		else if (__x86_##NAME##_tag == X86_SIM_TAG_STACK)          \
+			__x86_##NAME.ptr = (void *)(long)X86_SIM_L_STACK_NUMERIC_BITS(__x86_##NAME.ptr); \
 		KPROG_X86_WRITE_REG8(__x86_##NAME, __x86_##NAME##_tag,    \
 			__x86_wr_next, __x86_wr_shift, X86_SIM_TAG_SCALAR); \
 		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
@@ -481,6 +491,8 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 #define X86_SIM_L_WRITE_REG16_VALUE_CASE(REG, NAME)                         \
 	case REG:                                                          \
 		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr + __x86_native_stack_base); \
+		else if (__x86_##NAME##_tag == X86_SIM_TAG_STACK)          \
+			__x86_##NAME.ptr = (void *)(long)X86_SIM_L_STACK_NUMERIC_BITS(__x86_##NAME.ptr); \
 		KPROG_X86_WRITE_REG16(__x86_##NAME, __x86_##NAME##_tag,   \
 			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
 		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
@@ -579,7 +591,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 
 #define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                            \
 	do {                                                               \
-		__u32 __x86_stw_index = X86_SIM_L_STACK_INDEX(OFF);       \
+		__u64 __x86_stw_index = X86_SIM_L_STACK_INDEX(OFF);       \
 		if (KPROG_X86_STACK_ARM(                                  \
 			    (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) ==         \
 				    X86_WIDTH_64,                         \
@@ -629,7 +641,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 
 #define X86_SIM_L_STACK_READ(OFF, WIDTH)                                    \
 	({                                                                 \
-		__u32 __x86_str_index = X86_SIM_L_STACK_INDEX(OFF);       \
+		__u64 __x86_str_index = X86_SIM_L_STACK_INDEX(OFF);       \
 		__u64 __x86_str_value;                                   \
 		if (KPROG_X86_STACK_ARM(                                  \
 			    (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)) ==         \
@@ -678,7 +690,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 	})
 
 #define X86_SIM_L_STACK_PTR(OFF)                                           \
-	((void *)&__x86_stack_mem.b[X86_SIM_L_STACK_INDEX((OFF))])
+	((void *)KPROG_PTR_ADD64_BITS(&__x86_stack_mem.b[0], X86_SIM_L_STACK_INDEX((OFF))))
 
 #define X86_SIM_L_HELPER_ARG_PTR(REG)                                      \
 	X86_SIM_L_READ_REG_PTR(REG)
@@ -910,7 +922,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(BASE_REG);\
 		__u64 __x86_l_value;                                     \
 		void *__x86_l_addr = KPROG_X86_REG_PRESENT(BASE_REG) ?    \
-			(__u8 *)__x86_l_base_ptr + __x86_l_disp :         \
+			KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp) :         \
 			(void *)(unsigned long)__x86_l_disp;              \
 		switch (X86_SIM_L_MEM_READ_SRC(BASE_REG,                 \
 					       __x86_l_read_mem_width)) {\
@@ -958,7 +970,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		if (X86_SIM_L_REG_TAG(SRC) != X86_SIM_TAG_ABI)           \
 			X86_SIM_L_BARRIER_VAR(__x86_l_disp);              \
 		void *__x86_l_addr = KPROG_X86_REG_PRESENT(SRC) ?         \
-			(__u8 *)__x86_l_base_ptr + __x86_l_disp :         \
+			KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp) :         \
 			(void *)(unsigned long)__x86_l_disp;              \
 		switch (X86_SIM_L_MEM_READ_SRC(SRC, __x86_l_mem_width)) {\
 		case KPROG_X86_MEM_SRC_STACK:                            \
@@ -1031,8 +1043,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 				__x86_l_value);                            \
 			break;                                           \
 		default:                                                 \
-			void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
-					     __x86_l_disp;               \
+			void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
 			X86_SIM_L_STORE_ADDR(__x86_l_addr,                \
 					     __x86_l_width, __x86_l_value);\
 			break;                                           \
@@ -1066,8 +1077,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 				__x86_l_width, __x86_l_value);             \
 			break;                                            \
 		default:                                                  \
-			void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
-					     __x86_l_disp;               \
+			void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
 			X86_SIM_L_STORE_ADDR(__x86_l_addr, __x86_l_width, \
 					     __x86_l_value);              \
 			break;                                            \
@@ -1182,14 +1192,16 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 						KPROG_PTR_ADD64_BITS(          \
 							__x86_l_src_ptr, __x86_l_off);\
 				}                                         \
-				X86_SIM_L_WRITE_REG_PTR_TAG((DST),        \
-					__x86_l_result, __x86_l_dst_tag); \
+				if ((DST) == X86_RSP)                      \
+					X86_SIM_L_WRITE_REG_WIDTH((DST),  \
+						(KPROG_X86_REG_ABSENT(SRC) ? 0 : X86_SIM_L_READ_REG(SRC)) + __x86_l_off, __x86_l_width); \
+				else                                      \
+					X86_SIM_L_WRITE_REG_PTR_TAG((DST), \
+						__x86_l_result, __x86_l_dst_tag); \
 			} else {                                           \
-				__x86_l_result = (__u8 *)__x86_l_src_ptr +  \
-						  __x86_l_off;              \
-				X86_SIM_L_WRITE_REG_WIDTH((DST),         \
-					(__u64)(long)__x86_l_result,     \
-					__x86_l_width);                  \
+				__u64 __x86_l_numeric =                    \
+					(KPROG_X86_REG_ABSENT(SRC) ? 0 : X86_SIM_L_READ_REG(SRC)) + __x86_l_off; \
+				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_numeric, __x86_l_width); \
 			}                                                 \
 		}                                                         \
 	} while (0)
@@ -1383,8 +1395,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
 				__x86_l_width, __x86_l_result);          \
 		else {                                                    \
-			void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
-					     __x86_l_disp;               \
+			void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
 			X86_SIM_L_STORE_ADDR(__x86_l_addr,                \
 					     __x86_l_width, __x86_l_result);\
 		}                                                         \
@@ -1428,8 +1439,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
 				__x86_l_width, __x86_l_result);          \
 		else {                                                    \
-			void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
-					     __x86_l_disp;               \
+			void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
 			X86_SIM_L_STORE_ADDR(__x86_l_addr,                \
 					     __x86_l_width, __x86_l_result);\
 		}                                                         \
@@ -1472,8 +1482,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
 				__x86_l_width, __x86_l_result);          \
 		else {                                                    \
-			void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
-					     __x86_l_disp;               \
+			void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
 			X86_SIM_L_STORE_ADDR(__x86_l_addr,                \
 					     __x86_l_width, __x86_l_result);\
 		}                                                         \
@@ -1846,18 +1855,27 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 #define X86_SIM_L_EXEC_MOV_IMM(DST, FLAGS, IMM)                             \
 	X86_SIM_L_EXEC_MOV_IMM_AUX((DST), (FLAGS), 0U, (IMM))
 
+/* Full-width MOV keeps source selection separate from native destination writeback. */
+#define X86_SIM_L_WRITE_MOV_REG_PTR(DST, SRC, VALUE, TAG)                   \
+	do {                                                               \
+		if (KPROG_X86_MOV_REG_ARM(KPROG_X86_MOV_REG_FULL_WIDTH, (DST)) == KPROG_X86_MOV_REG_ARM_STACK_PTR) \
+			X86_SIM_L_WRITE_REG_WIDTH((DST), X86_SIM_L_READ_REG(SRC), KPROG_X86_MOV_REG_FULL_WIDTH); \
+		else                                                       \
+			X86_SIM_L_WRITE_REG_PTR_TAG((DST), (VALUE), (TAG)); \
+	} while (0)
+
 #define X86_SIM_L_EXEC_MOV_REG_AUX(DST, SRC, FLAGS, AUX)                    \
 	do {                                                               \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		if (KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC)) ==         \
 		    KPROG_X86_MOV_REG_ARM_STACK_PTR) {                     \
-			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
+			X86_SIM_L_WRITE_MOV_REG_PTR((DST), (SRC),                \
 				X86_SIM_L_STACK_PTR(                       \
 					(__s64)(long)X86_SIM_L_READ_REG_PTR(SRC)),\
 				X86_SIM_TAG_STACK);                        \
 		} else if (KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC)) ==  \
 			   KPROG_X86_MOV_REG_ARM_POINTER) {               \
-			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
+			X86_SIM_L_WRITE_MOV_REG_PTR((DST), (SRC),                \
 				X86_SIM_L_READ_REG_PTR(SRC),              \
 				X86_SIM_L_REG_TAG(SRC));                  \
 		} else if (KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC)) ==  \
@@ -1941,11 +1959,14 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			__u8 __x86_l_wb = KPROG_X86_CMOV_WRITEBACK(       \
 				__x86_l_width == X86_WIDTH_64);           \
 			if (__x86_l_wb ==                                 \
-			    KPROG_X86_CMOV_WRITEBACK_POINTER_TAG)         \
-				X86_SIM_L_WRITE_REG_PTR_TAG((DST),        \
-					(void *)(long)__x86_l_value,      \
-					(RHS_IS_MEM) ? X86_SIM_TAG_SCALAR :\
-						X86_SIM_L_REG_TAG(SRC));  \
+			    KPROG_X86_CMOV_WRITEBACK_POINTER_TAG) {       \
+				if (RHS_IS_MEM)                           \
+					X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value, __x86_l_width); \
+				else                                      \
+					X86_SIM_L_WRITE_MOV_REG_PTR((DST), (SRC), \
+						(SRC) == X86_RSP ? X86_SIM_L_STACK_PTR((__s64)(long)X86_SIM_L_READ_REG_PTR(SRC)) : X86_SIM_L_READ_REG_PTR(SRC), \
+						(SRC) == X86_RSP ? X86_SIM_TAG_STACK : X86_SIM_L_REG_TAG(SRC)); \
+			}                                                \
 			else                                              \
 				X86_SIM_L_WRITE_REG_WIDTH((DST),          \
 					__x86_l_value, __x86_l_width);    \
@@ -2039,7 +2060,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		    KPROG_X86_PUSH_STEP_PRE_DECREMENT) {                  \
 			__u64 __x86_l_pp_value = X86_SIM_L_READ_REG(SRC); \
 			__x86_rsp.ptr =                                   \
-				(__u8 *)__x86_rsp.ptr - __x86_l_pp_step;  \
+				KPROG_PTR_ADD64_BITS(__x86_rsp.ptr, -__x86_l_pp_step);  \
 			X86_SIM_L_STACK_WRITE(                            \
 				(__s64)(long)__x86_rsp.ptr,               \
 				__x86_l_pp_width, __x86_l_pp_value);      \
@@ -2048,7 +2069,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 				(__s64)(long)__x86_rsp.ptr,               \
 				__x86_l_pp_width);                        \
 			__x86_rsp.ptr =                                   \
-				(__u8 *)__x86_rsp.ptr + __x86_l_pp_step;  \
+				KPROG_PTR_ADD64_BITS(__x86_rsp.ptr, __x86_l_pp_step);  \
 			X86_SIM_L_WRITE_REG_WIDTH((DST),                  \
 				__x86_l_pp_value, __x86_l_pp_width);      \
 		}                                                         \
@@ -2072,8 +2093,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 				X86_PUSHPOP_AUX_MODE(AUX) == 1U ? (__u64)(IMM) : \
 				X86_SIM_L_READ_MEM_VALUE((SRC), (AUX), (IMM), \
 					__x86_pp_width, 0);                    \
-			__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr -            \
-				KPROG_X86_PUSH_STEP_BYTES(__x86_pp_width);  \
+			__x86_rsp.ptr = KPROG_PTR_ADD64_BITS(__x86_rsp.ptr, -(__u64)KPROG_X86_PUSH_STEP_BYTES(__x86_pp_width));  \
 			X86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp.ptr,  \
 				__x86_pp_width, __x86_pp_value);            \
 		}                                                           \
@@ -2087,8 +2107,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			__u8 __x86_pp_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64; \
 			__u64 __x86_pp_value = X86_SIM_L_STACK_READ(       \
 				(__s64)(long)__x86_rsp.ptr, __x86_pp_width); \
-			__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr +            \
-				KPROG_X86_PUSH_STEP_BYTES(__x86_pp_width);  \
+			__x86_rsp.ptr = KPROG_PTR_ADD64_BITS(__x86_rsp.ptr, (__u64)KPROG_X86_PUSH_STEP_BYTES(__x86_pp_width));  \
 			__s64 __x86_pp_disp = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM)); \
 			if ((DST) == X86_RSP)                              \
 				X86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp.ptr + \
@@ -2193,14 +2212,14 @@ x86_sim_divmod128(__u64 high, __u64 low, __u64 divisor)
 		} else if (KPROG_X86_DISP_MOV_REG_HANDLED(OP)) {          \
 			if (KPROG_X86_MOV_REG_ARM(__x86_l_width, (SRC)) ==\
 			    KPROG_X86_MOV_REG_ARM_STACK_PTR) {            \
-				X86_SIM_L_WRITE_REG_PTR_TAG((DST),         \
+				X86_SIM_L_WRITE_MOV_REG_PTR((DST), (SRC),         \
 					X86_SIM_L_STACK_PTR(               \
 						(__s64)(long)X86_SIM_L_READ_REG_PTR(SRC)),\
 					X86_SIM_TAG_STACK);                \
 			} else if (KPROG_X86_MOV_REG_ARM(__x86_l_width,   \
 				   (SRC)) ==                              \
 				   KPROG_X86_MOV_REG_ARM_POINTER) {       \
-				X86_SIM_L_WRITE_REG_PTR_TAG((DST),         \
+				X86_SIM_L_WRITE_MOV_REG_PTR((DST), (SRC),         \
 					X86_SIM_L_READ_REG_PTR(SRC),       \
 					X86_SIM_L_REG_TAG(SRC));           \
 			} else if (KPROG_X86_MOV_REG_ARM(__x86_l_width,   \
@@ -2348,14 +2367,20 @@ x86_sim_divmod128(__u64 high, __u64 low, __u64 divisor)
 			} else if (KPROG_X86_DISP_XCHG_HANDLED(OP)) {           \
 				if (KPROG_X86_XCHG_ARM(__x86_l_width) ==                \
 				    KPROG_X86_XCHG_ARM_POINTER_SWAP) {              \
-					void *__x86_l_dst_ptr =                    \
-					X86_SIM_L_READ_REG_PTR(DST);       \
-				void *__x86_l_src_ptr =                    \
-					X86_SIM_L_READ_REG_PTR(SRC);       \
-				X86_SIM_L_WRITE_REG_PTR((DST),             \
-							__x86_l_src_ptr);  \
-				X86_SIM_L_WRITE_REG_PTR((SRC),             \
-							__x86_l_dst_ptr);  \
+				void *__x86_l_dst_ptr = (DST) == X86_RSP ? X86_SIM_L_STACK_PTR((__s64)(long)X86_SIM_L_READ_REG_PTR(DST)) : X86_SIM_L_READ_REG_PTR(DST); \
+				void *__x86_l_src_ptr = (SRC) == X86_RSP ? X86_SIM_L_STACK_PTR((__s64)(long)X86_SIM_L_READ_REG_PTR(SRC)) : X86_SIM_L_READ_REG_PTR(SRC); \
+				__u8 __x86_l_dst_tag = (DST) == X86_RSP ? X86_SIM_TAG_STACK : X86_SIM_L_REG_TAG(DST); \
+				__u8 __x86_l_src_tag = (SRC) == X86_RSP ? X86_SIM_TAG_STACK : X86_SIM_L_REG_TAG(SRC); \
+				__u64 __x86_l_dst_bits = X86_SIM_L_READ_REG(DST); \
+				__u64 __x86_l_src_bits = X86_SIM_L_READ_REG(SRC); \
+				if ((DST) == X86_RSP) \
+				    X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_src_bits, X86_WIDTH_64); \
+				else \
+				    X86_SIM_L_WRITE_REG_PTR_TAG((DST), __x86_l_src_ptr, __x86_l_src_tag); \
+				if ((SRC) == X86_RSP) \
+				    X86_SIM_L_WRITE_REG_WIDTH((SRC), __x86_l_dst_bits, X86_WIDTH_64); \
+				else \
+				    X86_SIM_L_WRITE_REG_PTR_TAG((SRC), __x86_l_dst_ptr, __x86_l_dst_tag); \
 			} else {                                            \
 				__u64 __x86_l_dst_value =                  \
 					X86_SIM_L_READ_REG(DST);            \
@@ -2896,7 +2921,7 @@ extern void __x86_sim_unsupported_helper(void)
 
 #define X86_SIM_X86_CALL(LABEL, RETURN_ADDR)                               \
 	do {                                                               \
-		__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr - 8;                \
+		__x86_rsp.ptr = KPROG_PTR_ADD64_BITS(__x86_rsp.ptr, -8);                \
 		X86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp.ptr, X86_WIDTH_64,\
 				      (RETURN_ADDR));                     \
 		goto LABEL;                                               \
@@ -2911,7 +2936,7 @@ extern void __x86_sim_unsupported_helper(void)
 	do {                                                               \
 		__x86_sim_ret_addr = X86_SIM_L_STACK_READ(                 \
 			(__s64)(long)__x86_rsp.ptr, X86_WIDTH_64);         \
-		__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr + 8;                \
+		__x86_rsp.ptr = KPROG_PTR_ADD64_BITS(__x86_rsp.ptr, +8);                \
 		goto DISPATCH_LABEL;                                      \
 	} while (0)
 

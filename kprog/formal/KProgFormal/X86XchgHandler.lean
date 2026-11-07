@@ -110,10 +110,9 @@ theorem x86_xchg_effects :
   exact ⟨rfl, rfl, by decide⟩
 
 /-- Independent statement of the pointer-swap arm's register effect: the two
-cells exchange their whole 64-bit values and both tags become scalar. -/
+cells exchange their whole values and origin tags. -/
 def x86XchgPointerSpec (dst src : X86RegValue) : X86RegValue × X86RegValue :=
-  ({ bits := src.bits, tag := .scalar },
-   { bits := dst.bits, tag := .scalar })
+  (src, dst)
 
 /-- Independent statement of the subword-swap arm's register effect: each cell
 receives the other's value through the partial-register writeback at the access
@@ -131,12 +130,11 @@ theorem x86_xchg_pointer_swaps (dst src : X86RegValue) :
       (x86XchgPointerSpec dst src).2.bits = dst.bits := by
   exact ⟨rfl, rfl⟩
 
-/-- The pointer arm scalarizes both tags: the verifier provenance of neither
-cell survives the swap. -/
-theorem x86_xchg_pointer_scalarizes (dst src : X86RegValue) :
-    (x86XchgPointerSpec dst src).1.tag = .scalar ∧
-      (x86XchgPointerSpec dst src).2.tag = .scalar := by
-  exact ⟨rfl, rfl⟩
+/-- A full-width copy permutes origin metadata along with each value. -/
+theorem x86_xchg_pointer_preserves_origins (dst src : X86RegValue) :
+    (x86XchgPointerSpec dst src).1.tag = src.tag ∧
+      (x86XchgPointerSpec dst src).2.tag = dst.tag := by
+  exact { left := rfl, right := rfl }
 
 /-- The subword arm scalarizes both tags: the width-masked writeback of either
 cell discards provenance. -/

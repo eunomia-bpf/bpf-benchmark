@@ -232,6 +232,12 @@ static void check_pointer(const char *what, __s64 index, __u32 capacity)
 
 int main(void)
 {
+    if (KPROG_X86_STACK_WORD_INDEX(0x100000000ULL) != 0x20000000ULL ||
+        KPROG_X86_STACK_WORD_INDEX(0x800000000ULL) != 0x100000000ULL ||
+        KPROG_X86_STACK_WINDOW_FITS(0x100000000ULL, 8, 128)) {
+        puts("MISMATCH full-width native arena address"); return 1;
+    }
+
 	static const __u32 capacities[] = { 1U, 2U, 7U, 8U, 16U, 64U, 128U };
 	static const __u32 indices[] = {
 		0U, 1U, 7U, 8U, 9U, 15U, 16U, 56U, 60U, 63U, 64U, 127U, 128U,

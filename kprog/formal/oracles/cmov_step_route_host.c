@@ -28,6 +28,7 @@ typedef signed int __s32;
 #include "test_core_dumps.h"
 
 static int failures;
+static __u64 model_arena_top;
 static unsigned long cases;
 
 /* The register file the model tracks, kept parallel to the simulator's own
@@ -136,11 +137,11 @@ static __u64 model_read_mem(unsigned src, unsigned aux, __s64 disp,
 	unsigned i;
 
 	if (index_reg != X86_REG_NONE)
-		off += (__s64)(mreg[index_reg] << scale);
+		off += (__s64)(X86_HOST_NATIVE_REG(index_reg) << scale);
 	addr = base_ptr + (__u64)off;
 
 	if (src == X86_RSP) {
-		__u32 idx = (__u32)((base_ptr + (__u64)off) +
+		__u64 idx = (__u64)((base_ptr + (__u64)off) +
 				    X86_SIM_STACK_BYTES);
 
 		for (i = 0; i < mem_width; i++)
@@ -233,6 +234,7 @@ static void check_reg(__u32 aux_word, unsigned flags, unsigned dst,
 	(void)__x86_sim_abi_kind;
 	(void)__x86_sim_ret_addr;
 	X86_SIM_L_DECLARE_STACK();
+	model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 	(void)__x86_xmm0_lo;
 	(void)__x86_xmm0_hi;
 
@@ -246,17 +248,25 @@ static void check_reg(__u32 aux_word, unsigned flags, unsigned dst,
 	taken = model_cc_true(aux_word, cf, zf, sf, of);
 	if (taken) {
 		if (w == X86_WIDTH_64) {
-			mreg[dst] = model_read_reg(src);
-			mtag[dst] = mtag[src];
+			if (dst == X86_RSP) {
+				mreg[dst] = X86_HOST_NATIVE_REG(src);
+				mtag[dst] = X86_SIM_TAG_SCALAR;
+			} else if (src == X86_RSP) {
+				mreg[dst] = model_arena_top + mreg[src];
+				mtag[dst] = X86_SIM_TAG_STACK;
+			} else {
+				mreg[dst] = model_read_reg(src);
+				mtag[dst] = mtag[src];
+			}
 		} else {
-			mreg[dst] = model_partial_write(mreg[dst],
-							model_read_reg(src), w);
+			mreg[dst] = model_partial_write(X86_HOST_NATIVE_REG(dst),
+							X86_HOST_NATIVE_REG(src), w);
 			mtag[dst] = X86_SIM_TAG_SCALAR;
 		}
 	}
 
 	if (!taken && w == X86_WIDTH_32) {
-		mreg[dst] &= 0xffffffffULL;
+		mreg[dst] = X86_HOST_NATIVE_REG(dst) & 0xffffffffULL;
 		mtag[dst] = X86_SIM_TAG_SCALAR;
 	}
 
@@ -314,6 +324,7 @@ static void check_mem(unsigned src, unsigned base_tag, __u8 cc_byte,
 	(void)__x86_sim_skb_ctx;
 	(void)__x86_sim_abi_kind;
 	X86_SIM_L_DECLARE_STACK();
+	model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 	(void)__x86_sim_ret_addr;
 	(void)__x86_xmm0_lo;
 	(void)__x86_xmm0_hi;
@@ -355,13 +366,13 @@ static void check_mem(unsigned src, unsigned base_tag, __u8 cc_byte,
 			mreg[dst] = value;
 			mtag[dst] = X86_SIM_TAG_SCALAR;
 		} else {
-			mreg[dst] = model_partial_write(mreg[dst], value, w);
+			mreg[dst] = model_partial_write(X86_HOST_NATIVE_REG(dst), value, w);
 			mtag[dst] = X86_SIM_TAG_SCALAR;
 		}
 	}
 
 	if (!taken && w == X86_WIDTH_32) {
-		mreg[dst] &= 0xffffffffULL;
+		mreg[dst] = X86_HOST_NATIVE_REG(dst) & 0xffffffffULL;
 		mtag[dst] = X86_SIM_TAG_SCALAR;
 	}
 
@@ -401,6 +412,7 @@ static void check_untaken_memory_fault(unsigned width)
 		if (page == MAP_FAILED) { perror("mmap"); _exit(2); }
 		X86_SIM_L_DECLARE_STATE();
 		X86_SIM_L_DECLARE_STACK();
+	model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 		struct x86_sim_xdp_abi __x86_sim_abi = {};
 		struct __sk_buff *__x86_sim_skb_ctx = NULL;
 		__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;

@@ -32,6 +32,7 @@ typedef signed long long __s64;
 
 #include "../x86/x86_sim_local_bpf.h"
 
+#include "x86_no_helpers_host.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -81,6 +82,7 @@ static void check_rep(const char *what, __u8 flags, __u64 count,
 	unsigned i;
 
 	X86_SIM_L_DECLARE_STATE();
+    X86_SIM_L_DECLARE_STACK();
 	(void)__x86_cf;
 	(void)__x86_zf;
 	(void)__x86_sf;
@@ -107,8 +109,8 @@ static void check_rep(const char *what, __u8 flags, __u64 count,
 	elements = count < (__u64)bound ? (unsigned)count : bound;
 	for (i = 0; i < elements; i++)
 		memcpy(exp + (__u64)i * width, src + (__u64)i * width, width);
-	rsi_after = (__u64)(unsigned long)src + count * width;
-	rdi_after = (__u64)(unsigned long)dst + count * width;
+	rsi_after = kprog_x86_host_native_cell((__u64)(unsigned long)src + count * width, src_tag, X86_RSI, (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)]);
+	rdi_after = kprog_x86_host_native_cell((__u64)(unsigned long)dst + count * width, dst_tag, X86_RDI, (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)]);
 
 	/* ---- run the real body ---- */
 	X86_SIM_L_EXEC_REP_MOVS(flags, count);

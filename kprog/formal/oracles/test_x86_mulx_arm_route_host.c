@@ -85,11 +85,21 @@ static __u64 model_partial_write(__u64 old, __u64 v, unsigned width)
  * destination when one is named; both are width-confined writes that scalarize
  * their tag. Written in the instruction's own order so a destination/auxiliary
  * alias resolves the same way. */
+/* Raw STACK-tag cells carry private arena bits. Numeric instructions observe
+ * the native word; these zero-origin fixtures provide independent geometry. */
+static __u64 model_arena_top;
+static __u64 model_native_value(unsigned reg)
+{
+    if (reg != X86_RSP && mtag[reg] == X86_SIM_TAG_STACK)
+        return mreg[reg] - model_arena_top;
+    return mreg[reg];
+}
+
 static void model_mulx(unsigned dst, unsigned src, unsigned aux, unsigned flags)
 {
 	unsigned w = resolve_width(flags);
-	__u64 lhs = mreg[X86_RDX];
-	__u64 rhs = mreg[src];
+	__u64 lhs = model_native_value(X86_RDX);
+	__u64 rhs = model_native_value(src);
 	__u64 low;
 	__u64 high;
 
@@ -113,10 +123,10 @@ static void model_mulx(unsigned dst, unsigned src, unsigned aux, unsigned flags)
 		high = p3 + (p1 >> 32) + (p2 >> 32) + (mid >> 32);
 	}
 
-	mreg[dst] = model_partial_write(mreg[dst], low, w);
+	mreg[dst] = model_partial_write(model_native_value(dst), low, w);
 	mtag[dst] = X86_SIM_TAG_SCALAR;
 	if (KPROG_X86_REG_PRESENT(aux)) {
-		mreg[aux] = model_partial_write(mreg[aux], high, w);
+		mreg[aux] = model_partial_write(model_native_value(aux), high, w);
 		mtag[aux] = X86_SIM_TAG_SCALAR;
 	}
 }
@@ -157,6 +167,7 @@ static void check_mulx(unsigned dst, unsigned src, unsigned aux, unsigned flags)
 	(void)__x86_sim_ret_addr;
 	(void)__x86_stack_mem;
 
+	model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 	PLANT_REGS();
 
 	/* ---- independent model ---- */

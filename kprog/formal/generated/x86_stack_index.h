@@ -2,5 +2,5 @@
 #ifndef KPROG_FORMAL_GENERATED_X86_STACK_INDEX_H
 #define KPROG_FORMAL_GENERATED_X86_STACK_INDEX_H
 #define KPROG_X86_STACK_INDEX(OFF, CAPACITY)                               \
-	((__u32)((__s64)(OFF) + (__s64)(CAPACITY)))
+	((__u64)(OFF) + (__u64)(CAPACITY))
 #endif

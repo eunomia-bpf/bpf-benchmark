@@ -89,6 +89,7 @@ static void check_op(const char *what, int op_is_copy, int op_is_reg,
 	unsigned i;
 
 	X86_SIM_L_DECLARE_STATE();
+    X86_SIM_L_DECLARE_STACK();
 	(void)__x86_cf;
 	(void)__x86_zf;
 	(void)__x86_sf;

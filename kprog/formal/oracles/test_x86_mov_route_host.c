@@ -144,6 +144,27 @@ static __u64 model_partial_write(__u64 old, __u64 v, unsigned width,
 	return v;
 }
 
+/* The independent model observes the architectural word represented by a
+ * private stack pointer. Test fixtures use a zero native origin; arena_top
+ * comes from the allocated fixture object, not the simulator projection. */
+static __u64 model_arena_top;
+
+static __u64 model_native_value(unsigned reg)
+{
+    if (reg == X86_RSP)
+        return mreg[reg];
+    if (mtag[reg] == X86_SIM_TAG_STACK)
+        return mreg[reg] - model_arena_top;
+    return mreg[reg];
+}
+
+static void model_native_write(unsigned dst, __u64 value, unsigned width,
+                               unsigned shift)
+{
+    mreg[dst] = model_partial_write(model_native_value(dst), value, width, shift);
+    mtag[dst] = X86_SIM_TAG_SCALAR;
+}
+
 #define DECLARE_SIM_STATE()                                                \
 	X86_SIM_L_DECLARE_STATE();                                        \
 	struct x86_sim_xdp_abi __x86_sim_abi = {};                        \
@@ -155,7 +176,8 @@ static __u64 model_partial_write(__u64 old, __u64 v, unsigned width,
 	X86_SIM_L_DECLARE_STACK();                                        \
 	(void)__x86_xmm0_lo;                                              \
 	(void)__x86_xmm0_hi;                                              \
-	(void)__x86_sim_ret_addr;
+	(void)__x86_sim_ret_addr;                                         \
+	model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 
 /* Plant the register file: pattern values and pattern tags everywhere, with
  * two lanes forced -- the mapped-pointer lane under its mapped tag and the
@@ -313,9 +335,7 @@ static void check_mov_imm(unsigned dst, unsigned flags, unsigned aux,
 	/* The raw encoded immediate through the width-local writeback; the
 	 * model reads its own planted file (MEM-free), so no snapshot dance
 	 * is needed before the run. */
-	mreg[dst] = model_partial_write(mreg[dst], imm, w,
-					aux_dst_shift(aux));
-	mtag[dst] = X86_SIM_TAG_SCALAR;
+	model_native_write(dst, imm, w, aux_dst_shift(aux));
 
 	/* ---- the real routed arm ---- */
 	if (aux == 0U)
@@ -345,7 +365,10 @@ static void check_mov_reg(unsigned dst, unsigned src, unsigned flags,
 	/* ---- independent model ---- */
 	w = resolve_width(flags);
 	if (w == X86_WIDTH_64) {
-		if (src == X86_RSP) {
+        if (dst == X86_RSP) {
+            /* A native SP move stores an offset, not an arena pointer. */
+            model_native_write(dst, model_native_value(src), w, 0);
+        } else if (src == X86_RSP) {
 			/* The stack-base write: the arena address at the
 			 * window-wrapped source offset, tagged stack
 			 * provenance. */
@@ -355,18 +378,16 @@ static void check_mov_reg(unsigned dst, unsigned src, unsigned flags,
 			/* The provenance copy: the whole cell (value and
 			 * tag) moves. */
 			mreg[dst] = srcv;
-			mtag[dst] = X86_SIM_L_REG_TAG(src);
+			mtag[dst] = mtag[src];
 		}
 	} else {
 		/* The narrow write reads the whole source first, then writes
 		 * the partial destination, so when `dst` and `src` coincide
 		 * the destination's prior value is whatever the source plant
 		 * left in the model. */
-		__u64 value = model_read_reg_at(srcv, w, aux_src_shift(aux));
-
-		mreg[dst] = model_partial_write(mreg[dst], value, w,
-						aux_dst_shift(aux));
-		mtag[dst] = X86_SIM_TAG_SCALAR;
+		__u64 value = model_read_reg_at(model_native_value(src), w,
+                                            aux_src_shift(aux));
+        model_native_write(dst, value, w, aux_dst_shift(aux));
 	}
 
 	/* ---- the real routed arm ---- */

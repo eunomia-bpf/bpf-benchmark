@@ -1,26 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the shared x86-64 stack-index (frame-offset -> arena-index) contract.
-
-The generated Lean definition `GeneratedX86StackIndex.index` and the C macro
-`KPROG_X86_STACK_INDEX` implement the byte index the x86 simulator's stack
-helpers use to reach into its fixed `X86_SIM_STACK_BYTES` arena from an abstract
-frame offset `OFF` (the value the simulator's abstract frame base resolves to):
-
-  - the offset is added to the arena capacity, so an offset of `-capacity`
-    (the frame base) lands at index 0 and an offset of 0 lands at the top;
-  - the sum is truncated to 32 bits (`__u32`), the index type the C helpers use
-    for the `b[]` byte arena and the `q[]` word arena (`index >> 3`).
-
-The offset and capacity are 64-bit two's-complement quantities in the C code
-(`(__s64)(OFF) + X86_SIM_STACK_BYTES`), so a negative offset below the capacity
-wraps; the contract states the sum as wrapping 64-bit addition followed by a
-32-bit truncation, which is exactly the C bit pattern. `KProgFormal/X86StackIndex.lean`
-records that the map is the affine offset `capacity - base + delta`, that the
-frame base lands at index 0, that the wrap is the low 32 bits of the offset,
-and that two offsets differing by a multiple of `2^32` alias.
-
-The C macro evaluates neither flags nor memory: it is a pure index computation.
-"""
+"""Generate native-width wrapping frame indexes; distinct high bits must survive."""
 import argparse
 import json
 from pathlib import Path
@@ -36,7 +15,7 @@ EXPECTED = {
     "index_base": "capacity",
     "index_step": 1,
     "accumulate": "wrapping64",
-    "index_mask_bits": 32,
+    "index_mask_bits": 64,
 }
 
 
@@ -52,10 +31,10 @@ def render_lean(spec: dict) -> str:
 import Std
 namespace KProgFormal.GeneratedX86StackIndex
 /-- The arena byte index for an abstract frame offset `off` in an arena of
-`capacity` bytes: `off + capacity`, truncated to the C helpers' 32-bit index
+`capacity` bytes: `off + capacity`, retained in the C helpers' 64-bit index
 type. `capacity` is `X86_SIM_STACK_BYTES`. -/
-def index (capacity off : BitVec 64) : BitVec 32 :=
-  (capacity + off).truncate 32
+def index (capacity off : BitVec 64) : BitVec 64 :=
+  capacity + off
 end KProgFormal.GeneratedX86StackIndex
 '''
 
@@ -65,7 +44,7 @@ def render_c(spec: dict) -> str:
 #ifndef KPROG_FORMAL_GENERATED_X86_STACK_INDEX_H
 #define KPROG_FORMAL_GENERATED_X86_STACK_INDEX_H
 #define KPROG_X86_STACK_INDEX(OFF, CAPACITY)                               \\
-\t((__u32)((__s64)(OFF) + (__s64)(CAPACITY)))
+\t((__u64)(OFF) + (__u64)(CAPACITY))
 #endif
 '''
 

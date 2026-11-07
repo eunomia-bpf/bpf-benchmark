@@ -10,8 +10,8 @@
  * This oracle drives the *generated* macro and compares it, over a grid that
  * includes the frame base, the arena top, negative offsets below the base, and
  * offsets whose high 32 bits are set, against an independent restatement that
- * accumulates in unsigned 64-bit and keeps the low 32 bits. It also checks the
- * affine law / frame-base-is-zero / high-32-bit-aliasing properties the
+ * accumulates in unsigned 64-bit and keeps all 64 bits. It also checks the
+ * affine law / frame-base-is-zero / high-32-bit-nonaliasing properties the
  * refinement module proves. Exit 1 on mismatch.
  *
  * Build/run:
@@ -67,18 +67,17 @@ int main(void)
 		}
 
 		/* Cross-check the generated macro against the independent
-		 * unsigned-64-bit low-32-bits restatement over a broad grid,
+		 * unsigned-64-bit full-width restatement over a broad grid,
 		 * including offsets below the base and offsets with the high
 		 * 32 bits set. */
 		for (delta = -8; delta <= (long)cap + 8; delta++) {
 			__s64 off = base + delta;
 			unsigned long want =
-				(unsigned long)(((__u64)off + (__u64)cap) &
-						0xffffffffULL);
+				(unsigned long)((__u64)off + (__u64)cap);
 
 			check_index("restate", cap, off, want);
-			/* Aliasing: adding 2^32 to the offset keeps the index. */
-			check_index("alias", cap, off + 0x100000000LL, want);
+			/* The same old high32 input now retains its distinct address. */
+			check_index("distinct_high32", cap, off + 0x100000000LL, want + 0x100000000UL);
 			cases += 2;
 		}
 	}

@@ -176,7 +176,7 @@ body is selected on the `X86StackArena` guard: an index receives the word-arena
 body exactly when the access is 64-bit and the index is a whole number of
 8-byte words, which is the value `x86_stack_arena_word_aligned_refines` proves
 the guard computes. -/
-theorem x86_stack_arm_matches_arena (isW64 : Bool) (index : BitVec 32) :
+theorem x86_stack_arm_matches_arena (isW64 : Bool) (index : BitVec 64) :
     armOf isW64 (wordAligned index) = .word ↔
       isW64 = true ∧ x86StackArenaWordAlignedSpec index := by
   rw [x86_stack_arm_refines, x86_stack_arm_word_iff,
@@ -186,7 +186,7 @@ theorem x86_stack_arm_matches_arena (isW64 : Bool) (index : BitVec 32) :
 body is not selected, the access reaches the byte ladder, which the aligned
 word window `[index, index + 8)` roundtrip `x86_stack_arena_alignment_roundtrip`
 proves leaves no byte-arena element uncovered. -/
-theorem x86_stack_arm_byte_covers (isW64 : Bool) (index : BitVec 32)
+theorem x86_stack_arm_byte_covers (isW64 : Bool) (index : BitVec 64)
     (h : ¬(isW64 = true ∧ wordAligned index = true)) :
     armOf isW64 (wordAligned index) = .byte :=
   x86_stack_arm_ladder_total isW64 (wordAligned index) h

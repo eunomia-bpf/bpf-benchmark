@@ -178,6 +178,13 @@ struct snap {
 	__u8 stack[X86_SIM_STACK_BYTES];
 	__u8 heap[HEAP_BYTES];
 };
+static __u64 model_arena_top;
+static __u64 snap_numeric(const struct snap *s, unsigned reg)
+{
+    return reg != X86_RSP && s->t[reg] == X86_SIM_TAG_STACK ?
+        s->x[reg] - model_arena_top : s->x[reg];
+}
+
 
 #define CAPTURE_ALL(S)                                                     \
 	do {                                                               \
@@ -288,8 +295,8 @@ static void model_movx(unsigned op, unsigned dst, unsigned src, unsigned flags,
 {
 	unsigned w = resolve_width(flags);
 	unsigned sw = aux ? aux : w;
-	__u64 dstv = b->x[dst];
-	__u64 value = b->x[src];
+	__u64 dstv = snap_numeric(b, dst);
+	__u64 value = snap_numeric(b, src);
 
 	if (op == X86_OP_MOVSX_REG)
 		value = sign_extend_oracle(value, sw);
@@ -335,8 +342,8 @@ static void model_doubleshift(unsigned op, unsigned dst, unsigned src,
 	__u64 mask = width_mask(w);
 	__u64 sign = 1ULL << (bits - 1U);
 	unsigned count = shift_count(imm, w);
-	__u64 dstv = b->x[dst];
-	__u64 srcv = b->x[src];
+	__u64 dstv = snap_numeric(b, dst);
+	__u64 srcv = snap_numeric(b, src);
 	__u64 result;
 	unsigned alu;
 
@@ -373,6 +380,7 @@ static void model_doubleshift(unsigned op, unsigned dst, unsigned src,
 	(void)__x86_sim_skb_ctx;                                           \
 	(void)__x86_sim_abi_kind;                                          \
 	X86_SIM_L_DECLARE_STACK();                                         \
+    model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)]; \
 	(void)__x86_xmm0_lo;                                               \
 	(void)__x86_xmm0_hi;                                               \
 	(void)__x86_sim_ret_addr;                                          \

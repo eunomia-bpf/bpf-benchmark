@@ -39,6 +39,7 @@ typedef signed int __s32;
 #include <stdio.h>
 
 static int failures;
+static __u64 model_arena_top;
 static unsigned long cases;
 
 /* The register file the model tracks, parallel to the simulator's own state so
@@ -167,6 +168,7 @@ static void check_reg(unsigned payload, unsigned dst_shift, unsigned dst,
 	(void)__x86_sim_abi_kind;
 	(void)__x86_sim_ret_addr;
 	X86_SIM_L_DECLARE_STACK();
+    model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 	(void)__x86_xmm0_lo;
 	(void)__x86_xmm0_hi;
 
@@ -178,7 +180,7 @@ static void check_reg(unsigned payload, unsigned dst_shift, unsigned dst,
 
 	/* ---- independent model ---- */
 	taken = model_cc_true(payload, cf, zf, sf, of);
-	mreg[dst] = model_write8(mreg[dst], (__u8)taken,
+	mreg[dst] = model_write8(X86_HOST_NATIVE_REG(dst), (__u8)taken,
 				 dst_shift == 8U ? 8U : 0U);
 	mtag[dst] = X86_SIM_TAG_SCALAR;
 

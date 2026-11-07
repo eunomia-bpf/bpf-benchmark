@@ -51,6 +51,15 @@ def forms():
         ('stack alias XCHG32 control', 'mov rax,rsp; xchg eax,ecx'),
         ('stack alias XCHG16 control', 'mov rax,rsp; xchg ax,cx'),
     ]
+    result += [
+        ('CMOV stack alias taken', 'mov rax,rsp; cmp ecx,ecx; cmovz rcx,rax'),
+        ('CMOV stack alias not taken', 'mov rax,rsp; cmp ecx,ecx; cmovnz rcx,rax'),
+        ('CMOV from SP', 'cmp ecx,ecx; cmovz rax,rsp'),
+        ('CMOV to SP restore', 'mov rdx,rsp; cmp ecx,ecx; cmovz rsp,rax; mov rcx,rsp; mov rsp,rdx'),
+        ('CMOV partial alias', 'mov rax,rsp; cmp ecx,ecx; cmovz cx,ax'),
+        ('CMOV false32 alias', 'mov rax,rsp; cmp ecx,ecx; cmovnz eax,ecx'),
+        ('CMOV SP self', 'cmp ecx,ecx; cmovz rsp,rsp'),
+    ]
     return result
 
 

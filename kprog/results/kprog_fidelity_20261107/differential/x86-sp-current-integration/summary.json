@@ -1,0 +1,21 @@
+{
+  "route_tests": 50,
+  "failed_routes": [
+    "oracles/test_x86_div_route_host.c",
+    "oracles/test_x86_doubleshift_arm_route_host.c",
+    "oracles/test_x86_popcnt_flags_route_host.c",
+    "oracles/test_x86_bzhi_flags_route_host.c",
+    "oracles/test_x86_movx_shape_route_host.c",
+    "oracles/test_x86_mov_reg_arm_route_host.c",
+    "oracles/test_x86_write_width_arm_route_host.c",
+    "oracles/test_x86_dispatch_family_route_host.c",
+    "oracles/test_x86_dispatch_singleton_route_host.c",
+    "oracles/test_x86_setcc_route_host.c",
+    "oracles/test_x86_callmem_route_host.c",
+    "oracles/test_x86_rep_movs_route_host.c",
+    "oracles/test_x86_andn_route_host.c",
+    "oracles/test_x86_cmpop_route_host.c",
+    "oracles/test_x86_cmov_route_host.c"
+  ],
+  "lean_returncode": 0
+}

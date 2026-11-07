@@ -1,0 +1,35 @@
+{
+  "cmov-before": {
+    "forms": 47,
+    "cases": 48128,
+    "mismatches": 3072,
+    "canonical": {
+      "forms": 47,
+      "cases": 48128,
+      "cpu_mismatches": 0,
+      "simulator_mismatches": 3072
+    }
+  },
+  "cmov-fixed": {
+    "forms": 47,
+    "cases": 48128,
+    "mismatches": 0,
+    "canonical": {
+      "forms": 47,
+      "cases": 48128,
+      "cpu_mismatches": 0,
+      "simulator_mismatches": 0
+    }
+  },
+  "sanitized": {
+    "forms": 47,
+    "cases": 48128,
+    "mismatches": 0
+  },
+  "source_head": "e33f720464887431d082f19524131f4e7060eb57",
+  "runtime_sha256": "b3c5eaf24ca2b67f68b241d9c88ca41d419e7cc4e5795739536adcacd700847c",
+  "cmov_step_route": "OK (9585138 cases)",
+  "first_full_returncode": 2,
+  "first_full_failure": "cmov_step_route_host: FAIL (30192); stale raw-cell expected values corrected without changing case grids",
+  "current_full": "detached focused51 then shared incremental FULL, waits for existing full checks; not yet passed"
+}

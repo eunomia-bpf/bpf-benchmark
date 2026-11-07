@@ -157,13 +157,19 @@ struct snap {
  * drive inside check_arm, where the arena object is in scope); the model adds
  * the index arithmetic to it so pointer-valued outputs compare equal. */
 static unsigned long stack_arena_base;
+static __u64 snap_numeric(const struct snap *s, unsigned reg)
+{
+    return reg != X86_RSP && s->t[reg] == X86_SIM_TAG_STACK ?
+        s->x[reg] - (stack_arena_base + X86_SIM_STACK_BYTES) : s->x[reg];
+}
+
 
 /* The STACK_PTR value the sim writes for an offset: the arena object's
  * address at the KPROG_X86_STACK_INDEX position. */
 static unsigned long stack_ptr_value(long off)
 {
 	return stack_arena_base +
-	       (unsigned long)(unsigned int)(off + (long)X86_SIM_STACK_BYTES);
+	       (unsigned long)((__u64)off + (__u64)X86_SIM_STACK_BYTES);
 }
 
 #define CAPTURE_ALL(S)                                                     \
@@ -941,7 +947,10 @@ static void model_movreg(unsigned dst, unsigned src, unsigned flags,
 {
 	unsigned w = resolve_width(flags);
 
-	if (w == X86_WIDTH_64 && src == X86_RSP) {
+	if (w == X86_WIDTH_64 && dst == X86_RSP) {
+        b->x[dst] = snap_numeric(b, src);
+        b->t[dst] = X86_SIM_TAG_SCALAR;
+    } else if (w == X86_WIDTH_64 && src == X86_RSP) {
 		b->x[dst] = stack_ptr_value((long)b->x[src]);
 		b->t[dst] = X86_SIM_TAG_STACK;
 	} else if (w == X86_WIDTH_64) {
@@ -950,17 +959,17 @@ static void model_movreg(unsigned dst, unsigned src, unsigned flags,
 	} else {
 		unsigned dsh = (aux >> 8) & 0xffU;
 		unsigned ssh = (aux >> 16) & 0xffU;
-		__u64 v = lane_read(b->x[src], w, ssh);
+		__u64 v = lane_read(snap_numeric(b, src), w, ssh);
 
 		if (w == X86_WIDTH_8) {
 			if (dsh == 8U)
-				b->x[dst] = (b->x[dst] &
+				b->x[dst] = (snap_numeric(b, dst) &
 					     ~((__u64)0xffULL << 8)) |
 					    ((v << 8) & 0xff00ULL);
 			else
-				b->x[dst] = (b->x[dst] & ~(__u64)0xffULL) | v;
+				b->x[dst] = (snap_numeric(b, dst) & ~(__u64)0xffULL) | v;
 		} else {
-			b->x[dst] = model_partial_write(b->x[dst], v, w);
+			b->x[dst] = model_partial_write(snap_numeric(b, dst), v, w);
 		}
 		b->t[dst] = X86_SIM_TAG_SCALAR;
 	}
@@ -1423,12 +1432,12 @@ static void model_mulx(unsigned dst, unsigned src, unsigned aux,
 	__u64 low;
 	__u64 high;
 
-	mulx_oracle(seed->x[X86_RDX], src == 0xffU ? 0ULL : seed->x[src],
+	mulx_oracle(snap_numeric(seed, X86_RDX), src == 0xffU ? 0ULL : snap_numeric(seed, src),
 		    w, &low, &high);
-	b->x[dst] = model_partial_write(seed->x[dst], low, w);
+	b->x[dst] = model_partial_write(snap_numeric(seed, dst), low, w);
 	b->t[dst] = X86_SIM_TAG_SCALAR;
 	if (aux != 0xffU) {
-		b->x[aux] = model_partial_write(seed->x[aux], high, w);
+		b->x[aux] = model_partial_write(snap_numeric(seed, aux), high, w);
 		b->t[aux] = X86_SIM_TAG_SCALAR;
 	}
 }
@@ -1469,7 +1478,7 @@ static void model_andn(unsigned dst, unsigned src, unsigned aux,
 		       const struct snap *seed, struct snap *b)
 {
 	unsigned w = flags ? flags : X86_WIDTH_64;
-	__u64 src1 = seed->x[src];
+	__u64 src1 = snap_numeric(seed, src);
 	__u64 src2;
 	__u64 result;
 
@@ -1479,36 +1488,38 @@ static void model_andn(unsigned dst, unsigned src, unsigned aux,
 		src2 = model_mem_value(seed, (aux >> 24) & 0xffU, aux, imm, mw,
 				       DISP_REGULAR, 1U);
 	} else {
-		src2 = seed->x[aux];
+		src2 = snap_numeric(seed, aux);
 	}
 	result = (~src1) & src2;
 	logic_flags_into(b, result, w);
-	b->x[dst] = model_partial_write(seed->x[dst], result, w);
+	b->x[dst] = model_partial_write(snap_numeric(seed, dst), result, w);
 	b->t[dst] = X86_SIM_TAG_SCALAR;
 }
 
 /* xchg: pointer swap at 64 (values and tags both move), scalarizing narrow
  * value exchange otherwise. */
 static void model_xchg(unsigned dst, unsigned src, unsigned flags,
-		       const struct snap *seed, struct snap *b)
+                       const struct snap *seed, struct snap *b)
 {
-	unsigned w = resolve_width(flags);
-
-	if (w == X86_WIDTH_64) {
-		b->x[dst] = seed->x[src];
-		b->t[dst] = X86_SIM_TAG_SCALAR;
-		b->x[src] = seed->x[dst];
-		b->t[src] = X86_SIM_TAG_SCALAR;
-		return;
-	}
-	b->x[dst] = model_partial_write(seed->x[dst], seed->x[src], w);
-	b->t[dst] = X86_SIM_TAG_SCALAR;
-	b->x[src] = model_partial_write(seed->x[src], seed->x[dst], w);
-	b->t[src] = X86_SIM_TAG_SCALAR;
+    unsigned w = resolve_width(flags);
+    __u64 dv = snap_numeric(seed, dst), sv = snap_numeric(seed, src);
+    __u64 dr = dst == X86_RSP ? stack_ptr_value((long)seed->x[dst]) : seed->x[dst];
+    __u64 sr = src == X86_RSP ? stack_ptr_value((long)seed->x[src]) : seed->x[src];
+    __u8 dt = dst == X86_RSP ? X86_SIM_TAG_STACK : seed->t[dst];
+    __u8 st = src == X86_RSP ? X86_SIM_TAG_STACK : seed->t[src];
+    if (w == X86_WIDTH_64) {
+        b->x[dst] = dst == X86_RSP ? sv : sr;
+        b->t[dst] = dst == X86_RSP ? X86_SIM_TAG_SCALAR : st;
+        b->x[src] = src == X86_RSP ? dv : dr;
+        b->t[src] = src == X86_RSP ? X86_SIM_TAG_SCALAR : dt;
+    } else {
+        b->x[dst] = model_partial_write(dv, sv, w);
+        b->x[src] = model_partial_write(sv, dv, w);
+        b->t[dst] = b->t[src] = X86_SIM_TAG_SCALAR;
+    }
 }
 
-/* div: the four width arms of the byte-ladder; B8's single 16-bit quotient
- * write and the three split divide-and-write pairs. */
+
 static void model_div(unsigned src, unsigned flags, const struct snap *seed,
                       struct snap *b)
 {

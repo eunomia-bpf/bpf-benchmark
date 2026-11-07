@@ -41,6 +41,7 @@ typedef signed int __s32;
 #include <stdio.h>
 
 static int failures;
+static __u64 model_arena_top;
 static unsigned long cases;
 
 /* The register file the model tracks, kept parallel to the simulator's own
@@ -155,8 +156,8 @@ static void model_doubleshift(unsigned op, unsigned dst, unsigned src,
 	__u64 mask = width_mask(w);
 	__u64 sign = 1ULL << (bits - 1U);
 	unsigned count = shift_count(imm, w);
-	__u64 dstv = mreg[dst];
-	__u64 srcv = mreg[src];
+	__u64 dstv = X86_HOST_NATIVE_REG(dst);
+	__u64 srcv = X86_HOST_NATIVE_REG(src);
 	__u64 result;
 
 	if (count == 0) {
@@ -230,6 +231,7 @@ static void check_doubleshift(unsigned op, unsigned dst, unsigned src,
 	(void)__x86_sim_skb_ctx;
 	(void)__x86_sim_abi_kind;
 	X86_SIM_L_DECLARE_STACK();
+    model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 	(void)__x86_xmm0_lo;
 	(void)__x86_xmm0_hi;
 	(void)__x86_sim_ret_addr;

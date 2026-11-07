@@ -45,6 +45,7 @@ typedef signed long long __s64;
 #include <string.h>
 
 static int failures;
+static __u64 model_arena_top;
 static unsigned long cases;
 
 #define MEM_BYTES 4096U
@@ -150,6 +151,7 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 	(void)__x86_sim_abi;
 	(void)__x86_sim_skb_ctx;
 	X86_SIM_L_DECLARE_STACK();
+    model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 
 	(void)__x86_xmm0_lo;
 	(void)__x86_xmm0_hi;
@@ -186,16 +188,16 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 		mem[i] = pattern_byte(i);
 
 	/* ---- independent model of the complement-and step ---- */
-	src1 = mreg[src1_reg];
+	src1 = X86_HOST_NATIVE_REG(src1_reg);
 	if (op_is_mem) {
 		__u8 *p = (__u8 *)(long)mreg[X86_RBX] + disp;
 
 		src2 = model_load(p, mw);
 	} else {
-		src2 = mreg[aux_reg];
+		src2 = X86_HOST_NATIVE_REG(aux_reg);
 	}
 	result = (~src1) & src2;
-	mreg[dst_reg] = model_write(mreg[dst_reg], result, w);
+	mreg[dst_reg] = model_write(X86_HOST_NATIVE_REG(dst_reg), result, w);
 	mtag[dst_reg] = X86_SIM_TAG_SCALAR;
 	masked = result & model_mask(w);
 	mcf = 0U;

@@ -51,6 +51,7 @@ typedef signed int __s32;
 #include <string.h>
 
 static int failures;
+static __u64 model_arena_top;
 static unsigned long cases;
 
 #define MEM_BYTES 4096U
@@ -178,6 +179,7 @@ static void check_step(unsigned op, unsigned flags, unsigned aux_width,
 	(void)__x86_sim_abi;
 	(void)__x86_sim_skb_ctx;
 	X86_SIM_L_DECLARE_STACK();
+    model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 
 	(void)__x86_xmm0_lo;
 	(void)__x86_xmm0_hi;
@@ -235,11 +237,11 @@ static void check_step(unsigned op, unsigned flags, unsigned aux_width,
 		base = model_load(p, w);
 		index = imm & 0xffffffffULL;
 	} else if (op == 1U) {
-		base = mreg[base_reg];
+		base = X86_HOST_NATIVE_REG(base_reg);
 		index = imm;
 	} else {
-		base = mreg[base_reg];
-		index = mreg[index_reg];
+		base = X86_HOST_NATIVE_REG(base_reg);
+		index = X86_HOST_NATIVE_REG(index_reg);
 	}
 	mcf = model_bt(base, index, w);
 

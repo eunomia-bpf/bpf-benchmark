@@ -33,10 +33,12 @@ typedef signed int __s32;
 #define __always_inline inline
 
 #include "../x86/x86_sim_local_bpf.h"
+#include "x86_no_helpers_host.h"
 
 #include <stdio.h>
 
 static int failures;
+static __u64 model_arena_top;
 static unsigned long cases;
 
 /* The register file the model tracks, kept parallel to the simulator's own
@@ -160,6 +162,7 @@ static void check_write(unsigned reg, unsigned width, unsigned shift, __u64 valu
 	(void)__x86_sim_skb_ctx;
 	(void)__x86_sim_abi_kind;
 	X86_SIM_L_DECLARE_STACK();
+    model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 	(void)__x86_cf;
 	(void)__x86_zf;
 	(void)__x86_sf;
@@ -174,7 +177,7 @@ static void check_write(unsigned reg, unsigned width, unsigned shift, __u64 valu
 	/* ---- independent model ---- */
 	if (w == X86_WIDTH_8 || w == X86_WIDTH_16 || w == X86_WIDTH_32 ||
 	    w == X86_WIDTH_64) {
-		mreg[reg] = model_writeback(mreg[reg], value, w, shift);
+		mreg[reg] = model_writeback(X86_HOST_NATIVE_REG(reg), value, w, shift);
 		mtag[reg] = X86_SIM_TAG_SCALAR;
 	} else {
 		/* An effective width outside the four codes: the contract's

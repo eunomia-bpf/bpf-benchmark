@@ -58,6 +58,7 @@ typedef signed int __s32;
 #include <stdio.h>
 
 static int failures;
+static __u64 model_arena_top;
 static unsigned long cases;
 
 /* Deterministic register pattern: register-dependent and monotone in the
@@ -190,6 +191,7 @@ static void check_step(unsigned op, unsigned flags, unsigned dst_shift,
 	(void)__x86_sim_abi;
 	(void)__x86_sim_skb_ctx;
 	X86_SIM_L_DECLARE_STACK();
+    model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 
 	(void)__x86_xmm0_lo;
 	(void)__x86_xmm0_hi;
@@ -204,8 +206,8 @@ static void check_step(unsigned op, unsigned flags, unsigned dst_shift,
 	}
 
 	/* ---- independent model of the compare/test step ---- */
-	lhs = model_read(mreg[dst_reg], w, dst_shift);
-	rhs = is_reg ? model_read(mreg[src_reg], w, src_shift)
+	lhs = model_read(X86_HOST_NATIVE_REG(dst_reg), w, dst_shift);
+	rhs = is_reg ? model_read(X86_HOST_NATIVE_REG(src_reg), w, src_shift)
 		     : model_imm(CASE_IMM, w);
 	if (is_test)
 		model_logic_flags(lhs, rhs, w, &mcf, &mzf, &msf, &mof);

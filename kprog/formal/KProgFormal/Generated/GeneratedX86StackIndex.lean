@@ -2,8 +2,8 @@
 import Std
 namespace KProgFormal.GeneratedX86StackIndex
 /-- The arena byte index for an abstract frame offset `off` in an arena of
-`capacity` bytes: `off + capacity`, truncated to the C helpers' 32-bit index
+`capacity` bytes: `off + capacity`, retained in the C helpers' 64-bit index
 type. `capacity` is `X86_SIM_STACK_BYTES`. -/
-def index (capacity off : BitVec 64) : BitVec 32 :=
-  (capacity + off).truncate 32
+def index (capacity off : BitVec 64) : BitVec 64 :=
+  capacity + off
 end KProgFormal.GeneratedX86StackIndex

@@ -46,6 +46,7 @@ typedef signed long long __s64;
 #include <string.h>
 
 static int failures;
+static __u64 model_arena_top;
 static unsigned long cases;
 
 #define MEM_BYTES 4096U
@@ -179,6 +180,7 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 	(void)__x86_sim_abi;
 	(void)__x86_sim_skb_ctx;
 	X86_SIM_L_DECLARE_STACK();
+    model_arena_top = (__u64)(unsigned long)&__x86_stack_mem.b[sizeof(__x86_stack_mem.b)];
 
 	(void)__x86_xmm0_lo;
 	(void)__x86_xmm0_hi;
@@ -240,13 +242,13 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 		__u8 *p = (__u8 *)(long)mreg[src_reg] + disp;
 
 		value = model_load(p, w);
-		count = mreg[count_reg] & KPROG_X86_BZHI_COUNT_MASK;
+		count = X86_HOST_NATIVE_REG(count_reg) & KPROG_X86_BZHI_COUNT_MASK;
 	} else {
-		value = mreg[src_reg];
-		count = mreg[count_reg] & KPROG_X86_BZHI_COUNT_MASK;
+		value = X86_HOST_NATIVE_REG(src_reg);
+		count = X86_HOST_NATIVE_REG(count_reg) & KPROG_X86_BZHI_COUNT_MASK;
 	}
 	result = model_bzhi(value, count, w);
-	mreg[dst_reg] = model_write(mreg[dst_reg], result, w);
+	mreg[dst_reg] = model_write(X86_HOST_NATIVE_REG(dst_reg), result, w);
 	mtag[dst_reg] = X86_SIM_TAG_SCALAR;
 	mcf = (__u8)(count >= model_bits(w));
 	mzf = (__u8)(result == 0U);
