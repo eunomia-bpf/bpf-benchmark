@@ -1892,3 +1892,11 @@ path-existence, guest-access outcome, fuel or determinism premise remains.
 This is the payload model theorem; original ELF entry/ABI/terminal RET/physical
 platform transport and strict per-B-block full-state correspondence remain open.
 The result lists the exact trusted premises and all reported Lean axioms.
+
+`trusted-simple-native-abi-frame.json` proves that every finite decoded native
+prefix preserves RBX/RSP/RBP/R12–R15 and modeled XMM0/FS/GS/address-width fields.
+All actual instruction extents, permission outcomes and undefined AF choices
+remain covered. This supplies callee-save/SP evidence for ABI transport. It
+does not prove return-slot memory integrity: canonical RET reads eight bytes
+from native RSP and may fault, and guest writes can alias that slot without
+the physical invocation/platform disjointness fact. RET transport remains open.

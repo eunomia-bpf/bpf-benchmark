@@ -844,6 +844,266 @@ theorem bound_captured_native_prefix_effects_checked (env : BPF.Environment) (n 
     write40 write32 write24 write16 write8 read40 read32 guest0 guest1
   exact captured_native_prefix_effects_checked (checked validated) n nativePC completeChecked canonicalRun
 
+
+/-- The supported SysV callee-saved GPRs and native SP, plus every modeled
+vector/segment/address-width field used by invocation transport. Memory and
+RFLAGS deliberately remain outside this ABI-frame projection. -/
+def simpleABIFrame (s : X86.State) :=
+  (s.gpr 3,s.gpr 4,s.gpr 5,s.gpr 12,s.gpr 13,s.gpr 14,s.gpr 15,
+    s.xmm0,s.fsBase,s.gsBase,s.addressWidth)
+
+/-- This projection ignores only the AF freedom already justified by the
+captured native step relation; it does not erase any register value. -/
+theorem native_related_same_abi_frame {first second : X86.State}
+    (related : nativeStatesRelated first second) : simpleABIFrame second=simpleABIFrame first := by
+  by_cases at12 : first.pc=12
+  · have masked : afEquivalent first second := by
+      have branch := related.2
+      rw [if_pos at12] at branch
+      exact branch
+    obtain ⟨shape,_⟩ := af_equivalent_shape first second masked
+    have projected := congrArg simpleABIFrame shape
+    exact projected
+  · have same : first=second := by
+      have branch := related.2
+      rw [if_neg at12] at branch
+      exact branch
+    exact congrArg simpleABIFrame same.symm
+
+/-- The actual canonical decode and transition preserve the supported ABI
+frame for every captured instruction, including all read/write fault outcomes. -/
+theorem simple_native_canonical_abi_frame (s : X86.State) (offset : Nat)
+    (member : offset ∈ simpleNativeOffsets) :
+    match X86.decode (native.extract offset (offset+simpleNativeLength offset)) s with
+    | .error _ => False
+    | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s := by
+  have choices : offset=0 ∨ offset=3 ∨ offset=7 ∨ offset=10 ∨ offset=12 ∨ offset=15 ∨ offset=17 ∨ offset=21 ∨ offset=24 ∨ offset=26 ∨ offset=30 ∨ offset=33 ∨ offset=35 ∨ offset=40 ∨ offset=44 ∨ offset=51 ∨ offset=55 := by
+    simpa [simpleNativeOffsets] using member
+  rcases choices with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · change (match X86.decode (native.extract 0 3) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode0]
+    simp +decide [simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 3 7) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode3]
+    simp +decide [simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 7 10) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode7]
+    simp +decide [simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 10 12) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode10]
+    simp +decide [simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 12 15) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode12]
+    simp +decide [simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 15 17) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode15]
+    simp +decide [simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 17 21) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode17]
+    simp +decide [simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 21 24) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode21]
+    simp +decide [simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 24 26) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode24]
+    simp +decide [simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 26 30) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode26]
+    simp +decide [simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 30 33) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode30]
+    simp +decide [simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 33 35) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode33]
+    simp +decide [simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 35 40) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode35]
+    cases permission : permitted s.memory.writable (s.gpr 1) 2
+    all_goals simp +decide [permission,simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 40 44) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode40]
+    cases permission : permitted s.memory.writable (s.gpr 1+(2#64)) 1
+    all_goals simp +decide [permission,simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 44 51) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode44]
+    cases permission : permitted s.memory.writable (s.gpr 1+(3#64)) 4
+    all_goals simp +decide [permission,simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 51 55) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode51]
+    cases permission : permitted s.memory.writable (s.gpr 1+(7#64)) 1
+    all_goals simp +decide [permission,simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+  · change (match X86.decode (native.extract 55 60) s with
+      | .error _ => False
+      | .ok instruction => simpleABIFrame (X86.step instruction s).state=simpleABIFrame s)
+    rw [native_decode55]
+    simp +decide [simpleABIFrame,X86.step,X86.moveStep,X86.arithmeticStep,X86.logicalStep,
+      X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,X86.scalarRegisterValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+      X86.readSource,X86.ScalarDestination.source,writeMemory,
+      Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [simpleABIFrame,X86.scalarWriteValue,
+      X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits])
+
+/-- Actual undefined-output observations and arbitrary accepted extents
+preserve exactly the same callee-save/SP/platform frame. -/
+theorem simple_native_relational_abi_frame (s : X86.State) (entry : X86Path.Entry)
+    (instruction : X86.Instruction) (actual : Transition X86.State)
+    (valid : simpleClosedPC s.pc) (decoded : X86Path.decodeAt 0 native entry s=.ok instruction)
+    (run : X86.Step instruction s actual) : simpleABIFrame actual.state=simpleABIFrame s := by
+  obtain ⟨member,entryEq⟩ := closed_decoded_extent s entry instruction valid decoded
+  have raw := decode_extent_reflects_raw 0 native entry s instruction decoded
+  rw [entryEq] at raw
+  have canonical := simple_native_canonical_abi_frame s s.pc.toNat member
+  rw [raw] at canonical
+  have representative : X86.Step instruction s (X86.step instruction s) := ⟨rfl,rfl,rfl⟩
+  have related := (same_input_native_steps_couple s valid entry entry instruction instruction
+    (X86.step instruction s) actual decoded decoded representative run).2
+  exact (native_related_same_abi_frame related).trans canonical
+
+/-- Every finite actual native prefix preserves the supported SysV GPR/SP
+frame and modeled invocation configuration, including a faulting prefix. -/
+theorem captured_native_prefix_abi_frame {n last : X86.State} {trace : List Event}
+    (run : Execution (relationalNativeInstructionStep 0 native) n trace last)
+    (valid : simpleClosedPC n.pc) : simpleABIFrame last=simpleABIFrame n := by
+  revert valid
+  induction run with
+  | refl => intro _; rfl
+  | @next s t u head tail step suffix ih =>
+    intro valid
+    obtain ⟨entry,instruction,actual,decoded,actualRun,_,stateEq⟩ := step
+    have nextValid := simple_native_relational_step_closed s entry instruction actual valid decoded actualRun
+    have frame := simple_native_relational_abi_frame s entry instruction actual valid decoded actualRun
+    rw [stateEq] at nextValid frame
+    exact (ih nextValid).trans frame
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -921,3 +1181,11 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.captured_native_prefix_effects_checked
 
 #print axioms KProgTV.TrustedSimpleSafety.bound_captured_native_prefix_effects_checked
+
+#print axioms KProgTV.TrustedSimpleSafety.native_related_same_abi_frame
+
+#print axioms KProgTV.TrustedSimpleSafety.simple_native_canonical_abi_frame
+
+#print axioms KProgTV.TrustedSimpleSafety.simple_native_relational_abi_frame
+
+#print axioms KProgTV.TrustedSimpleSafety.captured_native_prefix_abi_frame
