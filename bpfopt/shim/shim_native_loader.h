@@ -194,7 +194,7 @@ static int shim_native_loader_is_libbpf_probe(const struct prog_entry *prog) {
     if (prog && (!name || !name[0]) &&
         prog->prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT &&
         prog->expected_attach_type == 0 && prog->attach_btf_id == 0 &&
-        insn_cnt == 11 && prog->hash == 0x71725f032fe1d5e4ULL)
+        insn_cnt == 11 && prog->policy_hash == 0x7f60b6fbd3faebcfULL)
         return 1;
     if (prog && (!name || !name[0]) &&
         prog->prog_type == BPF_PROG_TYPE_TRACING &&

@@ -1,0 +1,34 @@
+{
+  "utc": "2026-11-07T19:48:07.303670+00:00",
+  "scope": "Generic feature-probe classification uses the existing descriptor-normalized bytecode identity. Finite classifier and normalization mechanism regression.",
+  "before": {
+    "checks": 33094,
+    "descriptor_identity_errors": 257,
+    "metadata_boundary_errors": 64,
+    "normalized_hash_errors": 0
+  },
+  "after": {
+    "checks": 33094,
+    "descriptor_identity_errors": 0,
+    "metadata_boundary_errors": 0,
+    "normalized_hash_errors": 0
+  },
+  "source_sha256": {
+    "bpfopt/shim/shim_native_loader.h": "e9e0592efe80a4701f6db6d9e8da3617d8e5ed87820621066fa86e71e4349086",
+    "bpfopt/shim/shim_state.h": "13c9b5d0ec57821acf8a68ad5986262b572ef3701460dcf1ee74b1935c481181",
+    "bpfopt/shim/libbpfrejit_shim.c": "61b07a65e6cb3df347f931e05fcae7d1da4b00ee7a45a002b845ed8c734f29c6"
+  },
+  "builds": {
+    "x86": {
+      "exit": 0,
+      "sha256": "57021180e83d81cce9a1009d277be2a0a1462a77121d906c0035b9f193d6666c"
+    },
+    "arm64": {
+      "exit": 0,
+      "sha256": "dd216d98fba7a826c12e5108df460bdef47513b67e2465b487d3348f6255e329"
+    }
+  },
+  "archive_sha256": "42408ebc9c75c2a99d9487fba4016bcd9a66c6fc58ba749b2e380673de8526d3",
+  "runtime": "Existing guests retain their loaded binary epoch; Tetragon application replay follows the established serial queue.",
+  "safety": "Universal O1/O2/O4 and native-link preservation theorems provide the safety obligations."
+}
