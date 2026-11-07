@@ -1,0 +1,7 @@
+# Byte-exact ARM readonly proof data
+
+The first native-only OTel read_task_struct request failed before the verifier because the old ARM reader consumed hex-looking text from objdump's ASCII display column. Its 12,799-byte private object first diverges at byte160; the trusted binder correctly refused the changed bytes. The candidate reads section bytes and typed object extents directly from ELF, including a short final row; section and AArch64 mapping symbols are not data objects. No loader/native/kernel/ISA change or acceptance weakening is involved.
+
+The existing readonly-metadata regression rejects the old reader on actual assembled hex-ASCII/short-row data and passes the replacement while retaining identical-constant identity checks. The actual captured kernel ELF and normalized metadata regenerate and compile through the unchanged production ARM worker: private BPF data now exactly matches the captured native proof extent SHA256. All29 existing micro generated C sources are byte-identical before/after. Full compiler commands, old/new artifacts, native identity, source patch and original setup failures are in inputs.tar.gz; summary.json records exact hashes.
+
+Canonical source is not yet applied. One continuation waits by pidfd for the existing six-app serial queue to close, then applies only these two tested files and pushes them before one real OTel replay. It does not restart/interfere with running guests or edit their pinned input. This component/compiler result is not verifier, full application, hardware-performance or whole O1-O4 acceptance.
