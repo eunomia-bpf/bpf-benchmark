@@ -39,5 +39,116 @@
   "runtime_make_exit": 0,
   "runtime_host_ok": true,
   "runtime_guest_exit": 0,
-  "scope": "Generic readonly-label layout and coherent ARM service build integration. Application startup and universal safety theorem work continue."
+  "scope": "Generic readonly-label layout and coherent ARM service build integration. Application startup and universal safety theorem work continue.",
+  "reproduction": {
+    "archive_sha256": "44326bac1c7a0b907a978d24dab543144c8cd99e560d2b8bf81063e2dab9d3ea",
+    "added_inputs": [
+      {
+        "member": "reproduction/kprog/libnativeloader/src/native_loader_link_plan.hpp",
+        "sha256": "b1024931b2b97d698620856b2222dedcf2115f146eaeb573dcc67429eda95f9d",
+        "bytes": 4895
+      },
+      {
+        "member": "reproduction/kprog/libnativeloader/src/native_loader_manifest.hpp",
+        "sha256": "61718ae4af723319cbd478387930fada3cb5bedcae165ff3ad0a31b3f59759f5",
+        "bytes": 37957
+      },
+      {
+        "member": "reproduction/kprog/libnativeloader/src/native_source_map_binding.hpp",
+        "sha256": "2a7472bb7527597713137bfd3acb1b8db23b9ad7d0ebd7a43540f5f59212c345",
+        "bytes": 2309
+      },
+      {
+        "member": "reproduction/kprog/libnativeloader/src/native_loader.cpp",
+        "sha256": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "bytes": 240341
+      },
+      {
+        "member": "reproduction/kprog/libnativeloader/src/native_environment_binding.hpp",
+        "sha256": "e0e8bbc32b1df870b7620ee9dc0c09f7a5adfbd43879d9ff8086ca47d3b961ee",
+        "bytes": 3608
+      },
+      {
+        "member": "reproduction/kprog/libnativeloader/src/native_loader_cache.hpp",
+        "sha256": "39d7c8ed55f3107fac778dc8f5ffdf4f65eef23383c72b94972f61d1ed90f14d",
+        "bytes": 433
+      },
+      {
+        "member": "reproduction/kprog/libnativeloader/src/native_loader_bytecode.hpp",
+        "sha256": "f7e0184d400aad9ba981f03be14644677c61473b5ba022e54175099827dc68e1",
+        "bytes": 7914
+      },
+      {
+        "member": "reproduction/kprog/libnativeloader/src/native_data_layout.hpp",
+        "sha256": "5848f3ee7d411692a65016139151a7de3175ab1f4110e050e33575b60e3f7b6a",
+        "bytes": 4615
+      },
+      {
+        "member": "reproduction/kprog/libnativeloader/src/native_tv_capture.hpp",
+        "sha256": "84b0597ac279a40f293451c05273dbd7b57c83289f9380b8fe92ac075d5fe2b6",
+        "bytes": 8086
+      },
+      {
+        "member": "reproduction/kprog/libnativeloader/src/native_loader_link_schema.hpp",
+        "sha256": "4b811749b020d99ec78c1a8b428de4c00a7a796a952c7dc5e038afb4c8fe645f",
+        "bytes": 9021
+      },
+      {
+        "member": "reproduction/kprog/libnativeloader/src/native_rodata_binding.hpp",
+        "sha256": "4d7323ff590b1c46080fc35a4b651daf5a0a4442453bcb5ea1673f8a609d21cb",
+        "bytes": 5177
+      },
+      {
+        "member": "reproduction/kprog/libnativeloader/src/native_loader_fd_scan.hpp",
+        "sha256": "545c2cdbc6bec151250c95729d28acd4e3dbb72e416eb589c087df7597e32027",
+        "bytes": 328
+      },
+      {
+        "member": "reproduction/kprog/libnativeloader/include/native_loader.hpp",
+        "sha256": "9bb3e6f903c4037618f69827dbe76463ad554fdc5b714b880933f3bf7a0c7f93",
+        "bytes": 6176
+      },
+      {
+        "member": "reproduction/kprog/libnativeloader/CMakeLists.txt",
+        "sha256": "4ae1bb6fa3516a91b0129b3e4b32f618cfd178467cbbeb800631252e08291a80",
+        "bytes": 2713
+      },
+      {
+        "member": "reproduction/kprog/trusted_loader.cpp",
+        "sha256": "77d7944274bf9f8a66d7d5e7dceb30a55c66e5461c6028df37a9c32d5e81d548",
+        "bytes": 4406
+      },
+      {
+        "member": "reproduction/kprog/test/trusted_service_client.cpp",
+        "sha256": "161b48dcfe4400c4953b184d24f3b49f57ace1b4d4d47e8e22d3c49b4c2bab21",
+        "bytes": 2241
+      },
+      {
+        "member": "reproduction/control/control.S",
+        "sha256": "32197097fc8c3566752139f7ebe74231aa1cfac90d55eab1b7da81522ee507ea",
+        "bytes": 582
+      },
+      {
+        "member": "reproduction/control/control.o",
+        "sha256": "29c718c0dd9c592fb66ebdfe5a4f59b29bdf1bd53818f53771c13795f95bba4e",
+        "bytes": 1256
+      },
+      {
+        "member": "reproduction/control/control.elf.txt",
+        "sha256": "fdfdd4c5a5e7c19a6bda2b7fe2ad9931f139f4d2e66978930c4877235fb76a54",
+        "bytes": 1383
+      },
+      {
+        "member": "reproduction/control/control.sh",
+        "sha256": "59e0824bf4c4052fc8fee5c8936dd03ff1d827d3b4fc001be61a2b2cdf7a9e18",
+        "bytes": 1253
+      },
+      {
+        "member": "reproduction/control/manifest-name-diagnostic.tar.gz",
+        "sha256": "3bbef6aec2905e3e2f4839c6318c602b7ba79c901d3098dfe821b22e9aa2f0b1",
+        "bytes": 1259
+      }
+    ],
+    "scope": "Exact captured loader source files, generic readonly-alias control assembly/ELF and original private mount command accompany the built service binaries."
+  }
 }
