@@ -1,0 +1,61 @@
+form	assembly	width	phase	cases	native_faults	native_successes	zero_high_successes	nonzero_high_successes	cpu_simulator_mismatches
+0	div al	8	original-generation	1024	638	386	8	378	0
+0	div al	8	high-zero-extension	1024	256	768	768	0	0
+1	div cl	8	original-generation	1024	636	388	9	379	0
+1	div cl	8	high-zero-extension	1024	256	768	768	0	0
+2	div dl	8	original-generation	1024	645	379	10	369	0
+2	div dl	8	high-zero-extension	1024	257	767	767	0	0
+3	div bl	8	original-generation	1024	651	373	9	364	0
+3	div bl	8	high-zero-extension	1024	258	766	766	0	0
+4	div ah	8	original-generation	1024	1024	0	0	0	0
+4	div ah	8	high-zero-extension	1024	1024	0	0	0	0
+5	div ch	8	original-generation	1024	644	380	9	371	0
+5	div ch	8	high-zero-extension	1024	256	768	768	0	0
+6	div dh	8	original-generation	1024	644	380	8	372	0
+6	div dh	8	high-zero-extension	1024	256	768	768	0	0
+7	div bh	8	original-generation	1024	627	397	9	388	0
+7	div bh	8	high-zero-extension	1024	257	767	767	0	0
+8	div sil	8	original-generation	1024	654	370	8	362	0
+8	div sil	8	high-zero-extension	1024	256	768	768	0	0
+9	div dil	8	original-generation	1024	651	373	9	364	0
+9	div dil	8	high-zero-extension	1024	258	766	766	0	0
+10	div r8b	8	original-generation	1024	644	380	8	372	0
+10	div r8b	8	high-zero-extension	1024	257	767	767	0	0
+11	div BYTE PTR [rdi+8]	8	original-generation	1024	648	376	8	368	0
+11	div BYTE PTR [rdi+8]	8	high-zero-extension	1024	258	766	766	0	0
+12	div ax	16	original-generation	1024	640	384	0	384	0
+12	div ax	16	high-zero-extension	1024	256	768	768	0	0
+13	div cx	16	original-generation	1024	647	377	0	377	0
+13	div cx	16	high-zero-extension	1024	256	768	768	0	0
+14	div dx	16	original-generation	1024	1024	0	0	0	0
+14	div dx	16	high-zero-extension	1024	1024	0	0	0	0
+15	div bx	16	original-generation	1024	629	395	0	395	0
+15	div bx	16	high-zero-extension	1024	256	768	768	0	0
+16	div r8w	16	original-generation	1024	634	390	0	390	0
+16	div r8w	16	high-zero-extension	1024	256	768	768	0	0
+17	div WORD PTR [rdi+8]	16	original-generation	1024	628	396	0	396	0
+17	div WORD PTR [rdi+8]	16	high-zero-extension	1024	256	768	768	0	0
+18	div eax	32	original-generation	1024	631	393	0	393	0
+18	div eax	32	high-zero-extension	1024	256	768	768	0	0
+19	div ecx	32	original-generation	1024	647	377	0	377	0
+19	div ecx	32	high-zero-extension	1024	256	768	768	0	0
+20	div edx	32	original-generation	1024	1024	0	0	0	0
+20	div edx	32	high-zero-extension	1024	1024	0	0	0	0
+21	div ebx	32	original-generation	1024	641	383	0	383	0
+21	div ebx	32	high-zero-extension	1024	256	768	768	0	0
+22	div r8d	32	original-generation	1024	637	387	0	387	0
+22	div r8d	32	high-zero-extension	1024	256	768	768	0	0
+23	div DWORD PTR [rdi+8]	32	original-generation	1024	646	378	0	378	0
+23	div DWORD PTR [rdi+8]	32	high-zero-extension	1024	256	768	768	0	0
+24	div rax	64	original-generation	1024	642	382	0	382	0
+24	div rax	64	high-zero-extension	1024	256	768	768	0	0
+25	div rcx	64	original-generation	1024	637	387	0	387	0
+25	div rcx	64	high-zero-extension	1024	256	768	768	0	0
+26	div rdx	64	original-generation	1024	1024	0	0	0	0
+26	div rdx	64	high-zero-extension	1024	1024	0	0	0	0
+27	div rbx	64	original-generation	1024	632	392	0	392	0
+27	div rbx	64	high-zero-extension	1024	256	768	768	0	0
+28	div r8	64	original-generation	1024	633	391	0	391	0
+28	div r8	64	high-zero-extension	1024	256	768	768	0	0
+29	div QWORD PTR [rdi+8]	64	original-generation	1024	643	381	0	381	0
+29	div QWORD PTR [rdi+8]	64	high-zero-extension	1024	256	768	768	0	0

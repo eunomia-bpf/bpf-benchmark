@@ -1,0 +1,31 @@
+assembly	opcode	cases	mismatches
+div al	X86_OP_DIV	2048	0
+div cl	X86_OP_DIV	2048	0
+div dl	X86_OP_DIV	2048	0
+div bl	X86_OP_DIV	2048	0
+div ah	X86_OP_DIV	2048	0
+div ch	X86_OP_DIV	2048	0
+div dh	X86_OP_DIV	2048	0
+div bh	X86_OP_DIV	2048	0
+div sil	X86_OP_DIV	2048	0
+div dil	X86_OP_DIV	2048	0
+div r8b	X86_OP_DIV	2048	0
+div BYTE PTR [rdi+8]	X86_OP_DIV	2048	0
+div ax	X86_OP_DIV	2048	0
+div cx	X86_OP_DIV	2048	0
+div dx	X86_OP_DIV	2048	0
+div bx	X86_OP_DIV	2048	0
+div r8w	X86_OP_DIV	2048	0
+div WORD PTR [rdi+8]	X86_OP_DIV	2048	0
+div eax	X86_OP_DIV	2048	0
+div ecx	X86_OP_DIV	2048	0
+div edx	X86_OP_DIV	2048	0
+div ebx	X86_OP_DIV	2048	0
+div r8d	X86_OP_DIV	2048	0
+div DWORD PTR [rdi+8]	X86_OP_DIV	2048	0
+div rax	X86_OP_DIV	2048	0
+div rcx	X86_OP_DIV	2048	0
+div rdx	X86_OP_DIV	2048	0
+div rbx	X86_OP_DIV	2048	0
+div r8	X86_OP_DIV	2048	0
+div QWORD PTR [rdi+8]	X86_OP_DIV	2048	0

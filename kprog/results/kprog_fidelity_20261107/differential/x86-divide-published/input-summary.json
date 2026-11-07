@@ -1,0 +1,19 @@
+{
+  "original-generation": {
+    "cases": 30720,
+    "native_faults": 20745,
+    "native_successes": 9975,
+    "zero_high_successes": 95,
+    "nonzero_high_successes": 9880,
+    "cpu_simulator_mismatches": 0
+  },
+  "high-zero-extension": {
+    "cases": 30720,
+    "native_faults": 10761,
+    "native_successes": 19959,
+    "zero_high_successes": 19959,
+    "nonzero_high_successes": 0,
+    "cpu_simulator_mismatches": 0
+  },
+  "64bit_highzero_fastpath_successes": 3840
+}

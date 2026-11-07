@@ -69,7 +69,12 @@ PREPARE_INPUT = r'''
                 uint64_t mask=width_mask<<lane;
                 input.r[source]=(input.r[source]&~mask)|((divisor<<lane)&mask);
             }
-            if (c%4==1 || c%4==2) {
+            /* The additional 1024-state phase exercises the published
+             * high=0 fast path; retain the original first 1024 cases. */
+            if (c>=1024) {
+                if (form->width==8) input.r[0]&=~UINT64_C(0xff00);
+                else input.r[2]&=~width_mask;
+            } else if (c%4==1 || c%4==2) {
                 uint64_t high=c%4==1 ? width_mask : divisor/2;
                 if (form->width==8) input.r[0]=(input.r[0]&~UINT64_C(0xff00))|(high<<8);
                 else input.r[2]=(input.r[2]&~width_mask)|high;
