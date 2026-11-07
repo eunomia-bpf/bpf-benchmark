@@ -2869,4 +2869,155 @@ theorem step_through_pair_observed_refines (code : Nat) (flags : Byte) (aux : Bi
       simp only [observeExclusiveDispatch, separate, ↓reduceIte]
       exact pair_byte_refines i flags aux sourceScalar sourceStack firstScalar secondScalar failure s encoded memoryFlags pairAccess
 
+
+/-- Actual D0 pre/access/post body using the already-derived eight-byte
+transfer and generated upper-half clearing. FLAGS and the unused integer
+operand bytes do not select its width or vector bank. -/
+def dByteBody (load : Bool) (aux : BitVec 32) (base index : Byte) (immediate : Word)
+    (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let before := bumpMemoryBase base (GeneratedArm64MemPrepost.preDelta aux immediate) s
+  let address := Arm64Move.Fields.read before base + memoryOffsetBody aux index immediate before
+  let transferred := Arm64VectorMemory.dSuccess load address before
+  { transferred with state := bumpMemoryBase base (GeneratedArm64MemPrepost.postDelta aux immediate) transferred.state }
+
+theorem d_byte_body_immediate (load : Bool) (mode : Reference.AArch64.Writeback) (aux : BitVec 32)
+    (base : Register) (immediate : Word) (s : Reference.AArch64.State)
+    (flags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags mode)) :
+    dByteBody load aux (memoryBaseCode base) GeneratedArm64MemIndex.indexSentinel immediate s =
+      Arm64VectorMemory.dWritebackCore load mode base immediate s := by
+  obtain ⟨pre, post, suppressed⟩ := memory_flag_fields aux mode immediate flags
+  simp only [dByteBody, Arm64VectorMemory.dWritebackCore, pre, post, suppressed,
+    memory_offset_absent, memory_base_bump_typed, memory_base_read, Arm64Memory.base_refines]
+
+theorem d_byte_body_indexed (load : Bool) (aux : BitVec 32) (base index : Register)
+    (kind : Reference.AArch64.MemoryExtend) (scaled : Bool) (s : Reference.AArch64.State)
+    (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags .none))
+    (mod : Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = Arm64AddressedMemory.modifier kind ∨
+      (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = .none ∧
+        (kind = .lsl ∨ kind = .sxtx) ∧ (if scaled then 3 else 0) = 0))
+    (amount : (GeneratedArm64Aux.b2 aux).setWidth 64 = BitVec.ofNat 64 (if scaled then 3 else 0)) :
+    dByteBody load aux (memoryBaseCode base) (Arm64Register.registerCode index) 0 s =
+      Arm64VectorMemory.dWritebackCore load .none base (Arm64VectorMemory.dOffset s (.register index kind scaled)) s := by
+  have pre : GeneratedArm64MemPrepost.preDelta aux 0 = 0 := by
+    unfold GeneratedArm64MemPrepost.preDelta; split <;> rfl
+  have post : GeneratedArm64MemPrepost.postDelta aux 0 = 0 := by
+    unfold GeneratedArm64MemPrepost.postDelta; split <;> rfl
+  simp only [dByteBody, pre, post, bumpMemoryBase, ↓reduceIte,
+    memory_offset_indexed .double aux index kind scaled s memoryFlags mod amount, memory_base_read]
+  simp only [Arm64VectorMemory.dWritebackCore, Arm64Memory.base_refines]
+  rfl
+
+def dCode (load : Bool) : Nat := GeneratedArm64DispatchSingleton.code (if load then .loadD0 else .storeD0)
+
+/-- These gates ignore FLAGS: D0 is always eight bytes. LOAD uses SRC as
+base, STORE uses DST, and both use physical SRC2 as index; SRC3 is unused. -/
+def dispatchThroughD (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughPair code flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s with
+  | some result => some result
+  | none => if code = dCode true then some (dByteBody true aux src src2 value s)
+    else if code = dCode false then some (dByteBody false aux dst src2 value s) else none
+
+theorem d_before_none (load : Bool) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughPair (dCode load) flags aux dst src src2 src3 value
+      sourceScalar sourceStack firstScalar secondScalar failure s = none := by
+  unfold dispatchThroughPair dispatchThroughExclusive dispatchThroughStore dispatchThroughSigned dispatchThroughLoad dispatchEncodedPrefix
+  cases decoded : decodeDataWidth flags with
+  | none => cases load <;> rfl
+  | some width => cases load <;> rfl
+
+theorem d_reached (load : Bool) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughD (dCode load) flags aux dst src src2 src3 value
+      sourceScalar sourceStack firstScalar secondScalar failure s =
+      some (dByteBody load aux (if load then src else dst) src2 value s) := by
+  unfold dispatchThroughD
+  rw [d_before_none]
+  cases load <;> rfl
+
+def vectorMemoryAccess (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State) : Prop :=
+  match native with
+  | .vectorMemory i =>
+      Reference.AArch64.spAlignmentFault s i.base = none ∧
+      permitted (if i.load then s.memory.readable else s.memory.writable)
+        (Reference.AArch64.memoryBase s i.base +
+          (if i.writeback = .post then 0 else Reference.AArch64.memoryOffset s i.width.scale i.offset)) i.width.bytes = true
+  | _ => True
+
+inductive DBinding (pc : Word) : Nat → Byte → BitVec 32 → Byte → Byte → Byte → Byte → Word → Bool →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
+      (release : Bool) (native : Reference.AArch64.Instruction)
+      (binding : PairBinding pc code flags aux dst src src2 src3 value release native) :
+      DBinding pc code flags aux dst src src2 src3 value release native
+  | immediate (load : Bool) (mode : Reference.AArch64.Writeback) (base : Register) (immediate : Word)
+      (flags : Byte) (aux : BitVec 32) (unused src3 : Byte) (release : Bool)
+      (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags mode)) :
+      DBinding pc (dCode load) flags aux (if load then unused else memoryBaseCode base)
+        (if load then memoryBaseCode base else unused) GeneratedArm64MemIndex.indexSentinel src3 immediate release
+        (.vectorMemory ⟨.double, load, 0, base, .immediate immediate, mode⟩)
+  | indexed (load : Bool) (base index : Register) (kind : Reference.AArch64.MemoryExtend) (scaled : Bool)
+      (flags : Byte) (aux : BitVec 32) (unused src3 : Byte) (release : Bool)
+      (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags .none))
+      (mod : Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = Arm64AddressedMemory.modifier kind ∨
+        (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat = .none ∧
+          (kind = .lsl ∨ kind = .sxtx) ∧ (if scaled then 3 else 0) = 0))
+      (amount : (GeneratedArm64Aux.b2 aux).setWidth 64 = BitVec.ofNat 64 (if scaled then 3 else 0)) :
+      DBinding pc (dCode load) flags aux (if load then unused else memoryBaseCode base)
+        (if load then memoryBaseCode base else unused) (Arm64Register.registerCode index) src3 0 release
+        (.vectorMemory ⟨.double, load, 0, base, .register index kind scaled, .none⟩)
+
+theorem step_through_d_observed_refines (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (binding : DBinding s.pc code flags aux dst src src2 src3 value release native)
+    (access : scalarMemoryAccess native s) (environment : exclusiveStoreEnvironment native failure s)
+    (pairAccess : pairMemoryAccess native s) (vectorAccess : vectorMemoryAccess native s) :
+    observeExclusiveDispatch code flags release failure src2 s
+      (dispatchThroughD code flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s) =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier code flags aux dst src src2 src3 value release native earlier =>
+      have result := step_through_pair_observed_refines code flags aux dst src src2 src3 value sourceScalar
+        sourceStack firstScalar secondScalar release failure native s earlier access environment pairAccess
+      have numeric : ∃ prior, dispatchThroughPair code flags aux dst src src2 src3 value
+          sourceScalar sourceStack firstScalar secondScalar failure s = some prior := by
+        cases raw : dispatchThroughPair code flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s with
+        | none => simp [raw, observeExclusiveDispatch] at result; split at result <;> simp_all
+        | some prior => exact ⟨prior, rfl⟩
+      obtain ⟨prior, reached⟩ := numeric
+      simpa only [dispatchThroughD, reached] using result
+  | immediate load mode base immediate flags aux unused src3 release memoryFlags =>
+      have separate : dCode load ≠ GeneratedArm64Stlxr.code .stlxr := by cases load <;> decide
+      simp only [observeExclusiveDispatch, separate, ↓reduceIte]
+      rw [d_reached]
+      have route : (if load then (if load then memoryBaseCode base else unused) else
+          (if load then unused else memoryBaseCode base)) = memoryBaseCode base := by cases load <;> rfl
+      rw [route, d_byte_body_immediate load mode aux base value s memoryFlags]
+      rcases vectorAccess with ⟨alignment, accessible⟩
+      exact congrArg some (Arm64VectorMemory.d_writeback_refines load mode base value s alignment accessible)
+  | indexed load base index kind scaled flags aux unused src3 release memoryFlags mod amount =>
+      have separate : dCode load ≠ GeneratedArm64Stlxr.code .stlxr := by cases load <;> decide
+      simp only [observeExclusiveDispatch, separate, ↓reduceIte]
+      rw [d_reached]
+      have route : (if load then (if load then memoryBaseCode base else unused) else
+          (if load then unused else memoryBaseCode base)) = memoryBaseCode base := by cases load <;> rfl
+      rw [route, d_byte_body_indexed load aux base index kind scaled s memoryFlags mod amount]
+      rcases vectorAccess with ⟨alignment, accessible⟩
+      have allowed : permitted (if load then s.memory.readable else s.memory.writable)
+          (Reference.AArch64.memoryBase s base + Arm64VectorMemory.dOffset s (.register index kind scaled)) 8 = true := by
+        rw [Arm64VectorMemory.d_offset_refines]
+        simpa only [Reference.AArch64.VectorMemoryWidth.bytes, Reference.AArch64.VectorMemoryWidth.scale,
+          reduceCtorEq, ↓reduceIte] using accessible
+      have result := Arm64VectorMemory.d_writeback_refines load .none base
+        (Arm64VectorMemory.dOffset s (.register index kind scaled)) s alignment allowed
+      have same : Reference.AArch64.step (.vectorMemory ⟨.double, load, 0, base,
+          .immediate (Arm64VectorMemory.dOffset s (.register index kind scaled)), .none⟩) s =
+          Reference.AArch64.step (.vectorMemory ⟨.double, load, 0, base, .register index kind scaled, .none⟩) s := by
+        simp only [Reference.AArch64.step, Reference.AArch64.vectorMemoryStep, Reference.AArch64.memoryOffset,
+          Reference.AArch64.VectorMemoryWidth.scale, Arm64VectorMemory.d_offset_refines]
+      exact congrArg some (result.trans same)
+
 end KProgFormal.Refinement.Arm64Dispatcher

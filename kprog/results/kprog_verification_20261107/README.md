@@ -1475,7 +1475,7 @@ two-access profile. No LSE2 atomic-access equivalence is asserted; preceding
 exclusive monitor/order observations and their environment witnesses remain
 explicit. Faulting writeback/producer/artifact/O2/O4 and full77/72 stay open.
 
-Validation: Lean93/93 and12 existing contract/model checks pass;10 of13
+Validation: Lean93/93,12 existing contracts and dispatch-model checks pass;10 of13
 existing semantic hosts pass (including465696 pair-value and4096 pair-tag
 cases). Three existing route hosts fail compilation in the unchanged
 production XDP read branch: pair_mem_route, mem_base_src_route and
@@ -1486,3 +1486,40 @@ commands and original log. No source/ISA/runtime/oracle/test weakening.
 Four proof audits use only propext/Quot.sound plus the existing
 Classical.choice/Lean.ofReduceBool dependencies. Prior declaration bytes
 remain identical; proof SHA256 `952a1a7ae78a4eb56111819b7c828544787ca0ea06a95bf41996138328628f1f`.
+
+## Actual D0 byte-field gates composed after pair transfers
+
+`dispatchThroughD` adds LOAD_D0 and STORE_D0. Actual LOAD base is SRC,
+STORE base is DST, SRC2 is index, and the unused other operand/SRC3 bytes
+remain arbitrary. FLAGS is fully unused for these gates: neither width nor
+bank is taken from it. `dByteBody` composes the real pre/access/post sequence
+with the existing generated eight-byte D-success primitive, retaining low
+lane transfer and generated high-half clearing.
+
+Immediate offset/pre/post and native UXTW/SXTW/LSL/SXTX indexed forms share
+the original canonical vector-memory specification. Indexed forms retain
+scale3, ZR, NONE255 and omitted unscaled X modifiers; base31 maps to SP32.
+Derived byte/core equalities and the single
+`step_through_d_observed_refines` theorem preserve all prior cases, exact
+eight-byte events/init/full state and one PC advance. `DBinding` contains
+field identities; `vectorMemoryAccess` separately retains original-native SP
+alignment and read/write permissions. No shadow-derived permission, runtime
+guard or component semantic equality premise is introduced. Existing
+exclusive observation/environment and pair profile witnesses stay explicit.
+
+Validation: Lean93/93,11 existing contracts and dispatch-model checks pass.
+Nine of15 existing hosts pass (including9504 DQ and9504 vector-value cases);
+six existing route hosts fail compilation at the same production unmapped-XDP
+read branch: dq_mem, dq_mem_extra, vreg, vreg_field, mem_base_src and
+mem_prepost. Failed stale binaries were not executed. Their exact commands,
+exits and original log are appended to the integration receipt/archive.
+Three new proof audits report only propext/Classical.choice/Lean.ofReduceBool/
+Quot.sound; all previous declarations remain byte-identical, with no
+placeholders or ISA/runtime/oracle/test changes. Proof SHA256:
+`27f3c854152e76cbc8984787171455466473ddbcd4f8a82946253d4d5694406e`.
+
+The complete check is still failed at exact967's immutable snapshot, not
+rerun or declared passed. A owns the forward production integration repair.
+Q0's two C eight-byte events versus the canonical16-byte event, faulting
+writeback, remaining vector/control operations, full77/72 and native producer/
+compiled-body/Entry/O2/O4 transport remain open.
