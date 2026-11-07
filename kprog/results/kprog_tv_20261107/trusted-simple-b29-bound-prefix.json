@@ -1,0 +1,259 @@
+{
+  "utc": "2026-11-07T17:59:27.595407+00:00",
+  "status": "actual_B29_verifier_soundness_and_full_binding_imply_checked_effects_for_every_canonical_native_prefix_conditional_model_theorem",
+  "theorem": "KProgTV.TrustedSimpleB29.bound_native_prefix_effects_checked",
+  "capture_commit": "090564a50dfd6c7a38452b5df27a845948cb7d44",
+  "producer_binding_commit": "56b78767b31222e579895cdbafc73dd78a0bf1da",
+  "accepted_B_sha256": "45062cd04b8ae6b7ffe0d5f1ea42f61bb2041ad5f44a8a034482b238bf94c53c",
+  "native_sha256": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+  "claims": [
+    "Actual B29 execution/effect validation is constructed by the41 prior components, for all context/store permissions and branches, without assuming a native endpoint.",
+    "A single theorem composes that actual execution, assumed verifier soundness for the admitted B initial state, verifier acceptance and equality of complete executed/validated Artifacts.",
+    "Every effect of every finite canonical byte-decoded native prefix is checked; arbitrary extents, branch choices, undefined XOR AF outputs and repeated terminal faults are covered by the unchanged native-prefix coverage proof.",
+    "Complete Artifact equality includes native/proof bytes, entry, supported ABI bytes and specialization metadata; no hash-only or proof-image substitution occurs in the theorem."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-safety-certificate trusted-simple-b29-certificate",
+    "reproduction": "make -C kprog/tv trusted-simple-b29-certificate",
+    "exit": 0,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleB29.stack_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.data_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.end_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.entry_context_component": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.context_fault_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.first_context_fault": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.second_context_fault": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.zero_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.first_guard_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.first_guard_relational_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.entry_first_guard_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard8_move_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard8_add_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard8_branch_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard72_move_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard72_add_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard72_branch_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard8_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard72_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.remaining_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.remaining_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.remaining_relational_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.ordinary_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.ordinary_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_execution": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_component": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_fault_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_fault_execution": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_fault_component": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.exit_evaluation": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.exit_execution": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_any_permissions": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_relational_component": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.entry_guards_execution": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guards_boundary": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.completed_proof_execution": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.completed_relational_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.all_inputs_execution": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.all_inputs_relational_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.bound_native_prefix_effects_checked": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "log_sha256": "d35c8b674e19cb8860e9b76c328e50c68d0d682a6492a1bf78c3c7a5ddc52f19",
+    "dependency_scope": "Unchanged Safety/CFG SHA match the fully rechecked published213d/494c dependency receipt6c02e18a6; only actual B29 source/Make target extended, focused final compilation. Native-only prefix helper reused; old B37 proof correspondence is not reused."
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleB29.lean": "85b4e4f6e73f775f3f8ccf41746f1e9edf2f6f27864291c775fbfc97d05f0608",
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/Makefile": "4879c081d4cc8c36bb92d093869cc3425404bb0cae879640d68f7d5267215c0c",
+    "kprog/tv/TrustedSimpleSafety.lean": "5537b0f4d04c5b5ebec988c1cb9c63175e9b786d95495265f3273675f82f3bea",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa"
+  },
+  "premises": [
+    "Verifier acceptance and soundness for the exact B29 platform semantics and admitted initial state are assumed, not proved.",
+    "Full executed/validated Artifact equality; exact P60/B29 bytes and entry0; common context argument and initial memory; defined nativeSP input.",
+    "Native model execution at payload PC0, with the declared XDP context conversion map and its kernel provenance relation."
+  ],
+  "trusted": [
+    "Verifier soundness for the accepted physical B and its admitted entry; the declared context-conversion relation must describe that physical artifact.",
+    "The single V reference ISA/Memory semantics, whose hardware fidelity is validated separately by F and is not established by this theorem.",
+    "Kernel binding/entry/ABI/metadata enforcement and capture/platform provenance, including XDP conversion.",
+    "Lean kernel, propext, Classical.choice, Quot.sound and explicitly audited Lean.ofReduceBool."
+  ],
+  "remaining": [
+    "Full architectural reconstruction at basic-block boundaries for the requested full-state per-program TranslationValidation/O2 claim.",
+    "Physical native-body/JIT/caller transport, including actual invocation ABI/platform/stack premises, before a whole-machine safe_native claim.",
+    "All other micro/application per-program certificates. This theorem is for the exact simple P60/B29 artifact only."
+  ]
+}

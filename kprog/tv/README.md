@@ -2220,3 +2220,18 @@ exactly the same ordered guest effects and final memory as that execution.
 All41 accumulated audits pass. This selected-path composition still requires
 full architectural reconstruction, arbitrary-prefix TV and physical caller
 embedding before an end-to-end safety claim.
+
+`trusted-simple-b29-bound-prefix.json` records the actual-B29 conditional
+composition theorem `bound_native_prefix_effects_checked`. Constructed B29
+execution/effect validation, assumed verifier soundness and acceptance for the
+admitted B state, and complete Artifact binding imply checked effects for
+every finite canonical native prefix. Bytes, entry, ABI and metadata remain
+inside that equality. Arbitrary extents/branches, permission outcomes, undefined
+AF and terminal-fault repeats are covered by the unchanged native-only prefix
+lemma, without borrowing the older B37 correspondence. All42 audits pass.
+
+The verifier, V's ISA/Memory reference, kernel binding and declared XDP
+conversion/capture provenance remain trusted. Full per-basic-block
+architectural reconstruction and physical JIT/caller transport are still
+required; this is not a whole-machine safety claim or a certificate for other
+programs. The B29 Make target now depends on the native safety/CFG library.

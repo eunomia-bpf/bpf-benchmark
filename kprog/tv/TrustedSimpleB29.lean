@@ -1,4 +1,5 @@
 import TrustedSimpleX86
+import TrustedSimpleSafety
 
 /-! Exact B29 accepted in the private forward-candidate native-only capture
 26d51b0b9. These are certificate components, not a whole-program TV claim. -/
@@ -902,6 +903,53 @@ theorem all_inputs_relational_correspondence (env : BPF.Environment) (n : X86.St
   obtain ⟨proofRun,same⟩ := all_inputs_execution env n p stack nativePC proofPC active argument memory input
   exact ⟨endpoint,by simpa only [endpoint] using proofRun,by simpa only [endpoint] using same⟩
 
+
+/-- The exact accepted B image with its bound context-conversion map. -/
+def boundProofStep (env : BPF.Environment) (artifact : Artifact) : BlockStep BPF.State :=
+  fun before events after => ∃ result,
+    BPFPlatform.step (environment env) artifact.proofBytes.toArray before=.ok result ∧
+    result.events=events ∧ result.state=after
+
+/-- Actual B29 execution/effect validation, verifier soundness for the admitted
+B state (assumed), and equality of the complete bound artifact imply checked
+effects for EVERY finite native prefix. Native extents, all context/store
+permissions, branch choices and undefined AF outputs are unrestricted.
+
+Full Artifact equality includes bytes/entry/ABI/metadata. Kernel enforcement
+of that equality and XDP conversion, reference ISA hardware fidelity, and
+verifier soundness remain trusted. Physical JIT/caller transport and the full
+architectural reconstruction relation are not asserted by this theorem. -/
+theorem bound_native_prefix_effects_checked (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (validated executed : Artifact) (binding : executed=validated)
+    (nativeImage : validated.nativeBytes=native.toList)
+    (proofImage : validated.proofBytes=proof.toList) (entryImage : validated.entry=0)
+    (accepted : Artifact → Prop) (proofEntry : Artifact → BPF.State → Prop)
+    (checked : Artifact → Event → Prop)
+    (verifierSound : ∀ artifact, accepted artifact → proofEntry artifact p →
+      ∀ trace last, Execution (boundProofStep env artifact) p trace last →
+        ∀ event ∈ trace, checked artifact event)
+    (acceptance : accepted validated) (admitted : proofEntry validated p)
+    {trace : List Event} {last : X86.State}
+    (run : Execution (TrustedSimpleSafety.relationalNativeInstructionStep
+      (BitVec.ofNat 64 executed.entry) executed.nativeBytes.toArray) n trace last)
+    (stack : Word) (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (argument : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (nativeStack : env.nativeInput .stackPointer=.ok stack) :
+    ∀ event ∈ trace, checked validated event := by
+  subst executed
+  have canonicalRun : Execution (TrustedSimpleSafety.relationalNativeInstructionStep 0 native) n trace last := by
+    simpa only [nativeImage,entryImage,Array.toArray_toList] using run
+  obtain ⟨proofRun,_⟩ := all_inputs_execution env n p stack nativePC proofPC active argument memory nativeStack
+  have stepEq : boundProofStep env validated=instructionStep env := by
+    funext before events after
+    unfold boundProofStep instructionStep
+    rw [proofImage]
+  have boundRun : Execution (boundProofStep env validated) p (allReadNativeResult n).events (allInputsAfter p stack) := by
+    rw [stepEq]
+    exact proofRun
+  have completeChecked := verifierSound validated acceptance admitted _ _ boundRun
+  exact TrustedSimpleSafety.captured_native_prefix_effects_checked (checked validated) n nativePC completeChecked canonicalRun
+
 end KProgTV.TrustedSimpleB29
 #print axioms KProgTV.TrustedSimpleB29.stack_step
 #print axioms KProgTV.TrustedSimpleB29.data_step
@@ -954,3 +1002,5 @@ end KProgTV.TrustedSimpleB29
 
 #print axioms KProgTV.TrustedSimpleB29.all_inputs_execution
 #print axioms KProgTV.TrustedSimpleB29.all_inputs_relational_correspondence
+
+#print axioms KProgTV.TrustedSimpleB29.bound_native_prefix_effects_checked
