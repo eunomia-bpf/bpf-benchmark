@@ -62,6 +62,14 @@ return values. Any reachable unknown-PC default fails verification. The
 recorded control regressions and current native-address integration work are in
 `../../corpus/results/kprog_arm64_app_coverage_20261106/README.md`.
 
+Local CODE values currently carry offsets for finite label dispatch. The
+materialization macro handles stack and outer-return bases; ordinary arithmetic,
+memory and helper observations of CODE values require a generic relation between
+proof offsets and actual native addresses. The common kernel input ABI already
+provides CODE-base input, and native-link remaps local ADR targets through its
+final code layout. Their address/layout preservation bridge remains part of the
+universal O1/O4 work alongside the dispatcher relation.
+
 ## Smoke
 
 ```bash
