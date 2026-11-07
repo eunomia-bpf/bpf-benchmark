@@ -1,0 +1,18 @@
+{
+  "utc": "2026-11-07T23:10:18.216853+00:00",
+  "result_commit": "ed5f63c652efa2e33c9cbeff3c4a54309493c832",
+  "guest_exit": 1,
+  "hashes_unchanged": true,
+  "service_requests": 0,
+  "cause": "guest_endpoint_generation_deadline",
+  "evidence": [
+    "Cilium daemon initialized and served API",
+    "cil_xdp_entry attached with bpf_link",
+    "cil_to_host and cil_from_host attached with tcx",
+    "BPF host template compilation 3m41.424607504s",
+    "Initial endpoint regeneration reaches fixed330s Cilium context deadline"
+  ],
+  "source": "vendor/repos/cilium/pkg/endpoint/bpf.go:EndpointGenerationTimeout",
+  "runtime_state": "Complete baseline/native recipe stops during baseline endpoint preparation",
+  "next_mechanism": "Fixed instruction-count virtual clock for full-system functional QEMU, with original application deadline and workload retained"
+}

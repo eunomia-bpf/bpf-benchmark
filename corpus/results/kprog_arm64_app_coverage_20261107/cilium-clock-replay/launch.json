@@ -1,0 +1,26 @@
+{
+  "utc": "2026-11-07T23:13:44.725046+00:00",
+  "waiting_tracee_pid": 3774961,
+  "waiting_tracee_state": "arm-abi-join-candidate/continuation.status.json",
+  "otel_pid": 3969643,
+  "cpu_set": "8-15",
+  "guest_memory_mib": 8192,
+  "concurrent_otel_memory_mib": 4096,
+  "total_lane_memory_mib": 12288,
+  "control_memory_mib": 2048,
+  "qemu_clock": "shift=0,align=off,sleep=off",
+  "transport_sha256": "50a723a56ee426938a5dcc1f28ed6390ed1d9cafc4dfbea1084154f515f484f1",
+  "binary_and_manifest_pins": {
+    "vendor/build/arm64/linux/arch/arm64/boot/Image": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac",
+    "kinsn/module/arm64/build-native-resources/bpf_arm64_native_lab.ko": "0fd8117fb76b2301ecdde335a0731c549a977f492eb88914f458212a2649bec0",
+    "kprog/libnativeloader/build-arm64-typed-tail-v1/trusted-native-loader": "e6ec9ea7d8d6de43875b72c710a5d8a0148f8f1e717e3ffbd8b28fa33cb467bd",
+    "kprog/libnativeloader/build-arm64-typed-tail-v1/libnative_loader.so": "25a55681c481afcd85b6098b67b6608b35de0700dc75fca1a41dc038a8e57994",
+    "kprog/libnativeloader/build-arm64-typed-tail-v1/trusted-service-client": "aa2107f021db6e2bceb2f81de6157aaebfcf8687fd9744a62b26f51a14f9fbe1",
+    "kprog/libnativeloader/build-arm64-typed-tail-v1/trusted-native.o": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+    "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-rodata-extents": "a437397a861322ae476be40a059268ed20006bf21cfb0b6403905f7c827a28f8",
+    "bpfopt/shim/build-arm64-probe-map-fd/libbpfrejit_shim.so": "dd216d98fba7a826c12e5108df460bdef47513b67e2465b487d3348f6255e329",
+    "kprog/arm64/build/app-verified-stage/cilium/manifest.json": "37d9d55318296c5249b73453879d6498923705a0e3dedc9ab2cdce0569dd03ee"
+  },
+  "result_directory": "corpus/results/kprog_arm64_app_coverage_20261107/cilium-clock-replay",
+  "scope": "Common full-system instruction-count virtual clock for functional application startup. Existing native bytes, workload, samples,330s application deadline and generation-bound requirements retained. Generic service control followed by complete Cilium two-start recipe after the existing Tetragon/Tracee sequence."
+}
