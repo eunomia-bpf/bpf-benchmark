@@ -1,0 +1,99 @@
+{
+  "status": "actual_captured_x86_JIT_entry_wrapper_and_return_edge_canonical_components_proved",
+  "utc": "2026-11-07T16:08:58.910049+00:00",
+  "capture_commit": "0f44ffdcb2322116e7d6ddd4fc5164db081af375",
+  "jit_image_sha256": "88cc67b374bc72bf06906d9fd94fe1d1ce3326bafca5ff79050b131955e58584",
+  "jit_bytes": 82,
+  "native_offset": 14,
+  "native_bytes": 60,
+  "claims": [
+    "Actual first5 decoded instructions construct the full native-entry state at JITbase+14; RSP=callerSP-16,RBP=callerSP-8,RDI/flags/SIMD/segment/address-mode retained.",
+    "Both8-byte callee-save writes remain in the ordered trace; memory outside the16-byte save frame is unchanged.",
+    "Original caller return-slot read is identical including permissions, initialized bytes and faults; save words RBP/R15 are derived from actual stores.",
+    "Actual final JMP is canonically decoded/stepped with exact complete-state effects and reaches the recorded live its_return_thunk for the captured base."
+  ],
+  "premises": [
+    "Actual entry PC=JITbase; both host-frame8-byte writes permitted.",
+    "Saved-word readback additionally requires actual stack read permissions.",
+    "Kernel caller typed-context relation, runtime thunk alternatives and LEAVE are separate obligations."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-entry-certificate trusted-simple-jit-certificate",
+    "reproduction": "make -C kprog/tv trusted-simple-jit-certificate",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleJIT.emitted_payload": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_entry_path": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_entry_registers": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_entry_memory": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_outer_return_slot": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_saved_r15": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_saved_bp": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.actual_return_edge": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleJIT.captured_return_symbol": [
+        "propext"
+      ]
+    },
+    "no_sorryAx": true,
+    "log_sha256": "7278a7b62f00c286ef5b71a11ccfa76f8a71e67e6e130583296a4fba95aaadfb"
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "c810a7707495b230af90a4d95dffc012632232eea119080c76c9669f9f5801e3",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/TrustedSimpleJIT.lean": "9b6584bfdaa3f9911f1cf72c15e74f891a12dcbaaddce5d83691e4737510be49",
+    "kprog/tv/Makefile": "34b4c41798be72a5c68d934543dae6950d7196985494235b2d7510952b614c55"
+  },
+  "dependency_commit": "0f44ffdcb2322116e7d6ddd4fc5164db081af375",
+  "not_yet_claimed": [
+    "Canonical LEAVE/entire epilogue transport; Fhardware/Vcanonical work is active.",
+    "Every arbitrary wrapper fault prefix and packet/save-frame separation from the actual kernel caller.",
+    "CurrentB30 TV or a complete physical invocation safety theorem."
+  ],
+  "trusted": [
+    "single VcanonicalX86/reference memory semantics",
+    "Lean kernel and reported axioms; inherited memory algebra uses Lean.ofReduceBool",
+    "actual accepted/native/JIT capture and kernel live-symbol provenance",
+    "kernel caller/ABI/return-thunk code remains explicit trusted boundary"
+  ]
+}

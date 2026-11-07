@@ -2052,3 +2052,17 @@ symbol identity. The retained run passes8 packet checks,10 invocation mismatch
 controls and14 materialization mismatch controls. This binds addresses and
 bytes; runtime thunk text alternatives, the caller contract and current B30
 translation validation remain separate. Historical captures are preserved.
+
+`make -C kprog/tv trusted-simple-jit-certificate` checks the exact82-byte
+captured image in `TrustedSimpleJIT.lean`. Its first5 byte-decoded instructions
+establish RSP=callerSP-16, RBP=callerSP-8 and the unchanged incoming RDI,
+flags, SIMD and segment state. Both saves stay in the ordered trace; memory
+outside those16 bytes and the complete original return-slot read stay exact.
+Saved RBP/R15 words are proved from actual stores. The actual final JMP also
+has a canonical full-state step and reaches the captured live return symbol.
+
+`trusted-simple-jit-entry.json` records the9 axiom audits and exact sources.
+The proof has explicit stack write/read permissions. Canonical LEAVE, the
+whole epilogue, actual kernel caller/context premises, runtime thunk text and
+current B30 refinement remain to be composed; no host-ABI event is silently
+erased or claimed verifier-checked by this component.
