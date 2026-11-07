@@ -1,0 +1,131 @@
+{
+  "status": "private_candidate_compile_preserves_native_context_load_and_all_three_guard_order_no_kernel_acceptance_or_TV_claim",
+  "utc": "2026-11-07T16:18:43.873184+00:00",
+  "changes": [
+    "volatile XDP context view",
+    "existing empty +r value barrier",
+    "empty memory-clobber asm on JCC fallthrough"
+  ],
+  "compile_exit": 0,
+  "actual_clang": "/usr/lib/llvm-18/bin/clang",
+  "archived_command": [
+    "clang",
+    "-g",
+    "-O3",
+    "-mcpu=v4",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_x86",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/include/uapi",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu",
+    "-c",
+    "/workspaces/repository/kprog/results/kprog_tv_20261107/current-kernel/trusted-simple/.live-4j7erzqu/requests/request-75re46cs/generated/trusted_x86.bpf.c",
+    "-o",
+    "/workspaces/repository/kprog/results/kprog_tv_20261107/current-kernel/trusted-simple/.live-4j7erzqu/requests/request-75re46cs/generated/trusted_x86.bpf.o"
+  ],
+  "canonical_header_sha256": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+  "instructions": 28,
+  "conditional_positions": [
+    4,
+    7,
+    10
+  ],
+  "input_sha256": "c79c86913f3e0da8f65758c78aff2330b3319cb02a1b5c3c17398010d59a3de0",
+  "wire_prefix": [
+    {
+      "pc": 0,
+      "code": "0xb7",
+      "registers": "0x90",
+      "offset": 1,
+      "imm": 2
+    },
+    {
+      "pc": 1,
+      "code": "0x61",
+      "registers": "0x12",
+      "offset": 0,
+      "imm": 0
+    },
+    {
+      "pc": 2,
+      "code": "0x61",
+      "registers": "0x11",
+      "offset": 4,
+      "imm": 0
+    },
+    {
+      "pc": 3,
+      "code": "0xb4",
+      "registers": "0x0",
+      "offset": 0,
+      "imm": 0
+    },
+    {
+      "pc": 4,
+      "code": "0x2d",
+      "registers": "0x12",
+      "offset": 22,
+      "imm": 0
+    },
+    {
+      "pc": 5,
+      "code": "0xb7",
+      "registers": "0x3",
+      "offset": 0,
+      "imm": 8
+    },
+    {
+      "pc": 6,
+      "code": "0xf",
+      "registers": "0x23",
+      "offset": 0,
+      "imm": 0
+    },
+    {
+      "pc": 7,
+      "code": "0x2d",
+      "registers": "0x13",
+      "offset": 19,
+      "imm": 0
+    },
+    {
+      "pc": 8,
+      "code": "0xbf",
+      "registers": "0x23",
+      "offset": 0,
+      "imm": 0
+    },
+    {
+      "pc": 9,
+      "code": "0x7",
+      "registers": "0x3",
+      "offset": 0,
+      "imm": 72
+    },
+    {
+      "pc": 10,
+      "code": "0x2d",
+      "registers": "0x13",
+      "offset": 16,
+      "imm": 0
+    }
+  ],
+  "claims": [
+    "The compiled byte prefix reads virtual data0 before data_end4.",
+    "All three guards useJGT64: raw data/end, data+8/end, data+72/end, in native order.",
+    "There remain three conditional guards and28 instructions; the empty compiler barriers add no runtime check."
+  ],
+  "remaining": [
+    "Not kernel-loaded, accepted, bound or a whole-program/full-state TV certificate.",
+    "Only private compile-shape evidence; earlier canonical local guard proof certifies the earlier2-line artifact, not these changed bytes.",
+    "C owns canonical header integration after active OTel/frozen inputs close."
+  ],
+  "input_archive_sha256": "71ddd6d995273c6d64aa1992b076c6e870048f01fcdbd1c51a78987ee448c012",
+  "patch_sha256": "46226de8a5b09042afa606fc013c743b14d346671d1692ebe107b607657c9a6e"
+}

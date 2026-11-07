@@ -2075,3 +2075,12 @@ assumed. The captured tail POP also has an exact canonical full-state step
 with its read retained. The14 audit reports pass. LEAVE and whole-epilogue
 composition still await the single reference rule validated by F's hardware
 fault observations; no separate ISA implementation is introduced here.
+
+`trusted-simple-jcc-candidate.json` records a private follow-up to the context
+candidate: an empty memory-clobber asm on JCC fallthrough keeps the native
+branch order in this compiled simple body. The actual28-instruction output
+reads data before data_end and checks raw pointers, +8, then +72 with64-bit
+JGT, retaining exactly3 conditional guards. Its full source/header/object and
+patch are archived. This is compile-shape evidence, without a new semantic or
+kernel-acceptance claim; C owns integration after its active inputs close.
+The earlier2-line artifact and local Lean proofs remain separately retained.
