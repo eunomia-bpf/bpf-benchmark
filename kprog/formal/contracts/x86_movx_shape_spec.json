@@ -25,5 +25,10 @@
       "result": "zero_extend",
       "effect": "zero_extend_source_lane"
     }
-  ]
+  ],
+  "source_lane": {
+    "high_base": 128,
+    "high_count": 4,
+    "high_shift": 8
+  }
 }

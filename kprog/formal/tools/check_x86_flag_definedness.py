@@ -101,8 +101,16 @@ def main():
     for op in ("inc", "dec"):
         inverse = "dec" if op == "inc" else "inc"
         check([(op, ("rsp",)), (inverse, ("rsp",))] + finish)
+    for op, initial, observe in (("cbw", ("al", "BYTE PTR [rdi]"), ("movzx", ("eax", "ax"))),
+                                 ("cwde", ("ax", "WORD PTR [rdi]"), ("mov", ("eax", "eax"))),
+                                 ("cdqe", ("ax", "WORD PTR [rdi]"), ("movzx", ("eax", "ax")))):
+        check([("mov", initial), (op, ()), observe, ("ret", ())])
+        check([(op, ()), ("ret", ())], "undefined native ABI register")
+    check([("mov", ("ax", "WORD PTR [rdi]")),
+           ("movsx", ("eax", "ah")), ("ret", ())])
     print(f"x86 flag definedness: {cases} encoder/ABI condition and undefined-result cases OK")
     check_compiled_counts()
+    check_compiled_movx()
 
 
 def check_compiled_counts():
@@ -182,6 +190,48 @@ int main(void) {
             "-I" + str(ROOT.parents[1] / "vendor/libbpf/src"), "-I/usr/include/x86_64-linux-gnu",
             "-c", str(path), "-o", str(folder / f"{op}.bpf.o")], check=True)
     print("x86 generated CL/parity handler BPF compiles: both directions OK")
+
+
+def check_compiled_movx():
+    folder = ROOT / "build/movx-encoding"
+    folder.mkdir(parents=True, exist_ok=True)
+    cases = []
+    for signed in (False, True):
+        for width in (16,32):
+            for base, high, destination in (("rax","ah","ax"), ("rcx","ch","cx"),
+                                           ("rdx","dh","dx"), ("rbx","bh","bx")):
+                dst = "e"+destination if width == 32 else destination
+                body = [("mov", (base, "0xABCDEF012345805A")),
+                        ("movsx" if signed else "movzx", (dst,high))]
+                if width == 16: body.append(("movzx", ("eax",dst)))
+                elif dst != "eax": body.append(("mov", ("eax",dst)))
+                body.append(("ret", ()))
+                cases.append((body, (0xFF80 if width == 16 else 0xFFFFFF80) if signed else 0x80))
+    for op, value, tail, expected in (("cbw","0x80",[("movzx",("eax","ax"))],0xFF80),
+        ("cwde","0x8000",[],0xFFFF8000), ("cdqe","0x80000000",[("shr",("rax","32"))],0xFFFFFFFF)):
+        cases.append(([("mov",("rax",value)),(op,())]+tail+[("ret",())],expected))
+    includes = ["-I"+str(ROOT.parent/"x86/micro-prog"), "-I"+str(ROOT),
+                "-I"+str(ROOT.parents[1]/"vendor/libbpf/src"), "-I/usr/include/x86_64-linux-gnu"]
+    for n,(body,expected) in enumerate(cases):
+        instructions = [g.NativeInsn(i,op+" "+",".join(args),op,args) for i,(op,args) in enumerate(body)]
+        name = f"movx_encoding_{n}"
+        program = g.render_program(name,instructions)
+        path = folder/f"case-{n}.c"
+        path.write_text(program+f'\nint main(void) {{struct xdp_md ctx={{0}};return (unsigned){name}_x86_sim_xdp(&ctx)!={expected}U;}}\n')
+        subprocess.run(["cc","-O2","-fsanitize=undefined","-fno-sanitize-recover=undefined",*includes,
+                        str(path),"-o",str(path.with_suffix(""))],check=True)
+        subprocess.run([str(path.with_suffix(""))],check=True)
+        path.write_text(program)
+        subprocess.run(["clang-18","-target","bpfel","-O2","-D__TARGET_ARCH_x86",*includes,
+                        "-c",str(path),"-o",str(path.with_suffix(".o"))],check=True)
+    for op,args in (("movsx",("rax","ah")),("movzx",("r8d","bh")),("movzx",("ax","ebx")),
+                    ("movsx",("al","bl")),("movsxd",("eax","bx"))):
+        try:
+            g.encode(g.NativeInsn(0,op+" "+",".join(args),op,args),{})
+        except ValueError:
+            continue
+        raise AssertionError(("invalid width/REX widening move accepted",op,args))
+    print(f"x86 encoded widening: {len(cases)} actual rendered host/BPF programs pass; five impossible widths/REX pairs rejected")
 
 
 if __name__ == "__main__":

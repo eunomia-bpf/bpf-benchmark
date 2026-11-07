@@ -160,6 +160,9 @@ check:
 	python3 tools/check_reference_x86_logic.py
 	python3 tools/check_reference_x86_unary.py
 	python3 tools/check_reference_x86_popcount.py
+	python3 tools/check_reference_x86_movx.py
+	python3 tools/check_reference_x86_divide.py
+	python3 tools/check_x86_high_load.py
 	python3 tools/check_x86_popcount_memory.py
 	python3 tools/check_x86_flag_definedness.py
 	python3 tools/check_reference_x86_condition.py

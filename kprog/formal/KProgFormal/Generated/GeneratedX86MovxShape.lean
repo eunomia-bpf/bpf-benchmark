@@ -54,3 +54,10 @@ falls back to its effective (FLAGS-resolved) width. The fallback is a separate
 resolution (`effective_width`, the width kernel), not a width code. -/
 def srcWidth (aux : Nat) (effective : Nat) : Nat :=
   if aux = srcWidthAbsentCode then effective else aux
+/-- MOVX-only source codes for AH/CH/DH/BH; legacy register codes are unchanged. -/
+def sourceHighBase : Nat := 128
+def sourceHighCount : Nat := 4
+def sourceHighShift : Nat := 8
+def sourceHigh (source : Nat) : Bool := decide (sourceHighBase ≤ source ∧ source < sourceHighBase + sourceHighCount)
+def sourceRegister (source : Nat) : Nat := if sourceHigh source then source - sourceHighBase else source
+def sourceShift (source : Nat) : Nat := if sourceHigh source then sourceHighShift else 0
