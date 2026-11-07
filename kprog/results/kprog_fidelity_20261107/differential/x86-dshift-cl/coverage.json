@@ -1,0 +1,450 @@
+[
+  {
+    "assembly": "shld eax, ebx, cl",
+    "decoded": "shld   eax,ebx,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 0
+  },
+  {
+    "assembly": "shld eax, ebx, cl",
+    "decoded": "shld   eax,ebx,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 1
+  },
+  {
+    "assembly": "shld eax, eax, cl",
+    "decoded": "shld   eax,eax,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 2
+  },
+  {
+    "assembly": "shld eax, eax, cl",
+    "decoded": "shld   eax,eax,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 3
+  },
+  {
+    "assembly": "shld ecx, eax, cl",
+    "decoded": "shld   ecx,eax,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 4
+  },
+  {
+    "assembly": "shld ecx, eax, cl",
+    "decoded": "shld   ecx,eax,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 5
+  },
+  {
+    "assembly": "shld eax, ecx, cl",
+    "decoded": "shld   eax,ecx,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 6
+  },
+  {
+    "assembly": "shld eax, ecx, cl",
+    "decoded": "shld   eax,ecx,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 7
+  },
+  {
+    "assembly": "shld ecx, ecx, cl",
+    "decoded": "shld   ecx,ecx,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 8
+  },
+  {
+    "assembly": "shld ecx, ecx, cl",
+    "decoded": "shld   ecx,ecx,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 9
+  },
+  {
+    "assembly": "shld esp, eax, cl",
+    "decoded": "shld   esp,eax,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 10
+  },
+  {
+    "assembly": "shld esp, eax, cl",
+    "decoded": "shld   esp,eax,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 11
+  },
+  {
+    "assembly": "shld eax, esp, cl",
+    "decoded": "shld   eax,esp,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 12
+  },
+  {
+    "assembly": "shld eax, esp, cl",
+    "decoded": "shld   eax,esp,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 13
+  },
+  {
+    "assembly": "shld esp, esp, cl",
+    "decoded": "shld   esp,esp,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 14
+  },
+  {
+    "assembly": "shld esp, esp, cl",
+    "decoded": "shld   esp,esp,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 15
+  },
+  {
+    "assembly": "shld rax, rbx, cl",
+    "decoded": "shld   rax,rbx,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 16
+  },
+  {
+    "assembly": "shld rax, rbx, cl",
+    "decoded": "shld   rax,rbx,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 17
+  },
+  {
+    "assembly": "shld rax, rax, cl",
+    "decoded": "shld   rax,rax,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 18
+  },
+  {
+    "assembly": "shld rax, rax, cl",
+    "decoded": "shld   rax,rax,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 19
+  },
+  {
+    "assembly": "shld rcx, rax, cl",
+    "decoded": "shld   rcx,rax,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 20
+  },
+  {
+    "assembly": "shld rcx, rax, cl",
+    "decoded": "shld   rcx,rax,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 21
+  },
+  {
+    "assembly": "shld rax, rcx, cl",
+    "decoded": "shld   rax,rcx,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 22
+  },
+  {
+    "assembly": "shld rax, rcx, cl",
+    "decoded": "shld   rax,rcx,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 23
+  },
+  {
+    "assembly": "shld rcx, rcx, cl",
+    "decoded": "shld   rcx,rcx,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 24
+  },
+  {
+    "assembly": "shld rcx, rcx, cl",
+    "decoded": "shld   rcx,rcx,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 25
+  },
+  {
+    "assembly": "shld rsp, rax, cl",
+    "decoded": "shld   rsp,rax,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 26
+  },
+  {
+    "assembly": "shld rsp, rax, cl",
+    "decoded": "shld   rsp,rax,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 27
+  },
+  {
+    "assembly": "shld rax, rsp, cl",
+    "decoded": "shld   rax,rsp,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 28
+  },
+  {
+    "assembly": "shld rax, rsp, cl",
+    "decoded": "shld   rax,rsp,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 29
+  },
+  {
+    "assembly": "shld rsp, rsp, cl",
+    "decoded": "shld   rsp,rsp,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "raw",
+    "form": 30
+  },
+  {
+    "assembly": "shld rsp, rsp, cl",
+    "decoded": "shld   rsp,rsp,cl",
+    "opcode": "X86_OP_SHLD_IMM",
+    "route": "direct",
+    "form": 31
+  },
+  {
+    "assembly": "shrd eax, ebx, cl",
+    "decoded": "shrd   eax,ebx,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 32
+  },
+  {
+    "assembly": "shrd eax, ebx, cl",
+    "decoded": "shrd   eax,ebx,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 33
+  },
+  {
+    "assembly": "shrd eax, eax, cl",
+    "decoded": "shrd   eax,eax,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 34
+  },
+  {
+    "assembly": "shrd eax, eax, cl",
+    "decoded": "shrd   eax,eax,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 35
+  },
+  {
+    "assembly": "shrd ecx, eax, cl",
+    "decoded": "shrd   ecx,eax,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 36
+  },
+  {
+    "assembly": "shrd ecx, eax, cl",
+    "decoded": "shrd   ecx,eax,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 37
+  },
+  {
+    "assembly": "shrd eax, ecx, cl",
+    "decoded": "shrd   eax,ecx,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 38
+  },
+  {
+    "assembly": "shrd eax, ecx, cl",
+    "decoded": "shrd   eax,ecx,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 39
+  },
+  {
+    "assembly": "shrd ecx, ecx, cl",
+    "decoded": "shrd   ecx,ecx,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 40
+  },
+  {
+    "assembly": "shrd ecx, ecx, cl",
+    "decoded": "shrd   ecx,ecx,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 41
+  },
+  {
+    "assembly": "shrd esp, eax, cl",
+    "decoded": "shrd   esp,eax,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 42
+  },
+  {
+    "assembly": "shrd esp, eax, cl",
+    "decoded": "shrd   esp,eax,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 43
+  },
+  {
+    "assembly": "shrd eax, esp, cl",
+    "decoded": "shrd   eax,esp,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 44
+  },
+  {
+    "assembly": "shrd eax, esp, cl",
+    "decoded": "shrd   eax,esp,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 45
+  },
+  {
+    "assembly": "shrd esp, esp, cl",
+    "decoded": "shrd   esp,esp,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 46
+  },
+  {
+    "assembly": "shrd esp, esp, cl",
+    "decoded": "shrd   esp,esp,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 47
+  },
+  {
+    "assembly": "shrd rax, rbx, cl",
+    "decoded": "shrd   rax,rbx,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 48
+  },
+  {
+    "assembly": "shrd rax, rbx, cl",
+    "decoded": "shrd   rax,rbx,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 49
+  },
+  {
+    "assembly": "shrd rax, rax, cl",
+    "decoded": "shrd   rax,rax,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 50
+  },
+  {
+    "assembly": "shrd rax, rax, cl",
+    "decoded": "shrd   rax,rax,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 51
+  },
+  {
+    "assembly": "shrd rcx, rax, cl",
+    "decoded": "shrd   rcx,rax,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 52
+  },
+  {
+    "assembly": "shrd rcx, rax, cl",
+    "decoded": "shrd   rcx,rax,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 53
+  },
+  {
+    "assembly": "shrd rax, rcx, cl",
+    "decoded": "shrd   rax,rcx,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 54
+  },
+  {
+    "assembly": "shrd rax, rcx, cl",
+    "decoded": "shrd   rax,rcx,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 55
+  },
+  {
+    "assembly": "shrd rcx, rcx, cl",
+    "decoded": "shrd   rcx,rcx,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 56
+  },
+  {
+    "assembly": "shrd rcx, rcx, cl",
+    "decoded": "shrd   rcx,rcx,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 57
+  },
+  {
+    "assembly": "shrd rsp, rax, cl",
+    "decoded": "shrd   rsp,rax,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 58
+  },
+  {
+    "assembly": "shrd rsp, rax, cl",
+    "decoded": "shrd   rsp,rax,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 59
+  },
+  {
+    "assembly": "shrd rax, rsp, cl",
+    "decoded": "shrd   rax,rsp,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 60
+  },
+  {
+    "assembly": "shrd rax, rsp, cl",
+    "decoded": "shrd   rax,rsp,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 61
+  },
+  {
+    "assembly": "shrd rsp, rsp, cl",
+    "decoded": "shrd   rsp,rsp,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "raw",
+    "form": 62
+  },
+  {
+    "assembly": "shrd rsp, rsp, cl",
+    "decoded": "shrd   rsp,rsp,cl",
+    "opcode": "X86_OP_SHRD_IMM",
+    "route": "direct",
+    "form": 63
+  }
+]
