@@ -747,6 +747,15 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         address32 = any(reg_info(name) is not None and reg_info(name)[1] == 32
                         for name in re.findall(r"[A-Za-z][A-Za-z0-9]*", ops[1]))
         width = min(dst_reg[1], 32) if address32 else dst_reg[1]
+        base, index, scale_log2, displacement = parse_mem_terms(ops[1])
+        # Unit-scale RCX uses the equivalent base form, keeping the
+        # ordinary address encoding distinct from the RODATA AUX marker.
+        if (width == 64 and base == "X86_REG_NONE" and
+                index == "X86_RCX" and scale_log2 == 0):
+            return enc("X86_OP_LEA", dst=dst_reg[0], src="X86_RCX",
+                       flags=WIDTH_CONST[width],
+                       aux="X86_MEM_AUX(X86_REG_NONE, 0)",
+                       imm=c_u64(displacement))
         return enc("X86_OP_LEA", dst=dst_reg[0], src=mem_base_reg(ops[1]),
                    flags=WIDTH_CONST[width], aux=mem_aux(ops[1]),
                    imm=c_u64(mem_disp(ops[1])))

@@ -6,7 +6,7 @@
  * sign-extended displacement, an indexed access additionally adds the index
  * register value scaled by the aux-encoded base-2 log of the scale factor. The
  * accumulation is 64-bit two's-complement wrapping, the same bit pattern as
- * the C code's signed `__s64` addition and `__u64` shift.
+ * unsigned `__u64` addition and shift, followed by signed offset representation.
  */
 /*
  * AUX carries the addressing mode (its `X86_MEM_AUX_SCALE_LOG2` byte is the
@@ -21,15 +21,15 @@
 	({ \
 		__s64 __kprog_x86_mo_disp = (DISP); \
 		int __kprog_x86_mo_has_index = (HAS_INDEX) ? 1 : 0; \
-		__s64 __kprog_x86_mo_result = __kprog_x86_mo_disp; \
+		__u64 __kprog_x86_mo_result = (__u64)__kprog_x86_mo_disp; \
  \
 		if (__kprog_x86_mo_has_index) { \
 			__u8 __kprog_x86_mo_scale = \
 				X86_MEM_AUX_SCALE_LOG2(AUX); \
 			__u64 __kprog_x86_mo_index = (INDEX_VALUE); \
 			__kprog_x86_mo_result += \
-				(__s64)(__kprog_x86_mo_index << __kprog_x86_mo_scale); \
+				(__kprog_x86_mo_index << __kprog_x86_mo_scale); \
 		} \
-		__kprog_x86_mo_result; \
+		(__s64)__kprog_x86_mo_result; \
 	})
 #endif

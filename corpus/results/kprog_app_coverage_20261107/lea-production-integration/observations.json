@@ -1,0 +1,18 @@
+{
+  "handoff_sha256": "81ab3448a939d772b11418dff6ed3def8f46c8a34a60e452c7e3776ec70f64fc",
+  "adopted_sha256": {
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74",
+    "kprog/formal/tools/generate_x86_mem_offset_spec.py": "fbf55ace7f4a980c89d681e09bcfe256b945cf2b25a04a80098fb2e9cf6f7d1b",
+    "kprog/formal/generated/x86_mem_offset.h": "6360c8f4ab21446bcb444d934a80986b9e205e5a6ba58e3d68eb7fd2fa68b190",
+    "kprog/formal/oracles/test_x86_mem_offset_route_host.c": "2fa6fccb8bc9017333c5ca2b0bc15f6ba8fad4dd035cc58631dfa04c1f190e87"
+  },
+  "check_exit": 0,
+  "offset_cases": 8401,
+  "encoder_abi_cases": 141,
+  "cl_host_cases": 3072,
+  "rendered_movx_cases": 19,
+  "universal_handoff": "154955ad9fb60ede6ec74ce518e341b47cc182c1",
+  "bpf_ir_receipt": "78209f0716efe6b3c68392b7aa7c7ab823bc9be5",
+  "producer_pre_adoption_sha256": "55d189a2bd1ac19f298cd811e90218e8528cc760f67b39bfbfd0a5e0cead631b",
+  "raw_sha256": "eaa65bb116295c70855a8b578964003077eb133aba674a8a8f174cfdda78451a"
+}

@@ -14,10 +14,9 @@ Unlike the AArch64 contract, x86 encodes the scale as its base-2 logarithm
 (`X86_MEM_AUX_SCALE_LOG2`), so the index contribution is a left shift rather
 than a multiply; the two agree for every scale the arch encodes (1, 2, 4, 8 ->
 0, 1, 2, 3). Both the C and the contract accumulate in the 64-bit
-two's-complement domain: the C code adds `__s64` values and casts the shifted
-`__u64` index to `__s64`, all of which produce the same bits as wrapping
-64-bit addition, so the contract states the accumulation as `BitVec 64`
-addition. `KProgFormal/X86MemOffset.lean` records that equivalence explicitly.
+two's-complement domain: the C code accumulates the displacement and shifted
+index in `__u64`, then presents the resulting bits as a signed offset. The
+contract states this accumulation as `BitVec 64` addition. `KProgFormal/X86MemOffset.lean` records that equivalence explicitly.
 
 The C macro evaluates the displacement once and (only when an index is
 present) the scale byte and the already-read index once; it writes no flags.
@@ -74,16 +73,16 @@ def render_c(spec: dict) -> str:
         "\t({",
         "\t\t__s64 __kprog_x86_mo_disp = (DISP);",
         "\t\tint __kprog_x86_mo_has_index = (HAS_INDEX) ? 1 : 0;",
-        "\t\t__s64 __kprog_x86_mo_result = __kprog_x86_mo_disp;",
+        "\t\t__u64 __kprog_x86_mo_result = (__u64)__kprog_x86_mo_disp;",
         "",
         "\t\tif (__kprog_x86_mo_has_index) {",
         "\t\t\t__u8 __kprog_x86_mo_scale =",
         "\t\t\t\tX86_MEM_AUX_SCALE_LOG2(AUX);",
         "\t\t\t__u64 __kprog_x86_mo_index = (INDEX_VALUE);",
         "\t\t\t__kprog_x86_mo_result +=",
-        "\t\t\t\t(__s64)(__kprog_x86_mo_index << __kprog_x86_mo_scale);",
+        "\t\t\t\t(__kprog_x86_mo_index << __kprog_x86_mo_scale);",
         "\t\t}",
-        "\t\t__kprog_x86_mo_result;",
+        "\t\t(__s64)__kprog_x86_mo_result;",
         "\t})",
     ]
     continued = " \\\n".join(body)
@@ -95,7 +94,7 @@ def render_c(spec: dict) -> str:
  * sign-extended displacement, an indexed access additionally adds the index
  * register value scaled by the aux-encoded base-2 log of the scale factor. The
  * accumulation is 64-bit two's-complement wrapping, the same bit pattern as
- * the C code's signed `__s64` addition and `__u64` shift.
+ * unsigned `__u64` addition and shift, followed by signed offset representation.
  */
 /*
  * AUX carries the addressing mode (its `X86_MEM_AUX_SCALE_LOG2` byte is the

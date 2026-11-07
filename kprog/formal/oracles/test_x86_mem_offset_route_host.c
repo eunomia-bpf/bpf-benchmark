@@ -66,9 +66,11 @@ int main(void)
 		0x0ULL, 1ULL, 8ULL, 0x10ULL, 0xffffffffffffffffULL,
 		0x8000000000000000ULL, 0xfffffffffffffff8ULL,
 		0xffffffffffffffffULL - 12345ULL,
+                0x7fffffffffffffffULL, 0x7ffffffffffffff8ULL,
 	};
-	static const __s64 disps[] = { 0, 8, -4, -64, 0x7fffffff, -0x80000000LL };
-	static const __u8 scales[] = { 1, 2, 4, 8 };
+	static const __s64 disps[] = { 0, 8, -4, -64, 0x7fffffff, -0x80000000LL,
+                1, -1, 0x7fffffffffffffffLL, (-0x7fffffffffffffffLL - 1) };
+	static const __u8 scales[] = { 0, 1, 2, 3, 4, 8, 63 };
 	static const __u8 index_regs[] = { X86_RAX, X86_RSP, X86_RBP, X86_RDI,
 					   X86_R15, X86_REG_NONE };
 	unsigned long cases = 0;
