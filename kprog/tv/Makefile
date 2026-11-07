@@ -969,3 +969,9 @@ guest-trusted-memory-check:
 	rmmod bpf_x86_native_lab
 	insmod build-x86/bpf_x86_native_lab.ko
 	PATH="/usr/lib/llvm-18/bin:$$PATH" PYTHONDONTWRITEBYTECODE=1 python3 test_trusted_memory.py
+
+.PHONY: simulator-composition-check
+simulator-composition-check: bpf-check
+	cd ../formal && lake build KProgFormal.Refinement.X86Dispatcher
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/SimulatorComposition.olean ../tv/SimulatorComposition.lean

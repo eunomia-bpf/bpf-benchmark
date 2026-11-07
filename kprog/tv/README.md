@@ -131,6 +131,20 @@ archives and earlier fixture diagnostics are retained. This is runtime binding
 evidence; C supplies the whole-application replay and V/T supply universal
 intrinsic/compiler preservation.
 
+`generic-simulator-composition.json` connects V's unified dispatcher and
+O2 body equations directly to `Composition.lean`; 14 universal audits pass.
+Canonical decoding binds native PC/site execution, and the common-input encoder
+reconstructs the complete native state with its invocation stack origin.
+Universal field alignment and definedness transport retain all canonical
+successors and exact effects. The same-input token equation gives forward TV
+and reverse model reflection. Complete-output branches/MOVE derive exact-state
+closure. Actual-native coverage includes every block behavior before the bound
+accepted-B checked-effects instance applies. The138 Lean inputs use the recorded
+published `ae275afec` epoch plus this adapter;142 source/build pins are retained.
+Later V PUSH/POP source/cache evolution is recorded separately. Production
+PC/field/definedness/ABI and actual compiled-B/link preservation retain their
+universal correspondence interfaces.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations
