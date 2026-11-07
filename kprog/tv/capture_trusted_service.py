@@ -51,6 +51,42 @@ def elf_build_ids(path, receipt):
             for line in output.splitlines() if 'Build ID: ' in line]
 
 
+def kernel_symbols(live, vmlinux):
+    # This is provenance for the captured JIT's external return edge. Missing
+    # kallsyms access remains explicit and does not change application admission.
+    wanted = {'_text', 'its_return_thunk', '__x86_return_thunk'}
+    running, compiled, raw_running, raw_compiled = {}, {}, [], []
+    error = None
+    try:
+        with Path('/proc/kallsyms').open() as source:
+            for line in source:
+                fields = line.split()
+                if len(fields) >= 3 and fields[2] in wanted:
+                    running[fields[2]] = int(fields[0], 16)
+                    raw_running.append(line)
+    except OSError as failure:
+        error = str(failure)
+    process = subprocess.Popen(['readelf', '--symbols', '--wide', str(vmlinux)],
+                               stdout=subprocess.PIPE, text=True)
+    for line in process.stdout:
+        fields = line.split()
+        if len(fields) >= 8 and fields[-1] in wanted:
+            compiled[fields[-1]] = int(fields[1], 16)
+            raw_compiled.append(line)
+    if process.wait():
+        raise RuntimeError('cannot inspect cached kernel symbols')
+    slides = {name: (running[name] - compiled[name]) % (1 << 64)
+              for name in wanted if running.get(name) and compiled.get(name)}
+    result = dict(running=running, vmlinux=compiled, relocation_by_symbol=slides,
+                  all_three_share_slide=len(slides) == 3 and len(set(slides.values())) == 1,
+                  running_symbol_error=error,
+                  remaining='symbol provenance only; runtime text alternatives and thunk execution remain trusted')
+    (live / 'running-kernel-symbols.txt').write_text(''.join(raw_running))
+    (live / 'vmlinux-symbols.txt').write_text(''.join(raw_compiled))
+    (live / 'kernel-symbols.json').write_text(json.dumps(result, indent=2) + '\n')
+    return result
+
+
 def kernel_identity(live):
     notes = live / 'running-kernel.notes'
     notes.write_bytes(Path('/sys/kernel/notes').read_bytes())
@@ -65,6 +101,7 @@ def kernel_identity(live):
         kernel_sha256={str(p.relative_to(ROOT)): digest(p) for p in (vmlinux, image)},
         layout_profile_sha256=digest(profile_path),
         interpretation='structural XDP layout profile; not a post-conversion instruction capture')
+    result['symbols'] = kernel_symbols(live, vmlinux)
     result['running_matches_vmlinux'] = (len(result['vmlinux_build_ids']) == 1 and
         result['running_build_ids'] == result['vmlinux_build_ids'])
     result['layout_profile_matches_kernel'] = (
@@ -98,6 +135,7 @@ def main():
     summary = dict(ok=False, program='simple' if SIMPLE else 'return2-control', architecture='x86', route='registered native-only common service')
     with tempfile.TemporaryDirectory(prefix='.live-', dir=OUT) as temporary:
         live = Path(temporary)
+        (live / 'capture-script.py').write_bytes(Path(__file__).read_bytes())
         state = live / 'requests'
         environment = dict(os.environ, BPFREJIT_NATIVE_LOADER_TV_DIR=str(live / 'capture'))
         service = subprocess.Popen([
@@ -146,6 +184,9 @@ def main():
                 application_inputs={str(p.relative_to(ROOT)):digest(p) for p in client_argv},
                 capture_sha256={name: digest(record / name) for name in required},
                 sources={str(path.relative_to(ROOT)): digest(path) for path in [
+                    Path(__file__),
+                    ROOT / 'kprog/trusted_service.py',
+                    ROOT / 'kprog/libnativeloader/build/trusted-native-loader',
                     ROOT / 'kprog/libnativeloader/src/native_tv_capture.hpp',
                     ROOT / 'kinsn/module/include/native_lab_checked.h',
                     ROOT / 'kinsn/module/x86/bpf_x86_native_lab.c',

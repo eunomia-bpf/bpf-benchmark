@@ -1,0 +1,109 @@
+{
+  "binding": {
+    "native_bytes": 60,
+    "verifier_insns": 30,
+    "source_prog_id": 6,
+    "native_prog_id": 11,
+    "emitted_sites": [
+      {
+        "blob_id": 0,
+        "generation": 4,
+        "abi_mask": 0,
+        "entry_address": 18446744072640010402,
+        "jit_offset": 14,
+        "native_offset": 0,
+        "native_size": 60
+      }
+    ],
+    "materialization": {
+      "immutable_ELF_sha256": "d5d24d70e70dc8b6dce3d7abc85113227cdd14aef220f86047b5c57e66c580bd",
+      "entry": "simple_xdp",
+      "entry_offset": 0,
+      "entry_bytes": 61,
+      "payload_bytes": 60,
+      "exact_entry_relation": "immutable entry bytes = emitted payload bytes ++ c3",
+      "terminal_bytes_removed": "c3",
+      "generated_copy_byte_identical": true,
+      "native_link_abi": "native-link-abi-v2",
+      "callee_saved_mask": 0,
+      "relocations": 0,
+      "data_objects": 0,
+      "map_patches": 0,
+      "structural_only": true,
+      "remaining": "RET/entry-ABI/platform semantic transport and universal relational TV"
+    }
+  },
+  "invocation_layout": {
+    "jit_base": 18446744072640010388,
+    "native_entry": 18446744072640010402,
+    "native_end": 18446744072640010462,
+    "native_bytes": 60,
+    "caller_SP_to_body_SP": -16,
+    "saved_BP_offset": -8,
+    "saved_R15_offset": -16,
+    "return_target": 18446744071763478688,
+    "kernel_symbol": "its_return_thunk",
+    "kernel_relocation": 167772160,
+    "runtime_thunk_text": "not captured; alternatives/thunk execution remain trusted"
+  },
+  "rejected_controls": [
+    "entry padding",
+    "restore opcode",
+    "return displacement",
+    "JIT base",
+    "live return symbol",
+    "live text symbol",
+    "compiled return symbol",
+    "symbol relocation receipt",
+    "kernel build ID",
+    "layout profile"
+  ],
+  "materialization_rejected_controls": [
+    "immutable input SHA",
+    "generated copy",
+    "entry offset",
+    "entry code",
+    "terminal RET",
+    "ELF machine",
+    "ELF type",
+    "ABI version",
+    "ABI mask",
+    "generated blob",
+    "data layout",
+    "map patches",
+    "native relocations",
+    "duplicate blob"
+  ],
+  "archive_sha256": "c498057be952357352500f3bbc9f0cc93de02c1be1ee6fc6da29216e7b91e8a2",
+  "translation_validation": "current B30 not validated",
+  "remaining": [
+    "canonical LEAVE/whole epilogue transport",
+    "actual kernel caller/context/stack permissions",
+    "runtime thunk alternatives and exact return execution",
+    "full-state TV of the accepted B"
+  ],
+  "trusted": [
+    "kernel capture/provenance and live symbol reporting",
+    "structural ELF/archive parser",
+    "verifier soundness and canonical ISA semantics when composing the separate certificate"
+  ],
+  "utc": "2026-11-07T16:07:55.702475+00:00",
+  "validation_command": "PYTHONDONTWRITEBYTECODE=1 python3 kprog/tv/check_jit_invocation.py kprog/results/kprog_tv_20261107/jit-invocation/trusted-simple",
+  "launch_source_sha256": {
+    "kprog/tv/capture_trusted_service.py": "607827472ef327a0c418bb65e8a5225dda98e077185fa248d0b6409a22299830",
+    "kprog/tv/Makefile": "34b4c41798be72a5c68d934543dae6950d7196985494235b2d7510952b614c55",
+    "kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+    "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29",
+    "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "273cb89c3d576021d3582a8cd4d361c37ac98495a730749ee0b540d803dd2d79",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "c810a7707495b230af90a4d95dffc012632232eea119080c76c9669f9f5801e3"
+  },
+  "checker_sha256": {
+    "kprog/tv/check_jit_invocation.py": "30c1eedc00d9d8f38fa068b4ef5e7fb36dd2d801c47c9bcaf7665a7c2964e341",
+    "kprog/tv/check_trusted_capture.py": "43cb85f2f532683cfeca1f88c73db3ff0b9c4a4f7efabbfc70fccc16230af135",
+    "kprog/tv/emitted_sites.py": "3d05649e222ab603d757c6af44adeda3ee1eb3d17e1c2be8c646051dbd669105",
+    "kprog/tv/extract_checked.py": "60ce986eb22e3185ab565c1ad9b88987582dabd145bc9436c3973e02617ba252",
+    "kprog/tv/capture_trusted_service.py": "607827472ef327a0c418bb65e8a5225dda98e077185fa248d0b6409a22299830"
+  },
+  "historical_capture_preserved": true
+}

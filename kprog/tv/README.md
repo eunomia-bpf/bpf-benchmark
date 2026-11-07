@@ -2038,3 +2038,17 @@ runtime check. It remains unpromoted and was not kernel-loaded; later guard
 ordering, full-state transport and physical ABI still require completion.
 The canonical production header remains unchanged for the active application
 runs; the patch and exact compiler inputs are retained for its owner.
+
+The fresh `jit-invocation/trusted-simple/` capture additionally records three
+live kernel symbols and their compiled addresses. They share one observed
+KASLR relocation, and the actual final JIT relocation reaches the live
+`its_return_thunk`. The actual capture script and common loader binary hash
+are retained. Missing symbol access is reported by the capture tool without
+changing application admission.
+
+`python3 kprog/tv/check_jit_invocation.py CAPTURE_DIRECTORY` checks this exact
+single-function envelope, original native/entry/ABI metadata and archived live
+symbol identity. The retained run passes8 packet checks,10 invocation mismatch
+controls and14 materialization mismatch controls. This binds addresses and
+bytes; runtime thunk text alternatives, the caller contract and current B30
+translation validation remain separate. Historical captures are preserved.
