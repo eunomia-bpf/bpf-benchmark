@@ -185,3 +185,11 @@ compiles, accepts and binds29/29 through the common kernel-owned service.
 All58JIT/native samples match the expected64-bit result and action; all29
 terminal archives match their kernel native hashes. Launch sources retain
 their captured identities, with driver/collector exit0 and actual result215009.
+
+
+The [shared readonly-label repair](x86-readonly-labels/README.md) aligns proof
+and kernel PC32 addresses for zero-size LCPI/anonymous labels through one
+section-identity/displacement resolver. Current production native-link tests
+pass88/88, including243constructedELF address/extent combinations and the
+prior-source failure control. Runtime adoption follows the coherent image
+boundary while active runtime inputs retain their recorded executable bytes.

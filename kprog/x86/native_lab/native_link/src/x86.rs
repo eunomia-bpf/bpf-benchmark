@@ -2222,6 +2222,35 @@ fn proof_symbols_from_x86_layouts(
     Ok(out)
 }
 
+// A zero-sized readonly label names a location in its whole section. Both
+// link modes retain that section identity and carry the label displacement in
+// the relocation addend, preserving relationships among section-local labels.
+fn x86_local_data_object(
+    name: &str, section: object::SectionIndex, section_name: &str,
+    data: &[u8], section_size: u64, offset: u64, size: u64,
+) -> Result<(String, Vec<u8>, u64)> {
+    if size != 0 {
+        let end = offset.checked_add(size)
+            .ok_or_else(|| anyhow!("PC32 target size overflow"))?;
+        let start = usize::try_from(offset)?;
+        let end = usize::try_from(end)?;
+        let bytes = data.get(start..end)
+            .ok_or_else(|| anyhow!("PC32 target {name} exceeds section extent"))?;
+        return Ok((name.to_string(), bytes.to_vec(), 0));
+    }
+    let bytes = if section_name.starts_with(".rodata") {
+        data.to_vec()
+    } else if name.is_empty() && section_name == ".bss" {
+        vec![0; usize::try_from(section_size)?]
+    } else {
+        bail!("PC32 zero-sized target {name} requires a readonly section or an unnamed bss section");
+    };
+    if bytes.is_empty() || offset > bytes.len() as u64 {
+        bail!("PC32 label {name} exceeds section extent");
+    }
+    Ok((format!("section:{section:?}:{section_name}"), bytes, offset))
+}
+
 fn collect_x86_proof_relocs(
     elf: &object::File,
     layouts: &[SymbolLayout],
@@ -2430,38 +2459,9 @@ fn collect_x86_proof_relocs(
                         target_sym.address().checked_sub(sec_base).ok_or_else(|| {
                             anyhow!("PC32 proof target {} below section base", target_name)
                         })?;
-                    let sym_size = target_sym.size();
-                    let (data_symbol_name, sym_bytes) = if sym_size == 0 {
-                        if !target_name.is_empty() {
-                            bail!("PC32 proof target {} has zero size", target_name);
-                        }
-                        let section_bytes = if section_name.starts_with(".rodata") {
-                            target_data.to_vec()
-                        } else if section_name == ".bss" {
-                            let section_size = usize::try_from(target_section.size())
-                                .map_err(|_| anyhow!("PC32 proof .bss section too large"))?;
-                            vec![0; section_size]
-                        } else {
-                            bail!(
-                                "PC32 proof section-symbol target {section_name} is not rodata/bss"
-                            );
-                        };
-                        (
-                            format!("section:{target_section_idx:?}:{section_name}"),
-                            section_bytes,
-                        )
-                    } else {
-                        let end = sym_off_in_sec
-                            .checked_add(sym_size)
-                            .ok_or_else(|| anyhow!("PC32 proof target size overflow"))?;
-                        let bytes = target_data
-                            .get(sym_off_in_sec as usize..end as usize)
-                            .ok_or_else(|| {
-                                anyhow!("PC32 proof target {} out of section bounds", target_name)
-                            })?
-                            .to_vec();
-                        (target_name.clone(), bytes)
-                    };
+                    let (data_symbol_name, sym_bytes, data_offset) = x86_local_data_object(
+                        &target_name, target_section_idx, section_name, target_data,
+                        target_section.size(), sym_off_in_sec, target_sym.size())?;
                     let insn_idx = layout
                         .insn_local_ip
                         .iter()
@@ -2484,7 +2484,8 @@ fn collect_x86_proof_relocs(
                         offset: (new_insn_off + off_within_insn) as u64,
                         r_type,
                         symbol: data_symbol_name,
-                        addend: reloc.addend(),
+                        addend: reloc.addend().checked_add(i64::try_from(data_offset)?)
+                            .ok_or_else(|| anyhow!("PC32 data addend overflow"))?,
                         data: Some(sym_bytes),
                     });
                 }
@@ -2905,36 +2906,9 @@ fn apply_elf_relocations(
                         .address()
                         .checked_sub(sec_base)
                         .ok_or_else(|| anyhow!("PC32 target {} below section base", target_name))?;
-                    let sym_size = target_sym.size();
-                    let (data_symbol_name, sym_bytes) = if sym_size == 0 {
-                        if !target_name.is_empty() {
-                            bail!("PC32 target {} has zero size; cannot embed", target_name);
-                        }
-                        let section_bytes = if section_name.starts_with(".rodata") {
-                            target_data.to_vec()
-                        } else if section_name == ".bss" {
-                            let section_size = usize::try_from(target_section.size())
-                                .map_err(|_| anyhow!("PC32 .bss section too large"))?;
-                            vec![0; section_size]
-                        } else {
-                            bail!("PC32 section-symbol target {section_name} is not rodata/bss");
-                        };
-                        (
-                            format!("section:{target_section_idx:?}:{section_name}"),
-                            section_bytes,
-                        )
-                    } else {
-                        let end = sym_off_in_sec
-                            .checked_add(sym_size)
-                            .ok_or_else(|| anyhow!("PC32 target size overflow"))?;
-                        let bytes = target_data
-                            .get(sym_off_in_sec as usize..end as usize)
-                            .ok_or_else(|| {
-                                anyhow!("PC32 target {} bytes out of section bounds", target_name)
-                            })?
-                            .to_vec();
-                        (target_name.clone(), bytes)
-                    };
+                    let (data_symbol_name, sym_bytes, data_offset) = x86_local_data_object(
+                        &target_name, target_section_idx, section_name, target_data,
+                        target_section.size(), sym_off_in_sec, target_sym.size())?;
 
                     let embed_off = if let Some(&off) = local_data_embed.get(&data_symbol_name) {
                         off
@@ -2975,12 +2949,13 @@ fn apply_elf_relocations(
                         (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
                     let disp32_off = new_insn_off + off_within_insn;
 
-                    // Standard PC32 patch: S + A - P, where S = embed_off,
+                    // Standard PC32 patch: S + A - P, with the canonical object
+                    // base plus data_offset as S,
                     // A = reloc.addend() (typically -4 for rip-relative
                     // loads since the CPU's rip is 4 bytes past the
                     // disp32 field), P = disp32_off.
                     let addend = reloc.addend();
-                    let disp = embed_off as i64 + addend - disp32_off as i64;
+                    let disp = embed_off as i128 + data_offset as i128 + addend as i128 - disp32_off as i128;
                     let d =
                         i32::try_from(disp).map_err(|_| anyhow!("PC32 disp {disp} exceeds i32"))?;
                     blob[disp32_off..disp32_off + 4].copy_from_slice(&d.to_le_bytes());
@@ -4485,6 +4460,78 @@ fn build_x86_array_update(spec: &UpdateSiteSpec) -> Result<Vec<Instruction>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn readonly_label_extent_uses_canonical_section_and_offset() -> Result<()> {
+        let data: Vec<u8> = (0..64).map(|x| x ^ 0x5a).collect();
+        for offset in [0u64, 8, 32, 64] {
+            for name in ["", ".LCPI0_0", "anonymous_float_pool"] {
+                let (key, bytes, addend) = x86_local_data_object(
+                    name, object::SectionIndex(3), ".rodata.cst16", &data, 64,
+                    offset, 0)?;
+                assert_eq!(key, "section:SectionIndex(3):.rodata.cst16");
+                assert_eq!(bytes, data);
+                assert_eq!(addend, offset);
+            }
+        }
+        let (key, bytes, addend) = x86_local_data_object(
+            "typed", object::SectionIndex(3), ".rodata", &data, 64, 8, 16)?;
+        assert_eq!((key.as_str(), bytes.as_slice(), addend), ("typed", &data[8..24], 0));
+        assert!(x86_local_data_object("bad", object::SectionIndex(3), ".rodata", &data, 64, 65, 0).is_err());
+        assert!(x86_local_data_object("bad", object::SectionIndex(3), ".rodata", &data, 64, 60, 8).is_err());
+        assert!(x86_local_data_object("bad", object::SectionIndex(3), ".rodata", &data, 64, u64::MAX, 8).is_err());
+        assert!(x86_local_data_object("writable", object::SectionIndex(3), ".data", &data, 64, 0, 0).is_err());
+        assert!(x86_local_data_object("empty", object::SectionIndex(3), ".rodata", &[], 0, 0, 0).is_err());
+        assert_eq!(x86_local_data_object("", object::SectionIndex(3), ".bss", &[], 8, 0, 0)?.1, vec![0;8]);
+        Ok(())
+    }
+
+    #[test]
+    fn zero_sized_readonly_labels_keep_proof_and_kernel_pc32_identity() -> Result<()> {
+        for prefix in [[0x48,0x8d,0x05], [0x48,0x8b,0x05], [0x0f,0x10,0x05]] {
+            for length in [16usize, 32, 64] {
+                for offset in [0usize, length / 2, length - 8] {
+                    for addend in [-4i64, 0, 4] {
+                        let mut object = WriteObject::new(BinaryFormat::Elf,
+                            object::Architecture::X86_64, Endianness::Little);
+                        let text = object.section_id(StandardSection::Text);
+                        object.append_section_data(text, &[prefix[0],prefix[1],prefix[2],0,0,0,0,0xc3], 1);
+                        object.add_symbol(WriteSymbol { name: b"entry".to_vec(), value:0, size:8,
+                            kind:SymbolKind::Text, scope:SymbolScope::Linkage, weak:false,
+                            section:WriteSymbolSection::Section(text), flags:SymbolFlags::None });
+                        let data_section = object.add_section(Vec::new(), b".rodata.cst16".to_vec(), SectionKind::ReadOnlyData);
+                        let data:Vec<u8>=(0..length).map(|n| (n as u8).wrapping_mul(17)).collect();
+                        object.append_section_data(data_section, &data, 16);
+                        let label = object.add_symbol(WriteSymbol { name:b".LCPI_pool".to_vec(), value:offset as u64,
+                            size:0, kind:SymbolKind::Data, scope:SymbolScope::Linkage, weak:false,
+                            section:WriteSymbolSection::Section(data_section), flags:SymbolFlags::None });
+                        object.add_relocation(text, object::write::Relocation { offset:3, symbol:label,
+                            addend, flags:RelocationFlags::Elf { r_type:2 } })?;
+                        let bytes=object.write()?; let elf=object::File::parse(bytes.as_slice())?;
+                        let entry=find_symbol_by_name(&elf,"entry")?;
+                        let included=discover_reachable(&elf,&entry)?;
+                        let proof=rewrite_x86(&elf,&entry,&included,&HashMap::new(),&HashMap::new(),
+                            &HashSet::new(),&[],&HashMap::new(),&[],true,true,false)?;
+                        assert_eq!(proof.proof_relocs.len(),1);
+                        let reloc=&proof.proof_relocs[0];
+                        assert_eq!(reloc.addend,addend+offset as i64);
+                        assert_eq!(reloc.data.as_deref(),Some(data.as_slice()));
+                        let kernel=rewrite_x86(&elf,&entry,&included,&HashMap::new(),&HashMap::new(),
+                            &HashSet::new(),&[],&HashMap::new(),&[],false,true,false)?;
+                        assert_eq!(kernel.readonly_objects.len(),1);
+                        let obj=&kernel.readonly_objects[0];
+                        assert_eq!(obj.native_symbol,reloc.symbol);
+                        assert_eq!(obj.size,length as u64);
+                        assert_eq!(&kernel.blob[obj.offset as usize..][..length],data.as_slice());
+                        let insn=Decoder::new(64,&kernel.blob,DecoderOptions::NONE).decode();
+                        let want=(obj.offset as i128+offset as i128+addend as i128+4) as u64;
+                        assert_eq!(insn.ip_rel_memory_address(),want);
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
 
     #[test]
     fn direct_call_to_section_offset_zero_is_relocated() -> Result<()> {

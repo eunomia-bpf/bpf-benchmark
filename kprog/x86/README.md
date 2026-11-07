@@ -406,3 +406,9 @@ input provenance tag. Scalar inputs keep ordinary union writes; pointer-tagged
 inputs use complete volatile local storage before byte/word replacement and
 full64-bit reload. Both routes preserve the remaining native bits and scalarize
 the output tag. The generated register-write contract supplies both routes.
+
+
+The local readonly-link resolver carries zero-size labels through their whole
+section identity and original displacement in both proof and kernel modes.
+Typed objects retain their exact extents; common PC32 regression vectors compare
+full bytes, object identity and final decoded addresses across both routes.
