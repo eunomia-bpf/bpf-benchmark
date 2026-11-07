@@ -1,0 +1,292 @@
+[
+  {
+    "assembly": "xchg al, bl",
+    "decoded": "xchg   al,bl",
+    "opcode": "X86_OP_XCHG"
+  },
+  {
+    "assembly": "xchg ax, bx",
+    "decoded": "xchg   bx,ax",
+    "opcode": "X86_OP_XCHG"
+  },
+  {
+    "assembly": "imul ax, bx",
+    "decoded": "imul   ax,bx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "imul ax, WORD PTR [rdi+8]",
+    "decoded": "imul   ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "imul ax, bx, -7",
+    "decoded": "imul   ax,bx,0xfff9",
+    "opcode": "X86_OP_IMUL_IMM"
+  },
+  {
+    "assembly": "imul ax, WORD PTR [rdi+8], -7",
+    "decoded": "imul   ax,WORD PTR [rdi+0x8],0xfff9",
+    "opcode": "X86_OP_IMUL_MEM_IMM"
+  },
+  {
+    "assembly": "xchg eax, ebx",
+    "decoded": "xchg   ebx,eax",
+    "opcode": "X86_OP_XCHG"
+  },
+  {
+    "assembly": "imul eax, ebx",
+    "decoded": "imul   eax,ebx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "imul eax, DWORD PTR [rdi+8]",
+    "decoded": "imul   eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "imul eax, ebx, -7",
+    "decoded": "imul   eax,ebx,0xfffffff9",
+    "opcode": "X86_OP_IMUL_IMM"
+  },
+  {
+    "assembly": "imul eax, DWORD PTR [rdi+8], -7",
+    "decoded": "imul   eax,DWORD PTR [rdi+0x8],0xfffffff9",
+    "opcode": "X86_OP_IMUL_MEM_IMM"
+  },
+  {
+    "assembly": "xchg rax, rbx",
+    "decoded": "xchg   rbx,rax",
+    "opcode": "X86_OP_XCHG"
+  },
+  {
+    "assembly": "imul rax, rbx",
+    "decoded": "imul   rax,rbx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "imul rax, QWORD PTR [rdi+8]",
+    "decoded": "imul   rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "imul rax, rbx, -7",
+    "decoded": "imul   rax,rbx,0xfffffffffffffff9",
+    "opcode": "X86_OP_IMUL_IMM"
+  },
+  {
+    "assembly": "imul rax, QWORD PTR [rdi+8], -7",
+    "decoded": "imul   rax,QWORD PTR [rdi+0x8],0xfffffffffffffff9",
+    "opcode": "X86_OP_IMUL_MEM_IMM"
+  },
+  {
+    "assembly": "ja forward",
+    "decoded": "ja 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "ja backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; ja 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jae forward",
+    "decoded": "jae 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jae backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jae 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jb forward",
+    "decoded": "jb 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jb backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jb 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jbe forward",
+    "decoded": "jbe 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jbe backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jbe 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "je forward",
+    "decoded": "je 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "je backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; je 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jne forward",
+    "decoded": "jne 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jne backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jne 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jg forward",
+    "decoded": "jg 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jg backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jg 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jge forward",
+    "decoded": "jge 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jge backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jge 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jl forward",
+    "decoded": "jl 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jl backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jl 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jle forward",
+    "decoded": "jle 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jle backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jle 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "js forward",
+    "decoded": "js 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "js backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; js 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jns forward",
+    "decoded": "jns 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jns backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jns 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jo forward",
+    "decoded": "jo 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jo backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jo 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jno forward",
+    "decoded": "jno 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jno backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jno 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jp forward",
+    "decoded": "jp 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jp backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jp 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jpe forward",
+    "decoded": "jpe 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jpe backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jpe 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jnp forward",
+    "decoded": "jnp 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jnp backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jnp 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jpo forward",
+    "decoded": "jpo 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jpo backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jpo 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jmp forward",
+    "decoded": "jmp 1f; mov rax, 0; 1: mov rax, 1",
+    "opcode": "X86_OP_JMP"
+  },
+  {
+    "assembly": "call and ret (stack return address)",
+    "decoded": "call 1f; .global return_53; return_53: jmp 2f; 1: mov rax, QWORD PTR [rsp]; ret; 2:",
+    "opcode": "X86_OP_CALL"
+  },
+  {
+    "assembly": "rep movsb",
+    "decoded": "rep movsb",
+    "opcode": "X86_OP_REP_MOVS"
+  },
+  {
+    "assembly": "rep movsw",
+    "decoded": "rep movsw",
+    "opcode": "X86_OP_REP_MOVS"
+  },
+  {
+    "assembly": "rep movsd",
+    "decoded": "rep movsd",
+    "opcode": "X86_OP_REP_MOVS"
+  },
+  {
+    "assembly": "rep movsq",
+    "decoded": "rep movsq",
+    "opcode": "X86_OP_REP_MOVS"
+  }
+]

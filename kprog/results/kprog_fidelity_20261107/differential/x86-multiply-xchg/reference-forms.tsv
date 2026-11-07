@@ -1,0 +1,17 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+0	xchg al, bl	1024	1024	0	0	checked	none
+1	xchg ax, bx	1024	1024	0	0	checked	none
+2	imul ax, bx	1024	1024	0	0	checked	none
+3	imul ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+4	imul ax, bx, -7	1024	1024	0	0	checked	none
+5	imul ax, WORD PTR [rdi+8], -7	1024	1024	0	0	checked	none
+6	xchg eax, ebx	1024	1024	0	0	checked	none
+7	imul eax, ebx	1024	1024	0	0	checked	none
+8	imul eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+9	imul eax, ebx, -7	1024	1024	0	0	checked	none
+10	imul eax, DWORD PTR [rdi+8], -7	1024	1024	0	0	checked	none
+11	xchg rax, rbx	1024	1024	0	0	checked	none
+12	imul rax, rbx	1024	1024	0	0	checked	none
+13	imul rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+14	imul rax, rbx, -7	1024	1024	0	0	checked	none
+15	imul rax, QWORD PTR [rdi+8], -7	1024	1024	0	0	checked	none
