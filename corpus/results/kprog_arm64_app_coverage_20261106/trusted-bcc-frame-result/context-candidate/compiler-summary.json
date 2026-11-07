@@ -1,0 +1,120 @@
+{
+  "scope": "compiler only; no verifier/native execution",
+  "cases": [
+    {
+      "name": "valid_control",
+      "native_sha256": "0e5c0407b26746fe5465c46615365300dee08573ba7d187b35a1935e540703f5",
+      "object_sha256": "ed265b647f84e3a50c14a7db249b99018ff849a3a409f4442eb4b08c2f2c64f7"
+    },
+    {
+      "name": "context_field_write",
+      "native_sha256": "b7d54fdc74aac022cbd82c810e629a6d19b1d869ef4aba75544474a861242ca0",
+      "object_sha256": "5f9589f85bc272f1cdcb309d140f4e6eec3be226ff42b95d2f18b95cb56fd604"
+    },
+    {
+      "name": "valid_context_pointer_read",
+      "native_sha256": "1dea149a21224fa08f0995a365fe378922936b91d17c9e26843a54b268a6f31e",
+      "object_sha256": "6ae2dd0856d0f5bc8e7b4b8a5448b131c58e00c2f6798ac5dfeab3199ef3add3"
+    },
+    {
+      "name": "context_alias_write",
+      "native_sha256": "050058eb94d7d607a94361d75399c217add59342bf0768cea5dbe86766c1085b",
+      "object_sha256": "420223d55855fe2e8eac53ed4ca6e1dcb8068b0eaa46054bbcc449c10722f1c9"
+    },
+    {
+      "name": "context_scalar_alias_write",
+      "native_sha256": "77ef39b4ba262bd59491f3c3cbab590cc11146bdbde055738bfb6a0450720d9d",
+      "object_sha256": "cba3680360db748f59faf7dfba37fa64811ccaeca6847156e2b2358026aba6c1"
+    },
+    {
+      "name": "context_byte_write",
+      "native_sha256": "9e874111f0379fb5e726867dbc5f490d0f75c2b548d48a03fa507e1bda9109a8",
+      "object_sha256": "9ae6c0956049d5fbc226e13a18ab1ed43b2c0b5d8c8799607e2f329c477f0e74"
+    },
+    {
+      "name": "context_libc_memset",
+      "native_sha256": "eea34bf51c121a08d59c77d1fb33bb67369a6e4cc6750d9b22f3cba12eaa006c",
+      "object_sha256": "d58ee45f28b7fc87704a55698016f5eb69ab5558cb93073e1049eb6323570d08"
+    },
+    {
+      "name": "context_buffer_helper",
+      "native_sha256": "4ef65b909a8300c0eda63678a2b6e363a2e918795808c7b749f5661dfd31b8ff",
+      "object_sha256": "3acf3b1d73537f4c84a81d9bc3ce9659289c417c7211bd13800526ba8df5f9c5"
+    }
+  ],
+  "candidate_pins": {
+    "arm64_sim_local_bpf.h": "144b56896529b292cde065856cd698eb83384e9aeb9ee3806a937644e5f983fd",
+    "source-pins.json": "e6132ef7018b5041d6fb1914480029a74576aa785fe614b5c726e3b684ae3dd7",
+    "includes/kinsn/module/include/native_lab_input.h": "c43adcd858d4c53c500aaa1763e2f95196b9da7f7bc6f284ca305f7d15b1e131",
+    "includes/kprog/arm64/arm64_sim.h": "c0e90bae259d0bb47822b6cb31d9b428c44385f52a18373fac4d9a591d80cf7e",
+    "includes/kprog/arm64/arm64_sim_direct.h": "a0e8af116a7aaa666021ed4ffefeb7b54bd3dcf3d16c80762c36f79cec6fdbe7",
+    "includes/kprog/formal/generated/abi_load.h": "618e1ca06aa188eba278a992e815dbdd079c9e004bacb122ff88491d3018b571",
+    "includes/kprog/formal/generated/arm64_adrp.h": "da2004614c5ac4af1888b56f90398444e7d2f33c9e11391ab51e2f2a57fc4e20",
+    "includes/kprog/formal/generated/arm64_alu_handler.h": "5ace99d67ab6dc597ffce8d9cec6b567bcfc402d6cb424bceb5a4ff870bd8843",
+    "includes/kprog/formal/generated/arm64_alu_operand.h": "8a39f8c29c3dff0096dd15b8d49825ac0af6cfef0402efbaab43fa6683d57427",
+    "includes/kprog/formal/generated/arm64_alu_operand_select.h": "8f140666a12df159f4151df01dd6e3d336c06d1e93811337ad7f8bd0c72f097d",
+    "includes/kprog/formal/generated/arm64_alu_result.h": "57026f3f77c9538bae55db15c691961457b5ff2fd71c8e5a47efc911f14c45f7",
+    "includes/kprog/formal/generated/arm64_aux.h": "48f6484cf891986c04e0c31ac2c7776ad084583300b59c218b9ac1c6931b6592",
+    "includes/kprog/formal/generated/arm64_bitfield.h": "4037f701cf89fac8ea15569456acd359080f9c32e027716f11b4568d28ed8210",
+    "includes/kprog/formal/generated/arm64_branch.h": "597f1c706da47bb61fee586c8db342de0e046338510fe7b781ea23503b509b57",
+    "includes/kprog/formal/generated/arm64_branch_emit.h": "f0102c2c142207f8d52df1ef1368ce861acf1cd8474af493ffd906a73da84404",
+    "includes/kprog/formal/generated/arm64_byte_lane.h": "d2d25688aa3916f487adc26b6fab895ef40ab5b6f0b0ea9dfdf2cca31b6a7e44",
+    "includes/kprog/formal/generated/arm64_ccmp_decode.h": "74b38bc2feebc11f7d6079f2241054642670a290b7a9e68620a8b3c838da258e",
+    "includes/kprog/formal/generated/arm64_ccmp_handler.h": "76483f944f5292afe626dfbeb824eb9f838ec246c147e6a12128b5ae0ce2adca",
+    "includes/kprog/formal/generated/arm64_cneg.h": "a9b82f72fd8b67b020e3c8b3f1e64296c4fb6072401ddd3df22a243ba2275b6c",
+    "includes/kprog/formal/generated/arm64_cond.h": "d70d31c6911d0b6e731ee081e314de27ce232abc3f06935b49ba2dd248dab04a",
+    "includes/kprog/formal/generated/arm64_csel.h": "26b1a756a3920767761dee9be3a021dd1b691024ab4d622165de13f08d541fc7",
+    "includes/kprog/formal/generated/arm64_csel_ptr.h": "c305872b58e4930058e6218f89e1363f3e601f816929da89b1356ddcea4266d8",
+    "includes/kprog/formal/generated/arm64_decode.h": "50254db21e62953c9204cd5b1c4b2ac8e39ae45191152e062e21e33c7d4c3544",
+    "includes/kprog/formal/generated/arm64_dispatch_family.h": "14265108cb9cb9cf5eab817bbec8cebb6e2b384c5e8be36440967e5c520f352a",
+    "includes/kprog/formal/generated/arm64_dispatch_singleton.h": "4eaa6e68a7e396d365a3831e839b63ddd5f4c4f90979f7c2a3eb90e3ce0a12ac",
+    "includes/kprog/formal/generated/arm64_dq_mem.h": "92c3da7af26348576ecd967618750664c8f921576a4c8ffc5f1a7dc92a1b6b09",
+    "includes/kprog/formal/generated/arm64_dq_mem_extra.h": "cc5413cadf698ee0a2117979a3c0b4c5f3a04007f74c452ef39c721565bf024b",
+    "includes/kprog/formal/generated/arm64_extrev.h": "cd5735e626fcf97f2c91cc13e2ccb4e2d2666b01277b1fc7a2ba75f187d3f32f",
+    "includes/kprog/formal/generated/arm64_flag_handler.h": "500362ccb5871636f111aaca1a0b47d0d009f8a5b1eec4b0a5e21f79ab4b3564",
+    "includes/kprog/formal/generated/arm64_flag_operand.h": "cff285b48337d1bebe43fddf3c63c024102e93c6d2a83e09a10b4f700fa0f8ce",
+    "includes/kprog/formal/generated/arm64_flags.h": "d0a82dd9b8a6af80a65d67884843cf6fce8717e7c98d4ef78610936a60062ff9",
+    "includes/kprog/formal/generated/arm64_fmov.h": "61c6b6f281a48bb6d6157396eab01278c4649ac269d6a5ee0728a539ad1dba30",
+    "includes/kprog/formal/generated/arm64_fmov_dest.h": "71355ebc61a8e5a89fcc6dd35db9f63f5da117cc5f7c71f39ff3d3054716d72a",
+    "includes/kprog/formal/generated/arm64_helper_arg_ptr.h": "4e79818af70642277f578e8eedd096039cbecaad0389889ad8c282ff3d428199",
+    "includes/kprog/formal/generated/arm64_imm_operand.h": "ea25c93b74d1d29aca0fce7e49793001b78949af163cc9a99bff682a9e4bd643",
+    "includes/kprog/formal/generated/arm64_ldrsx.h": "2a0edd515553a70b0d64ac5aef2edcd5eb53e9c503f43619ee13e427fc33e6ed",
+    "includes/kprog/formal/generated/arm64_ldrsx_op.h": "5d9dd798aa466f554eea899d5d19812597c25e6a665ccf66c313616106629d7d",
+    "includes/kprog/formal/generated/arm64_load_bytes.h": "998c750370aed48ca699db040ebae945cf5344e53ebf383c1e98215200bdf571",
+    "includes/kprog/formal/generated/arm64_load_tag.h": "48663436f25022219aa7d68675ed869d90ba71180c81c31ddec0f4342b904e60",
+    "includes/kprog/formal/generated/arm64_logic_flag_handler.h": "a4f9b02b5bb52edbef43ff27f17d9ae8063626402665cff4199b648584faf7a5",
+    "includes/kprog/formal/generated/arm64_mem_base_src.h": "c16810e782741c2827fc5a3f71a366c4eadae0c7a061852715d2658491ee4a5f",
+    "includes/kprog/formal/generated/arm64_mem_dispatch.h": "64030b762d105a19c6f4cf832425e93a7b2c9db14723612d34b473b143ce590d",
+    "includes/kprog/formal/generated/arm64_mem_index.h": "8e6941bb22f9ebd8ee3ac0a5efc9cd88e579588919a9da3e2322477a7ef67d8b",
+    "includes/kprog/formal/generated/arm64_mem_index_value.h": "9c3f8bd661c9fc33c65d50dc53f2b4a23475cdee4493d26d4460e33dbe078c4e",
+    "includes/kprog/formal/generated/arm64_mem_offset.h": "bcde44489568bd580bff413c49d0f013597c4730b38edf2a80fd6e3d57003be5",
+    "includes/kprog/formal/generated/arm64_mem_prepost.h": "29ae20a6b2c7a5999c2f547140654e236d63dcf2e5d2fe89ca61bb3077fad765",
+    "includes/kprog/formal/generated/arm64_mem_write_arm.h": "68959e83cfd3fca3b049656fa5038c28a98aa99ce2e1ec17433da798a8eb87b8",
+    "includes/kprog/formal/generated/arm64_mod.h": "43019ec31b5719d677dd190e2eb5cc01577ea6184f75241bcb92261949d78a72",
+    "includes/kprog/formal/generated/arm64_mov.h": "704a0868ba2a31ed0db62fccbbe57bb4211c66309140c1f5a5affa272dfafd05",
+    "includes/kprog/formal/generated/arm64_movk.h": "210f4a0e46f5cdac335e569eb928648ff60d08cce7d5fd6e33e2923cce260063",
+    "includes/kprog/formal/generated/arm64_mul.h": "8b09ffb3f1f1f8c10c73adb3659d41f3d75f7b5aadc530f9d254166e7779064b",
+    "includes/kprog/formal/generated/arm64_orn.h": "8920584b794bf9a73469fa2f840cfc624184dda565bc9e763645603feaefd098",
+    "includes/kprog/formal/generated/arm64_pair_load_tag.h": "621e6a63e35cc2657fb9dabf3cc48af216565e83ae1cd832632088b7409edcc6",
+    "includes/kprog/formal/generated/arm64_pair_mem.h": "9f9e7c0068deb0afa482752c89661b297b7c76383633eb77ab5e949568eedbe6",
+    "includes/kprog/formal/generated/arm64_reduction.h": "0c1ff0ba12a6bac4344b552b814e38e8e51f9ed60f1012dcbcd4bfb92a4e5fab",
+    "includes/kprog/formal/generated/arm64_reg_dispatch.h": "0179453b7a3525b443378ff80043622427399f34cd4496b725e26f029f0308eb",
+    "includes/kprog/formal/generated/arm64_reg_presence.h": "14e1b10ab61cd336808127ffd281d7c03d04ce9ba5d7f76cc007ca99423771bb",
+    "includes/kprog/formal/generated/arm64_shift.h": "00c1b55aa69d024a2c1b2825a2d5edb9a4282c8ee12daad2d42d017e04828314",
+    "includes/kprog/formal/generated/arm64_stack_arena.h": "031d768e60dc0475f707d103ebb682b8b2b54d3e5ca8333d8940546f25fe206b",
+    "includes/kprog/formal/generated/arm64_stack_arm.h": "c43baa698b99e913cda9011095bfdbf9319786a632cfd7f141b98e6bcb0958ce",
+    "includes/kprog/formal/generated/arm64_stack_index.h": "8a6f548dc09ea34b879ca2b7e8a560d7f1a6a978f1b38b85c006808ebf970447",
+    "includes/kprog/formal/generated/arm64_stack_read_tag_source.h": "9275c9b11fdab9cfe3cf19b54136029bac515c14794fb5bb6610e8ed725e8987",
+    "includes/kprog/formal/generated/arm64_stack_tag.h": "f946d24a144914c9f3eff2d9d90569f6725c34155c734788c281fe7b4479b783",
+    "includes/kprog/formal/generated/arm64_stack_write_lanes.h": "587a78ac6adc1d941be42959cf8a150a2d54b3383e7377e95c3264ba13a55ecf",
+    "includes/kprog/formal/generated/arm64_stack_write_tag_action.h": "8007f7a172de5d830c86fd3fe7eb151c5206c92e601b670fc853920a5a980d66",
+    "includes/kprog/formal/generated/arm64_stlxr.h": "dbd0746d3ab527ae5ab41d7317e9d174e2ea366550b11f131296ec64fcef2e1e",
+    "includes/kprog/formal/generated/arm64_store_bytes.h": "33906394fd5a59f9d43e9a8b44d5e67d900ce0e9d71c109cc4c4c84af16f29cc",
+    "includes/kprog/formal/generated/arm64_unary.h": "ecc0ad59ed14658c60323f8eee35864e63f9fc4229da5ce99caf4b90fd60af0e",
+    "includes/kprog/formal/generated/arm64_vreg.h": "da5db5dc846ab3c1e1134f9c5b0555322c464bac685b75bcf4ec708e754c3cf0",
+    "includes/kprog/formal/generated/arm64_vreg_field.h": "e8c8dad50e97d99fcbaf3e91f54dad1e1677b5e907d9eee5ad631d148feb3141",
+    "includes/kprog/formal/generated/arm64_width.h": "ae96d8fefcbc97f9a62cff4fcc5c5dac120e57acd4237fa27f7dddd824729ab1",
+    "includes/kprog/formal/generated/arm64_write_arm.h": "63e15a94d7dea6e1d5d59081af63dde7edec91a286dc5d4caea8348eb11b9665",
+    "includes/kprog/formal/generated/ptr_add.h": "41cfc08ca5232f507788cb8d00d8fa216df9fb1c3c9ece8e00c5e83b06ae259d"
+  }
+}

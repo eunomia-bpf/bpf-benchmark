@@ -773,3 +773,14 @@ trusted-payload-katran-run:
 .PHONY: trusted-payload-negative-run
 trusted-payload-negative-run:
 	PYTHONDONTWRITEBYTECODE=1 python3 $(HERE)/trusted_payload_negative.py host
+
+.PHONY: trusted-context-candidate-prepare trusted-context-candidate-run
+trusted-context-candidate-prepare:
+	PYTHONDONTWRITEBYTECODE=1 python3 $(HERE)/trusted_context_check.py prepare
+
+trusted-context-candidate-run:
+	PYTHONDONTWRITEBYTECODE=1 python3 $(HERE)/trusted_context_check.py host
+
+.PHONY: trusted-context-candidate-check
+trusted-context-candidate-check:
+	PYTHONDONTWRITEBYTECODE=1 python3 $(HERE)/trusted_context_check.py check

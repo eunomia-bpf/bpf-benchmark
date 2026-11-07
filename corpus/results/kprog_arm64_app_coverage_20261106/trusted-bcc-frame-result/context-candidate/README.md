@@ -1,0 +1,18 @@
+# Isolated real-XDP-context representation
+
+The production ARM simulator places the XDP entry pointer at private expanded ABI memory. Lane F demonstrated that an ordinary store then passes verification by writing that private object. This candidate keeps architectural X0 at the actual verifier context instead. Native 64-bit reads of data/data_end use the corresponding typed XDP fields, including a base-register offset; context pointers passed to ordinary stores, libc and buffer helpers retain the external context identity. Store instructions do not gain a simulator bounds check or an alternate return.
+
+Only the frozen candidate header changes. The production header, generator, kernel/module, loader and existing Katran inputs stay unchanged. SKB context projection remains a separate unresolved issue. Other native XDP field reads fail compilation explicitly; this experiment does not claim complete context-field support or simulator-wide fidelity.
+
+The eight native inputs compile successfully with the candidate: the original F return2 control and ordinary-store finding have unchanged ELF hashes; a second positive reads data and data_end through an alias and a bounded packet word. The six load-only negatives cover direct/offset/scalarized-alias stores, a byte store, libc memset and a generic buffer helper destination. No unsafe program is executed. Compilation is preparation evidence; verifier rejection and positive bound execution are still pending in the detached full-system QEMU replay.
+
+The replay uses the same common kernel-owned native request service, F's corrected return-target linker, the unchanged producer/context binaries and a separate 2 GiB/two-vCPU guest. The existing 8 GiB Katran candidate continues, keeping total A guest memory at 10 GiB. No shared image, kernel or module is rebuilt.
+
+Commands in the retained Workspace:
+
+    make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile trusted-context-candidate-check
+    make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile trusted-context-candidate-run
+
+The input and compiler directories refuse reuse, preserving earlier evidence. To reproduce in a fresh retained build directory, unpack candidate-inputs.tar.gz under kprog/arm64/build/trusted-transport first; it contains the frozen candidate header, 71 dependency headers, snapshot preparation source, all eight native ELFs/assembly/manifests, bound producer and companion contexts. The compiler outputs go into a newly created compiler directory. The prepare target is for initial fixture construction from the existing F inputs; the frozen archive is the durable reproduction input.
+
+compiler-summary.json records every native/proof object identity and candidate header pins. compiler-inputs.tar.gz contains all eight generated proof C/BPF objects, native-link outputs, commands and disassembly. compiler-check.log.gz records the successful Make target. compiler-setup-failure.log.gz preserves an initial checker string-literal syntax error; it occurred before generation or guest startup and was corrected before the successful compile. No candidate promotion or application acceptance is claimed.
