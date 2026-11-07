@@ -1,0 +1,525 @@
+{
+  "scope": "generation/compiler ABI checks, not kernel/verifier/application acceptance",
+  "cases": [
+    {
+      "case": "dotted_alias_collision_direct0",
+      "compile_returncode": 0,
+      "native_sha256": "ffa352af17389c65fdedae25585975e70ce9093d92c1af32b4a1db7ee17b428b",
+      "aliases": {
+        "sys_exit.zero": "__arm64_trusted_map_0_",
+        "__arm64_trusted_map_0": "__arm64_trusted_map_0"
+      },
+      "map_relocations": [
+        {
+          "symbol": "sys_exit.zero",
+          "offset": 0,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "__arm64_trusted_map_0",
+          "offset": 24,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        }
+      ]
+    },
+    {
+      "case": "dotted_alias_collision_direct8",
+      "compile_returncode": 0,
+      "native_sha256": "ffa352af17389c65fdedae25585975e70ce9093d92c1af32b4a1db7ee17b428b",
+      "aliases": {
+        "sys_exit.zero": "__arm64_trusted_map_0_",
+        "__arm64_trusted_map_0": "__arm64_trusted_map_0"
+      },
+      "map_relocations": [
+        {
+          "symbol": "sys_exit.zero",
+          "offset": 0,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "__arm64_trusted_map_0",
+          "offset": 24,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        }
+      ]
+    },
+    {
+      "case": "actual_katran14_handles",
+      "compile_returncode": 0,
+      "native_sha256": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+      "undefined_map_symbols": [
+        "ch_rings",
+        "ctl_array",
+        "fallback_cache",
+        "lru_mapping",
+        "lru_miss_stats",
+        "quic_stats_map",
+        "reals",
+        "reals_stats",
+        "server_id_map",
+        "server_id_stats",
+        "stats",
+        "vip_map",
+        "vip_miss_stats",
+        "vip_to_down_reals_map"
+      ],
+      "map_relocations": [
+        {
+          "symbol": "stats",
+          "offset": 752,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 5104,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 5488,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 6488,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 7176,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "vip_map",
+          "offset": 8880,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 9072,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "lru_mapping",
+          "offset": 9576,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 9728,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "fallback_cache",
+          "offset": 9792,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "quic_stats_map",
+          "offset": 10072,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "vip_map",
+          "offset": 10536,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 10808,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "vip_map",
+          "offset": 12240,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 12432,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "lru_mapping",
+          "offset": 12936,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 13080,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "fallback_cache",
+          "offset": 13144,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "quic_stats_map",
+          "offset": 13384,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "vip_map",
+          "offset": 13832,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 14104,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 14448,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "server_id_stats",
+          "offset": 15888,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "server_id_map",
+          "offset": 18624,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "reals",
+          "offset": 18888,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 20120,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "server_id_stats",
+          "offset": 22112,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 25248,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "vip_to_down_reals_map",
+          "offset": 25440,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 25648,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 25840,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 26184,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "reals",
+          "offset": 26944,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "ctl_array",
+          "offset": 27080,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 27176,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "reals_stats",
+          "offset": 27384,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 28016,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "server_id_stats",
+          "offset": 34000,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 34536,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "vip_to_down_reals_map",
+          "offset": 34728,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 34936,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 35136,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 35600,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "ch_rings",
+          "offset": 37832,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "reals",
+          "offset": 38184,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "vip_miss_stats",
+          "offset": 38808,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "lru_miss_stats",
+          "offset": 39192,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "ch_rings",
+          "offset": 39696,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "reals",
+          "offset": 40048,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "vip_miss_stats",
+          "offset": 40672,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "lru_miss_stats",
+          "offset": 41232,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "reals",
+          "offset": 41808,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "ctl_array",
+          "offset": 41944,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 42056,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "reals_stats",
+          "offset": 42224,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "server_id_map",
+          "offset": 46384,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "reals",
+          "offset": 46648,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "server_id_stats",
+          "offset": 47928,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 48112,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        },
+        {
+          "symbol": "stats",
+          "offset": 49472,
+          "low": 0,
+          "high": 0,
+          "addend": null
+        }
+      ],
+      "metadata_origin": "stored typed host preparation; not runtime kernel facts"
+    }
+  ],
+  "input_sha256": {
+    "kprog/arm64/trusted_specializer.py": "9c96ba545a3856021520407ab6da93d60534ce5b536ceb6d151c79d498c08497",
+    "kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "464cae64514f8e9e8781c6c4a014d52b04758a92f4a0509ff5f6288df49b3a5f",
+    "kprog/arm64/build/app-native-link/release/native-link": "736646a1b70254e5ae88dcf5d8e65d325d0a27bf89eb35e6b1b93336500d7722"
+  },
+  "direct0_direct8_source_and_instruction_bytes_identical": true,
+  "invalid_direct_offsets_rejected_before_output": [
+    "True",
+    "-1",
+    "4294967296"
+  ],
+  "legacy_actual_katran_original_declaration_render_identical": {
+    "reference_generator_blob": "5f9e0ee22e3a255ef4fbefacc98288e3b9277364",
+    "generated_c_sha256": "aa19f4b365594b965a63e5a34bf477652ab41cd0a5473886b36c716d89974c9c"
+  },
+  "inputs_unchanged": true,
+  "ok": true,
+  "source_integration": "candidate source retained in archive; ARM source integration waits for C shared helper publication",
+  "producer_source_sha256": {
+    "kprog/arm64/trusted_specializer.py": "9c96ba545a3856021520407ab6da93d60534ce5b536ceb6d151c79d498c08497",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "464cae64514f8e9e8781c6c4a014d52b04758a92f4a0509ff5f6288df49b3a5f",
+    "kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+    "corpus/results/kprog_arm64_app_coverage_20261106/trusted_extern_check.py": "861958ec68408e9cdc37fd6cd38d48e853c5d2050b799e31b494d62a143b121a"
+  },
+  "compiler_archive_sha256": "19edb004c19d8c7602088d8c3e9a52598a4c52a5c28fe448bac082fd00495837"
+}
