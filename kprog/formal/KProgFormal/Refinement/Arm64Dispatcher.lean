@@ -3342,12 +3342,106 @@ theorem exec_reduction_refines (op : Reference.AArch64.ReductionOp) (flags : Byt
   rw [exec_tail_before_none _ _ _ _ _ _ _ _ _ _ _ _ _ s tailCode, if_neg separate]
   exact Arm64Reduction.dispatch_refines op aux.toNat s
 
+/-- The three generated DIRECT_BODY_4 tokens retain their literal opcode.
+The AUX low byte selects ADD/SUB/AND/ORR/EOR/BIC in the shared ALU body. -/
+inductive ImmediateToken where
+  | add | sub | alu
+  deriving DecidableEq
+
+def immediateTokenSelector : ImmediateToken → GeneratedArm64AluOperandSelect.AluOperandSelectOp
+  | .add => .addImm
+  | .sub => .subImm
+  | .alu => .aluImm
+
+def immediateTokenOpcode (token : ImmediateToken) : Nat :=
+  GeneratedArm64AluOperandSelect.code (immediateTokenSelector token)
+
+/-- W/X numeric projection of the generated direct macro: normalize FLAGS,
+decode AUX, and call EXEC_ALU with the literal immediate selector. The Option
+boundary and provenance predicates retain the established numeric-frame scope. -/
+def specializedImmediate (token : ImmediateToken) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (s : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  (decodeDataWidth flags).bind (fun width =>
+    (decodeAlu (GeneratedArm64Aux.b0 aux).toNat).map
+      (fun op => aluBody op (GeneratedArm64AluOperandSelect.immediate (immediateTokenSelector token))
+        sourceScalar sourceStack aux width dst src src2 value s))
+
+/-- The direct macro body and the complete L_EXEC dispatcher agree on every
+field and incoming numeric frame, with their existing Option boundary. -/
+theorem immediate_token_body_matches (token : ImmediateToken) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    specializedImmediate token flags aux dst src src2 value sourceScalar sourceStack s =
+      dispatchExec (immediateTokenOpcode token) flags aux dst src src2 src3 value
+        sourceScalar sourceStack firstScalar secondScalar failure s := by
+  cases token <;>
+    unfold specializedImmediate dispatchExec dispatchThroughQ dispatchThroughD dispatchThroughPair
+      dispatchThroughExclusive dispatchThroughStore dispatchThroughSigned
+      dispatchThroughLoad dispatchEncodedPrefix dispatchThroughSelect dispatchThroughCompare dispatchThroughOrn
+      dispatchThroughFlagLogic dispatchThroughFlagArithmetic dispatchThroughBitfield dispatchThroughExtrev
+      dispatchThroughUnary dispatchThroughMultiply dispatchThroughShift dispatch
+  all_goals cases w : decodeDataWidth flags <;> cases op : decodeAlu (GeneratedArm64Aux.b0 aux).toNat <;>
+    simp only [w, op, immediateTokenOpcode, immediateTokenSelector,
+      GeneratedArm64AluOperandSelect.code, GeneratedArm64AluOperandSelect.immediate, Option.bind_none, Option.bind_some,
+      Option.map_none, Option.map_some]
+  all_goals rfl
+
+/-- Both production immediate labels retain the complete numeric L_EXEC
+result for arbitrary fields, provenance predicates and incoming state. -/
+theorem exec_immediate_alias_dispatch (alias : Nat) (isAlias : alias = 3 ∨ alias = 4)
+    (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    dispatchExec alias flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s =
+      dispatchExec 6 flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s := by
+  rcases isAlias with h | h <;> subst alias <;> rfl
+
+/-- Q-vector and exclusive observations preserve the immediate-label identity
+including every state component, event and fault. -/
+theorem observed_immediate_alias_dispatch (alias : Nat) (isAlias : alias = 3 ∨ alias = 4)
+    (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool) (s : Reference.AArch64.State) :
+    observeExclusiveDispatch alias flags release failure src2 s
+      (observeQDispatch alias (dispatchExec alias flags aux dst src src2 src3 value
+        sourceScalar sourceStack firstScalar secondScalar failure s)) =
+      observeExclusiveDispatch 6 flags release failure src2 s
+        (observeQDispatch 6 (dispatchExec 6 flags aux dst src src2 src3 value
+          sourceScalar sourceStack firstScalar secondScalar failure s)) := by
+  rw [exec_immediate_alias_dispatch alias isAlias]
+  rcases isAlias with h | h <;> subst alias <;> rfl
+
+/-- Carry the existing field-only Q binding through the final L_EXEC gates. -/
+theorem q_exec_observed_refines (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (binding : QBinding s.pc code flags aux dst src src2 src3 value release native)
+    (access : scalarMemoryAccess native s) (environment : exclusiveStoreEnvironment native failure s)
+    (pairAccess : pairMemoryAccess native s) (vectorAccess : vectorMemoryAccess native s) :
+    observeExclusiveDispatch code flags release failure src2 s
+      (observeQDispatch code (dispatchExec code flags aux dst src src2 src3 value
+        sourceScalar sourceStack firstScalar secondScalar failure s)) = some (Reference.AArch64.step native s) := by
+  have result := step_through_q_observed_refines code flags aux dst src src2 src3 value sourceScalar
+    sourceStack firstScalar secondScalar release failure native s binding access environment pairAccess vectorAccess
+  have numeric : ∃ prior, dispatchThroughQ code flags aux dst src src2 src3 value
+      sourceScalar sourceStack firstScalar secondScalar failure s = some prior := by
+    cases raw : dispatchThroughQ code flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s with
+    | none =>
+        cases decoded : decodeDataWidth flags <;> simp [raw, decoded, observeExclusiveDispatch, observeQDispatch] at result
+    | some prior => exact ⟨prior, rfl⟩
+  obtain ⟨prior, reached⟩ := numeric
+  simpa only [dispatchExec, reached] using result
+
 inductive ExecBinding (pc : Word) : Nat → Byte → BitVec 32 → Byte → Byte → Byte → Byte → Word → Bool →
     Reference.AArch64.Instruction → Prop where
   | earlier (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
       (release : Bool) (native : Reference.AArch64.Instruction)
       (binding : QBinding pc code flags aux dst src src2 src3 value release native) :
       ExecBinding pc code flags aux dst src src2 src3 value release native
+  | immediateAlias (alias : Nat) (isAlias : alias = 3 ∨ alias = 4)
+      (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
+      (release : Bool) (native : Reference.AArch64.Instruction)
+      (binding : QBinding pc 6 flags aux dst src src2 src3 value release native) :
+      ExecBinding pc alias flags aux dst src src2 src3 value release native
   | fmov (bank : Register) (direction : GeneratedArm64Fmov.Fmov) (dst src : Register)
       (unusedDst unusedSrc src2 src3 : Byte) (flags : Byte) (aux : BitVec 32) (value : Word) (release : Bool)
       (bankCode : Arm64Fmov.vectorIndex src2.toNat = some bank)
@@ -3378,16 +3472,12 @@ theorem exec_observed_step_refines (code : Nat) (flags : Byte) (aux : BitVec 32)
         sourceScalar sourceStack firstScalar secondScalar failure s)) = some (Reference.AArch64.step native s) := by
   cases binding with
   | earlier code flags aux dst src src2 src3 value release native earlier =>
-      have result := step_through_q_observed_refines code flags aux dst src src2 src3 value sourceScalar
-        sourceStack firstScalar secondScalar release failure native s earlier access environment pairAccess vectorAccess
-      have numeric : ∃ prior, dispatchThroughQ code flags aux dst src src2 src3 value
-          sourceScalar sourceStack firstScalar secondScalar failure s = some prior := by
-        cases raw : dispatchThroughQ code flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s with
-        | none =>
-            cases decoded : decodeDataWidth flags <;> simp [raw, decoded, observeExclusiveDispatch, observeQDispatch] at result
-        | some prior => exact ⟨prior, rfl⟩
-      obtain ⟨prior, reached⟩ := numeric
-      simpa only [dispatchExec, reached] using result
+      exact q_exec_observed_refines code flags aux dst src src2 src3 value sourceScalar sourceStack
+        firstScalar secondScalar release failure native s earlier access environment pairAccess vectorAccess
+  | immediateAlias alias isAlias flags aux dst src src2 src3 value release native earlier =>
+      rw [observed_immediate_alias_dispatch _ isAlias]
+      exact q_exec_observed_refines 6 flags aux dst src src2 src3 value sourceScalar sourceStack
+        firstScalar secondScalar release failure native s earlier access environment pairAccess vectorAccess
   | fmov bank direction dst src unusedDst unusedSrc src2 src3 flags aux value release bankCode directionCode encoded =>
       have exclusiveSeparate : GeneratedArm64DispatchSingleton.code .fmov ≠ GeneratedArm64Stlxr.code .stlxr := by decide
       have qSeparate : ¬(GeneratedArm64DispatchSingleton.code .fmov = qCode true ∨
@@ -3401,6 +3491,24 @@ theorem exec_observed_step_refines (code : Nat) (flags : Byte) (aux : BitVec 32)
           GeneratedArm64Reduction.code (Arm64Reduction.operation op) = qCode false) := by cases op <;> decide
       simp only [observeExclusiveDispatch, exclusiveSeparate, ↓reduceIte, observeQDispatch, qSeparate]
       exact exec_reduction_refines op flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s
+
+
+/-- Once per generated immediate token: combine its direct-body identity with
+the unified canonical step theorem under the same field and platform binding. -/
+theorem immediate_token_step_refines (token : ImmediateToken) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (binding : ExecBinding s.pc (immediateTokenOpcode token) flags aux dst src src2 src3 value release native)
+    (access : scalarMemoryAccess native s) (environment : exclusiveStoreEnvironment native failure s)
+    (pairAccess : pairMemoryAccess native s) (vectorAccess : vectorMemoryAccess native s) :
+    observeExclusiveDispatch (immediateTokenOpcode token) flags release failure src2 s
+      (observeQDispatch (immediateTokenOpcode token) (specializedImmediate token flags aux dst src src2 value
+        sourceScalar sourceStack s)) = some (Reference.AArch64.step native s) := by
+  rw [immediate_token_body_matches token flags aux dst src src2 src3 value sourceScalar sourceStack
+    firstScalar secondScalar failure s]
+  exact exec_observed_step_refines _ flags aux dst src src2 src3 value sourceScalar sourceStack
+    firstScalar secondScalar release failure native s binding access environment pairAccess vectorAccess
 
 
 /-- Producer-level emission alternatives, not another ISA decoder or numeric
@@ -3692,6 +3800,17 @@ inductive SourceBinding (nativeAddress : Word → Word) (state : CodeState) (rel
       (allowed : targets.contains (Arm64Move.Fields.read state.bits (Arm64Register.registerCode src)) = true)
       (successorAddress : link = true → nativeAddress successor = (nativeCodeView nativeAddress state).pc + 4) :
       SourceBinding nativeAddress state release (.register link src targets successor) (.branchRegister link src)
+
+/-- Lift the generic immediate field binding into either literal alias through
+the complete numeric/source-emission chain. The input is a field binding. -/
+theorem source_immediate_alias_binding (nativeAddress : Word → Word) (state : CodeState)
+    (release : Bool) (alias : Nat) (isAlias : alias = 3 ∨ alias = 4)
+    (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
+    (native : Reference.AArch64.Instruction)
+    (binding : QBinding (nativeCodeView nativeAddress state).pc 6 flags aux dst src src2 src3 value release native) :
+    SourceBinding nativeAddress state release
+      (.numeric (.exec alias flags aux dst src src2 src3 value)) native := by
+  exact .numeric _ _ (.exec _ _ _ _ _ _ _ _ _ (.immediateAlias alias isAlias flags aux dst src src2 src3 value release native binding))
 
 /-- One observed source-emission step theorem for L_EXEC, all direct branches,
 internal BL/ADR and CODE-tag BR/BLR/internal RET. Original memory/profile/

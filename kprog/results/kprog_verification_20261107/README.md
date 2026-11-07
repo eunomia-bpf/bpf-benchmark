@@ -15,11 +15,10 @@ specialization token also has its own row.
 | Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
 | Addressed memory model / composed step | 13/75 | 0/71 |
 | Additional partial-model handler families | 18/75 | 0 |
-| Conditional modeled handler / observed dispatcher | 0 | 69/71 |
-| Conditional direct immediate-alias handler / dispatcher | 0 | 2/71 |
-| Alias source-emission binding completion | 0 | 2/71 |
+| Conditional modeled handler / observed dispatcher | 0 | 71/71 |
+| Immediate-alias source-emission binding composed | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 49/75 | 0/71 |
+| O2 C-model token-body equality | 49/75 | 3/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 3/71 |
@@ -31,8 +30,9 @@ The remaining18 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 now share the published generic
-immediate-body gate and have conditional direct alias state laws. Their unified
-source-emission binding and per-token equality stages continue.
+immediate-body gate through unified ExecBinding, source and invocation emission.
+ADD_IMM/SUB_IMM/ALU_IMM have three C-model W/X direct-body equalities and
+canonical-step composition under the existing field/provenance/platform bindings.
 Whole-simulator raw handler/dispatcher closure, compiled-B,
 ABI/definedness and native-link preservation remain universal obligations.
 
@@ -3733,3 +3733,29 @@ compiler, ABI and native-link stages continue. The receipt
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_518d33529`. Every check retains its exact published source identity.
+
+### ARM immediate token bodies and alias binding
+
+`ADD_IMM`, `SUB_IMM` and `ALU_IMM` now have three W/X numeric C-model
+body equalities and canonical-step composition. Their generated direct macros
+select `DIRECT_BODY_4`, use literal opcodes3/4/6 and obtain the immediate decision
+from the captured generated selector. AUX continues to select the ALU operation.
+The complete numeric dispatcher retains every field, state component, event and
+fault. `ExecBinding.immediateAlias` transports a generic6 field binding into
+numeric3/4; `source_immediate_alias_binding` carries that result through the
+existing source and invocation emission theorems. Source/code/provenance,
+permissions, ABI/definedness and C/compiler correspondence retain their explicit
+production interfaces.
+
+Default `lake build`, five generator/source checks, ten axiom audits and the
+four existing semantic C oracles pass. The oracles retain all37,616 cases under
+UBSan;192 existing theorem signatures retain their exact types. All395 focused
+proof/producer inputs stayed stable, and19 unchanged production/contract files
+match the adopted `f0517e493` Git epoch. The source snapshots, initial Lean
+diagnostics and final checks are losslessly archived under
+`arm_immediate_tokens_and_alias_binding` in
+[the integration receipt](arm64-xdp-host-integration.json) and its existing gzip.
+The central table now records71/71 conditional ARM modeled dispatcher rows and
+3/71 ARM C-model O2 tokens; x86 stays49/75. The prior published `518d33529`
+full `make check` separately passed with all1,140 source identities verified in
+`full_make_check_518d33529`.
