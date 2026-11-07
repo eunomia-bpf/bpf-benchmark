@@ -1,175 +1,84 @@
 # Native simulator verification
 
-With Lean/Elan, Python 3, Rust/Cargo, a C compiler with UBSan, clang18/LLVM18 tools, and the `vendor/libbpf` and `vendor/linux-framework` submodules
-available, run the complete local check:
+Run the complete local check on an x86-64 host:
 
 ```sh
 make -C kprog/formal check
 ```
 
-The target builds the Lean library, checks generated contracts and simulator
-routing, rejects proof placeholders, and compiles and runs the C semantic
-oracles. It does not read papers or require a separate build command.
+It requires Lean/Elan, Python3, Rust/Cargo, a C compiler with UBSan,
+clang18/LLVM18 tools, GNU objdump, and the `vendor/libbpf` and
+`vendor/linux-framework` submodules. The target builds every Lean theorem
+module, checks generated contracts and routing, rejects proof placeholders,
+and runs the C semantic oracles and executable-reference checks. Papers and
+paper/count checkers are not inputs.
 
-The current proofs cover arithmetic and flags, register/tag writeback, memory
-accesses, control flow, and selected handler compositions for x86-64 and
-AArch64. Dispatcher coverage and exclusivity theorems concern the modeled
-routing tables; they are **not yet a full simulator-step refinement theorem**.
-The ISA reference lives in `KProgFormal/Reference/`; it imports no simulator
-contracts. The step refinements in `Refinement/` connect CMOV, BT, BZHI,
-ANDN, BMI2 shifts/rotates, BSWAP/MOVBE, ordinary MOV, ADD/ADC/SUB/SBB/CMP and register/immediate/memory PUSH/POP handlers to that reference, including registers,
-flags, XMM0, memory, PC and ordered access/fault effects. MOV includes AL/AH,
-REX byte registers, partial/zero-extending writes, immediate/ModRM/moffs forms,
-prefix ordering and source/destination aliases. LEA has a materialized-address
-handler refinement, independent16/32/64-bit writeback and no memory access;
-its native decoder preserves SIB/RIP/address-size and ignored segment-prefix rules. High-byte memory loads use the existing
-eager memory reader followed by the generated high-lane MOV writer; the proof
-preserves the read/fault sequence and every other register byte. Its shared scalar primitives
-operate on materialized native register values. Arithmetic covers all four widths,
-six status flags, incoming carry/borrow, byte lanes, native immediates, CMP
-without data writeback, and ordered read/write faults. PF uses independent
-low-byte parity and AF uses widened nibble arithmetic in the reference;
-production C macros are checked against an independent integer oracle.
-AND/OR/XOR/TEST use the same scalar operands and ordered memory effects;
-CF/OF clear, SF/ZF/PF follow the operand-width result, and AF is undefined.
-SHL/SHR/SAR/ROL use the legacy count mask, immediate/one/CL forms,
-byte-register aliases, partial/zero-extending writes and ordered RMW faults.
-Their whole-state handler refinements compose the generated value and flag
-contracts with scalar register/memory reads and writes.
-PF is updated for nonzero shifts and preserved by rotates. The reference
-relation leaves AF and count-dependent CF/OF unconstrained where the ISA does.
-TEST preserves its data destination. Native group/immediate forms share the
-arithmetic decoder, including64-bit sign extension. ABI masks track logical
-zero/one bits so a mask may discard unspecified register bits before use.
-INC/DEC/NEG/NOT use all scalar widths, byte lanes and register/memory
-destinations. INC/DEC preserve CF, NOT preserves every flag, and RMW write
-faults preserve data/flags while retaining the completed read event.
-POPCNT register and memory handlers refine an independent bit walk at
-16/32/64-bit widths, including all six flags, aliases, partial/zero-extending
-writes, exact-width memory reads and faults. The encoder also handles scaled
-indexes, signed displacements, virtual-stack reads and relocated readonly data.
-The extended opcode/dispatch proofs retain every original enumeration theorem.
-MOVZX/MOVSX/MOVSXD and CBW/CWDE/CDQE refine independent sign/zero extension,
-including high-byte sources, aliases, distinct read/write widths and memory
-faults. Every status flag is preserved. The shared MOVX body serves both
-specialized and dispatcher calls; its source encoding respects REX constraints.
-Implicit accumulator extensions propagate known bits without inventing unknown
-source bits or requiring unrelated upper register bits.
-CWD/CDQ/CQO use the same MOV writer for DX/EDX/RDX. Their canonical native
-0x99 decoder follows active operand-size/REX prefixes; whole-state refinements
-preserve RAX, every other register, flags and memory. The widening check also
-compares the generated sign-high handlers with the actual x86 CPU.
-DIV's reference uses the complete AX/DX:AX/EDX:EAX/RDX:RAX dividend and
-preserves state on zero divisor or quotient overflow, including completed
-operand reads. The C handler exposes these native faults to the verifier;
-its qword arithmetic processes all128 dividend bits, using ordinary division
-when the high half is zero. The radix-two arithmetic has a checked prefix
-invariant and quotient/remainder theorem; the DIV step composes it with
-register writes and ordered read/fault effects. Register/memory encodings and
-successful arithmetic are also checked against the CPU, with fault markers
-checked in compiled BPF. The compiler remains part of the trust boundary.
-All sixteen native conditions refine the reference, including PF, through
-CMOV, SETcc and direct branches. SETcc includes high-byte/REX destinations,
-exact one-byte stores and write faults; CMOV retains eager read faults.
-Native branch displacement decoding, PC wrap and ordinary NOPs are covered.
-The encoder admits defined parity uses and rejects observations of undefined
-flags/results, including16-bit SHLD/SHRD counts17..31. CL-count forms use the
-actual count register, including destination aliases, and compile to BPF.
-The AArch64 multiply/divide, conditional-select, extract/reverse/extend, shift/unary, logical-register, MOVK, move-immediate, register-move, all32 SIMD/GPR bit-transfer (FMOV), byte-vector reduction (CNT/UADDLV), conditional-compare (CCMP), ADD/SUB immediate/shifted-register/extended-register, NOP, ordinary-branch, scalar immediate-memory and LDP/STP signed-offset
-families connect through their modules in `Refinement/`, including native
-aliases, all raw NZCV predicates, ZR/SP separation including MOV destinations, legal extract immediates,
-shifted source modifiers, exact NZCV updates and W zero-extension. Arithmetic NZCV uses width-sized operands
-with independent signed/unsigned widened sums for overflow and carry. All eight
-register extensions narrow at the operand size before extending and shifting.
-Branch offsets are signed native bytes; both generated goto shapes preserve
-the same PC choice, with W/ZR and tested-bit widths handled explicitly.
-BL/BLR write the native successor to X30; indirect branches and RET capture
-the incoming target before any link write, including BLR X30. ADR/ADRP use
-native signed offsets and page alignment. These core-state refinements retain
-all memory/vector/flag components and emit no helper or memory access; fetching
-a branch target is a later step. Control uses the Cortex-A72 base profile;
-linker target/provenance and platform control features require the same entry/profile relation.
-Scalar memory includes all unsigned and signed load widths, stores, signed
-unscaled and unsigned scaled offsets, exact byte permissions/initialization,
-ordered accesses and faults. Its handler theorem takes the admission witness
-that SP alignment is valid; it does not insert a runtime alignment guard.
-LDP/STP captures both load values before register writes and uses a4/8-byte
-stride at W/X width. Pair events follow the selected architectural profile;
-a second separate-store fault retains the first store. Duplicate LDP destinations
-are constrained-unpredictable (including UNDEF/NOP) and fail source validation.
+The specification is the single executable ISA model in
+[`Reference/X86.lean`](KProgFormal/Reference/X86.lean) and
+[`Reference/AArch64.lean`](KProgFormal/Reference/AArch64.lean), with the shared
+memory, permissions, initialization, effects and faults in
+[`Reference/Memory.lean`](KProgFormal/Reference/Memory.lean). Their headers
+identify the Intel/Arm architectural sources; they import no simulator or
+generated implementation contracts. Unwritten native memory has arbitrary
+contents, not invented zeros. Undefined x86 flags are masked by the relational
+step instead of assigning them architectural guarantees. ARM memory and
+exclusive accesses carry their explicit architectural/environment inputs;
+control uses the current Cortex-A72 base profile without GCS/BTI state.
+
+The proofs establish arithmetic/flags, register and tag operations, memory
+accesses, routing tables, and selected whole-state handler refinements.
+[`Refinement/`](KProgFormal/Refinement/) connects generated implementation
+slices to those same ISA steps, retaining registers, flags, vectors, memory,
+PC and ordered effects/faults. This includes scalar/logical/unary operations,
+width/sign extensions, conditional operations, shifts, bit operations,
+stack transfers, LEA, DIV, register XCHG, and the ARM arithmetic, vector,
+memory, exclusive and control families represented there. Individual module
+statements define their exact scope. Dispatcher coverage/exclusivity is
+**not yet a full simulator-step refinement theorem**; completing the remaining
+handler lifts and their dispatcher composition is ongoing work.
+
+The lifts consume materialized native register/address values.
+[`EntryEnvironment.lean`](KProgFormal/Refinement/EntryEnvironment.lean)
+states the same-invocation SP/code/return relation, with explicit frame biases
+and argument/return witnesses. Kernel/JIT, ABI and artifact certificates must
+establish those witnesses and code/provenance/profile bindings. A private
+stack offset alone is not a native numeric address. The entry arithmetic and
+partial-write theorems preserve this distinction.
+
+Trust boundary: Lean checks Lean models, not arbitrary C source or compiled
+BPF. The Lean kernel/toolchain are trusted; `native_decide` additionally trusts
+compiled evaluation. JSON-to-C/Lean generators, C compilation and native
+byte lowering remain cross-language boundaries: freshness checks, independent
+semantic oracles, real CPU examples and BPF access checks test them. They do
+not prove compiler correctness. Hardware fidelity, verifier acceptance,
+platform helpers and artifact/invocation binding require their corresponding
+evidence and proofs; a local passing check does not establish them by itself.
+
+Actual linked ARRAY/PERCPU_ARRAY instruction paths are checked against the
+canonical x86 model, including bounds, reads and first faults. Inline lookup
+blocks emit no helper event; direct map-type calls retain their exact target
+and relocation. Callee effects, arguments, map layout, CPU inputs and checked
+helper expansion use the [TV platform contract](../tv/README.md#map-lookup-inlining-and-the-proof-boundary-2026-11-07).
+These fixture paths are not application invocation certificates.
 
 Layout:
 
-- `KProgFormal/Reference/`: the executable ISA semantics and shared memory/effects.
-- `KProgFormal/Refinement/`: compositions against that ISA reference.
-- `KProgFormal/`: existing bounded handler proofs and their independently stated
-  bounded semantics.
-- `KProgFormal/Generated/`: emitted Lean contracts, with stable declaration
-  namespaces; the Lake library glob builds every theorem module.
-- `contracts/`: JSON input contracts. These describe implementation slices,
-  not a complete independent ISA model.
-- `tools/`: generators and semantic checks; `tools/mutations/` retains the
-  tracked semantic mutation batteries.
-- `generated/`: emitted C contracts used by the production simulators. Their
-  include paths stay stable for simulator consumers.
-- `oracles/`: semantic cross-checks, including the route hosts formerly kept
-  under `build/`. Each host compares a contract or simulator path with an
-  independently calculated expected result.
-- `build/` and `.lake/`: disposable compiled outputs, never oracle sources.
+- `KProgFormal/Reference/`: executable reference ISA and shared effects.
+- `KProgFormal/Refinement/`: lifts against that reference; other modules in
+  `KProgFormal/` retain the original bounded handler/table theorems.
+- `contracts/`, `tools/generate_*`, `generated/`, `KProgFormal/Generated/`:
+  implementation contracts, generators and emitted C/Lean expressions.
+- `oracles/`: retained semantic C hosts, including the former build hosts.
+- `tools/`: executable reference, encoding and semantic checks;
+  `tools/mutations/` retains the tracked semantic mutation batteries.
+- `build/`, `.lake/`: disposable generated/compiled outputs.
 
-Trust boundary: Lean checks the Lean models, not C source or compiled BPF.
-The Lean kernel and toolchain are trusted; `native_decide` proofs additionally
-trust compiled evaluation. The JSON-to-C and JSON-to-Lean generators emit
-separate expressions. Generator freshness checks and C semantic oracles test
-that boundary but do not prove arbitrary C compilation correct. Hardware
-fidelity, verifier acceptance, helper behavior, and artifact binding require
-separate evidence; these local proofs do not establish them by themselves.
-The lifts take architectural register values; connecting virtual stack/code/helper
-encodings to those values is part of the ongoing dispatcher proof.
-`Refinement/EntryEnvironment.lean` states the same-invocation SP/code/return
-relation with explicit source/body biases and argument/return witnesses. Its
-address arithmetic and partial-write proofs require materializing native bits;
-the kernel/JIT and per-program ABI certificates must establish the witnesses.
-
-The checked reference also builds as `.lake/build/bin/reference`: JSON lines
-on stdin, one JSON transition per line on stdout. Inputs contain `state`
-(registers, flags, PC, XMM0, FS/GS bases and explicit memory cells) and
-`native_bytes`; the ISA decoder determines operands and the next PC. Outputs
-include `defined_flags`, the ISA-defined RFLAGS bits; the relational step permits
-any values for undefined bits, and faults preserve every flag. Memory cells must supply a
-value, read/write permissions and initialization status; absent cells fault.
-`tools/check_reference.py` supplies concrete wire examples and checks the
-CPU counterexamples and the encoder's signed displacement packing. The binary
-executes the same Lean definitions used by the proofs, without a C/Python
-restatement of ISA semantics. `tools/check_reference_x86_scalar.py` adds concrete
-MOV/prefix/byte-lane cases. `tools/check_x86_memory_widths.py` compiles the actual
-C memory contract to BPF and checks access kind, address, width and count;
-unaligned host accesses use alignment-one alias types and remain UBSan-checked.
-Its fixed-load API keeps the base register and signed16 displacement separate,
-so context reads retain a literal BPF offset. Nonconstant or out-of-range
-displacements fail compilation; the access remains one native-width read.
-
-`tools/check_reference_x86_map_lookup.py` links actual ARRAY/PERCPU_ARRAY
-code and checks canonical block paths, complete states and ordered key/slot/GS
-reads and faults. Inline blocks have no helper event; direct map-type calls
-retain their exact call target/relocation. The bound callee, map layout,
-CPU inputs and helper expansion use the [TV platform contract](../tv/README.md#map-lookup-inlining-and-the-proof-boundary-2026-11-07).
-These fixture checks compose instruction semantics; application helper/ABI
-and platform binding certificates remain separate proof artifacts.
-
-For AArch64, send `isa: "aarch64"` to the same executable. Supply exactly four
-little-endian native bytes, `registers` as X0..X30 followed by SP (32 words),
-`flags` with NZCV in bits31..28, `vector0` as an unsigned128-bit word, `pc`
-and the same explicit `memory` cells. Outputs use `vector0` in place of `xmm0`
-and omit x86 segment bases. To access nonzero SIMD registers, also supply
-`vectors` as exactly32 unsigned128-bit words V0..V31, with `vectors[0]` equal
-to `vector0`; outputs preserve and return that complete bank. V0-only legacy
-requests remain valid, but cannot access an omitted SIMD register. Arithmetic field31 denotes ZR, independently of SP.
-`sp_alignment_check` selects the effective SCTLR.SA/SA0 setting and defaults
-to Linux's enabled setting. When enabled, an SP-base transfer tests the incoming
-SP's16-byte alignment, independently of its effective address; faults use
-`sp_alignment`. `pair_single_access` selects FEAT_LSE2's one double-sized
-architectural pair access; its default is false, matching Cortex-A72. Both
-profile settings are preserved in outputs when supplied. The memory model is
-sequential, with architectural events grouping the handler's byte operations.
-The default ISA remains x86-64; `isa: "x86_64"` is also explicit.
+The same reference builds as `.lake/build/bin/reference`: JSON lines on stdin,
+one complete transition per output line. Inputs provide native bytes, actual
+registers/PC and explicit memory cells (value, permissions, initialization).
+x86 also supplies XMM0/FS/GS and supports finite native paths whose byte extents
+and actual successors are checked. AArch64 currently accepts one four-byte
+instruction per request, with explicit SIMD/environment fields when needed.
+The `tools/check_reference*` scripts are concrete examples. They execute these
+Lean definitions, not a second Python/C ISA interpreter. F's hardware replay
+and T's path/artifact checks consume this same canonical specification.

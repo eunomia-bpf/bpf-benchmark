@@ -540,6 +540,16 @@ def unaryStep (width : ScalarWidth) (kind : UnaryKind) (dst : ScalarDestination)
       | .ok (result, writes) =>
           ⟨{ result with rflags := unaryFlags width kind value s.rflags, pc := nextPc }, reads ++ writes, none⟩
 
+/-- Register XCHG samples both lanes before either write. Sequential lane
+merges retain both changes when AL/AH (or another byte pair) share one GPR. -/
+def exchangeStep (width : ScalarWidth) (left right : RegisterSlice) (nextPc : Word)
+    (s : State) : Transition State :=
+  let a := scalarRegisterValue s width left
+  let b := scalarRegisterValue s width right
+  let first := { s with gpr := fun r => if r = left.reg then scalarWriteValue (s.gpr r) b width left else s.gpr r }
+  let second := { first with gpr := fun r => if r = right.reg then scalarWriteValue (first.gpr r) a width right else first.gpr r }
+  ⟨{ second with pc := nextPc }, [], none⟩
+
 /-- A legacy memory operand is a read-modify-write access even at count zero.
 Read or write faults commit neither flags nor data; a successful read precedes
 a write fault. Count/source aliases are sampled from the incoming state. -/
@@ -596,6 +606,7 @@ def signHighValue (width : CmovWidth) (source : Word) : Word :=
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | exchange (width : ScalarWidth) (left right : RegisterSlice) (nextPc : Word)
   | legacyShift (width : ScalarWidth) (kind : LegacyShift) (dst : ScalarDestination) (count nextPc : Word)
   | lea (width : CmovWidth) (dst : Register) (address nextPc : Word)
   | divide (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
@@ -631,7 +642,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -641,6 +652,7 @@ def Instruction.fallthrough : Instruction → Word
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .exchange width left right nextPc => exchangeStep width left right nextPc s
   | .legacyShift width kind dst count nextPc => legacyShiftStep width kind dst count nextPc s
   | .lea width dst address nextPc =>
       let result := writeValue width (s.gpr dst) address
@@ -733,6 +745,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .exchange .. => 0xffffffffffffffff
   | .legacyShift width kind _ count _ => legacyDefinedFlags width kind count
   | .lea .. => 0xffffffffffffffff
   | .divide .. => 0xfffffffffffff72a
@@ -901,6 +914,17 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
   let first ← byteAt bytes count
   if first = 0x90 ∧ p.rex % 2 = 0 then
     return .nop (← fallthrough s (count + 1))
+  if 0x90 ≤ first ∧ first ≤ 0x97 then
+    let width := scalarWidth p false
+    return .exchange width (.low 0) (.low (registerCode (first % 8 + 8 * (p.rex % 2))))
+      (← fallthrough s (count + 1))
+  if first = 0x86 ∨ first = 0x87 then
+    let modrm ← byteAt bytes (count + 1)
+    if modrm / 64 ≠ 3 then throw "register XCHG requires two register operands"
+    let width := scalarWidth p (first == 0x86)
+    let reg := scalarSlice p width ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
+    let rm := scalarSlice p width (modrm % 8 + 8 * (p.rex % 2))
+    return .exchange width reg rm (← fallthrough s (count + 2))
   if first = 0xeb ∨ first = 0xe9 ∨ (0x70 ≤ first ∧ first ≤ 0x7f) then
     let size := if first = 0xe9 then 4 else 1
     let offset ← signedDisplacement bytes (count + 1) size
