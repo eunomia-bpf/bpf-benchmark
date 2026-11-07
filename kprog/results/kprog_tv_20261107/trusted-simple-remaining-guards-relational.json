@@ -1,0 +1,119 @@
+{
+  "status": "captured_remaining_guards_every_canonical_relational_region_checked",
+  "utc": "2026-11-07T13:03:43.828151+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorem": "KProgTV.TrustedSimpleX86.remaining_guard_path_relational_correspondence",
+  "native_extents": [
+    [
+      17,
+      4
+    ],
+    [
+      21,
+      3
+    ],
+    [
+      24,
+      2
+    ],
+    [
+      26,
+      4
+    ],
+    [
+      30,
+      3
+    ],
+    [
+      33,
+      2
+    ]
+  ],
+  "B_PC": 12,
+  "claims": [
+    "every canonical relational actual remaining-guard region has full remainingNativeFinal state with no events/fault",
+    "native +8 then +72 and actual B +72 then +8 derive same rejecting OR and corresponding successor, including modular arithmetic",
+    "actual native path length is derived from the canonical +8 comparison; no branch outcome premise",
+    "generic representative evaluation yields a canonical relational path; nonfaulting canonical paths compose without new ISA semantics"
+  ],
+  "premises": [
+    "nativePC17/BPC12 and active B",
+    "nativeRSI/B r2 and nativeRDX/B r3 value correspondence",
+    "arbitrary canonical relational witness on the actual remainingNativePath"
+  ],
+  "not_yet_claimed": [
+    "entry and whole-program canonical relational composition",
+    "arbitrary extent/CFG completeness and strict per-basic-block mapping across reordered guards",
+    "unconditional artifact TV",
+    "entry/return ABI/platform semantic transport"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical prefix and audits retained",
+    "old_prefix_sha256": "9418855a7f06f1c88a14b4f2704fbbf9e6b31346e30375b2fe01cb3bc2859e0c",
+    "ISA_runtime_binding": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "binding_mismatch_controls_rejected": 22,
+    "materialization_controls_rejected": 28,
+    "no_sorryAx": true,
+    "log_sha256": "99c954025e44816373e6250a06130b7f604306e32894508ca4478dc2f85f8a16",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.canonical_evaluation_relational_sound": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.relational_path_append": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_native8_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_native72_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_native_path_defined": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_native_path_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_guard_path_relational_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    }
+  },
+  "trusted": [
+    "canonical reference ISA/memory and explicit B platform",
+    "Lean kernel/logical axioms and reported native reduction",
+    "kernel/archive/ELF parser provenance for eventual artifact composition",
+    "verifier soundness for eventual safety composition",
+    "entry/return ABI/platform semantic transport remains open"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "103dbcdb009b0ffdcfcd3a63568053de3f40819a97c5093d4fc9601006576f19",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "8f910e1dcd9b512c2b0407f94e785047a3051334de3fec8685d563c689409684",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463"
+  }
+}

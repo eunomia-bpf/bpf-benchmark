@@ -3122,6 +3122,159 @@ theorem first_guard_path_relational_correspondence (env : BPF.Environment)
   · simpa only [exactResult] using proofRun
   · simpa only [exactResult] using npc
 
+
+/-- Successful canonical representative evaluation is one valid relational
+path. This supplies a witness, never uniqueness for undefined outputs. -/
+theorem canonical_evaluation_relational_sound (base : Word) (bytes : Array Byte)
+    (entries : List X86Path.Entry) (state : X86.State) (result : X86Path.Result)
+    (accepted : X86Path.evaluate base bytes entries state=.ok result) :
+    CanonicalRelationalPath base bytes entries state result.effect := by
+  induction entries generalizing state result with
+  | nil =>
+    simp [X86Path.evaluate] at accepted
+    cases accepted
+    exact CanonicalRelationalPath.nil state
+  | cons entry rest ih =>
+    cases decoded : X86Path.decodeAt base bytes entry state with
+    | error reason => simp [X86Path.evaluate,decoded] at accepted
+    | ok instruction =>
+      have semantic : X86.Step instruction state (X86.step instruction state) := ⟨rfl,rfl,rfl⟩
+      cases fault : (X86.step instruction state).fault with
+      | some reason =>
+        cases rest with
+        | nil =>
+          simp [X86Path.evaluate,decoded,fault] at accepted
+          cases accepted
+          exact CanonicalRelationalPath.fault entry instruction decoded semantic (by simp [fault])
+        | cons next tail => simp [X86Path.evaluate,decoded,fault] at accepted
+      | none =>
+        cases evaluated : X86Path.evaluate base bytes rest (X86.step instruction state).state with
+        | error reason => simp [X86Path.evaluate,decoded,fault,evaluated] at accepted
+        | ok tail =>
+          simp [X86Path.evaluate,decoded,fault,evaluated] at accepted
+          cases accepted
+          exact CanonicalRelationalPath.next entry instruction decoded semantic fault
+            (ih _ tail evaluated)
+
+/-- Append only after a nonfaulting prefix, preserving all actual transitions
+and ordered effects. This also admits arbitrary undefined-output choices. -/
+theorem relational_path_append {base : Word} {bytes : Array Byte}
+    {firstEntries lastEntries : List X86Path.Entry} {start : X86.State}
+    {middle last : Transition X86.State}
+    (head : CanonicalRelationalPath base bytes firstEntries start middle)
+    (normal : middle.fault=none)
+    (tail : CanonicalRelationalPath base bytes lastEntries middle.state last) :
+    CanonicalRelationalPath base bytes (firstEntries++lastEntries) start
+      ⟨last.state,middle.events++last.events,last.fault⟩ := by
+  revert normal tail
+  induction head with
+  | nil state =>
+    intro normal tail
+    simpa only [List.nil_append] using tail
+  | fault entry instruction decoded step failed =>
+    intro normal tail
+    simp [normal] at failed
+  | @next before first rest remaining entry instruction decoded step continued suffix ih =>
+    intro normal tail
+    have combined := ih normal tail
+    have whole := CanonicalRelationalPath.next entry instruction decoded step continued combined
+    simpa only [List.cons_append,List.append_assoc] using whole
+
+theorem remaining_native8_evaluation (s : X86.State) (position : s.pc=17) :
+    X86Path.evaluate 0 native [⟨17,4⟩,⟨21,3⟩,⟨24,2⟩] s =
+      .ok ⟨⟨remainingNative8 s,[],none⟩,(0xffffffffffffffff#64)⟩ := by
+  have d0 : X86Path.decodeAt 0 native ⟨17,4⟩ s = .ok (.lea .w64 7 (s.gpr 6+(8#64)) 21) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode17,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have pc1 : (remainingNativeLea s).pc=21 := rfl
+  have pc2 : (remainingNativeCmp8 s).pc=24 := rfl
+  have d1 : X86Path.decodeAt 0 native ⟨21,3⟩ (remainingNativeLea s) = .ok
+      (.arithmetic .w64 .compare (.register (.low 7)) (.register (.low 2)) 24) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode21,pc1,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have d2 : X86Path.decodeAt 0 native ⟨24,2⟩ (remainingNativeCmp8 s) = .ok (.branch (some 7) 60 26) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode24,pc2,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  simp only [X86Path.evaluate,d0,d1,d2,remaining_native_lea_step,
+    remaining_native_cmp8_step,remaining_native_branch8_step,X86.definedFlags,
+    Option.isSome,Bool.false_eq_true,List.isEmpty_cons,List.isEmpty_nil,List.nil_append,ite_false]
+  rfl
+
+theorem remaining_native72_evaluation (s : X86.State) (position : s.pc=26) :
+    X86Path.evaluate 0 native [⟨26,4⟩,⟨30,3⟩,⟨33,2⟩] s =
+      .ok ⟨⟨remainingNative72 s,[],none⟩,(0xffffffffffffffff#64)⟩ := by
+  have d0 : X86Path.decodeAt 0 native ⟨26,4⟩ s = .ok
+      (.arithmetic .w64 .add (.register (.low 6)) (.immediate (72#64)) 30) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode26,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have pc1 : (remainingNativeAdd s).pc=30 := rfl
+  have pc2 : (remainingNativeCmp72 s).pc=33 := rfl
+  have d1 : X86Path.decodeAt 0 native ⟨30,3⟩ (remainingNativeAdd s) = .ok
+      (.arithmetic .w64 .compare (.register (.low 6)) (.register (.low 2)) 33) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode30,pc1,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have d2 : X86Path.decodeAt 0 native ⟨33,2⟩ (remainingNativeCmp72 s) = .ok (.branch (some 7) 60 35) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode33,pc2,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  simp only [X86Path.evaluate,d0,d1,d2,remaining_native_add72_step,
+    remaining_native_cmp72_step,remaining_native_branch72_step,X86.definedFlags,
+    Option.isSome,Bool.false_eq_true,List.isEmpty_cons,List.isEmpty_nil,List.nil_append,ite_false]
+  rfl
+
+
+def remainingNativePath (s : X86.State) : List X86Path.Entry :=
+  if s.gpr 6+(8#64)>s.gpr 2 then [⟨17,4⟩,⟨21,3⟩,⟨24,2⟩]
+  else [⟨17,4⟩,⟨21,3⟩,⟨24,2⟩,⟨26,4⟩,⟨30,3⟩,⟨33,2⟩]
+
+theorem remaining_native_path_defined (s : X86.State) :
+    ∀ entry ∈ remainingNativePath s, entry ∈ simpleDefinedExtents := by
+  by_cases reject8 : s.gpr 6+(8#64)>s.gpr 2 <;>
+    simp [remainingNativePath,reject8,simpleDefinedExtents]
+
+/-- Both remaining native guards evaluated in their actual order. All
+successors are derived by canonical arithmetic/branch semantics, including wrap. -/
+theorem remaining_native_path_evaluation (s : X86.State) (position : s.pc=17) :
+    X86Path.evaluate 0 native (remainingNativePath s) s =
+      .ok ⟨⟨remainingNativeFinal s,[],none⟩,(0xffffffffffffffff#64)⟩ := by
+  have head := remaining_native8_evaluation s position
+  by_cases reject8 : s.gpr 6+(8#64)>s.gpr 2
+  · simpa only [remainingNativePath,remainingNativeFinal,reject8,ite_true] using head
+  · have at26 : (remainingNative8 s).pc=26 := by simp [remainingNative8,reject8]
+    have tail := remaining_native72_evaluation (remainingNative8 s) at26
+    have headPath := canonical_evaluation_relational_sound _ _ _ _ _ head
+    have tailPath := canonical_evaluation_relational_sound _ _ _ _ _ tail
+    have combined := relational_path_append headPath rfl tailPath
+    have defined : ∀ entry ∈ [⟨17,4⟩,⟨21,3⟩,⟨24,2⟩]++[⟨26,4⟩,⟨30,3⟩,⟨33,2⟩],
+        entry ∈ simpleDefinedExtents := by simp [simpleDefinedExtents]
+    have evaluated := defined_relational_path_evaluation combined defined
+    simpa only [remainingNativePath,remainingNativeFinal,reject8,ite_false,List.nil_append] using evaluated
+
+/-- Every canonical relational remaining-guard path matches the actual B
+region, despite clang's opposite scheduling of its two side-effect-free tests. -/
+theorem remaining_guard_path_relational_correspondence (env : BPF.Environment)
+    (n : X86.State) (p : BPF.State) (actual : Transition X86.State)
+    (nativePC : n.pc=17) (proofPC : p.pc=12) (active : p.halted=false)
+    (pointer : n.gpr 6=p.regs 2) (limit : n.gpr 2=p.regs 3)
+    (run : CanonicalRelationalPath 0 native (remainingNativePath n) n actual) :
+    actual=⟨remainingNativeFinal n,[],none⟩ ∧
+    Execution (initializedInstructionStep env) p actual.events (remainingProofFinal p) ∧
+    actual.state.pc=(if p.regs 2+(8#64)>p.regs 3 ∨ p.regs 2+(72#64)>p.regs 3 then 60 else 35) ∧
+    (remainingProofFinal p).pc=(if p.regs 2+(8#64)>p.regs 3 ∨ p.regs 2+(72#64)>p.regs 3 then 34 else 18) ∧
+    actual.state.memory=n.memory ∧ (remainingProofFinal p).memory=p.memory := by
+  have evaluated := remaining_native_path_evaluation n nativePC
+  obtain ⟨unique,_⟩ := defined_relational_result_unique run (remaining_native_path_defined n) evaluated
+  obtain ⟨_,proofRun,npc,ppc,nmemory,pmemory⟩ := remaining_guard_correspondence env n p nativePC proofPC active pointer limit
+  refine ⟨unique,?_,?_,ppc,?_,pmemory⟩
+  · simpa only [unique] using proofRun
+  · simpa only [unique] using npc
+  · simpa only [unique] using nmemory
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -3390,3 +3543,17 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.first_guard_relational_path_result
 
 #print axioms KProgTV.TrustedSimpleX86.first_guard_path_relational_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.canonical_evaluation_relational_sound
+
+#print axioms KProgTV.TrustedSimpleX86.relational_path_append
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native8_evaluation
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native72_evaluation
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native_path_defined
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native_path_evaluation
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_guard_path_relational_correspondence

@@ -1692,3 +1692,15 @@ has the same empty trace and derived successor. It assumes no branch outcome
 or selected AF value. This lifts the prior step-wise universal guard result to
 the same path relation used by the packet body. Entry/remaining-guard/CFG and
 ABI/platform/RET composition remain open; see guard-relational-path JSON/log.
+
+### Remaining guards as a canonical relational region
+
+`remaining_guard_path_relational_correspondence` covers every canonical relational
+result on the actual native remaining-guard path, deriving nativePC60/35 and
+BPC34/18 from the compared values. Native +8 then +72 and B +72 then +8
+are related as one region, including modular arithmetic. The proof retains the
+complete native state and actual B execution without branch-outcome assumptions.
+Generic evaluation-to-relational soundness and nonfaulting path concatenation
+reuse the canonical ISA. Entry/whole-CFG completeness, strict per-basic-block
+mapping across reordered guards, ABI/platform and RET transport remain open.
+See remaining-guards-relational JSON/log for premises and source hashes.
