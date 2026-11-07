@@ -659,3 +659,17 @@ The existing target check establishes eligibility/identity, while the composed
 semantic and binding relation must establish the rest. In both cases the proof
 models the final emitted P, including any surviving internal hash call and
 post-call lookup operations.
+
+`SimpleCheckedBlocks.second_block` now matches the second native guard block,
+including CCMP's real fallback, with the accepted expanded B for all wrapping
+64-bit pointer/end values. Both native successors and their actual BPF
+successors remain explicit, with complete post-states and empty effect traces.
+`return_executions` checks the real linked `X7 <- X0` trampoline ending at byte84
+against the actual BPF JA27/EXIT28 sequence ending halted at PC29, for every
+64-bit return value, retaining all other state and unchanged memory. The second
+block's axioms retain the existing bitvector reduction trust; the return theorem
+uses only propext/Quot.sound. These are composing components, not yet a complete
+invocation/whole-program certificate. The existing
+`SimpleStoreCertificate.including_faults` already covers each first store fault
+without store-permission premises; its connection to this expanded program is
+next, along with rejection-path and complete state-relation composition.

@@ -916,3 +916,23 @@ that run's final linked image/plan. Source review for this decision covered the
 loader/link schema, native linker, kernel verifier/map generators/helper
 wrapper, TV event semantics and binding/capture implementation. No executable
 change or new test was needed for this read-only design item.
+
+Second guard and actual linked return components (2026-11-07)
+-------------------------------------------------------------
+
+`checked-guard-return-final.log` passes the existing checker on the updated
+`SimpleCheckedBlocks.lean`, using its already-checked unchanged dependencies.
+The actual second native guard and expanded B retain both branch outcomes,
+CCMP fallback, arbitrary wrapping pointer/end values, complete states and no
+memory/helper effects. The actual native X7-return trampoline and BPF redirected
+JA/EXIT are checked for all64-bit return values, including unchanged memory and
+all other architectural fields. Native body ends at byte84; proof halts at PC29.
+
+The only initial proof errors were explicit Fin7-register numeral reductions;
+the final check uses the concrete register-value facts and has no sorryAx.
+Second-block axioms: propext/Classical.choice/Lean.ofReduceBool/Quot.sound.
+Return axioms: propext/Quot.sound. Exact sources/inputs and the initial failed
+log are retained in `checked-guard-return-inputs.tar.gz`. Full-state block-edge,
+store/fault/private-memory, invocation and CPU-profile composition remain.
+The pre-existing `SimpleStoreCertificate.including_faults` is available for
+reuse; no duplicate store semantics or fault checker is being added.

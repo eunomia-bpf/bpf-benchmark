@@ -1,0 +1,6 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv ../tv/SimpleCheckedBlocks.lean
+'KProgTV.SimpleCheckedBlocks.first_block' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+'KProgTV.SimpleCheckedBlocks.second_block' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+'KProgTV.SimpleCheckedBlocks.return_executions' depends on axioms: [propext, Quot.sound]
+make: Leaving directory '/workspaces/repository/kprog/tv'

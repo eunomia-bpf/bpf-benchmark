@@ -88,5 +88,103 @@ theorem first_block (n : AArch64.State) (p : BPF.State)
   apply SimpleCheckedPlatform.execution_transport
   simpa only [List.append_nil, SimpleBlocks.firstProofFinal] using physicalRun
 
+theorem body_evaluate (env : BPF.Environment) (positions : List Nat)
+    (inside : ∀ pc ∈ positions, 4 ≤ pc ∧ pc < 27) (s : BPF.State) :
+    BPFPath.evaluate env SimpleCheckedPlatform.physical positions s =
+      BPFPath.evaluate env proof positions s := by
+  rw [prefix_evaluate env positions (fun pc member => (inside pc member).2)]
+  apply BPFPath.evaluate_program_congr
+  intro pc member
+  have bounds := inside pc member
+  have same := SimplePlatform.body_decode ⟨pc-4, by omega⟩
+  have start : pc-4+4 = pc := by omega
+  have next : pc-4+5 = pc+1 := by omega
+  simpa only [SimplePlatform.raw_is_exact_clang, start, next] using same
+
+/-- Actual second native block, including the CCMP fallback, against the
+accepted expanded artifact. Both success and failure successors are retained. -/
+theorem second_block (n : AArch64.State) (p : BPF.State) (pointer limit : Word) :
+    Execution (ARM64Path.instructionStep 0 native) (SimpleGuardCertificate.secondBefore n pointer limit)
+      [] (SimpleGuardCertificate.secondFinal n pointer limit) ∧
+    Execution SimpleCheckedPlatform.instructionStep (SimpleGuardCertificate.proofSecondBefore p pointer limit)
+      [] (SimpleGuardCertificate.proofSecondFinal p pointer limit) ∧
+    (SimpleGuardCertificate.secondFinal n pointer limit).pc =
+      (if pointer + (8#64) ≤ limit ∧ pointer + (72#64) ≤ limit then 44 else 36) ∧
+    (SimpleGuardCertificate.proofSecondFinal p pointer limit).pc =
+      (if pointer + (8#64) ≤ limit ∧ pointer + (72#64) ≤ limit then 14 else 27) := by
+  have bounds : ∀ pc ∈ SimpleGuardCertificate.proofSecondPositions pointer limit, 4 ≤ pc ∧ pc < 27 := by
+    intro pc inside
+    unfold SimpleGuardCertificate.proofSecondPositions at inside
+    split at inside <;> simp at inside <;> omega
+  have actual := (body_evaluate SimpleCheckedPlatform.externals
+    (SimpleGuardCertificate.proofSecondPositions pointer limit) bounds
+    (SimpleGuardCertificate.proofSecondBefore p pointer limit)).trans
+    (SimpleGuardCertificate.proof_second_block p pointer limit (env := SimpleCheckedPlatform.externals))
+  exact ⟨ARM64Path.evaluate_sound _ _ _ _ _ (SimpleGuardCertificate.native_second_block n pointer limit),
+    SimpleCheckedPlatform.execution_transport (BPFPath.evaluate_sound _ _ _ _ _ actual), rfl, rfl⟩
+
+theorem native_decode80 : AArch64.decode (native.extract 80 84) =
+    .ok (.moveRegister .w64 (.general 7) (.general 0)) := rfl
+
+def nativeReturnBefore (n : AArch64.State) (value : Word) : AArch64.State :=
+  { n with gpr := fun r => if r.val = 0 then value else n.gpr r, pc := 80 }
+
+def nativeReturnFinal (n : AArch64.State) (value : Word) : AArch64.State :=
+  { nativeReturnBefore n value with
+    gpr := fun r => if r.val = 7 then value else (nativeReturnBefore n value).gpr r
+    pc := 84 }
+
+theorem native_return (n : AArch64.State) (value : Word) :
+    ARM64Path.evaluate 0 native [80] (nativeReturnBefore n value) =
+      .ok ⟨nativeReturnFinal n value, [], none⟩ := by
+  simp +decide [ARM64Path.evaluate, ARM64Path.step, native_decode80,
+    nativeReturnBefore, nativeReturnFinal, AArch64.step, AArch64.moveRegStep,
+    AArch64.readData, AArch64.writeData, AArch64.readReg, AArch64.writeReg,
+    AArch64.narrow, AArch64.Width.bits, Fin.ofNat', Fin.instOfNat,
+    Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+  all_goals
+    funext r
+    have register7 : (7 : AArch64.Register).val = 7 := rfl
+    have gpr7 : (7 : AArch64.Gpr).val = 7 := rfl
+    have gpr0 : (0 : AArch64.Gpr).val = 0 := rfl
+    by_cases h : r.val = 7 <;> simp_all [register7, gpr7, gpr0]
+
+def proofReturnBefore (p : BPF.State) (value : Word) : BPF.State :=
+  { p with regs := fun r => if r.val = 0 then value else p.regs r, pc := 27, halted := false }
+
+def proofReturnFinal (p : BPF.State) (value : Word) : BPF.State :=
+  { proofReturnBefore p value with pc := 29, halted := true }
+
+theorem proof_decode27 : BPF.decode SimpleCheckedPlatform.physical 27 = .ok ⟨5,0,0,0,0⟩ := rfl
+theorem proof_decode28 : BPF.decode SimpleCheckedPlatform.physical 28 = .ok ⟨149,0,0,0,0⟩ := rfl
+
+theorem proof_return (p : BPF.State) (value : Word) :
+    BPFPath.evaluate SimpleCheckedPlatform.externals SimpleCheckedPlatform.physical [27,28]
+      (proofReturnBefore p value) = .ok ⟨proofReturnFinal p value, [], none⟩ := by
+  simp +decide [BPFPath.evaluate, proof_decode27, proof_decode28,
+    proofReturnBefore, proofReturnFinal, BPF.execute,
+    Except.bind, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+
+/-- The actual linked native trampoline and rewritten proof return preserve
+all memory and produce the same ABI return value for every 64-bit input. -/
+theorem return_executions (n : AArch64.State) (p : BPF.State) (value : Word) :
+    Execution (ARM64Path.instructionStep 0 native) (nativeReturnBefore n value)
+      [] (nativeReturnFinal n value) ∧
+    Execution SimpleCheckedPlatform.instructionStep (proofReturnBefore p value)
+      [] (proofReturnFinal p value) ∧
+    (nativeReturnFinal n value).gpr 7 = value ∧
+    (proofReturnFinal p value).regs 0 = value ∧
+    (nativeReturnFinal n value).memory = n.memory ∧
+    (proofReturnFinal p value).memory = p.memory := by
+  exact ⟨ARM64Path.evaluate_sound _ _ _ _ _ (native_return n value),
+    SimpleCheckedPlatform.execution_transport (BPFPath.evaluate_sound _ _ _ _ _ (proof_return p value)),
+    by
+      have gpr7 : (7 : AArch64.Gpr).val = 7 := rfl
+      simp [nativeReturnFinal, gpr7],
+    by simp [proofReturnFinal, proofReturnBefore], rfl, rfl⟩
+
 end KProgTV.SimpleCheckedBlocks
 #print axioms KProgTV.SimpleCheckedBlocks.first_block
+
+#print axioms KProgTV.SimpleCheckedBlocks.second_block
+#print axioms KProgTV.SimpleCheckedBlocks.return_executions
