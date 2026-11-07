@@ -1,6 +1,6 @@
 # x86 application follow-up, 2026-11-07 UTC
 
-This directory records x86 application repairs and native-only runtime results. The standard BCC corpus now completes25/25 fresh generation-bound loads; the other five applications remain to be completed on that path. Historical unbound experiments below retain their original evidence boundaries.
+This directory records x86 application repairs and native-only runtime results. The standard BCC corpus completes25/25 fresh generation-bound loads, and Katran completes1/1 with packet/action counters reconciled. OTel, Cilium, Tetragon and Tracee continue from the application table below. Historical unbound experiments below retain their original evidence boundaries.
 
 ## Tracee functional repair
 
@@ -178,3 +178,10 @@ The whole Katran header cf27e323c885 is now the production generated register-wr
 header, with its common generator synchronized. Regeneration,143encoder/ABI,
 3072CLhost/19renderedMOVX and100448MOVhost cases pass. R receives the trusted-path
 Katran timing request; the complete29suite follows this source adoption.
+
+
+The [current complete pure29 suite](micro-wrapping-epoch/README.md) generates,
+compiles, accepts and binds29/29 through the common kernel-owned service.
+All58JIT/native samples match the expected64-bit result and action; all29
+terminal archives match their kernel native hashes. Launch sources retain
+their captured identities, with driver/collector exit0 and actual result215009.
