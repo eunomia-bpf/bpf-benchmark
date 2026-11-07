@@ -1,0 +1,364 @@
+{
+  "recorded": "2026-11-07T14:20:36.422254+00:00",
+  "complete": true,
+  "isa": "x86-64 KVM",
+  "production_context_fix": "18aef1f0c",
+  "module_fix": "86e0927e9",
+  "total_cases": 38,
+  "valid_controls": 9,
+  "unsafe_cases": 29,
+  "accepted_unsafe": 0,
+  "unsafe_native_executed": false,
+  "stages": {
+    "valid_executed": 9,
+    "verifier_rejected": 22,
+    "loader_rejected": 1,
+    "specialization_rejected": 6
+  },
+  "guest_make_exit": 0,
+  "cases": [
+    {
+      "name": "valid_control",
+      "negative": false,
+      "stage": "valid_executed",
+      "native_sha256": "c9f04193a6aa2a3cde5cbbd05b7c386e423f014db1e5eb109da086f4dbc778f2",
+      "request_id": 1,
+      "diagnostics": []
+    },
+    {
+      "name": "valid_copy_restore",
+      "negative": false,
+      "stage": "valid_executed",
+      "native_sha256": "4ad9cac84858ee1e715f5ff9b324e05aa97f64c2a04646be1a1f1d735516358b",
+      "request_id": 2,
+      "diagnostics": []
+    },
+    {
+      "name": "valid_alias_load",
+      "negative": false,
+      "stage": "valid_executed",
+      "native_sha256": "df63d83fcae91cc09255b1c4f581ef6d482152a9a2aabad929dac572c788f217",
+      "request_id": 3,
+      "diagnostics": []
+    },
+    {
+      "name": "valid_cmov_alias",
+      "negative": false,
+      "stage": "valid_executed",
+      "native_sha256": "01e0a203a3766ca5177ed09e394e8fb941961ed5b2cd937c00e60176ecb946ac",
+      "request_id": 4,
+      "diagnostics": []
+    },
+    {
+      "name": "valid_cmov_from_sp",
+      "negative": false,
+      "stage": "valid_executed",
+      "native_sha256": "a7031d855816abe314a51511e0328331af3a7ee8155d8248d89d6c0db1c64589",
+      "request_id": 5,
+      "diagnostics": []
+    },
+    {
+      "name": "valid_cmov_to_sp",
+      "negative": false,
+      "stage": "valid_executed",
+      "native_sha256": "6ed525857176bd3e6fdd4dcc88ca510c7fb62da2e0ba693b7ce0ff8cec8f6dd8",
+      "request_id": 6,
+      "diagnostics": []
+    },
+    {
+      "name": "valid_cmov_self_sp",
+      "negative": false,
+      "stage": "valid_executed",
+      "native_sha256": "59fac48d454de18ae04d0771accc9191d3a323e6281ea11002120e459d5e8a8d",
+      "request_id": 7,
+      "diagnostics": []
+    },
+    {
+      "name": "valid_xchg_alias",
+      "negative": false,
+      "stage": "valid_executed",
+      "native_sha256": "75e033c227ae8f2bc77a7adb75d5b0a78855447f89c2eafb1de28718f9833ce8",
+      "request_id": 8,
+      "diagnostics": []
+    },
+    {
+      "name": "valid_spill_restore",
+      "negative": false,
+      "stage": "valid_executed",
+      "native_sha256": "9e9814fa6216569fb7f70b3e5fc99a4170668fc6de148e2ad431bd369986c96f",
+      "request_id": 9,
+      "diagnostics": []
+    },
+    {
+      "name": "past_data_end_read",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "d13322c4f789a82a48d931e245bd4a4cba543c5903614ab7a530eaf606c9dab2",
+      "request_id": 10,
+      "diagnostics": []
+    },
+    {
+      "name": "past_data_end_write",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "6fef709327bff0f3ba497ceebaa301c339528004ad52369d776e0747c9e1a322",
+      "request_id": 11,
+      "diagnostics": []
+    },
+    {
+      "name": "missing_data_end_check",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "a1eb1ae5b200e4368e9da90f6c30a7e5a6af39a9eddd275285170643ee8fc8b4",
+      "request_id": 12,
+      "diagnostics": []
+    },
+    {
+      "name": "map_value_oob",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "94892fdd4ecbceb5d24f89d6922e01d0aa73b16fa425a32f255d970e3a3e2d4f",
+      "request_id": 13,
+      "diagnostics": []
+    },
+    {
+      "name": "nullable_map_dereference",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "c24f3637847c1fec6e095744a1f1076228c2748992741fe850a427b7d230d2f4",
+      "request_id": 14,
+      "diagnostics": []
+    },
+    {
+      "name": "invalid_helper_argument",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "8e0238589df5378bd45e0e321813c2223543467b1e21219bfde808feafbb9efc",
+      "request_id": 15,
+      "diagnostics": []
+    },
+    {
+      "name": "stack_oob",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "551788d402c2aeb35f76ea4e5ec7935885e531e69d68f90556c8fdefa7bda601",
+      "request_id": 16,
+      "diagnostics": []
+    },
+    {
+      "name": "uninitialized_stack",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "f8f93d3f8bdef16052a409520c01f5db93b2c80bdcdfa78e156f48326bb4824a",
+      "request_id": 17,
+      "diagnostics": []
+    },
+    {
+      "name": "unbounded_loop",
+      "negative": true,
+      "stage": "loader_rejected",
+      "native_sha256": "584a47b0d7a56e0787a38332aed5fab5ee770328f9811ee177e13b478f402e36",
+      "request_id": 18,
+      "diagnostics": [
+        "trusted-native-loader: native_kernel bound proof contains no BPF exit; insns=2 0:0xb7 1:0x5"
+      ]
+    },
+    {
+      "name": "unbounded_indirect_jump",
+      "negative": true,
+      "stage": "specialization_rejected",
+      "native_sha256": "cad9f3c86207b0d3b3da44a092121d9dd28d4e933e0f75caef0dafcbdb95cb11",
+      "request_id": 19,
+      "diagnostics": []
+    },
+    {
+      "name": "unsupported_instruction",
+      "negative": true,
+      "stage": "specialization_rejected",
+      "native_sha256": "2250b819e251ef58b1807c40fd1dcfd29ffff1846c277a06b86755e4ffa3ce53",
+      "request_id": 20,
+      "diagnostics": [
+        "unsupported mnemonic: ud2"
+      ]
+    },
+    {
+      "name": "immediate_push_branch",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "cdf2b82d4eb97590da580e291117f08f8e2d39144358b5ed7d927fbac819fc7a",
+      "request_id": 21,
+      "diagnostics": [
+        "R1 invalid mem access 'scalar'"
+      ]
+    },
+    {
+      "name": "entry_return_slot_overwrite",
+      "negative": true,
+      "stage": "specialization_rejected",
+      "native_sha256": "4b4b66d1a588fac9c103dcb201ee1702c5d704eea01400545e994cda6912de50",
+      "request_id": 22,
+      "diagnostics": []
+    },
+    {
+      "name": "stack_base_flags",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "830201e5d40f0666fc8881811501cd788727ba8039bdf76e419ecd8a421a50ea",
+      "request_id": 23,
+      "diagnostics": [
+        "R1 invalid mem access 'scalar'"
+      ]
+    },
+    {
+      "name": "undefined_entry_register",
+      "negative": true,
+      "stage": "specialization_rejected",
+      "native_sha256": "3e72a9dcad4b83da9d572a45036994f5ea3f0e85ad529ca74007c43eb7d1a893",
+      "request_id": 24,
+      "diagnostics": []
+    },
+    {
+      "name": "undefined_entry_flags",
+      "negative": true,
+      "stage": "specialization_rejected",
+      "native_sha256": "bcf1f2d551d9fa28ed672c7b4a6618b21471ea1fa9a6807bb1d70ab1ffef34be",
+      "request_id": 25,
+      "diagnostics": []
+    },
+    {
+      "name": "div8_zero",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "e181d078966773bfe678096f2f8ce704885bb1c13ec2efebcbea59d49022848f",
+      "request_id": 26,
+      "diagnostics": [
+        "R0 invalid mem access 'scalar'"
+      ]
+    },
+    {
+      "name": "div8_overflow",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "09dec18c711dea7f63f24045b8f3839b4f427827fb993fff187c69c90dcdd677",
+      "request_id": 27,
+      "diagnostics": [
+        "R0 invalid mem access 'scalar'"
+      ]
+    },
+    {
+      "name": "div16_zero",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "1db3d4d6855a4629197c61ac5bc7a6a197b3f5209c4809292fd42cc632ce7f0f",
+      "request_id": 28,
+      "diagnostics": [
+        "R0 invalid mem access 'scalar'"
+      ]
+    },
+    {
+      "name": "div16_overflow",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "93ad60528fa9dc96d07cf3a614efbfff1eb36e62c8541721fcd9d7f637d841dc",
+      "request_id": 29,
+      "diagnostics": [
+        "R0 invalid mem access 'scalar'"
+      ]
+    },
+    {
+      "name": "div32_zero",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "5b92fb091d6fc0f31703a817eb6b4cf7ff34aee69aa09deb9e35ffebf2d0422a",
+      "request_id": 30,
+      "diagnostics": [
+        "R0 invalid mem access 'scalar'"
+      ]
+    },
+    {
+      "name": "div32_overflow",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "7a173acbb4d86ebf4f61bdfff03fb41210597d7207a07d501f8a5c72fdae2dde",
+      "request_id": 31,
+      "diagnostics": [
+        "R0 invalid mem access 'scalar'"
+      ]
+    },
+    {
+      "name": "div64_zero",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "fb2712e6fcb7e8eb40f834a476869c5ec1124b118a81f0ce0cf896ed2fbd0aea",
+      "request_id": 32,
+      "diagnostics": [
+        "R0 invalid mem access 'scalar'"
+      ]
+    },
+    {
+      "name": "div64_overflow",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "824eefa65613af8f15cc1fd100fead446bf029d07d49e7d659d3ee5590e247e4",
+      "request_id": 33,
+      "diagnostics": [
+        "R0 invalid mem access 'scalar'"
+      ]
+    },
+    {
+      "name": "helper_clobbered_register",
+      "negative": true,
+      "stage": "specialization_rejected",
+      "native_sha256": "a0f35016e58758d1b9b41b669e1fe826964c0b0557c3be3be7a62f39088d07d2",
+      "request_id": 34,
+      "diagnostics": []
+    },
+    {
+      "name": "high32_positive_byte",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "54d0d4208eb31a37b2515d83760f1a8cb0fd76b37eeab355327c2bf53f75d74b",
+      "request_id": 35,
+      "diagnostics": []
+    },
+    {
+      "name": "high32_positive_qword",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "323eaf857270e7c6fdfde7b68bb922ca4b6da74bdaf0fca61319aa541aeb5538",
+      "request_id": 36,
+      "diagnostics": []
+    },
+    {
+      "name": "high32_negative_byte",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "58ab137e73914c04b9e598ab384e56a6d2ab2ece60542d37bf1aa3424a8a4d6e",
+      "request_id": 37,
+      "diagnostics": []
+    },
+    {
+      "name": "high32_negative_qword",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "51dc957c6a5b4a9e0a1f73382089c8ad26f216b49db157e9f283db9aff3fe61c",
+      "request_id": 38,
+      "diagnostics": []
+    }
+  ],
+  "source_identities": {
+    "/workspaces/repository/kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+    "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+    "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+    "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+    "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+    "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "ffcef53c3a6025045b2d75efc96a462efef4ffc8b9204ae0ddc009fb026844d8",
+    "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "ed147232b680be95bbccf3843f1891dbb2a55272772bee3b33f6ed66b448260e",
+    "/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader": "571daa834a86b6660c908c6a5af31844e6e97f3aefecc52abe340ab207d61c5c"
+  },
+  "host_inputs_unchanged": true,
+  "archive": "run-production-context.tar.gz",
+  "archive_sha256": "a790519188f2656d10ae1807e59f414992d7c11ce835bc0f762e601eaee60fe4",
+  "scope": "Retained38 native identities only; SKB context projection and full O1-O4 remain separate"
+}

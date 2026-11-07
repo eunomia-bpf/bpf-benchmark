@@ -81,3 +81,23 @@ or native input was rebuilt. The command was
 `taskset -c 20-23 make -f kprog/results/kprog_fidelity_20261107/negative/context-projection/Makefile qemu`.
 The separate complete34-case production replay is running; this two-case
 result does not establish that replay, SKB projection or universal ABI safety.
+
+## Production x86 XDP repair regression
+
+The independent KVM replay after `18aef1f0c`/`86e0927e9` executes the unchanged
+return2 control correctly and verifier-rejects the original ordinary store
+with `invalid bpf_context access off=0 size=8`. There is zero accepted unsafe
+input and no unsafe execution. Both original/kernel/generated native hashes
+and the published production header match; source/host inputs are unchanged.
+`x86-production/summary.json`, compressed complete outcomes and
+`x86-production/run-production-context.tar.gz` retain exact receipts.
+Old accepted findings above and their archives remain unchanged.
+
+```sh
+taskset -c 20-23 make -f kprog/results/kprog_fidelity_20261107/negative/context-projection/Makefile kvm RUN_OUT=/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/context-projection/x86-production
+```
+
+Use a fresh RUN_OUT for each repeat; it changes only where evidence is stored.
+The original full38 suite also completes; SKB projection and universal
+ABI/safety claims remain separate. No kernel/module/loader or input rebuild
+was part of either F run.

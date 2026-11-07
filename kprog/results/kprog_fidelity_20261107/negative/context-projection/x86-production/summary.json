@@ -1,0 +1,52 @@
+{
+  "recorded": "2026-11-07T14:18:57.131033+00:00",
+  "complete": true,
+  "isa": "x86-64 KVM",
+  "production_context_fix": "18aef1f0c",
+  "module_fix": "86e0927e9",
+  "cases": [
+    {
+      "name": "valid_control",
+      "negative": false,
+      "stage": "valid_executed",
+      "native_sha256": "c9f04193a6aa2a3cde5cbbd05b7c386e423f014db1e5eb109da086f4dbc778f2",
+      "request_id": 1,
+      "diagnostics": []
+    },
+    {
+      "name": "context_field_write",
+      "negative": true,
+      "stage": "verifier_rejected",
+      "native_sha256": "ec951558fbf82d4760d41d8e5a76f505b24e4d1d04af9b5793305a78b635845c",
+      "request_id": 2,
+      "diagnostics": [
+        "invalid bpf_context access off=0 size=8"
+      ]
+    }
+  ],
+  "total_cases": 2,
+  "valid_controls": 1,
+  "unsafe_cases": 1,
+  "accepted_unsafe": 0,
+  "unsafe_native_executed": false,
+  "stages": {
+    "valid_executed": 1,
+    "verifier_rejected": 1
+  },
+  "guest_make_exit": 0,
+  "source_identities": {
+    "/workspaces/repository/kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+    "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+    "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+    "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+    "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+    "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "ffcef53c3a6025045b2d75efc96a462efef4ffc8b9204ae0ddc009fb026844d8",
+    "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "ed147232b680be95bbccf3843f1891dbb2a55272772bee3b33f6ed66b448260e",
+    "/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader": "571daa834a86b6660c908c6a5af31844e6e97f3aefecc52abe340ab207d61c5c"
+  },
+  "host_inputs_unchanged": true,
+  "archive": "run-production-context.tar.gz",
+  "archive_sha256": "de8b396d21f9b91415b41064df121f47a9063b083a7ff221927ab512d3c4c702",
+  "scope": "Original ordinary XDP context store and return2 control only; full38 and SKB projection separate"
+}

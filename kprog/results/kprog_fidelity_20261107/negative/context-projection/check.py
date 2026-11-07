@@ -39,7 +39,7 @@ def guest(arch,live=None):
   (m.OUT/'guest.json').write_text(json.dumps(summary,indent=2)+'\n')
 
 if sys.argv[1]=='build':build(sys.argv[2])
-elif sys.argv[1]=='guest-x86':guest('x86')
+elif sys.argv[1]=='guest-x86':guest('x86',sys.argv[2] if len(sys.argv)>2 else None)
 elif sys.argv[1]=='guest':guest('arm64',sys.argv[2])
 elif sys.argv[1]=='host':
  spec=importlib.util.spec_from_file_location('existing_arm_transport',R/'corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)

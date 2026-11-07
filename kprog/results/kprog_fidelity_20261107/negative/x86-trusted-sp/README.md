@@ -55,3 +55,30 @@ preserve receipts on a repeat. This result is x86 KVM only. Prior AArch64 QEMU
 results used the earlier bound path; the new common-service path still requires
 its own AArch64 safety replay. Whole-program formal closure and application
 acceptance are independent of this negative-suite result.
+
+## Production XDP context repair replay
+
+After published context repair `18aef1f0c` and module repair `86e0927e9`,
+the unchanged38 native inputs complete independently: **9 valid controls
+execute correctly and29 unsafe inputs reject; zero accepted negatives and
+zero unsafe execution**. Rejection stages are22 verifier,6 specialization and1 loader.
+Every native/request/kernel-capture/generated identity matches, all38
+request source-pin sets agree, host inputs are unchanged, and Make exits0.
+`production-context/summary.json` and compressed outcomes retain every case
+and exact diagnostics. `production-context/run-production-context.tar.gz`
+preserves the original request archives, stdout/stderr, service/console logs
+and input pins. The original39 tracked request/journal blobs remain
+byte-identical; their prior IDs and findings were not overwritten.
+
+The existing harness now accepts `RUN_OUT` (and `check.py --out`) only to
+select a fresh evidence directory. Default commands retain the previous
+output location and execute the identical fixtures/probe/service logic.
+Command used (choose a new RUN_OUT directory for a repeat):
+
+```sh
+taskset -c 20-23 make -f kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/Makefile kvm RUN_OUT=/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/production-context
+```
+
+The separate ordinary context-store control also rejects on this production
+path; see context-projection/x86-production. This finite suite does not close
+SKB projection, full ISA/ABI refinement or all six application admission.

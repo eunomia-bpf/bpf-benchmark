@@ -97,5 +97,6 @@ def check():
  print('ALL current native-only checks passed',flush=True)
 
 if __name__=='__main__':
- parser=argparse.ArgumentParser();parser.add_argument('mode',choices=['build','check']);a=parser.parse_args()
+ parser=argparse.ArgumentParser();parser.add_argument('mode',choices=['build','check']);parser.add_argument('--out',type=Path);a=parser.parse_args()
+ if a.out is not None:OUT=a.out
  (build if a.mode=='build' else check)()
