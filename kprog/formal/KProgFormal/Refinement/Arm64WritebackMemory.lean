@@ -1,4 +1,5 @@
 import KProgFormal.Refinement.Arm64VectorMemory
+import KProgFormal.Arm64LdrsxOp
 
 namespace KProgFormal.Refinement.Arm64WritebackMemory
 open Reference Reference.AArch64
@@ -256,5 +257,134 @@ theorem indexed_refines (i : AddressedMemoryInstruction) (s : State)
     (by simpa only [direct, reduceCtorEq, ↓reduceIte] using accessible)
   simpa only [direct, step, addressedMemoryStep, noWriteback, memoryOffset,
     offset_refines, reduceCtorEq, ↓reduceIte] using refined
+
+/-- Contract adapters retain the generated load opcode, independent memory
+width and derived SXTB/SXTH/SXTW opcode. They define no second ISA semantics. -/
+def signedWidth : GeneratedArm64LdrSx.LdrSx → MemoryWidth
+  | .ldrSb => .byte | .ldrSh => .half | .ldrSw => .word
+
+def signedSelector : GeneratedArm64LdrSx.LdrSx → GeneratedArm64LdrsxOp.LdrSxLoad
+  | .ldrSb => .ldrSb | .ldrSh => .ldrSh | .ldrSw => .ldrSw
+
+def signedExtend : GeneratedArm64LdrSx.LdrSx → GeneratedArm64Extrev.Extrev
+  | .ldrSb => .sxtb | .ldrSh => .sxth | .ldrSw => .sxtw
+
+theorem signed_selection (op : GeneratedArm64LdrSx.LdrSx) :
+    Arm64Memory.valueWidth (signedWidth op) = GeneratedArm64LdrSx.loadWidth op ∧
+    GeneratedArm64LdrsxOp.code (signedSelector op) = GeneratedArm64LdrSx.code op ∧
+    GeneratedArm64Extrev.code (signedExtend op) = GeneratedArm64LdrsxOp.sxCode (signedSelector op) := by
+  cases op <;> decide
+
+/-- Actual LDRSX successful transfer: opcode-selected native load width,
+opcode-selected shared sign-extension operation, then W/X destination write.
+The destination width is independent of the memory access width. -/
+def signedSuccess (op : GeneratedArm64LdrSx.LdrSx) (dst : Register) (output : Width)
+    (address : Word) (s : State) : Transition State :=
+  let width := signedWidth op
+  let loaded := GeneratedArm64LoadBytes.value (Arm64Memory.loadWidth width)
+    (wordAt s.memory address 8)
+  let value := GeneratedArm64Extrev.value (signedExtend op) loaded 0 0
+    (Arm64Register.handlerWidth output)
+  ⟨{ Arm64Register.writeReg s dst value output with pc := s.pc + 4 },
+   [.memory .read address (bytesAt s.memory address width.bytes)
+     (initializedAt s.memory address width.bytes)], none⟩
+
+theorem signed_success_eq (op : GeneratedArm64LdrSx.LdrSx) (dst : Register) (output : Width)
+    (address : Word) (s : State) :
+    signedSuccess op dst output address s =
+      success (signedWidth op) (.load dst (some output)) address s := by
+  cases op <;> rfl
+
+/-- The signed arm uses the same actual pre/access/post order, with the
+explicit generated LDRSX transfer rather than an assumed signed result. -/
+def signedCore (op : GeneratedArm64LdrSx.LdrSx) (dst : Register) (output : Width)
+    (mode : Writeback) (base : Register) (delta : Word) (s : State) : Transition State :=
+  let flags := Arm64AddressedMemory.flags mode
+  let before := bumpBase s base (GeneratedArm64MemPrepost.preDelta flags delta)
+  let offset := GeneratedArm64MemOffset.value
+    (GeneratedArm64MemPrepost.suppressOffset flags) false delta 0
+  let transferred := signedSuccess op dst output (Arm64Memory.baseValue before base + offset) before
+  { transferred with state := bumpBase transferred.state base (GeneratedArm64MemPrepost.postDelta flags delta) }
+
+theorem signed_core_eq (op : GeneratedArm64LdrSx.LdrSx) (dst : Register) (output : Width)
+    (mode : Writeback) (base : Register) (delta : Word) (s : State) :
+    signedCore op dst output mode base delta s =
+      core (signedWidth op) (.load dst (some output)) mode base delta s := by
+  simp only [signedCore, signed_success_eq, core]
+
+theorem signed_core_refines (op : GeneratedArm64LdrSx.LdrSx) (i : AddressedMemoryInstruction)
+    (dst : Register) (output : Width) (delta : Word) (s : State)
+    (width : i.width = signedWidth op) (transfer : i.transfer = .load dst (some output))
+    (immediate : i.offset = .immediate delta)
+    (alignment : spAlignmentFault s i.base = none)
+    (accessible : permitted s.memory.readable
+      (memoryBase s i.base + (if i.writeback = .post then 0 else delta)) i.width.bytes = true) :
+    signedCore op dst output i.writeback i.base delta s = step (.addressedMemory i) s := by
+  rw [signed_core_eq, ← width, ← transfer]
+  apply core_refines i delta s immediate alignment
+  simpa only [transfer] using accessible
+
+/-- The numeric family gate mirrors KPROG_ARM64_LDRSX_HANDLED and its three
+case labels. An unrelated opcode is left to its own dispatcher arm. -/
+def signedDecode (code : Nat) : Option GeneratedArm64LdrSx.LdrSx :=
+  if code = GeneratedArm64LdrSx.code .ldrSb then some .ldrSb
+  else if code = GeneratedArm64LdrSx.code .ldrSw then some .ldrSw
+  else if code = GeneratedArm64LdrSx.code .ldrSh then some .ldrSh
+  else none
+
+theorem signed_decode_code (op : GeneratedArm64LdrSx.LdrSx) :
+    signedDecode (GeneratedArm64LdrSx.code op) = some op := by
+  cases op <;> rfl
+
+def dispatchSigned (code : Nat) (dst : Register) (output : Width) (mode : Writeback)
+    (base : Register) (delta : Word) (s : State) : Option (Transition State) :=
+  (signedDecode code).map (fun op => signedCore op dst output mode base delta s)
+
+theorem dispatch_signed_refines (op : GeneratedArm64LdrSx.LdrSx) (i : AddressedMemoryInstruction)
+    (dst : Register) (output : Width) (delta : Word) (s : State)
+    (width : i.width = signedWidth op) (transfer : i.transfer = .load dst (some output))
+    (immediate : i.offset = .immediate delta)
+    (alignment : spAlignmentFault s i.base = none)
+    (accessible : permitted s.memory.readable
+      (memoryBase s i.base + (if i.writeback = .post then 0 else delta)) i.width.bytes = true) :
+    dispatchSigned (GeneratedArm64LdrSx.code op) dst output i.writeback i.base delta s =
+      some (step (.addressedMemory i) s) := by
+  simp only [dispatchSigned, signed_decode_code]
+  change some (signedCore op dst output i.writeback i.base delta s) = _
+  rw [signed_core_refines op i dst output delta s width transfer immediate alignment accessible]
+
+theorem dispatch_signed_other (code : Nat) (dst : Register) (output : Width) (mode : Writeback)
+    (base : Register) (delta : Word) (s : State)
+    (notByte : code ≠ 54) (notWord : code ≠ 57) (notHalf : code ≠ 63) :
+    dispatchSigned code dst output mode base delta s = none := by
+  simp [dispatchSigned, signedDecode, GeneratedArm64LdrSx.code, notByte, notWord, notHalf]
+
+/-- Signed register-offset forms retain the generated index modifier and
+memory scale as well as the independently selected sign-extension operation. -/
+theorem signed_indexed_refines (op : GeneratedArm64LdrSx.LdrSx) (i : AddressedMemoryInstruction)
+    (dst : Register) (output : Width) (s : State)
+    (width : i.width = signedWidth op) (transfer : i.transfer = .load dst (some output))
+    (noWriteback : i.writeback = .none)
+    (alignment : spAlignmentFault s i.base = none)
+    (accessible : permitted s.memory.readable
+      (memoryBase s i.base + offsetValue i.width s i.offset) i.width.bytes = true) :
+    signedCore op dst output .none i.base (offsetValue i.width s i.offset) s =
+      step (.addressedMemory i) s := by
+  rw [signed_core_eq, ← width, ← transfer]
+  apply indexed_refines i s noWriteback alignment
+  simpa only [transfer] using accessible
+
+theorem dispatch_signed_indexed_refines (op : GeneratedArm64LdrSx.LdrSx)
+    (i : AddressedMemoryInstruction) (dst : Register) (output : Width) (s : State)
+    (width : i.width = signedWidth op) (transfer : i.transfer = .load dst (some output))
+    (noWriteback : i.writeback = .none)
+    (alignment : spAlignmentFault s i.base = none)
+    (accessible : permitted s.memory.readable
+      (memoryBase s i.base + offsetValue i.width s i.offset) i.width.bytes = true) :
+    dispatchSigned (GeneratedArm64LdrSx.code op) dst output .none i.base
+      (offsetValue i.width s i.offset) s = some (step (.addressedMemory i) s) := by
+  simp only [dispatchSigned, signed_decode_code]
+  change some (signedCore op dst output .none i.base (offsetValue i.width s i.offset) s) = _
+  rw [signed_indexed_refines op i dst output s width transfer noWriteback alignment accessible]
 
 end KProgFormal.Refinement.Arm64WritebackMemory

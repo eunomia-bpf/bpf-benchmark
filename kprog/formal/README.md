@@ -57,6 +57,9 @@ pre/access/post order for ordinary and signed loads/stores, all four widths,
 and generated register-offset modifiers. It uses the canonical writeback-alias
 restriction and explicit successful-access/original-SP witnesses; its LOAD and
 STORE singleton compositions preserve the same complete numeric state and effects.
+LDRSB/LDRSH/LDRSW additionally compose their generated opcode, memory width and
+sign-operation selections with the same core and numeric family-dispatch gate,
+including no-writeback register-offset forms.
 Individual module statements define their
 exact scope. Dispatcher coverage/exclusivity is
 **not yet a full simulator-step refinement theorem**; completing the remaining

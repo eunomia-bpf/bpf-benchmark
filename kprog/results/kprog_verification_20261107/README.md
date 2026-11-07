@@ -193,3 +193,34 @@ existing addressed/vector reference suite passed 959 complete-state cases and
 cases. Early attempts failed on dependent record syntax and proof rewriting;
 no architectural input was filtered and no reference/premise was weakened.
 The full check of this increment is run separately after publication.
+
+## Signed-load operation and dispatcher composition
+
+`Arm64WritebackMemory` now pins the generated LDRSB/LDRSH/LDRSW operation codes
+to both their native memory widths and their independently selected
+SXTB/SXTH/SXTW operations. `signedSuccess` explicitly composes the generated
+load ladder, selected shared sign extension and destination-width write.
+`signed_core_refines` lifts that transfer in actual pre/access/post order;
+`dispatch_signed_refines` composes all three numeric family case labels.
+`signed_indexed_refines` and its dispatcher theorem retain the generated
+register modifiers and scalar scales for no-writeback forms, including legal
+base/destination/index aliases. Other opcode numbers return no result for this
+arm, preserving the rest of the dispatcher.
+
+The same canonical instruction, writeback-alias validity, original-SP alignment
+and successful-memory witnesses are used. The pipeline retains the independent
+W/X destination parameter; native-byte decoding must establish the valid source
+form and its flags (including X destination for LDRSW). Materialization,
+provenance and Entry/O4 bindings remain separate. This increment changes no
+runtime source, claims no faulting-writeback correspondence or complete
+72-operation dispatcher theorem, and preserves every previous theorem verbatim.
+
+Validation: 40 Lean/reference dependency jobs passed; the existing addressed
+reference suite passed 959 full-state cases and 18 precise rejects. Both existing
+LDRSX generated-contract freshness checks passed. The two existing scalar
+contract hosts each passed 256 cases; the actual LDRSX route host passed
+2,315,529 cases and the actual sign-selector route host passed 98,197 cases.
+An initial proof failed only to reduce an Option.map application before rewriting;
+explicitly exposing that application fixed it without changing any premise,
+reference behavior or test input. Exact `ad409c6de` full validation was still
+running separately when this increment was published.
