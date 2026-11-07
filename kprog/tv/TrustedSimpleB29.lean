@@ -93,8 +93,201 @@ theorem entry_context_component (env : BPF.Environment) (n : X86.State) (p : BPF
     ?_,?_,?_⟩
   all_goals simp +decide [nativePrefixFinal,nativeAfterSecond,nativeAfter,contextAfter,dataAfter,stackAfter,BPF.setReg,memory]
 
+
+/-- Both context accesses stop on the same denied byte permission, with the
+entire input state retained. The SP input preceding them is effect-free. -/
+theorem context_fault_step (env : BPF.Environment) (p : BPF.State) (address : Word)
+    (position : (p.pc=1 ∧ address=p.regs 1) ∨ (p.pc=2 ∧ address=p.regs 1+(8#64)))
+    (active : p.halted=false) (bad : permitted p.memory.readable address 8=false) :
+    BPFPlatform.step (environment env) proof p =
+      .ok ⟨p,[.fault (.read address 8)],some (.read address 8)⟩ := by
+  rcases position with ⟨position,rfl⟩ | ⟨position,rfl⟩
+  all_goals simp +decide [BPFPlatform.step,environment,active,position,decode1,decode2,
+    BPFPlatform.expand,expansion0,expansion2,BPFPath.evaluate,physical0,physical2,
+    BPF.decode,BPF.execute,BPF.load,BPF.setReg,readMemory,bad,littleEndian,
+    Except.bind,Except.map,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  all_goals cases p <;> simp_all +decide [proof]
+  all_goals exact position.symm
+
+def instructionStep (env : BPF.Environment) : BlockStep BPF.State :=
+  fun before events after => ∃ effect,
+    BPFPlatform.step (environment env) proof before=.ok effect ∧
+    effect.events=events ∧ effect.state=after
+
+theorem first_context_fault (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (stack : Word) (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (argument : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (input : env.nativeInput .stackPointer=.ok stack)
+    (bad : permitted p.memory.readable (p.regs 1) 8=false) :
+    X86Path.Execution 0 native n [.fault (.read (p.regs 1) 8)] n ∧
+    Execution (instructionStep env) p [.fault (.read (p.regs 1) 8)] (stackAfter p stack) := by
+  have nativeRun := native_first_context_fault n nativePC (by simpa only [memory,argument] using bad)
+  have badAfter : permitted (stackAfter p stack).memory.readable ((stackAfter p stack).regs 1) 8=false := by
+    simpa +decide [stackAfter,BPF.setReg] using bad
+  have fault := context_fault_step env (stackAfter p stack) ((stackAfter p stack).regs 1)
+    (Or.inl ⟨rfl,rfl⟩) (by simpa [stackAfter] using active) badAfter
+  have head : instructionStep env p [] (stackAfter p stack) :=
+    ⟨_,stack_step env p stack proofPC active input,rfl,rfl⟩
+  have tail : instructionStep env (stackAfter p stack) [.fault (.read (p.regs 1) 8)] (stackAfter p stack) := by
+    refine ⟨⟨stackAfter p stack,[.fault (.read (p.regs 1) 8)],some (.read (p.regs 1) 8)⟩,?_,rfl,rfl⟩
+    simpa +decide [stackAfter,BPF.setReg] using fault
+  exact ⟨by simpa only [argument] using nativeRun,
+    by simpa using Execution.next head (Execution.next tail (Execution.refl _))⟩
+
+theorem second_context_fault (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (stack pointer : Word) (first : Event)
+    (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (argument : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (input : env.nativeInput .stackPointer=.ok stack)
+    (read : readMemory p.memory (p.regs 1) 8=.ok (pointer,first))
+    (bad : permitted p.memory.readable (p.regs 1+(8#64)) 8=false) :
+    X86Path.Execution 0 native n [first,.fault (.read (p.regs 1+(8#64)) 8)] (nativeAfter n pointer) ∧
+    Execution (instructionStep env) p [first,.fault (.read (p.regs 1+(8#64)) 8)] (dataAfter p stack pointer) := by
+  have entry := native_entry_execution n pointer first nativePC (by simpa only [memory,argument] using read)
+  have fault := native_second_context_fault (nativeAfter n pointer)
+    (by simp [nativeAfter,nativePC]) (by simpa +decide [nativeAfter,memory,argument] using bad)
+  have nativeRun := native_execution_append entry fault
+  have dataRead : readMemory (stackAfter p stack).memory ((stackAfter p stack).regs 1) 8=.ok (pointer,first) := by
+    simpa +decide [stackAfter,BPF.setReg] using read
+  have badAfter : permitted (dataAfter p stack pointer).memory.readable
+      ((dataAfter p stack pointer).regs 1+(8#64)) 8=false := by
+    simpa +decide [dataAfter,stackAfter,BPF.setReg] using bad
+  have proofFault := context_fault_step env (dataAfter p stack pointer)
+    ((dataAfter p stack pointer).regs 1+(8#64)) (Or.inr ⟨rfl,rfl⟩)
+    (by simpa [dataAfter,stackAfter] using active) badAfter
+  have head : instructionStep env p [] (stackAfter p stack) :=
+    ⟨_,stack_step env p stack proofPC active input,rfl,rfl⟩
+  have middle : instructionStep env (stackAfter p stack) [first] (dataAfter p stack pointer) :=
+    ⟨_,data_step env _ pointer first rfl (by simpa [stackAfter] using active) dataRead,rfl,rfl⟩
+  have tail : instructionStep env (dataAfter p stack pointer)
+      [.fault (.read (p.regs 1+(8#64)) 8)] (dataAfter p stack pointer) := by
+    refine ⟨⟨dataAfter p stack pointer,[.fault (.read (p.regs 1+(8#64)) 8)],some (.read (p.regs 1+(8#64)) 8)⟩,?_,rfl,rfl⟩
+    simpa +decide [dataAfter,stackAfter,BPF.setReg] using proofFault
+  refine ⟨?_,?_⟩
+  · simpa +decide [nativeAfter,argument] using nativeRun
+  · simpa using Execution.next head (Execution.next middle (Execution.next tail (Execution.refl _)))
+
+theorem decode3 : BPF.decode proof 3 = .ok ⟨0xb4,0,0,0,0⟩ := rfl
+theorem decode4 : BPF.decode proof 4 = .ok ⟨0x2d,2,1,22,0⟩ := rfl
+
+def zeroAfter (p : BPF.State) : BPF.State := {BPF.setReg p 0 0 with pc:=4}
+def guardAfter (p : BPF.State) : BPF.State :=
+  {zeroAfter p with pc:=if p.regs 2 > p.regs 1 then 27 else 5}
+
+theorem zero_step (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=3) (active : p.halted=false) :
+    BPFPlatform.step (environment env) proof p=.ok ⟨zeroAfter p,[],none⟩ := by
+  simp +decide [BPFPlatform.step,environment,position,active,decode3,
+    BPF.execute,BPF.source,BPF.alu,BPF.setReg,zeroAfter,Except.map,
+    Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+theorem guard_step (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=3) (active : p.halted=false) :
+    BPFPlatform.step (environment env) proof (zeroAfter p)=.ok ⟨guardAfter p,[],none⟩ := by
+  simp +decide [BPFPlatform.step,environment,position,active,decode4,
+    BPF.execute,BPF.source,BPF.comparison,BPF.setReg,zeroAfter,guardAfter,
+    Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+/-- Native MOV/XOR/CMP/JA and the actual B29 zero/JGT64 instructions have
+matching branch predicates and effects, including wrap-free comparison of
+all 64 pointer bits. Both endpoints are exact complete states, without a
+chosen branch outcome. The imported decoded relational block theorem also
+covers every allowed value of XOR's undefined AF before CMP overwrites it. -/
+theorem first_guard_component (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (nativePC : n.pc=7) (proofPC : p.pc=3) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2) (limit : n.gpr 2=p.regs 1) :
+    X86Path.Execution 0 native n [] (guardFinal n) ∧
+    Execution (instructionStep env) p [] (guardAfter p) ∧
+    ((guardFinal n).pc=60 ↔ (guardAfter p).pc=27) ∧
+    ((guardFinal n).pc=17 ↔ (guardAfter p).pc=5) ∧
+    (guardFinal n).gpr 0=(guardAfter p).regs 0 ∧
+    (guardFinal n).gpr 6=(guardAfter p).regs 2 ∧
+    (guardFinal n).memory=(n.memory) ∧
+    (guardAfter p).memory=p.memory ∧
+    (guardFinal n).rflags=X86.arithmeticFlags .w64 true false (n.gpr 1) (n.gpr 2) n.rflags := by
+  have head : instructionStep env p [] (zeroAfter p) :=
+    ⟨_,zero_step env p proofPC active,rfl,rfl⟩
+  have tail : instructionStep env (zeroAfter p) [] (guardAfter p) :=
+    ⟨_,guard_step env p proofPC active,rfl,rfl⟩
+  refine ⟨native_first_guard n nativePC,by simpa using Execution.next head (Execution.next tail (Execution.refl _)),
+    ?_,?_,?_,?_,rfl,rfl,guard_final_flags n⟩
+  all_goals simp +decide [guardFinal,guardCompare,guardZero,guardMove,guardAfter,zeroAfter,BPF.setReg,pointer,limit]
+
+
+/-- Universal native semantics at this actual first branch: arbitrary
+byte-decoded relational steps, including every allowed XOR AF choice, end
+in the exact state paired with B29. No next state or branch choice is assumed. -/
+theorem first_guard_relational_component (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (nativePC : n.pc=7) (proofPC : p.pc=3) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2) (limit : n.gpr 2=p.regs 1)
+    (moved zeroed compared branched : Transition X86.State)
+    (i0 i1 i2 i3 : X86.Instruction)
+    (d0 : X86Path.decodeAt 0 native ⟨7,3⟩ n=.ok i0) (r0 : X86.Step i0 n moved)
+    (d1 : X86Path.decodeAt 0 native ⟨10,2⟩ moved.state=.ok i1) (r1 : X86.Step i1 moved.state zeroed)
+    (d2 : X86Path.decodeAt 0 native ⟨12,3⟩ zeroed.state=.ok i2) (r2 : X86.Step i2 zeroed.state compared)
+    (d3 : X86Path.decodeAt 0 native ⟨15,2⟩ compared.state=.ok i3) (r3 : X86.Step i3 compared.state branched) :
+    moved.events++zeroed.events++compared.events++branched.events=[] ∧
+    moved.fault=none ∧ zeroed.fault=none ∧ compared.fault=none ∧
+    branched=⟨guardFinal n,[],none⟩ ∧
+    Execution (instructionStep env) p [] (guardAfter p) ∧
+    (branched.state.pc=60 ↔ (guardAfter p).pc=27) ∧
+    (branched.state.pc=17 ↔ (guardAfter p).pc=5) := by
+  obtain ⟨events,mf,zf,cf,endpoint⟩ := native_guard_decoded_relational_block n nativePC
+    moved zeroed compared branched i0 i1 i2 i3 d0 r0 d1 r1 d2 r2 d3 r3
+  obtain ⟨_,proofRun,exit,fallthrough,_,_,_,_,_⟩ := first_guard_component env n p nativePC proofPC active pointer limit
+  refine ⟨events,mf,zf,cf,endpoint,proofRun,?_,?_⟩
+  · simpa only [endpoint] using exit
+  · simpa only [endpoint] using fallthrough
+
+/-- First complete successful-read basic block, entry through the actual
+conditional exit. Every full endpoint is fixed by the canonical semantics;
+all untouched native/BPF registers and memory remain in these explicit states.
+The two read-fault certificates above cover the earlier stopping points. -/
+theorem entry_first_guard_component (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (stack pointer limit : Word) (first second : Event)
+    (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (argument : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (input : env.nativeInput .stackPointer=.ok stack)
+    (read0 : readMemory p.memory (p.regs 1) 8=.ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8=.ok (limit,second)) :
+    X86Path.Execution 0 native n [first,second] (guardFinal (nativePrefixFinal n pointer limit)) ∧
+    Execution (instructionStep env) p [first,second] (guardAfter (contextAfter p stack pointer limit)) ∧
+    (guardFinal (nativePrefixFinal n pointer limit)).pc=(if pointer > limit then 60 else 17) ∧
+    (guardAfter (contextAfter p stack pointer limit)).pc=(if pointer > limit then 27 else 5) ∧
+    (guardFinal (nativePrefixFinal n pointer limit)).gpr 0=(guardAfter (contextAfter p stack pointer limit)).regs 0 ∧
+    (guardFinal (nativePrefixFinal n pointer limit)).memory=(guardAfter (contextAfter p stack pointer limit)).memory := by
+  obtain ⟨nativeContextRun,s0,s1,s2,pointerEq,limitEq,memoryEq⟩ := entry_context_component env n p
+    stack pointer limit first second nativePC proofPC active argument memory input read0 read1
+  have at7 : (nativePrefixFinal n pointer limit).pc=7 := by
+    simp +decide [nativePrefixFinal,nativeAfterSecond,nativeAfter,nativePC]
+  have stillActive : (contextAfter p stack pointer limit).halted=false := by
+    simpa [contextAfter,dataAfter,stackAfter] using active
+  obtain ⟨nativeGuard,proofGuard,_,_,resultEq,_,_,_,_⟩ := first_guard_component env
+    (nativePrefixFinal n pointer limit) (contextAfter p stack pointer limit)
+    at7 rfl stillActive pointerEq limitEq
+  have head : instructionStep env p [] (stackAfter p stack) := ⟨_,s0,rfl,rfl⟩
+  have middle : instructionStep env (stackAfter p stack) [first] (dataAfter p stack pointer) := ⟨_,s1,rfl,rfl⟩
+  have tail : instructionStep env (dataAfter p stack pointer) [second] (contextAfter p stack pointer limit) := ⟨_,s2,rfl,rfl⟩
+  have proofPrefix := Execution.next head (Execution.next middle (Execution.next tail (Execution.refl _)))
+  refine ⟨?_,?_,?_,?_,resultEq,?_⟩
+  · simpa only [List.append_nil] using native_execution_append nativeContextRun nativeGuard
+  · simpa using proofPrefix.append proofGuard
+  · simp +decide [guardFinal,nativePrefixFinal,nativeAfterSecond,nativeAfter]
+  · simp +decide [guardAfter,zeroAfter,contextAfter,dataAfter,stackAfter,BPF.setReg]
+  · simpa only [guardFinal,guardCompare,guardZero,guardMove,guardAfter,zeroAfter,BPF.setReg] using memoryEq
+
 end KProgTV.TrustedSimpleB29
 #print axioms KProgTV.TrustedSimpleB29.stack_step
 #print axioms KProgTV.TrustedSimpleB29.data_step
 #print axioms KProgTV.TrustedSimpleB29.end_step
 #print axioms KProgTV.TrustedSimpleB29.entry_context_component
+
+#print axioms KProgTV.TrustedSimpleB29.context_fault_step
+#print axioms KProgTV.TrustedSimpleB29.first_context_fault
+#print axioms KProgTV.TrustedSimpleB29.second_context_fault
+#print axioms KProgTV.TrustedSimpleB29.zero_step
+#print axioms KProgTV.TrustedSimpleB29.guard_step
+#print axioms KProgTV.TrustedSimpleB29.first_guard_component
+
+#print axioms KProgTV.TrustedSimpleB29.first_guard_relational_component
+#print axioms KProgTV.TrustedSimpleB29.entry_first_guard_component

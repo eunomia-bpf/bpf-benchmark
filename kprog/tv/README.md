@@ -2141,3 +2141,13 @@ version. The existing declared XDP expansions are applied at PCs1/2, with no
 simulator spills. Four axiom audits pass; this initial component explicitly
 assumes successful reads. Read faults, guards/stores and the full basic-block
 relation remain required, so this is not a whole-program TV certificate.
+
+`trusted-simple-b29-first-block.json` extends that same accepted-byte component
+to both context-read fault cases and the first actual64-bit conditional block.
+The failure state and preceding reads are retained exactly. The entry/read
+success path composes through zero/JGT64 and native MOV/XOR/CMP/JA, with exact
+whole endpoints and corresponding exits for either predicate value. A separate
+byte-decoded relational theorem covers every permitted XOR AF choice before
+CMP, without a selected branch premise. All12 audits pass with their axioms
+reported, including Lean.ofReduceBool. Remaining +8/+72 guards, stores, the
+full architectural relation and production-artifact TV still require proofs.
