@@ -54,3 +54,16 @@ capture-image:
 frozen-kernel:
 	install -d /workspaces/.agent-state/kprog-lanes/C/frozen-kernel
 	container=$$(docker create bpf-benchmark/kprog-corpus-base:c-20261107 /bin/true); trap 'docker rm "$$container" >/dev/null' EXIT; docker cp "$$container:/artifacts/manifest.json" /workspaces/.agent-state/kprog-lanes/C/frozen-kernel/manifest.json; docker cp "$$container:/artifacts/kernel/bzImage" /workspaces/.agent-state/kprog-lanes/C/frozen-kernel/bzImage
+
+perf-tool:
+	install -d /workspaces/.agent-state/kprog-lanes/C/perf-build
+	taskset -c 20-23 make -C $(ROOT)/vendor/linux-framework/tools/perf O=/workspaces/.agent-state/kprog-lanes/C/perf-build -j2 NO_JEVENTS=1 NO_LIBPERL=1 NO_LIBPYTHON=1 NO_LIBBABELTRACE=1 NO_LIBTRACEEVENT=1
+
+perf-profile-build:
+	gcc -O2 -Wall -Wextra -o $(HERE)/per-run-profile/fixed-run $(HERE)/per-run-profile/fixed-run.c
+
+perf-profile:
+	python3 -u $(HERE)/per-run-profile/host.py baseline
+
+perf-tables-profile:
+	python3 -u $(HERE)/per-run-profile/host.py tables
