@@ -1,0 +1,29 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv -o ../tv/build/SimpleExecutionRelocation.olean ../tv/SimpleExecutionRelocation.lean
+'KProgTV.SimpleExecutionRelocation.all_successors' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleExecutionRelocation.execution_rebase' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleExecutionRelocation.every_RX_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+make: Leaving directory '/workspaces/repository/kprog/tv'
+6-7: emitted native/program/entry/ABI/metadata certificate input generated
+6-8: emitted native/program/entry/ABI/metadata certificate input generated
+'KProgTV.SimpleEmitted_6_7.actual_jit_entry' depends on axioms: [propext]
+'KProgTV.SimpleEmitted_6_7.accepted_bound_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEmitted_6_7.accepted_RX_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEmitted_6_8.actual_jit_entry' depends on axioms: [propext]
+'KProgTV.SimpleEmitted_6_8.accepted_bound_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEmitted_6_8.accepted_RX_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]

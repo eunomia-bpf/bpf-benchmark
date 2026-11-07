@@ -779,3 +779,14 @@ KVM regression inspects actual JIT save/restore before safe positive execution.
 79 Rust tests,15 ELF cases/12 metadata negatives and6 KVM controls pass; evidence
 is results/kprog_tv_20261107/x86-abi-*. This increment covers the existing four-bit
 preservation ABI; reserved RBP/R12/frame and whole-program TV remain separate.
+
+`SimpleExecutionRelocation` now proves successor-PC closure and complete
+canonical execution transport to any RX base, with unchanged memory/events
+and full non-PC state, including faults. Its `every_RX_prefix_checked` covers
+every finite native prefix at that base. Both captured SimpleEmitted records
+instantiate `accepted_RX_prefix_checked` at their actual callback-reported RX
+addresses, preserving acceptance/admitted-entry/full-Artifact binding premises.
+The transport invariants use only propext/Quot.sound; concrete safety retains the
+existing reduction oracle with no sorryAx. Exact positive/negative/source inputs
+are in results/kprog_tv_20261107/actual-rx-prefix-*. Initial invocation/CPU-profile
+obligations remain; actual-PC relocation is no longer an assumed bridge.

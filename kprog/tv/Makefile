@@ -596,7 +596,7 @@ checked-first-block-check: checked-platform-check simple-blocks-check
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv -o ../tv/build/SimpleCheckedBlocks.olean ../tv/SimpleCheckedBlocks.lean
 
 .PHONY: simple-emitted-check simple-emitted-certificate
-simple-emitted-check: checked-first-block-check
+simple-emitted-check: simple-execution-relocation-check
 	python3 extract_checked.py build-arm64/checked-kernel.log build/simple-checked --exports build/capture-loader-arm64-emitted
 	python3 test_emitted_sites.py build/capture-loader-arm64-emitted
 	python3 extract_simple_emitted.py build/capture-loader-arm64-emitted build/simple-emitted
@@ -646,3 +646,7 @@ guest-x86-native-abi-check:
 	output=$$(mktemp -d build/x86-abi-kernel.XXXXXX) && \
 		python3 test_x86_abi_kernel.py run $$output --probe build/x86-abi-bound-probe && \
 		printf '%s\n' "$$output" > build/x86-abi-kernel.latest
+
+.PHONY: simple-execution-relocation-check
+simple-execution-relocation-check: simple-pc-relocation-check
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv -o ../tv/build/SimpleExecutionRelocation.olean ../tv/SimpleExecutionRelocation.lean

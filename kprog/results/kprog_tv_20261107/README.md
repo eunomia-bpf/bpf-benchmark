@@ -217,3 +217,32 @@ this increment does not prove that contract or replace translation validation.
 The accepted B/native correspondence, SP flags and actual entry/CPU-profile
 obligations remain separate. The producer/iced decoding and kernel binding are
 trusted until the native-only loader and canonical TV discharge those layers.
+
+Complete execution/prefix transport to actual captured RX addresses
+-----------------------------------------------------------------
+
+SimpleExecutionRelocation proves every native successor stays aligned within
+0..84 (including the real return boundary), lifts canonical steps and complete
+executions to any RX base, and transports the closed return/fault condition.
+These invariants use only propext/Quot.sound. every_RX_prefix_checked then proves
+that EVERY finite native execution at the rebased entry has only events checked
+for the same expanded B. Full state is preserved with only PC translated; memory,
+ordered guest effects and actual first faults remain unchanged. No executable
+alignment/bounds guard, new entry input or second ISA is introduced.
+
+Both actual GEN4/GEN8 SimpleEmitted records now additionally instantiate
+accepted_RX_prefix_checked at their callback-reported concrete RX addresses,
+using the same actual native/checked B byte identities and full Artifact binding.
+The theorem retains explicit acceptance, admitted proof entry, verifier/platform
+soundness and EntryConditions. It has the existing propext/choice/ofReduceBool/
+Quot.sound and no sorryAx. The repository checker and both instances pass in
+actual-rx-prefix-final.log. Both metadata-consistent native/JIT and checked-B
+byte corruption controls still reject at the exact Lean identity theorems
+(actual-rx-prefix-negatives.log). Source/program inputs and initial proof
+normalization errors are retained in actual-rx-prefix-inputs.tar.gz.
+
+The relative-PC-to-actual-RX execution obligation is now proved. The actual
+invocation/initial-state and selected CPU-profile bridge remains explicit;
+other micros/apps, relocated final-patch TV and the priority5 native-only loader
+remain active. The complete dependency refresh against current canonical
+sources follows separately; no full real-world invocation discharge is claimed.
