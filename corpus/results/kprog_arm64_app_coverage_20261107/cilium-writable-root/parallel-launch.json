@@ -1,0 +1,16 @@
+{
+  "utc": "2026-11-07T22:52:14.552699+00:00",
+  "previous_waiting_pid": 3914163,
+  "prior_otel_pid": 3308806,
+  "canonical_transport": "corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py",
+  "canonical_transport_before_sha256": "301e52865862a050d1eac76377840bc3941d881300d3674e73ac16185df9c35e",
+  "private_transport_sha256": "6d1991e8705b2d90299c22fee5a08bd16c8468b30560fbbeac4cabb0e2d8bfea",
+  "canonical_transport_after_sha256": "dc3de6998412a45afdefa92a5ddf7101d0891c4f5cebe16b8b78e97cb3abce12",
+  "cpu_set": "16-19",
+  "guest_memory_mib": 4096,
+  "vcpus": 8,
+  "concurrent_otel_memory_mib": 8192,
+  "total_lane_guest_memory_mib": 12288,
+  "native_resources_commit": "340a4ea5e07c38d415031c51aca057b57f62d955",
+  "scope": "Complete Cilium baseline/native two-start recipe with unchanged workload/sample/proof requirements. Private source mount retains the active OTel source and runtime views; canonical transport adoption follows actual OTel closure."
+}
