@@ -2167,3 +2167,10 @@ before/after, including the owner's physical header whose integration was
 uncommitted at capture time. This establishes the actual artifact identity,
 without claiming a published-header snapshot or whole-program TV. Per-session
 JIT addresses are recorded separately from the earlier JIT proof literals.
+
+`trusted-simple-b29-stores.json` checks actual PCs11..26 against the native
+store block: four writes of2,1,4,1 bytes, in the same order, with identical
+addresses/values, resulting memory and return value2. Both complete endpoints
+retain untouched fields. All28 accumulated audits pass. Store-success
+permissions are explicit; fault cases, final EXIT, full entry composition and
+architectural reconstruction remain required for whole-program TV.

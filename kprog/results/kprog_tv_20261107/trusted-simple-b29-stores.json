@@ -1,0 +1,178 @@
+{
+  "status": "actual_accepted_B29_successful_four_stores_and_return_value_component_proved_not_whole_TV",
+  "utc": "2026-11-07T17:35:08.133471+00:00",
+  "capture_commit": "090564a50dfd6c7a38452b5df27a845948cb7d44",
+  "accepted_B_sha256": "45062cd04b8ae6b7ffe0d5f1ea42f61bb2041ad5f44a8a034482b238bf94c53c",
+  "native_sha256": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+  "claims": [
+    "Actual B29 PCs11..26 decode and execute four ordered packet writes (2,1,4,1 bytes) then result MOV. Full BPF endpoint preserves all untouched fields.",
+    "Native actual byte-decoded store block and B29 have identical guest write events/address/value/size/order, exact resulting memory and return value2, with full explicit endpoints.",
+    "Outside context PCs1/2, the same platform step is exactly ordinary BPF; actual evaluator executions transport to the same certificate block relation."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-entry-certificate trusted-simple-b29-certificate",
+    "reproduction": "make -C kprog/tv trusted-simple-b29-certificate",
+    "exit": 0,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleB29.stack_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.data_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.end_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.entry_context_component": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.context_fault_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.first_context_fault": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.second_context_fault": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.zero_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.first_guard_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.first_guard_relational_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.entry_first_guard_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard8_move_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard8_add_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard8_branch_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard72_move_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard72_add_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard72_branch_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard8_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.guard72_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.remaining_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.remaining_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.remaining_relational_component": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.ordinary_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.ordinary_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_execution": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29.stores_component": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "dependency_scope": "same unchanged eleven reference/dependency pins as bffd entry receipt; only own B29 source extended; all affected dependencies previously rechecked for published213d/494c",
+    "log_sha256": "61f72b4d38d4af94ea641f01f502d181c202bd2b7a5d3eb8334873e99bb0f846"
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleB29.lean": "c846c9cddb5fc18dfe38f57e9f8a5dd9aac6b7acc054ee7357020d241ba41e2d",
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/Makefile": "74455f9271e4099ce25ba721bc5f57b377469c3ee1ecb9716611aa1509a64e2d"
+  },
+  "premises": [
+    "nativePC35/BPFPC11 active, nativeRCX=BPFr2 packet pointer and exact shared memory.",
+    "All four exact store permissions true: these premises specify successful cases and add no executed checks."
+  ],
+  "remaining": [
+    "Store fault cases, exit and entry/all-block composition, full architectural reconstruction relation and whole-program universal TV, physical native-body/caller composition.",
+    "Other micro/application programs; the current production-path capture matches B29 bytes but its header integration was uncommitted during capture."
+  ],
+  "trusted": [
+    "single canonicalV nativeISA and shared BPF/referenceMemory/platform specification",
+    "Lean kernel and reported logical axioms",
+    "actual verifier/native/JIT capture and kernel binding/XDP platform provenance",
+    "Lean.ofReduceBool explicitly reported for closed Boolean reduction in guard correspondence"
+  ]
+}

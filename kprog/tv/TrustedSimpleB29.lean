@@ -413,6 +413,125 @@ theorem remaining_relational_component (env : BPF.Environment) (n : X86.State) (
   obtain ⟨_,proofRun,npc,ppc,_,_⟩ := remaining_component env n p nativePC proofPC active pointer limit
   exact ⟨unique,by simpa only [unique] using proofRun,by simpa only [unique] using npc,ppc⟩
 
+
+/-- Outside the two bound context PCs, use the same ordinary BPF rule. -/
+theorem ordinary_step (env : BPF.Environment) (p : BPF.State)
+    (outside1 : p.pc≠1) (outside2 : p.pc≠2) :
+    BPFPlatform.step (environment env) proof p=BPF.step env proof p := by
+  cases active : p.halted <;> by_cases negative : p.pc<0 <;>
+    simp [BPFPlatform.step,environment,BPF.step,outside1,outside2,active,negative,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  cases BPF.decode proof p.pc.toNat <;> rfl
+
+theorem ordinary_execution (env : BPF.Environment) (positions : List Nat)
+    (p : BPF.State) (result : Transition BPF.State)
+    (outside : ∀ pc ∈ positions, pc≠1 ∧ pc≠2)
+    (accepted : BPFPath.evaluate env proof positions p=.ok result) :
+    Execution (instructionStep env) p result.events result.state := by
+  exact BPFPath.evaluate_execution_transport env proof id (instructionStep env)
+    (fun pc => pc≠1 ∧ pc≠2)
+    (by
+      intro state pc allowed position effect actual
+      have one : state.pc≠1 := by omega
+      have two : state.pc≠2 := by omega
+      exact ⟨effect,(ordinary_step env state one two).trans actual,rfl,rfl⟩)
+    positions outside p result accepted
+
+theorem decode11 : BPF.decode proof 11=.ok ⟨183,1,0,0,0⟩ := rfl
+
+theorem decode12 : BPF.decode proof 12=.ok ⟨183,3,0,0,0⟩ := rfl
+
+theorem decode13 : BPF.decode proof 13=.ok ⟨15,3,2,0,0⟩ := rfl
+
+theorem decode14 : BPF.decode proof 14=.ok ⟨183,4,0,0,24910⟩ := rfl
+
+theorem decode15 : BPF.decode proof 15=.ok ⟨107,3,4,0,0⟩ := rfl
+
+theorem decode16 : BPF.decode proof 16=.ok ⟨183,3,0,0,2⟩ := rfl
+
+theorem decode17 : BPF.decode proof 17=.ok ⟨15,3,2,0,0⟩ := rfl
+
+theorem decode18 : BPF.decode proof 18=.ok ⟨183,4,0,0,188⟩ := rfl
+
+theorem decode19 : BPF.decode proof 19=.ok ⟨115,3,4,0,0⟩ := rfl
+
+theorem decode20 : BPF.decode proof 20=.ok ⟨183,3,0,0,3⟩ := rfl
+
+theorem decode21 : BPF.decode proof 21=.ok ⟨15,3,2,0,0⟩ := rfl
+
+theorem decode22 : BPF.decode proof 22=.ok ⟨99,3,1,0,0⟩ := rfl
+
+theorem decode23 : BPF.decode proof 23=.ok ⟨183,3,0,0,7⟩ := rfl
+
+theorem decode24 : BPF.decode proof 24=.ok ⟨15,3,2,0,0⟩ := rfl
+
+theorem decode25 : BPF.decode proof 25=.ok ⟨115,3,1,0,0⟩ := rfl
+
+theorem decode26 : BPF.decode proof 26=.ok ⟨180,0,0,0,2⟩ := rfl
+
+theorem decode27 : BPF.decode proof 27=.ok ⟨5,0,0,0,0⟩ := rfl
+
+theorem decode28 : BPF.decode proof 28=.ok ⟨149,0,0,0,0⟩ := rfl
+
+def storesAfter (p : BPF.State) : BPF.State :=
+  {BPF.setReg (BPF.setReg (BPF.setReg (BPF.setReg p 1 0) 3 (p.regs 2+(7#64))) 4 188) 0 2 with
+    memory := packetWriteMemory p.memory (p.regs 2)
+    pc := 27}
+
+/-- Exact successful store block and result MOV of B29. No permission test is
+inserted into either program: these premises describe the successful cases. -/
+theorem stores_evaluation (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=11) (active : p.halted=false)
+    (write0 : permitted p.memory.writable (p.regs 2) 2=true)
+    (write2 : permitted p.memory.writable (p.regs 2+(2#64)) 1=true)
+    (write3 : permitted p.memory.writable (p.regs 2+(3#64)) 4=true)
+    (write7 : permitted p.memory.writable (p.regs 2+(7#64)) 1=true) :
+    BPFPath.evaluate env proof [11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26] p=
+      .ok ⟨storesAfter p,packetWriteEvents (p.regs 2),none⟩ := by
+  have plus2 : (2#64)+p.regs 2=p.regs 2+(2#64) := BitVec.add_comm _ _
+  have plus3 : (3#64)+p.regs 2=p.regs 2+(3#64) := BitVec.add_comm _ _
+  have plus7 : (7#64)+p.regs 2=p.regs 2+(7#64) := BitVec.add_comm _ _
+  simp +decide [BPFPath.evaluate,decode11,decode12,decode13,decode14,decode15,decode16,
+    decode17,decode18,decode19,decode20,decode21,decode22,decode23,decode24,decode25,decode26,
+    BPF.execute,BPF.source,BPF.alu,BPF.setReg,BPF.store,writeMemory,position,active,
+    storesAfter,packetWriteMemory,packetWriteEvents,storeMemory,
+    plus2,plus3,plus7,write0,write2,write3,write7,
+    Except.bind,Except.map,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  funext index
+  by_cases zero : index=0 <;> by_cases one : index=1 <;>
+    by_cases three : index=3 <;> by_cases four : index=4 <;> simp [zero,one,three,four]
+
+theorem stores_execution (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=11) (active : p.halted=false)
+    (write0 : permitted p.memory.writable (p.regs 2) 2=true)
+    (write2 : permitted p.memory.writable (p.regs 2+(2#64)) 1=true)
+    (write3 : permitted p.memory.writable (p.regs 2+(3#64)) 4=true)
+    (write7 : permitted p.memory.writable (p.regs 2+(7#64)) 1=true) :
+    Execution (instructionStep env) p (packetWriteEvents (p.regs 2)) (storesAfter p) := by
+  exact ordinary_execution env [11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26] p
+    ⟨storesAfter p,packetWriteEvents (p.regs 2),none⟩
+    (by intro pc inside; simp at inside; omega)
+    (stores_evaluation env p position active write0 write2 write3 write7)
+
+theorem stores_component (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (nativePC : n.pc=35) (proofPC : p.pc=11) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2) (memory : n.memory=p.memory)
+    (write0 : permitted p.memory.writable (p.regs 2) 2=true)
+    (write2 : permitted p.memory.writable (p.regs 2+(2#64)) 1=true)
+    (write3 : permitted p.memory.writable (p.regs 2+(3#64)) 4=true)
+    (write7 : permitted p.memory.writable (p.regs 2+(7#64)) 1=true) :
+    X86Path.Execution 0 native n (packetWriteEvents (p.regs 2)) (packetNativeFinal n) ∧
+    Execution (instructionStep env) p (packetWriteEvents (p.regs 2)) (storesAfter p) ∧
+    (packetNativeFinal n).memory=(storesAfter p).memory ∧
+    (packetNativeFinal n).gpr 0=(storesAfter p).regs 0 ∧
+    (packetNativeFinal n).pc=60 ∧ (storesAfter p).pc=27 := by
+  refine ⟨?_,stores_execution env p proofPC active write0 write2 write3 write7,?_,?_,rfl,rfl⟩
+  · simpa only [pointer] using native_packet_execution n nativePC
+      (by simpa only [memory,pointer] using write0) (by simpa only [memory,pointer] using write2)
+      (by simpa only [memory,pointer] using write3) (by simpa only [memory,pointer] using write7)
+  all_goals simp +decide [packetNativeFinal,packetNativeFourth,packetNativeThird,packetNativeSecond,packetNativeFirst,
+    storesAfter,packetWriteMemory,BPF.setReg,memory,pointer]
+
 end KProgTV.TrustedSimpleB29
 #print axioms KProgTV.TrustedSimpleB29.stack_step
 #print axioms KProgTV.TrustedSimpleB29.data_step
@@ -440,3 +559,9 @@ end KProgTV.TrustedSimpleB29
 #print axioms KProgTV.TrustedSimpleB29.remaining_execution
 #print axioms KProgTV.TrustedSimpleB29.remaining_component
 #print axioms KProgTV.TrustedSimpleB29.remaining_relational_component
+
+#print axioms KProgTV.TrustedSimpleB29.ordinary_step
+#print axioms KProgTV.TrustedSimpleB29.ordinary_execution
+#print axioms KProgTV.TrustedSimpleB29.stores_evaluation
+#print axioms KProgTV.TrustedSimpleB29.stores_execution
+#print axioms KProgTV.TrustedSimpleB29.stores_component
