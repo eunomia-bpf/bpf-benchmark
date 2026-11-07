@@ -1,0 +1,934 @@
+{
+  "timestamp": "2026-11-07T05:08:33.098175+00:00",
+  "authorization": "Coordinator notice 2026-11-07 04:36 UTC and direct operator cleanup instruction",
+  "preflight": {
+    "timestamp": "2026-11-07T05:07:42.995283+00:00",
+    "repository_head": "699e0cee1649a89defdfefc0f43a78c191cb268b",
+    "uid": 0,
+    "scanned_fds": 672,
+    "closed_process_or_fd_races": 2,
+    "permission_errors": [],
+    "candidates": [
+      {
+        "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-bitfield/cpu-states.bin",
+        "bytes": 236830744,
+        "allocated_bytes": 236838912,
+        "summary": [
+          {
+            "name": "README.md",
+            "tracked_head": true
+          },
+          {
+            "name": "forms.tsv",
+            "tracked_head": true
+          },
+          {
+            "name": "reference-forms.tsv",
+            "tracked_head": true
+          }
+        ],
+        "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-bitfield/cpu-states.bin",
+        "device": 2080,
+        "inode": 13904881,
+        "links": 1,
+        "is_symlink": false,
+        "committed_summaries": [
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-bitfield/README.md",
+            "git_blob": "526df598e4e53a44dd1b7beb37828b168e7ef5a4"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-bitfield/forms.tsv",
+            "git_blob": "5f19acd01c7a61a4a65706360526109dff8fafa8"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-bitfield/reference-forms.tsv",
+            "git_blob": "8e2267c682629a707508ccbf079dc39d49ccbe5d"
+          }
+        ]
+      },
+      {
+        "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive/cpu-states.bin",
+        "bytes": 27066392,
+        "allocated_bytes": 27070464,
+        "summary": [
+          {
+            "name": "README.md",
+            "tracked_head": true
+          },
+          {
+            "name": "forms.tsv",
+            "tracked_head": true
+          }
+        ],
+        "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive/cpu-states.bin",
+        "device": 2080,
+        "inode": 13506340,
+        "links": 1,
+        "is_symlink": false,
+        "committed_summaries": [
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive/README.md",
+            "git_blob": "e8e1b5558fa191d71835cb1ab7f28abf08a9d5f1"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive/forms.tsv",
+            "git_blob": "d26433aee3544a7ab6a6dd11d346dbf2c3308268"
+          }
+        ]
+      },
+      {
+        "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive-choice/cpu-states.bin",
+        "bytes": 27066392,
+        "allocated_bytes": 27074560,
+        "summary": [
+          {
+            "name": "README.md",
+            "tracked_head": true
+          },
+          {
+            "name": "forms.tsv",
+            "tracked_head": true
+          }
+        ],
+        "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive-choice/cpu-states.bin",
+        "device": 2080,
+        "inode": 13511355,
+        "links": 1,
+        "is_symlink": false,
+        "committed_summaries": [
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive-choice/README.md",
+            "git_blob": "7193b54236f23580883e617e9020c5e9e1ebbd75"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive-choice/forms.tsv",
+            "git_blob": "9305d891bb655a97561a9d0a319e3b2c27b675aa"
+          }
+        ]
+      },
+      {
+        "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-complete/cpu-states.bin",
+        "bytes": 215685144,
+        "allocated_bytes": 215691264,
+        "summary": [
+          {
+            "name": "README.md",
+            "tracked_head": true
+          },
+          {
+            "name": "forms.tsv",
+            "tracked_head": true
+          },
+          {
+            "name": "reference-forms.tsv",
+            "tracked_head": true
+          }
+        ],
+        "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-memory-complete/cpu-states.bin",
+        "device": 2080,
+        "inode": 13512730,
+        "links": 1,
+        "is_symlink": false,
+        "committed_summaries": [
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-complete/README.md",
+            "git_blob": "f7393962ba14c021ff250b488b0dd6fcc28fbbb8"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-complete/forms.tsv",
+            "git_blob": "38b75b69799d6e2614856d5964a480abecce59bb"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-complete/reference-forms.tsv",
+            "git_blob": "2a8b6792b1e8d8564cddedc969f74f0ec9134761"
+          }
+        ]
+      },
+      {
+        "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix/cpu-states.bin",
+        "bytes": 198768664,
+        "allocated_bytes": 198774784,
+        "summary": [
+          {
+            "name": "README.md",
+            "tracked_head": true
+          },
+          {
+            "name": "forms.tsv",
+            "tracked_head": true
+          },
+          {
+            "name": "reference-forms.tsv",
+            "tracked_head": true
+          }
+        ],
+        "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix/cpu-states.bin",
+        "device": 2080,
+        "inode": 13393111,
+        "links": 1,
+        "is_symlink": false,
+        "committed_summaries": [
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix/README.md",
+            "git_blob": "a89ebd2661606fa0d30f4167be8ab6fb02270521"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix/forms.tsv",
+            "git_blob": "696a8236997f118a4773ed47c27cdb3a3baf9865"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix/reference-forms.tsv",
+            "git_blob": "459ba1105bd86ff8ece1df579f2ead7038cd5ba1"
+          }
+        ]
+      },
+      {
+        "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix-fixed/cpu-states.bin",
+        "bytes": 198768664,
+        "allocated_bytes": 198774784,
+        "summary": [
+          {
+            "name": "README.md",
+            "tracked_head": true
+          },
+          {
+            "name": "forms.tsv",
+            "tracked_head": true
+          }
+        ],
+        "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix-fixed/cpu-states.bin",
+        "device": 2080,
+        "inode": 13396356,
+        "links": 1,
+        "is_symlink": false,
+        "committed_summaries": [
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix-fixed/README.md",
+            "git_blob": "425697144930b6590a984237ccecd34f08c4d7b3"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix-fixed/forms.tsv",
+            "git_blob": "86472981472b9b90698aa104e6349156684ddb83"
+          }
+        ]
+      },
+      {
+        "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-numeric/cpu-states.bin",
+        "bytes": 1054384152,
+        "allocated_bytes": 1054396416,
+        "summary": [
+          {
+            "name": "README.md",
+            "tracked_head": true
+          },
+          {
+            "name": "forms.tsv",
+            "tracked_head": true
+          },
+          {
+            "name": "reference-forms.tsv",
+            "tracked_head": true
+          }
+        ],
+        "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-numeric/cpu-states.bin",
+        "device": 2080,
+        "inode": 13528819,
+        "links": 1,
+        "is_symlink": false,
+        "committed_summaries": [
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-numeric/README.md",
+            "git_blob": "4cc223bd3506c21ff61bc92d12eb18c6b29124c9"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-numeric/forms.tsv",
+            "git_blob": "a35574c2987efe2ebb7cc6fe9a55bd31577e7cf5"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-numeric/reference-forms.tsv",
+            "git_blob": "d2ef2bdc9d3bc8a3a5bdd2d6432852f602a15472"
+          }
+        ]
+      },
+      {
+        "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-sp-reference/cpu-states.bin",
+        "bytes": 1054384152,
+        "allocated_bytes": 1054392320,
+        "summary": [
+          {
+            "name": "forms.tsv",
+            "tracked_head": true
+          },
+          {
+            "name": "reference-forms.tsv",
+            "tracked_head": true
+          }
+        ],
+        "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-sp-reference/cpu-states.bin",
+        "device": 2080,
+        "inode": 13536565,
+        "links": 1,
+        "is_symlink": false,
+        "committed_summaries": [
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-sp-reference/forms.tsv",
+            "git_blob": "003d0ca402c8d0d88dfdc7e7a644091bd320cc41"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-sp-reference/reference-forms.tsv",
+            "git_blob": "4140df0ae7bae0f9919fe1e4bd91e8344488fc31"
+          }
+        ]
+      },
+      {
+        "path": "kprog/results/kprog_fidelity_20261106/differential/x86-full-conditions/cpu-states.bin",
+        "bytes": 1485807640,
+        "allocated_bytes": 1485815808,
+        "summary": [
+          {
+            "name": "README.md",
+            "tracked_head": true
+          },
+          {
+            "name": "forms.tsv",
+            "tracked_head": true
+          },
+          {
+            "name": "reference-forms.tsv",
+            "tracked_head": true
+          }
+        ],
+        "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/x86-full-conditions/cpu-states.bin",
+        "device": 2080,
+        "inode": 13384717,
+        "links": 1,
+        "is_symlink": false,
+        "committed_summaries": [
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/x86-full-conditions/README.md",
+            "git_blob": "3f9bf75e280a0667ff3de5d254217b89b2d9ebbb"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/x86-full-conditions/forms.tsv",
+            "git_blob": "8901d1d514931610610038174454e4978ee833a1"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/x86-full-conditions/reference-forms.tsv",
+            "git_blob": "fe7e9405e893e11dd05cae6d2e2340824eda4398"
+          }
+        ]
+      },
+      {
+        "path": "kprog/results/kprog_fidelity_20261106/differential/x86-high-load-cpu/cpu-states.bin",
+        "bytes": 1517420568,
+        "allocated_bytes": 1517465600,
+        "summary": [
+          {
+            "name": "README.md",
+            "tracked_head": true
+          },
+          {
+            "name": "forms.tsv",
+            "tracked_head": true
+          },
+          {
+            "name": "reference-forms.tsv",
+            "tracked_head": true
+          }
+        ],
+        "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/x86-high-load-cpu/cpu-states.bin",
+        "device": 2080,
+        "inode": 13816771,
+        "links": 1,
+        "is_symlink": false,
+        "committed_summaries": [
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/x86-high-load-cpu/README.md",
+            "git_blob": "6eb103297d5f273186b2e413c1c830e22397424c"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/x86-high-load-cpu/forms.tsv",
+            "git_blob": "04736c2489f3004c2a259f5559bb295a5d0e65dc"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261106/differential/x86-high-load-cpu/reference-forms.tsv",
+            "git_blob": "03a6120780ce703b21d156c5e716a2925009cc39"
+          }
+        ]
+      },
+      {
+        "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing/cpu-states.bin",
+        "bytes": 1645731864,
+        "allocated_bytes": 1645772800,
+        "summary": [
+          {
+            "name": "README.md",
+            "tracked_head": true
+          },
+          {
+            "name": "forms.tsv",
+            "tracked_head": true
+          },
+          {
+            "name": "reference-forms.tsv",
+            "tracked_head": true
+          }
+        ],
+        "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing/cpu-states.bin",
+        "device": 2080,
+        "inode": 13925122,
+        "links": 1,
+        "is_symlink": false,
+        "committed_summaries": [
+          {
+            "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing/README.md",
+            "git_blob": "0422716d04f778ba645ab9568cf29eb56ce5706a"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing/forms.tsv",
+            "git_blob": "c944fcf60728e4b565ded1217235c6e197678fd2"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing/reference-forms.tsv",
+            "git_blob": "85e9922fde923fb0941b7d434111028da281969d"
+          }
+        ]
+      },
+      {
+        "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/cpu-states.bin",
+        "bytes": 1645731864,
+        "allocated_bytes": 1645740032,
+        "summary": [
+          {
+            "name": "README.md",
+            "tracked_head": true
+          },
+          {
+            "name": "forms.tsv",
+            "tracked_head": true
+          },
+          {
+            "name": "reference-forms.tsv",
+            "tracked_head": true
+          }
+        ],
+        "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/cpu-states.bin",
+        "device": 2080,
+        "inode": 13929707,
+        "links": 1,
+        "is_symlink": false,
+        "committed_summaries": [
+          {
+            "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/README.md",
+            "git_blob": "7715d7a03d258cfcadf81aa6a11dbd16ce767bef"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/forms.tsv",
+            "git_blob": "a080e807412ebf9189e0fe4b9193862890aa2017"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/reference-forms.tsv",
+            "git_blob": "88d7af0d14a1f78c32bcfedb2caf3a29e109046d"
+          }
+        ]
+      },
+      {
+        "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/published/cpu-states.bin",
+        "bytes": 213852184,
+        "allocated_bytes": 213860352,
+        "summary": [
+          {
+            "name": "forms.tsv",
+            "tracked_head": true
+          },
+          {
+            "name": "reference-forms.tsv",
+            "tracked_head": true
+          }
+        ],
+        "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/published/cpu-states.bin",
+        "device": 2080,
+        "inode": 13930013,
+        "links": 1,
+        "is_symlink": false,
+        "committed_summaries": [
+          {
+            "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/published/forms.tsv",
+            "git_blob": "f9ddd137e386bac48a9a12ea1dabf744223a00c0"
+          },
+          {
+            "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/published/reference-forms.tsv",
+            "git_blob": "b0de67abad470e8f486c40c6cdb3cb6cf705187a"
+          }
+        ]
+      }
+    ],
+    "open_references": []
+  },
+  "deleted": [
+    {
+      "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-bitfield/cpu-states.bin",
+      "bytes": 236830744,
+      "allocated_bytes": 236838912,
+      "summary": [
+        {
+          "name": "README.md",
+          "tracked_head": true
+        },
+        {
+          "name": "forms.tsv",
+          "tracked_head": true
+        },
+        {
+          "name": "reference-forms.tsv",
+          "tracked_head": true
+        }
+      ],
+      "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-bitfield/cpu-states.bin",
+      "device": 2080,
+      "inode": 13904881,
+      "links": 1,
+      "is_symlink": false,
+      "committed_summaries": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-bitfield/README.md",
+          "git_blob": "526df598e4e53a44dd1b7beb37828b168e7ef5a4"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-bitfield/forms.tsv",
+          "git_blob": "5f19acd01c7a61a4a65706360526109dff8fafa8"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-bitfield/reference-forms.tsv",
+          "git_blob": "8e2267c682629a707508ccbf079dc39d49ccbe5d"
+        }
+      ]
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive/cpu-states.bin",
+      "bytes": 27066392,
+      "allocated_bytes": 27070464,
+      "summary": [
+        {
+          "name": "README.md",
+          "tracked_head": true
+        },
+        {
+          "name": "forms.tsv",
+          "tracked_head": true
+        }
+      ],
+      "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive/cpu-states.bin",
+      "device": 2080,
+      "inode": 13506340,
+      "links": 1,
+      "is_symlink": false,
+      "committed_summaries": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive/README.md",
+          "git_blob": "e8e1b5558fa191d71835cb1ab7f28abf08a9d5f1"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive/forms.tsv",
+          "git_blob": "d26433aee3544a7ab6a6dd11d346dbf2c3308268"
+        }
+      ]
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive-choice/cpu-states.bin",
+      "bytes": 27066392,
+      "allocated_bytes": 27074560,
+      "summary": [
+        {
+          "name": "README.md",
+          "tracked_head": true
+        },
+        {
+          "name": "forms.tsv",
+          "tracked_head": true
+        }
+      ],
+      "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive-choice/cpu-states.bin",
+      "device": 2080,
+      "inode": 13511355,
+      "links": 1,
+      "is_symlink": false,
+      "committed_summaries": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive-choice/README.md",
+          "git_blob": "7193b54236f23580883e617e9020c5e9e1ebbd75"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive-choice/forms.tsv",
+          "git_blob": "9305d891bb655a97561a9d0a319e3b2c27b675aa"
+        }
+      ]
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-complete/cpu-states.bin",
+      "bytes": 215685144,
+      "allocated_bytes": 215691264,
+      "summary": [
+        {
+          "name": "README.md",
+          "tracked_head": true
+        },
+        {
+          "name": "forms.tsv",
+          "tracked_head": true
+        },
+        {
+          "name": "reference-forms.tsv",
+          "tracked_head": true
+        }
+      ],
+      "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-memory-complete/cpu-states.bin",
+      "device": 2080,
+      "inode": 13512730,
+      "links": 1,
+      "is_symlink": false,
+      "committed_summaries": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-complete/README.md",
+          "git_blob": "f7393962ba14c021ff250b488b0dd6fcc28fbbb8"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-complete/forms.tsv",
+          "git_blob": "38b75b69799d6e2614856d5964a480abecce59bb"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-complete/reference-forms.tsv",
+          "git_blob": "2a8b6792b1e8d8564cddedc969f74f0ec9134761"
+        }
+      ]
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix/cpu-states.bin",
+      "bytes": 198768664,
+      "allocated_bytes": 198774784,
+      "summary": [
+        {
+          "name": "README.md",
+          "tracked_head": true
+        },
+        {
+          "name": "forms.tsv",
+          "tracked_head": true
+        },
+        {
+          "name": "reference-forms.tsv",
+          "tracked_head": true
+        }
+      ],
+      "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix/cpu-states.bin",
+      "device": 2080,
+      "inode": 13393111,
+      "links": 1,
+      "is_symlink": false,
+      "committed_summaries": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix/README.md",
+          "git_blob": "a89ebd2661606fa0d30f4167be8ab6fb02270521"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix/forms.tsv",
+          "git_blob": "696a8236997f118a4773ed47c27cdb3a3baf9865"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix/reference-forms.tsv",
+          "git_blob": "459ba1105bd86ff8ece1df579f2ead7038cd5ba1"
+        }
+      ]
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix-fixed/cpu-states.bin",
+      "bytes": 198768664,
+      "allocated_bytes": 198774784,
+      "summary": [
+        {
+          "name": "README.md",
+          "tracked_head": true
+        },
+        {
+          "name": "forms.tsv",
+          "tracked_head": true
+        }
+      ],
+      "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix-fixed/cpu-states.bin",
+      "device": 2080,
+      "inode": 13396356,
+      "links": 1,
+      "is_symlink": false,
+      "committed_summaries": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix-fixed/README.md",
+          "git_blob": "425697144930b6590a984237ccecd34f08c4d7b3"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-matrix-fixed/forms.tsv",
+          "git_blob": "86472981472b9b90698aa104e6349156684ddb83"
+        }
+      ]
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-numeric/cpu-states.bin",
+      "bytes": 1054384152,
+      "allocated_bytes": 1054396416,
+      "summary": [
+        {
+          "name": "README.md",
+          "tracked_head": true
+        },
+        {
+          "name": "forms.tsv",
+          "tracked_head": true
+        },
+        {
+          "name": "reference-forms.tsv",
+          "tracked_head": true
+        }
+      ],
+      "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-numeric/cpu-states.bin",
+      "device": 2080,
+      "inode": 13528819,
+      "links": 1,
+      "is_symlink": false,
+      "committed_summaries": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-numeric/README.md",
+          "git_blob": "4cc223bd3506c21ff61bc92d12eb18c6b29124c9"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-numeric/forms.tsv",
+          "git_blob": "a35574c2987efe2ebb7cc6fe9a55bd31577e7cf5"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-numeric/reference-forms.tsv",
+          "git_blob": "d2ef2bdc9d3bc8a3a5bdd2d6432852f602a15472"
+        }
+      ]
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-sp-reference/cpu-states.bin",
+      "bytes": 1054384152,
+      "allocated_bytes": 1054392320,
+      "summary": [
+        {
+          "name": "forms.tsv",
+          "tracked_head": true
+        },
+        {
+          "name": "reference-forms.tsv",
+          "tracked_head": true
+        }
+      ],
+      "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/arm64-sp-reference/cpu-states.bin",
+      "device": 2080,
+      "inode": 13536565,
+      "links": 1,
+      "is_symlink": false,
+      "committed_summaries": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-sp-reference/forms.tsv",
+          "git_blob": "003d0ca402c8d0d88dfdc7e7a644091bd320cc41"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/arm64-sp-reference/reference-forms.tsv",
+          "git_blob": "4140df0ae7bae0f9919fe1e4bd91e8344488fc31"
+        }
+      ]
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261106/differential/x86-full-conditions/cpu-states.bin",
+      "bytes": 1485807640,
+      "allocated_bytes": 1485815808,
+      "summary": [
+        {
+          "name": "README.md",
+          "tracked_head": true
+        },
+        {
+          "name": "forms.tsv",
+          "tracked_head": true
+        },
+        {
+          "name": "reference-forms.tsv",
+          "tracked_head": true
+        }
+      ],
+      "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/x86-full-conditions/cpu-states.bin",
+      "device": 2080,
+      "inode": 13384717,
+      "links": 1,
+      "is_symlink": false,
+      "committed_summaries": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/x86-full-conditions/README.md",
+          "git_blob": "3f9bf75e280a0667ff3de5d254217b89b2d9ebbb"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/x86-full-conditions/forms.tsv",
+          "git_blob": "8901d1d514931610610038174454e4978ee833a1"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/x86-full-conditions/reference-forms.tsv",
+          "git_blob": "fe7e9405e893e11dd05cae6d2e2340824eda4398"
+        }
+      ]
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261106/differential/x86-high-load-cpu/cpu-states.bin",
+      "bytes": 1517420568,
+      "allocated_bytes": 1517465600,
+      "summary": [
+        {
+          "name": "README.md",
+          "tracked_head": true
+        },
+        {
+          "name": "forms.tsv",
+          "tracked_head": true
+        },
+        {
+          "name": "reference-forms.tsv",
+          "tracked_head": true
+        }
+      ],
+      "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261106/differential/x86-high-load-cpu/cpu-states.bin",
+      "device": 2080,
+      "inode": 13816771,
+      "links": 1,
+      "is_symlink": false,
+      "committed_summaries": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/x86-high-load-cpu/README.md",
+          "git_blob": "6eb103297d5f273186b2e413c1c830e22397424c"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/x86-high-load-cpu/forms.tsv",
+          "git_blob": "04736c2489f3004c2a259f5559bb295a5d0e65dc"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261106/differential/x86-high-load-cpu/reference-forms.tsv",
+          "git_blob": "03a6120780ce703b21d156c5e716a2925009cc39"
+        }
+      ]
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing/cpu-states.bin",
+      "bytes": 1645731864,
+      "allocated_bytes": 1645772800,
+      "summary": [
+        {
+          "name": "README.md",
+          "tracked_head": true
+        },
+        {
+          "name": "forms.tsv",
+          "tracked_head": true
+        },
+        {
+          "name": "reference-forms.tsv",
+          "tracked_head": true
+        }
+      ],
+      "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing/cpu-states.bin",
+      "device": 2080,
+      "inode": 13925122,
+      "links": 1,
+      "is_symlink": false,
+      "committed_summaries": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing/README.md",
+          "git_blob": "0422716d04f778ba645ab9568cf29eb56ce5706a"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing/forms.tsv",
+          "git_blob": "c944fcf60728e4b565ded1217235c6e197678fd2"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing/reference-forms.tsv",
+          "git_blob": "85e9922fde923fb0941b7d434111028da281969d"
+        }
+      ]
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/cpu-states.bin",
+      "bytes": 1645731864,
+      "allocated_bytes": 1645740032,
+      "summary": [
+        {
+          "name": "README.md",
+          "tracked_head": true
+        },
+        {
+          "name": "forms.tsv",
+          "tracked_head": true
+        },
+        {
+          "name": "reference-forms.tsv",
+          "tracked_head": true
+        }
+      ],
+      "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/cpu-states.bin",
+      "device": 2080,
+      "inode": 13929707,
+      "links": 1,
+      "is_symlink": false,
+      "committed_summaries": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/README.md",
+          "git_blob": "7715d7a03d258cfcadf81aa6a11dbd16ce767bef"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/forms.tsv",
+          "git_blob": "a080e807412ebf9189e0fe4b9193862890aa2017"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/reference-forms.tsv",
+          "git_blob": "88d7af0d14a1f78c32bcfedb2caf3a29e109046d"
+        }
+      ]
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/published/cpu-states.bin",
+      "bytes": 213852184,
+      "allocated_bytes": 213860352,
+      "summary": [
+        {
+          "name": "forms.tsv",
+          "tracked_head": true
+        },
+        {
+          "name": "reference-forms.tsv",
+          "tracked_head": true
+        }
+      ],
+      "resolved_path": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/published/cpu-states.bin",
+      "device": 2080,
+      "inode": 13930013,
+      "links": 1,
+      "is_symlink": false,
+      "committed_summaries": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/published/forms.tsv",
+          "git_blob": "f9ddd137e386bac48a9a12ea1dabf744223a00c0"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261107/differential/x86-lea-addressing-fixed/published/reference-forms.tsv",
+          "git_blob": "b0de67abad470e8f486c40c6cdb3cb6cf705187a"
+        }
+      ]
+    }
+  ],
+  "deleted_logical_bytes": 9521498424,
+  "deleted_allocated_bytes": 9521668096,
+  "free_bytes_before": 31572074496,
+  "free_bytes_after": 41093742592,
+  "observed_free_delta": 9521668096,
+  "df_before": "Filesystem                                             1024-blocks      Used Available Capacity Mounted on\n/dev/longhorn/pvc-5d4c4db8-b59c-44d0-a162-0ff347a6a005   263112772 232264284  30832104      89% /workspaces\n",
+  "df_after": "Filesystem                                             1024-blocks      Used Available Capacity Mounted on\n/dev/longhorn/pvc-5d4c4db8-b59c-44d0-a162-0ff347a6a005   263112772 222965780  40130608      85% /workspaces\n",
+  "open_references_before_unlink": [],
+  "permission_errors": []
+}
