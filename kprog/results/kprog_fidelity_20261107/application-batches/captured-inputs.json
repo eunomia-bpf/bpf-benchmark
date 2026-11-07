@@ -1,0 +1,31 @@
+{
+  "captured_at": "2026-11-07T21:06:21.229289+00:00",
+  "source_head": "52e83e0216f760f70b62c973c5d32aeb3f0615b0",
+  "files": {
+    "tetragon-functional.service.tar.gz": {
+      "source_path": "corpus/results/kprog_app_coverage_20261107/native-only-runtime/corpus-20261107T205401642460Z.tar.gz",
+      "sha256": "69fef30c9289fea51c4b018a2826132717e9d877f7e46faa767e49d570ff3136",
+      "bytes": 1929108
+    },
+    "tetragon-timing.service.tar.gz": {
+      "source_path": "corpus/results/kprog_app_coverage_20261107/native-only-runtime/corpus-20261107T205604738985Z.tar.gz",
+      "sha256": "455263b0c7304623bb1bbfe85f626da09678a2e1ded36854eae8704ad014e97e",
+      "bytes": 1928946
+    },
+    "tetragon-timing.metadata.json": {
+      "source_path": "corpus/results/x86_kvm_corpus_20261107_204105_213775/metadata.json",
+      "sha256": "75c0f78a22f6683324f304714b978b088f7b095f1fe2ec28593fdb4ce2ce21f4",
+      "bytes": 644
+    },
+    "tetragon-timing.result.json": {
+      "source_path": "corpus/results/x86_kvm_corpus_20261107_204105_213775/details/result.json",
+      "sha256": "9f229aa8e27d5c4cf22342ec1b54e127767a13ca0cc2711ede69fd738dda163c",
+      "bytes": 5904
+    },
+    "tetragon-timing.shim.log": {
+      "source_path": "corpus/results/x86_kvm_corpus_20261107_204105_213775/details/shim-logs/tetragon__observer.post_rejit.log",
+      "sha256": "5d075e02d30cb0569d46e10cf86621c09d65523959244ce49fba6eedcf9e5de3",
+      "bytes": 48773
+    }
+  }
+}

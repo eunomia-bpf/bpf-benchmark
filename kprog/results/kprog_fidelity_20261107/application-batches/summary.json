@@ -1,0 +1,408 @@
+{
+  "source_publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+  "batches": [
+    {
+      "app": "bcc",
+      "batch": "functional_153239",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/native-only-runtime/corpus-20261107T153640028572Z.tar.gz",
+      "service_sha256": "b8e5e4b824b7b06f60c7f5eff7f9b11b1b9615f95438ddff8dab7c8558fefad3",
+      "terminal_requests": 25,
+      "generated": 25,
+      "compiled": 25,
+      "accepted_bound": 25,
+      "stages": {
+        "bound": 25
+      },
+      "app_status": "ok",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 0,
+      "recorded_counts": {
+        "proof_generated": {
+          "observed": 25,
+          "recorded": 25,
+          "equal": true
+        },
+        "bound_loads": {
+          "observed": 25,
+          "recorded": 25,
+          "equal": true
+        },
+        "verifier_accepted": {
+          "observed": 25,
+          "recorded": 25,
+          "equal": true
+        },
+        "specialization_failed": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        },
+        "verifier_rejected": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        },
+        "terminal_requests": {
+          "observed": 25,
+          "recorded": 25,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "otel",
+      "batch": "functional_192310",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/otel-narrow-load/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/otel-narrow-load/service.tar.gz",
+      "service_sha256": "e4a3b31b1c1a6073d8e2dda80d05faac0a9aec39c4f82188673af00c2fff6b51",
+      "terminal_requests": 3,
+      "generated": 3,
+      "compiled": 3,
+      "accepted_bound": 2,
+      "stages": {
+        "bound": 2,
+        "verifier_rejected": 1
+      },
+      "app_status": "error",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 13,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 3,
+          "recorded": 3,
+          "equal": true
+        },
+        "generated": {
+          "observed": 3,
+          "recorded": 3,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 3,
+          "recorded": 3,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 2,
+          "recorded": 2,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "cilium",
+      "batch": "functional_201146",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/native-modules-cilium__agent/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/native-modules-cilium__agent/service.tar.gz",
+      "service_sha256": "4bc87c7959b1789c08e3cfe522173b673d5113f79d6798340109af0a1b56ff2c",
+      "terminal_requests": 1,
+      "generated": 1,
+      "compiled": 0,
+      "accepted_bound": 0,
+      "stages": {
+        "compiler_rejected": 1
+      },
+      "app_status": "error",
+      "baseline_accepted_loads": 163,
+      "baseline_resident_counters": 72,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        },
+        "generated": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "tetragon",
+      "batch": "functional_201956",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/native-coherent-tetragon__observer/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/native-coherent-tetragon__observer/service.tar.gz",
+      "service_sha256": "c54c05b7e3a4d29bf4f30eec46eee38471cdd7e6e15d2c18574e723fff31e5ea",
+      "terminal_requests": 3,
+      "generated": 2,
+      "compiled": 2,
+      "accepted_bound": 2,
+      "stages": {
+        "bound": 2,
+        "specialization_rejected": 1
+      },
+      "app_status": "error",
+      "baseline_accepted_loads": 289,
+      "baseline_resident_counters": 287,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 3,
+          "recorded": 3,
+          "equal": true
+        },
+        "generated": {
+          "observed": 2,
+          "recorded": 2,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 2,
+          "recorded": 2,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 2,
+          "recorded": 2,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "katran",
+      "batch": "functional_201524",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/native-coherent-katran/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/native-coherent-katran/service.tar.gz",
+      "service_sha256": "725ae6097189af6b35d23bdf2094cbe091d64d9dddd030bf7f5d438c89217c94",
+      "terminal_requests": 1,
+      "generated": 1,
+      "compiled": 1,
+      "accepted_bound": 0,
+      "stages": {
+        "verifier_rejected": 1
+      },
+      "app_status": "error",
+      "baseline_accepted_loads": 1,
+      "baseline_resident_counters": 1,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        },
+        "generated": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "tracee",
+      "batch": "functional_203243",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/tracee-core-helper/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/tracee-core-helper/service.tar.gz",
+      "service_sha256": "0db461bc6932c5afb46808c09e522e30abdc8b500e3a4946ff1401bbc7712465",
+      "terminal_requests": 3,
+      "generated": 2,
+      "compiled": 2,
+      "accepted_bound": 2,
+      "stages": {
+        "bound": 2,
+        "specialization_rejected": 1
+      },
+      "app_status": "error",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 151,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 3,
+          "recorded": 3,
+          "equal": true
+        },
+        "generated": {
+          "observed": 2,
+          "recorded": 2,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 2,
+          "recorded": 2,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 2,
+          "recorded": 2,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "tetragon",
+      "batch": "functional_205401",
+      "metadata_path": null,
+      "service_path": "capture:tetragon-functional.service.tar.gz",
+      "service_sha256": "69fef30c9289fea51c4b018a2826132717e9d877f7e46faa767e49d570ff3136",
+      "terminal_requests": 3,
+      "generated": 2,
+      "compiled": 2,
+      "accepted_bound": 2,
+      "stages": {
+        "bound": 2,
+        "specialization_rejected": 1
+      },
+      "app_status": "captured_service_batch",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 0,
+      "recorded_counts": {}
+    },
+    {
+      "app": "tetragon",
+      "batch": "timing_204105",
+      "metadata_path": null,
+      "service_path": "capture:tetragon-timing.service.tar.gz",
+      "service_sha256": "455263b0c7304623bb1bbfe85f626da09678a2e1ded36854eae8704ad014e97e",
+      "terminal_requests": 3,
+      "generated": 2,
+      "compiled": 2,
+      "accepted_bound": 2,
+      "stages": {
+        "bound": 2,
+        "specialization_rejected": 1
+      },
+      "app_status": "captured_service_batch",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 0,
+      "recorded_counts": {}
+    }
+  ],
+  "terminal_requests": 42,
+  "stages": {
+    "bound": 35,
+    "verifier_rejected": 2,
+    "compiler_rejected": 1,
+    "specialization_rejected": 4
+  },
+  "kernel_worker_receipt_identity_matches": 42,
+  "input_artifacts": {
+    "corpus/results/kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json": {
+      "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+      "sha256": "4f9f196d3397220cb098eef3a5cdf9ead33e706326be3dc19458d761967197ec",
+      "bytes": 27251
+    },
+    "corpus/results/kprog_app_coverage_20261107/native-only-runtime/corpus-20261107T153640028572Z.tar.gz": {
+      "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+      "sha256": "b8e5e4b824b7b06f60c7f5eff7f9b11b1b9615f95438ddff8dab7c8558fefad3",
+      "bytes": 10216392
+    },
+    "corpus/results/kprog_app_coverage_20261107/otel-narrow-load/coverage.json": {
+      "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+      "sha256": "1aa018e3fe9e687077aee6e31711c1dabbc5969d38549b2f5df3f273d5f466e6",
+      "bytes": 31992
+    },
+    "corpus/results/kprog_app_coverage_20261107/otel-narrow-load/service.tar.gz": {
+      "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+      "sha256": "e4a3b31b1c1a6073d8e2dda80d05faac0a9aec39c4f82188673af00c2fff6b51",
+      "bytes": 4017017
+    },
+    "corpus/results/kprog_app_coverage_20261107/native-modules-cilium__agent/coverage.json": {
+      "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+      "sha256": "671f88df41ee98162447be82d5e62bd2ca9bbf52f7a344be482f3f76baee0cfb",
+      "bytes": 49271
+    },
+    "corpus/results/kprog_app_coverage_20261107/native-modules-cilium__agent/service.tar.gz": {
+      "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+      "sha256": "4bc87c7959b1789c08e3cfe522173b673d5113f79d6798340109af0a1b56ff2c",
+      "bytes": 206450
+    },
+    "corpus/results/kprog_app_coverage_20261107/native-coherent-tetragon__observer/coverage.json": {
+      "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+      "sha256": "28b2050c6c101879a1157f68e45257e267b6f6b16d3a9bb0e577aeecb5402f4f",
+      "bytes": 81805
+    },
+    "corpus/results/kprog_app_coverage_20261107/native-coherent-tetragon__observer/service.tar.gz": {
+      "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+      "sha256": "c54c05b7e3a4d29bf4f30eec46eee38471cdd7e6e15d2c18574e723fff31e5ea",
+      "bytes": 1929839
+    },
+    "corpus/results/kprog_app_coverage_20261107/native-coherent-katran/coverage.json": {
+      "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+      "sha256": "8fbcc51e12f96537de0a8d5b65a3ac48b3457c342c9d15a69d55ef8df84661ed",
+      "bytes": 34493
+    },
+    "corpus/results/kprog_app_coverage_20261107/native-coherent-katran/service.tar.gz": {
+      "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+      "sha256": "725ae6097189af6b35d23bdf2094cbe091d64d9dddd030bf7f5d438c89217c94",
+      "bytes": 323758
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-core-helper/coverage.json": {
+      "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+      "sha256": "ce69f28dcabb13922601320f6c6333cbe94ee8330b89431077aea02ec1a4fb24",
+      "bytes": 59131
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-core-helper/service.tar.gz": {
+      "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
+      "sha256": "0db461bc6932c5afb46808c09e522e30abdc8b500e3a4946ff1401bbc7712465",
+      "bytes": 14059935
+    }
+  },
+  "captured_input_manifest": {
+    "captured_at": "2026-11-07T21:06:21.229289+00:00",
+    "source_head": "52e83e0216f760f70b62c973c5d32aeb3f0615b0",
+    "files": {
+      "tetragon-functional.service.tar.gz": {
+        "source_path": "corpus/results/kprog_app_coverage_20261107/native-only-runtime/corpus-20261107T205401642460Z.tar.gz",
+        "sha256": "69fef30c9289fea51c4b018a2826132717e9d877f7e46faa767e49d570ff3136",
+        "bytes": 1929108
+      },
+      "tetragon-timing.service.tar.gz": {
+        "source_path": "corpus/results/kprog_app_coverage_20261107/native-only-runtime/corpus-20261107T205604738985Z.tar.gz",
+        "sha256": "455263b0c7304623bb1bbfe85f626da09678a2e1ded36854eae8704ad014e97e",
+        "bytes": 1928946
+      },
+      "tetragon-timing.metadata.json": {
+        "source_path": "corpus/results/x86_kvm_corpus_20261107_204105_213775/metadata.json",
+        "sha256": "75c0f78a22f6683324f304714b978b088f7b095f1fe2ec28593fdb4ce2ce21f4",
+        "bytes": 644
+      },
+      "tetragon-timing.result.json": {
+        "source_path": "corpus/results/x86_kvm_corpus_20261107_204105_213775/details/result.json",
+        "sha256": "9f229aa8e27d5c4cf22342ec1b54e127767a13ca0cc2711ede69fd738dda163c",
+        "bytes": 5904
+      },
+      "tetragon-timing.shim.log": {
+        "source_path": "corpus/results/x86_kvm_corpus_20261107_204105_213775/details/shim-logs/tetragon__observer.post_rejit.log",
+        "sha256": "5d075e02d30cb0569d46e10cf86621c09d65523959244ce49fba6eedcf9e5de3",
+        "bytes": 48773
+      }
+    }
+  },
+  "captured_input_archive_sha256": "557e0bb18f6ac4989e964c601000b2a947510b1eccbd12a7eb0e37439cb6ee74",
+  "recorded_count_matches": true,
+  "timing_context": {
+    "metadata_status": "error",
+    "result_status": "error",
+    "samples": 3,
+    "workload_seconds": 180.0,
+    "failed_load_extents": [
+      {
+        "name": "event_wake_up_n",
+        "insn_cnt": 1362,
+        "bytes": 10896,
+        "raw_line": "[930.574330 pid=2316 tid=2322] BPF_PROG_LOAD type=2 (kprobe) name=event_wake_up_n insn_cnt=1362 hash=4eb9479231eb83ac policy_hash=c011733d6f49da37 branch_profile_hash=1cd5018eaa97290b license=Dual BSD/GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=62 attach_btf_obj_fd=0 attach_prog_fd=0"
+      }
+    ]
+  },
+  "scope": "Whole captured application/service batch observations and kernel/worker byte identities."
+}
