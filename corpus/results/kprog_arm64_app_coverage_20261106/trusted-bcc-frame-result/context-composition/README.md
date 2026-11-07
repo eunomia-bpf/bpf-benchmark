@@ -10,3 +10,10 @@ The failing sites include map-value reads following stack restores. Changing onl
 
 
 The canonical production header separately passes the documented negative-plus-29 micro proof build: `taskset -c 16-19 make -C kprog/arm64 micro-proofs-build`, exit0, with all five monitored source hashes unchanged. `micro-build.json` and `micro-build-inputs.tar.gz` retain the 30 compiler records, sources/objects, canonical dependency headers, source pins and full Make log. This is build evidence only, with no verifier or runtime claim. It does not close the current Katran composition failure.
+
+
+## Entry-selected live XDP translation
+
+Only ARM64_SIM_ENTRY_XDP enables live context translation. Bare DECLARE_STATE routing fixtures retain their original memory model and do not acquire a live context from abi_kind alone. This repairs the dynamic memory/pair/DQ/vector host compilation regression without a pointer-null guard or changed native load/store behavior. Seven original affected host checks compile and execute successfully. The negative and all29 micro proof builds pass; every executable BPF section in all30 objects is byte-identical to the prechange production snapshot.
+
+The complete immutable make -C kprog/formal check exits2 at tools/check_x86_popcount_memory.py: the shared x86 header raises x86_sim_unmapped_xdp_read while compiling a state-struct POPCNT memory host. The explicit committed base and owned ARM header overlay are recorded in entry-selection.json. This full-check failure is retained and reported to lane C; there is no full-green claim or skipped check. entry-selection-inputs.tar.gz retains the exact changed/baseline headers, seven host commands/logs, micro section hashes, full raw check log/source manifest, and closed canonical Katran and private metadata experiments. Canonical/full-stack Katran still fails at the same13 unmapped-XDP diagnostics as compact-stack Katran. The private bit-plane metadata experiment also fails at those13 sites and is not promoted. No new verifier/application acceptance, whole ISA theorem or safety result follows from this integration fix.

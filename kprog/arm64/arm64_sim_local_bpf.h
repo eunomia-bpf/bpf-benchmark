@@ -230,6 +230,7 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 	__u64 __a64_numeric_return __attribute__((unused)) = 0;            \
 	__u8 __a64_numeric_sp_valid __attribute__((unused)) = 0;           \
 	__u8 __a64_numeric_return_valid __attribute__((unused)) = 0;       \
+	__u8 __a64_sim_is_xdp __attribute__((unused)) = 0;               \
 	void *__a64_sim_helper_ctx __attribute__((unused)) = (void *)0;                            \
 	void *__a64_sim_helper_abi_base __attribute__((unused)) = (void *)0;                       \
 	ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_DECLARE_REG)                  \
@@ -253,6 +254,7 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 	__u8 __a64_sim_abi_kind = KPROG_ABI_KIND_XDP;                    \
 	ARM64_SIM_L_DECLARE_STATE();                                      \
 	ARM64_SIM_L_DECLARE_STACK();                                      \
+	__a64_sim_is_xdp = 1;                                          \
 	__a64_sim_helper_ctx = (void *)(CTX);                             \
 	__a64_sim_helper_abi_base = &__a64_sim_abi;                       \
 	__a64_x0.ptr = (void *)(CTX);                                    \
@@ -808,7 +810,9 @@ typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 	ARM64_SIM_L_MEM_PREPOST_STEP((BASE),                                \
 		KPROG_ARM64_MEM_PREPOST_POST_DELTA((AUX), (IMM)))
 
-/* Native XDP pointer fields are 64-bit; BPF ctx access uses typed fields.
+/* Entry-selected XDP translation is erased by specialization. Bare state
+ * declarations used by routing hosts do not establish a live context.
+ * Native XDP pointer fields are 64-bit; BPF ctx access uses typed fields.
  * Unknown native fields fail compilation instead of reading zero padding. */
 extern void arm64_sim_unmapped_xdp_read(void)
     __attribute__((error("unmapped native XDP context read")));
@@ -830,7 +834,7 @@ extern void arm64_sim_unmapped_xdp_read(void)
 		__u64 __a64_mrd_value;                                    \
 		__u8 __a64_mrd_src = KPROG_ARM64_MEM_READ_SRC(           \
 			((BASE) == ARM64_SP), __a64_mrd_tag, (WIDTH));   \
-		if (__a64_sim_abi_kind == KPROG_ABI_KIND_XDP && __a64_mrd_tag == ARM64_SIM_TAG_ABI) { \
+		if (__a64_sim_is_xdp && __a64_mrd_tag == ARM64_SIM_TAG_ABI) { \
             __a64_mrd_value = ARM64_SIM_L_XDP_READ((BASE), __a64_mrd_off, (WIDTH)); \
         } else switch (__a64_mrd_src) {                                 \
 		case KPROG_ARM64_MEM_SRC_STACK: {                        \
@@ -885,7 +889,7 @@ extern void arm64_sim_unmapped_xdp_read(void)
 		}                                                        \
 		case KPROG_ARM64_MEM_TAG_ABI:                            \
 			__a64_mrt_value_tag = __a64_sim_abi_kind == ARM64_SIM_ABI_KIND_RAW ? ARM64_SIM_TAG_ABI : KPROG_ABI_LOAD_TAG(          \
-				__a64_sim_abi_kind, (__a64_sim_abi_kind == KPROG_ABI_KIND_XDP ? (__s64)((__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) - (__u8 *)__a64_sim_helper_ctx) : 0) + __a64_mrt_off,           \
+				__a64_sim_abi_kind, (__a64_sim_is_xdp ? (__s64)((__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) - (__u8 *)__a64_sim_helper_ctx) : 0) + __a64_mrt_off,           \
 				ARM64_SIM_TAG_SCALAR, ARM64_SIM_TAG_PACKET,   \
 				ARM64_SIM_TAG_PACKET_END);                    \
 			break;                                             \

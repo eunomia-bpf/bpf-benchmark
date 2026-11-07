@@ -1,0 +1,239 @@
+{
+  "scope": "entry-selected XDP routing integration; current Katran compiler failure remains open",
+  "full_check_exit": 2,
+  "full_check_base": "8df6e716a484582953b185ee3c81f9b14ebbcf69",
+  "checked_header_sha256": "d382995ce88de3076d4c7650566d3a5961733c2a624becd8c8de3ddb08118126",
+  "baseline_header_sha256": "c82c0832be850e8755478516bea17daacd30424475a5d81348efce3497606787",
+  "full_check_failure": "shared x86 POPCNT memory host: x86_sim_unmapped_xdp_read compiler error; C notified, not bypassed",
+  "host_banners": [
+    "arm64 mem offset host cross-check: OK (20168 cases)",
+    "arm64 pre/post host cross-check: OK (4608 cases)",
+    "arm64 dq_mem_extra route host cross-check: OK (62424 cases)",
+    "arm64 vreg field route host cross-check: OK (62427 cases)",
+    "arm64 dq_mem route host cross-check: OK (62418 cases)",
+    "arm64 pair_mem route host cross-check: OK (122891 cases)",
+    "arm64 vreg route host cross-check: OK (62445 cases)"
+  ],
+  "micro_executable_identity": {
+    "scope": "entry-selector fix; compile-only, executable BPF sections compared byte for byte",
+    "positive": 29,
+    "negative": 1,
+    "all_executable_sections_identical": true,
+    "records": [
+      {
+        "path": "kprog/arm64/micro-prog/build/bcc_runqlat_log2_histogram_bucket.bpf.o",
+        "sections": {
+          "xdp": "662a751d92255d7ab1da88c71683c45712bf93b9b522c866f804bd5f413652e6"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/bcc_tcpconnect_ipv4_tuple_filter.bpf.o",
+        "sections": {
+          "xdp": "8088b8ff4a2017204f8c16668c7ad55cf3332ee9d0546967bf92fcf3b5b0d23a"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/bitmap_popcount_scan.bpf.o",
+        "sections": {
+          "xdp": "3364997b4e9804037415806adce80aebe8d8d10496c9186a75268f85c6262ea2"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/bpf_local_call_fanout_dispatch.bpf.o",
+        "sections": {
+          "xdp": "56ff51412fdefb7bda9c23b9f506511165ec827c31191ff82e5165e592f041c2"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/bpftrace_comm_key_fnv_hash.bpf.o",
+        "sections": {
+          "xdp": "edec6854720870e42ed1ab5e0ba0ad4db7b2d15a00d38f1c859760a0a3253512"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/bpftrace_string_search_prefix_scan.bpf.o",
+        "sections": {
+          "xdp": "98f59ba43619451945cd2530cf11fbc2c08c2dd326e1aa6d6a1a464deeb5b18a"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/cgroup_skb_hash_chain.bpf.o",
+        "sections": {
+          "cgroup_skb/egress": "5599d94f528e8cef8a5a6cec49ceeccb8a1b6b2b409ee671e297a61ba2a4c3cc"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/cilium_ct_nat_tuple_rewrite.bpf.o",
+        "sections": {
+          "xdp": "c96bf6af73631c04a5379bb154ed5f19e533561f560cd21e75e5d79f263bb7cb"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/cilium_policy_guard_tree_filter.bpf.o",
+        "sections": {
+          "xdp": "7cfcd8a1df37db63d6e3ffbffe9f40652411a89aa7d9ab4c4673a239b5bf2bae"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/cilium_socket_lb_service_select.bpf.o",
+        "sections": {
+          "xdp": "506fd6f1300a05af7ec845a747cce15c01edc3ccfd2350c22e9219e7942994dd"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/flow_5tuple_rss_hash.bpf.o",
+        "sections": {
+          "xdp": "caf4badc8de56838d10f1fc76cfaef661ef9fce0bba17d1cbcb4d482e5a7b196"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/flow_record_field_scan.bpf.o",
+        "sections": {
+          "xdp": "c8d82db6e3d8a40ddf748fed9982af40be8d5b90bf9072ba941b5479c42c4bbd"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/katran_lb_consistent_hash_select.bpf.o",
+        "sections": {
+          "xdp": "adf4938d4cc047a514e5dbe9666471871d66bed027c37948803dee28a2147eea"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/otel_stack_frame_unwind_scan.bpf.o",
+        "sections": {
+          "xdp": "96184a6ddb6b29ccd31b413f2b8d735315cd84c4db59c1a61132909d74e2106f"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/packed_header_bitfield_decode.bpf.o",
+        "sections": {
+          "xdp": "d619500764e05043e74e9acd10040d41dc235210d38c9b4fcabdbcbb267fbda0"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/packet_checksum_fold.bpf.o",
+        "sections": {
+          "xdp": "e72dc9baa9d81c5468c101c095223ab353cfa2933b00832b893598edfe2d5079"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/packet_record_bounds_window.bpf.o",
+        "sections": {
+          "xdp": "5230720a6f40f0f766675eda9652c85609ac4f85916dc7b146cd60537d6b76c3"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/packet_toeplitz_rss_hash.bpf.o",
+        "sections": {
+          "xdp": "35a685feebe50304337e3a7986eb4b5e635ee52bc33219fed57f6e45a3629544"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/packet_vlan_tcpopt_parser.bpf.o",
+        "sections": {
+          "xdp": "cf2ffe198a707c96af6a475187236720bc57870dc570c6225c58c9b762c223eb"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/payload_prefix_memcmp_scan.bpf.o",
+        "sections": {
+          "xdp": "03ab83fcd994e2581e0e62cf79a2b81713a271cbccc880b425426d82de6efc5b"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/simple.bpf.o",
+        "sections": {
+          "xdp": "49dd582587fdf0de190cd02b16151e9c132988bb80e361c8bd116c3a637d02ca"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/simple_packet.bpf.o",
+        "sections": {
+          "xdp": "51a1a32a5edef966671ade63bda3b05e4aaee82a3d03c6719e1c62925a629ddf"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/siphash_rotate64_mixer.bpf.o",
+        "sections": {
+          "xdp": "376e2f90e0828d3c34b0445969e34744be43b2f400db042e9c39b5a36170e213"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/sorted_rule_binary_search.bpf.o",
+        "sections": {
+          "xdp": "1564422f35254de9c1c358e173f10badd9ed48d2c0366de226bb5b5ac97d91ef"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/tc_packet_checksum_fold.bpf.o",
+        "sections": {
+          "tc": "b717f7760a470fc2d9a7aba05c3d262bec688fe5472c3bdde80d0abcdee52256"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/tetragon_process_event_arg_filter.bpf.o",
+        "sections": {
+          "xdp": "0295dc9f8ad31690f46399059d44a568ada647c3ef2b70468baab0a5d7c03396"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/trace_event_type_switch_dispatch.bpf.o",
+        "sections": {
+          "xdp": "15772d44d2dc4540f479e1df97ce94b2ac5d3152fcd21f417bd7b633f0ceb095"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/tracee_http_method_prefix_detect.bpf.o",
+        "sections": {
+          "xdp": "ce304d5c4049c80f0bc6a7b4ef21247750b3f3ff01371eb4479145a9bc8bc04b"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/tracee_syscall_name_table_lookup.bpf.o",
+        "sections": {
+          "xdp": "9a5930e3368151df7eaeead2afa31af5cb12b26f5ad9739e2c9503c1f43bf328"
+        },
+        "executable_sections_identical": true
+      },
+      {
+        "path": "kprog/arm64/micro-prog/build/negative/unchecked_packet_read.bpf.o",
+        "sections": {
+          "xdp": "ed70472010fefa65424c6b77f21b8148d8d61e4dd99e4d5a3d21af31fc949686"
+        },
+        "executable_sections_identical": true
+      }
+    ]
+  },
+  "canonical_Katran_generation_compile_returncode": 1,
+  "canonical_Katran_diagnostics": 13,
+  "private_bitplane_candidate_promoted": false,
+  "archive_sha256": "62774032cc9ff582bfe97b531d4f0ae8deeef62dd8d82f5ca6214fa443d99cd1"
+}
