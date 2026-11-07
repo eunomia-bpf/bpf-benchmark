@@ -68,6 +68,19 @@ def x86_forms(cc_aux):
             for op in ["movzx", "movsx"]:
                 forms += [f"{op} {dst}, {src}", f"{op} {dst}, {mem} PTR [rdi+8]"]
     forms += ["movsxd rax, ebx", "movsxd rax, DWORD PTR [rdi+8]"]
+    # LEA computes address bits without dereferencing: vary writeback width,
+    # SIB scale/base, address-size override, displacement and register aliases.
+    forms += [f"lea {dst}, {address}"
+              for dst in ["ax", "eax", "rax", "r8w", "r8d", "r8"]
+              for address in ["[rbx]", "[rbx+127]", "[rbx-128]",
+                              "[rbx+rcx*2-7]", "[r8+r9*4+2147483647]",
+                              "[r8+r9*8-2147483648]", "[rcx*8+127]",
+                              "[0x12345678]", "[ebx+ecx*4-7]",
+                              "[r8d+r9d*8+127]"]]
+    forms += ["lea rbx, [rbx+rcx*8]", "lea rcx, [rbx+rcx*8]",
+              "lea r9, [r8+r9*2-7]"]
+    forms += [f"lea {dst}, {segment}:[rbx+rcx*2-7]"
+              for dst in ["ax", "eax", "rax"] for segment in ["fs", "gs"]]
     forms += [f"mov {reg}, BYTE PTR {address}"
               for reg in ["ah", "ch", "dh", "bh"]
               for address in ["[rdi+8]", "[rsi+16]", "[rsp-16]"]]
