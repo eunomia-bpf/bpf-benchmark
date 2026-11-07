@@ -1,0 +1,90 @@
+{
+  "native_result": {
+    "compile_ns": 18591719248,
+    "exec_ns": 399,
+    "timing_source": "ktime",
+    "timing_source_wall": "wall_steady",
+    "wall_exec_ns": 3821,
+    "result": 2666935177028490406,
+    "retval": 2,
+    "code_size": {
+      "bpf_bytecode_bytes": 7936,
+      "native_code_bytes": 0
+    },
+    "phases_ns": {
+      "memory_prepare_ns": 4081226,
+      "packet_prepare_ns": 139115,
+      "native_load_ns": 18591719248,
+      "companion_load_ns": 4145673,
+      "companion_open_ns": 2016976,
+      "companion_object_load_ns": 2052081,
+      "companion_map_ptr_extract_ns": 0,
+      "companion_lookup_spec_ns": 0,
+      "native_link_cache_lookup_ns": 0,
+      "native_link_exec_ns": 0,
+      "native_link_read_ns": 0,
+      "native_link_map_patch_ns": 0,
+      "blob_upload_ns": 0,
+      "prog_load_ns": 0,
+      "prog_run_wall_ns": 3821
+    },
+    "perf_counters": {},
+    "perf_counters_meta": {
+      "requested": false,
+      "collected": false,
+      "include_kernel": true,
+      "scope": "full_repeat_raw",
+      "error": ""
+    }
+  },
+  "request": {
+    "request_id": 1,
+    "source_prog_id": 6,
+    "native_sha256": "6b6bcfc6519f3474f4dc2a7e886f3469081e1fa09d019ee4e204d0f84e47d695",
+    "started": "2026-11-07T18:52:09.920444+00:00",
+    "prog_id": 11,
+    "status": 0,
+    "artifact_archive": "/run/c-rorx-candidate/session-bto2z6n5/requests/1.success.tar.gz",
+    "finished": "2026-11-07T18:52:28.586298+00:00"
+  },
+  "fresh_source_direct_rorx_count": 116,
+  "native_sha256_verified": true,
+  "private_header_sha256": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+  "outside_unchanged_during_private_vm": true,
+  "source_paths": {
+    "kprog/x86/x86_sim_local_bpf.h": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+    "kprog/formal/contracts/x86_specialization_spec.json": "8a780b018fb388d3226f86a4d848d6b56bb62331ff2c93d303d837790f1412e3",
+    "kprog/formal/tools/generate_x86_specialization_spec.py": "caf6db3b69c1f682f0593230719dc965d89ba18b5fee20aef00ab1626c35ce54",
+    "kprog/formal/KProgFormal/X86Specialization.lean": "9eb6af319124f1ba9bc43b2aa27531449f25f485ecdf1850031a636516507f93",
+    "kprog/formal/KProgFormal/Generated/GeneratedX86Specialization.lean": "96e8b2407ae827d6ed29365c7d7f912f309319c96d29f79ce186c18c16992bf1",
+    "kprog/formal/generated/x86_specialization.h": "26186d96d6d04bf671577c9ec3c62622074c154877a14a99b28c083f96cde690",
+    "kprog/x86/micro-prog/generated_x86_specialization.py": "3508a8dd5f20975c6cce171e673548d91c123752f9df24cd7b2a84d8e02e7ac7",
+    "kprog/formal/oracles/test_x86_specialization_chain_host.c": "65eae3e19d51f5324dbdd39a4220f25aecdc7bd7f2925da358a8ebc35461063c",
+    "kprog/formal/oracles/test_x86_specialization_host.c": "07130ed0e9f522f145dad5524eec99657af6c0a6a1da00352f97a9fdba1fd25f",
+    "kprog/x86/README.md": "d3f9b7efd8b8b3fddc81f21ae560cfe16fbba7974354d0b55985faec8ea2c67d"
+  },
+  "host_route_cases": 195841,
+  "host_specialization_cases": 534,
+  "contract_generator_and_macro_hygiene_exit": 0,
+  "focused_lean_specialization_exit": 0,
+  "full_formal_not_rerun": true,
+  "build": {
+    "before": {
+      "preprocess_exit": 0,
+      "preprocessed_bytes": 599577941,
+      "preprocess_seconds": 46.35379283083603
+    },
+    "candidate": {
+      "preprocess_exit": 0,
+      "preprocessed_bytes": 24575752,
+      "preprocess_seconds": 1.6522587928920984
+    },
+    "compile": {
+      "returncode": 0,
+      "seconds": 13.624508222099394,
+      "maxrss_kib": 2006772
+    }
+  },
+  "scope": "Compiler-resource failure fixed by existing operation dispatch; no ISA/reference/limits/native/flags changes. Standard Make one-case run pending separately.",
+  "raw_sha256": "976e1768be86619c3ac3b279f5943c21baef6b984b6aefb424408dc60c7f3dea"
+}

@@ -1288,6 +1288,16 @@ extern void x86_sim_unmapped_xdp_read(void)
 		X86_SIM_L_SET_ROR_FLAGS(__x86_ror_result, __x86_ror_count, __x86_ror_width); \
 	} while (0)
 
+/* RORX reads its source before writing its destination and preserves flags. */
+#define X86_SIM_L_EXEC_RORX(DST, SRC, FLAGS, IMM)                         \
+	do {                                                               \
+		__u8 __x86_rorx_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+		__u64 __x86_rorx_src = X86_SIM_L_READ_REG(SRC);           \
+		X86_SIM_L_WRITE_REG_WIDTH((DST),                         \
+			x86_ror(__x86_rorx_src, (IMM), __x86_rorx_width),  \
+			__x86_rorx_width);                               \
+	} while (0)
+
 #define X86_SIM_L_EXEC_ROR_MEM(DST, FLAGS, AUX, IMM) \
 	do { \
 		__u8 __x86_ror_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
@@ -2387,10 +2397,7 @@ x86_sim_divmod128(__u64 high, __u64 low, __u64 divisor)
 			} else if (KPROG_X86_DISP_ROR_MEM_HANDLED(OP)) { \
 				X86_SIM_L_EXEC_ROR_MEM((DST), (FLAGS), (AUX), (IMM)); \
 			} else if (KPROG_X86_DISP_RORX_HANDLED(OP)) {           \
-				__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);      \
-				X86_SIM_L_WRITE_REG_WIDTH((DST),                  \
-					x86_ror(__x86_l_src, (IMM), __x86_l_width),\
-					__x86_l_width);                          \
+				X86_SIM_L_EXEC_RORX((DST), (SRC), (FLAGS), (IMM)); \
 			} else if (KPROG_X86_DISP_RORX_MEM_HANDLED(OP)) {       \
 				__u64 __x86_l_src = X86_SIM_L_READ_MEM_VALUE(     \
 					(SRC), (AUX), (IMM), (FLAGS), 1);         \

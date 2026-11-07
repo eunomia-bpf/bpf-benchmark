@@ -156,7 +156,7 @@ static const struct spec_row SPEC[] = {
 	{ X86_OP_CMP_REG_MEM, D },
 	{ X86_OP_MOV_LOAD_SCALAR, D },
 	{ X86_OP_SHIFTX, G },
-	{ X86_OP_RORX, G },
+	{ X86_OP_RORX, D },
 	{ X86_OP_MOVBE_LOAD, G },
 	{ X86_OP_MOVBE_STORE, D },
 	{ X86_OP_SHIFTX_MEM, G },
@@ -420,6 +420,8 @@ static void check_token(__u8 op, unsigned dst, unsigned src, unsigned flags,
 	case X86_OP_MOVBE_STORE:
 		X86_SIM_L_EXEC_MOVBE_STORE(dst,src,flags,aux,imm);break;
 
+	case X86_OP_RORX:
+		X86_SIM_L_EXEC_RORX(dst, src, flags, imm); break;
 	case X86_OP_ROR:
 		X86_SIM_L_EXEC_ROR(dst, flags, aux, imm); break;
 	case X86_OP_ROR_MEM:
@@ -596,8 +598,8 @@ static void check_dispatch(void)
 	}
 
 	cases++;
-	if (direct != 54U) {
-		printf("MISMATCH direct count %u want 54\n", direct);
+	if (direct != 55U) {
+		printf("MISMATCH direct count %u want 55\n", direct);
 		failures++;
 	}
 }

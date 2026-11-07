@@ -50,6 +50,10 @@ Deleted old paths:
 5. Compile with `clang -O3 -target bpf`.
 6. Load and test-run the proof object with the ReverseSim loader.
 
+RORX uses one C handler from both the generic dispatcher and direct emission.
+The specialization contract selects that handler without expanding unrelated
+dispatcher arms at every rotate; operands, writeback and preserved flags agree.
+
 The Python generator resolves native control flow, joining finite reaching
 targets for indirect calls/jumps and dispatching on the actual register value.
 Helper selection follows the original Linux ID or ELF helper symbol; C macros

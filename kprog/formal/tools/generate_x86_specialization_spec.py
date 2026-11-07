@@ -105,7 +105,7 @@ EXPECTED = [
     ("X86_OP_CMP_REG_MEM", "directMacro", "X86_SIM_L_EXEC_CMP_REG_MEM", "X86_SIM_L_EXEC_CMP_REG_MEM({dst}, {src}, {flags}, {aux}, {imm})", ""),
     ("X86_OP_MOV_LOAD_SCALAR", "directMacro", "X86_SIM_L_EXEC_MOV_LOAD", "X86_SIM_L_EXEC_MOV_LOAD({op}, {dst}, {src}, {flags}, {aux}, {imm})", ""),
     ("X86_OP_SHIFTX", "genericRunOp", "", "", ""),
-    ("X86_OP_RORX", "genericRunOp", "", "", ""),
+    ("X86_OP_RORX", "directMacro", "X86_SIM_L_EXEC_RORX", "X86_SIM_L_EXEC_RORX({dst}, {src}, {flags}, {imm})", ""),
     ("X86_OP_MOVBE_LOAD", "genericRunOp", "X86_SIM_L_EXEC_MOVBE_LOAD", "", ""),
     ("X86_OP_MOVBE_STORE", "directMacro", "X86_SIM_L_EXEC_MOVBE_STORE", "X86_SIM_L_EXEC_MOVBE_STORE({dst}, {src}, {flags}, {aux}, {imm})", ""),
     ("X86_OP_SHIFTX_MEM", "genericRunOp", "", "", ""),

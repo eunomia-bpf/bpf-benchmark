@@ -131,7 +131,7 @@ def dispatch : Op -> Dispatch
   | .cmpRegMem => .directMacro
   | .movLoadScalar => .directMacro
   | .shiftx => .genericRunOp
-  | .rorx => .genericRunOp
+  | .rorx => .directMacro
   | .movbeLoad => .genericRunOp
   | .movbeStore => .directMacro
   | .shiftxMem => .genericRunOp
@@ -287,7 +287,7 @@ def chainMacro : Op -> String
   | .cmpRegMem => "X86_SIM_L_EXEC_CMP_REG_MEM"
   | .movLoadScalar => "X86_SIM_L_EXEC_MOV_LOAD"
   | .shiftx => ""
-  | .rorx => ""
+  | .rorx => "X86_SIM_L_EXEC_RORX"
   | .movbeLoad => "X86_SIM_L_EXEC_MOVBE_LOAD"
   | .movbeStore => "X86_SIM_L_EXEC_MOVBE_STORE"
   | .shiftxMem => ""
@@ -365,7 +365,7 @@ def directMacro : Op -> String
   | .cmpRegMem => "X86_SIM_L_EXEC_CMP_REG_MEM"
   | .movLoadScalar => "X86_SIM_L_EXEC_MOV_LOAD"
   | .shiftx => ""
-  | .rorx => ""
+  | .rorx => "X86_SIM_L_EXEC_RORX"
   | .movbeLoad => ""
   | .movbeStore => "X86_SIM_L_EXEC_MOVBE_STORE"
   | .shiftxMem => ""
