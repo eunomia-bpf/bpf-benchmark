@@ -1,0 +1,227 @@
+{
+  "programs_total_baseline_app_loads": 14,
+  "resident_baseline_programs": 13,
+  "baseline_feature_probe_attempts": 3,
+  "baseline_unnamed_probe_attempts": 2,
+  "baseline_named_probe": "probe_bpf_perf_ (2 instructions; existing shim classifier)",
+  "native_requests": 3,
+  "generated": 3,
+  "compiled": 3,
+  "accepted_bound": 2,
+  "specialization_failed": 0,
+  "verifier_rejected": 1,
+  "unattempted_after_native_app_abort": 11,
+  "verifier_errors": [
+    "BPF program is too large. Processed 1000001 insn",
+    "processed 1000001 insns (limit 1000000) max_states_per_insn 31 total_states 64654 peak_states 2538 mark_read 0"
+  ],
+  "driver_exit": 0,
+  "app_status": "error",
+  "collector_exit": 1,
+  "terminal_archives_verified": 3,
+  "source_drift": [
+    "kprog/x86/trusted_specializer.py"
+  ],
+  "launch_worker_sha256": "b49b5a4883b1d6f33c440ebdaf2e2a13049efdd1652ece9121673507cffc12b7",
+  "physical_worker_after_sha256": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+  "baseline_application_loads": [
+    {
+      "type": 17,
+      "type_name": "raw_tracepoint",
+      "name": "read_task_struc",
+      "insn_cnt": 56
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_sto",
+      "insn_cnt": 1631
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_nat",
+      "insn_cnt": 6972
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_hot",
+      "insn_cnt": 7593
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_per",
+      "insn_cnt": 7475
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_php",
+      "insn_cnt": 6899
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_pyt",
+      "insn_cnt": 5894
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_rub",
+      "insn_cnt": 5458
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_v8",
+      "insn_cnt": 7817
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_dot",
+      "insn_cnt": 7974
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_go_labels",
+      "insn_cnt": 683
+    },
+    {
+      "type": 5,
+      "type_name": "tracepoint",
+      "name": "tracepoint__sch",
+      "insn_cnt": 283
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "native_tracer_e",
+      "insn_cnt": 1322
+    },
+    {
+      "type": 2,
+      "type_name": "kprobe",
+      "name": "custom__generic",
+      "insn_cnt": 1253
+    }
+  ],
+  "all_baseline_load_attempts": [
+    {
+      "type": 1,
+      "type_name": "socket_filter",
+      "name": "",
+      "insn_cnt": 2
+    },
+    {
+      "type": 2,
+      "type_name": "kprobe",
+      "name": "",
+      "insn_cnt": 6
+    },
+    {
+      "type": 17,
+      "type_name": "raw_tracepoint",
+      "name": "read_task_struc",
+      "insn_cnt": 56
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_sto",
+      "insn_cnt": 1631
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_nat",
+      "insn_cnt": 6972
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_hot",
+      "insn_cnt": 7593
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_per",
+      "insn_cnt": 7475
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_php",
+      "insn_cnt": 6899
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_pyt",
+      "insn_cnt": 5894
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_rub",
+      "insn_cnt": 5458
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_v8",
+      "insn_cnt": 7817
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_unwind_dot",
+      "insn_cnt": 7974
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "perf_go_labels",
+      "insn_cnt": 683
+    },
+    {
+      "type": 5,
+      "type_name": "tracepoint",
+      "name": "tracepoint__sch",
+      "insn_cnt": 283
+    },
+    {
+      "type": 7,
+      "type_name": "perf_event",
+      "name": "native_tracer_e",
+      "insn_cnt": 1322
+    },
+    {
+      "type": 2,
+      "type_name": "kprobe",
+      "name": "custom__generic",
+      "insn_cnt": 1253
+    },
+    {
+      "type": 2,
+      "type_name": "kprobe",
+      "name": "probe_bpf_perf_",
+      "insn_cnt": 2
+    }
+  ],
+  "native_workload_completed": false,
+  "temporary_files_remaining": [],
+  "files": {
+    "collection-evidence.tar.gz": "89a1f0f7cedee811a2af4deb95bb49b96a71f443e11e57a662704d5730e591e0",
+    "driver.log.gz": "2b4102d05f104d3238a4efb0223ed28f7096f74c00958b4bae4882594980859b",
+    "service.tar.gz": "29bf16022135f121d5de79f833969fe11d12294c9e0bc6508183761279d73ac1",
+    "launch.tar.gz": "27b2692eb20d569a853bf04aa5f5f6f209b498d5ab6e4daa8fbd9438956529a6",
+    "coverage.json": "a9e79e8a1939530b3b31b342b4ae21f4d495648bae157f1810683c2995ce7202",
+    "result.tar.gz": "25dc5740863d4476e230a92552699675b5aa23e02011ae259c047b6721ed3e33"
+  }
+}
