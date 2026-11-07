@@ -44,3 +44,15 @@ from the image build. The guest archives service requests and corpus output;
 its summary records raw make return code and actual corpus metadata statuses
 separately, since process exit0 does not establish application success.
 Do not stage active .live directories or incomplete runtime logs.
+
+## Private service workspace correction
+
+The first preparation guest was stopped before its first native submission:
+its proof work directory would have been inside the writable corpus-results
+mount. Its logs are retained in aborted-private-state.tar.gz and are not counted
+as an application or verifier result. The service now works under a0700 temporary
+directory in lane C state, outside the application result mount. Only after the
+service stops are complete request artifacts copied into the result archive.
+The guest summary records the actual private path and mode. This corrects the
+bridge's file placement; it does not claim isolation from a privileged operator.
+The application image is unchanged; the corrected bootstrap reuses it.

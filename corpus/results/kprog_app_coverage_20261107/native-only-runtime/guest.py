@@ -7,8 +7,9 @@ S=Path('/workspaces/.agent-state/kprog-lanes/C/native-only-runtime')
 p=argparse.ArgumentParser();p.add_argument('--samples',type=int,required=True);p.add_argument('--duration',type=int,required=True);p.add_argument('--apps',required=True);a=p.parse_args()
 subprocess.run(['insmod',str(R/'kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko')],check=True)
 summary=dict(started=datetime.now(timezone.utc).isoformat(),apps=a.apps,samples=a.samples,duration=a.duration)
-with tempfile.TemporaryDirectory(prefix='.live-',dir=O) as directory:
- live=Path(directory);state=live/'requests';state.mkdir(mode=0o700)
+with tempfile.TemporaryDirectory(prefix='.live-',dir=O) as directory, tempfile.TemporaryDirectory(prefix='trusted-',dir=S) as private:
+ live=Path(directory);state=Path(private)/'requests';state.mkdir(mode=0o700)
+ summary['service_state_directory']=str(state);summary['service_state_mode']=oct(state.stat().st_mode & 0o777)
  log=(live/'service.log').open('w');reader=None;reader_errors=[]
  service=subprocess.Popen([sys.executable,str(R/'kprog/trusted_service.py'),'--arch','1','--endpoint','/sys/kernel/debug/bpf_x86_native_lab/specializer','--state',str(state),'--native-link',str(R/'kprog/x86/native_lab/native_link/target/release/native-link'),'--loader',str(R/'kprog/libnativeloader/build/trusted-native-loader')],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,start_new_session=True)
  try:
@@ -39,7 +40,9 @@ with tempfile.TemporaryDirectory(prefix='.live-',dir=O) as directory:
   if reader_errors:summary['service_log_error']=reader_errors
   (live/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
   archive=O/('corpus-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')+'.tar.gz')
-  with tarfile.open(archive,'x:gz') as target:target.add(live,arcname='corpus')
+  with tarfile.open(archive,'x:gz') as target:
+   target.add(live,arcname='corpus')
+   target.add(state,arcname='corpus/requests')
   summary.update(archive=archive.name,archive_sha256=hashlib.sha256(archive.read_bytes()).hexdigest());(O/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
   print(json.dumps({k:summary.get(k) for k in ['returncode','corpus_metadata','archive']}),flush=True)
   if reader_errors:raise RuntimeError('service log collection failed: '+repr(reader_errors))
