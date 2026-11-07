@@ -86,3 +86,14 @@ actual CPU-profile binding discharge is claimed by these conditional theorems.
 Sources/program inputs, initial elaboration errors and final commands are
 retained in checked-simple-prefix-inputs.tar.gz; source pins and dependency
 check output are adjacent. Full existing dependency recheck follows separately.
+
+Full existing dependency refresh for 083cc64b9
+--------------------------------------------
+
+`checked-simple-bound-full.log` records exit0 for the complete existing
+`make -C kprog/tv checked-first-block-check`, including BPF semantics/platform,
+canonical AArch64, regenerated exact native/clang/context/expanded arrays,
+private spills, entry/guard/store certificates and concrete prefix/binding
+safety. Every final theorem retains the reported axioms and no sorryAx.
+This closes the pending dependency refresh; actual invocation/profile/emission
+binding continues independently.
