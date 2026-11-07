@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "platform": {
+    "qemu_cpu": "cortex-a72",
+    "observed_MIDR": "0x410fd083",
+    "pairSingleAccess": false,
+    "profile_correspondence": "explicit reference/hardware premise; not inferred from artifact bytes"
+  },
+  "trusted": [
+    "verifier soundness and admitted proof entry for the exact checked B",
+    "byte-decoded BPF platform agreement with kernel context/rewrites",
+    "canonical native ISA and hardware correspondence for stated CPU profile",
+    "kernel immutable binding, JIT emission and ABI/entry relation",
+    "Lean kernel and printed logical axioms"
+  ],
+  "programs": [
+    {
+      "program": "simple",
+      "arch": "aarch64",
+      "status": "whole_program_under_explicit_entry_and_platform_contract",
+      "theorem": "accepted_actual_entry_prefix_checked",
+      "validation_log": "invocation-abi-full.log",
+      "validation_log_sha256": "449b5ab2503a7c59dbee751207eca6168c1f73b6db29bc7c2aaefb20857d04f8",
+      "captures": [
+        {
+          "record": "6-7",
+          "load": {
+            "version": 1,
+            "source_prog_id": 6,
+            "native_prog_id": 7,
+            "prog_type": 6,
+            "generation": 4
+          },
+          "files": {
+            "native.bin": "5db9dcdb02b964a2ba37ed7cce79ca4c599ab3d242463e3c66a5f3839454ba91",
+            "proof-input.bin": "856006967f533bb368b01a31f21df8b620368d994c4df7163b5b48f108734455",
+            "checked.snapshot.bin": "7e698a132c3a1b80b65c8514207cf68717b1d417d36b061224a5fbc71bbd5f57",
+            "emitted.bin": "f3abc51229105b1cf059628940ca597c5518a3c6193843a0dd2940f263c80864",
+            "jit.bin": "2dc35f589240cb93ca666837ef73bb3643ec182d9ab50598e6cfc563e5322301",
+            "jit-addresses.bin": "34a9a0572cbb64f586d7306d3278595066bb5ef39b4a732baabdbd7e599d3db7",
+            "jit-lengths.bin": "709eddfc631541f3ecea46e733bbf3043279bddfb51fdfd7be60efbc2714537e"
+          }
+        },
+        {
+          "record": "6-8",
+          "load": {
+            "version": 1,
+            "source_prog_id": 6,
+            "native_prog_id": 8,
+            "prog_type": 6,
+            "generation": 8
+          },
+          "files": {
+            "native.bin": "5db9dcdb02b964a2ba37ed7cce79ca4c599ab3d242463e3c66a5f3839454ba91",
+            "proof-input.bin": "856006967f533bb368b01a31f21df8b620368d994c4df7163b5b48f108734455",
+            "checked.snapshot.bin": "0c802f64860eed2ce8714fe57861ab096c1813b1aec1c07dcd1314e057a9765b",
+            "emitted.bin": "dc41ee6c56bab77b2e969b0b136b434f0f0acbc48430e937111501ed5db600ca",
+            "jit.bin": "2dc35f589240cb93ca666837ef73bb3643ec182d9ab50598e6cfc563e5322301",
+            "jit-addresses.bin": "8c34a0ee450907fc194bea34f0567b7dacec92b9edebaa0123b8cb273983b42b",
+            "jit-lengths.bin": "709eddfc631541f3ecea46e733bbf3043279bddfb51fdfd7be60efbc2714537e"
+          }
+        }
+      ],
+      "remaining": [
+        "runtime_CPU_profile_metadata_enforcement",
+        "other_programs_and_native_only_trusted_loader"
+      ]
+    },
+    {
+      "program": "simple_packet",
+      "arch": "aarch64",
+      "status": "guard_component_only",
+      "theorem": "PacketGuardCertificate.actual_guard_executions",
+      "validation_log": "packet-final.log",
+      "validation_log_sha256": "d17796b8782d63ea7bdef3d16a1948522f1f098bd1c04d544c12e976d9c1e08a",
+      "captures": [
+        {
+          "record": "6-7",
+          "load": {
+            "version": 1,
+            "source_prog_id": 6,
+            "native_prog_id": 7,
+            "prog_type": 6,
+            "generation": 4
+          },
+          "files": {
+            "native.bin": "515c24f8e239b6351207b2c8f8073f92f55559e74b8fa955b88be5e00f45a778",
+            "proof-input.bin": "69f8cef92e3e15bdab520f681c87c9c48beb5b22b9666a224f395c74e35fdc82",
+            "checked.snapshot.bin": "513fc38411586d56c20e5217c365c66edbde8d401bdc7787d4e95487375947dd",
+            "emitted.bin": "c11a8e88b218f82048274359b5d8c0dfc2665c67bfecf6c66200cd4c4238d823",
+            "jit.bin": "0b0d420627aef289d13951d016d2f4785a12207091aec66a66b495128644b938",
+            "jit-addresses.bin": "f2f792943e9b8023b8fbf735052b58aa7557d03617f3ebcb120caf81b53959f7",
+            "jit-lengths.bin": "0e6c738e4fe755a64a276418309bb5dc7e6bf36772bc0238010718e091a780da"
+          }
+        },
+        {
+          "record": "6-8",
+          "load": {
+            "version": 1,
+            "source_prog_id": 6,
+            "native_prog_id": 8,
+            "prog_type": 6,
+            "generation": 8
+          },
+          "files": {
+            "native.bin": "515c24f8e239b6351207b2c8f8073f92f55559e74b8fa955b88be5e00f45a778",
+            "proof-input.bin": "69f8cef92e3e15bdab520f681c87c9c48beb5b22b9666a224f395c74e35fdc82",
+            "checked.snapshot.bin": "39af355f7bdc1609a7dbebf76202282f8319063fba0b71ad5df57e5197b027d0",
+            "emitted.bin": "c661c3a33a28fb61cc2bf15d438da8d78b651aa69217b04539b94cf858739e47",
+            "jit.bin": "0b0d420627aef289d13951d016d2f4785a12207091aec66a66b495128644b938",
+            "jit-addresses.bin": "9e9199201e2cfe5e44ac3ca4b1d22bd0c9459801a56340b2d668f86775cde5f8",
+            "jit-lengths.bin": "0e6c738e4fe755a64a276418309bb5dc7e6bf36772bc0238010718e091a780da"
+          }
+        }
+      ],
+      "remaining": [
+        "entry_and_private_spills",
+        "stores_and_all_faults",
+        "return",
+        "actual_RX_every_prefix_and_ABI",
+        "accepted_invocation_composition"
+      ]
+    }
+  ]
+}

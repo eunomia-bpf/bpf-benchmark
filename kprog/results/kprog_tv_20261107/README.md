@@ -283,3 +283,30 @@ clang arrays, context/private entry, every guard/store/return path, actual RX
 transport, ABI/entry identity and both accepted-entry instances. This supersedes
 the earlier leaf-only validation for the new module. It does not supply a
 runtime CPU-profile metadata check or certify another program.
+
+
+`simple_packet`: fresh actual artifact and complete guard states
+-------------------------------------------------------------
+
+`packet-capture.log` contains two actual generation-bound QEMU Cortex-A72 loads
+of the 68-byte native entry, paired with freshly compiled 200-byte B and the
+26-instruction expanded B actually checked by the verifier. The source proof,
+first native and second native controls all return2, write the exact expected
+8 bytes and preserve the remaining120 bytes. Stable historical captures and
+capture-IO failure propagation also pass. `packet-final.log` checks the complete
+native/checked-B guard post-states and successor correspondence for arbitrary
+inputs, repeats the36 emission/site corruptions for each simple-family fixture,
+and repeats actual default-simple capture after parameterizing the harness.
+
+The generated native/proof/checked arrays and source ELF/capture identities are
+checked in Lean. Guard proofs retain the existing propext/choice/ofReduceBool/
+Quot.sound dependencies; checked guard/successor facts use propext/Quot.sound
+(or fewer). Initial hardcoded-simple extent rejection, generated array
+recursion/normalization limits and the initial missing compiled dependency
+are retained separately; final input checking uses the existing native_decide
+for the exact finite byte-array prefix, with its printed axiom dependency.
+Raw inputs, exact source/binary pins and failures are retained in packet-inputs.tar.gz.
+
+This is a component certificate for simple_packet. Its entry/private-spill,
+store/fault, return and every-prefix/accepted invocation composition remains
+active. No application or other micro is certified by this result.

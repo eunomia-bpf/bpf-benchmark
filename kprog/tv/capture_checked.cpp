@@ -1,4 +1,4 @@
-/* Capture the actual production loader's verifier-visible simple artifact. */
+/* Capture the actual production loader's verifier-visible simple-family artifact. */
 #include "../libnativeloader/include/native_loader.hpp"
 #include "../../kinsn/module/include/native_lab_checked_wire.h"
 #include <bpf/bpf.h>
@@ -36,9 +36,11 @@ static void run(int fd, const char *name)
         !std::memcmp(output + 8, input + 8, sizeof(input) - 8), "simple packet/return mismatch");
     std::printf("%s: retval2, exact8-byte stores,120 untouched bytes: PASS\n", name);
 }
-int main()
+int main(int argc, char **argv)
 {
     try {
+        require(argc <= 2, "capture accepts one native entry symbol");
+        const char *symbol = argc == 2 ? argv[1] : "simple_xdp";
         for (const auto &item : {std::pair{"sysfs", "/sys"}, {"proc", "/proc"},
                 {"debugfs", "/sys/kernel/debug"}})
             require(!mount(item.first, item.second, item.first, 0, nullptr), "mount capture filesystems");
@@ -60,7 +62,7 @@ int main()
         options.expected_attach_type = bpf_program__expected_attach_type(program);
         options.prog_flags = bpf_program__flags(program);
         options.native_object_path = "/simple.o";
-        options.symbol_name = "simple_xdp";
+        options.symbol_name = symbol;
         options.native_link_path = "/native-link";
         require(!setenv("BPFREJIT_NATIVE_LOADER_TV_DIR", "/capture", 1), "enable per-program capture");
         auto loaded = native_loader::load_from_fd(options);
@@ -74,7 +76,7 @@ int main()
         require(head.version == 1 && head.prog_insns == options.proof_insns.size() + 1 &&
             head.regions == 1 && !head.map_refs && !head.helper_refs && head.actual_generation &&
             head.binding.proof_insns == options.proof_insns.size() && head.binding.abi_mask == 0 &&
-            head.binding.native_size == 84 && head.binding.expected_attach_type == options.expected_attach_type &&
+            head.binding.native_size && head.binding.expected_attach_type == options.expected_attach_type &&
             head.binding.source_prog_id == loaded.original_prog_id, "actual artifact identity/extent");
         auto saved = [&](const std::filesystem::path &path) {
             std::ifstream input(path, std::ios::binary);
@@ -100,7 +102,7 @@ int main()
         auto proof = saved(first / "proof-input.bin");
         require(proof.size() == options.proof_insns.size() * sizeof(bpf_insn) &&
             !std::memcmp(proof.data(), options.proof_insns.data(), proof.size()), "exact linked proof input");
-        require(saved(first / "native.bin").size() == 84 && saved(first / "native.relocs").empty(),
+        require(saved(first / "native.bin").size() == head.binding.native_size && saved(first / "native.relocs").empty(),
             "exact linked native extent");
         for (auto name : {"jit.bin", "stub.bin", "jit-addresses.bin", "jit-lengths.bin", "load.json"})
             require(!saved(first / name).empty(), "complete successful export");

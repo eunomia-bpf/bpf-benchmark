@@ -1,0 +1,333 @@
+completed per-program exports: 2; translation validation remains separate
+simple_packet actual ELF/capture identities: native=68 BPF=200 checked=208: PASS
+'KProgTV.PacketCompiled.checked_prefix' depends on axioms: [propext, Lean.ofReduceBool, Quot.sound]
+'KProgTV.PacketGuardCertificate.native_guard' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.PacketGuardCertificate.checked_guard' depends on axioms: [propext, Quot.sound]
+'KProgTV.PacketGuardCertificate.actual_guard_executions' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.PacketGuardCertificate.corresponding_successors' depends on axioms: [propext, Quot.sound]
+make module-check ARCH=arm64 KDIR=/workspaces/repository/kprog/tv/build-kernel-arm64
+make[1]: Entering directory '/workspaces/repository/kprog/tv'
+make -C /workspaces/repository/kprog/tv/build-kernel-arm64 M=/workspaces/repository/kprog/tv/build-arm64 ARCH=arm64 \
+	TV_ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules
+make[2]: Entering directory '/workspaces/repository/kprog/tv/build-kernel-arm64'
+make[3]: Entering directory '/workspaces/repository/kprog/tv/build-arm64'
+make[3]: Leaving directory '/workspaces/repository/kprog/tv/build-arm64'
+make[2]: Leaving directory '/workspaces/repository/kprog/tv/build-kernel-arm64'
+make[1]: Leaving directory '/workspaces/repository/kprog/tv'
+install -d build-arm64/simple-recheck/checked-initramfs/sys build-arm64/simple-recheck/checked-initramfs/proc build-arm64/simple-recheck/checked-initramfs/tmp build-arm64/simple-recheck/checked-initramfs/dev
+cp build-arm64/capture-checked build-arm64/simple-recheck/checked-initramfs/init
+cp build-arm64/bpf_arm64_native_lab.ko build-arm64/simple-recheck/checked-initramfs/module.ko
+cp build/simple-arm64/simple.bpf.o build-arm64/simple-recheck/checked-initramfs/simple.bpf.o
+cp build/simple-arm64/native-link/simple.proof.o build-arm64/simple-recheck/checked-initramfs/simple.o
+cp build/simple-arm64/native-link/simple.proof.o build-arm64/simple-recheck/checked-initramfs/simple.simple_xdp.proof.o
+cp -a ../arm64/build/app-coverage/exclusive-choice-bound-v1/root/bin ../arm64/build/app-coverage/exclusive-choice-bound-v1/root/lib ../arm64/build/app-coverage/exclusive-choice-bound-v1/root/native-link build-arm64/simple-recheck/checked-initramfs/
+cd build-arm64/simple-recheck/checked-initramfs && find . -print0 | cpio --null -o --format=newc > ../checked-initramfs.cpio
+28182 blocks
+timeout 180 taskset -c 8-11 qemu-system-aarch64 -M virt -cpu cortex-a72 \
+	-accel tcg,thread=multi -smp 2 -m 2048 -nographic -no-reboot \
+	-kernel build-kernel-arm64/arch/arm64/boot/Image \
+	-initrd build-arm64/simple-recheck/checked-initramfs.cpio -append 'console=ttyAMA0 rdinit=/init panic=1 -- simple_xdp' \
+	> build-arm64/simple-recheck/checked-kernel.log 2>&1
+cat build-arm64/simple-recheck/checked-kernel.log
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd083]
+[    0.000000] Linux version 7.0.0-rc2+ (root@coder-22123351-d4a5-40fc-bc3b-1b853af74a7e-c7ccfb766-mpvhz) (aarch64-linux-gnu-gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #25 SMP PREEMPT Fri Nov  6 18:58:28 UTC 2026
+[    0.000000] random: crng init done
+[    0.000000] Machine model: linux,dummy-virt
+[    0.000000] efi: UEFI not found.
+[    0.000000] OF: reserved mem: Reserved memory: No reserved-memory node in the DT
+[    0.000000] NUMA: Faking a node at [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000] NODE_DATA(0) allocated [mem 0xbfbfac80-0xbfbfdc7f]
+[    0.000000] cma: Reserved 64 MiB at 0x00000000bba00000
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: PSCIv1.1 detected in firmware.
+[    0.000000] psci: Using standard PSCI v0.2 function IDs
+[    0.000000] psci: Trusted OS migration not required
+[    0.000000] psci: SMC Calling Convention v1.0
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000]   DMA32    empty
+[    0.000000]   Normal   empty
+[    0.000000]   Device   empty
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x00000000bfffffff]
+[    0.000000] percpu: Embedded 34 pages/cpu s101400 r8192 d29672 u139264
+[    0.000000] Detected PIPT I-cache on CPU0
+[    0.000000] CPU features: detected: Spectre-v2
+[    0.000000] CPU features: detected: Spectre-v4
+[    0.000000] CPU features: detected: Spectre-BHB
+[    0.000000] CPU features: detected: ARM erratum 1742098
+[    0.000000] CPU features: detected: ARM errata 1165522, 1319367, or 1530923
+[    0.000000] alternatives: applying boot alternatives
+[    0.000000] Kernel command line: console=ttyAMA0 rdinit=/init panic=1 -- simple_xdp
+[    0.000000] printk: log buffer data + meta data: 2097152 + 7340032 = 9437184 bytes
+[    0.000000] Dentry cache hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 131072 (order: 8, 1048576 bytes, linear)
+[    0.000000] software IO TLB: SWIOTLB bounce buffer size adjusted to 2MB
+[    0.000000] software IO TLB: area num 2.
+[    0.000000] software IO TLB: mapped [mem 0x00000000b9600000-0x00000000b9800000] (2MB)
+[    0.000000] Fallback order for Node 0: 0 
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 524288
+[    0.000000] Policy zone: DMA
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
+[    0.000000] ftrace: allocating 49525 entries in 194 pages
+[    0.000000] ftrace: allocated 194 pages with 3 groups
+[    0.000000] rcu: Hierarchical RCU implementation.
+[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=4096 to nr_cpu_ids=2.
+[    0.000000] 	Trampoline variant of Tasks RCU enabled.
+[    0.000000] 	Rude variant of Tasks RCU enabled.
+[    0.000000] 	Tracing variant of Tasks RCU enabled.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 10 jiffies.
+[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=2
+[    0.000000] RCU Tasks: Setting shift to 1 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=2.
+[    0.000000] RCU Tasks Rude: Setting shift to 1 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=2.
+[    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+[    0.000000] Root IRQ handler: gic_handle_irq
+[    0.000000] GICv2m: range[mem 0x08020000-0x08020fff], SPI[80:143]
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] arch_timer: cp15 timer running at 62.50MHz (virt).
+[    0.000000] clocksource: arch_sys_counter: mask: 0x1ffffffffffffff max_cycles: 0x1cd42e208c, max_idle_ns: 881590405314 ns
+[    0.000073] sched_clock: 57 bits at 63MHz, resolution 16ns, wraps every 4398046511096ns
+[    0.005719] Console: colour dummy device 80x25
+[    0.008022] Calibrating delay loop (skipped), value calculated using timer frequency.. 125.00 BogoMIPS (lpj=625000)
+[    0.008193] pid_max: default: 32768 minimum: 301
+[    0.013952] landlock: Up and running.
+[    0.013988] Yama: becoming mindful.
+[    0.014168] SELinux:  Initializing.
+[    0.016876] LSM support for eBPF active
+[    0.018822] Mount-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    0.018871] Mountpoint-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+[    0.026351] VFS: Finished mounting rootfs on nullfs
+[    0.048212] cacheinfo: Unable to detect cache hierarchy for CPU 0
+[    0.062811] rcu: Hierarchical SRCU implementation.
+[    0.062879] rcu: 	Max phase no-delay instances is 1000.
+[    0.064271] Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[    0.068322] EFI services will not be available.
+[    0.069678] smp: Bringing up secondary CPUs ...
+[    0.073738] Detected PIPT I-cache on CPU1
+[    0.074844] CPU1: Booted secondary processor 0x0000000001 [0x410fd083]
+[    0.079031] smp: Brought up 1 node, 2 CPUs
+[    0.079070] SMP: Total of 2 processors activated.
+[    0.079105] CPU: All CPU(s) started at EL1
+[    0.079346] CPU features: detected: 32-bit EL0 Support
+[    0.079359] CPU features: detected: 32-bit EL1 Support
+[    0.079420] CPU features: detected: CRC32 instructions
+[    0.079614] CPU features: detected: PMUv3
+[    0.088547] alternatives: applying system-wide alternatives
+[    0.093998] CPU features: emulated: Privileged Access Never (PAN) using TTBR0_EL1 switching
+[    0.114073] Memory: 1915820K/2097152K available (15552K kernel code, 9226K rwdata, 10696K rodata, 5952K init, 11680K bss, 110940K reserved, 65536K cma-reserved)
+[    0.146447] devtmpfs: initialized
+[    0.173739] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.174339] posixtimers hash table entries: 1024 (order: 2, 16384 bytes, linear)
+[    0.174636] futex hash table entries: 512 (32768 bytes on 1 NUMA nodes, total 32 KiB, linear).
+[    0.177903] 19408 pages in range for non-PLT usage
+[    0.177966] 510928 pages in range for PLT usage
+[    0.183727] DMI not present or invalid.
+[    0.198258] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.209186] DMA: preallocated 256 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.209603] audit: initializing netlink subsys (disabled)
+[    0.214484] thermal_sys: Registered thermal governor 'fair_share'
+[    0.214525] thermal_sys: Registered thermal governor 'step_wise'
+[    0.214535] thermal_sys: Registered thermal governor 'user_space'
+[    0.215359] audit: type=2000 audit(0.200:1): state=initialized audit_enabled=0 res=1
+[    0.215553] cpuidle: using governor ladder
+[    0.215852] cpuidle: using governor menu
+[    0.217070] hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.
+[    0.217796] ASID allocator initialised with 65536 entries
+[    0.219176] Serial: AMBA PL011 UART driver
+[    0.251330] 9000000.pl011: ttyAMA0 at MMIO 0x9000000 (irq = 13, base_baud = 0) is a PL011 rev1
+[    0.255625] printk: console [ttyAMA0] enabled
+[    0.303389] HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.303731] HugeTLB: 0 KiB vmemmap can be freed for a 1.00 GiB page
+[    0.303782] HugeTLB: registered 32.0 MiB page size, pre-allocated 0 pages
+[    0.303796] HugeTLB: 0 KiB vmemmap can be freed for a 32.0 MiB page
+[    0.303810] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.303821] HugeTLB: 0 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.303833] HugeTLB: registered 64.0 KiB page size, pre-allocated 0 pages
+[    0.303844] HugeTLB: 0 KiB vmemmap can be freed for a 64.0 KiB page
+[    0.317582] ACPI: Interpreter disabled.
+[    0.318643] iommu: Default domain type: Translated
+[    0.318705] iommu: DMA domain TLB invalidation policy: lazy mode
+[    0.323650] pps_core: LinuxPPS API ver. 1 registered
+[    0.323722] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.323797] PTP clock support registered
+[    0.333518] EDAC MC: Ver: 3.0.0
+[    0.353651] NetLabel: Initializing
+[    0.353775] NetLabel:  domain hash size = 128
+[    0.353797] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.354663] NetLabel:  unlabeled traffic allowed by default
+[    0.356216] vgaarb: loaded
+[    0.359532] clocksource: Switched to clocksource arch_sys_counter
+[    0.362116] VFS: Disk quotas dquot_6.6.0
+[    0.362260] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.372738] netfs: FS-Cache loaded
+[    0.374241] pnp: PnP ACPI: disabled
+[    0.394016] NET: Registered PF_INET protocol family
+[    0.395925] IP idents hash table entries: 32768 (order: 6, 262144 bytes, linear)
+[    0.460180] tcp_listen_portaddr_hash hash table entries: 1024 (order: 2, 16384 bytes, linear)
+[    0.460405] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.460497] TCP established hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.460744] TCP bind hash table entries: 16384 (order: 7, 524288 bytes, linear)
+[    0.461006] TCP: Hash tables configured (established 16384 bind 16384)
+[    0.462669] MPTCP token hash table entries: 2048 (order: 4, 49152 bytes, linear)
+[    0.463063] UDP hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[    0.463337] UDP-Lite hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[    0.464886] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.465331] NET: Registered PF_XDP protocol family
+[    0.465519] PCI: CLS 0 bytes, default 64
+[    0.469601] kvm [1]: HYP mode not available
+[    0.473768] Trying to unpack rootfs image as initramfs...
+[    0.475789] Initialise system trusted keyrings
+[    0.476694] Key type blacklist registered
+[    0.501760] workingset: timestamp_bits=44 max_order=19 bucket_order=0
+[    0.530768] SGI XFS with ACLs, security attributes, quota, no debug enabled
+[    0.534279] 9p: Installing v9fs 9p2000 file system support
+[    0.538547] integrity: Platform Keyring initialized
+[    0.579902] Freeing initrd memory: 14088K
+[    0.599607] Key type asymmetric registered
+[    0.599825] Asymmetric key parser 'x509' registered
+[    0.600388] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 247)
+[    0.601537] io scheduler mq-deadline registered
+[    0.601662] io scheduler kyber registered
+[    0.601893] io scheduler bfq registered
+[    0.611686] pl061_gpio 9030000.pl061: PL061 GPIO chip registered
+[    0.618721] Serial: 8250/16550 driver, 4 ports, IRQ sharing disabled
+[    0.650237] loop: module loaded
+[    0.655367] hid: raw HID events driver (C) Jiri Kosina
+[    0.661305] hw perfevents: enabled with armv8_pmuv3 PMU driver, 7 (0,8000003f) counters available
+[    0.663830] NET: Registered PF_INET6 protocol family
+[    0.665540] watchdog: NMI not fully supported
+[    0.665596] watchdog: Hard watchdog permanently disabled
+[    0.672946] Segment Routing with IPv6
+[    0.673176] In-situ OAM (IOAM) with IPv6
+[    0.673733] NET: Registered PF_PACKET protocol family
+[    0.674627] 9pnet: Installing 9P2000 support
+[    0.696950] registered taskstats version 1
+[    0.708089] Loading compiled-in X.509 certificates
+[    0.726152] Loaded X.509 cert 'Build time autogenerated kernel key: 9f0cac519e1b43b7aed7b285e97f1d9691777458'
+[    0.751655] Demotion targets for Node 0: null
+[    0.752608] Key type .fscrypt registered
+[    0.752690] Key type fscrypt-provisioning registered
+[    0.754376] ima: No TPM chip found, activating TPM-bypass!
+[    0.754574] ima: Allocated hash algorithm: sha256
+[    0.756745] ima: No architecture policies found
+[    0.768196] clk: Disabling unused clocks
+[    0.768442] PM: genpd: Disabling unused power domains
+[    0.822276] Freeing unused kernel memory: 5952K
+[    0.823594] Run /init as init process
+[    0.877459] bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+[    0.877781] bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+TV_EXPORT 6-7/emitted.bin 0100000001000000060000000000000000000000040000005400000000000000b8d855830080ffff
+TV_EXPORT 6-7/checked.snapshot.bin 010000001d0000000100000000000000000000000400000002000000020000000000000001000000000000000000000000000000540000000100000054000000000000001c00000006000000250000000300000000000000000000000000000000000000000000000000000006000000010000000000000061120000000000007b2af8ff0000000061110400000000007b1af0ff00000000b70000000000000079a1f8ff0000000079a2f0ff000000002d21130000000000bf1300000000000007030000080000002d23100000000000bf1300000000000007030000480000002d230d0000000000bf120000000000000702000003000000b7030000000000006332000000000000bf1200000000000007020000070000007332000000000000b70200004e6100006b210000000000000701000002000000b7020000bc0000007321000000000000b70000000200000005000000000000009500000000000000000000001c0000000000400000000000
+TV_EXPORT 6-7/native.bin 082440a9ea0308aa5f0109ebc80000544b2100914a2101917f0109eb429149fa69000054e0031f2a0a000014c9298c52400080521f3100b81f1d0039090100798917805209090039020000141f2003d5e70300aa
+TV_EXPORT 6-7/native.relocs 
+TV_EXPORT 6-7/proof-input.bin 61120000000000007b2af8ff0000000061110400000000007b1af0ff00000000b70000000000000079a1f8ff0000000079a2f0ff000000002d21130000000000bf1300000000000007030000080000002d23100000000000bf1300000000000007030000480000002d230d0000000000bf120000000000000702000003000000b7030000000000006332000000000000bf1200000000000007020000070000007332000000000000b70200004e6100006b210000000000000701000002000000b7020000bc0000007321000000000000b7000000020000009500000000000000
+TV_EXPORT 6-7/jit.bin c90300911f2003d53f2303d5fd7bbfa9fd030091ff6bbfa9fa030091f97fbfa9f9030091ff0308d1082440a9ea0308aa5f0109ebc80000544b2100914a2101917f0109eb429149fa69000054e0031f2a0a000014c9298c52400080521f3100b81f1d0039090100798917805209090039020000141f2003d5e70300aaff030891f97fc1a8ff6bc1a8fd7bc1a8e0000091bf2303d5c0035fd64a00005840011fd6
+TV_EXPORT 6-7/stub.bin b73000000400000085400100aded01009500000000000000
+TV_EXPORT 6-7/jit-addresses.bin 90d855830080ffff
+TV_EXPORT 6-7/jit-lengths.bin a0000000
+TV_EXPORT 6-7/load.json 7b2276657273696f6e223a312c22736f757263655f70726f675f6964223a362c226e61746976655f70726f675f6964223a372c2270726f675f74797065223a362c2267656e65726174696f6e223a347d0a
+TV_EXPORT 6-8/emitted.bin 010000000100000006000000000000000000000008000000540000000000000078d955830080ffff
+TV_EXPORT 6-8/checked.snapshot.bin 010000001d0000000100000000000000000000000800000002000000020000000000000001000000000000000000000000000000540000000100000054000000000000001c00000006000000250000000700000000000000000000000000000000000000000000000000000006000000010000000000000061120000000000007b2af8ff0000000061110400000000007b1af0ff00000000b70000000000000079a1f8ff0000000079a2f0ff000000002d21130000000000bf1300000000000007030000080000002d23100000000000bf1300000000000007030000480000002d230d0000000000bf120000000000000702000003000000b7030000000000006332000000000000bf1200000000000007020000070000007332000000000000b70200004e6100006b210000000000000701000002000000b7020000bc0000007321000000000000b70000000200000005000000000000009500000000000000000000001c0000000000800000000000
+TV_EXPORT 6-8/native.bin 082440a9ea0308aa5f0109ebc80000544b2100914a2101917f0109eb429149fa69000054e0031f2a0a000014c9298c52400080521f3100b81f1d0039090100798917805209090039020000141f2003d5e70300aa
+TV_EXPORT 6-8/native.relocs 
+TV_EXPORT 6-8/proof-input.bin 61120000000000007b2af8ff0000000061110400000000007b1af0ff00000000b70000000000000079a1f8ff0000000079a2f0ff000000002d21130000000000bf1300000000000007030000080000002d23100000000000bf1300000000000007030000480000002d230d0000000000bf120000000000000702000003000000b7030000000000006332000000000000bf1200000000000007020000070000007332000000000000b70200004e6100006b210000000000000701000002000000b7020000bc0000007321000000000000b7000000020000009500000000000000
+TV_EXPORT 6-8/jit.bin c90300911f2003d53f2303d5fd7bbfa9fd030091ff6bbfa9fa030091f97fbfa9f9030091ff0308d1082440a9ea0308aa5f0109ebc80000544b2100914a2101917f0109eb429149fa69000054e0031f2a0a000014c9298c52400080521f3100b81f1d0039090100798917805209090039020000141f2003d5e70300aaff030891f97fc1a8ff6bc1a8fd7bc1a8e0000091bf2303d5c0035fd64a00005840011fd6
+TV_EXPORT 6-8/stub.bin b73000000800000085400100aded01009500000000000000
+TV_EXPORT 6-8/jit-addresses.bin 50d955830080ffff
+TV_EXPORT 6-8/jit-lengths.bin a0000000
+TV_EXPORT 6-8/load.json 7b2276657273696f6e223a312c22736f757263655f70726f675f6964223a362c226e61746976655f70726f675f6964223a382c2270726f675f74797065223a362c2267656e65726174696f6e223a387d0a
+second exported bound native: retval2, exact8-byte stores,120 untouched bytes: PASS
+per-program capture: exact bytes, distinct IDs/generations, stable history, IO failure: PASS
+TV_CHECKED 010000001d0000000100000000000000000000000400000002000000020000000000000001000000000000000000000000000000540000000100000054000000000000001c00000006000000250000000300000000000000000000000000000000000000000000000000000006000000010000000000000061120000000000007b2af8ff0000000061110400000000007b1af0ff00000000b70000000000000079a1f8ff0000000079a2f0ff000000002d21130000000000bf1300000000000007030000080000002d23100000000000bf1300000000000007030000480000002d230d0000000000bf120000000000000702000003000000b7030000000000006332000000000000bf1200000000000007020000070000007332000000000000b70200004e6100006b210000000000000701000002000000b7020000bc0000007321000000000000b70000000200000005000000000000009500000000000000000000001c0000000000400000000000
+original actual clang proof: retval2, exact8-byte stores,120 untouched bytes: PASS
+actual bound native: retval2, exact8-byte stores,120 untouched bytes: PASS
+actual bound expanded artifact capture: PASS
+[    1.560071] reboot: Power down
+grep -q '^actual bound expanded artifact capture: PASS' build-arm64/simple-recheck/checked-kernel.log
+6-7: actual callback RX entry 0xffff80008355d8c8, JIT offset 40, exact68B/GEN4: PASS
+6-7/truncated header: REJECTED
+6-7/truncated site: REJECTED
+6-7/extra site: REJECTED
+6-7/wrong version: REJECTED
+6-7/wrong site count: REJECTED
+6-7/wrong source ID: REJECTED
+6-7/nonzero reserved: REJECTED
+6-7/wrong blob ID: REJECTED
+6-7/stale generation: REJECTED
+6-7/wrong native extent: REJECTED
+6-7/wrong ABI: REJECTED
+6-7/absent RX entry: REJECTED
+6-7/RX outside function: REJECTED
+6-7/shifted RX entry: REJECTED
+6-7/changed emitted store: REJECTED
+6-7/changed entry with intact decoy: REJECTED
+6-7/truncated actual JIT layout: REJECTED
+6-7/wrong native program: REJECTED
+6-8: actual callback RX entry 0xffff80008355d980, JIT offset 40, exact68B/GEN8: PASS
+6-8/truncated header: REJECTED
+6-8/truncated site: REJECTED
+6-8/extra site: REJECTED
+6-8/wrong version: REJECTED
+6-8/wrong site count: REJECTED
+6-8/wrong source ID: REJECTED
+6-8/nonzero reserved: REJECTED
+6-8/wrong blob ID: REJECTED
+6-8/stale generation: REJECTED
+6-8/wrong native extent: REJECTED
+6-8/wrong ABI: REJECTED
+6-8/absent RX entry: REJECTED
+6-8/RX outside function: REJECTED
+6-8/shifted RX entry: REJECTED
+6-8/changed emitted store: REJECTED
+6-8/changed entry with intact decoy: REJECTED
+6-8/truncated actual JIT layout: REJECTED
+6-8/wrong native program: REJECTED
+actual entry binding: 2 captures PASS; 36 corruptions REJECTED
+6-7: actual callback RX entry 0xffff80008355d8b8, JIT offset 40, exact84B/GEN4: PASS
+6-7/truncated header: REJECTED
+6-7/truncated site: REJECTED
+6-7/extra site: REJECTED
+6-7/wrong version: REJECTED
+6-7/wrong site count: REJECTED
+6-7/wrong source ID: REJECTED
+6-7/nonzero reserved: REJECTED
+6-7/wrong blob ID: REJECTED
+6-7/stale generation: REJECTED
+6-7/wrong native extent: REJECTED
+6-7/wrong ABI: REJECTED
+6-7/absent RX entry: REJECTED
+6-7/RX outside function: REJECTED
+6-7/shifted RX entry: REJECTED
+6-7/changed emitted store: REJECTED
+6-7/changed entry with intact decoy: REJECTED
+6-7/truncated actual JIT layout: REJECTED
+6-7/wrong native program: REJECTED
+6-8: actual callback RX entry 0xffff80008355d970, JIT offset 40, exact84B/GEN8: PASS
+6-8/truncated header: REJECTED
+6-8/truncated site: REJECTED
+6-8/extra site: REJECTED
+6-8/wrong version: REJECTED
+6-8/wrong site count: REJECTED
+6-8/wrong source ID: REJECTED
+6-8/nonzero reserved: REJECTED
+6-8/wrong blob ID: REJECTED
+6-8/stale generation: REJECTED
+6-8/wrong native extent: REJECTED
+6-8/wrong ABI: REJECTED
+6-8/absent RX entry: REJECTED
+6-8/RX outside function: REJECTED
+6-8/shifted RX entry: REJECTED
+6-8/changed emitted store: REJECTED
+6-8/changed entry with intact decoy: REJECTED
+6-8/truncated actual JIT layout: REJECTED
+6-8/wrong native program: REJECTED
+actual entry binding: 2 captures PASS; 36 corruptions REJECTED

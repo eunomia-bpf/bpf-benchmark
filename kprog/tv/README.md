@@ -833,3 +833,39 @@ specializer do not supply the semantic correspondence as an assumption for
 this artifact. This result does not certify other micro/application artifacts,
 relocated native patches or the producer-independent loading boundary still
 being implemented.
+
+
+The next micro: actual `simple_packet` guard certificate
+------------------------------------------------------
+
+The same capture harness accepts an explicit native entry symbol and compares
+the bound native extent with the actual exported native bytes. Its packet/return
+checks remain specific to the simple family. The default `simple` fixture keeps
+its existing paths; another artifact uses separate capture directories:
+
+```
+make -C kprog/tv simple-checked-kernel-check-arm64 \
+  CAPTURE_ARM64_PROGRAM=simple_packet \
+  CAPTURE_ARM64_ARTIFACTS=build/simple-packet-arm64 \
+  CAPTURE_ARM64_OUTPUT=build-arm64/simple-packet
+make -C kprog/tv simple-packet-guard-check
+```
+
+`extract_simple_packet.py` reuses the ELF entry extractor and compares both
+actual loader captures with the exact native entry and clang proof input.
+It emits the full 68 native bytes, 200 clang BPF bytes and 208 checked BPF bytes;
+Lean checks the actual redirected exit and unchanged prefix. The old staged
+proof split native stores into byte writes. Recompilation with the current
+production header retains the actual 4/1/2/1-byte stores. No native instruction
+or runtime guard is changed by this capture work.
+
+`PacketGuardCertificate` proves full native and actual checked-B states for
+both guard outcomes, with no memory/helper effects, and proves corresponding
+native/BPF successors. It uses V's existing arithmetic/conditional semantics
+and the earlier proved comparison lemmas. The explicit sequence is the actual
+five native instructions after LDP and the one/four checked-B instructions
+after the real compiler spills; native flags and all untouched fields remain
+in the post-state. Entry/spill composition, all store faults, return, RX/ABI
+transport and the complete accepted invocation still need to be composed for
+this new program. Its successful runtime and guard proof alone do not certify
+the whole program.

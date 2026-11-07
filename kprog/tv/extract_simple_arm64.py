@@ -3,12 +3,6 @@ import argparse
 from pathlib import Path
 from elftools.elf.elffile import ELFFile
 
-parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument("--directory", type=Path, default=Path(__file__).resolve().parent / "build/simple-arm64")
-parser.add_argument("--native-blob", type=Path)
-args = parser.parse_args()
-root = args.directory
-
 
 def function_bytes(path, name, machine):
     with path.open("rb") as stream:
@@ -37,17 +31,29 @@ def function_bytes(path, name, machine):
         return data
 
 
-native = function_bytes(root / "native-link/simple.proof.o", "simple_xdp", "EM_AARCH64")
-proof = function_bytes(root / "simple.bpf.o", "simple_arm64_sim_xdp", "EM_BPF")
-if args.native_blob:
-    linked = args.native_blob.read_bytes()
-    if linked != native:
-        raise ValueError("actual emitted kernel native bytes differ from extracted native proof entry")
-    native = linked
-    print("actual complete kernel native blob equals the extracted native proof entry")
-lines = ["import ARM64Path", "import BPFPath", "namespace KProgTV.SimpleCompiled"]
-for name, data in [("native", native), ("proof", proof)]:
-    lines.append(f"def {name} : Array KProgTV.Byte := #[" + ",".join(hex(b) for b in data) + "]")
-lines += ["end KProgTV.SimpleCompiled", ""]
-(root / "SimpleCompiled.lean").write_text("\n".join(lines))
-print(f"exact ELF entry bytes: native={len(native)} BPF={len(proof)}")
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--directory", type=Path, default=Path(__file__).resolve().parent / "build/simple-arm64")
+    parser.add_argument("--native-blob", type=Path)
+    args = parser.parse_args()
+    root = args.directory
+
+    native = function_bytes(root / "native-link/simple.proof.o", "simple_xdp", "EM_AARCH64")
+    proof = function_bytes(root / "simple.bpf.o", "simple_arm64_sim_xdp", "EM_BPF")
+    if args.native_blob:
+        linked = args.native_blob.read_bytes()
+        if linked != native:
+            raise ValueError("actual emitted kernel native bytes differ from extracted native proof entry")
+        native = linked
+        print("actual complete kernel native blob equals the extracted native proof entry")
+    lines = ["import ARM64Path", "import BPFPath", "namespace KProgTV.SimpleCompiled"]
+    for name, data in [("native", native), ("proof", proof)]:
+        lines.append(f"def {name} : Array KProgTV.Byte := #[" + ",".join(hex(b) for b in data) + "]")
+    lines += ["end KProgTV.SimpleCompiled", ""]
+    (root / "SimpleCompiled.lean").write_text("\n".join(lines))
+    print(f"exact ELF entry bytes: native={len(native)} BPF={len(proof)}")
+
+
+if __name__ == "__main__":
+    main()

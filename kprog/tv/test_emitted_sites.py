@@ -7,7 +7,11 @@ from emitted_sites import validate_emitted
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('directory', type=Path)
+parser.add_argument('--native-bytes', type=int, default=84)
+parser.add_argument('--store-offset', type=int, default=52)
 args = parser.parse_args()
+if args.native_bytes <= 4 or args.native_bytes % 4 or not 0 <= args.store_offset < args.native_bytes:
+    raise ValueError('valid native extent/store fixture offset required')
 records = sorted(args.directory.glob('*/emitted.bin'))
 if len(records) != 2:
     raise ValueError('two actual ARM simple bound-load captures required')
@@ -19,11 +23,11 @@ for record in records:
     values = [(path/name).read_bytes() for name in
         ['native.bin', 'native.relocs', 'jit.bin', 'jit-addresses.bin', 'jit-lengths.bin']]
     result = validate_emitted(data, metadata, *values)
-    if len(result) != 1 or result[0]['native_size'] != 84:
+    if len(result) != 1 or result[0]['native_size'] != args.native_bytes:
         raise ValueError('actual complete simple entry required')
     observed.append(result[0])
     print(f'{path.name}: actual callback RX entry {result[0]["entry_address"]:#x}, '
-          f'JIT offset {result[0]["jit_offset"]}, exact84B/GEN{result[0]["generation"]}: PASS')
+          f'JIT offset {result[0]["jit_offset"]}, exact{args.native_bytes}B/GEN{result[0]["generation"]}: PASS')
 
     def changed(offset, fmt, value):
         copy = bytearray(data)
@@ -40,14 +44,14 @@ for record in records:
         'nonzero reserved': (changed(12, '<I', 1), values),
         'wrong blob ID': (changed(16, '<I', 1), values),
         'stale generation': (changed(20, '<I', result[0]['generation']+1), values),
-        'wrong native extent': (changed(24, '<I', 80), values),
+        'wrong native extent': (changed(24, '<I', args.native_bytes-4), values),
         'wrong ABI': (changed(28, '<I', 1), values),
         'absent RX entry': (changed(32, '<Q', 0), values),
         'RX outside function': (changed(32, '<Q', result[0]['entry_address']+len(values[2])), values),
         'shifted RX entry': (changed(32, '<Q', result[0]['entry_address']+4), values),
     }
     altered = list(values)
-    jit = bytearray(values[2]); jit[result[0]['jit_offset']+52] ^= 1
+    jit = bytearray(values[2]); jit[result[0]['jit_offset']+args.store_offset] ^= 1
     altered[2] = bytes(jit)
     cases['changed emitted store'] = (data, altered)
     # A byte search would find this correct decoy; the reported actual entry

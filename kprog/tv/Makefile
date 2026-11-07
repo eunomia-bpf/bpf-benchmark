@@ -528,24 +528,27 @@ build-arm64/capture-checked: capture_checked.cpp ../libnativeloader/build-tv-con
 		../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
 		-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -pthread -o $@
 
+CAPTURE_ARM64_PROGRAM ?= simple
+CAPTURE_ARM64_ARTIFACTS ?= build/simple-arm64
+CAPTURE_ARM64_OUTPUT ?= build-arm64
 .PHONY: simple-checked-kernel-check-arm64
 simple-checked-kernel-check-arm64: build-arm64/capture-checked
 	$(MAKE) module-check ARCH=arm64 KDIR=$(CURDIR)/build-kernel-arm64
-	install -d build-arm64/checked-initramfs/sys build-arm64/checked-initramfs/proc build-arm64/checked-initramfs/tmp build-arm64/checked-initramfs/dev
-	cp build-arm64/capture-checked build-arm64/checked-initramfs/init
-	cp build-arm64/bpf_arm64_native_lab.ko build-arm64/checked-initramfs/module.ko
-	cp build/simple-arm64/simple.bpf.o build-arm64/checked-initramfs/simple.bpf.o
-	cp build/simple-arm64/native-link/simple.proof.o build-arm64/checked-initramfs/simple.o
-	cp build/simple-arm64/native-link/simple.proof.o build-arm64/checked-initramfs/simple.simple_xdp.proof.o
-	cp -a ../arm64/build/app-coverage/exclusive-choice-bound-v1/root/bin ../arm64/build/app-coverage/exclusive-choice-bound-v1/root/lib ../arm64/build/app-coverage/exclusive-choice-bound-v1/root/native-link build-arm64/checked-initramfs/
-	cd build-arm64/checked-initramfs && find . -print0 | cpio --null -o --format=newc > ../checked-initramfs.cpio
+	install -d $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/sys $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/proc $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/tmp $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/dev
+	cp build-arm64/capture-checked $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/init
+	cp build-arm64/bpf_arm64_native_lab.ko $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/module.ko
+	cp $(CAPTURE_ARM64_ARTIFACTS)/$(CAPTURE_ARM64_PROGRAM).bpf.o $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/simple.bpf.o
+	cp $(CAPTURE_ARM64_ARTIFACTS)/native-link/$(CAPTURE_ARM64_PROGRAM).proof.o $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/simple.o
+	cp $(CAPTURE_ARM64_ARTIFACTS)/native-link/$(CAPTURE_ARM64_PROGRAM).proof.o $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/simple.$(CAPTURE_ARM64_PROGRAM)_xdp.proof.o
+	cp -a ../arm64/build/app-coverage/exclusive-choice-bound-v1/root/bin ../arm64/build/app-coverage/exclusive-choice-bound-v1/root/lib ../arm64/build/app-coverage/exclusive-choice-bound-v1/root/native-link $(CAPTURE_ARM64_OUTPUT)/checked-initramfs/
+	cd $(CAPTURE_ARM64_OUTPUT)/checked-initramfs && find . -print0 | cpio --null -o --format=newc > ../checked-initramfs.cpio
 	timeout 180 taskset -c 8-11 qemu-system-aarch64 -M virt -cpu cortex-a72 \
 		-accel tcg,thread=multi -smp 2 -m 2048 -nographic -no-reboot \
 		-kernel build-kernel-arm64/arch/arm64/boot/Image \
-		-initrd build-arm64/checked-initramfs.cpio -append 'console=ttyAMA0 rdinit=/init panic=1' \
-		> build-arm64/checked-kernel.log 2>&1
-	cat build-arm64/checked-kernel.log
-	grep -q '^actual bound expanded artifact capture: PASS' build-arm64/checked-kernel.log
+		-initrd $(CAPTURE_ARM64_OUTPUT)/checked-initramfs.cpio -append 'console=ttyAMA0 rdinit=/init panic=1 -- $(CAPTURE_ARM64_PROGRAM)_xdp' \
+		> $(CAPTURE_ARM64_OUTPUT)/checked-kernel.log 2>&1
+	cat $(CAPTURE_ARM64_OUTPUT)/checked-kernel.log
+	grep -q '^actual bound expanded artifact capture: PASS' $(CAPTURE_ARM64_OUTPUT)/checked-kernel.log
 
 .PHONY: checked-kernel-check-x86 guest-checked-kernel-check-x86
 checked-kernel-check-x86: build/test-binding-kernel build/test-loader
@@ -654,3 +657,10 @@ simple-execution-relocation-check: simple-pc-relocation-check
 .PHONY: simple-invocation-abi-check
 simple-invocation-abi-check: simple-execution-relocation-check
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv -o ../tv/build/SimpleInvocationABI.olean ../tv/SimpleInvocationABI.lean
+
+.PHONY: simple-packet-guard-check
+simple-packet-guard-check: simple-blocks-check
+	python3 extract_simple_packet.py build-arm64/simple-packet/checked-kernel.log build/simple-packet-arm64 build/capture-loader-arm64-simple-packet
+	python3 test_emitted_sites.py build/capture-loader-arm64-simple-packet --native-bytes 68 --store-offset 40
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv/build/simple-packet-arm64 -o ../tv/build/simple-packet-arm64/PacketCompiled.olean ../tv/build/simple-packet-arm64/PacketCompiled.lean
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-packet-arm64 lake env lean -R ../tv -o ../tv/build/PacketGuardCertificate.olean ../tv/PacketGuardCertificate.lean
