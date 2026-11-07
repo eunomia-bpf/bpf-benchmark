@@ -1,18 +1,17 @@
 {
-  "status": "kernel_transport_integration_in_progress",
+  "status": "kernel_transport_controls_passed",
   "vendor_commit": "9c50491de2a5f7c3067201b10a7182dbf172e541",
   "vendor_fork": "https://github.com/eunomia-bpf/linux/tree/kinsn-only",
   "completed": [
     "fixed native-only request/capability ioctl interface",
     "kernel immutable native capsule queue and program lifetime ownership source",
     "both module proof-writer/instantiate/JIT capsule checks source",
-    "x86 module compile exit0 before final submit-busy fastpath",
     "transport controls compile with -Werror",
-    "combined kernel patch idempotence/conflict/source identity tests pass with committed vendor HEAD"
+    "combined kernel patch idempotence/conflict/source identity tests pass with committed vendor HEAD",
+    "actual isolated x86 KVM transport/provenance controls EXIT0; no native code executed",
+    "final x86 kernel/module and -Werror transport binary built successfully"
   ],
-  "running": "isolated incremental x86 kernel build and real transport controls: lane T/trusted-kernel-v1.*",
   "remaining": [
-    "real transport result",
     "C shared service and x86 worker integration",
     "A worker integration",
     "application native-only submit routing",
@@ -29,5 +28,27 @@
     "kprog/tv/test_kernel_patch.py": "b7f91fedff5a22c6e1de95c099f6c5bcf07659329a879d26daf6d57c687b5b4d",
     "kprog/tv/test_trusted_transport.c": "a72c8efee8619823b3dc06f5eef46e32a88bf0975631b124bfe731e1ccbf1c3b",
     "kprog/tv/Makefile": "dab94f0e4da8cf18d38489eec3443e43814f635c3bae48c8af1d0e0ed1c1ccb8"
-  }
+  },
+  "controls": [
+    "application cannot obtain registered service authority: REJECTED (16)",
+    "application proof ELF refused: REJECTED (8)",
+    "unrecognized submission metadata refused: REJECTED (22)",
+    "application cannot complete proof request: REJECTED (1)",
+    "replace submitted native bytes refused: REJECTED (16)",
+    "application cannot read service requests: REJECTED (1)",
+    "capacity probe retains queued request: REJECTED (90)",
+    "immutable native ELF/entry/metadata survive producer mutation: PASS",
+    "wrong native request identity refused: REJECTED (116)",
+    "unrelated verified BPF program cannot authorize native request: REJECTED (18)",
+    "application proof upload refused with active trusted worker: REJECTED (1)",
+    "application cannot replace disconnected trusted registration: REJECTED (16)",
+    "registered trusted transport, immutable P, application proof refusal and fail-closed disconnect: PASS"
+  ],
+  "kernel_pair": {
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "32c132c4928e1035bd003dff644e7d9676441c578e9511335370c07d4e2c7652",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "ea5f57dd637c688968c0c05f3165a0b3296a46ff4dec3eda6a0ea92b9ab7f12c",
+    "kprog/tv/build-kernel-x86/.config": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864"
+  },
+  "raw_log_sha256": "622b18daa6abd8cec584f11733e6f8fe5e9a60cbb796532ca67cd3e885fc4596",
+  "raw_output": "summarized and removed per CLEANUP NOW; current incremental kernel/module retained for shared service integration"
 }
