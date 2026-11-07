@@ -967,3 +967,16 @@ checks, and has propext/Classical.choice/Lean.ofReduceBool/Quot.sound without
 sorryAx. The frozen program/snapshot inputs are unchanged from the preceding
 store archive; this commit retains the composing source and full check log.
 Other branches and the invocation/profile binding remain pending.
+
+Complete second-guard rejection path (2026-11-07)
+-------------------------------------------------
+
+`checked-reject-second-final.log` passes the second rejected path from original
+entry through both actual guard blocks and real returns. The first-to-second
+boundary equalities retain full native and BPF states instead of replacing
+registers/memory with independently chosen inputs. Complete final states,
+guest-memory agreement and projected ordered reads remain explicit; no runtime
+checks were added. Axioms remain propext/Classical.choice/Lean.ofReduceBool/
+Quot.sound without sorryAx. Frozen byte/snapshot inputs are unchanged.
+Both guard-rejected invocation paths now compose; the accepted store/fault
+paths and invocation/profile binding remain active.

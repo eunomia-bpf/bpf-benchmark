@@ -691,3 +691,12 @@ retained. The return value is zero and only proved-private spill effects are
 erased. Its hypotheses are the existing explicit mapped-context/frame entry
 relation and the real branch outcome, with no added executable test. This path
 certificate does not yet cover the second-guard rejection or store paths.
+
+`second_rejection` now covers the other complete rejected invocation path,
+starting at the original native/BPF entries, traversing the real first and
+second guards, then native rejection/trampoline and expanded JA/EXIT. The
+native/proof block-edge equalities preserve all fields; no new entry state is
+substituted at the second block. Complete final states, private-frame guest
+memory agreement and the exact ordered context reads are retained. Together
+with `first_rejection`, both guard-rejected paths are composed; store/fault and
+accepted-return paths still require the same whole-invocation relation.

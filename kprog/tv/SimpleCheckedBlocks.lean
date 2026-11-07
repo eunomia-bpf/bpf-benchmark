@@ -304,6 +304,82 @@ theorem first_rejection (n : AArch64.State) (p : BPF.State)
   · simpa only [nativeReturnFinal, nativeReturnBefore, rejectFinal, rejectBefore,
       AArch64.writeReg, proofReturnFinal, proofReturnBefore] using firstRun.2.2.1
 
+theorem first_to_second_native (n : AArch64.State) (context pointer limit : Word)
+    (pass : ¬ pointer > limit) :
+    SimpleGuardCertificate.secondBefore (SimpleBlocks.firstNativeFinal n context pointer limit) pointer limit =
+      SimpleBlocks.firstNativeFinal n context pointer limit := by
+  simp +decide [SimpleGuardCertificate.secondBefore, SimpleBlocks.firstNativeFinal,
+    SimpleGuardCertificate.final, SimpleGuardCertificate.before, SimpleEntryCertificate.loaded,
+    SimpleEntryCertificate.before, AArch64.writeReg, pass, Fin.ofNat', Fin.instOfNat]
+  all_goals
+    funext r
+    have reg8 : (8 : AArch64.Register).val = 8 := rfl
+    have reg9 : (9 : AArch64.Register).val = 9 := rfl
+    have reg10 : (10 : AArch64.Register).val = 10 := rfl
+    by_cases h9 : r.val = 9 <;> by_cases h10 : r.val = 10 <;> simp_all [reg8, reg9, reg10]
+
+theorem first_to_second_proof (p : BPF.State) (pointer limit : Word)
+    (pass : ¬ pointer > limit) :
+    SimpleGuardCertificate.proofSecondBefore (SimpleBlocks.firstProofFinal p pointer limit) pointer limit =
+      SimpleBlocks.firstProofFinal p pointer limit := by
+  simp +decide [SimpleGuardCertificate.proofSecondBefore, SimpleGuardCertificate.proofBefore,
+    SimpleBlocks.firstProofFinal, SimpleEntryCertificate.prefixFinal, pass,
+    Fin.ofNat', Fin.instOfNat, Fin.ext_iff]
+  all_goals
+    funext r
+    by_cases h0 : r.val = 0 <;> by_cases h1 : r.val = 1 <;>
+      by_cases h2 : r.val = 2 <;> simp_all [Fin.ext_iff, Fin.ofNat', Fin.instOfNat]
+
+/-- Complete second-guard rejection from the original entry, through native
+rejection/trampoline and the actual expanded proof's redirected exit. -/
+theorem second_rejection (n : AArch64.State) (p : BPF.State)
+    (context pointer limit : Word) (first second : Event)
+    (entry : SimpleBlocks.EntryConditions n p context pointer limit first second)
+    (pass : ¬ pointer > limit)
+    (reject : ¬ (pointer + (8#64) ≤ limit ∧ pointer + (72#64) ≤ limit)) :
+    Execution (ARM64Path.instructionStep 0 native) (SimpleEntryCertificate.before n context)
+      [first, second]
+      (nativeReturnFinal (rejectFinal (SimpleGuardCertificate.secondFinal
+        (SimpleBlocks.firstNativeFinal n context pointer limit) pointer limit)) 0) ∧
+    Execution SimpleCheckedPlatform.instructionStep (SimpleEntryCertificate.proofBefore p context 0)
+      (SimpleEntryCertificate.prefixEvents (p.regs 10) pointer limit first second)
+      (proofReturnFinal (SimpleGuardCertificate.proofSecondFinal
+        (SimpleBlocks.firstProofFinal p pointer limit) pointer limit) 0) ∧
+    PrivateSpills.AgreesOutside (p.regs 10)
+      (nativeReturnFinal (rejectFinal (SimpleGuardCertificate.secondFinal
+        (SimpleBlocks.firstNativeFinal n context pointer limit) pointer limit)) 0).memory
+      (proofReturnFinal (SimpleGuardCertificate.proofSecondFinal
+        (SimpleBlocks.firstProofFinal p pointer limit) pointer limit) 0).memory ∧
+    (SimpleEntryCertificate.prefixEvents (p.regs 10) pointer limit first second).filterMap
+      (PrivateSpills.projectEvent (p.regs 10)) = [first, second] := by
+  let n1 := SimpleBlocks.firstNativeFinal n context pointer limit
+  let p1 := SimpleBlocks.firstProofFinal p pointer limit
+  have firstRun := first_block n p context pointer limit first second entry
+  have nextRun := second_block n1 p1 pointer limit
+  rw [first_to_second_native n context pointer limit pass,
+    first_to_second_proof p pointer limit pass] at nextRun
+  have nativePC : (SimpleGuardCertificate.secondFinal n1 pointer limit).pc = 36 := by
+    simp [SimpleGuardCertificate.secondFinal, reject]
+  have proofPC : (SimpleGuardCertificate.proofSecondFinal p1 pointer limit).pc = 27 := by
+    simp [SimpleGuardCertificate.proofSecondFinal, reject]
+  have zero : (SimpleGuardCertificate.proofSecondFinal p1 pointer limit).regs 0 = 0 := by
+    simp +decide [p1, SimpleGuardCertificate.proofSecondFinal, SimpleGuardCertificate.proofSecondBefore,
+      SimpleGuardCertificate.proofBefore, SimpleBlocks.firstProofFinal, SimpleEntryCertificate.prefixFinal,
+      BPF.setReg, Fin.ofNat', Fin.instOfNat]
+  have memory : PrivateSpills.AgreesOutside (p.regs 10)
+      (SimpleGuardCertificate.secondFinal n1 pointer limit).memory
+      (SimpleGuardCertificate.proofSecondFinal p1 pointer limit).memory := by
+    simpa only [SimpleGuardCertificate.secondFinal, SimpleGuardCertificate.secondBefore,
+      AArch64.writeReg, SimpleGuardCertificate.proofSecondFinal, BPF.setReg,
+      SimpleGuardCertificate.proofSecondBefore, SimpleGuardCertificate.proofBefore] using firstRun.2.2.1
+  refine ⟨?_, ?_, ?_, firstRun.2.2.2.1⟩
+  · simpa only [List.append_nil] using (firstRun.1.append nextRun.1).append
+      (reject_execution (SimpleGuardCertificate.secondFinal n1 pointer limit) nativePC)
+  · simpa only [List.append_nil] using (firstRun.2.1.append nextRun.2.1).append
+      (proof_exit_execution (SimpleGuardCertificate.proofSecondFinal p1 pointer limit) 0 proofPC zero rfl)
+  · simpa only [nativeReturnFinal, nativeReturnBefore, rejectFinal, rejectBefore,
+      AArch64.writeReg, proofReturnFinal, proofReturnBefore] using memory
+
 end KProgTV.SimpleCheckedBlocks
 #print axioms KProgTV.SimpleCheckedBlocks.first_block
 
@@ -313,3 +389,5 @@ end KProgTV.SimpleCheckedBlocks
 #print axioms KProgTV.SimpleCheckedBlocks.store_including_faults
 
 #print axioms KProgTV.SimpleCheckedBlocks.first_rejection
+
+#print axioms KProgTV.SimpleCheckedBlocks.second_rejection
