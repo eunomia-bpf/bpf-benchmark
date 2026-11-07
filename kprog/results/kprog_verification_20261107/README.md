@@ -1055,3 +1055,28 @@ declaration is byte-identical except the shared Select import. No placeholders,
 new tests, input filtering, runtime/generator/oracle/ISA or paper changes.
 Original C warnings remain visible. An immutable combined full check follows
 publication; the already archived exact95 pass predates these extensions.
+
+## Uniform byte BITFIELD composed after EXTR
+
+`Arm64Dispatcher.dispatchThroughBitfield` adds the next production BITFIELD
+gate with five kinds UBFX/SBFX/UBFIZ/BFXIL/BFI. The actual byte body reads
+both incoming SRC and DST, extracts AUX byte1 LSB and byte2 count, applies
+the generated primitive and performs the width write with one PC advance.
+AUX byte0 independently selects the kind. Native typed bounds and kind
+identity are retained; no runtime bounds guard is invented. Destination/source
+aliases, ZR/discarded destinations and all other state components follow the
+existing complete canonical bitfield step. SRC2/SRC3/IMM/AUX3 remain arbitrary.
+
+Numeric disjointness derives reachability after every preceding gate, and
+all earlier results transport unchanged. The single step_through_bitfield_refines
+covers the field/kind/bounds-only binding without a component semantic premise.
+The remaining ISA families, raw native decoding/width and O2/O4 transport
+still require completion; this is not the full77/72 theorem.
+
+Validation: focused77-job dispatcher/reference build, eight existing contract
+freshness checks, direct-dispatch/model checks and10 existing semantic/route
+hosts passed 40080 cases,2072 cases,136 cases,126246 cases,512 cases,6913 cases,257 cases,6401 cases,586829 cases,1115374 cases. Exact proof SHA256
+`2171ceb79b9321305e570fea54e9e4ee2b9c80ea009665a29b42a92d3ca514ce` remained unchanged during validation. Every prior
+declaration is byte-identical except the shared Bitfield import. No placeholders,
+new tests, filtering, ISA/runtime/generator/oracle/paper changes. Original C
+warnings remain visible. The active exact261 full check predates this extension.

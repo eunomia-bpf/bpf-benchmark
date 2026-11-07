@@ -2,6 +2,7 @@ import KProgFormal.Refinement.Arm64Move
 import KProgFormal.Refinement.Arm64Arithmetic
 import KProgFormal.Refinement.Arm64Mul
 import KProgFormal.Refinement.Arm64Select
+import KProgFormal.Refinement.Arm64Bitfield
 import KProgFormal.Refinement.Arm64Movk
 import KProgFormal.Refinement.Arm64Branch
 import KProgFormal.Generated.GeneratedArm64Adrp
@@ -990,5 +991,81 @@ theorem step_through_extrev_refines (code : Nat) (aux : BitVec 32) (width : Widt
   | extract => apply extract_refines
   | reverse => apply reverse_refines
   | extend => apply extend_refines
+
+
+/-- BITFIELD reads the incoming destination as well as its source. Actual
+AUX0/1/2 choose kind/LSB/count; there is no additional runtime bounds guard. -/
+def bitfieldBody (kind : GeneratedArm64BitfieldDecode.Bitfield) (aux : BitVec 32) (width : Width)
+    (dst src : Byte) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let value := GeneratedArm64Bitfield.value kind (Arm64Move.Fields.read s src) (Arm64Move.Fields.read s dst)
+    ((GeneratedArm64Aux.b1 aux).setWidth 8) ((GeneratedArm64Aux.b2 aux).setWidth 8)
+  ⟨{ Arm64Move.Fields.write s dst value width with pc := s.pc + 4 }, [], none⟩
+
+theorem bitfield_body_typed (kind : GeneratedArm64BitfieldDecode.Bitfield) (aux : BitVec 32) (width : Width)
+    (dst src : Register) (s : Reference.AArch64.State) :
+    bitfieldBody kind aux width (Arm64Register.registerCode dst) (Arm64Register.registerCode src) s =
+      Arm64Bitfield.rawStep kind width dst src aux s := by
+  simp only [bitfieldBody, Arm64Bitfield.rawStep, Arm64Move.Fields.register_read, Arm64Move.Fields.register_write]
+
+def dispatchThroughBitfield (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughExtrev code aux width dst src src2 src3 value sourceScalar sourceStack s with
+  | some result => some result
+  | none => if code = GeneratedArm64DispatchSingleton.code .bitfield then
+      (Arm64Bitfield.decodeKind (GeneratedArm64Aux.b0 aux).toNat).map
+        (fun kind => bitfieldBody kind aux width dst src s)
+    else none
+
+theorem bitfield_reached (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughBitfield (GeneratedArm64DispatchSingleton.code .bitfield) aux width dst src src2 src3
+      value sourceScalar sourceStack s = (Arm64Bitfield.decodeKind (GeneratedArm64Aux.b0 aux).toNat).map
+        (fun kind => bitfieldBody kind aux width dst src s) := by
+  have before : dispatchThroughExtrev (GeneratedArm64DispatchSingleton.code .bitfield) aux width dst src src2 src3
+      value sourceScalar sourceStack s = none := rfl
+  unfold dispatchThroughBitfield
+  rw [before]
+  rfl
+
+theorem bitfield_refines (kind : GeneratedArm64BitfieldDecode.Bitfield) (i : Reference.AArch64.BitfieldInstruction)
+    (high src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State)
+    (matching : Arm64Bitfield.canonicalKind kind = i.kind) :
+    dispatchThroughBitfield (GeneratedArm64DispatchSingleton.code .bitfield)
+      (Arm64Bitfield.packedAux kind i.lsbByte i.countByte high) i.width
+      (Arm64Register.registerCode i.dst) (Arm64Register.registerCode i.src) src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.bitfield i) s) := by
+  rw [bitfield_reached, (Arm64Bitfield.packed_fields kind i.lsbByte i.countByte high).1]
+  change some (bitfieldBody kind (Arm64Bitfield.packedAux kind i.lsbByte i.countByte high) i.width
+    (Arm64Register.registerCode i.dst) (Arm64Register.registerCode i.src) s) = _
+  rw [bitfield_body_typed, Arm64Bitfield.raw_step_eq, Arm64Bitfield.step_refines kind i s matching]
+
+theorem bitfield_earlier_preserved (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : ExtrevBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughBitfield code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  simp only [dispatchThroughBitfield,
+    step_through_extrev_refines code aux width dst src src2 src3 value sourceScalar sourceStack native s binding]
+
+inductive BitfieldBinding (pc : Word) : Nat → BitVec 32 → Width → Byte → Byte → Byte → Byte → Word →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte) (value : Word)
+      (native : Reference.AArch64.Instruction) (binding : ExtrevBinding pc code aux width dst src src2 src3 value native) :
+      BitfieldBinding pc code aux width dst src src2 src3 value native
+  | bitfield (kind : GeneratedArm64BitfieldDecode.Bitfield) (i : Reference.AArch64.BitfieldInstruction)
+      (high src2 src3 : Byte) (value : Word) (matching : Arm64Bitfield.canonicalKind kind = i.kind) :
+      BitfieldBinding pc (GeneratedArm64DispatchSingleton.code .bitfield)
+        (Arm64Bitfield.packedAux kind i.lsbByte i.countByte high) i.width
+        (Arm64Register.registerCode i.dst) (Arm64Register.registerCode i.src) src2 src3 value (.bitfield i)
+
+theorem step_through_bitfield_refines (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : BitfieldBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughBitfield code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier _ _ _ _ _ _ _ _ _ earlier => exact bitfield_earlier_preserved _ _ _ _ _ _ _ _ _ _ _ s earlier
+  | bitfield => apply bitfield_refines; assumption
 
 end KProgFormal.Refinement.Arm64Dispatcher
