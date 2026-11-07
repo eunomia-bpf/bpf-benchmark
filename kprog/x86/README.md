@@ -380,3 +380,10 @@ retaining the external-pointer case and opaque-byte taint. The shared checker
 covers defined copies, opaque copies and variable-index unresolved origins.
 The helper-stack-affine result records the generic analysis observations;
 whole-application replay supplies the ensuing runtime coverage.
+
+
+The linked readonly reader obtains .native_link_rodata directly from the binary
+ELF section and extracts STT_OBJECT extents from its symbol table. Exact section
+bytes and distinct symbol identities retain their native layout. The generic
+frontend result records88 data fixtures and the production adoption hash;
+application batches capture the reader source at service startup.

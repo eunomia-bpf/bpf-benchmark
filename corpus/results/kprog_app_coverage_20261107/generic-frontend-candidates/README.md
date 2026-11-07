@@ -36,3 +36,12 @@ raw.tar.gz retains both source versions, exact candidate patches, data fixture
 objects, generic harnesses, commands and terminal outputs. observations.json
 records the counts, source identities and archive SHA. The common source paths
 retain their published production bytes at collection.
+
+
+The binary ELF readonly reader is now the production x86 reader. Its complete
+source SHA equals the candidate in the preserved88-fixture matrix and raw
+archive. Section bytes and STT_OBJECT records provide the data and extents;
+existing bounds errors remain explicit. The narrow-stack body candidate stays
+private, with its whole-OTel outcome preserved separately. New whole Tetragon
+and helper-preserving Tracee application batches capture this reader and the
+affine stack-origin analysis at their actual start.

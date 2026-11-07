@@ -1599,5 +1599,13 @@
   "runtime_queue": {
     "module_apps": 3653317,
     "whole_otel_candidate": 3653318
+  },
+  "readonly_adoption": {
+    "time": "2026-11-07T20:46:37.280657+00:00",
+    "source_sha256": "55d189a2bd1ac19f298cd811e90218e8528cc760f67b39bfbfd0a5e0cead631b",
+    "data_cases": 88,
+    "differences": 0,
+    "bounds_rejection": true,
+    "source": "kprog/x86/micro-prog/generate_micro_sim_proofs.py"
   }
 }
