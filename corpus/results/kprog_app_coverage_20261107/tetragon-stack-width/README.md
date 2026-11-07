@@ -1,0 +1,7 @@
+# Tetragon native-width stack replay
+
+The whole Tetragon native-only kernel capsule/service freshly generates and compiles5requests;4pass the verifier and bind. The private common native-width modeled stack read mechanism and comparison operand identity retain the actual native bytes and complete source manifest. All5terminal kernel-native hashes reconcile; source drift count0.
+
+execve_send reaches the actual8193-jump verifier sequence limit,165129processed instructions,1803states and4maximum states per instruction. The preceding CMP/resource epoch reached189726processed instructions and1926states. Both complete epochs retain their exact sources and native inputs; this replay records the continued control-flow frontier after the common representation extension.
+
+Command: make -f C/operand-width-replay/tetragon__observer/Makefile corpus STATE=C/operand-width-replay/tetragon__observer CPUS=20-23 VM_CPUS=8 VM_MEM=12G APPS=tetragon/observer SAMPLES=1 WORKLOAD_DURATION=2, after the captured image build. C denotes /workspaces/.agent-state/kprog-lanes/C. coverage.json retains launch/native/source identities and baseline work; launch.tar.gz retains executed private inputs; service.tar.gz retains every terminal request and the full verifier exploration trace; result.tar.gz retains app/shim/program/work artifacts; driver.log.gz retains the complete guest output. Complete application startup and matching-work timing continue through this recorded frontier.

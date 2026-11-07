@@ -114,7 +114,7 @@ measurement continue from the reported failure classes.
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [Earlier functional batch153239](native-only-runtime/standard-bcc-8g.json) |
 | OTel | 13 resident | 3 | 3 | 2 | 0 | 1: verifier exploration limit | [233455 batch](otel-cmp-identity/README.md) |
 | Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: BPF stack offset -536 | [232956 batch](cilium-helper-scoped/README.md) |
-| Tetragon | 311 startup attempts; 287 resident | 4 | 4 | 3 | 0 | 1: 8193-jump complexity | [225009 batch](tetragon-cmp-resources/README.md) |
+| Tetragon | 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [234541 batch](tetragon-stack-width/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [213447 bound batch](katran-tagged-storage/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: readonly index range | [231936 batch](tracee-resource-scoped/README.md) |
 
@@ -259,3 +259,6 @@ The [Cilium helper/scoped-resource batch232956](cilium-helper-scoped/README.md) 
 
 
 The [OTel CMP-operand identity batch233455](otel-cmp-identity/README.md) freshly binds read_task_struct and perf_unwind_stop, closing the perf-event size-range frontier. Its next perf_unwind_native request reaches1000001processed verifier instructions and64823total states. Generic native-width stack reads and common narrow-value identity continue with the captured native/application/workload inputs.
+
+
+The [Tetragon native-width stack batch234541](tetragon-stack-width/README.md) freshly generates/compiles5requests and binds4. execve_send reaches8193-jump sequence depth after165129processed instructions/1803states. Both the preceding byte-assembly and current native-width epochs retain their complete control-flow traces and source identities; the next generic representation repair follows that actual limit.
