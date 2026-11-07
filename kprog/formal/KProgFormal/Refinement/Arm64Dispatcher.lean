@@ -1,6 +1,7 @@
 import KProgFormal.Refinement.Arm64Move
 import KProgFormal.Refinement.Arm64Arithmetic
 import KProgFormal.Refinement.Arm64Mul
+import KProgFormal.Refinement.Arm64Select
 import KProgFormal.Refinement.Arm64Movk
 import KProgFormal.Refinement.Arm64Branch
 import KProgFormal.Generated.GeneratedArm64Adrp
@@ -827,5 +828,167 @@ theorem step_through_unary_refines (code : Nat) (aux : BitVec 32) (width : Width
   | invert => apply unary_invert_refines
   | negate => apply unary_negate_refines
   | unmodified => apply unary_unmodified_refines
+
+
+/-- CNEG consumes the whole AUX condition. Its scalar generated value and
+actual byte read/write preserve all other architectural components. -/
+def conditionalNegateBody (predicate : Arm64Cond) (width : Width) (dst src : Byte)
+    (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let value := GeneratedArm64Cneg.value .cneg
+    (generatedArm64Cond (Arm64Condition.flags s.flags) predicate)
+    (Arm64Move.Fields.read s src) (Arm64Register.handlerWidth width)
+  ⟨{ Arm64Move.Fields.write s dst value width with pc := s.pc + 4 }, [], none⟩
+
+theorem conditional_negate_body_typed (predicate : Arm64Cond) (width : Width) (dst src : Register)
+    (s : Reference.AArch64.State) :
+    conditionalNegateBody predicate width (Arm64Register.registerCode dst) (Arm64Register.registerCode src) s =
+      Arm64Select.negateStep width dst src predicate s := by
+  simp only [conditionalNegateBody, Arm64Select.negateStep,
+    Arm64Move.Fields.register_read, Arm64Move.Fields.register_write]
+
+/-- EXTR alone narrows the two input words before the generated value. The
+other five rows retain full input reads and ignore SRC2 and IMM. -/
+def extrevBody (op : GeneratedArm64Extrev.Extrev) (width : Width) (dst src src2 : Byte) (value : Word)
+    (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let inputWidth := if GeneratedArm64Extrev.code op = GeneratedArm64Extrev.code .extr
+    then Arm64Register.handlerWidth width else .w64
+  let lhs := GeneratedArm64Width.narrow (Arm64Move.Fields.read s src) inputWidth
+  let rhs := GeneratedArm64Width.narrow (Arm64Move.Fields.read s src2) inputWidth
+  let result := GeneratedArm64Extrev.value op lhs rhs value (Arm64Register.handlerWidth width)
+  ⟨{ Arm64Move.Fields.write s dst result width with pc := s.pc + 4 }, [], none⟩
+
+theorem extrev_body_typed (op : GeneratedArm64Extrev.Extrev) (width : Width) (dst src src2 : Register)
+    (value : Word) (s : Reference.AArch64.State) :
+    extrevBody op width (Arm64Register.registerCode dst) (Arm64Register.registerCode src)
+      (Arm64Register.registerCode src2) value s = Arm64Extrev.rawStep op width dst src src2 value s := by
+  simp only [extrevBody, Arm64Extrev.rawStep, Arm64Move.Fields.register_read, Arm64Move.Fields.register_write]
+
+theorem extrev_unused_fields (op : GeneratedArm64Extrev.Extrev) (width : Width) (dst src src2 other : Byte)
+    (value otherValue : Word) (s : Reference.AArch64.State) (unused : op ≠ .extr) :
+    extrevBody op width dst src src2 value s = extrevBody op width dst src other otherValue s := by
+  cases op with
+  | extr => exact False.elim (unused rfl)
+  | rev => rfl
+  | rev16 => rfl
+  | sxth => rfl
+  | sxtw => rfl
+  | sxtb => rfl
+
+/-- The next two production gates in order. CNEG's entire AUX is decoded;
+packed AUX fields do not replace that condition. EXTR/REV/SXT use IMM only
+where their actual generated primitive consumes it. -/
+def dispatchThroughExtrev (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughUnary code aux width dst src src2 src3 value sourceScalar sourceStack s with
+  | some result => some result
+  | none => if code = GeneratedArm64Cneg.code .cneg then
+      (Arm64Condition.decode aux.toNat).map (fun predicate => conditionalNegateBody predicate width dst src s)
+    else (Arm64Extrev.decodeOpcode code).map (fun op => extrevBody op width dst src src2 value s)
+
+theorem before_conditional_negate (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughUnary (GeneratedArm64Cneg.code .cneg) aux width dst src src2 src3 value sourceScalar sourceStack s = none := rfl
+
+theorem conditional_negate_reached (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughExtrev (GeneratedArm64Cneg.code .cneg) aux width dst src src2 src3 value sourceScalar sourceStack s =
+      (Arm64Condition.decode aux.toNat).map (fun predicate => conditionalNegateBody predicate width dst src s) := by
+  unfold dispatchThroughExtrev
+  rw [before_conditional_negate]
+  rfl
+
+theorem conditional_negate_refines (predicate : Arm64Cond) (width : Width) (dst src : Register)
+    (src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State)
+    (valid : predicate ≠ .al) :
+    dispatchThroughExtrev (GeneratedArm64Cneg.code .cneg) (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.select width .negate dst src src
+        (Arm64Condition.nativeCode (Arm64Select.inverse predicate))) s) := by
+  have condition : Arm64Condition.decode (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)).toNat =
+      some predicate := by cases predicate <;> rfl
+  rw [conditional_negate_reached, condition]
+  change some (conditionalNegateBody predicate width (Arm64Register.registerCode dst) (Arm64Register.registerCode src) s) = _
+  rw [conditional_negate_body_typed, Arm64Select.negate_step_refines width dst src predicate s valid]
+
+theorem extrev_reached (op : GeneratedArm64Extrev.Extrev) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughExtrev (GeneratedArm64Extrev.code op) aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (extrevBody op width dst src src2 value s) := by
+  have before : dispatchThroughUnary (GeneratedArm64Extrev.code op) aux width dst src src2 src3 value sourceScalar sourceStack s = none := by
+    cases op <;> rfl
+  have separate : GeneratedArm64Extrev.code op ≠ GeneratedArm64Cneg.code .cneg := by cases op <;> decide
+  unfold dispatchThroughExtrev
+  rw [before, if_neg separate, Arm64Extrev.decode_code]
+  rfl
+
+theorem extract_refines (width : Width) (amount : Fin width.bits) (dst src src2 : Register)
+    (aux : BitVec 32) (src3 : Byte) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughExtrev (GeneratedArm64Extrev.code .extr) aux width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (Arm64Register.registerCode src2) src3 (BitVec.ofNat 64 amount.val)
+      sourceScalar sourceStack s = some (Reference.AArch64.step (.extrev (.extract width amount dst src src2)) s) := by
+  rw [extrev_reached, extrev_body_typed, Arm64Extrev.raw_extract_refines]
+
+theorem reverse_refines (width : Width) (halfwords : Bool) (dst src : Register) (aux : BitVec 32)
+    (src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughExtrev (GeneratedArm64Extrev.code (if halfwords then .rev16 else .rev)) aux width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.extrev (.reverse width halfwords dst src)) s) := by
+  rw [extrev_reached, extrev_unused_fields _ width _ _ src2 (Arm64Register.registerCode 31) value value s
+      (by cases halfwords <;> decide), extrev_body_typed, Arm64Extrev.raw_reverse_refines]
+
+theorem extend_refines (width : Width) (source : Reference.AArch64.ExtendBits) (dst src : Register)
+    (aux : BitVec 32) (src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughExtrev (GeneratedArm64Extrev.code (Arm64Extrev.extendOpcode source)) aux width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.extrev (.extend width source dst src)) s) := by
+  rw [extrev_reached, extrev_unused_fields _ width _ _ src2 (Arm64Register.registerCode 31) value value s
+      (by cases source <;> decide), extrev_body_typed, Arm64Extrev.raw_extend_refines]
+
+theorem extrev_earlier_preserved (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : UnaryBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughExtrev code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  simp only [dispatchThroughExtrev,
+    step_through_unary_refines code aux width dst src src2 src3 value sourceScalar sourceStack native s binding]
+
+inductive ExtrevBinding (pc : Word) : Nat → BitVec 32 → Width → Byte → Byte → Byte → Byte → Word →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte) (value : Word)
+      (native : Reference.AArch64.Instruction) (binding : UnaryBinding pc code aux width dst src src2 src3 value native) :
+      ExtrevBinding pc code aux width dst src src2 src3 value native
+  | conditionalNegate (predicate : Arm64Cond) (width : Width) (dst src : Register)
+      (src2 src3 : Byte) (value : Word) (valid : predicate ≠ .al) :
+      ExtrevBinding pc (GeneratedArm64Cneg.code .cneg) (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value
+        (.select width .negate dst src src (Arm64Condition.nativeCode (Arm64Select.inverse predicate)))
+  | extract (width : Width) (amount : Fin width.bits) (dst src src2 : Register) (aux : BitVec 32) (src3 : Byte) :
+      ExtrevBinding pc (GeneratedArm64Extrev.code .extr) aux width (Arm64Register.registerCode dst)
+        (Arm64Register.registerCode src) (Arm64Register.registerCode src2) src3 (BitVec.ofNat 64 amount.val)
+        (.extrev (.extract width amount dst src src2))
+  | reverse (width : Width) (halfwords : Bool) (dst src : Register) (aux : BitVec 32) (src2 src3 : Byte) (value : Word) :
+      ExtrevBinding pc (GeneratedArm64Extrev.code (if halfwords then .rev16 else .rev)) aux width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value
+        (.extrev (.reverse width halfwords dst src))
+  | extend (width : Width) (source : Reference.AArch64.ExtendBits) (dst src : Register)
+      (aux : BitVec 32) (src2 src3 : Byte) (value : Word) :
+      ExtrevBinding pc (GeneratedArm64Extrev.code (Arm64Extrev.extendOpcode source)) aux width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value
+        (.extrev (.extend width source dst src))
+
+/-- One concrete step for all earlier gates, CNEG and six EXTR/REV/SXT rows;
+normalization premises are field/code/condition/amount identities only. -/
+theorem step_through_extrev_refines (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : ExtrevBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughExtrev code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier _ _ _ _ _ _ _ _ _ earlier => exact extrev_earlier_preserved _ _ _ _ _ _ _ _ _ _ _ s earlier
+  | conditionalNegate => apply conditional_negate_refines; assumption
+  | extract => apply extract_refines
+  | reverse => apply reverse_refines
+  | extend => apply extend_refines
 
 end KProgFormal.Refinement.Arm64Dispatcher

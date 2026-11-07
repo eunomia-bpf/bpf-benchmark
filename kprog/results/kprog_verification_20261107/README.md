@@ -1025,3 +1025,33 @@ SHA256 `c2548e069595ba7ef0ff659d77fd807d78856be382ac37655a8fa0278f18ed55` stayed
 is byte-identical. No placeholders, new tests, filtering, ISA/runtime/generator/
 oracle/paper changes. Original compiler warnings remain visible. Exact95's
 full pass predates both this extension and the multiply composition.
+
+## Uniform byte CNEG and extract/reverse/extend composed next
+
+`Arm64Dispatcher.dispatchThroughExtrev` appends the actual CNEG gate and then
+all six EXTR/REV/REV16/SXTH/SXTW/SXTB rows to the same prefix. CNEG decodes the
+whole AUX word, computes the incoming NZCV predicate and composes the generated
+negation with actual byte read/write. Its non-AL alias condition remains the
+native CSNEG inversion; no raw15 condition or truncated-AUX behavior is added.
+EXTR alone narrows both inputs before the generated concatenation window and
+retains native shift bounds. The other five rows read full inputs and ignore
+any second-source byte and immediate, including SP32/NONE255. All unused SRC3
+and earlier fields remain arbitrary. Destination aliases, ZR, W zero-extension,
+unchanged flags/vectors/memory and one PC advance follow the existing complete
+canonical family steps through derived body equalities.
+
+Numeric opcode disjointness derives reachability through every earlier gate,
+and all prior results transport unchanged. A single step_through_extrev_refines
+theorem covers the field/code/condition/amount-only ExtrevBinding without a
+component semantic/refinement premise. The remaining ISA families, native
+byte/raw-width normalization and O2/O4 provenance/artifact bindings are still
+open; this does not establish the full77/72 theorem.
+
+Validation: focused74-job dispatcher/affected-family/reference Lean build,
+nine existing contract freshness checks, direct dispatch/model checks and
+12 existing semantic/route hosts passed 240 cases,40080 cases,2072 cases,136 cases,120145 cases,26400 cases,1680 cases,40097 cases,512 cases,6913 cases,257 cases,6401 cases. The exact proof
+SHA256 `08bc91c71321078616fec93498329a384f69fc8e35dfeb14fdae022aa691821b` stayed unchanged through checks. Every old
+declaration is byte-identical except the shared Select import. No placeholders,
+new tests, input filtering, runtime/generator/oracle/ISA or paper changes.
+Original C warnings remain visible. An immutable combined full check follows
+publication; the already archived exact95 pass predates these extensions.
