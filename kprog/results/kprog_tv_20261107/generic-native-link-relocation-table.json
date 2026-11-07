@@ -1,0 +1,98 @@
+{
+  "utc": "2026-11-07T19:37:28.717911+00:00",
+  "status": "universal_kind1_relocation_table_full_state_CALL_preservation_proved_under_table_layout_and_binding_invariants",
+  "scope": "Arbitrary finite rel32 patch tables, arbitrary64-bit addresses and code memories, every32-bit displacement, every canonical X86 invocation state and CALL outcome.",
+  "claims": [
+    "Reference memory stores recover each byte of a bounded wrapping write; the emitted E8 opcode and four immediate bytes match callBytes exactly.",
+    "Ordered table application retains protected code bytes, complete earlier CALL spans, allocator read/write permissions and each bound record target.",
+    "Each final whole-table CALL span decodes through the single canonical X86 decoder to its bound target and exact fall-through.",
+    "table_call_preservation constructs Composition.TranslationValidation for every table-selected CALL with equality of the complete architectural successor and identical ordered memory/fault events.",
+    "table_call_reflects maps each final table-code step back to its original bound CALL contract.",
+    "List induction covers arbitrary finite table lengths; the semantic source consists of shared reference Memory and X86 definitions."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o native-link-relocation-check native-link-relocation-table-check",
+    "reproduction": "make -C kprog/tv native-link-relocation-table-check",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.NativeLinkRelocationTable.stored_bytes": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.opcode_preserved": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.written_call_bytes": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_permissions": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkRelocationTable.patch_value_outside": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_value_outside": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_span_outside": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_call_bytes": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_call_decode": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_call_preservation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_call_reflects": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "sorryAx_count": 0,
+    "log_sha256": "71780b323f30277802d09ad667da90565b7d37a2bc3dd902793d5e72c9c4bd86",
+    "dependency_scope": "The focused table module imports generic NativeLinkRelocation and Composition plus canonical Memory/X86. Existing generic dependencies retain their checked warm oleans."
+  },
+  "source_sha256": {
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/tv/NativeLinkRelocationTable.lean": "075c9f49ac237a691589f256a860f44606fb5cb3986cfae3858e672f96c59ae0",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "8b63557424953cc7d00d83ea3eab9b37748fd2e3ed3cd4892e0b7b3b0fb34506",
+    "kprog/x86/native_lab/native_link/src/main.rs": "563db62726d8ff0fbbcdc2d0f928eeafbd3d64b0e3fce3046723d2b18ab531d1",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "a02aee08743af771028352ae35fc3e8dc97a5b33b2c85df31a60d22c92677713",
+    "kprog/tv/Makefile": "0e58b8c532dc28c35789f1d2d800976f9aa0184336c326e7e470aadf97cc1f52"
+  },
+  "premises": [
+    "Pairwise separation protects each complete five-byte CALL span from every other immediate write, with wrapping64-bit arithmetic.",
+    "Initial code contains each E8 opcode; accepted records pass the existing kernel signed32 displacement round-trip check.",
+    "Call-site PC equals its bound record slot. The actual code snapshot and metadata remain linked through the kernel artifact-binding invariant."
+  ],
+  "completion_path": [
+    "Derive table separation from native-link u32 offsets and layout construction, then connect actual emitted-code and metadata correspondence.",
+    "Compose the remaining relocation kinds/ISAs, map lowering, private spill, helper identity/prototype and tail-call preservation stages through the generic interface.",
+    "Combine V universal token O1/O2 and definedness invariants with actual compiler-output preservation to complete generic_program_block_validation."
+  ],
+  "trusted": [
+    "Canonical ISA/Memory semantics with hardware fidelity accounted for by V/F.",
+    "Kernel code/entry/ABI/metadata binding and the supported emitter C/ABI profile.",
+    "Lean kernel and the reported propext/Classical.choice/Quot.sound."
+  ]
+}

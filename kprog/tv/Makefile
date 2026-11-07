@@ -898,3 +898,8 @@ trusted-simple-b29-wrapper-certificate: trusted-simple-b29-embedding-certificate
 native-link-relocation-check: bpf-check
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/NativeLinkRelocation.olean ../tv/NativeLinkRelocation.lean
+
+.PHONY: native-link-relocation-table-check
+native-link-relocation-table-check: native-link-relocation-check
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/NativeLinkRelocationTable.olean ../tv/NativeLinkRelocationTable.lean

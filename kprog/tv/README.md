@@ -1,40 +1,37 @@
-# Native artifact translation validation
+# Generic simulator and native-link preservation
 
-Operator reset, 2026-11-07 19:13 UTC: **“完全禁止逐个程序做.”**
-The active safety proof is now generic: O1/O2 are proved once per token for
-all artifacts, native-link transformations each need one universal
-preservation theorem, and `Composition.lean` derives the block relation and
-accepted-verifier/binding theorem for arbitrary programs. Every individual
-program proof/certificate/validation file and its old result below is frozen
-historical work: it is not extended, maintained, rechecked or used as current
-safety evidence. No new program-specific proof or validation file is allowed.
+The active safety line covers every program through O1/O2 theorems proved
+once per token, one preservation theorem for each native-link transformation,
+and `Composition.lean`'s universal block and accepted-verifier/binding theorem.
+Individual-program proof, certificate and validation files remain frozen
+historical records. Current evidence comes from the universal theorem line.
 
-`generic-program-composition.json` records the first generic composition
-increment. `TranslationValidation.trans` composes independent transformations;
-`tokenwise_validation` lifts universal token laws through real dispatch; the
-execution closure handles arbitrary finite blocks/prefixes without fuel.
-`generic_program_block_validation` and `generic_program_effects_checked`
-quantify O1, O2 and link laws over **every Artifact/token**, then instantiate
-the existing exact binding/verifier theorem. Six new audits pass (only
-`propext`, or no axioms); the generic BPF semantics checks also pass.
+`generic-program-composition.json` records transitive TV composition,
+uniform token dispatch, arbitrary finite-block closure, and the generic
+program safety instantiation. Six audits pass (`propext`, with two axiom-free
+lemmas). The generic BPF semantics checks pass through `bpf-check`.
 
-`generic-native-link-rel32.json` is the first concrete universal link-stage
-increment. `NativeLinkRelocation.lean` mirrors the existing kind1 signed32
-range guard and E8 byte writer, decodes through the single canonical ISA,
-and proves forward TV plus reverse step preservation for every successfully
-relocated slot and caller state. It also preserves bytes outside the immediate
-patch. Six audits pass. This is slot-local: arbitrary relocation-table/code
-binding, other relocation kinds, maps, helper identity/prototype and tail-call
-transforms remain required; no program-specific proof is involved.
+`generic-native-link-rel32.json` covers every successfully ranged E8 call
+slot through the existing signed32 guard, exact emitted bytes and canonical
+X86 decoding. Forward TV and reverse step preservation retain the complete
+CALL state, control, effects and faults. Six audits pass.
 
-These are composition theorems, not a claim that their concrete premises are
-already discharged. V's complete token/dispatcher refinement, specialization
-to the actual compiler output, and actual relocation/map/private-spill/helper/
-tail-call preservation remain required once for all programs. In particular,
-a C handler model does not establish clang output correctness. Tokens must
-include actual decoding/dispatch-PC binding; relations retain architecture,
-memory, ordered effects, control location and supported invocation metadata.
+`generic-native-link-relocation-table.json` lifts that local result to
+arbitrary finite tables. Reference memory writes recover the exact CALL bytes;
+protected spans and code permissions persist across the ordered patch list.
+Every final table-selected CALL has its bound target and complete canonical
+behavior, through a TV instance and reverse step theorem. Eleven audits pass.
+The premises carry pairwise span separation, existing range/opcode checks and
+actual code/metadata binding. The next bridge derives separation from native-link
+u32 offsets and its layout construction.
 
+Universal completion includes V's full token/dispatcher and definedness laws,
+specialization preservation through actual compiler output, remaining link
+transformations, and kernel entry/ABI/metadata correspondence. The relations
+retain architecture, memory, ordered effects, control location and invocation
+metadata. Concrete C models and actual emitted B have distinct proof stages.
+
+Directory reference and the historical development record follow.
 
 Lane T owns this directory. The required certificate is about clang's compiled
 BPF instructions as instantiated into the verifier program, paired with the
