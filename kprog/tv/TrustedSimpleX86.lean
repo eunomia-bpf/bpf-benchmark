@@ -3479,6 +3479,90 @@ theorem entry_first_guard_path_relational_correspondence (env : BPF.Environment)
     write16 write8 read40 read32 guest0 guest1
   exact ⟨unique,old.2⟩
 
+
+/-- Actual native path from entry through all guards; only canonical values
+choose whether the later region occurs. Both entry reads are assumed here. -/
+def guardedNativePath (n : X86.State) (pointer limit : Word) : List X86Path.Entry :=
+  [⟨0,3⟩,⟨3,4⟩,⟨7,3⟩,⟨10,2⟩,⟨12,3⟩,⟨15,2⟩]++
+    if pointer>limit then [] else remainingNativePath (guardFinal (nativePrefixFinal n pointer limit))
+
+theorem guarded_native_relational_result (n : X86.State) (pointer limit : Word)
+    (first second : Event) (actual : Transition X86.State) (position : n.pc=0)
+    (read0 : readMemory n.memory (n.gpr 7) 8=.ok (pointer,first))
+    (read1 : readMemory n.memory (n.gpr 7+(8#64)) 8=.ok (limit,second))
+    (run : CanonicalRelationalPath 0 native (guardedNativePath n pointer limit) n actual) :
+    actual=⟨guardedNativeFinal n pointer limit,[first,second],none⟩ := by
+  by_cases reject : pointer>limit
+  · have firstRun : CanonicalRelationalPath 0 native
+        [⟨0,3⟩,⟨3,4⟩,⟨7,3⟩,⟨10,2⟩,⟨12,3⟩,⟨15,2⟩] n actual := by
+      simpa only [guardedNativePath,reject,ite_true,List.append_nil] using run
+    simpa only [guardedNativeFinal,reject,ite_true] using
+      entry_first_guard_relational_result n pointer limit first second actual position read0 read1 firstRun
+  · have combined : CanonicalRelationalPath 0 native
+        ([⟨0,3⟩,⟨3,4⟩,⟨7,3⟩,⟨10,2⟩,⟨12,3⟩,⟨15,2⟩]++
+        remainingNativePath (guardFinal (nativePrefixFinal n pointer limit))) n actual := by
+      simpa only [guardedNativePath,reject,ite_false] using run
+    have nonempty : remainingNativePath (guardFinal (nativePrefixFinal n pointer limit))≠[] := by
+      unfold remainingNativePath
+      split <;> simp
+    obtain ⟨middle,tail,headRun,_,tailRun,same⟩ := relational_path_split_nonempty nonempty combined
+    have middleResult := entry_first_guard_relational_result n pointer limit first second middle
+      position read0 read1 headRun
+    rw [middleResult] at tailRun same
+    have at17 : (guardFinal (nativePrefixFinal n pointer limit)).pc=17 := by
+      simp +decide [guardFinal,nativePrefixFinal,nativeAfterSecond,nativeAfter,reject]
+    have tailResult := (defined_relational_result_unique tailRun
+      (remaining_native_path_defined _) (remaining_native_path_evaluation _ at17)).1
+    rw [same,tailResult]
+    simp only [guardedNativeFinal,reject,ite_false,List.append_nil]
+
+
+theorem entry_all_guards_path_relational_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (pointer limit stack : Word) (first second : Event)
+    (nativePC : n.pc = 0) (proofPC : p.pc = 0) (active : p.halted = false)
+    (context : n.gpr 7 = p.regs 1) (memory : n.memory = p.memory)
+    (nativeStack : env.nativeInput .stackPointer = .ok stack)
+    (read0 : readMemory p.memory (p.regs 1) 8 = .ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8 = .ok (limit,second))
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8 = true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8 = true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8 = true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8 = true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4 = true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8 = true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8 = true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (actual : Transition X86.State)
+    (run : CanonicalRelationalPath 0 native (guardedNativePath n pointer limit) n actual)
+    (guest1 : ∀ i < 8, ¬ initializationPrivateByte (p.regs 10)
+      (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    actual=⟨guardedNativeFinal n pointer limit,[first,second],none⟩ ∧
+    Execution (initializedInstructionStep env) p
+      (prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit)
+      (guardedProofFinal p pointer limit stack) ∧
+    (prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit).filterMap
+      (initializationProjectEvent (p.regs 10)) = [first,second] ∧
+    (guardedNativeFinal n pointer limit).pc =
+      (if pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit then 60 else 35) ∧
+    (guardedProofFinal p pointer limit stack).pc =
+      (if pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit then 34 else 18) ∧
+    initializationAgreesOutside (p.regs 10) (guardedNativeFinal n pointer limit).memory
+      (guardedProofFinal p pointer limit stack).memory ∧
+    (guardedNativeFinal n pointer limit).gpr 1 = pointer ∧
+    (guardedNativeFinal n pointer limit).gpr 0 = (0#64) ∧
+    (guardedProofFinal p pointer limit stack).regs 2 = pointer ∧
+    (guardedProofFinal p pointer limit stack).regs 1 = (0#64) := by
+  have nativeRead0 : readMemory n.memory (n.gpr 7) 8=.ok (pointer,first) := by
+    simpa only [memory,context] using read0
+  have nativeRead1 : readMemory n.memory (n.gpr 7+(8#64)) 8=.ok (limit,second) := by
+    simpa only [memory,context] using read1
+  have unique := guarded_native_relational_result n pointer limit first second actual
+    nativePC nativeRead0 nativeRead1 run
+  have old := entry_all_guards_correspondence env n p pointer limit stack first second
+    nativePC proofPC active context memory nativeStack read0 read1 write40 write32 write24
+    write16 write8 read40 read32 guest0 guest1
+  exact ⟨unique,old.2⟩
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -3778,3 +3862,8 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.entry_first_guard_relational_result
 
 #print axioms KProgTV.TrustedSimpleX86.entry_first_guard_path_relational_correspondence
+
+
+#print axioms KProgTV.TrustedSimpleX86.guarded_native_relational_result
+
+#print axioms KProgTV.TrustedSimpleX86.entry_all_guards_path_relational_correspondence

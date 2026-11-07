@@ -1717,3 +1717,16 @@ successors follow. Private-frame/entry/platform premises remain explicit.
 The generic nonempty-suffix split preserves faults and all relational choices.
 Whole-program/CFG, ABI/platform and RET composition remain open; see
 entry-guard-relational JSON/log for separate premise scopes and source pins.
+
+### Relational entry through all guards
+
+`entry_all_guards_path_relational_correspondence` combines the actual entry
+reads, arbitrary-AF XOR/CMP region and both remaining guards into one canonical
+relational path. Every result has the complete certified boundary state, two
+original read events and the actual B setup/guard execution, precise setup-only
+projection and memory relation. Modular comparisons select the native extents
+and corresponding successors without branch-outcome assumptions. The two
+actual reads, private-frame and entry/platform premises remain explicit.
+Complete body/fault composition, arbitrary CFG/extent coverage, strict
+per-basic-block mapping and ABI/platform/RET transport remain open. See
+entry-all-guards-relational JSON/log for exact premises and source pins.
