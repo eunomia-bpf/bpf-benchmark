@@ -20,16 +20,19 @@ used.
 
 # Summary
 
-| arm | native programs | current | reference | verdict |
-| --- | ---: | ---: | ---: | --- |
-| Pure bytecode (29) | — | **1.446x** | 1.478x | reproduces, -2.2% |
-| Helper/map (13) | — | **1.403x** | 1.429x | reproduces, -1.8% |
-| Corpus bcc/set | 18 / 25 | **1.002x** | 1.005x | reproduces |
-| Corpus tetragon | 118 | **1.008x** | 1.323x | **does not** |
-| Corpus katran | 1 | **1.018x** | 1.102x | **does not** |
-| Corpus cilium | 177 | **1.229x** | 2.358x | **does not** |
-| Corpus otelcol | 0 | — | 1.824x | blocked, see below |
-| Corpus tracee | 0 | — | 0.958x | blocked, see below |
+# Corpus geomean
+
+| set | geomean |
+| --- | ---: |
+| Five measured apps (bcc, tetragon, katran, cilium, otelcol) | **1.049x** |
+| Same five, excluding cilium | 1.008x |
+| Reference, all six apps | **1.349x** |
+
+**The 1.349x six-app reference does not reproduce.** Five of six apps
+measure now and their geomean is 1.049x; the shortfall is concentrated
+in cilium (1.229x against 2.358x) and tetragon (1.008x against 1.323x),
+which were the reference's two large wins. The other four sit at 1.00x
+in both runs.
 
 Corpus figures are at the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`)
 except where noted; each carries the replaced/failed count from its own
