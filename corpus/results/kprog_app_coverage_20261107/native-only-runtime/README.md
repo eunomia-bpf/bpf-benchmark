@@ -72,3 +72,22 @@ corpus archive). The guest no longer forces that bytecode pass. The standard
 native-driver path uses its existing empty enabled-pass list; feature probes
 load unchanged. REQUIRE_BOUND_PROOF=1 and the workload stay the same. Replay
 uses the existing pinned image and matching cached kernel/modules; no rebuild.
+
+
+## First corrected-plan run:23/25 bound, two compiler SIGKILLs
+
+Actual standard run152434_982905 enters verified_native_loader with no bytecode
+pass and passes50 libbpf feature probes unchanged. All25 native requests reach
+the registered service;23 freshly generated simulator objects are accepted and
+bound. Clang is killed with SIGKILL for inet_sock_set_state and sched_switch;
+these are compilation failures, not verifier rejections. No native workload
+measurement completes because tcplife exits97. Full service/request archives,
+raw app/shim/work counters and receipts are retained in standard-bcc.json,
+standard-bcc-result.tar.gz, standard-bcc-driver.log.gz and its service_archive.
+The JIT2second workload reports514/248219/24008/135585 syscall/cap/set/sockfd
+bogo operations; no JIT/native equality or timing follows from this failure.
+
+The next replay keeps the SAME image/kernel/modules/workload and raises the
+guest memory4G->8G, within C's12GiB limit. SIGKILL alone has not established OOM;
+the driver now saves full dmesg and meminfo before archiving. No code/simulator
+change, fallback, program omission or kernel rebuild is used for this retry.

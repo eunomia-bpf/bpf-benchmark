@@ -1,0 +1,281 @@
+{
+  "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_152434_982905",
+  "driver_exit": 0,
+  "metadata_status": "error",
+  "app_status": "error",
+  "app_error": "BCC tool tcplife exited with rc=97\nstdout tail:\n1834   vfsstat           23   0 /proc/self/fd\n1834   vfsstat           23   0 /proc/self/fd\n1834   vfsstat           23   0 /proc/self/fd\n1834   vfsstat           23   0 /proc/self/fd\n1837   opensnoop         35   0 /proc/self/fd\n1837   opensnoop         35   0 /proc/self/fd\n1837   opensnoop         35   0 /proc/self/fd\n1837   opensnoop         35   0 /proc/self/fd\n1837   opensnoop         35   0 /proc/self/fd\n1837   opensnoop         35   0 /proc/self/fd\n1837   opensnoop         35   0 /proc/self/fd\n1837   opensnoop         35   0 /proc/self/fd\n1837   opensnoop         35   0 /proc/self/fd\n1837   opensnoop         35   0 /proc/self/fd\n1837   opensnoop         35   0 /proc/self/fd\n1840   syscount          21   0 /proc/self/fd\n1840   syscount          21   0 /proc/self/fd\n1840   syscount          21   0 /proc/self/fd\n1840   syscount          21   0 /proc/self/fd\n1840   syscount          21   0 /proc/self/fd\n1840   syscount          21   0 /proc/self/fd\n1840   syscount          21   0 /proc/self/fd\n1840   syscount          21   0 /proc/self/fd\n1840   syscount          21   0 /proc/self/fd\n1840   syscount          21   0 /proc/self/fd\n1840   syscount          21   0 /proc/self/fd\n1843   tcpconnect        38   0 /proc/self/fd\n1843   tcpconnect        38   0 /proc/self/fd\n1843   tcpconnect        38   0 /proc/self/fd\n1843   tcpconnect        38   0 /proc/self/fd\n1843   tcpconnect        38   0 /proc/self/fd\n1843   tcpconnect        38   0 /proc/self/fd\n1843   tcpconnect        38   0 /proc/self/fd\n1843   tcpconnect        38   0 /proc/self/fd\n1843   tcpconnect        38   0 /proc/self/fd\n1843   tcpconnect        38   0 /proc/self/fd\n1843   tcpconnect        38   0 /proc/self/fd\nsyscount:\nnanosleep                     1        10072.551\nrecvfrom                      5         3290.673\nwrite                        11         1668.562\nbpf                          81          642.366\n[15:28:10]\nSYSCALL                   COUNT        TIME (us)\nread                          8     14500029.625\nepoll_wait                   59      3947134.888\nclock_nanosleep              14      3114439.164\naccept                        5      1003486.947\nrecvfrom                      5         4982.081\nwrite                        14         3014.423\nbpf                          81          644.864\nreadlink                    195          331.729\nnewfstatat                   46          223.990\nconnect                       5          166.751\n[15:28:11]\nSYSCALL                   COUNT        TIME (us)\nfutex                        33    129028770.156\naccept                        2     26625394.650\nepoll_pwait                   3      4515239.185\nclock_nanosleep              35      2843378.849\nepoll_wait                   27      2016145.582\nread                          4      1835833.472\nclose                        52       819066.518\nnanosleep                     2        20183.691\nwrite                        14         2683.076\nbrk                           1          743.463\n[15:28:12]\nSYSCALL                   COUNT        TIME (us)\nread                          2      7763057.573\naccept                        1      5747044.297\nclock_nanosleep              13      1188767.305\nepoll_wait                    6       601029.061\nclose                        17       458220.689\nwrite                         3          589.435\nwait4                        15          112.758\nfutex                        12           95.971\nmunmap                        5           78.788\nioctl                         2           49.196\ntcpconnect:\nPID    COMM         IP SADDR            DADDR            DPORT",
+  "mode": {
+    "enabled_passes": [],
+    "mode": "verified_native_loader",
+    "status": "ok"
+  },
+  "native_replaced": 23,
+  "native_failed": 2,
+  "native_bound_receipts": 23,
+  "shim_feature_probes": 50,
+  "service_archive": "corpus-20261107T152826302130Z.tar.gz",
+  "service_archive_sha256": "6da6eeb9e312b6facd399660eb0a1ae13931ca0ae6f0d584ccb6d810033c9cc9",
+  "work": {
+    "baseline": {
+      "workloads": [
+        {
+          "name": "stress_ng_bcc_hook_hot",
+          "returncode": 0,
+          "duration_s": 6.062845073000005,
+          "bogo_ops": {
+            "syscall": 514,
+            "cap": 248219,
+            "set": 24008,
+            "sockfd": 135585
+          }
+        }
+      ],
+      "bpf": {
+        "26": {
+          "bytes_jited": 40,
+          "bytes_xlated": 48,
+          "id": 26,
+          "name": "fentry_vfs_read",
+          "run_cnt_delta": 3958,
+          "run_time_ns_delta": 182289,
+          "type": "tracing"
+        },
+        "31": {
+          "bytes_jited": 40,
+          "bytes_xlated": 48,
+          "id": 31,
+          "name": "fentry_vfs_writ",
+          "run_cnt_delta": 3878,
+          "run_time_ns_delta": 175240,
+          "type": "tracing"
+        },
+        "33": {
+          "bytes_jited": 40,
+          "bytes_xlated": 48,
+          "id": 33,
+          "name": "fentry_vfs_fsyn",
+          "run_cnt_delta": 12,
+          "run_time_ns_delta": 3457,
+          "type": "tracing"
+        },
+        "35": {
+          "bytes_jited": 141,
+          "bytes_xlated": 240,
+          "id": 35,
+          "name": "tracepoint__sys",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "tracepoint"
+        },
+        "36": {
+          "bytes_jited": 40,
+          "bytes_xlated": 48,
+          "id": 36,
+          "name": "fentry_vfs_open",
+          "run_cnt_delta": 138390,
+          "run_time_ns_delta": 5198061,
+          "type": "tracing"
+        },
+        "39": {
+          "bytes_jited": 40,
+          "bytes_xlated": 48,
+          "id": 39,
+          "name": "fentry_vfs_crea",
+          "run_cnt_delta": 14,
+          "run_time_ns_delta": 1571,
+          "type": "tracing"
+        },
+        "41": {
+          "bytes_jited": 141,
+          "bytes_xlated": 240,
+          "id": 41,
+          "name": "tracepoint__sys",
+          "run_cnt_delta": 138210,
+          "run_time_ns_delta": 29276482,
+          "type": "tracepoint"
+        },
+        "47": {
+          "bytes_jited": 108,
+          "bytes_xlated": 168,
+          "id": 47,
+          "name": "sys_enter",
+          "run_cnt_delta": 5415404,
+          "run_time_ns_delta": 775739863,
+          "type": "tracepoint"
+        },
+        "48": {
+          "bytes_jited": 602,
+          "bytes_xlated": 792,
+          "id": 48,
+          "name": "tracepoint__sys",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "tracepoint"
+        },
+        "51": {
+          "bytes_jited": 121,
+          "bytes_xlated": 200,
+          "id": 51,
+          "name": "blk_account_io_",
+          "run_cnt_delta": 45,
+          "run_time_ns_delta": 13015,
+          "type": "kprobe"
+        },
+        "52": {
+          "bytes_jited": 602,
+          "bytes_xlated": 792,
+          "id": 52,
+          "name": "tracepoint__sys",
+          "run_cnt_delta": 138210,
+          "run_time_ns_delta": 290774811,
+          "type": "tracepoint"
+        },
+        "56": {
+          "bytes_jited": 110,
+          "bytes_xlated": 184,
+          "id": 56,
+          "name": "tcp_v4_connect",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "57": {
+          "bytes_jited": 1501,
+          "bytes_xlated": 2240,
+          "id": 57,
+          "name": "inet_sock_set_s",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "tracepoint"
+        },
+        "58": {
+          "bytes_jited": 121,
+          "bytes_xlated": 184,
+          "id": 58,
+          "name": "sched_wakeup",
+          "run_cnt_delta": 151758,
+          "run_time_ns_delta": 36798078,
+          "type": "tracing"
+        },
+        "59": {
+          "bytes_jited": 143,
+          "bytes_xlated": 232,
+          "id": 59,
+          "name": "kprobe__cap_cap",
+          "run_cnt_delta": 269333,
+          "run_time_ns_delta": 31356482,
+          "type": "kprobe"
+        },
+        "60": {
+          "bytes_jited": 406,
+          "bytes_xlated": 656,
+          "id": 60,
+          "name": "sys_exit",
+          "run_cnt_delta": 5415410,
+          "run_time_ns_delta": 558813682,
+          "type": "tracepoint"
+        },
+        "65": {
+          "bytes_jited": 493,
+          "bytes_xlated": 752,
+          "id": 65,
+          "name": "tcp_v4_connect_",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "66": {
+          "bytes_jited": 383,
+          "bytes_xlated": 616,
+          "id": 66,
+          "name": "kprobe__cap_cap",
+          "run_cnt_delta": 269328,
+          "run_time_ns_delta": 150167487,
+          "type": "kprobe"
+        },
+        "69": {
+          "bytes_jited": 110,
+          "bytes_xlated": 184,
+          "id": 69,
+          "name": "tcp_v6_connect",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "71": {
+          "bytes_jited": 496,
+          "bytes_xlated": 752,
+          "id": 71,
+          "name": "tcp_v6_connect_",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "72": {
+          "bytes_jited": 121,
+          "bytes_xlated": 184,
+          "id": 72,
+          "name": "sched_wakeup_ne",
+          "run_cnt_delta": 41,
+          "run_time_ns_delta": 19705,
+          "type": "tracing"
+        },
+        "74": {
+          "bytes_jited": 354,
+          "bytes_xlated": 648,
+          "id": 74,
+          "name": "block_rq_insert",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "tracing"
+        },
+        "75": {
+          "bytes_jited": 935,
+          "bytes_xlated": 1632,
+          "id": 75,
+          "name": "sched_switch",
+          "run_cnt_delta": 302131,
+          "run_time_ns_delta": 106835755,
+          "type": "tracing"
+        },
+        "76": {
+          "bytes_jited": 440,
+          "bytes_xlated": 824,
+          "id": 76,
+          "name": "block_rq_issue",
+          "run_cnt_delta": 77,
+          "run_time_ns_delta": 76418,
+          "type": "tracing"
+        },
+        "77": {
+          "bytes_jited": 437,
+          "bytes_xlated": 712,
+          "id": 77,
+          "name": "block_rq_comple",
+          "run_cnt_delta": 84,
+          "run_time_ns_delta": 790507,
+          "type": "tracing"
+        }
+      }
+    },
+    "post_rejit": null
+  },
+  "raw_archive_sha256": "256052e0780cb1f8494f2fbf039b72a7cd49140efbd38f59ad76fb2fe5401e17",
+  "compile_failures": [
+    {
+      "request_id": 8,
+      "entry": "inet_sock_set_state",
+      "stage": "clang_compile",
+      "signal": "SIGKILL",
+      "error": "Command '['clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-c', '/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/trusted-xkiiz_7k/requests/request-ntdntbzc/generated/trusted_x86.bpf.c', '-o', '/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/trusted-xkiiz_7k/requests/request-ntdntbzc/generated/trusted_x86.bpf.o']' died with <Signals.SIGKILL: 9>."
+    },
+    {
+      "request_id": 20,
+      "entry": "sched_switch",
+      "stage": "clang_compile",
+      "signal": "SIGKILL",
+      "error": "Command '['clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-c', '/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/trusted-xkiiz_7k/requests/request-dhb6f23x/generated/trusted_x86.bpf.c', '-o', '/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/trusted-xkiiz_7k/requests/request-dhb6f23x/generated/trusted_x86.bpf.o']' died with <Signals.SIGKILL: 9>."
+    }
+  ],
+  "guest_memory": "4G"
+}

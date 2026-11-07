@@ -32,6 +32,8 @@ with tempfile.TemporaryDirectory(prefix='.live-',dir=O) as directory, tempfile.T
   service.wait()
   if reader is not None:reader.join()
   log.close();summary['finished']=datetime.now(timezone.utc).isoformat()
+  with (live/'kernel.log').open('w') as kernel_log:subprocess.run(['dmesg'],stdout=kernel_log,stderr=subprocess.STDOUT)
+  (live/'meminfo.txt').write_text(Path('/proc/meminfo').read_text())
   boot=Path('/proc/sys/kernel/random/boot_id').read_text().strip()
   summary['corpus_metadata']=[]
   for m in (R/'corpus/results').glob('x86_kvm_corpus_*/metadata.json'):

@@ -64,3 +64,21 @@ The current framework-priority work is in [trusted-service-bcc-set](trusted-serv
 The [exact memory count repair](exact-memory-count/README.md) removes simulator truncation; the [XDP context identity repair](xdp-context-identity/README.md) retains actual context writes and passes13 unchanged positive generation-bound helper/map executions. Independent safety replay and full application completion remain pending.
 
 The complete native-only BCC receipt is [native-only-complete.json](trusted-service-bcc-set/native-only-complete.json). It records25/25 generated, verifier-accepted and bound loads with per-program counters. Standard JIT/native paired work and timing remain pending.
+
+
+### Current standard-runtime continuation
+
+[Cilium full-identity replay](cilium-update-identity/README.md) closes R's33
+update-name ambiguities: actual stats-off unbound151633_102078 replaces all177
+application loads,0native failures, applicationok and bidirectional packet
+counts/errors retained. Old/new linkers on16 identical captured plans fail/pass
+respectively; all16 corrected blobs equal actual cached bytes. This is functional
+unbound evidence, not generation-bound Cilium or performance acceptance.
+
+[Standard native-only BCC bridge](native-only-runtime/README.md) now reaches the
+kernel-backed service after removing its accidental forcednoop bytecode plan.
+Run152434_982905 records25 requests,23 fresh compiled/accepted/bound, and2 Clang
+SIGKILL compilation failures (inet_sock_set_state, sched_switch); zero recorded
+verifier rejections. The native workload is not reached. Full raw results and
+requests are retained. One identical8GiB replay is active, with full kernel logs
+saved; no program was dropped or simulator rule changed to obtain acceptance.
