@@ -1,0 +1,60 @@
+{
+  "recorded": "2026-11-07T16:08:46.035408+00:00",
+  "instruction": "LEAVE64 C9",
+  "forms": 1,
+  "input_classes": 8,
+  "cases": 8192,
+  "successes": 4096,
+  "faults": 4096,
+  "success_mismatches": 0,
+  "mapped_memory_writes": 0,
+  "all_fault_gprs_preserved": true,
+  "all_arithmetic_flags_preserved": true,
+  "final_build_werror": true,
+  "run_exit": 0,
+  "classes": {
+    "aligned_frame": {
+      "cases": 1024,
+      "successes": 1024
+    },
+    "unaligned_frame": {
+      "cases": 1024,
+      "successes": 1024
+    },
+    "last_readable_word": {
+      "cases": 1024,
+      "successes": 1024
+    },
+    "cross_page_frame": {
+      "cases": 1024,
+      "faults": 1024,
+      "trap_14": 1024,
+      "signal_11": 1024
+    },
+    "protected_frame": {
+      "cases": 1024,
+      "faults": 1024,
+      "trap_14": 1024,
+      "signal_11": 1024
+    },
+    "noncanonical_frame": {
+      "cases": 1024,
+      "faults": 1024,
+      "trap_12": 1024,
+      "signal_7": 1024
+    },
+    "null_frame": {
+      "cases": 1024,
+      "faults": 1024,
+      "trap_14": 1024,
+      "signal_11": 1024
+    },
+    "valid_frame_bad_sp": {
+      "cases": 1024,
+      "successes": 1024
+    }
+  },
+  "binary_sha256": "308f484b26db4e7c2537b1228ba837e026a22a2b7de875449e44c7f17a7da3d5",
+  "raw_cases_sha256": "2335b2a4de318aa73dc291d6f1f3f54eb872d190073cd6deeda1f9533e401c8d",
+  "canonical_comparison_complete": false
+}
