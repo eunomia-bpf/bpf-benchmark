@@ -1,0 +1,43 @@
+{
+  "started": "2026-11-07T19:22:52.115335+00:00",
+  "production_commit": "c0b8e9cfaf9298c565c5f35a9ae8f8f25ceec307",
+  "head": "b3a6676cb65fd96327376addfb53ea004eca9e1e",
+  "pins": {
+    "kprog/formal/generated/x86_mem_access.h": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e"
+  },
+  "inputs": {
+    "kprog/results/kprog_fidelity_20261107/differential/x86-load-width/loads.c": "0c7628331202d714a6f2ca6dbfbe22decb0e993a257f89604eb5bfe06f63ce48",
+    "kprog/results/kprog_fidelity_20261107/differential/x86-load-width/run.cpp": "c0c150ace285d1eb372acf77575917e92000b8583bd276a8d4c5ff82815285fd",
+    "kprog/results/kprog_fidelity_20261107/differential/x86-load-width/cases.h": "c108fb6d71419da91c5c3b34a7c233e07acc22475139122f5361b58ee206c5a1",
+    "kprog/results/kprog_fidelity_20261107/differential/x86-load-width/extract.py": "005db526cf47f997fdd7cd9f427f2cbbfb2c0aa14afe9a36bf75dd7baec0c21a",
+    "kprog/results/kprog_fidelity_20261107/differential/x86-load-width/Makefile": "5413c0a898b691ae3e10416c8f40268e81926ab96fa9404a4aafc5370e4d7da0",
+    "kprog/results/kprog_fidelity_20261107/differential/x86-load-width/current/x86_mem_access.h": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+    "kprog/results/kprog_fidelity_20261107/differential/x86-load-width/before/x86_mem_access.h": "f91533e6a8a031bdfbee072729575f8121f014ec932a4c4ae40a5ca105d85184",
+    "vendor/llvmbpf/example/basic.cpp": "2bf96f59a17418b01f6bafafa320ad885b1c7c05bcffbb41e7125bbdef8808ce",
+    "vendor/llvmbpf/example/maps.cpp": "6c2ef739e7f40fe141083ac7a2607c069d4363e5212c898f5b5ba895a6eabf01",
+    "vendor/llvmbpf/example/array_map_inline_bench.cpp": "c58155d08130a2c5dba93a509acfcd7587b8b60beea671af36d028aa872e5e7d",
+    "vendor/llvmbpf/src/compiler.cpp": "6efd99563b04a375c2d2cf4bfe48fece9818190aec5e9cb3361f4a9682e77b94",
+    "vendor/llvmbpf/src/vm.cpp": "9e8ad135f8648a90177f346b1354025655bbbc7d86272aa747c28e27ae19059d",
+    "vendor/llvmbpf/src/compiler_utils.hpp": "3fabe913bd46187a68a6c7ff1de3bed63a8b0896995a126306f6e642d5e2b8ca",
+    "vendor/llvmbpf/src/ebpf_inst.h": "c7cd824191802fa357bc979607a35077a6aa7c59201f05c2db5b0bc74abb034b",
+    "vendor/llvmbpf/src/llvm_jit_context.hpp": "ff017ddce8a25edd548845edb529c63c05e37270119d43f9e4b2d7db8c84d4c9",
+    "vendor/llvmbpf/src/llvm_jit_context.cpp": "0c448595537514c3874cfbe0c6a1c8cf7f2294a9133e336b77997369d158df8b",
+    "vendor/llvmbpf/src/compiler_utils.cpp": "a5afb71efa7aec0e7aba42d676fb1d0745a62d9ff233516efb440c010fd7841b",
+    "vendor/llvmbpf/cli/main.cpp": "9d17c0c4c56dcf8ff3a42fa197f0742e33321f2a071fa7e0c2f1e6c6dcd83229",
+    "vendor/llvmbpf/include/llvmbpf.hpp": "50c194f0663453bf482fad856453a726f828a533803eb800c5d7171f2de3e576",
+    "vendor/llvmbpf/example/spirv/spirv_opencl_test.cpp": "a031edc1c67a13d967763a77ddc5b7d729871d572bb3e96cd07dfd6ac2760834",
+    "vendor/llvmbpf/example/ptx/trampoline_ptx.h": "d5333c271f5469b34738c2214038db4adcf0d55cd685e80b960e347b67aeb350",
+    "vendor/llvmbpf/example/ptx/ptx_test.cpp": "be6e630069cfd380f6de02e4b78d2caa1a4d92e03792e952fc5cb6d64a436b91",
+    "vendor/llvmbpf/test/unit-test/bpf_progs.h": "a2d86f1834d4b49d0f01288f900dd9141a00a81593d3be9f92347a6cb35c18dd",
+    "vendor/llvmbpf/test/unit-test/bpf_prog_test.cpp": "ea9ca9bf18b5e5781412cf03fa80e2a2adffdac5a31e243e542f3c4d5fa8027c",
+    "vendor/llvmbpf/test/unit-test/vm_test.cpp": "42aeca35e3c4e5e9c8ac4630a21969cff3a407a8888bda1b248b3f03a5c15c01",
+    "vendor/llvmbpf/test/bpf_conformance_runner/main-bpf-conformance.cpp": "866bab2f4be5b99add8788692d55b27195b264b45fa10a701d6f9e06b9396fc2",
+    "vendor/llvmbpf/test/include/test_minimal_bpf_host_ufunc.h": "791c137aac3542f6fc955e0b5dcaea8c0c57e9b9145cfdefd476394dc738fc62",
+    "vendor/llvmbpf/test/include/test_bpf_progs.h": "e897005325ad948fc6a7d669ebf354a9bf0a8f7cfe7c87a9deef7a350ce3795d",
+    "vendor/llvmbpf/test/include/test_defs.h": "7226875ea383b23353ab04c87404ac9c6c1009e0dc4f8e75ac43d97d84eb55eb",
+    "runner/build-llvmbpf/CMakeFiles/micro_exec.dir/workspaces/repository/vendor/llvmbpf/src/compiler_utils.cpp.o": "bda57685226f2231a98bc8bd634821408c954a9767607a7b348249df40f9224c",
+    "runner/build-llvmbpf/CMakeFiles/micro_exec.dir/workspaces/repository/vendor/llvmbpf/src/compiler.cpp.o": "01926aa7c129d9f2190881bc46be9263fa74478395370d89a1b0eead1677b077",
+    "runner/build-llvmbpf/CMakeFiles/micro_exec.dir/workspaces/repository/vendor/llvmbpf/src/vm.cpp.o": "5573ae503512b6b616800cec5aef3ffd16e93fc8cac6ee4157bfcc1abc70cb51",
+    "runner/build-llvmbpf/CMakeFiles/micro_exec.dir/workspaces/repository/vendor/llvmbpf/src/llvm_jit_context.cpp.o": "dabec5f80afc509d09883a4e4dec61778f26b701dc96e1f13deb6451bc27d176"
+  }
+}

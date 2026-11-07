@@ -97,6 +97,12 @@ The focused RORX result checks the four existing register/memory forms at
 snapshot as a full run of the newer RORX source. The earlier dated result
 directories retain their original source attribution and failure history.
 
+The [generic memory-load mechanism check](results/kprog_fidelity_20261107/differential/x86-load-width/README.md)
+covers the BPF-only narrow-load casts separately: both source versions, 35 forms
+and 286,720 inputs each, with zero differences between compiled BPF JIT,
+host CPU loads and an independent byte oracle. This is supporting mechanism
+evidence; kernel acceptance and the generic safety theorems remain separate.
+
 The existing hardware-only script now defaults to the reviewed ARM core
 static artifact above. The coordinator runs it on a real AArch64 host:
 
