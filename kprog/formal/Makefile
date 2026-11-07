@@ -650,7 +650,7 @@ check:
 	./build/test_arm64_write_arm_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_dq_mem_host.c -o build/test_arm64_dq_mem_host
 	./build/test_arm64_dq_mem_host
-	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dq_mem_route_host.c -o build/test_arm64_dq_mem_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_dq_mem_route_host.c -o build/test_arm64_dq_mem_route_host
 	./build/test_arm64_dq_mem_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_pair_mem_host.c -o build/test_arm64_pair_mem_host
 	./build/test_arm64_pair_mem_host
@@ -670,7 +670,7 @@ check:
 	./build/test_arm64_mem_prepost_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_vreg_host.c -o build/test_arm64_vreg_host
 	./build/test_arm64_vreg_host
-	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_vreg_route_host.c -o build/test_arm64_vreg_route_host
+	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_vreg_route_host.c -o build/test_arm64_vreg_route_host
 	./build/test_arm64_vreg_route_host
 	$(CC) -Wall -Wextra -O2 -I. -I../arm64 oracles/test_arm64_aux_host.c -o build/test_arm64_aux_host
 	./build/test_arm64_aux_host

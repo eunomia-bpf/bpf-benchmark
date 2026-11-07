@@ -42,7 +42,7 @@ int main(void) {
              "-fno-sanitize-recover=undefined", *include, str(source), "-o", str(host)])
     print(command([str(host)]).strip())
     obj = out / "pointer.bpf.o"
-    command(["clang-18", "-target", "bpfel", "-O2", "-g", "-D__BPF__",
+    command(["clang-18", "-target", "bpfel", "-O2", "-g",
              "-I", "/usr/include/x86_64-linux-gnu", *include, "-c", str(source), "-o", str(obj)])
     disassembly = command(["llvm-objdump-18", "-d", str(obj)])
     (out / "pointer.asm").write_text(disassembly)

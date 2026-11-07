@@ -79,3 +79,37 @@ are retained. The compressed CALL CPU observations now come from this successful
 whole-check run rather than the earlier focused v8 run. Later source changes
 require their own validation; this result does not include the subsequent D0
 full-state proof work or other lanes' uncommitted runtime changes.
+
+## D0 handler and native pointer-read increment
+
+The concurrent V continuation published `b1cc1a232` (native pointer-read fix and
+compiler regression) and `ce776d453` (D0 full-state/index and two singleton-arm
+composition). The local continuation verified the same source bytes and keeps
+those commits. This follow-up enables UBSan on the two existing real DQ/vector
+route hosts and lets Clang's actual target definitions select the BPF path; no
+synthetic `__BPF__` definition is needed. A duplicate pointer-check recipe added
+by the overlapping continuations was removed before publication.
+
+Validation: incremental Lean/reference build passed; 959 addressed/vector
+complete-state cases and 18 precise rejects passed. Existing real DQ and vector
+route hosts passed 62,418 and 62,445 cases with UBSan. The new primitive check
+passed 512 native reads covering every alignment, and six actual compiled BPF
+functions retained exactly one 8-byte read at the required address, including
+literal context offset88, negative offsets, signed16 limits and the large-offset
+path. Existing simple_packet and cilium_ct_nat_tuple_rewrite ARM micro programs
+compiled successfully with the production BPF flags.
+
+The original pointer macro had C alignment/effective-type UB on unaligned ABI
+reads. Alignment1 alone was rejected: it fixed host UB but compiled into eight
+reordered byte reads. The final primitive keeps an exact-width typed BPF read
+and preserves literal context displacements; the host branch uses an aligned1,
+may_alias pointer type. `arm64-pointer-counterexamples.json.gz` retains the
+failing primitive and numeric byte-access counterexample. No inputs, sanitizer
+checks or architectural effects were removed to obtain passing results.
+
+D0 proofs currently cover V0 native8B loads/stores without writeback, including
+immediate and extended/scaled register offsets, exact effects/faults and all
+other state preservation under the explicit SP-alignment witness. The checked
+memory branches introduce no new C runtime permission guards. Pre/post writeback
+and Q16B versus two8B effect composition remain separate obligations; these two
+singleton arms are not the complete72-operation dispatcher theorem.
