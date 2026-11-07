@@ -282,3 +282,14 @@ all input identities and successful image-index/module observations. The
 four-application startup replay uses eight guest vCPUs for the existing Katran
 NAPI CPU layout,12GiB, one sample and a two-second workload. Each application
 batch records its actual refreshed image identity and startup outcome.
+
+
+### Coherent boot image and split BTF
+
+Live insertion in the a5b0/2f12 epoch identified the boot/module BTF difference.
+The modules recipe now requests bzImage and modules together. The resulting
+boot image df7a92936b41 and image1ead525666cc use the same5,670,459-byte kernel
+BTF stream as the module build base, SHA75fe34c0e2e. kernel-image-btf preserves
+the extracted stream, complete manifest and incremental build logs. The earlier
+Katran/Tetragon attempts retain their original startup errors and identities;
+subsequent application batches record the coherent image/kernel tuple.

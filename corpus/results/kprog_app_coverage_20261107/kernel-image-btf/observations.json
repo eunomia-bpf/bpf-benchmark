@@ -1,0 +1,23 @@
+{
+  "boot_btf": {
+    "boot": {
+      "btf_sha256": "75fe34c0e2e1da4cee5a0989934299c4d078460b31b4c611fcaf359101c74dc2",
+      "btf_bytes": 5670459
+    },
+    "build": {
+      "btf_sha256": "75fe34c0e2e1da4cee5a0989934299c4d078460b31b4c611fcaf359101c74dc2",
+      "btf_bytes": 5670459
+    },
+    "bzImage_sha256": "df7a92936b4180044271d87854fee6783d05a72a62eee72c70b28cf811cb5278"
+  },
+  "image": "sha256:1ead525666cc9da03d9740230bb9f1ac4cb567e36eb255172a7bd63ffa5a2b16",
+  "vmlinux_sha256": "76c6adc50151a4a7f8ab5591b353c27bcb1d404609fb7d56c00c861efc58bc02",
+  "kernel_modules": 842,
+  "build_exit": 0,
+  "boot_payload_btf_matches_module_base": true,
+  "earlier_epoch": {
+    "image": "sha256:a5b0b2b0db2ef3d5cd94a518a28992bbea976227a06ee3d935acc5367b459d6f",
+    "boot_sha256": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6",
+    "module_vmlinux_sha256": "76c6adc50151a4a7f8ab5591b353c27bcb1d404609fb7d56c00c861efc58bc02"
+  }
+}
