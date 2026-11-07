@@ -359,3 +359,16 @@ Result file:
 The remaining whole-suite failures, when present in future experiments, should
 be verifier/proof-expression failures after removing non-hardware guards, not
 runtime simulator fallbacks.
+
+
+## Native CORE read helper contract
+
+The shared vendor/bpf/native_compat.h expresses CORE register reads and
+single-field CORE reads through their kernel/legacy probe helpers. The native
+compiler thereby preserves the helper read, destination-zeroing and fault
+contract used by the upstream BPF path. Plain context-register access retains
+its direct field representation. Changes to this mechanism create a new native
+input epoch, recorded with the compiled object and runtime request identities.
+The native-core-helper result records generic x86/ARM helper observations and
+the queued whole-application replay; universal helper/native-link preservation
+laws provide the formal safety argument.

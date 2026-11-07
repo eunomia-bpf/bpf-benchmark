@@ -161,7 +161,7 @@
 #define __PT_IP_REG ip
 #endif
 
-#define __PT_CORE_READ(x, reg) (__PT_REGS_CAST(x)->reg)
+#define __PT_CORE_READ(x, reg) BPF_CORE_READ(__PT_REGS_CAST(x), reg)
 #define PT_REGS_RET_CORE(x) __PT_CORE_READ(x, __PT_RET_REG)
 #define PT_REGS_FP_CORE(x) __PT_CORE_READ(x, __PT_FP_REG)
 #define PT_REGS_RC_CORE(x) __PT_CORE_READ(x, __PT_RC_REG)
@@ -293,22 +293,6 @@ ____##name(struct pt_regs *ctx, ##args)
                        __native_core_type_2, \
                        __native_core_type_1)(src, args)
 
-static __always_inline int __native_core_is_null(const void *ptr)
-{
-    return ptr == NULL;
-}
-
-#define __native_core_is_pt_regs_ptr(src) \
-    (__builtin_types_compatible_p(typeof(src), struct pt_regs *) || \
-     __builtin_types_compatible_p(typeof(src), const struct pt_regs *))
-#define __native_core_direct_read(dst, src, a) ({ \
-    int __ret = -1; \
-    if (!__native_core_is_null(src)) { \
-        __builtin_memcpy((void *)(dst), (const void *)&((src)->a), sizeof(*(dst))); \
-        __ret = 0; \
-    } \
-    __ret; \
-})
 #define __native_core_read_into_1(fn, dst, src, a) \
     fn((dst), sizeof(*(dst)), &((src)->a))
 #define __native_core_read_into_2(fn, dst, src, a, b) ({ \
@@ -366,9 +350,7 @@ static __always_inline int __native_core_is_null(const void *ptr)
                        __native_core_read_into_1)(fn, dst, src, args)
 
 #define __native_core_read_value_1(fn, dst, src, a) \
-    __builtin_choose_expr(__native_core_is_pt_regs_ptr(src), \
-                          __native_core_direct_read((dst), (src), a), \
-                          fn((dst), sizeof(*(dst)), &((src)->a)))
+    fn((void *)(dst), sizeof(*(dst)), &((src)->a))
 #define __native_core_read_value_2(fn, dst, src, a, b) \
     __native_core_read_into_2(fn, dst, src, a, b)
 #define __native_core_read_value_3(fn, dst, src, a, b, c) \
