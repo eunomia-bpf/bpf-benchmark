@@ -54,6 +54,33 @@ def accesses(instructions, fixed_displacement=None):
     return events
 
 
+def instructions_by_function(disassembly):
+    functions, current = {}, None
+    for line in disassembly.splitlines():
+        label = re.fullmatch(r"[0-9a-f]+ <([^>]+)>:", line)
+        if label:
+            current = label[1]
+            if current in functions:
+                raise SystemExit(f"memory widths: duplicate function {current}")
+            functions[current] = []
+            continue
+        instruction = re.match(r"\s*\d+:((?:\s+[0-9a-f]{2}){8}(?:(?:\s+[0-9a-f]{2}){8})?)\s", line)
+        if instruction:
+            if current is None:
+                raise SystemExit("memory widths: instruction outside a function")
+            raw = bytes.fromhex(instruction[1])
+            if raw[0] == 0x18:
+                # A scalar64 literal kills pointer provenance like a scalar32
+                # MOV. Validate both slots; erase no memory or control flow.
+                if len(raw) != 16 or raw[1] >> 4 != 0 or raw[8:12] != bytes(4):
+                    raise SystemExit("memory widths: invalid scalar64 literal")
+                raw = bytes([0xB7, raw[1]]) + bytes(6)
+            elif len(raw) != 8:
+                raise SystemExit("memory widths: invalid instruction extent")
+            functions[current].append(raw)
+    return functions
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--clang", default="clang-18")
@@ -67,20 +94,7 @@ def main():
              "-I", str(ROOT), "-c", str(ROOT / "oracles/test_x86_memory_widths.c"), "-o", str(obj)])
     disassembly = command([args.objdump, "-d", str(obj)])
     (args.build_dir / "x86.asm").write_text(disassembly)
-    functions, current = {}, None
-    for line in disassembly.splitlines():
-        label = re.fullmatch(r"[0-9a-f]+ <([^>]+)>:", line)
-        if label:
-            current = label[1]
-            if current in functions:
-                raise SystemExit(f"memory widths: duplicate function {current}")
-            functions[current] = []
-            continue
-        instruction = re.match(r"\s*\d+:((?:\s+[0-9a-f]{2}){8})\s", line)
-        if instruction:
-            if current is None:
-                raise SystemExit("memory widths: instruction outside a function")
-            functions[current].append(bytes.fromhex(instruction[1]))
+    functions = instructions_by_function(disassembly)
     expected = {f"{kind}_{name}": [("read" if kind == "load" else "write", 3, width)]
                 for name, width in [("b8", 1), ("b16", 2), ("b32", 4), ("b64", 8), ("default", 8)]
                 for kind in ("load", "store")}
@@ -101,7 +115,22 @@ def main():
         (args.build_dir / f"bad-fixed-{mode}.log").write_text(result.stdout + result.stderr)
         if result.returncode == 0 or "fixed load requires a constant signed16 displacement" not in result.stderr:
             raise SystemExit(f"memory widths: bad fixed displacement mode{mode} did not fail precisely: {result.stderr}")
-    print("x86 BPF memory widths: ten generic + twenty fixed loads keep exact kind/address/width/count; fixed bases/displacements and three bad-offset rejections OK")
+    movx = args.build_dir / "x86-movx.bpf.o"
+    command([args.clang, "-target", "bpfel", "-O2", "-I", str(args.include_dir), "-I", str(ROOT),
+             "-I", str(ROOT.parent / "x86"), "-I", str(ROOT.parents[1] / "vendor/libbpf/src"),
+             "-I/usr/include/x86_64-linux-gnu", "-c", str(ROOT / "oracles/test_x86_movx_widths.c"), "-o", str(movx)])
+    assembly = command([args.objdump, "-d", str(movx)])
+    (args.build_dir / "x86-movx.asm").write_text(assembly)
+    functions = instructions_by_function(assembly)
+    expected = {f"{kind}_{sw}_{tw}": [("read", 3, sw)]
+                for kind in ("zx", "sx") for sw, tw in ((1,2),(1,4),(1,8),(2,4),(2,8),(4,8))}
+    if functions.keys() != expected.keys():
+        raise SystemExit(f"MOVX memory widths: function set mismatch: {functions.keys() ^ expected.keys()}")
+    for name, wanted in expected.items():
+        actual = accesses(functions[name])
+        if actual != wanted:
+            raise SystemExit(f"MOVX memory widths: {name}: got {actual}, expected {wanted}")
+    print("x86 BPF memory widths: ten generic + twenty fixed loads keep exact kind/address/width/count; fixed bases/displacements, three bad-offset rejections and twelve actual MOVX handler access widths OK")
 
 
 if __name__ == "__main__":

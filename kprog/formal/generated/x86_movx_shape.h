@@ -53,6 +53,11 @@ _Static_assert(KPROG_X86_MOVX_SHAPE(0) == KPROG_X86_MOVX_SHAPE_ZERO_EXTEND,
 	       "x86 movx shape absent opcode must reach the default arm");
 /* The decoded source-width code that means "absent": a MOVX body that leaves
  * its `aux` field empty falls back to its effective width. */
+/* MOVX-only high-byte source codes; AUX retains its legacy width semantics. */
+#define KPROG_X86_MOVX_HIGH_SOURCE(REG) (128U + (__u8)(REG))
+#define KPROG_X86_MOVX_SOURCE_HIGH(SRC) ((__u8)(SRC) >= 128U && (__u8)(SRC) < 132U)
+#define KPROG_X86_MOVX_SOURCE_REG(SRC) (KPROG_X86_MOVX_SOURCE_HIGH(SRC) ? (__u8)(SRC) - 128U : (__u8)(SRC))
+#define KPROG_X86_MOVX_SOURCE_SHIFT(SRC) (KPROG_X86_MOVX_SOURCE_HIGH(SRC) ? 8U : 0U)
 #define KPROG_X86_MOVX_SRC_WIDTH_ABSENT_CODE 0U
 /*
  * Resolve the source width a MOVX body operates at: the decoded `aux` code
