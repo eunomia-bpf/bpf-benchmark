@@ -1849,3 +1849,19 @@ theorems are byte-identical apart from the import. See related-step-coupling
 JSON/log. Complete-path existence and terminal quiet must still be composed
 to check every finite native execution; ABI/platform/RET transport and strict
 B block mapping remain open.
+
+### Complete actual canonical witness for any guest permissions
+
+`all_read_native_path_exists` constructs the actual selected complete canonical
+relational path for any reference memory read/write permissions, assuming only
+entryPC0. Both context faults, derived guard returns, every first-store fault
+and successful writes are covered. The witness's full state/events/fault are
+exactly `allReadNativeResult`; `all_read_native_complete_execution` lifts it to
+the actual decoded relational BlockStep. All comparisons and access outcomes
+come from existing canonical semantics. No successful-access or branch premise
+is added. The witness chooses one allowed representative; the already proved
+step coupling retains every AF choice for arbitrary actual executions.
+
+Five audits and the safety target pass; earlier declarations are unchanged.
+See canonical-complete-exists JSON/log. Terminal quiet and checked-prefix
+composition, ABI/platform/RET transport and strict B block mapping remain open.

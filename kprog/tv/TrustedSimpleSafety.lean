@@ -408,6 +408,116 @@ theorem related_native_instruction_steps_match
   refine ⟨firstTrace.symm.trans (sameEvents.trans secondTrace),?_⟩
   simpa only [firstStateEq,secondStateEq] using sameStates
 
+
+/-- The existing representative first-guard evaluator certificate, exposed
+for canonical path existence without constraining undefined AF choices. -/
+theorem first_guard_path_evaluation (s : X86.State) (position : s.pc=7) :
+    X86Path.evaluate 0 native [⟨7,3⟩,⟨10,2⟩,⟨12,3⟩,⟨15,2⟩] s =
+      .ok ⟨⟨guardFinal s,[],none⟩,(0xffffffffffffffef#64)⟩ := by
+  have d0 : X86Path.decodeAt 0 native ⟨7,3⟩ s = .ok
+      (.move .w64 (.register (.low 6)) (.register (.low 1)) 10) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode7,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have pc1 : (guardMove s).pc=10 := rfl
+  have pc2 : (guardZero s).pc=12 := rfl
+  have pc3 : (guardCompare s).pc=15 := rfl
+  have d1 : X86Path.decodeAt 0 native ⟨10,2⟩ (guardMove s) = .ok
+      (.logic .w32 .xor (.register (.low 0)) (.register (.low 0)) 12) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode10,pc1,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have d2 : X86Path.decodeAt 0 native ⟨12,3⟩ (guardZero s) = .ok
+      (.arithmetic .w64 .compare (.register (.low 6)) (.register (.low 2)) 15) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode12,pc2,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have d3 : X86Path.decodeAt 0 native ⟨15,2⟩ (guardCompare s) = .ok
+      (.branch (some 7) 60 17) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode15,pc3,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  simp only [X86Path.evaluate,d0,d1,d2,d3,guard_move_step s position,
+    guard_zero_step,guard_compare_step,guard_branch_step,X86.definedFlags,
+    Option.isSome, Bool.false_eq_true, List.isEmpty_cons, List.isEmpty_nil,
+    List.nil_append, ite_false]
+  rfl
+
+
+theorem guarded_native_path_exists (n : X86.State) (pointer limit : Word)
+    (first second : Event) (position : n.pc=0)
+    (read0 : readMemory n.memory (n.gpr 7) 8=.ok (pointer,first))
+    (read1 : readMemory n.memory (n.gpr 7+(8#64)) 8=.ok (limit,second)) :
+    CanonicalRelationalPath 0 native (guardedNativePath n pointer limit) n
+      ⟨guardedNativeFinal n pointer limit,[first,second],none⟩ := by
+  have contextCertificate := context_native_path_evaluation n position
+  have contextRun := canonical_evaluation_relational_sound _ _ _ _ _ contextCertificate
+  simp only [contextNativePath,contextNativeResult,read0,read1] at contextRun
+  have at7 : (nativePrefixFinal n pointer limit).pc=7 := by
+    simp [nativePrefixFinal,nativeAfterSecond,nativeAfter,position]
+  have firstCertificate := first_guard_path_evaluation (nativePrefixFinal n pointer limit) at7
+  have firstRun := canonical_evaluation_relational_sound _ _ _ _ _ firstCertificate
+  have combined := relational_path_append contextRun rfl firstRun
+  have prefixRun : CanonicalRelationalPath 0 native
+      [⟨0,3⟩,⟨3,4⟩,⟨7,3⟩,⟨10,2⟩,⟨12,3⟩,⟨15,2⟩] n
+      ⟨guardFinal (nativePrefixFinal n pointer limit),[first,second],none⟩ := by
+    simpa only [List.append_nil] using combined
+  by_cases reject : pointer>limit
+  · simpa only [guardedNativePath,guardedNativeFinal,reject,ite_true,List.append_nil] using prefixRun
+  · have at17 : (guardFinal (nativePrefixFinal n pointer limit)).pc=17 := by
+      simp +decide [guardFinal,nativePrefixFinal,nativeAfterSecond,nativeAfter,reject]
+    have remainingCertificate := remaining_native_path_evaluation (guardFinal (nativePrefixFinal n pointer limit)) at17
+    have remainingRun := canonical_evaluation_relational_sound _ _ _ _ _ remainingCertificate
+    have whole := relational_path_append prefixRun rfl remainingRun
+    simpa only [guardedNativePath,guardedNativeFinal,reject,ite_false,List.append_nil] using whole
+
+theorem complete_native_path_exists (n : X86.State) (pointer limit : Word)
+    (first second : Event) (position : n.pc=0)
+    (read0 : readMemory n.memory (n.gpr 7) 8=.ok (pointer,first))
+    (read1 : readMemory n.memory (n.gpr 7+(8#64)) 8=.ok (limit,second)) :
+    CanonicalRelationalPath 0 native (completeNativePath n pointer limit) n
+      (completeNativeResult n pointer limit first second) := by
+  have guards := guarded_native_path_exists n pointer limit first second position read0 read1
+  by_cases reject : pointer>limit ∨ pointer+(8#64)>limit ∨ pointer+(72#64)>limit
+  · simpa only [completeNativePath,completeNativeResult,completeNativeFinal,completeGuestSuffix,
+      completeNativeFault,reject,ite_true,List.append_nil] using guards
+  · obtain ⟨pc,pointerMatch,memoryMatch⟩ := guarded_native_body_boundary n pointer limit reject
+    have selected : packetFirstFailure n.memory pointer =
+        packetFirstFailure (guardedNativeFinal n pointer limit).memory
+          ((guardedNativeFinal n pointer limit).gpr 1) := by rw [pointerMatch,memoryMatch]
+    have bodyCertificate := packet_native_any_evaluation (guardedNativeFinal n pointer limit)
+      (packetFirstFailure n.memory pointer) pc selected
+    have bodyRun := canonical_evaluation_relational_sound _ _ _ _ _ bodyCertificate
+    have whole := relational_path_append guards rfl bodyRun
+    simpa only [completeNativePath,completeNativeResult,completeNativeFinal,completeGuestSuffix,
+      completeNativeFault,reject,ite_false,pointerMatch] using whole
+
+/-- A complete actual canonical relational path exists for every permission
+assignment. Faults terminate, and no guest-access outcome is assumed. -/
+theorem all_read_native_path_exists (n : X86.State) (position : n.pc=0) :
+    CanonicalRelationalPath 0 native (allReadNativePath n) n (allReadNativeResult n) := by
+  cases read0 : readMemory n.memory (n.gpr 7) 8 with
+  | error fault =>
+    have certificate := context_native_path_evaluation n position
+    have contextRun := canonical_evaluation_relational_sound _ _ _ _ _ certificate
+    simpa only [contextNativePath,contextNativeResult,allReadNativePath,allReadNativeResult,read0] using contextRun
+  | ok pair =>
+    rcases pair with ⟨pointer,first⟩
+    cases read1 : readMemory n.memory (n.gpr 7+(8#64)) 8 with
+    | error fault =>
+      have certificate := context_native_path_evaluation n position
+      have contextRun := canonical_evaluation_relational_sound _ _ _ _ _ certificate
+      simpa only [contextNativePath,contextNativeResult,allReadNativePath,allReadNativeResult,read0,read1] using contextRun
+    | ok pair =>
+      rcases pair with ⟨limit,second⟩
+      simpa only [allReadNativePath,allReadNativeResult,read0,read1] using
+        complete_native_path_exists n pointer limit first second position read0 read1
+
+theorem all_read_native_complete_execution (n : X86.State) (position : n.pc=0) :
+    Execution (relationalNativeInstructionStep 0 native) n
+      (allReadNativeResult n).events (allReadNativeResult n).state :=
+  canonical_relational_path_execution (all_read_native_path_exists n position)
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -451,3 +561,14 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.related_native_steps_couple
 
 #print axioms KProgTV.TrustedSimpleSafety.related_native_instruction_steps_match
+
+
+#print axioms KProgTV.TrustedSimpleSafety.first_guard_path_evaluation
+
+#print axioms KProgTV.TrustedSimpleSafety.guarded_native_path_exists
+
+#print axioms KProgTV.TrustedSimpleSafety.complete_native_path_exists
+
+#print axioms KProgTV.TrustedSimpleSafety.all_read_native_path_exists
+
+#print axioms KProgTV.TrustedSimpleSafety.all_read_native_complete_execution
