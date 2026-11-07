@@ -89,7 +89,7 @@ def check_definedness(insns, targets, linked_exit, decode):
         return State(tuple(x & y for x, y in zip(a.defined, b.defined)),
                      tuple(joined_pointer(x, y) for x, y in zip(a.aliases, b.aliases)),
                      a.flags & b.flags, {p: v for p, v in opaque.items() if v != 255},
-                     {p: joined_pointer(a.pointers.get(p), b.pointers.get(p))
+                     {p: joined_pointer(a.pointers.get(p, False), b.pointers.get(p, False))
                       for p in a.pointers.keys() | b.pointers.keys()},
                      tuple(x if x == y else None for x,y in zip(a.constants,b.constants)),
                      tuple(x or y for x,y in zip(a.ghost,b.ghost)), a.ghost_memory | b.ghost_memory,

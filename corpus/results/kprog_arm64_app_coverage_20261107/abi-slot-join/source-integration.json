@@ -1,0 +1,31 @@
+{
+  "utc": "2026-11-07T21:29:18.793124+00:00",
+  "retired_waiting_observer_pid": 3741817,
+  "phase_before": "waiting_existing_tetragon_chain",
+  "children_before": [],
+  "source_and_runtime_actions_before_retirement": 0,
+  "current_tracee_host_started": "2026-11-07T20:23:35.483062+00:00",
+  "tracee_service_ready_log_sha256": "fa680cdbe914f7783288043b62155cb0f1ca9e63f878e5d55e91d9ba71b309b5",
+  "tracee_startup_abi_sha256": "9cd5a458b5fe071a880347a2a84fb6c34ce8338388ebb052700f7854f81fcbca",
+  "new_source_effect": "Subsequent service startups load the tested ABI repair; the already-registered Tracee worker retains its startup Python functions.",
+  "basis": "trusted_service.serve calls adapter once before registration; the ARM producer imports check_definedness once into its module.",
+  "replacement": "One waiting runtime collector runs whole Tracee after the existing Tetragon predecessor closes.",
+  "source_adopted_utc": "2026-11-07T21:30:03.423361+00:00",
+  "source_path": "kprog/arm64/micro-prog/arm64_abi.py",
+  "source_before_sha256": "9cd5a458b5fe071a880347a2a84fb6c34ce8338388ebb052700f7854f81fcbca",
+  "source_after_sha256": "65f3ed7d1c53cac6673c88b957fab1e021420cddba8f379ffc9e2685e25b7cbb",
+  "mechanism_cases": 196,
+  "assembled_native_differences": 0,
+  "check_log_sha256": "3d91ca3a050299262cb3097634f29d1db78460e0f7b80b69e04cde6aac8e217c",
+  "bootstrap_source_sha256": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+  "source_pins": {
+    "kprog/arm64/micro-prog/generated_arm64_cc_decode.py": "da883b8b8f40516b8cfe88cc08adaed1e66376cee82787a91715b8c459e29511",
+    "kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "fd02214dff34fb5c47644be13571b46518b39258d403326754cc84096bc4003c",
+    "kprog/arm64/micro-prog/arm64_abi.py": "9cd5a458b5fe071a880347a2a84fb6c34ce8338388ebb052700f7854f81fcbca",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "b9eb4c7cba928342851ff055117e60e6debbc6d9c41dd1a34d5e5fa7e8b8f97f",
+    "kprog/arm64/micro-prog/generated_arm64_decode.py": "2a2ae48c6b70328e5a389adb91a9503cdbc856c85d390d6b1c81e291d27d36d2",
+    "kprog/helper_abi.py": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b",
+    "vendor/libbpf/src/bpf_helper_defs.h": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697"
+  },
+  "scope": "Generic ARM ABI source adoption for subsequent common-service startups"
+}

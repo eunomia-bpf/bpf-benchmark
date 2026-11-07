@@ -1,7 +1,7 @@
 {
   "utc": "2026-11-07T21:12:25.712595+00:00",
   "scope": "Generic ARM ABI slot-join and helper-copy mechanism; private source candidate",
-  "production_state": "Existing application source epochs retained; candidate promotion follows their closure.",
+  "production_state": "Source promoted before subsequent application service startups; the current Tracee worker retains its startup module.",
   "changed_source": "kprog/arm64/micro-prog/arm64_abi.py",
   "before_sha256": "9cd5a458b5fe071a880347a2a84fb6c34ce8338388ebb052700f7854f81fcbca",
   "after_sha256": "65f3ed7d1c53cac6673c88b957fab1e021420cddba8f379ffc9e2685e25b7cbb",
@@ -45,5 +45,6 @@
     "candidate.patch": "0d24004ad2a8a5ffcd064ba905d44506fece2aacafadd3c1a60a51f40e2453e6"
   },
   "theorem_scope": "Universal ABI read/join consistency and helper copy preservation compose with the common simulator/link safety obligations. This regression records generic analysis and source-generation behavior.",
-  "inputs_archive_sha256": "523955e18922cbfc723fd359664de0227aa332851fe904d75e45e8aabd5824a4"
+  "inputs_archive_sha256": "523955e18922cbfc723fd359664de0227aa332851fe904d75e45e8aabd5824a4",
+  "integration_receipt": "source-integration.json"
 }
