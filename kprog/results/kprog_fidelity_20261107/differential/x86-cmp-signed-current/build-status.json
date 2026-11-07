@@ -1,0 +1,13 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "16-19",
+    "make",
+    "-C",
+    "kprog/fidelity",
+    "build",
+    "ARCH=x86"
+  ],
+  "exit": 0
+}

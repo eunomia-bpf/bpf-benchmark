@@ -1,0 +1,31 @@
+{
+  "recorded": "2026-11-07T18:56:43.890204+00:00",
+  "execution": "Real x86-64 CPU versus compiled production C",
+  "forms": 1144,
+  "cases_per_form": 1024,
+  "cases": 1171456,
+  "cpu_c_mismatches": 0,
+  "explicit_cmp_forms": 23,
+  "explicit_cmp_cases": 23552,
+  "explicit_cmp_mismatches": 0,
+  "build_exit": 0,
+  "binary_sha256": "2057b385f3b982fc38adf9486f5025ab1b07b9cbd8deff038ad843fe9a4de924",
+  "compiled_header_sha256": "4fe6817022a81eaf529235979a9d0f0c237e972ae16ede5f5164b524ba5ac307",
+  "header_commit": "b46de606ccde1165966e8d9fc0d19e881bcfe00e",
+  "actual_compilation_files_verified": 90,
+  "production_source_files_exact": 82,
+  "production_closure_commit": "1d0a11029e706a9e51cb8b9ce15bf0410468d875",
+  "same_1144_assembly_opcode_order": true,
+  "same_observer_driver_and_build_rules": true,
+  "canonical_outcome": "Terminal reference status not independently reviewed in this CPU snapshot",
+  "source_drift_at_review": {
+    "kprog/x86/x86_sim_local_bpf.h": {
+      "compiled": "4fe6817022a81eaf529235979a9d0f0c237e972ae16ede5f5164b524ba5ac307",
+      "physical_at_review": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a"
+    },
+    "kprog/x86/micro-prog/generated_x86_specialization.py": {
+      "compiled": "3b68d720b251fa277114740d04020e017821022a8b410c9cc86d4b9280426a3b",
+      "physical_at_review": "3508a8dd5f20975c6cce171e673548d91c123752f9df24cd7b2a84d8e02e7ac7"
+    }
+  }
+}

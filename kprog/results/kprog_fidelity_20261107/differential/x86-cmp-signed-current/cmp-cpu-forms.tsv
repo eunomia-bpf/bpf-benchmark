@@ -1,0 +1,24 @@
+assembly	opcode	cases	mismatches
+cmp rsp, 0	X86_OP_CMP_IMM	1024	0
+cmp al, bl	X86_OP_CMP_REG	1024	0
+cmp al, 0x7f	X86_OP_CMP_IMM	1024	0
+cmp BYTE PTR [rdi+8], al	X86_OP_CMP_MEM_REG	1024	0
+cmp BYTE PTR [rdi+8], 0x7f	X86_OP_CMP_MEM_IMM	1024	0
+cmp al, BYTE PTR [rdi+8]	X86_OP_CMP_REG_MEM	1024	0
+cmp ax, bx	X86_OP_CMP_REG	1024	0
+cmp ax, 0x7f	X86_OP_CMP_IMM	1024	0
+cmp WORD PTR [rdi+8], ax	X86_OP_CMP_MEM_REG	1024	0
+cmp WORD PTR [rdi+8], 0x7f	X86_OP_CMP_MEM_IMM	1024	0
+cmp ax, WORD PTR [rdi+8]	X86_OP_CMP_REG_MEM	1024	0
+cmp eax, ebx	X86_OP_CMP_REG	1024	0
+cmp eax, 0x7f	X86_OP_CMP_IMM	1024	0
+cmp DWORD PTR [rdi+8], eax	X86_OP_CMP_MEM_REG	1024	0
+cmp DWORD PTR [rdi+8], 0x7f	X86_OP_CMP_MEM_IMM	1024	0
+cmp eax, DWORD PTR [rdi+8]	X86_OP_CMP_REG_MEM	1024	0
+cmp rax, rbx	X86_OP_CMP_REG	1024	0
+cmp rax, 0x7f	X86_OP_CMP_IMM	1024	0
+cmp QWORD PTR [rdi+8], rax	X86_OP_CMP_MEM_REG	1024	0
+cmp QWORD PTR [rdi+8], 0x7f	X86_OP_CMP_MEM_IMM	1024	0
+cmp rax, QWORD PTR [rdi+8]	X86_OP_CMP_REG_MEM	1024	0
+cmp ah, bh	X86_OP_CMP_REG	1024	0
+cmp ah, 0x7f	X86_OP_CMP_IMM	1024	0
