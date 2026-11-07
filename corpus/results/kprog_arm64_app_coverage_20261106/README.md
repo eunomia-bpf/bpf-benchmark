@@ -1,6 +1,29 @@
 # Lane A: AArch64 application artifact coverage, 2026-11-06
 
-Latest trusted-path checkpoints (2026-11-07): the [full-system native-only ARM service control](trusted-arm64-service-result/README.md) passed with fresh kernel-owned generation, verifier binding, application reopen and actual native TEST_RUN=2 (prebuilt_proof=false). This does not establish six-application acceptance; real Katran integration is the next running case.
+Latest trusted-path checkpoints (2026-11-07): [Katran completed the native-only
+kernel-service path](trusted-bcc-frame-result/context-native/trusted-arm64-katran-result/README.md).
+Its single balancer native request generated a fresh proof, passed verification
+and binding, and executed19,391 times during the unchanged packet workload;
+pktgen, VIP, TX and backend counters also recorded19,391 packets, with0 pktgen
+errors. The kernel/native identity audit and full request/compiler/runtime logs
+are retained with that result. QEMU timing is functional only.
+
+The [canonical ARM worker integration](trusted-bcc-frame-result/context-native/README.md)
+now includes the compact private stack payload and exact native-width XDP reads.
+All46 archived safety/Katran requests reproduce33 identical preprocessed C
+outputs and13 specialization refusals. The prior45-case safety replay completed
+8 valid executions and37 refusals, with0 unsafe executions. The canonical BCC
+`tcplife` compile has identical executable BPF/relocations and352 frame bytes.
+These exact comparisons do not establish universal compiler or ISA refinement.
+
+The standard BCC native-only replay is running through the canonical worker,
+using the existing eight-tool/two-start corpus recipe. Its baseline startup
+completed; application acceptance remains pending. Reproduce with
+`make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile trusted-bcc-arm64-run`.
+The [BCC run directory](trusted-arm64-bcc-result/) retains two zero-request
+startup failures and the module-version diagnosis; its collector publishes the
+current run when it closes. The earlier [service control](trusted-arm64-service-result/README.md)
+remains a separate component result. All-six-application acceptance is still open.
 
 The [complete current manifest audit](manifest-dispatch-result/README.md) analyzes all 546 selectors and 626 matching native entry candidates with finite indirect targets; live source BTF still determines the exact entry. The [fresh OTel compile result](otel-memory-compiler-result/README.md) records 14/14 generation/compile/link/install successes, with no application or verifier acceptance because the subsequent old runtime pin failed. Earlier runtime/prebuilt results below retain their historical scope.
 
