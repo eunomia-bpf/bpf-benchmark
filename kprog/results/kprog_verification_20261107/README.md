@@ -2408,3 +2408,30 @@ The sole complete make-check run is still checking immutable5c7549242, which
 precedes this CMP increment. It has passed the repaired POPCNT component and
 DIV at this observation, but is not yet a full PASS. This later CMP increment
 has its own focused validation; full77/72/whole-ISA/O2/O4 work remains open.
+
+## Immutable5c754 full check and CL/parity fixture repair
+
+The complete make-check command on published5c7549242 finished with actual
+exit2 at Makefile177, check_x86_flag_definedness.py. The repaired POPCNT and
+preceding DIV/rotate/high-load components passed. The new failure was the
+SHLD positive compilation fixture reading DWORD directly from the native XDP
+context; native data/data_end fields are64-bit pointers. Full commands, all
+1140 exported source hashes, compiler output, queue/runner controls and call
+CPU trace are retained here; the private source/cache export was deleted and
+the sole FULL slot released. This is a failed full run, not a partial PASS.
+The later CMP c1b proof is separately validated outside that fixed snapshot.
+
+The CL/parity positive fixtures now first load the native packet-data pointer
+before their existing DWORD load. The original jp7 target is rebased to jp8,
+so it still reaches the same mov eax,2 instruction. Both original context-
+read programs remain as negative compiles requiring the exact unmapped-read
+diagnostic. Neither the encoder, production header nor ABI rule is changed.
+
+The entire corrected component passes with no input drift: all132 existing
+ABI/undefined-state cases,3072 UBSan width/count/destination-alias cases,
+both SHLD/SHRD packet-memory BPF compiles,19 actual widening host/BPF programs,
+and five impossible-width/REX rejections remain. The two original narrow-
+context programs are checked explicitly as rejections. Exact old/final tool
+sources, generated C, diagnostics, commands and pins accompany the full-run
+failure in the existing integration JSON/gzip. A new full run after this
+repair will be a separate immutable record; no full77/72/O2/O4 claim follows.
