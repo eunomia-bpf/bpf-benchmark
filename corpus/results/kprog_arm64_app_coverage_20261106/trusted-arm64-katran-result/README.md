@@ -17,3 +17,7 @@ make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile trusted-katran
 ```
 
 Builds reuse the canonical shared ARM shim/loader/native-link caches. The VM uses the retained v35 root read-only, the newly built canonical Image/module, and the matched installed stock modules. It has eight vCPUs because the unchanged corpus recipe uses guest CPUs 5 and 6; the host process is pinned to CPUs 20-23. Temporary run state is archived and deleted automatically.
+
+After the shared source-used-map projection and ARM extern correction, the next real run successfully queried all 14 pinned map facts and generated the native-link proof. Its guest clang was killed by the kernel OOM killer at 3,437,480 KiB anonymous RSS in the 4 GiB guest. The native request failed with service status -5; compilation returned -9, and the verifier was never invoked. The application reported no attached XDP program and no workload ran. `compiler-oom.json` and `run-20261107T095459034219Z.tar.gz` preserve the actual receipt, kernel OOM line and full request inputs/logs. All recorded input hashes stayed unchanged.
+
+The next Katran replay uses 8 GiB guest RAM, within the lane limit, with the same eight guest vCPUs and CPUs 20-23 on the host. This is a response to the observed compiler OOM; no compiler flag, native input, kernel policy or workload change was made. Updated ARM shim/loader binaries must be built incrementally before that replay.

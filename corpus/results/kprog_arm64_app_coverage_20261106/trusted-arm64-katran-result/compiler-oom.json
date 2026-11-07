@@ -1,0 +1,22 @@
+{
+  "scope": "first actual Katran native request; complete application program total not observed",
+  "programs_observed": 1,
+  "proof_generated": 0,
+  "verifier_accepted": 0,
+  "specialization_failed_by_cause": {
+    "compiler_guest_oom": 1
+  },
+  "verifier_rejected_by_error_class": {},
+  "kernel_oom_line": "[ 3015.232448] Out of memory: Killed process 970 (clang) total-vm:3671952kB, anon-rss:3437480kB, file-rss:1228kB, shmem-rss:0kB, UID:0 pgtables:7068kB oom_score_adj:0",
+  "receipt": {
+    "request_id": 1,
+    "source_prog_id": 14,
+    "native_sha256": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+    "started": "1970-01-01T00:03:29.184074+00:00",
+    "status": -5,
+    "error": "Command '['clang', '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/aarch64-linux-gnu', '-c', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-_76a4gtj/requests/request-6mscpvps/generated/trusted_arm64.bpf.c', '-o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-_76a4gtj/requests/request-6mscpvps/generated/trusted_arm64.bpf.o']' died with <Signals.SIGKILL: 9>.",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 67, in specialize\n    run([\"clang\", \"-g\", \"-O2\", \"-mcpu=v4\", \"-target\", \"bpf\",\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 53, in run\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['clang', '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/aarch64-linux-gnu', '-c', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-_76a4gtj/requests/request-6mscpvps/generated/trusted_arm64.bpf.c', '-o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-_76a4gtj/requests/request-6mscpvps/generated/trusted_arm64.bpf.o']' died with <Signals.SIGKILL: 9>.\n",
+    "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-_76a4gtj/requests/1.failure.tar.gz",
+    "finished": "1970-01-01T00:50:35.998354+00:00"
+  }
+}

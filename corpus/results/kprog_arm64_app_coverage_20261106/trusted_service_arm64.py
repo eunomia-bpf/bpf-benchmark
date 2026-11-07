@@ -144,7 +144,7 @@ def host(case="control"):
         module = ROOT / 'kinsn/module/arm64/build/bpf_arm64_native_lab.ko'
         root = ROOT / 'kprog/arm64/build/app-runtime-v35/root'
         argv = ['taskset', '-c', '20-23', 'qemu-system-aarch64', '-M', 'virt',
-            '-cpu', 'max', '-smp', '8' if case == 'katran' else '2', '-m', '4096' if case == 'katran' else '2048', '-nographic', '-no-reboot',
+            '-cpu', 'max', '-smp', '8' if case == 'katran' else '2', '-m', '8192' if case == 'katran' else '4096' if case == 'katran' else '2048', '-nographic', '-no-reboot',
             '-kernel', str(image), '-fsdev',
             'local,id=rootfs,path=' + str(root) + ',security_model=none,readonly=on',
             '-device', 'virtio-9p-device,fsdev=rootfs,mount_tag=rootfs',

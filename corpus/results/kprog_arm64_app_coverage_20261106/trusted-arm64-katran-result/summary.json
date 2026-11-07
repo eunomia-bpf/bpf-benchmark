@@ -1,8 +1,8 @@
 {
   "ok": false,
   "case": "katran",
-  "started": "2026-11-07T09:36:49.635115+00:00",
-  "archive": "run-20261107T093649635094Z.tar.gz",
+  "started": "2026-11-07T09:54:59.034247+00:00",
+  "archive": "run-20261107T095459034219Z.tar.gz",
   "command": [
     "taskset",
     "-c",
@@ -34,21 +34,21 @@
   "hashes_before": {
     "vendor/build/arm64/linux/arch/arm64/boot/Image": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac",
     "kinsn/module/arm64/build/bpf_arm64_native_lab.ko": "2ebef5adbcd23e22a2a832900c4b1a47d48dacefbf573329c5518e8559ed3787",
-    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader": "e68e97bb7a6771a773c15f681de9b5b2f92332ab86a5fd7fc17650ce9830367f",
-    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-service-client": "7eee87ea08e6792c3152ef0dcd4c8904c103317b537e48d69382484a5e74a96a",
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader": "6ee30c665196957ad8f91a3ab49f68615f37b812bec52dfbd3df40dc0b83f8e3",
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-service-client": "1c8fb869d502636b356e0bfe026d5963ab4dbbba846c7b71d3b0091e24a4cbc9",
     "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native.o": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
     "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "7d55f12233643c26968509e5c701743900ee1f1b5022178e69037f4a1cf9ab74",
-    "kprog/trusted_service.py": "a2fa0dd0718d9569cfd47453cbabcc8a990fa1cb24ae3da394d597c62d5b2438",
+    "kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
     "kprog/trusted_loader.cpp": "77d7944274bf9f8a66d7d5e7dceb30a55c66e5461c6028df37a9c32d5e81d548",
-    "kprog/trusted_generation.py": "3e25aaba1c4d95f74d074efae8fee0986a86691858003ad685ad71a8c21e1a40",
-    "kprog/arm64/trusted_specializer.py": "e2dce1d930eb5a1d6851aef4cfd9f3b1a5a5956dff6c08f32a4a5313fe6d4ea8",
+    "kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+    "kprog/arm64/trusted_specializer.py": "9c96ba545a3856021520407ab6da93d60534ce5b536ceb6d151c79d498c08497",
     "kprog/arm64/arm64_sim_local_bpf.h": "60866e8e7a8a6b5772b8d177d01cd6013f1c90d7d0a67c6a9b5dd92f5a7e7a7b",
     "kprog/arm64/arm64_sim.h": "8d69f4e7b1aa1e809ed40861362e13ab7c493a6ede5abf3e0fd38a763d683fbe",
-    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "2d7a9d33130d643362e277201312577a9c1791497d5d059be20288fc3b35ad48",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "464cae64514f8e9e8781c6c4a014d52b04758a92f4a0509ff5f6288df49b3a5f",
     "kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
     "corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py": "8b417d0b594ed3f675cf8ce3b50fa2c8071531a9055850cec4fc1850cd3ce603",
     "bpfopt/shim/build-arm64/libbpfrejit_shim.so": "fc9dc34d079c4700456216dd7f57277f2d937325d3b000fb1c0f9376b2f7c2c2",
-    "kprog/libnativeloader/build-arm64-a-map-order-v3/libnative_loader.so": "d8aef8cc525ff66ccf399e39d8caf5e0ddce429f2ef2a58ce32a3ff5e87da4db",
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/libnative_loader.so": "50e3d44affc202186bf18acf4a3dc63d280745a5d0b998f82da294a2fd66a68a",
     "kprog/arm64/build/app-verified-stage/katran/manifest.json": "5161c0911ef19bef60714c3ce4ab6a37423f594b2665157ef0ca3f5e4551255d",
     "kprog/arm64/build/app-verified-stage/katran/balancer.native.o": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
     "kprog/arm64/build/app-runtime-v35/root/artifacts/user/repo-artifacts/arm64/katran/bin/katran_server_grpc": "8d90289251c7ca61cade7d649f74a192c779169ba63deb89fb26a66a28e66684",
@@ -63,12 +63,12 @@
     "ok": false,
     "arch": "arm64",
     "case": "katran",
-    "started": "1970-01-01T00:00:13.279475+00:00",
+    "started": "1970-01-01T00:00:14.578528+00:00",
     "error": "Katran server did not expose an attached XDP program on katran0",
     "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py\", line 102, in guest\n    summary.update(katran(live), ok=True)\n                   ^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py\", line 48, in katran\n    runner.start()\n  File \"/workspaces/repository/runner/libs/app_runners/katran.py\", line 841, in start\n    session.__enter__()\n  File \"/workspaces/repository/runner/libs/app_runners/katran.py\", line 638, in __enter__\n    self.attach_info = self._wait_for_xdp_attach()\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/runner/libs/app_runners/katran.py\", line 687, in _wait_for_xdp_attach\n    raise RuntimeError(f\"Katran server did not expose an attached XDP program on {self.iface}\")\nRuntimeError: Katran server did not expose an attached XDP program on katran0\n",
-    "finished": "1970-01-01T00:03:28.901402+00:00"
+    "finished": "1970-01-01T00:50:44.134309+00:00"
   },
   "hashes_unchanged": true,
-  "finished": "2026-11-07T09:40:21.430725+00:00",
-  "archive_sha256": "8b71092d9180d8fc0b4bcb1b6992eca2e8e0d68d72aaebcbd7c01937408b2267"
+  "finished": "2026-11-07T10:45:46.842505+00:00",
+  "archive_sha256": "fd484e05e02833cda549581650ee8a7d1e367e26bdcfb6e1cc428253639a92e6"
 }
