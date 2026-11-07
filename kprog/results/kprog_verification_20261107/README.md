@@ -361,3 +361,11 @@ passed. Existing independent MOVK semantics checked 20,145 cases; actual AUX
 and singleton route hosts checked 1,115,374 and 11,083 cases. All checks passed
 without failures or input filtering. A new immutable combined full check follows
 publication of this increment; exact6ded5f0d5's full result precedes it.
+
+Exact `db3066318d7b5a6d6ebda69ee7b47292624d9f43` completed
+`make -C kprog/formal check` with exit **0**, including packed BITFIELD/MOVK
+fields and dispatcher refinements, all earlier Lean modules, generated contracts,
+reference/wire/compiler checks and C semantic hosts. The immutable source/cache
+export was deleted automatically; compressed CALL CPU observations now retain
+this full run. Subsequent SHIFT field/operand composition is a separate increment
+requiring its own full validation.
