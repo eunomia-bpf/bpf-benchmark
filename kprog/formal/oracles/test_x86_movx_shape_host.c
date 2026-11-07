@@ -174,13 +174,6 @@ int main(void)
 		failures++;
 	}
 
-	/* Source decoding is independent of AUX width and opcode shape. */
-	for (unsigned source = 0; source < 256; source++) {
-		int high = source >= 128 && source < 132;
-		if (KPROG_X86_MOVX_SOURCE_REG(source) != (high ? source-128 : source) ||
-		    KPROG_X86_MOVX_SOURCE_SHIFT(source) != (high ? 8U : 0U)) failures++;
-		cases++;
-	}
 	if (failures != 0) {
 		printf("x86 movx shape host cross-check: FAIL (%d)\n", failures);
 		return 1;

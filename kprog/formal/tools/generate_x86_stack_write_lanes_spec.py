@@ -147,13 +147,9 @@ def check_region(region):
     if READ_ASSEMBLE not in region:
         raise SystemExit(
             "x86 stack read ladder does not assemble the byte lanes")
-    # The compiler identity barrier selects no byte lane and writes no memory.
-    gates = region.replace(
-        "if (__x86_stw_width == X86_WIDTH_64) "
-        "X86_SIM_L_BARRIER_VAR(__x86_stw_narrowed);", "")
-    if (HAND_GATE_16 in gates or HAND_GATE_32 in gates or
-            HAND_GATE_STR_16 in gates or HAND_GATE_STR_32 in gates or
-            HAND_GATE_64 in gates or HAND_GATE_STR_64 in gates):
+    if (HAND_GATE_16 in region or HAND_GATE_32 in region or
+            HAND_GATE_STR_16 in region or HAND_GATE_STR_32 in region or
+            HAND_GATE_64 in region or HAND_GATE_STR_64 in region):
         raise SystemExit(
             "x86 stack ladder gates its byte lanes by hand instead of "
             "through the generated activation predicate")

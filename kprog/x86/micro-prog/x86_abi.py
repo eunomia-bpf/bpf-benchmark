@@ -412,22 +412,9 @@ def check_definedness(insns, targets, exit_addr, decode):
                 need(incoming,'rax',where)
                 if op in {'div','idiv'}: need(incoming,'rdx',where)
                 write('rax');write('rdx')
-            elif op in {'cbw','cwde','cdqe'}:
-                source, target = {'cbw': ('al','ax'), 'cwde': ('ax','eax'), 'cdqe': ('eax','rax')}[op]
-                source_bits, target_bits = ri(source)[1], ri(target)[1]
-                known = mask(incoming,source)
-                if known & (1 << (source_bits-1)):
-                    known |= ((1 << target_bits)-1) ^ ((1 << source_bits)-1)
-                constant = incoming.constants[ri(source)[0]]
-                if constant is not None:
-                    constant &= (1 << source_bits)-1
-                    if constant & (1 << (source_bits-1)): constant -= 1 << source_bits
-                    constant &= (1 << target_bits)-1
-                write(target,known,constant=constant)
-            elif op in {'cdq','cqo','cwd'}:
-                source, target = {'cwd': ('ax','dx'), 'cdq': ('eax','edx'), 'cqo': ('rax','rdx')}[op]
-                known = (1 << ri(target)[1])-1 if mask(incoming,source) & (1 << (ri(source)[1]-1)) else 0
-                write(target,known)
+            elif op in {'cdqe','cdq','cqo','cwd'}:
+                need(incoming,'eax' if op in {'cdqe','cdq'} else 'rax',where)
+                write('rax' if op=='cdqe' else 'edx' if op=='cdq' else 'dx' if op=='cwd' else 'rdx')
             elif op=='mulx':
                 need(incoming,'rdx',where)
                 write(args[0]);write(args[1])

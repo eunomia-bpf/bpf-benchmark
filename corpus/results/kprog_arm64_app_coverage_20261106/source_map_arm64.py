@@ -41,15 +41,10 @@ if len(sys.argv)>2 and sys.argv[2]=='package':
     (root/'cases/manifest.json').write_text(json.dumps({'objects':[entry]},indent=2)+'\n')
     wrong=dict(entry,simulator_object='/cases/source_map_wrong.bpf.o')
     (root/'cases/wrong-offset.json').write_text(json.dumps({'objects':[wrong]},indent=2)+'\n')
-    readonly_argument=''
-    if (phase/'source_map_wrong_rodata.bpf.o').exists():
-        wrong=dict(entry,simulator_object='/cases/source_map_wrong_rodata.bpf.o')
-        (root/'cases/wrong-rodata.json').write_text(json.dumps({'objects':[wrong]},indent=2)+'\n')
-        readonly_argument=' /cases/wrong-rodata.json'
     script=['#!/bin/sh','export PATH=/bin','busybox mount -t proc proc /proc || exit 1',
         'busybox mount -t sysfs sysfs /sys || exit 1','busybox mount -t 9p -o trans=virtio results /results || exit 1',
         'busybox insmod /native_lab.ko || exit 1','ulimit -l unlimited || exit 1',
-        'BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1 /source-map-probe /cases/source.bpf.bin /cases/manifest.json /cases/wrong-offset.json'+readonly_argument+' >/results/source-map.log 2>&1',
+        'BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1 /source-map-probe /cases/source.bpf.bin /cases/manifest.json /cases/wrong-offset.json >/results/source-map.log 2>&1',
         'rc=$?','echo "$rc" >/results/guest-status','busybox dmesg >/results/dmesg.log','busybox sync','busybox poweroff -f']
     (root/'init').write_text('\n'.join(script)+'\n');(root/'init').chmod(0o755)
     names='\n'.join(['.']+sorted(str(p.relative_to(root)) for p in root.rglob('*')))+'\n'
@@ -59,12 +54,6 @@ if len(sys.argv)>2 and sys.argv[2]=='package':
 phase.mkdir();(phase/'native').mkdir()
 source=Path(__file__).with_name('source-map-input')
 for name in ['source.bpf.bin','native.opt.ll','source-map-bindings.json']:shutil.copy2(source/name,phase/name)
-if len(sys.argv)>2:
-    if sys.argv[2] != 'readonly': raise ValueError(sys.argv[2])
-    ir=phase/'native.opt.ll'
-    text=ir.read_text().replace('@__native_source_map_0 = external', '@__readonly_value = private constant i64 42, align 8\n\n@__native_source_map_0 = external')
-    text=text.replace('  store i64 42,', '  %value = load volatile i64, ptr @__readonly_value, align 8\n  store i64 %value,')
-    ir.write_text(text)
 bindings=json.loads((phase/'source-map-bindings.json').read_text())
 commands=[]
 def run(args):
@@ -97,14 +86,6 @@ text=text.replace('#include "../arm64_sim_local_bpf.h"',f'#include "{phase}/simu
 (phase/'source_map.bpf.c').write_text(text)
 run(['clang','-g','-O2','-target','bpf','-D__TARGET_ARCH_arm64','-I'+str(ROOT/'vendor/libbpf/include/uapi'),
      '-I'+str(ROOT/'vendor/libbpf/src'),'-I/usr/include/x86_64-linux-gnu','-c',phase/'source_map.bpf.c','-o',phase/'source_map.bpf.o'])
-if len(sys.argv)>2 and sys.argv[2]=='readonly':
-    with (phase/'source_map.bpf.o').open('rb') as stream:
-        elf=ELFFile(stream);section=elf.get_section_by_name('.rodata.native.0')
-        if section is None: raise RuntimeError('readonly fixture has no private data relocation')
-        data=bytearray(section.data());data[0]^=1
-    bad=phase/'wrong-readonly.bin';bad.write_bytes(data)
-    run(['llvm-objcopy-18','--update-section=.rodata.native.0='+str(bad),
-        phase/'source_map.bpf.o',phase/'source_map_wrong_rodata.bpf.o'])
 if text.count('__source_map_base_0 + 16ULL')!=1:raise RuntimeError('expected one explicit source map offset')
 (phase/'source_map_wrong.bpf.c').write_text(text.replace('__source_map_base_0 + 16ULL','__source_map_base_0 + 0ULL'))
 run(['clang','-g','-O2','-target','bpf','-D__TARGET_ARCH_arm64','-I'+str(ROOT/'vendor/libbpf/include/uapi'),

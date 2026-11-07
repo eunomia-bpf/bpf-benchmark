@@ -359,7 +359,7 @@ pin-runtime-v2:
 runtime-shim-v2:
 	python3 $(HERE)/pin_shim.py
 	taskset -c 16-23 $(MAKE) -C $(ROOT) host-shim-arm64 \
-		BPFOPT_SHIM_DIR=$(ROOT)/kprog/arm64/build/published-shim-v8/bpfopt/shim \
+		BPFOPT_SHIM_DIR=$(ROOT)/kprog/arm64/build/published-shim-v5/bpfopt/shim \
 		BPFOPT_SHIM_BUILD_ARM64=$(RUNTIME_SHIM_BUILD)
 
 .PHONY: qemu-context-v2-root
@@ -532,13 +532,13 @@ startup-arm64-collect:
 
 .PHONY: source-map-arm64-build
 source-map-arm64-build:
-	python3 $(HERE)/source_map_arm64.py $(HERE)/$(PHASE) $(SOURCE_MAP_ARGS)
+	python3 $(HERE)/source_map_arm64.py $(HERE)/$(PHASE)
 
 .PHONY: source-map-arm64-check
 source-map-arm64-check:
 	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static -D__EXPORTED_HEADERS__ \
 		-I$(ROOT)/vendor/linux-framework/include/uapi -I$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
-		$(HERE)/source_map_probe.cpp $(ROOT)/kprog/libnativeloader/build-arm64-a-map-order-v3/libnative_loader.a \
+		$(HERE)/source_map_probe.cpp /workspaces/.agent-state/kprog-lanes/T/context-v2-source-map/arm64/libnative_loader.a \
 		$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
 		-L$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -o $(HERE)/$(PHASE)/source-map-probe
 	python3 $(HERE)/source_map_arm64.py $(HERE)/$(PHASE) package $(BASE_INITRAMFS)
@@ -600,15 +600,7 @@ code-dispatch-build: direct-header-generate
 		-c $$source -o $${source%.c}.o || exit 1; \
 	done
 
-.PHONY: entry-abi-build context-helper-host-check
-context-helper-host-check:
-	cd $(ROOT)/kprog/formal && taskset -c 16-19 lake build KProgFormal.Arm64HelperArgPtrShape
-	install -d $(ROOT)/kprog/arm64/build
-	cc -Wall -Wextra -Werror -O2 -I$(ROOT) -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu $(HERE)/context_helper_host.c -o $(ROOT)/kprog/arm64/build/context-helper-host
-	$(ROOT)/kprog/arm64/build/context-helper-host
-	cd $(ROOT)/kprog/formal && cc -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_helper_call_host.c -o build/test_arm64_helper_call_host
-	$(ROOT)/kprog/formal/build/test_arm64_helper_call_host
-
+.PHONY: entry-abi-build
 entry-abi-build: direct-header-generate
 	python3 $(HERE)/entry_abi.py $(HERE)/$(PHASE) $(ENTRY_ABI_ARGS)
 	for source in $(HERE)/$(PHASE)/*.bpf.c; do \
@@ -616,13 +608,3 @@ entry-abi-build: direct-header-generate
 		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu \
 		-c $$source -o $${source%.c}.o || exit 1; \
 	done
-
-.PHONY: runtime-loader-build
-runtime-loader-build:
-	PKG_CONFIG_LIBDIR=$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu/pkgconfig \
-		PKG_CONFIG_SYSROOT_DIR=$(ROOT)/.cache/aarch64-sysroot \
-		CXX=aarch64-linux-gnu-g++ CC=aarch64-linux-gnu-gcc taskset -c 16-19 $(MAKE) -C $(ROOT)/kprog/libnativeloader \
-		BUILD_DIR=build-arm64-a-map-order-v3 \
-		LIBBPF_PREFIX=$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix \
-		LIBBPF_LIBRARY=$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
-		KERNEL_OFFSETS_INCLUDE=$(ROOT)/micro/programs/build-arm64

@@ -11,8 +11,7 @@ import generate_micro_sim_proofs as gen
 phase=Path(sys.argv[1]).resolve();phase.mkdir();(phase/'native').mkdir()
 tail_helpers=len(sys.argv)>2 and sys.argv[2]=='tail'
 stack_sub=len(sys.argv)>2 and sys.argv[2]=='sub'
-context=len(sys.argv)>2 and sys.argv[2]=='context'
-if len(sys.argv)>2 and not (tail_helpers or stack_sub or context):raise ValueError(sys.argv[2])
+if len(sys.argv)>2 and not (tail_helpers or stack_sub):raise ValueError(sys.argv[2])
 body='''stp x19,x30,[sp,#-32]!
 ldr x19,[x0]
 ldr x2,[x0,#8]
@@ -33,34 +32,12 @@ ret
 rows=[]
 for preserve in [False,True]:
     name=(('tail_helper_'+('local' if preserve else 'direct')) if tail_helpers else
-        ('helper_ctx_' if context else 'stack_sub_' if stack_sub else 'entry_abi_')+('preserved' if preserve else 'stripped'))
+        ('stack_sub_' if stack_sub else 'entry_abi_')+('preserved' if preserve else 'stripped'))
     source=phase/'native'/(name+'.S');native=source.with_suffix('.native.o')
     text=body.replace('bl bpf_get_current_uid_gid','bl leaf') if tail_helpers else body
     if stack_sub:
         text=body.replace('bl bpf_get_current_uid_gid',
             'add x8,sp,#24\nsub x0,x8,#8\nmov w1,#8\nmov x2,xzr\nbl bpf_probe_read_kernel')
-    if context:
-        text='''stp x19,x30,[sp,#-32]!
-mov x19,x0
-ldp x4,x3,[x19]
-add x6,x4,#8
-cmp x6,x3
-b.hi 1f
-mov w1,#4
-bl bpf_xdp_adjust_head
-cbnz x0,1f
-ldp x4,x3,[x19]
-add x6,x4,#8
-cmp x6,x3
-b.hi 1f
-mov x5,#37
-str x5,[x4]
-mov w0,#2
-b 2f
-1: mov w0,#0
-2: ldp x19,x30,[sp],#32
-ret
-'''
     text='.text\n.global entry\n.type entry,%function\nentry:\n'+text+'.size entry,.-entry\n'
     if tail_helpers:
         text+='\n.global leaf\n.type leaf,%function\nleaf:\nb '+('leaf2' if preserve else 'bpf_get_current_uid_gid')+'\n.size leaf,.-leaf\n'
@@ -77,8 +54,6 @@ ret
     (phase/(name+'.bpf.c')).write_text(gen.render_program(name,'entry',functions,'xdp',rodata16=rodata,linked_exit=True))
     workload=('__u64 value=37; bpf_probe_read_kernel(&value,8,(void *)0); *(__u64 *)p=value;' if stack_sub else
         'bpf_get_current_uid_gid(); *(__u64 *)p=37;')
-    if context:
-        workload='if (bpf_xdp_adjust_head(ctx,4)) return 0; p=(void *)(long)ctx->data; e=(void *)(long)ctx->data_end; if (p+8>e) return 0; *(__u64 *)p=37;'
     (phase/(name+'.source.bpf.c')).write_text('#include <linux/bpf.h>\n#include <bpf_helpers.h>\n'+
         f'SEC("xdp") int {name}(struct xdp_md *ctx) {{ void *p=(void *)(long)ctx->data; void *e=(void *)(long)ctx->data_end; if (p+8>e) return 0; {workload} return 2; }}\nchar LICENSE[] SEC("license")="GPL";\n')
     (phase/(name+'.manifest.json')).write_text(json.dumps({'objects':[dict(program=name[:15],source_btf_symbol=name,

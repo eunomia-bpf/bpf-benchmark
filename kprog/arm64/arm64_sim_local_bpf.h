@@ -209,7 +209,6 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 		__u8 b[ARM64_SIM_STACK_BYTES];                            \
 		__u64 q[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];  \
 	} __a64_stack;                                            \
-	__u64 __a64_stack_payload[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)]; \
 	__u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(ARM64_SIM_STACK_BYTES)] __attribute__((aligned(8))) = {};\
 	__s64 __a64_sp = 0
 #else
@@ -218,7 +217,6 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 		__u8 b[1];                                                \
 		__u64 q[KPROG_ARM64_STACK_WORDS(1U)];                     \
 	} __a64_stack;                                            \
-	__u64 __a64_stack_payload[KPROG_ARM64_STACK_WORDS(1U)];            \
 	__u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(1U)] __attribute__((aligned(8))) = {};     \
 	__s64 __a64_sp = 0
 #endif
@@ -226,12 +224,6 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 #define __a64_v0 (__a64_vectors[0].lo)
 #define __a64_v0_hi (__a64_vectors[0].hi)
 #define ARM64_SIM_L_DECLARE_STATE()                                         \
-	__u64 __a64_numeric_sp __attribute__((unused)) = 0;               \
-	__u64 __a64_numeric_return __attribute__((unused)) = 0;            \
-	__u8 __a64_numeric_sp_valid __attribute__((unused)) = 0;           \
-	__u8 __a64_numeric_return_valid __attribute__((unused)) = 0;       \
-	void *__a64_sim_helper_ctx __attribute__((unused)) = (void *)0;                            \
-	void *__a64_sim_helper_abi_base __attribute__((unused)) = (void *)0;                       \
 	ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_DECLARE_REG)                  \
 	union arm64_sim_gpr *const __a64_cells[KPROG_ARM64_GPR_COUNT] = { \
 		ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_REG_CELL) };           \
@@ -253,8 +245,6 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 	__u8 __a64_sim_abi_kind = KPROG_ABI_KIND_XDP;                    \
 	ARM64_SIM_L_DECLARE_STATE();                                      \
 	ARM64_SIM_L_DECLARE_STACK();                                      \
-	__a64_sim_helper_ctx = (void *)(CTX);                             \
-	__a64_sim_helper_abi_base = &__a64_sim_abi;                       \
 	__a64_x0.ptr = &__a64_sim_abi;                                    \
 	__a64_x30_tag = ARM64_SIM_TAG_RETURN;                           \
 	__a64_x0_tag = ARM64_SIM_TAG_ABI
@@ -268,8 +258,6 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 	__u8 __a64_sim_abi_kind = KPROG_ABI_KIND_SKB;                    \
 	ARM64_SIM_L_DECLARE_STATE();                                      \
 	ARM64_SIM_L_DECLARE_STACK();                                      \
-	__a64_sim_helper_ctx = (void *)(CTX);                             \
-	__a64_sim_helper_abi_base = &__a64_sim_abi;                       \
 	__a64_x0.ptr = &__a64_sim_abi;                                    \
 	__a64_x30_tag = ARM64_SIM_TAG_RETURN;                           \
 	__a64_x0_tag = ARM64_SIM_TAG_ABI
@@ -288,42 +276,11 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	__a64_x30_tag = ARM64_SIM_TAG_RETURN; \
 	__a64_x0_tag = ARM64_SIM_TAG_ABI
 
-#define ARM64_SIM_L_READ_REG_RAW(REG) \
+#define ARM64_SIM_L_READ_REG(REG) \
 	({ __u64 __a64_l_reg = (REG); \
 	   __a64_l_reg == ARM64_SP ? (__u64)__a64_sp : \
 	   __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
 	     __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->x : 0ULL; })
-
-/* Cache only invocation-stable environment inputs. A register's payload stays
- * relative for stack indexing; its numeric observation carries native bits.
- * The bound entry ABI preserves source SP, including stripped save deltas.
- */
-#define ARM64_SIM_L_STACK_BASE()                                         \
-	({ if (!__a64_numeric_sp_valid) {                                \
-		__a64_numeric_sp = NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_SP); \
-		__a64_numeric_sp_valid = 1;                                \
-	} __a64_numeric_sp; })
-#define ARM64_SIM_L_RETURN_BASE()                                        \
-	({ if (!__a64_numeric_return_valid) {                            \
-		__a64_numeric_return = NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_RETURN); \
-		__a64_numeric_return_valid = 1;                            \
-	} __a64_numeric_return; })
-#define ARM64_SIM_L_MATERIALIZE(VALUE, TAG)                               \
-	({ __u64 __a64_mat_value = (VALUE); __u8 __a64_mat_tag = (TAG);    \
-	   if (__a64_mat_tag == ARM64_SIM_TAG_STACK)                      \
-		__a64_mat_value += ARM64_SIM_L_STACK_BASE();               \
-	   else if (__a64_mat_tag == ARM64_SIM_TAG_RETURN)                \
-		__a64_mat_value += ARM64_SIM_L_RETURN_BASE();              \
-	   __a64_mat_value; })
-#define ARM64_SIM_L_UNMATERIALIZE(VALUE, TAG)                             \
-	({ __u64 __a64_unmat_value = (VALUE); __u8 __a64_unmat_tag = (TAG); \
-	   if (__a64_unmat_tag == ARM64_SIM_TAG_STACK)                    \
-		__a64_unmat_value -= ARM64_SIM_L_STACK_BASE();             \
-	   else if (__a64_unmat_tag == ARM64_SIM_TAG_RETURN)              \
-		__a64_unmat_value -= ARM64_SIM_L_RETURN_BASE();            \
-	   __a64_unmat_value; })
-#define ARM64_SIM_L_READ_REG(REG)                                        \
-	ARM64_SIM_L_MATERIALIZE(ARM64_SIM_L_READ_REG_RAW(REG), ARM64_SIM_L_REG_TAG(REG))
 
 #define ARM64_SIM_L_READ_REG_PTR(REG) \
 	({ __u64 __a64_l_reg = (REG); \
@@ -341,7 +298,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	do { __u64 __a64_l_reg = (REG); \
 	     __u64 __a64_l_next = KPROG_ARM64_APPLY_WIDTH((VALUE), (WIDTH)); \
 	     if (__a64_l_reg == ARM64_SP) { \
-	       __a64_sp = (__s64)(__a64_l_next - ARM64_SIM_L_STACK_BASE()); \
+	       __a64_sp = (__s64)__a64_l_next; \
 	     } else if (__a64_l_reg < KPROG_ARM64_GPR_COUNT && KPROG_ARM64_REG_WRITABLE(__a64_l_reg)) { \
 	       if (KPROG_ARM64_WRITE_ARM((WIDTH) == ARM64_WIDTH_32) == KPROG_ARM64_WRITE_ARM_NARROW) \
 	         __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->x = (__u32)__a64_l_next; \
@@ -359,9 +316,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	     void *__a64_l_next_ptr = (void *)(VALUE); \
 	     __u8 __a64_l_next_tag = (TAG); \
 	     if (__a64_l_reg == ARM64_SP) { \
-	       __a64_sp = __a64_l_next_tag == ARM64_SIM_TAG_STACK          \
-		? (__s64)(long)__a64_l_next_ptr                            \
-		: (__s64)(ARM64_SIM_L_MATERIALIZE((__u64)(long)__a64_l_next_ptr, __a64_l_next_tag) - ARM64_SIM_L_STACK_BASE()); \
+	       __a64_sp = (__s64)(long)__a64_l_next_ptr; \
 	     } else if (__a64_l_reg < KPROG_ARM64_GPR_COUNT && KPROG_ARM64_REG_WRITABLE(__a64_l_reg)) { \
 	       __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->ptr = __a64_l_next_ptr; \
 	       *__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)] = __a64_l_next_tag; \
@@ -565,7 +520,6 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 #define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
 	({                                                                 \
 		__u32 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
-		asm volatile("" : "+r"(__a64_str_index));     \
 		__u8 __a64_str_width = (WIDTH);                           \
 		__u64 __a64_str_value;                                    \
 		if (KPROG_ARM64_STACK_ARM(                         \
@@ -586,7 +540,6 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 #define ARM64_SIM_L_STACK_READ_TAG(OFF, WIDTH)                              \
 	({                                                                 \
 		__u32 __a64_srt_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
-		asm volatile("" : "+r"(__a64_srt_index));     \
 		__u8 __a64_srt_width = (WIDTH);                           \
 		__u8 __a64_srt_source =                                   \
 			KPROG_ARM64_STACK_READ_TAG_SOURCE(                \
@@ -604,7 +557,6 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 #define ARM64_SIM_L_STACK_WRITE_TAG(OFF, WIDTH, VALUE, TAG)                  \
 	do {                                                               \
 		__u32 __a64_stw_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
-		asm volatile("" : "+r"(__a64_stw_index));     \
 		__u8 __a64_stw_width = (WIDTH);                           \
 		__u64 __a64_stw_value = KPROG_ARM64_APPLY_WIDTH((VALUE), __a64_stw_width);\
 		__u8 __a64_stw_action = KPROG_ARM64_STACK_WRITE_TAG_ACTION(\
@@ -613,7 +565,6 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 		if (__a64_stw_action ==                              \
 		    KPROG_ARM64_STACK_WRITE_TAG_ACTION_WRITE_WORD_AND_TAG) {\
 			__a64_stack.q[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = __a64_stw_value;\
-			__a64_stack_payload[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = ARM64_SIM_L_UNMATERIALIZE(__a64_stw_value, (TAG));\
 			ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), ((TAG)));\
 		} else {                                                   \
 			ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), (ARM64_SIM_TAG_SCALAR));\
@@ -674,24 +625,6 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
            __a64_hap_ptr = ARM64_SIM_L_STACK_PTR(__a64_hap_off); \
        } else { __a64_hap_ptr = ARM64_SIM_L_READ_REG_PTR(REG); } \
        __a64_hap_ptr; })
-
-/* Only the proven expanded-context base denotes the original helper context.
- * Offset and arbitrary pointers retain their existing identity. */
-#define ARM64_SIM_L_HELPER_CTX_PTR(REG)                                  \
-	(ARM64_SIM_L_REG_TAG(REG) == ARM64_SIM_TAG_ABI ?                  \
-	 KPROG_ABI_HELPER_CONTEXT(ARM64_SIM_L_READ_REG_PTR(REG),          \
-		__a64_sim_helper_abi_base, __a64_sim_helper_ctx) :         \
-	 ARM64_SIM_L_HELPER_ARG_PTR(REG))
-
-#define ARM64_SIM_L_REFRESH_XDP_CONTEXT()                                \
-	do {                                                              \
-		if (__a64_sim_helper_ctx) {                               \
-			struct xdp_md *__a64_ctx = __a64_sim_helper_ctx;    \
-			struct arm64_sim_xdp_abi *__a64_abi = __a64_sim_helper_abi_base; \
-			__a64_abi->data = (void *)(long)__a64_ctx->data;    \
-			__a64_abi->data_end = (void *)(long)__a64_ctx->data_end; \
-		}                                                         \
-	} while (0)
 
 #define ARM64_SIM_L_STORE_Q0_STACK(OFF)                                    \
 	do {                                                               \
@@ -850,22 +783,6 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 		}                                                        \
 		__a64_mrt_value_tag;                                     \
 	})
-/* Ghost payloads recover relative addressing after a whole pointer spill.
- * Guest bytes remain materialized, so byte/word/vector observations see the
- * exact native address. Partial writes clear the corresponding tag first.
- */
-#define ARM64_SIM_L_MEM_PAYLOAD(BASE, INDEX, AUX, IMM, EXTRA, VALUE, TAG)   \
-	({ __u64 __a64_mp_value = (VALUE); __u8 __a64_mp_tag = (TAG);     \
-	   if (__a64_mp_tag == ARM64_SIM_TAG_STACK ||                     \
-	       __a64_mp_tag == ARM64_SIM_TAG_RETURN) {                    \
-		__s64 __a64_mp_base = KPROG_ARM64_MEM_BASE_SRC((BASE) == ARM64_SP) == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER ? __a64_sp :      \
-			(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);        \
-		__s64 __a64_mp_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA); \
-		__u32 __a64_mp_at = ARM64_SIM_L_STACK_INDEX(__a64_mp_base + __a64_mp_off); \
-		asm volatile("" : "+r"(__a64_mp_at));                      \
-		__a64_mp_value = __a64_stack_payload[KPROG_ARM64_STACK_WORD_INDEX(__a64_mp_at)]; \
-	   } __a64_mp_value; })
-
 #define ARM64_SIM_L_MEM_WRITE(BASE, INDEX, AUX, IMM, EXTRA, WIDTH, VALUE, TAG)\
 	do {                                                               \
 		__s64 __a64_mwr_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA);\
@@ -1026,18 +943,16 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 			__u64 __a64_pm_mask =                          \
 				ARM64_SIM_L_PAIR_LOAD_TAG_ROUTE((OP),      \
 					__a64_pm_t0, __a64_pm_t1, (WIDTH));\
-			__a64_pm_v0 = ARM64_SIM_L_MEM_PAYLOAD((BASE), (INDEX), (AUX), (IMM), 0, __a64_pm_v0, __a64_pm_t0);\
-			__a64_pm_v1 = ARM64_SIM_L_MEM_PAYLOAD((BASE), (INDEX), (AUX), (IMM), __a64_pm_hi, __a64_pm_v1, __a64_pm_t1);\
 			if (KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_LOW(__a64_pm_mask))\
 				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),   \
-					(void *)(long)__a64_pm_v0, \
+					(void *)(long)__a64_pm_v0,     \
 					__a64_pm_t0);                  \
 			else                                           \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST),     \
 					__a64_pm_v0, (WIDTH));         \
 			if (KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_HIGH(__a64_pm_mask))\
 				ARM64_SIM_L_WRITE_REG_PTR_TAG((SRC),   \
-					(void *)(long)__a64_pm_v1, \
+					(void *)(long)__a64_pm_v1,     \
 					__a64_pm_t1);                  \
 			else                                           \
 				ARM64_SIM_L_WRITE_REG_WIDTH((SRC),     \
@@ -1323,7 +1238,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 			if (ARM64_SIM_L_LOAD_TAG_PRESERVE((OP),            \
 					__a64_l_value_tag, __a64_l_width)) \
 				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),       \
-					(void *)(long)ARM64_SIM_L_MEM_PAYLOAD((SRC), (SRC2), (AUX), (IMM), 0, __a64_l_value, __a64_l_value_tag), \
+					(void *)(long)__a64_l_value,        \
 					__a64_l_value_tag);                 \
 			else                                                   \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
@@ -1415,11 +1330,8 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
                     if ((COPY) && (STAG) == ARM64_SIM_TAG_STACK && \
                         !(__a64_mt_at & 7U) && __a64_mt_len - __a64_mt_i >= 8U) { \
                         __u64 __a64_mt_src = ARM64_SIM_L_STACK_INDEX(SRC) + __a64_mt_i; \
-                        if (!(__a64_mt_src & 7U)) { \
+                        if (!(__a64_mt_src & 7U)) \
                             __a64_mt_tag = ARM64_SIM_L_TAG_GET(__a64_mt_src >> 3); \
-                            if (__a64_mt_tag == ARM64_SIM_TAG_STACK || __a64_mt_tag == ARM64_SIM_TAG_RETURN) \
-                                __a64_stack_payload[__a64_mt_at >> 3] = __a64_stack_payload[__a64_mt_src >> 3]; \
-                        } \
                     } \
                     ARM64_SIM_L_TAG_SET(__a64_mt_at >> 3, (__a64_mt_tag)); \
                 } \
@@ -1485,19 +1397,19 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_smp_processor_id())
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_store_bytes() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_store_bytes((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_store_bytes((struct __sk_buff *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
 
 #define ARM64_SIM_BPF_CALL_bpf_l3_csum_replace() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_l3_csum_replace((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_l3_csum_replace((struct __sk_buff *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
 
 #define ARM64_SIM_BPF_CALL_bpf_l4_csum_replace() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_l4_csum_replace((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_l4_csum_replace((struct __sk_buff *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
 
 #define ARM64_SIM_BPF_CALL_bpf_tail_call() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_tail_call((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_tail_call((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_clone_redirect() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_clone_redirect((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_clone_redirect((struct __sk_buff *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_get_current_pid_tgid() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_pid_tgid())
@@ -1509,31 +1421,31 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_comm((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_get_tunnel_key() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_get_tunnel_key((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (struct bpf_tunnel_key *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_get_tunnel_key((struct __sk_buff *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (struct bpf_tunnel_key *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3)))
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_set_tunnel_key() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_set_tunnel_key((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (struct bpf_tunnel_key *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_set_tunnel_key((struct __sk_buff *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (struct bpf_tunnel_key *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3)))
 
 #define ARM64_SIM_BPF_CALL_bpf_redirect() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_redirect((__u32)ARM64_SIM_L_READ_REG(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_perf_event_output() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_perf_event_output((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_perf_event_output((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_load_bytes() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X2); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X3); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_load_bytes((const void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X2); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X3); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_load_bytes((const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_get_stackid() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_stackid((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_stackid((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_csum_diff() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_csum_diff((__be32 *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__be32 *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3), (__wsum)ARM64_SIM_L_READ_REG(ARM64_X4)))
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_change_proto() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_proto((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__be16)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_proto((struct __sk_buff *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__be16)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_change_type() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_type((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_type((struct __sk_buff *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_under_cgroup() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_under_cgroup((struct __sk_buff *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
@@ -1548,58 +1460,49 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_current_task_under_cgroup((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_change_tail() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_tail((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_tail((struct __sk_buff *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_pull_data() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_pull_data((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_pull_data((struct __sk_buff *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_change_head() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_head((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_head((struct __sk_buff *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_xdp_adjust_head() \
-	do { \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_head((struct xdp_md *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (int)ARM64_SIM_L_READ_REG(ARM64_X1))); \
-		ARM64_SIM_L_REFRESH_XDP_CONTEXT(); \
-	} while (0)
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_head((struct xdp_md *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (int)ARM64_SIM_L_READ_REG(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_probe_read_str() \
 	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X0); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X0); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X1); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_str((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_get_socket_cookie() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_socket_cookie((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_socket_cookie((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_adjust_room() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_adjust_room((struct __sk_buff *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__s32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_adjust_room((struct __sk_buff *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__s32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3)))
 
 #define ARM64_SIM_BPF_CALL_bpf_xdp_adjust_meta() \
-	do { \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_meta((struct xdp_md *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (int)ARM64_SIM_L_READ_REG(ARM64_X1))); \
-		ARM64_SIM_L_REFRESH_XDP_CONTEXT(); \
-	} while (0)
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_meta((struct xdp_md *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (int)ARM64_SIM_L_READ_REG(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_override_return() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_override_return((struct pt_regs *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_override_return((struct pt_regs *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u64)ARM64_SIM_L_READ_REG(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_xdp_adjust_tail() \
-	do { \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_tail((struct xdp_md *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (int)ARM64_SIM_L_READ_REG(ARM64_X1))); \
-		ARM64_SIM_L_REFRESH_XDP_CONTEXT(); \
-	} while (0)
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_tail((struct xdp_md *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (int)ARM64_SIM_L_READ_REG(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_get_stack() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X1); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X1); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_stack((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X1); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X1); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X2); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_stack((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_skb_load_bytes_relative() \
-	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X2); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X3); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_load_bytes_relative((const void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3), (__u32)ARM64_SIM_L_READ_REG(ARM64_X4))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
+	do { __s64 __a64_hw_dst = (__s64)(long)ARM64_SIM_L_READ_REG_PTR(ARM64_X2); __u8 __a64_hw_dtag = ARM64_SIM_L_REG_TAG(ARM64_X2); __u32 __a64_hw_len = (__u32)ARM64_SIM_L_READ_REG(ARM64_X3); ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_load_bytes_relative((const void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3), (__u32)ARM64_SIM_L_READ_REG(ARM64_X4))); ARM64_SIM_L_MEMORY_TAG_TRANSFER(__a64_hw_dst, __a64_hw_dtag, 0, ARM64_SIM_TAG_SCALAR, __a64_hw_len, 0); } while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_fib_lookup() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_fib_lookup((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (struct bpf_fib_lookup *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (int)ARM64_SIM_L_READ_REG(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_fib_lookup((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (struct bpf_fib_lookup *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (int)ARM64_SIM_L_READ_REG(ARM64_X2), (__u32)ARM64_SIM_L_READ_REG(ARM64_X3)))
 
 #define ARM64_SIM_BPF_CALL_bpf_get_current_cgroup_id() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_cgroup_id())
 
 #define ARM64_SIM_BPF_CALL_bpf_sk_lookup_udp() \
-	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_sk_lookup_udp((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (struct bpf_sock_tuple *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
+	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_sk_lookup_udp((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (struct bpf_sock_tuple *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
 
 #define ARM64_SIM_BPF_CALL_bpf_sk_release() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_sk_release((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
@@ -1614,7 +1517,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_sk_fullsock((struct bpf_sock *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
 
 #define ARM64_SIM_BPF_CALL_bpf_skc_lookup_tcp() \
-	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_skc_lookup_tcp((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (struct bpf_sock_tuple *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
+	ARM64_SIM_L_HELPER_POINTER_RESULT(bpf_skc_lookup_tcp((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (struct bpf_sock_tuple *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2), (__u64)ARM64_SIM_L_READ_REG(ARM64_X3), (__u64)ARM64_SIM_L_READ_REG(ARM64_X4)))
 
 #define ARM64_SIM_BPF_CALL_bpf_send_signal() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_send_signal((__u32)ARM64_SIM_L_READ_REG(ARM64_X0)))
@@ -1668,10 +1571,10 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_ima_inode_hash((struct inode *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1), (__u32)ARM64_SIM_L_READ_REG(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_get_func_ip() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ip((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ip((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
 
 #define ARM64_SIM_BPF_CALL_bpf_get_attach_cookie() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_attach_cookie((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_attach_cookie((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
 
 #define ARM64_SIM_BPF_CALL_bpf_task_pt_regs() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_task_pt_regs((struct task_struct *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
@@ -1683,7 +1586,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_arg((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u32)ARM64_SIM_L_READ_REG(ARM64_X1), (__u64 *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2)))
 
 #define ARM64_SIM_BPF_CALL_bpf_get_func_ret() \
-	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ret((void *)ARM64_SIM_L_HELPER_CTX_PTR(ARM64_X0), (__u64 *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1)))
+	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_ret((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0), (__u64 *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1)))
 
 #define ARM64_SIM_BPF_CALL_bpf_get_func_arg_cnt() \
 	ARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_func_arg_cnt((void *)ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0)))
@@ -1706,7 +1609,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 			__a64_sim_skb_ctx->cb[0] = __a64_sim_abi.cb[0];    \
 			__a64_sim_skb_ctx->cb[1] = __a64_sim_abi.cb[1];    \
 		}                                                          \
-		return (__u32)ARM64_SIM_L_READ_REG(ARM64_X0);                                  \
+		return (__u32)__a64_x0.x;                                  \
 	} while (0)
 
 #define ARM64_SIM_A64_JMP(CURRENT, TARGET, LABEL)                           \
@@ -1825,7 +1728,7 @@ ARM64_SIM_CONCAT(__a64_sim_tb_fallthrough_, ID):                             \
 
 #define ARM64_SIM_A64_RET_TO(REG, CASES)                                    \
 	do {                                                               \
-		__a64_lr = ARM64_SIM_L_READ_REG_RAW(REG);                      \
+		__a64_lr = ARM64_SIM_L_READ_REG(REG);                      \
 		if (__a64_lr || ARM64_SIM_L_REG_TAG(REG) != ARM64_SIM_TAG_RETURN) {\
 			if (ARM64_SIM_L_REG_TAG(REG) != ARM64_SIM_TAG_CODE) { \
 				ARM64_SIM_L_REJECT_PC();                         \

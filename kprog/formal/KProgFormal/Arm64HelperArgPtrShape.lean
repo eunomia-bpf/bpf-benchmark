@@ -1,6 +1,5 @@
 import KProgFormal.Generated.GeneratedArm64HelperArgPtr
 import KProgFormal.Arm64StackIndex
-import KProgFormal.X86MovLoadHandler
 
 namespace KProgFormal
 
@@ -119,19 +118,5 @@ helper's 64-bit biased offset: the index at the simulator's bias (96) is the
 theorem arm64_helper_arg_ptr_stack_index (off : BitVec 64) :
     index 96 off = (ptrIndex 96 off).truncate 32 :=
   arm64_stack_index_ptr_truncation 96 off
-
-/-- Apply the shared ABI context relation only to an ABI-tagged argument.
-The argument has already passed through the existing stack/raw space mapping. -/
-theorem arm64_helper_context_refines (isAbi available : Bool) (value base kernel : Nat) :
-    (if isAbi then GeneratedAbiLoad.helperContext available value base kernel else value) =
-      (if isAbi then abiHelperContextSpec available value base kernel else value) := by
-  cases isAbi <;> simp [abi_helper_context_refines]
-
-/-- The relation composes with arbitrary helper return, memory and fault effects. -/
-theorem arm64_helper_context_call_refines {α : Type} (externalCall : Nat → α)
-    (isAbi available : Bool) (value base kernel : Nat) :
-    externalCall (if isAbi then GeneratedAbiLoad.helperContext available value base kernel else value) =
-      externalCall (if isAbi then abiHelperContextSpec available value base kernel else value) := by
-  rw [arm64_helper_context_refines]
 
 end KProgFormal

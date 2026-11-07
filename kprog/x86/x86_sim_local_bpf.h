@@ -567,13 +567,15 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			__x86_stack_mem.q                               \
 				[KPROG_X86_STACK_WORD_INDEX(             \
 					__x86_stw_index)] = (VALUE);     \
+		} else if (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH) == X86_WIDTH_64) { \
+			KPROG_X86_MEM_STORE(                              \
+				(void *)&__x86_stack_mem.b[__x86_stw_index], \
+				X86_WIDTH_64, (VALUE));                   \
 		} else {                                                  \
 			__u8 __x86_stw_width =                            \
 				X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);         \
 			__u64 __x86_stw_narrowed = (VALUE) &              \
 				x86_width_mask(__x86_stw_width);          \
-			if (__x86_stw_width == X86_WIDTH_64)              \
-				X86_SIM_L_BARRIER_VAR(__x86_stw_narrowed);  \
 			__x86_stack_mem.b[__x86_stw_index] =              \
 				KPROG_X86_STACK_BYTE(__x86_stw_narrowed, 0);\
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 1))\
@@ -936,9 +938,8 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(SRC);   \
 		if (X86_SIM_L_REG_TAG(SRC) != X86_SIM_TAG_ABI)           \
 			X86_SIM_L_BARRIER_VAR(__x86_l_disp);              \
-		void *__x86_l_addr = KPROG_X86_REG_PRESENT(SRC) ?         \
-			(__u8 *)__x86_l_base_ptr + __x86_l_disp :         \
-			(void *)(unsigned long)__x86_l_disp;              \
+		void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +           \
+				     __x86_l_disp;                       \
 		switch (X86_SIM_L_MEM_READ_SRC(SRC, __x86_l_mem_width)) {\
 		case KPROG_X86_MEM_SRC_STACK:                            \
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
@@ -1813,9 +1814,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		__u8 __x86_l_src_width =                                  \
 			KPROG_X86_MOVX_SRC_WIDTH((AUX), __x86_l_width);   \
 		__u8 __x86_l_shape = KPROG_X86_MOVX_SHAPE((OP));          \
-		__u64 __x86_l_value = X86_SIM_L_READ_REG_WIDTH_SHIFT(   \
-			KPROG_X86_MOVX_SOURCE_REG(SRC), __x86_l_src_width, \
-			KPROG_X86_MOVX_SOURCE_SHIFT(SRC));            \
+		__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);            \
 		if (__x86_l_shape ==                                      \
 		    KPROG_X86_MOVX_SHAPE_SIGN_EXTEND) {                   \
 			__x86_l_value = x86_sign_extend(__x86_l_value,    \
@@ -2032,20 +2031,6 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		}                                                           \
 	} while (0)
 
-#define X86_SIM_L_EXEC_PTR_LOAD(OP, DST, AUX, IMM) \
-	do { \
-			__u8 __x86_l_pw_tag =                             \
-				KPROG_X86_PTR_WRITE_SOURCE_TAG(           \
-					(OP) == X86_OP_MOV_LOAD_MAP_PTR,   \
-					(OP) == X86_OP_MOV_LOAD_HELPER_ID, (AUX));\
-			if (KPROG_X86_PTR_WRITE_IS_HELPER_ID(             \
-				    __x86_l_pw_tag))                      \
-				X86_SIM_L_WRITE_REG_WIDTH((DST), (IMM), \
-							  X86_WIDTH_64);\
-			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
-				(void *)(long)(IMM), __x86_l_pw_tag);     \
-	} while (0)
-
 /*
  * The opcode dispatch chain.
  *
@@ -2070,7 +2055,16 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		if (KPROG_X86_DISP_NOP_HANDLED(OP)) {                      \
 			(void)0;                                           \
 		} else if (KPROG_X86_MOV_LOAD_PTR_HANDLED(OP)) {          \
-			X86_SIM_L_EXEC_PTR_LOAD((OP), (DST), (AUX), (IMM)); \
+			__u8 __x86_l_pw_tag =                             \
+				KPROG_X86_PTR_WRITE_SOURCE_TAG(           \
+					(OP) == X86_OP_MOV_LOAD_MAP_PTR,   \
+					(OP) == X86_OP_MOV_LOAD_HELPER_ID, (AUX));\
+			if (KPROG_X86_PTR_WRITE_IS_HELPER_ID(             \
+				    __x86_l_pw_tag))                      \
+				X86_SIM_L_WRITE_REG_WIDTH((DST), (IMM), \
+							  X86_WIDTH_64);\
+			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
+				(void *)(long)(IMM), __x86_l_pw_tag);     \
 		} else if (KPROG_X86_DISP_CALL_MEMCPY_HANDLED(OP)) {     \
 			X86_SIM_L_EXEC_CALL_MEMCPY((IMM));                \
 		} else if (KPROG_X86_DISP_CALL_MEMSET_HANDLED(OP)) {     \
@@ -2110,8 +2104,22 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 					KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX));\
 			}                                                 \
 		} else if (KPROG_X86_MOVX_REG_HANDLED(OP)) {              \
-			X86_SIM_L_EXEC_MOVX_REG((OP), (DST), (SRC), (FLAGS), (AUX)); \
-		} else if (KPROG_X86_MOV_LOAD_HANDLED(OP)) {              \
+			__u8 __x86_l_src_width =                          \
+				KPROG_X86_MOVX_SRC_WIDTH((AUX),           \
+					__x86_l_width);                   \
+			__u8 __x86_l_shape = KPROG_X86_MOVX_SHAPE((OP));   \
+			__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);     \
+			if (__x86_l_shape ==                               \
+			    KPROG_X86_MOVX_SHAPE_SIGN_EXTEND) {            \
+				__x86_l_value = x86_sign_extend(           \
+					__x86_l_value, __x86_l_src_width); \
+			} else {                                           \
+				__x86_l_value = x86_apply_width(           \
+					__x86_l_value, __x86_l_src_width); \
+			}                                                  \
+			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
+						  __x86_l_width);        \
+			} else if (KPROG_X86_MOV_LOAD_HANDLED(OP)) {              \
 				X86_SIM_L_EXEC_MOV_LOAD((OP), (DST), (SRC), (FLAGS),\
 							(AUX), (IMM));          \
 			} else if (KPROG_X86_DISP_MOVBE_LOAD_HANDLED(OP)) {     \

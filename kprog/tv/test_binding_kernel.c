@@ -16,7 +16,6 @@
 #include <sys/reboot.h>
 #include <sys/syscall.h>
 #include "../../kinsn/module/include/native_lab_binding.h"
-#include "../../kinsn/module/include/native_lab_checked_wire.h"
 
 #if defined(__aarch64__)
 #define TV_ARCH NATIVE_LAB_ARCH_ARM64
@@ -90,67 +89,6 @@ static void upload(const char *suffix, const void *bytes, size_t size, int error
 		fprintf(stderr, "%s: written=%zd errno=%d expected=%d\n", path, n, saved, error);
 		exit(1);
 	}
-}
-
-/* Detect stale snapshots, torn reader data and missing resolved environment facts. */
-static int checked_open(void)
-{
- return open("/sys/kernel/debug/" MODULE "/checked_proof", O_RDONLY);
-}
-static void checked_missing(void)
-{
- int fd = checked_open();
- assert(fd < 0 && errno == ENODATA);
-}
-static void checked_enable(void)
-{
- checked_missing();
- int fd = open("/sys/module/" MODULE "/parameters/capture_checked", O_WRONLY);
- if (fd < 0 || write(fd, "1", 1) != 1 || close(fd)) fatal("enable checked capture");
-}
-static void checked_inspect(int fd, uint32_t expected_generation, int map_fd)
-{
- struct native_lab_checked_header head;
- assert(read(fd, &head, sizeof(head)) == sizeof(head));
- assert(head.version == 1 && head.actual_generation == expected_generation);
- assert(head.binding.source_prog_id == current_context.source_prog_id);
- assert(head.regions == 1 && head.prog_insns == head.binding.proof_insns + 1);
- size_t size = (size_t)head.prog_insns * sizeof(struct bpf_insn) +
-  head.regions * sizeof(struct native_lab_checked_region) +
-  head.map_refs * sizeof(struct native_lab_checked_map) +
-  head.helper_refs * sizeof(struct native_lab_checked_helper);
- unsigned char *data = malloc(size); assert(data);
- assert(read(fd, data, size) == (ssize_t)size);
- unsigned char extra; assert(read(fd, &extra, 1) == 0);
- struct bpf_insn *body = (void *)data;
- struct native_lab_checked_region *region = (void *)(body + head.prog_insns);
- struct native_lab_checked_map *maps = (void *)(region + head.regions);
- struct native_lab_checked_helper *helpers = (void *)(maps + head.map_refs);
- assert(region->start == 0 && region->insns == head.binding.proof_insns);
- assert((uint32_t)(region->payload >> 20) == expected_generation);
- assert(body[head.prog_insns - 1].code == (BPF_JMP | BPF_EXIT));
- if (map_fd < 0) {
-  assert(!head.map_refs && !head.helper_refs);
-  assert(!memcmp(body, &proof, sizeof(proof)));
- } else {
-  struct bpf_map_info info = {0}; uint32_t length = sizeof(info);
-  if (bpf_obj_get_info_by_fd(map_fd, &info, &length)) fatal("captured map info");
-  assert(head.map_refs == 1 && head.helper_refs == 1);
-  assert(maps->insn == 0 && maps->id == info.id && maps->type == info.type);
-  assert(maps->key_size == 4 && maps->value_size == 4 && maps->max_entries == 1);
-  assert(maps->pointer != 0 && maps->pointer != (uint32_t)map_fd);
-  assert(helpers->insn == 5 && helpers->id == BPF_FUNC_map_lookup_elem && helpers->function);
- }
- if (map_fd >= 0) {
-  printf("TV_CHECKED_ENV ");
-  const unsigned char *header_bytes = (const void *)&head;
-  for (size_t i = 0; i < sizeof(head); i++) printf("%02x", header_bytes[i]);
-  for (size_t i = 0; i < size; i++) printf("%02x", data[i]);
-  puts("");
- }
- free(data);
- if (close(fd)) fatal("close checked snapshot");
- puts("exact expanded proof / resolved environment capture: PASS");
 }
 
 static uint32_t generation(void)
@@ -693,7 +631,6 @@ static void helper_map_regressions(void)
 	};
 	seal_single_proof(map_proof, 9);
 	load(generation(), 0, 0, "verifier-visible map load and lookup");
-	checked_inspect(checked_open(), generation(), map);
 	map_proof[7].off = 8;
 	seal_single_proof(map_proof, 9);
 	load(generation(), 0, 1, "map value out-of-bounds negative");
@@ -732,7 +669,6 @@ int main(void)
 	int source_context = create_context(BPF_PROG_TYPE_XDP, 0, "GPL");
 	use_context(source_context, 0);
 	discover();
-	checked_enable();
 	upload("", native, sizeof(native), 0);
 	upload(".proof", &proof, sizeof(proof), 0);
 	uint32_t before = generation();
@@ -769,12 +705,9 @@ int main(void)
 	uint32_t sealed = generation();
 	assert(sealed == before + 1);
 	load(sealed, 0, 0, "exact binding");
-	int stable_reader = checked_open(); assert(stable_reader >= 0);
 	reject_surrounding_stack(sealed);
 	load(sealed, 1, 1, "ABI mask mismatch at instantiation");
 	upload(".proof", &proof, sizeof(proof), 0);
-	checked_missing();
-	checked_inspect(stable_reader, sealed, -1);
 	load(sealed, 0, 1, "proof mutation after sealing");
 	load(generation(), 0, 1, "new generation without resealing");
 	/* Valid metadata at seal time, but inconsistent with the loading context.

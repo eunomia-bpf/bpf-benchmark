@@ -109,60 +109,6 @@ static void check_popcount(unsigned width, __u64 source, unsigned flags, int ali
 	cases++;
 }
 
-/* Widening moves preserve every status flag and read the source before
- * aliasing writeback. Absolute-address loads must not add an offset to NULL. */
-static void check_movx(unsigned source_width, unsigned target_width, int sign,
-		       __u64 source, unsigned flags, int alias, unsigned memory, unsigned lane)
-{
-	struct x86_sim_state state = {0};
-	X86_SIM_L_BIND_COMMON_STATE(&state);
-	__u8 data[16];
-	for (unsigned i = 0; i < sizeof(data); i++) data[i] = 0xa5;
-	for (unsigned i = 0; i < source_width; i++) data[3+i] = source >> (8*i);
-	state.rax.ptr = (void *)(unsigned long)(alias && !memory ? source : 0xa5678901234589abULL);
-	state.rbx.ptr = (void *)(unsigned long)source;
-	state.rdi.ptr = data + 3;
-	state.cf = flags & 1;
-	state.pf = (flags >> 1) & 1;
-	state.af = (flags >> 2) & 1;
-	state.zf = (flags >> 3) & 1;
-	state.sf = (flags >> 4) & 1;
-	state.of = (flags >> 5) & 1;
-	struct x86_sim_state expected = state;
-	__u64 mask = (1ULL << (8*source_width)) - 1;
-	__u64 value = (source >> lane) & mask;
-	if (sign && (value & (1ULL << (8*source_width-1)))) value |= ~mask;
-	if (target_width == 4) value &= 0xffffffffULL;
-	__u64 old = (unsigned long)(alias && memory ? state.rdi.ptr : state.rax.ptr);
-	if (target_width == 2) value = (old & ~0xffffULL) | (value & 0xffffULL);
-	if (alias && memory) { expected.rdi.ptr = (void *)(unsigned long)value; expected.rdi_tag = X86_SIM_TAG_SCALAR; }
-	else { expected.rax.ptr = (void *)(unsigned long)value; expected.rax_tag = X86_SIM_TAG_SCALAR; }
-	if (memory) {
-		X86_SIM_L_EXEC_MOV_LOAD(sign ? X86_OP_MOVSX_LOAD : X86_OP_MOV_LOAD,
-			alias ? X86_RDI : X86_RAX, memory == 2 ? X86_REG_NONE : X86_RDI,
-			target_width, X86_MEM_AUX_FULL(X86_REG_NONE, 0, source_width),
-			memory == 2 ? (__u64)(unsigned long)(data + 3) : 0);
-	} else {
-		X86_SIM_L_EXEC_MOVX_REG(sign ? X86_OP_MOVSX_REG : X86_OP_MOVZX_REG,
-			X86_RAX, lane ? KPROG_X86_MOVX_HIGH_SOURCE(alias ? X86_RAX : X86_RBX) : (alias ? X86_RAX : X86_RBX), target_width, source_width);
-	}
-	int mismatch = state.cf != expected.cf || state.pf != expected.pf || state.af != expected.af ||
-		state.zf != expected.zf || state.sf != expected.sf || state.of != expected.of;
-#define CHECK_MOVX_GPR(_REG, NAME) mismatch |= state.NAME.ptr != expected.NAME.ptr || state.NAME##_tag != expected.NAME##_tag;
-	X86_SIM_L_FOR_EACH_GPR(CHECK_MOVX_GPR)
-#undef CHECK_MOVX_GPR
-	if (mismatch) {
-		fprintf(stderr, "MOVX mismatch source_width=%u target_width=%u sign=%d source=%llx flags=%u alias=%d memory=%u\n",
-			source_width, target_width, sign, source, flags, alias, memory);
-		exit(1);
-	}
-	for (unsigned i = 0; i < sizeof(data); i++) {
-		unsigned char want = i >= 3 && i < 3+source_width ? source >> (8*(i-3)) : 0xa5;
-		if (data[i] != want) exit(1);
-	}
-	cases++;
-}
-
 int main(void)
 {
 	/* Exhaustive byte arithmetic catches parity and nibble carry independently
@@ -193,22 +139,6 @@ int main(void)
 				check_popcount(width, 0, flags, alias);
 				check_popcount(width, ~0ULL, flags, alias);
 			}
-	for (unsigned target = 2; target <= 8; target *= 2)
-		for (unsigned source = 1; source <= 4; source *= 2)
-			for (int sign = 0; sign < 2; sign++) {
-				if (source > target || (source == target && !sign)) continue;
-				for (unsigned flags = 0; flags < 64; flags++)
-					for (int alias = 0; alias < 2; alias++)
-						for (unsigned memory = 0; memory < 3; memory++)
-							for (unsigned a = 0; a < sizeof(values)/sizeof(values[0]); a++)
-								check_movx(source, target, sign, values[a], flags, alias, memory, 0);
-			}
-	for (unsigned target = 2; target <= 4; target *= 2)
-		for (int sign = 0; sign < 2; sign++)
-			for (unsigned flags = 0; flags < 64; flags++)
-				for (int alias = 0; alias < 2; alias++)
-					for (unsigned a = 0; a < sizeof(values)/sizeof(values[0]); a++)
-						check_movx(1, target, sign, values[a], flags, alias, 0, 8);
 	/* Non-arithmetic users of the new state must preserve or define PF/AF as
 	 * the ISA requires: zero shifts/rotates preserve, logic defines PF only. */
 	struct x86_sim_state state = {0};

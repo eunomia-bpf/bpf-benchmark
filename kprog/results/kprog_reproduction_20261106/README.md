@@ -24,12 +24,12 @@ used.
 
 | set | geomean |
 | --- | ---: |
-| Five measured apps (bcc, tetragon, katran, cilium, otelcol) | **1.049x** |
-| Same five, excluding cilium | 1.008x |
+| Five measured apps (bcc, tetragon, katran, cilium, otelcol) | **1.051x** |
+| Same five, excluding cilium | 1.010x |
 | Reference, all six apps | **1.349x** |
 
 **The 1.349x six-app reference does not reproduce.** Five of six apps
-measure now and their geomean is 1.049x; the shortfall is concentrated
+measure now and their geomean is 1.051x; the shortfall is concentrated
 in cilium (1.229x against 2.358x) and tetragon (1.008x against 1.323x),
 which were the reference's two large wins. The other four sit at 1.00x
 in both runs.
@@ -263,7 +263,12 @@ over 11 components per arm (python3, ruby, perl and the other profiled
 runtimes); `sink=` counts climb in both arms too. Both arms ran 60 s with
 `rc=0`.
 
-**Does not reproduce**: 1.003x against 1.824x.
+At the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`,
+`corpus/results/x86_kvm_corpus_20261107_025604_139037`): 14 replaced,
+0 failed, 3 workloads per arm, 57,949,845,515 ops baseline against
+58,728,635,824 native = **1.013x**, consistent with the 60 s figure.
+
+**Does not reproduce**: 1.013x against 1.824x.
 
 ## tracee: 151 programs fail on one readonly data symbol
 

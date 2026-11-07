@@ -284,7 +284,7 @@ ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM)); \
 			if (ARM64_SIM_L_LOAD_TAG_PRESERVE((OP), \
 					__a64_l_value_tag, __a64_l_width)) \
 				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), \
-					(void *)(long)ARM64_SIM_L_MEM_PAYLOAD((SRC), (SRC2), (AUX), (IMM), 0, __a64_l_value, __a64_l_value_tag), \
+					(void *)(long)__a64_l_value, \
 					__a64_l_value_tag); \
 			else \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width); \
