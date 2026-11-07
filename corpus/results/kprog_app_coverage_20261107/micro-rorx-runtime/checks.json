@@ -1,0 +1,37 @@
+{
+  "driver_exit": 0,
+  "collector_exit": 0,
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 15,
+      "native_sha256": "6b6bcfc6519f3474f4dc2a7e886f3469081e1fa09d019ee4e204d0f84e47d695",
+      "started": "2026-11-07T18:57:12.245315+00:00",
+      "prog_id": 20,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-rorx-standard-20261107/session-r199tl7g/requests/1.success.tar.gz",
+      "finished": "2026-11-07T18:57:27.461867+00:00",
+      "entry": "siphash_rotate64_mixer_xdp",
+      "generated_source": true,
+      "compiled_object": true,
+      "load_error_tail": ""
+    }
+  ],
+  "original_native_sha256": "6b6bcfc6519f3474f4dc2a7e886f3469081e1fa09d019ee4e204d0f84e47d695",
+  "fresh_direct_rorx_calls": 116,
+  "jit_exact": true,
+  "native_exact": true,
+  "source_pins_match_published_repair": "2b1ab2c29449d3e80108c00133c99065717f636b",
+  "all_launch_pins_stable": true,
+  "temporary_files_remaining": [],
+  "initial_collector_error_preserved": true,
+  "initial_launcher_pid": 3310321,
+  "actual_driver_pid": 3310323,
+  "files": {
+    "collection-evidence.tar.gz": "7d5ba75cdf548a2993c27262d2f9676b5964b3bd524c082f68abd52c6575bfb5",
+    "runtime-raw.tar.gz": "e358c6ea5d46b0dc4ec9684f838e0264ceb28c96f6fd8a707fa02553de628036",
+    "runtime.json": "9acb447288e2e99e6d7d230f137658314a7344486ce309e650ae7f7cf61c9228",
+    "runtime-driver.log.gz": "52a8d8ebc16d3a79989fe82f7da88bfdf27184bdacf42227e1a297126f06d835",
+    "runtime-service.tar.gz": "160ff9b5e2d2a259c6b34d6d757773696581a3c43f07703824b7291fa8b1958f"
+  }
+}

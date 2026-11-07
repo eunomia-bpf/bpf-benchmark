@@ -1,0 +1,210 @@
+{
+  "driver_exit": 0,
+  "launch_inputs": {
+    "image": "sha256:a13312372b9b1d7c8b86929da098ddbb177aef120941ec70b7fafa2468110219",
+    "image_inputs": {
+      "base_id": "sha256:97d22473d33684164dd5314d94dccb0f6ae80816bb7243ad113cb85403f49ec7",
+      "base_layers": [
+        "sha256:bec87777bc2fb2edcdf9af11df1531469e7df911309c1413082b18fcb8610278",
+        "sha256:00bf98dea94ae93db644926814eba2ab9d800af151b02189bcd87b95da34145f",
+        "sha256:f9d03c48a3cec5e7d784183fae85fcc03c6ba3e15e8efb9a3933230f395c9626",
+        "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+        "sha256:95bb8313a552dadff953ee6f8c7d8987c2685dad44e2e0854af5b534956966d0",
+        "sha256:55fd53ca27ff26626740b613d47308815e93050830edf00c3fb2b78a222a7716",
+        "sha256:a51d161c020f8a0e8fd0df9345cbba3b23e8db5563fd8fe7b637bfcba0d66e46",
+        "sha256:3150ae7d0f3cbd9f04155b12546deef5ab20d0c174e65bc8398d0d351604ef55",
+        "sha256:c54565a179cb0f0db335590907171c3631394d047fb2c312bd0701e4ddfdec1f",
+        "sha256:88f74295b73359b841c80c1970eba49e562fe1f9f12418dd5163ebfc0144a414",
+        "sha256:f4342b31fb6ac149f7f355190055e221b75799d82d95d2cd325aa01007dd2c03",
+        "sha256:1051f9961a53edde645ab53d48bc0e2e62ff7f72c3f6bf408e260257dc8ac5be",
+        "sha256:1b7fac7e431cd2b697481a76ee5482074b257e5eb626269e7fb7489620e4f65f",
+        "sha256:33fcea4348006787971d32198ec91d997d68e5d9277db5a0f41ac2b11442f8ae",
+        "sha256:75a058d1385ed6e432e6806f339bb543deba6736bdc6f30c8793e0606045aa00",
+        "sha256:9cb01a7517df64c5baf283a57b8cea04c5a62e9446eb8533f73fb72271237920",
+        "sha256:b08eaafbf7296d1023866af4bc94cd50ae99875e6da91d8975b17ce277551aa4",
+        "sha256:2e30640dfbd107fca6ff1b877203a4ce278fa1d1095618fe96e6bd52f9857bea",
+        "sha256:3dd76e16a058a8a8c72321c8b507e55c4ec4e9d78be0ae8df14dfe9eca76a4b1",
+        "sha256:3acfb86e28394b000ca308f9411627de0a1ee1d9b4a62938810b1bb59847fdde",
+        "sha256:e11501a6665fc9386a615b3742ae2e6961a1eb0aba9a558a416d52f64c7002ad",
+        "sha256:fc373ed09b39c36a6f2df692ea7f739a4e81779245a08f8cedc6ae9503375137",
+        "sha256:645e829f01e356dc1829874bb69f7ad63b2de1247176a055727ceb9eb5f89c11",
+        "sha256:f766d462d042f832bdab1f22401ed2256d261aaa7f11912c81b2a7d11480bc0a",
+        "sha256:29f2c001f5714a1ea119dbdca0df30b02ff9685a3b3e26cd11b4b85f067151b9",
+        "sha256:db921692894248972d94ef530f46ef865da8d17aeddb3aeb65b129b87c3e07be",
+        "sha256:8c1bb7043f7ac00609460486a8812edbc3c4f672b1c557dd60883d3507fd314d",
+        "sha256:1bc870a61c1005748b5f97fc85a1c787d385e3baefeeb9ea7c81b7914c784cdf",
+        "sha256:fff8371bca86cf3c82238739a9eca5ccb1478cf2091336ef8c6150ed88c480a9",
+        "sha256:9a9498fd8cbf55304f280c913272985523dbb17d58ec7cc319d39dfb6b143fba",
+        "sha256:6332415d04612fe60b6899e73707c644d5b11361730952a03b9fb82180d4973a",
+        "sha256:38ca1593dfe18abad4cfc88c4b2143ae4c209acd34f2670c9b9daedb28d498d2",
+        "sha256:2ed1646ea3b2187a680b9a403494bb996db91d2224c149e357f87120440e7042",
+        "sha256:385e767e6ffc2a4dd75320948d47e784699df9e1057e842aaa8e0bffd0b30498",
+        "sha256:5352597f811d8920fc34c291a8c46d37adc8f808a7272d0b2fbab825f650f280",
+        "sha256:c16249d72e673230792834404464599ed75c97f59c0e3c8afe65140ce652d72c",
+        "sha256:7bc80101e91832fd26144259ccb24761d9f5eda533758f68bbdee34c34dcb5da",
+        "sha256:b5c67bc71e4c6e13e556c850514dda448a21832a6bbabce21f86b9944546b6c2",
+        "sha256:51cc2499b5072bb4796492da8b5d48cdbf823f0e3290a93804a03744ddcb7087",
+        "sha256:08c70698ca7606db950434a0f0ae6f1fa200a26b763f55d2a0b4236f1bf40489",
+        "sha256:7638760a8ad822fe1f4a1c1f8dbc69a34f543916144a1bbfe10583adc410496c",
+        "sha256:f557de84de1cc7c773887bb5dcea30167427f8728dd676b87bf7e976aa68b658",
+        "sha256:65bd3f9f9b853a3702049b16131d312b51476cee0d3c38ba9bf3451669161c32",
+        "sha256:8c3b73c4a41101aa6032a2d3e187a0efaf46d12e346df7bbe4c2121557f4683b",
+        "sha256:8a108457be811c18a0e15ea1ea0efd58a3a8af8add5a5d974d6530eb70b38f49",
+        "sha256:fd1c1e533167847af90de503619d85d8bebabaccc8bfdc8a093a3aec52798b46",
+        "sha256:457ca405d1d70685b6701e93941ce53af5aa01c3ca24c7c31da51e08d2d19705",
+        "sha256:1d1b413d99106ac89554fc2e96fac8a330cc03ac1fc1c2a4010c04da198c41f2",
+        "sha256:cb4c0c357e840c3fc2f1c10f2fea8968fedfa23c5e681eb94b258cd82ec7ee5d",
+        "sha256:9e2529e5785214f4425e90426a81312837953e02936a8349b86e1f11607dd369",
+        "sha256:f150fd71954f49e654fc1f9b756818ada7ff564d2afd113802d55eff15643aa6",
+        "sha256:211096c52f2fd35137082c6317f94663051a281735f2229e5550c061384416c7",
+        "sha256:d1ca36719ab0fed60873105f117d8e85b3c8b187a6d1e8977b2b430b6935f957",
+        "sha256:474717ebe34cebf240e1860ce82d4f0313cd62dc3db596d1fea41738c3ca87ea",
+        "sha256:59b3b81748141dfb0270bf3b7f65759c9a8e0b46f3b9e0427ba8e258e0d864a5",
+        "sha256:58a01c0c15316efdea0bceea514dc4d583eff1ae9a7fcc5eca9ae8935924f95e",
+        "sha256:3578cb2987b7261b190f6595b05259748f3153e7cf52e40cb4ddb8d58ec51c5f",
+        "sha256:1fff7341c6e755540273a42d1e8ef689afc02b5a8634e2a169c5db7737639090",
+        "sha256:01b63f80327f448d7b9a19e79bdca9ac99cf84fafd1b6f6a6c7df6565b833b88"
+      ],
+      "files": {
+        "runner/build-llvmbpf/micro_exec": "90530ee453832eccf0cf2191ef6a98eabdde9460108166e5f8ed2eafa3806533",
+        "micro/driver.py": "4e572bfa897e33d0bf607ea4c567f15d44319031afa72aa51331265f7597a73a",
+        "runner/suites/micro.py": "eb04c05ca8e8bc22180f331df252eacfda6bdfbac6a3b9c00034001f7c390f15"
+      }
+    },
+    "samples": 1,
+    "inner_repeat": 1,
+    "outer_guest_path": "/usr/sbin:/usr/bin:/sbin:/bin",
+    "started": "2026-11-07T18:54:42.215109+00:00",
+    "sha256": {
+      "kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+      "kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+      "kprog/x86/x86_sim_local_bpf.h": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+      "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+      "kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+      "runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2",
+      "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6",
+      "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko": "fba9989aa0641ca4654a02405e3f27f9532e9d1c4ccf8bfa38b0a4242044b2a1",
+      "kprog/x86/micro-prog/generated_x86_specialization.py": "3508a8dd5f20975c6cce171e673548d91c123752f9df24cd7b2a84d8e02e7ac7"
+    },
+    "guest_memory": "8G",
+    "cpus": "20-23",
+    "source_head": "e701fd9d6d3bd579ba737d02b8d8231e863d5237",
+    "driver_pid": 3310323,
+    "initial_launcher_pid": 3310321,
+    "pid_correction": "Initial Python launcher combined setsid with start_new_session; setsid forked. Actual existing run.sh PID identified by exact /proc argv; no guest restart."
+  },
+  "source_drift": [],
+  "temporary_files_remaining": [],
+  "result": "/workspaces/repository/micro/results/x86_kvm_micro_20261107_185712_174405",
+  "benchmarks": [
+    {
+      "name": "siphash_rotate64_mixer",
+      "expected_result": 2666935177028490406,
+      "expected_retval": 2,
+      "error": null,
+      "samples": {
+        "kernel": [
+          {
+            "code_size": {
+              "bpf_bytecode_bytes": 7936,
+              "native_code_bytes": 3524
+            },
+            "compile_ns": 731490,
+            "exec_cycles": 7032,
+            "exec_ns": 196,
+            "jited_prog_len": 3524,
+            "perf_counters": {},
+            "perf_counters_meta": {
+              "collected": false,
+              "error": "",
+              "include_kernel": true,
+              "requested": false,
+              "scope": "full_repeat_raw"
+            },
+            "phases_ns": {
+              "input_stage_ns": 845,
+              "memory_prepare_ns": 37678,
+              "object_load_ns": 542249,
+              "object_open_ns": 189241,
+              "prog_run_wall_ns": 2034,
+              "result_extract_ns": 274
+            },
+            "result": 2666935177028490406,
+            "retval": 2,
+            "sample_index": 0,
+            "timing_source": "ktime",
+            "timing_source_wall": "rdtsc",
+            "tsc_freq_hz": 3686262886,
+            "wall_exec_ns": 1908,
+            "xlated_prog_len": 7936
+          }
+        ],
+        "native_proof": [
+          {
+            "code_size": {
+              "bpf_bytecode_bytes": 7936,
+              "native_code_bytes": 0
+            },
+            "compile_ns": 15127926349,
+            "exec_ns": 59,
+            "perf_counters": {},
+            "perf_counters_meta": {
+              "collected": false,
+              "error": "",
+              "include_kernel": true,
+              "requested": false,
+              "scope": "full_repeat_raw"
+            },
+            "phases_ns": {
+              "blob_upload_ns": 0,
+              "companion_load_ns": 565560,
+              "companion_lookup_spec_ns": 0,
+              "companion_map_ptr_extract_ns": 0,
+              "companion_object_load_ns": 548611,
+              "companion_open_ns": 15673,
+              "memory_prepare_ns": 32062,
+              "native_link_cache_lookup_ns": 0,
+              "native_link_exec_ns": 0,
+              "native_link_map_patch_ns": 0,
+              "native_link_read_ns": 0,
+              "native_load_ns": 15127926349,
+              "packet_prepare_ns": 639,
+              "prog_load_ns": 0,
+              "prog_run_wall_ns": 937
+            },
+            "result": 2666935177028490406,
+            "retval": 2,
+            "sample_index": 0,
+            "timing_source": "ktime",
+            "timing_source_wall": "wall_steady",
+            "wall_exec_ns": 937
+          }
+        ]
+      }
+    }
+  ],
+  "programs_total": 1,
+  "benchmarks_failed": 0,
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 15,
+      "native_sha256": "6b6bcfc6519f3474f4dc2a7e886f3469081e1fa09d019ee4e204d0f84e47d695",
+      "started": "2026-11-07T18:57:12.245315+00:00",
+      "prog_id": 20,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-rorx-standard-20261107/session-r199tl7g/requests/1.success.tar.gz",
+      "finished": "2026-11-07T18:57:27.461867+00:00",
+      "entry": "siphash_rotate64_mixer_xdp",
+      "generated_source": true,
+      "compiled_object": true,
+      "load_error_tail": ""
+    }
+  ],
+  "native_requests": 1,
+  "generated": 1,
+  "compiled": 1,
+  "accepted_bound": 1,
+  "failed": 0,
+  "raw_sha256": "e358c6ea5d46b0dc4ec9684f838e0264ceb28c96f6fd8a707fa02553de628036"
+}
