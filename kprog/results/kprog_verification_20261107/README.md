@@ -2347,3 +2347,34 @@ validation. Full make-check has not yet been rerun, and this component pass
 does not close77/72/O2/O4. Exact failures, final sources, assembly, relocation
 output, commands, logs and source identities are appended to the existing
 integration JSON/gzip.
+
+## Logical immediate opcode/AUX dispatch composition
+
+The existing register_dispatch_step_refines theorem now also composes the
+ALU_IMM10/ADD_IMM3 logical payloads and TEST_IMM14 through the raw dispatcher.
+The generated family bridge checks all24 family constructors. Both ALU rows
+pass AUX unchanged, so the ADD-named opcode does not incorrectly force an
+addition. The low AUX byte selects AND/OR/XOR; destination-lane and effective-
+width fields feed the prior raw-frame proof. The generated low-imm32 helper
+and operand-width ImmediateBinding feed the SAME canonical immediate operand.
+SRC, source-shift and unused AUX bytes remain unconstrained; TEST_IMM ignores
+the payload and preserves all raw register/tag fields.
+
+Every prior register binding and theorem case remains. No result, flags,
+condition outcome, whole-word immediate equality or native-state equality is
+assumed. Focused92-job Lean build and three axiom audits PASS; the family
+bridge has no axioms, and the composed theorem uses only the previously
+reported propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies.
+All372 proof/configuration pins are stable. Four generated checks and all
+five existing UBSan hosts PASS:7629 lane,2603 family,1141 family-route,2913
+comparison and47529 comparison-route cases. This increment reuses the
+existing host binaries after checking all source/dependency and binary hashes;
+no duplicate builds or new oracles are introduced.
+
+C's af2f58c89 header publication has now been independently checked against
+origin/master and the exact d30d4ff1 physical input used by this and the
+preceding logical-register/POPCNT checks. Earlier candidate-at-validation
+records remain historical; a later publication receipt is added separately.
+Commands, pins, complete proof diff and logs are appended to the existing
+integration JSON/gzip. The logical ALU subsets are partial family coverage;
+full77/72/whole-dispatch/O2/O4 completion remains open.

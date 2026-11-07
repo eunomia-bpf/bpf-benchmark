@@ -182,6 +182,16 @@ theorem bswap_width_binding_decodes (flags : Byte) (width : Reference.X86.BzhiWi
   have decoded := width_binding_decodes flags (bswapScalarWidth width) binding
   cases width <;> simp [bswapWidthOf, decoded, bswapScalarWidth] at *
 
+/-- Both production immediate-ALU opcodes pass the AUX selector unchanged;
+the ADD-named row does not force an addition payload. -/
+def aluImmediateHandled (code : Nat) : Bool :=
+  ([.aluImm, .addImm].map GeneratedX86DispatchFamily.code).contains code
+
+theorem alu_immediate_family (op : GeneratedX86DispatchFamily.DispatchOp) :
+    aluImmediateHandled (GeneratedX86DispatchFamily.code op) =
+      GeneratedX86DispatchFamily.aluImmHandled op := by
+  cases op <;> rfl
+
 /-- The production ALU-register family gate, using generated opcode IDs.
 All three rows pass the AUX word unchanged to the shared handler. -/
 def aluRegisterHandled (code : Nat) : Bool :=
@@ -253,8 +263,8 @@ theorem logic_register_body_refines (env : EntryEnvironment.Environment) (frame 
 
 /-- Partial register-handler dispatcher. Existing NOP/MOV steps retain their
 prefix selection; the later singleton CMOV/BSWAP/POPCNT/XCHG gates consume their actual
-raw opcode, width and GPR fields. Logical ALU-register payloads and TEST_REG
-add their generated family/AUX/lane selection. Other unproved forms remain
+raw opcode, width and GPR fields. Logical ALU-register/immediate payloads
+and TEST_REG/TEST_IMM add their generated family/AUX/lane/low-imm32 selection. Other unproved forms remain
 None. Distinct generated opcode identities prevent an intervening handler
 from taking these gates; None never means production success/rejection. -/
 def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
@@ -263,7 +273,18 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
   match dispatchThroughMove env frame arena code flags aux dst src value nextPc state with
   | some result => some result
   | none =>
-      if aluRegisterHandled code then do
+      if aluImmediateHandled code then do
+        let width ← widthOf flags
+        let kind ← logicKindOf (GeneratedX86RegLaneAux.payload aux)
+        let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
+        pure ⟨nativeRegisters env frame arena
+          (logicImmediate env frame arena state width kind destination value nextPc), [], none⟩
+      else if code = GeneratedX86DispatchFamily.code .testImm then do
+        let width ← widthOf flags
+        let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
+        pure ⟨nativeRegisters env frame arena
+          (logicImmediate env frame arena state width .test destination value nextPc), [], none⟩
+      else if aluRegisterHandled code then do
         let width ← widthOf flags
         let kind ← logicKindOf (GeneratedX86RegLaneAux.payload aux)
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
@@ -303,12 +324,31 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
 
 /-- Field/operand identities only. CMOV consumes the entire condition AUX;
 XCHG ignores AUX and immediate, matching the production low-slice encoder.
+Immediate forms consume only the destination lane and low-imm32/width
+operand binding; SRC, source-shift and unused AUX bytes are unconstrained.
 The native instruction is the single canonical ISA's existing constructor. -/
 inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Word) :
     Nat → Reference.X86.Instruction → Prop where
   | move (code : Nat) (native : Reference.X86.Instruction)
       (fields : MoveBinding flags aux dst src value nextPc code native) :
       RegisterBinding flags aux dst src value nextPc code native
+  | logicImmediate (op : GeneratedX86DispatchFamily.DispatchOp) (width : ScalarWidth)
+      (kind : Reference.X86.LogicKind) (destination : RegisterSlice) (nativeValue : Word)
+      (familyField : GeneratedX86DispatchFamily.aluImmHandled op = true)
+      (writing : kind ≠ .test)
+      (operationField : GeneratedX86RegLaneAux.payload aux =
+        BitVec.ofNat 32 (GeneratedX86AluDecode.code (X86Logic.alu kind)))
+      (widthField : WidthBinding flags width)
+      (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination)
+      (immediateField : ImmediateBinding width value nativeValue) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code op)
+        (.logic width kind (.register destination) (.immediate nativeValue) nextPc)
+  | testImmediate (width : ScalarWidth) (destination : RegisterSlice) (nativeValue : Word)
+      (widthField : WidthBinding flags width)
+      (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination)
+      (immediateField : ImmediateBinding width value nativeValue) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code .testImm)
+        (.logic width .test (.register destination) (.immediate nativeValue) nextPc)
   | logicRegister (op : GeneratedX86DispatchFamily.DispatchOp) (width : ScalarWidth)
       (kind : Reference.X86.LogicKind) (destination source : RegisterSlice)
       (familyField : GeneratedX86DispatchFamily.aluRegHandled op = true)
@@ -350,7 +390,7 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
 
 /-- One complete raw-frame step for the currently lifted register opcodes:
 NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG plus logical ALU-register
-family payloads and TEST_REG. Neither component handler
+and immediate family payloads and TEST_REG/TEST_IMM. Neither component handler
 semantics nor a chosen condition/value/state equation is assumed. This is a
 partial dispatcher theorem, not all77 operations or a compiled-body claim. -/
 theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
@@ -362,13 +402,29 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
   cases binding with
   | move code native fields =>
       simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
+  | logicImmediate op width kind destination nativeValue familyField writing operationField widthField dstField immediateField =>
+      have widthDecoded := width_binding_decodes flags width widthField
+      have kindDecoded := logic_kind_binding_decodes _ kind writing operationField
+      have dstDecoded := slice_binding_decodes width dst _ destination dstField
+      cases op <;> simp [GeneratedX86DispatchFamily.aluImmHandled] at familyField
+      all_goals simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, kindDecoded, dstDecoded] using
+        congrArg some (logic_immediate_frame_refines env frame arena state width kind destination value nativeValue nextPc immediateField)
+  | testImmediate width destination nativeValue widthField dstField immediateField =>
+      have widthDecoded := width_binding_decodes flags width widthField
+      have dstDecoded := slice_binding_decodes width dst _ destination dstField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, dstDecoded] using
+        congrArg some (logic_immediate_frame_refines env frame arena state width .test destination value nativeValue nextPc immediateField)
   | logicRegister op width kind destination source familyField writing operationField widthField dstField srcField =>
       have widthDecoded := width_binding_decodes flags width widthField
       have kindDecoded := logic_kind_binding_decodes _ kind writing operationField
       have dstDecoded := slice_binding_decodes width dst _ destination dstField
       have srcDecoded := slice_binding_decodes width src _ source srcField
       cases op <;> simp [GeneratedX86DispatchFamily.aluRegHandled] at familyField
-      all_goals simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluRegisterHandled,
+      all_goals simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
         GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
         widthDecoded, kindDecoded, dstDecoded, srcDecoded] using
         congrArg some (logic_register_body_refines env frame arena state width kind dst src aux destination source nextPc operationField dstField srcField)
@@ -376,32 +432,32 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
       have widthDecoded := width_binding_decodes flags width widthField
       have dstDecoded := slice_binding_decodes width dst _ destination dstField
       have srcDecoded := slice_binding_decodes width src _ source srcField
-      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluRegisterHandled,
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
         GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
         widthDecoded, dstDecoded, srcDecoded] using
         congrArg some (logic_register_frame_refines env frame arena state width .test destination source nextPc)
   | cmov width cc destination source widthField dstField srcField conditionField =>
       subst dst; subst src; subst aux
       have decoded := cmov_width_binding_decodes flags width widthField
-      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
         GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
         congrArg some (conditional_move_word_frame_refines env frame arena state width cc destination source nextPc)
   | byteSwap width destination widthField dstField =>
       subst dst
       have decoded := bswap_width_binding_decodes flags width widthField
-      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
         GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
         congrArg some (byte_swap_register_frame_refines env frame arena state width destination nextPc)
   | populationCount width destination source widthField dstField srcField =>
       subst dst; subst src
       have decoded := cmov_width_binding_decodes flags width widthField
-      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
         GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
         congrArg some (population_count_register_frame_refines env frame arena state width destination source nextPc)
   | exchange width destination source widthField dstField srcField =>
       subst dst; subst src
       have decoded := width_binding_decodes flags width widthField
-      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
         GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
         congrArg some (exchange_register_frame_refines env frame arena state width destination source nextPc)
 
