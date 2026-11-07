@@ -3515,3 +3515,10 @@ route observations and the current28180495 memory-condition UBSan checks use
 headercf27. Universal C/Lean and compiler correspondence remains its explicit
 production interface. `x86_register_write_9b0_epoch` records the source pins,
 unchanged pure contracts, original full-log observations and row list.
+
+### Published source full check 6e51953dc
+
+`make check` on immutable published6e51953dc exits0. All1140 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_6e51953dc`. Every check retains its exact published source identity.

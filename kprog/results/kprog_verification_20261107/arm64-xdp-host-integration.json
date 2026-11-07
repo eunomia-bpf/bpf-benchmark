@@ -2110,6 +2110,26 @@
     "verified_published_source_count": 1140,
     "warm_shared_caches_retained": true
   },
+  "full_make_check_6e51953dc": {
+    "actual_exit": 0,
+    "archive_block_sha256": "874aad1250f0f302f6f23d1a0d33b005a63ccc188a0de225e7cdb4132a98571d",
+    "archive_marker": "=== FULL MAKE CHECK 6E51953DC PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/condition-memory-full.cpu.jsonl.gz": "5e58c55bc50cb7c579b03e1b922e660c0140d3a4d085fd9edebf3ef6faede882",
+      "/workspaces/.agent-state/kprog-lanes/V/condition-memory-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/condition-memory-full.head": "0c44d503400772e437a226196333331cf74cfa1405f772d4c4965e66a9fdf431",
+      "/workspaces/.agent-state/kprog-lanes/V/condition-memory-full.launch.log": "c080cccb2f3c84a95b0143de21c9793178d430c2c1b6576bcab222c7e8018b78",
+      "/workspaces/.agent-state/kprog-lanes/V/condition-memory-full.log": "f610e48813420135d990c9d1467f52a376e831a9ecbba0eb9889b64c81aaf70d",
+      "/workspaces/.agent-state/kprog-lanes/V/condition-memory-full.py": "1510b3cffa6e070ed9a2b98abe29587ec1e1617ccb8f489e64d8f1f6522eab7c",
+      "/workspaces/.agent-state/kprog-lanes/V/condition-memory-full.sources": "15a88ac62620ee9829fb43b23d9481d159dc1c3eea9a072ccd8891aa7008c652",
+      "/workspaces/.agent-state/kprog-lanes/V/condition-memory-full.state": "5dacd88b74341f6ed29fa9247af1b80770a1173c8c11ae77ef5ffabce9281b26"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "6e51953dc5d73f687e488c4cccb7270a03d2547f",
+    "scope": "Complete formal make check of the exact published source tree 6e51953dc5d73f687e488c4cccb7270a03d2547f. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1140
+  },
   "full_make_check_7a7893bc9": {
     "actual_exit": 0,
     "archive_block_sha256": "9dd95d21be71a7bcc7166cea3ffdf529e10aa12ba9de1d374d6f2e1f253b4e1e",
