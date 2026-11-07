@@ -359,7 +359,7 @@ __runtime-vm-docker:
 __runtime-vm-micro __runtime-vm-corpus __runtime-vm-test: __runtime-vm-docker
 	install -d "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)"
 	"$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
-	$(if $(and $(filter __runtime-vm-micro,$@),$(filter native_kernel native_proof,$(RUNTIMES))),$(PYTHON) $(ROOT_DIR)/kprog/trusted_service.py --arch $(if $(filter x86_64,$(RUN_TARGET_ARCH)),1,2) \
+	$(if $(and $(filter __runtime-vm-micro,$@),$(filter native_kernel native_proof,$(RUNTIMES))),PATH="/usr/lib/llvm-18/bin:$$PATH" $(PYTHON) $(ROOT_DIR)/kprog/trusted_service.py --arch $(if $(filter x86_64,$(RUN_TARGET_ARCH)),1,2) \
 	  --endpoint /sys/kernel/debug/bpf_$(if $(filter x86_64,$(RUN_TARGET_ARCH)),x86,arm64)_native_lab/specializer \
 	  --state /run/bpf-benchmark-trusted-$(RUN_TOKEN) \
 	  --module $(if $(filter x86_64,$(RUN_TARGET_ARCH)),$(HOST_KINSN_DIR_X86)/bpf_x86_native_lab.ko,$(HOST_KINSN_DIR_ARM64)/bpf_arm64_native_lab.ko) \

@@ -42,8 +42,8 @@ trusted service generates, verifies and binds its proof. The application
 submits only its native ELF, entry and typed metadata. Existing `.native.so`
 shared ELF and `.native.o` relocatable inputs both use the same service; entry
 bounds are relative to the executable section, preserving original ELF bytes. The VM Make entrypoint
-starts the service outside the application container, using a private `/run`
-directory, and archives its requests and logs under
+starts the service outside the application container, using the existing
+`/usr/lib/llvm-18/bin` compiler/tool PATH and a private `/run` directory, and archives its requests and logs under
 `micro/results/trusted-service-<RUN_TOKEN>.tar.gz` when the suite closes.
 The `host-runner-x86` build also builds the trusted service loader; reuse the
 existing incremental kernel and image build paths when refreshing artifacts.

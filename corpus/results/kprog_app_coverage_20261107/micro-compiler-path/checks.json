@@ -1,0 +1,15 @@
+{
+  "original_run": "x86_kvm_micro_20261107_182314_422946",
+  "original_requests": 29,
+  "original_generated_c": 29,
+  "original_compiled": 0,
+  "original_error": "[Errno 2] No such file or directory: 'clang'",
+  "original_service_sha256": "49cf813a8feedbf003714ec3496f962561aa131443574bf36bd7ec7b5891a746",
+  "published_original_raw": "kprog/results/kprog_tv_20261107/micro-pure-missing-clang-requests.tar.gz",
+  "before_path": "/usr/bin:/bin",
+  "after_path": "/usr/lib/llvm-18/bin:/usr/bin:/bin",
+  "same_native_input": "micro-shared-elf/request-1/kernel.native.o",
+  "fresh_compile_pass": true,
+  "kernel_acceptance_from_this_check": false,
+  "raw_sha256": "f6e63a37ef0e266609aab45b92991b723a6e3a37b7b435fb3c5c4eaa4967c97e"
+}
