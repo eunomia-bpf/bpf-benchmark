@@ -380,6 +380,21 @@ def legacyShiftFlags (width : ScalarWidth) (kind : LegacyShift) (value count old
     if kind = .rotateLeft then carryFlags else
       setFlag (setFlag (setFlag carryFlags 2 (evenParity result)) 6 (result == 0)) 7 sign
 
+/-- ROR selects the low operand-width bits of a shifted double-width pair.
+Unlike the implementation's two-shift OR, this uses one concatenated source. -/
+def rotateRightValue (width : ScalarWidth) (value count : Word) : Word :=
+  let source := (value.setWidth width.bits).setWidth 128
+  let pair := (source <<< width.bits) ||| source
+  let amount := (legacyCount width count &&& BitVec.ofNat 64 (width.bits - 1)).setWidth 128
+  ((pair >>> amount).setWidth width.bits).setWidth 64
+
+def rotateRightFlags (width : ScalarWidth) (value count old : Word) : Word :=
+  let n := (legacyCount width count).toNat
+  let result := rotateRightValue width value count
+  let cf := result.getLsbD (width.bits - 1)
+  let of := cf != result.getLsbD (width.bits - 2)
+  if n = 0 then old else setFlag (setFlag old 0 cf) 11 (if n = 1 then of else old.getLsbD 11)
+
 def legacyDefinedFlags (width : ScalarWidth) (kind : LegacyShift) (count : Word) : Word :=
   let n := (legacyCount width count).toNat
   if n = 0 then 0xffffffffffffffff else
@@ -563,6 +578,17 @@ def legacyShiftStep (width : ScalarWidth) (kind : LegacyShift) (dst : ScalarDest
       | .ok (result, writes) =>
           ⟨{ result with rflags := legacyShiftFlags width kind value count s.rflags, pc := nextPc }, reads ++ writes, none⟩
 
+/-- Register or memory ROR, retaining the completed read on a write fault. -/
+def rotateRightStep (width : ScalarWidth) (dst : ScalarDestination) (count nextPc : Word)
+    (s : State) : Transition State :=
+  match scalarRead s width dst.source with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (value, reads) =>
+      match scalarWrite s width dst (rotateRightValue width value count) with
+      | .error fault => ⟨s, reads ++ [.fault fault], some fault⟩
+      | .ok (result, writes) =>
+          ⟨{ result with rflags := rotateRightFlags width value count s.rflags, pc := nextPc }, reads ++ writes, none⟩
+
 /-- Widen the operand from its access width, independently of generated masks. -/
 def extendValue (sourceWidth : ScalarWidth) (signed : Bool) (source : Word) : Word :=
   if signed then (source.setWidth sourceWidth.bits).signExtend 64
@@ -606,6 +632,7 @@ def signHighValue (width : CmovWidth) (source : Word) : Word :=
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | rotateRight (width : ScalarWidth) (dst : ScalarDestination) (count nextPc : Word)
   | exchange (width : ScalarWidth) (left right : RegisterSlice) (nextPc : Word)
   | legacyShift (width : ScalarWidth) (kind : LegacyShift) (dst : ScalarDestination) (count nextPc : Word)
   | lea (width : CmovWidth) (dst : Register) (address nextPc : Word)
@@ -642,7 +669,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -652,6 +679,7 @@ def Instruction.fallthrough : Instruction → Word
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .rotateRight width dst count nextPc => rotateRightStep width dst count nextPc s
   | .exchange width left right nextPc => exchangeStep width left right nextPc s
   | .legacyShift width kind dst count nextPc => legacyShiftStep width kind dst count nextPc s
   | .lea width dst address nextPc =>
@@ -745,6 +773,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .rotateRight width _ count _ => legacyDefinedFlags width .rotateLeft count
   | .exchange .. => 0xffffffffffffffff
   | .legacyShift width kind _ count _ => legacyDefinedFlags width kind count
   | .lea .. => 0xffffffffffffffff
@@ -970,17 +999,19 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     return ← integerBinary ((modrm / 8) % 8) width (scalarDestination p width rm) (.immediate immediate) nextPc
   if first = 0xc0 ∨ first = 0xc1 ∨ first = 0xd0 ∨ first = 0xd1 ∨ first = 0xd2 ∨ first = 0xd3 then
     let modrm ← byteAt bytes (count + 1)
-    let kind ← match (modrm / 8) % 8 with
-      | 0 => pure LegacyShift.rotateLeft
-      | 4 | 6 => pure LegacyShift.left
-      | 5 => pure LegacyShift.right
-      | 7 => pure LegacyShift.arithmetic
-      | _ => throw "unsupported native rotate-through-carry/right group"
     let width := scalarWidth p (first % 2 == 0)
     let immediate := first = 0xc0 ∨ first = 0xc1
     let (rm, nextPc, cursor) ← operand bytes s p modrm (count + 2) (if immediate then 1 else 0)
     let amount ← if immediate then pure (BitVec.ofNat 64 (← byteAt bytes cursor))
       else if first = 0xd0 ∨ first = 0xd1 then pure 1 else pure (s.gpr 1 &&& 0xff)
+    if (modrm / 8) % 8 = 1 then
+      return .rotateRight width (scalarDestination p width rm) amount nextPc
+    let kind ← match (modrm / 8) % 8 with
+      | 0 => pure LegacyShift.rotateLeft
+      | 4 | 6 => pure LegacyShift.left
+      | 5 => pure LegacyShift.right
+      | 7 => pure LegacyShift.arithmetic
+      | _ => throw "unsupported native rotate-through-carry group"
     return .legacyShift width kind (scalarDestination p width rm) amount nextPc
   if first = 0x84 ∨ first = 0x85 then
     let width := scalarWidth p (first == 0x84)

@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86Scalar
 import KProgFormal.Refinement.X86Andn
 import KProgFormal.X86MemShiftHandler
 
@@ -51,5 +52,18 @@ theorem handler_refines (width : BzhiWidth) (kind : BmiShift) (dst : Register) (
       (handlerStep width kind dst source count nextPc s tag) := by
   rw [step_refines]
   exact ⟨rfl, rfl, rfl⟩
+
+/-- The generated ROR primitive also agrees with the concatenation reference
+at byte/word widths. This is a value-contract theorem; classical flag-writing
+ROR still needs a producer handler distinct from the existing flagless RORX. -/
+theorem legacy_ror_value_refines (width : Reference.X86.ScalarWidth)
+    (source count : Reference.Word) :
+    GeneratedX86ShiftResult.ror source count (X86Scalar.handlerWidth width) =
+      Reference.X86.rotateRightValue width source count := by
+  cases width <;> simp only [GeneratedX86ShiftResult.ror, X86Scalar.handlerWidth,
+    GeneratedX86ShiftCount.count, GeneratedX86ShiftCount.mask, GeneratedX86Width.narrow,
+    GeneratedX86Width.mask, GeneratedX86Width.bits, Reference.X86.rotateRightValue,
+    Reference.X86.legacyCount, Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes,
+    reduceCtorEq, ↓reduceIte, Nat.reduceMul, Nat.reduceSub, Reference.Word] <;> bv_decide
 
 end KProgFormal.Refinement.X86BmiShift

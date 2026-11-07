@@ -19,19 +19,21 @@ def numeric(kind, bits, value, count, old):
     if kind == 'shl': result = (a << n) & mask
     elif kind == 'shr': result = a >> n
     elif kind == 'sar': result = ((a - (1 << bits) if a >> (bits - 1) else a) >> n) & mask
-    else: result = ((a << k) | (a >> (bits - k))) & mask
+    elif kind == 'rol': result = ((a << k) | (a >> (bits - k))) & mask
+    else: result = ((a >> k) | (a << (bits - k))) & mask
     if not n: return result, old, MASK
     if kind == 'rol': cf = result & 1
+    elif kind == 'ror': cf = result >> (bits - 1)
     elif kind == 'shl': cf = (a >> (bits - n)) & 1 if n <= bits else 0
     elif n <= bits: cf = (a >> (n - 1)) & 1
     else: cf = (a >> (bits - 1)) if kind == 'sar' else 0
     sf = result >> (bits - 1)
-    of = (sf ^ cf) if kind in ('shl', 'rol') else (a >> (bits - 1)) if kind == 'shr' else 0
+    of = (sf ^ (result >> (bits - 2) & 1)) if kind == 'ror' else (sf ^ cf) if kind in ('shl', 'rol') else (a >> (bits - 1)) if kind == 'shr' else 0
     flags = (old & ~1) | cf
     if n == 1: flags = (flags & ~0x800) | (of << 11)
-    defined = MASK if kind == 'rol' else MASK ^ 16
+    defined = MASK if kind in ('rol', 'ror') else MASK ^ 16
     if n != 1: defined &= ~0x800
-    if kind != 'rol':
+    if kind not in ('rol', 'ror'):
         flags = (flags & ~0xC4) | (sf << 7) | (int(result == 0) << 6) | (int((result & 255).bit_count() % 2 == 0) << 2)
         if kind in ('shl', 'shr') and n >= bits: defined &= ~1
     return result, flags, defined
@@ -41,7 +43,7 @@ def main():
     build = ROOT / 'build/legacy-shift-reference'
     build.mkdir(parents=True, exist_ok=True)
     source = ['#include <stdint.h>']
-    for kind in ('shl', 'shr', 'sar', 'rol'):
+    for kind in ('shl', 'shr', 'sar', 'rol', 'ror'):
         for bits, suffix, operand in ((8, 'b', '%b0'), (16, 'w', '%w0'), (32, 'l', '%k0'), (64, 'q', '%0')):
             source.append('uint64_t %s%d(uint64_t a,uint64_t n,uint64_t old,uint64_t *out){uint64_t f;'
                 '__asm__ volatile("pushfq;pushq %%3;popfq;%s%s %%%%cl,%s;pushfq;popq %%1;popfq"'
@@ -51,7 +53,7 @@ def main():
     cpu = ctypes.CDLL(str(build / 'cpu.so'))
     cases = []
     cpu_cases = 0
-    for kind, group in (('rol', 0), ('shl', 4), ('shr', 5), ('sar', 7)):
+    for kind, group in (('rol', 0), ('ror', 1), ('shl', 4), ('shr', 5), ('sar', 7)):
         for bits, prefix in ((8, ''), (16, '66'), (32, ''), (64, '48')):
             width = bits // 8
             mask = (1 << bits) - 1
