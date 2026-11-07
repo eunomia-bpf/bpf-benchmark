@@ -759,3 +759,11 @@ old metadata/instruction/multichunk negatives and legacy captures. Evidence and
 remaining invocation/CPU-profile/native-PC-relocation obligations are recorded
 under results/kprog_tv_20261107/emitted-*. This is conditional per-load safety;
 the real invocation bridge and producer-independent loading remain to complete.
+
+`SimplePCRelocation` now proves full-state/event PC translation for all21 actual
+simple native instructions, including both pair profiles and faults, then lifts
+it to canonical byte fetching at any RX base (`step_at`). Only PC changes; all
+other architectural fields, memory and ordered effects remain identical.
+`make simple-pc-relocation-check` checks these theorems with their dependencies;
+both use only propext/Quot.sound. Whole-execution transport to the captured RX
+entry and the actual initial-state/profile bridge remain to compose.

@@ -1,0 +1,5 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv -o ../tv/build/SimplePCRelocation.olean ../tv/SimplePCRelocation.lean
+'KProgTV.SimplePCRelocation.all_instructions' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimplePCRelocation.step_at' depends on axioms: [propext, Quot.sound]
+make: Leaving directory '/workspaces/repository/kprog/tv'

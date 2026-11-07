@@ -150,3 +150,21 @@ these successful per-load conditional theorems do not claim full pipeline
 admission or all-program TV. No paper, benchmark, shared runtime image or native
 ISA implementation changed. Exact source/program/negative inputs and source
 pins are in emitted-inputs.tar.gz and emitted-source-pins.txt.
+
+Canonical instruction and byte-fetch PC relocation
+-------------------------------------------------
+
+`SimplePCRelocation.all_instructions` proves PC translation for all21 actual
+native instructions, retaining the entire architectural state and exact ordered
+memory/fault effects; it covers both pair-access profiles and every first fault.
+`step_at` lifts this to the real byte-decoded ARM64Path.step at any RX base and
+any actual aligned program position. Native bytes are decoded only by V's
+canonical semantics; existing exact decoder certificates are reused. No ISA,
+ABI input or runtime code is changed. Both theorems use only propext/Quot.sound,
+without sorryAx or a new bitvector reduction oracle.
+
+The repository make target passes (pc-relocation-final.log); exact inputs and
+initial finite-index/memory-match/range proof-development errors are retained in
+pc-relocation-inputs.tar.gz. This is instruction/fetch transport. Lifting whole
+executions and the per-load prefix safety theorem to actual RX addresses, plus
+the actual initial-state/CPU-profile bridge, remains active.

@@ -612,3 +612,7 @@ simple-emitted-certificate:
 .PHONY: simple-emitted-negative-check
 simple-emitted-negative-check:
 	python3 test_simple_emitted.py build/capture-loader-arm64-emitted
+
+.PHONY: simple-pc-relocation-check
+simple-pc-relocation-check: checked-first-block-check
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv -o ../tv/build/SimplePCRelocation.olean ../tv/SimplePCRelocation.lean
