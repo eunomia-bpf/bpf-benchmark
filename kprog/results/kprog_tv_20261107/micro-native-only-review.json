@@ -1,0 +1,28 @@
+{
+  "status": "independent_review_of_standard_native_only_micro_runtime_pass",
+  "utc": "2026-11-07T17:43:59.305738+00:00",
+  "producer_commit": "aaf7b9dc425f00ef9ee1f3e18ef0a5ef70e65201",
+  "source_artifact_sha256": {
+    "corpus/results/kprog_app_coverage_20261107/native-only-micro/checks.json": "a40f4c0dff096369b8e3798ccbdc8a380689ccfb6311f861e07ab01f605dd6b0",
+    "corpus/results/kprog_app_coverage_20261107/native-only-micro/raw.tar.gz": "0a031f6fd5606e776373946b9d580ebddc46a35ad29b610790f614b038026cb1",
+    "corpus/results/kprog_app_coverage_20261107/native-only-micro/service-requests.tar.gz": "3e7638c1725f1f1ff1cba7bbfd262c0ac29d368fb9e28942926cb3b000ef0e7f"
+  },
+  "programs": 13,
+  "exact_result_samples": 39,
+  "successful_fresh_service_requests": 26,
+  "checks": [
+    "All archived raw13x3 sample results equal expected64bit result and retval2.",
+    "All26 distinct request/program IDs have successful actual loader completions, archived fresh compiler commands and generated simulator object.",
+    "Each kernel-owned native ELF is byte-identical to generated request.native.o and matches its request SHA, with exactly two fresh requests per entry.",
+    "Actual runtime binary matches captured image binary SHA; later T build is explicitly distinct.",
+    "C source review: application close_fds, separate registered capability-owning service and enforced BOUND1, without application proof-upload exemption."
+  ],
+  "captured_runner_sha256": "6af68aec1c00f5bc2150beba0a89e610f20ee0f90e13445f04d3621d04720108",
+  "later_T_runner_sha256": "90530ee453832eccf0cf2191ef6a98eabdde9460108166e5f8ed2eafa3806533",
+  "bound_evidence": "Kernel-authenticated worker completion through the bound-only source path; no per-request numeric generation or checked-byte snapshot is claimed by this capture.",
+  "remaining": [
+    "T old-driver private guest remains separately active and supplies no completed runtime result here.",
+    "This is functional evidence, not a timing comparison or per-program semantic TV. Both native runtime labels currently use bound execution.",
+    "ARM standard bootstrap and all-program translation validation remain separate."
+  ]
+}

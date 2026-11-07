@@ -2197,3 +2197,11 @@ correspondence covers every canonical permission assignment; its universal
 native relational theorem fixes state/effects/fault without a next-state
 premise. All35 accumulated audits pass. Entry/all-block composition, the full
 architectural reconstruction relation and whole-program TV remain open.
+
+`micro-native-only-review.json` independently checks C's standard-bootstrap
+micro capture: all13x3 exact results and26 successful fresh native requests,
+with distinct request/program IDs, matching immutable/generated native ELF,
+actual compiler records and image binary hash. Both native labels execute P
+through the bound service. The captured earlier runner and later T binary are
+explicitly distinct. This functional evidence supplies no timing comparison,
+numeric generation, checked-byte snapshot or per-program TV certificate.
