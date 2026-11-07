@@ -24,6 +24,15 @@ TRACEE_PUBLICATION='f41ccb6b773d0b24273b8145d758680f9b3f8793'
 MEMCPY_PUBLICATION='4adeb4807bb26eddd57324799eb79d9dc0118d56'
 MANIFEST_PUBLICATION='071476a17f6526ef706404743ca19049201ed5e1'
 ARM_READONLY_PUBLICATION='24e3a1477d4f6f84b4ccb5b2c30426a0871b7091'
+RESOURCE_PUBLICATION='2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c'
+SCOPED_PUBLICATION='8e32cc4ebcf3d3a251f0875a02a46df6008d45a5'
+RESOURCE_COHORTS=[
+ ('cilium','functional_224658','cilium-native-resources',RESOURCE_PUBLICATION),
+ ('tetragon','functional_225009','tetragon-cmp-resources',RESOURCE_PUBLICATION),
+ ('otel','functional_225459','otel-cmp-resources',RESOURCE_PUBLICATION),
+ ('tracee','functional_230126','tracee-bound-startup',RESOURCE_PUBLICATION),
+ ('tracee','functional_231936','tracee-resource-scoped',SCOPED_PUBLICATION),
+]
 ARM_ROOT='corpus/results/kprog_arm64_app_coverage_20261107/'
 ARM_COHORTS=[
  ('bcc','arm64_functional_172354',ARM_ROOT+'bcc-full-start-coverage.json',
@@ -203,11 +212,15 @@ def whole_application_outcome(payload,metadata,batch_records,published_observati
             phases[phase]=dict(raw_measurement_present=value is not None,
                 resident_program_count=len(values),bpf_run_count=sum(v['run_cnt_delta'] for v in values),
                 workloads=[workload_observation(w) for w in (value or {}).get('workloads',[])])
-        replacements=[];plans=[];timings=[];shim_pins={}
+        replacements=[];plans=[];timings=[];shim_pins={};native_failures=[];submission_failures=[];baseline_attempts=0
         for member in archive.getmembers():
+            if member.isfile() and '/details/shim-logs/' in member.name and member.name.endswith('.baseline.log'):
+                baseline_attempts+=sum(' BPF_PROG_LOAD ' in line for line in archive.extractfile(member).read().decode().splitlines())
             if member.isfile() and '/details/shim-logs/' in member.name and member.name.endswith('.post_rejit.log'):
                 data=archive.extractfile(member).read();shim_pins[member.name]=sha(data)
                 for line in data.decode().splitlines():
+                    if 'native-loader failed ' in line:native_failures.append(line)
+                    if 'kernel native resource submission refused:' in line:submission_failures.append(line)
                     if any(label in line for label in ['native-loader replaced ','native-loader link-plan ','native-loader timings ']):
                         fields=dict(re.findall(r'(\w+)=(\S+)',line))
                         pair=(int(fields['original_id']),int(fields['native_id']))
@@ -219,12 +232,30 @@ def whole_application_outcome(payload,metadata,batch_records,published_observati
         assert set(plans)=={(*row,r['request_id']) for r in batch_records for row in expected if row[:2]==(r['source_prog_id'],r['bound_prog_id'])}
         assert len(timings)==len(expected) and set(timings)=={(*row[:2],0,1) for row in expected}
         assert len(expected)==metadata['native_replaced']
-        assert sorted([list(row[:2]) for row in expected])==published_observations['bound_id_pairs']
-        assert phases['baseline']['resident_program_count']==published_observations['baseline_resident_bpf_records']
-    return dict(app_status=result['status'],app_error=result['error'],app_result_sha256=sha(raw),
+        if 'bound_id_pairs' in published_observations:
+            assert sorted([list(row[:2]) for row in expected])==published_observations['bound_id_pairs']
+        for key in ['baseline_resident_bpf_records','baseline_resident_programs']:
+            if key in published_observations:assert phases['baseline']['resident_program_count']==published_observations[key]
+        extended='raw_hashes' in published_observations or 'artifact_sha256' in published_observations
+        if extended:
+            for key,value in dict(native_requests=len(batch_records),
+                generated=sum(row['generated_source'] for row in batch_records),
+                compiled=sum(row['compiled_object'] for row in batch_records),
+                accepted_bound=len(expected),native_replaced=len(replacements),
+                native_failed=len(native_failures)).items():
+                assert published_observations[key]==metadata[key]==value
+            if 'submission_error_lines' in published_observations:
+                assert submission_failures==published_observations['submission_error_lines']
+            if 'baseline_load_attempts' in published_observations:
+                assert baseline_attempts==published_observations['baseline_load_attempts']
+    outcome=dict(app_status=result['status'],app_error=result['error'],app_result_sha256=sha(raw),
         phases=phases,shim_sha256=shim_pins,replacement_pairs=sorted([list(row[:2]) for row in expected]),
         all_replacements_match_bound_service=True,all_replacements_require_bound=True,
         prebuilt_proof_count=sum(row[2] for row in timings),published_observations=published_observations)
+    if extended:
+        outcome.update(native_loader_failure_lines=native_failures,
+            submission_error_lines=submission_failures,baseline_load_attempts=baseline_attempts)
+    return outcome
 
 
 def main():
@@ -258,10 +289,13 @@ def main():
       ('tetragon','functional_223215',BASE+'tetragon-manifest-replay/coverage.json',BASE+'tetragon-manifest-replay/service.tar.gz'),
       ('otel','arm64_functional_215656',ARM_ROOT+'readonly-byte-exact/replay/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json',
        ARM_ROOT+'readonly-byte-exact/replay/trusted-arm64-otelcol-ebpf-profiler-result/run-20261107T215656632646Z.tar.gz')]
+    cases += [(app,batch,BASE+directory+'/coverage.json',BASE+directory+'/service.tar.gz')
+              for app,batch,directory,publication in RESOURCE_COHORTS]
+    resource_publications={batch:publication for app,batch,directory,publication in RESOURCE_COHORTS}
     arm_pass_batches={row[1] for row in ARM_COHORTS}
     batches=[];records=[];failures=[];identity_sets={};work_observations={}
     for app,batch,metadata_path,service_path in cases:
-        publication=ARM_READONLY_PUBLICATION if batch=='arm64_functional_215656' else MANIFEST_PUBLICATION if batch=='functional_223215' else MEMCPY_PUBLICATION if batch=='functional_221545' else TRACEE_PUBLICATION if batch=='functional_214037' else ARM_PASS_PUBLICATION if batch in arm_pass_batches else ARM_PUBLICATION if batch.startswith('arm64_') else KATRAN_PUBLICATION if batch=='functional_213447' else JOIN_PUBLICATION if batch in {'functional_210552','functional_211016'} else PUBLICATION
+        publication=resource_publications[batch] if batch in resource_publications else ARM_READONLY_PUBLICATION if batch=='arm64_functional_215656' else MANIFEST_PUBLICATION if batch=='functional_223215' else MEMCPY_PUBLICATION if batch=='functional_221545' else TRACEE_PUBLICATION if batch=='functional_214037' else ARM_PASS_PUBLICATION if batch in arm_pass_batches else ARM_PUBLICATION if batch.startswith('arm64_') else KATRAN_PUBLICATION if batch=='functional_213447' else JOIN_PUBLICATION if batch in {'functional_210552','functional_211016'} else PUBLICATION
         metadata=json.loads(published(metadata_path,publication)) if metadata_path else {}
         payload=captured[service_path.split(':',1)[1]] if service_path.startswith('capture:') else published(service_path,publication)
         service,log_path=service_archive(payload)
@@ -372,6 +406,29 @@ def main():
                 observations_path=str(Path(service_path).with_name('observations.json'))
                 work_observations[batch]=whole_application_outcome(published(result_path,publication),metadata,
                     [record for record in records if record['batch']==batch],json.loads(published(observations_path,publication)))
+            if batch in resource_publications:
+                result_path=str(Path(service_path).with_name('result.tar.gz'))
+                result_payload=published(result_path,publication)
+                observations=json.loads(published(str(Path(service_path).with_name('observations.json')),publication))
+                batch_records=[record for record in records if record['batch']==batch]
+                work=whole_application_outcome(result_payload,metadata,batch_records,observations)
+                artifact_hashes={'service.tar.gz':sha(payload),'result.tar.gz':sha(result_payload)}
+                for name in ['launch.tar.gz','driver.log.gz']:
+                    artifact_hashes[name]=sha(published(str(Path(service_path).with_name(name)),publication))
+                assert artifact_hashes==metadata['artifact_sha256']
+                key='raw_hashes' if 'raw_hashes' in observations else 'artifact_sha256'
+                assert artifact_hashes==observations[key]
+                assert all_rows==[json.loads(line) for line in metadata['service_log'].splitlines()]
+                published_records={row['request_id']:row for row in metadata['programs']}
+                assert len(published_records)==len(batch_records)
+                for record in batch_records:
+                    other=published_records[record['request_id']]
+                    for key in ['source_prog_id','native_sha256','entry','status']:
+                        assert record[key]==other[key]
+                    assert record['generated_source']==other['generated_source']
+                    assert record['compiled_object']==other['compiled_object']
+                work['archived_artifact_sha256']=artifact_hashes
+                work_observations[batch]=work
             if 'work_reconciliation' in metadata:
                 result_path=str(Path(service_path).with_name('result.tar.gz'))
                 work_observations[batch]=packet_work(published(result_path,publication),metadata,app,
@@ -393,7 +450,7 @@ def main():
             load_rows.append(dict(name=name[1],insn_cnt=int(count[1]),bytes=int(count[1])*8,raw_line=line))
     timing_metadata=json.loads(captured['tetragon-timing.metadata.json'])
     timing_result=json.loads(captured['tetragon-timing.result.json'])
-    summary=dict(source_publication=PUBLICATION,additional_source_publications=[JOIN_PUBLICATION,KATRAN_PUBLICATION,ARM_PUBLICATION,ARM_PASS_PUBLICATION,TRACEE_PUBLICATION,MEMCPY_PUBLICATION,MANIFEST_PUBLICATION,ARM_READONLY_PUBLICATION],batches=batches,terminal_requests=len(records),
+    summary=dict(source_publication=PUBLICATION,additional_source_publications=[JOIN_PUBLICATION,KATRAN_PUBLICATION,ARM_PUBLICATION,ARM_PASS_PUBLICATION,TRACEE_PUBLICATION,MEMCPY_PUBLICATION,MANIFEST_PUBLICATION,ARM_READONLY_PUBLICATION,RESOURCE_PUBLICATION,SCOPED_PUBLICATION],batches=batches,terminal_requests=len(records),
                  stages=dict(Counter(record['stage'] for record in records)),
                  kernel_worker_receipt_identity_matches=len(records),input_artifacts=source_pins,
                  captured_input_manifest=capture_manifest,captured_input_archive_sha256=sha((OUT/'captured-inputs.tar.gz').read_bytes()),

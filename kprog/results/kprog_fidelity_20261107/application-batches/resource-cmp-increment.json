@@ -1,0 +1,155 @@
+{
+  "previous_publication": "124a0b3b5f08f0f8c88b63740ecf05a7133e6543",
+  "checks": {
+    "prior21_batches_equal": true,
+    "prior91_rows_equal": true,
+    "prior51_input_pins_equal": true,
+    "prior_work_objects_equal": true,
+    "prior_source_vectors_equal": true,
+    "prior_failure_bytes_prefix_equal": true,
+    "recorded_counts_equal": true,
+    "totals_equal": true
+  },
+  "new_batches": [
+    "functional_224658",
+    "functional_225009",
+    "functional_225459",
+    "functional_230126",
+    "functional_231936"
+  ],
+  "retained_batches": 21,
+  "retained_requests": 91,
+  "retained_input_pins": 51,
+  "new_requests": 13,
+  "new_generated": 13,
+  "new_compiled": 12,
+  "new_bound": 9,
+  "new_input_pins": 30,
+  "new_service_failures": 4,
+  "new_application_submission_refusals": 1,
+  "diagnostics": {
+    "functional_224658": {
+      "stage": "compiler_rejected",
+      "entry": "cil_xdp_entry",
+      "loader_stderr_bytes": 0,
+      "loader_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "verifier_statistics": {},
+      "compiler_stderr_bytes": 55780,
+      "compiler_stderr_sha256": "545d51793990cd9d085866c073dfb25cde19df7c0ba0d209134f71e1e74e21d5",
+      "missing_helper_errors": 18
+    },
+    "functional_225009": {
+      "stage": "verifier_rejected",
+      "entry": "execve_send",
+      "loader_stderr_bytes": 15365659,
+      "loader_stderr_sha256": "19e912b931ea72c3aa62f4ba71da2c736babbe4327549f76ddd2fac059476597",
+      "verifier_statistics": {
+        "processed": 189726,
+        "limit": 1000000,
+        "total_states": 1926,
+        "peak_states": 1926
+      }
+    },
+    "functional_225459": {
+      "stage": "verifier_rejected",
+      "entry": "perf_unwind_stop",
+      "loader_stderr_bytes": 64339,
+      "loader_stderr_sha256": "0cae2fdd91df4d05739604729c7d49d351c882385efc9dfc469f8a9c9f3aca83",
+      "verifier_statistics": {
+        "processed": 805,
+        "limit": 1000000,
+        "total_states": 27,
+        "peak_states": 27
+      }
+    },
+    "functional_231936": {
+      "stage": "verifier_rejected",
+      "entry": "sys_exit_submit",
+      "loader_stderr_bytes": 171182,
+      "loader_stderr_sha256": "c3bc9b25e88bf62c55b944391658efdc6bab419654e5354358e9ad6e4510c052",
+      "verifier_statistics": {
+        "processed": 2154,
+        "limit": 1000000,
+        "total_states": 91,
+        "peak_states": 91
+      }
+    }
+  },
+  "bound_id_pairs": {
+    "functional_224658": [],
+    "functional_225009": [
+      [
+        333,
+        334
+      ],
+      [
+        335,
+        336
+      ],
+      [
+        337,
+        338
+      ]
+    ],
+    "functional_225459": [
+      [
+        21,
+        22
+      ]
+    ],
+    "functional_230126": [],
+    "functional_231936": [
+      [
+        174,
+        175
+      ],
+      [
+        177,
+        178
+      ],
+      [
+        179,
+        182
+      ],
+      [
+        183,
+        184
+      ],
+      [
+        185,
+        186
+      ]
+    ]
+  },
+  "baseline_resident_bpf_records": {
+    "functional_224658": 72,
+    "functional_225009": 287,
+    "functional_225459": 13,
+    "functional_230126": 151,
+    "functional_231936": 151
+  },
+  "baseline_bpf_runs": {
+    "functional_224658": 1356106,
+    "functional_225009": 416054,
+    "functional_225459": 12270,
+    "functional_230126": 9141585,
+    "functional_231936": 9112060
+  },
+  "baseline_load_attempts": {
+    "functional_224658": 207,
+    "functional_225009": 311,
+    "functional_225459": 17,
+    "functional_230126": 162,
+    "functional_231936": 162
+  },
+  "app_result_sha256": {
+    "functional_224658": "ce4bef71090d867961016aa4a2b39a19643c4975e8c38af82da89a21ad1cf733",
+    "functional_225009": "7228251735567a7ddb3f80e1702392807499de4dbffad4493e4cc50c0ca9085c",
+    "functional_225459": "fb23fca9c4a52e46935ccbb0e0ade0e4451fa86259ab2622344a74f628260d8b",
+    "functional_230126": "1926bb9a5e26431ad7f8977870f879c97c5be08538441a231b0ba7218b554781",
+    "functional_231936": "1b33fe7383a205502939bdfa8c1f99e2492da98967c7c3c0fb76d4dd754681f6"
+  },
+  "submission_error_lines": [
+    "[240.718184 pid=2789 tid=2799] native-loader failed prog=tracepoint__raw manifest=/opt/bpf-benchmark/native-bpf/x86_64/tracee/manifest.json source=/tmp/bpfrejit_2789_db023415dd9df842.bpf error=kernel native resource submission refused: Argument list too long"
+  ]
+}

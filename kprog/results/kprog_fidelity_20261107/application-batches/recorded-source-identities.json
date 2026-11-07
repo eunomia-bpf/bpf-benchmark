@@ -130,5 +130,49 @@
     "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
     "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "f9086a5d08126aabfcaa824a6bf93aad9bc47c2b665d3f44b8757ceaaa3f3456",
     "/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader": "bf44d57f74696235ab999c0a0c55e0d38f93813026142142a9bbd54a94f4832c"
+  },
+  "d30f7c9e2565a17488ee53a345d2dd1c8e270619c65f44540adc97679feac71c": {
+    "/workspaces/repository/kprog/trusted_service.py": "c5b7ea7c0c2e8115efeec20b22f75b38a53e5c40bab2ad33a84f889e88595d75",
+    "/workspaces/repository/kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+    "/workspaces/repository/kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+    "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11",
+    "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74",
+    "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "82ad104a0974b4152272dd5f98dbcf52e013843d19f70992f0dd2b53f504d732",
+    "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac",
+    "/workspaces/.agent-state/kprog-lanes/C/cilium-native-resources/native-link-readonly-c": "d56ae4705dbb841870cc6f35bd6cd064fb27760b4b1f54c26e67750e9e866fa4",
+    "/workspaces/.agent-state/kprog-lanes/C/cilium-native-resources/trusted-native-loader": "d2d4339c98fead6dbfde48071951e05408c04b4f4e522d873a4e7d8a2c79d595"
+  },
+  "72a7ab6633cb4b8081c894adf8d5c744217bc40d945be10d1019e6c9619803b0": {
+    "/workspaces/repository/kprog/trusted_service.py": "c5b7ea7c0c2e8115efeec20b22f75b38a53e5c40bab2ad33a84f889e88595d75",
+    "/workspaces/repository/kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+    "/workspaces/repository/kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+    "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11",
+    "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74",
+    "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "82ad104a0974b4152272dd5f98dbcf52e013843d19f70992f0dd2b53f504d732",
+    "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac",
+    "/workspaces/.agent-state/kprog-lanes/C/cmp-resource-app-replay/tetragon__observer/native-link-readonly-c": "d56ae4705dbb841870cc6f35bd6cd064fb27760b4b1f54c26e67750e9e866fa4",
+    "/workspaces/.agent-state/kprog-lanes/C/cmp-resource-app-replay/tetragon__observer/trusted-native-loader": "d2d4339c98fead6dbfde48071951e05408c04b4f4e522d873a4e7d8a2c79d595"
+  },
+  "05da4eff13a41e323f1716ed56164a95abc6e1f395947947e650572afe464cb4": {
+    "/workspaces/repository/kprog/trusted_service.py": "c5b7ea7c0c2e8115efeec20b22f75b38a53e5c40bab2ad33a84f889e88595d75",
+    "/workspaces/repository/kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+    "/workspaces/repository/kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+    "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11",
+    "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74",
+    "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "82ad104a0974b4152272dd5f98dbcf52e013843d19f70992f0dd2b53f504d732",
+    "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac",
+    "/workspaces/.agent-state/kprog-lanes/C/cmp-resource-app-replay/otelcol-ebpf-profiler__profiling/native-link-readonly-c": "d56ae4705dbb841870cc6f35bd6cd064fb27760b4b1f54c26e67750e9e866fa4",
+    "/workspaces/.agent-state/kprog-lanes/C/cmp-resource-app-replay/otelcol-ebpf-profiler__profiling/trusted-native-loader": "d2d4339c98fead6dbfde48071951e05408c04b4f4e522d873a4e7d8a2c79d595"
+  },
+  "fb2baab9ef8ace2453e6ffdab2d3f828f95302a933ca2d0f2e16a76b5893642e": {
+    "/workspaces/repository/kprog/trusted_service.py": "c5b7ea7c0c2e8115efeec20b22f75b38a53e5c40bab2ad33a84f889e88595d75",
+    "/workspaces/repository/kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+    "/workspaces/repository/kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+    "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11",
+    "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74",
+    "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "9c05c0b6577d502c09502cd55a4050585a048ed7c698dca7da8dc8eea3cae895",
+    "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac",
+    "/workspaces/.agent-state/kprog-lanes/C/scoped-resource-replay/tracee__monitor/native-link-readonly-c": "48e054b1b0a0099b1348bb6240af909ff4188ccb0faaf1734231443970286864",
+    "/workspaces/.agent-state/kprog-lanes/C/scoped-resource-replay/tracee__monitor/trusted-native-loader": "ebd3d0660613e71e4319f7565d817c2cb63c7f1a8b81baf894534d4e8f5bcb62"
   }
 }

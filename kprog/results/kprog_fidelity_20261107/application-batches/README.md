@@ -1,10 +1,10 @@
 # Application service batch observations
 
-One generic archive reader reconciles21 closed service batches across all six
-application names. All91 terminal requests preserve byte equality between the
+One generic archive reader reconciles26 closed service batches across all six
+application names. All104 terminal requests preserve byte equality between the
 kernel-owned native object, the worker's received copy and the service receipt's
-SHA256. Kernel source IDs match the service records. The batches contain87
-generated sources,86 compiled objects and74 successful bound replies.
+SHA256. Kernel source IDs match the service records. The batches contain100
+generated sources,98 compiled objects and83 successful bound replies.
 
 Every bound reply's request ID, program ID and status exactly match load.stdout.
 All available published counts match the archive-derived counts, including the
@@ -34,11 +34,109 @@ and each service's terminal requests and archive set agree.
 | tetragon / functional_221545 | 4 | 4 | 4 | 4 | next manifest selector frontier |
 | tetragon / functional_223215 | 5 | 5 | 5 | 4 | 1 verifier_rejected |
 | otel / arm64_functional_215656 | 2 | 2 | 2 | 1 | 1 loader_rejected |
+| cilium / functional_224658 | 1 | 1 | 0 | 0 | 1 compiler_rejected |
+| tetragon / functional_225009 | 4 | 4 | 4 | 3 | 1 verifier_rejected |
+| otel / functional_225459 | 2 | 2 | 2 | 1 | 1 verifier_rejected |
+| tracee / functional_230126 | 0 | 0 | 0 | 0 | application resource-submission refusal |
+| tracee / functional_231936 | 6 | 6 | 6 | 5 | 1 verifier_rejected |
 
-The21 rows retain distinct source, image and boot epochs. Counts describe observed
+The26 rows retain distinct source, image and boot epochs. Counts describe observed
 load instances; repeated native objects and repeated program IDs across boots stay
 in their original batches. Whole application completion and duration-driven
 workload measurements follow the recorded startup frontiers.
+
+## Entry resources and later x86 application frontiers
+
+The five later resource/CMP cohorts contribute13 service requests,13 generated
+sources,12 compiled objects and9 bound replies. All13 native objects match their
+kernel-owned copy, worker copy and receipt SHA. Every successful raw shim
+replacement, trusted-request link plan and timing row matches the service's
+source/bound IDs. Timing rows retain bound_required=1 and prebuilt_proof=0.
+The original whole-application phase values equal the archived coverage values.
+
+| Cohort | Baseline resident counters | Baseline BPF calls | Baseline load attempts | Bound ID pairs |
+| --- | ---: | ---: | ---: | --- |
+| Cilium224658 | 72 | 1,356,106 | 207 | 0 |
+| Tetragon225009 | 287 | 416,054 | 311 | 333→334;335→336;337→338 |
+| OTel225459 | 13 | 12,270 | 17 | 21→22 |
+| Tracee230126 | 151 | 9,141,585 | 162 | 0 |
+| Tracee231936 | 151 | 9,112,060 | 162 | 174→175;177→178;179→182;183→184;185→186 |
+
+These are separate startup and workload epochs. The reader checks baseline
+load-attempt counts directly from the raw shim and retains each workload's
+original duration, return code and output hashes. Resident counters and startup
+attempts retain their separate denominators. All five applications record
+status error and post_rejit=null at their captured frontiers.
+
+Cilium224658 generates its simulator C, and Clang records18 occurrences of
+the missing wrapper diagnostic:
+
+~~~text
+error: call to undeclared function 'X86_SIM_BPF_CALL_bpf_xdp_load_bytes'
+~~~
+
+The complete compiler stderr and command remain in failures.jsonl.gz.
+C's later generic helper/context implementation and actual application replay
+retain their own source epochs.
+
+Tetragon225009 binds three requests and reaches the verifier for execve_send:
+
+~~~text
+The sequence of 8193 jumps is too complex.
+processed 189726 insns (limit 1000000) max_states_per_insn 4 total_states 1926 peak_states 1926 mark_read 0
+~~~
+
+The complete15,365,659-byte loader stream remains in the failure archive.
+The earlier223215 cohort retains its original188,982 processed count and
+separate source/byte identities.
+
+OTel225459 binds read_task_struct and compiles perf_unwind_stop. Its later
+load reaches the helper-size verifier boundary:
+
+~~~text
+R5 min value is negative, either use unsigned or 'var &= const'
+processed 805 insns (limit 1000000) max_states_per_insn 0 total_states 27 peak_states 27 mark_read 0
+~~~
+
+Tracee230126 records one actual application submission refusal:
+
+~~~text
+kernel native resource submission refused: Argument list too long
+~~~
+
+Its registered service archive contains the ready record and zero terminal
+requests. The app shim's refusal is retained as a submission-stage observation.
+The later231936 source adopts the entry-resource closure and receives six
+requests. Five bind; sys_exit_submit reaches:
+
+~~~text
+invalid access to map value, value_size=80 off=1036 size=4
+processed 2154 insns (limit 1000000) max_states_per_insn 1 total_states 91 peak_states 91 mark_read 0
+~~~
+
+The source/entry resource query batch in ../binding/entry-resource-batch/
+reproduces the corresponding resource-name mechanism over both ISA formats.
+These application cohorts record the actual kernel submission, generation,
+verifier and binding behavior around that mechanism. C/A continue complete
+application replay and the generic representation repairs.
+
+For each new cohort, service/result/launch/driver artifact hashes match both
+published metadata objects. Thirty new Git input pins retain the five sets of
+six immutable inputs. Source identity vectors and launch/runtime images retain
+their recorded epochs. The reader checks the two published observation schemas
+through the shared whole-application join, including every native-loader
+failure row and the application submission refusal. Its existing failure
+classifier retains its code.
+
+resource-cmp-increment.json records all diagnostics' lengths/hashes, verifier
+statistics and the exact retention of21 earlier batch objects,91 terminal rows,
+51 input pins, full failure-byte prefix, work objects and source vectors.
+The26-cohort totals are104 requests,100 generated sources,98 compiled objects
+and83 bound replies. The four new service failures comprise one compiler
+refusal and three verifier refusals; the separate application submission
+refusal retains its original service-request count. Final collection exits0.
+Universal V/T simulator, token, compiler, ABI, native-link and binding laws
+retain their shared scope and ownership.
 
 ## AArch64 OTel readonly-reader progression
 
@@ -402,7 +500,9 @@ and service archive usef41ccb6b773d0b24273b8145d758680f9b3f8793.
 The Tetragon221545 metadata, service, raw result and published observations
 use4adeb4807bb26eddd57324799eb79d9dc0118d56. The later Tetragon223215 metadata, service, raw result and observations use
 071476a17f6526ef706404743ca19049201ed5e1. The later ARM OTel215656 coverage, raw archive, summary and identity audit use
-24e3a1477d4f6f84b4ccb5b2c30426a0871b7091. Fifty-one published metadata/archive
+24e3a1477d4f6f84b4ccb5b2c30426a0871b7091. The five later resource/CMP cohorts use
+2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c and
+8e32cc4ebcf3d3a251f0875a02a46df6008d45a5. Eighty-one published metadata/archive
 inputs have individual Git/hash/size pins in summary.json. Two additional captured Tetragon service epochs and the R timing
 inputs retain their exact five-file captured-inputs.tar.gz and manifest.
 

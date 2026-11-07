@@ -8,7 +8,9 @@
     "f41ccb6b773d0b24273b8145d758680f9b3f8793",
     "4adeb4807bb26eddd57324799eb79d9dc0118d56",
     "071476a17f6526ef706404743ca19049201ed5e1",
-    "24e3a1477d4f6f84b4ccb5b2c30426a0871b7091"
+    "24e3a1477d4f6f84b4ccb5b2c30426a0871b7091",
+    "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+    "8e32cc4ebcf3d3a251f0875a02a46df6008d45a5"
   ],
   "batches": [
     {
@@ -729,18 +731,214 @@
           "equal": true
         }
       }
+    },
+    {
+      "app": "cilium",
+      "batch": "functional_224658",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/cilium-native-resources/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/cilium-native-resources/service.tar.gz",
+      "service_sha256": "0d95759d6e3c8c738d90d776b3b00e53ace04930ff0f9cc793f2d9e7233e3323",
+      "terminal_requests": 1,
+      "generated": 1,
+      "compiled": 0,
+      "accepted_bound": 0,
+      "stages": {
+        "compiler_rejected": 1
+      },
+      "app_status": "error",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 72,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        },
+        "generated": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "tetragon",
+      "batch": "functional_225009",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/tetragon-cmp-resources/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/tetragon-cmp-resources/service.tar.gz",
+      "service_sha256": "85b339c14b3df66a1c5a631e1d440f78eb09250715368a685adbd11c5fbd931b",
+      "terminal_requests": 4,
+      "generated": 4,
+      "compiled": 4,
+      "accepted_bound": 3,
+      "stages": {
+        "bound": 3,
+        "verifier_rejected": 1
+      },
+      "app_status": "error",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 287,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 4,
+          "recorded": 4,
+          "equal": true
+        },
+        "generated": {
+          "observed": 4,
+          "recorded": 4,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 4,
+          "recorded": 4,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 3,
+          "recorded": 3,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "otel",
+      "batch": "functional_225459",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/otel-cmp-resources/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/otel-cmp-resources/service.tar.gz",
+      "service_sha256": "79f11e8e25bd323c4aadf23b205585298b7d183a75be6153f58252a9ab452b73",
+      "terminal_requests": 2,
+      "generated": 2,
+      "compiled": 2,
+      "accepted_bound": 1,
+      "stages": {
+        "bound": 1,
+        "verifier_rejected": 1
+      },
+      "app_status": "error",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 13,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 2,
+          "recorded": 2,
+          "equal": true
+        },
+        "generated": {
+          "observed": 2,
+          "recorded": 2,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 2,
+          "recorded": 2,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "tracee",
+      "batch": "functional_230126",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/tracee-bound-startup/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/tracee-bound-startup/service.tar.gz",
+      "service_sha256": "1c773fa4aeaf7a4ef757c1b26ab26d7ad890345b6c280ba85e9dcfdd20058ff8",
+      "terminal_requests": 0,
+      "generated": 0,
+      "compiled": 0,
+      "accepted_bound": 0,
+      "stages": {},
+      "app_status": "error",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 151,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        },
+        "generated": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "tracee",
+      "batch": "functional_231936",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/tracee-resource-scoped/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/tracee-resource-scoped/service.tar.gz",
+      "service_sha256": "ce239fef50c19d1e3e04453bf5758470fc0ea79613808b6b1ed027d31efe7ae9",
+      "terminal_requests": 6,
+      "generated": 6,
+      "compiled": 6,
+      "accepted_bound": 5,
+      "stages": {
+        "bound": 5,
+        "verifier_rejected": 1
+      },
+      "app_status": "error",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 151,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 6,
+          "recorded": 6,
+          "equal": true
+        },
+        "generated": {
+          "observed": 6,
+          "recorded": 6,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 6,
+          "recorded": 6,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 5,
+          "recorded": 5,
+          "equal": true
+        }
+      }
     }
   ],
-  "terminal_requests": 91,
+  "terminal_requests": 104,
   "stages": {
-    "bound": 74,
-    "verifier_rejected": 8,
-    "compiler_rejected": 1,
+    "bound": 83,
+    "verifier_rejected": 11,
+    "compiler_rejected": 2,
     "specialization_rejected": 4,
     "native_stub_load_error": 1,
     "loader_rejected": 3
   },
-  "kernel_worker_receipt_identity_matches": 91,
+  "kernel_worker_receipt_identity_matches": 104,
   "input_artifacts": {
     "corpus/results/kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json": {
       "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
@@ -996,6 +1194,156 @@
       "publication": "24e3a1477d4f6f84b4ccb5b2c30426a0871b7091",
       "sha256": "ca9de826b154d72f72fa193ff9f9144bb7a7d7cf5a388027fc91965630101de4",
       "bytes": 2980
+    },
+    "corpus/results/kprog_app_coverage_20261107/cilium-native-resources/coverage.json": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "ac0192585af07b0741ae458c786079598fd08713d4b3ff830eea93f2ddfd53cc",
+      "bytes": 65549
+    },
+    "corpus/results/kprog_app_coverage_20261107/cilium-native-resources/service.tar.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "0d95759d6e3c8c738d90d776b3b00e53ace04930ff0f9cc793f2d9e7233e3323",
+      "bytes": 208969
+    },
+    "corpus/results/kprog_app_coverage_20261107/cilium-native-resources/result.tar.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "9b1c79742031a1dc3b6af79c14f718a707c7d16b509ca4742c66cd3964feeaee",
+      "bytes": 1589052
+    },
+    "corpus/results/kprog_app_coverage_20261107/cilium-native-resources/observations.json": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "81654adcc41ee7a88414ea8df255ff58984530ddd15a3698aa07b07a022a04e1",
+      "bytes": 13122
+    },
+    "corpus/results/kprog_app_coverage_20261107/cilium-native-resources/launch.tar.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "a32466c294757f5cd6957b7319dee3d512de78b329ac63f4aba12fa5c431d38f",
+      "bytes": 2926908
+    },
+    "corpus/results/kprog_app_coverage_20261107/cilium-native-resources/driver.log.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "b83921745a8ec46b6ba162a2e74d491b2517106b9ce79d1cd7b9ecf9fd7ae46c",
+      "bytes": 313
+    },
+    "corpus/results/kprog_app_coverage_20261107/tetragon-cmp-resources/coverage.json": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "16bb5b369742f4a3676cc661973da5248cced109966403c1bee6f4cea916da17",
+      "bytes": 112587
+    },
+    "corpus/results/kprog_app_coverage_20261107/tetragon-cmp-resources/service.tar.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "85b339c14b3df66a1c5a631e1d440f78eb09250715368a685adbd11c5fbd931b",
+      "bytes": 2963964
+    },
+    "corpus/results/kprog_app_coverage_20261107/tetragon-cmp-resources/result.tar.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "bb0a23870b6268bfefaa672170b1f49f623587e66fce32d0ffe47ecb3e0c4aa4",
+      "bytes": 1599672
+    },
+    "corpus/results/kprog_app_coverage_20261107/tetragon-cmp-resources/observations.json": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "20317ea2458939e616c721793ef33f3654d5bec3db30a4371a0253556637fba3",
+      "bytes": 20079
+    },
+    "corpus/results/kprog_app_coverage_20261107/tetragon-cmp-resources/launch.tar.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "935dc37d6e5664ebb22b5575e6911fccb1b017a1e01e63b4c2e9eb7c4dde4a02",
+      "bytes": 2955599
+    },
+    "corpus/results/kprog_app_coverage_20261107/tetragon-cmp-resources/driver.log.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "453210ffc24161b051e6fd05322abcc8cd0c6ae5e474ec77b9321010cd263742",
+      "bytes": 325
+    },
+    "corpus/results/kprog_app_coverage_20261107/otel-cmp-resources/coverage.json": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "5d29cec765ec950476da6a47e1453d858ba1991afa223e4481c74aeffe7678fb",
+      "bytes": 56644
+    },
+    "corpus/results/kprog_app_coverage_20261107/otel-cmp-resources/service.tar.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "79f11e8e25bd323c4aadf23b205585298b7d183a75be6153f58252a9ab452b73",
+      "bytes": 2284434
+    },
+    "corpus/results/kprog_app_coverage_20261107/otel-cmp-resources/result.tar.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "a631a4af139be6d8239411a6355f7814922f629c0890407b8024760783bd223e",
+      "bytes": 319790
+    },
+    "corpus/results/kprog_app_coverage_20261107/otel-cmp-resources/observations.json": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "57cadd686a2b5ceffdace3d12cdacf4cd04326435c505647be850811e5b7d173",
+      "bytes": 1997
+    },
+    "corpus/results/kprog_app_coverage_20261107/otel-cmp-resources/launch.tar.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "9c6d8fc6a7e5fea843cfac54059a6bea36ab24a74ea6c4cd3d9045feceedfaf4",
+      "bytes": 2955603
+    },
+    "corpus/results/kprog_app_coverage_20261107/otel-cmp-resources/driver.log.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "257928a707f6aaf95d9a1b2aa89f1bc74a6e3270986e24bebb4f88c5ae4428ea",
+      "bytes": 334
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-bound-startup/coverage.json": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "3b7ccc1f572db70dd0ff1cc5cd37170c4b78c9f5c51c15f917b7636fbf60fd01",
+      "bytes": 60188
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-bound-startup/service.tar.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "1c773fa4aeaf7a4ef757c1b26ab26d7ad890345b6c280ba85e9dcfdd20058ff8",
+      "bytes": 15776
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-bound-startup/result.tar.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "4f524a383dee98f225fe00165415b34d575115306b74625c575b998654c3ed2e",
+      "bytes": 3437044
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-bound-startup/observations.json": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "9ad1c7a052de2dcf865cb97754c695b002191ed683d13088f7a237f2bc47de98",
+      "bytes": 11120
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-bound-startup/launch.tar.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "98ac771e8b63f7e43623a7cd70f724422a7bee0773f9fe68a10edd94dfab420f",
+      "bytes": 5392268
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-bound-startup/driver.log.gz": {
+      "publication": "2ebfce5112e0eaeaf3e2716e9f8fa4086c01343c",
+      "sha256": "3e82593dde224ced87271916f0b9b3e216159bb9169625ff4ee49762a1534f6e",
+      "bytes": 319
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-resource-scoped/coverage.json": {
+      "publication": "8e32cc4ebcf3d3a251f0875a02a46df6008d45a5",
+      "sha256": "4928001eb6ef1160be0705509e1a9b7375f7679ee94c47aae201eed82ddcd98f",
+      "bytes": 78765
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-resource-scoped/service.tar.gz": {
+      "publication": "8e32cc4ebcf3d3a251f0875a02a46df6008d45a5",
+      "sha256": "ce239fef50c19d1e3e04453bf5758470fc0ea79613808b6b1ed027d31efe7ae9",
+      "bytes": 28726933
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-resource-scoped/result.tar.gz": {
+      "publication": "8e32cc4ebcf3d3a251f0875a02a46df6008d45a5",
+      "sha256": "4cb27ea45d325113b33b92a5b4d12b9f5791af18d0722675e4a7186da8fc39b0",
+      "bytes": 3438030
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-resource-scoped/observations.json": {
+      "publication": "8e32cc4ebcf3d3a251f0875a02a46df6008d45a5",
+      "sha256": "e1cb781e27c4cb11f1b99258b6b70abc1298dc9f7a7ed4dd6ceca431a4300fac",
+      "bytes": 946
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-resource-scoped/launch.tar.gz": {
+      "publication": "8e32cc4ebcf3d3a251f0875a02a46df6008d45a5",
+      "sha256": "c45a48a06cdfaa941837e898e9cdb064b7d8bf776a8b36c32902610332f68301",
+      "bytes": 5405757
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-resource-scoped/driver.log.gz": {
+      "publication": "8e32cc4ebcf3d3a251f0875a02a46df6008d45a5",
+      "sha256": "948d580d9051285a8b51c1111748ac15626c3feb6fc955798d94cf80cf659c20",
+      "bytes": 322
     }
   },
   "captured_input_manifest": {
@@ -2168,6 +2516,3287 @@
       "archive_sha256": "1a83fddcc27c55f8200787b2947e570462fe5f02cd11fa6cca795432675d9021",
       "published_identity_rows_equal": true,
       "published_artifact_hash_matches": 12
+    },
+    "functional_224658": {
+      "app_status": "error",
+      "app_error": "native app exited before BPF programs were tracked by shim\nstdout tail:\ntime=2026-11-07T22:47:33.659136899Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), ::1 (primary)\" device=*\ntime=2026-11-07T22:47:33.659158793Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"10.244.0.37 (primary), fe80::4842:c8ff:fead:80ab\" device=cilium_host\ntime=2026-11-07T22:47:33.659173278Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary, nodeport)\" device=bpfbench0\ntime=2026-11-07T22:47:33.659193712Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"node-address-update (tables.(*nodeAddressController).register.func1.1 (.../datapath/tables/node_address.go:249))\" duration=1.1\u00b5s\ntime=2026-11-07T22:47:33.659201873Z level=info msg=\"Establishing connection to kvstore\" module=agent.infra.kvstore-client backendName=etcd\ntime=2026-11-07T22:47:33.659209156Z level=info msg=\"Creating etcd client\" module=agent.infra.kvstore-client backendName=etcd configPath=\"\" keepAliveHeartbeat=15s keepAliveTimeout=25s rateLimit=20 maxInflight=20 listLimit=256\ntime=2026-11-07T22:47:33.659505355Z level=info msg=\"Connecting to etcd server...\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\"\ntime=2026-11-07T22:47:33.674877547Z level=info msg=\"New lease successfully acquired\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" leaseID=1018272803248858886 ttl=25s\ntime=2026-11-07T22:47:33.674933284Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" prefix=cilium/.heartbeat\ntime=2026-11-07T22:47:33.675531847Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" prefix=cilium/.heartbeat count=0 revision=1\ntime=2026-11-07T22:47:33.675547642Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" prefix=cilium/.heartbeat revision=2\ntime=2026-11-07T22:47:33.675663554Z level=info msg=\"Initial etcd connection established\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\"\ntime=2026-11-07T22:47:33.67573893Z level=info msg=\"Connection to kvstore successfully established\" module=agent.infra.kvstore-client backendName=etcd\ntime=2026-11-07T22:47:33.875930826Z level=info msg=\"Start hook executed\" function=\"prefilter.newPreFilter.func1 (.../datapath/prefilter/prefilter.go:258) (agent.datapath.prefilter)\" duration=173.930695ms\ntime=2026-11-07T22:47:33.908162922Z level=info msg=\"Starting IP identity watcher\" module=agent.controlplane.ipcache\ntime=2026-11-07T22:47:33.9081958Z level=info msg=\"Starting restartable watch store\" module=agent.infra.kvstore-utils clusterName=default prefix=cilium/state/ip/v1/default/\ntime=2026-11-07T22:47:33.908270973Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" prefix=cilium/state/ip/v1/default/\ntime=2026-11-07T22:47:33.908914977Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" prefix=cilium/state/ip/v1/default/ count=0 revision=3\ntime=2026-11-07T22:47:33.90894722Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" prefix=cilium/state/ip/v1/default/ revision=4\ntime=2026-11-07T22:47:33.931365454Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"mtu-updater (mtu.(*MTUManager).Updater)\" duration=727ns\ntime=2026-11-07T22:47:33.933553661Z level=info msg=\"BPF host routing requires kube-proxy-replacement. Falling back to legacy host routing (enable-host-legacy-routing=true).\" module=agent.controlplane.kube-proxy-replacement-init\ntime=2026-11-07T22:47:33.933564763Z level=info msg=\"kube-proxy replacement starting with the following config\" module=agent.controlplane.kube-proxy-replacement-init kprConfiguration=\"{KubeProxyReplacement:false EnableSocketLB:false}\"\ntime=2026-11-07T22:47:33.933608966Z level=info msg=\"Datapath signal listener running\" module=agent.controlplane.signal\ntime=2026-11-07T22:47:33.933681099Z level=info msg=\"Starting connection tracking garbage collector\" module=agent.datapath.maps.ct-nat-map-gc\ntime=2026-11-07T22:47:33.953660436Z level=info msg=\"Restored node IDs from the BPF map\" module=agent.datapath count=0\ntime=2026-11-07T22:47:33.953700644Z level=info msg=\"Removing stale endpoint interfaces\" module=agent.controlplane.endpoint-restore\ntime=2026-11-07T22:47:33.953824992Z level=info msg=\"Reading old endpoints...\" module=agent.controlplane.endpoint-restore\ntime=2026-11-07T22:47:33.953871371Z level=info msg=\"No old endpoints found.\" module=agent.controlplane.endpoint-restore\ntime=2026-11-07T22:47:33.953899329Z level=info msg=\"Initializing daemon\" module=agent.controlplane.daemon\ntime=2026-11-07T22:47:33.953909535Z level=info msg=\"Direct routing device detected\" module=agent.controlplane.daemon direct-routing-device=bpfbench0\ntime=2026-11-07T22:47:33.954026105Z level=info msg=\"Initializing node addressing\" module=agent.controlplane.ipam\ntime=2026-11-07T22:47:33.954044195Z level=info msg=\"Initializing IPAM\" module=agent.controlplane.ipam mode=cluster-pool v4Prefix=10.244.0.0/24 v6Prefix=<nil>\ntime=2026-11-07T22:47:33.954057505Z level=info msg=\"Restoring endpoints...\" module=agent.controlplane.endpoint-restore\ntime=2026-11-07T22:47:33.954132748Z level=info msg=\"Endpoints restored\" module=agent.controlplane.endpoint-restore restored=0 failed=0\ntime=2026-11-07T22:47:34.019185584Z level=info msg=\"More than one stale router IP was found on the cilium_host device after restoration, cleaning up old router IPs.\" module=agent.controlplane.agent-infra-endpoints\ntime=2026-11-07T22:47:34.019280296Z level=info msg=\"Node updated\" module=agent.controlplane.node-manager clusterName=default nodeName=virtme-ng spi=0\ntime=2026-11-07T22:47:34.019366737Z level=info msg=\"Initializing identity allocator\" module=agent.controlplane.identity.identity\ntime=2026-11-07T22:47:34.019371609Z level=info msg=\"Allocating identities between range\" module=agent.controlplane.identity.identity min=256 max=65535 clusterID=0\ntime=2026-11-07T22:47:34.019427448Z level=info msg=\"Adding local node to cluster\" module=agent.controlplane.nodediscovery node=virtme-ng\ntime=2026-11-07T22:47:34.019495554Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" prefix=cilium/state/nodes/v1\ntime=2026-11-07T22:47:34.019592613Z level=info msg=\"Validating configured node address ranges\" module=agent.controlplane.daemon\ntime=2026-11-07T22:47:34.019600389Z level=info msg=\"Daemon initialization completed\" module=agent.controlplane.daemon\ntime=2026-11-07T22:47:34.019741506Z level=info msg=\"Serving cilium API at unix:///var/tmp/ciliumrunner_igd0086b/state/cilium.sock\" module=agent.infra.cilium-api-server\ntime=2026-11-07T22:47:34.01991752Z level=info msg=\"Hubble server is disabled\" module=agent.controlplane.hubble\ntime=2026-11-07T22:47:34.020039281Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"nat-stats (stats.(*Stats).countNat)\" duration=534ns\ntime=2026-11-07T22:47:34.020874342Z level=info msg=\"Regenerating restored endpoints\" module=agent.controlplane.endpoint-restore restored=0\ntime=2026-11-07T22:47:34.020996398Z level=info msg=\"Processing queued deletion requests\" module=agent.controlplane.endpoint-api lenEndpoints=0\ntime=2026-11-07T22:47:34.021130803Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"reconcile (reconciler.Register[...].func2 (.../statedb/reconciler/builder.go:84))\" duration=1.618\u00b5s\ntime=2026-11-07T22:47:34.021142451Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"refresh (reconciler.Register[...].func3 (.../statedb/reconciler/builder.go:86))\" duration=611ns\ntime=2026-11-07T22:47:34.021216467Z level=info msg=\"Fence waiting\" module=agent.controlplane.endpoint-api name=cni-deletion-queue remaining=1\ntime=2026-11-07T22:47:34.021232201Z level=info msg=\"Fence done\" module=agent.controlplane.endpoint-api name=cni-deletion-queue remaining=1 duration=18.192\u00b5s\ntime=2026-11-07T22:47:34.021237584Z level=info msg=\"Finished regenerating restored endpoints\" module=agent.controlplane.endpoint-restore regenerated=0 failed=0 total=0\ntime=2026-11-07T22:47:34.021251454Z level=info msg=\"Shell listening\" module=agent.infra.shell socket=/var/run/cilium/shell.sock\ntime=2026-11-07T22:47:34.021335383Z level=info msg=\"Creating host endpoint\" module=agent.controlplane.agent-infra-endpoints\ntime=2026-11-07T22:47:34.021369703Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"dns-garbage-collector-job (namemanager.(*manager).doGC)\" duration=1.185\u00b5s\ntime=2026-11-07T22:47:34.021406832Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=true\ntime=2026-11-07T22:47:34.021492055Z level=info msg=\"New endpoint\" ipv6=\"\" containerID=\"\" ciliumEndpointName=/ containerInterface=\"\" ipv4=\"\" endpointID=971 k8sPodName=/ subsys=endpoint\ntime=2026-11-07T22:47:34.021528374Z level=info msg=\"Resolving identity labels (blocking)\" ipv6=\"\" containerID=\"\" ciliumEndpointName=/ containerInterface=\"\" ipv4=\"\" endpointID=971 k8sPodName=/ subsys=endpoint identityLabels=reserved:host\ntime=2026-11-07T22:47:34.021556544Z level=info msg=\"Identity of endpoint changed\" ipv6=\"\" containerID=\"\" ciliumEndpointName=/ containerInterface=\"\" ipv4=\"\" endpointID=971 k8sPodName=/ subsys=endpoint new-identity=1 old-identity=\"no identity\" identityLabels=\"map[host:{Key:host Value: Source:reserved cidr:<nil>}]\"\ntime=2026-11-07T22:47:34.021699156Z level=info msg=\"Starting healthz status API server\" module=agent.infra.agent-healthz address=127.0.0.1:9879\ntime=2026-11-07T22:47:34.022245269Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" prefix=cilium/state/nodes/v1 count=0 revision=3\ntime=2026-11-07T22:47:34.022257788Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" prefix=cilium/state/nodes/v1 revision=4\ntime=2026-11-07T22:47:34.02255036Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_igd0086b/bpffs/tc/globals/cilium_cidr_v6_dyn\ntime=2026-11-07T22:47:34.022568427Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_igd0086b/bpffs/tc/globals/cilium_cidr_v6_fix\ntime=2026-11-07T22:47:34.022579034Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_igd0086b/bpffs/tc/globals/cilium_lb4_maglev\ntime=2026-11-07T22:47:34.024651882Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" prefix=cilium/state/identities/v1/id\ntime=2026-11-07T22:47:34.027206054Z level=info msg=\"initial gc of ct and nat maps completed\" module=agent.datapath.maps.ct-nat-map-gc duration=5.799412ms\ntime=2026-11-07T22:47:34.027227098Z level=info msg=\"Initial scan of connection tracking completed, starting ctmap pressure metrics controller\" module=agent.datapath.maps.ct-nat-map-gc\ntime=2026-11-07T22:47:34.033202337Z level=info msg=\"New lease successfully acquired\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" leaseID=1018272803248858894 ttl=15m0s\ntime=2026-11-07T22:47:34.033218995Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" prefix=cilium/state/identities/v1/id count=0 revision=3\ntime=2026-11-07T22:47:34.033416041Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:46087] config=\"\" prefix=cilium/state/identities/v1/id revision=4\ntime=2026-11-07T22:47:34.054353425Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), ::1 (primary)\" device=*\ntime=2026-11-07T22:47:34.091693072Z level=info msg=\"Started hive\" duration=435.307529ms\ntime=2026-11-07T22:47:34.160031048Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), ::1 (primary)\" device=*\ntime=2026-11-07T22:47:34.160078724Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=fe80::4842:c8ff:fead:80ab device=cilium_host\ntime=2026-11-07T22:47:34.260424406Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), ::1 (primary)\" device=*\ntime=2026-11-07T22:47:34.260489268Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"10.244.0.233 (primary), fe80::4842:c8ff:fead:80ab\" device=cilium_host\ntime=2026-11-07T22:47:34.460238292Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c075:e3ff:feff:e89e (primary)\" device=*\ntime=2026-11-07T22:47:34.460308191Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c075:e3ff:feff:e89e (primary)\" device=*\ntime=2026-11-07T22:47:34.460362541Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary, nodeport), fe80::c075:e3ff:feff:e89e\" device=bpfbench0",
+      "app_result_sha256": "ce4bef71090d867961016aa4a2b39a19643c4975e8c38af82da89a21ad1cf733",
+      "phases": {
+        "baseline": {
+          "raw_measurement_present": true,
+          "resident_program_count": 72,
+          "bpf_run_count": 1356106,
+          "workloads": [
+            {
+              "name": "cilium_endpoint_pktgen",
+              "components": [
+                {
+                  "name": "cilium_endpoint_pktgen_forward",
+                  "duration_seconds": 2.028023838999985,
+                  "returncode": 0,
+                  "stdout_sha256": "cb44850824e3e0eddc24e63ccd261ff500f740df43e7c7bfe1b12d54f630c989",
+                  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                },
+                {
+                  "name": "cilium_endpoint_pktgen_reverse",
+                  "duration_seconds": 2.008408727000017,
+                  "returncode": 0,
+                  "stdout_sha256": "12de013e61c7c800e48359d990cfdb4bb68eaf1988cd5a5727834163911181f3",
+                  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ]
+            }
+          ]
+        },
+        "post_rejit": {
+          "raw_measurement_present": false,
+          "resident_program_count": 0,
+          "bpf_run_count": 0,
+          "workloads": []
+        }
+      },
+      "shim_sha256": {
+        "result/details/shim-logs/cilium__agent.post_rejit.log": "1b7a1d3997051d2b898fc281e1c117930a488956470065a1db7274b24aa49b57"
+      },
+      "replacement_pairs": [],
+      "all_replacements_match_bound_service": true,
+      "all_replacements_require_bound": true,
+      "prebuilt_proof_count": 0,
+      "published_observations": {
+        "native_requests": 1,
+        "generated": 1,
+        "compiled": 0,
+        "accepted_bound": 0,
+        "failed": 1,
+        "terminal_archives_verified": 1,
+        "native_replaced": 0,
+        "native_failed": 1,
+        "app_status": "error",
+        "metadata_status": "error",
+        "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_224658_042401",
+        "failure_entry": "cil_xdp_entry",
+        "failure_class": "compile-helper-declaration",
+        "baseline_load_attempts": 207,
+        "baseline_accepted_loads": 196,
+        "baseline_named_accepted": 171,
+        "baseline_resident_programs": 72,
+        "baseline_named_loads": [
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "",
+            "fd": 7
+          },
+          {
+            "name": "",
+            "fd": 7
+          },
+          {
+            "name": "",
+            "fd": 7
+          },
+          {
+            "name": "",
+            "fd": 7
+          },
+          {
+            "name": "",
+            "fd": 7
+          },
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "",
+            "fd": 10
+          },
+          {
+            "name": "",
+            "fd": 66
+          },
+          {
+            "name": "",
+            "fd": 67
+          },
+          {
+            "name": "",
+            "fd": 65
+          },
+          {
+            "name": "",
+            "fd": 65
+          },
+          {
+            "name": "",
+            "fd": 64
+          },
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "",
+            "fd": 64
+          },
+          {
+            "name": "",
+            "fd": 64
+          },
+          {
+            "name": "",
+            "fd": 64
+          },
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "test",
+            "fd": 64
+          },
+          {
+            "name": "",
+            "fd": 67
+          },
+          {
+            "name": "",
+            "fd": 67
+          },
+          {
+            "name": "adjust_mac_room",
+            "fd": 74
+          },
+          {
+            "name": "",
+            "fd": 65
+          },
+          {
+            "name": "",
+            "fd": 65
+          },
+          {
+            "name": "",
+            "fd": 65
+          },
+          {
+            "name": "",
+            "fd": 65
+          },
+          {
+            "name": "",
+            "fd": 65
+          },
+          {
+            "name": "",
+            "fd": 65
+          },
+          {
+            "name": "",
+            "fd": 65
+          },
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "",
+            "fd": 65
+          },
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "probe_fib_looku",
+            "fd": 65
+          },
+          {
+            "name": "probe_fib_looku",
+            "fd": 70
+          },
+          {
+            "name": "probe_fib_looku",
+            "fd": 71
+          },
+          {
+            "name": "probe_fib_looku",
+            "fd": 67
+          },
+          {
+            "name": "probe_fib_looku",
+            "fd": 69
+          },
+          {
+            "name": "probe_fib_looku",
+            "fd": 71
+          },
+          {
+            "name": "",
+            "fd": 70
+          },
+          {
+            "name": "cil_xdp_entry",
+            "fd": 82
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 110
+          },
+          {
+            "name": "cil_host_policy",
+            "fd": 111
+          },
+          {
+            "name": "cil_to_netdev",
+            "fd": 112
+          },
+          {
+            "name": "cil_from_netdev",
+            "fd": 113
+          },
+          {
+            "name": "cil_from_host",
+            "fd": 114
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 115
+          },
+          {
+            "name": "tail_drop_notif",
+            "fd": 116
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 117
+          },
+          {
+            "name": "cil_to_host",
+            "fd": 118
+          },
+          {
+            "name": "tail_handle_sna",
+            "fd": 119
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 120
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 139
+          },
+          {
+            "name": "cil_to_netdev",
+            "fd": 140
+          },
+          {
+            "name": "tail_no_service",
+            "fd": 141
+          },
+          {
+            "name": "tail_handle_sna",
+            "fd": 142
+          },
+          {
+            "name": "cil_to_host",
+            "fd": 143
+          },
+          {
+            "name": "cil_from_netdev",
+            "fd": 144
+          },
+          {
+            "name": "tail_drop_notif",
+            "fd": 145
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 146
+          },
+          {
+            "name": "cil_host_policy",
+            "fd": 147
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 148
+          },
+          {
+            "name": "cil_from_host",
+            "fd": 149
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 150
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 172
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 173
+          },
+          {
+            "name": "cil_to_netdev",
+            "fd": 174
+          },
+          {
+            "name": "cil_to_host",
+            "fd": 175
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 176
+          },
+          {
+            "name": "tail_no_service",
+            "fd": 177
+          },
+          {
+            "name": "cil_from_netdev",
+            "fd": 178
+          },
+          {
+            "name": "tail_handle_sna",
+            "fd": 179
+          },
+          {
+            "name": "tail_drop_notif",
+            "fd": 180
+          },
+          {
+            "name": "cil_from_host",
+            "fd": 181
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 182
+          },
+          {
+            "name": "cil_host_policy",
+            "fd": 183
+          },
+          {
+            "name": "tail_handle_sna",
+            "fd": 100
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 101
+          },
+          {
+            "name": "cil_to_host",
+            "fd": 102
+          },
+          {
+            "name": "cil_from_netdev",
+            "fd": 103
+          },
+          {
+            "name": "tail_drop_notif",
+            "fd": 104
+          },
+          {
+            "name": "cil_to_netdev",
+            "fd": 105
+          },
+          {
+            "name": "cil_from_host",
+            "fd": 106
+          },
+          {
+            "name": "cil_host_policy",
+            "fd": 107
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 108
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 109
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 110
+          },
+          {
+            "name": "cil_from_host",
+            "fd": 131
+          },
+          {
+            "name": "tail_drop_notif",
+            "fd": 136
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 137
+          },
+          {
+            "name": "cil_to_netdev",
+            "fd": 138
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 139
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 140
+          },
+          {
+            "name": "tail_handle_sna",
+            "fd": 141
+          },
+          {
+            "name": "cil_to_host",
+            "fd": 142
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 143
+          },
+          {
+            "name": "tail_no_service",
+            "fd": 144
+          },
+          {
+            "name": "cil_host_policy",
+            "fd": 145
+          },
+          {
+            "name": "cil_from_netdev",
+            "fd": 146
+          },
+          {
+            "name": "tail_handle_sna",
+            "fd": 169
+          },
+          {
+            "name": "cil_from_netdev",
+            "fd": 170
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 171
+          },
+          {
+            "name": "cil_from_host",
+            "fd": 172
+          },
+          {
+            "name": "tail_drop_notif",
+            "fd": 173
+          },
+          {
+            "name": "cil_to_netdev",
+            "fd": 174
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 175
+          },
+          {
+            "name": "cil_to_host",
+            "fd": 176
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 177
+          },
+          {
+            "name": "tail_no_service",
+            "fd": 178
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 179
+          },
+          {
+            "name": "cil_host_policy",
+            "fd": 180
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 199
+          },
+          {
+            "name": "tail_ipv4_to_en",
+            "fd": 200
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 201
+          },
+          {
+            "name": "tail_drop_notif",
+            "fd": 202
+          },
+          {
+            "name": "tail_ipv4_ct_eg",
+            "fd": 203
+          },
+          {
+            "name": "cil_lxc_policy",
+            "fd": 204
+          },
+          {
+            "name": "tail_no_service",
+            "fd": 205
+          },
+          {
+            "name": "tail_handle_arp",
+            "fd": 206
+          },
+          {
+            "name": "cil_to_containe",
+            "fd": 207
+          },
+          {
+            "name": "tail_ipv4_polic",
+            "fd": 208
+          },
+          {
+            "name": "cil_from_contai",
+            "fd": 209
+          },
+          {
+            "name": "tail_nodeport_r",
+            "fd": 210
+          },
+          {
+            "name": "tail_ipv4_ct_in",
+            "fd": 211
+          },
+          {
+            "name": "cil_lxc_policy_",
+            "fd": 212
+          },
+          {
+            "name": "cil_xdp_entry",
+            "fd": 212
+          },
+          {
+            "name": "tail_ipv4_ct_eg",
+            "fd": 258
+          },
+          {
+            "name": "tail_ipv4_ct_in",
+            "fd": 279
+          },
+          {
+            "name": "tail_drop_notif",
+            "fd": 281
+          },
+          {
+            "name": "cil_from_contai",
+            "fd": 285
+          },
+          {
+            "name": "cil_lxc_policy",
+            "fd": 286
+          },
+          {
+            "name": "cil_from_host",
+            "fd": 287
+          },
+          {
+            "name": "cil_lxc_policy_",
+            "fd": 288
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 289
+          },
+          {
+            "name": "tail_handle_arp",
+            "fd": 290
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 291
+          },
+          {
+            "name": "tail_ipv4_polic",
+            "fd": 292
+          },
+          {
+            "name": "tail_drop_notif",
+            "fd": 71
+          },
+          {
+            "name": "cil_to_host",
+            "fd": 70
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 74
+          },
+          {
+            "name": "cil_to_containe",
+            "fd": 75
+          },
+          {
+            "name": "cil_from_contai",
+            "fd": 81
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 82
+          },
+          {
+            "name": "cil_to_containe",
+            "fd": 85
+          },
+          {
+            "name": "tail_ipv4_ct_in",
+            "fd": 86
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 88
+          },
+          {
+            "name": "tail_ipv4_to_en",
+            "fd": 87
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 89
+          },
+          {
+            "name": "tail_ipv4_to_en",
+            "fd": 90
+          },
+          {
+            "name": "tail_no_service",
+            "fd": 91
+          },
+          {
+            "name": "cil_to_netdev",
+            "fd": 92
+          },
+          {
+            "name": "tail_ipv4_ct_eg",
+            "fd": 64
+          },
+          {
+            "name": "cil_from_netdev",
+            "fd": 94
+          },
+          {
+            "name": "cil_host_policy",
+            "fd": 95
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 96
+          },
+          {
+            "name": "cil_lxc_policy",
+            "fd": 93
+          },
+          {
+            "name": "tail_drop_notif",
+            "fd": 98
+          },
+          {
+            "name": "tail_handle_arp",
+            "fd": 99
+          },
+          {
+            "name": "cil_lxc_policy_",
+            "fd": 100
+          },
+          {
+            "name": "tail_nodeport_r",
+            "fd": 101
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 102
+          },
+          {
+            "name": "tail_no_service",
+            "fd": 103
+          },
+          {
+            "name": "tail_nodeport_r",
+            "fd": 104
+          },
+          {
+            "name": "tail_ipv4_polic",
+            "fd": 84
+          },
+          {
+            "name": "tail_handle_sna",
+            "fd": 72
+          },
+          {
+            "name": "tail_no_service",
+            "fd": 125
+          },
+          {
+            "name": "cil_host_policy",
+            "fd": 126
+          },
+          {
+            "name": "tail_drop_notif",
+            "fd": 127
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 128
+          },
+          {
+            "name": "cil_from_host",
+            "fd": 129
+          },
+          {
+            "name": "cil_from_netdev",
+            "fd": 130
+          },
+          {
+            "name": "cil_to_host",
+            "fd": 131
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 154
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 155
+          },
+          {
+            "name": "tail_drop_notif",
+            "fd": 156
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 153
+          },
+          {
+            "name": "cil_lxc_policy",
+            "fd": 158
+          },
+          {
+            "name": "cil_from_contai",
+            "fd": 159
+          },
+          {
+            "name": "tail_handle_arp",
+            "fd": 160
+          },
+          {
+            "name": "tail_ipv4_to_en",
+            "fd": 161
+          },
+          {
+            "name": "tail_no_service",
+            "fd": 162
+          },
+          {
+            "name": "tail_nodeport_r",
+            "fd": 163
+          },
+          {
+            "name": "tail_ipv4_ct_in",
+            "fd": 164
+          },
+          {
+            "name": "tail_handle_sna",
+            "fd": 165
+          },
+          {
+            "name": "tail_ipv4_ct_eg",
+            "fd": 166
+          },
+          {
+            "name": "cil_to_netdev",
+            "fd": 167
+          },
+          {
+            "name": "tail_ipv4_polic",
+            "fd": 168
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 169
+          },
+          {
+            "name": "cil_to_containe",
+            "fd": 170
+          },
+          {
+            "name": "cil_lxc_policy_",
+            "fd": 157
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 172
+          },
+          {
+            "name": "cil_to_netdev",
+            "fd": 195
+          },
+          {
+            "name": "cil_host_policy",
+            "fd": 196
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 133
+          },
+          {
+            "name": "tail_handle_sna",
+            "fd": 157
+          },
+          {
+            "name": "cil_from_netdev",
+            "fd": 158
+          },
+          {
+            "name": "cil_to_host",
+            "fd": 159
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 170
+          },
+          {
+            "name": "tail_nodeport_n",
+            "fd": 194
+          },
+          {
+            "name": "cil_from_host",
+            "fd": 197
+          },
+          {
+            "name": "tail_drop_notif",
+            "fd": 199
+          },
+          {
+            "name": "tail_handle_ipv",
+            "fd": 200
+          },
+          {
+            "name": "tail_no_service",
+            "fd": 201
+          }
+        ],
+        "submission_error_lines": [],
+        "raw_hashes": {
+          "driver.log.gz": "b83921745a8ec46b6ba162a2e74d491b2517106b9ce79d1cd7b9ecf9fd7ae46c",
+          "service.tar.gz": "0d95759d6e3c8c738d90d776b3b00e53ace04930ff0f9cc793f2d9e7233e3323",
+          "launch.tar.gz": "a32466c294757f5cd6957b7319dee3d512de78b329ac63f4aba12fa5c431d38f",
+          "result.tar.gz": "9b1c79742031a1dc3b6af79c14f718a707c7d16b509ca4742c66cd3964feeaee"
+        }
+      },
+      "native_loader_failure_lines": [
+        "[174.069731 pid=3882 tid=3894] native-loader failed prog=cil_xdp_entry manifest=/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_224658_042401/details/cilium-native-config/manifest.json source=/tmp/bpfrejit_3882_d3d8a47e90a91a0c.bpf error=trusted specializer refused native program: Input/output error"
+      ],
+      "submission_error_lines": [],
+      "baseline_load_attempts": 207,
+      "archived_artifact_sha256": {
+        "service.tar.gz": "0d95759d6e3c8c738d90d776b3b00e53ace04930ff0f9cc793f2d9e7233e3323",
+        "result.tar.gz": "9b1c79742031a1dc3b6af79c14f718a707c7d16b509ca4742c66cd3964feeaee",
+        "launch.tar.gz": "a32466c294757f5cd6957b7319dee3d512de78b329ac63f4aba12fa5c431d38f",
+        "driver.log.gz": "b83921745a8ec46b6ba162a2e74d491b2517106b9ce79d1cd7b9ecf9fd7ae46c"
+      }
+    },
+    "functional_225009": {
+      "app_status": "error",
+      "app_error": "Tetragon exited before BPF programs were tracked by shim\nstdout tail:\nlevel=info msg=\"Starting tetragon\" version=v1.8.0-pre.0-79-g8ca052908\nlevel=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-cri:false enable-deprecated-tracingpolicy-grpc:false enable-event-metrics:true enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-environment-variables:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: filter-environment-variables:[] force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address:127.0.0.1:58885 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-file: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ parents-map-enabled:false parents-map-entries:0 parents-map-size: pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true retprobes-cache-size:4096 server-address:127.0.0.1:40475 tracing-policy: tracing-policy-dir:/workspaces/repository/runner/assets/tetragon_policies use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"\nlevel=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=none\nlevel=info msg=\"Tetragon pid file creation succeeded\" pid=2300 pidfile=/var/run/tetragon/tetragon.pid\nlevel=warn msg=\"BPF filesystem is going to be mounted automatically in /run/cilium/bpffs. However, it probably means that Cilium is running inside container and BPFFS is not mounted on the host. for more information, see: https://cilium.link/err-bpf-mount\"\nlevel=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/run/cilium/bpffs/tetragon\nlevel=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux\nlevel=info msg=\"BPF detected features: override_return: true, buildid: true, kprobe_multi: false, uprobe_multi: true, fmodret: true, fmodret_syscall: true, signal: true, large: true, link_pin: true, lsm: true, missed_stats_kprobe_multi: true, missed_stats_kprobe: true, batch_update: true, uprobe_refctroff: true, audit_loginuid: true, probe_write_user: true, uprobe_regs_change: true, mix_bpf_and_tail_calls: true, fentry: true, get_func_ret: true\"\nlevel=info msg=\"Cgroup mode detection succeeded\" cgroup.fs=/sys/fs/cgroup cgroup.mode=\"Unified mode (Cgroupv2)\"\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/proc/1/root/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids misc]\" cgroup.hierarchyID=0\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup/docker/44577cecae7a245ff4bf858ae80ff5b33f571a9dac150e90cdffebf69440f10b cgroup.controllers=\"[cpuset cpu io memory hugetlb pids misc]\" cgroup.hierarchyID=0\nlevel=info msg=\"Cgroupv2 hierarchy validated successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup/docker/44577cecae7a245ff4bf858ae80ff5b33f571a9dac150e90cdffebf69440f10b\nlevel=info msg=\"Deployment mode detection succeeded\" cgroup.fs=/sys/fs/cgroup deployment.mode=Container\nlevel=info msg=\"Updated TetragonConf map successfully\" confmap-update=tg_conf_map deployment.mode=Container log.level=0 cgroup.fs.magic=Cgroupv2 cgroup.hierarchyID=0 NSPID=2300\nlevel=info msg=\"Disabling Kubernetes API\"\nlevel=info msg=\"Configured redaction filters\" redactionFilters=\"\"\nlevel=info msg=\"Exit probe on acct_process\"\nlevel=info msg=\"Set execve_map entries 32768\" size=28M\nlevel=info msg=\"BPF ring buffer size (bytes)\" total=512K\nlevel=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux\nlevel=info msg=\"Loading sensor\" name=__base__\nlevel=info msg=\"Loading kernel version 7.0.0\"",
+      "app_result_sha256": "7228251735567a7ddb3f80e1702392807499de4dbffad4493e4cc50c0ca9085c",
+      "phases": {
+        "baseline": {
+          "raw_measurement_present": true,
+          "resident_program_count": 287,
+          "bpf_run_count": 416054,
+          "workloads": [
+            {
+              "name": "stress_ng_tetragon_policy_hot",
+              "duration_seconds": 2.2269394000000204,
+              "returncode": 0,
+              "stdout_sha256": "e3b6811e4d788359e94d2e4ee28dd34cba74fa019d09efa94d42a7966f6fd73c",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ]
+        },
+        "post_rejit": {
+          "raw_measurement_present": false,
+          "resident_program_count": 0,
+          "bpf_run_count": 0,
+          "workloads": []
+        }
+      },
+      "shim_sha256": {
+        "result/details/shim-logs/tetragon__observer.post_rejit.log": "fbd315def2694d8cff5ceec09f99840bcb54b335df286a15010644ce79b141dd"
+      },
+      "replacement_pairs": [
+        [
+          333,
+          334
+        ],
+        [
+          335,
+          336
+        ],
+        [
+          337,
+          338
+        ]
+      ],
+      "all_replacements_match_bound_service": true,
+      "all_replacements_require_bound": true,
+      "prebuilt_proof_count": 0,
+      "published_observations": {
+        "native_requests": 4,
+        "generated": 4,
+        "compiled": 4,
+        "accepted_bound": 3,
+        "failed": 1,
+        "terminal_archives_verified": 4,
+        "native_replaced": 3,
+        "native_failed": 1,
+        "app_status": "error",
+        "metadata_status": "error",
+        "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_225009_749635",
+        "failure_entry": "execve_send",
+        "failure_class": "verifier-jump-depth",
+        "baseline_load_attempts": 311,
+        "baseline_accepted_loads": 308,
+        "baseline_named_accepted": 298,
+        "baseline_resident_programs": 287,
+        "baseline_named_loads": [
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "",
+            "fd": 7
+          },
+          {
+            "name": "",
+            "fd": 7
+          },
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "probe_bpf_kprob",
+            "fd": 7
+          },
+          {
+            "name": "probe_kpm_link",
+            "fd": 10
+          },
+          {
+            "name": "probe_upm_link",
+            "fd": 7
+          },
+          {
+            "name": "probe_fmod_ret",
+            "fd": 7
+          },
+          {
+            "name": "probe_sys_fmod_",
+            "fd": 7
+          },
+          {
+            "name": "",
+            "fd": 7
+          },
+          {
+            "name": "",
+            "fd": 7
+          },
+          {
+            "name": "probe_bpf_kprob",
+            "fd": 7
+          },
+          {
+            "name": "probe_bpf_perf_",
+            "fd": 11
+          },
+          {
+            "name": "",
+            "fd": 7
+          },
+          {
+            "name": "probe_lsm_file_",
+            "fd": 7
+          },
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "uprobe_regs",
+            "fd": 7
+          },
+          {
+            "name": "",
+            "fd": 10
+          },
+          {
+            "name": "",
+            "fd": 11
+          },
+          {
+            "name": "",
+            "fd": 7
+          },
+          {
+            "name": "probe_get_func_",
+            "fd": 7
+          },
+          {
+            "name": "event_exit_acct",
+            "fd": 71
+          },
+          {
+            "name": "event_exit_disa",
+            "fd": 72
+          },
+          {
+            "name": "event_wake_up_n",
+            "fd": 71
+          },
+          {
+            "name": "execve_rate",
+            "fd": 86
+          },
+          {
+            "name": "execve_send",
+            "fd": 88
+          },
+          {
+            "name": "event_execve",
+            "fd": 89
+          },
+          {
+            "name": "tg_kp_bprm_comm",
+            "fd": 55
+          },
+          {
+            "name": "execve_map_upda",
+            "fd": 63
+          },
+          {
+            "name": "",
+            "fd": 25
+          },
+          {
+            "name": "",
+            "fd": 26
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 149
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 151
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 152
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 153
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 154
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 155
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 156
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 151
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 152
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 153
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 154
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 155
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 156
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 160
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 152
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 153
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 154
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 155
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 156
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 160
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 164
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 285
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 286
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 287
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 288
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 289
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 290
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 291
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 280
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 281
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 283
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 284
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 289
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 290
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 291
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 295
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 296
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 297
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 298
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 290
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 291
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 295
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 296
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 297
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 298
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 300
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 483
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 484
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 485
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 486
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 487
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 488
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 489
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 478
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 479
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 480
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 482
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 487
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 488
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 489
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 493
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 494
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 495
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 496
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 488
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 489
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 493
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 494
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 495
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 496
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 500
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 489
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 493
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 494
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 495
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 496
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 500
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 504
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 493
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 494
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 495
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 496
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 500
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 504
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 508
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 494
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 495
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 496
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 500
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 504
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 508
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 512
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 538
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 539
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 540
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 541
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 542
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 543
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 544
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 695
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 696
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 697
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 698
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 699
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 700
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 701
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 690
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 691
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 692
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 693
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 700
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 701
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 705
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 706
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 707
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 708
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 709
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 691
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 692
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 693
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 698
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 708
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 709
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 713
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 714
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 715
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 716
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 717
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 692
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 693
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 698
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 706
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 783
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 785
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 786
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 787
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 788
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 789
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 790
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 782
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 783
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 784
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 785
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 810
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 811
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 812
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 813
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 814
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 815
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 816
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 805
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 806
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 807
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 809
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 785
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 789
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 790
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 794
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 795
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 796
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 798
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 785
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 790
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 794
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 795
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 796
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 798
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 802
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 813
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 815
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 816
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 820
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 821
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 822
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 823
+          },
+          {
+            "name": "generic_tracepo",
+            "fd": 860
+          },
+          {
+            "name": "generic_tracepo",
+            "fd": 861
+          },
+          {
+            "name": "generic_tracepo",
+            "fd": 862
+          },
+          {
+            "name": "generic_tracepo",
+            "fd": 863
+          },
+          {
+            "name": "generic_tracepo",
+            "fd": 864
+          },
+          {
+            "name": "generic_tracepo",
+            "fd": 865
+          },
+          {
+            "name": "generic_rawtp_e",
+            "fd": 890
+          },
+          {
+            "name": "generic_rawtp_a",
+            "fd": 891
+          },
+          {
+            "name": "generic_rawtp_p",
+            "fd": 892
+          },
+          {
+            "name": "generic_rawtp_p",
+            "fd": 893
+          },
+          {
+            "name": "generic_rawtp_f",
+            "fd": 894
+          },
+          {
+            "name": "generic_rawtp_o",
+            "fd": 895
+          },
+          {
+            "name": "generic_rawtp_s",
+            "fd": 896
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 923
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 924
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 925
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 926
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 927
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 928
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 929
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 915
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 916
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 917
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 918
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 919
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 920
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 922
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 929
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 934
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 935
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 936
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 937
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 938
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 939
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1101
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1102
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1103
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1104
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1105
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1106
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1107
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 1096
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 1097
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 1098
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 1099
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1105
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1106
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1107
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1111
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1112
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1113
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1114
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1106
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1107
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1111
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1112
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1113
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1114
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1118
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1107
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1111
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1112
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1113
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1114
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1118
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1122
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1082
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1084
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1085
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1086
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1087
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1088
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1089
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 1081
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 1082
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 1083
+          },
+          {
+            "name": "generic_retkpro",
+            "fd": 1084
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1208
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1209
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1210
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1211
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1212
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1213
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1214
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1209
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1210
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1211
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1212
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1213
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1214
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1218
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1210
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1211
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1212
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1213
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1214
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1218
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1222
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1200
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1201
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1202
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1203
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1204
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1205
+          },
+          {
+            "name": "generic_kprobe_",
+            "fd": 1209
+          }
+        ],
+        "submission_error_lines": [],
+        "raw_hashes": {
+          "driver.log.gz": "453210ffc24161b051e6fd05322abcc8cd0c6ae5e474ec77b9321010cd263742",
+          "service.tar.gz": "85b339c14b3df66a1c5a631e1d440f78eb09250715368a685adbd11c5fbd931b",
+          "launch.tar.gz": "935dc37d6e5664ebb22b5575e6911fccb1b017a1e01e63b4c2e9eb7c4dde4a02",
+          "result.tar.gz": "bb0a23870b6268bfefaa672170b1f49f623587e66fce32d0ffe47ecb3e0c4aa4"
+        }
+      },
+      "native_loader_failure_lines": [
+        "[243.330548 pid=2300 tid=2312] native-loader failed prog=execve_send manifest=/opt/bpf-benchmark/native-bpf/x86_64/tetragon/manifest.json source=/tmp/bpfrejit_2300_03bfac54de17d211.bpf error=trusted specializer refused native program: Input/output error"
+      ],
+      "submission_error_lines": [],
+      "baseline_load_attempts": 311,
+      "archived_artifact_sha256": {
+        "service.tar.gz": "85b339c14b3df66a1c5a631e1d440f78eb09250715368a685adbd11c5fbd931b",
+        "result.tar.gz": "bb0a23870b6268bfefaa672170b1f49f623587e66fce32d0ffe47ecb3e0c4aa4",
+        "launch.tar.gz": "935dc37d6e5664ebb22b5575e6911fccb1b017a1e01e63b4c2e9eb7c4dde4a02",
+        "driver.log.gz": "453210ffc24161b051e6fd05322abcc8cd0c6ae5e474ec77b9321010cd263742"
+      }
+    },
+    "functional_225459": {
+      "app_status": "error",
+      "app_error": "native app exited before BPF programs were tracked by shim\nstderr tail:\n2026-11-07T22:55:11.943Z\tinfo\totelconftelemetry/metrics.go:24\tInternal metrics telemetry disabled\t{\"resource\": {\"service.instance.id\": \"fc105445-4faf-426f-b634-1b94da67940f\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-11-07T22:55:11.944Z\tinfo\tbuilders/builders.go:26\tDevelopment component. May change in the future.\t{\"resource\": {\"service.instance.id\": \"fc105445-4faf-426f-b634-1b94da67940f\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\"}\n2026-11-07T22:55:11.946Z\tinfo\tservice@v0.139.0/service.go:222\tStarting otelcol-ebpf-profiler...\t{\"resource\": {\"service.instance.id\": \"fc105445-4faf-426f-b634-1b94da67940f\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"Version\": \"0.140.0\", \"NumCPU\": 8}\n2026-11-07T22:55:11.946Z\tinfo\textensions/extensions.go:40\tStarting extensions...\t{\"resource\": {\"service.instance.id\": \"fc105445-4faf-426f-b634-1b94da67940f\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-11-07T22:55:11.946Z\tinfo\tInterpreter tracers: perl,php,python,hotspot,ruby,v8,dotnet,go,labels\t{\"resource\": {\"service.instance.id\": \"fc105445-4faf-426f-b634-1b94da67940f\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-11-07T22:55:15.943Z\tinfo\tFound offsets: task stack 0x20, pt_regs 0x3f48, tpbase 0x25b8\t{\"resource\": {\"service.instance.id\": \"fc105445-4faf-426f-b634-1b94da67940f\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}",
+      "app_result_sha256": "fb23fca9c4a52e46935ccbb0e0ade0e4451fa86259ab2622344a74f628260d8b",
+      "phases": {
+        "baseline": {
+          "raw_measurement_present": true,
+          "resident_program_count": 13,
+          "bpf_run_count": 12270,
+          "workloads": [
+            {
+              "name": "otel_mixed_workload",
+              "components": [
+                {
+                  "name": "otel_python3_int_loop_0",
+                  "duration_seconds": 2.0246661740000036,
+                  "returncode": 0,
+                  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "stderr_sha256": "7990ea13963697a305712d3045825fe18811ed237faace2247a45ea5adfc8fb2"
+                },
+                {
+                  "name": "otel_python3_int_loop_1",
+                  "duration_seconds": 2.0247935830000188,
+                  "returncode": 0,
+                  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "stderr_sha256": "e7faebb1e8ad8a4cbed43d94a40f78c7353e6a6250070d0813d59b81da95afb2"
+                },
+                {
+                  "name": "otel_ruby_int_loop_0",
+                  "duration_seconds": 2.1829038000000196,
+                  "returncode": 0,
+                  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "stderr_sha256": "5e517c25d4d7230bb78518f123136d15b8a11458a3d2ee78ae42716ca4eda8e8"
+                },
+                {
+                  "name": "otel_ruby_int_loop_1",
+                  "duration_seconds": 2.1830119110000226,
+                  "returncode": 0,
+                  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "stderr_sha256": "84e223bffa20c98b6897b38d8a4ac4d93fecf2d675fcd7a3410a444e44237ac9"
+                },
+                {
+                  "name": "otel_nodejs_int_loop_0",
+                  "duration_seconds": 2.233114663000009,
+                  "returncode": 0,
+                  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "stderr_sha256": "810ad9f5caa8fc5d381978e6a82fa50a811b894b792b63dcc7191bdaf078cb41"
+                },
+                {
+                  "name": "otel_nodejs_int_loop_1",
+                  "duration_seconds": 2.2424374570000225,
+                  "returncode": 0,
+                  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "stderr_sha256": "3fcdc83850cf7f2b1f2febb82a25e1514193f1b72e2a884b58cd7652fe89d36c"
+                },
+                {
+                  "name": "otel_perl_int_loop_0",
+                  "duration_seconds": 2.2426005300000043,
+                  "returncode": 0,
+                  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "stderr_sha256": "f91fea274963a315c4dfc26471ab1e8483bc44ece93728d94a2e9775090fdf04"
+                },
+                {
+                  "name": "otel_perl_int_loop_1",
+                  "duration_seconds": 2.242982425000008,
+                  "returncode": 0,
+                  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "stderr_sha256": "bc259b08e924b04f459b0cca10f9d84ac6a237e978f2c1113d45cd4e3b72859d"
+                },
+                {
+                  "name": "otel_php_int_loop_0",
+                  "duration_seconds": 2.243100945000009,
+                  "returncode": 0,
+                  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "stderr_sha256": "8d39a3e0fdcaf903633304afd0800f06ec93b30656d3503209133a952d745194"
+                },
+                {
+                  "name": "otel_php_int_loop_1",
+                  "duration_seconds": 2.243179390000023,
+                  "returncode": 0,
+                  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "stderr_sha256": "0155a188ed7702c58a3da1148c30638d2d1f2ff4e351a9d11874738e9744290f"
+                },
+                {
+                  "name": "otel_stress_ng_cpu",
+                  "duration_seconds": 2.243256477000017,
+                  "returncode": 0,
+                  "stdout_sha256": "285622057b1013341a0bf8d09d7c2ed512b30fb951577a467ab46b4ed91921ee",
+                  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ]
+            }
+          ]
+        },
+        "post_rejit": {
+          "raw_measurement_present": false,
+          "resident_program_count": 0,
+          "bpf_run_count": 0,
+          "workloads": []
+        }
+      },
+      "shim_sha256": {
+        "result/details/shim-logs/otelcol-ebpf-profiler__profiling.post_rejit.log": "6b038d8762da1a888a5b94151431f0cb80b4b6e99725aaf528f73aa6bd9289ef"
+      },
+      "replacement_pairs": [
+        [
+          21,
+          22
+        ]
+      ],
+      "all_replacements_match_bound_service": true,
+      "all_replacements_require_bound": true,
+      "prebuilt_proof_count": 0,
+      "published_observations": {
+        "native_requests": 2,
+        "generated": 2,
+        "compiled": 2,
+        "accepted_bound": 1,
+        "failed": 1,
+        "terminal_archives_verified": 2,
+        "native_replaced": 1,
+        "native_failed": 1,
+        "app_status": "error",
+        "metadata_status": "error",
+        "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_225459_314452",
+        "failure_entry": "perf_unwind_stop",
+        "failure_class": "verifier-helper-size-range",
+        "baseline_load_attempts": 17,
+        "baseline_accepted_loads": 16,
+        "baseline_named_accepted": 15,
+        "baseline_resident_programs": 13,
+        "baseline_named_loads": [
+          {
+            "name": "",
+            "fd": -1
+          },
+          {
+            "name": "",
+            "fd": 12
+          },
+          {
+            "name": "read_task_struc",
+            "fd": 12
+          },
+          {
+            "name": "perf_unwind_sto",
+            "fd": 54
+          },
+          {
+            "name": "perf_unwind_nat",
+            "fd": 55
+          },
+          {
+            "name": "perf_unwind_hot",
+            "fd": 56
+          },
+          {
+            "name": "perf_unwind_per",
+            "fd": 57
+          },
+          {
+            "name": "perf_unwind_php",
+            "fd": 58
+          },
+          {
+            "name": "perf_unwind_pyt",
+            "fd": 59
+          },
+          {
+            "name": "perf_unwind_rub",
+            "fd": 60
+          },
+          {
+            "name": "perf_unwind_v8",
+            "fd": 61
+          },
+          {
+            "name": "perf_unwind_dot",
+            "fd": 62
+          },
+          {
+            "name": "perf_go_labels",
+            "fd": 63
+          },
+          {
+            "name": "tracepoint__sch",
+            "fd": 64
+          },
+          {
+            "name": "native_tracer_e",
+            "fd": 65
+          },
+          {
+            "name": "custom__generic",
+            "fd": 66
+          },
+          {
+            "name": "probe_bpf_perf_",
+            "fd": 74
+          }
+        ],
+        "submission_error_lines": [],
+        "raw_hashes": {
+          "driver.log.gz": "257928a707f6aaf95d9a1b2aa89f1bc74a6e3270986e24bebb4f88c5ae4428ea",
+          "service.tar.gz": "79f11e8e25bd323c4aadf23b205585298b7d183a75be6153f58252a9ab452b73",
+          "launch.tar.gz": "9c6d8fc6a7e5fea843cfac54059a6bea36ab24a74ea6c4cd3d9045feceedfaf4",
+          "result.tar.gz": "a631a4af139be6d8239411a6355f7814922f629c0890407b8024760783bd223e"
+        }
+      },
+      "native_loader_failure_lines": [
+        "[184.609229 pid=2082 tid=2093] native-loader failed prog=perf_unwind_sto manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_2082_9a388fee6018e23b.bpf error=trusted specializer refused native program: Input/output error"
+      ],
+      "submission_error_lines": [],
+      "baseline_load_attempts": 17,
+      "archived_artifact_sha256": {
+        "service.tar.gz": "79f11e8e25bd323c4aadf23b205585298b7d183a75be6153f58252a9ab452b73",
+        "result.tar.gz": "a631a4af139be6d8239411a6355f7814922f629c0890407b8024760783bd223e",
+        "launch.tar.gz": "9c6d8fc6a7e5fea843cfac54059a6bea36ab24a74ea6c4cd3d9045feceedfaf4",
+        "driver.log.gz": "257928a707f6aaf95d9a1b2aa89f1bc74a6e3270986e24bebb4f88c5ae4428ea"
+      }
+    },
+    "functional_230126": {
+      "app_status": "error",
+      "app_error": "failed to launch Tracee: /artifacts/tracee/bin/tracee --events '*' --events -net_packet_raw,-print_mem_dump,-net_packet_ipv4,-net_packet_ipv6,-net_packet_tcp,-net_packet_udp,-net_packet_icmp,-net_packet_icmpv6,-net_packet_dns,-net_packet_dns_request,-net_packet_dns_response,-net_packet_http,-net_packet_http_request,-net_packet_http_response,-anti_debugging,-aslr_inspection,-cgroup_notify_on_release,-cgroup_release_agent,-core_pattern_modification,-default_loader_mod,-disk_mount,-docker_abuse,-dropped_executable,-dynamic_code_loading,-file_modification,-fileless_execution,-hidden_file_created,-hooked_seq_ops_detector,-hooked_syscall_detector,-illegitimate_shell,-k8s_service_account_token,-kernel_module_loading,-k8s_api_connection,-k8s_cert_theft,-ld_preload,-lsm_test,-proc_fops_hooking,-proc_kcore_read,-proc_mem_access,-proc_mem_code_injection,-process_vm_write_inject,-ptrace_code_injection,-rcd_modification,-sched_debug_recon,-scheduled_task_mod,-stack_pivot,-bpf_attach,-security_bpf,-security_bpf_map,-security_bpf_prog,-stdio_over_socket,-sudoers_modification,-syscall_hooking,-system_request_key_mod --output none --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/b9265232/tracee/signatures --capabilities bypass=true: command exited with code 97: {\"level\":\"warn\",\"ts\":1794092592.766572,\"msg\":\"KConfig: could not check enabled kconfig features\",\"error\":\"could not read /boot/config-7.0.0-rc2+: stat /boot/config-7.0.0-rc2+: no such file or directory\"}\n{\"level\":\"warn\",\"ts\":1794092592.766637,\"msg\":\"KConfig: assuming kconfig values, might have unexpected behavior\"}\n{\"level\":\"warn\",\"ts\":1794092593.05465,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"missing_ksymbol\"}\n{\"level\":\"warn\",\"ts\":1794092593.0556335,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"multiple_fallbacks_test\"}\n{\"level\":\"error\",\"ts\":1794092593.0623465,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-1013\",\"error\":\"detector TRC-1013 requires enrichment \\\"environment\\\" which is not enabled\"}\n{\"level\":\"error\",\"ts\":1794092593.0626369,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-107\",\"error\":\"detector TRC-107 requires enrichment \\\"environment\\\" which is not enabled\"}",
+      "app_result_sha256": "1926bb9a5e26431ad7f8977870f879c97c5be08538441a231b0ba7218b554781",
+      "phases": {
+        "baseline": {
+          "raw_measurement_present": true,
+          "resident_program_count": 151,
+          "bpf_run_count": 9141585,
+          "workloads": [
+            {
+              "name": "stress_ng_tracee_syscall_hot",
+              "duration_seconds": 2.056453194999989,
+              "returncode": 0,
+              "stdout_sha256": "067bdd2f2a065b30ab481179f032a1b4b8e144216c6841e7e50474f907497e25",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ]
+        },
+        "post_rejit": {
+          "raw_measurement_present": false,
+          "resident_program_count": 0,
+          "bpf_run_count": 0,
+          "workloads": []
+        }
+      },
+      "shim_sha256": {
+        "result/details/shim-logs/tracee__monitor.post_rejit.log": "d2bf8389d06a0cc731b9313ad1071759f14c29623e19e8476daac4d1af24ccef"
+      },
+      "replacement_pairs": [],
+      "all_replacements_match_bound_service": true,
+      "all_replacements_require_bound": true,
+      "prebuilt_proof_count": 0,
+      "published_observations": {
+        "native_requests": 0,
+        "generated": 0,
+        "compiled": 0,
+        "accepted_bound": 0,
+        "failed": 0,
+        "terminal_archives_verified": 0,
+        "native_replaced": 0,
+        "native_failed": 1,
+        "app_status": "error",
+        "metadata_status": "error",
+        "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_230126_679104",
+        "failure_entry": "tracepoint__raw_syscalls__sys_enter",
+        "failure_class": "kernel-resource-count",
+        "baseline_load_attempts": 162,
+        "baseline_accepted_loads": 162,
+        "baseline_named_accepted": 153,
+        "baseline_resident_programs": 151,
+        "baseline_named_loads": [
+          {
+            "name": "",
+            "fd": 113
+          },
+          {
+            "name": "",
+            "fd": 113
+          },
+          {
+            "name": "",
+            "fd": 113
+          },
+          {
+            "name": "",
+            "fd": 113
+          },
+          {
+            "name": "libbpf_nametest",
+            "fd": 113
+          },
+          {
+            "name": "det_arg_ctx",
+            "fd": 164
+          },
+          {
+            "name": "",
+            "fd": 60
+          },
+          {
+            "name": "",
+            "fd": 24
+          },
+          {
+            "name": "tracepoint__raw",
+            "fd": 24
+          },
+          {
+            "name": "",
+            "fd": 63
+          },
+          {
+            "name": "sys_enter_init",
+            "fd": 60
+          },
+          {
+            "name": "sys_enter_submi",
+            "fd": 63
+          },
+          {
+            "name": "tracepoint__raw",
+            "fd": 66
+          },
+          {
+            "name": "sys_exit_init",
+            "fd": 69
+          },
+          {
+            "name": "sys_exit_submit",
+            "fd": 72
+          },
+          {
+            "name": "trace_sys_enter",
+            "fd": 75
+          },
+          {
+            "name": "trace_sys_exit",
+            "fd": 78
+          },
+          {
+            "name": "trace_ptrace",
+            "fd": 81
+          },
+          {
+            "name": "trace_ret_ptrac",
+            "fd": 84
+          },
+          {
+            "name": "trace_process_v",
+            "fd": 87
+          },
+          {
+            "name": "trace_ret_proce",
+            "fd": 90
+          },
+          {
+            "name": "trace_arch_prct",
+            "fd": 93
+          },
+          {
+            "name": "trace_ret_arch_",
+            "fd": 96
+          },
+          {
+            "name": "trace_dup",
+            "fd": 164
+          },
+          {
+            "name": "trace_ret_dup",
+            "fd": 165
+          },
+          {
+            "name": "trace_dup2",
+            "fd": 166
+          },
+          {
+            "name": "trace_ret_dup2",
+            "fd": 167
+          },
+          {
+            "name": "trace_dup3",
+            "fd": 168
+          },
+          {
+            "name": "trace_ret_dup3",
+            "fd": 169
+          },
+          {
+            "name": "syscall__execve",
+            "fd": 170
+          },
+          {
+            "name": "syscall__execve",
+            "fd": 171
+          },
+          {
+            "name": "syscall__execve",
+            "fd": 172
+          },
+          {
+            "name": "syscall__execve",
+            "fd": 173
+          },
+          {
+            "name": "sys_dup_exit_ta",
+            "fd": 174
+          },
+          {
+            "name": "tracepoint__sch",
+            "fd": 175
+          },
+          {
+            "name": "sched_process_f",
+            "fd": 176
+          },
+          {
+            "name": "lkm_seeker_modt",
+            "fd": 177
+          },
+          {
+            "name": "heartbeat_captu",
+            "fd": 178
+          },
+          {
+            "name": "uprobe_lkm_seek",
+            "fd": 179
+          },
+          {
+            "name": "uprobe_lkm_seek",
+            "fd": 180
+          },
+          {
+            "name": "lkm_seeker_kset",
+            "fd": 181
+          },
+          {
+            "name": "lkm_seeker_mod_",
+            "fd": 182
+          },
+          {
+            "name": "lkm_seeker_proc",
+            "fd": 183
+          },
+          {
+            "name": "lkm_seeker_new_",
+            "fd": 184
+          },
+          {
+            "name": "tracepoint__sch",
+            "fd": 185
+          },
+          {
+            "name": "sched_process_e",
+            "fd": 186
+          },
+          {
+            "name": "sched_process_e",
+            "fd": 187
+          },
+          {
+            "name": "tracepoint__sch",
+            "fd": 188
+          },
+          {
+            "name": "sched_process_e",
+            "fd": 189
+          },
+          {
+            "name": "tracepoint__sch",
+            "fd": 190
+          },
+          {
+            "name": "syscall__accept",
+            "fd": 191
+          },
+          {
+            "name": "tracepoint__sch",
+            "fd": 192
+          },
+          {
+            "name": "trace_filldir64",
+            "fd": 193
+          },
+          {
+            "name": "trace_call_user",
+            "fd": 194
+          },
+          {
+            "name": "trace_do_exit",
+            "fd": 195
+          },
+          {
+            "name": "uprobe_syscall_",
+            "fd": 196
+          },
+          {
+            "name": "uprobe_seq_ops_",
+            "fd": 197
+          },
+          {
+            "name": "tracepoint__cgr",
+            "fd": 198
+          },
+          {
+            "name": "tracepoint__cgr",
+            "fd": 199
+          },
+          {
+            "name": "tracepoint__cgr",
+            "fd": 200
+          },
+          {
+            "name": "trace_security_",
+            "fd": 201
+          },
+          {
+            "name": "trace_security_",
+            "fd": 202
+          },
+          {
+            "name": "trace_security_",
+            "fd": 203
+          },
+          {
+            "name": "trace_security_",
+            "fd": 204
+          },
+          {
+            "name": "trace_commit_cr",
+            "fd": 205
+          },
+          {
+            "name": "trace_switch_ta",
+            "fd": 206
+          },
+          {
+            "name": "trace_cap_capab",
+            "fd": 207
+          },
+          {
+            "name": "trace_security_",
+            "fd": 208
+          },
+          {
+            "name": "trace_security_",
+            "fd": 209
+          },
+          {
+            "name": "trace_proc_crea",
+            "fd": 210
+          },
+          {
+            "name": "trace___debugfs",
+            "fd": 211
+          },
+          {
+            "name": "trace_debugfs_c",
+            "fd": 212
+          },
+          {
+            "name": "trace_security_",
+            "fd": 213
+          },
+          {
+            "name": "trace_security_",
+            "fd": 214
+          },
+          {
+            "name": "trace_security_",
+            "fd": 215
+          },
+          {
+            "name": "trace_security_",
+            "fd": 216
+          },
+          {
+            "name": "trace_security_",
+            "fd": 217
+          },
+          {
+            "name": "send_bin",
+            "fd": 218
+          },
+          {
+            "name": "send_bin_tp",
+            "fd": 219
+          },
+          {
+            "name": "trace_vfs_write",
+            "fd": 220
+          },
+          {
+            "name": "vfs_write_magic",
+            "fd": 221
+          },
+          {
+            "name": "trace_ret_vfs_w",
+            "fd": 222
+          },
+          {
+            "name": "vfs_write_magic",
+            "fd": 223
+          },
+          {
+            "name": "trace_ret_vfs_w",
+            "fd": 224
+          },
+          {
+            "name": "trace_vfs_write",
+            "fd": 225
+          },
+          {
+            "name": "vfs_writev_magi",
+            "fd": 226
+          },
+          {
+            "name": "trace_ret_vfs_w",
+            "fd": 227
+          },
+          {
+            "name": "vfs_writev_magi",
+            "fd": 228
+          },
+          {
+            "name": "trace_ret_vfs_w",
+            "fd": 229
+          },
+          {
+            "name": "trace_kernel_wr",
+            "fd": 230
+          },
+          {
+            "name": "kernel_write_ma",
+            "fd": 231
+          },
+          {
+            "name": "trace_ret_kerne",
+            "fd": 232
+          },
+          {
+            "name": "kernel_write_ma",
+            "fd": 233
+          },
+          {
+            "name": "trace_ret_kerne",
+            "fd": 234
+          },
+          {
+            "name": "trace_vfs_read",
+            "fd": 235
+          },
+          {
+            "name": "trace_ret_vfs_r",
+            "fd": 236
+          },
+          {
+            "name": "trace_ret_vfs_r",
+            "fd": 237
+          },
+          {
+            "name": "trace_vfs_readv",
+            "fd": 238
+          },
+          {
+            "name": "trace_ret_vfs_r",
+            "fd": 239
+          },
+          {
+            "name": "trace_ret_vfs_r",
+            "fd": 240
+          },
+          {
+            "name": "trace_mmap_aler",
+            "fd": 241
+          },
+          {
+            "name": "trace_do_mmap",
+            "fd": 242
+          },
+          {
+            "name": "trace_ret_do_mm",
+            "fd": 243
+          },
+          {
+            "name": "trace_security_",
+            "fd": 244
+          },
+          {
+            "name": "trace_security_",
+            "fd": 245
+          },
+          {
+            "name": "syscall__init_m",
+            "fd": 246
+          },
+          {
+            "name": "trace_register_",
+            "fd": 247
+          },
+          {
+            "name": "trace_ret_regis",
+            "fd": 248
+          },
+          {
+            "name": "trace_security_",
+            "fd": 249
+          },
+          {
+            "name": "trace_security_",
+            "fd": 250
+          },
+          {
+            "name": "trace_security_",
+            "fd": 251
+          },
+          {
+            "name": "trace_device_ad",
+            "fd": 252
+          },
+          {
+            "name": "trace___registe",
+            "fd": 253
+          },
+          {
+            "name": "trace_ret__regi",
+            "fd": 254
+          },
+          {
+            "name": "trace_do_splice",
+            "fd": 255
+          },
+          {
+            "name": "trace_ret_do_sp",
+            "fd": 256
+          },
+          {
+            "name": "tracepoint__mod",
+            "fd": 257
+          },
+          {
+            "name": "tracepoint__mod",
+            "fd": 258
+          },
+          {
+            "name": "trace_do_init_m",
+            "fd": 259
+          },
+          {
+            "name": "trace_ret_do_in",
+            "fd": 260
+          },
+          {
+            "name": "trace_load_elf_",
+            "fd": 261
+          },
+          {
+            "name": "trace_security_",
+            "fd": 262
+          },
+          {
+            "name": "tracepoint__tas",
+            "fd": 263
+          },
+          {
+            "name": "trace_security_",
+            "fd": 264
+          },
+          {
+            "name": "trace_kallsyms_",
+            "fd": 265
+          },
+          {
+            "name": "trace_ret_kalls",
+            "fd": 266
+          },
+          {
+            "name": "trace_do_sigact",
+            "fd": 267
+          },
+          {
+            "name": "trace_vfs_utime",
+            "fd": 268
+          },
+          {
+            "name": "trace_utimes_co",
+            "fd": 269
+          },
+          {
+            "name": "trace_do_trunca",
+            "fd": 270
+          },
+          {
+            "name": "trace_inotify_f",
+            "fd": 271
+          },
+          {
+            "name": "trace_ret_inoti",
+            "fd": 272
+          },
+          {
+            "name": "process_execute",
+            "fd": 273
+          },
+          {
+            "name": "trace_exec_binp",
+            "fd": 274
+          },
+          {
+            "name": "trace_security_",
+            "fd": 275
+          },
+          {
+            "name": "trace_execute_f",
+            "fd": 276
+          },
+          {
+            "name": "trace_security_",
+            "fd": 277
+          },
+          {
+            "name": "trace_set_fs_pw",
+            "fd": 278
+          },
+          {
+            "name": "trace_security_",
+            "fd": 279
+          },
+          {
+            "name": "trace_security_",
+            "fd": 280
+          },
+          {
+            "name": "trace_chmod_com",
+            "fd": 281
+          },
+          {
+            "name": "trace_security_",
+            "fd": 282
+          },
+          {
+            "name": "syscall_checker",
+            "fd": 283
+          },
+          {
+            "name": "trace_security_",
+            "fd": 284
+          },
+          {
+            "name": "trace_sock_allo",
+            "fd": 285
+          },
+          {
+            "name": "trace_ret_sock_",
+            "fd": 286
+          },
+          {
+            "name": "trace_security_",
+            "fd": 287
+          },
+          {
+            "name": "trace_security_",
+            "fd": 288
+          },
+          {
+            "name": "trace_security_",
+            "fd": 289
+          },
+          {
+            "name": "cgroup_bpf_run_",
+            "fd": 290
+          },
+          {
+            "name": "",
+            "fd": 291
+          },
+          {
+            "name": "cgroup_skb_ingr",
+            "fd": 291
+          },
+          {
+            "name": "cgroup_skb_egre",
+            "fd": 292
+          },
+          {
+            "name": "cgroup_mkdir_si",
+            "fd": 293
+          },
+          {
+            "name": "cgroup_rmdir_si",
+            "fd": 294
+          },
+          {
+            "name": "empty_kprobe",
+            "fd": 295
+          },
+          {
+            "name": "tracepoint__exe",
+            "fd": 296
+          },
+          {
+            "name": "uprobe__feature",
+            "fd": 297
+          },
+          {
+            "name": "uprobe__feature",
+            "fd": 298
+          },
+          {
+            "name": "uprobe__feature",
+            "fd": 299
+          },
+          {
+            "name": "uprobe__feature",
+            "fd": 300
+          },
+          {
+            "name": "",
+            "fd": 311
+          }
+        ],
+        "submission_error_lines": [
+          "[240.718184 pid=2789 tid=2799] native-loader failed prog=tracepoint__raw manifest=/opt/bpf-benchmark/native-bpf/x86_64/tracee/manifest.json source=/tmp/bpfrejit_2789_db023415dd9df842.bpf error=kernel native resource submission refused: Argument list too long"
+        ],
+        "raw_hashes": {
+          "driver.log.gz": "3e82593dde224ced87271916f0b9b3e216159bb9169625ff4ee49762a1534f6e",
+          "service.tar.gz": "1c773fa4aeaf7a4ef757c1b26ab26d7ad890345b6c280ba85e9dcfdd20058ff8",
+          "launch.tar.gz": "98ac771e8b63f7e43623a7cd70f724422a7bee0773f9fe68a10edd94dfab420f",
+          "result.tar.gz": "4f524a383dee98f225fe00165415b34d575115306b74625c575b998654c3ed2e"
+        }
+      },
+      "native_loader_failure_lines": [
+        "[240.718184 pid=2789 tid=2799] native-loader failed prog=tracepoint__raw manifest=/opt/bpf-benchmark/native-bpf/x86_64/tracee/manifest.json source=/tmp/bpfrejit_2789_db023415dd9df842.bpf error=kernel native resource submission refused: Argument list too long"
+      ],
+      "submission_error_lines": [
+        "[240.718184 pid=2789 tid=2799] native-loader failed prog=tracepoint__raw manifest=/opt/bpf-benchmark/native-bpf/x86_64/tracee/manifest.json source=/tmp/bpfrejit_2789_db023415dd9df842.bpf error=kernel native resource submission refused: Argument list too long"
+      ],
+      "baseline_load_attempts": 162,
+      "archived_artifact_sha256": {
+        "service.tar.gz": "1c773fa4aeaf7a4ef757c1b26ab26d7ad890345b6c280ba85e9dcfdd20058ff8",
+        "result.tar.gz": "4f524a383dee98f225fe00165415b34d575115306b74625c575b998654c3ed2e",
+        "launch.tar.gz": "98ac771e8b63f7e43623a7cd70f724422a7bee0773f9fe68a10edd94dfab420f",
+        "driver.log.gz": "3e82593dde224ced87271916f0b9b3e216159bb9169625ff4ee49762a1534f6e"
+      }
+    },
+    "functional_231936": {
+      "app_status": "error",
+      "app_error": "failed to launch Tracee: /artifacts/tracee/bin/tracee --events '*' --events -net_packet_raw,-print_mem_dump,-net_packet_ipv4,-net_packet_ipv6,-net_packet_tcp,-net_packet_udp,-net_packet_icmp,-net_packet_icmpv6,-net_packet_dns,-net_packet_dns_request,-net_packet_dns_response,-net_packet_http,-net_packet_http_request,-net_packet_http_response,-anti_debugging,-aslr_inspection,-cgroup_notify_on_release,-cgroup_release_agent,-core_pattern_modification,-default_loader_mod,-disk_mount,-docker_abuse,-dropped_executable,-dynamic_code_loading,-file_modification,-fileless_execution,-hidden_file_created,-hooked_seq_ops_detector,-hooked_syscall_detector,-illegitimate_shell,-k8s_service_account_token,-kernel_module_loading,-k8s_api_connection,-k8s_cert_theft,-ld_preload,-lsm_test,-proc_fops_hooking,-proc_kcore_read,-proc_mem_access,-proc_mem_code_injection,-process_vm_write_inject,-ptrace_code_injection,-rcd_modification,-sched_debug_recon,-scheduled_task_mod,-stack_pivot,-bpf_attach,-security_bpf,-security_bpf_map,-security_bpf_prog,-stdio_over_socket,-sudoers_modification,-syscall_hooking,-system_request_key_mod --output none --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/de9ff7da/tracee/signatures --capabilities bypass=true: command exited with code 97: {\"level\":\"warn\",\"ts\":1794093680.999516,\"msg\":\"KConfig: could not check enabled kconfig features\",\"error\":\"could not read /boot/config-7.0.0-rc2+: stat /boot/config-7.0.0-rc2+: no such file or directory\"}\n{\"level\":\"warn\",\"ts\":1794093680.9995723,\"msg\":\"KConfig: assuming kconfig values, might have unexpected behavior\"}\n{\"level\":\"warn\",\"ts\":1794093681.2835627,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"missing_ksymbol\"}\n{\"level\":\"warn\",\"ts\":1794093681.2885845,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"multiple_fallbacks_test\"}\n{\"level\":\"error\",\"ts\":1794093681.2960863,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-1013\",\"error\":\"detector TRC-1013 requires enrichment \\\"environment\\\" which is not enabled\"}\n{\"level\":\"error\",\"ts\":1794093681.296376,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-107\",\"error\":\"detector TRC-107 requires enrichment \\\"environment\\\" which is not enabled\"}",
+      "app_result_sha256": "1b33fe7383a205502939bdfa8c1f99e2492da98967c7c3c0fb76d4dd754681f6",
+      "phases": {
+        "baseline": {
+          "raw_measurement_present": true,
+          "resident_program_count": 151,
+          "bpf_run_count": 9112060,
+          "workloads": [
+            {
+              "name": "stress_ng_tracee_syscall_hot",
+              "duration_seconds": 2.057417805,
+              "returncode": 0,
+              "stdout_sha256": "01ed93751c9fc69f491bfbe639dd18b7604e795c21c23b0b733909414e21fd38",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ]
+        },
+        "post_rejit": {
+          "raw_measurement_present": false,
+          "resident_program_count": 0,
+          "bpf_run_count": 0,
+          "workloads": []
+        }
+      },
+      "shim_sha256": {
+        "result/details/shim-logs/tracee__monitor.post_rejit.log": "823dacb9d12ff97da23a0df63ad2bfb420f9529df9fb9c042298917236682f19"
+      },
+      "replacement_pairs": [
+        [
+          174,
+          175
+        ],
+        [
+          177,
+          178
+        ],
+        [
+          179,
+          182
+        ],
+        [
+          183,
+          184
+        ],
+        [
+          185,
+          186
+        ]
+      ],
+      "all_replacements_match_bound_service": true,
+      "all_replacements_require_bound": true,
+      "prebuilt_proof_count": 0,
+      "published_observations": {
+        "native_requests": 6,
+        "generated": 6,
+        "compiled": 6,
+        "accepted_bound": 5,
+        "failed": 1,
+        "terminal_archives_verified": 6,
+        "native_replaced": 5,
+        "native_failed": 1,
+        "app_status": "error",
+        "metadata_status": "error",
+        "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_231936_199685",
+        "failure_class": "verifier-readonly-index-range",
+        "failure_entry": "sys_exit_submit",
+        "verifier_processed_insns": 2154,
+        "verifier_total_states": 91,
+        "readonly_value_size": 80,
+        "max_access_offset": 1036,
+        "access_size": 4,
+        "artifact_sha256": {
+          "driver.log.gz": "948d580d9051285a8b51c1111748ac15626c3feb6fc955798d94cf80cf659c20",
+          "service.tar.gz": "ce239fef50c19d1e3e04453bf5758470fc0ea79613808b6b1ed027d31efe7ae9",
+          "launch.tar.gz": "c45a48a06cdfaa941837e898e9cdb064b7d8bf776a8b36c32902610332f68301",
+          "result.tar.gz": "4cb27ea45d325113b33b92a5b4d12b9f5791af18d0722675e4a7186da8fc39b0"
+        }
+      },
+      "native_loader_failure_lines": [
+        "[578.401303 pid=2851 tid=2859] native-loader failed prog=sys_exit_submit manifest=/opt/bpf-benchmark/native-bpf/x86_64/tracee/manifest.json source=/tmp/bpfrejit_2851_fb4d89953d9856d4.bpf error=trusted specializer refused native program: Input/output error"
+      ],
+      "submission_error_lines": [],
+      "baseline_load_attempts": 162,
+      "archived_artifact_sha256": {
+        "service.tar.gz": "ce239fef50c19d1e3e04453bf5758470fc0ea79613808b6b1ed027d31efe7ae9",
+        "result.tar.gz": "4cb27ea45d325113b33b92a5b4d12b9f5791af18d0722675e4a7186da8fc39b0",
+        "launch.tar.gz": "c45a48a06cdfaa941837e898e9cdb064b7d8bf776a8b36c32902610332f68301",
+        "driver.log.gz": "948d580d9051285a8b51c1111748ac15626c3feb6fc955798d94cf80cf659c20"
+      }
     }
   },
   "timing_context": {
