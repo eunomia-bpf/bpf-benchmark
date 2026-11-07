@@ -515,3 +515,31 @@ actual-dispatch oracle hosts passed 120,145 and 1680 cases; no proof/test failur
 or filtered inputs. Existing inline redefinition warnings remain visible.
 Exact0a9b8757c's Unary/MOV/MUL full check is queued separately behind F; this
 later increment requires its own combined full validation.
+
+## Consecutive SHIFT, multiply and unary dispatcher composition
+
+`Arm64Mul.DispatchChain.dispatch` composes the production SHIFT → multiply →
+unary branch order. Its canonical-step theorems cover both shift rows, all eight
+multiply rows and both unary rows, retaining the same immediate/register count,
+AUX, native amount/width and identity-modifier conditions. Numeric disjointness
+is proved against every preceding family; a later operation cannot be consumed
+or overwritten by an earlier branch. Unused SRC2/SRC3/immediate fields remain
+arbitrary where the body ignores them. Unrelated opcodes pass to the surrounding
+dispatcher as None rather than inventing a simulator transition.
+
+These are concrete full-state compositions of the generated operation bodies,
+not assumptions that handlers refine or a count-based completion claim. Existing
+flags, vectors, SP, memory and ordered effects are retained with one PC advance.
+This twelve-opcode fragment and the earlier FMOV/reduction tail still leave
+other ISA dispatcher branches and Entry/O4/native artifact transport to complete.
+No runtime, oracle, ISA, compiler or test source changed. All old theorem source
+is unchanged except the additional shared Shift import.
+
+Validation: the 34-job Lean dependency build passed. The final focused build
+also passed after renaming a local variable flagged by the constructor-name
+linter. Existing reference regressions include 3860 AArch64 control/PC complete
+states. All nine related contract freshness checks and generated direct-dispatch
+freshness passed. Existing actual operand/family/multiply/unary/AUX route hosts
+passed 3804, 136, 1296, 313 and 1,115,374 cases; original C host warnings remain
+visible. No proof/test failures or input filtering. Exact0a9b8757c's separate
+full check is running; this later composition requires its own full validation.

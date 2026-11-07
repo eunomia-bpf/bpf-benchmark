@@ -76,7 +76,9 @@ operand-source tables and the full-width pointer/narrowing branch order;
 immediate field31 remains ZR, while register operands distinguish SP and ZR. The eight-member
 multiply dispatcher includes UDIV input narrowing, unused alias operands and
 explicit X-width validity for long/high multiplies. EXTR/REV/REV16/SXT* bind
-the six numeric labels, EXTR-only input narrowing and unused operand fields.
+the six numeric labels, EXTR-only input narrowing and unused operand fields. A concrete
+SHIFT→multiply→unary segment composes the production branch order and proves
+that preceding numeric gates cannot intercept later family members.
 Individual module statements define their
 exact scope. Dispatcher coverage/exclusivity is
 **not yet a full simulator-step refinement theorem**; completing the remaining

@@ -1,5 +1,6 @@
 import KProgFormal.Arm64Mul
 import KProgFormal.Refinement.Arm64Register
+import KProgFormal.Refinement.Arm64Shift
 
 namespace KProgFormal.Refinement.Arm64Mul
 
@@ -236,5 +237,115 @@ theorem dispatch_other (opcode : Nat) (width : Width) (dst lhs rhs addend : Refe
     (s : Reference.AArch64.State) (other : ∀ op, opcode ≠ GeneratedArm64Mul.code op) :
     dispatch opcode width dst lhs rhs addend s = none := by
   simp [dispatch, decodeOpcode, other]
+
+
+namespace DispatchChain
+
+/-- The consecutive SHIFT, multiply and unary branches in ARM64_SIM_L_EXEC,
+in their actual order. None hands the opcode to the surrounding dispatcher;
+this is a concrete fragment, not a hypothesis that every handler refines. -/
+def dispatch (opcode : Nat) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Reference.AArch64.Register) (immediate : Word) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match Arm64Shift.dispatch opcode aux width dst src src2 immediate s with
+  | some result => some result
+  | none => match Arm64Mul.dispatch opcode width dst src src2 src3 s with
+    | some result => some result
+    | none => Arm64Shift.Unary.dispatch opcode aux width dst src s
+
+theorem shift_immediate_refines (width : Width) (kind : Reference.AArch64.ShiftKind)
+    (amount : Fin width.bits) (dst src src2 src3 : Reference.AArch64.Register)
+    (lane1 lane2 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64DispatchFamily.code .shiftImm)
+      (Arm64Shift.packedAux kind lane1 lane2 lane3) width dst src src2 src3 (BitVec.ofNat 64 amount.val) s =
+      some (Reference.AArch64.step (.shift (.immediate width kind amount dst src)) s) := by
+  unfold dispatch
+  rw [Arm64Shift.dispatch_immediate_refines]
+
+theorem shift_register_refines (width : Width) (kind : Reference.AArch64.ShiftKind)
+    (dst src src2 src3 : Reference.AArch64.Register) (immediate : Word)
+    (lane1 lane2 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64DispatchFamily.code .shiftReg)
+      (Arm64Shift.packedAux kind lane1 lane2 lane3) width dst src src2 src3 immediate s =
+      some (Reference.AArch64.step (.shift (.register width kind dst src src2)) s) := by
+  unfold dispatch
+  rw [Arm64Shift.dispatch_register_refines]
+
+theorem multiply_refines (op : GeneratedArm64Mul.Mul) (width : Width) (aux : BitVec 32)
+    (dst src src2 src3 : Reference.AArch64.Register) (immediate : Word) (s : Reference.AArch64.State)
+    (valid : nativeWidth op width) :
+    dispatch (GeneratedArm64Mul.code op) aux width dst src src2 src3 immediate s =
+      some (Reference.AArch64.step (.mul (instruction op width dst src src2 src3)) s) := by
+  have before : Arm64Shift.dispatch (GeneratedArm64Mul.code op) aux width dst src src2 immediate s = none :=
+    Arm64Shift.dispatch_other _ _ _ _ _ _ _ _
+      (by cases op <;> decide) (by cases op <;> decide)
+  unfold dispatch
+  rw [before]
+  rw [Arm64Mul.dispatch_refines op width dst src src2 src3 s valid]
+
+/-- Numeric disjointness is proved against both preceding families, so unary
+reaches its own body independently of AUX, unused operands and immediate. -/
+theorem unary_reached (op : GeneratedArm64Unary.Unary) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Reference.AArch64.Register) (immediate : Word) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Unary.code op) aux width dst src src2 src3 immediate s =
+      Arm64Shift.Unary.dispatch (GeneratedArm64Unary.code op) aux width dst src s := by
+  have before : Arm64Shift.dispatch (GeneratedArm64Unary.code op) aux width dst src src2 immediate s = none :=
+    Arm64Shift.dispatch_other _ _ _ _ _ _ _ _
+      (by cases op <;> decide) (by cases op <;> decide)
+  have middle : Arm64Mul.dispatch (GeneratedArm64Unary.code op) width dst src src2 src3 s = none :=
+    Arm64Mul.dispatch_other _ _ _ _ _ _ _ (by intro member; cases op <;> cases member <;> decide)
+  simp only [dispatch, before, middle]
+
+theorem invert_refines (width : Width) (kind : Reference.AArch64.ShiftKind) (amount : Fin width.bits)
+    (dst src src2 src3 : Reference.AArch64.Register) (immediate : Word) (lane0 lane3 : Byte)
+    (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Unary.code .mvn)
+      (Arm64Shift.Unary.packedAux (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3)
+      width dst src src2 src3 immediate s =
+      some (Reference.AArch64.step (.shift (.invert width kind amount dst src)) s) := by
+  rw [unary_reached]
+  exact Arm64Shift.Unary.dispatch_invert_refines width kind amount dst src lane0 lane3 s
+
+theorem negate_refines (width : Width) (kind : Fin 3) (amount : Fin width.bits)
+    (dst src src2 src3 : Reference.AArch64.Register) (immediate : Word) (lane0 lane3 : Byte)
+    (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Unary.code .neg)
+      (Arm64Shift.Unary.packedAux (Arm64Shift.modifier (Reference.AArch64.arithmeticShift kind))
+        (BitVec.ofNat 8 amount.val) lane0 lane3) width dst src src2 src3 immediate s =
+      some (Reference.AArch64.step (.shift (.negate width kind amount dst src)) s) := by
+  rw [unary_reached]
+  exact Arm64Shift.Unary.dispatch_negate_refines width kind amount dst src lane0 lane3 s
+
+theorem unmodified_invert_refines (width : Width) (dst src src2 src3 : Reference.AArch64.Register)
+    (immediate : Word) (amount lane0 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Unary.code .mvn) (Arm64Shift.Unary.packedAux .none amount lane0 lane3)
+      width dst src src2 src3 immediate s =
+      some (Reference.AArch64.step
+        (.shift (.invert width .lsl ⟨0, by cases width <;> decide⟩ dst src)) s) := by
+  rw [unary_reached]
+  exact Arm64Shift.Unary.dispatch_unmodified_invert_refines width dst src amount lane0 lane3 s
+
+theorem unmodified_negate_refines (width : Width) (dst src src2 src3 : Reference.AArch64.Register)
+    (immediate : Word) (amount lane0 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Unary.code .neg) (Arm64Shift.Unary.packedAux .none amount lane0 lane3)
+      width dst src src2 src3 immediate s =
+      some (Reference.AArch64.step
+        (.shift (.negate width 0 ⟨0, by cases width <;> decide⟩ dst src)) s) := by
+  rw [unary_reached]
+  exact Arm64Shift.Unary.dispatch_unmodified_negate_refines width dst src amount lane0 lane3 s
+
+theorem other (opcode : Nat) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Reference.AArch64.Register) (immediate : Word) (s : Reference.AArch64.State)
+    (notShiftImm : opcode ≠ GeneratedArm64DispatchFamily.code .shiftImm)
+    (notShiftReg : opcode ≠ GeneratedArm64DispatchFamily.code .shiftReg)
+    (notMul : ∀ op, opcode ≠ GeneratedArm64Mul.code op)
+    (notUnary : ∀ op, opcode ≠ GeneratedArm64Unary.code op) :
+    dispatch opcode aux width dst src src2 src3 immediate s = none := by
+  have first := Arm64Shift.dispatch_other opcode aux width dst src src2 immediate s notShiftImm notShiftReg
+  have second := Arm64Mul.dispatch_other opcode width dst src src2 src3 s notMul
+  have third := Arm64Shift.Unary.dispatch_other opcode aux width dst src s (notUnary .mvn) (notUnary .neg)
+  simp only [dispatch, first, second, third]
+
+end DispatchChain
 
 end KProgFormal.Refinement.Arm64Mul
