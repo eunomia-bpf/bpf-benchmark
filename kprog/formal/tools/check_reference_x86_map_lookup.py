@@ -19,7 +19,9 @@ STATUS=0x8D5
 
 
 def command(argv):
-    return subprocess.run([str(x) for x in argv],text=True,capture_output=True,check=True).stdout
+    result=subprocess.run([str(x) for x in argv],text=True,capture_output=True)
+    if result.returncode: raise RuntimeError(result.stderr or result.stdout)
+    return result.stdout
 
 
 def main():
@@ -30,9 +32,15 @@ def main():
         str(ROOT.parent/'x86/native_lab/native_link/Cargo.toml'),'--bin','native-link'],env=env,check=True)
     linker=ROOT/'build/native-link/debug/native-link'
     source=out/'lookup.c'
-    source.write_text('typedef void *(*lookup_fn)(void*,const void*);\nvoid *map_lookup(void *m,const void *k){return ((lookup_fn)1)(m,k);}\n')
-    command(['cc','-O2','-fno-optimize-sibling-calls','-c',source,'-o',out/'lookup.o'])
-    command([linker,'--mode','proof','--input',out/'lookup.o','--symbol','map_lookup','--output',out/'lookup.proof.o'])
+    source.write_text('typedef void *(*lookup_fn)(void*,const void*);\nextern char fixture_map[];\n'
+        'void *map_lookup(void *m,const void *k){return ((lookup_fn)1)(fixture_map,k); }\n'
+        'void *map_lookup_dynamic(void *m,const void *k){return ((lookup_fn)1)(m,k); }\n')
+    command(['cc','-O2','-fPIC','-fno-optimize-sibling-calls','-c',source,'-o',out/'lookup.o'])
+
+    command([linker,'--mode','proof','--input',out/'lookup.o','--symbol','map_lookup',
+        '--output',out/'lookup.proof.o'])
+    command([linker,'--mode','proof','--input',out/'lookup.o','--symbol','map_lookup_dynamic',
+        '--output',out/'lookup.dynamic.proof.o'])
     flags_source=out/'flags.c'
     flags_source.write_text('''#include <stdint.h>
 uint64_t cmp32(uint32_t a,uint32_t b){uint64_t f;__asm__ volatile("cmpl %k2,%k1;pushfq;popq %0":"=r"(f):"r"(a),"r"(b):"cc","memory");return f;}
@@ -45,14 +53,33 @@ uint64_t add64(uint64_t a,uint64_t b){uint64_t f;__asm__ volatile("addq %2,%1;pu
     cases=[]
     for kind,elem_size in [(k,8) for k in ('array','percpu_array','hash','lru_hash','percpu_hash','call')]+[('array',32),('percpu_array',32),('array',12),('percpu_array',12)]:
         name=kind if elem_size==8 else kind+'-stride'+str(elem_size)
-        plan=dict(version=1,helpers=[dict(name='bpf_map_lookup_elem',addr=0x1000)],lookup_sites=[dict(
+        plan=dict(version=1,helpers=[dict(name='bpf_map_lookup_elem',addr=0x1000)],
+            maps=[dict(name='fixture_map',addr=0x400000000000)],lookup_sites=[dict(
             kind=kind,target_addr=0x12345000,key_offset=48,max_entries=16,elem_size=elem_size,index_mask=15,
-            value_offset=128,percpu_base_addr=0x20,map_name=None)])
+            value_offset=128,percpu_base_addr=0x20,map_name='fixture_map')])
         plan_path=out/(name+'.json');plan_path.write_text(json.dumps(plan)+'\n')
         blob_path=out/(name+'.bin');reloc_path=out/(name+'.relocs')
         command([linker,'--input',out/'lookup.proof.o','--symbol','map_lookup','--output',blob_path,
-            '--link-plan',plan_path,'--output-relocs',reloc_path])
-        blob=blob_path.read_bytes()
+            '--link-plan',plan_path,'--output-relocs',reloc_path,'--output-map-patches',out/(name+'.maps')])
+        patches=[line.split('\t') for line in (out/(name+'.maps')).read_text().splitlines()]
+        assert patches and all(map_name=='fixture_map' for map_name,_ in patches),(name,patches)
+        if kind in ('array','percpu_array') and elem_size==8:
+            dynamic=out/(name+'.dynamic.bin');dynamic_reloc=out/(name+'.dynamic.relocs')
+            command([linker,'--input',out/'lookup.dynamic.proof.o','--symbol','map_lookup_dynamic',
+                '--output',dynamic,'--link-plan',plan_path,'--output-relocs',dynamic_reloc])
+            records=dynamic_reloc.read_bytes();assert len(records)==16,(name,records)
+            offset,reloc_kind,target=struct.unpack('<IIQ',records)
+            assert dynamic.read_bytes()[offset]==0xE8 and target==0x1000,(name,offset,reloc_kind,target)
+        blob=bytearray(blob_path.read_bytes())
+        offsets=[int(offset) for _,offset in patches]
+        assert len(set(offsets))==len(offsets),(name,patches)
+        # Apply the typed map-pointer binding as the loader does, retaining
+        # each symbol/offset record. Native-link reserves a zero movabs field.
+        for offset in offsets:
+            assert 2<=offset<=len(blob)-8 and blob[offset-2]&0xf8==0x48 and 0xb8<=blob[offset-1]<=0xbf,(name,offset)
+            assert struct.unpack_from('<Q',blob,offset)[0]==0,(name,offset)
+            struct.pack_into('<Q',blob,offset,0x400000000000)
+        blob_path.write_bytes(blob);blob=bytes(blob)
         assembly=command(['objdump','-D','-b','binary','-m','i386:x86-64','-Mintel','--insn-width=16',blob_path])
         (out/(name+'.asm')).write_text(assembly)
         insns={}
@@ -135,7 +162,7 @@ uint64_t add64(uint64_t a,uint64_t b){uint64_t f;__asm__ volatile("addq %2,%1;pu
     for (request,expected),actual in zip(cases,results):
         mask=expected['defined_flags'];actual['flags']&=mask;expected['flags']&=mask
         assert actual==expected,(request,actual,expected)
-    print(f'map lowering reference: {len(cases)} actual linked ARRAY/PERCPU_ARRAY paths, full state/ordered reads/faults and no helper event; four direct-call target records retained')
+    print(f'map lowering reference: {len(cases)} actual linked ARRAY/PERCPU_ARRAY paths, full state/ordered reads/faults and no helper event; four named direct-call targets and two opaque-map generic helper targets retained')
 
 
 if __name__=='__main__':
