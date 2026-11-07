@@ -640,3 +640,32 @@ fallback normalization; a single rewrite fixed it without changing premises.
 No test inputs were filtered, runtime/oracle/test/ISA source is unchanged, and
 original C warnings remain visible. Exact19773cca3's full check runs separately;
 this increment needs a later combined full validation.
+
+## ADDS/SUBS/CMP/CMN actual numeric and operand dispatch
+
+`Arm64Arithmetic.FlagArithmetic` binds all eight immediate/register labels,
+including the independent CMN singleton codes, to the existing generated flag
+body and operand selectors. Matching writeback/CMP codes are proved across
+the two generated tables. The actual AUX modifier/count extraction composes
+all eleven generated modifiers; the C switch's unknown-code identity behavior
+is retained instead of inventing an unsupported branch.
+
+One raw-body theorem retains result/flag production and writeback versus
+compare-only behavior. Three dispatcher theorems compose to the same canonical
+immediate, shifted-register and extended-register steps. Immediate forms ignore
+AUX and the RHS register; register forms ignore IMM. Compare forms ignore DST
+and replace only NZCV. Native three-kind/width-sized shift bounds, Fin5 extension
+amounts and original extended/plain-source aliases remain explicit. Full numeric
+state, non-NZCV flags, vectors, SP, memory and empty effects are retained with
+one PC advance. Native field/SP-ZR validity, width and Entry/O4 materialization
+and provenance still require their producer/platform bindings.
+
+All earlier theorem source is unchanged except one shared import. No runtime,
+oracle, test, compiler policy or ISA source changed. Validation: 49 Lean
+jobs and focused reference build passed, including existing regressions and
+3860 AArch64 control/PC complete states. Seven related freshness checks and
+generated direct-dispatch freshness passed. Existing flag-handler/operand/modifier
+semantic, two actual flag, AUX and singleton route hosts passed 64, 5120, 225292,
+1152, 2089, 1115374 and 11083 cases. No proof/test failure or input filtering;
+original C host warnings remain visible. Exact19773cca3's full check predates
+this increment; a later combined full validation remains required.

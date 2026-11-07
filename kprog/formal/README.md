@@ -83,7 +83,9 @@ family members. CSEL/CNEG also
 compose whole-AUX condition decoding, NV normalization and the generated
 CSEL/X pointer-preserving gate; alias condition validity remains explicit. CCMP also
 binds both numeric operand rows and packed condition/fallback bytes: only
-the fallback ignores its upper four bits.
+the fallback ignores its upper four bits. ADDS/SUBS/CMP/CMN compose their
+eight numeric rows and packed modifiers with immediate, shifted and extended
+arithmetic steps, preserving writeback versus compare-only behavior.
 Individual module statements define their
 exact scope. Dispatcher coverage/exclusivity is
 **not yet a full simulator-step refinement theorem**; completing the remaining

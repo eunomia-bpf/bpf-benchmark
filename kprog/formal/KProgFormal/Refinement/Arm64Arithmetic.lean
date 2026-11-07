@@ -10,6 +10,7 @@ import KProgFormal.Generated.GeneratedArm64FlagOperand
 import KProgFormal.Arm64Aux
 import KProgFormal.Arm64CcmpDecode
 import KProgFormal.Generated.GeneratedArm64DispatchFamily
+import KProgFormal.Generated.GeneratedArm64DispatchSingleton
 
 namespace KProgFormal.Refinement.Arm64Arithmetic
 
@@ -529,5 +530,150 @@ theorem dispatch_other (code : Nat) (aux : BitVec 32) (width : Width) (lhs src :
     dispatch code aux width lhs src immediate s = none := by simp [dispatch, decodeOpcode, notImm, notReg]
 
 end ConditionalCompare
+
+
+namespace FlagArithmetic
+
+/-- The generated four writeback, two CMP and two CMN numeric labels. -/
+def operationCode (subtract writeback immediate : Bool) : Nat :=
+  if writeback then
+    if subtract then GeneratedArm64FlagOperand.code (if immediate then .subsImm else .subsReg)
+    else GeneratedArm64FlagOperand.code (if immediate then .addsImm else .addsReg)
+  else if subtract then GeneratedArm64FlagOperand.code (if immediate then .cmpImm else .cmpReg)
+  else GeneratedArm64DispatchSingleton.code (if immediate then .cmnImm else .cmnReg)
+
+def decodeOpcode (code : Nat) : Option (Bool × Bool × Bool) :=
+  if code = operationCode true true true then some (true, true, true)
+  else if code = operationCode true true false then some (true, true, false)
+  else if code = operationCode false true true then some (false, true, true)
+  else if code = operationCode false true false then some (false, true, false)
+  else if code = operationCode true false true then some (true, false, true)
+  else if code = operationCode true false false then some (true, false, false)
+  else if code = operationCode false false true then some (false, false, true)
+  else if code = operationCode false false false then some (false, false, false) else none
+
+theorem decode_code (subtract writeback immediate : Bool) :
+    decodeOpcode (operationCode subtract writeback immediate) = some (subtract, writeback, immediate) := by
+  cases subtract <;> cases writeback <;> cases immediate <;> rfl
+
+theorem writeback_codes (subtract immediate : Bool) :
+    operationCode subtract true immediate = GeneratedArm64DispatchFamily.code
+      (if subtract then if immediate then .subsImm else .subsReg
+        else if immediate then .addsImm else .addsReg) := by cases subtract <;> cases immediate <;> rfl
+
+theorem compare_codes (immediate : Bool) :
+    operationCode true false immediate = GeneratedArm64DispatchFamily.code
+      (if immediate then .cmpImm else .cmpReg) := by cases immediate <;> rfl
+
+/-- The C modifier switch has no default assignment: unknown byte codes leave
+its incoming value unchanged, just like NONE. No rejection rule is invented. -/
+def modifierOf (code : Nat) : GeneratedArm64ModDecode.Mod :=
+  match code with
+  | 1 => .lsl | 2 => .lsr | 3 => .asr | 4 => .ror
+  | 5 => .uxtw | 6 => .sxtw | 7 => .uxth | 8 => .sxth
+  | 9 => .uxtb | 10 => .sxtb | _ => .none
+
+theorem modifier_code (mod : GeneratedArm64ModDecode.Mod) :
+    modifierOf (GeneratedArm64ModDecode.code mod) = mod := by cases mod <;> rfl
+
+def packedAux (mod : GeneratedArm64ModDecode.Mod) (amount lane0 lane3 : Byte) : BitVec 32 :=
+  GeneratedArm64Aux.pack (lane0.setWidth 32) (BitVec.ofNat 32 (GeneratedArm64ModDecode.code mod))
+    (amount.setWidth 32) (lane3.setWidth 32)
+
+theorem packed_modifier (mod : GeneratedArm64ModDecode.Mod) (amount lane0 lane3 : Byte) :
+    modifierOf (GeneratedArm64Aux.b1 (packedAux mod amount lane0 lane3)).toNat = mod := by
+  simp only [packedAux, arm64_aux_b1_roundtrip]
+  cases mod <;> rfl
+
+theorem packed_amount (mod : GeneratedArm64ModDecode.Mod) (amount lane0 lane3 : Byte) :
+    (GeneratedArm64Aux.b2 (packedAux mod amount lane0 lane3)).setWidth 64 = amount.setWidth 64 := by
+  simp only [packedAux, arm64_aux_b2_roundtrip]
+  bv_decide
+
+def registerValue (aux : BitVec 32) (width : Width) (rhs : Register) (s : Reference.AArch64.State) : Word :=
+  GeneratedArm64Mod.value (modifierOf (GeneratedArm64Aux.b1 aux).toNat) (Arm64Register.readReg s rhs)
+    ((GeneratedArm64Aux.b2 aux).setWidth 64) (Arm64Register.handlerWidth width)
+
+/-- Actual flag-setting writeback or compare-only body, with its generated
+immediate/register selector and packed source modifier. Compare rows ignore DST;
+flag-setting writeback never takes the non-flag pointer-ADD branch. -/
+def rawStep (subtract writeback immediate sourceIsScalar : Bool) (aux : BitVec 32) (width : Width)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (value : Word) (s : Reference.AArch64.State) :
+    Transition Reference.AArch64.State :=
+  if writeback then arithmeticHandlerStep width subtract true sourceIsScalar immediate dst src value
+      (registerValue aux width rhs s) s
+  else compareArithmeticHandlerStep width subtract immediate src value (registerValue aux width rhs s) s
+
+theorem raw_step_refines (subtract writeback immediate sourceIsScalar : Bool) (aux : BitVec 32) (width : Width)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (value : Word) (s : Reference.AArch64.State) :
+    rawStep subtract writeback immediate sourceIsScalar aux width dst src rhs value s =
+      Reference.AArch64.arithmeticImmediateStep width subtract true (if writeback then dst else .zero) src
+        (if immediate then value else registerValue aux width rhs s) s := by
+  cases writeback
+  · exact (compare_arithmetic_refines width subtract immediate src value (registerValue aux width rhs s) s).symm
+  · exact arithmetic_step_refines width subtract true sourceIsScalar immediate dst src value
+      (registerValue aux width rhs s) s
+
+def dispatch (code : Nat) (aux : BitVec 32) (width : Width) (sourceIsScalar : Bool)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (value : Word) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  (decodeOpcode code).map (fun choice => rawStep choice.1 choice.2.1 choice.2.2 sourceIsScalar
+    aux width dst src rhs value s)
+
+theorem dispatch_immediate_refines (subtract writeback sourceIsScalar : Bool) (aux : BitVec 32) (width : Width)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (value : Word) (s : Reference.AArch64.State) :
+    dispatch (operationCode subtract writeback true) aux width sourceIsScalar dst src rhs value s =
+      some (Reference.AArch64.step
+        (.arithmeticImmediate width subtract true (if writeback then dst else .zero) src value) s) := by
+  simp only [dispatch, decode_code]
+  change some (rawStep subtract writeback true sourceIsScalar aux width dst src rhs value s) = _
+  rw [raw_step_refines]
+  rfl
+
+theorem dispatch_register_refines (subtract writeback sourceIsScalar : Bool) (width : Width)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
+    (value : Word) (lane0 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (operationCode subtract writeback false)
+      (packedAux (registerModifier width kind amount) (BitVec.ofNat 8 amount.val) lane0 lane3)
+      width sourceIsScalar dst src rhs value s =
+      some (Reference.AArch64.step (.arithmeticRegister width subtract true
+        (if writeback then dst else .zero) src rhs kind amount) s) := by
+  simp only [dispatch, decode_code]
+  change some (rawStep subtract writeback false sourceIsScalar _ width dst src rhs value s) = _
+  rw [raw_step_refines]
+  simp only [Bool.false_eq_true, ↓reduceIte, registerValue, packed_modifier, packed_amount,
+    Arm64Shift.Unary.native_amount]
+  conv => lhs; rw [step_rhs_normalization]
+  simp only [Arm64Register.read_refines, register_modifier_refines]
+  rfl
+
+theorem extended_amount (amount : Fin 5) :
+    (BitVec.ofNat 8 amount.val).setWidth 64 = BitVec.ofNat 64 amount.val := by
+  apply BitVec.eq_of_toNat_eq
+  have bound : amount.val < 256 := by have := amount.isLt; omega
+  simp only [BitVec.toNat_setWidth, BitVec.toNat_ofNat, Nat.mod_eq_of_lt bound]
+
+theorem dispatch_extended_refines (subtract writeback sourceIsScalar plainSource : Bool) (width : Width)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (kind : Reference.AArch64.RegisterExtend)
+    (amount : Fin 5) (value : Word) (lane0 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (operationCode subtract writeback false)
+      (packedAux (extendedModifier width kind (BitVec.ofNat 64 amount.val) plainSource)
+        (BitVec.ofNat 8 amount.val) lane0 lane3) width sourceIsScalar dst src rhs value s =
+      some (Reference.AArch64.step (.arithmeticExtended width subtract true
+        (if writeback then dst else .zero) src rhs kind amount) s) := by
+  simp only [dispatch, decode_code]
+  change some (rawStep subtract writeback false sourceIsScalar _ width dst src rhs value s) = _
+  rw [raw_step_refines]
+  simp only [Bool.false_eq_true, ↓reduceIte, registerValue, packed_modifier, packed_amount, extended_amount]
+  conv => lhs; rw [step_rhs_normalization]
+  simp only [Arm64Register.read_refines, extended_modifier_refines _ _ _ _ _ (amount_bound amount)]
+  rfl
+
+theorem dispatch_other (code : Nat) (aux : BitVec 32) (width : Width) (sourceIsScalar : Bool)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (value : Word) (s : Reference.AArch64.State)
+    (other : ∀ subtract writeback immediate, code ≠ operationCode subtract writeback immediate) :
+    dispatch code aux width sourceIsScalar dst src rhs value s = none := by simp [dispatch, decodeOpcode, other]
+
+end FlagArithmetic
 
 end KProgFormal.Refinement.Arm64Arithmetic
