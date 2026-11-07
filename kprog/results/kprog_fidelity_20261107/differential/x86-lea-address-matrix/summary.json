@@ -1,0 +1,65 @@
+{
+  "native_forms": 384,
+  "forms": 768,
+  "cases": 196608,
+  "differences": {
+    "cpu_simulator": 0,
+    "cpu_reference": 0,
+    "simulator_reference": 0
+  },
+  "forms_awaiting_reference": 0,
+  "unchanged_memory_cases": 196608,
+  "compiled_input_files": 108,
+  "production_snapshot_files": 80,
+  "candidate_snapshot_files": 2,
+  "production_snapshot_git_equal": true,
+  "candidate_patch_reproduced": true,
+  "candidate_source_sha256": {
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "8a182de2e9cbb586d277edb97f6f1926b888648948bffb7347ece74f851724ad",
+    "kprog/formal/generated/x86_mem_offset.h": "6360c8f4ab21446bcb444d934a80986b9e205e5a6ba58e3d68eb7fd2fa68b190"
+  },
+  "derived_source_cache_files": 10,
+  "raw_direct_native_byte_pairs": 384,
+  "encoded_fields_preserved": true,
+  "source_head": "815df5cb2eb7b37f40151ab8ec878045cbc7ab12",
+  "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96",
+  "binary_sha256": "30ee2c8aefa441024fd744c1d214c5c82e594cf7afa5317defecd886c5786dc4",
+  "correction_commit": "154955ad9",
+  "patch_sha256": "81ab3448a939d772b11418dff6ed3def8f46c8a34a60e452c7e3776ec70f64fc",
+  "production_source_correspondence": {
+    "commit": "afc178f46e725fe96f85694d76fcf4c45c842914",
+    "identical_compiled_headers": 72,
+    "encoded_forms_equal": 384,
+    "direct_statements_equal": 384,
+    "report_sha256": "b035f8a7cbd4021eaf7816ea6287bce68738ffdf84223f24e8a60a0416a3a113"
+  },
+  "trace": {
+    "raw_bytes": 357040152,
+    "raw_sha256": "10209ab817b40002d4c9327b80fd15ee34a669c23bb2eb821e79419d8bd22f78",
+    "compressed_bytes": 115004060,
+    "compressed_sha256": "41cb07c56165a730586453873d6558f9afc1da1c29906f86cbca83973408ee8a",
+    "path": "cpu-states.bin.zst",
+    "decompressed_identity_equal": true
+  },
+  "exit": 0,
+  "finished": "2026-11-07T21:27:30.097607+00:00",
+  "live_source_drift": {
+    "kprog/x86/x86_sim_local_bpf.h": {
+      "before": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+      "after": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11"
+    },
+    "kprog/x86/micro-prog/x86_abi.py": {
+      "before": "d3c89b3163e7cb4354979323ca1ea2b7f3501aa7e6dd75e4f0502d1c163c50b6",
+      "after": "82ca3cdf81391ef732ca9e4a24a5666caa9deeddfe85ec0421163caaf993b346"
+    },
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": {
+      "before": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+      "after": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74"
+    },
+    "kprog/formal/generated/x86_mem_offset.h": {
+      "before": "181677ff104eda10108c2339c703df01ef53daab87a58a48f6f32f6447206b5c",
+      "after": "af79410916e0d55e96dc2cdf0f4b97c17807ecadd01db7ec1bdeb73196537e99"
+    }
+  },
+  "production_adoption": "owner_sync_pending"
+}

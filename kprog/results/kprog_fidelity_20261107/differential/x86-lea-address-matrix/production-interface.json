@@ -1,0 +1,140 @@
+{
+  "production_commit": "afc178f46e725fe96f85694d76fcf4c45c842914",
+  "observed_launch": "815df5cb2eb7b37f40151ab8ec878045cbc7ab12",
+  "headers_sha256": {
+    "kinsn/module/include/native_lab_input.h": "c43adcd858d4c53c500aaa1763e2f95196b9da7f7bc6f284ca305f7d15b1e131",
+    "kprog/x86/x86_sim_local_bpf.h": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+    "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+    "kprog/formal/generated/x86_mem_aux.h": "a625c69146bae62ce1c286ecac0c892bcf561afaadc800e3e15b6e492481ab4f",
+    "kprog/formal/generated/x86_sbb_flags.h": "92f097852c9dd9f51bff5e494a293d33e7d73b51d687dbf8318c15e4370a81f2",
+    "kprog/formal/generated/x86_reg_presence.h": "39b4d2c793a5e375dcf41bc4b77c112a6ddc017a7cabd6353f70b21993df60a7",
+    "kprog/formal/generated/x86_setcc.h": "72e3658fb0b43a51af0bbb996cccddcf13cbd42d43f2ffeb301d467947949078",
+    "kprog/formal/generated/x86_ptr_write.h": "49d49c4e5f9d52a4a19ee1394c7a9318a130acbe224d002596bfff17394f5d1f",
+    "kprog/formal/generated/x86_popcount.h": "7ace097a5036fc85acee215964983b31705da92ca9709b984963452e2487abe2",
+    "kprog/formal/generated/x86_not.h": "ea001c7e11dd1322104367f979ecd7d496a7d79f212a45ab33caa9d1beb67e9a",
+    "kprog/formal/generated/x86_width.h": "c340ce043a9bff0710c60904308b1a77f75d6157177ce0ae53420278dcda0cbe",
+    "kprog/formal/generated/x86_mem_dispatch.h": "780f6978f87c2fc642895acde55f8e0390baaf3ca4ee59d02df122e188de3635",
+    "kprog/formal/generated/x86_dispatch_family.h": "04f4c80c4eda61fa3bedb5d4dd48ea033a338ea46c91120738ce768049762c4c",
+    "kprog/formal/generated/x86_pushpop.h": "aa08c319cc0399a11b1c7fcd30d70a4b3f8bb1bd034a3d1bcceeef72c704e499",
+    "kprog/formal/generated/x86_stack_index.h": "a380689ecbdb79d41a1f6f14c2bc4b9fb3c4b16f19f859a33d6f6d5cfc5a4774",
+    "kprog/formal/generated/x86_stack_write_lanes.h": "afdea3a17371e1439488f54d88af64032b33888db082700727091f7c7f47b6c5",
+    "kprog/formal/generated/x86_andn.h": "b9940d306d64ebd957aed06866bd3f48856a7c3d4c985f4da1e190d2f9e45295",
+    "kprog/formal/generated/x86_alu_decode.h": "2dff009da97a2d8f6a78669222ff6e059b911cea8d89bf129666ccfbd27f712c",
+    "kprog/formal/generated/x86_store.h": "225dc46d0d17755604cecb41a75342e0e4b17cecaa49c3b675f491ccc19fd4d2",
+    "kprog/formal/generated/x86_reg_read.h": "ea2f60863873509caf64d3d1e50b69eed77248ce4347c5fbe3efc76fc677f685",
+    "kprog/formal/generated/x86_bitops.h": "646d276aa813d1128c37336c42718cefca905ba6333358325f18702b68c674ef",
+    "kprog/formal/generated/x86_signed.h": "08d5f4c3fbe1dfde98cedba008afde004d41fb8aa4b1304a635eddce85cae58f",
+    "kprog/formal/generated/x86_bzhi.h": "0830ec33b7d22ab6dee847035ebe792fd07ec208338ba885580ea539cb3da80c",
+    "kprog/formal/generated/abi_load.h": "618e1ca06aa188eba278a992e815dbdd079c9e004bacb122ff88491d3018b571",
+    "kprog/formal/generated/x86_full_condition.h": "120355f7f2862e018f293d7fe1586304b298cae339754a6894ee82c33f5d6bc0",
+    "kprog/formal/generated/x86_div.h": "98e8f3cafa319ad5caa6afe69d9d63ea8aa388d21ee4231033817fdd2901f2b2",
+    "kprog/formal/generated/x86_mov_load.h": "f5376284fd09715035fce0bbe17ba4de8ca4884c3604e84e8eed099510585e2d",
+    "kprog/formal/generated/x86_rep_movs.h": "fc6953a10600a3da7e8e68d4dc6c976f7a8bcf8077809e534de2dd193e84fa9f",
+    "kprog/formal/generated/x86_immediate.h": "87e13e96a59133776257d86fbdccde52f2d6f49fd773c98ad7cdda9bfc180013",
+    "kprog/formal/generated/x86_cmpop.h": "76a808165aea471f3f552de22aef02c2e0f2179d94f41ab37b90b67dd2ef2725",
+    "kprog/formal/generated/x86_popcnt_flags.h": "00c5cf90950bf33127ae117da2d47bd4006eb84a757644a99cf9fba779822a02",
+    "kprog/formal/generated/x86_opcode.h": "b0c77fef814795e82b0937fc820c4b3efae309229b8c0289af353fa0cbf2a031",
+    "kprog/formal/generated/x86_shift_result.h": "115f51b7f89c8970eb5ef8181466a64e669dda8b76ca13ce8c84b44e9468f95c",
+    "kprog/formal/generated/x86_mem_index.h": "6e0811aeed32f02e5a32cac49b9394fe43316309952cd6ad4b088277309f673e",
+    "kprog/formal/generated/x86_bt.h": "976b323fb5faff57795782b1ac2d2551558c0c5a55e8bff7d61b346e37730575",
+    "kprog/formal/generated/x86_mem_offset.h": "6360c8f4ab21446bcb444d934a80986b9e205e5a6ba58e3d68eb7fd2fa68b190",
+    "kprog/formal/generated/ptr_add.h": "41cfc08ca5232f507788cb8d00d8fa216df9fb1c3c9ece8e00c5e83b06ae259d",
+    "kprog/formal/generated/x86_mov_reg_arm.h": "4d90036061ffec933f3390c92ab6cc3aae2ab67865e11fdfb00e761a0c0d5ff7",
+    "kprog/formal/generated/x86_mulx_arm.h": "9a0b20e69254d28c06ab839a9465f468a7fc7c691382aa69892db5625dc4e966",
+    "kprog/formal/generated/x86_movbe.h": "b0d360e5ef0cf633d236c94009e766b087c611892f47575e377f4105f655d440",
+    "kprog/formal/generated/x86_shift_count.h": "a2827a7737e969fa8db59ebbb5d24be51c577b4ee7d6e1f05782abf348f62f35",
+    "kprog/formal/generated/x86_helper_dispatch.h": "5535e8fc78d7aad36e376afcdcf759a33d3f7494602b620ad6c46bd39d6e55dd",
+    "kprog/formal/generated/x86_adc.h": "100396b93353f6f9d6d8901d77e898e98a73d82d8ae0b6acce344dbce6399d4c",
+    "kprog/formal/generated/x86_write_width_arm.h": "1091909ca9e1e062f9ca2c86a2cde34ded2a51f875701be0f6e9ef03b5abe735",
+    "kprog/formal/generated/x86_logic_flags.h": "6d11b0faf4a6c87f4751f574abb1d90342cb348b1b4f6c7b5c20b87bbe6ef5d7",
+    "kprog/formal/generated/x86_xmm0.h": "228330852eb435154194ae7b6a2161be76edd977aa9b5f228db0232b3e11c848",
+    "kprog/formal/generated/x86_alu_result.h": "35d8aa92c3509c90c45a91044c44e7dee99bb70b25a0e8b33545737ae3adcbac",
+    "kprog/formal/generated/x86_alu_flag_arm.h": "fc9e830cd10fa99a2fec7be953eb39b6e72a575c9ccf55dbe24f87b25e7ef0ed",
+    "kprog/formal/generated/x86_callmem.h": "b1601391745fb8565da56fc478febf516a098a8c4a9612a2e53ade525bf12988",
+    "kprog/formal/generated/x86_branch_emit.h": "3e1e8c3c0aff7372321a2327d376a4c0d2b03ef255f0d92b53c578222687032d",
+    "kprog/formal/generated/x86_movx_shape.h": "01620a97791aea42be92b534faf19eb24f1ad3c15431615442002cbfc7380da3",
+    "kprog/formal/generated/x86_setcc_mem.h": "20550746ca7f71586941e1a99269972ab8da3379beb2087e5b2db5070c16f44c",
+    "kprog/formal/generated/x86_doubleshift_arm.h": "46f618a3c6c7eb9500ef3b5a359307aad092d2467a02e809717a575e515876de",
+    "kprog/formal/generated/x86_add_flags.h": "7ebbaece47e7641680fefb0ff3baaeac210c5aea9b2c00ae6b142e4e657434dd",
+    "kprog/formal/generated/x86_reg_lane_aux.h": "f0ea8ae8f038df703bfbbb3b5c3b3f354e29a043a3d4db3c725fc8c8354dbbbc",
+    "kprog/formal/generated/x86_xchg.h": "dac0aea0d9243697615cac402ee8c7b29a0fbe22be8c52173cdfbe07acdfe764",
+    "kprog/formal/generated/x86_shift_flags.h": "330e56f0ff9513fa8913965330ccdf555cc3a2c375461c45b2058eafb5c83770",
+    "kprog/formal/generated/x86_stack_arena.h": "ad2badc7df1b6a38be92fa2063c71cfb35a26cc9b46a6e4bccd3fec93e38ff16",
+    "kprog/formal/generated/x86_mem_access.h": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+    "kprog/formal/generated/x86_bzhi_flags.h": "af3190c3b419d1850ffc5b8558059ac4feca917d7676b0c4df3875cc08b5fcef",
+    "kprog/formal/generated/x86_bswap.h": "7f1864c7f6def18545542e06ada0b756a9170902907b0f79ec788a12bf5d4604",
+    "kprog/formal/generated/x86_aux_flags.h": "87d4aae4964aecb9b23f7f43c04b539595d7d4eedf8d1b76b92098f3f2d8c283",
+    "kprog/formal/generated/x86_cond.h": "4be0e06995d0a3d18fc258a5afc55d2ba11f7583c8c1243720916598683312ef",
+    "kprog/formal/generated/x86_reg_dispatch.h": "c67fa25eb62b52a59512795ef7f008bb3dcafc9f7853879524e810659d35b76c",
+    "kprog/formal/generated/x86_stack_arm.h": "8e003c807a6dd654b151ebd85de25ac9d12fd613cd164b7028591afe159515bb",
+    "kprog/formal/generated/x86_reg_write.h": "7d76ebfeb14bd54acccb5598f8ef3feb03dfc354c44789fedd46f9b7dd5b0279",
+    "kprog/formal/generated/x86_dispatch_singleton.h": "d6f10d69791cc0060311830c51e333bc4fe13d283da15b5fd4c575d8b80f8972",
+    "kprog/formal/generated/x86_doubleshift.h": "89b6454335410eb50202c5604f7075c583bdd9090d7f6d219590733e4ed7c1d5",
+    "kprog/formal/generated/x86_imul_flags.h": "71901232efdc2ba44bebac3cf00bd6272cd0a19b51db412e5cb870929ab0abc2",
+    "kprog/formal/generated/x86_sbb_result.h": "5741ccfa8e2632a111cbdbe23ed305b7b0eb1cd15f9f2a820db9a69aef63d7b7",
+    "kprog/formal/generated/x86_sub_flags.h": "ea614708dac56f7c78b52faf4bfc2ffcb021a2613ab23160130ca16d9f44aca9",
+    "kprog/formal/generated/x86_cmov.h": "262be691d055cb0eea8b4d0c20e97037bfc2a97b65cd77d6cd5cbe124346cdb4"
+  },
+  "compiled_headers": 72,
+  "all_compiled_headers_identical": true,
+  "python_source_comparison": {
+    "kprog/trusted_generation.py": {
+      "observed_sha256": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+      "published_sha256": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+      "equal": true
+    },
+    "kprog/helper_abi.py": {
+      "observed_sha256": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b",
+      "published_sha256": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b",
+      "equal": true
+    },
+    "kprog/x86/micro-prog/generated_x86_opcode.py": {
+      "observed_sha256": "cadf347e5a8acf877b5d5f6149014da541a2298407b1d1fb664bd56e331fc77a",
+      "published_sha256": "cadf347e5a8acf877b5d5f6149014da541a2298407b1d1fb664bd56e331fc77a",
+      "equal": true
+    },
+    "kprog/x86/micro-prog/generated_x86_cc_decode.py": {
+      "observed_sha256": "099d0b7ed401af1ceca7e57264cea88cce566434646036d59d02bd7b941d98ea",
+      "published_sha256": "099d0b7ed401af1ceca7e57264cea88cce566434646036d59d02bd7b941d98ea",
+      "equal": true
+    },
+    "kprog/x86/micro-prog/generated_x86_alu_decode.py": {
+      "observed_sha256": "106ba0f45de9218244ac1ca9aed6686306a3fa91fc358bdb9a4ec5c5a4040a90",
+      "published_sha256": "106ba0f45de9218244ac1ca9aed6686306a3fa91fc358bdb9a4ec5c5a4040a90",
+      "equal": true
+    },
+    "kprog/x86/micro-prog/x86_abi.py": {
+      "observed_sha256": "d3c89b3163e7cb4354979323ca1ea2b7f3501aa7e6dd75e4f0502d1c163c50b6",
+      "published_sha256": "d3c89b3163e7cb4354979323ca1ea2b7f3501aa7e6dd75e4f0502d1c163c50b6",
+      "equal": true
+    },
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": {
+      "observed_sha256": "8a182de2e9cbb586d277edb97f6f1926b888648948bffb7347ece74f851724ad",
+      "published_sha256": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74",
+      "equal": false
+    },
+    "kprog/x86/micro-prog/generated_x86_specialization.py": {
+      "observed_sha256": "3508a8dd5f20975c6cce171e673548d91c123752f9df24cd7b2a84d8e02e7ac7",
+      "published_sha256": "3508a8dd5f20975c6cce171e673548d91c123752f9df24cd7b2a84d8e02e7ac7",
+      "equal": true
+    },
+    "kprog/x86/micro-prog/generated_x86_reg_lane_aux.py": {
+      "observed_sha256": "f71f20841ee367aa4f738a8bde3852f483ce395716a5fe4608b36dbe95687ac9",
+      "published_sha256": "f71f20841ee367aa4f738a8bde3852f483ce395716a5fe4608b36dbe95687ac9",
+      "equal": true
+    },
+    "kprog/x86/micro-prog/generated_x86_full_condition.py": {
+      "observed_sha256": "648c6e0f09083376768900eddfe3454e6f3e506797cf641bd0dc4c51a3dbb276",
+      "published_sha256": "648c6e0f09083376768900eddfe3454e6f3e506797cf641bd0dc4c51a3dbb276",
+      "equal": true
+    }
+  },
+  "source_differences": [
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py"
+  ],
+  "encoded_forms_equal": 384,
+  "raw_direct_groups_equal": 768,
+  "direct_statements_equal": 384,
+  "field_and_direct_statement_sha256": "867cab7c2521f7ec7fce0b32a92356906320f2765c7ec114ef2cb69c0725289a",
+  "scope": "Finite instruction-form source correspondence; actual execution retains its captured launch/compiler/binary identity."
+}

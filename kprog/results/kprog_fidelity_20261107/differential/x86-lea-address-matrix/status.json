@@ -1,0 +1,22 @@
+{
+  "exit": 0,
+  "finished": "2026-11-07T21:27:30.097607+00:00",
+  "source_drift": {
+    "kprog/x86/x86_sim_local_bpf.h": {
+      "before": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+      "after": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11"
+    },
+    "kprog/x86/micro-prog/x86_abi.py": {
+      "before": "d3c89b3163e7cb4354979323ca1ea2b7f3501aa7e6dd75e4f0502d1c163c50b6",
+      "after": "82ca3cdf81391ef732ca9e4a24a5666caa9deeddfe85ec0421163caaf993b346"
+    },
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": {
+      "before": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+      "after": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74"
+    },
+    "kprog/formal/generated/x86_mem_offset.h": {
+      "before": "181677ff104eda10108c2339c703df01ef53daab87a58a48f6f32f6447206b5c",
+      "after": "af79410916e0d55e96dc2cdf0f4b97c17807ecadd01db7ec1bdeb73196537e99"
+    }
+  }
+}

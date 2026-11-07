@@ -1,0 +1,5378 @@
+[
+  {
+    "assembly": "lea ax, [rax*1+7]",
+    "decoded": "lea    ax,[rax*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 0
+  },
+  {
+    "assembly": "lea ax, [rax*1+7]",
+    "decoded": "lea    ax,[rax*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 1
+  },
+  {
+    "assembly": "lea ax, [rax*2+7]",
+    "decoded": "lea    ax,[rax*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 2
+  },
+  {
+    "assembly": "lea ax, [rax*2+7]",
+    "decoded": "lea    ax,[rax*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 3
+  },
+  {
+    "assembly": "lea ax, [rax*4+7]",
+    "decoded": "lea    ax,[rax*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 4
+  },
+  {
+    "assembly": "lea ax, [rax*4+7]",
+    "decoded": "lea    ax,[rax*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 5
+  },
+  {
+    "assembly": "lea ax, [rax*8+7]",
+    "decoded": "lea    ax,[rax*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 6
+  },
+  {
+    "assembly": "lea ax, [rax*8+7]",
+    "decoded": "lea    ax,[rax*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 7
+  },
+  {
+    "assembly": "lea ax, [rcx*1+7]",
+    "decoded": "lea    ax,[rcx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 8
+  },
+  {
+    "assembly": "lea ax, [rcx*1+7]",
+    "decoded": "lea    ax,[rcx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 9
+  },
+  {
+    "assembly": "lea ax, [rcx*2+7]",
+    "decoded": "lea    ax,[rcx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 10
+  },
+  {
+    "assembly": "lea ax, [rcx*2+7]",
+    "decoded": "lea    ax,[rcx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 11
+  },
+  {
+    "assembly": "lea ax, [rcx*4+7]",
+    "decoded": "lea    ax,[rcx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 12
+  },
+  {
+    "assembly": "lea ax, [rcx*4+7]",
+    "decoded": "lea    ax,[rcx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 13
+  },
+  {
+    "assembly": "lea ax, [rcx*8+7]",
+    "decoded": "lea    ax,[rcx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 14
+  },
+  {
+    "assembly": "lea ax, [rcx*8+7]",
+    "decoded": "lea    ax,[rcx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 15
+  },
+  {
+    "assembly": "lea ax, [rdx*1+7]",
+    "decoded": "lea    ax,[rdx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 16
+  },
+  {
+    "assembly": "lea ax, [rdx*1+7]",
+    "decoded": "lea    ax,[rdx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 17
+  },
+  {
+    "assembly": "lea ax, [rdx*2+7]",
+    "decoded": "lea    ax,[rdx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 18
+  },
+  {
+    "assembly": "lea ax, [rdx*2+7]",
+    "decoded": "lea    ax,[rdx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 19
+  },
+  {
+    "assembly": "lea ax, [rdx*4+7]",
+    "decoded": "lea    ax,[rdx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 20
+  },
+  {
+    "assembly": "lea ax, [rdx*4+7]",
+    "decoded": "lea    ax,[rdx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 21
+  },
+  {
+    "assembly": "lea ax, [rdx*8+7]",
+    "decoded": "lea    ax,[rdx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 22
+  },
+  {
+    "assembly": "lea ax, [rdx*8+7]",
+    "decoded": "lea    ax,[rdx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 23
+  },
+  {
+    "assembly": "lea ax, [rbx*1+7]",
+    "decoded": "lea    ax,[rbx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 24
+  },
+  {
+    "assembly": "lea ax, [rbx*1+7]",
+    "decoded": "lea    ax,[rbx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 25
+  },
+  {
+    "assembly": "lea ax, [rbx*2+7]",
+    "decoded": "lea    ax,[rbx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 26
+  },
+  {
+    "assembly": "lea ax, [rbx*2+7]",
+    "decoded": "lea    ax,[rbx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 27
+  },
+  {
+    "assembly": "lea ax, [rbx*4+7]",
+    "decoded": "lea    ax,[rbx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 28
+  },
+  {
+    "assembly": "lea ax, [rbx*4+7]",
+    "decoded": "lea    ax,[rbx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 29
+  },
+  {
+    "assembly": "lea ax, [rbx*8+7]",
+    "decoded": "lea    ax,[rbx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 30
+  },
+  {
+    "assembly": "lea ax, [rbx*8+7]",
+    "decoded": "lea    ax,[rbx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 31
+  },
+  {
+    "assembly": "lea ax, [rbp*1+7]",
+    "decoded": "lea    ax,[rbp*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 32
+  },
+  {
+    "assembly": "lea ax, [rbp*1+7]",
+    "decoded": "lea    ax,[rbp*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 33
+  },
+  {
+    "assembly": "lea ax, [rbp*2+7]",
+    "decoded": "lea    ax,[rbp*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 34
+  },
+  {
+    "assembly": "lea ax, [rbp*2+7]",
+    "decoded": "lea    ax,[rbp*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 35
+  },
+  {
+    "assembly": "lea ax, [rbp*4+7]",
+    "decoded": "lea    ax,[rbp*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 36
+  },
+  {
+    "assembly": "lea ax, [rbp*4+7]",
+    "decoded": "lea    ax,[rbp*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 37
+  },
+  {
+    "assembly": "lea ax, [rbp*8+7]",
+    "decoded": "lea    ax,[rbp*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 38
+  },
+  {
+    "assembly": "lea ax, [rbp*8+7]",
+    "decoded": "lea    ax,[rbp*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 39
+  },
+  {
+    "assembly": "lea ax, [rsi*1+7]",
+    "decoded": "lea    ax,[rsi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 40
+  },
+  {
+    "assembly": "lea ax, [rsi*1+7]",
+    "decoded": "lea    ax,[rsi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 41
+  },
+  {
+    "assembly": "lea ax, [rsi*2+7]",
+    "decoded": "lea    ax,[rsi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 42
+  },
+  {
+    "assembly": "lea ax, [rsi*2+7]",
+    "decoded": "lea    ax,[rsi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 43
+  },
+  {
+    "assembly": "lea ax, [rsi*4+7]",
+    "decoded": "lea    ax,[rsi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 44
+  },
+  {
+    "assembly": "lea ax, [rsi*4+7]",
+    "decoded": "lea    ax,[rsi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 45
+  },
+  {
+    "assembly": "lea ax, [rsi*8+7]",
+    "decoded": "lea    ax,[rsi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 46
+  },
+  {
+    "assembly": "lea ax, [rsi*8+7]",
+    "decoded": "lea    ax,[rsi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 47
+  },
+  {
+    "assembly": "lea ax, [rdi*1+7]",
+    "decoded": "lea    ax,[rdi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 48
+  },
+  {
+    "assembly": "lea ax, [rdi*1+7]",
+    "decoded": "lea    ax,[rdi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 49
+  },
+  {
+    "assembly": "lea ax, [rdi*2+7]",
+    "decoded": "lea    ax,[rdi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 50
+  },
+  {
+    "assembly": "lea ax, [rdi*2+7]",
+    "decoded": "lea    ax,[rdi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 51
+  },
+  {
+    "assembly": "lea ax, [rdi*4+7]",
+    "decoded": "lea    ax,[rdi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 52
+  },
+  {
+    "assembly": "lea ax, [rdi*4+7]",
+    "decoded": "lea    ax,[rdi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 53
+  },
+  {
+    "assembly": "lea ax, [rdi*8+7]",
+    "decoded": "lea    ax,[rdi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 54
+  },
+  {
+    "assembly": "lea ax, [rdi*8+7]",
+    "decoded": "lea    ax,[rdi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 55
+  },
+  {
+    "assembly": "lea ax, [r8*1+7]",
+    "decoded": "lea    ax,[r8*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 56
+  },
+  {
+    "assembly": "lea ax, [r8*1+7]",
+    "decoded": "lea    ax,[r8*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 57
+  },
+  {
+    "assembly": "lea ax, [r8*2+7]",
+    "decoded": "lea    ax,[r8*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 58
+  },
+  {
+    "assembly": "lea ax, [r8*2+7]",
+    "decoded": "lea    ax,[r8*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 59
+  },
+  {
+    "assembly": "lea ax, [r8*4+7]",
+    "decoded": "lea    ax,[r8*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 60
+  },
+  {
+    "assembly": "lea ax, [r8*4+7]",
+    "decoded": "lea    ax,[r8*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 61
+  },
+  {
+    "assembly": "lea ax, [r8*8+7]",
+    "decoded": "lea    ax,[r8*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 62
+  },
+  {
+    "assembly": "lea ax, [r8*8+7]",
+    "decoded": "lea    ax,[r8*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 63
+  },
+  {
+    "assembly": "lea ax, [r9*1+7]",
+    "decoded": "lea    ax,[r9*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 64
+  },
+  {
+    "assembly": "lea ax, [r9*1+7]",
+    "decoded": "lea    ax,[r9*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 65
+  },
+  {
+    "assembly": "lea ax, [r9*2+7]",
+    "decoded": "lea    ax,[r9*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 66
+  },
+  {
+    "assembly": "lea ax, [r9*2+7]",
+    "decoded": "lea    ax,[r9*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 67
+  },
+  {
+    "assembly": "lea ax, [r9*4+7]",
+    "decoded": "lea    ax,[r9*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 68
+  },
+  {
+    "assembly": "lea ax, [r9*4+7]",
+    "decoded": "lea    ax,[r9*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 69
+  },
+  {
+    "assembly": "lea ax, [r9*8+7]",
+    "decoded": "lea    ax,[r9*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 70
+  },
+  {
+    "assembly": "lea ax, [r9*8+7]",
+    "decoded": "lea    ax,[r9*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 71
+  },
+  {
+    "assembly": "lea ax, [r10*1+7]",
+    "decoded": "lea    ax,[r10*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 72
+  },
+  {
+    "assembly": "lea ax, [r10*1+7]",
+    "decoded": "lea    ax,[r10*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 73
+  },
+  {
+    "assembly": "lea ax, [r10*2+7]",
+    "decoded": "lea    ax,[r10*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 74
+  },
+  {
+    "assembly": "lea ax, [r10*2+7]",
+    "decoded": "lea    ax,[r10*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 75
+  },
+  {
+    "assembly": "lea ax, [r10*4+7]",
+    "decoded": "lea    ax,[r10*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 76
+  },
+  {
+    "assembly": "lea ax, [r10*4+7]",
+    "decoded": "lea    ax,[r10*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 77
+  },
+  {
+    "assembly": "lea ax, [r10*8+7]",
+    "decoded": "lea    ax,[r10*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 78
+  },
+  {
+    "assembly": "lea ax, [r10*8+7]",
+    "decoded": "lea    ax,[r10*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 79
+  },
+  {
+    "assembly": "lea ax, [r11*1+7]",
+    "decoded": "lea    ax,[r11*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 80
+  },
+  {
+    "assembly": "lea ax, [r11*1+7]",
+    "decoded": "lea    ax,[r11*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 81
+  },
+  {
+    "assembly": "lea ax, [r11*2+7]",
+    "decoded": "lea    ax,[r11*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 82
+  },
+  {
+    "assembly": "lea ax, [r11*2+7]",
+    "decoded": "lea    ax,[r11*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 83
+  },
+  {
+    "assembly": "lea ax, [r11*4+7]",
+    "decoded": "lea    ax,[r11*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 84
+  },
+  {
+    "assembly": "lea ax, [r11*4+7]",
+    "decoded": "lea    ax,[r11*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 85
+  },
+  {
+    "assembly": "lea ax, [r11*8+7]",
+    "decoded": "lea    ax,[r11*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 86
+  },
+  {
+    "assembly": "lea ax, [r11*8+7]",
+    "decoded": "lea    ax,[r11*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 87
+  },
+  {
+    "assembly": "lea ax, [r12*1+7]",
+    "decoded": "lea    ax,[r12*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 88
+  },
+  {
+    "assembly": "lea ax, [r12*1+7]",
+    "decoded": "lea    ax,[r12*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 89
+  },
+  {
+    "assembly": "lea ax, [r12*2+7]",
+    "decoded": "lea    ax,[r12*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 90
+  },
+  {
+    "assembly": "lea ax, [r12*2+7]",
+    "decoded": "lea    ax,[r12*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 91
+  },
+  {
+    "assembly": "lea ax, [r12*4+7]",
+    "decoded": "lea    ax,[r12*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 92
+  },
+  {
+    "assembly": "lea ax, [r12*4+7]",
+    "decoded": "lea    ax,[r12*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 93
+  },
+  {
+    "assembly": "lea ax, [r12*8+7]",
+    "decoded": "lea    ax,[r12*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 94
+  },
+  {
+    "assembly": "lea ax, [r12*8+7]",
+    "decoded": "lea    ax,[r12*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 95
+  },
+  {
+    "assembly": "lea ax, [r13*1+7]",
+    "decoded": "lea    ax,[r13*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 96
+  },
+  {
+    "assembly": "lea ax, [r13*1+7]",
+    "decoded": "lea    ax,[r13*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 97
+  },
+  {
+    "assembly": "lea ax, [r13*2+7]",
+    "decoded": "lea    ax,[r13*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 98
+  },
+  {
+    "assembly": "lea ax, [r13*2+7]",
+    "decoded": "lea    ax,[r13*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 99
+  },
+  {
+    "assembly": "lea ax, [r13*4+7]",
+    "decoded": "lea    ax,[r13*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 100
+  },
+  {
+    "assembly": "lea ax, [r13*4+7]",
+    "decoded": "lea    ax,[r13*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 101
+  },
+  {
+    "assembly": "lea ax, [r13*8+7]",
+    "decoded": "lea    ax,[r13*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 102
+  },
+  {
+    "assembly": "lea ax, [r13*8+7]",
+    "decoded": "lea    ax,[r13*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 103
+  },
+  {
+    "assembly": "lea ax, [r14*1+7]",
+    "decoded": "lea    ax,[r14*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 104
+  },
+  {
+    "assembly": "lea ax, [r14*1+7]",
+    "decoded": "lea    ax,[r14*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 105
+  },
+  {
+    "assembly": "lea ax, [r14*2+7]",
+    "decoded": "lea    ax,[r14*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 106
+  },
+  {
+    "assembly": "lea ax, [r14*2+7]",
+    "decoded": "lea    ax,[r14*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 107
+  },
+  {
+    "assembly": "lea ax, [r14*4+7]",
+    "decoded": "lea    ax,[r14*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 108
+  },
+  {
+    "assembly": "lea ax, [r14*4+7]",
+    "decoded": "lea    ax,[r14*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 109
+  },
+  {
+    "assembly": "lea ax, [r14*8+7]",
+    "decoded": "lea    ax,[r14*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 110
+  },
+  {
+    "assembly": "lea ax, [r14*8+7]",
+    "decoded": "lea    ax,[r14*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 111
+  },
+  {
+    "assembly": "lea ax, [r15*1+7]",
+    "decoded": "lea    ax,[r15*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 112
+  },
+  {
+    "assembly": "lea ax, [r15*1+7]",
+    "decoded": "lea    ax,[r15*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 113
+  },
+  {
+    "assembly": "lea ax, [r15*2+7]",
+    "decoded": "lea    ax,[r15*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 114
+  },
+  {
+    "assembly": "lea ax, [r15*2+7]",
+    "decoded": "lea    ax,[r15*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 115
+  },
+  {
+    "assembly": "lea ax, [r15*4+7]",
+    "decoded": "lea    ax,[r15*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 116
+  },
+  {
+    "assembly": "lea ax, [r15*4+7]",
+    "decoded": "lea    ax,[r15*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 117
+  },
+  {
+    "assembly": "lea ax, [r15*8+7]",
+    "decoded": "lea    ax,[r15*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 118
+  },
+  {
+    "assembly": "lea ax, [r15*8+7]",
+    "decoded": "lea    ax,[r15*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 119
+  },
+  {
+    "assembly": "lea ax, [rbx+rcx*1+7]",
+    "decoded": "lea    ax,[rbx+rcx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 120
+  },
+  {
+    "assembly": "lea ax, [rbx+rcx*1+7]",
+    "decoded": "lea    ax,[rbx+rcx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 121
+  },
+  {
+    "assembly": "lea ax, [rsp+rcx*2-7]",
+    "decoded": "lea    ax,[rsp+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 122
+  },
+  {
+    "assembly": "lea ax, [rsp+rcx*2-7]",
+    "decoded": "lea    ax,[rsp+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 123
+  },
+  {
+    "assembly": "lea ax, [rcx+7]",
+    "decoded": "lea    ax,[rcx+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 124
+  },
+  {
+    "assembly": "lea ax, [rcx+7]",
+    "decoded": "lea    ax,[rcx+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 125
+  },
+  {
+    "assembly": "lea ax, [rax+rcx*8+7]",
+    "decoded": "lea    ax,[rax+rcx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 126
+  },
+  {
+    "assembly": "lea ax, [rax+rcx*8+7]",
+    "decoded": "lea    ax,[rax+rcx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 127
+  },
+  {
+    "assembly": "lea eax, [rax*1+7]",
+    "decoded": "lea    eax,[rax*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 128
+  },
+  {
+    "assembly": "lea eax, [rax*1+7]",
+    "decoded": "lea    eax,[rax*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 129
+  },
+  {
+    "assembly": "lea eax, [rax*2+7]",
+    "decoded": "lea    eax,[rax*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 130
+  },
+  {
+    "assembly": "lea eax, [rax*2+7]",
+    "decoded": "lea    eax,[rax*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 131
+  },
+  {
+    "assembly": "lea eax, [rax*4+7]",
+    "decoded": "lea    eax,[rax*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 132
+  },
+  {
+    "assembly": "lea eax, [rax*4+7]",
+    "decoded": "lea    eax,[rax*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 133
+  },
+  {
+    "assembly": "lea eax, [rax*8+7]",
+    "decoded": "lea    eax,[rax*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 134
+  },
+  {
+    "assembly": "lea eax, [rax*8+7]",
+    "decoded": "lea    eax,[rax*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 135
+  },
+  {
+    "assembly": "lea eax, [rcx*1+7]",
+    "decoded": "lea    eax,[rcx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 136
+  },
+  {
+    "assembly": "lea eax, [rcx*1+7]",
+    "decoded": "lea    eax,[rcx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 137
+  },
+  {
+    "assembly": "lea eax, [rcx*2+7]",
+    "decoded": "lea    eax,[rcx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 138
+  },
+  {
+    "assembly": "lea eax, [rcx*2+7]",
+    "decoded": "lea    eax,[rcx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 139
+  },
+  {
+    "assembly": "lea eax, [rcx*4+7]",
+    "decoded": "lea    eax,[rcx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 140
+  },
+  {
+    "assembly": "lea eax, [rcx*4+7]",
+    "decoded": "lea    eax,[rcx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 141
+  },
+  {
+    "assembly": "lea eax, [rcx*8+7]",
+    "decoded": "lea    eax,[rcx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 142
+  },
+  {
+    "assembly": "lea eax, [rcx*8+7]",
+    "decoded": "lea    eax,[rcx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 143
+  },
+  {
+    "assembly": "lea eax, [rdx*1+7]",
+    "decoded": "lea    eax,[rdx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 144
+  },
+  {
+    "assembly": "lea eax, [rdx*1+7]",
+    "decoded": "lea    eax,[rdx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 145
+  },
+  {
+    "assembly": "lea eax, [rdx*2+7]",
+    "decoded": "lea    eax,[rdx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 146
+  },
+  {
+    "assembly": "lea eax, [rdx*2+7]",
+    "decoded": "lea    eax,[rdx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 147
+  },
+  {
+    "assembly": "lea eax, [rdx*4+7]",
+    "decoded": "lea    eax,[rdx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 148
+  },
+  {
+    "assembly": "lea eax, [rdx*4+7]",
+    "decoded": "lea    eax,[rdx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 149
+  },
+  {
+    "assembly": "lea eax, [rdx*8+7]",
+    "decoded": "lea    eax,[rdx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 150
+  },
+  {
+    "assembly": "lea eax, [rdx*8+7]",
+    "decoded": "lea    eax,[rdx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 151
+  },
+  {
+    "assembly": "lea eax, [rbx*1+7]",
+    "decoded": "lea    eax,[rbx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 152
+  },
+  {
+    "assembly": "lea eax, [rbx*1+7]",
+    "decoded": "lea    eax,[rbx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 153
+  },
+  {
+    "assembly": "lea eax, [rbx*2+7]",
+    "decoded": "lea    eax,[rbx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 154
+  },
+  {
+    "assembly": "lea eax, [rbx*2+7]",
+    "decoded": "lea    eax,[rbx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 155
+  },
+  {
+    "assembly": "lea eax, [rbx*4+7]",
+    "decoded": "lea    eax,[rbx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 156
+  },
+  {
+    "assembly": "lea eax, [rbx*4+7]",
+    "decoded": "lea    eax,[rbx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 157
+  },
+  {
+    "assembly": "lea eax, [rbx*8+7]",
+    "decoded": "lea    eax,[rbx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 158
+  },
+  {
+    "assembly": "lea eax, [rbx*8+7]",
+    "decoded": "lea    eax,[rbx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 159
+  },
+  {
+    "assembly": "lea eax, [rbp*1+7]",
+    "decoded": "lea    eax,[rbp*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 160
+  },
+  {
+    "assembly": "lea eax, [rbp*1+7]",
+    "decoded": "lea    eax,[rbp*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 161
+  },
+  {
+    "assembly": "lea eax, [rbp*2+7]",
+    "decoded": "lea    eax,[rbp*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 162
+  },
+  {
+    "assembly": "lea eax, [rbp*2+7]",
+    "decoded": "lea    eax,[rbp*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 163
+  },
+  {
+    "assembly": "lea eax, [rbp*4+7]",
+    "decoded": "lea    eax,[rbp*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 164
+  },
+  {
+    "assembly": "lea eax, [rbp*4+7]",
+    "decoded": "lea    eax,[rbp*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 165
+  },
+  {
+    "assembly": "lea eax, [rbp*8+7]",
+    "decoded": "lea    eax,[rbp*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 166
+  },
+  {
+    "assembly": "lea eax, [rbp*8+7]",
+    "decoded": "lea    eax,[rbp*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 167
+  },
+  {
+    "assembly": "lea eax, [rsi*1+7]",
+    "decoded": "lea    eax,[rsi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 168
+  },
+  {
+    "assembly": "lea eax, [rsi*1+7]",
+    "decoded": "lea    eax,[rsi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 169
+  },
+  {
+    "assembly": "lea eax, [rsi*2+7]",
+    "decoded": "lea    eax,[rsi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 170
+  },
+  {
+    "assembly": "lea eax, [rsi*2+7]",
+    "decoded": "lea    eax,[rsi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 171
+  },
+  {
+    "assembly": "lea eax, [rsi*4+7]",
+    "decoded": "lea    eax,[rsi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 172
+  },
+  {
+    "assembly": "lea eax, [rsi*4+7]",
+    "decoded": "lea    eax,[rsi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 173
+  },
+  {
+    "assembly": "lea eax, [rsi*8+7]",
+    "decoded": "lea    eax,[rsi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 174
+  },
+  {
+    "assembly": "lea eax, [rsi*8+7]",
+    "decoded": "lea    eax,[rsi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 175
+  },
+  {
+    "assembly": "lea eax, [rdi*1+7]",
+    "decoded": "lea    eax,[rdi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 176
+  },
+  {
+    "assembly": "lea eax, [rdi*1+7]",
+    "decoded": "lea    eax,[rdi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 177
+  },
+  {
+    "assembly": "lea eax, [rdi*2+7]",
+    "decoded": "lea    eax,[rdi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 178
+  },
+  {
+    "assembly": "lea eax, [rdi*2+7]",
+    "decoded": "lea    eax,[rdi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 179
+  },
+  {
+    "assembly": "lea eax, [rdi*4+7]",
+    "decoded": "lea    eax,[rdi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 180
+  },
+  {
+    "assembly": "lea eax, [rdi*4+7]",
+    "decoded": "lea    eax,[rdi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 181
+  },
+  {
+    "assembly": "lea eax, [rdi*8+7]",
+    "decoded": "lea    eax,[rdi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 182
+  },
+  {
+    "assembly": "lea eax, [rdi*8+7]",
+    "decoded": "lea    eax,[rdi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 183
+  },
+  {
+    "assembly": "lea eax, [r8*1+7]",
+    "decoded": "lea    eax,[r8*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 184
+  },
+  {
+    "assembly": "lea eax, [r8*1+7]",
+    "decoded": "lea    eax,[r8*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 185
+  },
+  {
+    "assembly": "lea eax, [r8*2+7]",
+    "decoded": "lea    eax,[r8*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 186
+  },
+  {
+    "assembly": "lea eax, [r8*2+7]",
+    "decoded": "lea    eax,[r8*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 187
+  },
+  {
+    "assembly": "lea eax, [r8*4+7]",
+    "decoded": "lea    eax,[r8*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 188
+  },
+  {
+    "assembly": "lea eax, [r8*4+7]",
+    "decoded": "lea    eax,[r8*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 189
+  },
+  {
+    "assembly": "lea eax, [r8*8+7]",
+    "decoded": "lea    eax,[r8*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 190
+  },
+  {
+    "assembly": "lea eax, [r8*8+7]",
+    "decoded": "lea    eax,[r8*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 191
+  },
+  {
+    "assembly": "lea eax, [r9*1+7]",
+    "decoded": "lea    eax,[r9*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 192
+  },
+  {
+    "assembly": "lea eax, [r9*1+7]",
+    "decoded": "lea    eax,[r9*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 193
+  },
+  {
+    "assembly": "lea eax, [r9*2+7]",
+    "decoded": "lea    eax,[r9*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 194
+  },
+  {
+    "assembly": "lea eax, [r9*2+7]",
+    "decoded": "lea    eax,[r9*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 195
+  },
+  {
+    "assembly": "lea eax, [r9*4+7]",
+    "decoded": "lea    eax,[r9*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 196
+  },
+  {
+    "assembly": "lea eax, [r9*4+7]",
+    "decoded": "lea    eax,[r9*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 197
+  },
+  {
+    "assembly": "lea eax, [r9*8+7]",
+    "decoded": "lea    eax,[r9*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 198
+  },
+  {
+    "assembly": "lea eax, [r9*8+7]",
+    "decoded": "lea    eax,[r9*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 199
+  },
+  {
+    "assembly": "lea eax, [r10*1+7]",
+    "decoded": "lea    eax,[r10*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 200
+  },
+  {
+    "assembly": "lea eax, [r10*1+7]",
+    "decoded": "lea    eax,[r10*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 201
+  },
+  {
+    "assembly": "lea eax, [r10*2+7]",
+    "decoded": "lea    eax,[r10*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 202
+  },
+  {
+    "assembly": "lea eax, [r10*2+7]",
+    "decoded": "lea    eax,[r10*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 203
+  },
+  {
+    "assembly": "lea eax, [r10*4+7]",
+    "decoded": "lea    eax,[r10*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 204
+  },
+  {
+    "assembly": "lea eax, [r10*4+7]",
+    "decoded": "lea    eax,[r10*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 205
+  },
+  {
+    "assembly": "lea eax, [r10*8+7]",
+    "decoded": "lea    eax,[r10*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 206
+  },
+  {
+    "assembly": "lea eax, [r10*8+7]",
+    "decoded": "lea    eax,[r10*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 207
+  },
+  {
+    "assembly": "lea eax, [r11*1+7]",
+    "decoded": "lea    eax,[r11*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 208
+  },
+  {
+    "assembly": "lea eax, [r11*1+7]",
+    "decoded": "lea    eax,[r11*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 209
+  },
+  {
+    "assembly": "lea eax, [r11*2+7]",
+    "decoded": "lea    eax,[r11*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 210
+  },
+  {
+    "assembly": "lea eax, [r11*2+7]",
+    "decoded": "lea    eax,[r11*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 211
+  },
+  {
+    "assembly": "lea eax, [r11*4+7]",
+    "decoded": "lea    eax,[r11*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 212
+  },
+  {
+    "assembly": "lea eax, [r11*4+7]",
+    "decoded": "lea    eax,[r11*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 213
+  },
+  {
+    "assembly": "lea eax, [r11*8+7]",
+    "decoded": "lea    eax,[r11*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 214
+  },
+  {
+    "assembly": "lea eax, [r11*8+7]",
+    "decoded": "lea    eax,[r11*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 215
+  },
+  {
+    "assembly": "lea eax, [r12*1+7]",
+    "decoded": "lea    eax,[r12*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 216
+  },
+  {
+    "assembly": "lea eax, [r12*1+7]",
+    "decoded": "lea    eax,[r12*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 217
+  },
+  {
+    "assembly": "lea eax, [r12*2+7]",
+    "decoded": "lea    eax,[r12*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 218
+  },
+  {
+    "assembly": "lea eax, [r12*2+7]",
+    "decoded": "lea    eax,[r12*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 219
+  },
+  {
+    "assembly": "lea eax, [r12*4+7]",
+    "decoded": "lea    eax,[r12*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 220
+  },
+  {
+    "assembly": "lea eax, [r12*4+7]",
+    "decoded": "lea    eax,[r12*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 221
+  },
+  {
+    "assembly": "lea eax, [r12*8+7]",
+    "decoded": "lea    eax,[r12*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 222
+  },
+  {
+    "assembly": "lea eax, [r12*8+7]",
+    "decoded": "lea    eax,[r12*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 223
+  },
+  {
+    "assembly": "lea eax, [r13*1+7]",
+    "decoded": "lea    eax,[r13*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 224
+  },
+  {
+    "assembly": "lea eax, [r13*1+7]",
+    "decoded": "lea    eax,[r13*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 225
+  },
+  {
+    "assembly": "lea eax, [r13*2+7]",
+    "decoded": "lea    eax,[r13*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 226
+  },
+  {
+    "assembly": "lea eax, [r13*2+7]",
+    "decoded": "lea    eax,[r13*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 227
+  },
+  {
+    "assembly": "lea eax, [r13*4+7]",
+    "decoded": "lea    eax,[r13*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 228
+  },
+  {
+    "assembly": "lea eax, [r13*4+7]",
+    "decoded": "lea    eax,[r13*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 229
+  },
+  {
+    "assembly": "lea eax, [r13*8+7]",
+    "decoded": "lea    eax,[r13*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 230
+  },
+  {
+    "assembly": "lea eax, [r13*8+7]",
+    "decoded": "lea    eax,[r13*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 231
+  },
+  {
+    "assembly": "lea eax, [r14*1+7]",
+    "decoded": "lea    eax,[r14*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 232
+  },
+  {
+    "assembly": "lea eax, [r14*1+7]",
+    "decoded": "lea    eax,[r14*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 233
+  },
+  {
+    "assembly": "lea eax, [r14*2+7]",
+    "decoded": "lea    eax,[r14*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 234
+  },
+  {
+    "assembly": "lea eax, [r14*2+7]",
+    "decoded": "lea    eax,[r14*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 235
+  },
+  {
+    "assembly": "lea eax, [r14*4+7]",
+    "decoded": "lea    eax,[r14*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 236
+  },
+  {
+    "assembly": "lea eax, [r14*4+7]",
+    "decoded": "lea    eax,[r14*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 237
+  },
+  {
+    "assembly": "lea eax, [r14*8+7]",
+    "decoded": "lea    eax,[r14*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 238
+  },
+  {
+    "assembly": "lea eax, [r14*8+7]",
+    "decoded": "lea    eax,[r14*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 239
+  },
+  {
+    "assembly": "lea eax, [r15*1+7]",
+    "decoded": "lea    eax,[r15*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 240
+  },
+  {
+    "assembly": "lea eax, [r15*1+7]",
+    "decoded": "lea    eax,[r15*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 241
+  },
+  {
+    "assembly": "lea eax, [r15*2+7]",
+    "decoded": "lea    eax,[r15*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 242
+  },
+  {
+    "assembly": "lea eax, [r15*2+7]",
+    "decoded": "lea    eax,[r15*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 243
+  },
+  {
+    "assembly": "lea eax, [r15*4+7]",
+    "decoded": "lea    eax,[r15*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 244
+  },
+  {
+    "assembly": "lea eax, [r15*4+7]",
+    "decoded": "lea    eax,[r15*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 245
+  },
+  {
+    "assembly": "lea eax, [r15*8+7]",
+    "decoded": "lea    eax,[r15*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 246
+  },
+  {
+    "assembly": "lea eax, [r15*8+7]",
+    "decoded": "lea    eax,[r15*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 247
+  },
+  {
+    "assembly": "lea eax, [rbx+rcx*1+7]",
+    "decoded": "lea    eax,[rbx+rcx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 248
+  },
+  {
+    "assembly": "lea eax, [rbx+rcx*1+7]",
+    "decoded": "lea    eax,[rbx+rcx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 249
+  },
+  {
+    "assembly": "lea eax, [rsp+rcx*2-7]",
+    "decoded": "lea    eax,[rsp+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 250
+  },
+  {
+    "assembly": "lea eax, [rsp+rcx*2-7]",
+    "decoded": "lea    eax,[rsp+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 251
+  },
+  {
+    "assembly": "lea eax, [rcx+7]",
+    "decoded": "lea    eax,[rcx+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 252
+  },
+  {
+    "assembly": "lea eax, [rcx+7]",
+    "decoded": "lea    eax,[rcx+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 253
+  },
+  {
+    "assembly": "lea eax, [rax+rcx*8+7]",
+    "decoded": "lea    eax,[rax+rcx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 254
+  },
+  {
+    "assembly": "lea eax, [rax+rcx*8+7]",
+    "decoded": "lea    eax,[rax+rcx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 255
+  },
+  {
+    "assembly": "lea rax, [rax*1+7]",
+    "decoded": "lea    rax,[rax*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 256
+  },
+  {
+    "assembly": "lea rax, [rax*1+7]",
+    "decoded": "lea    rax,[rax*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 257
+  },
+  {
+    "assembly": "lea rax, [rax*2+7]",
+    "decoded": "lea    rax,[rax*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 258
+  },
+  {
+    "assembly": "lea rax, [rax*2+7]",
+    "decoded": "lea    rax,[rax*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 259
+  },
+  {
+    "assembly": "lea rax, [rax*4+7]",
+    "decoded": "lea    rax,[rax*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 260
+  },
+  {
+    "assembly": "lea rax, [rax*4+7]",
+    "decoded": "lea    rax,[rax*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 261
+  },
+  {
+    "assembly": "lea rax, [rax*8+7]",
+    "decoded": "lea    rax,[rax*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 262
+  },
+  {
+    "assembly": "lea rax, [rax*8+7]",
+    "decoded": "lea    rax,[rax*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 263
+  },
+  {
+    "assembly": "lea rax, [rcx*1+7]",
+    "decoded": "lea    rax,[rcx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 264
+  },
+  {
+    "assembly": "lea rax, [rcx*1+7]",
+    "decoded": "lea    rax,[rcx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 265
+  },
+  {
+    "assembly": "lea rax, [rcx*2+7]",
+    "decoded": "lea    rax,[rcx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 266
+  },
+  {
+    "assembly": "lea rax, [rcx*2+7]",
+    "decoded": "lea    rax,[rcx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 267
+  },
+  {
+    "assembly": "lea rax, [rcx*4+7]",
+    "decoded": "lea    rax,[rcx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 268
+  },
+  {
+    "assembly": "lea rax, [rcx*4+7]",
+    "decoded": "lea    rax,[rcx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 269
+  },
+  {
+    "assembly": "lea rax, [rcx*8+7]",
+    "decoded": "lea    rax,[rcx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 270
+  },
+  {
+    "assembly": "lea rax, [rcx*8+7]",
+    "decoded": "lea    rax,[rcx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 271
+  },
+  {
+    "assembly": "lea rax, [rdx*1+7]",
+    "decoded": "lea    rax,[rdx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 272
+  },
+  {
+    "assembly": "lea rax, [rdx*1+7]",
+    "decoded": "lea    rax,[rdx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 273
+  },
+  {
+    "assembly": "lea rax, [rdx*2+7]",
+    "decoded": "lea    rax,[rdx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 274
+  },
+  {
+    "assembly": "lea rax, [rdx*2+7]",
+    "decoded": "lea    rax,[rdx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 275
+  },
+  {
+    "assembly": "lea rax, [rdx*4+7]",
+    "decoded": "lea    rax,[rdx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 276
+  },
+  {
+    "assembly": "lea rax, [rdx*4+7]",
+    "decoded": "lea    rax,[rdx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 277
+  },
+  {
+    "assembly": "lea rax, [rdx*8+7]",
+    "decoded": "lea    rax,[rdx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 278
+  },
+  {
+    "assembly": "lea rax, [rdx*8+7]",
+    "decoded": "lea    rax,[rdx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 279
+  },
+  {
+    "assembly": "lea rax, [rbx*1+7]",
+    "decoded": "lea    rax,[rbx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 280
+  },
+  {
+    "assembly": "lea rax, [rbx*1+7]",
+    "decoded": "lea    rax,[rbx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 281
+  },
+  {
+    "assembly": "lea rax, [rbx*2+7]",
+    "decoded": "lea    rax,[rbx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 282
+  },
+  {
+    "assembly": "lea rax, [rbx*2+7]",
+    "decoded": "lea    rax,[rbx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 283
+  },
+  {
+    "assembly": "lea rax, [rbx*4+7]",
+    "decoded": "lea    rax,[rbx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 284
+  },
+  {
+    "assembly": "lea rax, [rbx*4+7]",
+    "decoded": "lea    rax,[rbx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 285
+  },
+  {
+    "assembly": "lea rax, [rbx*8+7]",
+    "decoded": "lea    rax,[rbx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 286
+  },
+  {
+    "assembly": "lea rax, [rbx*8+7]",
+    "decoded": "lea    rax,[rbx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 287
+  },
+  {
+    "assembly": "lea rax, [rbp*1+7]",
+    "decoded": "lea    rax,[rbp*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 288
+  },
+  {
+    "assembly": "lea rax, [rbp*1+7]",
+    "decoded": "lea    rax,[rbp*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 289
+  },
+  {
+    "assembly": "lea rax, [rbp*2+7]",
+    "decoded": "lea    rax,[rbp*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 290
+  },
+  {
+    "assembly": "lea rax, [rbp*2+7]",
+    "decoded": "lea    rax,[rbp*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 291
+  },
+  {
+    "assembly": "lea rax, [rbp*4+7]",
+    "decoded": "lea    rax,[rbp*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 292
+  },
+  {
+    "assembly": "lea rax, [rbp*4+7]",
+    "decoded": "lea    rax,[rbp*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 293
+  },
+  {
+    "assembly": "lea rax, [rbp*8+7]",
+    "decoded": "lea    rax,[rbp*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 294
+  },
+  {
+    "assembly": "lea rax, [rbp*8+7]",
+    "decoded": "lea    rax,[rbp*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 295
+  },
+  {
+    "assembly": "lea rax, [rsi*1+7]",
+    "decoded": "lea    rax,[rsi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 296
+  },
+  {
+    "assembly": "lea rax, [rsi*1+7]",
+    "decoded": "lea    rax,[rsi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 297
+  },
+  {
+    "assembly": "lea rax, [rsi*2+7]",
+    "decoded": "lea    rax,[rsi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 298
+  },
+  {
+    "assembly": "lea rax, [rsi*2+7]",
+    "decoded": "lea    rax,[rsi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 299
+  },
+  {
+    "assembly": "lea rax, [rsi*4+7]",
+    "decoded": "lea    rax,[rsi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 300
+  },
+  {
+    "assembly": "lea rax, [rsi*4+7]",
+    "decoded": "lea    rax,[rsi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 301
+  },
+  {
+    "assembly": "lea rax, [rsi*8+7]",
+    "decoded": "lea    rax,[rsi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 302
+  },
+  {
+    "assembly": "lea rax, [rsi*8+7]",
+    "decoded": "lea    rax,[rsi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 303
+  },
+  {
+    "assembly": "lea rax, [rdi*1+7]",
+    "decoded": "lea    rax,[rdi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 304
+  },
+  {
+    "assembly": "lea rax, [rdi*1+7]",
+    "decoded": "lea    rax,[rdi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 305
+  },
+  {
+    "assembly": "lea rax, [rdi*2+7]",
+    "decoded": "lea    rax,[rdi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 306
+  },
+  {
+    "assembly": "lea rax, [rdi*2+7]",
+    "decoded": "lea    rax,[rdi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 307
+  },
+  {
+    "assembly": "lea rax, [rdi*4+7]",
+    "decoded": "lea    rax,[rdi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 308
+  },
+  {
+    "assembly": "lea rax, [rdi*4+7]",
+    "decoded": "lea    rax,[rdi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 309
+  },
+  {
+    "assembly": "lea rax, [rdi*8+7]",
+    "decoded": "lea    rax,[rdi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 310
+  },
+  {
+    "assembly": "lea rax, [rdi*8+7]",
+    "decoded": "lea    rax,[rdi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 311
+  },
+  {
+    "assembly": "lea rax, [r8*1+7]",
+    "decoded": "lea    rax,[r8*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 312
+  },
+  {
+    "assembly": "lea rax, [r8*1+7]",
+    "decoded": "lea    rax,[r8*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 313
+  },
+  {
+    "assembly": "lea rax, [r8*2+7]",
+    "decoded": "lea    rax,[r8*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 314
+  },
+  {
+    "assembly": "lea rax, [r8*2+7]",
+    "decoded": "lea    rax,[r8*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 315
+  },
+  {
+    "assembly": "lea rax, [r8*4+7]",
+    "decoded": "lea    rax,[r8*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 316
+  },
+  {
+    "assembly": "lea rax, [r8*4+7]",
+    "decoded": "lea    rax,[r8*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 317
+  },
+  {
+    "assembly": "lea rax, [r8*8+7]",
+    "decoded": "lea    rax,[r8*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 318
+  },
+  {
+    "assembly": "lea rax, [r8*8+7]",
+    "decoded": "lea    rax,[r8*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 319
+  },
+  {
+    "assembly": "lea rax, [r9*1+7]",
+    "decoded": "lea    rax,[r9*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 320
+  },
+  {
+    "assembly": "lea rax, [r9*1+7]",
+    "decoded": "lea    rax,[r9*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 321
+  },
+  {
+    "assembly": "lea rax, [r9*2+7]",
+    "decoded": "lea    rax,[r9*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 322
+  },
+  {
+    "assembly": "lea rax, [r9*2+7]",
+    "decoded": "lea    rax,[r9*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 323
+  },
+  {
+    "assembly": "lea rax, [r9*4+7]",
+    "decoded": "lea    rax,[r9*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 324
+  },
+  {
+    "assembly": "lea rax, [r9*4+7]",
+    "decoded": "lea    rax,[r9*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 325
+  },
+  {
+    "assembly": "lea rax, [r9*8+7]",
+    "decoded": "lea    rax,[r9*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 326
+  },
+  {
+    "assembly": "lea rax, [r9*8+7]",
+    "decoded": "lea    rax,[r9*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 327
+  },
+  {
+    "assembly": "lea rax, [r10*1+7]",
+    "decoded": "lea    rax,[r10*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 328
+  },
+  {
+    "assembly": "lea rax, [r10*1+7]",
+    "decoded": "lea    rax,[r10*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 329
+  },
+  {
+    "assembly": "lea rax, [r10*2+7]",
+    "decoded": "lea    rax,[r10*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 330
+  },
+  {
+    "assembly": "lea rax, [r10*2+7]",
+    "decoded": "lea    rax,[r10*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 331
+  },
+  {
+    "assembly": "lea rax, [r10*4+7]",
+    "decoded": "lea    rax,[r10*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 332
+  },
+  {
+    "assembly": "lea rax, [r10*4+7]",
+    "decoded": "lea    rax,[r10*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 333
+  },
+  {
+    "assembly": "lea rax, [r10*8+7]",
+    "decoded": "lea    rax,[r10*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 334
+  },
+  {
+    "assembly": "lea rax, [r10*8+7]",
+    "decoded": "lea    rax,[r10*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 335
+  },
+  {
+    "assembly": "lea rax, [r11*1+7]",
+    "decoded": "lea    rax,[r11*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 336
+  },
+  {
+    "assembly": "lea rax, [r11*1+7]",
+    "decoded": "lea    rax,[r11*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 337
+  },
+  {
+    "assembly": "lea rax, [r11*2+7]",
+    "decoded": "lea    rax,[r11*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 338
+  },
+  {
+    "assembly": "lea rax, [r11*2+7]",
+    "decoded": "lea    rax,[r11*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 339
+  },
+  {
+    "assembly": "lea rax, [r11*4+7]",
+    "decoded": "lea    rax,[r11*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 340
+  },
+  {
+    "assembly": "lea rax, [r11*4+7]",
+    "decoded": "lea    rax,[r11*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 341
+  },
+  {
+    "assembly": "lea rax, [r11*8+7]",
+    "decoded": "lea    rax,[r11*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 342
+  },
+  {
+    "assembly": "lea rax, [r11*8+7]",
+    "decoded": "lea    rax,[r11*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 343
+  },
+  {
+    "assembly": "lea rax, [r12*1+7]",
+    "decoded": "lea    rax,[r12*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 344
+  },
+  {
+    "assembly": "lea rax, [r12*1+7]",
+    "decoded": "lea    rax,[r12*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 345
+  },
+  {
+    "assembly": "lea rax, [r12*2+7]",
+    "decoded": "lea    rax,[r12*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 346
+  },
+  {
+    "assembly": "lea rax, [r12*2+7]",
+    "decoded": "lea    rax,[r12*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 347
+  },
+  {
+    "assembly": "lea rax, [r12*4+7]",
+    "decoded": "lea    rax,[r12*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 348
+  },
+  {
+    "assembly": "lea rax, [r12*4+7]",
+    "decoded": "lea    rax,[r12*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 349
+  },
+  {
+    "assembly": "lea rax, [r12*8+7]",
+    "decoded": "lea    rax,[r12*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 350
+  },
+  {
+    "assembly": "lea rax, [r12*8+7]",
+    "decoded": "lea    rax,[r12*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 351
+  },
+  {
+    "assembly": "lea rax, [r13*1+7]",
+    "decoded": "lea    rax,[r13*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 352
+  },
+  {
+    "assembly": "lea rax, [r13*1+7]",
+    "decoded": "lea    rax,[r13*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 353
+  },
+  {
+    "assembly": "lea rax, [r13*2+7]",
+    "decoded": "lea    rax,[r13*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 354
+  },
+  {
+    "assembly": "lea rax, [r13*2+7]",
+    "decoded": "lea    rax,[r13*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 355
+  },
+  {
+    "assembly": "lea rax, [r13*4+7]",
+    "decoded": "lea    rax,[r13*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 356
+  },
+  {
+    "assembly": "lea rax, [r13*4+7]",
+    "decoded": "lea    rax,[r13*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 357
+  },
+  {
+    "assembly": "lea rax, [r13*8+7]",
+    "decoded": "lea    rax,[r13*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 358
+  },
+  {
+    "assembly": "lea rax, [r13*8+7]",
+    "decoded": "lea    rax,[r13*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 359
+  },
+  {
+    "assembly": "lea rax, [r14*1+7]",
+    "decoded": "lea    rax,[r14*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 360
+  },
+  {
+    "assembly": "lea rax, [r14*1+7]",
+    "decoded": "lea    rax,[r14*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 361
+  },
+  {
+    "assembly": "lea rax, [r14*2+7]",
+    "decoded": "lea    rax,[r14*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 362
+  },
+  {
+    "assembly": "lea rax, [r14*2+7]",
+    "decoded": "lea    rax,[r14*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 363
+  },
+  {
+    "assembly": "lea rax, [r14*4+7]",
+    "decoded": "lea    rax,[r14*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 364
+  },
+  {
+    "assembly": "lea rax, [r14*4+7]",
+    "decoded": "lea    rax,[r14*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 365
+  },
+  {
+    "assembly": "lea rax, [r14*8+7]",
+    "decoded": "lea    rax,[r14*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 366
+  },
+  {
+    "assembly": "lea rax, [r14*8+7]",
+    "decoded": "lea    rax,[r14*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 367
+  },
+  {
+    "assembly": "lea rax, [r15*1+7]",
+    "decoded": "lea    rax,[r15*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 368
+  },
+  {
+    "assembly": "lea rax, [r15*1+7]",
+    "decoded": "lea    rax,[r15*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 369
+  },
+  {
+    "assembly": "lea rax, [r15*2+7]",
+    "decoded": "lea    rax,[r15*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 370
+  },
+  {
+    "assembly": "lea rax, [r15*2+7]",
+    "decoded": "lea    rax,[r15*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 371
+  },
+  {
+    "assembly": "lea rax, [r15*4+7]",
+    "decoded": "lea    rax,[r15*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 372
+  },
+  {
+    "assembly": "lea rax, [r15*4+7]",
+    "decoded": "lea    rax,[r15*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 373
+  },
+  {
+    "assembly": "lea rax, [r15*8+7]",
+    "decoded": "lea    rax,[r15*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 374
+  },
+  {
+    "assembly": "lea rax, [r15*8+7]",
+    "decoded": "lea    rax,[r15*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 375
+  },
+  {
+    "assembly": "lea rax, [rbx+rcx*1+7]",
+    "decoded": "lea    rax,[rbx+rcx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 376
+  },
+  {
+    "assembly": "lea rax, [rbx+rcx*1+7]",
+    "decoded": "lea    rax,[rbx+rcx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 377
+  },
+  {
+    "assembly": "lea rax, [rsp+rcx*2-7]",
+    "decoded": "lea    rax,[rsp+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 378
+  },
+  {
+    "assembly": "lea rax, [rsp+rcx*2-7]",
+    "decoded": "lea    rax,[rsp+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 379
+  },
+  {
+    "assembly": "lea rax, [rcx+7]",
+    "decoded": "lea    rax,[rcx+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 380
+  },
+  {
+    "assembly": "lea rax, [rcx+7]",
+    "decoded": "lea    rax,[rcx+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 381
+  },
+  {
+    "assembly": "lea rax, [rax+rcx*8+7]",
+    "decoded": "lea    rax,[rax+rcx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 382
+  },
+  {
+    "assembly": "lea rax, [rax+rcx*8+7]",
+    "decoded": "lea    rax,[rax+rcx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 383
+  },
+  {
+    "assembly": "lea ax, [eax*1+7]",
+    "decoded": "lea    ax,[eax*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 384
+  },
+  {
+    "assembly": "lea ax, [eax*1+7]",
+    "decoded": "lea    ax,[eax*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 385
+  },
+  {
+    "assembly": "lea ax, [eax*2+7]",
+    "decoded": "lea    ax,[eax*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 386
+  },
+  {
+    "assembly": "lea ax, [eax*2+7]",
+    "decoded": "lea    ax,[eax*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 387
+  },
+  {
+    "assembly": "lea ax, [eax*4+7]",
+    "decoded": "lea    ax,[eax*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 388
+  },
+  {
+    "assembly": "lea ax, [eax*4+7]",
+    "decoded": "lea    ax,[eax*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 389
+  },
+  {
+    "assembly": "lea ax, [eax*8+7]",
+    "decoded": "lea    ax,[eax*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 390
+  },
+  {
+    "assembly": "lea ax, [eax*8+7]",
+    "decoded": "lea    ax,[eax*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 391
+  },
+  {
+    "assembly": "lea ax, [ecx*1+7]",
+    "decoded": "lea    ax,[ecx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 392
+  },
+  {
+    "assembly": "lea ax, [ecx*1+7]",
+    "decoded": "lea    ax,[ecx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 393
+  },
+  {
+    "assembly": "lea ax, [ecx*2+7]",
+    "decoded": "lea    ax,[ecx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 394
+  },
+  {
+    "assembly": "lea ax, [ecx*2+7]",
+    "decoded": "lea    ax,[ecx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 395
+  },
+  {
+    "assembly": "lea ax, [ecx*4+7]",
+    "decoded": "lea    ax,[ecx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 396
+  },
+  {
+    "assembly": "lea ax, [ecx*4+7]",
+    "decoded": "lea    ax,[ecx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 397
+  },
+  {
+    "assembly": "lea ax, [ecx*8+7]",
+    "decoded": "lea    ax,[ecx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 398
+  },
+  {
+    "assembly": "lea ax, [ecx*8+7]",
+    "decoded": "lea    ax,[ecx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 399
+  },
+  {
+    "assembly": "lea ax, [edx*1+7]",
+    "decoded": "lea    ax,[edx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 400
+  },
+  {
+    "assembly": "lea ax, [edx*1+7]",
+    "decoded": "lea    ax,[edx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 401
+  },
+  {
+    "assembly": "lea ax, [edx*2+7]",
+    "decoded": "lea    ax,[edx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 402
+  },
+  {
+    "assembly": "lea ax, [edx*2+7]",
+    "decoded": "lea    ax,[edx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 403
+  },
+  {
+    "assembly": "lea ax, [edx*4+7]",
+    "decoded": "lea    ax,[edx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 404
+  },
+  {
+    "assembly": "lea ax, [edx*4+7]",
+    "decoded": "lea    ax,[edx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 405
+  },
+  {
+    "assembly": "lea ax, [edx*8+7]",
+    "decoded": "lea    ax,[edx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 406
+  },
+  {
+    "assembly": "lea ax, [edx*8+7]",
+    "decoded": "lea    ax,[edx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 407
+  },
+  {
+    "assembly": "lea ax, [ebx*1+7]",
+    "decoded": "lea    ax,[ebx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 408
+  },
+  {
+    "assembly": "lea ax, [ebx*1+7]",
+    "decoded": "lea    ax,[ebx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 409
+  },
+  {
+    "assembly": "lea ax, [ebx*2+7]",
+    "decoded": "lea    ax,[ebx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 410
+  },
+  {
+    "assembly": "lea ax, [ebx*2+7]",
+    "decoded": "lea    ax,[ebx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 411
+  },
+  {
+    "assembly": "lea ax, [ebx*4+7]",
+    "decoded": "lea    ax,[ebx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 412
+  },
+  {
+    "assembly": "lea ax, [ebx*4+7]",
+    "decoded": "lea    ax,[ebx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 413
+  },
+  {
+    "assembly": "lea ax, [ebx*8+7]",
+    "decoded": "lea    ax,[ebx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 414
+  },
+  {
+    "assembly": "lea ax, [ebx*8+7]",
+    "decoded": "lea    ax,[ebx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 415
+  },
+  {
+    "assembly": "lea ax, [ebp*1+7]",
+    "decoded": "lea    ax,[ebp*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 416
+  },
+  {
+    "assembly": "lea ax, [ebp*1+7]",
+    "decoded": "lea    ax,[ebp*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 417
+  },
+  {
+    "assembly": "lea ax, [ebp*2+7]",
+    "decoded": "lea    ax,[ebp*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 418
+  },
+  {
+    "assembly": "lea ax, [ebp*2+7]",
+    "decoded": "lea    ax,[ebp*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 419
+  },
+  {
+    "assembly": "lea ax, [ebp*4+7]",
+    "decoded": "lea    ax,[ebp*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 420
+  },
+  {
+    "assembly": "lea ax, [ebp*4+7]",
+    "decoded": "lea    ax,[ebp*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 421
+  },
+  {
+    "assembly": "lea ax, [ebp*8+7]",
+    "decoded": "lea    ax,[ebp*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 422
+  },
+  {
+    "assembly": "lea ax, [ebp*8+7]",
+    "decoded": "lea    ax,[ebp*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 423
+  },
+  {
+    "assembly": "lea ax, [esi*1+7]",
+    "decoded": "lea    ax,[esi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 424
+  },
+  {
+    "assembly": "lea ax, [esi*1+7]",
+    "decoded": "lea    ax,[esi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 425
+  },
+  {
+    "assembly": "lea ax, [esi*2+7]",
+    "decoded": "lea    ax,[esi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 426
+  },
+  {
+    "assembly": "lea ax, [esi*2+7]",
+    "decoded": "lea    ax,[esi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 427
+  },
+  {
+    "assembly": "lea ax, [esi*4+7]",
+    "decoded": "lea    ax,[esi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 428
+  },
+  {
+    "assembly": "lea ax, [esi*4+7]",
+    "decoded": "lea    ax,[esi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 429
+  },
+  {
+    "assembly": "lea ax, [esi*8+7]",
+    "decoded": "lea    ax,[esi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 430
+  },
+  {
+    "assembly": "lea ax, [esi*8+7]",
+    "decoded": "lea    ax,[esi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 431
+  },
+  {
+    "assembly": "lea ax, [edi*1+7]",
+    "decoded": "lea    ax,[edi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 432
+  },
+  {
+    "assembly": "lea ax, [edi*1+7]",
+    "decoded": "lea    ax,[edi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 433
+  },
+  {
+    "assembly": "lea ax, [edi*2+7]",
+    "decoded": "lea    ax,[edi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 434
+  },
+  {
+    "assembly": "lea ax, [edi*2+7]",
+    "decoded": "lea    ax,[edi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 435
+  },
+  {
+    "assembly": "lea ax, [edi*4+7]",
+    "decoded": "lea    ax,[edi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 436
+  },
+  {
+    "assembly": "lea ax, [edi*4+7]",
+    "decoded": "lea    ax,[edi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 437
+  },
+  {
+    "assembly": "lea ax, [edi*8+7]",
+    "decoded": "lea    ax,[edi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 438
+  },
+  {
+    "assembly": "lea ax, [edi*8+7]",
+    "decoded": "lea    ax,[edi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 439
+  },
+  {
+    "assembly": "lea ax, [r8d*1+7]",
+    "decoded": "lea    ax,[r8d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 440
+  },
+  {
+    "assembly": "lea ax, [r8d*1+7]",
+    "decoded": "lea    ax,[r8d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 441
+  },
+  {
+    "assembly": "lea ax, [r8d*2+7]",
+    "decoded": "lea    ax,[r8d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 442
+  },
+  {
+    "assembly": "lea ax, [r8d*2+7]",
+    "decoded": "lea    ax,[r8d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 443
+  },
+  {
+    "assembly": "lea ax, [r8d*4+7]",
+    "decoded": "lea    ax,[r8d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 444
+  },
+  {
+    "assembly": "lea ax, [r8d*4+7]",
+    "decoded": "lea    ax,[r8d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 445
+  },
+  {
+    "assembly": "lea ax, [r8d*8+7]",
+    "decoded": "lea    ax,[r8d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 446
+  },
+  {
+    "assembly": "lea ax, [r8d*8+7]",
+    "decoded": "lea    ax,[r8d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 447
+  },
+  {
+    "assembly": "lea ax, [r9d*1+7]",
+    "decoded": "lea    ax,[r9d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 448
+  },
+  {
+    "assembly": "lea ax, [r9d*1+7]",
+    "decoded": "lea    ax,[r9d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 449
+  },
+  {
+    "assembly": "lea ax, [r9d*2+7]",
+    "decoded": "lea    ax,[r9d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 450
+  },
+  {
+    "assembly": "lea ax, [r9d*2+7]",
+    "decoded": "lea    ax,[r9d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 451
+  },
+  {
+    "assembly": "lea ax, [r9d*4+7]",
+    "decoded": "lea    ax,[r9d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 452
+  },
+  {
+    "assembly": "lea ax, [r9d*4+7]",
+    "decoded": "lea    ax,[r9d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 453
+  },
+  {
+    "assembly": "lea ax, [r9d*8+7]",
+    "decoded": "lea    ax,[r9d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 454
+  },
+  {
+    "assembly": "lea ax, [r9d*8+7]",
+    "decoded": "lea    ax,[r9d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 455
+  },
+  {
+    "assembly": "lea ax, [r10d*1+7]",
+    "decoded": "lea    ax,[r10d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 456
+  },
+  {
+    "assembly": "lea ax, [r10d*1+7]",
+    "decoded": "lea    ax,[r10d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 457
+  },
+  {
+    "assembly": "lea ax, [r10d*2+7]",
+    "decoded": "lea    ax,[r10d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 458
+  },
+  {
+    "assembly": "lea ax, [r10d*2+7]",
+    "decoded": "lea    ax,[r10d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 459
+  },
+  {
+    "assembly": "lea ax, [r10d*4+7]",
+    "decoded": "lea    ax,[r10d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 460
+  },
+  {
+    "assembly": "lea ax, [r10d*4+7]",
+    "decoded": "lea    ax,[r10d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 461
+  },
+  {
+    "assembly": "lea ax, [r10d*8+7]",
+    "decoded": "lea    ax,[r10d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 462
+  },
+  {
+    "assembly": "lea ax, [r10d*8+7]",
+    "decoded": "lea    ax,[r10d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 463
+  },
+  {
+    "assembly": "lea ax, [r11d*1+7]",
+    "decoded": "lea    ax,[r11d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 464
+  },
+  {
+    "assembly": "lea ax, [r11d*1+7]",
+    "decoded": "lea    ax,[r11d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 465
+  },
+  {
+    "assembly": "lea ax, [r11d*2+7]",
+    "decoded": "lea    ax,[r11d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 466
+  },
+  {
+    "assembly": "lea ax, [r11d*2+7]",
+    "decoded": "lea    ax,[r11d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 467
+  },
+  {
+    "assembly": "lea ax, [r11d*4+7]",
+    "decoded": "lea    ax,[r11d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 468
+  },
+  {
+    "assembly": "lea ax, [r11d*4+7]",
+    "decoded": "lea    ax,[r11d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 469
+  },
+  {
+    "assembly": "lea ax, [r11d*8+7]",
+    "decoded": "lea    ax,[r11d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 470
+  },
+  {
+    "assembly": "lea ax, [r11d*8+7]",
+    "decoded": "lea    ax,[r11d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 471
+  },
+  {
+    "assembly": "lea ax, [r12d*1+7]",
+    "decoded": "lea    ax,[r12d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 472
+  },
+  {
+    "assembly": "lea ax, [r12d*1+7]",
+    "decoded": "lea    ax,[r12d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 473
+  },
+  {
+    "assembly": "lea ax, [r12d*2+7]",
+    "decoded": "lea    ax,[r12d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 474
+  },
+  {
+    "assembly": "lea ax, [r12d*2+7]",
+    "decoded": "lea    ax,[r12d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 475
+  },
+  {
+    "assembly": "lea ax, [r12d*4+7]",
+    "decoded": "lea    ax,[r12d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 476
+  },
+  {
+    "assembly": "lea ax, [r12d*4+7]",
+    "decoded": "lea    ax,[r12d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 477
+  },
+  {
+    "assembly": "lea ax, [r12d*8+7]",
+    "decoded": "lea    ax,[r12d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 478
+  },
+  {
+    "assembly": "lea ax, [r12d*8+7]",
+    "decoded": "lea    ax,[r12d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 479
+  },
+  {
+    "assembly": "lea ax, [r13d*1+7]",
+    "decoded": "lea    ax,[r13d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 480
+  },
+  {
+    "assembly": "lea ax, [r13d*1+7]",
+    "decoded": "lea    ax,[r13d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 481
+  },
+  {
+    "assembly": "lea ax, [r13d*2+7]",
+    "decoded": "lea    ax,[r13d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 482
+  },
+  {
+    "assembly": "lea ax, [r13d*2+7]",
+    "decoded": "lea    ax,[r13d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 483
+  },
+  {
+    "assembly": "lea ax, [r13d*4+7]",
+    "decoded": "lea    ax,[r13d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 484
+  },
+  {
+    "assembly": "lea ax, [r13d*4+7]",
+    "decoded": "lea    ax,[r13d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 485
+  },
+  {
+    "assembly": "lea ax, [r13d*8+7]",
+    "decoded": "lea    ax,[r13d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 486
+  },
+  {
+    "assembly": "lea ax, [r13d*8+7]",
+    "decoded": "lea    ax,[r13d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 487
+  },
+  {
+    "assembly": "lea ax, [r14d*1+7]",
+    "decoded": "lea    ax,[r14d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 488
+  },
+  {
+    "assembly": "lea ax, [r14d*1+7]",
+    "decoded": "lea    ax,[r14d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 489
+  },
+  {
+    "assembly": "lea ax, [r14d*2+7]",
+    "decoded": "lea    ax,[r14d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 490
+  },
+  {
+    "assembly": "lea ax, [r14d*2+7]",
+    "decoded": "lea    ax,[r14d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 491
+  },
+  {
+    "assembly": "lea ax, [r14d*4+7]",
+    "decoded": "lea    ax,[r14d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 492
+  },
+  {
+    "assembly": "lea ax, [r14d*4+7]",
+    "decoded": "lea    ax,[r14d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 493
+  },
+  {
+    "assembly": "lea ax, [r14d*8+7]",
+    "decoded": "lea    ax,[r14d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 494
+  },
+  {
+    "assembly": "lea ax, [r14d*8+7]",
+    "decoded": "lea    ax,[r14d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 495
+  },
+  {
+    "assembly": "lea ax, [r15d*1+7]",
+    "decoded": "lea    ax,[r15d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 496
+  },
+  {
+    "assembly": "lea ax, [r15d*1+7]",
+    "decoded": "lea    ax,[r15d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 497
+  },
+  {
+    "assembly": "lea ax, [r15d*2+7]",
+    "decoded": "lea    ax,[r15d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 498
+  },
+  {
+    "assembly": "lea ax, [r15d*2+7]",
+    "decoded": "lea    ax,[r15d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 499
+  },
+  {
+    "assembly": "lea ax, [r15d*4+7]",
+    "decoded": "lea    ax,[r15d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 500
+  },
+  {
+    "assembly": "lea ax, [r15d*4+7]",
+    "decoded": "lea    ax,[r15d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 501
+  },
+  {
+    "assembly": "lea ax, [r15d*8+7]",
+    "decoded": "lea    ax,[r15d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 502
+  },
+  {
+    "assembly": "lea ax, [r15d*8+7]",
+    "decoded": "lea    ax,[r15d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 503
+  },
+  {
+    "assembly": "lea ax, [ebx+ecx*1+7]",
+    "decoded": "lea    ax,[ebx+ecx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 504
+  },
+  {
+    "assembly": "lea ax, [ebx+ecx*1+7]",
+    "decoded": "lea    ax,[ebx+ecx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 505
+  },
+  {
+    "assembly": "lea ax, [esp+ecx*2-7]",
+    "decoded": "lea    ax,[esp+ecx*2-0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 506
+  },
+  {
+    "assembly": "lea ax, [esp+ecx*2-7]",
+    "decoded": "lea    ax,[esp+ecx*2-0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 507
+  },
+  {
+    "assembly": "lea ax, [ecx+7]",
+    "decoded": "lea    ax,[ecx+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 508
+  },
+  {
+    "assembly": "lea ax, [ecx+7]",
+    "decoded": "lea    ax,[ecx+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 509
+  },
+  {
+    "assembly": "lea ax, [eax+ecx*8+7]",
+    "decoded": "lea    ax,[eax+ecx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 510
+  },
+  {
+    "assembly": "lea ax, [eax+ecx*8+7]",
+    "decoded": "lea    ax,[eax+ecx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 511
+  },
+  {
+    "assembly": "lea eax, [eax*1+7]",
+    "decoded": "lea    eax,[eax*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 512
+  },
+  {
+    "assembly": "lea eax, [eax*1+7]",
+    "decoded": "lea    eax,[eax*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 513
+  },
+  {
+    "assembly": "lea eax, [eax*2+7]",
+    "decoded": "lea    eax,[eax*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 514
+  },
+  {
+    "assembly": "lea eax, [eax*2+7]",
+    "decoded": "lea    eax,[eax*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 515
+  },
+  {
+    "assembly": "lea eax, [eax*4+7]",
+    "decoded": "lea    eax,[eax*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 516
+  },
+  {
+    "assembly": "lea eax, [eax*4+7]",
+    "decoded": "lea    eax,[eax*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 517
+  },
+  {
+    "assembly": "lea eax, [eax*8+7]",
+    "decoded": "lea    eax,[eax*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 518
+  },
+  {
+    "assembly": "lea eax, [eax*8+7]",
+    "decoded": "lea    eax,[eax*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 519
+  },
+  {
+    "assembly": "lea eax, [ecx*1+7]",
+    "decoded": "lea    eax,[ecx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 520
+  },
+  {
+    "assembly": "lea eax, [ecx*1+7]",
+    "decoded": "lea    eax,[ecx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 521
+  },
+  {
+    "assembly": "lea eax, [ecx*2+7]",
+    "decoded": "lea    eax,[ecx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 522
+  },
+  {
+    "assembly": "lea eax, [ecx*2+7]",
+    "decoded": "lea    eax,[ecx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 523
+  },
+  {
+    "assembly": "lea eax, [ecx*4+7]",
+    "decoded": "lea    eax,[ecx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 524
+  },
+  {
+    "assembly": "lea eax, [ecx*4+7]",
+    "decoded": "lea    eax,[ecx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 525
+  },
+  {
+    "assembly": "lea eax, [ecx*8+7]",
+    "decoded": "lea    eax,[ecx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 526
+  },
+  {
+    "assembly": "lea eax, [ecx*8+7]",
+    "decoded": "lea    eax,[ecx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 527
+  },
+  {
+    "assembly": "lea eax, [edx*1+7]",
+    "decoded": "lea    eax,[edx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 528
+  },
+  {
+    "assembly": "lea eax, [edx*1+7]",
+    "decoded": "lea    eax,[edx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 529
+  },
+  {
+    "assembly": "lea eax, [edx*2+7]",
+    "decoded": "lea    eax,[edx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 530
+  },
+  {
+    "assembly": "lea eax, [edx*2+7]",
+    "decoded": "lea    eax,[edx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 531
+  },
+  {
+    "assembly": "lea eax, [edx*4+7]",
+    "decoded": "lea    eax,[edx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 532
+  },
+  {
+    "assembly": "lea eax, [edx*4+7]",
+    "decoded": "lea    eax,[edx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 533
+  },
+  {
+    "assembly": "lea eax, [edx*8+7]",
+    "decoded": "lea    eax,[edx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 534
+  },
+  {
+    "assembly": "lea eax, [edx*8+7]",
+    "decoded": "lea    eax,[edx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 535
+  },
+  {
+    "assembly": "lea eax, [ebx*1+7]",
+    "decoded": "lea    eax,[ebx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 536
+  },
+  {
+    "assembly": "lea eax, [ebx*1+7]",
+    "decoded": "lea    eax,[ebx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 537
+  },
+  {
+    "assembly": "lea eax, [ebx*2+7]",
+    "decoded": "lea    eax,[ebx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 538
+  },
+  {
+    "assembly": "lea eax, [ebx*2+7]",
+    "decoded": "lea    eax,[ebx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 539
+  },
+  {
+    "assembly": "lea eax, [ebx*4+7]",
+    "decoded": "lea    eax,[ebx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 540
+  },
+  {
+    "assembly": "lea eax, [ebx*4+7]",
+    "decoded": "lea    eax,[ebx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 541
+  },
+  {
+    "assembly": "lea eax, [ebx*8+7]",
+    "decoded": "lea    eax,[ebx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 542
+  },
+  {
+    "assembly": "lea eax, [ebx*8+7]",
+    "decoded": "lea    eax,[ebx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 543
+  },
+  {
+    "assembly": "lea eax, [ebp*1+7]",
+    "decoded": "lea    eax,[ebp*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 544
+  },
+  {
+    "assembly": "lea eax, [ebp*1+7]",
+    "decoded": "lea    eax,[ebp*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 545
+  },
+  {
+    "assembly": "lea eax, [ebp*2+7]",
+    "decoded": "lea    eax,[ebp*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 546
+  },
+  {
+    "assembly": "lea eax, [ebp*2+7]",
+    "decoded": "lea    eax,[ebp*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 547
+  },
+  {
+    "assembly": "lea eax, [ebp*4+7]",
+    "decoded": "lea    eax,[ebp*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 548
+  },
+  {
+    "assembly": "lea eax, [ebp*4+7]",
+    "decoded": "lea    eax,[ebp*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 549
+  },
+  {
+    "assembly": "lea eax, [ebp*8+7]",
+    "decoded": "lea    eax,[ebp*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 550
+  },
+  {
+    "assembly": "lea eax, [ebp*8+7]",
+    "decoded": "lea    eax,[ebp*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 551
+  },
+  {
+    "assembly": "lea eax, [esi*1+7]",
+    "decoded": "lea    eax,[esi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 552
+  },
+  {
+    "assembly": "lea eax, [esi*1+7]",
+    "decoded": "lea    eax,[esi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 553
+  },
+  {
+    "assembly": "lea eax, [esi*2+7]",
+    "decoded": "lea    eax,[esi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 554
+  },
+  {
+    "assembly": "lea eax, [esi*2+7]",
+    "decoded": "lea    eax,[esi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 555
+  },
+  {
+    "assembly": "lea eax, [esi*4+7]",
+    "decoded": "lea    eax,[esi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 556
+  },
+  {
+    "assembly": "lea eax, [esi*4+7]",
+    "decoded": "lea    eax,[esi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 557
+  },
+  {
+    "assembly": "lea eax, [esi*8+7]",
+    "decoded": "lea    eax,[esi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 558
+  },
+  {
+    "assembly": "lea eax, [esi*8+7]",
+    "decoded": "lea    eax,[esi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 559
+  },
+  {
+    "assembly": "lea eax, [edi*1+7]",
+    "decoded": "lea    eax,[edi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 560
+  },
+  {
+    "assembly": "lea eax, [edi*1+7]",
+    "decoded": "lea    eax,[edi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 561
+  },
+  {
+    "assembly": "lea eax, [edi*2+7]",
+    "decoded": "lea    eax,[edi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 562
+  },
+  {
+    "assembly": "lea eax, [edi*2+7]",
+    "decoded": "lea    eax,[edi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 563
+  },
+  {
+    "assembly": "lea eax, [edi*4+7]",
+    "decoded": "lea    eax,[edi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 564
+  },
+  {
+    "assembly": "lea eax, [edi*4+7]",
+    "decoded": "lea    eax,[edi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 565
+  },
+  {
+    "assembly": "lea eax, [edi*8+7]",
+    "decoded": "lea    eax,[edi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 566
+  },
+  {
+    "assembly": "lea eax, [edi*8+7]",
+    "decoded": "lea    eax,[edi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 567
+  },
+  {
+    "assembly": "lea eax, [r8d*1+7]",
+    "decoded": "lea    eax,[r8d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 568
+  },
+  {
+    "assembly": "lea eax, [r8d*1+7]",
+    "decoded": "lea    eax,[r8d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 569
+  },
+  {
+    "assembly": "lea eax, [r8d*2+7]",
+    "decoded": "lea    eax,[r8d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 570
+  },
+  {
+    "assembly": "lea eax, [r8d*2+7]",
+    "decoded": "lea    eax,[r8d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 571
+  },
+  {
+    "assembly": "lea eax, [r8d*4+7]",
+    "decoded": "lea    eax,[r8d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 572
+  },
+  {
+    "assembly": "lea eax, [r8d*4+7]",
+    "decoded": "lea    eax,[r8d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 573
+  },
+  {
+    "assembly": "lea eax, [r8d*8+7]",
+    "decoded": "lea    eax,[r8d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 574
+  },
+  {
+    "assembly": "lea eax, [r8d*8+7]",
+    "decoded": "lea    eax,[r8d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 575
+  },
+  {
+    "assembly": "lea eax, [r9d*1+7]",
+    "decoded": "lea    eax,[r9d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 576
+  },
+  {
+    "assembly": "lea eax, [r9d*1+7]",
+    "decoded": "lea    eax,[r9d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 577
+  },
+  {
+    "assembly": "lea eax, [r9d*2+7]",
+    "decoded": "lea    eax,[r9d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 578
+  },
+  {
+    "assembly": "lea eax, [r9d*2+7]",
+    "decoded": "lea    eax,[r9d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 579
+  },
+  {
+    "assembly": "lea eax, [r9d*4+7]",
+    "decoded": "lea    eax,[r9d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 580
+  },
+  {
+    "assembly": "lea eax, [r9d*4+7]",
+    "decoded": "lea    eax,[r9d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 581
+  },
+  {
+    "assembly": "lea eax, [r9d*8+7]",
+    "decoded": "lea    eax,[r9d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 582
+  },
+  {
+    "assembly": "lea eax, [r9d*8+7]",
+    "decoded": "lea    eax,[r9d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 583
+  },
+  {
+    "assembly": "lea eax, [r10d*1+7]",
+    "decoded": "lea    eax,[r10d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 584
+  },
+  {
+    "assembly": "lea eax, [r10d*1+7]",
+    "decoded": "lea    eax,[r10d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 585
+  },
+  {
+    "assembly": "lea eax, [r10d*2+7]",
+    "decoded": "lea    eax,[r10d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 586
+  },
+  {
+    "assembly": "lea eax, [r10d*2+7]",
+    "decoded": "lea    eax,[r10d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 587
+  },
+  {
+    "assembly": "lea eax, [r10d*4+7]",
+    "decoded": "lea    eax,[r10d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 588
+  },
+  {
+    "assembly": "lea eax, [r10d*4+7]",
+    "decoded": "lea    eax,[r10d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 589
+  },
+  {
+    "assembly": "lea eax, [r10d*8+7]",
+    "decoded": "lea    eax,[r10d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 590
+  },
+  {
+    "assembly": "lea eax, [r10d*8+7]",
+    "decoded": "lea    eax,[r10d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 591
+  },
+  {
+    "assembly": "lea eax, [r11d*1+7]",
+    "decoded": "lea    eax,[r11d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 592
+  },
+  {
+    "assembly": "lea eax, [r11d*1+7]",
+    "decoded": "lea    eax,[r11d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 593
+  },
+  {
+    "assembly": "lea eax, [r11d*2+7]",
+    "decoded": "lea    eax,[r11d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 594
+  },
+  {
+    "assembly": "lea eax, [r11d*2+7]",
+    "decoded": "lea    eax,[r11d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 595
+  },
+  {
+    "assembly": "lea eax, [r11d*4+7]",
+    "decoded": "lea    eax,[r11d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 596
+  },
+  {
+    "assembly": "lea eax, [r11d*4+7]",
+    "decoded": "lea    eax,[r11d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 597
+  },
+  {
+    "assembly": "lea eax, [r11d*8+7]",
+    "decoded": "lea    eax,[r11d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 598
+  },
+  {
+    "assembly": "lea eax, [r11d*8+7]",
+    "decoded": "lea    eax,[r11d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 599
+  },
+  {
+    "assembly": "lea eax, [r12d*1+7]",
+    "decoded": "lea    eax,[r12d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 600
+  },
+  {
+    "assembly": "lea eax, [r12d*1+7]",
+    "decoded": "lea    eax,[r12d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 601
+  },
+  {
+    "assembly": "lea eax, [r12d*2+7]",
+    "decoded": "lea    eax,[r12d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 602
+  },
+  {
+    "assembly": "lea eax, [r12d*2+7]",
+    "decoded": "lea    eax,[r12d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 603
+  },
+  {
+    "assembly": "lea eax, [r12d*4+7]",
+    "decoded": "lea    eax,[r12d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 604
+  },
+  {
+    "assembly": "lea eax, [r12d*4+7]",
+    "decoded": "lea    eax,[r12d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 605
+  },
+  {
+    "assembly": "lea eax, [r12d*8+7]",
+    "decoded": "lea    eax,[r12d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 606
+  },
+  {
+    "assembly": "lea eax, [r12d*8+7]",
+    "decoded": "lea    eax,[r12d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 607
+  },
+  {
+    "assembly": "lea eax, [r13d*1+7]",
+    "decoded": "lea    eax,[r13d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 608
+  },
+  {
+    "assembly": "lea eax, [r13d*1+7]",
+    "decoded": "lea    eax,[r13d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 609
+  },
+  {
+    "assembly": "lea eax, [r13d*2+7]",
+    "decoded": "lea    eax,[r13d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 610
+  },
+  {
+    "assembly": "lea eax, [r13d*2+7]",
+    "decoded": "lea    eax,[r13d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 611
+  },
+  {
+    "assembly": "lea eax, [r13d*4+7]",
+    "decoded": "lea    eax,[r13d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 612
+  },
+  {
+    "assembly": "lea eax, [r13d*4+7]",
+    "decoded": "lea    eax,[r13d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 613
+  },
+  {
+    "assembly": "lea eax, [r13d*8+7]",
+    "decoded": "lea    eax,[r13d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 614
+  },
+  {
+    "assembly": "lea eax, [r13d*8+7]",
+    "decoded": "lea    eax,[r13d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 615
+  },
+  {
+    "assembly": "lea eax, [r14d*1+7]",
+    "decoded": "lea    eax,[r14d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 616
+  },
+  {
+    "assembly": "lea eax, [r14d*1+7]",
+    "decoded": "lea    eax,[r14d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 617
+  },
+  {
+    "assembly": "lea eax, [r14d*2+7]",
+    "decoded": "lea    eax,[r14d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 618
+  },
+  {
+    "assembly": "lea eax, [r14d*2+7]",
+    "decoded": "lea    eax,[r14d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 619
+  },
+  {
+    "assembly": "lea eax, [r14d*4+7]",
+    "decoded": "lea    eax,[r14d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 620
+  },
+  {
+    "assembly": "lea eax, [r14d*4+7]",
+    "decoded": "lea    eax,[r14d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 621
+  },
+  {
+    "assembly": "lea eax, [r14d*8+7]",
+    "decoded": "lea    eax,[r14d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 622
+  },
+  {
+    "assembly": "lea eax, [r14d*8+7]",
+    "decoded": "lea    eax,[r14d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 623
+  },
+  {
+    "assembly": "lea eax, [r15d*1+7]",
+    "decoded": "lea    eax,[r15d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 624
+  },
+  {
+    "assembly": "lea eax, [r15d*1+7]",
+    "decoded": "lea    eax,[r15d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 625
+  },
+  {
+    "assembly": "lea eax, [r15d*2+7]",
+    "decoded": "lea    eax,[r15d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 626
+  },
+  {
+    "assembly": "lea eax, [r15d*2+7]",
+    "decoded": "lea    eax,[r15d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 627
+  },
+  {
+    "assembly": "lea eax, [r15d*4+7]",
+    "decoded": "lea    eax,[r15d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 628
+  },
+  {
+    "assembly": "lea eax, [r15d*4+7]",
+    "decoded": "lea    eax,[r15d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 629
+  },
+  {
+    "assembly": "lea eax, [r15d*8+7]",
+    "decoded": "lea    eax,[r15d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 630
+  },
+  {
+    "assembly": "lea eax, [r15d*8+7]",
+    "decoded": "lea    eax,[r15d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 631
+  },
+  {
+    "assembly": "lea eax, [ebx+ecx*1+7]",
+    "decoded": "lea    eax,[ebx+ecx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 632
+  },
+  {
+    "assembly": "lea eax, [ebx+ecx*1+7]",
+    "decoded": "lea    eax,[ebx+ecx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 633
+  },
+  {
+    "assembly": "lea eax, [esp+ecx*2-7]",
+    "decoded": "lea    eax,[esp+ecx*2-0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 634
+  },
+  {
+    "assembly": "lea eax, [esp+ecx*2-7]",
+    "decoded": "lea    eax,[esp+ecx*2-0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 635
+  },
+  {
+    "assembly": "lea eax, [ecx+7]",
+    "decoded": "lea    eax,[ecx+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 636
+  },
+  {
+    "assembly": "lea eax, [ecx+7]",
+    "decoded": "lea    eax,[ecx+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 637
+  },
+  {
+    "assembly": "lea eax, [eax+ecx*8+7]",
+    "decoded": "lea    eax,[eax+ecx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 638
+  },
+  {
+    "assembly": "lea eax, [eax+ecx*8+7]",
+    "decoded": "lea    eax,[eax+ecx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 639
+  },
+  {
+    "assembly": "lea rax, [eax*1+7]",
+    "decoded": "lea    rax,[eax*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 640
+  },
+  {
+    "assembly": "lea rax, [eax*1+7]",
+    "decoded": "lea    rax,[eax*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 641
+  },
+  {
+    "assembly": "lea rax, [eax*2+7]",
+    "decoded": "lea    rax,[eax*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 642
+  },
+  {
+    "assembly": "lea rax, [eax*2+7]",
+    "decoded": "lea    rax,[eax*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 643
+  },
+  {
+    "assembly": "lea rax, [eax*4+7]",
+    "decoded": "lea    rax,[eax*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 644
+  },
+  {
+    "assembly": "lea rax, [eax*4+7]",
+    "decoded": "lea    rax,[eax*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 645
+  },
+  {
+    "assembly": "lea rax, [eax*8+7]",
+    "decoded": "lea    rax,[eax*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 646
+  },
+  {
+    "assembly": "lea rax, [eax*8+7]",
+    "decoded": "lea    rax,[eax*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 647
+  },
+  {
+    "assembly": "lea rax, [ecx*1+7]",
+    "decoded": "lea    rax,[ecx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 648
+  },
+  {
+    "assembly": "lea rax, [ecx*1+7]",
+    "decoded": "lea    rax,[ecx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 649
+  },
+  {
+    "assembly": "lea rax, [ecx*2+7]",
+    "decoded": "lea    rax,[ecx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 650
+  },
+  {
+    "assembly": "lea rax, [ecx*2+7]",
+    "decoded": "lea    rax,[ecx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 651
+  },
+  {
+    "assembly": "lea rax, [ecx*4+7]",
+    "decoded": "lea    rax,[ecx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 652
+  },
+  {
+    "assembly": "lea rax, [ecx*4+7]",
+    "decoded": "lea    rax,[ecx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 653
+  },
+  {
+    "assembly": "lea rax, [ecx*8+7]",
+    "decoded": "lea    rax,[ecx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 654
+  },
+  {
+    "assembly": "lea rax, [ecx*8+7]",
+    "decoded": "lea    rax,[ecx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 655
+  },
+  {
+    "assembly": "lea rax, [edx*1+7]",
+    "decoded": "lea    rax,[edx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 656
+  },
+  {
+    "assembly": "lea rax, [edx*1+7]",
+    "decoded": "lea    rax,[edx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 657
+  },
+  {
+    "assembly": "lea rax, [edx*2+7]",
+    "decoded": "lea    rax,[edx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 658
+  },
+  {
+    "assembly": "lea rax, [edx*2+7]",
+    "decoded": "lea    rax,[edx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 659
+  },
+  {
+    "assembly": "lea rax, [edx*4+7]",
+    "decoded": "lea    rax,[edx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 660
+  },
+  {
+    "assembly": "lea rax, [edx*4+7]",
+    "decoded": "lea    rax,[edx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 661
+  },
+  {
+    "assembly": "lea rax, [edx*8+7]",
+    "decoded": "lea    rax,[edx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 662
+  },
+  {
+    "assembly": "lea rax, [edx*8+7]",
+    "decoded": "lea    rax,[edx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 663
+  },
+  {
+    "assembly": "lea rax, [ebx*1+7]",
+    "decoded": "lea    rax,[ebx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 664
+  },
+  {
+    "assembly": "lea rax, [ebx*1+7]",
+    "decoded": "lea    rax,[ebx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 665
+  },
+  {
+    "assembly": "lea rax, [ebx*2+7]",
+    "decoded": "lea    rax,[ebx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 666
+  },
+  {
+    "assembly": "lea rax, [ebx*2+7]",
+    "decoded": "lea    rax,[ebx*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 667
+  },
+  {
+    "assembly": "lea rax, [ebx*4+7]",
+    "decoded": "lea    rax,[ebx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 668
+  },
+  {
+    "assembly": "lea rax, [ebx*4+7]",
+    "decoded": "lea    rax,[ebx*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 669
+  },
+  {
+    "assembly": "lea rax, [ebx*8+7]",
+    "decoded": "lea    rax,[ebx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 670
+  },
+  {
+    "assembly": "lea rax, [ebx*8+7]",
+    "decoded": "lea    rax,[ebx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 671
+  },
+  {
+    "assembly": "lea rax, [ebp*1+7]",
+    "decoded": "lea    rax,[ebp*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 672
+  },
+  {
+    "assembly": "lea rax, [ebp*1+7]",
+    "decoded": "lea    rax,[ebp*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 673
+  },
+  {
+    "assembly": "lea rax, [ebp*2+7]",
+    "decoded": "lea    rax,[ebp*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 674
+  },
+  {
+    "assembly": "lea rax, [ebp*2+7]",
+    "decoded": "lea    rax,[ebp*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 675
+  },
+  {
+    "assembly": "lea rax, [ebp*4+7]",
+    "decoded": "lea    rax,[ebp*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 676
+  },
+  {
+    "assembly": "lea rax, [ebp*4+7]",
+    "decoded": "lea    rax,[ebp*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 677
+  },
+  {
+    "assembly": "lea rax, [ebp*8+7]",
+    "decoded": "lea    rax,[ebp*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 678
+  },
+  {
+    "assembly": "lea rax, [ebp*8+7]",
+    "decoded": "lea    rax,[ebp*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 679
+  },
+  {
+    "assembly": "lea rax, [esi*1+7]",
+    "decoded": "lea    rax,[esi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 680
+  },
+  {
+    "assembly": "lea rax, [esi*1+7]",
+    "decoded": "lea    rax,[esi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 681
+  },
+  {
+    "assembly": "lea rax, [esi*2+7]",
+    "decoded": "lea    rax,[esi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 682
+  },
+  {
+    "assembly": "lea rax, [esi*2+7]",
+    "decoded": "lea    rax,[esi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 683
+  },
+  {
+    "assembly": "lea rax, [esi*4+7]",
+    "decoded": "lea    rax,[esi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 684
+  },
+  {
+    "assembly": "lea rax, [esi*4+7]",
+    "decoded": "lea    rax,[esi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 685
+  },
+  {
+    "assembly": "lea rax, [esi*8+7]",
+    "decoded": "lea    rax,[esi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 686
+  },
+  {
+    "assembly": "lea rax, [esi*8+7]",
+    "decoded": "lea    rax,[esi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 687
+  },
+  {
+    "assembly": "lea rax, [edi*1+7]",
+    "decoded": "lea    rax,[edi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 688
+  },
+  {
+    "assembly": "lea rax, [edi*1+7]",
+    "decoded": "lea    rax,[edi*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 689
+  },
+  {
+    "assembly": "lea rax, [edi*2+7]",
+    "decoded": "lea    rax,[edi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 690
+  },
+  {
+    "assembly": "lea rax, [edi*2+7]",
+    "decoded": "lea    rax,[edi*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 691
+  },
+  {
+    "assembly": "lea rax, [edi*4+7]",
+    "decoded": "lea    rax,[edi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 692
+  },
+  {
+    "assembly": "lea rax, [edi*4+7]",
+    "decoded": "lea    rax,[edi*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 693
+  },
+  {
+    "assembly": "lea rax, [edi*8+7]",
+    "decoded": "lea    rax,[edi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 694
+  },
+  {
+    "assembly": "lea rax, [edi*8+7]",
+    "decoded": "lea    rax,[edi*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 695
+  },
+  {
+    "assembly": "lea rax, [r8d*1+7]",
+    "decoded": "lea    rax,[r8d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 696
+  },
+  {
+    "assembly": "lea rax, [r8d*1+7]",
+    "decoded": "lea    rax,[r8d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 697
+  },
+  {
+    "assembly": "lea rax, [r8d*2+7]",
+    "decoded": "lea    rax,[r8d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 698
+  },
+  {
+    "assembly": "lea rax, [r8d*2+7]",
+    "decoded": "lea    rax,[r8d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 699
+  },
+  {
+    "assembly": "lea rax, [r8d*4+7]",
+    "decoded": "lea    rax,[r8d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 700
+  },
+  {
+    "assembly": "lea rax, [r8d*4+7]",
+    "decoded": "lea    rax,[r8d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 701
+  },
+  {
+    "assembly": "lea rax, [r8d*8+7]",
+    "decoded": "lea    rax,[r8d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 702
+  },
+  {
+    "assembly": "lea rax, [r8d*8+7]",
+    "decoded": "lea    rax,[r8d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 703
+  },
+  {
+    "assembly": "lea rax, [r9d*1+7]",
+    "decoded": "lea    rax,[r9d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 704
+  },
+  {
+    "assembly": "lea rax, [r9d*1+7]",
+    "decoded": "lea    rax,[r9d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 705
+  },
+  {
+    "assembly": "lea rax, [r9d*2+7]",
+    "decoded": "lea    rax,[r9d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 706
+  },
+  {
+    "assembly": "lea rax, [r9d*2+7]",
+    "decoded": "lea    rax,[r9d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 707
+  },
+  {
+    "assembly": "lea rax, [r9d*4+7]",
+    "decoded": "lea    rax,[r9d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 708
+  },
+  {
+    "assembly": "lea rax, [r9d*4+7]",
+    "decoded": "lea    rax,[r9d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 709
+  },
+  {
+    "assembly": "lea rax, [r9d*8+7]",
+    "decoded": "lea    rax,[r9d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 710
+  },
+  {
+    "assembly": "lea rax, [r9d*8+7]",
+    "decoded": "lea    rax,[r9d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 711
+  },
+  {
+    "assembly": "lea rax, [r10d*1+7]",
+    "decoded": "lea    rax,[r10d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 712
+  },
+  {
+    "assembly": "lea rax, [r10d*1+7]",
+    "decoded": "lea    rax,[r10d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 713
+  },
+  {
+    "assembly": "lea rax, [r10d*2+7]",
+    "decoded": "lea    rax,[r10d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 714
+  },
+  {
+    "assembly": "lea rax, [r10d*2+7]",
+    "decoded": "lea    rax,[r10d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 715
+  },
+  {
+    "assembly": "lea rax, [r10d*4+7]",
+    "decoded": "lea    rax,[r10d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 716
+  },
+  {
+    "assembly": "lea rax, [r10d*4+7]",
+    "decoded": "lea    rax,[r10d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 717
+  },
+  {
+    "assembly": "lea rax, [r10d*8+7]",
+    "decoded": "lea    rax,[r10d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 718
+  },
+  {
+    "assembly": "lea rax, [r10d*8+7]",
+    "decoded": "lea    rax,[r10d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 719
+  },
+  {
+    "assembly": "lea rax, [r11d*1+7]",
+    "decoded": "lea    rax,[r11d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 720
+  },
+  {
+    "assembly": "lea rax, [r11d*1+7]",
+    "decoded": "lea    rax,[r11d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 721
+  },
+  {
+    "assembly": "lea rax, [r11d*2+7]",
+    "decoded": "lea    rax,[r11d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 722
+  },
+  {
+    "assembly": "lea rax, [r11d*2+7]",
+    "decoded": "lea    rax,[r11d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 723
+  },
+  {
+    "assembly": "lea rax, [r11d*4+7]",
+    "decoded": "lea    rax,[r11d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 724
+  },
+  {
+    "assembly": "lea rax, [r11d*4+7]",
+    "decoded": "lea    rax,[r11d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 725
+  },
+  {
+    "assembly": "lea rax, [r11d*8+7]",
+    "decoded": "lea    rax,[r11d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 726
+  },
+  {
+    "assembly": "lea rax, [r11d*8+7]",
+    "decoded": "lea    rax,[r11d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 727
+  },
+  {
+    "assembly": "lea rax, [r12d*1+7]",
+    "decoded": "lea    rax,[r12d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 728
+  },
+  {
+    "assembly": "lea rax, [r12d*1+7]",
+    "decoded": "lea    rax,[r12d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 729
+  },
+  {
+    "assembly": "lea rax, [r12d*2+7]",
+    "decoded": "lea    rax,[r12d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 730
+  },
+  {
+    "assembly": "lea rax, [r12d*2+7]",
+    "decoded": "lea    rax,[r12d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 731
+  },
+  {
+    "assembly": "lea rax, [r12d*4+7]",
+    "decoded": "lea    rax,[r12d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 732
+  },
+  {
+    "assembly": "lea rax, [r12d*4+7]",
+    "decoded": "lea    rax,[r12d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 733
+  },
+  {
+    "assembly": "lea rax, [r12d*8+7]",
+    "decoded": "lea    rax,[r12d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 734
+  },
+  {
+    "assembly": "lea rax, [r12d*8+7]",
+    "decoded": "lea    rax,[r12d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 735
+  },
+  {
+    "assembly": "lea rax, [r13d*1+7]",
+    "decoded": "lea    rax,[r13d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 736
+  },
+  {
+    "assembly": "lea rax, [r13d*1+7]",
+    "decoded": "lea    rax,[r13d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 737
+  },
+  {
+    "assembly": "lea rax, [r13d*2+7]",
+    "decoded": "lea    rax,[r13d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 738
+  },
+  {
+    "assembly": "lea rax, [r13d*2+7]",
+    "decoded": "lea    rax,[r13d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 739
+  },
+  {
+    "assembly": "lea rax, [r13d*4+7]",
+    "decoded": "lea    rax,[r13d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 740
+  },
+  {
+    "assembly": "lea rax, [r13d*4+7]",
+    "decoded": "lea    rax,[r13d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 741
+  },
+  {
+    "assembly": "lea rax, [r13d*8+7]",
+    "decoded": "lea    rax,[r13d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 742
+  },
+  {
+    "assembly": "lea rax, [r13d*8+7]",
+    "decoded": "lea    rax,[r13d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 743
+  },
+  {
+    "assembly": "lea rax, [r14d*1+7]",
+    "decoded": "lea    rax,[r14d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 744
+  },
+  {
+    "assembly": "lea rax, [r14d*1+7]",
+    "decoded": "lea    rax,[r14d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 745
+  },
+  {
+    "assembly": "lea rax, [r14d*2+7]",
+    "decoded": "lea    rax,[r14d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 746
+  },
+  {
+    "assembly": "lea rax, [r14d*2+7]",
+    "decoded": "lea    rax,[r14d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 747
+  },
+  {
+    "assembly": "lea rax, [r14d*4+7]",
+    "decoded": "lea    rax,[r14d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 748
+  },
+  {
+    "assembly": "lea rax, [r14d*4+7]",
+    "decoded": "lea    rax,[r14d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 749
+  },
+  {
+    "assembly": "lea rax, [r14d*8+7]",
+    "decoded": "lea    rax,[r14d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 750
+  },
+  {
+    "assembly": "lea rax, [r14d*8+7]",
+    "decoded": "lea    rax,[r14d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 751
+  },
+  {
+    "assembly": "lea rax, [r15d*1+7]",
+    "decoded": "lea    rax,[r15d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 752
+  },
+  {
+    "assembly": "lea rax, [r15d*1+7]",
+    "decoded": "lea    rax,[r15d*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 753
+  },
+  {
+    "assembly": "lea rax, [r15d*2+7]",
+    "decoded": "lea    rax,[r15d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 754
+  },
+  {
+    "assembly": "lea rax, [r15d*2+7]",
+    "decoded": "lea    rax,[r15d*2+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 755
+  },
+  {
+    "assembly": "lea rax, [r15d*4+7]",
+    "decoded": "lea    rax,[r15d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 756
+  },
+  {
+    "assembly": "lea rax, [r15d*4+7]",
+    "decoded": "lea    rax,[r15d*4+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 757
+  },
+  {
+    "assembly": "lea rax, [r15d*8+7]",
+    "decoded": "lea    rax,[r15d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 758
+  },
+  {
+    "assembly": "lea rax, [r15d*8+7]",
+    "decoded": "lea    rax,[r15d*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 759
+  },
+  {
+    "assembly": "lea rax, [ebx+ecx*1+7]",
+    "decoded": "lea    rax,[ebx+ecx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 760
+  },
+  {
+    "assembly": "lea rax, [ebx+ecx*1+7]",
+    "decoded": "lea    rax,[ebx+ecx*1+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 761
+  },
+  {
+    "assembly": "lea rax, [esp+ecx*2-7]",
+    "decoded": "lea    rax,[esp+ecx*2-0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 762
+  },
+  {
+    "assembly": "lea rax, [esp+ecx*2-7]",
+    "decoded": "lea    rax,[esp+ecx*2-0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 763
+  },
+  {
+    "assembly": "lea rax, [ecx+7]",
+    "decoded": "lea    rax,[ecx+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 764
+  },
+  {
+    "assembly": "lea rax, [ecx+7]",
+    "decoded": "lea    rax,[ecx+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 765
+  },
+  {
+    "assembly": "lea rax, [eax+ecx*8+7]",
+    "decoded": "lea    rax,[eax+ecx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "raw",
+    "form": 766
+  },
+  {
+    "assembly": "lea rax, [eax+ecx*8+7]",
+    "decoded": "lea    rax,[eax+ecx*8+0x7]",
+    "opcode": "X86_OP_LEA",
+    "route": "direct",
+    "form": 767
+  }
+]

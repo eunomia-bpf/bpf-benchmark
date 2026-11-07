@@ -1,0 +1,28 @@
+{
+  "correction_commit": "154955ad9",
+  "patch_sha256": "81ab3448a939d772b11418dff6ed3def8f46c8a34a60e452c7e3776ec70f64fc",
+  "changes": {
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": {
+      "before_sha256": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+      "after_sha256": "8a182de2e9cbb586d277edb97f6f1926b888648948bffb7347ece74f851724ad"
+    },
+    "kprog/formal/tools/generate_x86_mem_offset_spec.py": {
+      "before_sha256": "440cf14616328c01f90863db62b785645f79380d85881f82af33c1254695d7bb",
+      "after_sha256": "98310b71f41f3c92dac598f6d78fbe9546675ad7fbea5c1b418269013e7fff33"
+    },
+    "kprog/formal/generated/x86_mem_offset.h": {
+      "before_sha256": "181677ff104eda10108c2339c703df01ef53daab87a58a48f6f32f6447206b5c",
+      "after_sha256": "6360c8f4ab21446bcb444d934a80986b9e205e5a6ba58e3d68eb7fd2fa68b190"
+    },
+    "kprog/formal/oracles/test_x86_mem_offset_route_host.c": {
+      "before_sha256": "533de0216301d86b5a4ad3e09ab3b8d046b4deb8e2e6cf138dc33b52917c00f3",
+      "after_sha256": "2fa6fccb8bc9017333c5ca2b0bc15f6ba8fad4dd035cc58631dfa04c1f190e87"
+    }
+  },
+  "used_snapshot_changes": [
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py",
+    "kprog/formal/generated/x86_mem_offset.h"
+  ],
+  "scope": "Private source correction from V; candidate encoder and offset header drive F observation.",
+  "production_adoption": "owner_sync_pending"
+}
