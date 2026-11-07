@@ -1,0 +1,38 @@
+{
+  "publication": "9b1a92f5a3b76993c19d844152a7e6bb89a295ab",
+  "metadata_sha256": "38e77c58752e629c6737f4186d336496167644aa975bdb9b0570661e91df110b",
+  "shared_reader_sha256": "3747fab76e7c0b66d6a1a8467f597963ea8f8fe09dc8eba20bdda6152e1eaacb",
+  "checks": {
+    "full_raw_samples_equal_published_metadata": true,
+    "all_terminal_service_rows_equal_published_metadata": true,
+    "all_receipts_equal_published_requests": true,
+    "launch_source_vector_equal": true,
+    "launch_image_equal": true,
+    "original_native_archive_equal_5004364f": true,
+    "previous_three_report_bytes_equal": true
+  },
+  "full_sample_rows_reconciled": 58,
+  "terminal_rows_reconciled": 29,
+  "original_native_matches": 29,
+  "full_width_native_results_above_u32": 23,
+  "native_retvals": [
+    0,
+    1,
+    2
+  ],
+  "preserved_report_sha256": {
+    "pure-current.json": "b2bedaddf44e3a461c3fe9b2094c09caa98a767a9d4d3548bd148222492f4f58",
+    "pure-earlier.json.gz": "4bedb9d3b349cd458839c3d7acfd918808cc24d2a152b75cacf47e20156b1abd",
+    "stage2.json": "b9eeb45686b6280ce48bdb99b15ff1ff319bbb977175a5df1cafe16cdcbb14b4"
+  },
+  "launch_hashes_count": 159,
+  "captured_source_snapshots_count": 155,
+  "launch_hashes_outside_source_snapshots": [
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage",
+    "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko",
+    "kprog/x86/native_lab/native_link/target/release/native-link",
+    "runner/build-llvmbpf/native_loader/trusted-native-loader"
+  ],
+  "captured_simulator_sha256": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11",
+  "captured_register_write_sha256": "cf27e323c885cdf8258974a8800907af2f6ee56093d7721822b9e75360e72994"
+}

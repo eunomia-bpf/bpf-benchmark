@@ -53,5 +53,24 @@
     "aaf7b9dc425f00ef9ee1f3e18ef0a5ef70e65201",
     "--out",
     "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/standard-batch-outcomes/stage2.json"
+  ],
+  [
+    "taskset",
+    "-c",
+    "16-19",
+    "python3",
+    "kprog/fidelity/audit_micro_batch.py",
+    "--raw",
+    "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/micro-wrapping-epoch/runtime-raw.tar.gz",
+    "--service",
+    "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/micro-wrapping-epoch/runtime-service.tar.gz",
+    "--suite",
+    "micro/config/micro_pure_jit.yaml",
+    "--publication",
+    "9b1a92f5a3b76993c19d844152a7e6bb89a295ab",
+    "--out",
+    "/workspaces/repository/kprog/results/kprog_fidelity_20261107/helper-map/standard-batch-outcomes/pure-wrapping.json",
+    "--original-native-archive",
+    "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/micro-shared-elf/validation-raw.tar.gz"
   ]
 ]
