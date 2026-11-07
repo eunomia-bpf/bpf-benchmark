@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "started": "2026-11-07T13:58:07.726816+00:00",
+  "positive_driver_sha256": "d6319ef0d6dc39de75ef99e83c060c0e1e9cb6c8ff480c9554d0ffcfc3fea92b",
+  "source_pins": {
+    "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+    "kprog/formal/oracles/x86_route_host.c": "5018eb63a68cc030cbbb676e065058288a7eaaa20b7cb5f40f5604ae29e98b5f",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "5c5b3ee437d74c0173e86dbff3da4ffc1f7315837ac20856a662de5928e3fc09",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6"
+  },
+  "unsafe_execution_permitted": false,
+  "finished": "2026-11-07T13:58:46.608745+00:00",
+  "source_pins_after": {
+    "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+    "kprog/formal/oracles/x86_route_host.c": "5018eb63a68cc030cbbb676e065058288a7eaaa20b7cb5f40f5604ae29e98b5f",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "5c5b3ee437d74c0173e86dbff3da4ffc1f7315837ac20856a662de5928e3fc09",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6"
+  },
+  "pins_unchanged": true,
+  "cases": 13,
+  "passed": 13,
+  "archive": "positive-20261107T135846937454Z.tar.gz",
+  "archive_sha256": "39200aa2e3da90504aed56ed18a87ae32a800e61454f50a138fcba813e274eb1"
+}

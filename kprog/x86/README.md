@@ -76,11 +76,13 @@ fidelity. The removed `__x86_p_*` and `__x86_off_*` paths and the removed
 packet-plus-length to packet-end propagation must remain absent.
 
 The entry ABI is represented by `X86_SIM_ENTRY_XDP(ctx)` /
-`X86_SIM_ENTRY_SKB(ctx)`. These macros build a local guest ABI memory object and
-set the ABI entry register to that object's address (`RDI = &abi`, modeled
-`RSP = 0`). For XDP the object contains `data` at offset 0 and `data_end` at
-offset 8. For skb programs the object now mirrors the kernel/eBPF runtime ABI
-used by the linked native micro code: BPF-visible `__sk_buff.cb[]` scratch
+`X86_SIM_ENTRY_SKB(ctx)`. XDP retains the actual verifier context in `RDI`:
+ordinary native stores and memory intrinsics therefore reach that context,
+instead of a writable private copy. Native 64-bit `data`/`data_end` reads at
+offsets 0/8 use the corresponding live typed BPF fields, including offset
+aliases; unmapped reads fail specialization. XDP helpers need no cached-field
+refresh. For skb programs the local guest object still mirrors the
+kernel/eBPF runtime ABI used by the linked native micro code: BPF-visible `__sk_buff.cb[]` scratch
 storage starts at `sk_buff->cb + offsetof(struct qdisc_skb_cb, data)`, the
 BPF `data_end` value is loaded from `sk_buff->cb + offsetof(struct
 bpf_skb_data_end, data_end)`, and packet `data` is loaded from

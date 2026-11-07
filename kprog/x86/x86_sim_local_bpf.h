@@ -264,6 +264,7 @@ struct x86_sim_state {
 	struct x86_sim_skb_abi skb_abi;
 	struct __sk_buff *skb_ctx;
 	void *helper_ctx;
+	__u8 is_xdp;
 	void *helper_abi_base;
 	__u8 abi_kind;
 };
@@ -318,12 +319,14 @@ struct x86_sim_state {
 #define __x86_sim_call_depth (__x86_state->call_depth)
 #define __x86_stack_mem (__x86_state->stack_mem)
 #define __x86_sim_helper_ctx (__x86_state->helper_ctx)
+#define __x86_sim_is_xdp (__x86_state->is_xdp)
 #define __x86_sim_helper_abi_base (__x86_state->helper_abi_base)
 #define __x86_sim_skb_ctx (__x86_state->skb_ctx)
 #define __x86_sim_abi_kind (__x86_state->abi_kind)
 #endif
 
 #define X86_SIM_L_DECLARE_STATE()                                           \
+	__u8 __x86_sim_is_xdp = 0;                 \
 	void *__x86_sim_helper_ctx = (void *)0;                            \
 	void *__x86_sim_helper_abi_base = (void *)0;                       \
 	X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_DECLARE_REG)                       \
@@ -378,18 +381,16 @@ struct x86_sim_state {
 #define X86_SIM_L_ENTRY_STACK_BASE() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_SP)
 
 #define X86_SIM_ENTRY_XDP(CTX)                                               \
-	struct x86_sim_xdp_abi __x86_sim_abi = {                         \
-		.data = (void *)(long)(CTX)->data,                       \
-		.data_end = (void *)(long)(CTX)->data_end,               \
-	};                                                               \
+	struct x86_sim_xdp_abi __x86_sim_abi = {};                                                               \
 	struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;      \
 	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;                    \
 	X86_SIM_L_DECLARE_STATE();                                           \
 	X86_SIM_L_DECLARE_STACK();                                           \
 	__x86_native_stack_base = X86_SIM_L_ENTRY_STACK_BASE();             \
+	__x86_sim_is_xdp = 1;                                        \
 	__x86_sim_helper_ctx = (void *)(CTX);                            \
-	__x86_sim_helper_abi_base = &__x86_sim_abi;                        \
-	__x86_rdi.ptr = &__x86_sim_abi;                                     \
+	__x86_sim_helper_abi_base = (void *)(CTX);                        \
+	__x86_rdi.ptr = (void *)(CTX);                                     \
 	__x86_rdi_tag = X86_SIM_TAG_ABI
 
 #define X86_SIM_ENTRY_SKB(CTX)                                               \
@@ -914,6 +915,33 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 	KPROG_X86_XMM0_ARM((BASE_REG) == X86_RSP)
 
 
+/* Preserve context identity for writes; native pointer-width reads use the
+ * corresponding typed BPF context field. Unknown layouts fail specialization. */
+extern void x86_sim_unmapped_xdp_read(void)
+	__attribute__((error("unmapped native XDP context read")));
+/* Entry-selected representation, erased by specialization. A pointer-null
+ * test would add a branch that the verifier need not eliminate. */
+#define X86_SIM_L_LIVE_XDP() (__x86_sim_is_xdp)
+#define X86_SIM_L_XDP_OFFSET(BASE, OFF)                                   \
+	((__s64)((__u64)(long)(BASE) - (__u64)(long)__x86_sim_helper_ctx + (__u64)(OFF)))
+#define X86_SIM_L_XDP_READ(BASE, OFF, WIDTH)                               \
+	({                                                               \
+		__s64 __x86_xdp_off = X86_SIM_L_XDP_OFFSET((BASE), (OFF)); \
+		struct xdp_md *__x86_xdp_ctx = __x86_sim_helper_ctx;      \
+		__u64 __x86_xdp_value = 0;                                \
+		if ((WIDTH) == X86_WIDTH_64 &&                           \
+		    __x86_xdp_off == KPROG_ABI_XDP_DATA_OFF)              \
+			__x86_xdp_value = (__u64)(long)(void *)(long)     \
+				__x86_xdp_ctx->data;                      \
+		else if ((WIDTH) == X86_WIDTH_64 &&                      \
+			 __x86_xdp_off == KPROG_ABI_XDP_DATA_END_OFF)      \
+			__x86_xdp_value = (__u64)(long)(void *)(long)     \
+				__x86_xdp_ctx->data_end;                  \
+		else                                                     \
+			x86_sim_unmapped_xdp_read();                     \
+		__x86_xdp_value;                                         \
+	})
+
 #define X86_SIM_L_READ_MEM_VALUE(BASE_REG, AUX, IMM, WIDTH, STORE_DISP)      \
 	({                                                                 \
 		void *__x86_l_base_ptr = (void *)0;                      \
@@ -930,7 +958,12 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		void *__x86_l_addr = KPROG_X86_REG_PRESENT(BASE_REG) ?    \
 			KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp) :         \
 			(void *)(unsigned long)__x86_l_disp;              \
-		switch (X86_SIM_L_MEM_READ_SRC(BASE_REG,                 \
+		if (X86_SIM_L_LIVE_XDP() &&                               \
+		    X86_SIM_L_REG_TAG(BASE_REG) == X86_SIM_TAG_ABI)       \
+			__x86_l_value = X86_SIM_L_XDP_READ(              \
+				__x86_l_base_ptr, __x86_l_disp,             \
+				__x86_l_read_mem_width);                   \
+		else switch (X86_SIM_L_MEM_READ_SRC(BASE_REG,                 \
 					       __x86_l_read_mem_width)) {\
 		case KPROG_X86_MEM_SRC_STACK:                            \
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
@@ -978,7 +1011,19 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		void *__x86_l_addr = KPROG_X86_REG_PRESENT(SRC) ?         \
 			KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp) :         \
 			(void *)(unsigned long)__x86_l_disp;              \
-		switch (X86_SIM_L_MEM_READ_SRC(SRC, __x86_l_mem_width)) {\
+		if (X86_SIM_L_LIVE_XDP() &&                               \
+		    X86_SIM_L_REG_TAG(SRC) == X86_SIM_TAG_ABI) {          \
+			__u64 __x86_xdp_value = X86_SIM_L_XDP_READ(       \
+				__x86_l_base_ptr, __x86_l_disp,             \
+				__x86_l_mem_width);                        \
+			__u8 __x86_xdp_tag = KPROG_ABI_LOAD_TAG(          \
+				KPROG_ABI_KIND_XDP, X86_SIM_L_XDP_OFFSET(  \
+					__x86_l_base_ptr, __x86_l_disp),    \
+				X86_SIM_TAG_SCALAR, X86_SIM_TAG_PACKET,     \
+				X86_SIM_TAG_PACKET_END);                   \
+			X86_SIM_L_WRITE_REG_PTR_TAG((DST),               \
+				(void *)(long)__x86_xdp_value, __x86_xdp_tag); \
+		} else switch (X86_SIM_L_MEM_READ_SRC(SRC, __x86_l_mem_width)) {\
 		case KPROG_X86_MEM_SRC_STACK:                            \
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
 				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
@@ -2567,19 +2612,8 @@ extern void __x86_sim_unsupported_helper(void)
 #define X86_SIM_BPF_CALL_bpf_skb_change_head() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_change_head((struct __sk_buff *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (__u64)X86_SIM_L_READ_REG(X86_RDX)))
 
-#define X86_SIM_L_XDP_HELPER_RESULT(EXPR) \
-	do { \
-		X86_SIM_L_HELPER_SCALAR_RESULT(EXPR); \
-		if (__x86_sim_helper_ctx) { \
-			struct xdp_md *__x86_ctx = __x86_sim_helper_ctx; \
-			struct x86_sim_xdp_abi *__x86_abi = __x86_sim_helper_abi_base; \
-			__x86_abi->data = (void *)(long)__x86_ctx->data; \
-			__x86_abi->data_end = (void *)(long)__x86_ctx->data_end; \
-		} \
-	} while (0)
-
 #define X86_SIM_BPF_CALL_bpf_xdp_adjust_head() \
-	X86_SIM_L_XDP_HELPER_RESULT(bpf_xdp_adjust_head((struct xdp_md *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (int)X86_SIM_L_READ_REG(X86_RSI)))
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_head((struct xdp_md *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (int)X86_SIM_L_READ_REG(X86_RSI)))
 
 #define X86_SIM_BPF_CALL_bpf_probe_read_str() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_probe_read_str((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
@@ -2591,13 +2625,13 @@ extern void __x86_sim_unsupported_helper(void)
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_skb_adjust_room((struct __sk_buff *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (__s32)X86_SIM_L_READ_REG(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))
 
 #define X86_SIM_BPF_CALL_bpf_xdp_adjust_meta() \
-	X86_SIM_L_XDP_HELPER_RESULT(bpf_xdp_adjust_meta((struct xdp_md *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (int)X86_SIM_L_READ_REG(X86_RSI)))
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_meta((struct xdp_md *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (int)X86_SIM_L_READ_REG(X86_RSI)))
 
 #define X86_SIM_BPF_CALL_bpf_override_return() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_override_return((struct pt_regs *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)))
 
 #define X86_SIM_BPF_CALL_bpf_xdp_adjust_tail() \
-	X86_SIM_L_XDP_HELPER_RESULT(bpf_xdp_adjust_tail((struct xdp_md *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (int)X86_SIM_L_READ_REG(X86_RSI)))
+	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_xdp_adjust_tail((struct xdp_md *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (int)X86_SIM_L_READ_REG(X86_RSI)))
 
 #define X86_SIM_BPF_CALL_bpf_get_stack() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_get_stack((void *)X86_SIM_L_HELPER_CTX_PTR(X86_RDI), (void *)X86_SIM_L_HELPER_ARG_PTR(X86_RSI), (__u32)X86_SIM_L_READ_REG(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX)))

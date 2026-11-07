@@ -85,7 +85,7 @@ static void model_reset(void)
 	}
 	mc = mz = ms = mo = 0U;
 	/* model_reset runs AFTER the entry glue in every scene; the glue leaves
-	 * rdi = &__x86_sim_abi with TAG_ABI. The model lane mirrors the tag but
+	 * rdi = the actual XDP context with TAG_ABI. The model lane mirrors the tag but
 	 * not the pointer (the sim's own ABI slot address is observable state
 	 * the model can't replay as a constant): COMPARE_REGFILE check the
 	 * tag lane matches and skips only rdi's value lane while the entry
@@ -552,11 +552,19 @@ static __u64 scene_xdp_ret(void)
 		printf("MISMATCH xdp entry skb ctx non-null\n");
 		return 0xDEAD0008ULL;
 	}
-	/* entry lanes: ABI field copies from the xdp ctx */
-	cases = cases + 2U;
-	if (__x86_sim_abi.data != (void *)(long)xdp_ctx.data ||
-	    __x86_sim_abi.data_end != (void *)(long)xdp_ctx.data_end) {
-		printf("MISMATCH xdp entry abi fields\n");
+	/* Native writes must retain the actual context identity. Reads must
+	 * observe current fields, including through an offset alias, rather
+	 * than values copied before a helper could change the packet. */
+	xdp_ctx.data += 0x100U;
+	xdp_ctx.data_end += 0x200U;
+	cases += 3U;
+	if (__x86_rdi.ptr != (void *)&xdp_ctx ||
+	    X86_SIM_L_XDP_READ(__x86_rdi.ptr, KPROG_ABI_XDP_DATA_OFF,
+			       X86_WIDTH_64) != xdp_ctx.data ||
+	    X86_SIM_L_XDP_READ(KPROG_PTR_ADD64_BITS(__x86_rdi.ptr,
+				KPROG_ABI_XDP_DATA_END_OFF), 0,
+			       X86_WIDTH_64) != xdp_ctx.data_end) {
+		printf("MISMATCH xdp context identity or live fields\n");
 		return 0xDEAD000BULL;
 	}
 	RAX_SET(0x34ULL);
@@ -984,7 +992,8 @@ static __u64 scene_ptr_load(unsigned kind, __s64 off, unsigned sel)
 		return 0xDEAD006FULL;
 
 	model_reset();
-	X86_SIM_ENTRY_XDP(&xdp_ctx);
+	/* This scene tests the generic ABI slab, not an XDP context. */
+	X86_SIM_ENTRY_RAW(&xdp_ctx);
 	(void)__x86_sim_ret_addr;
 	(void)__x86_xmm0_lo;
 	(void)__x86_xmm0_hi;
@@ -1044,7 +1053,7 @@ static __u64 scene_ptr_load(unsigned kind, __s64 off, unsigned sel)
 		__u64 want = 0;
 		__u8 want_t = 0U;
 		if (i == X86_RDI) {
-			want = (__u64)(unsigned long)(void *)&__x86_sim_abi;
+			want = (__u64)(unsigned long)(void *)&xdp_ctx;
 			want_t = X86_SIM_TAG_ABI;
 		} else if (i == X86_RSI) {
 			want = (__u64)(unsigned long)(void *)ptr_slab;
@@ -1235,8 +1244,7 @@ static __u64 scene_barrier_lanes(unsigned sel)
 			else if (i == X86_R11)
 				want = 0x7F7E7D7C7B7A7978ULL;
 			else if (i == X86_RDI) {
-				want = (__u64)(unsigned long)(void
-							     *)&__x86_sim_abi;
+				want = (__u64)(unsigned long)(void *)&xdp_ctx;
 				want_t = X86_SIM_TAG_ABI;
 			}
 			if (i == X86_RAX)

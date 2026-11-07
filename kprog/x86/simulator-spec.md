@@ -82,7 +82,14 @@ ordinary architectural register value.
 
 ## Entry ABI
 
-For XDP and skb micro programs, ReverseSim starts with:
+For XDP, `RDI` retains the actual verifier context identity. Native 64-bit
+loads of `data`/`data_end` at offsets 0/8 are represented by the corresponding
+live typed BPF fields; the base-relative offset includes aliases. Unmapped
+native XDP reads fail specialization. Stores and memory intrinsics use the
+actual context, so they receive the verifier's context-access checks rather
+than permissions on a private shadow.
+
+For skb micro programs, the existing entry representation remains:
 
 ```text
 RDI = &guest_abi
@@ -98,13 +105,11 @@ X86_SIM_ENTRY_SKB(ctx);
 
 They may only:
 
-- create guest ABI memory containing the linked native ABI fields;
+- expose the linked native ABI fields through typed context reads or guest ABI memory;
 - declare simulator-local architectural variables and modeled stack storage;
-- set ABI-defined entry state (`RDI = &guest_abi`, modeled `RSP = 0`).
+- set ABI-defined entry state (the actual XDP context, or the skb guest ABI base).
 
-The guest ABI memory object is architectural memory for the linked native entry
-ABI. For XDP, offset 0 holds `ctx->data` and offset 8 holds `ctx->data_end`.
-For skb, the guest object mirrors the kernel BPF runtime ABI used by the linked
+The skb guest object mirrors the kernel BPF runtime ABI used by the linked
 native micro code:
 
 ```text
