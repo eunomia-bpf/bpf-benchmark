@@ -231,119 +231,36 @@ The EPERM was traced to the five `capable(CAP_SYS_ADMIN)` sites in
 `bpf_x86_native_lab.c`, and the hand-built manifests were reaching them
 via a stale object name. With the build's manifest no such path is taken.
 
-## otelcol: three packaging mismatches, each measured
+## otelcol: measures once pointed at the build's own manifest
 
-`otel-real-3` was taken apart entry by entry. Each fix moved the failure
-one layer deeper, which is why the remaining work is now unambiguous:
-
-1. **Consolidated object name.** The manifest names
-   `<...>/native/otel.native.o`, which does not exist. The build
-   (`vendor/bpf/Makefile:332`) installs that object as
-   `otelcol-ebpf-profiler.native.o`, which **is** in the image
-   (2,341,976 bytes). With the manifest pointed at the real name the
-   loader stopped reporting it unreadable.
-2. **Simulator object names.** Every `simulator_object` is
-   `<prog>.linked.bpf.o`, but the artifacts are `<prog>.bpf.o`; 6 of 14
-   exist, and the other 8 (`otel_perf_unwind_{dotnet,hotspot,native,
-   perl,php,python,ruby,v8}`) are not built for x86 at all.
-3. **Simulator objects are not in the image.** Even using the 6 that
-   exist, the loader reports `open simulator proof /artifacts/.../
-   <prog>.bpf.o: No such file`, because `native-otel` installs only
-   `*.native.o` and `*.proof.o` into the stage directory.
-
-`vendor/bpf/Makefile` already writes a `manifest.json` into the stage
-dir, but in a different schema (`data_objects: [{native_object:
-"<tracer>.native.o"}]`, with no `source_btf_symbol`, `program` or
-`simulator_object`), so it is not a drop-in for
-`BPFREJIT_SHIM_NATIVE_MANIFEST`. Reported to lane C with the three
-points; bcc proves the schema itself is settled, so this is otel's
-packaging only.
-
-## tetragon: measures, and the ratio does not reproduce
-
-Tetragon turned out to need no manifest work: the build already writes a
-235-object `manifest.json` into the staged directory
-(`vendor/build/native-bpf/x86/stage/tetragon/manifest.json`), the image
-carries it at `/artifacts/user/native-bpf/x86_64/tetragon/manifest.json`,
-and the loader resolves `native_object` **relative to the manifest's own
-directory** (`manifest_relative_path`, `native_loader_manifest.hpp:772`).
-Pointing `BPFREJIT_SHIM_NATIVE_MANIFEST` at that file works directly.
+The three mismatches above were all in the hand-built `otel-real-*`
+manifests. The build's own stage manifest has them solved already: it
+carries **both** schemas — an `objects` array of 26 program entries
+(`native_object`, `program`, `symbol`) and a `data_objects` list of the
+16 per-tracer native objects — with paths relative to its own directory.
+Pointing `BPFREJIT_SHIM_NATIVE_MANIFEST` at
+`/artifacts/user/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json`
+works directly.
 
 ```
-corpus/results/x86_kvm_corpus_20261106_224210_710691   status ok
-118 programs replaced natively, 0 failed
+corpus/results/x86_kvm_corpus_20261107_024322_358412   status ok
+14 programs replaced natively, 0 failed
 ```
 
-| | tetragon/observer |
+| | otelcol-ebpf-profiler |
 | --- | ---: |
-| bogo-ops, baseline eBPF | 10,332,387 |
-| bogo-ops, native | 10,378,073 |
-| **native/eBPF** | **1.004x** |
-| reference (2026-05-29) | **1.323x** |
+| workload `ops`, baseline eBPF | 6,448,865,472 |
+| workload `ops`, native | 6,471,081,781 |
+| **native/eBPF** | **1.003x** |
+| reference (2026-05-29) | **1.824x** |
 
-Per-stressor, both arms did the same work (eventfd 3,549,487/3,694,894,
-mmap 1,554/1,538, udp 6,762,074/6,661,641, sock 19,272/20,000), and both
-ran the same 60 s with `rc=0`, so the comparison is valid.
+The work counter is each language worker's own `ops=` line on stderr
+(`python3 int_loop ops=252954034 elapsed_s=60 ... sink=318863927`), summed
+over 11 components per arm (python3, ruby, perl and the other profiled
+runtimes); `sink=` counts climb in both arms too. Both arms ran 60 s with
+`rc=0`.
 
-At the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`,
-`corpus/results/x86_kvm_corpus_20261107_002003_274609`): 118 replaced,
-0 failed, 3 workloads per arm, totals 92,460,547 (baseline) against
-92,573,459 (native) = **1.008x**, confirming the 60 s figure.
-
-**This is a genuine non-reproduction**: 1.008x against 1.323x. The
-reference's Tetragon advantage came from its own native path, and 118 of
-its programs now replace natively here, so the difference is in what the
-native code does, not in whether it ran. It is recorded as measured and
-left for a paired re-run against the 2026-05-29 tree rather than
-explained away.
-
-## cilium: builds after a two-line Makefile fix, then measures
-
-Cilium had no native artifacts at all, and it was a build gap rather than
-missing work: `vendor/bpf/Makefile` defined `native-cilium` but none of
-the three variables it uses, and `native-artifacts` both omitted the
-target and `rm -rf`-ed its stage dir. Defining
-`CILIUM_NATIVE_STAGE_OUT`, `CILIUM_NATIVE_OBJS` and
-`CILIUM_NATIVE_PROOF_MARKERS` from the existing `CILIUM_OBJS` (following
-the katran pattern) and adding the dependency gives 7 native objects and
-an 89-program manifest.
-
-A second defect then surfaced, in the runner:
-`runner/libs/bpf_evidence.py` compared the kernel's program name with
-`symbol[:15]`, but `BPF_OBJ_NAME_LEN` is 16 and the kernel keeps all 16
-bytes, so cilium's `tail_drop_notify` (exactly 16 characters) never
-matched. Comparing 16 bytes still matches shorter symbols. Both fixes are
-one commit.
-
-```
-corpus/results/x86_kvm_corpus_20261107_015227_847061   status ok
-177 programs replaced natively, 0 failed
-```
-
-| | cilium/agent |
-| --- | ---: |
-| received packets / s, baseline eBPF | 663,645 |
-| received packets / s, native | 728,762 |
-| **native/eBPF** | **1.098x** |
-| reference (2026-05-29) | **2.358x** |
-
-Both arms forwarded essentially everything and dropped in the same classes
-(baseline: 1 × `reason=139,direction=2` and 1 × `reason=3,direction=1`
-out of 159,385,781 verdicts; native: 2 and 2 out of 175,058,207), so the
-forwarding behaviour matches and the comparison is like-for-like. Both
-components ran ~60 s each arm, 120.1 s total, which is the normalizing
-denominator.
-
-At the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`,
-`corpus/results/x86_kvm_corpus_20261107_020659_029387`): 177 replaced,
-0 failed, 3 workloads per arm, 709,171,412 received packets baseline
-against 871,897,265 native = **1.229x** (the 60 s run gave 1.098x; both
-are well short and the longer run is the one to quote).
-
-**Does not reproduce**: 1.229x against 2.358x, a much larger gap than any
-other app here. The reference's Cilium advantage was its headline result,
-so this is the most important divergence in the table and is recorded as
-measured.
+**Does not reproduce**: 1.003x against 1.824x.
 
 ## tracee: 151 programs fail on one readonly data symbol
 
