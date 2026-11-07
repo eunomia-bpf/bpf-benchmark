@@ -1,0 +1,26 @@
+{
+  "status": "capture_provenance_tool_host_checks_passed_fresh_guest_pending",
+  "utc": "2026-11-07T15:38:42.655498+00:00",
+  "changes": [
+    "explicit fresh output routing; existing historical capture refused without mutation",
+    "running kernel and loaded module GNU build ID receipts",
+    "streamed vmlinux/bzImage SHA256 matched to published structural layout profile"
+  ],
+  "validation": {
+    "note_records": "mixed Linux/GNU and padding PASS",
+    "truncated_note_rejections": 2,
+    "historical_output_preserved": true,
+    "old_summary_sha256": "2a04d18ba6451b73da791384ef8425303d7e155c5175f0180615f3a779e9f951",
+    "cli_help": "PASS",
+    "make_dry_run": "PASS; existing native-only entrypoint, unchanged kernel/module paths"
+  },
+  "remaining": [
+    "fresh native-only guest capture and actual artifact identity checks are pending",
+    "build ID/profile provenance does not establish physical entry/return ABI or compiler correctness"
+  ],
+  "source_sha256": {
+    "kprog/tv/capture_trusted_service.py": "b68d19112f21714523b3882e938c1dadf99554e7bbb3561459fc7dddcc45b2f9",
+    "kprog/tv/Makefile": "138f0172f165b92e1cd95d4ef61686e6b594987246c914210d8ff70ca271eab6",
+    "kprog/tv/README.md": "fd2ac632973fb209ea787c8493a414dd4f473b36dbb92ad60770cb4a9dd080c4"
+  }
+}

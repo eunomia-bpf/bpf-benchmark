@@ -769,6 +769,8 @@ build/trusted-simple-client: trusted_simple_client.cpp ../libnativeloader/build/
 		$< ../libnativeloader/build/libnative_loader.a \
 		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -o $@
 
+TRUSTED_SIMPLE_OUTPUT ?= $(abspath ../results/kprog_tv_20261107/trusted-simple)
+
 .PHONY: trusted-simple-check guest-trusted-simple-check
 trusted-simple-check: build/simple.native.o
 	$(MAKE) -C ../libnativeloader trusted-service
@@ -776,12 +778,12 @@ trusted-simple-check: build/simple.native.o
 	taskset -c 8-11 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
 		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/tv guest-trusted-simple-check'
+		--exec 'make -C kprog/tv guest-trusted-simple-check TRUSTED_SIMPLE_OUTPUT="$(TRUSTED_SIMPLE_OUTPUT)"'
 
 guest-trusted-simple-check:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod build-x86/bpf_x86_native_lab.ko capture_checked=1
-	PATH="/usr/lib/llvm-18/bin:$$PATH" PYTHONDONTWRITEBYTECODE=1 python3 capture_trusted_service.py simple
+	PATH="/usr/lib/llvm-18/bin:$$PATH" PYTHONDONTWRITEBYTECODE=1 python3 capture_trusted_service.py simple --output-dir "$(TRUSTED_SIMPLE_OUTPUT)"
 
 
 build/simple.native.o: ../../micro/programs/simple.bpf.c ../../micro/programs/common.h ../../micro/programs/build-host-docker-x86/kernel_offsets.h

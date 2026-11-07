@@ -1150,6 +1150,17 @@ generates B and the loader captures actual checked bytes and final native RX
 entry before publishing the result. REQUIRE_BOUND and legacy REQUIRE_PREBUILT
 are both1; the accepted result is prebuilt=false.
 
+Fresh captures accept `TRUSTED_SIMPLE_OUTPUT=/absolute/fresh/directory` on
+`make -C kprog/tv trusted-simple-check`; the capture script also exposes
+`--output-dir`. An existing summary or archive is preserved rather than
+overwritten. Each new archive includes raw running-kernel ELF notes, `uname`,
+GNU build-ID comparisons against the cached `vmlinux` and loaded module,
+streamed kernel-image hashes, and the structural XDP layout receipt identity.
+These provenance checks concern this capture tool; the common specialization
+service and application admission are unchanged. A matching layout receipt
+still does not constitute a post-conversion instruction capture or establish
+the physical entry/return ABI.
+
 `kprog/results/kprog_tv_20261107/trusted-simple/` retains the compact result and
 compressed complete request/compiler/kernel/JIT inputs. The two initial
 harness input-selection diagnostics are compressed separately: a previously

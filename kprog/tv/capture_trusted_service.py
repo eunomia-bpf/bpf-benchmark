@@ -4,24 +4,96 @@ One control request, no alternate broker or specialization implementation.
 Raw per-load bytes are compressed, hashed and deleted at completion.
 """
 from pathlib import Path
+import argparse
 import hashlib
 import json
 import os
 import signal
+import struct
 import subprocess
 import tarfile
 import tempfile
-import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-SIMPLE = sys.argv[1:] == ['simple']
-if sys.argv[1:] and not SIMPLE: raise ValueError('expected optional simple case')
-OUT = ROOT / 'kprog/results/kprog_tv_20261107' / ('trusted-simple' if SIMPLE else 'trusted-capture')
 
 def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    value = hashlib.sha256()
+    with path.open('rb') as source:
+        for block in iter(lambda: source.read(1024 * 1024), b''):
+            value.update(block)
+    return value.hexdigest()
+
+
+def gnu_build_ids(notes):
+    """GNU build IDs from little-endian, four-byte aligned ELF note records."""
+    result = []
+    offset = 0
+    while offset < len(notes):
+        if len(notes) - offset < 12:
+            raise ValueError('truncated ELF note header')
+        namesz, descsz, kind = struct.unpack_from('<III', notes, offset)
+        offset += 12
+        name_end = offset + namesz
+        desc_start = (name_end + 3) & ~3
+        desc_end = desc_start + descsz
+        if desc_end > len(notes):
+            raise ValueError('truncated ELF note payload')
+        if notes[offset:name_end] == b'GNU\0' and kind == 3:
+            result.append(notes[desc_start:desc_end].hex())
+        offset = (desc_end + 3) & ~3
+    return result
+
+
+def elf_build_ids(path, receipt):
+    output = subprocess.check_output(['readelf', '-n', str(path)], text=True)
+    receipt.write_text(output)
+    return [line.split('Build ID: ', 1)[1].strip()
+            for line in output.splitlines() if 'Build ID: ' in line]
+
+
+def kernel_identity(live):
+    notes = live / 'running-kernel.notes'
+    notes.write_bytes(Path('/sys/kernel/notes').read_bytes())
+    kernel = ROOT / 'kprog/tv/build-kernel-x86'
+    vmlinux = kernel / 'vmlinux'
+    image = kernel / 'arch/x86/boot/bzImage'
+    profile_path = ROOT / 'kprog/results/kprog_tv_20261107/trusted-simple-kernel-xdp-layout.json'
+    profile = json.loads(profile_path.read_text())
+    result = dict(uname=list(os.uname()), running_notes_sha256=digest(notes),
+        running_build_ids=gnu_build_ids(notes.read_bytes()),
+        vmlinux_build_ids=elf_build_ids(vmlinux, live / 'vmlinux.notes.txt'),
+        kernel_sha256={str(p.relative_to(ROOT)): digest(p) for p in (vmlinux, image)},
+        layout_profile_sha256=digest(profile_path),
+        interpretation='structural XDP layout profile; not a post-conversion instruction capture')
+    result['running_matches_vmlinux'] = (len(result['vmlinux_build_ids']) == 1 and
+        result['running_build_ids'] == result['vmlinux_build_ids'])
+    result['layout_profile_matches_kernel'] = (
+        result['vmlinux_build_ids'] == [profile['kernel_build_id']] and all(
+            profile['source_sha256'][p] == value for p, value in result['kernel_sha256'].items()))
+    module = ROOT / 'kprog/tv/build-x86/bpf_x86_native_lab.ko'
+    module_note = Path('/sys/module/bpf_x86_native_lab/notes/.note.gnu.build-id')
+    if module_note.is_file():
+        raw = live / 'loaded-module.notes'
+        raw.write_bytes(module_note.read_bytes())
+        result['loaded_module_build_ids'] = gnu_build_ids(raw.read_bytes())
+        result['module_file_build_ids'] = elf_build_ids(module, live / 'module.notes.txt')
+        result['loaded_module_matches_file'] = (len(result['module_file_build_ids']) == 1 and
+            result['loaded_module_build_ids'] == result['module_file_build_ids'])
+    (live / 'kernel-identity.json').write_text(json.dumps(result, indent=2) + '\n')
+    return result
+
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('case', nargs='?', choices=['simple'])
+    parser.add_argument('--output-dir', type=Path,
+                        help='fresh result directory (existing captures are preserved)')
+    args = parser.parse_args()
+    SIMPLE = args.case == 'simple'
+    OUT = args.output_dir or ROOT / 'kprog/results/kprog_tv_20261107' / (
+        'trusted-simple' if SIMPLE else 'trusted-capture')
+    if any((OUT / name).exists() for name in ('summary.json', 'artifacts.tar.gz')):
+        raise FileExistsError('capture already exists; select a fresh --output-dir')
     OUT.mkdir(parents=True, exist_ok=True)
     summary = dict(ok=False, program='simple' if SIMPLE else 'return2-control', architecture='x86', route='registered native-only common service')
     with tempfile.TemporaryDirectory(prefix='.live-', dir=OUT) as temporary:
@@ -37,6 +109,11 @@ def main():
             text=True, start_new_session=True)
         lines = []
         try:
+            summary['kernel_identity'] = kernel_identity(live)
+            identity = summary['kernel_identity']
+            if not identity['running_matches_vmlinux'] or not identity['layout_profile_matches_kernel'] or \
+                    identity.get('loaded_module_matches_file') is False:
+                raise RuntimeError('running kernel/module differs from captured build/profile')
             lines.append(service.stdout.readline())
             if not json.loads(lines[-1]).get('ready'):
                 raise RuntimeError('common service did not register')
