@@ -1,0 +1,72 @@
+[
+  {
+    "name": "otel_custom__generic",
+    "returncode": 0,
+    "cause": "compiled"
+  },
+  {
+    "name": "otel_native_tracer_entry",
+    "returncode": 0,
+    "cause": "compiled"
+  },
+  {
+    "name": "otel_perf_go_labels",
+    "returncode": 0,
+    "cause": "compiled"
+  },
+  {
+    "name": "otel_perf_unwind_hotspot",
+    "returncode": 1,
+    "cause": "LLVM out of memory"
+  },
+  {
+    "name": "otel_perf_unwind_native",
+    "returncode": 1,
+    "cause": "LLVM out of memory"
+  },
+  {
+    "name": "otel_perf_unwind_perl",
+    "returncode": 1,
+    "cause": "LLVM out of memory"
+  },
+  {
+    "name": "otel_perf_unwind_php",
+    "returncode": 124,
+    "cause": "timeout"
+  },
+  {
+    "name": "otel_perf_unwind_python",
+    "returncode": 1,
+    "cause": "LLVM out of memory"
+  },
+  {
+    "name": "otel_perf_unwind_ruby",
+    "returncode": 1,
+    "cause": "LLVM out of memory"
+  },
+  {
+    "name": "otel_perf_unwind_stop",
+    "returncode": 0,
+    "cause": "compiled"
+  },
+  {
+    "name": "otel_perf_unwind_v8",
+    "returncode": 124,
+    "cause": "timeout"
+  },
+  {
+    "name": "otel_read_task_struct",
+    "returncode": 0,
+    "cause": "compiled"
+  },
+  {
+    "name": "otel_tracepoint__sched_process_free",
+    "returncode": 0,
+    "cause": "compiled"
+  },
+  {
+    "name": "otel_tracepoint__sched_process_free_pre616",
+    "returncode": 0,
+    "cause": "compiled"
+  }
+]

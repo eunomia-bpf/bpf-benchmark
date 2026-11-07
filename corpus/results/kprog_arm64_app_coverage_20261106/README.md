@@ -987,3 +987,10 @@ against all included bodies before helper/tail cleanup. Exact frozen baseline
 plus ARM patch:79 Rust tests,13 valid ELF controls,14 wrong-mask rejections;
 QEMU8source/proof/bound-native matches and8wrong-mask rejections before upload.
 The simulator/native ISA and matched kernel/module are unchanged.
+
+## Complete frozen OTel direct compiler census
+
+[All14 v8 compiler outcomes](otel-real-v8-result/README.md) are retained:
+7compile,5LLVM OOM,2timeouts,0generation failures. The preclean compiler and
+actual application integration continue separately; these are compiler-stage
+counts and do not establish verifier admission or application completion.
