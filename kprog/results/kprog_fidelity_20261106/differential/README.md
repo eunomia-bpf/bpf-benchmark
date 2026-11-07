@@ -700,3 +700,5 @@ held a deleted file. Restore/regenerate a superseded trace before an explicit
 --reuse-trace command; archived matrix binaries/commands regenerate it.
 
 Canonical x86 MOVX replay:551forms/564224cases, CPU0/modelSP10240,248 remaining encodings. All26 newly checked forms agree with the saved real CPU and C simulator. Exact rows/bytes/inputs/executable/source are in x86-movx-reference/.
+
+Numeric Arm closure: see arm64-numeric/README.md.567forms/580608QEMU-C-reference cases and97control sequences/99328cases have zero mismatches. New static hardware handoffs are retained; hardware execution of this increment remains pending.

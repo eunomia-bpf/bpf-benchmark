@@ -1,4 +1,4 @@
-ARM64_HOST_ENV := -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h
+ARM64_HOST_ENV := -include oracles/arm64_entry_environment_host.h -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h
 .PHONY: check
 
 check:
@@ -512,7 +512,7 @@ check:
 	./build/test_arm64_unary_route_host
 	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_cneg_route_host.c -o build/test_arm64_cneg_route_host
 	./build/test_arm64_cneg_route_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stlxr_route_host.c -o build/test_arm64_stlxr_route_host
+	$(CC) -include oracles/arm64_entry_environment_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_stlxr_route_host.c -o build/test_arm64_stlxr_route_host
 	./build/test_arm64_stlxr_route_host
 	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_reduction_route_host.c -o build/test_arm64_reduction_route_host
 	./build/test_arm64_reduction_route_host
@@ -544,7 +544,7 @@ check:
 	./build/test_arm64_adrp_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_stlxr_host.c -o build/test_arm64_stlxr_host
 	./build/test_arm64_stlxr_host
-	$(CC) -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/stlxr_route_host.c -o build/stlxr_route_host
+	$(CC) -include oracles/arm64_entry_environment_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/stlxr_route_host.c -o build/stlxr_route_host
 	./build/stlxr_route_host
 	$(CC) -Wall -Wextra -O2 -I. oracles/test_arm64_mov_host.c -o build/test_arm64_mov_host
 	./build/test_arm64_mov_host

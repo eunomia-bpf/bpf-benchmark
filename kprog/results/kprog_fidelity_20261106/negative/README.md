@@ -317,3 +317,5 @@ The new D0high-clear program wasGEN1accepted before the fidelity repair and
 now rejects exactscalarNULLmemoryaccess. Per-case full messages, original
 findings and matched artifacts are retained under arm64-current-choice/ and
 arm64-vector-clear/. These do not count as application-program negatives.
+
+Numeric Arm repair now rejects30/30 unsafe bound fixtures, with5 valid spill controls admitted; exact final and prototype evidence is in arm64-numeric/. The new x86 divide-fault item retains8 accepted native#DE programs (load only), plus the existing x86 stack-flags acceptance; see x86-divide-fault/.

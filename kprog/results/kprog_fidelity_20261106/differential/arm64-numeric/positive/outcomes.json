@@ -1,0 +1,40 @@
+{
+  "arch": "arm64",
+  "cases": [
+    {
+      "name": "restore_return",
+      "assembly": "str x30,[sp,#-16]!; ldr x30,[sp],#16; mov w0,#2; ret",
+      "stage": "accepted_finding",
+      "message": "bound program id=8 chunks=1 nonzero_generations=1\n",
+      "returncode": 0
+    },
+    {
+      "name": "restore_stack",
+      "assembly": "mov x1,sp; str x1,[sp,#-16]!; ldr x1,[sp],#16; mov sp,x1; mov w0,#2; ret",
+      "stage": "accepted_finding",
+      "message": "bound program id=16 chunks=1 nonzero_generations=1\n",
+      "returncode": 0
+    },
+    {
+      "name": "restore_pair",
+      "assembly": "mov x1,sp; stp x1,x30,[sp,#-16]!; ldp x1,x30,[sp],#16; mov sp,x1; mov w0,#2; ret",
+      "stage": "accepted_finding",
+      "message": "bound program id=24 chunks=1 nonzero_generations=1\n",
+      "returncode": 0
+    },
+    {
+      "name": "stack_byte_observation",
+      "assembly": "mov x1,sp; str x1,[sp,#-16]!; ldrb w0,[sp]; add sp,sp,#16; ret",
+      "stage": "accepted_finding",
+      "message": "bound program id=32 chunks=1 nonzero_generations=1\n",
+      "returncode": 0
+    },
+    {
+      "name": "return_byte_observation",
+      "assembly": "str x30,[sp,#-16]!; ldrb w0,[sp]; add sp,sp,#16; ret",
+      "stage": "accepted_finding",
+      "message": "bound program id=40 chunks=1 nonzero_generations=1\n",
+      "returncode": 0
+    }
+  ]
+}

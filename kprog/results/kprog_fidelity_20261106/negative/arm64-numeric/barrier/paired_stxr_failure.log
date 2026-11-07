@@ -1,0 +1,79 @@
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=4838
+stub fd_array_cnt=2 fd_array=0:9,1:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=50;1:code=133,dst=0,src=4,off=1,imm=126378;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (b7) r2 = 0                        ; R2=0
+1: (7b) *(u64 *)(r10 -24) = r2        ; R2=0 R10=fp0 fp-24=0
+2: (b7) r0 = 2                        ; R0=scalar()
+3: (bf) r1 = r0                       ; R0=scalar(id=1) R1=scalar(id=1)
+4: (18) r0 = 0xfffffff8               ; R0=0xfffffff8
+6: (bf) r4 = r2                       ; R2=0 R4=0
+7: (5f) r4 &= r0                      ; R0=0xfffffff8 R4=0
+8: (77) r4 >>= 3                      ; R4=0
+9: (bf) r3 = r2                       ; R2=0 R3=0
+10: (57) r3 &= 7                      ; R3=0
+11: (55) if r3 != 0x0 goto pc+19      ; R3=0
+12: (bf) r3 = r4                      ; R3=0 R4=0
+13: (67) r3 <<= 3                     ; R3=0
+14: (bf) r5 = r10                     ; R5=fp0 R10=fp0
+15: (07) r5 += -16                    ; R5=fp-16
+16: (0f) r5 += r3                     ; R3=0 R5=fp-16
+17: (b7) r3 = 2                       ; R3=2
+18: (7b) *(u64 *)(r5 +0) = r3         ; R3=2 R5=fp-16 fp-16=2
+19: (57) r4 &= 536870904              ; R4=0
+20: (bf) r3 = r10                     ; R3=fp0 R10=fp0
+21: (07) r3 += -24                    ; R3=fp-24
+22: (0f) r3 += r4                     ; R3=fp-24 R4=0
+23: (57) r2 &= 56                     ; R2=0
+24: (b7) r4 = 255                     ; R4=255
+25: (6f) r4 <<= r2                    ; R2=0 R4=255
+26: (a7) r4 ^= -1                     ; R4=-256
+27: (79) r2 = *(u64 *)(r3 +0)         ; R2=0 R3=fp-24 fp-24=0
+28: (5f) r2 &= r4                     ; R2=0 R4=-256
+29: (7b) *(u64 *)(r3 +0) = r2         ; R2=0 R3=fp-24 fp-24=0
+30: (05) goto pc+86
+117: (b7) r2 = 0                      ; R2=0
+118: (bf) r3 = r2                     ; R2=0 R3=0
+119: (57) r3 &= 7                     ; R3=0
+120: (55) if r3 != 0x0 goto pc+7      ; R3=0
+121: (67) r2 <<= 32                   ; R2=0
+122: (77) r2 >>= 32                   ; R2=0
+123: (bf) r3 = r10                    ; R3=fp0 R10=fp0
+124: (07) r3 += -16                   ; R3=fp-16
+125: (0f) r3 += r2                    ; R2=0 R3=fp-16
+126: (79) r3 = *(u64 *)(r3 +0)        ; R3=2 fp-16=2
+127: (05) goto pc+6
+134: (b7) r2 = 0                      ; R2=0
+135: (b7) r4 = 0                      ; R4=0
+136: (bf) r5 = r4                     ; R4=0 R5=0
+137: (57) r5 &= 7                     ; R5=0
+138: (55) if r5 != 0x0 goto pc+18     ; R5=0
+139: (bf) r5 = r4                     ; R4=0 R5=0
+140: (77) r5 >>= 3                    ; R5=0
+141: (57) r5 &= 536870904             ; R5=0
+142: (bf) r0 = r10                    ; R0=fp0 R10=fp0
+143: (07) r0 += -24                   ; R0=fp-24
+144: (0f) r0 += r5                    ; R0=fp-24 R5=0
+145: (79) r5 = *(u64 *)(r0 +0)        ; R0=fp-24 R5=0 fp-24=0
+146: (57) r4 &= 56                    ; R4=0
+147: (7f) r5 >>= r4                   ; R4=0 R5=0
+148: (bf) r4 = r5                     ; R4=0 R5=0
+149: (57) r4 &= 255                   ; R4=0
+150: (15) if r4 == 0x0 goto pc+6      ; R4=0
+157: (b7) r6 = 1                      ; R6=1
+158: (b7) r5 = 0                      ; R5=0
+159: (b7) r0 = 20                     ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))
+160: (55) if r0 != 0x0 goto pc+7 168: R0=1 R1=scalar() R2=0 R3=2 R4=0 R5=0 R6=1 R10=fp0 fp-16=2 fp-24=0
+168: (b7) r1 = 0                      ; R1=0
+169: (61) r1 = *(u32 *)(r1 +0)
+R1 invalid mem access 'scalar'
+processed 100 insns (limit 1000000) max_states_per_insn 0 total_states 5 peak_states 5 mark_read 0
+
+native_lab stub context: prog_type=6 blob_bytes=52 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126378
+native_blob_diag: fnv64=99cbebdf4869bc15 word_count=13 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=52 final_size_matches=1
+chunk_bytes=0:52
+reloc_targets=20:0x140000009f
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
