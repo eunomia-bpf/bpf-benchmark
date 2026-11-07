@@ -40,6 +40,12 @@ The operator's knobs call for stats on and off. Stats-off
 (`BPFREJIT_CORPUS_BPF_STATS=0`, confirmed `bpf_stats: false` in each
 run's metadata) removes the runtime-counter overhead from the workload.
 
+Statistic: **median of each arm's per-sample totals**, not the mean. With
+three samples one outlier moves a mean by 18% while the median moves by
+0.2% — the tetragon case below is exactly that, and it is why the rule is
+stated rather than assumed. Every run here was checked for sample spread
+and only that one run exceeded 10%.
+
 | app | stats on | stats off | replacements |
 | --- | ---: | ---: | --- |
 | bcc/set | 1.002x | **1.000x** | 18 |
