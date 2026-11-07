@@ -1,3 +1,4 @@
+import KProgFormal.Generated.GeneratedX86MemAux
 import KProgFormal.Generated.GeneratedX86Specialization
 import KProgFormal.Generated.GeneratedX86DispatchFamily
 import KProgFormal.Refinement.X86NumericAddress
@@ -537,6 +538,59 @@ def movxRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment
   pure ⟨nativeRegisters env frame arena
     (extendRegister env frame arena state sourceWidth targetWidth signed destination source nextPc), [], none⟩
 
+/-- Encoded absent operands use byte255; present operands select their
+actual GPR cell. This interface retains the complete native source state. -/
+def optionalRegisterByte (reg : Option Register) : Byte :=
+  (reg.map registerByte).getD 255
+
+def optionalRegisterOf (code : Byte) : Option (Option Register) :=
+  if code = 255 then some none else (registerOf code).map some
+
+theorem optional_register_of_byte (reg : Option Register) :
+    optionalRegisterOf (optionalRegisterByte reg) = some reg := by
+  cases reg with
+  | none => rfl
+  | some reg =>
+      have distinct : registerByte reg ≠ (255 : Byte) := by
+        intro equal
+        have eq := congrArg BitVec.toNat equal
+        have bound := reg.isLt
+        change reg.val % 256 = 255 at eq
+        omega
+      change optionalRegisterOf (registerByte reg) = some (some reg)
+      unfold optionalRegisterOf
+      rw [if_neg distinct, register_of_byte]
+      rfl
+
+/-- Native effective-address operands, sampled before destination writeback.
+The generated offset contract uses full64-bit displacement bits and the
+actual AUX scale byte. Legal native scale encodings are0..3. -/
+def leaAddress (state : Reference.X86.State) (base index : Option Register)
+    (aux : BitVec 32) (displacement : Reference.Word) : Reference.Word :=
+  (base.map state.gpr).getD 0 + GeneratedX86MemOffset.value index.isSome
+    ((GeneratedX86MemAux.scaleLog2 aux).setWidth 64) displacement
+    ((index.map state.gpr).getD 0)
+
+/-- Shared LEA macro body, including its leading readonly-literal arm.
+All address reads precede the existing RSP/STACK-aware writer. The wrapping
+bitvector offset is the contract of the published unsigned-helper correction. -/
+def leaRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) := do
+  let width ← cmovWidthOf flags
+  let destination ← registerOf dst
+  if width = .w64 ∧ src = 255 ∧ aux = 1 then
+    pure ⟨nativeRegisters env frame arena (registerPc
+      (writeRegister env frame arena state .w64 (.low destination) value) nextPc), [], none⟩
+  else
+    let source ← optionalRegisterOf src
+    let index ← optionalRegisterOf ((GeneratedX86MemAux.index aux).setWidth 8)
+    let offset := GeneratedX86MemOffset.value index.isSome
+      ((GeneratedX86MemAux.scaleLog2 aux).setWidth 64) value
+      (leaBaseValue env frame arena state index)
+    pure ⟨nativeRegisters env frame arena
+      (leaRegister env frame arena state width destination source offset nextPc), [], none⟩
+
 /-- Partial ordered register dispatcher. MOVX follows the existing NOP/MOV
 prefix and precedes the ALU, compare and singleton register gates. Distinct
 opcode identities preserve selection across the covered handler families.
@@ -551,6 +605,8 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         movxRegisters env frame arena false flags aux dst src nextPc state
       else if code = GeneratedX86Opcode.code .movsxReg then
         movxRegisters env frame arena true flags aux dst src nextPc state
+      else if code = GeneratedX86Opcode.code .lea then
+        leaRegisters env frame arena flags aux dst src value nextPc state
       else if aluImmediateHandled code then
         aluImmediateRegisters env frame arena flags aux dst value nextPc state
       else if code = GeneratedX86DispatchFamily.code .cmpImm then do
@@ -684,6 +740,26 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
   | move (code : Nat) (native : Reference.X86.Instruction)
       (fields : MoveBinding flags aux dst src value nextPc code native) :
       RegisterBinding flags aux dst src value nextPc nativeState code native
+  | lea (width : Reference.X86.CmovWidth) (destination : Register) (base index : Option Register)
+      (widthField : WidthBinding flags (cmovScalarWidth width))
+      (dstField : dst = registerByte destination) (baseField : src = optionalRegisterByte base)
+      (indexField : (GeneratedX86MemAux.index aux).setWidth 8 = optionalRegisterByte index)
+      (scaleField : index.isSome = true → (GeneratedX86MemAux.scaleLog2 aux).toNat < 4)
+      (ordinary : width = .w64 → src = 255 → aux ≠ 1) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .lea)
+        (.lea width destination (leaAddress nativeState base index aux value) nextPc)
+  | leaAddress32 (destination : Register) (base index : Option Register)
+      (widthField : WidthBinding flags .w32)
+      (dstField : dst = registerByte destination) (baseField : src = optionalRegisterByte base)
+      (indexField : (GeneratedX86MemAux.index aux).setWidth 8 = optionalRegisterByte index)
+      (scaleField : index.isSome = true → (GeneratedX86MemAux.scaleLog2 aux).toNat < 4) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .lea)
+        (.lea .w64 destination (((leaAddress nativeState base index aux value).setWidth 32).setWidth 64) nextPc)
+  | leaLiteral (destination : Register)
+      (widthField : WidthBinding flags .w64) (dstField : dst = registerByte destination)
+      (baseField : src = 255) (literalField : aux = 1) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .lea)
+        (.lea .w64 destination value nextPc)
   | doubleShift (width : Reference.X86.CmovWidth) (left : Bool)
       (destination source : Register) (encoded : Byte)
       (widthField : WidthBinding flags (cmovScalarWidth width))
@@ -912,6 +988,26 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
       RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86DispatchSingleton.code .xchg)
         (.exchange width (.low destination) (.low source) nextPc)
 
+/-- The corrected producer's RCX unit-index form uses RCX as its base.
+The binding derives the original canonical effective address from that same
+incoming RCX, including every wrapping displacement and destination alias. -/
+theorem lea_unit_rcx_binding (state : Reference.X86.State) (flags : Byte)
+    (destination : Register) (displacement nextPc : Reference.Word)
+    (widthField : WidthBinding flags .w64) :
+    RegisterBinding flags 255 (registerByte destination) (registerByte 1)
+      displacement nextPc state (GeneratedX86Opcode.code .lea)
+      (.lea .w64 destination (X86Lea.address 0 displacement true 0 (state.gpr 1)) nextPc) := by
+  have binding : RegisterBinding flags 255 (registerByte destination) (registerByte 1)
+      displacement nextPc state (GeneratedX86Opcode.code .lea)
+      (.lea .w64 destination (leaAddress state (some 1) none 255 displacement) nextPc) :=
+    .lea .w64 destination (some 1) none widthField rfl rfl rfl (by simp) (by decide)
+  have address : leaAddress state (some 1) none 255 displacement =
+      X86Lea.address 0 displacement true 0 (state.gpr 1) := by
+    change state.gpr 1 + displacement = 0 + (displacement + (state.gpr 1 <<< (0 : Nat)))
+    simp only [Reference.Word]
+    bv_decide
+  simpa only [address] using binding
+
 /-- SHLD/SHRD CL reads the byte from the same incoming raw RCX frame.
 Count capture precedes every destination assignment, including destination RCX. -/
 theorem double_shift_cl_binding (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
@@ -962,6 +1058,7 @@ private theorem exact_dispatch_refines {native : Reference.X86.Instruction} {bef
     ∃ actual, dispatched = some actual ∧ Reference.X86.Step native before actual :=
   ⟨Reference.X86.step native before, same, rfl, rfl, rfl⟩
 
+set_option maxHeartbeats 800000 in
 /-- One complete raw-frame step for the currently lifted register opcodes:
 NOP/MOV/CMOV+SETCC(all16)/BSWAP/POPCNT/XCHG/ROR(imm8+CL)/SHIFTX/RORX/ANDN/BZHI/BT plus logical/arithmetic/unary/multiply/shift ALU-register
 and immediate family payloads and CMP/TEST register/immediate forms. Neither component handler
@@ -979,6 +1076,53 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
   | move code native fields =>
       apply exact_dispatch_refines
       simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
+  | lea width destination base index widthField dstField baseField indexField scaleField ordinary =>
+      apply exact_dispatch_refines
+      have widthDecoded := cmov_width_binding_decodes flags width widthField
+      have normal : ¬(width = .w64 ∧ src = 255 ∧ aux = 1) := by
+        intro h; exact ordinary h.1 h.2.1 h.2.2
+      have body : leaRegisters env frame arena flags aux dst src value nextPc state =
+          some (Reference.X86.step
+            (.lea width destination (leaAddress (nativeRegisters env frame arena state) base index aux value) nextPc)
+            (nativeRegisters env frame arena state)) := by
+        simp only [leaRegisters, widthDecoded, dstField, register_of_byte, Option.bind_some]
+        change (if width = .w64 ∧ src = 255 ∧ aux = 1 then _ else _) = _
+        rw [if_neg normal]
+        simpa [baseField, indexField, optional_register_of_byte, leaAddress, leaBaseValue, nativeRegisters] using
+          congrArg some (lea_register_frame_refines env frame arena state width destination base
+            (GeneratedX86MemOffset.value index.isSome
+              ((GeneratedX86MemAux.scaleLog2 aux).setWidth 64) value
+              (leaBaseValue env frame arena state index)) nextPc)
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove,
+        GeneratedX86Opcode.code, GeneratedX86DispatchSingleton.code] using body
+  | leaAddress32 destination base index widthField dstField baseField indexField scaleField =>
+      apply exact_dispatch_refines
+      have widthDecoded := cmov_width_binding_decodes flags .w32 widthField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, leaRegisters,
+        GeneratedX86Opcode.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, dstField, register_of_byte, baseField, indexField,
+        optional_register_of_byte, leaAddress, leaBaseValue, nativeRegisters] using
+        congrArg some (lea_address32_frame_refines env frame arena state destination base
+          (GeneratedX86MemOffset.value index.isSome
+            ((GeneratedX86MemAux.scaleLog2 aux).setWidth 64) value
+            (leaBaseValue env frame arena state index)) nextPc)
+  | leaLiteral destination widthField dstField baseField literalField =>
+      apply exact_dispatch_refines
+      have widthDecoded := cmov_width_binding_decodes flags .w64 widthField
+      have body : leaRegisters env frame arena flags aux dst src value nextPc state =
+          some (Reference.X86.step (.lea .w64 destination value nextPc)
+            (nativeRegisters env frame arena state)) := by
+        simp only [leaRegisters, widthDecoded, dstField, register_of_byte, Option.bind_some,
+          baseField, literalField, and_self, ↓reduceIte]
+        change some (⟨nativeRegisters env frame arena (registerPc
+          (writeRegister env frame arena state .w64 (.low destination) value) nextPc), [], none⟩ :
+          Transition Reference.X86.State) = _
+        rw [native_register_pc, native_register_write]
+        simp only [register_write64, Reference.X86.RegisterSlice.reg, Reference.X86.step,
+          Reference.X86.writeValue]
+        rfl
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove,
+        GeneratedX86Opcode.code, GeneratedX86DispatchSingleton.code] using body
   | doubleShift width left destination source encoded widthField dstField srcField countField =>
       apply exact_dispatch_refines
       subst dst; subst src
@@ -1322,7 +1466,7 @@ def directRegisterOpcode : GeneratedX86Specialization.Op → Option GeneratedX86
   | .setcc => some .setcc | .ror => some .ror | .rorx => some .rorx
   | .andn => some .andn | .bt => some .bt | .btImm => some .btImm
   | .imulImm => some .imulImm
-  | .mulx => some .mulx
+  | .mulx => some .mulx | .lea => some .lea
   | .movzxReg => some .movzxReg | .movsxReg => some .movsxReg
   | .addImm => some .addImm | .aluImm => some .aluImm
   | .addReg => some .addReg | .xorReg => some .xorReg | .aluReg => some .aluReg
@@ -1357,6 +1501,7 @@ def specializedRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvi
       let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
       let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
       pure ⟨nativeRegisters env frame arena (moveRegister env frame arena state width destination source nextPc), [], none⟩
+  | .lea => leaRegisters env frame arena flags aux dst src value nextPc state
   | .movzxReg => movxRegisters env frame arena false flags aux dst src nextPc state
   | .movsxReg => movxRegisters env frame arena true flags aux dst src nextPc state
   | .mulx => do

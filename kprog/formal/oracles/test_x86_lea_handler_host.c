@@ -63,14 +63,14 @@ struct lea_result {
 /* Part 1: the shared effective-address offset contract.              */
 
 /* Independent oracle: explicit power-of-two multiply and signed accumulate,
- * truncated to 64 bits on return. The shift amount is reduced modulo 64
- * because both the generated macro's `<<` and Lean's `<<<` do. */
+ * truncated to64 bits on return. A logical shift by at least64 contributes
+ * zero, as specified by the total BitVec64 shift contract. */
 static __u64 offset_oracle(int has_index, __u8 scale, __u64 disp, __u64 index)
 {
 	__int128 acc = (__int128)(__s64)disp;
 
-	if (has_index)
-		acc += (__int128)index * ((__int128)1 << (scale & 63U));
+	if (has_index && scale < 64U)
+		acc += (__int128)index * ((__int128)1 << scale);
 	return (__u64)(__s64)(acc & 0xffffffffffffffffLL);
 }
 
@@ -198,12 +198,7 @@ static struct lea_result oracle_lea(__u64 old, __u8 old_tag, __u8 src_reg,
 	__u64 sum;
 	(void)old_tag;
 
-	if (has_index)
-		off = (__u64)((__s64)raw_imm +
-			      (__s64)(index <<
-				      (X86_MEM_AUX_SCALE_LOG2(aux) & 63U)));
-	else
-		off = raw_imm;
+	off = offset_oracle(has_index, X86_MEM_AUX_SCALE_LOG2(aux), raw_imm, index);
 
 	if (width == X86_WIDTH_64 && src_is_none &&
 	    aux == X86_LEA_AUX_RODATA) {
@@ -275,7 +270,7 @@ static const __u64 disps[] = { 0x0ULL, 1ULL, 8ULL, 0x10ULL, ~0ULL,
 static const __u64 indexes[] = { 0x0ULL, 1ULL, 3ULL, 0x10ULL, ~0ULL,
 				 0x8000000000000000ULL,
 				 0xfffffffffffffff8ULL };
-static const __u8 scales[] = { 0, 1, 2, 3, 5, 200 };
+static const __u8 scales[] = { 0, 1, 2, 3, 5, 63, 64, 127, 200, 255 };
 static const unsigned widths[] = { X86_WIDTH_8, X86_WIDTH_16, X86_WIDTH_32,
 				   X86_WIDTH_64 };
 

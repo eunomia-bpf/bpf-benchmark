@@ -15,12 +15,13 @@ specialization token also has its own row.
 | Additional partial-model handler families | 37/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 69/71 |
 | Declared opcode dispatcher gaps | 0 | 2/71 |
-| O2 C-model token-body equality | 30/75 | 0/71 |
+| Additional wrapping-model dispatcher arm | 1/75 | 0/71 |
+| O2 C-model token-body equality | 31/75 | 0/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 65/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 5/71 |
 
-The 30 x86 O2 equalities cover 22 direct bodies and eight unchanged generic calls.
+The 31 x86 O2 equalities cover 23 direct bodies and eight unchanged generic calls.
 The remaining 37 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
@@ -36,7 +37,7 @@ the current 75/71 numeric catalogs. Five x86 compatibility aliases have separate
 rows and are excluded from operation/token totals. Numeric tokens, native
 instruction forms and control composites retain their distinct identities.
 
-Replay integration uses F's published input set `a13de4544662b94f6766be8aaa0f44d2f0c9fbee`
+Replay integration uses F's published input set `0265b6ff6be1ce7421dfb16b354bf5d9732f1374`
 ([source ledger](../kprog_fidelity_20261107/differential/replay-inputs/README.md)).
 Each `replay_source_epochs` cell records the actual backend, source snapshot,
 simulator/executable/reference hashes, selected forms, all three comparison
@@ -52,11 +53,16 @@ totals with each proof/status-changing publication; T supplies token/link-law
 status and F supplies source-pinned replay inputs. Safety evidence follows the
 universal simulator, token and transformation laws. Historical individual-program
 proof artifacts remain frozen.
-LEA's raw pointer/numeric frame, address-size32 case and unit-index/base step
-identity are proved. Its production-field bridge includes the RCX AUX-marker
-normalization and defined64-bit offset accumulation in the tested
-[correction patch](lea-corrections.patch.gz). The handler/dispatcher/O2 totals
-retain their30-operation scope while C aligns the production source epoch.
+LEA has universal optional-GPR/AUX field decoding, ordinary/readonly-literal/
+address32 dispatcher composition, corrected unit-RCX address binding and direct
+O2 body equality. The generated offset uses defined unsigned accumulation and
+total logical shifts, with62400 LEA-oracle and8401 offset-oracle UBSan cases.
+Production unit-RCX normalization is adopted. The remaining RSP-source signed
+sum has a tested [unsigned correction](lea-stack-wrapping.patch.gz):8192 full
+register/tag/flag/stack cases agree. C owns its coherent production adoption;
+raw-production totals retain30 while the C-model O2 total advances to31.
+The added finite CL replay epochs contribute98304 observations and preserve
+the66/75 numeric replay total and each original source identity.
 <!-- COVERAGE END -->
 
 <!-- O4 COVERAGE START -->
@@ -3120,3 +3126,28 @@ original signed accumulation emits `add nsw i64`; the unsigned correction
 emits `add i64`, preserving modular64-bit arithmetic in the compiled proof
 body. Both LLVM IR files, source and compiler receipt are archived under
 `LEA MEMORY OFFSET BPF WRAPPING IR`, alongside the8,401-case UBSan result.
+
+### LEA fields, dispatcher and token continuation
+
+The optional-register decoder, full AUX index/scale/displacement reads and the
+readonly-literal priority now connect the LEA raw-frame core through the ordered
+dispatcher. Ordinary addressing and address-size32 use the same incoming native
+projection; unit-scale RCX normalization derives its original effective address
+for every destination and wrapping displacement. The direct LEA token shares
+the body with its interpreter arm. All39 existing dispatcher theorem signatures
+are retained.
+
+The focused132-target build, default Lean build and12 axiom audits pass. Audits
+record propext, Classical.choice, Quot.sound and Lean.ofReduceBool; token identity
+uses the kernel's decidable reduction. Existing UBSan oracles pass48553 routed
+LEA,62400 composed LEA and8401 offset cases. The composition oracle retains its
+original vectors/random cases and adds63/64/127/255 scale boundaries. Its earlier
+UBSan failure at scale200 and the original modulo-shift expectation remain in
+the archived diagnostics. The generated Lean and canonical ISA bytes are retained.
+
+An actual RSP-source macro boundary at LONG_MAX+1 exposes a remaining signed
+addition. The published one-expression unsigned patch passes8192 whole-frame
+cases across16 source words,16 displacements,16 destinations and two flag seeds.
+C owns its adoption into a coherent source epoch. LEA therefore carries one
+proved wrapping-model dispatcher/token arm while raw production totals retain30.
+The integration JSON/raw archive records all inputs, failures and passing receipts.

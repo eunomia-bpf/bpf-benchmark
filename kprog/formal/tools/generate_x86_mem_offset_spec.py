@@ -18,6 +18,9 @@ two's-complement domain: the C code accumulates the displacement and shifted
 index in `__u64`, then presents the resulting bits as a signed offset. The
 contract states this accumulation as `BitVec 64` addition. `KProgFormal/X86MemOffset.lean` records that equivalence explicitly.
 
+Scale bytes at least64 contribute zero, matching the total logical shift in
+Lean; native encoded exponents0..3 keep their existing result.
+
 The C macro evaluates the displacement once and (only when an index is
 present) the scale byte and the already-read index once; it writes no flags.
 """
@@ -80,7 +83,8 @@ def render_c(spec: dict) -> str:
         "\t\t\t\tX86_MEM_AUX_SCALE_LOG2(AUX);",
         "\t\t\t__u64 __kprog_x86_mo_index = (INDEX_VALUE);",
         "\t\t\t__kprog_x86_mo_result +=",
-        "\t\t\t\t(__kprog_x86_mo_index << __kprog_x86_mo_scale);",
+        "\t\t\t\t(__kprog_x86_mo_scale < 64U ?",
+        "\t\t\t\t (__kprog_x86_mo_index << __kprog_x86_mo_scale) : 0);",
         "\t\t}",
         "\t\t(__s64)__kprog_x86_mo_result;",
         "\t})",

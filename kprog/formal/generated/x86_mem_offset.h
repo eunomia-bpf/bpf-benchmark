@@ -28,7 +28,8 @@
 				X86_MEM_AUX_SCALE_LOG2(AUX); \
 			__u64 __kprog_x86_mo_index = (INDEX_VALUE); \
 			__kprog_x86_mo_result += \
-				(__kprog_x86_mo_index << __kprog_x86_mo_scale); \
+				(__kprog_x86_mo_scale < 64U ? \
+				 (__kprog_x86_mo_index << __kprog_x86_mo_scale) : 0); \
 		} \
 		(__s64)__kprog_x86_mo_result; \
 	})
