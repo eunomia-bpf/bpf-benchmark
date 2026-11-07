@@ -334,5 +334,33 @@
       "path": "/workspaces/repository/kprog/results/kprog_tv_20261106/programs.jsonl",
       "allocated_bytes": 11415552
     }
-  ]
+  ],
+  "followup": {
+    "source_commit": "5d545ea7b",
+    "rule": "exact T duplicate cache paths checked against /proc cwd/exe/fd/cmdline and live launch scripts; completed raw outputs summarized before deletion",
+    "allocated_bytes_removed": 43343872,
+    "entries_removed": 60,
+    "removed_duplicate_builds": [
+      {
+        "path": "/workspaces/repository/kprog/libnativeloader/build-tv-binding",
+        "allocated_bytes": 13434880
+      },
+      {
+        "path": "/workspaces/repository/kprog/libnativeloader/build-tv-context-v2-arm64",
+        "allocated_bytes": 14671872
+      },
+      {
+        "path": "/workspaces/repository/kprog/libnativeloader/build-tv-input-abi2",
+        "allocated_bytes": 11976704
+      }
+    ],
+    "retained": [
+      "T/STOP unchanged",
+      "T prompt/last/turns and paired-context-v2 BCC input",
+      "canonical libnativeloader/build and build-arm64",
+      "current TV kernel/module/checker cache",
+      "all foreign/shared incremental caches"
+    ],
+    "raw_results": "source-query v4, frontend v8, numeric controls v7 and ARM library v5 summarized in trusted-transport.json/trusted-client.json; C keeps compressed actual app/service counterexamples"
+  }
 }
