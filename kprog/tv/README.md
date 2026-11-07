@@ -2351,3 +2351,20 @@ boundary, without adding an instruction or runtime check. Host prologue/
 epilogue/return memory operations remain separate and retained. Current-image
 wrapper composition, actual caller/context/stack provenance and other programs
 remain open. Reproduce with the embedding-certificate Make target.
+
+`trusted-simple-b29-current-wrapper.json` composes the same fresh image's
+actual prologue with bound/checked B29 payload effects, and its actual
+POP/LEAVE/JMP with the live C3 return. The fresh return displacement resolves
+the captured JIT base to its own kernel return symbol. Both PUSH writes and
+all three recovery/return reads remain in their respective ordered traces.
+Actual physical payload execution proves ABI preservation and derives SP/BP/
+R15 before the epilogue; no restored native endpoint is assumed. Canonical
+wrapper read/address/return-target faults retain exact partial state/effects.
+All21 audits pass using the single reference ISA.
+
+Caller writable slots, canonical frame/return target, actual saved-word reads,
+post-prologue memory matching the admitted B entry and physical provenance
+remain explicit premises. The missing kernel stack/packet separation and
+context-conversion obligations are not discharged by assuming those reads.
+The earlier wrapper's pure frame constructors are reused, while actual fresh
+bytes and return address are checked anew. No new guest run or timing is used.

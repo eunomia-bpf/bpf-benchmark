@@ -1,0 +1,179 @@
+{
+  "accepted_B_sha256": "45062cd04b8ae6b7ffe0d5f1ea42f61bb2041ad5f44a8a034482b238bf94c53c",
+  "native_sha256": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+  "capture_commit": "20e29a661f0a1708336126f2e90e8d4589a5ff6d",
+  "capture_archive_sha256": "cf734cc29bfa67762abddb624075d282e1f297cfa9ad5c415bf51e46117abda7",
+  "actual_JIT_sha256": "bc6517907c5cbdcfdf7278706b418e716f57ad7aeebde67b9ecd4d530e89e121",
+  "actual_JIT_hex": "0f1f4400000f1f00554889e54157488b0f488b57084889ce31c04839d6772b488d7e084839d777224883c6484839d6771966c7014e61c64102bcc7410300000000c6410700b802000000415fc9e9be2fc1df",
+  "actual_JIT_bytes": 82,
+  "payload_span": [
+    14,
+    74
+  ],
+  "captured_invocation_layout": {
+    "jit_base": 18446744072640010384,
+    "native_entry": 18446744072640010398,
+    "native_end": 18446744072640010458,
+    "native_bytes": 60,
+    "caller_SP_to_body_SP": -16,
+    "saved_BP_offset": -8,
+    "saved_R15_offset": -16,
+    "return_target": 18446744072099023008,
+    "kernel_symbol": "its_return_thunk",
+    "kernel_relocation": 503316480,
+    "runtime_return_text_verified": true,
+    "runtime_thunk_text": "captured stable C3/CC before and after execution"
+  },
+  "utc": "2026-11-07T19:13:38.566875+00:00",
+  "status": "same_fresh_JIT_entry_payload_checked_effects_ABI_preservation_epilogue_and_actual_return_semantics_composed_under_explicit_physical_stack_read_premises",
+  "claims": [
+    "Every wrapper code slice is decoded from the SAME fresh82-byte image as the physical payload theorem. Its current E9 displacement dfc12fbe resolves actual base18446744072640010384 to live return symbol18446744072099023008. No older session return displacement/base/target is substituted.",
+    "Actual prologue execution retains two ordered PUSH writes and the complete resulting body entry state, including SP bias-16, BP saved at-8, savedR15 at-16 and unchanged context/other fields.",
+    "Actual prologue plus verifier acceptance/soundness, admitted B29 entry, complete Artifact binding and physical payload TV imply that all P60 body prefix events are checked; host wrapper stack events remain retained separately.",
+    "ABI frame preservation follows from every actual physical payload prefix reflected to the canonical native semantics, including fault prefixes. Final native SP/BP/R15 equalities are derived from that run, not assumed as restored native output.",
+    "Actual current-image POP/LEAVE/JMP and live C3 RET compose to the caller continuation with full final state and all three real ordered reads. The body-to-caller theorem derives required SP/BP from actual payload execution.",
+    "POP/LEAVE read faults, LEAVE address faults, RET read faults and noncanonical return targets retain the exact partial state and preceding effects according to the single canonical ISA; they are not hidden or replaced by simulator guards.",
+    "Prior pure wrapper frame/state constructors are reused from TrustedSimpleJIT; actual current bytes/return PC are proved anew. No new ISA semantics or production edit occurs."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-b29-embedding-certificate -o trusted-simple-jit-certificate trusted-simple-b29-wrapper-certificate",
+    "reproduction": "make -C kprog/tv trusted-simple-b29-wrapper-certificate",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleB29Wrapper.actual_entry_path": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_return_edge": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.captured_return_symbol": [
+        "propext"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_pop_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_leave_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_leave_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_pop_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_epilogue_path": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.epilogue_restores_caller_frame": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_epilogue_pop_fault_path": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_epilogue_leave_fault_path": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_return_thunk_success": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_return_thunk_read_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_return_thunk_target_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_epilogue_and_return": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_leave_address_fault": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_epilogue_address_fault_path": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_entry_and_checked_body": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.physical_body_abi_frame": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.physical_body_stack_frame": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Wrapper.actual_body_to_caller_return": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "no_sorryAx": true,
+    "log_sha256": "0f704e27c3f1c2e58cbf9fce700c5e5d0cd73f0a259203497f67a794ee9108dd",
+    "dependency_scope": "Focused current wrapper module over previously checked embedding/block/B29 and28-audit pure prior wrapper frame library. Canonical reference unchanged; reproduction includes both dependency targets."
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleB29.lean": "47de242880e7e7c8817341c63586671402b2a0875be8474a5531370d05c9d6f5",
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/Makefile": "a83bb2b46ddb6555741e059493e4f4352a3842c949e6cd446707a3456f5397c4",
+    "kprog/tv/TrustedSimpleSafety.lean": "5537b0f4d04c5b5ebec988c1cb9c63175e9b786d95495265f3273675f82f3bea",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa",
+    "kprog/tv/TrustedSimpleB29State.lean": "a96d42aece68ac79445998e564f994569319ec047a472bd29c670bd2064be7bd",
+    "kprog/tv/TrustedSimpleB29Observer.lean": "8722e3997f26a6685415ccd6dc3f1c4ce8a4ee0d17c787752f059a70aca5568a",
+    "kprog/tv/TrustedSimpleB29Blocks.lean": "1995d4cdb25f7338ca9166c1c57f1670670ddb673d107a293d7547632aef2f07",
+    "kprog/tv/TrustedSimpleB29Embedding.lean": "ebcc0664bd80704fc9327aec965b9f65c11a94fd3d650f08c5e0983ffb35b88b",
+    "kprog/tv/TrustedSimpleJIT.lean": "1c77a04357bd701d62d27490a4295221abff3d37f970cc4daf611175d8cefad3",
+    "kprog/tv/TrustedSimpleB29Wrapper.lean": "69dcee99861d733ac263683c00b64c8ead25d4c53a6c1f03665bfcf599e65233"
+  },
+  "premises": [
+    "Caller enters actual JIT base with writable two saved-word slots; these are explicit kernel invocation ABI conditions, not added runtime checks.",
+    "Accepted B29 entry shares the actual body context argument and exact post-prologue memory, with bound SP=callerSP-16 and full executed/validated Artifact identity.",
+    "Returning epilogue starts at real body endPC=base+74; actual savedR15/BP and outer-return reads, canonical LEAVE frame span and canonical caller return target are supplied as physical-layout obligations. SP/BP/R15 frame values themselves are derived from actual body execution.",
+    "The loaded JIT image/live C3CC return text and source/capture identity are those structurally checked in20e29; this pure Lean proof does not establish kernel capture provenance."
+  ],
+  "trusted": [
+    "Verifier soundness for the accepted physical B and its admitted entry; the declared context-conversion relation must describe that physical artifact.",
+    "The single V reference ISA/Memory semantics, whose hardware fidelity is validated separately by F and is not established by this theorem.",
+    "Kernel binding/entry/ABI/metadata enforcement and capture/platform provenance, including XDP conversion.",
+    "Lean kernel, propext, Classical.choice, Quot.sound and explicitly audited Lean.ofReduceBool."
+  ],
+  "remaining": [
+    "Discharge actual kernel caller/stack permissions, saved-slot/packet separation, saved-word read preservation and admitted-proof/post-prologue memory relation against supported ABI and binding code, rather than assuming these physical premises. Prior canonical complete-path saved-slot lemmas exist but are not silently claimed to discharge every current physical prefix here.",
+    "Physical XDP context-conversion and capture/emission provenance remain trusted explicit obligations. This receipt is not an unconditional whole-machine safe_native theorem.",
+    "Every other micro/application certificate and generic automatic production remain open."
+  ]
+}
