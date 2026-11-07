@@ -3625,3 +3625,10 @@ generic, two branch), eight addressed-memory models and23 partial families.
 The audits report propext, Classical.choice, Quot.sound and Lean.ofReduceBool.
 The integration archive records `x86_modify_memory_dispatch_tokens` and
 `production_replay_1fb_epoch`.
+
+### Published source full check 0df15f53f
+
+`make check` on immutable published0df15f53f exits0. All1140 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_0df15f53f`. Every check retains its exact published source identity.

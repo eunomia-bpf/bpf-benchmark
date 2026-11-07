@@ -1779,6 +1779,26 @@
   "full_exit": 2,
   "full_head": "967fc6b49608634cd5566dfd6a2925aa828cdcbe",
   "full_log_sha256": "99ea8d210591437b72f741b2f0349eb271ca9a3b1d1415dfe495222023e970ed",
+  "full_make_check_0df15f53f": {
+    "actual_exit": 0,
+    "archive_block_sha256": "3755516d4b7a12520dc80a2cfc28f74691b4eb52b4653eb112be3cb3b795f241",
+    "archive_marker": "=== FULL MAKE CHECK 0DF15F53F PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/rmw-memory-full.cpu.jsonl.gz": "10d3b51d9b9f7a7359da0ee9030d2187d4de1e70e865b82e0b213938e36b0e6a",
+      "/workspaces/.agent-state/kprog-lanes/V/rmw-memory-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/rmw-memory-full.head": "9810fdf2935c3f381e3438b550f3570e7315273c0452cd154beb42bfaea425cd",
+      "/workspaces/.agent-state/kprog-lanes/V/rmw-memory-full.launch.log": "07960c4e25e36bd7f1da7e7bda355095f7fac1e4f96b1861096b0143b87fe22a",
+      "/workspaces/.agent-state/kprog-lanes/V/rmw-memory-full.log": "7dde1802d097bc4fbd36e85394be69a81e665f46766471dccd27e2b0e9ac079f",
+      "/workspaces/.agent-state/kprog-lanes/V/rmw-memory-full.py": "00b46f010b5cdfb4c9b76e60f151a5355970ab772462f13408b386b0651a1e14",
+      "/workspaces/.agent-state/kprog-lanes/V/rmw-memory-full.sources": "f69c6947041731493cd18c76d6595d6ebb9db76924a356c45b92e5e1f9c53901",
+      "/workspaces/.agent-state/kprog-lanes/V/rmw-memory-full.state": "efbd53d512cb419ee9da5d252914334f6c3756e3c662ee274a1d495099f08fcd"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "0df15f53f6de54852e62f709b699a2380c094faa",
+    "scope": "Complete formal make check of the exact published source tree 0df15f53f6de54852e62f709b699a2380c094faa. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1140
+  },
   "full_make_check_231cbde41": {
     "all_snapshot_sha256_match_published_blobs": true,
     "archive_block_sha256": "967e0e84388b9c39b3e1517965fac6c0de1f01ef680cb25e8543297be0d9c357",
