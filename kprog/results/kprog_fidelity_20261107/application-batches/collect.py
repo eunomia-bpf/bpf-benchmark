@@ -21,6 +21,7 @@ ARM_PUBLICATION='5d0d953946ffe83e2a958b8d6c6990850bb86531'
 ARM_BASE='corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tracee-result/'
 ARM_PASS_PUBLICATION='57db4da4387f19e86f79eae6dfa95bfaf024ee3d'
 TRACEE_PUBLICATION='f41ccb6b773d0b24273b8145d758680f9b3f8793'
+MEMCPY_PUBLICATION='4adeb4807bb26eddd57324799eb79d9dc0118d56'
 ARM_ROOT='corpus/results/kprog_arm64_app_coverage_20261107/'
 ARM_COHORTS=[
  ('bcc','arm64_functional_172354',ARM_ROOT+'bcc-full-start-coverage.json',
@@ -168,6 +169,46 @@ def recorded_application_work(payload,metadata,batch_records,run_summary):
         archive_sha256=sha(payload))
 
 
+def whole_application_outcome(payload,metadata,batch_records,published_observations):
+    with tarfile.open(fileobj=io.BytesIO(payload)) as archive:
+        members=[m.name for m in archive.getmembers() if m.isfile() and '/details/apps/' in m.name and m.name.endswith('.json')]
+        assert len(members)==1
+        raw=archive.extractfile(members[0]).read();result=json.loads(raw)
+        assert result['status']==metadata['app_status']
+        assert result['error']==metadata['app_error']
+        assert result['rejit_result']==metadata['rejit_result']
+        phases={}
+        for phase in ['baseline','post_rejit']:
+            value=result[phase]
+            assert value==metadata[phase]
+            values=list((value or {}).get('bpf',{}).values())
+            phases[phase]=dict(raw_measurement_present=value is not None,
+                resident_program_count=len(values),bpf_run_count=sum(v['run_cnt_delta'] for v in values),
+                workloads=[workload_observation(w) for w in (value or {}).get('workloads',[])])
+        replacements=[];plans=[];timings=[];shim_pins={}
+        for member in archive.getmembers():
+            if member.isfile() and '/details/shim-logs/' in member.name and member.name.endswith('.post_rejit.log'):
+                data=archive.extractfile(member).read();shim_pins[member.name]=sha(data)
+                for line in data.decode().splitlines():
+                    if any(label in line for label in ['native-loader replaced ','native-loader link-plan ','native-loader timings ']):
+                        fields=dict(re.findall(r'(\w+)=(\S+)',line))
+                        pair=(int(fields['original_id']),int(fields['native_id']))
+                        if 'native-loader replaced ' in line:replacements.append((*pair,fields['symbol']))
+                        elif 'native-loader link-plan ' in line:plans.append((*pair,fields['symbol'],int(fields['trusted_request'])))
+                        else:timings.append((*pair,int(fields['prebuilt_proof']),int(fields['bound_required'])))
+        expected={(r['source_prog_id'],r['bound_prog_id'],r['entry']) for r in batch_records if r['stage']=='bound'}
+        assert len(replacements)==len(expected) and set(replacements)==expected
+        assert set(plans)=={(*row,r['request_id']) for r in batch_records for row in expected if row[:2]==(r['source_prog_id'],r['bound_prog_id'])}
+        assert len(timings)==len(expected) and set(timings)=={(*row[:2],0,1) for row in expected}
+        assert len(expected)==metadata['native_replaced']
+        assert sorted([list(row[:2]) for row in expected])==published_observations['bound_id_pairs']
+        assert phases['baseline']['resident_program_count']==published_observations['baseline_resident_bpf_records']
+    return dict(app_status=result['status'],app_error=result['error'],app_result_sha256=sha(raw),
+        phases=phases,shim_sha256=shim_pins,replacement_pairs=sorted([list(row[:2]) for row in expected]),
+        all_replacements_match_bound_service=True,all_replacements_require_bound=True,
+        prebuilt_proof_count=sum(row[2] for row in timings),published_observations=published_observations)
+
+
 def main():
     source_pins={}
     def published(path,publication=PUBLICATION):
@@ -194,11 +235,12 @@ def main():
       ('tracee','arm64_functional_202335',ARM_BASE+'coverage.json',ARM_BASE+'run-20261107T202335483042Z.tar.gz'),
     ]
     cases+=ARM_COHORTS+[
-      ('tracee','functional_214037',BASE+'tracee-narrow-range/coverage.json',BASE+'tracee-narrow-range/service.tar.gz')]
+      ('tracee','functional_214037',BASE+'tracee-narrow-range/coverage.json',BASE+'tracee-narrow-range/service.tar.gz'),
+      ('tetragon','functional_221545',BASE+'tetragon-memcpy-replay/coverage.json',BASE+'tetragon-memcpy-replay/service.tar.gz')]
     arm_pass_batches={row[1] for row in ARM_COHORTS}
     batches=[];records=[];failures=[];identity_sets={};work_observations={}
     for app,batch,metadata_path,service_path in cases:
-        publication=TRACEE_PUBLICATION if batch=='functional_214037' else ARM_PASS_PUBLICATION if batch in arm_pass_batches else ARM_PUBLICATION if batch.startswith('arm64_') else KATRAN_PUBLICATION if batch=='functional_213447' else JOIN_PUBLICATION if batch in {'functional_210552','functional_211016'} else PUBLICATION
+        publication=MEMCPY_PUBLICATION if batch=='functional_221545' else TRACEE_PUBLICATION if batch=='functional_214037' else ARM_PASS_PUBLICATION if batch in arm_pass_batches else ARM_PUBLICATION if batch.startswith('arm64_') else KATRAN_PUBLICATION if batch=='functional_213447' else JOIN_PUBLICATION if batch in {'functional_210552','functional_211016'} else PUBLICATION
         metadata=json.loads(published(metadata_path,publication)) if metadata_path else {}
         payload=captured[service_path.split(':',1)[1]] if service_path.startswith('capture:') else published(service_path,publication)
         service,log_path=service_archive(payload)
@@ -302,6 +344,11 @@ def main():
             for stage,key in [('verifier_rejected','confirmed_verifier_rejections'),('native_stub_load_error','native_stub_load_errors'),('specialization_rejected','specialization_errors')]:
                 if key in classification:
                     compare[key]=dict(observed=stages[stage],recorded=classification[key],equal=stages[stage]==classification[key])
+            if batch=='functional_221545':
+                result_path=str(Path(service_path).with_name('result.tar.gz'))
+                observations_path=str(Path(service_path).with_name('observations.json'))
+                work_observations[batch]=whole_application_outcome(published(result_path,publication),metadata,
+                    [record for record in records if record['batch']==batch],json.loads(published(observations_path,publication)))
             if 'work_reconciliation' in metadata:
                 result_path=str(Path(service_path).with_name('result.tar.gz'))
                 work_observations[batch]=packet_work(published(result_path,publication),metadata,app,
@@ -323,7 +370,7 @@ def main():
             load_rows.append(dict(name=name[1],insn_cnt=int(count[1]),bytes=int(count[1])*8,raw_line=line))
     timing_metadata=json.loads(captured['tetragon-timing.metadata.json'])
     timing_result=json.loads(captured['tetragon-timing.result.json'])
-    summary=dict(source_publication=PUBLICATION,additional_source_publications=[JOIN_PUBLICATION,KATRAN_PUBLICATION,ARM_PUBLICATION,ARM_PASS_PUBLICATION,TRACEE_PUBLICATION],batches=batches,terminal_requests=len(records),
+    summary=dict(source_publication=PUBLICATION,additional_source_publications=[JOIN_PUBLICATION,KATRAN_PUBLICATION,ARM_PUBLICATION,ARM_PASS_PUBLICATION,TRACEE_PUBLICATION,MEMCPY_PUBLICATION],batches=batches,terminal_requests=len(records),
                  stages=dict(Counter(record['stage'] for record in records)),
                  kernel_worker_receipt_identity_matches=len(records),input_artifacts=source_pins,
                  captured_input_manifest=capture_manifest,captured_input_archive_sha256=sha((OUT/'captured-inputs.tar.gz').read_bytes()),

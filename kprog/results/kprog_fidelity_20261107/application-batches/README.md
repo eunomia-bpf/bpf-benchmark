@@ -1,10 +1,10 @@
 # Application service batch observations
 
-One generic archive reader reconciles18 closed service batches across all six
-application names. All80 terminal requests preserve byte equality between the
+One generic archive reader reconciles19 closed service batches across all six
+application names. All84 terminal requests preserve byte equality between the
 kernel-owned native object, the worker's received copy and the service receipt's
-SHA256. Kernel source IDs match the service records. The batches contain76
-generated sources,75 compiled objects and65 successful bound replies.
+SHA256. Kernel source IDs match the service records. The batches contain80
+generated sources,79 compiled objects and69 successful bound replies.
 
 Every bound reply's request ID, program ID and status exactly match load.stdout.
 All available published counts match the archive-derived counts, including the
@@ -31,11 +31,60 @@ and each service's terminal requests and archive set agree.
 | tetragon / arm64_functional_183759 | 0 | 0 | 0 | 0 | startup frontier |
 | katran / arm64_functional_185947 | 1 | 1 | 1 | 1 | 0 |
 | tracee / functional_214037 | 6 | 6 | 6 | 5 | 1 verifier_rejected |
+| tetragon / functional_221545 | 4 | 4 | 4 | 4 | next manifest selector frontier |
 
-The18 rows retain distinct source, image and boot epochs. Counts describe observed
+The19 rows retain distinct source, image and boot epochs. Counts describe observed
 load instances; repeated native objects and repeated program IDs across boots stay
 in their original batches. Whole application completion and duration-driven
 workload measurements follow the recorded startup frontiers.
+
+## Tetragon memcpy binding and the next startup frontier
+
+The221545 cohort receives4 requests and freshly generates, compiles and binds
+all4. Every kernel-owned native object equals its worker copy and service SHA256.
+The raw application shim agrees with the service's request/source/bound IDs:
+
+| Request | Source ID | Bound ID |
+| ---: | ---: | ---: |
+| 1 | 333 | 334 |
+| 2 | 335 | 336 |
+| 3 | 337 | 338 |
+| 4 | 339 | 340 |
+
+Every replacement timing row records bound_required=1 and prebuilt_proof=0.
+The link-plan rows also match their actual trusted_request IDs. The reader
+opens the immutable result archive, checks the complete raw application phase
+objects, hashes the executed shim log and joins each successful service reply
+to its corresponding application replacement.
+
+event_wake_up_new_task retains the exact native ELF SHA256 across five cohorts:
+474212d9dc1c0972c12b8adf84af75d84b69759f3d32c4c2dbb87393adbcf5d4.
+The201956,205401 and timing204105 epochs report specialization rejection;
+210552 reaches the native-stub load boundary;221545 binds source337 to338 on
+the captured T697bea memcpy module epoch. memcpy-increment.json preserves
+these five distinct runtime/source epochs around the same native bytes.
+
+The JIT phase contains287 resident counters and545,253 aggregate BPF runs.
+Its existing stress workload exits0 after2.176152895 seconds. C's published
+observations separately count311 baseline startup attempts, including probes.
+The later native startup reaches execve_send's manifest selector before its
+service request. C records10368 entry bytes plus928 callback bytes from
+cwd_read_v61, giving11296 actual source bytes. The post_rejit raw measurement
+remains null and application status remains error. The four terminal service
+requests all bind; the next upstream startup frontier retains its own stage.
+
+The shared reader compares C's full raw phase values directly, including null,
+while the ARM schema retains its documented empty-object projection.
+memcpy-initial-collection.tar.gz preserves the initial schema diagnostic.
+The final reader completes with exit0. All prior18 batch objects,80 request
+rows, the entire failure archive,39 input pins and earlier workload/source
+vectors retain their exact values.
+
+The current totals are19 cohorts,84 terminal requests,80 generated sources,
+79 compiled objects and69 bound replies. The15 earlier terminal failure records
+remain intact. C owns the generic source-manifest callback closure repair and
+the next complete application replay. The universal simulator, compiler, token
+and binding laws continue through V/T.
 
 ## Dual-ISA first-pass reconciliation
 
@@ -257,7 +306,8 @@ summary use5d0d953946ffe83e2a958b8d6c6990850bb86531. The five additional ARM met
 57db4da4387f19e86f79eae6dfa95bfaf024ee3d; the BCC raw archive retains its original
 5d6d067cfd55a627d7f367054decc72e09bb7e51 identity. The later x86 Tracee metadata
 and service archive usef41ccb6b773d0b24273b8145d758680f9b3f8793.
-Thirty-nine published metadata/archive
+The Tetragon221545 metadata, service, raw result and published observations
+use4adeb4807bb26eddd57324799eb79d9dc0118d56. Forty-three published metadata/archive
 inputs have individual Git/hash/size pins in summary.json. Two additional captured Tetragon service epochs and the R timing
 inputs retain their exact five-file captured-inputs.tar.gz and manifest.
 

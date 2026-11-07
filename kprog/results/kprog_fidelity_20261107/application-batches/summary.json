@@ -5,7 +5,8 @@
     "3993aa884362093ba6821db4e97cdded89504d99",
     "5d0d953946ffe83e2a958b8d6c6990850bb86531",
     "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
-    "f41ccb6b773d0b24273b8145d758680f9b3f8793"
+    "f41ccb6b773d0b24273b8145d758680f9b3f8793",
+    "4adeb4807bb26eddd57324799eb79d9dc0118d56"
   ],
   "batches": [
     {
@@ -622,18 +623,57 @@
           "equal": true
         }
       }
+    },
+    {
+      "app": "tetragon",
+      "batch": "functional_221545",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/tetragon-memcpy-replay/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/tetragon-memcpy-replay/service.tar.gz",
+      "service_sha256": "0ced1a22b92d1d5e6f80d86cfdcaeedc902fee745ce36134638b50827d99bab5",
+      "terminal_requests": 4,
+      "generated": 4,
+      "compiled": 4,
+      "accepted_bound": 4,
+      "stages": {
+        "bound": 4
+      },
+      "app_status": "error",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 287,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 4,
+          "recorded": 4,
+          "equal": true
+        },
+        "generated": {
+          "observed": 4,
+          "recorded": 4,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 4,
+          "recorded": 4,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 4,
+          "recorded": 4,
+          "equal": true
+        }
+      }
     }
   ],
-  "terminal_requests": 80,
+  "terminal_requests": 84,
   "stages": {
-    "bound": 65,
+    "bound": 69,
     "verifier_rejected": 7,
     "compiler_rejected": 1,
     "specialization_rejected": 4,
     "native_stub_load_error": 1,
     "loader_rejected": 2
   },
-  "kernel_worker_receipt_identity_matches": 80,
+  "kernel_worker_receipt_identity_matches": 84,
   "input_artifacts": {
     "corpus/results/kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json": {
       "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
@@ -829,6 +869,26 @@
       "publication": "f41ccb6b773d0b24273b8145d758680f9b3f8793",
       "sha256": "016b87cfe752d7d123c91297e8000531e7e0087dbca6ff4eae8cd75a51736aa7",
       "bytes": 28649408
+    },
+    "corpus/results/kprog_app_coverage_20261107/tetragon-memcpy-replay/coverage.json": {
+      "publication": "4adeb4807bb26eddd57324799eb79d9dc0118d56",
+      "sha256": "105c02d9f8910e0140968ef56631fba4d36a83d3c4dd6b5ad3e3995d785f9602",
+      "bytes": 96790
+    },
+    "corpus/results/kprog_app_coverage_20261107/tetragon-memcpy-replay/service.tar.gz": {
+      "publication": "4adeb4807bb26eddd57324799eb79d9dc0118d56",
+      "sha256": "0ced1a22b92d1d5e6f80d86cfdcaeedc902fee745ce36134638b50827d99bab5",
+      "bytes": 2740867
+    },
+    "corpus/results/kprog_app_coverage_20261107/tetragon-memcpy-replay/result.tar.gz": {
+      "publication": "4adeb4807bb26eddd57324799eb79d9dc0118d56",
+      "sha256": "c6702557fe5e259f1d0af00a213de151c16376bf50cb355aefbe25e944cff63f",
+      "bytes": 1545078
+    },
+    "corpus/results/kprog_app_coverage_20261107/tetragon-memcpy-replay/observations.json": {
+      "publication": "4adeb4807bb26eddd57324799eb79d9dc0118d56",
+      "sha256": "5e463cc0c6f1ec9170973541a15aca001d10040ebb84397880907ff48c66b3e0",
+      "bytes": 601
     }
   },
   "captured_input_manifest": {
@@ -1663,6 +1723,91 @@
         }
       ],
       "archive_sha256": "36631edd6c78c017533c13802d421386449241ef5e713d60c8eee07f625ef250"
+    },
+    "functional_221545": {
+      "app_status": "error",
+      "app_error": "Tetragon exited before BPF programs were tracked by shim\nstdout tail:\nlevel=info msg=\"Starting tetragon\" version=v1.8.0-pre.0-79-g8ca052908\nlevel=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-cri:false enable-deprecated-tracingpolicy-grpc:false enable-event-metrics:true enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-environment-variables:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: filter-environment-variables:[] force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address:127.0.0.1:48953 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-file: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ parents-map-enabled:false parents-map-entries:0 parents-map-size: pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true retprobes-cache-size:4096 server-address:127.0.0.1:49921 tracing-policy: tracing-policy-dir:/workspaces/repository/runner/assets/tetragon_policies use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"\nlevel=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=none\nlevel=info msg=\"Tetragon pid file creation succeeded\" pid=2265 pidfile=/var/run/tetragon/tetragon.pid\nlevel=warn msg=\"BPF filesystem is going to be mounted automatically in /run/cilium/bpffs. However, it probably means that Cilium is running inside container and BPFFS is not mounted on the host. for more information, see: https://cilium.link/err-bpf-mount\"\nlevel=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/run/cilium/bpffs/tetragon\nlevel=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux\nlevel=info msg=\"BPF detected features: override_return: true, buildid: true, kprobe_multi: false, uprobe_multi: true, fmodret: true, fmodret_syscall: true, signal: true, large: true, link_pin: true, lsm: true, missed_stats_kprobe_multi: true, missed_stats_kprobe: true, batch_update: true, uprobe_refctroff: true, audit_loginuid: true, probe_write_user: true, uprobe_regs_change: true, mix_bpf_and_tail_calls: true, fentry: true, get_func_ret: true\"\nlevel=info msg=\"Cgroup mode detection succeeded\" cgroup.fs=/sys/fs/cgroup cgroup.mode=\"Unified mode (Cgroupv2)\"\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/proc/1/root/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids misc]\" cgroup.hierarchyID=0\nlevel=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup/docker/5364df46a5dbfc3bdbc37ce71ede60d0c329adeab0e4949b1da01849c9cdc770 cgroup.controllers=\"[cpuset cpu io memory hugetlb pids misc]\" cgroup.hierarchyID=0\nlevel=info msg=\"Cgroupv2 hierarchy validated successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup/docker/5364df46a5dbfc3bdbc37ce71ede60d0c329adeab0e4949b1da01849c9cdc770\nlevel=info msg=\"Deployment mode detection succeeded\" cgroup.fs=/sys/fs/cgroup deployment.mode=Container\nlevel=info msg=\"Updated TetragonConf map successfully\" confmap-update=tg_conf_map deployment.mode=Container log.level=0 cgroup.fs.magic=Cgroupv2 cgroup.hierarchyID=0 NSPID=2265\nlevel=info msg=\"Disabling Kubernetes API\"\nlevel=info msg=\"Configured redaction filters\" redactionFilters=\"\"\nlevel=info msg=\"Exit probe on acct_process\"\nlevel=info msg=\"Set execve_map entries 32768\" size=28M\nlevel=info msg=\"BPF ring buffer size (bytes)\" total=512K\nlevel=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux\nlevel=info msg=\"Loading sensor\" name=__base__\nlevel=info msg=\"Loading kernel version 7.0.0\"",
+      "app_result_sha256": "b6fbd28c5a7aff6d2029cafb274ca5d2ec50c6c8821310d79c0ddc54f532e0ea",
+      "phases": {
+        "baseline": {
+          "raw_measurement_present": true,
+          "resident_program_count": 287,
+          "bpf_run_count": 545253,
+          "workloads": [
+            {
+              "name": "stress_ng_tetragon_policy_hot",
+              "duration_seconds": 2.1761528950000013,
+              "returncode": 0,
+              "stdout_sha256": "86727686907452d28acf2d0d71791258287ec482e1e53f81c43de0ef6aba9ad2",
+              "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ]
+        },
+        "post_rejit": {
+          "raw_measurement_present": false,
+          "resident_program_count": 0,
+          "bpf_run_count": 0,
+          "workloads": []
+        }
+      },
+      "shim_sha256": {
+        "result/details/shim-logs/tetragon__observer.post_rejit.log": "097ea430182b3e82bc35b84cfa663b7a5da129f170be166d24642051de9b127b"
+      },
+      "replacement_pairs": [
+        [
+          333,
+          334
+        ],
+        [
+          335,
+          336
+        ],
+        [
+          337,
+          338
+        ],
+        [
+          339,
+          340
+        ]
+      ],
+      "all_replacements_match_bound_service": true,
+      "all_replacements_require_bound": true,
+      "prebuilt_proof_count": 0,
+      "published_observations": {
+        "baseline_load_attempts": 311,
+        "baseline_resident_bpf_records": 287,
+        "native_requests": 4,
+        "generated": 4,
+        "compiled": 4,
+        "accepted_bound": 4,
+        "verifier_rejections": 0,
+        "app_status": "error",
+        "next_startup_failure": "manifest entry selector for execve_send",
+        "original_selector_bytes": 10368,
+        "callback_symbol": "cwd_read_v61",
+        "callback_bytes": 928,
+        "actual_source_bytes": 11296,
+        "bound_id_pairs": [
+          [
+            333,
+            334
+          ],
+          [
+            335,
+            336
+          ],
+          [
+            337,
+            338
+          ],
+          [
+            339,
+            340
+          ]
+        ],
+        "shared_source_drift": []
+      }
     }
   },
   "timing_context": {

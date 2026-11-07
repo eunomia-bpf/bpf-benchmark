@@ -1,0 +1,53 @@
+{
+  "previous_publication": "3d4f19db619fdc70d3f95cce2a3cbfbb71f15a56",
+  "checks": {
+    "prior18_batches_equal": true,
+    "prior80_terminal_rows_equal": true,
+    "full_failure_archive_bytes_equal": true,
+    "prior39_input_pins_equal": true,
+    "prior_work_observations_equal": true,
+    "prior_source_vectors_equal": true,
+    "recorded_counts_equal": true,
+    "final_counts_equal": true
+  },
+  "new_batch": "functional_221545",
+  "retained_batches": 18,
+  "retained_requests": 80,
+  "retained_input_pins": 39,
+  "new_requests": 4,
+  "new_bound": 4,
+  "new_input_pins": 4,
+  "wake_native_sha256": "474212d9dc1c0972c12b8adf84af75d84b69759f3d32c4c2dbb87393adbcf5d4",
+  "wake_cohorts": [
+    {
+      "batch": "functional_201956",
+      "source_prog_id": "337",
+      "bound_prog_id": "",
+      "stage": "specialization_rejected"
+    },
+    {
+      "batch": "functional_205401",
+      "source_prog_id": "337",
+      "bound_prog_id": "",
+      "stage": "specialization_rejected"
+    },
+    {
+      "batch": "timing_204105",
+      "source_prog_id": "337",
+      "bound_prog_id": "",
+      "stage": "specialization_rejected"
+    },
+    {
+      "batch": "functional_210552",
+      "source_prog_id": "337",
+      "bound_prog_id": "",
+      "stage": "native_stub_load_error"
+    },
+    {
+      "batch": "functional_221545",
+      "source_prog_id": "337",
+      "bound_prog_id": "338",
+      "stage": "bound"
+    }
+  ]
+}
