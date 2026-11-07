@@ -1068,4 +1068,187 @@ theorem step_through_bitfield_refines (code : Nat) (aux : BitVec 32) (width : Wi
   | earlier _ _ _ _ _ _ _ _ _ earlier => exact bitfield_earlier_preserved _ _ _ _ _ _ _ _ _ _ _ s earlier
   | bitfield => apply bitfield_refines; assumption
 
+
+/-- Actual flag arithmetic field roles differ between writeback and compares:
+ADDS/SUBS read SRC/SRC2 and write DST; CMP/CMN read DST/SRC and never write a
+register. The independent generated operand selector is retained. -/
+def flagArithmeticBody (subtract writeback immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src src2 : Byte) (value : Word) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let lhs := Arm64Move.Fields.read s (if writeback then src else dst)
+  let useImmediate := if writeback then
+      GeneratedArm64FlagOperand.immediate (if subtract then if immediate then .subsImm else .subsReg
+        else if immediate then .addsImm else .addsReg)
+    else if subtract then GeneratedArm64FlagOperand.immediate (if immediate then .cmpImm else .cmpReg)
+    else immediate
+  let rhs := if useImmediate then value else GeneratedArm64Mod.value
+    (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat)
+    (Arm64Move.Fields.read s (if writeback then src2 else src))
+    ((GeneratedArm64Aux.b2 aux).setWidth 64) (Arm64Register.handlerWidth width)
+  let result := GeneratedArm64FlagHandler.apply (if subtract then .sub else .add) lhs rhs
+    (Arm64Register.handlerWidth width)
+  let state := if writeback then Arm64Move.Fields.write s dst result.value width else s
+  ⟨{ state with flags := Arm64Logic.flagsWord s.flags result.flags, pc := s.pc + 4 }, [], none⟩
+
+/-- This equality derives the correspondence to the earlier typed pipeline;
+its byte-field routing is explicit for both compare-only and writeback rows. -/
+theorem flag_arithmetic_body_typed (subtract writeback immediate sourceScalar : Bool) (aux : BitVec 32)
+    (width : Width) (dst lhs : RegisterRef) (rhs : Register) (value : Word) (s : Reference.AArch64.State) :
+    flagArithmeticBody subtract writeback immediate aux width
+      (if writeback then Arm64Move.Fields.encode dst else Arm64Move.Fields.encode lhs)
+      (if writeback then Arm64Move.Fields.encode lhs else Arm64Register.registerCode rhs)
+      (Arm64Register.registerCode rhs) value s =
+      Arm64Arithmetic.FlagArithmetic.rawStep subtract writeback immediate sourceScalar aux width dst lhs rhs value s := by
+  cases writeback <;> cases subtract <;> cases immediate <;>
+    simp only [flagArithmeticBody, Arm64Arithmetic.FlagArithmetic.rawStep,
+      Arm64Arithmetic.arithmeticHandlerStep, Arm64Arithmetic.compareArithmeticHandlerStep,
+      Arm64Arithmetic.FlagArithmetic.registerValue, GeneratedArm64FlagHandler.apply,
+      GeneratedArm64FlagHandler.result, GeneratedArm64FlagOperand.immediate,
+      Arm64Move.Fields.typed_read, Arm64Move.Fields.typed_write, Arm64Move.Fields.register_read,
+      Bool.false_eq_true, Bool.true_eq, Bool.not_true, Bool.false_and, ↓reduceIte]
+
+def dispatchThroughFlagArithmetic (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughBitfield code aux width dst src src2 src3 value sourceScalar sourceStack s with
+  | some result => some result
+  | none => (Arm64Arithmetic.FlagArithmetic.decodeOpcode code).map
+      (fun choice => flagArithmeticBody choice.1 choice.2.1 choice.2.2 aux width dst src src2 value s)
+
+theorem flag_arithmetic_reached (subtract writeback immediate : Bool) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughFlagArithmetic (Arm64Arithmetic.FlagArithmetic.operationCode subtract writeback immediate)
+      aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (flagArithmeticBody subtract writeback immediate aux width dst src src2 value s) := by
+  have before : dispatchThroughBitfield (Arm64Arithmetic.FlagArithmetic.operationCode subtract writeback immediate)
+      aux width dst src src2 src3 value sourceScalar sourceStack s = none := by
+    cases subtract <;> cases writeback <;> cases immediate <;> rfl
+  unfold dispatchThroughFlagArithmetic
+  rw [before, Arm64Arithmetic.FlagArithmetic.decode_code]
+  rfl
+
+/-- Immediate rows ignore their physical RHS bytes. In compare rows SRC is
+unused, whereas writeback rows still need SRC for the left operand. -/
+theorem flag_arithmetic_immediate_body (subtract writeback : Bool) (aux : BitVec 32) (width : Width)
+    (dst lhs : RegisterRef) (unusedSrc src2 : Byte) (value : Word) (s : Reference.AArch64.State) :
+    flagArithmeticBody subtract writeback true aux width
+      (if writeback then Arm64Move.Fields.encode dst else Arm64Move.Fields.encode lhs)
+      (if writeback then Arm64Move.Fields.encode lhs else unusedSrc) src2 value s =
+    flagArithmeticBody subtract writeback true aux width
+      (if writeback then Arm64Move.Fields.encode dst else Arm64Move.Fields.encode lhs)
+      (if writeback then Arm64Move.Fields.encode lhs else Arm64Register.registerCode 31)
+      (Arm64Register.registerCode 31) value s := by
+  cases writeback <;> cases subtract <;> rfl
+
+/-- Compare rows ignore SRC2 for every byte, including SP32 and NONE255. -/
+theorem flag_arithmetic_register_body (subtract writeback : Bool) (aux : BitVec 32) (width : Width)
+    (dst lhs : RegisterRef) (rhs : Register) (unusedSrc2 : Byte) (value : Word) (s : Reference.AArch64.State) :
+    flagArithmeticBody subtract writeback false aux width
+      (if writeback then Arm64Move.Fields.encode dst else Arm64Move.Fields.encode lhs)
+      (if writeback then Arm64Move.Fields.encode lhs else Arm64Register.registerCode rhs)
+      (if writeback then Arm64Register.registerCode rhs else unusedSrc2) value s =
+    flagArithmeticBody subtract writeback false aux width
+      (if writeback then Arm64Move.Fields.encode dst else Arm64Move.Fields.encode lhs)
+      (if writeback then Arm64Move.Fields.encode lhs else Arm64Register.registerCode rhs)
+      (Arm64Register.registerCode rhs) value s := by
+  cases writeback <;> rfl
+
+theorem flag_arithmetic_immediate_refines (subtract writeback : Bool) (aux : BitVec 32) (width : Width)
+    (dst lhs : RegisterRef) (unusedSrc src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (s : Reference.AArch64.State) :
+    dispatchThroughFlagArithmetic (Arm64Arithmetic.FlagArithmetic.operationCode subtract writeback true) aux width
+      (if writeback then Arm64Move.Fields.encode dst else Arm64Move.Fields.encode lhs)
+      (if writeback then Arm64Move.Fields.encode lhs else unusedSrc) src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.arithmeticImmediate width subtract true (if writeback then dst else .zero) lhs value) s) := by
+  rw [flag_arithmetic_reached, flag_arithmetic_immediate_body,
+    flag_arithmetic_body_typed subtract writeback true sourceScalar,
+    Arm64Arithmetic.FlagArithmetic.raw_step_refines]
+  rfl
+
+theorem flag_arithmetic_register_refines (subtract writeback : Bool) (width : Width) (dst lhs : RegisterRef)
+    (rhs : Register) (kind : Fin 3) (amount : Fin width.bits) (unusedSrc2 src3 lane0 lane3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughFlagArithmetic (Arm64Arithmetic.FlagArithmetic.operationCode subtract writeback false)
+      (Arm64Arithmetic.FlagArithmetic.packedAux (Arm64Arithmetic.registerModifier width kind amount)
+        (BitVec.ofNat 8 amount.val) lane0 lane3) width
+      (if writeback then Arm64Move.Fields.encode dst else Arm64Move.Fields.encode lhs)
+      (if writeback then Arm64Move.Fields.encode lhs else Arm64Register.registerCode rhs)
+      (if writeback then Arm64Register.registerCode rhs else unusedSrc2) src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.arithmeticRegister width subtract true (if writeback then dst else .zero) lhs rhs kind amount) s) := by
+  rw [flag_arithmetic_reached, flag_arithmetic_register_body,
+    flag_arithmetic_body_typed subtract writeback false sourceScalar]
+  have result := Arm64Arithmetic.FlagArithmetic.dispatch_register_refines subtract writeback sourceScalar width
+    dst lhs rhs kind amount value lane0 lane3 s
+  simp only [Arm64Arithmetic.FlagArithmetic.dispatch, Arm64Arithmetic.FlagArithmetic.decode_code] at result
+  exact result
+
+theorem flag_arithmetic_extended_refines (subtract writeback plainSource : Bool) (width : Width)
+    (dst lhs : RegisterRef) (rhs : Register) (kind : Reference.AArch64.RegisterExtend) (amount : Fin 5)
+    (unusedSrc2 src3 lane0 lane3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughFlagArithmetic (Arm64Arithmetic.FlagArithmetic.operationCode subtract writeback false)
+      (Arm64Arithmetic.FlagArithmetic.packedAux
+        (Arm64Arithmetic.extendedModifier width kind (BitVec.ofNat 64 amount.val) plainSource)
+        (BitVec.ofNat 8 amount.val) lane0 lane3) width
+      (if writeback then Arm64Move.Fields.encode dst else Arm64Move.Fields.encode lhs)
+      (if writeback then Arm64Move.Fields.encode lhs else Arm64Register.registerCode rhs)
+      (if writeback then Arm64Register.registerCode rhs else unusedSrc2) src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.arithmeticExtended width subtract true (if writeback then dst else .zero) lhs rhs kind amount) s) := by
+  rw [flag_arithmetic_reached, flag_arithmetic_register_body,
+    flag_arithmetic_body_typed subtract writeback false sourceScalar]
+  have result := Arm64Arithmetic.FlagArithmetic.dispatch_extended_refines subtract writeback sourceScalar plainSource
+    width dst lhs rhs kind amount value lane0 lane3 s
+  simp only [Arm64Arithmetic.FlagArithmetic.dispatch, Arm64Arithmetic.FlagArithmetic.decode_code] at result
+  exact result
+
+theorem flag_arithmetic_earlier_preserved (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : BitfieldBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughFlagArithmetic code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  simp only [dispatchThroughFlagArithmetic,
+    step_through_bitfield_refines code aux width dst src src2 src3 value sourceScalar sourceStack native s binding]
+
+/-- Only numeric field routing, native modifier/amount and instruction
+identities appear in this extension; no handler-refinement premise is used. -/
+inductive FlagArithmeticBinding (pc : Word) : Nat → BitVec 32 → Width → Byte → Byte → Byte → Byte → Word →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte) (value : Word)
+      (native : Reference.AArch64.Instruction) (binding : BitfieldBinding pc code aux width dst src src2 src3 value native) :
+      FlagArithmeticBinding pc code aux width dst src src2 src3 value native
+  | immediate (subtract writeback : Bool) (aux : BitVec 32) (width : Width) (dst lhs : RegisterRef)
+      (unusedSrc src2 src3 : Byte) (value : Word) :
+      FlagArithmeticBinding pc (Arm64Arithmetic.FlagArithmetic.operationCode subtract writeback true) aux width
+        (if writeback then Arm64Move.Fields.encode dst else Arm64Move.Fields.encode lhs)
+        (if writeback then Arm64Move.Fields.encode lhs else unusedSrc) src2 src3 value
+        (.arithmeticImmediate width subtract true (if writeback then dst else .zero) lhs value)
+  | register (subtract writeback : Bool) (width : Width) (dst lhs : RegisterRef) (rhs : Register)
+      (kind : Fin 3) (amount : Fin width.bits) (unusedSrc2 src3 lane0 lane3 : Byte) (value : Word) :
+      FlagArithmeticBinding pc (Arm64Arithmetic.FlagArithmetic.operationCode subtract writeback false)
+        (Arm64Arithmetic.FlagArithmetic.packedAux (Arm64Arithmetic.registerModifier width kind amount)
+          (BitVec.ofNat 8 amount.val) lane0 lane3) width
+        (if writeback then Arm64Move.Fields.encode dst else Arm64Move.Fields.encode lhs)
+        (if writeback then Arm64Move.Fields.encode lhs else Arm64Register.registerCode rhs)
+        (if writeback then Arm64Register.registerCode rhs else unusedSrc2) src3 value
+        (.arithmeticRegister width subtract true (if writeback then dst else .zero) lhs rhs kind amount)
+  | extended (subtract writeback plainSource : Bool) (width : Width) (dst lhs : RegisterRef) (rhs : Register)
+      (kind : Reference.AArch64.RegisterExtend) (amount : Fin 5) (unusedSrc2 src3 lane0 lane3 : Byte) (value : Word) :
+      FlagArithmeticBinding pc (Arm64Arithmetic.FlagArithmetic.operationCode subtract writeback false)
+        (Arm64Arithmetic.FlagArithmetic.packedAux
+          (Arm64Arithmetic.extendedModifier width kind (BitVec.ofNat 64 amount.val) plainSource)
+          (BitVec.ofNat 8 amount.val) lane0 lane3) width
+        (if writeback then Arm64Move.Fields.encode dst else Arm64Move.Fields.encode lhs)
+        (if writeback then Arm64Move.Fields.encode lhs else Arm64Register.registerCode rhs)
+        (if writeback then Arm64Register.registerCode rhs else unusedSrc2) src3 value
+        (.arithmeticExtended width subtract true (if writeback then dst else .zero) lhs rhs kind amount)
+
+theorem step_through_flag_arithmetic_refines (code : Nat) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : FlagArithmeticBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughFlagArithmetic code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier _ _ _ _ _ _ _ _ _ earlier => exact flag_arithmetic_earlier_preserved _ _ _ _ _ _ _ _ _ _ _ s earlier
+  | immediate => apply flag_arithmetic_immediate_refines
+  | register => apply flag_arithmetic_register_refines
+  | extended => apply flag_arithmetic_extended_refines
+
 end KProgFormal.Refinement.Arm64Dispatcher

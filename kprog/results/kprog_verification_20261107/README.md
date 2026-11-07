@@ -1080,3 +1080,32 @@ hosts passed 40080 cases,2072 cases,136 cases,126246 cases,512 cases,6913 cases,
 declaration is byte-identical except the shared Bitfield import. No placeholders,
 new tests, filtering, ISA/runtime/generator/oracle/paper changes. Original C
 warnings remain visible. The active exact261 full check predates this extension.
+
+## Uniform byte flag arithmetic composed after BITFIELD
+
+`Arm64Dispatcher.dispatchThroughFlagArithmetic` adds all eight generated
+ADDS/SUBS/CMP/CMN immediate/register rows. Its actual byte body distinguishes
+production roles: writeback reads SRC/SRC2 and writes DST, whereas compare-only
+reads DST/SRC and does not write registers. The independent generated operand
+selector, all11 source modifiers and unknown-byte identity, generated arithmetic
+result/NZCV, full-width flag word preservation and one PC advance remain explicit.
+Flag-setting operations never take the non-flag pointer-ADD branch; all incoming
+provenance booleans remain quantified. SP32 is not silently mapped to ZR31.
+
+The derived typed-body equality feeds existing complete canonical immediate,
+shifted and extended-register steps, retaining native bounds and omitted shifts.
+Immediate rows ignore any physical RHS bytes; compares ignore any SRC2 byte.
+SRC3 and unused AUX bytes stay arbitrary, including absent/SP encodings. Numeric
+opcode disjointness derives reachability past all preceding gates. The single
+step_through_flag_arithmetic_refines theorem covers the field/role/modifier/
+amount-only binding and every earlier case, with no semantic/refinement premise.
+The remaining ISA families, native byte/raw-width decoding and O2/O4 transport
+still require completion; this is not the full77/72 theorem.
+
+Validation: focused77-job dispatcher/reference Lean build (first build passed),
+12 existing contract freshness checks, direct-dispatch/model checks and13 existing
+semantic/route hosts passed 40080 cases,60144 cases,5120 cases,64 cases,2072 cases,136 cases,225292 cases,512 cases,6913 cases,257 cases,6401 cases,586829 cases,1115374 cases. Exact proof SHA256
+`16409a2ec38ff028001de2214b0b113fe57da5d14391eb86dab2c841faebee90` stayed unchanged throughout validation. All prior
+declarations remain byte-identical. No placeholders, new tests, input filtering,
+ISA/runtime/generator/oracle/paper edits. Original C warnings remain visible.
+The active exact261 full check predates both this and BITFIELD composition.
