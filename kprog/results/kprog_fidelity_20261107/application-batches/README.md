@@ -1,10 +1,10 @@
 # Application service batch observations
 
-One generic archive reader reconciles12 closed service batches across all six
-application names. All53 terminal requests preserve byte equality between the
+One generic archive reader reconciles18 closed service batches across all six
+application names. All80 terminal requests preserve byte equality between the
 kernel-owned native object, the worker's received copy and the service receipt's
-SHA256. Kernel source IDs match the service records. The batches contain49
-generated sources,48 compiled objects and43 successful bound replies.
+SHA256. Kernel source IDs match the service records. The batches contain76
+generated sources,75 compiled objects and65 successful bound replies.
 
 Every bound reply's request ID, program ID and status exactly match load.stdout.
 All available published counts match the archive-derived counts, including the
@@ -25,11 +25,100 @@ and each service's terminal requests and archive set agree.
 | tracee / functional_211016 | 6 | 6 | 6 | 5 | 1 verifier_rejected |
 | katran / functional_213447 | 1 | 1 | 1 | 1 | 0 |
 | tracee / arm64_functional_202335 | 1 | 1 | 1 | 0 | 1 loader_rejected |
+| bcc / arm64_functional_172354 | 19 | 19 | 19 | 16 | 3 verifier_rejected |
+| otel / arm64_functional_182921 | 1 | 1 | 1 | 0 | 1 loader_rejected |
+| cilium / arm64_functional_183612 | 0 | 0 | 0 | 0 | startup frontier |
+| tetragon / arm64_functional_183759 | 0 | 0 | 0 | 0 | startup frontier |
+| katran / arm64_functional_185947 | 1 | 1 | 1 | 1 | 0 |
+| tracee / functional_214037 | 6 | 6 | 6 | 5 | 1 verifier_rejected |
 
-The12 rows retain distinct source, image and boot epochs. Counts describe observed
+The18 rows retain distinct source, image and boot epochs. Counts describe observed
 load instances; repeated native objects and repeated program IDs across boots stay
 in their original batches. Whole application completion and duration-driven
 workload measurements follow the recorded startup frontiers.
+
+## Dual-ISA first-pass reconciliation
+
+The added five ARM cohorts complete the six ARM application names beside the
+earlier Tracee cohort. One shared reader processes every archived request and
+whole raw application phase. The six ARM cohorts contain22 generated/compiled
+requests and17 bound replies: BCC16/19, Katran1/1, OTel0/1 and Tracee0/1.
+Cilium and Tetragon preserve their startup outcomes with zero terminal service
+requests. These counts describe actual service observations.
+
+| ARM application | Baseline resident counters | Baseline BPF runs | Bound replies | Recorded app status |
+| --- | ---: | ---: | ---: | --- |
+| BCC | 23 | 178611 | 16 | error |
+| OTel | 12 | 183227 | 0 | error |
+| Cilium | 0 | 0 | 0 | error |
+| Tetragon | 152 | 30593 | 0 | error |
+| Katran | 1 | 26197 | 1 | ok |
+| Tracee | 151 | 97751 | 0 | error |
+
+Every available published phase object and resident-counter row equals its raw
+application JSON. Empty phase objects retain their startup-frontier meaning.
+The older BCC schema supplies full raw phases and an error first line; these
+are checked directly. OTel's mixed workload retains its11 component outcomes.
+The remaining schemas retain their full error fields and individual counter
+lists. Source/host status, QEMU/guest exit and actual application status remain
+separate observations.
+
+ARM Katran's source ID31 binds to32; the executed post_rejit counter ID is32.
+Its workload records26,197 JIT inputs and23,208 native inputs, with exactly those
+BPF invocation counts. Both phase workloads complete. Their duration-driven
+totals remain in the captured QEMU functional epoch.
+
+The BCC failures carry explicit verifier loop diagnostics. The generic reader
+classifies these before the outer native-stub EINVAL wrapper:
+
+~~~text
+fentry_vfs_read: infinite loop detected at insn 2
+processed 29 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0
+sys_exit: infinite loop detected at insn 203
+processed 166 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0
+sched_switch: infinite loop detected at insn 346
+processed 350 insns (limit 1000000) max_states_per_insn 0 total_states 22 peak_states 22 mark_read 0
+~~~
+
+Every published decisive BCC diagnostic matches its raw stream. The historical
+x86 Tetragon native-stub classification retains its original value. OTel's
+actual loader boundary is preserved exactly:
+
+~~~text
+libbpf: elf: skipping unrecognized data section(6) .native_lab.rodata
+trusted-native-loader: readonly proof data does not match native bytes
+~~~
+
+A's coherent loader/linker publication advances the next application epochs;
+these six first-pass records retain their original execution sources.
+
+The additional x86 Tracee214037 batch has6 fresh generated/compiled requests
+and5 bound replies. sys_exit_submit retains the exact readonly rejection:
+
+~~~text
+invalid access to map value, value_size=80 off=1036 size=4
+R0 max value is outside of the allowed memory range
+processed 2154 insns (limit 1000000) max_states_per_insn 1 total_states 91 peak_states 91 mark_read 0
+~~~
+
+Its captured candidate include has SHA256
+d585cf1e5e2d7ae63ceb6ee5e877ca42ff2eb7c6cfae977337c5ff0867a13621,
+matching F's published13,434,880 register-read observations. The captured Clang18
+wrapper supplies that include through -include. The root ea2f header identity
+and private include identity keep their separate provenance.
+dual-isa-increment.json pins that auxiliary launch archive, include and wrapper.
+C's subsequent generic CMP/read representation trial follows this frontier.
+
+The increment retains all prior12 batch objects,53 terminal rows, the entire
+failure-byte prefix,22 input pins and earlier workload/source-vector values.
+It adds6 cohorts,27 requests and22 bound replies. The total stages are65 bound,
+7 verifier rejections,4 specialization rejections,1 compiler rejection,
+1 native-stub load error and2 loader rejections. All80 kernel-owned native
+objects equal their worker copies and service SHA256 receipts. Four initial
+collector schema/classification diagnostics remain in
+dual-initial-collections.tar.gz; the final reader handles raw-only phases,
+first-line errors, component workloads and explicit verifier-loop diagnostics,
+and completes with exit0.
 
 ## ARM Tracee startup frontier
 
@@ -164,7 +253,11 @@ afc178f46e725fe96f85694d76fcf4c45c842914. The new Tetragon/Tracee slot-join
 metadata and service archives use21cf7278605fc3b4b6468b3bec639badec9ab0fb.
 The later Katran metadata, service and raw result archive use
 3993aa884362093ba6821db4e97cdded89504d99. The ARM coverage, raw run and source
-summary use5d0d953946ffe83e2a958b8d6c6990850bb86531. Twenty-two published metadata/archive
+summary use5d0d953946ffe83e2a958b8d6c6990850bb86531. The five additional ARM metadata/raw/summary sets use
+57db4da4387f19e86f79eae6dfa95bfaf024ee3d; the BCC raw archive retains its original
+5d6d067cfd55a627d7f367054decc72e09bb7e51 identity. The later x86 Tracee metadata
+and service archive usef41ccb6b773d0b24273b8145d758680f9b3f8793.
+Thirty-nine published metadata/archive
 inputs have individual Git/hash/size pins in summary.json. Two additional captured Tetragon service epochs and the R timing
 inputs retain their exact five-file captured-inputs.tar.gz and manifest.
 

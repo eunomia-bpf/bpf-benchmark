@@ -1,0 +1,34 @@
+{
+  "previous_publication": "0a8fc602b5cef43496b986f13f5f8e0e9ff1402a",
+  "checks": {
+    "prior_twelve_batches_equal": true,
+    "prior_53_terminal_rows_equal": true,
+    "prior_failure_bytes_prefix_equal": true,
+    "prior_22_input_pins_equal": true,
+    "prior_work_observations_equal": true,
+    "prior_identity_vectors_equal": true,
+    "final_recorded_count_matches": true,
+    "final_counts_equal": true,
+    "new_five_failures_retained": true
+  },
+  "retained_batches": 12,
+  "retained_requests": 53,
+  "retained_input_pins": 22,
+  "new_batches": 6,
+  "new_requests": 27,
+  "new_bound": 22,
+  "new_failure_records": 5,
+  "new_input_pins": 17,
+  "arm_katran_executed_bound_ids": [
+    32
+  ],
+  "arm_bcc_all_decisive_verifier_lines_match": true,
+  "compiler_capture": {
+    "publication": "f41ccb6b773d0b24273b8145d758680f9b3f8793",
+    "path": "corpus/results/kprog_app_coverage_20261107/tracee-narrow-range/launch.tar.gz",
+    "archive_sha256": "f5585bc2fb85796ba527befbfe350f54bcaf11f20b65ea7d74a318bce0a42897",
+    "candidate_include_sha256": "d585cf1e5e2d7ae63ceb6ee5e877ca42ff2eb7c6cfae977337c5ff0867a13621",
+    "wrapper_sha256": "a840338b934ace8289549623bc4b4f31e23dadc840ec79db9605264a0019035e",
+    "wrapper": "#!/bin/sh\nexec /usr/lib/llvm-18/bin/clang -include /workspaces/.agent-state/kprog-lanes/C/representation-runtime-replay/tracee__monitor/candidate-include.h \"$@\"\n"
+  }
+}

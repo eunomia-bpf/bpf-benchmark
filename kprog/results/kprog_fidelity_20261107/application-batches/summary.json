@@ -3,7 +3,9 @@
   "additional_source_publications": [
     "21cf7278605fc3b4b6468b3bec639badec9ab0fb",
     "3993aa884362093ba6821db4e97cdded89504d99",
-    "5d0d953946ffe83e2a958b8d6c6990850bb86531"
+    "5d0d953946ffe83e2a958b8d6c6990850bb86531",
+    "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+    "f41ccb6b773d0b24273b8145d758680f9b3f8793"
   ],
   "batches": [
     {
@@ -463,18 +465,175 @@
           "equal": true
         }
       }
+    },
+    {
+      "app": "bcc",
+      "batch": "arm64_functional_172354",
+      "metadata_path": "corpus/results/kprog_arm64_app_coverage_20261107/bcc-full-start-coverage.json",
+      "service_path": "corpus/results/kprog_arm64_app_coverage_20261106/bcc-full-start/trusted-arm64-bcc-result/run-20261107T172354861230Z.tar.gz",
+      "service_sha256": "70369c4760749672015fe1a8a1a6c2970e5a6d240c6a17eab42acf23148aeeda",
+      "terminal_requests": 19,
+      "generated": 19,
+      "compiled": 19,
+      "accepted_bound": 16,
+      "stages": {
+        "verifier_rejected": 3,
+        "bound": 16
+      },
+      "app_status": "captured_service_batch",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 0,
+      "recorded_counts": {
+        "proof_generated": {
+          "observed": 19,
+          "recorded": 19,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "otel",
+      "batch": "arm64_functional_182921",
+      "metadata_path": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json",
+      "service_path": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-otelcol-ebpf-profiler-result/run-20261107T182921697243Z.tar.gz",
+      "service_sha256": "7813fe4ad89fbd34156991d201b91be45f2814e5b36b2aa13a322ba0f2d0a2a7",
+      "terminal_requests": 1,
+      "generated": 1,
+      "compiled": 1,
+      "accepted_bound": 0,
+      "stages": {
+        "loader_rejected": 1
+      },
+      "app_status": "captured_service_batch",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 0,
+      "recorded_counts": {
+        "proof_generated": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "cilium",
+      "batch": "arm64_functional_183612",
+      "metadata_path": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-cilium-result/coverage.json",
+      "service_path": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-cilium-result/run-20261107T183612879202Z.tar.gz",
+      "service_sha256": "de477778787a7d2c10eda86335e1e019d69ec23e12adb8414a38c32ccdfea0cd",
+      "terminal_requests": 0,
+      "generated": 0,
+      "compiled": 0,
+      "accepted_bound": 0,
+      "stages": {},
+      "app_status": "captured_service_batch",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 0,
+      "recorded_counts": {
+        "proof_generated": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "tetragon",
+      "batch": "arm64_functional_183759",
+      "metadata_path": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tetragon-result/coverage.json",
+      "service_path": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tetragon-result/run-20261107T183759739461Z.tar.gz",
+      "service_sha256": "41a55dba6e5474a85ed1688f39a6b9bc38a5040f74a8361a7e934f06d5880d28",
+      "terminal_requests": 0,
+      "generated": 0,
+      "compiled": 0,
+      "accepted_bound": 0,
+      "stages": {},
+      "app_status": "captured_service_batch",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 0,
+      "recorded_counts": {
+        "proof_generated": {
+          "observed": 0,
+          "recorded": 0,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "katran",
+      "batch": "arm64_functional_185947",
+      "metadata_path": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-katran-result/coverage.json",
+      "service_path": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-katran-result/run-20261107T185947373335Z.tar.gz",
+      "service_sha256": "36631edd6c78c017533c13802d421386449241ef5e713d60c8eee07f625ef250",
+      "terminal_requests": 1,
+      "generated": 1,
+      "compiled": 1,
+      "accepted_bound": 1,
+      "stages": {
+        "bound": 1
+      },
+      "app_status": "captured_service_batch",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 0,
+      "recorded_counts": {
+        "proof_generated": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        }
+      }
+    },
+    {
+      "app": "tracee",
+      "batch": "functional_214037",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/tracee-narrow-range/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/tracee-narrow-range/service.tar.gz",
+      "service_sha256": "016b87cfe752d7d123c91297e8000531e7e0087dbca6ff4eae8cd75a51736aa7",
+      "terminal_requests": 6,
+      "generated": 6,
+      "compiled": 6,
+      "accepted_bound": 5,
+      "stages": {
+        "bound": 5,
+        "verifier_rejected": 1
+      },
+      "app_status": "error",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 151,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 6,
+          "recorded": 6,
+          "equal": true
+        },
+        "generated": {
+          "observed": 6,
+          "recorded": 6,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 6,
+          "recorded": 6,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 5,
+          "recorded": 5,
+          "equal": true
+        }
+      }
     }
   ],
-  "terminal_requests": 53,
+  "terminal_requests": 80,
   "stages": {
-    "bound": 43,
-    "verifier_rejected": 3,
+    "bound": 65,
+    "verifier_rejected": 7,
     "compiler_rejected": 1,
     "specialization_rejected": 4,
     "native_stub_load_error": 1,
-    "loader_rejected": 1
+    "loader_rejected": 2
   },
-  "kernel_worker_receipt_identity_matches": 53,
+  "kernel_worker_receipt_identity_matches": 80,
   "input_artifacts": {
     "corpus/results/kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json": {
       "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
@@ -585,6 +744,91 @@
       "publication": "5d0d953946ffe83e2a958b8d6c6990850bb86531",
       "sha256": "6a60503b16e97bb687497cee01ba7fc679e0bdffc413b669d829697a74c462ac",
       "bytes": 25080
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/bcc-full-start-coverage.json": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "2d3fc03f75d7355845a3b93b13ce2498f066e7e233152a6d0a736d9a45609c7c",
+      "bytes": 28264
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261106/bcc-full-start/trusted-arm64-bcc-result/run-20261107T172354861230Z.tar.gz": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "70369c4760749672015fe1a8a1a6c2970e5a6d240c6a17eab42acf23148aeeda",
+      "bytes": 10240289
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261106/bcc-full-start/trusted-arm64-bcc-result/summary.json": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "bc2df545954c0b0bfc29a60e942dec30783671a29f36a05fc0134667c0039e18",
+      "bytes": 26644
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "8ab56e855454f68d83abe01a48a266ba6892160ab5362095ca2bf18f7d18f6a3",
+      "bytes": 25799
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-otelcol-ebpf-profiler-result/run-20261107T182921697243Z.tar.gz": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "7813fe4ad89fbd34156991d201b91be45f2814e5b36b2aa13a322ba0f2d0a2a7",
+      "bytes": 1099562
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-otelcol-ebpf-profiler-result/summary.json": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "3e3e73bc09bb843edb373ce445fdeb68138422bce82fbafcc34f6a10e2e6cdc1",
+      "bytes": 27396
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-cilium-result/coverage.json": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "5476759b1981f36f0dd2899ae0a6a94012481b533d7eefb55423131b63467ca9",
+      "bytes": 8579
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-cilium-result/run-20261107T183612879202Z.tar.gz": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "de477778787a7d2c10eda86335e1e019d69ec23e12adb8414a38c32ccdfea0cd",
+      "bytes": 25788
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-cilium-result/summary.json": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "5d225662089d699fc945717cb78b184e0f8bfa714fb85bab5d5df6e25b42063f",
+      "bytes": 25492
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tetragon-result/coverage.json": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "07a92211c0d1a91455031dfacd42272300bd7eb3cef8618ecc00e0aad175a67d",
+      "bytes": 92559
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tetragon-result/run-20261107T183759739461Z.tar.gz": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "41a55dba6e5474a85ed1688f39a6b9bc38a5040f74a8361a7e934f06d5880d28",
+      "bytes": 1524917
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tetragon-result/summary.json": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "70ce84f97fc22487ff66a636f8902714825e9cdbe1c1561ff49b689ac9a8d5c7",
+      "bytes": 48261
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-katran-result/coverage.json": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "ea8a3948563d1245d0bc66b8fe8a2723d78d4cb0dc0881aac3f1a6add412b985",
+      "bytes": 45448
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-katran-result/run-20261107T185947373335Z.tar.gz": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "36631edd6c78c017533c13802d421386449241ef5e713d60c8eee07f625ef250",
+      "bytes": 481323
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-katran-result/summary.json": {
+      "publication": "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
+      "sha256": "107256e7baf659d801e8d24e5f6d6e1f9ccf55839f13573dd509b328ee8383df",
+      "bytes": 24986
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-narrow-range/coverage.json": {
+      "publication": "f41ccb6b773d0b24273b8145d758680f9b3f8793",
+      "sha256": "e1cbb94dae4b7634c8f157f6dc8359a0089b63a5f1f55a103cad9768617c15c2",
+      "bytes": 81742
+    },
+    "corpus/results/kprog_app_coverage_20261107/tracee-narrow-range/service.tar.gz": {
+      "publication": "f41ccb6b773d0b24273b8145d758680f9b3f8793",
+      "sha256": "016b87cfe752d7d123c91297e8000531e7e0087dbca6ff4eae8cd75a51736aa7",
+      "bytes": 28649408
     }
   },
   "captured_input_manifest": {
@@ -755,6 +999,670 @@
         }
       ],
       "archive_sha256": "0834321bc7d5fbafe59b0d61afef55ffba012815dcadbf01a199cea562139b9a"
+    },
+    "arm64_functional_172354": {
+      "applications": [
+        {
+          "app": "bcc/set",
+          "app_status": "error",
+          "app_error": "BCC tool vfsstat exited with rc=97\nstdout tail:\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:01 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:02 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:02 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:02 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:02 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:02 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:02 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:02 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:02 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:02 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:02 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:02 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:02 0     824     biosnoop         39      CAP_BPF              1       allow\n01:05:02 0     824     biosnoop         39      CAP_BPF              1       allow\nbiosnoop:\nTIME(s)     COMM           PID     DISK    T    SECTOR     BYTES   LAT(ms)\nopensnoop:\n568    python3            5   0 /etc/group\n568    python3            5   0 /workspaces/repository/kprog/arm64/build/trusted-transport/service-h7e_1grc/requests/request-w3my5pja/generated/kernel-link/d433fb8b47352841.blob.bin\n824    biosnoop          22   0 /proc/self/fd\n568    python3            5   0 /etc/passwd\n568    python3            5   0 /etc/group\n568    python3            5   0 /workspaces/repository/kprog/arm64/build/trusted-transport/service-h7e_1grc/requests/request-w3my5pja/generated/kernel-link/d433fb8b47352841.data-layout.json\n568    python3            5   0 /etc/passwd\n568    python3            5   0 /etc/group\n568    python3            5   0 /workspaces/repository/kprog/arm64/build/trusted-transport/service-h7e_1grc/requests/request-w3my5pja/generated/kernel-link/d433fb8b47352841.environment-layout.json\n824    biosnoop          22   0 /proc/self/fd\n568    python3            5   0 /etc/passwd\n568    python3            5   0 /etc/group\n568    python3            5   0 /workspaces/repository/kprog/arm64/build/trusted-transport/service-h7e_1grc/requests/request-w3my5pja/generated/kernel-link/d433fb8b47352841.map-patches.tsv\n568    python3            5   0 /etc/passwd\n568    python3            5   0 /etc/group\n824    biosnoop          22   0 /proc/self/fd\n568    python3            5   0 /workspaces/repository/kprog/arm64/build/trusted-transport/service-h7e_1grc/requests/request-w3my5pja/generated/kernel-link/d433fb8b47352841.proof.o\n568    python3            5   0 /etc/passwd\n568    python3            5   0 /etc/group\n568    python3            5   0 /workspaces/repository/kprog/arm64/build/trusted-transport/service-h7e_1grc/requests/request-w3my5pja/generated/kernel-link/d433fb8b47352841.relocs.bin\n568    python3            5   0 /etc/passwd\n824    biosnoop          22   0 /proc/self/fd\n568    python3            5   0 /etc/group\n568    python3            5   0 /workspaces/repository/kprog/arm64/build/trusted-transport/service-h7e_1grc/requests/request-w3my5pja/generated/kernel-link/d433fb8b47352841.tmp.983.983.link-plan.json\n568    python3            5   0 /etc/passwd\n568    python3            5   0 /etc/group\n568    python3            5   0 /workspaces/repository/kprog/arm64/build/trusted-transport/service-h7e_1grc/requests/request-w3my5pja/generated/request.native.o\n824    biosnoop          22   0 /proc/self/fd\n824    biosnoop          22   0 /proc/self/fd\n824    biosnoop          24   0 /sys/devices/system/cpu/online\n824    biosnoop          25   0 /sys/bus/event_source/devices/kprobe/type\n824    biosnoop          25   0 /sys/bus/event_source/devices/uprobe/type\n824    biosnoop          25   0 /sys/bus/event_source/devices/kprobe/type\n824    biosnoop          25   0 /sys/bus/event_source/devices/uprobe/type\n568    python3            5   0 /etc/passwd\n568    python3            5   0 /etc/group\n568    python3            5   0 /workspaces/repository/kprog/arm64/build/trusted-transport/service-h7e_1grc/requests/request-w3my5pja/generated/trusted_arm64.bpf.c\n568    python3            5   0 /etc/passwd\n568    python3            5   0 /etc/group\n568    python3            5   0 /workspaces/repository/kprog/arm64/build/trusted-transport/service-h7e_1grc/requests/request-w3my5pja/generated/trusted_arm64.bpf.o\ntcpconnect:\nPID    COMM         IP SADDR            DADDR            DPORT\ntcplife:\nPID     COMM             LADDR           LPORT RADDR           RPORT TX_KB  RX_KB  MS",
+          "app_result_sha256": "2d740ba1cf69b5de7a8bf20580ec6c0298a614a6045960592f3c75fc98a13d07",
+          "phases": {
+            "baseline": {
+              "raw_measurement_present": true,
+              "archived_coverage_equal": true,
+              "resident_program_count": 23,
+              "bpf_run_count": 178611,
+              "bpf_run_time_ns": 4338716288,
+              "workloads": [
+                {
+                  "name": "stress_ng_bcc_hook_hot",
+                  "duration_seconds": 6.116020175999978,
+                  "returncode": 0,
+                  "stdout_sha256": "0b647d61df28f29cef6558cf1367c823caf3782aa1dee4b957106c1e3bb4c36e",
+                  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ]
+            },
+            "post_rejit": {
+              "raw_measurement_present": false,
+              "archived_coverage_equal": true,
+              "resident_program_count": 0,
+              "bpf_run_count": 0,
+              "bpf_run_time_ns": 0,
+              "workloads": []
+            }
+          }
+        }
+      ],
+      "published_request_fields_equal": true,
+      "host_ok": false,
+      "guest_exit": 1,
+      "qemu_returncode": 0,
+      "recorded_hashes_unchanged": false,
+      "initial_source_identity_count": 205,
+      "link_plans": [
+        {
+          "request_id": 1,
+          "sha256": "698ce29c1844bc24a73f83719641cc0621771a3a1b2dc88c2e3e8278ed63c914",
+          "map_names": [
+            "stats",
+            "vfsstat_.bss"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 2,
+          "sha256": "8dcb914316dab520fa7581c13ab3142820aa56ea46a38cf81a8bc003f98cd19b",
+          "map_names": [
+            "opensnoo.rodata",
+            "start",
+            "targ_failed",
+            "targ_pid",
+            "targ_tgid",
+            "targ_uid"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 3,
+          "sha256": "b5ed18c0d98033c974844e0fb90feff1e0adf68f58803429a48f837ec998d98c",
+          "map_names": [
+            "cgroup_map",
+            "count_by_process",
+            "filter_cg",
+            "filter_errno",
+            "filter_failed",
+            "filter_pid",
+            "measure_latency",
+            "start",
+            "sys_exit.zero",
+            "syscount.rodata"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 4,
+          "sha256": "44a13f5fbea0c274155d3aa9ca189441ff6762a7039fba485085546866eea9dd",
+          "map_names": [
+            "birth",
+            "events",
+            "filter_dport",
+            "filter_sport",
+            "idents",
+            "target_dports",
+            "target_family",
+            "target_pid",
+            "target_sports",
+            "tcplife_.rodata"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 5,
+          "sha256": "09015438fd7d59c40ba57b287d6606c5dfdd96baae807da55a399767341d34e2",
+          "map_names": [
+            "cgroup_map",
+            "filter_cg",
+            "runqlat_.rodata",
+            "start",
+            "targ_ms",
+            "targ_per_pidns",
+            "targ_per_process",
+            "targ_per_thread",
+            "targ_tgid"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 6,
+          "sha256": "b429f6aa65a0a4bf88c2ad4913238a10c7fb33052266909c029f23aa341306f6",
+          "map_names": [
+            "capable_.rodata",
+            "cgroup_map",
+            "filter_cg",
+            "kernel_stack",
+            "my_pid",
+            "start",
+            "targ_pid",
+            "unique_type",
+            "user_stack"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 7,
+          "sha256": "d600f78f5d2ff20c42eaf8eec742a9d68695af0dad6526362929b9e346e4b979",
+          "map_names": [
+            "count_v6.zero",
+            "do_count",
+            "filter_pid",
+            "filter_ports",
+            "filter_ports_len",
+            "filter_uid",
+            "sockets",
+            "source_port",
+            "tcpconne.rodata"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 8,
+          "sha256": "47b14c958b7c3a4c7128d718ffab1eed8ced9d31c90c451ffad927dfc16852f7",
+          "map_names": [
+            "biosnoop.rodata",
+            "cgroup_map",
+            "filter_cg",
+            "filter_dev",
+            "infobyreq",
+            "targ_dev",
+            "targ_queued"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 9,
+          "sha256": "f9155a6c2e0813b66a555ff6591d6f835b668528e8a34f9ce5cca0ce5a385de4",
+          "map_names": [
+            "events",
+            "opensnoo.rodata",
+            "start",
+            "targ_failed",
+            "targ_pid",
+            "targ_tgid",
+            "targ_uid"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 10,
+          "sha256": "9df6639a8150fc7b967657ad0025fa979244fde874a7ea8b4aa595ab2f262b08",
+          "map_names": [
+            "cgroup_map",
+            "count_by_process",
+            "data",
+            "filter_cg",
+            "filter_errno",
+            "filter_failed",
+            "filter_pid",
+            "measure_latency",
+            "start",
+            "sys_exit.zero",
+            "syscount.rodata"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 11,
+          "sha256": "09015438fd7d59c40ba57b287d6606c5dfdd96baae807da55a399767341d34e2",
+          "map_names": [
+            "cgroup_map",
+            "filter_cg",
+            "runqlat_.rodata",
+            "start",
+            "targ_ms",
+            "targ_per_pidns",
+            "targ_per_process",
+            "targ_per_thread",
+            "targ_tgid"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 12,
+          "sha256": "1df268679228237cdb65f54271e77aef4aacb6b787dcf804eccbaabf2405d030",
+          "map_names": [
+            "LINUX_KERNEL_VERSION",
+            "capable.kconfig",
+            "capable_.rodata",
+            "events",
+            "filter_cg",
+            "info",
+            "kernel_stack",
+            "my_pid",
+            "seen",
+            "stackmap",
+            "start",
+            "targ_pid",
+            "unique_type",
+            "user_stack"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 13,
+          "sha256": "d9e370f3d7be79ccfdd95218cd847dc3056af6b264871c4ca1cf3bc855fd6376",
+          "map_names": [
+            "count_v4.zero",
+            "count_v6.zero",
+            "do_count",
+            "events",
+            "filter_pid",
+            "filter_ports",
+            "filter_ports_len",
+            "filter_uid",
+            "ipv4_count",
+            "sockets",
+            "source_port",
+            "tcpconne.bss",
+            "tcpconne.rodata"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 14,
+          "sha256": "7c2879a5e06cf977cb7b93a7d7105f695b82c31e3cbcc330a0d922aec18ee70a",
+          "map_names": [
+            "LINUX_KERNEL_VERSION",
+            "biosnoo.kconfig",
+            "biosnoop.rodata",
+            "cgroup_map",
+            "filter_cg",
+            "filter_dev",
+            "start",
+            "targ_dev",
+            "targ_queued"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 15,
+          "sha256": "a65ab212e5c022c8584c08e39cbf1db491d4e23d7d5741cedce4dda7f8dfbf9b",
+          "map_names": [
+            "cgroup_map",
+            "filter_cg",
+            "hists",
+            "runqlat_.bss",
+            "runqlat_.rodata",
+            "start",
+            "targ_ms",
+            "targ_per_pidns",
+            "targ_per_process",
+            "targ_per_thread",
+            "targ_tgid",
+            "zero"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 16,
+          "sha256": "d600f78f5d2ff20c42eaf8eec742a9d68695af0dad6526362929b9e346e4b979",
+          "map_names": [
+            "count_v6.zero",
+            "do_count",
+            "filter_pid",
+            "filter_ports",
+            "filter_ports_len",
+            "filter_uid",
+            "sockets",
+            "source_port",
+            "tcpconne.rodata"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 17,
+          "sha256": "47a4f9659a5c7fc7c0ef3315add28e1542e27dfad46bf3ad06453cfc58193230",
+          "map_names": [
+            "LINUX_KERNEL_VERSION",
+            "biosnoo.kconfig",
+            "biosnoop.rodata",
+            "cgroup_map",
+            "filter_cg",
+            "filter_dev",
+            "infobyreq",
+            "start",
+            "targ_dev",
+            "targ_queued"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 18,
+          "sha256": "cc27f2720b8586dfee4da84077f69ea8d294d61431d47dae53b465172269ee05",
+          "map_names": [
+            "count_v6.zero",
+            "do_count",
+            "events",
+            "filter_pid",
+            "filter_ports",
+            "filter_ports_len",
+            "filter_uid",
+            "ipv6_count",
+            "sockets",
+            "source_port",
+            "tcpconne.rodata"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 19,
+          "sha256": "4343019cc348d781a8ea49ada02ddcbe0c2dd78075925110007995a0a4f6446c",
+          "map_names": [
+            "biosnoop.rodata",
+            "cgroup_map",
+            "events",
+            "filter_cg",
+            "filter_dev",
+            "infobyreq",
+            "start",
+            "targ_dev",
+            "targ_queued"
+          ],
+          "tail_call_maps": []
+        }
+      ],
+      "archive_sha256": "70369c4760749672015fe1a8a1a6c2970e5a6d240c6a17eab42acf23148aeeda"
+    },
+    "arm64_functional_182921": {
+      "applications": [
+        {
+          "app": "otelcol-ebpf-profiler/profiling",
+          "app_status": "error",
+          "app_error": "native app exited before BPF programs were tracked by shim\nstderr tail:\n1970-01-01T00:03:05.414Z\tinfo\totelconftelemetry/metrics.go:24\tInternal metrics telemetry disabled\t{\"resource\": {\"service.instance.id\": \"9224683b-3c9d-4d50-9448-5641d90956b5\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n1970-01-01T00:03:05.526Z\tinfo\tbuilders/builders.go:26\tDevelopment component. May change in the future.\t{\"resource\": {\"service.instance.id\": \"9224683b-3c9d-4d50-9448-5641d90956b5\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:03:05.893Z\tinfo\tservice@v0.139.0/service.go:222\tStarting otelcol-ebpf-profiler...\t{\"resource\": {\"service.instance.id\": \"9224683b-3c9d-4d50-9448-5641d90956b5\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"Version\": \"0.140.0\", \"NumCPU\": 8}\n1970-01-01T00:03:05.896Z\tinfo\textensions/extensions.go:40\tStarting extensions...\t{\"resource\": {\"service.instance.id\": \"9224683b-3c9d-4d50-9448-5641d90956b5\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n1970-01-01T00:03:05.935Z\tinfo\tInterpreter tracers: perl,php,python,hotspot,ruby,v8,go,labels\t{\"resource\": {\"service.instance.id\": \"9224683b-3c9d-4d50-9448-5641d90956b5\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:03:12.362Z\tinfo\tDetermined PAC mask to be 0x007F000000000000\t{\"resource\": {\"service.instance.id\": \"9224683b-3c9d-4d50-9448-5641d90956b5\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}",
+          "app_result_sha256": "59499c407982dc40bebc1c4132104c7595509f40b1194dbdb8a468387f3fe825",
+          "phases": {
+            "baseline": {
+              "raw_measurement_present": true,
+              "archived_coverage_equal": true,
+              "resident_program_count": 12,
+              "bpf_run_count": 183227,
+              "bpf_run_time_ns": 19722242112,
+              "workloads": [
+                {
+                  "name": "otel_mixed_workload",
+                  "components": [
+                    {
+                      "name": "otel_python3_int_loop_0",
+                      "duration_seconds": 8.328924416000007,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "5be2ca38e563ee51410f67a94128f199251bf8d53f7227464f0e6598d3e8a3a7"
+                    },
+                    {
+                      "name": "otel_python3_int_loop_1",
+                      "duration_seconds": 8.349518463999999,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "791870e9e524be3de1446906731170932dd712dca69f59e57711e9640b45003b"
+                    },
+                    {
+                      "name": "otel_ruby_int_loop_0",
+                      "duration_seconds": 45.29461395199999,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "7d56f16d1c44d8660e019073d7d8b5037d33c30489b9e0eacaa8bed7ab073e15"
+                    },
+                    {
+                      "name": "otel_ruby_int_loop_1",
+                      "duration_seconds": 45.303146736,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "912d590a61ea9785bfd9fe36947a357f4319e9dcec3ff241ceb629a82cdfae65"
+                    },
+                    {
+                      "name": "otel_nodejs_int_loop_0",
+                      "duration_seconds": 45.31024160000001,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "4ff8b9561bccf67970db9eccf6eb2c670db95ec3af6f55756af0c8ed8fcf2952"
+                    },
+                    {
+                      "name": "otel_nodejs_int_loop_1",
+                      "duration_seconds": 45.31865008,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "cd8ca3f72369bc8c06e750b4f7524a8e6310654cce2760e643b1578b36405cf8"
+                    },
+                    {
+                      "name": "otel_perl_int_loop_0",
+                      "duration_seconds": 45.327403616,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "9d34bffd56aaf53aacba9645c7c8b274b4cfe4ff5cc45895b1f3da43557e8900"
+                    },
+                    {
+                      "name": "otel_perl_int_loop_1",
+                      "duration_seconds": 45.33387583999999,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "d46a7b05b455987202e72c9f6e8352c8d56e05f710df5be7cb3c8a54efdba02f"
+                    },
+                    {
+                      "name": "otel_php_int_loop_0",
+                      "duration_seconds": 45.342817424,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "3e20a405fcce4ad64a2f00c3b9954e71d9202be54028c0047810d1c3f0ece403"
+                    },
+                    {
+                      "name": "otel_php_int_loop_1",
+                      "duration_seconds": 45.35348748800001,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "b240951c313928853d60c54bc2b4ef047886b40c499df2cfb0960101e940ab1f"
+                    },
+                    {
+                      "name": "otel_stress_ng_cpu",
+                      "duration_seconds": 45.361833648000015,
+                      "returncode": 0,
+                      "stdout_sha256": "9d59c0b8e34c2d33e236527ec2e1583e15312fd0ec748604b9dbe153cfbd93f1",
+                      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                    }
+                  ]
+                }
+              ]
+            },
+            "post_rejit": {
+              "raw_measurement_present": false,
+              "archived_coverage_equal": true,
+              "resident_program_count": 0,
+              "bpf_run_count": 0,
+              "bpf_run_time_ns": 0,
+              "workloads": []
+            }
+          }
+        }
+      ],
+      "published_request_fields_equal": true,
+      "host_ok": false,
+      "guest_exit": 1,
+      "qemu_returncode": 0,
+      "recorded_hashes_unchanged": true,
+      "initial_source_identity_count": 205,
+      "link_plans": [
+        {
+          "request_id": 1,
+          "sha256": "1feeca754850f699c66aa5ca63c688a57d891bac4841dc2e5fd6a3b296650c11",
+          "map_names": [
+            ".rodata.var",
+            "filter_error_frames",
+            "filter_idle_frames",
+            "inverse_pac_mask",
+            "off_cpu_threshold",
+            "stack_ptregs_offset",
+            "system_analysis",
+            "task_stack_offset",
+            "tpbase_offset",
+            "with_debug_output"
+          ],
+          "tail_call_maps": []
+        }
+      ],
+      "archive_sha256": "7813fe4ad89fbd34156991d201b91be45f2814e5b36b2aa13a322ba0f2d0a2a7"
+    },
+    "arm64_functional_183612": {
+      "applications": [
+        {
+          "app": "cilium/agent",
+          "app_status": "error",
+          "app_error": "native app exited before BPF programs were tracked by shim\nstdout tail:\ntime=1970-01-01T00:01:20.05912856Z level=info msg=\"  --pprof-address='localhost'\"\ntime=1970-01-01T00:01:20.059253328Z level=info msg=\"  --pprof-block-profile-rate='0'\"\ntime=1970-01-01T00:01:20.059377376Z level=info msg=\"  --pprof-mutex-profile-fraction='0'\"\ntime=1970-01-01T00:01:20.059508896Z level=info msg=\"  --pprof-port='6060'\"\ntime=1970-01-01T00:01:20.059637136Z level=info msg=\"  --preallocate-bpf-maps='true'\"\ntime=1970-01-01T00:01:20.059760864Z level=info msg=\"  --prefer-ipv6='false'\"\ntime=1970-01-01T00:01:20.059881984Z level=info msg=\"  --prepend-iptables-chains='true'\"\ntime=1970-01-01T00:01:20.060003328Z level=info msg=\"  --procfs='/proc'\"\ntime=1970-01-01T00:01:20.060408272Z level=info msg=\"  --prometheus-serve-addr=''\"\ntime=1970-01-01T00:01:20.060543968Z level=info msg=\"  --proxy-admin-port='0'\"\ntime=1970-01-01T00:01:20.060678304Z level=info msg=\"  --proxy-cluster-max-connections='1024'\"\ntime=1970-01-01T00:01:20.060803264Z level=info msg=\"  --proxy-cluster-max-requests='1024'\"\ntime=1970-01-01T00:01:20.060934192Z level=info msg=\"  --proxy-connect-timeout='2'\"\ntime=1970-01-01T00:01:20.06105672Z level=info msg=\"  --proxy-gid='1337'\"\ntime=1970-01-01T00:01:20.061182Z level=info msg=\"  --proxy-idle-timeout-seconds='60'\"\ntime=1970-01-01T00:01:20.061304976Z level=info msg=\"  --proxy-initial-fetch-timeout='30'\"\ntime=1970-01-01T00:01:20.061444016Z level=info msg=\"  --proxy-max-active-downstream-connections='50000'\"\ntime=1970-01-01T00:01:20.06159272Z level=info msg=\"  --proxy-max-concurrent-retries='128'\"\ntime=1970-01-01T00:01:20.06172512Z level=info msg=\"  --proxy-max-connection-duration-seconds='0'\"\ntime=1970-01-01T00:01:20.061852384Z level=info msg=\"  --proxy-max-requests-per-connection='0'\"\ntime=1970-01-01T00:01:20.061976Z level=info msg=\"  --proxy-portrange-max='20000'\"\ntime=1970-01-01T00:01:20.062096672Z level=info msg=\"  --proxy-portrange-min='10000'\"\ntime=1970-01-01T00:01:20.062225472Z level=info msg=\"  --proxy-prometheus-port='0'\"\ntime=1970-01-01T00:01:20.062348784Z level=info msg=\"  --proxy-use-original-source-address='true'\"\ntime=1970-01-01T00:01:20.062470944Z level=info msg=\"  --proxy-xff-num-trusted-hops-egress='0'\"\ntime=1970-01-01T00:01:20.062595952Z level=info msg=\"  --proxy-xff-num-trusted-hops-ingress='0'\"\ntime=1970-01-01T00:01:20.062779136Z level=info msg=\"  --read-cni-conf=''\"\ntime=1970-01-01T00:01:20.062913584Z level=info msg=\"  --restore='true'\"\ntime=1970-01-01T00:01:20.063037968Z level=info msg=\"  --restored-proxy-ports-age-limit='15'\"\ntime=1970-01-01T00:01:20.063164448Z level=info msg=\"  --route-metric='0'\"\ntime=1970-01-01T00:01:20.063276544Z level=info msg=\"  --routing-mode='native'\"\ntime=1970-01-01T00:01:20.063394768Z level=info msg=\"  --service-no-backend-response='reject'\"\ntime=1970-01-01T00:01:20.063515968Z level=info msg=\"  --shell-sock-path='/var/run/cilium/shell.sock'\"\ntime=1970-01-01T00:01:20.063643456Z level=info msg=\"  --socket-path='/var/tmp/ciliumrunner_n56l_shd/state/cilium.sock'\"\ntime=1970-01-01T00:01:20.063763552Z level=info msg=\"  --srv6-encap-mode='reduced'\"\ntime=1970-01-01T00:01:20.063891504Z level=info msg=\"  --standalone-dns-proxy-server-port='10095'\"\ntime=1970-01-01T00:01:20.06400608Z level=info msg=\"  --state-dir='/var/tmp/ciliumrunner_n56l_shd/state'\"\ntime=1970-01-01T00:01:20.064154656Z level=info msg=\"  --static-cnp-path=''\"\ntime=1970-01-01T00:01:20.064286496Z level=info msg=\"  --status-collector-failure-threshold='1m0s'\"\ntime=1970-01-01T00:01:20.06440744Z level=info msg=\"  --status-collector-interval='5s'\"\ntime=1970-01-01T00:01:20.064527648Z level=info msg=\"  --status-collector-probe-check-timeout='5m0s'\"\ntime=1970-01-01T00:01:20.064653504Z level=info msg=\"  --status-collector-stackdump-path='/run/cilium/state/agent.stack.gz'\"\ntime=1970-01-01T00:01:20.064779424Z level=info msg=\"  --status-collector-warning-threshold='15s'\"\ntime=1970-01-01T00:01:20.064938432Z level=info msg=\"  --subnet-topology=''\"\ntime=1970-01-01T00:01:20.065067616Z level=info msg=\"  --tofqdns-dns-reject-response-code='refused'\"\ntime=1970-01-01T00:01:20.0651924Z level=info msg=\"  --tofqdns-enable-dns-compression='true'\"\ntime=1970-01-01T00:01:20.065322816Z level=info msg=\"  --tofqdns-endpoint-max-ip-per-hostname='1000'\"\ntime=1970-01-01T00:01:20.06545016Z level=info msg=\"  --tofqdns-idle-connection-grace-period='0s'\"\ntime=1970-01-01T00:01:20.065584944Z level=info msg=\"  --tofqdns-max-deferred-connection-deletes='10000'\"\ntime=1970-01-01T00:01:20.065716896Z level=info msg=\"  --tofqdns-min-ttl='0'\"\ntime=1970-01-01T00:01:20.065865744Z level=info msg=\"  --tofqdns-pre-cache=''\"\ntime=1970-01-01T00:01:20.065988608Z level=info msg=\"  --tofqdns-preallocate-identities='true'\"\ntime=1970-01-01T00:01:20.0661144Z level=info msg=\"  --tofqdns-proxy-port='0'\"\ntime=1970-01-01T00:01:20.066237856Z level=info msg=\"  --tofqdns-proxy-response-max-delay='100ms'\"\ntime=1970-01-01T00:01:20.06636432Z level=info msg=\"  --trace-payloadlen='128'\"\ntime=1970-01-01T00:01:20.066489264Z level=info msg=\"  --trace-payloadlen-overlay='192'\"\ntime=1970-01-01T00:01:20.066617088Z level=info msg=\"  --trace-sock='true'\"\ntime=1970-01-01T00:01:20.0667444Z level=info msg=\"  --tunnel-port='0'\"\ntime=1970-01-01T00:01:20.066863904Z level=info msg=\"  --tunnel-protocol='vxlan'\"\ntime=1970-01-01T00:01:20.066982064Z level=info msg=\"  --tunnel-source-port-range='0-0'\"\ntime=1970-01-01T00:01:20.067098672Z level=info msg=\"  --underlay-protocol='auto'\"\ntime=1970-01-01T00:01:20.067235936Z level=info msg=\"  --use-cilium-internal-ip-for-ipsec='false'\"\ntime=1970-01-01T00:01:20.067377792Z level=info msg=\"  --use-full-tls-context='false'\"\ntime=1970-01-01T00:01:20.067503504Z level=info msg=\"  --version='false'\"\ntime=1970-01-01T00:01:20.068381024Z level=info msg=\"  --vlan-bpf-bypass=''\"\ntime=1970-01-01T00:01:20.068600992Z level=info msg=\"  --vtep-cidr=''\"\ntime=1970-01-01T00:01:20.068749504Z level=info msg=\"  --vtep-endpoint=''\"\ntime=1970-01-01T00:01:20.068894864Z level=info msg=\"  --vtep-mac=''\"\ntime=1970-01-01T00:01:20.068985008Z level=info msg=\"  --vtep-mask='255.255.255.0'\"\ntime=1970-01-01T00:01:20.069068544Z level=info msg=\"  --vtep-sync-interval='1m0s'\"\ntime=1970-01-01T00:01:20.069147264Z level=info msg=\"  --wireguard-persistent-keepalive='0s'\"\ntime=1970-01-01T00:01:20.069231184Z level=info msg=\"  --wireguard-track-all-ips-fallback='false'\"\ntime=1970-01-01T00:01:20.069340864Z level=info msg=\"  --write-cni-conf-when-ready=''\"\ntime=1970-01-01T00:01:20.0694368Z level=info msg=\"  --ztunnel-endpoint-event-channel-buffer-size='1'\"\ntime=1970-01-01T00:01:20.072983792Z level=info msg=\"     _ _ _\"\ntime=1970-01-01T00:01:20.073267936Z level=info msg=\" ___|_| |_|_ _ _____\"\ntime=1970-01-01T00:01:20.073358496Z level=info msg=\"|  _| | | | | |     |\"\ntime=1970-01-01T00:01:20.073435824Z level=info msg=|___|_|_|_|___|_|_|_|\ntime=1970-01-01T00:01:20.073551856Z level=info msg=\"Cilium 1.20.0-dev  go version go1.26.8 linux/arm64\"\ntime=1970-01-01T00:01:23.733715568Z level=fatal msg=\"failed to create header files with feature macros\" runDirectory=/var/tmp/ciliumrunner_n56l_shd/state libDirectory=/var/lib/cilium BPFDirectory=/var/lib/cilium/bpf StateDirectory=/var/tmp/ciliumrunner_n56l_shd/state/state error=\"could not create common features header file: open /var/lib/cilium/bpf/include/bpf/features.h: read-only file system\"",
+          "app_result_sha256": "2d623778342b8bdb424b5e8353ad86697c8c70c3ea2f32c92e06a25e4764bb1e",
+          "phases": {
+            "baseline": {
+              "raw_measurement_present": false,
+              "archived_coverage_equal": true,
+              "resident_program_count": 0,
+              "bpf_run_count": 0,
+              "bpf_run_time_ns": 0,
+              "workloads": []
+            },
+            "post_rejit": {
+              "raw_measurement_present": false,
+              "archived_coverage_equal": true,
+              "resident_program_count": 0,
+              "bpf_run_count": 0,
+              "bpf_run_time_ns": 0,
+              "workloads": []
+            }
+          }
+        }
+      ],
+      "published_request_fields_equal": true,
+      "host_ok": false,
+      "guest_exit": 1,
+      "qemu_returncode": 0,
+      "recorded_hashes_unchanged": true,
+      "initial_source_identity_count": 195,
+      "link_plans": [],
+      "archive_sha256": "de477778787a7d2c10eda86335e1e019d69ec23e12adb8414a38c32ccdfea0cd"
+    },
+    "arm64_functional_183759": {
+      "applications": [
+        {
+          "app": "tetragon/observer",
+          "app_status": "error",
+          "app_error": "Tetragon exited before BPF programs were tracked by shim\nstdout tail:\nlevel=info msg=\"Starting tetragon\" version=v1.8.0-pre.0-79-g8ca052908\nlevel=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/opt/bpf-benchmark/repo-artifacts/arm64/tetragon btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-cri:false enable-deprecated-tracingpolicy-grpc:false enable-event-metrics:true enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-environment-variables:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: filter-environment-variables:[] force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address:127.0.0.1:40215 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-file: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ parents-map-enabled:false parents-map-entries:0 parents-map-size: pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true retprobes-cache-size:4096 server-address:127.0.0.1:37439 tracing-policy: tracing-policy-dir:/workspaces/repository/runner/assets/tetragon_policies use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"\nlevel=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=\"\"\nlevel=info msg=\"Tetragon pid file creation succeeded\" pid=888 pidfile=/var/run/tetragon/tetragon.pid\nlevel=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/sys/fs/bpf/tetragon\nlevel=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux",
+          "app_result_sha256": "376ca94a5e00703407999f1e8eda3c40fbd419311ab558f2b73fb75c06b87d41",
+          "phases": {
+            "baseline": {
+              "raw_measurement_present": true,
+              "archived_coverage_equal": true,
+              "resident_program_count": 152,
+              "bpf_run_count": 30593,
+              "bpf_run_time_ns": 4206369472,
+              "workloads": [
+                {
+                  "name": "stress_ng_tetragon_policy_hot",
+                  "duration_seconds": 4.1945227359999535,
+                  "returncode": 0,
+                  "stdout_sha256": "785477652e0cf0419016d88dc5d3a921bd73343b9cef360c9b5785f7c0195184",
+                  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ]
+            },
+            "post_rejit": {
+              "raw_measurement_present": false,
+              "archived_coverage_equal": true,
+              "resident_program_count": 0,
+              "bpf_run_count": 0,
+              "bpf_run_time_ns": 0,
+              "workloads": []
+            }
+          }
+        }
+      ],
+      "published_request_fields_equal": true,
+      "host_ok": false,
+      "guest_exit": 1,
+      "qemu_returncode": 0,
+      "recorded_hashes_unchanged": false,
+      "initial_source_identity_count": 341,
+      "link_plans": [],
+      "archive_sha256": "41a55dba6e5474a85ed1688f39a6b9bc38a5040f74a8361a7e934f06d5880d28"
+    },
+    "arm64_functional_185947": {
+      "applications": [
+        {
+          "app": "katran",
+          "app_status": "ok",
+          "app_error": "",
+          "app_result_sha256": "6fa0adeb21728ca1a1644af9d341d6f366070a34edf2faae3e111ab99f9275d9",
+          "phases": {
+            "baseline": {
+              "raw_measurement_present": true,
+              "archived_coverage_equal": true,
+              "resident_program_count": 1,
+              "bpf_run_count": 26197,
+              "bpf_run_time_ns": 569939792,
+              "workloads": [
+                {
+                  "name": "katran_kernel_pktgen_l2_udp",
+                  "duration_seconds": 3.3277476639999577,
+                  "returncode": 0,
+                  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "components": [
+                    {
+                      "name": "katran_kernel_pktgen_l2_udp_thread",
+                      "duration_seconds": 3.3277476639999577,
+                      "returncode": 0,
+                      "stdout_sha256": "4492e5087d26edd2590c5def5b2dff41fbb862270fbdbb5a54ae61265ca9bb90",
+                      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                    }
+                  ]
+                }
+              ]
+            },
+            "post_rejit": {
+              "raw_measurement_present": true,
+              "archived_coverage_equal": true,
+              "resident_program_count": 1,
+              "bpf_run_count": 23208,
+              "bpf_run_time_ns": 530137376,
+              "workloads": [
+                {
+                  "name": "katran_kernel_pktgen_l2_udp",
+                  "duration_seconds": 3.425166271999842,
+                  "returncode": 0,
+                  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "components": [
+                    {
+                      "name": "katran_kernel_pktgen_l2_udp_thread",
+                      "duration_seconds": 3.425166271999842,
+                      "returncode": 0,
+                      "stdout_sha256": "12f68c02c741d0071046c857e93a859f75782dcadbe21ce24d4c9a11a114ad04",
+                      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "published_request_fields_equal": true,
+      "host_ok": false,
+      "guest_exit": 0,
+      "qemu_returncode": 0,
+      "recorded_hashes_unchanged": false,
+      "initial_source_identity_count": 192,
+      "link_plans": [
+        {
+          "request_id": 1,
+          "sha256": "5261c31b5da565286d7ac6d7cb3606743ed27459ee2f49460e237d8ad15ff1c1",
+          "map_names": [
+            "ch_rings",
+            "ctl_array",
+            "fallback_cache",
+            "lru_mapping",
+            "lru_miss_stats",
+            "quic_stats_map",
+            "reals",
+            "reals_stats",
+            "server_id_map",
+            "server_id_stats",
+            "stats",
+            "vip_map",
+            "vip_miss_stats",
+            "vip_to_down_rea",
+            "vip_to_down_reals_map"
+          ],
+          "tail_call_maps": []
+        }
+      ],
+      "archive_sha256": "36631edd6c78c017533c13802d421386449241ef5e713d60c8eee07f625ef250"
     }
   },
   "timing_context": {
