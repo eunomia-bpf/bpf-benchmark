@@ -161,6 +161,19 @@ piece construction, complete record identity/permutation and whole-field chunk
 coverage, snapshot/final-image identity and complete control/ABI stages supply
 the production correspondence interfaces.
 
+[`generic-native-link-chunk-planner.json`](../kprog_tv_20261107/generic-native-link-chunk-planner.json)
+adds 22 passing universal audits.
+The exact loader boundary scan advances and retains complete5B/8B fields.
+Checked group intervals and safe cuts give each record one complete-span owner.
+The actual filter/subtraction/rebase reconstructs the original record table as
+a permutation, including exact targets, selectors and multiplicities. Encoded
+piece containment now supplies that permutation directly to canonical CALL and
+MOVABS TV. Readonly one-byte placement anchors preserve each scan step; current
+u32 input/capacity bounds keep size arithmetic inside64-bit size_t. Actual
+Rust/iced field/image construction and implementation-value correspondence,
+final executable bytes/bases, complete PC/ABI and other ARM forms provide the
+surrounding production interfaces.
+
 <!-- O4 COVERAGE END -->
 
 
