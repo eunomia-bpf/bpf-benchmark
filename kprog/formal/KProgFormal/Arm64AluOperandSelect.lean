@@ -11,10 +11,10 @@ open GeneratedArm64AluDecode (Alu)
 open GeneratedArm64ModDecode (Mod)
 open GeneratedArm64Width (Width)
 
-/-- The one immediate-form operand-source opcode of the generic ALU arm (the
-ALU immediate), named independently of the generated `immediate` match. -/
+/-- The immediate-form operand-source opcodes of the generic ALU arm (the
+ALU immediate aliases), named independently of the generated `immediate` match. -/
 def arm64AluOperandSelectImmOps : List AluOperandSelectOp :=
-  [.aluImm]
+  [.addImm, .subImm, .aluImm]
 
 /-- The one register-form operand-source opcode of the generic ALU arm (the ALU
 register). -/
@@ -29,7 +29,7 @@ def arm64AluOperandSelectSpec (op : AluOperandSelectOp) : Bool :=
   op ∈ arm64AluOperandSelectImmOps
 
 /-- The generated operand-source selection table agrees with the independent
-list membership statement on both opcodes. -/
+list membership statement on all operand-source opcodes. -/
 theorem arm64_alu_operand_select_refines (op : AluOperandSelectOp) :
     immediate op = arm64AluOperandSelectSpec op := by
   cases op <;> decide
@@ -68,7 +68,7 @@ existing `KPROG_ARM64_ALU_RHS` contract: the immediate-form opcode selects the
 decoded immediate, the register-form opcode the (modifier-rewritten) register
 read. -/
 def aluOperandSelectMode : AluOperandSelectOp -> Mode
-  | .aluImm => .immediate
+  | .addImm | .subImm | .aluImm => .immediate
   | .aluReg => .register
 
 /-- The mode bridge agrees with the generated selector: the mode is the immediate
@@ -85,10 +85,10 @@ theorem arm64_alu_operand_select_mode_immediate_iff_mem
       op ∈ arm64AluOperandSelectImmOps := by
   cases op <;> decide
 
-/-- The selector's opcode-6 case is the only one that feeds the immediate mode. -/
-theorem arm64_alu_operand_select_code_six_is_immediate
+/-- The three immediate numeric labels select the immediate mode. -/
+theorem arm64_alu_operand_select_immediate_codes
     (op : AluOperandSelectOp) :
-    code op = 6 ↔ aluOperandSelectMode op = .immediate := by
+    code op ∈ ([3, 4, 6] : List Nat) ↔ aluOperandSelectMode op = .immediate := by
   cases op <;> decide
 
 /-- Composition with the existing ALU operand contract: feeding the ALU-arm

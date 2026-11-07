@@ -16,6 +16,8 @@ typedef unsigned char __u8;
 typedef unsigned int __u32;
 typedef unsigned long long __u64;
 
+#define ARM64_OP_ADD_IMM 0x03U
+#define ARM64_OP_SUB_IMM 0x04U
 #define ARM64_OP_ALU_IMM 0x06U
 #define ARM64_OP_ALU_REG 0x07U
 
@@ -31,6 +33,8 @@ typedef unsigned long long __u64;
 static int select_oracle(unsigned op)
 {
 	switch (op) {
+	case ARM64_OP_ADD_IMM:
+	case ARM64_OP_SUB_IMM:
 	case ARM64_OP_ALU_IMM:
 		return 1;
 	default:

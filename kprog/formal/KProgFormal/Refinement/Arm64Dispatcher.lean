@@ -266,6 +266,16 @@ def dispatch (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 : Byte
       (decodeAlu (GeneratedArm64Aux.b0 aux).toNat).map
         (fun op => aluBody op immediate sourceScalar sourceStack aux width dst src src2 value s))
 
+/-- The two immediate alias labels share the generic ALU immediate body for
+every AUX value, width, register assignment, operand and incoming state. AUX
+continues to identify the ALU operation in the common C body. -/
+theorem immediate_alias_dispatch (alias : Nat) (isAlias : alias = 3 ∨ alias = 4)
+    (aux : BitVec 32) (width : Width) (dst src src2 : Byte) (value : Word)
+    (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatch alias aux width dst src src2 value sourceScalar sourceStack s =
+      dispatch 6 aux width dst src src2 value sourceScalar sourceStack s := by
+  rcases isAlias with h | h <;> subst alias <;> rfl
+
 theorem alu_reached (immediate : Bool) (aux : BitVec 32) (width : Width) (dst src src2 : Byte)
     (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
     dispatch (aluCode immediate) aux width dst src src2 value sourceScalar sourceStack s =
@@ -321,6 +331,20 @@ theorem arithmetic_immediate_refines (subtract sourceScalar sourceStack : Bool) 
     (Arm64Arithmetic.AluDispatch.immediate_operation subtract lane1 lane2 lane3)]
   exact Arm64Arithmetic.AluDispatch.dispatch_immediate_refines subtract sourceScalar sourceStack width dst src 31 value
     lane1 lane2 lane3 s
+
+/-- The two immediate alias labels refine canonical ADD/SUB for every state
+and operand, using the same AUX operation binding as the common ALU body. -/
+theorem arithmetic_immediate_alias_refines (subtract sourceScalar sourceStack : Bool)
+    (width : Width) (dst src : RegisterRef) (src2 : Byte) (value : Word)
+    (lane1 lane2 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (if subtract then 4 else 3)
+      (Arm64Arithmetic.AluDispatch.immediateAux subtract lane1 lane2 lane3) width
+      (Arm64Move.Fields.encode dst) (Arm64Move.Fields.encode src) src2 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.arithmeticImmediate width subtract false dst src value) s) := by
+  have isAlias : (if subtract then 4 else 3) = 3 ∨ (if subtract then 4 else 3) = 4 := by
+    cases subtract <;> decide
+  rw [immediate_alias_dispatch _ isAlias]
+  exact arithmetic_immediate_refines subtract sourceScalar sourceStack width dst src src2 value lane1 lane2 lane3 s
 
 theorem arithmetic_register_refines (subtract sourceScalar sourceStack : Bool) (width : Width)
     (dst src : RegisterRef) (rhs : Register) (kind : Fin 3) (amount : Fin width.bits) (value : Word)

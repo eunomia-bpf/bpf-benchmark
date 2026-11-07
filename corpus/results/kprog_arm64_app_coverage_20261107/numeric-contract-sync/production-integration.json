@@ -1,0 +1,81 @@
+{
+  "plan": {
+    "utc": "2026-11-07T22:57:53.537281+00:00",
+    "before_pins": {
+      "kprog/formal/contracts/arm64_dispatch_family_spec.json": "14ac5d6b402290111c4865e399436b3648c7c125ac93950aeafbb221f4f73f28",
+      "kprog/formal/contracts/arm64_alu_operand_select_spec.json": "0f98a45c24e6d65f7985b679bb6a21a8ce6f2e1fbfb42a0c342e9855474e63fa",
+      "kprog/formal/tools/generate_arm64_dispatch_family_spec.py": "856455a15fb91c56109e9d2345fbf6240b517e992584d01e61190aaea3004204",
+      "kprog/formal/tools/generate_arm64_alu_operand_select_spec.py": "d65c468cfa58ceef99e62190b9c49515098348509f3fceb8e2f68eb5b3870035",
+      "kprog/formal/KProgFormal/Arm64DispatchFamily.lean": "35bafc841f96c4f52f8e8022bca9b74348a06f13245436604a1510db30c48068",
+      "kprog/formal/KProgFormal/Arm64AluOperandSelect.lean": "8a80c0dc1420f6c2a3d30dc278352953155b1f40d2f1a9fb9534aa89f8df6b43",
+      "kprog/formal/KProgFormal/Refinement/Arm64Arithmetic.lean": "546e0ae082e501078295271097cb8ca753d7521d00906214b4e63a995fdd7c7e",
+      "kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean": "861aa645b1a0820dc61aa67632c8b26966f474f210b4e972fe699f1d76d861f5",
+      "kprog/formal/oracles/test_arm64_dispatch_family_host.c": "59b153f8e042ee15ca527564fe5230a7ddb1c98207249462aaad9f7b89bb023d",
+      "kprog/formal/oracles/test_arm64_alu_operand_select_host.c": "b81f62a965b5afccb1c085acdbeaef0d2083920176cc89e9ecdaf4325f236c29",
+      "kprog/formal/oracles/test_arm64_alu_operand_select_route_host.c": "f169b3d9725c1ea3f3ecfdc0722a4edfb6a62df26da918d387bedbc9327e9e5b",
+      "kprog/arm64/arm64_sim_direct.h": "a0e8af116a7aaa666021ed4ffefeb7b54bd3dcf3d16c80762c36f79cec6fdbe7",
+      "kprog/formal/generated/arm64_dispatch_family.h": "14265108cb9cb9cf5eab817bbec8cebb6e2b384c5e8be36440967e5c520f352a",
+      "kprog/formal/generated/arm64_alu_operand_select.h": "8f140666a12df159f4151df01dd6e3d336c06d1e93811337ad7f8bd0c72f097d",
+      "kprog/formal/KProgFormal/Generated/GeneratedArm64DispatchFamily.lean": "547e9b8910375ca2f89534dfe467711c75df06096457dbdc2ab836e5dec83d02",
+      "kprog/formal/KProgFormal/Generated/GeneratedArm64AluOperandSelect.lean": "e7325adb8afe3a51a1ca3bb9d63ff5ef57d102015c94e72bc762e3c57d08d1b8",
+      "kprog/formal/KProgFormal/Arm64DispatchTotality.lean": "ae826989943d7c474006ab88d3ac78e4861533662f9a17e73909db275e9d46e3"
+    },
+    "after_pins": {
+      "kprog/formal/contracts/arm64_dispatch_family_spec.json": "a214028395dfbe9116cef660eea0b9f6b56110a787e870e74222623c1bd3ac59",
+      "kprog/formal/contracts/arm64_alu_operand_select_spec.json": "7831679afe0d5ef374bc4521167dc8049a731f924afe48a6430ea82e1efa5c89",
+      "kprog/formal/tools/generate_arm64_dispatch_family_spec.py": "8464af68c0b4d7664ccc6835c966c9ec5d439ac9f7fea5a4f99d734f19b80fb5",
+      "kprog/formal/tools/generate_arm64_alu_operand_select_spec.py": "494ed88c518041a0b6497705ddf877db6d98431714ae8a261a4516f5a337ce1a",
+      "kprog/formal/KProgFormal/Arm64DispatchFamily.lean": "f9e4363624f36d290a4d031e90e795d2cec472e28e3860ba6e9a418e58367f2e",
+      "kprog/formal/KProgFormal/Arm64AluOperandSelect.lean": "80404b12baaf7a1acb15934f6462b87c6f7ab720a51ff1913fdefd639583efbe",
+      "kprog/formal/KProgFormal/Refinement/Arm64Arithmetic.lean": "4b9ad15cb8de8a51d75a920c22a582241fb67192a391ee9f158a0128b03a98ac",
+      "kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean": "26db65b9802e616400ed0311c5bb0fb76abda4559d0c5ba4e1d8cd277d82bf10",
+      "kprog/formal/oracles/test_arm64_dispatch_family_host.c": "2b2b757319bc99cfb02512cd686c3f27db780742bf8168568ddfb994ce602c84",
+      "kprog/formal/oracles/test_arm64_alu_operand_select_host.c": "5e0f6ebf2d4cad49869d3e5693a5a084ce86eed7fc60dbc87fbe736b96e9a157",
+      "kprog/formal/oracles/test_arm64_alu_operand_select_route_host.c": "ca375aae6bd4b3a4cfcb4d5c35d806e3060fc083f635047a0a4a5a6235ce3ece",
+      "kprog/arm64/arm64_sim_direct.h": "4f0f074d953295594e4c443ac0d826d78764ec35bc581b39af0e60fdc6785d1d",
+      "kprog/formal/generated/arm64_dispatch_family.h": "b6e1d9ccb0aa7c430136b7e86c21f99fb3b8c5812a957d06f2b8a27d22304d02",
+      "kprog/formal/generated/arm64_alu_operand_select.h": "6604e16f46f5a59bb8a2946821e341bf01842d2b919273af7b9648c722d35f54",
+      "kprog/formal/KProgFormal/Generated/GeneratedArm64DispatchFamily.lean": "e9d7e6be7f9400b41b3872f08155444f28a431eae6e9827fe87f70538335cbe3",
+      "kprog/formal/KProgFormal/Generated/GeneratedArm64AluOperandSelect.lean": "cd512684d5c5524b9d85002974028672d9c59f0376a5a813cf9e3cce1d92f9a2",
+      "kprog/formal/KProgFormal/Arm64DispatchTotality.lean": "f48e41461c9ac2d9d106751843e479c3c82e0c9db72d82e262f8d51d60e46434"
+    },
+    "candidate_commit": "1f0f20eb5fc281c5e038d04f2cbf1ea5a25bc1fc",
+    "scope": "Generic numeric opcode3/4 ALU-immediate routing and per-token contracts. Existing emitted token6/7 bodies retain their source; whole-application runtimes retain their executable and worker inputs."
+  },
+  "checks": [
+    {
+      "target": "check",
+      "exit": 0,
+      "log_sha256": "44722de9f30ee5cf095786099b9672900f5e30f62f134af14ded77d6ea33c333"
+    },
+    {
+      "target": "source-checks",
+      "exit": 0,
+      "log_sha256": "9cea9bd2f6d91269594ebaa44bb71f9431a13cfeaa20ae20c1c9c18a4cb17cc6"
+    },
+    {
+      "target": "lean-check",
+      "exit": 0,
+      "log_sha256": "a6800f7b6052507fd2bda0bb364acf8576de8c3b26933a5315e9b9550e898fd6"
+    },
+    {
+      "target": "audit",
+      "exit": 0,
+      "log_sha256": "c17fb684e3aa14b5c44780b73a09e2b922b4aa9dcf399d8be61119d7bcd15b61"
+    }
+  ],
+  "lean_results": [
+    {
+      "module": "KProgFormal.Arm64DispatchTotality",
+      "returncode": 0,
+      "source_sha256": "f48e41461c9ac2d9d106751843e479c3c82e0c9db72d82e262f8d51d60e46434",
+      "olean_sha256": "310a125f0806ac895b8886e840afbbe4db8d7bf7c9e7f587f827a35f713d2371"
+    },
+    {
+      "module": "KProgFormal.Refinement.Arm64Dispatcher",
+      "returncode": 0,
+      "source_sha256": "26db65b9802e616400ed0311c5bb0fb76abda4559d0c5ba4e1d8cd277d82bf10",
+      "olean_sha256": "691be70ad3a70ce3bd1451cd5fa8a4efd0fd8fdbe83442178ac59863f5a77fa2"
+    }
+  ]
+}

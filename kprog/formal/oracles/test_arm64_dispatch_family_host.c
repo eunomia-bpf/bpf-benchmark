@@ -25,6 +25,8 @@ typedef unsigned long long __u64;
  * the family membership. The generated header is included afterwards; its own
  * _Static_asserts re-bind these numbers to the simulator's decode.
  */
+#define ARM64_OP_ADD_IMM 0x03U
+#define ARM64_OP_SUB_IMM 0x04U
 #define ARM64_OP_ALU_IMM 0x06U
 #define ARM64_OP_ALU_REG 0x07U
 #define ARM64_OP_SHIFT_IMM 0x08U
@@ -55,7 +57,8 @@ static int family_oracle(unsigned op, unsigned family)
 {
 	switch (family) {
 	case 0: /* alu */
-		return op == ARM64_OP_ALU_IMM || op == ARM64_OP_ALU_REG;
+		return op == ARM64_OP_ADD_IMM || op == ARM64_OP_SUB_IMM ||
+            op == ARM64_OP_ALU_IMM || op == ARM64_OP_ALU_REG;
 	case 1: /* shiftOp */
 		return op == ARM64_OP_SHIFT_IMM || op == ARM64_OP_SHIFT_REG;
 	case 2: /* subs */

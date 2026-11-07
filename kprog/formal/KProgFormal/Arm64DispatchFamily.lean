@@ -6,9 +6,9 @@ namespace KProgFormal
 open GeneratedArm64DispatchFamily (DispatchOp code aluHandled shiftOpHandled
   subsHandled addsHandled cmpHandled tstHandled andsHandled ccmpHandled)
 
-/-- The ALU pair members, named independently of the generated `aluHandled`
+/-- The ALU family members, named independently of the generated `aluHandled`
 match. -/
-def arm64DispAluOps : List DispatchOp := [.aluImm, .aluReg]
+def arm64DispAluOps : List DispatchOp := [.addImm, .subImm, .aluImm, .aluReg]
 
 /-- The SHIFT pair members. -/
 def arm64DispShiftOps : List DispatchOp := [.shiftImm, .shiftReg]
@@ -37,7 +37,7 @@ def arm64DispatchOps : List DispatchOp :=
   arm64DispCmpOps ++ arm64DispTstOps ++ arm64DispAndsOps ++ arm64DispCcmpOps
 
 /-- Independent statement of the ALU family membership: the opcode is one of the
-two named ALU members. Structurally separate from the generated disjunction: a
+four named ALU members. Structurally separate from the generated disjunction: a
 membership test over a named list rather than a chain of constructor
 comparisons. -/
 def arm64DispAluSpec (op : DispatchOp) : Bool := op ∈ arm64DispAluOps
@@ -64,7 +64,7 @@ def arm64DispAndsSpec (op : DispatchOp) : Bool := op ∈ arm64DispAndsOps
 def arm64DispCcmpSpec (op : DispatchOp) : Bool := op ∈ arm64DispCcmpOps
 
 /-- The generated ALU membership table agrees with the independent list
-membership statement on all sixteen opcodes. -/
+membership statement on all family opcodes. -/
 theorem arm64_dispatch_alu_refines (op : DispatchOp) :
     aluHandled op = arm64DispAluSpec op := by
   cases op <;> decide
@@ -184,7 +184,7 @@ theorem arm64_dispatch_nonmember_unhandled (op : DispatchOp)
     andsHandled op = false ∧ ccmpHandled op = false :=
   absurd (arm64_dispatch_ops_total op) h
 
-/-- The generated code dispatch: the sixteen mnemonics map onto the sixteen
+/-- The generated code dispatch: the selected mnemonics map onto their
 ARM64_OP_* opcode numbers the C macros compare against. -/
 theorem arm64_dispatch_code_dispatch :
     code .aluImm = 6 ∧ code .aluReg = 7 ∧

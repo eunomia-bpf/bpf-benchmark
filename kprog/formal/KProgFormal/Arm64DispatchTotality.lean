@@ -18,10 +18,9 @@ names into three sets:
   * opcodes with *no* arm, which are reserved and must reach the unsupported
     hook (the hosts use one of them, RET, as the non-member sentinel).
 
-The interesting property is that the third set is small, non-empty and
-enumerated. If a new opcode were added to the decoder and routed by nothing,
-it would join that set silently; making the set explicit is what turns that
-into a reviewable fact rather than an accident.
+The reserved set is explicit and empty for this modeled subset after the two
+immediate aliases join the ALU family. Its membership and partition laws retain
+the distinction between this subset and the complete dispatcher.
 
 Scope, stated because it is narrower than "the dispatch chain": this module
 speaks about the opcodes the *generated* dispatch tables name. The C chain in
@@ -48,9 +47,8 @@ def routedBySingleton : List Nat := (arm64SingletonOps.map GeneratedArm64Dispatc
 /-- Every routed opcode, from either side of the chain. -/
 def routed : List Nat := (routedByFamily ++ routedBySingleton).eraseDups
 
-/-- Opcodes defined in `arm64_sim.h` that no arm selects on. Enumerated, not
-discovered, so adding an opcode without routing it shows up as a diff here. -/
-def unrouted : List Nat := [0x03, 0x04]
+/-- Reserved numeric labels of the modeled generated-table subset. -/
+def unrouted : List Nat := []
 
 /-- No opcode is selected by both a family and a singleton arm -- the
 exclusivity half, restated over the deduped lists so it composes with the
@@ -67,35 +65,24 @@ theorem routed_lists_nodup :
   unfold routedByFamily routedBySingleton
   decide
 
-/-- The reserved set is exactly the three codes with no arm, and it is
-disjoint from everything routed. -/
+/-- Reserved labels stay disjoint from every modeled routed label. -/
 theorem unrouted_disjoint :
     routed.all (fun c => !unrouted.contains c) = true := by
   unfold routed unrouted
   decide
 
-/-- The reserved set is non-empty. If it were empty the "no arm" category
-would be vacuous, and the coverage statement below would say nothing. -/
-theorem unrouted_nonempty : unrouted.length = 2 := by
+/-- The modeled subset has an empty reserved set after both immediate aliases
+join the ALU family. -/
+theorem unrouted_empty : unrouted.length = 0 := by
   decide
 
-/-- Each reserved code is a *distinct* code, so the set is three opcodes and
-not one opcode written three times. -/
+/-- The reserved labels are pairwise distinct. -/
 theorem unrouted_distinct : unrouted.Nodup := by
   decide
 
-/-- The three reserved codes are precisely the ones the decoder names that
-appear in neither routed list. Stated as a membership equivalence rather than
-as list equality, so it holds regardless of ordering. -/
+/-- Every numeric query returns false for membership in the empty reserved set. -/
 theorem unrouted_characterisation (c : Nat) :
-    (c = 0x03 ∨ c = 0x04) ↔
-      unrouted.contains c = true := by
-  unfold unrouted
-  simp only [List.contains_cons, List.contains_nil, Bool.or_eq_true,
-             beq_iff_eq]
-  constructor
-  · rintro (rfl | rfl) <;> simp
-  · rintro (h | h) <;> simp_all
+    unrouted.contains c = false := by rfl
 
 /-- The routed and reserved sets together name every code the two generated
 tables mention, with no overlap -- the partition property. -/

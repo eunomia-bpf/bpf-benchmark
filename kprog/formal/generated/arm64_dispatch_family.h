@@ -2,7 +2,7 @@
 #ifndef KPROG_FORMAL_GENERATED_ARM64_DISPATCH_FAMILY_H
 #define KPROG_FORMAL_GENERATED_ARM64_DISPATCH_FAMILY_H
 /*
- * The eight AArch64 dispatch families of the `ARM64_SIM_L_EXEC` opcode chain
+ * The eight AArch64 dispatch families, including ALU immediate aliases, of the `ARM64_SIM_L_EXEC` opcode chain
  * that select an immediate and a register opcode through one arm: ALU, SHIFT,
  * SUBS, ADDS, CMP, TST, ANDS and CCMP. Each family names its member opcode set
  * and exposes it as a plain-expression membership macro, so the dispatcher's
@@ -12,6 +12,8 @@
  * This header is included after `arm64_sim.h`, so the opcode-number drift
  * checks bind the hand-written ARM64_OP_* decode to the generated member sets.
  */
+_Static_assert(ARM64_OP_ADD_IMM == 3U, "arm64 dispatch family code drift");
+_Static_assert(ARM64_OP_SUB_IMM == 4U, "arm64 dispatch family code drift");
 _Static_assert(ARM64_OP_ALU_IMM == 6U, "arm64 dispatch family code drift");
 _Static_assert(ARM64_OP_ALU_REG == 7U, "arm64 dispatch family code drift");
 _Static_assert(ARM64_OP_SHIFT_IMM == 8U, "arm64 dispatch family code drift");
@@ -30,7 +32,9 @@ _Static_assert(ARM64_OP_CCMP_IMM == 26U, "arm64 dispatch family code drift");
 _Static_assert(ARM64_OP_CCMP_REG == 27U, "arm64 dispatch family code drift");
 /* Each family's member opcode set, tested by the dispatcher. */
 #define KPROG_ARM64_ALU_HANDLED(OP)                                 \
-	(((OP) == ARM64_OP_ALU_IMM) || \
+	(((OP) == ARM64_OP_ADD_IMM) || \
+	((OP) == ARM64_OP_SUB_IMM) || \
+	((OP) == ARM64_OP_ALU_IMM) || \
 	((OP) == ARM64_OP_ALU_REG))
 #define KPROG_ARM64_SHIFT_OP_HANDLED(OP)                            \
 	(((OP) == ARM64_OP_SHIFT_IMM) || \
@@ -54,6 +58,8 @@ _Static_assert(ARM64_OP_CCMP_REG == 27U, "arm64 dispatch family code drift");
 	(((OP) == ARM64_OP_CCMP_IMM) || \
 	((OP) == ARM64_OP_CCMP_REG))
 /* Every family member must be named by its generated membership macro. */
+_Static_assert(KPROG_ARM64_ALU_HANDLED(ARM64_OP_ADD_IMM), "arm64 dispatch family coverage drift");
+_Static_assert(KPROG_ARM64_ALU_HANDLED(ARM64_OP_SUB_IMM), "arm64 dispatch family coverage drift");
 _Static_assert(KPROG_ARM64_ALU_HANDLED(ARM64_OP_ALU_IMM), "arm64 dispatch family coverage drift");
 _Static_assert(KPROG_ARM64_ALU_HANDLED(ARM64_OP_ALU_REG), "arm64 dispatch family coverage drift");
 _Static_assert(KPROG_ARM64_SHIFT_OP_HANDLED(ARM64_OP_SHIFT_IMM), "arm64 dispatch family coverage drift");

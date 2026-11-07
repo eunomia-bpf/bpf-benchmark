@@ -678,9 +678,11 @@ end FlagArithmetic
 
 namespace AluDispatch
 
-/-- Both numeric ALU rows use their independent generated operand selectors. -/
+/-- The numeric ALU family shares the generated immediate/register selection. -/
 def decodeOpcode (code : Nat) : Option Bool :=
-  if code = GeneratedArm64DispatchFamily.code .aluImm then some true
+  if code = GeneratedArm64DispatchFamily.code .addImm ∨
+      code = GeneratedArm64DispatchFamily.code .subImm ∨
+      code = GeneratedArm64DispatchFamily.code .aluImm then some true
   else if code = GeneratedArm64DispatchFamily.code .aluReg then some false else none
 
 theorem decode_code (immediate : Bool) :

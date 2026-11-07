@@ -1,24 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the AArch64 ALU-arm operand-source-selection contract.
-
-The generic ALU arm (`ALU_IMM`/`ALU_REG`) selects its right-hand operand between
-the decoded immediate and the second-source register read with an inlined test
-
-    __u64 rhs = KPROG_ARM64_ALU_RHS((OP) == ARM64_OP_ALU_IMM, (IMM), <mod>, ...);
-
-`KPROG_ARM64_ALU_RHS` already owns the immediate/register *value* choice (the
-existing `arm64AluOperand` contract); the remaining hand-written decision is only
-the boolean that tells it which form the arm carries. This contract pins that
-boolean: the `ALU_IMM` opcode (6) selects the immediate form, the `ALU_REG`
-opcode (7) selects the register form, and every other code is not an ALU arm and
-defaults to the register form. Because both members of the pair are handled, the
-selector never aborts.
-
-The immediate value, the modifier/register/shift expressions and the writeback
-stay in the handler; the macro only returns the 0/1 source decision. Both opcode
-numbers are re-checked against kprog/arm64/arm64_sim.h, so a drift there fails
-`--check`.
-"""
+"""Generate the four AArch64 ALU operand-source labels. Three immediate labels select the decoded immediate; the register label selects the modified register. AUX retains the ALU-operation selection in the common C body. The JSON contract, opcode constants, C selector and Lean constructors share these bindings."""
 import argparse
 import json
 import re
@@ -31,16 +12,13 @@ HEADER = ROOT.parent / "arm64/arm64_sim_local_bpf.h"
 LEAN = ROOT / "KProgFormal/Generated/GeneratedArm64AluOperandSelect.lean"
 CHEADER = ROOT / "generated/arm64_alu_operand_select.h"
 
-EXPECTED = {
-    "schema_version": 1,
-    "operation": "arm64AluOperandSelect",
-    "default": "register",
-    "selectors": [
-        {"name": "alu",
-         "imm": {"name": "aluImm", "code": 6, "macro": "ARM64_OP_ALU_IMM"},
-         "reg": {"name": "aluReg", "code": 7, "macro": "ARM64_OP_ALU_REG"}},
-    ],
-}
+EXPECTED = {'schema_version': 1,
+ 'operation': 'arm64AluOperandSelect',
+ 'default': 'register',
+ 'selectors': [{'name': 'addImm', 'code': 3, 'macro': 'ARM64_OP_ADD_IMM', 'immediate': True},
+               {'name': 'subImm', 'code': 4, 'macro': 'ARM64_OP_SUB_IMM', 'immediate': True},
+               {'name': 'aluImm', 'code': 6, 'macro': 'ARM64_OP_ALU_IMM', 'immediate': True},
+               {'name': 'aluReg', 'code': 7, 'macro': 'ARM64_OP_ALU_REG', 'immediate': False}]}
 
 OPCODE_DEFINE = re.compile(
     r"^#define\s+(ARM64_OP_[A-Z0-9_]+)\s+0x([0-9a-fA-F]+)U\s*$", re.M)
@@ -77,62 +55,36 @@ def check_region(region):
             "((OP) == ARM64_OP_ALU_IMM)")
 
 
+
 def load() -> list[dict]:
     data = json.loads(SPEC.read_text())
     if data != EXPECTED:
-        raise SystemExit(
-            f"invalid arm64 ALU operand select specification: {data!r}")
-    selectors = EXPECTED["selectors"]
-    names = [row["name"] for row in selectors]
-    if names != ["alu"]:
-        raise SystemExit(f"invalid arm64 ALU operand select order: {names!r}")
-    if EXPECTED["default"] != "register":
-        raise SystemExit(
-            "arm64 ALU operand select default must be the register form")
+        raise SystemExit(f"invalid arm64 ALU operand select specification: {data!r}")
     opcodes = {name: int(value, 16)
                for name, value in OPCODE_DEFINE.findall(SIM_HEADER.read_text())}
-    if not opcodes:
-        raise SystemExit(
-            f"no ARM64_OP_* opcode definitions found in {SIM_HEADER}")
-    for row in selectors:
-        for form in ("imm", "reg"):
-            item = row[form]
-            if opcodes.get(item["macro"]) != item["code"]:
-                raise SystemExit(
-                    "arm64 ALU operand select opcodes drift from "
-                    "kprog/arm64/arm64_sim.h: "
-                    f"spec={item['macro']}={item['code']} "
-                    f"sim={opcodes.get(item['macro'])}")
+    for item in data["selectors"]:
+        if opcodes.get(item["macro"]) != item["code"]:
+            raise SystemExit(f"arm64 ALU operand opcode drift: {item!r}")
     check_region(exec_region())
-    return selectors
+    return data["selectors"]
 
 
 def render_lean(selectors: list[dict]) -> str:
-    ctors = "\n".join(
-        f"  | {row['imm']['name']}\n  | {row['reg']['name']}" for row in selectors)
-    imm_codes = "\n".join(
-        f"  | .{row['imm']['name']} => {row['imm']['code']}" for row in selectors)
-    reg_codes = "\n".join(
-        f"  | .{row['reg']['name']} => {row['reg']['code']}" for row in selectors)
+    ctors = "\n".join(f"  | {row['name']}" for row in selectors)
+    codes = "\n".join(f"  | .{row['name']} => {row['code']}" for row in selectors)
     selects = "\n".join(
-        f"  | .{row['imm']['name']} => true\n  | .{row['reg']['name']} => false"
-        for row in selectors)
+        f"  | .{row['name']} => {str(row['immediate']).lower()}" for row in selectors)
     return f'''-- Generated by generate_arm64_alu_operand_select_spec.py from arm64_alu_operand_select_spec.json.
 import Std
 namespace KProgFormal.GeneratedArm64AluOperandSelect
-/-- The two AArch64 opcodes of the generic ALU arm, whose handler selects its
-right-hand operand between the decoded immediate and the second-source register
-read: the immediate and register member of the pair. -/
+/-- The four ALU operand-source labels: three immediate aliases and one register form. -/
 inductive AluOperandSelectOp where
 {ctors}
 deriving DecidableEq, Repr
 /-- The ARM64_OP_* opcode number the arm carries in arm64_sim.h. -/
 def code : AluOperandSelectOp -> Nat
-{imm_codes}
-{reg_codes}
-/-- Whether this opcode selects the decoded immediate as its right-hand operand
-(rather than the second-source register read). Exactly the `_IMM` member selects
-the immediate. -/
+{codes}
+/-- Whether the label selects the decoded immediate. The C body selects the ALU operation from AUX. -/
 def immediate (op : AluOperandSelectOp) : Bool :=
   match op with
 {selects}
@@ -141,18 +93,15 @@ end KProgFormal.GeneratedArm64AluOperandSelect
 
 
 def render_c(selectors: list[dict]) -> str:
-    asserts = []
-    for row in selectors:
-        for form in ("imm", "reg"):
-            item = row[form]
-            asserts.append(
-                f'_Static_assert({item["macro"]} == {item["code"]}U, '
-                '"arm64 alu operand select code drift");')
+    asserts = [
+        f'_Static_assert({row["macro"]} == {row["code"]}U, '
+        '"arm64 alu operand select code drift");' for row in selectors]
     cases = []
     for row in selectors:
-        cases.append(f"\t\tcase {row['imm']['code']}U:")
-        cases.append("\t\t\t__kprog_a64_aso_select = 1U;")
-        cases.append("\t\t\tbreak;")
+        if row["immediate"]:
+            cases.extend([f"\t\tcase {row['code']}U:",
+                          "\t\t\t__kprog_a64_aso_select = 1U;",
+                          "\t\t\tbreak;"])
     body = [
         "\t({",
         "\t\t__u8 __kprog_a64_aso_select = 0U;",
@@ -169,14 +118,8 @@ def render_c(selectors: list[dict]) -> str:
     return f'''/* Generated by generate_arm64_alu_operand_select_spec.py from arm64_alu_operand_select_spec.json. */
 #ifndef KPROG_FORMAL_GENERATED_ARM64_ALU_OPERAND_SELECT_H
 #define KPROG_FORMAL_GENERATED_ARM64_ALU_OPERAND_SELECT_H
-/*
- * The right-hand-operand *source* selection of the AArch64 generic ALU arm
- * (`ALU_IMM`/`ALU_REG`): the `_IMM` member selects the decoded immediate form,
- * the `_REG` member (and every other code) selects the register form. The
- * immediate/register value choice itself is the `KPROG_ARM64_ALU_RHS` contract,
- * which takes this decision as its first argument; this macro returns only the
- * 0/1 decision. Because both pair members are handled, a code outside the pair
- * is still the register form and never aborts.
+/* Three immediate labels select IMM; the register label selects its source.
+ * The common ALU body retains the operation encoded in AUX.
  */
 {chr(10).join(asserts)}
 /*

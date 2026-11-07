@@ -171,14 +171,15 @@ static __u8 m_rtag(unsigned reg)
 static void model_exec(unsigned op, unsigned dst, unsigned src, unsigned src2,
 		       unsigned src3, unsigned width, __u32 aux, __s64 imm)
 {
-	if (op == ARM64_OP_ALU_IMM || op == ARM64_OP_ALU_REG) {
+	if (op == ARM64_OP_ADD_IMM || op == ARM64_OP_SUB_IMM ||
+        op == ARM64_OP_ALU_IMM || op == ARM64_OP_ALU_REG) {
 		__u64 lhs = m_reg(src);
 		__u64 rhs;
 		__u8 alu_op = (__u8)(aux & 0xffU);
 		__u64 result;
 		__u8 src_tag;
 
-		if (op == ARM64_OP_ALU_IMM)
+		if (op == ARM64_OP_ADD_IMM || op == ARM64_OP_SUB_IMM || op == ARM64_OP_ALU_IMM)
 			rhs = (__u64)imm;
 		else
 			rhs = KPROG_ARM64_MOD_VALUE(KPROG_ARM64_AUX_B1(aux),
@@ -326,6 +327,11 @@ static void run_case(unsigned op, unsigned dst, unsigned src, unsigned src2,
 		     unsigned src3, unsigned width, __u32 aux, __s64 imm,
 		     int member, int scalar_src, const char *name)
 {
+    if (op == ARM64_OP_ALU_IMM) {
+        run_case(ARM64_OP_ADD_IMM, dst, src, src2, src3, width, aux, imm, member, scalar_src, name);
+        run_case(ARM64_OP_SUB_IMM, dst, src, src2, src3, width, aux, imm, member, scalar_src, name);
+    }
+
 	unsigned long u0 = unsupported_calls;
 	unsigned long mu0 = model_unsupported_calls;
 
