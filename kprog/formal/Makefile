@@ -156,6 +156,7 @@ check:
 	lake build
 	python3 tools/check_reference.py
 	python3 tools/check_reference_x86_scalar.py
+	python3 tools/check_reference_x86_map_lookup.py
 	python3 tools/check_reference_x86_arithmetic.py
 	python3 tools/check_reference_x86_logic.py
 	python3 tools/check_reference_x86_unary.py

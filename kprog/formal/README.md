@@ -137,6 +137,14 @@ Its fixed-load API keeps the base register and signed16 displacement separate,
 so context reads retain a literal BPF offset. Nonconstant or out-of-range
 displacements fail compilation; the access remains one native-width read.
 
+`tools/check_reference_x86_map_lookup.py` links actual ARRAY/PERCPU_ARRAY
+code and checks canonical block paths, complete states and ordered key/slot/GS
+reads and faults. Inline blocks have no helper event; direct map-type calls
+retain their exact call target/relocation. The bound callee, map layout,
+CPU inputs and helper expansion use the [TV platform contract](../tv/README.md#map-lookup-inlining-and-the-proof-boundary-2026-11-07).
+These fixture checks compose instruction semantics; application helper/ABI
+and platform binding certificates remain separate proof artifacts.
+
 For AArch64, send `isa: "aarch64"` to the same executable. Supply exactly four
 little-endian native bytes, `registers` as X0..X30 followed by SP (32 words),
 `flags` with NZCV in bits31..28, `vector0` as an unsigned128-bit word, `pc`
