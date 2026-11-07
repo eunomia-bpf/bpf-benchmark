@@ -1,0 +1,34 @@
+[
+  {
+    "family": "fmov",
+    "build": "build-arm64-bank32",
+    "previous": "arm64-bank32",
+    "archive": "kprog/results/kprog_fidelity_20261106/differential/arm64-bank32/harness-artifacts.tar.gz",
+    "sha256": "b9bfa1e20b60904d03a6eb5a6db50dc2ce3edf29872a5376d300a752018f3c97",
+    "restored_files": 91
+  },
+  {
+    "family": "bitfield",
+    "build": "build-arm64-bitfield",
+    "previous": "arm64-bitfield",
+    "archive": "kprog/results/kprog_fidelity_20261106/differential/arm64-bitfield/harness-artifacts.tar.gz",
+    "sha256": "edafa7d9f1d19ffe472f53fafe4303af9ccff774bc9dc92a5efd27d20708fef7",
+    "restored_files": 92
+  },
+  {
+    "family": "memory",
+    "build": "build-arm64-memory-complete",
+    "previous": "arm64-memory-complete",
+    "archive": "kprog/results/kprog_fidelity_20261106/differential/arm64-memory-complete/harness-artifacts.tar.gz",
+    "sha256": "e321fc220675d31be064464a93baba4af44cde6151f2e5d9d4209fd8faba291d",
+    "restored_files": 85
+  },
+  {
+    "family": "exclusive",
+    "build": "build-arm64-exclusive-choice",
+    "previous": "arm64-exclusive-choice",
+    "archive": "kprog/results/kprog_fidelity_20261106/differential/arm64-exclusive-choice/harness-artifacts.tar.gz",
+    "sha256": "3ec7d5d11e26f5ffb8a43176741f20496462e5f657ecf16faa015734e85b4f71",
+    "restored_files": 85
+  }
+]

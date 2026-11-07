@@ -1,0 +1,21 @@
+{
+  "recorded": "2026-11-07T15:42:52.200863+00:00",
+  "complete": true,
+  "family": "fmov",
+  "forms": 128,
+  "cases_per_form": 1024,
+  "total_cases": 131072,
+  "qemu_c_mismatches": 0,
+  "qemu_reference_mismatches": 0,
+  "c_reference_mismatches": 0,
+  "unavailable_forms": 0,
+  "qemu_exit": 0,
+  "reference_exit": 0,
+  "execution": "QEMU user mode; actual ARM hardware pending",
+  "observed_vectors": 32,
+  "trace_bytes": 433061912,
+  "trace_sha256": "000d2c528069a2212af2e7bda7d805ec3cbe14847511fc5fdab7be45a597d643",
+  "compiled_input_files": 92,
+  "binary_sha256": "6f5baeb218ddb7b1418ef430a9474f1d5b37ec9a0e97e09132c8d312b3a51461",
+  "reference_sha256": "f1c5d75bef1b16ee3db6bb2e1be18e3131b7b60e940a1be9ef4318d5f39f2a02"
+}

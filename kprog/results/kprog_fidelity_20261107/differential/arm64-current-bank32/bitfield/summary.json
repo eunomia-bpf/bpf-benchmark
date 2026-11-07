@@ -1,0 +1,21 @@
+{
+  "recorded": "2026-11-07T15:42:52.710064+00:00",
+  "complete": true,
+  "family": "bitfield",
+  "forms": 70,
+  "cases_per_form": 1024,
+  "total_cases": 71680,
+  "qemu_c_mismatches": 0,
+  "qemu_reference_mismatches": 0,
+  "c_reference_mismatches": 0,
+  "unavailable_forms": 0,
+  "qemu_exit": 0,
+  "reference_exit": 0,
+  "execution": "QEMU user mode; actual ARM hardware pending",
+  "observed_vectors": 32,
+  "trace_bytes": 236830744,
+  "trace_sha256": "573e7b796a11e460bf89ad6c9f9423ad92f216da1e26659877bb4389dec15ba4",
+  "compiled_input_files": 92,
+  "binary_sha256": "2ab93e7d8ca5f382b5d57fa63960f526ff7c6b5d02816a5d32f9b8262ef0d985",
+  "reference_sha256": "f1c5d75bef1b16ee3db6bb2e1be18e3131b7b60e940a1be9ef4318d5f39f2a02"
+}

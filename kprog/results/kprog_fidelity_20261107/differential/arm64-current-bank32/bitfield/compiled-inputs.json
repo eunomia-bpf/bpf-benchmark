@@ -1,0 +1,370 @@
+{
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kinsn/module/include/native_lab_input.h": {
+    "size": 2281,
+    "sha256": "c43adcd858d4c53c500aaa1763e2f95196b9da7f7bc6f284ca305f7d15b1e131"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/arm64/arm64_sim.h": {
+    "size": 5086,
+    "sha256": "8d69f4e7b1aa1e809ed40861362e13ab7c493a6ede5abf3e0fd38a763d683fbe"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/arm64/arm64_sim_direct.h": {
+    "size": 28780,
+    "sha256": "a0e8af116a7aaa666021ed4ffefeb7b54bd3dcf3d16c80762c36f79cec6fdbe7"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/arm64/arm64_sim_local_bpf.h": {
+    "size": 112639,
+    "sha256": "d382995ce88de3076d4c7650566d3a5961733c2a624becd8c8de3ddb08118126"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/arm64/micro-prog/arm64_abi.py": {
+    "size": 25441,
+    "sha256": "13fc75d14b735a00f254838b3b716933626fc3f3d7b696887e49ed18247973d4"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": {
+    "size": 55718,
+    "sha256": "1a0680419ddba423942158c4f01f1edba4929fd230f96b6e48b5b2ec0ad2e6a8"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/arm64/micro-prog/generated_arm64_cc_decode.py": {
+    "size": 577,
+    "sha256": "da883b8b8f40516b8cfe88cc08adaed1e66376cee82787a91715b8c459e29511"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/arm64/micro-prog/generated_arm64_decode.py": {
+    "size": 904,
+    "sha256": "2a2ae48c6b70328e5a389adb91a9503cdbc856c85d390d6b1c81e291d27d36d2"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/arm64/micro-prog/generated_arm64_helper_idents.py": {
+    "size": 2479,
+    "sha256": "fd02214dff34fb5c47644be13571b46518b39258d403326754cc84096bc4003c"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/abi_load.h": {
+    "size": 1517,
+    "sha256": "618e1ca06aa188eba278a992e815dbdd079c9e004bacb122ff88491d3018b571"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_adrp.h": {
+    "size": 1972,
+    "sha256": "da2004614c5ac4af1888b56f90398444e7d2f33c9e11391ab51e2f2a57fc4e20"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_alu_handler.h": {
+    "size": 549,
+    "sha256": "5ace99d67ab6dc597ffce8d9cec6b567bcfc402d6cb424bceb5a4ff870bd8843"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_alu_operand.h": {
+    "size": 407,
+    "sha256": "8a39f8c29c3dff0096dd15b8d49825ac0af6cfef0402efbaab43fa6683d57427"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_alu_operand_select.h": {
+    "size": 1369,
+    "sha256": "8f140666a12df159f4151df01dd6e3d336c06d1e93811337ad7f8bd0c72f097d"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_alu_result.h": {
+    "size": 1242,
+    "sha256": "57026f3f77c9538bae55db15c691961457b5ff2fd71c8e5a47efc911f14c45f7"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_aux.h": {
+    "size": 1170,
+    "sha256": "48f6484cf891986c04e0c31ac2c7776ad084583300b59c218b9ac1c6931b6592"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_bitfield.h": {
+    "size": 3962,
+    "sha256": "4037f701cf89fac8ea15569456acd359080f9c32e027716f11b4568d28ed8210"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_branch.h": {
+    "size": 2644,
+    "sha256": "597f1c706da47bb61fee586c8db342de0e046338510fe7b781ea23503b509b57"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_branch_emit.h": {
+    "size": 703,
+    "sha256": "f0102c2c142207f8d52df1ef1368ce861acf1cd8474af493ffd906a73da84404"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_byte_lane.h": {
+    "size": 1735,
+    "sha256": "d2d25688aa3916f487adc26b6fab895ef40ab5b6f0b0ea9dfdf2cca31b6a7e44"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_ccmp_decode.h": {
+    "size": 1482,
+    "sha256": "74b38bc2feebc11f7d6079f2241054642670a290b7a9e68620a8b3c838da258e"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_ccmp_handler.h": {
+    "size": 764,
+    "sha256": "76483f944f5292afe626dfbeb824eb9f838ec246c147e6a12128b5ae0ce2adca"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_cneg.h": {
+    "size": 1971,
+    "sha256": "f0b641e9cbbbd985565f45d3a466aec3313b2a05f2d1fd0b82050789e64597df"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_cond.h": {
+    "size": 1946,
+    "sha256": "d70d31c6911d0b6e731ee081e314de27ce232abc3f06935b49ba2dd248dab04a"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_csel.h": {
+    "size": 4510,
+    "sha256": "26b1a756a3920767761dee9be3a021dd1b691024ab4d622165de13f08d541fc7"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_csel_ptr.h": {
+    "size": 2321,
+    "sha256": "d3404e00574770ac890fb93d3704d4f613a8f3ac59c162a083b31317a83deff5"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_decode.h": {
+    "size": 877,
+    "sha256": "50254db21e62953c9204cd5b1c4b2ac8e39ae45191152e062e21e33c7d4c3544"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_dispatch_family.h": {
+    "size": 4935,
+    "sha256": "14265108cb9cb9cf5eab817bbec8cebb6e2b384c5e8be36440967e5c520f352a"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_dispatch_singleton.h": {
+    "size": 5594,
+    "sha256": "4eaa6e68a7e396d365a3831e839b63ddd5f4c4f90979f7c2a3eb90e3ce0a12ac"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_dq_mem.h": {
+    "size": 3513,
+    "sha256": "92c3da7af26348576ecd967618750664c8f921576a4c8ffc5f1a7dc92a1b6b09"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_dq_mem_extra.h": {
+    "size": 4585,
+    "sha256": "cc5413cadf698ee0a2117979a3c0b4c5f3a04007f74c452ef39c721565bf024b"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_extrev.h": {
+    "size": 5115,
+    "sha256": "cd5735e626fcf97f2c91cc13e2ccb4e2d2666b01277b1fc7a2ba75f187d3f32f"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_flag_handler.h": {
+    "size": 1369,
+    "sha256": "500362ccb5871636f111aaca1a0b47d0d009f8a5b1eec4b0a5e21f79ab4b3564"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_flag_operand.h": {
+    "size": 2495,
+    "sha256": "cff285b48337d1bebe43fddf3c63c024102e93c6d2a83e09a10b4f700fa0f8ce"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_flags.h": {
+    "size": 2838,
+    "sha256": "d0a82dd9b8a6af80a65d67884843cf6fce8717e7c98d4ef78610936a60062ff9"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_fmov.h": {
+    "size": 2443,
+    "sha256": "61c6b6f281a48bb6d6157396eab01278c4649ac269d6a5ee0728a539ad1dba30"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_fmov_dest.h": {
+    "size": 1602,
+    "sha256": "71355ebc61a8e5a89fcc6dd35db9f63f5da117cc5f7c71f39ff3d3054716d72a"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_helper_arg_ptr.h": {
+    "size": 2674,
+    "sha256": "4e79818af70642277f578e8eedd096039cbecaad0389889ad8c282ff3d428199"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_imm_operand.h": {
+    "size": 1687,
+    "sha256": "ea25c93b74d1d29aca0fce7e49793001b78949af163cc9a99bff682a9e4bd643"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_ldrsx.h": {
+    "size": 2148,
+    "sha256": "20e2d1ed13f2780872631360ce0deb911a1140601e9f29c6d8ff5436847e6a90"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_ldrsx_op.h": {
+    "size": 1861,
+    "sha256": "5d9dd798aa466f554eea899d5d19812597c25e6a665ccf66c313616106629d7d"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_load_bytes.h": {
+    "size": 3546,
+    "sha256": "998c750370aed48ca699db040ebae945cf5344e53ebf383c1e98215200bdf571"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_load_tag.h": {
+    "size": 1648,
+    "sha256": "92ac76aabe42dc0d9d701b07b06bd82f65da613864ff6ca59a91f70a9764c9c4"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_logic_flag_handler.h": {
+    "size": 843,
+    "sha256": "a4f9b02b5bb52edbef43ff27f17d9ae8063626402665cff4199b648584faf7a5"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_mem_base_src.h": {
+    "size": 2622,
+    "sha256": "c16810e782741c2827fc5a3f71a366c4eadae0c7a061852715d2658491ee4a5f"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_mem_dispatch.h": {
+    "size": 2947,
+    "sha256": "64030b762d105a19c6f4cf832425e93a7b2c9db14723612d34b473b143ce590d"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_mem_index.h": {
+    "size": 1445,
+    "sha256": "8e6941bb22f9ebd8ee3ac0a5efc9cd88e579588919a9da3e2322477a7ef67d8b"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_mem_index_value.h": {
+    "size": 2694,
+    "sha256": "9c3f8bd661c9fc33c65d50dc53f2b4a23475cdee4493d26d4460e33dbe078c4e"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_mem_offset.h": {
+    "size": 1432,
+    "sha256": "bcde44489568bd580bff413c49d0f013597c4730b38edf2a80fd6e3d57003be5"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_mem_prepost.h": {
+    "size": 2098,
+    "sha256": "29ae20a6b2c7a5999c2f547140654e236d63dcf2e5d2fe89ca61bb3077fad765"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_mem_write_arm.h": {
+    "size": 2970,
+    "sha256": "68959e83cfd3fca3b049656fa5038c28a98aa99ce2e1ec17433da798a8eb87b8"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_mod.h": {
+    "size": 5482,
+    "sha256": "43019ec31b5719d677dd190e2eb5cc01577ea6184f75241bcb92261949d78a72"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_mov.h": {
+    "size": 1912,
+    "sha256": "80ead9db28172eb01f442b54d4db4264a00482b349f23368a1a28a6938441395"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_movk.h": {
+    "size": 2271,
+    "sha256": "210f4a0e46f5cdac335e569eb928648ff60d08cce7d5fd6e33e2923cce260063"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_mul.h": {
+    "size": 5119,
+    "sha256": "8b09ffb3f1f1f8c10c73adb3659d41f3d75f7b5aadc530f9d254166e7779064b"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_orn.h": {
+    "size": 1964,
+    "sha256": "7bc74888f4f49abfffddefec25931a5605b2b7479508f71e8d841b569bcfe74b"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_pair_load_tag.h": {
+    "size": 2356,
+    "sha256": "e2f1240bbfb737e06784063ba783f71c8bd19043aa43db4322793ea0b7463399"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_pair_mem.h": {
+    "size": 2651,
+    "sha256": "9f9e7c0068deb0afa482752c89661b297b7c76383633eb77ab5e949568eedbe6"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_reduction.h": {
+    "size": 3294,
+    "sha256": "0c1ff0ba12a6bac4344b552b814e38e8e51f9ed60f1012dcbcd4bfb92a4e5fab"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_reg_dispatch.h": {
+    "size": 3684,
+    "sha256": "0179453b7a3525b443378ff80043622427399f34cd4496b725e26f029f0308eb"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_reg_presence.h": {
+    "size": 1588,
+    "sha256": "14e1b10ab61cd336808127ffd281d7c03d04ce9ba5d7f76cc007ca99423771bb"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_shift.h": {
+    "size": 3836,
+    "sha256": "f6ea479b7dd1cad90a3da8ab3ad3b7139a39d8c6d3b9fef1f9ffc7e32584e972"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_stack_arena.h": {
+    "size": 1847,
+    "sha256": "031d768e60dc0475f707d103ebb682b8b2b54d3e5ca8333d8940546f25fe206b"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_stack_arm.h": {
+    "size": 2879,
+    "sha256": "c43baa698b99e913cda9011095bfdbf9319786a632cfd7f141b98e6bcb0958ce"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_stack_index.h": {
+    "size": 426,
+    "sha256": "8a6f548dc09ea34b879ca2b7e8a560d7f1a6a978f1b38b85c006808ebf970447"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_stack_read_tag_source.h": {
+    "size": 3284,
+    "sha256": "9275c9b11fdab9cfe3cf19b54136029bac515c14794fb5bb6610e8ed725e8987"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_stack_tag.h": {
+    "size": 775,
+    "sha256": "f946d24a144914c9f3eff2d9d90569f6725c34155c734788c281fe7b4479b783"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_stack_write_lanes.h": {
+    "size": 8355,
+    "sha256": "587a78ac6adc1d941be42959cf8a150a2d54b3383e7377e95c3264ba13a55ecf"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_stack_write_tag_action.h": {
+    "size": 4332,
+    "sha256": "8007f7a172de5d830c86fd3fe7eb151c5206c92e601b670fc853920a5a980d66"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_stlxr.h": {
+    "size": 1641,
+    "sha256": "23e346ca5b8c4d0e11397b9cf8ce925d30250de28746ff8ad6ea92c2db9f1991"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_store_bytes.h": {
+    "size": 2433,
+    "sha256": "33906394fd5a59f9d43e9a8b44d5e67d900ce0e9d71c109cc4c4c84af16f29cc"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_unary.h": {
+    "size": 2118,
+    "sha256": "2f0081297ce74a7b68f4a5a0065c484abcd8a4658a62491bc99b3ca87945bca0"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_vreg.h": {
+    "size": 4958,
+    "sha256": "da5db5dc846ab3c1e1134f9c5b0555322c464bac685b75bcf4ec708e754c3cf0"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_vreg_field.h": {
+    "size": 3155,
+    "sha256": "e8c8dad50e97d99fcbaf3e91f54dad1e1677b5e907d9eee5ad631d148feb3141"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_width.h": {
+    "size": 1824,
+    "sha256": "ae96d8fefcbc97f9a62cff4fcc5c5dac120e57acd4237fa27f7dddd824729ab1"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/arm64_write_arm.h": {
+    "size": 3260,
+    "sha256": "63e15a94d7dea6e1d5d59081af63dde7edec91a286dc5d4caea8348eb11b9665"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/formal/generated/ptr_add.h": {
+    "size": 493,
+    "sha256": "41cfc08ca5232f507788cb8d00d8fa216df9fb1c3c9ece8e00c5e83b06ae259d"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/helper_abi.py": {
+    "size": 1879,
+    "sha256": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b"
+  },
+  "kprog/fidelity/build-arm64-bitfield/snapshot/kprog/trusted_generation.py": {
+    "size": 5913,
+    "sha256": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a"
+  },
+  "kprog/fidelity/build-arm64-bitfield/generated.c": {
+    "size": 449066,
+    "sha256": "91bb650091b795242045ea05df6e7bc240d66865d6f02f179727e6111d40124c"
+  },
+  "kprog/fidelity/build-arm64-bitfield/native.S": {
+    "size": 242608,
+    "sha256": "6afd42d0d617195e97cceeff1ead7f6dbf40bfa54ebb7fd9a409c57f4a1f0bbb"
+  },
+  "kprog/fidelity/build-arm64-bitfield/instructions.S": {
+    "size": 1490,
+    "sha256": "4d2f299682d6c6427e46489e91ae8bc28aaec9dfb1767ac62c3ec379bcf20d17"
+  },
+  "kprog/fidelity/build-arm64-bitfield/instructions.o": {
+    "size": 960,
+    "sha256": "6cf6dc112df29e8174326f456533dac3d46a053b96ca0ef767638052bb9e1d8a"
+  },
+  "kprog/fidelity/build-arm64-bitfield/instructions.asm": {
+    "size": 2673,
+    "sha256": "a3c14e5ece22c1e9c8795465bb54433cfca9cc4a7947246b974ac589ac3660f6"
+  },
+  "kprog/fidelity/build-arm64-bitfield/coverage.json": {
+    "size": 8487,
+    "sha256": "8bb88642ba7f4719973af300e03b2f4dbbf47ed33256de6b651f8acaa0f40d5b"
+  },
+  "kprog/fidelity/build-arm64-bitfield/family.txt": {
+    "size": 9,
+    "sha256": "f1a49f961db57dca98c9f0ded43162e648696ba17b25cfe985426f5b396165c5"
+  },
+  "kprog/fidelity/arm64_bank.py": {
+    "size": 9003,
+    "sha256": "f444e6f758f0c6c8e8b8353b4fce3131d162f6e83ae617afdf129b52c85e3c7c"
+  },
+  "kprog/fidelity/bank32.mk": {
+    "size": 1312,
+    "sha256": "623eba98649911eeac1e6ba20866e0fb0dc112968376895ddb63b522534f1303"
+  },
+  "kprog/fidelity/reference_check.py": {
+    "size": 15687,
+    "sha256": "26a06abfd311e79bd4ac715c5fd185ecd138d8310b238f0c03dadf5c3d604ecc"
+  },
+  "kprog/fidelity/tcb.py": {
+    "size": 10713,
+    "sha256": "ae767dd539b42c2b9d5d92cede33a1c918fad64444a8606458913a7c97dcb20b"
+  },
+  "kprog/fidelity/driver.c": {
+    "size": 9002,
+    "sha256": "7cadcc3540eb1b8ad85e7fb7f2da411d43acfcaea485177aa757d1b7ccd6e762"
+  },
+  "kprog/fidelity/driver.h": {
+    "size": 1073,
+    "sha256": "1227fc2d3f7794841fbdc09d382ea96e6d47c31c8f15091b4946e251659127a7"
+  }
+}
