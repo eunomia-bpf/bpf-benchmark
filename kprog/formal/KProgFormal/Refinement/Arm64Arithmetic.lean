@@ -7,6 +7,9 @@ import KProgFormal.Generated.GeneratedArm64FlagHandler
 import KProgFormal.Generated.GeneratedPtrAdd
 import KProgFormal.Generated.GeneratedArm64CcmpHandler
 import KProgFormal.Generated.GeneratedArm64FlagOperand
+import KProgFormal.Arm64Aux
+import KProgFormal.Arm64CcmpDecode
+import KProgFormal.Generated.GeneratedArm64DispatchFamily
 
 namespace KProgFormal.Refinement.Arm64Arithmetic
 
@@ -390,5 +393,141 @@ theorem extended_compare_alias_refines (width : Width) (subtract plainSource : B
   rw [← normalized_compare_refines]
   simp only [Arm64Register.read_refines, extended_modifier_refines _ _ _ _ _ (amount_bound amount)]
   rfl
+
+
+namespace ConditionalCompare
+
+/-- The two numeric family labels select their actual operand-table rows. -/
+def decodeOpcode (code : Nat) : Option GeneratedArm64FlagOperand.FlagOp :=
+  if code = GeneratedArm64DispatchFamily.code .ccmpImm then some .ccmpImm
+  else if code = GeneratedArm64DispatchFamily.code .ccmpReg then some .ccmpReg else none
+
+theorem decode_family (op : GeneratedArm64DispatchFamily.DispatchOp) :
+    (decodeOpcode (GeneratedArm64DispatchFamily.code op)).isSome =
+      GeneratedArm64DispatchFamily.ccmpHandled op := by cases op <;> rfl
+
+theorem decoded_operand (code : Nat) (op : GeneratedArm64FlagOperand.FlagOp)
+    (valid : decodeOpcode code = some op) :
+    GeneratedArm64FlagOperand.code op = code ∧
+      GeneratedArm64FlagOperand.immediate op = (code == GeneratedArm64DispatchFamily.code .ccmpImm) := by
+  unfold decodeOpcode at valid
+  split at valid
+  · have equal := Option.some.inj valid
+    subst op
+    subst code
+    exact ⟨rfl, rfl⟩
+  · split at valid
+    · have equal := Option.some.inj valid
+      subst op
+      subst code
+      exact ⟨rfl, rfl⟩
+    · simp at valid
+
+def packedAux (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) : BitVec 32 :=
+  GeneratedArm64Aux.pack (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate))
+    (fallback.setWidth 32) (lane2.setWidth 32) (lane3.setWidth 32)
+
+theorem packed_condition (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) :
+    Arm64Condition.decode (GeneratedArm64CcmpDecode.ccmpCond (packedAux predicate fallback lane2 lane3)).toNat =
+      some predicate := by
+  rw [(arm64_ccmp_decode_lanes _).1]
+  simp only [packedAux, arm64_aux_b0_roundtrip]
+  cases predicate <;> rfl
+
+theorem packed_fallback (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) :
+    (GeneratedArm64CcmpDecode.ccmpNzcv (packedAux predicate fallback lane2 lane3)).setWidth 8 = fallback := by
+  rw [(arm64_ccmp_decode_lanes _).2]
+  simp only [packedAux, arm64_aux_b1_roundtrip]
+  bv_decide
+
+/-- Only the fallback byte discards high bits; the condition decoder above
+compares all eight extracted condition bits. -/
+theorem fallback_low_bits (fallback : Byte) :
+    GeneratedArm64CcmpHandler.fallbackFlags fallback =
+      GeneratedArm64CcmpHandler.fallbackFlags ((fallback.setWidth 4).setWidth 8) := by
+  simp only [GeneratedArm64CcmpHandler.fallbackFlags]
+  congr 1 <;> bv_decide
+
+theorem apply_fallback_low_bits (incoming : GeneratedArm64Flags.Flags) (predicate : Arm64Cond)
+    (lhs rhs : Word) (width : GeneratedArm64Width.Width) (fallback : Byte) :
+    GeneratedArm64CcmpHandler.apply incoming predicate lhs rhs width fallback =
+      GeneratedArm64CcmpHandler.apply incoming predicate lhs rhs width ((fallback.setWidth 4).setWidth 8) := by
+  unfold GeneratedArm64CcmpHandler.apply
+  split
+  · rfl
+  · rw [fallback_low_bits]
+
+/-- Production CCMP uses the instruction's DST field as its left source,
+reads SRC only for the register operand and replaces NZCV without a GPR write. -/
+def rawStep (op : GeneratedArm64FlagOperand.FlagOp) (width : Width) (lhs src : Register)
+    (immediate : Word) (predicate : Arm64Cond) (fallback : Byte) (s : Reference.AArch64.State) :
+    Transition Reference.AArch64.State :=
+  let rhs := if GeneratedArm64FlagOperand.immediate op then immediate else Arm64Register.readReg s src
+  let result := GeneratedArm64CcmpHandler.apply (incomingFlags s.flags) predicate
+    (Arm64Register.readReg s lhs) rhs (Arm64Register.handlerWidth width) fallback
+  ⟨{ s with flags := Arm64Logic.flagsWord s.flags result.flags, pc := s.pc + 4 }, [], none⟩
+
+theorem raw_immediate_refines (width : Width) (lhs src : Register) (immediate : BitVec 5)
+    (predicate : Arm64Cond) (fallback : Byte) (s : Reference.AArch64.State) :
+    rawStep .ccmpImm width lhs src (immediate.setWidth 64) predicate fallback s =
+      Reference.AArch64.step (.compare width lhs (.immediate immediate)
+        (Arm64Condition.nativeCode predicate) (fallback.setWidth 4)) s := by
+  simp only [rawStep, GeneratedArm64FlagOperand.immediate, ↓reduceIte]
+  rw [apply_fallback_low_bits]
+  change handlerStep width lhs (.immediate immediate) predicate (fallback.setWidth 4) s = _
+  rw [step_refines]
+
+theorem raw_register_refines (width : Width) (lhs src : Register) (immediate : Word)
+    (predicate : Arm64Cond) (fallback : Byte) (s : Reference.AArch64.State) :
+    rawStep .ccmpReg width lhs src immediate predicate fallback s =
+      Reference.AArch64.step (.compare width lhs (.register src)
+        (Arm64Condition.nativeCode predicate) (fallback.setWidth 4)) s := by
+  simp only [rawStep, GeneratedArm64FlagOperand.immediate, Bool.false_eq_true, ↓reduceIte]
+  rw [apply_fallback_low_bits]
+  change handlerStep width lhs (.register src) predicate (fallback.setWidth 4) s = _
+  rw [step_refines]
+
+def dispatch (code : Nat) (aux : BitVec 32) (width : Width) (lhs src : Register)
+    (immediate : Word) (s : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  (decodeOpcode code).bind (fun op =>
+    (Arm64Condition.decode (GeneratedArm64CcmpDecode.ccmpCond aux).toNat).map
+      (fun predicate => rawStep op width lhs src immediate predicate
+        ((GeneratedArm64CcmpDecode.ccmpNzcv aux).setWidth 8) s))
+
+theorem dispatch_immediate_refines (width : Width) (lhs src : Register) (immediate : BitVec 5)
+    (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64DispatchFamily.code .ccmpImm) (packedAux predicate fallback lane2 lane3)
+      width lhs src (immediate.setWidth 64) s =
+      some (Reference.AArch64.step (.compare width lhs (.immediate immediate)
+        (Arm64Condition.nativeCode predicate) (fallback.setWidth 4)) s) := by
+  have decoded : decodeOpcode (GeneratedArm64DispatchFamily.code .ccmpImm) = some .ccmpImm := rfl
+  simp only [dispatch, decoded, packed_condition, packed_fallback]
+  change some (rawStep .ccmpImm width lhs src (immediate.setWidth 64) predicate fallback s) = _
+  rw [raw_immediate_refines]
+
+theorem dispatch_register_refines (width : Width) (lhs src : Register) (immediate : Word)
+    (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64DispatchFamily.code .ccmpReg) (packedAux predicate fallback lane2 lane3)
+      width lhs src immediate s =
+      some (Reference.AArch64.step (.compare width lhs (.register src)
+        (Arm64Condition.nativeCode predicate) (fallback.setWidth 4)) s) := by
+  have decoded : decodeOpcode (GeneratedArm64DispatchFamily.code .ccmpReg) = some .ccmpReg := rfl
+  simp only [dispatch, decoded, packed_condition, packed_fallback]
+  change some (rawStep .ccmpReg width lhs src immediate predicate fallback s) = _
+  rw [raw_register_refines]
+
+theorem dispatch_bad_condition (code : Nat) (aux : BitVec 32) (width : Width) (lhs src : Register)
+    (immediate : Word) (s : Reference.AArch64.State)
+    (bad : 15 ≤ (GeneratedArm64CcmpDecode.ccmpCond aux).toNat) :
+    dispatch code aux width lhs src immediate s = none := by
+  simp [dispatch, Arm64Condition.decode_bad _ bad]
+
+theorem dispatch_other (code : Nat) (aux : BitVec 32) (width : Width) (lhs src : Register)
+    (immediate : Word) (s : Reference.AArch64.State)
+    (notImm : code ≠ GeneratedArm64DispatchFamily.code .ccmpImm)
+    (notReg : code ≠ GeneratedArm64DispatchFamily.code .ccmpReg) :
+    dispatch code aux width lhs src immediate s = none := by simp [dispatch, decodeOpcode, notImm, notReg]
+
+end ConditionalCompare
 
 end KProgFormal.Refinement.Arm64Arithmetic

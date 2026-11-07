@@ -610,3 +610,33 @@ Existing actual operand/family/multiply/unary/CNEG/extrev route hosts passed
 input filtering; original C host warnings remain visible. No runtime, oracle,
 ISA, compiler policy or foreign work changed. A combined full check follows
 publication, separate from exact0a9b8757c's already archived full pass.
+
+## CCMP packed condition, fallback and operand dispatcher
+
+`Arm64Arithmetic.ConditionalCompare` connects numeric CCMP26/27 with the
+independent generated operand-source rows, proving matching numeric codes and
+immediate/register decisions. The actual DST field supplies the left source;
+SRC supplies the register right operand, while the native immediate remains
+five bits. AUX byte0 supplies the entire condition byte0..14; high condition
+bits are not masked away. Byte1 supplies fallback NZCV; only its low four bits
+affect flags. Both unused AUX bytes remain arbitrary and independent.
+
+The raw generated CCMP body composes to the existing canonical conditional
+compare step, reading incoming flags before replacing NZCV and preserving every
+other register/vector/SP/memory/PC-effect component except one PC advance.
+Immediate forms ignore SRC, register forms ignore IMM, and aliases remain valid.
+Invalid extracted conditions and unrelated opcodes stay outside this slice.
+A misleading generated Lean comment about low condition bits was corrected in
+its Python renderer and output; generated expressions and C bytes are unchanged.
+All earlier theorem source is unchanged except three shared imports. Native
+condition normalization/operand/width and Entry/O4 bindings remain separate.
+
+Validation: 48 Lean dependency jobs and focused reference build passed, including
+existing regressions with 3860 AArch64 control/PC complete states. Six contract
+freshness checks and generated direct-dispatch freshness passed. Existing CCMP
+handler/decode/actual-route, flag-operand and flag-route hosts passed 122880,
+2105024, 3, 5120 and 1152 cases. Initial proof simplification repeatedly reapplied
+fallback normalization; a single rewrite fixed it without changing premises.
+No test inputs were filtered, runtime/oracle/test/ISA source is unchanged, and
+original C warnings remain visible. Exact19773cca3's full check runs separately;
+this increment needs a later combined full validation.

@@ -81,7 +81,9 @@ SHIFT→multiply→unary→CNEG→extract/reverse/extend segment composes the pr
 branch order and proves that preceding numeric gates cannot intercept later
 family members. CSEL/CNEG also
 compose whole-AUX condition decoding, NV normalization and the generated
-CSEL/X pointer-preserving gate; alias condition validity remains explicit.
+CSEL/X pointer-preserving gate; alias condition validity remains explicit. CCMP also
+binds both numeric operand rows and packed condition/fallback bytes: only
+the fallback ignores its upper four bits.
 Individual module statements define their
 exact scope. Dispatcher coverage/exclusivity is
 **not yet a full simulator-step refinement theorem**; completing the remaining

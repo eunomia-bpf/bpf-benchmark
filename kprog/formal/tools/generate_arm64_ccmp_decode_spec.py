@@ -88,8 +88,8 @@ import KProgFormal.Generated.GeneratedArm64Aux
 namespace KProgFormal.GeneratedArm64CcmpDecode
 
 /-- The CCMP condition byte of a packed AUX word: lane {cond_lane},
-bits {cond_lane} to {cond_lane + 7}. The CCMP handler consumes the low four
-bits of this byte as the `GeneratedArm64Cond` selector. -/
+bits {cond_lane} to {cond_lane + 7}. The CCMP handler compares the whole
+byte with condition codes0..14; upper condition bits are not masked away. -/
 def ccmpCond (aux : BitVec 32) : BitVec 32 :=
   BitVec.and (aux >>> {cond_lane}) 0xff
 
