@@ -1,6 +1,7 @@
 """AArch64 full-system replay of the common native-only trusted service."""
 from datetime import datetime, timezone
 import hashlib
+import fcntl
 import json
 import os
 from pathlib import Path
@@ -98,10 +99,12 @@ def guest(live, case="control"):
         if line is None:
             raise RuntimeError('common service exited before receipt')
         return json.loads(line)
+    registered = False
     try:
         ready = event()
         if not ready.get('ready') or ready['arch'] != 2:
             raise RuntimeError('ARM common service did not register')
+        registered = True
         if case in CORPUS_APPS:
             summary.update(corpus_application(live, case), ok=True)
         else:
@@ -122,12 +125,21 @@ def guest(live, case="control"):
         summary.update(error=str(error), traceback=traceback.format_exc())
         raise
     finally:
-        if service.poll() is None:
-            try:
-                os.killpg(service.pid, signal.SIGTERM)
-            except ProcessLookupError:
-                if service.poll() is None:
-                    raise
+        request_lock = None
+        try:
+            if registered and service.poll() is None:
+                # COMPLETE can wake the app before its final archive/log closes.
+                request_lock = (state / 'request.lock').open('rb')
+                fcntl.flock(request_lock, fcntl.LOCK_EX)
+        finally:
+            if service.poll() is None:
+                try:
+                    os.killpg(service.pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    if service.poll() is None:
+                        raise
+            if request_lock is not None:
+                request_lock.close()
         service.wait(); reader.join()
         with (live / 'kernel.log').open('w') as output:
             subprocess.run(['dmesg'], stdout=output, stderr=subprocess.STDOUT, check=True)
