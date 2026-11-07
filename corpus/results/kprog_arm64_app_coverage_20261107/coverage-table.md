@@ -12,3 +12,13 @@ All six first-pass application runs are closed. Load attempts retain probes, tra
 | tracee | 162 / 162 / 151 | 9 | 1 | 1 | 0 | 0 | 0 | 1 | error |
 
 Katran completes guest/application execution with one bound request. [Its work record](katran-two-start-work.json) retains matching packet/BPF/VIP/TX/receiver counts for both phases. Tracee records one generated and compiled request, followed by a native-link tail-map-plan rejection before verifier submission. The recorded ARM loader build predates the shared PROG_ARRAY identity repair at 3d0e584b5; the next source epoch consumes an updated ARM build. Original host status and shared-source drift flags remain in each raw result. Whole-application repairs and universal safety theorem work continue.
+
+| Application | Recorded failure class | Count |
+| --- | --- | ---: |
+| BCC | Verifier infinite-loop rejection | 3 |
+| OTel | Readonly-byte binding | 1 |
+| Cilium | Guest library readonly filesystem | 1 |
+| Tetragon | Feature-probe map descriptor identity | 1 |
+| Tracee | Native-link tail-map plan | 1 |
+
+Cilium and Tetragon failures occur during application startup; their request counts stay zero. Each application row in coverage-table.json links the complete runtime coverage and original archive hash.

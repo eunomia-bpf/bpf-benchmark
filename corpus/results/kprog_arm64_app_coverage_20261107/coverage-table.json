@@ -22,7 +22,10 @@
         "unfinished": 3
       },
       "raw_archive_sha256": "70369c4760749672015fe1a8a1a6c2970e5a6d240c6a17eab42acf23148aeeda",
-      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/bcc-full-start-coverage.json"
+      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/bcc-full-start-coverage.json",
+      "failure_causes": {
+        "verifier_infinite_loop": 3
+      }
     },
     {
       "app": "otelcol-ebpf-profiler",
@@ -45,7 +48,10 @@
         "unfinished": 1
       },
       "raw_archive_sha256": "7813fe4ad89fbd34156991d201b91be45f2814e5b36b2aa13a322ba0f2d0a2a7",
-      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json"
+      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json",
+      "failure_causes": {
+        "readonly_byte_binding": 1
+      }
     },
     {
       "app": "cilium",
@@ -67,7 +73,10 @@
         "loaded": 5
       },
       "raw_archive_sha256": "de477778787a7d2c10eda86335e1e019d69ec23e12adb8414a38c32ccdfea0cd",
-      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-cilium-result/coverage.json"
+      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-cilium-result/coverage.json",
+      "failure_causes": {
+        "guest_library_readonly_filesystem": 1
+      }
     },
     {
       "app": "tetragon",
@@ -90,7 +99,10 @@
         "unfinished": 2
       },
       "raw_archive_sha256": "41a55dba6e5474a85ed1688f39a6b9bc38a5040f74a8361a7e934f06d5880d28",
-      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tetragon-result/coverage.json"
+      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tetragon-result/coverage.json",
+      "failure_causes": {
+        "feature_probe_map_descriptor_identity": 1
+      }
     },
     {
       "app": "katran",
@@ -114,7 +126,8 @@
         "loaded": 12
       },
       "raw_archive_sha256": "36631edd6c78c017533c13802d421386449241ef5e713d60c8eee07f625ef250",
-      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-katran-result/coverage.json"
+      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-katran-result/coverage.json",
+      "failure_causes": {}
     },
     {
       "app": "tracee",
