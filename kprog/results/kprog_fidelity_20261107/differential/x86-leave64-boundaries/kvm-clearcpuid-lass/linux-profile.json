@@ -1,0 +1,5 @@
+{
+  "lass_linux_flag": false,
+  "la57_linux_flag": false,
+  "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/workspaces/repository/kprog/tv/build-kernel-x86/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=workspaces/repository virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_console=ttyS0 console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`YmFzaCAvd29ya3NwYWNlcy9yZXBvc2l0b3J5L2twcm9nL3Jlc3VsdHMva3Byb2dfZmlkZWxpdHlfMjAyNjExMDcvZGlmZmVyZW50aWFsL3g4Ni1sZWF2ZTY0LWJvdW5kYXJpZXMvZ3Vlc3Quc2g=` virtme_chdir=workspaces/repository virtme_root_user=1 debug loglevel=4 panic=30 oops=panic clearcpuid=lass init=/opt/virtme-ng/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init"
+}

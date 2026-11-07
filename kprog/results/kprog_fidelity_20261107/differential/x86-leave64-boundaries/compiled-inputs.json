@@ -1,0 +1,30 @@
+{
+  "kprog/fidelity/leave64.c": {
+    "size": 8560,
+    "sha256": "fbffae61111091b142b27c07b4091fae64c567d2cb11fb50d37381fe1adacae1"
+  },
+  "kprog/fidelity/leave64.S": {
+    "size": 1121,
+    "sha256": "a5c60d99c582a84f73a7a348f62ff750cf5849a0b0642bc39598b3ccdab5872e"
+  },
+  "kprog/results/kprog_fidelity_20261107/differential/x86-leave64-boundaries/Makefile": {
+    "size": 1050,
+    "sha256": "5ea7004c6f9ed4ef248aac77f751ce8d17c1f13c639ba9c5660984653d0d26fc"
+  },
+  "kprog/results/kprog_fidelity_20261107/differential/x86-leave64-boundaries/address_control.c": {
+    "size": 3287,
+    "sha256": "686698a6a79e47811c15a47f53507a435fd9b4e430d3d25d27fe158a7f216851"
+  },
+  "kprog/results/kprog_fidelity_20261107/differential/x86-leave64-boundaries/control-inputs.tsv": {
+    "size": 986,
+    "sha256": "429e113abb1a896227a7b5ad6a4773238eb7c0d8e1e006e3bf19eec61f959a6b"
+  },
+  "kprog/results/kprog_fidelity_20261107/differential/x86-leave64-boundaries/guest.sh": {
+    "size": 725,
+    "sha256": "8732097c38502581836bdba83f0f09f9e56973c41911a8d68b3f0027857fc036"
+  },
+  "kprog/results/kprog_fidelity_20261107/differential/x86-leave64-boundaries/collect.py": {
+    "size": 8739,
+    "sha256": "ee375196266b178bbbaca2f4ada60f745fb5b97f6cb0f58dbc5ddad39aefc8e2"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "recorded": "2026-11-07T16:45:23.570430+00:00",
+  "instruction_form": "C9 LEAVE64, one instruction form",
+  "profiles": {
+    "host_lass": {
+      "classes": 33,
+      "cases": 33792,
+      "successes": 2048,
+      "faults": 31744,
+      "state_mismatches": 0,
+      "memory_writes": 0,
+      "raw_cases_sha256": "03cb325b1da256986b8373cc2fa5569d7f7c680782bf7e11c1096d7a01dad6d5",
+      "control_cases": 2048,
+      "address_profile": {
+        "cpuid_linear_address_bits": 48,
+        "cpuid_la57_supported": 0,
+        "high_address_map_success": 0,
+        "high_address_map_errno": 12,
+        "high_address_map_probe": 562949953421312
+      },
+      "control_profile": {
+        "cpuid_lass_supported": 1,
+        "cpuid_leaf7_subleaf1_eax": 1153436119,
+        "samples": 2048,
+        "instructions": 2,
+        "cases_per_address_instruction": 32
+      }
+    },
+    "kvm_without_lass": {
+      "classes": 33,
+      "cases": 33792,
+      "successes": 2048,
+      "faults": 31744,
+      "state_mismatches": 0,
+      "memory_writes": 0,
+      "raw_cases_sha256": "d22983761a9a1dd0fbb92feb12105693327691eb62b6c0405b7de1a4e46f9845",
+      "control_cases": 2048,
+      "address_profile": {
+        "cpuid_linear_address_bits": 48,
+        "cpuid_la57_supported": 0,
+        "high_address_map_success": 0,
+        "high_address_map_errno": 12,
+        "high_address_map_probe": 562949953421312
+      },
+      "control_profile": {
+        "cpuid_lass_supported": 0,
+        "cpuid_leaf7_subleaf1_eax": 8390800,
+        "samples": 2048,
+        "instructions": 2,
+        "cases_per_address_instruction": 32
+      }
+    },
+    "default_mode": {
+      "classes": 8,
+      "cases": 8192,
+      "successes": 4096,
+      "faults": 4096,
+      "state_mismatches": 0,
+      "memory_writes": 0,
+      "raw_cases_sha256": "f7d5ca6e3bb6167d37a6ff74c5aab09810ee38ba832aea4e889274c470e8e533"
+    }
+  },
+  "leave_cases": 75776,
+  "control_cases": 4096,
+  "cpu_binary_sha256": "968f6c49e58f2ecd56802b756d6e4196dddfb701bea4331a940c4b44288af98c",
+  "control_binary_sha256": "8c182c13dd8216ebcc035189346959a2578dc7b296abf593657a48f3b2bb852a",
+  "canonical_comparison": "not yet run for boundary dataset; V rule fix pending",
+  "wrap_conclusion": "all eight KVM wrap groups trap14; a nonwrap-to-SS guard contradicts observed faults",
+  "limitations": [
+    "48-bit hardware only; numeric 57-bit addresses do not establish LA57 execution",
+    "Host LASS and KVM-no-LASS are separate CPL3 platform profiles",
+    "No successful wrapped load, CPL0 wrapper, complete JIT ABI or per-operation simulator proof claimed"
+  ]
+}

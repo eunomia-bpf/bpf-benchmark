@@ -1,0 +1,9 @@
+input_class	cases	successes	faults	success_mismatches	memory_writes	fault_rsp_input	fault_rsp_frame	fault_all_gprs_input
+aligned_frame	1024	1024	0	0	0	0	0	0
+unaligned_frame	1024	1024	0	0	0	0	0	0
+last_readable_word	1024	1024	0	0	0	0	0	0
+cross_page_frame	1024	0	1024	0	0	1024	0	1024
+protected_frame	1024	0	1024	0	0	1024	0	1024
+noncanonical_frame	1024	0	1024	0	0	1024	0	1024
+null_frame	1024	0	1024	0	0	1024	0	1024
+valid_frame_bad_sp	1024	1024	0	0	0	0	0	0
