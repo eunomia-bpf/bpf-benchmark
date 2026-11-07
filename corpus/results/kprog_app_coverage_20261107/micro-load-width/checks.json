@@ -1,0 +1,255 @@
+{
+  "total": 29,
+  "generated": 29,
+  "compiled": 29,
+  "accepted_bound": 29,
+  "specialization_failed": 0,
+  "verifier_rejected": 0,
+  "jit_exact": 29,
+  "native_exact": 29,
+  "driver_exit": 0,
+  "collector_exit": 0,
+  "source_drift": [],
+  "temporary_files_remaining": [],
+  "request_archive_checks": [
+    {
+      "request_id": 1,
+      "source_prog_id": 15,
+      "native_prog_id": 20,
+      "native_sha256": "88e2b781a1aac6c191f85b02a86d868682915e4233c17ff008e0fadcfcb74124",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 32,
+      "native_prog_id": 37,
+      "native_sha256": "7a0ca9156e0d8f074068e29c10bdb4ea4ec1d6cec29c2ba058c58a845d368194",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 49,
+      "native_prog_id": 54,
+      "native_sha256": "a205b0cf19ad1aba702c0d368afe2cb882c79cc8a1a7406f46571c2f5fe33588",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 66,
+      "native_prog_id": 71,
+      "native_sha256": "e4ac0408575b81c5bcc161f8be562cf96d31388b6591aeaaa623d8291ea69ca7",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 83,
+      "native_prog_id": 88,
+      "native_sha256": "79fd5e7df9abda8691265277d8bfa568fd8b47e9678b84230d4457cb4d006cee",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 100,
+      "native_prog_id": 105,
+      "native_sha256": "bcc2fbd394b8f1e95e40c00ae9b19490710aaf977f84896e673dc4e2bd514b01",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 7,
+      "source_prog_id": 117,
+      "native_prog_id": 122,
+      "native_sha256": "e92d2c14d4d5f278b15d8ac32d050acb1b04494d520868ae2c812ad5379270c8",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 8,
+      "source_prog_id": 134,
+      "native_prog_id": 139,
+      "native_sha256": "acd7fd47b73a4f9156502b69332decb78c0e409b6e9fd7eaf1f8e5fd1739de27",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 9,
+      "source_prog_id": 151,
+      "native_prog_id": 156,
+      "native_sha256": "42e52fb28eb8c51460ca4eac4888547d70f54e3c6318c865838977518566e902",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 10,
+      "source_prog_id": 168,
+      "native_prog_id": 173,
+      "native_sha256": "c1ebbd29dc4c30f2ae275bf8202472c1c922a28add4e3efd4c87df843409856a",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 11,
+      "source_prog_id": 185,
+      "native_prog_id": 190,
+      "native_sha256": "0d11cf3d4cb8bc731ec434d53906e09a2b3aa78288db46faa37e67859a2a34ea",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 12,
+      "source_prog_id": 202,
+      "native_prog_id": 207,
+      "native_sha256": "0039873bed0be49a4692d321306f21b3cd0961c29e2ec3f478029609c1709d45",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 13,
+      "source_prog_id": 219,
+      "native_prog_id": 224,
+      "native_sha256": "6642186521b29ffff6c014a76c25d6835d07b45045aa6f2236fd1c1a91c63d8a",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 14,
+      "source_prog_id": 236,
+      "native_prog_id": 241,
+      "native_sha256": "6b6bcfc6519f3474f4dc2a7e886f3469081e1fa09d019ee4e204d0f84e47d695",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 15,
+      "source_prog_id": 253,
+      "native_prog_id": 258,
+      "native_sha256": "6efc565cf941125069ab4206d80348a3ed18b184b619642c7afc16d7d626bb6c",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 16,
+      "source_prog_id": 270,
+      "native_prog_id": 275,
+      "native_sha256": "dbb79507f4e0abda24c2f4b3e64dcb97fb24a2a53964418d28c3e956bff3e06a",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 17,
+      "source_prog_id": 287,
+      "native_prog_id": 292,
+      "native_sha256": "f8e1433423507b6ad462e124f40fb8a8888699d3e75fcd3642553f71687f6201",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 18,
+      "source_prog_id": 304,
+      "native_prog_id": 309,
+      "native_sha256": "6435841f269d5a63f36aa53f724d012900c945e040ee154c8a62fd63c3c5f390",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 19,
+      "source_prog_id": 321,
+      "native_prog_id": 326,
+      "native_sha256": "16f99add3d379da858eec67e98fba1cb09aec83e6197169537cd068804bbad0c",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 20,
+      "source_prog_id": 338,
+      "native_prog_id": 343,
+      "native_sha256": "3b8222f720bdf1b18811a27553b4cf6c7afc485d7d57b04aea24472d35472ee5",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 21,
+      "source_prog_id": 355,
+      "native_prog_id": 360,
+      "native_sha256": "b5d74a6bce6b658ae085b79e331eb3b94c72e1d4c5c234bb8a8e55b94f899d0f",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 22,
+      "source_prog_id": 372,
+      "native_prog_id": 377,
+      "native_sha256": "9a9e5807264be4db4162fdec537b70bf8dececfeefb770f2191fc31d1982a76c",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 23,
+      "source_prog_id": 389,
+      "native_prog_id": 394,
+      "native_sha256": "ff54282bb817676e7817102ef1644a56d507259495076e31f48c7ee74e5d75a0",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 24,
+      "source_prog_id": 406,
+      "native_prog_id": 411,
+      "native_sha256": "5ff16c53fc5bd6b2b0ef184be91cd8576e756be82a2649ba8d6bdfc8ff975eca",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 25,
+      "source_prog_id": 423,
+      "native_prog_id": 428,
+      "native_sha256": "ba3d1a791f94a20b1a6876ab16be24edf910cc1ec6b10f39245f045629bae0b3",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 26,
+      "source_prog_id": 440,
+      "native_prog_id": 445,
+      "native_sha256": "20552e85ea79dbd7556e78fbd36076a71de827408b3d333debd5ee2c2d146256",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 27,
+      "source_prog_id": 457,
+      "native_prog_id": 462,
+      "native_sha256": "679bf638419b8dca97c675c7bedfa594e6d264cdf35753fe4f1cdd78130c1f14",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 28,
+      "source_prog_id": 472,
+      "native_prog_id": 477,
+      "native_sha256": "3f9bb4157fbc4c2b8b2854adf81e5103e39bdce817dfcbb24934a494fec4d5e6",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    },
+    {
+      "request_id": 29,
+      "source_prog_id": 489,
+      "native_prog_id": 494,
+      "native_sha256": "15079ed0a4168927dd14343825dcdb52f33f4fa50f896a6a131b3bf9a4193fca",
+      "terminal_receipt_matches": true,
+      "archive_members": 24
+    }
+  ],
+  "files": {
+    "runtime-raw.tar.gz": "b967cad73bed48d5f4f760c7b4d6bcec0d0a5861c4dfdaf31f254d80db16ba93",
+    "runtime.json": "41914c1bcf363bc44e42afd0f6b96dac5b4cc38465c0efe9b179a59a426c5221",
+    "runtime-driver.log.gz": "95de8059ae48d7e1fc0042bd20564bd7509e58c68411ea04eb9bce8b8c0bdd97",
+    "runtime-service.tar.gz": "4be7f758a970b71bcb8d9d34a32647f280cb524eed107ed29522ad7008f169aa"
+  },
+  "all_29_original_native_sha_match_prior_29": true
+}
