@@ -60,8 +60,8 @@
       "accepted": 17,
       "causes": {
         "accepted": 17,
+        "native-load-EINVAL-no-rejection-line": 1,
         "request-activation-refused-during-teardown": 1,
-        "verifier-EINVAL-no-failure-line-retained": 1,
         "verifier-scalar-stack-pointer-arithmetic": 1,
         "verifier-stack-limit": 1
       },
@@ -78,8 +78,26 @@
       "accepted": 17,
       "causes": {
         "accepted": 17,
-        "verifier-EINVAL-no-failure-line-retained": 1,
+        "native-load-EINVAL-no-rejection-line": 1,
         "verifier-scalar-stack-pointer-arithmetic": 1
+      },
+      "functional_work": null,
+      "full_bcc_set": false
+    },
+    {
+      "archive": "run-20261107T102103054064Z.tar.gz",
+      "sha256": "e2ddd72a113aaf31e1655b3f115b6b514fa253d1240cdf8f1d0de4bbf7f6353e",
+      "outer_ok": false,
+      "observed_requests": 21,
+      "proof_generated": 21,
+      "proof_compiled": 21,
+      "accepted": 17,
+      "causes": {
+        "accepted": 17,
+        "native-load-EINVAL-no-rejection-line": 1,
+        "request-activation-refused-during-teardown": 1,
+        "verifier-scalar-stack-pointer-arithmetic": 1,
+        "verifier-stack-limit": 1
       },
       "functional_work": null,
       "full_bcc_set": false

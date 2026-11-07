@@ -38,7 +38,7 @@ for archive in sorted(ROOT.glob('run-*.tar.gz')):
    elif 'misaligned' in stderr:cause='verifier-misaligned-stack-access'
    elif 'invalid write to stack' in stderr:cause='verifier-stack-limit'
    elif 'math between fp pointer' in stderr:cause='verifier-scalar-stack-pointer-arithmetic'
-   elif 'BPF_PROG_LOAD native_lab stub' in stderr:cause='verifier-EINVAL-no-failure-line-retained'
+   elif 'BPF_PROG_LOAD native_lab stub' in stderr:cause='native-load-EINVAL-no-rejection-line'
    elif 'activation refused' in stderr:cause='request-activation-refused-during-teardown'
    elif 'GET_MAP' in error or 'No such file' in error:cause='map-metadata-kernel-query'
    elif error:cause='specialization-or-loader-error'
