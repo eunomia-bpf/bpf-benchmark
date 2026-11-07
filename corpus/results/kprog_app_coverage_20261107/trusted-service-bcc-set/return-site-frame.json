@@ -1,0 +1,24 @@
+{
+  "entry": "sched_switch",
+  "baseline": {
+    "direct_r10_min_offset": -672,
+    "disassembly_sha256": "bbecf4c3e4b31b0758c215771305edc542ac449f0d8f7a9e5858d9a33113fb0a",
+    "bpf_instructions": 1143
+  },
+  "candidate": {
+    "direct_r10_min_offset": -104,
+    "disassembly_sha256": "ec13fc8e028e592196e5c0a4fdbb204dfb8761ecfff263c9125a682008c32315",
+    "bpf_instructions": 472
+  },
+  "native_return_sites": [
+    "11"
+  ],
+  "native_sha256": "995e718c53a1c73e8294f8bbaa5d526923e644e988e3e2ae04c70429b45f0b63",
+  "source_sha256": {
+    "kprog/x86/micro-prog/x86_abi.py": "3462b366fee20d9ab6ef9d15249edbcb8e5f21a8fdffcde2585a0b871f0a9df8",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "a5eb5b6fd39052a30b31411f24e10593a3ed206e28c4c954bd3926969049360c",
+    "kprog/x86/x86_sim_local_bpf.h": "b3c5eaf24ca2b67f68b241d9c88ca41d419e7cc4e5795739536adcacd700847c"
+  },
+  "scope": "Actual archived runqlat native payload and typed metadata, fresh worker generation; static direct-r10 accesses only, not verifier acceptance.",
+  "measurement": "Decoded executable BPF instructions: signed memory displacement where base register is R10. Disassembly uses hex offsets; the initial regex metric was invalid and is replaced here."
+}

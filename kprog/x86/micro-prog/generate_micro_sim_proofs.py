@@ -1651,7 +1651,9 @@ def render_program(name: str, insns: list[NativeInsn],
     targets = indirect_targets(all_insns, exit_addr, {
         insns[0].addr, *(fn[0].addr for fn in subfunctions.values() if fn)
     }) if has_indirect else {}
-    stack_bytes = check_definedness(all_insns, targets, exit_addr, sys.modules[__name__])
+    native_return_sites = set()
+    stack_bytes = check_definedness(all_insns, targets, exit_addr,
+        sys.modules[__name__], return_sites=native_return_sites)
     if kind == "raw":
         if not program_section:
             raise ValueError("raw context requires its real BPF program section")
@@ -1681,12 +1683,9 @@ def render_program(name: str, insns: list[NativeInsn],
         for symbol, fn_insns in subfunctions.items()
         if fn_insns
     }
-    return_addrs = sorted({
-        fn_insns[index + 1].addr
-        for fn_insns in [insns, *subfunctions.values()]
-        for index, insn in enumerate(fn_insns[:-1])
-        if insn.mnemonic == "call"
-    })
+    # The existing ABI analysis follows actual saved ReturnAddress values.
+    # Helper fallthroughs are not produced by the modeled native CALL/RET.
+    return_addrs = sorted(native_return_sites)
     has_stack = any(
         insn.mnemonic in {"push", "pop"} or
         "[rsp" in insn.raw.lower() or

@@ -58,3 +58,21 @@ with (ROOT/'coverage.csv').open('w') as stream:
  writer=csv.DictWriter(stream,fieldnames=list(rows[0]),lineterminator=chr(10));writer.writeheader();writer.writerows(rows)
 (ROOT/'coverage.json').write_text(json.dumps(dict(runs=runs,scope='Observed actual requests, not a complete eight-tool inventory. No failed or interrupted requests are excluded.'),indent=2)+'\n')
 for run in runs:print(run['archive'],run['observed_requests'],run['proof_generated'],run['proof_compiled'],run['accepted'],run['causes'])
+
+# Reproduce the direct stack-displacement observation from immutable BPF bytes.
+if (ROOT/'return-site-frame-artifacts.tar.gz').exists():
+ import struct
+ from elftools.elf.elffile import ELFFile
+ p=ROOT/'return-site-frame.json';frame=json.loads(p.read_text())
+ with tarfile.open(ROOT/'return-site-frame-artifacts.tar.gz') as archive:
+  for kind,name in [('baseline','frame-check/baseline.bpf.o'),('candidate','frame-check/generated/trusted_x86.bpf.o')]:
+   elf=ELFFile(io.BytesIO(archive.extractfile(name).read()));offsets=[];count=0
+   for section in elf.iter_sections():
+    if not section['sh_flags']&4:continue
+    data=section.data();count+=len(data)//8
+    for i in range(0,len(data),8):
+     code,regs,off,imm=struct.unpack('<BBhi',data[i:i+8]);cls=code&7
+     base=(regs>>4) if cls==1 else (regs&15)
+     if cls in {1,2,3} and base==10:offsets.append(off)
+   frame[kind]['direct_r10_min_offset']=min(offsets,default=0);frame[kind]['bpf_instructions']=count
+ p.write_text(json.dumps(frame,indent=2)+chr(10))

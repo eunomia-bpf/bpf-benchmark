@@ -43,7 +43,7 @@ class State:
     constants: tuple[int | None, ...]
 
 
-def check_definedness(insns, targets, exit_addr, decode):
+def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
     regs = (*dict.fromkeys(r[0] for r in decode.REGS.values()), 'X86_XMM0')
     index = {reg: i for i, reg in enumerate(regs)}
     def ri(operand):
@@ -598,6 +598,8 @@ def check_definedness(insns, targets, exit_addr, decode):
                         raise ValueError(f'native entry return has an unbalanced stack pointer at {where}')
                     need(state,'eax',where)
                 else:
+                    if return_sites is not None:
+                        return_sites.add(destination.target)
                     returned_alias=list(alias)
                     returned_alias[rsp]+=8
                     push(destination.context,destination.target,State(tuple(bits),tuple(returned_alias),flags,opaque,pointers,tuple(constants)))
