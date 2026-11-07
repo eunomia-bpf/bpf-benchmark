@@ -4,6 +4,7 @@
 
 #include "native_lab_map_offset.h"
 #include "native_lab_exclusive.h"
+#include "native_lab_checked.h"
 
 /* Included after native_blob/blobs and decode_native_lab_payload in each
  * module. The final chunk owns a generation vector for the entire program.
@@ -593,6 +594,8 @@ static int native_lab_validate_proof(u64 payload, const struct bpf_verifier_env 
 			}
 		}
 	}
+	if (!err)
+		err = native_lab_capture_proof(&blobs[blob_id], generation, env);
 out:
 	mutex_unlock(&blobs_lock);
 	return err;
