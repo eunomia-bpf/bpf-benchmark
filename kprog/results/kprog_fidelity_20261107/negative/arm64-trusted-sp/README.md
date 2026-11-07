@@ -55,3 +55,14 @@ per-case identities across archives when reporting the full30-negative total.
 There is no complete ARM suite pass claim yet. No production simulator,
 generator, kernel or binding semantics changed for this report correction.
 The accepted original x86 and historical ARM bound-path results remain separate.
+
+The second host run also ended with a reporting-only failure: its repeated
+safe control executed correctly, and `misaligned_sp` was rejected by the
+production ABI analyzer with `native SP alignment fault at 0x10: ldrb w0, [sp]`.
+The original archive and guest exit1 are retained in `second-run-summary.json`;
+normalized outcomes are separate. The classifier now recognizes a ValueError
+whose traceback originates in the actual x86/ARM micro-prog generator or ABI
+analysis, rather than needing a new literal for every legitimate refusal.
+Compiler/syscall/producer exceptions retain their separate stages. Cumulative
+unique coverage is4 safe controls and12 rejected unsafe cases, with18 extended
+negatives still to execute. No unsafe native program has run or been accepted.

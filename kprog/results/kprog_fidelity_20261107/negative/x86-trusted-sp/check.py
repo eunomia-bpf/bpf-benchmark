@@ -54,6 +54,8 @@ def classify(record):
  with tarfile.open(archive) as ar:
   data={m.name:ar.extractfile(m).read().decode(errors='replace') for m in ar.getmembers() if m.isfile() and m.name.endswith(('.stderr','.stdout','.log','.txt'))}
  texts='\n'.join(data.values());error=record.get('error','')
+ trace=record.get('traceback','')
+ if 'ValueError:' in trace and any('/kprog/'+isa+'/micro-prog/' in trace for isa in ['x86','arm64']):return 'specialization_rejected',error+'\n'+texts
  if ('processed ' in texts and ('BPF_PROG_LOAD' in texts or 'bpf_object__load failed' in texts)):return 'verifier_rejected',texts
  if 'contains no BPF exit' in texts:return 'loader_rejected',texts
  if any(s in error for s in ['unsupported x86','unsupported arm64 instruction','unsupported mnemonic','native ABI','native entry','native return','uninitialized','unsupported instruction','indirect']):return 'specialization_rejected',error+'\n'+texts
