@@ -728,6 +728,17 @@ $(ROOT)/kprog/arm64/build/trusted-transport/test-trusted-transport: $(ROOT)/kpro
 trusted-transport-arm64-run: trusted-transport-arm64-build
 	python3 $(HERE)/trusted-arm64-transport-result/replay.py --rootfs "$(TRANSPORT_ROOTFS)"
 
+# Reuse the canonical ARM loader/native-link caches and the common service.
+.PHONY: trusted-service-arm64-build trusted-service-arm64-run
+trusted-service-arm64-build: runtime-loader-build
+	cmake --build $(ROOT)/kprog/libnativeloader/build-arm64-a-map-order-v3 --target trusted-native-loader trusted-service-client
+	aarch64-linux-gnu-gcc -O2 -fno-asynchronous-unwind-tables -c $(ROOT)/kprog/test/trusted_native.c -o $(ROOT)/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native.o
+	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc taskset -c 20-23 cargo build --release --target aarch64-unknown-linux-gnu --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml --target-dir $(ROOT)/kprog/arm64/build/app-native-link
+
+trusted-service-arm64-run:
+	python3 $(HERE)/trusted_service_arm64.py host
+
+
 .PHONY: manifest-dispatch-audit
 manifest-dispatch-audit:
 	taskset -c 8-11 python3 $(HERE)/manifest_dispatch_audit.py
