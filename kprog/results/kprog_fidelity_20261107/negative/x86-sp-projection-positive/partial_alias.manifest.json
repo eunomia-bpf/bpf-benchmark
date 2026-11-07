@@ -1,0 +1,12 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "source_btf_symbol": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-sp-projection-positive/partial_alias.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-sp-projection-positive/partial_alias.bpf.o",
+      "simulator_program": "partial_alias_x86_sim_xdp"
+    }
+  ]
+}

@@ -251,7 +251,7 @@ def main():
             if step is None:
                 step = f"X86_SIM_RUN_OP({encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, {encoded.aux}, {encoded.imm});"
             c += [step + ";"]
-            c += [f"s->r[{j}] = (uintptr_t)__x86_{reg}.ptr;" for j, reg in enumerate(regs)]
+            c += [f"s->r[{j}] = " + (f"(uintptr_t)__x86_{reg}.ptr;" if reg == "rsp" else f"X86_SIM_L_READ_REG({j});") for j, reg in enumerate(regs)]
             c += ["for (unsigned k=0;k<64;k++) s->stack[k]=__x86_stack_mem.b[k];"]
             c += ["s->flags = __x86_cf | ((uint64_t)__x86_pf << 2) | ((uint64_t)__x86_af << 4) | ((uint64_t)__x86_zf << 6) | ((uint64_t)__x86_sf << 7) | ((uint64_t)__x86_of << 11);", "s->vec[0] = __x86_xmm0_lo; s->vec[1] = __x86_xmm0_hi;"]
             width = next((bits for bits in [8, 16, 32, 64] if encoded.flags == f"X86_WIDTH_{bits}"), 64)

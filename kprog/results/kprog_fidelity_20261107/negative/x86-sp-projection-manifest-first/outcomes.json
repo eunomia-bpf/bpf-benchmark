@@ -1,0 +1,276 @@
+{
+  "arch": "x86",
+  "cases": [
+    {
+      "name": "past_data_end_read",
+      "assembly": "mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/past_data_end_read.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "past_data_end_write",
+      "assembly": "mov rax, QWORD PTR [rdi+8]; mov BYTE PTR [rax], 1; mov eax, 2; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/past_data_end_write.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "missing_data_end_check",
+      "assembly": "mov rax, QWORD PTR [rdi]; movzx eax, BYTE PTR [rax]; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/missing_data_end_check.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "map_value_oob",
+      "assembly": "mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; test rax, rax; je 1f; mov rax, QWORD PTR [rax+8]; ret; 1: mov eax, 0; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/map_value_oob.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "nullable_map_dereference",
+      "assembly": "mov rsi, QWORD PTR [rdi]; mov rax, QWORD PTR [rdi+8]; lea rdx, [rsi+4]; cmp rdx, rax; ja 1f; mov rdi, QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; mov rax, QWORD PTR [rax]; ret; 1: mov eax, 0; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/nullable_map_dereference.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "invalid_helper_argument",
+      "assembly": "mov rdi, 1; mov rsi, 0; call bpf_map_lookup_elem; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/invalid_helper_argument.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "stack_oob",
+      "assembly": "mov rax, QWORD PTR [rsp-1024]; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/stack_oob.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "uninitialized_stack",
+      "assembly": "mov rax, QWORD PTR [rsp-8]; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/uninitialized_stack.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "unbounded_loop",
+      "assembly": "1: jmp 1b",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/unbounded_loop.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "unbounded_indirect_jump",
+      "assembly": "mov rax, QWORD PTR [rdi]; jmp rax",
+      "stage": "specialization_rejected",
+      "message": "unresolved finite indirect target at 0x3: jmp    rax"
+    },
+    {
+      "name": "unsupported_instruction",
+      "assembly": "ud2; mov eax, 2; ret",
+      "stage": "specialization_rejected",
+      "message": "unsupported mnemonic: ud2"
+    },
+    {
+      "name": "immediate_push_branch",
+      "assembly": "mov eax, 2; push 1; pop rcx; test rcx, rcx; jz 1f; xor edx, edx; mov eax, DWORD PTR [rdx]; 1: ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/immediate_push_branch.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "entry_return_slot_overwrite",
+      "assembly": "mov QWORD PTR [rsp], 0; mov eax, 2; ret",
+      "stage": "specialization_rejected",
+      "message": "native return address lacks call/entry provenance at 0xd: ret"
+    },
+    {
+      "name": "stack_base_flags",
+      "assembly": "mov eax, 2; sub rsp, 8; add rsp, 8; jz 1f; xor ecx, ecx; mov eax, DWORD PTR [rcx]; 1: ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/stack_base_flags.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "undefined_entry_register",
+      "assembly": "test rax, rax; je 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret",
+      "stage": "specialization_rejected",
+      "message": "undefined native ABI flags at 0x3: je     d <entry+0xd>"
+    },
+    {
+      "name": "undefined_entry_flags",
+      "assembly": "jnc 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret",
+      "stage": "specialization_rejected",
+      "message": "undefined native ABI flags at 0x0: jae    a <entry+0xa>"
+    },
+    {
+      "name": "div8_zero",
+      "assembly": "mov eax, 1; xor edx, edx; xor ecx, ecx; div cl; mov eax, 2; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/div8_zero.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "div8_overflow",
+      "assembly": "mov eax, 256; xor edx, edx; mov ecx, 1; div cl; mov eax, 2; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/div8_overflow.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "div16_zero",
+      "assembly": "mov eax, 1; xor edx, edx; xor ecx, ecx; div cx; mov eax, 2; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/div16_zero.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "div16_overflow",
+      "assembly": "xor eax, eax; mov edx, 1; mov ecx, 1; div cx; mov eax, 2; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/div16_overflow.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "div32_zero",
+      "assembly": "mov eax, 1; xor edx, edx; xor ecx, ecx; div ecx; mov eax, 2; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/div32_zero.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "div32_overflow",
+      "assembly": "xor eax, eax; mov edx, 1; mov ecx, 1; div ecx; mov eax, 2; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/div32_overflow.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "div64_zero",
+      "assembly": "mov eax, 1; xor edx, edx; xor ecx, ecx; div rcx; mov eax, 2; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/div64_zero.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "div64_overflow",
+      "assembly": "xor eax, eax; mov edx, 1; mov ecx, 1; div rcx; mov eax, 2; ret",
+      "stage": "infrastructure_error",
+      "message": "bound-probe: manifest did not produce a native program\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-private/div64_overflow.manifest.json"
+      ],
+      "returncode": 1
+    },
+    {
+      "name": "helper_clobbered_register",
+      "assembly": "push rbx; mov rbx, rdi; xor esi, esi; call bpf_get_current_uid_gid; test rsi, rsi; je 1f; mov rax, QWORD PTR [rbx+8]; movzx eax, BYTE PTR [rax]; jmp 2f; 1: mov eax, 2; 2: pop rbx; ret",
+      "stage": "specialization_rejected",
+      "message": "undefined native ABI flags at 0xe: je     19 <entry+0x19>"
+    }
+  ],
+  "guest_uname": [
+    "Linux",
+    "virtme-ng",
+    "7.0.0-rc2+",
+    "#59 SMP PREEMPT_DYNAMIC Fri Nov  6 13:33:32 UTC 2026",
+    "x86_64"
+  ]
+}

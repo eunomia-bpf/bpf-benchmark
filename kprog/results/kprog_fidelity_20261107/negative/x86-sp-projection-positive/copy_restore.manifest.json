@@ -1,0 +1,12 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "source_btf_symbol": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-sp-projection-positive/copy_restore.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-sp-projection-positive/copy_restore.bpf.o",
+      "simulator_program": "copy_restore_x86_sim_xdp"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+[
+  {
+    "name": "copy_restore",
+    "assembly": "mov rax,rsp; mov rsp,rax; mov eax,2; ret",
+    "returncode": 0,
+    "command": [
+      "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+      "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-positive/copy_restore.manifest.json",
+      "0",
+      "2"
+    ],
+    "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=10 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n"
+  },
+  {
+    "name": "alias_load",
+    "assembly": "sub rsp,16; mov QWORD PTR [rsp],37; mov rax,rsp; mov ecx,DWORD PTR [rax]; add rsp,16; cmp ecx,37; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+    "returncode": 0,
+    "command": [
+      "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+      "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-positive/alias_load.manifest.json",
+      "0",
+      "2"
+    ],
+    "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=20 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n"
+  },
+  {
+    "name": "spill_restore",
+    "assembly": "sub rsp,32; lea rax,[rsp+16]; mov [rsp],rax; mov rax,[rsp]; mov rsp,rax; add rsp,16; mov eax,2; ret",
+    "returncode": 0,
+    "command": [
+      "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+      "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-positive/spill_restore.manifest.json",
+      "0",
+      "2"
+    ],
+    "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=30 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n"
+  },
+  {
+    "name": "partial_alias",
+    "assembly": "mov rax,rsp; mov al,1; cmp al,1; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+    "returncode": 0,
+    "command": [
+      "/workspaces/repository/kprog/fidelity/build-abi-fixed/bound-probe",
+      "/workspaces/repository/kprog/fidelity/build-abi-fixed/companion.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-sp-projection-positive/partial_alias.manifest.json",
+      "0",
+      "2"
+    ],
+    "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=40 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n"
+  }
+]

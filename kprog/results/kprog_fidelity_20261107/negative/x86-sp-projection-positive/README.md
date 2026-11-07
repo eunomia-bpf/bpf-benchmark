@@ -1,0 +1,1 @@
+Four valid programs preserve/restore entry SP, access a copied stack alias, spill/reload a stack address, or write a partial alias. Every original BPF and generation-bound native run returns2 with packet result0. Actual captures decode to GEN4/8/12/16 and mask0. All native sequences restore their entry SP before RET. See ../../differential/x86-sp-projection-private/README.md.

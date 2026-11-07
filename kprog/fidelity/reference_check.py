@@ -12,7 +12,7 @@ import subprocess
 ROOT=Path(__file__).resolve().parents[2]
 
 
-def control_extents(binary, metadata, forms):
+def control_extents(binary, metadata, forms, linear_paths=False):
     """Read extents only; canonical decode checks every byte and successor."""
     text=subprocess.check_output(['objdump','-d','-Mintel','--insn-width=16',str(binary)],text=True)
     extents={}
@@ -22,7 +22,7 @@ def control_extents(binary, metadata, forms):
             extents[int(match[1],16)]=len(match[2].split())
     result={}
     for index,form in enumerate(forms):
-        if form['opcode'] not in {'X86_OP_JCC','X86_OP_JMP'}:
+        if form['opcode'] not in {'X86_OP_JCC','X86_OP_JMP'} and not (linear_paths and form['opcode']=='X86_STACK_COMPOSITE'):
             continue
         code=metadata['forms'][index]
         pc=code['pc'];entries=[]
@@ -32,7 +32,7 @@ def control_extents(binary, metadata, forms):
                 raise RuntimeError('control instruction crosses observed byte span')
             entries.append(dict(offset=pc-code['pc'],length=length))
             pc+=length
-        expected=5 if form['assembly'].endswith('backward') else 4 if form['opcode']=='X86_OP_JCC' else 3
+        expected=form['native_instructions'] if form['opcode']=='X86_STACK_COMPOSITE' else 5 if form['assembly'].endswith('backward') else 4 if form['opcode']=='X86_OP_JCC' else 3
         if len(entries)!=expected:
             raise RuntimeError('unexpected generated control observer shape')
         result[index]=entries
@@ -70,6 +70,7 @@ def main():
     parser.add_argument('--trace',type=Path)
     parser.add_argument('--reference',type=Path,default=ROOT/'kprog/formal/.lake/build/bin/reference')
     parser.add_argument('--control-paths',action='store_true',help='use the canonical finite-path interface for generated Jcc/JMP observers')
+    parser.add_argument('--linear-paths',action='store_true',help='use canonical finite paths for complete acyclic straight-line stack observers')
     parser.add_argument('--opcode',action='append',help='replay only this production opcode from the saved trace; repeat for multiple families')
     args=parser.parse_args()
     if args.trace and not args.reuse_trace:
@@ -86,7 +87,7 @@ def main():
         command=(['qemu-aarch64-static'] if args.arch=='arm64' and platform.machine()!='aarch64' else [])
         cpu_failed=subprocess.run(command+[str(args.binary.resolve()),str(args.cases),str(args.out),str(trace)]).returncode != 0
     native_code=json.loads((args.out/'native-code.json').read_text())
-    paths=control_extents(args.binary,native_code,forms) if args.control_paths and args.arch=='x86' else {}
+    paths=control_extents(args.binary,native_code,forms,args.linear_paths) if (args.control_paths or args.linear_paths) and args.arch=='x86' else {}
     reference=args.reference
     # Only a serialization optimization: every non-composite encoding is
     # probed against the reference, including opcodes absent from this set.
@@ -131,7 +132,7 @@ def main():
                 continue
             requests=[];records=[];rejection=None
             omit_memory=(args.arch=='arm64' and form['opcode'] in arm_without_memory) or (
-                args.arch=='x86' and ((form['opcode'] in x86_without_memory and '[' not in form['assembly']) or form['opcode']=='X86_OP_LEA')) or index in paths
+                args.arch=='x86' and ((form['opcode'] in x86_without_memory and '[' not in form['assembly']) or form['opcode']=='X86_OP_LEA')) or (index in paths and form['opcode']!='X86_STACK_COMPOSITE')
             assembly=form['assembly']
             for case in range(cases):
                 ident=struct.unpack('<2I',source.read(8))
@@ -162,7 +163,7 @@ def main():
                 request=dict(isa='x86_64' if args.arch=='x86' else 'aarch64',state=architectural_state,native_bytes=native_code['forms'][index]['native_bytes'])
                 if index in paths:
                     request.update(native_base=native_code['forms'][index]['pc'],
-                        native_path=control_witness(form,paths[index],native))
+                        native_path=paths[index] if form['opcode']=='X86_STACK_COMPOSITE' else control_witness(form,paths[index],native))
                 encoded_request=json.dumps(request,separators=(',',':'))
                 if case==0:
                     probe=subprocess.run([str(reference)],input=encoded_request+'\n',text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)

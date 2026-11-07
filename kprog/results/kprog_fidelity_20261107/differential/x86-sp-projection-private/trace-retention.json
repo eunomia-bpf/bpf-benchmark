@@ -1,0 +1,20 @@
+{
+  "traces": [
+    {
+      "path": "kprog/results/kprog_fidelity_20261107/differential/x86-sp-projection-private/cpu-states.bin",
+      "logical_bytes": 1645731864,
+      "sha256": "eb9564677919266b5106d4e2c312373dddd4d0146e9f114afbfc71eb478f8aba"
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261107/differential/x86-sp-sequences-before/cpu-states.bin",
+      "logical_bytes": 46489624,
+      "sha256": "c320c20c1fbbd479f84d2abb4bc86fae9267619537ef59c1d0543ce26d0c2ca5"
+    },
+    {
+      "path": "kprog/results/kprog_fidelity_20261107/differential/x86-sp-sequences-fixed/cpu-states.bin",
+      "logical_bytes": 46489624,
+      "sha256": "1d8c2947cdc8dc30340b5238d41a43be59847e47efa5d9e67abff5c2225b5e03"
+    }
+  ],
+  "retention": "retire completed raw traces after commit/no-reader checks; retain compressed counterexamples and exact source/binaries"
+}

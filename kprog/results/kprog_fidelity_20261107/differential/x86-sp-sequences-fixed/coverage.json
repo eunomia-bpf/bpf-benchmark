@@ -1,0 +1,127 @@
+[
+  {
+    "assembly": "copy and restore SP: mov rax,rsp; mov rsp,rax",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "LEA alias and restore SP: lea rax,[rsp-16]; mov rsp,rax; add rsp,16",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 3
+  },
+  {
+    "assembly": "LEA alias to LEA SP: lea rax,[rsp-16]; lea rsp,[rax+16]",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "copy alias and compare SP: mov rax,rsp; mov rcx,rax; cmp rcx,rsp",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 3
+  },
+  {
+    "assembly": "alias load: lea rax,[rsp-16]; mov rdx,[rax]",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "alias store: lea rax,[rsp-16]; mov DWORD PTR [rax],ecx",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "alias LEA chain: lea rax,[rsp-16]; lea rdx,[rax+8]",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "alias self copy: lea rax,[rsp-16]; mov rax,rax",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "alias scalar add: mov rax,rsp; add rax,16",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "alias scalar subtract: mov rax,rsp; sub rax,16",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "full spill and restore SP: lea rax,[rsp-16]; mov [rsp-8],rax; mov rax,[rsp-8]; mov rsp,rax; add rsp,16",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 5
+  },
+  {
+    "assembly": "alias PUSH POP: mov rax,rsp; push rax; pop rax",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 3
+  },
+  {
+    "assembly": "alias PUSHW POPW: mov rax,rsp; push ax; pop dx",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 3
+  },
+  {
+    "assembly": "alias partial write al: mov rax,rsp; mov al,1",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "alias partial write ah: mov rax,rsp; mov ah,1",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "alias partial write ax: mov rax,rsp; mov ax,1",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "alias partial write eax: mov rax,rsp; mov eax,1",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "alias partial add al: mov rax,rsp; add al,1",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "alias partial add ah: mov rax,rsp; add ah,1",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "alias partial add ax: mov rax,rsp; add ax,1",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "alias partial add eax: mov rax,rsp; add eax,1",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 2
+  },
+  {
+    "assembly": "alias spill BYTE: mov rax,rsp; mov BYTE PTR [rsp-16],al; movzx edx,BYTE PTR [rsp-16]",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 3
+  },
+  {
+    "assembly": "alias spill WORD: mov rax,rsp; mov WORD PTR [rsp-16],ax; movzx edx,WORD PTR [rsp-16]",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 3
+  },
+  {
+    "assembly": "alias spill DWORD: mov rax,rsp; mov DWORD PTR [rsp-16],eax; mov edx,DWORD PTR [rsp-16]",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 3
+  },
+  {
+    "assembly": "alias spill QWORD: mov rax,rsp; mov QWORD PTR [rsp-16],rax; mov rdx,QWORD PTR [rsp-16]",
+    "opcode": "X86_STACK_COMPOSITE",
+    "native_instructions": 3
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-sp-projection-negative/past_data_end_write.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-sp-projection-negative/past_data_end_write.bpf.o",
+      "simulator_program": "past_data_end_write_x86_sim_xdp"
+    }
+  ]
+}

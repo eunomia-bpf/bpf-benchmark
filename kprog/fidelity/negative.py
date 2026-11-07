@@ -168,7 +168,7 @@ def run_bound(arch, build_dir, out, probe, companion):
     manifest['guest_uname']=list(os.uname())
     for row in manifest['cases']:
         if row['stage']!='generated':continue
-        plan={'objects':[dict(program='neg_source',native_object=str((build_dir/f"{row['name']}.native.o").resolve()),symbol='entry',simulator_object=str((build_dir/f"{row['name']}.bpf.o").resolve()),simulator_program=f"{row['name']}_{arch}_sim_xdp")]}
+        plan={'objects':[dict(program='neg_source',source_btf_symbol='neg_source',native_object=str((build_dir/f"{row['name']}.native.o").resolve()),symbol='entry',simulator_object=str((build_dir/f"{row['name']}.bpf.o").resolve()),simulator_program=f"{row['name']}_{arch}_sim_xdp")]}
         plan_path=out/f"{row['name']}.manifest.json"
         plan_path.write_text(json.dumps(plan,indent=2)+'\n')
         command=[str(probe.resolve()),str(companion.resolve()),str(plan_path.resolve())]
@@ -216,7 +216,7 @@ def package(build_dir, bound=False):
         files[f'/proofs/{name}.bpf.o'] = build_dir/f'{name}.bpf.o'
         if bound:
             files[f'/proofs/{name}.native.o']=build_dir/f'{name}.native.o'
-            plan={'objects':[dict(program='neg_source',native_object=f'{name}.native.o',symbol='entry',simulator_object=f'{name}.bpf.o',simulator_program=f'{name}_arm64_sim_xdp')]}
+            plan={'objects':[dict(program='neg_source',source_btf_symbol='neg_source',native_object=f'{name}.native.o',symbol='entry',simulator_object=f'{name}.bpf.o',simulator_program=f'{name}_arm64_sim_xdp')]}
             manifest=build_dir/f'{name}.manifest.json'
             manifest.write_text(json.dumps(plan,indent=2)+'\n')
             files[f'/proofs/{name}.manifest.json']=manifest

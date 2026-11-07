@@ -1,0 +1,14 @@
+{
+  "production_base": "f734ec40200cbcd1816f37b1d7f5c07fad4d5b64",
+  "runtime_header_sha256": "f4afe32dba503ae95bfad2938cf48df4da2b4122c44be43addca8e576f85d77a",
+  "candidate_patch_sha256": "d8b98a9aa6296c5762d7f0b511fce67e875845207f1d0a6ddd33ff183945520f",
+  "core_sources": {
+    "kprog/fidelity/generate.py": "6f53a222f2d75a22efa6cdce62b4dcc5c7e6d88286830d07c3a9bff0888de4dd",
+    "kprog/fidelity/reference_check.py": "7200044df993b12a0d1913fefe1c3ff05ba8cb70305f72cbc2faa94da37ed55c",
+    "kprog/fidelity/negative.py": "bd18a9b4e406ae8f4e1267c850e3968cccea8e29922bb2c9d60a9d30a22018bb",
+    "kprog/fidelity/x86_stack.py": "e28cca2d759e419e1ca12cb3c0e07c78ffe7abd56b53a8f35e7d0a150ff93ddb",
+    "kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean": "97d456a195e6ce0a43a9f95a76efcf2005f07af9d69ce3c3aa3cca899d20b8ac"
+  },
+  "canonical": "47de9665d",
+  "frozen_probe_and_cli_archive": "kprog/results/kprog_fidelity_20261107/negative/x86-callee-abi-fixed/inputs.tar.gz"
+}

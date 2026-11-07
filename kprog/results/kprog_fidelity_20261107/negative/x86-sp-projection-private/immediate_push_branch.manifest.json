@@ -1,0 +1,12 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "source_btf_symbol": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-sp-projection-negative/immediate_push_branch.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-sp-projection-negative/immediate_push_branch.bpf.o",
+      "simulator_program": "immediate_push_branch_x86_sim_xdp"
+    }
+  ]
+}

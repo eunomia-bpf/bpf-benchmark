@@ -1,0 +1,4427 @@
+[
+  {
+    "assembly": "push rbx",
+    "decoded": "push   rbx",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "pop rax",
+    "decoded": "pop    rax",
+    "opcode": "X86_OP_POP"
+  },
+  {
+    "assembly": "push bx",
+    "decoded": "push   bx",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "pop ax",
+    "decoded": "pop    ax",
+    "opcode": "X86_OP_POP"
+  },
+  {
+    "assembly": "nop",
+    "decoded": "nop",
+    "opcode": "X86_OP_NOP"
+  },
+  {
+    "assembly": "cbw",
+    "decoded": "cbw",
+    "opcode": "X86_OP_MOVSX_REG"
+  },
+  {
+    "assembly": "cwde",
+    "decoded": "cwde",
+    "opcode": "X86_OP_MOVSX_REG"
+  },
+  {
+    "assembly": "cdqe",
+    "decoded": "cdqe",
+    "opcode": "X86_OP_MOVSX_REG"
+  },
+  {
+    "assembly": "cwd",
+    "decoded": "cwd",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "cdq",
+    "decoded": "cdq",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "cqo",
+    "decoded": "cqo",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "movups xmm0, XMMWORD PTR [rdi]",
+    "decoded": "movups xmm0,XMMWORD PTR [rdi]",
+    "opcode": "X86_OP_LOAD_XMM0"
+  },
+  {
+    "assembly": "movups XMMWORD PTR [rdi], xmm0",
+    "decoded": "movups XMMWORD PTR [rdi],xmm0",
+    "opcode": "X86_OP_STORE_XMM0"
+  },
+  {
+    "assembly": "mov rax, rsp",
+    "decoded": "mov    rax,rsp",
+    "opcode": "X86_OP_MOV_REG"
+  },
+  {
+    "assembly": "mov eax, esp",
+    "decoded": "mov    eax,esp",
+    "opcode": "X86_OP_MOV_REG"
+  },
+  {
+    "assembly": "lea rax, [rsp+16]",
+    "decoded": "lea    rax,[rsp+0x10]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "cmp rsp, 0",
+    "decoded": "cmp    rsp,0x0",
+    "opcode": "X86_OP_CMP_IMM"
+  },
+  {
+    "assembly": "mov rsp, rax",
+    "decoded": "mov    rsp,rax",
+    "opcode": "X86_OP_MOV_REG"
+  },
+  {
+    "assembly": "mov esp, eax",
+    "decoded": "mov    esp,eax",
+    "opcode": "X86_OP_MOV_REG"
+  },
+  {
+    "assembly": "lea rsp, [rsp+16]",
+    "decoded": "lea    rsp,[rsp+0x10]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "add rsp, 16",
+    "decoded": "add    rsp,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "push rsp",
+    "decoded": "push   rsp",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "pop rsp",
+    "decoded": "pop    rsp",
+    "opcode": "X86_OP_POP"
+  },
+  {
+    "assembly": "push sp",
+    "decoded": "push   sp",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "pop sp",
+    "decoded": "pop    sp",
+    "opcode": "X86_OP_POP"
+  },
+  {
+    "assembly": "push -2147483648",
+    "decoded": "push   0xffffffff80000000",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "push -128",
+    "decoded": "push   0xffffffffffffff80",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "push -1",
+    "decoded": "push   0xffffffffffffffff",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "push 0",
+    "decoded": "push   0x0",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "push 1",
+    "decoded": "push   0x1",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "push 127",
+    "decoded": "push   0x7f",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "push 128",
+    "decoded": "push   0x80",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "push 305419896",
+    "decoded": "push   0x12345678",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "pushw -7",
+    "decoded": "pushw  0xfff9",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "push QWORD PTR [rdi+8]",
+    "decoded": "push   QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "push WORD PTR [rdi+8]",
+    "decoded": "push   WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "pop QWORD PTR [rdi+8]",
+    "decoded": "pop    QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_POP"
+  },
+  {
+    "assembly": "pop WORD PTR [rdi+8]",
+    "decoded": "pop    WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_POP"
+  },
+  {
+    "assembly": "push QWORD PTR [rsp-16]",
+    "decoded": "push   QWORD PTR [rsp-0x10]",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": "pop QWORD PTR [rsp-16]",
+    "decoded": "pop    QWORD PTR [rsp-0x10]",
+    "opcode": "X86_OP_POP"
+  },
+  {
+    "assembly": ".byte 0x66, 0x48, 0x53",
+    "decoded": "push rbx",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": ".byte 0x48, 0x66, 0x53",
+    "decoded": "push   bx",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": ".byte 0x66, 0x48, 0xff, 0xf3",
+    "decoded": "push rbx",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": ".byte 0x48, 0x66, 0xff, 0xf3",
+    "decoded": "push   bx",
+    "opcode": "X86_OP_PUSH"
+  },
+  {
+    "assembly": ".byte 0x66, 0x48, 0x58",
+    "decoded": "pop rax",
+    "opcode": "X86_OP_POP"
+  },
+  {
+    "assembly": ".byte 0x48, 0x66, 0x58",
+    "decoded": "pop    ax",
+    "opcode": "X86_OP_POP"
+  },
+  {
+    "assembly": ".byte 0x66, 0x48, 0x8f, 0xc0",
+    "decoded": "pop rax",
+    "opcode": "X86_OP_POP"
+  },
+  {
+    "assembly": ".byte 0x48, 0x66, 0x8f, 0xc0",
+    "decoded": "pop    ax",
+    "opcode": "X86_OP_POP"
+  },
+  {
+    "assembly": "mov al, bl",
+    "decoded": "mov    al,bl",
+    "opcode": "X86_OP_MOV_REG"
+  },
+  {
+    "assembly": "mov al, 0x7f",
+    "decoded": "mov    al,0x7f",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov BYTE PTR [rdi+8], al",
+    "decoded": "mov    BYTE PTR [rdi+0x8],al",
+    "opcode": "X86_OP_MOV_STORE_REG"
+  },
+  {
+    "assembly": "mov al, BYTE PTR [rdi+8]",
+    "decoded": "mov    al,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD"
+  },
+  {
+    "assembly": "mov BYTE PTR [rdi+8], 0x7f",
+    "decoded": "mov    BYTE PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_MOV_STORE_IMM"
+  },
+  {
+    "assembly": "add al, bl",
+    "decoded": "add    al,bl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "add al, 0x7f",
+    "decoded": "add    al,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "add BYTE PTR [rdi+8], al",
+    "decoded": "add    BYTE PTR [rdi+0x8],al",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "add BYTE PTR [rdi+8], 0x7f",
+    "decoded": "add    BYTE PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "add al, BYTE PTR [rdi+8]",
+    "decoded": "add    al,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "adc al, bl",
+    "decoded": "adc    al,bl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "adc al, 0x7f",
+    "decoded": "adc    al,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "adc BYTE PTR [rdi+8], al",
+    "decoded": "adc    BYTE PTR [rdi+0x8],al",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "adc BYTE PTR [rdi+8], 0x7f",
+    "decoded": "adc    BYTE PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "adc al, BYTE PTR [rdi+8]",
+    "decoded": "adc    al,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "sub al, bl",
+    "decoded": "sub    al,bl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sub al, 0x7f",
+    "decoded": "sub    al,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sub BYTE PTR [rdi+8], al",
+    "decoded": "sub    BYTE PTR [rdi+0x8],al",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "sub BYTE PTR [rdi+8], 0x7f",
+    "decoded": "sub    BYTE PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "sub al, BYTE PTR [rdi+8]",
+    "decoded": "sub    al,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "sbb al, bl",
+    "decoded": "sbb    al,bl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sbb al, 0x7f",
+    "decoded": "sbb    al,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sbb BYTE PTR [rdi+8], al",
+    "decoded": "sbb    BYTE PTR [rdi+0x8],al",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "sbb BYTE PTR [rdi+8], 0x7f",
+    "decoded": "sbb    BYTE PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "sbb al, BYTE PTR [rdi+8]",
+    "decoded": "sbb    al,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "cmp al, bl",
+    "decoded": "cmp    al,bl",
+    "opcode": "X86_OP_CMP_REG"
+  },
+  {
+    "assembly": "cmp al, 0x7f",
+    "decoded": "cmp    al,0x7f",
+    "opcode": "X86_OP_CMP_IMM"
+  },
+  {
+    "assembly": "cmp BYTE PTR [rdi+8], al",
+    "decoded": "cmp    BYTE PTR [rdi+0x8],al",
+    "opcode": "X86_OP_CMP_MEM_REG"
+  },
+  {
+    "assembly": "cmp BYTE PTR [rdi+8], 0x7f",
+    "decoded": "cmp    BYTE PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_CMP_MEM_IMM"
+  },
+  {
+    "assembly": "cmp al, BYTE PTR [rdi+8]",
+    "decoded": "cmp    al,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMP_REG_MEM"
+  },
+  {
+    "assembly": "test al, bl",
+    "decoded": "test   al,bl",
+    "opcode": "X86_OP_TEST_REG"
+  },
+  {
+    "assembly": "test al, 0x7f",
+    "decoded": "test   al,0x7f",
+    "opcode": "X86_OP_TEST_IMM"
+  },
+  {
+    "assembly": "test BYTE PTR [rdi+8], al",
+    "decoded": "test   BYTE PTR [rdi+0x8],al",
+    "opcode": "X86_OP_TEST_MEM_REG"
+  },
+  {
+    "assembly": "test BYTE PTR [rdi+8], 0x7f",
+    "decoded": "test   BYTE PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_TEST_MEM_IMM"
+  },
+  {
+    "assembly": "and al, bl",
+    "decoded": "and    al,bl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "and al, 0x7f",
+    "decoded": "and    al,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "and al, BYTE PTR [rdi+8]",
+    "decoded": "and    al,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "and BYTE PTR [rdi+8], al",
+    "decoded": "and    BYTE PTR [rdi+0x8],al",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "and BYTE PTR [rdi+8], 0x7f",
+    "decoded": "and    BYTE PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "or al, bl",
+    "decoded": "or     al,bl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "or al, 0x7f",
+    "decoded": "or     al,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "or al, BYTE PTR [rdi+8]",
+    "decoded": "or     al,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "or BYTE PTR [rdi+8], al",
+    "decoded": "or     BYTE PTR [rdi+0x8],al",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "or BYTE PTR [rdi+8], 0x7f",
+    "decoded": "or     BYTE PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "xor al, bl",
+    "decoded": "xor    al,bl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "xor al, 0x7f",
+    "decoded": "xor    al,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "xor al, BYTE PTR [rdi+8]",
+    "decoded": "xor    al,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "xor BYTE PTR [rdi+8], al",
+    "decoded": "xor    BYTE PTR [rdi+0x8],al",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "xor BYTE PTR [rdi+8], 0x7f",
+    "decoded": "xor    BYTE PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "inc al",
+    "decoded": "inc    al",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "inc BYTE PTR [rdi+8]",
+    "decoded": "inc    BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "dec al",
+    "decoded": "dec    al",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "dec BYTE PTR [rdi+8]",
+    "decoded": "dec    BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "neg al",
+    "decoded": "neg    al",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "neg BYTE PTR [rdi+8]",
+    "decoded": "neg    BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "not al",
+    "decoded": "not    al",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "not BYTE PTR [rdi+8]",
+    "decoded": "not    BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "xchg al, bl",
+    "decoded": "xchg   al,bl",
+    "opcode": "X86_OP_XCHG"
+  },
+  {
+    "assembly": "shl al, 0",
+    "decoded": "shl    al,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl al, 1",
+    "decoded": "shl    al,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl al, 7",
+    "decoded": "shl    al,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl al, 8",
+    "decoded": "shl    al,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl al, 15",
+    "decoded": "shl    al,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl al, 16",
+    "decoded": "shl    al,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl al, 31",
+    "decoded": "shl    al,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl al, 32",
+    "decoded": "shl    al,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl al, 63",
+    "decoded": "shl    al,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl al, 64",
+    "decoded": "shl    al,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl al, 255",
+    "decoded": "shl    al,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl al, cl",
+    "decoded": "shl    al,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "shr al, 0",
+    "decoded": "shr    al,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr al, 1",
+    "decoded": "shr    al,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr al, 7",
+    "decoded": "shr    al,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr al, 8",
+    "decoded": "shr    al,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr al, 15",
+    "decoded": "shr    al,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr al, 16",
+    "decoded": "shr    al,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr al, 31",
+    "decoded": "shr    al,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr al, 32",
+    "decoded": "shr    al,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr al, 63",
+    "decoded": "shr    al,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr al, 64",
+    "decoded": "shr    al,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr al, 255",
+    "decoded": "shr    al,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr al, cl",
+    "decoded": "shr    al,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sar al, 0",
+    "decoded": "sar    al,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar al, 1",
+    "decoded": "sar    al,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar al, 7",
+    "decoded": "sar    al,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar al, 8",
+    "decoded": "sar    al,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar al, 15",
+    "decoded": "sar    al,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar al, 16",
+    "decoded": "sar    al,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar al, 31",
+    "decoded": "sar    al,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar al, 32",
+    "decoded": "sar    al,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar al, 63",
+    "decoded": "sar    al,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar al, 64",
+    "decoded": "sar    al,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar al, 255",
+    "decoded": "sar    al,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar al, cl",
+    "decoded": "sar    al,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "rol al, 0",
+    "decoded": "rol    al,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol al, 1",
+    "decoded": "rol    al,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol al, 7",
+    "decoded": "rol    al,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol al, 8",
+    "decoded": "rol    al,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol al, 15",
+    "decoded": "rol    al,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol al, 16",
+    "decoded": "rol    al,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol al, 31",
+    "decoded": "rol    al,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol al, 32",
+    "decoded": "rol    al,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol al, 63",
+    "decoded": "rol    al,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol al, 64",
+    "decoded": "rol    al,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol al, 255",
+    "decoded": "rol    al,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol al, cl",
+    "decoded": "rol    al,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "mov ax, bx",
+    "decoded": "mov    ax,bx",
+    "opcode": "X86_OP_MOV_REG"
+  },
+  {
+    "assembly": "mov ax, 0x7f",
+    "decoded": "mov    ax,0x7f",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov WORD PTR [rdi+8], ax",
+    "decoded": "mov    WORD PTR [rdi+0x8],ax",
+    "opcode": "X86_OP_MOV_STORE_REG"
+  },
+  {
+    "assembly": "mov ax, WORD PTR [rdi+8]",
+    "decoded": "mov    ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD"
+  },
+  {
+    "assembly": "mov WORD PTR [rdi+8], 0x7f",
+    "decoded": "mov    WORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_MOV_STORE_IMM"
+  },
+  {
+    "assembly": "add ax, bx",
+    "decoded": "add    ax,bx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "add ax, 0x7f",
+    "decoded": "add    ax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "add WORD PTR [rdi+8], ax",
+    "decoded": "add    WORD PTR [rdi+0x8],ax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "add WORD PTR [rdi+8], 0x7f",
+    "decoded": "add    WORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "add ax, WORD PTR [rdi+8]",
+    "decoded": "add    ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "adc ax, bx",
+    "decoded": "adc    ax,bx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "adc ax, 0x7f",
+    "decoded": "adc    ax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "adc WORD PTR [rdi+8], ax",
+    "decoded": "adc    WORD PTR [rdi+0x8],ax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "adc WORD PTR [rdi+8], 0x7f",
+    "decoded": "adc    WORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "adc ax, WORD PTR [rdi+8]",
+    "decoded": "adc    ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "sub ax, bx",
+    "decoded": "sub    ax,bx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sub ax, 0x7f",
+    "decoded": "sub    ax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sub WORD PTR [rdi+8], ax",
+    "decoded": "sub    WORD PTR [rdi+0x8],ax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "sub WORD PTR [rdi+8], 0x7f",
+    "decoded": "sub    WORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "sub ax, WORD PTR [rdi+8]",
+    "decoded": "sub    ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "sbb ax, bx",
+    "decoded": "sbb    ax,bx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sbb ax, 0x7f",
+    "decoded": "sbb    ax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sbb WORD PTR [rdi+8], ax",
+    "decoded": "sbb    WORD PTR [rdi+0x8],ax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "sbb WORD PTR [rdi+8], 0x7f",
+    "decoded": "sbb    WORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "sbb ax, WORD PTR [rdi+8]",
+    "decoded": "sbb    ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "cmp ax, bx",
+    "decoded": "cmp    ax,bx",
+    "opcode": "X86_OP_CMP_REG"
+  },
+  {
+    "assembly": "cmp ax, 0x7f",
+    "decoded": "cmp    ax,0x7f",
+    "opcode": "X86_OP_CMP_IMM"
+  },
+  {
+    "assembly": "cmp WORD PTR [rdi+8], ax",
+    "decoded": "cmp    WORD PTR [rdi+0x8],ax",
+    "opcode": "X86_OP_CMP_MEM_REG"
+  },
+  {
+    "assembly": "cmp WORD PTR [rdi+8], 0x7f",
+    "decoded": "cmp    WORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_CMP_MEM_IMM"
+  },
+  {
+    "assembly": "cmp ax, WORD PTR [rdi+8]",
+    "decoded": "cmp    ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMP_REG_MEM"
+  },
+  {
+    "assembly": "test ax, bx",
+    "decoded": "test   ax,bx",
+    "opcode": "X86_OP_TEST_REG"
+  },
+  {
+    "assembly": "test ax, 0x7f",
+    "decoded": "test   ax,0x7f",
+    "opcode": "X86_OP_TEST_IMM"
+  },
+  {
+    "assembly": "test WORD PTR [rdi+8], ax",
+    "decoded": "test   WORD PTR [rdi+0x8],ax",
+    "opcode": "X86_OP_TEST_MEM_REG"
+  },
+  {
+    "assembly": "test WORD PTR [rdi+8], 0x7f",
+    "decoded": "test   WORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_TEST_MEM_IMM"
+  },
+  {
+    "assembly": "and ax, bx",
+    "decoded": "and    ax,bx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "and ax, 0x7f",
+    "decoded": "and    ax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "and ax, WORD PTR [rdi+8]",
+    "decoded": "and    ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "and WORD PTR [rdi+8], ax",
+    "decoded": "and    WORD PTR [rdi+0x8],ax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "and WORD PTR [rdi+8], 0x7f",
+    "decoded": "and    WORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "or ax, bx",
+    "decoded": "or     ax,bx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "or ax, 0x7f",
+    "decoded": "or     ax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "or ax, WORD PTR [rdi+8]",
+    "decoded": "or     ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "or WORD PTR [rdi+8], ax",
+    "decoded": "or     WORD PTR [rdi+0x8],ax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "or WORD PTR [rdi+8], 0x7f",
+    "decoded": "or     WORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "xor ax, bx",
+    "decoded": "xor    ax,bx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "xor ax, 0x7f",
+    "decoded": "xor    ax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "xor ax, WORD PTR [rdi+8]",
+    "decoded": "xor    ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "xor WORD PTR [rdi+8], ax",
+    "decoded": "xor    WORD PTR [rdi+0x8],ax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "xor WORD PTR [rdi+8], 0x7f",
+    "decoded": "xor    WORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "inc ax",
+    "decoded": "inc    ax",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "inc WORD PTR [rdi+8]",
+    "decoded": "inc    WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "dec ax",
+    "decoded": "dec    ax",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "dec WORD PTR [rdi+8]",
+    "decoded": "dec    WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "neg ax",
+    "decoded": "neg    ax",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "neg WORD PTR [rdi+8]",
+    "decoded": "neg    WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "not ax",
+    "decoded": "not    ax",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "not WORD PTR [rdi+8]",
+    "decoded": "not    WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "xchg ax, bx",
+    "decoded": "xchg   bx,ax",
+    "opcode": "X86_OP_XCHG"
+  },
+  {
+    "assembly": "shl ax, 0",
+    "decoded": "shl    ax,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl ax, 1",
+    "decoded": "shl    ax,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl ax, 7",
+    "decoded": "shl    ax,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl ax, 8",
+    "decoded": "shl    ax,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl ax, 15",
+    "decoded": "shl    ax,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl ax, 16",
+    "decoded": "shl    ax,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl ax, 31",
+    "decoded": "shl    ax,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl ax, 32",
+    "decoded": "shl    ax,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl ax, 63",
+    "decoded": "shl    ax,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl ax, 64",
+    "decoded": "shl    ax,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl ax, 255",
+    "decoded": "shl    ax,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl ax, cl",
+    "decoded": "shl    ax,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "shr ax, 0",
+    "decoded": "shr    ax,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr ax, 1",
+    "decoded": "shr    ax,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr ax, 7",
+    "decoded": "shr    ax,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr ax, 8",
+    "decoded": "shr    ax,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr ax, 15",
+    "decoded": "shr    ax,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr ax, 16",
+    "decoded": "shr    ax,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr ax, 31",
+    "decoded": "shr    ax,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr ax, 32",
+    "decoded": "shr    ax,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr ax, 63",
+    "decoded": "shr    ax,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr ax, 64",
+    "decoded": "shr    ax,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr ax, 255",
+    "decoded": "shr    ax,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr ax, cl",
+    "decoded": "shr    ax,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sar ax, 0",
+    "decoded": "sar    ax,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar ax, 1",
+    "decoded": "sar    ax,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar ax, 7",
+    "decoded": "sar    ax,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar ax, 8",
+    "decoded": "sar    ax,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar ax, 15",
+    "decoded": "sar    ax,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar ax, 16",
+    "decoded": "sar    ax,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar ax, 31",
+    "decoded": "sar    ax,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar ax, 32",
+    "decoded": "sar    ax,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar ax, 63",
+    "decoded": "sar    ax,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar ax, 64",
+    "decoded": "sar    ax,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar ax, 255",
+    "decoded": "sar    ax,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar ax, cl",
+    "decoded": "sar    ax,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "rol ax, 0",
+    "decoded": "rol    ax,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol ax, 1",
+    "decoded": "rol    ax,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol ax, 7",
+    "decoded": "rol    ax,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol ax, 8",
+    "decoded": "rol    ax,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol ax, 15",
+    "decoded": "rol    ax,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol ax, 16",
+    "decoded": "rol    ax,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol ax, 31",
+    "decoded": "rol    ax,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol ax, 32",
+    "decoded": "rol    ax,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol ax, 63",
+    "decoded": "rol    ax,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol ax, 64",
+    "decoded": "rol    ax,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol ax, 255",
+    "decoded": "rol    ax,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol ax, cl",
+    "decoded": "rol    ax,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "imul ax, bx",
+    "decoded": "imul   ax,bx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "imul ax, WORD PTR [rdi+8]",
+    "decoded": "imul   ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "imul ax, bx, -7",
+    "decoded": "imul   ax,bx,0xfff9",
+    "opcode": "X86_OP_IMUL_IMM"
+  },
+  {
+    "assembly": "imul ax, WORD PTR [rdi+8], -7",
+    "decoded": "imul   ax,WORD PTR [rdi+0x8],0xfff9",
+    "opcode": "X86_OP_IMUL_MEM_IMM"
+  },
+  {
+    "assembly": "popcnt ax, bx",
+    "decoded": "popcnt ax,bx",
+    "opcode": "X86_OP_POPCNT"
+  },
+  {
+    "assembly": "div bx",
+    "decoded": "div    bx",
+    "opcode": "X86_OP_DIV"
+  },
+  {
+    "assembly": "bt ax, bx",
+    "decoded": "bt     ax,bx",
+    "opcode": "X86_OP_BT"
+  },
+  {
+    "assembly": "bt ax, 7",
+    "decoded": "bt     ax,0x7",
+    "opcode": "X86_OP_BT_IMM"
+  },
+  {
+    "assembly": "bt WORD PTR [rdi+8], 7",
+    "decoded": "bt     WORD PTR [rdi+0x8],0x7",
+    "opcode": "X86_OP_BT_MEM_IMM"
+  },
+  {
+    "assembly": "movbe ax, WORD PTR [rdi+8]",
+    "decoded": "movbe  ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOVBE_LOAD"
+  },
+  {
+    "assembly": "movbe WORD PTR [rdi+8], ax",
+    "decoded": "movbe  WORD PTR [rdi+0x8],ax",
+    "opcode": "X86_OP_MOVBE_STORE"
+  },
+  {
+    "assembly": "shld ax, bx, 0",
+    "decoded": "shld   ax,bx,0x0",
+    "opcode": "X86_OP_SHLD_IMM"
+  },
+  {
+    "assembly": "shld ax, bx, 1",
+    "decoded": "shld   ax,bx,0x1",
+    "opcode": "X86_OP_SHLD_IMM"
+  },
+  {
+    "assembly": "shld ax, bx, 7",
+    "decoded": "shld   ax,bx,0x7",
+    "opcode": "X86_OP_SHLD_IMM"
+  },
+  {
+    "assembly": "shld ax, bx, 15",
+    "decoded": "shld   ax,bx,0xf",
+    "opcode": "X86_OP_SHLD_IMM"
+  },
+  {
+    "assembly": "shrd ax, bx, 0",
+    "decoded": "shrd   ax,bx,0x0",
+    "opcode": "X86_OP_SHRD_IMM"
+  },
+  {
+    "assembly": "shrd ax, bx, 1",
+    "decoded": "shrd   ax,bx,0x1",
+    "opcode": "X86_OP_SHRD_IMM"
+  },
+  {
+    "assembly": "shrd ax, bx, 7",
+    "decoded": "shrd   ax,bx,0x7",
+    "opcode": "X86_OP_SHRD_IMM"
+  },
+  {
+    "assembly": "shrd ax, bx, 15",
+    "decoded": "shrd   ax,bx,0xf",
+    "opcode": "X86_OP_SHRD_IMM"
+  },
+  {
+    "assembly": "mov eax, ebx",
+    "decoded": "mov    eax,ebx",
+    "opcode": "X86_OP_MOV_REG"
+  },
+  {
+    "assembly": "mov eax, 0x7f",
+    "decoded": "mov    eax,0x7f",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov DWORD PTR [rdi+8], eax",
+    "decoded": "mov    DWORD PTR [rdi+0x8],eax",
+    "opcode": "X86_OP_MOV_STORE_REG"
+  },
+  {
+    "assembly": "mov eax, DWORD PTR [rdi+8]",
+    "decoded": "mov    eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD"
+  },
+  {
+    "assembly": "mov DWORD PTR [rdi+8], 0x7f",
+    "decoded": "mov    DWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_MOV_STORE_IMM"
+  },
+  {
+    "assembly": "add eax, ebx",
+    "decoded": "add    eax,ebx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "add eax, 0x7f",
+    "decoded": "add    eax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "add DWORD PTR [rdi+8], eax",
+    "decoded": "add    DWORD PTR [rdi+0x8],eax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "add DWORD PTR [rdi+8], 0x7f",
+    "decoded": "add    DWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "add eax, DWORD PTR [rdi+8]",
+    "decoded": "add    eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "adc eax, ebx",
+    "decoded": "adc    eax,ebx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "adc eax, 0x7f",
+    "decoded": "adc    eax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "adc DWORD PTR [rdi+8], eax",
+    "decoded": "adc    DWORD PTR [rdi+0x8],eax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "adc DWORD PTR [rdi+8], 0x7f",
+    "decoded": "adc    DWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "adc eax, DWORD PTR [rdi+8]",
+    "decoded": "adc    eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "sub eax, ebx",
+    "decoded": "sub    eax,ebx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sub eax, 0x7f",
+    "decoded": "sub    eax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sub DWORD PTR [rdi+8], eax",
+    "decoded": "sub    DWORD PTR [rdi+0x8],eax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "sub DWORD PTR [rdi+8], 0x7f",
+    "decoded": "sub    DWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "sub eax, DWORD PTR [rdi+8]",
+    "decoded": "sub    eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "sbb eax, ebx",
+    "decoded": "sbb    eax,ebx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sbb eax, 0x7f",
+    "decoded": "sbb    eax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sbb DWORD PTR [rdi+8], eax",
+    "decoded": "sbb    DWORD PTR [rdi+0x8],eax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "sbb DWORD PTR [rdi+8], 0x7f",
+    "decoded": "sbb    DWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "sbb eax, DWORD PTR [rdi+8]",
+    "decoded": "sbb    eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "cmp eax, ebx",
+    "decoded": "cmp    eax,ebx",
+    "opcode": "X86_OP_CMP_REG"
+  },
+  {
+    "assembly": "cmp eax, 0x7f",
+    "decoded": "cmp    eax,0x7f",
+    "opcode": "X86_OP_CMP_IMM"
+  },
+  {
+    "assembly": "cmp DWORD PTR [rdi+8], eax",
+    "decoded": "cmp    DWORD PTR [rdi+0x8],eax",
+    "opcode": "X86_OP_CMP_MEM_REG"
+  },
+  {
+    "assembly": "cmp DWORD PTR [rdi+8], 0x7f",
+    "decoded": "cmp    DWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_CMP_MEM_IMM"
+  },
+  {
+    "assembly": "cmp eax, DWORD PTR [rdi+8]",
+    "decoded": "cmp    eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMP_REG_MEM"
+  },
+  {
+    "assembly": "test eax, ebx",
+    "decoded": "test   eax,ebx",
+    "opcode": "X86_OP_TEST_REG"
+  },
+  {
+    "assembly": "test eax, 0x7f",
+    "decoded": "test   eax,0x7f",
+    "opcode": "X86_OP_TEST_IMM"
+  },
+  {
+    "assembly": "test DWORD PTR [rdi+8], eax",
+    "decoded": "test   DWORD PTR [rdi+0x8],eax",
+    "opcode": "X86_OP_TEST_MEM_REG"
+  },
+  {
+    "assembly": "test DWORD PTR [rdi+8], 0x7f",
+    "decoded": "test   DWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_TEST_MEM_IMM"
+  },
+  {
+    "assembly": "and eax, ebx",
+    "decoded": "and    eax,ebx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "and eax, 0x7f",
+    "decoded": "and    eax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "and eax, DWORD PTR [rdi+8]",
+    "decoded": "and    eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "and DWORD PTR [rdi+8], eax",
+    "decoded": "and    DWORD PTR [rdi+0x8],eax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "and DWORD PTR [rdi+8], 0x7f",
+    "decoded": "and    DWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "or eax, ebx",
+    "decoded": "or     eax,ebx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "or eax, 0x7f",
+    "decoded": "or     eax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "or eax, DWORD PTR [rdi+8]",
+    "decoded": "or     eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "or DWORD PTR [rdi+8], eax",
+    "decoded": "or     DWORD PTR [rdi+0x8],eax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "or DWORD PTR [rdi+8], 0x7f",
+    "decoded": "or     DWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "xor eax, ebx",
+    "decoded": "xor    eax,ebx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "xor eax, 0x7f",
+    "decoded": "xor    eax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "xor eax, DWORD PTR [rdi+8]",
+    "decoded": "xor    eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "xor DWORD PTR [rdi+8], eax",
+    "decoded": "xor    DWORD PTR [rdi+0x8],eax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "xor DWORD PTR [rdi+8], 0x7f",
+    "decoded": "xor    DWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "inc eax",
+    "decoded": "inc    eax",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "inc DWORD PTR [rdi+8]",
+    "decoded": "inc    DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "dec eax",
+    "decoded": "dec    eax",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "dec DWORD PTR [rdi+8]",
+    "decoded": "dec    DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "neg eax",
+    "decoded": "neg    eax",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "neg DWORD PTR [rdi+8]",
+    "decoded": "neg    DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "not eax",
+    "decoded": "not    eax",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "not DWORD PTR [rdi+8]",
+    "decoded": "not    DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "xchg eax, ebx",
+    "decoded": "xchg   ebx,eax",
+    "opcode": "X86_OP_XCHG"
+  },
+  {
+    "assembly": "shl eax, 0",
+    "decoded": "shl    eax,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl eax, 1",
+    "decoded": "shl    eax,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl eax, 7",
+    "decoded": "shl    eax,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl eax, 8",
+    "decoded": "shl    eax,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl eax, 15",
+    "decoded": "shl    eax,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl eax, 16",
+    "decoded": "shl    eax,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl eax, 31",
+    "decoded": "shl    eax,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl eax, 32",
+    "decoded": "shl    eax,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl eax, 63",
+    "decoded": "shl    eax,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl eax, 64",
+    "decoded": "shl    eax,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl eax, 255",
+    "decoded": "shl    eax,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl eax, cl",
+    "decoded": "shl    eax,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "shr eax, 0",
+    "decoded": "shr    eax,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr eax, 1",
+    "decoded": "shr    eax,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr eax, 7",
+    "decoded": "shr    eax,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr eax, 8",
+    "decoded": "shr    eax,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr eax, 15",
+    "decoded": "shr    eax,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr eax, 16",
+    "decoded": "shr    eax,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr eax, 31",
+    "decoded": "shr    eax,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr eax, 32",
+    "decoded": "shr    eax,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr eax, 63",
+    "decoded": "shr    eax,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr eax, 64",
+    "decoded": "shr    eax,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr eax, 255",
+    "decoded": "shr    eax,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr eax, cl",
+    "decoded": "shr    eax,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sar eax, 0",
+    "decoded": "sar    eax,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar eax, 1",
+    "decoded": "sar    eax,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar eax, 7",
+    "decoded": "sar    eax,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar eax, 8",
+    "decoded": "sar    eax,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar eax, 15",
+    "decoded": "sar    eax,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar eax, 16",
+    "decoded": "sar    eax,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar eax, 31",
+    "decoded": "sar    eax,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar eax, 32",
+    "decoded": "sar    eax,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar eax, 63",
+    "decoded": "sar    eax,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar eax, 64",
+    "decoded": "sar    eax,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar eax, 255",
+    "decoded": "sar    eax,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar eax, cl",
+    "decoded": "sar    eax,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "rol eax, 0",
+    "decoded": "rol    eax,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol eax, 1",
+    "decoded": "rol    eax,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol eax, 7",
+    "decoded": "rol    eax,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol eax, 8",
+    "decoded": "rol    eax,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol eax, 15",
+    "decoded": "rol    eax,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol eax, 16",
+    "decoded": "rol    eax,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol eax, 31",
+    "decoded": "rol    eax,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol eax, 32",
+    "decoded": "rol    eax,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol eax, 63",
+    "decoded": "rol    eax,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol eax, 64",
+    "decoded": "rol    eax,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol eax, 255",
+    "decoded": "rol    eax,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol eax, cl",
+    "decoded": "rol    eax,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "imul eax, ebx",
+    "decoded": "imul   eax,ebx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "imul eax, DWORD PTR [rdi+8]",
+    "decoded": "imul   eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "imul eax, ebx, -7",
+    "decoded": "imul   eax,ebx,0xfffffff9",
+    "opcode": "X86_OP_IMUL_IMM"
+  },
+  {
+    "assembly": "imul eax, DWORD PTR [rdi+8], -7",
+    "decoded": "imul   eax,DWORD PTR [rdi+0x8],0xfffffff9",
+    "opcode": "X86_OP_IMUL_MEM_IMM"
+  },
+  {
+    "assembly": "popcnt eax, ebx",
+    "decoded": "popcnt eax,ebx",
+    "opcode": "X86_OP_POPCNT"
+  },
+  {
+    "assembly": "div ebx",
+    "decoded": "div    ebx",
+    "opcode": "X86_OP_DIV"
+  },
+  {
+    "assembly": "bt eax, ebx",
+    "decoded": "bt     eax,ebx",
+    "opcode": "X86_OP_BT"
+  },
+  {
+    "assembly": "bt eax, 7",
+    "decoded": "bt     eax,0x7",
+    "opcode": "X86_OP_BT_IMM"
+  },
+  {
+    "assembly": "bt DWORD PTR [rdi+8], 7",
+    "decoded": "bt     DWORD PTR [rdi+0x8],0x7",
+    "opcode": "X86_OP_BT_MEM_IMM"
+  },
+  {
+    "assembly": "movbe eax, DWORD PTR [rdi+8]",
+    "decoded": "movbe  eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOVBE_LOAD"
+  },
+  {
+    "assembly": "movbe DWORD PTR [rdi+8], eax",
+    "decoded": "movbe  DWORD PTR [rdi+0x8],eax",
+    "opcode": "X86_OP_MOVBE_STORE"
+  },
+  {
+    "assembly": "shld eax, ebx, 0",
+    "decoded": "shld   eax,ebx,0x0",
+    "opcode": "X86_OP_SHLD_IMM"
+  },
+  {
+    "assembly": "shld eax, ebx, 1",
+    "decoded": "shld   eax,ebx,0x1",
+    "opcode": "X86_OP_SHLD_IMM"
+  },
+  {
+    "assembly": "shld eax, ebx, 7",
+    "decoded": "shld   eax,ebx,0x7",
+    "opcode": "X86_OP_SHLD_IMM"
+  },
+  {
+    "assembly": "shld eax, ebx, 15",
+    "decoded": "shld   eax,ebx,0xf",
+    "opcode": "X86_OP_SHLD_IMM"
+  },
+  {
+    "assembly": "shrd eax, ebx, 0",
+    "decoded": "shrd   eax,ebx,0x0",
+    "opcode": "X86_OP_SHRD_IMM"
+  },
+  {
+    "assembly": "shrd eax, ebx, 1",
+    "decoded": "shrd   eax,ebx,0x1",
+    "opcode": "X86_OP_SHRD_IMM"
+  },
+  {
+    "assembly": "shrd eax, ebx, 7",
+    "decoded": "shrd   eax,ebx,0x7",
+    "opcode": "X86_OP_SHRD_IMM"
+  },
+  {
+    "assembly": "shrd eax, ebx, 15",
+    "decoded": "shrd   eax,ebx,0xf",
+    "opcode": "X86_OP_SHRD_IMM"
+  },
+  {
+    "assembly": "lea eax, [rdi+rbx*4-7]",
+    "decoded": "lea    eax,[rdi+rbx*4-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "bswap eax",
+    "decoded": "bswap  eax",
+    "opcode": "X86_OP_BSWAP"
+  },
+  {
+    "assembly": "andn eax, ebx, ecx",
+    "decoded": "andn   eax,ebx,ecx",
+    "opcode": "X86_OP_ANDN"
+  },
+  {
+    "assembly": "andn eax, ebx, DWORD PTR [rdi+8]",
+    "decoded": "andn   eax,ebx,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ANDN_MEM"
+  },
+  {
+    "assembly": "bzhi eax, ebx, ecx",
+    "decoded": "bzhi   eax,ebx,ecx",
+    "opcode": "X86_OP_BZHI"
+  },
+  {
+    "assembly": "bzhi eax, DWORD PTR [rdi+8], ecx",
+    "decoded": "bzhi   eax,DWORD PTR [rdi+0x8],ecx",
+    "opcode": "X86_OP_BZHI_MEM"
+  },
+  {
+    "assembly": "mulx eax, ebx, ecx",
+    "decoded": "mulx   eax,ebx,ecx",
+    "opcode": "X86_OP_MULX"
+  },
+  {
+    "assembly": "shlx eax, ebx, ecx",
+    "decoded": "shlx   eax,ebx,ecx",
+    "opcode": "X86_OP_SHIFTX"
+  },
+  {
+    "assembly": "shlx eax, DWORD PTR [rdi+8], ecx",
+    "decoded": "shlx   eax,DWORD PTR [rdi+0x8],ecx",
+    "opcode": "X86_OP_SHIFTX_MEM"
+  },
+  {
+    "assembly": "shrx eax, ebx, ecx",
+    "decoded": "shrx   eax,ebx,ecx",
+    "opcode": "X86_OP_SHIFTX"
+  },
+  {
+    "assembly": "shrx eax, DWORD PTR [rdi+8], ecx",
+    "decoded": "shrx   eax,DWORD PTR [rdi+0x8],ecx",
+    "opcode": "X86_OP_SHIFTX_MEM"
+  },
+  {
+    "assembly": "sarx eax, ebx, ecx",
+    "decoded": "sarx   eax,ebx,ecx",
+    "opcode": "X86_OP_SHIFTX"
+  },
+  {
+    "assembly": "sarx eax, DWORD PTR [rdi+8], ecx",
+    "decoded": "sarx   eax,DWORD PTR [rdi+0x8],ecx",
+    "opcode": "X86_OP_SHIFTX_MEM"
+  },
+  {
+    "assembly": "rorx eax, ebx, 7",
+    "decoded": "rorx   eax,ebx,0x7",
+    "opcode": "X86_OP_RORX"
+  },
+  {
+    "assembly": "rorx eax, DWORD PTR [rdi+8], 7",
+    "decoded": "rorx   eax,DWORD PTR [rdi+0x8],0x7",
+    "opcode": "X86_OP_RORX_MEM"
+  },
+  {
+    "assembly": "mov rax, rbx",
+    "decoded": "mov    rax,rbx",
+    "opcode": "X86_OP_MOV_REG"
+  },
+  {
+    "assembly": "mov rax, 0x7f",
+    "decoded": "mov    rax,0x7f",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov QWORD PTR [rdi+8], rax",
+    "decoded": "mov    QWORD PTR [rdi+0x8],rax",
+    "opcode": "X86_OP_MOV_STORE_REG"
+  },
+  {
+    "assembly": "mov rax, QWORD PTR [rdi+8]",
+    "decoded": "mov    rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD"
+  },
+  {
+    "assembly": "mov QWORD PTR [rdi+8], 0x7f",
+    "decoded": "mov    QWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_MOV_STORE_IMM"
+  },
+  {
+    "assembly": "add rax, rbx",
+    "decoded": "add    rax,rbx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "add rax, 0x7f",
+    "decoded": "add    rax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "add QWORD PTR [rdi+8], rax",
+    "decoded": "add    QWORD PTR [rdi+0x8],rax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "add QWORD PTR [rdi+8], 0x7f",
+    "decoded": "add    QWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "add rax, QWORD PTR [rdi+8]",
+    "decoded": "add    rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "adc rax, rbx",
+    "decoded": "adc    rax,rbx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "adc rax, 0x7f",
+    "decoded": "adc    rax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "adc QWORD PTR [rdi+8], rax",
+    "decoded": "adc    QWORD PTR [rdi+0x8],rax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "adc QWORD PTR [rdi+8], 0x7f",
+    "decoded": "adc    QWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "adc rax, QWORD PTR [rdi+8]",
+    "decoded": "adc    rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "sub rax, rbx",
+    "decoded": "sub    rax,rbx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sub rax, 0x7f",
+    "decoded": "sub    rax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sub QWORD PTR [rdi+8], rax",
+    "decoded": "sub    QWORD PTR [rdi+0x8],rax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "sub QWORD PTR [rdi+8], 0x7f",
+    "decoded": "sub    QWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "sub rax, QWORD PTR [rdi+8]",
+    "decoded": "sub    rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "sbb rax, rbx",
+    "decoded": "sbb    rax,rbx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sbb rax, 0x7f",
+    "decoded": "sbb    rax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sbb QWORD PTR [rdi+8], rax",
+    "decoded": "sbb    QWORD PTR [rdi+0x8],rax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "sbb QWORD PTR [rdi+8], 0x7f",
+    "decoded": "sbb    QWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "sbb rax, QWORD PTR [rdi+8]",
+    "decoded": "sbb    rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "cmp rax, rbx",
+    "decoded": "cmp    rax,rbx",
+    "opcode": "X86_OP_CMP_REG"
+  },
+  {
+    "assembly": "cmp rax, 0x7f",
+    "decoded": "cmp    rax,0x7f",
+    "opcode": "X86_OP_CMP_IMM"
+  },
+  {
+    "assembly": "cmp QWORD PTR [rdi+8], rax",
+    "decoded": "cmp    QWORD PTR [rdi+0x8],rax",
+    "opcode": "X86_OP_CMP_MEM_REG"
+  },
+  {
+    "assembly": "cmp QWORD PTR [rdi+8], 0x7f",
+    "decoded": "cmp    QWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_CMP_MEM_IMM"
+  },
+  {
+    "assembly": "cmp rax, QWORD PTR [rdi+8]",
+    "decoded": "cmp    rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMP_REG_MEM"
+  },
+  {
+    "assembly": "test rax, rbx",
+    "decoded": "test   rax,rbx",
+    "opcode": "X86_OP_TEST_REG"
+  },
+  {
+    "assembly": "test rax, 0x7f",
+    "decoded": "test   rax,0x7f",
+    "opcode": "X86_OP_TEST_IMM"
+  },
+  {
+    "assembly": "test QWORD PTR [rdi+8], rax",
+    "decoded": "test   QWORD PTR [rdi+0x8],rax",
+    "opcode": "X86_OP_TEST_MEM_REG"
+  },
+  {
+    "assembly": "test QWORD PTR [rdi+8], 0x7f",
+    "decoded": "test   QWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_TEST_MEM_IMM"
+  },
+  {
+    "assembly": "and rax, rbx",
+    "decoded": "and    rax,rbx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "and rax, 0x7f",
+    "decoded": "and    rax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "and rax, QWORD PTR [rdi+8]",
+    "decoded": "and    rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "and QWORD PTR [rdi+8], rax",
+    "decoded": "and    QWORD PTR [rdi+0x8],rax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "and QWORD PTR [rdi+8], 0x7f",
+    "decoded": "and    QWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "or rax, rbx",
+    "decoded": "or     rax,rbx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "or rax, 0x7f",
+    "decoded": "or     rax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "or rax, QWORD PTR [rdi+8]",
+    "decoded": "or     rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "or QWORD PTR [rdi+8], rax",
+    "decoded": "or     QWORD PTR [rdi+0x8],rax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "or QWORD PTR [rdi+8], 0x7f",
+    "decoded": "or     QWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "xor rax, rbx",
+    "decoded": "xor    rax,rbx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "xor rax, 0x7f",
+    "decoded": "xor    rax,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "xor rax, QWORD PTR [rdi+8]",
+    "decoded": "xor    rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "xor QWORD PTR [rdi+8], rax",
+    "decoded": "xor    QWORD PTR [rdi+0x8],rax",
+    "opcode": "X86_OP_ALU_MEM_REG"
+  },
+  {
+    "assembly": "xor QWORD PTR [rdi+8], 0x7f",
+    "decoded": "xor    QWORD PTR [rdi+0x8],0x7f",
+    "opcode": "X86_OP_ALU_MEM_IMM"
+  },
+  {
+    "assembly": "inc rax",
+    "decoded": "inc    rax",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "inc QWORD PTR [rdi+8]",
+    "decoded": "inc    QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "dec rax",
+    "decoded": "dec    rax",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "dec QWORD PTR [rdi+8]",
+    "decoded": "dec    QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "neg rax",
+    "decoded": "neg    rax",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "neg QWORD PTR [rdi+8]",
+    "decoded": "neg    QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "not rax",
+    "decoded": "not    rax",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "not QWORD PTR [rdi+8]",
+    "decoded": "not    QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM_UNARY"
+  },
+  {
+    "assembly": "xchg rax, rbx",
+    "decoded": "xchg   rbx,rax",
+    "opcode": "X86_OP_XCHG"
+  },
+  {
+    "assembly": "shl rax, 0",
+    "decoded": "shl    rax,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl rax, 1",
+    "decoded": "shl    rax,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl rax, 7",
+    "decoded": "shl    rax,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl rax, 8",
+    "decoded": "shl    rax,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl rax, 15",
+    "decoded": "shl    rax,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl rax, 16",
+    "decoded": "shl    rax,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl rax, 31",
+    "decoded": "shl    rax,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl rax, 32",
+    "decoded": "shl    rax,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl rax, 63",
+    "decoded": "shl    rax,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl rax, 64",
+    "decoded": "shl    rax,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl rax, 255",
+    "decoded": "shl    rax,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shl rax, cl",
+    "decoded": "shl    rax,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "shr rax, 0",
+    "decoded": "shr    rax,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr rax, 1",
+    "decoded": "shr    rax,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr rax, 7",
+    "decoded": "shr    rax,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr rax, 8",
+    "decoded": "shr    rax,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr rax, 15",
+    "decoded": "shr    rax,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr rax, 16",
+    "decoded": "shr    rax,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr rax, 31",
+    "decoded": "shr    rax,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr rax, 32",
+    "decoded": "shr    rax,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr rax, 63",
+    "decoded": "shr    rax,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr rax, 64",
+    "decoded": "shr    rax,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr rax, 255",
+    "decoded": "shr    rax,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "shr rax, cl",
+    "decoded": "shr    rax,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sar rax, 0",
+    "decoded": "sar    rax,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar rax, 1",
+    "decoded": "sar    rax,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar rax, 7",
+    "decoded": "sar    rax,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar rax, 8",
+    "decoded": "sar    rax,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar rax, 15",
+    "decoded": "sar    rax,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar rax, 16",
+    "decoded": "sar    rax,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar rax, 31",
+    "decoded": "sar    rax,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar rax, 32",
+    "decoded": "sar    rax,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar rax, 63",
+    "decoded": "sar    rax,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar rax, 64",
+    "decoded": "sar    rax,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar rax, 255",
+    "decoded": "sar    rax,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sar rax, cl",
+    "decoded": "sar    rax,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "rol rax, 0",
+    "decoded": "rol    rax,0x0",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol rax, 1",
+    "decoded": "rol    rax,1",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol rax, 7",
+    "decoded": "rol    rax,0x7",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol rax, 8",
+    "decoded": "rol    rax,0x8",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol rax, 15",
+    "decoded": "rol    rax,0xf",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol rax, 16",
+    "decoded": "rol    rax,0x10",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol rax, 31",
+    "decoded": "rol    rax,0x1f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol rax, 32",
+    "decoded": "rol    rax,0x20",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol rax, 63",
+    "decoded": "rol    rax,0x3f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol rax, 64",
+    "decoded": "rol    rax,0x40",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol rax, 255",
+    "decoded": "rol    rax,0xff",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "rol rax, cl",
+    "decoded": "rol    rax,cl",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "imul rax, rbx",
+    "decoded": "imul   rax,rbx",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "imul rax, QWORD PTR [rdi+8]",
+    "decoded": "imul   rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ALU_MEM"
+  },
+  {
+    "assembly": "imul rax, rbx, -7",
+    "decoded": "imul   rax,rbx,0xfffffffffffffff9",
+    "opcode": "X86_OP_IMUL_IMM"
+  },
+  {
+    "assembly": "imul rax, QWORD PTR [rdi+8], -7",
+    "decoded": "imul   rax,QWORD PTR [rdi+0x8],0xfffffffffffffff9",
+    "opcode": "X86_OP_IMUL_MEM_IMM"
+  },
+  {
+    "assembly": "popcnt rax, rbx",
+    "decoded": "popcnt rax,rbx",
+    "opcode": "X86_OP_POPCNT"
+  },
+  {
+    "assembly": "div rbx",
+    "decoded": "div    rbx",
+    "opcode": "X86_OP_DIV"
+  },
+  {
+    "assembly": "bt rax, rbx",
+    "decoded": "bt     rax,rbx",
+    "opcode": "X86_OP_BT"
+  },
+  {
+    "assembly": "bt rax, 7",
+    "decoded": "bt     rax,0x7",
+    "opcode": "X86_OP_BT_IMM"
+  },
+  {
+    "assembly": "bt QWORD PTR [rdi+8], 7",
+    "decoded": "bt     QWORD PTR [rdi+0x8],0x7",
+    "opcode": "X86_OP_BT_MEM_IMM"
+  },
+  {
+    "assembly": "movbe rax, QWORD PTR [rdi+8]",
+    "decoded": "movbe  rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOVBE_LOAD"
+  },
+  {
+    "assembly": "movbe QWORD PTR [rdi+8], rax",
+    "decoded": "movbe  QWORD PTR [rdi+0x8],rax",
+    "opcode": "X86_OP_MOVBE_STORE"
+  },
+  {
+    "assembly": "shld rax, rbx, 0",
+    "decoded": "shld   rax,rbx,0x0",
+    "opcode": "X86_OP_SHLD_IMM"
+  },
+  {
+    "assembly": "shld rax, rbx, 1",
+    "decoded": "shld   rax,rbx,0x1",
+    "opcode": "X86_OP_SHLD_IMM"
+  },
+  {
+    "assembly": "shld rax, rbx, 7",
+    "decoded": "shld   rax,rbx,0x7",
+    "opcode": "X86_OP_SHLD_IMM"
+  },
+  {
+    "assembly": "shld rax, rbx, 15",
+    "decoded": "shld   rax,rbx,0xf",
+    "opcode": "X86_OP_SHLD_IMM"
+  },
+  {
+    "assembly": "shrd rax, rbx, 0",
+    "decoded": "shrd   rax,rbx,0x0",
+    "opcode": "X86_OP_SHRD_IMM"
+  },
+  {
+    "assembly": "shrd rax, rbx, 1",
+    "decoded": "shrd   rax,rbx,0x1",
+    "opcode": "X86_OP_SHRD_IMM"
+  },
+  {
+    "assembly": "shrd rax, rbx, 7",
+    "decoded": "shrd   rax,rbx,0x7",
+    "opcode": "X86_OP_SHRD_IMM"
+  },
+  {
+    "assembly": "shrd rax, rbx, 15",
+    "decoded": "shrd   rax,rbx,0xf",
+    "opcode": "X86_OP_SHRD_IMM"
+  },
+  {
+    "assembly": "lea rax, [rdi+rbx*4-7]",
+    "decoded": "lea    rax,[rdi+rbx*4-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "bswap rax",
+    "decoded": "bswap  rax",
+    "opcode": "X86_OP_BSWAP"
+  },
+  {
+    "assembly": "andn rax, rbx, rcx",
+    "decoded": "andn   rax,rbx,rcx",
+    "opcode": "X86_OP_ANDN"
+  },
+  {
+    "assembly": "andn rax, rbx, QWORD PTR [rdi+8]",
+    "decoded": "andn   rax,rbx,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_ANDN_MEM"
+  },
+  {
+    "assembly": "bzhi rax, rbx, rcx",
+    "decoded": "bzhi   rax,rbx,rcx",
+    "opcode": "X86_OP_BZHI"
+  },
+  {
+    "assembly": "bzhi rax, QWORD PTR [rdi+8], rcx",
+    "decoded": "bzhi   rax,QWORD PTR [rdi+0x8],rcx",
+    "opcode": "X86_OP_BZHI_MEM"
+  },
+  {
+    "assembly": "mulx rax, rbx, rcx",
+    "decoded": "mulx   rax,rbx,rcx",
+    "opcode": "X86_OP_MULX"
+  },
+  {
+    "assembly": "shlx rax, rbx, rcx",
+    "decoded": "shlx   rax,rbx,rcx",
+    "opcode": "X86_OP_SHIFTX"
+  },
+  {
+    "assembly": "shlx rax, QWORD PTR [rdi+8], rcx",
+    "decoded": "shlx   rax,QWORD PTR [rdi+0x8],rcx",
+    "opcode": "X86_OP_SHIFTX_MEM"
+  },
+  {
+    "assembly": "shrx rax, rbx, rcx",
+    "decoded": "shrx   rax,rbx,rcx",
+    "opcode": "X86_OP_SHIFTX"
+  },
+  {
+    "assembly": "shrx rax, QWORD PTR [rdi+8], rcx",
+    "decoded": "shrx   rax,QWORD PTR [rdi+0x8],rcx",
+    "opcode": "X86_OP_SHIFTX_MEM"
+  },
+  {
+    "assembly": "sarx rax, rbx, rcx",
+    "decoded": "sarx   rax,rbx,rcx",
+    "opcode": "X86_OP_SHIFTX"
+  },
+  {
+    "assembly": "sarx rax, QWORD PTR [rdi+8], rcx",
+    "decoded": "sarx   rax,QWORD PTR [rdi+0x8],rcx",
+    "opcode": "X86_OP_SHIFTX_MEM"
+  },
+  {
+    "assembly": "rorx rax, rbx, 7",
+    "decoded": "rorx   rax,rbx,0x7",
+    "opcode": "X86_OP_RORX"
+  },
+  {
+    "assembly": "rorx rax, QWORD PTR [rdi+8], 7",
+    "decoded": "rorx   rax,QWORD PTR [rdi+0x8],0x7",
+    "opcode": "X86_OP_RORX_MEM"
+  },
+  {
+    "assembly": "mov ah, bh",
+    "decoded": "mov    ah,bh",
+    "opcode": "X86_OP_MOV_REG"
+  },
+  {
+    "assembly": "mov ah, 0x7f",
+    "decoded": "mov    ah,0x7f",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov BYTE PTR [rdi+8], ah",
+    "decoded": "mov    BYTE PTR [rdi+0x8],ah",
+    "opcode": "X86_OP_MOV_STORE_REG"
+  },
+  {
+    "assembly": "add ah, bh",
+    "decoded": "add    ah,bh",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "add ah, 0x7f",
+    "decoded": "add    ah,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "adc ah, bh",
+    "decoded": "adc    ah,bh",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "adc ah, 0x7f",
+    "decoded": "adc    ah,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sub ah, bh",
+    "decoded": "sub    ah,bh",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sub ah, 0x7f",
+    "decoded": "sub    ah,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sbb ah, bh",
+    "decoded": "sbb    ah,bh",
+    "opcode": "X86_OP_ALU_REG"
+  },
+  {
+    "assembly": "sbb ah, 0x7f",
+    "decoded": "sbb    ah,0x7f",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "cmp ah, bh",
+    "decoded": "cmp    ah,bh",
+    "opcode": "X86_OP_CMP_REG"
+  },
+  {
+    "assembly": "cmp ah, 0x7f",
+    "decoded": "cmp    ah,0x7f",
+    "opcode": "X86_OP_CMP_IMM"
+  },
+  {
+    "assembly": "test ah, bh",
+    "decoded": "test   ah,bh",
+    "opcode": "X86_OP_TEST_REG"
+  },
+  {
+    "assembly": "test ah, 0x7f",
+    "decoded": "test   ah,0x7f",
+    "opcode": "X86_OP_TEST_IMM"
+  },
+  {
+    "assembly": "inc ah",
+    "decoded": "inc    ah",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "dec ah",
+    "decoded": "dec    ah",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "neg ah",
+    "decoded": "neg    ah",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "not ah",
+    "decoded": "not    ah",
+    "opcode": "X86_OP_ALU_IMM"
+  },
+  {
+    "assembly": "movzx ax, bl",
+    "decoded": "movzx  ax,bl",
+    "opcode": "X86_OP_MOVZX_REG"
+  },
+  {
+    "assembly": "movzx ax, BYTE PTR [rdi+8]",
+    "decoded": "movzx  ax,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD"
+  },
+  {
+    "assembly": "movsx ax, bl",
+    "decoded": "movsx  ax,bl",
+    "opcode": "X86_OP_MOVSX_REG"
+  },
+  {
+    "assembly": "movsx ax, BYTE PTR [rdi+8]",
+    "decoded": "movsx  ax,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOVSX_LOAD"
+  },
+  {
+    "assembly": "movzx eax, bl",
+    "decoded": "movzx  eax,bl",
+    "opcode": "X86_OP_MOVZX_REG"
+  },
+  {
+    "assembly": "movzx eax, BYTE PTR [rdi+8]",
+    "decoded": "movzx  eax,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD"
+  },
+  {
+    "assembly": "movsx eax, bl",
+    "decoded": "movsx  eax,bl",
+    "opcode": "X86_OP_MOVSX_REG"
+  },
+  {
+    "assembly": "movsx eax, BYTE PTR [rdi+8]",
+    "decoded": "movsx  eax,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOVSX_LOAD"
+  },
+  {
+    "assembly": "movzx eax, bx",
+    "decoded": "movzx  eax,bx",
+    "opcode": "X86_OP_MOVZX_REG"
+  },
+  {
+    "assembly": "movzx eax, WORD PTR [rdi+8]",
+    "decoded": "movzx  eax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD"
+  },
+  {
+    "assembly": "movsx eax, bx",
+    "decoded": "movsx  eax,bx",
+    "opcode": "X86_OP_MOVSX_REG"
+  },
+  {
+    "assembly": "movsx eax, WORD PTR [rdi+8]",
+    "decoded": "movsx  eax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOVSX_LOAD"
+  },
+  {
+    "assembly": "movzx rax, bl",
+    "decoded": "movzx  rax,bl",
+    "opcode": "X86_OP_MOVZX_REG"
+  },
+  {
+    "assembly": "movzx rax, BYTE PTR [rdi+8]",
+    "decoded": "movzx  rax,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD"
+  },
+  {
+    "assembly": "movsx rax, bl",
+    "decoded": "movsx  rax,bl",
+    "opcode": "X86_OP_MOVSX_REG"
+  },
+  {
+    "assembly": "movsx rax, BYTE PTR [rdi+8]",
+    "decoded": "movsx  rax,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOVSX_LOAD"
+  },
+  {
+    "assembly": "movzx rax, bx",
+    "decoded": "movzx  rax,bx",
+    "opcode": "X86_OP_MOVZX_REG"
+  },
+  {
+    "assembly": "movzx rax, WORD PTR [rdi+8]",
+    "decoded": "movzx  rax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD"
+  },
+  {
+    "assembly": "movsx rax, bx",
+    "decoded": "movsx  rax,bx",
+    "opcode": "X86_OP_MOVSX_REG"
+  },
+  {
+    "assembly": "movsx rax, WORD PTR [rdi+8]",
+    "decoded": "movsx  rax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOVSX_LOAD"
+  },
+  {
+    "assembly": "movsxd rax, ebx",
+    "decoded": "movsxd rax,ebx",
+    "opcode": "X86_OP_MOVSX_REG"
+  },
+  {
+    "assembly": "movsxd rax, DWORD PTR [rdi+8]",
+    "decoded": "movsxd rax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOVSX_LOAD"
+  },
+  {
+    "assembly": "lea ax, [rbx]",
+    "decoded": "lea    ax,[rbx]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea ax, [rbx+127]",
+    "decoded": "lea    ax,[rbx+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea ax, [rbx-128]",
+    "decoded": "lea    ax,[rbx-0x80]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea ax, [rbx+rcx*2-7]",
+    "decoded": "lea    ax,[rbx+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea ax, [r8+r9*4+2147483647]",
+    "decoded": "lea    ax,[r8+r9*4+0x7fffffff]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea ax, [r8+r9*8-2147483648]",
+    "decoded": "lea    ax,[r8+r9*8-0x80000000]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea ax, [rcx*8+127]",
+    "decoded": "lea    ax,[rcx*8+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea ax, [0x12345678]",
+    "decoded": "lea    ax,ds:0x12345678",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea ax, [ebx+ecx*4-7]",
+    "decoded": "lea    ax,[ebx+ecx*4-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea ax, [r8d+r9d*8+127]",
+    "decoded": "lea    ax,[r8d+r9d*8+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea eax, [rbx]",
+    "decoded": "lea    eax,[rbx]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea eax, [rbx+127]",
+    "decoded": "lea    eax,[rbx+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea eax, [rbx-128]",
+    "decoded": "lea    eax,[rbx-0x80]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea eax, [rbx+rcx*2-7]",
+    "decoded": "lea    eax,[rbx+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea eax, [r8+r9*4+2147483647]",
+    "decoded": "lea    eax,[r8+r9*4+0x7fffffff]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea eax, [r8+r9*8-2147483648]",
+    "decoded": "lea    eax,[r8+r9*8-0x80000000]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea eax, [rcx*8+127]",
+    "decoded": "lea    eax,[rcx*8+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea eax, [0x12345678]",
+    "decoded": "lea    eax,ds:0x12345678",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea eax, [ebx+ecx*4-7]",
+    "decoded": "lea    eax,[ebx+ecx*4-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea eax, [r8d+r9d*8+127]",
+    "decoded": "lea    eax,[r8d+r9d*8+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rax, [rbx]",
+    "decoded": "lea    rax,[rbx]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rax, [rbx+127]",
+    "decoded": "lea    rax,[rbx+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rax, [rbx-128]",
+    "decoded": "lea    rax,[rbx-0x80]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rax, [rbx+rcx*2-7]",
+    "decoded": "lea    rax,[rbx+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rax, [r8+r9*4+2147483647]",
+    "decoded": "lea    rax,[r8+r9*4+0x7fffffff]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rax, [r8+r9*8-2147483648]",
+    "decoded": "lea    rax,[r8+r9*8-0x80000000]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rax, [rcx*8+127]",
+    "decoded": "lea    rax,[rcx*8+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rax, [0x12345678]",
+    "decoded": "lea    rax,ds:0x12345678",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rax, [ebx+ecx*4-7]",
+    "decoded": "lea    rax,[ebx+ecx*4-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rax, [r8d+r9d*8+127]",
+    "decoded": "lea    rax,[r8d+r9d*8+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8w, [rbx]",
+    "decoded": "lea    r8w,[rbx]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8w, [rbx+127]",
+    "decoded": "lea    r8w,[rbx+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8w, [rbx-128]",
+    "decoded": "lea    r8w,[rbx-0x80]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8w, [rbx+rcx*2-7]",
+    "decoded": "lea    r8w,[rbx+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8w, [r8+r9*4+2147483647]",
+    "decoded": "lea    r8w,[r8+r9*4+0x7fffffff]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8w, [r8+r9*8-2147483648]",
+    "decoded": "lea    r8w,[r8+r9*8-0x80000000]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8w, [rcx*8+127]",
+    "decoded": "lea    r8w,[rcx*8+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8w, [0x12345678]",
+    "decoded": "lea    r8w,ds:0x12345678",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8w, [ebx+ecx*4-7]",
+    "decoded": "lea    r8w,[ebx+ecx*4-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8w, [r8d+r9d*8+127]",
+    "decoded": "lea    r8w,[r8d+r9d*8+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8d, [rbx]",
+    "decoded": "lea    r8d,[rbx]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8d, [rbx+127]",
+    "decoded": "lea    r8d,[rbx+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8d, [rbx-128]",
+    "decoded": "lea    r8d,[rbx-0x80]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8d, [rbx+rcx*2-7]",
+    "decoded": "lea    r8d,[rbx+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8d, [r8+r9*4+2147483647]",
+    "decoded": "lea    r8d,[r8+r9*4+0x7fffffff]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8d, [r8+r9*8-2147483648]",
+    "decoded": "lea    r8d,[r8+r9*8-0x80000000]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8d, [rcx*8+127]",
+    "decoded": "lea    r8d,[rcx*8+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8d, [0x12345678]",
+    "decoded": "lea    r8d,ds:0x12345678",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8d, [ebx+ecx*4-7]",
+    "decoded": "lea    r8d,[ebx+ecx*4-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8d, [r8d+r9d*8+127]",
+    "decoded": "lea    r8d,[r8d+r9d*8+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8, [rbx]",
+    "decoded": "lea    r8,[rbx]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8, [rbx+127]",
+    "decoded": "lea    r8,[rbx+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8, [rbx-128]",
+    "decoded": "lea    r8,[rbx-0x80]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8, [rbx+rcx*2-7]",
+    "decoded": "lea    r8,[rbx+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8, [r8+r9*4+2147483647]",
+    "decoded": "lea    r8,[r8+r9*4+0x7fffffff]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8, [r8+r9*8-2147483648]",
+    "decoded": "lea    r8,[r8+r9*8-0x80000000]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8, [rcx*8+127]",
+    "decoded": "lea    r8,[rcx*8+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8, [0x12345678]",
+    "decoded": "lea    r8,ds:0x12345678",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8, [ebx+ecx*4-7]",
+    "decoded": "lea    r8,[ebx+ecx*4-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r8, [r8d+r9d*8+127]",
+    "decoded": "lea    r8,[r8d+r9d*8+0x7f]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rbx, [rbx+rcx*8]",
+    "decoded": "lea    rbx,[rbx+rcx*8]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rcx, [rbx+rcx*8]",
+    "decoded": "lea    rcx,[rbx+rcx*8]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea r9, [r8+r9*2-7]",
+    "decoded": "lea    r9,[r8+r9*2-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea ax, fs:[rbx+rcx*2-7]",
+    "decoded": "lea    ax,fs:[rbx+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea ax, gs:[rbx+rcx*2-7]",
+    "decoded": "lea    ax,gs:[rbx+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea eax, fs:[rbx+rcx*2-7]",
+    "decoded": "lea    eax,fs:[rbx+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea eax, gs:[rbx+rcx*2-7]",
+    "decoded": "lea    eax,gs:[rbx+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rax, fs:[rbx+rcx*2-7]",
+    "decoded": "lea    rax,fs:[rbx+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "lea rax, gs:[rbx+rcx*2-7]",
+    "decoded": "lea    rax,gs:[rbx+rcx*2-0x7]",
+    "opcode": "X86_OP_LEA"
+  },
+  {
+    "assembly": "mov ah, BYTE PTR [rdi+8]",
+    "decoded": "mov    ah,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov ah, BYTE PTR [rsi+16]",
+    "decoded": "mov    ah,BYTE PTR [rsi+0x10]",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov ah, BYTE PTR [rsp-16]",
+    "decoded": "mov    ah,BYTE PTR [rsp-0x10]",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov ch, BYTE PTR [rdi+8]",
+    "decoded": "mov    ch,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov ch, BYTE PTR [rsi+16]",
+    "decoded": "mov    ch,BYTE PTR [rsi+0x10]",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov ch, BYTE PTR [rsp-16]",
+    "decoded": "mov    ch,BYTE PTR [rsp-0x10]",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov dh, BYTE PTR [rdi+8]",
+    "decoded": "mov    dh,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov dh, BYTE PTR [rsi+16]",
+    "decoded": "mov    dh,BYTE PTR [rsi+0x10]",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov dh, BYTE PTR [rsp-16]",
+    "decoded": "mov    dh,BYTE PTR [rsp-0x10]",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov bh, BYTE PTR [rdi+8]",
+    "decoded": "mov    bh,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov bh, BYTE PTR [rsi+16]",
+    "decoded": "mov    bh,BYTE PTR [rsi+0x10]",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "mov bh, BYTE PTR [rsp-16]",
+    "decoded": "mov    bh,BYTE PTR [rsp-0x10]",
+    "opcode": "X86_OP_MOV_IMM"
+  },
+  {
+    "assembly": "seta al",
+    "decoded": "seta   al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "seta ah",
+    "decoded": "seta   ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "seta BYTE PTR [rdi+8]",
+    "decoded": "seta   BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setae al",
+    "decoded": "setae  al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setae ah",
+    "decoded": "setae  ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setae BYTE PTR [rdi+8]",
+    "decoded": "setae  BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setb al",
+    "decoded": "setb   al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setb ah",
+    "decoded": "setb   ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setb BYTE PTR [rdi+8]",
+    "decoded": "setb   BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setbe al",
+    "decoded": "setbe  al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setbe ah",
+    "decoded": "setbe  ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setbe BYTE PTR [rdi+8]",
+    "decoded": "setbe  BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "sete al",
+    "decoded": "sete   al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "sete ah",
+    "decoded": "sete   ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "sete BYTE PTR [rdi+8]",
+    "decoded": "sete   BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setg al",
+    "decoded": "setg   al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setg ah",
+    "decoded": "setg   ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setg BYTE PTR [rdi+8]",
+    "decoded": "setg   BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setge al",
+    "decoded": "setge  al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setge ah",
+    "decoded": "setge  ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setge BYTE PTR [rdi+8]",
+    "decoded": "setge  BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setl al",
+    "decoded": "setl   al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setl ah",
+    "decoded": "setl   ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setl BYTE PTR [rdi+8]",
+    "decoded": "setl   BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setle al",
+    "decoded": "setle  al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setle ah",
+    "decoded": "setle  ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setle BYTE PTR [rdi+8]",
+    "decoded": "setle  BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setne al",
+    "decoded": "setne  al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setne ah",
+    "decoded": "setne  ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setne BYTE PTR [rdi+8]",
+    "decoded": "setne  BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setns al",
+    "decoded": "setns  al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setns ah",
+    "decoded": "setns  ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setns BYTE PTR [rdi+8]",
+    "decoded": "setns  BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "sets al",
+    "decoded": "sets   al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "sets ah",
+    "decoded": "sets   ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "sets BYTE PTR [rdi+8]",
+    "decoded": "sets   BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "seto al",
+    "decoded": "seto   al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "seto ah",
+    "decoded": "seto   ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "seto BYTE PTR [rdi+8]",
+    "decoded": "seto   BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setno al",
+    "decoded": "setno  al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setno ah",
+    "decoded": "setno  ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setno BYTE PTR [rdi+8]",
+    "decoded": "setno  BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setp al",
+    "decoded": "setp   al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setp ah",
+    "decoded": "setp   ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setp BYTE PTR [rdi+8]",
+    "decoded": "setp   BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setpe al",
+    "decoded": "setp   al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setpe ah",
+    "decoded": "setp   ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setpe BYTE PTR [rdi+8]",
+    "decoded": "setp   BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setnp al",
+    "decoded": "setnp  al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setnp ah",
+    "decoded": "setnp  ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setnp BYTE PTR [rdi+8]",
+    "decoded": "setnp  BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "setpo al",
+    "decoded": "setnp  al",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setpo ah",
+    "decoded": "setnp  ah",
+    "opcode": "X86_OP_SETCC"
+  },
+  {
+    "assembly": "setpo BYTE PTR [rdi+8]",
+    "decoded": "setnp  BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_SETCC_MEM"
+  },
+  {
+    "assembly": "cmova ax, bx",
+    "decoded": "cmova  ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmova ax, WORD PTR [rdi+8]",
+    "decoded": "cmova  ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmova eax, ebx",
+    "decoded": "cmova  eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmova eax, DWORD PTR [rdi+8]",
+    "decoded": "cmova  eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmova rax, rbx",
+    "decoded": "cmova  rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmova rax, QWORD PTR [rdi+8]",
+    "decoded": "cmova  rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovb ax, bx",
+    "decoded": "cmovb  ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovb ax, WORD PTR [rdi+8]",
+    "decoded": "cmovb  ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovb eax, ebx",
+    "decoded": "cmovb  eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovb eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovb  eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovb rax, rbx",
+    "decoded": "cmovb  rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovb rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovb  rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovbe ax, bx",
+    "decoded": "cmovbe ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovbe ax, WORD PTR [rdi+8]",
+    "decoded": "cmovbe ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovbe eax, ebx",
+    "decoded": "cmovbe eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovbe eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovbe eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovbe rax, rbx",
+    "decoded": "cmovbe rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovbe rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovbe rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmove ax, bx",
+    "decoded": "cmove  ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmove ax, WORD PTR [rdi+8]",
+    "decoded": "cmove  ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmove eax, ebx",
+    "decoded": "cmove  eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmove eax, DWORD PTR [rdi+8]",
+    "decoded": "cmove  eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmove rax, rbx",
+    "decoded": "cmove  rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmove rax, QWORD PTR [rdi+8]",
+    "decoded": "cmove  rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovg ax, bx",
+    "decoded": "cmovg  ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovg ax, WORD PTR [rdi+8]",
+    "decoded": "cmovg  ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovg eax, ebx",
+    "decoded": "cmovg  eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovg eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovg  eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovg rax, rbx",
+    "decoded": "cmovg  rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovg rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovg  rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovge ax, bx",
+    "decoded": "cmovge ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovge ax, WORD PTR [rdi+8]",
+    "decoded": "cmovge ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovge eax, ebx",
+    "decoded": "cmovge eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovge eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovge eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovge rax, rbx",
+    "decoded": "cmovge rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovge rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovge rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovae ax, bx",
+    "decoded": "cmovae ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovae ax, WORD PTR [rdi+8]",
+    "decoded": "cmovae ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovae eax, ebx",
+    "decoded": "cmovae eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovae eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovae eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovae rax, rbx",
+    "decoded": "cmovae rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovae rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovae rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovl ax, bx",
+    "decoded": "cmovl  ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovl ax, WORD PTR [rdi+8]",
+    "decoded": "cmovl  ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovl eax, ebx",
+    "decoded": "cmovl  eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovl eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovl  eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovl rax, rbx",
+    "decoded": "cmovl  rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovl rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovl  rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovle ax, bx",
+    "decoded": "cmovle ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovle ax, WORD PTR [rdi+8]",
+    "decoded": "cmovle ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovle eax, ebx",
+    "decoded": "cmovle eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovle eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovle eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovle rax, rbx",
+    "decoded": "cmovle rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovle rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovle rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovne ax, bx",
+    "decoded": "cmovne ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovne ax, WORD PTR [rdi+8]",
+    "decoded": "cmovne ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovne eax, ebx",
+    "decoded": "cmovne eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovne eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovne eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovne rax, rbx",
+    "decoded": "cmovne rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovne rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovne rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovns ax, bx",
+    "decoded": "cmovns ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovns ax, WORD PTR [rdi+8]",
+    "decoded": "cmovns ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovns eax, ebx",
+    "decoded": "cmovns eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovns eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovns eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovns rax, rbx",
+    "decoded": "cmovns rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovns rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovns rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovs ax, bx",
+    "decoded": "cmovs  ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovs ax, WORD PTR [rdi+8]",
+    "decoded": "cmovs  ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovs eax, ebx",
+    "decoded": "cmovs  eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovs eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovs  eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovs rax, rbx",
+    "decoded": "cmovs  rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovs rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovs  rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovo ax, bx",
+    "decoded": "cmovo  ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovo ax, WORD PTR [rdi+8]",
+    "decoded": "cmovo  ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovo eax, ebx",
+    "decoded": "cmovo  eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovo eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovo  eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovo rax, rbx",
+    "decoded": "cmovo  rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovo rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovo  rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovno ax, bx",
+    "decoded": "cmovno ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovno ax, WORD PTR [rdi+8]",
+    "decoded": "cmovno ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovno eax, ebx",
+    "decoded": "cmovno eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovno eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovno eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovno rax, rbx",
+    "decoded": "cmovno rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovno rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovno rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovp ax, bx",
+    "decoded": "cmovp  ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovp ax, WORD PTR [rdi+8]",
+    "decoded": "cmovp  ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovp eax, ebx",
+    "decoded": "cmovp  eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovp eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovp  eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovp rax, rbx",
+    "decoded": "cmovp  rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovp rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovp  rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovpe ax, bx",
+    "decoded": "cmovp  ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovpe ax, WORD PTR [rdi+8]",
+    "decoded": "cmovp  ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovpe eax, ebx",
+    "decoded": "cmovp  eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovpe eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovp  eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovpe rax, rbx",
+    "decoded": "cmovp  rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovpe rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovp  rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovnp ax, bx",
+    "decoded": "cmovnp ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovnp ax, WORD PTR [rdi+8]",
+    "decoded": "cmovnp ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovnp eax, ebx",
+    "decoded": "cmovnp eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovnp eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovnp eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovnp rax, rbx",
+    "decoded": "cmovnp rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovnp rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovnp rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovpo ax, bx",
+    "decoded": "cmovnp ax,bx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovpo ax, WORD PTR [rdi+8]",
+    "decoded": "cmovnp ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovpo eax, ebx",
+    "decoded": "cmovnp eax,ebx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovpo eax, DWORD PTR [rdi+8]",
+    "decoded": "cmovnp eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "cmovpo rax, rbx",
+    "decoded": "cmovnp rax,rbx",
+    "opcode": "X86_OP_CMOV"
+  },
+  {
+    "assembly": "cmovpo rax, QWORD PTR [rdi+8]",
+    "decoded": "cmovnp rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_CMOV_MEM"
+  },
+  {
+    "assembly": "ja forward",
+    "decoded": "ja 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "ja backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; ja 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jae forward",
+    "decoded": "jae 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jae backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jae 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jb forward",
+    "decoded": "jb 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jb backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jb 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jbe forward",
+    "decoded": "jbe 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jbe backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jbe 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "je forward",
+    "decoded": "je 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "je backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; je 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jne forward",
+    "decoded": "jne 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jne backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jne 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jg forward",
+    "decoded": "jg 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jg backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jg 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jge forward",
+    "decoded": "jge 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jge backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jge 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jl forward",
+    "decoded": "jl 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jl backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jl 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jle forward",
+    "decoded": "jle 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jle backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jle 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "js forward",
+    "decoded": "js 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "js backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; js 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jns forward",
+    "decoded": "jns 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jns backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jns 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jo forward",
+    "decoded": "jo 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jo backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jo 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jno forward",
+    "decoded": "jno 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jno backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jno 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jp forward",
+    "decoded": "jp 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jp backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jp 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jpe forward",
+    "decoded": "jpe 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jpe backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jpe 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jnp forward",
+    "decoded": "jnp 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jnp backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jnp 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jpo forward",
+    "decoded": "jpo 1f; mov rax, 0; jmp 2f; 1: mov rax, 1; 2:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jpo backward",
+    "decoded": "jmp 2f; 1: mov rax, 1; jmp 3f; 2: mov rax, 0; jpo 1b; 3:",
+    "opcode": "X86_OP_JCC"
+  },
+  {
+    "assembly": "jmp forward",
+    "decoded": "jmp 1f; mov rax, 0; 1: mov rax, 1",
+    "opcode": "X86_OP_JMP"
+  },
+  {
+    "assembly": "call and ret (stack return address)",
+    "decoded": "call 1f; .global return_880; return_880: jmp 2f; 1: mov rax, QWORD PTR [rsp]; ret; 2:",
+    "opcode": "X86_OP_CALL"
+  },
+  {
+    "assembly": "rep movsb",
+    "decoded": "rep movsb",
+    "opcode": "X86_OP_REP_MOVS"
+  },
+  {
+    "assembly": "rep movsw",
+    "decoded": "rep movsw",
+    "opcode": "X86_OP_REP_MOVS"
+  },
+  {
+    "assembly": "rep movsd",
+    "decoded": "rep movsd",
+    "opcode": "X86_OP_REP_MOVS"
+  },
+  {
+    "assembly": "rep movsq",
+    "decoded": "rep movsq",
+    "opcode": "X86_OP_REP_MOVS"
+  }
+]
