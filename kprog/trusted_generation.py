@@ -104,13 +104,14 @@ def validate_native(native_bytes, entry_symbol, machine):
     if not isinstance(entry_symbol, str) or re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", entry_symbol) is None:
         raise ValueError("entry symbol must be a C identifier")
     elf = ELFFile(BytesIO(native_bytes))
-    if not elf.little_endian or elf.elfclass != 64 or elf["e_type"] != "ET_REL" or elf["e_machine"] != machine:
-        raise ValueError(f"native request must be a little-endian {machine} relocatable ELF")
+    if not elf.little_endian or elf.elfclass != 64 or elf["e_type"] not in {"ET_REL", "ET_DYN"} or elf["e_machine"] != machine:
+        raise ValueError(f"native request must be a little-endian {machine} relocatable or shared ELF")
     table = elf.get_section_by_name(".symtab")
     entries = [] if table is None else [s for s in table.iter_symbols() if s.name == entry_symbol and s["st_info"]["type"] == "STT_FUNC" and type(s["st_shndx"]) is int]
     if len(entries) != 1 or not entries[0]["st_size"]:
         raise ValueError("native entry must name exactly one defined nonempty function")
     entry = entries[0]
     section = elf.get_section(entry["st_shndx"])
-    if not section["sh_flags"] & 4 or entry["st_value"] + entry["st_size"] > section["sh_size"]:
+    offset = entry["st_value"] - section["sh_addr"]
+    if not section["sh_flags"] & 4 or offset < 0 or offset + entry["st_size"] > section["sh_size"]:
         raise ValueError("native entry must lie wholly in executable section bytes")

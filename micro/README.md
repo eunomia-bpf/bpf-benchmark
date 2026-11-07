@@ -39,7 +39,9 @@ make micro BENCH=simple SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
 
 For x86 KVM, select `native_proof` to execute native code after the registered
 trusted service generates, verifies and binds its proof. The application
-submits only its native ELF, entry and typed metadata. The VM Make entrypoint
+submits only its native ELF, entry and typed metadata. Existing `.native.so`
+shared ELF and `.native.o` relocatable inputs both use the same service; entry
+bounds are relative to the executable section, preserving original ELF bytes. The VM Make entrypoint
 starts the service outside the application container, using a private `/run`
 directory, and archives its requests and logs under
 `micro/results/trusted-service-<RUN_TOKEN>.tar.gz` when the suite closes.

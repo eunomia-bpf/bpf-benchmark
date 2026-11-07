@@ -117,6 +117,36 @@ class TrustedMetadata(unittest.TestCase):
     def test_native_machine_and_entry_checked_before_generation(self):
         with self.assertRaises(ValueError):validate_native(b'', 'entry','EM_X86_64')
         with self.assertRaises(ValueError):validate_native(b'not ELF','entry;code','EM_X86_64')
+    def test_real_relocatable_and_shared_entries_use_section_relative_bounds(self):
+        import io
+        import struct
+        import tempfile
+        from elftools.elf.elffile import ELFFile
+        with tempfile.TemporaryDirectory() as temporary:
+            for suffix,flags in [('o',['-c']),('so',['-shared','-nostdlib'])]:
+                output=Path(temporary)/('trusted.'+suffix)
+                subprocess.run(['clang','-target','x86_64-linux-gnu','-fPIC',
+                    *flags,str(ROOT/'kprog/test/trusted_native.c'),'-o',str(output)],check=True)
+                native=output.read_bytes()
+                validate_native(native,'trusted_entry','EM_X86_64')
+                with self.assertRaises(ValueError):
+                    validate_native(native,'trusted_entry','EM_AARCH64')
+                with self.assertRaises(ValueError):
+                    validate_native(native,'no_such_entry','EM_X86_64')
+                executable=bytearray(native);struct.pack_into('<H',executable,16,2)
+                with self.assertRaises(ValueError):
+                    validate_native(bytes(executable),'trusted_entry','EM_X86_64')
+                elf=ELFFile(io.BytesIO(native));table=elf.get_section_by_name('.symtab')
+                index,symbol=next((i,s) for i,s in enumerate(table.iter_symbols()) if s.name=='trusted_entry')
+                section=elf.get_section(symbol['st_shndx'])
+                bad_addresses=[section['sh_addr']+section['sh_size']]
+                if section['sh_addr']:bad_addresses.append(section['sh_addr']-1)
+                for address in bad_addresses:
+                    broken=bytearray(native)
+                    struct.pack_into('<Q',broken,table['sh_offset']+index*table['sh_entsize']+8,address)
+                    with self.assertRaises(ValueError):
+                        validate_native(bytes(broken),'trusted_entry','EM_X86_64')
+
     def test_python_transport_matches_compiled_kernel_header(self):
         values=list(map(int,subprocess.check_output([ROOT/'kprog/libnativeloader/build/trusted-native-loader','abi'],text=True).split()))
         expected=[ctypes.sizeof(service.Request),ctypes.sizeof(service.Result)]
