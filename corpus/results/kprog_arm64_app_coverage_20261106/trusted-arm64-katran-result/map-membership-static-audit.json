@@ -1,0 +1,74 @@
+{
+  "source_entry_relocation_names": [
+    "",
+    "ch_rings",
+    "ctl_array",
+    "fallback_cache",
+    "lru_mapping",
+    "lru_miss_stats",
+    "quic_stats_map",
+    "reals",
+    "reals_stats",
+    "server_id_map",
+    "server_id_stats",
+    "stats",
+    "vip_map",
+    "vip_miss_stats",
+    "vip_to_down_reals_map"
+  ],
+  "envelope_map_names": [
+    "ch_rings",
+    "ctl_array",
+    "decap_vip_stats",
+    "fallback_cache",
+    "lru_mapping",
+    "lru_miss_stats",
+    "quic_stats_map",
+    "reals",
+    "reals_stats",
+    "server_id_map",
+    "server_id_stats",
+    "stable_rt_stats",
+    "stats",
+    "tpr_stats_map",
+    "vip_map",
+    "vip_miss_stats",
+    "vip_to_down_reals_map"
+  ],
+  "native_link_relocation_map_names": [
+    "ch_rings",
+    "ctl_array",
+    "fallback_cache",
+    "lru_mapping",
+    "lru_miss_stats",
+    "quic_stats_map",
+    "reals",
+    "reals_stats",
+    "server_id_map",
+    "server_id_stats",
+    "stats",
+    "vip_map",
+    "vip_miss_stats",
+    "vip_to_down_reals_map"
+  ],
+  "envelope_not_referenced_by_source_entry": [
+    "decap_vip_stats",
+    "stable_rt_stats",
+    "tpr_stats_map"
+  ],
+  "envelope_not_referenced_by_native_link": [
+    "decap_vip_stats",
+    "stable_rt_stats",
+    "tpr_stats_map"
+  ],
+  "source_entry_bytes": 18544,
+  "scope": "ELF relocation inspection only; runtime GET_MAP failing map identity not yet observed",
+  "artifact_sha256": {
+    "kprog/arm64/build/app-verified-stage/katran/balancer.native.o": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+    "kprog/arm64/build/app-runtime-v35/root/artifacts/user/repo-artifacts/arm64/katran/bpf/balancer.bpf.o": "db3b1f1288448a964d760248cb465c7c6b2f58a6729aa4aa3d1442e1cd67c526",
+    "kprog/arm64/build/app-native-link/release/native-link": "736646a1b70254e5ae88dcf5d8e65d325d0a27bf89eb35e6b1b93336500d7722"
+  },
+  "native_proof_sha256": "9c7d2fb5636bd3135651660357a87d3f5384f6872cd5cdff440fd31914917fe3",
+  "native_link_returncode": 0,
+  "native_link_stderr": "native-link: arm64 entry=balancer_ingress (7484 bytes), 3 reachable symbol(s) total\n  - balancer_ingress (vaddr 0x0, 7484 bytes) [entry]\n  - jhash (vaddr 0x70, 216 bytes)\n  - jhash_2words (vaddr 0x0, 104 bytes) [entry]\nnative-link: wrote proof object 7812 bytes, 122 reloc(s) -> /tmp/a-map-proof-tnl1r86l/proof.o\n"
+}
