@@ -1,0 +1,12 @@
+{
+  "candidate_binary": "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-rodata-extents",
+  "retained_binary": "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+  "retained_binary_sha256": "f9086a5d08126aabfcaa824a6bf93aad9bc47c2b665d3f44b8757ceaaa3f3456",
+  "retained_fixture": "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native.o",
+  "retained_fixture_sha256": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+  "source_after_sha256": "ce789d253de442685383c86428f0aa2984724f1fa345706b80bb20f2df39cfc0",
+  "scope": "Private generic readonly extent/alias control through unchanged registered service; original application runtime paths retain their host bytes.",
+  "candidate_binary_sha256": "3ae8d02675c839a46a80f6c0fc9d80ff60e6b8fac7183abc896c5aee1925551e",
+  "control_native_sha256": "29c718c0dd9c592fb66ebdfe5a4f59b29bdf1bd53818f53771c13795f95bba4e",
+  "cross_source_sha256": "ce789d253de442685383c86428f0aa2984724f1fa345706b80bb20f2df39cfc0"
+}
