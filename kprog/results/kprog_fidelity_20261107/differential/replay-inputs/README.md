@@ -9,7 +9,7 @@ epochs, binaries and canonical references.
 | Numeric C token catalog | Tokens | Sampled three-way replay | Explicit-monitor observation | Replay pending |
 | --- | ---: | ---: | ---: | ---: |
 | x86 | 75 | 66 | 0 | 9 |
-| AArch64 | 71 | 65 | 1 | 5 |
+| AArch64 | 71 | 67 | 1 | 3 |
 
 The numeric catalogs come directly from the committed x86_sim.h and
 arm64_sim.h definitions. Five x86 width aliases point to existing tokens.
@@ -17,14 +17,14 @@ The requested 77/72 operation domain also needs V's semantic/control-family
 alignment; numeric tokens, native instruction families and specialization
 tokens each retain their own identities.
 
-replay-observations.tsv contains 219 operation/source rows from fifteen published
+replay-observations.tsv contains 222 operation/source rows from sixteen published
 snapshots. Each row records form counts, case counts, three comparison
 counts, backend, compiled simulator header, binary and reference hashes,
 and original per-form table paths. Both forms tables are joined by their
 exact assembly names and checked for equal case counts and zero differences.
 numeric-token-input.tsv lists all 146 numeric tokens, including the pending
 replay entries, with their supporting source paths. inputs.json pins all
-72 source artifacts used by the collector and records the aliases.
+163 source artifacts used by the collector and records the aliases.
 
 The main x86 snapshot covers 1,144 forms and 1,171,456 real-CPU/C/reference
 states with header 4fe6817. The later focused RORX snapshot covers four
@@ -46,7 +46,7 @@ remain explicit. The collector verifies the initial archive, exact38-row
 replacement,1106 retained rows, table/binary/trace hashes and the original
 reference-reader source. Eleven additional artifact pins record this complete
 source and interface history. All157 preceding operation/source rows and61
-artifact pins retain their values; the existing numeric-token totals remain66
+artifact pins retain their values; that fifteen-snapshot increment retained66
 x86 and65 ARM plus one explicit-monitor observation. The added62 operation/source
 rows describe the adopted production epoch and preserve each token's domain.
 
@@ -64,6 +64,44 @@ against production afc178f46, paired encoded fields and the published
 interface bridge has its own scope and all eight source/observation artifact
 pins; later header 6b3f3173 retains its separate source epoch. The LEA token
 already has replay evidence, so the catalog totals retain their values.
+
+The adopted ARM immediate-alias source adds three operation/source rows for
+ADD_IMM(3), SUB_IMM(4) and ALU_IMM(6). Its existing QEMU/C/canonical replay has
+60 raw/direct groups across ten actual native forms, totaling61,440 observed
+states and zero differences in all three comparisons. Each numeric token
+contributes20 groups and20,480 states. ADD/SUB/AND/ORR/EOR use both32-bit and
+64-bit widths, preserving AUX, register assignments, operands and immediate
+bits. These original observations retain executablef18fbcd9, main headerc21833de,
+canonical executablec110b03a and their captured private-candidate source epoch.
+
+A's production commitf0517e4931be058ddd8ce0d0df87612ee3ffb250 adopts the three
+changed C headers. The collector verifies all91 compiled archive files and
+the complete79-source snapshot:72 C headers and seven Python files. Every
+compiled C header and five Python sources match that production commit and
+the captured current HEAD. The two changed Python producer files retain
+their exact old/current hashes. All eight Python imports used by the current
+encoding check match the same production commit. The current encoder reads
+the original807-instruction disassembly and recreates every original field
+for all60 bindings across ten selected native forms. All30 raw/direct pairs
+retain identical native bytes. The archived bindings and candidate-change
+manifest equal their published metadata.
+
+inputs.json records this finite source/producer correspondence in the
+arm64-contract-aliases snapshot, alongside A's published integration checks.
+The original candidate commit and launch-era owner_sync_pending marker remain
+explicit historical fields. The actual QEMU observations and production
+source adoption retain separate timestamps. The collector consumes the
+existing observations and source archives; guest and CPU execution counts
+stay attached to their original run.
+
+The new ledger has16 snapshots,222 operation/source rows and163 pinned inputs.
+All219 preceding rows,72 artifact pins, source snapshot objects and numeric
+catalog definitions retain their values. Numeric3/4 now have sampled
+three-way observations, and numeric6 gains the additional adopted-source
+epoch. The resulting ARM catalog has67 sampled tokens, one explicit-monitor
+observation and three entries awaiting replay. The x86 catalog retains66
+sampled tokens. V owns central taxonomy/refinement integration; A/V/T continue
+the universal token, compiler, ABI and native-link laws.
 
 The ARM core snapshot covers 807 forms and 826,368 QEMU/C/reference states
 with header c21833de. Full-register-bank FMOV, memory and bitfield snapshots
@@ -97,5 +135,5 @@ canonical binaries, original raw traces and other lanes' jobs remain available.
 Closed raw state streams use lossless cpu-states.bin.zst storage. Restore a
 selected trace with zstd -d before an existing command that reads cpu-states.bin.
 The collector consumes the published summaries, tables and source archives
-directly. The private ARM numeric/contract and x86 partial-register storage candidates
+directly. The private ARM numeric and x86 partial-register storage candidates
 retain their owner integration boundaries and separately published observations.

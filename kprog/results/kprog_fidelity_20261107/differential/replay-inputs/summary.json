@@ -10,13 +10,13 @@
     "arm64": {
       "numeric_tokens": 71,
       "width_aliases": 0,
-      "sampled_three_way": 65,
+      "sampled_three_way": 67,
       "explicit_monitor_observation": 1,
-      "replay_pending": 5
+      "replay_pending": 3
     }
   },
-  "replay_source_snapshots": 15,
-  "replay_observation_rows": 219,
+  "replay_source_snapshots": 16,
+  "replay_observation_rows": 222,
   "domain": "Numeric C tokens, plus separately scoped control and architectural observations.",
   "integration": "Replay inputs for the central formal coverage table maintained by V.",
   "scope": "Sampled forms and pinned source epochs support generic ISA fidelity evidence."

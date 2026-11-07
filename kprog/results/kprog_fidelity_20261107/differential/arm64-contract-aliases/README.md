@@ -61,7 +61,7 @@ The launch Git is ffcb825a1bcf5a272eb3ba0a57f8d6211b5af0c2. The detached job
 3718339 completed comparison at 2026-11-07T20:34:42.942578+00:00, closed with
 exit 0 after lossless trace storage, and retained production_adoption as
 owner_sync_pending. A/V synchronize production integration with application
-source epochs. Current production ARM replay totals retain that adoption
+source epochs. The captured ARM replay totals retain that launch-era adoption
 boundary. The default 807-form hardware handoff retains its production epoch;
 this static observer records the synchronized private candidate epoch.
 
@@ -87,3 +87,25 @@ archives are shared with the c110b03a replay cohorts.
 A's later 1f0f20eb bundle retains byte-identical versions of the three C headers
 used here. The recorded 61,440 observations retain their captured f9b20a904
 source identity; the additional universal-model work retains A/V ownership.
+
+
+## Production source adoption
+
+A's f0517e4931be058ddd8ce0d0df87612ee3ffb250 integrates the generic alias
+mechanism. The current [replay input ledger](../replay-inputs/README.md)
+joins these existing61,440 QEMU/C/reference observations to the adopted source:
+all72 compiled C headers match, and the current encoder reproduces all60
+numeric route/form bindings across ten native forms. The79-source archive
+retains seven Python inputs, including two producer files with recorded
+old/current identities. Five Python inputs match directly. All91 archived
+files retain their original hashes, and all30 raw/direct pairs retain their
+native bytes. The ledger records the full correspondence and source pins.
+
+The original summary's owner_sync_pending value describes this observer's
+20:34 launch/completion epoch. The later shared-source adoption and its
+current producer-field checks are recorded separately in inputs.json under
+arm64-contract-aliases.production_source_correspondence. The ledger's ARM
+numeric domain now has67 sampled tokens plus one explicit-monitor observation.
+The static observer, reference, trace, comparison masks and original counts
+retain their captured identities. The existing16-19 ledger command performs
+the current source-adoption reconciliation.

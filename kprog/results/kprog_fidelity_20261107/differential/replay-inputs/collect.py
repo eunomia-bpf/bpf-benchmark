@@ -2,6 +2,10 @@
 from collections import defaultdict
 import csv
 import hashlib
+import gzip
+import importlib.util
+from dataclasses import asdict
+import sys
 import io
 import json
 from pathlib import Path
@@ -50,6 +54,100 @@ def compiled_header(path, arch):
         return sha(archive.extractfile(members[0]).read())
 
 
+
+def immediate_alias_adoption(directory, summary, archive):
+    production = "f0517e4931be058ddd8ce0d0df87612ee3ffb250"
+    changes = json.loads(read(directory / "candidate-changes.json"))
+    manifest = json.loads(read(directory / "actual-compiled-inputs.json"))
+    bindings = json.loads(read(directory / "numeric-bindings.json"))
+    native = json.loads(read(directory / "native-code.json"))["forms"]
+    pins = json.loads(read(directory / "executable-pins.json"))
+    observer = gzip.decompress(read(directory / "cpu-differential-arm64.gz"))
+    assert sha(observer) == pins["binary_sha256"] == summary["binary_sha256"]
+    assert observer[:4] == b"\x7fELF" and int.from_bytes(observer[18:20], "little") == 183
+    assert pins["reference_sha256"] == summary["reference_sha256"]
+    integration_path = ROOT / "corpus/results/kprog_arm64_app_coverage_20261107/numeric-contract-sync/production-integration.json"
+    integration_bytes = read(integration_path)
+    assert integration_bytes == subprocess.check_output(
+        ["git", "show", production + ":" + str(integration_path.relative_to(ROOT))], cwd=ROOT)
+    integration = json.loads(integration_bytes)
+    assert all(row["exit"] == 0 for row in integration["checks"])
+    prefix = "kprog/fidelity/build-arm64-contract-aliases/snapshot/"
+    headers, python_changes = {}, {}
+    with tarfile.open(fileobj=io.BytesIO(archive.read_bytes())) as compiled:
+        members = {m.name:m for m in compiled.getmembers() if m.isfile()}
+        assert set(members) == set(manifest)
+        for name,digest in manifest.items():
+            value = compiled.extractfile(members[name]).read()
+            assert sha(value) == digest
+            if name.startswith(prefix):
+                relative = name[len(prefix):]
+                published = subprocess.check_output(["git","show",production+":"+relative],cwd=ROOT)
+                assert read(ROOT / relative) == published
+                if relative.endswith(".h"):
+                    assert value == published
+                    headers[relative] = digest
+                else:
+                    assert relative.endswith(".py")
+                    python_changes[relative] = dict(captured_sha256=digest,production_sha256=sha(published))
+        assert json.loads(compiled.extractfile("kprog/fidelity/build-arm64-contract-aliases/numeric-bindings.json").read()) == bindings
+        assert json.loads(compiled.extractfile("kprog/fidelity/build-arm64-contract-aliases/candidate-changes.json").read()) == changes
+        assembly = compiled.extractfile("kprog/fidelity/build-arm64-contract-aliases/instructions.asm").read().decode()
+    assert len(manifest) == summary["compiled_input_files"] == 91
+    assert len(headers) == 72 and len(python_changes) == 7
+    assert sum(row["captured_sha256"] != row["production_sha256"] for row in python_changes.values()) == 2
+    assert len(headers)+len(python_changes) == summary["production_snapshot_files"]+summary["candidate_snapshot_files"] == 79
+    for path,change in changes["changes"].items():
+        assert headers[path] == change["after_sha256"]
+    sys.path.insert(0,str(ROOT / "kprog/fidelity"))
+    sys.path.insert(0,str(ROOT / "kprog/arm64/micro-prog"))
+    def module(name,path):
+        spec = importlib.util.spec_from_file_location(name,path)
+        value = importlib.util.module_from_spec(spec);sys.modules[name] = value
+        spec.loader.exec_module(value)
+        return value
+    modules_before = set(sys.modules)
+    encoder = module("f_adopted_alias_encoder",ROOT / "kprog/arm64/micro-prog/generate_micro_sim_proofs.py")
+    generator = module("f_adopted_alias_generator",ROOT / "kprog/fidelity/generate.py")
+    encoder_inputs = {}
+    for name in set(sys.modules)-modules_before:
+        module_path = getattr(sys.modules[name],"__file__",None)
+        if module_path and Path(module_path).resolve().is_relative_to(ROOT):
+            path = Path(module_path).resolve()
+            relative = str(path.relative_to(ROOT))
+            data = read(path)
+            assert data == subprocess.check_output(["git","show",production+":"+relative],cwd=ROOT)
+            encoder_inputs[relative] = sha(data)
+    assert len(encoder_inputs) == 8
+    instructions = encoder.parse_flat_instructions(assembly)
+    matrix = generator.arm64_forms()
+    assert len(matrix) == len(instructions) == 807
+    by_assembly = dict(zip(matrix,instructions))
+    tokens = {"ARM64_OP_ADD_IMM","ARM64_OP_SUB_IMM","ARM64_OP_ALU_IMM"}
+    assert len(bindings) == len(native) == summary["forms"] == 60
+    for index in range(0,60,6):
+        group = bindings[index:index+6]
+        encoded = asdict(encoder.encode(by_assembly[group[0]["assembly"]],{},{}))
+        assert [row["route"] for row in group] == ["raw","direct"]*3
+        assert {row["bound"]["op"] for row in group} == tokens
+        for offset,binding in enumerate(group):
+            assert encoded == binding["original"]
+            assert {k:v for k,v in binding["bound"].items() if k!="op"} == {
+                k:v for k,v in encoded.items() if k!="op"}
+            assert native[index+offset]["native_bytes"] == native[index]["native_bytes"]
+    assert summary["cases"] == 61440 and summary["forms_awaiting_reference"] == 0
+    assert summary["unchanged_memory_cases"] == 61440
+    return dict(production_commit=production,compiled_input_files=91,
+        compiled_snapshot_sources=79,production_equal_compiled_c_headers=72,production_equal_snapshot_sources=77,
+        compiled_c_header_sha256=headers,producer_python_snapshot_epochs=python_changes,
+        current_encoder_source_sha256=encoder_inputs,encoded_native_forms_equal=10,
+        numeric_route_form_bindings_equal=60,raw_direct_native_byte_pairs=30,
+        production_integration_checks=integration["checks"],
+        original_candidate_commit=summary["candidate_commit"],
+        original_candidate_adoption=summary["production_adoption"],
+        scope="Captured QEMU/C/reference observations with byte-identical adopted C headers and current producer field correspondence.")
+
+
 catalogs, aliases, header_identities = {}, {}, {}
 for arch in ["x86", "arm64"]:
     path = ROOT / "kprog" / arch / (arch + "_sim.h")
@@ -79,6 +177,7 @@ specs = [
     ("arm64", "arm64-current-bank32/exclusive/observed-projection", "qemu_user",
      "explicit_monitor_observation"),
     ("x86", "x86-production-current", "real_x86_cpu", "production_instruction_epoch"),
+    ("arm64", "arm64-contract-aliases", "qemu_user", "production_correspondent_immediate_alias_forms"),
 ]
 observations, source_summaries = [], []
 for arch, name, backend, scope in specs:
@@ -197,6 +296,8 @@ for arch, name, backend, scope in specs:
         assert len(manifest) == summary["compiled_input_files"] == 90
         assert summary["production_snapshot_git_equal"]
 
+    adoption = immediate_alias_adoption(directory, summary, archive) if scope == "production_correspondent_immediate_alias_forms" else None
+
     forms_path = str((directory / "forms.tsv").relative_to(ROOT))
     refs_path = str((directory / "reference-forms.tsv").relative_to(ROOT))
     for op, values in sorted(grouped.items()):
@@ -208,6 +309,8 @@ for arch, name, backend, scope in specs:
         backend=backend, forms=len(forms), cases=sum(int(r["cases"]) for r in forms),
         operation_rows=len(grouped), simulator_header_sha256=header,
         executable_sha256=binary, reference_sha256=reference_sha))
+    if adoption is not None:
+        source_summaries[-1]["production_source_correspondence"] = adoption
 
 # LEAVE uses a native architectural fixture and canonical fault-class replay.
 name = "x86-leave64-boundaries/canonical-after"
