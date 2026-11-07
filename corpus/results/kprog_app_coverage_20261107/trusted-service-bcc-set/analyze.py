@@ -13,6 +13,7 @@ for archive in sorted(ROOT.glob('run-*.tar.gz')):
   files={m.name:m for m in outer.getmembers() if m.isfile()}
   def read(name):return outer.extractfile(files[name]).read()
   summary=json.loads(read('run/summary.json'))
+  kernel_log=read('run/kernel.log').decode() if 'run/kernel.log' in files else ''
   records={}
   for line in read('run/service.log').decode().splitlines():
    record=json.loads(line)
@@ -38,6 +39,9 @@ for archive in sorted(ROOT.glob('run-*.tar.gz')):
    elif 'misaligned' in stderr:cause='verifier-misaligned-stack-access'
    elif 'invalid write to stack' in stderr:cause='verifier-stack-limit'
    elif 'math between fp pointer' in stderr:cause='verifier-scalar-stack-pointer-arithmetic'
+   elif any('proof relocation unmatched' in line and
+            re.search(r'\bsource_prog='+str(record.get('source_prog_id'))+r'\b',line)
+            for line in kernel_log.splitlines()):cause='native-binding-relocation-unmatched'
    elif 'BPF_PROG_LOAD native_lab stub' in stderr:cause='native-load-EINVAL-no-rejection-line'
    elif 'activation refused' in stderr:cause='request-activation-refused-during-teardown'
    elif 'GET_MAP' in error or 'No such file' in error:cause='map-metadata-kernel-query'

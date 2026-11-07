@@ -201,7 +201,7 @@ run-20261107T111812573720Z.tar.gz,13,64,capable,kprobe__cap_capable_exit,True,Tr
 run-20261107T111812573720Z.tar.gz,14,67,runqlat,sched_wakeup_new,True,True,True,accepted,0,run/requests/14.success.tar.gz,True
 run-20261107T111812573720Z.tar.gz,15,70,tcpconnect,tcp_v4_connect_ret,True,True,True,accepted,0,run/requests/15.success.tar.gz,True
 run-20261107T111812573720Z.tar.gz,16,72,vfsstat,fentry_vfs_fsync,True,True,True,accepted,0,run/requests/16.success.tar.gz,True
-run-20261107T111812573720Z.tar.gz,17,74,opensnoop,tracepoint__syscalls__sys_exit_open,True,True,False,native-load-EINVAL-no-rejection-line,-5,run/requests/17.failure.tar.gz,True
+run-20261107T111812573720Z.tar.gz,17,74,opensnoop,tracepoint__syscalls__sys_exit_open,True,True,False,native-binding-relocation-unmatched,-5,run/requests/17.failure.tar.gz,True
 run-20261107T111812573720Z.tar.gz,18,80,biosnoop,block_rq_issue,True,True,True,accepted,0,run/requests/18.success.tar.gz,True
 run-20261107T111812573720Z.tar.gz,19,84,runqlat,sched_switch,True,True,True,accepted,0,run/requests/19.success.tar.gz,True
 run-20261107T111812573720Z.tar.gz,20,88,tcpconnect,tcp_v6_connect,True,True,True,accepted,0,run/requests/20.success.tar.gz,True

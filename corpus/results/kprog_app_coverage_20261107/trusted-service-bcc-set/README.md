@@ -62,3 +62,18 @@ All eight tool outcomes are now collected before teardown. Seven tools are ready
 Biosnoop is now admitted with F's projection barrier; its request header hashes match published530ce848c. The raw archive, `startup-110052.json`, `biosnoop-projection-admission.json` and regenerated coverage tables retain the result. The current CPP kernel-log filter excludes the new `native_lab:` and `native proof load stage=` prefixes, explaining their absence from request stderr. The guest harness now captures full raw dmesg at completion, preserving the current common loader and active ARM inputs; another identical replay is running, with no kernel/module/image rebuild.
 
 The 11:13:32 replay retains the first full-log collector attempt. Kernel capture returned1 because util-linux dmesg rejects combining `--raw` and `--color`. Its empty kernel log is therefore not evidence that diagnostics did not fire. The driver now uses `--raw` alone; another identical replay is running. `coverage.json` records the kernel-capture return code separately from application/load outcomes.
+
+## Completed full-log capture, 11:18:12 UTC
+
+The final replay completed with kernel capture return code0 and preserved the
+same24 observed requests: all generated and compiled,23 bound loads accepted,
+7/8 tools ready. The remaining opensnoop entry is localized to the kernel's
+native/proof relocation binding check, not an instruction-level BPF rejection.
+The analyzer matches the kernel source-program identity to the request before
+assigning `native-binding-relocation-unmatched`; older unlocalized logs retain
+their original error class. The raw archive SHA256 is
+`dc2aac044c206f81cf3658006897c60bbfa01f6d99e808440cdaf1d0b8ab4473`.
+The target is the kernel memset routine. The call policy remains unchanged;
+the exact-count repair is recorded in `../exact-memory-count/`. Context
+identity must be repaired before any memory-intrinsic admission is reconsidered.
+No complete BCC coverage, matching work, or timing result is claimed.

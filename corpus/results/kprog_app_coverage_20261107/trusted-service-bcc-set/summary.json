@@ -1,8 +1,8 @@
 {
   "ok": false,
   "case": "bcc-set",
-  "started": "2026-11-07T11:00:52.574118+00:00",
-  "request_archive": "run-20261107T110052573341Z.tar.gz",
+  "started": "2026-11-07T11:18:12.574530+00:00",
+  "request_archive": "run-20261107T111812573720Z.tar.gz",
   "artifact_sha256": {
     "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6",
     "kprog/tv/build-x86/bpf_x86_native_lab.ko": "c98c7e256af7a173141bc5b67a2fecd5ae31dabb237e9ae655e2954a1f056795",
@@ -28,6 +28,7 @@
   },
   "error": "BCC tools failed startup: opensnoop",
   "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 128, in <module>\n    run_bcc_set(live,environment)\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 57, in run_bcc_set\n    if failures:raise RuntimeError('BCC tools failed startup: '+', '.join(failures))\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: BCC tools failed startup: opensnoop\n",
-  "finished": "2026-11-07T11:03:49.833393+00:00",
-  "archive_sha256": "a63882464c5649921b6e4765519fcb67188d9003091030d66c313f9167c1e8c7"
+  "kernel_log_returncode": 0,
+  "finished": "2026-11-07T11:21:12.564778+00:00",
+  "archive_sha256": "dc2aac044c206f81cf3658006897c60bbfa01f6d99e808440cdaf1d0b8ab4473"
 }
