@@ -6,7 +6,7 @@ from runner.libs.app_runners.katran import KatranServerSession,configure_katran_
 from runner.libs.app_runners.tetragon import TetragonRunner,inspect_tetragon_setup
 HERE=Path(__file__).resolve().parent;OUT=Path(sys.argv[1]);OUT.mkdir(parents=True,exist_ok=True)
 HELPER=HERE/'fixed-run';INPUT=ROOT/'corpus/inputs/katran_vip_packet_64.bin'
-COUNT=int(os.environ.get('KPROG_PROFILE_COUNT','200000'));WINDOW=0
+COUNT=int(os.environ.get('KPROG_PROFILE_COUNT','2000000'));WINDOW=0
 
 def command(argv,path=None):
  p=subprocess.run(list(map(str,argv)),capture_output=True,text=True)
@@ -36,6 +36,7 @@ def window(app,arm,scenario,ids,kind):
  global WINDOW
  seq=WINDOW;WINDOW+=1;prefix=OUT/f'{seq:03d}-{app}-{arm}-{scenario}-{kind}';prefix.mkdir()
  argv=[HELPER,'test' if app=='katran' else 'open',ids[0] if ids else 0,COUNT,INPUT]
+ if app=='katran':map_stats(prefix/'map-stats-before.json')
  before=[info(i) for i in ids]
  for i in ids:
   command([HELPER,'dump',i,0,prefix/(str(i)+'.jit.bin')],prefix/(str(i)+'.jit-dump.json'))
@@ -49,7 +50,25 @@ def window(app,arm,scenario,ids,kind):
   publish(OUT/f'done-{seq:03d}.json',dict(ok=False,error=str(e)));raise
  wait(OUT/f'ack-{seq:03d}')
  after=[info(i) for i in ids]
+ if app=='katran':map_stats(prefix/'map-stats-after.json')
  publish(prefix/'program-deltas.json',[dict(before=a,after=b,run_count=b['run_cnt']-a['run_cnt'],run_time_ns=b['run_time_ns']-a['run_time_ns']) for a,b in zip(before,after)])
+
+def wait_tetragon_ready(runner,arm):
+ # Upstream main loads the policy directory before Observer.RunEvents emits
+ # this readiness message. The runner's min100-program probe precedes it.
+ while True:
+  snap=runner.session.collector_snapshot()
+  publish(OUT/f'tetragon-{arm}-readiness.json',dict(command=runner.command_used,collector=snap))
+  lines=snap.get('stdout_tail',[])+snap.get('stderr_tail',[])
+  if any('Listening for events...' in line for line in lines):return
+  if runner.session.process.poll() is not None:raise RuntimeError('Tetragon exited before upstream event-reader readiness')
+  time.sleep(.1)
+
+def map_stats(path):
+ maps=json.loads(command(['bpftool','-j','map','show']));selected=[m for m in maps if m.get('name')=='stats' or m.get('name','').startswith(('lru_miss','vip_miss'))]
+ publish(path,dict(maps=selected,values={str(m['id']):json.loads(command(['bpftool','-j','map','dump','id',m['id']])) for m in selected}))
+ cache=[m for m in maps if m.get('name')=='fallback_cache']
+ publish(path.with_name(path.stem+'-cache.json'),[json.loads(command([HELPER,'map-sample',m['id'],16,INPUT])) for m in cache])
 
 class FixedKatran:
  # Upstream Katran server and all its program loads; TEST_RUN needs no traffic topology/NAPI workers.
@@ -66,36 +85,41 @@ class FixedKatran:
   if self.session:self.session.close()
   for name in ['kp-prof',DEFAULT_HC_V4_TUN_IFACE,DEFAULT_HC_V6_TUN_IFACE]:ip_command(['link','del',name],check=False)
 
-(OUT/'guest-launch.snapshot.py').write_bytes(Path(__file__).read_bytes())
-for p,v in [('/proc/sys/kernel/bpf_stats_enabled','1'),('/proc/sys/net/core/bpf_jit_kallsyms','1')]:Path(p).write_text(v+'\n')
-try:
- for app in ('katran','tetragon'):
-  for arm in ('jit','native'):
-   os.environ.update(BPFREJIT_SHIM_NATIVE_LOADER='1' if arm=='native' else '0',BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='0',BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF='1',BPFREJIT_NATIVE_LOADER_SO='/usr/local/lib/bpfrejit/libnative_loader.so',RUN_TARGET_ARCH='x86_64',BPFREJIT_NATIVE_DISABLE_MAP_LOWERING='0',BPFREJIT_SHIM_LOG=str(OUT/f'{app}-{arm}.shim.log'))
-   os.environ.pop('BPFREJIT_SHIM_NATIVE_MANIFEST',None)
-   previous={p['id'] for p in proglist()}
-   runner=FixedKatran() if app=='katran' else TetragonRunner(setup_result=inspect_tetragon_setup())
-   try:
-    runner.start();new=[p for p in proglist() if p['id'] not in previous];publish(OUT/f'{app}-{arm}-programs.json',new)
-    if app=='katran':
-     attach=runner.session.attach_info;publish(OUT/f'{app}-{arm}-setup.json',runner.artifacts)
-     entries=attach.get('xdp',[])
-     ids=[int(attach.get('prog_id') or attach.get('id') or (entries[0].get('id') if isinstance(entries,list) and entries else 0) or 0)]
-     if not ids[0]:raise RuntimeError(f'no attached XDP id: {attach}')
-     if info(ids[0])['type']!=6:raise RuntimeError('selected program is not XDP')
-     for scenario,flags in [('vip-hit-lru-bypass',F_LRU_BYPASS),('vip-hit-warm-lru',0)]:
-      configure_katran_maps(runner.session,flags=flags)
-      command([HELPER,'test',ids[0],100,INPUT],OUT/f'{app}-{arm}-{scenario}-warmup.json')
-      for kind in ('stat','record'):window(app,arm,scenario,ids,kind)
-    else:
-     ids=[p['id'] for p in new if p.get('name','').startswith('generic_kprobe_') and p.get('type')=='kprobe']
-     if arm=='jit':ids=[i for i in ids if info(i).get('source_btf_symbol')=='generic_kprobe_event']
-     if arm=='native':
-      text=Path(os.environ['BPFREJIT_SHIM_LOG']).read_text();active=set(map(int,re.findall(r'native-loader replaced .*?native_id=(\d+) .*?symbol=generic_kprobe_event(?: |$)',text,re.M)));ids=[i for i in ids if i in active]
-     if not ids:raise RuntimeError('no real generic_kprobe program IDs')
-     command([HELPER,'smoke',ids[0],1,INPUT],OUT/f'{app}-{arm}-test-run-capability.json')
-     for kind in ('stat','record'):window(app,arm,'open-dev-null',ids,kind)
-   finally:runner.stop()
- publish(OUT/'guest-complete.json',dict(ok=True,windows=WINDOW))
-except BaseException as e:
- publish(OUT/'guest-complete.json',dict(ok=False,error=str(e),traceback=traceback.format_exc()));raise
+def main():
+ (OUT/'guest-launch.snapshot.py').write_bytes(Path(__file__).read_bytes())
+ for p,v in [('/proc/sys/kernel/bpf_stats_enabled','1'),('/proc/sys/net/core/bpf_jit_kallsyms','1')]:Path(p).write_text(v+'\n')
+ try:
+  for app in ('katran','tetragon'):
+   for arm in ('jit','native'):
+    os.environ.update(BPFREJIT_SHIM_NATIVE_LOADER='1' if arm=='native' else '0',BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='0',BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF='1',BPFREJIT_NATIVE_LOADER_SO='/usr/local/lib/bpfrejit/libnative_loader.so',RUN_TARGET_ARCH='x86_64',BPFREJIT_NATIVE_DISABLE_MAP_LOWERING=os.environ.get('KPROG_MAP_LOWERING_DISABLED','0'),BPFREJIT_SHIM_LOG=str(OUT/f'{app}-{arm}.shim.log'))
+    os.environ.pop('BPFREJIT_SHIM_NATIVE_MANIFEST',None)
+    previous={p['id'] for p in proglist()}
+    runner=FixedKatran() if app=='katran' else TetragonRunner(setup_result=inspect_tetragon_setup())
+    try:
+     runner.start()
+     if app=='tetragon':wait_tetragon_ready(runner,arm)
+     new=[p for p in proglist() if p['id'] not in previous];publish(OUT/f'{app}-{arm}-programs.json',new)
+     if app=='katran':
+      attach=runner.session.attach_info;publish(OUT/f'{app}-{arm}-setup.json',runner.artifacts)
+      entries=attach.get('xdp',[])
+      ids=[int(attach.get('prog_id') or attach.get('id') or (entries[0].get('id') if isinstance(entries,list) and entries else 0) or 0)]
+      if not ids[0]:raise RuntimeError(f'no attached XDP id: {attach}')
+      if info(ids[0])['type']!=6:raise RuntimeError('selected program is not XDP')
+      for scenario,flags in [('vip-hit-lru-bypass',F_LRU_BYPASS),('vip-hit-warm-lru',0)]:
+       configure_katran_maps(runner.session,flags=flags)
+       command([HELPER,'test',ids[0],100,INPUT],OUT/f'{app}-{arm}-{scenario}-warmup.json')
+       for kind in ('stat','record'):window(app,arm,scenario,ids,kind)
+     else:
+      ids=[p['id'] for p in new if p.get('name','').startswith('generic_kprobe_') and p.get('type')=='kprobe']
+      if arm=='jit':ids=[i for i in ids if info(i).get('source_btf_symbol')=='generic_kprobe_event']
+      if arm=='native':
+       text=Path(os.environ['BPFREJIT_SHIM_LOG']).read_text();active=set(map(int,re.findall(r'native-loader replaced .*?native_id=(\d+) .*?symbol=generic_kprobe_event(?: |$)',text,re.M)));ids=[i for i in ids if i in active]
+      if not ids:raise RuntimeError('no real generic_kprobe program IDs')
+      command([HELPER,'smoke',ids[0],1,INPUT],OUT/f'{app}-{arm}-test-run-capability.json')
+      for kind in ('stat','record'):window(app,arm,'open-dev-null',ids,kind)
+    finally:runner.stop()
+  publish(OUT/'guest-complete.json',dict(ok=True,windows=WINDOW))
+ except BaseException as e:
+  publish(OUT/'guest-complete.json',dict(ok=False,error=str(e),traceback=traceback.format_exc()));raise
+
+if __name__=='__main__':main()

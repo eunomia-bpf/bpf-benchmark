@@ -91,3 +91,10 @@ perf-dump-control-build: perf-profile-build
 
 perf-dump-control:
 	taskset -c 12-15 vng --run /workspaces/.agent-state/kprog-lanes/C/frozen-kernel/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'bash $(HERE)/per-run-profile/dump-control.sh'
+
+perf-no-lowering-profile:
+	python3 -u $(HERE)/per-run-profile/host.py no-lowering
+
+perf-cache-diagnostic:
+	install -d /workspaces/.agent-state/kprog-lanes/C/cache-diag-var-tmp /workspaces/.agent-state/kprog-lanes/C/cache-diag-tmp /workspaces/.agent-state/kprog-lanes/C/cache-diag-modules
+	taskset -c 12-15 vng --run /workspaces/.agent-state/kprog-lanes/C/frozen-kernel/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=/workspaces/.agent-state/kprog-lanes/C/cache-diag-var-tmp --rwdir /tmp=/workspaces/.agent-state/kprog-lanes/C/cache-diag-tmp --rwdir /lib/modules=/workspaces/.agent-state/kprog-lanes/C/cache-diag-modules --disable-monitor --cpus 1 --memory 8G --append 'loglevel=4 panic=30 oops=panic' --exec 'bash $(HERE)/per-run-profile/guest.sh $(HERE)/per-run-profile/cache-trace-diagnostic bpf-benchmark/kprog-map-capture:c-20261107 /workspaces/.agent-state/kprog-lanes/C/map-capture-runtime.image.tar 0 cache-diagnostic.py'

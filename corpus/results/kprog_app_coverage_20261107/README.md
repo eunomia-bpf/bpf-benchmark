@@ -46,3 +46,7 @@ All14 captured programs generated, compiled and linked. The actual-type verifier
 ## Direct SP numerical safety increment
 
 `sp-entry-v1/` records the entry-SP correction:40,960 independent CPU ADD/SUB width cases0differences, SAME25negativecases19verifier/6specialization rejects and0accepted, and paired29microcompile/load checks with unchanged28accept/1oldCiliumreject. Private FULLv1's explicit legacy-environment failure and final FULLv2 exit0 are both retained. This closes the previously accepted direct-SP flag fixture; copied-stack pointer/alias numeric observations remain active work. No whole simulator or six-app bound-coverage completion is claimed.
+
+## Fixed-input perf results
+
+`per-run-profile/READY2M.md` records exclusiveCPU0 five-event PMU and actual BPF runtime for balancer_ingress/generic_kprobe_event, with loaded JIT bytes and full logs. Waiting for upstream Tetragon event-reader readiness fixes the initial startup confound. Katran nominal-warm native executes2M misses versus JIT0, so its slower observed path includes different state work; lowering-OFF/cache-key diagnostics investigate that defect. Original compiler-table single-window results show no benefit. No six-app bound-coverage completion is claimed.

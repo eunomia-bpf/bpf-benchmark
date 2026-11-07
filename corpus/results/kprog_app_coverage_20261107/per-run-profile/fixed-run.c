@@ -15,6 +15,20 @@ static uint64_t ns(void){struct timespec t;clock_gettime(CLOCK_MONOTONIC,&t);ret
 int main(int argc,char **argv){
  if(argc!=5){fprintf(stderr,"usage: fixed-run test|open|smoke ID COUNT INPUT\n");return 2;}
  unsigned id=strtoul(argv[2],0,10),count=strtoul(argv[3],0,10);
+ if(strcmp(argv[1],"map-sample")==0){
+  int mfd=bpf_map_get_fd_by_id(id);if(mfd<0){perror("map fd");return 2;}
+  struct bpf_map_info mi={0};uint32_t len=sizeof(mi);
+  if(bpf_obj_get_info_by_fd(mfd,&mi,&len)<0){perror("map info");return 2;}
+  if(mi.type!=BPF_MAP_TYPE_LRU_HASH&&mi.type!=BPF_MAP_TYPE_HASH){fprintf(stderr,"sample expects ordinary hash values\n");return 2;}
+  unsigned char *key=malloc(mi.key_size),*next_key=malloc(mi.key_size),*value=malloc(mi.value_size);if(!key||!next_key||!value)return 2;
+  printf("{\"map_id\":%u,\"type\":%u,\"key_size\":%u,\"value_size\":%u,\"max_entries\":%u,\"entries\":[",id,mi.type,mi.key_size,mi.value_size,mi.max_entries);
+  for(unsigned n=0;n<count;n++){
+   if(bpf_map_get_next_key(mfd,n?key:NULL,next_key)<0){if(errno==ENOENT)break;perror("next key");return 2;}
+   if(bpf_map_lookup_elem(mfd,next_key,value)<0){perror("map lookup");return 2;}
+   if(n){putchar(',');}printf("{\"key\":\"");for(unsigned j=0;j<mi.key_size;j++)printf("%02x",next_key[j]);printf("\",\"value\":\"");for(unsigned j=0;j<mi.value_size;j++)printf("%02x",value[j]);printf("\"}");memcpy(key,next_key,mi.key_size);
+  }
+  printf("]}\n");free(key);free(next_key);free(value);close(mfd);return 0;
+ }
  int fd=-1;if(id){fd=bpf_prog_get_fd_by_id(id);if(fd<0){perror("prog fd");return 2;}}
  if(strcmp(argv[1],"info")==0 || strcmp(argv[1],"dump")==0){
   struct bpf_prog_info info={0};struct bpf_func_info func={0};uint64_t syms[32]={0};uint32_t lens[32]={0};

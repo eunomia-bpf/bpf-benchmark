@@ -6,11 +6,10 @@ ROOT=Path('/workspaces/repository');sys.path.insert(0,str(ROOT))
 from corpus.profiling.perf_control import PerfCollector
 HERE=Path(__file__).resolve().parent;STATE=Path('/workspaces/.agent-state/kprog-lanes/C')
 PERF=STATE/'perf-build/perf';variant=sys.argv[1] if len(sys.argv)>1 else 'baseline'
-if variant not in ('baseline','tables'):raise ValueError(variant)
-image='bpf-benchmark/kprog-map-capture:c-20261107' if variant=='baseline' else 'bpf-benchmark/kprog-perf-tables:c-20261107'
-image_tar=str(STATE/('map-capture-runtime.image.tar' if variant=='baseline' else 'perf-tables-runtime.image.tar'))
+if variant not in ('baseline','tables','no-lowering'):raise ValueError(variant)
+image='bpf-benchmark/kprog-map-capture:c-20261107' if variant!='tables' else 'bpf-benchmark/kprog-perf-tables:c-20261107'
+image_tar=str(STATE/('map-capture-runtime.image.tar' if variant!='tables' else 'perf-tables-runtime.image.tar'))
 OUT=HERE/('run-'+variant+'-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ'));OUT.mkdir()
-(STATE/'current-perf-run').write_text(str(OUT)+'\n')
 QMP=STATE/'perf-qmp.sock'
 def occupants(exclude=None):
  busy=[]
@@ -25,8 +24,10 @@ if busy:print('queued for timing CPUs; existing QEMU',busy,flush=True)
 while busy:
  (OUT/'lease-wait.json').write_text(json.dumps(busy)+chr(10));time.sleep(5);busy=occupants()
 if QMP.exists():raise RuntimeError('existing own QMP socket: inspect prior job before restarting')
+(STATE/'current-perf-run').write_text(str(OUT)+'\n')
+print('RUN_DIRECTORY',OUT,flush=True)
 for n in ['perf-var-tmp','perf-tmp','perf-modules']:(STATE/n).mkdir(exist_ok=True)
-cmd=['taskset','-c','0','vng','--run',str(STATE/'frozen-kernel/bzImage'),'--cwd',str(ROOT),'--rwdir',str(ROOT),'--rwdir','/var/tmp='+str(STATE/'perf-var-tmp'),'--rwdir','/tmp='+str(STATE/'perf-tmp'),'--rwdir','/lib/modules='+str(STATE/'perf-modules'),'--disable-monitor','--cpus','1','--memory','8G','--append','loglevel=4 panic=30 oops=panic','--qemu-opts=-qmp unix:'+str(QMP)+',server=on,wait=off','--exec','bash '+str(HERE/'guest.sh')+' '+str(OUT)+' '+image+' '+image_tar]
+cmd=['taskset','-c','0','vng','--run',str(STATE/'frozen-kernel/bzImage'),'--cwd',str(ROOT),'--rwdir',str(ROOT),'--rwdir','/var/tmp='+str(STATE/'perf-var-tmp'),'--rwdir','/tmp='+str(STATE/'perf-tmp'),'--rwdir','/lib/modules='+str(STATE/'perf-modules'),'--disable-monitor','--cpus','1','--memory','8G','--append','loglevel=4 panic=30 oops=panic','--qemu-opts=-qmp unix:'+str(QMP)+',server=on,wait=off','--exec','bash '+str(HERE/'guest.sh')+' '+str(OUT)+' '+image+' '+image_tar+' '+('1' if variant=='no-lowering' else '0')]
 (OUT/'launch.json').write_text(json.dumps(cmd,indent=2)+'\n')
 log=(OUT/'guest.log').open('w');guest=subprocess.Popen(cmd,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
 def wait(path):

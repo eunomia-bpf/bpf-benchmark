@@ -36,3 +36,7 @@ Inspect the completed run listed in `C/current-perf-run`, then run `analyze.py R
 ## Raw JIT export correction
 
 The first acquired lease reached the actual upstream Katran server and stable VIP-hit warmup, then stopped before any perf window because the frozen bpftool lacks JIT disassembly support even for a binary dump. Export now uses official libbpf program-info APIs. A first two-query control exposed returned array counts being reused with NULL optional buffers (EFAULT); the second query now requests only a fresh byte buffer. The actual kernel control exports23nonzero JIT bytes matching `jited_len` and test-runs with return2. All source/raw bytes/logs and earlier failures are retained in `jit-export-control.tar.gz`. This diagnostic ran on12-15 and its duration is excluded from performance comparisons. Corrected baseline/table jobs are queued behind R's new0-7 guest; no measured cost conclusion yet.
+
+## Measured follow-ups
+
+`PILOT.md` retains the200k-input pilot and its Tetragon startup confound. `READY2M.md` reports the corrected upstream-ready2M-input run pair, all five PMU counters, loaded JIT identities and the Katran all-miss native-cache discrepancy. Raw archives and derived CSV/JSON are separate. These are unbound native measurements, not whole-application verified-path acceptance.

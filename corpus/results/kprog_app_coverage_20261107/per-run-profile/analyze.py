@@ -2,6 +2,8 @@
 import bisect,collections,json,re,sys
 from pathlib import Path
 out=Path(sys.argv[1]);summary=[];checks=[]
+completion=json.loads((out/'host-complete.json').read_text())
+if not completion.get('ok'):raise RuntimeError('collector did not complete: '+str(completion))
 for ready in sorted(out.glob('ready-*.json')):
  meta=json.loads(ready.read_text());p=Path(meta['prefix']);done=out/f"done-{meta['index']:03d}.json"
  if not done.exists():raise RuntimeError('unfinished window '+str(p))
@@ -49,6 +51,7 @@ for ready in sorted(out.glob('ready-*.json')):
   row['samples']=sum(hist.values());row['sample_regions']=dict(regions);row['top_symbols']=hist.most_common(25);row['top_ips']=[dict(ip=hex(ip),samples=n) for ip,n in sample_ips.most_common(30)]
   if not row['samples']:raise RuntimeError('no actual guest samples '+str(p))
  summary.append(row)
+if len(summary)!=completion['windows']:raise RuntimeError('analysis targeted an incomplete or different run')
 # Byte-identical transformed packet/action is required across arms for each scenario.
 for scenario in {r['scenario'] for r in summary if r['app']=='katran'}:
  vals={(r['work']['retval'],r['work']['output_size'],r['work']['output_fnv64']) for r in summary if r['app']=='katran' and r['scenario']==scenario}
