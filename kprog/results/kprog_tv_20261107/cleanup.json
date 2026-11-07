@@ -1,0 +1,338 @@
+{
+  "source_commit": "3f77f48f7",
+  "vendor_commit": "9c50491de2a5f7c3067201b10a7182dbf172e541",
+  "deleted_entries": 737,
+  "allocated_bytes_removed": 6465331200,
+  "retained": [
+    "running trusted-kernel-v1 job and its current x86 kernel/module build",
+    "paired-context-v2 while used by BCC recipe",
+    "one current TV checker build/input set",
+    "vendor/build, native_link/target, kprog/formal/.lake, ccache and docker build caches"
+  ],
+  "removed_directories": [
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/shared-vmlinux-btf.raw",
+      "allocated_bytes": 13094912
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/invocation-publication.index",
+      "allocated_bytes": 24850432
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/context-v2-map-value",
+      "allocated_bytes": 11902976
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/simple-entry-1793992509219094222.index",
+      "allocated_bytes": 24674304
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/context-v2-coarse",
+      "allocated_bytes": 11911168
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/unicode-identity",
+      "allocated_bytes": 3526656
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/packet-invocation-publication.index",
+      "allocated_bytes": 24911872
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/PacketInvocationABI.olean",
+      "allocated_bytes": 1052672
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/tracing-helpers-1793991484346221498.index",
+      "allocated_bytes": 24649728
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/publish-actual-rx-20261107.index",
+      "allocated_bytes": 24829952
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/publish-emitted-site-20261107.index",
+      "allocated_bytes": 24768512
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/repair-fifth.patch",
+      "allocated_bytes": 7987200
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/checked-second-rejection.index",
+      "allocated_bytes": 24739840
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/map-call-contract.index",
+      "allocated_bytes": 24702976
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/local-simple-pc-relocation.log",
+      "allocated_bytes": 1310720
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/checked-store-expanded.index",
+      "allocated_bytes": 24735744
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/PacketProofStoreTransport.olean",
+      "allocated_bytes": 1634304
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/context-v2-no-exit-diagnostic",
+      "allocated_bytes": 6103040
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/repair-third.patch",
+      "allocated_bytes": 7786496
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/final-runtime-1793992131558709628.index",
+      "allocated_bytes": 24674304
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/exclusive-marker-1793990518065915688.index",
+      "allocated_bytes": 24645632
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/audit-abi-merged.index",
+      "allocated_bytes": 24821760
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/context-v2-rodata",
+      "allocated_bytes": 14610432
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/shared-aux-dwarf.txt",
+      "allocated_bytes": 1822720
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/concurrent-recording-repair-1793991613315612156.index",
+      "allocated_bytes": 24653824
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/checked-bb0.index",
+      "allocated_bytes": 24686592
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/paired-vmlinux-btf.raw",
+      "allocated_bytes": 12738560
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/tracing-helpers-1793991732469688881.index",
+      "allocated_bytes": 24657920
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/run.20261106T173453Z.log",
+      "allocated_bytes": 4681728
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/repair-third.index",
+      "allocated_bytes": 24694784
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/audit-abi-final.index",
+      "allocated_bytes": 24821760
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/context-v2-exclusive-choice",
+      "allocated_bytes": 1515028480
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/publish-entry-store-return-20261107.index",
+      "allocated_bytes": 24752128
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/run.20261106T122351Z.log",
+      "allocated_bytes": 7045120
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/publish-simple-prefix-20261107.index",
+      "allocated_bytes": 24768512
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/trusted-vendor-publication.index",
+      "allocated_bytes": 9994240
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/packet-store-publication.index",
+      "allocated_bytes": 24911872
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/run.20261106T065021Z.log",
+      "allocated_bytes": 1564672
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/run.20261106T084049Z.log",
+      "allocated_bytes": 8028160
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/publish-store-spills-20261107.index",
+      "allocated_bytes": 24752128
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/publish-simple-full-20261107.index",
+      "allocated_bytes": 24772608
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/repair-fourth.patch",
+      "allocated_bytes": 7999488
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/invocation-full-publication.index",
+      "allocated_bytes": 24850432
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/paired-input-abi2",
+      "allocated_bytes": 87740416
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/context-v2-func-ip",
+      "allocated_bytes": 11907072
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/publish-x86-abi-20261107.index",
+      "allocated_bytes": 24821760
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/shared-btf-fixed",
+      "allocated_bytes": 26640384
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/checked-first-rejection.index",
+      "allocated_bytes": 24739840
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/repair-fifth.index",
+      "allocated_bytes": 24690688
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/repair-fourth.index",
+      "allocated_bytes": 24686592
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/platform-local.index",
+      "allocated_bytes": 24702976
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/packet-publication.index",
+      "allocated_bytes": 24887296
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/publish-pc-relocation-20261107.index",
+      "allocated_bytes": 24780800
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/capture-1793994994201200879.index",
+      "allocated_bytes": 24694784
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/checked-proof-v1",
+      "allocated_bytes": 1929216
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/packet-entry-publication.index",
+      "allocated_bytes": 24895488
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/disk-cleanup-20261106.json",
+      "allocated_bytes": 2797568
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/context-v2-datasec",
+      "allocated_bytes": 11182080
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/publish-actual-rx-full.index",
+      "allocated_bytes": 24846336
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/map-inline-decision.index",
+      "allocated_bytes": 24682496
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/capture-local.index",
+      "allocated_bytes": 24698880
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/context-v2-proof-stages",
+      "allocated_bytes": 6393856
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/repair2-1793994940510253459.index",
+      "allocated_bytes": 24686592
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/bb0-1793994377623081530.index",
+      "allocated_bytes": 24682496
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/context-v2-map-capacity",
+      "allocated_bytes": 11223040
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/shared-vmlinux-btf-after.raw",
+      "allocated_bytes": 12734464
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/packet-rx-review.index",
+      "allocated_bytes": 24911872
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/context-v2-source-map",
+      "allocated_bytes": 17506304
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/packet-rx-publication.index",
+      "allocated_bytes": 24915968
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/checked-guard-return.index",
+      "allocated_bytes": 24739840
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/PacketStoreTransport.olean",
+      "allocated_bytes": 1105920
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/packet-return-publication.index",
+      "allocated_bytes": 24895488
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/T/audit-published-prefix-20261107.index",
+      "allocated_bytes": 24768512
+    },
+    {
+      "path": "/workspaces/repository/kprog/tv/build-kernel-arm64",
+      "allocated_bytes": 3330088960
+    },
+    {
+      "path": "/workspaces/repository/kprog/tv/build-arm64",
+      "allocated_bytes": 205430784
+    },
+    {
+      "path": "/workspaces/repository/kprog/tv/build/simple-arm64-mutations",
+      "allocated_bytes": 4100096
+    },
+    {
+      "path": "/workspaces/repository/kprog/tv/build/context-mutations",
+      "allocated_bytes": 1175552
+    },
+    {
+      "path": "/workspaces/repository/kprog/tv/build/capture-loader-x86.5DxuL7",
+      "allocated_bytes": 2568192
+    },
+    {
+      "path": "/workspaces/repository/kprog/tv/build/packet-entry-mutations",
+      "allocated_bytes": 8974336
+    },
+    {
+      "path": "/workspaces/repository/kprog/tv/build/simple-entry-mutations",
+      "allocated_bytes": 6529024
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/kprog_tv_20261106/programs.jsonl",
+      "allocated_bytes": 11415552
+    }
+  ]
+}
