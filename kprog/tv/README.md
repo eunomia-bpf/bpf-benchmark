@@ -1191,11 +1191,24 @@ both complete successor states, the same single8-byte event, corresponding
 loaded values and equal memory. Native flags/other registers/vector/profile
 and all untouched BPF fields remain in those state equalities.
 
-The theorem requires initial entry PCs, an active proof, related context and
-memory, and an actual successful context-read witness. It does not yet prove
-the rest of BB0 or the whole program: the spill, second read, guards, stores,
-exit, fault cases and ABI composition remain. Context conversion still needs
-its bound kernel/platform transport. The axiom audit has only standard Lean
-logical axioms, with no sorryAx. Exact scope and hashes are recorded in
-`trusted-simple-entry.json`; this is a concrete partial refinement, not a
-whole-program certificate.
+The original single-step theorem requires initial entry PCs, an active proof,
+related context/memory, and a successful context-read witness. Its original
+scope and hashes remain in `trusted-simple-entry.json`.
+
+`two_load_prefix_correspondence` now composes both actual native loads
+(bytes0..7) with actual BPF steps0,1,2, including the real8-byte spill at
+r10-40. Both complete successor states are fixed, loaded registers correspond,
+and guest memory agrees outside the existing private-spill model shifted by24.
+The second post-spill read is derived from that store and byte disjointness;
+its value is not assumed. The full proof trace contains the spill write.
+Only after proving its private bytes does the existing projection produce the
+two ordered native read events. Permissions, successful reads and private/
+guest disjointness are explicit hypotheses, including wraparound addresses.
+
+The rest of BB0/program still needs later spills, flags/native input, reloads,
+guards, stores, exit, fault cases and ABI composition. Context conversion
+still needs bound kernel/platform transport. The axiom audit has no sorryAx;
+the existing BV/private-spill proofs introduce Lean.ofReduceBool, so native
+proof evaluation is an explicit proof-tool trust item alongside Lean's logical
+axioms. Exact prefix scope/dependencies are in `trusted-simple-prefix.json`.
+This is a concrete partial refinement, not a whole-program certificate.

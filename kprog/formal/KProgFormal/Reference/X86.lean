@@ -1503,4 +1503,13 @@ theorem decode_mov_rcx_rdi (s : State) :
     scalarSource, scalarDestination, Except.bind, Except.pure,
     Bind.bind, Pure.pure, Except.instMonad]
 
+/-- Second concrete simple-entry load, sharing the canonical decoder. -/
+theorem decode_mov_rdx_rdi8 (s : State) :
+    decode #[0x48,0x8b,0x57,0x08] s = .ok
+      (.move .w64 (.register (.low 2)) (.memory (s.gpr 7 + 8)) (s.pc + 4)) := by
+  simp +decide [decode, prefixes, byteAt, operand, addressParts,
+    signedDisplacement, registerCode, scalarWidth, scalarSlice,
+    scalarSource, scalarDestination, Except.bind, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad]
+
 end KProgFormal.Reference.X86

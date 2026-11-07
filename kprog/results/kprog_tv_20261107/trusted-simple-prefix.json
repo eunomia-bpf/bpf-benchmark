@@ -1,0 +1,137 @@
+{
+  "status": "successful_two_load_spill_prefix_refinement_checked",
+  "program": "actual trusted-service x86 simple from b61f291a8",
+  "theorem": "KProgTV.TrustedSimpleX86.two_load_prefix_correspondence",
+  "covered_native_byte_range": [
+    0,
+    7
+  ],
+  "covered_virtual_B_pcs": [
+    0,
+    1,
+    2
+  ],
+  "proof_trace": [
+    "first guest read8",
+    "private spill write8 at r10-40",
+    "second guest read8"
+  ],
+  "native_trace": [
+    "same first guest read8",
+    "same second guest read8"
+  ],
+  "properties": [
+    "actual byte-decoded canonical native execution prefix",
+    "actual captured BPF platform execution prefix",
+    "both complete successor states; loaded registers correspond",
+    "spill write retained before privacy projection",
+    "guest memory and initialization/permissions agree outside existing shifted private frame",
+    "second post-spill read derived from actual store and byte disjointness; no assumed post-spill value"
+  ],
+  "premises": [
+    "entry PCs0 and proof active",
+    "related native RDI/proof context and initial memory",
+    "successful original context reads with exact events",
+    "actual writable spill8 permission",
+    "first read address outside private frame; every byte of second read outside frame",
+    "bound XDP virtual32/physical64 context conversion contract"
+  ],
+  "remaining": [
+    "later spills/flags/native input/reloads/guards",
+    "whole BB0 and remaining blocks/stores/exit",
+    "fault cases and complete ABI/platform materialization",
+    "all-micro/application certificates",
+    "immutable P to emitted artifact whole-program refinement"
+  ],
+  "trusted": [
+    "verifier soundness",
+    "V canonical reference ISA semantics and explicit kernel/platform contract",
+    "kernel binding/capture and accepted-byte provenance",
+    "registered specialization/link service until whole-program TV",
+    "Lean logical kernel plus native proof evaluation (Lean.ofReduceBool) used by existing BV/private-spill proofs"
+  ],
+  "axiom_audit": {
+    "KProgTV.TrustedSimpleX86.native_decode0": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgTV.TrustedSimpleX86.native_load": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgTV.TrustedSimpleX86.proof_load": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgTV.TrustedSimpleX86.platform_load": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgTV.TrustedSimpleX86.entry_load_correspondence": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgTV.TrustedSimpleX86.native_decode3": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgTV.TrustedSimpleX86.native_second_load": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgTV.TrustedSimpleX86.platform_second_load": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgTV.TrustedSimpleX86.platform_spill": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgTV.TrustedSimpleX86.second_read_after_spill": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgTV.TrustedSimpleX86.native_two_loads": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgTV.TrustedSimpleX86.proof_two_loads_spill": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgTV.TrustedSimpleX86.prefix_event_projection": [
+      "propext",
+      "Classical.choice",
+      "Lean.ofReduceBool",
+      "Quot.sound"
+    ],
+    "KProgTV.TrustedSimpleX86.two_load_prefix_correspondence": [
+      "propext",
+      "Classical.choice",
+      "Lean.ofReduceBool",
+      "Quot.sound"
+    ]
+  },
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "accepted_capture_literal_and_binding_checks": "passed; two captures and22 rejected mismatches",
+    "canonical_reference_X86Path_incremental_build": "passed",
+    "BPF/Composition/platform and PrivateSpills build": "passed",
+    "log_sha256": "714b0a5b23a4b2daaf6d2d98c8089f171f98e6e5aeb75bb8cd40635442f09155"
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "e860e963f45e16dffb00708684e8d5858a3c004c4131b0783b2b5f9db502d134",
+    "kprog/tv/PrivateSpills.lean": "27afd89c7ffb1ccd911f584754427bf761cc972126df58dbecf5f2f6de70ac44",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "403c5e544b3fbdd250463dd436224bfae7c64a90d8af20f7194cd27f782b5ec9",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/tv/Makefile": "2123977b45e69a44f70507dd65b2c1506e23d509f1c244a7d1d5f0799456f9b4"
+  },
+  "raw_output": "summarized then removed; shared incremental caches and STOP retained"
+}

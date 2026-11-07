@@ -1,5 +1,6 @@
 import KProgFormal.Reference.X86Path
 import BPFPlatform
+import PrivateSpills
 
 set_option maxRecDepth 4096
 set_option maxHeartbeats 2000000
@@ -55,9 +56,15 @@ def expansion0 : BPFPlatform.Expansion where
   bytes := physical0
   positions := fun _ => [0]
 
+def physical2 : Array Byte := #[0x79,0x11,8,0,0,0,0,0]
+def expansion2 : BPFPlatform.Expansion where
+  original := ⟨0x61,1,1,4,0⟩
+  bytes := physical2
+  positions := fun _ => [0]
+
 def platform : BPFPlatform.Environment where
   bpf := externals
-  access := fun pc _ => .ok (if pc = 0 then some expansion0 else none)
+  access := fun pc _ => .ok (if pc = 0 then some expansion0 else if pc = 2 then some expansion2 else none)
 
 theorem platform_load (s : BPF.State) (value : Word) (event : Event)
     (active : s.halted = false) (position : s.pc = 0)
@@ -105,6 +112,202 @@ theorem entry_load_correspondence (n : X86.State) (p : BPF.State)
     platform_load p value event active proofPC read,
     by simp [nativeAfter, BPF.setReg], by simpa [nativeAfter, BPF.setReg] using memory⟩
 
+
+theorem native_decode3 (s : X86.State) :
+    X86.decode (native.extract 3 7) s = .ok
+      (.move .w64 (.register (.low 2)) (.memory (s.gpr 7 + (8#64))) (s.pc + 4)) := by
+  have bytes : native.extract 3 7 = #[0x48,0x8b,0x57,0x08] := by decide
+  rw [bytes]
+  exact X86.decode_mov_rdx_rdi8 s
+
+def nativeAfterSecond (s : X86.State) (value : Word) : X86.State :=
+  { s with gpr := fun r => if r = 2 then value else s.gpr r, pc := s.pc + 4 }
+
+theorem native_second_load (s : X86.State) (value : Word) (event : Event)
+    (read : readMemory s.memory (s.gpr 7 + (8#64)) 8 = .ok (value,event)) :
+    X86.step (.move .w64 (.register (.low 2)) (.memory (s.gpr 7+ (8#64))) (s.pc+4)) s =
+      ⟨nativeAfterSecond s value, [event], none⟩ := by
+  simp +decide [X86.step, X86.moveStep, X86.scalarRead, X86.readSource, read,
+    X86.scalarWrite, X86.scalarWriteValue, X86.RegisterSlice.reg,
+    X86.RegisterSlice.shift, X86.ScalarWidth.bits, X86.ScalarWidth.bytes, nativeAfterSecond]
+
+theorem platform_second_load (s : BPF.State) (value : Word) (event : Event)
+    (active : s.halted = false) (position : s.pc = 2)
+    (read : readMemory s.memory (s.regs 1 + (8#64)) 8 = .ok (value,event)) :
+    BPFPlatform.step platform proof s =
+      .ok ⟨{ BPF.setReg s 1 value with pc := 3 }, [event], none⟩ := by
+  simp +decide [BPFPlatform.step, platform, active, position,
+    BPFPlatform.expand, expansion2, BPFPath.evaluate, physical2, BPF.decode, proof,
+    BPF.execute, BPF.load, BPF.setReg, read, littleEndian,
+    Except.bind, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+
+-- Existing two-slot private-memory model shifted to this compiler's slots.
+def spillFrame (p : BPF.State) : Word := p.regs 10 - (24#64)
+
+theorem spill_address (frame : Word) :
+    frame - (40#64) = (frame - (24#64)) - (16#64) := by
+  unfold Word at *
+  bv_decide
+
+def afterSpill (p : BPF.State) (pointer : Word) : BPF.State :=
+  { BPF.setReg p 2 pointer with
+    pc := 2
+    memory := storeMemory p.memory (p.regs 10 - (40#64)) pointer 8 }
+
+theorem platform_spill (p : BPF.State) (pointer : Word)
+    (active : p.halted = false) (position : p.pc = 0)
+    (write : permitted p.memory.writable (p.regs 10 - (40#64)) 8 = true) :
+    BPFPlatform.step platform proof { BPF.setReg p 2 pointer with pc := 1 } =
+      .ok ⟨afterSpill p pointer,
+        [.memory .write (p.regs 10 - (40#64)) (valueBytes pointer 8) true], none⟩ := by
+  have neg40 (v : Word) : v + (18446744073709551576#64) = v - (40#64) := by
+    change v + -(40#64) = v - (40#64)
+    exact BitVec.add_neg_eq_sub
+  simp +decide [BPFPlatform.step, platform, active, position, proof, BPF.decode,
+    BPF.execute, BPF.store, BPF.setReg, afterSpill, neg40, writeMemory, write,
+    littleEndian, Except.bind, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+
+theorem spill_preserves_guest (p : BPF.State) (pointer : Word) :
+    PrivateSpills.AgreesOutside (spillFrame p) p.memory (afterSpill p pointer).memory := by
+  refine ⟨rfl,rfl,?_⟩
+  intro address outside
+  have untouched : ¬ (address - (p.regs 10 - (40#64))).toNat < 8 := by
+    rw [spill_address]
+    simp only [PrivateSpills.privateByte, spillFrame] at outside
+    omega
+  simp only [afterSpill, storeMemory, untouched, ite_false]
+  trivial
+
+-- Second guest read is derived from the actual spill, not supplied as a
+-- post-spill value premise. Disjointness covers every byte, including wrap.
+theorem second_read_after_spill (p : BPF.State) (pointer limit : Word) (event : Event)
+    (read : readMemory p.memory (p.regs 1 + (8#64)) 8 = .ok (limit,event))
+    (guest : ∀ i < 8, ¬ PrivateSpills.privateByte (spillFrame p)
+      (p.regs 1 + (8#64) + BitVec.ofNat 64 i)) :
+    readMemory (afterSpill p pointer).memory ((afterSpill p pointer).regs 1 + (8#64)) 8 =
+      .ok (limit,event) := by
+  have same := PrivateSpills.guest_reads_preserved (spillFrame p) (p.regs 1+ (8#64)) 8
+    p.memory (afterSpill p pointer).memory (spill_preserves_guest p pointer) guest
+  simpa [afterSpill, BPF.setReg] using same.symm.trans read
+
+
+def nativePrefixFinal (n : X86.State) (pointer limit : Word) : X86.State :=
+  nativeAfterSecond (nativeAfter n pointer) limit
+
+theorem native_two_loads (n : X86.State) (pointer limit : Word) (first second : Event)
+    (position : n.pc = 0)
+    (read0 : readMemory n.memory (n.gpr 7) 8 = .ok (pointer,first))
+    (read1 : readMemory n.memory (n.gpr 7 + (8#64)) 8 = .ok (limit,second)) :
+    X86Path.Execution 0 native n [first,second] (nativePrefixFinal n pointer limit) := by
+  let middle := nativeAfter n pointer
+  have firstDecoded : X86Path.decodeAt 0 native ⟨0,3⟩ n = .ok
+      (.move .w64 (.register (.low 1)) (.memory (n.gpr 7)) (n.pc+3)) := by
+    simp +decide [X86Path.decodeAt, position, native_size, native_decode0,
+      X86Path.fallthrough, X86.Instruction.fallthrough,
+      Except.bind, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+  have secondDecoded : X86Path.decodeAt 0 native ⟨3,4⟩ middle = .ok
+      (.move .w64 (.register (.low 2)) (.memory (middle.gpr 7 + (8#64))) (middle.pc+4)) := by
+    simp +decide [X86Path.decodeAt, middle, nativeAfter, position, native_size,
+      native_decode3, X86Path.fallthrough, X86.Instruction.fallthrough,
+      Except.bind, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+  have readMiddle : readMemory middle.memory (middle.gpr 7 + (8#64)) 8 = .ok (limit,second) := by
+    simpa +decide [middle, nativeAfter] using read1
+  have suffix := X86Path.Execution.next ⟨3,4⟩ _ secondDecoded
+    (X86Path.Execution.refl (X86.step
+      (.move .w64 (.register (.low 2)) (.memory (middle.gpr 7 + (8#64))) (middle.pc+4)) middle).state)
+  rw [native_second_load middle limit second readMiddle] at suffix
+  have tail : X86Path.Execution 0 native
+      (X86.step (.move .w64 (.register (.low 1)) (.memory (n.gpr 7)) (n.pc+3)) n).state
+      [second] (nativePrefixFinal n pointer limit) := by
+    rw [native_load n pointer first read0]
+    simpa [nativePrefixFinal, middle] using suffix
+  have complete := X86Path.Execution.next ⟨0,3⟩ _ firstDecoded tail
+  rw [native_load n pointer first read0] at complete
+  simpa using complete
+
+def platformInstructionStep : BlockStep BPF.State := fun before events after =>
+  ∃ result, BPFPlatform.step platform proof before = .ok result ∧
+    result.events = events ∧ result.state = after
+
+def proofPrefixFinal (p : BPF.State) (pointer limit : Word) : BPF.State :=
+  { BPF.setReg (afterSpill p pointer) 1 limit with pc := 3 }
+
+def prefixEvents (p : BPF.State) (pointer : Word) (first second : Event) : List Event :=
+  [first, .memory .write (p.regs 10 - (40#64)) (valueBytes pointer 8) true, second]
+
+theorem proof_two_loads_spill (p : BPF.State) (pointer limit : Word) (first second : Event)
+    (position : p.pc = 0) (active : p.halted = false)
+    (read0 : readMemory p.memory (p.regs 1) 8 = .ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1 + (8#64)) 8 = .ok (limit,second))
+    (write : permitted p.memory.writable (p.regs 10 - (40#64)) 8 = true)
+    (guest : ∀ i < 8, ¬ PrivateSpills.privateByte (spillFrame p)
+      (p.regs 1 + (8#64) + BitVec.ofNat 64 i)) :
+    Execution platformInstructionStep p (prefixEvents p pointer first second)
+      (proofPrefixFinal p pointer limit) := by
+  have thirdRead := second_read_after_spill p pointer limit second read1 guest
+  have third := platform_second_load (afterSpill p pointer) limit second
+    (by simpa [afterSpill, BPF.setReg] using active) rfl thirdRead
+  have step0 : platformInstructionStep p [first] { BPF.setReg p 2 pointer with pc := 1 } :=
+    ⟨_, platform_load p pointer first active position read0, rfl, rfl⟩
+  have step1 : platformInstructionStep { BPF.setReg p 2 pointer with pc := 1 }
+      [.memory .write (p.regs 10 - (40#64)) (valueBytes pointer 8) true] (afterSpill p pointer) :=
+    ⟨_, platform_spill p pointer active position write, rfl, rfl⟩
+  have step2 : platformInstructionStep (afterSpill p pointer) [second] (proofPrefixFinal p pointer limit) :=
+    ⟨_,third,rfl,rfl⟩
+  simpa [prefixEvents] using Execution.next step0
+    (Execution.next step1 (Execution.next step2 (Execution.refl _)))
+
+theorem prefix_event_projection (p : BPF.State) (pointer limit : Word) (first second : Event)
+    (read0 : readMemory p.memory (p.regs 1) 8 = .ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1 + (8#64)) 8 = .ok (limit,second))
+    (guest0 : ¬ PrivateSpills.privateByte (spillFrame p) (p.regs 1))
+    (guest1 : ¬ PrivateSpills.privateByte (spillFrame p) (p.regs 1 + (8#64))) :
+    (prefixEvents p pointer first second).filterMap (PrivateSpills.projectEvent (spillFrame p)) = [first,second] := by
+  have firstKept := PrivateSpills.read_event_retained p.memory (spillFrame p) _ _ _ first read0 guest0
+  have secondKept := PrivateSpills.read_event_retained p.memory (spillFrame p) _ _ _ second read1 guest1
+  have slot : p.regs 10 - (40#64) = spillFrame p - (16#64) := by
+    exact spill_address _
+  have gone : PrivateSpills.projectEvent (spillFrame p)
+      (.memory .write (p.regs 10 - (40#64)) (valueBytes pointer 8) true) = none := by
+    simp [PrivateSpills.projectEvent, slot, valueBytes]
+  simp [prefixEvents, List.filterMap_cons, List.filterMap_nil, firstKept, secondKept, gone]
+
+
+/-- Actual two-native-load / three-BPF-step prefix, including the real spill.
+The only erased event is proved private; all resulting fields are fixed by
+complete states, and guest memory agreement is established, not assumed. -/
+theorem two_load_prefix_correspondence (n : X86.State) (p : BPF.State)
+    (pointer limit : Word) (first second : Event)
+    (nativePC : n.pc = 0) (proofPC : p.pc = 0) (active : p.halted = false)
+    (context : n.gpr 7 = p.regs 1) (memory : n.memory = p.memory)
+    (read0 : readMemory p.memory (p.regs 1) 8 = .ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1 + (8#64)) 8 = .ok (limit,second))
+    (write : permitted p.memory.writable (p.regs 10 - (40#64)) 8 = true)
+    (guest0 : ¬ PrivateSpills.privateByte (spillFrame p) (p.regs 1))
+    (guest1 : ∀ i < 8, ¬ PrivateSpills.privateByte (spillFrame p)
+      (p.regs 1 + (8#64) + BitVec.ofNat 64 i)) :
+    X86Path.Execution 0 native n [first,second] (nativePrefixFinal n pointer limit) ∧
+    Execution platformInstructionStep p (prefixEvents p pointer first second)
+      (proofPrefixFinal p pointer limit) ∧
+    (prefixEvents p pointer first second).filterMap (PrivateSpills.projectEvent (spillFrame p)) = [first,second] ∧
+    (nativePrefixFinal n pointer limit).gpr 1 = (proofPrefixFinal p pointer limit).regs 2 ∧
+    (nativePrefixFinal n pointer limit).gpr 2 = (proofPrefixFinal p pointer limit).regs 1 ∧
+    PrivateSpills.AgreesOutside (spillFrame p) (nativePrefixFinal n pointer limit).memory
+      (proofPrefixFinal p pointer limit).memory := by
+  have nativeRead0 : readMemory n.memory (n.gpr 7) 8 = .ok (pointer,first) := by
+    simpa [memory,context] using read0
+  have nativeRead1 : readMemory n.memory (n.gpr 7+(8#64)) 8 = .ok (limit,second) := by
+    simpa [memory,context] using read1
+  have guest1Base : ¬ PrivateSpills.privateByte (spillFrame p) (p.regs 1+(8#64)) := by
+    simpa using guest1 0 (by decide)
+  refine ⟨native_two_loads n pointer limit first second nativePC nativeRead0 nativeRead1,
+    proof_two_loads_spill p pointer limit first second proofPC active read0 read1 write guest1,
+    prefix_event_projection p pointer limit first second read0 read1 guest0 guest1Base, ?_, ?_, ?_⟩
+  · simp +decide [nativePrefixFinal, nativeAfterSecond, nativeAfter, proofPrefixFinal, afterSpill, BPF.setReg]
+  · simp +decide [nativePrefixFinal, nativeAfterSecond, nativeAfter, proofPrefixFinal, afterSpill, BPF.setReg]
+  · simpa [nativePrefixFinal, nativeAfterSecond, nativeAfter, proofPrefixFinal, BPF.setReg, memory]
+      using spill_preserves_guest p pointer
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -113,3 +316,15 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.platform_load
 
 #print axioms KProgTV.TrustedSimpleX86.entry_load_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode3
+#print axioms KProgTV.TrustedSimpleX86.native_second_load
+#print axioms KProgTV.TrustedSimpleX86.platform_second_load
+#print axioms KProgTV.TrustedSimpleX86.platform_spill
+#print axioms KProgTV.TrustedSimpleX86.second_read_after_spill
+
+#print axioms KProgTV.TrustedSimpleX86.native_two_loads
+#print axioms KProgTV.TrustedSimpleX86.proof_two_loads_spill
+#print axioms KProgTV.TrustedSimpleX86.prefix_event_projection
+
+#print axioms KProgTV.TrustedSimpleX86.two_load_prefix_correspondence
