@@ -37,7 +37,7 @@ replays and T's artifact checks use this specification.
 The handler refinements retain the complete modeled state, PC, ordered memory
 accesses and faults under their stated field, address and platform witnesses.
 The x86 raw register frame covers RSP offsets and STACK arena pointers, lane
-reads/writes, MOV/CMOV/XCHG, reversal/count, logical, arithmetic, unary, multiply, compare and immediate/CL
+reads/writes, MOV/CMOV/SETCC/XCHG, reversal/count, logical, arithmetic, unary, multiply, compare and immediate/CL
 shift, classic ROR, BMI2 and bit-operation register bodies. Its partial raw
 dispatcher composes the published opcode/AUX/width/GPR bindings into the
 canonical `Step` relation, retaining actual writes to undefined flags. The AArch64

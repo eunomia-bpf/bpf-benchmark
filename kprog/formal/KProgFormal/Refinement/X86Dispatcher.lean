@@ -545,6 +545,10 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         let source ← registerOf src
         pure ⟨nativeRegisters env frame arena
           (conditionalMoveWord env frame arena state width aux destination source nextPc), [], none⟩
+      else if code = GeneratedX86DispatchSingleton.code .setcc then do
+        let destination ← sliceOf .w8 dst (GeneratedX86RegLaneAux.dstShift aux)
+        pure ⟨nativeRegisters env frame arena
+          (setConditionRegister env frame arena state (GeneratedX86RegLaneAux.payload aux) destination nextPc), [], none⟩
       else if code = GeneratedX86DispatchSingleton.code .bswap then do
         let width ← bswapWidthOf flags
         let destination ← registerOf dst
@@ -762,6 +766,11 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
       (conditionField : aux = BitVec.ofNat 32 cc.val) :
       RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86DispatchSingleton.code .cmov)
         (.cmov width cc destination (.register source) nextPc)
+  | setCondition (cc : Fin 16) (destination : RegisterSlice)
+      (dstField : SliceBinding .w8 dst (GeneratedX86RegLaneAux.dstShift aux) destination)
+      (conditionField : GeneratedX86RegLaneAux.payload aux = BitVec.ofNat 32 cc.val) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86DispatchSingleton.code .setcc)
+        (.setcc cc (.register destination) nextPc)
   | byteSwap (width : Reference.X86.BzhiWidth) (destination : Register)
       (widthField : WidthBinding flags (bswapScalarWidth width))
       (dstField : dst = registerByte destination) :
@@ -801,7 +810,7 @@ private theorem exact_dispatch_refines {native : Reference.X86.Instruction} {bef
   ⟨Reference.X86.step native before, same, rfl, rfl, rfl⟩
 
 /-- One complete raw-frame step for the currently lifted register opcodes:
-NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG/ROR(imm8+CL)/SHIFTX/RORX/ANDN/BZHI/BT plus logical/arithmetic/unary/multiply/shift ALU-register
+NOP/MOV/CMOV+SETCC(all16)/BSWAP/POPCNT/XCHG/ROR(imm8+CL)/SHIFTX/RORX/ANDN/BZHI/BT plus logical/arithmetic/unary/multiply/shift ALU-register
 and immediate family payloads and CMP/TEST register/immediate forms. Neither component handler
 semantics nor a chosen condition/value/state equation is assumed. This is a
 partial dispatcher theorem, not all77 operations or a compiled-body claim.
@@ -1063,6 +1072,13 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
         GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
         congrArg some (conditional_move_word_frame_refines env frame arena state width cc destination source nextPc)
+  | setCondition cc destination dstField conditionField =>
+      apply exact_dispatch_refines
+      have dstDecoded := slice_binding_decodes .w8 dst _ destination dstField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        dstDecoded, conditionField] using
+        congrArg some (set_condition_register_frame_refines env frame arena state cc destination nextPc)
   | byteSwap width destination widthField dstField =>
       apply exact_dispatch_refines
       subst dst

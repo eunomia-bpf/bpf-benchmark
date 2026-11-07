@@ -1243,4 +1243,32 @@ theorem bit_test_immediate_frame_refines (env : Environment) (frame : Frame) (ar
   rw [← X86Bt.step_refines]
   rfl
 
+/-- The actual SETCC register macro decodes the low AUX payload byte through
+FULL_CONDITION_MATCHED and writes only the selected byte; FLAGS is unused. -/
+def setConditionRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (payload : BitVec 32) (dst : Reference.X86.RegisterSlice)
+    (nextPc : NativeWord) : RegisterState :=
+  let matched := GeneratedX86FullCondition.matched (payload.setWidth 8)
+  let taken := (GeneratedX86FullCondition.eval (matched.setWidth 32)
+    (state.raw.rflags.getLsbD 0) (state.raw.rflags.getLsbD 6) (state.raw.rflags.getLsbD 7)
+    (state.raw.rflags.getLsbD 11) (state.raw.rflags.getLsbD 2)).getD false
+  registerPc (writeRegister env frame arena state .w8 dst (if taken then 1 else 0)) nextPc
+
+theorem set_condition_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (code : Fin 16) (dst : Reference.X86.RegisterSlice) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (setConditionRegister env frame arena state
+        (BitVec.ofNat 32 code.val) dst nextPc), [], none⟩ : Transition Reference.X86.State) =
+      Reference.X86.step (.setcc code (.register dst) nextPc) (nativeRegisters env frame arena state) := by
+  have low : (BitVec.ofNat 32 code.val).setWidth 8 = BitVec.ofNat 8 code.val := by simp
+  have fits : (BitVec.ofNat 16 code.val).setWidth 32 = BitVec.ofNat 32 code.val := by
+    apply BitVec.eq_of_toNat_eq
+    simp [BitVec.toNat_setWidth, Nat.mod_eq_of_lt (show code.val < 65536 by omega),
+      Nat.mod_eq_of_lt (show code.val < 4294967296 by omega)]
+  have condition := X86Condition.condition_refines code state.raw.rflags
+  unfold X86Condition.evaluate at condition
+  simp only [setConditionRegister, low, X86Condition.matched_code, fits, condition, Option.getD_some]
+  rw [native_register_pc, native_register_write]
+  simp only [Reference.X86.step, Reference.X86.scalarWrite]
+  rfl
+
 end KProgFormal.Refinement.X86NumericAddress

@@ -2748,3 +2748,24 @@ control omitting only the PF assignment was rejected with 10,800 differences;
 every difference was independently verified to be PF alone. Original failed
 elaborations and corrected source hashes are retained. Remaining opcodes,
 memory routes and compiled O2/O4 are still open.
+
+
+### SETCC raw register dispatcher
+
+All sixteen conditions, including parity and inverse parity, now pass through
+SETCC's actual low AUX payload, full matched-condition decoder and byte-lane
+writer in the same raw dispatcher theorem. Legal high/low register bytes,
+RSP/STACK projection and arbitrary input flags are covered. Flags, vector,
+memory and every other register byte are retained. The macro ignores FLAGS,
+SRC and IMM; the binding leaves those unused fields unconstrained.
+
+The focused 113-module and complete default Lean builds passed, as did three
+axiom audits and three generator checks. Existing checks passed 15,371
+canonical condition/width/lane/branch/memory/fault cases and 2,433,038 routed
+SETCC host cases under UBSan, with stable recorded inputs. The initial
+let-reduction elaboration failure and exact corrected proof sources are
+archived. C changed the shared memory-load header after the first stable host pass;
+those original inputs/results and the observed drift are archived, and these
+host checks were rerun successfully against the new load-cast header. V
+changed no production source, oracle or canonical ISA in this increment. The next full check will include both bit-operation and SETCC
+proof changes; the complete 9e7 full pass remains a preceding snapshot.
