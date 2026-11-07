@@ -113,7 +113,7 @@ matching-work measurement continue from the reported failure classes.
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [Earlier functional batch153239](native-only-runtime/standard-bcc-8g.json) |
 | OTel | 14 | 3 | 3 | 2 | 0 | 1: exploration limit | [192310 batch](otel-narrow-load/README.md) |
 | Cilium | 163 | 1 | 0 | 0 | 1: map declaration | 0 | [201146 batch](native-modules-cilium__agent/README.md) |
-| Tetragon | 311 attempts; 287 resident | 4 | 4 | 4 | 1: next entry manifest selector | 0 | [221545 batch](tetragon-memcpy-replay/README.md) |
+| Tetragon | 311 attempts; 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [223215 batch](tetragon-manifest-replay/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [213447 bound batch](katran-tagged-storage/README.md) |
 | Tracee | 151 | 6 | 6 | 5 | 0 | 1: readonly indexed extent | [214037 batch](tracee-narrow-range/README.md) |
 
@@ -226,3 +226,10 @@ Its component build and12service tests pass; actual kernel resource mutation,
 close and authorization controls are retained by T. The next wholeCilium
 replay consumes matching caller/worker/module inputs, preserving application
 workloads and the common fresh generation/verifier/binding service.
+
+
+The [Tetragon complete-manifest replay223215](tetragon-manifest-replay/README.md)
+closes execve_send source selection and freshly generates/compiles5requests,
+with4bound. Request5reaches the actual verifier8193-jump sequence limit,
+188982processed instructions and1926states. The next generic CMP representation
+trial retains native/application/workload inputs and the common service.

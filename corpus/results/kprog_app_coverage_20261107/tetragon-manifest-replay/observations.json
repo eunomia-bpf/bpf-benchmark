@@ -1,0 +1,36 @@
+{
+  "baseline_load_attempts": 311,
+  "baseline_resident_bpf_records": 287,
+  "native_requests": 5,
+  "generated": 5,
+  "compiled": 5,
+  "accepted_bound": 4,
+  "specialization_errors": 0,
+  "verifier_rejections": 1,
+  "error_class": "8193 jump sequence complexity",
+  "processed_instructions": 188982,
+  "total_states": 1926,
+  "peak_states": 1926,
+  "failed_entry": "execve_send",
+  "source_drift": [
+    "kprog/trusted_service.py"
+  ],
+  "bound_id_pairs": [
+    [
+      333,
+      334
+    ],
+    [
+      335,
+      336
+    ],
+    [
+      337,
+      338
+    ],
+    [
+      339,
+      340
+    ]
+  ]
+}
