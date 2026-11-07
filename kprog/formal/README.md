@@ -40,7 +40,10 @@ NOP/address/MOV/MOVK, generic ALU, SHIFT, multiply/divide, MVN/NEG, CNEG,
 EXTR/REV/SXT, BITFIELD, arithmetic/logical flags, ORN, CCMP and CSEL gates into one
 canonical step over field-only
 bindings. It retains pointer branch order, native bounds, source/destination
-aliases and arbitrary unused fields. The remaining families still need composition.
+aliases and arbitrary unused fields. Memory-base byte read/write/pre/post
+bridges separately retain native base31→SP32 and raw1/2/4/8-byte widths,
+including absent-width→doubleword. Memory accesses and the remaining families
+still need composition.
 
 The proofs establish arithmetic/flags, register and tag operations, memory
 accesses, routing tables, and selected whole-state handler refinements.

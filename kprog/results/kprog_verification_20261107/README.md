@@ -1227,3 +1227,31 @@ existing semantic/route hosts passed 240 cases,80 cases,40080 cases,2072 cases,1
 remain identical. No placeholders, new tests, input filtering, ISA/runtime/
 generator/oracle/paper changes. Original C warnings remain visible. Active
 exact45d's full check predates CCMP and this select extension.
+
+## Memory base bytes and scalar-memory width binding
+
+`Arm64Dispatcher.memoryBaseCode` binds native memory base field31 to actual
+simulator SP32, while data field31 continues to read/discard ZR. Complete-state
+byte read/write equalities connect this codec to the single canonical memory
+base operations, with all GPRs, aliases, SP, flags, vectors, memory and PC retained.
+The actual numeric pre/post base step keeps its zero-delta no-write behavior
+and full-width nonzero update; derived equality composes the existing generated
+pre/post deltas into the same native base update. Pointer materialization and
+tag transport remain explicit Entry/O4 obligations.
+
+Raw FLAGS binding separately retains all scalar-memory widths1/2/4/8. Zero
+selects exactly the production doubleword default; it never turns byte/halfword/
+word or16-byte vector accesses into an arbitrary integer W/X operation. These
+are field identities only. This increment proves base-update algebra before an
+intervening transfer; it does not establish permissions/access success, erase
+faults, identify one16-byte event with two8-byte accesses, or complete memory
+dispatch. Native byte/width/compiled-body and full77/72/O2/O4 transport remain open.
+
+Validation: focused88-job dispatcher/reference Lean build, seven existing
+contract freshness checks, direct-dispatch/model checks and12 existing semantic/
+route hosts passed 40080 cases,20168 cases,512 cases,22115 cases,512 cases,6913 cases,257 cases,6401 cases,15 cases,205324 cases,4608 cases,135170 cases. Exact proof SHA256
+`46f2ac87f4ff5225098a199d8d917a85144fb6ff47946797e8917ba759e04751` stayed unchanged. Earlier declaration bytes remain
+identical except the shared VectorMemory import. No placeholders, new tests,
+input filtering, ISA/runtime/generator/oracle/paper changes. Original compiler
+warnings remain visible. Exact45d's full pass predates CCMP/select and these
+memory-field bridges.

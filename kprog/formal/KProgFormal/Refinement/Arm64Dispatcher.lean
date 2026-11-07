@@ -3,6 +3,7 @@ import KProgFormal.Refinement.Arm64Arithmetic
 import KProgFormal.Refinement.Arm64Mul
 import KProgFormal.Refinement.Arm64Select
 import KProgFormal.Refinement.Arm64Bitfield
+import KProgFormal.Refinement.Arm64VectorMemory
 import KProgFormal.Refinement.Arm64Movk
 import KProgFormal.Refinement.Arm64Branch
 import KProgFormal.Generated.GeneratedArm64Adrp
@@ -1762,5 +1763,75 @@ theorem step_through_select_refines (code : Nat) (aux : BitVec 32) (width : Widt
   | select => apply select_refines
   | normalizedNv => apply select_normalized_nv_refines
   | alias => apply select_alias_refines; assumption
+
+
+/-- Native memory base field31 denotes SP, while a data field31 denotes ZR.
+Its actual simulator byte therefore uses the separate SP32 code. -/
+def memoryBaseCode (base : Register) : Byte :=
+  Arm64Move.Fields.encode (if h : base.val < 31 then .general ⟨base.val, h⟩ else .stack)
+
+theorem memory_base_read (s : Reference.AArch64.State) (base : Register) :
+    Arm64Move.Fields.read s (memoryBaseCode base) = Reference.AArch64.memoryBase s base := by
+  unfold memoryBaseCode
+  rw [Arm64Move.Fields.typed_read, Arm64Move.read_data_refines]
+  by_cases general : base.val < 31 <;>
+    simp only [general, ↓reduceDIte, Reference.AArch64.readData, Reference.AArch64.memoryBase]
+  all_goals rfl
+
+theorem memory_base_write (s : Reference.AArch64.State) (base : Register) (value : Word) :
+    Arm64Move.Fields.write s (memoryBaseCode base) value .w64 =
+      Reference.AArch64.writeMemoryBase s base value := by
+  unfold memoryBaseCode
+  rw [Arm64Move.Fields.typed_write, Arm64Move.width_write_refines]
+  by_cases general : base.val < 31
+  · have notStack : base.val ≠ 31 := by omega
+    simp [general, Reference.AArch64.writeMemoryBase, notStack, Reference.AArch64.writeData,
+      Reference.AArch64.writeReg, Reference.AArch64.narrow, Reference.AArch64.Width.bits]
+  · have stack : base.val = 31 := by have := base.isLt; omega
+    simp [general, stack, Reference.AArch64.writeMemoryBase, Reference.AArch64.writeData,
+      Reference.AArch64.narrow, Reference.AArch64.Width.bits]
+
+/-- Numeric projection of MEM_PREPOST_STEP: zero delta leaves even the
+private base cell untouched; nonzero pointer arithmetic must materialize the
+same native word through Entry/O4. The actual SP32 read/write is retained. -/
+def bumpMemoryBase (base : Byte) (delta : Word) (s : Reference.AArch64.State) : Reference.AArch64.State :=
+  if delta = 0 then s else Arm64Move.Fields.write s base (Arm64Move.Fields.read s base + delta) .w64
+
+theorem memory_base_bump_typed (base : Register) (delta : Word) (s : Reference.AArch64.State) :
+    bumpMemoryBase (memoryBaseCode base) delta s = Arm64VectorMemory.bumpBase s base delta := by
+  rw [Arm64VectorMemory.bump_refines]
+  by_cases zero : delta = 0
+  · simp only [bumpMemoryBase, zero, ↓reduceIte, BitVec.add_zero]
+    simpa [Reference.Word] using (Arm64VectorMemory.write_base_read s base).symm
+  · simp only [bumpMemoryBase, zero, ↓reduceIte, memory_base_read, memory_base_write]
+
+/-- Only the base-update algebra is composed here. An intervening transfer,
+its permissions/faults and ordering are still separate obligations. -/
+theorem memory_base_prepost (mode : Reference.AArch64.Writeback) (base : Register) (delta : Word)
+    (s : Reference.AArch64.State) :
+    bumpMemoryBase (memoryBaseCode base)
+      (GeneratedArm64MemPrepost.postDelta (Arm64AddressedMemory.flags mode) delta)
+      (bumpMemoryBase (memoryBaseCode base)
+        (GeneratedArm64MemPrepost.preDelta (Arm64AddressedMemory.flags mode) delta) s) =
+      Reference.AArch64.writeMemoryBase s base
+        (Reference.AArch64.memoryBase s base + (if mode = .none then 0 else delta)) := by
+  rw [memory_base_bump_typed, memory_base_bump_typed]
+  exact Arm64VectorMemory.writeback_base_refines mode s base delta
+
+/-- Bind the raw FLAGS byte to each scalar-memory width. Zero is exactly the
+production default doubleword, never byte/halfword/word or a 16-byte vector.
+These are field identities, not an access-success or safety premise. -/
+theorem scalar_memory_width_code (width : Reference.AArch64.MemoryWidth) :
+    GeneratedArm64Width.code (Arm64Memory.valueWidth width) = width.bytes := by cases width <;> rfl
+
+theorem scalar_memory_effective_width (flags : Byte) (width : Reference.AArch64.MemoryWidth)
+    (encoded : flags.toNat = width.bytes ∨ (flags.toNat = 0 ∧ width = .double)) :
+    GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code (Arm64Memory.valueWidth width) := by
+  rw [scalar_memory_width_code]
+  rcases encoded with explicit | ⟨absent, rfl⟩
+  · rw [explicit]
+    cases width <;> rfl
+  · rw [absent]
+    rfl
 
 end KProgFormal.Refinement.Arm64Dispatcher
