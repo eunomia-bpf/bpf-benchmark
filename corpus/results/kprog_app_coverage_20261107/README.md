@@ -158,3 +158,10 @@ native-stub EINVAL with34919processed instructions. Tracee reaches6generated/
 compiled and5bound, followed by an indexed readonly-map extent rejection.
 The linked batch reports distinguish that native-stub error from a confirmed
 verifier rejection and preserve the full current source epochs.
+
+
+[Katran private complete-register storage](katran-partial-storage/README.md) moves
+past the partial pointer mask to an unbounded index after a scalar spill/reload.
+The original native input stays fixed; provenance-selected storage is the next
+generic candidate. The production RSP LEA sum now uses unsigned wrapping addition,
+with48553route/62400composition/8401offset cases underUBSan and V's universal law.

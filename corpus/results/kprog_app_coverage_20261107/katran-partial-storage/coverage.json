@@ -1,0 +1,811 @@
+{
+  "driver_exit": 0,
+  "launch_inputs": {
+    "cpus": "20-23",
+    "vcpus": 8,
+    "guest_memory": "12G",
+    "samples": 1,
+    "duration": 2,
+    "app": "katran",
+    "started": "2026-11-07T21:17:17.347469+00:00",
+    "source_head": "da3f2f1e4ff7f7a6c6e263a4ae6c6fbe0f440c0e",
+    "sha256": {
+      "corpus/results/kprog_app_coverage_20261107/native-only-runtime/Dockerfile": "6a74df82258c37fab0209dae3a622b53823dbd53cd0f7d18ee72bc35929ec3bf",
+      "corpus/results/kprog_app_coverage_20261107/native-only-runtime/Makefile": "53f2ddab6f1fdf86df7873181d442066fbb609ea6ad1924f9d183ba68775b77d",
+      "corpus/results/kprog_app_coverage_20261107/native-only-runtime/guest.py": "32edbe1f1a1ceb06fe9b44ba1e12c22094309be008579ca925e1f6f60d46a1e2",
+      "corpus/results/kprog_app_coverage_20261107/native-only-runtime/package.py": "4497ef4ae1f49401c2dcf29f31d49b636699372d88b2701622187e60180ed0f9",
+      "kinsn/module/include/native_lab_group.h": "1ef0bbf95d3b5a8b64aa3cf6db3b5ecea8dc19db7ff4069d63955ecd34158fd5",
+      "kprog/formal/generated/abi_load.h": "618e1ca06aa188eba278a992e815dbdd079c9e004bacb122ff88491d3018b571",
+      "kprog/formal/generated/arm64_adrp.h": "da2004614c5ac4af1888b56f90398444e7d2f33c9e11391ab51e2f2a57fc4e20",
+      "kprog/formal/generated/arm64_alu_handler.h": "5ace99d67ab6dc597ffce8d9cec6b567bcfc402d6cb424bceb5a4ff870bd8843",
+      "kprog/formal/generated/arm64_alu_operand.h": "8a39f8c29c3dff0096dd15b8d49825ac0af6cfef0402efbaab43fa6683d57427",
+      "kprog/formal/generated/arm64_alu_operand_select.h": "8f140666a12df159f4151df01dd6e3d336c06d1e93811337ad7f8bd0c72f097d",
+      "kprog/formal/generated/arm64_alu_result.h": "57026f3f77c9538bae55db15c691961457b5ff2fd71c8e5a47efc911f14c45f7",
+      "kprog/formal/generated/arm64_aux.h": "48f6484cf891986c04e0c31ac2c7776ad084583300b59c218b9ac1c6931b6592",
+      "kprog/formal/generated/arm64_bitfield.h": "4037f701cf89fac8ea15569456acd359080f9c32e027716f11b4568d28ed8210",
+      "kprog/formal/generated/arm64_branch.h": "597f1c706da47bb61fee586c8db342de0e046338510fe7b781ea23503b509b57",
+      "kprog/formal/generated/arm64_branch_emit.h": "f0102c2c142207f8d52df1ef1368ce861acf1cd8474af493ffd906a73da84404",
+      "kprog/formal/generated/arm64_byte_lane.h": "d2d25688aa3916f487adc26b6fab895ef40ab5b6f0b0ea9dfdf2cca31b6a7e44",
+      "kprog/formal/generated/arm64_cc_decode.h": "a22666da330cad56f9fcbe1b142d9b4083b0dc47820cb82e84dcb5240fadd74c",
+      "kprog/formal/generated/arm64_ccmp_decode.h": "74b38bc2feebc11f7d6079f2241054642670a290b7a9e68620a8b3c838da258e",
+      "kprog/formal/generated/arm64_ccmp_handler.h": "76483f944f5292afe626dfbeb824eb9f838ec246c147e6a12128b5ae0ce2adca",
+      "kprog/formal/generated/arm64_cneg.h": "f0b641e9cbbbd985565f45d3a466aec3313b2a05f2d1fd0b82050789e64597df",
+      "kprog/formal/generated/arm64_cond.h": "d70d31c6911d0b6e731ee081e314de27ce232abc3f06935b49ba2dd248dab04a",
+      "kprog/formal/generated/arm64_csel.h": "26b1a756a3920767761dee9be3a021dd1b691024ab4d622165de13f08d541fc7",
+      "kprog/formal/generated/arm64_csel_ptr.h": "d3404e00574770ac890fb93d3704d4f613a8f3ac59c162a083b31317a83deff5",
+      "kprog/formal/generated/arm64_decode.h": "50254db21e62953c9204cd5b1c4b2ac8e39ae45191152e062e21e33c7d4c3544",
+      "kprog/formal/generated/arm64_dispatch_family.h": "14265108cb9cb9cf5eab817bbec8cebb6e2b384c5e8be36440967e5c520f352a",
+      "kprog/formal/generated/arm64_dispatch_singleton.h": "4eaa6e68a7e396d365a3831e839b63ddd5f4c4f90979f7c2a3eb90e3ce0a12ac",
+      "kprog/formal/generated/arm64_dq_mem.h": "92c3da7af26348576ecd967618750664c8f921576a4c8ffc5f1a7dc92a1b6b09",
+      "kprog/formal/generated/arm64_dq_mem_extra.h": "cc5413cadf698ee0a2117979a3c0b4c5f3a04007f74c452ef39c721565bf024b",
+      "kprog/formal/generated/arm64_extrev.h": "cd5735e626fcf97f2c91cc13e2ccb4e2d2666b01277b1fc7a2ba75f187d3f32f",
+      "kprog/formal/generated/arm64_flag_handler.h": "500362ccb5871636f111aaca1a0b47d0d009f8a5b1eec4b0a5e21f79ab4b3564",
+      "kprog/formal/generated/arm64_flag_operand.h": "cff285b48337d1bebe43fddf3c63c024102e93c6d2a83e09a10b4f700fa0f8ce",
+      "kprog/formal/generated/arm64_flags.h": "d0a82dd9b8a6af80a65d67884843cf6fce8717e7c98d4ef78610936a60062ff9",
+      "kprog/formal/generated/arm64_fmov.h": "61c6b6f281a48bb6d6157396eab01278c4649ac269d6a5ee0728a539ad1dba30",
+      "kprog/formal/generated/arm64_fmov_dest.h": "71355ebc61a8e5a89fcc6dd35db9f63f5da117cc5f7c71f39ff3d3054716d72a",
+      "kprog/formal/generated/arm64_helper_arg_ptr.h": "4e79818af70642277f578e8eedd096039cbecaad0389889ad8c282ff3d428199",
+      "kprog/formal/generated/arm64_helper_idents.h": "81c4c2b336844a72f381f2cd5b89d446c3d5f65784cda6843104274728a89c52",
+      "kprog/formal/generated/arm64_imm_operand.h": "ea25c93b74d1d29aca0fce7e49793001b78949af163cc9a99bff682a9e4bd643",
+      "kprog/formal/generated/arm64_ldrsx.h": "20e2d1ed13f2780872631360ce0deb911a1140601e9f29c6d8ff5436847e6a90",
+      "kprog/formal/generated/arm64_ldrsx_op.h": "5d9dd798aa466f554eea899d5d19812597c25e6a665ccf66c313616106629d7d",
+      "kprog/formal/generated/arm64_load_bytes.h": "998c750370aed48ca699db040ebae945cf5344e53ebf383c1e98215200bdf571",
+      "kprog/formal/generated/arm64_load_tag.h": "92ac76aabe42dc0d9d701b07b06bd82f65da613864ff6ca59a91f70a9764c9c4",
+      "kprog/formal/generated/arm64_logic_flag_handler.h": "a4f9b02b5bb52edbef43ff27f17d9ae8063626402665cff4199b648584faf7a5",
+      "kprog/formal/generated/arm64_mem_base_src.h": "c16810e782741c2827fc5a3f71a366c4eadae0c7a061852715d2658491ee4a5f",
+      "kprog/formal/generated/arm64_mem_dispatch.h": "64030b762d105a19c6f4cf832425e93a7b2c9db14723612d34b473b143ce590d",
+      "kprog/formal/generated/arm64_mem_index.h": "8e6941bb22f9ebd8ee3ac0a5efc9cd88e579588919a9da3e2322477a7ef67d8b",
+      "kprog/formal/generated/arm64_mem_index_value.h": "9c3f8bd661c9fc33c65d50dc53f2b4a23475cdee4493d26d4460e33dbe078c4e",
+      "kprog/formal/generated/arm64_mem_offset.h": "bcde44489568bd580bff413c49d0f013597c4730b38edf2a80fd6e3d57003be5",
+      "kprog/formal/generated/arm64_mem_prepost.h": "29ae20a6b2c7a5999c2f547140654e236d63dcf2e5d2fe89ca61bb3077fad765",
+      "kprog/formal/generated/arm64_mem_write_arm.h": "68959e83cfd3fca3b049656fa5038c28a98aa99ce2e1ec17433da798a8eb87b8",
+      "kprog/formal/generated/arm64_mod.h": "43019ec31b5719d677dd190e2eb5cc01577ea6184f75241bcb92261949d78a72",
+      "kprog/formal/generated/arm64_mov.h": "80ead9db28172eb01f442b54d4db4264a00482b349f23368a1a28a6938441395",
+      "kprog/formal/generated/arm64_movk.h": "210f4a0e46f5cdac335e569eb928648ff60d08cce7d5fd6e33e2923cce260063",
+      "kprog/formal/generated/arm64_mul.h": "8b09ffb3f1f1f8c10c73adb3659d41f3d75f7b5aadc530f9d254166e7779064b",
+      "kprog/formal/generated/arm64_orn.h": "7bc74888f4f49abfffddefec25931a5605b2b7479508f71e8d841b569bcfe74b",
+      "kprog/formal/generated/arm64_pair_load_tag.h": "e2f1240bbfb737e06784063ba783f71c8bd19043aa43db4322793ea0b7463399",
+      "kprog/formal/generated/arm64_pair_mem.h": "9f9e7c0068deb0afa482752c89661b297b7c76383633eb77ab5e949568eedbe6",
+      "kprog/formal/generated/arm64_reduction.h": "0c1ff0ba12a6bac4344b552b814e38e8e51f9ed60f1012dcbcd4bfb92a4e5fab",
+      "kprog/formal/generated/arm64_reg_dispatch.h": "0179453b7a3525b443378ff80043622427399f34cd4496b725e26f029f0308eb",
+      "kprog/formal/generated/arm64_reg_presence.h": "14e1b10ab61cd336808127ffd281d7c03d04ce9ba5d7f76cc007ca99423771bb",
+      "kprog/formal/generated/arm64_shift.h": "f6ea479b7dd1cad90a3da8ab3ad3b7139a39d8c6d3b9fef1f9ffc7e32584e972",
+      "kprog/formal/generated/arm64_stack_arena.h": "031d768e60dc0475f707d103ebb682b8b2b54d3e5ca8333d8940546f25fe206b",
+      "kprog/formal/generated/arm64_stack_arm.h": "c43baa698b99e913cda9011095bfdbf9319786a632cfd7f141b98e6bcb0958ce",
+      "kprog/formal/generated/arm64_stack_index.h": "8a6f548dc09ea34b879ca2b7e8a560d7f1a6a978f1b38b85c006808ebf970447",
+      "kprog/formal/generated/arm64_stack_read_tag_source.h": "9275c9b11fdab9cfe3cf19b54136029bac515c14794fb5bb6610e8ed725e8987",
+      "kprog/formal/generated/arm64_stack_tag.h": "f946d24a144914c9f3eff2d9d90569f6725c34155c734788c281fe7b4479b783",
+      "kprog/formal/generated/arm64_stack_write_lanes.h": "587a78ac6adc1d941be42959cf8a150a2d54b3383e7377e95c3264ba13a55ecf",
+      "kprog/formal/generated/arm64_stack_write_tag_action.h": "8007f7a172de5d830c86fd3fe7eb151c5206c92e601b670fc853920a5a980d66",
+      "kprog/formal/generated/arm64_stlxr.h": "23e346ca5b8c4d0e11397b9cf8ce925d30250de28746ff8ad6ea92c2db9f1991",
+      "kprog/formal/generated/arm64_store_bytes.h": "33906394fd5a59f9d43e9a8b44d5e67d900ce0e9d71c109cc4c4c84af16f29cc",
+      "kprog/formal/generated/arm64_unary.h": "2f0081297ce74a7b68f4a5a0065c484abcd8a4658a62491bc99b3ca87945bca0",
+      "kprog/formal/generated/arm64_vreg.h": "da5db5dc846ab3c1e1134f9c5b0555322c464bac685b75bcf4ec708e754c3cf0",
+      "kprog/formal/generated/arm64_vreg_field.h": "e8c8dad50e97d99fcbaf3e91f54dad1e1677b5e907d9eee5ad631d148feb3141",
+      "kprog/formal/generated/arm64_width.h": "ae96d8fefcbc97f9a62cff4fcc5c5dac120e57acd4237fa27f7dddd824729ab1",
+      "kprog/formal/generated/arm64_write_arm.h": "63e15a94d7dea6e1d5d59081af63dde7edec91a286dc5d4caea8348eb11b9665",
+      "kprog/formal/generated/control_flow_trace.h": "9700892f1ef5e5323e9d4599e59015ade53908f39ca29346b0bd0f9638a67c5a",
+      "kprog/formal/generated/ptr_add.h": "41cfc08ca5232f507788cb8d00d8fa216df9fb1c3c9ece8e00c5e83b06ae259d",
+      "kprog/formal/generated/x86_adc.h": "100396b93353f6f9d6d8901d77e898e98a73d82d8ae0b6acce344dbce6399d4c",
+      "kprog/formal/generated/x86_add_flags.h": "7ebbaece47e7641680fefb0ff3baaeac210c5aea9b2c00ae6b142e4e657434dd",
+      "kprog/formal/generated/x86_alu_decode.h": "2dff009da97a2d8f6a78669222ff6e059b911cea8d89bf129666ccfbd27f712c",
+      "kprog/formal/generated/x86_alu_flag_arm.h": "fc9e830cd10fa99a2fec7be953eb39b6e72a575c9ccf55dbe24f87b25e7ef0ed",
+      "kprog/formal/generated/x86_alu_result.h": "35d8aa92c3509c90c45a91044c44e7dee99bb70b25a0e8b33545737ae3adcbac",
+      "kprog/formal/generated/x86_andn.h": "b9940d306d64ebd957aed06866bd3f48856a7c3d4c985f4da1e190d2f9e45295",
+      "kprog/formal/generated/x86_aux_flags.h": "87d4aae4964aecb9b23f7f43c04b539595d7d4eedf8d1b76b92098f3f2d8c283",
+      "kprog/formal/generated/x86_bitops.h": "646d276aa813d1128c37336c42718cefca905ba6333358325f18702b68c674ef",
+      "kprog/formal/generated/x86_branch_emit.h": "3e1e8c3c0aff7372321a2327d376a4c0d2b03ef255f0d92b53c578222687032d",
+      "kprog/formal/generated/x86_bswap.h": "7f1864c7f6def18545542e06ada0b756a9170902907b0f79ec788a12bf5d4604",
+      "kprog/formal/generated/x86_bt.h": "976b323fb5faff57795782b1ac2d2551558c0c5a55e8bff7d61b346e37730575",
+      "kprog/formal/generated/x86_bzhi.h": "0830ec33b7d22ab6dee847035ebe792fd07ec208338ba885580ea539cb3da80c",
+      "kprog/formal/generated/x86_bzhi_flags.h": "af3190c3b419d1850ffc5b8558059ac4feca917d7676b0c4df3875cc08b5fcef",
+      "kprog/formal/generated/x86_callmem.h": "b1601391745fb8565da56fc478febf516a098a8c4a9612a2e53ade525bf12988",
+      "kprog/formal/generated/x86_cc_decode.h": "338b989d7d3c62adb6c6c43b269f69abc6582ada7d7bb981dcf4e862fe73bf68",
+      "kprog/formal/generated/x86_cmov.h": "262be691d055cb0eea8b4d0c20e97037bfc2a97b65cd77d6cd5cbe124346cdb4",
+      "kprog/formal/generated/x86_cmpop.h": "76a808165aea471f3f552de22aef02c2e0f2179d94f41ab37b90b67dd2ef2725",
+      "kprog/formal/generated/x86_cond.h": "4be0e06995d0a3d18fc258a5afc55d2ba11f7583c8c1243720916598683312ef",
+      "kprog/formal/generated/x86_dispatch_family.h": "04f4c80c4eda61fa3bedb5d4dd48ea033a338ea46c91120738ce768049762c4c",
+      "kprog/formal/generated/x86_dispatch_singleton.h": "d6f10d69791cc0060311830c51e333bc4fe13d283da15b5fd4c575d8b80f8972",
+      "kprog/formal/generated/x86_div.h": "98e8f3cafa319ad5caa6afe69d9d63ea8aa388d21ee4231033817fdd2901f2b2",
+      "kprog/formal/generated/x86_doubleshift.h": "89b6454335410eb50202c5604f7075c583bdd9090d7f6d219590733e4ed7c1d5",
+      "kprog/formal/generated/x86_doubleshift_arm.h": "46f618a3c6c7eb9500ef3b5a359307aad092d2467a02e809717a575e515876de",
+      "kprog/formal/generated/x86_full_condition.h": "120355f7f2862e018f293d7fe1586304b298cae339754a6894ee82c33f5d6bc0",
+      "kprog/formal/generated/x86_helper_dispatch.h": "5535e8fc78d7aad36e376afcdcf759a33d3f7494602b620ad6c46bd39d6e55dd",
+      "kprog/formal/generated/x86_immediate.h": "87e13e96a59133776257d86fbdccde52f2d6f49fd773c98ad7cdda9bfc180013",
+      "kprog/formal/generated/x86_imul_flags.h": "71901232efdc2ba44bebac3cf00bd6272cd0a19b51db412e5cb870929ab0abc2",
+      "kprog/formal/generated/x86_logic_flags.h": "6d11b0faf4a6c87f4751f574abb1d90342cb348b1b4f6c7b5c20b87bbe6ef5d7",
+      "kprog/formal/generated/x86_mem_access.h": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+      "kprog/formal/generated/x86_mem_aux.h": "a625c69146bae62ce1c286ecac0c892bcf561afaadc800e3e15b6e492481ab4f",
+      "kprog/formal/generated/x86_mem_dispatch.h": "780f6978f87c2fc642895acde55f8e0390baaf3ca4ee59d02df122e188de3635",
+      "kprog/formal/generated/x86_mem_index.h": "6e0811aeed32f02e5a32cac49b9394fe43316309952cd6ad4b088277309f673e",
+      "kprog/formal/generated/x86_mem_offset.h": "af79410916e0d55e96dc2cdf0f4b97c17807ecadd01db7ec1bdeb73196537e99",
+      "kprog/formal/generated/x86_mov_load.h": "f5376284fd09715035fce0bbe17ba4de8ca4884c3604e84e8eed099510585e2d",
+      "kprog/formal/generated/x86_mov_reg_arm.h": "4d90036061ffec933f3390c92ab6cc3aae2ab67865e11fdfb00e761a0c0d5ff7",
+      "kprog/formal/generated/x86_movbe.h": "b0d360e5ef0cf633d236c94009e766b087c611892f47575e377f4105f655d440",
+      "kprog/formal/generated/x86_movx_shape.h": "01620a97791aea42be92b534faf19eb24f1ad3c15431615442002cbfc7380da3",
+      "kprog/formal/generated/x86_mulx_arm.h": "9a0b20e69254d28c06ab839a9465f468a7fc7c691382aa69892db5625dc4e966",
+      "kprog/formal/generated/x86_not.h": "ea001c7e11dd1322104367f979ecd7d496a7d79f212a45ab33caa9d1beb67e9a",
+      "kprog/formal/generated/x86_opcode.h": "b0c77fef814795e82b0937fc820c4b3efae309229b8c0289af353fa0cbf2a031",
+      "kprog/formal/generated/x86_popcnt_flags.h": "00c5cf90950bf33127ae117da2d47bd4006eb84a757644a99cf9fba779822a02",
+      "kprog/formal/generated/x86_popcount.h": "7ace097a5036fc85acee215964983b31705da92ca9709b984963452e2487abe2",
+      "kprog/formal/generated/x86_ptr_write.h": "49d49c4e5f9d52a4a19ee1394c7a9318a130acbe224d002596bfff17394f5d1f",
+      "kprog/formal/generated/x86_pushpop.h": "aa08c319cc0399a11b1c7fcd30d70a4b3f8bb1bd034a3d1bcceeef72c704e499",
+      "kprog/formal/generated/x86_reg_dispatch.h": "c67fa25eb62b52a59512795ef7f008bb3dcafc9f7853879524e810659d35b76c",
+      "kprog/formal/generated/x86_reg_lane_aux.h": "f0ea8ae8f038df703bfbbb3b5c3b3f354e29a043a3d4db3c725fc8c8354dbbbc",
+      "kprog/formal/generated/x86_reg_presence.h": "39b4d2c793a5e375dcf41bc4b77c112a6ddc017a7cabd6353f70b21993df60a7",
+      "kprog/formal/generated/x86_reg_read.h": "ea2f60863873509caf64d3d1e50b69eed77248ce4347c5fbe3efc76fc677f685",
+      "kprog/formal/generated/x86_reg_write.h": "7d76ebfeb14bd54acccb5598f8ef3feb03dfc354c44789fedd46f9b7dd5b0279",
+      "kprog/formal/generated/x86_rep_movs.h": "fc6953a10600a3da7e8e68d4dc6c976f7a8bcf8077809e534de2dd193e84fa9f",
+      "kprog/formal/generated/x86_sbb_flags.h": "92f097852c9dd9f51bff5e494a293d33e7d73b51d687dbf8318c15e4370a81f2",
+      "kprog/formal/generated/x86_sbb_result.h": "5741ccfa8e2632a111cbdbe23ed305b7b0eb1cd15f9f2a820db9a69aef63d7b7",
+      "kprog/formal/generated/x86_setcc.h": "72e3658fb0b43a51af0bbb996cccddcf13cbd42d43f2ffeb301d467947949078",
+      "kprog/formal/generated/x86_setcc_mem.h": "20550746ca7f71586941e1a99269972ab8da3379beb2087e5b2db5070c16f44c",
+      "kprog/formal/generated/x86_shift_count.h": "a2827a7737e969fa8db59ebbb5d24be51c577b4ee7d6e1f05782abf348f62f35",
+      "kprog/formal/generated/x86_shift_flags.h": "330e56f0ff9513fa8913965330ccdf555cc3a2c375461c45b2058eafb5c83770",
+      "kprog/formal/generated/x86_shift_result.h": "115f51b7f89c8970eb5ef8181466a64e669dda8b76ca13ce8c84b44e9468f95c",
+      "kprog/formal/generated/x86_signed.h": "08d5f4c3fbe1dfde98cedba008afde004d41fb8aa4b1304a635eddce85cae58f",
+      "kprog/formal/generated/x86_specialization.h": "26186d96d6d04bf671577c9ec3c62622074c154877a14a99b28c083f96cde690",
+      "kprog/formal/generated/x86_stack_arena.h": "ad2badc7df1b6a38be92fa2063c71cfb35a26cc9b46a6e4bccd3fec93e38ff16",
+      "kprog/formal/generated/x86_stack_arm.h": "8e003c807a6dd654b151ebd85de25ac9d12fd613cd164b7028591afe159515bb",
+      "kprog/formal/generated/x86_stack_index.h": "a380689ecbdb79d41a1f6f14c2bc4b9fb3c4b16f19f859a33d6f6d5cfc5a4774",
+      "kprog/formal/generated/x86_stack_write_lanes.h": "afdea3a17371e1439488f54d88af64032b33888db082700727091f7c7f47b6c5",
+      "kprog/formal/generated/x86_store.h": "225dc46d0d17755604cecb41a75342e0e4b17cecaa49c3b675f491ccc19fd4d2",
+      "kprog/formal/generated/x86_sub_flags.h": "ea614708dac56f7c78b52faf4bfc2ffcb021a2613ab23160130ca16d9f44aca9",
+      "kprog/formal/generated/x86_width.h": "c340ce043a9bff0710c60904308b1a77f75d6157177ce0ae53420278dcda0cbe",
+      "kprog/formal/generated/x86_write_width_arm.h": "1091909ca9e1e062f9ca2c86a2cde34ded2a51f875701be0f6e9ef03b5abe735",
+      "kprog/formal/generated/x86_xchg.h": "dac0aea0d9243697615cac402ee8c7b29a0fbe22be8c52173cdfbe07acdfe764",
+      "kprog/formal/generated/x86_xmm0.h": "228330852eb435154194ae7b6a2161be76edd977aa9b5f228db0232b3e11c848",
+      "kprog/formal/tools/generate_x86_mem_access_spec.py": "9d9ab4d23938bee79e30c92211e9891fadaca73e4711b31e7d3a3cf04db42f34",
+      "kprog/formal/tools/generate_x86_mem_offset_spec.py": "4378b534f0ef4dfc79f221b2af2398044124146a2591a0ab72c9147db9e795a4",
+      "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29",
+      "kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+      "kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+      "kprog/trusted_loader.cpp": "77d7944274bf9f8a66d7d5e7dceb30a55c66e5461c6028df37a9c32d5e81d548",
+      "kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+      "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "df7a92936b4180044271d87854fee6783d05a72a62eee72c70b28cf811cb5278",
+      "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko": "fba9989aa0641ca4654a02405e3f27f9532e9d1c4ccf8bfa38b0a4242044b2a1",
+      "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "89c2ee4da5aaccbf903787a1592f3ff0139f7f7b4e2b94cfbfc8adccbecbef74",
+      "kprog/x86/micro-prog/generated_x86_alu_decode.py": "106ba0f45de9218244ac1ca9aed6686306a3fa91fc358bdb9a4ec5c5a4040a90",
+      "kprog/x86/micro-prog/generated_x86_cc_decode.py": "099d0b7ed401af1ceca7e57264cea88cce566434646036d59d02bd7b941d98ea",
+      "kprog/x86/micro-prog/generated_x86_full_condition.py": "648c6e0f09083376768900eddfe3454e6f3e506797cf641bd0dc4c51a3dbb276",
+      "kprog/x86/micro-prog/generated_x86_opcode.py": "cadf347e5a8acf877b5d5f6149014da541a2298407b1d1fb664bd56e331fc77a",
+      "kprog/x86/micro-prog/generated_x86_reg_lane_aux.py": "f71f20841ee367aa4f738a8bde3852f483ce395716a5fe4608b36dbe95687ac9",
+      "kprog/x86/micro-prog/generated_x86_specialization.py": "3508a8dd5f20975c6cce171e673548d91c123752f9df24cd7b2a84d8e02e7ac7",
+      "kprog/x86/micro-prog/x86_abi.py": "82ca3cdf81391ef732ca9e4a24a5666caa9deeddfe85ec0421163caaf993b346",
+      "kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+      "kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+      "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+      "kprog/x86/x86_sim_local_bpf.h": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+      "vendor/bpf/native_compat.h": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a"
+    },
+    "image": "sha256:1ead525666cc9da03d9740230bb9f1ac4cb567e36eb255172a7bd63ffa5a2b16",
+    "producer_increments": [
+      "binary_elf_readonly_reader",
+      "finite_affine_stack_origins",
+      "lea_unit_rcx_and_wrapping_offset",
+      "consistent_external_slot_joins",
+      "volatile_partial_gpr_storage"
+    ],
+    "candidate_include": {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/include/generated/x86_reg_write.h",
+      "sha256": "ad3b3e39ea65e459dc5d3a20902d33738457e965c3c16c56c9c790e4134562d3"
+    },
+    "candidate_compiler": {
+      "path": "/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/clang-candidate",
+      "sha256": "c5fc022689f4f52fcbf3f1e7bbe0a317d7e33e4b754d2e3f52489d383442b025"
+    },
+    "driver_pid": 3755111
+  },
+  "source_drift": [],
+  "temporary_files_remaining": [],
+  "service_log": "{\"ready\": true, \"arch\": 1, \"endpoint\": \"/sys/kernel/debug/bpf_x86_native_lab/specializer\"}\n{\"request_id\": 1, \"source_prog_id\": 34, \"native_sha256\": \"ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20\", \"started\": \"2026-11-07T21:20:46.204700+00:00\", \"status\": -5, \"error\": \"Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '1', '34', '/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/request-211qn_md/generated/request.native.o', 'balancer_ingress', '/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/request-211qn_md/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/request-211qn_md/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '37', '0', '0', '0', '0', '0', 'ch_rings', '33', 'null', 'ctl_array', '29', 'null', 'fallback_cache', '31', 'null', 'lru_mapping', '32', 'null', 'lru_miss_stats', '36', 'null', 'quic_stats_map', '38', 'null', 'reals', '34', 'null', 'reals_stats', '35', 'null', 'server_id_map', '41', 'null', 'server_id_stats', '43', 'null', 'stats', '28', 'null', 'vip_map', '30', 'null', 'vip_miss_stats', '37', 'null', 'vip_to_down_reals_map', '45', 'null']' returned non-zero exit status 1.\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"/workspaces/repository/kprog/trusted_service.py\\\", line 241, in serve\\n    result.check_returncode()\\n  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 502, in check_returncode\\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '1', '34', '/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/request-211qn_md/generated/request.native.o', 'balancer_ingress', '/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/request-211qn_md/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/request-211qn_md/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '37', '0', '0', '0', '0', '0', 'ch_rings', '33', 'null', 'ctl_array', '29', 'null', 'fallback_cache', '31', 'null', 'lru_mapping', '32', 'null', 'lru_miss_stats', '36', 'null', 'quic_stats_map', '38', 'null', 'reals', '34', 'null', 'reals_stats', '35', 'null', 'server_id_map', '41', 'null', 'server_id_stats', '43', 'null', 'stats', '28', 'null', 'vip_map', '30', 'null', 'vip_miss_stats', '37', 'null', 'vip_to_down_reals_map', '45', 'null']' returned non-zero exit status 1.\\n\", \"failure_archive\": \"/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/1.failure.tar.gz\", \"finished\": \"2026-11-07T21:22:01.411757+00:00\"}\n",
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 34,
+      "native_sha256": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20",
+      "started": "2026-11-07T21:20:46.204700+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '1', '34', '/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/request-211qn_md/generated/request.native.o', 'balancer_ingress', '/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/request-211qn_md/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/request-211qn_md/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '37', '0', '0', '0', '0', '0', 'ch_rings', '33', 'null', 'ctl_array', '29', 'null', 'fallback_cache', '31', 'null', 'lru_mapping', '32', 'null', 'lru_miss_stats', '36', 'null', 'quic_stats_map', '38', 'null', 'reals', '34', 'null', 'reals_stats', '35', 'null', 'server_id_map', '41', 'null', 'server_id_stats', '43', 'null', 'stats', '28', 'null', 'vip_map', '30', 'null', 'vip_miss_stats', '37', 'null', 'vip_to_down_reals_map', '45', 'null']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 241, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '4', '1', '34', '/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/request-211qn_md/generated/request.native.o', 'balancer_ingress', '/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/request-211qn_md/generated/trusted_x86.proof.o', '/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/request-211qn_md/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '37', '0', '0', '0', '0', '0', 'ch_rings', '33', 'null', 'ctl_array', '29', 'null', 'fallback_cache', '31', 'null', 'lru_mapping', '32', 'null', 'lru_miss_stats', '36', 'null', 'quic_stats_map', '38', 'null', 'reals', '34', 'null', 'reals_stats', '35', 'null', 'server_id_map', '41', 'null', 'server_id_stats', '43', 'null', 'stats', '28', 'null', 'vip_map', '30', 'null', 'vip_miss_stats', '37', 'null', 'vip_to_down_reals_map', '45', 'null']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/.agent-state/kprog-lanes/C/partial-gpr-storage-candidate/katran/trusted-1mayh59s/requests/1.failure.tar.gz",
+      "finished": "2026-11-07T21:22:01.411757+00:00",
+      "entry": "balancer_ingress",
+      "generated_source": true,
+      "compiled_object": true,
+      "native_sha256_verified": true,
+      "load_error_tail": "04) fp-288=scalar()\n6499: (0f) r2 += r1                   ; R1=pkt(r=34) R2=pkt(off=24,r=34)\n6500: (a5) if r3 < 0x10000 goto pc+4          ; R3=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n\nfrom 6500 to 6505: safe\n\n1 ^= r3                   ; R1=scalar(smin=umin=umin32=0xfffffff0,smax=umax=0xffffffff,smin32=-16,smax32=-1,var_off=(0xfffffff0; 0xf)) R3=0xffffffff\n6511: (6b) *(u16 *)(r2 +0) = r1       ; R1=scalar(smin=umin=umin32=0xfffffff0,smax=umax=0xffffffff,smin32=-16,smax32=-1,var_off=(0xfffffff0; 0xf)) R2=pkt(off=24,r=34)\n6512: (05) goto pc-3814\n2699: (b4) w7 = 1                     ; R7=1\n2700: (b7) r1 = 148                   ; R1=148\n2701: (b4) w6 = 3                     ; R6=3\n2702: (b4) w3 = 17                    ; R3=17\n2703: (06) gotol pc+5971\n8675: (bf) r2 = r10                   ; R2=fp0 R10=fp0\n8676: (07) r2 += -240                 ; R2=fp-240\n8677: (bf) r4 = r2                    ; R2=fp-240 R4=fp-240\n8678: (0f) r4 += r1                   ; R1=148 R4=fp-92\n8679: (73) *(u8 *)(r4 +8) = r3        ; R3=17 R4=fp-92 fp-88=mmmmmmmm\n8680: (72) *(u8 *)(r4 +9) = 2         ; R4=fp-92 fp-88=mmmmmmmm\n8681: (72) *(u8 *)(r4 +10) = 0        ; R4=fp-92 fp-88=m0mmmmmm\n8682: (72) *(u8 *)(r4 +11) = 0        ; R4=fp-92 fp-88=00mmmmmm\n8683: (b7) r1 = 148                   ; R1=148\n8684: (0f) r2 += r1                   ; R1=148 R2=fp-92\n8685: (07) r2 += 8                    ; R2=fp-84\n8686: (18) r1 = 0xffff8affbf02c000    ; R1=map_ptr(map=stats,ks=4,vs=16)\n8688: (85) call bpf_map_lookup_elem#1\n\nfrom 8688 to 8689: safe\n\nkernel log tail:\n4,495,4490817,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.\n\nnative_lab stub context: prog_type=6 blob_bytes=10129 reloc_records=92 reloc_bytes=1472 chunks=80 proof_bound=1 callee_saved_mask=15 tail_call_reachable=0 retained_map_fds=14 relocated_map_ids=14 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=27 kfunc_btf_id=129949\nretained_map_info=19:id=28:type=6:name=stats,20:id=30:type=1:name=vip_map,21:id=32:type=12:name=lru_mapping,22:id=31:type=9:name=fallback_cache,23:id=38:type=6:name=quic_stats_map,24:id=43:type=6:name=server_id_stats,25:id=34:type=2:name=reals,26:id=45:type=13:name=vip_to_down_rea,27:id=29:type=2:name=ctl_array,28:id=35:type=6:name=reals_stats,29:id=33:type=2:name=ch_rings,30:id=37:type=2:name=vip_miss_stats,31:id=36:type=6:name=lru_miss_stats,32:id=41:type=2:name=server_id_map\nnative_blob_diag: fnv64=ca21334ec6922128 word_count=2532 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=105 first_zero_offset=60 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=10129 final_size_matches=1\nchunk_bytes=0:128,128:128,256:128,384:128,512:128,640:128,768:128,896:128,1024:128,1152:128,1280:128,1408:128,1536:128,1664:128,1792:128,1920:128,2048:128,2176:128,2304:128,2432:128,2560:128,2688:128,2816:128,2944:128,3072:128,3200:128,3328:128,3456:128,3584:128,3712:128,3840:128,3968:128,4096:128,4224:128,4352:128,4480:128,4608:128,4736:125,4861:128,4989:128,5117:128,5245:128,5373:128,5501:128,5629:128,5757:128,5885:128,6013:128,6141:128,6269:128,6397:128,6525:128,6653:128,6781:128,6909:128,7037:128,7165:128,7293:128,7421:128,7549:128,7677:128,7805:128,7933:128,8061:128,8189:128,8317:128,8445:128,8573:128,8701:128,8829:128,8957:128,9085:128,9213:128,9341:128,9469:128,9597:128,9725:128,9853:128,9981:128,10109:20\nreloc_targets=1875:0xffffffff984c7770,2103:0xffffffff984cc320,2635:0xffffffff984c7770,2993:0xffffffff984c7770,3223:0xffffffff984cc320,3572:0xffffffff984c7770,4372:0xffffffff984b97a0,4397:0xffffffff984b9bd0,4599:0xffffffff984b9bd0,4681:0xffffffff984b97a0,4699:0xffffffff984b97a0,5044:0xffffffff98d64a30,5415:0xffffffff984b9bd0,5787:0xffffffff984b97d0,5931:0xffffffff98d64a30,6381:0xffffffff984b97a0,6648:0xffffffff984b9bd0,6948:0xffffffff984b97a0,7038:0xffffffff984b97a0,7063:0xffffffff984b9bd0,7274:0xffffffff984b9bd0,7356:0xffffffff984b97a0,7374:0xffffffff984b97a0,7733:0xffffffff98d64a30,8003:0xffffffff984b9bd0,8380:0xffffffff984b97d0,8891:0xffffffff98d64a30,9511:0xffffffff984b97d0,9616:0xffffffff984b9bd0,9791:0xffffffff984b97d0,59:0x1c,1625:0x1c,1854:0x1e,1941:0x1c,2082:0x20,2127:0x1c,2190:0x1f,2240:0x26,2446:0x1c,2614:0x1e,2769:0x1c,2972:0x1e,3061:0x1c,3202:0x20,3247:0x1c,3310:0x1f,3360:0x26,3551:0x1e,3633:0x1c,3813:0x1c,3910:0x1c,4034:0x2b,4134:0x2b,4449:0x22,4533:0x1c,4659:0x2d,4718:0x1c,4795:0x1d,4861:0x1c,4939:0x23,5249:0x1c,5348:0x1c,5591:0x21,5662:0x22,5801:0x25,6145:0x24,6255:0x29,6315:0x22,6582:0x1c,6707:0x2b,6809:0x29,6873:0x22,7124:0x22,7208:0x1c,7334:0x2d,7393:0x1c,7478:0x1d,7538:0x1c,7626:0x23,7755:0x1c,7837:0x1c,7936:0x1c,8179:0x21,8247:0x22,8394:0x25,8499:0x24,8588:0x1c,8660:0x1c,8786:0x1c,8913:0x1c,9550:0x1c,9668:0x2b\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\n"
+    }
+  ],
+  "native_requests": 1,
+  "generated": 1,
+  "compiled": 1,
+  "accepted_bound": 0,
+  "failed": 1,
+  "corpus_metadata": [
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_212000_496498/metadata.json",
+      "status": "error",
+      "error_message": "corpus suite reported errors"
+    }
+  ],
+  "terminal_archives_verified": 1,
+  "service_archive": "corpus-20261107T212213707362Z.tar.gz",
+  "service_archive_sha256": "f27b9e306d7f23ab74279f24cdb89c4793e0bdcc4086ad5ef101ab1f8b08beaf",
+  "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_212000_496498",
+  "metadata_status": "error",
+  "app_status": "error",
+  "app_error": "native app exited before BPF programs were tracked by shim\nstderr tail:\nI20261107 21:20:46.014945  3212 KatranGrpcService.cpp:69] Starting Katran\nE20261107 21:20:46.015161  3212 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20261107 21:20:46.015172  3212 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20261107 21:20:46.015357  3212 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20261107 21:20:46.015365  3212 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20261107 21:20:46.017346  3212 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20261107 21:20:46.017370  3212 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame",
+  "rejit_result": {
+    "enabled_passes": [],
+    "mode": "verified_native_loader",
+    "status": "ok"
+  },
+  "baseline": {
+    "bpf": {
+      "20": {
+        "bytes_jited": 13641,
+        "bytes_xlated": 23840,
+        "id": 20,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 2342535,
+        "run_time_ns_delta": 376021230,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@7",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": true,
+              "src_ip": "10.0.0.2",
+              "thread_id": 7,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 2.1149233849999973,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@7\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: SHARED\nCurrent:\n     pkts-sofar: 2342535  errors: 0\n     started: 175990108us  stopped: 177930806us idle: 0us\n     seq_num: 2342536  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 1940697(c1940697+d0) usec, 2342535 (64byte,0frags)\n  1207058pps 618Mb/sec (618013696bps) errors: 0",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "outcomes": {
+            "after": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 4713976
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 1,
+                  "packets_or_v1": 4713976
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 176990121025,
+                  "packets_or_v1": 1162533
+                },
+                "pass": {
+                  "bytes_or_v2": 70,
+                  "packets_or_v1": 1
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 301694534,
+                  "packets_or_v1": 4713977
+                },
+                "tx": {
+                  "bytes_or_v2": 301694464,
+                  "packets_or_v1": 4713976
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 235698800,
+                  "packets_or_v1": 4713976
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 235699622,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 4713986,
+                  "tx_bytes": 395952238,
+                  "tx_dropped": 268,
+                  "tx_errors": 0,
+                  "tx_packets": 4713719
+                },
+                "real/real0": {
+                  "rx_bytes": 395819198,
+                  "rx_dropped": 1593,
+                  "rx_errors": 0,
+                  "rx_packets": 4712135,
+                  "tx_bytes": 912,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 11
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 395952238,
+                  "rx_dropped": 268,
+                  "rx_errors": 0,
+                  "rx_packets": 4713719,
+                  "tx_bytes": 235699622,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 4713986
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 912,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 11,
+                  "tx_bytes": 395819198,
+                  "tx_dropped": 1593,
+                  "tx_errors": 0,
+                  "tx_packets": 4712135
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 235698800,
+                  "packets_or_v1": 4713976
+                }
+              },
+              "reals_stats_map_ids": [
+                14
+              ],
+              "receiver": {
+                "rx_bytes": 395819198,
+                "rx_dropped": 1593,
+                "rx_errors": 0,
+                "rx_packets": 4712135,
+                "tx_bytes": 912,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 11
+              },
+              "stats_map_ids": [
+                7
+              ]
+            },
+            "before": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 2371441
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 1,
+                  "packets_or_v1": 2371441
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 173400037573,
+                  "packets_or_v1": 1191638
+                },
+                "pass": {
+                  "bytes_or_v2": 70,
+                  "packets_or_v1": 1
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 151772294,
+                  "packets_or_v1": 2371442
+                },
+                "tx": {
+                  "bytes_or_v2": 151772224,
+                  "packets_or_v1": 2371441
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 118572050,
+                  "packets_or_v1": 2371441
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 118572872,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 2371451,
+                  "tx_bytes": 199201418,
+                  "tx_dropped": 4,
+                  "tx_errors": 0,
+                  "tx_packets": 2371447
+                },
+                "real/real0": {
+                  "rx_bytes": 199073516,
+                  "rx_dropped": 1531,
+                  "rx_errors": 0,
+                  "rx_packets": 2369924,
+                  "tx_bytes": 912,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 11
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 199201418,
+                  "rx_dropped": 4,
+                  "rx_errors": 0,
+                  "rx_packets": 2371447,
+                  "tx_bytes": 118572872,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 2371451
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 912,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 11,
+                  "tx_bytes": 199073516,
+                  "tx_dropped": 1531,
+                  "tx_errors": 0,
+                  "tx_packets": 2369924
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 118572050,
+                  "packets_or_v1": 2371441
+                }
+              },
+              "reals_stats_map_ids": [
+                14
+              ],
+              "receiver": {
+                "rx_bytes": 199073516,
+                "rx_dropped": 1531,
+                "rx_errors": 0,
+                "rx_packets": 2369924,
+                "tx_bytes": 912,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 11
+              },
+              "stats_map_ids": [
+                7
+              ]
+            },
+            "delta": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 2342535
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 2342535
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 3590083452,
+                  "packets_or_v1": -29105
+                },
+                "pass": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 149922240,
+                  "packets_or_v1": 2342535
+                },
+                "tx": {
+                  "bytes_or_v2": 149922240,
+                  "packets_or_v1": 2342535
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 117126750,
+                  "packets_or_v1": 2342535
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 117126750,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 2342535,
+                  "tx_bytes": 196750820,
+                  "tx_dropped": 264,
+                  "tx_errors": 0,
+                  "tx_packets": 2342272
+                },
+                "real/real0": {
+                  "rx_bytes": 196745682,
+                  "rx_dropped": 62,
+                  "rx_errors": 0,
+                  "rx_packets": 2342211,
+                  "tx_bytes": 0,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 0
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 196750820,
+                  "rx_dropped": 264,
+                  "rx_errors": 0,
+                  "rx_packets": 2342272,
+                  "tx_bytes": 117126750,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 2342535
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 0,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 0,
+                  "tx_bytes": 196745682,
+                  "tx_dropped": 62,
+                  "tx_errors": 0,
+                  "tx_packets": 2342211
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 117126750,
+                  "packets_or_v1": 2342535
+                }
+              },
+              "reals_stats_map_ids": [
+                14
+              ],
+              "receiver": {
+                "rx_bytes": 196745682,
+                "rx_dropped": 62,
+                "rx_errors": 0,
+                "rx_packets": 2342211,
+                "tx_bytes": 0,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 0
+              },
+              "stats_map_ids": [
+                7
+              ]
+            },
+            "settle_seconds": 1.0
+          },
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": true,
+          "src_ip": "10.0.0.2",
+          "threads": [
+            7
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 2.1149233849999973,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "post_rejit": null,
+  "native_replaced": 0,
+  "native_failed": 1,
+  "artifact_sha256": {
+    "driver.log.gz": "9c26b6c9c02d32c3745b0247668e07c95bb785d972b7bc9060e104a43f3f90cd",
+    "service.tar.gz": "94efde98adb6ef6b8f1b7df823314463b42f645fc867f2558c35a0a75707cfa6",
+    "launch.tar.gz": "9987aed52d14942709434f9ba1b0326556c7e85add344a1659ba9c6a93e87b43",
+    "result.tar.gz": "30b8133526f82b3ffd76559896d1a3f67129c3845cc6b54c94858a7ecea93e71"
+  },
+  "baseline_load_observations": {
+    "all_load_attempts": 6,
+    "feature_probe_attempts": 5,
+    "application_load_attempts": 1,
+    "application_accepted_loads": 1,
+    "application_rejected_attempts": 0,
+    "application_unique_kernel_ids": 1,
+    "resident_counters": 1,
+    "classifier_source_sha256": "b34494fcdd63253ad25e57c53d1f97b18e3e9ce832e36ad9351778d04f5a4166"
+  },
+  "failure_classification": {
+    "specialization_errors": 0,
+    "verifier_rejections": 1,
+    "bound": 0,
+    "class": "unbounded map-value index after partial scalar spill",
+    "instruction": 5920,
+    "processed_instructions": 3089,
+    "previous_class_closed": "partial pointer-register bit mask",
+    "candidate_include_sha256": "ad3b3e39ea65e459dc5d3a20902d33738457e965c3c16c56c9c790e4134562d3"
+  }
+}

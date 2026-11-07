@@ -1241,7 +1241,7 @@ extern void x86_sim_unmapped_xdp_read(void)
 					KPROG_PTR_ADD64_TAG(__x86_l_src_tag);\
 				if (KPROG_X86_LEA_STACK_REFERENCE((SRC) == X86_RSP, (DST) == X86_RSP)) {                  \
 					__s64 __x86_l_stack_off =          \
-						(__s64)(long)__x86_l_src_ptr + __x86_l_off;\
+						(__s64)((__u64)(unsigned long)__x86_l_src_ptr + (__u64)__x86_l_off);\
 					__x86_l_result =                  \
 						X86_SIM_L_STACK_PTR(__x86_l_stack_off);\
 					__x86_l_dst_tag = X86_SIM_TAG_STACK;\

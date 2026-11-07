@@ -394,3 +394,8 @@ A predecessor with helper-written ordinary bytes joins with a saved private-stac
 pointer as finite stack/external alternatives. Explicit unknown origins keep their
 rejection path; copied opaque ABI bytes retain their taint through every origin.
 The common encoder/ABI checker carries paired defined/opaque branch controls.
+
+
+The RSP LEA stack-reference sum accumulates source bits and displacement as
+unsigned64 values before signed offset presentation. Its arithmetic follows native
+modulo64 addition; the generic LEA refinement and dispatcher share this expression.
