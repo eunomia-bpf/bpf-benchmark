@@ -1,0 +1,30 @@
+{
+  "recorded": "2026-11-07T14:07:06.359996+00:00",
+  "stage": "production_encoder_rejected",
+  "build_exit": 2,
+  "native_forms_assembled": 805,
+  "new_forms_attempted": 34,
+  "new_forms_encoded": 32,
+  "new_forms_rejected": 2,
+  "rejections": [
+    {
+      "assembly": "ldur d0, [x4, #8]",
+      "native_decoded": "ldur d0, [x4, #8]",
+      "status": "encoder_rejected",
+      "error": "unsupported register: d0"
+    },
+    {
+      "assembly": "stur d0, [x4, #8]",
+      "native_decoded": "stur d0, [x4, #8]",
+      "status": "encoder_rejected",
+      "error": "unsupported register: d0"
+    }
+  ],
+  "cpu_or_canonical_execution": false,
+  "production_source_modified": false,
+  "encoder_sha256": "464cae64514f8e9e8781c6c4a014d52b04758a92f4a0509ff5f6288df49b3a5f",
+  "generator_sha256": "9a6712b01c8ee9a0cadafbc9201b2e0f99417e61a967f3219e01110cacce0724",
+  "attempt_inputs_sha256": "8f724300385e947e0892582bd4c8ee15f782888c8d9903483ccb63a67badedb4",
+  "pending": "Forward encoder fix and full805 replay; original34 safety guest still uses shared production encoder",
+  "scope": "Coverage failure is retained, not counted as a fidelity mismatch or safety-suite pass"
+}
