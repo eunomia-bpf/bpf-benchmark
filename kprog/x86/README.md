@@ -399,3 +399,10 @@ The common encoder/ABI checker carries paired defined/opaque branch controls.
 The RSP LEA stack-reference sum accumulates source bits and displacement as
 unsigned64 values before signed offset presentation. Its arithmetic follows native
 modulo64 addition; the generic LEA refinement and dispatcher share this expression.
+
+
+Partial8/16-bit GPR writes select their storage representation from the existing
+input provenance tag. Scalar inputs keep ordinary union writes; pointer-tagged
+inputs use complete volatile local storage before byte/word replacement and
+full64-bit reload. Both routes preserve the remaining native bits and scalarize
+the output tag. The generated register-write contract supplies both routes.

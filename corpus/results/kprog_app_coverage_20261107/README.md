@@ -172,3 +172,9 @@ sent packet, with LRU hit-path counters and miss0. JIT2318117packets reaches the
 receiver; native2386430packets yields2377743received plus5158TX and3529receiver
 drops. The exact generic provenance-selected write include is retained in the
 linked raw archive; production generator adoption follows the current Tracee epoch.
+
+
+The whole Katran header cf27e323c885 is now the production generated register-write
+header, with its common generator synchronized. Regeneration,143encoder/ABI,
+3072CLhost/19renderedMOVX and100448MOVhost cases pass. R receives the trusted-path
+Katran timing request; the complete29suite follows this source adoption.
