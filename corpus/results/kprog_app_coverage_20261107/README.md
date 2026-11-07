@@ -113,7 +113,7 @@ measurement continue from the reported failure classes.
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [Earlier functional batch153239](native-only-runtime/standard-bcc-8g.json) |
 | OTel | 17 startup attempts; 13 resident | 2 | 2 | 1 | 0 | 1: helper size range | [225459 batch](otel-cmp-resources/README.md) |
-| Cilium | 207 startup attempts; 72 resident | 1 | 0 | 0 | 1: helper189 declaration | 0 | [224658 batch](cilium-native-resources/README.md) |
+| Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: BPF stack offset -536 | [232956 batch](cilium-helper-scoped/README.md) |
 | Tetragon | 311 startup attempts; 287 resident | 4 | 4 | 3 | 0 | 1: 8193-jump complexity | [225009 batch](tetragon-cmp-resources/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [213447 bound batch](katran-tagged-storage/README.md) |
 | Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: readonly index range | [231936 batch](tracee-resource-scoped/README.md) |
@@ -253,3 +253,6 @@ The current serial continuation consumes entry-scoped resource metadata for Trac
 
 
 The [Tracee scoped-resource batch231936](tracee-resource-scoped/README.md) completes6fresh generated/compiled requests, binds5, and reaches the actual sys_exit_submit readonly-index verifier result. Entry resource selection and verified startup both reach this new service epoch; max index remains1036for80bytes,2154processed instructions/91states. The next generic narrow-value trial preserves the exact native comparisons and table address.
+
+
+The [Cilium helper/scoped-resource batch232956](cilium-helper-scoped/README.md) freshly generates/compiles2requests and binds cil_xdp_entry. Its next TC request reaches stack offset-536 with312bytes of modeled native stack and a padded skb ABI mirror. Private live TC context projection continues from the exact field accesses; actual native hashes and six first-entry kernel resources remain recorded.

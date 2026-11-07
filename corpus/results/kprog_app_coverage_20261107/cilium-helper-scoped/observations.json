@@ -1,0 +1,89 @@
+{
+  "native_requests": 2,
+  "generated": 2,
+  "compiled": 2,
+  "accepted_bound": 1,
+  "failed": 1,
+  "terminal_archives_verified": 2,
+  "native_replaced": 1,
+  "native_failed": 1,
+  "app_status": "error",
+  "metadata_status": "error",
+  "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_232956_866168",
+  "first_entry": "cil_xdp_entry",
+  "first_entry_resources": [
+    {
+      "name": "__config_enable_xdp_prefilter",
+      "map_id": 147,
+      "map_type": 2,
+      "key_size": 4,
+      "value_size": 186,
+      "max_entries": 1,
+      "map_flags": 1152,
+      "value_offset": 150
+    },
+    {
+      "name": "__config_tracing_ip_option_type",
+      "map_id": 147,
+      "map_type": 2,
+      "key_size": 4,
+      "value_size": 186,
+      "max_entries": 1,
+      "map_flags": 1152,
+      "value_offset": 107
+    },
+    {
+      "name": "cilium_cidr_v4_dyn",
+      "map_id": 113,
+      "map_type": 11,
+      "key_size": 8,
+      "value_size": 1,
+      "max_entries": 65536,
+      "map_flags": 129,
+      "value_offset": null
+    },
+    {
+      "name": "cilium_cidr_v4_fix",
+      "map_id": 114,
+      "map_type": 1,
+      "key_size": 8,
+      "value_size": 1,
+      "max_entries": 20971520,
+      "map_flags": 129,
+      "value_offset": null
+    },
+    {
+      "name": "cilium_percpu_trace_id",
+      "map_id": 121,
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 8,
+      "max_entries": 1,
+      "map_flags": 0,
+      "value_offset": null
+    },
+    {
+      "name": "cilium_xdp_scratch",
+      "map_id": 148,
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 28,
+      "max_entries": 1,
+      "map_flags": 0,
+      "value_offset": null
+    }
+  ],
+  "failure_class": "verifier-stack-offset",
+  "failure_entry": "tail_nodeport_nat_egress_ipv4",
+  "verifier_processed_insns": 423,
+  "verifier_total_states": 10,
+  "first_invalid_stack_offset": -536,
+  "native_modeled_stack_bytes": 312,
+  "baseline_resident_programs": 72,
+  "artifact_sha256": {
+    "driver.log.gz": "5193eade8af33c6bc47eae644ac11c9df31571323ae22155d520b915b248436c",
+    "service.tar.gz": "bce1e2f1807832b9d1f5237b0c49d54f8f37fd1e21d8de8cd54ad6b6f09ece9a",
+    "launch.tar.gz": "e202b58b4a28e45e1bbdd2c2686c06a252ab74aae3a7c08e2e72ad0ac04577fe",
+    "result.tar.gz": "483508f6c1bbea3fa7f974925061bea4d679baf21efcbaf712c1b0ca443f805b"
+  }
+}
