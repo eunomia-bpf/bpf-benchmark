@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 status=0
-python3 "$@" || status=$?
+"$@" || status=$?
 out=/workspaces/repository/corpus/results/kprog_app_coverage_20261107/cache-$(date -u +%Y%m%dT%H%M%SZ)-$$
 install -d "$out"
 printf '%s

@@ -1,0 +1,165 @@
+{
+  "total": 14,
+  "proof_generated": 14,
+  "compiled": 14,
+  "linked": 14,
+  "verifier_accepted": 9,
+  "verifier_rejected": 5,
+  "specialization_failed": 0,
+  "rows": [
+    {
+      "name": "otel_read_task_struct",
+      "original_id": 313,
+      "original_name": "read_task_struct",
+      "program_type": 17,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": true,
+      "error_class": ""
+    },
+    {
+      "name": "otel_perf_unwind_stop",
+      "original_id": 314,
+      "original_name": "perf_unwind_stop",
+      "program_type": 7,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": true,
+      "error_class": ""
+    },
+    {
+      "name": "otel_perf_unwind_native",
+      "original_id": 315,
+      "original_name": "perf_unwind_native",
+      "program_type": 7,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": false,
+      "error_class": "verifier instruction complexity"
+    },
+    {
+      "name": "otel_perf_unwind_hotspot",
+      "original_id": 316,
+      "original_name": "perf_unwind_hotspot",
+      "program_type": 7,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": false,
+      "error_class": "pointer right shift"
+    },
+    {
+      "name": "otel_perf_unwind_perl",
+      "original_id": 317,
+      "original_name": "perf_unwind_perl",
+      "program_type": 7,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": true,
+      "error_class": ""
+    },
+    {
+      "name": "otel_perf_unwind_php",
+      "original_id": 318,
+      "original_name": "perf_unwind_php",
+      "program_type": 7,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": true,
+      "error_class": ""
+    },
+    {
+      "name": "otel_perf_unwind_python",
+      "original_id": 319,
+      "original_name": "perf_unwind_python",
+      "program_type": 7,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": false,
+      "error_class": "pointer partial-byte masking"
+    },
+    {
+      "name": "otel_perf_unwind_ruby",
+      "original_id": 320,
+      "original_name": "perf_unwind_ruby",
+      "program_type": 7,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": false,
+      "error_class": "BPF stack exceeds512 bytes"
+    },
+    {
+      "name": "otel_perf_unwind_v8",
+      "original_id": 321,
+      "original_name": "perf_unwind_v8",
+      "program_type": 7,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": true,
+      "error_class": ""
+    },
+    {
+      "name": "otel_perf_unwind_dotnet",
+      "original_id": 322,
+      "original_name": "perf_unwind_dotnet",
+      "program_type": 7,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": true,
+      "error_class": ""
+    },
+    {
+      "name": "otel_perf_go_labels",
+      "original_id": 323,
+      "original_name": "perf_go_labels",
+      "program_type": 7,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": false,
+      "error_class": "unbounded helper destination"
+    },
+    {
+      "name": "otel_tracepoint__sched_process_free",
+      "original_id": 324,
+      "original_name": "tracepoint__sched_process_free",
+      "program_type": 5,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": true,
+      "error_class": ""
+    },
+    {
+      "name": "otel_native_tracer_entry",
+      "original_id": 325,
+      "original_name": "native_tracer_entry",
+      "program_type": 7,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": true,
+      "error_class": ""
+    },
+    {
+      "name": "otel_custom__generic",
+      "original_id": 326,
+      "original_name": "custom__generic",
+      "program_type": 2,
+      "proof_generated": true,
+      "compiled": true,
+      "linked": true,
+      "verifier_accepted": true,
+      "error_class": ""
+    }
+  ]
+}

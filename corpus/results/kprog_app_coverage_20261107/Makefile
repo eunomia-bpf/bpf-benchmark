@@ -10,7 +10,7 @@ readonly-loader-build:
 
 IMAGE := bpf-benchmark/kprog-readonly:c-20261107
 IMAGE_TAR := /workspaces/.agent-state/kprog-lanes/C/readonly-runtime.image.tar
-KERNEL := $(ROOT)/vendor/build/x86/linux/arch/x86/boot/bzImage
+KERNEL := /workspaces/.agent-state/kprog-lanes/C/frozen-kernel/bzImage
 APP ?= tracee/monitor
 CPUS ?= 12-15
 SAMPLES ?= 1
@@ -26,7 +26,7 @@ readonly-image: readonly-loader-build
 
 readonly-corpus:
 	install -d /workspaces/.agent-state/kprog-lanes/C/$(SCRATCH)-var-tmp /workspaces/.agent-state/kprog-lanes/C/$(SCRATCH)-tmp /workspaces/.agent-state/kprog-lanes/C/$(SCRATCH)-modules
-	BPFREJIT_CORPUS_APPS=$(APP) BPFREJIT_SHIM_NATIVE_LOADER=post BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=0 BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so BPFREJIT_NATIVE_DISABLE_MAP_LOWERING=$(MAP_LOWERING_DISABLED) BPFREJIT_KEEP_ALL_WORKDIRS=1 KEEP_WORKDIRS=all $(MAKE) -C $(ROOT) -o runtime-kernel-image corpus RUNTIME_CONTAINER_IMAGE=$(IMAGE) RUNTIME_IMAGE_TAR=$(IMAGE_TAR) RUN_RUNTIME_PYTHON_BIN=/usr/local/bin/kprog-capture-python 'RUNTIME_DOCKER_RUN=$$(RUNTIME_DOCKER) -v "$$(ROOT_DIR)/$$(RUNTIME_RESULT_DIR):$$(ROOT_DIR)/$$(RUNTIME_RESULT_DIR)" "$$(RUNTIME_CONTAINER_IMAGE)" /usr/local/bin/kprog-capture-python -m $$(RUNTIME_SUITE_MODULE)' BZIMAGE=$(KERNEL) VNG='taskset -c $(CPUS) vng --run $(KERNEL) --cwd $(ROOT) --disable-monitor --verbose --cpus 8 --memory 8G --rwdir $(ROOT) --rwdir /var/tmp=/workspaces/.agent-state/kprog-lanes/C/$(SCRATCH)-var-tmp --rwdir /tmp=/workspaces/.agent-state/kprog-lanes/C/$(SCRATCH)-tmp --rwdir /lib/modules=/workspaces/.agent-state/kprog-lanes/C/$(SCRATCH)-modules --append "loglevel=4 panic=30 oops=panic"' VM_CPU_PIN=$(CPUS) VM_CPUS=8 VM_MEM=8G SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION)
+	BPFREJIT_CORPUS_APPS=$(APP) BPFREJIT_SHIM_NATIVE_LOADER=post BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=0 BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so BPFREJIT_NATIVE_DISABLE_MAP_LOWERING=$(MAP_LOWERING_DISABLED) BPFREJIT_KEEP_ALL_WORKDIRS=1 KEEP_WORKDIRS=all $(MAKE) -C $(ROOT) -o runtime-kernel-image corpus RUNTIME_CONTAINER_IMAGE=$(IMAGE) RUNTIME_IMAGE_TAR=$(IMAGE_TAR) RUN_RUNTIME_PYTHON_BIN=/usr/local/bin/kprog-capture-python BZIMAGE=$(KERNEL) VNG='taskset -c $(CPUS) vng --run $(KERNEL) --cwd $(ROOT) --disable-monitor --verbose --cpus 8 --memory 8G --rwdir $(ROOT) --rwdir /var/tmp=/workspaces/.agent-state/kprog-lanes/C/$(SCRATCH)-var-tmp --rwdir /tmp=/workspaces/.agent-state/kprog-lanes/C/$(SCRATCH)-tmp --rwdir /lib/modules=/workspaces/.agent-state/kprog-lanes/C/$(SCRATCH)-modules --append "loglevel=4 panic=30 oops=panic"' VM_CPU_PIN=$(CPUS) VM_CPUS=8 VM_MEM=8G SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION)
 
 native-option-inputs:
 	install -d $(HERE)/baseline/katran $(HERE)/baseline/tetragon
@@ -46,3 +46,11 @@ tail-frame-image:
 	install -m0755 /workspaces/.agent-state/kprog-lanes/C/tail-frame-target/release/native-link $(HERE)/readonly-runtime/native-link
 	docker build -f $(HERE)/tail-frame.Dockerfile -t bpf-benchmark/kprog-tail-frame:c-20261107 $(HERE)/readonly-runtime
 	docker save -o /workspaces/.agent-state/kprog-lanes/C/tail-frame-runtime.image.tar bpf-benchmark/kprog-tail-frame:c-20261107
+
+capture-image:
+	docker build -f $(HERE)/capture.Dockerfile -t bpf-benchmark/kprog-map-capture:c-20261107 $(HERE)/readonly-runtime
+	docker save -o /workspaces/.agent-state/kprog-lanes/C/map-capture-runtime.image.tar bpf-benchmark/kprog-map-capture:c-20261107
+
+frozen-kernel:
+	install -d /workspaces/.agent-state/kprog-lanes/C/frozen-kernel
+	container=$$(docker create bpf-benchmark/kprog-corpus-base:c-20261107 /bin/true); trap 'docker rm "$$container" >/dev/null' EXIT; docker cp "$$container:/artifacts/manifest.json" /workspaces/.agent-state/kprog-lanes/C/frozen-kernel/manifest.json; docker cp "$$container:/artifacts/kernel/bzImage" /workspaces/.agent-state/kprog-lanes/C/frozen-kernel/bzImage
