@@ -199,7 +199,12 @@ both, `drop`/`encap_fail`/`lru_miss`/`consistent_hash_drop` all 0, and
 `tx`/`total` equal to the packet count — the same forwarding behaviour,
 so the comparison is like-for-like.
 
-**Does not reproduce at the reference size**: 1.016x against 1.102x. One
+At the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`,
+`corpus/results/x86_kvm_corpus_20261107_005419_246681`): 1 replaced,
+0 failed, 3 workloads per arm, 799,453,792 packets baseline against
+813,698,501 native = **1.018x**, confirming the 60 s figure.
+
+**Does not reproduce at the reference size**: 1.018x against 1.102x. One
 of katran's programs runs native here; the reference's advantage was
 larger, which is a property of the native code, not of whether it ran.
 
