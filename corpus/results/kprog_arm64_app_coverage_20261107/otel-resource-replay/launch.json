@@ -1,0 +1,28 @@
+{
+  "utc": "2026-11-07T23:11:08.461568+00:00",
+  "previous_result_commit": "24e3a1477d4f6f84b4ccb5b2c30426a0871b7091",
+  "resource_result_commit": "340a4ea5e07c38d415031c51aca057b57f62d955",
+  "caller_fix_commits": [
+    "3d0e584b5",
+    "4759785dc8b7fe5db02d683bb519e1c5df004eae"
+  ],
+  "cpu_set": "16-19",
+  "guest_memory_mib": 4096,
+  "concurrent_successor_memory_mib": 8192,
+  "total_lane_memory_mib": 12288,
+  "transport_sha256": "593c542bde3e1e4372f2a60fa6d75c35fec0336704ed9546878b34acbcffb39b",
+  "transport_source_sha256": "88fa7f3ac5f810ec662df122a8b65ca4e5641b1d86fed8c261f07b4c41106bbd",
+  "binary_and_manifest_pins": {
+    "vendor/build/arm64/linux/arch/arm64/boot/Image": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac",
+    "kinsn/module/arm64/build-native-resources/bpf_arm64_native_lab.ko": "0fd8117fb76b2301ecdde335a0731c549a977f492eb88914f458212a2649bec0",
+    "kprog/libnativeloader/build-arm64-typed-tail-v1/trusted-native-loader": "e6ec9ea7d8d6de43875b72c710a5d8a0148f8f1e717e3ffbd8b28fa33cb467bd",
+    "kprog/libnativeloader/build-arm64-typed-tail-v1/libnative_loader.so": "25a55681c481afcd85b6098b67b6608b35de0700dc75fca1a41dc038a8e57994",
+    "kprog/libnativeloader/build-arm64-typed-tail-v1/trusted-service-client": "aa2107f021db6e2bceb2f81de6157aaebfcf8687fd9744a62b26f51a14f9fbe1",
+    "kprog/libnativeloader/build-arm64-typed-tail-v1/trusted-native.o": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+    "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-rodata-extents": "a437397a861322ae476be40a059268ed20006bf21cfb0b6403905f7c827a28f8",
+    "bpfopt/shim/build-arm64-probe-map-fd/libbpfrejit_shim.so": "dd216d98fba7a826c12e5108df460bdef47513b67e2465b487d3348f6255e329",
+    "kprog/arm64/build/app-verified-stage/otelcol-ebpf-profiler/manifest.json": "f30d80bea5b8a264b52b5218bc16312fb0428fc39dca315dcbe4b2be8c6ad13c"
+  },
+  "result_directory": "corpus/results/kprog_arm64_app_coverage_20261107/otel-resource-replay",
+  "scope": "Complete existing OTel two-start recipe with generic typed tail maps, kernel-owned resource vector, readonly layout/bytes and ARM ABI join fixes. Native application inputs, workload, samples and REQUIRE_BOUND_PROOF retain their recipe."
+}
