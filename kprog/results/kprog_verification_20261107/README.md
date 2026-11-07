@@ -49,3 +49,18 @@ and successful accesses. CALL/RET internal core lifts require materialized nativ
 addresses and access/canonicality witnesses; helper and outer-invocation
 certificates remain separate. The CPU profile is trusted environment data:
 48/57-bit paging with CET disabled, not authority supplied by an application.
+
+The subsequent ARM exclusive core increment composes generated LDAXR-width reads,
+STLXR-width stores and W-status writes with the same canonical monitor semantics.
+Load refinement includes native access faults after explicit SP/natural alignment
+witnesses. Store refinement includes either externally supplied failure-bit
+outcome, source/status aliases, and preservation of all other state. Its failure
+preflight condition permits inaccessible memory when the architecture does not
+check it. The success/failure bit must equal the canonical monitor/commit result;
+monitor state and acquire/release/conditional-commit events are explicit ghost
+annotations requiring a platform witness, not implemented C monitor guards or a
+proof of hardware atomicity. The new proof and the three x86 import-composition
+regressions passed; existing exclusive wire checks passed 82 complete-state,
+effect and fault cases and 10 encoding/input rejections. One early proof attempt
+failed on redundant record updates in the failure arm; restructuring that arm
+removed the redundant update without weakening any theorem or filtering inputs.

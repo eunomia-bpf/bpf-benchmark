@@ -34,7 +34,11 @@ PC and ordered effects/faults. This includes scalar/logical/unary operations,
 width/sign extensions, signed and unsigned multiplication, conditional operations, shifts, bit operations,
 stack transfers, LEA, DIV, register XCHG, classic ROR, REP MOVS iteration progress and XMM0 successful-access
 lane projections, and the ARM arithmetic, vector, memory, exclusive and control
-families represented there. XMM0 MOVUPS/MOVAPS references include 16-byte
+families represented there. Exclusive load/store core lifts additionally compose
+the generated native-width memory primitives and W-status writeback, retaining
+both outcomes. Monitor state and ordering events are ghost annotations whose
+platform witnesses remain explicit; this does not certify ordinary stores as
+atomic exclusive operations. XMM0 MOVUPS/MOVAPS references include 16-byte
 permission and alignment faults; the two-lane C projection currently requires
 successful, suitably aligned access. REP MOVS includes direction, address32,
 segments and restart faults; its C core lift requires a matching bounded count,

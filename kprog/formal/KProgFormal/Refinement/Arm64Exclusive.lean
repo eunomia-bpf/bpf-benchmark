@@ -1,4 +1,5 @@
-import KProgFormal.Reference.AArch64
+import KProgFormal.Refinement.Arm64Memory
+import KProgFormal.Generated.GeneratedArm64Stlxr
 
 namespace KProgFormal.Refinement.Arm64Exclusive
 open Reference
@@ -52,5 +53,98 @@ theorem physical_alias_pass (s : State) (bytes : Nat) (monitor : ExclusiveMonito
     (covers : exclusiveCovers monitor s.exclusiveInputs.physicalAddress bytes = true) :
     exclusiveStorePass s bytes = true := by
   simp [exclusiveStorePass, exclusiveMonitorPass, hm, hr, hv, hg, hc, covers]
+
+/-- The exclusive C arms use native W/X memory widths, never a byte ladder. -/
+def accessWidth : Width → MemoryWidth
+  | .w32 => .word | .w64 => .double
+
+theorem access_width_refines (width : Width) : (accessWidth width).bytes = width.bytes := by
+  cases width <;> rfl
+
+/-- A monitor annotation belongs to the environment relation. The C simulator
+has no local monitor cell; a certificate must justify this ghost state and the
+acquire/release event, including atomicity and order on the target platform. -/
+def checkedState (s : State) : State :=
+  if !s.exclusiveInputs.retainLocal || s.exclusiveInputs.virtualPass then
+    { s with exclusiveMonitor := none } else s
+
+/-- LDAXR's generated load and GPR write, with the reservation annotation
+supplied by the same explicit environment as the canonical step. -/
+def loadCore (width : Width) (acquire : Bool) (dst base : Register) (s : State) :
+    Transition State :=
+  let address := Arm64Memory.baseValue s base
+  match Arm64Memory.read (accessWidth width) s.memory address with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (value, event) =>
+      ⟨{ Arm64Register.writeReg s dst value width with
+          exclusiveMonitor := some s.exclusiveInputs.reservation, pc := s.pc + 4 },
+       [event, .exclusive .reserve address width.bytes acquire false true], none⟩
+
+theorem load_core_refines (width : Width) (acquire : Bool) (dst base : Register)
+    (s : State) (spAligned : spAlignmentFault s base = none)
+    (aligned : exclusiveNaturalFault (memoryBase s base) width.bytes = none) :
+    loadCore width acquire dst base s = step (.exclusive (.load width acquire dst base)) s := by
+  simp only [loadCore, step, exclusiveStep, Arm64Memory.base_refines,
+    Arm64Memory.read_refines, access_width_refines, spAligned, aligned]
+  cases readMemory s.memory (memoryBase s base) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨value, event⟩
+      simp only [Arm64Register.write_refines]
+
+theorem status_value_refines (failure : Bool) :
+    narrow (GeneratedArm64Stlxr.value .stlxr .w32 failure) .w32 =
+      (if failure then 1 else 0) := by
+  cases failure <;> decide
+
+/-- STLXR tests the explicit outcome before accessing memory, then writes a
+W status. The source is captured before the status write, including aliases.
+Monitor and exclusive-event fields are ghost annotations, not extra C guards. -/
+def storeCore (width : Width) (release failure : Bool) (status src base : Register)
+    (s : State) : Transition State :=
+  let address := Arm64Memory.baseValue s base
+  let checked := checkedState s
+  let stored := if failure then checked else
+    { checked with memory := Arm64Memory.store (accessWidth width) s.memory address (Arm64Register.readReg s src) }
+  let result := Arm64Register.writeReg stored status
+    (GeneratedArm64Stlxr.value .stlxr .w32 failure) .w32
+  ⟨{ result with pc := s.pc + 4 },
+   [.exclusive .attempt address width.bytes false release (!failure)] ++
+     (if failure then [] else
+       [.memory .write address (valueBytes (Arm64Register.readReg s src) width.bytes) true]), none⟩
+
+/-- The environment outcome must match the canonical monitor AND commit
+result. Failure is included, not replaced with a chosen successful execution.
+If the architecture checks memory on failure, that preflight must also pass;
+when it does not check, inaccessible memory remains a permitted failure input. -/
+theorem store_core_refines (width : Width) (release failure : Bool)
+    (status src base : Register) (s : State)
+    (outcome : failure = !exclusiveStorePass s width.bytes)
+    (spAligned : spAlignmentFault s base = none)
+    (aligned : exclusiveNaturalFault (memoryBase s base) width.bytes = none)
+    (preflight : (exclusiveMonitorPass s width.bytes || s.exclusiveInputs.abortOnFailure) = true →
+      permitted s.memory.writable (memoryBase s base) width.bytes = true) :
+    storeCore width release failure status src base s =
+      step (.exclusive (.store width release status src base)) s := by
+  subst failure
+  simp only [storeCore, step, exclusiveStep, Arm64Memory.base_refines,
+    Arm64Memory.store_refines, access_width_refines, Arm64Register.read_refines,
+    Arm64Register.write_refines, status_value_refines, checkedState, spAligned]
+  by_cases monitor : exclusiveMonitorPass s width.bytes = true
+  · have writable := preflight (by simp [monitor])
+    simp only [monitor, Bool.true_or, ↓reduceIte, aligned, Option.isSome_none,
+      Bool.false_eq_true, writable, Bool.not_true, Bool.true_and]
+    cases commit : s.exclusiveInputs.commitPass <;>
+      simp [exclusiveStorePass, monitor, commit]
+  · have monitorFalse : exclusiveMonitorPass s width.bytes = false := by
+      cases h : exclusiveMonitorPass s width.bytes <;> simp_all
+    have failed : exclusiveStorePass s width.bytes = false := by
+      simp [exclusiveStorePass, monitorFalse]
+    by_cases abort : s.exclusiveInputs.abortOnFailure = true
+    · have writable := preflight (by simp [abort])
+      simp [monitorFalse, failed, abort, aligned, writable]
+    · have abortFalse : s.exclusiveInputs.abortOnFailure = false := by
+        cases h : s.exclusiveInputs.abortOnFailure <;> simp_all
+      simp [monitorFalse, failed, abortFalse]
 
 end KProgFormal.Refinement.Arm64Exclusive
