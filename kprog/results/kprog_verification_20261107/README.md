@@ -3164,3 +3164,13 @@ cases across16 source words,16 displacements,16 destinations and two flag seeds.
 C owns its adoption into a coherent source epoch. LEA therefore carries one
 proved wrapping-model dispatcher/token arm while raw production totals retain30.
 The integration JSON/raw archive records all inputs, failures and passing receipts.
+
+### Published LEA source full check
+
+`make check` on the immutable published635e79efb source exits0. All1140
+exported source SHA256 values independently match that commit’s Git blobs,
+and the temporary export has been retired. The full log, source manifest,
+CPU trace and exit receipt are in the integration archive under
+`full_make_check_635e79efb`. This result covers the LEA dispatcher and total
+offset arithmetic at that epoch; later DIV work and the C-owned RSP-source
+addition correction retain their separate completion evidence.

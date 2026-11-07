@@ -2088,6 +2088,28 @@
     "slot_released": true,
     "snapshot_file_count": 1140
   },
+  "full_make_check_635e79efb": {
+    "actual_exit": 0,
+    "archive_block_sha256": "55e38a02873da9d5bead8444eb54be858a38f2bbbe8c09917591a3dcc3e7e32c",
+    "archive_marker": "=== FULL MAKE CHECK 635E79EFB PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/lea-dispatch-full.cpu.jsonl.gz": "e6b94e0b1035010f9bfc8e73962ccefcc6304dc6b5c09d976d1fdcc633329b2a",
+      "/workspaces/.agent-state/kprog-lanes/V/lea-dispatch-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/lea-dispatch-full.head": "6504b448e198947bbf952baf375e907511d43904cb2c97991eeae269f57eeff0",
+      "/workspaces/.agent-state/kprog-lanes/V/lea-dispatch-full.launch.log": "b687ae62a13b841a2f36a0e2303ae073484ee0db545e088d04594e6767b905f2",
+      "/workspaces/.agent-state/kprog-lanes/V/lea-dispatch-full.log": "8bcc0527cbbb6a232475b5a536cc8c5c55433a24d10f11b1d0948f1a124b0cf3",
+      "/workspaces/.agent-state/kprog-lanes/V/lea-dispatch-full.py": "7af03b1bc1e41e24d466d1fb2a20188b5b9ef52cd3f8a26e059cfbe3604221ff",
+      "/workspaces/.agent-state/kprog-lanes/V/lea-dispatch-full.sources": "909d649e2294a537234a497144dbd9fce04cde42539707cf5230ae121d6ce416",
+      "/workspaces/.agent-state/kprog-lanes/V/lea-dispatch-full.state": "cc5913a7465ef04aea1d2c70839a138b9097741862ddc0ef1116c531b210731d"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "635e79efbe814d62d6bcb0a6b46fa87c4ef31bd0",
+    "scope": "Exact published LEA dispatcher/offset-totality source epoch. Later DIV proof changes and pending C-owned RSP signed-add correction retain their own identities.",
+    "source_manifest_sha256": "909d649e2294a537234a497144dbd9fce04cde42539707cf5230ae121d6ce416",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1140,
+    "warm_shared_caches_retained": true
+  },
   "full_make_check_8db6eb61a": {
     "all_snapshot_sha256_match_published_blobs": true,
     "archive_block_sha256": "36eb425b87c5cb1f00030fd96bfc8ad2cd5958c6c3f2b03ae2377c349f9563d9",
@@ -12632,7 +12654,7 @@
     "direct_c_model_tokens": 23,
     "focused_lake_build_exit": 0,
     "focused_lake_build_targets": 132,
-    "full_make_check_current_increment": "pending published immutable export; latest archived full8db exit0 retains its original identity",
+    "full_make_check_current_increment": "full_make_check_635e79efb: actual0;1140publishedGit source hashes verified; immutable export retired",
     "generated_offset_total_shift": "unsigned64 accumulation; scale bytes>=64 contribute0; valid native exponents0..3 retain output",
     "generic_c_model_tokens": 8,
     "previous_theorem_signatures_retained": 39,
