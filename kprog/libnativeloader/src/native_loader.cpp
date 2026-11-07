@@ -2973,6 +2973,7 @@ struct CompanionLoad {
     std::unordered_map<std::string, uint32_t> map_addr_ids;
     std::unordered_set<uint32_t> original_map_ids;
     std::unordered_set<std::string> source_map_symbols;
+    std::unordered_set<std::string> native_data_symbols;
     std::unordered_map<std::string, std::string> native_map_symbols;
     std::unordered_map<std::string, MapMeta> exact_map_addrs;
     std::unordered_set<std::string> ambiguous_exact_maps;
@@ -3848,6 +3849,9 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             if (!name || !name[0]) {
                 continue;
             }
+            if (GELF_ST_TYPE(sym.st_info) != STT_FUNC &&
+                (sym.st_shndx == SHN_UNDEF || GELF_ST_TYPE(sym.st_info) == STT_OBJECT))
+                load.native_data_symbols.insert(name);
             if (sym.st_shndx == SHN_UNDEF) {
                 load.needs_kernel_symbols = true;
                 add_native_map_symbol_alias(load, name);
@@ -5151,7 +5155,8 @@ void relocate_source_map_proof(bpf_object *object, const std::filesystem::path &
     const std::vector<ProofSourceMapBinding> &bindings,
     const std::vector<NativeSourceMapBinding> &manifest_bindings,
     const std::vector<bpf_insn> &source, const CompanionLoad &companion,
-    std::vector<bpf_insn> &proof, std::vector<std::unique_ptr<ScopedFd>> &pins)
+    std::vector<bpf_insn> &proof, std::vector<std::unique_ptr<ScopedFd>> &pins,
+    const std::vector<native_loader::TrustedMapBinding> *trusted = nullptr)
 {
     for (const auto &binding : bindings)
         if (std::find(manifest_bindings.begin(), manifest_bindings.end(), binding.source) == manifest_bindings.end())
@@ -5293,34 +5298,64 @@ void relocate_source_map_proof(bpf_object *object, const std::filesystem::path &
             }
             if (!name || GELF_ST_BIND(symbol.st_info) != STB_GLOBAL)
                 fail("source map relocation is not a strong explicit extern");
-            const auto binding = std::find_if(bindings.begin(), bindings.end(),
-                [&](const auto &item) { return item.proof_symbol == name; });
-            if (binding == bindings.end()) fail("unbound proof extern: " + std::string(name));
-            const auto reference = source_map_reference(source, binding->source.source_insn);
-            const auto identity = companion.map_addr_ids.find(binding->source.native_symbol);
-            if (identity == companion.map_addr_ids.end()) fail("source proof map lacks bound original identity");
-            const uint32_t id = identity->second;
+            uint32_t id;
+            bool value;
+            std::optional<uint32_t> base;
+            std::string native_symbol;
+            if (trusted) {
+                const auto binding = std::find_if(trusted->begin(), trusted->end(),
+                    [&](const auto &item) { return item.native_symbol == name; });
+                if (binding == trusted->end()) fail("unbound trusted proof extern: " + std::string(name));
+                id = binding->map_id;
+                base = binding->value_offset;
+                value = base.has_value();
+                native_symbol = binding->native_symbol;
+            } else {
+                const auto binding = std::find_if(bindings.begin(), bindings.end(),
+                    [&](const auto &item) { return item.proof_symbol == name; });
+                if (binding == bindings.end()) fail("unbound proof extern: " + std::string(name));
+                const auto reference = source_map_reference(source, binding->source.source_insn);
+                const auto identity = companion.map_addr_ids.find(binding->source.native_symbol);
+                if (identity == companion.map_addr_ids.end()) fail("source proof map lacks bound original identity");
+                id = identity->second;
+                value = reference.value;
+            }
             const auto map = std::find_if(companion.maps.begin(), companion.maps.end(),
                 [&](const MapMeta &meta) { return meta.kernel_id == id; });
             if (map == companion.maps.end()) fail("source proof map identity has no original layout");
+            if (trusted) {
+                const auto identity = companion.map_addr_ids.find(native_symbol);
+                const auto address = companion.map_addrs.find(native_symbol);
+                if (identity == companion.map_addr_ids.end() || identity->second != id ||
+                    address == companion.map_addrs.end() ||
+                    (value && (!map->value_addr || *base >= map->value_size)) ||
+                    address->second != (value ? map->value_addr + *base : map->kernel_addr))
+                    fail("trusted proof extern differs from bound native symbol address");
+            }
             bpf_insn &low = proof[offset / sizeof(bpf_insn)], &high = proof[offset / sizeof(bpf_insn) + 1];
             if (low.code != (BPF_LD | BPF_DW | BPF_IMM) || low.src_reg || low.off ||
                 high.code || high.dst_reg || high.src_reg || high.off)
                 fail("source proof map relocation does not target a plain LDDW");
             const uint64_t immediate = static_cast<uint32_t>(low.imm) |
                 (static_cast<uint64_t>(static_cast<uint32_t>(high.imm)) << 32);
-            if (relocation.r_addend < 0 || static_cast<uint64_t>(relocation.r_addend) > UINT32_MAX ||
-                immediate > UINT32_MAX - static_cast<uint64_t>(relocation.r_addend))
-                fail("source proof map addend exceeds wire format");
-            const uint64_t addend = immediate + relocation.r_addend;
-            if ((!reference.value && addend) || (reference.value && addend >= map->value_size))
-                fail("source proof map addend exceeds original object/value");
+            uint64_t addend;
+            if (trusted) {
+                addend = trusted_map_relocation_offset(base, immediate, relocation.r_addend,
+                    relocations.sh_type == SHT_RELA, map->value_size);
+            } else {
+                if (relocation.r_addend < 0 || static_cast<uint64_t>(relocation.r_addend) > UINT32_MAX ||
+                    immediate > UINT32_MAX - static_cast<uint64_t>(relocation.r_addend))
+                    fail("source proof map addend exceeds wire format");
+                addend = immediate + relocation.r_addend;
+                if ((!value && addend) || (value && addend >= map->value_size))
+                    fail("source proof map addend exceeds original object/value");
+            }
             if (!map_fds.contains(id)) {
                 auto fd = std::make_unique<ScopedFd>(bpf_map_get_fd_by_id(id));
                 if (fd->get() < 0) fail("pin original source proof map: " + std::string(std::strerror(errno)));
                 map_fds.emplace(id, fd->get()); pins.push_back(std::move(fd));
             }
-            low.src_reg = reference.value ? BPF_PSEUDO_MAP_VALUE : BPF_PSEUDO_MAP_FD;
+            low.src_reg = value ? BPF_PSEUDO_MAP_VALUE : BPF_PSEUDO_MAP_FD;
             low.imm = map_fds.at(id);
             high.imm = static_cast<int32_t>(addend);
         }
@@ -5404,14 +5439,25 @@ native_loader::LoadedProgram submit_trusted_native(
         << ",\"attach_prog_id\":" << options.attach_prog_id
         << ",\"prog_ifindex\":" << info.ifindex << "},\"maps\":[";
     bool first = true;
-    for (const auto &map : companion.maps) {
-        const auto actual = load_map_info(map.fd);
-        const auto address = companion.map_addrs.find(map.name);
-        if (address == companion.map_addrs.end())
-            fail("trusted native submission has an ambiguous map symbol: " + map.name);
+    std::vector<std::string> symbols(companion.native_data_symbols.begin(), companion.native_data_symbols.end());
+    std::sort(symbols.begin(), symbols.end());
+    for (const auto &name : symbols) {
+        const auto identity = companion.map_addr_ids.find(name);
+        if (identity == companion.map_addr_ids.end()) continue; // Not a bound map/data symbol.
+        const auto selected = std::find_if(companion.maps.begin(), companion.maps.end(),
+            [&](const auto &map) { return map.kernel_id == identity->second; });
+        if (selected == companion.maps.end()) fail("native symbol lacks its source map object: " + name);
+        const auto &map = *selected;
+        const auto address = companion.map_addrs.find(name);
+        if (address == companion.map_addrs.end()) fail("native symbol has no bound address: " + name);
+        // MapMeta.fd may be a borrowed descriptor already closed by parsing.
+        ScopedFd retained(bpf_map_get_fd_by_id(map.kernel_id));
+        if (retained.get() < 0)
+            fail("reopen native submission map identity: " + std::string(std::strerror(errno)));
+        const auto actual = load_map_info(retained.get());
         if (!first) metadata << ',';
         first = false;
-        metadata << "{\"name\":"; write_json_string(metadata, map.name);
+        metadata << "{\"name\":"; write_json_string(metadata, name);
         metadata << ",\"map_id\":" << actual.id << ",\"map_type\":" << actual.type
             << ",\"key_size\":" << actual.key_size << ",\"value_size\":" << actual.value_size
             << ",\"max_entries\":" << actual.max_entries << ",\"map_flags\":" << actual.map_flags
@@ -5639,6 +5685,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         return submitted;
     }
     const auto source_proof_metadata = read_proof_metadata(simulator_object_path, ".native_lab.source_maps");
+    const bool trusted_externs = trusted_worker && !options.trusted_maps.empty();
 
     // Native data resolution supplies full ELF map names for truncated kernel
     // names. Resolve those identities before deciding which proof maps to reuse.
@@ -5648,7 +5695,10 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         }
         simulator_object = open_simulator_proof(simulator_object_path,
             simulator_program, prog_info, companion, proof_insns);
-        if (source_proof_metadata)
+        if (trusted_externs)
+            relocate_source_map_proof(simulator_object.get(), simulator_object_path, simulator_program,
+                {}, {}, {}, companion, proof_insns, proof_map_fds, &options.trusted_maps);
+        else if (source_proof_metadata)
             relocate_source_map_proof(simulator_object.get(), simulator_object_path, simulator_program,
                 parse_proof_source_maps(*source_proof_metadata), source_map_bindings,
                 source_insns, companion, proof_insns, proof_map_fds);
@@ -5662,7 +5712,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         options.trusted_native_proof_path);
     const auto readonly_bindings = read_proof_readonly_metadata(simulator_object ?
         simulator_object_path : options.proof_object_path);
-    if (simulator_object && !source_proof_metadata)
+    if (simulator_object && !source_proof_metadata && !trusted_externs)
         finish_simulator_proof(simulator_object.get(), simulator_program, proof_insns, linked, readonly_bindings);
     else
         bind_raw_proof_maps(proof_insns, companion, proof_map_fds, linked, readonly_bindings);

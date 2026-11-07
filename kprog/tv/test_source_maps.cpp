@@ -82,5 +82,21 @@ int main()
     rejects([&] { manifest_bound_source_matches(encoded, source, {1}, bindings); }, "lacks an explicit");
     for (const char *sites : {"[0,0]", "[1.0]", "[4294967296]", "[-1]", "[0,]"})
         rejects([&] { parse_source_map_fd_sites("{\"source_map_fd_sites\":" + std::string(sites) + "}"); }, "");
+    // Native-symbol base and compiled REL/RELA addends are separate quantities.
+    assert(trusted_map_relocation_offset(std::nullopt,0,0,false,0)==0);
+    assert(trusted_map_relocation_offset(0,0,0,false,40)==0);
+    assert(trusted_map_relocation_offset(8,0,0,false,40)==8);
+    assert(trusted_map_relocation_offset(8,8,0,false,40)==16);
+    assert(trusted_map_relocation_offset(8,static_cast<uint64_t>(-4LL),0,false,40)==4);
+    assert(trusted_map_relocation_offset(8,123,8,true,40)==16);
+    assert(trusted_map_relocation_offset(UINT32_MAX-1,0,0,false,UINT32_MAX)==UINT32_MAX-1);
+    rejects([] { trusted_map_relocation_offset(std::nullopt,1,0,false,40); }, "trusted proof map addend");
+    rejects([] { trusted_map_relocation_offset(8,32,0,false,40); }, "trusted proof map addend");
+    rejects([] { trusted_map_relocation_offset(8,UINT32_MAX-3ULL,0,false,UINT32_MAX); }, "trusted proof map addend");
+    rejects([] { trusted_map_relocation_offset(1,INT64_MAX,0,false,40); }, "trusted proof map addend");
+    rejects([] { trusted_map_relocation_offset(1,1ULL<<63,0,false,40); }, "trusted proof map addend");
+    rejects([] { trusted_map_relocation_offset(UINT32_MAX,0,0,false,UINT32_MAX); }, "trusted proof map addend");
+    rejects([] { trusted_map_relocation_offset(0,0,-1,true,40); }, "trusted proof map addend");
+    std::puts("trusted extern base/relative/full-width/REL/RELA/boundary controls: PASS");
     std::puts("source map exact site/kind/continuation/FD/offset/metadata rejection: PASS");
 }

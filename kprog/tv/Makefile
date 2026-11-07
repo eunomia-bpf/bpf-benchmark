@@ -146,12 +146,12 @@ kernel-check: linker-build
 
 build/test-loader: test_loader.cpp build/context-helper-25.bpf.o build/context-helper-27.bpf.o build/context-helper-67.bpf.o build/bcc-map-probe/manifest.json build/source-value.bpf.o build/source-value-wrong-site.bpf.o build/native-entry.o build/simulator.bpf.o build/runtime-config/simulator.bpf.o build/wrong-capacity/simulator.bpf.o build/wrong-value-size/simulator.bpf.o build/wrong-layout/simulator.bpf.o build/wrong-readonly/simulator.bpf.o build/wrong-data-layout/simulator.bpf.o ../libnativeloader/src/native_loader.cpp \
 		$(wildcard ../libnativeloader/src/*.hpp ../libnativeloader/include/*.hpp)
-	$(MAKE) -C ../libnativeloader BUILD_DIR=build-tv-binding
+	$(MAKE) -C ../libnativeloader BUILD_DIR=build
 	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 \
 		-DTV_NATIVE_LINK_PATH='"$(TV_NATIVE_LINK)"' \
 		-I../../vendor/libbpf/include/uapi \
 		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
-		$< ../libnativeloader/build-tv-binding/libnative_loader.a \
+		$< ../libnativeloader/build/libnative_loader.a \
 		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $@
 
 TV_NATIVE_LINK ?= ../x86/native_lab/native_link/target/release/native-link
@@ -261,12 +261,12 @@ build/test-manifest: test_manifest.cpp ../libnativeloader/src/native_loader_mani
 	install -d build
 	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -fsanitize=address,undefined $< -o $@
 
-build-arm64/bound-probe: ../fidelity/bound_probe.cpp ../libnativeloader/include/native_loader.hpp ../libnativeloader/build-tv-context-v2-arm64/libnative_loader.a
+build-arm64/bound-probe: ../fidelity/bound_probe.cpp ../libnativeloader/include/native_loader.hpp ../libnativeloader/build-arm64/libnative_loader.a
 	install -d build-arm64
 	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static \
 		-D__EXPORTED_HEADERS__ -DNATIVE_LINK_PATH='"/native-link"' \
 		-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
-		$< ../libnativeloader/build-tv-context-v2-arm64/libnative_loader.a \
+		$< ../libnativeloader/build-arm64/libnative_loader.a \
 		../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
 		-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -pthread -o $@
 
@@ -520,11 +520,11 @@ simple-blocks-certificate:
 		-o ../tv/build/SimpleGuardCertificate.olean ../tv/SimpleGuardCertificate.lean
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv -o ../tv/build/SimpleBlocks.olean ../tv/SimpleBlocks.lean
 
-build-arm64/capture-checked: capture_checked.cpp ../libnativeloader/build-tv-context-v2-arm64/libnative_loader.a ../../kinsn/module/include/native_lab_checked_wire.h
+build-arm64/capture-checked: capture_checked.cpp ../libnativeloader/build-arm64/libnative_loader.a ../../kinsn/module/include/native_lab_checked_wire.h
 	install -d build-arm64
 	aarch64-linux-gnu-g++ -std=c++20 -Wall -Wextra -Werror -O2 -static -D__EXPORTED_HEADERS__ \
 		-I../../vendor/linux-framework/include/uapi -I../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
-		$< ../libnativeloader/build-tv-context-v2-arm64/libnative_loader.a \
+		$< ../libnativeloader/build-arm64/libnative_loader.a \
 		../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
 		-L../../.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -pthread -o $@
 
@@ -587,8 +587,8 @@ checked-platform-check: bpf-check simple-checked-artifact-check
 
 .PHONY: capture-loader-build
 capture-loader-build:
-	$(MAKE) -C ../libnativeloader BUILD_DIR=build-tv-binding
-	$(MAKE) -C ../libnativeloader BUILD_DIR=build-tv-context-v2-arm64 \
+	$(MAKE) -C ../libnativeloader BUILD_DIR=build
+	$(MAKE) -C ../libnativeloader BUILD_DIR=build-arm64 \
 		LIBBPF_PREFIX=$(abspath ../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix) \
 		LIBBPF_LIBRARY=$(abspath ../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a) \
 		KERNEL_OFFSETS_INCLUDE=$(abspath ../../micro/programs/build-arm64)
@@ -629,11 +629,11 @@ x86-native-abi-check:
 x86-native-abi-proof-build:
 	python3 test_x86_abi_kernel.py build build/x86-abi-proof
 
-build/x86-abi-bound-probe: ../fidelity/bound_probe.cpp ../libnativeloader/build-tv-binding/libnative_loader.a
+build/x86-abi-bound-probe: ../fidelity/bound_probe.cpp ../libnativeloader/build/libnative_loader.a
 	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -D__EXPORTED_HEADERS__ \
 		-DNATIVE_LINK_PATH='"$(abspath build/native-link-abi)"' \
 		-I../../vendor/linux-framework/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
-		$< ../libnativeloader/build-tv-binding/libnative_loader.a \
+		$< ../libnativeloader/build/libnative_loader.a \
 		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -o $@
 
 x86-native-abi-kernel-check: build/x86-abi-bound-probe
@@ -745,4 +745,4 @@ trusted-client-check:
 guest-trusted-client-check:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod build-x86/bpf_x86_native_lab.ko
-	./build/test-trusted-client ../x86/micro-prog/build/native-link/simple.proof.o simple_xdp
+	./build/test-trusted-client ../../vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o kprobe_vfs_read

@@ -1,49 +1,89 @@
 {
-  "status": "native_only_client_and_kernel_queries_passed",
-  "checks": {
-    "trusted-query-v4": {
-      "exit_code": 0,
-      "controls": [
-        "application cannot obtain registered service authority: REJECTED (16)",
-        "application proof ELF refused: REJECTED (8)",
-        "unrecognized submission metadata refused: REJECTED (22)",
-        "application cannot complete proof request: REJECTED (1)",
-        "replace submitted native bytes refused: REJECTED (16)",
-        "application cannot read service requests: REJECTED (1)",
-        "capacity probe retains queued request: REJECTED (90)",
-        "immutable native ELF/entry/metadata survive producer mutation: PASS",
-        "kernel source/load attributes and actual outer/inner map shapes: PASS",
-        "invented inner template refused: REJECTED (2)",
-        "map outside pinned source refused: REJECTED (2)",
-        "stale source context request refused: REJECTED (116)",
-        "application proof upload refused with active trusted worker: REJECTED (1)",
-        "application cannot use trusted source query: REJECTED (1)",
-        "wrong native request identity refused: REJECTED (116)",
-        "invalid final errno refused: REJECTED (22)",
-        "unrelated verified BPF program cannot authorize native request: REJECTED (18)",
-        "application cannot replace disconnected trusted registration: REJECTED (16)",
-        "registered trusted transport, immutable P, application proof refusal and fail-closed disconnect: PASS"
-      ]
-    },
-    "trusted-client-v2": {
-      "exit_code": 0,
-      "controls": [
-        "applications submit native programs and cannot supply a proof: REJECTED",
-        "applications submit native programs and cannot supply a proof: REJECTED",
-        "trusted worker capability/request activation refused: REJECTED",
-        "trusted specializer refused native program: Permission denied: REJECTED",
-        "public native-only loader: exact kernel request, proof/prebuilt separation, capability and failure propagation PASS"
-      ]
-    },
-    "trusted-loader-arm64-v2": {
-      "exit_code": 0,
-      "controls": []
-    }
+  "status": "native_only_frontend_real_kernel_controls_passed",
+  "frontend_vm_controls": [
+    "applications submit native programs and cannot supply a proof: REJECTED",
+    "applications submit native programs and cannot supply a proof: REJECTED",
+    "trusted worker capability/request activation refused: REJECTED",
+    "trusted specializer refused native program: Permission denied: REJECTED",
+    "ambiguous unused source map names cannot block a native-only submission: PASS",
+    "public native-only loader: exact kernel request, proof/prebuilt separation, capability and failure propagation PASS"
+  ],
+  "frontend_vm_log_sha256": "4f8602849e3f2c88d34c6224564a2405c3d2aac12f396b493438610875e94a9b",
+  "architectures_built": [
+    "x86 static library",
+    "x86 shared library",
+    "AArch64 static library",
+    "AArch64 shared library"
+  ],
+  "worker_success_handoff": "Actual common-service native-only control accepted, reopened after helper completion and TEST_RUN returned2; C receipt at corpus/results/kprog_app_coverage_20261107/trusted-service/summary.json (777653892). This frontend test returns controlled -EACCES and executes no native instructions.",
+  "metadata": {
+    "envelope": [
+      "version",
+      "load_context",
+      "maps"
+    ],
+    "map_fields": [
+      "name",
+      "map_id",
+      "map_type",
+      "key_size",
+      "value_size",
+      "max_entries",
+      "map_flags",
+      "value_offset"
+    ],
+    "value_offset": "null=map object; integer including0=direct value"
   },
   "remaining": [
-    "positive shared service generation and bound execution",
-    "real BCC x86 and Katran ARM trusted path",
-    "all-program translation validation"
+    "real BCC/x86 and Katran/ARM REQUIRE_BOUND_PROOF=1 runs",
+    "AArch64 common-service helper acceptance/execution",
+    "token-FD delegation",
+    "source/profile/artifact binding refinement certificates on the new path",
+    "retire/adapt historical direct proof-upload kernel fixtures to the common service"
   ],
-  "native_executed": false
+  "source_sha256": {
+    "kprog/libnativeloader/include/native_loader.hpp": "9bb3e6f903c4037618f69827dbe76463ad554fdc5b714b880933f3bf7a0c7f93",
+    "kprog/libnativeloader/src/native_loader.cpp": "3ae4d459643b071697e55c33445df23ff483810b0710e69edd58bdc9c4685997",
+    "kprog/libnativeloader/src/native_source_map_binding.hpp": "2a7472bb7527597713137bfd3acb1b8db23b9ad7d0ebd7a43540f5f59212c345",
+    "kprog/tv/test_trusted_client.cpp": "c6382e2324589c9214a319ad9149f2e1573aef104044962601e1942f0588150e",
+    "kprog/tv/test_source_maps.cpp": "9891f8d41714799ce08342fb423d86de11ff2532e51e0feb7aa09edb398b5a7b",
+    "kprog/tv/Makefile": "5be92b71f7dc15973d3d719c0637cee4dc351951f0a691f6b7f15a5fe969bd0b"
+  },
+  "native_alias_control": {
+    "native_elf": "vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o",
+    "entry": "kprobe_vfs_read",
+    "sha256": "cf752eac721769450c25ce39a1f00ed3aaa06c751d1d83997a0643d1e228f18c",
+    "alias": "stats",
+    "value_offset": 8,
+    "source": "actual accepted synthetic XDP with three retained maps; source_map_bindings site4 selects direct value, two unused maps share a name",
+    "manifest_proof": "nonexistent application simulator object is never opened",
+    "application_native_execution": false
+  },
+  "trusted_extern_controls": {
+    "command": "make -C kprog/tv source-map-check",
+    "exit": 0,
+    "controls": 14,
+    "sanitizers": [
+      "address",
+      "undefined"
+    ],
+    "log_sha256": "5919953978a3c137d45e68c60fccfd57883012c4caae2bdd311bff10c4d89d44",
+    "contract": "bare native-symbol extern + REL LDDW relative signed64 or RELA explicit addend + nullable capsule base; full128-bit intermediate, object kind/extent/wire overflow enforced; old source_insn contract unchanged"
+  },
+  "builds": {
+    "arm_static_shared_exit": 0,
+    "arm_log_sha256": "f190a1fa5761f95e23c9b11385adddac6a29f346d666376c13425a7850732d31",
+    "x86_static_shared_exit": 0,
+    "libraries": {
+      "kprog/libnativeloader/build/libnative_loader.a": "5f67a6a4b30375637aecb992e6a8da6f694015f0b5a5a52323347f4799a1f819",
+      "kprog/libnativeloader/build/libnative_loader.so": "c878cc0ffd995b1cb02f16f41587ab777f9230593eb61ce16b266efacdb0b2e6",
+      "kprog/libnativeloader/build-arm64/libnative_loader.a": "c1b11968c77e6be0c3a05afbf47f134b2ed6eade9ca00f2185ad73e01e5b69ca",
+      "kprog/libnativeloader/build-arm64/libnative_loader.so": "69c4e2e69dddb853715adbc5fa5bfc0963dce8b0ec066251901caacdf0349eb8"
+    }
+  },
+  "prior_diagnostics": [
+    "borrowed MapMeta FD serialization failed EBADFD; fixed by reopening pinned map ID, actual three-map guest passes",
+    "synthetic manifest symbol selector lacked source entry BTF and matched no entry; fixture uses explicit native API entry with manifest native/map selection, guest passes"
+  ],
+  "raw_output": "summarized and removed per CLEANUP NOW; C retains compressed actual positive and BCC failure counterexamples"
 }

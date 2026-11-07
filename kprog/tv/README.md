@@ -118,7 +118,7 @@ own BTF object and main function prototype are also carried into the stub and
 checked against the pinned source. Mutation releases all pinned objects and
 invalidates the generation. Both callbacks reject an unsealed snapshot,
 subsequent mutation, changed context or a different ABI mask. Generation-zero remains the existing
-explicitly unbound experiment. The shared loader seals its supplied proofs.
+explicitly unbound experiment. The registered service's loader seals its freshly generated proofs.
 
 The C entry `native_loader_load_from_fd_with_manifest_path_btf_and_context`
 accepts the existing BTF/attach arguments followed by a pointer to a 16-byte
@@ -1049,3 +1049,59 @@ controls pass, and both x86 and ARM loader libraries build. No native program
 executes in these controls. Shared service/worker integration and the required
 real BCC/x86 and Katran/ARM runs remain active. Generation-zero experiments
 retain their explicitly unbound interpretation.
+
+
+Application frontend and service kernel facts
+--------------------------------------------
+
+With `BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1`, the public loader resolves
+native/map metadata and uses SUBMIT/WAIT. It rejects explicit application proof
+fields and does not open a manifest's simulator object. The legacy prebuilt
+requirement cannot select an application proof on this route. The application
+submits native ELF, entry and a JSON envelope with version1, load_context and
+maps. The service must validate every assertion using the pinned source. Map
+`value_offset` is null for a map object and numeric (including0) for a direct
+value. Neither proof bytes, source C nor producer filenames/tool flags are in
+the request. Phase/body-size counters not returned by this initial transport
+remain unpopulated; they are not measured zeros.
+
+Service-only CONTEXT returns the kernel's actual program type, attach type,
+load flags/interface, attachment/BTF identity, GPL status and token presence.
+MAP accepts only a used map of that source and returns its actual shape/BTF
+IDs, with depth selecting its real inner template. These are48/56-byte query
+records. Source/foreign-map/stale/depth controls run against real kernel maps.
+They supply the common service's normalized worker declarations; an
+application's asserted shape cannot establish the facts.
+
+The C++ helper receives trusted_service_fd, trusted_request_id and its explicit
+fresh trusted_native_proof_path. ACTIVATE authenticates the inherited capability.
+It either opens its fresh proof_object_path/trusted_simulator_program or uses
+its freshly generated raw proof. TrustedMapBinding supplies validated native
+symbol/map-ID/direct-value aliases. Native linking uses an isolated directory
+under that request's output, with no application prebuilt discovery/cache. The
+helper automatically COMPLETEs success before returning, while its program FD
+is open. The kernel pins the result before a short-lived helper can exit. The
+common broker completes errors and proceeds to NEXT after helper success.
+Token-bearing sources still require actual token-FD delegation; the current
+frontend refuses them instead of dropping the source's token contract.
+
+`trusted-client-check` exercises the actual public frontend and kernel queue,
+including proof fields, a forged worker capability, exact native/entry/source
+submission, no-proof typed metadata and real generation-error propagation.
+The test uses the actual BCC vfsstat native ELF, checks the `stats` native
+alias with direct-value base8 and omits two unused same-name source maps.
+It executes no native instructions. C's common-service control already completes
+a fresh accepted native worker and TEST_RUN returns2 (see
+`corpus/results/kprog_app_coverage_20261107/trusted-service/summary.json`).
+Real BCC/x86 plus Katran/ARM runs remain active. The
+canonical library caches are `libnativeloader/build` and `build-arm64`; old
+T-named duplicate caches are retired.
+
+Trusted proof externs denote the already-bound native symbol address. The
+linker adds the compiled REL LDDW relative addend (or explicit RELA addend)
+to the capsule's nullable direct-value base, validates it against the actual
+map object and uses the same native symbol address/ID for both artifacts.
+Handle symbols forbid a nonzero relative addend. Intermediate arithmetic is
+128-bit so negative, full-width and overflowing values cannot wrap into a
+safe offset. `source-map-check` covers14 controls under ASan/UBSan. The
+legacy manifest/source-instruction binding contract is unchanged.

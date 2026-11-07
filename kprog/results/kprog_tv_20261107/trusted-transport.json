@@ -1,5 +1,5 @@
 {
-  "status": "kernel_transport_controls_passed",
+  "status": "kernel_transport_context_and_inner_map_controls_passed",
   "vendor_commit": "9c50491de2a5f7c3067201b10a7182dbf172e541",
   "vendor_fork": "https://github.com/eunomia-bpf/linux/tree/kinsn-only",
   "completed": [
@@ -9,25 +9,24 @@
     "transport controls compile with -Werror",
     "combined kernel patch idempotence/conflict/source identity tests pass with committed vendor HEAD",
     "actual isolated x86 KVM transport/provenance controls EXIT0; no native code executed",
-    "final x86 kernel/module and -Werror transport binary built successfully"
+    "final x86 kernel/module and -Werror transport binary built successfully",
+    "service-only actual source context and outer/inner map queries pass real KVM controls; wrong role/map/depth/request and invalid errno refused"
   ],
   "remaining": [
-    "C shared service and x86 worker integration",
-    "A worker integration",
-    "application native-only submit routing",
     "BCC x86 and Katran ARM REQUIRE_BOUND_PROOF=1 real runs",
+    "AArch64 common-service worker acceptance/execution",
     "program binding/refinement certificate for this new path"
   ],
   "sources": {
-    "kinsn/module/include/native_lab_trusted_wire.h": "69403ed433207f99ce020657e6d8cb88f44e61151d99f5ea738c073c1a3ed8e3",
-    "kinsn/module/include/native_lab_trusted.h": "bbab76f3d11eedd21660817551895d96f386edc834df910d2e10113e0abf1e24",
+    "kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+    "kinsn/module/include/native_lab_trusted.h": "c6274fad2057476882475b0fa47d946170f00b8f070029632c212f3cc1f4ed51",
     "kinsn/module/include/native_lab_group.h": "e3d947117223ea29c4fb6713e17686b038726ee8e8679559240565ecf8155bb0",
     "kinsn/module/x86/bpf_x86_native_lab.c": "f085cf299a55a7ff3c3cc11ad42bf1a76fd45e64ce6fd779541b947b012cba26",
     "kinsn/module/arm64/bpf_arm64_native_lab.c": "b019578c79209c9c68a0faeda80642be76b6b2b7406a044c2b2250a25a386ca4",
     "kprog/tv/native-proof-regions.patch": "82e9b4b39e15fd0da06a47954c1cd09bea9868c56c2e9e6bcf91a267a9366c12",
     "kprog/tv/test_kernel_patch.py": "b7f91fedff5a22c6e1de95c099f6c5bcf07659329a879d26daf6d57c687b5b4d",
-    "kprog/tv/test_trusted_transport.c": "a72c8efee8619823b3dc06f5eef46e32a88bf0975631b124bfe731e1ccbf1c3b",
-    "kprog/tv/Makefile": "dab94f0e4da8cf18d38489eec3443e43814f635c3bae48c8af1d0e0ed1c1ccb8"
+    "kprog/tv/test_trusted_transport.c": "bd010ceaf538775ce11c4c8023b27a805973e5dd4a35d092ffa2c623a17875d1",
+    "kprog/tv/Makefile": "5be92b71f7dc15973d3d719c0637cee4dc351951f0a691f6b7f15a5fe969bd0b"
   },
   "controls": [
     "application cannot obtain registered service authority: REJECTED (16)",
@@ -38,17 +37,28 @@
     "application cannot read service requests: REJECTED (1)",
     "capacity probe retains queued request: REJECTED (90)",
     "immutable native ELF/entry/metadata survive producer mutation: PASS",
-    "wrong native request identity refused: REJECTED (116)",
-    "unrelated verified BPF program cannot authorize native request: REJECTED (18)",
+    "kernel source/load attributes and actual outer/inner map shapes: PASS",
+    "invented inner template refused: REJECTED (2)",
+    "map outside pinned source refused: REJECTED (2)",
+    "stale source context request refused: REJECTED (116)",
     "application proof upload refused with active trusted worker: REJECTED (1)",
+    "application cannot use trusted source query: REJECTED (1)",
+    "wrong native request identity refused: REJECTED (116)",
+    "invalid final errno refused: REJECTED (22)",
+    "unrelated verified BPF program cannot authorize native request: REJECTED (18)",
     "application cannot replace disconnected trusted registration: REJECTED (16)",
     "registered trusted transport, immutable P, application proof refusal and fail-closed disconnect: PASS"
   ],
   "kernel_pair": {
     "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "32c132c4928e1035bd003dff644e7d9676441c578e9511335370c07d4e2c7652",
-    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "ea5f57dd637c688968c0c05f3165a0b3296a46ff4dec3eda6a0ea92b9ab7f12c",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "d8772a0ddbd1e72d70ab7ae3b01011011a46606255134d1726678a1e6f1959c9",
     "kprog/tv/build-kernel-x86/.config": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864"
   },
-  "raw_log_sha256": "622b18daa6abd8cec584f11733e6f8fe5e9a60cbb796532ca67cd3e885fc4596",
-  "raw_output": "summarized and removed per CLEANUP NOW; current incremental kernel/module retained for shared service integration"
+  "raw_log_sha256": "933a1284aee38e79fd3efc4c6b6656c336cf4246f30b1ffa6c2c290fefd7dc1b",
+  "raw_output": "summarized and removed per CLEANUP NOW; current incremental kernel/module retained for shared service integration",
+  "receipt_policy": "individual VM phases require explicit guest PASS markers; combined wrapper rc0 alone is not evidence",
+  "cross_lane_evidence": [
+    "common service actual x86 accepted-worker TEST_RUN2: corpus/results/kprog_app_coverage_20261107/trusted-service/summary.json",
+    "actual ARM full-system transport controls: corpus/results/kprog_arm64_app_coverage_20261107 (94fb9d50e); no native code executed"
+  ]
 }
