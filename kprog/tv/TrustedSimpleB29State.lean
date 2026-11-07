@@ -176,6 +176,63 @@ theorem second_block_relational_architecture (env : BPF.Environment) (entry n : 
   · simp only [endpoint]
   · simpa only [endpoint] using guard8_execution env p position active
 
+
+/-- This invariant is produced by the actual previous BPF ADD, not supplied
+as a new execution guard or a restriction on pointer inputs. -/
+theorem second_guard_temporary (p : BPF.State) :
+    (guard8After p).regs 3=(guard8After p).regs 2+(8#64) := by
+  simp +decide [guard8After,guard8Add,guard8Move,BPF.setReg]
+
+/-- +72 JA boundary. B no longer retains the +8 temporary, so native RDI is
+reconstructed from the still represented original pointer. All flag stages
+reuse the canonical operations; all other invocation fields stay immutable. -/
+def thirdGuardView (entry : X86.State) (p : BPF.State) : X86.State :=
+  {entry with
+    gpr := fun r => if r=0 then p.regs 0 else if r=1 then p.regs 2
+      else if r=2 then p.regs 1 else if r=6 then p.regs 3
+      else if r=7 then p.regs 2+(8#64) else entry.gpr r
+    rflags := X86.arithmeticFlags .w64 true false (p.regs 3) (p.regs 1)
+      (X86.arithmeticFlags .w64 false false (p.regs 2) (72#64)
+        (X86.arithmeticFlags .w64 true false (p.regs 2+(8#64)) (p.regs 1)
+          (X86.arithmeticFlags .w64 true false (p.regs 2) (p.regs 1) entry.rflags)))
+    memory := p.memory
+    pc := if p.pc=27 then 60 else 35}
+
+theorem third_guard_architecture (entry : X86.State) (p : BPF.State)
+    (temporary : p.regs 3=p.regs 2+(8#64)) :
+    remainingNative72 (secondGuardView entry p)=thirdGuardView entry (guard72After p) := by
+  by_cases reject : p.regs 2+(72#64)>p.regs 1
+  all_goals simp +decide [thirdGuardView,secondGuardView,remainingNative72,remainingNativeCmp72,remainingNativeAdd,
+    guard72After,guard72Add,guard72Move,BPF.setReg,temporary,reject]
+  all_goals funext r
+  all_goals by_cases zero : r=0
+  all_goals by_cases one : r=1
+  all_goals by_cases two : r=2
+  all_goals by_cases six : r=6
+  all_goals by_cases seven : r=7
+  all_goals simp_all +decide
+
+/-- Every decoded +72 native execution preserves the full architectural
+relation. The temporary invariant was established by the previous B block;
+no branch result, memory permission, or native next state is assumed. -/
+theorem third_block_relational_architecture (env : BPF.Environment) (entry n : X86.State)
+    (p : BPF.State) (actual : Transition X86.State)
+    (related : n=secondGuardView entry p) (position : p.pc=8) (active : p.halted=false)
+    (temporary : p.regs 3=p.regs 2+(8#64))
+    (run : CanonicalRelationalPath 0 native [⟨26,4⟩,⟨30,3⟩,⟨33,2⟩] n actual) :
+    actual.state=thirdGuardView entry (guard72After p) ∧ actual.events=[] ∧ actual.fault=none ∧
+    Execution (TrustedSimpleB29.instructionStep env) p actual.events (guard72After p) := by
+  subst n
+  have nativePC : (secondGuardView entry p).pc=26 := by simp [secondGuardView,position]
+  have members : ∀ extent ∈ [⟨26,4⟩,⟨30,3⟩,⟨33,2⟩], extent ∈ simpleDefinedExtents := by simp [simpleDefinedExtents]
+  obtain ⟨endpoint,_⟩ := defined_relational_result_unique run members
+    (remaining_native72_evaluation (secondGuardView entry p) nativePC)
+  refine ⟨?_,?_,?_,?_⟩
+  · simpa only [endpoint] using third_guard_architecture entry p temporary
+  · simp only [endpoint]
+  · simp only [endpoint]
+  · simpa only [endpoint] using guard72_execution env p position active
+
 end KProgTV.TrustedSimpleB29State
 #print axioms KProgTV.TrustedSimpleB29State.first_guard_architecture
 #print axioms KProgTV.TrustedSimpleB29State.first_block_relational_architecture
@@ -185,3 +242,7 @@ end KProgTV.TrustedSimpleB29State
 
 #print axioms KProgTV.TrustedSimpleB29State.second_guard_architecture
 #print axioms KProgTV.TrustedSimpleB29State.second_block_relational_architecture
+
+#print axioms KProgTV.TrustedSimpleB29State.second_guard_temporary
+#print axioms KProgTV.TrustedSimpleB29State.third_guard_architecture
+#print axioms KProgTV.TrustedSimpleB29State.third_block_relational_architecture

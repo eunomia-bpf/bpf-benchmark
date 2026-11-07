@@ -2265,3 +2265,10 @@ must be from the same actual zero-borrow subtraction. The single audit passes;
 source, reviewed patch, command and log are archived. C still owns actual
 macro/width routing and compiler regressions; no producer or ISA change is
 made by this review and no full handler/artifact TV is inferred.
+
+`trusted-simple-b29-third-block-state.json` adds +72 ADD/CMP/JA full-state
+reconstruction. Native RDI's earlier +8 value is recovered from the original
+B pointer after r3 is overwritten; the prior temporary invariant is derived
+from the preceding actual B ADD. Canonical ADD/CMP flag stages and modular
+arithmetic are retained. All9 state audits pass. Store/fault/exit views and
+composition into the full architectural TV relation remain open.
