@@ -2373,6 +2373,26 @@
     "slot_released": true,
     "snapshot_file_count": 1140
   },
+  "full_make_check_518d33529": {
+    "actual_exit": 0,
+    "archive_block_sha256": "63b78110fe7cbd2a35ee26fa6302106fc84d5a87c80d83143f3349e7730f39eb",
+    "archive_marker": "=== FULL MAKE CHECK 518D33529 PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/compare-memory-full.cpu.jsonl.gz": "2faac56ec748274d0849ef37fd8b1a9bd7f7a7639e876f5bdc3969786602fd6e",
+      "/workspaces/.agent-state/kprog-lanes/V/compare-memory-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/compare-memory-full.head": "8bee114112948458eedb9bbfb3350c3e78ab57f4422284a15381f9c78580d45f",
+      "/workspaces/.agent-state/kprog-lanes/V/compare-memory-full.launch.log": "0dfaf0ef799e5c08d2c26a5918f971e43746d6f54fccfea63e52bd7740ec7b78",
+      "/workspaces/.agent-state/kprog-lanes/V/compare-memory-full.log": "bc28e9d0334b2e9c58c95e2ecc83e65bf603c4ccfe909dd9306f506cffe8cff2",
+      "/workspaces/.agent-state/kprog-lanes/V/compare-memory-full.py": "6af69e85452865dff2be21559298980097384c272454625372b1db793e12ebbe",
+      "/workspaces/.agent-state/kprog-lanes/V/compare-memory-full.sources": "457a443a837969a32633ab7f489c5fac79d4d3c01f94aef6a3a586fbd119f63b",
+      "/workspaces/.agent-state/kprog-lanes/V/compare-memory-full.state": "81dccf5d44bb5e599cbd570239b9f09839a11c88f01fee682e084b4cbcc63b09"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "518d3352956e7ba809daf535916d59a3ac895089",
+    "scope": "Complete formal make check of the exact published source tree 518d3352956e7ba809daf535916d59a3ac895089. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1140
+  },
   "full_make_check_5a44604f5": {
     "all_snapshot_sha256_match_published_blobs": true,
     "archive_block_sha256": "38772c5ad18044b53466cce86fc0843ff66eabe0426c814bc9261f3615bed7f7",

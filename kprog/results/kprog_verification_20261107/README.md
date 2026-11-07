@@ -3726,3 +3726,10 @@ retain their distinct scopes:49 x86 C-model tokens,69 ARM observed conditional
 models and two ARM direct immediate-alias components. Universal alias-emission,
 compiler, ABI and native-link stages continue. The receipt
 `arm_immediate_alias_replay_924_epoch` retains the complete source bridge.
+
+### Published source full check 518d33529
+
+`make check` on immutable published518d33529 exits0. All1140 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_518d33529`. Every check retains its exact published source identity.
