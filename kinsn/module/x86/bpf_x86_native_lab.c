@@ -158,7 +158,6 @@ static int native_lab_advance_generation(struct native_blob *blob)
 {
 	if (blob->generation == U32_MAX)
 		return -EOVERFLOW;
-	native_lab_forget_checked();
 	native_lab_release_binding_objects(blob);
 	blob->generation++;
 	kfree(blob->bound_generations);
@@ -881,19 +880,11 @@ static const struct file_operations map_update_elem_fops = {
 static int __init bpf_x86_native_lab_debugfs_init(void)
 {
 	long i;
-	struct dentry *checked;
 
 	debugfs_root = debugfs_create_dir("bpf_x86_native_lab", NULL);
 	if (IS_ERR(debugfs_root))
 		return PTR_ERR(debugfs_root);
 
-	checked = debugfs_create_file("checked_proof", 0400, debugfs_root, NULL,
-			      &native_lab_checked_fops);
-	if (IS_ERR(checked)) {
-		debugfs_remove_recursive(debugfs_root);
-		debugfs_root = NULL;
-		return PTR_ERR(checked);
-	}
 	debugfs_create_file("map_ptr", 0600, debugfs_root, NULL,
 			    &map_ptr_fops);
 	debugfs_create_file("map_value_ptr", 0600, debugfs_root, NULL,
@@ -931,7 +922,6 @@ static void bpf_x86_native_lab_debugfs_exit(void)
 	debugfs_root = NULL;
 
 	mutex_lock(&blobs_lock);
-	native_lab_forget_checked();
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
 		kfree(blobs[i].bytes);
 		kfree(blobs[i].relocs);

@@ -36,8 +36,7 @@ for name,stream,offset,replacement in cases:
         if result.returncode:raise RuntimeError('unchanged entry failed: '+str(directory))
         print('unchanged actual entry streams: PASS',flush=True)
     else:
-        entry_reject = b'SimpleEntryCertificate.lean:' in result.stdout and b"tactic 'rfl' failed" in result.stdout and b'decode' in result.stdout
-        body_reject = b'SimplePlatform.lean:' in result.stdout and b'BPF.decode' in result.stdout and b'error:' in result.stdout
-        if not result.returncode or not (entry_reject or body_reject):
+        if not result.returncode or b'SimpleEntryCertificate.lean:' not in result.stdout or \
+                b"tactic 'rfl' failed" not in result.stdout or b'decode' not in result.stdout:
             raise RuntimeError('semantic rejection missing: '+str(directory))
         print(name+': REJECTED by canonical byte-decoded entry semantics',flush=True)
