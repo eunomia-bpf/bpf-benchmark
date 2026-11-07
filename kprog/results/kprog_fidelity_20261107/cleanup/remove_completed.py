@@ -26,6 +26,7 @@ for p in dirs:
   assert pos==len(ordered_tracked) or not ordered_tracked[pos].startswith(prefix)
 roots=[str(p)+'/' for p in dirs];file_names={str(p) for p in files}
 def matches(p):
+ if p==str(S/'STOP'):return False
  if not p.startswith(('/workspaces/repository/kprog/','/workspaces/.agent-state/kprog-lanes/F')):return False
  return p in file_names or any(p==x[:-1] or p.startswith(x) for x in roots)
 readers=[];errors=[]
@@ -53,11 +54,18 @@ for p in files:
 for p in dirs:
  for base,dnames,fnames in os.walk(p,followlinks=False):
   for name in fnames:
-   q=Path(base)/name;allocated+=q.lstat().st_blocks*512;count+=1
+   q=Path(base)/name
+   if q==S/'STOP':continue
+   allocated+=q.lstat().st_blocks*512;count+=1
 for p in files:
  if p.exists():p.unlink()
 for p in dirs:
- if p.exists():shutil.rmtree(p)
+ if p==S:
+  for child in p.iterdir():
+   if child.name=='STOP':continue
+   if child.is_dir() and not child.is_symlink():shutil.rmtree(child)
+   else:child.unlink()
+ elif p.exists():shutil.rmtree(p)
 S.mkdir(parents=True,exist_ok=True)
 (OUT/'deletion-audit.json').write_text(json.dumps(dict(published_commit=commit,deleted_entries=count,allocated_bytes=allocated,reader_scan='no matching command/cwd/fd/mapping; no permission errors',shared_caches='untouched',build_dirs=plan['build_dirs']),indent=2)+'\n')
 print('Removed completed F data:',count,'entries',allocated,'allocated bytes; shared caches untouched')

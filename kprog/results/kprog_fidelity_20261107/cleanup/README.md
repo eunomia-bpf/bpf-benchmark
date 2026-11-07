@@ -39,3 +39,15 @@ Deletion complete: 51987 entries, 20855283712 allocated
 bytes (19.42GiB) removed, including87private build
 directories and completed F lane copies. No matching process/cwd/open descriptor
 or mapping was found; no permission errors. Shared incremental caches untouched.
+
+Correction: removing the entire lane also removed its persistent STOP guard.
+The coordinator restored that marker and stopped restarted cloud loops. The
+cleanup recipe now preserves STOP; local Codex must never start lane-loop.sh.
+The earlier empty-lane observation describes that cleanup instant, not the
+required steady state. STOP is permanent control state, not disposable output.
+
+The STOP-preservation repair was checked separately in a temporary lane using
+the exact deletion and reader-matching blocks: STOP bytes and inode survived,
+completed siblings and nested files were removed, and a directory symlink was
+unlinked without touching its target. The real lane STOP was unchanged. The
+historical whole-lane cleanup was not rerun against current retained work.
