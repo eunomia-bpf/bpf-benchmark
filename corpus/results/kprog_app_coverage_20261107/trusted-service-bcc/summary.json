@@ -1,0 +1,36 @@
+{
+  "ok": false,
+  "returncode": 97,
+  "application": "bcc/vfsstat",
+  "observed_native_submissions": 1,
+  "proof_generated": 0,
+  "compiled": 0,
+  "verifier_accepted": 0,
+  "verifier_rejected": 0,
+  "specialization_failed": 1,
+  "cause": "native global stats alias/direct-value offset missing from envelope; original kernel data-map name is not its native symbol",
+  "kernel_metadata": {
+    "version": 1,
+    "load_context": {
+      "prog_type": 26,
+      "expected_attach_type": 24,
+      "prog_flags": 0,
+      "attach_btf_id": 123777,
+      "attach_btf_obj_id": 1,
+      "attach_prog_id": 0,
+      "prog_ifindex": 0
+    },
+    "maps": [
+      {
+        "name": "vfsstat_.bss",
+        "map_id": 3,
+        "map_type": 2,
+        "key_size": 4,
+        "value_size": 40,
+        "max_entries": 1,
+        "map_flags": 1024,
+        "value_offset": null
+      }
+    ]
+  }
+}

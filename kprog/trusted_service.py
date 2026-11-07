@@ -213,8 +213,8 @@ def serve(args):
                     entry = entry_bytes.decode('ascii')
                     envelope = strict_json(meta_bytes)
                     actual = kernel_facts(fd,request,envelope)
-                    metadata = normalize(envelope,actual)
                     (job/'kernel.facts.json').write_text(json.dumps(actual,indent=2))
+                    metadata = normalize(envelope,actual)
                     (job/'generation.metadata.json').write_text(json.dumps(metadata,indent=2))
                     isa={1:'x86',2:'arm64'}[request.arch]
                     source_paths=[Path(__file__),ROOT/'kprog/trusted_generation.py',Path(worker.__file__),

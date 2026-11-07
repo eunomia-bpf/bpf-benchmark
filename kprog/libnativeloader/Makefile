@@ -39,3 +39,12 @@ trusted-service-guest:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod ../tv/build-x86/bpf_x86_native_lab.ko
 	PATH="/usr/lib/llvm-18/bin:$$PATH" PYTHONDONTWRITEBYTECODE=1 python3 ../test/run_trusted_service_guest.py
+
+.PHONY: trusted-bcc-kvm trusted-bcc-guest
+trusted-bcc-kvm: trusted-service-check
+	taskset -c 16-19 vng --run "$(REPO_ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage" --cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -C kprog/libnativeloader trusted-bcc-guest'
+
+trusted-bcc-guest:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod ../tv/build-x86/bpf_x86_native_lab.ko
+	PATH="/usr/lib/llvm-18/bin:$$PATH" PYTHONDONTWRITEBYTECODE=1 python3 ../test/run_trusted_service_guest.py bcc
