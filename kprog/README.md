@@ -58,3 +58,24 @@ helper expansion. Width/release are checked against that final word; source
 PCs are unique/aligned and fit the signed32 marker payload. This ARM-only
 sideband supplies instruction identity for bound environment witnesses and
 does not alter native instructions. Proof mode rejects the sideband.
+
+### Kernel-backed trusted specialization
+
+The verified route submits native ELF bytes, entry and typed context/map metadata
+through the kernel's `native_submit` endpoint. A bootstrap-owned service opens
+`specializer` once, receives the kernel copy and queries its pinned source context
+and map shapes. `trusted_service.py` validates the envelope, calls the ISA worker
+and delegates fresh proof loading to `trusted-native-loader`; the loader completes
+the request before closing its program FD. Applications receive the resulting
+bound program through SUBMIT/WAIT. The service accepts no application proof, source
+C, tool flags or filenames, and reads no application manifest.
+
+Build/check the shared bridge with `make -C kprog/libnativeloader trusted-service-check`.
+`trusted-worker-check` compiles actual BCC native entries without proof siblings;
+`trusted-service-kvm` runs the real x86 kernel queue, generation, binding and native
+execution control using the existing incremental TV kernel/module. The service CLI
+requires its architecture, kernel endpoint, private state directory and trusted
+native-link/loader executable paths. Start it before applications; disconnect
+fails pending requests. Per-request compressed artifacts and errors are retained.
+[Current evidence](../corpus/results/kprog_app_coverage_20261107/trusted-service/README.md)
+distinguishes component acceptance from the pending six-application integration.

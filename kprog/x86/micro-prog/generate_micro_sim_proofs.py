@@ -1584,11 +1584,24 @@ def render_program(name: str, insns: list[NativeInsn],
                    program_section: str | None = None,
                    original_source: Path | None = None,
                    original_symbols: set[str] | None = None,
-                   source_map_bindings: list[dict] | None = None) -> str:
+                   source_map_bindings: list[dict] | None = None,
+                   trusted_map_bindings: list[dict] | None = None) -> str:
     if (original_source is None)!=(original_symbols is None):
         raise ValueError("original source and ELF symbols must be supplied together")
     rodata16 = {symbol:value for symbol,value in (rodata16 or {}).items()
                 if original_symbols is None or symbol not in original_symbols}
+    trusted_map_bindings = trusted_map_bindings or []
+    trusted_names = set()
+    for binding in trusted_map_bindings:
+        if set(binding) != {"native_symbol", "value_offset"}:
+            raise ValueError("trusted map binding requires native_symbol/value_offset")
+        symbol, offset = binding["native_symbol"], binding["value_offset"]
+        if not isinstance(symbol, str) or re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", symbol) is None or symbol in trusted_names:
+            raise ValueError("invalid/duplicate trusted native map symbol")
+        if offset is not None and (type(offset) is not int or not 0 <= offset <= 0xffffffff):
+            raise ValueError("trusted map value offset must be null or u32")
+        trusted_names.add(symbol)
+    rodata16 = {symbol:value for symbol,value in rodata16.items() if symbol not in trusted_names}
     ret_statement = "X86_SIM_X86_RET();"
     insns = annotated_fixed_count_ops(insns)
     subfunctions = {
@@ -1598,6 +1611,11 @@ def render_program(name: str, insns: list[NativeInsn],
     all_insns = [*insns, *(i for fn in subfunctions.values() for i in fn)]
     source_map_bindings = source_map_bindings or []
     source_pointers = {}
+    for binding in trusted_map_bindings:
+        symbol, offset = binding["native_symbol"], binding["value_offset"]
+        # The extern is the native symbol's bound address, including the
+        # capsule's direct-value base. ELF addends remain relative to it.
+        source_pointers[symbol] = (offset is not None, symbol)
     for binding in source_map_bindings:
         if set(binding) != {"native_symbol", "source_insn", "proof_symbol", "kind", "value_offset"}:
             raise ValueError("source-map binding fields must be explicit")
@@ -1612,7 +1630,12 @@ def render_program(name: str, insns: list[NativeInsn],
         if type(offset) is not int or offset < 0 or offset > 0xffffffff or (binding["kind"] == 1 and offset):
             raise ValueError("source-map value offset is invalid")
         source_pointers[symbol] = (binding["kind"] == 2, f"({proof_symbol} + {offset}ULL)")
-    used = {i.reloc_symbol for i in all_insns} & source_pointers.keys()
+    # A capsule can list maps unused by this particular entry. Annotate only
+    # actual native relocations; never manufacture an unused program load.
+    referenced = {i.reloc_symbol for i in all_insns}
+    source_pointers = {name:value for name,value in source_pointers.items()
+                       if name not in trusted_names or name in referenced}
+    used = referenced & source_pointers.keys()
     if used != source_pointers.keys():
         raise ValueError("source-map binding has no native address relocation")
     def source_annotations(body):
@@ -1703,6 +1726,8 @@ def render_program(name: str, insns: list[NativeInsn],
     if source_prelude:
         lines.append(source_prelude.rstrip())
         lines.append("")
+    for symbol in sorted(trusted_names & referenced):
+        lines.append(f'extern __u8 {symbol}[] __ksym;')
     if source_map_bindings:
         for binding in source_map_bindings:
             lines.append(f'extern __u8 {binding["proof_symbol"]}[] __ksym;')

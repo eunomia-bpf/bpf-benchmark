@@ -34,12 +34,15 @@ def declarations(metadata):
     def emit(item, label, name=None, tag=None):
         nonlocal inner_count
         required = fields | ({"name"} if name is not None else set())
-        if type(item) is not dict or set(item) - {"inner_map"} != required:
+        if type(item) is not dict or set(item) - ({"inner_map", "value_offset"} if name is not None else {"inner_map"}) != required:
             raise ValueError(f"{label} requires exactly the typed map fields")
         for field in fields:
             u32(item[field], f"{label}.{field}")
         if item["map_type"] == 0:
             raise ValueError(f"{label} type must be explicit")
+        if name is not None and item.get("value_offset") is not None:
+            if u32(item["value_offset"], label + ".value_offset") >= item["value_size"]:
+                raise ValueError(f"{label} direct value offset exceeds its map value")
         is_outer = item["map_type"] in {12, 13}
         if is_outer != ("inner_map" in item):
             raise ValueError(f"{label} inner template must match its map-in-map type")

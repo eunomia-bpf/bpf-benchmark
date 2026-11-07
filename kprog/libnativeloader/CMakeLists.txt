@@ -77,3 +77,8 @@ target_link_libraries(native_loader_shared
         PkgConfig::ZLIB
         ${CMAKE_DL_LIBS}
 )
+
+add_executable(trusted-native-loader ../trusted_loader.cpp)
+target_link_libraries(trusted-native-loader PRIVATE native_loader)
+add_executable(trusted-service-client ../test/trusted_service_client.cpp)
+target_link_libraries(trusted-service-client PRIVATE native_loader)

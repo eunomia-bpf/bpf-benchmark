@@ -1,0 +1,39 @@
+{
+  "ok": true,
+  "kind": "actual BCC generation/compile only; not kernel acceptance",
+  "programs": [
+    {
+      "entry": "kprobe_vfs_read",
+      "value_offset": 0,
+      "external_addends": [
+        0,
+        0
+      ],
+      "proof_instructions": 14,
+      "native_sha256": "d97c6b947b7858c986c2ca29990c0b9e2fd19775d70fc32c9e0f24c2c34174ff",
+      "simulator_sha256": "5323e8c5ca2ada4590a917fc2faed351933b7294a498972c57c7c23011f80d07"
+    },
+    {
+      "entry": "kprobe_vfs_write",
+      "value_offset": 0,
+      "external_addends": [
+        0,
+        0
+      ],
+      "proof_instructions": 14,
+      "native_sha256": "d97c6b947b7858c986c2ca29990c0b9e2fd19775d70fc32c9e0f24c2c34174ff",
+      "simulator_sha256": "5be0c9f53211a3c2e496216accf5d2b29ecdf877856a76496327a0f4a641cbd7"
+    },
+    {
+      "entry": "kprobe_vfs_read",
+      "value_offset": 8,
+      "external_addends": [
+        0,
+        0
+      ],
+      "proof_instructions": 14,
+      "native_sha256": "d97c6b947b7858c986c2ca29990c0b9e2fd19775d70fc32c9e0f24c2c34174ff",
+      "simulator_sha256": "3ada5acef36b9c025973fb1fb28bfa508f9be116d38d727abde4356680cbd9ea"
+    }
+  ]
+}

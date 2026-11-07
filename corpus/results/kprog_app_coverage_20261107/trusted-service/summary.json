@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "original_prog_id": 3,
+  "native_prog_id": 8,
+  "retval": 2,
+  "prebuilt_proof": false,
+  "request_id": 1,
+  "artifact_sha256": {
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "32c132c4928e1035bd003dff644e7d9676441c578e9511335370c07d4e2c7652",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "d8772a0ddbd1e72d70ab7ae3b01011011a46606255134d1726678a1e6f1959c9",
+    "kprog/libnativeloader/build/trusted-native.o": "d94117a420fcf032246cd6a869ef4a7f17e7def7ee610762f9116b90a4a18cf3",
+    "kprog/libnativeloader/build/trusted-service-client": "8a56cac8f869d1b7c053cc6671a9ba09119af3388b909489550f4533154f5340"
+  }
+}
