@@ -921,3 +921,11 @@ source-map identity and exact readonly object bytes in the same proof. The
 actual QEMU regression writes42 at16/generation1; wrong offsets and changed
 readonly bytes both reject before native execution. Static/shared ARM builds
 pass. New runtimev11 is queued for all six real application startups.
+
+## Completed resumed frozen census
+
+[The historical defined-frozen census](defined-frozen/README.md) now retains
+all1136 artifacts:706 generation failures,61 compiler failures,43 verifier
+acceptances,300 verifier rejections and26 loader failures. Compiler causes
+are60 recorded LLVM out-of-memory exits and1 timeout. All raw inputs/logs
+remain; this XDP diagnostic snapshot is separate from current real app runs.
