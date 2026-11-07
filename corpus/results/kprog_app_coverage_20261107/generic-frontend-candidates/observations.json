@@ -1,0 +1,1603 @@
+{
+  "scope": "generic ELF data extraction and generic stack-memory byte observations",
+  "readonly": {
+    "data_cases": 88,
+    "before_differences": 40,
+    "candidate_differences": 0,
+    "extent": {
+      "rejected": true,
+      "error": "native readonly extent exceeds its section: bad offset=0 size=9"
+    },
+    "missing_section_empty": true,
+    "rows": [
+      {
+        "name": "hex_ascii-1",
+        "object_sha256": "12a1e6d754aa8fb47be55f13c54b8903b85ae1be24e2fd4b7da9649e1c4cd042",
+        "expected_size": 1,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 1,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 1,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-1",
+        "object_sha256": "3abdf5c4232c0dfee442557bc19f94985c052581ceb95d317be97e5a9e2815a9",
+        "expected_size": 1,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 1,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 1,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-1",
+        "object_sha256": "f61f7ad1b674bcac02dde2ef52d07193d7eb7212d7d0e306ce2051d545c66137",
+        "expected_size": 17,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 17,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 17,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-1",
+        "object_sha256": "478b76fa87b2082b0e7eda1bcae841b6b4c6104fbce30357c50fb356783c1258",
+        "expected_size": 1,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 1,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-2",
+        "object_sha256": "385045921e342f28ae848dc48cb3cb998a9da30228c0a3938ce80c0ed8aa07d5",
+        "expected_size": 2,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 3,
+          "byte_equal": false,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 2,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-2",
+        "object_sha256": "400097c51827ff69b50f8b6be4b3bd09774c83a1084f763ed60ed37d3c641861",
+        "expected_size": 2,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 2,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 2,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-2",
+        "object_sha256": "d4443a38c3a63ce12450e2bcb2587e8c161ce06995e64280d17e380bcaca5138",
+        "expected_size": 18,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 18,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 18,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-2",
+        "object_sha256": "0b1bc3c4b3a7495f7eece65a1a58117ac582291150126f0f547f56467094ec5f",
+        "expected_size": 2,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 2,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-3",
+        "object_sha256": "28b2d4a20f989c1d0496584e107c259b9ee17e7a86ff81cffac0f8219cfd78b1",
+        "expected_size": 3,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 3,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 3,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-3",
+        "object_sha256": "5f97e59e66dd0c2098bd29c91f4304f018bf36f6852817c681b3dfb29b8b9f16",
+        "expected_size": 3,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 3,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 3,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-3",
+        "object_sha256": "a8aedb51a722e1c408f7163389dd92015b4af411c269bff4a657480be7078c54",
+        "expected_size": 19,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 19,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 19,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-3",
+        "object_sha256": "0ebc5929ce9ea6227090bb0d1d4e0202dc0dc1c69928401ebea6a881f27a5f87",
+        "expected_size": 3,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 3,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-4",
+        "object_sha256": "4ea0a9ea8ca995f1b569cf35dfbeba56260a84393f5240227d02a1fd3d3862b3",
+        "expected_size": 4,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 6,
+          "byte_equal": false,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 4,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-4",
+        "object_sha256": "d73cca82dd2da270376ed56f82bd8a0bb1e28d182219c8f3bc2198a48581ff7c",
+        "expected_size": 4,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 4,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 4,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-4",
+        "object_sha256": "e19520d2ebcede32aa47adc5053ca1b153b0aac4073c4a63a15aff89e3118e0b",
+        "expected_size": 20,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 20,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 20,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-4",
+        "object_sha256": "d4c8259c0da0643d51724632c12faf9be6c31e5b002b7fbe6406563150e12418",
+        "expected_size": 4,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 4,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-6",
+        "object_sha256": "bf730b499411eed5763b005b7e9026ae557cd44725285af42026fc98c9125985",
+        "expected_size": 6,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 9,
+          "byte_equal": false,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 6,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-6",
+        "object_sha256": "ed18db1c9b0cef5907a9a127e27ce4cedeb421cbd623236a3e0733f7064491b6",
+        "expected_size": 6,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 6,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 6,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-6",
+        "object_sha256": "9fcd5b63e3fb65d4e9e7f2038d77997ae0be71b1e16f312ffef7323f10c54666",
+        "expected_size": 22,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 22,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 22,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-6",
+        "object_sha256": "41d310bbadcc6a746670b3b698ace60ccb36d620cb9f22acb588be2d3815a4d4",
+        "expected_size": 6,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 6,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-7",
+        "object_sha256": "69b7cc0fd53916c8f0c513a45f1ac94ae36f7f0afdc84cd0ebae4013362968a6",
+        "expected_size": 7,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 7,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 7,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-7",
+        "object_sha256": "d37a6bfe57e1cd86173bb2aca400ee1dd327c4a49b06a8eac860487747e9c393",
+        "expected_size": 7,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 7,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 7,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-7",
+        "object_sha256": "fe5dc9a20b85cc953dd5d3af31543e863cef7b8a1a8405ad6d65b27a7c112ddb",
+        "expected_size": 23,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 23,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 23,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-7",
+        "object_sha256": "387ea9cf178d4db16c3f19e1079db34df36e78d453d1a4e6a09f759bc6742d22",
+        "expected_size": 7,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 7,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-8",
+        "object_sha256": "c4c2b7b047d7aa7ed06f03288f485d21c279aab1fa7f4c1452dd281f64ef8636",
+        "expected_size": 8,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 12,
+          "byte_equal": false,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 8,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-8",
+        "object_sha256": "d168448f0353db08f8f3969241d59024598d9223f0250051aedd46c60d31f3a1",
+        "expected_size": 8,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 8,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 8,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-8",
+        "object_sha256": "8ccb3fb50901f475dd260d051c80a8781ec6d9d2e5781cee43c01af8d7d4fa8e",
+        "expected_size": 24,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 24,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 24,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-8",
+        "object_sha256": "3f6a5e47bf0cd17e4687e2db0c56e1aad614c47687dda30adbd6f6d17a6155c5",
+        "expected_size": 8,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 8,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-15",
+        "object_sha256": "33110b089f30a3a2336ceb9baf8d004ab4b7242ce72a77ffb530b3cd9fe0578c",
+        "expected_size": 15,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 15,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 15,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-15",
+        "object_sha256": "81c3b3cf07bb3bfa44ae4f1b5a0f815f6abc43ea5f5b3f2f386941b49d8c2f24",
+        "expected_size": 15,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 15,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 15,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-15",
+        "object_sha256": "760e39b712da853e49951f6cc0b0aca027baaee2ca582b653120bc0c1dff70f7",
+        "expected_size": 31,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 31,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 31,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-15",
+        "object_sha256": "e67bc1b21724aa2e624c4a9bb247f318d8990f3bd576b7697b7a796a6e72d37a",
+        "expected_size": 15,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 15,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-16",
+        "object_sha256": "52d4c532c7cb91e8b1f7a1c98b9356a331e8abcc9b3212f950f0ded3cb450a3a",
+        "expected_size": 16,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 24,
+          "byte_equal": false,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 16,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-16",
+        "object_sha256": "ed952fe2a16cbb0c0ee521f8c3d4a564983f8149f3105257ae1f11a613e535ca",
+        "expected_size": 16,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 16,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 16,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-16",
+        "object_sha256": "14d739c0a443a4f527087ac4fe58528782f01b542728782405690c96cde4747c",
+        "expected_size": 32,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 32,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 32,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-16",
+        "object_sha256": "e7d05dfb9d1b53c6f4fcbe22a1f519df9b23824518720a0d6ae0b0cf1f1e5127",
+        "expected_size": 16,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 16,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-17",
+        "object_sha256": "982010d050bb94406a5dc13f99e7d1cdd3985e9f3f4249fd09f0807b042aa1f0",
+        "expected_size": 17,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 25,
+          "byte_equal": false,
+          "objects_equal": false
+        },
+        "candidate": {
+          "bytes": 17,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-17",
+        "object_sha256": "a65f1fd39916119d7541f98c8b5d74960e0b3d91ee95ab2b07f113d576ff802c",
+        "expected_size": 17,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 17,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 17,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-17",
+        "object_sha256": "775ed97af617fab294ff0e79bf54bde87dcf02331c953a3fb65c893149c85deb",
+        "expected_size": 49,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 49,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 49,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-17",
+        "object_sha256": "6baf85802b6a47e439c0057b9bc56101c3d4b7ac3fb29df632eaa8ca71271aab",
+        "expected_size": 17,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 17,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-31",
+        "object_sha256": "c03ececfb8ac0badbc07062caa84fae8781eea65c70be72cccc53d31037a03ff",
+        "expected_size": 31,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 39,
+          "byte_equal": false,
+          "objects_equal": false
+        },
+        "candidate": {
+          "bytes": 31,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-31",
+        "object_sha256": "e87ab967e6792f540db85d9267e941174f974fb312532cbb181308f6ecc0fa78",
+        "expected_size": 31,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 31,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 31,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-31",
+        "object_sha256": "cfaaecd848eb0f37f492463d9fcc209d6185da965e113a26bbadd7d271664a74",
+        "expected_size": 63,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 63,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 63,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-31",
+        "object_sha256": "6a10cc781841313bd1967bf2457e00eadb6027e2eeb5f77435a92560e278c9c2",
+        "expected_size": 31,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 31,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-32",
+        "object_sha256": "7966d9833eac64cfed3a5faceef8e2c98412ed0b1f1599be35bc0759528a0e79",
+        "expected_size": 32,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 48,
+          "byte_equal": false,
+          "objects_equal": false
+        },
+        "candidate": {
+          "bytes": 32,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-32",
+        "object_sha256": "b3bbdc86ee8d3f1d09b0840ad231f2299a767f4bef9f33795721d1fa7b4f03df",
+        "expected_size": 32,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 32,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 32,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-32",
+        "object_sha256": "fde030ae1820902d16c867ee1ac5fa6ade5d475cac299485d0a9d3cf105bc9e4",
+        "expected_size": 64,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 64,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 64,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-32",
+        "object_sha256": "68e157f92e4fb090734ca15695bf71a55f23786f2a4f3901dc8af93cd6dc405c",
+        "expected_size": 32,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 32,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-33",
+        "object_sha256": "7c4cebc0c8202a7b6a9941fc64249ec90f6236cdb8bb4f5f89c284d6fdb70385",
+        "expected_size": 33,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 49,
+          "byte_equal": false,
+          "objects_equal": false
+        },
+        "candidate": {
+          "bytes": 33,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-33",
+        "object_sha256": "8ab742b2baeba0cad943d5784cfaffc12f9a84440b17ccea63f5d65e23b4ee57",
+        "expected_size": 33,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 33,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 33,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-33",
+        "object_sha256": "e5fd0e7e803508de74bc2b357a0e2573f33f9bdacf5f51a970bca922da7988a9",
+        "expected_size": 81,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 81,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 81,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-33",
+        "object_sha256": "eb1696fa99d7fe8dfc18751e8eb12dfde706167df8fd245d11a6dfbf839fde1b",
+        "expected_size": 33,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 33,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-47",
+        "object_sha256": "fc5a20688deb835d25d521ee127cf1b5a53dda4b043a7d5486acf489cc0322c0",
+        "expected_size": 47,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 63,
+          "byte_equal": false,
+          "objects_equal": false
+        },
+        "candidate": {
+          "bytes": 47,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-47",
+        "object_sha256": "46c7454de550f5958d7cbf277e8c59006fecfcef9ebc388f97bd3c7a6808e638",
+        "expected_size": 47,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 47,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 47,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-47",
+        "object_sha256": "3ec838164ed7b564297a96fe55dfa15d2a7bac69608ee093c77b2c3899e97316",
+        "expected_size": 95,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 95,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 95,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-47",
+        "object_sha256": "4b6f29a13fdf99d6db5912c41b79179452b7cdc52883710eb7e0fe92e506ee7f",
+        "expected_size": 47,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 47,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-63",
+        "object_sha256": "a90c157b7246930e776dd92f68a291a60456d8cedf0481acb48d41ea9f9f0e1f",
+        "expected_size": 63,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 87,
+          "byte_equal": false,
+          "objects_equal": false
+        },
+        "candidate": {
+          "bytes": 63,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-63",
+        "object_sha256": "59e7920bbe0b47021c7f1cc2b5d4c6af2426a242ee3dd2d0be504abf47b2d44a",
+        "expected_size": 63,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 63,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 63,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-63",
+        "object_sha256": "aa6bb82dcf8fecf78bce0e1bd7d6326d265807849d82ed7aaa26bf22b79f34b1",
+        "expected_size": 127,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 127,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 127,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-63",
+        "object_sha256": "044cbc0ae79b90a70479f6f7a6abea19079efdc719857dc0898c197d215d7db5",
+        "expected_size": 63,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 63,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-64",
+        "object_sha256": "2e4c296cc37635b792e3c85afa87bd32fac9764fa29931c8dbdc0b73346fd214",
+        "expected_size": 64,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 96,
+          "byte_equal": false,
+          "objects_equal": false
+        },
+        "candidate": {
+          "bytes": 64,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-64",
+        "object_sha256": "e29fe12b088744f713cef61f80b44c3624dd11d2957f3a24e80dd4f924004c09",
+        "expected_size": 64,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 64,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 64,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-64",
+        "object_sha256": "2372c3d97789c3bea1353cac7604eb798785f2be7c16ad2b47671a51431b6ff2",
+        "expected_size": 128,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 128,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 128,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-64",
+        "object_sha256": "5746165a7e2829939ee079a3c15e2e4a7e3747f654fbad1803a97541a45ed042",
+        "expected_size": 64,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 64,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-65",
+        "object_sha256": "888a8cde47ae62d9e8835252ba46b7fd5e468cd22c3d606f17d8de76f9b60b0f",
+        "expected_size": 65,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 97,
+          "byte_equal": false,
+          "objects_equal": false
+        },
+        "candidate": {
+          "bytes": 65,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-65",
+        "object_sha256": "793b67dad3d0c71e8690df88e8cf88e4803303d544699073b7b105e1499587f4",
+        "expected_size": 65,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 65,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 65,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-65",
+        "object_sha256": "1949005019f85314da7416f988fccc262c97c6039e786fd735fdc1d87e010fe9",
+        "expected_size": 145,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 145,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 145,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-65",
+        "object_sha256": "e4b6e2c1e738ff03da3268b632acfd22ab033da6e1d368416d351b437a88fc06",
+        "expected_size": 65,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 65,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-127",
+        "object_sha256": "bb722d5cab7b42775f698771eaa0daf26d23954d8f332b71d6f48c23d89a0a3b",
+        "expected_size": 127,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 183,
+          "byte_equal": false,
+          "objects_equal": false
+        },
+        "candidate": {
+          "bytes": 127,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-127",
+        "object_sha256": "ca338901a09ed6486d5ca7817f6753147a3b7414bd10a565dba193888ef8cf72",
+        "expected_size": 127,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 127,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 127,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-127",
+        "object_sha256": "8f1effc8646db587f15e48f281dab8676149a60f8455f67c1beb27fcc3269608",
+        "expected_size": 255,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 255,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 255,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-127",
+        "object_sha256": "eb5df19c62cf7d3af2dfd530e846fe067fe2d113a1dd654cc94c3975f64d3176",
+        "expected_size": 127,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 127,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-128",
+        "object_sha256": "5b7b940a455d5668299d9ad2f3cb866197e032e5e2ff74cdc2f8dfd98de6fbed",
+        "expected_size": 128,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 192,
+          "byte_equal": false,
+          "objects_equal": false
+        },
+        "candidate": {
+          "bytes": 128,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-128",
+        "object_sha256": "abcd1d0c0ac0f81066c438d2e30e1b5c5c949824c9ecd5e42bee86d2dad45f92",
+        "expected_size": 128,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 128,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 128,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-128",
+        "object_sha256": "11e5ce061df10b9ec0a05d219d6c0351822665ceda1aa83bb6a4a8ba758d21b9",
+        "expected_size": 256,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 256,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 256,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-128",
+        "object_sha256": "4c07925efcda8b756799c2e13a1bf2d24e797eeed0f0cc1cba63831be9658319",
+        "expected_size": 128,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 128,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-255",
+        "object_sha256": "38f178d9a43e2daa67de10932c868a405e6df46d326629af5ccbec654cc90513",
+        "expected_size": 255,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 375,
+          "byte_equal": false,
+          "objects_equal": false
+        },
+        "candidate": {
+          "bytes": 255,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-255",
+        "object_sha256": "a889f0a60c6d139ca5bc2c0231c75ad9b650fafe125a3cd2b3c2c5208f6f819d",
+        "expected_size": 255,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 255,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 255,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-255",
+        "object_sha256": "37c5f834491833094efb144474f582f36e89e89c5feb4f2ff7fb5265244ec051",
+        "expected_size": 511,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 511,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 511,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-255",
+        "object_sha256": "af428ef0892b995302ff8ecc28e762b163d8764787a1cb0c204baad494211b4c",
+        "expected_size": 255,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 255,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-256",
+        "object_sha256": "0bb83808c84c13f4b219918e33c27f264e06378494edceafaaf3e1bc13a5d4d6",
+        "expected_size": 256,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 384,
+          "byte_equal": false,
+          "objects_equal": false
+        },
+        "candidate": {
+          "bytes": 256,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-256",
+        "object_sha256": "32d06484bd2715fdbc5d0c0d1b3a2c5c4e10ae04a111e84b228e48bd0217a1e1",
+        "expected_size": 256,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 256,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 256,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-256",
+        "object_sha256": "35764fa3a822f45b5101e78870d1f0e89702b57524481156862447b14085ae8e",
+        "expected_size": 512,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 512,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 512,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-256",
+        "object_sha256": "180edb901d9543654f9f2bad3a401c97a7e9e1884defe148afeff6b832510bed",
+        "expected_size": 256,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 256,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "hex_ascii-257",
+        "object_sha256": "824e72def8cedcbf5ba792df5bffb42f0f78d2f7119ffad7de835215b89eadbd",
+        "expected_size": 257,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 385,
+          "byte_equal": false,
+          "objects_equal": false
+        },
+        "candidate": {
+          "bytes": 257,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "random-257",
+        "object_sha256": "13fa37aa56a32460b915162d0f7cc3c760eb487205754aad32643e3807ad6f47",
+        "expected_size": 257,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "bytes": 257,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 257,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "paired-257",
+        "object_sha256": "ccfe5f72ebd2373f3a02871e8c297bb71aeeee589e469998b404d55cf2063cb2",
+        "expected_size": 529,
+        "expected_objects": [
+          "first",
+          "second"
+        ],
+        "before": {
+          "bytes": 529,
+          "byte_equal": true,
+          "objects_equal": true
+        },
+        "candidate": {
+          "bytes": 529,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      },
+      {
+        "name": "marker-257",
+        "object_sha256": "24894e24267c58bf3a6d78156a7521141e31aeffc37b38f170a1a0fe7fd82acb",
+        "expected_size": 257,
+        "expected_objects": [
+          "first"
+        ],
+        "before": {
+          "error": "native readonly extent exceeds its section: anchor"
+        },
+        "candidate": {
+          "bytes": 257,
+          "byte_equal": true,
+          "objects_equal": true
+        }
+      }
+    ]
+  },
+  "stack": {
+    "cases": 636928,
+    "differences": 0,
+    "width_bytes": [
+      0,
+      1,
+      2,
+      4,
+      8
+    ],
+    "arena_bytes": 128,
+    "seeds_per_width_offset": 1024,
+    "ubsan_exit": 0,
+    "source_sha256": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+    "candidate_sha256": "369210a17590754be8c7061864f68d706b9cd8703490b30cc2c52bb169fb58d8"
+  },
+  "readonly_inputs": {
+    "x86_before_sha256": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+    "x86_candidate_sha256": "55d189a2bd1ac19f298cd811e90218e8528cc760f67b39bfbfd0a5e0cead631b",
+    "arm_candidate_sha256": "15a0b9d6b0d8dc0489118ede846730c0e832caf2bc130600f34d64c9465665cb"
+  },
+  "raw_sha256": "3e1434de70e3be3f9c55406bbfb77ce087e2beb2e0aef7c97d832ea781c53606",
+  "runtime_queue": {
+    "module_apps": 3653317,
+    "whole_otel_candidate": 3653318
+  }
+}
