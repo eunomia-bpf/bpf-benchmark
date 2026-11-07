@@ -1,0 +1,13 @@
+{
+  "architecture": "x86_64",
+  "platform": "KVM",
+  "recorded": "2026-11-07T12:38:23.407683+00:00",
+  "valid_control": "kernel and bound expected result0/retval2",
+  "negative_stage": "accepted_finding",
+  "negative_executed": false,
+  "nonzero_generation_receipt": "bound program id=24 chunks=0 nonzero_generations=1",
+  "native_sha256": "ec951558fbf82d4760d41d8e5a76f505b24e4d1d04af9b5793305a78b635845c",
+  "accepted_archive_sha256": "ec31d7c3d14a9f763bcac2cfeb9356a685b6fe398f67b8e47d945c0a10c662da",
+  "production_policy": "unchanged; memory-intrinsic whitelist not enabled",
+  "source_fix_status": "open; C owns production projection repair"
+}
