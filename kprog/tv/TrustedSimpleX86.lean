@@ -1203,6 +1203,88 @@ theorem relational_first_guard_correspondence (env : BPF.Environment) (p : BPF.S
     exact proofRun
   · simpa only [branchedEq] using npc
 
+
+theorem virtual_decode12 : BPF.decode proof 12 = .ok ⟨0xb7,4,0,0,8⟩ := rfl
+theorem virtual_decode13 : BPF.decode proof 13 = .ok ⟨0xbf,5,2,0,0⟩ := rfl
+theorem virtual_decode14 : BPF.decode proof 14 = .ok ⟨0x07,5,0,0,72⟩ := rfl
+theorem virtual_decode15 : BPF.decode proof 15 = .ok ⟨0x2d,5,3,18,0⟩ := rfl
+theorem virtual_decode16 : BPF.decode proof 16 = .ok ⟨0x0f,4,2,0,0⟩ := rfl
+theorem virtual_decode17 : BPF.decode proof 17 = .ok ⟨0x2d,4,3,16,0⟩ := rfl
+
+/-- Reuse the existing evaluator transport for any actual ordinary B path.
+The witness must check every PC and real successor; no PC is changed here. -/
+theorem ordinary_path_execution (env : BPF.Environment) (positions : List Nat)
+    (p : BPF.State) (result : Transition BPF.State)
+    (ordinary : ∀ pc ∈ positions, pc ≠ 0 ∧ pc ≠ 2)
+    (accepted : BPFPath.evaluate env proof positions p = .ok result) :
+    Execution (initializedInstructionStep env) p result.events result.state := by
+  exact BPFPath.evaluate_execution_transport env proof id (initializedInstructionStep env)
+    (fun pc => pc ≠ 0 ∧ pc ≠ 2)
+    (by
+      intro s pc bound atPosition result actual
+      refine ⟨result,?_,rfl,rfl⟩
+      change BPFPlatform.step (initializedPlatform env) proof s = .ok result
+      rw [initialized_ordinary_step env s (by omega) (by omega)]
+      exact actual)
+    positions ordinary p result accepted
+
+def remainingProof72 (p : BPF.State) : BPF.State :=
+  { BPF.setReg (BPF.setReg p 4 (8#64)) 5 (p.regs 2+(72#64)) with
+    pc := if p.regs 2+(72#64) > p.regs 3 then 34 else 16 }
+
+def remainingProof8 (p : BPF.State) : BPF.State :=
+  { BPF.setReg p 4 (p.regs 4+p.regs 2) with
+    pc := if p.regs 4+p.regs 2 > p.regs 3 then 34 else 18 }
+
+def remainingProofFinal (p : BPF.State) : BPF.State :=
+  if p.regs 2+(72#64) > p.regs 3 then remainingProof72 p
+    else remainingProof8 (remainingProof72 p)
+
+theorem remaining_proof72_block (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=12) (active : p.halted=false) :
+    BPFPath.evaluate env proof [12,13,14,15] p = .ok ⟨remainingProof72 p,[],none⟩ := by
+  simp +decide [BPFPath.evaluate,virtual_decode12,virtual_decode13,virtual_decode14,virtual_decode15,
+    BPF.execute,BPF.source,BPF.alu,BPF.comparison,BPF.setReg,position,active,remainingProof72,
+    Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  funext index
+  by_cases h : index=5 <;> simp [h]
+
+theorem remaining_proof8_block (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=16) (active : p.halted=false) :
+    BPFPath.evaluate env proof [16,17] p = .ok ⟨remainingProof8 p,[],none⟩ := by
+  simp +decide [BPFPath.evaluate,virtual_decode16,virtual_decode17,
+    BPF.execute,BPF.source,BPF.alu,BPF.comparison,BPF.setReg,position,active,remainingProof8,
+    Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+/-- Actual accepted Bpc12..17, including either early exit or fall-through.
+No branch outcome, non-wrapping arithmetic or environment input is assumed. -/
+theorem remaining_proof_guards (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=12) (active : p.halted=false) :
+    Execution (initializedInstructionStep env) p [] (remainingProofFinal p) := by
+  have headRun := ordinary_path_execution env [12,13,14,15] p ⟨remainingProof72 p,[],none⟩
+    (by intro pc inside; simp at inside; omega) (remaining_proof72_block env p position active)
+  by_cases reject72 : p.regs 2+(72#64) > p.regs 3
+  · simpa only [remainingProofFinal,reject72,ite_true] using headRun
+  · have at16 : (remainingProof72 p).pc=16 := by simp [remainingProof72,reject72]
+    have stillActive : (remainingProof72 p).halted=false := by
+      simpa [remainingProof72,BPF.setReg] using active
+    have suffix := ordinary_path_execution env [16,17] (remainingProof72 p)
+      ⟨remainingProof8 (remainingProof72 p),[],none⟩
+      (by intro pc inside; simp at inside; omega)
+      (remaining_proof8_block env _ at16 stillActive)
+    simpa only [remainingProofFinal,reject72,ite_false,List.nil_append] using headRun.append suffix
+
+/-- The actual exit decision, with architectural 64-bit wraparound retained.
+Only the order of the two pure comparisons differs from the native program. -/
+theorem remaining_proof_successor (p : BPF.State) :
+    (remainingProofFinal p).pc =
+      (if p.regs 2+(8#64) > p.regs 3 ∨ p.regs 2+(72#64) > p.regs 3 then 34 else 18) := by
+  have add8 : (8#64)+p.regs 2 = p.regs 2+(8#64) := BitVec.add_comm _ _
+  by_cases reject72 : p.regs 2+(72#64) > p.regs 3 <;>
+    by_cases reject8 : p.regs 2+(8#64) > p.regs 3 <;>
+    simp +decide [remainingProofFinal,remainingProof72,remainingProof8,BPF.setReg,
+      add8,reject72,reject8]
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -1298,3 +1380,13 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_guard_decoded_relational_block
 
 #print axioms KProgTV.TrustedSimpleX86.relational_first_guard_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.ordinary_path_execution
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_proof72_block
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_proof8_block
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_proof_guards
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_proof_successor

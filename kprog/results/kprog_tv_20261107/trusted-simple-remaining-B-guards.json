@@ -1,0 +1,89 @@
+{
+  "status": "actual_accepted_B_remaining_guard_subpaths_checked",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "utc": "2026-11-07T11:09:48.843328+00:00",
+  "theorem": "KProgTV.TrustedSimpleX86.remaining_proof_guards",
+  "covered_B_pcs": [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "claims": [
+    "actual byte-decodes and complete resulting states for pc12..15 and pc16..17",
+    "one initializedInstructionStep env Execution with empty effect trace",
+    "real early exit pc34 or continuation pc16 then pc34/18",
+    "pc34 iff pointer+8>limit OR pointer+72>limit under canonical modular 64-bit arithmetic"
+  ],
+  "premises": [
+    "entry B PC12",
+    "active B state"
+  ],
+  "no_assumption_of": [
+    "non-wrapping addition",
+    "pointer monotonicity or range",
+    "branch outcome",
+    "nativeInput/helper/environment result"
+  ],
+  "scope": "B-subpath certificate; native order +8 then +72 vs B +72 then +8 coupling remains pending",
+  "compatibility": {
+    "old_declarations": "byte-identical before namespace end",
+    "old_declarations_sha256": "bca009f1b82409d3c651a80b874c82065c3eabde0b1e318c7a8601403e0d2fd5",
+    "ISA_runtime_wire_ABI_metadata_binding_rejection_contracts": "unchanged"
+  },
+  "remaining": [
+    "native remaining-guard full states/executions/coupling",
+    "entry and whole-program composition",
+    "stores/exit/fault/ABI/platform behavior",
+    "immutable P to emitted artifact transport"
+  ],
+  "trusted": [
+    "verifier soundness",
+    "canonical ISA/memory and explicit platform semantics",
+    "kernel binding/capture and accepted-byte provenance",
+    "registered specialization/link service until whole-program TV",
+    "Lean kernel/logical axioms and Lean.ofReduceBool native proof reduction where audited"
+  ],
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "binding_records": 2,
+    "mismatch_controls_rejected": 22,
+    "no_sorryAx": true,
+    "log_sha256": "b38c8ef303bd1c50c1541bece9e9c8086571866a2c3e271dc6ca800401e65d0e",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.ordinary_path_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_proof72_block": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_proof8_block": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_proof_guards": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_proof_successor": [
+        "propext",
+        "Quot.sound"
+      ]
+    }
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "7e05023cf58227149febccc6a91f35aa05f7b297d8b8abb94a8f1c08556e8bfc",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/check_trusted_capture.py": "71642150609627e7ac8de6ef265d79dc6814a58af669260ffc21e602983e29a9",
+    "kprog/tv/Makefile": "2123977b45e69a44f70507dd65b2c1506e23d509f1c244a7d1d5f0799456f9b4"
+  },
+  "raw_output": "summarized and retired after publication; STOP/shared caches retained"
+}

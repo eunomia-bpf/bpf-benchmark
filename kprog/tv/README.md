@@ -1379,3 +1379,25 @@ check. Whole-program relational composition, later guards/stores/exit,
 entry faults/ABI/platform behavior and immutable-P/materialized-artifact
 transport remain open. Evidence and axiom audit:
 `trusted-simple-relational-guard.json`.
+
+
+Actual accepted B's remaining bounds guards
+
+`remaining_proof72_block` checks actual pc12..15 (MOV/MOV/ADD/JGT), including
+its real pc34 or pc16 successor. `remaining_proof8_block` checks actual
+pc16..17 (ADD/JGT), including its real pc34 or pc18 successor.
+`remaining_proof_guards` transports and composes these paths under the same
+explicit `initializedPlatform env`. It derives the early-exit or continued
+path from the actual register comparison, retains complete resulting states,
+and proves the entire guard region has an empty effect trace.
+
+`remaining_proof_successor` derives the exact pc34/18 decision from the two
+unsigned comparisons. All additions are the canonical 64-bit operations,
+including wraparound; no monotonicity, pointer range, non-overflow, branch
+outcome or environment-input premise is added. The only entry premises are
+pc12 and an active B state. `ordinary_path_execution` reuses the existing
+path transport for ordinary instructions, checking every actual PC and
+successor. The native order is +8 then +72, whereas this B order is +72 then
++8; native-state correspondence and composition with the entry prefix remain
+separate work. This is a B-subpath certificate, not whole-program TV.
+Evidence: `trusted-simple-remaining-B-guards.json`.
