@@ -122,3 +122,12 @@ deltas for all three modes. Incremental Lean build passed (27 dependency jobs).
 This preserves the draft's useful proof work; it proves base-update algebra,
 not the outstanding intervening-memory/fault composition for a complete
 pre/post-indexed D0 handler.
+
+Exact `ef02edb2f7ced694a25efe0bc05f148d0e503f21` subsequently completed
+`make -C kprog/formal check` with exit **0**, including the D0/index/singleton
+proofs, writeback base algebra, native-pointer compiler regression and both
+existing DQ/vector route suites under UBSan. All other Lean modules, generated
+contracts, reference/wire/compiler checks and C semantic hosts also passed.
+The immutable source/cache export was deleted immediately. The compressed CALL
+CPU observations have been refreshed to this successful full run. This result
+precedes the subsequent full D0 pre/access/post transfer composition work.
