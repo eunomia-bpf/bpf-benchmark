@@ -79,3 +79,31 @@ native-link/loader executable paths. Start it before applications; disconnect
 fails pending requests. Per-request compressed artifacts and errors are retained.
 [Current evidence](../corpus/results/kprog_app_coverage_20261107/trusted-service/README.md)
 distinguishes component acceptance from the pending six-application integration.
+
+### Instruction-fidelity evidence snapshots
+
+The November 7 results below identify their actual compiled source snapshots.
+Each linked report includes per-form counts, source/binary hashes, commands and
+complete mismatch streams. Counts describe the enumerated forms in that report.
+
+| Snapshot | Forms / states | Reviewed comparison |
+| --- | ---: | --- |
+| [x86 CMP, header 4fe6817](results/kprog_fidelity_20261107/differential/x86-cmp-signed-current/README.md) | 1144 / 1,171,456 | Real CPU/C: zero differences; canonical outcome is recorded in the linked report |
+| [x86 RORX, header 47fb5565](results/kprog_fidelity_20261107/differential/x86-rorx-current/README.md) | 4 / 4096 | Real CPU/C/canonical: zero differences, zero unavailable forms |
+| [ARM core, header c21833de](results/kprog_fidelity_20261107/differential/arm64-current-core/README.md) | 807 / 826,368 | QEMU/C/canonical: zero differences, zero unavailable forms; real ARM execution pending |
+
+The focused RORX result checks the four existing register/memory forms at
+32/64-bit widths and immediate 7. It does not relabel the older 1144-form CMP
+snapshot as a full run of the newer RORX source. The earlier dated result
+directories retain their original source attribution and failure history.
+
+The existing hardware-only script now defaults to the reviewed ARM core
+static artifact above. The coordinator runs it on a real AArch64 host:
+
+~~~sh
+sh kprog/fidelity/run-arm64.sh
+~~~
+
+QEMU agreement is kept separate from real hardware evidence. These sampled
+observations support O1; the per-operation, specialization, binding and
+whole-program proof work remains in the formal and translation-validation lanes.
