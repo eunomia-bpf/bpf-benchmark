@@ -28,7 +28,7 @@ from ..workload import (
     run_named_workload,
 )
 from .base import AppRunner
-from .native_loader_env import native_loader_manifest_env
+from .native_loader_env import native_loader_enabled, native_loader_manifest_env
 from .process_support import AgentSession
 from .setup_support import pick_host_executable, repo_artifact_root
 
@@ -191,7 +191,12 @@ class TraceeAgentSession(AgentSession):
                 )
 
             try:
-                healthy = wait_healthy(proc, DEFAULT_STARTUP_TIMEOUT_S, _health_check)
+                startup_timeout = DEFAULT_STARTUP_TIMEOUT_S
+                if native_loader_enabled() and os.environ.get(
+                    "BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", ""
+                ).strip().lower() in {"1", "true", "yes", "on"}:
+                    startup_timeout = None
+                healthy = wait_healthy(proc, startup_timeout, _health_check)
             except Exception:
                 self.close()
                 raise

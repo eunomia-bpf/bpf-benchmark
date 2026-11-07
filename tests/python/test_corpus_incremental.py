@@ -331,5 +331,58 @@ class TestSigtermHandler(unittest.TestCase):
         self.assertTrue(payload.get("partial"))
 
 
+
+class TestTraceeVerifiedStartup(unittest.TestCase):
+    """A live bound-load compilation may outlast the ordinary readiness wait."""
+
+    def setUp(self) -> None:
+        from runner.libs.app_runners import tracee
+        self.tracee = tracee
+        temporary = self.enterContext(tempfile.TemporaryDirectory())
+        self.clock = [0.0]
+        self.process = mock.Mock(pid=123, returncode=None)
+        self.process.poll.return_value = None
+        self.enterContext(mock.patch.object(tracee, "_tracee_runtime_dir", return_value=Path(temporary)))
+        self.enterContext(mock.patch.object(tracee, "tracee_native_loader_env", return_value={}))
+        self.enterContext(mock.patch.object(tracee, "start_agent", return_value=self.process))
+        self.enterContext(mock.patch.object(tracee, "_tracee_event"))
+        self.enterContext(mock.patch.object(tracee, "_process_native_env_snapshot", return_value={}))
+        self.enterContext(mock.patch.object(tracee.TraceeAgentSession, "_start_io_threads"))
+        self.enterContext(mock.patch.object(tracee, "app_shim_has_programs", return_value=True))
+        self.enterContext(mock.patch.object(tracee, "_tracee_healthz_ready",
+            side_effect=lambda *_: self.clock[0] >= 400.0))
+        self.enterContext(mock.patch.object(tracee, "wait_for_app_shim_programs"))
+        self.enterContext(mock.patch("runner.libs.agent.time.monotonic", side_effect=lambda: self.clock[0]))
+        self.enterContext(mock.patch("runner.libs.agent.time.sleep",
+            side_effect=lambda _: self.clock.__setitem__(0, self.clock[0] + 100.0)))
+        self.session = tracee.TraceeAgentSession([["tracee"]])
+        self.enterContext(mock.patch.object(self.session, "close"))
+
+    def test_verified_phase_reaches_health_after_long_generation(self) -> None:
+        with mock.patch.dict(os.environ, {"BPFREJIT_SHIM_NATIVE_LOADER": "1",
+            "BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF": "1"}, clear=True):
+            self.assertIs(self.session.__enter__(), self.session)
+        self.assertGreater(self.clock[0], self.tracee.DEFAULT_STARTUP_TIMEOUT_S)
+        self.session.close.assert_not_called()
+
+    def test_jit_and_unbound_keep_ordinary_readiness_timeout(self) -> None:
+        for env in [{}, {"BPFREJIT_SHIM_NATIVE_LOADER": "1"},
+                    {"BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF": "1"}]:
+            with self.subTest(env=env), mock.patch.dict(os.environ, env, clear=True):
+                self.clock[0] = 0.0
+                with self.assertRaisesRegex(RuntimeError, "failed to launch Tracee"):
+                    self.session.__enter__()
+                self.assertEqual(self.clock[0], self.tracee.DEFAULT_STARTUP_TIMEOUT_S)
+
+    def test_verified_phase_surfaces_process_exit(self) -> None:
+        self.process.poll.return_value = 1
+        self.process.returncode = 1
+        with mock.patch.dict(os.environ, {"BPFREJIT_SHIM_NATIVE_LOADER": "1",
+            "BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF": "1"}, clear=True):
+            with self.assertRaisesRegex(RuntimeError, "failed to launch Tracee"):
+                self.session.__enter__()
+        self.assertEqual(self.clock[0], 0.0)
+
+
 if __name__ == "__main__":
     unittest.main()

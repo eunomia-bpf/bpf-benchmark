@@ -115,7 +115,7 @@ matching-work measurement continue from the reported failure classes.
 | Cilium | 163 | 1 | 0 | 0 | 1: map declaration | 0 | [201146 batch](native-modules-cilium__agent/README.md) |
 | Tetragon | 311 attempts; 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [223215 batch](tetragon-manifest-replay/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [213447 bound batch](katran-tagged-storage/README.md) |
-| Tracee | 151 | 6 | 6 | 5 | 0 | 1: readonly indexed extent | [214037 batch](tracee-narrow-range/README.md) |
+| Tracee | 151 | 6 | 6 | 5 | 0 | 0 confirmed; 1 activation after startup closes | [223700 batch](tracee-cmp-replay/README.md) |
 
 Tracee baseline now completes151 application loads on the coherent kernel BTF
 epoch. The shared native CORE helper-preservation repair48ff82cfb restores its
@@ -233,3 +233,11 @@ closes execve_send source selection and freshly generates/compiles5requests,
 with4bound. Request5reaches the actual verifier8193-jump sequence limit,
 188982processed instructions and1926states. The next generic CMP representation
 trial retains native/application/workload inputs and the common service.
+
+
+The [Tracee CMP/read batch223700](tracee-cmp-replay/README.md) compiles6requests
+and binds5, then reaches request6activation after app startup closes. The
+verified-native runner now waits for actual health/process exit, using the
+existing readiness loop. All16incremental-corpus tests pass, including simulated
+400s successful verified startup, ordinary phase deadlines and early exit.
+The next wholeTracee retry preserves native/workload/ISA/compiler inputs.

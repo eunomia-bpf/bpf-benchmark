@@ -1,0 +1,17 @@
+{
+  "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_223700_265056",
+  "generated": 6,
+  "compiled": 6,
+  "bound": 5,
+  "failed": 1,
+  "failed_stage": "worker activation after application startup closes",
+  "service_elapsed_seconds": 338.652522,
+  "ordinary_tracee_startup_deadline_seconds": 300,
+  "confirmed_verifier_rejections": 0,
+  "source_drift": [],
+  "readiness_tests_passed": 16,
+  "candidate_source_sha256": {
+    "runner/libs/app_runners/tracee.py": "0293477c76fba2809a1b550f1967c03bc6a1ede77164428040c39c637a28981b",
+    "tests/python/test_corpus_incremental.py": "b537bf12e58c776c2b4ddca1ae8b7b8cf3ea3263f5c74148fc51bc2a070253a1"
+  }
+}
