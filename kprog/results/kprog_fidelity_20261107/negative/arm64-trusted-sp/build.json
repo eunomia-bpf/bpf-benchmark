@@ -1,0 +1,29 @@
+{
+  "producer_command": [
+    "aarch64-linux-gnu-g++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-O2",
+    "-D__EXPORTED_HEADERS__",
+    "-DNATIVE_LINK_PATH=\"/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link\"",
+    "-I/workspaces/repository/vendor/linux-framework/include/uapi",
+    "-I/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include",
+    "/workspaces/repository/kprog/fidelity/bound_probe.cpp",
+    "/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/libnative_loader.a",
+    "/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a",
+    "-static",
+    "-L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu",
+    "-lelf",
+    "-lz",
+    "-lzstd",
+    "-ldl",
+    "-pthread",
+    "-o",
+    "/workspaces/repository/kprog/formal/build/fidelity-trusted-arm64/bound-probe"
+  ],
+  "producer_sha256": "1b2ecf5763d7647c0baf6b8121b320494cfbf043edc23ddea5038d0694b2424f",
+  "application_proofs_generated": false,
+  "negative_context": "mutable HASH,key0 may be absent; ARRAY key0 is a legitimate nonnull case"
+}
