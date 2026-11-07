@@ -1,0 +1,185 @@
+{
+  "utc": "2026-11-07T18:55:35.343137+00:00",
+  "status": "explicit_native_to_actual_accepted_B29_per_block_full_architectural_TranslationValidation_instance_and_bound_checked_effects_composition_proved_physical_transport_pending",
+  "accepted_B_sha256": "45062cd04b8ae6b7ffe0d5f1ea42f61bb2041ad5f44a8a034482b238bf94c53c",
+  "native_sha256": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+  "latest_matching_published_producer_capture_commit": "20e29a661f0a1708336126f2e90e8d4589a5ff6d",
+  "blocks": [
+    {
+      "native_entry": 0,
+      "native_successors": [
+        17,
+        60
+      ],
+      "proof_entry": 0,
+      "proof_successors": [
+        5,
+        27
+      ],
+      "native_fault_boundaries": [
+        0,
+        3
+      ],
+      "proof_fault_boundaries": [
+        1,
+        2
+      ]
+    },
+    {
+      "native_entry": 17,
+      "native_successors": [
+        26,
+        60
+      ],
+      "proof_entry": 5,
+      "proof_successors": [
+        8,
+        27
+      ]
+    },
+    {
+      "native_entry": 26,
+      "native_successors": [
+        35,
+        60
+      ],
+      "proof_entry": 8,
+      "proof_successors": [
+        11,
+        27
+      ]
+    },
+    {
+      "native_entry": 35,
+      "native_successors": [
+        60
+      ],
+      "proof_entry": 11,
+      "proof_successors": [
+        27
+      ],
+      "native_fault_boundaries": [
+        35,
+        40,
+        44,
+        51
+      ],
+      "proof_fault_boundaries": [
+        15,
+        19,
+        22,
+        25
+      ]
+    }
+  ],
+  "claims": [
+    "The generic Composition.TranslationValidation instance is explicitly constructed in the required native-to-proof direction for all four native basic blocks, actual byte-decoded canonical relational instructions and actual B29 executions.",
+    "Every related native block has matching ordered memory/fault events and a successor related by equality of the entire native architecture, not just live values or final memory. Both branch successors, all input read faults, modular64bit pointer arithmetic and all first-store fault outcomes are covered without result/permission/branch premises.",
+    "Proof macro-boundaries erase to actual accepted-B instruction executions; their ghost tags retain the real branch history. The store-end ghost snapshot copies only the actual incoming B r1 before it is killed. Immutable native invocation fields persist through every constructor. No new ISA semantics, runtime guard or helper is introduced.",
+    "Native block fault status is recorded as terminal control state; failed accesses retain their exact partial architecture and fault event. The unchanged separate instruction-prefix theorem handles every finite native prefix and terminal-fault repeats.",
+    "validated_architectural_execution composes the explicit TV instance across arbitrary finite block executions, with full endpoint reconstruction and a real accepted-B execution having exactly the same effects.",
+    "bound_block_effects_checked composes that TV instance, assumed accepted-proof verifier soundness/admitted entry, and complete Artifact equality. The native relation reads the executed artifact native bytes/entry, and the verifier relation reads the accepted artifact proof bytes; equality also binds ABI and specialization metadata."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-b29-observer-certificate trusted-simple-b29-blocks-certificate",
+    "reproduction": "make -C kprog/tv trusted-simple-b29-blocks-certificate",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleB29Blocks.proof_block_erases": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Blocks.proof_execution_erases": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Blocks.first_block_simulation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Blocks.second_block_simulation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Blocks.third_block_simulation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Blocks.store_outcome_boundary": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Blocks.store_block_simulation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Blocks.translation_validation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Blocks.validated_architectural_execution": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Blocks.initial_related": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29Blocks.bound_block_effects_checked": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "no_sorryAx": true,
+    "log_sha256": "e2cbc4be63f01109ead669cf017beadfe650692fc9e2a7f0ed92799e60d67cb4",
+    "dependency_scope": "Focused new block module imports checked observer/state/B29 and unchanged canonical reference dependencies. The reproduction target includes prerequisites; this focused pass does not relabel a new full formal run."
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleB29.lean": "47de242880e7e7c8817341c63586671402b2a0875be8474a5531370d05c9d6f5",
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/Makefile": "24e50c16883c684267c5ba83e466667ca9a242328b4200cf27de10e73b8204a7",
+    "kprog/tv/TrustedSimpleSafety.lean": "5537b0f4d04c5b5ebec988c1cb9c63175e9b786d95495265f3273675f82f3bea",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa",
+    "kprog/tv/TrustedSimpleB29State.lean": "a96d42aece68ac79445998e564f994569319ec047a472bd29c670bd2064be7bd",
+    "kprog/tv/TrustedSimpleB29Observer.lean": "8722e3997f26a6685415ccd6dc3f1c4ce8a4ee0d17c787752f059a70aca5568a",
+    "kprog/tv/TrustedSimpleB29Blocks.lean": "1995d4cdb25f7338ca9166c1c57f1670670ddb673d107a293d7547632aef2f07"
+  },
+  "premises": [
+    "Initial native PC0/BPF PC0 active, same context argument and exact memory, supported bound native SP input; permissions, branch choices, store results and native successors are not supplied.",
+    "The canonical instruction/CFG relation uses exact P60 payload bytes, excluding the terminal RET stripped during checked materialization; first fault terminates a block.",
+    "Actual accepted B29 bytes and declared XDP expansion at PCs1/2; verifier soundness for that physical artifact and admitted entry is assumed.",
+    "The bound composition explicitly requires exact native image, proof image, entry0 and full executed/validated Artifact equality including ABI and specialization metadata."
+  ],
+  "trusted": [
+    "Verifier soundness for the accepted physical B and its admitted entry; the declared context-conversion relation must describe that physical artifact.",
+    "The single V reference ISA/Memory semantics, whose hardware fidelity is validated separately by F and is not established by this theorem.",
+    "Kernel binding/entry/ABI/metadata enforcement and capture/platform provenance, including XDP conversion.",
+    "Lean kernel, propext, Classical.choice, Quot.sound and explicitly audited Lean.ofReduceBool."
+  ],
+  "remaining": [
+    "Physical JIT prologue/payload/epilogue embedding, actual caller/context/stack provenance and hardware fidelity of the canonical reference; therefore this is not a whole-machine safe_native theorem.",
+    "Per-program certificates for every other micro and application program.",
+    "Generic automatic per-program block discovery/certificate generation and transport of this logical block instance to each captured kernel-loaded artifact beyond the exact simple P60/B29 pair."
+  ]
+}

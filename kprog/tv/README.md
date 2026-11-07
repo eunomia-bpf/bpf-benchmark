@@ -2306,3 +2306,24 @@ snapshot comes from an actually reached BPC11 state. The all-outcome complete
 native full-state theorem now has a real observed B execution with identical
 ordered events and actual fault. All9 observer audits pass. Explicit generic
 per-block TV, physical JIT/caller transport and other programs remain open.
+
+`make -C kprog/tv trusted-simple-b29-blocks-certificate` now constructs the
+explicit generic `TranslationValidation` instance for all four simple native
+blocks against actual accepted B29 execution. Boundary relations retain the
+entire native architecture, corresponding successors and ordered effects,
+including both context faults, every guard exit and all four first-store
+faults. Ghost boundary tags keep branch history; the store-end snapshot is
+only the actual incoming B r1. Macro steps erase to real B instructions.
+
+`trusted-simple-b29-block-tv.json` records all11 axiom audits and the concrete
+composition theorem: verifier acceptance/soundness for the admitted B entry,
+the explicit TV instance and full Artifact binding imply that every event of
+any finite native block execution is checked. The executed native bytes/entry
+and accepted proof bytes occur in those relations; binding also retains ABI
+and specialization metadata. The earlier instruction-prefix theorem covers
+arbitrary instruction prefixes and terminal-fault repeats separately.
+
+This closes the previously missing explicit block-instance packaging for
+exact P60/B29 under the declared model. Physical JIT/caller/stack and context
+conversion provenance remain explicit obligations, and other micro/application
+programs still need certificates. This is not a whole-machine safety claim.
