@@ -1,0 +1,10 @@
+'KProgTV.PacketCheckedBlocks.first_block' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+'KProgTV.PacketCheckedBlocks.return_executions' depends on axioms: [propext, Lean.ofReduceBool, Quot.sound]
+'KProgTV.PacketCheckedBlocks.guard_rejection' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.PacketCheckedBlocks.rejected_native_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]

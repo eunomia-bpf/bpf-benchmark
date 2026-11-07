@@ -333,3 +333,19 @@ errors are retained in packet-entry-inputs.tar.gz with final source, exact
 generated arrays and mutation logs. No new runtime/image/native instruction or
 performance condition is introduced. The store/fault, return and complete
 accepted-invocation/ABI/RX obligations for simple_packet remain active.
+
+
+`simple_packet`: complete guard rejection and every rejected prefix
+----------------------------------------------------------------
+
+`packet-return-final.log` proves the actual native return trampoline and
+expanded BPF jump/EXIT for every return value. It composes both guard-rejection
+outcomes from original entry through their real exits with full states,
+private-memory relation and exact guest-event projection. The complete native
+return ends at PC68, matching the inline artifact boundary. A deterministic
+execution/closed-return argument then checks every arbitrary native execution
+prefix on either rejection outcome under explicit soundness for the exact B.
+All axioms are the existing propext/choice/ofReduceBool/Quot.sound, with no
+sorryAx. New source, exact generated arrays and proof logs are retained in
+packet-return-inputs.tar.gz. The actual RX/ABI/binding and store/fault path
+composition remains active; this is not a whole-program certificate yet.

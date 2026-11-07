@@ -901,3 +901,16 @@ its semantic entry/platform theorem. Every affected module is rebuilt in
 order for each mutation; a dependent compiled against an earlier definition
 is never reused. The successful original proof is checked by the positive
 entry command. Results are packet-entry-* and packet-guard-full.log.
+
+
+The packet certificate also proves the real native x7<-x0 return trampoline
+and actual expanded-B jump/EXIT for every 64-bit return value. Under either
+failed guard condition, `guard_rejection` composes the original entry, all
+compiler spills/reads, guard, native zero return and both real exits, retaining
+the complete post-states and justified trace projection. Native PC68 is the
+end of this inline blob; the surrounding kernel/JIT ABI remains trusted.
+`rejected_native_prefix_checked` uses this complete deterministic invocation
+to prove every event of ANY native prefix on a rejected guard path was checked
+for the same expanded B, under explicit verifier/platform soundness. The store
+path, actual RX transport, host ABI and full accepted artifact binding still
+need to be composed for simple_packet.
