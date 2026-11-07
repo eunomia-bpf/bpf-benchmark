@@ -30,3 +30,7 @@ word interpretation in the existing MULX route expectation, not an ISA change.
 Archival TSVs preserve empty trailing fields, and saved patches/logs preserve
 original indentation and whitespace byte-for-byte. Whitespace validation covers
 authored source and Markdown; archival data is not rewritten to satisfy formatting.
+
+The first deletion preflight was stopped before deleting any target after
+identifying12426993 redundant Path.relative_to evaluations in the tracked-file
+guard. The equivalent sorted-prefix check preserves the same exclusion.

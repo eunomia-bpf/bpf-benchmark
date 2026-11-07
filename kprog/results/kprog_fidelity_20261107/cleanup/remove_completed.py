@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Delete only F-owned completed artifacts after checking publication/readers."""
 from pathlib import Path
-import hashlib,json,os,shutil,subprocess
+import bisect,hashlib,json,os,shutil,subprocess
 R=Path('/workspaces/repository');OUT=R/'kprog/results/kprog_fidelity_20261107/cleanup';S=Path('/workspaces/.agent-state/kprog-lanes/F')
 plan=json.loads((OUT/'remove-plan.json').read_text());paths=json.loads((OUT/'publish-paths.json').read_text())
 commit=(OUT/'published-commit.txt').read_text().strip()
@@ -13,6 +13,7 @@ for rel in paths:
  got=subprocess.check_output(['git','hash-object','--',rel],cwd=R,text=True).strip()
  assert got==want,rel
 tracked=set(subprocess.check_output(['git','ls-tree','-r','--name-only','HEAD'],cwd=R,text=True).splitlines())
+ordered_tracked=sorted(tracked)
 files=[R/p for p in plan['files']];dirs=[R/p for p in plan['build_dirs']]+[S]
 for p in files:
  assert p.is_relative_to(R/'kprog/results') and str(p.relative_to(R)) not in tracked
@@ -20,9 +21,13 @@ for p in dirs:
  if p==S:assert p.resolve()==S
  else:
   assert p.parent==R/'kprog/fidelity' and p.name.startswith('build') and not p.is_symlink()
-  assert not any(t.startswith(str(p.relative_to(R))+'/') for t in tracked)
+  prefix=str(p.relative_to(R))+'/'
+  pos=bisect.bisect_left(ordered_tracked,prefix)
+  assert pos==len(ordered_tracked) or not ordered_tracked[pos].startswith(prefix)
 roots=[str(p)+'/' for p in dirs];file_names={str(p) for p in files}
-def matches(p):return p in file_names or any(p==x[:-1] or p.startswith(x) for x in roots)
+def matches(p):
+ if not p.startswith(('/workspaces/repository/kprog/','/workspaces/.agent-state/kprog-lanes/F')):return False
+ return p in file_names or any(p==x[:-1] or p.startswith(x) for x in roots)
 readers=[];errors=[]
 for proc in Path('/proc').iterdir():
  if not proc.name.isdigit() or int(proc.name)==os.getpid():continue
