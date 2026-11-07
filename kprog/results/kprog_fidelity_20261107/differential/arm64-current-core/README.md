@@ -15,7 +15,9 @@ The reviewed static artifact is published; the coordinator can use the EXISTING 
 ARM64_HANDOFF=/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/arm64-current-core/cpu-differential-arm64.gz OUT=/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/arm64-current-hardware sh kprog/fidelity/run-arm64.sh
 ~~~
 
-The existing script refuses non-AArch64 hosts and preserves per-form case counts and every mismatch input. Hardware results remain pending. The default still points to the earlier validated artifact while the x86 build captures shared Make inputs; the explicit command above selects this current artifact now.
+The existing script refuses non-AArch64 hosts and preserves per-form case counts and every mismatch input. Hardware results remain pending. The default Make handoff now selects this current artifact. The existing hardware-only
+run-arm64.sh uses it without an override; ARM64_HANDOFF remains available for
+reproducing a historical snapshot.
 
 ## Reviewed static handoff and QEMU/C phase
 
@@ -60,3 +62,17 @@ handoff-summary.json retains the earlier handoff timestamp plus this later revie
 Real ARM hardware execution remains pending with the coordinator. The static
 binary and existing hardware-only script command above are ready; QEMU and
 reference agreement are not relabeled as real hardware validation.
+
+## Default handoff selection
+
+The existing fidelity Makefile now defaults to this reviewed b890/c218 static
+artifact (2eb0d29a). The prior 14:22 artifact remains historical. The selection
+changed after both builds captured their actual inputs; no active build cache
+was overwritten. make -n ARCH=arm64 run-handoff resolves the new path, and
+sh -n kprog/fidelity/run-arm64.sh passes. These checks do not execute ARM
+instructions or claim a hardware result. On real ARM, the coordinator can now
+run the original one-command script without an environment override:
+
+~~~sh
+sh kprog/fidelity/run-arm64.sh
+~~~

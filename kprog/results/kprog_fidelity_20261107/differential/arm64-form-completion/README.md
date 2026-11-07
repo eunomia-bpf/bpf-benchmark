@@ -77,3 +77,12 @@ processes. The summary and per-form tables were already committed and
 published. Static executables, compiled input archives, logs, counterexample
 streams and incremental build caches remain. Regenerate the trace with the
 recorded run command before any future `--reuse-trace` replay.
+
+## Current handoff supersedes this historical snapshot
+
+The default hardware handoff now selects [arm64-current-core](../arm64-current-core/README.md),
+which contains the later published b890/c218 simulator snapshot and static
+binary 2eb0d29a. Its unchanged807-form QEMU/C/canonical replay completes with
+zero differences. This directory retains the exact14:22/c82 source, binary,
+failure and completed results as history. The existing run-arm64.sh command
+now selects the newer artifact; real ARM hardware results remain pending.
