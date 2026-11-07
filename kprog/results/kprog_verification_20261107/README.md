@@ -2467,3 +2467,36 @@ compiler warnings and logs are appended to the existing integration JSON/gzip.
 The immutable464cddd94 full check still runs independently and predates this
 increment; its outcome is not yet a PASS. Other ALU payloads and the remaining
 operation families, whole-ISA dispatch and compiled-B/O2/O4 remain active work.
+
+## INC/DEC/NEG/NOT raw-frame and dispatcher composition
+
+The same raw dispatcher step now composes all four unary payloads through
+both register and immediate ALU families. The destination lane is materialized
+before the existing generated value/flag helpers and numeric writeback. Every
+legal width/slice, RSP/STACK representation and incoming flag word is covered:
+INC/DEC preserve CF, NOT preserves all flags, and NEG derives all arithmetic
+flags. The body preserves every non-destination architectural field. There is
+no chosen output or state-equality premise and no source-value assumption.
+
+The actual generated unary result formulas ignore arbitrary RHS bits, proved
+universally. SRC, source-shift and immediate are therefore unconstrained for
+these bindings; register-source slice decoding remains required only by
+binary payloads. Selector lemmas derive exclusion of logical, carry-sensitive
+and self-XOR branches from AUX. All previous bindings still compile.
+Focused93-job Lean build and five audits PASS with only the prior reported
+propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies. All372
+proof/configuration pins are stable. Six existing generated checks and the
+cached UBSan ALU-result/flag/decode hosts pass with unchanged source/dependency
+and binary hashes (760337/776162/3256 cases). No oracle, test, encoder, header
+or canonical ISA is added or changed. Detailed proofs/diffs/commands/pins/logs
+are appended to the existing integration JSON/gzip.
+
+The separate immutable464cddd94 full check finished with actual exit2 at
+Makefile508, a64_route_host: the fixture plants an unrelated ABI-tagged buffer
+but expects the real-XDP field tag, and its include-guard scene expects the
+former synthetic-ABI entry pointer. The fixed x86 POPCNT/CL-parity components
+passed. All1140 source identities, command/output, CPU trace and queue controls
+are retained here. The private source/cache export was deleted and the FULL
+slot released. That run predates arithmetic687 and this unary increment;
+focused validations stay separate. The ARM oracle fixture is being corrected
+without changing production ISA/header behavior. No full77/72/O2/O4 claim.

@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86Unary
 import KProgFormal.Refinement.X86Arithmetic
 import KProgFormal.X86Immediate
 import KProgFormal.Refinement.X86Logic
@@ -768,6 +769,30 @@ theorem arithmetic_immediate_frame_refines (env : Environment) (frame : Frame) (
     native_register_read, X86Arithmetic.handlerStep, X86Scalar.read_refines,
     Reference.X86.ScalarDestination.source, Reference.X86.scalarRead, X86Scalar.write_refines,
     Reference.X86.scalarWrite, List.nil_append, List.append_nil, writing, ↓reduceIte, values, flags]
+  rfl
+
+
+/-- INC/DEC/NEG/NOT capture the materialized destination lane before flags
+and width-aware writeback. INC/DEC retain incoming CF; NOT retains all flags. -/
+def unaryRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.UnaryKind)
+    (dst : Reference.X86.RegisterSlice) (nextPc : NativeWord) : RegisterState :=
+  let source := readRegister env frame arena state width dst
+  let written := writeRegister env frame arena state width dst (X86Unary.value width kind source)
+  registerPc (registerFlags written (X86Unary.flags width kind source state.raw.rflags)) nextPc
+
+theorem unary_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.UnaryKind)
+    (dst : Reference.X86.RegisterSlice) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (unaryRegister env frame arena state width kind dst nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.unary width kind (.register dst) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86Unary.step_refines]
+  simp only [unaryRegister, native_register_pc, native_register_flags, native_register_write,
+    native_register_read, X86Unary.handlerStep, X86Scalar.read_refines,
+    Reference.X86.ScalarDestination.source, Reference.X86.scalarRead, X86Scalar.write_refines,
+    Reference.X86.scalarWrite, List.nil_append, List.append_nil]
   rfl
 
 end KProgFormal.Refinement.X86NumericAddress

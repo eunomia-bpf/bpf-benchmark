@@ -249,6 +249,37 @@ theorem arithmetic_payload_separate (payload : BitVec 32) (kind : Reference.X86.
   subst payload
   cases kind <;> simp [logicKindOf, arithmeticAlu, GeneratedX86AluDecode.code]
 
+/-- Unary payloads of the same actual ALU families. Their generated
+result formulas ignore the right-hand operand, even for a register-family row. -/
+def unaryKindOf (payload : BitVec 32) : Option Reference.X86.UnaryKind :=
+  if payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code .inc) then some .inc
+  else if payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code .dec) then some .dec
+  else if payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code .neg) then some .neg
+  else if payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code .not) then some .not
+  else none
+
+theorem unary_kind_binding_decodes (payload : BitVec 32) (kind : Reference.X86.UnaryKind)
+    (field : payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code (X86Unary.alu kind))) :
+    unaryKindOf payload = some kind := by
+  subst payload
+  cases kind <;> rfl
+
+theorem unary_payload_separate (payload : BitVec 32) (kind : Reference.X86.UnaryKind)
+    (field : payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code (X86Unary.alu kind))) :
+    logicKindOf payload = none ∧ arithmeticKindOf payload = none ∧
+      payload ≠ BitVec.ofNat 32 (GeneratedX86AluDecode.code .xor) := by
+  subst payload
+  cases kind <;> simp [logicKindOf, arithmeticKindOf, X86Unary.alu,
+    GeneratedX86AluDecode.code, GeneratedX86AluDecode.handlerForCode]
+
+/-- This is the actual generated result contract, not an assumed operand
+value: all four unary formulas discard arbitrary RHS bits. -/
+theorem unary_result_ignores_rhs (kind : Reference.X86.UnaryKind) (left right : Word)
+    (width : GeneratedX86Width.Width) :
+    GeneratedX86AluResult.result (X86Unary.alu kind) left right width =
+      GeneratedX86AluResult.result (X86Unary.alu kind) left 0 width := by
+  cases kind <;> rfl
+
 /-- C's current same-register/same-lane XOR zero-operand selection, tested
 on raw fields before either read. Partial writes still use the original cell. -/
 def logicRegisterBody (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
@@ -295,7 +326,7 @@ theorem logic_register_body_refines (env : EntryEnvironment.Environment) (frame 
 
 /-- Partial register-handler dispatcher. Existing NOP/MOV steps retain their
 prefix selection; the later singleton CMOV/BSWAP/POPCNT/XCHG gates consume their actual
-raw opcode, width and GPR fields. Logical and arithmetic ALU-register/immediate payloads
+raw opcode, width and GPR fields. Logical, arithmetic and unary ALU-register/immediate payloads
 and CMP/TEST register/immediate forms add their generated family/AUX/lane/low-imm32
 selection. Other unproved forms remain
 None. Distinct generated opcode identities prevent an intervening handler
@@ -312,10 +343,14 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         match logicKindOf (GeneratedX86RegLaneAux.payload aux) with
         | some kind => pure ⟨nativeRegisters env frame arena
             (logicImmediate env frame arena state width kind destination value nextPc), [], none⟩
-        | none => do
-            let kind ← arithmeticKindOf (GeneratedX86RegLaneAux.payload aux)
-            pure ⟨nativeRegisters env frame arena
-              (arithmeticImmediate env frame arena state width kind destination value nextPc), [], none⟩
+        | none =>
+            match arithmeticKindOf (GeneratedX86RegLaneAux.payload aux) with
+            | some kind => pure ⟨nativeRegisters env frame arena
+                (arithmeticImmediate env frame arena state width kind destination value nextPc), [], none⟩
+            | none => do
+                let kind ← unaryKindOf (GeneratedX86RegLaneAux.payload aux)
+                pure ⟨nativeRegisters env frame arena
+                  (unaryRegister env frame arena state width kind destination nextPc), [], none⟩
       else if code = GeneratedX86DispatchFamily.code .cmpImm then do
         let width ← widthOf flags
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
@@ -329,14 +364,21 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
       else if aluRegisterHandled code then do
         let width ← widthOf flags
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
-        let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
         match logicKindOf (GeneratedX86RegLaneAux.payload aux) with
-        | some kind => pure ⟨nativeRegisters env frame arena
-            (logicRegisterBody env frame arena state width kind dst src aux destination source nextPc), [], none⟩
-        | none => do
-            let kind ← arithmeticKindOf (GeneratedX86RegLaneAux.payload aux)
+        | some kind => do
+            let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
             pure ⟨nativeRegisters env frame arena
-              (arithmeticRegister env frame arena state width kind destination source nextPc), [], none⟩
+              (logicRegisterBody env frame arena state width kind dst src aux destination source nextPc), [], none⟩
+        | none =>
+            match arithmeticKindOf (GeneratedX86RegLaneAux.payload aux) with
+            | some kind => do
+                let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
+                pure ⟨nativeRegisters env frame arena
+                  (arithmeticRegister env frame arena state width kind destination source nextPc), [], none⟩
+            | none => do
+                let kind ← unaryKindOf (GeneratedX86RegLaneAux.payload aux)
+                pure ⟨nativeRegisters env frame arena
+                  (unaryRegister env frame arena state width kind destination nextPc), [], none⟩
       else if code = GeneratedX86DispatchFamily.code .cmpReg then do
         let width ← widthOf flags
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
@@ -384,6 +426,24 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
   | move (code : Nat) (native : Reference.X86.Instruction)
       (fields : MoveBinding flags aux dst src value nextPc code native) :
       RegisterBinding flags aux dst src value nextPc code native
+  | unaryImmediate (op : GeneratedX86DispatchFamily.DispatchOp) (width : ScalarWidth)
+      (kind : Reference.X86.UnaryKind) (destination : RegisterSlice)
+      (familyField : GeneratedX86DispatchFamily.aluImmHandled op = true)
+      (operationField : GeneratedX86RegLaneAux.payload aux =
+        BitVec.ofNat 32 (GeneratedX86AluDecode.code (X86Unary.alu kind)))
+      (widthField : WidthBinding flags width)
+      (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code op)
+        (.unary width kind (.register destination) nextPc)
+  | unaryRegister (op : GeneratedX86DispatchFamily.DispatchOp) (width : ScalarWidth)
+      (kind : Reference.X86.UnaryKind) (destination : RegisterSlice)
+      (familyField : GeneratedX86DispatchFamily.aluRegHandled op = true)
+      (operationField : GeneratedX86RegLaneAux.payload aux =
+        BitVec.ofNat 32 (GeneratedX86AluDecode.code (X86Unary.alu kind)))
+      (widthField : WidthBinding flags width)
+      (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code op)
+        (.unary width kind (.register destination) nextPc)
   | arithmeticImmediate (op : GeneratedX86DispatchFamily.DispatchOp) (width : ScalarWidth)
       (kind : Reference.X86.ArithmeticKind) (destination : RegisterSlice) (nativeValue : Word)
       (familyField : GeneratedX86DispatchFamily.aluImmHandled op = true)
@@ -475,7 +535,7 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
         (.exchange width (.low destination) (.low source) nextPc)
 
 /-- One complete raw-frame step for the currently lifted register opcodes:
-NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG plus logical/arithmetic ALU-register
+NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG plus logical/arithmetic/unary ALU-register
 and immediate family payloads and CMP/TEST register/immediate forms. Neither component handler
 semantics nor a chosen condition/value/state equation is assumed. This is a
 partial dispatcher theorem, not all77 operations or a compiled-body claim. -/
@@ -488,6 +548,26 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
   cases binding with
   | move code native fields =>
       simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
+  | unaryImmediate op width kind destination familyField operationField widthField dstField =>
+      have widthDecoded := width_binding_decodes flags width widthField
+      have kindDecoded := unary_kind_binding_decodes _ kind operationField
+      have separate := unary_payload_separate _ kind operationField
+      have dstDecoded := slice_binding_decodes width dst _ destination dstField
+      cases op <;> simp [GeneratedX86DispatchFamily.aluImmHandled] at familyField
+      all_goals simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, kindDecoded, separate.1, separate.2.1, dstDecoded] using
+        congrArg some (unary_register_frame_refines env frame arena state width kind destination nextPc)
+  | unaryRegister op width kind destination familyField operationField widthField dstField =>
+      have widthDecoded := width_binding_decodes flags width widthField
+      have kindDecoded := unary_kind_binding_decodes _ kind operationField
+      have separate := unary_payload_separate _ kind operationField
+      have dstDecoded := slice_binding_decodes width dst _ destination dstField
+      cases op <;> simp [GeneratedX86DispatchFamily.aluRegHandled] at familyField
+      all_goals simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, kindDecoded, separate.1, separate.2.1, dstDecoded] using
+        congrArg some (unary_register_frame_refines env frame arena state width kind destination nextPc)
   | arithmeticImmediate op width kind destination nativeValue familyField writing operationField widthField dstField immediateField =>
       have widthDecoded := width_binding_decodes flags width widthField
       have kindDecoded := arithmetic_kind_binding_decodes _ kind writing operationField
