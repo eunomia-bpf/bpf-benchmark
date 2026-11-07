@@ -80,12 +80,12 @@ continue to count their own `row_kind` values.
 
 | O4 status | Rows | Scope |
 | --- | ---: | --- |
-| `proved-conditional` | 6 | x86 kind1 slot/table/record layout, private-spill projection, generic block relation, checked-effects composition |
+| `proved-conditional` | 7 | x86 kind1 slot/table/record layout, ARM kind3 BL26 slot, private-spill projection, generic block relation, checked-effects composition |
 | `trusted-kernel-implementation` | 1 | Exact code, entry, ABI and metadata binding; full Artifact equality is the composition premise |
 | `partial-universal-component` | 4 | Shared kinds5/6/7 and x86/shared mixed-table layout; production, physical consumer, ABI and ARM layout bridges follow |
-| `pending-universal-law` | 10 | ARM kinds2/3/4/9, readonly kind8, spill insertion/reload/control, helper ABI, tail calls, actual compiled B and invocation ABI |
+| `pending-universal-law` | 9 | ARM kinds2/4/9, readonly kind8, spill insertion/reload/control, helper ABI, tail calls, actual compiled B and invocation ABI |
 
-All nine production relocation kinds have explicit rows. The six proved
+All nine production relocation kinds have explicit rows. The seven proved
 components carry their production correspondence premises in `o4_completion`.
 Their published Lean checks and axiom audits have exit 0 and `sorryAx_count=0`;
 the table points to the original source-pinned receipts. The rel32 table/layout
@@ -219,6 +219,19 @@ their original addresses. Actual kernel copy/size/cursor correspondence,
 post-finalization fixup separation and executable lifetime remain production
 interfaces, alongside complete PC/ABI/compiler and ARM transformation laws.
 Reproduce with `make -C kprog/tv native-link-final-image-check`.
+
+[`generic-native-link-arm-bl26.json`](../kprog_tv_20261107/generic-native-link-arm-bl26.json) records 20 passing universal audits for
+AArch64 relocation kind3. The aligned signed26-unit kernel guard is equivalent
+to exact displacement recovery. The actual signed division,32-bit cast, mask
+and opcode OR produce the same four bytes consumed by canonical AArch64.decode.
+Reference.Memory readback then supplies the actual written instruction. Forward
+TV, reverse reflection and the full-state result set X30 to PC+4 and PC to the
+bound target while retaining every other architectural field. The BL step has
+an empty guest trace; target helper effects compose through the helper ABI law.
+The existing offset/full-span/current-placeholder/kernel-target checks remain
+production inputs. Complete field/table layout, final text placement, supported
+ABI and implementation correspondence supply the surrounding link stages.
+Reproduce with `make -C kprog/tv native-link-arm-bl26-check`.
 
 <!-- O4 COVERAGE END -->
 

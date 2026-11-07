@@ -160,6 +160,19 @@ post-finalization fixup separation and executable lifetime remain production
 interfaces, alongside complete PC/ABI/compiler and ARM transformation laws.
 Reproduce with `make -C kprog/tv native-link-final-image-check`.
 
+`generic-native-link-arm-bl26.json` records 20 passing universal audits for
+AArch64 relocation kind3. The aligned signed26-unit kernel guard is equivalent
+to exact displacement recovery. The actual signed division,32-bit cast, mask
+and opcode OR produce the same four bytes consumed by canonical AArch64.decode.
+Reference.Memory readback then supplies the actual written instruction. Forward
+TV, reverse reflection and the full-state result set X30 to PC+4 and PC to the
+bound target while retaining every other architectural field. The BL step has
+an empty guest trace; target helper effects compose through the helper ABI law.
+The existing offset/full-span/current-placeholder/kernel-target checks remain
+production inputs. Complete field/table layout, final text placement, supported
+ABI and implementation correspondence supply the surrounding link stages.
+Reproduce with `make -C kprog/tv native-link-arm-bl26-check`.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations

@@ -1,0 +1,215 @@
+{
+  "utc": "2026-11-07T22:19:26.375605+00:00",
+  "status": "universal_arm64_kind3_kernel_guard_writer_and_canonical_branch_preservation",
+  "scope": "Every64-bit slot/target, every26-bit field and canonical AArch64 state; accepted aligned signed26-unit displacement and actual kernel signed-division/cast/mask/opcode word, with full written-byte decode and TV.",
+  "implementation_interfaces": {
+    "kernel_source": "emit_native_lab_arm64 case NATIVE_LAB_RELOC_HELPER_CALL_ARM64_BL26 checks offset%4, complete4B fit, current0x94000000 word, negative nonzero kernel target, final_ip, disp64%4 and imm26=disp64/4 within[-2^25,2^25-1], then stores0x94000000|((u32)imm26&0x03ffffff).",
+    "guard": "kernelGuard uses the exact aligned delta and signed quotient comparisons as64-bit word operations. guard_equivalence proves exact recovery through sign-extended26-bit displacement shifted left2; checked_rejects proves refusal for every failing guard.",
+    "writer": "kernelEncoding is the signed-division32-bit-cast/mask/or expression. kernel_word and kernel_written_decode connect this actual expression directly to canonical stored bytes and decoded branchLink. The emitted relation uses kernelGuard/kernelEncoding directly.",
+    "canonical_instruction": "The single Reference.AArch64.decode/Step profile supplies BL; X30=PC+4, PC=target, every other state field retained, empty BL event trace and successful instruction result. Helper callee effects compose through the separate helper ABI law.",
+    "production_correspondence": "Actual signed C arithmetic follows the supported kernel-address ABI; source/C extraction, immutable snapshot/placeholder/offset checks, field/table layout, final placement/lifetime and helper/entry ABI remain surrounding production correspondence interfaces.",
+    "composition": "bl26_preservation supplies a universal TranslationValidation component; emitted_reflects retains the reverse behavior and emitted_architecture the complete canonical successor."
+  },
+  "claims": [
+    "The aligned signed26-unit quotient guard is equivalent to exact canonical displacement recovery; rejected guards yield the checked encoder refusal.",
+    "Existing standard-library power-of-two division reasoning proves the signed-/4 shift form; alignment preserves the exact retained26-bit field.",
+    "The actual32-bit cast, low26 mask and BL opcode OR produce the canonical little-endian four-byte instruction for every field.",
+    "Reference.Memory readback reaches the same actual written word and canonical AArch64 decoder.",
+    "Forward TV, reverse reflection and complete successor equality retain X30, control, every remaining architectural field and the exact empty BL trace."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o native-link-relocation-table-check native-link-arm-bl26-check",
+    "reproduction": "make -C kprog/tv native-link-arm-bl26-check",
+    "exit": 0,
+    "audits": 20,
+    "axiom_audit": {
+      "KProgTV.NativeLinkArmBL26.guard_equivalence": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.checked_target": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkArmBL26.bytes_word": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.nat_mask": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.nat_mask_ne": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.decode_branch_bytes": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.signed_div_four": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.checked_displacement": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkArmBL26.checked_rejects": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.kernel_field": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.kernel_word": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.checked_decode": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.written_bytes": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.written_decode": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.branch_result": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.bl26_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.emitted_reflects": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.emitted_architecture": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.kernel_checked": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmBL26.kernel_written_decode": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "sorryAx_count": 0,
+    "warnings": 0,
+    "incremental_canonical_build": "lake build KProgFormal.Reference.AArch64 returned success; current canonical source identity is recorded.",
+    "dependency_cache": "All three imported TV oleans match their published generic receipts and source pins; the diagnostic dependency recipe also reran the22 existing relocation/table audits.",
+    "proof_development": "Initial reserved syntax/type/constant-shift diagnostics and retired elaborations are retained in the attempts archive. Direct file markers located canonical decoder expansion; an abstract byte-array plus exact word equality reduced it. Unfolding the Word abbreviation exposed fixed widths to bv_decide. The final checked source uses the default recursion/heartbeat budgets and retains the direct kernel-word relation.",
+    "retired_attempts": "Five elaborations were deliberately retired during normalization/stage diagnosis; their available logs/source/input snapshots are retained. Subsequent completed exits2 retain concrete elaboration diagnostics. The instrumented20-audit pass precedes the final marker-free20-audit pass."
+  },
+  "source_sha256": {
+    "kprog/formal/KProgFormal/Reference/AArch64.lean": "00c08b7441948c762d18d2bed62fac13c91f6f88f06e380323ac38bef66ece4a",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/NativeLinkArmBL26.lean": "b47b764c27d40d66e6fb69073724893a4129582ca742fd215c17cb287786eeff",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/tv/NativeLinkRelocationTable.lean": "3445aff6854ccaa85e433d8e8357a57edc8b7b2b9cdbdc07ceee8eced4c96f46",
+    "kprog/tv/Makefile": "79d7686e5e76cb674bc53f66dfd8343b4b46d643a47b605bff089748e67b5e3c",
+    "kprog/formal/lean-toolchain": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea",
+    "kprog/formal/lakefile.toml": "c0d43c10868d20a8ccc08e73c05a29eb4dbc40f05fd04872e597b527a620c91c",
+    "kprog/formal/lake-manifest.json": "8d120d7988d313b3173dd609e81a271dda67812d44b26e8cce6875245a59b4bb",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "a7d44bb00fa2fad8653e15c4d2d15dec1266ef80a7b434140c49fe94444ff343"
+  },
+  "source_git_epoch": {
+    "kprog/formal/KProgFormal/Reference/AArch64.lean": "8aa94baa2cb2c616f9dd542b594943a0cfe41bf8",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "8aa94baa2cb2c616f9dd542b594943a0cfe41bf8",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "8aa94baa2cb2c616f9dd542b594943a0cfe41bf8",
+    "kprog/tv/Composition.lean": "8aa94baa2cb2c616f9dd542b594943a0cfe41bf8",
+    "kprog/tv/NativeLinkRelocation.lean": "8aa94baa2cb2c616f9dd542b594943a0cfe41bf8",
+    "kprog/tv/NativeLinkRelocationTable.lean": "8aa94baa2cb2c616f9dd542b594943a0cfe41bf8",
+    "kprog/formal/lean-toolchain": "8aa94baa2cb2c616f9dd542b594943a0cfe41bf8",
+    "kprog/formal/lakefile.toml": "8aa94baa2cb2c616f9dd542b594943a0cfe41bf8",
+    "kprog/formal/lake-manifest.json": "8aa94baa2cb2c616f9dd542b594943a0cfe41bf8",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "8aa94baa2cb2c616f9dd542b594943a0cfe41bf8"
+  },
+  "compiled_olean_sha256": {
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/AArch64.olean": "e64ff1d4e35c62851d8208fbb0eddd9930e86aa10125a1af109c77263cc706f5",
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/Memory.olean": "dc3ed5d7d9a0180f57574646597651f8ea628af3a857a628ef5a767283a2d659",
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/X86.olean": "a556e3c6acb98eca7a1d03819576d912bb5262af49597ffe6c4282930bbd25c8",
+    "kprog/tv/build/Composition.olean": "7e66af8c2ba8a1467ae7405f26d142c6a150b51c977120173c4cba4bf55771d8",
+    "kprog/tv/build/NativeLinkArmBL26.olean": "924c5b38f7ee694a164126d33e131af7f9d95ed7783a7f0458e587f1ac9c8519",
+    "kprog/tv/build/NativeLinkRelocation.olean": "66e8c45092ce7f42c2040bac5f5f7b94ac84ab95a2dbeb44a6549aa3f03ff929",
+    "kprog/tv/build/NativeLinkRelocationTable.olean": "3349dbe8e06a43ca6b83714db6f313f42394b800b860d2531531e26d03b6c0eb"
+  },
+  "dependency_cache_receipts": {
+    "kprog/tv/build/Composition.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-patch-table.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-movabs.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-literal.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-final-image.json"
+    ],
+    "kprog/tv/build/NativeLinkRelocation.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-patch-table.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-literal.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-final-image.json"
+    ],
+    "kprog/tv/build/NativeLinkRelocationTable.olean": [
+      "kprog/results/kprog_tv_20261107/generic-native-link-patch-table.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-literal.json",
+      "kprog/results/kprog_tv_20261107/generic-native-link-final-image.json"
+    ]
+  },
+  "archives": {
+    "kprog/results/kprog_tv_20261107/generic-native-link-arm-bl26.log.gz": {
+      "gzip_sha256": "b788ec47f2bd57e8edcdd9ffa4e071b4541eab0479bb258bcb1a48850c2a5acf",
+      "raw_sha256": "5366e6efb89f73aa2381406870347cd01332a2e7f413f0eeae82d6808d862139",
+      "raw_bytes": 2508
+    },
+    "kprog/results/kprog_tv_20261107/generic-native-link-arm-bl26-attempts.log.gz": {
+      "gzip_sha256": "131fda90a91c520c4ec051bab08efa70f968fe4eb538588cccba56997b9a5822",
+      "raw_sha256": "b9bec52b32090a2ef400823a8076d741343cd5876d59886ab28984e46022e85b",
+      "raw_bytes": 67096
+    }
+  },
+  "completion_path": [
+    "Connect actual ARM producer field/record/table construction, immutable snapshot/current-placeholder and offset/span checks to the universal slot law.",
+    "Compose final text placement/stability and complete native PC/entry/helper ABI, including target helper memory/call effects.",
+    "Complete remaining ARM near/far helper, per-CPU, exclusive and tailcall transformations, actual compiler/private-frame/definedness preservation and universal O1/O2 Composition instances."
+  ],
+  "trusted": [
+    "Canonical AArch64/Memory semantics and F hardware/QEMU fidelity evidence.",
+    "Accepted-B verifier soundness.",
+    "Kernel binding and supported C/address/ABI implementation correspondence.",
+    "Lean kernel and the recorded propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies."
+  ],
+  "evidence_class": "Universal Lean transformation law over every accepted kind3 slot; whole-program helper/ABI/compiler and complete physical image correspondence compose through the listed production interfaces."
+}
