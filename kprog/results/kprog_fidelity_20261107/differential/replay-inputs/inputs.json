@@ -1,0 +1,257 @@
+{
+  "source_head": "76df7ccb83c3cd31a5da6f40a3a631f78d30cd8e",
+  "files": {
+    "kprog/x86/x86_sim.h": {
+      "sha256": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3"
+    },
+    "kprog/arm64/arm64_sim.h": {
+      "sha256": "8d69f4e7b1aa1e809ed40861362e13ab7c493a6ede5abf3e0fd38a763d683fbe"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-cmp-signed-current/summary.json": {
+      "sha256": "0fe393ad82a5fd028a15d48cc063d1c2ebb2f768f1a6d039c62fdec894fed5b7"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-cmp-signed-current/forms.tsv": {
+      "sha256": "9ec34ec599a53e437945ecca83ec446647c204808fc0ff1bb6d3b7cac858fb59"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-cmp-signed-current/reference-forms.tsv": {
+      "sha256": "297a8a8628beeeacb6ce26bb465ad597f51e124ec722ad9c1d160afd413b9c61"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-cmp-signed-current/actual-compiled-inputs.tar.gz": {
+      "sha256": "ce29623cad756b835f5e0229e4a853609201f714aa7aeb9308660d27718989e6"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-rorx-current/summary.json": {
+      "sha256": "1842158c89dff64c4f95d9645adda30357841a23f6fd2e19c9d8bbf26397119d"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-rorx-current/forms.tsv": {
+      "sha256": "7c4a2764ae6a9e10ca981a598e9b7d593d6484bc9c73972f4429116ca5935816"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-rorx-current/reference-forms.tsv": {
+      "sha256": "f8cfdfcdb7290fa49f14b29c2957679536800bc7141ec2a3a2c920cbd5774466"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-rorx-current/actual-compiled-inputs.tar.gz": {
+      "sha256": "35a51b426f171c7d3ba4275dbf6de1f43d505f5d9db9995a0905a0ebb7cbda04"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-control/summary.json": {
+      "sha256": "33490060aabbef115f1b021b2b5dce4be29a7af9a8575bb30511925be8e9f756"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-control/forms.tsv": {
+      "sha256": "978fab81fb0cf1359c6798aa1f5663463d5bc9b6ddcb2c770d494f346df3f04e"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-control/reference-forms.tsv": {
+      "sha256": "bbffebb3d399e53f56e6bfed4a3e48fb1676036865b7683f4092ad1c7b8ab3a3"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-control/compiled-inputs.tar.gz": {
+      "sha256": "9790751cfb079084ac4cbaf30619f2e8e5ba3dd3f87e85b977e97ddc1140d73f"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-core/summary.json": {
+      "sha256": "70708adddeb904f362eff8165509167b2dfda12a0b0074e55b176a8b6b35ce6c"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-core/forms.tsv": {
+      "sha256": "812edeacf121658105b54fd4c0e0889c3e1a318db4a12200b3bf636aa0193bf7"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-core/reference-forms.tsv": {
+      "sha256": "03306884ed0e6e93f3b31d8c473d1d579ea350bb98a35bce390c9474b60972a5"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-core/actual-compiled-inputs.tar.gz": {
+      "sha256": "6eee462719f6402ce11d47bd368ea8fd955b0467aac93f820ea95e99d03137c1"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-control-branches/summary.json": {
+      "sha256": "2a71943a46615f608df2095ce9ef5d130374d4145daa66b2ef8c070426f785e6"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-control-branches/forms.tsv": {
+      "sha256": "e39e9213261f6a160b9d505ff9df3903bd810d1bda1bc4a95e34100354e84c94"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-control-branches/reference-forms.tsv": {
+      "sha256": "bffc0aa810fd011ae39dcd0e9b91d566b0804344f356fbc75bf5d7806540173b"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-control-branches/compiled-inputs.tar.gz": {
+      "sha256": "af8ecd56ca2261770f0e822493a618eb11ad75ffda19dc2ff0a97f52f77dade2"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/fmov/summary.json": {
+      "sha256": "d57c3ed737c659746636f345701706ca739ab4de7e3eee82de2119208e1de82a"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/fmov/forms.tsv": {
+      "sha256": "4635f293020f6d8fa4ecfcfcc620793aa9eb4165b1a286f8a25ed40a24719fd6"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/fmov/reference-forms.tsv": {
+      "sha256": "fd30a05b86d5670f6c35789cdeeefe1550ce3a5bfcb02bf399abab0505035e09"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/fmov/compiled-inputs.tar.gz": {
+      "sha256": "e79f025550c174b86e3a4f60ed187e3a06e96bbc790a1842696f0a3d9492fbb9"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/memory/summary.json": {
+      "sha256": "be731fa87330ad9c6bc8c9024acb79ddb480686b509a7d0d9e3255ce269058a1"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/memory/forms.tsv": {
+      "sha256": "84b29885529838fc78deed60c732a0b30e5b1368ea45c1ce5f9a3155a65251d3"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/memory/reference-forms.tsv": {
+      "sha256": "b20abd68147f42d736d63930fcc200cce150d4e12e05a399c24915e1391db8b7"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/memory/compiled-inputs.tar.gz": {
+      "sha256": "4c253543385bacdf7eda9879b711e0d48965596ee628edc0c4ca53f7010d55f9"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/bitfield/summary.json": {
+      "sha256": "621b6a967adb98645658f03e0a773379d09ef819d2b42409eb9e5a5d2d7474b5"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/bitfield/forms.tsv": {
+      "sha256": "dc6016e2b807121794bb5fb5271be77890981d7c742d8c6f66eb218c0f6da5e0"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/bitfield/reference-forms.tsv": {
+      "sha256": "688692e1d910b621bbd3086ef0a729bde076cf0815f80d58e234fc0165350c01"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/bitfield/compiled-inputs.tar.gz": {
+      "sha256": "32cc76a2a75711b9295e9c59688d08ec2a36a388c334b60a526046ed77df61fd"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/exclusive/observed-projection/summary.json": {
+      "sha256": "46fcc3af6dbcef2c8a72f946b96897aaec4a6b7f30a4e7c7e691d6141c573bf4"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/exclusive/observed-projection/forms.tsv": {
+      "sha256": "9d3499c74949997779ce69c53f6bdd3674a0ae26294e2a08ce3970f669ba0fb9"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/exclusive/observed-projection/reference-forms.tsv": {
+      "sha256": "5e3ef6dd3518e656e296585d72b8abb7099dee1ba6e32b8095e1c6f22271e0ba"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/exclusive/summary.json": {
+      "sha256": "58a4d6690f4d5f454ba20a9f6e83219114e64a50290f72d57a9fac94d083ca95"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/exclusive/observed-projection/pins.json": {
+      "sha256": "4fd08cdd5eb9da764761d28663ad91b2547780f2e3655ba6778f692e755d73f1"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-bank32/exclusive/compiled-inputs.tar.gz": {
+      "sha256": "5553c31cf53ebec8aeb0791eb68d72fd3394a54ccbfa73cd3b65e775c53d0b02"
+    },
+    "kprog/results/kprog_fidelity_20261107/differential/x86-leave64-boundaries/canonical-after/summary.json": {
+      "sha256": "a547915e755b3d71d854e2aa8ad8b4550dac13f0565d73f60c4db0c1fd200509"
+    }
+  },
+  "aliases": {
+    "x86": {
+      "X86_OP_MOV_IMM64": "X86_OP_MOV_IMM",
+      "X86_OP_MOV_REG64": "X86_OP_MOV_REG",
+      "X86_OP_ADD_IMM64": "X86_OP_ADD_IMM",
+      "X86_OP_ADD_REG64": "X86_OP_ADD_REG",
+      "X86_OP_XOR_REG32": "X86_OP_XOR_REG"
+    },
+    "arm64": {}
+  },
+  "source_snapshots": [
+    {
+      "isa": "x86",
+      "source": "x86-cmp-signed-current",
+      "scope": "enumerated_instruction_forms",
+      "backend": "real_x86_cpu",
+      "forms": 1144,
+      "cases": 1171456,
+      "operation_rows": 62,
+      "simulator_header_sha256": "4fe6817022a81eaf529235979a9d0f0c237e972ae16ede5f5164b524ba5ac307",
+      "executable_sha256": "2057b385f3b982fc38adf9486f5025ab1b07b9cbd8deff038ad843fe9a4de924",
+      "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96"
+    },
+    {
+      "isa": "x86",
+      "source": "x86-rorx-current",
+      "scope": "enumerated_instruction_forms",
+      "backend": "real_x86_cpu",
+      "forms": 4,
+      "cases": 4096,
+      "operation_rows": 2,
+      "simulator_header_sha256": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+      "executable_sha256": "613cb2637e315b9dd20c2f9d42e2d8b75a8867d6568d0f4510b930ab16aa8069",
+      "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96"
+    },
+    {
+      "isa": "x86",
+      "source": "x86-control",
+      "scope": "finite_control_composites",
+      "backend": "real_x86_cpu",
+      "forms": 35,
+      "cases": 35840,
+      "operation_rows": 1,
+      "simulator_header_sha256": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+      "executable_sha256": "4a4e5ac7b75a8fbdf59383ebd1b12e67d9032c41f83669173ca552e890beec99",
+      "reference_sha256": "f1c5d75bef1b16ee3db6bb2e1be18e3131b7b60e940a1be9ef4318d5f39f2a02"
+    },
+    {
+      "isa": "arm64",
+      "source": "arm64-current-core",
+      "scope": "enumerated_instruction_forms",
+      "backend": "qemu_user",
+      "forms": 807,
+      "cases": 826368,
+      "operation_rows": 65,
+      "simulator_header_sha256": "c21833dee58cbdbc85aa176289585f705f189743b1337adfa13908775d6c28c5",
+      "executable_sha256": "2eb0d29a3dab3cb433cccbf42774eda9dd3c902905dd90f3044d87471c626f8d",
+      "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96"
+    },
+    {
+      "isa": "arm64",
+      "source": "arm64-control-branches",
+      "scope": "finite_control_composites",
+      "backend": "qemu_user",
+      "forms": 101,
+      "cases": 103424,
+      "operation_rows": 1,
+      "simulator_header_sha256": "d382995ce88de3076d4c7650566d3a5961733c2a624becd8c8de3ddb08118126",
+      "executable_sha256": "db737361a92f0571ba64736ad499c27d55fad50e8b2a921d521b9a9f05b334e4",
+      "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96"
+    },
+    {
+      "isa": "arm64",
+      "source": "arm64-current-bank32/fmov",
+      "scope": "full_vector_bank_forms",
+      "backend": "qemu_user",
+      "forms": 128,
+      "cases": 131072,
+      "operation_rows": 1,
+      "simulator_header_sha256": "d382995ce88de3076d4c7650566d3a5961733c2a624becd8c8de3ddb08118126",
+      "executable_sha256": "6f5baeb218ddb7b1418ef430a9474f1d5b37ec9a0e97e09132c8d312b3a51461",
+      "reference_sha256": "f1c5d75bef1b16ee3db6bb2e1be18e3131b7b60e940a1be9ef4318d5f39f2a02"
+    },
+    {
+      "isa": "arm64",
+      "source": "arm64-current-bank32/memory",
+      "scope": "full_vector_bank_memory_forms",
+      "backend": "qemu_user",
+      "forms": 255,
+      "cases": 261120,
+      "operation_rows": 11,
+      "simulator_header_sha256": "d382995ce88de3076d4c7650566d3a5961733c2a624becd8c8de3ddb08118126",
+      "executable_sha256": "9cef64714a71add5a12518f53671e52d11eebb82f095b0a5cb8c13f41be94896",
+      "reference_sha256": "f1c5d75bef1b16ee3db6bb2e1be18e3131b7b60e940a1be9ef4318d5f39f2a02"
+    },
+    {
+      "isa": "arm64",
+      "source": "arm64-current-bank32/bitfield",
+      "scope": "enumerated_bitfield_forms",
+      "backend": "qemu_user",
+      "forms": 70,
+      "cases": 71680,
+      "operation_rows": 2,
+      "simulator_header_sha256": "d382995ce88de3076d4c7650566d3a5961733c2a624becd8c8de3ddb08118126",
+      "executable_sha256": "2ab93e7d8ca5f382b5d57fa63960f526ff7c6b5d02816a5d32f9b8262ef0d985",
+      "reference_sha256": "f1c5d75bef1b16ee3db6bb2e1be18e3131b7b60e940a1be9ef4318d5f39f2a02"
+    },
+    {
+      "isa": "arm64",
+      "source": "arm64-current-bank32/exclusive/observed-projection",
+      "scope": "explicit_monitor_observation",
+      "backend": "qemu_user",
+      "forms": 8,
+      "cases": 8192,
+      "operation_rows": 2,
+      "simulator_header_sha256": "d382995ce88de3076d4c7650566d3a5961733c2a624becd8c8de3ddb08118126",
+      "executable_sha256": "8391b40fc6c9755c5cc08e3a5e52e1273f0a159528be81e923c18721ba1753d7",
+      "reference_sha256": "f1c5d75bef1b16ee3db6bb2e1be18e3131b7b60e940a1be9ef4318d5f39f2a02"
+    },
+    {
+      "isa": "x86",
+      "source": "x86-leave64-boundaries/canonical-after",
+      "scope": "architectural_fault_classes",
+      "backend": "real_x86_cpu",
+      "forms": 1,
+      "cases": 33792,
+      "input_classes": 33
+    }
+  ]
+}
