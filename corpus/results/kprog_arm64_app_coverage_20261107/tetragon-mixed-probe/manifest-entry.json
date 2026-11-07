@@ -1,0 +1,16 @@
+{
+  "program": "",
+  "prog_type": 17,
+  "source_bytecode_hex": "bf160000000000008510000007000000bf6100000000000018120000000000000000000000000000b703000000000000850000000c000000b7000000000000009500000000000000b7000000000000009500000000000000",
+  "source_map_fd_sites": [
+    3
+  ],
+  "source_map_bindings": [
+    {
+      "native_symbol": "__native_source_map_3",
+      "source_insn": 3
+    }
+  ],
+  "native_object": "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261107/tetragon-mixed-probe/mixed.native.o",
+  "symbol": "bpf_main"
+}

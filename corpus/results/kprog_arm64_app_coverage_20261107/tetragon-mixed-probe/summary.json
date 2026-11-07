@@ -1,0 +1,124 @@
+{
+  "utc": "2026-11-07T19:08:58.080095+00:00",
+  "scope": "Upstream reconstructed source with two observed hash matches; runtime full-byte selector match and verifier/application execution pending",
+  "upstream_commit": "8ca052908600a83c4fad7429a3023a921bc15851",
+  "upstream_source_sha256": "9ffd9eb0892725b3fd4ce078029eaf2527f958ec7c920684d56aa279f6e2d748",
+  "source_raw_hash": "ca47d4f26feca335",
+  "source_normalized_hash": "7f60b6fbd3faebcf",
+  "source_sha256": "953299898f7375042c29281436cef602ae572f7146cb7bbe27fa5f12ed398576",
+  "source_insns": 11,
+  "runtime_fd_site": 3,
+  "native_sha256": "35e27d01a6d74bbb0bc6a040e2f35bb52860dccb737e69412bf9ff3eca1435ac",
+  "native_proof_sha256": "6b1ff7465af22b009bec2cc2062cd77d8d7415c1ad83abe0e482d5b1ba32cfbb",
+  "proof_generated_and_compiled": true,
+  "proof_bpf_sha256": "71ccded734b5a5288c7382f64a45e1f0ee9b82c61ec54f2029cae27427c76dcf",
+  "frontend_sha256": "53509f915f268bdcee72a8fc8ec88bdff19c75ad85d1c005ebf2c7a6145050b6",
+  "native_link_sha256": "ed147232b680be95bbccf3843f1891dbb2a55272772bee3b33f6ed66b448260e",
+  "commands": [
+    {
+      "command": [
+        "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/lift-bpf-ir",
+        "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261107/tetragon-mixed-probe/source.bpf.bin",
+        "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261107/tetragon-mixed-probe/native.ll"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "opt-18",
+        "-O3",
+        "-S",
+        "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261107/tetragon-mixed-probe/native.ll",
+        "-o",
+        "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261107/tetragon-mixed-probe/native.opt.ll"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "llc-18",
+        "-mtriple=aarch64-linux-gnu",
+        "-mcpu=generic",
+        "-mattr=+reserve-x18,+reserve-x26,+reserve-x27,+reserve-x28",
+        "-filetype=obj",
+        "-O=3",
+        "-relocation-model=pic",
+        "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261107/tetragon-mixed-probe/native.opt.ll",
+        "-o",
+        "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261107/tetragon-mixed-probe/mixed.native.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+        "--input",
+        "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261107/tetragon-mixed-probe/mixed.native.o",
+        "--symbol",
+        "bpf_main",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi",
+        "--output",
+        "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261107/tetragon-mixed-probe/mixed.proof.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=bpf_main (32 bytes), 1 reachable symbol(s) total\n  - bpf_main (vaddr 0x0, 32 bytes) [entry]\nnative-link: wrote proof object 36 bytes, 3 reloc(s) -> /workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261107/tetragon-mixed-probe/mixed.proof.o\n"
+    },
+    {
+      "command": [
+        "clang",
+        "-g",
+        "-O2",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-D__TARGET_ARCH_arm64",
+        "-I/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261107/tetragon-mixed-probe/mixed.bpf.c",
+        "-o",
+        "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261107/tetragon-mixed-probe/mixed.bpf.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "kernel_or_verifier_changed": false,
+  "stage_install": {
+    "manifest": "kprog/arm64/build/app-verified-stage/tetragon/manifest.json",
+    "before_sha256": "12f30ddf453cd6579f126158b02545f7506b01e5021116f0f1c361ccc59eef53",
+    "after_sha256": "4d8f3da770686934ea412662f18759f709c32cb5844016c806f67ce1afc9ca4d",
+    "previous_entries": 245,
+    "new_entries": 246,
+    "added_entry": {
+      "program": "",
+      "prog_type": 17,
+      "source_bytecode_hex": "bf160000000000008510000007000000bf6100000000000018120000000000000000000000000000b703000000000000850000000c000000b7000000000000009500000000000000b7000000000000009500000000000000",
+      "source_map_fd_sites": [
+        3
+      ],
+      "source_map_bindings": [
+        {
+          "native_symbol": "__native_source_map_3",
+          "source_insn": 3
+        }
+      ],
+      "native_object": "startup/mixed_bpf_tail.native.o",
+      "symbol": "bpf_main"
+    },
+    "other_entries_unchanged": true,
+    "production_entry_has_no_proof_path": true,
+    "runtime_validation": "pending actual full-byte selector match and fresh trusted generation"
+  }
+}
