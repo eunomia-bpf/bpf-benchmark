@@ -51,6 +51,8 @@ typedef unsigned long long __u64;
 #define X86_OP_BSWAP 0x17U
 #define X86_OP_POPCNT 0x18U
 #define X86_OP_POPCNT_MEM 0x47U
+#define X86_OP_ROR 0x48U
+#define X86_OP_ROR_MEM 0x49U
 #define X86_OP_SHIFTX 0x26U
 #define X86_OP_SHIFTX_MEM 0x2aU
 #define X86_OP_RORX 0x27U
@@ -344,9 +346,14 @@ int main(void)
 	for (op = 0; op < 256; op++) {
 		cases++;
 		if (KPROG_X86_DISP_POPCNT_MEM_HANDLED(op) != (op == 71)) fails++;
+		cases += 2;
+		if (KPROG_X86_DISP_ROR_HANDLED(op) != (op == 72)) fails++;
+		if (KPROG_X86_DISP_ROR_MEM_HANDLED(op) != (op == 73)) fails++;
 	}
 	cases++;
 	if (KPROG_X86_DISP_POPCNT_MEM_HANDLED(~0U)) fails++;
+	cases += 2;
+	if (KPROG_X86_DISP_ROR_HANDLED(~0U) || KPROG_X86_DISP_ROR_MEM_HANDLED(~0U)) fails++;
 
 	if (fails) {
 		printf("x86 dispatch singleton host cross-check: FAILED "

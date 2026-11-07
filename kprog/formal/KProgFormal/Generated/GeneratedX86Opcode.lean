@@ -78,6 +78,8 @@ inductive Op where
   | callMemsetReg
   | callMemcpyReg
   | popcntMem
+  | ror
+  | rorMem
   | ret
   deriving DecidableEq, Repr
 /-- The numeric opcode each token stands for. -/
@@ -154,6 +156,8 @@ def code : Op -> Nat
   | .callMemsetReg => 69
   | .callMemcpyReg => 70
   | .popcntMem => 71
+  | .ror => 72
+  | .rorMem => 73
   | .ret => 255
 /-- The `X86_OP_*` token spelling each constructor stands for. -/
 def define : Op -> String
@@ -229,5 +233,7 @@ def define : Op -> String
   | .callMemsetReg => "X86_OP_CALL_MEMSET_REG"
   | .callMemcpyReg => "X86_OP_CALL_MEMCPY_REG"
   | .popcntMem => "X86_OP_POPCNT_MEM"
+  | .ror => "X86_OP_ROR"
+  | .rorMem => "X86_OP_ROR_MEM"
   | .ret => "X86_OP_RET"
 end KProgFormal.GeneratedX86Opcode

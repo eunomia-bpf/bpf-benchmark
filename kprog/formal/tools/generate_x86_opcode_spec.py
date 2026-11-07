@@ -36,7 +36,7 @@ LEAN = ROOT / "KProgFormal/Generated/GeneratedX86Opcode.lean"
 C_HEADER = ROOT / "generated/x86_opcode.h"
 PYTHON = ROOT.parent / "x86/micro-prog/generated_x86_opcode.py"
 
-# The independent enumeration of the 73 canonical opcodes, in the order
+# The independent enumeration of the canonical opcodes, in the order
 # `kprog/x86/x86_sim.h` defines them: (name, define, code).
 EXPECTED = [
     ("nop", "X86_OP_NOP", 0x00),
@@ -111,6 +111,8 @@ EXPECTED = [
     ("callMemsetReg", "X86_OP_CALL_MEMSET_REG", 0x45),
     ("callMemcpyReg", "X86_OP_CALL_MEMCPY_REG", 0x46),
     ("popcntMem", "X86_OP_POPCNT_MEM", 0x47),
+    ("ror", "X86_OP_ROR", 0x48),
+    ("rorMem", "X86_OP_ROR_MEM", 0x49),
     ("ret", "X86_OP_RET", 0xff),
 ]
 ALIAS_EXPECTED = [
@@ -232,7 +234,7 @@ def render_c(rows, aliases):
 #ifndef KPROG_FORMAL_GENERATED_X86_OPCODE_H
 #define KPROG_FORMAL_GENERATED_X86_OPCODE_H
 /*
- * The 72 canonical x86-64 opcode tokens and their numeric codes, re-derived
+ * The canonical x86-64 opcode tokens and their numeric codes, re-derived
  * from kprog/x86/x86_sim.h at generation time. Each assert fails the build if
  * the header renumbers a token, so a simulator body, a Lean handler arm, and an
  * artifact step cannot silently disagree about what a token means. The five

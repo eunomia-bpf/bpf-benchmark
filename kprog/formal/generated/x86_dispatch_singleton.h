@@ -62,6 +62,8 @@ _Static_assert(X86_OP_DIV == 26U, "x86 dispatch singleton code drift");
 _Static_assert(X86_OP_PUSH == 18U, "x86 dispatch singleton code drift");
 _Static_assert(X86_OP_POP == 19U, "x86 dispatch singleton code drift");
 _Static_assert(X86_OP_POPCNT_MEM == 71U, "x86 dispatch singleton code drift");
+_Static_assert(X86_OP_ROR == 72U, "x86 dispatch singleton code drift");
+_Static_assert(X86_OP_ROR_MEM == 73U, "x86 dispatch singleton code drift");
 /* Each singleton's opcode, tested by the dispatcher. */
 #define KPROG_X86_DISP_NOP_HANDLED(OP)                              \
 	((OP) == X86_OP_NOP)
@@ -151,6 +153,10 @@ _Static_assert(X86_OP_POPCNT_MEM == 71U, "x86 dispatch singleton code drift");
 	((OP) == X86_OP_POP)
 #define KPROG_X86_DISP_POPCNT_MEM_HANDLED(OP)                       \
 	((OP) == X86_OP_POPCNT_MEM)
+#define KPROG_X86_DISP_ROR_HANDLED(OP)                              \
+	((OP) == X86_OP_ROR)
+#define KPROG_X86_DISP_ROR_MEM_HANDLED(OP)                          \
+	((OP) == X86_OP_ROR_MEM)
 /* Every singleton must be named by its generated membership macro. */
 _Static_assert(KPROG_X86_DISP_NOP_HANDLED(X86_OP_NOP), "x86 dispatch singleton coverage drift");
 _Static_assert(KPROG_X86_DISP_CALL_MEMCPY_HANDLED(X86_OP_CALL_MEMCPY), "x86 dispatch singleton coverage drift");
@@ -196,4 +202,6 @@ _Static_assert(KPROG_X86_DISP_DIV_HANDLED(X86_OP_DIV), "x86 dispatch singleton c
 _Static_assert(KPROG_X86_DISP_PUSH_HANDLED(X86_OP_PUSH), "x86 dispatch singleton coverage drift");
 _Static_assert(KPROG_X86_DISP_POP_HANDLED(X86_OP_POP), "x86 dispatch singleton coverage drift");
 _Static_assert(KPROG_X86_DISP_POPCNT_MEM_HANDLED(X86_OP_POPCNT_MEM), "x86 dispatch singleton coverage drift");
+_Static_assert(KPROG_X86_DISP_ROR_HANDLED(X86_OP_ROR), "x86 dispatch singleton coverage drift");
+_Static_assert(KPROG_X86_DISP_ROR_MEM_HANDLED(X86_OP_ROR_MEM), "x86 dispatch singleton coverage drift");
 #endif

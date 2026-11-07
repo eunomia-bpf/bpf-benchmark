@@ -1196,6 +1196,52 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		}                                                         \
 	} while (0)
 
+/* Classic ROR updates only CF/OF. The masked count, not count modulo
+ * operand bits, decides whether flags change (e.g. ROR byte by eight). */
+#define X86_SIM_L_SET_ROR_FLAGS(RESULT, COUNT, WIDTH) \
+	do { \
+		__u8 __x86_ror_n = x86_shift_count((COUNT), (WIDTH)); \
+		if (__x86_ror_n) { \
+			__u32 __x86_ror_bits = x86_width_bits(WIDTH); \
+			__x86_cf = ((RESULT) >> (__x86_ror_bits - 1)) & 1; \
+			if (__x86_ror_n == 1) \
+				__x86_of = __x86_cf ^ (((RESULT) >> (__x86_ror_bits - 2)) & 1); \
+		} \
+	} while (0)
+
+#define X86_SIM_L_EXEC_ROR(DST, FLAGS, AUX, IMM) \
+	do { \
+		__u8 __x86_ror_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+		__u64 __x86_ror_count = (IMM); \
+		__u8 __x86_ror_lane = KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX); \
+		__u64 __x86_ror_result = x86_ror(X86_SIM_L_READ_REG_WIDTH_SHIFT( \
+			(DST), __x86_ror_width, __x86_ror_lane), __x86_ror_count, __x86_ror_width); \
+		X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_ror_result, __x86_ror_width, __x86_ror_lane); \
+		X86_SIM_L_SET_ROR_FLAGS(__x86_ror_result, __x86_ror_count, __x86_ror_width); \
+	} while (0)
+
+#define X86_SIM_L_EXEC_ROR_MEM(DST, FLAGS, AUX, IMM) \
+	do { \
+		__u8 __x86_ror_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+		__u32 __x86_ror_aux = (AUX); \
+		__u8 __x86_ror_count = KPROG_X86_MEM_AUX_OP(__x86_ror_aux); \
+		__u64 __x86_ror_address = (IMM); \
+		__u64 __x86_ror_result = x86_ror(X86_SIM_L_READ_MEM_VALUE( \
+			(DST), __x86_ror_aux, __x86_ror_address, __x86_ror_width, 0), \
+			__x86_ror_count, __x86_ror_width); \
+		__s64 __x86_ror_disp = X86_SIM_L_MEM_OFFSET(__x86_ror_aux, x86_simm(__x86_ror_address)); \
+		void *__x86_ror_base = (void *)0; \
+		X86_SIM_L_BARRIER_VAR(__x86_ror_disp); \
+		if (KPROG_X86_REG_PRESENT(DST)) __x86_ror_base = X86_SIM_L_READ_REG_PTR(DST); \
+		if ((DST) == X86_RSP) \
+			X86_SIM_L_STACK_WRITE((__s64)(long)__x86_ror_base + __x86_ror_disp, __x86_ror_width, __x86_ror_result); \
+		else { \
+			void *__x86_ror_addr = (__u8 *)__x86_ror_base + __x86_ror_disp; \
+			X86_SIM_L_STORE_ADDR(__x86_ror_addr, __x86_ror_width, __x86_ror_result); \
+		} \
+		X86_SIM_L_SET_ROR_FLAGS(__x86_ror_result, __x86_ror_count, __x86_ror_width); \
+	} while (0)
+
 #define X86_SIM_L_EXEC_ALU_IMM(DST, FLAGS, ALU, IMM)                        \
 	do {                                                               \
 		__u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
@@ -2263,6 +2309,10 @@ x86_sim_divmod128(__u64 high, __u64 low, __u64 divisor)
 					(__u8)(IMM), __x86_l_width);             \
 				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
 							  __x86_l_width);        \
+			} else if (KPROG_X86_DISP_ROR_HANDLED(OP)) { \
+				X86_SIM_L_EXEC_ROR((DST), (FLAGS), (AUX), (IMM)); \
+			} else if (KPROG_X86_DISP_ROR_MEM_HANDLED(OP)) { \
+				X86_SIM_L_EXEC_ROR_MEM((DST), (FLAGS), (AUX), (IMM)); \
 			} else if (KPROG_X86_DISP_RORX_HANDLED(OP)) {           \
 				__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);      \
 				X86_SIM_L_WRITE_REG_WIDTH((DST),                  \

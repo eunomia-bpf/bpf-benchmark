@@ -74,6 +74,8 @@ X86_SPECIALIZATION_DISPATCH = {
     "X86_OP_CALL_MEMSET_REG": "directMacro",
     "X86_OP_CALL_MEMCPY_REG": "directMacro",
     "X86_OP_POPCNT_MEM": "genericRunOp",
+    "X86_OP_ROR": "directMacro",
+    "X86_OP_ROR_MEM": "directMacro",
     "X86_OP_RET": "branchHandler",
 }
 # The specialized call the encoder emits at aux 0, as a `str.format` template
@@ -131,6 +133,8 @@ X86_SPECIALIZATION_DIRECT_CALL = {
     "X86_OP_ANDN_MEM": "X86_SIM_L_EXEC_ANDN_MEM({dst}, {src}, {flags}, {aux}, {imm})",
     "X86_OP_CALL_MEMSET_REG": "X86_SIM_L_EXEC_CALL_MEMSET_REG({imm})",
     "X86_OP_CALL_MEMCPY_REG": "X86_SIM_L_EXEC_CALL_MEMCPY_REG({imm})",
+    "X86_OP_ROR": "X86_SIM_L_EXEC_ROR({dst}, {flags}, {aux}, {imm})",
+    "X86_OP_ROR_MEM": "X86_SIM_L_EXEC_ROR_MEM({dst}, {flags}, {aux}, {imm})",
 }
 # The aux-gated call the encoder emits for nonzero aux. Every aux-gated token
 # runs through `X86_SIM_L_EXEC_<TOKEN>_AUX` (or its `_STEP` spelling) on both the

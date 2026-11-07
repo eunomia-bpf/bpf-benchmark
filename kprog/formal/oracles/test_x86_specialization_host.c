@@ -189,6 +189,8 @@ static const struct spec_row SPEC[] = {
 	{ X86_OP_CALL_MEMSET_REG, D },
 	{ X86_OP_CALL_MEMCPY_REG, D },
 	{ X86_OP_POPCNT_MEM, G },
+	{ X86_OP_ROR, D },
+	{ X86_OP_ROR_MEM, D },
 	{ X86_OP_RET, B },
 };
 
@@ -300,6 +302,7 @@ static int snap_eq(const struct snap *a, const struct snap *b)
 			 (OP) == X86_OP_TEST_MEM_REG ||                   \
 			 (OP) == X86_OP_ALU_MEM_UNARY ||                  \
 			 (OP) == X86_OP_ALU_MEM_IMM ||                    \
+			 (OP) == X86_OP_ROR_MEM ||                       \
 			 (OP) == X86_OP_ALU_MEM_REG ||                    \
 			 (OP) == X86_OP_BT_MEM_IMM ||                     \
 			 (OP) == X86_OP_SETCC_MEM)                        \
@@ -417,6 +420,10 @@ static void check_token(__u8 op, unsigned dst, unsigned src, unsigned flags,
 	case X86_OP_MOVBE_STORE:
 		X86_SIM_L_EXEC_MOVBE_STORE(dst,src,flags,aux,imm);break;
 
+	case X86_OP_ROR:
+		X86_SIM_L_EXEC_ROR(dst, flags, aux, imm); break;
+	case X86_OP_ROR_MEM:
+		X86_SIM_L_EXEC_ROR_MEM(dst, flags, aux, imm); break;
 	case X86_OP_MOV_IMM:
 		if (aux)
 			X86_SIM_L_EXEC_MOV_IMM_AUX(dst, flags, aux, imm);
@@ -589,8 +596,8 @@ static void check_dispatch(void)
 	}
 
 	cases++;
-	if (direct != 52U) {
-		printf("MISMATCH direct count %u want 52\n", direct);
+	if (direct != 54U) {
+		printf("MISMATCH direct count %u want 54\n", direct);
 		failures++;
 	}
 }

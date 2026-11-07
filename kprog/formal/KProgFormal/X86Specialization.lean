@@ -221,10 +221,12 @@ theorem x86_specialization_no_insertion :
   native_decide
 
 /-- Extended table; the original 72-row refinement remains available unchanged. -/
-def allSpecOpsExtended : List GeneratedX86Specialization.Op := allSpecOps ++ [.popcntMem]
+def allSpecOpsExtended : List GeneratedX86Specialization.Op := allSpecOps ++ [.popcntMem, .ror, .rorMem]
 
 def x86SpecSpecExtended : List (String × Dispatch × String × String × String) :=
-  x86SpecSpec ++ [("X86_OP_POPCNT_MEM", .genericRunOp, "", "", "")]
+  x86SpecSpec ++ [("X86_OP_POPCNT_MEM", .genericRunOp, "", "", ""),
+    ("X86_OP_ROR", .directMacro, "X86_SIM_L_EXEC_ROR", "X86_SIM_L_EXEC_ROR", ""),
+    ("X86_OP_ROR_MEM", .directMacro, "X86_SIM_L_EXEC_ROR_MEM", "X86_SIM_L_EXEC_ROR_MEM", "")]
 
 theorem x86_specialization_extended_complete (op : GeneratedX86Specialization.Op) :
     op ∈ allSpecOpsExtended := by cases op <;> decide
@@ -236,7 +238,7 @@ theorem x86_specialization_extended_refines :
        GeneratedX86Specialization.auxMacro op)) := by native_decide
 
 theorem x86_specialization_extended_total :
-    allSpecOpsExtended.length = 73 ∧ allSpecOpsExtended.Nodup ∧
+    allSpecOpsExtended.length = 75 ∧ allSpecOpsExtended.Nodup ∧
     (x86SpecSpecExtended.map (fun row => row.1)).Nodup ∧ noInsertion x86SpecSpecExtended = true := by
   native_decide
 

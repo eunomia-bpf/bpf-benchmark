@@ -267,4 +267,10 @@ def popHandled (op : SingletonOp) : Bool :=
 
 /-- Additional raw opcode; preserves the legacy closed SingletonOp API. -/
 def popcntMemHandled (op : Nat) : Bool := op == 71
+
+/-- Additional raw opcode; preserves the legacy closed SingletonOp API. -/
+def rorHandled (op : Nat) : Bool := op == 72
+
+/-- Additional raw opcode; preserves the legacy closed SingletonOp API. -/
+def rorMemHandled (op : Nat) : Bool := op == 73
 end KProgFormal.GeneratedX86DispatchSingleton

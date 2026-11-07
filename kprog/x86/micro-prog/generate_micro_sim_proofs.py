@@ -530,6 +530,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         (op in {"cmp", "test"} and len(ops) == 2 and
          reg_info(ops[0]) is not None and
          (is_int(ops[1]) or reg_info(ops[1]) is not None)) or
+        (op in {"rol", "ror"} and len(ops) == 2 and reg_info(ops[0]) is not None) or
         (op == "div" and len(ops) == 1 and reg_info(ops[0]) is not None) or
         (op in {"movzx", "movsx"} and len(ops) == 2 and
          reg_info(ops[0]) is not None and reg_info(ops[1]) is not None) or
@@ -1021,6 +1022,25 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        src=mem_base_reg(ops[1]), flags=WIDTH_CONST[dst[1]],
                        aux=f"({mem_aux(ops[1], dst[1])} | X86_REG_AUX_SRC_SHIFT({count[0]}))",
                        imm=packed)
+        raise ValueError(f"cannot encode {insn.raw}")
+    if op == "ror":
+        if len(ops) != 2 or not (is_int(ops[1]) or ops[1] == "cl"):
+            raise ValueError(f"cannot encode {insn.raw}")
+        count = (c_u64(parse_int(ops[1]) & 255) if is_int(ops[1]) else
+                 "X86_SIM_L_READ_REG_WIDTH_SHIFT(X86_RCX, X86_WIDTH_8, 0)")
+        dst = reg_info(ops[0])
+        if dst is not None:
+            return enc("X86_OP_ROR", dst=dst[0], flags=WIDTH_CONST[dst[1]],
+                       aux=c_reg_lane_aux("0", dst[2]), imm=count)
+        if is_mem(ops[0]):
+            width = operand_width(ops[0], 0)
+            if width not in WIDTH_CONST:
+                raise ValueError(f"ROR memory operand requires its native width: {insn.raw}")
+            address = (relocated_data_address(insn, rodata_idents) if insn.reloc_symbol
+                       else c_u64(mem_disp(ops[0])))
+            return enc("X86_OP_ROR_MEM", dst=mem_base_reg(ops[0]), flags=WIDTH_CONST[width],
+                       aux=f"({mem_aux(ops[0], width)} | X86_REG_AUX_SRC_SHIFT({count}))",
+                       imm=address)
         raise ValueError(f"cannot encode {insn.raw}")
     if op == "rorx":
         if len(ops) != 3:

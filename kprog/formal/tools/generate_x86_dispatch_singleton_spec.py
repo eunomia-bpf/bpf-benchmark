@@ -125,6 +125,9 @@ EXPECTED = {
     "extensions": [
         {"name": "popcntMem", "code": 71, "op_macro": "X86_OP_POPCNT_MEM",
          "gate_macro": "KPROG_X86_DISP_POPCNT_MEM_HANDLED"},
+        {'name': 'ror', 'code': 72, 'op_macro': 'X86_OP_ROR', 'gate_macro': 'KPROG_X86_DISP_ROR_HANDLED'},
+        {'name': 'rorMem', 'code': 73, 'op_macro': 'X86_OP_ROR_MEM', 'gate_macro': 'KPROG_X86_DISP_ROR_MEM_HANDLED'},
+
     ],
 }
 SINGLETON_NAMES = [

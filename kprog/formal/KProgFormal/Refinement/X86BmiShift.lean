@@ -55,7 +55,7 @@ theorem handler_refines (width : BzhiWidth) (kind : BmiShift) (dst : Register) (
 
 /-- The generated ROR primitive also agrees with the concatenation reference
 at byte/word widths. This is a value-contract theorem; classical flag-writing
-ROR still needs a producer handler distinct from the existing flagless RORX. -/
+The classic producer handler is refined in X86RotateRight; RORX stays flagless. -/
 theorem legacy_ror_value_refines (width : Reference.X86.ScalarWidth)
     (source count : Reference.Word) :
     GeneratedX86ShiftResult.ror source count (X86Scalar.handlerWidth width) =

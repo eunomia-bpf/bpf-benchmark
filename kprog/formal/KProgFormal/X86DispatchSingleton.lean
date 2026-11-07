@@ -898,4 +898,28 @@ theorem x86_popcnt_mem_disjoint_families (op : GeneratedX86DispatchFamily.Dispat
     GeneratedX86DispatchSingleton.popcntMemHandled (GeneratedX86DispatchFamily.code op) = false := by
   cases op <;> rfl
 
+theorem x86_ror_membership (op : Nat) :
+    GeneratedX86DispatchSingleton.rorHandled op = true ↔ op = 72 := by
+  simp [GeneratedX86DispatchSingleton.rorHandled]
+
+theorem x86_ror_disjoint_original (op : SingletonOp) :
+    GeneratedX86DispatchSingleton.rorHandled (code op) = false := by
+  cases op <;> rfl
+
+theorem x86_ror_disjoint_families (op : GeneratedX86DispatchFamily.DispatchOp) :
+    GeneratedX86DispatchSingleton.rorHandled (GeneratedX86DispatchFamily.code op) = false := by
+  cases op <;> rfl
+
+theorem x86_rorMem_membership (op : Nat) :
+    GeneratedX86DispatchSingleton.rorMemHandled op = true ↔ op = 73 := by
+  simp [GeneratedX86DispatchSingleton.rorMemHandled]
+
+theorem x86_rorMem_disjoint_original (op : SingletonOp) :
+    GeneratedX86DispatchSingleton.rorMemHandled (code op) = false := by
+  cases op <;> rfl
+
+theorem x86_rorMem_disjoint_families (op : GeneratedX86DispatchFamily.DispatchOp) :
+    GeneratedX86DispatchSingleton.rorMemHandled (GeneratedX86DispatchFamily.code op) = false := by
+  cases op <;> rfl
+
 end KProgFormal

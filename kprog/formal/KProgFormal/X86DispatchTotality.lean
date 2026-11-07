@@ -113,7 +113,7 @@ theorem unrouted_are_control_transfer : unrouted.length = 5 ∧
   refine ⟨rfl, ?_, ?_, ?_, ?_, ?_⟩ <;> decide
 
 /-- All production chain codes, including the memory POPCNT extension. -/
-def routedExtended : List Nat := routed ++ [71]
+def routedExtended : List Nat := routed ++ [71, 72, 73]
 
 theorem extended_dispatch_total (op : GeneratedX86Opcode.Op) :
     GeneratedX86Opcode.code op ∈ routedExtended ∨ GeneratedX86Opcode.code op ∈ unrouted := by

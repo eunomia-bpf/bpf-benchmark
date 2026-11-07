@@ -124,6 +124,8 @@ static const struct op OPCODE_OPS[] = {
 	{ "X86_OP_CALL_MEMSET_REG", 69 },
 	{ "X86_OP_CALL_MEMCPY_REG", 70 },
 	{ "X86_OP_POPCNT_MEM", 71 },
+	{ "X86_OP_ROR", 72 },
+	{ "X86_OP_ROR_MEM", 73 },
 	{ "X86_OP_RET", 255 },
 };
 
@@ -252,7 +254,7 @@ int main(void)
 	expect_eq("X86_OP_ADD_IMM64", X86_OP_ADD_IMM64, X86_OP_ADD_IMM);
 	expect_eq("X86_OP_ADD_REG64", X86_OP_ADD_REG64, X86_OP_ADD_REG);
 	expect_eq("X86_OP_XOR_REG32", X86_OP_XOR_REG32, X86_OP_XOR_REG);
-	expect_eq("alias-count", KPROG_X86_OPCODE_COUNT, 73);
+	expect_eq("alias-count", KPROG_X86_OPCODE_COUNT, 75);
 
 	free(text);
 	if (failures == 0)

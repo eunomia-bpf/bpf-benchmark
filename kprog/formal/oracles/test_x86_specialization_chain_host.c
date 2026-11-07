@@ -245,6 +245,8 @@ static const struct spec SPEC[] = {
 	{ "X86_OP_CALL_MEMSET_REG", "X86_SIM_L_EXEC_CALL_MEMSET_REG" },
 	{ "X86_OP_CALL_MEMCPY_REG", "X86_SIM_L_EXEC_CALL_MEMCPY_REG" },
 	{ "X86_OP_POPCNT_MEM", "" },
+	{ "X86_OP_ROR", "X86_SIM_L_EXEC_ROR" },
+	{ "X86_OP_ROR_MEM", "X86_SIM_L_EXEC_ROR_MEM" },
 	{ "X86_OP_RET", "" },
 };
 

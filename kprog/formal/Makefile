@@ -166,6 +166,7 @@ check:
 	python3 tools/check_reference_x86_divide.py
 	python3 tools/check_reference_x86_multiply.py
 	python3 tools/check_x86_divide_handler.py
+	python3 tools/check_x86_rotate_handler.py
 	python3 tools/check_x86_high_load.py
 	python3 tools/check_x86_popcount_memory.py
 	python3 tools/check_x86_flag_definedness.py

@@ -72,18 +72,18 @@ theorem x86_opcode_codes_distinct :
   native_decide
 
 /-- The complete opcode set, retaining the original enumeration and its proofs. -/
-def allOpcodesExtended : List GeneratedX86Opcode.Op := allOpcodes ++ [.popcntMem]
+def allOpcodesExtended : List GeneratedX86Opcode.Op := allOpcodes ++ [.popcntMem, .ror, .rorMem]
 
 theorem x86_opcode_extended_complete (op : GeneratedX86Opcode.Op) :
     op ∈ allOpcodesExtended := by cases op <;> decide
 
 theorem x86_opcode_extended_refines :
-    (x86OpcodeSpec ++ [("X86_OP_POPCNT_MEM", 71)]) =
+    (x86OpcodeSpec ++ [("X86_OP_POPCNT_MEM", 71), ("X86_OP_ROR", 72), ("X86_OP_ROR_MEM", 73)]) =
       allOpcodesExtended.map (fun op => (GeneratedX86Opcode.define op, GeneratedX86Opcode.code op)) := by
   native_decide
 
 theorem x86_opcode_extended_unique :
-    allOpcodesExtended.length = 73 ∧ allOpcodesExtended.Nodup ∧
+    allOpcodesExtended.length = 75 ∧ allOpcodesExtended.Nodup ∧
       (allOpcodesExtended.map GeneratedX86Opcode.code).Nodup := by decide
 
 end KProgFormal

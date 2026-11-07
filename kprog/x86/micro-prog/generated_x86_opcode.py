@@ -74,6 +74,8 @@ X86_OPCODE = {
     "callMemsetReg": "X86_OP_CALL_MEMSET_REG",
     "callMemcpyReg": "X86_OP_CALL_MEMCPY_REG",
     "popcntMem": "X86_OP_POPCNT_MEM",
+    "ror": "X86_OP_ROR",
+    "rorMem": "X86_OP_ROR_MEM",
     "ret": "X86_OP_RET",
 }
 # The same table indexed by token, for checking a caller-supplied token.
@@ -150,5 +152,7 @@ X86_OPCODE_NAME = {
     "X86_OP_CALL_MEMSET_REG": "callMemsetReg",
     "X86_OP_CALL_MEMCPY_REG": "callMemcpyReg",
     "X86_OP_POPCNT_MEM": "popcntMem",
+    "X86_OP_ROR": "ror",
+    "X86_OP_ROR_MEM": "rorMem",
     "X86_OP_RET": "ret",
 }

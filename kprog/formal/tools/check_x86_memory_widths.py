@@ -23,17 +23,30 @@ def accesses(instructions, fixed_displacement=None):
     # additions. Every other value is scalar. Unexpected control flow fails.
     registers = [None] * 11
     registers[1] = 0
+    constants = [None] * 11
     events = []
     for raw in instructions:
         code, packed, offset, immediate = struct.unpack("<BBhi", raw)
         dst, src = packed & 15, packed >> 4
         if dst >= 11 or src >= 11:
             raise SystemExit("memory widths: invalid BPF register")
-        if code in (0x07, 0x17):
+        # A compiler barrier can materialize a known displacement in a
+        # register. Track that literal exactly, and forget it on every write.
+        old_dst, old_src = constants[dst], constants[src]
+        constants[dst] = None
+        if code == 0xB7:
+            registers[dst] = None
+            constants[dst] = immediate
+        elif code == 0x0F and registers[dst] is not None and old_src is not None:
+            registers[dst] += old_src
+        elif code in (0x07, 0x17):
             if registers[dst] is not None:
                 registers[dst] += immediate if code == 0x07 else -immediate
+            if old_dst is not None:
+                constants[dst] = old_dst + (immediate if code == 0x07 else -immediate)
         elif code == 0xBF:
             registers[dst] = registers[src]
+            constants[dst] = old_src
         elif code & 7 in (1, 2, 3) and code & 0xE0 == 0x60:
             kind = "read" if code & 7 == 1 else "write"
             pointer = registers[src if kind == "read" else dst]
