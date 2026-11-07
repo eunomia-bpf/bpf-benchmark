@@ -1,0 +1,29 @@
+{
+  "assembly": "mov rbx,0x123456789abcdef0; mov eax,2; ret",
+  "abi_mask": 1,
+  "generation": 4,
+  "native_offset": 13,
+  "native_size": 15,
+  "rbx_operations": [
+    [
+      12,
+      "push"
+    ],
+    [
+      28,
+      "pop"
+    ]
+  ],
+  "load": "passed",
+  "jit_preservation": "passed",
+  "execution": "passed",
+  "packet_result": 0,
+  "retval": 2,
+  "guest_uname": [
+    "Linux",
+    "virtme-ng",
+    "7.0.0-rc2+",
+    "#59 SMP PREEMPT_DYNAMIC Fri Nov  6 13:33:32 UTC 2026",
+    "x86_64"
+  ]
+}

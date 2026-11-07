@@ -1,0 +1,3 @@
+native-link: entry=entry (20 bytes), 1 reachable symbol(s) total
+  - entry (vaddr 0x0, 20 bytes) [entry]
+Error: x86 .native_link_abi callee_saved_mask 0x0 omits native writes 0x1

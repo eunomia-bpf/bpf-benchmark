@@ -1,0 +1,12 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "source_btf_symbol": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-abi-fixed/callee_saved_clobber.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-abi-fixed/callee_saved_clobber.bpf.o",
+      "simulator_program": "callee_saved_clobber_x86_sim_xdp"
+    }
+  ]
+}
