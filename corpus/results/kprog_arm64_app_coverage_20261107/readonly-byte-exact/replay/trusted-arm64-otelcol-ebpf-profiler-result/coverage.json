@@ -11,7 +11,7 @@
     "loader_rejected": 1
   },
   "failure_causes": {
-    "see_exact_load_stderr": 1
+    "native_link_tail_map_plan": 1
   },
   "requests": [
     {
@@ -38,7 +38,7 @@
       "entry": "perf_unwind_stop",
       "status": -5,
       "stage": "loader_rejected",
-      "cause": "see_exact_load_stderr",
+      "cause": "native_link_tail_map_plan",
       "proof_generated": true,
       "source_generated": true,
       "prog_id": null,
