@@ -722,6 +722,25 @@ ratio.
 modes.** That matches the unbound arm (1.002x / 1.000x), so binding adds
 no measurable cost for this workload.
 
+## Other apps on the verified arm
+
+Only bcc is timeable so far. Tetragon, attempted with the same parameters
+(`corpus/results/x86_kvm_corpus_20261107_204105_213775`), binds 2 of its
+programs and then fails: `trusted specializer refused native program:
+Invalid argument` on **`event_wake_up_new_task`**, after which the app
+reports `Tetragon exited before BPF programs were tracked by shim`, so the
+native arm yields no workload.
+
+That symbol has **two** manifest entries, differing only by
+`source_bytecode_len` (7624 for `bpf_fork_v310.native.o`, 10896 for
+`bpf_fork_v511.native.o`). The other 330 tetragon loads bind, so the
+refusal is specific to that duplicate-symbol pair. It is not the clang
+defect fixed earlier: `clang` resolves inside that runtime image, which I
+checked directly.
+
+katran, cilium, otelcol and tracee have not been attempted on the
+verified arm; each needs its native-only manifest in that runtime first.
+
 ## Earlier unbound-arm context
 
 Attempted and blocked at the shim, not at configuration. With
