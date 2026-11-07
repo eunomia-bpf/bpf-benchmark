@@ -1,0 +1,21 @@
+{
+  "utc": "2026-11-07T23:01:00.913608+00:00",
+  "previous_waiting_pid": 3938058,
+  "prior_otel_pid": 3308806,
+  "canonical_transport": "corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py",
+  "canonical_transport_before_sha256": "301e52865862a050d1eac76377840bc3941d881300d3674e73ac16185df9c35e",
+  "private_transport_sha256": "a335aa74f79c5dbe0a7d4110fdee68d5a40aeca75cdb3f0c4d1344c4c55a7d9f",
+  "canonical_transport_after_sha256": "d3bec874d4bb53497823621afbfc8808495883a72b21e7760181bfd50e7e5c71",
+  "cpu_set": "16-19",
+  "guest_memory_mib": 4096,
+  "vcpus": 8,
+  "concurrent_otel_memory_mib": 8192,
+  "total_lane_guest_memory_mib": 12288,
+  "native_resources_commit": "340a4ea5e07c38d415031c51aca057b57f62d955",
+  "scope": "Whole-application Cilium replay after tmpfs HOME preparation. Original home contents, app workload/sample settings, native inputs and bound-proof requirements retained; shared descriptor-stable shim epoch adopted.",
+  "previous_result_commit": "67a9420988b128be65cecb9909599aee86d709b1",
+  "failure_class": "guest_home_readonly_filesystem",
+  "runtime_result_subdir": "home-replay",
+  "shim_path": "bpfopt/shim/build-arm64-probe-map-fd/libbpfrejit_shim.so",
+  "shim_sha256": "dd216d98fba7a826c12e5108df460bdef47513b67e2465b487d3348f6255e329"
+}
