@@ -1,27 +1,54 @@
 # Lane V verification checkpoint
 
 <!-- COVERAGE START -->
-Coverage is partial. [Per-operation and per-token table](coverage.tsv):
-x86-64 has **25/75 raw register handler and dispatcher proofs**, **25/75 C-model
-O2 token equalities** (19 direct + 6 unchanged generic calls), and selected
-hardware agreement for **62/75** declared operations. AArch64 has **71/71
-conditional modeled dispatcher entries**, **0/71 audited token-body O2
-equalities**, and selected QEMU agreement for **65/71** declared operations.
-Reference steps are defined for **67/75 x86-64** operations; eight pseudo
-operations need environment/native-link binding. ARM reference families are
-defined for **71/71** operations. Compiled-B, ABI/definedness and native-link
-preservation remain universal obligations. Replay cells record exact source
-epochs and selected forms; they are supporting observations.
+[Per-operation and per-token coverage](coverage.tsv) records the current partial
+formalization. Totals below count distinct numeric operations; each corresponding
+specialization token also has its own row.
 
-Inventory: current production headers declare **75 x86-64** numeric opcode IDs
-plus five compatibility aliases, and **71 AArch64** numeric IDs. The requested
-77/72 totals differ by two/one names; inventory reconciliation is recorded
-explicitly. Every declared operation and every corresponding token has its own
-row; aliases have separate excluded rows. No placeholder operation is counted.
+| Coverage obligation | x86-64 | AArch64 |
+| --- | ---: | ---: |
+| Requested operation domain | 77 | 72 |
+| Production numeric operations / specialization tokens | 75 / 75 | 71 / 71 |
+| Reference step family defined | 67/75 | 71/71 |
+| Raw register handler refinement | 25/75 | 0/71 |
+| Raw register dispatcher arm composition | 25/75 | 0/71 |
+| Additional partial-model handler families | 42/75 | 0 |
+| Conditional modeled handler / observed dispatcher | 0 | 71/71 |
+| O2 C-model token-body equality | 25/75 | 0/71 |
+| Selected CPU/C/reference or QEMU/C/reference agreement | 62/75 | 65/71 |
+| Additional explicit-monitor-only replay | 0 | 1/71 |
+| Numeric operations awaiting selected replay | 13/75 | 5/71 |
+
+The 25 x86 O2 equalities cover 19 direct bodies and six unchanged generic calls.
+The remaining 42 x86 reference-family handlers have partial model proofs; eight
+pseudo operations require environment/native-link binding. ARM conditional
+entries carry explicit observation, environment, address, code, monitor and ABI
+premises. Whole-simulator raw handler/dispatcher closure, compiled-B,
+ABI/definedness and native-link preservation remain universal obligations.
+
+Inventory is pinned to the production headers in each row's `catalog_source`
+and `catalog_sha256`. The requested 77/72 domain requires identification of two
+additional x86 operation names and one additional ARM operation name against
+the current 75/71 numeric catalogs. Five x86 compatibility aliases have separate
+rows and are excluded from operation/token totals. Numeric tokens, native
+instruction forms and control composites retain their distinct identities.
+
+Replay integration uses F's published input set `600edcdbe36511d057c2167b9848463753c52ea7`
+([source ledger](../kprog_fidelity_20261107/differential/replay-inputs/README.md)).
+Each `replay_source_epochs` cell records the actual backend, source snapshot,
+simulator/executable/reference hashes, selected forms, all three comparison
+counts and original evidence paths. Source epochs remain separate. ARM STLXR
+adds 4,096 explicit-monitor observations with that projection premise; the
+65 ordinary ARM replay totals retain their own scope. Architectural LEAVE64 and
+finite control composites retain their separately labeled rows in F's source
+ledger. These finite observations support the universal theorem work.
+
 `proved-raw-register`, `partial-model`, `conditional-observed`, `proved-C-model`
-and `pending` retain their distinct meanings in the table. Table status is
-updated with each proof/status-changing publication; historical per-program
-certificates are frozen and excluded from safety evidence.
+and `pending` retain their distinct meanings. V updates the table and these
+totals with each proof/status-changing publication; T supplies token/link-law
+status and F supplies source-pinned replay inputs. Safety evidence follows the
+universal simulator, token and transformation laws. Historical individual-program
+proof artifacts remain frozen.
 <!-- COVERAGE END -->
 
 
