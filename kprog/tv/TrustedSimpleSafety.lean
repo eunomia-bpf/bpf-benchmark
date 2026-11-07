@@ -799,6 +799,51 @@ theorem captured_native_prefix_effects_checked (checked : Event → Prop)
     related_native_instruction_steps_match checked complete allowed quiet
     (native_states_related_refl n valid) run
 
+
+/-- Verifier soundness for the exact bound compiled B image, the established
+native-to-B correspondence, and full artifact binding imply checked events
+for EVERY finite decoded native execution of the captured payload. Native
+extent, access outcome, branch choice and undefined AF observations are not
+caller supplied restrictions. Entry/ABI/platform transport remains explicit. -/
+theorem bound_captured_native_prefix_effects_checked (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (validated executed : Artifact) (binding : executed=validated)
+    (nativeImage : validated.nativeBytes=native.toList)
+    (proofImage : validated.proofBytes=proof.toList) (entryImage : validated.entry=0)
+    (accepted : Artifact → Prop) (proofEntry : Artifact → BPF.State → Prop)
+    (checked : Artifact → Event → Prop)
+    (verifierSound : ∀ artifact, accepted artifact → proofEntry artifact p →
+      ∀ trace last, Execution (boundCapturedProofStep env artifact) p trace last →
+        ∀ event ∈ trace, checked artifact event)
+    (acceptance : accepted validated) (admitted : proofEntry validated p)
+    {trace : List Event} {last : X86.State}
+    (run : Execution (relationalNativeInstructionStep (BitVec.ofNat 64 executed.entry)
+      executed.nativeBytes.toArray) n trace last)
+    (stack : Word) (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (context : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (nativeStack : env.nativeInput .stackPointer=.ok stack)
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8=true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8=true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8=true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8=true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4=true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8=true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8=true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (guest1 : ∀ i<8, ¬ initializationPrivateByte (p.regs 10) (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    ∀ event ∈ trace, checked validated event := by
+  subst executed
+  have canonicalRun : Execution (relationalNativeInstructionStep 0 native) n trace last := by
+    simpa only [nativeImage,entryImage,Array.toArray_toList] using run
+  have canonicalComplete := all_read_native_path_exists n nativePC
+  have boundComplete : CanonicalRelationalPath (BitVec.ofNat 64 validated.entry)
+      validated.nativeBytes.toArray (allReadNativePath n) n (allReadNativeResult n) := by
+    simpa only [nativeImage,entryImage,Array.toArray_toList] using canonicalComplete
+  have completeChecked := bound_captured_selected_path_effects_checked env n p validated validated rfl
+    nativeImage proofImage entryImage accepted proofEntry checked verifierSound acceptance admitted
+    (allReadNativeResult n) boundComplete stack nativePC proofPC active context memory nativeStack
+    write40 write32 write24 write16 write8 read40 read32 guest0 guest1
+  exact captured_native_prefix_effects_checked (checked validated) n nativePC completeChecked canonicalRun
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -874,3 +919,5 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.all_read_native_no_fault_end
 
 #print axioms KProgTV.TrustedSimpleSafety.captured_native_prefix_effects_checked
+
+#print axioms KProgTV.TrustedSimpleSafety.bound_captured_native_prefix_effects_checked

@@ -1,0 +1,70 @@
+{
+  "status": "accepted_exact_B_plus_full_artifact_binding_implies_every_canonical_native_prefix_event_checked_under_explicit_entry_platform_premises",
+  "utc": "2026-11-07T14:20:22.132147+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorems": [
+    "KProgTV.TrustedSimpleSafety.bound_captured_native_prefix_effects_checked"
+  ],
+  "claims": [
+    "Verifier acceptance and explicit verifier soundness for actual boundCapturedProofStep on EXACT captured clang B bytes, plus exact full Artifact equality and entry/private-frame premises, imply every finite decoded native payload execution emits only verifier-checked events.",
+    "Full Artifact equality includes native bytes, proof bytes, entry, ABI and all specialization metadata; native/proof identities are complete bytes, not just hashes.",
+    "Complete native trace is checked using actual B execution and event projection that erases only proved-private setup events; every guest suffix event retains its identity.",
+    "Every arbitrary native prefix is covered, including undefined AF freedom, arbitrary accepted extents, both context faults, all first store faults, guard returns and successful writes. No selected-path-existence/fuel/determinism/access-outcome premise."
+  ],
+  "premises": [
+    "exact full executed=validated Artifact binding; captured native/proof images; entry0",
+    "verifier accepts validated artifact; initial B state is admitted; verifier soundness for exact B execution is assumed",
+    "nativePC0/proofPC0/active; native RDI equals B r1 and initial memory equal",
+    "native SP input matches invocation; five private spill writes and two private reloads permitted",
+    "context words are disjoint from private setup frame (guest suffix is never erased)"
+  ],
+  "not_yet_claimed": [
+    "strict per-B-basic-block full architectural-state correspondence across reordered guards",
+    "semantic original ELF entry/ABI/terminal RET/physical platform transport",
+    "other micro/application whole-program certificates or unconditional safe_native for original ELF"
+  ],
+  "compatibility": {
+    "old_Safety_declarations": "byte-identical prefix and audits retained",
+    "old_prefix_sha256": "39834f3cc19e9745521a062270b506a45e4d39b6ef13d0d6128f7ade7b0a4a65",
+    "ISA_runtime": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-entry-certificate -o trusted-simple-cfg-certificate trusted-simple-safety-certificate",
+    "exit": 0,
+    "reproduction": "make -C kprog/tv trusted-simple-safety-certificate",
+    "binding_mismatch_controls_rejected": 22,
+    "materialization_controls_rejected": 28,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleSafety.bound_captured_native_prefix_effects_checked": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "current_log_sha256": "42de2c28360df4c7eabf39153f72c14dcb4e0e2149f0433f9cddfe46a51d94f0",
+    "combined_log_sha256": "a221c3448b58cad204e8a655096dcf63f6311f11d964bdf1277e9dac08451cee"
+  },
+  "trusted": [
+    "verifier soundness for accepted actual B (explicit theorem premise)",
+    "single canonical native/reference memory semantics and BPF/platform interpretation; V owns semantics, F checks hardware fidelity",
+    "kernel binding implementation and physical invocation/ABI/entry/RET/platform transport remain trusted or explicitly undischarged",
+    "Lean kernel, logical axioms and reported Lean.ofReduceBool native proof reduction",
+    "capture parser/provenance for connecting the recorded accepted bytes to the concrete Lean byte arrays"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "f0b9694a7f256928e83c688f0ac0f4b3101eb8906b7efc0e9dee0b8920167ac6",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/TrustedSimpleSafety.lean": "bb732a9294197d44786f32e3a8b77a6a35f8fa03ebffc413136a63082a5d786f",
+    "kprog/tv/Makefile": "02aeab2e0864840dac9a7a815ec0ae335cb4af559031a438d69d22fa382925eb",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa"
+  }
+}

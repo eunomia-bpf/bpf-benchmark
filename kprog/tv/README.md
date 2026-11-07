@@ -1881,3 +1881,14 @@ canonical trace is checked. Arbitrary extents, guest permissions, branches and
 undefined AF are covered, with no fuel or determinism premise. No-fault runs
 reach PC60; terminal fault repeats are covered by the checked-loop theorem.
 The accepted-B/full-artifact binding instantiation follows separately.
+
+`trusted-simple-bound-all-prefixes.json` closes the concrete checked-event
+composition for this captured simple payload: verifier acceptance/soundness
+for the exact clang B bytes and full executed/validated artifact equality imply
+that **every finite decoded native execution** emits only verifier-checked
+events, under the stated entry, invocation-input and private-frame premises.
+ABI and specialization metadata participate in the full equality. No selected
+path-existence, guest-access outcome, fuel or determinism premise remains.
+This is the payload model theorem; original ELF entry/ABI/terminal RET/physical
+platform transport and strict per-B-block full-state correspondence remain open.
+The result lists the exact trusted premises and all reported Lean axioms.
