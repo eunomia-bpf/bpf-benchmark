@@ -193,4 +193,111 @@ theorem writeback_base_refines (mode : Writeback) (s : State) (base : Register) 
       GeneratedArm64MemPrepost.postWriteback, GeneratedArm64MemPrepost.flags,
       bump_refines, write_base_read]
 
+/-- Successful native-eight-byte D0 transfer. No invented C permission
+branch appears here: admissibility supplies the accessible-memory witness.
+Values are the materialized numeric projection; tag/address transport remains
+an Entry/O4 obligation. The one event records the native-width read or write. -/
+def dSuccess (load : Bool) (address : Word) (s : State) : Transition State :=
+  if load then
+    ⟨{ s with vector0 := dLoad s.vector0 (GeneratedArm64LoadBytes.value (Arm64Memory.loadWidth .double) (wordAt s.memory address 8)), pc := s.pc + 4 },
+     [.memory .read address (bytesAt s.memory address 8) (initializedAt s.memory address 8)], none⟩
+  else
+    ⟨{ s with memory := Arm64Memory.store .double s.memory address (s.vector0.setWidth 64), pc := s.pc + 4 }, [.memory .write address (valueBytes (s.vector0.setWidth 64) 8) true], none⟩
+
+theorem base_bump (s : State) (base : Register) (delta : Word) :
+    memoryBase (bumpBase s base delta) base = memoryBase s base + delta := by
+  rw [bump_refines]
+  by_cases stack : base.val = 31
+  · simp [writeMemoryBase, memoryBase, stack, show ¬base.val < 31 by omega]
+  · simp [writeMemoryBase, memoryBase, writeReg, stack, show base.val < 31 by omega]
+
+theorem base_success (load : Bool) (address : Word) (s : State) (base : Register) :
+    memoryBase (dSuccess load address s).state base = memoryBase s base := by
+  cases load <;> rfl
+
+/-- Vector data and memory updates do not overwrite the integer base cell;
+therefore the pre-access base update commutes with a successful D0 transfer. -/
+theorem bump_success (load : Bool) (address : Word) (s : State) (base : Register) (delta : Word) :
+    dSuccess load address (bumpBase s base delta) =
+      { dSuccess load address s with state := bumpBase (dSuccess load address s).state base delta } := by
+  simp only [bump_refines, base_success]
+  cases load <;> by_cases stack : base.val = 31 <;>
+    simp only [dSuccess, writeMemoryBase, stack, writeReg,
+      Bool.false_eq_true, ↓reduceIte]
+
+/-- Numeric C-body order: generated pre-update, suppressed/immediate address,
+transfer, generated post-update. It never fabricates a runtime fault check. -/
+def dWritebackCore (load : Bool) (mode : Writeback) (base : Register) (delta : Word)
+    (s : State) : Transition State :=
+  let flags := Arm64AddressedMemory.flags mode
+  let before := bumpBase s base (GeneratedArm64MemPrepost.preDelta flags delta)
+  let offset := GeneratedArm64MemOffset.value (GeneratedArm64MemPrepost.suppressOffset flags) false delta 0
+  let transferred := dSuccess load (Arm64Memory.baseValue before base + offset) before
+  { transferred with state := bumpBase transferred.state base (GeneratedArm64MemPrepost.postDelta flags delta) }
+
+theorem d_writeback_core_eq (load : Bool) (mode : Writeback) (base : Register)
+    (delta : Word) (s : State) :
+    dWritebackCore load mode base delta s =
+      let address := memoryBase s base + (if mode = .post then 0 else delta)
+      let transferred := dSuccess load address s
+      { transferred with state := if mode = .none then transferred.state else
+          writeMemoryBase transferred.state base (memoryBase s base + delta) } := by
+  simp only [dWritebackCore, Arm64Memory.base_refines, base_bump, BitVec.add_assoc,
+    Arm64AddressedMemory.access_offset_refines, bump_success]
+  rw [writeback_base_refines]
+  cases mode with
+  | none => simp [Reference.Word, write_base_read]
+  | pre => simp [Reference.Word, base_success]
+  | post => simp [Reference.Word, base_success]
+
+/-- The original SP is checked before pre-indexing. The address may be
+unaligned: ordinary D loads/stores require no extra natural alignment. This
+whole-state theorem covers successful admitted memory accesses; the canonical
+faults and the C body's pre-update-on-fault are not silently identified. -/
+theorem d_writeback_refines (load : Bool) (mode : Writeback) (base : Register)
+    (delta : Word) (s : State)
+    (alignment : spAlignmentFault s base = none)
+    (accessible : permitted (if load then s.memory.readable else s.memory.writable)
+      (memoryBase s base + (if mode = .post then 0 else delta)) 8 = true) :
+    dWritebackCore load mode base delta s =
+      step (.vectorMemory ⟨.double, load, 0, base, .immediate delta, mode⟩) s := by
+  rw [d_writeback_core_eq]
+  cases mode <;> cases load <;> by_cases stack : base.val = 31 <;>
+    simp_all [dSuccess, step, vectorMemoryStep, memoryOffset,
+      VectorMemoryWidth.bytes, VectorMemoryWidth.scale,
+      Arm64Memory.load_value, Arm64Memory.store_refines, MemoryWidth.bytes,
+      d_load_refines, d_store_bytes, writeMemoryBase, writeReg, Reference.Word]
+
+/-- The two production singleton predicates now select the actual successful
+pre/access/post core. Other operations retain their own dispatcher arms. -/
+def dispatchDSuccess (op : GeneratedArm64DispatchSingleton.SingletonOp) (mode : Writeback)
+    (base : Register) (delta : Word) (s : State) : Option (Transition State) :=
+  if GeneratedArm64DispatchSingleton.loadD0Handled op then
+    some (dWritebackCore true mode base delta s)
+  else if GeneratedArm64DispatchSingleton.storeD0Handled op then
+    some (dWritebackCore false mode base delta s)
+  else none
+
+theorem dispatch_d_success_refines (load : Bool) (mode : Writeback) (base : Register)
+    (delta : Word) (s : State)
+    (alignment : spAlignmentFault s base = none)
+    (accessible : permitted (if load then s.memory.readable else s.memory.writable)
+      (memoryBase s base + (if mode = .post then 0 else delta)) 8 = true) :
+    dispatchDSuccess (if load then .loadD0 else .storeD0) mode base delta s =
+      some (step (.vectorMemory ⟨.double, load, 0, base, .immediate delta, mode⟩) s) := by
+  cases load with
+  | false =>
+      change some (dWritebackCore false mode base delta s) = _
+      rw [d_writeback_refines false mode base delta s alignment accessible]
+  | true =>
+      change some (dWritebackCore true mode base delta s) = _
+      rw [d_writeback_refines true mode base delta s alignment accessible]
+
+theorem dispatch_d_success_other (op : GeneratedArm64DispatchSingleton.SingletonOp)
+    (mode : Writeback) (base : Register) (delta : Word) (s : State)
+    (notLoad : op ≠ .loadD0) (notStore : op ≠ .storeD0) :
+    dispatchDSuccess op mode base delta s = none := by
+  simp [dispatchDSuccess, GeneratedArm64DispatchSingleton.loadD0Handled,
+    GeneratedArm64DispatchSingleton.storeD0Handled, notLoad, notStore]
+
 end KProgFormal.Refinement.Arm64VectorMemory

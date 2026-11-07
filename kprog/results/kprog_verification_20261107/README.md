@@ -131,3 +131,28 @@ contracts, reference/wire/compiler checks and C semantic hosts also passed.
 The immutable source/cache export was deleted immediately. The compressed CALL
 CPU observations have been refreshed to this successful full run. This result
 precedes the subsequent full D0 pre/access/post transfer composition work.
+
+## D0 pre/access/post transfer composition
+
+Arm64VectorMemory now composes the generated pre-delta, actual eight-byte D0
+transfer and post-delta in C-body order for offset, pre-index and post-index
+modes. `d_writeback_refines` proves complete numeric state and ordered effects
+against the existing single AArch64 reference. `dispatch_d_success_refines`
+composes the two production singleton predicates with that theorem; every other
+singleton is left to its own arm. These are two dispatcher arms, not a complete
+72-operation simulator-step theorem.
+
+The theorem explicitly requires the actual eight-byte access to be permitted
+and the original incoming SP alignment check to pass. It does not impose
+alignment on the updated SP or extra natural alignment on ordinary D memory.
+Loads clear V0's high half, stores preserve vectors, and all other registers,
+flags, memory properties, monitor/environment fields and PC behavior are kept.
+The core contains no fabricated runtime permission guard. Materialized numeric
+values and their tag/address transport remain Entry/O4 obligations; unsuccessful
+pre/post accesses and Q16B/two8B effect composition are not silently identified.
+
+Validation: the complete incremental Lean dependency build passed (36 jobs),
+plus the existing 959 addressed/vector full-state cases and 18 precise rejects.
+Early failed proof attempts involved record syntax and simplifier/if-case glue;
+no reference semantics, theorem premise or native test input was weakened or
+filtered. Every previous D0/Q/base-update theorem remains unchanged.
