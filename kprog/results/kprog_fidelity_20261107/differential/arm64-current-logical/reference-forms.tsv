@@ -1,0 +1,772 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+0	nop	1024	1024	0	0	checked	none
+1	add w0, w1, w2	1024	1024	0	0	checked	none
+2	add w0, w1, w2, lsl #3	1024	1024	0	0	checked	none
+3	add w0, w1, #127	1024	1024	0	0	checked	none
+4	sub w0, w1, w2	1024	1024	0	0	checked	none
+5	sub w0, w1, w2, lsl #3	1024	1024	0	0	checked	none
+6	sub w0, w1, #127	1024	1024	0	0	checked	none
+7	and w0, w1, w2	1024	1024	0	0	checked	none
+8	and w0, w1, w2, lsl #3	1024	1024	0	0	checked	none
+9	bic w0, w1, w2	1024	1024	0	0	checked	none
+10	bic w0, w1, w2, lsl #3	1024	1024	0	0	checked	none
+11	eor w0, w1, w2	1024	1024	0	0	checked	none
+12	eor w0, w1, w2, lsl #3	1024	1024	0	0	checked	none
+13	orr w0, w1, w2	1024	1024	0	0	checked	none
+14	orr w0, w1, w2, lsl #3	1024	1024	0	0	checked	none
+15	orn w0, w1, w2	1024	1024	0	0	checked	none
+16	orn w0, w1, w2, lsl #3	1024	1024	0	0	checked	none
+17	adds w0, w1, w2	1024	1024	0	0	checked	none
+18	adds w0, w1, w2, lsl #3	1024	1024	0	0	checked	none
+19	adds w0, w1, #127	1024	1024	0	0	checked	none
+20	subs w0, w1, w2	1024	1024	0	0	checked	none
+21	subs w0, w1, w2, lsl #3	1024	1024	0	0	checked	none
+22	subs w0, w1, #127	1024	1024	0	0	checked	none
+23	ands w0, w1, w2	1024	1024	0	0	checked	none
+24	ands w0, w1, w2, lsl #3	1024	1024	0	0	checked	none
+25	bics w0, w1, w2	1024	1024	0	0	checked	none
+26	bics w0, w1, w2, lsl #3	1024	1024	0	0	checked	none
+27	cmp w1, w2	1024	1024	0	0	checked	none
+28	cmp w1, w2, lsl #3	1024	1024	0	0	checked	none
+29	cmn w1, w2	1024	1024	0	0	checked	none
+30	cmn w1, w2, lsl #3	1024	1024	0	0	checked	none
+31	tst w1, w2	1024	1024	0	0	checked	none
+32	tst w1, w2, lsl #3	1024	1024	0	0	checked	none
+33	and w0, w1, #0x1	1024	1024	0	0	checked	none
+34	and w0, w0, #0x1	1024	1024	0	0	checked	none
+35	and w0, wzr, #0x1	1024	1024	0	0	checked	none
+36	and wsp, w1, #0x1	1024	1024	0	0	checked	none
+37	orr w0, w1, #0x1	1024	1024	0	0	checked	none
+38	orr w0, w0, #0x1	1024	1024	0	0	checked	none
+39	orr w0, wzr, #0x1	1024	1024	0	0	checked	none
+40	orr wsp, w1, #0x1	1024	1024	0	0	checked	none
+41	eor w0, w1, #0x1	1024	1024	0	0	checked	none
+42	eor w0, w0, #0x1	1024	1024	0	0	checked	none
+43	eor w0, wzr, #0x1	1024	1024	0	0	checked	none
+44	eor wsp, w1, #0x1	1024	1024	0	0	checked	none
+45	ands w0, w1, #0x1	1024	1024	0	0	checked	none
+46	ands w0, w0, #0x1	1024	1024	0	0	checked	none
+47	ands w0, wzr, #0x1	1024	1024	0	0	checked	none
+48	tst w1, #0x1	1024	1024	0	0	checked	none
+49	tst wzr, #0x1	1024	1024	0	0	checked	none
+50	and w0, w1, #0xff	1024	1024	0	0	checked	none
+51	and w0, w0, #0xff	1024	1024	0	0	checked	none
+52	and w0, wzr, #0xff	1024	1024	0	0	checked	none
+53	and wsp, w1, #0xff	1024	1024	0	0	checked	none
+54	orr w0, w1, #0xff	1024	1024	0	0	checked	none
+55	orr w0, w0, #0xff	1024	1024	0	0	checked	none
+56	orr w0, wzr, #0xff	1024	1024	0	0	checked	none
+57	orr wsp, w1, #0xff	1024	1024	0	0	checked	none
+58	eor w0, w1, #0xff	1024	1024	0	0	checked	none
+59	eor w0, w0, #0xff	1024	1024	0	0	checked	none
+60	eor w0, wzr, #0xff	1024	1024	0	0	checked	none
+61	eor wsp, w1, #0xff	1024	1024	0	0	checked	none
+62	ands w0, w1, #0xff	1024	1024	0	0	checked	none
+63	ands w0, w0, #0xff	1024	1024	0	0	checked	none
+64	ands w0, wzr, #0xff	1024	1024	0	0	checked	none
+65	tst w1, #0xff	1024	1024	0	0	checked	none
+66	tst wzr, #0xff	1024	1024	0	0	checked	none
+67	and w0, w1, #0x80000000	1024	1024	0	0	checked	none
+68	and w0, w0, #0x80000000	1024	1024	0	0	checked	none
+69	and w0, wzr, #0x80000000	1024	1024	0	0	checked	none
+70	and wsp, w1, #0x80000000	1024	1024	0	0	checked	none
+71	orr w0, w1, #0x80000000	1024	1024	0	0	checked	none
+72	orr w0, w0, #0x80000000	1024	1024	0	0	checked	none
+73	orr w0, wzr, #0x80000000	1024	1024	0	0	checked	none
+74	orr wsp, w1, #0x80000000	1024	1024	0	0	checked	none
+75	eor w0, w1, #0x80000000	1024	1024	0	0	checked	none
+76	eor w0, w0, #0x80000000	1024	1024	0	0	checked	none
+77	eor w0, wzr, #0x80000000	1024	1024	0	0	checked	none
+78	eor wsp, w1, #0x80000000	1024	1024	0	0	checked	none
+79	ands w0, w1, #0x80000000	1024	1024	0	0	checked	none
+80	ands w0, w0, #0x80000000	1024	1024	0	0	checked	none
+81	ands w0, wzr, #0x80000000	1024	1024	0	0	checked	none
+82	tst w1, #0x80000000	1024	1024	0	0	checked	none
+83	tst wzr, #0x80000000	1024	1024	0	0	checked	none
+84	and w0, w1, #0xffff	1024	1024	0	0	checked	none
+85	and w0, w0, #0xffff	1024	1024	0	0	checked	none
+86	and w0, wzr, #0xffff	1024	1024	0	0	checked	none
+87	and wsp, w1, #0xffff	1024	1024	0	0	checked	none
+88	orr w0, w1, #0xffff	1024	1024	0	0	checked	none
+89	orr w0, w0, #0xffff	1024	1024	0	0	checked	none
+90	orr w0, wzr, #0xffff	1024	1024	0	0	checked	none
+91	orr wsp, w1, #0xffff	1024	1024	0	0	checked	none
+92	eor w0, w1, #0xffff	1024	1024	0	0	checked	none
+93	eor w0, w0, #0xffff	1024	1024	0	0	checked	none
+94	eor w0, wzr, #0xffff	1024	1024	0	0	checked	none
+95	eor wsp, w1, #0xffff	1024	1024	0	0	checked	none
+96	ands w0, w1, #0xffff	1024	1024	0	0	checked	none
+97	ands w0, w0, #0xffff	1024	1024	0	0	checked	none
+98	ands w0, wzr, #0xffff	1024	1024	0	0	checked	none
+99	tst w1, #0xffff	1024	1024	0	0	checked	none
+100	tst wzr, #0xffff	1024	1024	0	0	checked	none
+101	and w0, w1, #0xff00ff	1024	1024	0	0	checked	none
+102	and w0, w0, #0xff00ff	1024	1024	0	0	checked	none
+103	and w0, wzr, #0xff00ff	1024	1024	0	0	checked	none
+104	and wsp, w1, #0xff00ff	1024	1024	0	0	checked	none
+105	orr w0, w1, #0xff00ff	1024	1024	0	0	checked	none
+106	orr w0, w0, #0xff00ff	1024	1024	0	0	checked	none
+107	orr w0, wzr, #0xff00ff	1024	1024	0	0	checked	none
+108	orr wsp, w1, #0xff00ff	1024	1024	0	0	checked	none
+109	eor w0, w1, #0xff00ff	1024	1024	0	0	checked	none
+110	eor w0, w0, #0xff00ff	1024	1024	0	0	checked	none
+111	eor w0, wzr, #0xff00ff	1024	1024	0	0	checked	none
+112	eor wsp, w1, #0xff00ff	1024	1024	0	0	checked	none
+113	ands w0, w1, #0xff00ff	1024	1024	0	0	checked	none
+114	ands w0, w0, #0xff00ff	1024	1024	0	0	checked	none
+115	ands w0, wzr, #0xff00ff	1024	1024	0	0	checked	none
+116	tst w1, #0xff00ff	1024	1024	0	0	checked	none
+117	tst wzr, #0xff00ff	1024	1024	0	0	checked	none
+118	and w0, w1, #0xaaaaaaaa	1024	1024	0	0	checked	none
+119	and w0, w0, #0xaaaaaaaa	1024	1024	0	0	checked	none
+120	and w0, wzr, #0xaaaaaaaa	1024	1024	0	0	checked	none
+121	and wsp, w1, #0xaaaaaaaa	1024	1024	0	0	checked	none
+122	orr w0, w1, #0xaaaaaaaa	1024	1024	0	0	checked	none
+123	orr w0, w0, #0xaaaaaaaa	1024	1024	0	0	checked	none
+124	orr w0, wzr, #0xaaaaaaaa	1024	1024	0	0	checked	none
+125	orr wsp, w1, #0xaaaaaaaa	1024	1024	0	0	checked	none
+126	eor w0, w1, #0xaaaaaaaa	1024	1024	0	0	checked	none
+127	eor w0, w0, #0xaaaaaaaa	1024	1024	0	0	checked	none
+128	eor w0, wzr, #0xaaaaaaaa	1024	1024	0	0	checked	none
+129	eor wsp, w1, #0xaaaaaaaa	1024	1024	0	0	checked	none
+130	ands w0, w1, #0xaaaaaaaa	1024	1024	0	0	checked	none
+131	ands w0, w0, #0xaaaaaaaa	1024	1024	0	0	checked	none
+132	ands w0, wzr, #0xaaaaaaaa	1024	1024	0	0	checked	none
+133	tst w1, #0xaaaaaaaa	1024	1024	0	0	checked	none
+134	tst wzr, #0xaaaaaaaa	1024	1024	0	0	checked	none
+135	mov w0, w1	1024	1024	0	0	checked	none
+136	mov w0, #127	1024	1024	0	0	checked	none
+137	movk w0, #0xdead, lsl #16	1024	1024	0	0	checked	none
+138	mov w0, wsp	1024	1024	0	0	checked	none
+139	mov wsp, w0	1024	1024	0	0	checked	none
+140	mvn w0, w1	1024	1024	0	0	checked	none
+141	neg w0, w1	1024	1024	0	0	checked	none
+142	rev w0, w1	1024	1024	0	0	checked	none
+143	rev16 w0, w1	1024	1024	0	0	checked	none
+144	sxtb w0, w1	1024	1024	0	0	checked	none
+145	sxth w0, w1	1024	1024	0	0	checked	none
+146	mvn w0, w1, lsl #0	1024	1024	0	0	checked	none
+147	mvn w0, w1, lsl #1	1024	1024	0	0	checked	none
+148	mvn w0, w1, lsl #31	1024	1024	0	0	checked	none
+149	mvn w0, w1, lsr #0	1024	1024	0	0	checked	none
+150	mvn w0, w1, lsr #1	1024	1024	0	0	checked	none
+151	mvn w0, w1, lsr #31	1024	1024	0	0	checked	none
+152	mvn w0, w1, asr #0	1024	1024	0	0	checked	none
+153	mvn w0, w1, asr #1	1024	1024	0	0	checked	none
+154	mvn w0, w1, asr #31	1024	1024	0	0	checked	none
+155	mvn w0, w1, ror #0	1024	1024	0	0	checked	none
+156	mvn w0, w1, ror #1	1024	1024	0	0	checked	none
+157	mvn w0, w1, ror #31	1024	1024	0	0	checked	none
+158	neg w0, w1, lsl #0	1024	1024	0	0	checked	none
+159	neg w0, w1, lsl #1	1024	1024	0	0	checked	none
+160	neg w0, w1, lsl #31	1024	1024	0	0	checked	none
+161	neg w0, w1, lsr #0	1024	1024	0	0	checked	none
+162	neg w0, w1, lsr #1	1024	1024	0	0	checked	none
+163	neg w0, w1, lsr #31	1024	1024	0	0	checked	none
+164	neg w0, w1, asr #0	1024	1024	0	0	checked	none
+165	neg w0, w1, asr #1	1024	1024	0	0	checked	none
+166	neg w0, w1, asr #31	1024	1024	0	0	checked	none
+167	mul w0, w1, w2	1024	1024	0	0	checked	none
+168	udiv w0, w1, w2	1024	1024	0	0	checked	none
+169	madd w0, w1, w2, w3	1024	1024	0	0	checked	none
+170	msub w0, w1, w2, w3	1024	1024	0	0	checked	none
+171	lsl w0, w1, w2	1024	1024	0	0	checked	none
+172	lsl w0, w1, #0	1024	1024	0	0	checked	none
+173	lsl w0, w1, #1	1024	1024	0	0	checked	none
+174	lsl w0, w1, #7	1024	1024	0	0	checked	none
+175	lsl w0, w1, #31	1024	1024	0	0	checked	none
+176	lsr w0, w1, w2	1024	1024	0	0	checked	none
+177	lsr w0, w1, #0	1024	1024	0	0	checked	none
+178	lsr w0, w1, #1	1024	1024	0	0	checked	none
+179	lsr w0, w1, #7	1024	1024	0	0	checked	none
+180	lsr w0, w1, #31	1024	1024	0	0	checked	none
+181	asr w0, w1, w2	1024	1024	0	0	checked	none
+182	asr w0, w1, #0	1024	1024	0	0	checked	none
+183	asr w0, w1, #1	1024	1024	0	0	checked	none
+184	asr w0, w1, #7	1024	1024	0	0	checked	none
+185	asr w0, w1, #31	1024	1024	0	0	checked	none
+186	ror w0, w1, w2	1024	1024	0	0	checked	none
+187	ror w0, w1, #0	1024	1024	0	0	checked	none
+188	ror w0, w1, #1	1024	1024	0	0	checked	none
+189	ror w0, w1, #7	1024	1024	0	0	checked	none
+190	ror w0, w1, #31	1024	1024	0	0	checked	none
+191	extr w0, w1, w2, #7	1024	1024	0	0	checked	none
+192	ubfx w0, w1, #7, #13	1024	1024	0	0	checked	none
+193	sbfx w0, w1, #7, #13	1024	1024	0	0	checked	none
+194	ubfiz w0, w1, #7, #13	1024	1024	0	0	checked	none
+195	bfxil w0, w1, #7, #13	1024	1024	0	0	checked	none
+196	bfi w0, w1, #7, #13	1024	1024	0	0	checked	none
+197	csel w0, w1, w2, eq	1024	1024	0	0	checked	none
+198	csinc w0, w1, w2, eq	1024	1024	0	0	checked	none
+199	csinv w0, w1, w2, eq	1024	1024	0	0	checked	none
+200	csneg w0, w1, w2, eq	1024	1024	0	0	checked	none
+201	cinc w0, w1, eq	1024	1024	0	0	checked	none
+202	cinv w0, w1, eq	1024	1024	0	0	checked	none
+203	cneg w0, w1, eq	1024	1024	0	0	checked	none
+204	cset w0, eq	1024	1024	0	0	checked	none
+205	csetm w0, eq	1024	1024	0	0	checked	none
+206	ccmp w1, w2, #5, eq	1024	1024	0	0	checked	none
+207	ccmp w1, #7, #10, eq	1024	1024	0	0	checked	none
+208	csel w0, w1, w2, ne	1024	1024	0	0	checked	none
+209	csinc w0, w1, w2, ne	1024	1024	0	0	checked	none
+210	csinv w0, w1, w2, ne	1024	1024	0	0	checked	none
+211	csneg w0, w1, w2, ne	1024	1024	0	0	checked	none
+212	cinc w0, w1, ne	1024	1024	0	0	checked	none
+213	cinv w0, w1, ne	1024	1024	0	0	checked	none
+214	cneg w0, w1, ne	1024	1024	0	0	checked	none
+215	cset w0, ne	1024	1024	0	0	checked	none
+216	csetm w0, ne	1024	1024	0	0	checked	none
+217	ccmp w1, w2, #5, ne	1024	1024	0	0	checked	none
+218	ccmp w1, #7, #10, ne	1024	1024	0	0	checked	none
+219	csel w0, w1, w2, cs	1024	1024	0	0	checked	none
+220	csinc w0, w1, w2, cs	1024	1024	0	0	checked	none
+221	csinv w0, w1, w2, cs	1024	1024	0	0	checked	none
+222	csneg w0, w1, w2, cs	1024	1024	0	0	checked	none
+223	cinc w0, w1, cs	1024	1024	0	0	checked	none
+224	cinv w0, w1, cs	1024	1024	0	0	checked	none
+225	cneg w0, w1, cs	1024	1024	0	0	checked	none
+226	cset w0, cs	1024	1024	0	0	checked	none
+227	csetm w0, cs	1024	1024	0	0	checked	none
+228	ccmp w1, w2, #5, cs	1024	1024	0	0	checked	none
+229	ccmp w1, #7, #10, cs	1024	1024	0	0	checked	none
+230	csel w0, w1, w2, cc	1024	1024	0	0	checked	none
+231	csinc w0, w1, w2, cc	1024	1024	0	0	checked	none
+232	csinv w0, w1, w2, cc	1024	1024	0	0	checked	none
+233	csneg w0, w1, w2, cc	1024	1024	0	0	checked	none
+234	cinc w0, w1, cc	1024	1024	0	0	checked	none
+235	cinv w0, w1, cc	1024	1024	0	0	checked	none
+236	cneg w0, w1, cc	1024	1024	0	0	checked	none
+237	cset w0, cc	1024	1024	0	0	checked	none
+238	csetm w0, cc	1024	1024	0	0	checked	none
+239	ccmp w1, w2, #5, cc	1024	1024	0	0	checked	none
+240	ccmp w1, #7, #10, cc	1024	1024	0	0	checked	none
+241	csel w0, w1, w2, mi	1024	1024	0	0	checked	none
+242	csinc w0, w1, w2, mi	1024	1024	0	0	checked	none
+243	csinv w0, w1, w2, mi	1024	1024	0	0	checked	none
+244	csneg w0, w1, w2, mi	1024	1024	0	0	checked	none
+245	cinc w0, w1, mi	1024	1024	0	0	checked	none
+246	cinv w0, w1, mi	1024	1024	0	0	checked	none
+247	cneg w0, w1, mi	1024	1024	0	0	checked	none
+248	cset w0, mi	1024	1024	0	0	checked	none
+249	csetm w0, mi	1024	1024	0	0	checked	none
+250	ccmp w1, w2, #5, mi	1024	1024	0	0	checked	none
+251	ccmp w1, #7, #10, mi	1024	1024	0	0	checked	none
+252	csel w0, w1, w2, pl	1024	1024	0	0	checked	none
+253	csinc w0, w1, w2, pl	1024	1024	0	0	checked	none
+254	csinv w0, w1, w2, pl	1024	1024	0	0	checked	none
+255	csneg w0, w1, w2, pl	1024	1024	0	0	checked	none
+256	cinc w0, w1, pl	1024	1024	0	0	checked	none
+257	cinv w0, w1, pl	1024	1024	0	0	checked	none
+258	cneg w0, w1, pl	1024	1024	0	0	checked	none
+259	cset w0, pl	1024	1024	0	0	checked	none
+260	csetm w0, pl	1024	1024	0	0	checked	none
+261	ccmp w1, w2, #5, pl	1024	1024	0	0	checked	none
+262	ccmp w1, #7, #10, pl	1024	1024	0	0	checked	none
+263	csel w0, w1, w2, vs	1024	1024	0	0	checked	none
+264	csinc w0, w1, w2, vs	1024	1024	0	0	checked	none
+265	csinv w0, w1, w2, vs	1024	1024	0	0	checked	none
+266	csneg w0, w1, w2, vs	1024	1024	0	0	checked	none
+267	cinc w0, w1, vs	1024	1024	0	0	checked	none
+268	cinv w0, w1, vs	1024	1024	0	0	checked	none
+269	cneg w0, w1, vs	1024	1024	0	0	checked	none
+270	cset w0, vs	1024	1024	0	0	checked	none
+271	csetm w0, vs	1024	1024	0	0	checked	none
+272	ccmp w1, w2, #5, vs	1024	1024	0	0	checked	none
+273	ccmp w1, #7, #10, vs	1024	1024	0	0	checked	none
+274	csel w0, w1, w2, vc	1024	1024	0	0	checked	none
+275	csinc w0, w1, w2, vc	1024	1024	0	0	checked	none
+276	csinv w0, w1, w2, vc	1024	1024	0	0	checked	none
+277	csneg w0, w1, w2, vc	1024	1024	0	0	checked	none
+278	cinc w0, w1, vc	1024	1024	0	0	checked	none
+279	cinv w0, w1, vc	1024	1024	0	0	checked	none
+280	cneg w0, w1, vc	1024	1024	0	0	checked	none
+281	cset w0, vc	1024	1024	0	0	checked	none
+282	csetm w0, vc	1024	1024	0	0	checked	none
+283	ccmp w1, w2, #5, vc	1024	1024	0	0	checked	none
+284	ccmp w1, #7, #10, vc	1024	1024	0	0	checked	none
+285	csel w0, w1, w2, hi	1024	1024	0	0	checked	none
+286	csinc w0, w1, w2, hi	1024	1024	0	0	checked	none
+287	csinv w0, w1, w2, hi	1024	1024	0	0	checked	none
+288	csneg w0, w1, w2, hi	1024	1024	0	0	checked	none
+289	cinc w0, w1, hi	1024	1024	0	0	checked	none
+290	cinv w0, w1, hi	1024	1024	0	0	checked	none
+291	cneg w0, w1, hi	1024	1024	0	0	checked	none
+292	cset w0, hi	1024	1024	0	0	checked	none
+293	csetm w0, hi	1024	1024	0	0	checked	none
+294	ccmp w1, w2, #5, hi	1024	1024	0	0	checked	none
+295	ccmp w1, #7, #10, hi	1024	1024	0	0	checked	none
+296	csel w0, w1, w2, ls	1024	1024	0	0	checked	none
+297	csinc w0, w1, w2, ls	1024	1024	0	0	checked	none
+298	csinv w0, w1, w2, ls	1024	1024	0	0	checked	none
+299	csneg w0, w1, w2, ls	1024	1024	0	0	checked	none
+300	cinc w0, w1, ls	1024	1024	0	0	checked	none
+301	cinv w0, w1, ls	1024	1024	0	0	checked	none
+302	cneg w0, w1, ls	1024	1024	0	0	checked	none
+303	cset w0, ls	1024	1024	0	0	checked	none
+304	csetm w0, ls	1024	1024	0	0	checked	none
+305	ccmp w1, w2, #5, ls	1024	1024	0	0	checked	none
+306	ccmp w1, #7, #10, ls	1024	1024	0	0	checked	none
+307	csel w0, w1, w2, ge	1024	1024	0	0	checked	none
+308	csinc w0, w1, w2, ge	1024	1024	0	0	checked	none
+309	csinv w0, w1, w2, ge	1024	1024	0	0	checked	none
+310	csneg w0, w1, w2, ge	1024	1024	0	0	checked	none
+311	cinc w0, w1, ge	1024	1024	0	0	checked	none
+312	cinv w0, w1, ge	1024	1024	0	0	checked	none
+313	cneg w0, w1, ge	1024	1024	0	0	checked	none
+314	cset w0, ge	1024	1024	0	0	checked	none
+315	csetm w0, ge	1024	1024	0	0	checked	none
+316	ccmp w1, w2, #5, ge	1024	1024	0	0	checked	none
+317	ccmp w1, #7, #10, ge	1024	1024	0	0	checked	none
+318	csel w0, w1, w2, lt	1024	1024	0	0	checked	none
+319	csinc w0, w1, w2, lt	1024	1024	0	0	checked	none
+320	csinv w0, w1, w2, lt	1024	1024	0	0	checked	none
+321	csneg w0, w1, w2, lt	1024	1024	0	0	checked	none
+322	cinc w0, w1, lt	1024	1024	0	0	checked	none
+323	cinv w0, w1, lt	1024	1024	0	0	checked	none
+324	cneg w0, w1, lt	1024	1024	0	0	checked	none
+325	cset w0, lt	1024	1024	0	0	checked	none
+326	csetm w0, lt	1024	1024	0	0	checked	none
+327	ccmp w1, w2, #5, lt	1024	1024	0	0	checked	none
+328	ccmp w1, #7, #10, lt	1024	1024	0	0	checked	none
+329	csel w0, w1, w2, gt	1024	1024	0	0	checked	none
+330	csinc w0, w1, w2, gt	1024	1024	0	0	checked	none
+331	csinv w0, w1, w2, gt	1024	1024	0	0	checked	none
+332	csneg w0, w1, w2, gt	1024	1024	0	0	checked	none
+333	cinc w0, w1, gt	1024	1024	0	0	checked	none
+334	cinv w0, w1, gt	1024	1024	0	0	checked	none
+335	cneg w0, w1, gt	1024	1024	0	0	checked	none
+336	cset w0, gt	1024	1024	0	0	checked	none
+337	csetm w0, gt	1024	1024	0	0	checked	none
+338	ccmp w1, w2, #5, gt	1024	1024	0	0	checked	none
+339	ccmp w1, #7, #10, gt	1024	1024	0	0	checked	none
+340	csel w0, w1, w2, le	1024	1024	0	0	checked	none
+341	csinc w0, w1, w2, le	1024	1024	0	0	checked	none
+342	csinv w0, w1, w2, le	1024	1024	0	0	checked	none
+343	csneg w0, w1, w2, le	1024	1024	0	0	checked	none
+344	cinc w0, w1, le	1024	1024	0	0	checked	none
+345	cinv w0, w1, le	1024	1024	0	0	checked	none
+346	cneg w0, w1, le	1024	1024	0	0	checked	none
+347	cset w0, le	1024	1024	0	0	checked	none
+348	csetm w0, le	1024	1024	0	0	checked	none
+349	ccmp w1, w2, #5, le	1024	1024	0	0	checked	none
+350	ccmp w1, #7, #10, le	1024	1024	0	0	checked	none
+351	csel w0, w1, w2, al	1024	1024	0	0	checked	none
+352	csinc w0, w1, w2, al	1024	1024	0	0	checked	none
+353	csinv w0, w1, w2, al	1024	1024	0	0	checked	none
+354	csneg w0, w1, w2, al	1024	1024	0	0	checked	none
+355	ccmp w1, w2, #5, al	1024	1024	0	0	checked	none
+356	ccmp w1, #7, #10, al	1024	1024	0	0	checked	none
+357	csel w0, w1, w2, nv	1024	1024	0	0	checked	none
+358	csinc w0, w1, w2, nv	1024	1024	0	0	checked	none
+359	csinv w0, w1, w2, nv	1024	1024	0	0	checked	none
+360	csneg w0, w1, w2, nv	1024	1024	0	0	checked	none
+361	ccmp w1, w2, #5, nv	1024	1024	0	0	checked	none
+362	ccmp w1, #7, #10, nv	1024	1024	0	0	checked	none
+363	ldr w0, [x4, #8]	1024	1024	0	0	checked	none
+364	str w0, [x4, #8]	1024	1024	0	0	checked	none
+365	ldur w0, [x4, #8]	1024	1024	0	0	checked	none
+366	stur w0, [x4, #8]	1024	1024	0	0	checked	none
+367	ldr w0, [x4, #8]!	1024	1024	0	0	checked	none
+368	ldr w0, [x4], #8	1024	1024	0	0	checked	none
+369	ldr w0, [x4, x5, lsl #2]	1024	1024	0	0	checked	none
+370	str w0, [x4, #8]!	1024	1024	0	0	checked	none
+371	str w0, [x4], #8	1024	1024	0	0	checked	none
+372	str w0, [x4, x5, lsl #2]	1024	1024	0	0	checked	none
+373	ldrb w0, [x4, #8]	1024	1024	0	0	checked	none
+374	ldrh w0, [x4, #8]	1024	1024	0	0	checked	none
+375	strb w0, [x4, #8]	1024	1024	0	0	checked	none
+376	strh w0, [x4, #8]	1024	1024	0	0	checked	none
+377	ldrsb w0, [x4, #8]	1024	1024	0	0	checked	none
+378	ldrsh w0, [x4, #8]	1024	1024	0	0	checked	none
+379	add x0, x1, x2	1024	1024	0	0	checked	none
+380	add x0, x1, x2, lsl #3	1024	1024	0	0	checked	none
+381	add x0, x1, #127	1024	1024	0	0	checked	none
+382	sub x0, x1, x2	1024	1024	0	0	checked	none
+383	sub x0, x1, x2, lsl #3	1024	1024	0	0	checked	none
+384	sub x0, x1, #127	1024	1024	0	0	checked	none
+385	and x0, x1, x2	1024	1024	0	0	checked	none
+386	and x0, x1, x2, lsl #3	1024	1024	0	0	checked	none
+387	bic x0, x1, x2	1024	1024	0	0	checked	none
+388	bic x0, x1, x2, lsl #3	1024	1024	0	0	checked	none
+389	eor x0, x1, x2	1024	1024	0	0	checked	none
+390	eor x0, x1, x2, lsl #3	1024	1024	0	0	checked	none
+391	orr x0, x1, x2	1024	1024	0	0	checked	none
+392	orr x0, x1, x2, lsl #3	1024	1024	0	0	checked	none
+393	orn x0, x1, x2	1024	1024	0	0	checked	none
+394	orn x0, x1, x2, lsl #3	1024	1024	0	0	checked	none
+395	adds x0, x1, x2	1024	1024	0	0	checked	none
+396	adds x0, x1, x2, lsl #3	1024	1024	0	0	checked	none
+397	adds x0, x1, #127	1024	1024	0	0	checked	none
+398	subs x0, x1, x2	1024	1024	0	0	checked	none
+399	subs x0, x1, x2, lsl #3	1024	1024	0	0	checked	none
+400	subs x0, x1, #127	1024	1024	0	0	checked	none
+401	ands x0, x1, x2	1024	1024	0	0	checked	none
+402	ands x0, x1, x2, lsl #3	1024	1024	0	0	checked	none
+403	bics x0, x1, x2	1024	1024	0	0	checked	none
+404	bics x0, x1, x2, lsl #3	1024	1024	0	0	checked	none
+405	cmp x1, x2	1024	1024	0	0	checked	none
+406	cmp x1, x2, lsl #3	1024	1024	0	0	checked	none
+407	cmn x1, x2	1024	1024	0	0	checked	none
+408	cmn x1, x2, lsl #3	1024	1024	0	0	checked	none
+409	tst x1, x2	1024	1024	0	0	checked	none
+410	tst x1, x2, lsl #3	1024	1024	0	0	checked	none
+411	and x0, x1, #0x1	1024	1024	0	0	checked	none
+412	and x0, x0, #0x1	1024	1024	0	0	checked	none
+413	and x0, xzr, #0x1	1024	1024	0	0	checked	none
+414	and sp, x1, #0x1	1024	1024	0	0	checked	none
+415	orr x0, x1, #0x1	1024	1024	0	0	checked	none
+416	orr x0, x0, #0x1	1024	1024	0	0	checked	none
+417	orr x0, xzr, #0x1	1024	1024	0	0	checked	none
+418	orr sp, x1, #0x1	1024	1024	0	0	checked	none
+419	eor x0, x1, #0x1	1024	1024	0	0	checked	none
+420	eor x0, x0, #0x1	1024	1024	0	0	checked	none
+421	eor x0, xzr, #0x1	1024	1024	0	0	checked	none
+422	eor sp, x1, #0x1	1024	1024	0	0	checked	none
+423	ands x0, x1, #0x1	1024	1024	0	0	checked	none
+424	ands x0, x0, #0x1	1024	1024	0	0	checked	none
+425	ands x0, xzr, #0x1	1024	1024	0	0	checked	none
+426	tst x1, #0x1	1024	1024	0	0	checked	none
+427	tst xzr, #0x1	1024	1024	0	0	checked	none
+428	and x0, x1, #0xff	1024	1024	0	0	checked	none
+429	and x0, x0, #0xff	1024	1024	0	0	checked	none
+430	and x0, xzr, #0xff	1024	1024	0	0	checked	none
+431	and sp, x1, #0xff	1024	1024	0	0	checked	none
+432	orr x0, x1, #0xff	1024	1024	0	0	checked	none
+433	orr x0, x0, #0xff	1024	1024	0	0	checked	none
+434	orr x0, xzr, #0xff	1024	1024	0	0	checked	none
+435	orr sp, x1, #0xff	1024	1024	0	0	checked	none
+436	eor x0, x1, #0xff	1024	1024	0	0	checked	none
+437	eor x0, x0, #0xff	1024	1024	0	0	checked	none
+438	eor x0, xzr, #0xff	1024	1024	0	0	checked	none
+439	eor sp, x1, #0xff	1024	1024	0	0	checked	none
+440	ands x0, x1, #0xff	1024	1024	0	0	checked	none
+441	ands x0, x0, #0xff	1024	1024	0	0	checked	none
+442	ands x0, xzr, #0xff	1024	1024	0	0	checked	none
+443	tst x1, #0xff	1024	1024	0	0	checked	none
+444	tst xzr, #0xff	1024	1024	0	0	checked	none
+445	and x0, x1, #0x8000000000000000	1024	1024	0	0	checked	none
+446	and x0, x0, #0x8000000000000000	1024	1024	0	0	checked	none
+447	and x0, xzr, #0x8000000000000000	1024	1024	0	0	checked	none
+448	and sp, x1, #0x8000000000000000	1024	1024	0	0	checked	none
+449	orr x0, x1, #0x8000000000000000	1024	1024	0	0	checked	none
+450	orr x0, x0, #0x8000000000000000	1024	1024	0	0	checked	none
+451	orr x0, xzr, #0x8000000000000000	1024	1024	0	0	checked	none
+452	orr sp, x1, #0x8000000000000000	1024	1024	0	0	checked	none
+453	eor x0, x1, #0x8000000000000000	1024	1024	0	0	checked	none
+454	eor x0, x0, #0x8000000000000000	1024	1024	0	0	checked	none
+455	eor x0, xzr, #0x8000000000000000	1024	1024	0	0	checked	none
+456	eor sp, x1, #0x8000000000000000	1024	1024	0	0	checked	none
+457	ands x0, x1, #0x8000000000000000	1024	1024	0	0	checked	none
+458	ands x0, x0, #0x8000000000000000	1024	1024	0	0	checked	none
+459	ands x0, xzr, #0x8000000000000000	1024	1024	0	0	checked	none
+460	tst x1, #0x8000000000000000	1024	1024	0	0	checked	none
+461	tst xzr, #0x8000000000000000	1024	1024	0	0	checked	none
+462	and x0, x1, #0xffffffff	1024	1024	0	0	checked	none
+463	and x0, x0, #0xffffffff	1024	1024	0	0	checked	none
+464	and x0, xzr, #0xffffffff	1024	1024	0	0	checked	none
+465	and sp, x1, #0xffffffff	1024	1024	0	0	checked	none
+466	orr x0, x1, #0xffffffff	1024	1024	0	0	checked	none
+467	orr x0, x0, #0xffffffff	1024	1024	0	0	checked	none
+468	orr x0, xzr, #0xffffffff	1024	1024	0	0	checked	none
+469	orr sp, x1, #0xffffffff	1024	1024	0	0	checked	none
+470	eor x0, x1, #0xffffffff	1024	1024	0	0	checked	none
+471	eor x0, x0, #0xffffffff	1024	1024	0	0	checked	none
+472	eor x0, xzr, #0xffffffff	1024	1024	0	0	checked	none
+473	eor sp, x1, #0xffffffff	1024	1024	0	0	checked	none
+474	ands x0, x1, #0xffffffff	1024	1024	0	0	checked	none
+475	ands x0, x0, #0xffffffff	1024	1024	0	0	checked	none
+476	ands x0, xzr, #0xffffffff	1024	1024	0	0	checked	none
+477	tst x1, #0xffffffff	1024	1024	0	0	checked	none
+478	tst xzr, #0xffffffff	1024	1024	0	0	checked	none
+479	and x0, x1, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+480	and x0, x0, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+481	and x0, xzr, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+482	and sp, x1, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+483	orr x0, x1, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+484	orr x0, x0, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+485	orr x0, xzr, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+486	orr sp, x1, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+487	eor x0, x1, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+488	eor x0, x0, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+489	eor x0, xzr, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+490	eor sp, x1, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+491	ands x0, x1, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+492	ands x0, x0, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+493	ands x0, xzr, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+494	tst x1, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+495	tst xzr, #0xff00ff00ff00ff	1024	1024	0	0	checked	none
+496	and x0, x1, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+497	and x0, x0, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+498	and x0, xzr, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+499	and sp, x1, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+500	orr x0, x1, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+501	orr x0, x0, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+502	orr x0, xzr, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+503	orr sp, x1, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+504	eor x0, x1, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+505	eor x0, x0, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+506	eor x0, xzr, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+507	eor sp, x1, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+508	ands x0, x1, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+509	ands x0, x0, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+510	ands x0, xzr, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+511	tst x1, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+512	tst xzr, #0xaaaaaaaaaaaaaaaa	1024	1024	0	0	checked	none
+513	mov x0, x1	1024	1024	0	0	checked	none
+514	mov x0, #127	1024	1024	0	0	checked	none
+515	movk x0, #0xdead, lsl #16	1024	1024	0	0	checked	none
+516	mov x0, sp	1024	1024	0	0	checked	none
+517	mov sp, x0	1024	1024	0	0	checked	none
+518	mvn x0, x1	1024	1024	0	0	checked	none
+519	neg x0, x1	1024	1024	0	0	checked	none
+520	rev x0, x1	1024	1024	0	0	checked	none
+521	rev16 x0, x1	1024	1024	0	0	checked	none
+522	sxtb x0, w1	1024	1024	0	0	checked	none
+523	sxth x0, w1	1024	1024	0	0	checked	none
+524	mvn x0, x1, lsl #0	1024	1024	0	0	checked	none
+525	mvn x0, x1, lsl #1	1024	1024	0	0	checked	none
+526	mvn x0, x1, lsl #63	1024	1024	0	0	checked	none
+527	mvn x0, x1, lsr #0	1024	1024	0	0	checked	none
+528	mvn x0, x1, lsr #1	1024	1024	0	0	checked	none
+529	mvn x0, x1, lsr #63	1024	1024	0	0	checked	none
+530	mvn x0, x1, asr #0	1024	1024	0	0	checked	none
+531	mvn x0, x1, asr #1	1024	1024	0	0	checked	none
+532	mvn x0, x1, asr #63	1024	1024	0	0	checked	none
+533	mvn x0, x1, ror #0	1024	1024	0	0	checked	none
+534	mvn x0, x1, ror #1	1024	1024	0	0	checked	none
+535	mvn x0, x1, ror #63	1024	1024	0	0	checked	none
+536	neg x0, x1, lsl #0	1024	1024	0	0	checked	none
+537	neg x0, x1, lsl #1	1024	1024	0	0	checked	none
+538	neg x0, x1, lsl #63	1024	1024	0	0	checked	none
+539	neg x0, x1, lsr #0	1024	1024	0	0	checked	none
+540	neg x0, x1, lsr #1	1024	1024	0	0	checked	none
+541	neg x0, x1, lsr #63	1024	1024	0	0	checked	none
+542	neg x0, x1, asr #0	1024	1024	0	0	checked	none
+543	neg x0, x1, asr #1	1024	1024	0	0	checked	none
+544	neg x0, x1, asr #63	1024	1024	0	0	checked	none
+545	mul x0, x1, x2	1024	1024	0	0	checked	none
+546	udiv x0, x1, x2	1024	1024	0	0	checked	none
+547	madd x0, x1, x2, x3	1024	1024	0	0	checked	none
+548	msub x0, x1, x2, x3	1024	1024	0	0	checked	none
+549	lsl x0, x1, x2	1024	1024	0	0	checked	none
+550	lsl x0, x1, #0	1024	1024	0	0	checked	none
+551	lsl x0, x1, #1	1024	1024	0	0	checked	none
+552	lsl x0, x1, #7	1024	1024	0	0	checked	none
+553	lsl x0, x1, #31	1024	1024	0	0	checked	none
+554	lsr x0, x1, x2	1024	1024	0	0	checked	none
+555	lsr x0, x1, #0	1024	1024	0	0	checked	none
+556	lsr x0, x1, #1	1024	1024	0	0	checked	none
+557	lsr x0, x1, #7	1024	1024	0	0	checked	none
+558	lsr x0, x1, #31	1024	1024	0	0	checked	none
+559	asr x0, x1, x2	1024	1024	0	0	checked	none
+560	asr x0, x1, #0	1024	1024	0	0	checked	none
+561	asr x0, x1, #1	1024	1024	0	0	checked	none
+562	asr x0, x1, #7	1024	1024	0	0	checked	none
+563	asr x0, x1, #31	1024	1024	0	0	checked	none
+564	ror x0, x1, x2	1024	1024	0	0	checked	none
+565	ror x0, x1, #0	1024	1024	0	0	checked	none
+566	ror x0, x1, #1	1024	1024	0	0	checked	none
+567	ror x0, x1, #7	1024	1024	0	0	checked	none
+568	ror x0, x1, #31	1024	1024	0	0	checked	none
+569	extr x0, x1, x2, #7	1024	1024	0	0	checked	none
+570	ubfx x0, x1, #7, #13	1024	1024	0	0	checked	none
+571	sbfx x0, x1, #7, #13	1024	1024	0	0	checked	none
+572	ubfiz x0, x1, #7, #13	1024	1024	0	0	checked	none
+573	bfxil x0, x1, #7, #13	1024	1024	0	0	checked	none
+574	bfi x0, x1, #7, #13	1024	1024	0	0	checked	none
+575	csel x0, x1, x2, eq	1024	1024	0	0	checked	none
+576	csinc x0, x1, x2, eq	1024	1024	0	0	checked	none
+577	csinv x0, x1, x2, eq	1024	1024	0	0	checked	none
+578	csneg x0, x1, x2, eq	1024	1024	0	0	checked	none
+579	cinc x0, x1, eq	1024	1024	0	0	checked	none
+580	cinv x0, x1, eq	1024	1024	0	0	checked	none
+581	cneg x0, x1, eq	1024	1024	0	0	checked	none
+582	cset x0, eq	1024	1024	0	0	checked	none
+583	csetm x0, eq	1024	1024	0	0	checked	none
+584	ccmp x1, x2, #5, eq	1024	1024	0	0	checked	none
+585	ccmp x1, #7, #10, eq	1024	1024	0	0	checked	none
+586	csel x0, x1, x2, ne	1024	1024	0	0	checked	none
+587	csinc x0, x1, x2, ne	1024	1024	0	0	checked	none
+588	csinv x0, x1, x2, ne	1024	1024	0	0	checked	none
+589	csneg x0, x1, x2, ne	1024	1024	0	0	checked	none
+590	cinc x0, x1, ne	1024	1024	0	0	checked	none
+591	cinv x0, x1, ne	1024	1024	0	0	checked	none
+592	cneg x0, x1, ne	1024	1024	0	0	checked	none
+593	cset x0, ne	1024	1024	0	0	checked	none
+594	csetm x0, ne	1024	1024	0	0	checked	none
+595	ccmp x1, x2, #5, ne	1024	1024	0	0	checked	none
+596	ccmp x1, #7, #10, ne	1024	1024	0	0	checked	none
+597	csel x0, x1, x2, cs	1024	1024	0	0	checked	none
+598	csinc x0, x1, x2, cs	1024	1024	0	0	checked	none
+599	csinv x0, x1, x2, cs	1024	1024	0	0	checked	none
+600	csneg x0, x1, x2, cs	1024	1024	0	0	checked	none
+601	cinc x0, x1, cs	1024	1024	0	0	checked	none
+602	cinv x0, x1, cs	1024	1024	0	0	checked	none
+603	cneg x0, x1, cs	1024	1024	0	0	checked	none
+604	cset x0, cs	1024	1024	0	0	checked	none
+605	csetm x0, cs	1024	1024	0	0	checked	none
+606	ccmp x1, x2, #5, cs	1024	1024	0	0	checked	none
+607	ccmp x1, #7, #10, cs	1024	1024	0	0	checked	none
+608	csel x0, x1, x2, cc	1024	1024	0	0	checked	none
+609	csinc x0, x1, x2, cc	1024	1024	0	0	checked	none
+610	csinv x0, x1, x2, cc	1024	1024	0	0	checked	none
+611	csneg x0, x1, x2, cc	1024	1024	0	0	checked	none
+612	cinc x0, x1, cc	1024	1024	0	0	checked	none
+613	cinv x0, x1, cc	1024	1024	0	0	checked	none
+614	cneg x0, x1, cc	1024	1024	0	0	checked	none
+615	cset x0, cc	1024	1024	0	0	checked	none
+616	csetm x0, cc	1024	1024	0	0	checked	none
+617	ccmp x1, x2, #5, cc	1024	1024	0	0	checked	none
+618	ccmp x1, #7, #10, cc	1024	1024	0	0	checked	none
+619	csel x0, x1, x2, mi	1024	1024	0	0	checked	none
+620	csinc x0, x1, x2, mi	1024	1024	0	0	checked	none
+621	csinv x0, x1, x2, mi	1024	1024	0	0	checked	none
+622	csneg x0, x1, x2, mi	1024	1024	0	0	checked	none
+623	cinc x0, x1, mi	1024	1024	0	0	checked	none
+624	cinv x0, x1, mi	1024	1024	0	0	checked	none
+625	cneg x0, x1, mi	1024	1024	0	0	checked	none
+626	cset x0, mi	1024	1024	0	0	checked	none
+627	csetm x0, mi	1024	1024	0	0	checked	none
+628	ccmp x1, x2, #5, mi	1024	1024	0	0	checked	none
+629	ccmp x1, #7, #10, mi	1024	1024	0	0	checked	none
+630	csel x0, x1, x2, pl	1024	1024	0	0	checked	none
+631	csinc x0, x1, x2, pl	1024	1024	0	0	checked	none
+632	csinv x0, x1, x2, pl	1024	1024	0	0	checked	none
+633	csneg x0, x1, x2, pl	1024	1024	0	0	checked	none
+634	cinc x0, x1, pl	1024	1024	0	0	checked	none
+635	cinv x0, x1, pl	1024	1024	0	0	checked	none
+636	cneg x0, x1, pl	1024	1024	0	0	checked	none
+637	cset x0, pl	1024	1024	0	0	checked	none
+638	csetm x0, pl	1024	1024	0	0	checked	none
+639	ccmp x1, x2, #5, pl	1024	1024	0	0	checked	none
+640	ccmp x1, #7, #10, pl	1024	1024	0	0	checked	none
+641	csel x0, x1, x2, vs	1024	1024	0	0	checked	none
+642	csinc x0, x1, x2, vs	1024	1024	0	0	checked	none
+643	csinv x0, x1, x2, vs	1024	1024	0	0	checked	none
+644	csneg x0, x1, x2, vs	1024	1024	0	0	checked	none
+645	cinc x0, x1, vs	1024	1024	0	0	checked	none
+646	cinv x0, x1, vs	1024	1024	0	0	checked	none
+647	cneg x0, x1, vs	1024	1024	0	0	checked	none
+648	cset x0, vs	1024	1024	0	0	checked	none
+649	csetm x0, vs	1024	1024	0	0	checked	none
+650	ccmp x1, x2, #5, vs	1024	1024	0	0	checked	none
+651	ccmp x1, #7, #10, vs	1024	1024	0	0	checked	none
+652	csel x0, x1, x2, vc	1024	1024	0	0	checked	none
+653	csinc x0, x1, x2, vc	1024	1024	0	0	checked	none
+654	csinv x0, x1, x2, vc	1024	1024	0	0	checked	none
+655	csneg x0, x1, x2, vc	1024	1024	0	0	checked	none
+656	cinc x0, x1, vc	1024	1024	0	0	checked	none
+657	cinv x0, x1, vc	1024	1024	0	0	checked	none
+658	cneg x0, x1, vc	1024	1024	0	0	checked	none
+659	cset x0, vc	1024	1024	0	0	checked	none
+660	csetm x0, vc	1024	1024	0	0	checked	none
+661	ccmp x1, x2, #5, vc	1024	1024	0	0	checked	none
+662	ccmp x1, #7, #10, vc	1024	1024	0	0	checked	none
+663	csel x0, x1, x2, hi	1024	1024	0	0	checked	none
+664	csinc x0, x1, x2, hi	1024	1024	0	0	checked	none
+665	csinv x0, x1, x2, hi	1024	1024	0	0	checked	none
+666	csneg x0, x1, x2, hi	1024	1024	0	0	checked	none
+667	cinc x0, x1, hi	1024	1024	0	0	checked	none
+668	cinv x0, x1, hi	1024	1024	0	0	checked	none
+669	cneg x0, x1, hi	1024	1024	0	0	checked	none
+670	cset x0, hi	1024	1024	0	0	checked	none
+671	csetm x0, hi	1024	1024	0	0	checked	none
+672	ccmp x1, x2, #5, hi	1024	1024	0	0	checked	none
+673	ccmp x1, #7, #10, hi	1024	1024	0	0	checked	none
+674	csel x0, x1, x2, ls	1024	1024	0	0	checked	none
+675	csinc x0, x1, x2, ls	1024	1024	0	0	checked	none
+676	csinv x0, x1, x2, ls	1024	1024	0	0	checked	none
+677	csneg x0, x1, x2, ls	1024	1024	0	0	checked	none
+678	cinc x0, x1, ls	1024	1024	0	0	checked	none
+679	cinv x0, x1, ls	1024	1024	0	0	checked	none
+680	cneg x0, x1, ls	1024	1024	0	0	checked	none
+681	cset x0, ls	1024	1024	0	0	checked	none
+682	csetm x0, ls	1024	1024	0	0	checked	none
+683	ccmp x1, x2, #5, ls	1024	1024	0	0	checked	none
+684	ccmp x1, #7, #10, ls	1024	1024	0	0	checked	none
+685	csel x0, x1, x2, ge	1024	1024	0	0	checked	none
+686	csinc x0, x1, x2, ge	1024	1024	0	0	checked	none
+687	csinv x0, x1, x2, ge	1024	1024	0	0	checked	none
+688	csneg x0, x1, x2, ge	1024	1024	0	0	checked	none
+689	cinc x0, x1, ge	1024	1024	0	0	checked	none
+690	cinv x0, x1, ge	1024	1024	0	0	checked	none
+691	cneg x0, x1, ge	1024	1024	0	0	checked	none
+692	cset x0, ge	1024	1024	0	0	checked	none
+693	csetm x0, ge	1024	1024	0	0	checked	none
+694	ccmp x1, x2, #5, ge	1024	1024	0	0	checked	none
+695	ccmp x1, #7, #10, ge	1024	1024	0	0	checked	none
+696	csel x0, x1, x2, lt	1024	1024	0	0	checked	none
+697	csinc x0, x1, x2, lt	1024	1024	0	0	checked	none
+698	csinv x0, x1, x2, lt	1024	1024	0	0	checked	none
+699	csneg x0, x1, x2, lt	1024	1024	0	0	checked	none
+700	cinc x0, x1, lt	1024	1024	0	0	checked	none
+701	cinv x0, x1, lt	1024	1024	0	0	checked	none
+702	cneg x0, x1, lt	1024	1024	0	0	checked	none
+703	cset x0, lt	1024	1024	0	0	checked	none
+704	csetm x0, lt	1024	1024	0	0	checked	none
+705	ccmp x1, x2, #5, lt	1024	1024	0	0	checked	none
+706	ccmp x1, #7, #10, lt	1024	1024	0	0	checked	none
+707	csel x0, x1, x2, gt	1024	1024	0	0	checked	none
+708	csinc x0, x1, x2, gt	1024	1024	0	0	checked	none
+709	csinv x0, x1, x2, gt	1024	1024	0	0	checked	none
+710	csneg x0, x1, x2, gt	1024	1024	0	0	checked	none
+711	cinc x0, x1, gt	1024	1024	0	0	checked	none
+712	cinv x0, x1, gt	1024	1024	0	0	checked	none
+713	cneg x0, x1, gt	1024	1024	0	0	checked	none
+714	cset x0, gt	1024	1024	0	0	checked	none
+715	csetm x0, gt	1024	1024	0	0	checked	none
+716	ccmp x1, x2, #5, gt	1024	1024	0	0	checked	none
+717	ccmp x1, #7, #10, gt	1024	1024	0	0	checked	none
+718	csel x0, x1, x2, le	1024	1024	0	0	checked	none
+719	csinc x0, x1, x2, le	1024	1024	0	0	checked	none
+720	csinv x0, x1, x2, le	1024	1024	0	0	checked	none
+721	csneg x0, x1, x2, le	1024	1024	0	0	checked	none
+722	cinc x0, x1, le	1024	1024	0	0	checked	none
+723	cinv x0, x1, le	1024	1024	0	0	checked	none
+724	cneg x0, x1, le	1024	1024	0	0	checked	none
+725	cset x0, le	1024	1024	0	0	checked	none
+726	csetm x0, le	1024	1024	0	0	checked	none
+727	ccmp x1, x2, #5, le	1024	1024	0	0	checked	none
+728	ccmp x1, #7, #10, le	1024	1024	0	0	checked	none
+729	csel x0, x1, x2, al	1024	1024	0	0	checked	none
+730	csinc x0, x1, x2, al	1024	1024	0	0	checked	none
+731	csinv x0, x1, x2, al	1024	1024	0	0	checked	none
+732	csneg x0, x1, x2, al	1024	1024	0	0	checked	none
+733	ccmp x1, x2, #5, al	1024	1024	0	0	checked	none
+734	ccmp x1, #7, #10, al	1024	1024	0	0	checked	none
+735	csel x0, x1, x2, nv	1024	1024	0	0	checked	none
+736	csinc x0, x1, x2, nv	1024	1024	0	0	checked	none
+737	csinv x0, x1, x2, nv	1024	1024	0	0	checked	none
+738	csneg x0, x1, x2, nv	1024	1024	0	0	checked	none
+739	ccmp x1, x2, #5, nv	1024	1024	0	0	checked	none
+740	ccmp x1, #7, #10, nv	1024	1024	0	0	checked	none
+741	ldr x0, [x4, #8]	1024	1024	0	0	checked	none
+742	str x0, [x4, #8]	1024	1024	0	0	checked	none
+743	ldur x0, [x4, #8]	1024	1024	0	0	checked	none
+744	stur x0, [x4, #8]	1024	1024	0	0	checked	none
+745	ldr x0, [x4, #8]!	1024	1024	0	0	checked	none
+746	ldr x0, [x4], #8	1024	1024	0	0	checked	none
+747	ldr x0, [x4, x5, lsl #3]	1024	1024	0	0	checked	none
+748	str x0, [x4, #8]!	1024	1024	0	0	checked	none
+749	str x0, [x4], #8	1024	1024	0	0	checked	none
+750	str x0, [x4, x5, lsl #3]	1024	1024	0	0	checked	none
+751	ldrsb x0, [x4, #8]	1024	1024	0	0	checked	none
+752	ldrsh x0, [x4, #8]	1024	1024	0	0	checked	none
+753	sxtw x0, w1	1024	1024	0	0	checked	none
+754	umulh x0, x1, x2	1024	1024	0	0	checked	none
+755	umull x0, w1, w2	1024	1024	0	0	checked	none
+756	umaddl x0, w1, w2, x3	1024	1024	0	0	checked	none
+757	smaddl x0, w1, w2, x3	1024	1024	0	0	checked	none
+758	ldrsw x0, [x4, #8]	1024	1024	0	0	checked	none
+759	ldp x0, x1, [x4, #8]	1024	1024	0	0	checked	none
+760	stp x0, x1, [x4, #8]	1024	1024	0	0	checked	none
+761	fmov d0, x0	1024	1024	0	0	checked	none
+762	fmov x0, d0	1024	1024	0	0	checked	none
+763	fmov s0, w0	1024	1024	0	0	checked	none
+764	fmov w0, s0	1024	1024	0	0	checked	none
+765	cnt v0.8b, v0.8b	1024	1024	0	0	checked	none
+766	cnt v0.16b, v0.16b	1024	1024	0	0	checked	none
+767	uaddlv h0, v0.8b	1024	1024	0	0	checked	none
+768	uaddlv h0, v0.16b	1024	1024	0	0	checked	none
+769	ldr q0, [x4, #16]	1024	1024	0	0	checked	none
+770	str q0, [x4, #16]	1024	1024	0	0	checked	none

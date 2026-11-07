@@ -40,3 +40,13 @@ separate existing artifact. QEMU results do not substitute hardware evidence.
 The independent canonical replay uses the same already-pinned executable as
 the completed x86 matrix, through this directory's `make reference` target;
 its outcome is pending and is not counted here.
+
+The canonical phase also completed successfully: **all771 forms and789,504
+states**, zero QEMU/reference or C/reference differences, zero unavailable
+forms. `reference-forms.tsv` holds the per-form comparisons;
+`canonical-summary.json` pins both executables. The canonical SHA is the same
+c110b03a executable used for the completed x86 replay. The mismatch and
+unavailable streams are both empty; the complete run log is compressed without
+alteration. No canonical ISA, simulator, kernel, loader or module changed.
+These remain emulated ARM observations; actual CPU fidelity awaits the
+coordinator's existing static handoff run.
