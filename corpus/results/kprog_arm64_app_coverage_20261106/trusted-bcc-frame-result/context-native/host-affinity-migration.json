@@ -1,0 +1,261 @@
+{
+  "utc": "2026-11-07T15:33:00.710499+00:00",
+  "qemu_pid": 2486232,
+  "parent_pid": 2486221,
+  "driver_pid": 2486214,
+  "process_starttime": "249491860",
+  "original_command": "qemu-system-aarch64 -M virt -cpu max -smp 8 -m 8192 -nographic -no-reboot -kernel /workspaces/repository/vendor/build/arm64/linux/arch/arm64/boot/Image -fsdev local,id=rootfs,path=/workspaces/repository/kprog/arm64/build/app-runtime-v35/root,security_model=none,readonly=on -device virtio-9p-device,fsdev=rootfs,mount_tag=rootfs -fsdev local,id=repo,path=/workspaces/repository,security_model=none -device virtio-9p-device,fsdev=repo,mount_tag=repo -append console=ttyAMA0 root=rootfs rootfstype=9p rootflags=trans=virtio,version=9p2000.L ro init=/bin/sh loglevel=4 panic=-1 oops=panic ",
+  "before_cpus": [
+    20,
+    21,
+    22,
+    23
+  ],
+  "after_cpus": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "threads": [
+    {
+      "tid": 2486232,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "tid": 2486235,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "tid": 2486236,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "tid": 2486237,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "tid": 2486238,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "tid": 2486239,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "tid": 2486240,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "tid": 2486241,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "tid": 2486242,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "tid": 2486243,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "tid": 2486481,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "tid": 2486482,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "tid": 2486627,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "tid": 2486655,
+      "before": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "after": [
+        8,
+        9,
+        10,
+        11
+      ]
+    }
+  ],
+  "one_second_cpu_busy_percent": {
+    "8-11": [
+      11.1,
+      9.1,
+      25.7,
+      6.1
+    ],
+    "20-23": [
+      96,
+      98,
+      98,
+      96
+    ]
+  },
+  "reason": "distribute two functional guests over less-contended allowed A CPUs",
+  "guest_restarted": false,
+  "guest_memory_mib": 8192,
+  "safety_guest": {
+    "qemu_pid": 2508078,
+    "cpus": [
+      20,
+      21,
+      22,
+      23
+    ],
+    "memory_mib": 2048,
+    "changed": false
+  },
+  "boundary": "QEMU functional run only; launch argv retains20-23, actual host affinity changed at this UTC; preserve this receipt with raw run"
+}
