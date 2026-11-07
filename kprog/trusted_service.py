@@ -156,7 +156,7 @@ def normalize(envelope, actual):
         names.add(name)
         mid = u32(item['map_id'],'map_id')
         if mid not in used:
-            raise ValueError('map is not used by the kernel-pinned source')
+            raise ValueError('map identity is outside the kernel-pinned request')
         source = used[mid]
         for field in SHAPE:
             if u32(item[field],field) != source[field]:

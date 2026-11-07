@@ -1,0 +1,19 @@
+{
+  "utc": "2026-11-07T22:34:04.400217+00:00",
+  "component_build_exit": 0,
+  "service_unit_tests": 12,
+  "wire_source_sha256": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac",
+  "wire_publication_matches": true,
+  "binary_sha256": {
+    "libnative_loader.so": "efbb25c27be2ce95cb7d1f6356628ab4c72d4d732b8dca249843791feac22dc6",
+    "trusted-native-loader": "f9dcb6572f597bd3e561ef66f7a9ef5c0d4192b3cbb1e6a51824d72850b65c1e"
+  },
+  "owned_source_sha256": {
+    "kprog/libnativeloader/src/native_loader.cpp": "ba644619b262f16892cd15001eda2842636d08c535b81952424ca03e4960d79c",
+    "kprog/trusted_service.py": "c5b7ea7c0c2e8115efeec20b22f75b38a53e5c40bab2ad33a84f889e88595d75"
+  },
+  "runtime_status": "whole Cilium application replay follows current Tracee batch",
+  "kernel_dependency_commit": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+  "kernel_resource_regression": "kprog/results/kprog_tv_20261107/trusted-native-resources.json",
+  "raw_sha256": "b55614f4d040cda5b22b188dbbcf27f88a7c1d296ec7805e4b714878773b2700"
+}

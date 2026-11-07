@@ -5446,13 +5446,14 @@ native_loader::LoadedProgram submit_trusted_native(
         << ",\"attach_prog_id\":" << options.attach_prog_id
         << ",\"prog_ifindex\":" << info.ifindex << "},\"maps\":[";
     bool first = true;
+    std::vector<std::unique_ptr<ScopedFd>> native_resource_fds;
+    std::vector<int32_t> native_resource_numbers;
+    std::unordered_set<uint32_t> native_resource_ids;
     std::vector<std::string> symbols(companion.native_data_symbols.begin(), companion.native_data_symbols.end());
     std::sort(symbols.begin(), symbols.end());
     for (const auto &name : symbols) {
         const auto identity = companion.map_addr_ids.find(name);
         if (identity == companion.map_addr_ids.end()) continue; // Not a bound map/data symbol.
-        // A native object also contains sibling-entry aliases; those are not this source's resources.
-        if (!companion.original_map_ids.contains(identity->second)) continue;
         const auto selected = std::find_if(companion.maps.begin(), companion.maps.end(),
             [&](const auto &map) { return map.kernel_id == identity->second; });
         if (selected == companion.maps.end()) fail("native symbol lacks its source map object: " + name);
@@ -5460,10 +5461,14 @@ native_loader::LoadedProgram submit_trusted_native(
         const auto address = companion.map_addrs.find(name);
         if (address == companion.map_addrs.end()) fail("native symbol has no bound address: " + name);
         // MapMeta.fd may be a borrowed descriptor already closed by parsing.
-        ScopedFd retained(bpf_map_get_fd_by_id(map.kernel_id));
-        if (retained.get() < 0)
+        auto retained = std::make_unique<ScopedFd>(bpf_map_get_fd_by_id(map.kernel_id));
+        if (retained->get() < 0)
             fail("reopen native submission map identity: " + std::string(std::strerror(errno)));
-        const auto actual = load_map_info(retained.get());
+        const auto actual = load_map_info(retained->get());
+        if (!companion.original_map_ids.contains(actual.id) && native_resource_ids.insert(actual.id).second) {
+            native_resource_numbers.push_back(retained->get());
+            native_resource_fds.push_back(std::move(retained));
+        }
         if (!first) metadata << ',';
         first = false;
         metadata << "{\"name\":"; write_json_string(metadata, name);
@@ -5500,8 +5505,20 @@ native_loader::LoadedProgram submit_trusted_native(
     request.native_user = ptr_to_u64(native.data());
     request.entry_user = ptr_to_u64(entry.data());
     request.metadata_user = ptr_to_u64(serialized.data());
-    if (ioctl(submit.get(), NATIVE_LAB_TRUSTED_SUBMIT, &request))
-        fail("kernel native submission refused: " + std::string(std::strerror(errno)));
+    if (native_resource_numbers.empty()) {
+        if (ioctl(submit.get(), NATIVE_LAB_TRUSTED_SUBMIT, &request))
+            fail("kernel native submission refused: " + std::string(std::strerror(errno)));
+    } else {
+        if (native_resource_numbers.size() > UINT32_MAX)
+            fail("native resource descriptor count exceeds request ABI");
+        native_lab_trusted_submission submission{};
+        submission.request = request;
+        submission.map_count = static_cast<uint32_t>(native_resource_numbers.size());
+        submission.map_fds_user = ptr_to_u64(native_resource_numbers.data());
+        if (ioctl(submit.get(), NATIVE_LAB_TRUSTED_SUBMIT_RESOURCES, &submission))
+            fail("kernel native resource submission refused: " + std::string(std::strerror(errno)));
+        request = submission.request;
+    }
     native_lab_trusted_result result{};
     int status;
     do { status = ioctl(submit.get(), NATIVE_LAB_TRUSTED_WAIT, &result); }
@@ -5665,9 +5682,29 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     for (const auto &binding : options.trusted_maps) {
         const auto selected = std::find_if(companion.maps.begin(), companion.maps.end(),
             [&](const auto &map) { return map.kernel_id == binding.map_id; });
-        if (selected == companion.maps.end())
-            fail("trusted map identity is not used by the kernel-pinned source program");
-        const MapMeta map = *selected;
+        MapMeta map{};
+        if (selected == companion.maps.end()) {
+            native_lab_trusted_map shape{};
+            shape.request_id = options.trusted_request_id;
+            shape.map_id = binding.map_id;
+            if (ioctl(options.trusted_service_fd, NATIVE_LAB_TRUSTED_MAP, &shape))
+                fail("trusted native map capability query refused: " + std::string(std::strerror(errno)));
+            if (shape.request_id != options.trusted_request_id || shape.map_id != binding.map_id ||
+                shape.depth || shape.reserved)
+                fail("trusted native map capability query identity differs");
+            ScopedFd retained(bpf_map_get_fd_by_id(binding.map_id));
+            if (retained.get() < 0)
+                fail("reopen kernel-pinned native map: " + std::string(std::strerror(errno)));
+            const auto actual = load_map_info(retained.get());
+            if (actual.id != shape.map_id || actual.type != shape.map_type ||
+                actual.key_size != shape.key_size || actual.value_size != shape.value_size ||
+                actual.max_entries != shape.max_entries || actual.map_flags != shape.map_flags)
+                fail("kernel-pinned native map shape differs");
+            map = load_map_meta_from_fd(retained.get());
+            add_map_meta(companion, map);
+        } else {
+            map = *selected;
+        }
         add_source_tail_call_map(companion, map);
         add_map_symbol_alias_meta(companion, binding.native_symbol, map);
         if (binding.value_offset) {

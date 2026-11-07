@@ -117,3 +117,10 @@ per-operation refinement, per-token specialization and binding theorems, and
 preservation of each native-link transformation, composed through
 Composition.lean. The formal lanes develop these universal theorems;
 historical program-specific proof files remain frozen in the archive.
+
+
+Native requests can carry live map capabilities through SUBMIT_RESOURCES. The
+kernel retains each referenced object in the immutable capsule alongside source
+maps; common service MAP queries supply actual identities, shapes and inner
+templates. The authenticated worker uses those pinned resources for native
+alias binding, including native references beyond the source map set.

@@ -218,3 +218,11 @@ matching libbpf assembly. Three compiled BPF regressions and existing C++
 manifest checks pass. Tetragon execve_send selector becomes11296bytes; the
 next whole-app replay consumes the regenerated manifest with fixed native
 objects, workload and common kernel-owned generation/binding service.
+
+
+The [native resource caller](native-resource-caller/README.md) now carries
+deduplicated live map FDs into the kernel-owned capsule through T c94fbff01.
+Its component build and12service tests pass; actual kernel resource mutation,
+close and authorization controls are retained by T. The next wholeCilium
+replay consumes matching caller/worker/module inputs, preserving application
+workloads and the common fresh generation/verifier/binding service.
