@@ -1,0 +1,240 @@
+{
+  "utc": "2026-11-07T11:26:00.365961+00:00",
+  "source_commit": "ea2b294825a777b3f19adfe3c94813e739a1a750",
+  "scope": "isolated host compiler/layout diagnostic; production unchanged, no kernel load or native execution",
+  "candidate_promoted": false,
+  "compiler": {
+    "input_header_sha256": "60866e8e7a8a6b5772b8d177d01cd6013f1c90d7d0a67c6a9b5dd92f5a7e7a7b",
+    "cases": [
+      {
+        "app": "tcplife",
+        "stack_min": -240,
+        "stack_max": 0,
+        "ghost_slots": null,
+        "compile": 0,
+        "max_fp_minus": 584,
+        "command": [
+          "clang",
+          "-g",
+          "-O2",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_arm64",
+          "-I",
+          "/workspaces/repository/kprog/arm64",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/A/sparse-compile-fz9xrxge/tcplife.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/A/sparse-compile-fz9xrxge/tcplife.o"
+        ]
+      },
+      {
+        "app": "katran",
+        "stack_min": -240,
+        "stack_max": 0,
+        "ghost_slots": [
+          -64
+        ],
+        "compile": 0,
+        "max_fp_minus": 440,
+        "command": [
+          "clang",
+          "-g",
+          "-O2",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_arm64",
+          "-I",
+          "/workspaces/repository/kprog/arm64",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-c",
+          "/workspaces/.agent-state/kprog-lanes/A/sparse-compile-fz9xrxge/katran.c",
+          "-o",
+          "/workspaces/.agent-state/kprog-lanes/A/sparse-compile-fz9xrxge/katran.o"
+        ]
+      }
+    ],
+    "header_unchanged": true
+  },
+  "static_layout": [
+    {
+      "app": "tcplife",
+      "stack_min": -240,
+      "stack_max": 0,
+      "ghost_slots": null
+    },
+    {
+      "app": "katran",
+      "stack_min": -240,
+      "stack_max": 0,
+      "ghost_slots": [
+        -64
+      ]
+    }
+  ],
+  "fixtures": [
+    {
+      "case": "none",
+      "stack_bounds": [
+        0,
+        0
+      ],
+      "ghost_offsets": [],
+      "expected": []
+    },
+    {
+      "case": "outer_return",
+      "stack_bounds": [
+        -32,
+        0
+      ],
+      "ghost_offsets": [
+        -24
+      ],
+      "expected": [
+        -24
+      ]
+    },
+    {
+      "case": "stack_spill",
+      "stack_bounds": [
+        -32,
+        0
+      ],
+      "ghost_offsets": [
+        -32,
+        -24
+      ],
+      "expected": [
+        -32,
+        -24
+      ]
+    },
+    {
+      "case": "narrow",
+      "stack_bounds": [
+        -32,
+        0
+      ],
+      "ghost_offsets": [],
+      "expected": []
+    },
+    {
+      "case": "dynamic_add",
+      "stack_bounds": [
+        -32,
+        0
+      ],
+      "ghost_offsets": null,
+      "expected": null
+    },
+    {
+      "case": "joined",
+      "stack_bounds": [
+        -32,
+        0
+      ],
+      "ghost_offsets": [
+        -32
+      ],
+      "expected": [
+        -32
+      ]
+    },
+    {
+      "case": "memcpy",
+      "stack_bounds": [
+        -32,
+        0
+      ],
+      "ghost_offsets": [
+        -32,
+        -24
+      ],
+      "expected": [
+        -32,
+        -24
+      ]
+    },
+    {
+      "case": "copied_return",
+      "stack_bounds": [
+        -32,
+        0
+      ],
+      "ghost_offsets": [
+        -16
+      ],
+      "expected": [
+        -16
+      ]
+    },
+    {
+      "case": "conditional_increment",
+      "stack_bounds": [
+        -32,
+        0
+      ],
+      "ghost_offsets": null,
+      "expected": null
+    },
+    {
+      "case": "postindexed_spill",
+      "stack_bounds": [
+        -32,
+        0
+      ],
+      "ghost_offsets": [
+        -24,
+        -16
+      ],
+      "expected": [
+        -24,
+        -16
+      ]
+    },
+    {
+      "case": "external_probe",
+      "stack_bounds": [
+        -32,
+        0
+      ],
+      "ghost_offsets": [
+        -32
+      ],
+      "expected": [
+        -32
+      ]
+    },
+    {
+      "case": "unknown_stack_probe",
+      "stack_bounds": [
+        -32,
+        0
+      ],
+      "ghost_offsets": null,
+      "expected": null
+    }
+  ],
+  "regression_before": "postindexed_spill expected [-24,-16], previous candidate returned [-24]; fixed by retaining base-register ghost provenance across address writeback",
+  "tcplife_dense_reason": "probe_read_kernel at native PC0x3d4 joins real lengths4 and16; single-constant analysis loses the length and retains dense payload",
+  "notes": "Raw native stack bytes and tags remain full size. The candidate stores ghost payload only for STACK/RETURN. Finite ghost slots use rank indexing without a default-value/trap/zero-return arm; unresolved layouts retain the existing dense representation. No application/verifier success is inferred from compiler frame size.",
+  "archive_sha256": "13bc9b100ccb4dacb461e6105ea21f147537d47b53100aa596de44206c58eef8"
+}
