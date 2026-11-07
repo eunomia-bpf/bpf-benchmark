@@ -13,20 +13,20 @@ specialization token also has its own row.
 | Raw register handler refinement | 32/75 | 0/71 |
 | Raw register dispatcher arm composition | 32/75 | 0/71 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
-| Addressed memory model / composed step | 6/75 | 0/71 |
-| Additional partial-model handler families | 25/75 | 0 |
+| Addressed memory model / composed step | 8/75 | 0/71 |
+| Additional partial-model handler families | 23/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 69/71 |
 | Declared opcode dispatcher gaps | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 42/75 | 0/71 |
+| O2 C-model token-body equality | 44/75 | 0/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 65/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 5/71 |
 
-The 42 x86 O2 equalities cover30 direct bodies, ten generic calls and two
+The 44 x86 O2 equalities cover32 direct bodies, ten generic calls and two
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
-The remaining25 x86 reference-family handlers have partial model proofs; eight
+The remaining23 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 require ALU-family and
@@ -41,7 +41,7 @@ the current 75/71 numeric catalogs. Five x86 compatibility aliases have separate
 rows and are excluded from operation/token totals. Numeric tokens, native
 instruction forms and control composites retain their distinct identities.
 
-Replay integration uses F's published input set `bc8015a5d4114a025a8015d991cfe0068009f434`
+Replay integration uses F's published input set `1fb265102ed767ecfc4e4c8e9264c6ceb3bc24c6`
 ([source ledger](../kprog_fidelity_20261107/differential/replay-inputs/README.md)).
 Each `replay_source_epochs` cell records the actual backend, source snapshot,
 simulator/executable/reference hashes, selected forms, all three comparison
@@ -73,6 +73,13 @@ source receipt; the pure Lean/JSON bit contract retains its original bytes.
 The published8aa94baa2 full check and current memory-condition oracles both
 use this header. C/Lean and compiler correspondence retain their stated trust
 and production interfaces.
+
+The adopted production replay epoch contributes1,144 forms and292,864
+real-CPU/C/canonical cases with all three comparison counts agreeing. Its
+main6b3f3173/tagged-writecf27e323/executable5188ecde identities retain
+the actual initial283,136 cases and9,728 control-completion cases. The source
+ledger now carries15 epochs/219 operation-source rows/72 artifact pins;
+62 additional source rows extend124 central operation/token rows.
 
 <!-- COVERAGE END -->
 
@@ -3562,3 +3569,40 @@ under `x86_store_memory_dispatch_tokens`.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_23a3cfde9`. Every check retains its exact published source identity.
+
+### Memory unary and rotate read/modify/write refinement
+
+ALU_MEM_UNARY and ROR_MEM now compose through the universal x86 dispatcher
+step and per-token body/native-successor laws. A shared numeric-frame memory
+transfer preserves the completed read before a write fault and commits the
+result, flags and PC on a permitted write. Native input fields derive the
+base/index/scale address from the complete displacement. Unary composition
+uses the actual RHS1 generated result for INC/DEC/NEG/NOT and all six status
+flags; ROR consumes the high AUX byte as its raw count and preserves PF/AF/
+ZF/SF. The observed frame includes memory initialization, ordered effects
+and fault rollback. Private arena/permission, ABI, definedness, C-model
+correspondence, compiler and native-link interfaces retain their scope.
+
+Focused141-module and default Lean builds and ten axiom audits passed. The
+143 transitive proof/toolchain inputs and78 published replay inputs match
+their221 publication hashes. All98 NumericAddress and54 Dispatcher public
+signatures are retained. The existing ALU-memory route oracle passed
+26,547,217 UBSan observations:261,137 original checks plus773,120 complete
+frames with34 observations each. Address matrices cover heap/RSP/STACK/
+absent-base forms, four index modes/scales, three native origins, widths
+8/16/32/64/default and both direct/dispatcher routes. Separate matrices cover
+all64 incoming six-flag combinations, width-specific signed boundaries and
+every raw ROR count0..255 with mixed source bits. The actual156 C inputs
+remain stable. Initial proof diagnostics and the earlier successful fixture
+revision are retained with the final source, logs and hashes.
+
+F's published1fb265102 replay ledger supplies the adopted production epoch
+01ce447e7:1,144 forms/292,864 real-CPU/C/canonical observations, with zero
+differences in each comparison. All72 artifact pins and six ledger files
+match published Git. Each of124 updated central rows retains its preceding
+epochs exactly. Numeric replay totals retain66/75 x86 and65/71 ARM plus the
+separate monitor projection. Coverage becomes44 O2 tokens (32 direct, ten
+generic, two branch), eight addressed-memory models and23 partial families.
+The audits report propext, Classical.choice, Quot.sound and Lean.ofReduceBool.
+The integration archive records `x86_modify_memory_dispatch_tokens` and
+`production_replay_1fb_epoch`.

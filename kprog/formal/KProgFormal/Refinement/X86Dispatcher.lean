@@ -2114,6 +2114,58 @@ theorem store_registers_refine (env : EntryEnvironment.Environment) (frame : Ent
       rw [memory_address_registers_refine env frame arena state dst base index aux value baseField indexField]
       exact congrArg some (store_register_frame_refines env frame arena state width source _ nextPc)
 
+/-- Memory unary payloads and ROR's raw byte count share AUX's high byte;
+their effective address uses the complete displacement word. -/
+def modifyMemoryRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+  if code = GeneratedX86Opcode.code .aluMemUnary then do
+    let width ← widthOf flags
+    let kind ← unaryKindOf (GeneratedX86MemAux.op aux)
+    let address ← memoryAddressRegisters env frame arena state dst aux value
+    pure (unaryMemoryFrame env frame arena state width kind address nextPc)
+  else if code = GeneratedX86Opcode.code .rorMem then do
+    let width ← widthOf flags
+    let address ← memoryAddressRegisters env frame arena state dst aux value
+    pure (rotateMemoryFrame env frame arena state width ((GeneratedX86MemAux.op aux).setWidth 64) address nextPc)
+  else none
+
+inductive ModifyMemoryBinding (flags : Byte) (aux : BitVec 32) (dst : Byte)
+    (value nextPc : Reference.Word) (nativeState : Reference.X86.State) :
+    Nat → Reference.X86.Instruction → Prop where
+  | unary (width : ScalarWidth) (kind : Reference.X86.UnaryKind) (base index : Option Register)
+      (widthField : WidthBinding flags width)
+      (kindField : GeneratedX86MemAux.op aux = BitVec.ofNat 32 (GeneratedX86AluDecode.code (X86Unary.alu kind)))
+      (baseField : dst = optionalRegisterByte base)
+      (indexField : (GeneratedX86MemAux.index aux).setWidth 8 = optionalRegisterByte index) :
+      ModifyMemoryBinding flags aux dst value nextPc nativeState (GeneratedX86Opcode.code .aluMemUnary)
+        (.unary width kind (.memory (leaAddress nativeState base index aux value)) nextPc)
+  | rotate (width : ScalarWidth) (base index : Option Register)
+      (widthField : WidthBinding flags width) (baseField : dst = optionalRegisterByte base)
+      (indexField : (GeneratedX86MemAux.index aux).setWidth 8 = optionalRegisterByte index) :
+      ModifyMemoryBinding flags aux dst value nextPc nativeState (GeneratedX86Opcode.code .rorMem)
+        (.rotateRight width (.memory (leaAddress nativeState base index aux value))
+          ((GeneratedX86MemAux.op aux).setWidth 64) nextPc)
+
+theorem modify_memory_registers_refine (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : ModifyMemoryBinding flags aux dst value nextPc (nativeRegisters env frame arena state) code native) :
+    modifyMemoryRegisters env frame arena code flags aux dst value nextPc state =
+      some (Reference.X86.step native (nativeRegisters env frame arena state)) := by
+  cases binding with
+  | unary width kind base index widthField kindField baseField indexField =>
+      simp only [modifyMemoryRegisters, if_pos rfl, width_binding_decodes flags width widthField,
+        unary_kind_binding_decodes _ kind kindField, Option.bind_some]
+      rw [memory_address_registers_refine env frame arena state dst base index aux value baseField indexField]
+      exact congrArg some (unary_memory_frame_refines env frame arena state width kind _ nextPc)
+  | rotate width base index widthField baseField indexField =>
+      have separate : GeneratedX86Opcode.code .rorMem ≠ GeneratedX86Opcode.code .aluMemUnary := by decide
+      simp only [modifyMemoryRegisters, separate, if_pos rfl, ↓reduceIte,
+        width_binding_decodes flags width widthField, Option.bind_some]
+      rw [memory_address_registers_refine env frame arena state dst base index aux value baseField indexField]
+      exact congrArg some (rotate_memory_frame_refines env frame arena state width _ _ nextPc)
+
 /-- Unified partial simulator step: register execution and the producer's
 separate JCC/JMP branch-handler class share one transition interface. Logical
 label/PC and compiled-code correspondence retain their layout/ABI obligations. -/
@@ -2125,6 +2177,8 @@ def dispatchStep (env : EntryEnvironment.Environment) (frame : EntryEnvironment.
   | none =>
       if code = GeneratedX86Opcode.code .jcc then branchRegisters env frame arena current aux value nextPc state
       else if code = GeneratedX86Opcode.code .jmp then jumpRegisters env frame arena value state
+      else if code = GeneratedX86Opcode.code .aluMemUnary ∨ code = GeneratedX86Opcode.code .rorMem then
+        modifyMemoryRegisters env frame arena code flags aux dst value nextPc state
       else if code = GeneratedX86Opcode.code .movStoreImm ∨ code = GeneratedX86Opcode.code .movStoreReg then
         storeRegisters env frame arena code flags aux dst src value nextPc state
       else if code = GeneratedX86Opcode.code .setccMem ∨ code = GeneratedX86Opcode.code .cmovMem then
@@ -2146,6 +2200,9 @@ inductive StepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value n
       StepBinding flags aux dst src value nextPc nativeState code native
   | endian (code : Nat) (native : Reference.X86.Instruction)
       (fields : EndianBinding flags aux dst src value nextPc nativeState code native) :
+      StepBinding flags aux dst src value nextPc nativeState code native
+  | modifyMemory (code : Nat) (native : Reference.X86.Instruction)
+      (fields : ModifyMemoryBinding flags aux dst value nextPc nativeState code native) :
       StepBinding flags aux dst src value nextPc nativeState code native
   | store (code : Nat) (native : Reference.X86.Instruction)
       (fields : StoreBinding flags aux dst src value nextPc nativeState code native) :
@@ -2185,6 +2242,12 @@ theorem simulator_step_refines (env : EntryEnvironment.Environment) (frame : Ent
   | endian code native fields =>
       apply exact_dispatch_refines
       have model := endian_registers_refine env frame arena code flags aux dst src value nextPc state native fields
+      cases fields <;>
+        simpa [dispatchStep, dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+          GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code] using model
+  | modifyMemory code native fields =>
+      apply exact_dispatch_refines
+      have model := modify_memory_registers_refine env frame arena code flags aux dst value nextPc state native fields
       cases fields <;>
         simpa [dispatchStep, dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
           GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code] using model
@@ -2228,6 +2291,8 @@ def specializedStep (env : EntryEnvironment.Environment) (frame : EntryEnvironme
   else if token = .cmovMem then conditionMemoryRegisters env frame arena (GeneratedX86Opcode.code .cmovMem) flags aux dst src value nextPc state
   else if token = .movStoreImm then storeRegisters env frame arena (GeneratedX86Opcode.code .movStoreImm) flags aux dst src value nextPc state
   else if token = .movStoreReg then storeRegisters env frame arena (GeneratedX86Opcode.code .movStoreReg) flags aux dst src value nextPc state
+  else if token = .aluMemUnary then modifyMemoryRegisters env frame arena (GeneratedX86Opcode.code .aluMemUnary) flags aux dst value nextPc state
+  else if token = .rorMem then modifyMemoryRegisters env frame arena (GeneratedX86Opcode.code .rorMem) flags aux dst value nextPc state
   else specializedRegisters env frame arena token flags aux dst src value nextPc state
 
 def stepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
@@ -2236,6 +2301,7 @@ def stepTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX8
   else if token = .movbeLoad then some .movbeLoad else if token = .movbeStore then some .movbeStore
   else if token = .setccMem then some .setccMem else if token = .cmovMem then some .cmovMem
   else if token = .movStoreImm then some .movStoreImm else if token = .movStoreReg then some .movStoreReg
+  else if token = .aluMemUnary then some .aluMemUnary else if token = .rorMem then some .rorMem
   else registerTokenOpcode token
 
 private theorem register_token_excludes_control (token : GeneratedX86Specialization.Op)
@@ -2274,6 +2340,14 @@ private theorem register_token_excludes_store (token : GeneratedX86Specializatio
     (opcode : GeneratedX86Opcode.Op) (selected : registerTokenOpcode token = some opcode) :
     token ≠ .movStoreImm ∧ token ≠ .movStoreReg ∧ GeneratedX86Opcode.code opcode ≠ GeneratedX86Opcode.code .movStoreImm ∧
       GeneratedX86Opcode.code opcode ≠ GeneratedX86Opcode.code .movStoreReg := by
+  cases token <;> simp only [registerTokenOpcode, directRegisterOpcode] at selected
+  all_goals first | contradiction | cases selected
+  all_goals decide
+
+private theorem register_token_excludes_modify_memory (token : GeneratedX86Specialization.Op)
+    (opcode : GeneratedX86Opcode.Op) (selected : registerTokenOpcode token = some opcode) :
+    token ≠ .aluMemUnary ∧ token ≠ .rorMem ∧ GeneratedX86Opcode.code opcode ≠ GeneratedX86Opcode.code .aluMemUnary ∧
+      GeneratedX86Opcode.code opcode ≠ GeneratedX86Opcode.code .rorMem := by
   cases token <;> simp only [registerTokenOpcode, directRegisterOpcode] at selected
   all_goals first | contradiction | cases selected
   all_goals decide
@@ -2364,18 +2438,33 @@ theorem step_token_body_matches (env : EntryEnvironment.Environment) (frame : En
                       simp [specializedStep, dispatchStep, dispatchRegisters, dispatchThroughMove, beforeMove,
                         aluImmediateHandled, aluRegisterHandled, GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code,
                         GeneratedX86DispatchSingleton.code]
-                    · have registerSelected : registerTokenOpcode token = some opcode := by
-                        simpa only [stepTokenOpcode, conditional, jump, push, pop, load, store, set, move, immediateStore, registerStore, ↓reduceIte] using selected
-                      obtain ⟨_, _, notConditional, notJump⟩ := register_token_excludes_control token opcode registerSelected
-                      obtain ⟨_, _, notPush, notPop⟩ := register_token_excludes_stack token opcode registerSelected
-                      obtain ⟨_, _, notLoad, notStore⟩ := register_token_excludes_endian token opcode registerSelected
-                      obtain ⟨_, _, notSet, notMove⟩ := register_token_excludes_memory_condition token opcode registerSelected
-                      obtain ⟨_, _, notImmediateStore, notRegisterStore⟩ := register_token_excludes_store token opcode registerSelected
-                      simp only [specializedStep, conditional, jump, push, pop, load, store, set, move, immediateStore, registerStore, ↓reduceIte]
-                      rw [register_token_body_matches env frame arena token opcode flags aux dst src value nextPc state registerSelected]
-                      unfold dispatchStep
-                      cases dispatched : dispatchRegisters env frame arena (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
-                        simp [dispatched, notConditional, notJump, notSet, notMove, notLoad, notStore, notImmediateStore, notRegisterStore, stackRegisters, notPush, notPop]
+                    · by_cases memoryUnary : token = .aluMemUnary
+                      · subst token
+                        simp only [stepTokenOpcode, reduceCtorEq, ↓reduceIte, Option.some.injEq] at selected
+                        subst opcode
+                        simp [specializedStep, dispatchStep, dispatchRegisters, dispatchThroughMove, beforeMove,
+                          aluImmediateHandled, aluRegisterHandled, GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code,
+                          GeneratedX86DispatchSingleton.code]
+                      · by_cases memoryRotate : token = .rorMem
+                        · subst token
+                          simp only [stepTokenOpcode, reduceCtorEq, ↓reduceIte, Option.some.injEq] at selected
+                          subst opcode
+                          simp [specializedStep, dispatchStep, dispatchRegisters, dispatchThroughMove, beforeMove,
+                            aluImmediateHandled, aluRegisterHandled, GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code,
+                            GeneratedX86DispatchSingleton.code]
+                        · have registerSelected : registerTokenOpcode token = some opcode := by
+                            simpa only [stepTokenOpcode, conditional, jump, push, pop, load, store, set, move, immediateStore, registerStore, memoryUnary, memoryRotate, ↓reduceIte] using selected
+                          obtain ⟨_, _, notConditional, notJump⟩ := register_token_excludes_control token opcode registerSelected
+                          obtain ⟨_, _, notPush, notPop⟩ := register_token_excludes_stack token opcode registerSelected
+                          obtain ⟨_, _, notLoad, notStore⟩ := register_token_excludes_endian token opcode registerSelected
+                          obtain ⟨_, _, notSet, notMove⟩ := register_token_excludes_memory_condition token opcode registerSelected
+                          obtain ⟨_, _, notImmediateStore, notRegisterStore⟩ := register_token_excludes_store token opcode registerSelected
+                          obtain ⟨_, _, notMemoryUnary, notMemoryRotate⟩ := register_token_excludes_modify_memory token opcode registerSelected
+                          simp only [specializedStep, conditional, jump, push, pop, load, store, set, move, immediateStore, registerStore, memoryUnary, memoryRotate, ↓reduceIte]
+                          rw [register_token_body_matches env frame arena token opcode flags aux dst src value nextPc state registerSelected]
+                          unfold dispatchStep
+                          cases dispatched : dispatchRegisters env frame arena (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state <;>
+                            simp [dispatched, notConditional, notJump, notSet, notMove, notLoad, notStore, notImmediateStore, notRegisterStore, notMemoryUnary, notMemoryRotate, stackRegisters, notPush, notPop]
 
 
 theorem simulator_token_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)

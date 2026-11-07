@@ -809,6 +809,123 @@ static void check_selectors(void)
 	}
 }
 
+
+/* Generic memory unary/ROR frame checks, using independent byte and flag
+formulas over the original source, with full register/tag preservation. */
+static __u64 rmw_native_cell(const __u64 *r, const __u8 *tags, unsigned reg,
+                              __u64 arena, __u64 base)
+{
+    return reg == X86_RSP ? r[reg] + base :
+        tags[reg] == X86_SIM_TAG_STACK ? r[reg] - arena + base : r[reg];
+}
+
+static void check_rmw_frame(unsigned operation, unsigned flags, unsigned count,
+                             unsigned base_kind, unsigned index_kind, unsigned scale,
+                             __u64 native_base, unsigned seed, unsigned fv, unsigned via)
+{
+    static const __u64 values[] = {0, 1, ~0ULL, 0x7fffffffffffffffULL,
+        0x8000000000000000ULL, 0x80, 0x7f, 0x9123456789abcdefULL};
+    static const unsigned unary[] = {X86_ALU_INC, X86_ALU_DEC, X86_ALU_NEG, X86_ALU_NOT};
+    __u8 h[192], eh[192], es[X86_SIM_STACK_BYTES], tags[16], expected_flags[6];
+    __u64 r[16], arena, base, index, target, disp, source, result, mask, sign, sample;
+    unsigned width = flags ? flags : 8, bits = width * 8, i, bad, parity = 0;
+    unsigned br = base_kind == 0 ? X86_RSP : base_kind == 3 ? X86_REG_NONE : X86_RBP;
+    unsigned ir = index_kind == 0 ? X86_REG_NONE : index_kind == 1 ? X86_RCX :
+        index_kind == 2 ? X86_RSP : X86_RBP;
+    __u32 aux = ir | (scale << 8) | (0xd3U << 16) | ((operation == 4 ? count : unary[operation]) << 24);
+    __u8 *memory;
+    X86_SIM_L_DECLARE_STATE();
+    struct x86_sim_xdp_abi __x86_sim_abi = {};
+    struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;
+    __u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;
+    X86_SIM_L_DECLARE_STACK();
+    (void)__x86_sim_abi; (void)__x86_sim_skb_ctx; (void)__x86_sim_abi_kind;
+    (void)__x86_sim_ret_addr; (void)__x86_sim_helper_abi_base;
+    mask = width == 8 ? ~0ULL : (1ULL << bits) - 1; sign = 1ULL << (bits - 1);
+    sample = seed == 3 ? sign - 1 : seed == 4 ? sign : values[seed];
+    arena = (__u64)(unsigned long)&__x86_stack_mem.b[X86_SIM_STACK_BYTES];
+    for (i = 0; i < X86_SIM_STACK_BYTES; i++) es[i] = __x86_stack_mem.b[i] = (__u8)(i * 37 + 11);
+    for (i = 0; i < sizeof(h); i++) eh[i] = h[i] = (__u8)(i * 19 + 0xa7);
+    for (i = 0; i < 16; i++) {r[i] = 0x123456789abcdef0ULL + i * 0x10101; tags[i] = X86_SIM_TAG_SCALAR;}
+    r[X86_RSP] = (__u64)-32; r[X86_RCX] = 3;
+    r[X86_RBP] = base_kind == 2 ? arena - 40 : (__u64)(unsigned long)&h[48];
+    tags[X86_RBP] = base_kind == 2 ? X86_SIM_TAG_STACK : X86_SIM_TAG_SCALAR;
+    for (i = 0; i < 16; i++) X86_SIM_L_WRITE_REG_PTR_TAG(i, (void *)(unsigned long)r[i], tags[i]);
+    __x86_native_stack_base = native_base;
+    for (i = 0; i < 6; i++) expected_flags[i] = (fv >> i) & 1;
+    __x86_cf = expected_flags[0]; __x86_zf = expected_flags[1]; __x86_sf = expected_flags[2];
+    __x86_of = expected_flags[3]; __x86_pf = expected_flags[4]; __x86_af = expected_flags[5];
+    __x86_xmm0_lo = 0x12345678abcdef01ULL; __x86_xmm0_hi = 0xfedcba9876543210ULL;
+    base = br == X86_REG_NONE ? 0 : r[br];
+    index = ir == X86_REG_NONE ? 0 : rmw_native_cell(r, tags, ir, arena, native_base);
+    target = base_kind == 0 ? (__u64)-17 : base_kind == 2 ? arena - 17 : (__u64)(unsigned long)&h[97];
+    disp = target - base - (ir == X86_REG_NONE ? 0 : index << scale);
+    memory = base_kind == 0 || base_kind == 2 ? &es[X86_SIM_STACK_BYTES - 17] : &eh[97];
+    for (i = 0; i < width; i++) memory[i] = (__u8)(sample >> (i * 8));
+    if (base_kind == 0 || base_kind == 2)
+        for (i = 0; i < width; i++) __x86_stack_mem.b[X86_SIM_STACK_BYTES - 17 + i] = memory[i];
+    else for (i = 0; i < width; i++) h[97 + i] = memory[i];
+    source = sample & mask;
+    if (operation == 4) {
+        unsigned n = count & (width == 8 ? 63 : 31), rotation = n % bits;
+        result = 0;
+        for (i = 0; i < bits; i++) result |= ((source >> ((i + rotation) % bits)) & 1ULL) << i;
+        if (n) {
+            expected_flags[0] = (result >> (bits - 1)) & 1;
+            if (n == 1) expected_flags[3] = expected_flags[0] ^ ((result >> (bits - 2)) & 1);
+        }
+    } else {
+        result = operation == 0 ? (source + 1) & mask : operation == 1 ? (source - 1) & mask :
+            operation == 2 ? (0ULL - source) & mask : (~source) & mask;
+        if (operation < 3) {
+            expected_flags[1] = result == 0; expected_flags[2] = (result & sign) != 0;
+            expected_flags[3] = source == (operation == 0 ? sign - 1 : sign);
+            expected_flags[5] = ((source ^ (operation == 2 ? 0 : 1) ^ result) >> 4) & 1;
+            if (operation == 2) expected_flags[0] = source != 0;
+            for (i = 0; i < 8; i++) parity ^= (result >> i) & 1;
+            expected_flags[4] = !parity;
+        }
+    }
+    for (i = 0; i < width; i++) memory[i] = (__u8)(result >> (8 * i));
+    if (via) X86_SIM_L_EXEC(operation == 4 ? X86_OP_ROR_MEM : X86_OP_ALU_MEM_UNARY,
+        br, X86_REG_NONE, flags, aux, disp);
+    else if (operation == 4) X86_SIM_L_EXEC_ROR_MEM(br, flags, aux, disp);
+    else X86_SIM_L_EXEC_ALU_MEM_UNARY(br, flags, aux, disp);
+    bad = memcmp(h, eh, sizeof(h)) != 0;
+    for (i = 0; i < X86_SIM_STACK_BYTES; i++) bad |= es[i] != __x86_stack_mem.b[i];
+    cases++;
+    if (bad) {printf("MISMATCH RMW memory op=%u width=%u count=%u seed=%u base=%u index=%u\n", operation, width, count, seed, base_kind, index_kind); failures++; return;}
+    for (i = 0; i < 16; i++) {
+        cases += 2;
+        if ((__u64)(unsigned long)X86_SIM_L_REG_VALUE(i) != r[i] || X86_SIM_L_REG_TAG(i) != tags[i]) {
+            printf("MISMATCH RMW preserved reg%u\n", i); failures++; return;
+        }
+    }
+    cases++;
+    if (__x86_cf != expected_flags[0] || __x86_zf != expected_flags[1] || __x86_sf != expected_flags[2] ||
+        __x86_of != expected_flags[3] || __x86_pf != expected_flags[4] || __x86_af != expected_flags[5] ||
+        __x86_xmm0_lo != 0x12345678abcdef01ULL || __x86_xmm0_hi != 0xfedcba9876543210ULL) {
+        printf("MISMATCH RMW flags/vector op=%u width=%u count=%u seed=%u flags=%u\n", operation, width, count, seed, fv); failures++;
+    }
+}
+
+static void check_rmw_frames(void)
+{
+    static const unsigned widths[] = {0, 1, 2, 4, 8}, counts[] = {0, 1, 7, 8, 16, 31, 32, 255};
+    static const __u64 bases[] = {0, 0x7fffffffef91ULL, 0xfffffffffffffff9ULL};
+    unsigned wi, op, bk, ik, sc, bi, via, seed, fv, count;
+    for (wi = 0; wi < 5; wi++) for (op = 0; op < 5; op++)
+    for (bk = 0; bk < 4; bk++) for (ik = 0; ik < 4; ik++) for (sc = 0; sc < 4; sc++)
+    for (bi = 0; bi < 3; bi++) for (via = 0; via < 2; via++) for (seed = 0; seed < 8; seed++)
+        check_rmw_frame(op, widths[wi], counts[seed], bk, ik, sc, bases[bi], seed, (seed * 13) & 63, via);
+    for (wi = 0; wi < 5; wi++) for (op = 0; op < 4; op++) for (fv = 0; fv < 64; fv++)
+    for (seed = 0; seed < 8; seed++) for (via = 0; via < 2; via++) for (bk = 0; bk < 2; bk++)
+        check_rmw_frame(op, widths[wi], 0, bk, 0, 0, bases[1], seed, fv, via);
+    for (wi = 0; wi < 5; wi++) for (count = 0; count < 256; count++) for (fv = 0; fv < 64; fv++)
+    for (seed = 0; seed < 2; seed++) for (via = 0; via < 2; via++) for (bk = 0; bk < 2; bk++)
+        check_rmw_frame(4, widths[wi], count, bk, 0, 0, bases[2], seed ? 2 : 7, fv, via);
+}
+
 int main(void)
 {
 	static const unsigned tokens[16] = {
@@ -871,6 +988,7 @@ int main(void)
 									imm_values[l] :
 									disp_values[l],
 								s, f, f);
+	check_rmw_frames();
 	if (failures != 0) {
 		printf("x86 alu mem result route host cross-check: FAIL "
 		       "(%d)\n", failures);

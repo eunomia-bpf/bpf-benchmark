@@ -2090,4 +2090,77 @@ theorem store_immediate_frame_refines (env : Environment) (frame : Frame) (arena
         (nativeRegisters env frame arena state) := by
   simp only [storeImmediateFrame, KProgFormal.x86_immediate_value_refines, store_value_frame_refines]
 
+
+/-- Observed memory read/modify/write over one incoming numeric frame. A read
+fault retains the frame; a write fault also retains its completed read event. -/
+def modifyMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (value : NativeWord → NativeWord) (flags : NativeWord → NativeWord → NativeWord → NativeWord)
+    (address nextPc : NativeWord) : Transition Reference.X86.State :=
+  match X86Scalar.read (nativeRegisters env frame arena state) width (.memory address) with
+  | .error fault => ⟨nativeRegisters env frame arena state, [.fault fault], some fault⟩
+  | .ok (source, reads) =>
+      let result := value source
+      if permitted state.raw.memory.writable address width.bytes then
+        let memory := X86Scalar.store state.raw.memory width address result
+        let written := registerMemory state memory
+        ⟨nativeRegisters env frame arena
+          (registerPc (registerFlags written (flags source result state.raw.rflags)) nextPc),
+          reads ++ [.memory .write address (valueBytes result width.bytes) true], none⟩
+      else ⟨nativeRegisters env frame arena state,
+        reads ++ [.fault (.write address width.bytes)], some (.write address width.bytes)⟩
+
+def unaryMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.UnaryKind)
+    (address nextPc : NativeWord) : Transition Reference.X86.State :=
+  modifyMemoryFrame env frame arena state width
+    (fun source => X86Arithmetic.narrow width (GeneratedX86AluResult.result (X86Unary.alu kind)
+      (X86Arithmetic.narrow width source) 1 (X86Scalar.handlerWidth width)))
+    (fun source _ old => X86Unary.flags width kind source old) address nextPc
+
+theorem unary_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.UnaryKind)
+    (address nextPc : NativeWord) :
+    unaryMemoryFrame env frame arena state width kind address nextPc =
+      Reference.X86.step (.unary width kind (.memory address) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have result (source : NativeWord) :
+      X86Arithmetic.narrow width (GeneratedX86AluResult.result (X86Unary.alu kind)
+        (X86Arithmetic.narrow width source) 1 (X86Scalar.handlerWidth width)) = X86Unary.value width kind source := by
+    cases kind <;> rfl
+  rw [← X86Unary.step_refines]
+  simp only [unaryMemoryFrame, modifyMemoryFrame, X86Unary.handlerStep,
+    Reference.X86.ScalarDestination.source, result]
+  cases read : X86Scalar.read (nativeRegisters env frame arena state) width (.memory address) with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [X86Scalar.write, native_register_pc, native_register_flags, native_register_memory,
+        show (nativeRegisters env frame arena state).memory = state.raw.memory from rfl,
+        show (nativeRegisters env frame arena state).rflags = state.raw.rflags from rfl]
+      split <;> rename_i allowed <;> simp only [allowed, ↓reduceIte] <;> rfl
+
+def rotateMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (count address nextPc : NativeWord) : Transition Reference.X86.State :=
+  modifyMemoryFrame env frame arena state width (fun source => X86RotateRight.value width source count)
+    (fun _ result old => X86RotateRight.flags width result count old) address nextPc
+
+theorem rotate_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (count address nextPc : NativeWord) :
+    rotateMemoryFrame env frame arena state width count address nextPc =
+      Reference.X86.step (.rotateRight width (.memory address) count nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86RotateRight.step_refines]
+  simp only [rotateMemoryFrame, modifyMemoryFrame, X86RotateRight.handlerStep,
+    Reference.X86.ScalarDestination.source]
+  cases read : X86Scalar.read (nativeRegisters env frame arena state) width (.memory address) with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨source, reads⟩
+      simp only [X86Scalar.write, native_register_pc, native_register_flags, native_register_memory,
+        show (nativeRegisters env frame arena state).memory = state.raw.memory from rfl,
+        show (nativeRegisters env frame arena state).rflags = state.raw.rflags from rfl]
+      split <;> rename_i allowed <;> simp only [allowed, ↓reduceIte] <;> rfl
+
 end KProgFormal.Refinement.X86NumericAddress
