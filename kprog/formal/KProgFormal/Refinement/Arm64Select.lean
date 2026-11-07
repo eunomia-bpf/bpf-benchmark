@@ -3,6 +3,7 @@ import KProgFormal.Arm64Cneg
 import KProgFormal.Arm64CselPtr
 import KProgFormal.Refinement.Arm64Condition
 import KProgFormal.Refinement.Arm64Register
+import KProgFormal.Refinement.Arm64Extrev
 
 namespace KProgFormal.Refinement.Arm64Select
 
@@ -271,5 +272,122 @@ theorem dispatch_other (code condition : Nat) (width : Width) (dst lhs rhs : Reg
 theorem dispatch_negate_other (code condition : Nat) (width : Width) (dst src : Register)
     (s : Reference.AArch64.State) (other : code ≠ GeneratedArm64Cneg.code .cneg) :
     dispatchNegate code condition width dst src s = none := by simp [dispatchNegate, other]
+
+
+namespace DispatchChain
+
+/-- Extend the existing consecutive SHIFT/multiply/unary segment with the
+next production CNEG and extract/reverse/extend branches. The same whole AUX
+word is a condition for CNEG and packed modifier fields for the earlier rows. -/
+def dispatch (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register)
+    (immediate : Word) (s : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  match Arm64Mul.DispatchChain.dispatch code aux width dst src src2 src3 immediate s with
+  | some result => some result
+  | none => match Arm64Select.dispatchNegate code aux.toNat width dst src s with
+    | some result => some result
+    | none => Arm64Extrev.dispatch code width dst src src2 immediate s
+
+/-- An equality of executable fragments, not a premise that the prefix refines.
+All earlier canonical-step theorems therefore transport through the added
+branches, even when an invalid prefix AUX yields None. -/
+theorem prefix_preserved (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register)
+    (immediate : Word) (s : Reference.AArch64.State)
+    (valid : code = GeneratedArm64DispatchFamily.code .shiftImm ∨
+      code = GeneratedArm64DispatchFamily.code .shiftReg ∨
+      (∃ op, code = GeneratedArm64Mul.code op) ∨ (∃ op, code = GeneratedArm64Unary.code op)) :
+    dispatch code aux width dst src src2 src3 immediate s =
+      Arm64Mul.DispatchChain.dispatch code aux width dst src src2 src3 immediate s := by
+  have cnegNone : Arm64Select.dispatchNegate code aux.toNat width dst src s = none := by
+    apply Arm64Select.dispatch_negate_other
+    rcases valid with h | h | ⟨member, h⟩ | ⟨member, h⟩
+    · subst code; decide
+    · subst code; decide
+    · subst code; cases member <;> decide
+    · subst code; cases member <;> decide
+  have extrevNone : Arm64Extrev.dispatch code width dst src src2 immediate s = none := by
+    apply Arm64Extrev.dispatch_other
+    intro target
+    rcases valid with h | h | ⟨member, h⟩ | ⟨member, h⟩
+    · subst code; cases target <;> decide
+    · subst code; cases target <;> decide
+    · subst code; cases member <;> cases target <;> decide
+    · subst code; cases member <;> cases target <;> decide
+  cases result : Arm64Mul.DispatchChain.dispatch code aux width dst src src2 src3 immediate s <;>
+    simp only [dispatch, result, cnegNone, extrevNone]
+
+theorem negate_refines (width : Width) (dst src src2 src3 : Register) (immediate : Word)
+    (predicate : Arm64Cond) (s : Reference.AArch64.State) (valid : predicate ≠ .al) :
+    dispatch (GeneratedArm64Cneg.code .cneg) (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate))
+      width dst src src2 src3 immediate s =
+      some (Reference.AArch64.step (.select width .negate dst src src (nativeCode (inverse predicate))) s) := by
+  have before : Arm64Mul.DispatchChain.dispatch (GeneratedArm64Cneg.code .cneg)
+      (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)) width dst src src2 src3 immediate s = none := by
+    apply Arm64Mul.DispatchChain.other
+    · decide
+    · decide
+    · intro member; cases member <;> decide
+    · intro member; cases member <;> decide
+  have condition : (BitVec.ofNat 32 (GeneratedArm64Cond.code predicate)).toNat =
+      GeneratedArm64Cond.code predicate := by cases predicate <;> rfl
+  unfold dispatch
+  rw [before, condition, Arm64Select.dispatch_negate_refines width dst src predicate s valid]
+
+/-- Every extract/reverse/extend member bypasses both the concrete prefix and
+CNEG; no property of its AUX or unused operands is required for that routing. -/
+theorem extrev_reached (op : GeneratedArm64Extrev.Extrev) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Register) (immediate : Word) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Extrev.code op) aux width dst src src2 src3 immediate s =
+      Arm64Extrev.dispatch (GeneratedArm64Extrev.code op) width dst src src2 immediate s := by
+  have before : Arm64Mul.DispatchChain.dispatch (GeneratedArm64Extrev.code op)
+      aux width dst src src2 src3 immediate s = none := by
+    apply Arm64Mul.DispatchChain.other
+    · cases op <;> decide
+    · cases op <;> decide
+    · intro member; cases op <;> cases member <;> decide
+    · intro member; cases op <;> cases member <;> decide
+  have cnegNone : Arm64Select.dispatchNegate (GeneratedArm64Extrev.code op) aux.toNat width dst src s = none := by
+    apply Arm64Select.dispatch_negate_other
+    cases op <;> decide
+  simp only [dispatch, before, cnegNone]
+
+theorem extract_refines (width : Width) (amount : Fin width.bits) (aux : BitVec 32)
+    (dst src src2 src3 : Register) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Extrev.code .extr) aux width dst src src2 src3 (BitVec.ofNat 64 amount.val) s =
+      some (Reference.AArch64.step (.extrev (.extract width amount dst src src2)) s) := by
+  rw [extrev_reached]
+  exact Arm64Extrev.dispatch_extract_refines width amount dst src src2 s
+
+theorem reverse_refines (width : Width) (halfwords : Bool) (aux : BitVec 32)
+    (dst src src2 src3 : Register) (immediate : Word) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Extrev.code (if halfwords then .rev16 else .rev)) aux
+      width dst src src2 src3 immediate s =
+      some (Reference.AArch64.step (.extrev (.reverse width halfwords dst src)) s) := by
+  rw [extrev_reached]
+  exact Arm64Extrev.dispatch_reverse_refines width halfwords dst src src2 immediate s
+
+theorem extend_refines (width : Width) (source : Reference.AArch64.ExtendBits) (aux : BitVec 32)
+    (dst src src2 src3 : Register) (immediate : Word) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Extrev.code (Arm64Extrev.extendOpcode source)) aux
+      width dst src src2 src3 immediate s =
+      some (Reference.AArch64.step (.extrev (.extend width source dst src)) s) := by
+  rw [extrev_reached]
+  exact Arm64Extrev.dispatch_extend_refines width source dst src src2 immediate s
+
+theorem other (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Register)
+    (immediate : Word) (s : Reference.AArch64.State)
+    (notShiftImm : code ≠ GeneratedArm64DispatchFamily.code .shiftImm)
+    (notShiftReg : code ≠ GeneratedArm64DispatchFamily.code .shiftReg)
+    (notMul : ∀ op, code ≠ GeneratedArm64Mul.code op)
+    (notUnary : ∀ op, code ≠ GeneratedArm64Unary.code op)
+    (notNegate : code ≠ GeneratedArm64Cneg.code .cneg)
+    (notExtrev : ∀ op, code ≠ GeneratedArm64Extrev.code op) :
+    dispatch code aux width dst src src2 src3 immediate s = none := by
+  have first := Arm64Mul.DispatchChain.other code aux width dst src src2 src3 immediate s
+    notShiftImm notShiftReg notMul notUnary
+  have second := Arm64Select.dispatch_negate_other code aux.toNat width dst src s notNegate
+  have third := Arm64Extrev.dispatch_other code width dst src src2 immediate s notExtrev
+  simp only [dispatch, first, second, third]
+
+end DispatchChain
 
 end KProgFormal.Refinement.Arm64Select

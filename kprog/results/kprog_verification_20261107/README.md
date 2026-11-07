@@ -581,3 +581,32 @@ reference/wire/compiler and semantic checks. The immutable source/cache export
 was deleted automatically; compressed CALL CPU observations retain this 440-case
 full run. Later Extrev, concrete dispatcher-chain and conditional-select work
 need their own full validation.
+
+## Consecutive dispatcher segment through CNEG and extract/reverse/extend
+
+`Arm64Select.DispatchChain` extends the prior SHIFT/multiply/unary fragment
+with the next production CNEG and extract/reverse/extend branches. The equality
+`prefix_preserved` retains every earlier executable-prefix result for its exact
+numeric operation set, even when malformed prefix AUX yields None. No refinement
+assumption is supplied: both later numeric gates are proved disjoint from all
+prefix members. The existing twelve-opcode canonical-step theorems consequently
+transport unchanged through this equality.
+
+CNEG's canonical step composes its whole-AUX condition with the unchanged alias
+validity/inversion theorem. Each of the six later extract/reverse/extend members
+is proved to bypass the earlier fragment and CNEG for arbitrary AUX/SRC3, then
+compose to its canonical full-state step. Their unused immediate/SRC2 fields and
+EXTR native Fin-width count remain unchanged. Other opcodes pass to surrounding
+dispatch as None. No flag/vector/SP/memory/effect changes or extra PC advance
+are introduced. This is a concrete nineteen-opcode fragment; the full72 step,
+Entry/O4 materialization/provenance and compiled-artifact correspondence remain
+open. All earlier theorem source is unchanged except one shared import.
+
+Validation: the 45-job Lean build and focused reference build passed, including
+existing regressions and 3860 AArch64 control/PC complete states. Six related
+contract freshness checks and generated direct-dispatch freshness passed.
+Existing actual operand/family/multiply/unary/CNEG/extrev route hosts passed
+3804, 136, 1296, 313, 26400 and 1680 cases. No proof/test failures, new tests or
+input filtering; original C host warnings remain visible. No runtime, oracle,
+ISA, compiler policy or foreign work changed. A combined full check follows
+publication, separate from exact0a9b8757c's already archived full pass.

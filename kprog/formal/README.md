@@ -77,8 +77,9 @@ immediate field31 remains ZR, while register operands distinguish SP and ZR. The
 multiply dispatcher includes UDIV input narrowing, unused alias operands and
 explicit X-width validity for long/high multiplies. EXTR/REV/REV16/SXT* bind
 the six numeric labels, EXTR-only input narrowing and unused operand fields. A concrete
-SHIFT→multiply→unary segment composes the production branch order and proves
-that preceding numeric gates cannot intercept later family members. CSEL/CNEG also
+SHIFT→multiply→unary→CNEG→extract/reverse/extend segment composes the production
+branch order and proves that preceding numeric gates cannot intercept later
+family members. CSEL/CNEG also
 compose whole-AUX condition decoding, NV normalization and the generated
 CSEL/X pointer-preserving gate; alias condition validity remains explicit.
 Individual module statements define their
