@@ -1,0 +1,77 @@
+{
+  "invocation_control": [
+    {
+      "command": [
+        "fuser",
+        "-s",
+        "--",
+        "/workspaces/.agent-state/kprog-lanes/C/fuser-open-control"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "No process specification given\nUsage: fuser [-fIMuvw] [-a|-s] [-4|-6] [-c|-m|-n SPACE]\n             [-k [-i] [-SIGNAL]] NAME...\n       fuser -l\n       fuser -V\nShow which processes use the named files, sockets, or filesystems.\n\n  -a,--all              display unused files too\n  -i,--interactive      ask before killing (ignored without -k)\n  -I,--inode            use always inodes to compare files\n  -k,--kill             kill processes accessing the named file\n  -l,--list-signals     list available signal names\n  -m,--mount            show all processes using the named filesystems or\n          "
+    },
+    {
+      "command": [
+        "fuser",
+        "-s",
+        "/workspaces/.agent-state/kprog-lanes/C/fuser-open-control"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "recipes": [
+    {
+      "makefile": "corpus/results/kprog_app_coverage_20261107/native-only-runtime/Makefile",
+      "held_files_retained": 2,
+      "closed_files_deleted": 2,
+      "open_check_stderr": "retaining open experiment file: /workspaces/.agent-state/kprog-lanes/C/cleanup-control-r67bbn6b/var-tmp/bpf-benchmark-docker.img\nretaining open experiment file: /workspaces/.agent-state/kprog-lanes/C/cleanup-control-r67bbn6b/runtime.image.tar\n",
+      "make_shell_syntax": "PASS"
+    },
+    {
+      "makefile": "corpus/results/kprog_app_coverage_20261107/cilium-update-identity/Makefile",
+      "held_files_retained": 2,
+      "closed_files_deleted": 2,
+      "open_check_stderr": "retaining open experiment file: /workspaces/.agent-state/kprog-lanes/C/cleanup-control-zyz2n1t2/var-tmp/bpf-benchmark-docker.img\nretaining open experiment file: /workspaces/.agent-state/kprog-lanes/C/cleanup-control-zyz2n1t2/runtime.image.tar\n",
+      "make_shell_syntax": "PASS"
+    }
+  ],
+  "closed_diagnostic_cleanup": {
+    "commit": "bcdb053047f97798e3f24a81a5c726e68ab4fd52",
+    "removed": [
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/control.i",
+        "bytes": 53808121,
+        "reason": "byte-identical published raw archive"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/unwinder.i",
+        "bytes": 274959358,
+        "reason": "byte-identical published raw archive"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/control.direct.o",
+        "bytes": 491920,
+        "reason": "byte-identical published raw archive"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/control.split.o",
+        "bytes": 532192,
+        "reason": "byte-identical published raw archive"
+      },
+      {
+        "path": "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/unwinder.split.o",
+        "bytes": 2689136,
+        "reason": "byte-identical published raw archive"
+      },
+      {
+        "path": "corpus/results/kprog_app_coverage_20261107/xdp-context-census/commands.jsonl",
+        "bytes": 34568852,
+        "reason": "byte-identical published gzip"
+      }
+    ]
+  },
+  "historical_occupancy_probe_valid": false
+}

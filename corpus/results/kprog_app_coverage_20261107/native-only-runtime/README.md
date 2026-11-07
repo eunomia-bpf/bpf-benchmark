@@ -218,3 +218,16 @@ otel-native-12g.json and its raw archives. The separate header-repair result
 records the exact native xor edx,edx source of this rejection, CPU validation
 and successful private compilation after repair; a new actual guest acceptance
 remains required. Disk and exported image tar were removed on closure.
+
+
+### Open-file cleanup invocation repair
+
+The Workspace fuser implementation rejects `fuser -s -- /absolute/path`,
+returning1 with usage text even for an open file. Both C corpus cleanup
+recipes now use `fuser -s /absolute/path`. Testing the actual Make-expanded
+cleanup functions with two genuinely open files retains both; after closing
+the handles the same functions delete both. This fixes occupancy detection;
+it does not change application, guest or proof behavior. Historical diagnostic
+duplicate removal had already checked closed job state and byte-identical
+published archives, but its fuser command was invalid and is not open-file
+evidence. The correction and raw control results are in cleanup-checks.json.
