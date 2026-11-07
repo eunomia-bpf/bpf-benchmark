@@ -1828,3 +1828,41 @@ to the existing integration JSON/gzip. Full exact900 `make check` EXIT2 at
 the unresolved dynamic x86 POPCNT harness remains unchanged; no redundant
 full was run. Full77/72/dispatcher/O2/O4 completion is not claimed.
 Proof SHA256 `9185aa823802161136a3ea98a76eb032ee98b22c12972751d305e86fb768f63b`.
+
+## x86 register CMOV through the raw stack frame
+
+`conditional_move_frame_refines` composes actual register CMOV branches with
+the same RSP-offset/STACK-arena native view. It derives the condition from
+complete native RFLAGS through the existing generated condition theorem;
+no branch-result premise is introduced. Taken64 uses the RSP-aware pointer
+MOV path, taken16/32 use the numeric writer, false32 writes and zero-extends
+the old native value, and false16/64 preserve the representation. All typed
+conditions, legal widths, source/destination/self aliases and all other
+architectural state/events are retained. Initial ABI/private-memory,
+compiled-B/whole-dispatch/full77/72/O2/O4 obligations remain open.
+
+Lean49-job graph and one axiom audit PASS, with only the existing propext,
+Classical.choice, Lean.ofReduceBool and Quot.sound dependencies. Older
+proof declarations are byte-identical except the CMOV import. The focused
+canonical reference includes F's FF/4 decoder-only work; its complete typed
+semantics prefix is byte-identical to published HEAD, and V changes no ISA.
+All7 proof source pins stayed unchanged.
+
+Fresh canonical UBSan checks: three contracts and the existing484369-case
+CMOV handler host PASS. The unchanged route host FAILS at source405,
+expanding `X86_SIM_L_LOAD_PTR_ADDR`'s misaligned volatile pointer load. That
+failure is preserved. A PRIVATE host-only aligned(1),may_alias pointer type
+candidate passes the SAME484369 handler and26526735 route cases; the route
+oracle body changes only its header include at the original include point.
+Both __BPF__ and __bpf__ preprocessed translation units are BYTEIDENTICAL
+to the canonical header. This is preprocessing equality, not compiled-BPF
+execution evidence. All candidate/canonical pins stay unchanged.
+
+The candidate is NOT promoted: C owns the shared header and its pinned
+census inputs. Its exact patch and complete source/logs/commands, the initial
+failed force-include setup, original UBSan failure and repaired candidate
+are archived separately in the existing integration JSON/gzip. The canonical
+host cache binary was restored by compilation without reexecuting its known
+UBSan failure. No shared header/ISA/runtime/oracle/test edits or sanitizer
+skips. Full exact900 POPCNT compile EXIT2 remains a separate unresolved
+complete-check result. Proof SHA256 `80efca20fcb8480e935eb9d0503873001c02a4142929d0fa8bd0888a1fa0f747`.

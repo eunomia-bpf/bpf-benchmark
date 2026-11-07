@@ -140,6 +140,8 @@ relates the actual register representation: RSP stores an offset, other STACK
 cells store private arena pointers, numeric partial writes materialize before
 merging, and RSP writeback normalizes once. Its MOV-immediate/register lifts
 preserve complete native state for all widths, byte lanes and register aliases.
+The register CMOV lift derives the same condition from native RFLAGS, retaining
+false32 zero extension and the RSP-aware full-width pointer path.
 The invocation stack origin and arena origin remain independent; initial ABI,
 private-memory and compiled-body correspondence still require certificates.
 

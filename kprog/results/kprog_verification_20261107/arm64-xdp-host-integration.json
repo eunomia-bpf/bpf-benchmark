@@ -2526,6 +2526,275 @@
     "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69",
     "kprog/formal/oracles/test_arm64_imm_operand_route_host.c": "9b985653d0650ae5a251ed14cb78388fd0cf2540ce05f534e5f3a2273dec7621"
   },
+  "x86_cmov_register_frame": {
+    "archive_block_sha256": "afab7df061ab7a32448e919277180607f83b91e0989e7521a5a49366952a7511",
+    "candidate_bpf_preprocessing": [
+      {
+        "candidate_exit": 0,
+        "candidate_sha256": "1035dca77258cbc03d8766e6d05aa8f8c402f1141103df095736948bb10178ce",
+        "canonical_exit": 0,
+        "canonical_sha256": "1035dca77258cbc03d8766e6d05aa8f8c402f1141103df095736948bb10178ce",
+        "host": "test_x86_cmov_route_host",
+        "identical": true,
+        "macro": "__BPF__"
+      },
+      {
+        "candidate_exit": 0,
+        "candidate_sha256": "c57f159207c22c5d5ed820988ed11b242a2244021cd4f3110c622673eda1bf24",
+        "canonical_exit": 0,
+        "canonical_sha256": "c57f159207c22c5d5ed820988ed11b242a2244021cd4f3110c622673eda1bf24",
+        "host": "test_x86_cmov_route_host",
+        "identical": true,
+        "macro": "__bpf__"
+      }
+    ],
+    "candidate_host_validation": {
+      "commands": [
+        {
+          "command": [
+            "python3",
+            "tools/generate_x86_cmov_spec.py",
+            "--check"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "python3",
+            "tools/generate_x86_reg_write_spec.py",
+            "--check"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "python3",
+            "tools/generate_x86_mov_reg_arm_spec.py",
+            "--check"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-fsanitize=undefined",
+            "-fno-sanitize-recover=undefined",
+            "-I.",
+            "-Ioracles",
+            "-I../x86",
+            "-I../../kprog",
+            "-I../../vendor/libbpf/src",
+            "oracles/test_x86_cmov_host.c",
+            "-o",
+            "build/test_x86_cmov_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "./build/test_x86_cmov_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-fsanitize=undefined",
+            "-fno-sanitize-recover=undefined",
+            "-I.",
+            "-Ioracles",
+            "-I../x86",
+            "-I../../kprog",
+            "-I../../vendor/libbpf/src",
+            "/workspaces/.agent-state/kprog-lanes/V/test_x86_cmov_route_host-candidate.c",
+            "-o",
+            "build/test_x86_cmov_route_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "./build/test_x86_cmov_route_host"
+          ],
+          "exit": 0
+        }
+      ],
+      "exit": 0,
+      "pins": {
+        "/workspaces/.agent-state/kprog-lanes/V/test_x86_cmov_route_host-candidate.c": "d74aef3238a52dc1bdecc23a2d35e331a4a63b5b84a8591af323ffd57068fea2",
+        "/workspaces/.agent-state/kprog-lanes/V/x86-pointer-load-candidate.h": "caba2355f63afc3c72bff8b29d13af75aba6247f8b25ae3011d1ac5666a32d36",
+        "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69",
+        "kprog/formal/generated/x86_cmov.h": "262be691d055cb0eea8b4d0c20e97037bfc2a97b65cd77d6cd5cbe124346cdb4",
+        "kprog/formal/generated/x86_mov_reg_arm.h": "4d90036061ffec933f3390c92ab6cc3aae2ab67865e11fdfb00e761a0c0d5ff7",
+        "kprog/formal/generated/x86_reg_read.h": "ea2f60863873509caf64d3d1e50b69eed77248ce4347c5fbe3efc76fc677f685",
+        "kprog/formal/generated/x86_reg_write.h": "7d76ebfeb14bd54acccb5598f8ef3feb03dfc354c44789fedd46f9b7dd5b0279",
+        "kprog/formal/generated/x86_stack_index.h": "a380689ecbdb79d41a1f6f14c2bc4b9fb3c4b16f19f859a33d6f6d5cfc5a4774",
+        "kprog/formal/oracles/test_x86_cmov_host.c": "4a2820da5f91f73459604b27a004bb88501358a01862ffa76d67162ba2504c12",
+        "kprog/formal/oracles/test_x86_cmov_route_host.c": "9f64bea3d96966970ababbabc4b21280d0d51da2ce31dcd6981494058a04ae92",
+        "kprog/formal/oracles/x86_no_helpers_host.h": "c47df126fb5e8b86011e99c337273727987cf5fdfaf24a5f9559be77dc4d50ae",
+        "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+        "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854"
+      },
+      "source_drift": []
+    },
+    "candidate_not_promoted": true,
+    "candidate_oracle_body_unchanged": true,
+    "canonical_cache_restore": {
+      "command": [
+        "cc",
+        "-Wall",
+        "-Wextra",
+        "-O2",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=undefined",
+        "-I.",
+        "-I../x86",
+        "-I../../kprog",
+        "-I../../vendor/libbpf/src",
+        "oracles/test_x86_cmov_route_host.c",
+        "-o",
+        "build/test_x86_cmov_route_host"
+      ],
+      "exit": 0,
+      "reexecuted": false
+    },
+    "canonical_host_validation": {
+      "commands": [
+        {
+          "command": [
+            "python3",
+            "tools/generate_x86_cmov_spec.py",
+            "--check"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "python3",
+            "tools/generate_x86_reg_write_spec.py",
+            "--check"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "python3",
+            "tools/generate_x86_mov_reg_arm_spec.py",
+            "--check"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-fsanitize=undefined",
+            "-fno-sanitize-recover=undefined",
+            "-I.",
+            "-I../x86",
+            "-I../../kprog",
+            "-I../../vendor/libbpf/src",
+            "oracles/test_x86_cmov_host.c",
+            "-o",
+            "build/test_x86_cmov_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "./build/test_x86_cmov_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-fsanitize=undefined",
+            "-fno-sanitize-recover=undefined",
+            "-I.",
+            "-I../x86",
+            "-I../../kprog",
+            "-I../../vendor/libbpf/src",
+            "oracles/test_x86_cmov_route_host.c",
+            "-o",
+            "build/test_x86_cmov_route_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "./build/test_x86_cmov_route_host"
+          ],
+          "exit": 1
+        }
+      ],
+      "exit": 1,
+      "pins": {
+        "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69",
+        "kprog/formal/generated/x86_cmov.h": "262be691d055cb0eea8b4d0c20e97037bfc2a97b65cd77d6cd5cbe124346cdb4",
+        "kprog/formal/generated/x86_mov_reg_arm.h": "4d90036061ffec933f3390c92ab6cc3aae2ab67865e11fdfb00e761a0c0d5ff7",
+        "kprog/formal/generated/x86_reg_read.h": "ea2f60863873509caf64d3d1e50b69eed77248ce4347c5fbe3efc76fc677f685",
+        "kprog/formal/generated/x86_reg_write.h": "7d76ebfeb14bd54acccb5598f8ef3feb03dfc354c44789fedd46f9b7dd5b0279",
+        "kprog/formal/generated/x86_stack_index.h": "a380689ecbdb79d41a1f6f14c2bc4b9fb3c4b16f19f859a33d6f6d5cfc5a4774",
+        "kprog/formal/oracles/test_x86_cmov_host.c": "4a2820da5f91f73459604b27a004bb88501358a01862ffa76d67162ba2504c12",
+        "kprog/formal/oracles/test_x86_cmov_route_host.c": "9f64bea3d96966970ababbabc4b21280d0d51da2ce31dcd6981494058a04ae92",
+        "kprog/formal/oracles/x86_no_helpers_host.h": "c47df126fb5e8b86011e99c337273727987cf5fdfaf24a5f9559be77dc4d50ae",
+        "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+        "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854"
+      },
+      "source_drift": []
+    },
+    "commands": [
+      {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.Refinement.X86NumericAddress"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "/workspaces/.agent-state/kprog-lanes/V/x86-cmov-frame-audit.lean"
+        ],
+        "exit": 0
+      }
+    ],
+    "exit": 0,
+    "pins": {
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+      "kprog/formal/KProgFormal/Reference/X86.lean": "c810a7707495b230af90a4d95dffc012632232eea119080c76c9669f9f5801e3",
+      "kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean": "80efca20fcb8480e935eb9d0503873001c02a4142929d0fa8bd0888a1fa0f747",
+      "kprog/formal/KProgFormal/Refinement/X86Scalar.lean": "aa9d8527e111c7bb9e9fbd494045855135defdb670f06e27acc7be7b294b50ce",
+      "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69",
+      "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+      "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854"
+    },
+    "prior_declarations_byte_identical_except_import": true,
+    "reference_source": {
+      "focused_sha256": "c810a7707495b230af90a4d95dffc012632232eea119080c76c9669f9f5801e3",
+      "owner": "F",
+      "published_sha256_at_collection": "c810a7707495b230af90a4d95dffc012632232eea119080c76c9669f9f5801e3",
+      "scope": "only FF/4 decoder hunk may be unpublished; CMOV/MOV/reference step prefix byte-identical",
+      "typed_semantics_prefix_equal": true
+    },
+    "scope": "CMOV register raw stack frame; typed generated conditions, all widths/aliases, both outcomes; ABI/private memory/compiled B/full77 remain open",
+    "source_drift": []
+  },
   "x86_register_frame": {
     "archive_block_sha256": "037eccc294ae9bdc5e8dc059ee4922b3520d05a612a58fbfd1497081d3d0cbb5",
     "commands": [
