@@ -20,7 +20,10 @@ def main():
     folder.mkdir(parents=True, exist_ok=True)
     source = ['#define X86_SIM_USE_STATE_STRUCT', '#define X86_SIM_ENABLE_STACK 1',
         '#include "../x86/x86_sim_local_bpf.h"', '#include "oracles/x86_no_helpers_host.h"',
-        '#include <string.h>', 'static __u8 datum[64];']
+        '#include <string.h>',
+        '/* Entry mode is immutable; snapshot it before opaque compiler barriers. */',
+        '#undef __x86_sim_is_xdp', '#define __x86_sim_is_xdp host_entry_is_xdp',
+        'static __u8 datum[64];']
     variants = [
         ("rdi+17", "rax", 0, False), ("rdi-3", "rax", 20, False),
         ("rdi+rcx*4-3", "rax", 12, False), ("rdi+17", "rdi", 0, False),
@@ -35,7 +38,8 @@ def main():
                 symbol_offset=17 if n == 6 else 0)
             encoded = g.encode(insn, {"datum": "datum"})
             assert encoded.op == "X86_OP_POPCNT_MEM", encoded
-            source += [f'static void run_{width}_{n}(struct x86_sim_state *state) {{',
+            source += [f'static __always_inline void run_{width}_{n}(struct x86_sim_state *state) {{',
+                'const __u8 host_entry_is_xdp = state->is_xdp;',
                 'X86_SIM_L_BIND_COMMON_STATE(state);',
                 f'X86_SIM_L_EXEC({encoded.op},{encoded.dst},{encoded.src},{encoded.flags},{encoded.aux},{encoded.imm});', '}']
     source += ['int main(void) { unsigned cases = 0;',
@@ -61,6 +65,8 @@ def main():
                 f'expected.{dst}.ptr=(void *)(unsigned long)'+('((old & ~0xffffULL)|count);' if width==2 else 'count;'),
                 f'expected.{dst}_tag=X86_SIM_TAG_SCALAR;',
                 'expected.cf=expected.pf=expected.af=expected.sf=expected.of=0;expected.zf=narrowed==0;',
+                '/* The fixture entry is raw memory, as initialized above. */',
+                'state.is_xdp=0;',
                 f'run_{width}_{n}(&state);',
                 f'if(memcmp(&state,&expected,sizeof state)||memcmp(before,datum,sizeof datum)) {{ fprintf(stderr,"POPCNT memory mismatch width={width} variant={n} flags=%u pattern=%u\\n",flags,pattern);return 1;}}',
                 '(void)old;cases++;}']
@@ -86,8 +92,24 @@ def main():
         body = [g.NativeInsn(0, "popcnt memory", "popcnt", (dst, f"{ptr} PTR [rdi]"))]
         if width == 2: body.append(g.NativeInsn(1, "movzx eax,ax", "movzx", ("eax", "ax")))
         body.append(g.NativeInsn(2, "ret", "ret", ()))
+        # Preserve the original context access: narrow reads are invalid native
+        # XDP ABI fields; the qword pointer-field read still compiles.
+        context = folder / f"context-{width}.c"
+        context.write_text(g.render_program(f"popcount_context_{width}", body))
+        context_command = ["clang-18", "-target", "bpfel", "-O2", "-D__TARGET_ARCH_x86", *includes,
+            "-I/usr/include/x86_64-linux-gnu", "-c", str(context), "-o", str(context.with_suffix(".o"))]
+        result = subprocess.run(context_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        context.with_suffix(".log").write_text(result.stdout)
+        if width == 8:
+            result.check_returncode()
+        elif result.returncode == 0 or "unmapped native XDP context read" not in result.stdout:
+            raise AssertionError(("narrow context read did not fail for its ABI mapping", width, result.stdout))
+        # The positive XDP fixture first obtains the native packet-data pointer.
+        # Keep the raw probe below focused on the POPCNT instruction alone.
+        packet_body = [g.NativeInsn(0, "mov rdi,QWORD PTR [rdi]", "mov", ("rdi", "QWORD PTR [rdi]"))]
+        packet_body += [g.NativeInsn(i.addr + 1, i.raw, i.mnemonic, i.operands) for i in body]
         c = folder / f"bpf-{width}.c"
-        c.write_text(g.render_program(f"popcount_memory_{width}", body))
+        c.write_text(g.render_program(f"popcount_memory_{width}", packet_body))
         subprocess.run(["clang-18", "-target", "bpfel", "-O2", "-D__TARGET_ARCH_x86", *includes,
             "-I/usr/include/x86_64-linux-gnu", "-c", str(c), "-o", str(c.with_suffix(".o"))], check=True)
         encoded = g.encode(body[0], {})
@@ -114,7 +136,7 @@ def main():
     relocations = subprocess.check_output(["llvm-readelf-18", "-r", str(c.with_suffix(".o"))], text=True)
     c.with_suffix(".relocs").write_text(relocations)
     assert ".rodata.native.0" in relocations, relocations
-    print("x86 POPCNT memory: five malformed encodings rejected; three raw BPF steps retain one exact-width read; four rendered programs compile including readonly relocation")
+    print("x86 POPCNT memory: five malformed encodings rejected; two narrow XDP-context accesses rejected; three raw BPF steps retain one exact-width read; three packet-memory programs plus the qword-context and readonly programs compile")
 
 
 if __name__ == "__main__":

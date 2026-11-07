@@ -2312,3 +2312,38 @@ The formal entry README is shortened to its requested role: what is proved,
 the single reference, layout, trusted assumptions and one make-check entry.
 Detailed chronological results stay in this dated log and the existing
 structured/compressed archive. No theorem or semantic oracle is removed.
+
+## POPCNT memory harness: preserve entry mode and use the native XDP ABI
+
+The previously blocking make-check component now passes, with GCC and Clang18
+both executing the same88,704 complete-state and memory comparisons under
+UBSan. All21 width/address/alias variants,64 flag combinations and66 value
+patterns remain. Five malformed encodings are rejected. Three raw BPF probes
+still contain exactly one load of their respective16/32/64-bit width; the
+readonly relocation remains checked.
+
+The state-struct host fixture now inlines its wrappers and snapshots the
+actual immutable entry-mode field before opaque compiler barriers, as the
+production local-state entry does. Each raw-memory case explicitly writes its
+already-zero mode before invocation. The snapshot changes no operand, memory,
+flag, register, tag or oracle expectation; complete-state memcmp is retained.
+Only the host fixture alias is rebound; generated BPF uses unmodified
+production macros. Initial inline, explicit-mode and working-copy attempts
+failed under Clang; their source, output and optimized IR remain in the
+archive. The ineffective working copy is absent from the final check.
+
+The old rendered XDP fixtures incorrectly treated the native context pointer
+as packet data: native data/data_end fields are64-bit pointers. Their direct
+16/32-bit context reads remain as two negative compilation checks requiring
+the unmapped-context diagnostic, and the direct64-bit context case still
+compiles. Three positive memory programs first load the native packet-data
+pointer and then perform the original POPCNT. Together with the readonly
+program, all five positive programs compile. No ISA/encoder/header/ABI rule
+is weakened and no original check is silently discarded.
+
+The final command exits0 with no drift among all input pins, using C's
+physical d30d4ff1 header candidate; its HEAD publication was still pending at
+validation. Full make-check has not yet been rerun, and this component pass
+does not close77/72/O2/O4. Exact failures, final sources, assembly, relocation
+output, commands, logs and source identities are appended to the existing
+integration JSON/gzip.
