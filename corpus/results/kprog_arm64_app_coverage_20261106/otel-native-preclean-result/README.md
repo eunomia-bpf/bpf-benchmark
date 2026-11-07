@@ -13,13 +13,14 @@ No simulator semantics or native instructions were changed. Huge intermediate
 IR remains in the lane-owned rebuildable cache, reproducible from the source.
 The archived commands use /workspaces/repository and the frozen v8 phase.
 
-A fresh14-program v15 preclean compilation is active. read_task_struct
-completes all five stages; stop reveals LLVM18's one-iteration instcombine
-fixpoint diagnostic. A corrected run with explicit max-iterations=16 is
-active in otel-stop-v16. The first16-iteration preclean step succeeds; a
-separate diagnostic then failed only because default<O2> was nested in a
-function-pass pipeline. The reusable compiler runs standard O2 as its own
-module invocation and retains every failure. No fallback path is used.
+A fresh14-program v15 preclean compilation remains active. read_task_struct
+completes all five stages; stop initially revealed LLVM18's one-iteration
+instcombine fixpoint diagnostic. The corrected otel-stop-v16 compile now
+completes **all five stages**, with explicit max-iterations=16 and standard
+O2 in its own module invocation. Its exact record, source, frozen contracts
+and compiled object are archived. No verifier or application claim follows
+from this compile. The earlier failed diagnostic (incorrectly nesting module
+O2 in a function-pass pipeline) is also preserved.
 
 Reusable command (fresh phase with generated program rows):
 make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile compile-preclean
