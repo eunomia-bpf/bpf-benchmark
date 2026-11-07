@@ -63,6 +63,41 @@ def state(data):
     return dict(registers=list(words[:32]),flags=words[32],vector=list(words[33:-1]),stack=words[-1].hex())
 
 
+def trace_layout(trace, arch, form_count, cases, observer_returncode=None):
+    """Validate the complete observer stream before decoding states."""
+    origin = ('saved_trace' if observer_returncode is None
+              else f'observer_returncode={observer_returncode}')
+    try:
+        with trace.open('rb') as source:
+            header = source.read(24)
+            actual_bytes = source.seek(0, 2)
+    except OSError as error:
+        raise RuntimeError(f'CPU state trace open failed: {trace}; {origin}; {error}') from error
+    if len(header) != 24:
+        raise RuntimeError(
+            f'CPU state trace header truncated: {trace}; {origin}; '
+            f'header_bytes={len(header)} expected_header_bytes=24; trace_bytes={actual_bytes}')
+    magic = header[:8]
+    size, memory, count, recorded_cases = struct.unpack('<4I', header[8:])
+    if (magic != b'KPFID002' or size not in {344, 840}
+            or (arch == 'x86' and size != 344) or memory != 256
+            or count != form_count or recorded_cases != cases):
+        raise RuntimeError(
+            f'CPU state trace layout mismatch: {trace}; {origin}; '
+            f'magic={magic.hex()} state_bytes={size} memory_bytes={memory} '
+            f'forms={count} expected_forms={form_count} '
+            f'cases={recorded_cases} expected_cases={cases}')
+    record_bytes = 16 + 3 * size + 3 * memory
+    expected_bytes = 24 + count * cases * record_bytes
+    if actual_bytes != expected_bytes:
+        raise RuntimeError(
+            f'CPU state trace length mismatch: {trace}; {origin}; '
+            f'trace_bytes={actual_bytes} expected_bytes={expected_bytes}; '
+            f'complete_records={(actual_bytes - 24) // record_bytes} '
+            f'expected_records={count * cases}')
+    return size, memory, count, recorded_cases, record_bytes
+
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--binary',type=Path,required=True)
@@ -84,12 +119,15 @@ def main():
     if args.opcode and (not args.reuse_trace or set(args.opcode)-{form['opcode'] for form in forms}):
         parser.error('--opcode requires --reuse-trace and opcodes present in the saved form matrix')
     trace=args.trace if args.trace else args.out/'cpu-states.bin'
+    observer_returncode=None
     if args.reuse_trace:
         with (args.out/'forms.tsv').open() as source:
             cpu_failed=any(int(row['mismatches']) for row in csv.DictReader(source,delimiter='\t') if not args.opcode or row['opcode'] in args.opcode)
     else:
         command=(['qemu-aarch64-static'] if args.arch=='arm64' and platform.machine()!='aarch64' else [])
-        cpu_failed=subprocess.run(command+[str(args.binary.resolve()),str(args.cases),str(args.out),str(trace)]).returncode != 0
+        observer_returncode=subprocess.run(command+[str(args.binary.resolve()),str(args.cases),str(args.out),str(trace)]).returncode
+        cpu_failed=observer_returncode != 0
+    size,memory,count,cases,record_bytes=trace_layout(trace,args.arch,len(forms),args.cases,observer_returncode)
     native_code=json.loads((args.out/'native-code.json').read_text())
     witness=None
     if args.exclusive_observation_witness:
@@ -135,13 +173,7 @@ def main():
     }
     rows=[];bad=0;checked=0
     with trace.open('rb') as source,(args.out/'reference-mismatches.jsonl').open('w') as failures,(args.out/'reference-unavailable.jsonl').open('w') as unavailable:
-        magic=source.read(8)
-        size,memory,count,cases=struct.unpack('<4I',source.read(16))
-        if magic!=b'KPFID002' or size not in {344,840} or (args.arch=='x86' and size!=344) or memory!=256 or count!=len(forms) or cases!=args.cases:
-            raise RuntimeError('trace layout/header mismatch')
-        record_bytes=16+3*size+3*256
-        if trace.stat().st_size!=24+count*cases*record_bytes:
-            raise RuntimeError('incomplete CPU state trace')
+        source.seek(24)
         for index,form in enumerate(forms):
             if args.opcode and form['opcode'] not in args.opcode:
                 source.seek(cases*record_bytes,1)

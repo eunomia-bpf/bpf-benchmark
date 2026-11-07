@@ -1,0 +1,33 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+0	mov al, BYTE PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=raw]	1024	1024	0	0	checked	none
+1	mov al, BYTE PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=direct]	1024	1024	0	0	checked	none
+2	add al, bl [token=X86_OP_ADD_REG; route=raw]	1024	1024	0	0	checked	none
+3	add al, bl [token=X86_OP_ADD_REG; route=direct]	1024	1024	0	0	checked	none
+4	add al, 0x7f [token=X86_OP_ADD_IMM; route=raw]	1024	1024	0	0	checked	none
+5	add al, 0x7f [token=X86_OP_ADD_IMM; route=direct]	1024	1024	0	0	checked	none
+6	xor al, bl [token=X86_OP_XOR_REG; route=raw]	1024	1024	0	0	checked	none
+7	xor al, bl [token=X86_OP_XOR_REG; route=direct]	1024	1024	0	0	checked	none
+8	mov ax, WORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=raw]	1024	1024	0	0	checked	none
+9	mov ax, WORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=direct]	1024	1024	0	0	checked	none
+10	add ax, bx [token=X86_OP_ADD_REG; route=raw]	1024	1024	0	0	checked	none
+11	add ax, bx [token=X86_OP_ADD_REG; route=direct]	1024	1024	0	0	checked	none
+12	add ax, 0x7f [token=X86_OP_ADD_IMM; route=raw]	1024	1024	0	0	checked	none
+13	add ax, 0x7f [token=X86_OP_ADD_IMM; route=direct]	1024	1024	0	0	checked	none
+14	xor ax, bx [token=X86_OP_XOR_REG; route=raw]	1024	1024	0	0	checked	none
+15	xor ax, bx [token=X86_OP_XOR_REG; route=direct]	1024	1024	0	0	checked	none
+16	mov eax, DWORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=raw]	1024	1024	0	0	checked	none
+17	mov eax, DWORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=direct]	1024	1024	0	0	checked	none
+18	add eax, ebx [token=X86_OP_ADD_REG; route=raw]	1024	1024	0	0	checked	none
+19	add eax, ebx [token=X86_OP_ADD_REG; route=direct]	1024	1024	0	0	checked	none
+20	add eax, 0x7f [token=X86_OP_ADD_IMM; route=raw]	1024	1024	0	0	checked	none
+21	add eax, 0x7f [token=X86_OP_ADD_IMM; route=direct]	1024	1024	0	0	checked	none
+22	xor eax, ebx [token=X86_OP_XOR_REG; route=raw]	1024	1024	0	0	checked	none
+23	xor eax, ebx [token=X86_OP_XOR_REG; route=direct]	1024	1024	0	0	checked	none
+24	mov rax, QWORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=raw]	1024	1024	0	0	checked	none
+25	mov rax, QWORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=direct]	1024	1024	0	0	checked	none
+26	add rax, rbx [token=X86_OP_ADD_REG; route=raw]	1024	1024	0	0	checked	none
+27	add rax, rbx [token=X86_OP_ADD_REG; route=direct]	1024	1024	0	0	checked	none
+28	add rax, 0x7f [token=X86_OP_ADD_IMM; route=raw]	1024	1024	0	0	checked	none
+29	add rax, 0x7f [token=X86_OP_ADD_IMM; route=direct]	1024	1024	0	0	checked	none
+30	xor rax, rbx [token=X86_OP_XOR_REG; route=raw]	1024	1024	0	0	checked	none
+31	xor rax, rbx [token=X86_OP_XOR_REG; route=direct]	1024	1024	0	0	checked	none

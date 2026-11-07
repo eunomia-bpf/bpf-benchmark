@@ -1,0 +1,33 @@
+assembly	opcode	cases	mismatches
+mov al, BYTE PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=raw]	X86_OP_MOV_LOAD_SCALAR	1024	0
+mov al, BYTE PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=direct]	X86_OP_MOV_LOAD_SCALAR	1024	0
+add al, bl [token=X86_OP_ADD_REG; route=raw]	X86_OP_ADD_REG	1024	0
+add al, bl [token=X86_OP_ADD_REG; route=direct]	X86_OP_ADD_REG	1024	0
+add al, 0x7f [token=X86_OP_ADD_IMM; route=raw]	X86_OP_ADD_IMM	1024	0
+add al, 0x7f [token=X86_OP_ADD_IMM; route=direct]	X86_OP_ADD_IMM	1024	0
+xor al, bl [token=X86_OP_XOR_REG; route=raw]	X86_OP_XOR_REG	1024	0
+xor al, bl [token=X86_OP_XOR_REG; route=direct]	X86_OP_XOR_REG	1024	0
+mov ax, WORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=raw]	X86_OP_MOV_LOAD_SCALAR	1024	0
+mov ax, WORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=direct]	X86_OP_MOV_LOAD_SCALAR	1024	0
+add ax, bx [token=X86_OP_ADD_REG; route=raw]	X86_OP_ADD_REG	1024	0
+add ax, bx [token=X86_OP_ADD_REG; route=direct]	X86_OP_ADD_REG	1024	0
+add ax, 0x7f [token=X86_OP_ADD_IMM; route=raw]	X86_OP_ADD_IMM	1024	0
+add ax, 0x7f [token=X86_OP_ADD_IMM; route=direct]	X86_OP_ADD_IMM	1024	0
+xor ax, bx [token=X86_OP_XOR_REG; route=raw]	X86_OP_XOR_REG	1024	0
+xor ax, bx [token=X86_OP_XOR_REG; route=direct]	X86_OP_XOR_REG	1024	0
+mov eax, DWORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=raw]	X86_OP_MOV_LOAD_SCALAR	1024	0
+mov eax, DWORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=direct]	X86_OP_MOV_LOAD_SCALAR	1024	0
+add eax, ebx [token=X86_OP_ADD_REG; route=raw]	X86_OP_ADD_REG	1024	0
+add eax, ebx [token=X86_OP_ADD_REG; route=direct]	X86_OP_ADD_REG	1024	0
+add eax, 0x7f [token=X86_OP_ADD_IMM; route=raw]	X86_OP_ADD_IMM	1024	0
+add eax, 0x7f [token=X86_OP_ADD_IMM; route=direct]	X86_OP_ADD_IMM	1024	0
+xor eax, ebx [token=X86_OP_XOR_REG; route=raw]	X86_OP_XOR_REG	1024	0
+xor eax, ebx [token=X86_OP_XOR_REG; route=direct]	X86_OP_XOR_REG	1024	0
+mov rax, QWORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=raw]	X86_OP_MOV_LOAD_SCALAR	1024	0
+mov rax, QWORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=direct]	X86_OP_MOV_LOAD_SCALAR	1024	0
+add rax, rbx [token=X86_OP_ADD_REG; route=raw]	X86_OP_ADD_REG	1024	0
+add rax, rbx [token=X86_OP_ADD_REG; route=direct]	X86_OP_ADD_REG	1024	0
+add rax, 0x7f [token=X86_OP_ADD_IMM; route=raw]	X86_OP_ADD_IMM	1024	0
+add rax, 0x7f [token=X86_OP_ADD_IMM; route=direct]	X86_OP_ADD_IMM	1024	0
+xor rax, rbx [token=X86_OP_XOR_REG; route=raw]	X86_OP_XOR_REG	1024	0
+xor rax, rbx [token=X86_OP_XOR_REG; route=direct]	X86_OP_XOR_REG	1024	0

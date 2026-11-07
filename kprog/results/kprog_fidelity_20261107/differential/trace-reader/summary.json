@@ -1,0 +1,165 @@
+{
+  "reader_sha256": "5ea8c03e03dc74c374a24137344eeb92d152b1fdd962161052b3474b97358348",
+  "archive_sha256": "0b9704eab79189049001a5bf4eec5b1f3464111a4ab0d715ea241dc169ec1556",
+  "archived_baseline_trace_bytes": 0,
+  "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96",
+  "checks": [
+    {
+      "check": "archived_empty",
+      "status": "pass",
+      "message": "CPU state trace header truncated: $WORK/fixture.bin; observer_returncode=-6; header_bytes=0 expected_header_bytes=24; trace_bytes=0"
+    },
+    {
+      "check": "partial_header",
+      "status": "pass",
+      "message": "CPU state trace header truncated: $WORK/fixture.bin; observer_returncode=-6; header_bytes=23 expected_header_bytes=24; trace_bytes=23"
+    },
+    {
+      "check": "header_only",
+      "status": "pass",
+      "message": "CPU state trace length mismatch: $WORK/fixture.bin; observer_returncode=-6; trace_bytes=24 expected_bytes=27066392; complete_records=0 expected_records=8192"
+    },
+    {
+      "check": "partial_record",
+      "status": "pass",
+      "message": "CPU state trace length mismatch: $WORK/fixture.bin; observer_returncode=-6; trace_bytes=3327 expected_bytes=27066392; complete_records=0 expected_records=8192"
+    },
+    {
+      "check": "magic",
+      "status": "pass",
+      "message": "CPU state trace layout mismatch: $WORK/fixture.bin; observer_returncode=-6; magic=4b50464944303031 state_bytes=840 memory_bytes=256 forms=8 expected_forms=8 cases=1024 expected_cases=1024"
+    },
+    {
+      "check": "state_size",
+      "status": "pass",
+      "message": "CPU state trace layout mismatch: $WORK/fixture.bin; observer_returncode=-6; magic=4b50464944303032 state_bytes=841 memory_bytes=256 forms=8 expected_forms=8 cases=1024 expected_cases=1024"
+    },
+    {
+      "check": "memory_size",
+      "status": "pass",
+      "message": "CPU state trace layout mismatch: $WORK/fixture.bin; observer_returncode=-6; magic=4b50464944303032 state_bytes=840 memory_bytes=255 forms=8 expected_forms=8 cases=1024 expected_cases=1024"
+    },
+    {
+      "check": "form_count",
+      "status": "pass",
+      "message": "CPU state trace layout mismatch: $WORK/fixture.bin; observer_returncode=-6; magic=4b50464944303032 state_bytes=840 memory_bytes=256 forms=7 expected_forms=8 cases=1024 expected_cases=1024"
+    },
+    {
+      "check": "case_count",
+      "status": "pass",
+      "message": "CPU state trace layout mismatch: $WORK/fixture.bin; observer_returncode=-6; magic=4b50464944303032 state_bytes=840 memory_bytes=256 forms=8 expected_forms=8 cases=1023 expected_cases=1024"
+    },
+    {
+      "check": "complete_trace_with_observer_mismatch_exit",
+      "status": "pass"
+    },
+    {
+      "check": "complete_x86_trace",
+      "status": "pass"
+    },
+    {
+      "check": "full_vector_arm_layout",
+      "status": "pass"
+    },
+    {
+      "check": "architecture_layout",
+      "status": "pass"
+    },
+    {
+      "check": "fresh_observer_exit_-6",
+      "status": "pass",
+      "observer_calls": 1,
+      "canonical_calls": 0,
+      "message": "CPU state trace header truncated: $WORK/exit--6/cpu-states.bin; observer_returncode=-6; header_bytes=0 expected_header_bytes=24; trace_bytes=0"
+    },
+    {
+      "check": "fresh_observer_exit_1",
+      "status": "pass",
+      "observer_calls": 1,
+      "canonical_calls": 0,
+      "message": "CPU state trace header truncated: $WORK/exit-1/cpu-states.bin; observer_returncode=1; header_bytes=0 expected_header_bytes=24; trace_bytes=0"
+    },
+    {
+      "check": "fresh_observer_exit_0",
+      "status": "pass",
+      "observer_calls": 1,
+      "canonical_calls": 0,
+      "message": "CPU state trace header truncated: $WORK/exit-0/cpu-states.bin; observer_returncode=0; header_bytes=0 expected_header_bytes=24; trace_bytes=0"
+    },
+    {
+      "check": "complete_trace_extra_byte",
+      "status": "pass"
+    },
+    {
+      "check": "arm64_canonical_replay",
+      "status": "pass",
+      "forms": 8,
+      "cases": 8192,
+      "byte_identical_reports": [
+        "reference-forms.tsv",
+        "reference-mismatches.jsonl",
+        "reference-unavailable.jsonl"
+      ],
+      "command": [
+        "/opt/virtme-ng/bin/python3",
+        "/workspaces/repository/kprog/fidelity/reference_check.py",
+        "--reuse-trace",
+        "--binary",
+        "/workspaces/repository/kprog/fidelity/build-arm64-numeric-tokens/cpu-differential",
+        "--arch",
+        "arm64",
+        "--cases",
+        "1024",
+        "--out",
+        "kprog/results/kprog_fidelity_20261107/differential/trace-reader/arm64",
+        "--trace",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/arm64-numeric-tokens/cpu-states.bin",
+        "--reference",
+        "/workspaces/.agent-state/kprog-lanes/F/reference-control-frozen"
+      ]
+    },
+    {
+      "check": "x86_canonical_replay",
+      "status": "pass",
+      "forms": 32,
+      "cases": 32768,
+      "byte_identical_reports": [
+        "reference-forms.tsv",
+        "reference-mismatches.jsonl",
+        "reference-unavailable.jsonl"
+      ],
+      "command": [
+        "/opt/virtme-ng/bin/python3",
+        "/workspaces/repository/kprog/fidelity/reference_check.py",
+        "--reuse-trace",
+        "--binary",
+        "/workspaces/repository/kprog/fidelity/build-x86-numeric-tokens/cpu-differential",
+        "--arch",
+        "x86",
+        "--cases",
+        "1024",
+        "--out",
+        "kprog/results/kprog_fidelity_20261107/differential/trace-reader/x86",
+        "--trace",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-numeric-tokens/cpu-states.bin",
+        "--reference",
+        "/workspaces/.agent-state/kprog-lanes/F/reference-control-frozen"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "arch": "arm64",
+      "trace": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/arm64-numeric-tokens/cpu-states.bin",
+      "trace_sha256": "103219f5774a418eb0a55680ee513a5753125bc59cb0f1faa14973b9f9c11412",
+      "trace_bytes": 14876696
+    },
+    {
+      "arch": "x86",
+      "trace": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-numeric-tokens/cpu-states.bin",
+      "trace_sha256": "094ffa64d75ddcdcf15753d908ac0e1111453405e45b8aacecfc5436e9ab2697",
+      "trace_bytes": 59506712
+    }
+  ],
+  "checked_cases": 40960
+}

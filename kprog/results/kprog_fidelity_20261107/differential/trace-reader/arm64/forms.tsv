@@ -1,0 +1,9 @@
+assembly	opcode	cases	mismatches
+add w0, w1, #127 [token=ARM64_OP_ADD_IMM; route=raw]	ARM64_OP_ADD_IMM	1024	0
+add w0, w1, #127 [token=ARM64_OP_ADD_IMM; route=direct]	ARM64_OP_ADD_IMM	1024	0
+sub w0, w1, #127 [token=ARM64_OP_SUB_IMM; route=raw]	ARM64_OP_SUB_IMM	1024	0
+sub w0, w1, #127 [token=ARM64_OP_SUB_IMM; route=direct]	ARM64_OP_SUB_IMM	1024	0
+add x0, x1, #127 [token=ARM64_OP_ADD_IMM; route=raw]	ARM64_OP_ADD_IMM	1024	0
+add x0, x1, #127 [token=ARM64_OP_ADD_IMM; route=direct]	ARM64_OP_ADD_IMM	1024	0
+sub x0, x1, #127 [token=ARM64_OP_SUB_IMM; route=raw]	ARM64_OP_SUB_IMM	1024	0
+sub x0, x1, #127 [token=ARM64_OP_SUB_IMM; route=direct]	ARM64_OP_SUB_IMM	1024	0
