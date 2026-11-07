@@ -1,0 +1,5 @@
+assembly	opcode	cases	mismatches
+rorx eax, ebx, 7	X86_OP_RORX	1024	0
+rorx eax, DWORD PTR [rdi+8], 7	X86_OP_RORX_MEM	1024	0
+rorx rax, rbx, 7	X86_OP_RORX	1024	0
+rorx rax, QWORD PTR [rdi+8], 7	X86_OP_RORX_MEM	1024	0

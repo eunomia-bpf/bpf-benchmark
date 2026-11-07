@@ -1,0 +1,5 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+0	rorx eax, ebx, 7	1024	1024	0	0	checked	none
+1	rorx eax, DWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+2	rorx rax, rbx, 7	1024	1024	0	0	checked	none
+3	rorx rax, QWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none

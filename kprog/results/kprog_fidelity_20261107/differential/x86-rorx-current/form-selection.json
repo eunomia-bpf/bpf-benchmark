@@ -1,0 +1,22 @@
+[
+  {
+    "assembly": "rorx eax, ebx, 7",
+    "decoded": "rorx   eax,ebx,0x7",
+    "opcode": "X86_OP_RORX"
+  },
+  {
+    "assembly": "rorx eax, DWORD PTR [rdi+8], 7",
+    "decoded": "rorx   eax,DWORD PTR [rdi+0x8],0x7",
+    "opcode": "X86_OP_RORX_MEM"
+  },
+  {
+    "assembly": "rorx rax, rbx, 7",
+    "decoded": "rorx   rax,rbx,0x7",
+    "opcode": "X86_OP_RORX"
+  },
+  {
+    "assembly": "rorx rax, QWORD PTR [rdi+8], 7",
+    "decoded": "rorx   rax,QWORD PTR [rdi+0x8],0x7",
+    "opcode": "X86_OP_RORX_MEM"
+  }
+]

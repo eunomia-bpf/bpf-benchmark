@@ -1,0 +1,40 @@
+{
+  "original_generator_sha256": "897a1385da018269df070befca388ad26e143fb396a037be0717cf18c9ea8fb6",
+  "executed_selected_source_sha256": "ade15c8866446fa20de02af7d61ed971c642c8b873d409bab649d34c46fc8896",
+  "exact_source_diff": [
+    "--- ",
+    "+++ ",
+    "@@ -277,6 +277,7 @@",
+    "         for width, suffix in [(8,\"b\"),(16,\"w\"),(32,\"d\"),(64,\"q\")]:",
+    "             body = f\"rep movs{suffix}\"",
+    "             pairs.append((body, encoder.enc(\"X86_OP_REP_MOVS\", flags=f\"X86_WIDTH_{width}\", imm=\"8\"), None, body, body))",
+    "+    pairs = [pair for pair in pairs if pair[1].op in {'X86_OP_RORX', 'X86_OP_RORX_MEM'}]",
+    "     for i, (assembly, encoded, special, native_body, decoded) in enumerate(pairs):",
+    "         c += [f\"extern unsigned char native_pc_{i}, native_next_{i};\", f\"extern void native_{i}(struct state *);\", f\"static void sim_{i}(struct state *s) {{\"]",
+    "         if arch == \"x86\":"
+  ],
+  "selected_forms_equal_original_four": true,
+  "forms": [
+    {
+      "assembly": "rorx eax, ebx, 7",
+      "decoded": "rorx   eax,ebx,0x7",
+      "opcode": "X86_OP_RORX"
+    },
+    {
+      "assembly": "rorx eax, DWORD PTR [rdi+8], 7",
+      "decoded": "rorx   eax,DWORD PTR [rdi+0x8],0x7",
+      "opcode": "X86_OP_RORX_MEM"
+    },
+    {
+      "assembly": "rorx rax, rbx, 7",
+      "decoded": "rorx   rax,rbx,0x7",
+      "opcode": "X86_OP_RORX"
+    },
+    {
+      "assembly": "rorx rax, QWORD PTR [rdi+8], 7",
+      "decoded": "rorx   rax,QWORD PTR [rdi+0x8],0x7",
+      "opcode": "X86_OP_RORX_MEM"
+    }
+  ],
+  "oracle_note": "Only the pair selection line changes; native_wrapper, driver state initialization/comparison, defined flag masks and memory observation remain untouched."
+}
