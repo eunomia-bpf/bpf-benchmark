@@ -3405,3 +3405,12 @@ before exporting sources. Its actual full result is collected independently.
 The wrong-source logs, manifest, script and signal receipt remain archived
 under `full_runner_marker_correction`; MOVBE proof/source/oracle evidence is
 under `x86_endian_addressed_dispatch_tokens`.
+
+### Published addressed-stack source full check
+
+`make check` on immutable publishedc435a1dac exits0. All1140 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_c435a1dac`. This is the corrected runner’s actual addressed-stack
+epoch. The earlier redundant7a7893bc9 signal-15 remains recorded separately;
+subsequent MOVBE source has its own completion evidence.

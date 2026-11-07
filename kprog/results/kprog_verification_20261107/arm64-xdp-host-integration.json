@@ -2371,6 +2371,26 @@
     "temporary_export_retired": true,
     "verified_published_source_count": 1140
   },
+  "full_make_check_c435a1dac": {
+    "actual_exit": 0,
+    "archive_block_sha256": "b63ea7910daa5c1c3c5df389bca64cabf7d80e2d40f7fcefbdf55cbb3c0c7c80",
+    "archive_marker": "=== FULL MAKE CHECK C435A1DAC PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/load-memory-full.cpu.jsonl.gz": "7293a0af12f3168b3d7fb7bb7f2e62dceacf7b499df9f6f2c8f1ee86d613c224",
+      "/workspaces/.agent-state/kprog-lanes/V/load-memory-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/load-memory-full.head": "c8d636bc8070c29e1eb40b368f43133053213f930e24d60ea96e5fedaafd4884",
+      "/workspaces/.agent-state/kprog-lanes/V/load-memory-full.launch.log": "e382e6e7b8a82c19d8883e9ac02e5d421c3b47628cc2a0fc08ef6605211775e9",
+      "/workspaces/.agent-state/kprog-lanes/V/load-memory-full.log": "720c485d39d172b82db6ebfdfec5b6730fe090e7131283bd87307850a6e0180a",
+      "/workspaces/.agent-state/kprog-lanes/V/load-memory-full.py": "ea84b2d5dbfb398c6a879ac505bc80f196742e14aa53bd92952625a9e5aca735",
+      "/workspaces/.agent-state/kprog-lanes/V/load-memory-full.sources": "d5d0747a130cc98f1859553f91b7caf87ad95a85c99337ca3e00b65cbd349550",
+      "/workspaces/.agent-state/kprog-lanes/V/load-memory-full.state": "e471c5e73d39fd595601af1dd5bc28eebd83346581aa1de8622341a5c353b60d"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "c435a1dac7b2f298e31c1530ba1364613ee6509d",
+    "scope": "Published PUSH/POP mode2 full addressed frame and unified token epoch. Later MOVBE source retains its independent source identity; earlier wrong-source duplicate remains actual-15 in full_runner_marker_correction.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1140
+  },
   "full_runner_marker_correction": {
     "archive_marker": "=== MOVBE ADDRESSED FRAME TOKENS AND FULL MARKER CORRECTION ===",
     "replacement_has_explicit_source_assertion": true,
