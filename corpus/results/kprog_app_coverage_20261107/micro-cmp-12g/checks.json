@@ -1,0 +1,203 @@
+{
+  "programs_total": 29,
+  "native_requests": 29,
+  "generated": 29,
+  "compiled": 28,
+  "accepted_bound": 27,
+  "compiler_oom": 1,
+  "verifier_scalar_divisor_fault": 1,
+  "jit_exact": 29,
+  "native_exact": 27,
+  "terminal_records": 29,
+  "source_drift": [],
+  "temporary_files_remaining": [],
+  "raw_sha256": "672cf80e66cb0bc381112710e92b0086745b22a866594b524836644fefe6a3f7",
+  "driver_exit": 2,
+  "collector_exit": 1,
+  "kernel_oom_records": [
+    "[  471.074156] oom-kill:constraint=CONSTRAINT_NONE,nodemask=(null),cpuset=/,mems_allowed=0,global_oom,task_memcg=/,task=clang,pid=1822,uid=0",
+    "[  471.074167] Out of memory: Killed process 1822 (clang) total-vm:10678888kB, anon-rss:10299508kB, file-rss:4kB, shmem-rss:40kB, UID:0 pgtables:20516kB oom_score_adj:0"
+  ],
+  "files": {
+    "runtime-raw.tar.gz": "672cf80e66cb0bc381112710e92b0086745b22a866594b524836644fefe6a3f7",
+    "runtime.json": "872c98e28c5ab846f2e1a693335483199f27bfcd4222cf367401a695d75f2445",
+    "runtime-driver.log.gz": "332da01d9427475cfbf8849b06ad0515b9c2cc786256d4a9ce02ebd49c12786d",
+    "runtime-service.tar.gz": "3451904a729cece7da75fd111af4e5d3fe13b5641c37b8351472d313b25dde37"
+  },
+  "all_request_archives": [
+    {
+      "request_id": 1,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 20
+    },
+    {
+      "request_id": 2,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 37
+    },
+    {
+      "request_id": 3,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 54
+    },
+    {
+      "request_id": 4,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 71
+    },
+    {
+      "request_id": 5,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 88
+    },
+    {
+      "request_id": 6,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 105
+    },
+    {
+      "request_id": 7,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 122
+    },
+    {
+      "request_id": 8,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 139
+    },
+    {
+      "request_id": 9,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 156
+    },
+    {
+      "request_id": 10,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 173
+    },
+    {
+      "request_id": 11,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 190
+    },
+    {
+      "request_id": 12,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 207
+    },
+    {
+      "request_id": 13,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 224
+    },
+    {
+      "request_id": 14,
+      "native_sha256_matches": true,
+      "archive_members": 14,
+      "prog_id": null
+    },
+    {
+      "request_id": 15,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 253
+    },
+    {
+      "request_id": 16,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 270
+    },
+    {
+      "request_id": 17,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 287
+    },
+    {
+      "request_id": 18,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 304
+    },
+    {
+      "request_id": 19,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 321
+    },
+    {
+      "request_id": 20,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 338
+    },
+    {
+      "request_id": 21,
+      "native_sha256_matches": true,
+      "archive_members": 25,
+      "prog_id": null
+    },
+    {
+      "request_id": 22,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 371
+    },
+    {
+      "request_id": 23,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 388
+    },
+    {
+      "request_id": 24,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 405
+    },
+    {
+      "request_id": 25,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 422
+    },
+    {
+      "request_id": 26,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 439
+    },
+    {
+      "request_id": 27,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 456
+    },
+    {
+      "request_id": 28,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 471
+    },
+    {
+      "request_id": 29,
+      "native_sha256_matches": true,
+      "archive_members": 24,
+      "prog_id": 488
+    }
+  ]
+}
