@@ -2109,3 +2109,13 @@ preserved and do not inherit this later session's text observation.
 Text unavailability is recorded without changing native admission. The proof
 must still compose canonical RET and its outer return read with the actual
 epilogue; observing bytes alone is not that proof.
+
+`context-candidate/trusted-simple/` is a controlled kernel regression of the
+three-line candidate through the same registered native-only service, worker,
+loader and client. A bootstrap-only compiler PATH wrapper preincludes the
+archived header; its actual argv, source and header are in the capture. The
+application submits only P. The kernel accepted and bound the fresh B29
+(input28), byte-identical to the private compile's proof input, and all8 exact
+packet checks pass. Structural invocation/materialization controls also pass.
+The canonical header is unchanged. This supplies the actual accepted B for TV;
+it is neither a full-state certificate nor production/app promotion.

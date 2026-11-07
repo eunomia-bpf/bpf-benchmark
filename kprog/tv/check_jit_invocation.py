@@ -155,7 +155,7 @@ def check(directory):
             raise AssertionError('invocation mismatch accepted: '+name)
     return dict(binding=binding,invocation_layout=layout,rejected_controls=rejected,
         materialization_rejected_controls=materialization_controls(files,request,expected),
-        archive_sha256=saved['archive_sha256'],translation_validation='current B30 not validated',
+        archive_sha256=saved['archive_sha256'],translation_validation='not established by this structural checker',
         remaining=['canonical LEAVE/whole epilogue transport','actual kernel caller/context/stack permissions',
                    'canonical return execution composition','full-state TV of the accepted B'],
         trusted=['kernel capture/provenance and live symbol reporting','structural ELF/archive parser',

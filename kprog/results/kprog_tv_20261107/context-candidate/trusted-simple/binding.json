@@ -1,0 +1,165 @@
+{
+  "binding": {
+    "native_bytes": 60,
+    "verifier_insns": 29,
+    "source_prog_id": 6,
+    "native_prog_id": 11,
+    "emitted_sites": [
+      {
+        "blob_id": 0,
+        "generation": 4,
+        "abi_mask": 0,
+        "entry_address": 18446744072640010422,
+        "jit_offset": 14,
+        "native_offset": 0,
+        "native_size": 60
+      }
+    ],
+    "materialization": {
+      "immutable_ELF_sha256": "d5d24d70e70dc8b6dce3d7abc85113227cdd14aef220f86047b5c57e66c580bd",
+      "entry": "simple_xdp",
+      "entry_offset": 0,
+      "entry_bytes": 61,
+      "payload_bytes": 60,
+      "exact_entry_relation": "immutable entry bytes = emitted payload bytes ++ c3",
+      "terminal_bytes_removed": "c3",
+      "generated_copy_byte_identical": true,
+      "native_link_abi": "native-link-abi-v2",
+      "callee_saved_mask": 0,
+      "relocations": 0,
+      "data_objects": 0,
+      "map_patches": 0,
+      "structural_only": true,
+      "remaining": "RET/entry-ABI/platform semantic transport and universal relational TV"
+    }
+  },
+  "invocation_layout": {
+    "jit_base": 18446744072640010408,
+    "native_entry": 18446744072640010422,
+    "native_end": 18446744072640010482,
+    "native_bytes": 60,
+    "caller_SP_to_body_SP": -16,
+    "saved_BP_offset": -8,
+    "saved_R15_offset": -16,
+    "return_target": 18446744071813810336,
+    "kernel_symbol": "its_return_thunk",
+    "kernel_relocation": 218103808,
+    "runtime_return_text_verified": true,
+    "runtime_thunk_text": "captured stable C3/CC before and after execution"
+  },
+  "rejected_controls": [
+    "entry padding",
+    "restore opcode",
+    "return displacement",
+    "JIT base",
+    "live return symbol",
+    "live text symbol",
+    "compiled return symbol",
+    "symbol relocation receipt",
+    "kernel build ID",
+    "layout profile",
+    "return instruction",
+    "return text address",
+    "return text SHA",
+    "return text instability"
+  ],
+  "materialization_rejected_controls": [
+    "immutable input SHA",
+    "generated copy",
+    "entry offset",
+    "entry code",
+    "terminal RET",
+    "ELF machine",
+    "ELF type",
+    "ABI version",
+    "ABI mask",
+    "generated blob",
+    "data layout",
+    "map patches",
+    "native relocations",
+    "duplicate blob"
+  ],
+  "archive_sha256": "7a8fd0198899b31d9fd33247e406f0240a3dc7765a44a93e8edada49e4fceb0b",
+  "translation_validation": "not established by this structural checker",
+  "remaining": [
+    "canonical LEAVE/whole epilogue transport",
+    "actual kernel caller/context/stack permissions",
+    "canonical return execution composition",
+    "full-state TV of the accepted B"
+  ],
+  "trusted": [
+    "kernel capture/provenance and live symbol reporting",
+    "structural ELF/archive parser",
+    "verifier soundness and canonical ISA semantics when composing the separate certificate"
+  ],
+  "utc": "2026-11-07T16:52:47.528230+00:00",
+  "status": "private_forward_header_candidate_fresh_native_only_service_accepted_bound_and_executed_8_exact_checks",
+  "actual_accepted_B_instructions": 29,
+  "proof_input_instructions": 28,
+  "native_bytes": 60,
+  "accepted_B_sha256": "45062cd04b8ae6b7ffe0d5f1ea42f61bb2041ad5f44a8a034482b238bf94c53c",
+  "proof_input_sha256": "c79c86913f3e0da8f65758c78aff2330b3319cb02a1b5c3c17398010d59a3de0",
+  "candidate_header_sha256": "b1821ed05ee3cdc4a8d9018c6e895c9b3ec6abe5091beb45873f1511c6630fc2",
+  "compiler_wrapper_sha256": "b6752750d575f06d3c01bdc23e9f4f3755c25f40e800487b4434eb3e678d73d3",
+  "actual_compiler_commands": [
+    {
+      "command": [
+        "/usr/lib/llvm-18/bin/clang",
+        "-include",
+        "/workspaces/.agent-state/kprog-lanes/T/candidate-simulator.h",
+        "-I",
+        "/workspaces/repository/kprog/x86",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/repository/kprog/results/kprog_tv_20261107/context-candidate/trusted-simple/.live-d3fc7dda/requests/request-o764v5wx/generated/trusted_x86.bpf.c",
+        "-o",
+        "/workspaces/repository/kprog/results/kprog_tv_20261107/context-candidate/trusted-simple/.live-d3fc7dda/requests/request-o764v5wx/generated/trusted_x86.bpf.o"
+      ],
+      "header_sha256": "b1821ed05ee3cdc4a8d9018c6e895c9b3ec6abe5091beb45873f1511c6630fc2"
+    }
+  ],
+  "launch_source_sha256": {
+    "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+    "kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+    "kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+    "kprog/tv/capture_trusted_service.py": "ef139e6cce529af2ac0218ed4485435f61a7323dedaa7672cad7cbf93bc4e80c",
+    "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "273cb89c3d576021d3582a8cd4d361c37ac98495a730749ee0b540d803dd2d79",
+    "candidate_header": "b1821ed05ee3cdc4a8d9018c6e895c9b3ec6abe5091beb45873f1511c6630fc2",
+    "compiler_wrapper": "b6752750d575f06d3c01bdc23e9f4f3755c25f40e800487b4434eb3e678d73d3"
+  },
+  "current_source_matches_launch": {
+    "kprog/x86/x86_sim_local_bpf.h": true,
+    "kprog/x86/trusted_specializer.py": true,
+    "kprog/trusted_service.py": true,
+    "kprog/tv/capture_trusted_service.py": true,
+    "kprog/libnativeloader/build/trusted-native-loader": true,
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": true
+  },
+  "source_override": "Bootstrap-only PATH compiler wrapper preincludes exact archived3-line header; actualargv/header/wrapper archived. Common registeredservice/worker/loader unchanged; application supplies P only.",
+  "canonical_production_promotion": false,
+  "compiled_shape": "data then data_end; raw/+8/+72 guards all JGT64 in native order;3conditionalguards",
+  "not_yet_claimed": [
+    "Whole-program/per-basic-block full-state TV of this actual accepted B29.",
+    "Canonical productionheader promotion or any application/micro beyond this simple capture."
+  ],
+  "checker_sha256": {
+    "kprog/tv/check_jit_invocation.py": "0072d34637b9278024c180fd80d2cd98b25ea74b6df1a4f8ae1970caa4b84736",
+    "kprog/tv/check_trusted_capture.py": "43cb85f2f532683cfeca1f88c73db3ff0b9c4a4f7efabbfc70fccc16230af135",
+    "kprog/tv/emitted_sites.py": "3d05649e222ab603d757c6af44adeda3ee1eb3d17e1c2be8c646051dbd669105",
+    "kprog/tv/extract_checked.py": "60ce986eb22e3185ab565c1ad9b88987582dabd145bc9436c3973e02617ba252"
+  }
+}
