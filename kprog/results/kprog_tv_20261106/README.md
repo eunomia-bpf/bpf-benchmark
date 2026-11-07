@@ -850,3 +850,18 @@ three real reverse-order captures pass; overlapping regions, stale generation
 and a region beyond the program reject. Existing14 metadata corruptions and
 four actual instruction mutants still reject. Raw regression:
 `per-program-capture-negatives.log`.
+
+Complete expanded-program context conversion transport
+-----------------------------------------------------
+
+`checked-platform-final.log` checks every instruction position of the actual
+29-instruction expanded simple program, including both changed context loads,
+all ordinary operations, the redirected EXIT and final stub EXIT. The universal
+state theorem includes arbitrary memory and faults. `execution_transport`
+composes every successful physical instruction transition into an execution of
+the exact virtual verifier stream with identical complete state and ordered
+effects. PC bounds follow from actual decoding, rather than a supplied bound.
+Final theorem axioms are propext/Quot.sound, with no sorryAx. The separate byte
+prefix check retains its explicit Lean.ofReduceBool dependency. This transport
+is a platform component; it does not discharge the native block/ABI/CPU-profile
+obligations. Exact source/captured-array inputs are archived alongside the log.

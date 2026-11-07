@@ -578,6 +578,10 @@ checked-certificate:
 checked-artifact-negative-check:
 	python3 test_checked_artifact.py build/simple-checked/checked.snapshot.bin build-arm64/kernel.log
 
+.PHONY: checked-platform-check
+checked-platform-check: bpf-check simple-checked-artifact-check
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv ../tv/SimpleCheckedPlatform.lean
+
 .PHONY: capture-loader-build
 capture-loader-build:
 	$(MAKE) -C ../libnativeloader BUILD_DIR=build-tv-binding

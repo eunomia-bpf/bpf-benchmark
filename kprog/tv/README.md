@@ -567,3 +567,14 @@ retains all exported bytes as `TV_EXPORT` records. Reconstruct them with
 `python3 kprog/tv/extract_checked.py <guest-log> <simple-output> --exports <directory>`.
 The resulting inventory explicitly marks translation validation `not_validated`;
 these are complete inputs to TV, rather than TV certificates.
+
+`checked-platform-check` proves that all29 actual expanded instruction positions
+agree with the captured physical context conversion for arbitrary complete BPF
+states and memory, including read/write faults. It includes the loader's real
+JA-to-final-EXIT rewrite. `accepted_step` derives the PC extent from successful
+byte decoding; `execution_transport` lifts every actual physical execution to
+that exact virtual verifier program with identical complete states and ordered
+events. There is no caller-supplied safety premise or forced successor in this
+transport. Its axioms are propext/Quot.sound; byte-prefix identity separately
+uses Lean.ofReduceBool. Native-to-proof block composition, invocation ABI
+premises and CPU-profile binding remain separate obligations.
