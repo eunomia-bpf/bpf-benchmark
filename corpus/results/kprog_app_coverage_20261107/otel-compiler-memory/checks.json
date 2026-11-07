@@ -1,0 +1,193 @@
+{
+  "scope": "Closed host-only compiler resource diagnostic; no production pipeline change, kernel acceptance or application-performance claim",
+  "measurements": {
+    "control.preprocess.measure.json": {
+      "command": [
+        "taskset",
+        "-c",
+        "20-23",
+        "/usr/lib/llvm-18/bin/clang",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-E",
+        "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/control.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/control.i"
+      ],
+      "returncode": 0,
+      "elapsed_s": 3.1186451809480786,
+      "max_rss_kib": 262924,
+      "user_s": 2.990243,
+      "system_s": 0.11796999999999999
+    },
+    "control.split.measure.json": {
+      "command": [
+        "taskset",
+        "-c",
+        "20-23",
+        "/usr/lib/llvm-18/bin/clang",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-x",
+        "cpp-output",
+        "-c",
+        "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/control.i",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/control.split.o"
+      ],
+      "returncode": 0,
+      "elapsed_s": 21.284824293106794,
+      "max_rss_kib": 1081544,
+      "user_s": 20.611567,
+      "system_s": 0.6599539999999999
+    },
+    "unwinder.preprocess.measure.json": {
+      "command": [
+        "taskset",
+        "-c",
+        "20-23",
+        "/usr/lib/llvm-18/bin/clang",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-E",
+        "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/unwinder.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/unwinder.i"
+      ],
+      "returncode": 0,
+      "elapsed_s": 16.369492155034095,
+      "max_rss_kib": 982284,
+      "user_s": 15.796022,
+      "system_s": 0.567928
+    },
+    "control.direct.measure.json": {
+      "command": [
+        "taskset",
+        "-c",
+        "20-23",
+        "/usr/lib/llvm-18/bin/clang",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/control.c",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/control.direct.o"
+      ],
+      "returncode": 0,
+      "elapsed_s": 23.5717104957439,
+      "max_rss_kib": 1391528,
+      "user_s": 22.744383,
+      "system_s": 0.823977
+    },
+    "unwinder.split.measure.json": {
+      "command": [
+        "taskset",
+        "-c",
+        "20-23",
+        "/usr/lib/llvm-18/bin/clang",
+        "-g",
+        "-O3",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-x",
+        "cpp-output",
+        "-c",
+        "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/unwinder.i",
+        "-o",
+        "/workspaces/.agent-state/kprog-lanes/C/otel-compile-memory/unwinder.split.o"
+      ],
+      "returncode": 0,
+      "elapsed_s": 265.14386191079393,
+      "max_rss_kib": 5205064,
+      "user_s": 261.191785,
+      "system_s": 3.88849
+    }
+  },
+  "section_relocation_comparisons": [
+    {
+      "before": "control.direct.o",
+      "after": "control.split.o",
+      "equal": true
+    },
+    {
+      "before": "control.archived.bpf.o",
+      "after": "control.direct.o",
+      "equal": true
+    },
+    {
+      "before": "actual-unwinder.bpf.o",
+      "after": "unwinder.split.o",
+      "equal": true
+    }
+  ],
+  "expanded_inputs": {
+    "control.i": {
+      "bytes": 53808121,
+      "sha256": "3c059d441d699361c987eef2854587b50fc00e5084f392e53f35cc5d70011517"
+    },
+    "unwinder.i": {
+      "bytes": 274959358,
+      "sha256": "47f4fff13ae1c5f52eafba2defa11bc1adb7b1ca942ebc5f23463cba0f38bbdb"
+    }
+  },
+  "raw_sha256": "47b881228650ba062326469843e4d9a381c1b96714c7b3dc954a0946cef68b48",
+  "baseline_header_sha256": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854"
+}
