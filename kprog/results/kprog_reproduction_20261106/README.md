@@ -22,7 +22,7 @@ used.
 
 | arm | native programs | current | reference | verdict |
 | --- | ---: | ---: | ---: | --- |
-| Pure bytecode (29) | — | **1.446x** \* | 1.478x | reproduces, -2.2% |
+| Pure bytecode (29) | — | **1.468x** | 1.478x | reproduces, -0.7% |
 | Helper/map (13) | — | **1.403x** \* | 1.429x | reproduces, -1.8% |
 | Corpus bcc/set | 18 / 25 | **1.002x** | 1.005x | reproduces |
 | Corpus tetragon | 118 | **1.008x** | 1.323x | **does not** |
@@ -31,12 +31,11 @@ used.
 | Corpus otelcol | 14 | **1.013x** | 1.824x | **does not** |
 | Corpus tracee | 151 | **1.539x** | 0.958x | **does not** |
 
-\* Measured before two new native gates landed in the loader; on current
-code `make micro` no longer completes on the native path (see the micro
-sections). The corpus rows are current: after both gates landed I
-re-measured katran (1 replaced, 0 failed, `status ok`) and tetragon
-(118 replaced, 0 failed, `status ok`) on the current loader, so the
-corpus path is unaffected and the matrix stands. Corpus figures are at the operator recipe
+The pure-bytecode row is re-measured on current code after two loader
+fixes (see the micro sections). The helper/map row predates those fixes
+and has not been re-run. The corpus rows are current: katran (1
+replaced) and tetragon (118 replaced) were re-measured with zero failures
+after the loader changes, so the corpus matrix stands. Corpus figures are at the operator recipe
 (`SAMPLES=3 WORKLOAD_DURATION=180`) and each carries the replaced/failed
 count from its own shim log.
 
@@ -185,28 +184,31 @@ across runtimes, not by trusting the timings.
 
 # Micro: pure bytecode (29 programs)
 
-**Provenance.** Both micro arms below were measured before the native
-submission path was reworked (`fd1b65560`), and on current code
-`make micro` does not complete on it. The failure turned out to have two
-causes, and the reported symptom named neither:
+**Re-measured on current code.** The micro native path had broken after
+`fd1b65560` and now works; the symptom named neither actual cause:
 
-1. The trusted specializer invoked a bare `"clang"`, which is not on
-   `PATH` in the service's environment, so its first subprocess failed
-   with `[Errno 2] No such file or directory: 'clang'` — surfacing to the
-   caller as `trusted specializer refused native program: Invalid
-   argument`. The specializer was never reached. It now honours `CLANG`
-   with `clang` as fallback (`e549bcaea`), and the first native request
-   then verifies end to end (`status: 0`).
-2. The service container is terminated after the first request
-   (`service_returncode: -15`, SIGTERM, 17 s in) while 28 more programs
-   are still loading, so those surface as
-   `trusted specializer refused native program: Input/output error`. Its
-   serve loop is `while True`, so something tears the container down early.
+1. The trusted specializer invoked a bare `"clang"`, absent from `PATH`
+   where the service runs (it re-launches itself with an explicit
+   environment, and the image keeps clang under `/usr/lib/llvm-*/bin`), so
+   its first subprocess raised `ENOENT` and callers saw
+   `trusted specializer refused native program: Invalid argument`. The
+   specializer was never reached. It now resolves `CLANG`, then `PATH`,
+   then the versioned llvm bin directories.
+2. The service container was SIGTERMed after the first request, with 28
+   programs still loading.
 
-How to read the two figures below: they were measured with recipe parity
-verified from the result files, but they are **not** re-verified on today's
-tree, and the corpus matrix (re-checked after both native gates and still
-measuring) is the part of this report that reflects current code.
+With both cleared:
+
+| Run | Programs | Geomean |
+| --- | ---: | ---: |
+| Reference 2026-05-29 | 29 | 1.478x |
+| Current (pre-gate, 2026-11-06) | 29 | 1.446x |
+| **Current (2026-11-07)** | 29 | **1.468x** |
+
+Artifact: `micro/results/x86_kvm_micro_20261107_191200_758943`, RC=0,
+zero refusals, and all **116 runtime comparisons agree** on `(retval,
+result)`. Recipe parity with the reference holds (four runtimes,
+`inner_repeat` 100000, 3 samples).
 
 Artifact: `micro/results/x86_kvm_micro_20261106_090507_158145`.
 
