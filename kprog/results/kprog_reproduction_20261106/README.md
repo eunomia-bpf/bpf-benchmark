@@ -179,6 +179,17 @@ across runtimes, not by trusting the timings.
 
 # Micro: pure bytecode (29 programs)
 
+**Provenance.** Both micro arms below were measured before the loader
+gained two new native gates, and on current code `make micro` no longer
+completes on the native path at all: `native_kernel` fails all 29
+programs with `trusted specializer refused native program: Invalid
+argument`, and `native_proof` fails with `applications submit native
+programs and cannot supply a proof`. The figures are kept because they
+were measured with recipe parity verified from the result files, but they
+are **not** re-verified on today's tree, and the corpus matrix above
+(which was re-checked after both gates and still measures) is the part of
+this report that reflects current code.
+
 | Run | Suite | Programs | Geomean |
 | --- | --- | ---: | ---: |
 | Reference 2026-05-29 | `micro_staged_codegen` | 29 | **1.478x** |
