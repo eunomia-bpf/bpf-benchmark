@@ -1,0 +1,16 @@
+{
+  "recorded": "2026-11-07T13:58:41.179300+00:00",
+  "complete": true,
+  "execution": "QEMU user-mode, not ARM hardware",
+  "forms": 771,
+  "cases_per_form": 1024,
+  "total_cases": 789504,
+  "cpu_reference_mismatches": 0,
+  "simulator_reference_mismatches": 0,
+  "unavailable_forms": 0,
+  "exit_code": 0,
+  "production_fix": "b2b6f28d9bc59aa3f17c44eb558acdb1c2214d37",
+  "binary_sha256": "ed8b3e7b65b7f2bf29602e204440c85f742b8559bc69732301ddc7ca6b10273f",
+  "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96",
+  "scope": "Existing numeric instruction observers; no entry-ABI, dynamic dispatcher compile, universal native safety or full34 claim"
+}

@@ -34,8 +34,12 @@ On the coordinator's actual ARM host, from the repository root, run:
 sh kprog/fidelity/run-arm64.sh
 ```
 
-Hardware execution remains pending. The canonical phase is still running
-against the unchanged c110b03a reference; no canonical pass is asserted yet.
+Hardware execution remains pending. The canonical phase subsequently completed
+against the unchanged c110b03a reference: all771 forms/789,504 states checked,
+zero QEMU/reference or C/reference differences and zero unavailable forms.
+`canonical-summary.json`, `reference-forms.tsv` and compressed original log
+record the result; both complete mismatch/unavailable streams are empty and
+retained compressed. Native-code and host metadata are also preserved.
 The concurrent production full-system34-case safety replay remains separate.
 V has independently found a dynamic-dispatch host compilation regression from
 the new unmapped-XDP-read diagnostic; A owns its forward repair. This harness
