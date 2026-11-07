@@ -1,0 +1,20 @@
+{
+  "utc": "2026-11-07T18:59:44.522473+00:00",
+  "kind": "tetragon",
+  "scope": "native byte identity and closed raw results; no compiler/ISA refinement claim",
+  "archive": "run-20261107T183759739461Z.tar.gz",
+  "archive_sha256": "41a55dba6e5474a85ed1688f39a6b9bc38a5040f74a8361a7e934f06d5880d28",
+  "host_reported_ok": false,
+  "hashes_unchanged": false,
+  "completed_counts": {
+    "service_accepted": 0,
+    "service_refused": 0
+  },
+  "expected_safety_cases": null,
+  "completed_requests_or_cases": 0,
+  "not_completed": [],
+  "request_identities": [],
+  "identity_errors": [],
+  "all_recorded_identities_match": false,
+  "collector_source_sha256": "c2bc29e948378b579635b8f91a3409557679bfc8a702449a3549137a60a628f9"
+}
