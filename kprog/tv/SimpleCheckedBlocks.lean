@@ -215,6 +215,95 @@ theorem store_including_faults (n : AArch64.State) (p : BPF.State) (pointer : Wo
   simpa only [SimpleStoreCertificate.proofObserved] using
     SimpleStoreCertificate.including_faults n p pointer (env := SimpleCheckedPlatform.externals)
 
+theorem native_decode36 : AArch64.decode (native.extract 36 40) =
+    .ok (.moveRegister .w32 (.general 0) .zero) := rfl
+
+theorem native_decode40 : AArch64.decode (native.extract 40 44) = .ok (.branch 40) := rfl
+
+def rejectBefore (n : AArch64.State) : AArch64.State := { n with pc := 36 }
+def rejectFinal (n : AArch64.State) : AArch64.State :=
+  { AArch64.writeReg (rejectBefore n) 0 0 with pc := 80 }
+
+theorem native_reject (n : AArch64.State) :
+    ARM64Path.evaluate 0 native [36,40] (rejectBefore n) = .ok ⟨rejectFinal n, [], none⟩ := by
+  simp +decide [ARM64Path.evaluate, ARM64Path.step, native_decode36, native_decode40,
+    rejectBefore, rejectFinal, AArch64.step, AArch64.moveRegStep, AArch64.branchStep,
+    AArch64.readData, AArch64.writeData, AArch64.readReg, AArch64.writeReg,
+    AArch64.narrow, AArch64.Width.bits, Fin.ofNat', Fin.instOfNat,
+    Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+
+theorem native_return_fixed (n : AArch64.State) (value : Word)
+    (pc : n.pc = 80) (r0 : n.gpr 0 = value) : nativeReturnBefore n value = n := by
+  have registers : (fun r : AArch64.Gpr => if r.val = 0 then value else n.gpr r) = n.gpr := by
+    funext r
+    by_cases zero : r.val = 0
+    · have same : r = 0 := Fin.ext (by simpa using zero)
+      simp [same, r0]
+    · simp [zero]
+  simp only [nativeReturnBefore, registers, ← pc]
+
+theorem proof_return_fixed (p : BPF.State) (value : Word)
+    (pc : p.pc = 27) (r0 : p.regs 0 = value) (active : p.halted = false) :
+    proofReturnBefore p value = p := by
+  have registers : (fun r : BPF.Register => if r.val = 0 then value else p.regs r) = p.regs := by
+    funext r
+    by_cases zero : r.val = 0
+    · have same : r = 0 := Fin.ext (by simpa using zero)
+      simp [same, r0]
+    · simp [zero]
+  simp only [proofReturnBefore, registers, ← pc, ← active]
+
+theorem reject_execution (n : AArch64.State) (pc : n.pc = 36) :
+    Execution (ARM64Path.instructionStep 0 native) n [] (nativeReturnFinal (rejectFinal n) 0) := by
+  have atReject : rejectBefore n = n := by simp only [rejectBefore, ← pc]
+  have first := native_reject n
+  rw [atReject] at first
+  have zero : (rejectFinal n).gpr 0 = 0 := by
+    simp +decide [rejectFinal, AArch64.writeReg, Fin.ofNat', Fin.instOfNat]
+  have last := native_return (rejectFinal n) 0
+  rw [native_return_fixed (rejectFinal n) 0 rfl zero] at last
+  simpa using (ARM64Path.evaluate_sound _ _ _ _ _ first).append
+    (ARM64Path.evaluate_sound _ _ _ _ _ last)
+
+theorem proof_exit_execution (p : BPF.State) (value : Word)
+    (pc : p.pc = 27) (r0 : p.regs 0 = value) (active : p.halted = false) :
+    Execution SimpleCheckedPlatform.instructionStep p [] (proofReturnFinal p value) := by
+  have actual := SimpleCheckedPlatform.execution_transport
+    (BPFPath.evaluate_sound _ _ _ _ _ (proof_return p value))
+  rw [proof_return_fixed p value pc r0 active] at actual
+  exact actual
+
+/-- Complete first-guard rejection, through both real returns, with full
+post-states and exactly the justified guest-effect projection. -/
+theorem first_rejection (n : AArch64.State) (p : BPF.State)
+    (context pointer limit : Word) (first second : Event)
+    (entry : SimpleBlocks.EntryConditions n p context pointer limit first second)
+    (reject : pointer > limit) :
+    Execution (ARM64Path.instructionStep 0 native) (SimpleEntryCertificate.before n context)
+      [first, second] (nativeReturnFinal (rejectFinal (SimpleBlocks.firstNativeFinal n context pointer limit)) 0) ∧
+    Execution SimpleCheckedPlatform.instructionStep (SimpleEntryCertificate.proofBefore p context 0)
+      (SimpleEntryCertificate.prefixEvents (p.regs 10) pointer limit first second)
+      (proofReturnFinal (SimpleBlocks.firstProofFinal p pointer limit) 0) ∧
+    PrivateSpills.AgreesOutside (p.regs 10)
+      (nativeReturnFinal (rejectFinal (SimpleBlocks.firstNativeFinal n context pointer limit)) 0).memory
+      (proofReturnFinal (SimpleBlocks.firstProofFinal p pointer limit) 0).memory ∧
+    (SimpleEntryCertificate.prefixEvents (p.regs 10) pointer limit first second).filterMap
+      (PrivateSpills.projectEvent (p.regs 10)) = [first, second] := by
+  have firstRun := first_block n p context pointer limit first second entry
+  have nativePC : (SimpleBlocks.firstNativeFinal n context pointer limit).pc = 36 := by
+    simp [SimpleBlocks.firstNativeFinal, SimpleGuardCertificate.final, reject]
+  have proofPC : (SimpleBlocks.firstProofFinal p pointer limit).pc = 27 := by
+    simp [SimpleBlocks.firstProofFinal, reject]
+  have zero : (SimpleBlocks.firstProofFinal p pointer limit).regs 0 = 0 := by
+    simp [SimpleBlocks.firstProofFinal, SimpleEntryCertificate.prefixFinal]
+  refine ⟨?_, ?_, ?_, firstRun.2.2.2.1⟩
+  · simpa only [List.append_nil] using firstRun.1.append
+      (reject_execution (SimpleBlocks.firstNativeFinal n context pointer limit) nativePC)
+  · simpa only [List.append_nil] using firstRun.2.1.append
+      (proof_exit_execution (SimpleBlocks.firstProofFinal p pointer limit) 0 proofPC zero rfl)
+  · simpa only [nativeReturnFinal, nativeReturnBefore, rejectFinal, rejectBefore,
+      AArch64.writeReg, proofReturnFinal, proofReturnBefore] using firstRun.2.2.1
+
 end KProgTV.SimpleCheckedBlocks
 #print axioms KProgTV.SimpleCheckedBlocks.first_block
 
@@ -222,3 +311,5 @@ end KProgTV.SimpleCheckedBlocks
 #print axioms KProgTV.SimpleCheckedBlocks.return_executions
 
 #print axioms KProgTV.SimpleCheckedBlocks.store_including_faults
+
+#print axioms KProgTV.SimpleCheckedBlocks.first_rejection

@@ -682,3 +682,12 @@ witness stops at the real first fault or block successor; those predicates add
 no executable checks. The reused certificate accepts an explicit BPF environment
 with the original default preserved. Full architectural/block-edge and private
 memory composition remains required beyond this store observation theorem.
+
+`first_rejection` composes the first complete invocation path: when the real
+first native comparison rejects, native entry/guard/reject/return execution
+matches entry/spills/guard/JA/EXIT in the actual expanded B. Both complete final
+states, the guest-memory relation and exact projected ordered context reads are
+retained. The return value is zero and only proved-private spill effects are
+erased. Its hypotheses are the existing explicit mapped-context/frame entry
+relation and the real branch outcome, with no added executable test. This path
+certificate does not yet cover the second-guard rejection or store paths.

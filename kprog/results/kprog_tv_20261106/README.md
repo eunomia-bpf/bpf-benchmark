@@ -953,3 +953,17 @@ Quot.sound, with no sorryAx. Exact checker/array/snapshot sources are archived i
 `checked-store-expanded-inputs.tar.gz`. This result concerns store observations;
 complete architectural block-edge/private-frame/invocation/profile composition
 continues before a whole-program certificate can be claimed.
+
+Complete first-guard rejection path (2026-11-07)
+------------------------------------------------
+
+`checked-reject-first-final.log` passes `SimpleCheckedBlocks.first_rejection`.
+It composes actual native entry/first guard/rejection block/return and the
+actual expanded verifier program through JA/EXIT. Complete final states,
+guest-memory agreement and the two ordered guest context reads are explicit;
+only the existing justified compiler spills are erased. The result uses the
+existing entry ABI premises and actual rejecting comparison, adds no runtime
+checks, and has propext/Classical.choice/Lean.ofReduceBool/Quot.sound without
+sorryAx. The frozen program/snapshot inputs are unchanged from the preceding
+store archive; this commit retains the composing source and full check log.
+Other branches and the invocation/profile binding remain pending.
