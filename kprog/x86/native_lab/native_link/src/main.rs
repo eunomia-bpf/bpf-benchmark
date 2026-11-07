@@ -3917,7 +3917,7 @@ fn rewrite_arm64(
                         }
                         if tail {
                             append_u32(&mut blob, 0xa8c1_7bfd);
-                            if is_entry {
+                            if is_entry && !(proof_mode && preserve_entry_abi) {
                                 patches.push(Arm64Patch { word_index: blob.len() / 4,
                                     kind: Arm64PatchKind::ReturnToTrampoline });
                                 append_u32(&mut blob, A64_NOP);
@@ -4219,7 +4219,10 @@ fn rewrite_arm64(
                 });
             }
 
-            if is_entry && a64_is_ret(insn) {
+            // Proofs retaining the entry ABI must observe the actual return
+            // register. Erasing RET here would hide a corrupted LR from the
+            // simulator before it can reject that control-flow target.
+            if is_entry && a64_is_ret(insn) && !(proof_mode && preserve_entry_abi) {
                 patches.push(Arm64Patch {
                     word_index: emit_word_index,
                     kind: Arm64PatchKind::ReturnToTrampoline,
@@ -4620,6 +4623,7 @@ mod tests {
                 assert_eq!(output.proof_relocs[0].offset, 4);
                 assert_eq!(output.proof_relocs[0].symbol, "bpf_ktime_get_coarse_ns");
                 assert_eq!(arm64_word_at(&output.blob, 2), Some(0xa8c1_7bfd));
+                assert_eq!(arm64_word_at(&output.blob, 3), Some(0xd65f_03c0));
             } else {
                 assert_eq!(a64_blr_reg(arm64_word_at(&output.blob, 2).unwrap()), Some(10));
                 assert_eq!(arm64_word_at(&output.blob, 3), Some(0xa8c1_7bfd));
@@ -4661,6 +4665,8 @@ mod tests {
             assert_eq!(output[0], if preserve { words[0] } else { 0xd100_83ff });
             assert_eq!(output[3], if preserve { words[3] } else { 0x9100_83ff });
             assert_eq!(&output[1..3], &words[1..3]);
+            if preserve { assert_eq!(output[4], words[4]); }
+            else { assert!(a64_is_uncond_b(output[4])); }
         }
         let bytes = words.iter().flat_map(|w| w.to_le_bytes()).collect::<Vec<_>>();
         let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();

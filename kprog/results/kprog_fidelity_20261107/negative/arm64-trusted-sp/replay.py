@@ -5,6 +5,9 @@ import importlib.util,json,sys
 R=Path('/workspaces/repository');O=Path(__file__).resolve().parent
 s=importlib.util.spec_from_file_location('native_safety',R/'kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/check.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
 m.ARCH='arm64';m.OUT=O;m.BUILD=R/'kprog/formal/build/fidelity-trusted-arm64'
+# Private incremental linker output: never replace another lane's active input.
+LINKER=R/'kprog/fidelity/build-return-linker/aarch64-unknown-linux-gnu/release/native-link'
+m.native_link=lambda:LINKER
 POSITIVES={
  'valid_control':'mov w0,#2; ret',
  'valid_copy_restore':'mov x1,sp; mov sp,x1; mov w0,#2; ret',
@@ -15,15 +18,10 @@ if len(sys.argv)==2 and sys.argv[1]=='build':m.build()
 elif len(sys.argv)==2 and sys.argv[1]=='host':
  spec=importlib.util.spec_from_file_location('arm_transport',R/'corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py');transport=importlib.util.module_from_spec(spec);spec.loader.exec_module(transport)
  # Reuse A's unchanged readonly-root transport; output/guest dispatch belong to F.
- transport.HERE=O;transport.__file__=__file__;transport.host()
+ transport.HERE=O;transport.__file__=__file__;transport.NATIVE_LINK=LINKER;transport.host()
 elif len(sys.argv) in (3,4) and sys.argv[1]=='guest':
  live=Path(sys.argv[2]);selected=json.loads((O/'cases.json').read_text())
- completed=O/'completed-cases.json'
- if completed.exists():
-  known={r['name']:r for r in json.loads(completed.read_text())}
-  for row in selected:
-   if row['name'] in known:assert row['native_sha256']==known[row['name']]['native_sha256'],'completed native input changed'
-  selected=[r for r in selected if r['name'] not in known or r['name']=='valid_control']
+ # A linker change requires fresh receipts for every case, including controls.
  (live/'cases.json').write_text(json.dumps(selected,indent=2)+'\n');m.cases=lambda:selected;m.OUT=live
  try:m.check()
  finally:
