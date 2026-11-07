@@ -1951,3 +1951,39 @@ existing integration JSON/gzip. Full exact900 `make check` POPCNT EXIT2
 and the separate canonical CMOV-route pointer-alignment UBSan failure remain
 unresolved; no complete-check or whole77/72/O2/O4 pass is claimed.
 Proof SHA256 `63c715ee643a0754de4b703e8e87f10ea4e0c0849b62c91a3883d3e1ac639823`.
+
+## Single canonical LEAVE64 for the actual JIT tail
+
+The existing X86 reference now decodes C9 LEAVE64 and executes its implicit
+8-byte read at incoming RBP. Only a successful read commits RSP=oldRBP+8,
+RBP=loaded word and the fall-through PC. A read fault retains the complete
+input state, including old RSP/RBP, with the original fault effect. Every
+outcome preserves memory and all flags. Five public decode/success/fault/
+unreadable/frame lemmas let T reuse this same rule in wrapper certificates.
+Old reference declarations are retained; only the new instruction cases
+extend decode, step, fall-through and defined-flags selection.
+
+[Intel SDM Vol2A, LEAVE](https://cdrdv2-public.intel.com/812383/253666-sdm-vol-2a.pdf)
+and F's published hardware receipt `1e18c95cbabc07a19e2c6d31daa661754882ae87`
+provide the operation and fault evidence. Its8192 saved states include4096
+successes and4096 faults preserving every incoming GPR; a valid frame works
+even with a noncanonical OLD RSP. F retains the concrete #PF/#SS traps and
+raw delivery flags. The shared memory abstraction represents the failed
+stack read; concrete trap delivery, including RF, is a platform obligation.
+No simulator LEAVE handler or complete JIT/ABI/O2/O4 result is inferred.
+16-bit LEAVE remains outside this extension; no previously accepted form is
+removed. F owns independent replay of those same saved states against this
+canonical executable; that comparison is pending at this publication.
+
+Default incremental `lake build` passes its378-job graph, including every
+library module and the relinked reference executable. Five axiom audits
+report only propext and Quot.sound. The corrected physical-source manifest
+includes all library files and entry/configuration inputs, with no source
+drift; the first successful build's shared-index manifest omission of the
+new X86Dispatcher is retained and corrected by a cached follow-up. Original
+syntax failures and every successful command/output/source pin are retained
+in the existing integration JSON/gzip. No header, generator, oracle, test,
+build configuration, paper, shared cache or other ISA semantics change.
+The separate full exact900 POPCNT compile EXIT2 and canonical CMOV-route
+unaligned-pointer UBSan failure remain open; this is not `make check` PASS.
+Canonical source SHA256 `9fca3291b55b8ef0bfdfa8fab8afe8935210e5fd30f6c0314f7db53661b7afa8`; validation pins 372.

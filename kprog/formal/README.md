@@ -85,7 +85,12 @@ successful, suitably aligned access. REP MOVS includes direction, address32,
 segments and restart faults; its C core lift requires a matching bounded count,
 forward direction, default addressing and successful accesses. Near CALL/RET
 uses explicit 48/57-bit paging canonicality (default 48, optional
-`state.linear_address_bits`) with CET (IBT and shadow stacks) disabled. Internal call/return
+`state.linear_address_bits`) with CET (IBT and shadow stacks) disabled. The same canonical decoder includes C9 LEAVE64: an eight-byte read at incoming
+RBP commits RSP/RBP only on success; read faults preserve the complete input
+state. Public decode/success/fault/frame lemmas serve wrapper certificates.
+The shared memory abstraction represents failed stack reads; signal delivery
+(including RF), concrete paging traps and the initial ABI remain platform inputs.
+Internal call/return
 stack cores are distinct from helper and outer-invocation platform certificates. D0 pre/access/post success cores and their two dispatcher arms additionally
 compose generated base updates with the transfer, under explicit accessible-memory
 and original-SP alignment witnesses. Their numeric projection still needs Entry/O4

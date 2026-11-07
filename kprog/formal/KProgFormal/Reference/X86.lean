@@ -816,6 +816,19 @@ def returnStep (release : BitVec 16) (s : State) : Transition State :=
         ⟨{ s with gpr := fun r => if r = 4 then s.gpr 4 + 8 + release.setWidth 64 else s.gpr r, pc := target }, [read], none⟩
       else ⟨s, [read, .fault (.nonCanonical target)], some (.nonCanonical target)⟩
 
+/-- Long-mode LEAVE64 (C9), Intel SDM Vol2A 3-597/598:
+https://cdrdv2-public.intel.com/812383/253666-sdm-vol-2a.pdf
+The implicit eight-byte read is at incoming RBP, not old RSP. Commit both
+registers only after it succeeds. F's8192 real C9 observations confirm that
+read faults preserve ALL incoming GPRs, including old RSP/RBP. Exception
+signal/trap delivery (including RF) is outside this instruction transition;
+the shared memory fault abstracts the failed stack read, as for POP. -/
+def leave64Step (nextPc : Word) (s : State) : Transition State :=
+  match readMemory s.memory (s.gpr 5) 8 with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (value, event) =>
+      ⟨{ s with gpr := (fun r => if r = 4 then s.gpr 5 + 8 else if r = 5 then value else s.gpr r), pc := nextPc }, [event], none⟩
+
 /-- One architectural instruction with its decoded fall-through address.
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
@@ -838,6 +851,7 @@ inductive Instruction
   | unary (width : ScalarWidth) (kind : UnaryKind) (dst : ScalarDestination) (nextPc : Word)
   | logic (width : ScalarWidth) (kind : LogicKind) (dst : ScalarDestination) (src : ScalarSource) (nextPc : Word)
   | nop (nextPc : Word)
+  | leave64 (nextPc : Word)
   | branch (condition : Option (Fin 16)) (target nextPc : Word)
   | setcc (condition : Fin 16) (dst : ScalarDestination) (nextPc : Word)
   | arithmetic (width : ScalarWidth) (kind : ArithmeticKind) (dst : ScalarDestination)
@@ -864,7 +878,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .call _ next | .returnNear _ next | .repMovs _ _ _ next | .xmm0Move _ _ _ next | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .call _ next | .returnNear _ next | .repMovs _ _ _ next | .xmm0Move _ _ _ next | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next | .leave64 next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -906,6 +920,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
   | .unary width kind dst nextPc => unaryStep width kind dst nextPc s
   | .logic width kind dst src nextPc => logicalStep width kind dst src nextPc s
   | .nop nextPc => ⟨{ s with pc := nextPc }, [], none⟩
+  | .leave64 nextPc => leave64Step nextPc s
   | .branch cc target nextPc =>
       let taken := match cc with | none => true | some code => condition s.rflags code
       ⟨{ s with pc := if taken then target else nextPc }, [], none⟩
@@ -975,7 +990,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
-  | .call .. | .returnNear .. => 0xffffffffffffffff
+  | .call .. | .returnNear .. | .leave64 .. => 0xffffffffffffffff
   | .repMovs .. => 0xffffffffffffffff
   | .xmm0Move .. => 0xffffffffffffffff
   | .doubleShift width _ _ _ count _ =>
@@ -1174,6 +1189,9 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     let size := if first = 0xc2 then 2 else 0
     let raw ← signedDisplacement bytes (count + 1) size
     return .returnNear (raw.setWidth 16) (← fallthrough s (count + 1 + size))
+  if first = 0xc9 then
+    if stackWidth p ≠ .w64 then throw "LEAVE reference requires the 64-bit operand form"
+    return .leave64 (← fallthrough s (count + 1))
   if first = 0xa4 ∨ first = 0xa5 then
     if p.mandatoryPrefix ≠ 0xf3 then throw "MOVS reference requires the architectural REP prefix"
     let sourceBase := if p.segment = 0x64 then s.fsBase else if p.segment = 0x65 then s.gsBase else 0
@@ -1573,5 +1591,38 @@ macro "canonical_x86_decode" : tactic =>
     scalarDestination,ScalarWidth.bytes,ScalarWidth.bits,fallthrough,integerBinary,
     Instruction.fallthrough,List.range'_succ,Except.bind,Except.map,Except.pure,
     Bind.bind,Pure.pure,Except.instMonad])
+
+
+/-- Concrete C9 decodes at any code origin without a supplied operand/step. -/
+theorem leave64_decode (s : State) :
+    decode #[(0xc9 : Byte)] s = .ok (.leave64 (s.pc + 1)) := by rfl
+
+/-- Complete successful LEAVE result, retaining the original ordered read. -/
+theorem leave64_read_success (nextPc value : Word) (event : Event) (s : State)
+    (read : readMemory s.memory (s.gpr 5) 8 = .ok (value, event)) :
+    step (.leave64 nextPc) s =
+      ⟨{ s with gpr := (fun r => if r = 4 then s.gpr 5 + 8 else if r = 5 then value else s.gpr r), pc := nextPc }, [event], none⟩ := by
+  simp only [step, leave64Step, read]
+
+/-- A failed frame read changes no architectural state, including old RSP. -/
+theorem leave64_read_fault (nextPc : Word) (fault : Fault) (s : State)
+    (read : readMemory s.memory (s.gpr 5) 8 = .error fault) :
+    step (.leave64 nextPc) s = ⟨s, [.fault fault], some fault⟩ := by
+  simp only [step, leave64Step, read]
+
+theorem leave64_unreadable (nextPc : Word) (s : State)
+    (denied : permitted s.memory.readable (s.gpr 5) 8 = false) :
+    step (.leave64 nextPc) s = ⟨s, [.fault (.read (s.gpr 5) 8)], some (.read (s.gpr 5) 8)⟩ := by
+  simp only [step, leave64Step, readMemory, denied, Bool.false_eq_true, ↓reduceIte]
+
+/-- Memory and all flags are preserved on every outcome; no delivery RF or
+write effect is manufactured by the ISA step. -/
+theorem leave64_memory_flags (nextPc : Word) (s : State) :
+    (step (.leave64 nextPc) s).state.memory = s.memory ∧
+      (step (.leave64 nextPc) s).state.rflags = s.rflags := by
+  simp only [step, leave64Step]
+  cases read : readMemory s.memory (s.gpr 5) 8 with
+  | error fault => exact ⟨rfl, rfl⟩
+  | ok pair => exact ⟨rfl, rfl⟩
 
 end KProgFormal.Reference.X86
