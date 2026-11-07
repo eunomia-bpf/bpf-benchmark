@@ -1,0 +1,195 @@
+--- a/kprog/x86/x86_sim_local_bpf.h
++++ b/kprog/x86/x86_sim_local_bpf.h
+@@ -7,6 +7,7 @@
+ #include <bpf_helpers.h>
+ 
+ #include "x86_sim.h"
++#include "../../kinsn/module/include/native_lab_input.h"
+ #include "../formal/generated/abi_load.h"
+ #include "../formal/generated/ptr_add.h"
+ #include "../formal/generated/x86_full_condition.h"
+@@ -247,6 +248,7 @@
+ 
+ struct x86_sim_state {
+ 	X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_STATE_REG_FIELD)
++	__u64 native_stack_base;
+ 	__u8 cf;
+ 	__u8 zf;
+ 	__u8 sf;
+@@ -303,6 +305,7 @@
+ #define __x86_r13_tag (__x86_state->r13_tag)
+ #define __x86_r14_tag (__x86_state->r14_tag)
+ #define __x86_r15_tag (__x86_state->r15_tag)
++#define __x86_native_stack_base (__x86_state->native_stack_base)
+ #define __x86_cf (__x86_state->cf)
+ #define __x86_zf (__x86_state->zf)
+ #define __x86_sf (__x86_state->sf)
+@@ -324,6 +327,7 @@
+ 	void *__x86_sim_helper_ctx = (void *)0;                            \
+ 	void *__x86_sim_helper_abi_base = (void *)0;                       \
+ 	X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_DECLARE_REG)                       \
++	__u64 __x86_native_stack_base = 0;                                 \
+ 	__u8 __x86_cf = 0;                                                  \
+ 	__u8 __x86_zf = 0;                                                  \
+ 	__u8 __x86_sf = 0;                                                  \
+@@ -366,6 +370,13 @@
+ 	 (REG) == X86_R14 ? __x86_r14.ptr :                                  \
+ 	 (REG) == X86_R15 ? __x86_r15.ptr : (void *)0)
+ 
++/* Numeric entry address is distinct from the private arena's offset zero.
++ * Both BPF and host use the existing explicit ABI2 entry input. Routing
++ * oracles provide a zero-origin fixture; hardware observers provide their
++ * actual source stack base. No production host value is guessed.
++ */
++#define X86_SIM_L_ENTRY_STACK_BASE() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_SP)
++
+ #define X86_SIM_ENTRY_XDP(CTX)                                               \
+ 	struct x86_sim_xdp_abi __x86_sim_abi = {                         \
+ 		.data = (void *)(long)(CTX)->data,                       \
+@@ -375,6 +386,7 @@
+ 	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;                    \
+ 	X86_SIM_L_DECLARE_STATE();                                           \
+ 	X86_SIM_L_DECLARE_STACK();                                           \
++	__x86_native_stack_base = X86_SIM_L_ENTRY_STACK_BASE();             \
+ 	__x86_sim_helper_ctx = (void *)(CTX);                            \
+ 	__x86_sim_helper_abi_base = &__x86_sim_abi;                        \
+ 	__x86_rdi.ptr = &__x86_sim_abi;                                     \
+@@ -389,6 +401,7 @@
+ 	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_SKB;                    \
+ 	X86_SIM_L_DECLARE_STATE();                                           \
+ 	X86_SIM_L_DECLARE_STACK();                                           \
++	__x86_native_stack_base = X86_SIM_L_ENTRY_STACK_BASE();             \
+ 	__x86_sim_helper_ctx = (void *)(CTX);                            \
+ 	__x86_sim_helper_abi_base = &__x86_sim_abi;                        \
+ 	__x86_rdi.ptr = &__x86_sim_abi;                                     \
+@@ -405,6 +418,7 @@
+ 	__u8 __x86_sim_abi_kind = X86_SIM_ABI_KIND_RAW;                                     \
+ 	X86_SIM_L_DECLARE_STATE();                                       \
+ 	X86_SIM_L_DECLARE_STACK();                                       \
++	__x86_native_stack_base = X86_SIM_L_ENTRY_STACK_BASE();             \
+ 	__x86_rdi.ptr = (void *)(CTX);                                   \
+ 	__x86_rdi_tag = X86_SIM_TAG_ABI
+ 
+@@ -424,7 +438,8 @@
+ 			X86_SIM_L_EFFECTIVE_WIDTH(__x86_rd_raw_width);             \
+ 		__u8 __x86_rd_shift = (SRC_SHIFT);                          \
+ 		__u64 __x86_rd_value =                                    \
+-			(__u64)(long)X86_SIM_L_READ_REG_PTR(__x86_rd_reg);  \
++			(__u64)(long)X86_SIM_L_READ_REG_PTR(__x86_rd_reg) + \
++			(__x86_rd_reg == X86_RSP ? __x86_native_stack_base : 0);  \
+ 		KPROG_X86_READ_REG_AT(__x86_rd_value, __x86_rd_width,      \
+ 			__x86_rd_shift);                                    \
+ 	})
+@@ -452,24 +467,30 @@
+ 	case REG:                                                          \
+ 		KPROG_X86_WRITE_REG64(__x86_##NAME, __x86_##NAME##_tag,   \
+ 			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
++		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
+ 		break;
+ 
+ #define X86_SIM_L_WRITE_REG8_VALUE_CASE(REG, NAME)                          \
+ 	case REG:                                                          \
++		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr + __x86_native_stack_base); \
+ 		KPROG_X86_WRITE_REG8(__x86_##NAME, __x86_##NAME##_tag,    \
+ 			__x86_wr_next, __x86_wr_shift, X86_SIM_TAG_SCALAR); \
++		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
+ 		break;
+ 
+ #define X86_SIM_L_WRITE_REG16_VALUE_CASE(REG, NAME)                         \
+ 	case REG:                                                          \
++		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr + __x86_native_stack_base); \
+ 		KPROG_X86_WRITE_REG16(__x86_##NAME, __x86_##NAME##_tag,   \
+ 			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
++		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
+ 		break;
+ 
+ #define X86_SIM_L_WRITE_REG32_VALUE_CASE(REG, NAME)                         \
+ 	case REG:                                                          \
+ 		KPROG_X86_WRITE_REG32(__x86_##NAME, __x86_##NAME##_tag,   \
+ 			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
++		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
+ 		break;
+ 
+ #define X86_SIM_L_WRITE_REG_PTR_VALUE_CASE(REG, NAME)                       \
+--- a/kprog/formal/Makefile
++++ b/kprog/formal/Makefile
+@@ -275,7 +275,7 @@
+ 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_helper_dispatch_route_host.c -o build/test_x86_helper_dispatch_route_host
+ 	./build/test_x86_helper_dispatch_route_host
+ 	python3 tools/check_helper_errors.py --cc "$(CC)"
+-	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/x86_route_host.c -o build/x86_route_host
++	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/x86_route_host.c -o build/x86_route_host
+ 	./build/x86_route_host
+ 	$(CC) -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/btmem_index_route_host.c -o build/btmem_index_route_host
+ 	./build/btmem_index_route_host
+--- a/kprog/formal/oracles/arm64_entry_environment_host.h
++++ b/kprog/formal/oracles/arm64_entry_environment_host.h
+@@ -1,3 +1,6 @@
++#ifndef KPROG_ZERO_ORIGIN_ENTRY_ENVIRONMENT_HOST_H
++#define KPROG_ZERO_ORIGIN_ENTRY_ENVIRONMENT_HOST_H
++#ifndef __bpf__
+ /* Legacy routing oracles use zero-origin abstract coordinates. Hardware
+  * observers supply the actual invocation's stack and outer return separately.
+  * This is an explicit test environment, never a production default.
+@@ -11,3 +14,6 @@
+ 	fputs("unexpected legacy entry-environment input\n", stderr);
+ 	exit(1);
+ }
++
++#endif
++#endif
+--- a/kprog/formal/tools/check_reference_x86_movx.py
++++ b/kprog/formal/tools/check_reference_x86_movx.py
+@@ -97,7 +97,7 @@
+     spec.loader.exec_module(g)
+     folder = ROOT/"build/sign-high"
+     folder.mkdir(parents=True,exist_ok=True)
+-    includes = ["-I"+str(ROOT.parent/"x86/micro-prog"),"-I"+str(ROOT),
++    includes = ["-include", str(ROOT/"oracles/arm64_entry_environment_host.h"), "-I"+str(ROOT.parent/"x86/micro-prog"),"-I"+str(ROOT),
+         "-I"+str(ROOT.parent/"x86"),"-I"+str(ROOT.parents[1]/"vendor/libbpf/src"),"-I/usr/include/x86_64-linux-gnu"]
+     for mnemonic,width in (("cwd",16),("cdq",32),("cqo",64)):
+         rows = [("mov",("rax","QWORD PTR [rdi]")),("mov",("rdx","0xabcdef0123456789")),
+--- a/kprog/formal/tools/check_x86_divide_handler.py
++++ b/kprog/formal/tools/check_x86_divide_handler.py
+@@ -17,7 +17,7 @@
+ def main():
+     folder=ROOT/"build/divide-handler"
+     folder.mkdir(parents=True,exist_ok=True)
+-    includes=["-I"+str(ROOT.parent/"x86/micro-prog"),"-I"+str(ROOT),"-I"+str(ROOT.parent/"x86"),
++    includes=["-include", str(ROOT/"oracles/arm64_entry_environment_host.h"), "-I"+str(ROOT.parent/"x86/micro-prog"),"-I"+str(ROOT),"-I"+str(ROOT.parent/"x86"),
+         "-I"+str(ROOT.parents[1]/"vendor/libbpf/src"),"-I/usr/include/x86_64-linux-gnu"]
+     byte_names={8:"cl",16:"cx",32:"ecx",64:"rcx"}
+     ptr_names={8:"BYTE",16:"WORD",32:"DWORD",64:"QWORD"}
+--- a/kprog/formal/tools/check_x86_flag_definedness.py
++++ b/kprog/formal/tools/check_x86_flag_definedness.py
+@@ -210,7 +210,7 @@
+     for op, value, tail, expected in (("cbw","0x80",[("movzx",("eax","ax"))],0xFF80),
+         ("cwde","0x8000",[],0xFFFF8000), ("cdqe","0x80000000",[("shr",("rax","32"))],0xFFFFFFFF)):
+         cases.append(([("mov",("rax",value)),(op,())]+tail+[("ret",())],expected))
+-    includes = ["-I"+str(ROOT.parent/"x86/micro-prog"), "-I"+str(ROOT),
++    includes = ["-include", str(ROOT/"oracles/arm64_entry_environment_host.h"), "-I"+str(ROOT.parent/"x86/micro-prog"), "-I"+str(ROOT),
+                 "-I"+str(ROOT.parents[1]/"vendor/libbpf/src"), "-I/usr/include/x86_64-linux-gnu"]
+     for n,(body,expected) in enumerate(cases):
+         instructions = [g.NativeInsn(i,op+" "+",".join(args),op,args) for i,(op,args) in enumerate(body)]
+--- a/kprog/formal/tools/check_x86_high_load.py
++++ b/kprog/formal/tools/check_x86_high_load.py
+@@ -17,7 +17,7 @@
+ def main():
+     folder=ROOT/"build/high-load"
+     folder.mkdir(parents=True,exist_ok=True)
+-    includes=["-I"+str(ROOT.parent/"x86/micro-prog"),"-I"+str(ROOT),
++    includes=["-include", str(ROOT/"oracles/arm64_entry_environment_host.h"), "-I"+str(ROOT.parent/"x86/micro-prog"),"-I"+str(ROOT),
+               "-I"+str(ROOT.parent/"x86"),"-I"+str(ROOT.parents[1]/"vendor/libbpf/src"),"-I/usr/include/x86_64-linux-gnu"]
+     cases=[]
+     for base,high in (("rax","ah"),("rcx","ch"),("rdx","dh"),("rbx","bh")):
+--- a/kprog/formal/tools/check_x86_popcount_memory.py
++++ b/kprog/formal/tools/check_x86_popcount_memory.py
+@@ -67,7 +67,7 @@
+     source += ['} printf("x86 encoded POPCNT memory: %u full-state cases OK\\n",cases); return 0; }']
+     path = folder / "memory.c"
+     path.write_text("\n".join(source))
+-    includes = ["-I"+str(ROOT.parent / "x86/micro-prog"), "-I"+str(ROOT), "-I"+str(ROOT.parent / "x86"), "-I"+str(ROOT.parents[1] / "vendor/libbpf/src")]
++    includes = ["-include", str(ROOT/"oracles/arm64_entry_environment_host.h"), "-I"+str(ROOT.parent / "x86/micro-prog"), "-I"+str(ROOT), "-I"+str(ROOT.parent / "x86"), "-I"+str(ROOT.parents[1] / "vendor/libbpf/src")]
+     for compiler in ("cc", "clang-18"):
+         obj = folder / (compiler + ".o")
+         exe = folder / compiler

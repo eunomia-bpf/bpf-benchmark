@@ -76,7 +76,7 @@ try:
   (OUT/f'ack-{index:03d}').touch();print('window',index,meta['app'],meta['arm'],meta['scenario'],meta['kind'],'done',flush=True);index+=1
  result=json.loads((OUT/'guest-complete.json').read_text());(OUT/'host-complete.json').write_text(json.dumps(result,indent=2)+'\n')
  guest.wait();raise SystemExit(0 if result['ok'] and guest.returncode==0 else 1)
-except BaseException as e:
+except Exception as e:
  if collector:collector.abort()
  (OUT/'abort').touch();(OUT/'host-error.txt').write_text(traceback.format_exc());raise
 finally:

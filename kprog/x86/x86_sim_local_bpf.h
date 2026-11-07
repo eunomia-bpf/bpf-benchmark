@@ -7,6 +7,7 @@
 #include <bpf_helpers.h>
 
 #include "x86_sim.h"
+#include "../../kinsn/module/include/native_lab_input.h"
 #include "../formal/generated/abi_load.h"
 #include "../formal/generated/ptr_add.h"
 #include "../formal/generated/x86_full_condition.h"
@@ -247,6 +248,7 @@ _Static_assert(KPROG_X86_GPR_CELL(X86_R15) == 15U,
 
 struct x86_sim_state {
 	X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_STATE_REG_FIELD)
+	__u64 native_stack_base;
 	__u8 cf;
 	__u8 zf;
 	__u8 sf;
@@ -303,6 +305,7 @@ struct x86_sim_state {
 #define __x86_r13_tag (__x86_state->r13_tag)
 #define __x86_r14_tag (__x86_state->r14_tag)
 #define __x86_r15_tag (__x86_state->r15_tag)
+#define __x86_native_stack_base (__x86_state->native_stack_base)
 #define __x86_cf (__x86_state->cf)
 #define __x86_zf (__x86_state->zf)
 #define __x86_sf (__x86_state->sf)
@@ -324,6 +327,7 @@ struct x86_sim_state {
 	void *__x86_sim_helper_ctx = (void *)0;                            \
 	void *__x86_sim_helper_abi_base = (void *)0;                       \
 	X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_DECLARE_REG)                       \
+	__u64 __x86_native_stack_base = 0;                                 \
 	__u8 __x86_cf = 0;                                                  \
 	__u8 __x86_zf = 0;                                                  \
 	__u8 __x86_sf = 0;                                                  \
@@ -366,6 +370,13 @@ struct x86_sim_state {
 	 (REG) == X86_R14 ? __x86_r14.ptr :                                  \
 	 (REG) == X86_R15 ? __x86_r15.ptr : (void *)0)
 
+/* Numeric entry address is distinct from the private arena's offset zero.
+ * Both BPF and host use the existing explicit ABI2 entry input. Routing
+ * oracles provide a zero-origin fixture; hardware observers provide their
+ * actual source stack base. No production host value is guessed.
+ */
+#define X86_SIM_L_ENTRY_STACK_BASE() NATIVE_LAB_ENTRY_INPUT(NATIVE_LAB_INPUT_SP)
+
 #define X86_SIM_ENTRY_XDP(CTX)                                               \
 	struct x86_sim_xdp_abi __x86_sim_abi = {                         \
 		.data = (void *)(long)(CTX)->data,                       \
@@ -375,6 +386,7 @@ struct x86_sim_state {
 	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;                    \
 	X86_SIM_L_DECLARE_STATE();                                           \
 	X86_SIM_L_DECLARE_STACK();                                           \
+	__x86_native_stack_base = X86_SIM_L_ENTRY_STACK_BASE();             \
 	__x86_sim_helper_ctx = (void *)(CTX);                            \
 	__x86_sim_helper_abi_base = &__x86_sim_abi;                        \
 	__x86_rdi.ptr = &__x86_sim_abi;                                     \
@@ -389,6 +401,7 @@ struct x86_sim_state {
 	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_SKB;                    \
 	X86_SIM_L_DECLARE_STATE();                                           \
 	X86_SIM_L_DECLARE_STACK();                                           \
+	__x86_native_stack_base = X86_SIM_L_ENTRY_STACK_BASE();             \
 	__x86_sim_helper_ctx = (void *)(CTX);                            \
 	__x86_sim_helper_abi_base = &__x86_sim_abi;                        \
 	__x86_rdi.ptr = &__x86_sim_abi;                                     \
@@ -405,6 +418,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 	__u8 __x86_sim_abi_kind = X86_SIM_ABI_KIND_RAW;                                     \
 	X86_SIM_L_DECLARE_STATE();                                       \
 	X86_SIM_L_DECLARE_STACK();                                       \
+	__x86_native_stack_base = X86_SIM_L_ENTRY_STACK_BASE();             \
 	__x86_rdi.ptr = (void *)(CTX);                                   \
 	__x86_rdi_tag = X86_SIM_TAG_ABI
 
@@ -424,7 +438,8 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			X86_SIM_L_EFFECTIVE_WIDTH(__x86_rd_raw_width);             \
 		__u8 __x86_rd_shift = (SRC_SHIFT);                          \
 		__u64 __x86_rd_value =                                    \
-			(__u64)(long)X86_SIM_L_READ_REG_PTR(__x86_rd_reg);  \
+			(__u64)(long)X86_SIM_L_READ_REG_PTR(__x86_rd_reg) + \
+			(__x86_rd_reg == X86_RSP ? __x86_native_stack_base : 0);  \
 		KPROG_X86_READ_REG_AT(__x86_rd_value, __x86_rd_width,      \
 			__x86_rd_shift);                                    \
 	})
@@ -452,24 +467,30 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 	case REG:                                                          \
 		KPROG_X86_WRITE_REG64(__x86_##NAME, __x86_##NAME##_tag,   \
 			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
+		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
 		break;
 
 #define X86_SIM_L_WRITE_REG8_VALUE_CASE(REG, NAME)                          \
 	case REG:                                                          \
+		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr + __x86_native_stack_base); \
 		KPROG_X86_WRITE_REG8(__x86_##NAME, __x86_##NAME##_tag,    \
 			__x86_wr_next, __x86_wr_shift, X86_SIM_TAG_SCALAR); \
+		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
 		break;
 
 #define X86_SIM_L_WRITE_REG16_VALUE_CASE(REG, NAME)                         \
 	case REG:                                                          \
+		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr + __x86_native_stack_base); \
 		KPROG_X86_WRITE_REG16(__x86_##NAME, __x86_##NAME##_tag,   \
 			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
+		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
 		break;
 
 #define X86_SIM_L_WRITE_REG32_VALUE_CASE(REG, NAME)                         \
 	case REG:                                                          \
 		KPROG_X86_WRITE_REG32(__x86_##NAME, __x86_##NAME##_tag,   \
 			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
+		if ((REG) == X86_RSP) __x86_##NAME.ptr = (void *)(long)((__u64)(long)__x86_##NAME.ptr - __x86_native_stack_base); \
 		break;
 
 #define X86_SIM_L_WRITE_REG_PTR_VALUE_CASE(REG, NAME)                       \

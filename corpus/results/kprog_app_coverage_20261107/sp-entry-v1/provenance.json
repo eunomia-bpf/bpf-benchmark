@@ -1,0 +1,28 @@
+{
+  "base": "e8034604702e23a1ec5e242fd4ebec2a96b1cfaf",
+  "unpublished_candidate": false,
+  "sha256": {
+    "kprog/x86/x86_sim_local_bpf.h": "7a81468d6cacf79f3d0aaa06510292a518a8900f5089053b40ebc87cd01987bb",
+    "kprog/formal/Makefile": "b7212d1ad3ceb628ff43013a582a07cebfd5d60fd1cd4bb238457ab2f47e417d",
+    "kprog/formal/oracles/arm64_entry_environment_host.h": "c99389a5584be946a7e179275111653d2ee1be3ec2e32201d20fbe082f129c8d",
+    "kprog/formal/tools/check_reference_x86_movx.py": "59f665c796b31776ca912751608a6485e54ee2dbd911b48e59cb11dc3ed78536",
+    "kprog/formal/tools/check_x86_divide_handler.py": "90fb1c1c968f7d486edc97771b567420eb4e9afbf6b8dbadcd5843e0623988eb",
+    "kprog/formal/tools/check_x86_flag_definedness.py": "4ee0c9f1f5de3f82414371f7f920d37c09b28673df7f2ca8ce03d2e43c4b0fad",
+    "kprog/formal/tools/check_x86_high_load.py": "e83caccc2059ec86bc34ebe29e7f77dce8b335fa125fdc6634251349731d5158",
+    "kprog/formal/tools/check_x86_popcount_memory.py": "7c60129e1233c1c52d4a0d3932bda1b397618fb2887ac02a8e62c8ba15cde90d"
+  },
+  "full_v2_exit": 0,
+  "published_source_sha256": {
+    "kprog/x86/x86_sim_local_bpf.h": "7a81468d6cacf79f3d0aaa06510292a518a8900f5089053b40ebc87cd01987bb",
+    "kprog/formal/Makefile": "06f53ee96b4cffb796f6e08d6ab243e530c68aa6ed9d48bae55ffc2df9220da4",
+    "kprog/formal/oracles/arm64_entry_environment_host.h": "c99389a5584be946a7e179275111653d2ee1be3ec2e32201d20fbe082f129c8d",
+    "kprog/formal/tools/check_reference_x86_movx.py": "59f665c796b31776ca912751608a6485e54ee2dbd911b48e59cb11dc3ed78536",
+    "kprog/formal/tools/check_x86_divide_handler.py": "90fb1c1c968f7d486edc97771b567420eb4e9afbf6b8dbadcd5843e0623988eb",
+    "kprog/formal/tools/check_x86_flag_definedness.py": "4ee0c9f1f5de3f82414371f7f920d37c09b28673df7f2ca8ce03d2e43c4b0fad",
+    "kprog/formal/tools/check_x86_high_load.py": "e83caccc2059ec86bc34ebe29e7f77dce8b335fa125fdc6634251349731d5158",
+    "kprog/formal/tools/check_x86_popcount_memory.py": "7c60129e1233c1c52d4a0d3932bda1b397618fb2887ac02a8e62c8ba15cde90d"
+  },
+  "preserved_concurrent_changes": {
+    "kprog/formal/Makefile": "Preserved independently published multiply checker added after frozen FULL base."
+  }
+}

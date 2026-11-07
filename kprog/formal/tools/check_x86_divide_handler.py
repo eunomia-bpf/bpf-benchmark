@@ -17,7 +17,7 @@ spec.loader.exec_module(g)
 def main():
     folder=ROOT/"build/divide-handler"
     folder.mkdir(parents=True,exist_ok=True)
-    includes=["-I"+str(ROOT.parent/"x86/micro-prog"),"-I"+str(ROOT),"-I"+str(ROOT.parent/"x86"),
+    includes=["-include", str(ROOT/"oracles/arm64_entry_environment_host.h"), "-I"+str(ROOT.parent/"x86/micro-prog"),"-I"+str(ROOT),"-I"+str(ROOT.parent/"x86"),
         "-I"+str(ROOT.parents[1]/"vendor/libbpf/src"),"-I/usr/include/x86_64-linux-gnu"]
     byte_names={8:"cl",16:"cx",32:"ecx",64:"rcx"}
     ptr_names={8:"BYTE",16:"WORD",32:"DWORD",64:"QWORD"}

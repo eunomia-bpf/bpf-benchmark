@@ -60,10 +60,34 @@ perf-tool:
 	taskset -c 20-23 make -C $(ROOT)/vendor/linux-framework/tools/perf O=/workspaces/.agent-state/kprog-lanes/C/perf-build -j2 NO_JEVENTS=1 NO_LIBPERL=1 NO_LIBPYTHON=1 NO_LIBBABELTRACE=1 NO_LIBTRACEEVENT=1
 
 perf-profile-build:
-	gcc -O2 -Wall -Wextra -o $(HERE)/per-run-profile/fixed-run $(HERE)/per-run-profile/fixed-run.c
+	gcc -O2 -Wall -Wextra -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include -o $(HERE)/per-run-profile/fixed-run $(HERE)/per-run-profile/fixed-run.c $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz
 
 perf-profile:
 	python3 -u $(HERE)/per-run-profile/host.py baseline
 
 perf-tables-profile:
 	python3 -u $(HERE)/per-run-profile/host.py tables
+
+sp-entry-v1-build:
+	taskset -c 20-23 python3 $(HERE)/sp-entry-v1/build.py
+
+sp-entry-v1-run:
+	taskset -c 12-15 vng --run /workspaces/.agent-state/kprog-lanes/C/frozen-kernel/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile sp-entry-v1-guest'
+
+sp-entry-v1-guest:
+	python3 $(ROOT)/kprog/fidelity/negative.py run --arch x86 --build /workspaces/.agent-state/kprog-lanes/C/sp-entry-source/negative --out $(HERE)/sp-entry-v1/verify --loader $(ROOT)/kprog/loader/target/debug/reversesim-loader
+
+sp-entry-v1-positive-build:
+	taskset -c 20-23 python3 $(HERE)/sp-entry-v1/positive.py
+
+sp-entry-v1-positive-run:
+	taskset -c 12-15 vng --run /workspaces/.agent-state/kprog-lanes/C/frozen-kernel/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile sp-entry-v1-positive-guest'
+
+sp-entry-v1-positive-guest:
+	python3 $(HERE)/sp-entry-v1/positive-load.py
+
+perf-dump-control-build: perf-profile-build
+	clang-18 -target bpf -O2 -g -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include -I/usr/include/x86_64-linux-gnu -c $(HERE)/per-run-profile/dump-control.bpf.c -o $(HERE)/per-run-profile/dump-control.bpf.o
+
+perf-dump-control:
+	taskset -c 12-15 vng --run /workspaces/.agent-state/kprog-lanes/C/frozen-kernel/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'bash $(HERE)/per-run-profile/dump-control.sh'

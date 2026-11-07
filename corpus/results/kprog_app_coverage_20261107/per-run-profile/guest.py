@@ -38,7 +38,7 @@ def window(app,arm,scenario,ids,kind):
  argv=[HELPER,'test' if app=='katran' else 'open',ids[0] if ids else 0,COUNT,INPUT]
  before=[info(i) for i in ids]
  for i in ids:
-  command(['bpftool','prog','dump','jited','id',i,'file',prefix/(str(i)+'.jit.bin')],prefix/(str(i)+'.jit-dump.json'))
+  command([HELPER,'dump',i,0,prefix/(str(i)+'.jit.bin')],prefix/(str(i)+'.jit-dump.json'))
  (prefix/'kallsyms.txt').write_text(Path('/proc/kallsyms').read_text())
  publish(OUT/f'ready-{seq:03d}.json',dict(index=seq,prefix=str(prefix),app=app,arm=arm,scenario=scenario,kind=kind,programs=before,count=COUNT,command=list(map(str,argv))))
  wait(OUT/f'go-{seq:03d}')

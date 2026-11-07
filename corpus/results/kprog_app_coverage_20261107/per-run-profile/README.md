@@ -32,3 +32,7 @@ setsid nohup make -f corpus/results/kprog_app_coverage_20261107/Makefile perf-pr
 ```
 
 Inspect the completed run listed in `C/current-perf-run`, then run `analyze.py RUN_DIRECTORY`. `perf-tables-profile` uses the same protocol for the candidate. `tool-and-candidate-sha256.json` pins binaries/inputs. `preflight-and-setup.tar.gz` retains capability probes and failed setup logs. Completed private guest Docker disks are deleted after their logs/artifacts are retained. This is an unbound performance experiment, not proof of generation-bound application coverage.
+
+## Raw JIT export correction
+
+The first acquired lease reached the actual upstream Katran server and stable VIP-hit warmup, then stopped before any perf window because the frozen bpftool lacks JIT disassembly support even for a binary dump. Export now uses official libbpf program-info APIs. A first two-query control exposed returned array counts being reused with NULL optional buffers (EFAULT); the second query now requests only a fresh byte buffer. The actual kernel control exports23nonzero JIT bytes matching `jited_len` and test-runs with return2. All source/raw bytes/logs and earlier failures are retained in `jit-export-control.tar.gz`. This diagnostic ran on12-15 and its duration is excluded from performance comparisons. Corrected baseline/table jobs are queued behind R's new0-7 guest; no measured cost conclusion yet.

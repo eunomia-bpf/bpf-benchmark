@@ -97,7 +97,7 @@ def sign_high_encoder():
     spec.loader.exec_module(g)
     folder = ROOT/"build/sign-high"
     folder.mkdir(parents=True,exist_ok=True)
-    includes = ["-I"+str(ROOT.parent/"x86/micro-prog"),"-I"+str(ROOT),
+    includes = ["-include", str(ROOT/"oracles/arm64_entry_environment_host.h"), "-I"+str(ROOT.parent/"x86/micro-prog"),"-I"+str(ROOT),
         "-I"+str(ROOT.parent/"x86"),"-I"+str(ROOT.parents[1]/"vendor/libbpf/src"),"-I/usr/include/x86_64-linux-gnu"]
     for mnemonic,width in (("cwd",16),("cdq",32),("cqo",64)):
         rows = [("mov",("rax","QWORD PTR [rdi]")),("mov",("rdx","0xabcdef0123456789")),

@@ -210,7 +210,7 @@ def check_compiled_movx():
     for op, value, tail, expected in (("cbw","0x80",[("movzx",("eax","ax"))],0xFF80),
         ("cwde","0x8000",[],0xFFFF8000), ("cdqe","0x80000000",[("shr",("rax","32"))],0xFFFFFFFF)):
         cases.append(([("mov",("rax",value)),(op,())]+tail+[("ret",())],expected))
-    includes = ["-I"+str(ROOT.parent/"x86/micro-prog"), "-I"+str(ROOT),
+    includes = ["-include", str(ROOT/"oracles/arm64_entry_environment_host.h"), "-I"+str(ROOT.parent/"x86/micro-prog"), "-I"+str(ROOT),
                 "-I"+str(ROOT.parents[1]/"vendor/libbpf/src"), "-I/usr/include/x86_64-linux-gnu"]
     for n,(body,expected) in enumerate(cases):
         instructions = [g.NativeInsn(i,op+" "+",".join(args),op,args) for i,(op,args) in enumerate(body)]

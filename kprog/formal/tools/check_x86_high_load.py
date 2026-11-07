@@ -17,7 +17,7 @@ spec.loader.exec_module(g)
 def main():
     folder=ROOT/"build/high-load"
     folder.mkdir(parents=True,exist_ok=True)
-    includes=["-I"+str(ROOT.parent/"x86/micro-prog"),"-I"+str(ROOT),
+    includes=["-include", str(ROOT/"oracles/arm64_entry_environment_host.h"), "-I"+str(ROOT.parent/"x86/micro-prog"),"-I"+str(ROOT),
               "-I"+str(ROOT.parent/"x86"),"-I"+str(ROOT.parents[1]/"vendor/libbpf/src"),"-I/usr/include/x86_64-linux-gnu"]
     cases=[]
     for base,high in (("rax","ah"),("rcx","ch"),("rdx","dh"),("rbx","bh")):

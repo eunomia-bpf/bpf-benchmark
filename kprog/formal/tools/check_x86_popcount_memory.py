@@ -67,7 +67,7 @@ def main():
     source += ['} printf("x86 encoded POPCNT memory: %u full-state cases OK\\n",cases); return 0; }']
     path = folder / "memory.c"
     path.write_text("\n".join(source))
-    includes = ["-I"+str(ROOT.parent / "x86/micro-prog"), "-I"+str(ROOT), "-I"+str(ROOT.parent / "x86"), "-I"+str(ROOT.parents[1] / "vendor/libbpf/src")]
+    includes = ["-include", str(ROOT/"oracles/arm64_entry_environment_host.h"), "-I"+str(ROOT.parent / "x86/micro-prog"), "-I"+str(ROOT), "-I"+str(ROOT.parent / "x86"), "-I"+str(ROOT.parents[1] / "vendor/libbpf/src")]
     for compiler in ("cc", "clang-18"):
         obj = folder / (compiler + ".o")
         exe = folder / compiler

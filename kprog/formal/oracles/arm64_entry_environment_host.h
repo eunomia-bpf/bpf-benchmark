@@ -1,3 +1,6 @@
+#ifndef KPROG_ZERO_ORIGIN_ENTRY_ENVIRONMENT_HOST_H
+#define KPROG_ZERO_ORIGIN_ENTRY_ENVIRONMENT_HOST_H
+#ifndef __bpf__
 /* Legacy routing oracles use zero-origin abstract coordinates. Hardware
  * observers supply the actual invocation's stack and outer return separately.
  * This is an explicit test environment, never a production default.
@@ -11,3 +14,6 @@ unsigned long native_lab_entry_input(unsigned int kind)
 	fputs("unexpected legacy entry-environment input\n", stderr);
 	exit(1);
 }
+
+#endif
+#endif

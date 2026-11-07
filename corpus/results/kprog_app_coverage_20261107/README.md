@@ -42,3 +42,7 @@ All14 captured programs generated, compiled and linked. The actual-type verifier
 ## Matching-kernel linked capture
 
 `x86_kvm_corpus_20261107_042741_542193` completes both applications with statusok. Raw logs show Katran1 native replacement and Tetragon118, each0 loader failures; this is the observed replacement count, not a claim that every loaded program was native/verified. Exact cache-keyed templates, relocations, ABI/map/data layouts and full result/logs are in `linked-app-capture.tar.gz`. These are linked templates before final live map literal patch/upload; do not present them as final JIT bytes. Per-run profiling separately captures real JIT bytes and IDs.
+
+## Direct SP numerical safety increment
+
+`sp-entry-v1/` records the entry-SP correction:40,960 independent CPU ADD/SUB width cases0differences, SAME25negativecases19verifier/6specialization rejects and0accepted, and paired29microcompile/load checks with unchanged28accept/1oldCiliumreject. Private FULLv1's explicit legacy-environment failure and final FULLv2 exit0 are both retained. This closes the previously accepted direct-SP flag fixture; copied-stack pointer/alias numeric observations remain active work. No whole simulator or six-app bound-coverage completion is claimed.
