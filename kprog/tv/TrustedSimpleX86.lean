@@ -2122,6 +2122,221 @@ theorem first_store_fault_correspondence (env : BPF.Environment) (frame : Word) 
   refine ⟨?_,packet_proof_first_fault env p proofPC active bad,same⟩
   simpa only [pointer] using packet_native_first_fault n nativePC nbad
 
+
+/-- Concrete captured store descriptors; permissions are those of the same
+canonical memory, not checks inserted into either artifact. -/
+def packetStorePermission (m : Memory) (pointer : Word) : Nat → Bool
+  | 0 => permitted m.writable pointer 2
+  | 1 => permitted m.writable (pointer+(2#64)) 1
+  | 2 => permitted m.writable (pointer+(3#64)) 4
+  | _ => permitted m.writable (pointer+(7#64)) 1
+
+def packetStoreFault (pointer : Word) : Nat → Fault
+  | 0 => .write pointer 2
+  | 1 => .write (pointer+(2#64)) 1
+  | 2 => .write (pointer+(3#64)) 4
+  | _ => .write (pointer+(7#64)) 1
+
+def packetStoredPrefix (m : Memory) (pointer : Word) : Nat → Memory
+  | 0 => m
+  | 1 => storeMemory m pointer (24910#64) 2
+  | 2 => storeMemory (storeMemory m pointer (24910#64) 2) (pointer+(2#64)) (188#64) 1
+  | _ => storeMemory (storeMemory (storeMemory m pointer (24910#64) 2)
+      (pointer+(2#64)) (188#64) 1) (pointer+(3#64)) (0#64) 4
+
+def packetFaultEvents (pointer : Word) (index : Nat) : List Event :=
+  (packetWriteEvents pointer).take index ++ [.fault (packetStoreFault pointer index)]
+
+def packetProofFaultState (p : BPF.State) : Nat → BPF.State
+  | 0 => packetProofBeforeFirst p
+  | 1 => {BPF.setReg (BPF.setReg (BPF.setReg p 1 (0#64)) 3 (p.regs 2+(2#64))) 4 (188#64) with
+      memory := packetStoredPrefix p.memory (p.regs 2) 1, pc := 26}
+  | 2 => {BPF.setReg (BPF.setReg (BPF.setReg p 1 (0#64)) 3 (p.regs 2+(3#64))) 4 (188#64) with
+      memory := packetStoredPrefix p.memory (p.regs 2) 2, pc := 29}
+  | _ => {BPF.setReg (BPF.setReg (BPF.setReg p 1 (0#64)) 3 (p.regs 2+(7#64))) 4 (188#64) with
+      memory := packetStoredPrefix p.memory (p.regs 2) 3, pc := 32}
+
+def packetNativeFaultState (s : X86.State) : Nat → X86.State
+  | 0 => s
+  | 1 => packetNativeFirst s
+  | 2 => packetNativeSecond s
+  | _ => packetNativeThird s
+
+def packetProofFaultPath : Nat → List Nat
+  | 0 => [18,19,20,21,22]
+  | 1 => [18,19,20,21,22,23,24,25,26]
+  | 2 => [18,19,20,21,22,23,24,25,26,27,28,29]
+  | _ => [18,19,20,21,22,23,24,25,26,27,28,29,30,31,32]
+
+def packetNativeFaultPath : Nat → List X86Path.Entry
+  | 0 => [⟨35,5⟩]
+  | 1 => [⟨35,5⟩,⟨40,4⟩]
+  | 2 => [⟨35,5⟩,⟨40,4⟩,⟨44,7⟩]
+  | _ => [⟨35,5⟩,⟨40,4⟩,⟨44,7⟩,⟨51,4⟩]
+
+/-- Every possible first failing packet store stops the actual B path at its
+faulting instruction; all successful earlier writes and values are retained. -/
+theorem packet_all_store_fault_blocks (env : BPF.Environment) (p : BPF.State) (index : Nat)
+    (bounded : index<4) (position : p.pc=18) (active : p.halted=false)
+    (prior : ∀ i<index, packetStorePermission p.memory (p.regs 2) i=true)
+    (bad : packetStorePermission p.memory (p.regs 2) index=false) :
+    BPFPath.evaluate env proof (packetProofFaultPath index) p =
+      .ok ⟨packetProofFaultState p index,packetFaultEvents (p.regs 2) index,
+        some (packetStoreFault (p.regs 2) index)⟩ := by
+  have plus2 : (2#64)+p.regs 2=p.regs 2+(2#64) := BitVec.add_comm _ _
+  have plus3 : (3#64)+p.regs 2=p.regs 2+(3#64) := BitVec.add_comm _ _
+  have plus7 : (7#64)+p.regs 2=p.regs 2+(7#64) := BitVec.add_comm _ _
+  have choices : index=0 ∨ index=1 ∨ index=2 ∨ index=3 := by omega
+  rcases choices with rfl | rfl | rfl | rfl
+  · simpa only [packetProofFaultPath,packetProofFaultState,packetFaultEvents,
+      packetWriteEvents,packetStoreFault,List.take_zero,List.nil_append] using
+      packet_proof_first_fault_block env p position active bad
+  · have w0 := prior 0 (by omega)
+    simp only [packetStorePermission] at w0 bad
+    simp +decide [BPFPath.evaluate,virtual_decode18,virtual_decode19,virtual_decode20,
+      virtual_decode21,virtual_decode22,virtual_decode23,virtual_decode24,virtual_decode25,
+      virtual_decode26,virtual_decode27,virtual_decode28,virtual_decode29,virtual_decode30,
+      virtual_decode31,virtual_decode32,BPF.execute,BPF.source,BPF.alu,BPF.setReg,BPF.store,
+      writeMemory,position,active,packetProofFaultPath,packetProofFaultState,packetStoredPrefix,
+      packetFaultEvents,packetStoreFault,packetWriteEvents,storeMemory,
+      plus2,plus3,plus7,w0,bad,
+      Except.bind,Except.map,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    funext r
+    by_cases one : r=1 <;> by_cases three : r=3 <;> by_cases four : r=4 <;>
+      simp [one,three,four]
+  · have w0 := prior 0 (by omega)
+    have w1 := prior 1 (by omega)
+    simp only [packetStorePermission] at w0 w1 bad
+    simp +decide [BPFPath.evaluate,virtual_decode18,virtual_decode19,virtual_decode20,
+      virtual_decode21,virtual_decode22,virtual_decode23,virtual_decode24,virtual_decode25,
+      virtual_decode26,virtual_decode27,virtual_decode28,virtual_decode29,virtual_decode30,
+      virtual_decode31,virtual_decode32,BPF.execute,BPF.source,BPF.alu,BPF.setReg,BPF.store,
+      writeMemory,position,active,packetProofFaultPath,packetProofFaultState,packetStoredPrefix,
+      packetFaultEvents,packetStoreFault,packetWriteEvents,storeMemory,
+      plus2,plus3,plus7,w0,w1,bad,
+      Except.bind,Except.map,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    funext r
+    by_cases one : r=1 <;> by_cases three : r=3 <;> by_cases four : r=4 <;>
+      simp [one,three,four]
+  · have w0 := prior 0 (by omega)
+    have w1 := prior 1 (by omega)
+    have w2 := prior 2 (by omega)
+    simp only [packetStorePermission] at w0 w1 w2 bad
+    simp +decide [BPFPath.evaluate,virtual_decode18,virtual_decode19,virtual_decode20,
+      virtual_decode21,virtual_decode22,virtual_decode23,virtual_decode24,virtual_decode25,
+      virtual_decode26,virtual_decode27,virtual_decode28,virtual_decode29,virtual_decode30,
+      virtual_decode31,virtual_decode32,BPF.execute,BPF.source,BPF.alu,BPF.setReg,BPF.store,
+      writeMemory,position,active,packetProofFaultPath,packetProofFaultState,packetStoredPrefix,
+      packetFaultEvents,packetStoreFault,packetWriteEvents,storeMemory,
+      plus2,plus3,plus7,w0,w1,w2,bad,
+      Except.bind,Except.map,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    funext r
+    by_cases one : r=1 <;> by_cases three : r=3 <;> by_cases four : r=4 <;>
+      simp [one,three,four]
+
+/-- All four actual native store instruction extents, each decoded from the
+same captured artifact and the full partial state after preceding stores. -/
+theorem packet_native_store_decodes (s : X86.State) (position : s.pc=35) :
+    X86Path.decodeAt 0 native ⟨35,5⟩ s = .ok
+      (.move .w16 (.memory (s.gpr 1)) (.immediate (24910#64)) 40) ∧
+    X86Path.decodeAt 0 native ⟨40,4⟩ (packetNativeFirst s) = .ok
+      (.move .w8 (.memory (s.gpr 1+(2#64))) (.immediate ((188#8).signExtend 64)) 44) ∧
+    X86Path.decodeAt 0 native ⟨44,7⟩ (packetNativeSecond s) = .ok
+      (.move .w32 (.memory (s.gpr 1+(3#64))) (.immediate (0#64)) 51) ∧
+    X86Path.decodeAt 0 native ⟨51,4⟩ (packetNativeThird s) = .ok
+      (.move .w8 (.memory (s.gpr 1+(7#64))) (.immediate (0#64)) 55) := by
+  refine ⟨?_,?_,?_,?_⟩
+  all_goals simp +decide [X86Path.decodeAt,native_size,native_decode35,native_decode40,
+    native_decode44,native_decode51,position,packetNativeFirst,packetNativeSecond,packetNativeThird,
+    X86Path.fallthrough,X86.Instruction.fallthrough,
+    Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+/-- Native first-fault evaluation, including exact writes before the failure.
+No byte store occurs at or after the failed access. -/
+theorem packet_all_native_store_faults (s : X86.State) (index : Nat)
+    (bounded : index<4) (position : s.pc=35)
+    (prior : ∀ i<index, packetStorePermission s.memory (s.gpr 1) i=true)
+    (bad : packetStorePermission s.memory (s.gpr 1) index=false) :
+    X86Path.evaluate 0 native (packetNativeFaultPath index) s =
+      .ok ⟨⟨packetNativeFaultState s index,packetFaultEvents (s.gpr 1) index,
+        some (packetStoreFault (s.gpr 1) index)⟩,(0xffffffffffffffff#64)⟩ := by
+  obtain ⟨d0,d1,d2,d3⟩ := packet_native_store_decodes s position
+  have choices : index=0 ∨ index=1 ∨ index=2 ∨ index=3 := by omega
+  rcases choices with rfl | rfl | rfl | rfl
+  · have fault := native_immediate_store_fault s .w16 (s.gpr 1) (24910#64) 40 bad
+    simp only [packetNativeFaultPath,packetNativeFaultState,packetFaultEvents,packetWriteEvents,
+      packetStoreFault,X86Path.evaluate,d0,d1,d2,d3,fault,X86.definedFlags,
+      Option.isSome,Bool.false_eq_true,List.isEmpty_cons,List.isEmpty_nil,
+      List.nil_append,List.cons_append,List.append_nil,ite_false,ite_true]
+    rfl
+  · have w0 := prior 0 (by omega)
+    have fault := native_immediate_store_fault (packetNativeFirst s) .w8 (s.gpr 1+(2#64)) ((188#8).signExtend 64) 44 bad
+    simp only [packetNativeFaultPath,packetNativeFaultState,packetFaultEvents,packetWriteEvents,
+      packetStoreFault,X86Path.evaluate,d0,d1,d2,d3,packet_native_first_step s w0,fault,X86.definedFlags,
+      Option.isSome,Bool.false_eq_true,List.isEmpty_cons,List.isEmpty_nil,
+      List.nil_append,List.cons_append,List.append_nil,ite_false,ite_true]
+    rfl
+  · have w0 := prior 0 (by omega)
+    have w1 := prior 1 (by omega)
+    have fault := native_immediate_store_fault (packetNativeSecond s) .w32 (s.gpr 1+(3#64)) (0#64) 51 bad
+    simp only [packetNativeFaultPath,packetNativeFaultState,packetFaultEvents,packetWriteEvents,
+      packetStoreFault,X86Path.evaluate,d0,d1,d2,d3,packet_native_first_step s w0,packet_native_second_step s w1,fault,X86.definedFlags,
+      Option.isSome,Bool.false_eq_true,List.isEmpty_cons,List.isEmpty_nil,
+      List.nil_append,List.cons_append,List.append_nil,ite_false,ite_true]
+    rfl
+  · have w0 := prior 0 (by omega)
+    have w1 := prior 1 (by omega)
+    have w2 := prior 2 (by omega)
+    have fault := native_immediate_store_fault (packetNativeThird s) .w8 (s.gpr 1+(7#64)) (0#64) 55 bad
+    simp only [packetNativeFaultPath,packetNativeFaultState,packetFaultEvents,packetWriteEvents,
+      packetStoreFault,X86Path.evaluate,d0,d1,d2,d3,packet_native_first_step s w0,packet_native_second_step s w1,packet_native_third_step s w2,fault,X86.definedFlags,
+      Option.isSome,Bool.false_eq_true,List.isEmpty_cons,List.isEmpty_nil,
+      List.nil_append,List.cons_append,List.append_nil,ite_false,ite_true]
+    rfl
+
+/-- Native and B stop at the same first failed store with identical ordered
+write/fault events and full partial memories, including initialization bits. -/
+theorem all_store_fault_correspondence (env : BPF.Environment) (frame : Word)
+    (n : X86.State) (p : BPF.State) (index : Nat)
+    (bounded : index<4) (nativePC : n.pc=35) (proofPC : p.pc=18) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2) (same : initializationAgreesOutside frame n.memory p.memory)
+    (prior : ∀ i<index, packetStorePermission p.memory (p.regs 2) i=true)
+    (bad : packetStorePermission p.memory (p.regs 2) index=false) :
+    X86Path.Execution 0 native n (packetFaultEvents (p.regs 2) index) (packetNativeFaultState n index) ∧
+    Execution (initializedInstructionStep env) p (packetFaultEvents (p.regs 2) index) (packetProofFaultState p index) ∧
+    initializationAgreesOutside frame (packetNativeFaultState n index).memory
+      (packetProofFaultState p index).memory := by
+  have permission : ∀ i, packetStorePermission n.memory (n.gpr 1) i =
+      packetStorePermission p.memory (p.regs 2) i := by
+    intro i
+    simp only [packetStorePermission,same.2.1,pointer]
+  have nativeEval := packet_all_native_store_faults n index bounded nativePC
+    (by intro i lt; rw [permission]; exact prior i lt)
+    (by rw [permission]; exact bad)
+  have proofEval := packet_all_store_fault_blocks env p index bounded proofPC active prior bad
+  refine ⟨?_,?_,?_⟩
+  · simpa only [pointer] using X86Path.evaluate_sound _ _ _ _ _ nativeEval
+  · apply ordinary_path_execution env (packetProofFaultPath index) p
+      ⟨packetProofFaultState p index,packetFaultEvents (p.regs 2) index,
+        some (packetStoreFault (p.regs 2) index)⟩ _ proofEval
+    intro pc inside
+    have choices : index=0 ∨ index=1 ∨ index=2 ∨ index=3 := by omega
+    rcases choices with rfl | rfl | rfl | rfl <;> simp [packetProofFaultPath] at inside <;> omega
+  · have choices : index=0 ∨ index=1 ∨ index=2 ∨ index=3 := by omega
+    rcases choices with rfl | rfl | rfl | rfl
+    · exact same
+    · simpa only [packetNativeFaultState,packetProofFaultState,packetStoredPrefix,
+        packetNativeFirst,pointer,BPF.setReg] using initialization_store_agrees same (p.regs 2) (24910#64) 2
+    · simpa only [packetNativeFaultState,packetProofFaultState,packetStoredPrefix,
+        packetNativeSecond,packetNativeFirst,pointer,BPF.setReg] using
+        initialization_store_agrees (initialization_store_agrees same (p.regs 2) (24910#64) 2)
+          (p.regs 2+(2#64)) (188#64) 1
+    · simpa only [packetNativeFaultState,packetProofFaultState,packetStoredPrefix,
+        packetNativeThird,packetNativeSecond,packetNativeFirst,pointer,BPF.setReg] using
+        initialization_store_agrees (initialization_store_agrees
+          (initialization_store_agrees same (p.regs 2) (24910#64) 2)
+          (p.regs 2+(2#64)) (188#64) 1) (p.regs 2+(3#64)) (0#64) 4
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -2328,3 +2543,11 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.packet_native_first_fault
 
 #print axioms KProgTV.TrustedSimpleX86.first_store_fault_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.packet_all_store_fault_blocks
+
+#print axioms KProgTV.TrustedSimpleX86.packet_native_store_decodes
+
+#print axioms KProgTV.TrustedSimpleX86.packet_all_native_store_faults
+
+#print axioms KProgTV.TrustedSimpleX86.all_store_fault_correspondence

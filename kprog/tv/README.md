@@ -1563,3 +1563,15 @@ outside-private memory agreement. The canonical native state remains atPC35;
 B retains its actual setup state atPC22. This is a model-only component proof;
 no unsafe native test is executed. Remaining fault positions, entry composition,
 ABI/materialization and unconditional whole-program TV remain open.
+
+### All four guest-store fault positions
+
+`all_store_fault_correspondence` covers the first failing store at native
+PC35/40/44/51 and actual B PC22/26/29/32, widths2/1/4/1. Both actual artifact
+paths retain exactly the successful preceding writes and then the same fault.
+Complete partial memory, initialization bits and outside-private36 agreement
+are preserved; the failed write and later writes do not occur. Only earlier
+store permissions are required. This extends the first-store component without
+changing earlier theorems or the ISA. The dated all-store-faults JSON/log records
+the checked certificate. Entry composition, context faults, relational/ABI and
+materialization obligations still remain; no unsafe native test was executed.

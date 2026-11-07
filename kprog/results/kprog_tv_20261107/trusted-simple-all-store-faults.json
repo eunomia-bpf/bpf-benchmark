@@ -1,0 +1,105 @@
+{
+  "status": "all_four_first_guest_store_fault_correspondences_checked",
+  "utc": "2026-11-07T12:23:02.562200+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorem": "KProgTV.TrustedSimpleX86.all_store_fault_correspondence",
+  "fault_positions": [
+    {
+      "index": 0,
+      "native_PC": 35,
+      "B_PC": 22,
+      "address_offset": 0,
+      "width": 2,
+      "preceding_guest_writes": 0
+    },
+    {
+      "index": 1,
+      "native_PC": 40,
+      "B_PC": 26,
+      "address_offset": 2,
+      "width": 1,
+      "preceding_guest_writes": 1
+    },
+    {
+      "index": 2,
+      "native_PC": 44,
+      "B_PC": 29,
+      "address_offset": 3,
+      "width": 4,
+      "preceding_guest_writes": 2
+    },
+    {
+      "index": 3,
+      "native_PC": 51,
+      "B_PC": 32,
+      "address_offset": 7,
+      "width": 1,
+      "preceding_guest_writes": 3
+    }
+  ],
+  "claims": [
+    "actual native instruction extents decoded against captured60bytes",
+    "actual accepted B paths18 through first failed store evaluated against captured37instructions",
+    "identical exact ordered successful write events then exact address/width fault",
+    "no write at or after fault; all preceding writes remain in full partial memory",
+    "outside-private36 memory values/initialization and global permissions preserved",
+    "no unsafe native execution performed"
+  ],
+  "premises": [
+    "nativePC35/BPC18, B active",
+    "same nativeRCX/B r2 guest pointer",
+    "same canonical memory permissions and outside-private36 values/init",
+    "index0..3 is first failed store; only preceding permissions true"
+  ],
+  "not_yet_claimed": [
+    "entry/guard-to-first-fault composition",
+    "context-load faults",
+    "unconditional whole-program TranslationValidation",
+    "whole-program canonical relational/architectural simulation",
+    "ABI/return-boundary/platform/original ELF to materialized native transport"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical prefix and old audits retained",
+    "old_prefix_sha256": "c76f7e769fb8f1532e55e055993da099be7d16be44df59cbbb9ac6fdfaced76d",
+    "canonical_ISA_runtime_binding": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "mismatch_controls_rejected": 22,
+    "no_sorryAx": true,
+    "log_sha256": "39b8ed2b67faf5d7e0db44fe8665868fe59f6570b19269d726d99e2785513ca4",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.packet_all_store_fault_blocks": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.packet_native_store_decodes": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.packet_all_native_store_faults": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.all_store_fault_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "trusted": [
+    "verifier soundness for eventual safety composition",
+    "canonical ISA/memory and explicit B platform semantics",
+    "kernel binding/capture/provenance",
+    "specialization/link service until whole-program TV",
+    "Lean kernel and reported axioms including native reduction in prior entry lemmas"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "24def01ebe092cb4043cde2a04718901d2308306861aa4a2274de26e13b69f75"
+  }
+}
