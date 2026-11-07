@@ -1,0 +1,171 @@
+{
+  "recorded": "2026-11-07T16:30:08.703336+00:00",
+  "complete": true,
+  "cases": 13,
+  "passed": 13,
+  "failed": 0,
+  "all_exact_64bit_results_match": true,
+  "retval": 2,
+  "nonzero_generations_min": 1,
+  "nonzero_generations_max": 3,
+  "guest_make_exit": 0,
+  "host_inputs_unchanged": true,
+  "source_identities": {
+    "/workspaces/repository/kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+    "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+    "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+    "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+    "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+    "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+    "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+    "/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29"
+  },
+  "results": [
+    {
+      "name": "helper_only_uid_gid",
+      "expected_result": 0,
+      "kernel_result": 0,
+      "native_result": 0,
+      "retval": 2,
+      "nonzero_generations": 1,
+      "request_id": 1,
+      "native_sha256": "b9e18bf54b633dfe139660f5912047ecbc2832d4f3f374e0b484153a94c7d44f"
+    },
+    {
+      "name": "helper_chain_simple",
+      "expected_result": 0,
+      "kernel_result": 0,
+      "native_result": 0,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 2,
+      "native_sha256": "cbb37ca9e412a4b42ad0f1556449ab942ad30cdad5ed5371740dba987570c3d4"
+    },
+    {
+      "name": "map_array_lookup",
+      "expected_result": 16045690984503050241,
+      "kernel_result": 16045690984503050241,
+      "native_result": 16045690984503050241,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 3,
+      "native_sha256": "0d9c63a25fdbd64ae506f20febc0d81e8a6ce0a67d68494cb08da6841bf02dd1"
+    },
+    {
+      "name": "map_array_index_packet",
+      "expected_result": 16045690984503098046,
+      "kernel_result": 16045690984503098046,
+      "native_result": 16045690984503098046,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 4,
+      "native_sha256": "7235ce2e930156f4e00d2e76bfaf61cface9b0e6734d3ffdca18fa9ecf4806af"
+    },
+    {
+      "name": "map_hash_lookup",
+      "expected_result": 1234605616436508552,
+      "kernel_result": 1234605616436508552,
+      "native_result": 1234605616436508552,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 5,
+      "native_sha256": "b1e61f0b7b974c6afc5e8ef494150b3510b2ee6b1b3989bd942a6f9a764cf537"
+    },
+    {
+      "name": "map_hash_str_key",
+      "expected_result": 18369614221520256751,
+      "kernel_result": 18369614221520256751,
+      "native_result": 18369614221520256751,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 6,
+      "native_sha256": "364d9f7d4febb344ce64602d8902c438d614e8bfbe5ce58d9a73756b8ebfaa7f"
+    },
+    {
+      "name": "map_percpu_array",
+      "expected_result": 18369614221190019774,
+      "kernel_result": 18369614221190019774,
+      "native_result": 18369614221190019774,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 7,
+      "native_sha256": "5bea9ad073d12b924342527c608a9d4d04c4ebcbfa973070c760e74dde2b6b73"
+    },
+    {
+      "name": "map_lru_hash_counter",
+      "expected_result": 1,
+      "kernel_result": 1,
+      "native_result": 1,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 8,
+      "native_sha256": "bd13a3732a9c76042f07f478c61dd8686fd096e006595625f3296134b667e3a9"
+    },
+    {
+      "name": "map_percpu_hash_counter",
+      "expected_result": 1,
+      "kernel_result": 1,
+      "native_result": 1,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 9,
+      "native_sha256": "f14bb650ac209874d77fe1138e2399f90e17f67c5db07b90fe482f44138801d5"
+    },
+    {
+      "name": "combined_helper_map",
+      "expected_result": 0,
+      "kernel_result": 0,
+      "native_result": 0,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 10,
+      "native_sha256": "e3926285d50e4b779b2e381c002cc311733dedca130ec8d374c6ebf10c8aff12"
+    },
+    {
+      "name": "multi_map_policy",
+      "expected_result": 1311768465173141112,
+      "kernel_result": 1311768465173141112,
+      "native_result": 1311768465173141112,
+      "retval": 2,
+      "nonzero_generations": 3,
+      "request_id": 11,
+      "native_sha256": "1a286a57bd5f9e0a8eac3fd5d18031a18663edd59b1ea0a05eaef615837860ac"
+    },
+    {
+      "name": "packet_5tuple_classify",
+      "expected_result": 3405691582,
+      "kernel_result": 3405691582,
+      "native_result": 3405691582,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 12,
+      "native_sha256": "09ec83d0b2adb13e51bf1198de8207e46fb91fe77b7a539a912da96c03e0c965"
+    },
+    {
+      "name": "stats_mixed_helpers",
+      "expected_result": 1,
+      "kernel_result": 1,
+      "native_result": 1,
+      "retval": 2,
+      "nonzero_generations": 3,
+      "request_id": 13,
+      "native_sha256": "f822c41fd59d25ecd241e4101c463db7c7b3ba8b881515e76467038bc0d15664"
+    }
+  ],
+  "request_archives": {
+    "requests/1.success.tar.gz": "827896e54eada4259f380e1cf55f4fd092bdd96d13c25a8fab99b07b3596a343",
+    "requests/2.success.tar.gz": "c4dc3f838970326c300de67c0d4617a88ba495ece44347fc2d53cea915a2eb0c",
+    "requests/3.success.tar.gz": "7a8ab07aaf8b16204dd83e7ea03883dc48f23d18d1065996f0028248c9d1f54d",
+    "requests/4.success.tar.gz": "0efb51650345376e77593b8eb9a11e60c582858d77cba8cef2084c9ed07387cc",
+    "requests/5.success.tar.gz": "f8a69026b4141609366916a9a1e86da5d9905fa5b9e09c6503f08ce972353411",
+    "requests/6.success.tar.gz": "4cabe63c4f5c6072cd8b5cbb44fa3eb081cc4ef3fa60b1bb45863cf8f01ff1ce",
+    "requests/7.success.tar.gz": "31614f34aa1955c9d6c7c1d8f2ed9f583a7f870d672e1b389bd0f9dfbac8779c",
+    "requests/8.success.tar.gz": "f11d593d3eae03dc3b3e16f8b96c72127766c64d14e8fe65ce5625cc2cdbce02",
+    "requests/9.success.tar.gz": "e718bc1a966b22a1ebb5e43329b4de79d083c87a7a13b162646319ebd25c7bb3",
+    "requests/10.success.tar.gz": "7a5492e44afe4a00474332d8e6f4d0ccef55a67df222605c04883c391eb5faa4",
+    "requests/11.success.tar.gz": "3991e5a597dc14a2952be926e16c32ad41ac6534a72017f43b0cdd8f20e4549d",
+    "requests/12.success.tar.gz": "301c4aa2f66b06f1481240622edee6e853ea195189ffd63d5416781460522555",
+    "requests/13.success.tar.gz": "6f9b4c44aadcf8f624d55358d7d5d40757cc78e1733206a94f9bea088bcd19f8"
+  }
+}
