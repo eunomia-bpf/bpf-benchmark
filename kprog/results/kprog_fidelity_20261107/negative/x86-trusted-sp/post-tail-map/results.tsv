@@ -1,0 +1,654 @@
+name	negative	stage	native_sha256	request_id	exact_message
+valid_control	False	valid_executed	c9f04193a6aa2a3cde5cbbd05b7c386e423f014db1e5eb109da086f4dbc778f2	1	"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=13 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2
+"
+valid_copy_restore	False	valid_executed	4ad9cac84858ee1e715f5ff9b324e05aa97f64c2a04646be1a1f1d735516358b	2	"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=26 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2
+"
+valid_alias_load	False	valid_executed	df63d83fcae91cc09255b1c4f581ef6d482152a9a2aabad929dac572c788f217	3	"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=39 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2
+"
+valid_cmov_alias	False	valid_executed	01e0a203a3766ca5177ed09e394e8fb941961ed5b2cd937c00e60176ecb946ac	4	"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=52 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2
+"
+valid_cmov_from_sp	False	valid_executed	a7031d855816abe314a51511e0328331af3a7ee8155d8248d89d6c0db1c64589	5	"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=65 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2
+"
+valid_cmov_to_sp	False	valid_executed	6ed525857176bd3e6fdd4dcc88ca510c7fb62da2e0ba693b7ce0ff8cec8f6dd8	6	"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=78 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2
+"
+valid_cmov_self_sp	False	valid_executed	59fac48d454de18ae04d0771accc9191d3a323e6281ea11002120e459d5e8a8d	7	"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=91 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2
+"
+valid_xchg_alias	False	valid_executed	75e033c227ae8f2bc77a7adb75d5b0a78855447f89c2eafb1de28718f9833ce8	8	"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=104 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2
+"
+valid_spill_restore	False	valid_executed	9e9814fa6216569fb7f70b3e5fc99a4170668fc6de148e2ad431bd369986c96f	9	"kernel result=0 retval=2 expected_result=0 expected_retval=2
+bound program id=117 chunks=0 nonzero_generations=1
+native_bound result=0 retval=2 expected_result=0 expected_retval=2
+"
+past_data_end_read	True	verifier_rejected	d13322c4f789a82a48d931e245bd4a4cba543c5903614ab7a530eaf606c9dab2	10	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=329
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=40;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()
+2: (b7) r2 = 0                        ; R2=0
+3: (0f) r2 += r1
+R2 pointer arithmetic on pkt_end prohibited
+processed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=7 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=3d138471ebf51234 word_count=1 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=7 final_size_matches=1
+chunk_bytes=0:7
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+past_data_end_write	True	verifier_rejected	6fef709327bff0f3ba497ceebaa301c339528004ad52369d776e0747c9e1a322	11	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=329
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=44;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()
+2: (b7) r2 = 0                        ; R2=0
+3: (0f) r2 += r1
+R2 pointer arithmetic on pkt_end prohibited
+processed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=5716c056c483c1cc word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1
+chunk_bytes=0:12
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+missing_data_end_check	True	verifier_rejected	a1eb1ae5b200e4368e9da90f6c30a7e5a6af39a9eddd275285170643ee8fc8b4	12	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=453
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=48;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (61) r1 = *(u32 *)(r1 +0)          ; R1=pkt(r=0)
+2: (b7) r2 = 0                        ; R2=0
+3: (0f) r2 += r1                      ; R1=pkt(r=0) R2=pkt(r=0)
+4: (71) r0 = *(u8 *)(r2 +0)
+invalid access to packet, off=0 size=1, R2(id=0,off=0,r=0)
+R2 offset is outside of the packet
+processed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=6 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=28f636c49dc3fd8a word_count=1 tail_bytes=2 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=6 final_size_matches=1
+chunk_bytes=0:6
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+map_value_oob	True	verifier_rejected	94892fdd4ecbceb5d24f89d6922e01d0aa73b16fa425a32f255d970e3a3e2d4f	13	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=1064
+stub fd_array_cnt=3 fd_array=0:8,1:8,2:6
+stub insns=0:code=183,dst=0,src=3,off=0,imm=52;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (61) r3 = *(u32 *)(r1 +4)          ; R1=ctx() R3=pkt_end()
+2: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)
+3: (b7) r1 = 4                        ; R1=4
+4: (b4) w6 = 0                        ; R6=0
+5: (0f) r1 += r2                      ; R1=pkt(off=4,r=0) R2=pkt(r=0)
+6: (2d) if r1 > r3 goto pc+7          ; R1=pkt(off=4,r=4) R3=pkt_end()
+7: (18) r1 = 0xffff8c38043da800       ; R1=map_ptr(map=neg_map,ks=4,vs=8)
+9: (85) call bpf_map_lookup_elem#1    ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)
+10: (15) if r0 == 0x0 goto pc+3       ; R0=map_value(map=neg_map,ks=4,vs=8)
+11: (b7) r1 = 8                       ; R1=8
+12: (0f) r1 += r0                     ; R0=map_value(map=neg_map,ks=4,vs=8) R1=map_value(map=neg_map,ks=4,vs=8,off=8)
+13: (79) r6 = *(u64 *)(r1 +0)
+invalid access to map value, value_size=8 off=8 size=8
+R1 min value is outside of the allowed memory range
+processed 13 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=59 reloc_records=2 reloc_bytes=32 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+retained_map_info=6:id=22:type=1:name=neg_map
+native_blob_diag: fnv64=d4ff49278b216fec word_count=14 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=1 first_zero_offset=20 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=59 final_size_matches=1
+chunk_bytes=0:59
+reloc_targets=26:0xffffffffb64c7770,18:0x16
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+nullable_map_dereference	True	verifier_rejected	c24f3637847c1fec6e095744a1f1076228c2748992741fe850a427b7d230d2f4	14	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=826
+stub fd_array_cnt=3 fd_array=0:8,1:8,2:6
+stub insns=0:code=183,dst=0,src=3,off=0,imm=56;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (61) r3 = *(u32 *)(r1 +4)          ; R1=ctx() R3=pkt_end()
+2: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)
+3: (b7) r1 = 4                        ; R1=4
+4: (b4) w0 = 0                        ; R0=0
+5: (0f) r1 += r2                      ; R1=pkt(off=4,r=0) R2=pkt(r=0)
+6: (2d) if r1 > r3 goto pc+6          ; R1=pkt(off=4,r=4) R3=pkt_end()
+7: (18) r1 = 0xffff8c38043d8000       ; R1=map_ptr(map=neg_map,ks=4,vs=8)
+9: (85) call bpf_map_lookup_elem#1    ; R0=map_value_or_null(id=1,map=neg_map,ks=4,vs=8)
+10: (b7) r1 = 0                       ; R1=0
+11: (0f) r1 += r0
+R1 pointer arithmetic on map_value_or_null prohibited, null-check it first
+processed 11 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=53 reloc_records=2 reloc_bytes=32 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+retained_map_info=6:id=23:type=1:name=neg_map
+native_blob_diag: fnv64=c3e09461b1cb1a7e word_count=13 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=1 first_zero_offset=20 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=53 final_size_matches=1
+chunk_bytes=0:53
+reloc_targets=26:0xffffffffb64c7770,18:0x17
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+invalid_helper_argument	True	verifier_rejected	8e0238589df5378bd45e0e321813c2223543467b1e21219bfde808feafbb9efc	15	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=327
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=60;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r1 = 1                        ; R1=1
+2: (b7) r2 = 0                        ; R2=0
+3: (85) call bpf_map_lookup_elem#1
+R1 type=scalar expected=map_ptr
+processed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=19 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=92ef0a7092d57869 word_count=4 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=19 final_size_matches=1
+chunk_bytes=0:19
+reloc_targets=14:0xffffffffb64b97a0
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+stack_oob	True	verifier_rejected	551788d402c2aeb35f76ea4e5ec7935885e531e69d68f90556c8fdefa7bda601	16	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=827
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=64;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r1 = -1024                    ; R1=-1024
+2: (bf) r2 = r1                       ; R1=-1024 R2=-1024
+3: (07) r2 += 1                       ; R2=-1023
+4: (bf) r3 = r2                       ; R2=-1023 R3=-1023
+5: (57) r3 &= 7                       ; R3=1
+6: (55) if r3 != 0x0 goto pc+2        ; R3=1
+9: (bf) r3 = r10                      ; R3=fp0 R10=fp0
+10: (07) r3 += -8                     ; R3=fp-8
+11: (bf) r4 = r3                      ; R3=fp-8 R4=fp-8
+12: (0f) r4 += r1                     ; R1=-1024 R4=fp-1032
+13: (0f) r3 += r2                     ; R2=-1023 R3=fp-1031
+14: (71) r1 = *(u8 *)(r3 +0)
+invalid read from stack R3 off=-1031 size=1
+processed 13 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=8 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=26644872a66eaf68 word_count=2 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=8 final_size_matches=1
+chunk_bytes=0:8
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+uninitialized_stack	True	verifier_rejected	f8f93d3f8bdef16052a409520c01f5db93b2c80bdcdfa78e156f48326bb4824a	17	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=797
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=68;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r1 = -8                       ; R1=-8
+2: (bf) r2 = r1                       ; R1=-8 R2=-8
+3: (07) r2 += 1                       ; R2=-7
+4: (bf) r3 = r2                       ; R2=-7 R3=-7
+5: (57) r3 &= 7                       ; R3=1
+6: (55) if r3 != 0x0 goto pc+2        ; R3=1
+9: (bf) r3 = r10                      ; R3=fp0 R10=fp0
+10: (07) r3 += -8                     ; R3=fp-8
+11: (bf) r4 = r3                      ; R3=fp-8 R4=fp-8
+12: (0f) r4 += r1                     ; R1=-8 R4=fp-16
+13: (0f) r3 += r2                     ; R2=-7 R3=fp-15
+14: (71) r1 = *(u8 *)(r3 +0)
+invalid read from stack R3 off=-15 size=1
+processed 13 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=5 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=5a9045d6a2ed8ae2 word_count=1 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=5 final_size_matches=1
+chunk_bytes=0:5
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+unbounded_loop	True	loader_rejected	584a47b0d7a56e0787a38332aed5fab5ee770328f9811ee177e13b478f402e36	18	"trusted-native-loader: native_kernel bound proof contains no BPF exit; insns=2 0:0xb7 1:0x5
+
+"
+unbounded_indirect_jump	True	specialization_rejected	cad9f3c86207b0d3b3da44a092121d9dd28d4e933e0f75caef0dafcbdb95cb11	19	"unresolved finite indirect target at 0x3: jmp    rax
+"
+unsupported_instruction	True	specialization_rejected	2250b819e251ef58b1807c40fd1dcfd29ffff1846c277a06b86755e4ffa3ce53	20	"unsupported mnemonic: ud2
+"
+immediate_push_branch	True	verifier_rejected	cdf2b82d4eb97590da580e291117f08f8e2d39144358b5ed7d927fbac819fc7a	21	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=480
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=74;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b4) w1 = 2                        ; R1=2
+1: (b7) r0 = 2                        ; R0=scalar()
+2: (7a) *(u64 *)(r10 -8) = 1          ; R10=fp0 fp-8=1
+3: (79) r2 = *(u64 *)(r10 -8)         ; R2=1 R10=fp0 fp-8=1
+4: (15) if r2 == 0x0 goto pc+2        ; R2=1
+5: (b7) r1 = 0                        ; R1=0
+6: (61) r1 = *(u32 *)(r1 +0)
+R1 invalid mem access 'scalar'
+processed 7 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=17 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=b243d5fbce0fd1ab word_count=4 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=17 final_size_matches=1
+chunk_bytes=0:17
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+entry_return_slot_overwrite	True	specialization_rejected	4b4b66d1a588fac9c103dcb201ee1702c5d704eea01400545e994cda6912de50	22	"native return address lacks call/entry provenance at 0xd: jmp    12 <entry+0x12> ; native-link entry RET
+"
+stack_base_flags	True	verifier_rejected	830201e5d40f0666fc8881811501cd788727ba8039bdf76e419ecd8a421a50ea	23	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=378
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=78;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b4) w1 = 2                        ; R1=2
+1: (b7) r0 = 2                        ; R0=scalar()
+2: (15) if r0 == 0x0 goto pc+2        ; R0=scalar(umin=1)
+3: (b7) r1 = 0                        ; R1=0
+4: (61) r1 = *(u32 *)(r1 +0)
+R1 invalid mem access 'scalar'
+processed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=19 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=375f75a3c96d4ae9 word_count=4 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=19 final_size_matches=1
+chunk_bytes=0:19
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+undefined_entry_register	True	specialization_rejected	3e72a9dcad4b83da9d572a45036994f5ea3f0e85ad529ca74007c43eb7d1a893	24	"undefined native ABI flags at 0x3: je     11 <entry+0x11>
+"
+undefined_entry_flags	True	specialization_rejected	bcf1f2d551d9fa28ed672c7b4a6618b21471ea1fa9a6807bb1d70ab1ffef34be	25	"undefined native ABI flags at 0x0: jae    e <entry+0xe>
+"
+div8_zero	True	verifier_rejected	e181d078966773bfe678096f2f8ce704885bb1c13ec2efebcbea59d49022848f	26	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=275
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=82;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r0 = 0                        ; R0=0
+2: (7b) *(u64 *)(r0 +0) = r0
+R0 invalid mem access 'scalar'
+processed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=16 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=e1cd8c3a27ebc43a word_count=4 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=16 final_size_matches=1
+chunk_bytes=0:16
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+div8_overflow	True	verifier_rejected	09dec18c711dea7f63f24045b8f3839b4f427827fb993fff187c69c90dcdd677	27	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=275
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=86;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r0 = 0                        ; R0=0
+2: (7b) *(u64 *)(r0 +0) = r0
+R0 invalid mem access 'scalar'
+processed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=19 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=fe4d7f0c07975552 word_count=4 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=19 final_size_matches=1
+chunk_bytes=0:19
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+div16_zero	True	verifier_rejected	1db3d4d6855a4629197c61ac5bc7a6a197b3f5209c4809292fd42cc632ce7f0f	28	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=275
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=90;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r0 = 0                        ; R0=0
+2: (7b) *(u64 *)(r0 +0) = r0
+R0 invalid mem access 'scalar'
+processed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=17 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=b13b009362b02121 word_count=4 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=17 final_size_matches=1
+chunk_bytes=0:17
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+div16_overflow	True	verifier_rejected	93ad60528fa9dc96d07cf3a614efbfff1eb36e62c8541721fcd9d7f637d841dc	29	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=275
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=94;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r0 = 0                        ; R0=0
+2: (7b) *(u64 *)(r0 +0) = r0
+R0 invalid mem access 'scalar'
+processed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=9cc3013ebcaa2b45 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1
+chunk_bytes=0:20
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+div32_zero	True	verifier_rejected	5b92fb091d6fc0f31703a817eb6b4cf7ff34aee69aa09deb9e35ffebf2d0422a	30	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=275
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=98;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r0 = 0                        ; R0=0
+2: (7b) *(u64 *)(r0 +0) = r0
+R0 invalid mem access 'scalar'
+processed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=16 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=845c6ca284a2783d word_count=4 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=16 final_size_matches=1
+chunk_bytes=0:16
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+div32_overflow	True	verifier_rejected	7a173acbb4d86ebf4f61bdfff03fb41210597d7207a07d501f8a5c72fdae2dde	31	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=275
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=102;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r0 = 0                        ; R0=0
+2: (7b) *(u64 *)(r0 +0) = r0
+R0 invalid mem access 'scalar'
+processed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=19 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=24cba849e9bcf6c1 word_count=4 tail_bytes=3 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=19 final_size_matches=1
+chunk_bytes=0:19
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+div64_zero	True	verifier_rejected	fb2712e6fcb7e8eb40f834a476869c5ec1124b118a81f0ce0cf896ed2fbd0aea	32	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=275
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=106;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r0 = 0                        ; R0=0
+2: (7b) *(u64 *)(r0 +0) = r0
+R0 invalid mem access 'scalar'
+processed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=17 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=57fd9fdf36df4e1b word_count=4 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=17 final_size_matches=1
+chunk_bytes=0:17
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+div64_overflow	True	verifier_rejected	824eefa65613af8f15cc1fd100fead446bf029d07d49e7d659d3ee5590e247e4	33	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=275
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=110;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r0 = 0                        ; R0=0
+2: (7b) *(u64 *)(r0 +0) = r0
+R0 invalid mem access 'scalar'
+processed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=deacdeffe54c2987 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1
+chunk_bytes=0:20
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied
+
+"
+helper_clobbered_register	True	specialization_rejected	a0f35016e58758d1b9b41b669e1fe826964c0b0557c3be3be7a62f39088d07d2	34	"undefined native ABI flags at 0xe: je     19 <entry+0x19>
+"
+high32_positive_byte	True	verifier_rejected	54d0d4208eb31a37b2515d83760f1a8cb0fd76b37eeab355327c2bf53f75d74b	35	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument
+diagnostic BPF_PROG_LOAD: Invalid argument
+stub verifier_log_size=262144 log_true_size=966
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=114;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r1 = 0                        ; R1=0
+2: (bf) r2 = r1                       ; R1=0 R2=0
+3: (57) r2 &= 7                       ; R2=0
+4: (55) if r2 != 0x0 goto pc+5        ; R2=0
+5: (bf) r2 = r10                      ; R2=fp0 R10=fp0
+6: (07) r2 += -16                     ; R2=fp-16
+7: (0f) r2 += r1                      ; R1=0 R2=fp-16
+8: (7a) *(u64 *)(r2 +0) = 37          ; R2=fp-16 fp-16=37
+9: (05) goto pc+11
+21: (b7) r1 = 0                       ; R1=0
+22: (b7) r2 = 0                       ; R2=0
+23: (bf) r3 = r10                     ; R3=fp0 R10=fp0
+24: (07) r3 += -16                    ; R3=fp-16
+25: (0f) r3 += r2                     ; R2=0 R3=fp-16
+26: (18) r2 = 0x100000000             ; R2=0x100000000
+28: (0f) r3 += r2
+math between fp pointer and 4294967296 is not allowed
+processed 17 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=34 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=08ba4b52559dd074 word_count=8 tail_bytes=2 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=34 final_size_matches=1
+chunk_bytes=0:34
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument
+
+"
+high32_positive_qword	True	verifier_rejected	323eaf857270e7c6fdfde7b68bb922ca4b6da74bdaf0fca61319aa541aeb5538	36	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument
+diagnostic BPF_PROG_LOAD: Invalid argument
+stub verifier_log_size=262144 log_true_size=1127
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=118;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r1 = 0                        ; R1=0
+2: (bf) r2 = r1                       ; R1=0 R2=0
+3: (57) r2 &= 7                       ; R2=0
+4: (55) if r2 != 0x0 goto pc+5        ; R2=0
+5: (bf) r2 = r10                      ; R2=fp0 R10=fp0
+6: (07) r2 += -16                     ; R2=fp-16
+7: (0f) r2 += r1                      ; R1=0 R2=fp-16
+8: (7a) *(u64 *)(r2 +0) = 37          ; R2=fp-16 fp-16=37
+9: (05) goto pc+11
+21: (b7) r2 = 0                       ; R2=0
+22: (18) r3 = 0x100000000             ; R3=0x100000000
+24: (bf) r1 = r2                      ; R1=0 R2=0
+25: (0f) r1 += r3                     ; R1=0x100000000 R3=0x100000000
+26: (bf) r3 = r2                      ; R2=0 R3=0
+27: (57) r3 &= 7                      ; R3=0
+28: (55) if r3 != 0x0 goto pc+5       ; R3=0
+29: (bf) r2 = r10                     ; R2=fp0 R10=fp0
+30: (07) r2 += -16                    ; R2=fp-16
+31: (0f) r2 += r1
+math between fp pointer and 4294967296 is not allowed
+processed 20 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=34 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=bdf3132db69dbad0 word_count=8 tail_bytes=2 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=34 final_size_matches=1
+chunk_bytes=0:34
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument
+
+"
+high32_negative_byte	True	verifier_rejected	58ab137e73914c04b9e598ab384e56a6d2ab2ece60542d37bf1aa3424a8a4d6e	37	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument
+diagnostic BPF_PROG_LOAD: Invalid argument
+stub verifier_log_size=262144 log_true_size=974
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=122;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r1 = 0                        ; R1=0
+2: (bf) r2 = r1                       ; R1=0 R2=0
+3: (57) r2 &= 7                       ; R2=0
+4: (55) if r2 != 0x0 goto pc+5        ; R2=0
+5: (bf) r2 = r10                      ; R2=fp0 R10=fp0
+6: (07) r2 += -16                     ; R2=fp-16
+7: (0f) r2 += r1                      ; R1=0 R2=fp-16
+8: (7a) *(u64 *)(r2 +0) = 37          ; R2=fp-16 fp-16=37
+9: (05) goto pc+11
+21: (b7) r1 = 0                       ; R1=0
+22: (b7) r2 = 0                       ; R2=0
+23: (bf) r3 = r10                     ; R3=fp0 R10=fp0
+24: (07) r3 += -16                    ; R3=fp-16
+25: (0f) r3 += r2                     ; R2=0 R3=fp-16
+26: (18) r2 = 0xffffffff00000000      ; R2=0xffffffff00000000
+28: (0f) r3 += r2
+math between fp pointer and -4294967296 is not allowed
+processed 17 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=37 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=3eb691181c9707da word_count=9 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=37 final_size_matches=1
+chunk_bytes=0:37
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument
+
+"
+high32_negative_qword	True	verifier_rejected	51dc957c6a5b4a9e0a1f73382089c8ad26f216b49db157e9f283db9aff3fe61c	38	"trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument
+diagnostic BPF_PROG_LOAD: Invalid argument
+stub verifier_log_size=262144 log_true_size=1149
+stub fd_array_cnt=2 fd_array=0:7,1:7
+stub insns=0:code=183,dst=0,src=3,off=0,imm=126;1:code=133,dst=0,src=4,off=1,imm=129949;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log:
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 2                        ; R0=scalar()
+1: (b7) r1 = 0                        ; R1=0
+2: (bf) r2 = r1                       ; R1=0 R2=0
+3: (57) r2 &= 7                       ; R2=0
+4: (55) if r2 != 0x0 goto pc+5        ; R2=0
+5: (bf) r2 = r10                      ; R2=fp0 R10=fp0
+6: (07) r2 += -16                     ; R2=fp-16
+7: (0f) r2 += r1                      ; R1=0 R2=fp-16
+8: (7a) *(u64 *)(r2 +0) = 37          ; R2=fp-16 fp-16=37
+9: (05) goto pc+11
+21: (b7) r2 = 0                       ; R2=0
+22: (18) r3 = 0xffffffff00000000      ; R3=0xffffffff00000000
+24: (bf) r1 = r2                      ; R1=0 R2=0
+25: (0f) r1 += r3                     ; R1=0xffffffff00000000 R3=0xffffffff00000000
+26: (bf) r3 = r2                      ; R2=0 R3=0
+27: (57) r3 &= 7                      ; R3=0
+28: (55) if r3 != 0x0 goto pc+5       ; R3=0
+29: (bf) r2 = r10                     ; R2=fp0 R10=fp0
+30: (07) r2 += -16                    ; R2=fp-16
+31: (0f) r2 += r1
+math between fp pointer and -4294967296 is not allowed
+processed 20 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+
+kernel log tail:
+4,1776,1974826,-;bpf_x86_native_lab: loading out-of-tree module taints kernel.
+
+native_lab stub context: prog_type=6 blob_bytes=37 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=3 kfunc_btf_id=129949
+native_blob_diag: fnv64=10b4ce9a3c14dfc2 word_count=9 tail_bytes=1 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=37 final_size_matches=1
+chunk_bytes=0:37
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument
+
+"
