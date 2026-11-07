@@ -1,0 +1,119 @@
+{
+  "utc": "2026-11-07T15:26:54.966089+00:00",
+  "scope": "current compiled ARM kernel layout and conversion routine identity; no program load, execution or whole-proof claim",
+  "build_id": "141aad6ee6f5385be65475cc2f99aac9aec12698",
+  "fields": [
+    {
+      "field": "data",
+      "bpf_context_offset": 0,
+      "bpf_context_width": 4,
+      "native_context_offset": 0,
+      "native_context_width": 8
+    },
+    {
+      "field": "data_end",
+      "bpf_context_offset": 4,
+      "bpf_context_width": 4,
+      "native_context_offset": 8,
+      "native_context_width": 8
+    },
+    {
+      "field": "data_meta",
+      "bpf_context_offset": 8,
+      "bpf_context_width": 4,
+      "native_context_offset": 16,
+      "native_context_width": 8
+    }
+  ],
+  "conversion_function": {
+    "symbol": "xdp_convert_ctx_access",
+    "elf_address": "0xffff800080c7b248",
+    "image_base": "0xffff800080000000",
+    "image_offset": 13087304,
+    "size": 388,
+    "code_sha256": "bbe37fd33118ee417a82721989589de845bf90f3490fe0b7cf6773ae5b16ea5e",
+    "elf_and_image_bytes_equal": true
+  },
+  "inputs": {
+    "vmlinux": {
+      "path": "vendor/build/arm64/linux/vmlinux",
+      "size": 457577520,
+      "sha256": "8860a2fc8b6431399b9e44fc49660d7b806fec24f366a15aeec7571636f1ed44"
+    },
+    "image": {
+      "path": "vendor/build/arm64/linux/arch/arm64/boot/Image",
+      "size": 42674688,
+      "sha256": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac"
+    },
+    "module": {
+      "path": "kinsn/module/arm64/build/bpf_arm64_native_lab.ko",
+      "size": 1360608,
+      "sha256": "2ebef5adbcd23e22a2a832900c4b1a47d48dacefbf573329c5518e8559ed3787"
+    },
+    "config": {
+      "path": "vendor/build/arm64/linux/.config",
+      "size": 163032,
+      "sha256": "29ec41dbd9a2c91e46dfd8b2fd5ad649fa0710fcafa80c67593ed406ba64e680"
+    },
+    "filter": {
+      "path": "vendor/linux-framework/net/core/filter.c",
+      "size": 348350,
+      "sha256": "629e5372b2d239485e75fc5c3f5bee98be4bbe6201794d4480de68a4fcd6f542"
+    },
+    "candidate": {
+      "path": "kprog/arm64/build/trusted-transport/context-memory-read/arm64_sim_local_bpf.h",
+      "size": 120237,
+      "sha256": "7fb8d1130f54e5320ddc07f41676b6ea705a58dd027c9747119c65a1151343c9"
+    },
+    "abi": {
+      "path": "kprog/formal/generated/abi_load.h",
+      "size": 1517,
+      "sha256": "618e1ca06aa188eba278a992e815dbdd079c9e004bacb122ff88491d3018b571"
+    }
+  },
+  "active_guest_inputs": [
+    {
+      "path": "kprog/arm64/build/trusted-transport/service-qs1rry_w/inputs.json",
+      "started": "2026-11-07T14:59:06.541138+00:00",
+      "image_sha256": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac"
+    },
+    {
+      "path": "kprog/arm64/build/trusted-transport/service-06947zy4/inputs.json",
+      "started": "2026-11-07T15:20:46.236422+00:00",
+      "image_sha256": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac"
+    }
+  ],
+  "raw_archive_sha256": "fc247d630cd86ff06911e39a0f7c1c3f5f17ab3a3d98c9f7f91bb3f210fbca53",
+  "boundary": "pahole inspects actual compiled types; current source conversion branches are retained with exact machine code. This does not prove arbitrary compiled C semantics or capture live post-conversion BPF instructions.",
+  "compiled_projection_observation": {
+    "method": "read exact archived ARM disassembly; same388 function bytes in current raw Image",
+    "input_offset_member": "signed16 at si+2",
+    "output_bpf_opcode": 121,
+    "output_register_byte": "copied from si+1",
+    "output_immediate": 0,
+    "fields": [
+      {
+        "field": "data",
+        "input_offset": 0,
+        "body_offset": "0x2c",
+        "output_offset": 0,
+        "returned_instruction_count": 1
+      },
+      {
+        "field": "data_end",
+        "input_offset": 4,
+        "body_offset": "0x150",
+        "output_offset": 8,
+        "returned_instruction_count": 1
+      },
+      {
+        "field": "data_meta",
+        "input_offset": 8,
+        "body_offset": "0x12c",
+        "output_offset": 16,
+        "returned_instruction_count": 1
+      }
+    ],
+    "interpretation": "0x79 is BPF_LDX|BPF_MEM|BPF_DW; source4-byte typed ctx loads become8-byte native pointer loads. This is bounded manual binary inspection, not a general compiler proof."
+  }
+}
