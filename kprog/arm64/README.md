@@ -145,3 +145,9 @@ controls](../../corpus/results/kprog_arm64_app_coverage_20261107/native-resource
 record immutable-resource lifecycle checks and generation-bound native execution
 with the captured module/caller sources. Application cohorts retain their own
 source and binary epochs.
+
+Numeric labels3/4 (ADD_IMM/SUB_IMM) select the same ALU immediate body as
+label6; AUX supplies its arithmetic operation. The [shared operand/family
+contracts](../../corpus/results/kprog_arm64_app_coverage_20261107/numeric-contract-sync/README.md)
+record the universal alias equation, operation-specific refinement and focused
+C/Lean checks. Existing label6/7 bodies retain their implementation.

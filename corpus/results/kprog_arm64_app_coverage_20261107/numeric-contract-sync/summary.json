@@ -1,7 +1,7 @@
 {
   "utc": "2026-11-07T20:37:10.532561+00:00",
-  "scope": "Private source-of-truth integration of generic ARM immediate alias mechanism",
-  "production_state": "Active application source epochs retained; integration awaits their closure and owner synchronization",
+  "scope": "Shared source-of-truth integration of generic ARM immediate alias mechanism",
+  "production_state": "Shared source integrated at f0517e4931be058ddd8ce0d0df87612ee3ffb250 after focused C/source/Lean/axiom checks; existing application and compiler input epochs retain their recorded identities.",
   "source_files_changed": 17,
   "source_pins_verified": 258,
   "c_checks": {
