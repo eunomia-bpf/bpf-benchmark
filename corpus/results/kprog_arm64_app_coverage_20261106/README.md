@@ -1,5 +1,9 @@
 # Lane A: AArch64 application artifact coverage, 2026-11-06
 
+Latest trusted-path checkpoints (2026-11-07): the [full-system native-only ARM service control](trusted-arm64-service-result/README.md) passed with fresh kernel-owned generation, verifier binding, application reopen and actual native TEST_RUN=2 (prebuilt_proof=false). This does not establish six-application acceptance; real Katran integration is the next running case.
+
+The [complete current manifest audit](manifest-dispatch-result/README.md) analyzes all 546 selectors and 626 matching native entry candidates with finite indirect targets; live source BTF still determines the exact entry. The [fresh OTel compile result](otel-memory-compiler-result/README.md) records 14/14 generation/compile/link/install successes, with no application or verifier acceptance because the subsequent old runtime pin failed. Earlier runtime/prebuilt results below retain their historical scope.
+
 Baseline generation: **1,090/1,136 staged native proof objects generated C**,
 covering all six application directories. The remaining 46 Tetragon objects fail on unresolved indirect `blr` targets;
 all failures and call-register details are retained.

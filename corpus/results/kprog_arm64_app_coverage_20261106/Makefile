@@ -742,3 +742,15 @@ trusted-service-arm64-run:
 .PHONY: manifest-dispatch-audit
 manifest-dispatch-audit:
 	taskset -c 8-11 python3 $(HERE)/manifest_dispatch_audit.py
+
+.PHONY: trusted-katran-arm64-build trusted-katran-arm64-run
+trusted-katran-arm64-build: trusted-service-arm64-build
+	taskset -c 20-23 $(MAKE) -C $(ROOT) host-shim-arm64 BPFOPT_SHIM_BUILD_ARM64=$(ROOT)/bpfopt/shim/build-arm64
+
+trusted-katran-arm64-run: trusted-arm64-module-index
+	python3 $(HERE)/trusted_service_arm64.py host katran
+
+# host-kernel-arm64 installs modules with DEPMOD=true; guests need the index.
+.PHONY: trusted-arm64-module-index
+trusted-arm64-module-index:
+	depmod -b $(ROOT)/vendor/build/arm64/linux/modules-install "$$(cat $(ROOT)/vendor/build/arm64/linux/include/config/kernel.release)"
