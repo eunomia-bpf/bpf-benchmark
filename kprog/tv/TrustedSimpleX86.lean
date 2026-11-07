@@ -2425,6 +2425,111 @@ theorem packet_body_any_permissions (env : BPF.Environment) (frame : Word)
     · intro wrong
       exact (success wrong).elim
 
+
+/-- Concrete completed outcome, including a first guest-store fault. -/
+def completeNativeFinal (n : X86.State) (pointer limit : Word) : X86.State :=
+  if pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit then
+    guardedNativeFinal n pointer limit
+  else packetNativeOutcome (guardedNativeFinal n pointer limit) (packetFirstFailure n.memory pointer)
+
+def completeProofFinal (p : BPF.State) (pointer limit stack : Word) : BPF.State :=
+  if pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit then
+    proofExitFinal (guardedProofFinal p pointer limit stack)
+  else packetProofOutcome (guardedProofFinal p pointer limit stack) (packetFirstFailure p.memory pointer)
+
+def completeGuestSuffix (m : Memory) (pointer limit : Word) : List Event :=
+  if pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit then []
+  else packetOutcomeEvents pointer (packetFirstFailure m pointer)
+
+/-- One actual execution from entry through guard return, successful writes
+and EXIT, or any of the four first store faults. No packet-write permission or
+branch outcome premise is required. Entry/platform/private-frame premises are
+explicit; this is not yet an unconditional artifact TranslationValidation. -/
+theorem complete_all_store_outcomes_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (pointer limit stack : Word) (first second : Event)
+    (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (context : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (nativeStack : env.nativeInput .stackPointer=.ok stack)
+    (read0 : readMemory p.memory (p.regs 1) 8=.ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8=.ok (limit,second))
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8=true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8=true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8=true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8=true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4=true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8=true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8=true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (guest1 : ∀ i<8, ¬ initializationPrivateByte (p.regs 10) (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    X86Path.Execution 0 native n ([first,second]++completeGuestSuffix p.memory pointer limit)
+      (completeNativeFinal n pointer limit) ∧
+    Execution (initializedInstructionStep env) p
+      ((prefixEvents p pointer first second++initializationEvents (p.regs 10) pointer limit)++
+        completeGuestSuffix p.memory pointer limit) (completeProofFinal p pointer limit stack) ∧
+    ((prefixEvents p pointer first second++initializationEvents (p.regs 10) pointer limit).filterMap
+      (initializationProjectEvent (p.regs 10)))++completeGuestSuffix p.memory pointer limit =
+      [first,second]++completeGuestSuffix p.memory pointer limit ∧
+    initializationAgreesOutside (p.regs 10) (completeNativeFinal n pointer limit).memory
+      (completeProofFinal p pointer limit stack).memory ∧
+    ((pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit) ∨
+      packetFirstFailure p.memory pointer=4 →
+      (completeNativeFinal n pointer limit).pc=60 ∧
+      (completeProofFinal p pointer limit stack).halted=true ∧
+      (completeNativeFinal n pointer limit).gpr 0=(completeProofFinal p pointer limit stack).regs 0) := by
+  obtain ⟨nrun,prun,trace,npc,ppc,memoryMatch,npointer,nzero,ppointer,pzero⟩ :=
+    entry_all_guards_correspondence env n p pointer limit stack first second nativePC proofPC active
+      context memory nativeStack read0 read1 write40 write32 write24 write16 write8 read40 read32 guest0 guest1
+  let n1 := guardedNativeFinal n pointer limit
+  let p1 := guardedProofFinal p pointer limit stack
+  change n1.gpr 0=(0#64) at nzero
+  change p1.regs 2=pointer at ppointer
+  change p1.regs 1=(0#64) at pzero
+  have writable : p1.memory.writable=p.memory.writable := by
+    dsimp only [p1,guardedProofFinal,remainingProofFinal]
+    split
+    · rfl
+    · split <;> rfl
+  have sameHalted : p1.halted=p.halted := by
+    dsimp only [p1,guardedProofFinal,remainingProofFinal]
+    split
+    · rfl
+    · split <;> rfl
+  have stillActive : p1.halted=false := sameHalted.trans active
+  have nativeIndex : packetFirstFailure n.memory pointer=packetFirstFailure p.memory pointer := by
+    rw [memory]
+  have selected : packetFirstFailure p.memory pointer=packetFirstFailure p1.memory (p1.regs 2) := by
+    simp only [packetFirstFailure,packetStorePermission,writable,ppointer]
+  have projection := congrArg (fun events => events++completeGuestSuffix p.memory pointer limit) trace
+  by_cases reject : pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit
+  · have at34 : p1.pc=34 := by simpa only [reject,ite_true] using ppc
+    have exitRun := proof_exit_execution env p1 at34 stillActive
+    refine ⟨?_,?_,projection,?_,?_⟩
+    · simpa only [completeNativeFinal,completeGuestSuffix,reject,ite_true,List.append_nil] using nrun
+    · simpa only [completeProofFinal,completeGuestSuffix,reject,ite_true,List.append_nil] using prun.append exitRun
+    · simpa only [completeNativeFinal,completeProofFinal,reject,ite_true,proofExitFinal,BPF.setReg] using memoryMatch
+    · intro _
+      simp only [completeNativeFinal,completeProofFinal,reject,ite_true]
+      refine ⟨?_,rfl,?_⟩
+      · simpa only [reject,ite_true] using npc
+      · change n1.gpr 0=(proofExitFinal p1).regs 0
+        simpa +decide [proofExitFinal,BPF.setReg,pzero] using nzero
+  · have at35 : n1.pc=35 := by simpa only [reject,ite_false] using npc
+    have at18 : p1.pc=18 := by simpa only [reject,ite_false] using ppc
+    have storePointer : n1.gpr 1=p1.regs 2 := npointer.trans ppointer.symm
+    obtain ⟨bounded,nbody,pbody,finalMemory,returned⟩ :=
+      packet_body_any_permissions env (p.regs 10) n1 p1 (packetFirstFailure p.memory pointer)
+        at35 at18 stillActive storePointer memoryMatch selected
+    refine ⟨?_,?_,projection,?_,?_⟩
+    · simpa only [completeNativeFinal,completeGuestSuffix,reject,ite_false,nativeIndex,ppointer] using
+        native_execution_append nrun nbody
+    · simpa only [completeProofFinal,completeGuestSuffix,reject,ite_false,ppointer] using prun.append pbody
+    · simpa only [completeNativeFinal,completeProofFinal,reject,ite_false,nativeIndex] using finalMemory
+    · intro finished
+      have success : packetFirstFailure p.memory pointer=4 := finished.resolve_left reject
+      obtain ⟨donePC,doneHalted,returnMatch,_⟩ := returned success
+      simpa only [completeNativeFinal,completeProofFinal,reject,ite_false,nativeIndex] using
+        And.intro donePC (And.intro doneHalted returnMatch)
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -2645,3 +2750,5 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.packet_failure_index_agrees
 
 #print axioms KProgTV.TrustedSimpleX86.packet_body_any_permissions
+
+#print axioms KProgTV.TrustedSimpleX86.complete_all_store_outcomes_correspondence

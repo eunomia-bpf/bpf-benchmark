@@ -1,0 +1,65 @@
+{
+  "status": "captured_entry_all_guards_all_store_outcomes_correspondence_checked",
+  "utc": "2026-11-07T12:28:17.681938+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorem": "KProgTV.TrustedSimpleX86.complete_all_store_outcomes_correspondence",
+  "artifact_scope": {
+    "materialized_native_bytes": 60,
+    "accepted_B_instructions": 37,
+    "entry_PC": 0
+  },
+  "claims": [
+    "one actual native execution and one actual B platform execution from entry",
+    "guard rejection derives return0 and actual B EXIT",
+    "otherwise every guest write-permission assignment derives four writes/return2/EXIT or exact first-store-fault prefix",
+    "no guest write-success/write-failure/branch-outcome premise",
+    "complete final/partial states and outside-private36 values/init/global permissions",
+    "private projection applies only to actual9event initialization prefix; all guest-write/fault suffix events retained including aliases"
+  ],
+  "premises": [
+    "entry nativePC0/BPC0, active B",
+    "native RDI equals B r1 context and same initial canonical memory",
+    "two actual successful context reads with loaded pointer/limit and actual events",
+    "private initializer/reload permissions for exact36byte footprint",
+    "explicit env native stack-pointer witness",
+    "context/private-footprint disjointness as in existing entry theorem",
+    "explicit captured kernel context-conversion platform"
+  ],
+  "not_yet_claimed": [
+    "context-load fault paths",
+    "private frame/kernel platform premise discharge against native ABI",
+    "unconditional whole-program TranslationValidation",
+    "universal canonical relational/architectural simulation",
+    "original immutable ELF/entry/return-boundary to emitted native60 transport"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical prefix and audits retained",
+    "old_prefix_sha256": "0df0cb5623a290aa452a65b54760f7c0cc36f6317775aa94096531d7d53e88a1",
+    "ISA_runtime_binding": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "mismatch_controls_rejected": 22,
+    "no_sorryAx": true,
+    "log_sha256": "9acaafa0d7705e3d8dd6750c16d5be53e9198f2260b1a9973ca722a61cd291b9",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.complete_all_store_outcomes_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    }
+  },
+  "trusted": [
+    "verifier soundness for eventual composition",
+    "canonical reference ISA/memory and explicit platform semantics",
+    "kernel binding/capture/byte provenance",
+    "registered specialization/link service until whole-program TV",
+    "Lean kernel/logical axioms and Lean.ofReduceBool native proof reduction"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c11dc48c42761b5b2188a8409d4624fb9cfd965eb9b86ccecb39436db7faaa41"
+  }
+}

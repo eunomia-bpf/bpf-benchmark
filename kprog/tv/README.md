@@ -1585,3 +1585,16 @@ either reach nativePC60/B EXIT with return2 or preserve the exact first-fault
 prefix and full partial state. The selection function is proof-only and adds
 no artifact checks. Entry/context/private-frame/ABI and whole-program relational
 transport remain separate obligations. Evidence: dated body-any-permissions JSON/log.
+
+### Entry through every packet-store outcome
+
+`complete_all_store_outcomes_correspondence` composes the actual entry, all
+three guards, arbitrary packet write permissions and real EXIT or first fault
+in one native/B execution pair. It requires no packet-write permission or branch
+outcome premise. The two actual successful context reads, exact private-frame
+permissions, stack-input witness, context/private disjointness and captured kernel
+platform remain explicit. Private projection applies only to the9-event setup;
+every guest suffix event remains, including fault and alias cases. This extends
+the earlier conditional-complete certificate; context faults, universal relational
+simulation and ABI/original-ELF materialization still prevent an unconditional TV
+claim. The entry-any-permissions JSON/log gives the exact checked checkpoint.
