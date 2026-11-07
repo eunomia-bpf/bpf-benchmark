@@ -669,3 +669,11 @@ semantic, two actual flag, AUX and singleton route hosts passed 64, 5120, 225292
 1152, 2089, 1115374 and 11083 cases. No proof/test failure or input filtering;
 original C host warnings remain visible. Exact19773cca3's full check predates
 this increment; a later combined full validation remains required.
+
+Exact `19773cca3108ed099645acbf706930c2d3ce22ae` completed the full
+`make -C kprog/formal check` with exit **0**, including Extrev, CSEL/CNEG and the
+nineteen-opcode concrete dispatcher segment, plus all prior Lean, contract,
+reference/wire/compiler and semantic checks. The immutable source/cache export
+was deleted automatically; compressed CALL CPU observations retain this 440-case
+full run. The later CCMP and ADDS/SUBS/CMP/CMN actual-field increments still
+require their own combined full check.
