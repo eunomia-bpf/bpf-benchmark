@@ -1,0 +1,20 @@
+control	outcome	errno	record_kind
+application cannot obtain registered service authority	REJECTED	16	individual_outcome
+application proof ELF refused	REJECTED	8	individual_outcome
+unrecognized submission metadata refused	REJECTED	22	individual_outcome
+application cannot complete proof request	REJECTED	1	individual_outcome
+replace submitted native bytes refused	REJECTED	16	individual_outcome
+application cannot read service requests	REJECTED	1	individual_outcome
+capacity probe retains queued request	REJECTED	90	individual_outcome
+immutable native ELF/entry/metadata survive producer mutation	PASS		individual_outcome
+kernel source/load attributes and actual outer/inner map shapes	PASS		individual_outcome
+invented inner template refused	REJECTED	2	individual_outcome
+map outside pinned source refused	REJECTED	2	individual_outcome
+stale source context request refused	REJECTED	116	individual_outcome
+application proof upload refused with active trusted worker	REJECTED	1	individual_outcome
+application cannot use trusted source query	REJECTED	1	individual_outcome
+wrong native request identity refused	REJECTED	116	individual_outcome
+invalid final errno refused	REJECTED	22	individual_outcome
+unrelated verified BPF program cannot authorize native request	REJECTED	18	individual_outcome
+application cannot replace disconnected trusted registration	REJECTED	16	individual_outcome
+registered trusted transport, immutable P, application proof refusal and fail-closed disconnect	PASS		suite_summary
