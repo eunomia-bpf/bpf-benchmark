@@ -1370,6 +1370,273 @@ theorem original_native_invocation_return (n : X86.State) (position : n.pc=0)
   · simp only [originalNativeResult,failed,ite_true]
   · simp [originalNativeResult,failed,X86.step,X86.returnStep,stack,width,retainedEntry,canonical]
 
+
+/-- A change of code-address origin only. No register or memory address is
+translated, and architectural PC addition retains64-bit wrapping semantics. -/
+def shiftNativeState (base : Word) (s : X86.State) : X86.State := {s with pc := base+s.pc}
+
+def shiftNativeTransition (base : Word) (effect : Transition X86.State) : Transition X86.State :=
+  {effect with state := shiftNativeState base effect.state}
+
+/-- Every actual captured instruction commutes with a code-origin shift.
+Both instructions are decoded from the same immutable bytes by the canonical
+ISA, rather than selected by a separate instruction semantics. Full states,
+ordered events and faults agree after shifting only the resulting PC. -/
+theorem simple_native_canonical_code_shift (base : Word) (s : X86.State) (offset : Nat)
+    (member : offset ∈ simpleNativeOffsets) :
+    match X86.decode (native.extract offset (offset+simpleNativeLength offset)) s,
+        X86.decode (native.extract offset (offset+simpleNativeLength offset)) (shiftNativeState base s) with
+    | .ok instruction,.ok shifted =>
+        X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+    | _,_ => False := by
+  have choices : offset=0 ∨ offset=3 ∨ offset=7 ∨ offset=10 ∨ offset=12 ∨ offset=15 ∨ offset=17 ∨ offset=21 ∨ offset=24 ∨ offset=26 ∨ offset=30 ∨ offset=33 ∨ offset=35 ∨ offset=40 ∨ offset=44 ∨ offset=51 ∨ offset=55 := by
+    simpa [simpleNativeOffsets] using member
+  rcases choices with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · change (match X86.decode (native.extract 0 3) s,
+        X86.decode (native.extract 0 3) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode0,native_decode0]
+    cases read : readMemory s.memory (s.gpr 7) 8
+    all_goals simp +decide [read,shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 3 7) s,
+        X86.decode (native.extract 3 7) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode3,native_decode3]
+    cases read : readMemory s.memory (s.gpr 7+(8#64)) 8
+    all_goals simp +decide [read,shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 7 10) s,
+        X86.decode (native.extract 7 10) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode7,native_decode7]
+    all_goals simp +decide [shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 10 12) s,
+        X86.decode (native.extract 10 12) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode10,native_decode10]
+    all_goals simp +decide [shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 12 15) s,
+        X86.decode (native.extract 12 15) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode12,native_decode12]
+    all_goals simp +decide [shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 15 17) s,
+        X86.decode (native.extract 15 17) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode15,native_decode15]
+    all_goals simp +decide [shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 17 21) s,
+        X86.decode (native.extract 17 21) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode17,native_decode17]
+    all_goals simp +decide [shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 21 24) s,
+        X86.decode (native.extract 21 24) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode21,native_decode21]
+    all_goals simp +decide [shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 24 26) s,
+        X86.decode (native.extract 24 26) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode24,native_decode24]
+    all_goals simp +decide [shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 26 30) s,
+        X86.decode (native.extract 26 30) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode26,native_decode26]
+    all_goals simp +decide [shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 30 33) s,
+        X86.decode (native.extract 30 33) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode30,native_decode30]
+    all_goals simp +decide [shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 33 35) s,
+        X86.decode (native.extract 33 35) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode33,native_decode33]
+    all_goals simp +decide [shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 35 40) s,
+        X86.decode (native.extract 35 40) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode35,native_decode35]
+    cases permission : permitted s.memory.writable (s.gpr 1) 2
+    all_goals simp +decide [permission,shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 40 44) s,
+        X86.decode (native.extract 40 44) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode40,native_decode40]
+    cases permission : permitted s.memory.writable (s.gpr 1+(2#64)) 1
+    all_goals simp +decide [permission,shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 44 51) s,
+        X86.decode (native.extract 44 51) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode44,native_decode44]
+    cases permission : permitted s.memory.writable (s.gpr 1+(3#64)) 4
+    all_goals simp +decide [permission,shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 51 55) s,
+        X86.decode (native.extract 51 55) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode51,native_decode51]
+    cases permission : permitted s.memory.writable (s.gpr 1+(7#64)) 1
+    all_goals simp +decide [permission,shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+  · change (match X86.decode (native.extract 55 60) s,
+        X86.decode (native.extract 55 60) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s)
+      | _,_ => False)
+    rw [native_decode55,native_decode55]
+    all_goals simp +decide [shiftNativeState,shiftNativeTransition,X86.step,
+      X86.moveStep,X86.arithmeticStep,X86.logicalStep,X86.scalarRead,X86.scalarWrite,
+      X86.scalarWriteValue,X86.scalarRegisterValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,
+      X86.ScalarWidth.bits,X86.ScalarWidth.bytes,X86.readSource,X86.ScalarDestination.source,
+      writeMemory,BitVec.add_assoc,Except.map,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+    all_goals repeat' (split <;> simp_all +decide [shiftNativeState,shiftNativeTransition,
+      X86.scalarWriteValue,X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,
+      BitVec.add_assoc])
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -1481,3 +1748,5 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.original_native_complete_path_exists
 
 #print axioms KProgTV.TrustedSimpleSafety.original_native_invocation_return
+
+#print axioms KProgTV.TrustedSimpleSafety.simple_native_canonical_code_shift

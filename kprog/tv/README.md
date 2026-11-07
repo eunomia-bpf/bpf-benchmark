@@ -1928,3 +1928,11 @@ body faults stop before RET. No final return-read/success premise is supplied.
 The actual kernel invocation must still establish these initial ABI facts and
 continuation identity. The retained RET read is not asserted to be a guest
 access checked by B. Actual codebase and strict B-block transport remain open.
+
+`trusted-simple-canonical-code-shift.json` proves that all17 actual payload
+instructions commute with an arbitrary64-bit code-origin shift under the
+canonical decoder and transition. Only resulting PC shifts; complete registers,
+flags, memory, events and faults remain exact for every permission/branch
+outcome. Relational AF/accepted-extent/whole-execution transport follows next.
+Terminal RET needs separate boundary transport: its saved absolute caller
+continuation must not be shifted along with the payload's internal PCs.
