@@ -1,0 +1,30 @@
+{
+  "before": {
+    "command": [
+      "/usr/lib/llvm-18/bin/clang",
+      "-O2",
+      "-target",
+      "bpf",
+      "-mcpu=v4",
+      "-I/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-register-read-bpf/before",
+      "-E",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-register-read-bpf/reads.c"
+    ],
+    "sha256": "26c6f90a7016d0af81b7323cfcdb2e404e73ffae9075f5b7e86fdee9d05adad2",
+    "bytes": 7868
+  },
+  "candidate": {
+    "command": [
+      "/usr/lib/llvm-18/bin/clang",
+      "-O2",
+      "-target",
+      "bpf",
+      "-mcpu=v4",
+      "-I/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-register-read-bpf/candidate",
+      "-E",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-register-read-bpf/reads.c"
+    ],
+    "sha256": "20ef4c363a852bc8fc1b06ce276ddf6dfa38ffc6b1b917b82ab1016b02a853b5",
+    "bytes": 11801
+  }
+}

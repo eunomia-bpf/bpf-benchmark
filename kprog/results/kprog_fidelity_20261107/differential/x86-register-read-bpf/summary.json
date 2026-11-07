@@ -1,0 +1,31 @@
+{
+  "variants": {
+    "before": {
+      "cases": 6717440,
+      "guard_taken": 123242,
+      "jit_vs_bytes": 0,
+      "native_vs_bytes": 0,
+      "host_vs_bytes": 0,
+      "jit_vs_native": 0,
+      "memory_writes": 0,
+      "forms": 20
+    },
+    "candidate": {
+      "cases": 6717440,
+      "guard_taken": 123242,
+      "jit_vs_bytes": 0,
+      "native_vs_bytes": 0,
+      "host_vs_bytes": 0,
+      "jit_vs_native": 0,
+      "memory_writes": 0,
+      "forms": 20
+    }
+  },
+  "total_cases": 13434880,
+  "input_domain": {
+    "exhaustive_low16": 262144,
+    "random_full64": 65536,
+    "guarded_positive": 8192
+  },
+  "scope": "Generic register-read BPF lowering, native read values and guarded readonly indexing."
+}
