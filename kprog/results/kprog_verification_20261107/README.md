@@ -3257,3 +3257,11 @@ Its prior8192case execution identity is retained as candidate evidence. LEA now
 contributes to32raw register operations; JCC/JMP add two control-model operations,
 and33 reference-family operations retain partial models. O2 covers34tokens
 (23direct/ninegeneric/twobranch). Coverage318rows/24columns retain every T O4 cell.
+
+### Published unified-step source full check
+
+`make check` on immutable publishedae275afec exits0. All1140 exported source
+SHA256 values match its Git blobs; the private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_ae275afec`. This epoch includes the unified JCC/JMP step and
+adopted LEA header. Subsequent PUSH/POP work keeps its own source identity.

@@ -2311,6 +2311,26 @@
     "snapshot_file_count": 1140,
     "temporary_export_basename": "source-check-bits-published"
   },
+  "full_make_check_ae275afec": {
+    "actual_exit": 0,
+    "archive_block_sha256": "0d741b82ee65e8b3ed6f8487282da83fa5b898221f5420bf661250e63bdefe63",
+    "archive_marker": "=== FULL MAKE CHECK AE275AFEC PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/control-refinement-full.cpu.jsonl.gz": "1997b1656a8f2c22df0958ad267df7ad4b360d70258ddf3b8f6e180210bea4b1",
+      "/workspaces/.agent-state/kprog-lanes/V/control-refinement-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/control-refinement-full.head": "69d12fe61f41ce96d0b0ea80109507fd6b4450d97e2b409a5acba65357297594",
+      "/workspaces/.agent-state/kprog-lanes/V/control-refinement-full.launch.log": "1bf83257ce7446ef7166265c96a4d1e0f2708c853c389da50f1a8fbc4ef40d6f",
+      "/workspaces/.agent-state/kprog-lanes/V/control-refinement-full.log": "5bfadcb541e2457f8c04c1ab9037dfe8e38da208622f2f40ace3a2b9298fa569",
+      "/workspaces/.agent-state/kprog-lanes/V/control-refinement-full.py": "38fcf080bbc3af546c183fc66c8c9fbd8b12c597cd6002a40d86636f010e84b6",
+      "/workspaces/.agent-state/kprog-lanes/V/control-refinement-full.sources": "f626dc0363735bb25d7168bfb56df3af47aea0923b3a47c6201453262e2a4a96",
+      "/workspaces/.agent-state/kprog-lanes/V/control-refinement-full.state": "3bb46ab42acc6facd8947637fa2a19ca7075ba36ed2bf209c84aedc895ee894d"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "ae275afec94228c73f84fcce34174ab9d827418b",
+    "scope": "Published unified JCC/JMP step and adopted LEA source epoch; subsequent PUSH/POP work keeps its own source identity.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1140
+  },
   "full_make_check_af38184ef": {
     "actual_exit": 0,
     "archive_block_sha256": "6f3017abfac8aae4bd9896a88f0657e475c63dcb21417f67737ed1a155c66885",
