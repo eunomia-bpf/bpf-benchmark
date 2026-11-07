@@ -1,0 +1,70 @@
+{
+  "header_sha256": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+  "self_xor_cpu": {
+    "cases": 94208,
+    "differences": 0,
+    "forms": 7,
+    "full_width_tags": 9,
+    "other_register_changes": 0,
+    "defined_native_flags_mask": 2245,
+    "model_af_preserved": true
+  },
+  "cmov_ubsan_cases": [
+    484369,
+    26526735
+  ],
+  "host_only_bpf_equivalence": {
+    "before_host_alignment": {
+      "-P": {
+        "bytes": 303051,
+        "sha256": "28fb410e0bfa06f39d3b2a9959ef829d033949d7c53f2f3b7567330f1f176016"
+      },
+      "-dM": {
+        "bytes": 174700,
+        "sha256": "5d8ff07500495d6b116e46c84b1e162c0a2c707eff8f7e935f04b473e405046d"
+      }
+    },
+    "after_host_alignment": {
+      "-P": {
+        "bytes": 303051,
+        "sha256": "28fb410e0bfa06f39d3b2a9959ef829d033949d7c53f2f3b7567330f1f176016"
+      },
+      "-dM": {
+        "bytes": 174700,
+        "sha256": "5d8ff07500495d6b116e46c84b1e162c0a2c707eff8f7e935f04b473e405046d"
+      }
+    }
+  },
+  "private_unwinder_compile": {
+    "command": [
+      "taskset",
+      "-c",
+      "20-23",
+      "/usr/lib/llvm-18/bin/clang",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/.agent-state/kprog-lanes/C/otel-self-xor/unwinder.c",
+      "-o",
+      "/workspaces/.agent-state/kprog-lanes/C/otel-self-xor/unwinder.bpf.o"
+    ],
+    "returncode": 0,
+    "elapsed_s": 275.03356505092233,
+    "max_rss_kib": 6820692,
+    "user_s": 270.900613,
+    "system_s": 4.033398
+  },
+  "raw_sha256": "b998a3a0cbb6cacb27c75b29af992c8446a7add2fccefc486d6c101ac06cf2cb"
+}

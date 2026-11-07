@@ -711,7 +711,13 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 
 #define X86_SIM_L_LOAD_ADDR(ADDR, WIDTH) KPROG_X86_MEM_LOAD((ADDR), (WIDTH))
 
+#if defined(__BPF__) || defined(__bpf__)
 #define X86_SIM_L_LOAD_PTR_ADDR(ADDR) (*(void * volatile *)(ADDR))
+#else
+/* x86 permits unaligned pointer-width reads; the host C type must too. */
+typedef void *x86_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
+#define X86_SIM_L_LOAD_PTR_ADDR(ADDR) (*(x86_sim_unaligned_ptr volatile *)(ADDR))
+#endif
 
 #define X86_SIM_L_STORE_ADDR(ADDR, WIDTH, VALUE)                           \
 	KPROG_X86_MEM_STORE((ADDR), (WIDTH), (VALUE))
@@ -927,7 +933,7 @@ extern void x86_sim_unmapped_xdp_read(void)
 #define X86_SIM_L_XDP_READ(BASE, OFF, WIDTH)                               \
 	({                                                               \
 		__s64 __x86_xdp_off = X86_SIM_L_XDP_OFFSET((BASE), (OFF)); \
-		struct xdp_md *__x86_xdp_ctx = __x86_sim_helper_ctx;      \
+		volatile struct xdp_md *__x86_xdp_ctx = __x86_sim_helper_ctx;      \
 		__u64 __x86_xdp_value = 0;                                \
 		if ((WIDTH) == X86_WIDTH_64 &&                           \
 		    __x86_xdp_off == KPROG_ABI_XDP_DATA_OFF)              \
@@ -939,6 +945,7 @@ extern void x86_sim_unmapped_xdp_read(void)
 				__x86_xdp_ctx->data_end;                  \
 		else                                                     \
 			x86_sim_unmapped_xdp_read();                     \
+		X86_SIM_L_BARRIER_VAR(__x86_xdp_value);                    \
 		__x86_xdp_value;                                         \
 	})
 
@@ -1356,11 +1363,17 @@ extern void x86_sim_unmapped_xdp_read(void)
 			KPROG_X86_REG_LANE_AUX_PAYLOAD(__x86_l_aux);       \
 		__u8 __x86_l_dst_shift =                                  \
 			KPROG_X86_REG_LANE_AUX_DST_SHIFT(__x86_l_aux);       \
-		__u64 __x86_l_lhs = X86_SIM_L_READ_REG_WIDTH_SHIFT(       \
-			(DST), __x86_l_width, __x86_l_dst_shift);           \
-		__u64 __x86_l_rhs = X86_SIM_L_READ_REG_WIDTH_SHIFT(       \
-			(SRC), __x86_l_width,                              \
-			KPROG_X86_REG_LANE_AUX_SRC_SHIFT(__x86_l_aux));      \
+		__u8 __x86_l_src_shift =                                  \
+			KPROG_X86_REG_LANE_AUX_SRC_SHIFT(__x86_l_aux);       \
+		__u64 __x86_l_lhs = 0, __x86_l_rhs = 0;                  \
+		/* XOR of the same decoded register lane is always zero. */ \
+		if (!(__x86_l_alu == X86_ALU_XOR && (DST) == (SRC) &&     \
+		      __x86_l_dst_shift == __x86_l_src_shift)) {          \
+			__x86_l_lhs = X86_SIM_L_READ_REG_WIDTH_SHIFT(     \
+				(DST), __x86_l_width, __x86_l_dst_shift);  \
+			__x86_l_rhs = X86_SIM_L_READ_REG_WIDTH_SHIFT(     \
+				(SRC), __x86_l_width, __x86_l_src_shift);  \
+		}                                                        \
 		__u64 __x86_l_result;                                    \
 		if (KPROG_X86_ALU_USES_SBB_HANDLER(__x86_l_alu)) {        \
 			__u8 __x86_l_borrow = __x86_cf;                   \
@@ -2991,6 +3004,7 @@ X86_SIM_CONCAT(__x86_sim_jcc_fallthrough_, ID):                              \
 		} else if (X86_SIM_L_EVAL_CC(CC)) {                        \
 			X86_SIM_X86_JMP((CURRENT), (TARGET), LABEL);       \
 		}                                                           \
+		asm volatile("" ::: "memory");                            \
 	} while (0)
 
 #define X86_SIM_X86_JCC(CC, CURRENT, TARGET, LABEL)                         \
