@@ -29,7 +29,7 @@ used.
 | Corpus katran | 1 | **1.018x** | 1.102x | **does not** |
 | Corpus cilium | 177 | **1.229x** | 2.358x | **does not** |
 | Corpus otelcol | 14 | **1.013x** | 1.824x | **does not** |
-| Corpus tracee | 0 | — | 0.958x | blocked, see below |
+| Corpus tracee | 151 | **1.475x** | 0.958x | **does not** |
 
 Corpus figures are at the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`)
 and each carries the replaced/failed count from its own shim log.
@@ -38,20 +38,17 @@ and each carries the replaced/failed count from its own shim log.
 
 | set | geomean |
 | --- | ---: |
-| Five measured apps (bcc, tetragon, katran, cilium, otelcol) | **1.051x** |
-| Same five, excluding cilium | 1.010x |
+| All six apps | **1.112x** |
 | Reference, all six apps | **1.349x** |
 
-**The 1.349x six-app reference does not reproduce.** Five of six apps
-measure now and their geomean is 1.051x; the shortfall is concentrated
-in cilium (1.229x against 2.358x) and tetragon (1.008x against 1.323x),
-which were the reference's two large wins. The other four sit at 1.00x
-in both runs.
+**The 1.349x six-app reference does not reproduce.** All six apps now
+measure and their geomean is 1.112x. The shortfall is concentrated in
+cilium (1.229x against 2.358x) and tetragon (1.008x against 1.323x), the
+reference's two large wins; the other four sit near 1.00x in both runs,
+except tracee, whose 1.475x reverses its reference 0.958x.
 
 Every pair ran the same duration with the same work counters.
-**One of six corpus apps reproduces its reference ratio; four are
-measured and short; one (tracee) is blocked by a loader defect named
-below.**
+**One of six corpus apps reproduces its reference ratio; five diverge.**
 
 Both micro arms ran with recipe parity verified from the result files, and
 every arm's correctness was checked by comparing return values and results
@@ -282,37 +279,56 @@ At the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`,
 
 **Does not reproduce**: 1.013x against 1.824x.
 
-## tracee: 151 programs fail on one readonly data symbol
+## tracee: measures after two loader fixes, and reverses its reference
 
-Tracee's build manifest has 114 objects, but every load fails with
+Two defects had to be fixed, both in the loader, and each was found by
+measurement rather than inspection.
+
+**First, a data symbol the app's map does not cover.** All 151 programs
+failed with `native data symbol .L.str.14 exceeds BPF data map value_size
+for .rodata.str1.1`. The numbers rule out the obvious readings: the app
+creates a real 246-byte map for that section, and the native object's
+`.rodata.str1.1` is **261 bytes** — the extra 15 being `"vdso"` at 248 and
+`"unknown"` at 253, strings the loaded app never references. A symbol past
+the app's map simply cannot be placed, which the loader already had an
+`Absent` path for; treating it as fatal was wrong. Skipping it (and
+rewriting the comparison to avoid unsigned wrap) maps every symbol the app
+does use.
+
+**Second, a wrong-symbol match.** The programs then replaced but the guest
+panicked:
 
 ```
-native data symbol .L.str.14 exceeds BPF data map value_size for .rodata.str1.1
+BUG: kernel NULL pointer dereference ... in
+  bpf_prog_23aa4acac7a3a6bd_tracepoint__raw_syscalls__sys_enter
+native_id=175 ... jited_len=246 xlated_len=48
 ```
 
-— one symbol, all 151 loads, so **0 programs replace** and tracee has no
-native number.
+A 264-byte program became a 48-byte fragment. `tracee/manifest.json` has
+**no** `source_btf_symbol` in any of its 114 entries — only `symbol` — and
+every remaining match condition was optional, so `trace_sys_enter`'s entry
+matched `tracepoint__raw_syscalls__sys_enter` on bytecode length and
+helpers alone. An entry that names a symbol now has to match the loaded
+program's BTF symbol.
 
-The numbers rule out the obvious explanations. The app creates a real
-map for the section — `BPF_MAP_CREATE type=2 key_size=4 value_size=246
-max_entries=1 name=.rodata.str1.1` (and `value_size=72` for `.rodata`) —
-and the check is `native_loader.cpp:3893`, `if (*off + sym.st_size >
-map->value_size)`. So the map is 246 bytes and the loader computes an
-offset for `.L.str.14` whose end passes 246.
+```
+corpus/results/x86_kvm_corpus_20261107_041920_105442   status ok
+151 programs replaced natively, 0 failed, no oops
+```
 
-That reads as a **placement mismatch between the proof object's own
-`.rodata.str1.1` layout and the app's map**: the native object puts that
-string later in its section than the app's 246-byte map provides for.
-Either the proof object should be linked with the app's section base and
-size, or `source_data_symbol_offset` should map by symbol identity rather
-than by offset-into-section. It is a loader/link placement defect, not an
-app property, and it matters because tracee is the one app whose
-reference ratio (0.958x) is below 1. Reported with these numbers and
-recorded as blocked, not as a boundary.
+| | tracee/monitor |
+| --- | ---: |
+| bogo-ops, baseline eBPF | 22,549,454 |
+| bogo-ops, native | 33,257,102 |
+| **native/eBPF** | **1.475x** |
+| reference (2026-05-29) | **0.958x** |
 
-bcc shows a related but distinct gap on 7 of 25 programs: `proof readonly
-map lacks explicit symbol metadata: .rodata.native...`, which reads like
-the same readonly-map metadata family.
+Both arms ran the same seven stressors (cap, set, sigfd, eventfd, kill,
+futex, prctl) for the same duration, so the comparison is like-for-like.
+
+**Does not reproduce, and reverses**: 1.475x here against 0.958x in the
+reference. Tracee was the reference's only regression below 1; on this
+tree it is one of the larger wins.
 
 # Blockers cleared to reach the native arm
 
