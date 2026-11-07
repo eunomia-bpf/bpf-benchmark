@@ -534,6 +534,7 @@ def signHighValue (width : CmovWidth) (source : Word) : Word :=
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | lea (width : CmovWidth) (dst : Register) (address nextPc : Word)
   | divide (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
   | signHigh (width : CmovWidth) (nextPc : Word)
   | extend (sourceWidth targetWidth : ScalarWidth) (signed : Bool) (dst : Register) (source : ScalarSource) (nextPc : Word)
@@ -567,7 +568,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -577,6 +578,9 @@ def Instruction.fallthrough : Instruction → Word
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .lea width dst address nextPc =>
+      let result := writeValue width (s.gpr dst) address
+      ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), pc := nextPc }, [], none⟩
   | .divide width source nextPc => divideStep width source nextPc s
   | .signHigh width nextPc =>
       let result := writeValue width (s.gpr 2) (signHighValue width (s.gpr 0))
@@ -665,6 +669,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .lea .. => 0xffffffffffffffff
   | .divide .. => 0xfffffffffffff72a
   | .signHigh .. => 0xffffffffffffffff
   | .extend .. => 0xffffffffffffffff
@@ -903,6 +908,16 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
       let (rm, nextPc, cursor) ← operand bytes s p modrm (count + 2) size
       let immediate ← signedDisplacement bytes cursor size
       return .logic width .test (scalarDestination p width rm) (.immediate immediate) nextPc
+  if first = 0x8d then
+    let modrm ← byteAt bytes (count + 1)
+    if modrm / 64 = 3 then throw "LEA requires a memory-address encoding"
+    let width := if p.rex / 8 = 1 then CmovWidth.w64 else if p.operand16 then .w16 else .w32
+    let dst := registerCode ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
+    -- LEA computes an offset: segment overrides contribute no FS/GS base.
+    let (source, nextPc, _) ← operand bytes s { p with segment := 0 } modrm (count + 2) 0
+    match source with
+    | .memory address => return .lea width dst address nextPc
+    | .register _ => throw "LEA requires a memory-address encoding"
   if first = 0x63 then
     let modrm ← byteAt bytes (count + 1)
     let targetWidth := scalarWidth p false

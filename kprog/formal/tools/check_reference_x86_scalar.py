@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Concrete native MOV encodings: register lanes, prefixes and exact memory effects."""
+"""Concrete MOV/LEA encodings: register lanes, address prefixes and memory effects."""
 import copy
 import json
 from pathlib import Path
@@ -130,6 +130,43 @@ def main():
     expected = result(request)
     expected["registers"][0] = 0x112233445566777F
     cases.append((request, expected))
+    # LEA reads neither addressed memory nor segment bases. The address-size
+    # truncation precedes the destination's independent partial write.
+    lea_cases = [
+        ("488d4705",0,64,7,None,0,5,False,False),
+        ("488d44c7fd",0,64,7,0,3,-3,False,False),
+        ("488d0447",0,64,7,0,1,0,False,False),
+        ("4b8d44e405",0,64,12,12,3,5,False,False),
+        ("4c8d440705",8,64,7,0,0,5,False,False),
+        ("488d2c24",5,64,4,None,0,0,False,False),
+        ("488d0501000000",0,64,None,None,0,1,True,False),
+        ("488d0425ffffffff",0,64,None,None,0,-1,False,False),
+        ("67488d0425ffffffff",0,64,None,None,0,-1,False,True),
+        ("678d0501000000",0,32,None,None,0,1,True,True),
+        ("488d5b01",3,64,3,None,0,1,False,False),
+        ("8d44c7fd",0,32,7,0,3,-3,False,False),
+        ("668d44c7fd",0,16,7,0,3,-3,False,False),
+        ("66488d44c7fd",0,64,7,0,3,-3,False,False),
+        ("48668d44c7fd",0,16,7,0,3,-3,False,False),
+        ("64488d4705",0,64,7,None,0,5,False,False),
+        ("65488d4705",0,64,7,None,0,5,False,False),
+        ("48648d4705",0,32,7,None,0,5,False,False),
+        ("66"*13+"8d00",0,16,0,None,0,0,False,False)]
+    for code,dst,width,base_reg,index_reg,scale,disp,relative,address32 in lea_cases:
+        for pc in (0x1000,MASK-5):
+            request=copy.deepcopy(base)
+            request["native_bytes"]=list(bytes.fromhex(code))
+            state=request["state"]
+            state.update(pc=pc,fs_base=0x123400000000,gs_base=0x567800000000)
+            expected=result(request)
+            address=(pc+len(request["native_bytes"])) if relative else state["registers"][base_reg] if base_reg is not None else 0
+            address=(address+disp+(state["registers"][index_reg]<<scale if index_reg is not None else 0))&MASK
+            if address32: address &= 0xFFFFFFFF
+            # An absent memory mapping is intentional: even a noncanonical
+            # offset must not turn LEA into a read, a fault or a helper event.
+            value=address&((1<<width)-1)
+            expected["registers"][dst]=(state["registers"][dst]&~0xFFFF)|value if width==16 else value
+            cases.append((request,expected))
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
         input="".join(json.dumps(request) + "\n" for request, _ in cases),
         text=True, stdout=subprocess.PIPE, check=True)
@@ -137,13 +174,13 @@ def main():
     assert len(outputs) == len(cases)
     for (request, expected), output in zip(cases, outputs):
         assert output == expected, (request, output, expected)
-    for code in ("b8ffffff", "48b800", "a001200000", "c7c801000000", "66" * 14 + "b07f"):
+    for code in ("b8ffffff", "48b800", "a001200000", "c7c801000000", "66" * 14 + "b07f", "488dc0", "488d44", "66"*14+"8d00"):
         request = copy.deepcopy(base)
         request["native_bytes"] = list(bytes.fromhex(code))
         run = subprocess.run([str(ROOT / ".lake/build/bin/reference")], input=json.dumps(request) + "\n",
                              text=True, capture_output=True)
         assert run.returncode == 1 and run.stderr.startswith("reference:"), (request, run)
-    print("x86 scalar reference: MOV lanes, REX40/order, immediate forms, ModRM/moffs, exact writes/faults and full preservation OK")
+    print("x86 scalar reference: MOV/LEA lanes, REX/order, ModRM/SIB/RIP, address-size/segment rules, exact reads/faults and full preservation OK")
 
 
 if __name__ == "__main__":

@@ -20,7 +20,9 @@ contracts. The step refinements in `Refinement/` connect CMOV, BT, BZHI,
 ANDN, BMI2 shifts/rotates, BSWAP/MOVBE, ordinary MOV, ADD/ADC/SUB/SBB/CMP and register/immediate/memory PUSH/POP handlers to that reference, including registers,
 flags, XMM0, memory, PC and ordered access/fault effects. MOV includes AL/AH,
 REX byte registers, partial/zero-extending writes, immediate/ModRM/moffs forms,
-prefix ordering and source/destination aliases. High-byte memory loads use the existing
+prefix ordering and source/destination aliases. LEA has a materialized-address
+handler refinement, independent16/32/64-bit writeback and no memory access;
+its native decoder preserves SIB/RIP/address-size and ignored segment-prefix rules. High-byte memory loads use the existing
 eager memory reader followed by the generated high-lane MOV writer; the proof
 preserves the read/fault sequence and every other register byte. Its shared scalar primitives
 operate on materialized native register values. Arithmetic covers all four widths,
