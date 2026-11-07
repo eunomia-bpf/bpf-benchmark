@@ -188,3 +188,20 @@ runtime memory knob (default8G, unchanged for BCC timing). Next diagnostic uses
 12G, within lane C's12GiB cap, retaining the same image/kernel/workload/native
 code/generator/Clang flags. No compiler-optimization or verifier workaround was
 introduced. Reproduce with the preceding OTel command plus VM_MEM=12G.
+
+
+### Guest CPU count for verified-arm timing
+
+VM_CPUS defaults to4 and controls vng --cpus; CPUS independently selects
+host CPU affinity. The guest boots the existing incremental kernel at
+kprog/tv/build-kernel-x86/arch/x86/boot/bzImage and uses the cached image
+bpf-benchmark/kprog-native-only:x86-current (image ID
+a20b2981171de35a85d1827760701e157efa17347c8705374f146a5d7dbe1a90).
+The corpus target reuses these artifacts without rebuilding them. R's BCC
+verified/JIT pair uses the following, repeated with stats0:
+
+```
+make -f corpus/results/kprog_app_coverage_20261107/native-only-runtime/Makefile corpus CPUS=0-7 VM_CPUS=8 VM_MEM=64G SAMPLES=3 WORKLOAD_DURATION=180 BPFREJIT_CORPUS_BPF_STATS=1
+```
+
+This is a timing command for R; no timing run was launched by this change.
