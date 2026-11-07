@@ -2634,3 +2634,36 @@ symlinks were reused. That full snapshot includes IMULbc3b, and predates this
 shift increment and C's new CMP header; later input differences are explicitly
 recorded. It is not relabeled as a current-HEAD PASS. Whole-ISA dispatch and
 compiled-B/O2/O4 remain active work.
+
+## Current CMP OF assignment is now in the core refinement
+
+C's publishedb46de606c/4fe6817 CMP body computes the existing zero-borrow SUB
+flags and then assigns OF = SF xor signedLT(width-signextended lhs,rhs).
+The core now models that exact assignment with the actual generated sign-
+extension helper. A universal all4-width identity uses SF/OF from the SAME
+preceding subtraction, without a free result/SF/borrow premise. The entire
+flag word, including PF/AF and all preserved bits, is derived equal to the
+prior generated CMP flags and the SAME canonical arithmetic step.
+
+The canonical word law assessed independently by T inb0ad7c7cf is integrated
+into the core; its two original published archive/review blobs, Lean/source/
+canonical hashes and actual C-added lines were independently verified. The
+promoted C additions byte-match T's reviewed candidate. The new bridge adds
+the generated helper correspondence and actual flags assignment, rather than
+leaving the assessment as an isolated candidate proof. Raw CMP_REG/CMP_IMM
+models now call this compareFlags body; their whole-frame and the existing
+dispatcher theorem are re-established. No ISA, generated contract, production
+header, encoder, oracle or test is changed by V.
+
+Focused98-job Lean build, five audits and complete378-job default library+
+executable-reference build PASS. Standard propext/Classical.choice/
+Lean.ofReduceBool/Quot.sound dependencies remain explicit, with no sorryAx.
+Four existing generated checks and unchanged UBSan comparison handler/route/
+memory hosts PASS:2913/47529/40784 cases, with all input pins stable. Initial
+doc-placement elaboration and an unnecessary BV enum-support name collision
+are retained as actual failed phases; the local flag-restoration subproof now
+excludes its unrelated context, and the entire library imports successfully.
+Exact old/new source, diffs, commands, logs, input identities and provenance
+are appended to the existing integration JSON/gzip. A new complete make-check
+on this published model/current C header will be a separate immutable record;
+prior full231 PASS is not relabeled. Other opcodes and O2/O4 remain active.

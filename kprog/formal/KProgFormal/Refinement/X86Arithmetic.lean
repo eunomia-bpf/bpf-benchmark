@@ -1,3 +1,4 @@
+import KProgFormal.Generated.GeneratedX86Signed
 import KProgFormal.Refinement.X86Scalar
 import KProgFormal.Refinement.X86AuxFlags
 import KProgFormal.Generated.GeneratedX86Adc
@@ -94,5 +95,51 @@ theorem handler_refines (width : ScalarWidth) (kind : ArithmeticKind) (dst : Sca
     Reference.X86.Step (.arithmetic width kind dst src nextPc) s (handlerStep width kind dst src nextPc s) := by
   rw [step_refines]
   exact ⟨rfl, rfl, rfl⟩
+
+
+set_option maxRecDepth 4096 in
+set_option maxHeartbeats 4000000 in
+/-- Canonical CMP identity independently assessed by T (b0ad7c7cf): only
+actual zero-borrow subtraction, with SF/OF from that same operation. -/
+theorem compare_overflow_identity (width : ScalarWidth) (left right old : Reference.Word) :
+    (Reference.X86.arithmeticFlags width true false left right old).getLsbD 11 =
+      Bool.xor ((Reference.X86.arithmeticFlags width true false left right old).getLsbD 7)
+        (((left.setWidth width.bits).signExtend 64).slt ((right.setWidth width.bits).signExtend 64)) := by
+  cases width <;> simp only [Reference.X86.arithmeticFlags, Reference.X86.ScalarWidth.bits,
+    Reference.X86.ScalarWidth.bytes, Reference.X86.evenParity, Reference.X86.auxiliaryCarry]
+  all_goals unfold Reference.Word at *
+  all_goals bv_decide
+
+theorem compare_signed_operand (width : ScalarWidth) (value : Reference.Word) :
+    GeneratedX86Signed.signExtend value (handlerWidth width) =
+      (value.setWidth width.bits).signExtend 64 := by
+  cases width <;> simp only [GeneratedX86Signed.signExtend, handlerWidth,
+    GeneratedX86Width.narrow, GeneratedX86Width.mask, GeneratedX86Width.signMask,
+    GeneratedX86Width.bits, Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes,
+    Nat.reduceMul, reduceCtorEq, ↓reduceIte] <;> bv_decide
+
+/-- The current production CMP body first computes the existing SUB flags,
+then assigns OF = SF xor signedLT using the generated width sign extension. -/
+def compareFlags (width : ScalarWidth) (left right old : Reference.Word) : Reference.Word :=
+  let original := flags width .compare left right old
+  let less := (GeneratedX86Signed.signExtend left (handlerWidth width)).slt
+    (GeneratedX86Signed.signExtend right (handlerWidth width))
+  Reference.X86.setFlag original 11 (Bool.xor (original.getLsbD 7) less)
+
+/-- No arbitrary result/SF/borrow premise: the assignment is derived from
+the exact preceding CMP. All flag bits, including PF/AF, remain identical. -/
+theorem compare_flags_eq (width : ScalarWidth) (left right old : Reference.Word) :
+    compareFlags width left right old = flags width .compare left right old := by
+  have base : flags width .compare left right old =
+      Reference.X86.arithmeticFlags width true false left right old := by
+    simpa [Reference.X86.ArithmeticKind.subtract, Reference.X86.ArithmeticKind.carry] using
+      flags_refine width .compare left right old
+  have restore (word : Reference.Word) : Reference.X86.setFlag word 11 (word.getLsbD 11) = word := by
+    clear base width left right old
+    unfold Reference.X86.setFlag
+    bv_decide
+  have identity := compare_overflow_identity width left right old
+  simpa only [compareFlags, base, compare_signed_operand, ← identity] using
+    restore (Reference.X86.arithmeticFlags width true false left right old)
 
 end KProgFormal.Refinement.X86Arithmetic

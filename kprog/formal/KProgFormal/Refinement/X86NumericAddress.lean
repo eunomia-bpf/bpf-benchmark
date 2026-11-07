@@ -663,7 +663,7 @@ def compareRegister (env : Environment) (frame : Frame) (arena : NativeWord)
     (dst src : Reference.X86.RegisterSlice) (nextPc : NativeWord) : RegisterState :=
   let left := readRegister env frame arena state width dst
   let right := readRegister env frame arena state width src
-  registerPc (registerFlags state (X86Arithmetic.flags width .compare left right state.raw.rflags)) nextPc
+  registerPc (registerFlags state (X86Arithmetic.compareFlags width left right state.raw.rflags)) nextPc
 
 theorem compare_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
     (state : RegisterState) (width : Reference.X86.ScalarWidth)
@@ -673,7 +673,7 @@ theorem compare_register_frame_refines (env : Environment) (frame : Frame) (aren
       Reference.X86.step (.arithmetic width .compare (.register dst) (.register src) nextPc)
         (nativeRegisters env frame arena state) := by
   rw [← X86Arithmetic.step_refines]
-  simp only [compareRegister, native_register_pc, native_register_flags, native_register_read,
+  simp only [compareRegister, X86Arithmetic.compare_flags_eq, native_register_pc, native_register_flags, native_register_read,
     X86Arithmetic.handlerStep, X86Scalar.read_refines, Reference.X86.ScalarDestination.source,
     Reference.X86.scalarRead, List.nil_append, List.append_nil]
   rfl
@@ -685,7 +685,7 @@ def compareImmediate (env : Environment) (frame : Frame) (arena : NativeWord)
     (dst : Reference.X86.RegisterSlice) (raw nextPc : NativeWord) : RegisterState :=
   let left := readRegister env frame arena state width dst
   let right := GeneratedX86Immediate.value raw (X86Scalar.handlerWidth width)
-  registerPc (registerFlags state (X86Arithmetic.flags width .compare left right state.raw.rflags)) nextPc
+  registerPc (registerFlags state (X86Arithmetic.compareFlags width left right state.raw.rflags)) nextPc
 
 theorem compare_immediate_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
     (state : RegisterState) (width : Reference.X86.ScalarWidth)
@@ -701,7 +701,7 @@ theorem compare_immediate_frame_refines (env : Environment) (frame : Frame) (are
     exact field.symm
   have flags (left old : NativeWord) := arithmetic_flags_operand_bits width .compare left _ native old bits
   rw [← X86Arithmetic.step_refines]
-  simp only [compareImmediate, native_register_pc, native_register_flags, native_register_read,
+  simp only [compareImmediate, X86Arithmetic.compare_flags_eq, native_register_pc, native_register_flags, native_register_read,
     X86Arithmetic.handlerStep, X86Scalar.read_refines, Reference.X86.ScalarDestination.source,
     Reference.X86.scalarRead, List.nil_append, List.append_nil, flags]
   rfl
