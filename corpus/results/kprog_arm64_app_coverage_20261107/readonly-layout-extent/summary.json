@@ -1,0 +1,333 @@
+{
+  "utc": "2026-11-07T22:01:48.620244+00:00",
+  "scope": "Private generic ARM readonly label extent and alias identity repair",
+  "production_state": "Candidate source and test binary remain private; full-system common-service control follows.",
+  "input_pins": {
+    "utc": "2026-11-07T21:39:38.844940+00:00",
+    "source_base": "kprog/x86/native_lab/native_link",
+    "before_pins": {
+      "Cargo.toml": "52ae348d7ba92c420fa3a3041f8e84a403265082d608d7f71bdcf6384d41705a",
+      "Cargo.lock": "31c9de5a098920f3600c987c85e5a309dde4cd401766e3978eb2965440aca65f",
+      "src/main.rs": "563db62726d8ff0fbbcdc2d0f928eeafbd3d64b0e3fce3046723d2b18ab531d1",
+      "src/x86.rs": "8b63557424953cc7d00d83ea3eab9b37748fd2e3ed3cd4892e0b7b3b0fb34506"
+    },
+    "runtime_binary_retained": "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link"
+  },
+  "root_pin_observation": {
+    "Cargo.toml": true,
+    "Cargo.lock": true,
+    "src/main.rs": true,
+    "src/x86.rs": true
+  },
+  "cases": 10,
+  "valid_extent_cases": 9,
+  "declared_extent_error_controls": 1,
+  "original_zero_sized_label_kernel_errors": 6,
+  "candidate_zero_sized_label_kernel_errors": 0,
+  "candidate_alias_pairs": 6,
+  "candidate_identity_collision_rejections": 6,
+  "adjacent_arm_backend_tests": 58,
+  "candidate_native_payload_executions": 0,
+  "patch_application_check_exit": 0,
+  "source_after_sha256": "ce789d253de442685383c86428f0aa2984724f1fa345706b80bb20f2df39cfc0",
+  "observations": {
+    "before": {
+      "compiled_source_sha256": "0809bfb68cd4060bace91368e5100ec320265fef127da33b6ad5e2d54870e0d6",
+      "compiled_source_fnv64": "2c01ea897c62fd1d",
+      "observations": [
+        {
+          "actual_kernel": [
+            {
+              "native_symbol": "value",
+              "offset": 32,
+              "size": 8
+            }
+          ],
+          "addend": 0,
+          "declared_size": 8,
+          "expected_kernel": {
+            "native_symbol": "value",
+            "offset": 32,
+            "size": 8
+          },
+          "proof_data_size": 8,
+          "section_size": 32,
+          "symbol_base": 16,
+          "symbol_kind": "Data"
+        },
+        {
+          "actual_kernel": [
+            {
+              "native_symbol": "value",
+              "offset": 32,
+              "size": 32
+            }
+          ],
+          "addend": 7,
+          "declared_size": 32,
+          "expected_kernel": {
+            "native_symbol": "value",
+            "offset": 32,
+            "size": 32
+          },
+          "proof_data_size": 32,
+          "section_size": 56,
+          "symbol_base": 16,
+          "symbol_kind": "Data"
+        },
+        {
+          "actual_kernel": [
+            {
+              "native_symbol": "value",
+              "offset": 32,
+              "size": 120
+            }
+          ],
+          "addend": 48,
+          "declared_size": 120,
+          "expected_kernel": {
+            "native_symbol": "value",
+            "offset": 32,
+            "size": 120
+          },
+          "proof_data_size": 120,
+          "section_size": 144,
+          "symbol_base": 16,
+          "symbol_kind": "Data"
+        },
+        {
+          "declared_size": 0,
+          "kernel_error": "symbol value not found in input ELF",
+          "proof_data_size": 16,
+          "section_size": 32,
+          "symbol_kind": "Data"
+        },
+        {
+          "declared_size": 0,
+          "kernel_error": "symbol value not found in input ELF",
+          "proof_data_size": 40,
+          "section_size": 56,
+          "symbol_kind": "Data"
+        },
+        {
+          "declared_size": 0,
+          "kernel_error": "symbol value not found in input ELF",
+          "proof_data_size": 128,
+          "section_size": 144,
+          "symbol_kind": "Data"
+        },
+        {
+          "declared_size": 0,
+          "kernel_error": "symbol value not found in input ELF",
+          "proof_data_size": 16,
+          "section_size": 32,
+          "symbol_kind": "Unknown"
+        },
+        {
+          "declared_size": 0,
+          "kernel_error": "symbol value not found in input ELF",
+          "proof_data_size": 40,
+          "section_size": 56,
+          "symbol_kind": "Unknown"
+        },
+        {
+          "declared_size": 0,
+          "kernel_error": "symbol value not found in input ELF",
+          "proof_data_size": 128,
+          "section_size": 144,
+          "symbol_kind": "Unknown"
+        }
+      ],
+      "kernel_layout_errors": 6
+    },
+    "after": {
+      "compiled_source_sha256": "ce789d253de442685383c86428f0aa2984724f1fa345706b80bb20f2df39cfc0",
+      "compiled_source_fnv64": "5688a1c13ce07d76",
+      "observations": [
+        {
+          "actual_kernel": [
+            {
+              "native_symbol": "value",
+              "offset": 32,
+              "size": 8
+            }
+          ],
+          "addend": 0,
+          "declared_size": 8,
+          "expected_kernel": {
+            "native_symbol": "value",
+            "offset": 32,
+            "size": 8
+          },
+          "proof_data_size": 8,
+          "section_size": 32,
+          "symbol_base": 16,
+          "symbol_kind": "Data"
+        },
+        {
+          "actual_kernel": [
+            {
+              "native_symbol": "value",
+              "offset": 32,
+              "size": 32
+            }
+          ],
+          "addend": 7,
+          "declared_size": 32,
+          "expected_kernel": {
+            "native_symbol": "value",
+            "offset": 32,
+            "size": 32
+          },
+          "proof_data_size": 32,
+          "section_size": 56,
+          "symbol_base": 16,
+          "symbol_kind": "Data"
+        },
+        {
+          "actual_kernel": [
+            {
+              "native_symbol": "value",
+              "offset": 32,
+              "size": 120
+            }
+          ],
+          "addend": 48,
+          "declared_size": 120,
+          "expected_kernel": {
+            "native_symbol": "value",
+            "offset": 32,
+            "size": 120
+          },
+          "proof_data_size": 120,
+          "section_size": 144,
+          "symbol_base": 16,
+          "symbol_kind": "Data"
+        },
+        {
+          "actual_kernel": [
+            {
+              "native_symbol": "__arm64_rodata_section_1_base_16",
+              "offset": 48,
+              "size": 16
+            }
+          ],
+          "addend": 0,
+          "declared_size": 0,
+          "expected_kernel": {
+            "native_symbol": "__arm64_rodata_section_1_base_16",
+            "offset": 48,
+            "size": 16
+          },
+          "proof_data_size": 16,
+          "section_size": 32,
+          "symbol_base": 16,
+          "symbol_kind": "Data"
+        },
+        {
+          "actual_kernel": [
+            {
+              "native_symbol": "__arm64_rodata_section_1_base_16",
+              "offset": 48,
+              "size": 40
+            }
+          ],
+          "addend": 7,
+          "declared_size": 0,
+          "expected_kernel": {
+            "native_symbol": "__arm64_rodata_section_1_base_16",
+            "offset": 48,
+            "size": 40
+          },
+          "proof_data_size": 40,
+          "section_size": 56,
+          "symbol_base": 16,
+          "symbol_kind": "Data"
+        },
+        {
+          "actual_kernel": [
+            {
+              "native_symbol": "__arm64_rodata_section_1_base_16",
+              "offset": 48,
+              "size": 128
+            }
+          ],
+          "addend": 48,
+          "declared_size": 0,
+          "expected_kernel": {
+            "native_symbol": "__arm64_rodata_section_1_base_16",
+            "offset": 48,
+            "size": 128
+          },
+          "proof_data_size": 128,
+          "section_size": 144,
+          "symbol_base": 16,
+          "symbol_kind": "Data"
+        },
+        {
+          "actual_kernel": [
+            {
+              "native_symbol": "__arm64_rodata_section_1_base_16",
+              "offset": 48,
+              "size": 16
+            }
+          ],
+          "addend": 0,
+          "declared_size": 0,
+          "expected_kernel": {
+            "native_symbol": "__arm64_rodata_section_1_base_16",
+            "offset": 48,
+            "size": 16
+          },
+          "proof_data_size": 16,
+          "section_size": 32,
+          "symbol_base": 16,
+          "symbol_kind": "Unknown"
+        },
+        {
+          "actual_kernel": [
+            {
+              "native_symbol": "__arm64_rodata_section_1_base_16",
+              "offset": 48,
+              "size": 40
+            }
+          ],
+          "addend": 7,
+          "declared_size": 0,
+          "expected_kernel": {
+            "native_symbol": "__arm64_rodata_section_1_base_16",
+            "offset": 48,
+            "size": 40
+          },
+          "proof_data_size": 40,
+          "section_size": 56,
+          "symbol_base": 16,
+          "symbol_kind": "Unknown"
+        },
+        {
+          "actual_kernel": [
+            {
+              "native_symbol": "__arm64_rodata_section_1_base_16",
+              "offset": 48,
+              "size": 128
+            }
+          ],
+          "addend": 48,
+          "declared_size": 0,
+          "expected_kernel": {
+            "native_symbol": "__arm64_rodata_section_1_base_16",
+            "offset": 48,
+            "size": 128
+          },
+          "proof_data_size": 128,
+          "section_size": 144,
+          "symbol_base": 16,
+          "symbol_kind": "Unknown"
+        }
+      ],
+      "kernel_layout_errors": 0
+    }
+  },
+  "candidate_patch_gzip_sha256": "ef43e335f72ca86cb1085eab48f917ad731dbf18502d50b9eaf44b898057f603",
+  "inputs_archive_sha256": "315163e1e9b9dff2df0d70360f0a077f26bca5db5aa43c19b4a52597e890281e"
+}

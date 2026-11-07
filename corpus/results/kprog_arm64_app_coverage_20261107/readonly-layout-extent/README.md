@@ -1,0 +1,9 @@
+# ARM readonly label extents across link modes
+
+The candidate uses one checked extent resolver for proof bytes and kernel readonly metadata. Typed objects keep their declared bounds; zero-sized labels use the remaining section bytes from their exact ELF symbol base. Local-data patches carry that base explicitly. Labels with the same section and base share a canonical identity, and collisions with declared-object identities produce an error. Function-entry symbol lookup retains its existing positive-size requirement.
+
+The extended existing regression retains its original four cases and adds six zero-sized label cases across STT_OBJECT/STT_NOTYPE, three extents and three relocation addends. Two alias labels in each added case share one readonly object. The original linker records six kernel-side failures; the candidate passes all nine valid byte/extent cases, the declared-bounds error control and six identity-collision controls. Complete kernel blob bytes match the expected object slice, proof payloads match that same slice, and all 58 ARM backend regressions pass.
+
+Both actual test binaries print a compile-time source fingerprint checked against their captured Rust inputs. The existing Cargo cache supplies the incremental dependencies. The captured fixture uses explicit ELF STT_NOTYPE flags supported by the object writer. Initial symbol-lookup, fixture and cache-observation diagnostics remain archived with their source epochs.
+
+candidate.patch.gz and inputs.tar.gz retain the complete source snapshots, test commands and raw output. The source remains a private candidate while a separate ARM build and full-system common-service control exercise the runtime binding path. The six-application queue continues on its recorded inputs. Universal readonly identity, layout, simulator, specialization and compiler preservation theorem work continues with the formal owners.
