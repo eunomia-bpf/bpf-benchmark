@@ -22,8 +22,8 @@ used.
 
 | arm | native programs | current | reference | verdict |
 | --- | ---: | ---: | ---: | --- |
-| Pure bytecode (29) | — | **1.446x** | 1.478x | reproduces, -2.2% |
-| Helper/map (13) | — | **1.403x** | 1.429x | reproduces, -1.8% |
+| Pure bytecode (29) | — | **1.446x** \* | 1.478x | reproduces, -2.2% |
+| Helper/map (13) | — | **1.403x** \* | 1.429x | reproduces, -1.8% |
 | Corpus bcc/set | 18 / 25 | **1.002x** | 1.005x | reproduces |
 | Corpus tetragon | 118 | **1.008x** | 1.323x | **does not** |
 | Corpus katran | 1 | **1.018x** | 1.102x | **does not** |
@@ -31,8 +31,12 @@ used.
 | Corpus otelcol | 14 | **1.013x** | 1.824x | **does not** |
 | Corpus tracee | 151 | **1.539x** | 0.958x | **does not** |
 
-Corpus figures are at the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`)
-and each carries the replaced/failed count from its own shim log.
+\* Measured before two new native gates landed in the loader; on current
+code `make micro` no longer completes on the native path (see the micro
+sections). The corpus rows were re-checked after both gates and are
+current. Corpus figures are at the operator recipe
+(`SAMPLES=3 WORKLOAD_DURATION=180`) and each carries the replaced/failed
+count from its own shim log.
 
 ## BPF stats off
 
