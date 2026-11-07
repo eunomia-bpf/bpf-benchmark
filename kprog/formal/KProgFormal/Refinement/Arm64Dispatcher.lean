@@ -1,5 +1,6 @@
 import KProgFormal.Refinement.Arm64Move
 import KProgFormal.Refinement.Arm64Arithmetic
+import KProgFormal.Refinement.Arm64Mul
 import KProgFormal.Refinement.Arm64Movk
 import KProgFormal.Refinement.Arm64Branch
 import KProgFormal.Generated.GeneratedArm64Adrp
@@ -577,5 +578,119 @@ theorem step_through_shift_refines (code : Nat) (aux : BitVec 32) (width : Width
   | earlier _ _ _ _ _ _ _ _ earlier => exact shift_earlier_preserved _ _ _ _ _ _ _ _ _ _ s earlier
   | immediate => apply shift_immediate_refines
   | register => apply shift_register_refines
+
+
+/-- The actual eight-row multiply body: only UDIV narrows its two inputs
+before the generated value; every row uses the common width write. SRC3 is
+an actual byte, including SP32 and NONE255, rather than an invented GPR. -/
+def multiplyBody (op : GeneratedArm64Mul.Mul) (width : Width) (dst src src2 src3 : Byte)
+    (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let inputWidth := if GeneratedArm64Mul.code op = GeneratedArm64Mul.code .udiv
+    then Arm64Register.handlerWidth width else .w64
+  let lhs := GeneratedArm64Width.narrow (Arm64Move.Fields.read s src) inputWidth
+  let rhs := GeneratedArm64Width.narrow (Arm64Move.Fields.read s src2) inputWidth
+  let value := GeneratedArm64Mul.value op lhs rhs (Arm64Move.Fields.read s src3)
+  ⟨{ Arm64Move.Fields.write s dst value width with pc := s.pc + 4 }, [], none⟩
+
+theorem multiply_body_typed (op : GeneratedArm64Mul.Mul) (width : Width)
+    (dst src src2 src3 : Register) (s : Reference.AArch64.State) :
+    multiplyBody op width (Arm64Register.registerCode dst) (Arm64Register.registerCode src)
+      (Arm64Register.registerCode src2) (Arm64Register.registerCode src3) s =
+      Arm64Mul.rawStep op width dst src src2 src3 s := by
+  simp only [multiplyBody, Arm64Mul.rawStep, Arm64Move.Fields.register_read,
+    Arm64Move.Fields.register_write]
+
+/-- These four numeric operations read SRC3 but do not use its value. No
+encoding, presence or tag condition is imposed on that unused field. -/
+theorem multiply_ignores_accumulator (op : GeneratedArm64Mul.Mul) (width : Width)
+    (dst src src2 src3 other : Byte) (s : Reference.AArch64.State)
+    (unused : op = .mul ∨ op = .umull ∨ op = .udiv ∨ op = .umulh) :
+    multiplyBody op width dst src src2 src3 s = multiplyBody op width dst src src2 other s := by
+  rcases unused with rfl | rfl | rfl | rfl <;> rfl
+
+/-- SRC3 first becomes live at this production gate. Earlier gates retain
+all their unused-field freedom, including an arbitrary SRC3 byte. -/
+def dispatchThroughMultiply (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughShift code aux width dst src src2 value sourceScalar sourceStack s with
+  | some result => some result
+  | none => (Arm64Mul.decodeOpcode code).map (fun op => multiplyBody op width dst src src2 src3 s)
+
+theorem before_multiply (op : GeneratedArm64Mul.Mul) (aux : BitVec 32) (width : Width)
+    (dst src src2 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughShift (GeneratedArm64Mul.code op) aux width dst src src2 value sourceScalar sourceStack s = none := by
+  have leading : dispatchPrefix (GeneratedArm64Mul.code op) aux width dst src value s = none := by
+    apply other <;> cases op <;> decide
+  have noAlu : Arm64Arithmetic.AluDispatch.decodeOpcode (GeneratedArm64Mul.code op) = none := by
+    cases op <;> rfl
+  have noShift : Arm64Shift.decodeOpcode (GeneratedArm64Mul.code op) = none := by
+    cases op <;> rfl
+  simp only [dispatchThroughShift, dispatch, leading, noAlu, noShift]
+  rfl
+
+theorem multiply_reached (op : GeneratedArm64Mul.Mul) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughMultiply (GeneratedArm64Mul.code op) aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (multiplyBody op width dst src src2 src3 s) := by
+  unfold dispatchThroughMultiply
+  rw [before_multiply, Arm64Mul.decode_code]
+  rfl
+
+theorem multiply_earlier_preserved (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : ShiftBinding s.pc code aux width dst src src2 value native) :
+    dispatchThroughMultiply code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  simp only [dispatchThroughMultiply,
+    step_through_shift_refines code aux width dst src src2 value sourceScalar sourceStack native s binding]
+
+theorem multiply_refines (op : GeneratedArm64Mul.Mul) (width : Width) (aux : BitVec 32)
+    (dst src src2 src3 : Register) (value : Word) (sourceScalar sourceStack : Bool)
+    (s : Reference.AArch64.State) (valid : Arm64Mul.nativeWidth op width) :
+    dispatchThroughMultiply (GeneratedArm64Mul.code op) aux width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (Arm64Register.registerCode src2) (Arm64Register.registerCode src3)
+      value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.mul (Arm64Mul.instruction op width dst src src2 src3)) s) := by
+  rw [multiply_reached, multiply_body_typed, Arm64Mul.raw_step_refines op width dst src src2 src3 s valid]
+
+theorem multiply_unused_refines (op : GeneratedArm64Mul.Mul) (width : Width) (aux : BitVec 32)
+    (dst src src2 : Register) (src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (s : Reference.AArch64.State) (valid : Arm64Mul.nativeWidth op width)
+    (unused : op = .mul ∨ op = .umull ∨ op = .udiv ∨ op = .umulh) :
+    dispatchThroughMultiply (GeneratedArm64Mul.code op) aux width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) (Arm64Register.registerCode src2) src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.mul (Arm64Mul.instruction op width dst src src2 31)) s) := by
+  rw [multiply_reached, multiply_ignores_accumulator op width _ _ _ src3 (Arm64Register.registerCode 31) s unused,
+    multiply_body_typed, Arm64Mul.raw_step_refines op width dst src src2 31 s valid]
+
+/-- Field/code/native-width normalization only. In particular no constructor
+assumes the generated body or dispatcher already refines an ISA step. -/
+inductive MultiplyBinding (pc : Word) : Nat → BitVec 32 → Width → Byte → Byte → Byte → Byte → Word →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte) (value : Word)
+      (native : Reference.AArch64.Instruction) (binding : ShiftBinding pc code aux width dst src src2 value native) :
+      MultiplyBinding pc code aux width dst src src2 src3 value native
+  | multiply (op : GeneratedArm64Mul.Mul) (width : Width) (aux : BitVec 32)
+      (dst src src2 src3 : Register) (value : Word) (valid : Arm64Mul.nativeWidth op width) :
+      MultiplyBinding pc (GeneratedArm64Mul.code op) aux width (Arm64Register.registerCode dst)
+        (Arm64Register.registerCode src) (Arm64Register.registerCode src2) (Arm64Register.registerCode src3) value
+        (.mul (Arm64Mul.instruction op width dst src src2 src3))
+  | unusedAccumulator (op : GeneratedArm64Mul.Mul) (width : Width) (aux : BitVec 32)
+      (dst src src2 : Register) (src3 : Byte) (value : Word) (valid : Arm64Mul.nativeWidth op width)
+      (unused : op = .mul ∨ op = .umull ∨ op = .udiv ∨ op = .umulh) :
+      MultiplyBinding pc (GeneratedArm64Mul.code op) aux width (Arm64Register.registerCode dst)
+        (Arm64Register.registerCode src) (Arm64Register.registerCode src2) src3 value
+        (.mul (Arm64Mul.instruction op width dst src src2 31))
+
+theorem step_through_multiply_refines (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : MultiplyBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughMultiply code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier _ _ _ _ _ _ _ _ _ earlier => exact multiply_earlier_preserved _ _ _ _ _ _ _ _ _ _ _ s earlier
+  | multiply => apply multiply_refines; assumption
+  | unusedAccumulator => apply multiply_unused_refines <;> assumption
 
 end KProgFormal.Refinement.Arm64Dispatcher

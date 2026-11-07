@@ -959,3 +959,33 @@ bytes remain unchanged; no placeholders, runtime/generator/oracle/ISA edits,
 new tests or filtered inputs. Original compiler warnings remain visible.
 A combined immutable full check follows publication, including this and the
 preceding uniform-byte ALU extension; exact96's archived full pass is earlier.
+
+## Uniform byte multiply/divide composed after SHIFT
+
+`Arm64Dispatcher.dispatchThroughMultiply` adds the next production gate and
+all eight generated operations, using actual SRC3 bytes. Only UDIV narrows
+both incoming inputs before the generated value. Every operation uses the
+same byte-coded destination/width write and advances PC once. The typed-body
+equality derives the existing complete canonical multiply-step refinement,
+including aliased operands, ZR/discarded destinations and native X-width
+conditions for long/high operations. No flags, vectors or memory change.
+
+MUL/UMULL/UDIV/UMULH read but ignore the accumulator. Their independent
+refinement allows every SRC3 byte, including SP32 and NONE255; accumulating
+forms bind the native accumulator register. All earlier prefix/ALU/SHIFT
+results transport with arbitrary unused SRC3, AUX and IMM fields. Numeric
+opcode disjointness derives actual gate reachability. The single
+step_through_multiply_refines theorem covers the extended field-only binding
+without a component-step or refinement premise. Native-byte/raw-width and
+Entry/O4 pointer/provenance/artifact bindings, the remaining ISA families and
+the full77/72 operation theorem still require completion.
+
+Validation: focused74-job dispatcher/affected-family/reference Lean build,
+seven existing contract freshness checks, direct dispatch/model checks and
+11 existing semantic/route hosts passed 40080 cases,5120 cases,3804 cases,2072 cases,136 cases,160161 cases,1296 cases,512 cases,6913 cases,257 cases,6401 cases . The multiply
+primitive host retains UBSan. Final proof SHA256 is
+`0f0d710b375416f31874b2b49ce967638c8c0836f2fb38d86a1ff68e9c94eb1f` and remained unchanged throughout validation.
+All prior declarations are byte-identical except the shared Mul import.
+No proof placeholders, new tests, input filtering, runtime/generator/oracle/
+ISA or paper changes. Original C warnings remain visible. Exact95bad0374's
+ongoing immutable full check predates this extension.

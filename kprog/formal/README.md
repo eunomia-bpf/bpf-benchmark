@@ -41,7 +41,10 @@ and the MOV-bitmask SP alias kept explicit. The same byte-field dispatcher
 now composes both generic ALU rows and all six arithmetic/logical choices
 through `dispatch_step_refines`. `step_through_shift_refines` extends that
 composition through both SHIFT rows and all four kinds, preserving count
-selection and width masking. The remaining families still need composition.
+selection and width masking. `step_through_multiply_refines` adds all eight
+multiply/divide rows using the actual SRC3 byte, with arbitrary unused
+accumulators and native long/high width conditions. The remaining families
+still need composition.
 
 The proofs establish arithmetic/flags, register and tag operations, memory
 accesses, routing tables, and selected whole-state handler refinements.
