@@ -1,5 +1,6 @@
 import KProgFormal.Arm64Csel
 import KProgFormal.Arm64Cneg
+import KProgFormal.Arm64CselPtr
 import KProgFormal.Refinement.Arm64Condition
 import KProgFormal.Refinement.Arm64Register
 
@@ -156,5 +157,119 @@ theorem negate_handler_refines (width : Width) (dst src : Register) (predicate :
     (s : Reference.AArch64.State) (h : predicate ≠ .al) :
     Reference.AArch64.Step (.select width .negate dst src src (nativeCode (inverse predicate))) s
       (negateStep width dst src predicate s) := (negate_step_refines width dst src predicate s h).symm
+
+
+/-- Actual eight-member conditional-select family gate. -/
+def decodeOpcode (code : Nat) : Option GeneratedArm64Csel.Csel :=
+  if code = GeneratedArm64Csel.code .csel then some .csel
+  else if code = GeneratedArm64Csel.code .cinc then some .cinc
+  else if code = GeneratedArm64Csel.code .cset then some .cset
+  else if code = GeneratedArm64Csel.code .cinv then some .cinv
+  else if code = GeneratedArm64Csel.code .csinv then some .csinv
+  else if code = GeneratedArm64Csel.code .csinc then some .csinc
+  else if code = GeneratedArm64Csel.code .csetm then some .csetm
+  else if code = GeneratedArm64Csel.code .csneg then some .csneg else none
+
+theorem decode_code (op : GeneratedArm64Csel.Csel) :
+    decodeOpcode (GeneratedArm64Csel.code op) = some op := by cases op <;> rfl
+
+/-- The generated pointer-preserving gate precedes the scalar computation.
+Only CSEL/X copies the selected incoming source at full width; every other
+row computes its generated scalar value and performs the width write. This
+numeric projection leaves native pointer/provenance transport to Entry/O4. -/
+def rawStep (op : GeneratedArm64Csel.Csel) (width : Width) (dst lhs rhs : Register)
+    (predicate : Arm64Cond) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let taken := generatedArm64Cond (flags s.flags) predicate
+  let state := if GeneratedArm64CselPtr.ptrTagPath op (Arm64Register.handlerWidth width) then
+      writeReg s dst (if taken then readReg s lhs else readReg s rhs) .w64
+    else writeReg s dst (GeneratedArm64Csel.value op taken (readReg s lhs) (readReg s rhs)) width
+  ⟨{ state with pc := s.pc + 4 }, [], none⟩
+
+theorem raw_step_refines (width : Width) (alternative : SelectElse) (dst lhs rhs : Register)
+    (predicate : Arm64Cond) (s : Reference.AArch64.State) :
+    rawStep (opcode alternative) width dst lhs rhs predicate s =
+      Reference.AArch64.step (.select width alternative dst lhs rhs (nativeCode predicate)) s := by
+  rw [← step_refines]
+  cases alternative <;> cases width <;>
+    simp only [rawStep, handlerStep, opcode, GeneratedArm64CselPtr.ptrTagPath,
+      Arm64Register.handlerWidth, GeneratedArm64Csel.value, Bool.false_eq_true, ↓reduceIte]
+
+theorem raw_alias_refines (width : Width) (alias : Alias) (dst src src2 : Register)
+    (predicate : Arm64Cond) (s : Reference.AArch64.State) (valid : predicate ≠ .al) :
+    rawStep (aliasOpcode alias) width dst src src2 predicate s =
+      Reference.AArch64.step (.select width (aliasAlternative alias) dst
+        (aliasSource alias src) (aliasSource alias src) (nativeCode (inverse predicate))) s := by
+  rw [← alias_step_refines width alias dst src predicate s valid]
+  cases alias <;> cases width <;>
+    simp only [rawStep, aliasStep, aliasOpcode, GeneratedArm64CselPtr.ptrTagPath,
+      Arm64Register.handlerWidth, GeneratedArm64Csel.value, Bool.false_eq_true, ↓reduceIte]
+
+def dispatch (code condition : Nat) (width : Width) (dst lhs rhs : Register)
+    (s : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  (decodeOpcode code).bind (fun op => (Arm64Condition.decode condition).map
+    (fun predicate => rawStep op width dst lhs rhs predicate s))
+
+theorem dispatch_refines (width : Width) (alternative : SelectElse) (dst lhs rhs : Register)
+    (predicate : Arm64Cond) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Csel.code (opcode alternative)) (GeneratedArm64Cond.code predicate)
+      width dst lhs rhs s =
+      some (Reference.AArch64.step (.select width alternative dst lhs rhs (nativeCode predicate)) s) := by
+  simp only [dispatch, decode_code, Arm64Condition.decode_code]
+  change some (rawStep (opcode alternative) width dst lhs rhs predicate s) = _
+  rw [raw_step_refines]
+
+theorem dispatch_alias_refines (width : Width) (alias : Alias) (dst src src2 : Register)
+    (predicate : Arm64Cond) (s : Reference.AArch64.State) (valid : predicate ≠ .al) :
+    dispatch (GeneratedArm64Csel.code (aliasOpcode alias)) (GeneratedArm64Cond.code predicate)
+      width dst src src2 s =
+      some (Reference.AArch64.step (.select width (aliasAlternative alias) dst
+        (aliasSource alias src) (aliasSource alias src) (nativeCode (inverse predicate))) s) := by
+  simp only [dispatch, decode_code, Arm64Condition.decode_code]
+  change some (rawStep (aliasOpcode alias) width dst src src2 predicate s) = _
+  rw [raw_alias_refines width alias dst src src2 predicate s valid]
+
+/-- NV's native encoding15 consumes the existing producer-normalized AL14,
+while the canonical ISA retains native condition15. No raw15 C arm is added. -/
+theorem dispatch_normalized_nv (width : Width) (alternative : SelectElse) (dst lhs rhs : Register)
+    (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Csel.code (opcode alternative)) (GeneratedArm64CcDecode.code .nv)
+      width dst lhs rhs s =
+      some (Reference.AArch64.step (.select width alternative dst lhs rhs 15) s) := by
+  simp only [dispatch, decode_code, Arm64Condition.decode_normalized_nv]
+  change some (rawStep (opcode alternative) width dst lhs rhs .al s) = _
+  rw [raw_step_refines]
+  rfl
+
+def dispatchNegate (code condition : Nat) (width : Width) (dst src : Register)
+    (s : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  if code = GeneratedArm64Cneg.code .cneg then
+    (Arm64Condition.decode condition).map (fun predicate => negateStep width dst src predicate s)
+  else none
+
+theorem dispatch_negate_refines (width : Width) (dst src : Register) (predicate : Arm64Cond)
+    (s : Reference.AArch64.State) (valid : predicate ≠ .al) :
+    dispatchNegate (GeneratedArm64Cneg.code .cneg) (GeneratedArm64Cond.code predicate) width dst src s =
+      some (Reference.AArch64.step (.select width .negate dst src src (nativeCode (inverse predicate))) s) := by
+  simp only [dispatchNegate, ↓reduceIte, Arm64Condition.decode_code]
+  change some (negateStep width dst src predicate s) = _
+  rw [negate_step_refines width dst src predicate s valid]
+
+theorem dispatch_bad_condition (code condition : Nat) (width : Width) (dst lhs rhs : Register)
+    (s : Reference.AArch64.State) (bad : 15 ≤ condition) :
+    dispatch code condition width dst lhs rhs s = none := by
+  simp [dispatch, Arm64Condition.decode_bad condition bad]
+
+theorem dispatch_negate_bad_condition (code condition : Nat) (width : Width) (dst src : Register)
+    (s : Reference.AArch64.State) (bad : 15 ≤ condition) :
+    dispatchNegate code condition width dst src s = none := by
+  simp [dispatchNegate, Arm64Condition.decode_bad condition bad]
+
+theorem dispatch_other (code condition : Nat) (width : Width) (dst lhs rhs : Register)
+    (s : Reference.AArch64.State) (other : ∀ op, code ≠ GeneratedArm64Csel.code op) :
+    dispatch code condition width dst lhs rhs s = none := by simp [dispatch, decodeOpcode, other]
+
+theorem dispatch_negate_other (code condition : Nat) (width : Width) (dst src : Register)
+    (s : Reference.AArch64.State) (other : code ≠ GeneratedArm64Cneg.code .cneg) :
+    dispatchNegate code condition width dst src s = none := by simp [dispatchNegate, other]
 
 end KProgFormal.Refinement.Arm64Select

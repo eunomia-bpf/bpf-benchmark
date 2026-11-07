@@ -543,3 +543,33 @@ freshness passed. Existing actual operand/family/multiply/unary/AUX route hosts
 passed 3804, 136, 1296, 313 and 1,115,374 cases; original C host warnings remain
 visible. No proof/test failures or input filtering. Exact0a9b8757c's separate
 full check is running; this later composition requires its own full validation.
+
+## Conditional-select and CNEG raw fields and dispatch
+
+`Arm64Condition.decode` models the actual whole-AUX condition comparison, with
+exact codes0..14. Code15 and nonzero upper bits reach no condition arm; no low
+byte mask or raw NV case is invented. Native NV consumes the existing generated
+mnemonic normalization to AL14 while the canonical ISA retains native15.
+
+`Arm64Select.rawStep` composes the generated CSEL/X pointer-preserving gate
+before scalar selection. The selected incoming GPR/ZR is written full width
+on that numeric path; every other row computes the generated scalar result and
+performs the width write. Both the four base forms and four aliases compose
+through the actual eight numeric opcodes and condition decoder to the same
+canonical complete-state step. The separate opcode65 CNEG arm composes its
+condition/value/write with CSNEG's native condition inversion. All five aliases
+retain the valid non-AL condition premise; unused second sources remain arbitrary.
+Raw invalid-condition and unrelated-opcode paths remain outside these slices.
+
+Old theorem source is unchanged except two shared imports. No runtime, oracle,
+test, compiler policy or ISA source changed. Native operand/flag/condition
+normalization and Entry/O4 native-address/provenance transport remain explicit
+boundaries; this numeric projection does not prove compiler or artifact identity.
+
+Validation: 24 Lean dependency jobs and the focused 27-job reference build
+passed, including existing regressions and 3860 AArch64 control/PC complete
+states. Six contract freshness checks and generated direct-dispatch freshness
+passed. Existing condition/decode/CSEL/pointer/CNEG semantic and CSEL/CNEG actual
+route hosts passed 240, 80, 160161, 1024, 40097, 192 and 26400 cases. No proof/test
+failures or input filtering; existing C inline warnings remain visible. The
+running exact0a9b8757c full check predates this increment.
