@@ -285,5 +285,7 @@
       "binary_filter": 32
     }
   },
-  "candidate_header_sha256": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a"
+  "candidate_header_sha256": "d8f3497c11a5ceebb14ea389c9a4018caf22f065c53ba407e856a23cee717a3a",
+  "execution_backend": "x86-64 host with x86 and ARM register-selector preprocessor configurations",
+  "helper_backend": "instrumented process_vm_readv contract model for helper IDs4/113"
 }

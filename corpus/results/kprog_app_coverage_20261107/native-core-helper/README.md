@@ -16,9 +16,11 @@ private support macros are retired.
 
 The independent helper fixture uses process_vm_readv to obtain real protected
 memory errors, then applies the documented helper destination-zeroing contract.
-It checks17 CORE register selectors, ordinary/const single-field reads, INTO
-and low-level forms, four data widths and plain-context access, across1024
-seeds in four architecture/helper variants under UBSan. The helper and caller
+It runs on the x86-64 host with x86 and ARM register-selector preprocessor
+configurations and instrumented kernel/legacy helper contract models. It checks17
+CORE register selectors, ordinary/const single-field reads, INTO and low-level
+forms, four data widths and plain-context access, across1024 seeds in the four
+selector/helper configurations under UBSan. The helper and caller
 both observe the requested source address, width and helper identity. The full
 command/output histories include the first candidate and its refined explicit
 void destination cast.

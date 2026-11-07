@@ -124,8 +124,8 @@ replay follows the current OTel private generic stack candidate. The native
 symbol inventory remains173 functions/87 maps and input025fe5e116ed becomes
 7479850e2345. All application/workload sources and baseline BPF objects retain
 their captured identities. The generic CORE mechanism result records102400
-valid reads per epoch and84 protected reads across x86/ARM and kernel/legacy
-helper variants. Universal safety evidence comes from simulator/token/link
+valid reads per epoch and84 protected reads on the x86-64 host, using x86/ARM
+field-selector configurations and kernel/legacy helper contract models. Universal safety evidence comes from simulator/token/link
 laws; these tables and archives record runtime observations.
 
 
