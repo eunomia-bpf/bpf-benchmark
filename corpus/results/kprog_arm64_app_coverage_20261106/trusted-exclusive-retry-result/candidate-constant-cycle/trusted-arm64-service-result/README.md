@@ -1,0 +1,5 @@
+# Private ARM constant-state marked-cycle diagnostic
+
+Completed 2/2 load-only negative fixtures. Accepted at load: `["constant_marker_cycle", "constant_success_cycle"]`. Native executions: zero. The two loops store the value they just loaded, keeping private memory unchanged; one ignores store status and the other retries on failure and loops again after success. Both source fixtures have an exit arm. Actual generated BPF exit counts and every original outcome are in `admission-review.json`. This avoids treating a complexity-limit rejection of a changing counter as evidence that invariant cycles are refused.
+
+The canonical native-only registered service and existing private broad248 kernel candidate are reused, with no shared source, Image or module replacement and no new kernel build. This diagnostic is not a safety pass. The candidate is not adopted; any accepted infinite cycle requires fixing convergence eligibility. Complete raw requests/compiler/verifier logs and native identities are retained in `run-20261107T174747372031Z.tar.gz` (SHA256 `4ab475d7d70f834fd3636c63113b2006771a562beebbf1a91845e7b863062232`). No program was executed by TEST_RUN.

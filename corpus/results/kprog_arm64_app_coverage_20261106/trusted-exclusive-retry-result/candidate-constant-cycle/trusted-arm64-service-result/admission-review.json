@@ -1,0 +1,151 @@
+{
+  "expected_cases": 2,
+  "completed_cases": 2,
+  "negative_accepted_load_only": [
+    "constant_marker_cycle",
+    "constant_success_cycle"
+  ],
+  "native_executions": 0,
+  "all_load_only": true,
+  "candidate_adopted": false,
+  "safety_pass": false,
+  "executable_bpf_sections": {
+    "constant_marker_cycle": {
+      ".text": {
+        "instructions": 0,
+        "exits": 0
+      },
+      "xdp": {
+        "instructions": 47,
+        "exits": 1
+      }
+    },
+    "constant_success_cycle": {
+      ".text": {
+        "instructions": 0,
+        "exits": 0
+      },
+      "xdp": {
+        "instructions": 47,
+        "exits": 1
+      }
+    }
+  },
+  "rows": [
+    {
+      "name": "constant_marker_cycle",
+      "symbol": "constant_marker_cycle",
+      "negative": true,
+      "bug_detected": "unbounded marked cycle with unchanged memory; ignores status or success backedge",
+      "expectation": "reject before execution",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-constant-cycle/constant_marker_cycle.manifest.json",
+      "native_sha256": "e85fdc01c1dfda9de977f84a8848ebaf5f7a0c4b9492a7956d158d5459b129d7",
+      "load_only": true,
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-constant-cycle/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-constant-cycle/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-constant-cycle/constant_marker_cycle.manifest.json"
+      ],
+      "returncode": 0,
+      "request": {
+        "request_id": 1,
+        "source_prog_id": 6,
+        "native_sha256": "e85fdc01c1dfda9de977f84a8848ebaf5f7a0c4b9492a7956d158d5459b129d7",
+        "started": "1970-01-01T00:00:35.883811+00:00",
+        "prog_id": 11,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-pelpyx5r/requests/1.success.tar.gz",
+        "finished": "1970-01-01T00:01:19.198364+00:00"
+      },
+      "stage": "accepted_load_only",
+      "message": "bound program id=11 chunks=0 nonzero_generations=1\n",
+      "native_executed": false
+    },
+    {
+      "name": "constant_success_cycle",
+      "symbol": "constant_success_cycle",
+      "negative": true,
+      "bug_detected": "unbounded marked cycle with unchanged memory; ignores status or success backedge",
+      "expectation": "reject before execution",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-constant-cycle/constant_success_cycle.manifest.json",
+      "native_sha256": "e85fdc01c1dfda9de977f84a8848ebaf5f7a0c4b9492a7956d158d5459b129d7",
+      "load_only": true,
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-constant-cycle/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-constant-cycle/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-constant-cycle/constant_success_cycle.manifest.json"
+      ],
+      "returncode": 0,
+      "request": {
+        "request_id": 2,
+        "source_prog_id": 17,
+        "native_sha256": "e85fdc01c1dfda9de977f84a8848ebaf5f7a0c4b9492a7956d158d5459b129d7",
+        "started": "1970-01-01T00:01:24.478849+00:00",
+        "prog_id": 22,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-pelpyx5r/requests/2.success.tar.gz",
+        "finished": "1970-01-01T00:02:08.943597+00:00"
+      },
+      "stage": "accepted_load_only",
+      "message": "bound program id=22 chunks=0 nonzero_generations=1\n",
+      "native_executed": false
+    }
+  ],
+  "request_audit": {
+    "utc": "2026-11-07T17:49:58.808460+00:00",
+    "kind": "exclusive-constant-cycle",
+    "scope": "native byte identity and closed raw results; no compiler/ISA refinement claim",
+    "archive": "run-20261107T174747372031Z.tar.gz",
+    "archive_sha256": "4ab475d7d70f834fd3636c63113b2006771a562beebbf1a91845e7b863062232",
+    "host_reported_ok": true,
+    "hashes_unchanged": true,
+    "completed_counts": {
+      "service_accepted": 2,
+      "service_refused": 0
+    },
+    "expected_safety_cases": null,
+    "completed_requests_or_cases": 2,
+    "not_completed": [],
+    "request_identities": [
+      {
+        "request_id": 1,
+        "status": 0,
+        "entry": "constant_marker_cycle",
+        "native_sha256": "e85fdc01c1dfda9de977f84a8848ebaf5f7a0c4b9492a7956d158d5459b129d7",
+        "kernel_native_matches_receipt": true,
+        "generated_native_present": true,
+        "generated_native_matches_kernel": true,
+        "request_archive_sha256": "8bd297f12600919b49060916db8f76ad41c50a9549b3a6957bfeaf7f47cebac5",
+        "artifacts": {
+          "request/generated/trusted_arm64.proof.o": "4d24c9fdc24378af75b660754bfb9aa596e2604f2653ade2af176a6706f260ff",
+          "request/generated/trusted_arm64.bpf.o": "7aea1f17cdbf589c3188e196e4514c705f5431ef8fe9c29434cb86a1c1748127",
+          "request/generated/trusted_arm64.bpf.c": "d54ba10919c50d0df21fe1487151f0ebcb21b0170c9de92dff2f13289f2c8517",
+          "request/generation.metadata.json": "65f5d58de67f109d4b28c305ac526e5bc7d007b87e5bc111303af2e304e1a891",
+          "request/kernel.facts.json": "261bfa97ef6c4e8f95101c2a640180ec890436250c99b5d6a6b064c1190ff127",
+          "request/source-identities.json": "f0fe74dbb2d3a8476a4bf98180934fd56b9bb856be9480dad0f915796e2ded15"
+        }
+      },
+      {
+        "request_id": 2,
+        "status": 0,
+        "entry": "constant_success_cycle",
+        "native_sha256": "e85fdc01c1dfda9de977f84a8848ebaf5f7a0c4b9492a7956d158d5459b129d7",
+        "kernel_native_matches_receipt": true,
+        "generated_native_present": true,
+        "generated_native_matches_kernel": true,
+        "request_archive_sha256": "ed8a69d46ec0b3d4681ab2e2d606fd45c8ed79654c8dd41abc5bd77241d49bd3",
+        "artifacts": {
+          "request/generated/trusted_arm64.proof.o": "3ff78f45116c21d13d737c3106da404b55ad4c6108aa1d70b39f5de9d0f668a6",
+          "request/generated/trusted_arm64.bpf.o": "b82dc5fad03538b694a35c0399ed28f1ecade79af17dd99cfd87653f485373c2",
+          "request/generated/trusted_arm64.bpf.c": "2049c6a70db3e1d5afd4ca4078550c0b9ea47df4d9fb3a1b1e355ea91cca1c4d",
+          "request/generation.metadata.json": "65f5d58de67f109d4b28c305ac526e5bc7d007b87e5bc111303af2e304e1a891",
+          "request/kernel.facts.json": "d011ba52dd393a40cabdb9134a2db7750ff7646bc7eef51e451fab9137a150b4",
+          "request/source-identities.json": "f0fe74dbb2d3a8476a4bf98180934fd56b9bb856be9480dad0f915796e2ded15"
+        }
+      }
+    ],
+    "identity_errors": [],
+    "all_recorded_identities_match": true,
+    "collector_source_sha256": "c2bc29e948378b579635b8f91a3409557679bfc8a702449a3549137a60a628f9"
+  }
+}
