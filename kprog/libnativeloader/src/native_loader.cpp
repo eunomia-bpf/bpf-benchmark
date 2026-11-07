@@ -3889,11 +3889,17 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             if (!off) {
                 continue;
             }
-            if (*off + sym.st_size > map->value_size) {
-                elf_end(elf);
-                close(fd);
-                fail("native data symbol " + std::string(name) +
-                     " exceeds BPF data map value_size for " + map->name);
+            /* A symbol that ends past the app's map value cannot be placed,
+             * but it is not an error: a native object built from a newer
+             * source can carry strings the loaded app never references.
+             * Tracee is the case in point — its .rodata.str1.1 is 261 bytes
+             * where the app's map is 246, the extra bytes being "vdso" and
+             * "unknown" at 248 and 253. Failing here rejected all 112 of
+             * its programs; skipping maps the ones the app does use and
+             * leaves the rest to the app's own bytecode. */
+            if (*off >= map->value_size ||
+                sym.st_size > map->value_size - *off) {
+                continue;
             }
             if (map->value_addr == 0) {
                 elf_end(elf);
@@ -5128,7 +5134,7 @@ SimulatorObject open_simulator_proof(
     return object;
 }
 
-void relocate_source_map_proof(const std::filesystem::path &path, const std::string &entry,
+void relocate_source_map_proof(bpf_object *object, const std::filesystem::path &path, const std::string &entry,
     const std::vector<ProofSourceMapBinding> &bindings,
     const std::vector<NativeSourceMapBinding> &manifest_bindings,
     const std::vector<bpf_insn> &source, const CompanionLoad &companion,
@@ -5177,7 +5183,7 @@ void relocate_source_map_proof(const std::filesystem::path &path, const std::str
         std::memcmp(proof.data(), static_cast<const char *>(code_data->d_buf) + begin, selected->st_size))
         fail("source proof entry bytes differ from selected BPF program");
     std::set<uint64_t> patched;
-    std::unordered_map<uint32_t, int> map_fds;
+    std::unordered_map<uint32_t, int> map_fds, readonly_fds;
     section = nullptr;
     while ((section = elf_nextscn(elf.get(), section))) {
         GElf_Shdr relocations{};
@@ -5208,7 +5214,71 @@ void relocate_source_map_proof(const std::filesystem::path &path, const std::str
             GElf_Sym symbol{};
             if (!gelf_getsym(symbol_data, GELF_R_SYM(relocation.r_info), &symbol)) fail("read source proof relocation symbol");
             const char *name = elf_strptr(elf.get(), symbol_table.sh_link, symbol.st_name);
-            if (!name || symbol.st_shndx != SHN_UNDEF || GELF_ST_BIND(symbol.st_info) != STB_GLOBAL)
+            if (symbol.st_shndx != SHN_UNDEF) {
+                GElf_Shdr data_section{};
+                Elf_Scn *data_scn = elf_getscn(elf.get(), symbol.st_shndx);
+                if (!data_scn || !gelf_getshdr(data_scn, &data_section) ||
+                    data_section.sh_type != SHT_PROGBITS ||
+                    (data_section.sh_flags & (SHF_ALLOC | SHF_WRITE | SHF_EXECINSTR)) != SHF_ALLOC)
+                    fail("defined source proof relocation is not readonly data");
+                size_t names = 0;
+                if (elf_getshdrstrndx(elf.get(), &names)) fail("read proof section names");
+                const char *data_name = elf_strptr(elf.get(), names, data_section.sh_name);
+                bpf_map *data_map = nullptr, *candidate;
+                btf *types = bpf_object__btf(object);
+                if (!types) fail("readonly source proof lacks BTF");
+                bpf_object__for_each_map(candidate, object) {
+                    const auto *type = btf__type_by_id(types, bpf_map__btf_value_type_id(candidate));
+                    if (!type || btf_kind(type) != BTF_KIND_DATASEC) continue;
+                    const char *map_section = btf__name_by_offset(types, type->name_off);
+                    if (!data_name || !map_section || std::strcmp(data_name, map_section)) continue;
+                    if (data_map) fail("ambiguous readonly proof section");
+                    data_map = candidate;
+                }
+                if (!data_map || !bpf_map__is_internal(data_map) ||
+                    !(bpf_map__map_flags(data_map) & BPF_F_RDONLY_PROG) ||
+                    bpf_map__type(data_map) != BPF_MAP_TYPE_ARRAY ||
+                    bpf_map__key_size(data_map) != sizeof(uint32_t) || bpf_map__max_entries(data_map) != 1)
+                    fail("defined proof relocation lacks a readonly single-value map");
+                if (!readonly_fds.contains(symbol.st_shndx)) {
+                    size_t length = 0;
+                    const void *initial = bpf_map__initial_value(data_map, &length);
+                    if (!initial || length != data_section.sh_size || length != bpf_map__value_size(data_map))
+                        fail("readonly proof map extent differs from ELF section");
+                    if (btf__fd(types) < 0) {
+                        const int err = btf__load_into_kernel(types);
+                        if (err) fail("load readonly proof BTF: " + libbpf_error_string(err));
+                    }
+                    bpf_map_create_opts opts{}; opts.sz = sizeof(opts);
+                    opts.map_flags = bpf_map__map_flags(data_map); opts.btf_fd = btf__fd(types);
+                    opts.btf_key_type_id = bpf_map__btf_key_type_id(data_map);
+                    opts.btf_value_type_id = bpf_map__btf_value_type_id(data_map);
+                    auto fd = std::make_unique<ScopedFd>(bpf_map_create(BPF_MAP_TYPE_ARRAY,
+                        bpf_map__name(data_map), sizeof(uint32_t), length, 1, &opts));
+                    if (fd->get() < 0) fail("create readonly source proof map: " + std::string(std::strerror(errno)));
+                    const uint32_t key = 0;
+                    if (bpf_map_update_elem(fd->get(), &key, initial, BPF_ANY) || bpf_map_freeze(fd->get()))
+                        fail("initialize readonly source proof map: " + std::string(std::strerror(errno)));
+                    readonly_fds.emplace(symbol.st_shndx, fd->get()); pins.push_back(std::move(fd));
+                }
+                bpf_insn &low = proof[offset / sizeof(bpf_insn)], &high = proof[offset / sizeof(bpf_insn) + 1];
+                if (low.code != (BPF_LD | BPF_DW | BPF_IMM) || low.src_reg || low.off ||
+                    high.code || high.dst_reg || high.src_reg || high.off || relocation.r_addend < 0 ||
+                    symbol.st_value < data_section.sh_addr)
+                    fail("invalid readonly source proof load");
+                const uint64_t immediate = static_cast<uint32_t>(low.imm) |
+                    (static_cast<uint64_t>(static_cast<uint32_t>(high.imm)) << 32);
+                const uint64_t symbol_offset = symbol.st_value - data_section.sh_addr;
+                if (symbol_offset >= data_section.sh_size ||
+                    static_cast<uint64_t>(relocation.r_addend) >= data_section.sh_size - symbol_offset ||
+                    immediate >= data_section.sh_size - symbol_offset - relocation.r_addend)
+                    fail("readonly source proof load exceeds ELF object");
+                low.src_reg = BPF_PSEUDO_MAP_VALUE;
+                low.imm = readonly_fds.at(symbol.st_shndx);
+                high.imm = static_cast<int32_t>(symbol_offset + relocation.r_addend + immediate);
+                continue;
+            }
+            if (!name || GELF_ST_BIND(symbol.st_info) != STB_GLOBAL)
                 fail("source map relocation is not a strong explicit extern");
             const auto binding = std::find_if(bindings.begin(), bindings.end(),
                 [&](const auto &item) { return item.proof_symbol == name; });
@@ -5416,17 +5486,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     SimulatorObject simulator_object(nullptr, bpf_object__close);
     std::vector<std::unique_ptr<ScopedFd>> proof_map_fds;
     const auto source_proof_metadata = read_proof_metadata(simulator_object_path, ".native_lab.source_maps");
-    if (!simulator_object_path.empty()) {
-        if (!proof_insns.empty()) {
-            fail("simulator proof supplied both as raw instructions and manifest object");
-        }
-        simulator_object = open_simulator_proof(simulator_object_path,
-            simulator_program, prog_info, companion, proof_insns);
-        if (source_proof_metadata)
-            relocate_source_map_proof(simulator_object_path, simulator_program,
-                parse_proof_source_maps(*source_proof_metadata), source_map_bindings,
-                source_insns, companion, proof_insns, proof_map_fds);
-    }
     const auto native_data_symbols_start = std::chrono::steady_clock::now();
     {
         OpenProcessMapsCache open_maps_cache;
@@ -5437,6 +5496,19 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     }
     const auto native_data_symbols_end = std::chrono::steady_clock::now();
 
+    // Native data resolution supplies full ELF map names for truncated kernel
+    // names. Resolve those identities before deciding which proof maps to reuse.
+    if (!simulator_object_path.empty()) {
+        if (!proof_insns.empty()) {
+            fail("simulator proof supplied both as raw instructions and manifest object");
+        }
+        simulator_object = open_simulator_proof(simulator_object_path,
+            simulator_program, prog_info, companion, proof_insns);
+        if (source_proof_metadata)
+            relocate_source_map_proof(simulator_object.get(), simulator_object_path, simulator_program,
+                parse_proof_source_maps(*source_proof_metadata), source_map_bindings,
+                source_insns, companion, proof_insns, proof_map_fds);
+    }
     companion.needs_kernel_symbols |= proof_needs_kernel_symbols(proof_insns);
     LinkedBlob linked = load_or_link_native_blob(
         options.native_link_path,
