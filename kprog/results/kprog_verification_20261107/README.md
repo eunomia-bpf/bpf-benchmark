@@ -224,3 +224,12 @@ An initial proof failed only to reduce an Option.map application before rewritin
 explicitly exposing that application fixed it without changing any premise,
 reference behavior or test input. Exact `ad409c6de` full validation was still
 running separately when this increment was published.
+
+Exact `ad409c6deaf6cae900d62b01d8401f86f48122d0` subsequently completed
+`make -C kprog/formal check` with exit **0**, including the scalar actual-order,
+indexed and LOAD/STORE singleton-arm proofs. All previous Lean modules,
+generated contracts, reference/wire/compiler checks and C semantic hosts also
+passed. The private immutable source/cache export was deleted automatically;
+compressed CALL CPU observations now retain this full run. This result precedes
+the signed-load selector increment `f112d2fb8` and the subsequent pair-body work,
+which require their own full validation.
