@@ -32,6 +32,10 @@ low-byte parity and AF uses widened nibble arithmetic in the reference;
 production C macros are checked against an independent integer oracle.
 AND/OR/XOR/TEST use the same scalar operands and ordered memory effects;
 CF/OF clear, SF/ZF/PF follow the operand-width result, and AF is undefined.
+SHL/SHR/SAR/ROL use the legacy count mask, immediate/one/CL forms,
+byte-register aliases, partial/zero-extending writes and ordered RMW faults.
+PF is updated for nonzero shifts and preserved by rotates. The reference
+relation leaves AF and count-dependent CF/OF unconstrained where the ISA does.
 TEST preserves its data destination. Native group/immediate forms share the
 arithmetic decoder, including64-bit sign extension. ABI masks track logical
 zero/one bits so a mask may discard unspecified register bits before use.
