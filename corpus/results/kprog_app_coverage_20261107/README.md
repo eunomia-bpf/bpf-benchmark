@@ -98,3 +98,32 @@ performance acceptance. The preceding two Clang SIGKILLs resolve at8GiB with
 byte-identical generated C/native proofs;4GiB OOM remains unconfirmed. All failed
 and successful raw data are retained; the closed guest disk/tar are removed.
 R timing commands and exact reproduction inputs are in the linked README.
+
+
+## Native-only application coverage, November7 evening batch
+
+Each row follows actual application startup through the common registered
+native-only service. Application totals count accepted baseline load instances;
+resident snapshots and feature-probe counts appear in each linked batch. Source
+and image epochs stay separate across rows. Whole-application completion and
+matching-work measurement continue from the reported failure classes.
+
+| Application | Observed app loads | Generated | Compiled | Accepted/bound | Specialization errors | Verifier rejections | Runtime evidence |
+| --- | ---: | ---: | ---: | ---: | --- | --- | --- |
+| BCC | 25 | 25 | 25 | 25 | 0 | 0 | [Earlier functional batch153239](native-only-runtime/standard-bcc-8g.json) |
+| OTel | 14 | 3 | 3 | 2 | 0 | 1: exploration limit | [192310 batch](otel-narrow-load/README.md) |
+| Cilium | 163 | 1 | 0 | 0 | 1: map declaration | 0 | [201146 batch](native-modules-cilium__agent/README.md) |
+| Tetragon | 289 | 2 | 2 | 2 | 1: helper stack relation | 0 | [201956 batch](native-coherent-tetragon__observer/README.md) |
+| Katran | 1 | 1 | 1 | 0 | 0 | 1: partial pointer-register write | [201524 batch](native-coherent-katran/README.md) |
+| Tracee | 151 | 2 | 2 | 1 | 0 | 1: raw-context scalar address | [200640 batch](native-modules-tracee__monitor/README.md) |
+
+Tracee baseline now completes151 application loads on the coherent kernel BTF
+epoch. The shared native CORE helper-preservation repair48ff82cfb restores its
+upstream fault/helper contract in a new native-input epoch; whole-application
+replay follows the current OTel private generic stack candidate. The native
+symbol inventory remains173 functions/87 maps and input025fe5e116ed becomes
+7479850e2345. All application/workload sources and baseline BPF objects retain
+their captured identities. The generic CORE mechanism result records102400
+valid reads per epoch and84 protected reads across x86/ARM and kernel/legacy
+helper variants. Universal safety evidence comes from simulator/token/link
+laws; these tables and archives record runtime observations.
