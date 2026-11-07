@@ -33,6 +33,15 @@ FIXTURES = {
         'stack_base_flags': 'mov eax, 2; sub rsp, 8; add rsp, 8; jz 1f; xor ecx, ecx; mov eax, DWORD PTR [rcx]; 1: ret',
         'undefined_entry_register': 'test rax, rax; je 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret',
         'undefined_entry_flags': 'jnc 1f; mov rax, QWORD PTR [rdi+8]; movzx eax, BYTE PTR [rax]; ret; 1: mov eax, 2; ret',
+        # LOAD ONLY: all widths raise native #DE before the following return.
+        'div8_zero': 'mov eax, 1; xor edx, edx; xor ecx, ecx; div cl; mov eax, 2; ret',
+        'div8_overflow': 'mov eax, 256; xor edx, edx; mov ecx, 1; div cl; mov eax, 2; ret',
+        'div16_zero': 'mov eax, 1; xor edx, edx; xor ecx, ecx; div cx; mov eax, 2; ret',
+        'div16_overflow': 'xor eax, eax; mov edx, 1; mov ecx, 1; div cx; mov eax, 2; ret',
+        'div32_zero': 'mov eax, 1; xor edx, edx; xor ecx, ecx; div ecx; mov eax, 2; ret',
+        'div32_overflow': 'xor eax, eax; mov edx, 1; mov ecx, 1; div ecx; mov eax, 2; ret',
+        'div64_zero': 'mov eax, 1; xor edx, edx; xor ecx, ecx; div rcx; mov eax, 2; ret',
+        'div64_overflow': 'xor eax, eax; mov edx, 1; mov ecx, 1; div rcx; mov eax, 2; ret',
         'helper_clobbered_register': 'push rbx; mov rbx, rdi; xor esi, esi; call bpf_get_current_uid_gid; test rsi, rsi; je 1f; mov rax, QWORD PTR [rbx+8]; movzx eax, BYTE PTR [rax]; jmp 2f; 1: mov eax, 2; 2: pop rbx; ret',
     },
     'arm64': {

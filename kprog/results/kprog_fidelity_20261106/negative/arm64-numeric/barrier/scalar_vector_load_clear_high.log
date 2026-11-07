@@ -1,0 +1,178 @@
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=8597
+stub fd_array_cnt=2 fd_array=0:9,1:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=38;1:code=133,dst=0,src=4,off=1,imm=126378;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+                    ; R3=0
+9: (bf) r4 = r1                       ; R1=0 R4=0
+10: (57) r4 &= 7                      ; R4=0
+11: (55) if r4 != 0x0 goto pc+18      ; R4=0
+12: (bf) r4 = r3                      ; R3=0 R4=0
+13: (67) r4 <<= 3                     ; R4=0
+14: (bf) r5 = r10                     ; R5=fp0 R10=fp0
+15: (07) r5 += -32                    ; R5=fp-32
+16: (0f) r5 += r4                     ; R4=0 R5=fp-32
+17: (7b) *(u64 *)(r5 +0) = r2         ; R2=0 R5=fp-32 fp-32=0
+18: (57) r3 &= 536870904              ; R3=0
+19: (bf) r2 = r10                     ; R2=fp0 R10=fp0
+20: (07) r2 += -40                    ; R2=fp-40
+21: (0f) r2 += r3                     ; R2=fp-40 R3=0
+22: (57) r1 &= 56                     ; R1=0
+23: (b7) r3 = 255                     ; R3=255
+24: (6f) r3 <<= r1                    ; R1=0 R3=255
+25: (a7) r3 ^= -1                     ; R3=-256
+26: (79) r1 = *(u64 *)(r2 +0)         ; R1=0 R2=fp-40 fp-40=0
+27: (5f) r1 &= r3                     ; R1=0 R3=-256
+28: (7b) *(u64 *)(r2 +0) = r1         ; R1=0 R2=fp-40 fp-40=0
+29: (05) goto pc+85
+115: (b7) r1 = 8                      ; R1=8
+116: (18) r5 = 0xfffffff8             ; R5=0xfffffff8
+118: (bf) r3 = r1                     ; R1=8 R3=8
+119: (5f) r3 &= r5                    ; R3=8 R5=0xfffffff8
+120: (77) r3 >>= 3                    ; R3=1
+121: (bf) r2 = r1                     ; R1=8 R2=8
+122: (57) r2 &= 7                     ; R2=0
+123: (55) if r2 != 0x0 goto pc+19     ; R2=0
+124: (bf) r2 = r3                     ; R2=1 R3=1
+125: (67) r2 <<= 3                    ; R2=8
+126: (bf) r4 = r10                    ; R4=fp0 R10=fp0
+127: (07) r4 += -32                   ; R4=fp-32
+128: (0f) r4 += r2                    ; R2=8 R4=fp-24
+129: (b7) r2 = 1                      ; R2=1
+130: (7b) *(u64 *)(r4 +0) = r2        ; R2=1 R4=fp-24 fp-24=1
+131: (57) r3 &= 536870904             ; R3=0
+132: (bf) r2 = r10                    ; R2=fp0 R10=fp0
+133: (07) r2 += -40                   ; R2=fp-40
+134: (0f) r2 += r3                    ; R2=fp-40 R3=0
+135: (57) r1 &= 56                    ; R1=8
+136: (b7) r3 = 255                    ; R3=255
+137: (6f) r3 <<= r1                   ; R1=8 R3=0xff00
+138: (a7) r3 ^= -1                    ; R3=0xffffffffffff00ff
+139: (79) r1 = *(u64 *)(r2 +0)        ; R1=0 R2=fp-40 fp-40=0
+140: (5f) r1 &= r3                    ; R1=0 R3=0xffffffffffff00ff
+141: (7b) *(u64 *)(r2 +0) = r1        ; R1=0 R2=fp-40 fp-40=0
+142: (05) goto pc+86
+229: (b7) r1 = 0                      ; R1=0
+230: (bf) r2 = r1                     ; R1=0 R2=0
+231: (57) r2 &= 7                     ; R2=0
+232: (55) if r2 != 0x0 goto pc+7      ; R2=0
+233: (67) r1 <<= 32                   ; R1=0
+234: (77) r1 >>= 32                   ; R1=0
+235: (bf) r2 = r10                    ; R2=fp0 R10=fp0
+236: (07) r2 += -32                   ; R2=fp-32
+237: (0f) r2 += r1                    ; R1=0 R2=fp-32
+238: (79) r1 = *(u64 *)(r2 +0)        ; R1=0 R2=fp-32 fp-32=0
+239: (05) goto pc+6
+246: (b7) r1 = 8                      ; R1=8
+247: (bf) r2 = r1                     ; R1=8 R2=8
+248: (57) r2 &= 7                     ; R2=0
+249: (15) if r2 == 0x0 goto pc+7      ; R2=0
+257: (67) r1 <<= 32                   ; R1=0x800000000
+258: (77) r1 >>= 32                   ; R1=8
+259: (bf) r2 = r10                    ; R2=fp0 R10=fp0
+260: (07) r2 += -32                   ; R2=fp-32
+261: (0f) r2 += r1                    ; R1=8 R2=fp-24
+262: (79) r1 = *(u64 *)(r2 +0)        ; R1=1 R2=fp-24 fp-24=1
+263: (b7) r1 = 0                      ; R1=0
+264: (bf) r2 = r1                     ; R1=0 R2=0
+265: (57) r2 &= 7                     ; R2=0
+266: (55) if r2 != 0x0 goto pc+7      ; R2=0
+267: (67) r1 <<= 32                   ; R1=0
+268: (77) r1 >>= 32                   ; R1=0
+269: (bf) r2 = r10                    ; R2=fp0 R10=fp0
+270: (07) r2 += -32                   ; R2=fp-32
+271: (0f) r2 += r1                    ; R1=0 R2=fp-32
+272: (79) r6 = *(u64 *)(r2 +0)        ; R2=fp-32 R6=0 fp-32=0
+273: (05) goto pc+6
+280: (b7) r1 = 16                     ; R1=16
+281: (18) r2 = 0xfffffff8             ; R2=0xfffffff8
+283: (bf) r9 = r1                     ; R1=16 R9=16
+284: (5f) r9 &= r2                    ; R2=0xfffffff8 R9=16
+285: (77) r9 >>= 3                    ; R9=2
+286: (bf) r2 = r1                     ; R1=16 R2=16
+287: (57) r2 &= 7                     ; R2=0
+288: (15) if r2 == 0x0 goto pc+109    ; R2=0
+398: (bf) r2 = r9                     ; R2=2 R9=2
+399: (67) r2 <<= 3                    ; R2=16
+400: (bf) r3 = r10                    ; R3=fp0 R10=fp0
+401: (07) r3 += -32                   ; R3=fp-32
+402: (0f) r3 += r2                    ; R2=16 R3=fp-16
+403: (7b) *(u64 *)(r3 +0) = r6        ; R3=fp-16 R6=0 fp-16=0
+404: (57) r9 &= 536870904             ; R9=0
+405: (bf) r2 = r10                    ; R2=fp0 R10=fp0
+406: (07) r2 += -40                   ; R2=fp-40
+407: (0f) r2 += r9                    ; R2=fp-40 R9=0
+408: (57) r1 &= 56                    ; R1=16
+409: (b7) r3 = 255                    ; R3=255
+410: (6f) r3 <<= r1                   ; R1=16 R3=0xff0000
+411: (a7) r3 ^= -1                    ; R3=0xffffffffff00ffff
+412: (79) r1 = *(u64 *)(r2 +0)        ; R1=0 R2=fp-40 fp-40=0
+413: (5f) r1 &= r3                    ; R1=0 R3=0xffffffffff00ffff
+414: (7b) *(u64 *)(r2 +0) = r1        ; R1=0 R2=fp-40 fp-40=0
+415: (b7) r1 = 24                     ; R1=24
+416: (18) r5 = 0xfffffff8             ; R5=0xfffffff8
+418: (bf) r3 = r1                     ; R1=24 R3=24
+419: (5f) r3 &= r5                    ; R3=24 R5=0xfffffff8
+420: (77) r3 >>= 3                    ; R3=3
+421: (bf) r2 = r1                     ; R1=24 R2=24
+422: (57) r2 &= 7                     ; R2=0
+423: (15) if r2 == 0x0 goto pc+86     ; R2=0
+510: (bf) r2 = r3                     ; R2=3 R3=3
+511: (67) r2 <<= 3                    ; R2=24
+512: (bf) r4 = r10                    ; R4=fp0 R10=fp0
+513: (07) r4 += -32                   ; R4=fp-32
+514: (0f) r4 += r2                    ; R2=24 R4=fp-8
+515: (b7) r2 = 0                      ; R2=0
+516: (7b) *(u64 *)(r4 +0) = r2        ; R2=0 R4=fp-8 fp-8=0
+517: (57) r3 &= 536870904             ; R3=0
+518: (bf) r2 = r10                    ; R2=fp0 R10=fp0
+519: (07) r2 += -40                   ; R2=fp-40
+520: (0f) r2 += r3                    ; R2=fp-40 R3=0
+521: (57) r1 &= 56                    ; R1=24
+522: (b7) r3 = 255                    ; R3=255
+523: (6f) r3 <<= r1                   ; R1=24 R3=0xff000000
+524: (a7) r3 ^= -1                    ; R3=0xffffffff00ffffff
+525: (79) r1 = *(u64 *)(r2 +0)        ; R1=0 R2=fp-40 fp-40=0
+526: (5f) r1 &= r3                    ; R1=0 R3=0xffffffff00ffffff
+527: (7b) *(u64 *)(r2 +0) = r1        ; R1=0 R2=fp-40 fp-40=0
+528: (b7) r1 = 24                     ; R1=24
+529: (bf) r2 = r1                     ; R1=24 R2=24
+530: (57) r2 &= 7                     ; R2=0
+531: (55) if r2 != 0x0 goto pc+7      ; R2=0
+532: (67) r1 <<= 32                   ; R1=0x1800000000
+533: (77) r1 >>= 32                   ; R1=24
+534: (bf) r2 = r10                    ; R2=fp0 R10=fp0
+535: (07) r2 += -32                   ; R2=fp-32
+536: (0f) r2 += r1                    ; R1=24 R2=fp-8
+537: (79) r1 = *(u64 *)(r2 +0)        ; R1=0 R2=fp-8 fp-8=0
+538: (05) goto pc+6
+545: (b7) r2 = 24                     ; R2=24
+546: (bf) r3 = r2                     ; R2=24 R3=24
+547: (57) r3 &= 7                     ; R3=0
+548: (55) if r3 != 0x0 goto pc+12     ; R3=0
+549: (bf) r3 = r2                     ; R2=24 R3=24
+550: (77) r3 >>= 3                    ; R3=3
+551: (57) r3 &= 536870904             ; R3=0
+552: (bf) r4 = r10                    ; R4=fp0 R10=fp0
+553: (07) r4 += -40                   ; R4=fp-40
+554: (0f) r4 += r3                    ; R3=0 R4=fp-40
+555: (79) r3 = *(u64 *)(r4 +0)        ; R3=0 R4=fp-40 fp-40=0
+556: (57) r2 &= 56                    ; R2=24
+557: (7f) r3 >>= r2                   ; R2=24 R3=0
+558: (57) r3 &= 255                   ; R3=0
+559: (55) if r3 != 0xa goto pc+1      ; R3=0
+561: (55) if r1 != 0x0 goto pc+2      ; R1=0
+562: (b7) r1 = 0                      ; R1=0
+563: (79) r1 = *(u64 *)(r1 +0)
+R1 invalid mem access 'scalar'
+processed 168 insns (limit 1000000) max_states_per_insn 0 total_states 7 peak_states 7 mark_read 0
+
+kernel log tail:
+4,197,1117629,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+5,198,1118370,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+
+native_lab stub context: prog_type=6 blob_bytes=60 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126378
+native_blob_diag: fnv64=75b15acc0ab9c9b7 word_count=15 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=60 final_size_matches=1
+chunk_bytes=0:60
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied

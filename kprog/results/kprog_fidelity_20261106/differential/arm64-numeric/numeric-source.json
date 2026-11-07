@@ -1,0 +1,18 @@
+{
+  "head": "2ebc80b251f746148eaab609fc5763515590eae9",
+  "paths": [
+    "kprog/arm64/arm64_sim_local_bpf.h",
+    "kprog/arm64/arm64_sim_direct.h",
+    "kinsn/module/include/native_lab_input.h",
+    "kprog/fidelity/arm64_control.py",
+    "kprog/fidelity/generate.py",
+    "kprog/formal/Makefile",
+    "kprog/formal/KProgFormal/Refinement/Arm64NumericAddress.lean",
+    "kprog/formal/oracles/arm64_entry_environment_host.h",
+    "kprog/formal/oracles/test_arm64_stack_arena_route_host.c",
+    "kprog/formal/oracles/test_arm64_stack_arm_route_host.c",
+    "kprog/formal/oracles/test_arm64_stack_read_tag_source_route_host.c",
+    "kprog/formal/oracles/test_arm64_stack_write_lanes_route_host.c",
+    "kprog/formal/oracles/test_arm64_stack_write_tag_action_route_host.c"
+  ]
+}

@@ -43,6 +43,17 @@ def forms():
         ('SP observation offset', 'sub sp,sp,#16\nmov x0,#37\nb finish'),
         ('SP compare flags', 'cmp sp,#0\n'+branch('b.eq', False)),
     ]
+    # Numeric observations must expose actual address bytes while full-width
+    # restores retain the private offset needed for typed stack indexing.
+    out += [('entry LR compare flags', 'cmp x30,#0\n'+branch('b.eq',False)),
+            ('SP numeric W move', 'mov w0,wsp\nb finish'),
+            ('SP tagged numeric ADD', 'mov x0,sp\nadd x0,x0,#31\nb finish'),
+            ('SP tagged numeric SUB', 'mov x0,sp\nsub x0,x0,#31\nb finish')]
+    for source in ['sp','x30']:
+        for width,load in [(1,'ldrb w0'),(2,'ldrh w0'),(4,'ldr w0'),(8,'ldr x0')]:
+            for offset in [0,8-width]:
+                out.append((f'{source} spill bytes{width} offset{offset}',
+                    f'mov x10,{source}\nstr x10,[sp,#-16]!\n{load},[sp,#{offset}]\nadd sp,sp,#16\nb finish'))
     return out
 
 
@@ -127,10 +138,11 @@ def main():
                             targets.get(instruction.addr),{}, {})
         init = ['ARM64_SIM_L_DECLARE_STATE(); ARM64_SIM_L_DECLARE_STACK(); __u8 __a64_sim_abi_kind=KPROG_ABI_KIND_XDP;']
         init += [f'__a64_x{j}.x=s->r[{j}];' for j in range(31)]
+        init += ['entry_return_bits=s->r[30]; __a64_x30.x=0; __a64_x30_tag=ARM64_SIM_TAG_RETURN;']
         init += ['for (unsigned k=0;k<64;k++) __a64_stack.b[ARM64_SIM_STACK_BIAS-64+k]=s->stack[k];',
                  '__a64_n=(s->flags>>31)&1; __a64_z=(s->flags>>30)&1; __a64_c=(s->flags>>29)&1; __a64_v=(s->flags>>28)&1;',
                  '__a64_v0=s->vec[0]; __a64_v0_hi=s->vec[1];']
-        finish = ['observed:;']+[f's->r[{j}]=__a64_x{j}.x;' for j in range(31)]
+        finish = ['observed:;']+[f's->r[{j}]=ARM64_SIM_L_READ_REG({j});' for j in range(31)]
         finish += ['s->r[31]=__a64_sp;', 's->flags=((uint64_t)__a64_n<<31)|((uint64_t)__a64_z<<30)|((uint64_t)__a64_c<<29)|((uint64_t)__a64_v<<28);',
                    's->vec[0]=__a64_v0; s->vec[1]=__a64_v0_hi;', 'for (unsigned k=0;k<64;k++) s->stack[k]=__a64_stack.b[ARM64_SIM_STACK_BIAS-64+k];']
         body='\n'.join([f'static void sim_{i}(struct state *s) {{',*init,*emitted,'goto observed;',*finish,'}'])
@@ -140,6 +152,8 @@ def main():
     prelude = ['#include "../driver.h"','#include <stdlib.h>','#define ARM64_SIM_ENABLE_STACK 1',*definitions,
         f'#include "{snapshot}/kprog/arm64/arm64_sim_local_bpf.h"',
         'static void arm64_sim_unsupported_opcode(void) { abort(); }',
+        'extern uint64_t native_stack_base; static uint64_t entry_return_bits;',
+        'unsigned long native_lab_entry_input(unsigned int kind) { if (kind == NATIVE_LAB_INPUT_SP) return native_stack_base; if (kind == NATIVE_LAB_INPUT_RETURN) return entry_return_bits; fputs("unknown control entry environment\\n",stderr); exit(1); }',
         '#undef ARM64_SIM_RET','#define ARM64_SIM_RET() goto observed']
     (out/'generated.c').write_text('\n'.join(prelude+functions+['const struct form forms[]={',',\n'.join(entries),'};','const unsigned form_count=sizeof(forms)/sizeof(forms[0]);'])+'\n')
     (out/'coverage.json').write_text(json.dumps(coverage,indent=2)+'\n')

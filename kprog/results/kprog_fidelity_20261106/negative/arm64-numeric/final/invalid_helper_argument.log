@@ -1,0 +1,58 @@
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=2174
+stub fd_array_cnt=2 fd_array=0:9,1:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=24;1:code=133,dst=0,src=4,off=1,imm=126378;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (b7) r2 = 0                        ; R2=0
+1: (7b) *(u64 *)(r10 -40) = r2        ; R2=0 R10=fp0 fp-40=0
+2: (b7) r1 = 0                        ; R1=0
+3: (b7) r0 = 2                        ; R0=scalar()
+4: (18) r5 = 0xfffffff8               ; R5=0xfffffff8
+6: (bf) r3 = r1                       ; R1=0 R3=0
+7: (5f) r3 &= r5                      ; R3=0 R5=0xfffffff8
+8: (77) r3 >>= 3                      ; R3=0
+9: (bf) r4 = r1                       ; R1=0 R4=0
+10: (57) r4 &= 7                      ; R4=0
+11: (55) if r4 != 0x0 goto pc+25      ; R4=0
+12: (bf) r4 = r3                      ; R3=0 R4=0
+13: (67) r4 <<= 3                     ; R4=0
+14: (bf) r5 = r10                     ; R5=fp0 R10=fp0
+15: (07) r5 += -16                    ; R5=fp-16
+16: (0f) r5 += r4                     ; R4=0 R5=fp-16
+17: (7b) *(u64 *)(r5 +0) = r0         ; R0=scalar(id=1) R5=fp-16 fp-16=scalar(id=1)
+18: (bf) r5 = r10                     ; R5=fp0 R10=fp0
+19: (07) r5 += -32                    ; R5=fp-32
+20: (0f) r5 += r4                     ; R4=0 R5=fp-32
+21: (7b) *(u64 *)(r5 +0) = r2         ; R2=0 R5=fp-32 fp-32=0
+22: (57) r3 &= 536870904              ; R3=0
+23: (bf) r2 = r10                     ; R2=fp0 R10=fp0
+24: (07) r2 += -40                    ; R2=fp-40
+25: (0f) r2 += r3                     ; R2=fp-40 R3=0
+26: (57) r1 &= 56                     ; R1=0
+27: (b7) r3 = 255                     ; R3=255
+28: (6f) r3 <<= r1                    ; R1=0 R3=255
+29: (a7) r3 ^= -1                     ; R3=-256
+30: (79) r4 = *(u64 *)(r2 +0)         ; R2=fp-40 R4=0 fp-40=0
+31: (5f) r4 &= r3                     ; R3=-256 R4=0
+32: (b7) r3 = 10                      ; R3=10
+33: (6f) r3 <<= r1                    ; R1=0 R3=10
+34: (4f) r4 |= r3                     ; R3=10 R4=10
+35: (7b) *(u64 *)(r2 +0) = r4         ; R2=fp-40 R4=10 fp-40=10
+36: (05) goto pc+97
+134: (b7) r7 = 0                      ; R7=0
+135: (b7) r1 = 1                      ; R1=1
+136: (b7) r2 = 0                      ; R2=0
+137: (85) call bpf_map_lookup_elem#1
+R1 type=scalar expected=map_ptr
+processed 40 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+
+kernel log tail:
+4,197,1041099,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+5,198,1041405,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+
+native_lab stub context: prog_type=6 blob_bytes=52 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126378
+native_blob_diag: fnv64=29c8727fed9e3df0 word_count=13 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=52 final_size_matches=1
+chunk_bytes=0:52
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied

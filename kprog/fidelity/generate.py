@@ -201,7 +201,7 @@ def main():
         raise RuntimeError(f"decoded {len(insns)} instructions for {len(forms)} forms")
     c = ['#include "../driver.h"', '#include <stdlib.h>', '#include <string.h>', '#define X86_SIM_ENABLE_STACK 1', f'#include "{snapshot}/kprog/{arch}/{arch}_sim_local_bpf.h"']
     if arch == "arm64":
-        c += ['static void arm64_sim_unsupported_opcode(void) { abort(); }']
+        c += ['extern uint64_t native_stack_base;', 'static void arm64_sim_unsupported_opcode(void) { abort(); }', 'unsigned long native_lab_entry_input(unsigned int kind) { if (kind == NATIVE_LAB_INPUT_SP) return native_stack_base; fputs("unexpected numeric observer environment input\\n", stderr); exit(1); }']
     entries, coverage = [], []
     pairs = [(assembly, encoder.encode(insn, {}) if arch == "x86" else encoder.encode(insn, {}, {}), None, assembly, insn.raw) for assembly, insn in zip(forms, insns)]
     if arch == "x86":
@@ -251,15 +251,15 @@ def main():
                 mode = 3 if op in ["rol", "ror"] else 2
                 count = 256 if assembly.endswith("cl") else int(assembly.rsplit(", ", 1)[1])
         else:
-            c += ["ARM64_SIM_L_DECLARE_STATE(); ARM64_SIM_L_DECLARE_STACK(); __u8 __a64_sim_abi_kind = KPROG_ABI_KIND_XDP;"]
+            c += ["ARM64_SIM_L_DECLARE_STATE(); ARM64_SIM_L_DECLARE_STACK(); __a64_sp = s->r[31]; __u8 __a64_sim_abi_kind = KPROG_ABI_KIND_XDP;"]
             c += [f"__a64_x{j}.x = s->r[{j}];" for j in range(31)]
             c += ["__a64_n = (s->flags >> 31) & 1; __a64_z = (s->flags >> 30) & 1; __a64_c = (s->flags >> 29) & 1; __a64_v = (s->flags >> 28) & 1;", "__a64_v0 = s->vec[0]; __a64_v0_hi = s->vec[1];"]
             emitted = []
             encoder.append_insn(emitted, insns[i], {insns[i].addr}, insns[i].addr+4,
                                 frozenset(), {}, {})
             c += emitted
-            c += [f"s->r[{j}] = __a64_x{j}.x;" for j in range(31)]
-            c += ["s->flags = ((uint64_t)__a64_n << 31) | ((uint64_t)__a64_z << 30) | ((uint64_t)__a64_c << 29) | ((uint64_t)__a64_v << 28);", "s->vec[0] = __a64_v0; s->vec[1] = __a64_v0_hi;"]
+            c += [f"s->r[{j}] = ARM64_SIM_L_READ_REG({j});" for j in range(31)]
+            c += ["s->r[31] = __a64_sp;", "s->flags = ((uint64_t)__a64_n << 31) | ((uint64_t)__a64_z << 30) | ((uint64_t)__a64_c << 29) | ((uint64_t)__a64_v << 28);", "s->vec[0] = __a64_v0; s->vec[1] = __a64_v0_hi;"]
             mode, count, mask, width = 0, 0, 0xf0000000, 64
         c += ["}"]
         entries += [f"{{{json.dumps(assembly)}, {json.dumps(encoded.op)}, native_{i}, sim_{i}, {mask}U, {width}, {count}, {mode}, &native_pc_{i}, &native_next_{i}}}"]

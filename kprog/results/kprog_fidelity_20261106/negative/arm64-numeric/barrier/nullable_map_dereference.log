@@ -1,0 +1,94 @@
+bound-probe: BPF_PROG_LOAD native_lab stub: Permission denied
+diagnostic BPF_PROG_LOAD: Permission denied
+stub verifier_log_size=262144 log_true_size=4104
+stub fd_array_cnt=3 fd_array=0:11,1:11,2:9
+stub insns=0:code=183,dst=0,src=3,off=0,imm=20;1:code=133,dst=0,src=4,off=1,imm=126378;2:code=149,dst=0,src=0,off=0,imm=0
+verifier log tail:
+0: R1=ctx() R10=fp0
+0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)
+1: (7b) *(u64 *)(r10 -8) = r2         ; R2=pkt(r=0) R10=fp0 fp-8=pkt(r=0)
+2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()
+3: (7b) *(u64 *)(r10 -16) = r1        ; R1=pkt_end() R10=fp0 fp-16=pkt_end()
+4: (b7) r6 = 0                        ; R6=0
+5: (7b) *(u64 *)(r10 -40) = r6        ; R6=0 R10=fp0 fp-40=0
+6: (79) r2 = *(u64 *)(r10 -8)         ; R2=pkt(r=0) R10=fp0 fp-8=pkt(r=0)
+7: (bf) r1 = r2                       ; R1=pkt(r=0) R2=pkt(r=0)
+8: (07) r1 += 4                       ; R1=pkt(off=4,r=0)
+9: (79) r3 = *(u64 *)(r10 -16)        ; R3=pkt_end() R10=fp0 fp-16=pkt_end()
+10: (2d) if r1 > r3 goto pc+176       ; R1=pkt(off=4,r=4) R3=pkt_end()
+11: (b7) r1 = 0                       ; R1=0
+12: (b7) r0 = 2                       ; R0=scalar()
+13: (bf) r6 = r0                      ; R0=scalar(id=1) R6=scalar(id=1)
+14: (18) r0 = 0xfffffff8              ; R0=0xfffffff8
+16: (bf) r4 = r1                      ; R1=0 R4=0
+17: (5f) r4 &= r0                     ; R0=0xfffffff8 R4=0
+18: (77) r4 >>= 3                     ; R4=0
+19: (bf) r3 = r1                      ; R1=0 R3=0
+20: (57) r3 &= 7                      ; R3=0
+21: (55) if r3 != 0x0 goto pc+21      ; R3=0
+22: (bf) r3 = r4                      ; R3=0 R4=0
+23: (67) r3 <<= 3                     ; R3=0
+24: (bf) r5 = r10                     ; R5=fp0 R10=fp0
+25: (07) r5 += -32                    ; R5=fp-32
+26: (0f) r5 += r3                     ; R3=0 R5=fp-32
+27: (7b) *(u64 *)(r5 +0) = r6         ; R5=fp-32 R6=scalar(id=1) fp-32=scalar(id=1)
+28: (57) r4 &= 536870904              ; R4=0
+29: (bf) r3 = r10                     ; R3=fp0 R10=fp0
+30: (07) r3 += -40                    ; R3=fp-40
+31: (0f) r3 += r4                     ; R3=fp-40 R4=0
+32: (57) r1 &= 56                     ; R1=0
+33: (b7) r4 = 255                     ; R4=255
+34: (6f) r4 <<= r1                    ; R1=0 R4=255
+35: (a7) r4 ^= -1                     ; R4=-256
+36: (79) r5 = *(u64 *)(r3 +0)         ; R3=fp-40 R5=0 fp-40=0
+37: (5f) r5 &= r4                     ; R4=-256 R5=0
+38: (b7) r4 = 10                      ; R4=10
+39: (6f) r4 <<= r1                    ; R1=0 R4=10
+40: (4f) r5 |= r4                     ; R4=10 R5=10
+41: (7b) *(u64 *)(r3 +0) = r5         ; R3=fp-40 R5=10 fp-40=10
+42: (05) goto pc+98
+141: (18) r1 = 0xffff00000579c400     ; R1=map_ptr(map=neg_map,ks=4,vs=8)
+143: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=2,map=neg_map,ks=4,vs=8)
+144: (b7) r1 = 0                      ; R1=0
+145: (bf) r2 = r1                     ; R1=0 R2=0
+146: (57) r2 &= 7                     ; R2=0
+147: (55) if r2 != 0x0 goto pc+7      ; R2=0
+148: (67) r1 <<= 32                   ; R1=0
+149: (77) r1 >>= 32                   ; R1=0
+150: (bf) r2 = r10                    ; R2=fp0 R10=fp0
+151: (07) r2 += -32                   ; R2=fp-32
+152: (0f) r2 += r1                    ; R1=0 R2=fp-32
+153: (79) r2 = *(u64 *)(r2 +0)        ; R2=scalar(id=1) fp-32=scalar(id=1)
+154: (05) goto pc+6
+161: (b7) r1 = 0                      ; R1=0
+162: (bf) r3 = r1                     ; R1=0 R3=0
+163: (57) r3 &= 7                     ; R3=0
+164: (55) if r3 != 0x0 goto pc+20     ; R3=0
+165: (bf) r3 = r1                     ; R1=0 R3=0
+166: (77) r3 >>= 3                    ; R3=0
+167: (57) r3 &= 536870904             ; R3=0
+168: (bf) r4 = r10                    ; R4=fp0 R10=fp0
+169: (07) r4 += -40                   ; R4=fp-40
+170: (0f) r4 += r3                    ; R3=0 R4=fp-40
+171: (79) r3 = *(u64 *)(r4 +0)        ; R3=10 R4=fp-40 fp-40=10
+172: (57) r1 &= 56                    ; R1=0
+173: (7f) r3 >>= r1                   ; R1=0 R3=10
+174: (bf) r1 = r3                     ; R1=10 R3=10
+175: (57) r1 &= 255                   ; R1=10
+176: (15) if r1 == 0x0 goto pc+8      ; R1=10
+177: (15) if r1 == 0xa goto pc+11     ; R1=10
+189: (1f) r2 -= r6                    ; R2=scalar() R6=scalar(id=1)
+190: (79) r6 = *(u64 *)(r0 +0)
+R0 invalid mem access 'map_value_or_null'
+processed 74 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0
+
+kernel log tail:
+4,197,1117629,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.
+5,198,1118370,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel
+
+native_lab stub context: prog_type=6 blob_bytes=92 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126378
+retained_map_info=9:id=5:type=2:name=neg_map
+native_blob_diag: fnv64=67c938b210766f03 word_count=23 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=80 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=92 final_size_matches=1
+chunk_bytes=0:92
+reloc_targets=80:0x5
+stub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied

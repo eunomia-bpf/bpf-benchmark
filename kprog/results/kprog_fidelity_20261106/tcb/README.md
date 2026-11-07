@@ -232,3 +232,5 @@ loader binding headers, module support, reference API and context extractors
 now have explicit scopes. Earlier counts remain historical; scope additions
 are not presented as measured code growth. Every captured file/component row
 is reproducible from the counted-source archive.
+
+The after-numeric/ snapshot retains a fresh source-byte inventory and independently verified component/file counts, including current numeric-address, loader/capture and binding work. Earlier snapshots remain unchanged.

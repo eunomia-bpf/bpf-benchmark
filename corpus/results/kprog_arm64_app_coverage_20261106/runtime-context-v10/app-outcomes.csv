@@ -1,0 +1,11 @@
+app,run,status,baseline_counter_rows,post_counter_rows,error
+katran,arm64_qemu_corpus_19700101_000007_687191,ok,1,1,
+otelcol-ebpf-profiler/profiling,arm64_qemu_corpus_19700101_000007_687191,error,12,0,"native app exited before BPF programs were tracked by shim
+stderr tail:
+1970-01-01T00:02:15.136Z	info	otelconftelemetry/metrics.go:24	Internal metrics telemetry disabled	{""resource"": {""service.instance.id"": ""5adef0b6-30da-44c8-a292-2609e74860b6"", ""service.name"": ""otelcol-ebpf-profiler"", ""service.version"": ""0.140.0""}}
+1970-01-01T00:02:15.196Z	info	builders/builders.go:26	Development component. May change in the future.	{""resource"": {""service.instance.id"": ""5adef0b6-30da-44c8-a292-2609e74860b6"", ""service.name"": ""otelcol-ebpf-profiler"", ""service.version"": ""0.140.0""}, ""otelcol.component.id"": ""debug"", ""otelcol.component.kind"": ""exporter"", ""otelcol.signal"": ""profiles""}
+1970-01-01T00:02:15.609Z	info	service@v0.139.0/service.go:222	Starting otelcol-ebpf-profiler...	{""resource"": {""service.instance.id"": ""5adef0b6-30da-44c8-a292-2609e74860b6"", ""service.name"": ""otelcol-ebpf-profiler"", ""service.version"": ""0.140.0""}, ""Version"": ""0.140.0"", ""NumCPU"": 8}
+1970-01-01T00:02:15.612Z	info	extensions/extensions.go:40	Starting extensions...	{""resource"": {""service.instance.id"": ""5adef0b6-30da-44c8-a292-2609e74860b6"", ""service.name"": ""otelcol-ebpf-profiler"", ""service.version"": ""0.140.0""}}
+1970-01-01T00:02:15.629Z	info	Interpreter tracers: perl,php,python,hotspot,ruby,v8,go,labels	{""resource"": {""service.instance.id"": ""5adef0b6-30da-44c8-a292-2609e74860b6"", ""service.name"": ""otelcol-ebpf-profiler"", ""service.version"": ""0.140.0""}, ""otelcol.component.id"": ""profiling"", ""otelcol.component.kind"": ""receiver"", ""otelcol.signal"": ""profiles""}
+libbpf: elf: skipping unrecognized data section(5) .native_lab.source_maps
+libbpf: elf: skipping unrecognized data section(7) .native_lab.rodata"

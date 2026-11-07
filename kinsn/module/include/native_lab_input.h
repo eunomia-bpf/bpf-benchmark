@@ -48,6 +48,8 @@ static inline bool bpf_native_input_candidate(const struct bpf_insn *insn)
 /* Host simulators must supply an explicit outcome for each dynamic visit.
  * There is deliberately no constant-success or random fallback.
  */
+extern unsigned long native_lab_entry_input(unsigned int kind);
+#define NATIVE_LAB_ENTRY_INPUT(kind) native_lab_entry_input(kind)
 extern unsigned long native_lab_exclusive_failure_choice(unsigned int site);
 #define NATIVE_LAB_EXCLUSIVE_FAILURE(site) ({ \
 	unsigned long __native_failure = native_lab_exclusive_failure_choice(site); \
