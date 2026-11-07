@@ -8,6 +8,7 @@ from extract_checked import decode, emit
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('simple', type=Path)
 parser.add_argument('environment_log', type=Path)
+parser.add_argument('--exports', type=Path, help='actual successful loader records, including multichunk')
 args = parser.parse_args()
 simple = args.simple.read_bytes()
 program, metadata = decode(simple)
@@ -63,3 +64,32 @@ for name, pc, opcode in [('context-width', 0, 0x79), ('erased-store', 17, 0xb7),
     if not result.returncode or b'SimpleChecked.lean:' not in result.stdout or b'error:' not in result.stdout:
         raise AssertionError('changed checked instruction not rejected semantically: '+name)
     print(name+': REJECTED by exact captured-byte Lean certificate')
+
+if args.exports is not None:
+    snapshots = sorted(args.exports.glob('*/checked.snapshot.bin'))
+    multi = []
+    for snapshot in snapshots:
+        data = snapshot.read_bytes()
+        actual_program, actual_metadata = decode(data)
+        if len(actual_metadata['regions']) > 1:
+            multi.append(data)
+    assert snapshots and multi, 'actual successful multichunk captures required'
+    for data in multi:
+        body, meta = decode(data)
+        offset = 120 + len(body)
+        ordered = sorted(meta['regions'])
+        # Discovery order is deliberately not execution order in the kernel.
+        assert meta['regions'] != ordered
+        corruptions = {
+            'overlap': changed(data, offset+16, ordered[-1][0]),
+            'wrong final generation': changed(data, 20, meta['generation']+1),
+            'region past program': changed(data, offset, len(body)//8),
+        }
+        for name, bad in corruptions.items():
+            try:
+                decode(bad)
+            except ValueError:
+                print('multichunk '+name+': REJECTED')
+            else:
+                raise AssertionError('accepted multichunk corruption: '+name)
+    print(f'actual successful captures: {len(snapshots)} PASS; reverse-order multichunk: {len(multi)} PASS')

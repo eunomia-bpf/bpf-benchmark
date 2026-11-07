@@ -548,3 +548,22 @@ Whole-program context/state/effect simulation remains active; these byte
 identity checks do not replace that theorem. Both complete x86/Arm binding
 regressions also verify resolved map/helper facts, invalidation and stable FDs.
 The inputs archive includes the exact small guest runtime used by this test.
+
+`BPFREJIT_NATIVE_LOADER_TV_DIR=<directory>` optionally exports each successful
+bound load while the existing upload lock still protects its snapshot. Enable
+`capture_checked=1` on the paired native-lab module. Each source-ID/native-ID
+subdirectory contains the exact expanded verifier snapshot, linked native bytes
+and relocations, linked proof input, actual JIT bytes/addresses/function lengths,
+and restored stub. `load.json` is written last; a failed export propagates and
+closes the candidate program. An incomplete directory carries no success claim.
+The loader checks generation, entry/ABI/chunk layout and the complete serialized
+load context before exporting. It never substitutes a later program's snapshot.
+
+`capture-loader-build` builds both libraries; `checked-kernel-check-x86`
+exercises the export on the existing real loader/map/helper/multichunk regression.
+`simple-checked-kernel-check-arm64` exercises two distinct successful records,
+stable history after another upload, and a real output-path IO failure. Its log
+retains all exported bytes as `TV_EXPORT` records. Reconstruct them with
+`python3 kprog/tv/extract_checked.py <guest-log> <simple-output> --exports <directory>`.
+The resulting inventory explicitly marks translation validation `not_validated`;
+these are complete inputs to TV, rather than TV certificates.

@@ -8,6 +8,8 @@
 #include <cstring>
 #include <fcntl.h>
 #include <fstream>
+#include <filesystem>
+#include <cstdlib>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
@@ -60,6 +62,7 @@ int main()
         options.native_object_path = "/simple.o";
         options.symbol_name = "simple_xdp";
         options.native_link_path = "/native-link";
+        require(!setenv("BPFREJIT_NATIVE_LOADER_TV_DIR", "/capture", 1), "enable per-program capture");
         auto loaded = native_loader::load_from_fd(options);
         require(loaded.replaced && loaded.prog_fd >= 0, "actual generation-bound replacement");
         std::ifstream capture("/sys/kernel/debug/bpf_arm64_native_lab/checked_proof", std::ios::binary);
@@ -73,6 +76,60 @@ int main()
             head.binding.proof_insns == options.proof_insns.size() && head.binding.abi_mask == 0 &&
             head.binding.native_size == 84 && head.binding.expected_attach_type == options.expected_attach_type &&
             head.binding.source_prog_id == loaded.original_prog_id, "actual artifact identity/extent");
+        auto saved = [&](const std::filesystem::path &path) {
+            std::ifstream input(path, std::ios::binary);
+            require(bool(input), "open exported artifact");
+            std::vector<unsigned char> value{std::istreambuf_iterator<char>(input), {}};
+            require(!input.bad(), "read exported artifact");
+            return value;
+        };
+        auto record = [&](const native_loader::LoadedProgram &item) {
+            return std::filesystem::path("/capture") /
+                (std::to_string(item.original_prog_id) + "-" + std::to_string(item.native_prog_id));
+        };
+        auto print_record = [&](const std::filesystem::path &path) {
+            for (auto name : {"checked.snapshot.bin", "native.bin", "native.relocs", "proof-input.bin",
+                    "jit.bin", "stub.bin", "jit-addresses.bin", "jit-lengths.bin", "load.json"}) {
+                std::printf("TV_EXPORT %s/%s ", path.filename().c_str(), name);
+                for (unsigned char byte : saved(path / name)) std::printf("%02x", byte);
+                std::puts("");
+            }
+        };
+        auto first = record(loaded);
+        require(saved(first / "checked.snapshot.bin") == bytes, "automatic/direct snapshot equality");
+        auto proof = saved(first / "proof-input.bin");
+        require(proof.size() == options.proof_insns.size() * sizeof(bpf_insn) &&
+            !std::memcmp(proof.data(), options.proof_insns.data(), proof.size()), "exact linked proof input");
+        require(saved(first / "native.bin").size() == 84 && saved(first / "native.relocs").empty(),
+            "exact linked native extent");
+        for (auto name : {"jit.bin", "stub.bin", "jit-addresses.bin", "jit-lengths.bin", "load.json"})
+            require(!saved(first / name).empty(), "complete successful export");
+        auto next = native_loader::load_from_fd(options);
+        require(next.replaced && next.prog_fd >= 0 && record(next) != first,
+            "second load has a distinct program record");
+        require(saved(first / "checked.snapshot.bin") == bytes &&
+            saved(record(next) / "checked.snapshot.bin") != bytes,
+            "first snapshot retained after next generation");
+        print_record(first);
+        print_record(record(next));
+        run(next.prog_fd, "second exported bound native");
+        native_loader::close_loaded_program(&next);
+        std::ofstream blocked("/capture-blocked");
+        blocked << "existing file";
+        blocked.close();
+        require(bool(blocked), "write capture IO failure fixture");
+        require(!setenv("BPFREJIT_NATIVE_LOADER_TV_DIR", "/capture-blocked", 1), "select failed export");
+        bool rejected = false;
+        try {
+            auto failed = native_loader::load_from_fd(options);
+            native_loader::close_loaded_program(&failed);
+        } catch (const std::exception &error) {
+            rejected = std::string(error.what()).find("capture-blocked") != std::string::npos;
+        }
+        require(rejected && !std::filesystem::is_directory("/capture-blocked"),
+            "capture IO failure propagates without success record");
+        require(!unsetenv("BPFREJIT_NATIVE_LOADER_TV_DIR"), "disable per-program capture");
+        std::puts("per-program capture: exact bytes, distinct IDs/generations, stable history, IO failure: PASS");
         std::printf("TV_CHECKED ");
         for (unsigned char byte : bytes) std::printf("%02x", byte);
         std::puts("");

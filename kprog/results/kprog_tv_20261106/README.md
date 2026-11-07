@@ -819,3 +819,34 @@ small guest runtime and both capture modules; development failures remain
 in `checked-proof-development.tar.gz`. Read-only API and ownership are
 documented in the TV README and wire header. No whole-program TV claim is
 made from capture or successful execution alone.
+
+Per-program verifier/JIT capture after successful bound load
+-----------------------------------------------------------
+
+The opt-in loader export passed both actual kernel paths. x86 retains41
+successful per-program records from the existing loader regressions, including
+helper/map and multichunk loads. Arm QEMU retains two successful loads of the
+actual simple artifact with distinct IDs/generations, exact direct/automatic
+snapshot equality, stable earlier bytes after another upload, and a real
+output-path IO failure that propagates. Native execution still returns2 and
+updates exactly8 packet bytes. Both static/shared loader libraries build for
+both ISAs. These checks use T's private modules/kernel outputs.
+
+`per-program-capture-arm64.log`, `per-program-capture-x86.log` and
+`per-program-capture-inputs.tar.gz` retain the run, all nine exact files per
+successful load and the per-program inventories. Inventories retain
+`translation_validation: not_validated`. Capturing accepted bytes closes the
+input-provenance gap; the full-state native/compiled-BPF relation and CPU-profile
+binding still need their certificates. The original first Arm run reached all
+assertions but its Makefile's final `rg` lookup failed because that binary is
+absent; the exact output check now uses `grep` and the complete rerun passes.
+
+All41 x86 records now pass offline extent/identity/JIT-layout checks:19 carry
+map facts,21 helper facts and3 multiple chunks. Real multichunk capture exposed
+the extractor's incorrect assumption that the kernel region array is ordered
+by instruction position; it is in reverse discovery order. Validation now
+checks sorted coordinates while preserving the exact original records. The
+three real reverse-order captures pass; overlapping regions, stale generation
+and a region beyond the program reject. Existing14 metadata corruptions and
+four actual instruction mutants still reject. Raw regression:
+`per-program-capture-negatives.log`.

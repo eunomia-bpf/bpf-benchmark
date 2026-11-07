@@ -24,13 +24,16 @@ def decode(data):
     region_records = [struct.unpack_from('<IIQ', data, position+i*16) for i in range(regions)]
     position += regions*16
     previous_end = 0
-    for start, length, payload in region_records:
+    # Kernel records retain reverse discovery order; validate coordinates without
+    # changing the captured record order or assuming a different control flow.
+    ordered_regions = sorted(region_records)
+    for start, length, payload in ordered_regions:
         if not length or start < previous_end or start + length > count:
             raise ValueError('invalid proof region')
         previous_end = start + length
         if payload & 15 or ((payload >> 20) & 0xffffffff) == 0:
             raise ValueError('invalid bound region payload')
-    if region_records[-1][1] < binding[11] or region_records[-1][2] >> 20 != generation:
+    if ordered_regions[-1][1] < binding[11] or ordered_regions[-1][2] >> 20 != generation:
         raise ValueError('final proof region generation/extent mismatch')
     map_records = [struct.unpack_from('<8IQ', data, position+i*40) for i in range(maps)]
     position += maps*40
@@ -57,12 +60,59 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('log', type=Path)
     parser.add_argument('output', type=Path)
+    parser.add_argument('--exports', type=Path, help='retain completed per-program loader exports from guest log')
     args = parser.parse_args()
     captures = [line.split()[1] for line in args.log.read_text().splitlines() if line.startswith('TV_CHECKED ')]
     if len(captures) != 1 or 'actual bound expanded artifact capture: PASS' not in args.log.read_text():
         raise ValueError('one completed actual bound load/capture is required')
     data = bytes.fromhex(captures[0])
     emit(data, args.output)
+    if args.exports is not None:
+        extract_exports(args.log.read_text(), args.exports)
+
+
+def extract_exports(log, output):
+    records = {}
+    names = {'checked.snapshot.bin', 'native.bin', 'native.relocs', 'proof-input.bin',
+        'jit.bin', 'stub.bin', 'jit-addresses.bin', 'jit-lengths.bin', 'load.json'}
+    for line in log.splitlines():
+        if not line.startswith('TV_EXPORT '):
+            continue
+        fields = line.split(maxsplit=2)
+        path = Path(fields[1])
+        if len(path.parts) != 2 or path.name not in names or \
+                len(path.parts[0].split('-')) != 2 or not all(x.isdigit() for x in path.parts[0].split('-')):
+            raise ValueError('invalid exported artifact path')
+        files = records.setdefault(path.parts[0], {})
+        if path.name in files:
+            raise ValueError('duplicate exported artifact')
+        files[path.name] = bytes.fromhex(fields[2]) if len(fields) == 3 else b''
+    if not records or 'per-program capture: exact bytes, distinct IDs/generations, stable history, IO failure: PASS' not in log:
+        raise ValueError('completed per-program export regression is required')
+    inventory = []
+    for identity, files in records.items():
+        if files.keys() != names:
+            raise ValueError('incomplete per-program export')
+        program, metadata = decode(files['checked.snapshot.bin'])
+        load = json.loads(files['load.json'])
+        binding = metadata['binding']
+        if load['version'] != 1 or identity != f"{load['source_prog_id']}-{load['native_prog_id']}" or \
+                load['source_prog_id'] != binding[21] or load['generation'] != metadata['generation'] or \
+                load['prog_type'] != binding[12] or len(files['native.bin']) != binding[7] or \
+                len(files['native.relocs']) % 16 or len(files['proof-input.bin']) != binding[11]*8 or \
+                not files['stub.bin'] or len(files['stub.bin']) % 8 or not files['jit.bin'] or \
+                not files['jit-addresses.bin'] or len(files['jit-addresses.bin']) % 8 or \
+                len(files['jit-lengths.bin'])*2 != len(files['jit-addresses.bin']) or \
+                sum(v[0] for v in struct.iter_unpack('<I', files['jit-lengths.bin'])) != len(files['jit.bin']):
+            raise ValueError('successful export differs from bound load identity/extent')
+        destination = output/identity
+        destination.mkdir(parents=True, exist_ok=True)
+        for name, value in files.items():
+            (destination/name).write_bytes(value)
+        inventory.append(dict(load, native_bytes=len(files['native.bin']), proof_insns=len(program)//8,
+            translation_validation='not_validated'))
+    (output/'programs.json').write_text(json.dumps(inventory, indent=2)+'\n')
+    print(f'completed per-program exports: {len(inventory)}; translation validation remains separate')
 
 
 def emit(data, output):

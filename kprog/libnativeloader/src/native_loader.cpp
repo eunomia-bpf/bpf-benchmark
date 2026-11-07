@@ -1,5 +1,6 @@
 #include "native_loader.hpp"
 #include "../../../kinsn/module/include/native_lab_binding.h"
+#include "../../../kinsn/module/include/native_lab_checked_wire.h"
 
 #include "kernel_offsets.h"
 
@@ -38,6 +39,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <optional>
@@ -276,6 +278,7 @@ void write_binary_file(const std::filesystem::path &path, const uint8_t *data, s
     if (size != 0) {
         output.write(reinterpret_cast<const char *>(data), static_cast<std::streamsize>(size));
     }
+    output.close();
     if (!output) {
         fail("unable to write file: " + path.string());
     }
@@ -4600,6 +4603,8 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     return linked;
 }
 
+#include "native_tv_capture.hpp"
+
 struct LoadedStub {
     int prog_fd = -1;
     uint64_t upload_ns = 0;
@@ -4798,6 +4803,7 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
         }
         try {
             verify_loaded_prog_uses_maps(out.prog_fd, linked.relocated_map_ids);
+            capture_bound_artifact(linked, proof_insns, generations, chunks, attrs, out.prog_fd);
         } catch (...) {
             close(out.prog_fd);
             out.prog_fd = -1;

@@ -545,10 +545,10 @@ simple-checked-kernel-check-arm64: build-arm64/capture-checked
 		-initrd build-arm64/checked-initramfs.cpio -append 'console=ttyAMA0 rdinit=/init panic=1' \
 		> build-arm64/checked-kernel.log 2>&1
 	cat build-arm64/checked-kernel.log
-	rg -q '^actual bound expanded artifact capture: PASS' build-arm64/checked-kernel.log
+	grep -q '^actual bound expanded artifact capture: PASS' build-arm64/checked-kernel.log
 
 .PHONY: checked-kernel-check-x86 guest-checked-kernel-check-x86
-checked-kernel-check-x86: build/test-binding-kernel
+checked-kernel-check-x86: build/test-binding-kernel build/test-loader
 	$(MAKE) module-check KDIR=$(CURDIR)/build-kernel-x86
 	taskset -c 8-11 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
 		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
@@ -559,6 +559,9 @@ guest-checked-kernel-check-x86:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod build-x86/bpf_x86_native_lab.ko
 	./build/test-binding-kernel
+	capture=$$(mktemp -d build/capture-loader-x86.XXXXXX) && \
+		BPFREJIT_NATIVE_LOADER_TV_DIR=$$capture ./build/test-loader && \
+		printf '%s\n' "$$capture" > build/capture-loader-x86.latest
 
 .PHONY: simple-checked-artifact-check
 simple-checked-artifact-check:
@@ -574,3 +577,11 @@ checked-certificate:
 .PHONY: checked-artifact-negative-check
 checked-artifact-negative-check:
 	python3 test_checked_artifact.py build/simple-checked/checked.snapshot.bin build-arm64/kernel.log
+
+.PHONY: capture-loader-build
+capture-loader-build:
+	$(MAKE) -C ../libnativeloader BUILD_DIR=build-tv-binding
+	$(MAKE) -C ../libnativeloader BUILD_DIR=build-tv-context-v2-arm64 \
+		LIBBPF_PREFIX=$(abspath ../../runner/build-arm64-llvmbpf/vendor/libbpf/prefix) \
+		LIBBPF_LIBRARY=$(abspath ../../runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a) \
+		KERNEL_OFFSETS_INCLUDE=$(abspath ../../micro/programs/build-arm64)
