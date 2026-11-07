@@ -136,3 +136,12 @@ partial native reads scalarize the actual pointer bits before shifting/masking.
 Other native offsets retain their accesses for verifier review. The trusted
 Katran replay, 45 safety cases and canonical source/compiled-code comparisons are
 recorded in [context-native](../../corpus/results/kprog_arm64_app_coverage_20261106/trusted-bcc-frame-result/context-native/README.md).
+
+Native ELF map dependencies can accompany source-used maps through the common
+SUBMIT_RESOURCES interface. The kernel pins actual map objects from a live
+descriptor vector, and the registered service queries capsule identities and
+shapes before binding native aliases. The [ARM capability build and runtime
+controls](../../corpus/results/kprog_arm64_app_coverage_20261107/native-resources/README.md)
+record immutable-resource lifecycle checks and generation-bound native execution
+with the captured module/caller sources. Application cohorts retain their own
+source and binary epochs.
