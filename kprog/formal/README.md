@@ -230,3 +230,11 @@ lane reads, generated logic/flag primitives and the raw width-aware writer.
 TEST retains the raw register/tag representation. The complete numeric
 state/effect theorem covers aliases and RSP; raw operation/AUX field binding
 and dispatcher gates for this core remain separate.
+
+The same register dispatcher also composes the logical AND/OR/XOR payloads
+of the ALU_REG/ADD_REG/XOR_REG family and TEST_REG. All three ALU opcodes
+consume AUX unchanged; the opcode name does not force the ALU operation.
+The current same-GPR/same-shift XOR zero path is selected from raw fields,
+and field decoding derives identical native slices before using its proof.
+TEST_REG ignores the payload and preserves raw registers/tags. Other ALU
+payloads, remaining handlers and compiled-body/ABI transport remain open.

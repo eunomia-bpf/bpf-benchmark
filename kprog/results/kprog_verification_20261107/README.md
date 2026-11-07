@@ -2231,3 +2231,49 @@ test/configuration/paper change. Complete commands/log/audit/pins are appended
 to the existing integration archive. This proof-only composition does not
 rerun or recount underlying existing C oracles. Full77/72/dispatcher/O2/O4
 and the known complete-check failures remain open.
+
+## Raw logical family and TEST register dispatch
+
+register_dispatch_step_refines now composes AND/OR/XOR payloads of the
+ALU_REG/ADD_REG/XOR_REG family and the separate TEST_REG row with all prior
+seven raw register gates. The existing generated family table is proved to
+match the raw opcode predicate for every family constructor. All three ALU
+rows pass AUX unchanged, so their names do not force the operation: the low
+payload byte selects AND/OR/XOR. Other ALU payloads still need their own
+body lifts; this is not full coverage of those operation families or all77.
+
+Width, physical GPR bytes and both AUX lane shifts are decoded using the
+existing bindings. Byte high/low lanes and aliases, wider unused lane bytes,
+absent0-to64 widths, next PC and unused immediate fields are retained.
+TEST_REG consumes the lane bytes but ignores the payload and high AUX byte,
+then changes only native flags/PC through the same raw RSP/STACK frame.
+No handler-semantic, computed-value, chosen-flag or state-equality premise
+is added, and None still denotes an unproved interface case rather than a
+new runtime guard or successful no-op.
+
+C's current same-GPR/same-shift XOR zero-operand path is represented explicitly.
+The raw payload, GPR-byte and shift equality gate is retained. Its field
+bindings derive both native XOR and equal RegisterSlice operands; the whole
+body then uses the published zero-body theorem. Other inputs use the proved
+generic body. AL/AH cross-lane inputs remain distinct, without an assumed
+same-value equality. The C owner retains the producer/header/compiler work;
+this does not close compiled-B or initial ABI transport.
+
+Focused92-job Lean graph and four axiom audits PASS with only the existing
+propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies (the
+family bridge has no axioms). All372 proof inputs remain stable. Five existing
+generated checks and all five existing UBSan hosts PASS on a stable input
+snapshot:7629 AUX,2603 family,1141 family-route,2913 comparison and47529
+comparison-route cases. Compiler warnings are retained verbatim. The first
+run also returned0 for every command, but C's authorized header promotion
+changed its source during the run; that record retains metadata exit1 and
+its old pins. A second stable-source run is recorded separately.
+
+The tested C-owner header has SHA256
+d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327.
+At this validation its physical source is an owner candidate; publication
+identity will be checked when C commits it. Its complete input snapshot,
+header diff, original/final proofs and host commands/output/pins are in the
+existing integration JSON/gzip, without creating another runtime header.
+No ISA/header/generator/oracle/test/configuration/paper changes by V. Full
+77/72/whole-dispatch/O2/O4 and complete make-check completion remain open.
