@@ -30,7 +30,9 @@ SP destinations for AND/ORR/EOR and ZR destinations for ANDS/TST. Their generate
 value/width/flag lift preserves the same complete numeric state. Actual logical-immediate
 ALU AUX selection and all six TST/ANDS/BICS numeric dispatch rows compose
 with their generated operand/value/write/flag primitives. Test aliases retain
-DST/SRC routing; register forms retain native shift bounds and SP/ZR rules.
+DST/SRC routing; register forms retain native shift bounds and SP/ZR rules. Generic ALU_REG
+logical forms also compose the generated register RHS with AUX extraction,
+including the stack-ORR path and bare NONE modifiers.
 
 The proofs establish arithmetic/flags, register and tag operations, memory
 accesses, routing tables, and selected whole-state handler refinements.

@@ -772,3 +772,27 @@ that foreign WIP was preserved and reported to T, not changed or hidden as a
 passing check. Native field/mask/width bindings, all77/72 dispatcher steps,
 compiled artifact correspondence and O2/O4 remain open. ExactEA's full pass
 above predates this new dispatcher increment; a new immutable full check follows.
+
+## Generic ALU register logical dispatcher
+
+`Arm64Logic.ImmediateDispatch.dispatchRegister` now binds ALU_REG7 and its
+independent operand-source code to the same generated logical body. Register
+RHS selection precedes that body; its scalar identity selector neither creates
+a synthetic guest register nor adds a second PC advance. AUX byte0 selects
+AND/BIC/EOR/ORR, byte1 the modifier and byte2 its count. Unused IMM and byte3
+remain arbitrary. All four native shifts with width-sized bounds and bare
+NONE with an arbitrary ignored amount compose to the existing canonical
+register-logic step. NONE's untrimmed temporary and LSL0 have identical width
+results; only64bit ORR can enter the retained stack-pointer branch. The prior
+universal pointer-ORR identity therefore applies without a scalar-source
+premise. Register field31 remains ZR, including discarded destinations.
+
+Validation: focused Logic41 and Arithmetic50 dependency builds, seven contract
+freshness checks, generated direct-dispatch and dispatcher-model checks passed.
+Seven existing C semantic/actual-route hosts passed336,5632,256,21688,136,
+1115374,225292cases. Final proof SHA remained unchanged through checks; original
+compiler warnings remain visible. All prior theorem bodies are unchanged; no
+canonical ISA, runtime, generator, oracle or test inputs changed. Modifier
+None outside this native-form slice is not a new C rejection. Native field and
+Entry/O4 materialization/provenance bindings, full77/72 dispatcher steps and
+O2 remain open; exact88ddc9d14's running FULL predates this increment.

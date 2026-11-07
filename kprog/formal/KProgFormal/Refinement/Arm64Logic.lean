@@ -224,6 +224,118 @@ theorem dispatch_refines (op : Logical) (width : Width) (sourceStack : Bool)
   change some (rawStep op width sourceStack dst src immediate s) = _
   rw [raw_step_refines]
 
+/-- The ALU_REG row selects its register through the independent operand
+contract before entering the same logical value/write body. rawStep's
+immediate selector is the identity on that already-selected word; it neither
+manufactures a guest register nor adds a second instruction transition. -/
+def registerRawStep (op : Logical) (mod : GeneratedArm64ModDecode.Mod) (amount : Word)
+    (width : Width) (sourceStack : Bool) (dst src rhs : Reference.AArch64.Register)
+    (immediate : Word) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let selected := GeneratedArm64AluOperand.rhs
+    (if GeneratedArm64AluOperandSelect.immediate .aluReg then .immediate else .register)
+    immediate mod (readReg s rhs) amount (handlerWidth width)
+  rawStep op width sourceStack (Arm64Move.scalarDestination dst) src selected s
+
+theorem register_operand_code : GeneratedArm64AluOperandSelect.code .aluReg =
+    GeneratedArm64DispatchFamily.code .aluReg := rfl
+
+theorem register_raw_refines (op : Logical) (width : Width) (sourceStack : Bool)
+    (kind : ShiftKind) (amount : Fin width.bits) (dst src rhs : Reference.AArch64.Register)
+    (immediate : Word) (s : Reference.AArch64.State) :
+    registerRawStep op (Arm64Shift.modifier kind) (BitVec.ofNat 64 amount.val)
+      width sourceStack dst src rhs immediate s =
+      Reference.AArch64.step (.logic ⟨width, operation op, kind, amount, dst, src, rhs⟩) s := by
+  unfold registerRawStep
+  have body (right : Word) : rawStep op width sourceStack (Arm64Move.scalarDestination dst) src right s =
+      immediateHandlerStep width (operation op) (Arm64Move.scalarDestination dst) src right s := by
+    rw [raw_step_refines, immediate_step_refines]
+  rw [body]
+  have same : immediateHandlerStep width (operation op) (Arm64Move.scalarDestination dst) src
+      (GeneratedArm64AluOperand.rhs
+        (if GeneratedArm64AluOperandSelect.immediate .aluReg then .immediate else .register)
+        immediate (Arm64Shift.modifier kind) (readReg s rhs) (BitVec.ofNat 64 amount.val) (handlerWidth width)) s =
+      handlerStep ⟨width, operation op, kind, amount, dst, src, rhs⟩ s := by
+    cases op <;>
+      simp only [immediateHandlerStep, handlerStep, operation, LogicOp.setFlags,
+        GeneratedArm64AluOperandSelect.immediate, GeneratedArm64AluOperand.rhs,
+        Arm64Move.scalar_destination_write, Bool.false_eq_true, ↓reduceIte]
+  rw [same, step_refines]
+
+def registerAux (op : Logical) (mod : GeneratedArm64ModDecode.Mod) (amount lane3 : Byte) : BitVec 32 :=
+  Arm64Shift.Unary.packedAux mod amount (BitVec.ofNat 8 (GeneratedArm64AluDecode.code (alu op))) lane3
+
+theorem register_aux_operation (op : Logical) (mod : GeneratedArm64ModDecode.Mod) (amount lane3 : Byte) :
+    (GeneratedArm64Aux.b0 (registerAux op mod amount lane3)).toNat = GeneratedArm64AluDecode.code (alu op) := by
+  simp only [registerAux, Arm64Shift.Unary.packedAux, arm64_aux_b0_roundtrip]
+  cases op <;> rfl
+
+/-- Unknown or extended modifier codes are outside this native logical-shift
+certificate, not newly rejected by the production C modifier switch. -/
+def dispatchRegister (code : Nat) (aux : BitVec 32) (width : Width) (sourceStack : Bool)
+    (dst src rhs : Reference.AArch64.Register) (immediate : Word) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  if code = GeneratedArm64DispatchFamily.code .aluReg then
+    (decodeAlu (GeneratedArm64Aux.b0 aux).toNat).bind (fun op =>
+      (Arm64Shift.Unary.decodeModifier (GeneratedArm64Aux.b1 aux).toNat).map
+        (fun mod => registerRawStep op mod ((GeneratedArm64Aux.b2 aux).setWidth 64)
+          width sourceStack dst src rhs immediate s))
+  else none
+
+theorem dispatch_register_refines (op : Logical) (width : Width) (sourceStack : Bool)
+    (kind : ShiftKind) (amount : Fin width.bits) (dst src rhs : Reference.AArch64.Register)
+    (immediate : Word) (lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatchRegister (GeneratedArm64DispatchFamily.code .aluReg)
+      (registerAux op (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane3)
+      width sourceStack dst src rhs immediate s =
+      some (Reference.AArch64.step (.logic ⟨width, operation op, kind, amount, dst, src, rhs⟩) s) := by
+  simp only [dispatchRegister, ↓reduceIte, register_aux_operation, decode_code]
+  change (Arm64Shift.Unary.decodeModifier
+    (GeneratedArm64Aux.b1 (registerAux op (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane3)).toNat).map _ = _
+  simp only [registerAux]
+  rw [Arm64Shift.Unary.packed_shift]
+  change some (registerRawStep op (Arm64Shift.modifier kind)
+    ((GeneratedArm64Aux.b2 (registerAux op (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane3)).setWidth 64)
+    width sourceStack dst src rhs immediate s) = _
+  simp only [registerAux]
+  rw [Arm64Shift.Unary.packed_amount, Arm64Shift.Unary.native_amount, register_raw_refines]
+
+/-- NONE's temporary may retain high bits. Width result and flags use only
+architectural low bits, and only the64bit ORR branch can preserve pointers. -/
+theorem register_identity (op : Logical) (width : Width) (sourceStack : Bool)
+    (dst src rhs : Reference.AArch64.Register) (immediate amount : Word) (s : Reference.AArch64.State) :
+    registerRawStep op .none amount width sourceStack dst src rhs immediate s =
+      registerRawStep op .lsl 0 width sourceStack dst src rhs immediate s := by
+  unfold registerRawStep
+  simp only [GeneratedArm64AluOperandSelect.immediate, GeneratedArm64AluOperand.rhs,
+    Bool.false_eq_true, ↓reduceIte, raw_step_refines, Reference.AArch64.step,
+    Reference.AArch64.logicImmediateStep, Arm64Move.scalarDestination]
+  have equal : Reference.AArch64.logicValue width (operation op) (Reference.AArch64.readReg s src)
+      (GeneratedArm64Mod.value .none (readReg s rhs) amount (handlerWidth width)) =
+    Reference.AArch64.logicValue width (operation op) (Reference.AArch64.readReg s src)
+      (GeneratedArm64Mod.value .lsl (readReg s rhs) 0 (handlerWidth width)) := by
+    cases width <;> cases op <;>
+      simp only [GeneratedArm64Mod.value, operation, handlerWidth, GeneratedArm64Width.mask,
+        Reference.AArch64.logicValue, Reference.AArch64.narrow, Reference.AArch64.Width.bits,
+        Reference.Word, Bool.false_eq_true, ↓reduceIte] <;> bv_decide
+  rw [equal]
+
+theorem dispatch_register_unmodified_refines (op : Logical) (width : Width) (sourceStack : Bool)
+    (dst src rhs : Reference.AArch64.Register) (immediate : Word) (amount lane3 : Byte)
+    (s : Reference.AArch64.State) :
+    dispatchRegister (GeneratedArm64DispatchFamily.code .aluReg) (registerAux op .none amount lane3)
+      width sourceStack dst src rhs immediate s =
+      some (Reference.AArch64.step (.logic
+        ⟨width, operation op, .lsl, ⟨0, by cases width <;> decide⟩, dst, src, rhs⟩) s) := by
+  simp only [dispatchRegister, ↓reduceIte, register_aux_operation, decode_code]
+  change (Arm64Shift.Unary.decodeModifier (GeneratedArm64Aux.b1 (registerAux op .none amount lane3)).toNat).map _ = _
+  simp only [registerAux]
+  rw [Arm64Shift.Unary.packed_none]
+  change some (registerRawStep op .none ((GeneratedArm64Aux.b2 (registerAux op .none amount lane3)).setWidth 64)
+    width sourceStack dst src rhs immediate s) = _
+  rw [register_identity]
+  exact congrArg some (register_raw_refines op width sourceStack .lsl
+    ⟨0, by cases width <;> decide⟩ dst src rhs immediate s)
+
 end ImmediateDispatch
 
 namespace FlagDispatch
