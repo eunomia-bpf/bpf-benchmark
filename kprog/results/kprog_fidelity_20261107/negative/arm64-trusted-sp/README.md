@@ -143,3 +143,25 @@ the independent ordinary-context-store admission finding on both ISAs remains
 open in `../context-projection/README.md`, with C/A owning the production
 projection repair. Real-hardware validation of the current ARM771-form
 static differential harness also remains pending.
+
+## Complete replay after production XDP context repair
+
+The unchanged34 native inputs were replayed independently after production
+header repair `b2b6f28d9`, with the same corrected return-target linker.
+All34 complete: **4 valid controls execute correctly,30 unsafe cases reject,
+zero accepted negatives and zero unsafe execution**. Rejection stages are
+16 verifier,13 specialization and1 loader; guest and QEMU exits are0.
+Every original/request/kernel-captured/generated native identity matches,
+all34 request source-pin sets agree, and host input hashes remain unchanged.
+`production-context-full-summary.json` records every case, exact decisive
+diagnostics and source/host pins; `production-context-full-outcomes.json.gz`
+retains complete original messages. The original transport archive is
+`trusted-arm64-service-result/run-20261107T134739355275Z.tar.gz`
+(SHA256 `b4f8e12dc0b22cbe434b10e2ae8a20688a1a216a20d60ccbd6c00d74e0418342`).
+
+Command: `taskset -c 20-23 make -f kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/Makefile qemu`.
+The separate ordinary context-store regression now also rejects on this
+production header (context-projection result `f7269487c`). These finite suites
+do not close SKB projection, V's dynamic-dispatch host compile regression,
+real ARM CPU fidelity or the full O1-O4 obligations. Earlier old-header and
+old-linker receipts above remain historical observations.
