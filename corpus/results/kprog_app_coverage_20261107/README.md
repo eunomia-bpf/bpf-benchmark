@@ -116,7 +116,7 @@ measurement continue from the reported failure classes.
 | Cilium | 207 startup attempts; 72 resident | 1 | 0 | 0 | 1: helper189 declaration | 0 | [224658 batch](cilium-native-resources/README.md) |
 | Tetragon | 311 startup attempts; 287 resident | 4 | 4 | 3 | 0 | 1: 8193-jump complexity | [225009 batch](tetragon-cmp-resources/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [213447 bound batch](katran-tagged-storage/README.md) |
-| Tracee | 162 startup attempts; 151 resident | 0 | 0 | 0 | 1: kernel resource count before generation | 0 | [230126 batch](tracee-bound-startup/README.md) |
+| Tracee | 151 resident | 6 | 6 | 5 | 0 | 1: readonly index range | [231936 batch](tracee-resource-scoped/README.md) |
 
 Tracee baseline now completes151 application loads on the coherent kernel BTF
 epoch. The shared native CORE helper-preservation repair48ff82cfb restores its
@@ -250,3 +250,6 @@ The [Tetragon CMP/resource batch225009](tetragon-cmp-resources/README.md) genera
 
 
 The current serial continuation consumes entry-scoped resource metadata for Tracee/Cilium, then the [comparison-identity and native-width stack candidates](native-compare-load-width/README.md) for OTel/Tetragon. Their component checks and compilation pass; whole-application verifier and work receipts follow each closed guest. Earlier epochs retain their individual coverage and source identities in the linked raw archives.
+
+
+The [Tracee scoped-resource batch231936](tracee-resource-scoped/README.md) completes6fresh generated/compiled requests, binds5, and reaches the actual sys_exit_submit readonly-index verifier result. Entry resource selection and verified startup both reach this new service epoch; max index remains1036for80bytes,2154processed instructions/91states. The next generic narrow-value trial preserves the exact native comparisons and table address.
