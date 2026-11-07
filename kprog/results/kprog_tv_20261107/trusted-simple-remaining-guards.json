@@ -1,0 +1,167 @@
+{
+  "status": "actual_native_B_remaining_guard_region_executions_and_control_checked",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "utc": "2026-11-07T11:17:05.132274+00:00",
+  "theorem": "KProgTV.TrustedSimpleX86.remaining_guard_correspondence",
+  "native_instruction_extents": [
+    [
+      17,
+      4
+    ],
+    [
+      21,
+      3
+    ],
+    [
+      24,
+      2
+    ],
+    [
+      26,
+      4
+    ],
+    [
+      30,
+      3
+    ],
+    [
+      33,
+      2
+    ]
+  ],
+  "covered_B_pcs": [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "order": {
+    "native": [
+      "pointer+8",
+      "pointer+72"
+    ],
+    "B": [
+      "pointer+72",
+      "pointer+8"
+    ],
+    "arithmetic": "canonical 64-bit modular operations, including wraparound"
+  },
+  "successors": {
+    "condition": "pointer+8>limit OR pointer+72>limit",
+    "true": {
+      "native": 60,
+      "B": 34
+    },
+    "false": {
+      "native": 35,
+      "B": 18
+    },
+    "outcome_is_a_premise": false
+  },
+  "claims": [
+    "actual native byte decoding and complete successor states at all six instructions",
+    "actual native and B region executions, including either early exit or continuation",
+    "ordered native/B effects both empty; both memories unchanged",
+    "widened/narrowed native ADD proven equal to modular 64-bit addition",
+    "distinct native/B state functions preserve different schedules and temporary values"
+  ],
+  "premises": [
+    "native PC17",
+    "B PC12 and active",
+    "matching native RSI/B r2 pointer and native RDX/B r3 limit"
+  ],
+  "no_assumption_of": [
+    "non-wrapping addition",
+    "pointer monotonicity or range",
+    "branch outcome"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical before namespace end in both files",
+    "old_declarations_sha256": {
+      "kprog/tv/TrustedSimpleX86.lean": "6dc96598fe8165c20b67c681da840e7a2d05224e9ab4afb6f95c5194d8920cdb",
+      "kprog/formal/KProgFormal/Reference/X86.lean": "e50dc101e752bdde0dece9892af9b3df087a2bd8ef9f4ff8be5e9cfaa9e3b409"
+    },
+    "canonical_change": "two public byte-decoding theorems only; no ISA definition changed",
+    "runtime_wire_ABI_metadata_binding_rejection_contracts": "unchanged"
+  },
+  "remaining": [
+    "composition with entry and first guard",
+    "stores/exit and whole-program state relation",
+    "program-level canonical relational execution",
+    "fault/ABI/platform behavior",
+    "immutable P to emitted artifact transport"
+  ],
+  "trusted": [
+    "verifier soundness",
+    "canonical ISA/memory and explicit platform semantics",
+    "kernel binding/capture and accepted-byte provenance",
+    "registered specialization/link service until whole-program TV",
+    "Lean kernel/logical axioms and Lean.ofReduceBool native proof reduction where audited"
+  ],
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "binding_records": 2,
+    "mismatch_controls_rejected": 22,
+    "no_sorryAx": true,
+    "log_sha256": "8d4e39cbe9a0e02c4957dd83fca6f70198e26f1c08c9374f5f97f9d3ac993551",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.add72_value": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_native8_block": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_native72_block": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_native_guards": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_native_successor": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_guard_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgFormal.Reference.X86.decode_lea_rdi_rsi8": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.Reference.X86.decode_add_rsi72": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "2431c62a387f64a219356a3c9c0f318741da1cdde2a7d3528fea171334d9130c",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "5795eae5ccab41ce25d47f99820b7c96f881f32339301f5604ea01607cfbc1cf",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/check_trusted_capture.py": "71642150609627e7ac8de6ef265d79dc6814a58af669260ffc21e602983e29a9",
+    "kprog/tv/Makefile": "2123977b45e69a44f70507dd65b2c1506e23d509f1c244a7d1d5f0799456f9b4"
+  },
+  "raw_output": "summarized and retired after publication; STOP/shared caches retained"
+}

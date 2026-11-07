@@ -1401,3 +1401,30 @@ successor. The native order is +8 then +72, whereas this B order is +72 then
 +8; native-state correspondence and composition with the entry prefix remain
 separate work. This is a B-subpath certificate, not whole-program TV.
 Evidence: `trusted-simple-remaining-B-guards.json`.
+
+
+Native remaining guards and their reordered B counterpart
+
+`native_decode17/21/24/26/30/33` check the actual LEA/CMP/JA/ADD/CMP/JA
+bytes. Two public decoding lemmas expose the same canonical decoder's LEA
+and signed-immediate ADD; no ISA definition changes. `add72_value` proves
+the reference widened/narrowed ADD result equals modular 64-bit addition.
+Every actual instruction step fixes its complete successor state, including
+RFLAGS, all GPRs, XMM0, memory, bases and the address-width profile.
+
+`remaining_native8_block` and `remaining_native72_block` validate the actual
+byte extents and branch targets. `remaining_native_guards` composes the
+actual +8-first native paths, taking the second segment only when the first
+JA falls through. `remaining_guard_correspondence` pairs this with the
+actual +72-first B execution. Both complete final states and empty ordered
+effect traces are retained; both memories are unchanged. The same disjunction
+of the two modular unsigned comparisons determines native PC60/Bpc34 or
+native PC35/Bpc18. No pointer monotonicity, no-overflow or branch-outcome
+premise occurs. The separate native/B state functions retain their different
+schedules and temporary values.
+
+This is an actual guard-region execution/control certificate. Composition
+with the full entry prefix and subsequent stores/exit, program-wide state
+relations and canonical relational execution, faults, ABI/platform behavior
+and immutable-P/materialized-artifact transport remain open. Evidence:
+`trusted-simple-remaining-guards.json`.

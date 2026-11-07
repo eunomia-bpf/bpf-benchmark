@@ -1521,4 +1521,20 @@ theorem decode_ja_rel8 (s : State) (displacement : Byte) :
   simp +decide [decode,prefixes,byteAt,signedDisplacement,fallthrough,
     Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
 
+
+/-- Captured simple bounds-check LEA decoded by the single native decoder. -/
+theorem decode_lea_rdi_rsi8 (s : State) :
+    decode #[0x48,0x8d,0x7e,0x08] s = .ok
+      (.lea .w64 7 (s.gpr 6+8) (s.pc+4)) := by
+  simp +decide [decode,prefixes,byteAt,operand,addressParts,signedDisplacement,registerCode,
+    Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+/-- Captured simple ADD uses its signed immediate and architectural width. -/
+theorem decode_add_rsi72 (s : State) :
+    decode #[0x48,0x83,0xc6,0x48] s = .ok
+      (.arithmetic .w64 .add (.register (.low 6)) (.immediate 72) (s.pc+4)) := by
+  simp +decide [decode,prefixes,byteAt,operand,addressParts,signedDisplacement,registerCode,
+    scalarWidth,scalarSlice,scalarDestination,integerBinary,
+    Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
 end KProgFormal.Reference.X86

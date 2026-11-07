@@ -1285,6 +1285,208 @@ theorem remaining_proof_successor (p : BPF.State) :
     simp +decide [remainingProofFinal,remainingProof72,remainingProof8,BPF.setReg,
       add8,reject72,reject8]
 
+
+theorem native_decode17 (s : X86.State) :
+    X86.decode (native.extract 17 21) s = .ok (.lea .w64 7 (s.gpr 6+8) (s.pc+4)) := by
+  have bytes : native.extract 17 21 = #[0x48,0x8d,0x7e,0x08] := by decide
+  rw [bytes]
+  exact X86.decode_lea_rdi_rsi8 s
+
+theorem native_decode21 (s : X86.State) :
+    X86.decode (native.extract 21 24) s = .ok
+      (.arithmetic .w64 .compare (.register (.low 7)) (.register (.low 2)) (s.pc+3)) := by rfl
+
+theorem native_decode24 (s : X86.State) :
+    X86.decode (native.extract 24 26) s = .ok (.branch (some 7) ((s.pc+2)+(34#64)) (s.pc+2)) := by
+  have bytes : native.extract 24 26 = #[0x77,0x22] := by decide
+  rw [bytes]
+  exact X86.decode_ja_rel8 s (0x22#8)
+
+theorem native_decode26 (s : X86.State) :
+    X86.decode (native.extract 26 30) s = .ok
+      (.arithmetic .w64 .add (.register (.low 6)) (.immediate 72) (s.pc+4)) := by
+  have bytes : native.extract 26 30 = #[0x48,0x83,0xc6,0x48] := by decide
+  rw [bytes]
+  exact X86.decode_add_rsi72 s
+
+theorem native_decode30 (s : X86.State) :
+    X86.decode (native.extract 30 33) s = .ok
+      (.arithmetic .w64 .compare (.register (.low 6)) (.register (.low 2)) (s.pc+3)) := by rfl
+
+theorem native_decode33 (s : X86.State) :
+    X86.decode (native.extract 33 35) s = .ok (.branch (some 7) ((s.pc+2)+(25#64)) (s.pc+2)) := by
+  have bytes : native.extract 33 35 = #[0x77,0x19] := by decide
+  rw [bytes]
+  exact X86.decode_ja_rel8 s (0x19#8)
+
+def remainingNativeLea (s : X86.State) : X86.State :=
+  { s with gpr := fun r => if r=7 then s.gpr 6+(8#64) else s.gpr r, pc := 21 }
+
+def remainingNativeCmp8 (s : X86.State) : X86.State :=
+  { remainingNativeLea s with
+    rflags := X86.arithmeticFlags .w64 true false (s.gpr 6+(8#64)) (s.gpr 2) s.rflags
+    pc := 24 }
+
+def remainingNative8 (s : X86.State) : X86.State :=
+  { remainingNativeCmp8 s with pc := if s.gpr 6+(8#64) > s.gpr 2 then 60 else 26 }
+
+def remainingNativeAdd (s : X86.State) : X86.State :=
+  { s with
+    gpr := fun r => if r=6 then s.gpr 6+(72#64) else s.gpr r
+    rflags := X86.arithmeticFlags .w64 false false (s.gpr 6) (72#64) s.rflags
+    pc := 30 }
+
+def remainingNativeCmp72 (s : X86.State) : X86.State :=
+  { remainingNativeAdd s with
+    rflags := X86.arithmeticFlags .w64 true false (s.gpr 6+(72#64)) (s.gpr 2) (remainingNativeAdd s).rflags
+    pc := 33 }
+
+def remainingNative72 (s : X86.State) : X86.State :=
+  { remainingNativeCmp72 s with pc := if s.gpr 6+(72#64) > s.gpr 2 then 60 else 35 }
+
+def remainingNativeFinal (s : X86.State) : X86.State :=
+  if s.gpr 6+(8#64) > s.gpr 2 then remainingNative8 s else remainingNative72 (remainingNative8 s)
+
+theorem remaining_native_lea_step (s : X86.State) :
+    X86.step (.lea .w64 7 (s.gpr 6+(8#64)) 21) s = ⟨remainingNativeLea s,[],none⟩ := by
+  rfl
+
+theorem remaining_native_cmp8_step (s : X86.State) :
+    X86.step (.arithmetic .w64 .compare (.register (.low 7)) (.register (.low 2)) 24) (remainingNativeLea s) =
+      ⟨remainingNativeCmp8 s,[],none⟩ := by
+  have nocarry (f : Word) : X86.ArithmeticKind.compare.carry f = false := by rfl
+  simp +decide [X86.step,X86.arithmeticStep,X86.scalarRead,X86.scalarRegisterValue,
+    X86.ScalarDestination.source,X86.ArithmeticKind.subtract,nocarry,
+    X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+    remainingNativeCmp8,remainingNativeLea]
+
+theorem remaining_native_branch8_step (s : X86.State) :
+    X86.step (.branch (some 7) 60 26) (remainingNativeCmp8 s) = ⟨remainingNative8 s,[],none⟩ := by
+  simp only [X86.step,remainingNative8,remainingNativeCmp8,compare_ja_predicate]
+
+theorem add72_value (value : Word) :
+    X86.arithmeticValue .w64 false false value (72#64) = value+(72#64) := by
+  simp only [X86.arithmeticValue,X86.ScalarWidth.bits,X86.ScalarWidth.bytes]
+  unfold Word at *
+  bv_decide
+
+theorem remaining_native_add72_step (s : X86.State) :
+    X86.step (.arithmetic .w64 .add (.register (.low 6)) (.immediate (72#64)) 30) s =
+      ⟨remainingNativeAdd s,[],none⟩ := by
+  have nocarry (f : Word) : X86.ArithmeticKind.add.carry f = false := by rfl
+  simp +decide [X86.step,X86.arithmeticStep,X86.scalarRead,X86.scalarRegisterValue,
+    X86.scalarWrite,X86.scalarWriteValue,X86.ScalarDestination.source,
+    X86.ArithmeticKind.subtract,nocarry,add72_value,
+    X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+    remainingNativeAdd]
+
+theorem remaining_native_cmp72_step (s : X86.State) :
+    X86.step (.arithmetic .w64 .compare (.register (.low 6)) (.register (.low 2)) 33) (remainingNativeAdd s) =
+      ⟨remainingNativeCmp72 s,[],none⟩ := by
+  have nocarry (f : Word) : X86.ArithmeticKind.compare.carry f = false := by rfl
+  simp +decide [X86.step,X86.arithmeticStep,X86.scalarRead,X86.scalarRegisterValue,
+    X86.ScalarDestination.source,X86.ArithmeticKind.subtract,nocarry,
+    X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+    remainingNativeCmp72,remainingNativeAdd]
+
+theorem remaining_native_branch72_step (s : X86.State) :
+    X86.step (.branch (some 7) 60 35) (remainingNativeCmp72 s) = ⟨remainingNative72 s,[],none⟩ := by
+  simp only [X86.step,remainingNative72,remainingNativeCmp72,compare_ja_predicate]
+
+
+theorem remaining_native8_block (s : X86.State) (position : s.pc=17) :
+    X86Path.Execution 0 native s [] (remainingNative8 s) := by
+  have d0 : X86Path.decodeAt 0 native ⟨17,4⟩ s = .ok (.lea .w64 7 (s.gpr 6+(8#64)) 21) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode17,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have pc1 : (remainingNativeLea s).pc=21 := rfl
+  have pc2 : (remainingNativeCmp8 s).pc=24 := rfl
+  have d1 : X86Path.decodeAt 0 native ⟨21,3⟩ (remainingNativeLea s) = .ok
+      (.arithmetic .w64 .compare (.register (.low 7)) (.register (.low 2)) 24) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode21,pc1,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have d2 : X86Path.decodeAt 0 native ⟨24,2⟩ (remainingNativeCmp8 s) = .ok (.branch (some 7) 60 26) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode24,pc2,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have evaluated : X86Path.evaluate 0 native [⟨17,4⟩,⟨21,3⟩,⟨24,2⟩] s =
+      .ok ⟨⟨remainingNative8 s,[],none⟩,(0xffffffffffffffff#64)⟩ := by
+    simp only [X86Path.evaluate,d0,d1,d2,remaining_native_lea_step,
+      remaining_native_cmp8_step,remaining_native_branch8_step,X86.definedFlags,
+      Option.isSome,Bool.false_eq_true,List.isEmpty_cons,List.isEmpty_nil,List.nil_append,ite_false]
+    rfl
+  exact X86Path.evaluate_sound _ _ _ _ _ evaluated
+
+theorem remaining_native72_block (s : X86.State) (position : s.pc=26) :
+    X86Path.Execution 0 native s [] (remainingNative72 s) := by
+  have d0 : X86Path.decodeAt 0 native ⟨26,4⟩ s = .ok
+      (.arithmetic .w64 .add (.register (.low 6)) (.immediate (72#64)) 30) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode26,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have pc1 : (remainingNativeAdd s).pc=30 := rfl
+  have pc2 : (remainingNativeCmp72 s).pc=33 := rfl
+  have d1 : X86Path.decodeAt 0 native ⟨30,3⟩ (remainingNativeAdd s) = .ok
+      (.arithmetic .w64 .compare (.register (.low 6)) (.register (.low 2)) 33) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode30,pc1,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have d2 : X86Path.decodeAt 0 native ⟨33,2⟩ (remainingNativeCmp72 s) = .ok (.branch (some 7) 60 35) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode33,pc2,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have evaluated : X86Path.evaluate 0 native [⟨26,4⟩,⟨30,3⟩,⟨33,2⟩] s =
+      .ok ⟨⟨remainingNative72 s,[],none⟩,(0xffffffffffffffff#64)⟩ := by
+    simp only [X86Path.evaluate,d0,d1,d2,remaining_native_add72_step,
+      remaining_native_cmp72_step,remaining_native_branch72_step,X86.definedFlags,
+      Option.isSome,Bool.false_eq_true,List.isEmpty_cons,List.isEmpty_nil,List.nil_append,ite_false]
+    rfl
+  exact X86Path.evaluate_sound _ _ _ _ _ evaluated
+
+/-- The native order is +8 then +72. Actual byte-decoded successors choose
+which segment executes; neither a branch nor non-wrapping addition is assumed. -/
+theorem remaining_native_guards (s : X86.State) (position : s.pc=17) :
+    X86Path.Execution 0 native s [] (remainingNativeFinal s) := by
+  have headRun := remaining_native8_block s position
+  by_cases reject8 : s.gpr 6+(8#64) > s.gpr 2
+  · simpa only [remainingNativeFinal,reject8,ite_true] using headRun
+  · have at26 : (remainingNative8 s).pc=26 := by simp [remainingNative8,reject8]
+    have tailRun := remaining_native72_block (remainingNative8 s) at26
+    simpa only [remainingNativeFinal,reject8,ite_false,List.nil_append] using
+      native_execution_append headRun tailRun
+
+theorem remaining_native_successor (s : X86.State) :
+    (remainingNativeFinal s).pc =
+      (if s.gpr 6+(8#64) > s.gpr 2 ∨ s.gpr 6+(72#64) > s.gpr 2 then 60 else 35) := by
+  by_cases reject8 : s.gpr 6+(8#64) > s.gpr 2 <;>
+    by_cases reject72 : s.gpr 6+(72#64) > s.gpr 2 <;>
+    simp +decide [remainingNativeFinal,remainingNative72,remainingNative8,
+      remainingNativeCmp8,remainingNativeLea,reject8,reject72]
+
+/-- Both actual guard regions, including their different evaluation orders,
+complete successor states, identical empty effects and corresponding exits.
+All arithmetic is modular; no monotonicity or non-overflow premise is used. -/
+theorem remaining_guard_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (nativePC : n.pc=17) (proofPC : p.pc=12) (active : p.halted=false)
+    (pointer : n.gpr 6=p.regs 2) (limit : n.gpr 2=p.regs 3) :
+    X86Path.Execution 0 native n [] (remainingNativeFinal n) ∧
+    Execution (initializedInstructionStep env) p [] (remainingProofFinal p) ∧
+    (remainingNativeFinal n).pc =
+      (if p.regs 2+(8#64) > p.regs 3 ∨ p.regs 2+(72#64) > p.regs 3 then 60 else 35) ∧
+    (remainingProofFinal p).pc =
+      (if p.regs 2+(8#64) > p.regs 3 ∨ p.regs 2+(72#64) > p.regs 3 then 34 else 18) ∧
+    (remainingNativeFinal n).memory = n.memory ∧ (remainingProofFinal p).memory = p.memory := by
+  refine ⟨remaining_native_guards n nativePC,remaining_proof_guards env p proofPC active,
+    ?_,remaining_proof_successor p,?_,?_⟩
+  · simpa only [pointer,limit] using remaining_native_successor n
+  · by_cases reject8 : n.gpr 6+(8#64) > n.gpr 2 <;>
+      simp [remainingNativeFinal,reject8,remainingNative8,remainingNativeCmp8,remainingNativeLea,
+        remainingNative72,remainingNativeCmp72,remainingNativeAdd]
+  · by_cases reject72 : p.regs 2+(72#64) > p.regs 3 <;>
+      simp [remainingProofFinal,reject72,remainingProof72,remainingProof8,BPF.setReg]
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -1390,3 +1592,42 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.remaining_proof_guards
 
 #print axioms KProgTV.TrustedSimpleX86.remaining_proof_successor
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode17
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode21
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode24
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode26
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode30
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode33
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native_lea_step
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native_cmp8_step
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native_branch8_step
+
+#print axioms KProgTV.TrustedSimpleX86.add72_value
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native_add72_step
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native_cmp72_step
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native_branch72_step
+
+#print axioms KProgFormal.Reference.X86.decode_lea_rdi_rsi8
+#print axioms KProgFormal.Reference.X86.decode_add_rsi72
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native8_block
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native72_block
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native_guards
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native_successor
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_guard_correspondence
