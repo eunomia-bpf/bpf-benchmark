@@ -1,0 +1,690 @@
+[
+  {
+    "phase": "bcc-memory-v35",
+    "sp_bounds": [
+      -240,
+      0
+    ],
+    "known_memory_min": -240,
+    "known_memory_end": 0,
+    "unknown_memory": [],
+    "memory": [
+      [
+        -240,
+        -232,
+        "read"
+      ],
+      [
+        -240,
+        -232,
+        "write"
+      ],
+      [
+        -232,
+        -230,
+        "read"
+      ],
+      [
+        -232,
+        -228,
+        "read"
+      ],
+      [
+        -232,
+        -224,
+        "read"
+      ],
+      [
+        -216,
+        -208,
+        "read"
+      ],
+      [
+        -208,
+        -200,
+        "write"
+      ],
+      [
+        -200,
+        -192,
+        "write"
+      ],
+      [
+        -192,
+        -184,
+        "write"
+      ],
+      [
+        -184,
+        -176,
+        "write"
+      ],
+      [
+        -176,
+        -168,
+        "write"
+      ],
+      [
+        -168,
+        -160,
+        "write"
+      ],
+      [
+        -160,
+        -152,
+        "write"
+      ],
+      [
+        -152,
+        -144,
+        "write"
+      ],
+      [
+        -144,
+        -140,
+        "write"
+      ],
+      [
+        -144,
+        -136,
+        "write"
+      ],
+      [
+        -140,
+        -138,
+        "write"
+      ],
+      [
+        -138,
+        -136,
+        "write"
+      ],
+      [
+        -136,
+        -134,
+        "write"
+      ],
+      [
+        -136,
+        -128,
+        "write"
+      ],
+      [
+        -128,
+        -120,
+        "write"
+      ],
+      [
+        -120,
+        -112,
+        "write"
+      ],
+      [
+        -104,
+        -100,
+        "write"
+      ],
+      [
+        -104,
+        -96,
+        "write"
+      ],
+      [
+        -96,
+        -88,
+        "write"
+      ],
+      [
+        -88,
+        -84,
+        "write"
+      ],
+      [
+        -80,
+        -72,
+        "read"
+      ],
+      [
+        -80,
+        -72,
+        "write"
+      ],
+      [
+        -72,
+        -64,
+        "read"
+      ],
+      [
+        -72,
+        -64,
+        "write"
+      ],
+      [
+        -64,
+        -56,
+        "read"
+      ],
+      [
+        -64,
+        -56,
+        "write"
+      ],
+      [
+        -56,
+        -48,
+        "read"
+      ],
+      [
+        -56,
+        -48,
+        "write"
+      ],
+      [
+        -48,
+        -40,
+        "read"
+      ],
+      [
+        -48,
+        -40,
+        "write"
+      ],
+      [
+        -40,
+        -32,
+        "read"
+      ],
+      [
+        -40,
+        -32,
+        "write"
+      ],
+      [
+        -32,
+        -24,
+        "read"
+      ],
+      [
+        -32,
+        -24,
+        "write"
+      ],
+      [
+        -24,
+        -16,
+        "read"
+      ],
+      [
+        -24,
+        -16,
+        "write"
+      ],
+      [
+        -16,
+        -8,
+        "read"
+      ],
+      [
+        -16,
+        -8,
+        "write"
+      ],
+      [
+        -8,
+        0,
+        "read"
+      ],
+      [
+        -8,
+        0,
+        "write"
+      ]
+    ],
+    "helpers": [
+      [
+        "bpf_get_current_comm",
+        "(-100, False, None, None, None)",
+        "(None, 16, None, None, None)"
+      ],
+      [
+        "bpf_get_current_comm",
+        "(-134, False, None, None, None)",
+        "(None, 16, None, None, None)"
+      ],
+      [
+        "bpf_get_current_pid_tgid",
+        "(False, None, None, None, None)",
+        "(None, None, None, None, None)"
+      ],
+      [
+        "bpf_ktime_get_ns",
+        "(False, None, None, None, None)",
+        "(None, None, None, None, None)"
+      ],
+      [
+        "bpf_map_delete_elem",
+        "(False, -216, None, None, None)",
+        "(None, None, None, None, None)"
+      ],
+      [
+        "bpf_map_lookup_elem",
+        "(False, -216, None, None, None)",
+        "(None, None, None, None, None)"
+      ],
+      [
+        "bpf_map_update_elem",
+        "(False, -216, -104, False, None)",
+        "(None, None, None, 0, None)"
+      ],
+      [
+        "bpf_map_update_elem",
+        "(False, -216, -72, False, None)",
+        "(None, None, None, 0, None)"
+      ],
+      [
+        "bpf_perf_event_output",
+        "(False, False, False, -208, False)",
+        "(None, None, 4294967295, None, 96)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-134, False, False, None, None)",
+        "(None, 16, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-152, False, False, None, None)",
+        "(None, 8, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-192, False, -232, None, None)",
+        "(None, 16, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-192, False, -232, None, None)",
+        "(None, None, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-208, False, -232, None, None)",
+        "(None, 16, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-208, False, -232, None, None)",
+        "(None, 4, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-216, False, False, None, None)",
+        "(None, 8, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-232, False, False, None, None)",
+        "(None, 16, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-232, False, False, None, None)",
+        "(None, 2, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-232, False, False, None, None)",
+        "(None, 4, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-232, False, False, None, None)",
+        "(None, 8, None, None, None)"
+      ]
+    ]
+  },
+  {
+    "phase": "bcc-stripped-v34",
+    "sp_bounds": [
+      -240,
+      0
+    ],
+    "known_memory_min": -240,
+    "known_memory_end": 0,
+    "unknown_memory": [],
+    "memory": [
+      [
+        -240,
+        -232,
+        "read"
+      ],
+      [
+        -240,
+        -232,
+        "write"
+      ],
+      [
+        -232,
+        -230,
+        "read"
+      ],
+      [
+        -232,
+        -228,
+        "read"
+      ],
+      [
+        -232,
+        -224,
+        "read"
+      ],
+      [
+        -216,
+        -208,
+        "read"
+      ],
+      [
+        -208,
+        -200,
+        "write"
+      ],
+      [
+        -200,
+        -192,
+        "write"
+      ],
+      [
+        -192,
+        -184,
+        "write"
+      ],
+      [
+        -184,
+        -176,
+        "write"
+      ],
+      [
+        -176,
+        -168,
+        "write"
+      ],
+      [
+        -168,
+        -160,
+        "write"
+      ],
+      [
+        -160,
+        -152,
+        "write"
+      ],
+      [
+        -152,
+        -144,
+        "write"
+      ],
+      [
+        -144,
+        -140,
+        "write"
+      ],
+      [
+        -144,
+        -136,
+        "write"
+      ],
+      [
+        -140,
+        -138,
+        "write"
+      ],
+      [
+        -138,
+        -136,
+        "write"
+      ],
+      [
+        -136,
+        -134,
+        "write"
+      ],
+      [
+        -136,
+        -128,
+        "write"
+      ],
+      [
+        -128,
+        -120,
+        "write"
+      ],
+      [
+        -120,
+        -112,
+        "write"
+      ],
+      [
+        -104,
+        -100,
+        "write"
+      ],
+      [
+        -104,
+        -96,
+        "write"
+      ],
+      [
+        -96,
+        -88,
+        "write"
+      ],
+      [
+        -88,
+        -84,
+        "write"
+      ],
+      [
+        -80,
+        -72,
+        "read"
+      ],
+      [
+        -80,
+        -72,
+        "write"
+      ],
+      [
+        -72,
+        -64,
+        "read"
+      ],
+      [
+        -72,
+        -64,
+        "write"
+      ],
+      [
+        -64,
+        -56,
+        "read"
+      ],
+      [
+        -64,
+        -56,
+        "write"
+      ],
+      [
+        -56,
+        -48,
+        "read"
+      ],
+      [
+        -56,
+        -48,
+        "write"
+      ],
+      [
+        -48,
+        -40,
+        "read"
+      ],
+      [
+        -48,
+        -40,
+        "write"
+      ],
+      [
+        -40,
+        -32,
+        "read"
+      ],
+      [
+        -40,
+        -32,
+        "write"
+      ],
+      [
+        -32,
+        -24,
+        "read"
+      ],
+      [
+        -32,
+        -24,
+        "write"
+      ],
+      [
+        -24,
+        -16,
+        "read"
+      ],
+      [
+        -24,
+        -16,
+        "write"
+      ],
+      [
+        -16,
+        -8,
+        "read"
+      ],
+      [
+        -16,
+        -8,
+        "write"
+      ],
+      [
+        -8,
+        0,
+        "read"
+      ],
+      [
+        -8,
+        0,
+        "write"
+      ]
+    ],
+    "helpers": [
+      [
+        "bpf_get_current_comm",
+        "(-100, False, None, None, None)",
+        "(None, 16, None, None, None)"
+      ],
+      [
+        "bpf_get_current_comm",
+        "(-134, False, None, None, None)",
+        "(None, 16, None, None, None)"
+      ],
+      [
+        "bpf_get_current_pid_tgid",
+        "(False, None, None, None, None)",
+        "(None, None, None, None, None)"
+      ],
+      [
+        "bpf_ktime_get_ns",
+        "(False, None, None, None, None)",
+        "(None, None, None, None, None)"
+      ],
+      [
+        "bpf_map_delete_elem",
+        "(False, -216, None, None, None)",
+        "(None, None, None, None, None)"
+      ],
+      [
+        "bpf_map_lookup_elem",
+        "(False, -216, None, None, None)",
+        "(None, None, None, None, None)"
+      ],
+      [
+        "bpf_map_update_elem",
+        "(False, -216, -104, False, None)",
+        "(None, None, None, 0, None)"
+      ],
+      [
+        "bpf_map_update_elem",
+        "(False, -216, -72, False, None)",
+        "(None, None, None, 0, None)"
+      ],
+      [
+        "bpf_perf_event_output",
+        "(False, False, False, -208, False)",
+        "(None, None, 4294967295, None, 96)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-134, False, False, None, None)",
+        "(None, 16, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-152, False, False, None, None)",
+        "(None, 8, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-192, False, -232, None, None)",
+        "(None, 16, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-192, False, -232, None, None)",
+        "(None, None, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-208, False, -232, None, None)",
+        "(None, 16, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-208, False, -232, None, None)",
+        "(None, 4, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-216, False, False, None, None)",
+        "(None, 8, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-232, False, False, None, None)",
+        "(None, 16, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-232, False, False, None, None)",
+        "(None, 2, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-232, False, False, None, None)",
+        "(None, 4, None, None, None)"
+      ],
+      [
+        "bpf_probe_read_kernel",
+        "(-232, False, False, None, None)",
+        "(None, 8, None, None, None)"
+      ]
+    ]
+  }
+]

@@ -1,0 +1,24 @@
+[
+  {
+    "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/katran/balancer.native.o",
+    "symbol": "balancer_ingress",
+    "sha256": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+    "bytes": 69600,
+    "elf_machine": "EM_AARCH64",
+    "entry_section": "xdp",
+    "entry_offset": 0,
+    "entry_size": 7484,
+    "undefined_symbols": []
+  },
+  {
+    "path": "/workspaces/repository/kprog/arm64/build/app-verified-stage/katran/xdp_root.native.o",
+    "symbol": "xdp_root",
+    "sha256": "2edeaa3477e5f9d9579a480379458b1cdfd85daf32f1b0a8ecbf950380816341",
+    "bytes": 6264,
+    "elf_machine": "EM_AARCH64",
+    "entry_section": "xdp",
+    "entry_offset": 0,
+    "entry_size": 84,
+    "undefined_symbols": []
+  }
+]

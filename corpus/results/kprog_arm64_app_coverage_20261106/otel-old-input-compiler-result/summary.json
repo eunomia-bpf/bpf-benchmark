@@ -1,0 +1,32 @@
+{
+  "input": "older OTel ELF without the newly embedded native memset",
+  "native_sha256": "05eafda0a80d7df80cb8d6ab5765dd1d3be448b21b9b5c1406e6092b0f3b912b",
+  "phase": "otel-real-v18",
+  "candidates": 14,
+  "compiled": 10,
+  "failed": 4,
+  "failures": [
+    {
+      "name": "otel_perf_unwind_hotspot",
+      "returncode": -6,
+      "cause": "LLVM out of memory"
+    },
+    {
+      "name": "otel_perf_unwind_perl",
+      "returncode": -6,
+      "cause": "LLVM out of memory"
+    },
+    {
+      "name": "otel_perf_unwind_php",
+      "returncode": -6,
+      "cause": "LLVM out of memory"
+    },
+    {
+      "name": "otel_perf_unwind_v8",
+      "returncode": -6,
+      "cause": "LLVM out of memory"
+    }
+  ],
+  "scope": "compiler only; separate from active new-input v36; no verifier/app admission",
+  "driver_exit": 2
+}

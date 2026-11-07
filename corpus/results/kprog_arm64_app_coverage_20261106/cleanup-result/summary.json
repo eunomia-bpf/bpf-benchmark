@@ -1,0 +1,175 @@
+{
+  "utc": "2026-11-07T08:05:12.691195+00:00",
+  "source_commit": "f333aac8c400201c36ea1d43d0a94056f7148ca0",
+  "run_directories": {
+    "deleted": [
+      "kprog/arm64/app-coverage-baseline-run-3607553",
+      "kprog/arm64/app-coverage-bounded-all-run-238812",
+      "kprog/arm64/app-coverage-defined-frozen-run-1216226",
+      "kprog/arm64/app-coverage-defined-known-run-1150429",
+      "kprog/arm64/app-coverage-helper-complete-75-run-623109",
+      "kprog/arm64/app-coverage-helper-complete-run-621776",
+      "kprog/arm64/app-coverage-helper-ids-run-3723782",
+      "kprog/arm64/app-coverage-label-all-run-3659439",
+      "kprog/arm64/app-coverage-label-pilot-run-3644785",
+      "kprog/arm64/app-coverage-pilot-run-3607178",
+      "kprog/arm64/app-coverage-real-helpers-run-505183"
+    ],
+    "blocked": [],
+    "free_before": 42866491392,
+    "free_after": 44734603264,
+    "delta": 1868111872
+  },
+  "raw_outputs": {
+    "deleted_untracked_files": 45616,
+    "pruned_dirs": 1606,
+    "deleted_private_builds": [
+      "kprog/arm64/build/a-ir-diagnostic",
+      "kprog/arm64/build/python-tests",
+      "kprog/arm64/build/app-qemu-paired",
+      "kprog/arm64/build/constant-dispatch",
+      "kprog/arm64/build/abi-boundary-baseline",
+      "kprog/arm64/build/fidelity-ldp",
+      "kprog/arm64/build/fidelity-wsp",
+      "kprog/arm64/build/negative-native",
+      "kprog/arm64/build/app-qemu-kinsn",
+      "kprog/arm64/build/tetragon-alignchecker",
+      "kprog/arm64/build/high32-v38-micro",
+      "kprog/arm64/build/bounded-dispatch",
+      "kprog/arm64/build/app-helper-negative-native",
+      "kprog/arm64/build/layout-v27-micro",
+      "kprog/arm64/build/layout-v27-negative",
+      "kprog/arm64/build/app-coverage",
+      "kprog/arm64/build/app-qemu-kernel-config",
+      "kprog/arm64/build/abi-boundary-frozen",
+      "kprog/arm64/build/fidelity-exclusive-overlap",
+      "kprog/arm64/build/direct-dispatch",
+      "kprog/arm64/build/high32-v38-negative",
+      "kprog/arm64/build/fidelity-writeback",
+      "kprog/arm64/build/app-helper-micro",
+      "kprog/arm64/build/fidelity-sp-alignment",
+      "kprog/arm64/build/register-cell-hosts",
+      "kprog/arm64/build/published-shim-v8",
+      "kprog/arm64/build/published-shim-v5"
+    ],
+    "blocked": [],
+    "live_inputs": [
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_custom__generic.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_native_tracer_entry.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_perf_go_labels.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_perf_unwind_hotspot.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_perf_unwind_native.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_perf_unwind_perl.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_perf_unwind_php.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_perf_unwind_python.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_perf_unwind_ruby.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_perf_unwind_stop.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_perf_unwind_v8.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_read_task_struct.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_tracepoint__sched_process_free.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/native/otel_tracepoint__sched_process_free_pre616.proof.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/original/declarations.h",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/original/tracer.bpf.o",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_custom__generic.bpf.c",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_native_tracer_entry.bpf.c",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_perf_go_labels.bpf.c",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_perf_unwind_hotspot.bpf.c",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_perf_unwind_native.bpf.c",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_perf_unwind_perl.bpf.c",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_perf_unwind_php.bpf.c",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_perf_unwind_python.bpf.c",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_perf_unwind_ruby.bpf.c",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_perf_unwind_stop.bpf.c",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_perf_unwind_v8.bpf.c",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_read_task_struct.bpf.c",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_tracepoint__sched_process_free.bpf.c",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v15/sources/otel_tracepoint__sched_process_free_pre616.bpf.c"
+    ],
+    "live_phase_dirs": [
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-memory-v36",
+      "corpus/results/kprog_arm64_app_coverage_20261106/otel-real-v18"
+    ],
+    "retained_builds": [
+      "app-native-link",
+      "app-runtime-v35",
+      "app-verified-stage"
+    ],
+    "free_before": 44723994624,
+    "free_after": 53864255488,
+    "free_delta_bytes": 9140260864
+  },
+  "lane": {
+    "deleted_count": 898,
+    "blocked": [
+      {
+        "path": "runtime-v36-collect-launch.log",
+        "pids": [
+          "963202",
+          "963204"
+        ]
+      }
+    ],
+    "retained": [
+      "last.md",
+      "otel-memory-v36-build.sh",
+      "otel-memory-v36-compile.log",
+      "otel-memory-v36-embed.exit",
+      "otel-memory-v36-embed.log",
+      "otel-memory-v36-generate.exit",
+      "otel-memory-v36-generate.log",
+      "otel-memory-v36-launch.log",
+      "otel-real-v18-after-v15.sh",
+      "otel-real-v18-compile.exit",
+      "otel-real-v18-compile.log",
+      "otel-real-v18-launch.log",
+      "otel-real-v18-prepare.exit",
+      "prompt.md",
+      "runtime-v18-otel.sh",
+      "runtime-v36-collect-launch.log",
+      "runtime-v36-collect.sh",
+      "runtime-v36-otel.sh",
+      "turns.log"
+    ],
+    "free_delta_bytes": 692539392
+  },
+  "shared_incremental_caches": "preserved vendor/build, native_link/target, formal/.lake, ccache, Docker build cache",
+  "fresh_builds": 0,
+  "old_queue_completed": {
+    "input": "older OTel ELF without the newly embedded native memset",
+    "native_sha256": "05eafda0a80d7df80cb8d6ab5765dd1d3be448b21b9b5c1406e6092b0f3b912b",
+    "phase": "otel-real-v18",
+    "candidates": 14,
+    "compiled": 10,
+    "failed": 4,
+    "failures": [
+      {
+        "name": "otel_perf_unwind_hotspot",
+        "returncode": -6,
+        "cause": "LLVM out of memory"
+      },
+      {
+        "name": "otel_perf_unwind_perl",
+        "returncode": -6,
+        "cause": "LLVM out of memory"
+      },
+      {
+        "name": "otel_perf_unwind_php",
+        "returncode": -6,
+        "cause": "LLVM out of memory"
+      },
+      {
+        "name": "otel_perf_unwind_v8",
+        "returncode": -6,
+        "cause": "LLVM out of memory"
+      }
+    ],
+    "scope": "compiler only; separate from active new-input v36; no verifier/app admission",
+    "driver_exit": 2
+  },
+  "retire_after_summary_commit": [
+    "otel-real-v18",
+    "otel-real-v15"
+  ],
+  "recovered_committed_files": 17,
+  "kept_files_verified_against_head": 20
+}
