@@ -164,6 +164,7 @@ check:
 	python3 tools/check_reference_x86_popcount.py
 	python3 tools/check_reference_x86_movx.py
 	python3 tools/check_reference_x86_divide.py
+	python3 tools/check_reference_x86_multiply.py
 	python3 tools/check_x86_divide_handler.py
 	python3 tools/check_x86_high_load.py
 	python3 tools/check_x86_popcount_memory.py

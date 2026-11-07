@@ -43,7 +43,7 @@ uint64_t add64(uint64_t a,uint64_t b){uint64_t f;__asm__ volatile("addq %2,%1;pu
     for name,args in [('cmp32',[ctypes.c_uint32,ctypes.c_uint32]),('add64',[ctypes.c_uint64,ctypes.c_uint64])]:
         fn=getattr(flags,name);fn.argtypes=args;fn.restype=ctypes.c_uint64
     cases=[]
-    for kind,elem_size in [(k,8) for k in ('array','percpu_array','hash','lru_hash','percpu_hash','call')]+[('array',32),('percpu_array',32)]:
+    for kind,elem_size in [(k,8) for k in ('array','percpu_array','hash','lru_hash','percpu_hash','call')]+[('array',32),('percpu_array',32),('array',12),('percpu_array',12)]:
         name=kind if elem_size==8 else kind+'-stride'+str(elem_size)
         plan=dict(version=1,helpers=[dict(name='bpf_map_lookup_elem',addr=0x1000)],lookup_sites=[dict(
             kind=kind,target_addr=0x12345000,key_offset=48,max_entries=16,elem_size=elem_size,index_mask=15,
@@ -105,11 +105,11 @@ uint64_t add64(uint64_t a,uint64_t b){uint64_t f;__asm__ volatile("addq %2,%1;pu
                         expected['flags']=(expected['flags']&~(STATUS^0x10))|0x44
                         expected['defined_flags']=MASK^0x10
                     elif elem_size>8:
-                        # SHL is followed by real ADDs of map base and
+                        # SHL/IMUL is followed by real ADDs of map base and
                         # value offset. Path masks conservatively retain
-                        # earlier undefined AF/OF even after later writes.
+                        # earlier undefined flags even after later writes.
                         expected['flags']=(expected['flags']&~STATUS)|(flags.add64((key*elem_size+state['registers'][7])&MASK,128)&STATUS)
-                        expected['defined_flags']=MASK^0x810
+                        expected['defined_flags']=MASK^(0x810 if elem_size&(elem_size-1)==0 else 0xD4)
                     if key<16 and kind=='percpu_array':
                         if mode=='slot_fault':fault(slot,8,first_pp)
                         else:

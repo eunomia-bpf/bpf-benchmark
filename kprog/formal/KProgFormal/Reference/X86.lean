@@ -589,6 +589,44 @@ def rotateRightStep (width : ScalarWidth) (dst : ScalarDestination) (count nextP
       | .ok (result, writes) =>
           ⟨{ result with rflags := rotateRightFlags width value count s.rflags, pc := nextPc }, reads ++ writes, none⟩
 
+/-- Low-width product bits are independent of signed/unsigned interpretation.
+The signed magnitude product below separately decides representability. -/
+def multiplyValue (width : CmovWidth) (left right : Word) : Word :=
+  ((left.setWidth width.bits) * (right.setWidth width.bits)).setWidth 64
+
+def multiplyMagnitude (width : CmovWidth) (value : Word) : Word :=
+  let narrowed := value.setWidth width.bits
+  (if narrowed.getLsbD (width.bits - 1) then -narrowed else narrowed).setWidth 64
+
+def multiplyMixedSign (width : CmovWidth) (left right : Word) : Bool :=
+  left.getLsbD (width.bits - 1) != right.getLsbD (width.bits - 1)
+
+/-- A negative signed product may have magnitude2^(n-1), while a nonnegative
+one is bounded by2^(n-1)-1. Nat multiplication retains all128 product bits. -/
+def multiplyOverflow (width : CmovWidth) (left right : Word) : Bool :=
+  let limit := 2^(width.bits - 1) - (if multiplyMixedSign width left right then 0 else 1)
+  decide (limit < (multiplyMagnitude width left).toNat * (multiplyMagnitude width right).toNat)
+
+def multiplyFlags (width : CmovWidth) (left right old : Word) : Word :=
+  let overflow := multiplyOverflow width left right
+  setFlag (setFlag old 0 overflow) 11 overflow
+
+/-- The immediate container holds encoded operand bits. 6B sign-extends its
+byte on decoding;69 supplies16 or32 bits. REX.W still encodes only imm32. -/
+def multiplyImmediate (width : CmovWidth) (raw : BitVec 32) : Word :=
+  (raw.setWidth (if width = .w16 then 16 else 32)).signExtend 64
+
+def multiplyStep (width : CmovWidth) (dst : Register) (source : Source)
+    (immediate : Option (BitVec 32)) (nextPc : Word) (s : State) : Transition State :=
+  match readSource s source width.bytes with
+  | .error fault => ⟨s, [.fault fault], some fault⟩
+  | .ok (value, events) =>
+      let operands := match immediate with
+        | none => (s.gpr dst, value)
+        | some raw => (value, multiplyImmediate width raw)
+      let result := writeValue width (s.gpr dst) (multiplyValue width operands.1 operands.2)
+      ⟨{ s with gpr := (fun r => if r = dst then result else s.gpr r), rflags := multiplyFlags width operands.1 operands.2 s.rflags, pc := nextPc }, events, none⟩
+
 /-- Widen the operand from its access width, independently of generated masks. -/
 def extendValue (sourceWidth : ScalarWidth) (signed : Bool) (source : Word) : Word :=
   if signed then (source.setWidth sourceWidth.bits).signExtend 64
@@ -632,6 +670,7 @@ def signHighValue (width : CmovWidth) (source : Word) : Word :=
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | multiply (width : CmovWidth) (dst : Register) (source : Source) (immediate : Option (BitVec 32)) (nextPc : Word)
   | rotateRight (width : ScalarWidth) (dst : ScalarDestination) (count nextPc : Word)
   | exchange (width : ScalarWidth) (left right : RegisterSlice) (nextPc : Word)
   | legacyShift (width : ScalarWidth) (kind : LegacyShift) (dst : ScalarDestination) (count nextPc : Word)
@@ -669,7 +708,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -679,6 +718,7 @@ def Instruction.fallthrough : Instruction → Word
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .multiply width dst source immediate nextPc => multiplyStep width dst source immediate nextPc s
   | .rotateRight width dst count nextPc => rotateRightStep width dst count nextPc s
   | .exchange width left right nextPc => exchangeStep width left right nextPc s
   | .legacyShift width kind dst count nextPc => legacyShiftStep width kind dst count nextPc s
@@ -773,6 +813,7 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .multiply .. => 0xffffffffffffff2b
   | .rotateRight width _ count _ => legacyDefinedFlags width .rotateLeft count
   | .exchange .. => 0xffffffffffffffff
   | .legacyShift width kind _ count _ => legacyDefinedFlags width kind count
@@ -963,6 +1004,12 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     return .branch cc (nextPc + offset) nextPc
   if first = 0x0f then
     let opcode ← byteAt bytes (count + 1)
+    if opcode = 0xaf then
+      let width := if p.rex / 8 = 1 then CmovWidth.w64 else if p.operand16 then .w16 else .w32
+      let modrm ← byteAt bytes (count + 2)
+      let dst := registerCode ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
+      let (source, nextPc, _) ← operand bytes s p modrm (count + 3) 0
+      return .multiply width dst source none nextPc
     if opcode = 0x1f then
       let modrm ← byteAt bytes (count + 2)
       if (modrm / 8) % 8 != 0 then throw "reserved native NOP extension"
@@ -1013,6 +1060,14 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
       | 7 => pure LegacyShift.arithmetic
       | _ => throw "unsupported native rotate-through-carry group"
     return .legacyShift width kind (scalarDestination p width rm) amount nextPc
+  if first = 0x69 ∨ first = 0x6b then
+    let width := if p.rex / 8 = 1 then CmovWidth.w64 else if p.operand16 then .w16 else .w32
+    let size := if first = 0x6b then 1 else if width = .w16 then 2 else 4
+    let modrm ← byteAt bytes (count + 1)
+    let dst := registerCode ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
+    let (source, nextPc, cursor) ← operand bytes s p modrm (count + 2) size
+    let immediate ← signedDisplacement bytes cursor size
+    return .multiply width dst source (some (immediate.setWidth 32)) nextPc
   if first = 0x84 ∨ first = 0x85 then
     let width := scalarWidth p (first == 0x84)
     let modrm ← byteAt bytes (count + 1)

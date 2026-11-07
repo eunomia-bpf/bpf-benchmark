@@ -30,7 +30,7 @@ accesses, routing tables, and selected whole-state handler refinements.
 [`Refinement/`](KProgFormal/Refinement/) connects generated implementation
 slices to those same ISA steps, retaining registers, flags, vectors, memory,
 PC and ordered effects/faults. This includes scalar/logical/unary operations,
-width/sign extensions, conditional operations, shifts, bit operations,
+width/sign extensions, signed multiplication, conditional operations, shifts, bit operations,
 stack transfers, LEA, DIV, register XCHG, and the ARM arithmetic, vector,
 memory, exclusive and control families represented there. Individual module
 statements define their exact scope. Dispatcher coverage/exclusivity is
