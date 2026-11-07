@@ -1,0 +1,52 @@
+{
+  "forms": 60,
+  "native_forms": 10,
+  "cases": 61440,
+  "operations": [
+    "add",
+    "and",
+    "eor",
+    "orr",
+    "sub"
+  ],
+  "tokens": [
+    "ARM64_OP_ADD_IMM",
+    "ARM64_OP_ALU_IMM",
+    "ARM64_OP_SUB_IMM"
+  ],
+  "widths": [
+    32,
+    64
+  ],
+  "differences": {
+    "cpu_simulator": 0,
+    "cpu_reference": 0,
+    "simulator_reference": 0
+  },
+  "forms_awaiting_reference": 0,
+  "unchanged_memory_cases": 61440,
+  "compiled_input_files": 91,
+  "production_snapshot_files": 76,
+  "candidate_snapshot_files": 3,
+  "production_snapshot_git_equal": true,
+  "candidate_headers_equal_published_bundle": true,
+  "candidate_commit": "f9b20a904",
+  "candidate_inputs_sha256": "1f26e955931593fbad76e7b1a8ca3da5be0d5251f615e95b165655d240fb73e1",
+  "encoded_fields_preserved": true,
+  "native_byte_groups": 10,
+  "raw_direct_native_byte_pairs": 30,
+  "source_head": "ffcb825a1bcf5a272eb3ba0a57f8d6211b5af0c2",
+  "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96",
+  "binary_sha256": "f18fbcd9d4c3bd5249bac8773eed408e1de827c1076eee11c5a339b9e2388c5b",
+  "trace": {
+    "raw_bytes": 111575064,
+    "raw_sha256": "d3ec7d8b96b6bfdd2fda194b69658047f20fd19dc1b8254201cabf506c4f9aa0",
+    "compressed_bytes": 36183410,
+    "compressed_sha256": "5fc8114be3e1e94d9fafc8a8b0aee8f232904a1d7d151995e35a74342babaffe",
+    "path": "cpu-states.bin.zst",
+    "decompressed_identity_equal": true
+  },
+  "finished": "2026-11-07T20:34:42.942578+00:00",
+  "source_drift": {},
+  "production_adoption": "owner_sync_pending"
+}

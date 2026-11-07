@@ -1,0 +1,302 @@
+[
+  {
+    "assembly": "add w0, w1, #127 [token=ARM64_OP_ADD_IMM; route=raw]",
+    "decoded": "add w0, w1, #0x7f",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "add w0, w1, #127 [token=ARM64_OP_ADD_IMM; route=direct]",
+    "decoded": "add w0, w1, #0x7f",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "add w0, w1, #127 [token=ARM64_OP_SUB_IMM; route=raw]",
+    "decoded": "add w0, w1, #0x7f",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "add w0, w1, #127 [token=ARM64_OP_SUB_IMM; route=direct]",
+    "decoded": "add w0, w1, #0x7f",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "add w0, w1, #127 [token=ARM64_OP_ALU_IMM; route=raw]",
+    "decoded": "add w0, w1, #0x7f",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "add w0, w1, #127 [token=ARM64_OP_ALU_IMM; route=direct]",
+    "decoded": "add w0, w1, #0x7f",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sub w0, w1, #127 [token=ARM64_OP_ADD_IMM; route=raw]",
+    "decoded": "sub w0, w1, #0x7f",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "sub w0, w1, #127 [token=ARM64_OP_ADD_IMM; route=direct]",
+    "decoded": "sub w0, w1, #0x7f",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "sub w0, w1, #127 [token=ARM64_OP_SUB_IMM; route=raw]",
+    "decoded": "sub w0, w1, #0x7f",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "sub w0, w1, #127 [token=ARM64_OP_SUB_IMM; route=direct]",
+    "decoded": "sub w0, w1, #0x7f",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "sub w0, w1, #127 [token=ARM64_OP_ALU_IMM; route=raw]",
+    "decoded": "sub w0, w1, #0x7f",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sub w0, w1, #127 [token=ARM64_OP_ALU_IMM; route=direct]",
+    "decoded": "sub w0, w1, #0x7f",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "and w0, w1, #0xff [token=ARM64_OP_ADD_IMM; route=raw]",
+    "decoded": "and w0, w1, #0xff",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "and w0, w1, #0xff [token=ARM64_OP_ADD_IMM; route=direct]",
+    "decoded": "and w0, w1, #0xff",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "and w0, w1, #0xff [token=ARM64_OP_SUB_IMM; route=raw]",
+    "decoded": "and w0, w1, #0xff",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "and w0, w1, #0xff [token=ARM64_OP_SUB_IMM; route=direct]",
+    "decoded": "and w0, w1, #0xff",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "and w0, w1, #0xff [token=ARM64_OP_ALU_IMM; route=raw]",
+    "decoded": "and w0, w1, #0xff",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "and w0, w1, #0xff [token=ARM64_OP_ALU_IMM; route=direct]",
+    "decoded": "and w0, w1, #0xff",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "orr w0, w1, #0xff [token=ARM64_OP_ADD_IMM; route=raw]",
+    "decoded": "orr w0, w1, #0xff",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "orr w0, w1, #0xff [token=ARM64_OP_ADD_IMM; route=direct]",
+    "decoded": "orr w0, w1, #0xff",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "orr w0, w1, #0xff [token=ARM64_OP_SUB_IMM; route=raw]",
+    "decoded": "orr w0, w1, #0xff",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "orr w0, w1, #0xff [token=ARM64_OP_SUB_IMM; route=direct]",
+    "decoded": "orr w0, w1, #0xff",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "orr w0, w1, #0xff [token=ARM64_OP_ALU_IMM; route=raw]",
+    "decoded": "orr w0, w1, #0xff",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "orr w0, w1, #0xff [token=ARM64_OP_ALU_IMM; route=direct]",
+    "decoded": "orr w0, w1, #0xff",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "eor w0, w1, #0xff [token=ARM64_OP_ADD_IMM; route=raw]",
+    "decoded": "eor w0, w1, #0xff",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "eor w0, w1, #0xff [token=ARM64_OP_ADD_IMM; route=direct]",
+    "decoded": "eor w0, w1, #0xff",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "eor w0, w1, #0xff [token=ARM64_OP_SUB_IMM; route=raw]",
+    "decoded": "eor w0, w1, #0xff",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "eor w0, w1, #0xff [token=ARM64_OP_SUB_IMM; route=direct]",
+    "decoded": "eor w0, w1, #0xff",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "eor w0, w1, #0xff [token=ARM64_OP_ALU_IMM; route=raw]",
+    "decoded": "eor w0, w1, #0xff",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "eor w0, w1, #0xff [token=ARM64_OP_ALU_IMM; route=direct]",
+    "decoded": "eor w0, w1, #0xff",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "add x0, x1, #127 [token=ARM64_OP_ADD_IMM; route=raw]",
+    "decoded": "add x0, x1, #0x7f",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "add x0, x1, #127 [token=ARM64_OP_ADD_IMM; route=direct]",
+    "decoded": "add x0, x1, #0x7f",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "add x0, x1, #127 [token=ARM64_OP_SUB_IMM; route=raw]",
+    "decoded": "add x0, x1, #0x7f",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "add x0, x1, #127 [token=ARM64_OP_SUB_IMM; route=direct]",
+    "decoded": "add x0, x1, #0x7f",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "add x0, x1, #127 [token=ARM64_OP_ALU_IMM; route=raw]",
+    "decoded": "add x0, x1, #0x7f",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "add x0, x1, #127 [token=ARM64_OP_ALU_IMM; route=direct]",
+    "decoded": "add x0, x1, #0x7f",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sub x0, x1, #127 [token=ARM64_OP_ADD_IMM; route=raw]",
+    "decoded": "sub x0, x1, #0x7f",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "sub x0, x1, #127 [token=ARM64_OP_ADD_IMM; route=direct]",
+    "decoded": "sub x0, x1, #0x7f",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "sub x0, x1, #127 [token=ARM64_OP_SUB_IMM; route=raw]",
+    "decoded": "sub x0, x1, #0x7f",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "sub x0, x1, #127 [token=ARM64_OP_SUB_IMM; route=direct]",
+    "decoded": "sub x0, x1, #0x7f",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "sub x0, x1, #127 [token=ARM64_OP_ALU_IMM; route=raw]",
+    "decoded": "sub x0, x1, #0x7f",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "sub x0, x1, #127 [token=ARM64_OP_ALU_IMM; route=direct]",
+    "decoded": "sub x0, x1, #0x7f",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "and x0, x1, #0xff [token=ARM64_OP_ADD_IMM; route=raw]",
+    "decoded": "and x0, x1, #0xff",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "and x0, x1, #0xff [token=ARM64_OP_ADD_IMM; route=direct]",
+    "decoded": "and x0, x1, #0xff",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "and x0, x1, #0xff [token=ARM64_OP_SUB_IMM; route=raw]",
+    "decoded": "and x0, x1, #0xff",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "and x0, x1, #0xff [token=ARM64_OP_SUB_IMM; route=direct]",
+    "decoded": "and x0, x1, #0xff",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "and x0, x1, #0xff [token=ARM64_OP_ALU_IMM; route=raw]",
+    "decoded": "and x0, x1, #0xff",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "and x0, x1, #0xff [token=ARM64_OP_ALU_IMM; route=direct]",
+    "decoded": "and x0, x1, #0xff",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "orr x0, x1, #0xff [token=ARM64_OP_ADD_IMM; route=raw]",
+    "decoded": "orr x0, x1, #0xff",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "orr x0, x1, #0xff [token=ARM64_OP_ADD_IMM; route=direct]",
+    "decoded": "orr x0, x1, #0xff",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "orr x0, x1, #0xff [token=ARM64_OP_SUB_IMM; route=raw]",
+    "decoded": "orr x0, x1, #0xff",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "orr x0, x1, #0xff [token=ARM64_OP_SUB_IMM; route=direct]",
+    "decoded": "orr x0, x1, #0xff",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "orr x0, x1, #0xff [token=ARM64_OP_ALU_IMM; route=raw]",
+    "decoded": "orr x0, x1, #0xff",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "orr x0, x1, #0xff [token=ARM64_OP_ALU_IMM; route=direct]",
+    "decoded": "orr x0, x1, #0xff",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "eor x0, x1, #0xff [token=ARM64_OP_ADD_IMM; route=raw]",
+    "decoded": "eor x0, x1, #0xff",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "eor x0, x1, #0xff [token=ARM64_OP_ADD_IMM; route=direct]",
+    "decoded": "eor x0, x1, #0xff",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "eor x0, x1, #0xff [token=ARM64_OP_SUB_IMM; route=raw]",
+    "decoded": "eor x0, x1, #0xff",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "eor x0, x1, #0xff [token=ARM64_OP_SUB_IMM; route=direct]",
+    "decoded": "eor x0, x1, #0xff",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "eor x0, x1, #0xff [token=ARM64_OP_ALU_IMM; route=raw]",
+    "decoded": "eor x0, x1, #0xff",
+    "opcode": "ARM64_OP_ALU_IMM"
+  },
+  {
+    "assembly": "eor x0, x1, #0xff [token=ARM64_OP_ALU_IMM; route=direct]",
+    "decoded": "eor x0, x1, #0xff",
+    "opcode": "ARM64_OP_ALU_IMM"
+  }
+]

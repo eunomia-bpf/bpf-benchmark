@@ -1,0 +1,30 @@
+{
+  "scope": "A synchronized generic immediate-alias contracts; C headers copied exactly from published candidate bundle into F private compiled snapshot.",
+  "candidate_commit": "f9b20a904",
+  "candidate_inputs_sha256": "1f26e955931593fbad76e7b1a8ca3da5be0d5251f615e95b165655d240fb73e1",
+  "changes": {
+    "kprog/formal/generated/arm64_dispatch_family.h": {
+      "before_sha256": "14265108cb9cb9cf5eab817bbec8cebb6e2b384c5e8be36440967e5c520f352a",
+      "after_sha256": "b6e1d9ccb0aa7c430136b7e86c21f99fb3b8c5812a957d06f2b8a27d22304d02",
+      "source": "f9b20a904:inputs.tar.gz:after/kprog/formal/generated/arm64_dispatch_family.h"
+    },
+    "kprog/formal/generated/arm64_alu_operand_select.h": {
+      "before_sha256": "8f140666a12df159f4151df01dd6e3d336c06d1e93811337ad7f8bd0c72f097d",
+      "after_sha256": "6604e16f46f5a59bb8a2946821e341bf01842d2b919273af7b9648c722d35f54",
+      "source": "f9b20a904:inputs.tar.gz:after/kprog/formal/generated/arm64_alu_operand_select.h"
+    },
+    "kprog/arm64/arm64_sim_direct.h": {
+      "before_sha256": "a0e8af116a7aaa666021ed4ffefeb7b54bd3dcf3d16c80762c36f79cec6fdbe7",
+      "after_sha256": "4f0f074d953295594e4c443ac0d826d78764ec35bc581b39af0e60fdc6785d1d",
+      "source": "f9b20a904:inputs.tar.gz:after/kprog/arm64/arm64_sim_direct.h"
+    }
+  },
+  "changed_direct_tokens": [
+    "ARM64_OP_ADD_IMM",
+    "ARM64_OP_SUB_IMM"
+  ],
+  "retained_direct_tokens": 69,
+  "generated_body_text_equal": true,
+  "universal_alias_theorem": "KProgFormal.Refinement.Arm64Dispatcher.immediate_alias_dispatch",
+  "production_adoption": "owner_sync_pending"
+}
