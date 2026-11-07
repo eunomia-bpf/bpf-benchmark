@@ -1,0 +1,43 @@
+{
+  "source_pins_before": {
+    "Cargo.toml": "52ae348d7ba92c420fa3a3041f8e84a403265082d608d7f71bdcf6384d41705a",
+    "Cargo.lock": "31c9de5a098920f3600c987c85e5a309dde4cd401766e3978eb2965440aca65f",
+    "src/main.rs": "563db62726d8ff0fbbcdc2d0f928eeafbd3d64b0e3fce3046723d2b18ab531d1",
+    "src/x86.rs": "7e49c5fe135036f11b4abc26169a900047679cd717db81f7d8ed6d84f9035434"
+  },
+  "candidate_main_sha256": "ce789d253de442685383c86428f0aa2984724f1fa345706b80bb20f2df39cfc0",
+  "loader_build": {
+    "phase": "finished",
+    "utc": "2026-11-07T22:11:28.426737+00:00",
+    "command": [
+      "cmake",
+      "--build",
+      "/workspaces/repository/kprog/libnativeloader/build-arm64-typed-tail-v1",
+      "--parallel",
+      "4",
+      "--target",
+      "native_loader_shared",
+      "trusted-native-loader",
+      "trusted-service-client"
+    ],
+    "binaries": {
+      "trusted-native-loader": "2869d6e91565b76263e3fd165a56ac13837a275c428a8022f865a6edd42a54dd",
+      "libnative_loader.so": "693205ee30b0b3af3401f33c396ee58ef5fa588aa6593f86f3ced12bceeacebf",
+      "trusted-service-client": "8755e4dbfc1336c25be89d208559ddc673d9019d7b950929c890206e30023e47",
+      "trusted-native.o": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c"
+    }
+  },
+  "source_base": "kprog/x86/native_lab/native_link",
+  "linker_sha256": "a437397a861322ae476be40a059268ed20006bf21cfb0b6403905f7c827a28f8",
+  "retained_runtime": {
+    "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "f9086a5d08126aabfcaa824a6bf93aad9bc47c2b665d3f44b8757ceaaa3f3456",
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader": "bf44d57f74696235ab999c0a0c55e0d38f93813026142142a9bbd54a94f4832c",
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/libnative_loader.so": "cb3d38eb7529ef9b15e30a90de595a9936f28d3ab8eaec4f3a327a1b82d4c12f",
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-service-client": "6afa31017265cc6445d28c57887917c1acfe4cb28787e9e8c6ebd85a1dd29c4d",
+    "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native.o": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c"
+  },
+  "runtime_make_exit": 0,
+  "runtime_host_ok": true,
+  "runtime_guest_exit": 0,
+  "scope": "Generic readonly-label layout and coherent ARM service build integration. Application startup and universal safety theorem work continue."
+}

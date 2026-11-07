@@ -2468,7 +2468,24 @@ fn arm64_text_relocations(
                     let raw_name = target_sym
                         .name()
                         .map_err(|e| anyhow!("reloc target symbol name: {e}"))?;
-                    let target_name = if raw_name.is_empty() {
+                    let unsized_readonly = if let Some(index) = target_section_index {
+                        elf.section_by_index(index)?.kind() == SectionKind::ReadOnlyData &&
+                            target_sym.size() == 0
+                    } else { false };
+                    let target_name = if unsized_readonly {
+                        let index = target_section_index.expect("classified section");
+                        let section = elf.section_by_index(index)?;
+                        let base = target_sym.address().checked_sub(section.address())
+                            .ok_or_else(|| anyhow!("readonly label precedes its section"))?;
+                        let name = format!("__arm64_rodata_section_{}_base_{base}", index.0);
+                        for symbol in elf.symbols().chain(elf.dynamic_symbols()) {
+                            if symbol.kind() == SymbolKind::Data && symbol.size() > 0 &&
+                                symbol.name()? == name {
+                                bail!("readonly label identity collides with a declared object: {name}");
+                            }
+                        }
+                        name
+                    } else if raw_name.is_empty() {
                         format!(
                             "__arm64_section_{:?}_addend_{}",
                             target_section_index, addend
@@ -2495,6 +2512,37 @@ fn arm64_text_relocations(
     Ok(out)
 }
 
+fn arm64_data_extent(
+    elf: &object::File,
+    section_index: object::SectionIndex,
+    target_name: &str,
+    base: u64,
+    section_base: u64,
+    section_size: usize,
+) -> Result<(usize, usize)> {
+    let start = usize::try_from(base.checked_sub(section_base)
+        .ok_or_else(|| anyhow!("arm64 proof data symbol precedes its section"))?)?;
+    let mut size = None;
+    for symbol in elf.symbols() {
+        if symbol.section_index() == Some(section_index) && symbol.address() == base &&
+            symbol.kind() == SymbolKind::Data && symbol.name()? == target_name {
+            if symbol.size() != 0 { size = Some(symbol.size()); }
+            break;
+        }
+    }
+    // Typed objects keep their complete declared extent. Section and
+    // constant-pool labels retain the remaining bytes from their base.
+    let end = match size {
+        Some(size) => start.checked_add(usize::try_from(size)?),
+        None => Some(section_size),
+    }.ok_or_else(|| anyhow!("arm64 proof data extent overflows"))?;
+    if start >= end || end > section_size {
+        bail!("arm64 proof data relocation {} extent {}..{} exceeds section size {}",
+            target_name, start, end, section_size);
+    }
+    Ok((start, end))
+}
+
 fn arm64_reloc_data(elf: &object::File, reloc: &Arm64RelocInfo) -> Result<Vec<u8>> {
     let section_index = reloc.target_section_index.ok_or_else(|| {
         anyhow!(
@@ -2517,26 +2565,8 @@ fn arm64_reloc_data(elf: &object::File, reloc: &Arm64RelocInfo) -> Result<Vec<u8
     let base = reloc.target_address
         .and_then(|address| address.checked_sub(reloc.addend as u64))
         .ok_or_else(|| anyhow!("arm64 proof data relocation {} has no symbol base", reloc.target_name))?;
-    let start = usize::try_from(base.checked_sub(section.address())
-        .ok_or_else(|| anyhow!("arm64 proof data symbol precedes its section"))?)?;
-    let mut size = None;
-    for symbol in elf.symbols() {
-        if symbol.section_index() == Some(section_index) && symbol.address() == base &&
-            symbol.kind() == SymbolKind::Data && symbol.name()? == reloc.target_name {
-            if symbol.size() != 0 { size = Some(symbol.size()); }
-            break;
-        }
-    }
-    // A named object owns its complete ELF extent; a section relocation owns
-    // that section's remaining bytes. Preserve the original addend separately.
-    let end = match size {
-        Some(size) => start.checked_add(usize::try_from(size)?),
-        None => Some(data.len()),
-    }.ok_or_else(|| anyhow!("arm64 proof data extent overflows"))?;
-    if start >= end || end > data.len() {
-        bail!("arm64 proof data relocation {} extent {}..{} exceeds section size {}",
-            reloc.target_name, start, end, data.len());
-    }
+    let (start, end) = arm64_data_extent(elf, section_index, &reloc.target_name,
+        base, section.address(), data.len())?;
     Ok(data[start..end].to_vec())
 }
 
@@ -2660,6 +2690,7 @@ enum Arm64PatchKind {
         target_name: String,
         section_index: object::SectionIndex,
         addend: i64,
+        symbol_base: u64,
     },
     Nop,
 }
@@ -3829,6 +3860,9 @@ fn rewrite_arm64(
                                 target_name: reloc.target_name.clone(),
                                 section_index,
                                 addend: i64::try_from(target_offset).context("arm64 local data offset exceeds i64")?,
+                                symbol_base: reloc.target_address
+                                    .and_then(|address| address.checked_sub(reloc.addend as u64))
+                                    .ok_or_else(|| anyhow!("arm64 local data symbol base is unavailable"))?,
                             },
                         });
                         blob.extend_from_slice(&insn.to_le_bytes());
@@ -4297,6 +4331,7 @@ fn rewrite_arm64(
                 target_name,
                 section_index,
                 addend,
+                symbol_base,
             } => {
                 if *addend < 0 {
                     bail!("arm64 local data relocation {target_name} has negative addend {addend}");
@@ -4312,20 +4347,11 @@ fn rewrite_arm64(
                 let section_len = usize::try_from(section.size())
                     .context("arm64 local data section size does not fit usize")?;
                 if section.kind() == SectionKind::ReadOnlyData {
-                    let object = find_symbol_by_name(elf, target_name)?;
-                    if object.section_index != *section_index {
-                        bail!("readonly object {target_name} has a conflicting section");
-                    }
-                    let start = object.address.checked_sub(section.address())
-                        .ok_or_else(|| anyhow!("readonly object lies below its section"))?;
-                    let end = start.checked_add(object.size)
-                        .ok_or_else(|| anyhow!("readonly object extent overflows"))?;
-                    if end > section_len as u64 {
-                        bail!("readonly object {target_name} exceeds its section");
-                    }
+                    let (start, end) = arm64_data_extent(elf, *section_index, target_name,
+                        *symbol_base, section.address(), section_len)?;
                     record_readonly_object(&mut readonly_objects, target_name,
-                        (section_offset as u64).checked_add(start)
-                            .ok_or_else(|| anyhow!("readonly blob offset overflows"))?, object.size)?;
+                        (section_offset as u64).checked_add(start as u64)
+                            .ok_or_else(|| anyhow!("readonly blob offset overflows"))?, (end - start) as u64)?;
                 }
                 if *addend as usize > section_len {
                     bail!(
@@ -4684,7 +4710,20 @@ mod tests {
 
     #[test]
     fn arm64_readonly_relocations_preserve_symbol_base_extent_and_addend() {
-        for (size, declared, offset) in [(8usize, 8u64, 0i64), (32, 32, 7), (120, 120, 48), (32, 80, 0)] {
+        let mut layout_differences: Vec<serde_json::Value> = Vec::new();
+        let compiled_source_fingerprint = include_bytes!("main.rs").iter().fold(0xcbf29ce484222325u64,
+            |state, byte| (state ^ u64::from(*byte)).wrapping_mul(0x100000001b3));
+        eprintln!("compiled-readonly-source-fnv64={compiled_source_fingerprint:016x}");
+        let mut cases = 0;
+        let mut collision_controls = 0;
+        for (size, declared, offset, kind) in [
+            (8usize, 8u64, 0i64, SymbolKind::Data), (32, 32, 7, SymbolKind::Data),
+            (120, 120, 48, SymbolKind::Data), (32, 80, 0, SymbolKind::Data),
+            (8, 0, 0, SymbolKind::Data), (32, 0, 7, SymbolKind::Data),
+            (120, 0, 48, SymbolKind::Data), (8, 0, 0, SymbolKind::Unknown),
+            (32, 0, 7, SymbolKind::Unknown), (120, 0, 48, SymbolKind::Unknown),
+        ] {
+            cases += 1;
             let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::Aarch64, Endianness::Little);
             let section = object.add_section(Vec::new(), b".rodata".to_vec(), SectionKind::ReadOnlyData);
             let bytes = (0..size+24).map(|i| (i*13+7) as u8).collect::<Vec<_>>();
@@ -4692,13 +4731,24 @@ mod tests {
             let value = object.add_symbol(WriteSymbol {
                 name: b"value".to_vec(), value: 16, size: declared,
                 kind: SymbolKind::Data, scope: SymbolScope::Linkage, weak: false,
-                section: WriteSymbolSection::Section(section), flags: SymbolFlags::None,
+                section: WriteSymbolSection::Section(section),
+                flags: if kind == SymbolKind::Unknown {
+                    SymbolFlags::Elf { st_info: object::elf::STB_GLOBAL << 4, st_other: 0 }
+                } else { SymbolFlags::None },
             });
+            let alias = if declared == 0 {
+                Some(object.add_symbol(WriteSymbol { name: b"value_alias".to_vec(), value: 16, size: 0,
+                    kind: SymbolKind::Data, scope: SymbolScope::Linkage, weak: false,
+                    section: WriteSymbolSection::Section(section),
+                    flags: SymbolFlags::Elf { st_info: object::elf::STB_GLOBAL << 4, st_other: 0 } }))
+            } else { None };
             let code = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
-            let words = [0x90000000u32, 0x91000000u32, 0x39400000u32, 0xd65f03c0u32];
+            let words = if declared == 0 {
+                vec![0x90000000u32, 0x91000000, 0x39400000, 0x90000001, 0x91000021, 0x39400021, 0xd65f03c0]
+            } else { vec![0x90000000, 0x91000000, 0x39400000, 0xd65f03c0] };
             object.append_section_data(code, &words.iter().flat_map(|word| word.to_le_bytes()).collect::<Vec<_>>(), 4);
             object.add_symbol(WriteSymbol {
-                name: b"entry".to_vec(), value: 0, size: 16, kind: SymbolKind::Text,
+                name: b"entry".to_vec(), value: 0, size: words.len() as u64 * 4, kind: SymbolKind::Text,
                 scope: SymbolScope::Linkage, weak: false, section: WriteSymbolSection::Section(code), flags: SymbolFlags::None,
             });
             for (at, kind) in [(0, R_AARCH64_ADR_PREL_PG_HI21), (4, R_AARCH64_ADD_ABS_LO12_NC)] {
@@ -4706,9 +4756,19 @@ mod tests {
                     offset: at, symbol: value, addend: offset, flags: RelocationFlags::Elf { r_type: kind },
                 }).unwrap();
             }
+            if let Some(alias) = alias {
+                for (at, kind) in [(12, R_AARCH64_ADR_PREL_PG_HI21), (16, R_AARCH64_ADD_ABS_LO12_NC)] {
+                    object.add_relocation(code, WriteRelocation { offset: at, symbol: alias,
+                        addend: offset, flags: RelocationFlags::Elf { r_type: kind } }).unwrap();
+                }
+            }
             let encoded = object.write().unwrap();
             let elf = object::File::parse(encoded.as_slice()).unwrap();
             let section_index = elf.section_by_name(".rodata").unwrap().index();
+            assert_eq!(elf.symbols().find(|s| s.name().unwrap() == "value").unwrap().kind(), kind);
+            if declared == 0 {
+                assert_eq!(elf.symbols().find(|s| s.name().unwrap() == "value_alias").unwrap().kind(), SymbolKind::Unknown);
+            }
             let mut reloc = Arm64RelocInfo {
                 r_type: R_AARCH64_ADR_PREL_PG_HI21, target_name: "value".to_string(),
                 target_section_index: Some(section_index), target_address: Some(16+offset as u64), addend: offset,
@@ -4717,21 +4777,71 @@ mod tests {
                 assert!(arm64_reloc_data(&elf, &reloc).unwrap_err().to_string().contains("exceeds section size"));
                 continue;
             }
-            assert_eq!(arm64_reloc_data(&elf, &reloc).unwrap(), bytes[16..16+size]);
+            let extent = if declared == 0 { size + 8 } else { size };
+            assert_eq!(arm64_reloc_data(&elf, &reloc).unwrap(), bytes[16..16+extent]);
             assert_eq!(arm64_proof_reloc_addend(&reloc), offset);
             let entry = find_symbol_by_name(&elf, "entry").unwrap();
-            let linked = rewrite_arm64(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
-                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, false, false, false, &mut Vec::new()).unwrap();
+            let linked = match rewrite_arm64(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
+                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, false, false, false, &mut Vec::new()) {
+                Ok(value) => value,
+                Err(error) => {
+                    let observation = serde_json::json!({"declared_size":declared,
+                        "symbol_kind":format!("{kind:?}"),"section_size":bytes.len(),
+                        "proof_data_size":extent,"kernel_error":error.to_string()});
+                    eprintln!("readonly-extent-observation {observation}");
+                    layout_differences.push(observation); continue;
+                }
+            };
+            let proof = rewrite_arm64(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
+                &HashSet::new(), &[], &HashMap::new(), &[], Arm64HelperCallSlot::FarSafe, true, true, false, &mut Vec::new()).unwrap();
+            let proof_data = proof.proof_relocs.iter().filter_map(|r| r.data.as_ref()).collect::<Vec<_>>();
+            assert!(!proof_data.is_empty());
+            assert!(proof_data.iter().all(|data| data.as_slice() == &bytes[16..16+extent]));
             let instruction = u32::from_le_bytes(linked.blob[..4].try_into().unwrap());
             assert_eq!(instruction & 0x9f00001f, 0x10000000); // ADR x0, actual data address
             let displacement = ((instruction >> 29) & 3) | (((instruction >> 5) & 0x7ffff) << 2);
             assert_eq!(linked.blob[displacement as usize], bytes[16+offset as usize]);
+            let expected_name = if declared == 0 {
+                format!("__arm64_rodata_section_{}_base_16", section_index.0)
+            } else { "value".to_string() };
+            assert!(proof.proof_relocs.iter().filter(|r| r.data.is_some()).all(|r| r.symbol == expected_name));
+            let expected = ReadonlyObject { native_symbol: expected_name,
+                offset: (displacement as i64 - offset) as u64, size: extent as u64 };
+            assert!(expected.size > 0);
+            assert_eq!(linked.blob.get(expected.offset as usize..(expected.offset + expected.size) as usize),
+                Some(&bytes[16..16+extent]));
+            if linked.readonly_objects != vec![expected.clone()] {
+                layout_differences.push(serde_json::json!({"declared":declared,"kind":format!("{kind:?}"),"actual":linked.readonly_objects,"expected":expected}));
+            }
+            eprintln!("readonly-extent-observation {}", serde_json::json!({
+                "declared_size":declared,"symbol_kind":format!("{kind:?}"),
+                "section_size":bytes.len(),"symbol_base":16,"addend":offset,
+                "proof_data_size":extent,"expected_kernel":expected,
+                "actual_kernel":linked.readonly_objects
+            }));
 
+            if declared == 0 {
+                object.add_symbol(WriteSymbol { name: expected.native_symbol.as_bytes().to_vec(),
+                    value: 16, size: 8, kind: SymbolKind::Data, scope: SymbolScope::Linkage,
+                    weak: false, section: WriteSymbolSection::Section(section), flags: SymbolFlags::None });
+                let collision_bytes = object.write().unwrap();
+                let collision_elf = object::File::parse(collision_bytes.as_slice()).unwrap();
+                let collision_entry = find_symbol_by_name(&collision_elf, "entry").unwrap();
+                let error = rewrite_arm64(&collision_elf, &collision_entry, &[collision_entry.clone()],
+                    &HashMap::new(), &HashMap::new(), &HashSet::new(), &[], &HashMap::new(), &[],
+                    Arm64HelperCallSlot::FarSafe, false, false, false, &mut Vec::new()).err().unwrap();
+                assert!(error.to_string().contains("readonly label identity collides"));
+                collision_controls += 1;
+                eprintln!("readonly-collision-observation {}", error);
+            }
             reloc.target_name = "__arm64_section_test_addend_7".to_string();
             reloc.target_address = Some(7); reloc.addend = 7;
             assert_eq!(arm64_reloc_data(&elf, &reloc).unwrap(), bytes);
             assert_eq!(arm64_proof_reloc_addend(&reloc), 7);
         }
+        assert_eq!(cases, 10);
+        assert!(layout_differences.is_empty(), "readonly extent mode differences: {layout_differences:?}");
+        assert_eq!(collision_controls, 6);
     }
 
     #[test]

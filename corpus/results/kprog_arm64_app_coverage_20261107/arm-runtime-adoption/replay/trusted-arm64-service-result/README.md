@@ -1,0 +1,1 @@
+Coherent ARM loader, client, DSO and native-link common-service control. Host and guest exit 0; request/native identity checks agree. Private mount bindings retain active application inputs and original host executable bytes. Universal simulator, specialization and native-link theorem work accompanies whole-application replays.
