@@ -12,6 +12,7 @@ sys.path.insert(0,str(ROOT/'kprog/arm64/micro-prog'))
 import generate_micro_sim_proofs as gen
 phase=Path(sys.argv[1]).resolve();phase.mkdir()
 linker=Path(sys.argv[2]).resolve()
+native_input=Path(sys.argv[3]).resolve() if len(sys.argv)>3 else ROOT/'vendor/build/native-bpf/arm64/stage/bcc'
 (phase/'sources').mkdir();(phase/'native').mkdir()
 programs=json.loads((ROOT/'corpus/results/arm64_qemu_corpus_19700101_000006_886537/details/bpf-evidence/bcc_set/baseline/program-inventory.json').read_text())
 manifest=json.loads((HERE/'inventory/bcc.json').read_text())['objects']
@@ -32,9 +33,9 @@ for program in programs:
   section=elf.get_section(target[0]['st_shndx']).name
  name='bcc_'+stem+'_'+symbol
  native=phase/'native'/(stem+'.native.o')
- if not native.exists(): shutil.copy2(ROOT/f'vendor/build/native-bpf/arm64/stage/bcc/{stem}.native.o',native)
+ if not native.exists(): shutil.copy2(native_input/(stem+'.native.o'),native)
  local=phase/'native'/(name+'.proof.o')
- command=[str(linker),'--input',str(native),'--symbol',symbol,'--output',str(local),'--mode','proof']
+ command=[str(linker),'--input',str(native),'--symbol',symbol,'--output',str(local),'--mode','proof','--preserve-entry-abi']
  result=subprocess.run(command,text=True,capture_output=True)
  (phase/'native'/(name+'.link.json')).write_text(json.dumps(dict(command=command,returncode=result.returncode,stdout=result.stdout,stderr=result.stderr),indent=2)+'\n')
  if result.returncode: raise RuntimeError(result.stderr)

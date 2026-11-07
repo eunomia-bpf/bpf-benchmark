@@ -1,0 +1,94 @@
+[
+  {
+    "name": "bcc_biosnoop_blk_account_io_merge_bio",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_tcpconnect_tcp_v4_connect_ret",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_runqlat_sched_wakeup",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_biosnoop_block_rq_insert",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_biosnoop_block_rq_issue",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_tcplife_inet_sock_set_state",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_tcpconnect_tcp_v6_connect",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_biosnoop_block_rq_complete",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_syscount_sys_enter",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_vfsstat_fentry_vfs_read",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_vfsstat_fentry_vfs_write",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_opensnoop_tracepoint__syscalls__sys_exit_openat",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_tcpconnect_tcp_v4_connect",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_vfsstat_fentry_vfs_create",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_tcpconnect_tcp_v6_connect_ret",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_syscount_sys_exit",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_runqlat_sched_switch",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_runqlat_sched_wakeup_new",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_vfsstat_fentry_vfs_fsync",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_vfsstat_fentry_vfs_open",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_capable_kprobe__cap_capable_entry",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_capable_kprobe__cap_capable_exit",
+    "returncode": 0
+  },
+  {
+    "name": "bcc_opensnoop_tracepoint__syscalls__sys_enter_openat",
+    "returncode": 0
+  }
+]

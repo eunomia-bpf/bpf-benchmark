@@ -214,9 +214,11 @@ native-link-build:
 native-link-ro-artifacts:
 	tar -C $(ROOT) -czf $(HERE)/readonly-link/replay.tar.gz -T $(HERE)/readonly-link/replay-files.txt
 
+BCC_NATIVE_DIR ?= $(ROOT)/vendor/build/native-bpf/arm64/stage/bcc
+
 .PHONY: bcc-real-generate
 bcc-real-generate: native-link-build
-	python3 $(HERE)/bcc_real.py $(HERE)/$(PHASE) $(ROOT)/kprog/arm64/build/app-native-link/release/native-link
+	python3 $(HERE)/bcc_real.py $(HERE)/$(PHASE) $(ROOT)/kprog/arm64/build/app-native-link/release/native-link $(BCC_NATIVE_DIR)
 
 .PHONY: bcc-real-manifest
 bcc-real-manifest:
@@ -677,3 +679,7 @@ layout-verifier-check:
 		-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >$(HERE)/$(PHASE)/qemu.log 2>&1
 	test "$$(cat $(HERE)/$(PHASE)/verify/guest-status)" = 0
 	python3 $(HERE)/layout_verifier_check.py $(HERE)/$(PHASE) collect
+
+.PHONY: bcc-memory-input
+bcc-memory-input:
+	python3 $(ROOT)/corpus/results/kprog_app_coverage_20261106/embed_memory_runtime.py $(HERE)/bcc-layout-v27 $(HERE)/bcc-memory-input-v35

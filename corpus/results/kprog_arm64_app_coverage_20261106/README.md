@@ -1023,3 +1023,12 @@ expands this into memory writes, while the binding callback expects a BPF helper
 call for the external target. Acceptance was unchanged during diagnosis. The
 repair embeds a real local ARM memset instruction body into the native ELF,
 following the existing x86 approach.
+
+## Native ARM memset body prepared
+
+[The embedded-libc checkpoint](embedded-libc-result/README.md) supplies a real
+local ARM memset instruction body through the shared ELF preparation tool.
+ARM and unchanged x86 assembly each pass 8,257 CPU boundary/canary cases; all
+23 BCC proofs generate and compile. The loader and producer use the same
+preserved-entry ABI. Actual BCC v35 startup follows separately; no binding
+exception or simulator-only libc shortcut was added.

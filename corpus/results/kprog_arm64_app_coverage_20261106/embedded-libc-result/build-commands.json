@@ -1,0 +1,73 @@
+[
+  {
+    "command": [
+      "cc",
+      "-O0",
+      "-fno-builtin",
+      "-c",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/embedded-libc-v35/x86-input/control.c",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/embedded-libc-v35/x86-input/native/control.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python3",
+      "/workspaces/repository/corpus/results/kprog_app_coverage_20261106/embed_memory_runtime.py",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/embedded-libc-v35/x86-input",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/embedded-libc-v35/x86-output"
+    ],
+    "returncode": 0,
+    "stdout": "embedded exact memset in control.native.o\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "cc",
+      "-O2",
+      "-fno-builtin",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/embedded-libc-v35/check.c",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/embedded-libc-v35/x86-output/memset.o",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/embedded-libc-v35/x86-check"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "taskset",
+      "-c",
+      "20-23",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/embedded-libc-v35/x86-check"
+    ],
+    "returncode": 0,
+    "stdout": "embedded memset CPU: 8257 cases, 0 failures\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "aarch64-linux-gnu-gcc",
+      "-static",
+      "-O2",
+      "-fno-builtin",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/embedded-libc-v35/check.c",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/bcc-memory-input-v35/memset.o",
+      "-o",
+      "/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/embedded-libc-v35/arm64-check"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]
