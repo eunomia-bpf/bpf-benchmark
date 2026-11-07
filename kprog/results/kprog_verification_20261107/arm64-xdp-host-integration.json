@@ -2954,6 +2954,67 @@
     "scope": "actual raw RSP offset/STACK arena-pointer register frame; MOV immediate/register whole-state canonical steps; initial ABI, memory and compiled B remain open",
     "source_drift": []
   },
+  "x86_xchg_encoder_admission": {
+    "accepted_low_register_pairs": 1024,
+    "archive_block_sha256": "0ee8fc2ae584af988fe445c4d56760cdbcc281fe3d63977a689f23fcc9bd8a8b",
+    "existing_high_byte_rejections": [
+      {
+        "error": "unsupported high-byte register operand(s) [0]: xchg ah,al",
+        "operands": [
+          "ah",
+          "al"
+        ]
+      },
+      {
+        "error": "unsupported high-byte register operand(s) [1]: xchg al,ah",
+        "operands": [
+          "al",
+          "ah"
+        ]
+      },
+      {
+        "error": "unsupported high-byte register operand(s) [0, 1]: xchg ah,ch",
+        "operands": [
+          "ah",
+          "ch"
+        ]
+      },
+      {
+        "error": "unsupported high-byte register operand(s) [0, 1]: xchg ch,ah",
+        "operands": [
+          "ch",
+          "ah"
+        ]
+      },
+      {
+        "error": "unsupported high-byte register operand(s) [0]: xchg bh,dl",
+        "operands": [
+          "bh",
+          "dl"
+        ]
+      },
+      {
+        "error": "unsupported high-byte register operand(s) [1]: xchg dl,bh",
+        "operands": [
+          "dl",
+          "bh"
+        ]
+      }
+    ],
+    "exit": 0,
+    "hardware_or_c_execution_in_rejected_probe": false,
+    "pins": {
+      "kprog/formal/KProgFormal/Reference/X86.lean": "c810a7707495b230af90a4d95dffc012632232eea119080c76c9669f9f5801e3",
+      "kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean": "73b1487713565e8e1fe0c9b405edb5f28cf33f8329e7fb8804c118519c9684ca",
+      "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+      "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+      "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854"
+    },
+    "proof_commit": "f6ca8da9c59719a49066caef17538d86c729b4e0",
+    "scope": "finite encoder-field admission check, not a theorem about arbitrary Python/compiler/native invocations",
+    "semantic_counterexample_found": false,
+    "source_records_sha256": "7addb4701f052f7f51ae05196a11ef682550ccbcdfb825d7cd1ee10773d08481"
+  },
   "x86_xchg_register_frame": {
     "archive_block_sha256": "5b5203edc9f6ab6530d29ebcfe67fd5074ce00bd074752ef38061b887c5683f3",
     "commands": [

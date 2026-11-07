@@ -144,6 +144,7 @@ The register CMOV lift derives the same condition from native RFLAGS, retaining
 false32 zero extension and the RSP-aware full-width pointer path. Register XCHG
 additionally captures both raw pointers/tags/native values before either write;
 its low-slice lift retains both ordered merges and every alias, including RSP/RSP.
+The production encoder already rejects high-byte XCHG operands.
 The invocation stack origin and arena origin remain independent; initial ABI,
 private-memory and compiled-body correspondence still require certificates.
 

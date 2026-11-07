@@ -1894,3 +1894,24 @@ are appended to the existing integration JSON/gzip. The known full exact900
 POPCNT compile EXIT2 and separate canonical CMOV-route unaligned-pointer UB
 remain unresolved; no full pass or private-candidate promotion is claimed.
 Proof SHA256 `73b1487713565e8e1fe0c9b405edb5f28cf33f8329e7fb8804c118519c9684ca`.
+
+## XCHG encoder admission matches the low-slice refinement
+
+The existing production encoder's early high-byte guard rejects AH/AL and
+other high-byte XCHG operands before the later XCHG field branch is reached.
+Inspecting that later branch alone suggested a possible dropped-lane bug;
+the actual encoder call disproves that admission assumption. No accepted
+semantic counterexample was obtained, and no C/native/reference execution
+ran for the rejected probe. The first import-path setup failure and subsequent
+actual ValueError are retained as different investigation outcomes.
+
+A finite check of all16x16x4=1024 low-register width pairs verifies actual
+producer opcode, destination, source, width and AUX0 fields. Six existing
+high-byte rejections are retained verbatim. This confirms the existing
+accepted-field boundary of the low-slice XCHG frame theorem; V introduces
+no new rejection or coverage exclusion. It is an encoder-field test, not
+a proof of Python/compiler correctness or a native execution certificate.
+All five source pins remained unchanged. Complete records and original
+probe diagnostics are in the existing compressed integration archive;
+JSON stores the summary and source/archive hashes without duplicating all
+1024 rows. Production source, ISA, oracles and tests remain untouched.
