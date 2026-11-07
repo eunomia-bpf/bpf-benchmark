@@ -113,7 +113,7 @@ matching-work measurement continue from the reported failure classes.
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [Earlier functional batch153239](native-only-runtime/standard-bcc-8g.json) |
 | OTel | 14 | 3 | 3 | 2 | 0 | 1: exploration limit | [192310 batch](otel-narrow-load/README.md) |
 | Cilium | 163 | 1 | 0 | 0 | 1: map declaration | 0 | [201146 batch](native-modules-cilium__agent/README.md) |
-| Tetragon | 289 | 3 | 3 | 2 | 0 | 0 confirmed; 1 native-stub EINVAL | [210552 batch](native-join-tetragon__observer/README.md) |
+| Tetragon | 311 attempts; 287 resident | 4 | 4 | 4 | 1: next entry manifest selector | 0 | [221545 batch](tetragon-memcpy-replay/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [213447 bound batch](katran-tagged-storage/README.md) |
 | Tracee | 151 | 6 | 6 | 5 | 0 | 1: readonly indexed extent | [214037 batch](tracee-narrow-range/README.md) |
 
@@ -202,3 +202,11 @@ readonly object,maximum offset1036,read4bytes,2154processed instructions/91state
 All6terminal native identities and full logs remain retained; private executed
 sources and the concurrent shared guest.py change are recorded separately.
 The generic CMP representation trial continues from this observed failure class.
+
+
+The [whole Tetragon memcpy-binding replay221545](tetragon-memcpy-replay/README.md)
+closes the earlier wake_up_new_task target-materialization failure:4fresh
+generated/compiled requests bind4/4, allnative hashes and shim boundIDs agree.
+The next upstream execve_send load stops at its manifest length selector before
+generation; libbpf appends a928-byte callback to its10368-byte entry. The common
+manifest scanner is being repaired to describe the complete11296-byte source.

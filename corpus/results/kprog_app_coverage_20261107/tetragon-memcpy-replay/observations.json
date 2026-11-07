@@ -1,0 +1,34 @@
+{
+  "baseline_load_attempts": 311,
+  "baseline_resident_bpf_records": 287,
+  "native_requests": 4,
+  "generated": 4,
+  "compiled": 4,
+  "accepted_bound": 4,
+  "verifier_rejections": 0,
+  "app_status": "error",
+  "next_startup_failure": "manifest entry selector for execve_send",
+  "original_selector_bytes": 10368,
+  "callback_symbol": "cwd_read_v61",
+  "callback_bytes": 928,
+  "actual_source_bytes": 11296,
+  "bound_id_pairs": [
+    [
+      333,
+      334
+    ],
+    [
+      335,
+      336
+    ],
+    [
+      337,
+      338
+    ],
+    [
+      339,
+      340
+    ]
+  ],
+  "shared_source_drift": []
+}
