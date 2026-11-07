@@ -724,3 +724,12 @@ memory959states/18rejects and existing C ALU/logic-flags/flag/operand/route host
 (336/64/1152/21688/4470cases) passed. No runtime/generator/header/kernel policy
 or wire schema changed. F hardware replay and complete77/72 dispatch/O2 remain
 separate obligations. A new immutable full check follows publication.
+
+Exact `ea2b294825a777b3f19adfe3c94813e739a1a750` completed the full
+`make -C kprog/formal check` with exit **0**, including the canonical
+logical-immediate addition, all45312 LLVM encodings/48384 complete states/
+1580 reserved-field rejects and all prior Lean, contract, reference/wire/compiler
+and C semantic checks. The immutable source/cache export was deleted automatically;
+compressed CALL CPU observations retain this 440-case run. This exact checkpoint
+predates the subsequent actual logical-dispatch proof and other lanes' later WIP;
+it is not a full check of those later changes or a whole77/72/O2 certificate.
