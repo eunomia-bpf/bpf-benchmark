@@ -1,0 +1,1083 @@
+{
+  "recorded": "2026-11-07T18:20:34.041056+00:00",
+  "source_publication": "5004364fdd58bd09df13133478fddb01f09987cf",
+  "archives": {
+    "corpus/results/kprog_app_coverage_20261107/micro-shared-elf/validation-raw.tar.gz": "bc4519b81095c00cd053f8673de6ded562030e3c26bab1bd24ef93a8d3476c04",
+    "corpus/results/kprog_app_coverage_20261107/micro-shared-elf/runtime-raw.tar.gz": "9d6403a31df8f98d2d0af956c0d29e560ecf6218d24f1e08852272ad9f1884c7",
+    "corpus/results/kprog_app_coverage_20261107/micro-shared-elf/runtime-service.tar.gz": "0de71e4981b28cfac15d1436df62e36dd4d748fe34bd336d8998856ad9472cab"
+  },
+  "original_ET_DYN_inputs": 29,
+  "original_to_kernel_to_generated_exact_matches": 29,
+  "correct_samples": {
+    "kernel": 29,
+    "native_proof": 26
+  },
+  "request_stages": {
+    "bound": 26,
+    "loader_refused": 2,
+    "compiler_SIGKILL": 1
+  },
+  "source_identity_sets": {
+    "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5": {
+      "/workspaces/repository/kprog/trusted_service.py": "8763816abaf2707e496f5bc03b709c9c21724a63754d76d185208f76a3281e24",
+      "/workspaces/repository/kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+      "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+      "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+      "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+      "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+      "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+    }
+  },
+  "runtime_micro_exec_sha256": "90530ee453832eccf0cf2191ef6a98eabdde9460108166e5f8ed2eafa3806533",
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 15,
+      "native_sha256": "88e2b781a1aac6c191f85b02a86d868682915e4233c17ff008e0fadcfcb74124",
+      "status": 0,
+      "entry": "simple_xdp",
+      "archive_sha256": "7ca8a3ada369bfe8a25e65d034f3e198c6a16849c12cb9192e9e23bb8ada1228",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 20
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 32,
+      "native_sha256": "7a0ca9156e0d8f074068e29c10bdb4ea4ec1d6cec29c2ba058c58a845d368194",
+      "status": 0,
+      "entry": "simple_packet_xdp",
+      "archive_sha256": "ab56b841d882f605ba484c6f7b2a7337e0adba001a4b74aba2296e00e6efe076",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 37
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 49,
+      "native_sha256": "a205b0cf19ad1aba702c0d368afe2cb882c79cc8a1a7406f46571c2f5fe33588",
+      "status": 0,
+      "entry": "bitmap_popcount_scan_xdp",
+      "archive_sha256": "e08bb0ca256de330019011d84faafb1157444987e3b0206a5a81bfd8cde19f5f",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 54
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 66,
+      "native_sha256": "e4ac0408575b81c5bcc161f8be562cf96d31388b6591aeaaa623d8291ea69ca7",
+      "status": 0,
+      "entry": "sorted_rule_binary_search_xdp",
+      "archive_sha256": "77d8e437b8daf357cf6c46f25969271313f597c5166d1b0e1fc34402e15bd709",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 71
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 83,
+      "native_sha256": "79fd5e7df9abda8691265277d8bfa568fd8b47e9678b84230d4457cb4d006cee",
+      "status": 0,
+      "entry": "bcc_runqlat_log2_histogram_bucket_xdp",
+      "archive_sha256": "01709d5d9e77b095fd3ea5acb27e6aad824655403e160e42a52d3b1a47a5fea2",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 88
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 100,
+      "native_sha256": "bcc2fbd394b8f1e95e40c00ae9b19490710aaf977f84896e673dc4e2bd514b01",
+      "status": -5,
+      "entry": "trace_event_type_switch_dispatch_xdp",
+      "archive_sha256": "825f81848d80dccd10dba5b596ed9ff1e423575f94dd8f89bcb554f1c5c28080",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "loader_refused",
+      "loader_first_message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Argument list too long",
+      "verifier_summary": [
+        "processed 1000001 insns (limit 1000000) max_states_per_insn 191 total_states 51997 peak_states 1274 mark_read 0"
+      ],
+      "scalar_access_message": [],
+      "service_error": "Command '['/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader', 'load', '3', '6', '100', '/run/bpf-benchmark-trusted-c-dyn-pure-20261107/session-_whnaen7/requests/request-9mwe8_2g/generated/request.native.o', 'trace_event_type_switch_dispatch_xdp', '/run/bpf-benchmark-trusted-c-dyn-pure-20261107/session-_whnaen7/requests/request-9mwe8_2g/generated/trusted_x86.proof.o', '/run/bpf-benchmark-trusted-c-dyn-pure-20261107/session-_whnaen7/requests/request-9mwe8_2g/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1."
+    },
+    {
+      "request_id": 7,
+      "source_prog_id": 116,
+      "native_sha256": "e92d2c14d4d5f278b15d8ac32d050acb1b04494d520868ae2c812ad5379270c8",
+      "status": 0,
+      "entry": "packet_checksum_fold_xdp",
+      "archive_sha256": "ff4663d30452d130e128a96ec06ac38cf577e67f7df43349ca3653b60333d9e2",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 121
+    },
+    {
+      "request_id": 8,
+      "source_prog_id": 133,
+      "native_sha256": "acd7fd47b73a4f9156502b69332decb78c0e409b6e9fd7eaf1f8e5fd1739de27",
+      "status": 0,
+      "entry": "payload_prefix_memcmp_scan_xdp",
+      "archive_sha256": "95323bac837def94856cf9ec567012b2f5b1b74c2d0661063422a70279c85433",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 138
+    },
+    {
+      "request_id": 9,
+      "source_prog_id": 150,
+      "native_sha256": "42e52fb28eb8c51460ca4eac4888547d70f54e3c6318c865838977518566e902",
+      "status": 0,
+      "entry": "packet_vlan_tcpopt_parser_xdp",
+      "archive_sha256": "cee8f14aa8866e941bd5c0dc5bfa9e554b04818a80a3d7a548d9dda559db7410",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 155
+    },
+    {
+      "request_id": 10,
+      "source_prog_id": 167,
+      "native_sha256": "c1ebbd29dc4c30f2ae275bf8202472c1c922a28add4e3efd4c87df843409856a",
+      "status": 0,
+      "entry": "bpf_local_call_fanout_dispatch_xdp",
+      "archive_sha256": "c725ec6f94b41a77d8b65c8613690561636d382863b6d68f85f7d6c0e8be7d0f",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 172
+    },
+    {
+      "request_id": 11,
+      "source_prog_id": 184,
+      "native_sha256": "0d11cf3d4cb8bc731ec434d53906e09a2b3aa78288db46faa37e67859a2a34ea",
+      "status": 0,
+      "entry": "flow_5tuple_rss_hash_xdp",
+      "archive_sha256": "a1e75e55b5a550bc9affc4728f47af7f494b963e5f14e9f2df7595636d5fee74",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 189
+    },
+    {
+      "request_id": 12,
+      "source_prog_id": 201,
+      "native_sha256": "0039873bed0be49a4692d321306f21b3cd0961c29e2ec3f478029609c1709d45",
+      "status": 0,
+      "entry": "katran_lb_consistent_hash_select_xdp",
+      "archive_sha256": "a5e26a046a4b40fe80c3b1c5ee55654bc7ad205fa781343cda8d75c25777fdf3",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 206
+    },
+    {
+      "request_id": 13,
+      "source_prog_id": 218,
+      "native_sha256": "6642186521b29ffff6c014a76c25d6835d07b45045aa6f2236fd1c1a91c63d8a",
+      "status": 0,
+      "entry": "cilium_policy_guard_tree_filter_xdp",
+      "archive_sha256": "b803ca6fa9d34cdc2f777437544729e3008c3713a952e5bdf8c57a5fc2103d23",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 223
+    },
+    {
+      "request_id": 14,
+      "source_prog_id": 235,
+      "native_sha256": "6b6bcfc6519f3474f4dc2a7e886f3469081e1fa09d019ee4e204d0f84e47d695",
+      "status": -5,
+      "entry": "siphash_rotate64_mixer_xdp",
+      "archive_sha256": "c57af70dfb9fa6427be598fec76064625c8302286e9c1dc3cf97ae91957c36c3",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": -9
+        }
+      ],
+      "stage": "compiler_SIGKILL",
+      "service_error": "Command '['clang', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-c', '/run/bpf-benchmark-trusted-c-dyn-pure-20261107/session-_whnaen7/requests/request-3usmm48k/generated/trusted_x86.bpf.c', '-o', '/run/bpf-benchmark-trusted-c-dyn-pure-20261107/session-_whnaen7/requests/request-3usmm48k/generated/trusted_x86.bpf.o']' died with <Signals.SIGKILL: 9>."
+    },
+    {
+      "request_id": 15,
+      "source_prog_id": 247,
+      "native_sha256": "6efc565cf941125069ab4206d80348a3ed18b184b619642c7afc16d7d626bb6c",
+      "status": 0,
+      "entry": "packet_record_bounds_window_xdp",
+      "archive_sha256": "97d7aab13b5a4e9c8134a27cbfd7f10e758514f78806c065fbf29de1cd492afd",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 252
+    },
+    {
+      "request_id": 16,
+      "source_prog_id": 264,
+      "native_sha256": "dbb79507f4e0abda24c2f4b3e64dcb97fb24a2a53964418d28c3e956bff3e06a",
+      "status": 0,
+      "entry": "flow_record_field_scan_xdp",
+      "archive_sha256": "a90e489c49bd59073a3495487d9081d5c3d537bca4944d275093a6c9c55d8d0e",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 269
+    },
+    {
+      "request_id": 17,
+      "source_prog_id": 281,
+      "native_sha256": "f8e1433423507b6ad462e124f40fb8a8888699d3e75fcd3642553f71687f6201",
+      "status": 0,
+      "entry": "packed_header_bitfield_decode_xdp",
+      "archive_sha256": "ac4feec9565e365f5f4c324455866605c29bbf9fd8b47ec2c7bc2dab38ca254b",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 286
+    },
+    {
+      "request_id": 18,
+      "source_prog_id": 298,
+      "native_sha256": "6435841f269d5a63f36aa53f724d012900c945e040ee154c8a62fd63c3c5f390",
+      "status": 0,
+      "entry": "bpftrace_string_search_prefix_scan_xdp",
+      "archive_sha256": "845a584f01cfc07c2f4cb00e5ad4ecaa2943997e0541305376442484089a67c6",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 303
+    },
+    {
+      "request_id": 19,
+      "source_prog_id": 315,
+      "native_sha256": "16f99add3d379da858eec67e98fba1cb09aec83e6197169537cd068804bbad0c",
+      "status": 0,
+      "entry": "tracee_syscall_name_table_lookup_xdp",
+      "archive_sha256": "02178aaadf5e50852bb0db4edecff4d0a0174658122db4baff234e9880cb4632",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 320
+    },
+    {
+      "request_id": 20,
+      "source_prog_id": 332,
+      "native_sha256": "3b8222f720bdf1b18811a27553b4cf6c7afc485d7d57b04aea24472d35472ee5",
+      "status": 0,
+      "entry": "tracee_http_method_prefix_detect_xdp",
+      "archive_sha256": "a6f47a776e3a6366799cb6ba7b3ffa89db8e84aff86360b07dcfa461b5f09cd7",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 337
+    },
+    {
+      "request_id": 21,
+      "source_prog_id": 349,
+      "native_sha256": "b5d74a6bce6b658ae085b79e331eb3b94c72e1d4c5c234bb8a8e55b94f899d0f",
+      "status": -5,
+      "entry": "cilium_socket_lb_service_select_xdp",
+      "archive_sha256": "6070166c858d561231bdeb1190b6ee96cb06bfcc9ab4b442cd9e30fff83c5350",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "loader_refused",
+      "loader_first_message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied",
+      "verifier_summary": [
+        "processed 118 insns (limit 1000000) max_states_per_insn 0 total_states 8 peak_states 8 mark_read 0"
+      ],
+      "scalar_access_message": [
+        "R0 invalid mem access 'scalar'"
+      ],
+      "service_error": "Command '['/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader', 'load', '3', '21', '349', '/run/bpf-benchmark-trusted-c-dyn-pure-20261107/session-_whnaen7/requests/request-gkvdkf3n/generated/request.native.o', 'cilium_socket_lb_service_select_xdp', '/run/bpf-benchmark-trusted-c-dyn-pure-20261107/session-_whnaen7/requests/request-gkvdkf3n/generated/trusted_x86.proof.o', '/run/bpf-benchmark-trusted-c-dyn-pure-20261107/session-_whnaen7/requests/request-gkvdkf3n/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1."
+    },
+    {
+      "request_id": 22,
+      "source_prog_id": 365,
+      "native_sha256": "9a9e5807264be4db4162fdec537b70bf8dececfeefb770f2191fc31d1982a76c",
+      "status": 0,
+      "entry": "bcc_tcpconnect_ipv4_tuple_filter_xdp",
+      "archive_sha256": "0b84bf35ea4291deaa0cb421de3608204bec3581afc5f24a79fe49c5f448ba5f",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 370
+    },
+    {
+      "request_id": 23,
+      "source_prog_id": 382,
+      "native_sha256": "ff54282bb817676e7817102ef1644a56d507259495076e31f48c7ee74e5d75a0",
+      "status": 0,
+      "entry": "tetragon_process_event_arg_filter_xdp",
+      "archive_sha256": "117dd260f790e75a490e482061b8c304c2e46dd81c75e1ece17bfcda48411c41",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 387
+    },
+    {
+      "request_id": 24,
+      "source_prog_id": 399,
+      "native_sha256": "5ff16c53fc5bd6b2b0ef184be91cd8576e756be82a2649ba8d6bdfc8ff975eca",
+      "status": 0,
+      "entry": "otel_stack_frame_unwind_scan_xdp",
+      "archive_sha256": "4095ab7135f701bf4f6e2e6998c9f8da0e8cedd9a54d76e41249a97ab9054e0e",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 404
+    },
+    {
+      "request_id": 25,
+      "source_prog_id": 416,
+      "native_sha256": "ba3d1a791f94a20b1a6876ab16be24edf910cc1ec6b10f39245f045629bae0b3",
+      "status": 0,
+      "entry": "cilium_ct_nat_tuple_rewrite_xdp",
+      "archive_sha256": "e1e291ab84d995bd131d8e9a8119a28fac41a7c4a81c2a10d0c367171b3fdba9",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 421
+    },
+    {
+      "request_id": 26,
+      "source_prog_id": 433,
+      "native_sha256": "20552e85ea79dbd7556e78fbd36076a71de827408b3d333debd5ee2c2d146256",
+      "status": 0,
+      "entry": "packet_toeplitz_rss_hash_xdp",
+      "archive_sha256": "10bdf2622bdf791d4f87c801d3b138f823e6e4c95890b0dc8b65109ec8318b2e",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 438
+    },
+    {
+      "request_id": 27,
+      "source_prog_id": 450,
+      "native_sha256": "679bf638419b8dca97c675c7bedfa594e6d264cdf35753fe4f1cdd78130c1f14",
+      "status": 0,
+      "entry": "bpftrace_comm_key_fnv_hash_xdp",
+      "archive_sha256": "346669fe1549879c5ba7acf39d27b3b7b3f3fb5896049ccd108629dbf3c29912",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 455
+    },
+    {
+      "request_id": 28,
+      "source_prog_id": 465,
+      "native_sha256": "3f9bb4157fbc4c2b8b2854adf81e5103e39bdce817dfcbb24934a494fec4d5e6",
+      "status": 0,
+      "entry": "tc_packet_checksum_fold_prog",
+      "archive_sha256": "2fee6385fa0131b6413fc17394bb2d1166f579a68fafac72489333c8a8b14a3a",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 470
+    },
+    {
+      "request_id": 29,
+      "source_prog_id": 482,
+      "native_sha256": "15079ed0a4168927dd14343825dcdb52f33f4fa50f896a6a131b3bf9a4193fca",
+      "status": 0,
+      "entry": "cgroup_skb_hash_chain_prog",
+      "archive_sha256": "3861fddc69ff84a41bad17784b9127e28c7dbc12c10f1d2cbee3030a05476a17",
+      "source_identity_set_sha256": "82af737497d13580f4ed4b5ee8024b3079ef6d721039f4c3e8bad3107ea05ad5",
+      "command_returns": [
+        {
+          "executable": "native-link",
+          "returncode": 0
+        },
+        {
+          "executable": "clang",
+          "returncode": 0
+        }
+      ],
+      "stage": "bound",
+      "bound_prog_id": 487
+    }
+  ],
+  "benchmarks": {
+    "simple": {
+      "expected_result": 12345678,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 12345678,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 12345678,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "simple_packet": {
+      "expected_result": 12345678,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 12345678,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 12345678,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "bitmap_popcount_scan": {
+      "expected_result": 12830754992348206170,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 12830754992348206170,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 12830754992348206170,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "sorted_rule_binary_search": {
+      "expected_result": 126,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 126,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 126,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "bcc_runqlat_log2_histogram_bucket": {
+      "expected_result": 17790125373615940312,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 17790125373615940312,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 17790125373615940312,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "trace_event_type_switch_dispatch": {
+      "expected_result": 16,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 16,
+          "retval": 2
+        }
+      },
+      "error": "command failed (1): /workspaces/repository/runner/build-llvmbpf/micro_exec run-native-kernel --program /artifacts/user/micro-programs/x86_64/trace_event_type_switch_dispatch.bpf.o --native-program /artifacts/user/micro-programs/x86_64/trace_event_type_switch_dispatch.native.so --memory /workspaces/repository/micro/generated-inputs/trace_event_type_switch_dispatch.mem --io-mode staged --input-size 1028 --inner-repeat 1 --dump-jit-path /workspaces/repository/micro/results/x86_kvm_micro_20261107_175810_925495/details/jit_dumps/trace_event_type_switch_dispatch__native_proof__sample00.jited.bin\ntrusted specializer refused native program: Input/output error"
+    },
+    "packet_checksum_fold": {
+      "expected_result": 0,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 0,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 0,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "payload_prefix_memcmp_scan": {
+      "expected_result": 9377358970524074984,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 9377358970524074984,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 9377358970524074984,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "packet_vlan_tcpopt_parser": {
+      "expected_result": 7124500222221,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 7124500222221,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 7124500222221,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "bpf_local_call_fanout_dispatch": {
+      "expected_result": 1171593469689687806,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 1171593469689687806,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 1171593469689687806,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "flow_5tuple_rss_hash": {
+      "expected_result": 11016707074064960918,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 11016707074064960918,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 11016707074064960918,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "katran_lb_consistent_hash_select": {
+      "expected_result": 5895923248507644458,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 5895923248507644458,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 5895923248507644458,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "cilium_policy_guard_tree_filter": {
+      "expected_result": 5333736376993440184,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 5333736376993440184,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 5333736376993440184,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "siphash_rotate64_mixer": {
+      "expected_result": 2666935177028490406,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 2666935177028490406,
+          "retval": 2
+        }
+      },
+      "error": "command failed (1): /workspaces/repository/runner/build-llvmbpf/micro_exec run-native-kernel --program /artifacts/user/micro-programs/x86_64/siphash_rotate64_mixer.bpf.o --native-program /artifacts/user/micro-programs/x86_64/siphash_rotate64_mixer.native.so --memory /workspaces/repository/micro/generated-inputs/siphash_rotate64_mixer.mem --io-mode staged --input-size 64 --inner-repeat 1 --dump-jit-path /workspaces/repository/micro/results/x86_kvm_micro_20261107_175810_925495/details/jit_dumps/siphash_rotate64_mixer__native_proof__sample00.jited.bin\ntrusted specializer refused native program: Input/output error"
+    },
+    "packet_record_bounds_window": {
+      "expected_result": 1610777047308888911,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 1610777047308888911,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 1610777047308888911,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "flow_record_field_scan": {
+      "expected_result": 9354240374969449171,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 9354240374969449171,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 9354240374969449171,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "packed_header_bitfield_decode": {
+      "expected_result": 12211926182125163441,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 12211926182125163441,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 12211926182125163441,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "bpftrace_string_search_prefix_scan": {
+      "expected_result": 15111065535037762995,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 15111065535037762995,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 15111065535037762995,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "tracee_syscall_name_table_lookup": {
+      "expected_result": 4063733557757466536,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 4063733557757466536,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 4063733557757466536,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "tracee_http_method_prefix_detect": {
+      "expected_result": 11562433829591280482,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 11562433829591280482,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 11562433829591280482,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "cilium_socket_lb_service_select": {
+      "expected_result": 2868565165525030065,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 2868565165525030065,
+          "retval": 2
+        }
+      },
+      "error": "command failed (1): /workspaces/repository/runner/build-llvmbpf/micro_exec run-native-kernel --program /artifacts/user/micro-programs/x86_64/cilium_socket_lb_service_select.bpf.o --native-program /artifacts/user/micro-programs/x86_64/cilium_socket_lb_service_select.native.so --memory /workspaces/repository/micro/generated-inputs/cilium_socket_lb_service_select.mem --io-mode staged --input-size 1544 --inner-repeat 1 --dump-jit-path /workspaces/repository/micro/results/x86_kvm_micro_20261107_175810_925495/details/jit_dumps/cilium_socket_lb_service_select__native_proof__sample00.jited.bin\ntrusted specializer refused native program: Input/output error"
+    },
+    "bcc_tcpconnect_ipv4_tuple_filter": {
+      "expected_result": 18109187572642697766,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 18109187572642697766,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 18109187572642697766,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "tetragon_process_event_arg_filter": {
+      "expected_result": 12641586655603153431,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 12641586655603153431,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 12641586655603153431,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "otel_stack_frame_unwind_scan": {
+      "expected_result": 12043289854646947360,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 12043289854646947360,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 12043289854646947360,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "cilium_ct_nat_tuple_rewrite": {
+      "expected_result": 14199193300769829204,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 14199193300769829204,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 14199193300769829204,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "packet_toeplitz_rss_hash": {
+      "expected_result": 13526464303109995596,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 13526464303109995596,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 13526464303109995596,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "bpftrace_comm_key_fnv_hash": {
+      "expected_result": 8524536671075880526,
+      "expected_retval": 2,
+      "observed": {
+        "kernel": {
+          "result": 8524536671075880526,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 8524536671075880526,
+          "retval": 2
+        }
+      },
+      "error": null
+    },
+    "tc_packet_checksum_fold": {
+      "expected_result": 0,
+      "expected_retval": 0,
+      "observed": {
+        "kernel": {
+          "result": 0,
+          "retval": 0
+        },
+        "native_proof": {
+          "result": 0,
+          "retval": 0
+        }
+      },
+      "error": null
+    },
+    "cgroup_skb_hash_chain": {
+      "expected_result": 12027228624407116210,
+      "expected_retval": 1,
+      "observed": {
+        "kernel": {
+          "result": 12027228624407116210,
+          "retval": 1
+        },
+        "native_proof": {
+          "result": 12027228624407116210,
+          "retval": 1
+        }
+      },
+      "error": null
+    }
+  },
+  "scope": "independent raw-archive review; unchanged original P; no new guest, timing or all29 acceptance claim"
+}
