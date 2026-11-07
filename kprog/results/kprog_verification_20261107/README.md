@@ -804,3 +804,33 @@ contract, reference/wire/compiler and C semantic check. The immutable source/cac
 export was deleted automatically; compressed CALL CPU observations retain this
 440-case run. Later ALU_REG logical and non-flag ADD/SUB dispatcher increments
 remain separate from this exact pass and require a subsequent full check.
+
+## Non-flag ADD/SUB actual ALU dispatcher
+
+`Arm64Arithmetic.AluDispatch` binds both ALU numeric rows6/7 and the independent
+generated immediate/register selector, then AUX byte0 ADD/SUB. It retains the
+production branch order: stack ORR (proved impossible for ADD/SUB), private-stack
+SUB, general pointer ADD and scalar width write. All source provenance choices
+remain quantified; no scalar-source premise removes a pointer branch. Generated
+pointer addition of the negated64bit word equals modular subtraction for every
+word. The same full-state body theorem therefore composes the actual result,
+width/SP write and one PC advance to canonical non-flag arithmetic, retaining
+all flags, vectors, memory and effects.
+
+Three concrete dispatch theorems cover immediate, shifted-register and
+extended-register canonical steps. Immediate RHS ignores all three unused AUX
+bytes and the arbitrary RHS register. Register RHS ignores IMM, extracts byte1
+through the existing eleven-modifier/unknown-identity switch and byte2 as count;
+byte3 is arbitrary. Native three-kind/width-sized shifts, Fin5 extensions and
+plain-register/LSL aliases retain their original normalization bounds. SP/ZR
+roles and native field validity still require producer binding; native pointer
+reads must project to the same materialized word/provenance through Entry/O4.
+
+All old declarations are byte-identical. Validation: focused50-job Lean build,
+seven existing contract freshness checks, direct-dispatch/model checks and
+seven existing C semantic/actual-route hosts passed336,5632,256,21688,136,
+1115374,225292cases with unchanged final proof SHA. No proof placeholders,
+new tests, input filtering, canonical ISA, runtime, generator or oracle changes;
+original C warnings remain visible. The full77/72 dispatcher and compiled-body
+O2/O4 obligations remain open. A subsequent immutable full check includes this
+increment and the preceding generic ALU_REG logical increment together.

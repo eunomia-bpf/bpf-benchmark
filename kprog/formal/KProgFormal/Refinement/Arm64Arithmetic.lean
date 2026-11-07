@@ -676,4 +676,150 @@ theorem dispatch_other (code : Nat) (aux : BitVec 32) (width : Width) (sourceIsS
 
 end FlagArithmetic
 
+namespace AluDispatch
+
+/-- Both numeric ALU rows use their independent generated operand selectors. -/
+def decodeOpcode (code : Nat) : Option Bool :=
+  if code = GeneratedArm64DispatchFamily.code .aluImm then some true
+  else if code = GeneratedArm64DispatchFamily.code .aluReg then some false else none
+
+theorem decode_code (immediate : Bool) :
+    decodeOpcode (GeneratedArm64AluOperandSelect.code (if immediate then .aluImm else .aluReg)) = some immediate := by
+  cases immediate <;> rfl
+
+theorem decode_family (op : GeneratedArm64DispatchFamily.DispatchOp) :
+    (decodeOpcode (GeneratedArm64DispatchFamily.code op)).isSome =
+      GeneratedArm64DispatchFamily.aluHandled op := by cases op <;> rfl
+
+
+def decodeArithmetic (code : Nat) : Option Bool :=
+  if code = GeneratedArm64AluDecode.code .add then some false
+  else if code = GeneratedArm64AluDecode.code .sub then some true else none
+
+def arithmetic (subtract : Bool) : GeneratedArm64AluDecode.Alu := if subtract then .sub else .add
+
+theorem decode_arithmetic (subtract : Bool) :
+    decodeArithmetic (GeneratedArm64AluDecode.code (arithmetic subtract)) = some subtract := by cases subtract <;> rfl
+
+theorem not_orr (subtract : Bool) : arithmetic subtract ≠ .orr := by cases subtract <;> decide
+
+theorem pointer_sub (lhs rhs : Word) : GeneratedPtrAdd.bits lhs (-rhs) = lhs - rhs := by
+  simp only [GeneratedPtrAdd.bits, Reference.Word]
+  bv_decide
+
+/-- Actual non-flag arithmetic body: generated RHS and ALU result, private
+stack SUB before general pointer ADD, then scalar width write. Pointer reads
+are projected to the same incoming native word, an Entry/O4 obligation. The
+ORR-only pointer branch is impossible for both arithmetic AUX choices. -/
+def rawStep (subtract immediate sourceScalar sourceStack : Bool) (aux : BitVec 32) (width : Width)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (value : Word) (s : Reference.AArch64.State) :
+    Transition Reference.AArch64.State :=
+  let lhs := Arm64Move.readData s src
+  let selected := GeneratedArm64AluOperand.rhs
+    (if GeneratedArm64AluOperandSelect.immediate (if immediate then .aluImm else .aluReg)
+      then .immediate else .register)
+    value (FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat) (Arm64Register.readReg s rhs)
+    ((GeneratedArm64Aux.b2 aux).setWidth 64) (Arm64Register.handlerWidth width)
+  let result := GeneratedArm64AluResult.result (arithmetic subtract) lhs selected
+  let state := if width = .w64 ∧ arithmetic subtract = .orr ∧ sourceStack ∧ selected < 16 then
+      Arm64Move.widthWrite s dst (GeneratedPtrAdd.bits lhs (selected &&& ~~~lhs)) .w64
+    else if GeneratedArm64AluHandler.useStackSub (Arm64Register.handlerWidth width)
+      (arithmetic subtract) (decide (dst = .stack)) sourceStack then
+      Arm64Move.widthWrite s dst (GeneratedPtrAdd.bits lhs (-selected)) .w64
+    else if GeneratedArm64AluHandler.usePointer (Arm64Register.handlerWidth width)
+      (arithmetic subtract) (decide (dst = .stack)) sourceScalar then
+      Arm64Move.widthWrite s dst (GeneratedPtrAdd.bits lhs selected) .w64
+    else Arm64Move.widthWrite s dst result width
+  ⟨{ state with pc := s.pc + 4 }, [], none⟩
+
+theorem raw_step_refines (subtract immediate sourceScalar sourceStack : Bool) (aux : BitVec 32) (width : Width)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (value : Word) (s : Reference.AArch64.State) :
+    rawStep subtract immediate sourceScalar sourceStack aux width dst src rhs value s =
+      Reference.AArch64.arithmeticImmediateStep width subtract false dst src
+        (if immediate then value else FlagArithmetic.registerValue aux width rhs s) s := by
+  cases width <;> cases subtract <;> cases immediate <;> cases sourceScalar <;> cases sourceStack <;> cases dst <;>
+    simp [rawStep, not_orr, arithmetic, GeneratedArm64AluOperandSelect.immediate, GeneratedArm64AluOperand.rhs,
+      GeneratedArm64AluHandler.useStackSub, GeneratedArm64AluHandler.usePointer,
+      GeneratedArm64AluResult.result, GeneratedPtrAdd.bits, pointer_sub,
+      Arm64Register.handlerWidth, Arm64Move.read_data_refines, Arm64Move.width_write_refines,
+      Reference.AArch64.arithmeticImmediateStep, Reference.AArch64.writeData, FlagArithmetic.registerValue,
+      Arm64Register.read_refines]
+  all_goals
+    have equal (lhs rhs : Word) : lhs + -rhs = lhs - rhs := pointer_sub lhs rhs
+    simp only [equal]
+
+def packedAux (subtract : Bool) (mod : GeneratedArm64ModDecode.Mod) (amount lane3 : Byte) : BitVec 32 :=
+  FlagArithmetic.packedAux mod amount (BitVec.ofNat 8 (GeneratedArm64AluDecode.code (arithmetic subtract))) lane3
+
+theorem packed_operation (subtract : Bool) (mod : GeneratedArm64ModDecode.Mod) (amount lane3 : Byte) :
+    (GeneratedArm64Aux.b0 (packedAux subtract mod amount lane3)).toNat =
+      GeneratedArm64AluDecode.code (arithmetic subtract) := by
+  simp only [packedAux, FlagArithmetic.packedAux, arm64_aux_b0_roundtrip]
+  cases subtract <;> rfl
+
+def dispatch (code : Nat) (aux : BitVec 32) (width : Width) (sourceScalar sourceStack : Bool)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (value : Word) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  (decodeOpcode code).bind (fun immediate =>
+    (decodeArithmetic (GeneratedArm64Aux.b0 aux).toNat).map
+      (fun subtract => rawStep subtract immediate sourceScalar sourceStack aux width dst src rhs value s))
+
+def immediateAux (subtract : Bool) (lane1 lane2 lane3 : Byte) : BitVec 32 :=
+  GeneratedArm64Aux.pack (BitVec.ofNat 32 (GeneratedArm64AluDecode.code (arithmetic subtract)))
+    (lane1.setWidth 32) (lane2.setWidth 32) (lane3.setWidth 32)
+
+theorem immediate_operation (subtract : Bool) (lane1 lane2 lane3 : Byte) :
+    (GeneratedArm64Aux.b0 (immediateAux subtract lane1 lane2 lane3)).toNat =
+      GeneratedArm64AluDecode.code (arithmetic subtract) := by
+  simp only [immediateAux, arm64_aux_b0_roundtrip]
+  cases subtract <;> rfl
+
+theorem dispatch_immediate_refines (subtract sourceScalar sourceStack : Bool) (width : Width)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (value : Word)
+    (lane1 lane2 lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64AluOperandSelect.code .aluImm) (immediateAux subtract lane1 lane2 lane3)
+      width sourceScalar sourceStack dst src rhs value s =
+      some (Reference.AArch64.step (.arithmeticImmediate width subtract false dst src value) s) := by
+  have decoded := decode_code true
+  simp only [dispatch, decoded, immediate_operation, decode_arithmetic]
+  change some (rawStep subtract true sourceScalar sourceStack _ width dst src rhs value s) = _
+  rw [raw_step_refines]
+  rfl
+
+theorem dispatch_register_refines (subtract sourceScalar sourceStack : Bool) (width : Width)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (kind : Fin 3) (amount : Fin width.bits)
+    (value : Word) (lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64AluOperandSelect.code .aluReg)
+      (packedAux subtract (registerModifier width kind amount) (BitVec.ofNat 8 amount.val) lane3)
+      width sourceScalar sourceStack dst src rhs value s =
+      some (Reference.AArch64.step (.arithmeticRegister width subtract false dst src rhs kind amount) s) := by
+  have decoded := decode_code false
+  simp only [dispatch, decoded, packed_operation, decode_arithmetic]
+  change some (rawStep subtract false sourceScalar sourceStack _ width dst src rhs value s) = _
+  rw [raw_step_refines]
+  simp only [Bool.false_eq_true, ↓reduceIte, FlagArithmetic.registerValue, packedAux,
+    FlagArithmetic.packed_modifier, FlagArithmetic.packed_amount, Arm64Shift.Unary.native_amount]
+  conv => lhs; rw [step_rhs_normalization]
+  simp only [Arm64Register.read_refines, register_modifier_refines]
+  rfl
+
+theorem dispatch_extended_refines (subtract sourceScalar sourceStack plainSource : Bool) (width : Width)
+    (dst src : Reference.AArch64.RegisterRef) (rhs : Register) (kind : Reference.AArch64.RegisterExtend)
+    (amount : Fin 5) (value : Word) (lane3 : Byte) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64AluOperandSelect.code .aluReg)
+      (packedAux subtract (extendedModifier width kind (BitVec.ofNat 64 amount.val) plainSource)
+        (BitVec.ofNat 8 amount.val) lane3) width sourceScalar sourceStack dst src rhs value s =
+      some (Reference.AArch64.step (.arithmeticExtended width subtract false dst src rhs kind amount) s) := by
+  have decoded := decode_code false
+  simp only [dispatch, decoded, packed_operation, decode_arithmetic]
+  change some (rawStep subtract false sourceScalar sourceStack _ width dst src rhs value s) = _
+  rw [raw_step_refines]
+  simp only [Bool.false_eq_true, ↓reduceIte, FlagArithmetic.registerValue, packedAux,
+    FlagArithmetic.packed_modifier, FlagArithmetic.packed_amount, FlagArithmetic.extended_amount]
+  conv => lhs; rw [step_rhs_normalization]
+  simp only [Arm64Register.read_refines, extended_modifier_refines _ _ _ _ _ (amount_bound amount)]
+  rfl
+
+end AluDispatch
+
 end KProgFormal.Refinement.Arm64Arithmetic

@@ -32,7 +32,9 @@ ALU AUX selection and all six TST/ANDS/BICS numeric dispatch rows compose
 with their generated operand/value/write/flag primitives. Test aliases retain
 DST/SRC routing; register forms retain native shift bounds and SP/ZR rules. Generic ALU_REG
 logical forms also compose the generated register RHS with AUX extraction,
-including the stack-ORR path and bare NONE modifiers.
+including the stack-ORR path and bare NONE modifiers. Non-flag ADD/SUB
+likewise retains the stack-SUB and pointer-ADD branches through immediate,
+shifted and extended-register numeric dispatch.
 
 The proofs establish arithmetic/flags, register and tag operations, memory
 accesses, routing tables, and selected whole-state handler refinements.
