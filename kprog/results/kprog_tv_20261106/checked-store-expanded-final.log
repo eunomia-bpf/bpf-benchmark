@@ -1,0 +1,15 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv -o ../tv/build/SimpleStoreCertificate.olean ../tv/SimpleStoreCertificate.lean
+'KProgTV.SimpleStoreCertificate.native_full_state' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.proof_full_state' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.matching_executions' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.including_faults' depends on axioms: [propext, Classical.choice, Quot.sound]
+cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv ../tv/SimpleCheckedBlocks.lean
+'KProgTV.SimpleCheckedBlocks.first_block' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+'KProgTV.SimpleCheckedBlocks.second_block' depends on axioms: [propext, Classical.choice, Lean.ofReduceBool, Quot.sound]
+'KProgTV.SimpleCheckedBlocks.return_executions' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleCheckedBlocks.store_including_faults' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+make: Leaving directory '/workspaces/repository/kprog/tv'

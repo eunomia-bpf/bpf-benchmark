@@ -174,15 +174,17 @@ def nativeObserved (n : AArch64.State) (pointer : Word) :=
   (ARM64Path.evaluate 0 native (nativePositions n.memory pointer) (nativeInitial n pointer)).map
     fun result => (result.state.memory, result.events, result.fault, result.state.pc)
 
-def proofObserved (n : AArch64.State) (p : BPF.State) (pointer : Word) :=
-  (BPFPath.evaluate noExternals proof (proofPositions n.memory pointer) (proofInitial n p pointer)).map
+def proofObserved (n : AArch64.State) (p : BPF.State) (pointer : Word)
+    (env : BPF.Environment := noExternals) :=
+  (BPFPath.evaluate env proof (proofPositions n.memory pointer) (proofInitial n p pointer)).map
     fun result => (result.state.memory, result.events, result.fault, proofNativePC result.state.pc)
 
 /-- No store-permission precondition: either execution faults at the same
 access, with the same earlier writes, or both reach their corresponding exits.
 Arbitrary unreadable/uninitialized bytes and wraparound pointers are included. -/
-theorem including_faults (n : AArch64.State) (p : BPF.State) (pointer : Word) :
-    ∃ result, nativeObserved n pointer = .ok result ∧ proofObserved n p pointer = .ok result := by
+theorem including_faults (n : AArch64.State) (p : BPF.State) (pointer : Word)
+    (env : BPF.Environment := noExternals) :
+    ∃ result, nativeObserved n pointer = .ok result ∧ proofObserved n p pointer env = .ok result := by
   cases p4 : permitted n.memory.writable (pointer + (3#64)) 4 <;>
     cases p1 : permitted n.memory.writable (pointer + (7#64)) 1 <;>
     cases p2 : permitted n.memory.writable pointer 2 <;>

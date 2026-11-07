@@ -592,4 +592,5 @@ capture-loader-build:
 
 .PHONY: checked-first-block-check
 checked-first-block-check: checked-platform-check simple-blocks-check
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv -o ../tv/build/SimpleStoreCertificate.olean ../tv/SimpleStoreCertificate.lean
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv ../tv/SimpleCheckedBlocks.lean

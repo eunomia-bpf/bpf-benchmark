@@ -936,3 +936,20 @@ log are retained in `checked-guard-return-inputs.tar.gz`. Full-state block-edge,
 store/fault/private-memory, invocation and CPU-profile composition remain.
 The pre-existing `SimpleStoreCertificate.including_faults` is available for
 reuse; no duplicate store semantics or fault checker is being added.
+
+Actual expanded store/fault observations (2026-11-07)
+-----------------------------------------------------
+
+`checked-store-expanded-final.log` passes the reused native/compiled store
+certificate and its transport to the accepted expanded B. It preserves complete
+memory, ordered writes/faults and their identity/address/size, plus corresponding
+PC, with no store-permission precondition. All first-fault cases and the successful
+successor are covered; witnesses follow actual decoded control flow and stop at
+the fault. Only the existing proof environment was parameterized, preserving its
+default; no second ISA or duplicate store semantics was introduced.
+
+Final expanded-store theorem axioms are propext/Classical.choice/Lean.ofReduceBool/
+Quot.sound, with no sorryAx. Exact checker/array/snapshot sources are archived in
+`checked-store-expanded-inputs.tar.gz`. This result concerns store observations;
+complete architectural block-edge/private-frame/invocation/profile composition
+continues before a whole-program certificate can be claimed.

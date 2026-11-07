@@ -1,5 +1,6 @@
 import SimpleCheckedPlatform
 import SimpleBlocks
+import SimpleStoreCertificate
 
 set_option maxRecDepth 4096
 set_option maxHeartbeats 1000000
@@ -183,8 +184,41 @@ theorem return_executions (n : AArch64.State) (p : BPF.State) (value : Word) :
       simp [nativeReturnFinal, gpr7],
     by simp [proofReturnFinal, proofReturnBefore], rfl, rfl⟩
 
+/-- Every store witness stops at its first real fault or actual successor;
+the witness contributes no executable permission test or artificial bound. -/
+theorem store_positions (memory : Memory) (pointer : Word) :
+    ∀ pc ∈ SimpleStoreCertificate.proofPositions memory pointer, 4 ≤ pc ∧ pc < 27 := by
+  intro pc inside
+  unfold SimpleStoreCertificate.proofPositions at inside
+  split at inside
+  · simp at inside; omega
+  · split at inside
+    · simp at inside; omega
+    · split at inside
+      · simp at inside; omega
+      · split at inside <;> simp at inside <;> omega
+
+/-- Exact memory, ordered writes/fault, fault identity and corresponding PC
+against the accepted expanded B, without a store-permission assumption. This
+reuses the existing canonical native/BPF store certificate. -/
+theorem store_including_faults (n : AArch64.State) (p : BPF.State) (pointer : Word) :
+    ∃ observed, SimpleStoreCertificate.nativeObserved n pointer = .ok observed ∧
+      (BPFPath.evaluate SimpleCheckedPlatform.externals SimpleCheckedPlatform.physical
+        (SimpleStoreCertificate.proofPositions n.memory pointer)
+        (SimpleStoreCertificate.proofInitial n p pointer)).map
+          (fun result => (result.state.memory, result.events, result.fault,
+            SimpleStoreCertificate.proofNativePC result.state.pc)) = .ok observed := by
+  have actual := body_evaluate SimpleCheckedPlatform.externals
+    (SimpleStoreCertificate.proofPositions n.memory pointer) (store_positions n.memory pointer)
+    (SimpleStoreCertificate.proofInitial n p pointer)
+  rw [actual]
+  simpa only [SimpleStoreCertificate.proofObserved] using
+    SimpleStoreCertificate.including_faults n p pointer (env := SimpleCheckedPlatform.externals)
+
 end KProgTV.SimpleCheckedBlocks
 #print axioms KProgTV.SimpleCheckedBlocks.first_block
 
 #print axioms KProgTV.SimpleCheckedBlocks.second_block
 #print axioms KProgTV.SimpleCheckedBlocks.return_executions
+
+#print axioms KProgTV.SimpleCheckedBlocks.store_including_faults

@@ -673,3 +673,12 @@ invocation/whole-program certificate. The existing
 `SimpleStoreCertificate.including_faults` already covers each first store fault
 without store-permission premises; its connection to this expanded program is
 next, along with rejection-path and complete state-relation composition.
+
+`store_including_faults` now transports the existing store/fault certificate to
+the actual expanded B. For arbitrary memory and wrapping pointers it matches
+complete resulting memory, ordered writes and fault, exact fault identity and
+corresponding native/proof PC, without a writable-memory premise. Its finite
+witness stops at the real first fault or block successor; those predicates add
+no executable checks. The reused certificate accepts an explicit BPF environment
+with the original default preserved. Full architectural/block-edge and private
+memory composition remains required beyond this store observation theorem.
