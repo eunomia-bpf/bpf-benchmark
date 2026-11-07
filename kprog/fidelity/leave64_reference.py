@@ -22,6 +22,7 @@ def main():
  p.add_argument('--binary',type=Path,required=True)
  p.add_argument('--reference',type=Path,required=True)
  p.add_argument('--out',type=Path,required=True)
+ p.add_argument('--input-classes',type=int,choices=(8,33),default=8,help='expected complete CPU input-class count')
  a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
  symbols={}
  for line in subprocess.check_output(['nm',a.binary],text=True).splitlines():
@@ -35,7 +36,7 @@ def main():
  with gzip.open(a.cases,'rt') as f:
   for line in f:
    row=json.loads(line);groups[row['input_class']].append(row)
- if len(groups)!=8 or any(len(rows)!=1024 for rows in groups.values()):raise ValueError('incomplete saved CPU states')
+ if len(groups)!=a.input_classes or any(len(rows)!=1024 for rows in groups.values()):raise ValueError('incomplete saved CPU states')
  tables=[]
  with (a.out/'mismatches.jsonl').open('w') as bad,(a.out/'unavailable.jsonl').open('w') as missing:
   for name,rows in groups.items():
@@ -71,7 +72,7 @@ def main():
    print(name,'cases1024 differences',count,flush=True)
  with (a.out/'reference-classes.tsv').open('w') as f:
   w=csv.DictWriter(f,fieldnames=list(tables[0]),delimiter='\t',lineterminator='\n');w.writeheader();w.writerows(tables)
- summary=dict(cpu_cases=8192,reference_cases=sum(r['reference_cases'] for r in tables),mismatches=sum(r['mismatches'] for r in tables),unavailable_classes=sum(r['reference_cases']==0 for r in tables),reference_sha256=hashlib.sha256(a.reference.read_bytes()).hexdigest(),cpu_binary_sha256=hashlib.sha256(a.binary.read_bytes()).hexdigest(),cpu_cases_gzip_sha256=hashlib.sha256(a.cases.read_bytes()).hexdigest(),fault_flags_normalization='clear exception-delivery RF bit16 only; compare all remaining RFLAGS',compared='all16 GPR/full normalized flags/PC/memory plus fault presence and modeled class; SIMD and segment state not measured by this CPU fixture')
+ summary=dict(cpu_cases=sum(len(rows) for rows in groups.values()),input_classes=len(groups),reference_cases=sum(r['reference_cases'] for r in tables),mismatches=sum(r['mismatches'] for r in tables),unavailable_classes=sum(r['reference_cases']==0 for r in tables),reference_sha256=hashlib.sha256(a.reference.read_bytes()).hexdigest(),cpu_binary_sha256=hashlib.sha256(a.binary.read_bytes()).hexdigest(),cpu_cases_gzip_sha256=hashlib.sha256(a.cases.read_bytes()).hexdigest(),fault_flags_normalization='clear exception-delivery RF bit16 only; compare all remaining RFLAGS',compared='all16 GPR/full normalized flags/PC/memory plus fault presence and modeled class; SIMD and segment state not measured by this CPU fixture')
  (a.out/'summary.json').write_text(json.dumps(summary,indent=2)+'\n');print(json.dumps(summary))
  return int(summary['mismatches']!=0 or summary['unavailable_classes']!=0)
 
