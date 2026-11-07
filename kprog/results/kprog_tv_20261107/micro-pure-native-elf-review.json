@@ -185,5 +185,6 @@
   },
   "cause": "Catalog uses native.so for non-stage2 native kernel programs, while the common service supports relocatable ELF only. All refusals occur before generation/verifier.",
   "owner": "C standard micro artifact/catalog integration; T preserves strict classifier and input validation.",
-  "remaining": "Produce and select the supported ET_REL input on the pure native-kernel path, then run actual regression; no exemption or success claim."
+  "remaining": "Produce and select the supported ET_REL input on the pure native-kernel path, then run actual regression; no exemption or success claim.",
+  "retained_archive": "kprog/results/kprog_tv_20261107/micro-pure-native-elf-refusals.tar.gz"
 }
