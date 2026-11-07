@@ -591,6 +591,18 @@ def leaRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.
     pure ⟨nativeRegisters env frame arena
       (leaRegister env frame arena state width destination source offset nextPc), [], none⟩
 
+/-- DIV's raw SRC selector samples a full GPR or the already captured IMM
+operand before RAX/RDX writeback. DST and AUX retain their unused values. -/
+def divideRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (flags : Byte) (src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+  match widthOf flags with
+  | none => none
+  | some width =>
+      if src = 255 then some (divideWord env frame arena state width value nextPc)
+      else (registerOf src).map (fun source =>
+        divideWord env frame arena state width (registerValue env frame arena state source) nextPc)
+
 /-- Partial ordered register dispatcher. MOVX follows the existing NOP/MOV
 prefix and precedes the ALU, compare and singleton register gates. Distinct
 opcode identities preserve selection across the covered handler families.
@@ -724,6 +736,8 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         let source ← registerOf src
         pure ⟨nativeRegisters env frame arena
           (exchangeRegisters env frame arena state width destination source nextPc), [], none⟩
+      else if code = GeneratedX86Opcode.code .div then
+        divideRegisters env frame arena flags src value nextPc state
       else none
 
 /-- Field/operand identities only. CMOV consumes the entire condition AUX;
@@ -740,6 +754,16 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
   | move (code : Nat) (native : Reference.X86.Instruction)
       (fields : MoveBinding flags aux dst src value nextPc code native) :
       RegisterBinding flags aux dst src value nextPc nativeState code native
+  | divide (width : ScalarWidth) (source : Register)
+      (widthField : WidthBinding flags width) (sourceField : src = registerByte source) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .div)
+        (.divide width (.register (.low source)) nextPc)
+  | divideCaptured (width : ScalarWidth) (source : RegisterSlice)
+      (widthField : WidthBinding flags width) (sourceField : src = 255)
+      (legal : match source with | .low _ => True | .high _ => width = .w8)
+      (operandField : value = Reference.X86.scalarRegisterValue nativeState width source) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .div)
+        (.divide width (.register source) nextPc)
   | lea (width : Reference.X86.CmovWidth) (destination : Register) (base index : Option Register)
       (widthField : WidthBinding flags (cmovScalarWidth width))
       (dstField : dst = registerByte destination) (baseField : src = optionalRegisterByte base)
@@ -1008,6 +1032,17 @@ theorem lea_unit_rcx_binding (state : Reference.X86.State) (flags : Byte)
     bv_decide
   simpa only [address] using binding
 
+/-- The high-byte DIV producer argument is the exact incoming native byte;
+its SRC_NONE encoding therefore establishes the generic captured-lane binding. -/
+theorem divide_high_byte_binding (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (flags : Byte) (aux : BitVec 32) (dst : Byte)
+    (source : Fin 4) (nextPc : Reference.Word) (widthField : WidthBinding flags .w8) :
+    RegisterBinding flags aux dst 255 (readRegister env frame arena state .w8 (.high source)) nextPc
+      (nativeRegisters env frame arena state) (GeneratedX86Opcode.code .div)
+      (.divide .w8 (.register (.high source)) nextPc) :=
+  .divideCaptured .w8 (.high source) widthField rfl rfl
+    (native_register_read env frame arena state .w8 (.high source))
+
 /-- SHLD/SHRD CL reads the byte from the same incoming raw RCX frame.
 Count capture precedes every destination assignment, including destination RCX. -/
 theorem double_shift_cl_binding (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
@@ -1076,6 +1111,32 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
   | move code native fields =>
       apply exact_dispatch_refines
       simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
+  | divide width source widthField sourceField =>
+      apply exact_dispatch_refines
+      subst src
+      have decoded := width_binding_decodes flags width widthField
+      have present : registerByte source ≠ (255 : Byte) := by
+        intro equal
+        have encoded := congrArg BitVec.toNat equal
+        change source.val % 256 = 255 at encoded
+        have bound := source.isLt
+        omega
+      change divideRegisters env frame arena flags (registerByte source) value nextPc state =
+        some (Reference.X86.step (.divide width (.register (.low source)) nextPc)
+          (nativeRegisters env frame arena state))
+      simp only [divideRegisters, decoded]
+      rw [if_neg present]
+      simpa [register_of_byte] using
+        congrArg some (divide_register_frame_refines env frame arena state width source nextPc)
+  | divideCaptured width source widthField sourceField legal operandField =>
+      apply exact_dispatch_refines
+      have decoded := width_binding_decodes flags width widthField
+      have captured : value = readRegister env frame arena state width source := by
+        rw [native_register_read]; exact operandField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        divideRegisters, decoded, sourceField, captured] using
+        congrArg some (divide_captured_frame_refines env frame arena state width source nextPc)
   | lea width destination base index widthField dstField baseField indexField scaleField ordinary =>
       apply exact_dispatch_refines
       have widthDecoded := cmov_width_binding_decodes flags width widthField
@@ -1569,6 +1630,7 @@ def specializedRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvi
       let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
       let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
       pure ⟨nativeRegisters env frame arena (logicRegister env frame arena state width .test destination source nextPc), [], none⟩
+  | .div => dispatchRegisters env frame arena (GeneratedX86Opcode.code .div) flags aux dst src value nextPc state
   | .nop => dispatchRegisters env frame arena (GeneratedX86Opcode.code .nop) flags aux dst src value nextPc state
   | .bswap => dispatchRegisters env frame arena (GeneratedX86Opcode.code .bswap) flags aux dst src value nextPc state
   | .popcnt => dispatchRegisters env frame arena (GeneratedX86Opcode.code .popcnt) flags aux dst src value nextPc state
@@ -1633,6 +1695,7 @@ theorem specialized_register_native_matches (env : EntryEnvironment.Environment)
 RUN_OP calls. The direct-only API above remains available for its direct-macro subset. -/
 def registerTokenOpcode (token : GeneratedX86Specialization.Op) : Option GeneratedX86Opcode.Op :=
   match token with
+  | .div => some .div
   | .nop => some .nop | .bswap => some .bswap | .popcnt => some .popcnt
   | .xchg => some .xchg | .shiftx => some .shiftx | .bzhi => some .bzhi
   | .shldImm => some .shldImm | .shrdImm => some .shrdImm

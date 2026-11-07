@@ -10,19 +10,19 @@ specialization token also has its own row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 71 / 71 |
 | Reference step family defined | 67/75 | 71/71 |
-| Raw register handler refinement | 30/75 | 0/71 |
-| Raw register dispatcher arm composition | 30/75 | 0/71 |
-| Additional partial-model handler families | 37/75 | 0 |
+| Raw register handler refinement | 31/75 | 0/71 |
+| Raw register dispatcher arm composition | 31/75 | 0/71 |
+| Additional partial-model handler families | 36/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 69/71 |
 | Declared opcode dispatcher gaps | 0 | 2/71 |
 | Additional wrapping-model dispatcher arm | 1/75 | 0/71 |
-| O2 C-model token-body equality | 31/75 | 0/71 |
+| O2 C-model token-body equality | 32/75 | 0/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 65/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 5/71 |
 
-The 31 x86 O2 equalities cover 23 direct bodies and eight unchanged generic calls.
-The remaining 37 x86 reference-family handlers have partial model proofs; eight
+The 32 x86 O2 equalities cover 23 direct bodies and nine unchanged generic calls.
+The remaining 36 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 require ALU-family and
@@ -60,7 +60,7 @@ total logical shifts, with62400 LEA-oracle and8401 offset-oracle UBSan cases.
 Production unit-RCX normalization is adopted. The remaining RSP-source signed
 sum has a tested [unsigned correction](lea-stack-wrapping.patch.gz):8192 full
 register/tag/flag/stack cases agree. C owns its coherent production adoption;
-raw-production totals retain30 while the C-model O2 total advances to31.
+raw-production totals retain31 while the C-model O2 total advances to32.
 The added finite CL replay epochs contribute98304 observations and preserve
 the66/75 numeric replay total and each original source identity.
 <!-- COVERAGE END -->
@@ -3187,3 +3187,29 @@ CPU trace and exit receipt are in the integration archive under
 `full_make_check_635e79efb`. This result covers the LEA dispatcher and total
 offset arithmetic at that epoch; later DIV work and the C-owned RSP-source
 addition correction retain their separate completion evidence.
+
+### DIV raw register dispatcher and generic token
+
+Unsigned DIV now lifts all four operand widths through the actual SRC selector
+and ordered register dispatcher. The proof captures divisor/RAX/RDX from the
+same incoming frame, derives zero-divisor and quotient-overflow faults, and
+composes byte AH:AL packing or ordered quotient/remainder writes. Qword zero-high
+and restoring long-division branches share the verified arithmetic result. The
+producer’s captured high-byte SRC_NONE/IMM expression has its own input binding.
+All77 existing numeric-frame and41 dispatcher theorem signatures are retained.
+
+The135-target focused build, default Lean build and16 axiom audits pass.
+Audits retain propext, Classical.choice, Quot.sound and Lean.ofReduceBool as
+reported by the existing trust boundary. Fresh UBSan oracles pass260 selector
+and110885 full routed checks. The canonical executable passes1298 full-state
+cases including699 divide/read faults. The existing semantic handler oracle
+passes18432 real-CPU/encoded register-memory/high-byte observations,9 valid BPF
+compiles,9 retained fault markers,2 narrow-ABI and2 undefined-RDX controls.
+All captured oracle source inputs keep their SHA256 values through execution.
+
+The C-model O2 interface now covers32 tokens:23 direct bodies and nine generic
+RUN_OP calls. Raw register handler/dispatcher coverage is31/75, with LEA
+retaining its separate wrapping-model arm pending the C-owned signed-stack sum
+repair. DIV memory-source capture/read-fault/effect composition, whole-ISA raw
+coverage and generic ABI/definedness/C correspondence/compiler/native-link
+preservation retain their explicit completion interfaces.

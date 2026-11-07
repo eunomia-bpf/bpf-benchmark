@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86Divide
 import KProgFormal.Refinement.X86Lea
 import KProgFormal.Refinement.X86DoubleShift
 import KProgFormal.Refinement.X86Mulx
@@ -1576,5 +1577,110 @@ theorem lea_address32_frame_refines (env : Environment) (frame : Frame) (arena :
         (nativeRegisters env frame arena state) := by
   rw [lea_register_frame_refines]
   simp [Reference.X86.step, Reference.X86.writeValue]
+
+/-- DIV captures its divisor and both implicit accumulator halves before
+writeback. Narrow cases and the zero-high qword fast path use native division;
+the remaining qword path uses the verified restoring long-division loop. -/
+def divideResult (width : Reference.X86.ScalarWidth) (high low divisor : Nat) : Nat × Nat :=
+  if width = .w64 ∧ high ≠ 0 then X86Divide.longDivide width.bits high low divisor
+  else ((high * X86Divide.base width + low) / divisor,
+        (high * X86Divide.base width + low) % divisor)
+
+theorem divide_result_refines (width : Reference.X86.ScalarWidth) (high low divisor : Nat)
+    (highBound : high < divisor) (lowBound : low < X86Divide.base width) :
+    divideResult width high low divisor = X86Divide.longDivide width.bits high low divisor := by
+  unfold divideResult
+  split
+  · rfl
+  · have result := X86Divide.longDivide_quot_rem width.bits high low divisor highBound lowBound
+    exact Prod.ext result.1.symm result.2.symm
+
+/-- The divisor is narrowed by its actual operand width. Zero divisors and
+high-half overflow return the unchanged frame with the canonical divide fault.
+Successful byte DIV packs AH:AL; wider cases write RAX and then RDX. -/
+def divideWord (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (operand nextPc : NativeWord) : Transition Reference.X86.State :=
+  let native := nativeRegisters env frame arena state
+  let divisor := operand.toNat % X86Divide.base width
+  let high := X86Divide.high width native
+  let low := X86Divide.low width native
+  if divisor = 0 ∨ divisor ≤ high then ⟨native, [.fault .divide], some .divide⟩
+  else
+    let result := divideResult width high low divisor
+    let written := if width = .w8 then
+      writeRegister env frame arena state .w16 (.low 0) (BitVec.ofNat 64 (256 * result.2 + result.1))
+    else
+      writeRegister env frame arena
+        (writeRegister env frame arena state width (.low 0) (BitVec.ofNat 64 result.1))
+        width (.low 2) (BitVec.ofNat 64 result.2)
+    ⟨nativeRegisters env frame arena (registerPc written nextPc), [], none⟩
+
+theorem divide_narrow_nat (width : Reference.X86.ScalarWidth) (operand : NativeWord) :
+    (((operand.setWidth width.bits).setWidth 64).toNat % X86Divide.base width) =
+      operand.toNat % X86Divide.base width := by
+  cases width <;> simp [X86Divide.base, Reference.X86.ScalarWidth.bits,
+    Reference.X86.ScalarWidth.bytes, BitVec.toNat_setWidth, Nat.mod_mod]
+
+theorem divide_word_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (operand nextPc : NativeWord) :
+    divideWord env frame arena state width operand nextPc =
+      Reference.X86.step (.divide width (.immediate operand) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have readWrite (current : RegisterState) (access : Reference.X86.ScalarWidth)
+      (destination : Reference.X86.RegisterSlice) (value : NativeWord) (reg : Reference.X86.Register) :
+      registerValue env frame arena (writeRegister env frame arena current access destination value) reg =
+        if reg = destination.reg then Reference.X86.scalarWriteValue
+          (registerValue env frame arena current reg) value access destination
+        else registerValue env frame arena current reg :=
+    congrArg (fun native => native.gpr reg) (native_register_write env frame arena current access destination value)
+  rw [← X86Divide.step_refines]
+  simp only [divideWord, X86Divide.handlerStep, X86Scalar.read_refines,
+    Reference.X86.scalarRead, divide_narrow_nat]
+  by_cases fault : operand.toNat % X86Divide.base width = 0 ∨
+      operand.toNat % X86Divide.base width ≤ X86Divide.high width (nativeRegisters env frame arena state)
+  · simp [fault]
+  · have highBound : X86Divide.high width (nativeRegisters env frame arena state) <
+        operand.toNat % X86Divide.base width := by omega
+    rw [if_neg fault, if_neg fault,
+      divide_result_refines width _ _ _ highBound (X86Divide.low_lt width _)]
+    by_cases byte : width = .w8
+    · simp only [byte, ↓reduceIte, native_register_pc, native_register_write, X86Divide.write_refines]
+      rfl
+    · simp only [byte, ↓reduceIte, native_register_pc, native_register_write, readWrite, X86Divide.write_refines]
+      congr 2
+      funext reg
+      by_cases low : reg = 0 <;> by_cases high : reg = 2 <;>
+        simp_all [Reference.X86.RegisterSlice.reg, Reference.X86.scalarWriteValue, Reference.X86.RegisterSlice.shift, nativeRegisters]
+
+/-- Present DIV source cells are sampled from the same native input frame,
+including RAX, RDX and RSP aliases, before either implicit result write. -/
+theorem divide_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (source : Reference.X86.Register) (nextPc : NativeWord) :
+    divideWord env frame arena state width (registerValue env frame arena state source) nextPc =
+      Reference.X86.step (.divide width (.register (.low source)) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [divide_word_frame_refines]
+  have divisor : (Reference.X86.scalarRegisterValue (nativeRegisters env frame arena state)
+      width (.low source)).toNat % X86Divide.base width =
+      (registerValue env frame arena state source).toNat % X86Divide.base width := by
+    simpa [Reference.X86.scalarRegisterValue, Reference.X86.RegisterSlice.shift,
+      Reference.X86.RegisterSlice.reg, nativeRegisters] using
+      divide_narrow_nat width (registerValue env frame arena state source)
+  simp only [X86Divide.base] at divisor
+  simp only [Reference.X86.step, Reference.X86.divideStep, Reference.X86.scalarRead, divisor]
+
+/-- Captured register-lane operands retain the native read from the same
+input state. This includes the producer's SRC_NONE/IMM high-byte encoding. -/
+theorem divide_captured_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (source : Reference.X86.RegisterSlice) (nextPc : NativeWord) :
+    divideWord env frame arena state width (readRegister env frame arena state width source) nextPc =
+      Reference.X86.step (.divide width (.register source) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [divide_word_frame_refines, native_register_read]
+  rfl
 
 end KProgFormal.Refinement.X86NumericAddress
