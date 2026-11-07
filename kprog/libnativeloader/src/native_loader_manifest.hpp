@@ -895,6 +895,20 @@ std::optional<ManifestResolution> resolve_native_manifest(
             *source_bytecode_len != source_insns.size() * sizeof(bpf_insn)) {
             continue;
         }
+        /* An entry that names only `symbol` (no `source_btf_symbol`) still
+         * identifies one program. Without this the remaining conditions are
+         * all optional, so such an entry matches the first program with the
+         * same bytecode length and helpers — which is how tracee's
+         * `trace_sys_enter` fragment ran as
+         * `tracepoint__raw_syscalls__sys_enter` and dereferenced a null
+         * pt_regs. */
+        if (!json_object_string(entry, "source_btf_symbol")) {
+            const auto only_symbol = json_object_string(entry, "symbol");
+            if (only_symbol && !only_symbol->empty() &&
+                *only_symbol != source_btf_symbol) {
+                continue;
+            }
+        }
         if (const auto selector = json_object_string(entry, "source_btf_symbol")) {
             if (selector->empty()) {
                 manifest_fail("native_loader: empty source_btf_symbol selector");
