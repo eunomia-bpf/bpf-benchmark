@@ -1,0 +1,25 @@
+{
+  "utc": "2026-11-07T23:24:00.159228+00:00",
+  "build_commit": "bca4d587e9ca84a2d55043e2c30a95c02438e9cd",
+  "predecessor_pid": 3543128,
+  "predecessor_state": "tetra-mixed-probe/continuation.status.json",
+  "retired_waiting_pids": [
+    3971849,
+    3774961
+  ],
+  "concurrent_otel_pid": 3969643,
+  "control_memory_mib": 2048,
+  "app_memory_mib": 8192,
+  "concurrent_otel_memory_mib": 4096,
+  "total_memory_mib": 12288,
+  "tracee_cpu_set": "8-11",
+  "cilium_cpu_set": "8-15",
+  "otel_cpu_set": "16-19",
+  "source_pins": {
+    "transport.py": "591fb5213fd3c4b5defbac21763620119c46c6c5f1c49da9c9a2e2e491dc2c30",
+    "clock-transport.py": "0a81fa4157134c2231da7120c24e180b34757273c4373f1f5b617569be4c3d2a",
+    "runtime.sh": "847bdc24672429a664fcfb908c262e88b099b73aac77849aa2fdd92c87e86a3b",
+    "clock-runtime.sh": "400bf50788bb2c00e2098f6675e491c08fe8bd2b1e996a6f54192fd1922d4d84"
+  },
+  "scope": "One successor queue preserves active whole-application guests and adopts paired scoped-resource caller/linker. Generic service control and complete Tracee recipe precede instruction-clock control and complete Cilium recipe."
+}
