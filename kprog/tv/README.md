@@ -1225,10 +1225,31 @@ from the earlier real spill before constructing the actual BPF execution.
 The native stack input is an arbitrary bound environment value, with an
 explicit nativeInput witness; it is not substituted with zero.
 
-This is the pc3..10 subpath entered at the proven context-prefix state. It
-still needs composition under a common platform environment with pc0..2,
-privacy projection for all initializer accesses, and the native register/flag
-operations and guard. Successful accesses and actual stack permissions remain
-explicit kernel/platform premises. It does not yet discharge whole-BB/program,
-fault, ABI or immutable-P materialization obligations. Exact source/axiom
-scope is recorded in `trusted-simple-initialization.json`.
+The original pc3..10 subpath and its scope remain recorded in
+`trusted-simple-initialization.json`. The unified environment composition below
+now connects it to pc0..2. Privacy projection for all initializer accesses and
+the native register/flag operations and guard remain. Successful accesses and
+actual stack permissions are explicit kernel/platform premises; whole-BB/
+program, fault, ABI and immutable-P materialization obligations remain open.
+
+
+Unified initialized environment
+-------------------------------
+
+`initializedPlatform env` is a separate, explicit environment value over the
+same captured context classifier. Existing `platform`, fail-closed `externals`,
+and all earlier theorem declarations retain their original contracts.
+`entry_environment_independent` proves equality of complete transitions at
+pc0,1,2 for arbitrary environments/states, including faults: these instructions
+observe no environment input. `initialized_body` reuses the existing path
+transport theorem to lift actual pc3..10 steps to this same platform.
+`initialized_complete_prefix` composes a single execution from pc0 to pc11,
+with an explicit native-stack input witness and all nine ordered memory
+accesses retained. No PC, successor or trace element is forced or erased.
+
+The captured literal/binding checks and the complete supported Make target
+remain in place. This composition needs no runtime/wire/interface change.
+It closes the common-environment gap between the two proved subpaths; the
+complete private40-byte footprint projection and native register/flags/guard,
+whole-program, fault and ABI/materialization refinement are still separate
+obligations. Scope/compatibility/axiom audit: `trusted-simple-environment.json`.

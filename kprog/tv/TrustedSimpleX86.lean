@@ -454,6 +454,131 @@ theorem initialization_after_context_prefix (env : BPF.Environment) (p : BPF.Sta
   have run := BPFPath.evaluate_sound env proof [3,4,5,6,7,8,9,10] q _ block
   simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using run
 
+
+/-- Explicit environment for the initialized proof. The previous fail-closed
+platform/externals and every earlier theorem retain their original contract. -/
+def initializedPlatform (env : BPF.Environment) : BPFPlatform.Environment :=
+  { platform with bpf := env }
+
+def initializedInstructionStep (env : BPF.Environment) : BlockStep BPF.State :=
+  fun before events after => ∃ result,
+    BPFPlatform.step (initializedPlatform env) proof before = .ok result ∧
+      result.events = events ∧ result.state = after
+
+/-- These actual entry instructions observe no environment inputs, including
+on a fault. This is equality of full transitions for arbitrary states. -/
+theorem entry_environment_independent (env : BPF.Environment) (s : BPF.State)
+    (entry : s.pc = 0 ∨ s.pc = 1 ∨ s.pc = 2) :
+    BPFPlatform.step (initializedPlatform env) proof s = BPFPlatform.step platform proof s := by
+  rcases entry with first | spill | second
+  all_goals
+    simp +decide [initializedPlatform, BPFPlatform.step, platform, *,
+      BPFPlatform.expand, expansion0, expansion2, BPFPath.evaluate,
+      physical0, physical2, BPF.decode, proof, BPF.execute,
+      littleEndian, Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+
+theorem initialized_ordinary_step (env : BPF.Environment) (s : BPF.State)
+    (notFirst : s.pc ≠ 0) (notSecond : s.pc ≠ 2) :
+    BPFPlatform.step (initializedPlatform env) proof s = BPF.step env proof s := by
+  cases active : s.halted <;> by_cases negative : s.pc < 0 <;>
+    cases decoded : BPF.decode proof s.pc.toNat <;>
+    simp [initializedPlatform, BPFPlatform.step, platform, BPF.step,
+      notFirst, notSecond, active, negative, decoded,
+      Except.bind, Except.map, Except.pure, Bind.bind, Pure.pure, Except.instMonad]
+
+theorem initialized_context_prefix (env : BPF.Environment) (p : BPF.State)
+    (pointer limit : Word) (first second : Event)
+    (position : p.pc = 0) (active : p.halted = false)
+    (read0 : readMemory p.memory (p.regs 1) 8 = .ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1 + (8#64)) 8 = .ok (limit,second))
+    (write : permitted p.memory.writable (p.regs 10-(40#64)) 8 = true)
+    (guest : ∀ i < 8, ¬ PrivateSpills.privateByte (spillFrame p)
+      (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    Execution (initializedInstructionStep env) p (prefixEvents p pointer first second)
+      (proofPrefixFinal p pointer limit) := by
+  have thirdRead := second_read_after_spill p pointer limit second read1 guest
+  have step0 : initializedInstructionStep env p [first] { BPF.setReg p 2 pointer with pc := 1 } := by
+    refine ⟨⟨{ BPF.setReg p 2 pointer with pc := 1 },[first],none⟩,?_,rfl,rfl⟩
+    rw [entry_environment_independent env p (Or.inl position)]
+    exact platform_load p pointer first active position read0
+  have step1 : initializedInstructionStep env { BPF.setReg p 2 pointer with pc := 1 }
+      [.memory .write (p.regs 10-(40#64)) (valueBytes pointer 8) true] (afterSpill p pointer) := by
+    refine ⟨⟨afterSpill p pointer,
+      [.memory .write (p.regs 10-(40#64)) (valueBytes pointer 8) true],none⟩,?_,rfl,rfl⟩
+    rw [entry_environment_independent env _ (Or.inr (Or.inl rfl))]
+    exact platform_spill p pointer active position write
+  have step2 : initializedInstructionStep env (afterSpill p pointer) [second]
+      (proofPrefixFinal p pointer limit) := by
+    refine ⟨⟨proofPrefixFinal p pointer limit,[second],none⟩,?_,rfl,rfl⟩
+    rw [entry_environment_independent env _ (Or.inr (Or.inr rfl))]
+    exact platform_second_load (afterSpill p pointer) limit second
+      (by simpa [afterSpill,BPF.setReg] using active) rfl thirdRead
+  simpa [prefixEvents] using Execution.next step0
+    (Execution.next step1 (Execution.next step2 (Execution.refl _)))
+
+/-- Lift the exact initializer witness to the same platform used at entry;
+no path position is changed or branch successor supplied. -/
+theorem initialized_body (env : BPF.Environment) (p : BPF.State) (pointer limit stack : Word)
+    (position : p.pc = 3) (active : p.halted = false) (savedLimit : p.regs 1 = limit)
+    (nativeStack : env.nativeInput .stackPointer = .ok stack)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8 = true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8 = true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8 = true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4 = true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8 = true)
+    (pointerRead : readMemory p.memory (p.regs 10-(40#64)) 8 =
+      .ok (pointer,.memory .read (p.regs 10-(40#64)) (valueBytes pointer 8) true)) :
+    Execution (initializedInstructionStep env) p (initializationEvents (p.regs 10) pointer limit)
+      (initializationFinal p pointer limit stack) := by
+  have block := initialization_block env p pointer limit stack position active savedLimit nativeStack
+    write32 write24 write16 write8 read32 pointerRead
+  exact BPFPath.evaluate_execution_transport env proof id (initializedInstructionStep env)
+    (fun pc => 3 ≤ pc ∧ pc ≤ 10)
+    (by
+      intro s pc bound atPosition result actual
+      refine ⟨result,?_,rfl,rfl⟩
+      change BPFPlatform.step (initializedPlatform env) proof s = .ok result
+      rw [initialized_ordinary_step env s (by omega) (by omega)]
+      exact actual)
+    [3,4,5,6,7,8,9,10] (by intro pc inside; simp at inside; omega) p _ block
+
+/-- One environment, one platform and one actual execution from entry to
+pc11. Every initializer/spill/reload access remains in the ordered trace. -/
+theorem initialized_complete_prefix (env : BPF.Environment) (p : BPF.State)
+    (pointer limit stack : Word) (first second : Event)
+    (position : p.pc = 0) (active : p.halted = false)
+    (nativeStack : env.nativeInput .stackPointer = .ok stack)
+    (read0 : readMemory p.memory (p.regs 1) 8 = .ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8 = .ok (limit,second))
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8 = true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8 = true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8 = true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8 = true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4 = true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8 = true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8 = true)
+    (guest : ∀ i < 8, ¬ PrivateSpills.privateByte (spillFrame p)
+      (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    Execution (initializedInstructionStep env) p
+      (prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit)
+      (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack) := by
+  have entry := initialized_context_prefix env p pointer limit first second
+    position active read0 read1 write40 guest
+  let q := proofPrefixFinal p pointer limit
+  have pointerRead : readMemory q.memory (q.regs 10-(40#64)) 8 =
+      .ok (pointer,.memory .read (q.regs 10-(40#64)) (valueBytes pointer 8) true) := by
+    simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using
+      PrivateSpills.spill_read p.memory (p.regs 10-(40#64)) pointer read40
+  have body := initialized_body env q pointer limit stack rfl
+    (by simpa [q,proofPrefixFinal,afterSpill,BPF.setReg] using active)
+    (by simp +decide [q,proofPrefixFinal,BPF.setReg]) nativeStack
+    (by simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using write32)
+    (by simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using write24)
+    (by simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using write16)
+    (by simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using write8)
+    (by simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using read32) pointerRead
+  simpa +decide [q,proofPrefixFinal,afterSpill,BPF.setReg] using entry.append body
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -480,3 +605,10 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.initialization_block
 
 #print axioms KProgTV.TrustedSimpleX86.initialization_after_context_prefix
+
+#print axioms KProgTV.TrustedSimpleX86.entry_environment_independent
+#print axioms KProgTV.TrustedSimpleX86.initialized_body
+#print axioms KProgTV.TrustedSimpleX86.initialized_complete_prefix
+
+#print axioms KProgTV.TrustedSimpleX86.initialized_ordinary_step
+#print axioms KProgTV.TrustedSimpleX86.initialized_context_prefix

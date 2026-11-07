@@ -1,0 +1,95 @@
+{
+  "status": "single_platform_environment_prefix_execution_checked",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "covered_B_pcs": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "successor_pc": 11,
+  "theorem": "KProgTV.TrustedSimpleX86.initialized_complete_prefix",
+  "memory_events": 9,
+  "trace_projection": "none; all guest/private reads and writes retained",
+  "claims": [
+    "pc0..2 full transitions independent of all environment inputs, including faults",
+    "actual ordinary pc3..10 transitions transported through existing BPFPath evaluator soundness",
+    "single environment/platform Execution from pc0 to pc11 and complete resulting state",
+    "explicit nativeInput stackPointer witness; no invented zero/default or new native checks"
+  ],
+  "compatibility": {
+    "old_declarations_before_namespace_end": "byte-identical to HEAD baseline before this increment",
+    "old_declarations_sha256": "651e30217d132738fa35a6a0424553bf77c17566d26f39d38f6cebb596af0396",
+    "old_externals": "unchanged; unbound nativeInput still fails closed",
+    "wire_API_binding_and_rejection_contracts": "unchanged",
+    "structural_negative_checks": "both retained native-only records pass and22 mismatch checks still reject"
+  },
+  "premises": [
+    "entry PC0 and active proof",
+    "actual successful context reads and byte-disjoint spill/read area",
+    "actual writable/readable stack slots at captured widths",
+    "explicit successful env.nativeInput stackPointer witness",
+    "bound kernel XDP virtual/physical context transport"
+  ],
+  "remaining": [
+    "complete initializer private40-byte footprint/projection",
+    "native register/flags/CMP/Jcc and all successors",
+    "whole-basic-block/program architectural-state/event refinement",
+    "fault/ABI/nativeInput and kernel-platform transport",
+    "immutable P to emitted artifact materialization"
+  ],
+  "trusted": [
+    "verifier soundness",
+    "canonical reference ISA and explicit platform semantics",
+    "kernel binding/capture and accepted-byte provenance",
+    "registered specialization/link service until whole-program TV",
+    "Lean kernel/logical axioms plus native proof reduction (Lean.ofReduceBool) in existing BV/private-spill proofs"
+  ],
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "log_sha256": "9fdfa96c96642327f5414daff047df946c3c22a98d8bbbd7754cf6a0c5619b82",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.entry_environment_independent": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialized_ordinary_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialized_context_prefix": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialized_body": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialized_complete_prefix": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    }
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "04ad97a76135ce31b79e25ceb753f3a2da73a9c684b374724f608b5599d2177f",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/check_trusted_capture.py": "71642150609627e7ac8de6ef265d79dc6814a58af669260ffc21e602983e29a9",
+    "kprog/tv/Makefile": "2123977b45e69a44f70507dd65b2c1506e23d509f1c244a7d1d5f0799456f9b4"
+  },
+  "raw_output": "summarized and removed after publication; shared incremental caches and STOP retained"
+}
