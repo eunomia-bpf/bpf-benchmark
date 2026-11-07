@@ -105,6 +105,16 @@ supply the production bridge recorded in the two updated O4 rows. The8B literal 
 covers its field/data; complete consumer instruction/prefix coverage belongs
 to that physical-consumer bridge.
 
+[`generic-native-link-movabs.json`](../kprog_tv_20261107/generic-native-link-movabs.json)
+adds nine passing universal audits for the actual fixed10B MOVABS consumer,
+all16GPR destinations and every64-bit target. Final mixed-table bytes plus the
+protected original header decode to exact bound materialization. Forward TV,
+reverse reflection and the relational Step theorem retain the full architectural
+successor and empty guest trace; stable map-ID/offset/callback witnesses compose
+through the same target. Kinds5/6/7 retain component status while actual producer
+header/field/PC/chunk correspondence, other GOT/memory-table consumers and
+helper/entry ABI supply the surrounding production stages.
+
 <!-- O4 COVERAGE END -->
 
 

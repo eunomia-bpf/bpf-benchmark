@@ -1,0 +1,136 @@
+{
+  "utc": "2026-11-07T20:35:49.251825+00:00",
+  "status": "universal_final_code_MOVABS_literal_consumer_and_map_resolution_composition_proved",
+  "scope": "Every64-bit target, all16x86GPR destinations, canonical initial states, code bases and mixed relocation tables satisfying the static layout/header premises.",
+  "producer_template": {
+    "source": "kprog/x86/native_lab/native_link/src/x86.rs",
+    "function": "build_x86_movabs_reg",
+    "register_mapping": "x86_gpr64_encoding enumerates16canonical GPR indices",
+    "header": "REX=0x48|high; opcode=0xb8+low",
+    "literal_field_offset": 2,
+    "instruction_bytes": 10,
+    "literal_bytes": 8,
+    "callers": "Map/helper GOT replacement via MapImmediate imm_offset2 and HelperPointer global_offset+2"
+  },
+  "claims": [
+    "All64-bit targets reconstruct exactly from their eight little-endian immediate bytes. Every16GPR destination uses the actual fixed10B MOVABS template and canonical nextPC+10.",
+    "The canonical executable result changes precisely the destination GPR and PC, preserves all other GPRs/RFLAGS/XMM0/memory/FS/GS/addressWidth and has an empty guest effect trace.",
+    "Final mixed-table8B literal identity and protected two-byte original header yield the exact complete10B fetched instruction at the actual PC.",
+    "Final-code canonical decode produces the intended bound target materialization. Forward TranslationValidation Eq and reverse reflection preserve all behaviors.",
+    "Stable retained-map ID and pointer/value-offset callback resolution compose with physical final-code consumption using the same bound target and retained-object witness.",
+    "Every relational canonical Step of this MOVABS has the exact complete architectural successor and empty trace. Its full defined-register/flag masks establish complete state equality through matchesTransition."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o native-link-patch-table-check native-link-movabs-check",
+    "reproduction": "make -C kprog/tv native-link-movabs-check",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.NativeLinkMovabs.target_roundtrip": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkMovabs.movabs_decode": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkMovabs.movabs_result": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkMovabs.table_movabs_bytes": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkMovabs.table_movabs_decode": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkMovabs.movabs_preservation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkMovabs.emitted_reflects": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkMovabs.map_movabs_preservation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkMovabs.emitted_architecture": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "sorryAx_count": 0,
+    "log_sha256": "993b287f50a336dafb218561b09de8459a6ca5b959e5f6ebd456ea06b4a710ac",
+    "attempts_archive": "kprog/results/kprog_tv_20261107/generic-native-link-movabs-attempts.log.gz",
+    "attempts_raw_sha256": "01e6105370ce76edb2df73de4cbf6915a812beb5fad30c3e3c808b97025b2efc",
+    "proof_elaboration_attempt_exits": [
+      2,
+      2,
+      2,
+      2
+    ],
+    "intermediate_audit_passes": [
+      7
+    ],
+    "dependency_scope": "Generic Composition/literal/rel32/mixed-table modules and canonical Memory/X86 supply the import closure; warm dependency source identities match prior published generic receipts."
+  },
+  "source_sha256": {
+    "kprog/tv/NativeLinkMovabs.lean": "5095a8a33f17cb84f91aba377615af8810ca5285a0b82981d620b0afc21b8390",
+    "kprog/tv/NativeLinkPatchTable.lean": "193d88ad78284bedc178d47063f5ce323d326b9c55c824c85ad18a34c3282224",
+    "kprog/tv/NativeLinkLiteral.lean": "59a5733a5f8c42fa4235e32ab108bb3604875b10984bf2acab342a819f105530",
+    "kprog/tv/NativeLinkRelocationTable.lean": "3445aff6854ccaa85e433d8e8357a57edc8b7b2b9cdbdc07ceee8eced4c96f46",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/Makefile": "03ae587f344b8cca6c30e1008ed51989abed11aaf20edeb0d8dada90669189d3",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "8b63557424953cc7d00d83ea3eab9b37748fd2e3ed3cd4892e0b7b3b0fb34506",
+    "kprog/x86/native_lab/native_link/src/main.rs": "563db62726d8ff0fbbcdc2d0f928eeafbd3d64b0e3fce3046723d2b18ab531d1",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "a02aee08743af771028352ae35fc3e8dc97a5b33b2c85df31a60d22c92677713",
+    "kinsn/module/include/native_lab_binding.h": "5abc935861b6920b05a6352064af2999a4febbcbff41d2fb4fc88cb43db02a06",
+    "kinsn/module/include/native_lab_group.h": "5fbd5b82f304bbf6b8fbfeedd3d5152adaa103fb374c08dc5d32d5c3f3cdffc5"
+  },
+  "implementation_source_observations": [
+    {
+      "path": "kinsn/module/include/native_lab_group.h",
+      "observed_sha256": "1ef0bbf95d3b5a8b64aa3cf6db3b5ecea8dc19db7ff4069d63955ecd34158fd5",
+      "published_sha256": "5fbd5b82f304bbf6b8fbfeedd3d5152adaa103fb374c08dc5d32d5c3f3cdffc5",
+      "exact_difference": "Two additional blank lines after native_lab_checked.h include.",
+      "observed_patch": "diff --git a/kinsn/module/include/native_lab_group.h b/kinsn/module/include/native_lab_group.h\nindex 7992c4106..0ded174ff 100644\n--- a/kinsn/module/include/native_lab_group.h\n+++ b/kinsn/module/include/native_lab_group.h\n@@ -6,6 +6,8 @@\n #include \"native_lab_exclusive.h\"\n #include \"native_lab_checked.h\"\n \n+\n+\n /* Included after native_blob/blobs and decode_native_lab_payload in each\n  * module. The final chunk owns a generation vector for the entire program.\n  * All callers hold blobs_lock.\n",
+      "implementation_body_identity": "identical"
+    }
+  ],
+  "compiled_olean_sha256": {
+    "kprog/tv/build/Composition.olean": "7e66af8c2ba8a1467ae7405f26d142c6a150b51c977120173c4cba4bf55771d8",
+    "kprog/tv/build/NativeLinkLiteral.olean": "71f590b22e7f11cd6987df11a5b8866e422233dc219c89f3b4c0549eeb32288c",
+    "kprog/tv/build/NativeLinkPatchTable.olean": "c2a5820644ea097cd10e89ad7bcf17c7edfd98ec59ce39602a0c86e50eb540fb",
+    "kprog/tv/build/NativeLinkMovabs.olean": "07fdf80aaaad660bf0ebbadd148ed5fe8a8ce44df295e8775afa2c0d2189fbf1"
+  },
+  "premises": [
+    "The actual producer/layout supplies the original REX/opcode header, final literal record at instructionPC+2 and the same resolved target. Full code/entry/ABI/metadata binding identifies the accepted and emitted artifact.",
+    "The mixed table satisfies its consumed-span separation and template validity. HeaderProtected states that every write preserves the actual two header bytes; deriving it and literal membership from the producer instruction/chunk construction is the production layout bridge.",
+    "Retained-map/callback inputs correspond to the kernel pinned objects and accepted value offset. The theorem composes that target witness with materialization; source GOT rewrite and complete interpreter/native environment correspondence supply the surrounding stage.",
+    "This consumer is the fixed10B build_x86_movabs_reg template. Helper-dispatch memory-table consumers and other pointer/GOT lowering forms receive their own generic preservation stages."
+  ],
+  "completion_path": [
+    "Derive header/field/PC metadata, target identity and complete code/chunk correspondence from the actual Rust builder/encoder and kernel emission route.",
+    "Compose remaining memory-table/GOT consumers with bound helper identity/prototype, invocation ABI and complete control/PC partition.",
+    "Combine V O1/O2/definedness, actual compiler/private-frame preservation and remaining ARM/tail-call laws through Composition.lean."
+  ],
+  "trusted": [
+    "Accepted-B verifier soundness for the final checked-effects theorem.",
+    "Canonical ISA/Memory semantics and F hardware/QEMU fidelity evidence.",
+    "Kernel artifact binding, retained map/callback identity and supported C/ABI/environment correspondence.",
+    "Lean kernel and the explicitly reported axiom dependencies."
+  ]
+}

@@ -64,6 +64,16 @@ provide the remaining production correspondence for this universal component.
 The8B literal span describes its field/data; whole consumer instruction/prefix
 coverage is part of the physical-consumer bridge.
 
+`generic-native-link-movabs.json` connects the actual fixed10B
+`build_x86_movabs_reg` consumer to the mixed table. Nine audits pass for all16
+GPR destinations and every64-bit target. Final8B literal bytes and a protected
+original2B header yield the complete canonical instruction and nextPC+10.
+Forward TV, reverse reflection and the relational Step result preserve the full
+architectural successor and empty guest trace. Stable map-ID/offset/callback
+resolution composes through that same target. Producer header/field/PC/chunk
+correspondence, other GOT/memory-table forms and helper/entry ABI provide the
+surrounding generic stages; kinds5/6/7 keep their component status.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations

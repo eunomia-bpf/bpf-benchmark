@@ -918,3 +918,8 @@ native-link-literal-check: native-link-relocation-table-check
 native-link-patch-table-check: native-link-literal-check
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/NativeLinkPatchTable.olean ../tv/NativeLinkPatchTable.lean
+
+.PHONY: native-link-movabs-check
+native-link-movabs-check: native-link-patch-table-check
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/NativeLinkMovabs.olean ../tv/NativeLinkMovabs.lean
