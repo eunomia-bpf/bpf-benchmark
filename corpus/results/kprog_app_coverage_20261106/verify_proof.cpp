@@ -2,16 +2,26 @@
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
 #include <cerrno>
+#include <charconv>
 #include <cstdio>
 #include <cstring>
 #include <vector>
 int main(int argc,char **argv)
 {
-    if(argc!=4){std::fprintf(stderr,"usage: verify-proof OBJECT PROGRAM LOG\n");return 2;}
+    if(argc!=4 && argc!=5){std::fprintf(stderr,"usage: verify-proof OBJECT PROGRAM LOG [PROG_TYPE]\n");return 2;}
     bpf_object *object=bpf_object__open_file(argv[1],nullptr);
     if(!object){std::fprintf(stderr,"open proof: %s\n",std::strerror(errno));return 1;}
     bpf_program *chosen=bpf_object__find_program_by_name(object,argv[2]);
     if(!chosen){std::fprintf(stderr,"proof program missing: %s\n",argv[2]);bpf_object__close(object);return 1;}
+    if(argc==5){
+        unsigned type=0;auto end=argv[4]+std::strlen(argv[4]);
+        auto parsed=std::from_chars(argv[4],end,type);
+        if(parsed.ec!=std::errc{} || parsed.ptr!=end || type==0){
+            std::fprintf(stderr,"invalid original program type: %s\n",argv[4]);bpf_object__close(object);return 2;
+        }
+        int error=bpf_program__set_type(chosen,static_cast<bpf_prog_type>(type));
+        if(error){std::fprintf(stderr,"set original program type: %d\n",error);bpf_object__close(object);return 1;}
+    }
     bpf_program *program;
     bpf_object__for_each_program(program,object){
         int error=bpf_program__set_autoload(program,program==chosen);

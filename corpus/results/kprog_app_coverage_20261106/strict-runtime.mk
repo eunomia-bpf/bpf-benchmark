@@ -246,3 +246,53 @@ katran-real-7:
 
 bcc-byte-stack-compile:
 	KPROG_COMPILE_WORKERS=1 taskset -c 12-15 prlimit --as=8589934592 --core=0 -- $(MAKE) -f $(HERE)/Makefile compile PHASE=bcc-real-17
+
+original-btf-declarations:
+	cc -O2 -Wall -Wextra -Werror -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include $(HERE)/original_btf_declarations.c $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $(HERE)/original-btf-declarations
+	$(HERE)/original-btf-declarations $(ROOT)/vendor/build/x86/katran/bpf/balancer.bpf.o $(HERE)/original-map-declarations.h
+
+otel-real-1:
+	$(MAKE) -f $(HERE)/strict-runtime.mk original-btf-declarations
+	python3 $(HERE)/otel_real.py
+
+otel-real-2:
+	python3 $(HERE)/otel_real.py otel-real-2
+
+otel-compile-2:
+	KPROG_COMPILE_WORKERS=1 taskset -c 12-15 prlimit --as=12884901888 --core=0 -- $(MAKE) -f $(HERE)/Makefile compile PHASE=otel-real-2
+
+otel-real-3:
+	python3 $(HERE)/otel_real.py otel-real-3
+
+otel-compile-3:
+	KPROG_COMPILE_WORKERS=1 taskset -c 12-15 prlimit --as=12884901888 --core=0 -- $(MAKE) -f $(HERE)/Makefile compile PHASE=otel-real-3
+
+otel-link-3:
+	taskset -c 12-15 python3 $(HERE)/coverage.py link $(HERE)/otel-real-3
+
+otel-real-4:
+	python3 $(HERE)/otel_real.py otel-real-4
+
+otel-compile-4:
+	KPROG_COMPILE_WORKERS=1 taskset -c 12-15 prlimit --as=12884901888 --core=0 -- $(MAKE) -f $(HERE)/Makefile compile PHASE=otel-real-4
+
+otel-link-4:
+	taskset -c 12-15 python3 $(HERE)/coverage.py link $(HERE)/otel-real-4
+
+otel-verify-4:
+	taskset -c 12-15 vng --run $(PAIRED)/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile guest-verify PHASE=otel-real-4'
+
+actual-type-verify-build:
+	c++ -std=c++20 -Wall -Wextra -Werror -O2 -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include $(HERE)/verify_proof.cpp $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $(HERE)/verify-proof
+
+otel-real-5:
+	python3 $(HERE)/otel_real.py otel-real-5
+
+otel-compile-5:
+	KPROG_COMPILE_WORKERS=1 taskset -c 12-15 prlimit --as=12884901888 --core=0 -- $(MAKE) -f $(HERE)/Makefile compile PHASE=otel-real-5
+
+otel-link-5:
+	taskset -c 12-15 python3 $(HERE)/coverage.py link $(HERE)/otel-real-5
+
+otel-verify-5:
+	taskset -c 12-15 vng --run $(PAIRED)/bzImage --cwd $(ROOT) --rwdir $(ROOT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile guest-verify PHASE=otel-real-5'

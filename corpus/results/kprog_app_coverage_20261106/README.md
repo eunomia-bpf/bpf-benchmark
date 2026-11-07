@@ -1119,3 +1119,44 @@ passes on the capacity snapshot plus this exact constructor overlay.
 reproduce constructor controls with `make -f corpus/results/kprog_app_coverage_20261106/Makefile abi-regression helper-effects-regression arithmetic-regression`.
 V/F own the separate division-fault repair and its bound regressions recorded
 in coordination. This change preserves their division implementation.
+
+
+## OTel: all14 paired proofs compile, ten pass the stock verifier
+
+Phase `otel-real-4` contains all13 resident OTel programs plus the successful
+transient read_task_struct load from the retained17-load startup inventory.
+All14 native/proof pairs generate, compile and link against the actual original
+BPF ELF maps/globals. BPFv4 compilation closes the eight short-branch-range
+failures. The diagnostic loader sets the captured program type explicitly;
+upstream Go-loader section names such as perf_event/unwind_stop are not libbpf
+section-type declarations.
+
+| Application / retained phase | Application entries | Generated | Compiled | Stock verifier accepted | Specialization failed | Stock verifier rejected | Whole-app bound run |
+|---|---:|---:|---:|---:|---:|---:|---|
+| BCC / complete18 |25|25|25|25|0|0|25/25, retained workload run|
+| OTel / real4 |14|14|14|10|0|4|pending|
+| Katran / real14 |1|1|1|0|0|1|pending|
+| Cilium / captured inventory |pending (92 resident)|pending|pending|pending|pending|pending|pending|
+| Tetragon / captured inventory |pending (81 resident)|pending|pending|pending|pending|pending|pending|
+| Tracee / captured inventory |pending (151 resident)|pending|pending|pending|pending|pending|pending|
+
+The four OTel rejection classes are hotspot pointer arithmetic after a partial
+write, Python pointer partial write, native unwinder verifier complexity
+(1,000,001 processed instructions), and Go-label helper destination bounds.
+Katran retains its map-pointer partial-MOVBE rejection. Every entry remains in
+scope. Historical staged-artifact census denominators are separate from these
+actual startup programs. Cilium/Tetragon/Tracee still need classification of
+transient application loads; their resident counts are not final denominators.
+
+The separate link input changes ELF entry binding and20 BTF FUNC linkage words
+only. All40 non-linkage sections retain exact bytes;36,834 relocation target
+identities are unchanged despite ELF symbol reordering. Maps/globals, executable
+bytes, BTF IDs/type layouts and .BTF.ext retain their original contents. Earlier
+source-location, branch-range, static-entry, type-selection and argument-parser
+failures remain in their original attempt logs/directories.
+
+[Exact objects, per-program coverage.csv and raw logs](otel-real-artifacts.tar.gz)
+include all three completed OTel phases. This phase predates V's production
+DIV/#DE repair; its ten stock accepts are diagnostics, and no OTel bound runtime
+or timing request is claimed. Phase5 regenerates all14 against the current
+production simulator. Reproduce with `make -f corpus/results/kprog_app_coverage_20261106/strict-runtime.mk otel-real-5 otel-compile-5 otel-link-5 otel-verify-5`.

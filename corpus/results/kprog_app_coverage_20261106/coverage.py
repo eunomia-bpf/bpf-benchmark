@@ -36,7 +36,7 @@ def compile_one(row, directory):
                "-I", str(ROOT / "vendor/libbpf/src"), "-I", "/usr/include/x86_64-linux-gnu",
                "-I", str(ROOT / "kprog/x86/micro-prog"), "-c", str(source),
                "-o", str(build / (row["name"] + ".bpf.o"))]
-    return execute(row, directory, "compile", command, 120)
+    return execute(row, directory, "compile", command, None)
 
 
 def execute(row, directory, stage, command, timeout):
@@ -63,11 +63,70 @@ def execute(row, directory, stage, command, timeout):
     return record
 
 
+def link_one(row, directory):
+    from elftools.elf.elffile import ELFFile
+    original = Path(row['original_object'])
+    # OTel's Go loader accepts local entry symbols. libbpf requires global
+    # entry symbols, including unused original entries retained by ELF linking.
+    # Change only ELF linkage; every original instruction/map/global stays exact.
+    with original.open('rb') as stream:
+        elf = ELFFile(stream)
+        entries = [symbol.name for symbol in elf.get_section_by_name('.symtab').iter_symbols()
+                   if symbol['st_info']['type'] == 'STT_FUNC'
+                   and isinstance(symbol['st_shndx'], int)
+                   and elf.get_section(symbol['st_shndx'])['sh_flags'] & 4
+                   and elf.get_section(symbol['st_shndx']).name != '.text']
+    # BTF_KIND_FUNC carries the same linkage as the ELF symbol. Patch only
+    # those FUNC info words; BTF IDs, type layouts and all other bytes stay exact.
+    import struct
+    with original.open('rb') as stream:
+        elf = ELFFile(stream)
+        endian = '<' if elf.little_endian else '>'
+        btf = bytearray(elf.get_section_by_name('.BTF').data())
+    magic, version, _, header, type_off, type_len, string_off, string_len = struct.unpack_from(endian+'HBBIIIII', btf)
+    if magic != 0xeb9f or version != 1:
+        raise ValueError('unsupported original BTF header')
+    strings = btf[header+string_off:header+string_off+string_len]
+    cursor, end = header+type_off, header+type_off+type_len
+    remaining = set(entries)
+    while cursor < end:
+        name_off, info, _ = struct.unpack_from(endian+'III', btf, cursor)
+        kind, vlen = (info >> 24) & 31, info & 65535
+        if kind == 12:
+            name = strings[name_off:strings.index(0, name_off)].decode()
+            if name in remaining:
+                struct.pack_into(endian+'I', btf, cursor+4, (info & ~65535) | 1)
+                remaining.remove(name)
+        sizes = {1:4,2:0,3:12,4:12*vlen,5:12*vlen,6:8*vlen,7:0,
+                 8:0,9:0,10:0,11:0,12:0,13:8*vlen,14:4,15:12*vlen,
+                 16:0,17:4,18:0,19:12*vlen}
+        cursor += 12 + sizes[kind]
+    if cursor != end or remaining:
+        raise ValueError(f'original entry BTF linkage unresolved: {sorted(remaining)}')
+    btf_input = original.with_name(original.stem+'.global.btf')
+    btf_input.write_bytes(btf)
+    link_input = original.with_name(original.stem+'.libbpf.o')
+    (directory/'link-input').mkdir(exist_ok=True)
+    prepared = execute(row, directory, 'link-input',
+                       ['llvm-objcopy', '--update-section', '.BTF='+str(btf_input),
+                        *['--globalize-symbol='+name for name in entries],
+                        str(original), str(link_input)], None)
+    if prepared['returncode'] != 0:
+        return prepared
+    command = [str(ROOT/'vendor/build/x86/bpftool/bin/bpftool'),
+               'gen', 'object', row['simulator_object'],
+               str(directory/'objects'/(row['name']+'.bpf.o')),
+               str(link_input)]
+    return execute(row, directory, 'link', command, None)
+
+
 def verify_one(row, directory):
     if row.get('program_section'):
         command = [str(ROOT/'corpus/results/kprog_app_coverage_20261106/verify-proof'),
-            str(directory/'objects'/(row['name']+'.bpf.o')),row['name']+'_x86_sim_xdp',
+            row.get('simulator_object', str(directory/'objects'/(row['name']+'.bpf.o'))),row['name']+'_x86_sim_xdp',
             str(directory/'verify'/(row['name']+'.verifier.log'))]
+        if 'program_type' in row:
+            command.append(str(row['program_type']))
         return execute(row,directory,'verify',command,60)
     command = [str(ROOT / "kprog/loader/target/debug/reversesim-loader"),
                "--object", str(directory / "objects" / (row["name"] + ".bpf.o")),
@@ -84,8 +143,8 @@ def main():
     rows = [row for row in rows if row["stage"] == "generate" and row["ok"]]
     if stage == "compile":
         worker, jobs = compile_one, int(os.environ.get("KPROG_COMPILE_WORKERS","6"))
-    elif stage == "verify":
-        worker, jobs = verify_one, 2
+    elif stage in {"link", "verify"}:
+        worker, jobs = (link_one, 1) if stage == "link" else (verify_one, 2)
         completed = {p.name.removesuffix('.gz').removesuffix('.json'): returncode(p)
                      for pattern in ('*.json','*.json.gz')
                      for p in (directory / "compile").glob(pattern)}
