@@ -194,9 +194,13 @@ static u32 a64_movk_x(u32 reg, u16 imm16, u32 shift)
 	return 0xf2800000U | ((shift / 16) << 21) | ((u32)imm16 << 5) | reg;
 }
 
-static void emit_arm64_far_helper_call(u32 *image, size_t slot_index, u64 target)
+static int emit_arm64_far_helper_call(u32 *image, size_t slot_index, u64 target)
 {
 	u64 tmp = target;
+
+	/* Three immediate words represent the upper-ones 48-bit address range. */
+	if ((target >> 48) != 0xffff)
+		return -ERANGE;
 
 	image[slot_index] = a64_movn_x(A64_TMP_REG, (u16)(~tmp & 0xffff), 0);
 	tmp >>= 16;
@@ -204,6 +208,7 @@ static void emit_arm64_far_helper_call(u32 *image, size_t slot_index, u64 target
 	tmp >>= 16;
 	image[slot_index + 2] = a64_movk_x(A64_TMP_REG, (u16)(tmp & 0xffff), 32);
 	image[slot_index + 3] = A64_BLR_X10;
+	return 0;
 }
 
 static bool arm64_helper_call_slot_matches(const u32 *image, size_t slot_index)
@@ -561,8 +566,13 @@ static int emit_native_lab_arm64(u32 *image, int *idx, bool emit, u64 payload,
 				imm26 = disp64 / 4;
 				if (imm26 < -(1LL << 25) ||
 				    imm26 > ((1LL << 25) - 1)) {
-					emit_arm64_far_helper_call(image, slot_index,
-								   r->target);
+					err = emit_arm64_far_helper_call(image, slot_index,
+								     r->target);
+					if (err)
+						native_lab_emit_error("helper_target_encoding", err,
+								      payload, blob_id, snapshot_len,
+								      snapshot_reloc_count, i,
+								      r->offset, r->kind, r->target);
 					break;
 				}
 				image[slot_index] = A64_BL_IMM26_PLACEHOLDER |

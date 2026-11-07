@@ -1,0 +1,171 @@
+{
+  "utc": "2026-11-07T23:23:29.249284+00:00",
+  "status": "universal_arm_helper_far_acceptance_and_exact_target_component",
+  "evidence_class": "Generic universal Lean and portable production-C word-writer regression; ARM whole-module/runtime adoption follows its coherent build epoch.",
+  "scope": "Every64-bit target/state/code base after the existing outer relocation guards; exact accepted far-target reconstruction, selected near/far entry and all finite selected-site block prefixes.",
+  "implementation_interfaces": {
+    "kernel_guard": "emit_arm64_far_helper_call returns -ERANGE when unsigned target>>48 differs from0xffff, before its first store; success returns0 after the unchanged four word stores.",
+    "caller": "The kind2 far branch stores the return in err, emits helper_target_encoding diagnostics, and reaches the existing err->out_free->return path before checked binding/capture publication.",
+    "canonical": "farAccepted is the same unsigned comparison. far_acceptance_exact derives precisely the existing canonical reconstructed_exact condition. checkedHelper retains the signed26 near choice; accepted_helper_entry reaches exact target with each actual X10/LR successor.",
+    "composition": "Successful emitted-memory equality supplies accepted_block_preservation and accepted_block_reflects through the published single-ISA token/block laws.",
+    "outer_guards": "Offset alignment, complete16B span, original BL/NOP placeholder, supported kernel target, final_ip and target alignment remain production inputs."
+  },
+  "validation": {
+    "command": "make -C kprog/tv -o native-link-arm-helper-check native-link-arm-helper-guard-check",
+    "reproduction": "make -C kprog/tv native-link-arm-helper-guard-check",
+    "exit": 0,
+    "audits": 9,
+    "axiom_audit": {
+      "KProgTV.NativeLinkArmHelperGuard.far_accepted": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkArmHelperGuard.far_acceptance_exact": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelperGuard.far_success": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelperGuard.far_refusal": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkArmHelperGuard.helper_success": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelperGuard.accepted_far_entry": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelperGuard.accepted_helper_entry": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelperGuard.accepted_block_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmHelperGuard.accepted_block_reflects": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "sorryAx_count": 0,
+    "warnings": 0,
+    "production_c": {
+      "host_cases": 262144,
+      "aarch64_qemu_user_cases": 262144,
+      "accepted_each": 65539,
+      "refused_each": 196605,
+      "upper_fields_each": 65536,
+      "accepted_prior_bytes": "PASS",
+      "refused_canaries": "PASS",
+      "caller_error_route": "PASS",
+      "ubsan": "PASS",
+      "baseline_distinct_negative_targets_share_encoded_bytes": "reproduced",
+      "prior_writer_git_epoch": "92441b38ac8110766058094409f9758fa3cbd68c",
+      "prior_writer_sha256": "bf03581ef8f07275b27efc3c915e230fff28274de368ed7aa370054e5356a14d",
+      "guard_projected_body_identical_to_prior": true,
+      "observed_binary_sha256": {
+        "host": "fe02779e780ad78c92c2be802835d0d58a4ba912a457eb0f637e98287e0d4149",
+        "aarch64": "7f8c39217fe87748e17e7838a086accf7ec9cf3d26cf92797183105779090e3f"
+      },
+      "compiled_extraction_sha256": "bae3e868cfb3f74e11b0ecaac80cb0216746b40e514d4ec9c34ba78a506a6710",
+      "tools": {
+        "cc": {
+          "path": "/usr/bin/x86_64-linux-gnu-gcc-13",
+          "sha256": "1b99826121ae6682a634e5efe09bd3e3df58ce58e0b28f849114ab5b89139c26",
+          "version": "x86_64-linux-gnu-gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+        },
+        "aarch64-linux-gnu-gcc": {
+          "path": "/usr/bin/aarch64-linux-gnu-gcc-13",
+          "sha256": "cd90adc7801f4595267f61a5d25bd3a0c6beb2f9f1f107ab919a97a12972dc9a",
+          "version": "aarch64-linux-gnu-gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+        },
+        "qemu-aarch64-static": {
+          "path": "/usr/bin/qemu-aarch64-static",
+          "sha256": "e4f8d99e9ff69c3cefffab71cee358ce2af1ecba1282d04c3eeb44ef76f5a71e",
+          "version": "qemu-aarch64 version 8.2.2 (Debian 1:8.2.2+ds-0ubuntu1.18)"
+        }
+      }
+    }
+  },
+  "source_sha256": {
+    "kprog/formal/KProgFormal/Reference/AArch64.lean": "00c08b7441948c762d18d2bed62fac13c91f6f88f06e380323ac38bef66ece4a",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/NativeLinkArmBL26.lean": "b47b764c27d40d66e6fb69073724893a4129582ca742fd215c17cb287786eeff",
+    "kprog/tv/NativeLinkArmHelper.lean": "66a37c9f89145cc296e7247845cc750e1359008a04b7e651976d39008ef4a169",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/tv/NativeLinkRelocationTable.lean": "3445aff6854ccaa85e433d8e8357a57edc8b7b2b9cdbdc07ceee8eced4c96f46",
+    "kprog/tv/Makefile": "f8de33d48979bf10da273438aa151f4363b86c6001c4ab91884febfd0e6441b6",
+    "kprog/formal/lean-toolchain": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea",
+    "kprog/formal/lakefile.toml": "c0d43c10868d20a8ccc08e73c05a29eb4dbc40f05fd04872e597b527a620c91c",
+    "kprog/formal/lake-manifest.json": "8d120d7988d313b3173dd609e81a271dda67812d44b26e8cce6875245a59b4bb",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "0523c2d4d77f9685e37e1d006eb7d462a75b885e6cac50917926a3695792bff5",
+    "kprog/tv/NativeLinkArmHelperGuard.lean": "6409bb161d9a5d4d677d18cd22cb5cad88747470e73f422f691d4a5388a5022b",
+    "kprog/tv/test_arm_helper_emitter.py": "bed9d159eb221fcddc2bf3f9a65ea98fa99fc3bc7f3dc032934067098461c473"
+  },
+  "source_git_epoch": {
+    "kprog/formal/KProgFormal/Reference/AArch64.lean": "92441b38ac8110766058094409f9758fa3cbd68c",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "92441b38ac8110766058094409f9758fa3cbd68c",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "92441b38ac8110766058094409f9758fa3cbd68c",
+    "kprog/tv/Composition.lean": "92441b38ac8110766058094409f9758fa3cbd68c",
+    "kprog/tv/NativeLinkArmBL26.lean": "92441b38ac8110766058094409f9758fa3cbd68c",
+    "kprog/tv/NativeLinkArmHelper.lean": "92441b38ac8110766058094409f9758fa3cbd68c",
+    "kprog/tv/NativeLinkRelocation.lean": "92441b38ac8110766058094409f9758fa3cbd68c",
+    "kprog/tv/NativeLinkRelocationTable.lean": "92441b38ac8110766058094409f9758fa3cbd68c",
+    "kprog/formal/lean-toolchain": "92441b38ac8110766058094409f9758fa3cbd68c",
+    "kprog/formal/lakefile.toml": "92441b38ac8110766058094409f9758fa3cbd68c",
+    "kprog/formal/lake-manifest.json": "92441b38ac8110766058094409f9758fa3cbd68c"
+  },
+  "compiled_olean_sha256": {
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/AArch64.olean": "e64ff1d4e35c62851d8208fbb0eddd9930e86aa10125a1af109c77263cc706f5",
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/Memory.olean": "dc3ed5d7d9a0180f57574646597651f8ea628af3a857a628ef5a767283a2d659",
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/X86.olean": "a556e3c6acb98eca7a1d03819576d912bb5262af49597ffe6c4282930bbd25c8",
+    "kprog/tv/build/Composition.olean": "7e66af8c2ba8a1467ae7405f26d142c6a150b51c977120173c4cba4bf55771d8",
+    "kprog/tv/build/NativeLinkArmBL26.olean": "924c5b38f7ee694a164126d33e131af7f9d95ed7783a7f0458e587f1ac9c8519",
+    "kprog/tv/build/NativeLinkArmHelper.olean": "4379d75ca3e078633d96bc9868d8a6177dc50789543add41c5860b9f0ccc3584",
+    "kprog/tv/build/NativeLinkRelocation.olean": "66e8c45092ce7f42c2040bac5f5f7b94ac84ab95a2dbeb44a6549aa3f03ff929",
+    "kprog/tv/build/NativeLinkRelocationTable.olean": "3349dbe8e06a43ca6b83714db6f313f42394b800b860d2531531e26d03b6c0eb",
+    "kprog/tv/build/NativeLinkArmHelperGuard.olean": "521808a429992ae493929a05075d3cc3f8ef64a95c6de8893c5413d4431a73a6"
+  },
+  "dependency_cache_receipt": "kprog/results/kprog_tv_20261107/generic-native-link-arm-helper.json",
+  "archives": {
+    "kprog/results/kprog_tv_20261107/generic-native-link-arm-helper-guard.log.gz": {
+      "gzip_sha256": "ab8d6d7f55e7220e0d7f1b57291f4004ad8d1ff39a3c7be46ecfcc464869d8af",
+      "raw_sha256": "2b3b740ce63cfa5325f5e7cb6ed653e694f3aedce5207d6d1cbd31289fbb1509",
+      "raw_bytes": 2064
+    },
+    "kprog/results/kprog_tv_20261107/generic-native-link-arm-helper-guard-attempts.log.gz": {
+      "gzip_sha256": "b67f8e91a5f5099a404c823c1358b9ccdeb85f5c5243e488b3917e5562fc6b63",
+      "raw_sha256": "1740ec9115b4a93b6812256e5b91cc749a7c6170013442cdf25d07ac341a4572",
+      "raw_bytes": 4150
+    }
+  },
+  "completion_path": [
+    "A adopts the checked emitter at the next coherent whole-module/image boundary.",
+    "Establish actual Rust/loader field/table/cursor/final-image bytes and executable lifetime.",
+    "Compose complete helper/caller/entry ABI and callee effects, then the remaining ARM/compiler transformation laws."
+  ],
+  "trusted": [
+    "Accepted-B verifier soundness.",
+    "Single canonical ISA semantics with F hardware/QEMU fidelity evidence.",
+    "Kernel binding and C implementation-value correspondence, plus supported ABI.",
+    "Lean kernel and the recorded propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies."
+  ]
+}

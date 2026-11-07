@@ -214,6 +214,21 @@ surrounding production stages. Current kernel target checks cover the negative
 pointer half; `Kernel48` identifies the exact far-encoding equality interface.
 Reproduce with `make -C kprog/tv native-link-arm-helper-check`.
 
+`generic-native-link-arm-helper-guard.json` connects the actual far-writer
+acceptance check to exact target reconstruction. The kernel writer checks the
+upper16 target bits before its four stores and returns `ERANGE` for targets
+outside that encoding range; the caller propagates this through the existing
+JIT error path. Every accepted far entry reaches the bound target. Near BL keeps
+its existing range choice and link address. Nine universal Lean audits pass;
+accepted emitted bytes supply the same block TV and reverse execution relation.
+The source-extracted C writer passes262,144 cases on the host and262,144 on
+AArch64 QEMU user mode with UBSan: each has65,539 accepted targets retaining
+prior bytes and196,605 refused targets retaining buffer canaries. This closes
+the far-address representability interface. Actual whole-module adoption,
+field/table/final-image correspondence and complete helper/caller/entry ABI
+supply the remaining production stages. Reproduce with
+`make -C kprog/tv native-link-arm-helper-guard-check`.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations

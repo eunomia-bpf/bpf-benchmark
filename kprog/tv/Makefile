@@ -991,3 +991,11 @@ native-link-arm-bl26-check: native-link-relocation-table-check
 native-link-arm-helper-check: native-link-arm-bl26-check
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/NativeLinkArmHelper.olean ../tv/NativeLinkArmHelper.lean
+
+.PHONY: native-link-arm-helper-guard-check arm-helper-emitter-check
+arm-helper-emitter-check:
+	python3 test_arm_helper_emitter.py
+
+native-link-arm-helper-guard-check: native-link-arm-helper-check arm-helper-emitter-check
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/NativeLinkArmHelperGuard.olean ../tv/NativeLinkArmHelperGuard.lean
