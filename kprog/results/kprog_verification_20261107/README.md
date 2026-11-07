@@ -270,3 +270,37 @@ contracts, reference/wire/compiler checks and C semantic hosts also passed.
 The private immutable source/cache export was deleted automatically; compressed
 CALL CPU observations now retain this successful full run. The subsequent
 FMOV/reduction raw-field dispatcher work requires its own full validation.
+
+## FMOV and reduction dispatcher tail
+
+`Arm64Fmov.rawStep` exposes the actual generated value/destination selectors,
+S_FROM_W truncation, vector-high clearing and independently supplied GPR/ZR
+fields and destination width. `raw_step_refines` relates every native direction
+to the existing banked FMOV reference. Numeric singleton and AUX decoding then
+compose with all32 vector-bank indices and the legacy NONE=255→V0 mapping.
+The existing guard is retained for invalid bank or direction fields.
+
+`Arm64Reduction.dispatch` binds opcode36/37 to the generated CNT/UADDLV
+primitive and the actual AUX==16 high-half selector. `dispatchTail` composes
+the production FMOV-first, reduction-next order and proves each of the three
+operation arms against the same canonical full-state step, including legacy
+FMOV. Unrelated opcodes return no result for this slice, preserving the rest
+of the dispatcher. Reduction ignores the unused FMOV fields exactly as the
+production chain does.
+
+This is a numeric projection for well-formed generated input fields. Native
+byte decoding and Entry/O4 must bind live GPR/ZR representations, the bounded
+vector-selector field, valid direction/arrangement and FMOV width flags; these
+are not application-supplied authority. No runtime, oracle or ISA-specification
+source changed. Every earlier FMOV/reduction theorem remains byte-identical.
+The tail is not a complete72-operation dispatcher or compiled-artifact proof.
+
+Validation: 27 Lean/reference dependency jobs passed. Existing AArch64 reference
+regressions passed, including 3860 internal-control/PC-address complete-state
+cases, plus 959 addressed/vector states and 18 precise rejects. All three
+related generated-contract freshness checks passed. Existing FMOV value,
+FMOV destination and reduction semantic hosts passed 20,145, 256 and 20,017
+cases; actual FMOV and two reduction route hosts passed 127,016, 11,223 and
+21 cases. The FMOV route suite includes all32 banks, NONE and invalid bank
+controls. A new immutable full check follows publication; exact0afcda79c's
+successful full result above precedes this increment.

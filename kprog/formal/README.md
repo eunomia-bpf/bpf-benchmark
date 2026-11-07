@@ -63,6 +63,10 @@ including no-writeback register-offset forms.
 LDP/STP also compose the two generated element transfers and pre/post updates,
 retaining both ordered effects on the explicit two-access (non-LSE2) profile;
 original-SP alignment, per-element access and canonical alias validity remain explicit.
+The FMOV/CNT/UADDLV dispatcher tail composes numeric opcode/AUX selection,
+all32 vector banks and legacy NONE→V0, generated direction/destination/width
+selection and full-state steps; invalid fields retain rejection. Native decoding
+and Entry/O4 must bind the typed operands, bank, direction and width flags.
 Individual module statements define their
 exact scope. Dispatcher coverage/exclusivity is
 **not yet a full simulator-step refinement theorem**; completing the remaining
