@@ -81,7 +81,10 @@ def guest(live, case):
     def start(command, *args, **kwargs):
         if len(command) > 1 and Path(command[1]) in {
             ROOT / "kprog/trusted_service.py", HERE / "trusted_payload_check.py"}:
-            command = [command[0], __file__, "service", *command[2:]]
+            command = list(command)
+            command[1] = __file__
+            if command[2:3] != ["service"]:
+                command.insert(2, "service")
         return original(command, *args, **kwargs)
 
     module.subprocess.Popen = start
