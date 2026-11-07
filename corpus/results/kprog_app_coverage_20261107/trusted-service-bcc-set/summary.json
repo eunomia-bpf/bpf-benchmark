@@ -1,10 +1,10 @@
 {
   "ok": false,
   "case": "bcc-set",
-  "started": "2026-11-07T10:46:37.164837+00:00",
-  "request_archive": "run-20261107T104637164250Z.tar.gz",
+  "started": "2026-11-07T11:00:52.574118+00:00",
+  "request_archive": "run-20261107T110052573341Z.tar.gz",
   "artifact_sha256": {
-    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "32c132c4928e1035bd003dff644e7d9676441c578e9511335370c07d4e2c7652",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6",
     "kprog/tv/build-x86/bpf_x86_native_lab.ko": "c98c7e256af7a173141bc5b67a2fecd5ae31dabb237e9ae655e2954a1f056795",
     "vendor/build/x86/bcc/bin/vfsstat": "7620da18ec87eb09d12309cf965f35f25df6c3934492cf8f4edf831e1a676a83",
     "bpfopt/shim/build-x86/libbpfrejit_shim.so": "93b7f74137a3998f7893b88bdb932311c4a4577a31231229ed517733c2764062",
@@ -26,8 +26,8 @@
     "vendor/build/native-bpf/x86/stage/bcc/tcplife.native.o": "ffaf5d2d19c988641e679182c65e589064c883e171398433d3ead02cdbac6e97",
     "vendor/build/native-bpf/x86/stage/bcc/runqlat.native.o": "03de8f33615e9b9aeec7ccb3bab43bcff1f27c897832f32df1b104e1060edadd"
   },
-  "error": "BCC tool biosnoop exited before BPF programs were tracked by shim",
-  "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 108, in <module>\n    run_bcc_set(live,environment)\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 37, in run_bcc_set\n    runner.start()\n  File \"/workspaces/repository/runner/libs/app_runners/bcc_set.py\", line 88, in start\n    wait_for_app_shim_programs(\n  File \"/workspaces/repository/runner/libs/rejit.py\", line 382, in wait_for_app_shim_programs\n    raise RuntimeError(f\"{process_name} exited before BPF programs were tracked by shim{detail}\")\nRuntimeError: BCC tool biosnoop exited before BPF programs were tracked by shim\n",
-  "finished": "2026-11-07T10:48:51.376846+00:00",
-  "archive_sha256": "b100b9193fc14f09e770c9b0fd2f8edd0949dd224366c0febe465a7c78555f7b"
+  "error": "BCC tools failed startup: opensnoop",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 128, in <module>\n    run_bcc_set(live,environment)\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 57, in run_bcc_set\n    if failures:raise RuntimeError('BCC tools failed startup: '+', '.join(failures))\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: BCC tools failed startup: opensnoop\n",
+  "finished": "2026-11-07T11:03:49.833393+00:00",
+  "archive_sha256": "a63882464c5649921b6e4765519fcb67188d9003091030d66c313f9167c1e8c7"
 }

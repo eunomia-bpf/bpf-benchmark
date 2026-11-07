@@ -1,0 +1,27 @@
+{
+  "capable": {
+    "ready": true
+  },
+  "biosnoop": {
+    "ready": true
+  },
+  "vfsstat": {
+    "ready": true
+  },
+  "opensnoop": {
+    "ready": false,
+    "error": "BCC tool opensnoop exited before BPF programs were tracked by shim"
+  },
+  "syscount": {
+    "ready": true
+  },
+  "tcpconnect": {
+    "ready": true
+  },
+  "tcplife": {
+    "ready": true
+  },
+  "runqlat": {
+    "ready": true
+  }
+}

@@ -157,6 +157,10 @@ with tempfile.TemporaryDirectory(prefix='.live-',dir=OUT) as temporary:
                 if service.poll() is None:raise
         service.wait();reader.join()
         if reader_errors:summary.update(ok=False,error='service log collection: '+repr(reader_errors))
+        kernel_log=subprocess.run(['dmesg','--raw','--color=never'],text=True,capture_output=True)
+        (live/'kernel.log').write_text(kernel_log.stdout)
+        (live/'kernel-log-error.txt').write_text(kernel_log.stderr)
+        summary['kernel_log_returncode']=kernel_log.returncode
         summary['finished']=datetime.now(timezone.utc).isoformat()
         (live/'summary.json').write_text(json.dumps(summary,indent=2)+chr(10))
         with tarfile.open(archive,'x:gz') as output:output.add(live,arcname='run')

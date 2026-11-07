@@ -149,6 +149,21 @@
       },
       "functional_work": null,
       "full_bcc_set": false
+    },
+    {
+      "archive": "run-20261107T110052573341Z.tar.gz",
+      "sha256": "a63882464c5649921b6e4765519fcb67188d9003091030d66c313f9167c1e8c7",
+      "outer_ok": false,
+      "observed_requests": 24,
+      "proof_generated": 24,
+      "proof_compiled": 24,
+      "accepted": 23,
+      "causes": {
+        "accepted": 23,
+        "native-load-EINVAL-no-rejection-line": 1
+      },
+      "functional_work": null,
+      "full_bcc_set": false
     }
   ],
   "scope": "Observed actual requests, not a complete eight-tool inventory. No failed or interrupted requests are excluded."
