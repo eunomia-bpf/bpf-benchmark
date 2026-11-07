@@ -20,5 +20,26 @@
     "kprog/x86/x86_sim_local_bpf.h": "b3c5eaf24ca2b67f68b241d9c88ca41d419e7cc4e5795739536adcacd700847c"
   },
   "scope": "Actual archived runqlat native payload and typed metadata, fresh worker generation; static direct-r10 accesses only, not verifier acceptance.",
-  "measurement": "Decoded executable BPF instructions: signed memory displacement where base register is R10. Disassembly uses hex offsets; the initial regex metric was invalid and is replaced here."
+  "measurement": "Decoded executable BPF instructions: signed memory displacement where base register is R10. Disassembly uses hex offsets; the initial regex metric was invalid and is replaced here.",
+  "runtime_acceptance": {
+    "archive": "run-20261107T104637164250Z.tar.gz",
+    "request_id": 17,
+    "source_prog_id": 74,
+    "native_prog_id": 93,
+    "status": 0,
+    "native_sha256": "03de8f33615e9b9aeec7ccb3bab43bcff1f27c897832f32df1b104e1060edadd",
+    "proof_executable_sha256": "607e67f3597652020426c11e89ee68755d3198a4de9aa4e9b64c8744389644f9",
+    "candidate_executable_identical": true
+  },
+  "native_payload_comparison": {
+    "baseline_sha256": "995e718c53a1c73e8294f8bbaa5d526923e644e988e3e2ae04c70429b45f0b63",
+    "runtime_sha256": "03de8f33615e9b9aeec7ccb3bab43bcff1f27c897832f32df1b104e1060edadd",
+    "whole_elf_identical": false,
+    "defined_function_bytes_identical": true,
+    "allocated_data_sections_identical": true,
+    "allocated_relocations_identical": true,
+    "different_sections": [
+      ".debug_line"
+    ]
+  }
 }

@@ -53,7 +53,7 @@ for archive in sorted(ROOT.glob('run-*.tar.gz')):
   runs.append(dict(archive=archive.name,sha256=hashlib.sha256(archive.read_bytes()).hexdigest(),outer_ok=summary['ok'],
     observed_requests=len(run_rows),proof_generated=sum(r['proof_generated'] for r in run_rows),proof_compiled=sum(r['proof_compiled'] for r in run_rows),
     accepted=sum(r['accepted'] for r in run_rows),causes={cause:sum(r['cause']==cause for r in run_rows) for cause in sorted({r['cause'] for r in run_rows})},
-    functional_work=work,full_bcc_set=False))
+    functional_work=work,full_bcc_set=bool(summary['ok'] and work and 'run/tool-startup.json' in files)))
 with (ROOT/'coverage.csv').open('w') as stream:
  writer=csv.DictWriter(stream,fieldnames=list(rows[0]),lineterminator=chr(10));writer.writeheader();writer.writerows(rows)
 (ROOT/'coverage.json').write_text(json.dumps(dict(runs=runs,scope='Observed actual requests, not a complete eight-tool inventory. No failed or interrupted requests are excluded.'),indent=2)+'\n')

@@ -1,8 +1,8 @@
 {
   "ok": false,
   "case": "bcc-set",
-  "started": "2026-11-07T10:37:10.412610+00:00",
-  "request_archive": "run-20261107T103710411769Z.tar.gz",
+  "started": "2026-11-07T10:46:37.164837+00:00",
+  "request_archive": "run-20261107T104637164250Z.tar.gz",
   "artifact_sha256": {
     "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "32c132c4928e1035bd003dff644e7d9676441c578e9511335370c07d4e2c7652",
     "kprog/tv/build-x86/bpf_x86_native_lab.ko": "c98c7e256af7a173141bc5b67a2fecd5ae31dabb237e9ae655e2954a1f056795",
@@ -28,6 +28,6 @@
   },
   "error": "BCC tool biosnoop exited before BPF programs were tracked by shim",
   "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 108, in <module>\n    run_bcc_set(live,environment)\n  File \"/workspaces/repository/kprog/libnativeloader/../test/run_trusted_service_guest.py\", line 37, in run_bcc_set\n    runner.start()\n  File \"/workspaces/repository/runner/libs/app_runners/bcc_set.py\", line 88, in start\n    wait_for_app_shim_programs(\n  File \"/workspaces/repository/runner/libs/rejit.py\", line 382, in wait_for_app_shim_programs\n    raise RuntimeError(f\"{process_name} exited before BPF programs were tracked by shim{detail}\")\nRuntimeError: BCC tool biosnoop exited before BPF programs were tracked by shim\n",
-  "finished": "2026-11-07T10:38:54.761129+00:00",
-  "archive_sha256": "4f982a04b0b08a93c80b404cc68b4ed4dd6298644a1b7b8b25dd79bc620fb559"
+  "finished": "2026-11-07T10:48:51.376846+00:00",
+  "archive_sha256": "b100b9193fc14f09e770c9b0fd2f8edd0949dd224366c0febe465a7c78555f7b"
 }

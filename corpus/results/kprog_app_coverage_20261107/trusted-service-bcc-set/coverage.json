@@ -132,6 +132,23 @@
       },
       "functional_work": null,
       "full_bcc_set": false
+    },
+    {
+      "archive": "run-20261107T104637164250Z.tar.gz",
+      "sha256": "b100b9193fc14f09e770c9b0fd2f8edd0949dd224366c0febe465a7c78555f7b",
+      "outer_ok": false,
+      "observed_requests": 21,
+      "proof_generated": 21,
+      "proof_compiled": 21,
+      "accepted": 18,
+      "causes": {
+        "accepted": 18,
+        "native-load-EINVAL-no-rejection-line": 1,
+        "request-activation-refused-during-teardown": 1,
+        "verifier-scalar-stack-pointer-arithmetic": 1
+      },
+      "functional_work": null,
+      "full_bcc_set": false
     }
   ],
   "scope": "Observed actual requests, not a complete eight-tool inventory. No failed or interrupted requests are excluded."
