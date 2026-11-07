@@ -1,0 +1,35 @@
+control	outcome	errno	record_kind	operation_kind
+application cannot obtain registered service authority	REJECTED	16	individual_outcome	protocol_refusal
+application proof ELF refused	REJECTED	8	individual_outcome	protocol_refusal
+unrecognized submission metadata refused	REJECTED	22	individual_outcome	protocol_refusal
+application cannot complete proof request	REJECTED	1	individual_outcome	protocol_refusal
+service endpoint resource submission refused	REJECTED	1	individual_outcome	protocol_refusal
+resource reserved field refused	REJECTED	22	individual_outcome	protocol_refusal
+resource count beyond verifier limit refused	REJECTED	7	individual_outcome	protocol_refusal
+empty resource pointer ambiguity refused	REJECTED	22	individual_outcome	protocol_refusal
+resource vector inaccessible memory refused	REJECTED	14	individual_outcome	protocol_refusal
+partial resource vector invalid FD refused	REJECTED	9	individual_outcome	protocol_refusal
+duplicate resource identity refused	REJECTED	17	individual_outcome	protocol_refusal
+ordinary file resource refused	REJECTED	22	individual_outcome	protocol_refusal
+resource submission proof ELF refused	REJECTED	8	individual_outcome	protocol_refusal
+resource request copyback failure refused	REJECTED	14	individual_outcome	protocol_refusal
+failed submissions release partial resource references	REJECTED	2	individual_outcome	lifetime_map_id_lookup
+submitted resource vector replacement refused	REJECTED	16	individual_outcome	protocol_refusal
+replace submitted native bytes refused	REJECTED	16	individual_outcome	protocol_refusal
+application cannot read service requests	REJECTED	1	individual_outcome	protocol_refusal
+capacity probe retains queued request	REJECTED	90	individual_outcome	protocol_refusal
+immutable native ELF/entry/metadata survive producer mutation	PASS		individual_outcome	protocol_observation
+valid omitted application resource refused	REJECTED	2	individual_outcome	protocol_refusal
+native-only map capability survives descriptor mutation and close	PASS		individual_outcome	protocol_observation
+kernel source/load attributes and actual outer/inner map shapes	PASS		individual_outcome	protocol_observation
+invented inner template refused	REJECTED	2	individual_outcome	protocol_refusal
+map outside pinned source refused	REJECTED	2	individual_outcome	protocol_refusal
+stale source context request refused	REJECTED	116	individual_outcome	protocol_refusal
+application proof upload refused with active trusted worker	REJECTED	1	individual_outcome	protocol_refusal
+application cannot use trusted source query	REJECTED	1	individual_outcome	protocol_refusal
+wrong native request identity refused	REJECTED	116	individual_outcome	protocol_refusal
+invalid final errno refused	REJECTED	22	individual_outcome	protocol_refusal
+unrelated verified BPF program cannot authorize native request	REJECTED	18	individual_outcome	protocol_refusal
+completed request releases native resource references	REJECTED	2	individual_outcome	lifetime_map_id_lookup
+application cannot replace disconnected trusted registration	REJECTED	16	individual_outcome	protocol_refusal
+registered trusted transport, immutable P, application proof refusal and fail-closed disconnect	PASS		suite_summary	suite_summary

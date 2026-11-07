@@ -170,5 +170,179 @@
       "difference": "Two existing extra blank lines after native_lab_checked.h; same implementation bodies."
     }
   ],
-  "scope": "Offline batch runtime/source identity reconciliation supporting generic memory binding and refusal."
+  "scope": "Offline batch runtime/source identity reconciliation supporting generic memory binding and refusal.",
+  "resource_transport_batch": {
+    "source_publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+    "input_pins": {
+      "kprog/results/kprog_tv_20261107/trusted-native-resources.json": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "9f15cd92870261a35d07d597e6cb26bb5eff53c8b56ac789411094a2a31a23ec",
+        "bytes": 12781
+      },
+      "kprog/results/kprog_tv_20261107/trusted-native-resources.raw.tar.gz": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "21e2987465213ed3f70da37f6311cc03d053b80d33c214b9003d67d4e8b356cf",
+        "bytes": 566125
+      },
+      "kprog/results/kprog_tv_20261107/trusted-native-resources.log.gz": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "9394c81d657ad2c8e339df2b3cd2755bb08d2f9c545f674a9ba258c441b40c1b",
+        "bytes": 876
+      },
+      "kinsn/module/include/kinsn_common.h": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "a1b9972833128167031b7e6e52e2c3d547f40e9ded8ee36fbb8e6ba74ff27df0",
+        "bytes": 4093
+      },
+      "kinsn/module/include/kinsn_x86_emit.h": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "a5abe18c25f98def03dfd2224a410272ca6a5e1b85c8bd2fb646cf97a3baf27e",
+        "bytes": 4660
+      },
+      "kinsn/module/include/native_lab_binding.h": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "5abc935861b6920b05a6352064af2999a4febbcbff41d2fb4fc88cb43db02a06",
+        "bytes": 4704
+      },
+      "kinsn/module/include/native_lab_checked.h": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "b6784a78bb1184f097720e25f0ac8352ca0ecd8f3f6a2d22718a72b8691d0d33",
+        "bytes": 7580
+      },
+      "kinsn/module/include/native_lab_checked_wire.h": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "5ca755370dc5872392137bae749bc069c96e23335a7565b7562b96dd6fbfdfc2",
+        "bytes": 1326
+      },
+      "kinsn/module/include/native_lab_exclusive.h": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "9149b3351de498bfc3f4cfa037066c79dec41c9214ba3d882318c4d83237b4f3",
+        "bytes": 1472
+      },
+      "kinsn/module/include/native_lab_group.h": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "a8a4427257da6a07391ceca5f1fa06597225378c938098e3f002527229c671fb",
+        "bytes": 20394
+      },
+      "kinsn/module/include/native_lab_input.h": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "c43adcd858d4c53c500aaa1763e2f95196b9da7f7bc6f284ca305f7d15b1e131",
+        "bytes": 2281
+      },
+      "kinsn/module/include/native_lab_map_offset.h": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "5a707883677eb5fbe27e534263d27ad87b771043c2523861c62587e56c6622c2",
+        "bytes": 3458
+      },
+      "kinsn/module/include/native_lab_trusted.h": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "ceb3ab5d3b7b0c5eb01a857963fee268ec824cfdb9ac1ee6097f842bfd2fbd8a",
+        "bytes": 20289
+      },
+      "kinsn/module/include/native_lab_trusted_wire.h": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac",
+        "bytes": 3899
+      },
+      "kinsn/module/x86/bpf_x86_native_lab.c": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "ffa42fd42f06d048dc050ae83ca77bdd4454238331b4f76416e24a2f95f58888",
+        "bytes": 28638
+      },
+      "kprog/tv/test_trusted_transport.c": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "f4fcb4c6cc5654509350588c57c4f024a8054896ba1105a23b48864e69de1e3b",
+        "bytes": 16810
+      },
+      "kprog/tv/Makefile": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "79d7686e5e76cb674bc53f66dfd8343b4b46d643a47b605bff089748e67b5e3c",
+        "bytes": 53996
+      },
+      "kprog/tv/module.mk": {
+        "publication": "c94fbff015cfcf2a6b253a26122e9991036c558b",
+        "sha256": "ff4d110f1a8732952edad9f96442e29528095a8f88d4fe85403213ef2a5704b3",
+        "bytes": 89
+      }
+    },
+    "published_source_files": 15,
+    "archived_source_sha256": {
+      "kinsn/module/include/kinsn_common.h": "a1b9972833128167031b7e6e52e2c3d547f40e9ded8ee36fbb8e6ba74ff27df0",
+      "kinsn/module/include/kinsn_x86_emit.h": "a5abe18c25f98def03dfd2224a410272ca6a5e1b85c8bd2fb646cf97a3baf27e",
+      "kinsn/module/include/native_lab_binding.h": "5abc935861b6920b05a6352064af2999a4febbcbff41d2fb4fc88cb43db02a06",
+      "kinsn/module/include/native_lab_checked.h": "b6784a78bb1184f097720e25f0ac8352ca0ecd8f3f6a2d22718a72b8691d0d33",
+      "kinsn/module/include/native_lab_checked_wire.h": "5ca755370dc5872392137bae749bc069c96e23335a7565b7562b96dd6fbfdfc2",
+      "kinsn/module/include/native_lab_exclusive.h": "9149b3351de498bfc3f4cfa037066c79dec41c9214ba3d882318c4d83237b4f3",
+      "kinsn/module/include/native_lab_group.h": "26844694a56b92c167731d0759c78785dc57a77eb5821c12fb1001f48f9a9632",
+      "kinsn/module/include/native_lab_input.h": "c43adcd858d4c53c500aaa1763e2f95196b9da7f7bc6f284ca305f7d15b1e131",
+      "kinsn/module/include/native_lab_map_offset.h": "5a707883677eb5fbe27e534263d27ad87b771043c2523861c62587e56c6622c2",
+      "kinsn/module/include/native_lab_trusted.h": "ceb3ab5d3b7b0c5eb01a857963fee268ec824cfdb9ac1ee6097f842bfd2fbd8a",
+      "kinsn/module/include/native_lab_trusted_wire.h": "b6d52a878443957e63ee78fd97ec5df831ecb3e3760d3f9c73b6cbaf8b496dac",
+      "kinsn/module/x86/bpf_x86_native_lab.c": "ffa42fd42f06d048dc050ae83ca77bdd4454238331b4f76416e24a2f95f58888",
+      "kprog/tv/test_trusted_transport.c": "f4fcb4c6cc5654509350588c57c4f024a8054896ba1105a23b48864e69de1e3b",
+      "kprog/tv/Makefile": "79d7686e5e76cb674bc53f66dfd8343b4b46d643a47b605bff089748e67b5e3c",
+      "kprog/tv/module.mk": "ff4d110f1a8732952edad9f96442e29528095a8f88d4fe85403213ef2a5704b3"
+    },
+    "archived_runtime_artifact_sha256": {
+      "kprog/tv/build-x86/bpf_x86_native_lab.ko": "57e6f868da0768526965fdd0a789c4d7080358efe4439edb1f0e32c5136ceb9f",
+      "kprog/tv/build/test-trusted-transport": "27c1c0f97f1b4918322b92b637cc01d182941e4e9c786237e930505f20d73dfd",
+      "kprog/tv/build-x86/.bpf_x86_native_lab.o.cmd": "b941864e215b29ecc77d09469481aecb032cd55fce0621382a503e1a88c020a5"
+    },
+    "recorded_runtime_artifact_sha256": {
+      "kprog/tv/build-x86/bpf_x86_native_lab.ko": "57e6f868da0768526965fdd0a789c4d7080358efe4439edb1f0e32c5136ceb9f",
+      "kprog/tv/build/test-trusted-transport": "27c1c0f97f1b4918322b92b637cc01d182941e4e9c786237e930505f20d73dfd",
+      "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "df7a92936b4180044271d87854fee6783d05a72a62eee72c70b28cf811cb5278",
+      "kprog/tv/build-kernel-x86/.config": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864",
+      "kprog/tv/build-kernel-x86/Module.symvers": "59e1113d4d6a08410452bfec5bc047fb9a21ad1e15d7ca044b10eb12a5e64447",
+      "runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a": "79fe9c97c5b4d9853c8d592b280473f70f8399dd0c729178fd58fcf1b57ae6dc",
+      "kprog/tv/build-x86/.bpf_x86_native_lab.o.cmd": "b941864e215b29ecc77d09469481aecb032cd55fce0621382a503e1a88c020a5"
+    },
+    "metadata_runtime_artifact_pins_beyond_archive": [
+      "kprog/tv/build-kernel-x86/.config",
+      "kprog/tv/build-kernel-x86/Module.symvers",
+      "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage",
+      "runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a"
+    ],
+    "source_observations": {
+      "kinsn/module/include/native_lab_group.h": {
+        "observed_sha256": "26844694a56b92c167731d0759c78785dc57a77eb5821c12fb1001f48f9a9632",
+        "published_sha256": "a8a4427257da6a07391ceca5f1fa06597225378c938098e3f002527229c671fb",
+        "observed_patch": "diff --git a/kinsn/module/include/native_lab_group.h b/kinsn/module/include/native_lab_group.h\nindex 3af810d76..b44ef33a6 100644\n--- a/kinsn/module/include/native_lab_group.h\n+++ b/kinsn/module/include/native_lab_group.h\n@@ -6,6 +6,8 @@\n #include \"native_lab_exclusive.h\"\n #include \"native_lab_checked.h\"\n \n+\n+\n /* Included after native_blob/blobs and decode_native_lab_payload in each\n  * module. The final chunk owns a generation vector for the entire program.\n  * All callers hold blobs_lock.\n",
+        "implementation_body_identity": "identical; two retained blank lines"
+      }
+    },
+    "outcomes": 34,
+    "named_outcomes": 33,
+    "expected_refusals": 30,
+    "positive_named_outcomes": 3,
+    "suite_summaries": 1,
+    "prior_outcomes_preserved": 19,
+    "protocol_refusal_outcomes": 28,
+    "lifetime_map_id_lookup_outcomes": 2,
+    "positive_protocol_observations": 3,
+    "additional_named_outcomes": 15,
+    "additional_expected_refusals": 14,
+    "lifetime_api_observations": [
+      {
+        "control": "failed submissions release partial resource references",
+        "libbpf_result": -2,
+        "errno": 2
+      },
+      {
+        "control": "completed request releases native resource references",
+        "libbpf_result": -2,
+        "errno": 2
+      }
+    ],
+    "abi_bytes": {
+      "native_lab_trusted_request": 64,
+      "native_lab_trusted_submission": 80
+    },
+    "ioctl_group": "N",
+    "ioctl_number": 119,
+    "recorded_command_exit": 0,
+    "final_log_matches_archive": true,
+    "initial_diagnostic_sha256": "665f12233ec382d30b281972ce1c2ca7c8f2f2beec568ca22de05893f2a2ce9a",
+    "scope": "Archived transport submission/query/completion and map-reference-lifetime observations."
+  }
 }

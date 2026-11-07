@@ -1,4 +1,4 @@
-# Inline-memory binding batch observations
+# Native resource and inline-memory batch observations
 
 One offline collector reconciles T's published generic memory-binding regression
 at 697bea0ea4326472119c137b306d298621a9a218. It reads all three retained service
@@ -47,6 +47,64 @@ PASS line. The source metadata records all 19 outcome lines together; summary.js
 keeps that reported count alongside the 18 individual outcomes and one summary.
 The collector confirms the closing puts statement in the pinned C source.
 Exact labels, errno values and record kinds are in transport-outcomes.tsv.
+
+## Kernel-owned native map capabilities
+
+The same offline reader now reconciles T's separate c94fbff015cfcf2a6b253a26122e9991036c558b
+x86 KVM2vCPU/2GiB transport cohort. Its34 output lines contain33 named outcomes and one closing
+suite summary. The complete old19-line cohort appears in the new cohort with
+the same labels, outcomes, errno values and ordering. Fifteen additional named
+outcomes cover native-resource submission, descriptor mutation, pinned object
+identity, reference lifetime and rollback.
+
+| Observed operation | Count |
+| --- | ---: |
+| Protocol refusals | 28 |
+| Map-ID lifetime lookups returning -ENOENT | 2 |
+| Positive protocol observations | 3 |
+| Closing suite summary | 1 |
+
+The source metadata's30 REJECTED lines include the28 protocol refusals and
+the two lifetime lookups. resource-transport-outcomes.tsv keeps every original
+label/outcome/errno and records operation_kind alongside record_kind.
+Both lifetime lookups return libbpf_result=-2 and errno=2: one after rollback
+of partial submission, duplicate-identity and copyback cases; one after request
+completion and submitting-file close. The test completes that request with
+status-EINVAL. Its separate object-ID query and map-shape assertions execute
+before the corresponding PASS lines.
+
+The positive resource observation checks a PERCPU_ARRAY with key size4,
+value size8 and max_entries3 after the application mutates the submitted FD
+array and closes its descriptors. Querying an omitted valid object receives
+ENOENT, while the pinned object's ID remains resolvable. The source outer map
+and inner template retain their actual shape checks. These are transport
+submission/query/completion and reference-lifetime observations. The earlier
+memory cohort above supplies its three actual native copy/fill executions.
+
+The captured wire source defines SUBMIT_RESOURCES at ioctl group N,
+number0x77. Compile-time source assertions retain the64-byte base request
+and80-byte resource submission. The raw transport log equals the decompressed
+published log exactly, and its recorded outer command exits0.
+
+The resource result has its own18 immutable input pins: metadata, raw/log
+archives and15 published source files. All15 archived source identities agree
+with their recorded input manifest; the common group header retains its
+documented two extra blank lines and exact observed/published hashes.
+The archived module, test executable and compiler-command file match their
+three published artifact digests:
+
+- Module:57e6f868da0768526965fdd0a789c4d7080358efe4439edb1f0e32c5136ceb9f.
+- Test executable:27c1c0f97f1b4918322b92b637cc01d182941e4e9c786237e930505f20d73dfd.
+- Compiler command:b941864e215b29ecc77d09469481aecb032cd55fce0621382a503e1a88c020a5.
+
+Four further kernel/configuration/libbpf identities remain explicit metadata
+pins. summary.json separates these recorded identities from the artifact bytes
+available in the archive. Its resource_transport_batch holds the new cohort;
+the original memory/source/input fields retain their complete values.
+resource-increment.json confirms exact retention of the three earlier service
+batches,17 old input pins, terminal/transport tables and full failure archive.
+C/A own coherent caller/service/module adoption and actual application runs;
+V/T continue the universal resource, compiler and binding laws.
 
 ## Source and binary identities
 

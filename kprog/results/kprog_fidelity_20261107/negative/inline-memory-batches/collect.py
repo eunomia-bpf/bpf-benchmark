@@ -10,6 +10,112 @@ PUBLICATION='697bea0ea4326472119c137b306d298621a9a218'
 HELPER_PUBLICATION='919dd0201b092e9b3b3cb56befe11832985d7d27'
 BASE='kprog/results/kprog_tv_20261107/trusted-inline-memory-binding'
 def sha(data):return hashlib.sha256(data).hexdigest()
+def resource_observations(previous_outcomes):
+    publication='c94fbff015cfcf2a6b253a26122e9991036c558b'
+    base='kprog/results/kprog_tv_20261107/trusted-native-resources'
+    pins={}
+    def published(path):
+        value=subprocess.check_output(['git','show',publication+':'+path],cwd=ROOT)
+        pins[path]=dict(publication=publication,sha256=sha(value),bytes=len(value))
+        return value
+    metadata=json.loads(published(base+'.json'))
+    raw=published(base+'.raw.tar.gz');packed_log=published(base+'.log.gz')
+    log_bytes=gzip.decompress(packed_log);log=log_bytes.decode()
+    for path,packed,unpacked in [(base+'.raw.tar.gz',raw,gzip.decompress(raw)),
+                                (base+'.log.gz',packed_log,log_bytes)]:
+        entry=metadata['archives'][path]
+        assert sha(packed)==entry['gzip_sha256']
+        assert sha(unpacked)==entry['raw_sha256'] and len(unpacked)==entry['raw_bytes']
+    sources={path:published(path) for path in metadata['source_sha256']}
+    assert all(sha(data)==metadata['source_sha256'][path] for path,data in sources.items())
+    tested_sources={};tested_artifacts={}
+    with tarfile.open(fileobj=io.BytesIO(raw)) as archive:
+        input_metadata=json.loads(archive.extractfile('metadata/inputs.json').read())
+        for key in ['source_sha256','source_git_epoch','implementation_source_observations','runtime_artifact_sha256']:
+            assert input_metadata[key]==metadata[key]
+        for path,digest in metadata['source_sha256'].items():
+            data=archive.extractfile('inputs/'+path).read()
+            observed=sha(data);tested_sources[path]=observed
+            assert observed==input_metadata['observed_source_sha256'][path]
+            if observed!=digest:
+                observation=metadata['implementation_source_observations'][path]
+                assert observed==observation['observed_sha256'] and digest==observation['published_sha256']
+                assert [line for line in data.splitlines() if line.strip()]==[
+                    line for line in sources[path].splitlines() if line.strip()]
+        mapping={
+            'artifacts/bpf_x86_native_lab.ko':'kprog/tv/build-x86/bpf_x86_native_lab.ko',
+            'artifacts/test-trusted-transport':'kprog/tv/build/test-trusted-transport',
+            'artifacts/.bpf_x86_native_lab.o.cmd':'kprog/tv/build-x86/.bpf_x86_native_lab.o.cmd'}
+        for member,path in mapping.items():
+            digest=sha(archive.extractfile(member).read())
+            assert digest==metadata['runtime_artifact_sha256'][path]
+            tested_artifacts[path]=digest
+        assert archive.extractfile('logs/final.log').read()==log_bytes
+        initial=archive.extractfile('logs/initial-wrapper-diagnostic.log').read()
+        initial_sha256=sha(initial)
+    segment=re.findall(r'^\./build/test-trusted-transport[^\n]*\n(.*?)(?=^rmmod |^make: Leaving|\Z)',log,re.M|re.S)
+    assert len(segment)==1
+    suite='registered trusted transport, immutable P, application proof refusal and fail-closed disconnect'
+    rows=[];api=[]
+    source=sources['kprog/tv/test_trusted_transport.c'].decode()
+    for line in segment[0].splitlines():
+        match=re.fullmatch(r'(.+): (PASS|REJECTED)(?: \((\d+)\))?',line)
+        if match:
+            label=match[1]
+            assert json.dumps(label) in source or json.dumps(label+': PASS') in source
+            rows.append(dict(control=label,outcome=match[2],errno=match[3] or '',
+                record_kind='suite_summary' if label==suite else 'individual_outcome'))
+        match=re.fullmatch(r'(.+): libbpf_result=(-?\d+) errno=(\d+)',line)
+        if match:
+            api.append(dict(control=match[1],libbpf_result=int(match[2]),errno=int(match[3])))
+    assert len({row['control'] for row in rows})==len(rows)
+    validation=metadata['validation']
+    assert len(rows)==validation['outcome_lines']==34
+    named=[row for row in rows if row['record_kind']=='individual_outcome']
+    assert len(named)==validation['named_case_outcomes']==33
+    assert sum(row['record_kind']=='suite_summary' for row in rows)==validation['suite_summary_lines']==1
+    refused=[dict(case=row['control'],errno=int(row['errno'])) for row in rows if row['outcome']=='REJECTED']
+    assert refused==validation['refusal_records'] and len(refused)==validation['expected_refusals']==30
+    passed=[row['control'] for row in rows if row['outcome']=='PASS']
+    assert passed==validation['positive_records']
+    assert sum(row['outcome']=='PASS' for row in named)==validation['positive_case_outcomes']==3
+    assert len(api)==len(validation['lifetime_api_results'])==2
+    for observed,recorded in zip(api,validation['lifetime_api_results']):
+        assert observed['libbpf_result']==recorded['libbpf_result']==-2
+        assert observed['errno']==recorded['errno']==2
+    original_labels={row['control'] for row in previous_outcomes}
+    assert [row for row in rows if row['control'] in original_labels]==previous_outcomes
+    additional=[row for row in named if row['control'] not in original_labels]
+    assert len(additional)==15 and sum(row['outcome']=='REJECTED' for row in additional)==14
+    abi=dict(re.findall(r'_Static_assert\(sizeof\(struct (native_lab_trusted_\w+)\) == (\d+)',source))
+    assert abi==dict(native_lab_trusted_request='64',native_lab_trusted_submission='80')
+    wire=sources['kinsn/module/include/native_lab_trusted_wire.h'].decode()
+    assert "_IOWR('N', 0x77, struct native_lab_trusted_submission)" in wire
+    assert 'puts("'+suite+': PASS");' in source
+    lifetime_labels={row['control'] for row in api}
+    for row in rows:
+        row['operation_kind']=('suite_summary' if row['record_kind']=='suite_summary' else
+            'lifetime_map_id_lookup' if row['control'] in lifetime_labels else
+            'protocol_refusal' if row['outcome']=='REJECTED' else 'protocol_observation')
+    report=dict(source_publication=publication,input_pins=pins,
+        published_source_files=len(sources),archived_source_sha256=tested_sources,
+        archived_runtime_artifact_sha256=tested_artifacts,
+        recorded_runtime_artifact_sha256=metadata['runtime_artifact_sha256'],
+        metadata_runtime_artifact_pins_beyond_archive=sorted(set(metadata['runtime_artifact_sha256'])-set(tested_artifacts)),
+        source_observations=metadata['implementation_source_observations'],
+        outcomes=len(rows),named_outcomes=len(named),expected_refusals=len(refused),
+        positive_named_outcomes=3,suite_summaries=1,prior_outcomes_preserved=len(previous_outcomes),
+        protocol_refusal_outcomes=sum(row['operation_kind']=='protocol_refusal' for row in rows),
+        lifetime_map_id_lookup_outcomes=len(api),
+        positive_protocol_observations=sum(row['operation_kind']=='protocol_observation' for row in rows),
+        additional_named_outcomes=len(additional),additional_expected_refusals=14,
+        lifetime_api_observations=api,abi_bytes={key:int(value) for key,value in abi.items()},
+        ioctl_group='N',ioctl_number=0x77,recorded_command_exit=validation['exit'],
+        final_log_matches_archive=True,initial_diagnostic_sha256=initial_sha256,
+        scope='Archived transport submission/query/completion and map-reference-lifetime observations.')
+    return report,rows
+
+
 def main():
     pins={}
     def published(path,commit=PUBLICATION):
@@ -141,7 +247,8 @@ def main():
     final=[row for row in records if row['final_batch']]
     assert len(final)==4 and Counter(row['stage'] for row in final)==Counter(bound=3,verifier_rejected=1)
     assert len({row['recorded_source_set_sha256'] for row in final})==1
-    for path,rows in [('terminal-outcomes.tsv',records),('transport-outcomes.tsv',transports)]:
+    resource_report,resource_rows=resource_observations(transports)
+    for path,rows in [('terminal-outcomes.tsv',records),('transport-outcomes.tsv',transports),('resource-transport-outcomes.tsv',resource_rows)]:
         with (OUT/path).open('w') as output:
             columns=list(rows[0])
             if path=='terminal-outcomes.tsv':
@@ -160,6 +267,8 @@ def main():
                 tested_artifact_sha256=tested,recorded_source_vectors=source_sets,
                 source_observations=metadata['source_observations'],
                 scope='Offline batch runtime/source identity reconciliation supporting generic memory binding and refusal.')
+    report['resource_transport_batch']=resource_report
     (OUT/'summary.json').write_text(json.dumps(report,indent=2)+'\n')
-    print(json.dumps({k:v for k,v in report.items() if k not in ['input_pins','tested_artifact_sha256','recorded_source_vectors','source_observations']},indent=2))
+    print(json.dumps({k:v for k,v in report.items() if k not in ['input_pins','tested_artifact_sha256','recorded_source_vectors','source_observations','resource_transport_batch']},indent=2))
+    print(json.dumps(dict(resource_transport={key:resource_report[key] for key in ['source_publication','outcomes','named_outcomes','protocol_refusal_outcomes','lifetime_map_id_lookup_outcomes','positive_protocol_observations','suite_summaries','prior_outcomes_preserved']}),indent=2))
 if __name__=='__main__':main()
