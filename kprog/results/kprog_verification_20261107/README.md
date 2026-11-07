@@ -573,3 +573,11 @@ passed. Existing condition/decode/CSEL/pointer/CNEG semantic and CSEL/CNEG actua
 route hosts passed 240, 80, 160161, 1024, 40097, 192 and 26400 cases. No proof/test
 failures or input filtering; existing C inline warnings remain visible. The
 running exact0a9b8757c full check predates this increment.
+
+Exact `0a9b8757c6e7baf6a40fea1c93d9ee3d88edf2f7` completed the full
+`make -C kprog/formal check` with exit **0**, including MVN/NEG, MOV and the
+multiply-family dispatcher increments plus all prior Lean, contract,
+reference/wire/compiler and semantic checks. The immutable source/cache export
+was deleted automatically; compressed CALL CPU observations retain this 440-case
+full run. Later Extrev, concrete dispatcher-chain and conditional-select work
+need their own full validation.
