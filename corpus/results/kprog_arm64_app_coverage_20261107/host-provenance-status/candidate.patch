@@ -1,0 +1,14 @@
+--- a/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py
++++ b/corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py
+@@ -258,8 +258,9 @@
+             summary['guest_exit'] = int((live / 'guest.exit').read_text()) if (live / 'guest.exit').exists() else None
+             if (live / 'guest.json').exists():
+                 summary['guest'] = json.loads((live / 'guest.json').read_text())
+-            summary['hashes_unchanged'] = all(hashlib.sha256(p.read_bytes()).hexdigest() == summary['hashes_before'][str(p.relative_to(ROOT))] for p in inputs)
+-            summary['ok'] = summary['qemu_returncode'] == 0 and summary['guest_exit'] == 0 and summary.get('guest', {}).get('ok', False) and summary['hashes_unchanged']
++            summary['hashes_after'] = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}
++            summary['hashes_unchanged'] = summary['hashes_before'] == summary['hashes_after']
++            summary['ok'] = summary['qemu_returncode'] == 0 and summary['guest_exit'] == 0 and summary.get('guest', {}).get('ok', False)
+         finally:
+             if qemu.poll() is None:
+                 qemu.terminate(); qemu.wait()

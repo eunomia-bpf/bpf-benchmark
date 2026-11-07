@@ -1,0 +1,129 @@
+{
+  "utc": "2026-11-07T20:49:40.052403+00:00",
+  "scope": "Generic host outcome reporting and source provenance",
+  "production_state": "Queued common transport source after existing predecessors close",
+  "cases": [
+    {
+      "qemu_returncode": 0,
+      "guest_exit": 0,
+      "guest_ok": true,
+      "hashes_unchanged": true,
+      "host_ok": true
+    },
+    {
+      "qemu_returncode": 0,
+      "guest_exit": 0,
+      "guest_ok": true,
+      "hashes_unchanged": false,
+      "host_ok": true
+    },
+    {
+      "qemu_returncode": 0,
+      "guest_exit": 0,
+      "guest_ok": false,
+      "hashes_unchanged": true,
+      "host_ok": false
+    },
+    {
+      "qemu_returncode": 0,
+      "guest_exit": 0,
+      "guest_ok": false,
+      "hashes_unchanged": false,
+      "host_ok": false
+    },
+    {
+      "qemu_returncode": 0,
+      "guest_exit": 1,
+      "guest_ok": true,
+      "hashes_unchanged": true,
+      "host_ok": false
+    },
+    {
+      "qemu_returncode": 0,
+      "guest_exit": 1,
+      "guest_ok": true,
+      "hashes_unchanged": false,
+      "host_ok": false
+    },
+    {
+      "qemu_returncode": 0,
+      "guest_exit": 1,
+      "guest_ok": false,
+      "hashes_unchanged": true,
+      "host_ok": false
+    },
+    {
+      "qemu_returncode": 0,
+      "guest_exit": 1,
+      "guest_ok": false,
+      "hashes_unchanged": false,
+      "host_ok": false
+    },
+    {
+      "qemu_returncode": 1,
+      "guest_exit": 0,
+      "guest_ok": true,
+      "hashes_unchanged": true,
+      "host_ok": false
+    },
+    {
+      "qemu_returncode": 1,
+      "guest_exit": 0,
+      "guest_ok": true,
+      "hashes_unchanged": false,
+      "host_ok": false
+    },
+    {
+      "qemu_returncode": 1,
+      "guest_exit": 0,
+      "guest_ok": false,
+      "hashes_unchanged": true,
+      "host_ok": false
+    },
+    {
+      "qemu_returncode": 1,
+      "guest_exit": 0,
+      "guest_ok": false,
+      "hashes_unchanged": false,
+      "host_ok": false
+    },
+    {
+      "qemu_returncode": 1,
+      "guest_exit": 1,
+      "guest_ok": true,
+      "hashes_unchanged": true,
+      "host_ok": false
+    },
+    {
+      "qemu_returncode": 1,
+      "guest_exit": 1,
+      "guest_ok": true,
+      "hashes_unchanged": false,
+      "host_ok": false
+    },
+    {
+      "qemu_returncode": 1,
+      "guest_exit": 1,
+      "guest_ok": false,
+      "hashes_unchanged": true,
+      "host_ok": false
+    },
+    {
+      "qemu_returncode": 1,
+      "guest_exit": 1,
+      "guest_ok": false,
+      "hashes_unchanged": false,
+      "host_ok": false
+    }
+  ],
+  "captured_completed_run": {
+    "guest_exit": 0,
+    "guest_ok": true,
+    "raw_host_ok": false,
+    "raw_hashes_unchanged": false,
+    "corrected_host_ok": true
+  },
+  "planned_source_before_sha256": "8026adcf92fb62ebaaa44978cc56c84f4d1a2fa1c987e1ff68ef605350047313",
+  "planned_source_after_sha256": "81f4a2b35032ed2da0c464ad289101bd6c48d69fae5fd4a9d9bd4067e64ac376",
+  "source_file": "corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py"
+}
