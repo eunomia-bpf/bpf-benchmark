@@ -16,6 +16,7 @@ OUT=Path(__file__).resolve().parent
 BASE='corpus/results/kprog_app_coverage_20261107/'
 PUBLICATION='afc178f46e725fe96f85694d76fcf4c45c842914'
 JOIN_PUBLICATION='21cf7278605fc3b4b6468b3bec639badec9ab0fb'
+KATRAN_PUBLICATION='3993aa884362093ba6821db4e97cdded89504d99'
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
@@ -32,6 +33,52 @@ def service_archive(payload):
         nested=archive.extractfile(files[0]).read()
         archive.close();archive=tarfile.open(fileobj=io.BytesIO(nested))
     raise ValueError('service archive nesting depth')
+
+def packet_work(payload,metadata,app,batch_records):
+    with tarfile.open(fileobj=io.BytesIO(payload)) as archive:
+        members=[m for m in archive.getmembers() if m.isfile() and m.name.endswith('/details/apps/'+app+'.json')]
+        assert len(members)==1
+        raw_app=archive.extractfile(members[0]).read()
+    result=json.loads(raw_app)
+    assert result['status']==metadata['app_status']
+    observed={};configs={}
+    for phase in ['baseline','post_rejit']:
+        value=result[phase]
+        assert value==metadata[phase]
+        assert len(value['workloads'])==1
+        workload=value['workloads'][0]
+        config=dict(workload['config']);outcomes=config.pop('outcomes');configs[phase]=config
+        before,after,delta=[outcomes[key] for key in ['before','after','delta']]
+        for name in ['lru','lru_miss','tx','drop','vip_0','pass','encap_fail','consistent_hash_drop']:
+            assert after['counters'][name]['packets_or_v1']-before['counters'][name]['packets_or_v1']==delta['counters'][name]['packets_or_v1']
+        for name in ['rx_packets','rx_dropped']:
+            assert after['receiver'][name]-before['receiver'][name]==delta['receiver'][name]
+        device='load_balancer/katran0'
+        assert after['interfaces'][device]['tx_dropped']-before['interfaces'][device]['tx_dropped']==delta['interfaces'][device]['tx_dropped']
+        sent=sum(int(re.search(r'pkts-sofar:\s*(\d+)',part['stdout'])[1]) for part in workload['components'])
+        packet=lambda name:delta['counters'][name]['packets_or_v1']
+        receiver=delta['receiver']['rx_packets'];receiver_drop=delta['receiver']['rx_dropped']
+        tx_drop=delta['interfaces'][device]['tx_dropped']
+        recorded=metadata['work_reconciliation'][phase]
+        counts=dict(sent=sent,bpf_run_count=sum(row['run_cnt_delta'] for row in value['bpf'].values()),
+                    xdp_tx=packet('tx'),xdp_drop=packet('drop'),lru=delta['counters']['lru'],
+                    lru_miss=delta['counters']['lru_miss'],receiver_packets=receiver,
+                    receiver_drops=receiver_drop,load_balancer_tx_drops=tx_drop)
+        assert counts==recorded
+        ids={int(key) for key in value['bpf']}
+        if phase=='post_rejit':
+            assert ids=={int(row['bound_prog_id']) for row in batch_records if row['stage']=='bound'}
+        observed[phase]=dict(**counts,bpf_ids=sorted(ids),vip_packets=packet('vip_0'),
+                            sent_equals_bpf_xdp_lru_vip=sent==counts['bpf_run_count']==counts['xdp_tx']==packet('lru')==packet('vip_0'),
+                            receiver_gap=sent-receiver,network_drop_sum=tx_drop+receiver_drop,
+                            network_accounting_equal=sent-receiver==tx_drop+receiver_drop,
+                            derived_counter_deltas_equal=True,duration_seconds=workload['duration_s'],
+                            workload_returncode=workload['returncode'],
+                            component_returncodes=[part['returncode'] for part in workload['components']])
+    return dict(app_result_sha256=sha(raw_app),app_status=result['status'],
+                phases=observed,workload_configs_equal=configs['baseline']==configs['post_rejit'],
+                recorded_work_reconciliation_equal=True)
+
 
 def main():
     source_pins={}
@@ -55,10 +102,11 @@ def main():
       ('tetragon','timing_204105',None,'capture:tetragon-timing.service.tar.gz'),
       ('tetragon','functional_210552',BASE+'native-join-tetragon__observer/coverage.json',BASE+'native-join-tetragon__observer/service.tar.gz'),
       ('tracee','functional_211016',BASE+'tracee-join-helper/coverage.json',BASE+'tracee-join-helper/service.tar.gz'),
+      ('katran','functional_213447',BASE+'katran-tagged-storage/coverage.json',BASE+'katran-tagged-storage/service.tar.gz'),
     ]
-    batches=[];records=[];failures=[];identity_sets={}
+    batches=[];records=[];failures=[];identity_sets={};work_observations={}
     for app,batch,metadata_path,service_path in cases:
-        publication=JOIN_PUBLICATION if batch in {'functional_210552','functional_211016'} else PUBLICATION
+        publication=KATRAN_PUBLICATION if batch=='functional_213447' else JOIN_PUBLICATION if batch in {'functional_210552','functional_211016'} else PUBLICATION
         metadata=json.loads(published(metadata_path,publication)) if metadata_path else {}
         payload=captured[service_path.split(':',1)[1]] if service_path.startswith('capture:') else published(service_path,publication)
         service,log_path=service_archive(payload)
@@ -150,6 +198,10 @@ def main():
             for stage,key in [('verifier_rejected','confirmed_verifier_rejections'),('native_stub_load_error','native_stub_load_errors'),('specialization_rejected','specialization_errors')]:
                 if key in classification:
                     compare[key]=dict(observed=stages[stage],recorded=classification[key],equal=stages[stage]==classification[key])
+            if 'work_reconciliation' in metadata:
+                result_path=str(Path(service_path).with_name('result.tar.gz'))
+                work_observations[batch]=packet_work(published(result_path,publication),metadata,app,
+                    [record for record in records if record['batch']==batch])
             batches.append(dict(app=app,batch=batch,metadata_path=metadata_path,service_path=service_path,
                                 service_sha256=sha(payload),**counts,stages=dict(stages),
                                 app_status=metadata.get('app_status','captured_service_batch'),
@@ -167,11 +219,12 @@ def main():
             load_rows.append(dict(name=name[1],insn_cnt=int(count[1]),bytes=int(count[1])*8,raw_line=line))
     timing_metadata=json.loads(captured['tetragon-timing.metadata.json'])
     timing_result=json.loads(captured['tetragon-timing.result.json'])
-    summary=dict(source_publication=PUBLICATION,additional_source_publications=[JOIN_PUBLICATION],batches=batches,terminal_requests=len(records),
+    summary=dict(source_publication=PUBLICATION,additional_source_publications=[JOIN_PUBLICATION,KATRAN_PUBLICATION],batches=batches,terminal_requests=len(records),
                  stages=dict(Counter(record['stage'] for record in records)),
                  kernel_worker_receipt_identity_matches=len(records),input_artifacts=source_pins,
                  captured_input_manifest=capture_manifest,captured_input_archive_sha256=sha((OUT/'captured-inputs.tar.gz').read_bytes()),
                  recorded_count_matches=all(row['equal'] for batch in batches for row in batch['recorded_counts'].values()),
+                 work_observations=work_observations,
                  timing_context=dict(metadata_status=timing_metadata['status'],result_status=timing_result['status'],
                                      samples=timing_result['samples'],workload_seconds=timing_result['workload_seconds'],
                                      failed_load_extents=load_rows),
@@ -184,7 +237,7 @@ def main():
     (OUT/'failures.jsonl.gz').write_bytes(gzip.compress((''.join(json.dumps(row)+'\n' for row in failures)).encode(),mtime=0))
     print(json.dumps(dict(batches=len(batches),requests=len(records),stages=summary['stages'],
                          identity_matches=len(records),recorded_counts_match=summary['recorded_count_matches'],
-                         timing_failed_extents=load_rows),indent=2))
+                         timing_failed_extents=load_rows,work_observations=work_observations),indent=2))
     return 0
 
 if __name__=='__main__':

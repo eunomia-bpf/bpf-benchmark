@@ -1,10 +1,10 @@
 # Application service batch observations
 
-One generic archive reader reconciles10 closed service batches across all six
-application names. All51 terminal requests preserve byte equality between the
+One generic archive reader reconciles11 closed service batches across all six
+application names. All52 terminal requests preserve byte equality between the
 kernel-owned native object, the worker's received copy and the service receipt's
-SHA256. Kernel source IDs match the service records. The batches contain47
-generated sources,46 compiled objects and42 successful bound replies.
+SHA256. Kernel source IDs match the service records. The batches contain48
+generated sources,47 compiled objects and43 successful bound replies.
 
 Every bound reply's request ID, program ID and status exactly match load.stdout.
 All available published counts match the archive-derived counts, including the
@@ -23,11 +23,39 @@ and each service's terminal requests and archive set agree.
 | tetragon / timing_204105 | 3 | 2 | 2 | 2 | 1 specialization_rejected |
 | tetragon / functional_210552 | 3 | 3 | 3 | 2 | 1 native_stub_load_error |
 | tracee / functional_211016 | 6 | 6 | 6 | 5 | 1 verifier_rejected |
+| katran / functional_213447 | 1 | 1 | 1 | 1 | 0 |
 
-The10 rows retain distinct source, image and boot epochs. Counts describe observed
+The11 rows retain distinct source, image and boot epochs. Counts describe observed
 load instances; repeated native objects and repeated program IDs across boots stay
 in their original batches. Whole application completion and duration-driven
 workload measurements follow the recorded startup frontiers.
+
+## Whole Katran execution and packet work
+
+The later Katran213447 batch completes startup and the existing two-second pktgen
+workload with app status ok: one source program, one fresh generation/compile/
+binding and one native replacement. The service's bound ID35 exactly matches
+the executed post_rejit counter ID35; the baseline counter ID is20.
+The reader opens C's published raw result archive and reconciles its app JSON
+against the coverage metadata, parses sent counts directly from pktgen stdout,
+and recomputes the selected before/after counter and interface differences.
+
+| Arm | Sent / BPF runs / XDP TX / LRU path / VIP packets | LRU miss | Receiver packets | Load-balancer TX drops | Receiver drops | XDP drops |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| JIT | 2318117 | 0 | 2318117 | 0 | 0 | 0 |
+| Bound native | 2386430 | 0 | 2377743 | 5158 | 3529 | 0 |
+
+Native receiver accounting is2386430 -2377743 =8687 =5158 +3529. Baseline receiver
+accounting has zero gap. Both arms execute one BPF invocation and one XDP TX
+per sent workload packet, using the LRU hit path with miss0. Their workload
+configurations match exactly. Achieved packet totals differ during their
+duration-driven workloads; R's existing recipe provides the performance run.
+All network drops remain explicit in the observation.
+
+The work_observations field in summary.json contains the raw-source app hash,
+executed IDs, packet/action/cache counters, receiver/drop reconciliation and
+duration/return values. katran-increment.json confirms retention of all prior
+10 batches,51 terminal rows, the complete failure archive and16 source input pins.
 
 ## Slot-join continuation
 
@@ -94,8 +122,9 @@ separate from the later functional slot-join cohorts.
 The first six published cohorts use immutable Git blobs at
 afc178f46e725fe96f85694d76fcf4c45c842914. The new Tetragon/Tracee slot-join
 metadata and service archives use21cf7278605fc3b4b6468b3bec639badec9ab0fb.
-Sixteen published metadata/archive inputs have individual Git/hash/size pins in
-summary.json. Two additional captured Tetragon service epochs and the R timing
+The later Katran metadata, service and raw result archive use
+3993aa884362093ba6821db4e97cdded89504d99. Nineteen published metadata/archive
+inputs have individual Git/hash/size pins in summary.json. Two additional captured Tetragon service epochs and the R timing
 inputs retain their exact five-file captured-inputs.tar.gz and manifest.
 
 recorded-source-identities.json groups literal service-reported file identities.

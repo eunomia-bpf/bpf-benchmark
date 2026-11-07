@@ -1,7 +1,8 @@
 {
   "source_publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
   "additional_source_publications": [
-    "21cf7278605fc3b4b6468b3bec639badec9ab0fb"
+    "21cf7278605fc3b4b6468b3bec639badec9ab0fb",
+    "3993aa884362093ba6821db4e97cdded89504d99"
   ],
   "batches": [
     {
@@ -398,17 +399,56 @@
           "equal": true
         }
       }
+    },
+    {
+      "app": "katran",
+      "batch": "functional_213447",
+      "metadata_path": "corpus/results/kprog_app_coverage_20261107/katran-tagged-storage/coverage.json",
+      "service_path": "corpus/results/kprog_app_coverage_20261107/katran-tagged-storage/service.tar.gz",
+      "service_sha256": "287d3a3a6789aba644e8b6c9881dbc87977daa033fd4142dc8db86a9b5ed385c",
+      "terminal_requests": 1,
+      "generated": 1,
+      "compiled": 1,
+      "accepted_bound": 1,
+      "stages": {
+        "bound": 1
+      },
+      "app_status": "ok",
+      "baseline_accepted_loads": 1,
+      "baseline_resident_counters": 1,
+      "recorded_counts": {
+        "terminal_requests": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        },
+        "generated": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        },
+        "compiled": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        },
+        "accepted_bound": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        }
+      }
     }
   ],
-  "terminal_requests": 51,
+  "terminal_requests": 52,
   "stages": {
-    "bound": 42,
+    "bound": 43,
     "verifier_rejected": 3,
     "compiler_rejected": 1,
     "specialization_rejected": 4,
     "native_stub_load_error": 1
   },
-  "kernel_worker_receipt_identity_matches": 51,
+  "kernel_worker_receipt_identity_matches": 52,
   "input_artifacts": {
     "corpus/results/kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json": {
       "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
@@ -489,6 +529,21 @@
       "publication": "21cf7278605fc3b4b6468b3bec639badec9ab0fb",
       "sha256": "a3e29010586ea1c486d37fef2b4a60a688fba4a50733a603bae29b476c18d156",
       "bytes": 28648925
+    },
+    "corpus/results/kprog_app_coverage_20261107/katran-tagged-storage/coverage.json": {
+      "publication": "3993aa884362093ba6821db4e97cdded89504d99",
+      "sha256": "7d4e19877a564f620cce5ef5b8ac101ad2b4f5c3f40522352f6f23ad5f6c3333",
+      "bytes": 59662
+    },
+    "corpus/results/kprog_app_coverage_20261107/katran-tagged-storage/service.tar.gz": {
+      "publication": "3993aa884362093ba6821db4e97cdded89504d99",
+      "sha256": "287d3a3a6789aba644e8b6c9881dbc87977daa033fd4142dc8db86a9b5ed385c",
+      "bytes": 307279
+    },
+    "corpus/results/kprog_app_coverage_20261107/katran-tagged-storage/result.tar.gz": {
+      "publication": "3993aa884362093ba6821db4e97cdded89504d99",
+      "sha256": "626cb84b500084b7c001d7d65177b9249dce069c4f65100ed64bf7a0c4a6ec46",
+      "bytes": 86007
     }
   },
   "captured_input_manifest": {
@@ -524,6 +579,78 @@
   },
   "captured_input_archive_sha256": "557e0bb18f6ac4989e964c601000b2a947510b1eccbd12a7eb0e37439cb6ee74",
   "recorded_count_matches": true,
+  "work_observations": {
+    "functional_213447": {
+      "app_result_sha256": "bee1f1a67f1b2b6fa6d0ab52aeb033e93a0f3e1857a027b51994b132fe0d0030",
+      "app_status": "ok",
+      "phases": {
+        "baseline": {
+          "sent": 2318117,
+          "bpf_run_count": 2318117,
+          "xdp_tx": 2318117,
+          "xdp_drop": 0,
+          "lru": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 2318117
+          },
+          "lru_miss": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "receiver_packets": 2318117,
+          "receiver_drops": 0,
+          "load_balancer_tx_drops": 0,
+          "bpf_ids": [
+            20
+          ],
+          "vip_packets": 2318117,
+          "sent_equals_bpf_xdp_lru_vip": true,
+          "receiver_gap": 0,
+          "network_drop_sum": 0,
+          "network_accounting_equal": true,
+          "derived_counter_deltas_equal": true,
+          "duration_seconds": 2.0119972520000147,
+          "workload_returncode": 0,
+          "component_returncodes": [
+            0
+          ]
+        },
+        "post_rejit": {
+          "sent": 2386430,
+          "bpf_run_count": 2386430,
+          "xdp_tx": 2386430,
+          "xdp_drop": 0,
+          "lru": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 2386430
+          },
+          "lru_miss": {
+            "bytes_or_v2": 0,
+            "packets_or_v1": 0
+          },
+          "receiver_packets": 2377743,
+          "receiver_drops": 3529,
+          "load_balancer_tx_drops": 5158,
+          "bpf_ids": [
+            35
+          ],
+          "vip_packets": 2386430,
+          "sent_equals_bpf_xdp_lru_vip": true,
+          "receiver_gap": 8687,
+          "network_drop_sum": 8687,
+          "network_accounting_equal": true,
+          "derived_counter_deltas_equal": true,
+          "duration_seconds": 2.0084318499999654,
+          "workload_returncode": 0,
+          "component_returncodes": [
+            0
+          ]
+        }
+      },
+      "workload_configs_equal": true,
+      "recorded_work_reconciliation_equal": true
+    }
+  },
   "timing_context": {
     "metadata_status": "error",
     "result_status": "error",
