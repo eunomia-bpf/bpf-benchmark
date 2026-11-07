@@ -274,8 +274,11 @@ kernel module SHA plus the vmlinux SHA. Existing kernel objects and build
 caches support the incremental build. Application code and the workload
 protocol retain their existing sources.
 
-The incremental module refresh is running on20–23. Image replacement and the
-four-application startup replay are queued after R's active BCC timing guest.
-That replay uses eight guest vCPUs for the existing Katran NAPI CPU layout,
-12GiB, one sample and a two-second workload. The next application batch will
-record the refreshed image identity, kernel/module inputs and startup results.
+The incremental module refresh and image build completed on20–23. R's current
+timing guest retains its captured image on its separate Docker disk. The host
+image now carries842 kernel modules, fresh dependency indexes and the current
+descriptor-stable feature-probe shim. The module-package-refresh result records
+all input identities and successful image-index/module observations. The
+four-application startup replay uses eight guest vCPUs for the existing Katran
+NAPI CPU layout,12GiB, one sample and a two-second workload. Each application
+batch records its actual refreshed image identity and startup outcome.

@@ -1,0 +1,144 @@
+{
+  "image": "sha256:a5b0b2b0db2ef3d5cd94a518a28992bbea976227a06ee3d935acc5367b459d6f",
+  "image_refresh_exit": 0,
+  "kernel_image_sha256": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6",
+  "vmlinux_sha256": "76c6adc50151a4a7f8ab5591b353c27bcb1d404609fb7d56c00c861efc58bc02",
+  "packaged_kernel_modules": 842,
+  "module_indexes": {
+    "modules.dep": {
+      "image_sha256": "33426ea5a756fc4d0c881c6a4c85aebf20858990f01fb2aa464ae9f24b8ca334",
+      "export_sha256": "33426ea5a756fc4d0c881c6a4c85aebf20858990f01fb2aa464ae9f24b8ca334",
+      "equal": true
+    },
+    "modules.dep.bin": {
+      "image_sha256": "9dad1f0c0919ab859f591a841d0cd6ea4bb30a27b812b8f17a242656c8a9bc5f",
+      "export_sha256": "9dad1f0c0919ab859f591a841d0cd6ea4bb30a27b812b8f17a242656c8a9bc5f",
+      "equal": true
+    },
+    "modules.alias": {
+      "image_sha256": "e82cfa1e55cb64072253da2dec2b321bee2edb2449d32be21dda31472163dd31",
+      "export_sha256": "e82cfa1e55cb64072253da2dec2b321bee2edb2449d32be21dda31472163dd31",
+      "equal": true
+    },
+    "modules.alias.bin": {
+      "image_sha256": "2ec3348f5b63abd71349f8fe236b505ff06d85657cbbc3441b9241313ae9fdd0",
+      "export_sha256": "2ec3348f5b63abd71349f8fe236b505ff06d85657cbbc3441b9241313ae9fdd0",
+      "equal": true
+    },
+    "modules.softdep": {
+      "image_sha256": "8c845e92b773749467b476b215bb8e7ec4f9d7aea775f194ed6e455b68adb957",
+      "export_sha256": "8c845e92b773749467b476b215bb8e7ec4f9d7aea775f194ed6e455b68adb957",
+      "equal": true
+    },
+    "modules.builtin": {
+      "image_sha256": "5d536165e4a1d0a019f2f361d5acf7393598bc35abb1da434bf89027fbb07c7b",
+      "export_sha256": "5d536165e4a1d0a019f2f361d5acf7393598bc35abb1da434bf89027fbb07c7b",
+      "equal": true
+    },
+    "kernel/drivers/scsi/scsi_common.ko": {
+      "sha256": "a89bce76749818fdd35e07d57acb8e634b8a95fc38389bf65a02f9690d3052a1",
+      "btf_sha256": "b0863f5f525422ff6f4dd45158dedb8934027b1c44415dc7b34888d9abc19bd8",
+      "built_btf_equal": true
+    },
+    "kernel/net/ipv4/tunnel4.ko": {
+      "sha256": "8efb4bd25e02ef3027bb96804350eb5c10a1e0c404b3e54d325ce00c016cfb00",
+      "btf_sha256": "32b6926d56f1492c690ed1444853c04e73de9d4ae883e9846d747cf240a87967",
+      "built_btf_equal": true
+    }
+  },
+  "lookup_observations": [
+    {
+      "name": "tunnel4",
+      "command": [
+        "modprobe",
+        "-d",
+        "/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules",
+        "--set-version",
+        "7.0.0-rc2+",
+        "--show-depends",
+        "tunnel4"
+      ],
+      "returncode": 0,
+      "stdout": "insmod /workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules/lib/modules/7.0.0-rc2+/kernel/net/ipv4/tunnel4.ko \n",
+      "stderr": ""
+    },
+    {
+      "name": "ip_tunnel",
+      "command": [
+        "modprobe",
+        "-d",
+        "/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules",
+        "--set-version",
+        "7.0.0-rc2+",
+        "--show-depends",
+        "ip_tunnel"
+      ],
+      "returncode": 0,
+      "stdout": "insmod /workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules/lib/modules/7.0.0-rc2+/kernel/net/ipv4/ip_tunnel.ko \n",
+      "stderr": ""
+    },
+    {
+      "name": "ipip",
+      "command": [
+        "modprobe",
+        "-d",
+        "/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules",
+        "--set-version",
+        "7.0.0-rc2+",
+        "--show-depends",
+        "ipip"
+      ],
+      "returncode": 0,
+      "stdout": "insmod /workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules/lib/modules/7.0.0-rc2+/kernel/net/ipv4/ip_tunnel.ko \ninsmod /workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules/lib/modules/7.0.0-rc2+/kernel/net/ipv4/tunnel4.ko \ninsmod /workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules/lib/modules/7.0.0-rc2+/kernel/net/ipv4/ipip.ko \n",
+      "stderr": ""
+    },
+    {
+      "name": "ip6_tunnel",
+      "command": [
+        "modprobe",
+        "-d",
+        "/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules",
+        "--set-version",
+        "7.0.0-rc2+",
+        "--show-depends",
+        "ip6_tunnel"
+      ],
+      "returncode": 0,
+      "stdout": "insmod /workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules/lib/modules/7.0.0-rc2+/kernel/net/ipv6/tunnel6.ko \ninsmod /workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules/lib/modules/7.0.0-rc2+/kernel/net/ipv6/ip6_tunnel.ko \n",
+      "stderr": ""
+    },
+    {
+      "name": "nf_tables",
+      "command": [
+        "modprobe",
+        "-d",
+        "/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules",
+        "--set-version",
+        "7.0.0-rc2+",
+        "--show-depends",
+        "nf_tables"
+      ],
+      "returncode": 0,
+      "stdout": "insmod /workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules/lib/modules/7.0.0-rc2+/kernel/net/netfilter/nfnetlink.ko \ninsmod /workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules/lib/modules/7.0.0-rc2+/kernel/net/netfilter/nf_tables.ko \n",
+      "stderr": ""
+    },
+    {
+      "name": "nfnetlink",
+      "command": [
+        "modprobe",
+        "-d",
+        "/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules",
+        "--set-version",
+        "7.0.0-rc2+",
+        "--show-depends",
+        "nfnetlink"
+      ],
+      "returncode": 0,
+      "stdout": "insmod /workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules/lib/modules/7.0.0-rc2+/kernel/net/netfilter/nfnetlink.ko \n",
+      "stderr": ""
+    }
+  ],
+  "shim_sha256": "57021180e83d81cce9a1009d277be2a0a1462a77121d906c0035b9f193d6666c",
+  "application_queue_pid": 3653317,
+  "private_otel_queue_pid": 3653318
+}
