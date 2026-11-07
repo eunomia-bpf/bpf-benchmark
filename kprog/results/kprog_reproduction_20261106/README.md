@@ -749,8 +749,23 @@ program is `insn_cnt=1362` = 10896 bytes, so `bpf_fork_v511` matches
 exactly. ELF validation is not at fault either — `st_size` 3926,
 `STT_FUNC`, inside the text section.
 
-katran, cilium, otelcol and tracee have not been attempted on the
-verified arm; each needs its native-only manifest in that runtime first.
+**Katran** also fails on the verified arm
+(`corpus/results/x86_kvm_corpus_20261107_210908_972159`): 0 of 1 replaced,
+`trusted specializer refused native program: Input/output error`. EIO is a
+different signal from tetragon's EINVAL — EINVAL is the service relaying
+its own exception status, EIO is what the client sees when the request
+completes abnormally — so katran's cause is likely in the load step after
+generation rather than in the generator.
+
+cilium, otelcol and tracee have not been attempted on the verified arm;
+each needs its native-only manifest in that runtime first.
+
+| app | verified arm | replacements | failure |
+| --- | --- | ---: | --- |
+| bcc/set | **ok** | **25/25 bound** | — |
+| tetragon | error | 2, then 1 refused | `native helper source stack relation unresolved at 0x9ab: call rax` |
+| katran | error | 0/1 | `refused native program: Input/output error` |
+| tracee, cilium, otelcol | not run | — | need manifests |
 
 ## Earlier unbound-arm context
 
