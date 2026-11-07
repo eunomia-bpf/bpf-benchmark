@@ -1,0 +1,159 @@
+{
+  "recorded": "2026-11-07T14:29:24.454455+00:00",
+  "complete": true,
+  "cases": 13,
+  "passed": 13,
+  "failed": 0,
+  "all_exact_64bit_results_match": true,
+  "retval": 2,
+  "nonzero_generations_min": 1,
+  "nonzero_generations_max": 3,
+  "guest_make_exit": 0,
+  "host_inputs_unchanged": true,
+  "source_identities": {
+    "/workspaces/repository/kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+    "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+    "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+    "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+    "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+    "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "ffcef53c3a6025045b2d75efc96a462efef4ffc8b9204ae0ddc009fb026844d8",
+    "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "ed147232b680be95bbccf3843f1891dbb2a55272772bee3b33f6ed66b448260e",
+    "/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader": "571daa834a86b6660c908c6a5af31844e6e97f3aefecc52abe340ab207d61c5c"
+  },
+  "results": [
+    {
+      "name": "helper_only_uid_gid",
+      "expected_result": 0,
+      "kernel_result": 0,
+      "native_result": 0,
+      "retval": 2,
+      "nonzero_generations": 1,
+      "request_id": 1,
+      "native_sha256": "b9e18bf54b633dfe139660f5912047ecbc2832d4f3f374e0b484153a94c7d44f"
+    },
+    {
+      "name": "helper_chain_simple",
+      "expected_result": 0,
+      "kernel_result": 0,
+      "native_result": 0,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 2,
+      "native_sha256": "cbb37ca9e412a4b42ad0f1556449ab942ad30cdad5ed5371740dba987570c3d4"
+    },
+    {
+      "name": "map_array_lookup",
+      "expected_result": 16045690984503050241,
+      "kernel_result": 16045690984503050241,
+      "native_result": 16045690984503050241,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 3,
+      "native_sha256": "0d9c63a25fdbd64ae506f20febc0d81e8a6ce0a67d68494cb08da6841bf02dd1"
+    },
+    {
+      "name": "map_array_index_packet",
+      "expected_result": 16045690984503098046,
+      "kernel_result": 16045690984503098046,
+      "native_result": 16045690984503098046,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 4,
+      "native_sha256": "7235ce2e930156f4e00d2e76bfaf61cface9b0e6734d3ffdca18fa9ecf4806af"
+    },
+    {
+      "name": "map_hash_lookup",
+      "expected_result": 1234605616436508552,
+      "kernel_result": 1234605616436508552,
+      "native_result": 1234605616436508552,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 5,
+      "native_sha256": "b1e61f0b7b974c6afc5e8ef494150b3510b2ee6b1b3989bd942a6f9a764cf537"
+    },
+    {
+      "name": "map_hash_str_key",
+      "expected_result": 18369614221520256751,
+      "kernel_result": 18369614221520256751,
+      "native_result": 18369614221520256751,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 6,
+      "native_sha256": "364d9f7d4febb344ce64602d8902c438d614e8bfbe5ce58d9a73756b8ebfaa7f"
+    },
+    {
+      "name": "map_percpu_array",
+      "expected_result": 18369614221190019774,
+      "kernel_result": 18369614221190019774,
+      "native_result": 18369614221190019774,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 7,
+      "native_sha256": "5bea9ad073d12b924342527c608a9d4d04c4ebcbfa973070c760e74dde2b6b73"
+    },
+    {
+      "name": "map_lru_hash_counter",
+      "expected_result": 1,
+      "kernel_result": 1,
+      "native_result": 1,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 8,
+      "native_sha256": "bd13a3732a9c76042f07f478c61dd8686fd096e006595625f3296134b667e3a9"
+    },
+    {
+      "name": "map_percpu_hash_counter",
+      "expected_result": 1,
+      "kernel_result": 1,
+      "native_result": 1,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 9,
+      "native_sha256": "f14bb650ac209874d77fe1138e2399f90e17f67c5db07b90fe482f44138801d5"
+    },
+    {
+      "name": "combined_helper_map",
+      "expected_result": 0,
+      "kernel_result": 0,
+      "native_result": 0,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 10,
+      "native_sha256": "e3926285d50e4b779b2e381c002cc311733dedca130ec8d374c6ebf10c8aff12"
+    },
+    {
+      "name": "multi_map_policy",
+      "expected_result": 1311768465173141112,
+      "kernel_result": 1311768465173141112,
+      "native_result": 1311768465173141112,
+      "retval": 2,
+      "nonzero_generations": 3,
+      "request_id": 11,
+      "native_sha256": "1a286a57bd5f9e0a8eac3fd5d18031a18663edd59b1ea0a05eaef615837860ac"
+    },
+    {
+      "name": "packet_5tuple_classify",
+      "expected_result": 3405691582,
+      "kernel_result": 3405691582,
+      "native_result": 3405691582,
+      "retval": 2,
+      "nonzero_generations": 2,
+      "request_id": 12,
+      "native_sha256": "09ec83d0b2adb13e51bf1198de8207e46fb91fe77b7a539a912da96c03e0c965"
+    },
+    {
+      "name": "stats_mixed_helpers",
+      "expected_result": 1,
+      "kernel_result": 1,
+      "native_result": 1,
+      "retval": 2,
+      "nonzero_generations": 3,
+      "request_id": 13,
+      "native_sha256": "f822c41fd59d25ecd241e4101c463db7c7b3ba8b881515e76467038bc0d15664"
+    }
+  ],
+  "archive": "run-post-context.tar.gz",
+  "archive_sha256": "d45989ab618175715a35408d7f65f3b876ac06da4316623ccff98e17c0d8bdb9",
+  "scope": "Functional correctness after C18a/86e; no timing/workload throughput or whole safety claim"
+}

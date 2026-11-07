@@ -46,3 +46,11 @@ kernel, loader or workload rebuild is part of this replay. This is functional
 correctness evidence, not timing; R's existing stage2 timing request stays in
 COORDINATION.md. Earlier13-case bound/prebuilt results remain separate.
 The report does not assert a full O1/O2/O4 proof or six-application completion.
+
+A later independent replay after production context/module repairs
+`18aef1f0c`/`86e0927e9` also passes all13 unchanged cases with exact64-bit
+kernel/native results, retval2 and1-3 nonzero generations. See
+`post-context/README.md`, per-case CSV and untouched raw archive. The existing
+harness now accepts RUN_OUT/--out solely for separate evidence directories;
+default behavior and all inputs/expected values remain unchanged. No timing
+result or whole-application conclusion is added.

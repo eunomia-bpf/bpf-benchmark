@@ -28,4 +28,6 @@ def check():
   assert len(outcomes)==13 and all(r['stage']=='passed' for r in outcomes),'inspect recorded failures'
  finally:
   service.terminate();log.append(service.communicate()[0]);(O/'service.log').write_text(''.join(log))
-p=argparse.ArgumentParser();p.add_argument('mode',choices=['build','check']);a=p.parse_args();(build if a.mode=='build' else check)()
+p=argparse.ArgumentParser();p.add_argument('mode',choices=['build','check']);p.add_argument('--out',type=Path);a=p.parse_args()
+if a.out is not None:O=a.out
+(build if a.mode=='build' else check)()
