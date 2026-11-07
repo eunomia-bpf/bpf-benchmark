@@ -1,0 +1,23 @@
+{
+  "utc": "2026-11-07T17:28:14.992162+00:00",
+  "scope": "private diagnostic kernel build; broad convergence candidate remains unadopted; no termination or O3 acceptance claim",
+  "base_kernel_source_pins": {
+    "include/linux/bpf_verifier.h": "cc21c8c4da376255ac0f232a4076b3997b847886f43299b0d7b7b0c92e12760a",
+    "kernel/bpf/verifier.c": "6bccb2ae3244f1d85ffc4b3e7b0c64acafa9aa78d2955944ae1f1bdc870375a1"
+  },
+  "base_image_sha256": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac",
+  "base_module_sha256": "2ebef5adbcd23e22a2a832900c4b1a47d48dacefbf573329c5518e8559ed3787",
+  "candidate_patch_sha256": "2480264e275e8dafab9f745b36f788075f2d32d373771b3780c1bf0005dcb2f3",
+  "mount_namespace": true,
+  "reuse_existing_kernel_cache": true,
+  "canonical_files_modified": false,
+  "shared_source_image_module_unchanged": true,
+  "candidate_image_sha256": "8502582b6fb810ad0b60186dfcdb32dabae92270a93d4769fcb484a89193a772",
+  "candidate_module_sha256": "5bbcdc74837e241ff1a8ad90248ac79fe67f6d2df422fef63667b2ecbd442929",
+  "candidate_booted": false,
+  "archive": "inputs.tar.gz",
+  "archive_sha256": "d824fc7cd77840114b3e92d9eb2569159bdbe722f9e512d5f2e7b35f864f1134",
+  "build_exit": 0,
+  "candidate_booted_at_build_publication": false,
+  "admission_test": "separate load-only diagnostic running; no acceptance claim"
+}

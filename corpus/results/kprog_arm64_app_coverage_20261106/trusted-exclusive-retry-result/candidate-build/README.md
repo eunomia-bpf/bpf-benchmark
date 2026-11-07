@@ -1,0 +1,5 @@
+# Isolated ARM exclusive-retry candidate kernel build
+
+The private diagnostic kernel and all eleven kinsn modules build successfully using the existing ARM Kbuild cache. No clean rebuild was performed. A private mount namespace bound the copied cache and two candidate source files to their original paths; the canonical source, Image and module hashes remained unchanged after the build. Kernel configuration, candidate source/patch, exact commands and complete build log are archived in `inputs.tar.gz`; exact base and resulting binary hashes are in `summary.json`. The candidate binary remains in the lane-owned build cache.
+
+This broad state-convergence candidate is not adopted. Compilation does not prove bounded termination or O3. The ARM exclusive-outcome model still permits failure on every attempt, and the existing region/epoch condition is not a retry-scope or progress witness. A separate nine-case native-only, load-only guest diagnostic is running, including two marked unbounded cycles with syntactic exits. No candidate application result, unsafe execution, safety acceptance or all-six-app completion is claimed here.
