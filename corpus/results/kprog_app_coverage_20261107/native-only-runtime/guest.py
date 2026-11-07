@@ -44,11 +44,15 @@ with tempfile.TemporaryDirectory(prefix='.live-',dir=O) as directory, tempfile.T
   # on exit, so a failed run otherwise leaves no diagnosis behind. Keep the
   # terminal records beside the results.
   retained=[]
-  if state.is_dir():
+  root=state.parent if state.is_dir() else None
+  if root is not None and root.is_dir():
+   # The service writes beside --state, not only inside requests/.
    keep=O/('trusted-state-'+summary['started'].replace(':','').replace('-','')[:15])
-   for item in sorted(state.iterdir()):
-    if item.suffix in ('.json','.jsonl') or item.name.endswith('.failure.tar.gz'):
-     keep.mkdir(parents=True,exist_ok=True);shutil.copy2(item,keep/item.name);retained.append(item.name)
+   for item in sorted(root.rglob('*')):
+    if item.is_file() and (item.suffix in ('.json','.jsonl') or item.name.endswith('.failure.tar.gz')):
+     rel=item.relative_to(root);keep.mkdir(parents=True,exist_ok=True)
+     (keep/rel).parent.mkdir(parents=True,exist_ok=True);shutil.copy2(item,keep/rel)
+     retained.append(str(rel))
   summary['retained_service_state']=str(keep) if retained else None
   summary['retained_service_files']=sorted(retained)
   log.close();summary['finished']=datetime.now(timezone.utc).isoformat()
