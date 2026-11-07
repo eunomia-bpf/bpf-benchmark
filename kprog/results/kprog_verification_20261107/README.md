@@ -2718,3 +2718,33 @@ The archived first count-decoder elaboration failure was corrected without
 changing a theorem premise. Memory-source BMI forms, remaining operations,
 whole-ISA coverage and compiled O2/O4 remain open. The next full check will
 use a new published snapshot; the prior a076 full pass remains separate.
+
+
+### Full 9e7f86146 check and actual bit-operation flags
+
+The complete `make check` at immutable published
+`9e7f86146306fe75089391470d9a04dc22aebbdb` finished with actual exit 0 and
+queue exit 0. All 1,140 selected source hashes were independently verified
+against published Git blobs. It includes classic ROR, register BMI2 and C's
+RORX extraction; the new bit-operation lift below comes later. Shared vendor
+submodules and warm copied caches were used. The export was deleted; full
+logs, commands, manifest and CPU trace are archived, with later drift listed.
+
+ANDN, BZHI, BT and BT_IMM now compose their actual raw fields and register
+frame through the same dispatcher. Legal 32/64-bit ANDN/BZHI and 16/32/64-bit
+BT forms cover every GPR, RSP/STACK projection and operand alias. ANDN's
+production shared logic macro writes PF parity, whereas canonical PF/AF are
+undefined. The model retains that real write. The dispatcher theorem now
+returns the actual transition and the existing canonical `Step` relation;
+all earlier per-operation exact equality proofs remain. No ISA mask or
+production handler changed, and no output/state equality is a premise.
+
+Focused 113-module and complete default Lean builds passed; seven axiom
+audits contain no proof placeholders. Four generator checks and existing
+UBSan route oracles passed 356,404 ANDN, 356,405 BZHI and 534,606 BT cases.
+The ANDN oracle now plants opposite PF parity and checks preserved AF, adding
+a missing real-behavior assertion without dropping any old case. A private
+control omitting only the PF assignment was rejected with 10,800 differences;
+every difference was independently verified to be PF alone. Original failed
+elaborations and corrected source hashes are retained. Remaining opcodes,
+memory routes and compiled O2/O4 are still open.

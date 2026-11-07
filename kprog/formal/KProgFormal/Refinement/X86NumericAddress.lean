@@ -1116,4 +1116,131 @@ theorem bmi_shift_register_frame_refines (env : Environment) (frame : Frame) (ar
         (nativeRegisters env frame arena state) :=
   bmi_register_frame_refines env frame arena state width kind dst src (.register count) nextPc
 
+/-- ANDN's actual shared logic macro writes PF as well as CF/ZF/SF/OF.
+The ISA leaves PF undefined; the raw model must still retain the real write. -/
+def andnFlags (width : Reference.X86.BzhiWidth) (result old : NativeWord) : NativeWord :=
+  Reference.X86.setFlag (X86Bzhi.liftFlags old (generatedX86AndnFlags result (X86Bzhi.handlerWidth width)))
+    2 (GeneratedX86AuxFlags.parity result)
+
+private theorem andn_parity_mask (flags : NativeWord) (pf : Bool) :
+    Reference.X86.setFlag flags 2 pf &&& 0xffffffffffffffeb = flags &&& 0xffffffffffffffeb := by
+  simp only [Reference.X86.setFlag, NativeWord, Reference.Word]
+  bv_decide
+
+theorem andn_flags_observed (width : Reference.X86.BzhiWidth) (result old : NativeWord) :
+    andnFlags width result old &&& 0xffffffffffffffeb =
+      X86Bzhi.liftFlags old (generatedX86AndnFlags result (X86Bzhi.handlerWidth width)) &&& 0xffffffffffffffeb :=
+  andn_parity_mask _ _
+
+def andnRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst first second : Reference.X86.Register) (nextPc : NativeWord) : RegisterState :=
+  let result := generatedX86AndnResult (registerValue env frame arena state first)
+    (registerValue env frame arena state second)
+  let scalar := match width with | .w32 => Reference.X86.ScalarWidth.w32 | .w64 => .w64
+  registerPc (registerFlags (writeRegister env frame arena state scalar (.low dst) result)
+    (andnFlags width result state.raw.rflags)) nextPc
+
+/-- Exact raw writeback, with the production PF assignment explicitly retained.
+The following refinement uses the canonical defined-output mask, not equality
+with a selected value of an architecturally undefined flag. -/
+theorem andn_register_frame_matches (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst first second : Reference.X86.Register) (nextPc : NativeWord) :
+    let expected := X86Andn.handlerStep width dst first (.register second) nextPc
+      (nativeRegisters env frame arena state) .scalar;
+    (⟨nativeRegisters env frame arena (andnRegister env frame arena state width dst first second nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      { expected with state := { expected.state with rflags := (andnFlags width
+        (generatedX86AndnResult (registerValue env frame arena state first)
+          (registerValue env frame arena state second)) state.raw.rflags) } } := by
+  unfold andnRegister
+  rw [native_register_pc, native_register_flags, native_register_write]
+  simp only [X86Andn.handlerStep, X86Bt.readOperand, nativeRegisters]
+  congr 1
+  congr 1
+  funext r
+  by_cases same : r = dst
+  · subst r
+    simp only [Reference.X86.RegisterSlice.reg, ↓reduceIte]
+    rw [← X86Scalar.register_write_refines]
+    cases width <;> rfl
+  · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
+
+theorem andn_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst first second : Reference.X86.Register) (nextPc : NativeWord) :
+    Reference.X86.Step (.andn width dst first (.register second) nextPc) (nativeRegisters env frame arena state)
+      ⟨nativeRegisters env frame arena (andnRegister env frame arena state width dst first second nextPc), [], none⟩ := by
+  rw [andn_register_frame_matches]
+  unfold Reference.X86.Step
+  rw [← X86Andn.step_refines width dst first (.register second) nextPc
+    (nativeRegisters env frame arena state) .scalar]
+  simp only [Reference.X86.matchesTransition, X86Andn.handlerStep, X86Bt.readOperand,
+    Reference.X86.definedFlags, Reference.X86.observedRegisters, Option.isSome_none, Bool.false_eq_true,
+    ↓reduceIte]
+  refine ⟨trivial, trivial, ?_⟩
+  congr 1
+  exact (andn_flags_observed width _ _).symm
+
+/-- BZHI samples the low count byte before the destination writer and writes
+exactly CF/ZF/SF/OF; unlike the shared ANDN macro it leaves PF untouched. -/
+def bzhiRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst src count : Reference.X86.Register) (nextPc : NativeWord) : RegisterState :=
+  let source := registerValue env frame arena state src
+  let amount := registerValue env frame arena state count &&& 0xff
+  let result := generatedX86BzhiResult source amount (X86Bzhi.handlerWidth width)
+  let flags := generatedX86BzhiFlags amount result (X86Bzhi.handlerWidth width)
+  let scalar := match width with | .w32 => Reference.X86.ScalarWidth.w32 | .w64 => .w64
+  registerPc (registerFlags (writeRegister env frame arena state scalar (.low dst) result)
+    (X86Bzhi.liftFlags state.raw.rflags flags)) nextPc
+
+theorem bzhi_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst src count : Reference.X86.Register) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (bzhiRegister env frame arena state width dst src count nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.bzhi width dst (.register src) count nextPc) (nativeRegisters env frame arena state) := by
+  rw [← X86Bzhi.step_refines width dst (.register src) count nextPc (nativeRegisters env frame arena state) .scalar]
+  unfold bzhiRegister
+  rw [native_register_pc, native_register_flags, native_register_write]
+  simp only [X86Bzhi.handlerStep, X86Bt.readOperand, nativeRegisters]
+  congr 1
+  congr 1
+  funext r
+  by_cases same : r = dst
+  · subst r
+    simp only [Reference.X86.RegisterSlice.reg, ↓reduceIte]
+    rw [← X86Scalar.register_write_refines]
+    cases width <;> rfl
+  · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
+
+/-- BT changes only CF: neither register values/tags nor memory are written. -/
+def bitTestRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth)
+    (base : Reference.X86.Register) (index nextPc : NativeWord) : RegisterState :=
+  let cf := generatedX86BtCf (registerValue env frame arena state base) index (X86Cmov.handlerWidth width)
+  registerPc (registerFlags state (Reference.X86.setFlag state.raw.rflags 0 cf)) nextPc
+
+theorem bit_test_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth)
+    (base index : Reference.X86.Register) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (bitTestRegister env frame arena state width base
+        (registerValue env frame arena state index) nextPc), [], none⟩ : Transition Reference.X86.State) =
+      Reference.X86.step (.bt width (.register base) (.register index) nextPc) (nativeRegisters env frame arena state) := by
+  change _ = Reference.X86.step (X86Bt.instruction width (.registers base index) nextPc) _
+  rw [← X86Bt.step_refines]
+  rfl
+
+theorem bit_test_immediate_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth)
+    (base : Reference.X86.Register) (index : Byte) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (bitTestRegister env frame arena state width base
+        (index.setWidth 64) nextPc), [], none⟩ : Transition Reference.X86.State) =
+      Reference.X86.step (.bt width (.register base) (.immediate index) nextPc) (nativeRegisters env frame arena state) := by
+  change _ = Reference.X86.step (X86Bt.instruction width (.immediate base index) nextPc) _
+  rw [← X86Bt.step_refines]
+  rfl
+
 end KProgFormal.Refinement.X86NumericAddress

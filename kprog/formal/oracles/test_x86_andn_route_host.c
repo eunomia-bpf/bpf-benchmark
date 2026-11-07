@@ -143,6 +143,8 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 	__u8 mzf;
 	__u8 msf;
 	__u8 mof;
+	__u8 mpf = 1U;
+	__u8 maf;
 
 	X86_SIM_L_DECLARE_STATE();
 	struct x86_sim_xdp_abi __x86_sim_abi = {};
@@ -204,6 +206,14 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 	mzf = (__u8)(masked == 0U);
 	msf = (__u8)((masked >> (w * 8U - 1U)) & 1U);
 	mof = 0U;
+	/* Catch a missing PF write in the shared logic macro, even though PF
+	 * is architecturally undefined for ANDN. AF must remain untouched.
+	 * Plant PF opposite the independently counted low-byte parity. */
+	for (i = 0; i < 8U; i++)
+		mpf ^= (__u8)((masked >> i) & 1U);
+	maf = (__u8)((src1_reg ^ aux_reg ^ dst_reg ^ flags ^ via_dispatch) & 1U);
+	__x86_pf = mpf ^ 1U;
+	__x86_af = maf;
 
 	/* ---- run the real body ---- */
 	if (op_is_mem) {
@@ -250,13 +260,13 @@ static void check_step(unsigned op_is_mem, unsigned flags, unsigned aux_width,
 	/* ---- compare the flags ---- */
 	cases++;
 	if (__x86_cf != mcf || __x86_zf != mzf || __x86_sf != msf ||
-	    __x86_of != mof) {
+	    __x86_of != mof || __x86_pf != mpf || __x86_af != maf) {
 		printf("MISMATCH mem=%u flags=%u auxw=%u src1=%u dst=%u "
-		       "disp=%lld flags: got cf=%u zf=%u sf=%u of=%u "
-		       "want cf=%u zf=%u sf=%u of=%u\n",
+		       "disp=%lld flags: got cf=%u zf=%u sf=%u of=%u pf=%u af=%u "
+		       "want cf=%u zf=%u sf=%u of=%u pf=%u af=%u\n",
 		       op_is_mem, flags, aux_width, src1_reg, dst_reg,
-		       (long long)disp, __x86_cf, __x86_zf, __x86_sf, __x86_of,
-		       mcf, mzf, msf, mof);
+		       (long long)disp, __x86_cf, __x86_zf, __x86_sf, __x86_of, __x86_pf, __x86_af,
+		       mcf, mzf, msf, mof, mpf, maf);
 		failures++;
 	}
 }

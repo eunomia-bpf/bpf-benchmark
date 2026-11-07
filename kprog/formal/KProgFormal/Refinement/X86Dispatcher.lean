@@ -508,6 +508,31 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
         pure ⟨nativeRegisters env frame arena
           (rotateRightRegister env frame arena state width destination value nextPc), [], none⟩
+      else if code = GeneratedX86DispatchSingleton.code .andn then do
+        let width ← bswapWidthOf flags
+        let destination ← registerOf dst
+        let first ← registerOf src
+        let second ← registerOf (aux.setWidth 8)
+        pure ⟨nativeRegisters env frame arena
+          (andnRegister env frame arena state width destination first second nextPc), [], none⟩
+      else if code = GeneratedX86DispatchSingleton.code .bzhi then do
+        let width ← bswapWidthOf flags
+        let destination ← registerOf dst
+        let source ← registerOf src
+        let count ← registerOf (aux.setWidth 8)
+        pure ⟨nativeRegisters env frame arena
+          (bzhiRegister env frame arena state width destination source count nextPc), [], none⟩
+      else if code = GeneratedX86DispatchSingleton.code .bt then do
+        let width ← cmovWidthOf flags
+        let base ← registerOf dst
+        let index ← registerOf src
+        pure ⟨nativeRegisters env frame arena
+          (bitTestRegister env frame arena state width base (registerValue env frame arena state index) nextPc), [], none⟩
+      else if code = GeneratedX86DispatchSingleton.code .btImm then do
+        let width ← cmovWidthOf flags
+        let base ← registerOf dst
+        pure ⟨nativeRegisters env frame arena
+          (bitTestRegister env frame arena state width base value nextPc), [], none⟩
       else if code = GeneratedX86DispatchSingleton.code .imulImm then do
         let width ← cmovWidthOf flags
         let destination ← registerOf dst
@@ -553,6 +578,28 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
   | move (code : Nat) (native : Reference.X86.Instruction)
       (fields : MoveBinding flags aux dst src value nextPc code native) :
       RegisterBinding flags aux dst src value nextPc nativeState code native
+  | andn (width : Reference.X86.BzhiWidth) (destination first second : Register)
+      (widthField : WidthBinding flags (bswapScalarWidth width))
+      (dstField : dst = registerByte destination) (srcField : src = registerByte first)
+      (secondField : aux = BitVec.ofNat 32 second.val) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86DispatchSingleton.code .andn)
+        (.andn width destination first (.register second) nextPc)
+  | bzhi (width : Reference.X86.BzhiWidth) (destination source count : Register)
+      (widthField : WidthBinding flags (bswapScalarWidth width))
+      (dstField : dst = registerByte destination) (srcField : src = registerByte source)
+      (countField : aux = BitVec.ofNat 32 count.val) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86DispatchSingleton.code .bzhi)
+        (.bzhi width destination (.register source) count nextPc)
+  | bitTest (width : Reference.X86.CmovWidth) (base index : Register)
+      (widthField : WidthBinding flags (cmovScalarWidth width))
+      (dstField : dst = registerByte base) (srcField : src = registerByte index) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86DispatchSingleton.code .bt)
+        (.bt width (.register base) (.register index) nextPc)
+  | bitTestImmediate (width : Reference.X86.CmovWidth) (base : Register) (encoded : Byte)
+      (widthField : WidthBinding flags (cmovScalarWidth width))
+      (dstField : dst = registerByte base) (indexField : value = encoded.setWidth 64) :
+      RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86DispatchSingleton.code .btImm)
+        (.bt width (.register base) (.immediate encoded) nextPc)
   | bmiShift (width : Reference.X86.BzhiWidth) (kind : Reference.X86.BmiShift)
       (destination source count : Register)
       (widthField : WidthBinding flags (bswapScalarWidth width))
@@ -744,21 +791,69 @@ theorem rotate_cl_binding (env : EntryEnvironment.Environment) (frame : EntryEnv
         (Reference.X86.scalarRegisterValue (nativeRegisters env frame arena state) .w8 (.low 1)) nextPc) :=
   .rotateCl width destination widthField dstField (rotate_right_cl_operand env frame arena state)
 
+/-- Exact equality with the executable representative is sufficient for the
+canonical relation. The raw dispatcher also admits actual defined-output
+refinement when an implementation writes architecturally undefined flags. -/
+private theorem exact_dispatch_refines {native : Reference.X86.Instruction} {before : Reference.X86.State}
+    {dispatched : Option (Transition Reference.X86.State)}
+    (same : dispatched = some (Reference.X86.step native before)) :
+    ∃ actual, dispatched = some actual ∧ Reference.X86.Step native before actual :=
+  ⟨Reference.X86.step native before, same, rfl, rfl, rfl⟩
+
 /-- One complete raw-frame step for the currently lifted register opcodes:
-NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG/ROR(imm8+CL)/SHIFTX/RORX plus logical/arithmetic/unary/multiply/shift ALU-register
+NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG/ROR(imm8+CL)/SHIFTX/RORX/ANDN/BZHI/BT plus logical/arithmetic/unary/multiply/shift ALU-register
 and immediate family payloads and CMP/TEST register/immediate forms. Neither component handler
 semantics nor a chosen condition/value/state equation is assumed. This is a
-partial dispatcher theorem, not all77 operations or a compiled-body claim. -/
+partial dispatcher theorem, not all77 operations or a compiled-body claim.
+It returns the actual transition and canonical Step relation, retaining real
+ANDN parity writes without constraining architecturally undefined PF/AF. -/
 theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
     (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
     (binding : RegisterBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
-    dispatchRegisters env frame arena code flags aux dst src value nextPc state =
-      some (Reference.X86.step native (nativeRegisters env frame arena state)) := by
+    ∃ actual, dispatchRegisters env frame arena code flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
   cases binding with
   | move code native fields =>
+      apply exact_dispatch_refines
       simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
+  | andn width destination first second widthField dstField srcField secondField =>
+      subst dst; subst src; subst aux
+      have widthDecoded := bswap_width_binding_decodes flags width widthField
+      have secondDecoded : registerOf (BitVec.ofNat 8 second.val) = some second := register_of_byte second
+      refine ⟨⟨nativeRegisters env frame arena
+        (andnRegister env frame arena state width destination first second nextPc), [], none⟩, ?_, ?_⟩
+      · simp [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+          GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+          widthDecoded, register_of_byte, secondDecoded]
+      · exact andn_register_frame_refines env frame arena state width destination first second nextPc
+  | bzhi width destination source count widthField dstField srcField countField =>
+      apply exact_dispatch_refines
+      subst dst; subst src; subst aux
+      have widthDecoded := bswap_width_binding_decodes flags width widthField
+      have countDecoded : registerOf (BitVec.ofNat 8 count.val) = some count := register_of_byte count
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, register_of_byte, countDecoded] using
+        congrArg some (bzhi_register_frame_refines env frame arena state width destination source count nextPc)
+  | bitTest width base index widthField dstField srcField =>
+      apply exact_dispatch_refines
+      subst dst; subst src
+      have widthDecoded := cmov_width_binding_decodes flags width widthField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, register_of_byte] using
+        congrArg some (bit_test_register_frame_refines env frame arena state width base index nextPc)
+  | bitTestImmediate width base encoded widthField dstField indexField =>
+      apply exact_dispatch_refines
+      subst dst
+      have widthDecoded := cmov_width_binding_decodes flags width widthField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, register_of_byte, indexField] using
+        congrArg some (bit_test_immediate_frame_refines env frame arena state width base encoded nextPc)
   | bmiShift width kind destination source count widthField dstField srcField countField ordinary operationField =>
+      apply exact_dispatch_refines
       subst dst; subst src; subst aux
       have widthDecoded := bswap_width_binding_decodes flags width widthField
       have kindDecoded := bmi_shift_kind_decodes kind _ ordinary operationField
@@ -769,6 +864,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         widthDecoded, register_of_byte, countDecoded, kindDecoded] using
         congrArg some (bmi_shift_register_frame_refines env frame arena state width kind destination source count nextPc)
   | rorx width destination source encoded widthField dstField srcField countField =>
+      apply exact_dispatch_refines
       subst dst; subst src
       have widthDecoded := bswap_width_binding_decodes flags width widthField
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
@@ -776,6 +872,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         widthDecoded, register_of_byte, countField, Reference.X86.countValue] using
         congrArg some (bmi_register_frame_refines env frame arena state width .rotate destination source (.immediate encoded) nextPc)
   | rotateImmediate width destination encoded widthField dstField countField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have dstDecoded := slice_binding_decodes width dst _ destination dstField
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
@@ -784,6 +881,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         congrArg some (rotate_right_register_frame_refines env frame arena state width destination
           (encoded.setWidth 64) (encoded.setWidth 64) nextPc rfl)
   | rotateCl width destination widthField dstField countField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have dstDecoded := slice_binding_decodes width dst _ destination dstField
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
@@ -793,6 +891,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
           (Reference.X86.scalarRegisterValue (nativeRegisters env frame arena state) .w8 (.low 1))
           (Reference.X86.scalarRegisterValue (nativeRegisters env frame arena state) .w8 (.low 1)) nextPc rfl)
   | shiftImmediate op width kind destination familyField operationField widthField dstField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have kindDecoded := shift_kind_binding_decodes _ kind operationField
       have separate := shift_payload_separate _ kind operationField
@@ -805,6 +904,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
           (GeneratedX86Immediate.value value (X86Scalar.handlerWidth width)) ((value.setWidth 8).setWidth 64)
           nextPc (shift_immediate_count width value))
   | shiftRegister op width kind destination familyField operationField widthField dstField srcField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have kindDecoded := shift_kind_binding_decodes _ kind operationField
       have separate := shift_payload_separate _ kind operationField
@@ -819,6 +919,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
           (Reference.X86.scalarRegisterValue (nativeRegisters env frame arena state) .w8 (.low 1))
           nextPc (shift_register_count env frame arena state width 1))
   | multiplyRegister op width destination source familyField operationField widthField dstField srcField =>
+      apply exact_dispatch_refines
       subst dst; subst src
       have widthDecoded := width_binding_decodes flags (cmovScalarWidth width) widthField
       have wideDecoded := cmov_width_binding_decodes flags width widthField
@@ -833,6 +934,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         register_of_byte, Reference.X86.RegisterSlice.reg] using
         congrArg some (multiply_register_frame_refines env frame arena state width destination source nextPc)
   | multiplyAluImmediate op width destination familyField operationField widthField dstField =>
+      apply exact_dispatch_refines
       subst dst
       have widthDecoded := width_binding_decodes flags (cmovScalarWidth width) widthField
       have wideDecoded := cmov_width_binding_decodes flags width widthField
@@ -847,6 +949,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         Reference.X86.RegisterSlice.reg] using
         congrArg some (multiply_alu_immediate_frame_refines env frame arena state width destination value nextPc)
   | multiplyImmediate width destination source encoded widthField dstField srcField immediateField =>
+      apply exact_dispatch_refines
       subst dst; subst src
       have decoded := cmov_width_binding_decodes flags width widthField
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
@@ -854,6 +957,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         decoded, register_of_byte] using
         congrArg some (multiply_immediate_frame_refines env frame arena state width destination source value encoded nextPc immediateField)
   | unaryImmediate op width kind destination familyField operationField widthField dstField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have kindDecoded := unary_kind_binding_decodes _ kind operationField
       have separate := unary_payload_separate _ kind operationField
@@ -864,6 +968,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         widthDecoded, kindDecoded, separate.1, separate.2.1, dstDecoded] using
         congrArg some (unary_register_frame_refines env frame arena state width kind destination nextPc)
   | unaryRegister op width kind destination familyField operationField widthField dstField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have kindDecoded := unary_kind_binding_decodes _ kind operationField
       have separate := unary_payload_separate _ kind operationField
@@ -874,6 +979,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         widthDecoded, kindDecoded, separate.1, separate.2.1, dstDecoded] using
         congrArg some (unary_register_frame_refines env frame arena state width kind destination nextPc)
   | arithmeticImmediate op width kind destination nativeValue familyField writing operationField widthField dstField immediateField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have kindDecoded := arithmetic_kind_binding_decodes _ kind writing operationField
       have separate := arithmetic_payload_separate _ kind operationField
@@ -884,6 +990,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         widthDecoded, kindDecoded, separate.1, dstDecoded] using
         congrArg some (arithmetic_immediate_frame_refines env frame arena state width kind destination value nativeValue nextPc writing immediateField)
   | arithmeticRegister op width kind destination source familyField writing operationField widthField dstField srcField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have kindDecoded := arithmetic_kind_binding_decodes _ kind writing operationField
       have separate := arithmetic_payload_separate _ kind operationField
@@ -895,6 +1002,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         widthDecoded, kindDecoded, separate.1, dstDecoded, srcDecoded] using
         congrArg some (arithmetic_register_frame_refines env frame arena state width kind destination source nextPc writing)
   | logicImmediate op width kind destination nativeValue familyField writing operationField widthField dstField immediateField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have kindDecoded := logic_kind_binding_decodes _ kind writing operationField
       have dstDecoded := slice_binding_decodes width dst _ destination dstField
@@ -904,6 +1012,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         widthDecoded, kindDecoded, dstDecoded] using
         congrArg some (logic_immediate_frame_refines env frame arena state width kind destination value nativeValue nextPc immediateField)
   | compareImmediate width destination nativeValue widthField dstField immediateField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have dstDecoded := slice_binding_decodes width dst _ destination dstField
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled,
@@ -911,6 +1020,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         widthDecoded, dstDecoded] using
         congrArg some (compare_immediate_frame_refines env frame arena state width destination value nativeValue nextPc immediateField)
   | testImmediate width destination nativeValue widthField dstField immediateField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have dstDecoded := slice_binding_decodes width dst _ destination dstField
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled,
@@ -918,6 +1028,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         widthDecoded, dstDecoded] using
         congrArg some (logic_immediate_frame_refines env frame arena state width .test destination value nativeValue nextPc immediateField)
   | logicRegister op width kind destination source familyField writing operationField widthField dstField srcField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have kindDecoded := logic_kind_binding_decodes _ kind writing operationField
       have dstDecoded := slice_binding_decodes width dst _ destination dstField
@@ -928,6 +1039,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         widthDecoded, kindDecoded, dstDecoded, srcDecoded] using
         congrArg some (logic_register_body_refines env frame arena state width kind dst src aux destination source nextPc operationField dstField srcField)
   | compareRegister width destination source widthField dstField srcField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have dstDecoded := slice_binding_decodes width dst _ destination dstField
       have srcDecoded := slice_binding_decodes width src _ source srcField
@@ -936,6 +1048,7 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         widthDecoded, dstDecoded, srcDecoded] using
         congrArg some (compare_register_frame_refines env frame arena state width destination source nextPc)
   | testRegister width destination source widthField dstField srcField =>
+      apply exact_dispatch_refines
       have widthDecoded := width_binding_decodes flags width widthField
       have dstDecoded := slice_binding_decodes width dst _ destination dstField
       have srcDecoded := slice_binding_decodes width src _ source srcField
@@ -944,24 +1057,28 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         widthDecoded, dstDecoded, srcDecoded] using
         congrArg some (logic_register_frame_refines env frame arena state width .test destination source nextPc)
   | cmov width cc destination source widthField dstField srcField conditionField =>
+      apply exact_dispatch_refines
       subst dst; subst src; subst aux
       have decoded := cmov_width_binding_decodes flags width widthField
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
         GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
         congrArg some (conditional_move_word_frame_refines env frame arena state width cc destination source nextPc)
   | byteSwap width destination widthField dstField =>
+      apply exact_dispatch_refines
       subst dst
       have decoded := bswap_width_binding_decodes flags width widthField
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
         GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
         congrArg some (byte_swap_register_frame_refines env frame arena state width destination nextPc)
   | populationCount width destination source widthField dstField srcField =>
+      apply exact_dispatch_refines
       subst dst; subst src
       have decoded := cmov_width_binding_decodes flags width widthField
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
         GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
         congrArg some (population_count_register_frame_refines env frame arena state width destination source nextPc)
   | exchange width destination source widthField dstField srcField =>
+      apply exact_dispatch_refines
       subst dst; subst src
       have decoded := width_binding_decodes flags width widthField
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
