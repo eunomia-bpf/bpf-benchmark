@@ -1798,7 +1798,11 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         }
         if (log_size != 0) {
             message += "\nverifier log:\n";
-            message.append(verifier_log.data(), log_size);
+            // Preserve every log segment through exception.what() consumers:
+            // embedded NULs would otherwise hide all following diagnostics.
+            for (size_t i = 0; i < log_size; ++i) {
+                message += verifier_log[i] ? verifier_log[i] : char(10);
+            }
         }
         message += native_lab_kernel_log_tail();
         fail(message);
