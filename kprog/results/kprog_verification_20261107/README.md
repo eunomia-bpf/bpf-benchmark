@@ -304,3 +304,29 @@ cases; actual FMOV and two reduction route hosts passed 127,016, 11,223 and
 21 cases. The FMOV route suite includes all32 banks, NONE and invalid bank
 controls. A new immutable full check follows publication; exact0afcda79c's
 successful full result above precedes this increment.
+
+## BITFIELD packed fields and dispatcher
+
+`Arm64Bitfield.packed_fields` composes the existing generated AUX packer and
+byte extractors: the five operation codes, LSB and bit count round-trip without
+interference from one another or the unused high byte. `rawStep` consumes those
+actual fields through the generated bitfield value and width-specific register
+write. `dispatch_refines` composes numeric opcode18, kind decoding and the old
+full-state theorem against the same canonical ISA. Invalid kind bytes and other
+operation codes retain the unsupported/no-result branch.
+
+The existing typed native instruction supplies field bounds; no runtime bounds
+guard is inserted. W/X narrowing, GPR/ZR and source/destination aliases preserve
+the same complete numeric state and empty effects. Native byte/operand/flag and
+Entry/O4 transport remain separate. Only the five currently implemented aliases
+are covered; no extra ISA operation or compiled-artifact certificate is invented.
+Every prior theorem remains unchanged.
+
+Validation: 28 Lean/reference dependency jobs passed, plus the existing reference
+regressions including 3860 control/PC-address states and 959 addressed/vector
+states with 18 precise rejects. Four generated-contract freshness checks passed.
+Existing independent bitfield semantics checked 126,246 cases; actual AUX and
+singleton route hosts checked 1,115,374 and 11,083 cases. Initial proof attempts
+failed on argument parentheses and a free-variable decide goal; explicit field
+proofs fixed these without changing any premise or filtering inputs. Current
+combined full validation is recorded separately from the earlier tail source.
