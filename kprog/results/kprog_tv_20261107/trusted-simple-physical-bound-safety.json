@@ -1,0 +1,89 @@
+{
+  "status": "exact_bound_B_and_ordinary_declared_physical_BPF_soundness_imply_all_native_real_base_prefix_events_checked_under_explicit_invocation_premises",
+  "utc": "2026-11-07T15:28:19.820591+00:00",
+  "program": "declared physical interpretation of pinned accepted simple b61f291a8 B37",
+  "theorems": [
+    "KProgTV.TrustedSimplePlatform.bound_physical_instruction_relation_eq",
+    "KProgTV.TrustedSimplePlatform.bound_physical_execution_iff",
+    "KProgTV.TrustedSimplePlatform.bound_native_effects_checked_from_physical_B"
+  ],
+  "claims": [
+    "Exact bound virtual proof bytes give the ordinary declared physical BPF instruction relation and all finite executions with unchanged full endpoints and traces.",
+    "Assumed verifier soundness stated on that ordinary physical BPF interpretation plus actual acceptance/full Artifact binding yields checked events for every actual-base native payload prefix.",
+    "The generic theorem is specialized to the exact accepted artifact only inside the proof; no production admission check, artifact field substitution or second ISA is introduced."
+  ],
+  "premises": [
+    "exact full executed=validated Artifact binding (native bytes, proof bytes, relative entry0, ABI and specialization metadata)",
+    "actual verifier acceptance/admitted B entry; explicit verifier soundness on the declared physical BPF interpretation",
+    "actual nativePC=codebase; B entryPC0 active; nativeRDI=B r1, initial memory equal",
+    "native SP proof input, private spill/reload permissions and context/private-frame separation as in the native payload certificate",
+    "the existing declared XDP conversion map; actual kernel/profile/physical ABI correspondence remains separate"
+  ],
+  "not_yet_claimed": [
+    "the derived physical image is a historical post-conversion kernel capture or the old capture pins its kernel binary",
+    "physical invocation/entry-return ABI premises are established or strict native-block full-state TV is discharged",
+    "validation against the concurrently edited F reference decoder working tree",
+    "other micro/application whole-program certificates or unconditional whole-ELF safety"
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-safety-certificate trusted-simple-platform-certificate",
+    "exit": 0,
+    "reproduction": "make -C kprog/tv trusted-simple-platform-certificate",
+    "unchanged_safety_reused": true,
+    "binding_mismatch_controls_rejected": 22,
+    "materialization_controls_rejected": 28,
+    "axiom_audit": {
+      "KProgTV.TrustedSimplePlatform.bound_physical_instruction_relation_eq": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimplePlatform.bound_physical_execution_iff": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimplePlatform.bound_native_effects_checked_from_physical_B": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "no_sorryAx": true,
+    "current_log_sha256": "5d4b8ebce7172da305cf4f5ce6cc657ef4d9d78a651d19adc6faf05a8e6dcbea",
+    "combined_log_sha256": "30bebf56a40e43e6f71511369d1babf6a9d26de96b16c5a0134e025a7b58e7a2"
+  },
+  "compatibility": {
+    "old_Platform_declarations": "byte-identical prefix and audits retained",
+    "old_Safety_CFG_ISA_Makefile": "unchanged by T"
+  },
+  "kernel_layout_receipt_sha256": "a25ba781b1dd4896d3a9e2e3f6dd0b5a6bcd65e698a75b8bf279265ce5e4a0e6",
+  "trusted": [
+    "single existing BPF/reference memory semantics and explicit platform interpretation",
+    "Lean kernel and reported logical axioms",
+    "kernel conversion implementation/provenance and actual invocation facts remain separate (current compiled layout receipt is structural supporting evidence)"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "f0b9694a7f256928e83c688f0ac0f4b3101eb8906b7efc0e9dee0b8920167ac6",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/TrustedSimpleSafety.lean": "5537b0f4d04c5b5ebec988c1cb9c63175e9b786d95495265f3273675f82f3bea",
+    "kprog/tv/Makefile": "600673dfc99ec00d9ae932014cbc141e9645229f68c9fadc2a3f1f41ecc54504",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa",
+    "kprog/tv/TrustedSimplePlatform.lean": "1bfe67bb10353fca860197907738815bea87995a0ecb8211d0836e0d6f236f9f"
+  },
+  "source_snapshot": {
+    "dependency_commit": "71b66593d74a8ed57eb99ea39523f5c337a736d3",
+    "own_proof_path": "kprog/tv/TrustedSimplePlatform.lean",
+    "concurrent_foreign_worktree_excluded": [
+      "kprog/formal/KProgFormal/Reference/X86.lean"
+    ],
+    "cache": "same previously checked unchanged incremental dependencies; F uses a separate private reference cache",
+    "remaining": "revalidate with the new canonical decoder after its owner publishes; this result certifies the pinned committed dependency snapshot"
+  }
+}

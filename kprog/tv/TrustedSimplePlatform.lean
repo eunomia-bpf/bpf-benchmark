@@ -243,6 +243,68 @@ theorem physical_execution_iff (env : BPF.Environment) (first last : BPF.State) 
       Execution (BPFPath.instructionStep env physicalProof) first trace last := by
   rw [physical_instruction_relation_eq]
 
+
+/-- Exact bound virtual proof bytes have the ordinary physical relation
+proved above; no proof bytes or surviving event are substituted. -/
+theorem bound_physical_instruction_relation_eq (env : BPF.Environment) (artifact : Artifact)
+    (proofImage : artifact.proofBytes=proof.toList) :
+    boundCapturedProofStep env artifact=BPFPath.instructionStep env physicalProof := by
+  have virtual : boundCapturedProofStep env artifact=initializedInstructionStep env := by
+    funext before events after
+    unfold boundCapturedProofStep initializedInstructionStep
+    rw [proofImage]
+  exact virtual.trans (physical_instruction_relation_eq env)
+
+theorem bound_physical_execution_iff (env : BPF.Environment) (artifact : Artifact)
+    (proofImage : artifact.proofBytes=proof.toList) (first last : BPF.State) (trace : List Event) :
+    Execution (boundCapturedProofStep env artifact) first trace last ↔
+      Execution (BPFPath.instructionStep env physicalProof) first trace last := by
+  rw [bound_physical_instruction_relation_eq env artifact proofImage]
+
+/-- The actual-base native result follows from ordinary physical-B semantics
+and explicit verifier soundness for that declared context interpretation.
+This does not assert historical kernel image identity or physical ABI facts. -/
+theorem bound_native_effects_checked_from_physical_B (env : BPF.Environment) (n : X86.State) (p : BPF.State) (codeBase : Word)
+    (validated executed : Artifact) (binding : executed=validated)
+    (nativeImage : validated.nativeBytes=native.toList)
+    (proofImage : validated.proofBytes=proof.toList) (entryImage : validated.entry=0)
+    (accepted : Artifact → Prop) (proofEntry : Artifact → BPF.State → Prop)
+    (checked : Artifact → Event → Prop)
+    (verifierSound : accepted validated → proofEntry validated p →
+      ∀ trace last, Execution (BPFPath.instructionStep env physicalProof) p trace last →
+        ∀ event ∈ trace, checked validated event)
+    (acceptance : accepted validated) (admitted : proofEntry validated p)
+    {trace : List Event} {last : X86.State}
+    (run : Execution (relationalNativeInstructionStep (codeBase+BitVec.ofNat 64 executed.entry)
+      executed.nativeBytes.toArray) n trace last)
+    (stack : Word) (nativePC : n.pc=codeBase) (proofPC : p.pc=0) (active : p.halted=false)
+    (context : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (nativeStack : env.nativeInput .stackPointer=.ok stack)
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8=true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8=true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8=true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8=true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4=true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8=true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8=true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (guest1 : ∀ i<8, ¬ initializationPrivateByte (p.regs 10) (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    ∀ event ∈ trace, checked validated event := by
+  let onlyAccepted : Artifact → Prop := fun artifact => artifact=validated ∧ accepted artifact
+  have acceptedHere : onlyAccepted validated := ⟨rfl,acceptance⟩
+  have soundHere : ∀ artifact, onlyAccepted artifact → proofEntry artifact p →
+      ∀ trace last, Execution (boundCapturedProofStep env artifact) p trace last →
+        ∀ event ∈ trace, checked artifact event := by
+    intro artifact selected entry trace last execution
+    obtain ⟨same,acceptedArtifact⟩ := selected
+    subst artifact
+    have physicalRun := (bound_physical_execution_iff env validated proofImage p last trace).mp execution
+    exact verifierSound acceptedArtifact entry trace last physicalRun
+  exact bound_captured_based_native_prefix_effects_checked env n p codeBase validated executed binding
+    nativeImage proofImage entryImage onlyAccepted proofEntry checked soundHere acceptedHere admitted
+    run stack nativePC proofPC active context memory nativeStack
+    write40 write32 write24 write16 write8 read40 read32 guest0 guest1
+
 end KProgTV.TrustedSimplePlatform
 
 #print axioms KProgTV.TrustedSimplePlatform.physical_proof_size
@@ -268,3 +330,9 @@ end KProgTV.TrustedSimplePlatform
 #print axioms KProgTV.TrustedSimplePlatform.physical_instruction_relation_eq
 
 #print axioms KProgTV.TrustedSimplePlatform.physical_execution_iff
+
+#print axioms KProgTV.TrustedSimplePlatform.bound_physical_instruction_relation_eq
+
+#print axioms KProgTV.TrustedSimplePlatform.bound_physical_execution_iff
+
+#print axioms KProgTV.TrustedSimplePlatform.bound_native_effects_checked_from_physical_B

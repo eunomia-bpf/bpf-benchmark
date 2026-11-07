@@ -1987,3 +1987,11 @@ from exact bytes; invalid PC, halt, environment and all fault outcomes remain
 covered. Full endpoints and ordered traces are exact, with no fuel/path/access
 premise. This remains a declared interpretation, not a newly captured kernel
 post-conversion program or proof of historical kernel binary identity.
+
+`trusted-simple-physical-bound-safety.json` combines exact accepted-artifact
+binding with verifier soundness stated on ordinary BPF semantics for the
+declared physical interpretation. Every native payload prefix at its actual
+codebase has checked events under the explicit invocation/private-frame
+premises. The result pins its committed dependency snapshot; F's concurrent
+uncommitted decoder extension is excluded. This proves neither historical
+kernel binary identity nor the remaining physical ABI/strict block obligations.
