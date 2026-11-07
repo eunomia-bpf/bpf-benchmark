@@ -67,14 +67,31 @@ That also reframes the stats-on number: 1.008x there is close to parity
 only because the counter overhead is present in both arms. Removing it
 exposes the native cost.
 
-**Cilium has no stats-off arm.** Its native arm yields 0 packets:
-`native-link` refuses 33 of its programs —
-`Error: x86 bpf_map_update_elem native call 0 uses map
-"cilium_ipv4_frag_datagrams", which truncation-matches multiple
-update_sites entries` — and the evidence step then aborts with
-`did not publish symbols for live programs [317, 318, 334, ...]`. The
-stats-on arm works (177 replaced), so this is the linker's map-identity
-resolution, not a manifest difference. Reported.
+**Cilium has no stats-off arm.** Its native arm yields 0 packets, in two
+steps worth separating.
+
+`native-link` refuses 33 of its programs:
+
+```
+Error: x86 bpf_map_update_elem native call 0 uses map
+  "cilium_ipv4_frag_datagrams", which truncation-matches multiple
+  update_sites entries
+```
+
+That is **correct behaviour, not a bug**: `cilium_ipv4_frag_datagrams` is
+26 characters, the kernel keeps only `cilium_ipv4_fra`, and cilium has
+more than one `cilium_ipv4_frag_*` map, so they collide in those 15
+bytes. The resolver admits a truncation match only when exactly one
+unused site matches (the exact-match and address paths both run first), so
+picking one would risk binding the wrong map. What is missing is
+disambiguation in cilium's own metadata — its update-site entries should
+carry the resolved kernel map address rather than the truncated name.
+
+The evidence step then aborts the app with `native-loader log ... did not
+publish symbols for live programs [317, 318, 334, ...]`, because programs
+that passed through have no native symbol to publish. The operator's rule
+is that a failed native load stays eBPF and does not stop the run, so that
+step is stricter than the rule. Both are reported.
 
 One caveat remains:
 
