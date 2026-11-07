@@ -885,3 +885,40 @@ generator recheck. No source programs/oracles were filtered, no proof placeholde
 new test suite, runtime/header/kernel/ISA or paper changes; original C warnings
 remain visible. Whole77/72 dispatch, native-field/artifact and O2/O4 bindings
 remain open; a new immutable full check follows publication.
+
+## Uniform byte ALU composed with the leading dispatcher
+
+`Arm64Dispatcher.dispatch` extends the preceding NOP/address/MOV/MOVK prefix
+with the actual next ALU gate6/7. One byte-field body consumes every generated
+ALU choice ADD/SUB/AND/BIC/EOR/ORR, generated immediate/register RHS selection,
+AUX byte1 modifier and byte2 amount. All three production pointer branches
+remain in order: stack ORR, stack SUB, pointer ADD, then scalar width write.
+SP32 is tested and read/written explicitly, with no silent conversion to ZR31;
+all incoming scalar/stack provenance predicates remain quantified.
+
+The arithmetic-body and logical-body equalities derive correspondence with
+the already-proven family pipelines. Concrete complete-state theorems cover
+arithmetic immediate, shifted and extended-register steps, plus logical
+immediate, all four native register shifts and bare NONE. Immediate forms
+ignore arbitrary SRC2 bytes, including absent/SP encodings; register forms
+ignore IMM and unused AUX byte3. Unknown modifier-byte identity remains the
+actual C behavior. Native shift/extension bounds and SP/ZR validity are kept.
+Normalized BIC-immediate describes a complemented operand, not an invented
+native BIC immediate encoding.
+
+The extended DispatchBinding relation contains field/code/address identities
+only. Its single dispatch_step_refines theorem now composes both earlier and
+ALU cases into the same canonical ISA step, retaining every state component,
+ordered empty effects and exactly one PC advance. No constructor assumes a
+handler-refinement or step-equality premise. Native-byte decoding, raw-width,
+materialized address/provenance and compiled-artifact correspondence still
+need their producer/platform bindings; this is not the full72-op ISA theorem.
+
+All earlier declarations are byte-identical except the additional shared
+Arithmetic import. Focused58-job and affected-family/reference Lean builds,
+eight existing contract freshness checks, direct-dispatch/model checks and
+ten existing semantic/route hosts passed336,5632,256,21688,136,1115374,225292,
+6401,6913,337cases. Final proof SHA stayed unchanged through checks, with no
+placeholders, new tests, input filtering or runtime/generator/oracle/ISA changes.
+Original compiler warnings remain visible. A subsequent immutable full check
+will include this extension; the ongoing exact96dac03b8 check predates it.
