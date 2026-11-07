@@ -241,3 +241,8 @@ verified-native runner now waits for actual health/process exit, using the
 existing readiness loop. All16incremental-corpus tests pass, including simulated
 400s successful verified startup, ordinary phase deadlines and early exit.
 The next wholeTracee retry preserves native/workload/ISA/compiler inputs.
+
+
+The [Cilium resource-capsule batch224658](cilium-native-resources/README.md) reaches fresh generation with kernel-authenticated extra native maps, then helper189 declaration errors during compilation. Its generic helper/XDP data_meta candidate passes four UBSan ABI controls and compiles the actual generated BPF source. The paired [entry-resource closure](native-resource-scope/README.md) passes89linker/12service checks and scopes Tracee/Cilium first-entry resources to2/6symbols. Whole Tracee then Cilium replay is active.
+
+The [Tetragon CMP/resource batch225009](tetragon-cmp-resources/README.md) generates/compiles4requests and binds3, then reaches8193-jump verifier complexity with189726processed instructions/1926states. The [OTel batch225459](otel-cmp-resources/README.md) generates/compiles2requests and binds1, then reaches perf-event-output size range checking with805processed instructions/27states. The [Tracee verified-startup batch230126](tracee-bound-startup/README.md) records one kernel resource-count refusal before service generation; current scoped-resource replay consumes the common closure repair. Each linked report retains the exact epoch, baseline census, full raw logs and next repair class.

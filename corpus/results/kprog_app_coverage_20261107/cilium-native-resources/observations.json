@@ -1,0 +1,856 @@
+{
+  "native_requests": 1,
+  "generated": 1,
+  "compiled": 0,
+  "accepted_bound": 0,
+  "failed": 1,
+  "terminal_archives_verified": 1,
+  "native_replaced": 0,
+  "native_failed": 1,
+  "app_status": "error",
+  "metadata_status": "error",
+  "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_224658_042401",
+  "failure_entry": "cil_xdp_entry",
+  "failure_class": "compile-helper-declaration",
+  "baseline_load_attempts": 207,
+  "baseline_accepted_loads": 196,
+  "baseline_named_accepted": 171,
+  "baseline_resident_programs": 72,
+  "baseline_named_loads": [
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "",
+      "fd": 7
+    },
+    {
+      "name": "",
+      "fd": 7
+    },
+    {
+      "name": "",
+      "fd": 7
+    },
+    {
+      "name": "",
+      "fd": 7
+    },
+    {
+      "name": "",
+      "fd": 7
+    },
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "",
+      "fd": 10
+    },
+    {
+      "name": "",
+      "fd": 66
+    },
+    {
+      "name": "",
+      "fd": 67
+    },
+    {
+      "name": "",
+      "fd": 65
+    },
+    {
+      "name": "",
+      "fd": 65
+    },
+    {
+      "name": "",
+      "fd": 64
+    },
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "",
+      "fd": 64
+    },
+    {
+      "name": "",
+      "fd": 64
+    },
+    {
+      "name": "",
+      "fd": 64
+    },
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "test",
+      "fd": 64
+    },
+    {
+      "name": "",
+      "fd": 67
+    },
+    {
+      "name": "",
+      "fd": 67
+    },
+    {
+      "name": "adjust_mac_room",
+      "fd": 74
+    },
+    {
+      "name": "",
+      "fd": 65
+    },
+    {
+      "name": "",
+      "fd": 65
+    },
+    {
+      "name": "",
+      "fd": 65
+    },
+    {
+      "name": "",
+      "fd": 65
+    },
+    {
+      "name": "",
+      "fd": 65
+    },
+    {
+      "name": "",
+      "fd": 65
+    },
+    {
+      "name": "",
+      "fd": 65
+    },
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "",
+      "fd": 65
+    },
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "probe_fib_looku",
+      "fd": 65
+    },
+    {
+      "name": "probe_fib_looku",
+      "fd": 70
+    },
+    {
+      "name": "probe_fib_looku",
+      "fd": 71
+    },
+    {
+      "name": "probe_fib_looku",
+      "fd": 67
+    },
+    {
+      "name": "probe_fib_looku",
+      "fd": 69
+    },
+    {
+      "name": "probe_fib_looku",
+      "fd": 71
+    },
+    {
+      "name": "",
+      "fd": 70
+    },
+    {
+      "name": "cil_xdp_entry",
+      "fd": 82
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 110
+    },
+    {
+      "name": "cil_host_policy",
+      "fd": 111
+    },
+    {
+      "name": "cil_to_netdev",
+      "fd": 112
+    },
+    {
+      "name": "cil_from_netdev",
+      "fd": 113
+    },
+    {
+      "name": "cil_from_host",
+      "fd": 114
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 115
+    },
+    {
+      "name": "tail_drop_notif",
+      "fd": 116
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 117
+    },
+    {
+      "name": "cil_to_host",
+      "fd": 118
+    },
+    {
+      "name": "tail_handle_sna",
+      "fd": 119
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 120
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 139
+    },
+    {
+      "name": "cil_to_netdev",
+      "fd": 140
+    },
+    {
+      "name": "tail_no_service",
+      "fd": 141
+    },
+    {
+      "name": "tail_handle_sna",
+      "fd": 142
+    },
+    {
+      "name": "cil_to_host",
+      "fd": 143
+    },
+    {
+      "name": "cil_from_netdev",
+      "fd": 144
+    },
+    {
+      "name": "tail_drop_notif",
+      "fd": 145
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 146
+    },
+    {
+      "name": "cil_host_policy",
+      "fd": 147
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 148
+    },
+    {
+      "name": "cil_from_host",
+      "fd": 149
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 150
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 172
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 173
+    },
+    {
+      "name": "cil_to_netdev",
+      "fd": 174
+    },
+    {
+      "name": "cil_to_host",
+      "fd": 175
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 176
+    },
+    {
+      "name": "tail_no_service",
+      "fd": 177
+    },
+    {
+      "name": "cil_from_netdev",
+      "fd": 178
+    },
+    {
+      "name": "tail_handle_sna",
+      "fd": 179
+    },
+    {
+      "name": "tail_drop_notif",
+      "fd": 180
+    },
+    {
+      "name": "cil_from_host",
+      "fd": 181
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 182
+    },
+    {
+      "name": "cil_host_policy",
+      "fd": 183
+    },
+    {
+      "name": "tail_handle_sna",
+      "fd": 100
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 101
+    },
+    {
+      "name": "cil_to_host",
+      "fd": 102
+    },
+    {
+      "name": "cil_from_netdev",
+      "fd": 103
+    },
+    {
+      "name": "tail_drop_notif",
+      "fd": 104
+    },
+    {
+      "name": "cil_to_netdev",
+      "fd": 105
+    },
+    {
+      "name": "cil_from_host",
+      "fd": 106
+    },
+    {
+      "name": "cil_host_policy",
+      "fd": 107
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 108
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 109
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 110
+    },
+    {
+      "name": "cil_from_host",
+      "fd": 131
+    },
+    {
+      "name": "tail_drop_notif",
+      "fd": 136
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 137
+    },
+    {
+      "name": "cil_to_netdev",
+      "fd": 138
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 139
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 140
+    },
+    {
+      "name": "tail_handle_sna",
+      "fd": 141
+    },
+    {
+      "name": "cil_to_host",
+      "fd": 142
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 143
+    },
+    {
+      "name": "tail_no_service",
+      "fd": 144
+    },
+    {
+      "name": "cil_host_policy",
+      "fd": 145
+    },
+    {
+      "name": "cil_from_netdev",
+      "fd": 146
+    },
+    {
+      "name": "tail_handle_sna",
+      "fd": 169
+    },
+    {
+      "name": "cil_from_netdev",
+      "fd": 170
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 171
+    },
+    {
+      "name": "cil_from_host",
+      "fd": 172
+    },
+    {
+      "name": "tail_drop_notif",
+      "fd": 173
+    },
+    {
+      "name": "cil_to_netdev",
+      "fd": 174
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 175
+    },
+    {
+      "name": "cil_to_host",
+      "fd": 176
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 177
+    },
+    {
+      "name": "tail_no_service",
+      "fd": 178
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 179
+    },
+    {
+      "name": "cil_host_policy",
+      "fd": 180
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 199
+    },
+    {
+      "name": "tail_ipv4_to_en",
+      "fd": 200
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 201
+    },
+    {
+      "name": "tail_drop_notif",
+      "fd": 202
+    },
+    {
+      "name": "tail_ipv4_ct_eg",
+      "fd": 203
+    },
+    {
+      "name": "cil_lxc_policy",
+      "fd": 204
+    },
+    {
+      "name": "tail_no_service",
+      "fd": 205
+    },
+    {
+      "name": "tail_handle_arp",
+      "fd": 206
+    },
+    {
+      "name": "cil_to_containe",
+      "fd": 207
+    },
+    {
+      "name": "tail_ipv4_polic",
+      "fd": 208
+    },
+    {
+      "name": "cil_from_contai",
+      "fd": 209
+    },
+    {
+      "name": "tail_nodeport_r",
+      "fd": 210
+    },
+    {
+      "name": "tail_ipv4_ct_in",
+      "fd": 211
+    },
+    {
+      "name": "cil_lxc_policy_",
+      "fd": 212
+    },
+    {
+      "name": "cil_xdp_entry",
+      "fd": 212
+    },
+    {
+      "name": "tail_ipv4_ct_eg",
+      "fd": 258
+    },
+    {
+      "name": "tail_ipv4_ct_in",
+      "fd": 279
+    },
+    {
+      "name": "tail_drop_notif",
+      "fd": 281
+    },
+    {
+      "name": "cil_from_contai",
+      "fd": 285
+    },
+    {
+      "name": "cil_lxc_policy",
+      "fd": 286
+    },
+    {
+      "name": "cil_from_host",
+      "fd": 287
+    },
+    {
+      "name": "cil_lxc_policy_",
+      "fd": 288
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 289
+    },
+    {
+      "name": "tail_handle_arp",
+      "fd": 290
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 291
+    },
+    {
+      "name": "tail_ipv4_polic",
+      "fd": 292
+    },
+    {
+      "name": "tail_drop_notif",
+      "fd": 71
+    },
+    {
+      "name": "cil_to_host",
+      "fd": 70
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 74
+    },
+    {
+      "name": "cil_to_containe",
+      "fd": 75
+    },
+    {
+      "name": "cil_from_contai",
+      "fd": 81
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 82
+    },
+    {
+      "name": "cil_to_containe",
+      "fd": 85
+    },
+    {
+      "name": "tail_ipv4_ct_in",
+      "fd": 86
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 88
+    },
+    {
+      "name": "tail_ipv4_to_en",
+      "fd": 87
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 89
+    },
+    {
+      "name": "tail_ipv4_to_en",
+      "fd": 90
+    },
+    {
+      "name": "tail_no_service",
+      "fd": 91
+    },
+    {
+      "name": "cil_to_netdev",
+      "fd": 92
+    },
+    {
+      "name": "tail_ipv4_ct_eg",
+      "fd": 64
+    },
+    {
+      "name": "cil_from_netdev",
+      "fd": 94
+    },
+    {
+      "name": "cil_host_policy",
+      "fd": 95
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 96
+    },
+    {
+      "name": "cil_lxc_policy",
+      "fd": 93
+    },
+    {
+      "name": "tail_drop_notif",
+      "fd": 98
+    },
+    {
+      "name": "tail_handle_arp",
+      "fd": 99
+    },
+    {
+      "name": "cil_lxc_policy_",
+      "fd": 100
+    },
+    {
+      "name": "tail_nodeport_r",
+      "fd": 101
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 102
+    },
+    {
+      "name": "tail_no_service",
+      "fd": 103
+    },
+    {
+      "name": "tail_nodeport_r",
+      "fd": 104
+    },
+    {
+      "name": "tail_ipv4_polic",
+      "fd": 84
+    },
+    {
+      "name": "tail_handle_sna",
+      "fd": 72
+    },
+    {
+      "name": "tail_no_service",
+      "fd": 125
+    },
+    {
+      "name": "cil_host_policy",
+      "fd": 126
+    },
+    {
+      "name": "tail_drop_notif",
+      "fd": 127
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 128
+    },
+    {
+      "name": "cil_from_host",
+      "fd": 129
+    },
+    {
+      "name": "cil_from_netdev",
+      "fd": 130
+    },
+    {
+      "name": "cil_to_host",
+      "fd": 131
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 154
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 155
+    },
+    {
+      "name": "tail_drop_notif",
+      "fd": 156
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 153
+    },
+    {
+      "name": "cil_lxc_policy",
+      "fd": 158
+    },
+    {
+      "name": "cil_from_contai",
+      "fd": 159
+    },
+    {
+      "name": "tail_handle_arp",
+      "fd": 160
+    },
+    {
+      "name": "tail_ipv4_to_en",
+      "fd": 161
+    },
+    {
+      "name": "tail_no_service",
+      "fd": 162
+    },
+    {
+      "name": "tail_nodeport_r",
+      "fd": 163
+    },
+    {
+      "name": "tail_ipv4_ct_in",
+      "fd": 164
+    },
+    {
+      "name": "tail_handle_sna",
+      "fd": 165
+    },
+    {
+      "name": "tail_ipv4_ct_eg",
+      "fd": 166
+    },
+    {
+      "name": "cil_to_netdev",
+      "fd": 167
+    },
+    {
+      "name": "tail_ipv4_polic",
+      "fd": 168
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 169
+    },
+    {
+      "name": "cil_to_containe",
+      "fd": 170
+    },
+    {
+      "name": "cil_lxc_policy_",
+      "fd": 157
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 172
+    },
+    {
+      "name": "cil_to_netdev",
+      "fd": 195
+    },
+    {
+      "name": "cil_host_policy",
+      "fd": 196
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 133
+    },
+    {
+      "name": "tail_handle_sna",
+      "fd": 157
+    },
+    {
+      "name": "cil_from_netdev",
+      "fd": 158
+    },
+    {
+      "name": "cil_to_host",
+      "fd": 159
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 170
+    },
+    {
+      "name": "tail_nodeport_n",
+      "fd": 194
+    },
+    {
+      "name": "cil_from_host",
+      "fd": 197
+    },
+    {
+      "name": "tail_drop_notif",
+      "fd": 199
+    },
+    {
+      "name": "tail_handle_ipv",
+      "fd": 200
+    },
+    {
+      "name": "tail_no_service",
+      "fd": 201
+    }
+  ],
+  "submission_error_lines": [],
+  "raw_hashes": {
+    "driver.log.gz": "b83921745a8ec46b6ba162a2e74d491b2517106b9ce79d1cd7b9ecf9fd7ae46c",
+    "service.tar.gz": "0d95759d6e3c8c738d90d776b3b00e53ace04930ff0f9cc793f2d9e7233e3323",
+    "launch.tar.gz": "a32466c294757f5cd6957b7319dee3d512de78b329ac63f4aba12fa5c431d38f",
+    "result.tar.gz": "9b1c79742031a1dc3b6af79c14f718a707c7d16b509ca4742c66cd3964feeaee"
+  }
+}

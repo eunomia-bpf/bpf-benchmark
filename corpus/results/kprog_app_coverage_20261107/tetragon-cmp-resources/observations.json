@@ -1,0 +1,1272 @@
+{
+  "native_requests": 4,
+  "generated": 4,
+  "compiled": 4,
+  "accepted_bound": 3,
+  "failed": 1,
+  "terminal_archives_verified": 4,
+  "native_replaced": 3,
+  "native_failed": 1,
+  "app_status": "error",
+  "metadata_status": "error",
+  "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_225009_749635",
+  "failure_entry": "execve_send",
+  "failure_class": "verifier-jump-depth",
+  "baseline_load_attempts": 311,
+  "baseline_accepted_loads": 308,
+  "baseline_named_accepted": 298,
+  "baseline_resident_programs": 287,
+  "baseline_named_loads": [
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "",
+      "fd": 7
+    },
+    {
+      "name": "",
+      "fd": 7
+    },
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "probe_bpf_kprob",
+      "fd": 7
+    },
+    {
+      "name": "probe_kpm_link",
+      "fd": 10
+    },
+    {
+      "name": "probe_upm_link",
+      "fd": 7
+    },
+    {
+      "name": "probe_fmod_ret",
+      "fd": 7
+    },
+    {
+      "name": "probe_sys_fmod_",
+      "fd": 7
+    },
+    {
+      "name": "",
+      "fd": 7
+    },
+    {
+      "name": "",
+      "fd": 7
+    },
+    {
+      "name": "probe_bpf_kprob",
+      "fd": 7
+    },
+    {
+      "name": "probe_bpf_perf_",
+      "fd": 11
+    },
+    {
+      "name": "",
+      "fd": 7
+    },
+    {
+      "name": "probe_lsm_file_",
+      "fd": 7
+    },
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "uprobe_regs",
+      "fd": 7
+    },
+    {
+      "name": "",
+      "fd": 10
+    },
+    {
+      "name": "",
+      "fd": 11
+    },
+    {
+      "name": "",
+      "fd": 7
+    },
+    {
+      "name": "probe_get_func_",
+      "fd": 7
+    },
+    {
+      "name": "event_exit_acct",
+      "fd": 71
+    },
+    {
+      "name": "event_exit_disa",
+      "fd": 72
+    },
+    {
+      "name": "event_wake_up_n",
+      "fd": 71
+    },
+    {
+      "name": "execve_rate",
+      "fd": 86
+    },
+    {
+      "name": "execve_send",
+      "fd": 88
+    },
+    {
+      "name": "event_execve",
+      "fd": 89
+    },
+    {
+      "name": "tg_kp_bprm_comm",
+      "fd": 55
+    },
+    {
+      "name": "execve_map_upda",
+      "fd": 63
+    },
+    {
+      "name": "",
+      "fd": 25
+    },
+    {
+      "name": "",
+      "fd": 26
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 149
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 151
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 152
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 153
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 154
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 155
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 156
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 151
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 152
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 153
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 154
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 155
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 156
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 160
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 152
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 153
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 154
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 155
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 156
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 160
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 164
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 285
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 286
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 287
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 288
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 289
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 290
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 291
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 280
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 281
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 283
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 284
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 289
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 290
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 291
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 295
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 296
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 297
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 298
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 290
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 291
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 295
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 296
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 297
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 298
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 300
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 483
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 484
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 485
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 486
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 487
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 488
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 489
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 478
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 479
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 480
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 482
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 487
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 488
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 489
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 493
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 494
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 495
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 496
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 488
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 489
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 493
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 494
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 495
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 496
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 500
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 489
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 493
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 494
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 495
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 496
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 500
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 504
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 493
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 494
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 495
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 496
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 500
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 504
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 508
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 494
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 495
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 496
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 500
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 504
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 508
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 512
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 538
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 539
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 540
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 541
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 542
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 543
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 544
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 695
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 696
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 697
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 698
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 699
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 700
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 701
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 690
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 691
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 692
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 693
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 700
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 701
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 705
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 706
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 707
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 708
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 709
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 691
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 692
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 693
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 698
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 708
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 709
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 713
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 714
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 715
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 716
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 717
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 692
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 693
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 698
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 706
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 783
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 785
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 786
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 787
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 788
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 789
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 790
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 782
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 783
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 784
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 785
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 810
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 811
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 812
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 813
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 814
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 815
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 816
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 805
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 806
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 807
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 809
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 785
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 789
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 790
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 794
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 795
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 796
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 798
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 785
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 790
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 794
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 795
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 796
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 798
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 802
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 813
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 815
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 816
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 820
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 821
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 822
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 823
+    },
+    {
+      "name": "generic_tracepo",
+      "fd": 860
+    },
+    {
+      "name": "generic_tracepo",
+      "fd": 861
+    },
+    {
+      "name": "generic_tracepo",
+      "fd": 862
+    },
+    {
+      "name": "generic_tracepo",
+      "fd": 863
+    },
+    {
+      "name": "generic_tracepo",
+      "fd": 864
+    },
+    {
+      "name": "generic_tracepo",
+      "fd": 865
+    },
+    {
+      "name": "generic_rawtp_e",
+      "fd": 890
+    },
+    {
+      "name": "generic_rawtp_a",
+      "fd": 891
+    },
+    {
+      "name": "generic_rawtp_p",
+      "fd": 892
+    },
+    {
+      "name": "generic_rawtp_p",
+      "fd": 893
+    },
+    {
+      "name": "generic_rawtp_f",
+      "fd": 894
+    },
+    {
+      "name": "generic_rawtp_o",
+      "fd": 895
+    },
+    {
+      "name": "generic_rawtp_s",
+      "fd": 896
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 923
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 924
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 925
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 926
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 927
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 928
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 929
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 915
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 916
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 917
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 918
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 919
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 920
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 922
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 929
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 934
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 935
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 936
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 937
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 938
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 939
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1101
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1102
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1103
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1104
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1105
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1106
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1107
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 1096
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 1097
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 1098
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 1099
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1105
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1106
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1107
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1111
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1112
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1113
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1114
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1106
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1107
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1111
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1112
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1113
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1114
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1118
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1107
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1111
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1112
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1113
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1114
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1118
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1122
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1082
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1084
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1085
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1086
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1087
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1088
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1089
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 1081
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 1082
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 1083
+    },
+    {
+      "name": "generic_retkpro",
+      "fd": 1084
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1208
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1209
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1210
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1211
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1212
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1213
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1214
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1209
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1210
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1211
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1212
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1213
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1214
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1218
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1210
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1211
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1212
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1213
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1214
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1218
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1222
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1200
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1201
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1202
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1203
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1204
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1205
+    },
+    {
+      "name": "generic_kprobe_",
+      "fd": 1209
+    }
+  ],
+  "submission_error_lines": [],
+  "raw_hashes": {
+    "driver.log.gz": "453210ffc24161b051e6fd05322abcc8cd0c6ae5e474ec77b9321010cd263742",
+    "service.tar.gz": "85b339c14b3df66a1c5a631e1d440f78eb09250715368a685adbd11c5fbd931b",
+    "launch.tar.gz": "935dc37d6e5664ebb22b5575e6911fccb1b017a1e01e63b4c2e9eb7c4dde4a02",
+    "result.tar.gz": "bb0a23870b6268bfefaa672170b1f49f623587e66fce32d0ffe47ecb3e0c4aa4"
+  }
+}

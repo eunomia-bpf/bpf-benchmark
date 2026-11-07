@@ -1,0 +1,96 @@
+{
+  "native_requests": 2,
+  "generated": 2,
+  "compiled": 2,
+  "accepted_bound": 1,
+  "failed": 1,
+  "terminal_archives_verified": 2,
+  "native_replaced": 1,
+  "native_failed": 1,
+  "app_status": "error",
+  "metadata_status": "error",
+  "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_225459_314452",
+  "failure_entry": "perf_unwind_stop",
+  "failure_class": "verifier-helper-size-range",
+  "baseline_load_attempts": 17,
+  "baseline_accepted_loads": 16,
+  "baseline_named_accepted": 15,
+  "baseline_resident_programs": 13,
+  "baseline_named_loads": [
+    {
+      "name": "",
+      "fd": -1
+    },
+    {
+      "name": "",
+      "fd": 12
+    },
+    {
+      "name": "read_task_struc",
+      "fd": 12
+    },
+    {
+      "name": "perf_unwind_sto",
+      "fd": 54
+    },
+    {
+      "name": "perf_unwind_nat",
+      "fd": 55
+    },
+    {
+      "name": "perf_unwind_hot",
+      "fd": 56
+    },
+    {
+      "name": "perf_unwind_per",
+      "fd": 57
+    },
+    {
+      "name": "perf_unwind_php",
+      "fd": 58
+    },
+    {
+      "name": "perf_unwind_pyt",
+      "fd": 59
+    },
+    {
+      "name": "perf_unwind_rub",
+      "fd": 60
+    },
+    {
+      "name": "perf_unwind_v8",
+      "fd": 61
+    },
+    {
+      "name": "perf_unwind_dot",
+      "fd": 62
+    },
+    {
+      "name": "perf_go_labels",
+      "fd": 63
+    },
+    {
+      "name": "tracepoint__sch",
+      "fd": 64
+    },
+    {
+      "name": "native_tracer_e",
+      "fd": 65
+    },
+    {
+      "name": "custom__generic",
+      "fd": 66
+    },
+    {
+      "name": "probe_bpf_perf_",
+      "fd": 74
+    }
+  ],
+  "submission_error_lines": [],
+  "raw_hashes": {
+    "driver.log.gz": "257928a707f6aaf95d9a1b2aa89f1bc74a6e3270986e24bebb4f88c5ae4428ea",
+    "service.tar.gz": "79f11e8e25bd323c4aadf23b205585298b7d183a75be6153f58252a9ab452b73",
+    "launch.tar.gz": "9c6d8fc6a7e5fea843cfac54059a6bea36ab24a74ea6c4cd3d9045feceedfaf4",
+    "result.tar.gz": "a631a4af139be6d8239411a6355f7814922f629c0890407b8024760783bd223e"
+  }
+}

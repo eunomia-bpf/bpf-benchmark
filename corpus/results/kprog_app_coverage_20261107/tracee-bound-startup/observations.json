@@ -1,0 +1,678 @@
+{
+  "native_requests": 0,
+  "generated": 0,
+  "compiled": 0,
+  "accepted_bound": 0,
+  "failed": 0,
+  "terminal_archives_verified": 0,
+  "native_replaced": 0,
+  "native_failed": 1,
+  "app_status": "error",
+  "metadata_status": "error",
+  "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_230126_679104",
+  "failure_entry": "tracepoint__raw_syscalls__sys_enter",
+  "failure_class": "kernel-resource-count",
+  "baseline_load_attempts": 162,
+  "baseline_accepted_loads": 162,
+  "baseline_named_accepted": 153,
+  "baseline_resident_programs": 151,
+  "baseline_named_loads": [
+    {
+      "name": "",
+      "fd": 113
+    },
+    {
+      "name": "",
+      "fd": 113
+    },
+    {
+      "name": "",
+      "fd": 113
+    },
+    {
+      "name": "",
+      "fd": 113
+    },
+    {
+      "name": "libbpf_nametest",
+      "fd": 113
+    },
+    {
+      "name": "det_arg_ctx",
+      "fd": 164
+    },
+    {
+      "name": "",
+      "fd": 60
+    },
+    {
+      "name": "",
+      "fd": 24
+    },
+    {
+      "name": "tracepoint__raw",
+      "fd": 24
+    },
+    {
+      "name": "",
+      "fd": 63
+    },
+    {
+      "name": "sys_enter_init",
+      "fd": 60
+    },
+    {
+      "name": "sys_enter_submi",
+      "fd": 63
+    },
+    {
+      "name": "tracepoint__raw",
+      "fd": 66
+    },
+    {
+      "name": "sys_exit_init",
+      "fd": 69
+    },
+    {
+      "name": "sys_exit_submit",
+      "fd": 72
+    },
+    {
+      "name": "trace_sys_enter",
+      "fd": 75
+    },
+    {
+      "name": "trace_sys_exit",
+      "fd": 78
+    },
+    {
+      "name": "trace_ptrace",
+      "fd": 81
+    },
+    {
+      "name": "trace_ret_ptrac",
+      "fd": 84
+    },
+    {
+      "name": "trace_process_v",
+      "fd": 87
+    },
+    {
+      "name": "trace_ret_proce",
+      "fd": 90
+    },
+    {
+      "name": "trace_arch_prct",
+      "fd": 93
+    },
+    {
+      "name": "trace_ret_arch_",
+      "fd": 96
+    },
+    {
+      "name": "trace_dup",
+      "fd": 164
+    },
+    {
+      "name": "trace_ret_dup",
+      "fd": 165
+    },
+    {
+      "name": "trace_dup2",
+      "fd": 166
+    },
+    {
+      "name": "trace_ret_dup2",
+      "fd": 167
+    },
+    {
+      "name": "trace_dup3",
+      "fd": 168
+    },
+    {
+      "name": "trace_ret_dup3",
+      "fd": 169
+    },
+    {
+      "name": "syscall__execve",
+      "fd": 170
+    },
+    {
+      "name": "syscall__execve",
+      "fd": 171
+    },
+    {
+      "name": "syscall__execve",
+      "fd": 172
+    },
+    {
+      "name": "syscall__execve",
+      "fd": 173
+    },
+    {
+      "name": "sys_dup_exit_ta",
+      "fd": 174
+    },
+    {
+      "name": "tracepoint__sch",
+      "fd": 175
+    },
+    {
+      "name": "sched_process_f",
+      "fd": 176
+    },
+    {
+      "name": "lkm_seeker_modt",
+      "fd": 177
+    },
+    {
+      "name": "heartbeat_captu",
+      "fd": 178
+    },
+    {
+      "name": "uprobe_lkm_seek",
+      "fd": 179
+    },
+    {
+      "name": "uprobe_lkm_seek",
+      "fd": 180
+    },
+    {
+      "name": "lkm_seeker_kset",
+      "fd": 181
+    },
+    {
+      "name": "lkm_seeker_mod_",
+      "fd": 182
+    },
+    {
+      "name": "lkm_seeker_proc",
+      "fd": 183
+    },
+    {
+      "name": "lkm_seeker_new_",
+      "fd": 184
+    },
+    {
+      "name": "tracepoint__sch",
+      "fd": 185
+    },
+    {
+      "name": "sched_process_e",
+      "fd": 186
+    },
+    {
+      "name": "sched_process_e",
+      "fd": 187
+    },
+    {
+      "name": "tracepoint__sch",
+      "fd": 188
+    },
+    {
+      "name": "sched_process_e",
+      "fd": 189
+    },
+    {
+      "name": "tracepoint__sch",
+      "fd": 190
+    },
+    {
+      "name": "syscall__accept",
+      "fd": 191
+    },
+    {
+      "name": "tracepoint__sch",
+      "fd": 192
+    },
+    {
+      "name": "trace_filldir64",
+      "fd": 193
+    },
+    {
+      "name": "trace_call_user",
+      "fd": 194
+    },
+    {
+      "name": "trace_do_exit",
+      "fd": 195
+    },
+    {
+      "name": "uprobe_syscall_",
+      "fd": 196
+    },
+    {
+      "name": "uprobe_seq_ops_",
+      "fd": 197
+    },
+    {
+      "name": "tracepoint__cgr",
+      "fd": 198
+    },
+    {
+      "name": "tracepoint__cgr",
+      "fd": 199
+    },
+    {
+      "name": "tracepoint__cgr",
+      "fd": 200
+    },
+    {
+      "name": "trace_security_",
+      "fd": 201
+    },
+    {
+      "name": "trace_security_",
+      "fd": 202
+    },
+    {
+      "name": "trace_security_",
+      "fd": 203
+    },
+    {
+      "name": "trace_security_",
+      "fd": 204
+    },
+    {
+      "name": "trace_commit_cr",
+      "fd": 205
+    },
+    {
+      "name": "trace_switch_ta",
+      "fd": 206
+    },
+    {
+      "name": "trace_cap_capab",
+      "fd": 207
+    },
+    {
+      "name": "trace_security_",
+      "fd": 208
+    },
+    {
+      "name": "trace_security_",
+      "fd": 209
+    },
+    {
+      "name": "trace_proc_crea",
+      "fd": 210
+    },
+    {
+      "name": "trace___debugfs",
+      "fd": 211
+    },
+    {
+      "name": "trace_debugfs_c",
+      "fd": 212
+    },
+    {
+      "name": "trace_security_",
+      "fd": 213
+    },
+    {
+      "name": "trace_security_",
+      "fd": 214
+    },
+    {
+      "name": "trace_security_",
+      "fd": 215
+    },
+    {
+      "name": "trace_security_",
+      "fd": 216
+    },
+    {
+      "name": "trace_security_",
+      "fd": 217
+    },
+    {
+      "name": "send_bin",
+      "fd": 218
+    },
+    {
+      "name": "send_bin_tp",
+      "fd": 219
+    },
+    {
+      "name": "trace_vfs_write",
+      "fd": 220
+    },
+    {
+      "name": "vfs_write_magic",
+      "fd": 221
+    },
+    {
+      "name": "trace_ret_vfs_w",
+      "fd": 222
+    },
+    {
+      "name": "vfs_write_magic",
+      "fd": 223
+    },
+    {
+      "name": "trace_ret_vfs_w",
+      "fd": 224
+    },
+    {
+      "name": "trace_vfs_write",
+      "fd": 225
+    },
+    {
+      "name": "vfs_writev_magi",
+      "fd": 226
+    },
+    {
+      "name": "trace_ret_vfs_w",
+      "fd": 227
+    },
+    {
+      "name": "vfs_writev_magi",
+      "fd": 228
+    },
+    {
+      "name": "trace_ret_vfs_w",
+      "fd": 229
+    },
+    {
+      "name": "trace_kernel_wr",
+      "fd": 230
+    },
+    {
+      "name": "kernel_write_ma",
+      "fd": 231
+    },
+    {
+      "name": "trace_ret_kerne",
+      "fd": 232
+    },
+    {
+      "name": "kernel_write_ma",
+      "fd": 233
+    },
+    {
+      "name": "trace_ret_kerne",
+      "fd": 234
+    },
+    {
+      "name": "trace_vfs_read",
+      "fd": 235
+    },
+    {
+      "name": "trace_ret_vfs_r",
+      "fd": 236
+    },
+    {
+      "name": "trace_ret_vfs_r",
+      "fd": 237
+    },
+    {
+      "name": "trace_vfs_readv",
+      "fd": 238
+    },
+    {
+      "name": "trace_ret_vfs_r",
+      "fd": 239
+    },
+    {
+      "name": "trace_ret_vfs_r",
+      "fd": 240
+    },
+    {
+      "name": "trace_mmap_aler",
+      "fd": 241
+    },
+    {
+      "name": "trace_do_mmap",
+      "fd": 242
+    },
+    {
+      "name": "trace_ret_do_mm",
+      "fd": 243
+    },
+    {
+      "name": "trace_security_",
+      "fd": 244
+    },
+    {
+      "name": "trace_security_",
+      "fd": 245
+    },
+    {
+      "name": "syscall__init_m",
+      "fd": 246
+    },
+    {
+      "name": "trace_register_",
+      "fd": 247
+    },
+    {
+      "name": "trace_ret_regis",
+      "fd": 248
+    },
+    {
+      "name": "trace_security_",
+      "fd": 249
+    },
+    {
+      "name": "trace_security_",
+      "fd": 250
+    },
+    {
+      "name": "trace_security_",
+      "fd": 251
+    },
+    {
+      "name": "trace_device_ad",
+      "fd": 252
+    },
+    {
+      "name": "trace___registe",
+      "fd": 253
+    },
+    {
+      "name": "trace_ret__regi",
+      "fd": 254
+    },
+    {
+      "name": "trace_do_splice",
+      "fd": 255
+    },
+    {
+      "name": "trace_ret_do_sp",
+      "fd": 256
+    },
+    {
+      "name": "tracepoint__mod",
+      "fd": 257
+    },
+    {
+      "name": "tracepoint__mod",
+      "fd": 258
+    },
+    {
+      "name": "trace_do_init_m",
+      "fd": 259
+    },
+    {
+      "name": "trace_ret_do_in",
+      "fd": 260
+    },
+    {
+      "name": "trace_load_elf_",
+      "fd": 261
+    },
+    {
+      "name": "trace_security_",
+      "fd": 262
+    },
+    {
+      "name": "tracepoint__tas",
+      "fd": 263
+    },
+    {
+      "name": "trace_security_",
+      "fd": 264
+    },
+    {
+      "name": "trace_kallsyms_",
+      "fd": 265
+    },
+    {
+      "name": "trace_ret_kalls",
+      "fd": 266
+    },
+    {
+      "name": "trace_do_sigact",
+      "fd": 267
+    },
+    {
+      "name": "trace_vfs_utime",
+      "fd": 268
+    },
+    {
+      "name": "trace_utimes_co",
+      "fd": 269
+    },
+    {
+      "name": "trace_do_trunca",
+      "fd": 270
+    },
+    {
+      "name": "trace_inotify_f",
+      "fd": 271
+    },
+    {
+      "name": "trace_ret_inoti",
+      "fd": 272
+    },
+    {
+      "name": "process_execute",
+      "fd": 273
+    },
+    {
+      "name": "trace_exec_binp",
+      "fd": 274
+    },
+    {
+      "name": "trace_security_",
+      "fd": 275
+    },
+    {
+      "name": "trace_execute_f",
+      "fd": 276
+    },
+    {
+      "name": "trace_security_",
+      "fd": 277
+    },
+    {
+      "name": "trace_set_fs_pw",
+      "fd": 278
+    },
+    {
+      "name": "trace_security_",
+      "fd": 279
+    },
+    {
+      "name": "trace_security_",
+      "fd": 280
+    },
+    {
+      "name": "trace_chmod_com",
+      "fd": 281
+    },
+    {
+      "name": "trace_security_",
+      "fd": 282
+    },
+    {
+      "name": "syscall_checker",
+      "fd": 283
+    },
+    {
+      "name": "trace_security_",
+      "fd": 284
+    },
+    {
+      "name": "trace_sock_allo",
+      "fd": 285
+    },
+    {
+      "name": "trace_ret_sock_",
+      "fd": 286
+    },
+    {
+      "name": "trace_security_",
+      "fd": 287
+    },
+    {
+      "name": "trace_security_",
+      "fd": 288
+    },
+    {
+      "name": "trace_security_",
+      "fd": 289
+    },
+    {
+      "name": "cgroup_bpf_run_",
+      "fd": 290
+    },
+    {
+      "name": "",
+      "fd": 291
+    },
+    {
+      "name": "cgroup_skb_ingr",
+      "fd": 291
+    },
+    {
+      "name": "cgroup_skb_egre",
+      "fd": 292
+    },
+    {
+      "name": "cgroup_mkdir_si",
+      "fd": 293
+    },
+    {
+      "name": "cgroup_rmdir_si",
+      "fd": 294
+    },
+    {
+      "name": "empty_kprobe",
+      "fd": 295
+    },
+    {
+      "name": "tracepoint__exe",
+      "fd": 296
+    },
+    {
+      "name": "uprobe__feature",
+      "fd": 297
+    },
+    {
+      "name": "uprobe__feature",
+      "fd": 298
+    },
+    {
+      "name": "uprobe__feature",
+      "fd": 299
+    },
+    {
+      "name": "uprobe__feature",
+      "fd": 300
+    },
+    {
+      "name": "",
+      "fd": 311
+    }
+  ],
+  "submission_error_lines": [
+    "[240.718184 pid=2789 tid=2799] native-loader failed prog=tracepoint__raw manifest=/opt/bpf-benchmark/native-bpf/x86_64/tracee/manifest.json source=/tmp/bpfrejit_2789_db023415dd9df842.bpf error=kernel native resource submission refused: Argument list too long"
+  ],
+  "raw_hashes": {
+    "driver.log.gz": "3e82593dde224ced87271916f0b9b3e216159bb9169625ff4ee49762a1534f6e",
+    "service.tar.gz": "1c773fa4aeaf7a4ef757c1b26ab26d7ad890345b6c280ba85e9dcfdd20058ff8",
+    "launch.tar.gz": "98ac771e8b63f7e43623a7cd70f724422a7bee0773f9fe68a10edd94dfab420f",
+    "result.tar.gz": "4f524a383dee98f225fe00165415b34d575115306b74625c575b998654c3ed2e"
+  }
+}
