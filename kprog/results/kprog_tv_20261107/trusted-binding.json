@@ -1,0 +1,93 @@
+{
+  "trusted-capture": {
+    "binding": "passed",
+    "translation_validation": "not_discharged",
+    "native_bytes": 5,
+    "verifier_insns": 4,
+    "source_prog_id": 3,
+    "native_prog_id": 8,
+    "emitted_sites": [
+      {
+        "blob_id": 0,
+        "generation": 4,
+        "abi_mask": 0,
+        "entry_address": 18446744072642107350,
+        "jit_offset": 14,
+        "native_offset": 0,
+        "native_size": 5
+      }
+    ],
+    "rejected_controls": [
+      "entry",
+      "abi",
+      "architecture",
+      "metadata",
+      "proof",
+      "native",
+      "RX entry",
+      "accepted B",
+      "proof correspondence",
+      "RX bytes",
+      "RX address"
+    ],
+    "expected": {
+      "arch": 1,
+      "abi": 0,
+      "entry": "trusted_entry"
+    },
+    "trusted": [
+      "kernel capture/binding code and archived accepted-byte provenance",
+      "registered specialization/link service until per-program TV connects output to immutable P",
+      "verifier soundness",
+      "reference ISA/platform semantics when refinement is supplied"
+    ]
+  },
+  "trusted-simple": {
+    "binding": "passed",
+    "translation_validation": "not_discharged",
+    "native_bytes": 60,
+    "verifier_insns": 37,
+    "source_prog_id": 6,
+    "native_prog_id": 11,
+    "emitted_sites": [
+      {
+        "blob_id": 0,
+        "generation": 4,
+        "abi_mask": 0,
+        "entry_address": 18446744072642107553,
+        "jit_offset": 21,
+        "native_offset": 0,
+        "native_size": 60
+      }
+    ],
+    "rejected_controls": [
+      "entry",
+      "abi",
+      "architecture",
+      "metadata",
+      "proof",
+      "native",
+      "RX entry",
+      "accepted B",
+      "proof correspondence",
+      "RX bytes",
+      "RX address"
+    ],
+    "expected": {
+      "arch": 1,
+      "abi": 0,
+      "entry": "simple_xdp"
+    },
+    "trusted": [
+      "kernel capture/binding code and archived accepted-byte provenance",
+      "registered specialization/link service until per-program TV connects output to immutable P",
+      "verifier soundness",
+      "reference ISA/platform semantics when refinement is supplied"
+    ]
+  },
+  "checker_sha256": {
+    "kprog/tv/check_trusted_capture.py": "7dfddc726875c05fb7cbc4c70f101d4922166cb54256d2d74ed5c1befdea0c55",
+    "kprog/tv/emitted_sites.py": "3d05649e222ab603d757c6af44adeda3ee1eb3d17e1c2be8c646051dbd669105",
+    "kprog/tv/extract_checked.py": "60ce986eb22e3185ab565c1ad9b88987582dabd145bc9436c3973e02617ba252"
+  }
+}

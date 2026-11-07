@@ -789,3 +789,7 @@ build/simple.native.o: ../../micro/programs/simple.bpf.c ../../micro/programs/co
 	clang -O3 -g -fPIC -fno-plt -DMICRO_NATIVE -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only \
 		-fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
 		-mllvm -switch-to-lookup=false -I../../micro/programs/build-host-docker-x86 -c $< -o $@
+
+.PHONY: trusted-binding-check
+trusted-binding-check:
+	PYTHONDONTWRITEBYTECODE=1 python3 check_trusted_capture.py

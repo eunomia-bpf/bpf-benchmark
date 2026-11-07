@@ -12,7 +12,7 @@ def validate_emitted(data, metadata, native, relocs, jit, addresses, lengths):
         raise ValueError('emission identity/count differs from accepted binding')
     if relocs:
         raise ValueError('relocated native needs final-patch validation before an exact-byte certificate')
-    if binding[1] != 2 or len(native) != binding[7]:
+    if binding[1] not in (1, 2) or len(native) != binding[7]:
         raise ValueError('wrong native architecture/extent')
     bases = [x[0] for x in struct.iter_unpack('<Q', addresses)]
     sizes = [x[0] for x in struct.iter_unpack('<I', lengths)]
@@ -31,7 +31,7 @@ def validate_emitted(data, metadata, native, relocs, jit, addresses, lengths):
     for index in range(count):
         blob, generation, size, abi, address = struct.unpack_from('<4IQ', data, 16 + index * 24)
         if blob != index or (generation, abi) != regions[index] or abi != binding[4] or \
-                not size or size % 4 or not address or address % 4 or native_offset + size > len(native):
+                not size or not address or (binding[1] == 2 and (size % 4 or address % 4)) or native_offset + size > len(native):
             raise ValueError('native site generation/ABI/extent mismatch')
         matches, image_offset = [], 0
         for base, length in zip(bases, sizes):

@@ -1158,3 +1158,22 @@ the service's ET_REL contract. The final input is compiled directly from the
 original micro source; service/generator policy is unchanged. These runtime
 checks and bound artifacts are inputs to the whole-program certificate; they
 do not establish full-state or exact-event ISA refinement on their own.
+
+`trusted-binding-check` validates the two retained native-only service exports
+with the existing checked-artifact and RX-entry parsers. The RX parser now
+accepts x86 byte alignment as well as ARM's four-byte alignment. The checker
+requires external expected entry/ISA/ABI, pins every exported accepted file,
+compares immutable capsule context to actual pinned source facts and binding,
+reconstructs the real EXIT-to-JA proof instantiation, and compares all native
+bytes at the reported RX entry. It rejects11 mismatches per accepted program
+(entry, ISA, ABI, metadata, proof/native/checked bytes and RX entry), including
+three structural mismatches tested without the external byte pins. These are
+offline evidence checks, not additional kernel rejection tests or an ISA
+refinement proof. The supported check here is the actual single-region,
+mapless, relocation-free, zero-ABI-mask records; other artifacts retain their
+own existing checks and still require refinement/materialization certificates.
+The currently trusted specialization/link service still has to be connected
+to immutable P by per-program TV. Accepted-byte provenance and the kernel
+capture/binding implementation remain explicit trust assumptions. Extending
+RX checks to x86 retains the existing ARM simple/simple_packet regression:
+four actual captures pass and all72 corruptions remain rejected.
