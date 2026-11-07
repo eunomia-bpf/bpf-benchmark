@@ -1,0 +1,31 @@
+{
+  "utc": "2026-11-07T18:08:42.702445+00:00",
+  "status": "cancelled_superseded_no_completed_benchmark_result",
+  "vng_exit": 255,
+  "reason": "Separate mutable-source diagnostic superseded by independently audited standard C bootstrap13program/39sample/26fresh-request regression.",
+  "replacement_commit": "aaf7b9dc425f00ef9ee1f3e18ef0a5ef70e65201",
+  "independent_review_commit": "e8087267395fce4338ed9c78cc8a56f79a8d7a29",
+  "no_success_or_failure_sample_claim": true,
+  "complete_driver_result_exists": false,
+  "request_log_exists": false,
+  "source_before": {
+    "runner/src/native_lab_runner.cpp": "afa5c2567fc8d8ac486b231849f82ef0018f89455fc58d67970b140e3aedff5d",
+    "runner/build-llvmbpf/micro_exec": "6af68aec1c00f5bc2150beba0a89e610f20ee0f90e13445f04d3621d04720108",
+    "kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+    "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29",
+    "kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1"
+  },
+  "source_after": {
+    "runner/src/native_lab_runner.cpp": "afa5c2567fc8d8ac486b231849f82ef0018f89455fc58d67970b140e3aedff5d",
+    "runner/build-llvmbpf/micro_exec": "90530ee453832eccf0cf2191ef6a98eabdde9460108166e5f8ed2eafa3806533",
+    "kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+    "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29",
+    "kprog/trusted_service.py": "8763816abaf2707e496f5bc03b709c9c21724a63754d76d185208f76a3281e24"
+  },
+  "source_drift": [
+    "runner/build-llvmbpf/micro_exec",
+    "kprog/trusted_service.py"
+  ],
+  "driver_provenance": "Exact imported driver source was not captured. Launch predates C migration; no exact old-import assertion is supported.",
+  "raw_archive_sha256": "a40587475e03a6ba0e000e1f0066c7c809ebe3a92992d5c2618cdbbed0590f18"
+}
