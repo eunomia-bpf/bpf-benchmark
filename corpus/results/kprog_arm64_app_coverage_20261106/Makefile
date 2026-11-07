@@ -359,7 +359,7 @@ pin-runtime-v2:
 runtime-shim-v2:
 	python3 $(HERE)/pin_shim.py
 	taskset -c 16-23 $(MAKE) -C $(ROOT) host-shim-arm64 \
-		BPFOPT_SHIM_DIR=$(ROOT)/kprog/arm64/build/published-shim-v5/bpfopt/shim \
+		BPFOPT_SHIM_DIR=$(ROOT)/kprog/arm64/build/published-shim-v8/bpfopt/shim \
 		BPFOPT_SHIM_BUILD_ARM64=$(RUNTIME_SHIM_BUILD)
 
 .PHONY: qemu-context-v2-root

@@ -1,9 +1,9 @@
-"""Build ARM images from the published strict shim without consuming shared WIP."""
+"""Build ARM images from the published shim without consuming shared WIP."""
 from pathlib import Path
 import subprocess
 ROOT=Path(__file__).resolve().parents[3]
-revision='0bff849bf'
-target=ROOT/'kprog/arm64/build/published-shim-v5'
+revision='9962aec5e'
+target=ROOT/'kprog/arm64/build/published-shim-v8'
 files=subprocess.check_output(['git','ls-tree','-r','--name-only',revision,'--','bpfopt/shim'],cwd=ROOT,text=True).splitlines()
 if not files:raise RuntimeError('published shim source is absent')
 for name in files:
@@ -12,4 +12,4 @@ for name in files:
 vendor=target/'vendor'
 if not vendor.exists():vendor.symlink_to(ROOT/'vendor',target_is_directory=True)
 (target/'SOURCE_COMMIT').write_text(revision+'\n')
-print(f'published strict shim {revision} exported to {target}; shared shim files preserved')
+print(f'published shim {revision} exported to {target}; shared shim files preserved')
