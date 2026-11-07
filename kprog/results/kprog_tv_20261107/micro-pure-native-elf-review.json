@@ -1,0 +1,189 @@
+{
+  "utc": "2026-11-07T17:50:54.087927+00:00",
+  "status": "all29_actual_pure_micro_requests_refused_for_ET_DYN_instead_of_required_ET_REL",
+  "archive": "micro/results/trusted-service-b6652829.tar.gz",
+  "archive_sha256": "b69f9befde2ee24e2454e82ef6867e294a3553beb064d0094f3318ddf6f99a27",
+  "requests": [
+    {
+      "request_id": 1,
+      "entry": "simple_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 2,
+      "entry": "simple_packet_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 3,
+      "entry": "bitmap_popcount_scan_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 4,
+      "entry": "sorted_rule_binary_search_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 5,
+      "entry": "bcc_runqlat_log2_histogram_bucket_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 6,
+      "entry": "trace_event_type_switch_dispatch_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 7,
+      "entry": "packet_checksum_fold_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 8,
+      "entry": "payload_prefix_memcmp_scan_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 9,
+      "entry": "packet_vlan_tcpopt_parser_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 10,
+      "entry": "bpf_local_call_fanout_dispatch_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 11,
+      "entry": "flow_5tuple_rss_hash_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 12,
+      "entry": "katran_lb_consistent_hash_select_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 13,
+      "entry": "cilium_policy_guard_tree_filter_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 14,
+      "entry": "siphash_rotate64_mixer_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 15,
+      "entry": "packet_record_bounds_window_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 16,
+      "entry": "flow_record_field_scan_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 17,
+      "entry": "packed_header_bitfield_decode_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 18,
+      "entry": "bpftrace_string_search_prefix_scan_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 19,
+      "entry": "tracee_syscall_name_table_lookup_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 20,
+      "entry": "tracee_http_method_prefix_detect_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 21,
+      "entry": "cilium_socket_lb_service_select_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 22,
+      "entry": "bcc_tcpconnect_ipv4_tuple_filter_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 23,
+      "entry": "tetragon_process_event_arg_filter_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 24,
+      "entry": "otel_stack_frame_unwind_scan_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 25,
+      "entry": "cilium_ct_nat_tuple_rewrite_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 26,
+      "entry": "packet_toeplitz_rss_hash_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 27,
+      "entry": "bpftrace_comm_key_fnv_hash_xdp",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 28,
+      "entry": "tc_packet_checksum_fold_prog",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    },
+    {
+      "request_id": 29,
+      "entry": "cgroup_skb_hash_chain_prog",
+      "ELF_type": "ET_DYN",
+      "status": -22
+    }
+  ],
+  "source_sha256": {
+    "micro/catalog.py": "f00db002834d5c374739c29ba3a198bc7e62022d3201bcfd916e6b7e4c618076",
+    "kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a"
+  },
+  "cause": "Catalog uses native.so for non-stage2 native kernel programs, while the common service supports relocatable ELF only. All refusals occur before generation/verifier.",
+  "owner": "C standard micro artifact/catalog integration; T preserves strict classifier and input validation.",
+  "remaining": "Produce and select the supported ET_REL input on the pure native-kernel path, then run actual regression; no exemption or success claim."
+}
