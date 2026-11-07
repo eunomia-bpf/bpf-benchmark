@@ -1,7 +1,7 @@
 """Keep the registered trusted service outside the unchanged corpus container."""
 from pathlib import Path
 from datetime import datetime,timezone
-import argparse,fcntl,hashlib,json,os,signal,subprocess,sys,tarfile,tempfile,threading,traceback
+import argparse,fcntl,hashlib,json,os,shutil,signal,subprocess,sys,tarfile,tempfile,threading,traceback
 R=Path('/workspaces/repository');O=Path(__file__).resolve().parent
 S=Path('/workspaces/.agent-state/kprog-lanes/C/native-only-runtime')
 p=argparse.ArgumentParser();p.add_argument('--samples',type=int,required=True);p.add_argument('--duration',type=int,required=True);p.add_argument('--apps',required=True);p.add_argument('--state',type=Path,default=S);a=p.parse_args();S=a.state.resolve()
@@ -39,6 +39,18 @@ with tempfile.TemporaryDirectory(prefix='.live-',dir=O) as directory, tempfile.T
   service.wait()
   if reader is not None:reader.join()
   service.stdout.close()
+  # The service's per-request error.json is the only place an EIO's reason
+  # is written, and `private` is a TemporaryDirectory this harness deletes
+  # on exit, so a failed run otherwise leaves no diagnosis behind. Keep the
+  # terminal records beside the results.
+  retained=[]
+  if state.is_dir():
+   keep=O/('trusted-state-'+summary['started'].replace(':','').replace('-','')[:15])
+   for item in sorted(state.iterdir()):
+    if item.suffix in ('.json','.jsonl') or item.name.endswith('.failure.tar.gz'):
+     keep.mkdir(parents=True,exist_ok=True);shutil.copy2(item,keep/item.name);retained.append(item.name)
+  summary['retained_service_state']=str(keep) if retained else None
+  summary['retained_service_files']=sorted(retained)
   log.close();summary['finished']=datetime.now(timezone.utc).isoformat()
   with (live/'kernel.log').open('w') as kernel_log:subprocess.run(['dmesg'],stdout=kernel_log,stderr=subprocess.STDOUT)
   (live/'meminfo.txt').write_text(Path('/proc/meminfo').read_text())
