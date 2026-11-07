@@ -1,6 +1,6 @@
 # Observed ARM first-pass application coverage
 
-Load attempts retain probes, transients, retries and failures. Resident rows and service requests have separate denominators. Closed application outcomes preserve startup errors and measured work.
+All six first-pass application runs are closed. Load attempts retain probes, transients, retries and failures. Resident rows and service requests have separate denominators.
 
 | App | Baseline loads / IDs / resident | Native loads | Requests | Compiled | Bound | Specialization error | Verifier error | Other loader error | Application |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
@@ -8,5 +8,7 @@ Load attempts retain probes, transients, retries and failures. Resident rows and
 | otelcol-ebpf-profiler | 16 / 15 / 12 | 3 | 1 | 1 | 0 | 0 | 0 | 1 | error |
 | cilium | 8 / 5 / 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | error |
 | tetragon | 205 / 201 / 152 | 19 | 0 | 0 | 0 | 0 | 0 | 0 | error |
+| katran | 6 / 6 / 1 | 6 | 1 | 1 | 1 | 0 | 0 | 0 | ok |
+| tracee | 162 / 162 / 151 | 9 | 1 | 1 | 0 | 0 | 0 | 1 | error |
 
-Katran guest and application complete with exit0 and one bound service request. [The two-start work record](katran-two-start-work.json) retains 26,197 baseline packets and 23,208 native packets, each with matching BPF, VIP, TX and receiver counts and one LRU miss. Original host metadata keeps its shared-source drift flag; observed analysis-time change is the published x86 memory-access header. First-pass corpus and universal safety work continue.
+Katran completes guest/application execution with one bound request. [Its work record](katran-two-start-work.json) retains matching packet/BPF/VIP/TX/receiver counts for both phases. Tracee records one generated and compiled request, followed by a native-link tail-map-plan rejection before verifier submission. The recorded ARM loader build predates the shared PROG_ARRAY identity repair at 3d0e584b5; the next source epoch consumes an updated ARM build. Original host status and shared-source drift flags remain in each raw result. Whole-application repairs and universal safety theorem work continue.
