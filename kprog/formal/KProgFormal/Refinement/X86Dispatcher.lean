@@ -150,4 +150,91 @@ theorem step_through_move_refines (env : EntryEnvironment.Environment) (frame : 
         GeneratedX86DispatchSingleton.code, widthDecoded, dstDecoded, srcDecoded] using
         congrArg some (move_register_frame_refines env frame arena state width destination source nextPc)
 
+
+/-- CMOV has no byte operand form. The width field retains the production
+zero-to64 fallback through the same raw-width decoder. -/
+def cmovWidthOf (flags : Byte) : Option Reference.X86.CmovWidth := do
+  match ← widthOf flags with
+  | .w16 => some .w16 | .w32 => some .w32 | .w64 => some .w64 | .w8 => none
+
+def cmovScalarWidth : Reference.X86.CmovWidth → ScalarWidth
+  | .w16 => .w16 | .w32 => .w32 | .w64 => .w64
+
+theorem cmov_width_binding_decodes (flags : Byte) (width : Reference.X86.CmovWidth)
+    (binding : WidthBinding flags (cmovScalarWidth width)) :
+    cmovWidthOf flags = some width := by
+  have decoded := width_binding_decodes flags (cmovScalarWidth width) binding
+  cases width <;> simp [cmovWidthOf, decoded, cmovScalarWidth] at *
+
+/-- Partial register-handler dispatcher. Existing NOP/MOV steps retain their
+prefix selection; the later singleton CMOV/XCHG gates consume their actual
+raw opcode, width and GPR fields. Every intervening unproved opcode remains
+None. Distinct generated opcode identities prevent an intervening handler
+from taking these two gates; None never means production success/rejection. -/
+def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
+  match dispatchThroughMove env frame arena code flags aux dst src value nextPc state with
+  | some result => some result
+  | none =>
+      if code = GeneratedX86DispatchSingleton.code .cmov then do
+        let width ← cmovWidthOf flags
+        let destination ← registerOf dst
+        let source ← registerOf src
+        pure ⟨nativeRegisters env frame arena
+          (conditionalMoveWord env frame arena state width aux destination source nextPc), [], none⟩
+      else if code = GeneratedX86DispatchSingleton.code .xchg then do
+        let width ← widthOf flags
+        let destination ← registerOf dst
+        let source ← registerOf src
+        pure ⟨nativeRegisters env frame arena
+          (exchangeRegisters env frame arena state width destination source nextPc), [], none⟩
+      else none
+
+/-- Field/operand identities only. CMOV consumes the entire condition AUX;
+XCHG ignores AUX and immediate, matching the production low-slice encoder.
+The native instruction is the single canonical ISA's existing constructor. -/
+inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Word) :
+    Nat → Reference.X86.Instruction → Prop where
+  | move (code : Nat) (native : Reference.X86.Instruction)
+      (fields : MoveBinding flags aux dst src value nextPc code native) :
+      RegisterBinding flags aux dst src value nextPc code native
+  | cmov (width : Reference.X86.CmovWidth) (cc : Fin 16) (destination source : Register)
+      (widthField : WidthBinding flags (cmovScalarWidth width))
+      (dstField : dst = registerByte destination) (srcField : src = registerByte source)
+      (conditionField : aux = BitVec.ofNat 32 cc.val) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchSingleton.code .cmov)
+        (.cmov width cc destination (.register source) nextPc)
+  | exchange (width : ScalarWidth) (destination source : Register)
+      (widthField : WidthBinding flags width)
+      (dstField : dst = registerByte destination) (srcField : src = registerByte source) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchSingleton.code .xchg)
+        (.exchange width (.low destination) (.low source) nextPc)
+
+/-- One complete raw-frame step for the currently lifted register opcodes:
+NOP/MOV immediate/MOV register/CMOV(all16)/XCHG. Neither component handler
+semantics nor a chosen condition/value/state equation is assumed. This is a
+partial dispatcher theorem, not all77 operations or a compiled-body claim. -/
+theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : RegisterBinding flags aux dst src value nextPc code native) :
+    dispatchRegisters env frame arena code flags aux dst src value nextPc state =
+      some (Reference.X86.step native (nativeRegisters env frame arena state)) := by
+  cases binding with
+  | move code native fields =>
+      simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
+  | cmov width cc destination source widthField dstField srcField conditionField =>
+      subst dst; subst src; subst aux
+      have decoded := cmov_width_binding_decodes flags width widthField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, GeneratedX86Opcode.code,
+        GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
+        congrArg some (conditional_move_word_frame_refines env frame arena state width cc destination source nextPc)
+  | exchange width destination source widthField dstField srcField =>
+      subst dst; subst src
+      have decoded := width_binding_decodes flags width widthField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, GeneratedX86Opcode.code,
+        GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
+        congrArg some (exchange_register_frame_refines env frame arena state width destination source nextPc)
+
 end KProgFormal.Refinement.X86Dispatcher

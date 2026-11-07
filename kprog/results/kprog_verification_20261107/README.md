@@ -2014,3 +2014,33 @@ against the unchanged POPCNT harness compile failure or separate CMOV-route
 unaligned-pointer failure. F's newly published LEAVE fault-kind discrepancy
 is separately acknowledged for the canonical owner correction, not hidden
 by this CMOV proof.
+
+## Joined raw register dispatcher for MOV, CMOV and XCHG
+
+`register_dispatch_step_refines` joins the existing NOP/MOV prefix to the
+later generated singleton gates for register CMOV and XCHG. Every generated
+opcode identity is distinct; intervening unproved opcode bodies stay outside
+the partial dispatcher, without a new runtime guard or a successful-no-op
+claim. The same canonical whole-state step uses the raw RSP/STACK frame.
+
+RegisterBinding carries encoded opcode, width, GPR bytes, next-PC and native
+operand identities only. CMOV uses complete32-bit AUX and all16 conditions,
+including parity, with the actual64-bit pointer arm and false32 clearing.
+XCHG ignores AUX/immediate at every width, as its production handler does;
+both operands are captured before either write. All aliases and RSP source/
+destination cases remain covered. MOV high/low-byte bindings are retained.
+No handler-semantic, condition-result, state-value or register-disjointness
+premise is added. The producer's earlier high-byte XCHG rejection is already
+recorded separately; no admitted form is excluded by a new producer rule.
+
+Focused58-job Lean graph and two axiom audits PASS with only the existing
+propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies; all372
+physical proof/configuration pins remain unchanged. Original declarations
+are byte-identical; no ISA/runtime/header/generator/oracle/test/configuration
+changes. Existing underlying CMOV/XCHG hosts and raw-field checks are the
+separately recorded evidence, not silently rerun or counted as new cases.
+Full logs/audits/commands/pins are appended to the existing integration archive.
+All other x86 handlers, all77/72 completion, compiled B, initial ABI/O2/O4,
+full-check POPCNT and CMOV-route failures remain open. The strict LEAVE
+noncanonical fault-kind discrepancy likewise awaits its canonical correction;
+this proof does not coarsen or hide that hardware failure.

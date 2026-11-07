@@ -201,3 +201,9 @@ AUX condition word to all16 native CMOV conditions, including parity,
 through the raw RSP/STACK frame. Both outcomes and false32 zero extension
 are derived from generated condition evaluation; no condition-result premise
 is required. This component still requires dispatcher/artifact/ABI composition.
+
+`X86Dispatcher.register_dispatch_step_refines` composes the same raw-field
+NOP/MOV prefix with register CMOV(all16 conditions) and XCHG through generated
+singleton opcode gates. Its binding contains only operand/width/AUX/PC field
+identities; XCHG ignores AUX/immediate, and CMOV reads the entire AUX word.
+Other opcodes remain explicitly outside this partial theorem.
