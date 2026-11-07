@@ -251,3 +251,31 @@ input/Clang flags were used; no verifier limit, fuel, branch assertion or
 application code was changed. Both guest disk and exported image tar are
 absent after closure. Continue from this exact complexity rejection after
 the higher-priority micro shared-ELF repair.
+
+
+### Module dependency indexes and matching split BTF
+
+The 19:31–19:40 application batch records Cilium route protocol availability,
+Katran tunnel4 lookup, and Tetragon/Tracee scsi_common split-BTF relocation
+errors during baseline startup. Their full runtime observations are published
+in the adjacent native-width application directories. OTel reaches native
+loading and retains its separately measured verifier exploration limit.
+
+The common image now generates module dependency indexes inside /artifacts,
+the root used by the existing corpus module loader. The recorded host lookup
+control keeps the same tunnel4 module bytes: modprobe lookup exits1 before
+index generation and exits0 with the exact tunnel4 path after depmod.
+module-package-index.json holds both raw command outcomes.
+
+The modules target first advances the existing kernel module build against its
+current vmlinux BTF, then installs the current module set and the matching
+native modules. Packaging refreshes its owned staging copy and records every
+kernel module SHA plus the vmlinux SHA. Existing kernel objects and build
+caches support the incremental build. Application code and the workload
+protocol retain their existing sources.
+
+The incremental module refresh is running on20–23. Image replacement and the
+four-application startup replay are queued after R's active BCC timing guest.
+That replay uses eight guest vCPUs for the existing Katran NAPI CPU layout,
+12GiB, one sample and a two-second workload. The next application batch will
+record the refreshed image identity, kernel/module inputs and startup results.

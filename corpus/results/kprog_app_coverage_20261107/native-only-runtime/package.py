@@ -13,7 +13,7 @@ for src,name in [('kprog/libnativeloader/build/libnative_loader.so','libnative_l
 K=R/'kprog/tv/build-kernel-x86';release=(K/'include/config/kernel.release').read_text().strip()
 module_root=S/'kernel-modules/lib/modules'
 assert (module_root/release).is_dir(),'export current cached kbuild modules with modules_install'
-if (D/'modules').exists():raise RuntimeError('preserve existing package; do not silently replace compiled inputs')
+if (D/'modules').exists():shutil.rmtree(D/'modules')
 shutil.copytree(module_root,D/'modules',ignore=shutil.ignore_patterns('build','source'))
 for src in sorted((R/'kprog/tv/build-x86/corpus-modules').glob('*.ko')):copy(src,D/'kinsn'/src.name)
 assert len(list((D/'kinsn').glob('*.ko')))==15
@@ -28,6 +28,8 @@ for folder in ['runner/libs','runner/config','runner/suites','corpus/config','co
   if src.is_file() and '__pycache__' not in src.parts:copy(src,D/'code'/src.relative_to(R))
 for folder in ['runner','corpus']:
  for src in sorted((R/folder).glob('*.py')):copy(src,D/'code'/src.relative_to(R))
-record=dict(base_id=base['Id'],base_layers=base['RootFS']['Layers'],source_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=R,text=True).strip(),kernel_release=release,input_sha256=pins)
+module_hashes={str(p.relative_to(module_root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(module_root.rglob('*.ko'))}
+with (K/'vmlinux').open('rb') as stream:kernel_vmlinux_sha256=hashlib.file_digest(stream,'sha256').hexdigest()
+record=dict(kernel_module_sha256=module_hashes,kernel_vmlinux_sha256=kernel_vmlinux_sha256,base_id=base['Id'],base_layers=base['RootFS']['Layers'],source_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=R,text=True).strip(),kernel_release=release,input_sha256=pins)
 (O/'package-inputs.json').write_text(json.dumps(record,indent=2)+'\n')
 print('packaged',len(pins),'current inputs; cached kernel modules and15 matching kinsn modules; base',base['Id'],flush=True)

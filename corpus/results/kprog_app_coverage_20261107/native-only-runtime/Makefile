@@ -15,6 +15,7 @@ WORKLOAD_DURATION ?= 2
 APPS ?= bcc/set
 .PHONY: modules package image corpus guest
 modules:
+	$(MAKE) -C $(KDIR) ARCH=x86 modules
 	$(MAKE) -C $(KDIR) M=$(ROOT)/kinsn/module/x86 MO=$(ROOT)/kprog/tv/build-x86/corpus-modules ARCH=x86 modules
 	$(MAKE) -C $(KDIR) INSTALL_MOD_PATH=$(STATE)/kernel-modules DEPMOD=true modules_install
 package:

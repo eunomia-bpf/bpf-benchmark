@@ -1,0 +1,21 @@
+{
+  "command": [
+    "modprobe",
+    "-d",
+    "/workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules",
+    "--set-version",
+    "7.0.0-rc2+",
+    "--show-depends",
+    "tunnel4"
+  ],
+  "before": {
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "modprobe: FATAL: Module tunnel4 not found in directory /workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules/lib/modules/7.0.0-rc2+\n"
+  },
+  "after": {
+    "returncode": 0,
+    "stdout": "insmod /workspaces/.agent-state/kprog-lanes/C/native-only-runtime/kernel-modules/lib/modules/7.0.0-rc2+/kernel/net/ipv4/tunnel4.ko \n",
+    "stderr": ""
+  }
+}

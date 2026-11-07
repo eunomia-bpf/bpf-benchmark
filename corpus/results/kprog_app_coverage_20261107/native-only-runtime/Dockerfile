@@ -8,5 +8,6 @@ COPY kinsn/ /artifacts/kinsn/
 COPY modules/ /artifacts/lib/modules/
 COPY kernel/ /artifacts/kernel/
 COPY manifest.json /artifacts/manifest.json
+RUN depmod -b /artifacts "$(python3 -c 'import json; print(json.load(open("/artifacts/manifest.json"))["kernel_release"])')"
 COPY native-bpf/ /artifacts/user/native-bpf/x86_64/
 COPY code/ /workspaces/repository/
