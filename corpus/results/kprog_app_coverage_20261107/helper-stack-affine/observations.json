@@ -1,0 +1,13 @@
+{
+  "generic_encoder_abi_cases": 141,
+  "new_affine_cases": 9,
+  "cl_ubsan_cases": 3072,
+  "rendered_movx_host_bpf_cases": 19,
+  "candidate_exit": 0,
+  "prior_affine_control_detected": true,
+  "source_sha256": {
+    "kprog/x86/micro-prog/x86_abi.py": "d3c89b3163e7cb4354979323ca1ea2b7f3501aa7e6dd75e4f0502d1c163c50b6",
+    "kprog/formal/tools/check_x86_flag_definedness.py": "1d3da75bea52e53fa8726d62f529e9183a05f2476b05c7bd5321c6d742f41769"
+  },
+  "scope": "finite stack-origin and external-pointer alternatives under affine addressing, with opaque-byte taint preserved"
+}

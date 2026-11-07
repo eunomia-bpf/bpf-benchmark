@@ -108,6 +108,31 @@ def main():
         check([(op, ()), ("ret", ())], "undefined native ABI register")
     check([("mov", ("ax", "WORD PTR [rdi]")),
            ("movsx", ("eax", "ah")), ("ret", ())])
+    # Finite stack/external joins retain every affine source alternative.
+    for operation in ("lea", "indexed", "add", "sub"):
+        for opaque_source in (False, True):
+            prefix = [("sub", ("rsp", "64")),
+                      ("mov", ("QWORD PTR [rsp+8]", "rbx" if opaque_source else "42")),
+                      ("mov", ("r8", "rdi")), ("mov", ("r9", "rsp")),
+                      ("cmp", ("rdi", "0")), ("cmove", ("r8", "r9"))]
+            source = {"lea": [("lea", ("rdx", "[r8+8]"))],
+                      "indexed": [("mov", ("ecx", "2")), ("lea", ("rdx", "[r8+rcx*2+4]"))],
+                      "add": [("mov", ("rdx", "r8")), ("add", ("rdx", "8"))],
+                      "sub": [("mov", ("rdx", "r8")), ("sub", ("rdx", "-8"))]}[operation]
+            call = [("lea", ("rdi", "[rsp+32]")), ("mov", ("esi", "8")),
+                    ("mov", ("eax", "113")), ("call", ("rax",)),
+                    ("mov", ("eax", "DWORD PTR [rsp+32]")),
+                    ("add", ("rsp", "64")), ("ret", ())]
+            check(prefix + source + call,
+                  "undefined native ABI register eax" if opaque_source else None)
+    unresolved = [("sub", ("rsp", "64")), ("mov", ("rcx", "QWORD PTR [rdi]")),
+                  ("mov", ("r8", "rdi")), ("mov", ("r9", "rsp")),
+                  ("cmp", ("rdi", "0")), ("cmove", ("r8", "r9")),
+                  ("lea", ("rdx", "[r8+rcx*2+4]")),
+                  ("lea", ("rdi", "[rsp+32]")), ("mov", ("esi", "8")),
+                  ("mov", ("eax", "113")), ("call", ("rax",)),
+                  ("add", ("rsp", "64"))] + finish
+    check(unresolved, "native helper source stack relation unresolved")
     print(f"x86 flag definedness: {cases} encoder/ABI condition and undefined-result cases OK")
     check_compiled_counts()
     check_compiled_movx()

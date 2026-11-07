@@ -115,7 +115,7 @@ matching-work measurement continue from the reported failure classes.
 | Cilium | 163 | 1 | 0 | 0 | 1: map declaration | 0 | [201146 batch](native-modules-cilium__agent/README.md) |
 | Tetragon | 289 | 2 | 2 | 2 | 1: helper stack relation | 0 | [201956 batch](native-coherent-tetragon__observer/README.md) |
 | Katran | 1 | 1 | 1 | 0 | 0 | 1: partial pointer-register write | [201524 batch](native-coherent-katran/README.md) |
-| Tracee | 151 | 2 | 2 | 1 | 0 | 1: raw-context scalar address | [200640 batch](native-modules-tracee__monitor/README.md) |
+| Tracee | 151 | 2 | 2 | 2 | 1: helper stack relation | 0 | [203243 helper-preserving batch](tracee-core-helper/README.md) |
 
 Tracee baseline now completes151 application loads on the coherent kernel BTF
 epoch. The shared native CORE helper-preservation repair48ff82cfb restores its
@@ -136,3 +136,12 @@ candidate stays private and the production header remains47fb. The next
 representation repair continues from this complete runtime result. Tracee's
 helper-preserving whole-application replay is now active in a separate serial
 batch with native input7479850e2345 and exact new image/input identities.
+
+
+The [Tracee CORE helper-preserving batch203243](tracee-core-helper/README.md)
+closes the register-frame read failure at sys_enter_init and fresh-binds two
+entries. Its next request reaches helper source stack relation analysis. The
+shared [affine stack-origin repair](helper-stack-affine/README.md) preserves
+finite private-stack/external alternatives through displacement, known index
+and constant ADD/SUB while retaining opaque-byte checks. The generic checker
+passes141 cases; whole Tetragon/Tracee replay follows the new source epoch.

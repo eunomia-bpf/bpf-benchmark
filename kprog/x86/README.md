@@ -372,3 +372,11 @@ input epoch, recorded with the compiled object and runtime request identities.
 The native-core-helper result records generic x86/ARM helper observations and
 the queued whole-application replay; universal helper/native-link preservation
 laws provide the formal safety argument.
+
+
+Native ABI helper-copy analysis translates each finite stack-origin alternative
+through LEA displacement, known scaled indices and64-bit constant ADD/SUB,
+retaining the external-pointer case and opaque-byte taint. The shared checker
+covers defined copies, opaque copies and variable-index unresolved origins.
+The helper-stack-affine result records the generic analysis observations;
+whole-application replay supplies the ensuing runtime coverage.

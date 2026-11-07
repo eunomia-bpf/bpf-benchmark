@@ -84,6 +84,15 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
             return PointerAlternatives(left.offsets | right.offsets,left.external or right.external)
         return None
 
+    def offset_pointer(value, displacement):
+        if type(value) is int:
+            return value + displacement
+        if isinstance(value, PointerAlternatives):
+            return PointerAlternatives(
+                frozenset(offset + displacement for offset in value.offsets),
+                value.external)
+        return value
+
     def joined(a, b):
         opaque = {p: a.opaque.get(p, 255) & b.opaque.get(p, 255)
                   for p in a.opaque.keys() | b.opaque.keys()}
@@ -182,14 +191,14 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
                     need(incoming, regs[index[reg]].removeprefix('X86_').lower(), where)
             if ix != 'X86_REG_NONE':
                 iv = incoming.constants[index[ix]]
-                if base != 'X86_REG_NONE' and type(alias[index[base]]) is int:
-                    return alias[index[base]] + (iv << scale) + disp if iv is not None else None
+                if base != 'X86_REG_NONE' and (type(alias[index[base]]) is int or
+                                               isinstance(alias[index[base]], PointerAlternatives)):
+                    return offset_pointer(alias[index[base]], (iv << scale) + disp) if iv is not None else None
                 return False if base == 'X86_REG_NONE' or alias[index[base]] is False else None
             if base == 'X86_REG_NONE':
                 return False
             origin = alias[index[base]]
-            if isinstance(origin,PointerAlternatives) and disp: return None
-            return origin + disp if type(origin) is int else origin
+            return offset_pointer(origin, disp)
 
         def read_alias(location, width):
             if type(location) is int:
@@ -436,13 +445,13 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
                 old = alias[ri(args[0])[0]] if ri(args[0]) else False
                 if ri(args[0]): write(args[0],result,constant=0 if zero else None)
                 else: store(args[0],width,result)
-                if width==64 and type(old) is int and decode.is_int(args[1]):
+                if width==64 and (type(old) is int or isinstance(old,PointerAlternatives)) and decode.is_int(args[1]):
                     delta = decode.parse_int(args[1])
                     if delta >= 1 << 63: delta -= 1 << 64
                     if op in {'add','sub'}:
-                        alias[ri(args[0])[0]] = old + (delta if op=='add' else -delta)
+                        alias[ri(args[0])[0]] = offset_pointer(old, delta if op=='add' else -delta)
                 elif width==64 and isinstance(old,PointerAlternatives) and op in {'add','sub'}:
-                    alias[ri(args[0])[0]] = old if decode.is_int(args[1]) and decode.parse_int(args[1])==0 else None
+                    alias[ri(args[0])[0]] = None
         elif op not in {'call','ret','jmp','nop','data16','cs'} and not op.startswith('j'):
             zero = op in {'pxor','xorps'} and len(args)==2 and args[0]==args[1] and ri(args[0])
             pure = op in {'andn','bzhi','mulx','popcnt','movbe','shlx','shrx','sarx','rorx'} or (op=='imul' and len(args)==3)
