@@ -1595,3 +1595,42 @@ full EXIT2 and all failed logs remain intact; they are not relabeled as a
 pass. Complete new command exits/source pins and original PASS log are
 appended to the existing integration JSON/compressed archive. V does not
 commit A's header or change a host model/guard to obtain this result.
+
+## Actual FMOV/reduction tail and complete L_EXEC observed step
+
+`dispatchExec` now follows every actual L_EXEC branch gate through the
+final FMOV/CNT/UADDLV cases. `fmovByteBody` uses physical byte reads/writes
+and generated direction/value/destination selectors. Every inactive integer
+operand/SRC3/IMM remains arbitrary; vector bank selection is independent of
+GPR/ZR, retaining all32 banks and legacy NONE255→bank0. Whole AUX selects
+the four directions. Vector destinations ignore FLAGS, retain S_FROM_W
+low32 truncation and clear high64; integer destinations use raw FLAGS with
+native W/X width. Reduction ignores all integer fields/FLAGS/IMM and tests
+the complete AUX word for16, retaining low-only/wide CNT/UADDLV behavior.
+
+The single `exec_observed_step_refines` theorem derives the entire L_EXEC
+branch composition through field-only `ExecBinding`. It preserves preceding
+Q-byte observation, exclusive ghost/environment, native access/SP/pair
+profile witnesses and complete state/events. No caller assumes component
+semantic equality. This completes the modeled numeric L_EXEC branch order;
+it is NOT the outer control/helper/native-entry/return step theorem or
+full72/77/O2/O4/compiled-artifact/platform completion. Faulting writeback
+and concurrency/atomicity/entry permission transport remain open.
+
+Validation:98-job Lean dependency graph,5 axiom audits,10 existing contracts,
+dispatch-model check and ALL16 existing semantic hosts pass:
+20145FMOV,256destination,20017reduction,21reduction-route,40080width,
+1280effective-width,257register,6401register-route,586829AUX,1115374AUX-route,
+62418DQ-route,62445vector-route,3804immediate-operand-route,686110STLXR-route,
+122891pair-route,135170pre/post-route. All8 source pins stayed unchanged;
+all earlier declaration bytes are identical except the added Reduction
+import. No placeholders/new tests/ISA/runtime/oracle edits. Proof audits
+report only propext/Classical.choice/Lean.ofReduceBool/Quot.sound.
+Dispatcher SHA256 `183be56113e11495b4a6887459e846d151f6a6aea7581ab0dfd777917ff2a8e1`.
+
+This run still uses A's pinned entry-selector header repair WIP, SHA256
+`d382995ce88de3076d4c7650566d3a5961733c2a624becd8c8de3ddb08118126`.
+Source-owner publication and a new immutable full check are pending; the
+old exact967 full EXIT2 is retained unchanged. All commands/source pins and
+complete original output are appended to the existing integration receipt
+and compressed log. V commits only its proof/doc/result paths.

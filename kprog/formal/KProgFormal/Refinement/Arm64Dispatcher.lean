@@ -1,4 +1,5 @@
 import KProgFormal.Refinement.Arm64Move
+import KProgFormal.Refinement.Arm64Reduction
 import KProgFormal.Refinement.Arm64Exclusive
 import KProgFormal.Refinement.Arm64Arithmetic
 import KProgFormal.Refinement.Arm64Mul
@@ -3201,5 +3202,180 @@ theorem step_through_q_observed_refines (code : Nat) (flags : Byte) (aux : BitVe
           Reference.AArch64.step (.vectorMemory ⟨.quad, load, 0, base, .register index kind scaled, .none⟩) s := by
         rfl
       exact congrArg some (result.trans same)
+
+
+/-- Real FMOV integer bytes and generated value/destination selection. The
+inactive integer field may be any byte. S_FROM_W truncates low32, both vector
+writes clear high64, and vector bank31 remains a real vector bank. -/
+def fmovByteBody (bank : Register) (direction : GeneratedArm64Fmov.Fmov) (width : Width)
+    (dst src : Byte) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let code := GeneratedArm64Fmov.code direction
+  let value := GeneratedArm64Fmov.value direction
+    ((Reference.AArch64.readVector s bank).setWidth 64) (Arm64Move.Fields.read s src)
+  let result := if GeneratedArm64FmovDest.vectorDestination code then
+      let low := if code = GeneratedArm64Fmov.code .s_from_w then (value.setWidth 32).setWidth 64 else value
+      Reference.AArch64.writeVector s bank (low.setWidth 128)
+    else Arm64Move.Fields.write s dst value width
+  ⟨{ result with pc := s.pc + 4 }, [], none⟩
+
+theorem fmov_byte_body_refines (bank : Register) (direction : GeneratedArm64Fmov.Fmov) (width : Width)
+    (dst src : Register) (unusedDst unusedSrc : Byte) (s : Reference.AArch64.State)
+    (widthMatches : GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) = true ∨
+      width = Arm64Fmov.operandWidth direction) :
+    fmovByteBody bank direction width
+      (if GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) then unusedDst else Arm64Register.registerCode dst)
+      (if GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) then Arm64Register.registerCode src else unusedSrc) s =
+      Reference.AArch64.step (.fmovBank bank (Arm64Fmov.nativeMove direction dst src)) s := by
+  cases direction <;> cases width <;>
+    simp_all [fmovByteBody, GeneratedArm64Fmov.code, GeneratedArm64FmovDest.vectorDestination,
+      GeneratedArm64Fmov.value, Arm64Fmov.operandWidth, Arm64Fmov.nativeMove,
+      Arm64Move.Fields.register_read, Arm64Move.Fields.register_write,
+      Arm64Register.read_refines, Arm64Register.write_refines, Reference.AArch64.step,
+      Reference.AArch64.fmovBankStep, Reference.AArch64.narrow, Reference.AArch64.Width.bits]
+
+/-- FLAGS is ignored for vector destinations; the generated FMOV value
+already selects W/X input. Integer destinations retain the real FLAGS width. -/
+def fmovByteWidth (direction : GeneratedArm64Fmov.Fmov) : Width :=
+  if GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) then .w64 else Arm64Fmov.operandWidth direction
+
+def decodeFmovWidth (direction : GeneratedArm64Fmov.Fmov) (flags : Byte) : Option Width :=
+  if GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) then some .w64 else decodeDataWidth flags
+
+theorem fmov_byte_width (direction : GeneratedArm64Fmov.Fmov) (flags : Byte)
+    (encoded : GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) = true ∨
+      GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code (Arm64Register.handlerWidth (Arm64Fmov.operandWidth direction))) :
+    decodeFmovWidth direction flags = some (fmovByteWidth direction) := by
+  by_cases vector : GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) = true
+  · simp only [decodeFmovWidth, fmovByteWidth, vector, ↓reduceIte]
+  · have integer := encoded.resolve_left vector
+    simp only [decodeFmovWidth, fmovByteWidth, vector, Bool.false_eq_true, ↓reduceIte,
+      decode_data_width flags (Arm64Fmov.operandWidth direction) integer]
+
+/-- Complete production L_EXEC branch order. Unknown/uncertified fields
+remain absent from this numeric slice; None is not a successful no-op. Native
+control/entry/return/helper dispatch outside L_EXEC remains separate. -/
+def dispatchExec (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughQ code flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s with
+  | some result => some result
+  | none => if code = GeneratedArm64DispatchSingleton.code .fmov then
+      (Arm64Fmov.decodeDirection aux.toNat).bind (fun direction =>
+        (Arm64Fmov.vectorIndex src2.toNat).bind (fun bank =>
+          (decodeFmovWidth direction flags).map (fun width => fmovByteBody bank direction width dst src s)))
+    else Arm64Reduction.dispatch code aux.toNat s
+
+theorem exec_tail_before_none (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State)
+    (tailCode : code = GeneratedArm64DispatchSingleton.code .fmov ∨ code = GeneratedArm64Reduction.code .cnt ∨
+      code = GeneratedArm64Reduction.code .uaddlv) :
+    dispatchThroughQ code flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s = none := by
+  rcases tailCode with rfl | rfl | rfl <;>
+    unfold dispatchThroughQ dispatchThroughD dispatchThroughPair dispatchThroughExclusive dispatchThroughStore dispatchThroughSigned dispatchThroughLoad dispatchEncodedPrefix <;>
+    cases decoded : decodeDataWidth flags <;> rfl
+
+theorem exec_fmov_refines (bank : Register) (direction : GeneratedArm64Fmov.Fmov) (dst src : Register)
+    (unusedDst unusedSrc src2 src3 : Byte) (flags : Byte) (aux : BitVec 32) (value : Word)
+    (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State)
+    (bankCode : Arm64Fmov.vectorIndex src2.toNat = some bank)
+    (directionCode : aux.toNat = GeneratedArm64Fmov.code direction)
+    (encoded : GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) = true ∨
+      GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code (Arm64Register.handlerWidth (Arm64Fmov.operandWidth direction))) :
+    dispatchExec (GeneratedArm64DispatchSingleton.code .fmov) flags aux
+      (if GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) then unusedDst else Arm64Register.registerCode dst)
+      (if GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) then Arm64Register.registerCode src else unusedSrc)
+      src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s =
+      some (Reference.AArch64.step (.fmovBank bank (Arm64Fmov.nativeMove direction dst src)) s) := by
+  unfold dispatchExec
+  rw [exec_tail_before_none _ _ _ _ _ _ _ _ _ _ _ _ _ s (Or.inl rfl)]
+  simp only [↓reduceIte, directionCode, Arm64Fmov.decode_direction_code]
+  change (Arm64Fmov.vectorIndex src2.toNat).bind (fun bank =>
+    (decodeFmovWidth direction flags).map (fun width => fmovByteBody bank direction width _ _ s)) = _
+  rw [bankCode]
+  change (decodeFmovWidth direction flags).map (fun width => fmovByteBody bank direction width _ _ s) = _
+  rw [fmov_byte_width direction flags encoded]
+  change some (fmovByteBody bank direction (fmovByteWidth direction) _ _ s) = _
+  have widthMatches : GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) = true ∨
+      fmovByteWidth direction = Arm64Fmov.operandWidth direction := by
+    by_cases vector : GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) = true
+    · exact Or.inl vector
+    · exact Or.inr (by simp [fmovByteWidth, vector])
+  exact congrArg some (fmov_byte_body_refines bank direction (fmovByteWidth direction) dst src unusedDst unusedSrc s widthMatches)
+
+theorem exec_reduction_refines (op : Reference.AArch64.ReductionOp) (flags : Byte) (aux : BitVec 32)
+    (dst src src2 src3 : Byte) (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool)
+    (s : Reference.AArch64.State) :
+    dispatchExec (GeneratedArm64Reduction.code (Arm64Reduction.operation op)) flags aux dst src src2 src3 value
+      sourceScalar sourceStack firstScalar secondScalar failure s =
+      some (Reference.AArch64.step (.reduction op (aux.toNat == 16)) s) := by
+  have tailCode : GeneratedArm64Reduction.code (Arm64Reduction.operation op) = GeneratedArm64DispatchSingleton.code .fmov ∨
+      GeneratedArm64Reduction.code (Arm64Reduction.operation op) = GeneratedArm64Reduction.code .cnt ∨
+      GeneratedArm64Reduction.code (Arm64Reduction.operation op) = GeneratedArm64Reduction.code .uaddlv := by
+    cases op <;> simp [Arm64Reduction.operation]
+  have separate : GeneratedArm64Reduction.code (Arm64Reduction.operation op) ≠ GeneratedArm64DispatchSingleton.code .fmov := by
+    cases op <;> decide
+  unfold dispatchExec
+  rw [exec_tail_before_none _ _ _ _ _ _ _ _ _ _ _ _ _ s tailCode, if_neg separate]
+  exact Arm64Reduction.dispatch_refines op aux.toNat s
+
+inductive ExecBinding (pc : Word) : Nat → Byte → BitVec 32 → Byte → Byte → Byte → Byte → Word → Bool →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
+      (release : Bool) (native : Reference.AArch64.Instruction)
+      (binding : QBinding pc code flags aux dst src src2 src3 value release native) :
+      ExecBinding pc code flags aux dst src src2 src3 value release native
+  | fmov (bank : Register) (direction : GeneratedArm64Fmov.Fmov) (dst src : Register)
+      (unusedDst unusedSrc src2 src3 : Byte) (flags : Byte) (aux : BitVec 32) (value : Word) (release : Bool)
+      (bankCode : Arm64Fmov.vectorIndex src2.toNat = some bank)
+      (directionCode : aux.toNat = GeneratedArm64Fmov.code direction)
+      (encoded : GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) = true ∨
+        GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code (Arm64Register.handlerWidth (Arm64Fmov.operandWidth direction))) :
+      ExecBinding pc (GeneratedArm64DispatchSingleton.code .fmov) flags aux
+        (if GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) then unusedDst else Arm64Register.registerCode dst)
+        (if GeneratedArm64FmovDest.vectorDestination (GeneratedArm64Fmov.code direction) then Arm64Register.registerCode src else unusedSrc)
+        src2 src3 value release (.fmovBank bank (Arm64Fmov.nativeMove direction dst src))
+  | reduction (op : Reference.AArch64.ReductionOp) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+      (value : Word) (release : Bool) :
+      ExecBinding pc (GeneratedArm64Reduction.code (Arm64Reduction.operation op)) flags aux dst src src2 src3 value release
+        (.reduction op (aux.toNat == 16))
+
+/-- One step through all actual L_EXEC branch families, with explicit Q-byte
+observation and exclusive ghost/environment. Field bindings do not assume any
+handler semantic equality. This is not the outside control/helper dispatcher
+or compiled-artifact/ABI/platform transport theorem. -/
+theorem exec_observed_step_refines (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (binding : ExecBinding s.pc code flags aux dst src src2 src3 value release native)
+    (access : scalarMemoryAccess native s) (environment : exclusiveStoreEnvironment native failure s)
+    (pairAccess : pairMemoryAccess native s) (vectorAccess : vectorMemoryAccess native s) :
+    observeExclusiveDispatch code flags release failure src2 s
+      (observeQDispatch code (dispatchExec code flags aux dst src src2 src3 value
+        sourceScalar sourceStack firstScalar secondScalar failure s)) = some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier code flags aux dst src src2 src3 value release native earlier =>
+      have result := step_through_q_observed_refines code flags aux dst src src2 src3 value sourceScalar
+        sourceStack firstScalar secondScalar release failure native s earlier access environment pairAccess vectorAccess
+      have numeric : ∃ prior, dispatchThroughQ code flags aux dst src src2 src3 value
+          sourceScalar sourceStack firstScalar secondScalar failure s = some prior := by
+        cases raw : dispatchThroughQ code flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s with
+        | none =>
+            cases decoded : decodeDataWidth flags <;> simp [raw, decoded, observeExclusiveDispatch, observeQDispatch] at result
+        | some prior => exact ⟨prior, rfl⟩
+      obtain ⟨prior, reached⟩ := numeric
+      simpa only [dispatchExec, reached] using result
+  | fmov bank direction dst src unusedDst unusedSrc src2 src3 flags aux value release bankCode directionCode encoded =>
+      have exclusiveSeparate : GeneratedArm64DispatchSingleton.code .fmov ≠ GeneratedArm64Stlxr.code .stlxr := by decide
+      have qSeparate : ¬(GeneratedArm64DispatchSingleton.code .fmov = qCode true ∨
+          GeneratedArm64DispatchSingleton.code .fmov = qCode false) := by decide
+      simp only [observeExclusiveDispatch, exclusiveSeparate, ↓reduceIte, observeQDispatch, qSeparate]
+      exact exec_fmov_refines bank direction dst src unusedDst unusedSrc src2 src3 flags aux value
+        sourceScalar sourceStack firstScalar secondScalar failure s bankCode directionCode encoded
+  | reduction op flags aux dst src src2 src3 value release =>
+      have exclusiveSeparate : GeneratedArm64Reduction.code (Arm64Reduction.operation op) ≠ GeneratedArm64Stlxr.code .stlxr := by cases op <;> decide
+      have qSeparate : ¬(GeneratedArm64Reduction.code (Arm64Reduction.operation op) = qCode true ∨
+          GeneratedArm64Reduction.code (Arm64Reduction.operation op) = qCode false) := by cases op <;> decide
+      simp only [observeExclusiveDispatch, exclusiveSeparate, ↓reduceIte, observeQDispatch, qSeparate]
+      exact exec_reduction_refines op flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s
 
 end KProgFormal.Refinement.Arm64Dispatcher

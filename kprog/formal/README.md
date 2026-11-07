@@ -35,21 +35,21 @@ logical forms also compose the generated register RHS with AUX extraction,
 including the stack-ORR path and bare NONE modifiers. Non-flag ADD/SUB
 likewise retains the stack-SUB and pointer-ADD branches through immediate,
 shifted and extended-register numeric dispatch. The actual register-byte codec binds GPR/ZR/SP/NONE reads and writes.
-`Arm64Dispatcher.step_through_select_refines` composes the production
-NOP/address/MOV/MOVK, generic ALU, SHIFT, multiply/divide, MVN/NEG, CNEG,
-EXTR/REV/SXT, BITFIELD, arithmetic/logical flags, ORN, CCMP and CSEL gates into one
-canonical step over field-only
-bindings. It retains pointer branch order, native bounds, source/destination
-aliases and arbitrary unused fields. Memory-base byte read/write/pre/post
-bridges separately retain native base31→SP32 and raw1/2/4/8-byte widths,
-including absent-width→doubleword. The actual byte-field scalar memory body
-also composes immediate pre/access/post transfers, both LOAD tag branches and
-all four widths under explicit original-SP/access witnesses. `step_through_store_refines` combines the raw-FLAGS prefix, ordinary/signed
-loads and STORE for offset/pre/post and register-index forms, preserving the
-STORE-specific DST-base/SRC-data routing and per-byte writable permissions.
-Signed input width/sign operation and W/X output width remain independent. Its field-only binding is separate
-from explicit native SP-alignment/read-permission premises; no runtime guard is
-inserted. Faulting writeback and the remaining families still need completion. The next STLXR row now has an actual byte-field/site-indexed numeric body and an explicitly observed step theorem for both store outcomes. The observation supplies monitor/release events under separate original-native alignment, conditional write-permission and monitor/commit witnesses; it proves no C atomicity/order or native-site transport. LDP/STP now extend the same observed prefix through actual byte fields, W/X strides, two ordered elements and pre/post writeback, with separate original-native permissions and two-access profile. D0 extends that prefix for fixed-eight-byte bank0 transfers with fully unused FLAGS, pre/post immediates and native indexed forms. Q0 now retains its two raw eight-byte events and derives their sixteen-byte architectural observation, values, initialization, full state and immediate pre/post writeback in the same sequential ISA model. Event joining checks direction, adjacency and lengths; it supplies no concurrent atomicity guarantee. `step_through_q_observed_refines` also composes both actual Q0 gates, including index scale4 and unused FLAGS. The last complete check failed in dynamic ARM host oracles after the production XDP read change. Later focused checks pass with A's pinned entry-selector repair WIP; the repaired complete check is pending. See the dated verification results.
+`Arm64Dispatcher.exec_observed_step_refines` composes the actual numeric
+`L_EXEC` branch order through scalar operations, ordinary/signed/exclusive
+memory, pairs, D0/Q0, FMOV and reductions. Its binding contains field identities;
+original native permissions, alignment, pair profile and exclusive environment
+witnesses remain separate. It retains actual GPR/ZR/SP32/NONE255 routing,
+widths, aliases, modifiers and unused bytes. Q0 retains its two raw8-byte
+events; the explicit architectural observation checks direction, adjacency
+and lengths before concatenating bytes/init, preserving every ordered byte
+address and value. Exclusive monitor/order events are explicit ghost
+observations. Neither observation proves concurrent atomicity or platform
+ordering. Faulting writeback, the outer control/helper/entry/return dispatcher,
+compiled-body transport and full77/72 completion remain open. Latest focused
+checks pass with a pinned entry-selector header repair; the repaired complete
+check remains pending. Dated verification results retain the previous full
+failure and distinguish source publication from focused validation.
 
 The proofs establish arithmetic/flags, register and tag operations, memory
 accesses, routing tables, and selected whole-state handler refinements.
