@@ -1,0 +1,80 @@
+{
+  "finished": "2026-11-07T19:51:33.696770+00:00",
+  "execution": "real_x86_cpu",
+  "forms": 32,
+  "distinct_native_forms": 16,
+  "cases_per_form": 1024,
+  "cases": 32768,
+  "tokens": 4,
+  "routes": [
+    "raw",
+    "direct"
+  ],
+  "cpu_c_differences": 0,
+  "cpu_reference_differences": 0,
+  "c_reference_differences": 0,
+  "unavailable_forms": 0,
+  "source_drift": {},
+  "binary_sha256": "51b7b4172dfdf90caca657d978123a0db8dc38df8033d7c673c2150d8cdc72a0",
+  "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96",
+  "compiled_header_sha256": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+  "memory_header_sha256": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+  "actual_compilation_files_verified": 93,
+  "production_source_files_exact": 82,
+  "production_source_commit": "6029a8009341f74667f1ce2e185f54818b5432ec",
+  "trace_bytes": 59506712,
+  "trace_sha256": "094ffa64d75ddcdcf15753d908ac0e1111453405e45b8aacecfc5436e9ab2697",
+  "original_operands_width_aux_immediate_preserved": true,
+  "native_bytes_identical_between_routes": 16,
+  "per_token_route": [
+    {
+      "token": "X86_OP_ADD_IMM",
+      "route": "direct",
+      "forms": 4,
+      "cases": 4096
+    },
+    {
+      "token": "X86_OP_ADD_IMM",
+      "route": "raw",
+      "forms": 4,
+      "cases": 4096
+    },
+    {
+      "token": "X86_OP_ADD_REG",
+      "route": "direct",
+      "forms": 4,
+      "cases": 4096
+    },
+    {
+      "token": "X86_OP_ADD_REG",
+      "route": "raw",
+      "forms": 4,
+      "cases": 4096
+    },
+    {
+      "token": "X86_OP_MOV_LOAD_SCALAR",
+      "route": "direct",
+      "forms": 4,
+      "cases": 4096
+    },
+    {
+      "token": "X86_OP_MOV_LOAD_SCALAR",
+      "route": "raw",
+      "forms": 4,
+      "cases": 4096
+    },
+    {
+      "token": "X86_OP_XOR_REG",
+      "route": "direct",
+      "forms": 4,
+      "cases": 4096
+    },
+    {
+      "token": "X86_OP_XOR_REG",
+      "route": "raw",
+      "forms": 4,
+      "cases": 4096
+    }
+  ],
+  "scope": "Legal numeric-token bindings to existing native forms; sampled raw/direct entry fidelity using the shared observer and canonical reference."
+}

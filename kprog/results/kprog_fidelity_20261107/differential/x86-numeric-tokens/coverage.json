@@ -1,0 +1,162 @@
+[
+  {
+    "assembly": "mov al, BYTE PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=raw]",
+    "decoded": "mov    al,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD_SCALAR"
+  },
+  {
+    "assembly": "mov al, BYTE PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=direct]",
+    "decoded": "mov    al,BYTE PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD_SCALAR"
+  },
+  {
+    "assembly": "add al, bl [token=X86_OP_ADD_REG; route=raw]",
+    "decoded": "add    al,bl",
+    "opcode": "X86_OP_ADD_REG"
+  },
+  {
+    "assembly": "add al, bl [token=X86_OP_ADD_REG; route=direct]",
+    "decoded": "add    al,bl",
+    "opcode": "X86_OP_ADD_REG"
+  },
+  {
+    "assembly": "add al, 0x7f [token=X86_OP_ADD_IMM; route=raw]",
+    "decoded": "add    al,0x7f",
+    "opcode": "X86_OP_ADD_IMM"
+  },
+  {
+    "assembly": "add al, 0x7f [token=X86_OP_ADD_IMM; route=direct]",
+    "decoded": "add    al,0x7f",
+    "opcode": "X86_OP_ADD_IMM"
+  },
+  {
+    "assembly": "xor al, bl [token=X86_OP_XOR_REG; route=raw]",
+    "decoded": "xor    al,bl",
+    "opcode": "X86_OP_XOR_REG"
+  },
+  {
+    "assembly": "xor al, bl [token=X86_OP_XOR_REG; route=direct]",
+    "decoded": "xor    al,bl",
+    "opcode": "X86_OP_XOR_REG"
+  },
+  {
+    "assembly": "mov ax, WORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=raw]",
+    "decoded": "mov    ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD_SCALAR"
+  },
+  {
+    "assembly": "mov ax, WORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=direct]",
+    "decoded": "mov    ax,WORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD_SCALAR"
+  },
+  {
+    "assembly": "add ax, bx [token=X86_OP_ADD_REG; route=raw]",
+    "decoded": "add    ax,bx",
+    "opcode": "X86_OP_ADD_REG"
+  },
+  {
+    "assembly": "add ax, bx [token=X86_OP_ADD_REG; route=direct]",
+    "decoded": "add    ax,bx",
+    "opcode": "X86_OP_ADD_REG"
+  },
+  {
+    "assembly": "add ax, 0x7f [token=X86_OP_ADD_IMM; route=raw]",
+    "decoded": "add    ax,0x7f",
+    "opcode": "X86_OP_ADD_IMM"
+  },
+  {
+    "assembly": "add ax, 0x7f [token=X86_OP_ADD_IMM; route=direct]",
+    "decoded": "add    ax,0x7f",
+    "opcode": "X86_OP_ADD_IMM"
+  },
+  {
+    "assembly": "xor ax, bx [token=X86_OP_XOR_REG; route=raw]",
+    "decoded": "xor    ax,bx",
+    "opcode": "X86_OP_XOR_REG"
+  },
+  {
+    "assembly": "xor ax, bx [token=X86_OP_XOR_REG; route=direct]",
+    "decoded": "xor    ax,bx",
+    "opcode": "X86_OP_XOR_REG"
+  },
+  {
+    "assembly": "mov eax, DWORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=raw]",
+    "decoded": "mov    eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD_SCALAR"
+  },
+  {
+    "assembly": "mov eax, DWORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=direct]",
+    "decoded": "mov    eax,DWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD_SCALAR"
+  },
+  {
+    "assembly": "add eax, ebx [token=X86_OP_ADD_REG; route=raw]",
+    "decoded": "add    eax,ebx",
+    "opcode": "X86_OP_ADD_REG"
+  },
+  {
+    "assembly": "add eax, ebx [token=X86_OP_ADD_REG; route=direct]",
+    "decoded": "add    eax,ebx",
+    "opcode": "X86_OP_ADD_REG"
+  },
+  {
+    "assembly": "add eax, 0x7f [token=X86_OP_ADD_IMM; route=raw]",
+    "decoded": "add    eax,0x7f",
+    "opcode": "X86_OP_ADD_IMM"
+  },
+  {
+    "assembly": "add eax, 0x7f [token=X86_OP_ADD_IMM; route=direct]",
+    "decoded": "add    eax,0x7f",
+    "opcode": "X86_OP_ADD_IMM"
+  },
+  {
+    "assembly": "xor eax, ebx [token=X86_OP_XOR_REG; route=raw]",
+    "decoded": "xor    eax,ebx",
+    "opcode": "X86_OP_XOR_REG"
+  },
+  {
+    "assembly": "xor eax, ebx [token=X86_OP_XOR_REG; route=direct]",
+    "decoded": "xor    eax,ebx",
+    "opcode": "X86_OP_XOR_REG"
+  },
+  {
+    "assembly": "mov rax, QWORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=raw]",
+    "decoded": "mov    rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD_SCALAR"
+  },
+  {
+    "assembly": "mov rax, QWORD PTR [rdi+8] [token=X86_OP_MOV_LOAD_SCALAR; route=direct]",
+    "decoded": "mov    rax,QWORD PTR [rdi+0x8]",
+    "opcode": "X86_OP_MOV_LOAD_SCALAR"
+  },
+  {
+    "assembly": "add rax, rbx [token=X86_OP_ADD_REG; route=raw]",
+    "decoded": "add    rax,rbx",
+    "opcode": "X86_OP_ADD_REG"
+  },
+  {
+    "assembly": "add rax, rbx [token=X86_OP_ADD_REG; route=direct]",
+    "decoded": "add    rax,rbx",
+    "opcode": "X86_OP_ADD_REG"
+  },
+  {
+    "assembly": "add rax, 0x7f [token=X86_OP_ADD_IMM; route=raw]",
+    "decoded": "add    rax,0x7f",
+    "opcode": "X86_OP_ADD_IMM"
+  },
+  {
+    "assembly": "add rax, 0x7f [token=X86_OP_ADD_IMM; route=direct]",
+    "decoded": "add    rax,0x7f",
+    "opcode": "X86_OP_ADD_IMM"
+  },
+  {
+    "assembly": "xor rax, rbx [token=X86_OP_XOR_REG; route=raw]",
+    "decoded": "xor    rax,rbx",
+    "opcode": "X86_OP_XOR_REG"
+  },
+  {
+    "assembly": "xor rax, rbx [token=X86_OP_XOR_REG; route=direct]",
+    "decoded": "xor    rax,rbx",
+    "opcode": "X86_OP_XOR_REG"
+  }
+]
