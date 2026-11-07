@@ -1,0 +1,30 @@
+[
+  {
+    "name": "stack_alias_map_value_compare",
+    "assembly": "push r14; sub rsp,16; mov QWORD PTR [rsp],0; lea r14,[rsp+8]; lea rsi,[rsp]; mov rdi,QWORD PTR [rip+neg_map@GOTPCREL]; call bpf_map_lookup_elem; cmp rax,r14; jne 1f; xor eax,eax; jmp 2f; 1: mov eax,2; 2: add rsp,16; pop r14; ret",
+    "negative": false,
+    "native_sha256": "971e229f6d3a6851b5544397fbc790a035fed388de8937720bdfcb92830079b3",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-stack-projection-order/after/stack_alias_map_value_compare.manifest.json",
+    "command": [
+      "/workspaces/repository/kprog/formal/build/fidelity-projection-order/bound-probe",
+      "/workspaces/repository/kprog/formal/build/fidelity-projection-order/context_array.bpf.o",
+      "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-stack-projection-order/after/stack_alias_map_value_compare.manifest.json",
+      "0",
+      "2"
+    ],
+    "returncode": 0,
+    "request": {
+      "request_id": 1,
+      "source_prog_id": 8,
+      "native_sha256": "971e229f6d3a6851b5544397fbc790a035fed388de8937720bdfcb92830079b3",
+      "started": "2026-11-07T10:55:50.265640+00:00",
+      "prog_id": 9,
+      "status": 0,
+      "artifact_archive": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/x86-stack-projection-order/after/requests/1.success.tar.gz",
+      "finished": "2026-11-07T10:55:53.212506+00:00"
+    },
+    "unsafe_native_executed": false,
+    "stage": "valid_executed",
+    "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=9 chunks=0 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n"
+  }
+]

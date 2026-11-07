@@ -431,9 +431,15 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 	X86_SIM_L_REG_VALUE(REG)
 
 /* Pointer addressing uses the private arena; scalar reads expose native bits. */
+/* Keep pointer subtraction ahead of scalar-base addition: reassociation to
+ * (native_base - arena_top) + pointer is verifier-illegal scalar-minus-fp. */
 #define X86_SIM_L_STACK_NUMERIC_BITS(VALUE)                                 \
-	((__u64)(long)(VALUE) - (__u64)(long)X86_SIM_L_STACK_PTR(0) +       \
-	 __x86_native_stack_base)
+	({                                                                 \
+		__u64 __x86_stack_delta = (__u64)(long)(VALUE) -             \
+			(__u64)(long)X86_SIM_L_STACK_PTR(0);                 \
+		X86_SIM_L_BARRIER_VAR(__x86_stack_delta);                   \
+		__x86_stack_delta + __x86_native_stack_base;               \
+	})
 
 #define X86_SIM_L_READ_REG_WIDTH_SHIFT(REG, WIDTH, SRC_SHIFT)               \
 	({                                                                 \

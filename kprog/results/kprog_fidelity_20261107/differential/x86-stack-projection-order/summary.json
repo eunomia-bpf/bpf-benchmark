@@ -1,0 +1,20 @@
+{
+  "cpu_forms": 47,
+  "cpu_cases": 48128,
+  "cpu_differences": 0,
+  "canonical_cases": 48128,
+  "canonical_cpu_differences": 0,
+  "canonical_simulator_differences": 0,
+  "safety": {
+    "valid_executed": 9,
+    "verifier_rejected": 22,
+    "loader_rejected": 1,
+    "specialization_rejected": 6
+  },
+  "unsafe_native_executed": false,
+  "minimal_map_stack_control": "bound execution passed both before and after; not a failing reproducer",
+  "actual_biosnoop": "same archived source: scalar-minus-fp removed from emitted BPF; real application admission awaits C replay",
+  "safety_binary_drift": false,
+  "header_sha256": "4de0aba51ba40302b26031947f33373bdc6c33eb7974c7106e2895f13be0f539",
+  "focused_route_status": "queued behind existing whole checks; not a completion claim"
+}

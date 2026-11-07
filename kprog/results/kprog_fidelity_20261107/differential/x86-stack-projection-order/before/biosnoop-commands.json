@@ -1,0 +1,37 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop.c",
+      "-o",
+      "/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop-before.bpf.o"
+    ],
+    "returncode": 0,
+    "stderr": "/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop.c:72:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]\n   72 |         X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_REG, X86_RSP, X86_RBX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);\n      |         ^\n/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1046:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'\n 1046 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\n/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop.c:78:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]\n   78 |         X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_IMM, X86_RSP, X86_REG_NONE, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 137438953472ULL);\n      |         ^\n/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1046:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'\n 1046 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\n/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop.c:81:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]\n   81 |         X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_IMM, X86_RSP, X86_REG_NONE, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 103079215104ULL);\n      |         ^\n/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1046:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'\n 1046 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\n/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop.c:87:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]\n   87 |         X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_REG, X86_RSP, X86_RAX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 40ULL);\n      |         ^\n/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1046:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'\n 1046 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\n/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop.c:120:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]\n  120 |         X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_REG, X86_RSP, X86_RBX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 16ULL);\n      |         ^\n/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1046:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'\n 1046 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\n/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop.c:123:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]\n  123 |         X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_IMM, X86_RSP, X86_REG_NONE, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 171798691840ULL);\n      |         ^\n/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1046:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'\n 1046 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\n/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop.c:126:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]\n  126 |         X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_IMM, X86_RSP, X86_REG_NONE, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 137438953472ULL);\n      |         ^\n/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1046:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'\n 1046 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\n/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop.c:129:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]\n  129 |         X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_IMM, X86_RSP, X86_REG_NONE, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 103079215104ULL);\n      |         ^\n/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1046:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'\n 1046 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\n/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop.c:153:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]\n  153 |         X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_REG, X86_RAX, X86_RBX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);\n      |         ^\n/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1046:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'\n 1046 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\n/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop.c:225:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]\n  225 |         X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_REG, X86_RSP, X86_R15, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 40ULL);\n      |         ^\n/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1046:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'\n 1046 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\n/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop.c:249:2: warning: label followed by a declaration is a C23 extension [-Wc23-extensions]\n  249 |         X86_SIM_L_EXEC_STORE(X86_OP_MOV_STORE_REG, X86_RSP, X86_RBX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 32ULL);\n      |         ^\n/workspaces/repository/kprog/x86/x86_sim_local_bpf.h:1046:4: note: expanded from macro 'X86_SIM_L_EXEC_STORE'\n 1046 |                         void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \\\n      |                         ^\n11 warnings generated.\n"
+  },
+  {
+    "command": [
+      "llvm-objdump-18",
+      "-d",
+      "-S",
+      "/workspaces/repository/kprog/formal/build/fidelity-projection-order/biosnoop-before.bpf.o"
+    ],
+    "returncode": 0,
+    "stderr": ""
+  }
+]
