@@ -1965,3 +1965,16 @@ and memory remain exact. Physical typed-context/private-frame/invocation facts,
 strict per-native-block full-state correspondence and the original terminal
 RET boundary remain explicit obligations. This is a model proof for the pinned
 accepted capture, not a new runtime or hardware-fidelity result.
+
+`trusted-simple-kernel-xdp-layout.json` pins the current compiled kernel's
+`xdp_md`/`xdp_buff` field layouts and exact two source conversion branches.
+Those facts match the existing declared simple context expansions; the old
+accepted capture does not pin its kernel binary, so this is supporting current
+layout evidence, not a reconstructed historical post-conversion capture.
+
+`make -C kprog/tv trusted-simple-platform-certificate` checks
+`TrustedSimplePlatform.lean`. `trusted-simple-physical-context.json` proves
+full-state equality between each declared context conversion and an ordinary
+BPF step on the whole derived physical37instruction image. Both read faults
+and successes are covered without access-outcome premises. The other35 bytes
+retain their exact positions; all-PC/whole-execution equivalence follows next.

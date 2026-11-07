@@ -1,0 +1,92 @@
+{
+  "status": "declared_XDP_context_conversion_equals_entire_physical_BPF_operation_for_all_memory_outcomes",
+  "utc": "2026-11-07T15:18:54.725470+00:00",
+  "program": "declared physical interpretation of pinned accepted simple b61f291a8 B37",
+  "theorems": [
+    "KProgTV.TrustedSimplePlatform.physical_proof_size",
+    "KProgTV.TrustedSimplePlatform.physical_proof_literal",
+    "KProgTV.TrustedSimplePlatform.physical_decode0",
+    "KProgTV.TrustedSimplePlatform.physical_decode2",
+    "KProgTV.TrustedSimplePlatform.virtual_decode2",
+    "KProgTV.TrustedSimplePlatform.physical_context_step_0",
+    "KProgTV.TrustedSimplePlatform.physical_context_step_2"
+  ],
+  "claims": [
+    "Whole physical37instruction image derives from existing context expansion0/2 and exact other35 accepted B instructions. Byte identity/literal and both actual decode results are proved.",
+    "At either context PC0 or2, initialized BPFPlatform step equals ordinary BPF step on that whole physical image for every environment and complete state, including read errors and halted state.",
+    "Complete registers/memory/PC/halt/exclusiveVisit, ordered events and faults agree; no read-success or permission premise, extra runtime check or ISA copy."
+  ],
+  "premises": [
+    "PC equals0 or2 for the corresponding context theorem",
+    "the existing declared XDP conversion map (virtualLD32+0/+4 tophysicalLD64+0/+8)"
+  ],
+  "not_yet_claimed": [
+    "pointwise whole-program/every-PC or whole-execution physical BPF equivalence",
+    "this derived physical image is a captured historical kernel post-conversion image",
+    "historical capture kernel binary identity, physical invocation/ABI facts, strict native-block full-state TV or other programs"
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-safety-certificate trusted-simple-platform-certificate",
+    "exit": 0,
+    "reproduction": "make -C kprog/tv trusted-simple-platform-certificate",
+    "unchanged_safety_reused": true,
+    "binding_mismatch_controls_rejected": 22,
+    "materialization_controls_rejected": 28,
+    "axiom_audit": {
+      "KProgTV.TrustedSimplePlatform.physical_proof_size": [
+        "propext"
+      ],
+      "KProgTV.TrustedSimplePlatform.physical_proof_literal": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimplePlatform.physical_decode0": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimplePlatform.physical_decode2": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimplePlatform.virtual_decode2": [
+        "propext"
+      ],
+      "KProgTV.TrustedSimplePlatform.physical_context_step_0": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimplePlatform.physical_context_step_2": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    "no_sorryAx": true,
+    "current_log_sha256": "eba5baae49462f951d48a20173ade5323fb5987742d9f9ebf494afcf394ff8bc",
+    "combined_log_sha256": "beef7bd5b21f211ee2459111950fd72e4166ba07097eddf16c14174025338831"
+  },
+  "compatibility": {
+    "old_Safety_CFG_ISA": "unchanged",
+    "old_Makefile": "byte-identical prefix; only dependent platform certificate target appended"
+  },
+  "kernel_layout_receipt_sha256": "a25ba781b1dd4896d3a9e2e3f6dd0b5a6bcd65e698a75b8bf279265ce5e4a0e6",
+  "trusted": [
+    "single existing BPF/reference memory semantics and explicit platform interpretation",
+    "Lean kernel and reported logical axioms",
+    "kernel conversion implementation/provenance and actual invocation facts remain separate (current compiled layout receipt is structural supporting evidence)"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "f0b9694a7f256928e83c688f0ac0f4b3101eb8906b7efc0e9dee0b8920167ac6",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/TrustedSimpleSafety.lean": "5537b0f4d04c5b5ebec988c1cb9c63175e9b786d95495265f3273675f82f3bea",
+    "kprog/tv/Makefile": "600673dfc99ec00d9ae932014cbc141e9645229f68c9fadc2a3f1f41ecc54504",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa",
+    "kprog/tv/TrustedSimplePlatform.lean": "f2b629cf9b15133f3959c18e4cf639fdbb89e32245034248091eb35fa07dfe88"
+  }
+}

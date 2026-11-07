@@ -846,3 +846,8 @@ guest-unbound-katran-check:
 	python3 test_unbound_katran.py $(UNBOUND_KATRAN_INPUTS)
 
 unbound-loader-regression: unbound-kernel-check unbound-katran-check
+
+.PHONY: trusted-simple-platform-certificate
+trusted-simple-platform-certificate: trusted-simple-safety-certificate
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/TrustedSimplePlatform.olean ../tv/TrustedSimplePlatform.lean
