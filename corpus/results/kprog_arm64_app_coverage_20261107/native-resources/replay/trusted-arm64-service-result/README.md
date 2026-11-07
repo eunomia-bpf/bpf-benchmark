@@ -1,0 +1,1 @@
+ARM native-resource capability build and common-service compatibility control. QEMU/guest exit0; native retval2 and request identity agreement. Original host status and source drift fields remain in summary.json. Universal safety and complete-application execution continue.
