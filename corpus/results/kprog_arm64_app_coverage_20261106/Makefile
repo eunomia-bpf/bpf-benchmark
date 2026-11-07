@@ -637,8 +637,10 @@ original-btf-declarations:
 		$(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz \
 		-o $(ROOT)/kprog/arm64/build/original-btf-declarations
 
+OTEL_NATIVE_OBJECT ?= $(ROOT)/vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o
+
 otel-real-generate: direct-header-generate original-btf-declarations
-	python3 $(HERE)/otel_real.py $(HERE)/$(PHASE)
+	python3 $(HERE)/otel_real.py $(HERE)/$(PHASE) generate $(OTEL_NATIVE_OBJECT)
 
 otel-real-link:
 	python3 $(HERE)/otel_real.py $(HERE)/$(PHASE) link
@@ -697,3 +699,7 @@ app-replay-run:
 
 app-replay-collect:
 	cp -a $(RUNTIME_BASE)/root/workspaces/repository/corpus/results/. $(ROOT)/corpus/results/
+
+.PHONY: otel-memory-input
+otel-memory-input:
+	python3 $(ROOT)/corpus/results/kprog_app_coverage_20261106/embed_memory_runtime.py $(HERE)/otel-real-v15 $(HERE)/otel-memory-input-v36

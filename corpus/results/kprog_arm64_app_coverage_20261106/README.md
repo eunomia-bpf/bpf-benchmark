@@ -1042,3 +1042,12 @@ failures; the app still errors before native workload measurement. All 32
 selectors, raw results and the built Spark launcher are preserved. Its
 configuration round-trip retains bound proof, BPF stats and the requested
 sample/duration values; hardware execution remains unmeasured.
+
+## OTel native-local memset inputs
+
+[Fresh OTel inputs](otel-embedded-libc-result/README.md) now embed the same
+CPU-tested ARM memset body and generate all 14 retained ELF/BTF candidates.
+Original map/global declarations and all selectors remain. New frozen-input
+compilation runs independently of the preserved older queue; verifier and app
+completion remain pending. The completed old v15 compiler census is archived
+separately, so its outcomes are not attributed to the new inputs.

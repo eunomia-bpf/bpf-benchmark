@@ -73,7 +73,8 @@ phase.mkdir()
 for name in ['native', 'original', 'sources']:
     (phase / name).mkdir()
 native = phase / 'native/otel.native.o'
-shutil.copy2(ROOT / 'vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o', native)
+native_input = Path(sys.argv[3]).resolve() if len(sys.argv)>3 else ROOT / 'vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o'
+shutil.copy2(native_input, native)
 original = phase / 'original/tracer.bpf.o'
 subprocess.run(['llvm-objcopy-18', '--strip-debug', '--remove-section=.eh_frame',
     str(ROOT / 'vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.arm64'), str(original)], check=True)
