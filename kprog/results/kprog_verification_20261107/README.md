@@ -98,8 +98,8 @@ continue to count their own `row_kind` values.
 | --- | ---: | --- |
 | `proved-conditional` | 7 | x86 kind1 slot/table/record layout, ARM kind3 BL26 slot, private-spill projection, generic block relation, checked-effects composition |
 | `trusted-kernel-implementation` | 1 | Exact code, entry, ABI and metadata binding; full Artifact equality is the composition premise |
-| `partial-universal-component` | 5 | ARM kind2 near/far body, shared kinds5/6/7 and x86/shared mixed-table layout; production, physical consumer, ABI and ARM layout bridges follow |
-| `pending-universal-law` | 8 | ARM kinds4/9, readonly kind8, spill insertion/reload/control, helper ABI, tail calls, actual compiled B and invocation ABI |
+| `partial-universal-component` | 6 | ARM kind2 near/far body and kind9 exclusive/marker binding, shared kinds5/6/7 and x86/shared mixed-table layout; production, physical consumer, ABI and ARM layout bridges follow |
+| `pending-universal-law` | 7 | ARM kind4, readonly kind8, spill insertion/reload/control, helper ABI, tail calls, actual compiled B and invocation ABI |
 
 All nine production relocation kinds have explicit rows. The seven proved
 components carry their production correspondence premises in `o4_completion`.
@@ -318,6 +318,26 @@ byte-copy relations. Actual C copy/cursor/field extraction, final-fixup separati
 executable lifetime and complete helper/caller/entry ABI form the surrounding
 production interfaces. Reproduce with
 `make -C kprog/tv native-link-arm-placement-check`.
+
+[`generic-native-link-arm-exclusive.json`](../kprog_tv_20261107/generic-native-link-arm-exclusive.json) records16 passing universal audits
+for kind9's exclusive-byte and proof-marker binding components. Every accepted
+STXR/STLXR word selects the canonical width, release bit and status/data/base
+registers. The exact native site retains full architectural state, ordered
+effects and faults, with forward block TV and reverse reflection for every
+finite prefix. Full32-bit descriptor index/source-PC fields round-trip.
+
+The exact one/two-word proof scanner advances monotonically, excludes every
+LDDW continuation from its instruction boundaries and fits the kernel's current
+one-million-instruction u32 bound. The bound BPF marker consumes the complete
+source PC and current dynamic visit, advances the visit once, and preserves the
+remaining state. The verifier's fresh `[0,1]` scalar interval represents exactly
+both Boolean outcomes. The existing C++ regression passes131,072 actual kernel
+matcher width/order/register triples, plus continuation and following-boundary
+controls for all four width/order forms. Actual byte/field/scanner correspondence,
+sealed-group descriptor coverage, dynamic platform exclusive inputs and complete
+specialized-body/compiled-B/PC/ABI composition supply the remaining production
+interfaces. Reproduce with
+`make -C kprog/tv native-link-arm-exclusive-check`.
 
 <!-- O4 COVERAGE END -->
 

@@ -243,6 +243,26 @@ executable lifetime and complete helper/caller/entry ABI form the surrounding
 production interfaces. Reproduce with
 `make -C kprog/tv native-link-arm-placement-check`.
 
+`generic-native-link-arm-exclusive.json` records16 passing universal audits
+for kind9's exclusive-byte and proof-marker binding components. Every accepted
+STXR/STLXR word selects the canonical width, release bit and status/data/base
+registers. The exact native site retains full architectural state, ordered
+effects and faults, with forward block TV and reverse reflection for every
+finite prefix. Full32-bit descriptor index/source-PC fields round-trip.
+
+The exact one/two-word proof scanner advances monotonically, excludes every
+LDDW continuation from its instruction boundaries and fits the kernel's current
+one-million-instruction u32 bound. The bound BPF marker consumes the complete
+source PC and current dynamic visit, advances the visit once, and preserves the
+remaining state. The verifier's fresh `[0,1]` scalar interval represents exactly
+both Boolean outcomes. The existing C++ regression passes131,072 actual kernel
+matcher width/order/register triples, plus continuation and following-boundary
+controls for all four width/order forms. Actual byte/field/scanner correspondence,
+sealed-group descriptor coverage, dynamic platform exclusive inputs and complete
+specialized-body/compiled-B/PC/ABI composition supply the remaining production
+interfaces. Reproduce with
+`make -C kprog/tv native-link-arm-exclusive-check`.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations

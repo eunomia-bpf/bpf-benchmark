@@ -1004,3 +1004,9 @@ native-link-arm-helper-guard-check: native-link-arm-helper-check arm-helper-emit
 native-link-arm-placement-check: native-link-arm-helper-guard-check native-link-final-image-check
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/NativeLinkArmPlacement.olean ../tv/NativeLinkArmPlacement.lean
+
+.PHONY: native-link-arm-exclusive-check
+native-link-arm-exclusive-check: native-link-arm-helper-check bpf-check build/test-environment-binding
+	./build/test-environment-binding
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/NativeLinkArmExclusive.olean ../tv/NativeLinkArmExclusive.lean

@@ -1,0 +1,286 @@
+{
+  "utc": "2026-11-07T23:45:43.974418+00:00",
+  "status": "universal_arm_exclusive_encoding_boundary_and_fresh_marker_component",
+  "evidence_class": "Generic canonical ISA/block and BPF marker theorems with actual kernel-header regression; full dynamic exclusive/compiler/ABI composition follows universal production interfaces.",
+  "scope": "Every32-bit STXR/STLXR word satisfying the kernel opcode and status/data/base guards; all canonical native states, proof scanner code sequences, descriptor PC/index values and dynamic Boolean visits.",
+  "implementation_interfaces": {
+    "native_word": "AcceptedWord is the fixed STXR/STLXR opcode class plus status/data and status/base constraints. accepted_decode uses the existing little-endian canonical AArch64 decoder and recovers width/release/all3registers.",
+    "unchanged_code": "Kind9 emits immutable metadata and retains the native instruction bytes. Accepted site and arbitrary family/block forwardTV/reverse reflection preserve full state, ordered effects, faults and every finite prefix.",
+    "proof_scanner": "proofWords exactly uses code==0x18 ?2:1. position_mono/position_visits derive monotonicity and finite scanner visits; wide_continuation_excluded excludes the second LDDW word. scanner_step_bounds uses actual index<count<=1000000 to retain C u32 addition bounds.",
+    "descriptor": "descriptor_fields proves full32-bit proof index and source PC packing/unpacking. marker_fields matches code0xb7/src9/dst0/off5/immPC, including source PCs with their high bit set.",
+    "fresh_choice": "marker_execution and actual decoded BPF.step consume env.exclusiveFailure(sourcePC,currentVisit), increment the visit exactly once, write R0=0/1, advancePC and retain memory/other registers/halted state. verifier_choice_range/complete prove exactly the fresh scalar0..1 interval.",
+    "kernel_binding": "The observed sealed-group pass validates every kind9 descriptor against original native bytes/rootproof; its reverse pass requires exactly one descriptor per executable marker. The source observation retains the exact shared two-blank insertion separately from published Git bytes.",
+    "production_correspondence": "Actual C byte/field/scanner extraction and sealed-group coverage, native-source/linked PC mapping, dynamic platform monitor/input alignment and V specialized-body/actual compiled-B/ABI composition retain explicit universal interfaces."
+  },
+  "validation": {
+    "command": "make -C kprog/tv -o native-link-arm-helper-check native-link-arm-exclusive-check",
+    "reproduction": "make -C kprog/tv native-link-arm-exclusive-check",
+    "exit": 0,
+    "audits": 16,
+    "axiom_audit": {
+      "KProgTV.NativeLinkArmExclusive.accepted_decode": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmExclusive.descriptor_fields": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmExclusive.marker_fields": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkArmExclusive.marker_execution": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmExclusive.accepted_site": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmExclusive.accepted_site_reflects": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmExclusive.proof_words_bounds": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmExclusive.position_mono": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmExclusive.position_visits": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmExclusive.wide_continuation_excluded": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmExclusive.scanner_step_bounds": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmExclusive.marker_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmExclusive.accepted_blocks": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmExclusive.accepted_blocks_reflect": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmExclusive.verifier_choice_range": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkArmExclusive.verifier_choice_complete": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    "additional_bpf_audits": {
+      "KProgTV.validated_execution": [
+        "propext"
+      ],
+      "KProgTV.native_effects_checked": [
+        "propext"
+      ],
+      "KProgTV.execution_checked_of_complete": [
+        "propext"
+      ],
+      "KProgTV.TranslationValidation.trans": [
+        "propext"
+      ],
+      "KProgTV.TranslationValidation.execution": [
+        "propext"
+      ],
+      "KProgTV.generic_program_block_validation": [
+        "propext"
+      ],
+      "KProgTV.generic_program_effects_checked": [
+        "propext"
+      ],
+      "KProgTV.BPFPath.evaluate_sound": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.BPFPath.evaluate_program_congr": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.BPFPath.evaluate_program_congr_if_wide": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.BPFPath.evaluate_execution_transport": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.BPFPlatform.expand_sound": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.BPFPlatform.step_program_congr_if_wide": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.BPFPlatform.physical_step_program_congr_if_wide": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    "additional_axiom_free_audits": [
+      "KProgTV.Execution.of_step_imp",
+      "KProgTV.tokenwise_validation"
+    ],
+    "sorryAx_count": 0,
+    "warnings": 0,
+    "proof_budgets": "default recursion and heartbeat",
+    "kernel_matcher": {
+      "word_cases": 131072,
+      "widths": [
+        4,
+        8
+      ],
+      "release_values": [
+        false,
+        true
+      ],
+      "all_status_data_base_registers": 32,
+      "complete_unsigned_pc": 4294967292,
+      "lddw_continuation_and_following_boundary_controls": 8,
+      "original_environment_regressions": "PASS",
+      "sanitizers": "address,undefined",
+      "binary_path": "kprog/tv/build/test-environment-binding",
+      "binary_sha256": "98c33fc199144f4022396666ad9cf774a49c44c40e994fbcd0d9412809699860",
+      "compiler_path": "/usr/bin/x86_64-linux-gnu-g++-13",
+      "compiler_sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+      "compiler_version": "x86_64-linux-gnu-g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+    }
+  },
+  "source_sha256": {
+    "kprog/formal/KProgFormal/Reference/AArch64.lean": "00c08b7441948c762d18d2bed62fac13c91f6f88f06e380323ac38bef66ece4a",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/NativeLinkArmBL26.lean": "b47b764c27d40d66e6fb69073724893a4129582ca742fd215c17cb287786eeff",
+    "kprog/tv/NativeLinkArmHelper.lean": "66a37c9f89145cc296e7247845cc750e1359008a04b7e651976d39008ef4a169",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/tv/NativeLinkRelocationTable.lean": "3445aff6854ccaa85e433d8e8357a57edc8b7b2b9cdbdc07ceee8eced4c96f46",
+    "kprog/formal/lean-toolchain": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea",
+    "kprog/formal/lakefile.toml": "c0d43c10868d20a8ccc08e73c05a29eb4dbc40f05fd04872e597b527a620c91c",
+    "kprog/formal/lake-manifest.json": "8d120d7988d313b3173dd609e81a271dda67812d44b26e8cce6875245a59b4bb",
+    "kprog/tv/NativeLinkArmExclusive.lean": "e62722b2c9859cca8592efc60330bc8887653b2ab16ce8c3cb1efad0a5606061",
+    "kprog/tv/Makefile": "f6ae2c97e6f1f21cf8fdb11c4f58f644669a1ec8ee856cd70451e164c70c5b1f",
+    "kprog/tv/test_environment_binding.cpp": "44f473e49ed2c270dfb6980abda6126b195a7d63f2f16d387c6b8e93f37b2960",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFChecks.lean": "e04dbfe3adf0b313c41c267c60c79eff14cfd02af9eec60d6fdfb1425aa045d7",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/libnativeloader/src/native_environment_binding.hpp": "e0e8bbc32b1df870b7620ee9dc0c09f7a5adfbd43879d9ff8086ca47d3b961ee",
+    "kprog/libnativeloader/src/native_loader_manifest.hpp": "61718ae4af723319cbd478387930fada3cb5bedcae165ff3ad0a31b3f59759f5",
+    "kprog/libnativeloader/src/native_source_map_binding.hpp": "2a7472bb7527597713137bfd3acb1b8db23b9ad7d0ebd7a43540f5f59212c345",
+    "kinsn/module/include/native_lab_binding.h": "5abc935861b6920b05a6352064af2999a4febbcbff41d2fb4fc88cb43db02a06",
+    "kinsn/module/include/native_lab_exclusive.h": "9149b3351de498bfc3f4cfa037066c79dec41c9214ba3d882318c4d83237b4f3",
+    "kinsn/module/include/native_lab_input.h": "c43adcd858d4c53c500aaa1763e2f95196b9da7f7bc6f284ca305f7d15b1e131",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "0523c2d4d77f9685e37e1d006eb7d462a75b885e6cac50917926a3695792bff5"
+  },
+  "source_git_epoch": {
+    "kprog/formal/KProgFormal/Reference/AArch64.lean": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/tv/Composition.lean": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/tv/NativeLinkArmBL26.lean": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/tv/NativeLinkArmHelper.lean": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/tv/NativeLinkRelocation.lean": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/tv/NativeLinkRelocationTable.lean": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/formal/lean-toolchain": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/formal/lakefile.toml": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/formal/lake-manifest.json": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/tv/BPF.lean": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/tv/BPFPath.lean": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/tv/BPFChecks.lean": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/tv/BPFPlatform.lean": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/libnativeloader/src/native_environment_binding.hpp": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/libnativeloader/src/native_loader_manifest.hpp": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kprog/libnativeloader/src/native_source_map_binding.hpp": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kinsn/module/include/native_lab_binding.h": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kinsn/module/include/native_lab_exclusive.h": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kinsn/module/include/native_lab_input.h": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "fe6049ac8dc2964a16a99976fe2e4c22424f7395"
+  },
+  "implementation_source_observations": {
+    "kinsn/module/include/native_lab_group.h": {
+      "git_epoch": "fe6049ac8dc2964a16a99976fe2e4c22424f7395",
+      "published_sha256": "a8a4427257da6a07391ceca5f1fa06597225378c938098e3f002527229c671fb",
+      "observed_sha256": "26844694a56b92c167731d0759c78785dc57a77eb5821c12fb1001f48f9a9632",
+      "observed_insert_offset": 194,
+      "observed_insert_hex": "0a0a",
+      "body_identity_after_exact_insertion_removal": true
+    },
+    "vendor/linux-framework/kernel/bpf/verifier.c": {
+      "sha256": "6bccb2ae3244f1d85ffc4b3e7b0c64acafa9aa78d2955944ae1f1bdc870375a1",
+      "submodule_git_epoch": "9c50491de2a5f7c3067201b10a7182dbf172e541",
+      "submodule_path": "kernel/bpf/verifier.c",
+      "interface": "check_native_input requires bound native proof region, validates marker fields and assigns a fresh scalar with complete0..1 bounds."
+    }
+  },
+  "compiled_olean_sha256": {
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/AArch64.olean": "e64ff1d4e35c62851d8208fbb0eddd9930e86aa10125a1af109c77263cc706f5",
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/Memory.olean": "dc3ed5d7d9a0180f57574646597651f8ea628af3a857a628ef5a767283a2d659",
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/X86.olean": "a556e3c6acb98eca7a1d03819576d912bb5262af49597ffe6c4282930bbd25c8",
+    "kprog/tv/build/Composition.olean": "7e66af8c2ba8a1467ae7405f26d142c6a150b51c977120173c4cba4bf55771d8",
+    "kprog/tv/build/NativeLinkArmBL26.olean": "924c5b38f7ee694a164126d33e131af7f9d95ed7783a7f0458e587f1ac9c8519",
+    "kprog/tv/build/NativeLinkArmHelper.olean": "4379d75ca3e078633d96bc9868d8a6177dc50789543add41c5860b9f0ccc3584",
+    "kprog/tv/build/NativeLinkRelocation.olean": "66e8c45092ce7f42c2040bac5f5f7b94ac84ab95a2dbeb44a6549aa3f03ff929",
+    "kprog/tv/build/NativeLinkRelocationTable.olean": "3349dbe8e06a43ca6b83714db6f313f42394b800b860d2531531e26d03b6c0eb",
+    "kprog/tv/build/BPF.olean": "702c8c08f0afeb26edec660a4797c2f1799c46fc467c0c4eddd7c5ff9de4d79a",
+    "kprog/tv/build/BPFPath.olean": "3d7d58162fd7b44cf48bc8baa6ec5e81fe25a13144571c333176da10e7de67aa",
+    "kprog/tv/build/BPFPlatform.olean": "6a25b50fcbb259445172864020f72ee50c1075fea6f8193abbd350bf4218426a",
+    "kprog/tv/build/NativeLinkArmExclusive.olean": "7122fd3919a7b36764b5d38aac91366e901e3500444e037e2d2cf4a198ed2181"
+  },
+  "dependency_cache_receipt": "kprog/results/kprog_tv_20261107/generic-native-link-arm-helper.json",
+  "archives": {
+    "kprog/results/kprog_tv_20261107/generic-native-link-arm-exclusive.log.gz": {
+      "gzip_sha256": "51b8859b05bc81f34ce8a9153ff95b8f1062f5bea0585c2c22231bba1c281e1e",
+      "raw_sha256": "9056eb6864e9fd4c6c59207d22fb5eb6ce3ca4a8072e95e74017d55188109baf",
+      "raw_bytes": 3928
+    },
+    "kprog/results/kprog_tv_20261107/generic-native-link-arm-exclusive-attempts.log.gz": {
+      "gzip_sha256": "ad02f82811bda2dde13bd36964d426d580ad60a88bd1b355ed301a6d689a52f5",
+      "raw_sha256": "029f73414ad20ea177ffa05fee2df97553d85891fecf55d1c5e4134787e8311a",
+      "raw_bytes": 23292
+    }
+  },
+  "completion_path": [
+    "Extract actual C bytes/fields/scanner and sealed-group descriptor coverage into the universal binding relation.",
+    "Connect original and linked source PCs, every dynamic platform exclusive outcome and canonical monitor/state evolution through V token/O2 interfaces.",
+    "Compose actual specialized BPF bytes, compiler/private-frame/ABI preservation and accepted-B soundness with complete Artifact identity."
+  ],
+  "trusted": [
+    "Accepted-B verifier soundness, including the source-pinned fresh0..1 native-input rule.",
+    "Single canonical ISA semantics with F hardware/QEMU fidelity evidence.",
+    "Kernel binding and C implementation-value/ABI correspondence.",
+    "Lean kernel and recorded propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies."
+  ]
+}

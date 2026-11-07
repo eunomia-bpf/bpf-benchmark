@@ -7,6 +7,25 @@
 
 int main()
 {
+    // Catch disagreement between actual STXR field/overlap guards and all
+    // four width/order encodings, including ZR/SP and every register triple.
+    unsigned exclusive_words = 0;
+    const bpf_insn marker = {.code = BPF_ALU64 | BPF_MOV | BPF_K,
+        .dst_reg = 0, .src_reg = 9, .off = 5, .imm = -4};
+    for (uint32_t width : {4U, 8U}) for (bool release : {false, true})
+    for (uint32_t status = 0; status < 32; ++status)
+    for (uint32_t source = 0; source < 32; ++source)
+    for (uint32_t base = 0; base < 32; ++base) {
+        const uint32_t word = 0x88007c00U | (width == 8 ? 1U << 30 : 0) |
+            (release ? 1U << 15 : 0) | (status << 16) | (base << 5) | source;
+        const unsigned char native[] = {uint8_t(word), uint8_t(word >> 8),
+            uint8_t(word >> 16), uint8_t(word >> 24)};
+        const bool expected = status != source && (base == 31 || status != base);
+        assert(native_lab_exclusive_match(native, 4, 0, &marker, 1, 0, 0xfffffffcU) == expected);
+        ++exclusive_words;
+    }
+    assert(exclusive_words == 131072);
+    std::cout << "exclusive actual kernel matcher: 131072 width/order/register combinations PASS\n";
     for (uint32_t width : {4U, 8U}) for (bool release : {false, true}) {
         const uint32_t word = 0x88037c22U | (width == 8 ? 1U << 30 : 0) |
             (release ? 1U << 15 : 0); // STXR/STLXR w3,w/x2,[x1]
@@ -60,6 +79,14 @@ int main()
             .src_reg = 9, .off = 5, .imm = 16}};
         reject([&] { bind_exclusive_environment({}, native, proof); });
         assert(!native_lab_exclusive_match(native.data(), 3, 0, proof.data(), 1, 0, 16));
+        // A forged marker in the second LDDW word stays a continuation;
+        // the next complete instruction remains an eligible boundary.
+        auto scanner_proof = std::vector<bpf_insn>(3, proof[0]);
+        scanner_proof[0].code = BPF_LD | BPF_DW | BPF_IMM;
+        assert(!native_lab_exclusive_match(native.data(), 4, 0,
+            scanner_proof.data(), 3, 1, 16));
+        assert(native_lab_exclusive_match(native.data(), 4, 0,
+            scanner_proof.data(), 3, 2, 16));
         // Status aliases source or base: constrained-unpredictable, no unique semantics.
         for (uint32_t status : {1U, 2U}) {
             const uint32_t alias = (word & ~(31U << 16)) | status << 16;
