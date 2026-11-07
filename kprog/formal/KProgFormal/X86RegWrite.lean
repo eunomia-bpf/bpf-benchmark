@@ -1,6 +1,7 @@
 import KProgFormal.Generated.GeneratedX86RegWrite
 import KProgFormal.TagErasure
 import KProgFormal.X86Width
+import Std.Tactic.BVDecide
 
 namespace KProgFormal
 
@@ -150,5 +151,22 @@ theorem x86_reg_write_scalarizes (old : X86RegValue) (value : BitVec 64)
     (generatedX86RegWrite old value width).tag = .scalar := by
   cases old
   cases width <;> rfl
+
+/-- A low-byte MOV immediate can use a 32-bit destination when none of the
+upper56 bits is observed. The byte immediate is explicitly zero-extended;
+a wider immediate would make this statement false. -/
+theorem x86_byte_mov_widen_projected (old value live : BitVec 64)
+    (h : live &&& 0xffffffffffffff00 = 0) :
+    GeneratedX86RegWrite.bits old value .w8 &&& live =
+      GeneratedX86RegWrite.bits old (value &&& 0xff) .w32 &&& live := by
+  unfold GeneratedX86RegWrite.bits
+  bv_decide
+
+/-- Both MOV forms scalarize the destination and preserve every flag; the
+register-value projection above is the only changed part of their action. -/
+theorem x86_byte_mov_widen_tag (old : X86RegValue) (value : BitVec 64) :
+    (generatedX86RegWrite old value .w8).tag =
+      (generatedX86RegWrite old (value &&& 0xff) .w32).tag := by
+  rfl
 
 end KProgFormal
