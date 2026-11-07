@@ -300,4 +300,179 @@ theorem dispatch_d_success_other (op : GeneratedArm64DispatchSingleton.Singleton
   simp [dispatchDSuccess, GeneratedArm64DispatchSingleton.loadD0Handled,
     GeneratedArm64DispatchSingleton.storeD0Handled, notLoad, notStore]
 
+
+/-- Architectural Q observation joins only two equal-direction, contiguous
+8-byte effects. Any other trace, including fault/helper/exclusive events,
+passes through unchanged. The original two events remain in `qSuccess`;
+joining is an explicit observation of this sequential memory model and does
+not prove single-copy atomicity or concurrency guarantees for C/platforms. -/
+def joinQEvents (events : List Event) : List Event :=
+  match events with
+  | [.memory kind address low firstInit, .memory secondKind secondAddress high secondInit] =>
+      if kind = secondKind ∧ secondAddress = address + 8 ∧ low.length = 8 ∧ high.length = 8 then
+        [.memory kind address (low ++ high) (firstInit && secondInit)]
+      else events
+  | _ => events
+
+def observeQ (result : Transition State) : Transition State :=
+  { result with events := joinQEvents result.events }
+
+theorem q_observation_state (result : Transition State) : (observeQ result).state = result.state := rfl
+
+theorem q_observation_fault (result : Transition State) : (observeQ result).fault = result.fault := rfl
+
+theorem join_q_pair (kind : AccessKind) (address : Word) (low high : List Byte) (firstInit secondInit : Bool)
+    (lowLength : low.length = 8) (highLength : high.length = 8) :
+    joinQEvents [.memory kind address low firstInit, .memory kind (address + 8) high secondInit] =
+      [.memory kind address (low ++ high) (firstInit && secondInit)] := by
+  simp only [joinQEvents, lowLength, highLength, true_and, and_self, ↓reduceIte]
+
+/-- Joining preserves every ordered byte's access kind, wrapping address
+and value. Initialization is the explicit conjunction in `join_q_pair`. -/
+theorem q_byte_positions (kind : AccessKind) (address : Word) (low high : List Byte)
+    (lowLength : low.length = 8) :
+    (low ++ high).mapIdx (fun n value => (kind, address + BitVec.ofNat 64 n, value)) =
+      low.mapIdx (fun n value => (kind, address + BitVec.ofNat 64 n, value)) ++
+      high.mapIdx (fun n value => (kind, address + 8 + BitVec.ofNat 64 n, value)) := by
+  simp [List.mapIdx_append, lowLength, BitVec.ofNat_add, BitVec.add_assoc, Nat.add_comm, BitVec.add_comm]
+  congr 1
+  funext n value
+  ac_rfl
+
+theorem q_read_bytes (m : Memory) (address : Word) :
+    bytesAt m address 8 ++ bytesAt m (address + 8) 8 = bytesAt m address 16 := by
+  simp [bytesAt, List.range_succ, Reference.Word, BitVec.add_assoc]
+
+theorem q_read_initialized (m : Memory) (address : Word) :
+    (initializedAt m address 8 && initializedAt m (address + 8) 8) = initializedAt m address 16 := by
+  simp [initializedAt, permitted, List.range_succ, Reference.Word, BitVec.add_assoc, Bool.and_assoc]
+
+theorem q_store_bytes (value : BitVec 128) :
+    valueBytes (value.setWidth 64) 8 ++ valueBytes ((value >>> 64).setWidth 64) 8 =
+      (List.range 16).map (fun n => (value >>> (8 * n)).setWidth 8) := by
+  rw [← d_store_bytes value]
+  unfold valueBytes
+  rw [show List.range 16 = List.range 8 ++ (List.range 8).map (fun n => 8 + n) from (List.range_add (n := 8) (m := 8))]
+  rw [List.map_append, List.map_map]
+  congr 1
+  apply List.map_congr_left
+  intro n member
+  have nBound : n < 8 := List.mem_range.mp member
+  apply BitVec.eq_of_getLsbD_eq
+  intro bit bitBound
+  have lowBound : 8 * n + bit < 64 := by omega
+  simp only [BitVec.getLsbD_setWidth, BitVec.getLsbD_ushiftRight]
+  simp [bitBound, lowBound, Nat.mul_add, Nat.add_assoc]
+
+/-- Actual two-lane Q transfer: no C permission guard is invented. Both read
+lanes use the same incoming sequential memory; stores retain low then high
+updates and their two separate events. Faulting and concurrent accesses are
+not inferred from this admitted-success body. -/
+def qSuccess (load : Bool) (address : Word) (s : State) : Transition State :=
+  if load then
+    let low := GeneratedArm64LoadBytes.value (Arm64Memory.loadWidth .double) (wordAt s.memory address 8)
+    let high := GeneratedArm64LoadBytes.value (Arm64Memory.loadWidth .double) (wordAt s.memory (address + 8) 8)
+    ⟨{ s with vector0 := qLoad low high, pc := s.pc + 4 },
+      [.memory .read address (bytesAt s.memory address 8) (initializedAt s.memory address 8),
+       .memory .read (address + 8) (bytesAt s.memory (address + 8) 8) (initializedAt s.memory (address + 8) 8)], none⟩
+  else
+    let low := s.vector0.setWidth 64
+    let high := (s.vector0 >>> 64).setWidth 64
+    let memory := Arm64Memory.store .double (Arm64Memory.store .double s.memory address low) (address + 8) high
+    ⟨{ s with memory := memory, pc := s.pc + 4 },
+      [.memory .write address (valueBytes low 8) true, .memory .write (address + 8) (valueBytes high 8) true], none⟩
+
+/-- Grouped architectural observation is derived from the two concrete lane
+values/events; it is not a semantic equality supplied by a caller. -/
+def qGroupedSuccess (load : Bool) (address : Word) (s : State) : Transition State :=
+  if load then
+    ⟨{ s with vector0 := qLoad (wordAt s.memory address 8) (wordAt s.memory (address + 8) 8), pc := s.pc + 4 },
+      [.memory .read address (bytesAt s.memory address 16) (initializedAt s.memory address 16)], none⟩
+  else
+    ⟨{ s with memory := (storeMemory (storeMemory s.memory address (s.vector0.setWidth 64) 8)
+        (address + 8) ((s.vector0 >>> 64).setWidth 64) 8), pc := s.pc + 4 },
+      [.memory .write address ((List.range 16).map (fun n => (s.vector0 >>> (8 * n)).setWidth 8)) true], none⟩
+
+theorem q_success_observation (load : Bool) (address : Word) (s : State) :
+    observeQ (qSuccess load address s) = qGroupedSuccess load address s := by
+  cases load <;>
+    simp only [qSuccess, qGroupedSuccess, observeQ, Bool.false_eq_true, ↓reduceIte,
+      Arm64Memory.load_value, Arm64Memory.store_refines, MemoryWidth.bytes]
+  · rw [join_q_pair .write address _ _ true true (by simp [valueBytes]) (by simp [valueBytes]), q_store_bytes]
+    rfl
+  · rw [join_q_pair .read address _ _ _ _ (by simp [bytesAt]) (by simp [bytesAt]), q_read_bytes, q_read_initialized]
+
+theorem q_grouped_base (load : Bool) (address : Word) (s : State) (base : Register) :
+    memoryBase (qGroupedSuccess load address s).state base = memoryBase s base := by cases load <;> rfl
+
+theorem q_grouped_bump (load : Bool) (address : Word) (s : State) (base : Register) (delta : Word) :
+    qGroupedSuccess load address (bumpBase s base delta) =
+      { qGroupedSuccess load address s with state := bumpBase (qGroupedSuccess load address s).state base delta } := by
+  simp only [bump_refines, q_grouped_base]
+  cases load <;> by_cases stack : base.val = 31 <;>
+    simp only [qGroupedSuccess, writeMemoryBase, stack, writeReg, Bool.false_eq_true, ↓reduceIte]
+
+/-- The two lane accesses occur between the actual pre/post base updates.
+Its observation groups events only; the complete numeric state is unchanged. -/
+def qWritebackCore (load : Bool) (mode : Writeback) (base : Register) (delta : Word)
+    (s : State) : Transition State :=
+  let flags := Arm64AddressedMemory.flags mode
+  let before := bumpBase s base (GeneratedArm64MemPrepost.preDelta flags delta)
+  let offset := GeneratedArm64MemOffset.value (GeneratedArm64MemPrepost.suppressOffset flags) false delta 0
+  let transferred := qSuccess load (Arm64Memory.baseValue before base + offset) before
+  { transferred with state := bumpBase transferred.state base (GeneratedArm64MemPrepost.postDelta flags delta) }
+
+def qGroupedWritebackCore (load : Bool) (mode : Writeback) (base : Register) (delta : Word)
+    (s : State) : Transition State :=
+  let flags := Arm64AddressedMemory.flags mode
+  let before := bumpBase s base (GeneratedArm64MemPrepost.preDelta flags delta)
+  let offset := GeneratedArm64MemOffset.value (GeneratedArm64MemPrepost.suppressOffset flags) false delta 0
+  let transferred := qGroupedSuccess load (Arm64Memory.baseValue before base + offset) before
+  { transferred with state := bumpBase transferred.state base (GeneratedArm64MemPrepost.postDelta flags delta) }
+
+theorem q_writeback_observation (load : Bool) (mode : Writeback) (base : Register) (delta : Word) (s : State) :
+    observeQ (qWritebackCore load mode base delta s) = qGroupedWritebackCore load mode base delta s := by
+  unfold qWritebackCore qGroupedWritebackCore
+  have observed := q_success_observation load
+    (Arm64Memory.baseValue (bumpBase s base (GeneratedArm64MemPrepost.preDelta (Arm64AddressedMemory.flags mode) delta)) base +
+      GeneratedArm64MemOffset.value (GeneratedArm64MemPrepost.suppressOffset (Arm64AddressedMemory.flags mode)) false delta 0)
+    (bumpBase s base (GeneratedArm64MemPrepost.preDelta (Arm64AddressedMemory.flags mode) delta))
+  cases raw : qSuccess load
+    (Arm64Memory.baseValue (bumpBase s base (GeneratedArm64MemPrepost.preDelta (Arm64AddressedMemory.flags mode) delta)) base +
+      GeneratedArm64MemOffset.value (GeneratedArm64MemPrepost.suppressOffset (Arm64AddressedMemory.flags mode)) false delta 0)
+    (bumpBase s base (GeneratedArm64MemPrepost.preDelta (Arm64AddressedMemory.flags mode) delta))
+  simp only [raw, observeQ] at observed ⊢
+  rw [← observed]
+
+theorem q_grouped_writeback_eq (load : Bool) (mode : Writeback) (base : Register) (delta : Word) (s : State) :
+    qGroupedWritebackCore load mode base delta s =
+      let address := memoryBase s base + (if mode = .post then 0 else delta)
+      let transferred := qGroupedSuccess load address s
+      { transferred with state := if mode = .none then transferred.state else
+          writeMemoryBase transferred.state base (memoryBase s base + delta) } := by
+  simp only [qGroupedWritebackCore, Arm64Memory.base_refines, base_bump, BitVec.add_assoc,
+    Arm64AddressedMemory.access_offset_refines, q_grouped_bump]
+  rw [writeback_base_refines]
+  cases mode with
+  | none => simp [Reference.Word, write_base_read]
+  | pre => simp [Reference.Word, q_grouped_base]
+  | post => simp [Reference.Word, q_grouped_base]
+
+/-- Successful Q0 refinement in the canonical sequential model, retaining
+original SP alignment and all sixteen byte permissions. Grouped events and
+pre/post writeback are proved, not assumed. Concurrent atomicity/order and
+faulting writeback remain separate platform/body obligations. -/
+theorem q_writeback_observed_refines (load : Bool) (mode : Writeback) (base : Register)
+    (delta : Word) (s : State) (alignment : spAlignmentFault s base = none)
+    (accessible : permitted (if load then s.memory.readable else s.memory.writable)
+      (memoryBase s base + (if mode = .post then 0 else delta)) 16 = true) :
+    observeQ (qWritebackCore load mode base delta s) =
+      step (.vectorMemory ⟨.quad, load, 0, base, .immediate delta, mode⟩) s := by
+  rw [q_writeback_observation, q_grouped_writeback_eq]
+  simp only [qGroupedSuccess, q_load_refines]
+  cases mode <;> cases load <;> by_cases stack : base.val = 31 <;>
+    simp_all [qGroupedSuccess, step, vectorMemoryStep, memoryOffset,
+      VectorMemoryWidth.bytes, VectorMemoryWidth.scale, q_load_refines,
+      writeMemoryBase, writeReg, Reference.Word]
+
 end KProgFormal.Refinement.Arm64VectorMemory

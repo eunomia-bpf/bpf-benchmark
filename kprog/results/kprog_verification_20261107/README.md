@@ -1523,3 +1523,38 @@ rerun or declared passed. A owns the forward production integration repair.
 Q0's two C eight-byte events versus the canonical16-byte event, faulting
 writeback, remaining vector/control operations, full77/72 and native producer/
 compiled-body/Entry/O2/O4 transport remain open.
+
+## Q0 raw lane core and proved architectural observation
+
+`Arm64VectorMemory.qSuccess` retains two separate ordered8-byte events and
+the actual low/high value and memory updates. `joinQEvents` joins only exactly
+two same-direction events at consecutive8-byte addresses with both lengths8;
+every other shape passes unchanged. `q_byte_positions` proves conservation
+of every ordered byte's access kind, wrapping address and value. Read bytes
+and initialization concatenate exactly; high store bytes are proved by bit
+extensionality, without adding an axiom or relying on the solver that failed.
+`observeQ` preserves the entire state and fault fields.
+
+`q_success_observation` derives the grouped16-byte event from the original
+raw lanes; no semantic equality is supplied by callers. Successful Q0
+pre/access/post bodies then refine the SAME canonical vector-memory step
+through `q_writeback_observed_refines`, with original-SP alignment and
+all16 original-native read/write permissions explicit. This closes the
+sequential successful core's event-grouping/value/init/writeback obligation.
+It does not establish hardware single-copy atomicity, concurrency/order,
+faulting writeback, producer/compiled-body transport or Q0 global dispatcher
+reachability; those remain separate. No ISA/runtime/oracle changes.
+
+Validation: Lean27-job vector target and93-job dependent dispatcher target
+pass;8 proof-axiom audits report only propext/Classical.choice/Quot.sound plus
+the existing Lean.ofReduceBool dependency. Nine existing contracts/model
+checks and6 of10 existing semantic hosts pass (9504DQ,21extra,9504vector,
+7field,20168offset,4608pre/post cases). Four unchanged dynamic route hosts
+(dq_mem,dq_mem_extra,vreg,vreg_field) fail compilation at the production
+unmapped-XDP branch; failed stale binaries were never run. All8 pinned
+source files stayed unchanged during checks; old declaration bytes are
+identical. Exact proof SHA256 `c9cc458244547e07a068dcfcad90d1ea5c7c549555bfeb89240343570248da0d`.
+Full original focused log and command/source pins are appended to the
+existing integration archive/JSON. The prior immutable967 full remains
+EXIT2, no repeated full or full-pass claim. A owns that forward integration
+repair; full77/72/O2/O4 completion remains open.
