@@ -50,3 +50,7 @@ unavailable streams are both empty; the complete run log is compressed without
 alteration. No canonical ISA, simulator, kernel, loader or module changed.
 These remain emulated ARM observations; actual CPU fidelity awaits the
 coordinator's existing static handoff run.
+
+The later production-context refresh in `../arm64-production-context/` now
+supplies the default static hardware handoff. This directory retains the
+pre-context-repair instruction snapshot and its completed canonical evidence.

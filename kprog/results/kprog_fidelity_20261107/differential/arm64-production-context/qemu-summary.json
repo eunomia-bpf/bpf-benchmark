@@ -1,0 +1,14 @@
+{
+  "recorded": "2026-11-07T13:55:31.952076+00:00",
+  "production_fix": "b2b6f28d9bc59aa3f17c44eb558acdb1c2214d37",
+  "execution": "qemu-user emulation, not hardware",
+  "forms": 771,
+  "cases_per_form": 1024,
+  "total_cases": 789504,
+  "mismatches": 0,
+  "static_binary_sha256": "ed8b3e7b65b7f2bf29602e204440c85f742b8559bc69732301ddc7ca6b10273f",
+  "compressed_binary_sha256": "c699305a0bfd37cd7e3a5174f5c5e4e1127b5b8be58fd6f73ac0976efdaaa7d6",
+  "compiled_inputs_sha256": "b43d453dd7bfb97bde30113f9c521e660ddbed10c18a9f5d014c27691221763e",
+  "reference_status": "running",
+  "scope": "Existing numeric instruction observers; no entry-ABI, runtime dynamic-dispatch compile or universal safety claim"
+}
