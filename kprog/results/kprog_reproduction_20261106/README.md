@@ -685,6 +685,45 @@ lookup implies. Recorded as measured, not as evidence the patch works.
 
 # The verified (generation-bound) arm
 
+## bcc/set, timed through the trusted path
+
+Measured with `corpus/results/kprog_app_coverage_20261107/
+native-only-runtime/Makefile` and the operator's parameters — `CPUS=0-7
+VM_CPUS=8 VM_MEM=64G SAMPLES=3 WORKLOAD_DURATION=180`, both
+`BPFREJIT_CORPUS_BPF_STATS` modes. Each ratio is against the **JIT arm of
+the same run**.
+
+| stats | JIT (M bogo-ops) | verified native (M) | native/JIT |
+| --- | --- | --- | ---: |
+| on | 94.0, 93.1, 93.4 | 93.0, 93.8, 93.4 | **1.000x** |
+| off | 119.2, 119.1, 119.3 | 119.9, 119.0, 118.4 | **0.998x** |
+
+Both runs are `status ok` with **25 of 25 programs replaced and
+`bound_required=1` on every one** — this is the trusted, generation-bound
+path, not the unbound arm elsewhere in this file. Artifacts:
+`corpus/results/x86_kvm_corpus_20261107_193339_549598` (stats on) and
+`..._200711_640362` (stats off).
+
+Work done, per stressor, both arms (stats on):
+
+| stressor | JIT | verified native |
+| --- | ---: | ---: |
+| cap | 153,430,517 | 153,341,775 |
+| set | 11,953,358 | 11,885,900 |
+| sockfd | 115,031,497 | 114,993,394 |
+| syscall | 59,182 | 1,542 |
+
+The three substantial stressors agree to within 0.6%, so the ratio compares
+equal work. `syscall` differs between arms because its short sample takes
+2-3 s instead of 180 s, but at 0.02% of the total it cannot move the
+ratio.
+
+**Reading: the verified path is at parity with JIT on bcc, in both stats
+modes.** That matches the unbound arm (1.002x / 1.000x), so binding adds
+no measurable cost for this workload.
+
+## Earlier unbound-arm context
+
 Attempted and blocked at the shim, not at configuration. With
 `BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1` every app program fails:
 
