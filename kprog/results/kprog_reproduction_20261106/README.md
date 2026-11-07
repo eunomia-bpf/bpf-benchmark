@@ -46,6 +46,8 @@ run's metadata) removes the runtime-counter overhead from the workload.
 | tracee/monitor | 1.539x | **1.640x** | 148 / 151 |
 | katran | 1.018x | **1.001x** | 1 / 1 |
 | tetragon/observer | 1.008x | **0.805x** | 118 / 118 |
+| otelcol | 1.013x | **1.026x** | 14 / 14 |
+| cilium/agent | 1.229x | — | blocked, below |
 
 Tracee's stats-off arm is the firmest datapoint in this file: 148 of 151
 programs replaced, no oops, 256,984,354 bogo-ops baseline against
@@ -64,6 +66,15 @@ than its eBPF path.
 That also reframes the stats-on number: 1.008x there is close to parity
 only because the counter overhead is present in both arms. Removing it
 exposes the native cost.
+
+**Cilium has no stats-off arm.** Its native arm yields 0 packets:
+`native-link` refuses 33 of its programs —
+`Error: x86 bpf_map_update_elem native call 0 uses map
+"cilium_ipv4_frag_datagrams", which truncation-matches multiple
+update_sites entries` — and the evidence step then aborts with
+`did not publish symbols for live programs [317, 318, 334, ...]`. The
+stats-on arm works (177 replaced), so this is the linker's map-identity
+resolution, not a manifest difference. Reported.
 
 One caveat remains:
 
