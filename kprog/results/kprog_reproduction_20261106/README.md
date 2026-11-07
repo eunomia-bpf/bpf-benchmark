@@ -34,6 +34,30 @@ used.
 Corpus figures are at the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`)
 and each carries the replaced/failed count from its own shim log.
 
+## The three arms, where all three exist
+
+`BPFREJIT_CORPUS_WORKLOAD_ONLY=1` gives the no-eBPF baseline (the
+workload with no BPF program attached), which is the denominator the
+reference's first two columns use. Measured at the operator recipe
+(`corpus/results/x86_kvm_corpus_20261107_060516_326524`,
+`workload_only: true`, 3 workloads per app):
+
+| app | eBPF/no-eBPF | native/no-eBPF | native/eBPF | reference (ebpf/no, nat/no, nat/ebpf) |
+| --- | ---: | ---: | ---: | --- |
+| bcc/set | 0.370 | 0.371 | 1.002x | 0.451, 0.453, 1.005x |
+| tetragon/observer | 0.196 | 0.196 | 1.008x | 0.233, 0.308, 1.323x |
+
+Two things this shows that the native/eBPF column alone cannot. First, the
+eBPF overhead itself is larger here than in the reference (bcc 0.370
+against 0.451, tetragon 0.196 against 0.233), so the workload is more
+BPF-sensitive on this tree, not less. Second, tetragon's reference gain
+was almost entirely in the **native/no-eBPF** column (0.308 against 0.233)
+— its native path recovered a third of the BPF overhead, where ours
+recovers only 0.3% (0.196 against 0.196). That is where the missing 1.323x
+went.
+
+The other four apps have no `workload_only` arm yet.
+
 ## Corpus geomean
 
 | set | geomean |
@@ -279,6 +303,65 @@ At the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`,
 
 **Does not reproduce**: 1.013x against 1.824x.
 
+## tetragon: measures, and the ratio does not reproduce
+
+Tetragon needed no manifest work: the build already writes a 235-object
+`manifest.json` into the staged directory, the image carries it, and the
+loader resolves `native_object` **relative to the manifest's own
+directory** (`manifest_relative_path`, `native_loader_manifest.hpp:772`),
+so pointing `BPFREJIT_SHIM_NATIVE_MANIFEST` at it works directly.
+
+```
+corpus/results/x86_kvm_corpus_20261107_002003_274609   status ok
+118 programs replaced natively, 0 failed, 3 workloads per arm
+```
+
+| | tetragon/observer |
+| --- | ---: |
+| bogo-ops, baseline eBPF | 90,842,189 |
+| bogo-ops, native | 91,585,459 |
+| **native/eBPF** | **1.008x** |
+| reference (2026-05-29) | **1.323x** |
+
+Per-stressor, both arms did the same work (eventfd 32,680,567/32,861,758,
+mmap 13,977/14,088, udp 57,965,933/58,528,092, sock 181,712/181,521).
+
+**Does not reproduce**: 1.008x against 1.323x.
+
+## cilium: builds after a two-line Makefile fix, then measures
+
+Cilium had no native artifacts, and it was a build gap rather than missing
+work: `vendor/bpf/Makefile` defined `native-cilium` but none of the three
+variables it uses, and `native-artifacts` both omitted the target and
+`rm -rf`-ed its stage dir. Defining `CILIUM_NATIVE_STAGE_OUT`,
+`CILIUM_NATIVE_OBJS` and `CILIUM_NATIVE_PROOF_MARKERS` from the existing
+`CILIUM_OBJS` and adding the dependency gives 7 native objects and an
+89-program manifest.
+
+A second defect then surfaced in the runner: `runner/libs/bpf_evidence.py`
+compared the kernel's program name with `symbol[:15]`, but
+`BPF_OBJ_NAME_LEN` is 16 and the kernel keeps all 16 bytes, so cilium's
+`tail_drop_notify` (exactly 16 characters) never matched. Both fixes are
+one commit each.
+
+```
+corpus/results/x86_kvm_corpus_20261107_020659_029387   status ok
+177 programs replaced natively, 0 failed, 3 workloads per arm
+```
+
+| | cilium/agent |
+| --- | ---: |
+| received packets, baseline eBPF | 709,171,412 |
+| received packets, native | 871,897,265 |
+| **native/eBPF** | **1.229x** |
+| reference (2026-05-29) | **2.358x** |
+
+Both arms forward essentially everything and drop in the same classes
+(`reason=139,direction=2` and `reason=3,direction=1`), so the comparison
+is like-for-like.
+
+**Does not reproduce**: 1.229x against 2.358x, the largest gap here.
+
 ## tracee: measures after two loader fixes, and reverses its reference
 
 Two defects had to be fixed, both in the loader, and each was found by
@@ -431,5 +514,7 @@ failed in each.
   measurement.
 - arm64 AWS (`1.056x`) is not rerun — it costs money and waits for the
   operator.
-- katran, otelcol, tetragon, cilium and tracee have no native number yet,
-  for the artifact reasons stated per app.
+- The no-eBPF baseline was measured for bcc and tetragon only; the other
+  four apps have no `workload_only` arm yet.
+- The trusted native kernel-module baseline the coordinator asked for is
+  not measured for any app.
