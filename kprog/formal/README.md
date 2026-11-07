@@ -92,7 +92,9 @@ Address faults and read faults retain the complete input state. Only success
 commits RSP/RBP and PC. Public decode/success/fault/frame lemmas serve wrapper
 certificates; read-result lemmas require the proved canonical span. Host
 LASS user/supervisor policy, signal delivery RF and the initial ABI remain
-platform inputs. The hardware boundary receipt exercises48-bit mode only.
+platform inputs. The hardware boundary receipt exercises48-bit mode only. F
+independently compares41984 saved CPU states with this same executable step,
+including fault class, with zero mismatches or unavailable cases.
 Internal call/return
 stack cores are distinct from helper and outer-invocation platform certificates. D0 pre/access/post success cores and their two dispatcher arms additionally
 compose generated base updates with the transfer, under explicit accessible-memory

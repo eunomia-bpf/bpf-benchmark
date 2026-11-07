@@ -4498,7 +4498,49 @@
       ],
       "metadata_drift_scope": "F collector summary finalized; both raw CPU streams and profile bytes unchanged"
     },
-    "independent_cpu_reference_replay": "F same8192 and no-LASS33792 pending",
+    "independent_cpu_reference_replay": {
+      "canonical_sha256": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+      "cases": 41984,
+      "commit": "4bf280aea6415514a1935a08cbeb889f22aefeac",
+      "comparison": "16GPR/fullRF-normalizedflags/PC/memory/faultclass; SIMD/segments unobserved; NO-LASS48 profile; noCPL0/ABI/active57 claim",
+      "mismatches": 0,
+      "receipts": [
+        {
+          "path": "kprog/results/kprog_fidelity_20261107/differential/x86-leave64/canonical-after/summary.json",
+          "result": {
+            "compared": "all16 GPR/full normalized flags/PC/memory plus fault presence and modeled class; SIMD and segment state not measured by this CPU fixture",
+            "cpu_binary_sha256": "308f484b26db4e7c2537b1228ba837e026a22a2b7de875449e44c7f17a7da3d5",
+            "cpu_cases": 8192,
+            "cpu_cases_gzip_sha256": "1a11e572a3177ae13acb9f664b6317c45787865b4c83099b261a54ee13dcf5a5",
+            "fault_flags_normalization": "clear exception-delivery RF bit16 only; compare all remaining RFLAGS",
+            "input_classes": 8,
+            "mismatches": 0,
+            "reference_cases": 8192,
+            "reference_sha256": "a5a9f6ced54c79d4de8d8443e097f8179dd5b0bc49e7051de3b4a33a385c6ffe",
+            "unavailable_classes": 0
+          },
+          "sha256": "3d2eed2ad9da07fd33a04c1b8436a382af8eae136524f514861773af9aa457f0"
+        },
+        {
+          "path": "kprog/results/kprog_fidelity_20261107/differential/x86-leave64-boundaries/canonical-after/summary.json",
+          "result": {
+            "compared": "all16 GPR/full normalized flags/PC/memory plus fault presence and modeled class; SIMD and segment state not measured by this CPU fixture",
+            "cpu_binary_sha256": "968f6c49e58f2ecd56802b756d6e4196dddfb701bea4331a940c4b44288af98c",
+            "cpu_cases": 33792,
+            "cpu_cases_gzip_sha256": "56cb73d8bfa523e187d18839b3a995fde7ac85298fb9f32dea431d88d6cd2798",
+            "fault_flags_normalization": "clear exception-delivery RF bit16 only; compare all remaining RFLAGS",
+            "input_classes": 33,
+            "mismatches": 0,
+            "reference_cases": 33792,
+            "reference_sha256": "a5a9f6ced54c79d4de8d8443e097f8179dd5b0bc49e7051de3b4a33a385c6ffe",
+            "unavailable_classes": 0
+          },
+          "sha256": "a547915e755b3d71d854e2aa8ad8b4550dac13f0565d73f60c4db0c1fd200509"
+        }
+      ],
+      "unavailable_classes": 0,
+      "verification": "remoteancestor; both exact committed summary blobs; both actual raw trace hashes; canonical source identical"
+    },
     "old_failure": "347c4c1e9 strict1024 fault-kind differences retained",
     "profile": "flat longmode48/57 LASS disabled; hardware48 only",
     "prototype_correction": "nonwrap variant and stopped own build archived; corrected raw KVM wrap groups PF14",

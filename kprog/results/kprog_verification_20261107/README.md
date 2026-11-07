@@ -2176,3 +2176,29 @@ declarations are identical except one import. Complete commands/logs/audits/
 pins are appended to the existing integration archive. No ISA/header/
 generator/oracle/test/configuration/paper changes. Full77/72/whole-dispatch/
 compiled-B/O2/O4 and the separate known complete-check failures remain open.
+
+## Independent LEAVE replay closes the reported fault-kind discrepancy
+
+F published4bf280aea6415514a1935a08cbeb889f22aefeac against V213d's exact494c
+canonical reference: original8192 states plus no-LASS KVM33792 boundary states
+are41984 exact matches, zero mismatches and zero unavailable cases. Comparison
+retains all16 GPRs, full RFLAGS after removing exception-delivery RF only,
+PC, memory and modeled fault presence/class. The previously failing1024
+noncanonical-frame cases now report the matching address fault. All wrap
+cases retain the native read-fault outcome; no nonwrap guard is introduced.
+
+V separately verified the remote commit ancestry, exact committed summary
+blobs, both actual raw-trace hashes and the identical committed/current
+canonical source. The compact integration JSON records those receipts and
+hashes. Full raw traces, CPU binaries, executable reference, source closure,
+adapter commands and the earlier failure remain in F's dated artifacts;
+V does not duplicate or reinterpret them. F's adapter only added explicit
+33-class counting and computed totals; fault and state comparisons remain
+unchanged. Historical failure347c4c1e9 and old decoder-refusal data are retained.
+
+This closes the measured LEAVE fault-kind discrepancy for those inputs.
+Hardware mode is48-bit and LASS is disabled for the boundary reference replay.
+Host LASS behavior, active57-bit execution, unobserved SIMD/segments, CPL0
+platform correspondence, simulator LEAVE support and whole JIT/ABI/O2/O4
+remain separate. Neither the complete formal check nor full77/72 coverage
+is claimed by this one-instruction result.
