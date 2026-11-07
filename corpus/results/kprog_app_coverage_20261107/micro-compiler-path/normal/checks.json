@@ -1,0 +1,22 @@
+{
+  "driver_exit": 0,
+  "collector_exit": 0,
+  "native_requests": 1,
+  "generated": 1,
+  "compiled": 1,
+  "accepted_bound": 1,
+  "jit_result": 12345678,
+  "native_result": 12345678,
+  "both_return_actions": 2,
+  "outer_path": "/usr/sbin:/usr/bin:/sbin:/bin",
+  "make_supplies_llvm18_path": true,
+  "native_hash_verified": "88e2b781a1aac6c191f85b02a86d868682915e4233c17ff008e0fadcfcb74124",
+  "source_drift": [],
+  "temporary_files_remaining": [],
+  "files": {
+    "runtime-raw.tar.gz": "4cf5f1f357fe3c888d5c01a196509f3a8dc825e5103f5b317ffe27766e65b1e1",
+    "runtime.json": "bd005dee0b9a6a869fa25c0d434a92766f30cc7f7564c3bdc1a2281e9073b206",
+    "runtime-driver.log.gz": "631b575c589b21c50ae5d61fafecdae78ee2306a7748327c3b6c270c24d60dff",
+    "runtime-service.tar.gz": "857a68fb6ebfb50a755a3db9094dd7de341db2bca13bc375700f5f2e70652c45"
+  }
+}
