@@ -2241,3 +2241,12 @@ emitted payload code base, preserving every invocation field except the
 logical PC shift. All43 audits pass. Full JIT-image/caller embedding and
 architectural reconstruction remain separate; an absolute return address is
 not shifted by this payload transport.
+
+`make -C kprog/tv trusted-simple-b29-state-certificate` checks full
+architectural reconstruction for the first native basic block, including both
+read-fault boundaries. Changed GPRs come from actual B29 registers; untouched
+fields come from the immutable invocation frame. Canonical CMP rematerializes
+all RFLAGS. Equality covers all16GPRs, flags, XMM0, memory, PC, segments and
+address width, with actual ordered effects and every permitted XOR AF choice.
+All4 state audits pass. Later guard/store boundary reconstruction and complete
+full-state TV remain open; the physical context-conversion premise persists.

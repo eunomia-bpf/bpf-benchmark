@@ -1,0 +1,79 @@
+{
+  "utc": "2026-11-07T18:09:52.913952+00:00",
+  "status": "actual_B29_first_native_basic_block_full_architectural_reconstruction_for_all_context_read_outcomes_proved_not_all_blocks_TV",
+  "capture_commit": "090564a50dfd6c7a38452b5df27a845948cb7d44",
+  "producer_binding_commit": "56b78767b31222e579895cdbafc73dd78a0bf1da",
+  "accepted_B_sha256": "45062cd04b8ae6b7ffe0d5f1ea42f61bb2041ad5f44a8a034482b238bf94c53c",
+  "native_sha256": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+  "claims": [
+    "First JA boundary native state equals a reconstruction from actual B29 r0/r1/r2, actual B memory/PC, and immutable invocation fields. Equality covers all16GPRs/allRFLAGS/XMM0/memory/PC/FS/GS/address width, not only live registers.",
+    "Flags are rematerialized using the single canonical CMP rule; no copied flag or ISA semantics is introduced and every allowed native XOR AF choice is covered.",
+    "Both first/second context-read fault boundaries reconstruct full native state from actual B state plus unchanged invocation fields; second-load fault uses actual B data value for native RCX.",
+    "Actual byte-decoded native relational first-block execution and actual B29 execution retain identical ordered read/fault effects, with no selected native successor or architectural endpoint premise."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-b29-certificate trusted-simple-b29-state-certificate",
+    "reproduction": "make -C kprog/tv trusted-simple-b29-state-certificate",
+    "exit": 0,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleB29State.first_guard_architecture": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.first_block_relational_architecture": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.first_read_fault_architecture": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.second_read_fault_architecture": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "log_sha256": "27c9025bd1d32fd48b003ea9e81f4104f78c6f77c23c18a2a97437fa29fc0747",
+    "dependency_scope": "New state module imports exact previously checked B29 certificate at5a44604f5; reference/Safety/CFG sources unchanged. One new module focused check; the reproduction target includes all prerequisites."
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleB29.lean": "47de242880e7e7c8817341c63586671402b2a0875be8474a5531370d05c9d6f5",
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/Makefile": "c5f5ce2a4fd02a1e4e0ac39c73c7920b9dac6eea090d0bfdb5d16e5cc2f28c9a",
+    "kprog/tv/TrustedSimpleSafety.lean": "5537b0f4d04c5b5ebec988c1cb9c63175e9b786d95495265f3273675f82f3bea",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa",
+    "kprog/tv/TrustedSimpleB29State.lean": "51dbcee398f45dfc79d981170c8150aa744756177ab67374129604faae353770"
+  },
+  "premises": [
+    "Same context argument and exact initial memory, bound SP input, nativePC0/BPFPC0 active.",
+    "Successful-read first-block case explicitly takes the two actual read results; separate first/second fault theorems cover failed permissions.",
+    "Declared kernel XDP context map at B29PC1/2 and its physical conversion provenance remain explicit."
+  ],
+  "trusted": [
+    "Verifier soundness for the accepted physical B and its admitted entry; the declared context-conversion relation must describe that physical artifact.",
+    "The single V reference ISA/Memory semantics, whose hardware fidelity is validated separately by F and is not established by this theorem.",
+    "Kernel binding/entry/ABI/metadata enforcement and capture/platform provenance, including XDP conversion.",
+    "Lean kernel, propext, Classical.choice, Quot.sound and explicitly audited Lean.ofReduceBool."
+  ],
+  "remaining": [
+    "Architectural reconstruction for the +8/+72 and store blocks, including values no longer live in B; composition into the complete full-state TranslationValidation relation.",
+    "Full physical JIT/caller embedding and other micro/application certificates; first-block equality is not whole-program TV."
+  ]
+}
