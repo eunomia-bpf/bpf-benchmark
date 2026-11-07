@@ -1,0 +1,104 @@
+{
+  "recorded": "2026-11-07T12:29:13.412256+00:00",
+  "complete": false,
+  "completed_cases": 14,
+  "total_cases": 34,
+  "stages": {
+    "valid_executed": 4,
+    "verifier_rejected": 8,
+    "loader_rejected": 1,
+    "specialization_rejected": 1
+  },
+  "accepted_unsafe": 0,
+  "unsafe_native_executed": false,
+  "source_drift_at_checkpoint": {},
+  "live_directory": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-apnoo9h3",
+  "archive": "fresh-prefix-requests.tar.gz",
+  "request_artifacts": [
+    {
+      "name": "valid_control",
+      "file": "1.success.tar.gz",
+      "sha256": "583dadf3ae20156f3cac301a50010d2da4675cc4534a361cb78bd10be264a775",
+      "native_sha256": "0e5c0407b26746fe5465c46615365300dee08573ba7d187b35a1935e540703f5"
+    },
+    {
+      "name": "valid_copy_restore",
+      "file": "2.success.tar.gz",
+      "sha256": "0a3cbe0aee34d723f7250557a94df635639775ccec20cb54ba0075da01c14cee",
+      "native_sha256": "62deafc04c19cf6157b5a1db9e52f7d2ece1f38958afb4a6ba1962e1aa419d9b"
+    },
+    {
+      "name": "valid_alias_load",
+      "file": "3.success.tar.gz",
+      "sha256": "39252d4e25cdae6424dfcb53efdd2b84c3e01a8d98a549a1aa0c5380521fbc72",
+      "native_sha256": "f5c5efe2f30e2950ecc98b97ac29f0e9bc7e5e4474a4ea13384d2b0ef3e38d0b"
+    },
+    {
+      "name": "valid_spill_restore",
+      "file": "4.success.tar.gz",
+      "sha256": "634f9df09aa7c53ce225176dfd33aa951d5a8396cf8e36816213eaa7f9b14b92",
+      "native_sha256": "539354542a4e9fbbec15da240a5c8223c0725f644c38cba34ebedc40e42d9e0f"
+    },
+    {
+      "name": "past_data_end_read",
+      "file": "5.failure.tar.gz",
+      "sha256": "9fa3abaa7d41110e484dabd2a63ade63cd1dd3b3bd479b4a97576fcbff548efb",
+      "native_sha256": "b59cfc6568481220ac84c773c748076a79d2343db974edfc7e493b3efaefc030"
+    },
+    {
+      "name": "past_data_end_write",
+      "file": "6.failure.tar.gz",
+      "sha256": "abb18b08d0dbb0ab59580ea5f01082a73c6627db1d389c22ea71c3a2329ce220",
+      "native_sha256": "9f47d4ab36a5e4c84db06e141115d68fe4300671d4167ff115a2c03376e12908"
+    },
+    {
+      "name": "missing_data_end_check",
+      "file": "7.failure.tar.gz",
+      "sha256": "ac0b19e0ad9252acf9bc790b9a6fab7aefb5ec77f5ab5937e9dc5b396890476a",
+      "native_sha256": "af2effa86101b552dca5fb6b0fdc69578b705a07ce446a113548707923b31a35"
+    },
+    {
+      "name": "map_value_oob",
+      "file": "8.failure.tar.gz",
+      "sha256": "2e6e57c9e72051e6bea3e02777fd27a06ab54f9f328b7fdcb2ea12179ed75c0d",
+      "native_sha256": "a9028b2c67f9402bb6d397da5ba814ca4e359e8ff8a5c43aec3ecaa33e49a650"
+    },
+    {
+      "name": "nullable_map_dereference",
+      "file": "9.failure.tar.gz",
+      "sha256": "ae447102d404137be308aceddd05d0c87c34abfdfb384651867ed8665c70ca97",
+      "native_sha256": "2f4681342b27ef34166b6493942a36f9a4e063cfc959428c48ffb73e65748ad2"
+    },
+    {
+      "name": "invalid_helper_argument",
+      "file": "10.failure.tar.gz",
+      "sha256": "4cdad2e4e56d7dbec4f90b6961446917ae68b20373d017329e80dc3014857688",
+      "native_sha256": "dad4bdf806f097d9aad6e7c96549664240ad2e44293f14e7e896a6809cb949f9"
+    },
+    {
+      "name": "stack_oob",
+      "file": "11.failure.tar.gz",
+      "sha256": "f50d4810389c18a662c6bbf4153d9316cfc3378cb45b1c8de26ccfbdf21e39ee",
+      "native_sha256": "fc982ce7fc4a52e051e4c7037c2216aeccd87e1deb48c460dd79c5875a25c8a9"
+    },
+    {
+      "name": "uninitialized_stack",
+      "file": "12.failure.tar.gz",
+      "sha256": "6f860cb2db8b5771ea74dd840bd145bffcb5ee2f54cdee19097b394b028fd20a",
+      "native_sha256": "a50aa1007ba884a8a4a1d12598c5a8d84a9ed25fcf3e73d68d0c07ca6768be04"
+    },
+    {
+      "name": "unbounded_loop",
+      "file": "13.failure.tar.gz",
+      "sha256": "010a85e9ff9b498f5085c018f8b0113200e2406818bf2b0b783ebe4365280614",
+      "native_sha256": "4ad10da9f1969bf96619f6f451001c29fb976b638d395a7293e1dbf4b75f90b8"
+    },
+    {
+      "name": "unbounded_indirect_jump",
+      "file": "14.failure.tar.gz",
+      "sha256": "86a2d55c8fe28201d01bf4f622dede4809a573f43f533c55d53d10ed4c81eef3",
+      "native_sha256": "691911d84bf7d44a61fdedfca7f4f6db68ea79596c1578f8b828b622b89bf0f9"
+    }
+  ],
+  "archive_sha256": "48ce7916aacc963db3eedb7936d250d78356c7ac6251bb01ef43b61006050a8d"
+}
