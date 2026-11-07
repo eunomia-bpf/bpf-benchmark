@@ -1,0 +1,171 @@
+{
+  "status": "actual_entry_through_all_three_guard_executions_checked",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "utc": "2026-11-07T11:22:23.272579+00:00",
+  "theorem": "KProgTV.TrustedSimpleX86.entry_all_guards_correspondence",
+  "native_instruction_extents": [
+    [
+      0,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      7,
+      3
+    ],
+    [
+      10,
+      2
+    ],
+    [
+      12,
+      3
+    ],
+    [
+      15,
+      2
+    ],
+    [
+      17,
+      4
+    ],
+    [
+      21,
+      3
+    ],
+    [
+      24,
+      2
+    ],
+    [
+      26,
+      4
+    ],
+    [
+      30,
+      3
+    ],
+    [
+      33,
+      2
+    ]
+  ],
+  "covered_B_pcs": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "successors": {
+    "condition": "pointer>limit OR pointer+8>limit OR pointer+72>limit",
+    "true": {
+      "native": 60,
+      "B": 34
+    },
+    "false": {
+      "native": 35,
+      "B": 18
+    },
+    "all_outcomes_derived_from_actual_loaded_values": true,
+    "arithmetic": "canonical modular 64-bit operations, including wraparound"
+  },
+  "execution": {
+    "native": "one actual canonical byte-decoded Execution with complete guardedNativeFinal state",
+    "B": "one initializedInstructionStep env Execution with complete guardedProofFinal state",
+    "B_memory_events_retained": 9,
+    "proved_private_events_projected": 7,
+    "guest_events": "exact original two ordered reference-memory reads"
+  },
+  "state_claims": [
+    "guest values/initialization outside precise36-byte private footprint agree",
+    "readable/writable permissions agree globally",
+    "native RCX and B r2 retain loaded store-address pointer",
+    "native EAX and B r1 retain zero at guard boundary",
+    "later native guards modify only RSI/RDI; B guards only r4/r5"
+  ],
+  "premises": [
+    "both entry PCs0 and active B",
+    "same entry context pointer and memory",
+    "actual successful context reads",
+    "actual private stack read/write permissions at captured widths",
+    "explicit env.nativeInput stackPointer witness",
+    "byte-disjoint context-read/private footprint",
+    "kernel virtual/physical context and ABI transport remains explicit"
+  ],
+  "no_assumption_of": [
+    "branch outcome",
+    "non-wrapping addition",
+    "pointer monotonicity/range"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical before namespace end",
+    "old_declarations_sha256": "d2851d2161d19da88725421ef360350cb7206ba93207e28ea8061cea46a0f623",
+    "ISA_runtime_wire_ABI_metadata_binding_rejection_contracts": "unchanged"
+  },
+  "remaining": [
+    "packet-write body and return/exit",
+    "whole-program architectural and canonical relational simulation",
+    "arbitrary entry faults and ABI/nativeInput/kernel platform transport",
+    "immutable P to materialized emitted native artifact"
+  ],
+  "trusted": [
+    "verifier soundness",
+    "canonical ISA/memory and explicit platform semantics",
+    "kernel binding/capture and accepted-byte provenance",
+    "registered specialization/link service until whole-program TV",
+    "Lean kernel/logical axioms and Lean.ofReduceBool native proof reduction where audited"
+  ],
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "binding_records": 2,
+    "mismatch_controls_rejected": 22,
+    "no_sorryAx": true,
+    "log_sha256": "8b3d6b681e5f7f3d4af85c5031f8427951d8b830bb1ecfbfb0e0f178fba8b32b",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.remaining_native_frame": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.remaining_proof_frame": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.entry_all_guards_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    }
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "2272b2139b4013f14c86716a2308aa54993e8771e8b66b65a01546f0ea4dbef3",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "5795eae5ccab41ce25d47f99820b7c96f881f32339301f5604ea01607cfbc1cf",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/tv/check_trusted_capture.py": "71642150609627e7ac8de6ef265d79dc6814a58af669260ffc21e602983e29a9",
+    "kprog/tv/Makefile": "2123977b45e69a44f70507dd65b2c1506e23d509f1c244a7d1d5f0799456f9b4"
+  },
+  "raw_output": "summarized and retired after publication; STOP/shared caches retained"
+}

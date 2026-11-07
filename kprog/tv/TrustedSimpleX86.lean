@@ -1487,6 +1487,133 @@ theorem remaining_guard_correspondence (env : BPF.Environment) (n : X86.State) (
   · by_cases reject72 : p.regs 2+(72#64) > p.regs 3 <;>
       simp [remainingProofFinal,reject72,remainingProof72,remainingProof8,BPF.setReg]
 
+
+def guardedNativeFinal (n : X86.State) (pointer limit : Word) : X86.State :=
+  let first := guardFinal (nativePrefixFinal n pointer limit)
+  if pointer > limit then first else remainingNativeFinal first
+
+def guardedProofFinal (p : BPF.State) (pointer limit stack : Word) : BPF.State :=
+  let first := proofGuardFinal (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack)
+  if pointer > limit then first else remainingProofFinal first
+
+/-- Only RSI/RDI are modified by the later native guard region. -/
+theorem remaining_native_frame (s : X86.State) (r : X86.Register) (not6 : r≠6) (not7 : r≠7) :
+    (remainingNativeFinal s).gpr r = s.gpr r := by
+  by_cases reject8 : s.gpr 6+(8#64) > s.gpr 2 <;>
+    simp +decide [remainingNativeFinal,remainingNative8,remainingNativeCmp8,remainingNativeLea,
+      remainingNative72,remainingNativeCmp72,remainingNativeAdd,reject8,not6,not7]
+
+/-- The captured later B guards modify only their actual r4/r5 temporaries. -/
+theorem remaining_proof_frame (p : BPF.State) (r : BPF.Register) (not4 : r≠4) (not5 : r≠5) :
+    (remainingProofFinal p).regs r = p.regs r := by
+  by_cases reject72 : p.regs 2+(72#64) > p.regs 3 <;>
+    simp +decide [remainingProofFinal,remainingProof72,remainingProof8,BPF.setReg,reject72,not4,not5]
+
+/-- Actual entry through all three bounds guards. All B events remain in
+one execution; only proved-private events are projected. The loaded values
+choose every actual successor, including wrapping arithmetic. -/
+theorem entry_all_guards_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (pointer limit stack : Word) (first second : Event)
+    (nativePC : n.pc = 0) (proofPC : p.pc = 0) (active : p.halted = false)
+    (context : n.gpr 7 = p.regs 1) (memory : n.memory = p.memory)
+    (nativeStack : env.nativeInput .stackPointer = .ok stack)
+    (read0 : readMemory p.memory (p.regs 1) 8 = .ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8 = .ok (limit,second))
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8 = true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8 = true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8 = true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8 = true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4 = true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8 = true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8 = true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (guest1 : ∀ i < 8, ¬ initializationPrivateByte (p.regs 10)
+      (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    X86Path.Execution 0 native n [first,second] (guardedNativeFinal n pointer limit) ∧
+    Execution (initializedInstructionStep env) p
+      (prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit)
+      (guardedProofFinal p pointer limit stack) ∧
+    (prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit).filterMap
+      (initializationProjectEvent (p.regs 10)) = [first,second] ∧
+    (guardedNativeFinal n pointer limit).pc =
+      (if pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit then 60 else 35) ∧
+    (guardedProofFinal p pointer limit stack).pc =
+      (if pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit then 34 else 18) ∧
+    initializationAgreesOutside (p.regs 10) (guardedNativeFinal n pointer limit).memory
+      (guardedProofFinal p pointer limit stack).memory ∧
+    (guardedNativeFinal n pointer limit).gpr 1 = pointer ∧
+    (guardedNativeFinal n pointer limit).gpr 0 = (0#64) ∧
+    (guardedProofFinal p pointer limit stack).regs 2 = pointer ∧
+    (guardedProofFinal p pointer limit stack).regs 1 = (0#64) := by
+  obtain ⟨nrun,prun,trace,npc,ppc,memoryMatch,zeroMatch,pointerMatch,flags⟩ :=
+    entry_first_guard_correspondence env n p pointer limit stack first second nativePC proofPC active
+      context memory nativeStack read0 read1 write40 write32 write24 write16 write8 read40 read32 guest0 guest1
+  let n1 := guardFinal (nativePrefixFinal n pointer limit)
+  let p1 := proofGuardFinal (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack)
+  have p2 : p1.regs 2=pointer := by simp +decide [p1,proofGuardFinal,initializationFinal,BPF.setReg]
+  have p3 : p1.regs 3=limit := by simp +decide [p1,proofGuardFinal,initializationFinal,BPF.setReg]
+  have p0 : p1.regs 1=(0#64) := by simp +decide [p1,proofGuardFinal,initializationFinal,BPF.setReg]
+  have n2 : n1.gpr 1=pointer := by
+    simp +decide [n1,guardFinal,guardCompare,guardZero,guardMove,nativePrefixFinal,nativeAfterSecond,nativeAfter]
+  have n0 : n1.gpr 0=(0#64) := by simp +decide [n1,guardFinal,guardCompare,guardZero]
+  have core :
+      X86Path.Execution 0 native n [first,second] (guardedNativeFinal n pointer limit) ∧
+      Execution (initializedInstructionStep env) p
+        (prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit)
+        (guardedProofFinal p pointer limit stack) ∧
+      (guardedNativeFinal n pointer limit).pc =
+        (if pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit then 60 else 35) ∧
+      (guardedProofFinal p pointer limit stack).pc =
+        (if pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit then 34 else 18) ∧
+      initializationAgreesOutside (p.regs 10) (guardedNativeFinal n pointer limit).memory
+        (guardedProofFinal p pointer limit stack).memory := by
+    by_cases reject : pointer > limit
+    · refine ⟨?_,?_,?_,?_,?_⟩
+      · simpa only [guardedNativeFinal,reject,ite_true] using nrun
+      · simpa only [guardedProofFinal,reject,ite_true] using prun
+      · simpa only [guardedNativeFinal,reject,ite_true,true_or] using npc
+      · simpa only [guardedProofFinal,reject,ite_true,true_or] using ppc
+      · simpa only [guardedNativeFinal,guardedProofFinal,reject,ite_true] using memoryMatch
+    · have at17 : n1.pc=17 := by simpa only [reject,ite_false] using npc
+      have at12 : p1.pc=12 := by simpa only [reject,ite_false] using ppc
+      have stillActive : p1.halted=false := by
+        simpa [p1,proofGuardFinal,initializationFinal,proofPrefixFinal,afterSpill,BPF.setReg] using active
+      have limitMatch : n1.gpr 2=p1.regs 3 := by
+        simp +decide [n1,p1,guardFinal,guardCompare,guardZero,guardMove,nativePrefixFinal,nativeAfterSecond,nativeAfter,
+          proofGuardFinal,initializationFinal,BPF.setReg]
+      obtain ⟨ntail,ptail,ntarget,ptarget,nmemory,pmemory⟩ :=
+        remaining_guard_correspondence env n1 p1 at17 at12 stillActive pointerMatch limitMatch
+      refine ⟨?_,?_,?_,?_,?_⟩
+      · simpa only [guardedNativeFinal,reject,ite_false,List.append_nil] using native_execution_append nrun ntail
+      · simpa only [guardedProofFinal,reject,ite_false,List.append_nil] using prun.append ptail
+      · simpa only [guardedNativeFinal,reject,ite_false,false_or,p2,p3] using ntarget
+      · simpa only [guardedProofFinal,reject,ite_false,false_or,p2,p3] using ptarget
+      · simp only [guardedNativeFinal,guardedProofFinal,reject,ite_false]
+        change initializationAgreesOutside (p.regs 10) (remainingNativeFinal n1).memory (remainingProofFinal p1).memory
+        rw [nmemory,pmemory]
+        exact memoryMatch
+  refine ⟨core.1,core.2.1,trace,core.2.2.1,core.2.2.2.1,core.2.2.2.2,?_,?_,?_,?_⟩
+  · by_cases reject : pointer > limit
+    · simpa only [guardedNativeFinal,reject,ite_true] using n2
+    · simp only [guardedNativeFinal,reject,ite_false]
+      change (remainingNativeFinal n1).gpr 1=pointer
+      exact (remaining_native_frame n1 1 (by decide) (by decide)).trans n2
+  · by_cases reject : pointer > limit
+    · simpa only [guardedNativeFinal,reject,ite_true] using n0
+    · simp only [guardedNativeFinal,reject,ite_false]
+      change (remainingNativeFinal n1).gpr 0=(0#64)
+      exact (remaining_native_frame n1 0 (by decide) (by decide)).trans n0
+  · by_cases reject : pointer > limit
+    · simpa only [guardedProofFinal,reject,ite_true] using p2
+    · simp only [guardedProofFinal,reject,ite_false]
+      change (remainingProofFinal p1).regs 2=pointer
+      exact (remaining_proof_frame p1 2 (by decide) (by decide)).trans p2
+  · by_cases reject : pointer > limit
+    · simpa only [guardedProofFinal,reject,ite_true] using p0
+    · simp only [guardedProofFinal,reject,ite_false]
+      change (remainingProofFinal p1).regs 1=(0#64)
+      exact (remaining_proof_frame p1 1 (by decide) (by decide)).trans p0
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -1631,3 +1758,9 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.remaining_native_successor
 
 #print axioms KProgTV.TrustedSimpleX86.remaining_guard_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_native_frame
+
+#print axioms KProgTV.TrustedSimpleX86.remaining_proof_frame
+
+#print axioms KProgTV.TrustedSimpleX86.entry_all_guards_correspondence

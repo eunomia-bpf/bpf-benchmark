@@ -1423,8 +1423,36 @@ native PC35/Bpc18. No pointer monotonicity, no-overflow or branch-outcome
 premise occurs. The separate native/B state functions retain their different
 schedules and temporary values.
 
-This is an actual guard-region execution/control certificate. Composition
-with the full entry prefix and subsequent stores/exit, program-wide state
+This is an actual guard-region execution/control certificate. Full entry
+composition is provided below. Subsequent stores/exit, program-wide state
 relations and canonical relational execution, faults, ABI/platform behavior
 and immutable-P/materialized-artifact transport remain open. Evidence:
 `trusted-simple-remaining-guards.json`.
+
+
+Actual entry through all three bounds guards
+
+`entry_all_guards_correspondence` composes the actual context loads, private
+initialization, first guard and remaining reordered guards into one native
+execution and one `initializedInstructionStep env` execution. The three
+actual modular comparisons choose all paths. Any failed comparison leads to
+native PC60/Bpc34; otherwise execution reaches native PC35/Bpc18, immediately
+before the packet-write body. No branch outcome or no-overflow premise is
+added. The theorem retains complete successor states and all nine original
+B memory events; the proved-private projection yields exactly the two
+original native guest reads.
+
+Guest memory agreement outside the precise 36-byte initializer footprint,
+including permissions and initialization bits, survives every guard. The
+store-address registers retain the same loaded pointer (native RCX/B r2),
+and native EAX/B r1 remain zero at this boundary. The frame lemmas prove that
+later native guards modify only RSI/RDI and B guards only their actual r4/r5
+temporaries. Thus these field relations follow from actual instructions.
+
+The premises remain successful context reads and private-slot permissions,
+explicit native stack input, entry context/memory relation and private/guest
+disjointness. This does not yet cover packet writes, return/exit, arbitrary
+entry faults, the program-wide architectural/relational simulation or
+ABI/platform and immutable-P/materialized-artifact transport. It is not a
+whole-program TV certificate. Scope and audit:
+`trusted-simple-entry-all-guards.json`.
