@@ -1,0 +1,348 @@
+{
+  "utc": "2026-11-07T23:59:31.878248+00:00",
+  "source": "kprog/formal/KProgFormal/Refinement/Arm64Exclusive.lean",
+  "before_sha256": "9657b86d9a34abe16e18df14e86941bbe64b7a30363a4d88f0ada7ec176060e5",
+  "after_sha256": "3b046e8882352f257dd1ca99f950a8cc1a005aa547e9bfc6afda3791c0ea36c0",
+  "theorems": [
+    "retry_status_refines",
+    "retry_suffix_refines",
+    "retry_suffix_fault"
+  ],
+  "scope": "Universal composition of the existing canonical exclusive store with its actual W-status CBNZ. Both native data widths, every real W status register, arbitrary source/base registers, PC and displacement. Existing store monitor/commit, alignment and writable-preflight premises retained; full post-store state, ordered events and fault transition preserved.",
+  "published_profile": {
+    "exit": 0,
+    "source_epoch": "f0517e4931be058ddd8ce0d0df87612ee3ffb250",
+    "imports": [
+      {
+        "module": "KProgFormal.Refinement.Arm64Memory",
+        "source_sha256": "f5b3c04001e9b1cfd8f06ffaaf3248ff66124d119dd3f22d56f83e2248b790cc",
+        "warm_olean_sha256": "0857b62787df93f263120fba8883c69bfecdb898661158520c3f5c74e229f54f"
+      },
+      {
+        "module": "KProgFormal.Refinement.Arm64Register",
+        "source_sha256": "491588063ac42493dfc6f523218bf2831f32a1748c4b93bfcbc56915d9ad08b8",
+        "warm_olean_sha256": "a52ea5a08739abe7b99968484e0687615be1a15ce60fb831f1bf1e8e4bf836e0"
+      },
+      {
+        "module": "KProgFormal.Reference.AArch64",
+        "source_sha256": "00c08b7441948c762d18d2bed62fac13c91f6f88f06e380323ac38bef66ece4a",
+        "warm_olean_sha256": "e64ff1d4e35c62851d8208fbb0eddd9930e86aa10125a1af109c77263cc706f5"
+      },
+      {
+        "module": "KProgFormal.Reference.Memory",
+        "source_sha256": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+        "warm_olean_sha256": "dc3ed5d7d9a0180f57574646597651f8ea628af3a857a628ef5a767283a2d659"
+      },
+      {
+        "module": "KProgFormal.Arm64RegDispatch",
+        "source_sha256": "cf32a3e23b0386574ec9b2b728c760a7dfcd4521fd46d92075959e1438d9fccf",
+        "warm_olean_sha256": "0e4904a0cf83825b98e2a17a5d416c7981294b42da91063ce6eb79857848ed70"
+      },
+      {
+        "module": "KProgFormal.Generated.GeneratedArm64RegDispatch",
+        "source_sha256": "cdf1723df5504058c7849c8682f854f392a871d1eaf896ba3e9f33095575a6b7",
+        "warm_olean_sha256": "a03a7d864d4e0436ecc793ce57e3393032eab4fb6093ae2f2c486a87adec12d4"
+      },
+      {
+        "module": "KProgFormal.Generated.GeneratedArm64RegPresence",
+        "source_sha256": "1bb899b1bcd79a7506af7cd70668c7fed768f393d126c5b21b70b761a130c57b",
+        "warm_olean_sha256": "4f1354e128491e667e69a9e904fd74150283830b3a7f14d1c67769e355465964"
+      },
+      {
+        "module": "KProgFormal.Generated.GeneratedArm64MemIndex",
+        "source_sha256": "48267724ffe31c8665d0516ee97dc22beff95d4bfb20ee692d825cc9d7524e0a",
+        "warm_olean_sha256": "3c71cc10e3bc95a8c38a88ed35eae30cd402067db942e4c88178ae05900292f0"
+      },
+      {
+        "module": "KProgFormal.Arm64WriteArmShape",
+        "source_sha256": "073efe56aaac06a58e48b4ca7c027711d4f9e523e9ff4ce135810e6c7692ed12",
+        "warm_olean_sha256": "7dc3f693743e1daca266500af9075c41a575cfec51acc75247a654dfcaca813e"
+      },
+      {
+        "module": "KProgFormal.Generated.GeneratedArm64WriteArm",
+        "source_sha256": "76384a625fbb7281f8cf189537b998fbb586b35d91735cd50fc1f36bfde1e6d7",
+        "warm_olean_sha256": "21744b4ba502dc640e5f462bce7765bf2c9eeea42068a0722315aca51844b1dc"
+      },
+      {
+        "module": "KProgFormal.Arm64Width",
+        "source_sha256": "b2a6b8c133b109d4a1f6c4b461b2320940237d6bf8900d5cbd5b753fae3be695",
+        "warm_olean_sha256": "1d48d47f70ad996baf78d676631ba8e4548b8041b8c327c6a43117b9496b87b4"
+      },
+      {
+        "module": "KProgFormal.Generated.GeneratedArm64Width",
+        "source_sha256": "b33d060173bc3a3cc588876731338c3ea4ccefaf1d0ec62b4a027eb306ab767f",
+        "warm_olean_sha256": "203e90e87bfe1c78d0c3645174b4b4c509717ac1b0331b6cf26771585846240f"
+      },
+      {
+        "module": "KProgFormal.Generated.GeneratedArm64LoadBytes",
+        "source_sha256": "7398acfa56c32687773d525e48c695b60eeecefbfa2ab8fef85f9f98d2988b12",
+        "warm_olean_sha256": "d89266aae0c1c42339b0bdbd6f9e2c11543733a7c39de8d975439151526ee472"
+      },
+      {
+        "module": "KProgFormal.Generated.GeneratedArm64StoreBytes",
+        "source_sha256": "76aad1d9007e42f25adf6d2611733bc94b67866572d6f28fe463acdf0ea728c0",
+        "warm_olean_sha256": "9578be5a64d28849e73ced9ff4fe91b916e6cef4c3779f42ea174a407ae463eb"
+      },
+      {
+        "module": "KProgFormal.Generated.GeneratedArm64MemBaseSrc",
+        "source_sha256": "27016cedc6c8da160295482c9f735e896bdf5ece5f9d4d3e3bb9ff3ec95acf59",
+        "warm_olean_sha256": "6065e1fac8fddac74cc780fb0957a9a9510d9a19e957455e5c08c5ca0b45a90f"
+      },
+      {
+        "module": "KProgFormal.Generated.GeneratedArm64MemOffset",
+        "source_sha256": "ca3bfd6c14b225fbe4827f8767be6ba984e42268c4a5ab93d3cdf60020394941",
+        "warm_olean_sha256": "a425e0db1acfd4be5c18b800377e5077c44153e0f91d9b719af23f0c843eba5d"
+      },
+      {
+        "module": "KProgFormal.Generated.GeneratedArm64Extrev",
+        "source_sha256": "870cb3079e4824e148665fc4e2a70b72d6183eb8e95353f60be90d6722641c8f",
+        "warm_olean_sha256": "d2410bf7cba3eb17b8aed851e0ce55c2a8a0361e7d299dfdd19445bf875cc11a"
+      },
+      {
+        "module": "KProgFormal.Generated.GeneratedArm64Stlxr",
+        "source_sha256": "3ba8a62ff9fd3284b17e5b0716ac848b6b7c1c122c371e57aab7da57eb107e8a",
+        "warm_olean_sha256": "2e2f18611291391d6cfce5bdf9e261b4505de237b7d632a021e9f89e8718fbc8"
+      }
+    ],
+    "olean_sha256": "875e59b80c1e356d7f333a190d94e1572bf87fbff7c7f7547782ab452116967c"
+  },
+  "extended_state_profile": {
+    "plan": {
+      "order": [
+        "KProgFormal.Reference.Memory",
+        "KProgFormal.Reference.AArch64",
+        "KProgFormal.Generated.GeneratedArm64RegDispatch",
+        "KProgFormal.Generated.GeneratedArm64RegPresence",
+        "KProgFormal.Generated.GeneratedArm64MemIndex",
+        "KProgFormal.Arm64RegDispatch",
+        "KProgFormal.Generated.GeneratedArm64WriteArm",
+        "KProgFormal.Generated.GeneratedArm64Width",
+        "KProgFormal.Arm64Width",
+        "KProgFormal.Arm64WriteArmShape",
+        "KProgFormal.Refinement.Arm64Register",
+        "KProgFormal.Generated.GeneratedArm64LoadBytes",
+        "KProgFormal.Generated.GeneratedArm64StoreBytes",
+        "KProgFormal.Generated.GeneratedArm64MemBaseSrc",
+        "KProgFormal.Generated.GeneratedArm64MemOffset",
+        "KProgFormal.Generated.GeneratedArm64Extrev",
+        "KProgFormal.Refinement.Arm64Memory",
+        "KProgFormal.Generated.GeneratedArm64Stlxr",
+        "KProgFormal.Refinement.Arm64Exclusive"
+      ],
+      "modules": {
+        "KProgFormal.Refinement.Arm64Exclusive": {
+          "path": "kprog/formal/KProgFormal/Refinement/Arm64Exclusive.lean",
+          "source_sha256": "9657b86d9a34abe16e18df14e86941bbe64b7a30363a4d88f0ada7ec176060e5",
+          "dependencies": [
+            "KProgFormal.Refinement.Arm64Memory",
+            "KProgFormal.Generated.GeneratedArm64Stlxr"
+          ],
+          "published_equal": true,
+          "affected": true
+        },
+        "KProgFormal.Refinement.Arm64Memory": {
+          "path": "kprog/formal/KProgFormal/Refinement/Arm64Memory.lean",
+          "source_sha256": "f5b3c04001e9b1cfd8f06ffaaf3248ff66124d119dd3f22d56f83e2248b790cc",
+          "dependencies": [
+            "KProgFormal.Refinement.Arm64Register",
+            "KProgFormal.Generated.GeneratedArm64LoadBytes",
+            "KProgFormal.Generated.GeneratedArm64StoreBytes",
+            "KProgFormal.Generated.GeneratedArm64MemBaseSrc",
+            "KProgFormal.Generated.GeneratedArm64MemOffset",
+            "KProgFormal.Generated.GeneratedArm64Extrev"
+          ],
+          "published_equal": true,
+          "affected": true
+        },
+        "KProgFormal.Refinement.Arm64Register": {
+          "path": "kprog/formal/KProgFormal/Refinement/Arm64Register.lean",
+          "source_sha256": "491588063ac42493dfc6f523218bf2831f32a1748c4b93bfcbc56915d9ad08b8",
+          "dependencies": [
+            "KProgFormal.Reference.AArch64",
+            "KProgFormal.Arm64RegDispatch",
+            "KProgFormal.Arm64WriteArmShape",
+            "KProgFormal.Generated.GeneratedArm64Width"
+          ],
+          "published_equal": true,
+          "affected": true
+        },
+        "KProgFormal.Reference.AArch64": {
+          "path": "kprog/formal/KProgFormal/Reference/AArch64.lean",
+          "source_sha256": "082b90154c33c374ea58c5afb5259fc39b5b735fbcce2e6c0e0e6364785deb56",
+          "dependencies": [
+            "KProgFormal.Reference.Memory"
+          ],
+          "published_equal": false,
+          "affected": true
+        },
+        "KProgFormal.Reference.Memory": {
+          "path": "kprog/formal/KProgFormal/Reference/Memory.lean",
+          "source_sha256": "18fc564a7acdc6bdf309d0eac7da3b5d58d7aa2a176782c11a829456bf79d3d0",
+          "dependencies": [],
+          "published_equal": false,
+          "affected": true
+        },
+        "KProgFormal.Arm64RegDispatch": {
+          "path": "kprog/formal/KProgFormal/Arm64RegDispatch.lean",
+          "source_sha256": "cf32a3e23b0386574ec9b2b728c760a7dfcd4521fd46d92075959e1438d9fccf",
+          "dependencies": [
+            "KProgFormal.Generated.GeneratedArm64RegDispatch",
+            "KProgFormal.Generated.GeneratedArm64RegPresence",
+            "KProgFormal.Generated.GeneratedArm64MemIndex"
+          ],
+          "published_equal": true,
+          "affected": false
+        },
+        "KProgFormal.Generated.GeneratedArm64RegDispatch": {
+          "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64RegDispatch.lean",
+          "source_sha256": "cdf1723df5504058c7849c8682f854f392a871d1eaf896ba3e9f33095575a6b7",
+          "dependencies": [],
+          "published_equal": true,
+          "affected": false
+        },
+        "KProgFormal.Generated.GeneratedArm64RegPresence": {
+          "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64RegPresence.lean",
+          "source_sha256": "1bb899b1bcd79a7506af7cd70668c7fed768f393d126c5b21b70b761a130c57b",
+          "dependencies": [],
+          "published_equal": true,
+          "affected": false
+        },
+        "KProgFormal.Generated.GeneratedArm64MemIndex": {
+          "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64MemIndex.lean",
+          "source_sha256": "48267724ffe31c8665d0516ee97dc22beff95d4bfb20ee692d825cc9d7524e0a",
+          "dependencies": [],
+          "published_equal": true,
+          "affected": false
+        },
+        "KProgFormal.Arm64WriteArmShape": {
+          "path": "kprog/formal/KProgFormal/Arm64WriteArmShape.lean",
+          "source_sha256": "073efe56aaac06a58e48b4ca7c027711d4f9e523e9ff4ce135810e6c7692ed12",
+          "dependencies": [
+            "KProgFormal.Generated.GeneratedArm64WriteArm",
+            "KProgFormal.Arm64Width"
+          ],
+          "published_equal": true,
+          "affected": false
+        },
+        "KProgFormal.Generated.GeneratedArm64WriteArm": {
+          "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64WriteArm.lean",
+          "source_sha256": "76384a625fbb7281f8cf189537b998fbb586b35d91735cd50fc1f36bfde1e6d7",
+          "dependencies": [],
+          "published_equal": true,
+          "affected": false
+        },
+        "KProgFormal.Arm64Width": {
+          "path": "kprog/formal/KProgFormal/Arm64Width.lean",
+          "source_sha256": "b2a6b8c133b109d4a1f6c4b461b2320940237d6bf8900d5cbd5b753fae3be695",
+          "dependencies": [
+            "KProgFormal.Generated.GeneratedArm64Width"
+          ],
+          "published_equal": true,
+          "affected": false
+        },
+        "KProgFormal.Generated.GeneratedArm64Width": {
+          "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64Width.lean",
+          "source_sha256": "b33d060173bc3a3cc588876731338c3ea4ccefaf1d0ec62b4a027eb306ab767f",
+          "dependencies": [],
+          "published_equal": true,
+          "affected": false
+        },
+        "KProgFormal.Generated.GeneratedArm64LoadBytes": {
+          "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64LoadBytes.lean",
+          "source_sha256": "7398acfa56c32687773d525e48c695b60eeecefbfa2ab8fef85f9f98d2988b12",
+          "dependencies": [],
+          "published_equal": true,
+          "affected": false
+        },
+        "KProgFormal.Generated.GeneratedArm64StoreBytes": {
+          "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64StoreBytes.lean",
+          "source_sha256": "76aad1d9007e42f25adf6d2611733bc94b67866572d6f28fe463acdf0ea728c0",
+          "dependencies": [],
+          "published_equal": true,
+          "affected": false
+        },
+        "KProgFormal.Generated.GeneratedArm64MemBaseSrc": {
+          "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64MemBaseSrc.lean",
+          "source_sha256": "27016cedc6c8da160295482c9f735e896bdf5ece5f9d4d3e3bb9ff3ec95acf59",
+          "dependencies": [],
+          "published_equal": true,
+          "affected": false
+        },
+        "KProgFormal.Generated.GeneratedArm64MemOffset": {
+          "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64MemOffset.lean",
+          "source_sha256": "ca3bfd6c14b225fbe4827f8767be6ba984e42268c4a5ab93d3cdf60020394941",
+          "dependencies": [],
+          "published_equal": true,
+          "affected": false
+        },
+        "KProgFormal.Generated.GeneratedArm64Extrev": {
+          "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64Extrev.lean",
+          "source_sha256": "870cb3079e4824e148665fc4e2a70b72d6183eb8e95353f60be90d6722641c8f",
+          "dependencies": [
+            "KProgFormal.Generated.GeneratedArm64Width"
+          ],
+          "published_equal": true,
+          "affected": false
+        },
+        "KProgFormal.Generated.GeneratedArm64Stlxr": {
+          "path": "kprog/formal/KProgFormal/Generated/GeneratedArm64Stlxr.lean",
+          "source_sha256": "3ba8a62ff9fd3284b17e5b0716ac848b6b7c1c122c371e57aab7da57eb107e8a",
+          "dependencies": [
+            "KProgFormal.Generated.GeneratedArm64Width"
+          ],
+          "published_equal": true,
+          "affected": false
+        }
+      },
+      "affected": [
+        "KProgFormal.Reference.Memory",
+        "KProgFormal.Reference.AArch64",
+        "KProgFormal.Refinement.Arm64Register",
+        "KProgFormal.Refinement.Arm64Memory",
+        "KProgFormal.Refinement.Arm64Exclusive"
+      ],
+      "register_profile": "Published general-register body, byte-identical prefix of current register module. Current MRS-specific appended proof work is retained in the private diagnostic. Canonical extended State/Memory fields are captured from the current source snapshot."
+    },
+    "checks": [
+      {
+        "module": "KProgFormal.Reference.Memory",
+        "exit": 0,
+        "source_sha256": "18fc564a7acdc6bdf309d0eac7da3b5d58d7aa2a176782c11a829456bf79d3d0",
+        "olean_sha256": "3d664253da7f9823532f75c3a42a3bdf10965ce69644254bd22df44603f0c2e8"
+      },
+      {
+        "module": "KProgFormal.Reference.AArch64",
+        "exit": 0,
+        "source_sha256": "082b90154c33c374ea58c5afb5259fc39b5b735fbcce2e6c0e0e6364785deb56",
+        "olean_sha256": "01cce2e0e7394bc554f998b64c16a59165e2ae30f9234e27c970e4121ba3126e"
+      },
+      {
+        "module": "KProgFormal.Refinement.Arm64Register",
+        "exit": 0,
+        "source_sha256": "491588063ac42493dfc6f523218bf2831f32a1748c4b93bfcbc56915d9ad08b8",
+        "olean_sha256": "a9d4e93643342f35a671cc58e98a058d1ee0ccbf1dc094fe14ee7cceb6869617"
+      },
+      {
+        "module": "KProgFormal.Refinement.Arm64Memory",
+        "exit": 0,
+        "source_sha256": "f5b3c04001e9b1cfd8f06ffaaf3248ff66124d119dd3f22d56f83e2248b790cc",
+        "olean_sha256": "0838962160a1f0ce4d9b9ca3475f5e1d03b8afb319916165384e08d830451e14"
+      },
+      {
+        "module": "KProgFormal.Refinement.Arm64Exclusive",
+        "exit": 0,
+        "source_sha256": "3b046e8882352f257dd1ca99f950a8cc1a005aa547e9bfc6afda3791c0ea36c0",
+        "olean_sha256": "72f91c1e6523e12c7ace4727affddb08b2fc9735d5e8dedbbb0fa08944408203"
+      }
+    ],
+    "audit_exit": 0
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Lean.ofReduceBool",
+    "Quot.sound"
+  ],
+  "runtime": "Current generator/kernel/choice/native branch bytes retained. Universal native CFG identity and retry progress/termination contracts continue through the shared T/V interface.",
+  "old_api": "Existing theorem statements and signatures retained."
+}

@@ -147,4 +147,58 @@ theorem store_core_refines (width : Width) (release failure : Bool)
         cases h : s.exclusiveInputs.abortOnFailure <;> simp_all
       simp [monitorFalse, failed, abortFalse]
 
+/-- A real W status receives the exact outcome of the existing exclusive store
+body for every incoming state and native data width. -/
+theorem retry_status_refines (width : Width) (release failure : Bool)
+    (status : Gpr) (src base : Register) (s : State) :
+    readReg (storeCore width release failure status.castSucc src base s).state
+      status.castSucc = (if failure then 1 else 0) := by
+  cases failure <;>
+    simp [storeCore, Arm64Register.write_refines, readReg, writeReg,
+      status_value_refines, status.isLt]
+
+/-- The canonical store and its actual W-status branch retain ordered effects
+and any store fault. Displacement is a native branch operand. -/
+def retrySuffix (width : Width) (release : Bool) (status : Gpr)
+    (src base : Register) (displacement : Word) (s : State) : Transition State :=
+  let attempt := step (.exclusive (.store width release status.castSucc src base)) s
+  match attempt.fault with
+  | some _ => attempt
+  | none =>
+      let branch := step (.branchZero .w32 true status.castSucc displacement) attempt.state
+      ⟨branch.state, attempt.events ++ branch.events, branch.fault⟩
+
+/-- The branch takes the supplied retry displacement exactly on the fresh
+failure outcome. Success takes the architectural fallthrough; all other state
+and exclusive/store events come from the existing canonical refinement. -/
+theorem retry_suffix_refines (width : Width) (release failure : Bool)
+    (status : Gpr) (src base : Register) (displacement : Word) (s : State)
+    (outcome : failure = !exclusiveStorePass s width.bytes)
+    (spAligned : spAlignmentFault s base = none)
+    (aligned : exclusiveNaturalFault (memoryBase s base) width.bytes = none)
+    (preflight : (exclusiveMonitorPass s width.bytes || s.exclusiveInputs.abortOnFailure) = true →
+      permitted s.memory.writable (memoryBase s base) width.bytes = true) :
+    retrySuffix width release status src base displacement s =
+      ⟨{ (storeCore width release failure status.castSucc src base s).state with
+          pc := s.pc + 4 + (if failure then displacement else 4) },
+        (storeCore width release failure status.castSucc src base s).events, none⟩ := by
+  have refined := store_core_refines width release failure status.castSucc src base s
+    outcome spAligned aligned preflight
+  have statusValue := retry_status_refines width release failure status src base s
+  unfold retrySuffix
+  rw [← refined]
+  have faultNone : (storeCore width release failure status.castSucc src base s).fault = none := rfl
+  simp only [faultNone]
+  simp only [step, branchStep, statusValue, zeroBranch, List.append_nil]
+  cases failure <;> simp [storeCore, narrow, Width.bits]
+
+/-- Any canonical store fault ends the suffix with the complete original fault
+transition, retaining its state and events. -/
+theorem retry_suffix_fault (width : Width) (release : Bool) (status : Gpr)
+    (src base : Register) (displacement : Word) (s : State) (fault : Fault)
+    (failed : (step (.exclusive (.store width release status.castSucc src base)) s).fault = some fault) :
+    retrySuffix width release status src base displacement s =
+      step (.exclusive (.store width release status.castSucc src base)) s := by
+  simp [retrySuffix, failed]
+
 end KProgFormal.Refinement.Arm64Exclusive
