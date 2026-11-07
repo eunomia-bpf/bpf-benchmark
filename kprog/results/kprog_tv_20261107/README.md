@@ -254,3 +254,25 @@ transport and BOTH actual RX-address theorem instances. The36 site corruptions
 also reject in this run; all positive theorem axioms remain as stated without
 sorryAx. This refresh includes current canonical sources, not only old cached
 checker modules. Invocation/initial-state/profile work continues separately.
+
+
+Actual-entry invocation and ABI preservation
+-------------------------------------------
+
+`invocation-abi-final.log` checks SimpleInvocationABI plus both actual GEN4/GEN8
+accepted-entry instances. All 21 actual instructions and every RX prefix
+preserve SP, all SIMD registers and x12..x30. The actual-entry state identity is
+proved from explicit PC/x0/split-pair premises. The composed conclusion covers
+all native events and host ABI preservation, using the existing exact B/native
+identities, full artifact binding and admitted-verifier-entry hypothesis.
+The ABI/entry identity proofs have only propext/Quot.sound; composed safety has
+the existing propext/choice/ofReduceBool/Quot.sound and no sorryAx.
+
+The same run repeats all36 emission/site/JIT corruptions and both coherent
+native/JIT and checked-B byte mutations. Source/generated instances, raw
+successful log and earlier proof-development failures are retained in
+invocation-abi-inputs.tar.gz, with source pins adjacent. The entry contract,
+proof-entry admissibility, verifier/platform soundness, canonical ISA/hardware
+connection and immutable kernel binding remain explicit trusted obligations.
+The tested target is the existing Cortex-A72/no-LSE2 QEMU recipe; runtime CPU
+profile metadata enforcement is not claimed by this increment.

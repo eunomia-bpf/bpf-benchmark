@@ -790,3 +790,46 @@ The transport invariants use only propext/Quot.sound; concrete safety retains th
 existing reduction oracle with no sorryAx. Exact positive/negative/source inputs
 are in results/kprog_tv_20261107/actual-rx-prefix-*. Initial invocation/CPU-profile
 obligations remain; actual-PC relocation is no longer an assumed bridge.
+
+
+The actual-entry `simple` invocation and host ABI
+----------------------------------------------
+
+`SimpleInvocationABI` checks all 21 decoded native instructions against V's
+canonical step. It proves that every actual RX execution prefix preserves SP,
+all 32 SIMD registers, and x12..x30, including faults and conditional paths.
+The instruction and execution/ABI proofs use only `propext` and `Quot.sound`.
+This establishes this body's zero callee-save mask independently of a producer
+annotation or compiler prologue pattern.
+
+`EntryState` states the actual entry requirements explicitly: PC is the
+callback-reported RX entry, x0 contains the kernel context pointer, and the
+selected Cortex-A72 profile uses split pair accesses. `entry_is_model` proves
+that the complete actual state equals the state used by the TV invocation;
+it changes no register, memory, flag, profile or environmental input. It does
+not infer these requirements by overwriting an unrelated actual state.
+`actual_entry_prefix_checked` then proves both checked effects and ABI
+preservation for every execution from that actual state.
+
+Each captured GEN4/GEN8 module additionally instantiates
+`accepted_actual_entry_prefix_checked` with its exact native/checked-B bytes,
+entry RX address and full Artifact identity. Verifier acceptance and its
+soundness for the admitted proof entry remain explicit. `EntryConditions`
+records equal initial architectural memory, the two valid kernel context
+reads, the private proof frame's permissions and its separation from context.
+The paired kernel/JIT is trusted to supply this entry/ABI relation and to emit
+and execute the sealed artifact. The Cortex-A72/no-LSE2 hardware-to-reference
+profile is explicit; the current capture recipe selects `-cpu cortex-a72`.
+There is no theorem that an arbitrary CPU or kernel provides these guarantees.
+Kernel-side CPU-profile metadata enforcement remains active binding work.
+
+For this specific artifact the complete native-to-checked-B execution argument
+now comes from byte-level TV, including guards, actual private spills, ordered
+memory/fault effects, return, actual RX fetch and host ABI preservation. The
+remaining trusted components are verifier/platform soundness, the canonical
+ISA/hardware connection with the stated profile and the kernel binding/entry
+implementation, plus Lean and the printed logical axioms. Clang and the native
+specializer do not supply the semantic correspondence as an assumption for
+this artifact. This result does not certify other micro/application artifacts,
+relocated native patches or the producer-independent loading boundary still
+being implemented.

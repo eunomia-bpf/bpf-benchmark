@@ -1,0 +1,80 @@
+'KProgTV.SimpleInvocationABI.all_instructions_preserve' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleInvocationABI.every_RX_prefix_preserves' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleInvocationABI.entry_is_model' depends on axioms: [propext, Quot.sound]
+'KProgTV.SimpleInvocationABI.actual_entry_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+6-7: actual callback RX entry 0xffff80008355d8b8, JIT offset 40, exact84B/GEN4: PASS
+6-7/truncated header: REJECTED
+6-7/truncated site: REJECTED
+6-7/extra site: REJECTED
+6-7/wrong version: REJECTED
+6-7/wrong site count: REJECTED
+6-7/wrong source ID: REJECTED
+6-7/nonzero reserved: REJECTED
+6-7/wrong blob ID: REJECTED
+6-7/stale generation: REJECTED
+6-7/wrong native extent: REJECTED
+6-7/wrong ABI: REJECTED
+6-7/absent RX entry: REJECTED
+6-7/RX outside function: REJECTED
+6-7/shifted RX entry: REJECTED
+6-7/changed emitted store: REJECTED
+6-7/changed entry with intact decoy: REJECTED
+6-7/truncated actual JIT layout: REJECTED
+6-7/wrong native program: REJECTED
+6-8: actual callback RX entry 0xffff80008355d970, JIT offset 40, exact84B/GEN8: PASS
+6-8/truncated header: REJECTED
+6-8/truncated site: REJECTED
+6-8/extra site: REJECTED
+6-8/wrong version: REJECTED
+6-8/wrong site count: REJECTED
+6-8/wrong source ID: REJECTED
+6-8/nonzero reserved: REJECTED
+6-8/wrong blob ID: REJECTED
+6-8/stale generation: REJECTED
+6-8/wrong native extent: REJECTED
+6-8/wrong ABI: REJECTED
+6-8/absent RX entry: REJECTED
+6-8/RX outside function: REJECTED
+6-8/shifted RX entry: REJECTED
+6-8/changed emitted store: REJECTED
+6-8/changed entry with intact decoy: REJECTED
+6-8/truncated actual JIT layout: REJECTED
+6-8/wrong native program: REJECTED
+actual entry binding: 2 captures PASS; 36 corruptions REJECTED
+6-7: emitted native/program/entry/ABI/metadata certificate input generated
+6-8: emitted native/program/entry/ABI/metadata certificate input generated
+'KProgTV.SimpleEmitted_6_7.actual_jit_entry' depends on axioms: [propext]
+'KProgTV.SimpleEmitted_6_7.accepted_bound_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEmitted_6_7.accepted_RX_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEmitted_6_7.accepted_actual_entry_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEmitted_6_8.actual_jit_entry' depends on axioms: [propext]
+'KProgTV.SimpleEmitted_6_8.accepted_bound_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEmitted_6_8.accepted_RX_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+'KProgTV.SimpleEmitted_6_8.accepted_actual_entry_prefix_checked' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+python3 test_simple_emitted.py build/capture-loader-arm64-emitted
+6-7: emitted native/program/entry/ABI/metadata certificate input generated
+coherent-native-store: metadata consistent, REJECTED by native_is_certified
+6-7: emitted native/program/entry/ABI/metadata certificate input generated
+checked-store: metadata consistent, REJECTED by proof_is_checked
+actual emitted/native and accepted-B byte-identity negative certificates: PASS

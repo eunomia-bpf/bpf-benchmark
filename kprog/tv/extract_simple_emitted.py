@@ -30,7 +30,7 @@ for record in records:
         raise ValueError('completed simple supported inline XDP invocation identity required')
     site = sites[0]
     namespace = 'KProgTV.SimpleEmitted_' + path.name.replace('-', '_')
-    lines = ['import SimpleExecutionRelocation', 'namespace '+namespace,
+    lines = ['import SimpleInvocationABI', 'namespace '+namespace,
         'open KProgFormal.Reference', 'set_option maxRecDepth 4096']
     arrays = {'native': files['native.bin'], 'program': program, 'jit': files['jit.bin'],
         'bindingBytes': files['checked.snapshot.bin'][24:120],
@@ -99,8 +99,36 @@ for record in records:
   exact KProgTV.SimpleExecutionRelocation.every_RX_prefix_checked
     (BitVec.ofNat 64 entryAddress) n p context pointer limit first second entryConditions
     (checked artifact) (verifierSound artifact acceptance artifact_identity.2.1 admittedEntry) actual''',
+        '''theorem accepted_actual_entry_prefix_checked (n : AArch64.State) (p : KProgTV.BPF.State)
+    (context pointer limit : Word) (first second : KProgTV.Event)
+    (entryState : KProgTV.SimpleInvocationABI.EntryState (BitVec.ofNat 64 entryAddress) context n)
+    (entryConditions : KProgTV.SimpleBlocks.EntryConditions n p context pointer limit first second)
+    (accepted : KProgTV.Artifact → Prop) (checked : KProgTV.Artifact → KProgTV.Event → Prop)
+    (proofEntry : KProgTV.Artifact → KProgTV.BPF.State → Prop)
+    (verifierSound : ∀ a, accepted a → a.proofBytes = KProgTV.SimpleChecked.program.toList →
+      proofEntry a (KProgTV.SimpleEntryCertificate.proofBefore p context 0) → ∀ trace last,
+      KProgTV.Execution KProgTV.SimpleCheckedPlatform.instructionStep
+        (KProgTV.SimpleEntryCertificate.proofBefore p context 0) trace last →
+      ∀ event ∈ trace, checked a event)
+    (executed : KProgTV.Artifact) (bound : executed = artifact)
+    (acceptance : accepted artifact)
+    (admittedEntry : proofEntry artifact (KProgTV.SimpleEntryCertificate.proofBefore p context 0))
+    {trace : List KProgTV.Event} {last : AArch64.State}
+    (run : KProgTV.Execution
+      (KProgTV.ARM64Path.instructionStep (BitVec.ofNat 64 entryAddress) executed.nativeBytes.toArray)
+      n trace last) :
+    (∀ event ∈ trace, checked artifact event) ∧ KProgTV.SimpleInvocationABI.preservesABI n last := by
+  subst executed
+  have actual : KProgTV.Execution
+      (KProgTV.ARM64Path.instructionStep (BitVec.ofNat 64 entryAddress) KProgTV.SimpleCompiled.native)
+      n trace last := by
+    simpa only [artifact_identity.1, Array.toArray_toList] using run
+  exact KProgTV.SimpleInvocationABI.actual_entry_prefix_checked
+    (BitVec.ofNat 64 entryAddress) context n entryState p pointer limit first second entryConditions
+    (checked artifact) (verifierSound artifact acceptance artifact_identity.2.1 admittedEntry) actual''',
         'end '+namespace, '#print axioms '+namespace+'.actual_jit_entry',
         '#print axioms '+namespace+'.accepted_bound_prefix_checked',
-        '#print axioms '+namespace+'.accepted_RX_prefix_checked', '']
+        '#print axioms '+namespace+'.accepted_RX_prefix_checked',
+        '#print axioms '+namespace+'.accepted_actual_entry_prefix_checked', '']
     (args.output/('SimpleEmitted_'+path.name.replace('-', '_')+'.lean')).write_text('\n'.join(lines))
     print(path.name+': emitted native/program/entry/ABI/metadata certificate input generated')
