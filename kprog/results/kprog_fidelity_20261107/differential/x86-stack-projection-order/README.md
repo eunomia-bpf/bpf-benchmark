@@ -37,10 +37,12 @@ Validation on CPUs16-23:
 - A small map-value/stack-alias CMP control executes correctly before AND
   after. It does not reproduce the compiler's problematic register schedule;
   the actual archived BIOSNOOP object is the code-generation reproducer.
-- Six existing affected routing hosts are queued behind current full checks;
-  their status is independent of the completed CPU/service results. No full
-  post-barrier formal pass is claimed. The earlier whole source checkpoint
-  passed and is separately archived under `x86-sp-current-integration`.
+- All six existing affected routing hosts PASS after the earlier full-check
+  slot was released: CMP, CMOV, CMOV STEP, MOV, partial-width writeback and
+  singleton dispatcher. Exact commands/source hashes and compressed logs are
+  in `after/focused`. No full post-barrier formal pass is claimed. The earlier
+  whole source checkpoint passed and is separately archived under
+  `x86-sp-current-integration`.
 
 Commands from the repository root:
 

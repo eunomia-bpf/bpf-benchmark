@@ -1,0 +1,116 @@
+[
+  {
+    "source": "oracles/test_x86_mov_reg_arm_route_host.c",
+    "sha256": "8dd0a4c808db4a7b2fcc5414fb0fbe24e2bdc68e24c69b760bfa3810f236edb0",
+    "compile_command": [
+      "cc",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-I.",
+      "-I../x86",
+      "-I../../kprog",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_mov_reg_arm_route_host.c",
+      "-o",
+      "build/test_x86_mov_reg_arm_route_host"
+    ],
+    "compile_returncode": 0,
+    "run_returncode": 0
+  },
+  {
+    "source": "oracles/test_x86_write_width_arm_route_host.c",
+    "sha256": "dc300400e9536e1a1ac67943c3ab6933a82d106fa657e516e0dc80ed2723720d",
+    "compile_command": [
+      "cc",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-I.",
+      "-I../x86",
+      "-I../../kprog",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_write_width_arm_route_host.c",
+      "-o",
+      "build/test_x86_write_width_arm_route_host"
+    ],
+    "compile_returncode": 0,
+    "run_returncode": 0
+  },
+  {
+    "source": "oracles/test_x86_dispatch_singleton_route_host.c",
+    "sha256": "c91707720c47b2cc4cdfe1f0a9487708c8fe38ec410ad0578c115a90c2529104",
+    "compile_command": [
+      "cc",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-I.",
+      "-I../x86",
+      "-I../../kprog",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_dispatch_singleton_route_host.c",
+      "-o",
+      "build/test_x86_dispatch_singleton_route_host"
+    ],
+    "compile_returncode": 0,
+    "run_returncode": 0
+  },
+  {
+    "source": "oracles/cmov_step_route_host.c",
+    "sha256": "66ca0b059f2c79a89c06f71b041bdf01456c51dda2ebe30dca51d378fff10ca6",
+    "compile_command": [
+      "cc",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-I.",
+      "-I../x86",
+      "-I../../kprog",
+      "-I../../vendor/libbpf/src",
+      "oracles/cmov_step_route_host.c",
+      "-o",
+      "build/cmov_step_route_host"
+    ],
+    "compile_returncode": 0,
+    "run_returncode": 0
+  },
+  {
+    "source": "oracles/test_x86_cmpop_route_host.c",
+    "sha256": "b93a2622dff7f1d0f671df0ebeab4df39a5880dd448830e5aaa8d24db80aafc5",
+    "compile_command": [
+      "cc",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-I.",
+      "-I../x86",
+      "-I../../kprog",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_cmpop_route_host.c",
+      "-o",
+      "build/test_x86_cmpop_route_host"
+    ],
+    "compile_returncode": 0,
+    "run_returncode": 0
+  },
+  {
+    "source": "oracles/test_x86_cmov_route_host.c",
+    "sha256": "9f64bea3d96966970ababbabc4b21280d0d51da2ce31dcd6981494058a04ae92",
+    "compile_command": [
+      "cc",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-I.",
+      "-I../x86",
+      "-I../../kprog",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_cmov_route_host.c",
+      "-o",
+      "build/test_x86_cmov_route_host"
+    ],
+    "compile_returncode": 0,
+    "run_returncode": 0
+  }
+]
