@@ -1,0 +1,283 @@
+{
+  "utc": "2026-11-07T14:00:44.924711+00:00",
+  "scope": "host compilation only; no guest/verifier/native execution in these attempts",
+  "production_header_sha256": "c82c0832be850e8755478516bea17daacd30424475a5d81348efce3497606787",
+  "production_source_unchanged": true,
+  "attempts": [
+    {
+      "attempt": "context-payload-positive",
+      "native_sha256": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+      "compile_returncode": 1,
+      "source_inputs_unchanged": true,
+      "diagnostic_count": 13,
+      "diagnostics": [
+        {
+          "source_line": 2613,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0xba4: ldr x8, [x9, #8] */"
+        },
+        {
+          "source_line": 6216,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1b28: ldr x9, [x8] */"
+        },
+        {
+          "source_line": 6573,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1ca4: ldr x8, [x9, #88] */"
+        },
+        {
+          "source_line": 6345,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1ba4: ldr x8, [x9, #80] */"
+        },
+        {
+          "source_line": 6681,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1d14: ldr x8, [x9, #96] */"
+        },
+        {
+          "source_line": 6693,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1d24: ldr x8, [x9, #32] */"
+        },
+        {
+          "source_line": 6375,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1bcc: ldr x8, [x9, #40] */"
+        },
+        {
+          "source_line": 6360,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1bb8: ldr x8, [x9, #16] */"
+        },
+        {
+          "source_line": 4395,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x135c: ldr x8, [x9] */"
+        },
+        {
+          "source_line": 5475,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x17bc: ldr x9, [x8, #8] */"
+        },
+        {
+          "source_line": 4083,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x11ec: ldr x9, [x8, #8] */"
+        },
+        {
+          "source_line": 6039,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1a6c: ldp x9, x10, [x22] */"
+        },
+        {
+          "source_line": 6039,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1a6c: ldp x9, x10, [x22] */"
+        }
+      ],
+      "header_sha256": "851ad962e9b9fa606152fec3b6b5fc2cef279ba866905f0355a5b7abcac88a4e",
+      "compiler_log_sha256": "fc14735c344ec5df483972cf6ad7972f741387367cf67d3ce62d47e2f7162d4f"
+    },
+    {
+      "attempt": "context-payload-tag-check",
+      "native_sha256": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+      "compile_returncode": 1,
+      "source_inputs_unchanged": true,
+      "diagnostic_count": 13,
+      "diagnostics": [
+        {
+          "source_line": 2613,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0xba4: ldr x8, [x9, #8] */"
+        },
+        {
+          "source_line": 6216,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1b28: ldr x9, [x8] */"
+        },
+        {
+          "source_line": 6573,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1ca4: ldr x8, [x9, #88] */"
+        },
+        {
+          "source_line": 6345,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1ba4: ldr x8, [x9, #80] */"
+        },
+        {
+          "source_line": 6681,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1d14: ldr x8, [x9, #96] */"
+        },
+        {
+          "source_line": 6693,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1d24: ldr x8, [x9, #32] */"
+        },
+        {
+          "source_line": 6375,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1bcc: ldr x8, [x9, #40] */"
+        },
+        {
+          "source_line": 6360,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1bb8: ldr x8, [x9, #16] */"
+        },
+        {
+          "source_line": 4395,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x135c: ldr x8, [x9] */"
+        },
+        {
+          "source_line": 5475,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x17bc: ldr x9, [x8, #8] */"
+        },
+        {
+          "source_line": 4083,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x11ec: ldr x9, [x8, #8] */"
+        },
+        {
+          "source_line": 6039,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1a6c: ldp x9, x10, [x22] */"
+        },
+        {
+          "source_line": 6039,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1a6c: ldp x9, x10, [x22] */"
+        }
+      ],
+      "header_sha256": "705c642537d93852c4c39f7aaa1f05837ff9ab00ca78becae6f34c871c8a1a81",
+      "compiler_log_sha256": "ac69375c00f651683ac183c759e927e2d8b8741dc045029c567d0d2178605751"
+    },
+    {
+      "attempt": "context-payload-byte-tag",
+      "native_sha256": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+      "compile_returncode": 1,
+      "source_inputs_unchanged": true,
+      "diagnostic_count": 13,
+      "diagnostics": [
+        {
+          "source_line": 2613,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0xba4: ldr x8, [x9, #8] */"
+        },
+        {
+          "source_line": 6216,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1b28: ldr x9, [x8] */"
+        },
+        {
+          "source_line": 6573,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1ca4: ldr x8, [x9, #88] */"
+        },
+        {
+          "source_line": 6345,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1ba4: ldr x8, [x9, #80] */"
+        },
+        {
+          "source_line": 6681,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1d14: ldr x8, [x9, #96] */"
+        },
+        {
+          "source_line": 6693,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1d24: ldr x8, [x9, #32] */"
+        },
+        {
+          "source_line": 6375,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1bcc: ldr x8, [x9, #40] */"
+        },
+        {
+          "source_line": 6360,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1bb8: ldr x8, [x9, #16] */"
+        },
+        {
+          "source_line": 4395,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x135c: ldr x8, [x9] */"
+        },
+        {
+          "source_line": 5475,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x17bc: ldr x9, [x8, #8] */"
+        },
+        {
+          "source_line": 4083,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x11ec: ldr x9, [x8, #8] */"
+        },
+        {
+          "source_line": 6039,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1a6c: ldp x9, x10, [x22] */"
+        },
+        {
+          "source_line": 6039,
+          "column": 2,
+          "message": "call to 'arm64_sim_unmapped_xdp_read' declared with 'error' attribute: unmapped native XDP context read",
+          "native_instruction": "/* 0x1a6c: ldp x9, x10, [x22] */"
+        }
+      ],
+      "header_sha256": "b3ad86b6f87c310334999e9c0b9270ab82c0e17b1e0e7b5f5b3feeb9b7e1bde7",
+      "compiler_log_sha256": "c28f859e83521f71e2bea8ba48a17eaa39a50e0f55d1d8122cdbc021b4aaa310"
+    }
+  ],
+  "archive": "compiler-inputs.tar.gz",
+  "archive_sha256": "ff228cd0424109bef119ec57fd09d082edefae66391bfec6daee9f3152d26b72",
+  "llvm_diagnostic_export": {
+    "compiler_returncode": 0,
+    "unmapped_read_calls": 13,
+    "scope": "LLVM only: error attribute replaced with noinline to inspect residual branches; no BPF compilation/load/execution",
+    "root_observation": "At the first failing site, a private stack tag load feeds a switch retaining ABI tag1; the restored value then reaches runtime pointer-offset tests and the unmapped-read call."
+  }
+}
