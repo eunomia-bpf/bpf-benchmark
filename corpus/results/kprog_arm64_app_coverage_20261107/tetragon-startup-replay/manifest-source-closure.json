@@ -1,0 +1,1497 @@
+{
+  "utc": "2026-11-07T22:39:13.933764+00:00",
+  "scope": "Shared linked-source manifest generator consumption for the whole ARM Tetragon application cohort. Runtime application coverage follows the existing serialized queue.",
+  "scanner_commit": "db0228718c314a58193bc3217309f8e6855164d1",
+  "scanner_sha256": "7db97e4613c4c6e2a69811ed1f7db170ea0f7b90c261322748d95f3f676fdca7",
+  "native_source_pairs": 62,
+  "before_rows": 245,
+  "after_rows": 247,
+  "existing_extra_rows_retained": 9,
+  "changed_rows": 50,
+  "changes": [
+    {
+      "identity": [
+        "bpf_execve_event_v61.native.o",
+        "event_execve",
+        "event_execve"
+      ],
+      "before": {
+        "native_object": "bpf_execve_event_v61.native.o",
+        "program": "event_execve",
+        "source_bytecode_len": 16272,
+        "source_lacks_helper": 174,
+        "symbol": "event_execve"
+      },
+      "after": {
+        "native_object": "bpf_execve_event_v61.native.o",
+        "program": "event_execve",
+        "source_bytecode_len": 22448,
+        "source_lacks_helper": 174,
+        "symbol": "event_execve"
+      }
+    },
+    {
+      "identity": [
+        "bpf_execve_event_v61.native.o",
+        "execve_send",
+        "execve_send"
+      ],
+      "before": {
+        "native_object": "bpf_execve_event_v61.native.o",
+        "program": "execve_send",
+        "source_bytecode_len": 10368,
+        "source_lacks_helper": 174,
+        "symbol": "execve_send"
+      },
+      "after": {
+        "native_object": "bpf_execve_event_v61.native.o",
+        "program": "execve_send",
+        "source_bytecode_len": 11296,
+        "source_lacks_helper": 174,
+        "symbol": "execve_send"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_fentry_v61.native.o",
+        "generic_fentry_actions",
+        "generic_fentry_"
+      ],
+      "before": {
+        "native_object": "bpf_generic_fentry_v61.native.o",
+        "program": "generic_fentry_",
+        "source_bytecode_len": 800,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fentry_actions"
+      },
+      "after": {
+        "native_object": "bpf_generic_fentry_v61.native.o",
+        "program": "generic_fentry_",
+        "source_bytecode_len": 7040,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fentry_actions"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_fentry_v61.native.o",
+        "generic_fentry_filter_arg",
+        "generic_fentry_"
+      ],
+      "before": {
+        "native_object": "bpf_generic_fentry_v61.native.o",
+        "program": "generic_fentry_",
+        "source_bytecode_len": 2920,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fentry_filter_arg"
+      },
+      "after": {
+        "native_object": "bpf_generic_fentry_v61.native.o",
+        "program": "generic_fentry_",
+        "source_bytecode_len": 27968,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fentry_filter_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_fentry_v61.native.o",
+        "generic_fentry_process_event",
+        "generic_fentry_"
+      ],
+      "before": {
+        "native_object": "bpf_generic_fentry_v61.native.o",
+        "program": "generic_fentry_",
+        "source_bytecode_len": 27328,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fentry_process_event"
+      },
+      "after": {
+        "native_object": "bpf_generic_fentry_v61.native.o",
+        "program": "generic_fentry_",
+        "source_bytecode_len": 31312,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fentry_process_event"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_fentry_v61.native.o",
+        "generic_fentry_process_filter",
+        "generic_fentry_"
+      ],
+      "before": {
+        "native_object": "bpf_generic_fentry_v61.native.o",
+        "program": "generic_fentry_",
+        "source_bytecode_len": 22424,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fentry_process_filter"
+      },
+      "after": {
+        "native_object": "bpf_generic_fentry_v61.native.o",
+        "program": "generic_fentry_",
+        "source_bytecode_len": 23352,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fentry_process_filter"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_fexit_v61.native.o",
+        "generic_fexit_actions",
+        "generic_fexit_a"
+      ],
+      "before": {
+        "native_object": "bpf_generic_fexit_v61.native.o",
+        "program": "generic_fexit_a",
+        "source_bytecode_len": 800,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fexit_actions"
+      },
+      "after": {
+        "native_object": "bpf_generic_fexit_v61.native.o",
+        "program": "generic_fexit_a",
+        "source_bytecode_len": 7040,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fexit_actions"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_fexit_v61.native.o",
+        "generic_fexit_event",
+        "generic_fexit_e"
+      ],
+      "before": {
+        "native_object": "bpf_generic_fexit_v61.native.o",
+        "program": "generic_fexit_e",
+        "source_bytecode_len": 25936,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fexit_event"
+      },
+      "after": {
+        "native_object": "bpf_generic_fexit_v61.native.o",
+        "program": "generic_fexit_e",
+        "source_bytecode_len": 26864,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fexit_event"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_fexit_v61.native.o",
+        "generic_fexit_filter_arg",
+        "generic_fexit_f"
+      ],
+      "before": {
+        "native_object": "bpf_generic_fexit_v61.native.o",
+        "program": "generic_fexit_f",
+        "source_bytecode_len": 2720,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fexit_filter_arg"
+      },
+      "after": {
+        "native_object": "bpf_generic_fexit_v61.native.o",
+        "program": "generic_fexit_f",
+        "source_bytecode_len": 27768,
+        "source_lacks_helper": 174,
+        "symbol": "generic_fexit_filter_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_lsm_core_v61.native.o",
+        "generic_lsm_actions",
+        "generic_lsm_act"
+      ],
+      "before": {
+        "native_object": "bpf_generic_lsm_core_v61.native.o",
+        "program": "generic_lsm_act",
+        "source_bytecode_len": 1704,
+        "source_lacks_helper": 174,
+        "symbol": "generic_lsm_actions"
+      },
+      "after": {
+        "native_object": "bpf_generic_lsm_core_v61.native.o",
+        "program": "generic_lsm_act",
+        "source_bytecode_len": 8416,
+        "source_lacks_helper": 174,
+        "symbol": "generic_lsm_actions"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_lsm_core_v61.native.o",
+        "generic_lsm_filter_arg",
+        "generic_lsm_fil"
+      ],
+      "before": {
+        "native_object": "bpf_generic_lsm_core_v61.native.o",
+        "program": "generic_lsm_fil",
+        "source_bytecode_len": 2920,
+        "source_lacks_helper": 174,
+        "symbol": "generic_lsm_filter_arg"
+      },
+      "after": {
+        "native_object": "bpf_generic_lsm_core_v61.native.o",
+        "program": "generic_lsm_fil",
+        "source_bytecode_len": 27968,
+        "source_lacks_helper": 174,
+        "symbol": "generic_lsm_filter_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_lsm_core_v61.native.o",
+        "generic_lsm_process_event",
+        "generic_lsm_pro"
+      ],
+      "before": {
+        "native_object": "bpf_generic_lsm_core_v61.native.o",
+        "program": "generic_lsm_pro",
+        "source_bytecode_len": 27328,
+        "source_lacks_helper": 174,
+        "symbol": "generic_lsm_process_event"
+      },
+      "after": {
+        "native_object": "bpf_generic_lsm_core_v61.native.o",
+        "program": "generic_lsm_pro",
+        "source_bytecode_len": 31312,
+        "source_lacks_helper": 174,
+        "symbol": "generic_lsm_process_event"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_lsm_core_v61.native.o",
+        "generic_lsm_process_filter",
+        "generic_lsm_pro"
+      ],
+      "before": {
+        "native_object": "bpf_generic_lsm_core_v61.native.o",
+        "program": "generic_lsm_pro",
+        "source_bytecode_len": 22424,
+        "source_lacks_helper": 174,
+        "symbol": "generic_lsm_process_filter"
+      },
+      "after": {
+        "native_object": "bpf_generic_lsm_core_v61.native.o",
+        "program": "generic_lsm_pro",
+        "source_bytecode_len": 23352,
+        "source_lacks_helper": 174,
+        "symbol": "generic_lsm_process_filter"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_rawtp_v61.native.o",
+        "generic_rawtp_actions",
+        "generic_rawtp_a"
+      ],
+      "before": {
+        "native_object": "bpf_generic_rawtp_v61.native.o",
+        "program": "generic_rawtp_a",
+        "source_bytecode_len": 800,
+        "source_lacks_helper": 174,
+        "symbol": "generic_rawtp_actions"
+      },
+      "after": {
+        "native_object": "bpf_generic_rawtp_v61.native.o",
+        "program": "generic_rawtp_a",
+        "source_bytecode_len": 7040,
+        "source_lacks_helper": 174,
+        "symbol": "generic_rawtp_actions"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_rawtp_v61.native.o",
+        "generic_rawtp_filter_arg",
+        "generic_rawtp_f"
+      ],
+      "before": {
+        "native_object": "bpf_generic_rawtp_v61.native.o",
+        "program": "generic_rawtp_f",
+        "source_bytecode_len": 2920,
+        "source_lacks_helper": 174,
+        "symbol": "generic_rawtp_filter_arg"
+      },
+      "after": {
+        "native_object": "bpf_generic_rawtp_v61.native.o",
+        "program": "generic_rawtp_f",
+        "source_bytecode_len": 27968,
+        "source_lacks_helper": 174,
+        "symbol": "generic_rawtp_filter_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_rawtp_v61.native.o",
+        "generic_rawtp_process_event",
+        "generic_rawtp_p"
+      ],
+      "before": {
+        "native_object": "bpf_generic_rawtp_v61.native.o",
+        "program": "generic_rawtp_p",
+        "source_bytecode_len": 27328,
+        "source_lacks_helper": 174,
+        "symbol": "generic_rawtp_process_event"
+      },
+      "after": {
+        "native_object": "bpf_generic_rawtp_v61.native.o",
+        "program": "generic_rawtp_p",
+        "source_bytecode_len": 31312,
+        "source_lacks_helper": 174,
+        "symbol": "generic_rawtp_process_event"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_rawtp_v61.native.o",
+        "generic_rawtp_process_filter",
+        "generic_rawtp_p"
+      ],
+      "before": {
+        "native_object": "bpf_generic_rawtp_v61.native.o",
+        "program": "generic_rawtp_p",
+        "source_bytecode_len": 22424,
+        "source_lacks_helper": 174,
+        "symbol": "generic_rawtp_process_filter"
+      },
+      "after": {
+        "native_object": "bpf_generic_rawtp_v61.native.o",
+        "program": "generic_rawtp_p",
+        "source_bytecode_len": 23352,
+        "source_lacks_helper": 174,
+        "symbol": "generic_rawtp_process_filter"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_retkprobe_v61.native.o",
+        "generic_retkprobe_event",
+        "generic_retkpro"
+      ],
+      "before": {
+        "native_object": "bpf_generic_retkprobe_v61.native.o",
+        "program": "generic_retkpro",
+        "source_bytecode_len": 25920,
+        "source_lacks_helper": 174,
+        "symbol": "generic_retkprobe_event"
+      },
+      "after": {
+        "native_object": "bpf_generic_retkprobe_v61.native.o",
+        "program": "generic_retkpro",
+        "source_bytecode_len": 26848,
+        "source_lacks_helper": 174,
+        "symbol": "generic_retkprobe_event"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_retuprobe_v61.native.o",
+        "generic_retuprobe_event",
+        "generic_retupro"
+      ],
+      "before": {
+        "native_object": "bpf_generic_retuprobe_v61.native.o",
+        "program": "generic_retupro",
+        "source_bytecode_len": 25424,
+        "source_lacks_helper": 174,
+        "symbol": "generic_retuprobe_event"
+      },
+      "after": {
+        "native_object": "bpf_generic_retuprobe_v61.native.o",
+        "program": "generic_retupro",
+        "source_bytecode_len": 26352,
+        "source_lacks_helper": 174,
+        "symbol": "generic_retuprobe_event"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_tracepoint_v61.native.o",
+        "generic_tracepoint_actions",
+        "generic_tracepo"
+      ],
+      "before": {
+        "native_object": "bpf_generic_tracepoint_v61.native.o",
+        "program": "generic_tracepo",
+        "source_bytecode_len": 800,
+        "source_lacks_helper": 174,
+        "symbol": "generic_tracepoint_actions"
+      },
+      "after": {
+        "native_object": "bpf_generic_tracepoint_v61.native.o",
+        "program": "generic_tracepo",
+        "source_bytecode_len": 8864,
+        "source_lacks_helper": 174,
+        "symbol": "generic_tracepoint_actions"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_tracepoint_v61.native.o",
+        "generic_tracepoint_arg",
+        "generic_tracepo"
+      ],
+      "before": {
+        "native_object": "bpf_generic_tracepoint_v61.native.o",
+        "program": "generic_tracepo",
+        "source_bytecode_len": 2920,
+        "source_lacks_helper": 174,
+        "symbol": "generic_tracepoint_arg"
+      },
+      "after": {
+        "native_object": "bpf_generic_tracepoint_v61.native.o",
+        "program": "generic_tracepo",
+        "source_bytecode_len": 27968,
+        "source_lacks_helper": 174,
+        "symbol": "generic_tracepoint_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_tracepoint_v61.native.o",
+        "generic_tracepoint_filter",
+        "generic_tracepo"
+      ],
+      "before": {
+        "native_object": "bpf_generic_tracepoint_v61.native.o",
+        "program": "generic_tracepo",
+        "source_bytecode_len": 22424,
+        "source_lacks_helper": 174,
+        "symbol": "generic_tracepoint_filter"
+      },
+      "after": {
+        "native_object": "bpf_generic_tracepoint_v61.native.o",
+        "program": "generic_tracepo",
+        "source_bytecode_len": 23352,
+        "source_lacks_helper": 174,
+        "symbol": "generic_tracepoint_filter"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_tracepoint_v61.native.o",
+        "generic_tracepoint_process_event",
+        "generic_tracepo"
+      ],
+      "before": {
+        "native_object": "bpf_generic_tracepoint_v61.native.o",
+        "program": "generic_tracepo",
+        "source_bytecode_len": 26568,
+        "source_lacks_helper": 174,
+        "symbol": "generic_tracepoint_process_event"
+      },
+      "after": {
+        "native_object": "bpf_generic_tracepoint_v61.native.o",
+        "program": "generic_tracepo",
+        "source_bytecode_len": 27928,
+        "source_lacks_helper": 174,
+        "symbol": "generic_tracepoint_process_event"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_uprobe_v53.native.o",
+        "generic_uprobe_filter_arg",
+        "generic_uprobe_"
+      ],
+      "before": {
+        "native_object": "bpf_generic_uprobe_v53.native.o",
+        "program": "generic_uprobe_",
+        "source_bytecode_len": 28296,
+        "source_lacks_helper": 174,
+        "symbol": "generic_uprobe_filter_arg"
+      },
+      "after": {
+        "native_object": "bpf_generic_uprobe_v53.native.o",
+        "program": "generic_uprobe_",
+        "source_bytecode_len": 28696,
+        "source_lacks_helper": 174,
+        "symbol": "generic_uprobe_filter_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_uprobe_v61.native.o",
+        "generic_sleepable_preload",
+        "generic_sleepab"
+      ],
+      "before": null,
+      "after": {
+        "native_object": "bpf_generic_uprobe_v61.native.o",
+        "program": "generic_sleepab",
+        "source_bytecode_len": 5520,
+        "source_lacks_helper": 174,
+        "symbol": "generic_sleepable_preload"
+      }
+    },
+    {
+      "identity": [
+        "bpf_generic_usdt_v61.native.o",
+        "generic_sleepable_preload",
+        "generic_sleepab"
+      ],
+      "before": {
+        "native_object": "bpf_generic_usdt_v61.native.o",
+        "program": "generic_sleepab",
+        "source_bytecode_len": 376,
+        "source_lacks_helper": 174,
+        "symbol": "generic_sleepable_preload"
+      },
+      "after": {
+        "native_object": "bpf_generic_usdt_v61.native.o",
+        "program": "generic_sleepab",
+        "source_bytecode_len": 6800,
+        "source_lacks_helper": 174,
+        "symbol": "generic_sleepable_preload"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_kprobe_v511.native.o",
+        "generic_kprobe_filter_arg",
+        "generic_kprobe_"
+      ],
+      "before": {
+        "native_object": "bpf_multi_kprobe_v511.native.o",
+        "program": "generic_kprobe_",
+        "source_bytecode_len": 32272,
+        "source_lacks_helper": 174,
+        "symbol": "generic_kprobe_filter_arg"
+      },
+      "after": {
+        "native_object": "bpf_multi_kprobe_v511.native.o",
+        "program": "generic_kprobe_",
+        "source_bytecode_len": 32672,
+        "source_lacks_helper": 174,
+        "symbol": "generic_kprobe_filter_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_kprobe_v53.native.o",
+        "generic_kprobe_filter_arg",
+        "generic_kprobe_"
+      ],
+      "before": {
+        "native_object": "bpf_multi_kprobe_v53.native.o",
+        "program": "generic_kprobe_",
+        "source_bytecode_len": 28296,
+        "source_lacks_helper": 174,
+        "symbol": "generic_kprobe_filter_arg"
+      },
+      "after": {
+        "native_object": "bpf_multi_kprobe_v53.native.o",
+        "program": "generic_kprobe_",
+        "source_bytecode_len": 28696,
+        "source_lacks_helper": 174,
+        "symbol": "generic_kprobe_filter_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_kprobe_v61.native.o",
+        "generic_kprobe_actions",
+        "generic_kprobe_"
+      ],
+      "before": {
+        "native_object": "bpf_multi_kprobe_v61.native.o",
+        "program": "generic_kprobe_",
+        "source_bytecode_len": 800,
+        "source_lacks_helper": 174,
+        "symbol": "generic_kprobe_actions"
+      },
+      "after": {
+        "native_object": "bpf_multi_kprobe_v61.native.o",
+        "program": "generic_kprobe_",
+        "source_bytecode_len": 9328,
+        "source_lacks_helper": 174,
+        "symbol": "generic_kprobe_actions"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_kprobe_v61.native.o",
+        "generic_kprobe_filter_arg",
+        "generic_kprobe_"
+      ],
+      "before": {
+        "native_object": "bpf_multi_kprobe_v61.native.o",
+        "program": "generic_kprobe_",
+        "source_bytecode_len": 3496,
+        "source_lacks_helper": 174,
+        "symbol": "generic_kprobe_filter_arg"
+      },
+      "after": {
+        "native_object": "bpf_multi_kprobe_v61.native.o",
+        "program": "generic_kprobe_",
+        "source_bytecode_len": 28944,
+        "source_lacks_helper": 174,
+        "symbol": "generic_kprobe_filter_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_kprobe_v61.native.o",
+        "generic_kprobe_process_event",
+        "generic_kprobe_"
+      ],
+      "before": {
+        "native_object": "bpf_multi_kprobe_v61.native.o",
+        "program": "generic_kprobe_",
+        "source_bytecode_len": 27536,
+        "source_lacks_helper": 174,
+        "symbol": "generic_kprobe_process_event"
+      },
+      "after": {
+        "native_object": "bpf_multi_kprobe_v61.native.o",
+        "program": "generic_kprobe_",
+        "source_bytecode_len": 33168,
+        "source_lacks_helper": 174,
+        "symbol": "generic_kprobe_process_event"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_kprobe_v61.native.o",
+        "generic_kprobe_process_filter",
+        "generic_kprobe_"
+      ],
+      "before": {
+        "native_object": "bpf_multi_kprobe_v61.native.o",
+        "program": "generic_kprobe_",
+        "source_bytecode_len": 22424,
+        "source_lacks_helper": 174,
+        "symbol": "generic_kprobe_process_filter"
+      },
+      "after": {
+        "native_object": "bpf_multi_kprobe_v61.native.o",
+        "program": "generic_kprobe_",
+        "source_bytecode_len": 23352,
+        "source_lacks_helper": 174,
+        "symbol": "generic_kprobe_process_filter"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_retkprobe_v61.native.o",
+        "generic_retkprobe_actions",
+        "generic_retkpro"
+      ],
+      "before": {
+        "native_object": "bpf_multi_retkprobe_v61.native.o",
+        "program": "generic_retkpro",
+        "source_bytecode_len": 800,
+        "source_lacks_helper": 174,
+        "symbol": "generic_retkprobe_actions"
+      },
+      "after": {
+        "native_object": "bpf_multi_retkprobe_v61.native.o",
+        "program": "generic_retkpro",
+        "source_bytecode_len": 7040,
+        "source_lacks_helper": 174,
+        "symbol": "generic_retkprobe_actions"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_retkprobe_v61.native.o",
+        "generic_retkprobe_event",
+        "generic_retkpro"
+      ],
+      "before": {
+        "native_object": "bpf_multi_retkprobe_v61.native.o",
+        "program": "generic_retkpro",
+        "source_bytecode_len": 25936,
+        "source_has_helper": 174,
+        "symbol": "generic_retkprobe_event"
+      },
+      "after": {
+        "native_object": "bpf_multi_retkprobe_v61.native.o",
+        "program": "generic_retkpro",
+        "source_bytecode_len": 26864,
+        "source_has_helper": 174,
+        "symbol": "generic_retkprobe_event"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_retkprobe_v61.native.o",
+        "generic_retkprobe_filter_arg",
+        "generic_retkpro"
+      ],
+      "before": {
+        "native_object": "bpf_multi_retkprobe_v61.native.o",
+        "program": "generic_retkpro",
+        "source_bytecode_len": 2720,
+        "source_lacks_helper": 174,
+        "symbol": "generic_retkprobe_filter_arg"
+      },
+      "after": {
+        "native_object": "bpf_multi_retkprobe_v61.native.o",
+        "program": "generic_retkpro",
+        "source_bytecode_len": 27768,
+        "source_lacks_helper": 174,
+        "symbol": "generic_retkprobe_filter_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_retuprobe_v61.native.o",
+        "generic_retuprobe_actions",
+        "generic_retupro"
+      ],
+      "before": {
+        "native_object": "bpf_multi_retuprobe_v61.native.o",
+        "program": "generic_retupro",
+        "source_bytecode_len": 800,
+        "source_lacks_helper": 174,
+        "symbol": "generic_retuprobe_actions"
+      },
+      "after": {
+        "native_object": "bpf_multi_retuprobe_v61.native.o",
+        "program": "generic_retupro",
+        "source_bytecode_len": 7040,
+        "source_lacks_helper": 174,
+        "symbol": "generic_retuprobe_actions"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_retuprobe_v61.native.o",
+        "generic_retuprobe_event",
+        "generic_retupro"
+      ],
+      "before": {
+        "native_object": "bpf_multi_retuprobe_v61.native.o",
+        "program": "generic_retupro",
+        "source_bytecode_len": 25440,
+        "source_has_helper": 174,
+        "symbol": "generic_retuprobe_event"
+      },
+      "after": {
+        "native_object": "bpf_multi_retuprobe_v61.native.o",
+        "program": "generic_retupro",
+        "source_bytecode_len": 26368,
+        "source_has_helper": 174,
+        "symbol": "generic_retuprobe_event"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_retuprobe_v61.native.o",
+        "generic_retuprobe_filter_arg",
+        "generic_retupro"
+      ],
+      "before": {
+        "native_object": "bpf_multi_retuprobe_v61.native.o",
+        "program": "generic_retupro",
+        "source_bytecode_len": 2720,
+        "source_lacks_helper": 174,
+        "symbol": "generic_retuprobe_filter_arg"
+      },
+      "after": {
+        "native_object": "bpf_multi_retuprobe_v61.native.o",
+        "program": "generic_retupro",
+        "source_bytecode_len": 27768,
+        "source_lacks_helper": 174,
+        "symbol": "generic_retuprobe_filter_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_uprobe_v511.native.o",
+        "generic_uprobe_filter_arg",
+        "generic_uprobe_"
+      ],
+      "before": {
+        "native_object": "bpf_multi_uprobe_v511.native.o",
+        "program": "generic_uprobe_",
+        "source_bytecode_len": 32272,
+        "source_lacks_helper": 174,
+        "symbol": "generic_uprobe_filter_arg"
+      },
+      "after": {
+        "native_object": "bpf_multi_uprobe_v511.native.o",
+        "program": "generic_uprobe_",
+        "source_bytecode_len": 32672,
+        "source_lacks_helper": 174,
+        "symbol": "generic_uprobe_filter_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_uprobe_v61.native.o",
+        "generic_sleepable_offload",
+        "generic_sleepab"
+      ],
+      "before": {
+        "native_object": "bpf_multi_uprobe_v61.native.o",
+        "program": "generic_sleepab",
+        "source_bytecode_len": 784,
+        "source_lacks_helper": 174,
+        "symbol": "generic_sleepable_offload"
+      },
+      "after": {
+        "native_object": "bpf_multi_uprobe_v61.native.o",
+        "program": "generic_sleepab",
+        "source_bytecode_len": 4592,
+        "source_lacks_helper": 174,
+        "symbol": "generic_sleepable_offload"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_uprobe_v61.native.o",
+        "generic_sleepable_preload",
+        "generic_sleepab"
+      ],
+      "before": null,
+      "after": {
+        "native_object": "bpf_multi_uprobe_v61.native.o",
+        "program": "generic_sleepab",
+        "source_bytecode_len": 5520,
+        "source_has_helper": 174,
+        "symbol": "generic_sleepable_preload"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_uprobe_v61.native.o",
+        "generic_uprobe_actions",
+        "generic_uprobe_"
+      ],
+      "before": {
+        "native_object": "bpf_multi_uprobe_v61.native.o",
+        "program": "generic_uprobe_",
+        "source_bytecode_len": 800,
+        "source_lacks_helper": 174,
+        "symbol": "generic_uprobe_actions"
+      },
+      "after": {
+        "native_object": "bpf_multi_uprobe_v61.native.o",
+        "program": "generic_uprobe_",
+        "source_bytecode_len": 7560,
+        "source_lacks_helper": 174,
+        "symbol": "generic_uprobe_actions"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_uprobe_v61.native.o",
+        "generic_uprobe_filter_arg",
+        "generic_uprobe_"
+      ],
+      "before": {
+        "native_object": "bpf_multi_uprobe_v61.native.o",
+        "program": "generic_uprobe_",
+        "source_bytecode_len": 3496,
+        "source_lacks_helper": 174,
+        "symbol": "generic_uprobe_filter_arg"
+      },
+      "after": {
+        "native_object": "bpf_multi_uprobe_v61.native.o",
+        "program": "generic_uprobe_",
+        "source_bytecode_len": 28944,
+        "source_lacks_helper": 174,
+        "symbol": "generic_uprobe_filter_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_uprobe_v61.native.o",
+        "generic_uprobe_process_event",
+        "generic_uprobe_"
+      ],
+      "before": {
+        "native_object": "bpf_multi_uprobe_v61.native.o",
+        "program": "generic_uprobe_",
+        "source_bytecode_len": 27144,
+        "source_lacks_helper": 174,
+        "symbol": "generic_uprobe_process_event"
+      },
+      "after": {
+        "native_object": "bpf_multi_uprobe_v61.native.o",
+        "program": "generic_uprobe_",
+        "source_bytecode_len": 30152,
+        "source_lacks_helper": 174,
+        "symbol": "generic_uprobe_process_event"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_uprobe_v61.native.o",
+        "generic_uprobe_process_filter",
+        "generic_uprobe_"
+      ],
+      "before": {
+        "native_object": "bpf_multi_uprobe_v61.native.o",
+        "program": "generic_uprobe_",
+        "source_bytecode_len": 22424,
+        "source_lacks_helper": 174,
+        "symbol": "generic_uprobe_process_filter"
+      },
+      "after": {
+        "native_object": "bpf_multi_uprobe_v61.native.o",
+        "program": "generic_uprobe_",
+        "source_bytecode_len": 23352,
+        "source_lacks_helper": 174,
+        "symbol": "generic_uprobe_process_filter"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_usdt_v61.native.o",
+        "generic_sleepable_preload",
+        "generic_sleepab"
+      ],
+      "before": {
+        "native_object": "bpf_multi_usdt_v61.native.o",
+        "program": "generic_sleepab",
+        "source_bytecode_len": 376,
+        "source_has_helper": 174,
+        "symbol": "generic_sleepable_preload"
+      },
+      "after": {
+        "native_object": "bpf_multi_usdt_v61.native.o",
+        "program": "generic_sleepab",
+        "source_bytecode_len": 6800,
+        "source_has_helper": 174,
+        "symbol": "generic_sleepable_preload"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_usdt_v61.native.o",
+        "generic_usdt_actions",
+        "generic_usdt_ac"
+      ],
+      "before": {
+        "native_object": "bpf_multi_usdt_v61.native.o",
+        "program": "generic_usdt_ac",
+        "source_bytecode_len": 800,
+        "source_lacks_helper": 174,
+        "symbol": "generic_usdt_actions"
+      },
+      "after": {
+        "native_object": "bpf_multi_usdt_v61.native.o",
+        "program": "generic_usdt_ac",
+        "source_bytecode_len": 9664,
+        "source_lacks_helper": 174,
+        "symbol": "generic_usdt_actions"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_usdt_v61.native.o",
+        "generic_usdt_filter_arg",
+        "generic_usdt_fi"
+      ],
+      "before": {
+        "native_object": "bpf_multi_usdt_v61.native.o",
+        "program": "generic_usdt_fi",
+        "source_bytecode_len": 2920,
+        "source_lacks_helper": 174,
+        "symbol": "generic_usdt_filter_arg"
+      },
+      "after": {
+        "native_object": "bpf_multi_usdt_v61.native.o",
+        "program": "generic_usdt_fi",
+        "source_bytecode_len": 27968,
+        "source_lacks_helper": 174,
+        "symbol": "generic_usdt_filter_arg"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_usdt_v61.native.o",
+        "generic_usdt_process_event",
+        "generic_usdt_pr"
+      ],
+      "before": {
+        "native_object": "bpf_multi_usdt_v61.native.o",
+        "program": "generic_usdt_pr",
+        "source_bytecode_len": 27448,
+        "source_lacks_helper": 174,
+        "symbol": "generic_usdt_process_event"
+      },
+      "after": {
+        "native_object": "bpf_multi_usdt_v61.native.o",
+        "program": "generic_usdt_pr",
+        "source_bytecode_len": 31432,
+        "source_lacks_helper": 174,
+        "symbol": "generic_usdt_process_event"
+      }
+    },
+    {
+      "identity": [
+        "bpf_multi_usdt_v61.native.o",
+        "generic_usdt_process_filter",
+        "generic_usdt_pr"
+      ],
+      "before": {
+        "native_object": "bpf_multi_usdt_v61.native.o",
+        "program": "generic_usdt_pr",
+        "source_bytecode_len": 22424,
+        "source_lacks_helper": 174,
+        "symbol": "generic_usdt_process_filter"
+      },
+      "after": {
+        "native_object": "bpf_multi_usdt_v61.native.o",
+        "program": "generic_usdt_pr",
+        "source_bytecode_len": 23352,
+        "source_lacks_helper": 174,
+        "symbol": "generic_usdt_process_filter"
+      }
+    }
+  ],
+  "input_pins": {
+    "scanner_commit": "db0228718c314a58193bc3217309f8e6855164d1",
+    "scanner_path": "vendor/bpf/write_native_manifest.py",
+    "scanner_sha256": "7db97e4613c4c6e2a69811ed1f7db170ea0f7b90c261322748d95f3f676fdca7",
+    "manifest_path": "kprog/arm64/build/app-verified-stage/tetragon/manifest.json",
+    "manifest_before_sha256": "12f30ddf453cd6579f126158b02545f7506b01e5021116f0f1c361ccc59eef53",
+    "inputs": [
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_cgroup_mkdir_v511.native.o",
+        "native_sha256": "c5038b20feb99d5df8480b94b3e3046525a540dd97653adb4e3a479ed0d8fcb7",
+        "source": "vendor/build/arm64/tetragon/bpf_cgroup_mkdir_v511.o",
+        "source_sha256": "162c17ebb579da5f7af23856fb701dd2bf991d2228583a6c3a4ed23759682841",
+        "source_bytes": 978600
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_cgroup_release_v511.native.o",
+        "native_sha256": "bd73a15da730cfcde7c525ba32ff5a4dc0874a5e2636009e0aa2b0c39ebc0031",
+        "source": "vendor/build/arm64/tetragon/bpf_cgroup_release_v511.o",
+        "source_sha256": "74900a40575d12c08e9201cdc34a0df24e32c15506ffc73ebec781675f925ddf",
+        "source_bytes": 975496
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_cgroup_rmdir_v511.native.o",
+        "native_sha256": "2f01ae5ebc40d28942036afe0c8b9aa49eb518d564d8a6cdaf2391b91fea1616",
+        "source": "vendor/build/arm64/tetragon/bpf_cgroup_rmdir_v511.o",
+        "source_sha256": "45907a894d6b6e973cb9fdedeefacdc7badc5653d128d3b35d77023a6cbe0221",
+        "source_bytes": 975488
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v310.native.o",
+        "native_sha256": "e9b2537b8f4b5bf5ba9c82b2cea5db936b677a8e8e4e8716f135cd52e62fe868",
+        "source": "vendor/build/arm64/tetragon/bpf_execve_event_v310.o",
+        "source_sha256": "97a82b409462ed8b968c6d2b76a08ae09d66eda1360fce27a4832937403c1160",
+        "source_bytes": 1236704
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v511.native.o",
+        "native_sha256": "02731137f2beface72a22f675b347b684464246ee9ec7f0d51e9414be2291219",
+        "source": "vendor/build/arm64/tetragon/bpf_execve_event_v511.o",
+        "source_sha256": "976b26cde2145a6f5ee97c0495d6ab2b978dc02b27d39b3905513e94c77da312",
+        "source_bytes": 2251328
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v53.native.o",
+        "native_sha256": "3835f7983e72cf9dbd75a1f6d26d760fcb6b0465c7d313807633790243e7b9f9",
+        "source": "vendor/build/arm64/tetragon/bpf_execve_event_v53.o",
+        "source_sha256": "e25083ef9bc564b18baeac4a60d1f35a0eb88b5037fd700cfcf2e6f72cf4a6f2",
+        "source_bytes": 2226888
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_event_v61.native.o",
+        "native_sha256": "d82daa48cff9ba6fb60457d2460e9593e77a54024d8b6d55997d4aa128a8180a",
+        "source": "vendor/build/arm64/tetragon/bpf_execve_event_v61.o",
+        "source_sha256": "c114160cde70f568a46442def67564f1b409e7451af6d2aab308011c0789bf1c",
+        "source_bytes": 1269424
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_map_update_v511.native.o",
+        "native_sha256": "a02ad55661b9043277cad90624ca163e743bc5e8ef7c37c261e39c0abe831198",
+        "source": "vendor/build/arm64/tetragon/bpf_execve_map_update_v511.o",
+        "source_sha256": "f45a7fe30948f63dd15a449d021a5d7aeee8e582f8f4e63f0ab8ed72830e3154",
+        "source_bytes": 37176
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_map_update_v53.native.o",
+        "native_sha256": "770e8a29fc8f0e8cd1ef92af9cc18677de3145cdddeb2cea8fcc5685b657db65",
+        "source": "vendor/build/arm64/tetragon/bpf_execve_map_update_v53.o",
+        "source_sha256": "a30a189951a8afe403a884489e3beee1ee8aaf4a3615895d03da15c01d26134a",
+        "source_bytes": 31368
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_execve_map_update_v61.native.o",
+        "native_sha256": "707121ef64b9746ef1b863b60441b5e3df8d88ee29ce1c6c0c462ca69f82ee16",
+        "source": "vendor/build/arm64/tetragon/bpf_execve_map_update_v61.o",
+        "source_sha256": "c9693d94f803a71042a40b25c459a96f9ccd7fc19dabc626c4efa0c10d2bd518",
+        "source_bytes": 37144
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_exit_v310.native.o",
+        "native_sha256": "fbe4e0750f61db9fd77c04a1083000b36670a7e926b61676bc7115b74716786e",
+        "source": "vendor/build/arm64/tetragon/bpf_exit_v310.o",
+        "source_sha256": "39190343fa7c95f3305e3b321eddfc57e433ca448a2f0d7e74359c9d618a879a",
+        "source_bytes": 992024
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_exit_v511.native.o",
+        "native_sha256": "7620cc8d34b1d50c5d504a233b6db0ca1383b78e6c49d462e3ae64e19976b937",
+        "source": "vendor/build/arm64/tetragon/bpf_exit_v511.o",
+        "source_sha256": "eeec931e112b69b87f15834ed2fd507628fd47564eb44e65ee41eb40c85d41f9",
+        "source_bytes": 1001432
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_fork_v310.native.o",
+        "native_sha256": "596b161a033bf7c9ea304e04296681638927fed0e6100e805b21c0f0c5b9052b",
+        "source": "vendor/build/arm64/tetragon/bpf_fork_v310.o",
+        "source_sha256": "f7c62938a385d849222194ac3750e7a5fdf128557e3fc3997cade646c8f26339",
+        "source_bytes": 1070008
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_fork_v511.native.o",
+        "native_sha256": "10370b76066dec79aa2da7465d42053582f8198ca6cfa2f43351d24693338da1",
+        "source": "vendor/build/arm64/tetragon/bpf_fork_v511.o",
+        "source_sha256": "2475b60906371ce8b09d8285e7843292fff47fdea716a0375f923ca6e557c6d0",
+        "source_bytes": 1105312
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v511.native.o",
+        "native_sha256": "04ba868275e07289bf449c3c50a9643d5f21dfaf72923927265ef571dd547120",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_fentry_v511.o",
+        "source_sha256": "fb3caa14427529d9279e29c6039611bc78a832b69bc26bd2d7f9f9de50007953",
+        "source_bytes": 3265248
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v53.native.o",
+        "native_sha256": "c36af358cb9eb9729e8a8481f6d2d240cf5517fe8677038fd5b4ce757bf814fe",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_fentry_v53.o",
+        "source_sha256": "eea691557e6d2062068da1c453af67a7d316aa7f479c7f6ff940f22bbef7663a",
+        "source_bytes": 3198624
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fentry_v61.native.o",
+        "native_sha256": "3424e69d814b5f8c6719426a15cc6e2646e4c304abef2e43913f9f97f36917cc",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_fentry_v61.o",
+        "source_sha256": "95dccd8cba8417e15e77c84e16cf6684f23a1f3b30e5d8a749a8aad286e03429",
+        "source_bytes": 1705032
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v511.native.o",
+        "native_sha256": "456718dfc8a31c18e6f887ccc6b6692f485d136e3848296495a55b9e047669b2",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_fexit_v511.o",
+        "source_sha256": "2953387e91b7b1e348b1ce00ea74f9aa480f844b99e6f83f4823aa5408456009",
+        "source_bytes": 1998536
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v53.native.o",
+        "native_sha256": "92fcd7480b6159584986f58d2ed4ae051efa4859b8a72fcc2dbc71f578092a7c",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_fexit_v53.o",
+        "source_sha256": "47a4b9f12454c58c323d55b9e0bc827ffc621b15a51136bd983b9bb30d2f96ec",
+        "source_bytes": 1957424
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_fexit_v61.native.o",
+        "native_sha256": "503b6fae42b2129582dd9e59c9e47abdde3917e37b823388dba3e61b1fa6861a",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_fexit_v61.o",
+        "source_sha256": "43a7a9770dac8e88ca5f018118fcd39fc77483deb66068bdd89821d392fcf76c",
+        "source_bytes": 1462816
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_kprobe_v511.native.o",
+        "native_sha256": "c8c5e5adbf3500abb31861ff786844f30f1918e9a58fc066223b6e940d5b93cb",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_kprobe_v511.o",
+        "source_sha256": "49a3fddcf24fd8edcd9ce1813fb77cb5e89d4c575dbb44a7631b94f99f5cf419",
+        "source_bytes": 3304680
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_kprobe_v53.native.o",
+        "native_sha256": "97200b177558bc8ca69ba2b5721b1cadf8d9878cdb8c7583f9c51f629a927086",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_kprobe_v53.o",
+        "source_sha256": "200c2c79a27577b0b9e6d70ee644e3dc552c32b49e55fe33505a23c29fce953b",
+        "source_bytes": 3240352
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_kprobe_v61.native.o",
+        "native_sha256": "e7559dfbc14ef6a8391ab4a5a44a356f0a2f4c95940962fa141b10c7fe87c080",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_kprobe_v61.o",
+        "source_sha256": "fcc191dc556b6e3a1b043b7e3352a4dd25576f0e69572907cf1a55665136e9f1",
+        "source_bytes": 1744016
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v511.native.o",
+        "native_sha256": "869777958f9660c5fc5ae48679b617d199a3c698e7a6ff97b2945a6af406a047",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_core_v511.o",
+        "source_sha256": "d55b71804e6f253395712d4e17eb0e19de0f4ce5504eae745cd737f9336e3354",
+        "source_bytes": 3248560
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_core_v61.native.o",
+        "native_sha256": "83dd15f79cb121ba5fd65bc995d1f28f880f879251c07035011494fd4e52f317",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_core_v61.o",
+        "source_sha256": "45ccec300b9286f930e0aac68012deebf65c32c6c43c845454cf09c99e4ecb81",
+        "source_bytes": 1688944
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_ima_bprm_v511.native.o",
+        "native_sha256": "5a2eca944d4e64b0942025d7aa1165d85956ba42edf0383a414c9642a25df668",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_ima_bprm_v511.o",
+        "source_sha256": "03692bbee5a814860edf114955410dc9d36550c25feb4518baae8252d9d6fd03",
+        "source_bytes": 975328
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_ima_bprm_v61.native.o",
+        "native_sha256": "075549b0765b2d660ef490fdfba7751b8a15eac800bd11aa0e881104d312b230",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_ima_bprm_v61.o",
+        "source_sha256": "fe1aaa9a3b88d9859bc729d477e35bdb145370ecc11579187388be65660268d1",
+        "source_bytes": 974592
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_ima_file_v511.native.o",
+        "native_sha256": "01f189148e8b3b4606cfc78b1310a3dbebedc70d43282cb06c4c7497473c2846",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_ima_file_v511.o",
+        "source_sha256": "a09f7cca80e0615ff18e014db526da748c7974708ec8e7ba10293b047ac0c789",
+        "source_bytes": 975272
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_ima_file_v61.native.o",
+        "native_sha256": "a9180fa2d6a2e59fb657cae1185879d9e78acb2fa1d73ba9e4b6165ddfc7b022",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_ima_file_v61.o",
+        "source_sha256": "0c6a23399f8b91777dc19080561dd1ee9448be62405e735bc2ba50a9db4b023a",
+        "source_bytes": 974536
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_output_v511.native.o",
+        "native_sha256": "06493d2c763470a9481092b1ab9435e0ffa0fe71f69658f110275315458f4a4a",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_output_v511.o",
+        "source_sha256": "f98b94237a44e8f560dd98b21eda47d0a67d0684d0eb22b657cca207a9cc0584",
+        "source_bytes": 1083600
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_lsm_output_v61.native.o",
+        "native_sha256": "569a1cbf316b1acb590c279b6f9d6d689a8c93950d3f812a74e677e31f13a50f",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_lsm_output_v61.o",
+        "source_sha256": "1186ef1145a158636a88cd3e70bcc857e2b91b4a7b3cac5dac62754aa8175e66",
+        "source_bytes": 1083000
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v511.native.o",
+        "native_sha256": "b1bb6fb1ddaf10ea4215a9d72f865a519c58f098d7bbc3ed5520eb2494759a6d",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_rawtp_v511.o",
+        "source_sha256": "77c6c5bef27aa4cef2dbb1687de4081b843bf49493b443dd2c5df9b333d0fb30",
+        "source_bytes": 3259224
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v53.native.o",
+        "native_sha256": "44a983e7a55d815dc85a29ca0a9e3b888fc94b1db2dcd7d47ee5c5fdfdbf4ab9",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_rawtp_v53.o",
+        "source_sha256": "8413d4541d9903c2c3320553018062e8da14aa52f35a689fd000c6e6835b6134",
+        "source_bytes": 3192592
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_rawtp_v61.native.o",
+        "native_sha256": "7f0ce1618d25f23a7d962c5f6c101c60cc69719cad570a2b260d60f8c1927527",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_rawtp_v61.o",
+        "source_sha256": "8ea277c8fd6c67304f282239251c0df6cb32f3cdd82f75d2decff71e3cc18cb6",
+        "source_bytes": 1699016
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retkprobe_v511.native.o",
+        "native_sha256": "609c30d297b5622e71d382bcc54de37583ce33abbd455eb93e696cebc909c2d0",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_retkprobe_v511.o",
+        "source_sha256": "1e38fc47039735e8b54e1bb61ca1ec59959fa7bb6af344534e2ae3a9cde96ac6",
+        "source_bytes": 1999528
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retkprobe_v53.native.o",
+        "native_sha256": "56b94370549e4dd66a5aa78a20ec671032eca61cfec6c2c6d590f000a2ebbf19",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_retkprobe_v53.o",
+        "source_sha256": "18dc9772d859bb1c6820bc8e1e30b9cacdcceac9b58c7e8d88f8281cdb41f072",
+        "source_bytes": 1958416
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retkprobe_v61.native.o",
+        "native_sha256": "efd9883080dfad86c840fc2748e9d2843fdbf0a1a5bfc7ea026285e32d904e0f",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_retkprobe_v61.o",
+        "source_sha256": "d4b7a4be6e6aa6224e33ad363ed07a2815d5c39d76d2f44e6ae05f2a8ae14caf",
+        "source_bytes": 1463816
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retuprobe_v511.native.o",
+        "native_sha256": "744faa3926d758bacca675e82fc2675cb577875645440d4917e6900b6c67db1a",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_retuprobe_v511.o",
+        "source_sha256": "05f90220a5c3e43ab49185e9ced519c9817eef055bdb7bbed7f175c6dbb53bd1",
+        "source_bytes": 2001112
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retuprobe_v53.native.o",
+        "native_sha256": "4c0491c4c86ac67d1c179adb26fad90452a23f3023ae9a25601880c8f1137df3",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_retuprobe_v53.o",
+        "source_sha256": "649dceaff37eddf34fc125567dd4fcb8542b0e3f87eb9d54b6c86825cc790ffb",
+        "source_bytes": 1949336
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_retuprobe_v61.native.o",
+        "native_sha256": "7ea3f661c06b549660c2fc66b686bbfdb3f58e925828c063eee6a2a0bfeab5a5",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_retuprobe_v61.o",
+        "source_sha256": "0839fbe78f938d247e05a05de7176c0fc7f1b3fd4d2f865312fe1f9db8bc8fc0",
+        "source_bytes": 1462064
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v511.native.o",
+        "native_sha256": "ff3b24eb91ff95e9cd7bc7233bdd76daf476a4904b039de4cb40a372bc0d6509",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_tracepoint_v511.o",
+        "source_sha256": "f9816cca0a02dbbab3c33a06ae8bf112a668888b81baeb6296a4b9a30fcde028",
+        "source_bytes": 2867488
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v53.native.o",
+        "native_sha256": "2aa7db0f078cd30083e3ec9347fcb6f6089e33ad05f1bd53f1e05ee4180ba3e7",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_tracepoint_v53.o",
+        "source_sha256": "e2be33c4d8b0d5776466037da82d4eb4148d3db1d14b032ba10913e1b8a3b655",
+        "source_bytes": 2804736
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_tracepoint_v61.native.o",
+        "native_sha256": "ff2814dd8538361aa42a322af064296400b34dc6be1f2411a7df42edc258b247",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_tracepoint_v61.o",
+        "source_sha256": "bba84e4c72fa6526999d86222be3cf2b6e55fc3a885ad186a999fefaa9e9ef16",
+        "source_bytes": 1838704
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_uprobe_v511.native.o",
+        "native_sha256": "c446feb305257c5e0d697164938153afea13ec34f119530c20e92918551bba5a",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_uprobe_v511.o",
+        "source_sha256": "19bafad372af72cd308fe2f274156381de8bf17243b6f87a4fc37abd1c09754a",
+        "source_bytes": 3574920
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_uprobe_v53.native.o",
+        "native_sha256": "e4f0f048b4a17ebe0dd965a9c5f74d34af48911f68c31b54f5a2ed6f5bb4e852",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_uprobe_v53.o",
+        "source_sha256": "17206c8515446250a42e248cf2d73a3925e1eb8b68b8d1f15171b5893686b702",
+        "source_bytes": 3443448
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_uprobe_v61.native.o",
+        "native_sha256": "ca46ff6916ac0847b8e7269518c0b7380fe4c3607dbb6a82f54a45fa51f32a18",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_uprobe_v61.o",
+        "source_sha256": "892bd196eb4578ce44ba12eaa507adc67066a7cf7b7a11590c5cc0faf1d94f41",
+        "source_bytes": 1749488
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_usdt_v511.native.o",
+        "native_sha256": "b7da37a286441e90fbdded99bb95dc0b9f7bbfee6040b5053f23d4eb83bcf2ce",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_usdt_v511.o",
+        "source_sha256": "3d831b7ebdd8398e1367463522608dd190a806e77c6cb29cd01dd0179117ea66",
+        "source_bytes": 3535176
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_usdt_v53.native.o",
+        "native_sha256": "e2c19f1c02d812f972f69c66803987d67c3919f17ec053d37eb78a1987fcb6c2",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_usdt_v53.o",
+        "source_sha256": "40234dd0a8847cc577180bc8ffcfbb571589955adbff6591f7ba304177a5f24a",
+        "source_bytes": 3397136
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_generic_usdt_v61.native.o",
+        "native_sha256": "9266402750ec495393e7624acaa17f22239c6d1da2950ccc43ca5a847433964d",
+        "source": "vendor/build/arm64/tetragon/bpf_generic_usdt_v61.o",
+        "source_sha256": "b1d519917fb17566d7e75fdf0a34a7b33aaeb1238c770c9e02210ae522bcdae2",
+        "source_bytes": 1762288
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_loader_v511.native.o",
+        "native_sha256": "d5cf1f9290269dad0be0782651282036551c522b8505bba51a98847452563ea1",
+        "source": "vendor/build/arm64/tetragon/bpf_loader_v511.o",
+        "source_sha256": "3a77a48c8c149eecff82906543a6f38e6b27755f31d72d8ed4079c5a312c81e0",
+        "source_bytes": 986512
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v511.native.o",
+        "native_sha256": "d7bbe8e86a4045c8ad9d50bb685bf1d50ac84412707a11214ca69ce0e5ad8997",
+        "source": "vendor/build/arm64/tetragon/bpf_multi_kprobe_v511.o",
+        "source_sha256": "57f148bd3ee5d94d1e2b337bb5f75a9bfc46cfd342ba52490babbfacbbf33a7f",
+        "source_bytes": 3305168
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v53.native.o",
+        "native_sha256": "0b591b6b6eebb16b725576e8a0a30a1e1d32adf6fadd39de3b55adea755a0a79",
+        "source": "vendor/build/arm64/tetragon/bpf_multi_kprobe_v53.o",
+        "source_sha256": "900e5cbfa7061e74a9c3557c259c1ec7f52764842ea909d7aefdd0ad28b9a6ef",
+        "source_bytes": 3240840
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_kprobe_v61.native.o",
+        "native_sha256": "afc2c7ba551de823cb482a8a87a4814c64519ca601d1dce9b1541c35dee4ad48",
+        "source": "vendor/build/arm64/tetragon/bpf_multi_kprobe_v61.o",
+        "source_sha256": "84117d909d5514a4941689debbe977c95bc1770683f9791726781c602d5aba2e",
+        "source_bytes": 1744512
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v511.native.o",
+        "native_sha256": "f29688152a4cdad91367ec189b7ebb9bf06ada49feacdff5165a20138e296c6c",
+        "source": "vendor/build/arm64/tetragon/bpf_multi_retkprobe_v511.o",
+        "source_sha256": "b21212d5280086e52b45da81979c4d712ed0dff9cbc326e081ba050a87300366",
+        "source_bytes": 1999856
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v53.native.o",
+        "native_sha256": "04648cf1a670431a5299da356b97112f4211a4bdc040a23173c6ecb3ec234d8f",
+        "source": "vendor/build/arm64/tetragon/bpf_multi_retkprobe_v53.o",
+        "source_sha256": "99ac7c4848bb859f6861454a1b2329ebd114431e3447b2af50f8876afa993654",
+        "source_bytes": 1958736
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retkprobe_v61.native.o",
+        "native_sha256": "33af2b09b1b76a90ffd9b3f1a26a6e61311bdadebe41bb9422f40ae92006c39d",
+        "source": "vendor/build/arm64/tetragon/bpf_multi_retkprobe_v61.o",
+        "source_sha256": "d19f68f1cfca82f4ec61c89e61170ee058657bfa3da88a616d7985f59d2d3379",
+        "source_bytes": 1464136
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retuprobe_v511.native.o",
+        "native_sha256": "545fcfca2b8ade6deb9da4ad498713c64a096861422431fdf0071cbf1a87d923",
+        "source": "vendor/build/arm64/tetragon/bpf_multi_retuprobe_v511.o",
+        "source_sha256": "3dda436cdec0fcdeb9bf07124dc22a3232213d70e73415765386ea8a2ea5aff8",
+        "source_bytes": 2001448
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_retuprobe_v61.native.o",
+        "native_sha256": "8326602cf1af1928065af6f98fbbe171484f8a4c40bbe7538646757633cfd3eb",
+        "source": "vendor/build/arm64/tetragon/bpf_multi_retuprobe_v61.o",
+        "source_sha256": "963c07f968733882e954f42a8ddd7482c9025570902ab379480c6bdce00a79e5",
+        "source_bytes": 1462400
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v511.native.o",
+        "native_sha256": "7165c9e4a737fa8896eb881f6acf7fe07d173c5ad7032a5f01e8a8352943997e",
+        "source": "vendor/build/arm64/tetragon/bpf_multi_uprobe_v511.o",
+        "source_sha256": "6da03709abe13e51f9f5d2159534da65f1c0742569b234a4050e25177176f942",
+        "source_bytes": 3575456
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_uprobe_v61.native.o",
+        "native_sha256": "65bd7a494d7d2a9690b30a72c5eee684511bb4dc73f40b439b6e19905a1447ad",
+        "source": "vendor/build/arm64/tetragon/bpf_multi_uprobe_v61.o",
+        "source_sha256": "27b681c3c3b993ef0a0ffc7cde63c686a4ab38eecbfbccf6a4a4e9d7c67a8c76",
+        "source_bytes": 1750176
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v511.native.o",
+        "native_sha256": "39dd2b4ba89e8ef6fa4e984e74a31bc2fc73ad783c617b178d64d89d831def97",
+        "source": "vendor/build/arm64/tetragon/bpf_multi_usdt_v511.o",
+        "source_sha256": "daf3b80b2b0d7279ec2caa0b42da093a35099ce36e0bf05c6c1a23836f013b6d",
+        "source_bytes": 3536544
+      },
+      {
+        "native": "kprog/arm64/build/app-verified-stage/tetragon/bpf_multi_usdt_v61.native.o",
+        "native_sha256": "794c8b659e57c2c83b9ab5aaafe99b4c3e666922c92fe8ab6993b9bf56847c2d",
+        "source": "vendor/build/arm64/tetragon/bpf_multi_usdt_v61.o",
+        "source_sha256": "792887ed387a9c84d1d024d2780e39f750930fc6e645b04e5a9acd9f7fd31e3f",
+        "source_bytes": 1762968
+      }
+    ]
+  },
+  "manifest_after_sha256": "bff94acd86fa5e9f7253db1c486ff6d9002687ac5485fc6656ca70c9feeafa10",
+  "make_exit": 0,
+  "raw_archive_sha256": "ecc22c29e8227b74cff92616b5e75e620537a36b8cad3d703580bd1543032231"
+}
