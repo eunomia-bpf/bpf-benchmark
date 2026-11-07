@@ -518,6 +518,208 @@ theorem all_read_native_complete_execution (n : X86.State) (position : n.pc=0) :
       (allReadNativeResult n).events (allReadNativeResult n).state :=
   canonical_relational_path_execution (all_read_native_path_exists n position)
 
+
+/-- Canonical MOV access faults preserve the entire input state. This is a
+property of the existing reference transition, not an added native check. -/
+theorem canonical_move_fault_stutters (s : X86.State) (width : X86.ScalarWidth)
+    (destination : X86.ScalarDestination) (source : X86.ScalarSource) (next : Word) (fault : Fault)
+    (bad : (X86.step (.move width destination source next) s).fault=some fault) :
+    (X86.step (.move width destination source next) s).state=s := by
+  change (X86.moveStep width destination source next s).fault=some fault at bad
+  change (X86.moveStep width destination source next s).state=s
+  cases read : X86.scalarRead s width source with
+  | error reason => simp only [X86.moveStep,read]
+  | ok pair =>
+    rcases pair with ⟨value,events⟩
+    cases write : X86.scalarWrite s width destination value with
+    | error reason => simp only [X86.moveStep,read,write]
+    | ok pair =>
+      simp only [X86.moveStep,read,write] at bad
+      cases bad
+
+/-- A faulting actual instruction in this captured CFG stutters on full
+architectural state, including every undefined-output observation. -/
+theorem simple_native_fault_stutters (s : X86.State) (entry : X86Path.Entry)
+    (instruction : X86.Instruction) (actual : Transition X86.State) (fault : Fault)
+    (valid : simpleClosedPC s.pc) (decoded : X86Path.decodeAt 0 native entry s=.ok instruction)
+    (run : X86.Step instruction s actual) (bad : actual.fault=some fault) : actual.state=s := by
+  rcases closed_decoded_extent_classification s entry instruction valid decoded with defined | xor
+  · have exactResult := simple_defined_decoded_step_unique s entry instruction actual defined decoded run
+    rw [exactResult] at bad ⊢
+    have raw := decode_extent_reflects_raw 0 native entry s instruction decoded
+    simp only [simpleDefinedExtents,List.mem_cons,List.mem_singleton,List.not_mem_nil,or_false] at defined
+    rcases defined with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
+      rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+    · change X86.decode (native.extract 0 3) s=.ok instruction at raw
+      rw [native_decode0] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 3 7) s=.ok instruction at raw
+      rw [native_decode3] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 7 10) s=.ok instruction at raw
+      rw [native_decode7] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 12 15) s=.ok instruction at raw
+      rw [native_decode12] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 15 17) s=.ok instruction at raw
+      rw [native_decode15] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 17 21) s=.ok instruction at raw
+      rw [native_decode17] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 21 24) s=.ok instruction at raw
+      rw [native_decode21] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 24 26) s=.ok instruction at raw
+      rw [native_decode24] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 26 30) s=.ok instruction at raw
+      rw [native_decode26] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 30 33) s=.ok instruction at raw
+      rw [native_decode30] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 33 35) s=.ok instruction at raw
+      rw [native_decode33] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 35 40) s=.ok instruction at raw
+      rw [native_decode35] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 40 44) s=.ok instruction at raw
+      rw [native_decode40] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 44 51) s=.ok instruction at raw
+      rw [native_decode44] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 51 55) s=.ok instruction at raw
+      rw [native_decode51] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+    · change X86.decode (native.extract 55 60) s=.ok instruction at raw
+      rw [native_decode55] at raw
+      cases Except.ok.inj raw
+      first
+        | exact canonical_move_fault_stutters _ _ _ _ _ _ bad
+        | (change none=some fault at bad; cases bad)
+
+  · subst entry
+    have instructionEq := (xor10_decoded_instruction s instruction decoded).2
+    have observed := (canonical_relational_observed_fields instruction s actual run).2.2.2
+    rw [instructionEq] at observed
+    have normal : (X86.step (.logic .w32 .xor (.register (.low 0)) (.register (.low 0)) 12) s).fault=none := rfl
+    rw [normal] at observed
+    rw [observed] at bad
+    cases bad
+
+/-- A terminal fault in any actual canonical path supplies a real self-loop
+step at that terminal state. Its loop events already occurred in the path. -/
+theorem canonical_relational_terminal_fault_loop {entries : List X86Path.Entry}
+    {s : X86.State} {actual : Transition X86.State}
+    (run : CanonicalRelationalPath 0 native entries s actual)
+    (valid : simpleClosedPC s.pc) (bad : actual.fault.isSome=true) :
+    ∃ events, relationalNativeInstructionStep 0 native actual.state events actual.state ∧
+      ∀ event ∈ events, event ∈ actual.events := by
+  revert valid bad
+  induction run with
+  | nil state => intro _ bad; simp at bad
+  | @fault before effect entry instruction decoded step failed =>
+    intro valid bad
+    cases fault : effect.fault with
+    | none => simp only [fault,Option.isSome,Bool.false_eq_true] at failed
+    | some reason =>
+      have stutter := simple_native_fault_stutters before entry instruction effect reason valid decoded step fault
+      refine ⟨effect.events,?_,fun _ inside => inside⟩
+      rw [stutter]
+      exact ⟨entry,instruction,effect,decoded,step,rfl,stutter⟩
+  | @next before first rest tail entry instruction decoded step continued suffix ih =>
+    intro valid bad
+    have nextValid := simple_native_relational_step_closed before entry instruction first valid decoded step
+    obtain ⟨events,loop,subset⟩ := ih nextValid bad
+    exact ⟨events,loop,fun event inside => List.mem_append_right _ (subset event inside)⟩
+
+theorem related_terminal_quiet_from_loop (checked : Event → Prop) (terminal : X86.State)
+    (loopEvents : List Event)
+    (loop : relationalNativeInstructionStep 0 native terminal loopEvents terminal)
+    (allowed : ∀ event ∈ loopEvents, checked event) :
+    ∀ {s events next}, nativeStatesRelated terminal s →
+      relationalNativeInstructionStep 0 native s events next →
+      nativeStatesRelated terminal next ∧ ∀ event ∈ events, checked event := by
+  intro s events next relation actualStep
+  obtain ⟨sameEvents,nextRelation⟩ := related_native_instruction_steps_match relation loop actualStep
+  exact ⟨nextRelation,by simpa only [sameEvents] using allowed⟩
+
+theorem related_terminal_quiet_from_fault_path (checked : Event → Prop)
+    {entries : List X86Path.Entry} {s : X86.State} {actual : Transition X86.State}
+    (run : CanonicalRelationalPath 0 native entries s actual)
+    (valid : simpleClosedPC s.pc) (bad : actual.fault.isSome=true)
+    (allowed : ∀ event ∈ actual.events, checked event) :
+    ∀ {state events next}, nativeStatesRelated actual.state state →
+      relationalNativeInstructionStep 0 native state events next →
+      nativeStatesRelated actual.state next ∧ ∀ event ∈ events, checked event := by
+  obtain ⟨events,loop,subset⟩ := canonical_relational_terminal_fault_loop run valid bad
+  exact related_terminal_quiet_from_loop checked actual.state events loop
+    (fun event inside => allowed event (subset event inside))
+
+theorem related_payload_end_quiet (checked : Event → Prop) (terminal : X86.State)
+    (atEnd : terminal.pc=60) :
+    ∀ {state events next}, nativeStatesRelated terminal state →
+      relationalNativeInstructionStep 0 native state events next →
+      nativeStatesRelated terminal next ∧ ∀ event ∈ events, checked event := by
+  intro state events next relation step
+  have not12 : terminal.pc≠12 := by rw [atEnd]; decide
+  have same : terminal=state := by
+    have branch := relation.2
+    rw [if_neg not12] at branch
+    exact branch
+  obtain ⟨entry,instruction,effect,decoded,_,_,_⟩ := step
+  rw [← same] at decoded
+  exact False.elim (simple_native_end_no_decode terminal entry instruction atEnd decoded)
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -572,3 +774,16 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.all_read_native_path_exists
 
 #print axioms KProgTV.TrustedSimpleSafety.all_read_native_complete_execution
+
+
+#print axioms KProgTV.TrustedSimpleSafety.canonical_move_fault_stutters
+
+#print axioms KProgTV.TrustedSimpleSafety.simple_native_fault_stutters
+
+#print axioms KProgTV.TrustedSimpleSafety.canonical_relational_terminal_fault_loop
+
+#print axioms KProgTV.TrustedSimpleSafety.related_terminal_quiet_from_loop
+
+#print axioms KProgTV.TrustedSimpleSafety.related_terminal_quiet_from_fault_path
+
+#print axioms KProgTV.TrustedSimpleSafety.related_payload_end_quiet

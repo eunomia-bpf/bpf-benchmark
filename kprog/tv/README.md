@@ -1865,3 +1865,11 @@ step coupling retains every AF choice for arbitrary actual executions.
 Five audits and the safety target pass; earlier declarations are unchanged.
 See canonical-complete-exists JSON/log. Terminal quiet and checked-prefix
 composition, ABI/platform/RET transport and strict B block mapping remain open.
+
+`trusted-simple-terminal-quiet.json` records six Lean certificates for actual
+faulting-instruction state preservation, a checked terminal fault self-loop,
+and absence of decoded instructions at payload end PC60. Published state
+coupling covers every related terminal state, including the wrapper's explicit
+fault-repeat overapproximation. This closes the terminal premise needed by
+related-prefix composition; its final concrete instantiation and entry/ABI/RET/
+platform transport remain open. No ISA or runtime behavior changes.

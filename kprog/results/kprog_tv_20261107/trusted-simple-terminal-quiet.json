@@ -1,0 +1,96 @@
+{
+  "status": "actual_fault_terminal_and_payload_end_quiet_under_published_native_state_relation",
+  "utc": "2026-11-07T14:16:29.732995+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorems": [
+    "KProgTV.TrustedSimpleSafety.canonical_move_fault_stutters",
+    "KProgTV.TrustedSimpleSafety.simple_native_fault_stutters",
+    "KProgTV.TrustedSimpleSafety.canonical_relational_terminal_fault_loop",
+    "KProgTV.TrustedSimpleSafety.related_terminal_quiet_from_loop",
+    "KProgTV.TrustedSimpleSafety.related_terminal_quiet_from_fault_path",
+    "KProgTV.TrustedSimpleSafety.related_payload_end_quiet"
+  ],
+  "claims": [
+    "Every faulting decoded instruction in the captured closed CFG preserves the entire native state under canonical relational semantics.",
+    "Every fault-terminated complete canonical path supplies a decoded self-loop at its final state whose ordered events are contained in the original trace.",
+    "Published related-step coupling transfers that checked loop to every related terminal state; decoded steps at payload end PC60 are impossible.",
+    "Wrapper permits fault repeats as an explicit overapproximation: those repetitions cannot add an unchecked event."
+  ],
+  "premises": [
+    "closed captured CFG for fault-path entry",
+    "complete-path events checked when deriving checked terminal quiet",
+    "single canonical byte decoder/ISA/memory; no extra native access check"
+  ],
+  "not_yet_claimed": [
+    "universal checked-prefix final composition",
+    "strict B basic-block correspondence across reordered guards",
+    "semantic entry/ABI/RET/platform transport",
+    "unconditional whole-artifact TV or other programs"
+  ],
+  "compatibility": {
+    "old_Safety_declarations": "byte-identical prefix and audits retained",
+    "old_prefix_sha256": "6b2eb4639b5b3af94e42b5b74e10292b879d329f64c1b1c4a362c43eaf35eed9",
+    "ISA_runtime": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-entry-certificate -o trusted-simple-cfg-certificate trusted-simple-safety-certificate",
+    "exit": 0,
+    "reproduction": "make -C kprog/tv trusted-simple-safety-certificate",
+    "binding_mismatch_controls_rejected": 22,
+    "materialization_controls_rejected": 28,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleSafety.canonical_move_fault_stutters": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.simple_native_fault_stutters": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.canonical_relational_terminal_fault_loop": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.related_terminal_quiet_from_loop": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.related_terminal_quiet_from_fault_path": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.related_payload_end_quiet": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    "current_log_sha256": "54070c347fd8186999ebe9c07288923523d5f43cab508c48adbb4fc2f8faa512",
+    "combined_log_sha256": "8b793742ba5f5317fe1e89a02311c244d090ab514bc9755abf94709210146ac5"
+  },
+  "trusted": [
+    "single canonical reference ISA/decoder/memory",
+    "Lean kernel/logical axioms and reported native proof reduction",
+    "verifier soundness/kernel binding/entry and platform semantics remain explicit in concrete safety composition"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "f0b9694a7f256928e83c688f0ac0f4b3101eb8906b7efc0e9dee0b8920167ac6",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/TrustedSimpleSafety.lean": "b6acb1b464059a4c5d49a14ed832736a1200423beb3620179f869ecc83182390",
+    "kprog/tv/Makefile": "02aeab2e0864840dac9a7a815ec0ae335cb4af559031a438d69d22fa382925eb",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa"
+  }
+}
