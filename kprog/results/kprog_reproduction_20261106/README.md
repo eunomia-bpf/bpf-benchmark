@@ -34,6 +34,35 @@ used.
 Corpus figures are at the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`)
 and each carries the replaced/failed count from its own shim log.
 
+## BPF stats off
+
+The operator's knobs call for stats on and off. Stats-off
+(`BPFREJIT_CORPUS_BPF_STATS=0`, confirmed `bpf_stats: false` in each
+run's metadata) removes the runtime-counter overhead from the workload.
+
+| app | stats on | stats off | replacements |
+| --- | ---: | ---: | --- |
+| bcc/set | 1.002x | **1.000x** | 18 |
+| tracee/monitor | 1.539x | **1.640x** | 148 / 151 |
+| tetragon/observer | 1.008x | 1.017x | 70 (partial, below) |
+
+Tracee's stats-off arm is the firmest datapoint in this file: 148 of 151
+programs replaced, no oops, 256,984,354 bogo-ops baseline against
+421,466,196 native, both arms 3 samples of 180 s.
+
+Two caveats, stated rather than smoothed over:
+
+- **tetragon's stats-off arms are partial** (70 of 118 replaced) because
+  those runs were launched with tracee's manifest in the environment and
+  the shim read each app's own file — the replacements are real but
+  fewer, so 1.017x is indicative, not comparable to the 1.008x.
+- **katran's stats-off arm is 0 replaced**, so it has no native number:
+  after the 10:50 kernel rebuild the stub rejects its 80-chunk blob at the
+  first instruction with `BPF_PROG_LOAD native_lab stub: Permission
+  denied` (`processed 1 insns`, `log_true_size=146`), where the earlier
+  stats-on run took the prebuilt-proof path and replaced. Reported to the
+  kernel owner.
+
 ## The three arms
 
 `BPFREJIT_CORPUS_WORKLOAD_ONLY=1` runs the workload with no BPF program
