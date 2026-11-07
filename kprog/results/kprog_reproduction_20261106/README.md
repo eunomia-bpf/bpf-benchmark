@@ -20,12 +20,23 @@ used.
 
 # Summary
 
-| arm | current | reference | verdict |
-| --- | ---: | ---: | --- |
-| Pure bytecode (29) | **1.446x** | 1.478x | reproduces, -2.2% |
-| Helper/map (13) | **1.403x** | 1.429x | reproduces, -1.8% |
-| Corpus, bcc/set native | **1.002x** / 1.000x | 1.005x | reproduces |
-| Corpus, other five apps | — | — | blocked on app artifacts, see below |
+| arm | native programs | current | reference | verdict |
+| --- | ---: | ---: | ---: | --- |
+| Pure bytecode (29) | — | **1.446x** | 1.478x | reproduces, -2.2% |
+| Helper/map (13) | — | **1.403x** | 1.429x | reproduces, -1.8% |
+| Corpus bcc/set | 18 / 25 | **1.002x** | 1.005x | reproduces |
+| Corpus tetragon | 118 | **1.008x** | 1.323x | **does not** |
+| Corpus katran | 1 | **1.018x** | 1.102x | **does not** |
+| Corpus cilium | 177 | **1.229x** | 2.358x | **does not** |
+| Corpus otelcol | 0 | — | 1.824x | blocked, see below |
+| Corpus tracee | 0 | — | 0.958x | blocked, see below |
+
+Corpus figures are at the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`)
+except where noted; each carries the replaced/failed count from its own
+shim log, and every pair ran the same duration with the same work
+counters. **One of six corpus apps reproduces its reference ratio; three
+are measured and short; two are blocked by artifact and loader defects
+listed below.**
 
 Both micro arms ran with recipe parity verified from the result files, and
 every arm's correctness was checked by comparing return values and results
