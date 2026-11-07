@@ -1,0 +1,338 @@
+{
+  "recorded": "2026-11-07T17:41:09.141390+00:00",
+  "status": "native assembler and production encoder preflight passed; CPU execution pending",
+  "existing_forms": 1080,
+  "expanded_forms": 1144,
+  "added_forms": 64,
+  "previous_assembly_order_preserved": true,
+  "forms": [
+    {
+      "assembly": "xor al, al",
+      "decoded": "xor    al,al",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor cl, cl",
+      "decoded": "xor    cl,cl",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor dl, dl",
+      "decoded": "xor    dl,dl",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor bl, bl",
+      "decoded": "xor    bl,bl",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor spl, spl",
+      "decoded": "xor    spl,spl",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor bpl, bpl",
+      "decoded": "xor    bpl,bpl",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor sil, sil",
+      "decoded": "xor    sil,sil",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor dil, dil",
+      "decoded": "xor    dil,dil",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor ax, ax",
+      "decoded": "xor    ax,ax",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor cx, cx",
+      "decoded": "xor    cx,cx",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor dx, dx",
+      "decoded": "xor    dx,dx",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor bx, bx",
+      "decoded": "xor    bx,bx",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor sp, sp",
+      "decoded": "xor    sp,sp",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor bp, bp",
+      "decoded": "xor    bp,bp",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor si, si",
+      "decoded": "xor    si,si",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor di, di",
+      "decoded": "xor    di,di",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor eax, eax",
+      "decoded": "xor    eax,eax",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor ecx, ecx",
+      "decoded": "xor    ecx,ecx",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor edx, edx",
+      "decoded": "xor    edx,edx",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor ebx, ebx",
+      "decoded": "xor    ebx,ebx",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor esp, esp",
+      "decoded": "xor    esp,esp",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor ebp, ebp",
+      "decoded": "xor    ebp,ebp",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor esi, esi",
+      "decoded": "xor    esi,esi",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor edi, edi",
+      "decoded": "xor    edi,edi",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor rax, rax",
+      "decoded": "xor    rax,rax",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor rcx, rcx",
+      "decoded": "xor    rcx,rcx",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor rdx, rdx",
+      "decoded": "xor    rdx,rdx",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor rbx, rbx",
+      "decoded": "xor    rbx,rbx",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor rsp, rsp",
+      "decoded": "xor    rsp,rsp",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor rbp, rbp",
+      "decoded": "xor    rbp,rbp",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor rsi, rsi",
+      "decoded": "xor    rsi,rsi",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor rdi, rdi",
+      "decoded": "xor    rdi,rdi",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r8b, r8b",
+      "decoded": "xor    r8b,r8b",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r8w, r8w",
+      "decoded": "xor    r8w,r8w",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r8d, r8d",
+      "decoded": "xor    r8d,r8d",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r8, r8",
+      "decoded": "xor    r8,r8",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r9b, r9b",
+      "decoded": "xor    r9b,r9b",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r9w, r9w",
+      "decoded": "xor    r9w,r9w",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r9d, r9d",
+      "decoded": "xor    r9d,r9d",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r9, r9",
+      "decoded": "xor    r9,r9",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r10b, r10b",
+      "decoded": "xor    r10b,r10b",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r10w, r10w",
+      "decoded": "xor    r10w,r10w",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r10d, r10d",
+      "decoded": "xor    r10d,r10d",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r10, r10",
+      "decoded": "xor    r10,r10",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r11b, r11b",
+      "decoded": "xor    r11b,r11b",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r11w, r11w",
+      "decoded": "xor    r11w,r11w",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r11d, r11d",
+      "decoded": "xor    r11d,r11d",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r11, r11",
+      "decoded": "xor    r11,r11",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r12b, r12b",
+      "decoded": "xor    r12b,r12b",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r12w, r12w",
+      "decoded": "xor    r12w,r12w",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r12d, r12d",
+      "decoded": "xor    r12d,r12d",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r12, r12",
+      "decoded": "xor    r12,r12",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r13b, r13b",
+      "decoded": "xor    r13b,r13b",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r13w, r13w",
+      "decoded": "xor    r13w,r13w",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r13d, r13d",
+      "decoded": "xor    r13d,r13d",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r13, r13",
+      "decoded": "xor    r13,r13",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r14b, r14b",
+      "decoded": "xor    r14b,r14b",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r14w, r14w",
+      "decoded": "xor    r14w,r14w",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r14d, r14d",
+      "decoded": "xor    r14d,r14d",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r14, r14",
+      "decoded": "xor    r14,r14",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r15b, r15b",
+      "decoded": "xor    r15b,r15b",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r15w, r15w",
+      "decoded": "xor    r15w,r15w",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r15d, r15d",
+      "decoded": "xor    r15d,r15d",
+      "opcode": "X86_OP_ALU_REG"
+    },
+    {
+      "assembly": "xor r15, r15",
+      "decoded": "xor    r15,r15",
+      "opcode": "X86_OP_ALU_REG"
+    }
+  ],
+  "header_publication": "af2f58c899d99f4092a710734ceb4cdac2b5e6df",
+  "header_sha256": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+  "generator_sha256": "897a1385da018269df070befca388ad26e143fb396a037be0717cf18c9ea8fb6",
+  "generated_c_sha256": "ae51a1826c02854005f12a7b353a6dfc523c4c8acbdb6aa0b638b1934a3bb883",
+  "native_asm_sha256": "8917928ae3dd1646db9edbc47a0cf1bfad9ba8b62dec138c47e04922af1bbb04",
+  "instruction_object_sha256": "3b2feb1fffb42baf8ac3a16de134165a1fa0e8bdfe62edb6a31a4e314120c379",
+  "instructions_disassembly_sha256": "0c6b67265692dc9080b43062b55959744df43b277a0d73a3f40b01f976955d20",
+  "log_sha256": "f22a692780423fe86e77789113080af6687ac2ced50f032d49c626a0703d3639"
+}

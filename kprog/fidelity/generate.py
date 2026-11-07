@@ -96,6 +96,16 @@ def x86_forms(cc_aux):
     for mnemonic in (name for name in cc_aux if name.startswith("cmov")):
         for a, b, m in [("ax", "bx", "WORD"), ("eax", "ebx", "DWORD"), ("rax", "rbx", "QWORD")]:
             forms += [f"{mnemonic} {a}, {b}", f"{mnemonic} {a}, {m} PTR [rdi+8]"]
+    # Exercise the production same-register XOR fast path at every native lane.
+    for registers in [
+        ("al", "cl", "dl", "bl", "spl", "bpl", "sil", "dil"),
+        ("ax", "cx", "dx", "bx", "sp", "bp", "si", "di"),
+        ("eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi"),
+        ("rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi"),
+    ]:
+        forms += [f"xor {reg}, {reg}" for reg in registers]
+    forms += [f"xor r{reg}{suffix}, r{reg}{suffix}"
+              for reg in range(8, 16) for suffix in ("b", "w", "d", "")]
     return list(dict.fromkeys(forms))
 
 

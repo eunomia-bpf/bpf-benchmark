@@ -1,0 +1,12 @@
+make: Entering directory '/workspaces/repository/kprog/fidelity'
+install -d /workspaces/.agent-state/kprog-lanes/F/xor-encoding-preflight
+python3 generate.py --arch x86 --out /workspaces/.agent-state/kprog-lanes/F/xor-encoding-preflight
+/workspaces/.agent-state/kprog-lanes/F/xor-encoding-preflight/instructions.S: Assembler messages:
+/workspaces/.agent-state/kprog-lanes/F/xor-encoding-preflight/instructions.S:861: Warning: segment override on `lea' is ineffectual
+/workspaces/.agent-state/kprog-lanes/F/xor-encoding-preflight/instructions.S:862: Warning: segment override on `lea' is ineffectual
+/workspaces/.agent-state/kprog-lanes/F/xor-encoding-preflight/instructions.S:863: Warning: segment override on `lea' is ineffectual
+/workspaces/.agent-state/kprog-lanes/F/xor-encoding-preflight/instructions.S:864: Warning: segment override on `lea' is ineffectual
+/workspaces/.agent-state/kprog-lanes/F/xor-encoding-preflight/instructions.S:865: Warning: segment override on `lea' is ineffectual
+/workspaces/.agent-state/kprog-lanes/F/xor-encoding-preflight/instructions.S:866: Warning: segment override on `lea' is ineffectual
+generated 1144 x86 CPU/simulator pairs
+make: Leaving directory '/workspaces/repository/kprog/fidelity'
