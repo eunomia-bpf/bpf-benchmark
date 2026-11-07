@@ -17,14 +17,14 @@ The requested 77/72 operation domain also needs V's semantic/control-family
 alignment; numeric tokens, native instruction families and specialization
 tokens each retain their own identities.
 
-replay-observations.tsv contains 156 operation/source rows from thirteen published
+replay-observations.tsv contains 157 operation/source rows from fourteen published
 snapshots. Each row records form counts, case counts, three comparison
 counts, backend, compiled simulator header, binary and reference hashes,
 and original per-form table paths. Both forms tables are joined by their
 exact assembly names and checked for equal case counts and zero differences.
 numeric-token-input.tsv lists all 146 numeric tokens, including the pending
 replay entries, with their supporting source paths. inputs.json pins all
-53 source artifacts used by the collector and records the aliases.
+61 source artifacts used by the collector and records the aliases.
 
 The main x86 snapshot covers 1,144 forms and 1,171,456 real-CPU/C/reference
 states with header 4fe6817. The later focused RORX snapshot covers four
@@ -37,6 +37,16 @@ C/reference observations. The 32/64-bit snapshot covers all effective counts;
 the 16-bit snapshot samples its defined count domain 0–16. Both retain RCX/RSP
 source and destination alias cases, production encoding and header 47fb5565.
 Their scope labels and original per-form tables preserve those input domains.
+The LEA matrix adds 768 raw/direct groups, 384 native forms and 196,608
+real-CPU/C/reference observations. Its original compiler epoch retains main
+header 47fb5565, 80 production snapshot sources and two exact V-corrected
+producer/offset sources. The collector verifies the archived 72 C headers
+against production afc178f46, paired encoded fields and the published
+384-field/384-direct-statement correspondence report. This finite production
+interface bridge has its own scope and all eight source/observation artifact
+pins; later header 6b3f3173 retains its separate source epoch. The LEA token
+already has replay evidence, so the catalog totals retain their values.
+
 The ARM core snapshot covers 807 forms and 826,368 QEMU/C/reference states
 with header c21833de. Full-register-bank FMOV, memory and bitfield snapshots
 supply their own rows and source hashes.
@@ -69,5 +79,5 @@ canonical binaries, original raw traces and other lanes' jobs remain available.
 Closed raw state streams use lossless cpu-states.bin.zst storage. Restore a
 selected trace with zstd -d before an existing command that reads cpu-states.bin.
 The collector consumes the published summaries, tables and source archives
-directly. The private ARM numeric/contract candidates retain their owner
-integration boundary and their separately published observations.
+directly. The private ARM numeric/contract and x86 partial-register storage candidates
+retain their owner integration boundaries and separately published observations.

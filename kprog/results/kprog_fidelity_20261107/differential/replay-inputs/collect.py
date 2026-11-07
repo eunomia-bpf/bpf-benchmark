@@ -69,6 +69,7 @@ specs = [
     ("x86", "x86-numeric-tokens", "real_x86_cpu", "legal_numeric_token_binding"),
     ("x86", "x86-dshift-cl", "real_x86_cpu", "cl_register_alias_forms"),
     ("x86", "x86-dshift-cl16", "real_x86_cpu", "defined_16bit_cl_domain"),
+    ("x86", "x86-lea-address-matrix", "real_x86_cpu", "production_correspondent_lea_forms"),
     ("x86", "x86-control", "real_x86_cpu", "finite_control_composites"),
     ("arm64", "arm64-current-core", "qemu_user", "enumerated_instruction_forms"),
     ("arm64", "arm64-control-branches", "qemu_user", "finite_control_composites"),
@@ -122,6 +123,35 @@ for arch, name, backend, scope in specs:
         binary = summary["binary_sha256"]
         reference_sha = summary["reference_sha256"]
     header = compiled_header(archive, arch)
+    if scope == "production_correspondent_lea_forms":
+        interface = json.loads(read(directory / "production-interface.json"))
+        manifest = json.loads(read(directory / "actual-compiled-inputs.json"))
+        bindings = json.loads(read(directory / "numeric-bindings.json"))
+        changes = json.loads(read(directory / "candidate-changes.json"))
+        correspondence = summary["production_source_correspondence"]
+        assert sha((directory / "production-interface.json").read_bytes()) == correspondence["report_sha256"]
+        assert summary["candidate_patch_reproduced"] and summary["production_snapshot_git_equal"]
+        assert correspondence["commit"] == interface["production_commit"]
+        assert correspondence["identical_compiled_headers"] == interface["compiled_headers"] == 72
+        assert correspondence["encoded_forms_equal"] == correspondence["direct_statements_equal"] == 384
+        assert len(bindings) == 768 and set(grouped) == {"X86_OP_LEA"}
+        assert summary["cases"] == grouped["X86_OP_LEA"]["device_c_cases"] == 196608
+        for index in range(384):
+            a, b = bindings[2*index:2*index+2]
+            assert [a["route"], b["route"]] == ["raw", "direct"] and a["encoded"] == b["encoded"]
+        raw = (archive).read_bytes()
+        with tarfile.open(fileobj=io.BytesIO(raw)) as captured:
+            for path, digest in interface["headers_sha256"].items():
+                matches = [member for member in captured.getmembers() if member.name.endswith("/snapshot/" + path)]
+                assert len(matches) == 1
+                member = matches[0]
+                assert sha(captured.extractfile(member).read()) == manifest[member.name] == digest
+                production = subprocess.check_output(["git", "show", correspondence["commit"] + ":" + path], cwd=ROOT)
+                assert sha(production) == digest
+        assert set(changes["used_snapshot_changes"]) == set(summary["candidate_source_sha256"])
+        for path in changes["used_snapshot_changes"]:
+            assert changes["changes"][path]["after_sha256"] == summary["candidate_source_sha256"][path]
+
     forms_path = str((directory / "forms.tsv").relative_to(ROOT))
     refs_path = str((directory / "reference-forms.tsv").relative_to(ROOT))
     for op, values in sorted(grouped.items()):
