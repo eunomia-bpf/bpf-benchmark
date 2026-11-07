@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -51,10 +52,15 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
                         '#include ' + json.dumps(str(ROOT / "kprog/x86/x86_sim_local_bpf.h")))
     source.write_text(text)
     obj = output_dir / (name + ".bpf.o")
-    # `clang` is not always on PATH in the service's environment (the
-    # container image ships it under /usr/lib/llvm-*/bin), so the compiler
-    # is overridable exactly as the rest of the build does it.
-    clang = os.environ.get("CLANG") or "clang"
+    # `clang` need not be on PATH where the service runs: it re-launches
+    # itself with an explicit environment, and the container image ships the
+    # compiler under /usr/lib/llvm-*/bin. Resolve in this order so the
+    # specializer works without any caller plumbing: CLANG, then PATH, then
+    # the versioned llvm bin directories the build already uses.
+    clang = os.environ.get("CLANG") or shutil.which("clang")
+    if not clang:
+        candidates = sorted(Path("/usr/lib").glob("llvm-*/bin/clang"))
+        clang = str(candidates[-1]) if candidates else "clang"
     run([clang, "-g", "-O3", "-mcpu=v4", "-target", "bpf",
          "-mllvm", "-bpf-stack-size=4096", "-D__TARGET_ARCH_x86",
          "-I", ROOT / "vendor/libbpf/include/uapi", "-I", ROOT / "vendor/libbpf/src",
