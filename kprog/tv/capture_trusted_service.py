@@ -87,6 +87,38 @@ def kernel_symbols(live, vmlinux):
     return result
 
 
+def kernel_return_text(live, symbols, label):
+    """Read only the two bytes at the known live return-thunk symbol."""
+    try:
+        address = symbols['running']['its_return_thunk']
+        if not address:
+            raise ValueError('live return symbol is hidden')
+        with Path('/proc/kcore').open('rb', buffering=0) as core:
+            header = os.pread(core.fileno(), 64, 0)
+            if len(header) != 64 or header[:6] != b'\x7fELF\x02\x01':
+                raise ValueError('expected little-endian ELF64 kcore')
+            offset = struct.unpack_from('<Q', header, 32)[0]
+            size, count = struct.unpack_from('<HH', header, 54)
+            if size != 56:
+                raise ValueError('unexpected kcore program-header size')
+            headers = os.pread(core.fileno(), size * count, offset)
+            for index in range(count):
+                entry = headers[index*size:(index+1)*size]
+                kind, _, file_offset, start, _, length, _, _ = struct.unpack('<IIQQQQQQ', entry)
+                if kind == 1 and start <= address and address+2 <= start+length:
+                    code = os.pread(core.fileno(), 2, file_offset+address-start)
+                    if len(code) != 2:
+                        raise ValueError('short live return-text read')
+                    (live / ('return-text-'+label+'.bin')).write_bytes(code)
+                    (live / ('return-text-'+label+'.elf-header.bin')).write_bytes(header)
+                    (live / ('return-text-'+label+'.segment.bin')).write_bytes(entry)
+                    return dict(status='captured', address=address, bytes=2, hex=code.hex(),
+                                sha256=hashlib.sha256(code).hexdigest())
+            raise ValueError('live return symbol is outside kcore load segments')
+    except (OSError, ValueError, KeyError, struct.error) as error:
+        return dict(status='unavailable', error=str(error))
+
+
 def kernel_identity(live):
     notes = live / 'running-kernel.notes'
     notes.write_bytes(Path('/sys/kernel/notes').read_bytes())
@@ -102,6 +134,7 @@ def kernel_identity(live):
         layout_profile_sha256=digest(profile_path),
         interpretation='structural XDP layout profile; not a post-conversion instruction capture')
     result['symbols'] = kernel_symbols(live, vmlinux)
+    result['return_text_before'] = kernel_return_text(live, result['symbols'], 'before')
     result['running_matches_vmlinux'] = (len(result['vmlinux_build_ids']) == 1 and
         result['running_build_ids'] == result['vmlinux_build_ids'])
     result['layout_profile_matches_kernel'] = (
@@ -180,6 +213,10 @@ def main():
             identity = json.loads((record / 'load.json').read_text())
             if identity['native_prog_id'] != client['native_prog_id'] or identity['source_prog_id'] != client['original_prog_id']:
                 raise RuntimeError('captured load identity differs from returned native program')
+            kernel = summary['kernel_identity']
+            kernel['return_text_after'] = kernel_return_text(live, kernel['symbols'], 'after')
+            kernel['return_text_stable'] = (kernel['return_text_before'].get('status') == 'captured' and
+                kernel['return_text_before'] == kernel['return_text_after'])
             summary.update(ok=True, client=client, completion=completion,
                 application_inputs={str(p.relative_to(ROOT)):digest(p) for p in client_argv},
                 capture_sha256={name: digest(record / name) for name in required},

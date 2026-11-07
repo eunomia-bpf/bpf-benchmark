@@ -2096,3 +2096,16 @@ comparison reports1024 noncanonical-frame #SS fault-kind differences, tracked
 by V/F; full architectural fault classification is not claimed here. Actual
 caller premises, current B30 refinement and the live RET boundary remain
 separate obligations.
+
+`jit-return-text/trusted-simple/` captures the two actual bytes at its own
+live return symbol through existing `/proc/kcore`, before and after the8
+native packet checks. Both samples are `c3 cc` and unchanged; the captured
+ELF load-segment receipt bounds their address. The checker compares the
+initial identity snapshot, completed archived summary and raw samples, and
+checks the relocation reaches this same symbol. It passes14 invocation
+mismatch controls and14 materialization controls. Earlier captures are
+preserved and do not inherit this later session's text observation.
+
+Text unavailability is recorded without changing native admission. The proof
+must still compose canonical RET and its outer return read with the actual
+epilogue; observing bytes alone is not that proof.

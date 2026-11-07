@@ -1,0 +1,126 @@
+{
+  "binding": {
+    "native_bytes": 60,
+    "verifier_insns": 30,
+    "source_prog_id": 6,
+    "native_prog_id": 11,
+    "emitted_sites": [
+      {
+        "blob_id": 0,
+        "generation": 4,
+        "abi_mask": 0,
+        "entry_address": 18446744072642107566,
+        "jit_offset": 14,
+        "native_offset": 0,
+        "native_size": 60
+      }
+    ],
+    "materialization": {
+      "immutable_ELF_sha256": "d5d24d70e70dc8b6dce3d7abc85113227cdd14aef220f86047b5c57e66c580bd",
+      "entry": "simple_xdp",
+      "entry_offset": 0,
+      "entry_bytes": 61,
+      "payload_bytes": 60,
+      "exact_entry_relation": "immutable entry bytes = emitted payload bytes ++ c3",
+      "terminal_bytes_removed": "c3",
+      "generated_copy_byte_identical": true,
+      "native_link_abi": "native-link-abi-v2",
+      "callee_saved_mask": 0,
+      "relocations": 0,
+      "data_objects": 0,
+      "map_patches": 0,
+      "structural_only": true,
+      "remaining": "RET/entry-ABI/platform semantic transport and universal relational TV"
+    }
+  },
+  "invocation_layout": {
+    "jit_base": 18446744072642107552,
+    "native_entry": 18446744072642107566,
+    "native_end": 18446744072642107626,
+    "native_bytes": 60,
+    "caller_SP_to_body_SP": -16,
+    "saved_BP_offset": -8,
+    "saved_R15_offset": -16,
+    "return_target": 18446744071948028064,
+    "kernel_symbol": "its_return_thunk",
+    "kernel_relocation": 352321536,
+    "runtime_return_text_verified": true,
+    "runtime_thunk_text": "captured stable C3/CC before and after execution"
+  },
+  "rejected_controls": [
+    "entry padding",
+    "restore opcode",
+    "return displacement",
+    "JIT base",
+    "live return symbol",
+    "live text symbol",
+    "compiled return symbol",
+    "symbol relocation receipt",
+    "kernel build ID",
+    "layout profile",
+    "return instruction",
+    "return text address",
+    "return text SHA",
+    "return text instability"
+  ],
+  "materialization_rejected_controls": [
+    "immutable input SHA",
+    "generated copy",
+    "entry offset",
+    "entry code",
+    "terminal RET",
+    "ELF machine",
+    "ELF type",
+    "ABI version",
+    "ABI mask",
+    "generated blob",
+    "data layout",
+    "map patches",
+    "native relocations",
+    "duplicate blob"
+  ],
+  "archive_sha256": "810bf9a88f024e0a08e6f105a06a502c8501a8fa922adc8ac1d15a3090f852d6",
+  "translation_validation": "current B30 not validated",
+  "remaining": [
+    "canonical LEAVE/whole epilogue transport",
+    "actual kernel caller/context/stack permissions",
+    "canonical return execution composition",
+    "full-state TV of the accepted B"
+  ],
+  "trusted": [
+    "kernel capture/provenance and live symbol reporting",
+    "structural ELF/archive parser",
+    "verifier soundness and canonical ISA semantics when composing the separate certificate"
+  ],
+  "current_source_matches_launch": {
+    "kprog/tv/capture_trusted_service.py": true,
+    "kprog/trusted_service.py": true,
+    "kprog/libnativeloader/build/trusted-native-loader": true,
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": true,
+    "kprog/x86/x86_sim_local_bpf.h": true
+  },
+  "utc": "2026-11-07T16:32:32.929408+00:00",
+  "launch_source_sha256": {
+    "kprog/tv/capture_trusted_service.py": "ef139e6cce529af2ac0218ed4485435f61a7323dedaa7672cad7cbf93bc4e80c",
+    "kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+    "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "273cb89c3d576021d3582a8cd4d361c37ac98495a730749ee0b540d803dd2d79",
+    "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854"
+  },
+  "validation_command": "PYTHONDONTWRITEBYTECODE=1 python3 kprog/tv/check_jit_invocation.py kprog/results/kprog_tv_20261107/jit-return-text/trusted-simple",
+  "checker_sha256": {
+    "kprog/tv/capture_trusted_service.py": "ef139e6cce529af2ac0218ed4485435f61a7323dedaa7672cad7cbf93bc4e80c",
+    "kprog/tv/check_jit_invocation.py": "0cffb087b6b486579a15b191e2429dcf5c805766fb7af5ef177dcd86e15dc215",
+    "kprog/tv/check_trusted_capture.py": "43cb85f2f532683cfeca1f88c73db3ff0b9c4a4f7efabbfc70fccc16230af135",
+    "kprog/tv/emitted_sites.py": "3d05649e222ab603d757c6af44adeda3ee1eb3d17e1c2be8c646051dbd669105",
+    "kprog/tv/extract_checked.py": "60ce986eb22e3185ab565c1ad9b88987582dabd145bc9436c3973e02617ba252"
+  },
+  "runtime_return_text": {
+    "status": "captured",
+    "address": 18446744071948028064,
+    "bytes": 2,
+    "hex": "c3cc",
+    "sha256": "56de62c1837575efee31915828000fde2932e3c34c06b498f648ecaf6bae8d7c"
+  },
+  "same_capture_only": true
+}
