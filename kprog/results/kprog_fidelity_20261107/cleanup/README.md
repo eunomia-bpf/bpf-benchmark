@@ -34,3 +34,8 @@ authored source and Markdown; archival data is not rewritten to satisfy formatti
 The first deletion preflight was stopped before deleting any target after
 identifying12426993 redundant Path.relative_to evaluations in the tracked-file
 guard. The equivalent sorted-prefix check preserves the same exclusion.
+
+Deletion complete: 51987 entries, 20855283712 allocated
+bytes (19.42GiB) removed, including87private build
+directories and completed F lane copies. No matching process/cwd/open descriptor
+or mapping was found; no permission errors. Shared incremental caches untouched.
