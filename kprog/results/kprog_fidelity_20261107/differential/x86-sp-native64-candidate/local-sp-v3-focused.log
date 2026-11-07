@@ -1,0 +1,6 @@
+x86 stack index host cross-check: OK (690 cases)
+x86 stack arena host cross-check: OK (71657 cases)
+x86 mov route host cross-check: OK (23396 cases)
+x86 xchg route host cross-check: OK (62725 cases)
+cc1: fatal error: oracles/test_x86_alu_mem_route_host.c: No such file or directory
+compilation terminated.

@@ -32,6 +32,25 @@ def forms():
         result.append((f'alias partial add {dst}',f'mov rax,rsp; add {dst},1'))
     for reg, memory, load in [('al','BYTE','movzx edx'),('ax','WORD','movzx edx'),('eax','DWORD','mov edx'),('rax','QWORD','mov rdx')]:
         result.append((f'alias spill {memory}',f'mov rax,rsp; mov {memory} PTR [rsp-16],{reg}; {load},{memory} PTR [rsp-16]'))
+    result += [
+        ('LEA AX from SP', 'lea ax,[rsp+16]'),
+        ('LEA EAX from SP', 'lea eax,[rsp+16]'),
+        ('LEA SP from SP', 'lea sp,[rsp+16]'),
+        ('LEA ESP from SP', 'lea esp,[rsp+16]'),
+        ('LEA CX from alias', 'lea rax,[rsp-16]; lea cx,[rax+8]'),
+        ('LEA ECX from alias', 'lea rax,[rsp-16]; lea ecx,[rax+8]'),
+        ('MOV SP self', 'mov rsp,rsp'),
+        ('LEA SP self full', 'lea rsp,[rsp+16]'),
+    ]
+    result += [
+        ('stack alias full XCHG', 'mov rax,rsp; xchg rax,rcx'),
+        ('stack alias full XCHG reverse', 'mov rax,rsp; xchg rcx,rax'),
+        ('stack alias full XCHG round trip', 'mov rax,rsp; xchg rax,rcx; xchg rax,rcx'),
+        ('SP XCHG restore', 'mov rdx,rsp; xchg rax,rsp; mov rsp,rdx'),
+        ('scalar SP read restore', 'mov rdx,rsp; mov rsp,rax; mov rcx,rsp; mov rsp,rdx'),
+        ('stack alias XCHG32 control', 'mov rax,rsp; xchg eax,ecx'),
+        ('stack alias XCHG16 control', 'mov rax,rsp; xchg ax,cx'),
+    ]
     return result
 
 

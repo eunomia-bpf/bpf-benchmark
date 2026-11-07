@@ -1,0 +1,17 @@
+✖ [8/9] Building KProgFormal.CrossIsaStackArena
+trace: .> LEAN_PATH=././.lake/build/lib/lean /root/.elan/toolchains/leanprover--lean4---v4.19.0/bin/lean ././././KProgFormal/CrossIsaStackArena.lean -R ./././. -o ././.lake/build/lib/lean/KProgFormal/CrossIsaStackArena.olean -i ././.lake/build/lib/lean/KProgFormal/CrossIsaStackArena.ilean -c ././.lake/build/ir/KProgFormal/CrossIsaStackArena.c --json
+error: ././././KProgFormal/CrossIsaStackArena.lean:54:86: unsolved goals
+index width : BitVec 32
+⊢ index.toNat + width.toNat = index.toNat % 18446744073709551616 + width.toNat % 18446744073709551616
+error: ././././KProgFormal/CrossIsaStackArena.lean:61:112: unsolved goals
+index width capacity : BitVec 32
+⊢ index.toNat + width.toNat ≤ capacity.toNat ↔
+    index.toNat % 18446744073709551616 + width.toNat % 18446744073709551616 ≤ capacity.toNat % 18446744073709551616
+error: ././././KProgFormal/CrossIsaStackArena.lean:69:91: unsolved goals
+index capacity : BitVec 32
+⊢ index.toNat ≤ capacity.toNat ↔ index.toNat % 18446744073709551616 ≤ capacity.toNat % 18446744073709551616
+error: Lean exited with code 1
+✔ [9/9] Built KProgFormal.X86StackArmShape
+Some required builds logged failures:
+- KProgFormal.CrossIsaStackArena
+error: build failed

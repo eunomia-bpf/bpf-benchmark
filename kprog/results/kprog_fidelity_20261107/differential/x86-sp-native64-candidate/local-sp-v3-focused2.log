@@ -1,0 +1,17 @@
+x86 stack index host cross-check: OK (690 cases)
+x86 stack arena host cross-check: OK (71657 cases)
+x86 mov route host cross-check: OK (23396 cases)
+x86 xchg route host cross-check: OK (62725 cases)
+x86 alu mem result route host cross-check: OK (261137 cases)
+✔ [9/19] Built KProgFormal.Generated.GeneratedX86StackIndex
+✔ [10/19] Built KProgFormal.Generated.GeneratedX86StackArena
+✔ [11/19] Built KProgFormal.X86StackIndex
+✔ [12/19] Built KProgFormal.Reference.Memory
+✔ [13/19] Built KProgFormal.X86StackArena
+✔ [14/19] Built KProgFormal.X86RegWrite
+✔ [15/19] Built KProgFormal.X86XchgHandler
+✔ [16/19] Built KProgFormal.Reference.X86
+✔ [17/19] Built KProgFormal.Reference.AArch64
+✔ [18/19] Built KProgFormal.Refinement.EntryEnvironment
+✔ [19/19] Built KProgFormal.Refinement.X86NumericAddress
+Build completed successfully.

@@ -1,0 +1,323 @@
+In file included from /workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:4:
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c: In function 'sim_33':
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:919:60: note: in definition of macro 'X86_SIM_L_READ_MEM_VALUE'
+  919 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1554:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1554 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RCX,X86_RAX,X86_WIDTH_64,0,0);;
+      | ^~~~~~~~~~~~~~
+In file included from /workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:23:
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_mem_access.h:129:87: note: in definition of macro 'KPROG_X86_MEM_LOAD_FIXED'
+  129 | #define KPROG_X86_MEM_LOAD_FIXED(BASE, DISP, WIDTH) kprog_x86_mem_load_fixed((BASE), (DISP), (WIDTH))
+      |                                                                                       ^~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1959:33: note: in expansion of macro 'X86_SIM_L_READ_MEM_VALUE'
+ 1959 |                                 X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),    \
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1554:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1554 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RCX,X86_RAX,X86_WIDTH_64,0,0);;
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c: In function 'sim_34':
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:919:60: note: in definition of macro 'X86_SIM_L_READ_MEM_VALUE'
+  919 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1600:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1600 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RCX,X86_RAX,X86_WIDTH_64,0,0);;
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_mem_access.h:129:87: note: in definition of macro 'KPROG_X86_MEM_LOAD_FIXED'
+  129 | #define KPROG_X86_MEM_LOAD_FIXED(BASE, DISP, WIDTH) kprog_x86_mem_load_fixed((BASE), (DISP), (WIDTH))
+      |                                                                                       ^~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1959:33: note: in expansion of macro 'X86_SIM_L_READ_MEM_VALUE'
+ 1959 |                                 X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),    \
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1600:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1600 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RCX,X86_RAX,X86_WIDTH_64,0,0);;
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c: In function 'sim_35':
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:919:60: note: in definition of macro 'X86_SIM_L_READ_MEM_VALUE'
+  919 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1646:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1646 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RCX,X86_RAX,X86_WIDTH_64,0,0);;
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_mem_access.h:129:87: note: in definition of macro 'KPROG_X86_MEM_LOAD_FIXED'
+  129 | #define KPROG_X86_MEM_LOAD_FIXED(BASE, DISP, WIDTH) kprog_x86_mem_load_fixed((BASE), (DISP), (WIDTH))
+      |                                                                                       ^~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1959:33: note: in expansion of macro 'X86_SIM_L_READ_MEM_VALUE'
+ 1959 |                                 X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),    \
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1646:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1646 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RCX,X86_RAX,X86_WIDTH_64,0,0);;
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:919:60: note: in definition of macro 'X86_SIM_L_READ_MEM_VALUE'
+  919 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1647:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1647 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RCX,X86_RAX,X86_WIDTH_64,0,0);;
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_mem_access.h:129:87: note: in definition of macro 'KPROG_X86_MEM_LOAD_FIXED'
+  129 | #define KPROG_X86_MEM_LOAD_FIXED(BASE, DISP, WIDTH) kprog_x86_mem_load_fixed((BASE), (DISP), (WIDTH))
+      |                                                                                       ^~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1959:33: note: in expansion of macro 'X86_SIM_L_READ_MEM_VALUE'
+ 1959 |                                 X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),    \
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1647:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1647 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RCX,X86_RAX,X86_WIDTH_64,0,0);;
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c: In function 'sim_36':
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:919:60: note: in definition of macro 'X86_SIM_L_READ_MEM_VALUE'
+  919 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1693:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1693 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RSP,X86_RAX,X86_WIDTH_64,0,0);;
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_mem_access.h:129:87: note: in definition of macro 'KPROG_X86_MEM_LOAD_FIXED'
+  129 | #define KPROG_X86_MEM_LOAD_FIXED(BASE, DISP, WIDTH) kprog_x86_mem_load_fixed((BASE), (DISP), (WIDTH))
+      |                                                                                       ^~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1959:33: note: in expansion of macro 'X86_SIM_L_READ_MEM_VALUE'
+ 1959 |                                 X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),    \
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1693:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1693 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RSP,X86_RAX,X86_WIDTH_64,0,0);;
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c: In function 'sim_38':
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:919:60: note: in definition of macro 'X86_SIM_L_READ_MEM_VALUE'
+  919 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1788:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1788 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RCX,X86_RAX,X86_WIDTH_32,0,0);;
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_mem_access.h:129:87: note: in definition of macro 'KPROG_X86_MEM_LOAD_FIXED'
+  129 | #define KPROG_X86_MEM_LOAD_FIXED(BASE, DISP, WIDTH) kprog_x86_mem_load_fixed((BASE), (DISP), (WIDTH))
+      |                                                                                       ^~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1959:33: note: in expansion of macro 'X86_SIM_L_READ_MEM_VALUE'
+ 1959 |                                 X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),    \
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1788:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1788 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RCX,X86_RAX,X86_WIDTH_32,0,0);;
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c: In function 'sim_39':
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:919:60: note: in definition of macro 'X86_SIM_L_READ_MEM_VALUE'
+  919 |                         x86_store_imm_disp(IMM) : x86_simm(IMM);          \
+      |                                                            ^~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1834:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1834 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RCX,X86_RAX,X86_WIDTH_16,0,0);;
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_cmov.h:58:60: warning: right shift count >= width of type [-Wshift-count-overflow]
+   58 | #define KPROG_X86_CMOV_MEM_DISP(IMM) ((__s64)(__s32)((IMM) >> 32))
+      |                                                            ^~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/../formal/generated/x86_mem_access.h:129:87: note: in definition of macro 'KPROG_X86_MEM_LOAD_FIXED'
+  129 | #define KPROG_X86_MEM_LOAD_FIXED(BASE, DISP, WIDTH) kprog_x86_mem_load_fixed((BASE), (DISP), (WIDTH))
+      |                                                                                       ^~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1959:33: note: in expansion of macro 'X86_SIM_L_READ_MEM_VALUE'
+ 1959 |                                 X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),    \
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1960:41: note: in expansion of macro 'KPROG_X86_CMOV_MEM_DISP'
+ 1960 |                                         KPROG_X86_CMOV_MEM_DISP(IMM), __x86_l_cmw, 0); \
+      |                                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:1987:9: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_STEP'
+ 1987 |         X86_SIM_L_EXEC_CMOV_STEP(1U, (DST), (SRC), (FLAGS), (AUX), (IMM))
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2289:25: note: in expansion of macro 'X86_SIM_L_EXEC_CMOV_MEM'
+ 2289 |                         X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3/source/kprog/x86/x86_sim_local_bpf.h:2472:17: note: in expansion of macro 'X86_SIM_L_EXEC'
+ 2472 |                 X86_SIM_L_EXEC((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+      |                 ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/fidelity/build-sp-v3-sequences/generated.c:1834:1: note: in expansion of macro 'X86_SIM_RUN_OP'
+ 1834 | X86_SIM_RUN_OP(X86_OP_XCHG,X86_RCX,X86_RAX,X86_WIDTH_16,0,0);;
+      | ^~~~~~~~~~~~~~
