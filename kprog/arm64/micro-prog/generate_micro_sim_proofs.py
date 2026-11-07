@@ -491,11 +491,11 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
     if op in {"rev", "rev16", "sxtb", "sxth", "sxtw"}:
         op_const = {"rev": "ARM64_OP_REV", "rev16": "ARM64_OP_REV16", "sxtb": "ARM64_OP_SXTB", "sxth": "ARM64_OP_SXTH", "sxtw": "ARM64_OP_SXTW"}[op]
         return Encoded(op_const, reg_const(ops[0]), reg_const(ops[1]), width=width_const(reg_width(ops[0])))
-    if op == "ldr" and ops[0].lower() == "q0":
+    if op in {"ldr", "ldur"} and ops[0].lower() == "q0":
         mem = parse_mem(ops, 1)
         return Encoded("ARM64_OP_LOAD_Q0", src=mem.base, src2=mem.index,
                        aux=mem_aux(mem), imm=c_u64(mem.offset))
-    if op == "ldr" and ops[0].lower() == "d0":
+    if op in {"ldr", "ldur"} and ops[0].lower() == "d0":
         mem = parse_mem(ops, 1)
         return Encoded("ARM64_OP_LOAD_D0", src=mem.base, src2=mem.index,
                        aux=mem_aux(mem), imm=c_u64(mem.offset))
@@ -521,11 +521,11 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
         width = reg_width(ops[0])
         return Encoded("ARM64_OP_LDP", reg_const(ops[0]), reg_const(ops[1]), mem.base, mem.index,
                        width=width_const(width), aux=mem_aux(mem), imm=c_u64(mem.offset))
-    if op == "str" and ops[0].lower() == "q0":
+    if op in {"str", "stur"} and ops[0].lower() == "q0":
         mem = parse_mem(ops, 1)
         return Encoded("ARM64_OP_STORE_Q0", dst=mem.base, src2=mem.index,
                        aux=mem_aux(mem), imm=c_u64(mem.offset))
-    if op == "str" and ops[0].lower() == "d0":
+    if op in {"str", "stur"} and ops[0].lower() == "d0":
         mem = parse_mem(ops, 1)
         return Encoded("ARM64_OP_STORE_D0", dst=mem.base, src2=mem.index,
                        aux=mem_aux(mem), imm=c_u64(mem.offset))

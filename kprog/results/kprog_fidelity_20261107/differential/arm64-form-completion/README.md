@@ -33,3 +33,36 @@ The10-line matrix extension remains pending source work until the parser
 repair and replay pass. Production code has not been edited while the
 independent original34 safety guest still consumes it; that active source
 input is preserved. This is an open encoder defect, not out-of-scope work.
+
+## Forward parser repair and complete807 replay
+
+The production encoder now recognizes unscaled LDUR/STUR for its existing
+D0 and Q0 handlers. Only four mnemonic predicates change; existing memory
+semantics, width/address decoding and native instructions stay unchanged.
+Two matching Q0-unscaled forms extend the matrix from805 to807.
+`repaired-decoder-comparison.json` checks all807 actually assembled native
+instructions against the original encoder:803 previously accepted records
+are unchanged, while the four valid unscaled vector forms now select their
+existing D0/Q0 opcodes. The original805 failure archive above is retained.
+
+The incremental build and full canonical replay both exit0:
+**807 forms x1,024 =826,368 states, zero QEMU/C, QEMU/reference or C/reference
+differences, zero unavailable forms**. `repaired-summary.json` pins both
+executables; form tables preserve every case count. Complete mismatch and
+unavailable streams are empty and retained compressed with original logs.
+`repaired-compiled-inputs.tar.gz` preserves exact source/header/generated
+inputs; every archived file was independently rehashed against its manifest.
+
+The current static ARM handoff is `cpu-differential-arm64.gz`, SHA256
+`f579152c37404acec64c36c187700babc42b5a09544754f0013e65dbe935d682`.
+The existing default handoff now selects this807-form executable. On real ARM
+hardware the coordinator runs, from the repository root:
+
+```sh
+sh kprog/fidelity/run-arm64.sh
+```
+
+Actual ARM hardware execution remains pending. These constant-form observers
+do not close entry ABI projection, the independent dynamic-dispatch host
+compile regression, exclusive monitor/order effects or all O1-O4 obligations.
+The separately completed ARM34 and x86 safety suites retain their own scope.

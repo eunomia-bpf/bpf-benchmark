@@ -1,0 +1,63 @@
+{
+  "native_forms": 807,
+  "unchanged_decode_records": 803,
+  "fixed_valid_forms": [
+    {
+      "assembly": "ldur d0, [x4, #8]",
+      "old_error": "unsupported register: d0",
+      "encoded": {
+        "op": "ARM64_OP_LOAD_D0",
+        "dst": "ARM64_REG_NONE",
+        "src": "ARM64_X4",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "stur d0, [x4, #8]",
+      "old_error": "unsupported register: d0",
+      "encoded": {
+        "op": "ARM64_OP_STORE_D0",
+        "dst": "ARM64_X4",
+        "src": "ARM64_REG_NONE",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldur q0, [x4, #16]",
+      "old_error": "unsupported register: q0",
+      "encoded": {
+        "op": "ARM64_OP_LOAD_Q0",
+        "dst": "ARM64_REG_NONE",
+        "src": "ARM64_X4",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "16ULL"
+      }
+    },
+    {
+      "assembly": "stur q0, [x4, #16]",
+      "old_error": "unsupported register: q0",
+      "encoded": {
+        "op": "ARM64_OP_STORE_Q0",
+        "dst": "ARM64_X4",
+        "src": "ARM64_REG_NONE",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "16ULL"
+      }
+    }
+  ],
+  "production_semantics_changed": false
+}

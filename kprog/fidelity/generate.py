@@ -109,6 +109,11 @@ def arm64_forms():
                 forms += [f"{op} {a}, {b}, #127"]
         for op in ["cmp", "cmn", "tst"]:
             forms += [f"{op} {b}, {c}", f"{op} {b}, {c}, lsl #3"]
+        for op in ["cmp", "cmn"]:
+            forms += [f"{op} {b}, #{n}" for n in [0, 127, 4095]]
+            forms += [f"{op} {b}, #1, lsl #12"]
+        for modifier in ["", ", lsr #7", ", asr #31", ", ror #7"]:
+            forms += [f"bics {width}zr, {b}, {c}{modifier}"]
         bits = 32 if width == "w" else 64
         masks = [1, 0xff, (1 << (bits - 1)), (1 << (bits // 2)) - 1,
                  int("00ff" * (bits // 16), 16), int("aa" * (bits // 8), 16)]
@@ -155,6 +160,12 @@ def arm64_forms():
         for op in ["ldrsb", "ldrsh"]:
             forms += [f"{op} {a}, [x4, #8]"]
     forms += ["sxtw x0, w1", "umulh x0, x1, x2", "umull x0, w1, w2", "umaddl x0, w1, w2, x3", "smaddl x0, w1, w2, x3", "ldrsw x0, [x4, #8]", "ldp x0, x1, [x4, #8]", "stp x0, x1, [x4, #8]", "fmov d0, x0", "fmov x0, d0", "fmov s0, w0", "fmov w0, s0", "cnt v0.8b, v0.8b", "cnt v0.16b, v0.16b", "uaddlv h0, v0.8b", "uaddlv h0, v0.16b", "ldr q0, [x4, #16]", "str q0, [x4, #16]"]
+    for op in ["ldr", "str", "ldur", "stur"]:
+        forms += [f"{op} d0, [x4, #8]"]
+    for op in ["ldr", "str"]:
+        forms += [f"{op} d0, [x4, #8]!", f"{op} d0, [x4], #8",
+                  f"{op} d0, [x4, x5, lsl #3]"]
+    forms += ["ldur q0, [x4, #16]", "stur q0, [x4, #16]"]
     return list(dict.fromkeys(forms))
 
 

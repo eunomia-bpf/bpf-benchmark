@@ -44,3 +44,7 @@ The concurrent production full-system34-case safety replay remains separate.
 V has independently found a dynamic-dispatch host compilation regression from
 the new unmapped-XDP-read diagnostic; A owns its forward repair. This harness
 uses constant decoded forms and does not establish that dynamic host path.
+
+The later `../arm64-form-completion/`807-form result now supplies the default
+static hardware handoff. This directory retains the earlier771-form production
+context-repair snapshot and its complete canonical evidence.

@@ -1,0 +1,18 @@
+{
+  "recorded": "2026-11-07T14:22:45.993182+00:00",
+  "complete": true,
+  "execution": "QEMU user mode, not real ARM hardware",
+  "forms": 807,
+  "cases_per_form": 1024,
+  "total_cases": 826368,
+  "cpu_simulator_mismatches": 0,
+  "cpu_reference_mismatches": 0,
+  "simulator_reference_mismatches": 0,
+  "unavailable_forms": 0,
+  "build_exit": 0,
+  "reference_exit": 0,
+  "binary_sha256": "f579152c37404acec64c36c187700babc42b5a09544754f0013e65dbe935d682",
+  "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96",
+  "compiled_inputs_sha256": "bcb19d1eb86a5ddf23e2c3e1a23178c9b1c1965f1ac9d1f10768434fac31582a",
+  "scope": "Numeric instruction forms; no entry ABI/dynamic dispatcher/whole O1-O4 or hardware claim"
+}
