@@ -111,3 +111,11 @@ Result:
 - benchmarks: 29/29
 - runtimes: native userspace (`native`), LLVM-BPF (`llvmbpf`), kernel eBPF (`kernel`)
 - AWS instance: one `t4g.small`, terminated by the executor after result sync
+
+The canonical generator compacts private stack/outer-return identity payloads to
+slots found by the ABI analysis. An unknown alias or copy extent keeps the full
+payload layout. XDP context fields use opaque 64-bit results from typed BPF loads;
+partial native reads scalarize the actual pointer bits before shifting/masking.
+Other native offsets retain their accesses for verifier review. The trusted
+Katran replay, 45 safety cases and canonical source/compiled-code comparisons are
+recorded in [context-native](../../corpus/results/kprog_arm64_app_coverage_20261106/trusted-bcc-frame-result/context-native/README.md).

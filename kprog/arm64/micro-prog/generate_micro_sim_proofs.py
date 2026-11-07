@@ -991,7 +991,7 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         for index in range(len(insns) - 1)
     }
     targets_by_addr = indirect_targets(all_insns)
-    stack_min, stack_max = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])
+    stack_min, stack_max, payload_offsets = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])
     returns_by_addr = return_targets(all_insns, targets_by_addr)
     return_addrs = sorted(next_by_addr[insn.addr] for insn in all_insns
                           if insn.mnemonic in {"bl", "blr"})
@@ -1019,6 +1019,16 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         lines.extend(["#define ARM64_SIM_ENABLE_STACK 1",
                       f"#define ARM64_SIM_STACK_BIAS {stack_bias}LL",
                       f"#define ARM64_SIM_STACK_BYTES {stack_bytes}U"])
+        if payload_offsets is not None:
+            # Keep only private stack/outer-return identity payloads. Unknown
+            # alias/copy extents use the complete layout from the C header.
+            indexes = [(off + stack_bias) // 8 for off in payload_offsets]
+            rank = " + ".join(f"((__u64)(INDEX) > {index}ULL)" for index in indexes) or "0ULL"
+            lines.extend([
+                f"#define ARM64_SIM_STACK_PAYLOAD_WORDS {max(1, len(indexes))}U",
+                f"#define ARM64_SIM_L_STACK_PAYLOAD_LOAD(INDEX) (__a64_stack_payload[({rank})])",
+                f"#define ARM64_SIM_L_STACK_PAYLOAD_STORE(INDEX, VALUE) do {{ __a64_stack_payload[({rank})] = (VALUE); }} while (0)",
+            ])
     if return_addrs:
         lines.append("#define ARM64_SIM_RETURN_CASES \\")
         for idx, addr in enumerate(return_addrs):

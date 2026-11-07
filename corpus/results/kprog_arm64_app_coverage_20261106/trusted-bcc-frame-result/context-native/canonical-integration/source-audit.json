@@ -1,0 +1,676 @@
+{
+  "scope": "canonical source/preprocessing and compiled executable/relocation identity against actual frozen worker; no new kernel run",
+  "requests": [
+    {
+      "kind": "service",
+      "request": "run/requests/1.success.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "3e8343b74bba96b3ed0bef3321c16bf7cd960c070de0aa6a35dff54ec5a74885",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "9708cf1b71210991b891ec151b1cd08229a14d684a4f430f7469358c2db113c1",
+      "canonical_preprocessed_sha256": "9708cf1b71210991b891ec151b1cd08229a14d684a4f430f7469358c2db113c1"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/10.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "7f71cadfea410fc77ced65a775c73db1e7cdb4c66fc1e5026b4ec60192ecb77c",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "b1e7090535b3ba45a9a1dd989ccc0d9a50ac506b5932f16db75bf3945f3cdc3c",
+      "canonical_preprocessed_sha256": "b1e7090535b3ba45a9a1dd989ccc0d9a50ac506b5932f16db75bf3945f3cdc3c"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/11.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "c0dab6141ccaca8537938067c94285ec606e669819d030e1f01f75217845f693",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "266bd53eb69b9afaa083e2d3c68c63bc15839f9038c85a5150721aad846c1a16",
+      "canonical_preprocessed_sha256": "266bd53eb69b9afaa083e2d3c68c63bc15839f9038c85a5150721aad846c1a16"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/12.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "d910df6e8e51f6e5f6e9ac9f30ad0fce38f2380268f521e16cee3a2aedab7431",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "b181d7f6764ea5b8b1e1d9f883b0a0cb45eda34292f2208e02aa017210d877d6",
+      "canonical_preprocessed_sha256": "b181d7f6764ea5b8b1e1d9f883b0a0cb45eda34292f2208e02aa017210d877d6"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/13.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "a6004675fbc6b9ac200da690e7cfa4dd6301eac3930a46e1396e390e675d0ae8",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "5ad29659a5f303334d92c1e31b4caff58c498c6f76e5d282feefed97679f9798",
+      "canonical_preprocessed_sha256": "5ad29659a5f303334d92c1e31b4caff58c498c6f76e5d282feefed97679f9798"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/14.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "42797aaa49cb22dce4ef288bbda06996b65d0fcd69fd49ab575900e151eeb879",
+      "generated": false,
+      "specialization_error": "unbounded indirect target at 0x4: br x1",
+      "frozen_refused": true
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/15.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "f87fc8eb4d878bf4b615d3741a5c43b5a25f49340a1d345d7588e29033872289",
+      "generated": false,
+      "specialization_error": "unsupported arm64 instruction: brk #0x0",
+      "frozen_refused": true
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/16.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "6451dde5602eada285cf351a2d51d0cbd4d5ee204134ba338ce18e3193c65ebd",
+      "generated": false,
+      "specialization_error": "native SP alignment fault at 0x10: ldrb w0, [sp]",
+      "frozen_refused": true
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/17.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "b305a1bb0a98197f129035913fd3664ca5c5f6cbe843816d7d396d27a075f48b",
+      "generated": false,
+      "specialization_error": "constrained-unpredictable native LDP destination overlap at 0xc: ldp x1, x1, [sp]",
+      "frozen_refused": true
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/18.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "338157145810b3715ffce3601df1899c19d5d11d38fd471962b87e64f5f9c092",
+      "generated": false,
+      "specialization_error": "constrained-unpredictable native writeback/base register overlap at 0x10: ldr x1, [x1], #8",
+      "frozen_refused": true
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/19.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "d58749a7dcd108cd64d33ed5759b5cf1b8651c59f3cb0689e269507d8d423b1c",
+      "generated": false,
+      "specialization_error": "constrained-unpredictable native writeback/base register overlap at 0x10: str x1, [x1], #8",
+      "frozen_refused": true
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/2.success.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "0e9ebbbae82b86c52e19b3ef02d6a5bd8a682cdfbb1c898c84d8adc1ae6da83a",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "f0af8320a45043ff65239ed944db2be2062f47b46e3e001cb39add5bdd98245d",
+      "canonical_preprocessed_sha256": "f0af8320a45043ff65239ed944db2be2062f47b46e3e001cb39add5bdd98245d"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/20.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "eadce16743f3ccc43eed8200c7f7c4c1f93e5c9179b3e75a6dbf02b336aa35b3",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "4eec2a55bbc4316402709d14f8055c1a377671093ce3ebb9c3c8843c09152075",
+      "canonical_preprocessed_sha256": "4eec2a55bbc4316402709d14f8055c1a377671093ce3ebb9c3c8843c09152075"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/21.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "38fe5c724e68fb446aee7f9352c80b235826f73d387aa237142ab42500834f8c",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "252d7eca45c73ad12e353207c9cd86436259ec9843e7cb6723b19ef21cf626bb",
+      "canonical_preprocessed_sha256": "252d7eca45c73ad12e353207c9cd86436259ec9843e7cb6723b19ef21cf626bb"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/22.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "d5b7cc7f565ddc858db87057115fee076ba74ea5eda6231d0c040f49928d2aa5",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "252d7eca45c73ad12e353207c9cd86436259ec9843e7cb6723b19ef21cf626bb",
+      "canonical_preprocessed_sha256": "252d7eca45c73ad12e353207c9cd86436259ec9843e7cb6723b19ef21cf626bb"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/23.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "8b67fabd5bef9f1922815d85b00a51fce998a4e7208160a266ce06d727181a9c",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "0dec8d66679cdc160de40c44b38a6a485b9ce5d3289615abcc80b4aeb65f9597",
+      "canonical_preprocessed_sha256": "0dec8d66679cdc160de40c44b38a6a485b9ce5d3289615abcc80b4aeb65f9597"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/24.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "698cd2c736c69f4ba29b7d8306a68a7628e1d78c4d815ed0c77e5bc97a067f39",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "0dec8d66679cdc160de40c44b38a6a485b9ce5d3289615abcc80b4aeb65f9597",
+      "canonical_preprocessed_sha256": "0dec8d66679cdc160de40c44b38a6a485b9ce5d3289615abcc80b4aeb65f9597"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/25.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "5f19f6d80c8fde7310e5913b110aae3e64a3c0823612f8c583cfa9d72726bda7",
+      "generated": false,
+      "specialization_error": "constrained-unpredictable native exclusive status register overlap at 0x10: stxr w1, x1, [x2]",
+      "frozen_refused": true
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/26.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "fe4dc8352608f9e8a78c0e3912a7498d7effb8aa7042a6a20aa94d990289578c",
+      "generated": false,
+      "specialization_error": "constrained-unpredictable native exclusive status register overlap at 0x10: stlxr w1, w1, [x2]",
+      "frozen_refused": true
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/27.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "3c922eb2fbb6ec9c7fd3770aaca8943c618e5021443db7ba2f1e20ecbbaa7fa8",
+      "generated": false,
+      "specialization_error": "constrained-unpredictable native exclusive status register overlap at 0x10: stxr w2, x1, [x2]",
+      "frozen_refused": true
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/28.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "025e791acb21391558f652dd5d5283bc3648bcb293e73474825c3b7d87bb6e77",
+      "generated": false,
+      "specialization_error": "constrained-unpredictable native exclusive status register overlap at 0x10: stlxr w2, w1, [x2]",
+      "frozen_refused": true
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/29.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "30bb147eb130b61a9435d92904a17c01e6108526128f8d591b795a5c3e31d87d",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "9867fc4eccfa0ea71fd29253d3ebb999b47a6fb8ec3ad8c3cad3c984cc8fc3fe",
+      "canonical_preprocessed_sha256": "9867fc4eccfa0ea71fd29253d3ebb999b47a6fb8ec3ad8c3cad3c984cc8fc3fe"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/3.success.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "6d3666fd579801e09c5f3488c30645877608f0c57f25e3014a3e431836d5009c",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "e118339b08571e9d1c7ec185000bf9a5ab9dc58f1b41419cd05c8e09dc387d08",
+      "canonical_preprocessed_sha256": "e118339b08571e9d1c7ec185000bf9a5ab9dc58f1b41419cd05c8e09dc387d08"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/30.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "89f4d977e1fe5125a8301af3ba228c0666f1bc78fb277a30303bd608a84ae3be",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "820504326065d401a94140a08f6c8752c9681dfd1343022fd59e72ac9c5c3ed6",
+      "canonical_preprocessed_sha256": "820504326065d401a94140a08f6c8752c9681dfd1343022fd59e72ac9c5c3ed6"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/31.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "8fd532d12119caaa31a4d298bbb8a85d6d505269247adc594985a416a074df95",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "3dc384821c05577b9f09c23a162d67f4372b7947aad3828625dceea720a91a45",
+      "canonical_preprocessed_sha256": "3dc384821c05577b9f09c23a162d67f4372b7947aad3828625dceea720a91a45"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/32.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "f299f00379644879b6d01de5a864227fc0616d2038182744ad7c1a6da3a37375",
+      "generated": false,
+      "specialization_error": "undefined native ABI register x1 at 0x0: cbz x1, 10 <entry+0x10>",
+      "frozen_refused": true
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/33.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "e692f0d0f98f3edf63594118e807b483866e1005a15ee6cd60f74a92be9bbfed",
+      "generated": false,
+      "specialization_error": "undefined native ABI flags at 0x0: b.cc 10 <entry+0x10>",
+      "frozen_refused": true
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/34.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "7546f5d97df5673941a5aa38c59e3a28341f1e034d3e940fbb846a01ddcacfd3",
+      "generated": false,
+      "specialization_error": "undefined native ABI register x1 at 0x10: cbz x1, 20 <entry+0x20>",
+      "frozen_refused": true
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/35.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "80f96267b9435f32e326decb278567c0800f53d31631a34bc92c416a0f4446ac",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "4834c741f5bde8961dd4677871dea8935dad83fea1b7f78f8c93d4d3d2397765",
+      "canonical_preprocessed_sha256": "4834c741f5bde8961dd4677871dea8935dad83fea1b7f78f8c93d4d3d2397765"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/36.success.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "a8e38886f8aff0392ba4dc91dc22981e7d2fa9ed419b1d9cb536fd47e032e4f0",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "3358c65c7a842ceff9514d83fc354bd7d913f2dd2d60b158722e90218cf481a1",
+      "canonical_preprocessed_sha256": "3358c65c7a842ceff9514d83fc354bd7d913f2dd2d60b158722e90218cf481a1"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/37.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "21b8b3b846a15767f6e3b1989ebfcf0e3e81b0e1f385f0227ad4bccc1747cb30",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "830c4091e78c87bdffb624334a9872d2fe89f5e9122a7137dd77d639e99597ea",
+      "canonical_preprocessed_sha256": "830c4091e78c87bdffb624334a9872d2fe89f5e9122a7137dd77d639e99597ea"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/38.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "7a59d7ad1d5287b5dd0868309f93b8fc0512e0afa0d8e262201f8ebc781beae1",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "6a0d0c47fe649714468bdce96dd4a60dd38947b6e9b96110eda0742d8f1339bd",
+      "canonical_preprocessed_sha256": "6a0d0c47fe649714468bdce96dd4a60dd38947b6e9b96110eda0742d8f1339bd"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/39.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "73c960d32be4044d80246b832862f67a476620fbbdd894f9d9b3f86bae221225",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "63ee4bfd7427bf36a9ce28360b9dc1c11e14647b35bd83017e8def2d0806732e",
+      "canonical_preprocessed_sha256": "63ee4bfd7427bf36a9ce28360b9dc1c11e14647b35bd83017e8def2d0806732e"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/4.success.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "d78a2cfd53e831abdef6c8e8be9afb0ff310fb0800bd9024ac871a82a8051e05",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "26b236052c72bc5c39aa1b7ea74cb0a810da2c48fdc87a09c29735f4ebaf2922",
+      "canonical_preprocessed_sha256": "26b236052c72bc5c39aa1b7ea74cb0a810da2c48fdc87a09c29735f4ebaf2922"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/40.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "4ecc14f8f38b50acf3a3e45bed14fe8a7deb2ad2fcb8a4c0abd1d7d523e25273",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "eb960da2044ed2c11fb4ccdf7f9cc57827b8be8e71750e0140fe35260825f914",
+      "canonical_preprocessed_sha256": "eb960da2044ed2c11fb4ccdf7f9cc57827b8be8e71750e0140fe35260825f914"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/41.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "3dca75e37ea64ba191fc5c74949a5b4f45d7cd1fbc885624e0d2c7887a03bbf7",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "a8177976b0070937f977bcee2cc9c3137e6404470be522858f66bb412b1de1e0",
+      "canonical_preprocessed_sha256": "a8177976b0070937f977bcee2cc9c3137e6404470be522858f66bb412b1de1e0"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/42.success.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "2167774b962415e3d0d36dfa1f4d5490545182d8fa966635d1b8bba1eecb26b7",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "6124ca93382f41ad9392a8bfbd437ec8670924ec685f485762c2b3e2db1c96c4",
+      "canonical_preprocessed_sha256": "6124ca93382f41ad9392a8bfbd437ec8670924ec685f485762c2b3e2db1c96c4"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/43.success.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "a3ae8f9e5962336c4e02af8d721daa62963088c6ac63be2b7bf90ae21333432b",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "7a78191a128da3590562f99368dccc98f2c289b98a9b1073ed35df4ec84dd65e",
+      "canonical_preprocessed_sha256": "7a78191a128da3590562f99368dccc98f2c289b98a9b1073ed35df4ec84dd65e"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/44.success.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "c9acf2712cc4745db30dca9f4fb6aad72622b5b85453b39a798364cd33d8778f",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "2bd1ccaa6e69697d45fc809cddf8d5a9086109bbed17c0e302928260398227ce",
+      "canonical_preprocessed_sha256": "2bd1ccaa6e69697d45fc809cddf8d5a9086109bbed17c0e302928260398227ce"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/45.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "a6a24a8f1f78d1be3e8232ce2e440d7c05c13fb0d7bf5bcf02a35315bd386552",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "0210194976d193c29aea9307290a9f2349f59e1ea09f0f3db0fbd1210e9cd1cd",
+      "canonical_preprocessed_sha256": "0210194976d193c29aea9307290a9f2349f59e1ea09f0f3db0fbd1210e9cd1cd"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/5.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "7735450fb726a2e102dc9c144663dc16b4fff28caa682fda62a9ced11d746974",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "b03cfa341d6dd2cea412cdc0e27fbca052a8a41d97ad284ad5338da7109d1798",
+      "canonical_preprocessed_sha256": "b03cfa341d6dd2cea412cdc0e27fbca052a8a41d97ad284ad5338da7109d1798"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/6.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "35e7cad43dbb3a6c9bcd210b0c5304b512a38d5f1146b641d135b574e8f7b392",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "cab6ee4e182d1e301a403971d91c5aa098c2eea7380df97bd24d5751a5d28dec",
+      "canonical_preprocessed_sha256": "cab6ee4e182d1e301a403971d91c5aa098c2eea7380df97bd24d5751a5d28dec"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/7.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "32e5ff5b87822091b52d654a8f754bf4e9a305623dcb5172dab044a1a2bc0c92",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "f38cfaea315d0fc99e12ad53f0bf79d15d92be7f2273fef66ab6b2b67ab13d5e",
+      "canonical_preprocessed_sha256": "f38cfaea315d0fc99e12ad53f0bf79d15d92be7f2273fef66ab6b2b67ab13d5e"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/8.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "d1d6b09e3d473d2d69c85154cd4979b45a32da2fe02fbaffc43179f05773586c",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "8ada5962d414dcce4b9b2d330e833cb2f2f65847622ee89883a0ea143cdf7597",
+      "canonical_preprocessed_sha256": "8ada5962d414dcce4b9b2d330e833cb2f2f65847622ee89883a0ea143cdf7597"
+    },
+    {
+      "kind": "service",
+      "request": "run/requests/9.failure.tar.gz",
+      "entry": "entry",
+      "proof_sha256": "317748955e37168d2aeaa5f3a4cf6fc0535d70de79b5fd84ed1908227d36c54f",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "b1cb4935c7d2e1cabfd9d343108c04618e46e077290adb4c42994d8fd9f64892",
+      "canonical_preprocessed_sha256": "b1cb4935c7d2e1cabfd9d343108c04618e46e077290adb4c42994d8fd9f64892"
+    },
+    {
+      "kind": "katran",
+      "request": "run/requests/1.success.tar.gz",
+      "entry": "balancer_ingress",
+      "proof_sha256": "624a19d8c9ddc5a5127b1f0abe2cab80628adc572fb8d066586e818c9daef7a2",
+      "generated": true,
+      "preprocessed_identical": true,
+      "frozen_preprocessed_sha256": "bc19cffd359a504e3375b73592fb7b376e40449d12b93f6e4b7138366d4b7723",
+      "canonical_preprocessed_sha256": "bc19cffd359a504e3375b73592fb7b376e40449d12b93f6e4b7138366d4b7723"
+    }
+  ],
+  "tcplife": {
+    "executable_and_relocations_identical": true,
+    "frozen": {
+      "executable": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracepoint/sock/inet_sock_set_state": "1e1d6d88143abfb3d6efa85f143e6f6e975e01fdb9a70e1f815e5532fffedda8"
+      },
+      "relocations": [
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          1232,
+          1,
+          "target_family",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          1424,
+          1,
+          "filter_sport",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          1472,
+          1,
+          "target_sports",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          1688,
+          1,
+          "filter_dport",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          1736,
+          1,
+          "target_dports",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          2208,
+          1,
+          "birth",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          2464,
+          1,
+          "target_pid",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          2816,
+          1,
+          "idents",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          3104,
+          1,
+          "birth",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          3256,
+          1,
+          "idents",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          3336,
+          1,
+          "target_pid",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          7808,
+          1,
+          "events",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          7896,
+          1,
+          "birth",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          7960,
+          1,
+          "idents",
+          null
+        ]
+      ]
+    },
+    "canonical": {
+      "executable": {
+        ".text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracepoint/sock/inet_sock_set_state": "1e1d6d88143abfb3d6efa85f143e6f6e975e01fdb9a70e1f815e5532fffedda8"
+      },
+      "relocations": [
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          1232,
+          1,
+          "target_family",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          1424,
+          1,
+          "filter_sport",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          1472,
+          1,
+          "target_sports",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          1688,
+          1,
+          "filter_dport",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          1736,
+          1,
+          "target_dports",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          2208,
+          1,
+          "birth",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          2464,
+          1,
+          "target_pid",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          2816,
+          1,
+          "idents",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          3104,
+          1,
+          "birth",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          3256,
+          1,
+          "idents",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          3336,
+          1,
+          "target_pid",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          7808,
+          1,
+          "events",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          7896,
+          1,
+          "birth",
+          null
+        ],
+        [
+          ".reltracepoint/sock/inet_sock_set_state",
+          7960,
+          1,
+          "idents",
+          null
+        ]
+      ]
+    },
+    "canonical_frame_bytes": 352
+  },
+  "ok": true,
+  "source_pins": {
+    "kprog/arm64/arm64_sim_local_bpf.h": "c21833dee58cbdbc85aa176289585f705f189743b1337adfa13908775d6c28c5",
+    "kprog/arm64/arm64_sim_direct.h": "a0e8af116a7aaa666021ed4ffefeb7b54bd3dcf3d16c80762c36f79cec6fdbe7",
+    "kprog/arm64/micro-prog/arm64_abi.py": "9cd5a458b5fe071a880347a2a84fb6c34ce8338388ebb052700f7854f81fcbca",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "b9eb4c7cba928342851ff055117e60e6debbc6d9c41dd1a34d5e5fa7e8b8f97f",
+    "/workspaces/.agent-state/kprog-lanes/A/canonical-source-audit.py": "57ecddaaee6c59fe6ee33b78cf17cf5670ad1235e640550e890b353e2842ea95"
+  }
+}

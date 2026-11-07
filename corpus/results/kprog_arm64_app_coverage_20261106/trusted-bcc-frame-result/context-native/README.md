@@ -32,3 +32,24 @@ The Katran launch argv records CPUs20-23. At2026-11-07T15:33:00.710499+00:00 its
 The frozen context/compact worker completed all45 original inputs:8 matching kernel/native executions,23 verifier refusals,13 specialization refusals and1 loader refusal. All8 positives returned2 with nonzero binding generations; all37 negative commands were load-only, with zero accepted unsafe programs and zero unsafe execution. An independent reread of the complete archive checked every input/receipt/kernel native hash, each available generated native copy, all8 result/generation receipts and the exact four-path published commit.
 
 [Complete raw run and outcomes](trusted-arm64-service-result/README.md), [native identity audit](trusted-arm64-service-result/native-identity-audit.json) and [host summary](trusted-arm64-service-result/summary.json) are published in c3da19c4f. This establishes the recorded examples for the private worker. Canonical producer promotion, the still-running actual Katran workload and all-six-application acceptance remain open.
+
+## Canonical integration after the closed Katran run
+
+Katran completed through the native-only kernel service: one proof accepted and
+bound, program15 executed19,391 times. The unchanged packet workload sent19,391
+packets with0 errors; VIP, TX and real1 counters also increased19,391. Full raw
+counters are in `canonical-integration/katran-work-counters.json`; QEMU timing is
+functional only. The closed archive and native identity audit remain in
+`trusted-arm64-katran-result/` (commit4b3d09c55).
+
+The compact payload analysis and exact native-width XDP reads are now integrated
+in the canonical ARM header/ABI analysis/generator. No candidate adapter is used
+by the production worker. Re-rendering all46 archived safety/Katran requests gave
+33 byte-identical preprocessed C outputs and the same13 specialization refusals.
+The real BCC tcplife canonical compile uses352 frame bytes, with executable BPF
+sections and executable relocations identical to the accepted private candidate's
+host preflight. See `canonical-integration/source-audit.json` and `inputs.tar.gz`
+for source pins, comparison code, compiler artifacts and logs. This establishes
+these exact artifact comparisons; a new canonical BCC guest run and all-six-app
+acceptance remain pending. Existing dated candidate scripts/archives describe the
+historical private replay; the supported producer is `kprog/arm64/trusted_specializer.py`.

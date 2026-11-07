@@ -34,6 +34,9 @@ class State:
     opaque: dict[int, int]
     pointers: dict[int, int | bool | PointerAlternatives | None]
     constants: tuple[int | None, ...]
+    ghost: tuple[bool, ...]
+    ghost_memory: frozenset[int]
+    maxima: tuple[int | None, ...]
 
 
 def check_definedness(insns, targets, linked_exit, decode):
@@ -88,7 +91,9 @@ def check_definedness(insns, targets, linked_exit, decode):
                      a.flags & b.flags, {p: v for p, v in opaque.items() if v != 255},
                      {p: joined_pointer(a.pointers.get(p), b.pointers.get(p))
                       for p in a.pointers.keys() | b.pointers.keys()},
-                     tuple(x if x == y else None for x,y in zip(a.constants,b.constants)))
+                     tuple(x if x == y else None for x,y in zip(a.constants,b.constants)),
+                     tuple(x or y for x,y in zip(a.ghost,b.ghost)), a.ghost_memory | b.ghost_memory,
+                     tuple(max(x,y) if x is not None and y is not None else None for x,y in zip(a.maxima,b.maxima)))
 
     def mask(state, operand):
         parsed = ri(operand)
@@ -106,12 +111,14 @@ def check_definedness(insns, targets, linked_exit, decode):
     bits, aliases = [0] * 64, [None] * 64
     for register in [0, 30, 31]: bits[register] = FULL
     aliases[0], aliases[30], aliases[31] = False, False, 0
-    initial = State(tuple(bits), tuple(aliases), 0, {}, {}, (None,)*64)
+    initial = State(tuple(bits), tuple(aliases), 0, {}, {}, (None,)*64, tuple(i in {30,31} for i in range(64)), frozenset(), (None,)*64)
     states = {((), insns[0].addr): initial}
     queue = deque(states)
     returns = {}
     entry_sp = {(): {0}}
     stack_min = stack_max = 0
+    payload_slots = set()
+    layout_unknown = False
 
     def push(context, addr, state):
         if addr is None:
@@ -138,9 +145,12 @@ def check_definedness(insns, targets, linked_exit, decode):
         opaque, pointers = dict(incoming.opaque), dict(incoming.pointers)
         flags = incoming.flags
         constants = list(incoming.constants)
+        maxima = list(incoming.maxima)
+        ghost = list(incoming.ghost)
+        ghost_memory = set(incoming.ghost_memory)
 
         no_pointer = object()
-        def write(operand, value=None, pointer=no_pointer, constant=None):
+        def write(operand, value=None, pointer=no_pointer, constant=None, may_payload=None):
             parsed = ri(operand)
             if parsed is None or parsed[0] is None: return
             register, width = parsed
@@ -154,6 +164,8 @@ def check_definedness(insns, targets, linked_exit, decode):
                 pointer = None if isinstance(incoming.aliases[register], PointerAlternatives) and constant is None else False
             aliases[register] = pointer if width == 64 else False
             constants[register] = constant & ((1 << width)-1) if constant is not None else None
+            maxima[register] = constants[register]
+            ghost[register] = (any(incoming.ghost[q[0]] for arg in args[1:] if (q := ri(arg)) and q[0] is not None) if may_payload is None else may_payload) if width == 64 else False
 
         def address(mem):
             base, index = raw(mem.base), raw(mem.index)
@@ -181,7 +193,19 @@ def check_definedness(insns, targets, linked_exit, decode):
                 return value, pointer
             return (0 if location is None and opaque else (1 << width)-1), None if location is None else False
 
-        def store(location, width, value, pointer=False):
+        def store(location, width, value, pointer=False, may_payload=True):
+            nonlocal layout_unknown
+            if width == 64 and may_payload:
+                base_register = ri(raw(mem.base))[0]
+                if location is False and incoming.ghost[base_register]:
+                    location = None
+                destinations = location.offsets if isinstance(location, PointerAlternatives) else {location} if type(location) is int else set()
+                if location is None:
+                    layout_unknown = True
+                for destination in destinations:
+                    if destination % 8 == 0:
+                        payload_slots.add(destination)
+                        ghost_memory.add(destination)
             if isinstance(location, PointerAlternatives):
                 if location.external and value & ((1 << width)-1) != (1 << width)-1:
                     raise ValueError(f'undefined native ABI value escapes private stack at {where}')
@@ -265,16 +289,27 @@ def check_definedness(insns, targets, linked_exit, decode):
                     if op in {'ldrsb', 'ldrsh', 'ldrsw'}:
                         if value & (1 << (width-1)): value |= FULL ^ ((1 << width)-1)
                     else: value |= FULL ^ ((1 << width)-1) if width < 64 else 0
-                    write(operand, value, pointer)
+                    base_register = ri(raw(mem.base))[0]
+                    if at is False and incoming.ghost[base_register]:
+                        at = None
+                    if width != 64 or at is False:
+                        may_payload = False
+                    elif type(at) is int:
+                        may_payload = at in incoming.ghost_memory
+                    elif isinstance(at, PointerAlternatives):
+                        may_payload = any(p in incoming.ghost_memory for p in at.offsets)
+                    else:
+                        may_payload = True
+                    write(operand, value, pointer, may_payload=may_payload)
                 else:
                     parsed = ri(operand)
                     pointer = incoming.aliases[parsed[0]] if parsed and parsed[0] is not None else False
-                    store(at, width, mask(incoming, operand), pointer)
+                    store(at, width, mask(incoming, operand), pointer, incoming.ghost[parsed[0]] if parsed and parsed[0] is not None else False)
             if op in {'stxr', 'stlxr'}: write(args[0])
             if mem.flags:
                 base = raw(mem.base)
                 origin = incoming.aliases[ri(base)[0]]
-                write(base, FULL, shifted_pointer(origin, mem.offset))
+                write(base, FULL, shifted_pointer(origin, mem.offset), may_payload=incoming.ghost[ri(base)[0]])
         elif op == 'mov' or op == 'fmov':
             source = ri(args[1])
             pointer = incoming.aliases[source[0]] if source and source[0] is not None else False
@@ -283,9 +318,11 @@ def check_definedness(insns, targets, linked_exit, decode):
             literal = (decode.parse_shifted_imm(args,1) if args[1].startswith('#') else
                        incoming.constants[source[0]] if source and source[0] is not None else
                        0 if args[1] in {'xzr','wzr'} else None)
-            write(args[0], value, pointer, literal)
+            write(args[0], value, pointer, literal, incoming.ghost[source[0]] if source and source[0] is not None else False)
+            if ri(args[0])[0] is not None and source and source[0] is not None and incoming.maxima[source[0]] is not None:
+                maxima[ri(args[0])[0]] = min(incoming.maxima[source[0]], (1 << ri(args[0])[1])-1)
         elif op in {'adr', 'adrp', 'cset', 'csetm'}:
-            write(args[0], pointer=False)
+            write(args[0], pointer=False, may_payload=False)
         elif op == 'movk':
             shift = decode.parse_imm(args[2].split()[-1]) if len(args)>2 else 0
             write(args[0], mask(incoming, args[0]) | (0xffff << shift))
@@ -351,7 +388,7 @@ def check_definedness(insns, targets, linked_exit, decode):
         if type(aliases[31]) is int:
             stack_min = min(stack_min, aliases[31])
             stack_max = max(stack_max, aliases[31])
-        state = State(tuple(bits), tuple(aliases), flags, opaque, pointers, tuple(constants))
+        state = State(tuple(bits), tuple(aliases), flags, opaque, pointers, tuple(constants), tuple(ghost), frozenset(ghost_memory),tuple(maxima))
         next_pc = following.get(addr)
         if op in {'bl','blr'} or (op == 'br' and any(k == 'scalar' for k,v in targets.get(addr,()))):
             choices = targets.get(addr, ())
@@ -398,26 +435,53 @@ def check_definedness(insns, targets, linked_exit, decode):
                                     saved.update({start+p-origin:v for p,v in state.pointers.items() if origin<=p and p+8<=origin+length})
                                 elif origins:
                                     for position in range(max(0, length-7)): saved[start+position] = None
-                    effects.append(State(state.defined,state.aliases,state.flags,written,saved,state.constants))
+                    # Helper copies may transport private pointer tags. Unknown
+                    # destinations/lengths retain the complete ghost layout.
+                    source_arg = 1 if name == 'memcpy' else HELPER_COPY_SOURCES.get(name)
+                    if effect is not None and source_arg is not None:
+                        dst,size = effect
+                        start,length = incoming.aliases[dst],incoming.maxima[size]
+                        source = incoming.aliases[source_arg]
+                        origins = source.offsets if isinstance(source,PointerAlternatives) else {source} if type(source) is int else set()
+                        if ((source is None or source is False) and incoming.ghost[source_arg]) or (origins and (type(start) is not int or length is None)):
+                            layout_unknown = True
+                        elif origins and length is not None:
+                            for origin in origins:
+                                for position in incoming.ghost_memory:
+                                    if origin <= position and position+8 <= origin+length:
+                                        destination = start+position-origin
+                                        if destination % 8 == 0:
+                                            payload_slots.add(destination)
+                                            ghost_memory.add(destination)
+                    effects.append(State(state.defined,state.aliases,state.flags,written,saved,state.constants,state.ghost,frozenset(ghost_memory),state.maxima))
                 effect=effects[0]
                 for branch in effects[1:]: effect=joined(effect,branch)
                 opaque,pointers=effect.opaque,effect.pointers
                 for register in range(19):
                     bits[register], aliases[register], constants[register] = 0, None, None
+                    ghost[register] = False
+                    maxima[register] = None
                 for register in range(32,64):
                     bits[register], aliases[register], constants[register] = 0, None, None
+                    ghost[register] = False
+                    maxima[register] = None
                 bits[0], aliases[0] = FULL, False
+                ghost[0] = False
+                maxima[0] = None
                 if len(names)==1 and names[0] in {'memcpy','memset'}:
                     aliases[0]=incoming.aliases[0]
+                    ghost[0]=incoming.ghost[0]
                 if op != 'br':
                     bits[30], aliases[30] = FULL, False
+                    ghost[30] = False
+                    maxima[30] = None
                     constants[30]=None
-                    push(context, next_pc, State(tuple(bits),tuple(aliases),0,opaque,pointers,tuple(constants)))
+                    push(context, next_pc, State(tuple(bits),tuple(aliases),0,opaque,pointers,tuple(constants),tuple(ghost),frozenset(ghost_memory),tuple(maxima)))
                 else:
                     if type(state.aliases[31]) is not int or state.aliases[31] not in entry_sp[context]:
                         raise ValueError(f'native ABI tail return has an unbalanced stack pointer at {where}')
                     need(state,'x30',where)
-                    result = State(tuple(bits),tuple(aliases),0,opaque,pointers,tuple(constants))
+                    result = State(tuple(bits),tuple(aliases),0,opaque,pointers,tuple(constants),tuple(ghost),frozenset(ghost_memory),tuple(maxima))
                     if context:
                         for parent, continuation in returns.get(context,set()): push(parent,continuation,result)
                     else: need(result,'w0',where)
@@ -425,7 +489,10 @@ def check_definedness(insns, targets, linked_exit, decode):
             if op == 'bl' and not names: code = [decode.branch_target(args[0])]
             for target in code:
                 bits, aliases = list(state.defined), list(state.aliases)
+                ghost = list(state.ghost)
                 bits[30], aliases[30] = FULL, False
+                ghost[30] = False
+                maxima[30] = None
                 child = context+(addr,) if addr not in context else context[:context.index(addr)+1]
                 if type(state.aliases[31]) is not int:
                     raise ValueError(f'native call stack relation unresolved at {where}')
@@ -434,7 +501,7 @@ def check_definedness(insns, targets, linked_exit, decode):
                 if edge not in returns.setdefault(child,set()):
                     returns[child].add(edge)
                     queue.extend(key for key in states if key[0]==child and by_addr[key[1]].mnemonic=='ret')
-                push(child,target,State(tuple(bits),tuple(aliases),flags,opaque,pointers,state.constants))
+                push(child,target,State(tuple(bits),tuple(aliases),flags,opaque,pointers,state.constants,tuple(ghost),frozenset(ghost_memory),tuple(maxima)))
         elif op == 'ret':
             if type(state.aliases[31]) is not int or state.aliases[31] not in entry_sp[context]:
                 raise ValueError(f'native ABI return has an unbalanced stack pointer at {where}')
@@ -451,4 +518,4 @@ def check_definedness(insns, targets, linked_exit, decode):
             if op.startswith('b.') or op in {'cbz','cbnz','tbz','tbnz'}:
                 push(context,decode.branch_target(args[-1]),state)
             push(context,next_pc,state)
-    return stack_min, stack_max
+    return stack_min, stack_max, None if layout_unknown else sorted(payload_slots)

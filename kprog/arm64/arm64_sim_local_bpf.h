@@ -203,13 +203,20 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 #define ARM64_SIM_L_TAG_WORD_PTR(INDEX) ((volatile arm64_sim_tag_word *)(void *)&__a64_stack_tag[(__u64)(INDEX)&~7ULL])
 #define ARM64_SIM_L_TAG_GET(INDEX) ({ __u64 __ti=(INDEX); (__u8)(*ARM64_SIM_L_TAG_WORD_PTR(__ti) >> ((__ti&7U)*8U)); })
 #define ARM64_SIM_L_TAG_SET(INDEX, TAG) do { __u64 __ti=(INDEX); __u32 __ts=(__ti&7U)*8U; volatile arm64_sim_tag_word *__tp=ARM64_SIM_L_TAG_WORD_PTR(__ti); __u64 __tv=*__tp; *__tp=(__tv&~(255ULL<<__ts))|((__u64)(__u8)(TAG)<<__ts); } while (0)
+#ifndef ARM64_SIM_STACK_PAYLOAD_WORDS
+#define ARM64_SIM_STACK_PAYLOAD_WORDS KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)
+#endif
+#ifndef ARM64_SIM_L_STACK_PAYLOAD_LOAD
+#define ARM64_SIM_L_STACK_PAYLOAD_LOAD(INDEX) (__a64_stack_payload[(INDEX)])
+#define ARM64_SIM_L_STACK_PAYLOAD_STORE(INDEX, VALUE) do { __a64_stack_payload[(INDEX)] = (VALUE); } while (0)
+#endif
 #ifdef ARM64_SIM_ENABLE_STACK
 #define ARM64_SIM_L_DECLARE_STACK()                                         \
 	volatile union {                                                            \
 		__u8 b[ARM64_SIM_STACK_BYTES];                            \
 		__u64 q[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)];  \
 	} __a64_stack;                                            \
-	__u64 __a64_stack_payload[KPROG_ARM64_STACK_WORDS(ARM64_SIM_STACK_BYTES)]; \
+	volatile __u64 __a64_stack_payload[ARM64_SIM_STACK_PAYLOAD_WORDS]; \
 	__u8 __a64_stack_tag[ARM64_SIM_TAG_STORAGE_BYTES(ARM64_SIM_STACK_BYTES)] __attribute__((aligned(8))) = {};\
 	__s64 __a64_sp = 0
 #else
@@ -627,7 +634,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 		if (__a64_stw_action ==                              \
 		    KPROG_ARM64_STACK_WRITE_TAG_ACTION_WRITE_WORD_AND_TAG) {\
 			__a64_stack.q[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = __a64_stw_value;\
-			__a64_stack_payload[KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)] = ARM64_SIM_L_UNMATERIALIZE(__a64_stw_value, (TAG));\
+			if ((TAG) == ARM64_SIM_TAG_STACK || (TAG) == ARM64_SIM_TAG_RETURN) ARM64_SIM_L_STACK_PAYLOAD_STORE(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), ARM64_SIM_L_UNMATERIALIZE(__a64_stw_value, (TAG)));\
 			ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), ((TAG)));\
 		} else {                                                   \
 			ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), (ARM64_SIM_TAG_SCALAR));\
@@ -813,18 +820,32 @@ typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 /* Entry-selected XDP translation is erased by specialization. Bare state
  * declarations used by routing hosts do not establish a live context.
  * Native XDP pointer fields are 64-bit; BPF ctx access uses typed fields.
- * Unknown native fields fail compilation instead of reading zero padding. */
-extern void arm64_sim_unmapped_xdp_read(void)
-    __attribute__((error("unmapped native XDP context read")));
+ * Other accesses retain their native address and width for verifier review. */
+/* C sees an opaque 64-bit result even though BPF context fields use a
+ * 32-bit access opcode; the verifier/JIT supplies the actual pointer width.
+ * Partial native pointer-field reads scalarize those exact native bits before
+ * the source-width shift/mask. Other accesses keep their native address/width.
+ */
+#if defined(__bpf__) || defined(__BPF__)
+#define ARM64_SIM_L_XDP_NUMERIC(VALUE) NATIVE_LAB_NUMERIC(VALUE)
+#else
+#define ARM64_SIM_L_XDP_NUMERIC(VALUE) ((__u64)(VALUE))
+#endif
+#define ARM64_SIM_L_XDP_FIELD(CTX, FIELD) ({ __u64 __a64_xf_value; KPROG_ARM64_LOAD_ACCESS_OFFSET(32, (CTX), (__s64)__builtin_offsetof(struct xdp_md, FIELD), __a64_xf_value); __a64_xf_value; })
 #define ARM64_SIM_L_XDP_READ(BASE, OFF, WIDTH) \
  ({ __s64 __a64_xdp_off = (__s64)((__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) - (__u8 *)__a64_sim_helper_ctx) + (OFF); \
     struct xdp_md *__a64_xdp_ctx = __a64_sim_helper_ctx; \
-    __u64 __a64_xdp_value = 0; \
-    if ((WIDTH) == ARM64_WIDTH_64 && __a64_xdp_off == KPROG_ABI_XDP_DATA_OFF) \
-        __a64_xdp_value = (__u64)(long)(void *)(long)__a64_xdp_ctx->data; \
-    else if ((WIDTH) == ARM64_WIDTH_64 && __a64_xdp_off == KPROG_ABI_XDP_DATA_END_OFF) \
-        __a64_xdp_value = (__u64)(long)(void *)(long)__a64_xdp_ctx->data_end; \
-    else arm64_sim_unmapped_xdp_read(); \
+    __u64 __a64_xdp_value; \
+    if (__a64_xdp_off >= 0 && __a64_xdp_off < 24 && \
+        (__a64_xdp_off & 7) + (WIDTH) <= 8) { \
+        if (__a64_xdp_off < 8) __a64_xdp_value = ARM64_SIM_L_XDP_FIELD(__a64_xdp_ctx, data); \
+        else if (__a64_xdp_off < 16) __a64_xdp_value = ARM64_SIM_L_XDP_FIELD(__a64_xdp_ctx, data_end); \
+        else __a64_xdp_value = ARM64_SIM_L_XDP_FIELD(__a64_xdp_ctx, data_meta); \
+        if ((WIDTH) != ARM64_WIDTH_64) { \
+            __a64_xdp_value = ARM64_SIM_L_XDP_NUMERIC(__a64_xdp_value); \
+            __a64_xdp_value = KPROG_ARM64_APPLY_WIDTH(__a64_xdp_value >> ((__a64_xdp_off & 7) * 8), (WIDTH)); \
+        } \
+    } else __a64_xdp_value = KPROG_ARM64_LOAD_BYTES_OFFSET(ARM64_SIM_L_READ_REG_PTR(BASE), (OFF), (WIDTH)); \
     __a64_xdp_value; })
 
 #define ARM64_SIM_L_MEM_READ(BASE, INDEX, AUX, IMM, EXTRA, WIDTH)            \
@@ -917,7 +938,7 @@ extern void arm64_sim_unmapped_xdp_read(void)
 		__s64 __a64_mp_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA); \
 		__u64 __a64_mp_at = ARM64_SIM_L_STACK_INDEX(__a64_mp_base + __a64_mp_off); \
 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_mp_at, ARM64_WIDTH_64);                      \
-		__a64_mp_value = __a64_stack_payload[KPROG_ARM64_STACK_WORD_INDEX(__a64_mp_at)]; \
+		__a64_mp_value = ARM64_SIM_L_STACK_PAYLOAD_LOAD(KPROG_ARM64_STACK_WORD_INDEX(__a64_mp_at)); \
 	   break; } default: break; } __a64_mp_value; })
 
 #define ARM64_SIM_L_MEM_WRITE(BASE, INDEX, AUX, IMM, EXTRA, WIDTH, VALUE, TAG)\
@@ -1472,7 +1493,7 @@ extern void arm64_sim_unmapped_xdp_read(void)
                         if (!(__a64_mt_src & 7U)) { \
                             __a64_mt_tag = ARM64_SIM_L_TAG_GET(__a64_mt_src >> 3); \
                             if (__a64_mt_tag == ARM64_SIM_TAG_STACK || __a64_mt_tag == ARM64_SIM_TAG_RETURN) \
-                                __a64_stack_payload[__a64_mt_at >> 3] = __a64_stack_payload[__a64_mt_src >> 3]; \
+                                ARM64_SIM_L_STACK_PAYLOAD_STORE(__a64_mt_at >> 3, ARM64_SIM_L_STACK_PAYLOAD_LOAD(__a64_mt_src >> 3)); \
                         } \
                     } \
                     ARM64_SIM_L_TAG_SET(__a64_mt_at >> 3, (__a64_mt_tag)); \
