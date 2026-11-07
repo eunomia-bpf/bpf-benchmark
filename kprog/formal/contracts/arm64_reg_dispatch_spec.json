@@ -3,6 +3,7 @@
   "operation": "arm64RegDispatch",
   "reg_bits": 8,
   "gpr_count": 31,
+  "stack_number": 32,
   "cells": [
     {"name": "x0", "number": 0},
     {"name": "x1", "number": 1},

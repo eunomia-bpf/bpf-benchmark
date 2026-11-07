@@ -34,7 +34,10 @@ DST/SRC routing; register forms retain native shift bounds and SP/ZR rules. Gene
 logical forms also compose the generated register RHS with AUX extraction,
 including the stack-ORR path and bare NONE modifiers. Non-flag ADD/SUB
 likewise retains the stack-SUB and pointer-ADD branches through immediate,
-shifted and extended-register numeric dispatch.
+shifted and extended-register numeric dispatch. The actual register-byte codec
+binds GPR/ZR/SP/NONE reads and writes; the leading NOP/address/MOV/MOVK gates
+compose through `Arm64Dispatcher.step_refines`, with field/relocation bindings
+and the MOV-bitmask SP alias kept explicit. This is a dispatcher prefix.
 
 The proofs establish arithmetic/flags, register and tag operations, memory
 accesses, routing tables, and selected whole-state handler refinements.

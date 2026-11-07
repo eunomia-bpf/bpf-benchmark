@@ -26,6 +26,7 @@ host cross-check supplies the same number macros itself.
 """
 import argparse
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -38,6 +39,7 @@ EXPECTED = {
     "operation": "arm64RegDispatch",
     "reg_bits": 8,
     "gpr_count": 31,
+    "stack_number": 32,
     "cells": [{"name": f"x{n}", "number": n} for n in range(31)],
 }
 
@@ -53,6 +55,10 @@ def load() -> dict:
         raise SystemExit(f"invalid arm64 reg-dispatch cell numbers: {cells!r}")
     if len(cells) != EXPECTED["gpr_count"]:
         raise SystemExit("arm64 reg-dispatch cell count disagrees with gpr_count")
+    header = ROOT.parent / "arm64/arm64_sim.h"
+    match = re.search(r"^#define\s+ARM64_SP\s+([0-9]+)[Uu]?\s*$", header.read_text(), re.MULTILINE)
+    if match is None or int(match.group(1)) != data["stack_number"]:
+        raise SystemExit("ARM64_SP disagrees with the register-byte contract")
     return EXPECTED
 
 
@@ -70,6 +76,8 @@ holds (`x0 .. x30`). -/
 def gprCount : Nat := {count}
 /-- The width in bits of a decoded AArch64 register number. -/
 def regBits : Nat := {bits}
+/-- The SP byte checked against ARM64_SP in the production decoder header. -/
+def stackNumber : Nat := {spec["stack_number"]}
 /-- The register number of each dispatch cell, in `ARM64_SIM_L_FOR_EACH_GPR`
 order: cell `i` is register number `i`. -/
 def cellNumbers : List Nat := [{numbers}]

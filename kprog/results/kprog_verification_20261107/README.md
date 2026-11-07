@@ -842,3 +842,46 @@ Lean, contract, reference/wire/compiler and C semantic check. The immutable
 source/cache export was deleted automatically; compressed CALL CPU observations
 retain this440-case run. Later actual register-byte and leading-dispatcher
 composition work is separate and requires its own subsequent full validation.
+
+## Actual register bytes and leading dispatcher step
+
+`Arm64Move.Fields` connects all256 operand byte values to the production
+SP-first read/write and generated GPR presence/cell tables. ZR31, SP32,
+NONE255 and other absent cells retain their distinct routing behavior; an
+unknown byte that classifies writable still cannot write a nonexistent cell.
+Typed GPR/SP/ZR operands round-trip through the real byte encoding, and complete
+numeric-state writes compose to the same canonical writeData. Native SP offset
+materialization and pointer/tag transport remain the existing Entry/O4 relation.
+
+The existing register-dispatch JSON now binds stack_number32. Its generated
+Lean constant is consumed by the codec, and the existing generator checks
+ARM64_SP in the actual production header. The generated C header is
+byte-identical, so no active ARM runtime/compiler input changes. An isolated
+SP33 fixture fails with the exact drift diagnostic. Original cell entries and
+all existing theorem/ISA definitions are unchanged.
+
+`Arm64Dispatcher.dispatchPrefix` follows the actual first four gates in order:
+NOP, GOT/rodata address writes, pointer-first MOV and MOVK. Individual gate
+proofs compose generated operand/value/width primitives through actual byte
+reads and writes into complete canonical states with exactly one PC advance.
+MOV-immediate GPR/ZR and native MOV-bitmask ORR-with-ZR are separate normalization
+cases; the latter includes SP destinations without inventing a MOVZ-to-SP form.
+MOVK keeps native column bounds and all unused AUX/source fields. Both address
+kinds retain exact native address/relocation and provenance obligations.
+
+One `step_refines` theorem covers every constructor of the prefix Binding
+relation. Its premises state only field/code/address identities, with no
+handler-refinement or step-equality premise. This is the normalization boundary
+for the covered prefix, not a native-byte-decoder certificate or a full72-op
+step theorem. Other operations pass to the remaining dispatcher as None.
+
+Validation: the32-job focused build and affected-family/reference
+build passed, nine existing contract freshness checks, generated direct-dispatch,
+dispatcher-model and mutation-source checks passed. Fourteen existing semantic/
+actual-route hosts passed1280,337,20145,61,257,1024,512,6913,257,6401,260,6401,
+11083,3804cases. Final proof/source hashes stayed unchanged through checks;
+the JSON received only a format-preserving single-field addition, with a final
+generator recheck. No source programs/oracles were filtered, no proof placeholders,
+new test suite, runtime/header/kernel/ISA or paper changes; original C warnings
+remain visible. Whole77/72 dispatch, native-field/artifact and O2/O4 bindings
+remain open; a new immutable full check follows publication.

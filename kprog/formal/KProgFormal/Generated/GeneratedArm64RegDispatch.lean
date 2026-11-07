@@ -6,6 +6,8 @@ holds (`x0 .. x30`). -/
 def gprCount : Nat := 31
 /-- The width in bits of a decoded AArch64 register number. -/
 def regBits : Nat := 8
+/-- The SP byte checked against ARM64_SP in the production decoder header. -/
+def stackNumber : Nat := 32
 /-- The register number of each dispatch cell, in `ARM64_SIM_L_FOR_EACH_GPR`
 order: cell `i` is register number `i`. -/
 def cellNumbers : List Nat := [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
