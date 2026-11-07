@@ -3356,3 +3356,12 @@ All156 compiled input hashes remain stable. Canonical stack/memory/fault,
 Coverage keeps36 C-model O2 tokens,32 pure register operations, two control
 models and two stack-memory models. `x86_stack_memory_dispatch_tokens` records
 the expanded domain, exact source pins and preserved prior interfaces.
+
+### Published raw-stack source full check
+
+`make check` on immutable published7a7893bc9 exits0. All1140 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_7a7893bc9`. This epoch covers PUSH/POP register/immediate raw
+frames and adopted production tagged writes. The subsequent mode2 memory and
+effective-address expansion retains its separate source identity.

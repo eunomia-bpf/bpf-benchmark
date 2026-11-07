@@ -2110,6 +2110,26 @@
     "verified_published_source_count": 1140,
     "warm_shared_caches_retained": true
   },
+  "full_make_check_7a7893bc9": {
+    "actual_exit": 0,
+    "archive_block_sha256": "9dd95d21be71a7bcc7166cea3ffdf529e10aa12ba9de1d374d6f2e1f253b4e1e",
+    "archive_marker": "=== FULL MAKE CHECK 7A7893BC9 PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/stack-refinement-full.cpu.jsonl.gz": "7bd077a44138b885cd8655f579209649ca789ef177fa6c8a723facfc9685b7e4",
+      "/workspaces/.agent-state/kprog-lanes/V/stack-refinement-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/stack-refinement-full.head": "43342cf121b92a82229abac54e45bae7441549fa4866f6834d82c8d39431d99b",
+      "/workspaces/.agent-state/kprog-lanes/V/stack-refinement-full.launch.log": "070b2b314ff9ac905433dd1fbd65c084bba23ef914f79639b27aac414295fe55",
+      "/workspaces/.agent-state/kprog-lanes/V/stack-refinement-full.log": "e7626230ad300898a6f0e4a3023844f82377d73177fc253766062558ad1a6304",
+      "/workspaces/.agent-state/kprog-lanes/V/stack-refinement-full.py": "4ebf9c0c2e08a1c88679e5bc586d5114bcc001e743de0ffaa9f3ffcad9b764db",
+      "/workspaces/.agent-state/kprog-lanes/V/stack-refinement-full.sources": "83e03feb6e1df6dab32de64cef8c706cef3fecedfd6df1f26b9673b5a7ca160a",
+      "/workspaces/.agent-state/kprog-lanes/V/stack-refinement-full.state": "67b2266ad83d80e3b5d8039697e923b2cc1021c24a200bf58a340dfa0799324f"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "7a7893bc9b4942a3065afdfdc2a00d3d5749e2dd",
+    "scope": "Published PUSH/POP register/immediate raw-stack source epoch; subsequent mode2 effective-address/memory expansion retains its own source identity.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1140
+  },
   "full_make_check_8db6eb61a": {
     "all_snapshot_sha256_match_published_blobs": true,
     "archive_block_sha256": "36eb425b87c5cb1f00030fd96bfc8ad2cd5958c6c3f2b03ae2377c349f9563d9",
