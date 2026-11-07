@@ -762,3 +762,10 @@ trusted-arm64-extern-check:
 .PHONY: trusted-bcc-frame-check
 trusted-bcc-frame-check:
 	taskset -c 20-23 python3 $(HERE)/trusted_bcc_frame.py
+
+.PHONY: trusted-payload-worker-check trusted-payload-katran-run
+trusted-payload-worker-check:
+	PYTHONDONTWRITEBYTECODE=1 taskset -c 20-23 python3 $(HERE)/trusted_payload_check.py check
+
+trusted-payload-katran-run:
+	PYTHONDONTWRITEBYTECODE=1 python3 $(HERE)/trusted_payload_check.py host

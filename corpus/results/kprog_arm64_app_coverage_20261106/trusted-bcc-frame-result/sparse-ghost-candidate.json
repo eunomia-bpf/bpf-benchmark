@@ -1,7 +1,8 @@
 {
-  "utc": "2026-11-07T11:26:00.365961+00:00",
-  "source_commit": "ea2b294825a777b3f19adfe3c94813e739a1a750",
-  "scope": "isolated host compiler/layout diagnostic; production unchanged, no kernel load or native execution",
+  "utc": "2026-11-07T11:40:10.673486+00:00",
+  "previous_evidence_commit": "9e8a799d0f3d91113c50694b0bda70efe91e0dbc",
+  "source_commit": "88ddc9d140ec4f4728406c93970cd2d63a56b299",
+  "scope": "isolated host compiler/layout checks; private real-service candidate prepared, actual QEMU outcome pending",
   "candidate_promoted": false,
   "compiler": {
     "input_header_sha256": "60866e8e7a8a6b5772b8d177d01cd6013f1c90d7d0a67c6a9b5dd92f5a7e7a7b",
@@ -10,9 +11,11 @@
         "app": "tcplife",
         "stack_min": -240,
         "stack_max": 0,
-        "ghost_slots": null,
+        "ghost_slots": [
+          -64
+        ],
         "compile": 0,
-        "max_fp_minus": 584,
+        "max_fp_minus": 352,
         "command": [
           "clang",
           "-g",
@@ -32,9 +35,9 @@
           "-I",
           "/usr/include/x86_64-linux-gnu",
           "-c",
-          "/workspaces/.agent-state/kprog-lanes/A/sparse-compile-fz9xrxge/tcplife.c",
+          "/workspaces/.agent-state/kprog-lanes/A/sparse-compile-m8pkib_o/tcplife.c",
           "-o",
-          "/workspaces/.agent-state/kprog-lanes/A/sparse-compile-fz9xrxge/tcplife.o"
+          "/workspaces/.agent-state/kprog-lanes/A/sparse-compile-m8pkib_o/tcplife.o"
         ]
       },
       {
@@ -65,9 +68,9 @@
           "-I",
           "/usr/include/x86_64-linux-gnu",
           "-c",
-          "/workspaces/.agent-state/kprog-lanes/A/sparse-compile-fz9xrxge/katran.c",
+          "/workspaces/.agent-state/kprog-lanes/A/sparse-compile-m8pkib_o/katran.c",
           "-o",
-          "/workspaces/.agent-state/kprog-lanes/A/sparse-compile-fz9xrxge/katran.o"
+          "/workspaces/.agent-state/kprog-lanes/A/sparse-compile-m8pkib_o/katran.o"
         ]
       }
     ],
@@ -78,7 +81,9 @@
       "app": "tcplife",
       "stack_min": -240,
       "stack_max": 0,
-      "ghost_slots": null
+      "ghost_slots": [
+        -64
+      ]
     },
     {
       "app": "katran",
@@ -231,10 +236,40 @@
       ],
       "ghost_offsets": null,
       "expected": null
+    },
+    {
+      "case": "joined_copy_lengths",
+      "stack_bounds": [
+        -32,
+        0
+      ],
+      "ghost_offsets": [
+        -32,
+        -16
+      ],
+      "expected": [
+        -32,
+        -16
+      ]
+    },
+    {
+      "case": "zero_register_write",
+      "stack_bounds": [
+        0,
+        0
+      ],
+      "ghost_offsets": [],
+      "expected": []
     }
   ],
-  "regression_before": "postindexed_spill expected [-24,-16], previous candidate returned [-24]; fixed by retaining base-register ghost provenance across address writeback",
-  "tcplife_dense_reason": "probe_read_kernel at native PC0x3d4 joins real lengths4 and16; single-constant analysis loses the length and retains dense payload",
-  "notes": "Raw native stack bytes and tags remain full size. The candidate stores ghost payload only for STACK/RETURN. Finite ghost slots use rank indexing without a default-value/trap/zero-return arm; unresolved layouts retain the existing dense representation. No application/verifier success is inferred from compiler frame size.",
-  "archive_sha256": "13bc9b100ccb4dacb461e6105ea21f147537d47b53100aa596de44206c58eef8"
+  "host_sanitizers": {
+    "checks": 1356480,
+    "passed": true,
+    "raw_stack_bytes": 240,
+    "compact_ghost_bytes": 16
+  },
+  "worker_control_compiled": true,
+  "analysis_rule": "Literal/MOV upper bounds join with max only when both bounds are known. Other arithmetic/clobbers give unknown. Helper runtime length is unchanged; upper bounds only overapproximate the private ghost-copy layout.",
+  "native_stack_bytes_preserved": true,
+  "archive_sha256": "4d626be9e39cb9a10ae127dc37e9eef5cdeaa6278d2a770b91cc069004b77ff7"
 }
