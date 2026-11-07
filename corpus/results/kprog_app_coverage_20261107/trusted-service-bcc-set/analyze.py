@@ -50,7 +50,7 @@ for archive in sorted(ROOT.glob('run-*.tar.gz')):
   for request_id,record in records.items():
    if request_id not in done:raise ValueError(f'receipt without archive: {archive.name}/{request_id}')
   work=json.loads(read('run/functional-work.json')) if 'run/functional-work.json' in files else None
-  runs.append(dict(archive=archive.name,sha256=hashlib.sha256(archive.read_bytes()).hexdigest(),outer_ok=summary['ok'],
+  runs.append(dict(kernel_capture_returncode=summary.get('kernel_log_returncode'),kernel_native_messages=[line for line in read('run/kernel.log').decode().splitlines() if any(tag in line for tag in ('native_lab:', 'native proof load stage=', 'emit failed'))] if 'run/kernel.log' in files else [],archive=archive.name,sha256=hashlib.sha256(archive.read_bytes()).hexdigest(),outer_ok=summary['ok'],
     observed_requests=len(run_rows),proof_generated=sum(r['proof_generated'] for r in run_rows),proof_compiled=sum(r['proof_compiled'] for r in run_rows),
     accepted=sum(r['accepted'] for r in run_rows),causes={cause:sum(r['cause']==cause for r in run_rows) for cause in sorted({r['cause'] for r in run_rows})},
     functional_work=work,full_bcc_set=bool(summary['ok'] and work and 'run/tool-startup.json' in files)))

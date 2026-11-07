@@ -1,6 +1,8 @@
 {
   "runs": [
     {
+      "kernel_capture_returncode": null,
+      "kernel_native_messages": [],
       "archive": "run-20261107T093056559759Z.tar.gz",
       "sha256": "67fbebdea54238a0bdf58aad1865daf37aa8df5c24596717fdf6d73352f1d259",
       "outer_ok": false,
@@ -17,6 +19,8 @@
       "full_bcc_set": false
     },
     {
+      "kernel_capture_returncode": null,
+      "kernel_native_messages": [],
       "archive": "run-20261107T094936220605Z.tar.gz",
       "sha256": "8bf49a73612703af1df2eef94d9b1c5b43603111257464ba08286de0f43268b7",
       "outer_ok": true,
@@ -35,6 +39,8 @@
       "full_bcc_set": false
     },
     {
+      "kernel_capture_returncode": null,
+      "kernel_native_messages": [],
       "archive": "run-20261107T095602396820Z.tar.gz",
       "sha256": "a948860469aa0a5f961e99c4bdb924ac3ebc41432c1ffde40b7d41fa7c416745",
       "outer_ok": false,
@@ -51,6 +57,8 @@
       "full_bcc_set": false
     },
     {
+      "kernel_capture_returncode": null,
+      "kernel_native_messages": [],
       "archive": "run-20261107T100525410513Z.tar.gz",
       "sha256": "de040d15a4a294ce9f84d27d1b105516fc960a42092b785d119bc8afef443c3a",
       "outer_ok": false,
@@ -69,6 +77,8 @@
       "full_bcc_set": false
     },
     {
+      "kernel_capture_returncode": null,
+      "kernel_native_messages": [],
       "archive": "run-20261107T101634339245Z.tar.gz",
       "sha256": "e5523e546071d002e3ae66b4da7b3407765e5e17727b6c3ebbaf6a054583411c",
       "outer_ok": false,
@@ -85,6 +95,8 @@
       "full_bcc_set": false
     },
     {
+      "kernel_capture_returncode": null,
+      "kernel_native_messages": [],
       "archive": "run-20261107T102103054064Z.tar.gz",
       "sha256": "e2ddd72a113aaf31e1655b3f115b6b514fa253d1240cdf8f1d0de4bbf7f6353e",
       "outer_ok": false,
@@ -103,6 +115,8 @@
       "full_bcc_set": false
     },
     {
+      "kernel_capture_returncode": null,
+      "kernel_native_messages": [],
       "archive": "run-20261107T103048813742Z.tar.gz",
       "sha256": "67649f0db17b59d7a5f5e4bd6008982fc5437198819d2cf06c2a0b80bb2729a9",
       "outer_ok": false,
@@ -119,6 +133,8 @@
       "full_bcc_set": false
     },
     {
+      "kernel_capture_returncode": null,
+      "kernel_native_messages": [],
       "archive": "run-20261107T103710411769Z.tar.gz",
       "sha256": "4f982a04b0b08a93c80b404cc68b4ed4dd6298644a1b7b8b25dd79bc620fb559",
       "outer_ok": false,
@@ -134,6 +150,8 @@
       "full_bcc_set": false
     },
     {
+      "kernel_capture_returncode": null,
+      "kernel_native_messages": [],
       "archive": "run-20261107T104637164250Z.tar.gz",
       "sha256": "b100b9193fc14f09e770c9b0fd2f8edd0949dd224366c0febe465a7c78555f7b",
       "outer_ok": false,
@@ -151,8 +169,52 @@
       "full_bcc_set": false
     },
     {
+      "kernel_capture_returncode": null,
+      "kernel_native_messages": [],
       "archive": "run-20261107T110052573341Z.tar.gz",
       "sha256": "a63882464c5649921b6e4765519fcb67188d9003091030d66c313f9167c1e8c7",
+      "outer_ok": false,
+      "observed_requests": 24,
+      "proof_generated": 24,
+      "proof_compiled": 24,
+      "accepted": 23,
+      "causes": {
+        "accepted": 23,
+        "native-load-EINVAL-no-rejection-line": 1
+      },
+      "functional_work": null,
+      "full_bcc_set": false
+    },
+    {
+      "kernel_capture_returncode": 1,
+      "kernel_native_messages": [],
+      "archive": "run-20261107T111332627278Z.tar.gz",
+      "sha256": "bd3237558f9212f7fc476d349a0923be3c5f611cb22a8e8faf26512577ae36dc",
+      "outer_ok": false,
+      "observed_requests": 24,
+      "proof_generated": 24,
+      "proof_compiled": 24,
+      "accepted": 23,
+      "causes": {
+        "accepted": 23,
+        "native-load-EINVAL-no-rejection-line": 1
+      },
+      "functional_work": null,
+      "full_bcc_set": false
+    },
+    {
+      "kernel_capture_returncode": 0,
+      "kernel_native_messages": [
+        "<4>[    2.025641] bpf_x86_native_lab: loading out-of-tree module taints kernel.",
+        "<3>[  107.584607] native_lab: proof relocation unmatched chunk=0 record=0 kind=1 offset=26 target=0xffffffff890062a0 source_prog=74",
+        "<3>[  107.586126] native_lab: validate_proof err=-22 prog_len=296 blob=2",
+        "<3>[  107.587004] native proof load stage=verifier err=-22 len=296",
+        "<3>[  107.593091] native_lab: proof relocation unmatched chunk=0 record=0 kind=1 offset=26 target=0xffffffff890062a0 source_prog=74",
+        "<3>[  107.594700] native_lab: validate_proof err=-22 prog_len=296 blob=2",
+        "<3>[  107.595798] native proof load stage=verifier err=-22 len=296"
+      ],
+      "archive": "run-20261107T111812573720Z.tar.gz",
+      "sha256": "dc2aac044c206f81cf3658006897c60bbfa01f6d99e808440cdaf1d0b8ab4473",
       "outer_ok": false,
       "observed_requests": 24,
       "proof_generated": 24,
