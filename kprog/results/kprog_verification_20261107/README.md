@@ -2769,3 +2769,45 @@ those original inputs/results and the observed drift are archived, and these
 host checks were rerun successfully against the new load-cast header. V
 changed no production source, oracle or canonical ISA in this increment. The next full check will include both bit-operation and SETCC
 proof changes; the complete 9e7 full pass remains a preceding snapshot.
+
+
+### Generic simulator argument and direct token bodies
+
+The operator's 19:13 order prohibits per-program proofs, certificates and
+validation files. Current safety work consists of universal simulator,
+per-token and native-link preservation theorems. Frozen historical program
+proofs are not current safety evidence and are neither extended nor rechecked
+by this increment.
+
+Ten direct tokens now have semantic C-model bodies separate from the ordered
+interpreter gates: MOV_IMM, MOV_REG, CMOV, SETCC, ROR, RORX, ANDN, BT, BT_IMM
+and IMUL_IMM. `specialized_register_body_matches` proves their complete body
+result equals interpreter dispatch for every raw field, state, frame and
+invocation. The generated token spelling and direct dispatch class are also
+proved to agree. This is a state-transformer theorem, beyond the earlier
+macro-name table check. Unsupported modeled fields remain `none`, without
+claiming a production runtime guard or unlifted token coverage.
+
+`register_dispatch_native_matches` and
+`specialized_register_native_matches` quantify over any canonical successor
+from the same projected input. They retain events, faults and all defined
+architectural outputs. Composing masked states across instructions still
+requires a generic definedness/ABI invariant. These C-model equalities do not
+silently replace a compiler or actual-B preservation law; the C/Lean
+correspondence and compiler trust boundary remain explicit.
+
+Focused 114-module and complete default Lean builds passed, with six axiom
+audits and stable selected inputs. Four generator checks, dispatch-model and
+undefined-output checks passed; unchanged UBSan hosts passed 205 chain and
+534 specialization cases. No per-program file, production source, contract
+or oracle was edited. Original elaboration failures and proof inputs remain
+in the archive. O1's remaining operations, both complete dispatcher steps,
+the remaining O2 tokens and generic compiled/native-link preservation continue.
+
+The preceding immutable full check at
+`a6bc0aad3567a58363b003619aecdf532b5fc56c` completed with actual exit 0 and
+queue exit 0. All 1,140 selected source hashes match published Git blobs;
+full commands/logs/manifest/CPU trace and later drift are retained. Shared
+vendor submodules and warm caches were used; the temporary export was deleted.
+That snapshot predates these new token theorems and C's c0b load casts. The
+focused token checks used the published new load header, SHA256 `3ba4bc78`.

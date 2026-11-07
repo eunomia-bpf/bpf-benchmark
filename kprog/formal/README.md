@@ -54,6 +54,12 @@ explicit. A sequential vector footprint does not prove concurrent atomicity.
 Exclusive failure remains a possible outcome on each dynamic attempt; the
 per-instruction proofs supply no bounded-retry or eventual-success guarantee.
 
+Ten direct register token bodies also have semantic equality to interpreter
+dispatch for arbitrary fields and invocations. Safety work is generic per
+simulator and token; historical per-program proofs are frozen and excluded
+from the argument. Remaining tokens and native-link/compiler preservation
+are being connected through [generic composition](../tv/Composition.lean).
+
 The trusted boundary includes Lean's kernel/toolchain, the contract generation
 and C/Lean correspondence, native decoding/encoding, and the C/BPF compilers.
 Initial ABI, provenance/permissions, physical exclusive monitor/order/site

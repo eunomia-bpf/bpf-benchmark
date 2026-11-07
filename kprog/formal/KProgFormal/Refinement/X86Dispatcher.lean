@@ -1,3 +1,4 @@
+import KProgFormal.Generated.GeneratedX86Specialization
 import KProgFormal.Generated.GeneratedX86DispatchFamily
 import KProgFormal.Refinement.X86NumericAddress
 import KProgFormal.Generated.GeneratedX86RegDispatch
@@ -1100,5 +1101,164 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled, GeneratedX86DispatchFamily.code, GeneratedX86Opcode.code,
         GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
         congrArg some (exchange_register_frame_refines env frame arena state width destination source nextPc)
+
+/-- Two allowed successors of the same reference instruction agree on its
+observable outputs. Undefined output bits are masked by the canonical ISA,
+not assigned a fabricated value by this bridge. -/
+private theorem successors_match (native : Reference.X86.Instruction) (before : Reference.X86.State)
+    (left right : Transition Reference.X86.State)
+    (first : Reference.X86.Step native before left) (second : Reference.X86.Step native before right) :
+    Reference.X86.matchesTransition native left right := by
+  unfold Reference.X86.Step at first second
+  unfold Reference.X86.matchesTransition at first second ⊢
+  obtain ⟨firstEvents, firstFault, firstState⟩ := first
+  obtain ⟨secondEvents, secondFault, secondState⟩ := second
+  refine ⟨firstEvents.symm.trans secondEvents, firstFault.symm.trans secondFault, ?_⟩
+  rw [← firstFault]
+  exact firstState.symm.trans secondState
+
+/-- Native-to-handler direction for ANY canonical successor and every covered
+raw token. This is single-step observational matching, including real faults
+and effects. Composing steps still needs the generic flag/register-definedness
+invariant; equality of architecturally undefined bits is not claimed. -/
+theorem register_dispatch_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : RegisterBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native)
+    (nativeAfter : Transition Reference.X86.State)
+    (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
+    ∃ actual, dispatchRegisters env frame arena code flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.matchesTransition native nativeAfter actual := by
+  obtain ⟨actual, dispatched, refines⟩ :=
+    register_dispatch_step_refines env frame arena code flags aux dst src value nextPc state native binding
+  exact ⟨actual, dispatched, successors_match native _ nativeAfter actual nativeStep refines⟩
+
+/-- Direct macro tokens whose complete raw register bodies are lifted below.
+The code comes from the full opcode contract; the specialization table's
+independent token spellings and dispatch class are checked by the next lemma. -/
+def directRegisterOpcode : GeneratedX86Specialization.Op → Option GeneratedX86Opcode.Op
+  | .movImm => some .movImm | .movReg => some .movReg | .cmov => some .cmov
+  | .setcc => some .setcc | .ror => some .ror | .rorx => some .rorx
+  | .andn => some .andn | .bt => some .bt | .btImm => some .btImm
+  | .imulImm => some .imulImm | _ => none
+
+theorem direct_register_token_identity (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (selected : directRegisterOpcode token = some opcode) :
+    GeneratedX86Specialization.dispatch token = .directMacro ∧
+      GeneratedX86Specialization.tokenName token = GeneratedX86Opcode.define opcode := by
+  cases token <;> simp only [directRegisterOpcode] at selected
+  all_goals first | contradiction | cases selected
+  all_goals decide
+
+/-- Semantic C-macro bodies selected by the direct renderer, independently of
+L_EXEC's ordered opcode gates. Raw fields, aliases, input flags and the full
+frame remain parameters. None is an unproved/malformed modeled binding, not
+an added runtime guard. This is C-model O2; compiler/actual-B preservation is
+still a separate trusted or proved transformation law. -/
+def specializedRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (token : GeneratedX86Specialization.Op) (flags : Byte) (aux : BitVec 32)
+    (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState) :
+    Option (Transition Reference.X86.State) :=
+  match token with
+  | .movImm => do
+      let width ← widthOf flags
+      let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
+      pure ⟨nativeRegisters env frame arena (registerPc
+        (writeRegister env frame arena state width destination value) nextPc), [], none⟩
+  | .movReg => do
+      let width ← widthOf flags
+      let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
+      let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
+      pure ⟨nativeRegisters env frame arena (moveRegister env frame arena state width destination source nextPc), [], none⟩
+  | .cmov => do
+      let width ← cmovWidthOf flags
+      let destination ← registerOf dst
+      let source ← registerOf src
+      pure ⟨nativeRegisters env frame arena (conditionalMoveWord env frame arena state width aux destination source nextPc), [], none⟩
+  | .setcc => do
+      let destination ← sliceOf .w8 dst (GeneratedX86RegLaneAux.dstShift aux)
+      pure ⟨nativeRegisters env frame arena (setConditionRegister env frame arena state
+        (GeneratedX86RegLaneAux.payload aux) destination nextPc), [], none⟩
+  | .ror => do
+      let width ← widthOf flags
+      let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
+      pure ⟨nativeRegisters env frame arena (rotateRightRegister env frame arena state width destination value nextPc), [], none⟩
+  | .rorx => do
+      let width ← bswapWidthOf flags
+      let destination ← registerOf dst
+      let source ← registerOf src
+      pure ⟨nativeRegisters env frame arena (bmiRegister env frame arena state width .rotate destination source value nextPc), [], none⟩
+  | .andn => do
+      let width ← bswapWidthOf flags
+      let destination ← registerOf dst
+      let first ← registerOf src
+      let second ← registerOf (aux.setWidth 8)
+      pure ⟨nativeRegisters env frame arena (andnRegister env frame arena state width destination first second nextPc), [], none⟩
+  | .bt => do
+      let width ← cmovWidthOf flags
+      let base ← registerOf dst
+      let index ← registerOf src
+      pure ⟨nativeRegisters env frame arena (bitTestRegister env frame arena state width base
+        (registerValue env frame arena state index) nextPc), [], none⟩
+  | .btImm => do
+      let width ← cmovWidthOf flags
+      let base ← registerOf dst
+      pure ⟨nativeRegisters env frame arena (bitTestRegister env frame arena state width base value nextPc), [], none⟩
+  | .imulImm => do
+      let width ← cmovWidthOf flags
+      let destination ← registerOf dst
+      let source ← registerOf src
+      pure ⟨nativeRegisters env frame arena (multiplyImmediate env frame arena state width destination source value nextPc), [], none⟩
+  | _ => none
+
+/-- O2 once per lifted direct token: specializing opcode dispatch retains the
+entire raw body result for ALL fields, states and invocations. No ISA result,
+condition, chosen state, program bytes or program certificate is a premise. -/
+theorem specialized_register_body_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word) (state : RegisterState)
+    (selected : directRegisterOpcode token = some opcode) :
+    specializedRegisters env frame arena token flags aux dst src value nextPc state =
+      dispatchRegisters env frame arena (GeneratedX86Opcode.code opcode) flags aux dst src value nextPc state := by
+  cases token <;> simp only [directRegisterOpcode] at selected
+  all_goals first | contradiction | cases selected
+  all_goals simp [specializedRegisters, dispatchRegisters, dispatchThroughMove, beforeMove,
+    aluImmediateHandled, aluRegisterHandled, GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code,
+    GeneratedX86DispatchSingleton.code]
+  all_goals symm
+  all_goals split <;> symm <;> assumption
+
+/-- The same O1 result holds for each specialized body through its O2 equality.
+This supplies a program-independent per-token interface, not compiled-B or
+whole-ISA coverage for tokens whose raw bodies are still being lifted. -/
+theorem specialized_register_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word)
+    (state : RegisterState) (native : Reference.X86.Instruction)
+    (selected : directRegisterOpcode token = some opcode)
+    (binding : RegisterBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
+      (GeneratedX86Opcode.code opcode) native) :
+    ∃ actual, specializedRegisters env frame arena token flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.Step native (nativeRegisters env frame arena state) actual := by
+  rw [specialized_register_body_matches env frame arena token opcode flags aux dst src value nextPc state selected]
+  exact register_dispatch_step_refines env frame arena _ flags aux dst src value nextPc state native binding
+
+/-- Combine O1's native-successor observation with O2's per-token body
+identity. All fields and invocations remain arbitrary. This common-input
+single-step interface does not replace the generic definedness/ABI relation
+needed to compose masked architectural states across instructions. -/
+theorem specialized_register_native_matches (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
+    (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value nextPc : Reference.Word)
+    (state : RegisterState) (native : Reference.X86.Instruction)
+    (selected : directRegisterOpcode token = some opcode)
+    (binding : RegisterBinding flags aux dst src value nextPc (nativeRegisters env frame arena state)
+      (GeneratedX86Opcode.code opcode) native)
+    (nativeAfter : Transition Reference.X86.State)
+    (nativeStep : Reference.X86.Step native (nativeRegisters env frame arena state) nativeAfter) :
+    ∃ actual, specializedRegisters env frame arena token flags aux dst src value nextPc state = some actual ∧
+      Reference.X86.matchesTransition native nativeAfter actual := by
+  rw [specialized_register_body_matches env frame arena token opcode flags aux dst src value nextPc state selected]
+  exact register_dispatch_native_matches env frame arena _ flags aux dst src value nextPc state native binding nativeAfter nativeStep
 
 end KProgFormal.Refinement.X86Dispatcher
