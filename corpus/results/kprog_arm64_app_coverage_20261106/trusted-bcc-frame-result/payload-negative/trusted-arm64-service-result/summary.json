@@ -1,8 +1,8 @@
 {
-  "ok": false,
+  "ok": true,
   "case": "control",
-  "started": "2026-11-07T11:48:12.325110+00:00",
-  "archive": "run-20261107T114812325090Z.tar.gz",
+  "started": "2026-11-07T13:42:02.577998+00:00",
+  "archive": "run-20261107T134202577970Z.tar.gz",
   "command": [
     "taskset",
     "-c",
@@ -37,12 +37,12 @@
     "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader": "bf44d57f74696235ab999c0a0c55e0d38f93813026142142a9bbd54a94f4832c",
     "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-service-client": "6afa31017265cc6445d28c57887917c1acfe4cb28787e9e8c6ebd85a1dd29c4d",
     "kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native.o": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
-    "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "7d55f12233643c26968509e5c701743900ee1f1b5022178e69037f4a1cf9ab74",
+    "kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "f9086a5d08126aabfcaa824a6bf93aad9bc47c2b665d3f44b8757ceaaa3f3456",
     "kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
     "kprog/trusted_loader.cpp": "77d7944274bf9f8a66d7d5e7dceb30a55c66e5461c6028df37a9c32d5e81d548",
     "kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
     "kprog/arm64/trusted_specializer.py": "9c96ba545a3856021520407ab6da93d60534ce5b536ceb6d151c79d498c08497",
-    "kprog/arm64/arm64_sim_local_bpf.h": "60866e8e7a8a6b5772b8d177d01cd6013f1c90d7d0a67c6a9b5dd92f5a7e7a7b",
+    "kprog/arm64/arm64_sim_local_bpf.h": "c82c0832be850e8755478516bea17daacd30424475a5d81348efce3497606787",
     "kprog/arm64/arm64_sim.h": "8d69f4e7b1aa1e809ed40861362e13ab7c493a6ede5abf3e0fd38a763d683fbe",
     "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "464cae64514f8e9e8781c6c4a014d52b04758a92f4a0509ff5f6288df49b3a5f",
     "kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
@@ -50,14 +50,14 @@
   },
   "qemu_returncode": 0,
   "booted": true,
-  "guest_exit": 1,
+  "guest_exit": 0,
   "guest": {
-    "ok": false,
-    "cases": 30,
+    "ok": true,
+    "cases": 34,
     "expected_cases": 34,
-    "accepted_unsafe": 1
+    "accepted_unsafe": 0
   },
   "hashes_unchanged": true,
-  "finished": "2026-11-07T12:29:23.133200+00:00",
-  "archive_sha256": "2dd1fe8c82866e841448035b242f306a0b2f84b9a433954a0442f76f7071af5d"
+  "finished": "2026-11-07T14:03:03.440320+00:00",
+  "archive_sha256": "bfa4ba2d4250ad34e88ec4bb3a1d3d3ddbac4b3ece82f501b054472bd6a38988"
 }

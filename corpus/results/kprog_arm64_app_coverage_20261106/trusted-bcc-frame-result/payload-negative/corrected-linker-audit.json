@@ -1,0 +1,325 @@
+{
+  "utc": "2026-11-07T14:06:02.739982+00:00",
+  "archive": "run-20261107T134202577970Z.tar.gz",
+  "archive_sha256": "bfa4ba2d4250ad34e88ec4bb3a1d3d3ddbac4b3ece82f501b054472bd6a38988",
+  "cases": 34,
+  "stage_counts": {
+    "valid_executed": 4,
+    "verifier_rejected": 16,
+    "loader_rejected": 1,
+    "specialization_rejected": 13
+  },
+  "accepted_unsafe": 0,
+  "unsafe_executed": 0,
+  "hashes_unchanged": true,
+  "guest_exit": 0,
+  "qemu_returncode": 0,
+  "request_audits": [
+    {
+      "name": "valid_control",
+      "stage": "valid_executed",
+      "native_sha256": "0e5c0407b26746fe5465c46615365300dee08573ba7d187b35a1935e540703f5",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "1.success.tar.gz",
+      "request_archive_sha256": "6c3fd774cd3346acc6d16e11ffa188bfac5d283754fbca84e2620e2cd751a3e5",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "valid_copy_restore",
+      "stage": "valid_executed",
+      "native_sha256": "62deafc04c19cf6157b5a1db9e52f7d2ece1f38958afb4a6ba1962e1aa419d9b",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "2.success.tar.gz",
+      "request_archive_sha256": "2d0476ba30753b574b35d40633655d1fd021d59fd3c0597b39da2076307483d0",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "valid_alias_load",
+      "stage": "valid_executed",
+      "native_sha256": "f5c5efe2f30e2950ecc98b97ac29f0e9bc7e5e4474a4ea13384d2b0ef3e38d0b",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "3.success.tar.gz",
+      "request_archive_sha256": "fae5a3e00c286614a5f048ffdad25d09cfca373cfc46fe5494d1a4efb07e1c8a",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "valid_spill_restore",
+      "stage": "valid_executed",
+      "native_sha256": "539354542a4e9fbbec15da240a5c8223c0725f644c38cba34ebedc40e42d9e0f",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "4.success.tar.gz",
+      "request_archive_sha256": "27da33114416206516deabb0b936e59fdc0787dc525a20b09c6dc26ea0cb1862",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "past_data_end_read",
+      "stage": "verifier_rejected",
+      "native_sha256": "b59cfc6568481220ac84c773c748076a79d2343db974edfc7e493b3efaefc030",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "5.failure.tar.gz",
+      "request_archive_sha256": "0a7f1eb3f5beddd6987ad1082868fa7e0e4a1e8468bfbfe2f636653e20edc980",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "past_data_end_write",
+      "stage": "verifier_rejected",
+      "native_sha256": "9f47d4ab36a5e4c84db06e141115d68fe4300671d4167ff115a2c03376e12908",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "6.failure.tar.gz",
+      "request_archive_sha256": "cd6d22b686a954afb96266b9186f6e26c67cd65b2be065a9653f8d68f3b956c7",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "missing_data_end_check",
+      "stage": "verifier_rejected",
+      "native_sha256": "af2effa86101b552dca5fb6b0fdc69578b705a07ce446a113548707923b31a35",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "7.failure.tar.gz",
+      "request_archive_sha256": "c68870a97dd562d747886d495a188f255cd108673dbdbcb1b66db96776911d61",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "map_value_oob",
+      "stage": "verifier_rejected",
+      "native_sha256": "a9028b2c67f9402bb6d397da5ba814ca4e359e8ff8a5c43aec3ecaa33e49a650",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "8.failure.tar.gz",
+      "request_archive_sha256": "a5b35c6ae61ccf448888f89c039afd75a0782a08afb4139b4ce26196f12fefc6",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "nullable_map_dereference",
+      "stage": "verifier_rejected",
+      "native_sha256": "2f4681342b27ef34166b6493942a36f9a4e063cfc959428c48ffb73e65748ad2",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "9.failure.tar.gz",
+      "request_archive_sha256": "48d0bbfb2ccac6ba8544dcec5689cf155a9b2afe44e5b7f8b09a10ee8837b1fe",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "invalid_helper_argument",
+      "stage": "verifier_rejected",
+      "native_sha256": "dad4bdf806f097d9aad6e7c96549664240ad2e44293f14e7e896a6809cb949f9",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "10.failure.tar.gz",
+      "request_archive_sha256": "49ccfdf92d209ba8371c670e435ebf2ddbfb19e1d4881dd554b7bf11e9aa201e",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "stack_oob",
+      "stage": "verifier_rejected",
+      "native_sha256": "fc982ce7fc4a52e051e4c7037c2216aeccd87e1deb48c460dd79c5875a25c8a9",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "11.failure.tar.gz",
+      "request_archive_sha256": "7f65ddc278083f21e8679822f4f4fa1770a469b2c48eb422798d62a59287b762",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "uninitialized_stack",
+      "stage": "verifier_rejected",
+      "native_sha256": "a50aa1007ba884a8a4a1d12598c5a8d84a9ed25fcf3e73d68d0c07ca6768be04",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "12.failure.tar.gz",
+      "request_archive_sha256": "7e5a21809ac1b9ce2ca589ae854b356ef8b90b51cf99276ff43794dd171405ad",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "unbounded_loop",
+      "stage": "loader_rejected",
+      "native_sha256": "4ad10da9f1969bf96619f6f451001c29fb976b638d395a7293e1dbf4b75f90b8",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "13.failure.tar.gz",
+      "request_archive_sha256": "c0d1cbeb70b0f24d5ef2ee8042ee8ae06ca247e920980049a77660b42458572d",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "unbounded_indirect_jump",
+      "stage": "specialization_rejected",
+      "native_sha256": "691911d84bf7d44a61fdedfca7f4f6db68ea79596c1578f8b828b622b89bf0f9",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "14.failure.tar.gz",
+      "request_archive_sha256": "b4c3ed6d120ec4477f15e33e30d3e0387d6bf3acb47e43e898a93548cf07ac2c",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "unsupported_instruction",
+      "stage": "specialization_rejected",
+      "native_sha256": "5da6847a41519b2fc4aabfb7f59cf5522c7d5a70551276827c213e80d0d7b88d",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "15.failure.tar.gz",
+      "request_archive_sha256": "1b722ad86ba7cce5d2e3c8c182cfad4bf73df52c5b319185ac65e224b5dc9279",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "misaligned_sp",
+      "stage": "specialization_rejected",
+      "native_sha256": "f4221688b7d5f9a49606f6b9c290f1640f2d1e4e0f3871712cef663f989a6d17",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "16.failure.tar.gz",
+      "request_archive_sha256": "a451a848fecd9b904a74d4011e11f412d2dd8ed4b5760b1ea51890d3192d4473",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "overlapping_load_pair",
+      "stage": "specialization_rejected",
+      "native_sha256": "0c21de7f41b9fe37ed93bcd3effd8119a773bf18dfa58c99f916f67294181246",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "17.failure.tar.gz",
+      "request_archive_sha256": "a7a392be8e971596362c756e1a890adfc3712f29d5f6104ad30e52349a2cc97a",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "writeback_load_overlap",
+      "stage": "specialization_rejected",
+      "native_sha256": "5d87182ae0e9031e2bfbf8ac1e8036a31c23e9dd0b89a6d40b02fea5b9650608",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "18.failure.tar.gz",
+      "request_archive_sha256": "b5b2ca640cc02a838748bfbbe4031cbaac915877b11eeba09b68466f95c223b0",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "writeback_store_overlap",
+      "stage": "specialization_rejected",
+      "native_sha256": "b1142b61bed214bdcfd665a0f9718dca18f13f508630009f8007f836d59cc012",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "19.failure.tar.gz",
+      "request_archive_sha256": "f55553203f7bc0d31a4ea6b881d3b413c803c9deca0581d31f791f20dbe792dd",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "scalar_vector_load_clear_high",
+      "stage": "verifier_rejected",
+      "native_sha256": "7b377f88c0fc305b2b0842e45663a9b0c5d602c23a089ba454c63d4f986d60cc",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "20.failure.tar.gz",
+      "request_archive_sha256": "d3ed2217d85dc425397881bc46dd2186fc39a2e194cfddd7f6f7595f4681f4f0",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "unpaired_stxr_failure",
+      "stage": "verifier_rejected",
+      "native_sha256": "cc18f710c67956078237759625d7fefc65727a4170c193f9ab6ae92109a607ef",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "21.failure.tar.gz",
+      "request_archive_sha256": "e61dd65bf9ac3f8b0debff838e3a67f06dddfbdf0f8a033acca159a6c9f96de5",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "unpaired_stlxr_failure",
+      "stage": "verifier_rejected",
+      "native_sha256": "eca5e9bb32b67d7cf02066072a3b14c07caf4c8897aae11b651497ce3906c360",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "22.failure.tar.gz",
+      "request_archive_sha256": "14a4a4699a05e39ecafd8fa00caf0ad19e2002781a4ae0114cbde75020258092",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "paired_stxr_failure",
+      "stage": "verifier_rejected",
+      "native_sha256": "15115e53de99c5297833321a2a7d085a1d35e24b45284980af6d679c7a8d47b7",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "23.failure.tar.gz",
+      "request_archive_sha256": "25eb3ec7f8b29f97782df118cb56495a4ff3ed0566e8af35d21a49a2c5f69c48",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "paired_stlxr_failure",
+      "stage": "verifier_rejected",
+      "native_sha256": "4d51789865c04e46dbdd0fdd1ebb5d07ab99d484e97c5549b7caa39fc4ba7dcd",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "24.failure.tar.gz",
+      "request_archive_sha256": "0c0112c9540c80a1860d7abb23ffc3163d5cda18a403b4ea0cb411896798b852",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "stxr_status_data_overlap",
+      "stage": "specialization_rejected",
+      "native_sha256": "b648c256af28b5fd786f3aadcc85406ac080be85aad1338386f95d180567ef61",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "25.failure.tar.gz",
+      "request_archive_sha256": "6dce43a85fed6a792859cf36169f0ceb5b3fcf9f49b30dc11f45e8029f8a134e",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "stlxr_status_data_overlap",
+      "stage": "specialization_rejected",
+      "native_sha256": "4e99d694c78dba6569d422d9b8245189e098fd58da6b17f5b3fab1795d94ab34",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "26.failure.tar.gz",
+      "request_archive_sha256": "8c41507126bcfeb533701dcc44f77b829dddd6a3c86984520224a449e509d2bd",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "stxr_status_base_overlap",
+      "stage": "specialization_rejected",
+      "native_sha256": "8afdf2fd098a7a164c45b31a035d44c39ed290d89d407aea01015503f84ca547",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "27.failure.tar.gz",
+      "request_archive_sha256": "958ddeceafbe946dcad3b923eb4f1b48dc230bb0cd66958d17870fe77409c29d",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "stlxr_status_base_overlap",
+      "stage": "specialization_rejected",
+      "native_sha256": "e3ec9b5fb31e585fb268a3bb00d4bbde93a253436cb89a6f69ad301862eed65a",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "28.failure.tar.gz",
+      "request_archive_sha256": "85b9235b1e6859d49b317e03c0ac022aa4305ec78c994d07487e06b05e75f5ba",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "entry_return_address_flags",
+      "stage": "verifier_rejected",
+      "native_sha256": "167f607b9c1cbf7bde3b23ba77502f1cae96830b267e1c54d9ca99738148b512",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "29.failure.tar.gz",
+      "request_archive_sha256": "96f0144ec6dd6503b5208a1b72a85c62f940fda893e65096a42bb1c1859c4d00",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "return_register_overwrite",
+      "stage": "verifier_rejected",
+      "native_sha256": "462fc8b21938c92c5bd2fd2b2d8fddb6e36a34ca0fd12e427b773850145c9c13",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "30.failure.tar.gz",
+      "request_archive_sha256": "e9eae7ea60c8ab404dde9036f0023210ad1234a163beff9d0d3b38d0cb6a8f00",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "stack_base_flags",
+      "stage": "verifier_rejected",
+      "native_sha256": "14a25095df58aa9dbf3b28706df5a80dff621eab9b89a264f03063f49cd543b1",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "31.failure.tar.gz",
+      "request_archive_sha256": "979281a876dcdc9af8e27b7ba89573c1cfc30f730999df97e40ffdb66a3b4b4f",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "undefined_entry_register",
+      "stage": "specialization_rejected",
+      "native_sha256": "39ff34ff8ce52a5ac01cb85e2348cf3ed9568cc9d27a7f3e33dbb354a49bfaea",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "32.failure.tar.gz",
+      "request_archive_sha256": "6545b7516f68ff0056836eeed85eca3dbe1646bcbd26ea0e88d6cb3f2efe4a14",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "undefined_entry_flags",
+      "stage": "specialization_rejected",
+      "native_sha256": "c3fb46ad8e5667536e2b02c613ab73033f31086d7e1cb0bfbde21014351f59b9",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "33.failure.tar.gz",
+      "request_archive_sha256": "d33c876286d594c34a0642b2b788b85c1c75fd8ddd3f2df8d4e5bf72597bab6e",
+      "unsafe_native_executed": false
+    },
+    {
+      "name": "helper_clobbered_register",
+      "stage": "specialization_rejected",
+      "native_sha256": "3e77ab66f1632b91e38f609e945bebe946b307e8169811600a6d56cd420e414d",
+      "kernel_and_generated_native_identity_verified": true,
+      "request_archive": "34.failure.tar.gz",
+      "request_archive_sha256": "b9a78fabe33ba353d3af060494fa6f66c857a92217dec069321719ea5d06ddd2",
+      "unsafe_native_executed": false
+    }
+  ]
+}

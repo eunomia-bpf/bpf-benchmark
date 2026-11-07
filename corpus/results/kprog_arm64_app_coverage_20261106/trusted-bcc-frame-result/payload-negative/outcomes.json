@@ -1,207 +1,6 @@
 {
-  "collected_utc": "2026-11-07T12:17:04.090495+00:00",
-  "scope": "PARTIAL live QEMU checkpoint; not full-suite or application acceptance",
-  "expected_cases": 34,
-  "completed_cases": 19,
-  "pending_cases": [
-    "scalar_vector_load_clear_high",
-    "unpaired_stxr_failure",
-    "unpaired_stlxr_failure",
-    "paired_stxr_failure",
-    "paired_stlxr_failure",
-    "stxr_status_data_overlap",
-    "stlxr_status_data_overlap",
-    "stxr_status_base_overlap",
-    "stlxr_status_base_overlap",
-    "entry_return_address_flags",
-    "return_register_overwrite",
-    "stack_base_flags",
-    "undefined_entry_register",
-    "undefined_entry_flags",
-    "helper_clobbered_register"
-  ],
-  "stages": {
-    "valid_executed": 4,
-    "verifier_rejected": 8,
-    "loader_rejected": 1,
-    "specialization_rejected": 6
-  },
-  "accepted_unsafe_completed": 0,
-  "guest_finished": false,
-  "request_archives": [
-    {
-      "name": "valid_control",
-      "request_id": 1,
-      "stage": "valid_executed",
-      "archive": "1.success.tar.gz",
-      "sha256": "90e260fad72da8363a878926279daa375f9fc2f850476a3b18730d82424aef80",
-      "bytes": 12028,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "valid_copy_restore",
-      "request_id": 2,
-      "stage": "valid_executed",
-      "archive": "2.success.tar.gz",
-      "sha256": "fa583dd11f1ae16e99065908344f67d409601e16282607a8d76702b0b58729c4",
-      "bytes": 12067,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "valid_alias_load",
-      "request_id": 3,
-      "stage": "valid_executed",
-      "archive": "3.success.tar.gz",
-      "sha256": "816d49c8c03936d6e213677a2fdcd63403df070bf6ba82dd4058d78ae6b3928f",
-      "bytes": 14811,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "valid_spill_restore",
-      "request_id": 4,
-      "stage": "valid_executed",
-      "archive": "4.success.tar.gz",
-      "sha256": "fbb38abe4bb28997ecc894cc7e28e863fe68343bce200504be664a503cd9b98e",
-      "bytes": 14197,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "past_data_end_read",
-      "request_id": 5,
-      "stage": "verifier_rejected",
-      "archive": "5.failure.tar.gz",
-      "sha256": "fe5c7d74d913a711631b3913cb877dc98a4ed5dd24dc8b90e4b236c4100ae756",
-      "bytes": 15859,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "past_data_end_write",
-      "request_id": 6,
-      "stage": "verifier_rejected",
-      "archive": "6.failure.tar.gz",
-      "sha256": "98665ae4b9d7715200d0d89dbe186fdee976b7aa239befa04b1d7f2cc4fe97c2",
-      "bytes": 16038,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "missing_data_end_check",
-      "request_id": 7,
-      "stage": "verifier_rejected",
-      "archive": "7.failure.tar.gz",
-      "sha256": "f12e1879a6e906f7e230e5d63fc01cc9dae21d2f2f8523ad347b9a28357ca133",
-      "bytes": 15890,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "map_value_oob",
-      "request_id": 8,
-      "stage": "verifier_rejected",
-      "archive": "8.failure.tar.gz",
-      "sha256": "e69cfb1724de87c7d2aefc9edcb83aeeb91aca0829ad11465f79cb156d268534",
-      "bytes": 19522,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "nullable_map_dereference",
-      "request_id": 9,
-      "stage": "verifier_rejected",
-      "archive": "9.failure.tar.gz",
-      "sha256": "6a47cf0247ddacf30c9264de54e14ae9d46c6d401657ec008e8b888325ec99f1",
-      "bytes": 19352,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "invalid_helper_argument",
-      "request_id": 10,
-      "stage": "verifier_rejected",
-      "archive": "10.failure.tar.gz",
-      "sha256": "07395772efa3b33b369edef7ce40db3a77204c2151f93784384aec2ca8ecb5f8",
-      "bytes": 17131,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "stack_oob",
-      "request_id": 11,
-      "stage": "verifier_rejected",
-      "archive": "11.failure.tar.gz",
-      "sha256": "6ca62ac7ecfc7389798e1f5696bac713e0cc21d19a5b3bd4f142d57d8bd62632",
-      "bytes": 16448,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "uninitialized_stack",
-      "request_id": 12,
-      "stage": "verifier_rejected",
-      "archive": "12.failure.tar.gz",
-      "sha256": "96a3b580e99681834d3dccc4269c51791cf20d5a9350e55fdde4d18187864e42",
-      "bytes": 16476,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "unbounded_loop",
-      "request_id": 13,
-      "stage": "loader_rejected",
-      "archive": "13.failure.tar.gz",
-      "sha256": "a91f8d727e12313f765d6bb1569cf72b34edc7f64c583efbf449379aa5381cf2",
-      "bytes": 13687,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "unbounded_indirect_jump",
-      "request_id": 14,
-      "stage": "specialization_rejected",
-      "archive": "14.failure.tar.gz",
-      "sha256": "fdac77361beaf4803bc2a208327ac5d67f9988d74dff9b57aaf88eac7df4115e",
-      "bytes": 6443,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "unsupported_instruction",
-      "request_id": 15,
-      "stage": "specialization_rejected",
-      "archive": "15.failure.tar.gz",
-      "sha256": "7f7d9763d2babcffee7bd285440ded0c64ecbe47ff7e07931e29940a999bf231",
-      "bytes": 6478,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "misaligned_sp",
-      "request_id": 16,
-      "stage": "specialization_rejected",
-      "archive": "16.failure.tar.gz",
-      "sha256": "26f1a3629787caf23a3eac1feb9bc38ee4bf02c4a54c91733f8f82e668d83551",
-      "bytes": 6550,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "overlapping_load_pair",
-      "request_id": 17,
-      "stage": "specialization_rejected",
-      "archive": "17.failure.tar.gz",
-      "sha256": "7a8b6a54926f1d7c550ecb8674a6bf3e51ac2cf9e99611d185f47cd9e4486838",
-      "bytes": 6581,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "writeback_load_overlap",
-      "request_id": 18,
-      "stage": "specialization_rejected",
-      "archive": "18.failure.tar.gz",
-      "sha256": "0a99ac4df2d17686bae7f51bbecdf754fec2ddc2ef3652d0f670b9d09bdc2309",
-      "bytes": 6588,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    },
-    {
-      "name": "writeback_store_overlap",
-      "request_id": 19,
-      "stage": "specialization_rejected",
-      "archive": "19.failure.tar.gz",
-      "sha256": "044ef1fe5ab749ea9df05b2097ac459e8143917512d55c55f71cbd4a36dd8dd4",
-      "bytes": 6587,
-      "candidate_pins_sha256": "d2ba6727ebca5fd814c58f02d78df0017e2ab01013eb529ad097ad3dd1aaba79"
-    }
-  ],
-  "outcomes": [
+  "scope": "complete corrected-linker private compact-worker replay; no current context-repair/app acceptance claim",
+  "cases": [
     {
       "name": "valid_control",
       "assembly": "mov w0,#2; ret",
@@ -220,11 +19,11 @@
         "request_id": 1,
         "source_prog_id": 8,
         "native_sha256": "0e5c0407b26746fe5465c46615365300dee08573ba7d187b35a1935e540703f5",
-        "started": "1970-01-01T00:01:05.025637+00:00",
+        "started": "1970-01-01T00:00:38.389078+00:00",
         "prog_id": 13,
         "status": 0,
-        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/1.success.tar.gz",
-        "finished": "1970-01-01T00:02:36.356528+00:00"
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/1.success.tar.gz",
+        "finished": "1970-01-01T00:01:09.204989+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "valid_executed",
@@ -248,11 +47,11 @@
         "request_id": 2,
         "source_prog_id": 21,
         "native_sha256": "62deafc04c19cf6157b5a1db9e52f7d2ece1f38958afb4a6ba1962e1aa419d9b",
-        "started": "1970-01-01T00:02:42.564266+00:00",
+        "started": "1970-01-01T00:01:14.465817+00:00",
         "prog_id": 26,
         "status": 0,
-        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/2.success.tar.gz",
-        "finished": "1970-01-01T00:04:09.280626+00:00"
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/2.success.tar.gz",
+        "finished": "1970-01-01T00:01:46.804063+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "valid_executed",
@@ -276,11 +75,11 @@
         "request_id": 3,
         "source_prog_id": 34,
         "native_sha256": "f5c5efe2f30e2950ecc98b97ac29f0e9bc7e5e4474a4ea13384d2b0ef3e38d0b",
-        "started": "1970-01-01T00:04:15.818425+00:00",
+        "started": "1970-01-01T00:01:52.099731+00:00",
         "prog_id": 39,
         "status": 0,
-        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/3.success.tar.gz",
-        "finished": "1970-01-01T00:05:49.712146+00:00"
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/3.success.tar.gz",
+        "finished": "1970-01-01T00:03:19.465180+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "valid_executed",
@@ -304,11 +103,11 @@
         "request_id": 4,
         "source_prog_id": 47,
         "native_sha256": "539354542a4e9fbbec15da240a5c8223c0725f644c38cba34ebedc40e42d9e0f",
-        "started": "1970-01-01T00:05:56.583629+00:00",
+        "started": "1970-01-01T00:03:26.416853+00:00",
         "prog_id": 52,
         "status": 0,
-        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/4.success.tar.gz",
-        "finished": "1970-01-01T00:07:33.154978+00:00"
+        "artifact_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/4.success.tar.gz",
+        "finished": "1970-01-01T00:05:04.251885+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "valid_executed",
@@ -330,16 +129,16 @@
         "request_id": 5,
         "source_prog_id": 58,
         "native_sha256": "b59cfc6568481220ac84c773c748076a79d2343db974edfc7e493b3efaefc030",
-        "started": "1970-01-01T00:07:39.874808+00:00",
+        "started": "1970-01-01T00:05:09.770708+00:00",
         "status": -5,
-        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '5', '58', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-0ymk3y35/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-0ymk3y35/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-0ymk3y35/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
-        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '5', '58', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-0ymk3y35/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-0ymk3y35/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-0ymk3y35/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/5.failure.tar.gz",
-        "finished": "1970-01-01T00:09:18.395491+00:00"
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '5', '58', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-j9ebvecb/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-j9ebvecb/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-j9ebvecb/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '5', '58', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-j9ebvecb/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-j9ebvecb/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-j9ebvecb/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/5.failure.tar.gz",
+        "finished": "1970-01-01T00:05:52.039450+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "verifier_rejected",
-      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=790\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=20;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n5: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n6: (62) *(u32 *)(r10 -8) = 0          ; R10=fp0 fp-8=????0\n7: (bf) r1 = r10                      ; R1=fp0 R10=fp0\n8: (07) r1 += -40                     ; R1=fp-40\n9: (79) r1 = *(u64 *)(r1 +8)          ; R1=pkt_end() fp-32=pkt_end()\n10: (71) r0 = *(u8 *)(r1 +0)\nR1 invalid mem access 'pkt_end'\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,10866980,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,10867346,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=8390e88279162497 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1\nchunk_bytes=0:20\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=790\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=20;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n5: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n6: (62) *(u32 *)(r10 -8) = 0          ; R10=fp0 fp-8=????0\n7: (bf) r1 = r10                      ; R1=fp0 R10=fp0\n8: (07) r1 += -40                     ; R1=fp-40\n9: (79) r1 = *(u64 *)(r1 +8)          ; R1=pkt_end() fp-32=pkt_end()\n10: (71) r0 = *(u8 *)(r1 +0)\nR1 invalid mem access 'pkt_end'\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=8390e88279162497 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1\nchunk_bytes=0:20\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
     },
     {
       "name": "past_data_end_write",
@@ -357,16 +156,16 @@
         "request_id": 6,
         "source_prog_id": 68,
         "native_sha256": "9f47d4ab36a5e4c84db06e141115d68fe4300671d4167ff115a2c03376e12908",
-        "started": "1970-01-01T00:09:25.472844+00:00",
+        "started": "1970-01-01T00:05:57.781183+00:00",
         "status": -5,
-        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '6', '68', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-cwsn803l/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-cwsn803l/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-cwsn803l/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
-        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '6', '68', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-cwsn803l/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-cwsn803l/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-cwsn803l/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/6.failure.tar.gz",
-        "finished": "1970-01-01T00:11:00.974549+00:00"
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '6', '68', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-x5z1em86/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-x5z1em86/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-x5z1em86/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '6', '68', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-x5z1em86/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-x5z1em86/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-x5z1em86/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/6.failure.tar.gz",
+        "finished": "1970-01-01T00:06:36.702807+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "verifier_rejected",
-      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=835\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=24;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n5: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n6: (62) *(u32 *)(r10 -8) = 0          ; R10=fp0 fp-8=????0\n7: (bf) r1 = r10                      ; R1=fp0 R10=fp0\n8: (07) r1 += -40                     ; R1=fp-40\n9: (79) r1 = *(u64 *)(r1 +8)          ; R1=pkt_end() fp-32=pkt_end()\n10: (b7) r2 = 1                       ; R2=1\n11: (73) *(u8 *)(r1 +0) = r2\nR1 invalid mem access 'pkt_end'\nprocessed 12 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,10866980,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,10867346,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=28 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=0330b138d1d15997 word_count=7 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=28 final_size_matches=1\nchunk_bytes=0:28\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=835\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=24;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n5: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n6: (62) *(u32 *)(r10 -8) = 0          ; R10=fp0 fp-8=????0\n7: (bf) r1 = r10                      ; R1=fp0 R10=fp0\n8: (07) r1 += -40                     ; R1=fp-40\n9: (79) r1 = *(u64 *)(r1 +8)          ; R1=pkt_end() fp-32=pkt_end()\n10: (b7) r2 = 1                       ; R2=1\n11: (73) *(u8 *)(r1 +0) = r2\nR1 invalid mem access 'pkt_end'\nprocessed 12 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=28 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=0330b138d1d15997 word_count=7 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=28 final_size_matches=1\nchunk_bytes=0:28\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
     },
     {
       "name": "missing_data_end_check",
@@ -384,16 +183,16 @@
         "request_id": 7,
         "source_prog_id": 78,
         "native_sha256": "af2effa86101b552dca5fb6b0fdc69578b705a07ce446a113548707923b31a35",
-        "started": "1970-01-01T00:11:08.015811+00:00",
+        "started": "1970-01-01T00:06:42.464968+00:00",
         "status": -5,
-        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '7', '78', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-pro1vnfs/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-pro1vnfs/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-pro1vnfs/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
-        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '7', '78', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-pro1vnfs/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-pro1vnfs/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-pro1vnfs/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/7.failure.tar.gz",
-        "finished": "1970-01-01T00:12:32.660907+00:00"
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '7', '78', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-9c__47n8/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-9c__47n8/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-9c__47n8/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '7', '78', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-9c__47n8/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-9c__47n8/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-9c__47n8/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/7.failure.tar.gz",
+        "finished": "1970-01-01T00:07:23.014188+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "verifier_rejected",
-      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=850\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=28;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n5: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n6: (62) *(u32 *)(r10 -8) = 0          ; R10=fp0 fp-8=????0\n7: (bf) r1 = r10                      ; R1=fp0 R10=fp0\n8: (07) r1 += -40                     ; R1=fp-40\n9: (79) r1 = *(u64 *)(r1 +0)          ; R1=pkt(r=0) fp-40=pkt(r=0)\n10: (71) r0 = *(u8 *)(r1 +0)\ninvalid access to packet, off=0 size=1, R1(id=0,off=0,r=0)\nR1 offset is outside of the packet\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,10866980,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,10867346,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=7c32214a9a3e17f3 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1\nchunk_bytes=0:20\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=850\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=28;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n5: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n6: (62) *(u32 *)(r10 -8) = 0          ; R10=fp0 fp-8=????0\n7: (bf) r1 = r10                      ; R1=fp0 R10=fp0\n8: (07) r1 += -40                     ; R1=fp-40\n9: (79) r1 = *(u64 *)(r1 +0)          ; R1=pkt(r=0) fp-40=pkt(r=0)\n10: (71) r0 = *(u8 *)(r1 +0)\ninvalid access to packet, off=0 size=1, R1(id=0,off=0,r=0)\nR1 offset is outside of the packet\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=7c32214a9a3e17f3 word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1\nchunk_bytes=0:20\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
     },
     {
       "name": "map_value_oob",
@@ -411,16 +210,16 @@
         "request_id": 8,
         "source_prog_id": 88,
         "native_sha256": "a9028b2c67f9402bb6d397da5ba814ca4e359e8ff8a5c43aec3ecaa33e49a650",
-        "started": "1970-01-01T00:12:39.726219+00:00",
+        "started": "1970-01-01T00:07:28.787844+00:00",
         "status": -5,
-        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '8', '88', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-ivgbsui4/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-ivgbsui4/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-ivgbsui4/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '12', 'null']' returned non-zero exit status 1.",
-        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '8', '88', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-ivgbsui4/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-ivgbsui4/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-ivgbsui4/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '12', 'null']' returned non-zero exit status 1.\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/8.failure.tar.gz",
-        "finished": "1970-01-01T00:14:19.781217+00:00"
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '8', '88', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-u0_y37yg/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-u0_y37yg/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-u0_y37yg/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '12', 'null']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '8', '88', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-u0_y37yg/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-u0_y37yg/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-u0_y37yg/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '12', 'null']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/8.failure.tar.gz",
+        "finished": "1970-01-01T00:08:20.174737+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "verifier_rejected",
-      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=2324\nstub fd_array_cnt=3 fd_array=0:8,1:8,2:6\nstub insns=0:code=183,dst=0,src=3,off=0,imm=32;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n5: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n6: (62) *(u32 *)(r10 -8) = 0          ; R10=fp0 fp-8=????0\n7: (7a) *(u64 *)(r10 -64) = 0         ; R10=fp0 fp-64=0\n8: (bf) r1 = r10                      ; R1=fp0 R10=fp0\n9: (07) r1 += -40                     ; R1=fp-40\n10: (79) r2 = *(u64 *)(r1 +0)         ; R1=fp-40 R2=pkt(r=0) fp-40=pkt(r=0)\n11: (79) r1 = *(u64 *)(r1 +8)         ; R1=pkt_end() fp-32=pkt_end()\n12: (b4) w6 = 0                       ; R6=0\n13: (bf) r3 = r2                      ; R2=pkt(r=0) R3=pkt(r=0)\n14: (07) r3 += 4                      ; R3=pkt(off=4,r=0)\n15: (2d) if r3 > r1 goto pc+21        ; R1=pkt_end() R3=pkt(off=4,r=4)\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (7b) *(u64 *)(r10 -48) = r0       ; R0=scalar(id=1) R10=fp0 fp-48=scalar(id=1)\n18: (7a) *(u64 *)(r10 -56) = 0        ; R10=fp0 fp-56=0\n19: (79) r1 = *(u64 *)(r10 -64)       ; R1=0 R10=fp0 fp-64=0\n20: (57) r1 &= -256                   ; R1=0\n21: (47) r1 |= 10                     ; R1=10\n22: (7b) *(u64 *)(r10 -64) = r1       ; R1=10 R10=fp0 fp-64=10\n23: (18) r1 = 0xffff000005938000      ; R1=map_ptr(map=neg_map,ks=4,vs=8)\n25: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=2,map=neg_map,ks=4,vs=8)\n26: (79) r1 = *(u64 *)(r10 -48)       ; R1=scalar(id=3) R10=fp0 fp-48=scalar(id=3)\n27: (79) r1 = *(u64 *)(r10 -64)       ; R1=10 R10=fp0 fp-64=10\n28: (bf) r2 = r1                      ; R1=10 R2=10\n29: (57) r2 &= 255                    ; R2=10\n30: (15) if r2 == 0x0 goto pc+4       ; R2=10\n31: (54) w1 &= 255                    ; R1=10\n32: (16) if w1 == 0xa goto pc+1       ; R1=10\n34: (79) r1 = *(u64 *)(r10 -56)       ; R1=0 R10=fp0 fp-56=0\n35: (15) if r0 == 0x0 goto pc+1       ; R0=map_value(map=neg_map,ks=4,vs=8)\n36: (79) r6 = *(u64 *)(r0 +8)\ninvalid access to map value, value_size=8 off=8 size=8\nR0 min value is outside of the allowed memory range\nprocessed 35 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n\nkernel log tail:\n4,232,10866980,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,10867346,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=92 reloc_records=2 reloc_bytes=32 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nretained_map_info=6:id=12:type=1:name=neg_map\nnative_blob_diag: fnv64=d69734e66e7e57de word_count=23 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=80 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=92 final_size_matches=1\nchunk_bytes=0:92\nreloc_targets=32:0xffff800080301ca8,80:0xc\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=2698\nstub fd_array_cnt=3 fd_array=0:8,1:8,2:6\nstub insns=0:code=183,dst=0,src=3,off=0,imm=32;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n5: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n6: (62) *(u32 *)(r10 -8) = 0          ; R10=fp0 fp-8=????0\n7: (7a) *(u64 *)(r10 -64) = 0         ; R10=fp0 fp-64=0\n8: (bf) r1 = r10                      ; R1=fp0 R10=fp0\n9: (07) r1 += -40                     ; R1=fp-40\n10: (79) r2 = *(u64 *)(r1 +0)         ; R1=fp-40 R2=pkt(r=0) fp-40=pkt(r=0)\n11: (79) r1 = *(u64 *)(r1 +8)         ; R1=pkt_end() fp-32=pkt_end()\n12: (b4) w6 = 0                       ; R6=0\n13: (bf) r3 = r2                      ; R2=pkt(r=0) R3=pkt(r=0)\n14: (07) r3 += 4                      ; R3=pkt(off=4,r=0)\n15: (2d) if r3 > r1 goto pc+43        ; R1=pkt_end() R3=pkt(off=4,r=4)\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (7b) *(u64 *)(r10 -48) = r0       ; R0=scalar(id=1) R10=fp0 fp-48=scalar(id=1)\n18: (7a) *(u64 *)(r10 -56) = 0        ; R10=fp0 fp-56=0\n19: (79) r1 = *(u64 *)(r10 -64)       ; R1=0 R10=fp0 fp-64=0\n20: (57) r1 &= -256                   ; R1=0\n21: (47) r1 |= 10                     ; R1=10\n22: (7b) *(u64 *)(r10 -64) = r1       ; R1=10 R10=fp0 fp-64=10\n23: (18) r1 = 0xffff000004500c00      ; R1=map_ptr(map=neg_map,ks=4,vs=8)\n25: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=2,map=neg_map,ks=4,vs=8)\n26: (b4) w1 = 0                       ; R1=0\n27: (79) r2 = *(u64 *)(r10 -48)       ; R2=scalar(id=3) R10=fp0 fp-48=scalar(id=3)\n28: (79) r3 = *(u64 *)(r10 -64)       ; R3=10 R10=fp0 fp-64=10\n29: (bf) r4 = r3                      ; R3=10 R4=10\n30: (57) r4 &= 255                    ; R4=10\n31: (15) if r4 == 0x0 goto pc+9       ; R4=10\n32: (bc) w1 = w3                      ; R1=10 R3=10\n33: (54) w1 &= 255                    ; R1=10\n34: (16) if w1 == 0xa goto pc+1       ; R1=10\n36: (79) r2 = *(u64 *)(r10 -56)       ; R2=0 R10=fp0 fp-56=0\n37: (54) w3 &= 255                    ; R3=10\n38: (b4) w1 = 1                       ; R1=1\n39: (16) if w3 == 0xa goto pc+1       ; R3=10\n41: (15) if r0 == 0x0 goto pc+9       ; R0=map_value(map=neg_map,ks=4,vs=8)\n42: (b4) w3 = 1                       ; R3=1\n43: (15) if r2 == 0x0 goto pc+1       ; R2=0\n45: (5c) w1 &= w3                     ; R1=1 R3=1\n46: (79) r6 = *(u64 *)(r0 +8)\ninvalid access to map value, value_size=8 off=8 size=8\nR0 min value is outside of the allowed memory range\nprocessed 43 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=92 reloc_records=2 reloc_bytes=32 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nretained_map_info=6:id=12:type=1:name=neg_map\nnative_blob_diag: fnv64=d69734e66e7e57de word_count=23 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=80 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=92 final_size_matches=1\nchunk_bytes=0:92\nreloc_targets=32:0xffff800080301ca8,80:0xc\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
     },
     {
       "name": "nullable_map_dereference",
@@ -438,16 +237,16 @@
         "request_id": 9,
         "source_prog_id": 94,
         "native_sha256": "2f4681342b27ef34166b6493942a36f9a4e063cfc959428c48ffb73e65748ad2",
-        "started": "1970-01-01T00:14:27.435455+00:00",
+        "started": "1970-01-01T00:08:25.909068+00:00",
         "status": -5,
-        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '9', '94', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-ggmsrdbh/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-ggmsrdbh/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-ggmsrdbh/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '13', 'null']' returned non-zero exit status 1.",
-        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '9', '94', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-ggmsrdbh/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-ggmsrdbh/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-ggmsrdbh/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '13', 'null']' returned non-zero exit status 1.\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/9.failure.tar.gz",
-        "finished": "1970-01-01T00:16:03.267723+00:00"
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '9', '94', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-4lvtnrqj/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-4lvtnrqj/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-4lvtnrqj/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '13', 'null']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '9', '94', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-4lvtnrqj/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-4lvtnrqj/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-4lvtnrqj/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '13', 'null']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/9.failure.tar.gz",
+        "finished": "1970-01-01T00:09:16.957476+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "verifier_rejected",
-      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=2183\nstub fd_array_cnt=3 fd_array=0:8,1:8,2:6\nstub insns=0:code=183,dst=0,src=3,off=0,imm=36;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n5: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n6: (62) *(u32 *)(r10 -8) = 0          ; R10=fp0 fp-8=????0\n7: (7a) *(u64 *)(r10 -64) = 0         ; R10=fp0 fp-64=0\n8: (bf) r1 = r10                      ; R1=fp0 R10=fp0\n9: (07) r1 += -40                     ; R1=fp-40\n10: (79) r2 = *(u64 *)(r1 +0)         ; R1=fp-40 R2=pkt(r=0) fp-40=pkt(r=0)\n11: (79) r1 = *(u64 *)(r1 +8)         ; R1=pkt_end() fp-32=pkt_end()\n12: (b4) w0 = 0                       ; R0=0\n13: (bf) r3 = r2                      ; R2=pkt(r=0) R3=pkt(r=0)\n14: (07) r3 += 4                      ; R3=pkt(off=4,r=0)\n15: (2d) if r3 > r1 goto pc+20        ; R1=pkt_end() R3=pkt(off=4,r=4)\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (7b) *(u64 *)(r10 -48) = r0       ; R0=scalar(id=1) R10=fp0 fp-48=scalar(id=1)\n18: (7a) *(u64 *)(r10 -56) = 0        ; R10=fp0 fp-56=0\n19: (79) r1 = *(u64 *)(r10 -64)       ; R1=0 R10=fp0 fp-64=0\n20: (57) r1 &= -256                   ; R1=0\n21: (47) r1 |= 10                     ; R1=10\n22: (7b) *(u64 *)(r10 -64) = r1       ; R1=10 R10=fp0 fp-64=10\n23: (18) r1 = 0xffff00000593a400      ; R1=map_ptr(map=neg_map,ks=4,vs=8)\n25: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=2,map=neg_map,ks=4,vs=8)\n26: (79) r1 = *(u64 *)(r10 -48)       ; R1=scalar(id=3) R10=fp0 fp-48=scalar(id=3)\n27: (79) r1 = *(u64 *)(r10 -64)       ; R1=10 R10=fp0 fp-64=10\n28: (bf) r2 = r1                      ; R1=10 R2=10\n29: (57) r2 &= 255                    ; R2=10\n30: (15) if r2 == 0x0 goto pc+4       ; R2=10\n31: (54) w1 &= 255                    ; R1=10\n32: (16) if w1 == 0xa goto pc+1       ; R1=10\n34: (79) r1 = *(u64 *)(r10 -56)       ; R1=0 R10=fp0 fp-56=0\n35: (79) r0 = *(u64 *)(r0 +0)\nR0 invalid mem access 'map_value_or_null'\nprocessed 34 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n\nkernel log tail:\n4,232,10866980,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,10867346,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=92 reloc_records=2 reloc_bytes=32 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nretained_map_info=6:id=13:type=1:name=neg_map\nnative_blob_diag: fnv64=e4a770fd789d1c09 word_count=23 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=80 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=92 final_size_matches=1\nchunk_bytes=0:92\nreloc_targets=32:0xffff800080301ca8,80:0xd\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=2235\nstub fd_array_cnt=3 fd_array=0:8,1:8,2:6\nstub insns=0:code=183,dst=0,src=3,off=0,imm=36;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (61) r2 = *(u32 *)(r1 +0)          ; R1=ctx() R2=pkt(r=0)\n1: (7b) *(u64 *)(r10 -40) = r2        ; R2=pkt(r=0) R10=fp0 fp-40=pkt(r=0)\n2: (61) r1 = *(u32 *)(r1 +4)          ; R1=pkt_end()\n3: (7b) *(u64 *)(r10 -32) = r1        ; R1=pkt_end() R10=fp0 fp-32=pkt_end()\n4: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n5: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n6: (62) *(u32 *)(r10 -8) = 0          ; R10=fp0 fp-8=????0\n7: (7a) *(u64 *)(r10 -64) = 0         ; R10=fp0 fp-64=0\n8: (bf) r1 = r10                      ; R1=fp0 R10=fp0\n9: (07) r1 += -40                     ; R1=fp-40\n10: (79) r2 = *(u64 *)(r1 +0)         ; R1=fp-40 R2=pkt(r=0) fp-40=pkt(r=0)\n11: (79) r1 = *(u64 *)(r1 +8)         ; R1=pkt_end() fp-32=pkt_end()\n12: (b4) w6 = 0                       ; R6=0\n13: (bf) r3 = r2                      ; R2=pkt(r=0) R3=pkt(r=0)\n14: (07) r3 += 4                      ; R3=pkt(off=4,r=0)\n15: (2d) if r3 > r1 goto pc+27        ; R1=pkt_end() R3=pkt(off=4,r=4)\n16: (b7) r0 = 2                       ; R0=scalar()\n17: (7b) *(u64 *)(r10 -48) = r0       ; R0=scalar(id=1) R10=fp0 fp-48=scalar(id=1)\n18: (7a) *(u64 *)(r10 -56) = 0        ; R10=fp0 fp-56=0\n19: (79) r1 = *(u64 *)(r10 -64)       ; R1=0 R10=fp0 fp-64=0\n20: (57) r1 &= -256                   ; R1=0\n21: (47) r1 |= 10                     ; R1=10\n22: (7b) *(u64 *)(r10 -64) = r1       ; R1=10 R10=fp0 fp-64=10\n23: (18) r1 = 0xffff00000557a400      ; R1=map_ptr(map=neg_map,ks=4,vs=8)\n25: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=2,map=neg_map,ks=4,vs=8)\n26: (79) r1 = *(u64 *)(r10 -48)       ; R1=scalar(id=3) R10=fp0 fp-48=scalar(id=3)\n27: (79) r2 = *(u64 *)(r10 -64)       ; R2=10 R10=fp0 fp-64=10\n28: (bf) r3 = r2                      ; R2=10 R3=10\n29: (57) r3 &= 255                    ; R3=10\n30: (15) if r3 == 0x0 goto pc+10      ; R3=10\n31: (bc) w3 = w2                      ; R2=10 R3=10\n32: (54) w3 &= 255                    ; R3=10\n33: (16) if w3 == 0xa goto pc+1       ; R3=10\n35: (79) r1 = *(u64 *)(r10 -56)       ; R1=0 R10=fp0 fp-56=0\n36: (79) r6 = *(u64 *)(r0 +0)\nR0 invalid mem access 'map_value_or_null'\nprocessed 35 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=92 reloc_records=2 reloc_bytes=32 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=1 relocated_map_ids=1 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nretained_map_info=6:id=13:type=1:name=neg_map\nnative_blob_diag: fnv64=e4a770fd789d1c09 word_count=23 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=2 first_zero_offset=80 chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=92 final_size_matches=1\nchunk_bytes=0:92\nreloc_targets=32:0xffff800080301ca8,80:0xd\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
     },
     {
       "name": "invalid_helper_argument",
@@ -465,16 +264,16 @@
         "request_id": 10,
         "source_prog_id": 100,
         "native_sha256": "dad4bdf806f097d9aad6e7c96549664240ad2e44293f14e7e896a6809cb949f9",
-        "started": "1970-01-01T00:16:10.951955+00:00",
+        "started": "1970-01-01T00:09:22.712837+00:00",
         "status": -5,
-        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '10', '100', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-g2sdq92t/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-g2sdq92t/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-g2sdq92t/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
-        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '10', '100', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-g2sdq92t/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-g2sdq92t/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-g2sdq92t/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/10.failure.tar.gz",
-        "finished": "1970-01-01T00:17:55.323065+00:00"
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '10', '100', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-n3dikpmq/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-n3dikpmq/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-n3dikpmq/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '10', '100', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-n3dikpmq/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-n3dikpmq/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-n3dikpmq/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/10.failure.tar.gz",
+        "finished": "1970-01-01T00:10:02.507523+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "verifier_rejected",
-      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=738\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=40;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (7b) *(u64 *)(r10 -8) = r0         ; R0=scalar(id=1) R10=fp0 fp-8=scalar(id=1)\n3: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n4: (79) r1 = *(u64 *)(r10 -24)        ; R1=0 R10=fp0 fp-24=0\n5: (57) r1 &= -256                    ; R1=0\n6: (47) r1 |= 10                      ; R1=10\n7: (7b) *(u64 *)(r10 -24) = r1        ; R1=10 R10=fp0 fp-24=10\n8: (b7) r1 = 1                        ; R1=1\n9: (b7) r2 = 0                        ; R2=0\n10: (85) call bpf_map_lookup_elem#1\nR1 type=scalar expected=map_ptr\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,10866980,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,10867346,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=44 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=f844212fb31d795e word_count=11 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=44 final_size_matches=1\nchunk_bytes=0:44\nreloc_targets=12:0xffff8000802f11e0\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=738\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=40;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (7b) *(u64 *)(r10 -8) = r0         ; R0=scalar(id=1) R10=fp0 fp-8=scalar(id=1)\n3: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n4: (79) r1 = *(u64 *)(r10 -24)        ; R1=0 R10=fp0 fp-24=0\n5: (57) r1 &= -256                    ; R1=0\n6: (47) r1 |= 10                      ; R1=10\n7: (7b) *(u64 *)(r10 -24) = r1        ; R1=10 R10=fp0 fp-24=10\n8: (b7) r1 = 1                        ; R1=1\n9: (b7) r2 = 0                        ; R2=0\n10: (85) call bpf_map_lookup_elem#1\nR1 type=scalar expected=map_ptr\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=44 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=f844212fb31d795e word_count=11 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=44 final_size_matches=1\nchunk_bytes=0:44\nreloc_targets=12:0xffff8000802f11e0\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
     },
     {
       "name": "stack_oob",
@@ -492,16 +291,16 @@
         "request_id": 11,
         "source_prog_id": 110,
         "native_sha256": "fc982ce7fc4a52e051e4c7037c2216aeccd87e1deb48c460dd79c5875a25c8a9",
-        "started": "1970-01-01T00:18:03.012925+00:00",
+        "started": "1970-01-01T00:10:08.225011+00:00",
         "status": -5,
-        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '11', '110', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-7x7qiv6e/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-7x7qiv6e/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-7x7qiv6e/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
-        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '11', '110', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-7x7qiv6e/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-7x7qiv6e/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-7x7qiv6e/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/11.failure.tar.gz",
-        "finished": "1970-01-01T00:20:01.362345+00:00"
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '11', '110', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-8xwmjaxq/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-8xwmjaxq/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-8xwmjaxq/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '11', '110', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-8xwmjaxq/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-8xwmjaxq/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-8xwmjaxq/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/11.failure.tar.gz",
+        "finished": "1970-01-01T00:10:44.246648+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "verifier_rejected",
-      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=438\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=44;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n1: (b7) r1 = 1024                     ; R1=1024\n2: (bf) r2 = r1                       ; R1=1024 R2=1024\n3: (57) r2 &= 7                       ; R2=0\n4: (55) if r2 != 0x0 goto pc+2        ; R2=0\n5: (79) r1 = *(u64 *)(r10 -8)\ninvalid read from stack off -8+0 size 8\nprocessed 6 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,10866980,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,10867346,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=04e9cefe01762702 word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1\nchunk_bytes=0:12\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=438\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=44;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n1: (b7) r1 = 1024                     ; R1=1024\n2: (bf) r2 = r1                       ; R1=1024 R2=1024\n3: (57) r2 &= 7                       ; R2=0\n4: (55) if r2 != 0x0 goto pc+2        ; R2=0\n5: (79) r1 = *(u64 *)(r10 -8)\ninvalid read from stack off -8+0 size 8\nprocessed 6 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=04e9cefe01762702 word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1\nchunk_bytes=0:12\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
     },
     {
       "name": "uninitialized_stack",
@@ -519,16 +318,16 @@
         "request_id": 12,
         "source_prog_id": 120,
         "native_sha256": "a50aa1007ba884a8a4a1d12598c5a8d84a9ed25fcf3e73d68d0c07ca6768be04",
-        "started": "1970-01-01T00:20:10.488243+00:00",
+        "started": "1970-01-01T00:10:50.061861+00:00",
         "status": -5,
-        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '12', '120', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-a5ovkvas/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-a5ovkvas/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-a5ovkvas/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
-        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '12', '120', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-a5ovkvas/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-a5ovkvas/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-a5ovkvas/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/12.failure.tar.gz",
-        "finished": "1970-01-01T00:22:15.841360+00:00"
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '12', '120', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-367x0pev/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-367x0pev/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-367x0pev/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '12', '120', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-367x0pev/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-367x0pev/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-367x0pev/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/12.failure.tar.gz",
+        "finished": "1970-01-01T00:11:25.863327+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "verifier_rejected",
-      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=432\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=48;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n1: (b7) r1 = -8                       ; R1=-8\n2: (bf) r2 = r1                       ; R1=-8 R2=-8\n3: (57) r2 &= 7                       ; R2=0\n4: (55) if r2 != 0x0 goto pc+2        ; R2=0\n5: (79) r1 = *(u64 *)(r10 -8)\ninvalid read from stack off -8+0 size 8\nprocessed 6 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,10866980,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,10867346,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=ed7a608bbfe6da68 word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1\nchunk_bytes=0:12\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=432\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=48;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n1: (b7) r1 = -8                       ; R1=-8\n2: (bf) r2 = r1                       ; R1=-8 R2=-8\n3: (57) r2 &= 7                       ; R2=0\n4: (55) if r2 != 0x0 goto pc+2        ; R2=0\n5: (79) r1 = *(u64 *)(r10 -8)\ninvalid read from stack off -8+0 size 8\nprocessed 6 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=12 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=ed7a608bbfe6da68 word_count=3 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=12 final_size_matches=1\nchunk_bytes=0:12\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
     },
     {
       "name": "unbounded_loop",
@@ -546,12 +345,12 @@
         "request_id": 13,
         "source_prog_id": 130,
         "native_sha256": "4ad10da9f1969bf96619f6f451001c29fb976b638d395a7293e1dbf4b75f90b8",
-        "started": "1970-01-01T00:22:24.659773+00:00",
+        "started": "1970-01-01T00:11:31.610013+00:00",
         "status": -5,
-        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '13', '130', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-httb8zoy/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-httb8zoy/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-httb8zoy/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
-        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '13', '130', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-httb8zoy/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-httb8zoy/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/request-httb8zoy/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/13.failure.tar.gz",
-        "finished": "1970-01-01T00:24:10.925484+00:00"
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '13', '130', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-teglrl93/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-teglrl93/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-teglrl93/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '13', '130', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-teglrl93/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-teglrl93/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-teglrl93/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/13.failure.tar.gz",
+        "finished": "1970-01-01T00:12:02.309826+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "loader_rejected",
@@ -573,12 +372,12 @@
         "request_id": 14,
         "source_prog_id": 140,
         "native_sha256": "691911d84bf7d44a61fdedfca7f4f6db68ea79596c1578f8b828b622b89bf0f9",
-        "started": "1970-01-01T00:24:19.407869+00:00",
+        "started": "1970-01-01T00:12:08.039442+00:00",
         "status": -22,
         "error": "unbounded indirect target at 0x4: br x1",
         "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 69, in build\n    result = specialize(native, entry, metadata, output_dir, native_link)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 60, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 51, in generate\n    text = render(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 993, in render_program\n    targets_by_addr = indirect_targets(all_insns)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 793, in indirect_targets\n    raise ValueError(f\"unbounded indirect target at 0x{insn.addr:x}: {insn.raw}\")\nValueError: unbounded indirect target at 0x4: br x1\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/14.failure.tar.gz",
-        "finished": "1970-01-01T00:24:38.591596+00:00"
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/14.failure.tar.gz",
+        "finished": "1970-01-01T00:12:13.245151+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "specialization_rejected",
@@ -600,12 +399,12 @@
         "request_id": 15,
         "source_prog_id": 146,
         "native_sha256": "5da6847a41519b2fc4aabfb7f59cf5522c7d5a70551276827c213e80d0d7b88d",
-        "started": "1970-01-01T00:24:46.572472+00:00",
+        "started": "1970-01-01T00:12:18.861579+00:00",
         "status": -22,
         "error": "unsupported arm64 instruction: brk #0x0",
         "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 69, in build\n    result = specialize(native, entry, metadata, output_dir, native_link)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 60, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 51, in generate\n    text = render(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 1112, in render_program\n    append_insn(lines, insn, all_addrs, next_by_addr.get(insn.addr),\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 922, in append_insn\n    enc = encode(insn, rodata_idents, reloc_idents)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 650, in encode\n    raise ValueError(f\"unsupported arm64 instruction: {insn.raw}\")\nValueError: unsupported arm64 instruction: brk #0x0\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/15.failure.tar.gz",
-        "finished": "1970-01-01T00:25:07.872652+00:00"
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/15.failure.tar.gz",
+        "finished": "1970-01-01T00:12:24.319727+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "specialization_rejected",
@@ -627,12 +426,12 @@
         "request_id": 16,
         "source_prog_id": 152,
         "native_sha256": "f4221688b7d5f9a49606f6b9c290f1640f2d1e4e0f3871712cef663f989a6d17",
-        "started": "1970-01-01T00:25:16.541309+00:00",
+        "started": "1970-01-01T00:12:29.879273+00:00",
         "status": -22,
         "error": "native SP alignment fault at 0x10: ldrb w0, [sp]",
         "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 69, in build\n    result = specialize(native, entry, metadata, output_dir, native_link)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 60, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 51, in generate\n    text = render(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 994, in render_program\n    stack_min, stack_max = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 45, in check\n    bounds = analysis.check_definedness(*args)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 275, in check_definedness\n    raise ValueError(f'native SP alignment fault at {where}')\nValueError: native SP alignment fault at 0x10: ldrb w0, [sp]\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/16.failure.tar.gz",
-        "finished": "1970-01-01T00:25:27.987135+00:00"
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/16.failure.tar.gz",
+        "finished": "1970-01-01T00:12:35.074175+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "specialization_rejected",
@@ -654,12 +453,12 @@
         "request_id": 17,
         "source_prog_id": 158,
         "native_sha256": "0c21de7f41b9fe37ed93bcd3effd8119a773bf18dfa58c99f916f67294181246",
-        "started": "1970-01-01T00:25:36.271283+00:00",
+        "started": "1970-01-01T00:12:40.389177+00:00",
         "status": -22,
         "error": "constrained-unpredictable native LDP destination overlap at 0xc: ldp x1, x1, [sp]",
         "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 69, in build\n    result = specialize(native, entry, metadata, output_dir, native_link)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 60, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 51, in generate\n    text = render(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 994, in render_program\n    stack_min, stack_max = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 45, in check\n    bounds = analysis.check_definedness(*args)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 260, in check_definedness\n    raise ValueError(f'constrained-unpredictable native LDP destination overlap at {where}')\nValueError: constrained-unpredictable native LDP destination overlap at 0xc: ldp x1, x1, [sp]\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/17.failure.tar.gz",
-        "finished": "1970-01-01T00:25:49.738655+00:00"
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/17.failure.tar.gz",
+        "finished": "1970-01-01T00:12:46.060498+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "specialization_rejected",
@@ -681,12 +480,12 @@
         "request_id": 18,
         "source_prog_id": 164,
         "native_sha256": "5d87182ae0e9031e2bfbf8ac1e8036a31c23e9dd0b89a6d40b02fea5b9650608",
-        "started": "1970-01-01T00:25:58.204165+00:00",
+        "started": "1970-01-01T00:12:51.415254+00:00",
         "status": -22,
         "error": "constrained-unpredictable native writeback/base register overlap at 0x10: ldr x1, [x1], #8",
         "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 69, in build\n    result = specialize(native, entry, metadata, output_dir, native_link)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 60, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 51, in generate\n    text = render(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 994, in render_program\n    stack_min, stack_max = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 45, in check\n    bounds = analysis.check_definedness(*args)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 267, in check_definedness\n    raise ValueError(f'constrained-unpredictable native writeback/base register overlap at {where}')\nValueError: constrained-unpredictable native writeback/base register overlap at 0x10: ldr x1, [x1], #8\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/18.failure.tar.gz",
-        "finished": "1970-01-01T00:26:10.040417+00:00"
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/18.failure.tar.gz",
+        "finished": "1970-01-01T00:12:56.628569+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "specialization_rejected",
@@ -708,16 +507,422 @@
         "request_id": 19,
         "source_prog_id": 170,
         "native_sha256": "b1142b61bed214bdcfd665a0f9718dca18f13f508630009f8007f836d59cc012",
-        "started": "1970-01-01T00:26:18.094034+00:00",
+        "started": "1970-01-01T00:13:02.120786+00:00",
         "status": -22,
         "error": "constrained-unpredictable native writeback/base register overlap at 0x10: str x1, [x1], #8",
         "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 69, in build\n    result = specialize(native, entry, metadata, output_dir, native_link)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 60, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 51, in generate\n    text = render(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 994, in render_program\n    stack_min, stack_max = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 45, in check\n    bounds = analysis.check_definedness(*args)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 267, in check_definedness\n    raise ValueError(f'constrained-unpredictable native writeback/base register overlap at {where}')\nValueError: constrained-unpredictable native writeback/base register overlap at 0x10: str x1, [x1], #8\n",
-        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-l8a99gie/requests/19.failure.tar.gz",
-        "finished": "1970-01-01T00:26:30.701279+00:00"
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/19.failure.tar.gz",
+        "finished": "1970-01-01T00:13:07.519702+00:00"
       },
       "unsafe_native_executed": false,
       "stage": "specialization_rejected",
       "message": "constrained-unpredictable native writeback/base register overlap at 0x10: str x1, [x1], #8"
+    },
+    {
+      "name": "scalar_vector_load_clear_high",
+      "assembly": "sub sp, sp, #32; mov x1, #1; str xzr, [sp]; str x1, [sp, #8]; ldr q0, [sp]; ldr d0, [sp]; str q0, [sp, #16]; ldr x1, [sp, #24]; cbnz x1, 1f; mov x0, #0; ldr x0, [x0]; 1: add sp, sp, #32; mov w0, #2; ret",
+      "negative": true,
+      "native_sha256": "7b377f88c0fc305b2b0842e45663a9b0c5d602c23a089ba454c63d4f986d60cc",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/scalar_vector_load_clear_high.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/scalar_vector_load_clear_high.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 20,
+        "source_prog_id": 176,
+        "native_sha256": "7b377f88c0fc305b2b0842e45663a9b0c5d602c23a089ba454c63d4f986d60cc",
+        "started": "1970-01-01T00:13:12.965155+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '20', '176', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-ntt1k9aq/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-ntt1k9aq/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-ntt1k9aq/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '20', '176', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-ntt1k9aq/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-ntt1k9aq/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-ntt1k9aq/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/20.failure.tar.gz",
+        "finished": "1970-01-01T00:14:10.828311+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1846\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=54;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (7a) *(u64 *)(r10 -48) = 0         ; R10=fp0 fp-48=0\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (7a) *(u64 *)(r10 -8) = 0          ; R10=fp0 fp-8=0\n3: (79) r1 = *(u64 *)(r10 -48)        ; R1=0 R10=fp0 fp-48=0\n4: (57) r1 &= -256                    ; R1=0\n5: (7b) *(u64 *)(r10 -48) = r1        ; R1=0 R10=fp0 fp-48=0\n6: (7a) *(u64 *)(r10 -16) = 1         ; R10=fp0 fp-16=1\n7: (79) r1 = *(u64 *)(r10 -48)        ; R1=0 R10=fp0 fp-48=0\n8: (57) r1 &= -65281                  ; R1=0\n9: (7b) *(u64 *)(r10 -48) = r1        ; R1=0 R10=fp0 fp-48=0\n10: (79) r1 = *(u64 *)(r10 -8)        ; R1=0 R10=fp0 fp-8=0\n11: (79) r1 = *(u64 *)(r10 -16)       ; R1=1 R10=fp0 fp-16=1\n12: (79) r1 = *(u64 *)(r10 -8)        ; R1=0 R10=fp0 fp-8=0\n13: (7b) *(u64 *)(r10 -24) = r1       ; R1=0 R10=fp0 fp-24=0\n14: (79) r1 = *(u64 *)(r10 -48)       ; R1=0 R10=fp0 fp-48=0\n15: (57) r1 &= -16711681              ; R1=0\n16: (7b) *(u64 *)(r10 -48) = r1       ; R1=0 R10=fp0 fp-48=0\n17: (7a) *(u64 *)(r10 -32) = 0        ; R10=fp0 fp-32=0\n18: (18) r1 = 0xffffffff00ffffff      ; R1=0xffffffff00ffffff\n20: (79) r2 = *(u64 *)(r10 -48)       ; R2=0 R10=fp0 fp-48=0\n21: (5f) r2 &= r1                     ; R1=0xffffffff00ffffff R2=0\n22: (7b) *(u64 *)(r10 -48) = r2       ; R2=0 R10=fp0 fp-48=0\n23: (79) r1 = *(u64 *)(r10 -32)       ; R1=0 R10=fp0 fp-32=0\n24: (79) r2 = *(u64 *)(r10 -48)       ; R2=0 R10=fp0 fp-48=0\n25: (77) r2 >>= 24                    ; R2=0\n26: (bc) w3 = w2                      ; R2=0 R3=0\n27: (54) w3 &= 255                    ; R3=0\n28: (16) if w3 == 0x0 goto pc+11      ; R3=0\n40: (55) if r1 != 0x0 goto pc+2       ; R1=0\n41: (b7) r1 = 0                       ; R1=0\n42: (79) r1 = *(u64 *)(r1 +0)\nR1 invalid mem access 'scalar'\nprocessed 31 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=60 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=75b15acc0ab9c9b7 word_count=15 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=60 final_size_matches=1\nchunk_bytes=0:60\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "unpaired_stxr_failure",
+      "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret",
+      "negative": true,
+      "native_sha256": "cc18f710c67956078237759625d7fefc65727a4170c193f9ab6ae92109a607ef",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/unpaired_stxr_failure.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/unpaired_stxr_failure.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 21,
+        "source_prog_id": 186,
+        "native_sha256": "cc18f710c67956078237759625d7fefc65727a4170c193f9ab6ae92109a607ef",
+        "started": "1970-01-01T00:14:16.595815+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '21', '186', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-q2q1cemy/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-q2q1cemy/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-q2q1cemy/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '21', '186', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-q2q1cemy/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-q2q1cemy/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-q2q1cemy/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/21.failure.tar.gz",
+        "finished": "1970-01-01T00:15:01.976008+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=825\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=58;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (7a) *(u64 *)(r10 -8) = 2          ; R10=fp0 fp-8=2\n3: (79) r1 = *(u64 *)(r10 -16)        ; R1=0 R10=fp0 fp-16=0\n4: (57) r1 &= -256                    ; R1=0\n5: (7b) *(u64 *)(r10 -16) = r1        ; R1=0 R10=fp0 fp-16=0\n6: (b7) r0 = 16                       ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n7: (55) if r0 != 0x0 goto pc+5 13: R0=1 R1=0 R10=fp0 fp-8=2 fp-16=0\n13: (b7) r1 = 0                       ; R1=0\n14: (61) r1 = *(u32 *)(r1 +0)\nR1 invalid mem access 'scalar'\nprocessed 18 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\n5) goto pc+2\n15: (b4) w0 = 2                       ; R0=2\n16: (05) goto pc+0\n17: (95) exit\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=52 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=d14d398858aea937 word_count=13 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=52 final_size_matches=1\nchunk_bytes=0:52\nreloc_targets=16:0x1000000006\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "unpaired_stlxr_failure",
+      "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stlxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret",
+      "negative": true,
+      "native_sha256": "eca5e9bb32b67d7cf02066072a3b14c07caf4c8897aae11b651497ce3906c360",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/unpaired_stlxr_failure.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/unpaired_stlxr_failure.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 22,
+        "source_prog_id": 196,
+        "native_sha256": "eca5e9bb32b67d7cf02066072a3b14c07caf4c8897aae11b651497ce3906c360",
+        "started": "1970-01-01T00:15:07.708411+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '22', '196', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-blz5lhwf/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-blz5lhwf/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-blz5lhwf/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '22', '196', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-blz5lhwf/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-blz5lhwf/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-blz5lhwf/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/22.failure.tar.gz",
+        "finished": "1970-01-01T00:15:50.880622+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=825\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=62;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (7a) *(u64 *)(r10 -16) = 0         ; R10=fp0 fp-16=0\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (7a) *(u64 *)(r10 -8) = 2          ; R10=fp0 fp-8=2\n3: (79) r1 = *(u64 *)(r10 -16)        ; R1=0 R10=fp0 fp-16=0\n4: (57) r1 &= -256                    ; R1=0\n5: (7b) *(u64 *)(r10 -16) = r1        ; R1=0 R10=fp0 fp-16=0\n6: (b7) r0 = 16                       ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n7: (55) if r0 != 0x0 goto pc+5 13: R0=1 R1=0 R10=fp0 fp-8=2 fp-16=0\n13: (b7) r1 = 0                       ; R1=0\n14: (61) r1 = *(u32 *)(r1 +0)\nR1 invalid mem access 'scalar'\nprocessed 18 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\n\n5) goto pc+2\n15: (b4) w0 = 2                       ; R0=2\n16: (05) goto pc+0\n17: (95) exit\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=52 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=0345afe1383a6db7 word_count=13 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=52 final_size_matches=1\nchunk_bytes=0:52\nreloc_targets=16:0x1000000006\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "paired_stxr_failure",
+      "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; ldxr x1, [x2]; stxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret",
+      "negative": true,
+      "native_sha256": "15115e53de99c5297833321a2a7d085a1d35e24b45284980af6d679c7a8d47b7",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/paired_stxr_failure.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/paired_stxr_failure.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 23,
+        "source_prog_id": 206,
+        "native_sha256": "15115e53de99c5297833321a2a7d085a1d35e24b45284980af6d679c7a8d47b7",
+        "started": "1970-01-01T00:15:56.735656+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '23', '206', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-5bvtdmvz/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-5bvtdmvz/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-5bvtdmvz/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '23', '206', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-5bvtdmvz/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-5bvtdmvz/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-5bvtdmvz/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/23.failure.tar.gz",
+        "finished": "1970-01-01T00:16:44.902930+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1469\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=66;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (bf) r1 = r0                       ; R0=scalar(id=1) R1=scalar(id=1)\n3: (7a) *(u64 *)(r10 -8) = 2          ; R10=fp0 fp-8=2\n4: (79) r2 = *(u64 *)(r10 -24)        ; R2=0 R10=fp0 fp-24=0\n5: (57) r2 &= -256                    ; R2=0\n6: (7b) *(u64 *)(r10 -24) = r2        ; R2=0 R10=fp0 fp-24=0\n7: (79) r3 = *(u64 *)(r10 -8)         ; R3=2 R10=fp0 fp-8=2\n8: (79) r2 = *(u64 *)(r10 -24)        ; R2=0 R10=fp0 fp-24=0\n9: (bc) w4 = w2                       ; R2=0 R4=0\n10: (bc) w5 = w4                      ; R4=0 R5=0\n11: (54) w5 &= 255                    ; R5=0\n12: (16) if w5 == 0xa goto pc+1       ; R5=0\n13: (56) if w5 != 0x4 goto pc+1       ; R5=0\n15: (b7) r0 = 20                      ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n16: (55) if r0 != 0x0 goto pc+7 24: R0=1 R1=scalar(id=1) R2=0 R3=2 R4=0 R5=0 R10=fp0 fp-8=2 fp-24=0\n24: (b7) r1 = 0                       ; R1=0\n25: (61) r1 = *(u32 *)(r1 +0)\nR1 invalid mem access 'scalar'\nprocessed 30 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n\n*)(r10 -24)       ; R1=0 R10=fp0 fp-24=0\n35: (57) r1 &= -256                   ; R1=0\n36: (4f) r1 |= r2                     ; R1=0 R2=0\n37: (7b) *(u64 *)(r10 -24) = r1       ; R1=0 R10=fp0 fp-24=0\n38: (b4) w0 = 2                       ; R0=2\n39: (05) goto pc+0\n40: (95) exit\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=52 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=99cbebdf4869bc15 word_count=13 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=52 final_size_matches=1\nchunk_bytes=0:52\nreloc_targets=20:0x140000000f\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "paired_stlxr_failure",
+      "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; ldaxr x1, [x2]; stlxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret",
+      "negative": true,
+      "native_sha256": "4d51789865c04e46dbdd0fdd1ebb5d07ab99d484e97c5549b7caa39fc4ba7dcd",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/paired_stlxr_failure.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/paired_stlxr_failure.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 24,
+        "source_prog_id": 216,
+        "native_sha256": "4d51789865c04e46dbdd0fdd1ebb5d07ab99d484e97c5549b7caa39fc4ba7dcd",
+        "started": "1970-01-01T00:16:50.618227+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '24', '216', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-gh55viyn/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-gh55viyn/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-gh55viyn/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '24', '216', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-gh55viyn/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-gh55viyn/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-gh55viyn/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/24.failure.tar.gz",
+        "finished": "1970-01-01T00:17:37.609703+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=1469\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=70;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (7a) *(u64 *)(r10 -24) = 0         ; R10=fp0 fp-24=0\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (bf) r1 = r0                       ; R0=scalar(id=1) R1=scalar(id=1)\n3: (7a) *(u64 *)(r10 -8) = 2          ; R10=fp0 fp-8=2\n4: (79) r2 = *(u64 *)(r10 -24)        ; R2=0 R10=fp0 fp-24=0\n5: (57) r2 &= -256                    ; R2=0\n6: (7b) *(u64 *)(r10 -24) = r2        ; R2=0 R10=fp0 fp-24=0\n7: (79) r3 = *(u64 *)(r10 -8)         ; R3=2 R10=fp0 fp-8=2\n8: (79) r2 = *(u64 *)(r10 -24)        ; R2=0 R10=fp0 fp-24=0\n9: (bc) w4 = w2                       ; R2=0 R4=0\n10: (bc) w5 = w4                      ; R4=0 R5=0\n11: (54) w5 &= 255                    ; R5=0\n12: (16) if w5 == 0xa goto pc+1       ; R5=0\n13: (56) if w5 != 0x4 goto pc+1       ; R5=0\n15: (b7) r0 = 20                      ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))\n16: (55) if r0 != 0x0 goto pc+7 24: R0=1 R1=scalar(id=1) R2=0 R3=2 R4=0 R5=0 R10=fp0 fp-8=2 fp-24=0\n24: (b7) r1 = 0                       ; R1=0\n25: (61) r1 = *(u32 *)(r1 +0)\nR1 invalid mem access 'scalar'\nprocessed 30 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\n\n*)(r10 -24)       ; R1=0 R10=fp0 fp-24=0\n35: (57) r1 &= -256                   ; R1=0\n36: (4f) r1 |= r2                     ; R1=0 R2=0\n37: (7b) *(u64 *)(r10 -24) = r1       ; R1=0 R10=fp0 fp-24=0\n38: (b4) w0 = 2                       ; R0=2\n39: (05) goto pc+0\n40: (95) exit\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=52 reloc_records=1 reloc_bytes=16 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=3081baaedcf15c15 word_count=13 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=52 final_size_matches=1\nchunk_bytes=0:52\nreloc_targets=20:0x140000000f\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "stxr_status_data_overlap",
+      "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stxr w1, x1, [x2]; add sp, sp, #16; mov w0, #2; ret",
+      "negative": true,
+      "native_sha256": "b648c256af28b5fd786f3aadcc85406ac080be85aad1338386f95d180567ef61",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/stxr_status_data_overlap.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/stxr_status_data_overlap.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 25,
+        "source_prog_id": 226,
+        "native_sha256": "b648c256af28b5fd786f3aadcc85406ac080be85aad1338386f95d180567ef61",
+        "started": "1970-01-01T00:17:43.283951+00:00",
+        "status": -22,
+        "error": "constrained-unpredictable native exclusive status register overlap at 0x10: stxr w1, x1, [x2]",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 69, in build\n    result = specialize(native, entry, metadata, output_dir, native_link)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 60, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 51, in generate\n    text = render(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 994, in render_program\n    stack_min, stack_max = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 45, in check\n    bounds = analysis.check_definedness(*args)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 256, in check_definedness\n    raise ValueError(f'constrained-unpredictable native exclusive status register overlap at {where}')\nValueError: constrained-unpredictable native exclusive status register overlap at 0x10: stxr w1, x1, [x2]\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/25.failure.tar.gz",
+        "finished": "1970-01-01T00:17:48.843106+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "specialization_rejected",
+      "message": "constrained-unpredictable native exclusive status register overlap at 0x10: stxr w1, x1, [x2]"
+    },
+    {
+      "name": "stlxr_status_data_overlap",
+      "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stlxr w1, w1, [x2]; add sp, sp, #16; mov w0, #2; ret",
+      "negative": true,
+      "native_sha256": "4e99d694c78dba6569d422d9b8245189e098fd58da6b17f5b3fab1795d94ab34",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/stlxr_status_data_overlap.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/stlxr_status_data_overlap.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 26,
+        "source_prog_id": 232,
+        "native_sha256": "4e99d694c78dba6569d422d9b8245189e098fd58da6b17f5b3fab1795d94ab34",
+        "started": "1970-01-01T00:17:54.234129+00:00",
+        "status": -22,
+        "error": "constrained-unpredictable native exclusive status register overlap at 0x10: stlxr w1, w1, [x2]",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 69, in build\n    result = specialize(native, entry, metadata, output_dir, native_link)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 60, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 51, in generate\n    text = render(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 994, in render_program\n    stack_min, stack_max = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 45, in check\n    bounds = analysis.check_definedness(*args)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 256, in check_definedness\n    raise ValueError(f'constrained-unpredictable native exclusive status register overlap at {where}')\nValueError: constrained-unpredictable native exclusive status register overlap at 0x10: stlxr w1, w1, [x2]\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/26.failure.tar.gz",
+        "finished": "1970-01-01T00:17:59.546252+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "specialization_rejected",
+      "message": "constrained-unpredictable native exclusive status register overlap at 0x10: stlxr w1, w1, [x2]"
+    },
+    {
+      "name": "stxr_status_base_overlap",
+      "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stxr w2, x1, [x2]; add sp, sp, #16; mov w0, #2; ret",
+      "negative": true,
+      "native_sha256": "8afdf2fd098a7a164c45b31a035d44c39ed290d89d407aea01015503f84ca547",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/stxr_status_base_overlap.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/stxr_status_base_overlap.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 27,
+        "source_prog_id": 238,
+        "native_sha256": "8afdf2fd098a7a164c45b31a035d44c39ed290d89d407aea01015503f84ca547",
+        "started": "1970-01-01T00:18:04.878224+00:00",
+        "status": -22,
+        "error": "constrained-unpredictable native exclusive status register overlap at 0x10: stxr w2, x1, [x2]",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 69, in build\n    result = specialize(native, entry, metadata, output_dir, native_link)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 60, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 51, in generate\n    text = render(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 994, in render_program\n    stack_min, stack_max = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 45, in check\n    bounds = analysis.check_definedness(*args)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 256, in check_definedness\n    raise ValueError(f'constrained-unpredictable native exclusive status register overlap at {where}')\nValueError: constrained-unpredictable native exclusive status register overlap at 0x10: stxr w2, x1, [x2]\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/27.failure.tar.gz",
+        "finished": "1970-01-01T00:18:10.444551+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "specialization_rejected",
+      "message": "constrained-unpredictable native exclusive status register overlap at 0x10: stxr w2, x1, [x2]"
+    },
+    {
+      "name": "stlxr_status_base_overlap",
+      "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stlxr w2, w1, [x2]; add sp, sp, #16; mov w0, #2; ret",
+      "negative": true,
+      "native_sha256": "e3ec9b5fb31e585fb268a3bb00d4bbde93a253436cb89a6f69ad301862eed65a",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/stlxr_status_base_overlap.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/stlxr_status_base_overlap.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 28,
+        "source_prog_id": 244,
+        "native_sha256": "e3ec9b5fb31e585fb268a3bb00d4bbde93a253436cb89a6f69ad301862eed65a",
+        "started": "1970-01-01T00:18:15.873955+00:00",
+        "status": -22,
+        "error": "constrained-unpredictable native exclusive status register overlap at 0x10: stlxr w2, w1, [x2]",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 69, in build\n    result = specialize(native, entry, metadata, output_dir, native_link)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 60, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 51, in generate\n    text = render(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 994, in render_program\n    stack_min, stack_max = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 45, in check\n    bounds = analysis.check_definedness(*args)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 256, in check_definedness\n    raise ValueError(f'constrained-unpredictable native exclusive status register overlap at {where}')\nValueError: constrained-unpredictable native exclusive status register overlap at 0x10: stlxr w2, w1, [x2]\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/28.failure.tar.gz",
+        "finished": "1970-01-01T00:18:21.441946+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "specialization_rejected",
+      "message": "constrained-unpredictable native exclusive status register overlap at 0x10: stlxr w2, w1, [x2]"
+    },
+    {
+      "name": "entry_return_address_flags",
+      "assembly": "mov w0, #2; cmp x30, #0; b.eq 1f; mov x1, #0; ldr w0, [x1]; 1: ret",
+      "negative": true,
+      "native_sha256": "167f607b9c1cbf7bde3b23ba77502f1cae96830b267e1c54d9ca99738148b512",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/entry_return_address_flags.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/entry_return_address_flags.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 29,
+        "source_prog_id": 250,
+        "native_sha256": "167f607b9c1cbf7bde3b23ba77502f1cae96830b267e1c54d9ca99738148b512",
+        "started": "1970-01-01T00:18:26.829044+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '29', '250', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-05cqmmvx/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-05cqmmvx/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-05cqmmvx/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '29', '250', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-05cqmmvx/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-05cqmmvx/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-05cqmmvx/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/29.failure.tar.gz",
+        "finished": "1970-01-01T00:19:03.054091+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=378\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=74;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b4) w1 = 2                        ; R1=2\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (15) if r0 == 0x0 goto pc+2        ; R0=scalar(umin=1)\n3: (b7) r1 = 0                        ; R1=0\n4: (61) r1 = *(u32 *)(r1 +0)\nR1 invalid mem access 'scalar'\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=28 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=e7bb58c11192bf11 word_count=7 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=28 final_size_matches=1\nchunk_bytes=0:28\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "return_register_overwrite",
+      "assembly": "mov x30, #0; mov w0, #2; ret",
+      "negative": true,
+      "native_sha256": "462fc8b21938c92c5bd2fd2b2d8fddb6e36a34ca0fd12e427b773850145c9c13",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/return_register_overwrite.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/return_register_overwrite.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 30,
+        "source_prog_id": 260,
+        "native_sha256": "462fc8b21938c92c5bd2fd2b2d8fddb6e36a34ca0fd12e427b773850145c9c13",
+        "started": "1970-01-01T00:19:08.830634+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '30', '260', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-0_6lyqrw/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-0_6lyqrw/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-0_6lyqrw/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '30', '260', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-0_6lyqrw/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-0_6lyqrw/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-0_6lyqrw/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/30.failure.tar.gz",
+        "finished": "1970-01-01T00:19:40.959903+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Invalid argument\ndiagnostic BPF_PROG_LOAD: Invalid argument\nstub verifier_log_size=262144 log_true_size=166\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=78;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (85) call unknown#-1\ninvalid func unknown#-1\nprocessed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=20 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=63bdd71299e4207c word_count=5 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=20 final_size_matches=1\nchunk_bytes=0:20\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Invalid argument\n\n"
+    },
+    {
+      "name": "stack_base_flags",
+      "assembly": "mov w0, #2; sub sp, sp, #16; add sp, sp, #16; cmp sp, #0; b.eq 1f; mov x1, #0; ldr w0, [x1]; 1: ret",
+      "negative": true,
+      "native_sha256": "14a25095df58aa9dbf3b28706df5a80dff621eab9b89a264f03063f49cd543b1",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/stack_base_flags.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/stack_base_flags.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 31,
+        "source_prog_id": 270,
+        "native_sha256": "14a25095df58aa9dbf3b28706df5a80dff621eab9b89a264f03063f49cd543b1",
+        "started": "1970-01-01T00:19:46.737174+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '31', '270', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-8qeij8_s/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-8qeij8_s/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-8qeij8_s/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '31', '270', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-8qeij8_s/generated/request.native.o', 'entry', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-8qeij8_s/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/request-8qeij8_s/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/31.failure.tar.gz",
+        "finished": "1970-01-01T00:20:24.700758+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "verifier_rejected",
+      "message": "trusted-native-loader: BPF_PROG_LOAD native_lab stub: Permission denied\ndiagnostic BPF_PROG_LOAD: Permission denied\nstub verifier_log_size=262144 log_true_size=378\nstub fd_array_cnt=2 fd_array=0:7,1:7\nstub insns=0:code=183,dst=0,src=3,off=0,imm=82;1:code=133,dst=0,src=4,off=1,imm=126402;2:code=149,dst=0,src=0,off=0,imm=0\nverifier log:\n0: R1=ctx() R10=fp0\n0: (b4) w1 = 2                        ; R1=2\n1: (b7) r0 = 2                        ; R0=scalar()\n2: (15) if r0 == 0x0 goto pc+2        ; R0=scalar(umin=1)\n3: (b7) r1 = 0                        ; R1=0\n4: (61) r1 = *(u32 *)(r1 +0)\nR1 invalid mem access 'scalar'\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nkernel log tail:\n4,232,5128510,-;bpf_arm64_native_lab: loading out-of-tree module taints kernel.\n5,233,5128855,-;bpf_arm64_native_lab: module verification failed: signature and/or required key missing - tainting kernel\n\nnative_lab stub context: prog_type=6 blob_bytes=36 reloc_records=0 reloc_bytes=0 chunks=1 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=37 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=2 kfunc_btf_id=126402\nnative_blob_diag: fnv64=ba1a91e8f5f30c2d word_count=9 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=36 final_size_matches=1\nchunk_bytes=0:36\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: Permission denied\n\n"
+    },
+    {
+      "name": "undefined_entry_register",
+      "assembly": "cbz x1, 1f; ldr x1, [x0, #8]; ldrb w0, [x1]; ret; 1: mov w0, #2; ret",
+      "negative": true,
+      "native_sha256": "39ff34ff8ce52a5ac01cb85e2348cf3ed9568cc9d27a7f3e33dbb354a49bfaea",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/undefined_entry_register.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/undefined_entry_register.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 32,
+        "source_prog_id": 280,
+        "native_sha256": "39ff34ff8ce52a5ac01cb85e2348cf3ed9568cc9d27a7f3e33dbb354a49bfaea",
+        "started": "1970-01-01T00:20:30.433492+00:00",
+        "status": -22,
+        "error": "undefined native ABI register x1 at 0x0: cbz x1, 10 <entry+0x10>",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 69, in build\n    result = specialize(native, entry, metadata, output_dir, native_link)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 60, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 51, in generate\n    text = render(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 994, in render_program\n    stack_min, stack_max = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 45, in check\n    bounds = analysis.check_definedness(*args)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 243, in check_definedness\n    need(incoming, args[0], where)\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 107, in need\n    raise ValueError(f'undefined native ABI register {operand} at {where}')\nValueError: undefined native ABI register x1 at 0x0: cbz x1, 10 <entry+0x10>\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/32.failure.tar.gz",
+        "finished": "1970-01-01T00:20:36.040046+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "specialization_rejected",
+      "message": "undefined native ABI register x1 at 0x0: cbz x1, 10 <entry+0x10>"
+    },
+    {
+      "name": "undefined_entry_flags",
+      "assembly": "b.cc 1f; ldr x1, [x0, #8]; ldrb w0, [x1]; ret; 1: mov w0, #2; ret",
+      "negative": true,
+      "native_sha256": "c3fb46ad8e5667536e2b02c613ab73033f31086d7e1cb0bfbde21014351f59b9",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/undefined_entry_flags.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/undefined_entry_flags.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 33,
+        "source_prog_id": 286,
+        "native_sha256": "c3fb46ad8e5667536e2b02c613ab73033f31086d7e1cb0bfbde21014351f59b9",
+        "started": "1970-01-01T00:20:41.442649+00:00",
+        "status": -22,
+        "error": "undefined native ABI flags at 0x0: b.cc 10 <entry+0x10>",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 69, in build\n    result = specialize(native, entry, metadata, output_dir, native_link)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 60, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 51, in generate\n    text = render(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 994, in render_program\n    stack_min, stack_max = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 45, in check\n    bounds = analysis.check_definedness(*args)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 239, in check_definedness\n    condition(op.split('.')[1])\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 236, in condition\n    raise ValueError(f'undefined native ABI flags at {where}')\nValueError: undefined native ABI flags at 0x0: b.cc 10 <entry+0x10>\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/33.failure.tar.gz",
+        "finished": "1970-01-01T00:20:47.382246+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "specialization_rejected",
+      "message": "undefined native ABI flags at 0x0: b.cc 10 <entry+0x10>"
+    },
+    {
+      "name": "helper_clobbered_register",
+      "assembly": "stp x19, x30, [sp, #-16]!; mov x19, x0; mov x1, #0; bl bpf_get_current_uid_gid; cbz x1, 1f; ldr x1, [x19, #8]; ldrb w0, [x1]; b 2f; 1: mov w0, #2; 2: ldp x19, x30, [sp], #16; ret",
+      "negative": true,
+      "native_sha256": "3e77ab66f1632b91e38f609e945bebe946b307e8169811600a6d56cd420e414d",
+      "manifest": "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/helper_clobbered_register.manifest.json",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/payload-safety-inputs/helper_clobbered_register.manifest.json"
+      ],
+      "returncode": 1,
+      "request": {
+        "request_id": 34,
+        "source_prog_id": 292,
+        "native_sha256": "3e77ab66f1632b91e38f609e945bebe946b307e8169811600a6d56cd420e414d",
+        "started": "1970-01-01T00:20:52.862540+00:00",
+        "status": -22,
+        "error": "undefined native ABI register x1 at 0x10: cbz x1, 20 <entry+0x20>",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 226, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 69, in build\n    result = specialize(native, entry, metadata, output_dir, native_link)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 60, in specialize\n    text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 51, in generate\n    text = render(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 994, in render_program\n    stack_min, stack_max = check_definedness(all_insns, targets_by_addr, linked_exit, sys.modules[__name__])\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/corpus/results/kprog_arm64_app_coverage_20261106/trusted_payload_check.py\", line 45, in check\n    bounds = analysis.check_definedness(*args)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 243, in check_definedness\n    need(incoming, args[0], where)\n  File \"/workspaces/repository/kprog/arm64/build/trusted-transport/payload-candidate/arm64_abi.py\", line 107, in need\n    raise ValueError(f'undefined native ABI register {operand} at {where}')\nValueError: undefined native ABI register x1 at 0x10: cbz x1, 20 <entry+0x20>\n",
+        "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-3xwfgnhw/requests/34.failure.tar.gz",
+        "finished": "1970-01-01T00:20:58.745624+00:00"
+      },
+      "unsafe_native_executed": false,
+      "stage": "specialization_rejected",
+      "message": "undefined native ABI register x1 at 0x10: cbz x1, 20 <entry+0x20>"
     }
-  ]
+  ],
+  "pending": []
 }
