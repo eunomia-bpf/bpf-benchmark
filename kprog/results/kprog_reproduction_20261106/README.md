@@ -33,8 +33,10 @@ used.
 
 \* Measured before two new native gates landed in the loader; on current
 code `make micro` no longer completes on the native path (see the micro
-sections). The corpus rows were re-checked after both gates and are
-current. Corpus figures are at the operator recipe
+sections). The corpus rows are current: after both gates landed I
+re-measured katran (1 replaced, 0 failed, `status ok`) and tetragon
+(118 replaced, 0 failed, `status ok`) on the current loader, so the
+corpus path is unaffected and the matrix stands. Corpus figures are at the operator recipe
 (`SAMPLES=3 WORKLOAD_DURATION=180`) and each carries the replaced/failed
 count from its own shim log.
 
