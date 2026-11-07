@@ -244,6 +244,7 @@ def serve(args):
                 except Exception as error:
                     record.update(status=-errno.EINVAL if isinstance(error,(ValueError,KeyError,UnicodeError)) else -errno.EIO,
                                   error=str(error),traceback=traceback.format_exc())
+                    (job/'error.json').write_text(json.dumps(record,indent=2))
                     archive = root / (str(request.request_id)+'.failure.tar.gz')
                     with tarfile.open(archive,'x:gz') as output:
                         output.add(job,arcname='request')

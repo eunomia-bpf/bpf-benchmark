@@ -1,70 +1,111 @@
-"""Run the real trusted queue/worker/compiler/loader/native positive control."""
-import json
+"""Run the kernel-backed service control or actual upstream BCC startup."""
+from datetime import datetime, timezone
 import hashlib
+import json
 import os
 from pathlib import Path
+import queue
+import re
+import signal
 import subprocess
 import sys
+import tarfile
+import tempfile
+import threading
+import traceback
+
 ROOT=Path(__file__).resolve().parents[2]
 CASE=sys.argv[1] if len(sys.argv)==2 else 'control'
 if CASE not in {'control','bcc'}:raise ValueError('unknown trusted service case')
 OUT=ROOT/'corpus/results/kprog_app_coverage_20261107'/('trusted-service-bcc' if CASE=='bcc' else 'trusted-service')
 OUT.mkdir(exist_ok=True)
-state=OUT/'requests'
-state.mkdir(mode=0o700)
-service=subprocess.Popen([sys.executable,ROOT/'kprog/trusted_service.py',
-    '--arch','1','--endpoint','/sys/kernel/debug/bpf_x86_native_lab/specializer',
-    '--state',state,'--native-link',ROOT/'kprog/x86/native_lab/native_link/target/release/native-link',
-    '--loader',ROOT/'kprog/libnativeloader/build/trusted-native-loader'],
-    text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-log=''
-try:
-    line=service.stdout.readline();log+=line
-    if not line or not json.loads(line).get('ready'):
-        raise RuntimeError('trusted service did not register: '+line)
-    environment=dict(os.environ)
-    if CASE=='bcc':
-        environment.update(LD_PRELOAD=str(ROOT/'bpfopt/shim/build-x86/libbpfrejit_shim.so'),
-            BPFREJIT_SHIM_NATIVE_LOADER='1',BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1',
-            BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF='1',
-            BPFREJIT_NATIVE_LOADER_SO=str(ROOT/'kprog/libnativeloader/build/libnative_loader.so'),
-            BPFREJIT_SHIM_NATIVE_MANIFEST=str(ROOT/'vendor/build/native-bpf/x86/stage/bcc/manifest.json'),
-            BPFREJIT_SHIM_LOG=str(OUT/'shim.log'))
-        argv=[ROOT/'vendor/build/x86/bcc/bin/vfsstat','-v','1','1']
-    else:
-        argv=[ROOT/'kprog/libnativeloader/build/trusted-service-client',
-              ROOT/'kprog/libnativeloader/build/trusted-native.o']
-    result=subprocess.run(argv,env=environment,text=True,capture_output=True)
-    (OUT/'client.stdout').write_text(result.stdout)
-    (OUT/'client.stderr').write_text(result.stderr)
-    if result.returncode:
-        (OUT/'summary.json').write_text(json.dumps(dict(ok=False,returncode=result.returncode),indent=2))
-    result.check_returncode()
-    if CASE=='bcc':
-        records=[json.loads(line) for line in (state/'requests.jsonl').read_text().splitlines()]
-        if not records or any(record['status'] for record in records):
-            raise RuntimeError('BCC did not complete all required trusted native requests')
-        for record in records:log+=service.stdout.readline()
-        summary=dict(ok=True,app='bcc/vfsstat',completed_requests=records)
-    else:
-        summary=json.loads(result.stdout)
-        assert summary['ok'] and summary['retval']==2
-        line=service.stdout.readline();log+=line
-        completion=json.loads(line)
-        if completion['status'] or completion['prog_id'] != summary['native_prog_id']:
-            raise RuntimeError('service evidence did not finish for the completed native request')
-        summary['request_id']=completion['request_id']
-    inputs=[ROOT/'kprog/tv/build-kernel-x86/arch/x86/boot/bzImage',
-            ROOT/'kprog/tv/build-x86/bpf_x86_native_lab.ko',Path(argv[0])]
-    if CASE=='bcc':
-        inputs.extend([ROOT/'bpfopt/shim/build-x86/libbpfrejit_shim.so',
-            ROOT/'kprog/libnativeloader/build/libnative_loader.so',
-            ROOT/'vendor/build/native-bpf/x86/stage/bcc/manifest.json',
-            ROOT/'vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o'])
-    else:inputs.append(ROOT/'kprog/libnativeloader/build/trusted-native.o')
-    summary['artifact_sha256']={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}
-    (OUT/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
-finally:
-    service.terminate()
-    tail=service.communicate()[0];log+=tail
-    (OUT/'service.log').write_text(log)
+STAMP=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+archive=OUT/('run-'+STAMP+'.tar.gz')
+summary=dict(ok=False,case=CASE,started=datetime.now(timezone.utc).isoformat(),request_archive=archive.name)
+with tempfile.TemporaryDirectory(prefix='.live-',dir=OUT) as temporary:
+    live=Path(temporary)
+    state=live/'requests'
+    state.mkdir(mode=0o700)
+    events=queue.Queue()
+    reader_errors=[]
+    service=subprocess.Popen([sys.executable,ROOT/'kprog/trusted_service.py',
+        '--arch','1','--endpoint','/sys/kernel/debug/bpf_x86_native_lab/specializer',
+        '--state',state,'--native-link',ROOT/'kprog/x86/native_lab/native_link/target/release/native-link',
+        '--loader',ROOT/'kprog/libnativeloader/build/trusted-native-loader'],
+        text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,start_new_session=True)
+    def collect():
+        # Drain continuously: many application loads must not fill stdout and
+        # block the persistent service while the app waits for its next proof.
+        try:
+            with (live/'service.log').open('w') as log:
+                for line in service.stdout:
+                    log.write(line);log.flush();events.put(line)
+        except Exception as error:
+            reader_errors.append(str(error))
+        finally:
+            events.put(None)
+    reader=threading.Thread(target=collect)
+    reader.start()
+    def event():
+        line=events.get()
+        if line is None:raise RuntimeError('trusted service exited before its expected receipt')
+        return json.loads(line)
+    try:
+        ready=event()
+        if not ready.get('ready'):raise RuntimeError('trusted service did not register')
+        environment=dict(os.environ)
+        if CASE=='bcc':
+            environment.update(LD_PRELOAD=str(ROOT/'bpfopt/shim/build-x86/libbpfrejit_shim.so'),
+                BPFREJIT_SHIM_NATIVE_LOADER='1',BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1',
+                BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF='1',
+                BPFREJIT_NATIVE_LOADER_SO=str(ROOT/'kprog/libnativeloader/build/libnative_loader.so'),
+                BPFREJIT_SHIM_NATIVE_MANIFEST=str(ROOT/'vendor/build/native-bpf/x86/stage/bcc/manifest.json'),
+                BPFREJIT_SHIM_LOG=str(live/'shim.log'))
+            argv=[ROOT/'vendor/build/x86/bcc/bin/vfsstat','-v','1','1']
+        else:
+            argv=[ROOT/'kprog/libnativeloader/build/trusted-service-client',
+                  ROOT/'kprog/libnativeloader/build/trusted-native.o']
+        inputs=[ROOT/'kprog/tv/build-kernel-x86/arch/x86/boot/bzImage',
+                ROOT/'kprog/tv/build-x86/bpf_x86_native_lab.ko',Path(argv[0])]
+        if CASE=='bcc':
+            inputs.extend([ROOT/'bpfopt/shim/build-x86/libbpfrejit_shim.so',
+                ROOT/'kprog/libnativeloader/build/libnative_loader.so',
+                ROOT/'vendor/build/native-bpf/x86/stage/bcc/manifest.json',
+                ROOT/'vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o'])
+        else:inputs.append(ROOT/'kprog/libnativeloader/build/trusted-native.o')
+        summary['artifact_sha256']={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}
+        result=subprocess.run(argv,env=environment,text=True,capture_output=True)
+        (live/'client.stdout').write_text(result.stdout)
+        (live/'client.stderr').write_text(result.stderr)
+        summary['returncode']=result.returncode
+        result.check_returncode()
+        if CASE=='bcc':
+            count=len(re.findall(r'native-loader timings prog=',(live/'shim.log').read_text()))
+            if not count:raise RuntimeError('BCC produced no required native replacement receipts')
+            records=[event() for _ in range(count)]
+            if any(record['status'] for record in records):raise RuntimeError('BCC service request failed')
+            summary.update(app='bcc/vfsstat',completed_requests=records)
+        else:
+            client=json.loads(result.stdout)
+            if not client['ok'] or client['retval']!=2:raise RuntimeError('native control result mismatch')
+            completion=event()
+            if completion['status'] or completion['prog_id']!=client['native_prog_id']:
+                raise RuntimeError('service receipt differs from completed native request')
+            summary.update(client,request_id=completion['request_id'])
+        summary['ok']=True
+    except Exception as error:
+        summary.update(error=str(error),traceback=traceback.format_exc())
+        raise
+    finally:
+        if service.poll() is None:
+            try:os.killpg(service.pid,signal.SIGTERM)
+            except ProcessLookupError:
+                if service.poll() is None:raise
+        service.wait();reader.join()
+        if reader_errors:summary.update(ok=False,error='service log collection: '+repr(reader_errors))
+        summary['finished']=datetime.now(timezone.utc).isoformat()
+        (live/'summary.json').write_text(json.dumps(summary,indent=2)+chr(10))
+        with tarfile.open(archive,'x:gz') as output:output.add(live,arcname='run')
+        summary['archive_sha256']=hashlib.sha256(archive.read_bytes()).hexdigest()
+        (OUT/'summary.json').write_text(json.dumps(summary,indent=2)+chr(10))
+        if reader_errors:raise RuntimeError('service log collection failed: '+repr(reader_errors))

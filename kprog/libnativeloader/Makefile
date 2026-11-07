@@ -33,7 +33,7 @@ trusted-worker-check:
 trusted-service-kvm: trusted-service-check
 	cmake --build "$(BUILD_DIR)" --target trusted-service-client
 	clang -O2 -fno-asynchronous-unwind-tables -c ../test/trusted_native.c -o "$(BUILD_DIR)/trusted-native.o"
-	taskset -c 12-15 vng --run "$(REPO_ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage" --cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -C kprog/libnativeloader trusted-service-guest'
+	taskset -c 16-19 vng --run "$(REPO_ROOT)/kprog/tv/build-kernel-x86/arch/x86/boot/bzImage" --cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -C kprog/libnativeloader trusted-service-guest'
 
 trusted-service-guest:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
