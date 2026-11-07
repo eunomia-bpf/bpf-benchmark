@@ -1,0 +1,26 @@
+{
+  "native_requests": 3,
+  "generated": 3,
+  "compiled": 3,
+  "accepted_bound": 2,
+  "failed": 1,
+  "terminal_archives_verified": 3,
+  "native_replaced": 2,
+  "native_failed": 1,
+  "app_status": "error",
+  "metadata_status": "error",
+  "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_233455_801976",
+  "failure_entry": "perf_unwind_native",
+  "failure_class": "verifier-exploration-limit",
+  "verifier_processed_insns": 1000001,
+  "verifier_total_states": 64823,
+  "verifier_peak_states": 2471,
+  "verifier_max_states_per_insn": 31,
+  "baseline_resident_programs": 13,
+  "artifact_sha256": {
+    "driver.log.gz": "0a48cc8884674d885619e15050d7b69d05afd9034c01a6d2cb97a0d5db57b1f6",
+    "service.tar.gz": "a8a72acdc0dc5835a70d4e3668d46b458f35790aabcc259dd4f5e775ce28af5d",
+    "launch.tar.gz": "698256449297a29038cbd46d1f5d123ab9fcc248bf589a04d77e5ee1b4549fd7",
+    "result.tar.gz": "cf2f0118e0d9d9bb10c4ef67c5861d6d2b710525cc491f84ca35afa70f73205a"
+  }
+}

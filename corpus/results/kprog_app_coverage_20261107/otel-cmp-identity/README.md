@@ -1,0 +1,7 @@
+# OTel comparison operand identity replay
+
+The whole OTel registered native-only service freshly generates and compiles3requests; read_task_struct and perf_unwind_stop pass the verifier and bind. The generic full64CMP operand identity closes the preceding output-size range failure while retaining the native3792upper-bound comparison and actual helper arguments.
+
+Request3 perf_unwind_native reaches the actual verifier exploration limit:1000001processed instructions,64823total states,2471peak states and31maximum states per instruction. All3terminal native hashes match the immutable kernel inputs; source drift count0. Exact-width modeled stack reads and common narrow-value identity are the next generic representation trial.
+
+Command: make -f C/operand-width-replay/otelcol-ebpf-profiler__profiling/Makefile corpus STATE=C/operand-width-replay/otelcol-ebpf-profiler__profiling CPUS=20-23 VM_CPUS=8 VM_MEM=12G APPS=otelcol-ebpf-profiler/profiling SAMPLES=1 WORKLOAD_DURATION=2, after the captured private image build. C denotes /workspaces/.agent-state/kprog-lanes/C. coverage.json retains complete source/image identities and baseline work; launch.tar.gz preserves executed private inputs; service.tar.gz preserves all terminal compiler/verifier logs; result.tar.gz retains app/shim/program/sample/work artifacts; driver.log.gz retains full guest output. Complete startup and matching-work timing continue from this recorded limit.

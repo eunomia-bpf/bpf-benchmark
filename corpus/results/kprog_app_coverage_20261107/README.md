@@ -112,7 +112,7 @@ measurement continue from the reported failure classes.
 | Application | Baseline census | Generated | Compiled | Accepted/bound | Submission / specialization errors | Verifier rejections | Runtime evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [Earlier functional batch153239](native-only-runtime/standard-bcc-8g.json) |
-| OTel | 17 startup attempts; 13 resident | 2 | 2 | 1 | 0 | 1: helper size range | [225459 batch](otel-cmp-resources/README.md) |
+| OTel | 13 resident | 3 | 3 | 2 | 0 | 1: verifier exploration limit | [233455 batch](otel-cmp-identity/README.md) |
 | Cilium | 72 resident | 2 | 2 | 1 | 0 | 1: BPF stack offset -536 | [232956 batch](cilium-helper-scoped/README.md) |
 | Tetragon | 311 startup attempts; 287 resident | 4 | 4 | 3 | 0 | 1: 8193-jump complexity | [225009 batch](tetragon-cmp-resources/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [213447 bound batch](katran-tagged-storage/README.md) |
@@ -256,3 +256,6 @@ The [Tracee scoped-resource batch231936](tracee-resource-scoped/README.md) compl
 
 
 The [Cilium helper/scoped-resource batch232956](cilium-helper-scoped/README.md) freshly generates/compiles2requests and binds cil_xdp_entry. Its next TC request reaches stack offset-536 with312bytes of modeled native stack and a padded skb ABI mirror. Private live TC context projection continues from the exact field accesses; actual native hashes and six first-entry kernel resources remain recorded.
+
+
+The [OTel CMP-operand identity batch233455](otel-cmp-identity/README.md) freshly binds read_task_struct and perf_unwind_stop, closing the perf-event size-range frontier. Its next perf_unwind_native request reaches1000001processed verifier instructions and64823total states. Generic native-width stack reads and common narrow-value identity continue with the captured native/application/workload inputs.
