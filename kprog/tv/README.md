@@ -1623,3 +1623,28 @@ Private-frame permissions, entry/context relation, stack-input witness and
 captured platform remain explicit. This is a canonical representative execution
 correspondence, not yet a universal relational or unconditional artifact TV
 certificate. Evidence: all-read-write-outcomes JSON/log in the dated results.
+
+### Immutable ELF entry to emitted payload byte identity
+
+The existing `trusted-binding-check` also anchors the complete kernel-owned
+native ELF to its archived completion SHA and checks the whole accepted archive
+SHA. For the captured control and simple inputs, it requires one defined global
+entry spanning the only readonly executable section, supported x86-64 SysV
+ET_REL format, no code relocations, and exact equality:
+`immutable entry bytes = captured/emitted payload bytes ++ c3`.
+The generated request-native ELF must be byte-identical to the immutable input;
+its generated blob, native-link-abi-v2/mask0, empty data layout/map patches and
+empty relocations must agree with the bound artifact. Current entry/payload
+sizes are6/5 and61/60. The final RX comparison remains in the existing checker.
+
+The28 added mutation controls cover original ELF SHA, generated-copy identity,
+entry offset/code/terminal RET, ELF machine/type, ABI version/mask, generated blob,
+data/map/relocation metadata and duplicate materialization components. Alongside
+the original22 controls, both actual archives pass and all50 mismatches reject.
+Most new controls exercise structural relations directly without byte-hash pins.
+Results remain per program in `trusted-binding.json`.
+
+This closes a structural byte-identity gap for these two captures. The ELF/parser
+checker and archive provenance are trusted, and RET/ABI/platform semantic transport
+and universal native relational validation remain open. This checker does not
+claim that removing RET is semantically faithful.

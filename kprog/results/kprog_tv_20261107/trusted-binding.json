@@ -17,6 +17,23 @@
         "native_size": 5
       }
     ],
+    "materialization": {
+      "immutable_ELF_sha256": "d94117a420fcf032246cd6a869ef4a7f17e7def7ee610762f9116b90a4a18cf3",
+      "entry": "trusted_entry",
+      "entry_offset": 0,
+      "entry_bytes": 6,
+      "payload_bytes": 5,
+      "exact_entry_relation": "immutable entry bytes = emitted payload bytes ++ c3",
+      "terminal_bytes_removed": "c3",
+      "generated_copy_byte_identical": true,
+      "native_link_abi": "native-link-abi-v2",
+      "callee_saved_mask": 0,
+      "relocations": 0,
+      "data_objects": 0,
+      "map_patches": 0,
+      "structural_only": true,
+      "remaining": "RET/entry-ABI/platform semantic transport and universal relational TV"
+    },
     "rejected_controls": [
       "entry",
       "abi",
@@ -30,16 +47,34 @@
       "RX bytes",
       "RX address"
     ],
+    "materialization_rejected_controls": [
+      "immutable input SHA",
+      "generated copy",
+      "entry offset",
+      "entry code",
+      "terminal RET",
+      "ELF machine",
+      "ELF type",
+      "ABI version",
+      "ABI mask",
+      "generated blob",
+      "data layout",
+      "map patches",
+      "native relocations",
+      "duplicate blob"
+    ],
     "expected": {
       "arch": 1,
       "abi": 0,
-      "entry": "trusted_entry"
+      "entry": "trusted_entry",
+      "native_sha256": "d94117a420fcf032246cd6a869ef4a7f17e7def7ee610762f9116b90a4a18cf3"
     },
     "trusted": [
       "kernel capture/binding code and archived accepted-byte provenance",
       "registered specialization/link service until per-program TV connects output to immutable P",
       "verifier soundness",
-      "reference ISA/platform semantics when refinement is supplied"
+      "reference ISA/platform semantics when refinement is supplied",
+      "structural ELF/archive parser and checker; terminal RET semantic transport remains open"
     ]
   },
   "trusted-simple": {
@@ -60,6 +95,23 @@
         "native_size": 60
       }
     ],
+    "materialization": {
+      "immutable_ELF_sha256": "d5d24d70e70dc8b6dce3d7abc85113227cdd14aef220f86047b5c57e66c580bd",
+      "entry": "simple_xdp",
+      "entry_offset": 0,
+      "entry_bytes": 61,
+      "payload_bytes": 60,
+      "exact_entry_relation": "immutable entry bytes = emitted payload bytes ++ c3",
+      "terminal_bytes_removed": "c3",
+      "generated_copy_byte_identical": true,
+      "native_link_abi": "native-link-abi-v2",
+      "callee_saved_mask": 0,
+      "relocations": 0,
+      "data_objects": 0,
+      "map_patches": 0,
+      "structural_only": true,
+      "remaining": "RET/entry-ABI/platform semantic transport and universal relational TV"
+    },
     "rejected_controls": [
       "entry",
       "abi",
@@ -73,20 +125,38 @@
       "RX bytes",
       "RX address"
     ],
+    "materialization_rejected_controls": [
+      "immutable input SHA",
+      "generated copy",
+      "entry offset",
+      "entry code",
+      "terminal RET",
+      "ELF machine",
+      "ELF type",
+      "ABI version",
+      "ABI mask",
+      "generated blob",
+      "data layout",
+      "map patches",
+      "native relocations",
+      "duplicate blob"
+    ],
     "expected": {
       "arch": 1,
       "abi": 0,
-      "entry": "simple_xdp"
+      "entry": "simple_xdp",
+      "native_sha256": "d5d24d70e70dc8b6dce3d7abc85113227cdd14aef220f86047b5c57e66c580bd"
     },
     "trusted": [
       "kernel capture/binding code and archived accepted-byte provenance",
       "registered specialization/link service until per-program TV connects output to immutable P",
       "verifier soundness",
-      "reference ISA/platform semantics when refinement is supplied"
+      "reference ISA/platform semantics when refinement is supplied",
+      "structural ELF/archive parser and checker; terminal RET semantic transport remains open"
     ]
   },
   "checker_sha256": {
-    "kprog/tv/check_trusted_capture.py": "71642150609627e7ac8de6ef265d79dc6814a58af669260ffc21e602983e29a9",
+    "kprog/tv/check_trusted_capture.py": "43cb85f2f532683cfeca1f88c73db3ff0b9c4a4f7efabbfc70fccc16230af135",
     "kprog/tv/emitted_sites.py": "3d05649e222ab603d757c6af44adeda3ee1eb3d17e1c2be8c646051dbd669105",
     "kprog/tv/extract_checked.py": "60ce986eb22e3185ab565c1ad9b88987582dabd145bc9436c3973e02617ba252"
   }
