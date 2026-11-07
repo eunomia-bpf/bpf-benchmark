@@ -1,0 +1,30 @@
+{
+  "scope": "Private generic candidate: numeric3/4 join existing ALU immediate family; source fields and live production files retain their bytes.",
+  "changes": {
+    "kprog/formal/generated/arm64_dispatch_family.h": {
+      "before_sha256": "14265108cb9cb9cf5eab817bbec8cebb6e2b384c5e8be36440967e5c520f352a",
+      "after_sha256": "1e2c9840f99670c9ae86d97ef4730748a4761cf1ffdc35185fba4fcf5b3ea185",
+      "diff": "--- a/kprog/formal/generated/arm64_dispatch_family.h\n+++ b/kprog/formal/generated/arm64_dispatch_family.h\n@@ -30,7 +30,9 @@\n _Static_assert(ARM64_OP_CCMP_REG == 27U, \"arm64 dispatch family code drift\");\n /* Each family's member opcode set, tested by the dispatcher. */\n #define KPROG_ARM64_ALU_HANDLED(OP)                                 \\\n-\t(((OP) == ARM64_OP_ALU_IMM) || \\\n+\t(((OP) == ARM64_OP_ADD_IMM) || \\\n+\t((OP) == ARM64_OP_SUB_IMM) || \\\n+\t((OP) == ARM64_OP_ALU_IMM) || \\\n \t((OP) == ARM64_OP_ALU_REG))\n #define KPROG_ARM64_SHIFT_OP_HANDLED(OP)                            \\\n \t(((OP) == ARM64_OP_SHIFT_IMM) || \\\n"
+    },
+    "kprog/formal/generated/arm64_alu_operand_select.h": {
+      "before_sha256": "8f140666a12df159f4151df01dd6e3d336c06d1e93811337ad7f8bd0c72f097d",
+      "after_sha256": "d2828fe708b9718bd4bf81e78662a0c6976840dbde55c2adbf0aa75ebd64ea5e",
+      "diff": "--- a/kprog/formal/generated/arm64_alu_operand_select.h\n+++ b/kprog/formal/generated/arm64_alu_operand_select.h\n@@ -22,6 +22,8 @@\n \t\t__u8 __kprog_a64_aso_select = 0U; \\\n  \\\n \t\tswitch (OP) { \\\n+\t\tcase 3U: \\\n+\t\tcase 4U: \\\n \t\tcase 6U: \\\n \t\t\t__kprog_a64_aso_select = 1U; \\\n \t\t\tbreak; \\\n"
+    },
+    "kprog/arm64/arm64_sim_direct.h": {
+      "before_sha256": "a0e8af116a7aaa666021ed4ffefeb7b54bd3dcf3d16c80762c36f79cec6fdbe7",
+      "after_sha256": "4f0f074d953295594e4c443ac0d826d78764ec35bc581b39af0e60fdc6785d1d",
+      "diff": "--- a/kprog/arm64/arm64_sim_direct.h\n+++ b/kprog/arm64/arm64_sim_direct.h\n@@ -410,9 +410,9 @@\n #define ARM64_SIM_DIRECT_ARM64_OP_MOV_REG(DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \\\n ARM64_SIM_DIRECT_BODY_2(ARM64_OP_MOV_REG, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM)\n #define ARM64_SIM_DIRECT_ARM64_OP_ADD_IMM(DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \\\n-ARM64_SIM_DIRECT_BODY_35(ARM64_OP_ADD_IMM, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM)\n+ARM64_SIM_DIRECT_BODY_4(ARM64_OP_ADD_IMM, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM)\n #define ARM64_SIM_DIRECT_ARM64_OP_SUB_IMM(DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \\\n-ARM64_SIM_DIRECT_BODY_35(ARM64_OP_SUB_IMM, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM)\n+ARM64_SIM_DIRECT_BODY_4(ARM64_OP_SUB_IMM, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM)\n #define ARM64_SIM_DIRECT_ARM64_OP_MOVK(DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \\\n ARM64_SIM_DIRECT_BODY_3(ARM64_OP_MOVK, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM)\n #define ARM64_SIM_DIRECT_ARM64_OP_ALU_IMM(DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \\\n"
+    }
+  },
+  "direct_token_mapping_changes": [
+    "ARM64_OP_ADD_IMM",
+    "ARM64_OP_SUB_IMM"
+  ],
+  "retained_direct_mapping_tokens": 69,
+  "live_source_sha256": {
+    "kprog/formal/generated/arm64_dispatch_family.h": "14265108cb9cb9cf5eab817bbec8cebb6e2b384c5e8be36440967e5c520f352a",
+    "kprog/formal/generated/arm64_alu_operand_select.h": "8f140666a12df159f4151df01dd6e3d336c06d1e93811337ad7f8bd0c72f097d",
+    "kprog/arm64/arm64_sim_direct.h": "a0e8af116a7aaa666021ed4ffefeb7b54bd3dcf3d16c80762c36f79cec6fdbe7"
+  }
+}

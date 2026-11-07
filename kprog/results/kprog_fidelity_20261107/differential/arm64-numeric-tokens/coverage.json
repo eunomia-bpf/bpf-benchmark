@@ -1,0 +1,42 @@
+[
+  {
+    "assembly": "add w0, w1, #127 [token=ARM64_OP_ADD_IMM; route=raw]",
+    "decoded": "add w0, w1, #0x7f",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "add w0, w1, #127 [token=ARM64_OP_ADD_IMM; route=direct]",
+    "decoded": "add w0, w1, #0x7f",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "sub w0, w1, #127 [token=ARM64_OP_SUB_IMM; route=raw]",
+    "decoded": "sub w0, w1, #0x7f",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "sub w0, w1, #127 [token=ARM64_OP_SUB_IMM; route=direct]",
+    "decoded": "sub w0, w1, #0x7f",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "add x0, x1, #127 [token=ARM64_OP_ADD_IMM; route=raw]",
+    "decoded": "add x0, x1, #0x7f",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "add x0, x1, #127 [token=ARM64_OP_ADD_IMM; route=direct]",
+    "decoded": "add x0, x1, #0x7f",
+    "opcode": "ARM64_OP_ADD_IMM"
+  },
+  {
+    "assembly": "sub x0, x1, #127 [token=ARM64_OP_SUB_IMM; route=raw]",
+    "decoded": "sub x0, x1, #0x7f",
+    "opcode": "ARM64_OP_SUB_IMM"
+  },
+  {
+    "assembly": "sub x0, x1, #127 [token=ARM64_OP_SUB_IMM; route=direct]",
+    "decoded": "sub x0, x1, #0x7f",
+    "opcode": "ARM64_OP_SUB_IMM"
+  }
+]

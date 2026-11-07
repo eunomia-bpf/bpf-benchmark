@@ -1,0 +1,46 @@
+{
+  "execution": "qemu_user",
+  "production_adoption": "owner_sync_pending",
+  "forms": 8,
+  "distinct_native_forms": 4,
+  "cases_per_form": 1024,
+  "cases": 8192,
+  "qemu_c_differences": 0,
+  "qemu_reference_differences": 0,
+  "c_reference_differences": 0,
+  "pending_forms": 0,
+  "finished": "2026-11-07T20:04:05.101264+00:00",
+  "source_drift": {},
+  "binary_sha256": "59553e3a193181b52ca0d7acab11650a67b2a0ccbecb3f4250cd67672485d251",
+  "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96",
+  "compiled_header_sha256": "c21833dee58cbdbc85aa176289585f705f189743b1337adfa13908775d6c28c5",
+  "actual_compilation_files_verified": 91,
+  "snapshot_production_files": 79,
+  "production_files_matching_launch_commit": 76,
+  "private_candidate_headers": [
+    "kprog/arm64/arm64_sim_direct.h",
+    "kprog/formal/generated/arm64_dispatch_family.h",
+    "kprog/formal/generated/arm64_alu_operand_select.h"
+  ],
+  "production_source_commit": "c15b51f49f61acb502990bb579c528319eea32d0",
+  "trace_bytes": 14876696,
+  "trace_sha256": "103219f5774a418eb0a55680ee513a5753125bc59cb0f1faa14973b9f9c11412",
+  "direct_classification": {
+    "tokens": 71,
+    "mapping_changes": [
+      "ARM64_OP_ADD_IMM",
+      "ARM64_OP_SUB_IMM"
+    ],
+    "retained_mappings": 69,
+    "target_body": 4,
+    "retained_body_text": true
+  },
+  "baseline": {
+    "compile": "succeeded",
+    "first_simulated_body": "unconditional_abort",
+    "captured_state_records": 0,
+    "trace_bytes": 0,
+    "reference_reader_error": "unpack requires a buffer of 16 bytes"
+  },
+  "scope": "Private generic ALU family and immediate-selection candidate; live production source hashes retained; sampled QEMU/C/canonical agreement."
+}

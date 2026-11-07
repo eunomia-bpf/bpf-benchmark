@@ -1,0 +1,194 @@
+[
+  {
+    "assembly": "add w0, w1, #127",
+    "route": "raw",
+    "original": {
+      "op": "ARM64_OP_ALU_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_32",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    },
+    "bound": {
+      "op": "ARM64_OP_ADD_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_32",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    }
+  },
+  {
+    "assembly": "add w0, w1, #127",
+    "route": "direct",
+    "original": {
+      "op": "ARM64_OP_ALU_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_32",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    },
+    "bound": {
+      "op": "ARM64_OP_ADD_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_32",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    }
+  },
+  {
+    "assembly": "sub w0, w1, #127",
+    "route": "raw",
+    "original": {
+      "op": "ARM64_OP_ALU_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_32",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_SUB, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    },
+    "bound": {
+      "op": "ARM64_OP_SUB_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_32",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_SUB, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    }
+  },
+  {
+    "assembly": "sub w0, w1, #127",
+    "route": "direct",
+    "original": {
+      "op": "ARM64_OP_ALU_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_32",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_SUB, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    },
+    "bound": {
+      "op": "ARM64_OP_SUB_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_32",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_SUB, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    }
+  },
+  {
+    "assembly": "add x0, x1, #127",
+    "route": "raw",
+    "original": {
+      "op": "ARM64_OP_ALU_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_64",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    },
+    "bound": {
+      "op": "ARM64_OP_ADD_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_64",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    }
+  },
+  {
+    "assembly": "add x0, x1, #127",
+    "route": "direct",
+    "original": {
+      "op": "ARM64_OP_ALU_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_64",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    },
+    "bound": {
+      "op": "ARM64_OP_ADD_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_64",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    }
+  },
+  {
+    "assembly": "sub x0, x1, #127",
+    "route": "raw",
+    "original": {
+      "op": "ARM64_OP_ALU_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_64",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_SUB, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    },
+    "bound": {
+      "op": "ARM64_OP_SUB_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_64",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_SUB, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    }
+  },
+  {
+    "assembly": "sub x0, x1, #127",
+    "route": "direct",
+    "original": {
+      "op": "ARM64_OP_ALU_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_64",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_SUB, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    },
+    "bound": {
+      "op": "ARM64_OP_SUB_IMM",
+      "dst": "ARM64_X0",
+      "src": "ARM64_X1",
+      "src2": "ARM64_REG_NONE",
+      "src3": "ARM64_REG_NONE",
+      "width": "ARM64_WIDTH_64",
+      "aux": "ARM64_AUX_ALU(ARM64_ALU_SUB, ARM64_MOD_NONE, 0)",
+      "imm": "127ULL"
+    }
+  }
+]
