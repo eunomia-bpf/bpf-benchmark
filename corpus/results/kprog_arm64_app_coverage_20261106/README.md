@@ -16,13 +16,14 @@ outputs and13 specialization refusals. The prior45-case safety replay completed
 `tcplife` compile has identical executable BPF/relocations and352 frame bytes.
 These exact comparisons do not establish universal compiler or ISA refinement.
 
-The standard BCC native-only replay is running through the canonical worker,
-using the existing eight-tool/two-start corpus recipe. Its baseline startup
-completed; application acceptance remains pending. Reproduce with
+The [standard BCC native-only replay](trusted-arm64-bcc-result/README.md) closed
+with application statuserror after the900s native-start timeout:23 baseline
+programs,7 generated C outputs,6 compiled proofs,5 accepted/bound,1 exclusive-retry
+verifier rejection, and1 interrupted tcplife compile. No native workload was
+measured. The existing eight-tool/two-start corpus recipe was unchanged. Reproduce with
 `make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile trusted-bcc-arm64-run`.
-The [BCC run directory](trusted-arm64-bcc-result/) retains two zero-request
-startup failures and the module-version diagnosis; its collector publishes the
-current run when it closes. The earlier [service control](trusted-arm64-service-result/README.md)
+The [BCC run directory](trusted-arm64-bcc-result/) retains the closed raw run,
+application review, two zero-request startup failures and module-version diagnosis. The earlier [service control](trusted-arm64-service-result/README.md)
 remains a separate component result. All-six-application acceptance is still open.
 
 The [complete current manifest audit](manifest-dispatch-result/README.md) analyzes all 546 selectors and 626 matching native entry candidates with finite indirect targets; live source BTF still determines the exact entry. The [fresh OTel compile result](otel-memory-compiler-result/README.md) records 14/14 generation/compile/link/install successes, with no application or verifier acceptance because the subsequent old runtime pin failed. Earlier runtime/prebuilt results below retain their historical scope.
