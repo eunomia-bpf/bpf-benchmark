@@ -269,7 +269,12 @@ Per-stressor, both arms did the same work (eventfd 3,549,487/3,694,894,
 mmap 1,554/1,538, udp 6,762,074/6,661,641, sock 19,272/20,000), and both
 ran the same 60 s with `rc=0`, so the comparison is valid.
 
-**This is a genuine non-reproduction**: 1.004x against 1.323x. The
+At the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`,
+`corpus/results/x86_kvm_corpus_20261107_002003_274609`): 118 replaced,
+0 failed, 3 workloads per arm, totals 92,460,547 (baseline) against
+92,573,459 (native) = **1.008x**, confirming the 60 s figure.
+
+**This is a genuine non-reproduction**: 1.008x against 1.323x. The
 reference's Tetragon advantage came from its own native path, and 118 of
 its programs now replace natively here, so the difference is in what the
 native code does, not in whether it ran. It is recorded as measured and
