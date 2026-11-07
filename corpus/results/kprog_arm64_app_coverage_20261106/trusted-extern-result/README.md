@@ -1,4 +1,4 @@
-# AArch64 trusted extern contract candidate
+# AArch64 trusted extern contract
 
 The ARM worker now validates the kernel-derived typed generation view, then emits bare extern references for the reachable native symbols. It creates no replacement maps and includes no producer C, proof, source-instruction metadata or compiler flags. The loader binds each extern to the exact native symbol address. A null value_offset means a map handle; numeric zero and nonzero offsets both mean a direct map-value pointer. The capsule base is added once by the loader, while native instruction/ELF addends remain relative.
 
@@ -11,4 +11,4 @@ The compiler checks cover:
 - Boolean, negative and oversized direct bases rejected before output creation.
 - The old declaration-based rendering of the actual Katran body compared byte-for-byte with the pinned prior generator blob. This checks compatibility without changing ISA handlers or dropping native instructions.
 
-summary.json pins the inputs and records each relocation. compiler-inputs.tar.gz retains the exact C/native/proof/BPF inputs and compiler logs. Temporary raw files are removed automatically. The exact candidate generator, worker, checker and shared helper used for this result are retained under producer-source/ in the archive. The ARM source integration and Make reproducer are pending publication of C's shared helper; this result is not a released source/API claim.
+summary.json pins the inputs and records each relocation. compiler-inputs.tar.gz retains the exact C/native/proof/BPF inputs and compiler logs. Temporary raw files are removed automatically. The exact checked generator, worker, checker and shared helper are retained under producer-source/ in the archive. The ARM source integration now uses the byte-identical committed shared helper. Reproduce with make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile trusted-arm64-extern-check. Compiler acceptance here is not kernel or application acceptance.

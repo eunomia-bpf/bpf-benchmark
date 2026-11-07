@@ -630,7 +630,7 @@ entry-abi-build: direct-header-generate
 runtime-loader-build:
 	PKG_CONFIG_LIBDIR=$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu/pkgconfig \
 		PKG_CONFIG_SYSROOT_DIR=$(ROOT)/.cache/aarch64-sysroot \
-		CXX=aarch64-linux-gnu-g++ CC=aarch64-linux-gnu-gcc taskset -c 16-19 $(MAKE) -C $(ROOT)/kprog/libnativeloader \
+		CXX=aarch64-linux-gnu-g++ CC=aarch64-linux-gnu-gcc taskset -c 20-23 $(MAKE) -C $(ROOT)/kprog/libnativeloader \
 		BUILD_DIR=build-arm64-a-map-order-v3 \
 		LIBBPF_PREFIX=$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix \
 		LIBBPF_LIBRARY=$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
@@ -754,3 +754,7 @@ trusted-katran-arm64-run: trusted-arm64-module-index
 .PHONY: trusted-arm64-module-index
 trusted-arm64-module-index:
 	depmod -b $(ROOT)/vendor/build/arm64/linux/modules-install "$$(cat $(ROOT)/vendor/build/arm64/linux/include/config/kernel.release)"
+
+.PHONY: trusted-arm64-extern-check
+trusted-arm64-extern-check:
+	taskset -c 20-23 python3 $(HERE)/trusted_extern_check.py

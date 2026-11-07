@@ -21,3 +21,5 @@ The ARM adapter now uses the committed common declaration/ELF validator: it is
 actual native entries accepted by preflight. ARM/x86 module imports coexist.
 The committed helper and the workspace helper were checked separately; their
 hashes are recorded in shared-helper-check.json. This worker creates no broker.
+
+This directory records earlier declaration-based host preparation. The current native-only trusted route uses the [bare extern contract](../trusted-extern-result/README.md); the historical 17-map libbpf-open result here is not current kernel admission evidence.

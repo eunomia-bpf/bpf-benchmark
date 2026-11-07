@@ -36,13 +36,11 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
     The returned paths are freshly created worker outputs, never producer paths.
     """
     validate_native(native_bytes, entry_symbol, "EM_AARCH64")
-    declarations_text, names = declarations(metadata)
+    declarations(metadata)
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, mode=0o700)
     native = output_dir / "request.native.o"
     native.write_bytes(native_bytes)
-    declarations_file = output_dir / "maps.h"
-    declarations_file.write_text(declarations_text)
     name = "trusted_arm64"
     native_proof = output_dir / (name + ".proof.o")
 
@@ -61,7 +59,7 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
     source = output_dir / (name + ".bpf.c")
     text = gen.render_program(name, entry_symbol, functions, kind, rodata16=rodata,
         linked_exit=True, program_section=metadata["section"],
-        original_source=declarations_file, original_symbols=names)
+        trusted_map_bindings=[dict(native_symbol=m["name"], value_offset=m.get("value_offset")) for m in metadata["maps"]])
     text = text.replace('#include "../arm64_sim_local_bpf.h"',
                         '#include ' + json.dumps(str(ROOT / "kprog/arm64/arm64_sim_local_bpf.h")))
     source.write_text(text)

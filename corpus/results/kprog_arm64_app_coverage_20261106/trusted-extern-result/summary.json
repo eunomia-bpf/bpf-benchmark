@@ -514,12 +514,14 @@
   },
   "inputs_unchanged": true,
   "ok": true,
-  "source_integration": "candidate source retained in archive; ARM source integration waits for C shared helper publication",
+  "source_integration": "ARM generator/worker integrated with the identical committed shared helper",
   "producer_source_sha256": {
     "kprog/arm64/trusted_specializer.py": "9c96ba545a3856021520407ab6da93d60534ce5b536ceb6d151c79d498c08497",
     "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "464cae64514f8e9e8781c6c4a014d52b04758a92f4a0509ff5f6288df49b3a5f",
     "kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
     "corpus/results/kprog_arm64_app_coverage_20261106/trusted_extern_check.py": "861958ec68408e9cdc37fd6cd38d48e853c5d2050b799e31b494d62a143b121a"
   },
-  "compiler_archive_sha256": "19edb004c19d8c7602088d8c3e9a52598a4c52a5c28fe448bac082fd00495837"
+  "compiler_archive_sha256": "19edb004c19d8c7602088d8c3e9a52598a4c52a5c28fe448bac082fd00495837",
+  "shared_helper_source_commit": "deeee301e176f54443f67ae4f0b4776eba7a07d5",
+  "integration_base_HEAD": "e189b3a872c440b334fa3ff45c004d89806bb455"
 }

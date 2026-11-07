@@ -932,13 +932,34 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
                    linked_exit: bool = False, program_section: str | None = None,
                    original_source: Path | None = None,
                    original_symbols: set[str] | None = None,
-                   source_map_bindings: list[dict] | None = None) -> str:
+                   source_map_bindings: list[dict] | None = None,
+                   trusted_map_bindings: list[dict] | None = None) -> str:
     if (original_source is None) != (original_symbols is None):
         raise ValueError("original source and ELF-defined symbol set must be supplied together")
     rodata16 = {symbol: value for symbol, value in (rodata16 or {}).items()
                 if original_symbols is None or symbol not in original_symbols}
+    trusted_map_bindings = trusted_map_bindings or []
+    trusted_names = set()
+    if trusted_map_bindings:
+        from trusted_generation import elf_symbol, c_symbol_aliases
+    for binding in trusted_map_bindings:
+        if set(binding) != {"native_symbol", "value_offset"}:
+            raise ValueError("trusted map binding requires native_symbol/value_offset")
+        symbol, offset = binding["native_symbol"], binding["value_offset"]
+        if elf_symbol(symbol) in trusted_names:
+            raise ValueError("invalid/duplicate trusted native map symbol")
+        if offset is not None and (type(offset) is not int or not 0 <= offset <= 0xffffffff):
+            raise ValueError("trusted map value offset must be null or u32")
+        trusted_names.add(symbol)
+    trusted_idents = c_symbol_aliases([b["native_symbol"] for b in trusted_map_bindings], "__arm64_trusted_map_") if trusted_map_bindings else {}
+    rodata16 = {symbol: value for symbol, value in rodata16.items() if symbol not in trusted_names}
     source_map_bindings = source_map_bindings or []
     source_pointers = {}
+    for binding in trusted_map_bindings:
+        symbol, offset = binding["native_symbol"], binding["value_offset"]
+        # The extern already denotes the native symbol's bound address,
+        # including any capsule direct-value base. Do not add that base twice.
+        source_pointers[symbol] = (offset is not None, trusted_idents[symbol])
     proof_symbols = set()
     for binding in source_map_bindings:
         if set(binding) != {"native_symbol", "source_insn", "proof_symbol", "kind", "value_offset"}:
@@ -958,7 +979,8 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
     functions = OrderedDict((fn, [replace(insn, source_pointer=source_pointers[insn.reloc_symbol])
         if insn.reloc_symbol in source_pointers else insn for insn in body]) for fn, body in functions.items())
     all_insns = [insn for fn in functions.values() for insn in fn]
-    if {insn.reloc_symbol for insn in all_insns} & source_pointers.keys() != source_pointers.keys():
+    referenced = {insn.reloc_symbol for insn in all_insns}
+    if {binding["native_symbol"] for binding in source_map_bindings} - referenced:
         raise ValueError("source-map binding has no native address relocation")
     if any(insn.source_pointer is not None and insn.mnemonic not in {"adrp", "ldr"} for insn in all_insns):
         raise ValueError("source-map binding requires an explicit GOT address/load pair")
@@ -1013,6 +1035,10 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
     if prelude:
         lines.append(prelude.rstrip())
         lines.append("")
+    for symbol in sorted(trusted_names & referenced):
+        ident = trusted_idents[symbol]
+        alias = '' if ident == symbol else ' __asm__(' + json.dumps(symbol) + ')'
+        lines.append(f'extern __u8 {ident}[]{alias} __ksym;')
     if source_map_bindings:
         for binding in source_map_bindings:
             lines.append(f'extern __u8 {binding["proof_symbol"]}[] __ksym;')
