@@ -22,7 +22,7 @@ def control_extents(binary, metadata, forms, linear_paths=False):
             extents[int(match[1],16)]=len(match[2].split())
     result={}
     for index,form in enumerate(forms):
-        if form['opcode'] not in {'X86_OP_JCC','X86_OP_JMP'} and not (linear_paths and form['opcode']=='X86_STACK_COMPOSITE'):
+        if form['opcode'] not in {'X86_OP_JCC','X86_OP_JMP','X86_OP_CALL'} and not (linear_paths and form['opcode']=='X86_STACK_COMPOSITE'):
             continue
         code=metadata['forms'][index]
         pc=code['pc'];entries=[]
@@ -32,7 +32,7 @@ def control_extents(binary, metadata, forms, linear_paths=False):
                 raise RuntimeError('control instruction crosses observed byte span')
             entries.append(dict(offset=pc-code['pc'],length=length))
             pc+=length
-        expected=form['native_instructions'] if form['opcode']=='X86_STACK_COMPOSITE' else 5 if form['assembly'].endswith('backward') else 4 if form['opcode']=='X86_OP_JCC' else 3
+        expected=form['native_instructions'] if form['opcode']=='X86_STACK_COMPOSITE' else 4 if form['opcode']=='X86_OP_CALL' else 5 if form['assembly'].endswith('backward') else 4 if form['opcode']=='X86_OP_JCC' else 3
         if len(entries)!=expected:
             raise RuntimeError('unexpected generated control observer shape')
         result[index]=entries
@@ -44,6 +44,9 @@ def control_witness(form, extents, native):
     No flags/condition are interpreted here. Canonical execution must validate
     the entire selected witness and end at the actual observed final PC.
     """
+    if form['opcode']=='X86_OP_CALL':
+        # Generated observer order: CALL, callee load, RET, caller JMP.
+        return [extents[index] for index in [0,2,3,1]]
     if native['registers'][0] not in {0,1}:
         raise RuntimeError('control observer did not produce a 0/1 outcome')
     if form['opcode']=='X86_OP_JMP':
@@ -69,7 +72,7 @@ def main():
     parser.add_argument('--reuse-trace',action='store_true')
     parser.add_argument('--trace',type=Path)
     parser.add_argument('--reference',type=Path,default=ROOT/'kprog/formal/.lake/build/bin/reference')
-    parser.add_argument('--control-paths',action='store_true',help='use the canonical finite-path interface for generated Jcc/JMP observers')
+    parser.add_argument('--control-paths',action='store_true',help='use the canonical finite-path interface for generated Jcc/JMP/CALL observers')
     parser.add_argument('--linear-paths',action='store_true',help='use canonical finite paths for complete acyclic straight-line stack observers')
     parser.add_argument('--opcode',action='append',help='replay only this production opcode from the saved trace; repeat for multiple families')
     args=parser.parse_args()
@@ -132,7 +135,7 @@ def main():
                 continue
             requests=[];records=[];rejection=None
             omit_memory=(args.arch=='arm64' and form['opcode'] in arm_without_memory) or (
-                args.arch=='x86' and ((form['opcode'] in x86_without_memory and '[' not in form['assembly']) or form['opcode']=='X86_OP_LEA')) or (index in paths and form['opcode']!='X86_STACK_COMPOSITE')
+                args.arch=='x86' and ((form['opcode'] in x86_without_memory and '[' not in form['assembly']) or form['opcode']=='X86_OP_LEA')) or (index in paths and form['opcode'] not in {'X86_STACK_COMPOSITE','X86_OP_CALL'})
             assembly=form['assembly']
             for case in range(cases):
                 ident=struct.unpack('<2I',source.read(8))

@@ -95,7 +95,7 @@ reference-build:
 	cd ../formal && lake build reference
 
 reference-check: build reference-build
-	$(PYTHON) reference_check.py --binary ./$(BUILD)/cpu-differential --arch $(ARCH) --cases $(CASES) --out $(OUT)
+	$(PYTHON) reference_check.py --binary ./$(BUILD)/cpu-differential --arch $(ARCH) --cases $(CASES) --out $(OUT) --control-paths
 
 .PHONY: check-stack-memory
 check-stack-memory:
@@ -233,7 +233,7 @@ arm64-control-qemu:
 
 .PHONY: reference-replay
 reference-replay: reference-build
-	$(PYTHON) reference_check.py --reuse-trace --binary ./$(BUILD)/cpu-differential --arch $(ARCH) --cases $(CASES) --out $(OUT)
+	$(PYTHON) reference_check.py --reuse-trace --binary ./$(BUILD)/cpu-differential --arch $(ARCH) --cases $(CASES) --out $(OUT) --control-paths
 
 .PHONY: arm64-control-handoff
 ARM64_CONTROL_HANDOFF ?= ../results/kprog_fidelity_20261106/differential/cpu-differential-arm64-control.gz
