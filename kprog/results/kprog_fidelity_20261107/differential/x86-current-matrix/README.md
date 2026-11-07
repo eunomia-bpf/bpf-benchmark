@@ -18,10 +18,19 @@ compiler output and later per-form observations are stored here.
 python3 kprog/results/kprog_fidelity_20261107/differential/x86-current-matrix/run.py
 ```
 
-`state.json` and F/matrix-current.state record progress. The compiler is
-currently active; no all-form mismatch/coverage total is claimed before its
-CPU/reference stages complete. Eventual `forms.tsv`, mismatch inputs and
-reference status must be read together. Any unsupported reference encoding or
-source drift is retained explicitly, not counted as agreement or hidden.
-Build and replay logs are separate, and the full dataset stays intact on a
-mismatch. Do not start another writer for this current build while it runs.
+The complete real-CPU/C stage PASS: **1,077 forms x1,024 inputs =1,102,848
+cases, zero architectural-state or memory mismatches**. `forms.tsv` records
+all per-form counts; `native-code.json` retains native encodings, and
+`cpu-mismatches.jsonl.gz` is the empty counterexample stream. The source
+snapshot actually compiled by the existing generator, generatedC/nativeASM
+and observer source are preserved in `current-cpu-inputs.tar.gz`, with exact
+hashes in `compiled-source-pins.json`. `cpu-summary.json` pins the binary.
+The completed build and warm-reference build logs are compressed separately.
+
+The canonical reference replay is STILL RUNNING; its agreement/unsupported
+counts are not yet claimed. `state.json` and F/matrix-current.state record that
+independent stage. Eventual reference per-form status and unavailable-encoding
+inputs must be read together. Source drift stays explicit, not counted as
+agreement or hidden. The raw passing CPU trace remains live input to the
+reference replay and must be preserved until that process exits. No second
+writer or duplicate full matrix build is started while this job runs.
