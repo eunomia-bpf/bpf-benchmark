@@ -1011,6 +1011,198 @@ theorem entry_first_guard_correspondence (env : BPF.Environment) (n : X86.State)
       proofGuardFinal,initializationFinal,BPF.setReg]
   · simpa +decide [initializationFinal,BPF.setReg,nativePrefixFinal,nativeAfterSecond,nativeAfter] using flags
 
+
+/-- A universal canonical relational-step fact, not just the executable XOR
+representative. Every allowed XOR transition has exactly the actual empty
+trace/no fault, and the next CMP reaches the same complete architectural state. -/
+theorem compare_after_relational_xor (s : X86.State) (actual : Transition X86.State)
+    (run : X86.Step (.logic .w32 .xor (.register (.low 0)) (.register (.low 0)) 12)
+      (guardMove s) actual) :
+    actual.events = [] ∧ actual.fault = none ∧ actual.state.pc = 12 ∧
+    X86.step (.arithmetic .w64 .compare (.register (.low 6)) (.register (.low 2)) 15) actual.state =
+      ⟨guardCompare s,[],none⟩ := by
+  change X86.matchesTransition _ (X86.step _ (guardMove s)) actual at run
+  rw [guard_zero_step] at run
+  simp only [X86.matchesTransition,X86.definedFlags,X86.observedRegisters,
+    Option.isSome,Bool.false_eq_true,ite_false] at run
+  obtain ⟨events,fault,states⟩ := run
+  change { guardZero s with rflags := (guardZero s).rflags &&& (0xffffffffffffffef : Word) } =
+    { actual.state with rflags := actual.state.rflags &&& (0xffffffffffffffef : Word) } at states
+  have shape : actual.state = { guardZero s with rflags := actual.state.rflags } := by
+    exact (congrArg (fun t : X86.State => {t with rflags := actual.state.rflags}) states).symm
+  have allowed : actual.state.rflags &&& (0xffffffffffffffef#64) =
+      X86.logicalFlags .w32 .xor (0#64) (0#64) s.rflags &&& (0xffffffffffffffef#64) := by
+    simpa +decide [guardZero,guardZeroFlags] using (congrArg X86.State.rflags states).symm
+  have sameFlags : X86.arithmeticFlags .w64 true false (s.gpr 1) (s.gpr 2) actual.state.rflags =
+      X86.arithmeticFlags .w64 true false (s.gpr 1) (s.gpr 2) (guardZeroFlags s.rflags) :=
+    (xor_compare_flags_choice _ _ (0#64) _ _ allowed).trans
+      (xor_compare_flags_choice (s.gpr 1) (s.gpr 2) (0#64) s.rflags (guardZeroFlags s.rflags) rfl).symm
+  refine ⟨events.symm,fault.symm,(congrArg X86.State.pc states).symm,?_⟩
+  rw [shape]
+  have nocarry (f : Word) : X86.ArithmeticKind.compare.carry f = false := by rfl
+  simp +decide [X86.step,X86.arithmeticStep,X86.scalarRead,X86.scalarRegisterValue,
+    X86.ScalarDestination.source,X86.ArithmeticKind.subtract,nocarry,
+    X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+    guardCompare,guardZero,guardMove,sameFlags]
+
+
+/-- A fully observed reference step determines its entire transition. The
+register observation premise excludes instructions with undefined GPR bits. -/
+theorem fully_observed_step_unique (instruction : X86.Instruction) (s : X86.State)
+    (actual : Transition X86.State)
+    (flags : X86.definedFlags instruction = (0xffffffffffffffff#64))
+    (registers : ∀ state, X86.observedRegisters instruction state = state.gpr)
+    (run : X86.Step instruction s actual) : actual = X86.step instruction s := by
+  have maskAll (word : Word) : word &&& (0xffffffffffffffff#64) = word := by
+    unfold Word at *
+    bv_decide
+  change X86.matchesTransition instruction (X86.step instruction s) actual at run
+  obtain ⟨events,fault,states⟩ := run
+  have stateExact : (X86.step instruction s).state = actual.state := by
+    cases beforeState : (X86.step instruction s).state
+    cases afterState : actual.state
+    cases h : (X86.step instruction s).fault <;>
+      simpa [beforeState,afterState,h,flags,registers,maskAll] using states
+  cases actual
+  cases expected : X86.step instruction s
+  simp only [expected] at events fault stateExact
+  cases stateExact
+  cases events
+  cases fault
+  rfl
+
+/-- Universal local guard transport for canonical relational steps. Each
+supplied step is proved to be the actual byte-decoded instruction at its
+actual pre-state; arbitrary XOR AF choices are admitted. All other state,
+ordered effects, faults and the actual branch successor are determined. -/
+theorem native_guard_relational_block (s : X86.State) (position : s.pc=7)
+    (moved zeroed compared branched : Transition X86.State)
+    (moveRun : X86.Step (.move .w64 (.register (.low 6)) (.register (.low 1)) 10) s moved)
+    (xorRun : X86.Step (.logic .w32 .xor (.register (.low 0)) (.register (.low 0)) 12) moved.state zeroed)
+    (compareRun : X86.Step (.arithmetic .w64 .compare (.register (.low 6)) (.register (.low 2)) 15)
+      zeroed.state compared)
+    (branchRun : X86.Step (.branch (some 7) 60 17) compared.state branched) :
+    moved = ⟨guardMove s,[],none⟩ ∧
+    zeroed.events = [] ∧ zeroed.fault = none ∧ zeroed.state.pc = 12 ∧
+    compared = ⟨guardCompare s,[],none⟩ ∧ branched = ⟨guardFinal s,[],none⟩ ∧
+    X86Path.decodeAt 0 native ⟨7,3⟩ s = .ok
+      (.move .w64 (.register (.low 6)) (.register (.low 1)) 10) ∧
+    X86Path.decodeAt 0 native ⟨10,2⟩ moved.state = .ok
+      (.logic .w32 .xor (.register (.low 0)) (.register (.low 0)) 12) ∧
+    X86Path.decodeAt 0 native ⟨12,3⟩ zeroed.state = .ok
+      (.arithmetic .w64 .compare (.register (.low 6)) (.register (.low 2)) 15) ∧
+    X86Path.decodeAt 0 native ⟨15,2⟩ compared.state = .ok (.branch (some 7) 60 17) := by
+  have moveExact := fully_observed_step_unique _ _ moved rfl (fun _ => rfl) moveRun
+  rw [guard_move_step s position] at moveExact
+  have actualXor : X86.Step (.logic .w32 .xor (.register (.low 0)) (.register (.low 0)) 12)
+      (guardMove s) zeroed := by simpa only [moveExact] using xorRun
+  obtain ⟨zeroEvents,zeroFault,zeroPC,nextCompare⟩ := compare_after_relational_xor s zeroed actualXor
+  have compareExact := fully_observed_step_unique _ _ compared rfl (fun _ => rfl) compareRun
+  rw [nextCompare] at compareExact
+  have actualBranch : X86.Step (.branch (some 7) 60 17) (guardCompare s) branched := by
+    simpa only [compareExact] using branchRun
+  have branchExact := fully_observed_step_unique _ _ branched rfl (fun _ => rfl) actualBranch
+  rw [guard_branch_step] at branchExact
+  refine ⟨moveExact,zeroEvents,zeroFault,zeroPC,compareExact,branchExact,?_,?_,?_,?_⟩
+  · simp +decide [X86Path.decodeAt,native_size,native_decode7,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  · have pc : moved.state.pc=10 := by rw [moveExact]; rfl
+    simp +decide [X86Path.decodeAt,native_size,native_decode10,pc,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  · simp +decide [X86Path.decodeAt,native_size,native_decode12,zeroPC,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  · have pc : compared.state.pc=15 := by rw [compareExact]; rfl
+    simp +decide [X86Path.decodeAt,native_size,native_decode15,pc,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
+
+/-- Unknown decoded instructions and arbitrary relational transitions for
+these actual artifact extents. Decoding determines the operations; the
+complete final transition and all ordered effects follow without selecting
+an XOR AF value or a branch outcome. -/
+theorem native_guard_decoded_relational_block (s : X86.State) (position : s.pc=7)
+    (moved zeroed compared branched : Transition X86.State)
+    (i0 i1 i2 i3 : X86.Instruction)
+    (decode0 : X86Path.decodeAt 0 native ⟨7,3⟩ s = .ok i0) (moveRun : X86.Step i0 s moved)
+    (decode1 : X86Path.decodeAt 0 native ⟨10,2⟩ moved.state = .ok i1) (xorRun : X86.Step i1 moved.state zeroed)
+    (decode2 : X86Path.decodeAt 0 native ⟨12,3⟩ zeroed.state = .ok i2) (compareRun : X86.Step i2 zeroed.state compared)
+    (decode3 : X86Path.decodeAt 0 native ⟨15,2⟩ compared.state = .ok i3) (branchRun : X86.Step i3 compared.state branched) :
+    moved.events ++ zeroed.events ++ compared.events ++ branched.events = [] ∧
+    moved.fault = none ∧ zeroed.fault = none ∧ compared.fault = none ∧
+    branched = ⟨guardFinal s,[],none⟩ := by
+  have d0 : X86Path.decodeAt 0 native ⟨7,3⟩ s = .ok
+      (.move .w64 (.register (.low 6)) (.register (.low 1)) 10) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode7,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have same0 := Except.ok.inj (decode0.symm.trans d0)
+  subst i0
+  have moveExact := fully_observed_step_unique _ _ moved rfl (fun _ => rfl) moveRun
+  rw [guard_move_step s position] at moveExact
+  have pc1 : moved.state.pc=10 := by rw [moveExact]; rfl
+  have d1 : X86Path.decodeAt 0 native ⟨10,2⟩ moved.state = .ok
+      (.logic .w32 .xor (.register (.low 0)) (.register (.low 0)) 12) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode10,pc1,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have same1 := Except.ok.inj (decode1.symm.trans d1)
+  subst i1
+  have actualXor : X86.Step (.logic .w32 .xor (.register (.low 0)) (.register (.low 0)) 12)
+      (guardMove s) zeroed := by simpa only [moveExact] using xorRun
+  obtain ⟨_,_,zeroPC,nextCompare⟩ := compare_after_relational_xor s zeroed actualXor
+  have d2 : X86Path.decodeAt 0 native ⟨12,3⟩ zeroed.state = .ok
+      (.arithmetic .w64 .compare (.register (.low 6)) (.register (.low 2)) 15) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode12,zeroPC,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have same2 := Except.ok.inj (decode2.symm.trans d2)
+  subst i2
+  have compareExact := fully_observed_step_unique _ _ compared rfl (fun _ => rfl) compareRun
+  rw [nextCompare] at compareExact
+  have pc3 : compared.state.pc=15 := by rw [compareExact]; rfl
+  have d3 : X86Path.decodeAt 0 native ⟨15,2⟩ compared.state = .ok (.branch (some 7) 60 17) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode15,pc3,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have same3 := Except.ok.inj (decode3.symm.trans d3)
+  subst i3
+  obtain ⟨movedEq,zeroEvents,zeroFault,_,comparedEq,branchedEq,_,_,_,_⟩ :=
+    native_guard_relational_block s position moved zeroed compared branched moveRun xorRun compareRun branchRun
+  refine ⟨?_,?_,zeroFault,?_,branchedEq⟩
+  · simp only [movedEq,comparedEq,branchedEq,zeroEvents,List.nil_append]
+  · exact congrArg Transition.fault movedEq
+  · exact congrArg Transition.fault comparedEq
+
+
+/-- The actual verifier-facing B guard checks every canonical relational
+execution of the decoded native guard, not only the executable representative. -/
+theorem relational_first_guard_correspondence (env : BPF.Environment) (p : BPF.State) (s : X86.State) (position : s.pc=7)
+    (moved zeroed compared branched : Transition X86.State)
+    (i0 i1 i2 i3 : X86.Instruction)
+    (decode0 : X86Path.decodeAt 0 native ⟨7,3⟩ s = .ok i0) (moveRun : X86.Step i0 s moved)
+    (decode1 : X86Path.decodeAt 0 native ⟨10,2⟩ moved.state = .ok i1) (xorRun : X86.Step i1 moved.state zeroed)
+    (decode2 : X86Path.decodeAt 0 native ⟨12,3⟩ zeroed.state = .ok i2) (compareRun : X86.Step i2 zeroed.state compared)
+    (decode3 : X86Path.decodeAt 0 native ⟨15,2⟩ compared.state = .ok i3) (branchRun : X86.Step i3 compared.state branched)
+    (proofPC : p.pc=11) (active : p.halted=false)
+    (pointer : s.gpr 1=p.regs 2) (limit : s.gpr 2=p.regs 3) :
+    moved.events ++ zeroed.events ++ compared.events ++ branched.events = [] ∧
+    Execution (initializedInstructionStep env) p
+      (moved.events ++ zeroed.events ++ compared.events ++ branched.events) (proofGuardFinal p) ∧
+    branched = ⟨guardFinal s,[],none⟩ ∧
+    branched.state.pc = (if p.regs 2 > p.regs 3 then 60 else 17) ∧
+    (proofGuardFinal p).pc = (if p.regs 2 > p.regs 3 then 34 else 12) := by
+  obtain ⟨trace,_,_,_,branchedEq⟩ := native_guard_decoded_relational_block s position
+    moved zeroed compared branched i0 i1 i2 i3 decode0 moveRun decode1 xorRun decode2 compareRun decode3 branchRun
+  obtain ⟨_,proofRun,npc,ppc,_⟩ := first_guard_correspondence env s p position proofPC active pointer limit
+  refine ⟨trace,?_,branchedEq,?_,ppc⟩
+  · rw [trace]
+    exact proofRun
+  · simpa only [branchedEq] using npc
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -1096,3 +1288,13 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_execution_append
 
 #print axioms KProgTV.TrustedSimpleX86.entry_first_guard_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.compare_after_relational_xor
+
+#print axioms KProgTV.TrustedSimpleX86.fully_observed_step_unique
+
+#print axioms KProgTV.TrustedSimpleX86.native_guard_relational_block
+
+#print axioms KProgTV.TrustedSimpleX86.native_guard_decoded_relational_block
+
+#print axioms KProgTV.TrustedSimpleX86.relational_first_guard_correspondence

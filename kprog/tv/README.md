@@ -1309,9 +1309,8 @@ CMP flags for arbitrary incoming flags. `xor_compare_flags_choice` proves
 that every flags value allowed by XOR's mask, including every undefined AF
 choice, yields the same complete subsequent CMP flags;
 `guard_final_flags` specializes this to the captured guard. The native path
-witness uses the existing executable `X86Path.Execution`; full relational
-execution transport across the undefined intermediate flag is still an
-explicit remaining obligation. The path evaluator's conservative flag mask
+witness uses the existing executable `X86Path.Execution`; universal local
+relational transport across the undefined intermediate flag is supplied below. The path evaluator's conservative flag mask
 is retained unchanged.
 
 This discharges the local first-guard correspondence, not a whole-program
@@ -1340,7 +1339,43 @@ and the fail-closed environment/interface/binding contracts remain unchanged.
 This is an actual first-basic-block correspondence for successful entry
 loads/stack initialization under the explicit platform premises, not a
 whole-program certificate or a universal fault/relational-execution theorem.
-The remaining work is the later guards, stores and exit, canonical relational
-transport through undefined intermediate flags, fault/ABI/platform behavior
-and immutable-P/materialized-artifact transport. Audit and hashes:
+The remaining work is the later guards, stores and exit, program-level
+relational composition (the local guard transport is supplied below),
+fault/ABI/platform behavior and immutable-P/materialized-artifact transport. Audit and hashes:
 `trusted-simple-entry-first-guard.json`.
+
+
+Universal canonical relational transport for the first guard
+
+`compare_after_relational_xor` quantifies over every transition allowed by
+canonical `X86.Step` for the actual XOR, including every undefined AF choice.
+It derives an empty trace, no fault, PC12, and exactly the same complete
+subsequent CMP transition. It constrains no undefined flag beyond the
+reference ISA's own observation mask.
+
+`fully_observed_step_unique` proves uniqueness when both canonical flag and
+register observations are complete; the guard's MOV/CMP/JA meet these
+premises. `native_guard_relational_block` combines those unique steps with
+the arbitrary XOR transition. `native_guard_decoded_relational_block` then
+admits unknown decoded instructions and arbitrary canonical relational
+transitions at all four actual artifact extents. The decoder determines the
+operations from the captured bytes and actual intermediate states. It
+proves every fault absent, the concatenated actual trace empty and the final
+transition exactly `guardFinal`, including every register, memory field,
+flag and the selected PC60/17. Neither an AF value nor a branch outcome is
+selected as a premise.
+
+`relational_first_guard_correspondence` connects every such actual decoded
+relational native execution directly to an `initializedInstructionStep env`
+execution of the actual B guard with the same ordered effect trace. It
+derives both corresponding successors from the pointer/limit relation and
+retains the complete native final transition and B state. Thus the B witness
+is no longer limited to matching the executable XOR representative.
+
+This closes the undefined-AF/local-relational gap for native bytes7..17.
+It uses existing canonical `Step`, `matchesTransition`, `definedFlags`,
+`observedRegisters` and the same decoder; it adds no ISA semantics or runtime
+check. Whole-program relational composition, later guards/stores/exit,
+entry faults/ABI/platform behavior and immutable-P/materialized-artifact
+transport remain open. Evidence and axiom audit:
+`trusted-simple-relational-guard.json`.
