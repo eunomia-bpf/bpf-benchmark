@@ -2975,6 +2975,92 @@ theorem all_store_fault_relational_correspondence (env : BPF.Environment) (frame
   · simpa only [exactResult] using proofRun
   · simpa only [exactResult] using memory
 
+
+/-- Expose the already checked actual successful five-instruction evaluation
+so arbitrary canonical relational path results can be compared to it. -/
+theorem packet_native_evaluation (s : X86.State) (position : s.pc=35)
+    (write0 : permitted s.memory.writable (s.gpr 1) 2=true)
+    (write2 : permitted s.memory.writable (s.gpr 1+(2#64)) 1=true)
+    (write3 : permitted s.memory.writable (s.gpr 1+(3#64)) 4=true)
+    (write7 : permitted s.memory.writable (s.gpr 1+(7#64)) 1=true) :
+    X86Path.evaluate 0 native [⟨35,5⟩,⟨40,4⟩,⟨44,7⟩,⟨51,4⟩,⟨55,5⟩] s =
+      .ok ⟨⟨packetNativeFinal s,packetWriteEvents (s.gpr 1),none⟩,(0xffffffffffffffff#64)⟩ := by
+  obtain ⟨d0,d1,d2,d3⟩ := packet_native_store_decodes s position
+  have pc4 : (packetNativeFourth s).pc=55 := rfl
+  have d4 : X86Path.decodeAt 0 native ⟨55,5⟩ (packetNativeFourth s)=.ok
+      (.move .w32 (.register (.low 0)) (.immediate (2#64)) 60) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode55,pc4,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  simp only [X86Path.evaluate,d0,d1,d2,d3,d4,packet_native_first_step s write0,
+    packet_native_second_step s write2,packet_native_third_step s write3,
+    packet_native_fourth_step s write7,packet_native_result_step,X86.definedFlags,
+    Option.isSome,Bool.false_eq_true,List.isEmpty_cons,List.isEmpty_nil,
+    List.nil_append,List.cons_append,List.append_nil,ite_false,packetWriteEvents]
+  rfl
+
+/-- The extent list is the actual first-fault prefix or successful write body.
+Selection uses canonical permissions and never adds an artifact check. -/
+def packetNativeOutcomePath (index : Nat) : List X86Path.Entry :=
+  if index=4 then [⟨35,5⟩,⟨40,4⟩,⟨44,7⟩,⟨51,4⟩,⟨55,5⟩] else packetNativeFaultPath index
+
+theorem packet_outcome_path_defined (index : Nat) (bounded : index≤4) :
+    ∀ entry ∈ packetNativeOutcomePath index, entry ∈ simpleDefinedExtents := by
+  by_cases success : index=4
+  · simp [packetNativeOutcomePath,success,simpleDefinedExtents]
+  · simpa only [packetNativeOutcomePath,success,ite_false] using
+      packet_fault_path_defined index (by omega)
+
+/-- One actual canonical evaluation for every packet-write permission
+assignment, including its precise terminal fault field and full state. -/
+theorem packet_native_any_evaluation (s : X86.State) (index : Nat) (position : s.pc=35)
+    (selected : index=packetFirstFailure s.memory (s.gpr 1)) :
+    X86Path.evaluate 0 native (packetNativeOutcomePath index) s =
+      .ok ⟨⟨packetNativeOutcome s index,packetOutcomeEvents (s.gpr 1) index,
+        if index=4 then none else some (packetStoreFault (s.gpr 1) index)⟩,(0xffffffffffffffff#64)⟩ := by
+  have spec := packet_first_failure_spec s.memory (s.gpr 1)
+  change packetFirstFailure s.memory (s.gpr 1)≤4 ∧ _ at spec
+  rw [← selected] at spec
+  by_cases success : index=4
+  · have permissions := spec.2.2 success
+    have evaluated := packet_native_evaluation s position
+      (permissions 0 (by omega)) (permissions 1 (by omega))
+      (permissions 2 (by omega)) (permissions 3 (by omega))
+    simpa only [packetNativeOutcomePath,packetNativeOutcome,packetOutcomeEvents,success,ite_true] using evaluated
+  · have failed : index<4 := by omega
+    obtain ⟨prior,bad⟩ := spec.2.1 failed
+    simpa only [packetNativeOutcomePath,packetNativeOutcome,packetOutcomeEvents,success,ite_false] using
+      packet_all_native_store_faults s index failed position prior bad
+
+/-- Every canonical relational execution of the actual complete packet-body
+path, for every permission assignment, has the state/effects/fault checked by B.
+No caller supplies successful stores, a branch outcome, or observation masks. -/
+theorem packet_body_relational_correspondence (env : BPF.Environment) (frame : Word)
+    (n : X86.State) (p : BPF.State) (index : Nat) (actual : Transition X86.State)
+    (nativePC : n.pc=35) (proofPC : p.pc=18) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2) (same : initializationAgreesOutside frame n.memory p.memory)
+    (selected : index=packetFirstFailure p.memory (p.regs 2))
+    (run : CanonicalRelationalPath 0 native (packetNativeOutcomePath index) n actual) :
+    actual=⟨packetNativeOutcome n index,packetOutcomeEvents (p.regs 2) index,
+      if index=4 then none else some (packetStoreFault (p.regs 2) index)⟩ ∧
+    Execution (initializedInstructionStep env) p actual.events (packetProofOutcome p index) ∧
+    initializationAgreesOutside frame actual.state.memory (packetProofOutcome p index).memory ∧
+    (index=4 → actual.state.pc=60 ∧ (packetProofOutcome p index).halted=true ∧
+      actual.state.gpr 0=(packetProofOutcome p index).regs 0 ∧ actual.state.gpr 0=(2#64)) := by
+  obtain ⟨bounded,_,proofRun,memory,returned⟩ :=
+    packet_body_any_permissions env frame n p index nativePC proofPC active pointer same selected
+  have nativeSelected : index=packetFirstFailure n.memory (n.gpr 1) :=
+    selected.trans (packet_failure_index_agrees same pointer).symm
+  have evaluated := packet_native_any_evaluation n index nativePC nativeSelected
+  obtain ⟨unique,_⟩ := defined_relational_result_unique run (packet_outcome_path_defined index bounded) evaluated
+  have exactResult : actual=⟨packetNativeOutcome n index,packetOutcomeEvents (p.regs 2) index,
+      if index=4 then none else some (packetStoreFault (p.regs 2) index)⟩ := by
+    simpa only [pointer] using unique
+  refine ⟨exactResult,?_,?_,?_⟩
+  · simpa only [exactResult] using proofRun
+  · simpa only [exactResult] using memory
+  · simpa only [exactResult] using returned
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -3227,3 +3313,11 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.packet_fault_path_defined
 
 #print axioms KProgTV.TrustedSimpleX86.all_store_fault_relational_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.packet_native_evaluation
+
+#print axioms KProgTV.TrustedSimpleX86.packet_outcome_path_defined
+
+#print axioms KProgTV.TrustedSimpleX86.packet_native_any_evaluation
+
+#print axioms KProgTV.TrustedSimpleX86.packet_body_relational_correspondence

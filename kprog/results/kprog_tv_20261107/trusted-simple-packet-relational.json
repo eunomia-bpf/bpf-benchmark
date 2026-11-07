@@ -1,0 +1,78 @@
+{
+  "status": "complete_captured_packet_body_all_permissions_relational_correspondence_checked",
+  "utc": "2026-11-07T12:54:26.554143+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorem": "KProgTV.TrustedSimpleX86.packet_body_relational_correspondence",
+  "claims": [
+    "every canonical relational result on actual packet-body successful or first-fault extent path is exactly the certified complete transition",
+    "arbitrary guest write permissions; no successful-store or branch-outcome premise",
+    "first failure/path selection forced by canonical permissions",
+    "complete native state and precise ordered guest events/fault, actual B execution through first fault or real EXIT",
+    "successful case nativePC60/B halted, exact native/B return2",
+    "outside-private36 values/init/global-permissions preserved"
+  ],
+  "premises": [
+    "nativePC35/BPC18, active B",
+    "nativeRCX/B r2 pointer correspondence and canonical memory relation",
+    "selection equation names computed first failure",
+    "arbitrary canonical relational evaluation on selected actual complete extent path"
+  ],
+  "not_yet_claimed": [
+    "universal whole-program relational composition through entry/guards/XOR AF",
+    "arbitrary extent/CFG coverage theorem",
+    "unconditional artifact TV",
+    "entry/return-ABI/platform semantic transport"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical prefix and audits retained",
+    "old_prefix_sha256": "b14e00ca9dd29a421fbc62e733fc5f5443d96250556b2bc134daf8a75c19b10b",
+    "ISA_runtime_binding": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "binding_mismatch_controls_rejected": 22,
+    "materialization_controls_rejected": 28,
+    "no_sorryAx": true,
+    "log_sha256": "4e2c624d519e44d717227eaa15b2af06bcffbee1f633c320591d1cdee5aafa58",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.packet_native_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.packet_outcome_path_defined": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.packet_native_any_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.packet_body_relational_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "trusted": [
+    "canonical reference ISA/memory and explicit B platform",
+    "Lean kernel/logical axioms and reported native proof reduction",
+    "kernel/archive/ELF-parser provenance for eventual artifact composition",
+    "verifier soundness for eventual safety composition",
+    "entry/return ABI/physical platform semantic transport remains open"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "07e486cc73079288d9c69b6ad14774652d726cff11b33e36539d4c7b7ecfc5b2",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "8f910e1dcd9b512c2b0407f94e785047a3051334de3fec8685d563c689409684",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463"
+  }
+}

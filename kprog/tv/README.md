@@ -1671,3 +1671,14 @@ execution, retaining exact prior writes, fault and full partial memory state.
 The ISA is reused unchanged. Successful-body and whole-program relational path
 composition, CFG/extent completeness, ABI/platform and RET transport remain open.
 See relational-fault-paths JSON/log for assumptions and reference source hashes.
+
+### Complete packet-body relational correspondence
+
+`packet_body_relational_correspondence` covers every canonical relational result
+on the actual native packet-body path, for every guest write-permission assignment.
+The path ends at its first store fault or nativePC60; the actual B path reaches
+the same guest effects/fault or real EXIT and return2. Complete native state and
+outside-private36 memory agreement are retained. The first-failure/path selection
+is computed from permissions; no store success or branch result is assumed.
+Whole-program entry/guard/XOR composition, arbitrary CFG/extent completeness,
+ABI/platform and RET transport remain open. See packet-relational JSON/log.
