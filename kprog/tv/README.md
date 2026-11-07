@@ -1704,3 +1704,16 @@ Generic evaluation-to-relational soundness and nonfaulting path concatenation
 reuse the canonical ISA. Entry/whole-CFG completeness, strict per-basic-block
 mapping across reordered guards, ABI/platform and RET transport remain open.
 See remaining-guards-relational JSON/log for premises and source hashes.
+
+### Relational entry reads and first guard
+
+`context_native_relational_result` covers every canonical relational context
+prefix for any read permissions, including either first read fault, with exact
+full state, ordered events and fault. `entry_first_guard_path_relational_correspondence`
+connects successful actual entry reads through XOR/CMP and the first branch to
+the real B entry/setup/guard execution. Every undefined XOR AF choice is retained;
+the complete boundary state, setup-only projection, memory agreement and derived
+successors follow. Private-frame/entry/platform premises remain explicit.
+The generic nonempty-suffix split preserves faults and all relational choices.
+Whole-program/CFG, ABI/platform and RET composition remain open; see
+entry-guard-relational JSON/log for separate premise scopes and source pins.

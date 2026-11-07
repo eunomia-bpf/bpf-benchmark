@@ -3275,6 +3275,210 @@ theorem remaining_guard_path_relational_correspondence (env : BPF.Environment)
   · simpa only [unique] using npc
   · simpa only [unique] using nmemory
 
+
+/-- Entry read certificates use the existing scalar read and canonical step,
+including a precise read fault. No permission outcome is assumed. -/
+theorem native_first_read_evaluation (s : X86.State) (position : s.pc=0) :
+    X86Path.evaluate 0 native [⟨0,3⟩] s = .ok ⟨
+      (match readMemory s.memory (s.gpr 7) 8 with
+       | .error fault => ⟨s,[.fault fault],some fault⟩
+       | .ok (value,event) => ⟨nativeAfter s value,[event],none⟩),
+      (0xffffffffffffffff#64)⟩ := by
+  have decoded : X86Path.decodeAt 0 native ⟨0,3⟩ s = .ok
+      (.move .w64 (.register (.low 1)) (.memory (s.gpr 7)) (s.pc+3)) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode0,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  cases read : readMemory s.memory (s.gpr 7) 8 with
+  | error fault =>
+    obtain ⟨bad,rfl⟩ := canonical_read_error read
+    simp only [X86Path.evaluate,decoded,native_memory_source_fault s _ _ _ bad,
+      read,Option.isSome,ite_true,List.isEmpty_nil]
+    rfl
+  | ok pair =>
+    rcases pair with ⟨value,event⟩
+    simp only [X86Path.evaluate,decoded,native_load s value event read,read,
+      Option.isSome,Bool.false_eq_true,ite_false,X86.definedFlags]
+    rfl
+
+theorem native_second_read_evaluation (s : X86.State) (position : s.pc=3) :
+    X86Path.evaluate 0 native [⟨3,4⟩] s = .ok ⟨
+      (match readMemory s.memory (s.gpr 7+(8#64)) 8 with
+       | .error fault => ⟨s,[.fault fault],some fault⟩
+       | .ok (value,event) => ⟨nativeAfterSecond s value,[event],none⟩),
+      (0xffffffffffffffff#64)⟩ := by
+  have decoded : X86Path.decodeAt 0 native ⟨3,4⟩ s = .ok
+      (.move .w64 (.register (.low 2)) (.memory (s.gpr 7+(8#64))) (s.pc+4)) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode3,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  cases read : readMemory s.memory (s.gpr 7+(8#64)) 8 with
+  | error fault =>
+    obtain ⟨bad,rfl⟩ := canonical_read_error read
+    simp only [X86Path.evaluate,decoded,native_memory_source_fault s _ _ _ bad,
+      read,Option.isSome,ite_true,List.isEmpty_nil]
+    rfl
+  | ok pair =>
+    rcases pair with ⟨value,event⟩
+    simp only [X86Path.evaluate,decoded,native_second_load s value event read,read,
+      Option.isSome,Bool.false_eq_true,ite_false,X86.definedFlags]
+    rfl
+
+def contextNativePath (n : X86.State) : List X86Path.Entry :=
+  match readMemory n.memory (n.gpr 7) 8 with
+  | .error _ => [⟨0,3⟩]
+  | .ok _ => [⟨0,3⟩,⟨3,4⟩]
+
+def contextNativeResult (n : X86.State) : Transition X86.State :=
+  match readMemory n.memory (n.gpr 7) 8 with
+  | .error fault => ⟨n,[.fault fault],some fault⟩
+  | .ok (pointer,first) =>
+    match readMemory n.memory (n.gpr 7+(8#64)) 8 with
+    | .error fault => ⟨nativeAfter n pointer,[first,.fault fault],some fault⟩
+    | .ok (limit,second) => ⟨nativePrefixFinal n pointer limit,[first,second],none⟩
+
+theorem context_native_path_defined (n : X86.State) :
+    ∀ entry ∈ contextNativePath n, entry ∈ simpleDefinedExtents := by
+  cases read : readMemory n.memory (n.gpr 7) 8 <;>
+    simp [contextNativePath,read,simpleDefinedExtents]
+
+theorem context_native_path_evaluation (n : X86.State) (position : n.pc=0) :
+    X86Path.evaluate 0 native (contextNativePath n) n =
+      .ok ⟨contextNativeResult n,(0xffffffffffffffff#64)⟩ := by
+  have firstCertificate := native_first_read_evaluation n position
+  cases read0 : readMemory n.memory (n.gpr 7) 8 with
+  | error fault =>
+    simpa only [contextNativePath,contextNativeResult,read0] using firstCertificate
+  | ok pair =>
+    rcases pair with ⟨pointer,first⟩
+    have head := canonical_evaluation_relational_sound _ _ _ _ _ firstCertificate
+    simp only [read0] at head
+    have at3 : (nativeAfter n pointer).pc=3 := by simp [nativeAfter,position]
+    have tailCertificate := native_second_read_evaluation (nativeAfter n pointer) at3
+    have tail := canonical_evaluation_relational_sound _ _ _ _ _ tailCertificate
+    have combined := relational_path_append head rfl tail
+    have defined : ∀ entry ∈ [⟨0,3⟩]++[⟨3,4⟩], entry ∈ simpleDefinedExtents := by
+      simp [simpleDefinedExtents]
+    have evaluated := defined_relational_path_evaluation combined defined
+    cases read1 : readMemory n.memory (n.gpr 7+(8#64)) 8 with
+    | error fault =>
+      simpa +decide [contextNativePath,contextNativeResult,read0,read1,nativeAfter] using evaluated
+    | ok pair =>
+      rcases pair with ⟨limit,second⟩
+      simpa +decide [contextNativePath,contextNativeResult,read0,read1,nativePrefixFinal,nativeAfter] using evaluated
+
+/-- Every relational context prefix, including either first read fault,
+retains its exact full state, event order and fault. -/
+theorem context_native_relational_result (n : X86.State) (actual : Transition X86.State)
+    (position : n.pc=0)
+    (run : CanonicalRelationalPath 0 native (contextNativePath n) n actual) :
+    actual=contextNativeResult n := by
+  exact (defined_relational_result_unique run (context_native_path_defined n)
+    (context_native_path_evaluation n position)).1
+
+/-- Split before a nonempty suffix. Every earlier transition must be
+nonfaulting; the decomposition preserves all effects and undefined choices. -/
+theorem relational_path_split_nonempty {firstEntries lastEntries : List X86Path.Entry}
+    {start : X86.State} {actual : Transition X86.State}
+    (nonempty : lastEntries≠[])
+    (run : CanonicalRelationalPath 0 native (firstEntries++lastEntries) start actual) :
+    ∃ middle tail, CanonicalRelationalPath 0 native firstEntries start middle ∧
+      middle.fault=none ∧ CanonicalRelationalPath 0 native lastEntries middle.state tail ∧
+      actual=⟨tail.state,middle.events++tail.events,tail.fault⟩ := by
+  induction firstEntries generalizing start actual with
+  | nil => exact ⟨⟨start,[],none⟩,actual,CanonicalRelationalPath.nil start,rfl,run,rfl⟩
+  | cons entry rest ih =>
+    have tailNonempty : rest++lastEntries≠[] := by
+      intro empty
+      exact nonempty (List.append_eq_nil.mp empty).2
+    cases shape : rest++lastEntries with
+    | nil => exact False.elim (tailNonempty shape)
+    | cons second remaining =>
+      have expanded : CanonicalRelationalPath 0 native (entry::second::remaining) start actual := by
+        simpa only [List.cons_append,shape] using run
+      obtain ⟨instruction,head,tail,decoded,step,normal,suffix,same⟩ := relational_cons_split expanded
+      have unsplit : CanonicalRelationalPath 0 native (rest++lastEntries) head.state tail := by
+        simpa only [shape] using suffix
+      obtain ⟨middle,last,headRun,nonfault,lastRun,assembled⟩ := ih unsplit
+      refine ⟨⟨middle.state,head.events++middle.events,middle.fault⟩,last,
+        CanonicalRelationalPath.next entry instruction decoded step normal headRun,nonfault,lastRun,?_⟩
+      rw [same,assembled]
+      simp only [List.append_assoc]
+
+/-- The first complete region from entry through the XOR/CMP guard has one
+boundary transition for every undefined AF choice. Successful reads are
+assumed only in this region theorem; context_native_relational_result covers
+both fault paths without such an assumption. -/
+theorem entry_first_guard_relational_result (n : X86.State) (pointer limit : Word)
+    (first second : Event) (actual : Transition X86.State) (position : n.pc=0)
+    (read0 : readMemory n.memory (n.gpr 7) 8=.ok (pointer,first))
+    (read1 : readMemory n.memory (n.gpr 7+(8#64)) 8=.ok (limit,second))
+    (run : CanonicalRelationalPath 0 native
+      [⟨0,3⟩,⟨3,4⟩,⟨7,3⟩,⟨10,2⟩,⟨12,3⟩,⟨15,2⟩] n actual) :
+    actual=⟨guardFinal (nativePrefixFinal n pointer limit),[first,second],none⟩ := by
+  have splitRun : CanonicalRelationalPath 0 native
+      ([⟨0,3⟩,⟨3,4⟩]++[⟨7,3⟩,⟨10,2⟩,⟨12,3⟩,⟨15,2⟩]) n actual := run
+  obtain ⟨middle,tail,headRun,_,tailRun,same⟩ := relational_path_split_nonempty (by simp) splitRun
+  have contextRun : CanonicalRelationalPath 0 native (contextNativePath n) n middle := by
+    simpa only [contextNativePath,read0] using headRun
+  have middleResult := context_native_relational_result n middle position contextRun
+  simp only [contextNativeResult,read0,read1] at middleResult
+  rw [middleResult] at tailRun same
+  have at7 : (nativePrefixFinal n pointer limit).pc=7 := by
+    simp [nativePrefixFinal,nativeAfterSecond,nativeAfter,position]
+  have tailResult := first_guard_relational_path_result _ tail at7 tailRun
+  rw [same,tailResult]
+  rfl
+
+
+theorem entry_first_guard_path_relational_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (pointer limit stack : Word) (first second : Event)
+    (nativePC : n.pc = 0) (proofPC : p.pc = 0) (active : p.halted = false)
+    (context : n.gpr 7 = p.regs 1) (memory : n.memory = p.memory)
+    (nativeStack : env.nativeInput .stackPointer = .ok stack)
+    (read0 : readMemory p.memory (p.regs 1) 8 = .ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8 = .ok (limit,second))
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8 = true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8 = true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8 = true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8 = true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4 = true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8 = true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8 = true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (actual : Transition X86.State)
+    (run : CanonicalRelationalPath 0 native
+      [⟨0,3⟩,⟨3,4⟩,⟨7,3⟩,⟨10,2⟩,⟨12,3⟩,⟨15,2⟩] n actual)
+    (guest1 : ∀ i < 8, ¬ initializationPrivateByte (p.regs 10)
+      (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    actual=⟨guardFinal (nativePrefixFinal n pointer limit),[first,second],none⟩ ∧
+    Execution (initializedInstructionStep env) p
+      (prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit)
+      (proofGuardFinal (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack)) ∧
+    (prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit).filterMap
+      (initializationProjectEvent (p.regs 10)) = [first,second] ∧
+    (guardFinal (nativePrefixFinal n pointer limit)).pc = (if pointer > limit then 60 else 17) ∧
+    (proofGuardFinal (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack)).pc =
+      (if pointer > limit then 34 else 12) ∧
+    initializationAgreesOutside (p.regs 10) (guardFinal (nativePrefixFinal n pointer limit)).memory
+      (proofGuardFinal (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack)).memory ∧
+    (guardFinal (nativePrefixFinal n pointer limit)).gpr 0 =
+      (proofGuardFinal (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack)).regs 1 ∧
+    (guardFinal (nativePrefixFinal n pointer limit)).gpr 6 =
+      (proofGuardFinal (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack)).regs 2 ∧
+    (guardFinal (nativePrefixFinal n pointer limit)).rflags =
+      X86.arithmeticFlags .w64 true false pointer limit n.rflags := by
+  have nativeRead0 : readMemory n.memory (n.gpr 7) 8=.ok (pointer,first) := by
+    simpa only [memory,context] using read0
+  have nativeRead1 : readMemory n.memory (n.gpr 7+(8#64)) 8=.ok (limit,second) := by
+    simpa only [memory,context] using read1
+  have unique := entry_first_guard_relational_result n pointer limit first second actual
+    nativePC nativeRead0 nativeRead1 run
+  have old := entry_first_guard_correspondence env n p pointer limit stack first second
+    nativePC proofPC active context memory nativeStack read0 read1 write40 write32 write24
+    write16 write8 read40 read32 guest0 guest1
+  exact ⟨unique,old.2⟩
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -3557,3 +3761,20 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.remaining_native_path_evaluation
 
 #print axioms KProgTV.TrustedSimpleX86.remaining_guard_path_relational_correspondence
+
+
+#print axioms KProgTV.TrustedSimpleX86.native_first_read_evaluation
+
+#print axioms KProgTV.TrustedSimpleX86.native_second_read_evaluation
+
+#print axioms KProgTV.TrustedSimpleX86.context_native_path_defined
+
+#print axioms KProgTV.TrustedSimpleX86.context_native_path_evaluation
+
+#print axioms KProgTV.TrustedSimpleX86.context_native_relational_result
+
+#print axioms KProgTV.TrustedSimpleX86.relational_path_split_nonempty
+
+#print axioms KProgTV.TrustedSimpleX86.entry_first_guard_relational_result
+
+#print axioms KProgTV.TrustedSimpleX86.entry_first_guard_path_relational_correspondence

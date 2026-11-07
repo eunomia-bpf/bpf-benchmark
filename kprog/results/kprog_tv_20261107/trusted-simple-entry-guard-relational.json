@@ -1,0 +1,127 @@
+{
+  "status": "captured_context_reads_and_entry_first_guard_canonical_relational_checked",
+  "utc": "2026-11-07T13:08:31.296549+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorems": [
+    "KProgTV.TrustedSimpleX86.context_native_relational_result",
+    "KProgTV.TrustedSimpleX86.entry_first_guard_path_relational_correspondence"
+  ],
+  "native_extents": [
+    [
+      0,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      7,
+      3
+    ],
+    [
+      10,
+      2
+    ],
+    [
+      12,
+      3
+    ],
+    [
+      15,
+      2
+    ]
+  ],
+  "claims": [
+    "every canonical relational context prefix has exact full state/events/fault for any read permission assignment, including either first fault",
+    "every entry-through-first-guard path with actual successful reads yields complete boundary state despite all undefined XOR AF choices",
+    "actual B entry/context conversion/private setup/first guard executes with exact setup-only projected guest events, corresponding successors and memory agreement",
+    "generic path split before nonempty suffix proves earlier transition nonfaulting without altering any semantic output"
+  ],
+  "premises": [
+    "entryPC0/BPC0 active, nativeRDI/B r1 and initial memory equal",
+    "context-only relational result assumes no read outcome",
+    "entry-through-guard correspondence assumes both actual canonical read equations",
+    "existing private frame permissions, context/frame disjointness and stack-input environment witness",
+    "arbitrary actual canonical relational path witness on stated extents"
+  ],
+  "not_yet_claimed": [
+    "whole-program all-guard/body relational composition",
+    "arbitrary extent/CFG completeness and strict per-basic-block mapping across reordered guards",
+    "unconditional artifact TV",
+    "entry/return ABI/platform semantic transport"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical prefix and audits retained",
+    "old_prefix_sha256": "84eff626c29c2fd526f03792e2b694e53d2d04cc28c9d319376b045d7f5e766d",
+    "ISA_runtime_binding": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "binding_mismatch_controls_rejected": 22,
+    "materialization_controls_rejected": 28,
+    "no_sorryAx": true,
+    "log_sha256": "b1e11b181836909d9f029cf587f623f8f970afd49a1c156827d71933f2381196",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.native_first_read_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.native_second_read_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.context_native_path_defined": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.context_native_path_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.context_native_relational_result": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.relational_path_split_nonempty": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.entry_first_guard_relational_result": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.entry_first_guard_path_relational_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    }
+  },
+  "trusted": [
+    "canonical reference ISA/memory and explicit B platform",
+    "Lean kernel/logical axioms and reported native reduction",
+    "kernel/archive/ELF parser provenance for eventual artifact composition",
+    "verifier soundness for eventual safety composition",
+    "entry/return ABI/platform semantic transport remains open"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "ccf4d8b32fda25ef35738284c49c7ddbe22c2fe823290ef596253b5d5993b9b2",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "8f910e1dcd9b512c2b0407f94e785047a3051334de3fec8685d563c689409684",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463"
+  }
+}
