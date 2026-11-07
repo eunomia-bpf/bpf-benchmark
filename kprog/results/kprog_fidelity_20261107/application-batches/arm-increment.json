@@ -1,0 +1,24 @@
+{
+  "previous_publication": "919dd0201b092e9b3b3cb56befe11832985d7d27",
+  "checks": {
+    "prior_batches_equal": true,
+    "prior_terminal_rows_equal": true,
+    "prior_failure_bytes_prefix_equal": true,
+    "prior_input_pins_equal": true,
+    "prior_work_observations_equal": true,
+    "prior_identity_vectors_equal": true,
+    "new_failure_count": true,
+    "final_request_counts": true,
+    "final_bound_count": true,
+    "full_published_counts_match": true
+  },
+  "retained_batches": 11,
+  "retained_requests": 52,
+  "retained_input_pins": 19,
+  "new_input_pins": 3,
+  "new_requests": 1,
+  "new_bound": 0,
+  "new_batch": "arm64_functional_202335",
+  "total_generated": 49,
+  "total_compiled": 48
+}

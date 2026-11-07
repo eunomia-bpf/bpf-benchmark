@@ -17,6 +17,8 @@ BASE='corpus/results/kprog_app_coverage_20261107/'
 PUBLICATION='afc178f46e725fe96f85694d76fcf4c45c842914'
 JOIN_PUBLICATION='21cf7278605fc3b4b6468b3bec639badec9ab0fb'
 KATRAN_PUBLICATION='3993aa884362093ba6821db4e97cdded89504d99'
+ARM_PUBLICATION='5d0d953946ffe83e2a958b8d6c6990850bb86531'
+ARM_BASE='corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tracee-result/'
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
@@ -80,6 +82,60 @@ def packet_work(payload,metadata,app,batch_records):
                 recorded_work_reconciliation_equal=True)
 
 
+def recorded_application_work(payload,metadata,batch_records,run_summary):
+    with tarfile.open(fileobj=io.BytesIO(payload)) as archive:
+        applications=[]
+        for recorded in metadata['applications']:
+            raw=archive.extractfile(recorded['archive_member']).read()
+            result=json.loads(raw)
+            assert all(result[key]==recorded[key] for key in ['app','status','error'])
+            phases={}
+            for phase,coverage in recorded['phases'].items():
+                actual=result[phase]
+                assert (actual or {})==coverage['raw_measurement']
+                programs=list((actual or {}).get('bpf',{}).values())
+                assert programs==coverage['programs']
+                workloads=(actual or {}).get('workloads',[])
+                phases[phase]=dict(raw_measurement_present=actual is not None,
+                    archived_coverage_equal=True,resident_program_count=len(programs),
+                    bpf_run_count=sum(row['run_cnt_delta'] for row in programs),
+                    bpf_run_time_ns=sum(row['run_time_ns_delta'] for row in programs),
+                    workloads=[dict(name=w['workload_name'],duration_seconds=w['duration_s'],
+                        returncode=w['returncode'],stdout_sha256=sha(w['stdout'].encode()),
+                        stderr_sha256=sha(w['stderr'].encode())) for w in workloads])
+            applications.append(dict(app=result['app'],app_status=result['status'],
+                app_error=result['error'],app_result_sha256=sha(raw),phases=phases))
+    expected=metadata['requests']
+    assert len(expected)==len(batch_records)==metadata['service_request_attempts']
+    for observed,recorded in zip(batch_records,expected):
+        for key in ['request_id','source_prog_id','native_sha256','entry','status','stage','request_archive_sha256']:
+            assert observed[key]==recorded[key]
+        assert observed['generated_source']==recorded['source_generated']
+        assert observed['compiled_object']==recorded['proof_generated']
+    assert Counter(row['stage'] for row in batch_records)==Counter(metadata['stages'])
+    assert len({row['source_prog_id'] for row in batch_records})==metadata['distinct_source_prog_ids']
+    assert sha(payload)==run_summary['archive_sha256']
+    assert run_summary['hashes_unchanged']==metadata['hashes_unchanged']
+    plans=[]
+    with tarfile.open(fileobj=io.BytesIO(payload)) as archive:
+        for row in expected:
+            request_bytes=archive.extractfile(row['request_archive']).read()
+            assert sha(request_bytes)==row['request_archive_sha256']
+            with tarfile.open(fileobj=io.BytesIO(request_bytes)) as request:
+                for member in request.getmembers():
+                    if member.isfile() and member.name.endswith('.link-plan.json'):
+                        plan_bytes=request.extractfile(member).read();plan=json.loads(plan_bytes)
+                        plans.append(dict(request_id=row['request_id'],sha256=sha(plan_bytes),
+                            map_names=[value['name'] for value in plan['maps']],
+                            tail_call_maps=plan['tail_call_maps']))
+    return dict(applications=applications,published_request_fields_equal=True,
+        host_ok=run_summary['ok'],guest_exit=run_summary['guest_exit'],
+        qemu_returncode=run_summary['qemu_returncode'],
+        recorded_hashes_unchanged=run_summary['hashes_unchanged'],
+        initial_source_identity_count=len(run_summary['hashes_before']),link_plans=plans,
+        archive_sha256=sha(payload))
+
+
 def main():
     source_pins={}
     def published(path,publication=PUBLICATION):
@@ -103,10 +159,11 @@ def main():
       ('tetragon','functional_210552',BASE+'native-join-tetragon__observer/coverage.json',BASE+'native-join-tetragon__observer/service.tar.gz'),
       ('tracee','functional_211016',BASE+'tracee-join-helper/coverage.json',BASE+'tracee-join-helper/service.tar.gz'),
       ('katran','functional_213447',BASE+'katran-tagged-storage/coverage.json',BASE+'katran-tagged-storage/service.tar.gz'),
+      ('tracee','arm64_functional_202335',ARM_BASE+'coverage.json',ARM_BASE+'run-20261107T202335483042Z.tar.gz'),
     ]
     batches=[];records=[];failures=[];identity_sets={};work_observations={}
     for app,batch,metadata_path,service_path in cases:
-        publication=KATRAN_PUBLICATION if batch=='functional_213447' else JOIN_PUBLICATION if batch in {'functional_210552','functional_211016'} else PUBLICATION
+        publication=ARM_PUBLICATION if batch.startswith('arm64_') else KATRAN_PUBLICATION if batch=='functional_213447' else JOIN_PUBLICATION if batch in {'functional_210552','functional_211016'} else PUBLICATION
         metadata=json.loads(published(metadata_path,publication)) if metadata_path else {}
         payload=captured[service_path.split(':',1)[1]] if service_path.startswith('capture:') else published(service_path,publication)
         service,log_path=service_archive(payload)
@@ -180,6 +237,12 @@ def main():
                                              stage=stage,error_json=error,service_error=row.get('error',''),
                                              loader_stderr=stderr,verifier_statistics=verifier_stats,commands=commands))
             assert consumed==archives
+            if batch.startswith('arm64_'):
+                batch_records=[record for record in records if record['batch']==batch]
+                work_observations[batch]=recorded_application_work(payload,metadata,batch_records,
+                    json.loads(published(ARM_BASE+'summary.json',publication)))
+                for actual,recorded in zip([failure for failure in failures if failure['batch']==batch],metadata['requests']):
+                    assert actual['loader_stderr']==recorded['load_stderr']
             baseline=metadata.get('baseline_load_observations',{})
             counts=dict(terminal_requests=len(terminal),generated=generated,compiled=compiled,accepted_bound=stages['bound'])
             compare={}
@@ -219,7 +282,7 @@ def main():
             load_rows.append(dict(name=name[1],insn_cnt=int(count[1]),bytes=int(count[1])*8,raw_line=line))
     timing_metadata=json.loads(captured['tetragon-timing.metadata.json'])
     timing_result=json.loads(captured['tetragon-timing.result.json'])
-    summary=dict(source_publication=PUBLICATION,additional_source_publications=[JOIN_PUBLICATION,KATRAN_PUBLICATION],batches=batches,terminal_requests=len(records),
+    summary=dict(source_publication=PUBLICATION,additional_source_publications=[JOIN_PUBLICATION,KATRAN_PUBLICATION,ARM_PUBLICATION],batches=batches,terminal_requests=len(records),
                  stages=dict(Counter(record['stage'] for record in records)),
                  kernel_worker_receipt_identity_matches=len(records),input_artifacts=source_pins,
                  captured_input_manifest=capture_manifest,captured_input_archive_sha256=sha((OUT/'captured-inputs.tar.gz').read_bytes()),

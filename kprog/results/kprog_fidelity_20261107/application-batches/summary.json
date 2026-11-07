@@ -2,7 +2,8 @@
   "source_publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
   "additional_source_publications": [
     "21cf7278605fc3b4b6468b3bec639badec9ab0fb",
-    "3993aa884362093ba6821db4e97cdded89504d99"
+    "3993aa884362093ba6821db4e97cdded89504d99",
+    "5d0d953946ffe83e2a958b8d6c6990850bb86531"
   ],
   "batches": [
     {
@@ -438,17 +439,42 @@
           "equal": true
         }
       }
+    },
+    {
+      "app": "tracee",
+      "batch": "arm64_functional_202335",
+      "metadata_path": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tracee-result/coverage.json",
+      "service_path": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tracee-result/run-20261107T202335483042Z.tar.gz",
+      "service_sha256": "0834321bc7d5fbafe59b0d61afef55ffba012815dcadbf01a199cea562139b9a",
+      "terminal_requests": 1,
+      "generated": 1,
+      "compiled": 1,
+      "accepted_bound": 0,
+      "stages": {
+        "loader_rejected": 1
+      },
+      "app_status": "captured_service_batch",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 0,
+      "recorded_counts": {
+        "proof_generated": {
+          "observed": 1,
+          "recorded": 1,
+          "equal": true
+        }
+      }
     }
   ],
-  "terminal_requests": 52,
+  "terminal_requests": 53,
   "stages": {
     "bound": 43,
     "verifier_rejected": 3,
     "compiler_rejected": 1,
     "specialization_rejected": 4,
-    "native_stub_load_error": 1
+    "native_stub_load_error": 1,
+    "loader_rejected": 1
   },
-  "kernel_worker_receipt_identity_matches": 52,
+  "kernel_worker_receipt_identity_matches": 53,
   "input_artifacts": {
     "corpus/results/kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json": {
       "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
@@ -544,6 +570,21 @@
       "publication": "3993aa884362093ba6821db4e97cdded89504d99",
       "sha256": "626cb84b500084b7c001d7d65177b9249dce069c4f65100ed64bf7a0c4a6ec46",
       "bytes": 86007
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tracee-result/coverage.json": {
+      "publication": "5d0d953946ffe83e2a958b8d6c6990850bb86531",
+      "sha256": "af1a515756ae44eb31cbeb311489508cca86ecc92fd5637c37a930430f657e7e",
+      "bytes": 96140
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tracee-result/run-20261107T202335483042Z.tar.gz": {
+      "publication": "5d0d953946ffe83e2a958b8d6c6990850bb86531",
+      "sha256": "0834321bc7d5fbafe59b0d61afef55ffba012815dcadbf01a199cea562139b9a",
+      "bytes": 8444974
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tracee-result/summary.json": {
+      "publication": "5d0d953946ffe83e2a958b8d6c6990850bb86531",
+      "sha256": "6a60503b16e97bb687497cee01ba7fc679e0bdffc413b669d829697a74c462ac",
+      "bytes": 25080
     }
   },
   "captured_input_manifest": {
@@ -649,6 +690,71 @@
       },
       "workload_configs_equal": true,
       "recorded_work_reconciliation_equal": true
+    },
+    "arm64_functional_202335": {
+      "applications": [
+        {
+          "app": "tracee/monitor",
+          "app_status": "error",
+          "app_error": "failed to launch Tracee: /artifacts/tracee/bin/tracee --events '*' --events -net_packet_raw,-print_mem_dump,-net_packet_ipv4,-net_packet_ipv6,-net_packet_tcp,-net_packet_udp,-net_packet_icmp,-net_packet_icmpv6,-net_packet_dns,-net_packet_dns_request,-net_packet_dns_response,-net_packet_http,-net_packet_http_request,-net_packet_http_response,-anti_debugging,-aslr_inspection,-cgroup_notify_on_release,-cgroup_release_agent,-core_pattern_modification,-default_loader_mod,-disk_mount,-docker_abuse,-dropped_executable,-dynamic_code_loading,-file_modification,-fileless_execution,-hidden_file_created,-hooked_seq_ops_detector,-hooked_syscall_detector,-illegitimate_shell,-k8s_service_account_token,-kernel_module_loading,-k8s_api_connection,-k8s_cert_theft,-ld_preload,-lsm_test,-proc_fops_hooking,-proc_kcore_read,-proc_mem_access,-proc_mem_code_injection,-process_vm_write_inject,-ptrace_code_injection,-rcd_modification,-sched_debug_recon,-scheduled_task_mod,-stack_pivot,-bpf_attach,-security_bpf,-security_bpf_map,-security_bpf_prog,-stdio_over_socket,-sudoers_modification,-syscall_hooking,-system_request_key_mod --output none --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/86ddf06c/tracee/signatures --capabilities bypass=true: command exited with code 97: {\"level\":\"warn\",\"ts\":5395.032117536,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"missing_ksymbol\"}\n{\"level\":\"warn\",\"ts\":5395.0662172,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"multiple_fallbacks_test\"}\n{\"level\":\"error\",\"ts\":5395.257071392,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-1013\",\"error\":\"detector TRC-1013 requires enrichment \\\"environment\\\" which is not enabled\"}\n{\"level\":\"error\",\"ts\":5395.264422144,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-107\",\"error\":\"detector TRC-107 requires enrichment \\\"environment\\\" which is not enabled\"}",
+          "app_result_sha256": "54188d137a4927ab9bb9fd8451f5b3e6f33cce4c888a3ca2540d5732a47c75bc",
+          "phases": {
+            "baseline": {
+              "raw_measurement_present": true,
+              "archived_coverage_equal": true,
+              "resident_program_count": 151,
+              "bpf_run_count": 97751,
+              "bpf_run_time_ns": 14263753616,
+              "workloads": [
+                {
+                  "name": "stress_ng_tracee_syscall_hot",
+                  "duration_seconds": 5.819921264000186,
+                  "returncode": 0,
+                  "stdout_sha256": "47250fbbb40d0caf5a55c89ba5b9e74e15c3819c30979935446ed40b4c482d8f",
+                  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                }
+              ]
+            },
+            "post_rejit": {
+              "raw_measurement_present": false,
+              "archived_coverage_equal": true,
+              "resident_program_count": 0,
+              "bpf_run_count": 0,
+              "bpf_run_time_ns": 0,
+              "workloads": []
+            }
+          }
+        }
+      ],
+      "published_request_fields_equal": true,
+      "host_ok": false,
+      "guest_exit": 1,
+      "qemu_returncode": 0,
+      "recorded_hashes_unchanged": false,
+      "initial_source_identity_count": 192,
+      "link_plans": [
+        {
+          "request_id": 1,
+          "sha256": "fbb495444404b9577c9626e50d7333e717d109beeed421a3f199e4823318f880",
+          "map_names": [
+            "generic_sys_enter_tails",
+            "generic_sys_exit_tails",
+            "prog_array",
+            "prog_array_tp",
+            "sys_32_to_64_ma",
+            "sys_32_to_64_map",
+            "sys_enter_init_",
+            "sys_enter_init_tail",
+            "sys_enter_submit_tail",
+            "sys_enter_tails",
+            "sys_exit_init_tail",
+            "sys_exit_submit_tail",
+            "sys_exit_tails"
+          ],
+          "tail_call_maps": []
+        }
+      ],
+      "archive_sha256": "0834321bc7d5fbafe59b0d61afef55ffba012815dcadbf01a199cea562139b9a"
     }
   },
   "timing_context": {

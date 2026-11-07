@@ -1,10 +1,10 @@
 # Application service batch observations
 
-One generic archive reader reconciles11 closed service batches across all six
-application names. All52 terminal requests preserve byte equality between the
+One generic archive reader reconciles12 closed service batches across all six
+application names. All53 terminal requests preserve byte equality between the
 kernel-owned native object, the worker's received copy and the service receipt's
-SHA256. Kernel source IDs match the service records. The batches contain48
-generated sources,47 compiled objects and43 successful bound replies.
+SHA256. Kernel source IDs match the service records. The batches contain49
+generated sources,48 compiled objects and43 successful bound replies.
 
 Every bound reply's request ID, program ID and status exactly match load.stdout.
 All available published counts match the archive-derived counts, including the
@@ -24,11 +24,51 @@ and each service's terminal requests and archive set agree.
 | tetragon / functional_210552 | 3 | 3 | 3 | 2 | 1 native_stub_load_error |
 | tracee / functional_211016 | 6 | 6 | 6 | 5 | 1 verifier_rejected |
 | katran / functional_213447 | 1 | 1 | 1 | 1 | 0 |
+| tracee / arm64_functional_202335 | 1 | 1 | 1 | 0 | 1 loader_rejected |
 
-The11 rows retain distinct source, image and boot epochs. Counts describe observed
+The12 rows retain distinct source, image and boot epochs. Counts describe observed
 load instances; repeated native objects and repeated program IDs across boots stay
 in their original batches. Whole application completion and duration-driven
 workload measurements follow the recorded startup frontiers.
+
+## ARM Tracee startup frontier
+
+The added ARM QEMU cohort uses A's immutable
+5d0d953946ffe83e2a958b8d6c6990850bb86531 archive. The generic reader consumes its
+complete service batch, matches the kernel-owned native ELF to the worker copy
+and service SHA256, and reconciles every published request field, raw loader
+diagnostic and archive identity. Source ID174 and request1 reach fresh C
+generation and BPF compilation. The kernel native-link stage requires the
+sys_enter_init_tail map in tail_call_maps; its captured link plan contains
+13 map names and0 tail-call-map entries:
+
+~~~text
+Error: arm64 bpf_tail_call in tracepoint__raw_syscalls__sys_enter at byte offset 0x80 uses map "sys_enter_init_tail", which is not a link-plan tail_call_maps entry
+~~~
+
+The exact linker plan SHA256 is
+fbb495444404b9577c9626e50d7333e717d109beeed421a3f199e4823318f880.
+The request remains loader_rejected, with0 bound replies in this cohort.
+A owns the common tail-call plan/metadata repair.
+
+The raw application JSON matches the published coverage phase objects and
+151 baseline resident counter records exactly. That baseline records97,751 BPF
+runs and14,263,753,616ns of aggregate BPF runtime. Its existing seven-stressor
+workload exits0 after5.819921264 seconds. The post_rejit phase remains at its
+startup frontier; its raw measurement is null and coverage uses an empty object.
+The reader explicitly reconciles those representations. Tracee's later startup
+reports detector TRC-1013/TRC-107 environment-enrichment requirements, preserved
+verbatim in summary.json. Application status error, guest exit1, QEMU exit0 and
+the host's hashes_unchanged=false observation retain their distinct meanings.
+The source summary captures192 initial file identities. Per-request reported
+identity vectors and directly checked native bytes retain separate provenance.
+
+arm-increment.json confirms exact retention of the prior11 batches,52 request
+rows, complete failure-byte prefix,19 published input pins and packet-work
+observations. The collector's first source-vector lookup expected a before/after
+schema; this ARM summary provides hashes_before and hashes_unchanged.
+arm-initial-collection.tar.gz preserves that attempt. The final reader records
+the actual available fields and exits0.
 
 ## Whole Katran execution and packet work
 
@@ -123,7 +163,8 @@ The first six published cohorts use immutable Git blobs at
 afc178f46e725fe96f85694d76fcf4c45c842914. The new Tetragon/Tracee slot-join
 metadata and service archives use21cf7278605fc3b4b6468b3bec639badec9ab0fb.
 The later Katran metadata, service and raw result archive use
-3993aa884362093ba6821db4e97cdded89504d99. Nineteen published metadata/archive
+3993aa884362093ba6821db4e97cdded89504d99. The ARM coverage, raw run and source
+summary use5d0d953946ffe83e2a958b8d6c6990850bb86531. Twenty-two published metadata/archive
 inputs have individual Git/hash/size pins in summary.json. Two additional captured Tetragon service epochs and the R timing
 inputs retain their exact five-file captured-inputs.tar.gz and manifest.
 
@@ -147,6 +188,6 @@ taskset -c 16-19 python3 kprog/results/kprog_fidelity_20261107/application-batch
 
 The reader opens immutable published blobs and its captured input archive, then
 writes batch tables and diagnostic streams in this directory. Service archives
-support both service/ and corpus/ roots plus nested single-archive wrappers.
+support service/, corpus/ and run/ roots plus nested single-archive wrappers.
 Original application requests, workloads, source trees and runtime outcomes stay
 in their recorded epochs. Final collection exits0.
