@@ -1994,6 +1994,34 @@
     "slot_released": true,
     "snapshot_file_count": 1140
   },
+  "full_make_check_5b999fc5b": {
+    "all_snapshot_sha256_match_published_blobs": true,
+    "archive_block_sha256": "f9afe5bd7aa9a685a53c418c9437aedb247c8b04fbc813885d00c8b9269a1ed2",
+    "archive_marker": "=== FULL MAKE CHECK 5B999FC5B PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/movx-full-published.txt": "a4044ba719d382eae982d681dc2bfeffbec4373bf99892483bd4b0e5f1c6f5da",
+      "/workspaces/.agent-state/kprog-lanes/V/movx-full-queue.log": "92a462a198e3e4773311608a4c35265c229a892c30ffa21fb408232ea30785e7",
+      "/workspaces/.agent-state/kprog-lanes/V/movx-full-queue.py": "85be045bee5a9a7ffd8b57fb7e8429a26d792688cd06d681a2e86fbc1bc7307f",
+      "/workspaces/.agent-state/kprog-lanes/V/movx-full-queue.state": "0f895c72720d02679e14db573794998b90176bc61d52adaa16980ab66e9e8fd9",
+      "/workspaces/.agent-state/kprog-lanes/V/movx-full-run.py": "1ed6e38562d0fa18aabe5992060ad0323b2a8d4f18c31cb26697d7c638c7d625",
+      "/workspaces/.agent-state/kprog-lanes/V/movx-full.cpu.jsonl.gz": "9e1794aca2ce1813a60c1874cdd388d57a9897bcb12c2652030fccd9f55eda81",
+      "/workspaces/.agent-state/kprog-lanes/V/movx-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/movx-full.head": "a4044ba719d382eae982d681dc2bfeffbec4373bf99892483bd4b0e5f1c6f5da",
+      "/workspaces/.agent-state/kprog-lanes/V/movx-full.log": "b8cb918b44574e2e243d9050974480d034ac3b7ff0e9a5d3ea7003d005751806",
+      "/workspaces/.agent-state/kprog-lanes/V/movx-full.sources": "dd235532f6d16323523239f442cb25299ac51b6649eec9a244eb2c58b9904e16",
+      "/workspaces/.agent-state/kprog-lanes/V/movx-full.state": "0f895c72720d02679e14db573794998b90176bc61d52adaa16980ab66e9e8fd9"
+    },
+    "command": "taskset -c12-15 make -C immutable-export/kprog/formal check",
+    "commit": "5b999fc5b7cf41b6964b245d39a32f79ae1022a9",
+    "exit": 0,
+    "export_deleted": true,
+    "queue_exit": 0,
+    "recorded": "2026-11-07T20:10:56.300129+00:00",
+    "remote_ancestor_verified": true,
+    "scope": "published MOVZX/MOVSX raw frame/ordered dispatcher and27-register-token O2; later MULX28 increment has separate validation and awaits its full source-snapshot check",
+    "slot_released": true,
+    "snapshot_file_count": 1140
+  },
   "full_make_check_5c754": {
     "archive_block_sha256": "b50b8806657ce27fd993d132b269ef227385c56fb613f12291eaa6f2fb46baa7",
     "archived_inputs": {

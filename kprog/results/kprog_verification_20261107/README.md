@@ -3007,3 +3007,5 @@ Canonical arithmetic families remain defined, and conditional modeled entries
 now total **69/71**. F's private gate/operand-selector candidate and A's source
 adoption carry separate replay/publication identities. Universal O1/O2 work
 continues against the actual published production definitions.
+
+Full `make check` at published `5b999fc5b7cf41b6964b245d39a32f79ae1022a9` completed with actual make exit **0** and queue exit **0**. All **1140** selected source hashes match that published commit. This snapshot includes the MOVZX/MOVSX raw frame, dispatcher and27-token O2 interface. Complete commands/logs/source manifest/CPU trace remain in `FULL MAKE CHECK 5B999FC5B PASS`; the private export is retired and incremental caches retained. The later MULX increment retains its own focused/default Lean and oracle results.
