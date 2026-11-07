@@ -17,7 +17,7 @@ BASE = 0x1000000
 
 def forms():
     out = []
-    for cc in ['eq','ne','cs','cc','mi','pl','vs','vc','hi','ls','ge','lt','gt','le']:
+    for cc in ['eq','ne','cs','cc','mi','pl','vs','vc','hi','ls','ge','lt','gt','le','al','nv']:
         for backward in [False, True]:
             out.append((f'b.{cc} {"backward" if backward else "forward"}', branch(f'b.{cc}', backward)))
     for width in ['w','x']:

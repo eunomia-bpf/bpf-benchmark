@@ -237,7 +237,7 @@ reference-replay: reference-build
 	$(PYTHON) reference_check.py --reuse-trace --binary ./$(BUILD)/cpu-differential --arch $(ARCH) --cases $(CASES) --out $(OUT) --control-paths
 
 .PHONY: arm64-control-handoff
-ARM64_CONTROL_HANDOFF ?= ../results/kprog_fidelity_20261106/differential/cpu-differential-arm64-control.gz
+ARM64_CONTROL_HANDOFF ?= ../results/kprog_fidelity_20261107/differential/arm64-control-branches/cpu-differential-arm64.gz
 arm64-control-handoff:
 	install -d $(ARM64_CONTROL_BUILD) $(ARM64_CONTROL_OUT)
 	gzip -dc $(ARM64_CONTROL_HANDOFF) > $(ARM64_CONTROL_BUILD)/cpu-differential-handoff
