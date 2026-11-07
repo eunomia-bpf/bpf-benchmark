@@ -1,0 +1,66 @@
+{
+  "driver_exit": 0,
+  "launch_inputs": {
+    "cpus": "20-23",
+    "vcpus": 4,
+    "guest_memory": "12G",
+    "samples": 1,
+    "duration": 2,
+    "started": "2026-11-07T19:34:45.907892+00:00",
+    "app": "katran",
+    "source_head": "d657babc2a8a29af7fb5649d91f4cf365165bf06",
+    "sha256": {
+      "kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+      "kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+      "kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+      "kprog/x86/x86_sim_local_bpf.h": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+      "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+      "kprog/x86/micro-prog/generated_x86_specialization.py": "3508a8dd5f20975c6cce171e673548d91c123752f9df24cd7b2a84d8e02e7ac7",
+      "kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+      "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29",
+      "kprog/trusted_loader.cpp": "77d7944274bf9f8a66d7d5e7dceb30a55c66e5461c6028df37a9c32d5e81d548",
+      "kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+      "kinsn/module/include/native_lab_group.h": "1ef0bbf95d3b5a8b64aa3cf6db3b5ecea8dc19db7ff4069d63955ecd34158fd5",
+      "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6",
+      "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko": "fba9989aa0641ca4654a02405e3f27f9532e9d1c4ccf8bfa38b0a4242044b2a1",
+      "corpus/results/kprog_app_coverage_20261107/native-only-runtime/guest.py": "32edbe1f1a1ceb06fe9b44ba1e12c22094309be008579ca925e1f6f60d46a1e2",
+      "corpus/results/kprog_app_coverage_20261107/native-only-runtime/Makefile": "c3dd46933f01ce5ac105b662eb348bd39be3c25a92adc1142ac7ae4eabcb53eb",
+      "kprog/formal/generated/x86_mem_access.h": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+      "kprog/formal/tools/generate_x86_mem_access_spec.py": "9d9ab4d23938bee79e30c92211e9891fadaca73e4711b31e7d3a3cf04db42f34"
+    },
+    "image": "sha256:a20b2981171de35a85d1827760701e157efa17347c8705374f146a5d7dbe1a90",
+    "driver_pid": 3544002
+  },
+  "source_drift": [],
+  "temporary_files_remaining": [],
+  "service_log": "{\"ready\": true, \"arch\": 1, \"endpoint\": \"/sys/kernel/debug/bpf_x86_native_lab/specializer\"}\n",
+  "programs": [],
+  "native_requests": 0,
+  "generated": 0,
+  "compiled": 0,
+  "accepted_bound": 0,
+  "failed": 0,
+  "corpus_metadata": [
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_193718_187857/metadata.json",
+      "status": "error",
+      "error_message": "corpus suite reported errors"
+    }
+  ],
+  "terminal_archives_verified": 0,
+  "service_archive": "corpus-20261107T193729766168Z.tar.gz",
+  "service_archive_sha256": "b1411f9379ade271c4e556ee729f385ac9bb28abae6bcc2db509d1735a3f9791",
+  "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_193718_187857",
+  "metadata_status": "error",
+  "app_status": "error",
+  "app_error": "modprobe tunnel4 failed: modprobe: FATAL: Module tunnel4 not found in directory /artifacts/lib/modules/7.0.0-rc2+",
+  "rejit_result": null,
+  "baseline": null,
+  "post_rejit": null,
+  "artifact_sha256": {
+    "driver.log.gz": "64fc33a6e99d608b4b8d3535a1d444d63b094bfd7007276a4e7d4a88aedeec43",
+    "service.tar.gz": "10f695b188e9f6a23e54c104356bbf92a0cf51d3d27b1b37ce3d1fd3e46c5a89",
+    "launch.tar.gz": "af151e786159d9c7bb3e726fe7356f81eced24391182475c00509c10c1b47e42",
+    "result.tar.gz": "5b967122807e958acdb10903155b34889b96d50a6a16db69abceaf4ac002d2b9"
+  }
+}

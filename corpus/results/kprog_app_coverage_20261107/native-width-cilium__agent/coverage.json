@@ -1,0 +1,66 @@
+{
+  "driver_exit": 0,
+  "launch_inputs": {
+    "cpus": "20-23",
+    "vcpus": 4,
+    "guest_memory": "12G",
+    "samples": 1,
+    "duration": 2,
+    "started": "2026-11-07T19:29:26.236418+00:00",
+    "app": "cilium/agent",
+    "source_head": "aa921ffbf40dbad3839b82366651eddbbaad28b2",
+    "sha256": {
+      "kprog/trusted_generation.py": "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4",
+      "kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+      "kprog/x86/trusted_specializer.py": "c3b1e38fb577df4265b440430f181790c42775d27388dcbf4724224cf71e47a5",
+      "kprog/x86/x86_sim_local_bpf.h": "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a",
+      "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+      "kprog/x86/micro-prog/generated_x86_specialization.py": "3508a8dd5f20975c6cce171e673548d91c123752f9df24cd7b2a84d8e02e7ac7",
+      "kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+      "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29",
+      "kprog/trusted_loader.cpp": "77d7944274bf9f8a66d7d5e7dceb30a55c66e5461c6028df37a9c32d5e81d548",
+      "kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+      "kinsn/module/include/native_lab_group.h": "1ef0bbf95d3b5a8b64aa3cf6db3b5ecea8dc19db7ff4069d63955ecd34158fd5",
+      "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6",
+      "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko": "fba9989aa0641ca4654a02405e3f27f9532e9d1c4ccf8bfa38b0a4242044b2a1",
+      "corpus/results/kprog_app_coverage_20261107/native-only-runtime/guest.py": "32edbe1f1a1ceb06fe9b44ba1e12c22094309be008579ca925e1f6f60d46a1e2",
+      "corpus/results/kprog_app_coverage_20261107/native-only-runtime/Makefile": "c3dd46933f01ce5ac105b662eb348bd39be3c25a92adc1142ac7ae4eabcb53eb",
+      "kprog/formal/generated/x86_mem_access.h": "3ba4bc7881f88de413811befef9113c48f2591ecab77bfde88d6041eba4d0d7e",
+      "kprog/formal/tools/generate_x86_mem_access_spec.py": "9d9ab4d23938bee79e30c92211e9891fadaca73e4711b31e7d3a3cf04db42f34"
+    },
+    "image": "sha256:a20b2981171de35a85d1827760701e157efa17347c8705374f146a5d7dbe1a90",
+    "driver_pid": 3540546
+  },
+  "source_drift": [],
+  "temporary_files_remaining": [],
+  "service_log": "{\"ready\": true, \"arch\": 1, \"endpoint\": \"/sys/kernel/debug/bpf_x86_native_lab/specializer\"}\n",
+  "programs": [],
+  "native_requests": 0,
+  "generated": 0,
+  "compiled": 0,
+  "accepted_bound": 0,
+  "failed": 0,
+  "corpus_metadata": [
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_193144_888740/metadata.json",
+      "status": "error",
+      "error_message": "corpus suite reported errors"
+    }
+  ],
+  "terminal_archives_verified": 0,
+  "service_archive": "corpus-20261107T193159350704Z.tar.gz",
+  "service_archive_sha256": "b692ee2228ab5b321fb9fd3312d0064359b54176801e7b7b561a86f52157fdcf",
+  "result": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261107_193144_888740",
+  "metadata_status": "error",
+  "app_status": "error",
+  "app_error": "cilium-agent exited before API became ready (rc=255): time=2026-11-07T19:31:46.504706945Z level=info msg=\"Removed map pin, recreating and re-pinning map\" bpfMapPath=cilium_ipcache_v2 bpfMapName=cilium_ipcache_v2\ntime=2026-11-07T19:31:46.505706853Z level=info msg=\"Devices changed\" module=agent.datapath.devices-controller devices=[bpfbench0]\ntime=2026-11-07T19:31:46.505779296Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"backgroundSync (manager.(*manager).backgroundSync)\" duration=3.271\u00b5s\ntime=2026-11-07T19:31:46.50581536Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c075:e3ff:feff:e89e (primary)\" device=*\ntime=2026-11-07T19:31:46.505849346Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary, nodeport), fe80::c075:e3ff:feff:e89e\" device=bpfbench0\ntime=2026-11-07T19:31:46.505869977Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c075:e3ff:feff:e89e (primary)\" device=*\ntime=2026-11-07T19:31:46.505907171Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"node-address-update (tables.(*nodeAddressController).register.func1.1 (.../datapath/tables/node_address.go:249))\" duration=2.559\u00b5s\ntime=2026-11-07T19:31:46.505916529Z level=info msg=\"Establishing connection to kvstore\" module=agent.infra.kvstore-client backendName=etcd\ntime=2026-11-07T19:31:46.505924293Z level=info msg=\"Creating etcd client\" module=agent.infra.kvstore-client backendName=etcd configPath=\"\" keepAliveHeartbeat=15s keepAliveTimeout=25s rateLimit=20 maxInflight=20 listLimit=256\ntime=2026-11-07T19:31:46.506258598Z level=info msg=\"Connecting to etcd server...\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48801] config=\"\"\ntime=2026-11-07T19:31:46.515031401Z level=info msg=\"New lease successfully acquired\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48801] config=\"\" leaseID=3010834160376216838 ttl=25s\ntime=2026-11-07T19:31:46.515105648Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48801] config=\"\" prefix=cilium/.heartbeat\ntime=2026-11-07T19:31:46.515924807Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48801] config=\"\" prefix=cilium/.heartbeat count=0 revision=1\ntime=2026-11-07T19:31:46.515943247Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48801] config=\"\" prefix=cilium/.heartbeat revision=2\ntime=2026-11-07T19:31:46.516014907Z level=info msg=\"Initial etcd connection established\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48801] config=\"\"\ntime=2026-11-07T19:31:46.516112046Z level=info msg=\"Connection to kvstore successfully established\" module=agent.infra.kvstore-client backendName=etcd\ntime=2026-11-07T19:31:46.678992418Z level=info msg=\"Start hook executed\" function=\"iptables.newManager.func1 (.../datapath/iptables/iptables.go:456) (agent.datapath.iptables)\" duration=161.517602ms\ntime=2026-11-07T19:31:46.749752919Z level=warn msg=\"iptables table is not available on this system\" module=agent.datapath.iptables error=\"unable to run 'iptables -t nat -L -n' iptables command: exit status 1 stderr=\\\"iptables: Failed to initialize nft: Protocol not supported\\\\n\\\"\" table=nat\ntime=2026-11-07T19:31:46.830234673Z level=warn msg=\"iptables table is not available on this system\" module=agent.datapath.iptables error=\"unable to run 'iptables -t mangle -L -n' iptables command: exit status 1 stderr=\\\"iptables: Failed to initialize nft: Protocol not supported\\\\n\\\"\" table=mangle\ntime=2026-11-07T19:31:46.90106452Z level=warn msg=\"iptables table is not available on this system\" module=agent.datapath.iptables error=\"unable to run 'iptables -t raw -L -n' iptables command: exit status 1 stderr=\\\"iptables: Failed to initialize nft: Protocol not supported\\\\n\\\"\" table=raw\ntime=2026-11-07T19:31:46.961456949Z level=warn msg=\"iptables table is not available on this system\" module=agent.datapath.iptables error=\"unable to run 'iptables -t filter -L -n' iptables command: exit status 1 stderr=\\\"iptables: Failed to initialize nft: Protocol not supported\\\\n\\\"\" table=filter\ntime=2026-11-07T19:31:47.239614261Z level=warn msg=\"iptables match socket is not available (try installing xt_socket kernel module)\" module=agent.datapath.iptables error=\"unable to run 'iptables -t mangle -L -m socket -n' iptables command: exit status 1 stderr=\\\"iptables: Failed to initialize nft: Protocol not supported\\\\n\\\"\"\ntime=2026-11-07T19:31:47.239653626Z level=info msg=\"Start hook executed\" function=\"*iptables.manager.Start (agent.datapath.iptables)\" duration=560.58996ms\ntime=2026-11-07T19:31:47.388017786Z level=error msg=\"Start hook failed\" function=\"reconciler.newOps.func1 (.../route/reconciler/reconciler.go:76) (agent.datapath.route-reconciler)\" error=\"protocol not supported\"\ntime=2026-11-07T19:31:47.388083974Z level=error msg=\"Failed to start hive\" error=\"protocol not supported\" duration=891.151799ms\ntime=2026-11-07T19:31:47.388111216Z level=info msg=\"Stopping hive\"\ntime=2026-11-07T19:31:47.459157071Z level=error msg=\"Failed to wait for endpoints to regenerate\" module=agent.controlplane.fqdn.namemanager error=\"context canceled\"\ntime=2026-11-07T19:31:47.459201718Z level=error msg=\"failed to delete reporter status tree\" module=health error=\"reporting for \\\"agent.controlplane.fqdn.namemanager.job-wait-for-endpoint-restore\\\" has been stopped\"\ntime=2026-11-07T19:31:47.459293123Z level=info msg=\"Stopped watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48801] config=\"\" prefix=cilium/.heartbeat\ntime=2026-11-07T19:31:47.490742197Z level=error msg=\"Close() called without calling InitIdentityAllocator() first\" module=agent.controlplane.identity.identity\ntime=2026-11-07T19:31:47.490850088Z level=info msg=\"Waiting for all endpoints' goroutines to be stopped.\" module=agent.controlplane.endpoint-manager\ntime=2026-11-07T19:31:47.490856194Z level=info msg=\"All endpoints' goroutines stopped.\" module=agent.controlplane.endpoint-manager\ntime=2026-11-07T19:31:47.490902294Z level=error msg=\"failed to delete reporter status tree\" module=health error=\"provider is stopped, no more updates will take place\"\ntime=2026-11-07T19:31:47.4909131Z level=info msg=\"Stop hook executed\" module=jobs function=*job.queuedJob.Stop detail=\"node-address-update (tables.(*nodeAddressController).register.func1.1 (.../datapath/tables/node_address.go:249))\" duration=17.224\u00b5s\ntime=2026-11-07T19:31:47.490929384Z level=error msg=\"failed to delete reporter status tree\" module=health error=\"provider is stopped, no more updates will take place\"\ntime=2026-11-07T19:31:47.490936075Z level=info msg=\"Stop hook executed\" module=jobs function=*job.queuedJob.Stop detail=\"backgroundSync (manager.(*manager).backgroundSync)\" duration=11.733\u00b5s\ntime=2026-11-07T19:31:47.490944654Z level=info msg=\"Stop hook executed\" module=jobs function=*job.queuedJob.Stop detail=\"sync-local-node (node.NewLocalNodeStore.func1.1 (pkg/node/local_node_store.go:118))\" duration=629ns\ntime=2026-11-07T19:31:47.491038006Z level=info msg=\"Stopped gops server\" module=agent.infra.gops address=127.0.0.1:9890\ntime=2026-11-07T19:31:47.491045485Z level=info msg=\"Stopped hive\" duration=102.92973ms\ntime=2026-11-07T19:31:49.491253303Z level=fatal msg=\"unable to run agent: failed to start: protocol not supported\" subsys=daemon",
+  "rejit_result": null,
+  "baseline": null,
+  "post_rejit": null,
+  "artifact_sha256": {
+    "driver.log.gz": "3f116e7910984a4021f43771c3f28091c6e21ed147b23555aadf1bca2c7084c6",
+    "service.tar.gz": "7071fa9ab051d879aa671d4578e614442f6e5031dbdc422cc444cb361897af7a",
+    "launch.tar.gz": "3ed6d5a1e0c3fdd85cd828b8271625d3cfa0d846bd3434a5cf53ddd18183e19b",
+    "result.tar.gz": "6530b080e35db269025c093a71ddd5838c3dcd5600ffed44902fc2219c1e4d1b"
+  }
+}
