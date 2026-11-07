@@ -56,3 +56,5 @@ service stops are complete request artifacts copied into the result archive.
 The guest summary records the actual private path and mode. This corrects the
 bridge's file placement; it does not claim isolation from a privileged operator.
 The application image is unchanged; the corrected bootstrap reuses it.
+
+The first relocated-state attempt exited before registering the service because that path was read-only in the guest. The VNG recipe now mounts the lane state directory writable in the guest, outside the application container mounts. The exact setup error is retained; no native requests or application result are counted from it.
