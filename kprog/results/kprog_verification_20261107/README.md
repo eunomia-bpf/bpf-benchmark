@@ -3461,3 +3461,10 @@ O2 now covers40 C-model tokens (28direct/tengeneric/twobranch). Coverage keeps
 memory models separate;27 further reference-family models retain their raw
 field/frame completion interfaces. `x86_condition_memory_dispatch_tokens`
 records the proofs, source identities, original route count and complete checks.
+
+### Published source full check 8aa94baa2
+
+`make check` on immutable published8aa94baa2 exits0. All1140 exported source
+SHA256 values match its Git blobs; its private export is retired. Full log,
+source manifest, CPU trace and exit receipt are archived under
+`full_make_check_8aa94baa2`. Every check retains its exact published source identity.

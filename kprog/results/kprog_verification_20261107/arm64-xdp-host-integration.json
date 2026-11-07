@@ -2130,6 +2130,26 @@
     "temporary_export_retired": true,
     "verified_published_source_count": 1140
   },
+  "full_make_check_8aa94baa2": {
+    "actual_exit": 0,
+    "archive_block_sha256": "f39c765117912c1050b77a48935a6334d8483620f264c7e031e8c64d9c13ddb4",
+    "archive_marker": "=== FULL MAKE CHECK 8AA94BAA2 PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/endian-full.cpu.jsonl.gz": "b6b782d287ef11f8e44f5938f60ff392eeaeb518bddd1e110b9c3492420c37b2",
+      "/workspaces/.agent-state/kprog-lanes/V/endian-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/endian-full.head": "523a19a1865b4df9b4a4369866460ca4b7ea16cf4df43cfff0daa2493f80532c",
+      "/workspaces/.agent-state/kprog-lanes/V/endian-full.launch.log": "fcbaa58c11323a9de1d7ff2ce747a607c358925e68639791fcef0a556c4b0988",
+      "/workspaces/.agent-state/kprog-lanes/V/endian-full.log": "51fdd1862b1bb3c13f780dd674d37e08e2afeff050f0c87cb0643a17117e70cd",
+      "/workspaces/.agent-state/kprog-lanes/V/endian-full.py": "99819ced11d71803aecc0a2c37cfb78fa40bb98b938cf8c14c4f51f454366ea1",
+      "/workspaces/.agent-state/kprog-lanes/V/endian-full.sources": "8876560c27132796e24f8a605ce27c0cee18c43f9b658117d9ffe0afaa31132d",
+      "/workspaces/.agent-state/kprog-lanes/V/endian-full.state": "c95555214d176d7e6c96db08ca644c6d65684877e5a04301d1d7a7870c47f74c"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "8aa94baa2cb2c616f9dd542b594943a0cfe41bf8",
+    "scope": "Complete formal make check of the exact published source tree 8aa94baa2cb2c616f9dd542b594943a0cfe41bf8. Other source epochs retain separate receipts.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1140
+  },
   "full_make_check_8db6eb61a": {
     "all_snapshot_sha256_match_published_blobs": true,
     "archive_block_sha256": "36eb425b87c5cb1f00030fd96bfc8ad2cd5958c6c3f2b03ae2377c349f9563d9",
