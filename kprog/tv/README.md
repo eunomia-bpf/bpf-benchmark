@@ -74,6 +74,17 @@ resolution composes through that same target. Producer header/field/PC/chunk
 correspondence, other GOT/memory-table forms and helper/entry ABI provide the
 surrounding generic stages; kinds5/6/7 keep their component status.
 
+`generic-native-link-guarded-emission.json` derives MOVABS header protection
+from existing kernel emitter byte checks. Rel32 uses the current destination's
+E8+four-zero pattern; literals use the immutable snapshot's eight-zero pattern.
+An ordered-table invariant preserves every original nonzero byte and excludes
+all checked write fields from those addresses. MOVABS REX/opcode bytes are
+nonzero for all16GPRs. Eleven audits pass; guarded template bytes, map resolution
+and the final-code TV/full-state result now compose through that derived header
+law. Producer template/field/PC/chunk correspondence and mixed-field separation
+provide their remaining layout inputs. Literal-field identity and other
+GOT/helper/entry ABI stages retain their own generic preservation laws.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations

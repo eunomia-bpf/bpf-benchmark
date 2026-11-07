@@ -923,3 +923,8 @@ native-link-patch-table-check: native-link-literal-check
 native-link-movabs-check: native-link-patch-table-check
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/NativeLinkMovabs.olean ../tv/NativeLinkMovabs.lean
+
+.PHONY: native-link-guarded-emission-check
+native-link-guarded-emission-check: native-link-movabs-check
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/NativeLinkGuardedEmission.olean ../tv/NativeLinkGuardedEmission.lean

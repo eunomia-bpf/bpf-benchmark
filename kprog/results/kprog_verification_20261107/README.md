@@ -120,6 +120,16 @@ through the same target. Kinds5/6/7 retain component status while actual produce
 header/field/PC/chunk correspondence, other GOT/memory-table consumers and
 helper/entry ABI supply the surrounding production stages.
 
+[`generic-native-link-guarded-emission.json`](../kprog_tv_20261107/generic-native-link-guarded-emission.json)
+adds 11 passing audits for existing sequential emitter guards. Rel32 checks the
+current output; literals check the immutable original. Their shared invariant
+preserves every original nonzero byte and derives MOVABS header protection.
+Original template bytes then compose with field identity, map resolution and
+final-code full-state consumption. Actual producer template/field/PC/chunk
+correspondence and mixed-field separation retain their completion steps;
+other GOT/memory-table consumers and helper/entry ABI follow. Original nonzero
+byte protection and final literal-field identity have their separate invariants.
+
 <!-- O4 COVERAGE END -->
 
 

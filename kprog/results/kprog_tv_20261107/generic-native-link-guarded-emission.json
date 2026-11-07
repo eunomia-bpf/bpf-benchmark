@@ -1,0 +1,130 @@
+{
+  "utc": "2026-11-07T20:47:06.186021+00:00",
+  "status": "universal_sequential_emitter_guard_invariant_derives_MOVABS_header_protection_and_consumption",
+  "scope": "Every finite mixed kind1/5/6/7 table, original/current canonical memories, arbitrary64-bit addresses/targets and16GPR MOVABS destinations.",
+  "kernel_guard_sources": {
+    "rel32": "kinsn/module/x86/bpf_x86_native_lab.c:current emit_at+r.offset memcmp against E8 00 00 00 00 before writing4B displacement",
+    "literal": "kinsn/module/include/native_lab_group.h:native_lab_emit_literal checks immutable blob+r.offset8B with memchr_inv before writing current destination",
+    "ordering": "CheckedTable threads current destination through the ordered canonical memory writes and retains the same immutable original snapshot."
+  },
+  "claims": [
+    "Every successful rel32 byte-pattern guard gives four zero current-destination write bytes; every literal byte-pattern guard gives eight zero original-snapshot write bytes.",
+    "If the current image retains every original nonzero byte, an accepted next write field lies outside every original nonzero address. The canonical write therefore maintains that invariant.",
+    "Induction over arbitrary ordered mixed tables proves preservation of all original nonzero bytes and write exclusion for every table member, using the actual distinct guard sources.",
+    "All MOVABS REX/opcode bytes for16GPR destinations are nonzero. The sequential guard invariant derives HeaderProtected directly from original header bytes.",
+    "Original fixed10B template bytes provide the header; existing emitter guards, field membership and mixed-field separation supply the complete final-code MOVABS TV instance.",
+    "Stable retained-map ID/value-offset callback witnesses compose through the same derived guard and target. Every resulting emitted consumer has the exact complete architectural successor and empty guest trace."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o native-link-movabs-check native-link-guarded-emission-check",
+    "reproduction": "make -C kprog/tv native-link-guarded-emission-check",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.NativeLinkGuardedEmission.zero_span": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkGuardedEmission.call_guard_zero": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkGuardedEmission.guard_outside_nonzero": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkGuardedEmission.checked_table_nonzero": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkGuardedEmission.rex_nonzero": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkGuardedEmission.opcode_nonzero": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkGuardedEmission.checked_movabs_header": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkGuardedEmission.template_header": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkGuardedEmission.checked_movabs_preservation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkGuardedEmission.checked_map_movabs_preservation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkGuardedEmission.checked_emitted_architecture": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "sorryAx_count": 0,
+    "log_sha256": "68b12994e8f9363283d5c912c066d1cc683be143fbcd7a7927a8462dcbd814dd",
+    "attempts_archive": "kprog/results/kprog_tv_20261107/generic-native-link-guarded-emission-attempts.log.gz",
+    "attempts_raw_sha256": "69656c9ea83dd1e9e90bad466c94d3b06b05b9297af471c04356939ef7469d50",
+    "proof_elaboration_attempt_exits": [
+      2,
+      2
+    ],
+    "dependency_scope": "Only prior generic Composition/literal/mixed-table/MOVABS modules and canonical Memory/X86 provide the proof import closure."
+  },
+  "source_sha256": {
+    "kprog/tv/NativeLinkGuardedEmission.lean": "0da5a9fda6d301494ffa5e59b4f009c66a9f4ecdb251fd2340ec37d0db28b2b5",
+    "kprog/tv/NativeLinkMovabs.lean": "5095a8a33f17cb84f91aba377615af8810ca5285a0b82981d620b0afc21b8390",
+    "kprog/tv/NativeLinkPatchTable.lean": "193d88ad78284bedc178d47063f5ce323d326b9c55c824c85ad18a34c3282224",
+    "kprog/tv/NativeLinkLiteral.lean": "59a5733a5f8c42fa4235e32ab108bb3604875b10984bf2acab342a819f105530",
+    "kprog/tv/NativeLinkRelocationTable.lean": "3445aff6854ccaa85e433d8e8357a57edc8b7b2b9cdbdc07ceee8eced4c96f46",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/Makefile": "b96de3c404b0950b632472bcab4528d3fc6c3183a40e4e5548c9d0bad97de3d2",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "8b63557424953cc7d00d83ea3eab9b37748fd2e3ed3cd4892e0b7b3b0fb34506",
+    "kprog/x86/native_lab/native_link/src/main.rs": "563db62726d8ff0fbbcdc2d0f928eeafbd3d64b0e3fce3046723d2b18ab531d1",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "a02aee08743af771028352ae35fc3e8dc97a5b33b2c85df31a60d22c92677713",
+    "kinsn/module/include/native_lab_binding.h": "5abc935861b6920b05a6352064af2999a4febbcbff41d2fb4fc88cb43db02a06",
+    "kinsn/module/include/native_lab_group.h": "5fbd5b82f304bbf6b8fbfeedd3d5152adaa103fb374c08dc5d32d5c3f3cdffc5"
+  },
+  "implementation_source_observations": [
+    {
+      "path": "kinsn/module/include/native_lab_group.h",
+      "observed_sha256": "1ef0bbf95d3b5a8b64aa3cf6db3b5ecea8dc19db7ff4069d63955ecd34158fd5",
+      "published_sha256": "5fbd5b82f304bbf6b8fbfeedd3d5152adaa103fb374c08dc5d32d5c3f3cdffc5",
+      "exact_difference": "Two additional blank lines after native_lab_checked.h include.",
+      "observed_patch": "diff --git a/kinsn/module/include/native_lab_group.h b/kinsn/module/include/native_lab_group.h\nindex 7992c4106..0ded174ff 100644\n--- a/kinsn/module/include/native_lab_group.h\n+++ b/kinsn/module/include/native_lab_group.h\n@@ -6,6 +6,8 @@\n #include \"native_lab_exclusive.h\"\n #include \"native_lab_checked.h\"\n \n+\n+\n /* Included after native_blob/blobs and decode_native_lab_payload in each\n  * module. The final chunk owns a generation vector for the entire program.\n  * All callers hold blobs_lock.\n",
+      "implementation_body_identity": "identical"
+    }
+  ],
+  "compiled_olean_sha256": {
+    "kprog/tv/build/NativeLinkPatchTable.olean": "c2a5820644ea097cd10e89ad7bcf17c7edfd98ec59ce39602a0c86e50eb540fb",
+    "kprog/tv/build/NativeLinkMovabs.olean": "07fdf80aaaad660bf0ebbadd148ed5fe8a8ce44df295e8775afa2c0d2189fbf1",
+    "kprog/tv/build/NativeLinkGuardedEmission.olean": "aab75037cb67d7e522558d29e1a76ab8779a6f8fa5cf4bca5d6b165410b09f5f"
+  },
+  "premises": [
+    "The trusted kernel C/ABI byte-view correspondence connects actual successful memcmp/memchr_inv checks and emitter writes to EmitGuard/CheckedTable and the canonical memory writer. Other emitter bounds, target and range checks strengthen this necessary byte-guard condition.",
+    "The actual producer/binding route supplies original fixed-template bytes at the selected PC, the same final literal member at PC+2, resolved target identity and full code/entry/ABI/metadata equality.",
+    "Mixed consumed-field separation and original call-template validity retain their typed layout premises. They establish each final literal target; the new sequential invariant establishes original header protection independently of pairwise separation.",
+    "The invariant concerns original nonzero bytes. Literal-field identity across overlapping zero fields continues to use the separate mixed-table layout law.",
+    "Map/callback witnesses denote actual pinned kernel objects and their supported invocation environment; surrounding interpreter/native ABI correspondence supplies that environment."
+  ],
+  "completion_path": [
+    "Derive original template/field/PC/chunk correspondence and mixed-field separation from actual Rust encoder/layout construction and kernel serialization/binding.",
+    "Compose other GOT/memory-table consumers, complete control partition, bound helper identity/prototype and invocation ABI.",
+    "Combine V O1/O2/definedness, actual compiler/private-frame preservation and remaining ARM/tail-call transformations through Composition.lean."
+  ],
+  "trusted": [
+    "Kernel binding and C/ABI correspondence for the existing byte checks, immutable snapshot, ordered writes and final executable image.",
+    "Canonical ISA/Memory semantics and separate F hardware/QEMU fidelity evidence.",
+    "Accepted-B verifier soundness for final checked-effects composition.",
+    "Lean kernel and the explicitly reported axiom dependencies."
+  ]
+}
