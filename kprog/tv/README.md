@@ -1942,3 +1942,9 @@ and absence of payload-end decoding at every64-bit codebase. Bounded native
 byte offsets prevent PC-wrap aliases, and canonical consumed lengths determine
 the actual extent. Relational execution transport into the PC0 certificate
 remains the next component; no new ISA or runtime behavior is introduced.
+
+`trusted-simple-relational-code-shift.json` transports canonical relational
+step observations across code origins in both directions. State translation
+is invertible; all17 actual decoded instructions preserve their flag masks
+and complete GPR observations. Undefined AF remains arbitrary. Events, faults
+and memory stay exact; accepted-extent and whole-execution reflection are next.

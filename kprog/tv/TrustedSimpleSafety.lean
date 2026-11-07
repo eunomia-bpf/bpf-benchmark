@@ -1688,6 +1688,212 @@ theorem simple_native_based_end_no_decode (base : Word) (s : X86.State)
   have codeBound : entry.offset+entry.length≤60 := inside
   omega
 
+
+/-- Code-origin translation is invertible on complete native states. -/
+theorem shift_native_state_inverse (base : Word) (s : X86.State) :
+    shiftNativeState (-base) (shiftNativeState base s)=s := by
+  have cancel : (-base)+(base+s.pc)=s.pc := by
+    unfold Word at *
+    bv_decide
+  simp only [shiftNativeState,cancel]
+
+theorem shift_native_state_injective (base : Word) :
+    ∀ {first second}, shiftNativeState base first=shiftNativeState base second → first=second := by
+  intro first second same
+  have moved := congrArg (shiftNativeState (-base)) same
+  simpa only [shift_native_state_inverse] using moved
+
+/-- Captured decoding preserves observation masks when PC origin changes;
+none of these instructions has undefined GPR bits. AF freedom is retained. -/
+theorem simple_native_code_shift_observations (base : Word) (s : X86.State) (offset : Nat)
+    (member : offset ∈ simpleNativeOffsets) :
+    match X86.decode (native.extract offset (offset+simpleNativeLength offset)) s,
+        X86.decode (native.extract offset (offset+simpleNativeLength offset)) (shiftNativeState base s) with
+    | .ok instruction,.ok shifted =>
+        X86.definedFlags instruction=X86.definedFlags shifted ∧
+        (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+        (∀ state, X86.observedRegisters shifted state=state.gpr)
+    | _,_ => False := by
+  have choices : offset=0 ∨ offset=3 ∨ offset=7 ∨ offset=10 ∨ offset=12 ∨ offset=15 ∨ offset=17 ∨ offset=21 ∨ offset=24 ∨ offset=26 ∨ offset=30 ∨ offset=33 ∨ offset=35 ∨ offset=40 ∨ offset=44 ∨ offset=51 ∨ offset=55 := by
+    simpa [simpleNativeOffsets] using member
+  rcases choices with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · change (match X86.decode (native.extract 0 3) s,
+        X86.decode (native.extract 0 3) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode0,native_decode0]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 3 7) s,
+        X86.decode (native.extract 3 7) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode3,native_decode3]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 7 10) s,
+        X86.decode (native.extract 7 10) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode7,native_decode7]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 10 12) s,
+        X86.decode (native.extract 10 12) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode10,native_decode10]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 12 15) s,
+        X86.decode (native.extract 12 15) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode12,native_decode12]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 15 17) s,
+        X86.decode (native.extract 15 17) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode15,native_decode15]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 17 21) s,
+        X86.decode (native.extract 17 21) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode17,native_decode17]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 21 24) s,
+        X86.decode (native.extract 21 24) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode21,native_decode21]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 24 26) s,
+        X86.decode (native.extract 24 26) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode24,native_decode24]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 26 30) s,
+        X86.decode (native.extract 26 30) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode26,native_decode26]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 30 33) s,
+        X86.decode (native.extract 30 33) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode30,native_decode30]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 33 35) s,
+        X86.decode (native.extract 33 35) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode33,native_decode33]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 35 40) s,
+        X86.decode (native.extract 35 40) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode35,native_decode35]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 40 44) s,
+        X86.decode (native.extract 40 44) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode40,native_decode40]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 44 51) s,
+        X86.decode (native.extract 44 51) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode44,native_decode44]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 51 55) s,
+        X86.decode (native.extract 51 55) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode51,native_decode51]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+  · change (match X86.decode (native.extract 55 60) s,
+        X86.decode (native.extract 55 60) (shiftNativeState base s) with
+      | .ok instruction,.ok shifted =>
+          X86.definedFlags instruction=X86.definedFlags shifted ∧
+          (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+          (∀ state, X86.observedRegisters shifted state=state.gpr)
+      | _,_ => False)
+    rw [native_decode55,native_decode55]
+    exact ⟨rfl,fun _ => rfl,fun _ => rfl⟩
+
+/-- Observation transport uses full state equality modulo the ISA's actual
+undefined flag mask, without fixing any undefined AF bit. -/
+theorem native_relational_code_shift_iff (base : Word) (s : X86.State)
+    (instruction shifted : X86.Instruction) (actual : Transition X86.State)
+    (canonical : X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s))
+    (flags : X86.definedFlags instruction=X86.definedFlags shifted)
+    (firstObserved : ∀ state, X86.observedRegisters instruction state=state.gpr)
+    (secondObserved : ∀ state, X86.observedRegisters shifted state=state.gpr) :
+    X86.Step instruction s actual ↔
+      X86.Step shifted (shiftNativeState base s) (shiftNativeTransition base actual) := by
+  unfold X86.Step
+  rw [canonical]
+  unfold X86.matchesTransition
+  simp only [shiftNativeTransition,firstObserved,secondObserved,ite_self,← flags]
+  constructor
+  · intro run
+    refine ⟨run.1,run.2.1,?_⟩
+    exact congrArg (shiftNativeState base) run.2.2
+  · intro run
+    refine ⟨run.1,run.2.1,?_⟩
+    apply shift_native_state_injective base
+    exact run.2.2
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -1805,3 +2011,11 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.simple_native_based_extent_unique
 
 #print axioms KProgTV.TrustedSimpleSafety.simple_native_based_end_no_decode
+
+#print axioms KProgTV.TrustedSimpleSafety.shift_native_state_inverse
+
+#print axioms KProgTV.TrustedSimpleSafety.shift_native_state_injective
+
+#print axioms KProgTV.TrustedSimpleSafety.simple_native_code_shift_observations
+
+#print axioms KProgTV.TrustedSimpleSafety.native_relational_code_shift_iff
