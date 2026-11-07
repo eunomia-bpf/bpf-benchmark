@@ -1032,3 +1032,13 @@ ARM and unchanged x86 assembly each pass 8,257 CPU boundary/canary cases; all
 23 BCC proofs generate and compile. The loader and producer use the same
 preserved-entry ABI. Actual BCC v35 startup follows separately; no binding
 exception or simulator-only libc shortcut was added.
+
+## Opensnoop admitted with the real native memset body
+
+[Actual BCC v35](runtime-context-v35/README.md) admits the previously rejected
+opensnoop sys_exit_openat on the generation-bound path with the standard module.
+The startup has 13 bound replacements and four remaining native-load
+failures; the app still errors before native workload measurement. All 32
+selectors, raw results and the built Spark launcher are preserved. Its
+configuration round-trip retains bound proof, BPF stats and the requested
+sample/duration values; hardware execution remains unmeasured.

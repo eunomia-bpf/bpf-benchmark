@@ -1,0 +1,31 @@
+{
+  "bound_required": "1",
+  "app": "bcc/set",
+  "samples": "3",
+  "duration": "180",
+  "unchanged_environment_keys": [
+    "BPFREJIT_INSIDE_RUNTIME_CONTAINER",
+    "HOME",
+    "TARGET",
+    "RUN_TARGET_NAME",
+    "RUN_TARGET_ARCH",
+    "RUN_EXECUTOR",
+    "RUNTIME_CONTAINER_IMAGE",
+    "RUNTIME_IMAGE_TAR",
+    "RUN_REMOTE_PYTHON_BIN",
+    "RUN_RUNTIME_PYTHON_BIN",
+    "RUN_BPFTOOL_BIN",
+    "RUN_NATIVE_REPOS_CSV",
+    "RUN_TOKEN",
+    "FUZZ_ROUNDS",
+    "KEEP_WORKDIRS",
+    "BPFREJIT_CORPUS_APPS",
+    "MERLIN_COMPILETIME_MODE",
+    "BPFREJIT_CORPUS_APP_TIMEOUT",
+    "BPFREJIT_CORPUS_BPF_STATS",
+    "BPFREJIT_SHIM_NATIVE_LOADER",
+    "BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF",
+    "CILIUM_PROFILE_ARM"
+  ],
+  "hardware_run": false
+}

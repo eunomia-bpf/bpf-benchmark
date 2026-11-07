@@ -1,0 +1,22 @@
+{
+  "app_status": "error",
+  "baseline_resident_rows": 23,
+  "native_workload_rows": 0,
+  "bound_replacements": 13,
+  "native_load_failures": [
+    "[161.548685 pid=811 tid=811] native-loader failed prog=fentry_vfs_read manifest=/opt/bpf-benchmark/native-bpf/arm64/bcc/manifest.json source=/tmp/bpfrejit_811_ca9822ef332acdf2.bpf error=BPF_PROG_LOAD native_lab stub: Invalid argument",
+    "[163.706744 pid=831 tid=831] native-loader failed prog=inet_sock_set_s manifest=/opt/bpf-benchmark/native-bpf/arm64/bcc/manifest.json source=/tmp/bpfrejit_831_8e43f6c8f4b557f0.bpf error=BPF_PROG_LOAD native_lab stub: Permission denied",
+    "[165.168019 pid=821 tid=821] native-loader failed prog=sys_exit manifest=/opt/bpf-benchmark/native-bpf/arm64/bcc/manifest.json source=/tmp/bpfrejit_821_10b3fccfdb4f8ff6.bpf error=BPF_PROG_LOAD native_lab stub: Invalid argument",
+    "[166.292660 pid=839 tid=839] native-loader failed prog=sched_switch manifest=/opt/bpf-benchmark/native-bpf/arm64/bcc/manifest.json source=/tmp/bpfrejit_839_ae344fbc473d1ed7.bpf error=BPF_PROG_LOAD native_lab stub: Invalid argument"
+  ],
+  "opensnoop_sys_exit_openat": {
+    "run": "arm64_qemu_corpus_19700101_000007_384678",
+    "log": "bcc__set.post_rejit.log",
+    "pid": 817,
+    "tid": 817,
+    "timestamp": "163.166324",
+    "record": "native-loader replaced prog=tracepoint__sys original_fd=10 native_fd=23 original_id=159 native_id=184 symbol=tracepoint__syscalls__sys_exit_openat native_object=/opt/bpf-benchmark/native-bpf/arm64/bcc/opensnoop.native.o manifest=/opt/bpf-benchmark/native-bpf/arm64/bcc/manifest.json source=/tmp/bpfrejit_817_3ee7b67cec664f61.bpf"
+  },
+  "closes": "external memset helper-binding mismatch",
+  "remaining": "tcplife stack and three exclusive retry loops"
+}

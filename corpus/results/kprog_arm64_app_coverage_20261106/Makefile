@@ -683,3 +683,17 @@ layout-verifier-check:
 .PHONY: bcc-memory-input
 bcc-memory-input:
 	python3 $(ROOT)/corpus/results/kprog_app_coverage_20261106/embed_memory_runtime.py $(HERE)/bcc-layout-v27 $(HERE)/bcc-memory-input-v35
+
+.PHONY: app-replay-build
+app-replay-build:
+	python3 $(HERE)/app_replay.py build $(RUNTIME_BASE) $(RUNTIME_IMAGE)
+
+.PHONY: app-replay-run app-replay-collect
+app-replay-run:
+	taskset -c 8-11 $(MAKE) -C $(RUNTIME_BASE)/spark run \
+		ROOTFS=$(RUNTIME_BASE)/root IMAGE_TAR=$(RUNTIME_BASE)/image.tar APP=$(APP) \
+		SAMPLES=1 WORKLOAD_DURATION=2
+	$(MAKE) -f $(HERE)/Makefile app-replay-collect RUNTIME_BASE=$(RUNTIME_BASE)
+
+app-replay-collect:
+	cp -a $(RUNTIME_BASE)/root/workspaces/repository/corpus/results/. $(ROOT)/corpus/results/
