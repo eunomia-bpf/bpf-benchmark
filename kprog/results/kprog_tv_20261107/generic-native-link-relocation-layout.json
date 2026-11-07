@@ -1,0 +1,153 @@
+{
+  "utc": "2026-11-07T19:41:30.584751+00:00",
+  "status": "universal_u32_metadata_layout_to_physical_relocation_table_TV_proved",
+  "scope": "Arbitrary u32 offset/u64 target record lists, either record ordering, every64-bit final code base including wrapping address addition, all accepted signed32 displacements and canonical CALL behaviors.",
+  "claims": [
+    "Separation of five-byte intervals in serialized u32 offsets derives protection of both physical CALL spans at any64-bit emitted base.",
+    "The interval law covers either relative record order and lifts through arbitrary List.map table materialization.",
+    "Materialization retains each record target and derives its physical slot and low32 displacement from the final base, matching the existing emitter arithmetic.",
+    "The signed-cast acceptance predicate yields the exact checkedRel32 result for every materialized record.",
+    "record_table_preservation derives the whole-table TranslationValidation instance from serialized offset separation, initial E8 opcode facts and the existing emitter range acceptance. The physical separation predicate is established by the u32 arithmetic theorem."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o native-link-relocation-check native-link-relocation-table-check",
+    "reproduction": "make -C kprog/tv native-link-relocation-table-check",
+    "exit": 0,
+    "new_axiom_audit": {
+      "KProgTV.NativeLinkRelocationTable.ordered_offsets_separated": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.record_offsets_separated": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.materialized_table_separated": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.materialized_table_accepted": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.record_table_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "all_axiom_audits": {
+      "KProgTV.NativeLinkRelocationTable.stored_bytes": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.opcode_preserved": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.written_call_bytes": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_permissions": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkRelocationTable.patch_value_outside": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_value_outside": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_span_outside": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_call_bytes": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_call_decode": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_call_preservation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.table_call_reflects": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.ordered_offsets_separated": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.record_offsets_separated": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.materialized_table_separated": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.materialized_table_accepted": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocationTable.record_table_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "sorryAx_count": 0,
+    "log_sha256": "188b2ac515a9631adcc692308dcf496148bb36c3241c29a061045282127d7820"
+  },
+  "source_sha256": {
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/tv/NativeLinkRelocationTable.lean": "3445aff6854ccaa85e433d8e8357a57edc8b7b2b9cdbdc07ceee8eced4c96f46",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "8b63557424953cc7d00d83ea3eab9b37748fd2e3ed3cd4892e0b7b3b0fb34506",
+    "kprog/x86/native_lab/native_link/src/main.rs": "563db62726d8ff0fbbcdc2d0f928eeafbd3d64b0e3fce3046723d2b18ab531d1",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "a02aee08743af771028352ae35fc3e8dc97a5b33b2c85df31a60d22c92677713",
+    "kprog/tv/Makefile": "0e58b8c532dc28c35789f1d2d800976f9aa0184336c326e7e470aadf97cc1f52"
+  },
+  "premises": [
+    "Serialized call intervals satisfy pairwise separation; the record list retains its source order.",
+    "Each record has its initial E8 opcode and passes the existing signed32 cast round-trip at the final code base.",
+    "Kernel code/entry/ABI/metadata identity connects these modeled records and code bytes to the actual accepted/emitted artifact."
+  ],
+  "completion_path": [
+    "Derive serialized interval separation from the actual native-link block/offset construction and carry global code binding across chunk layout and every relocation kind.",
+    "Compose map lowering, private spill projection, helper identity/prototype and tail-call preservation with the generic token/definedness/compiler-output laws."
+  ],
+  "trusted": [
+    "Canonical ISA/Memory semantics with hardware fidelity accounted for by V/F.",
+    "Kernel code/entry/ABI/metadata binding and the supported emitter C/ABI profile.",
+    "Lean kernel and the reported propext/Classical.choice/Quot.sound."
+  ]
+}

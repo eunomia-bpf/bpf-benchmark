@@ -188,6 +188,86 @@ theorem table_call_reflects (patches : List Patch) (code : Memory)
   exact ⟨patch,member,position,patch.displacement,effect,
     by simpa only [position] using accepted patch member,step,trace,state⟩
 
+/-- Kind1 wire records retain the producer's u32 offset and u64 target.
+The emitter derives displacement bits from its final physical code base. -/
+structure Record where
+  offset : BitVec 32
+  target : Word
+
+def materialize (base : Word) (record : Record) : Patch :=
+  let slot := base+record.offset.zeroExtend 64
+  ⟨slot,record.target,(record.target-(slot+(5#64))).setWidth 32⟩
+
+def RecordSeparated (first second : Record) : Prop :=
+  first.offset.toNat+5≤second.offset.toNat ∨ second.offset.toNat+5≤first.offset.toNat
+
+def AcceptedRecord (base : Word) (record : Record) : Prop :=
+  let patch := materialize base record
+  patch.displacement.signExtend 64=patch.target-(patch.slot+(5#64))
+
+/-- Ordered u32 offsets protect both whole CALL spans at every64-bit base,
+including a code span whose address addition crosses architectural zero. -/
+theorem ordered_offsets_separated (base : Word) (first second : Record)
+    (ordered : first.offset.toNat+5≤second.offset.toNat) :
+    Separated (materialize base first) (materialize base second) := by
+  have firstBound := first.offset.isLt
+  have secondBound := second.offset.isLt
+  have wordOrder : first.offset.zeroExtend 64+(5#64)≤second.offset.zeroExtend 64 := by
+    change (first.offset.zeroExtend 64+(5#64)).toNat≤(second.offset.zeroExtend 64).toNat
+    simp only [BitVec.toNat_add,BitVec.toNat_setWidth,BitVec.toNat_ofNat]
+    omega
+  constructor
+  all_goals intro i bounded
+  all_goals have indices : i=0 ∨ i=1 ∨ i=2 ∨ i=3 ∨ i=4 := by omega
+  all_goals rcases indices with rfl | rfl | rfl | rfl | rfl
+  all_goals dsimp only [OutsideWrite,materialize]
+  all_goals change (4#64)≤(_ : Word)
+  all_goals unfold Word at *
+  all_goals bv_decide
+
+theorem record_offsets_separated (base : Word) (first second : Record)
+    (apart : RecordSeparated first second) :
+    Separated (materialize base first) (materialize base second) := by
+  rcases apart with forward | backward
+  · exact ordered_offsets_separated base first second forward
+  · obtain ⟨secondProtected,firstProtected⟩ := ordered_offsets_separated base second first backward
+    exact ⟨firstProtected,secondProtected⟩
+
+/-- Interval layout of serialized offsets derives physical span separation
+for arbitrary table order and final emitted base. -/
+theorem materialized_table_separated (base : Word) (records : List Record)
+    (apart : records.Pairwise RecordSeparated) :
+    (records.map (materialize base)).Pairwise Separated := by
+  apply List.pairwise_map.mpr
+  exact apart.imp (fun {first second} interval => record_offsets_separated base first second interval)
+
+/-- Every successful signed-cast acceptance remains attached to the same
+record target and physical slot through table materialization. -/
+theorem materialized_table_accepted (base : Word) (records : List Record)
+    (accepted : ∀ record∈records, AcceptedRecord base record) :
+    ∀ patch∈records.map (materialize base),
+      checkedRel32 patch.slot patch.target=some patch.displacement := by
+  intro patch member
+  obtain ⟨record,inside,rfl⟩ := List.mem_map.mp member
+  have fits := accepted record inside
+  dsimp only [AcceptedRecord,materialize] at fits
+  simp only [materialize,checkedRel32,fits,ite_true]
+
+/-- Metadata offsets, existing emitter acceptance and opcode facts derive
+the generic table TV instance through the reference code-byte semantics. -/
+theorem record_table_preservation (base : Word) (records : List Record) (code : Memory)
+    (apart : records.Pairwise RecordSeparated)
+    (opcodes : ∀ record∈records, code.value (base+record.offset.zeroExtend 64)=(0xe8#8))
+    (accepted : ∀ record∈records, AcceptedRecord base record) :
+    TranslationValidation (intendedCalls (records.map (materialize base)))
+      (emittedCalls (records.map (materialize base))
+        (applyTable (records.map (materialize base)) code)) Eq := by
+  apply table_call_preservation _ code (materialized_table_separated base records apart)
+  · intro patch member
+    obtain ⟨record,inside,rfl⟩ := List.mem_map.mp member
+    exact opcodes record inside
+  · exact materialized_table_accepted base records accepted
+
 end KProgTV.NativeLinkRelocationTable
 #print axioms KProgTV.NativeLinkRelocationTable.stored_bytes
 #print axioms KProgTV.NativeLinkRelocationTable.opcode_preserved
@@ -207,3 +287,13 @@ end KProgTV.NativeLinkRelocationTable
 #print axioms KProgTV.NativeLinkRelocationTable.table_call_preservation
 
 #print axioms KProgTV.NativeLinkRelocationTable.table_call_reflects
+
+#print axioms KProgTV.NativeLinkRelocationTable.ordered_offsets_separated
+
+#print axioms KProgTV.NativeLinkRelocationTable.record_offsets_separated
+
+#print axioms KProgTV.NativeLinkRelocationTable.materialized_table_separated
+
+#print axioms KProgTV.NativeLinkRelocationTable.materialized_table_accepted
+
+#print axioms KProgTV.NativeLinkRelocationTable.record_table_preservation

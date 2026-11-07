@@ -22,8 +22,12 @@ protected spans and code permissions persist across the ordered patch list.
 Every final table-selected CALL has its bound target and complete canonical
 behavior, through a TV instance and reverse step theorem. Eleven audits pass.
 The premises carry pairwise span separation, existing range/opcode checks and
-actual code/metadata binding. The next bridge derives separation from native-link
-u32 offsets and its layout construction.
+actual code/metadata binding. `generic-native-link-relocation-layout.json` derives physical separation from
+u32 record interval separation at every64-bit code base, handles either record
+order, and preserves each target/range check through materialization. Five
+additional audits pass (sixteen cumulative). `record_table_preservation`
+supplies the resulting table TV instance. Actual native-link interval
+construction, chunk layout and global code binding form the next bridge.
 
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
