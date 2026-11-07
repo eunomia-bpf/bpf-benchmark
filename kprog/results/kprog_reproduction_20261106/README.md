@@ -34,29 +34,47 @@ used.
 Corpus figures are at the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`)
 and each carries the replaced/failed count from its own shim log.
 
-## The three arms, where all three exist
+## The three arms
 
-`BPFREJIT_CORPUS_WORKLOAD_ONLY=1` gives the no-eBPF baseline (the
-workload with no BPF program attached), which is the denominator the
-reference's first two columns use. Measured at the operator recipe
-(`corpus/results/x86_kvm_corpus_20261107_060516_326524`,
-`workload_only: true`, 3 workloads per app):
+`BPFREJIT_CORPUS_WORKLOAD_ONLY=1` runs the workload with no BPF program
+attached — the denominator the reference's first two columns use. Arm
+artifacts: `corpus/results/x86_kvm_corpus_20261107_060516_326524`
+(bcc, tetragon) and `..._064125_589233` (the rest),
+`workload_only: true`, 3 workloads per app.
 
 | app | eBPF/no-eBPF | native/no-eBPF | native/eBPF | reference (ebpf/no, nat/no, nat/ebpf) |
 | --- | ---: | ---: | ---: | --- |
 | bcc/set | 0.370 | 0.371 | 1.002x | 0.451, 0.453, 1.005x |
-| tetragon/observer | 0.196 | 0.196 | 1.008x | 0.233, 0.308, 1.323x |
+| tetragon/observer | 0.192 | 0.194 | 1.008x | 0.233, 0.308, 1.323x |
+| katran | 0.713 | 0.726 | 1.018x | 0.348, 0.383, 1.102x |
+| cilium/agent | 1.711 | 2.103 | 1.229x | 0.680, 1.603, 2.358x |
+| otelcol | 0.978 | 0.991 | 1.013x | 0.397, 0.724, 1.824x |
+| tracee/monitor | 0.128 | 0.197 | 1.539x | 0.136, 0.130, 0.958x |
 
-Two things this shows that the native/eBPF column alone cannot. First, the
-eBPF overhead itself is larger here than in the reference (bcc 0.370
-against 0.451, tetragon 0.196 against 0.233), so the workload is more
-BPF-sensitive on this tree, not less. Second, tetragon's reference gain
-was almost entirely in the **native/no-eBPF** column (0.308 against 0.233)
-— its native path recovered a third of the BPF overhead, where ours
-recovers only 0.3% (0.196 against 0.196). That is where the missing 1.323x
-went.
+**Which columns are comparable.** For the three apps whose workload runs
+on the same host path with and without BPF (bcc, tetragon, tracee), all
+three columns are like-for-like and the readings are informative. For
+katran, cilium and otelcol the no-eBPF arm is a different harness path —
+katran and cilium forward through an interface whose pktgen generator
+behaves differently without BPF (eBPF/no-eBPF above 1 means the workload
+*ran faster with* BPF, which is generator behaviour, not a speedup), and
+otel's no-eBPF arm still runs the profiler. So for those three, quote
+`native/eBPF` and read the first two columns as context only.
 
-The other four apps have no `workload_only` arm yet.
+**What the bcc and tetragon rows show that native/eBPF alone hides.**
+
+1. Our eBPF path costs the workload more than the reference's for both
+   (0.370 against 0.451, 0.192 against 0.233 — lower is more overhead).
+2. Tetragon's reference gain lived in **native/no-eBPF**: the reference
+   recovered a third of the BPF overhead (0.233 to 0.308) while we recover
+   1% (0.192 to 0.194). That is where the missing 1.323x went — our
+   native is no cheaper than our eBPF for tetragon's traced workload,
+   where the reference's was.
+
+Tracee is the mirror case: our native arm cuts BPF overhead substantially
+(0.128 to 0.197, a 54% recovery) where the reference's made the workload
+slightly worse (0.136 to 0.130). That is the same measurement read the
+other way, and it is consistent with the 1.539x against 0.958x.
 
 ## Corpus geomean
 
@@ -514,7 +532,8 @@ failed in each.
   measurement.
 - arm64 AWS (`1.056x`) is not rerun — it costs money and waits for the
   operator.
-- The no-eBPF baseline was measured for bcc and tetragon only; the other
-  four apps have no `workload_only` arm yet.
+- The no-eBPF baseline is measured for all six apps, but for katran,
+  cilium and otelcol it is a different harness path, so only
+  bcc/tetragon/tracee give all three columns like-for-like.
 - The trusted native kernel-module baseline the coordinator asked for is
   not measured for any app.
