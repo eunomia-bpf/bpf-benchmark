@@ -2034,6 +2034,20 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		}                                                           \
 	} while (0)
 
+#define X86_SIM_L_EXEC_PTR_LOAD(OP, DST, AUX, IMM) \
+	do { \
+			__u8 __x86_l_pw_tag =                             \
+				KPROG_X86_PTR_WRITE_SOURCE_TAG(           \
+					(OP) == X86_OP_MOV_LOAD_MAP_PTR,   \
+					(OP) == X86_OP_MOV_LOAD_HELPER_ID, (AUX));\
+			if (KPROG_X86_PTR_WRITE_IS_HELPER_ID(             \
+				    __x86_l_pw_tag))                      \
+				X86_SIM_L_WRITE_REG_WIDTH((DST), (IMM), \
+							  X86_WIDTH_64);\
+			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
+				(void *)(long)(IMM), __x86_l_pw_tag);     \
+	} while (0)
+
 /*
  * The opcode dispatch chain.
  *
@@ -2058,16 +2072,7 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 		if (KPROG_X86_DISP_NOP_HANDLED(OP)) {                      \
 			(void)0;                                           \
 		} else if (KPROG_X86_MOV_LOAD_PTR_HANDLED(OP)) {          \
-			__u8 __x86_l_pw_tag =                             \
-				KPROG_X86_PTR_WRITE_SOURCE_TAG(           \
-					(OP) == X86_OP_MOV_LOAD_MAP_PTR,   \
-					(OP) == X86_OP_MOV_LOAD_HELPER_ID, (AUX));\
-			if (KPROG_X86_PTR_WRITE_IS_HELPER_ID(             \
-				    __x86_l_pw_tag))                      \
-				X86_SIM_L_WRITE_REG_WIDTH((DST), (IMM), \
-							  X86_WIDTH_64);\
-			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
-				(void *)(long)(IMM), __x86_l_pw_tag);     \
+			X86_SIM_L_EXEC_PTR_LOAD((OP), (DST), (AUX), (IMM)); \
 		} else if (KPROG_X86_DISP_CALL_MEMCPY_HANDLED(OP)) {     \
 			X86_SIM_L_EXEC_CALL_MEMCPY((IMM));                \
 		} else if (KPROG_X86_DISP_CALL_MEMSET_HANDLED(OP)) {     \

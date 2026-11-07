@@ -243,3 +243,6 @@ katran-real-7:
 	python3 $(HERE)/katran_real.py katran-real-7
 	python3 -c 'from pathlib import Path; p=Path("$(HERE)/katran-real-7/simulator/kprog/formal/generated/x86_reg_write.h");s=p.read_text().replace("(STORAGE).b[1] = (__u8)(VALUE);", "do { if ((TAG) != (SCALAR_TAG)) *(volatile __u8 *)\u0026(STORAGE).b[1] = (__u8)(VALUE); else (STORAGE).b[1] = (__u8)(VALUE); } while (0);").replace("(STORAGE).b[0] = (__u8)(VALUE);", "do { if ((TAG) != (SCALAR_TAG)) *(volatile __u8 *)\u0026(STORAGE).b[0] = (__u8)(VALUE); else (STORAGE).b[0] = (__u8)(VALUE); } while (0);").replace("(STORAGE).w = (__u16)(VALUE);", "do { if ((TAG) != (SCALAR_TAG)) *(volatile __u16 *)\u0026(STORAGE).w = (__u16)(VALUE); else (STORAGE).w = (__u16)(VALUE); } while (0);");p.write_text(s)'
 	KPROG_COMPILE_WORKERS=1 taskset -c 12-15 prlimit --as=8589934592 --core=0 -- $(MAKE) -f $(HERE)/Makefile compile PHASE=katran-real-7
+
+bcc-byte-stack-compile:
+	KPROG_COMPILE_WORKERS=1 taskset -c 12-15 prlimit --as=8589934592 --core=0 -- $(MAKE) -f $(HERE)/Makefile compile PHASE=bcc-real-17

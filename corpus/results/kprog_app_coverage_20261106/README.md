@@ -1010,3 +1010,91 @@ raw KVM output, host/Lean logs and Katran phases1–5. Reproduce with targets
 `packet-helper-contract`, `packet-helper-host`, `packet-stack-host`,
 `packet-helper-bound-build`, `packet-helper-kvm`, `katran-real-5`, and
 `katran-verify KATRAN_PHASE=katran-real-5` under `strict-runtime.mk`.
+
+
+## BCC: all25 application programs run generation-bound
+
+Real upstream corpus run `x86_kvm_corpus_20261106_192927_028755` completes with
+`status: ok` and `mode: verified_native_loader`. All25 resident application
+programs generate proofs, compile, pass bound admission and replace the originals;
+there are zero specialization failures or verifier rejections. All52 libbpf
+feature-probe loads remain unchanged as instructed. No application program is
+excluded. The upstream BCC tool set starts and the existing workload completes
+in both arms; no workload, launcher or application source was changed.
+
+| Application | Application programs | Proof generated | Compiled | Bound verifier accepted | Specialization failed | Verifier rejected |
+|---|---:|---:|---:|---:|---:|---:|
+| BCC |25|25|25|25|0|0|
+
+The same four stressors run in both arms. Raw bogo-op counts are:
+
+| Stressor | JIT | Bound native |
+|---|---:|---:|
+| syscall |8434|514|
+| cap |436024|436591|
+| set |31324|31673|
+| sockfd |340324|318564|
+
+These are functional measurements on CPUs12–15, not final timing. The syscall
+sample finishes in3 seconds in the native arm versus2 seconds in the baseline;
+all four stressors report success. The raw counts, elapsed/user/system times,
+stdout/stderr and per-program run counts are retained without imposing a
+count-equality or minimum-work requirement. No application performance ratio is
+claimed from this short run.
+
+The last two opensnoop failures were closed by embedding an exact20-byte SysV
+memset byte loop in the native ELF. Its real local-callee instructions appear in
+both the canonical proof and executed native blob; no external-helper reference
+waiver was added. A rerun caught an unaligned8-byte stack-store regression in the
+previous increment. The forward repair restores the original byte ladder for
+unaligned stores and puts an identity compiler barrier inside its64-bit arm,
+preventing pointer-extraction hoisting while retaining aligned pointer spills.
+The existing117,782 stack-arm and1,401,654 write-lane cases pass, all25 proofs
+compile again, and the complete application run above passes.
+
+[BCC complete evidence](bcc-complete-artifacts.tar.gz) includes exact paired
+source/native/proof/simulator objects, every compile record, the runtime package,
+all captured loads, the failed preceding run and both complete raw result trees.
+`bcc-complete-18/programs.json` lists every accepted symbol;
+`bcc-complete-18/workload-counters.json` extracts only raw per-stressor counters.
+The runtime package is `bcc-runtime-18`, with image
+`bpf-benchmark/kprog-bcc:c-20261106-18`. Reproduce with:
+
+```bash
+make -f corpus/results/kprog_app_coverage_20261106/bcc-strict.mk image corpus
+```
+
+Lane R's timing request uses the same target with
+`CPUS=0-7 SAMPLES=3 WORKLOAD_DURATION=30`. The target deletes its image tar,
+guest disk and scratch roots as soon as the guest exits. The immutable runtime
+package and Docker image permit immediate re-export for that next run. The
+other five applications remain active work; this is BCC completion only.
+
+
+## Direct specialization for large application proofs (local continuation)
+
+Five operations now call their existing C handler directly: PUSH, POP,
+MOVBE_STORE, MOV_LOAD_MAP_PTR and MOV_LOAD_HELPER_ID. The generic dispatcher
+uses the same extracted pointer-load body. This changes macro expansion size;
+it introduces no instruction, branch, guard, fuel or fallback. The JSON contract,
+generated C/Python/Lean, independent Lean dispatch specification and both existing
+host oracles agree on all five rows (52 direct forms).
+
+An isolated source snapshot passes the complete `make -C kprog/formal check`
+and `make -C kprog/x86 micro-proofs-build` (negative plus all29 workloads).
+Focused specialization/chain hosts pass508/198 cases. The snapshot starts at
+9487f632f and overlays only the nine capacity files plus A's independently
+published stack-barrier checker correction. Initial incomplete-export failures
+and the checker false positive are retained beside the successful full run.
+[Exact source and raw checks](direct-specialization-artifacts.tar.gz) include
+provenance, compiler output and the generated micro artifacts. Native-link,
+entry-definedness, high-byte and numeric-environment WIP are excluded from this
+validation snapshot. Reproduce from the archived source with the two Make
+commands above; its vendor dependencies are from the recorded repository.
+
+All14 OTel application entries now render through the actual source/native
+pairing, including the transient read_task_struct program. OTel phase3 removes
+Clang's source-location exhaustion; six proofs compile and eight retain a
+backend short-branch-range failure. Those eight remain active. The next phase
+uses installed clang18's BPFv4 long-jump target for every program. No OTel
+application bound execution or timing is claimed here.

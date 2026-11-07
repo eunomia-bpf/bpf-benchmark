@@ -135,8 +135,8 @@ static const struct spec_row SPEC[] = {
 	{ X86_OP_TEST_REG, D },
 	{ X86_OP_JCC, B },
 	{ X86_OP_JMP, B },
-	{ X86_OP_PUSH, G },
-	{ X86_OP_POP, G },
+	{ X86_OP_PUSH, D },
+	{ X86_OP_POP, D },
 	{ X86_OP_CALL, B },
 	{ X86_OP_CMOV, D },
 	{ X86_OP_SETCC, D },
@@ -158,11 +158,11 @@ static const struct spec_row SPEC[] = {
 	{ X86_OP_SHIFTX, G },
 	{ X86_OP_RORX, G },
 	{ X86_OP_MOVBE_LOAD, G },
-	{ X86_OP_MOVBE_STORE, G },
+	{ X86_OP_MOVBE_STORE, D },
 	{ X86_OP_SHIFTX_MEM, G },
 	{ X86_OP_RORX_MEM, G },
-	{ X86_OP_MOV_LOAD_MAP_PTR, G },
-	{ X86_OP_MOV_LOAD_HELPER_ID, G },
+	{ X86_OP_MOV_LOAD_MAP_PTR, D },
+	{ X86_OP_MOV_LOAD_HELPER_ID, D },
 	{ X86_OP_CALL_HELPER, D },
 	{ X86_OP_CALL_REG, D },
 	{ X86_OP_LOAD_XMM0, G },
@@ -293,6 +293,7 @@ static int snap_eq(const struct snap *a, const struct snap *b)
 			SETBASE(SRC);                                     \
 		else if ((OP) == X86_OP_MOV_STORE_IMM ||                  \
 			 (OP) == X86_OP_MOV_STORE_REG ||                  \
+			 (OP) == X86_OP_MOVBE_STORE ||                  \
 			 (OP) == X86_OP_CMP_MEM_IMM ||                    \
 			 (OP) == X86_OP_TEST_MEM_IMM ||                   \
 			 (OP) == X86_OP_CMP_MEM_REG ||                    \
@@ -406,6 +407,16 @@ static void check_token(__u8 op, unsigned dst, unsigned src, unsigned flags,
 	/* ---- side B: the encoder's emitted body, restated by hand ---- */
 	PLANT(op, dst, src);
 	switch (op) {
+	case X86_OP_MOV_LOAD_MAP_PTR:
+	case X86_OP_MOV_LOAD_HELPER_ID:
+		X86_SIM_L_EXEC_PTR_LOAD(op,dst,aux,imm);break;
+	case X86_OP_PUSH:
+		X86_SIM_L_EXEC_PUSH_OP(src,flags,aux,imm);break;
+	case X86_OP_POP:
+		X86_SIM_L_EXEC_POP_OP(dst,flags,aux,imm);break;
+	case X86_OP_MOVBE_STORE:
+		X86_SIM_L_EXEC_MOVBE_STORE(dst,src,flags,aux,imm);break;
+
 	case X86_OP_MOV_IMM:
 		if (aux)
 			X86_SIM_L_EXEC_MOV_IMM_AUX(dst, flags, aux, imm);
@@ -578,8 +589,8 @@ static void check_dispatch(void)
 	}
 
 	cases++;
-	if (direct != 47U) {
-		printf("MISMATCH direct count %u want 47\n", direct);
+	if (direct != 52U) {
+		printf("MISMATCH direct count %u want 52\n", direct);
 		failures++;
 	}
 }
