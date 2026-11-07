@@ -262,3 +262,11 @@ Early proof attempts exposed only rewrite order, record layout and transition
 eta-expansion obligations; the final proof retains every original architectural
 input and premise. Runtime and oracle source are unchanged. A new immutable full
 check is queued for this published increment together with the signed-load work.
+
+Exact `0afcda79cb766709a5896f7aea07779a0e12c340` completed the full
+`make -C kprog/formal check` with exit **0**, including the signed-load selector
+and pair actual-order/dispatcher increments. All prior Lean modules, generated
+contracts, reference/wire/compiler checks and C semantic hosts also passed.
+The private immutable source/cache export was deleted automatically; compressed
+CALL CPU observations now retain this successful full run. The subsequent
+FMOV/reduction raw-field dispatcher work requires its own full validation.
