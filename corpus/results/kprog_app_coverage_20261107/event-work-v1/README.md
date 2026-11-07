@@ -1,0 +1,7 @@
+# App-owned event-work counters (functional capture)
+
+The unchanged Tetragon application, policies and fixed map-identity image complete10,000 `/dev/null` opens/closes in each arm. Captures ran on CPU12-15 as functional evidence only. Kernel-owned policy_stats counts successful policy event submissions; tg_stats_map records failed submissions by message opcode and errno class. The upstream source hashes are recorded separately. POLICY_POST increments after successful perf/ring output; it does not count userspace delivery.
+
+The snapshots include collector/control activity around the fixed work. Observed POLICY_POST deltas are108230 JIT and104905 native; observed submission failures total69981 JIT and79005 native, all reason6(EAGAIN), with per-opcode detail in summary.json. These are natural measured outcomes, retained without a zero-drop gate. They do not establish equal per-input event work, or a performance gain. All15 active policy_stats maps plus tg_stats_map and tg_errmetrics_m were captured. The raw guest/run directories are removed after this compact summary under the cleanup instruction.
+
+cohort.py and guest.sh retain the functional collection recipe; per-run-profile/guest.py contains the same read-only counter capture. No common app runner, launch policy or workload is changed. Future profiling/cost attribution is deferred by the operator's07:23 priorities. The next active implementation is the trusted native-only specializer path with T/A.

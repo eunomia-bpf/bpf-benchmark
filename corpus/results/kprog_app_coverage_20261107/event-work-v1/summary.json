@@ -1,0 +1,164 @@
+{
+  "jit": {
+    "before": {
+      "map_counts": {
+        "tg_stats_map": 1,
+        "tg_errmetrics_m": 1,
+        "policy_stats": 15
+      },
+      "policy_actions": [
+        0,
+        86831,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "send_failures_by_opcode_reason": {
+        "5:6": 2,
+        "13:6": 12014,
+        "14:6": 143808
+      },
+      "helper_errors": []
+    },
+    "after": {
+      "map_counts": {
+        "tg_stats_map": 1,
+        "tg_errmetrics_m": 1,
+        "policy_stats": 15
+      },
+      "policy_actions": [
+        0,
+        195061,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "send_failures_by_opcode_reason": {
+        "5:6": 9,
+        "7:6": 6,
+        "13:6": 15514,
+        "14:6": 210267,
+        "23:6": 9
+      },
+      "helper_errors": []
+    },
+    "policy_action_deltas": [
+      0,
+      108230,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "send_failure_deltas": {
+      "13:6": 3500,
+      "14:6": 66459,
+      "23:6": 9,
+      "5:6": 7,
+      "7:6": 6
+    },
+    "work": {
+      "kind": "open_dev_null",
+      "count": 10000,
+      "open_calls": 10000,
+      "close_calls": 10000,
+      "elapsed_ns": 40414786
+    }
+  },
+  "native": {
+    "before": {
+      "map_counts": {
+        "tg_stats_map": 1,
+        "tg_errmetrics_m": 1,
+        "policy_stats": 15
+      },
+      "policy_actions": [
+        0,
+        97516,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "send_failures_by_opcode_reason": {
+        "5:6": 7,
+        "7:6": 7,
+        "13:6": 52408,
+        "14:6": 609919,
+        "23:6": 8
+      },
+      "helper_errors": []
+    },
+    "after": {
+      "map_counts": {
+        "tg_stats_map": 1,
+        "tg_errmetrics_m": 1,
+        "policy_stats": 15
+      },
+      "policy_actions": [
+        0,
+        202421,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "send_failures_by_opcode_reason": {
+        "5:6": 11,
+        "7:6": 13,
+        "13:6": 56785,
+        "14:6": 684532,
+        "23:6": 13
+      },
+      "helper_errors": []
+    },
+    "policy_action_deltas": [
+      0,
+      104905,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "send_failure_deltas": {
+      "13:6": 4377,
+      "14:6": 74613,
+      "23:6": 5,
+      "5:6": 4,
+      "7:6": 6
+    },
+    "work": {
+      "kind": "open_dev_null",
+      "count": 10000,
+      "open_calls": 10000,
+      "close_calls": 10000,
+      "elapsed_ns": 38255021
+    }
+  }
+}

@@ -1,0 +1,56 @@
+[
+  {
+    "app": "bcc",
+    "attempts": 77,
+    "loaded": 77,
+    "failed": 0,
+    "unfinished": 0,
+    "resident_programs": 25,
+    "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261106_114826_062263/details"
+  },
+  {
+    "app": "otelcol-ebpf-profiler",
+    "attempts": 17,
+    "loaded": 16,
+    "failed": 1,
+    "unfinished": 0,
+    "resident_programs": 13,
+    "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261106_114826_062263/details"
+  },
+  {
+    "app": "cilium",
+    "attempts": 221,
+    "loaded": 210,
+    "failed": 11,
+    "unfinished": 0,
+    "resident_programs": 92,
+    "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261106_114826_062263/details"
+  },
+  {
+    "app": "tetragon",
+    "attempts": 311,
+    "loaded": 308,
+    "failed": 3,
+    "unfinished": 0,
+    "resident_programs": 81,
+    "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261106_114826_062263/details"
+  },
+  {
+    "app": "tracee",
+    "attempts": 162,
+    "loaded": 162,
+    "failed": 0,
+    "unfinished": 0,
+    "resident_programs": 151,
+    "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261106_114826_062263/details"
+  },
+  {
+    "app": "katran",
+    "attempts": 6,
+    "loaded": 6,
+    "failed": 0,
+    "unfinished": 0,
+    "resident_programs": 1,
+    "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261106_113727_795524/details"
+  }
+]

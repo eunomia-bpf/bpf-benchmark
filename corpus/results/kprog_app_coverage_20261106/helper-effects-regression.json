@@ -103,5 +103,42 @@
   {
     "name": "both_probe_targets_write",
     "accepted": true
+  },
+  {
+    "name": "joined_external_defined_stack",
+    "accepted": true
+  },
+  {
+    "name": "joined_external_opaque_stack",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x7: ret"
+  },
+  {
+    "name": "joined_store_cannot_initialize_other_path",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x8: ret"
+  },
+  {
+    "name": "joined_store_cannot_escape_opaque_bits",
+    "accepted": false,
+    "message": "undefined native ABI value escapes private stack at 0x5: mov QWORD PTR [rcx], rbx"
+  },
+  {
+    "name": "joined_two_stack_origins_keep_opaque_alternative",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0x9: ret"
+  },
+  {
+    "name": "joined_two_defined_stack_origins",
+    "accepted": true
+  },
+  {
+    "name": "joined_copy_source_keeps_opaque_stack_bits",
+    "accepted": false,
+    "message": "undefined native ABI register eax at 0xb: ret"
+  },
+  {
+    "name": "joined_copy_source_defined_on_every_path",
+    "accepted": true
   }
 ]

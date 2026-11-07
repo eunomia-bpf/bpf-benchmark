@@ -1,0 +1,30 @@
+{
+  "inputs": [
+    {
+      "path": "corpus/results/x86_kvm_corpus_20260529_045551_393389/details/apps/tetragon__observer.json",
+      "sha256": "31e7024c572a94a0b98878c5ed018312cb9fc01da30a761ca0694f2b0b6cb55d",
+      "status": "ok",
+      "mode": {
+        "mode": "loadtime",
+        "status": "skipped"
+      }
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261107_002003_274609/details/apps/tetragon__observer.json",
+      "sha256": "6b3c64d8f6c953d3c0ec2cbea239ce1420194253862b217f54e83eaa330e5886",
+      "status": "ok",
+      "mode": {
+        "enabled_passes": [],
+        "mode": "native_loader",
+        "status": "ok"
+      }
+    }
+  ],
+  "grouping_rule": "Existing archived analysis uses run_cnt_delta>=100 for its summary; raw CSV retains every record.",
+  "nearby_source": {
+    "commit": "9f3855f6fa1c43027cfe0788615b6efb247f2a4d",
+    "path": "native-sim/x86/native_lab/native_link/src/x86.rs",
+    "sha256": "ba60da2d9bf7f07b56d7410cdc05a42eb2c895e3a0508514d26ecbb00f98f2fe",
+    "pinned_to_measured_image": false
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "base_head": "35e38584ce89ac5c0b67d70db469cd4237920c38",
+  "reason": "Unqualified partial-write native canonicalizer and byte-stack experiment retired; associated generated outputs and unpublished trial recipes removed from the active tree.",
+  "files": [
+    {
+      "path": "kprog/x86/native_lab/native_link/src/x86.rs",
+      "retired_sha256": "60dc25432b5284d73627bcbba06a90ab7ab6a9bb78db4394ced7ff00e1d66563",
+      "published_sha256": "24622d051fdc46ceca4102af5242b185215ac11147ebef6eb2f168590cb94d6f"
+    },
+    {
+      "path": "kprog/x86/x86_sim_local_bpf.h",
+      "retired_sha256": "e1b46bfb6f363774dc11568437c3688627764c2b25b95379d8cac9249b58a7b8",
+      "published_sha256": "9f3ad7f6d9b3711862b2c23611a70bdeda346fae380fdd10e5e9a30d6d57c952"
+    },
+    {
+      "path": "corpus/results/kprog_app_coverage_20261106/strict-runtime.mk",
+      "retired_sha256": "c8a12bfd0a6d77397a45ed032ee08d6bb956b1754b436af7836d8bbecdf1c2b3",
+      "published_sha256": "fa48d589ba4326364e7420b5eda3267049ce3cd3a372dd6c8d2e5eb287faf3d1"
+    },
+    {
+      "path": "kprog/x86/micro-prog/bcc_runqlat_log2_histogram_bucket.bpf.c",
+      "retired_sha256": "c73331c8eb1ce6bc640adb92f5772fea8c1f5b1fb4ea61ee536f9c03dde47c6d",
+      "published_sha256": "e3c52a6aa41f4f4fd3f5cbd73fda37fd96ee750db17cc2669c1a8f107c3ca773"
+    },
+    {
+      "path": "kprog/x86/micro-prog/bcc_tcpconnect_ipv4_tuple_filter.bpf.c",
+      "retired_sha256": "809f55b57dab479762a3ea1d3d7cb7fe70bb1504c331984e3a78e24764698c9b",
+      "published_sha256": "2895e438cd939b9fd421117fe1300f49e1405cd6ab32e4cbc470ac1a0861628e"
+    },
+    {
+      "path": "kprog/x86/micro-prog/bpf_local_call_fanout_dispatch.bpf.c",
+      "retired_sha256": "7d87b7ad42f8b8a285a84f7a9ac3157c40246fd327b39d5de6317d26fadf1904",
+      "published_sha256": "7dd3d050125a77acb63470ed7e882d115b174c2daf585e36b5b139cc1e6f5e8f"
+    },
+    {
+      "path": "kprog/x86/micro-prog/bpftrace_comm_key_fnv_hash.bpf.c",
+      "retired_sha256": "4a782e50f94c6e1b4e8161c8c48650283684a6d01185529286bff0f609c2f02d",
+      "published_sha256": "8358ed1c43a121fc8f8803c2865e0b5272053637de061c8202d0967026445f18"
+    },
+    {
+      "path": "kprog/x86/micro-prog/bpftrace_string_search_prefix_scan.bpf.c",
+      "retired_sha256": "d0f62b44ac92b7a307b954a022aec206f2afe888832fff22287de5c5802076f6",
+      "published_sha256": "cadcb2029d77631b5085110cf0a49d79a08ab2e53378747d30bf14abbada9bc1"
+    },
+    {
+      "path": "kprog/x86/micro-prog/cgroup_skb_hash_chain.bpf.c",
+      "retired_sha256": "99c40a44968eba45085e289dc8958639aceb3e7e3c975fc1b18d414af61cb867",
+      "published_sha256": "11196fa894348a35b5a1804f49e23c96ad1bb7baf2050238ece69a3669ce3fc4"
+    },
+    {
+      "path": "kprog/x86/micro-prog/cilium_ct_nat_tuple_rewrite.bpf.c",
+      "retired_sha256": "3a15797c39a1348f9ba88929184823063a618cf28b614b8ddf9ed5a3dc9fa307",
+      "published_sha256": "14f592c3605f9b96d34fe3615a4a764e37a0fdedc691df7e15f3d5d83a347d03"
+    },
+    {
+      "path": "kprog/x86/micro-prog/cilium_policy_guard_tree_filter.bpf.c",
+      "retired_sha256": "3a4006451ca844324e4aff2315e05d82946fd460713644e9b1091ec3fcbb8202",
+      "published_sha256": "5947989dafbfb9d06923baa06390aa9a76bc8b0cf058190fdcecb6f7f805bf38"
+    },
+    {
+      "path": "kprog/x86/micro-prog/cilium_socket_lb_service_select.bpf.c",
+      "retired_sha256": "b111f78627d8f81a596d42943f4541d3cc34e5f63323396338f278f840588441",
+      "published_sha256": "93b7f4ab320227c5fa3832bc3825eb7d488b3e763648f514b67c340fd2a1bd1e"
+    },
+    {
+      "path": "kprog/x86/micro-prog/combined_helper_map.bpf.c",
+      "retired_sha256": "c0069653fd177349dc0fa0f66adcf3f4e6e4b63b7dd6c675e52c24e7f6758319",
+      "published_sha256": "212656d1aa998054eac62bf46abb24830b3e28efe6315de7d00c03aacb246bf3"
+    },
+    {
+      "path": "kprog/x86/micro-prog/flow_5tuple_rss_hash.bpf.c",
+      "retired_sha256": "6e26b130e6ab8ca54623278a3bc4dd3fa1fcdf140c05195dd9d1eee91df3b02f",
+      "published_sha256": "96debf7a26339f9350fdb45c61c9f418ae305941591cf884c28d2c4f48a6fc6d"
+    },
+    {
+      "path": "kprog/x86/micro-prog/flow_record_field_scan.bpf.c",
+      "retired_sha256": "f5a4821d04c1e6e18565c9c5eccdcf509c6f06a971adc44d15ae3af730cf184a",
+      "published_sha256": "22f15418d4d0d7b4c3cc64b2a26dcf7e3fc78c4a00c415178fa1292202f25612"
+    },
+    {
+      "path": "kprog/x86/micro-prog/helper_chain_simple.bpf.c",
+      "retired_sha256": "61803f05cd324dee756b8411f0e95e8240da891d70c45ddce200b7aed22fed66",
+      "published_sha256": "e98d329186ad37641ed3604d5da213dfa919011ce8eb2aab37aca0439c1ec077"
+    },
+    {
+      "path": "kprog/x86/micro-prog/helper_only_uid_gid.bpf.c",
+      "retired_sha256": "8c24a48906ffd80abfbecc547c00fa798cbd82a86d766145d380a282db14698a",
+      "published_sha256": "e10385b4241e027aff764fa7e4558e2e71d462d80d95f1a44396174edf8cc54d"
+    },
+    {
+      "path": "kprog/x86/micro-prog/katran_lb_consistent_hash_select.bpf.c",
+      "retired_sha256": "abb9d8c8edb56a37c6c855c9b04dc80817446df60db979d97e01aac9ba7ee41a",
+      "published_sha256": "a7f01e1c8639d2f5500ada8417499ca692909dd9c29d956dde103e3c4da30966"
+    },
+    {
+      "path": "kprog/x86/micro-prog/map_array_index_packet.bpf.c",
+      "retired_sha256": "d21a992be837daacdee0112b68221cb212ef193840d65587f1bceedb7b5883a7",
+      "published_sha256": "b1bb9f77fdf1ec153a109a3177db35f79048b7acc07f6c539386d743bd6356af"
+    },
+    {
+      "path": "kprog/x86/micro-prog/map_array_lookup.bpf.c",
+      "retired_sha256": "01894e11cad0bb66734a2ddff12201ff22e42b02552460cd56c8c8d7628b6435",
+      "published_sha256": "7455a93962702fb2e3dd548abca6d27e92d0987188e8cdd13a3e9e753f6e497b"
+    },
+    {
+      "path": "kprog/x86/micro-prog/map_hash_lookup.bpf.c",
+      "retired_sha256": "bb488dd787619e1bff803a64886e612c57d02679ccac589bd59c73b9e5990525",
+      "published_sha256": "03947e9f59b1647ee9b7a4d5227bf16488c8cafb3a90adb953efeb89df4fcc14"
+    },
+    {
+      "path": "kprog/x86/micro-prog/map_hash_str_key.bpf.c",
+      "retired_sha256": "8f4741c54e5b75d1e7607d453f17eb756484326762b7f98495e6a568247884b4",
+      "published_sha256": "0eaa52b6bc9681428c12c669f24eea4b1a17f349b15636b4c6e5e593ecb48f1e"
+    },
+    {
+      "path": "kprog/x86/micro-prog/map_lru_hash_counter.bpf.c",
+      "retired_sha256": "f2dba19bdef7694e0fcb9eb69b20b96afd7807edb34598fd0704f9f0e4877f61",
+      "published_sha256": "083f02fd94d47fea8cb525bf13eff73c4c1138ca7b2a0b7ef85619afcfe13816"
+    },
+    {
+      "path": "kprog/x86/micro-prog/map_percpu_array.bpf.c",
+      "retired_sha256": "7b4540342e6c04275b6b23f2accf3d8cee781820c6fa4c5af03b38f26bcd2eeb",
+      "published_sha256": "ccec0be08197578b1a11947884c044e55f806c8e663c4a2e27418bd1aa745ede"
+    },
+    {
+      "path": "kprog/x86/micro-prog/map_percpu_hash_counter.bpf.c",
+      "retired_sha256": "2efa0f5d570cc20d521911b5fd7a72e8c85eaa9febb8eebbf69e45f6e4519341",
+      "published_sha256": "a688b34c19e67d0e680d2044b44dc5d976a0d1c82c8192e9a6628d65a2f04955"
+    },
+    {
+      "path": "kprog/x86/micro-prog/multi_map_policy.bpf.c",
+      "retired_sha256": "80738143948a1f22de9dd8235f8a33f8f6e75e35227d5f02b13b744cd9497b1d",
+      "published_sha256": "e9c9792edbd2cd7d0a27d9660f20686b4ae08f80c9151a7731d4c1c0f6a320be"
+    },
+    {
+      "path": "kprog/x86/micro-prog/otel_stack_frame_unwind_scan.bpf.c",
+      "retired_sha256": "eaca154c6b9e87f448bb1285926e5f5ea58f6dc6c6d42cecfe3154fe9bf3b916",
+      "published_sha256": "296f936d480e27159bb35710f64cc9c1fea6a2467e2346087dc4c7034a460aa3"
+    },
+    {
+      "path": "kprog/x86/micro-prog/packed_header_bitfield_decode.bpf.c",
+      "retired_sha256": "daea24e1dfc47ea96beeadb1685d64cfcd28f11a133075941d6e6e81a09c90c6",
+      "published_sha256": "52defea5cbe478daf3e812214620093d1ea152d0976005e9666f11cbf01741c7"
+    },
+    {
+      "path": "kprog/x86/micro-prog/packet_5tuple_classify.bpf.c",
+      "retired_sha256": "8bd3bb88f859f17d43ae589dfc9d700580ac5d4e61d921a6004a5ca81bc367e0",
+      "published_sha256": "140fa1030191e52242876709e59dd2200033abcbbcd58e15bb43bcce5832d8b1"
+    },
+    {
+      "path": "kprog/x86/micro-prog/packet_record_bounds_window.bpf.c",
+      "retired_sha256": "b1bcb60fd5bb16d16ce15c249ac9b5708bd2b89bab13f110464e90cf736619a2",
+      "published_sha256": "341bb823174bbdd51be18b82496c8be2aab19907fd087bbea847bb3569b92dbc"
+    },
+    {
+      "path": "kprog/x86/micro-prog/packet_toeplitz_rss_hash.bpf.c",
+      "retired_sha256": "163536c2e71ec77bc3be440c70c4aae46cec70cbeedb9fad59f51ad10911f47d",
+      "published_sha256": "56abb1050131bdb1685ab8fd944133715b9cfeb3d3fc65775fc755bfd5b671e7"
+    },
+    {
+      "path": "kprog/x86/micro-prog/packet_vlan_tcpopt_parser.bpf.c",
+      "retired_sha256": "e750e74c38695040d6b3f60416b3fa5cf3b6c7e1a9f0df94702b802a9417ae90",
+      "published_sha256": "f559ee90eab8ef8e3ee2c1050fd43a1bb1926368bbb8558519cb74089fdfdb85"
+    },
+    {
+      "path": "kprog/x86/micro-prog/siphash_rotate64_mixer.bpf.c",
+      "retired_sha256": "21013af24a933bcfb026f36ef9e35170648f2c3b6306aec17b39d5353dae8c4e",
+      "published_sha256": "e6e3abc63a2aafab5e6725cda4a555c00a62644b7c6cae15332ea9f37d0c3b61"
+    },
+    {
+      "path": "kprog/x86/micro-prog/sorted_rule_binary_search.bpf.c",
+      "retired_sha256": "b3fec44bdc46fb24665f15b9ccd446e30c1976507d684dc1c34d6967b9213df6",
+      "published_sha256": "9c0b8592efd980963750a5d15d258f744410a3f776d1235af476b8a20c4aa64d"
+    },
+    {
+      "path": "kprog/x86/micro-prog/stats_mixed_helpers.bpf.c",
+      "retired_sha256": "f6d368441635b8500d9230b8cf1c685da50edd9464860865f008f53c212aa5b1",
+      "published_sha256": "05e729d0c72d362adcd636a157088480a08f4bdbcfc7ee2b57b8e6ad3cdcd3a9"
+    },
+    {
+      "path": "kprog/x86/micro-prog/tetragon_process_event_arg_filter.bpf.c",
+      "retired_sha256": "caa632354481338a712937a9dcc66ec30fc48110caa5cccf2cbe50a30ffe6c60",
+      "published_sha256": "0203563b5cae1c9e2815f055f4e81191ae6a61679566ad4cbf3228cfb2c95c84"
+    },
+    {
+      "path": "kprog/x86/micro-prog/trace_event_type_switch_dispatch.bpf.c",
+      "retired_sha256": "c18631f863fe7d2d18b7f8ab7d8f46d425f7d790b639f6abab3a00ba063ba3e9",
+      "published_sha256": "11b8712a86a632ba4e814ae9cb724b66b7a0d54b242bf7f4872981848450ee11"
+    },
+    {
+      "path": "kprog/x86/micro-prog/tracee_http_method_prefix_detect.bpf.c",
+      "retired_sha256": "53a37aca9d7e84c1b79ba308d541e953a90a199a7ba178bb82765f4964ab88d8",
+      "published_sha256": "9c024b71350727e34b3928cd9a7280b975a4140aa24055a3a06869611bdb12a8"
+    },
+    {
+      "path": "kprog/x86/micro-prog/tracee_syscall_name_table_lookup.bpf.c",
+      "retired_sha256": "1b396c7b7c7167c3ab9f3e120af2d44ff6f39b2fc2134e39bb7b11386af013af",
+      "published_sha256": "d7f8f0a90f37e2220a9eb249c90574a21a6a84c5aec582e8b565a19ac8888466"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+# C lane cleanup,2026-11-07
+
+Kept the published map-identity repair a4d37a890 and its validated summaries. Retired the unqualified partial-register canonicalization/byte-stack experiment and its36 generated micro outputs plus unpublished trial recipes; retired-source.json records39 exact file hashes and the compressed patch preserves source history without an active second implementation. Published native/ISA/ABI fixes and other lanes' working changes remain intact.
+
+Kept authored scripts, Makefiles, compact regression/counter/reference summaries and compressed counterexamples. Removed untracked raw outputs/run directories from the two C coverage result roots,19 source-tree app coverage runs, target-c-tail/target-c-readonly and unused lane source/build/image exports. Shared vendor/build, native_link/target, kprog/formal/.lake, ccache and Docker build cache are retained. Current component work uses shared incremental builds; no clean rebuild was performed. Deletion counts and scoped paths are in deletions.json.
+
+Historical prebuilt-proof/load-time recipes are archived evidence. The current verified design is kernel-owned P plus registered trusted specializer; legacy application-supplied proof/prebuilt input is not the new verified path. New performance optimization/cost work is deferred. Cleanup excludes all paper trees and all foreign lane paths.
+
+Deletion totals are a lower bound: the first cleanup pass stopped at an old Unix socket before writing counts; the resumed pass correctly unlinked special files. The abandoned standalone map-link trial script was also removed because its unpublished header/input was never retained. Archived functional recipes require the recorded image/input exports to be reconstructed; deleted private exports are not active build dependencies.

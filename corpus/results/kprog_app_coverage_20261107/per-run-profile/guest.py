@@ -37,6 +37,7 @@ def window(app,arm,scenario,ids,kind):
  seq=WINDOW;WINDOW+=1;prefix=OUT/f'{seq:03d}-{app}-{arm}-{scenario}-{kind}';prefix.mkdir()
  argv=[HELPER,'test' if app=='katran' else 'open',ids[0] if ids else 0,COUNT,INPUT]
  if app=='katran':map_stats(prefix/'map-stats-before.json')
+ else:tetragon_work_counters(prefix/'event-counters-before.json',json.loads((OUT/f'tetragon-{arm}-programs.json').read_text()))
  before=[info(i) for i in ids]
  for i in ids:
   command([HELPER,'dump',i,0,prefix/(str(i)+'.jit.bin')],prefix/(str(i)+'.jit-dump.json'))
@@ -51,6 +52,7 @@ def window(app,arm,scenario,ids,kind):
  wait(OUT/f'ack-{seq:03d}')
  after=[info(i) for i in ids]
  if app=='katran':map_stats(prefix/'map-stats-after.json')
+ else:tetragon_work_counters(prefix/'event-counters-after.json',json.loads((OUT/f'tetragon-{arm}-programs.json').read_text()))
  publish(prefix/'program-deltas.json',[dict(before=a,after=b,run_count=b['run_cnt']-a['run_cnt'],run_time_ns=b['run_time_ns']-a['run_time_ns']) for a,b in zip(before,after)])
 
 def wait_tetragon_ready(runner,arm):
@@ -69,6 +71,16 @@ def map_stats(path):
  publish(path,dict(maps=selected,values={str(m['id']):json.loads(command(['bpftool','-j','map','dump','id',m['id']])) for m in selected}))
  cache=[m for m in maps if m.get('name')=='fallback_cache']
  publish(path.with_name(path.stem+'-cache.json'),[json.loads(command([HELPER,'map-sample',m['id'],16,INPUT])) for m in cache])
+
+def tetragon_work_counters(path,programs):
+ # Read app-owned counters only; no policy or launch changes. POLICY_POST is
+ # updated after a successful kernel event submission, not user delivery.
+ names={'policy_stats','tg_stats_map','tg_errmetrics_map'}
+ aliases=names|{n[:15] for n in names}
+ active={i for p in programs for i in p.get('map_ids',[])}
+ maps=json.loads(command(['bpftool','-j','map','show']))
+ selected=[m for m in maps if m['id'] in active and m.get('name') in aliases]
+ publish(path,dict(maps=selected,values={str(m['id']):json.loads(command(['bpftool','-j','map','dump','id',m['id']])) for m in selected}))
 
 class FixedKatran:
  # Upstream Katran server and all its program loads; TEST_RUN needs no traffic topology/NAPI workers.
