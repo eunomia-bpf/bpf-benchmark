@@ -1,0 +1,19 @@
+{
+  "image_id": "sha256:a20b2981171de35a85d1827760701e157efa17347c8705374f146a5d7dbe1a90",
+  "image_size": 5050845003,
+  "base_layers_match": true,
+  "verified_image_inputs": {
+    "/usr/local/lib/bpfrejit/libnative_loader.so": "kprog/libnativeloader/build/libnative_loader.so",
+    "/usr/local/lib/bpfrejit/libbpfrejit_shim.so": "bpfopt/shim/build-x86/libbpfrejit_shim.so",
+    "/usr/local/bin/native-link": "kprog/x86/native_lab/native_link/target/release/native-link",
+    "/workspaces/repository/corpus/driver.py": "corpus/driver.py",
+    "/artifacts/kinsn/bpf_x86_native_lab.ko": "kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko"
+  },
+  "image_tar_sha256": "41ade202524d26160ac7984eed20114fb24c65183b0f3edfee9930f80487ef0d",
+  "bootstrap_source_sha256": {
+    "Makefile": "c764d94a83e45c3064365b219f9ca26aeb7ab5f0ec69e7af640ffb21b83b1bed",
+    "Dockerfile": "53d38b6faa87c63fee2b6eeaa3d811a975f4da749bb28d54708273c9cb737234",
+    "package.py": "07faa41066f14f2d20124c821f0b8373b8a07fabeebbed4a71246ff3ba6d4188",
+    "guest.py": "04c8830d0c2b61c61c6d668ffa46789af5e520bf96d4c3b07d1c551c5f7e05a5"
+  }
+}
