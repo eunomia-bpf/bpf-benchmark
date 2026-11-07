@@ -963,3 +963,11 @@ workload counters. The specific sys_exit load is not reached.
 [Actual BCC v14](bcc-runtime-v14/README.md) admits the formerly rejected capable
 entry, with7startup replacements and3logged verifier failures. All23 proofs
 compile; the application still fails before native workload execution.
+
+## Completed six-application v11 QEMU attempt
+
+[All six actual app outcomes and934raw startup requests](runtime-context-v11/README.md)
+are retained. Katran completes both workload phases with1baseline/1native
+resident counter row. BCC, OTel, Cilium, Tetragon and Tracee record application
+errors and no native workload phase. These failures remain open; BCC's newer
+v14 evidence is listed above. Driver exit0 is not application success.
