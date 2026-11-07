@@ -7,7 +7,8 @@
     "57db4da4387f19e86f79eae6dfa95bfaf024ee3d",
     "f41ccb6b773d0b24273b8145d758680f9b3f8793",
     "4adeb4807bb26eddd57324799eb79d9dc0118d56",
-    "071476a17f6526ef706404743ca19049201ed5e1"
+    "071476a17f6526ef706404743ca19049201ed5e1",
+    "24e3a1477d4f6f84b4ccb5b2c30426a0871b7091"
   ],
   "batches": [
     {
@@ -703,18 +704,43 @@
           "equal": true
         }
       }
+    },
+    {
+      "app": "otel",
+      "batch": "arm64_functional_215656",
+      "metadata_path": "corpus/results/kprog_arm64_app_coverage_20261107/readonly-byte-exact/replay/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json",
+      "service_path": "corpus/results/kprog_arm64_app_coverage_20261107/readonly-byte-exact/replay/trusted-arm64-otelcol-ebpf-profiler-result/run-20261107T215656632646Z.tar.gz",
+      "service_sha256": "1a83fddcc27c55f8200787b2947e570462fe5f02cd11fa6cca795432675d9021",
+      "terminal_requests": 2,
+      "generated": 2,
+      "compiled": 2,
+      "accepted_bound": 1,
+      "stages": {
+        "bound": 1,
+        "loader_rejected": 1
+      },
+      "app_status": "captured_service_batch",
+      "baseline_accepted_loads": null,
+      "baseline_resident_counters": 0,
+      "recorded_counts": {
+        "proof_generated": {
+          "observed": 2,
+          "recorded": 2,
+          "equal": true
+        }
+      }
     }
   ],
-  "terminal_requests": 89,
+  "terminal_requests": 91,
   "stages": {
-    "bound": 73,
+    "bound": 74,
     "verifier_rejected": 8,
     "compiler_rejected": 1,
     "specialization_rejected": 4,
     "native_stub_load_error": 1,
-    "loader_rejected": 2
+    "loader_rejected": 3
   },
-  "kernel_worker_receipt_identity_matches": 89,
+  "kernel_worker_receipt_identity_matches": 91,
   "input_artifacts": {
     "corpus/results/kprog_app_coverage_20261107/native-only-runtime/standard-bcc-8g.json": {
       "publication": "afc178f46e725fe96f85694d76fcf4c45c842914",
@@ -950,6 +976,26 @@
       "publication": "071476a17f6526ef706404743ca19049201ed5e1",
       "sha256": "8e14eb92e9c3ca4f78e3c77572845b8e80b0a96e9d7cfbb557dc5fd6797d1faf",
       "bytes": 600
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/readonly-byte-exact/replay/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json": {
+      "publication": "24e3a1477d4f6f84b4ccb5b2c30426a0871b7091",
+      "sha256": "b190c03e48dfeae524311b8f6ccd2ed1d295c0a32629489dc5ab6f53a8e5e6e9",
+      "bytes": 29050
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/readonly-byte-exact/replay/trusted-arm64-otelcol-ebpf-profiler-result/run-20261107T215656632646Z.tar.gz": {
+      "publication": "24e3a1477d4f6f84b4ccb5b2c30426a0871b7091",
+      "sha256": "1a83fddcc27c55f8200787b2947e570462fe5f02cd11fa6cca795432675d9021",
+      "bytes": 2455073
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/readonly-byte-exact/replay/trusted-arm64-otelcol-ebpf-profiler-result/summary.json": {
+      "publication": "24e3a1477d4f6f84b4ccb5b2c30426a0871b7091",
+      "sha256": "98cd6f42ab0a5cfdfa6ed8905e94b47913c20f3546d7d9a71a7ba0c38cb78250",
+      "bytes": 27397
+    },
+    "corpus/results/kprog_arm64_app_coverage_20261107/readonly-byte-exact/replay/trusted-arm64-otelcol-ebpf-profiler-result/native-identity-audit.json": {
+      "publication": "24e3a1477d4f6f84b4ccb5b2c30426a0871b7091",
+      "sha256": "ca9de826b154d72f72fa193ff9f9144bb7a7d7cf5a388027fc91965630101de4",
+      "bytes": 2980
     }
   },
   "captured_input_manifest": {
@@ -1956,6 +2002,172 @@
           ]
         ]
       }
+    },
+    "arm64_functional_215656": {
+      "applications": [
+        {
+          "app": "otelcol-ebpf-profiler/profiling",
+          "app_status": "error",
+          "app_error": "native app exited before BPF programs were tracked by shim\nstderr tail:\n1970-01-01T00:03:21.663Z\tinfo\totelconftelemetry/metrics.go:24\tInternal metrics telemetry disabled\t{\"resource\": {\"service.instance.id\": \"058bcdef-e303-4d39-84b7-ad4076776fff\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n1970-01-01T00:03:21.757Z\tinfo\tbuilders/builders.go:26\tDevelopment component. May change in the future.\t{\"resource\": {\"service.instance.id\": \"058bcdef-e303-4d39-84b7-ad4076776fff\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:03:22.020Z\tinfo\tservice@v0.139.0/service.go:222\tStarting otelcol-ebpf-profiler...\t{\"resource\": {\"service.instance.id\": \"058bcdef-e303-4d39-84b7-ad4076776fff\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"Version\": \"0.140.0\", \"NumCPU\": 8}\n1970-01-01T00:03:22.026Z\tinfo\textensions/extensions.go:40\tStarting extensions...\t{\"resource\": {\"service.instance.id\": \"058bcdef-e303-4d39-84b7-ad4076776fff\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n1970-01-01T00:03:22.064Z\tinfo\tInterpreter tracers: perl,php,python,hotspot,ruby,v8,go,labels\t{\"resource\": {\"service.instance.id\": \"058bcdef-e303-4d39-84b7-ad4076776fff\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:03:26.409Z\tinfo\tDetermined PAC mask to be 0x007F000000000000\t{\"resource\": {\"service.instance.id\": \"058bcdef-e303-4d39-84b7-ad4076776fff\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n1970-01-01T00:06:39.373Z\tinfo\tFound offsets: task stack 0x28, pt_regs 0x3ec0, tpbase 0x1ed0\t{\"resource\": {\"service.instance.id\": \"058bcdef-e303-4d39-84b7-ad4076776fff\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}",
+          "app_result_sha256": "472cba56841d0fc93e3f49f9b0477e9ba728de85b379487697e73205d31c6dc1",
+          "phases": {
+            "baseline": {
+              "raw_measurement_present": true,
+              "archived_coverage_equal": true,
+              "resident_program_count": 12,
+              "bpf_run_count": 167785,
+              "bpf_run_time_ns": 17260530464,
+              "workloads": [
+                {
+                  "name": "otel_mixed_workload",
+                  "components": [
+                    {
+                      "name": "otel_python3_int_loop_0",
+                      "duration_seconds": 7.508352400000007,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "df06bbd5b9af6f84eff698b68f03c3939b5a35b5e42b842e852dfb135a218008"
+                    },
+                    {
+                      "name": "otel_python3_int_loop_1",
+                      "duration_seconds": 7.683193504000002,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "00fdf560dcb3050de95a8620df1ec539db2424997c8616058ed9e0fffb8bc055"
+                    },
+                    {
+                      "name": "otel_ruby_int_loop_0",
+                      "duration_seconds": 38.88009465600001,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "a41dc9f4797648d1474289f1913d0649a53ff8b002d29c5c5c4cdbb0305ba5ee"
+                    },
+                    {
+                      "name": "otel_ruby_int_loop_1",
+                      "duration_seconds": 39.10444923200001,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "97c3926ceeba6febee3651f8edf375002fb8f4b52905ed6722b2e6a8bedd4f27"
+                    },
+                    {
+                      "name": "otel_nodejs_int_loop_0",
+                      "duration_seconds": 40.213609136,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "e7cde183a7e1b2e6f285de3d90bd7b6c488ca6cdf9b6ccf7ef629e17e6682fea"
+                    },
+                    {
+                      "name": "otel_nodejs_int_loop_1",
+                      "duration_seconds": 40.221894128,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "ce9460266679c6919d80237de16033f4a70958c21fddd4b67d6eea18693efc99"
+                    },
+                    {
+                      "name": "otel_perl_int_loop_0",
+                      "duration_seconds": 40.229746688000006,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "c806286d0a27ef9f8b9ff0f5da0cf08c2171d0f958622281ffa463c2d56a495f"
+                    },
+                    {
+                      "name": "otel_perl_int_loop_1",
+                      "duration_seconds": 40.23641977600002,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "7be52c4c4261b9fdaba01ff866d12d2efdce663e74c8330847a2db49dbf60b6c"
+                    },
+                    {
+                      "name": "otel_php_int_loop_0",
+                      "duration_seconds": 40.252281904,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "be30a26785fc5a4befca7b04f1fb793ce06a57a8615b15c899cda254ef01d837"
+                    },
+                    {
+                      "name": "otel_php_int_loop_1",
+                      "duration_seconds": 40.26587608,
+                      "returncode": 0,
+                      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "stderr_sha256": "e095b1f4431149f654e68f954d087735f7ccda6899d70b40c0e1a4311ebcdd7c"
+                    },
+                    {
+                      "name": "otel_stress_ng_cpu",
+                      "duration_seconds": 40.27272849600001,
+                      "returncode": 0,
+                      "stdout_sha256": "3aaf145dc8f0a93a3996b518de0ed468c9e33ba7f2b3ba02aee8759b555afc37",
+                      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                    }
+                  ]
+                }
+              ]
+            },
+            "post_rejit": {
+              "raw_measurement_present": false,
+              "archived_coverage_equal": true,
+              "resident_program_count": 0,
+              "bpf_run_count": 0,
+              "bpf_run_time_ns": 0,
+              "workloads": []
+            }
+          }
+        }
+      ],
+      "published_request_fields_equal": true,
+      "host_ok": false,
+      "guest_exit": 1,
+      "qemu_returncode": 0,
+      "recorded_hashes_unchanged": false,
+      "initial_source_identity_count": 205,
+      "link_plans": [
+        {
+          "request_id": 1,
+          "sha256": "1feeca754850f699c66aa5ca63c688a57d891bac4841dc2e5fd6a3b296650c11",
+          "map_names": [
+            ".rodata.var",
+            "filter_error_frames",
+            "filter_idle_frames",
+            "inverse_pac_mask",
+            "off_cpu_threshold",
+            "stack_ptregs_offset",
+            "system_analysis",
+            "task_stack_offset",
+            "tpbase_offset",
+            "with_debug_output"
+          ],
+          "tail_call_maps": []
+        },
+        {
+          "request_id": 2,
+          "sha256": "54a0c8debc34253bec7736a865a3146fccab5f7b49c0cdece59c78486ff9e55a",
+          "map_names": [
+            ".rodata.var",
+            "apm_int_procs",
+            "filter_error_frames",
+            "filter_idle_frames",
+            "go_labels_procs",
+            "inhibit_events",
+            "inverse_pac_mask",
+            "kprobe_progs",
+            "metrics",
+            "off_cpu_threshold",
+            "per_cpu_records",
+            "perf_progs",
+            "pid_events",
+            "report_events",
+            "reported_pids",
+            "stack_ptregs_offset",
+            "task_stack_offset",
+            "tpbase_offset",
+            "trace_events",
+            "with_debug_output"
+          ],
+          "tail_call_maps": []
+        }
+      ],
+      "archive_sha256": "1a83fddcc27c55f8200787b2947e570462fe5f02cd11fa6cca795432675d9021",
+      "published_identity_rows_equal": true,
+      "published_artifact_hash_matches": 12
     }
   },
   "timing_context": {

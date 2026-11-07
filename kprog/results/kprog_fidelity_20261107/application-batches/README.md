@@ -1,10 +1,10 @@
 # Application service batch observations
 
-One generic archive reader reconciles20 closed service batches across all six
-application names. All89 terminal requests preserve byte equality between the
+One generic archive reader reconciles21 closed service batches across all six
+application names. All91 terminal requests preserve byte equality between the
 kernel-owned native object, the worker's received copy and the service receipt's
-SHA256. Kernel source IDs match the service records. The batches contain85
-generated sources,84 compiled objects and73 successful bound replies.
+SHA256. Kernel source IDs match the service records. The batches contain87
+generated sources,86 compiled objects and74 successful bound replies.
 
 Every bound reply's request ID, program ID and status exactly match load.stdout.
 All available published counts match the archive-derived counts, including the
@@ -33,11 +33,69 @@ and each service's terminal requests and archive set agree.
 | tracee / functional_214037 | 6 | 6 | 6 | 5 | 1 verifier_rejected |
 | tetragon / functional_221545 | 4 | 4 | 4 | 4 | next manifest selector frontier |
 | tetragon / functional_223215 | 5 | 5 | 5 | 4 | 1 verifier_rejected |
+| otel / arm64_functional_215656 | 2 | 2 | 2 | 1 | 1 loader_rejected |
 
-The20 rows retain distinct source, image and boot epochs. Counts describe observed
+The21 rows retain distinct source, image and boot epochs. Counts describe observed
 load instances; repeated native objects and repeated program IDs across boots stay
 in their original batches. Whole application completion and duration-driven
 workload measurements follow the recorded startup frontiers.
+
+## AArch64 OTel readonly-reader progression
+
+The later215656 cohort uses A's closed24e3a1477 publication. Both requests
+receive fresh generation and successful BPF compilation. read_task_struct
+binds source20 as native23; perf_unwind_stop reaches a loader/native-link
+refusal during kernel linking. The entire native ELF retains the same digest
+as the earlier182921 OTel cohort:
+
+~~~text
+53958f3b8204a0a9cba59245b2908145c6de440276be56b48d7926408db702b1
+~~~
+
+The earlier read_task_struct request records a readonly-data loader refusal;
+the later request binds with the same native bytes. The separate source/boot
+epochs and each request's selected entry remain explicit. For both new
+requests, kernel-owned bytes, worker-copy bytes and receipt SHA agree. Source
+IDs, successful loader reply and the published request fields match the raw
+nested archives. All12 published artifact hashes across the two request
+archives match their actual bytes through the reader's shared optional
+identity-audit input.
+
+The second request selects5280 native bytes. Its loader diagnostic is:
+
+~~~text
+Error: arm64 bpf_tail_call in perf_unwind_stop at byte offset 0x1000 uses map "perf_progs", which is not a link-plan tail_call_maps entry
+~~~
+
+The raw generated link plan contains perf_progs in its maps array and an
+empty tail_call_maps vector. Its exact SHA, complete2023-byte loader stderr,
+source vector and byte identities remain in arm-readonly-increment.json and
+failures.jsonl.gz. The existing generic classifier records loader_rejected.
+The native-link boundary follows successful generation and BPF compilation.
+
+The archived application JSON matches every raw phase in the published
+coverage object. Baseline records12 resident programs and167,785 BPF calls.
+All11 existing mixed-workload components return0; their durations and output
+hashes remain recorded individually. Application status is error and its
+post_rejit raw measurement is null. QEMU exits0, guest exits1, and the final
+host result reports false. These are functional QEMU observations. R owns
+the actual hardware timing queue.
+
+The run summary records hashes_unchanged=false and205 initial path identities.
+Both request source vectors agree on all nine reported paths, including the
+captured c218 simulator header, bf44 loader and f908 linker. The old runtime
+epoch remains separate from the later340a4ea5 native-resource controls and
+the active whole-application retry queue. Literal source-file observations
+retain their execution-provenance scope. C/A own generic tail-call/loader
+adoption and complete app replay; V/T continue universal operation, compiler,
+link and binding laws.
+
+The21-cohort totals are91 requests,87 generated sources,86 compiled objects
+and74 bound replies. The earlier20 batch objects,89 terminal rows,47 input
+pins, complete failure-byte prefix, work objects and source vectors retain
+their exact values. Four new published input pins include the independent
+identity audit. arm-readonly-increment.json records the retention checks.
+The shared collector exits0 and keeps its existing failure classification.
 
 ## Tetragon complete-source manifest progression
 
@@ -343,7 +401,8 @@ summary use5d0d953946ffe83e2a958b8d6c6990850bb86531. The five additional ARM met
 and service archive usef41ccb6b773d0b24273b8145d758680f9b3f8793.
 The Tetragon221545 metadata, service, raw result and published observations
 use4adeb4807bb26eddd57324799eb79d9dc0118d56. The later Tetragon223215 metadata, service, raw result and observations use
-071476a17f6526ef706404743ca19049201ed5e1. Forty-seven published metadata/archive
+071476a17f6526ef706404743ca19049201ed5e1. The later ARM OTel215656 coverage, raw archive, summary and identity audit use
+24e3a1477d4f6f84b4ccb5b2c30426a0871b7091. Fifty-one published metadata/archive
 inputs have individual Git/hash/size pins in summary.json. Two additional captured Tetragon service epochs and the R timing
 inputs retain their exact five-file captured-inputs.tar.gz and manifest.
 

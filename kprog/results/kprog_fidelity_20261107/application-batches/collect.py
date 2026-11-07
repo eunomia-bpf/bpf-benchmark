@@ -23,6 +23,7 @@ ARM_PASS_PUBLICATION='57db4da4387f19e86f79eae6dfa95bfaf024ee3d'
 TRACEE_PUBLICATION='f41ccb6b773d0b24273b8145d758680f9b3f8793'
 MEMCPY_PUBLICATION='4adeb4807bb26eddd57324799eb79d9dc0118d56'
 MANIFEST_PUBLICATION='071476a17f6526ef706404743ca19049201ed5e1'
+ARM_READONLY_PUBLICATION='24e3a1477d4f6f84b4ccb5b2c30426a0871b7091'
 ARM_ROOT='corpus/results/kprog_arm64_app_coverage_20261107/'
 ARM_COHORTS=[
  ('bcc','arm64_functional_172354',ARM_ROOT+'bcc-full-start-coverage.json',
@@ -113,7 +114,7 @@ def workload_observation(workload):
     return value
 
 
-def recorded_application_work(payload,metadata,batch_records,run_summary):
+def recorded_application_work(payload,metadata,batch_records,run_summary,identity_audit=None):
     with tarfile.open(fileobj=io.BytesIO(payload)) as archive:
         applications=[]
         for recorded in metadata['applications']:
@@ -150,24 +151,40 @@ def recorded_application_work(payload,metadata,batch_records,run_summary):
     assert len({row['source_prog_id'] for row in batch_records})==metadata['distinct_source_prog_ids']
     assert sha(payload)==run_summary['archive_sha256']
     assert run_summary['hashes_unchanged']==metadata['hashes_unchanged']
-    plans=[]
+    plans=[];artifact_matches=0
+    if identity_audit is not None:
+        assert identity_audit['archive_sha256']==sha(payload)
+        assert identity_audit['identity_errors']==[] and identity_audit['all_recorded_identities_match']
+        assert identity_audit['completed_requests_or_cases']==len(expected)
+        audited={row['request_id']:row for row in identity_audit['request_identities']}
+        assert set(audited)=={row['request_id'] for row in expected}
     with tarfile.open(fileobj=io.BytesIO(payload)) as archive:
         for row in expected:
             request_bytes=archive.extractfile(row['request_archive']).read()
             assert sha(request_bytes)==row['request_archive_sha256']
             with tarfile.open(fileobj=io.BytesIO(request_bytes)) as request:
+                if identity_audit is not None:
+                    audited_row=audited[row['request_id']]
+                    for key in ['status','entry','native_sha256','request_archive_sha256']:
+                        assert audited_row[key]==row[key]
+                    for path,digest in audited_row['artifacts'].items():
+                        assert sha(request.extractfile(path).read())==digest
+                        artifact_matches+=1
                 for member in request.getmembers():
                     if member.isfile() and member.name.endswith('.link-plan.json'):
                         plan_bytes=request.extractfile(member).read();plan=json.loads(plan_bytes)
                         plans.append(dict(request_id=row['request_id'],sha256=sha(plan_bytes),
                             map_names=[value['name'] for value in plan['maps']],
                             tail_call_maps=plan['tail_call_maps']))
-    return dict(applications=applications,published_request_fields_equal=True,
+    outcome=dict(applications=applications,published_request_fields_equal=True,
         host_ok=run_summary['ok'],guest_exit=run_summary['guest_exit'],
         qemu_returncode=run_summary['qemu_returncode'],
         recorded_hashes_unchanged=run_summary['hashes_unchanged'],
         initial_source_identity_count=len(run_summary['hashes_before']),link_plans=plans,
         archive_sha256=sha(payload))
+    if identity_audit is not None:
+        outcome.update(published_identity_rows_equal=True,published_artifact_hash_matches=artifact_matches)
+    return outcome
 
 
 def whole_application_outcome(payload,metadata,batch_records,published_observations):
@@ -238,11 +255,13 @@ def main():
     cases+=ARM_COHORTS+[
       ('tracee','functional_214037',BASE+'tracee-narrow-range/coverage.json',BASE+'tracee-narrow-range/service.tar.gz'),
       ('tetragon','functional_221545',BASE+'tetragon-memcpy-replay/coverage.json',BASE+'tetragon-memcpy-replay/service.tar.gz'),
-      ('tetragon','functional_223215',BASE+'tetragon-manifest-replay/coverage.json',BASE+'tetragon-manifest-replay/service.tar.gz')]
+      ('tetragon','functional_223215',BASE+'tetragon-manifest-replay/coverage.json',BASE+'tetragon-manifest-replay/service.tar.gz'),
+      ('otel','arm64_functional_215656',ARM_ROOT+'readonly-byte-exact/replay/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json',
+       ARM_ROOT+'readonly-byte-exact/replay/trusted-arm64-otelcol-ebpf-profiler-result/run-20261107T215656632646Z.tar.gz')]
     arm_pass_batches={row[1] for row in ARM_COHORTS}
     batches=[];records=[];failures=[];identity_sets={};work_observations={}
     for app,batch,metadata_path,service_path in cases:
-        publication=MANIFEST_PUBLICATION if batch=='functional_223215' else MEMCPY_PUBLICATION if batch=='functional_221545' else TRACEE_PUBLICATION if batch=='functional_214037' else ARM_PASS_PUBLICATION if batch in arm_pass_batches else ARM_PUBLICATION if batch.startswith('arm64_') else KATRAN_PUBLICATION if batch=='functional_213447' else JOIN_PUBLICATION if batch in {'functional_210552','functional_211016'} else PUBLICATION
+        publication=ARM_READONLY_PUBLICATION if batch=='arm64_functional_215656' else MANIFEST_PUBLICATION if batch=='functional_223215' else MEMCPY_PUBLICATION if batch=='functional_221545' else TRACEE_PUBLICATION if batch=='functional_214037' else ARM_PASS_PUBLICATION if batch in arm_pass_batches else ARM_PUBLICATION if batch.startswith('arm64_') else KATRAN_PUBLICATION if batch=='functional_213447' else JOIN_PUBLICATION if batch in {'functional_210552','functional_211016'} else PUBLICATION
         metadata=json.loads(published(metadata_path,publication)) if metadata_path else {}
         payload=captured[service_path.split(':',1)[1]] if service_path.startswith('capture:') else published(service_path,publication)
         service,log_path=service_archive(payload)
@@ -321,7 +340,9 @@ def main():
             if batch.startswith('arm64_'):
                 batch_records=[record for record in records if record['batch']==batch]
                 work_observations[batch]=recorded_application_work(payload,metadata,batch_records,
-                    json.loads(published(str(Path(service_path).with_name('summary.json')),publication)))
+                    json.loads(published(str(Path(service_path).with_name('summary.json')),publication)),
+                    json.loads(published(str(Path(service_path).with_name('native-identity-audit.json')),publication))
+                    if batch=='arm64_functional_215656' else None)
                 published_requests={row['request_id']:row for row in metadata['requests']}
                 for actual in [failure for failure in failures if failure['batch']==batch]:
                     recorded=published_requests[actual['request_id']]
@@ -372,7 +393,7 @@ def main():
             load_rows.append(dict(name=name[1],insn_cnt=int(count[1]),bytes=int(count[1])*8,raw_line=line))
     timing_metadata=json.loads(captured['tetragon-timing.metadata.json'])
     timing_result=json.loads(captured['tetragon-timing.result.json'])
-    summary=dict(source_publication=PUBLICATION,additional_source_publications=[JOIN_PUBLICATION,KATRAN_PUBLICATION,ARM_PUBLICATION,ARM_PASS_PUBLICATION,TRACEE_PUBLICATION,MEMCPY_PUBLICATION,MANIFEST_PUBLICATION],batches=batches,terminal_requests=len(records),
+    summary=dict(source_publication=PUBLICATION,additional_source_publications=[JOIN_PUBLICATION,KATRAN_PUBLICATION,ARM_PUBLICATION,ARM_PASS_PUBLICATION,TRACEE_PUBLICATION,MEMCPY_PUBLICATION,MANIFEST_PUBLICATION,ARM_READONLY_PUBLICATION],batches=batches,terminal_requests=len(records),
                  stages=dict(Counter(record['stage'] for record in records)),
                  kernel_worker_receipt_identity_matches=len(records),input_artifacts=source_pins,
                  captured_input_manifest=capture_manifest,captured_input_archive_sha256=sha((OUT/'captured-inputs.tar.gz').read_bytes()),
