@@ -998,3 +998,30 @@ export was deleted automatically. Compressed CALL CPU observations retain
 this440-case run. The later multiply/divide and unary compositions are
 separate increments and are not included in this full pass. The complete
 77/72 dispatcher and O2/O4 bindings remain open.
+
+## Uniform byte MVN/NEG composed after multiply
+
+`Arm64Dispatcher.dispatchThroughUnary` adds both actual MVN/NEG rows after
+the multiply gate. Its byte-coded body extracts AUX byte1/byte2, applies the
+shared generated modifier and unary value, then writes the real destination
+with width and a single PC advance. The actual modifier switch retains all
+11 selectors and unknown-byte identity; no native-form filter is added to
+the body. Complete canonical refinements bind all four native MVN shifts,
+three native NEG shifts and omitted modifiers. NEG-with-ROR is not invented.
+Omitted modifiers ignore any amount byte, including values outside the
+native immediate bound; all unused SRC2/SRC3/IMM/AUX0/AUX3 remain arbitrary.
+
+Numeric disjointness derives reachability through every preceding gate,
+and prior results transport unchanged. One step_through_unary_refines theorem
+covers the field-only binding for this complete prefix without assuming
+handler-step equalities. Native byte/width/normalization, provenance, compiled
+body and Entry/O4 transport still need their witnesses; the remaining ISA
+families and full77/72 theorem are not yet composed.
+
+Validation: focused74-job dispatcher/affected-family/reference Lean build,
+nine existing contract freshness checks, direct dispatch/model checks and
+10 existing semantic/route hosts passed 40080 cases,2072 cases,136 cases,225292 cases,40081 cases,313 cases,512 cases,6913 cases,257 cases,6401 cases. Final proof
+SHA256 `c2548e069595ba7ef0ff659d77fd807d78856be382ac37655a8fa0278f18ed55` stayed unchanged; every earlier declaration
+is byte-identical. No placeholders, new tests, filtering, ISA/runtime/generator/
+oracle/paper changes. Original compiler warnings remain visible. Exact95's
+full pass predates both this extension and the multiply composition.

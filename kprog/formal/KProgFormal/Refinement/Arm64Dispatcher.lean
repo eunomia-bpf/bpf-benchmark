@@ -693,4 +693,139 @@ theorem step_through_multiply_refines (code : Nat) (aux : BitVec 32) (width : Wi
   | multiply => apply multiply_refines; assumption
   | unusedAccumulator => apply multiply_unused_refines <;> assumption
 
+
+/-- The actual unary modifier switch retains all eleven selectors and the
+unknown-byte identity behavior. Native MVN/NEG normalization below selects
+only their architectural modifiers; the body adds no rejection policy. -/
+def unaryBody (op : GeneratedArm64Unary.Unary) (aux : BitVec 32) (width : Width) (dst src : Byte)
+    (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let modified := GeneratedArm64Mod.value
+    (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat)
+    (Arm64Move.Fields.read s src) ((GeneratedArm64Aux.b2 aux).setWidth 64) (Arm64Register.handlerWidth width)
+  let value := GeneratedArm64Unary.value op modified (Arm64Register.handlerWidth width)
+  ⟨{ Arm64Move.Fields.write s dst value width with pc := s.pc + 4 }, [], none⟩
+
+theorem unary_body_typed (op : GeneratedArm64Unary.Unary) (mod : GeneratedArm64ModDecode.Mod)
+    (amount lane0 lane3 : Byte) (width : Width) (dst src : Register) (s : Reference.AArch64.State) :
+    unaryBody op (Arm64Shift.Unary.packedAux mod amount lane0 lane3) width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src) s =
+      Arm64Shift.Unary.rawStep op mod (amount.setWidth 64) width dst src s := by
+  change unaryBody op (Arm64Arithmetic.FlagArithmetic.packedAux mod amount lane0 lane3) width
+    (Arm64Register.registerCode dst) (Arm64Register.registerCode src) s = _
+  simp only [unaryBody, Arm64Shift.Unary.rawStep, Arm64Arithmetic.FlagArithmetic.packed_modifier,
+    Arm64Arithmetic.FlagArithmetic.packed_amount, Arm64Move.Fields.register_read, Arm64Move.Fields.register_write]
+
+def dispatchThroughUnary (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughMultiply code aux width dst src src2 src3 value sourceScalar sourceStack s with
+  | some result => some result
+  | none => (Arm64Shift.Unary.decodeOpcode code).map (fun op => unaryBody op aux width dst src s)
+
+theorem unary_reached (op : GeneratedArm64Unary.Unary) (aux : BitVec 32) (width : Width)
+    (dst src src2 src3 : Byte) (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughUnary (GeneratedArm64Unary.code op) aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (unaryBody op aux width dst src s) := by
+  have leading : dispatchPrefix (GeneratedArm64Unary.code op) aux width dst src value s = none := by
+    apply other <;> cases op <;> decide
+  have noAlu : Arm64Arithmetic.AluDispatch.decodeOpcode (GeneratedArm64Unary.code op) = none := by cases op <;> rfl
+  have noShift : Arm64Shift.decodeOpcode (GeneratedArm64Unary.code op) = none := by cases op <;> rfl
+  have noMul : Arm64Mul.decodeOpcode (GeneratedArm64Unary.code op) = none := by cases op <;> rfl
+  have known : Arm64Shift.Unary.decodeOpcode (GeneratedArm64Unary.code op) = some op := by cases op <;> rfl
+  simp only [dispatchThroughUnary, dispatchThroughMultiply, dispatchThroughShift, dispatch,
+    leading, noAlu, noShift, noMul, known]
+  rfl
+
+theorem unary_earlier_preserved (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : MultiplyBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughUnary code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  simp only [dispatchThroughUnary,
+    step_through_multiply_refines code aux width dst src src2 src3 value sourceScalar sourceStack native s binding]
+
+theorem unary_invert_refines (width : Width) (kind : Reference.AArch64.ShiftKind) (amount : Fin width.bits)
+    (dst src : Register) (src2 src3 lane0 lane3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (s : Reference.AArch64.State) :
+    dispatchThroughUnary (GeneratedArm64Unary.code .mvn)
+      (Arm64Shift.Unary.packedAux (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3) width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.shift (.invert width kind amount dst src)) s) := by
+  rw [unary_reached, unary_body_typed, Arm64Shift.Unary.native_amount]
+  change some (Arm64Shift.handlerStep (.invert width kind amount dst src) s) = _
+  rw [Arm64Shift.step_refines]
+
+theorem unary_negate_refines (width : Width) (kind : Fin 3) (amount : Fin width.bits)
+    (dst src : Register) (src2 src3 lane0 lane3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (s : Reference.AArch64.State) :
+    dispatchThroughUnary (GeneratedArm64Unary.code .neg)
+      (Arm64Shift.Unary.packedAux (Arm64Shift.modifier (Reference.AArch64.arithmeticShift kind))
+        (BitVec.ofNat 8 amount.val) lane0 lane3) width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.shift (.negate width kind amount dst src)) s) := by
+  rw [unary_reached, unary_body_typed, Arm64Shift.Unary.native_amount]
+  change some (Arm64Shift.handlerStep (.negate width kind amount dst src) s) = _
+  rw [Arm64Shift.step_refines]
+
+/-- Omitted modifiers ignore the entire amount byte. This includes values
+outside the native shift-immediate bound; no fictitious amount guard is added. -/
+theorem unary_unmodified_refines (op : GeneratedArm64Unary.Unary) (width : Width)
+    (dst src : Register) (src2 src3 amount lane0 lane3 : Byte) (value : Word) (sourceScalar sourceStack : Bool)
+    (s : Reference.AArch64.State) :
+    dispatchThroughUnary (GeneratedArm64Unary.code op) (Arm64Shift.Unary.packedAux .none amount lane0 lane3) width
+      (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.shift (if op = .mvn then
+        .invert width .lsl ⟨0, by cases width <;> decide⟩ dst src else
+        .negate width 0 ⟨0, by cases width <;> decide⟩ dst src)) s) := by
+  rw [unary_reached, unary_body_typed]
+  simp only [Arm64Shift.Unary.rawStep, Arm64Shift.Unary.identity_value]
+  cases op with
+  | mvn =>
+      simp only [if_pos rfl]
+      change some (Arm64Shift.handlerStep (.invert width .lsl ⟨0, by cases width <;> decide⟩ dst src) s) = _
+      rw [Arm64Shift.step_refines]
+      rfl
+  | neg =>
+      simp only [if_neg (by decide : GeneratedArm64Unary.Unary.neg ≠ .mvn)]
+      change some (Arm64Shift.handlerStep (.negate width 0 ⟨0, by cases width <;> decide⟩ dst src) s) = _
+      rw [Arm64Shift.step_refines]
+
+/-- Native field/modifier/amount identities for both unary rows. Unused
+SRC2/SRC3/IMM/AUX0/AUX3 retain arbitrary values. NEG has no native ROR form. -/
+inductive UnaryBinding (pc : Word) : Nat → BitVec 32 → Width → Byte → Byte → Byte → Byte → Word →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte) (value : Word)
+      (native : Reference.AArch64.Instruction) (binding : MultiplyBinding pc code aux width dst src src2 src3 value native) :
+      UnaryBinding pc code aux width dst src src2 src3 value native
+  | invert (width : Width) (kind : Reference.AArch64.ShiftKind) (amount : Fin width.bits)
+      (dst src : Register) (src2 src3 lane0 lane3 : Byte) (value : Word) :
+      UnaryBinding pc (GeneratedArm64Unary.code .mvn)
+        (Arm64Shift.Unary.packedAux (Arm64Shift.modifier kind) (BitVec.ofNat 8 amount.val) lane0 lane3) width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value
+        (.shift (.invert width kind amount dst src))
+  | negate (width : Width) (kind : Fin 3) (amount : Fin width.bits)
+      (dst src : Register) (src2 src3 lane0 lane3 : Byte) (value : Word) :
+      UnaryBinding pc (GeneratedArm64Unary.code .neg)
+        (Arm64Shift.Unary.packedAux (Arm64Shift.modifier (Reference.AArch64.arithmeticShift kind))
+          (BitVec.ofNat 8 amount.val) lane0 lane3) width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value
+        (.shift (.negate width kind amount dst src))
+  | unmodified (op : GeneratedArm64Unary.Unary) (width : Width)
+      (dst src : Register) (src2 src3 amount lane0 lane3 : Byte) (value : Word) :
+      UnaryBinding pc (GeneratedArm64Unary.code op) (Arm64Shift.Unary.packedAux .none amount lane0 lane3) width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value
+        (.shift (if op = .mvn then .invert width .lsl ⟨0, by cases width <;> decide⟩ dst src
+          else .negate width 0 ⟨0, by cases width <;> decide⟩ dst src))
+
+theorem step_through_unary_refines (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : UnaryBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughUnary code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier _ _ _ _ _ _ _ _ _ earlier => exact unary_earlier_preserved _ _ _ _ _ _ _ _ _ _ _ s earlier
+  | invert => apply unary_invert_refines
+  | negate => apply unary_negate_refines
+  | unmodified => apply unary_unmodified_refines
+
 end KProgFormal.Refinement.Arm64Dispatcher

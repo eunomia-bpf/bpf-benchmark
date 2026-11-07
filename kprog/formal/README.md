@@ -43,8 +43,9 @@ through `dispatch_step_refines`. `step_through_shift_refines` extends that
 composition through both SHIFT rows and all four kinds, preserving count
 selection and width masking. `step_through_multiply_refines` adds all eight
 multiply/divide rows using the actual SRC3 byte, with arbitrary unused
-accumulators and native long/high width conditions. The remaining families
-still need composition.
+accumulators and native long/high width conditions. `step_through_unary_refines`
+further composes MVN/NEG with actual modifier bytes and arbitrary unused
+fields. The remaining families still need composition.
 
 The proofs establish arithmetic/flags, register and tag operations, memory
 accesses, routing tables, and selected whole-state handler refinements.
