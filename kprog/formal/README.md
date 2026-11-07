@@ -67,9 +67,9 @@ The FMOV/CNT/UADDLV dispatcher tail composes numeric opcode/AUX selection,
 all32 vector banks and legacy NONE→V0, generated direction/destination/width
 selection and full-state steps; invalid fields retain rejection. Native decoding
 and Entry/O4 must bind the typed operands, bank, direction and width flags.
-BITFIELD additionally composes the real packed AUX kind/LSB/count extraction
-with the five generated value operations, typed native field bounds and the
-singleton dispatcher, independently of the unused high byte.
+BITFIELD and MOVK compose packed AUX kind/LSB/count/column extraction with
+their generated value operations, typed native field bounds and singleton
+dispatchers, independently of unused AUX bytes.
 Individual module statements define their
 exact scope. Dispatcher coverage/exclusivity is
 **not yet a full simulator-step refinement theorem**; completing the remaining

@@ -338,3 +338,26 @@ contracts, reference/wire/compiler checks and C semantic hosts. The immutable
 source/cache export was deleted automatically; compressed CALL CPU observations
 now retain this successful full run. Subsequent packed BITFIELD/MOVK work needs
 its own full validation.
+
+## MOVK packed column and dispatcher
+
+`Arm64Movk.packed_column` binds AUX byte2 to the actual 0/16/32/48 bit column,
+independently of all three unused bytes. `decodeShift` reflects the production
+switch exactly; an invalid shift returns no result instead of taking the old
+bounded helper's default column48. `dispatch_refines` composes numeric opcode5,
+column decoding, generated insertion and width-specific destination write with
+the same canonical MOVK step. The typed native instruction admits only the
+legal two W columns or four X columns, preserving every complementary bit and
+W zero extension. Other opcodes retain their own dispatcher arms.
+
+These are source-validity and numeric-state proofs, with no extra runtime guard,
+ISA operation, oracle, test or compiler policy. Native byte/operand/width and
+Entry/O4 bindings remain separate; every previous MOVK theorem is unchanged.
+
+Validation: 31 Lean/reference dependency jobs passed together with the new
+BITFIELD module and existing AArch64 reference regressions, including 3860
+control/PC-address states. Three related generated-contract freshness checks
+passed. Existing independent MOVK semantics checked 20,145 cases; actual AUX
+and singleton route hosts checked 1,115,374 and 11,083 cases. All checks passed
+without failures or input filtering. A new immutable combined full check follows
+publication of this increment; exact6ded5f0d5's full result precedes it.
