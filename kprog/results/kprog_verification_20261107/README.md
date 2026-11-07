@@ -1987,3 +1987,30 @@ build configuration, paper, shared cache or other ISA semantics change.
 The separate full exact900 POPCNT compile EXIT2 and canonical CMOV-route
 unaligned-pointer UBSan failure remain open; this is not `make check` PASS.
 Canonical source SHA256 `9fca3291b55b8ef0bfdfa8fab8afe8935210e5fd30f6c0314f7db53661b7afa8`; validation pins 372.
+
+## All16 CMOV conditions through the raw register frame
+
+`conditionalMoveWord` follows the existing generated full-condition table
+on the complete32-bit AUX word, including parity/even and parity/odd.
+`conditional_move_word_frame_refines` composes that evaluation with the
+actual64-bit RSP-aware pointer write,16/32-bit numeric writes and false32
+zero extension. Widths, aliases, STACK predicates and every incoming flag
+bit remain arbitrary. The native condition code supplies an encoded AUX
+identity; no branch-result or state/value equality premise is introduced.
+Unsupported whole words retain the implementation false default, without
+adding a producer/runtime restriction or truncating AUX to a byte.
+
+The older14-condition proof and all other previous declarations are retained
+byte-for-byte except one import. Focused58-job Lean graph, including the
+existing X86Dispatcher consumer, and one axiom audit PASS (only propext,
+Classical.choice, Lean.ofReduceBool, Quot.sound). The existing full-condition
+generated-contract check and existing full-condition C host pass under
+UBSan. All physical proof/host input pins stay unchanged. Complete initial
+proof-normalization failure and final commands/output/manifests are appended
+to the existing integration JSON/gzip. No ISA, header, generator, oracle,
+test, build configuration or paper changes. Whole dispatcher, compiled B,
+initial ABI and full77/72/O2/O4 remain open; no full `make check` is rerun
+against the unchanged POPCNT harness compile failure or separate CMOV-route
+unaligned-pointer failure. F's newly published LEAVE fault-kind discrepancy
+is separately acknowledged for the canonical owner correction, not hidden
+by this CMOV proof.

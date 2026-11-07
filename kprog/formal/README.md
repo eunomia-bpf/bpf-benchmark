@@ -195,3 +195,9 @@ instruction per request, with explicit SIMD/environment fields when needed.
 The `tools/check_reference*` scripts are concrete examples. They execute these
 Lean definitions, not a second Python/C ISA interpreter. F's hardware replay
 and T's path/artifact checks consume this same canonical specification.
+
+`conditional_move_word_frame_refines` additionally connects the whole32-bit
+AUX condition word to all16 native CMOV conditions, including parity,
+through the raw RSP/STACK frame. Both outcomes and false32 zero extension
+are derived from generated condition evaluation; no condition-result premise
+is required. This component still requires dispatcher/artifact/ABI composition.

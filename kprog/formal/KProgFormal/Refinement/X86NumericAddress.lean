@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86Condition
 import KProgFormal.Refinement.EntryEnvironment
 import KProgFormal.X86RegWrite
 import KProgFormal.Refinement.X86Scalar
@@ -365,5 +366,59 @@ theorem exchange_register_frame_refines (env : Environment) (frame : Frame) (are
     Reference.X86.RegisterSlice.reg, exchange_numeric_write, X86Exchange.handlerStep]
   all_goals try simp only [show ∀ old value, X86Exchange.write .w64 old value = value from fun _ _ => rfl]
   all_goals rfl
+
+
+/-- The actual CMOV register arm evaluates the entire AUX word, including
+parity conditions, through the generated full-condition table. Unsupported
+words take its false default; no AUX truncation or new runtime guard occurs. -/
+def conditionalMoveWord (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (aux : BitVec 32)
+    (dst src : Reference.X86.Register) (nextPc : NativeWord) : RegisterState :=
+  let taken := (GeneratedX86FullCondition.eval aux
+    (state.raw.rflags.getLsbD 0) (state.raw.rflags.getLsbD 6)
+    (state.raw.rflags.getLsbD 7) (state.raw.rflags.getLsbD 11)
+    (state.raw.rflags.getLsbD 2)).getD false
+  let result := if taken then
+    match width with
+    | .w64 => movePointer env frame arena state dst src
+    | .w32 => writeRegister env frame arena state .w32 (.low dst) (registerValue env frame arena state src)
+    | .w16 => writeRegister env frame arena state .w16 (.low dst) (registerValue env frame arena state src)
+  else match width with
+    | .w32 => writeRegister env frame arena state .w32 (.low dst) (registerValue env frame arena state dst)
+    | _ => state
+  registerPc result nextPc
+
+/-- All sixteen native conditions through the same raw RSP/STACK frame.
+AUX identity is an encoded field fact, not an assumed condition result.
+All widths, aliases and incoming flag bits remain arbitrary. -/
+theorem conditional_move_word_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (code : Fin 16)
+    (dst src : Reference.X86.Register) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena
+        (conditionalMoveWord env frame arena state width (BitVec.ofNat 32 code.val) dst src nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.cmov width code dst (.register src) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have condition := X86Condition.condition_refines code state.raw.rflags
+  unfold X86Condition.evaluate at condition
+  unfold conditionalMoveWord
+  rw [condition]
+  simp only [Option.getD_some]
+  rw [native_register_pc]
+  simp only [Reference.X86.step, Reference.X86.readSource]
+  have flags : (nativeRegisters env frame arena state).rflags = state.raw.rflags := rfl
+  cases width <;> cases taken : Reference.X86.condition state.raw.rflags code <;>
+    simp only [flags, taken, Bool.false_eq_true, ↓reduceIte]
+  all_goals first | rw [native_pointer_move] | rw [native_register_write] | skip
+  all_goals simp only [Reference.X86.cmovValue, nativeRegisters]
+  all_goals congr 1
+  all_goals congr 1
+  all_goals funext r
+  all_goals by_cases same : r = dst
+  all_goals simp only [same, ↓reduceIte, Reference.X86.RegisterSlice.reg,
+    Reference.X86.scalarWriteValue, Reference.X86.RegisterSlice.shift,
+    Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes]
+  all_goals simp only [NativeWord, Reference.Word] at *
+  all_goals bv_decide
 
 end KProgFormal.Refinement.X86NumericAddress
