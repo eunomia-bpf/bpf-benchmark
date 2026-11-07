@@ -27,10 +27,12 @@ and observer source are preserved in `current-cpu-inputs.tar.gz`, with exact
 hashes in `compiled-source-pins.json`. `cpu-summary.json` pins the binary.
 The completed build and warm-reference build logs are compressed separately.
 
-The canonical reference replay is STILL RUNNING; its agreement/unsupported
-counts are not yet claimed. `state.json` and F/matrix-current.state record that
-independent stage. Eventual reference per-form status and unavailable-encoding
-inputs must be read together. Source drift stays explicit, not counted as
-agreement or hidden. The raw passing CPU trace remains live input to the
-reference replay and must be preserved until that process exits. No second
-writer or duplicate full matrix build is started while this job runs.
+The canonical replay completed at11:39:43UTC with exit2: **1,039 forms,
+1,063,936 states, zero CPU/reference or C/reference mismatches**. Another38
+control-flow observer forms were explicitly `awaiting_reference_block`, not
+counted as agreement. `reference-forms.tsv`, `reference-unavailable.jsonl`,
+`reference-summary.json` and `state.json` retain every per-form count/status
+and the unchanged executable hash. The existing finite-path replay interface
+can consume these saved control observer states without rebuilding or rerunning
+the CPU matrix; that follow-up is separate. The raw trace no longer has an
+active reader and is retained for this follow-up. No complete O1 claim is made.

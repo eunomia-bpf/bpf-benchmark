@@ -1,0 +1,12 @@
+{
+  "archive": "run-20261107T112703385738Z.tar.gz",
+  "sha256": "fe771cefcc794ba1bb9aa2c080d5f5a8385d7c33adac314483819373b9830623",
+  "cases": 15,
+  "stages": {
+    "valid_executed": 1,
+    "specialization_rejected": 7,
+    "verifier_rejected": 6,
+    "accepted_finding": 1
+  },
+  "unsafe_native_executed": false
+}

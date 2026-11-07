@@ -66,3 +66,17 @@ analysis, rather than needing a new literal for every legitimate refusal.
 Compiler/syscall/producer exceptions retain their separate stages. Cumulative
 unique coverage is4 safe controls and12 rejected unsafe cases, with18 extended
 negatives still to execute. No unsafe native program has run or been accepted.
+
+The third continuation finished on2026-11-07 at11:43UTC. It recorded the
+unchanged passing control,13 additional unsafe refusals (7 specialization and
+6 verifier), then **one accepted unsafe return-target input**. That accepted
+case was strictly LOAD-ONLY: no unsafe TEST_RUN occurred. The unmodified host
+archive is `trusted-arm64-service-result/run-20261107T112703385738Z.tar.gz`;
+`third-run-*` files retain its exact messages, identities, exit and counts.
+Cumulative completed unique identities are4 valid controls and25 rejected
+unsafe inputs;5 unsafe inputs remain unresolved, including the accepted
+finding. `completed-cases.json` excludes that acceptance so a continuation
+must retry it. Root cause: the proof native linker changed entry RET into an
+unconditional trampoline branch before the simulator could observe the
+return register. A repair and native-only common-service replay are in
+progress; no full safety pass is claimed.

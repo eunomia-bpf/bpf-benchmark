@@ -94,5 +94,83 @@
     "native_sha256": "f4221688b7d5f9a49606f6b9c290f1640f2d1e4e0f3871712cef663f989a6d17",
     "stage": "specialization_rejected",
     "host_archive": "run-20261107T111831280589Z.tar.gz"
+  },
+  {
+    "name": "overlapping_load_pair",
+    "native_sha256": "0c21de7f41b9fe37ed93bcd3effd8119a773bf18dfa58c99f916f67294181246",
+    "stage": "specialization_rejected",
+    "host_archive": "run-20261107T112703385738Z.tar.gz"
+  },
+  {
+    "name": "writeback_load_overlap",
+    "native_sha256": "5d87182ae0e9031e2bfbf8ac1e8036a31c23e9dd0b89a6d40b02fea5b9650608",
+    "stage": "specialization_rejected",
+    "host_archive": "run-20261107T112703385738Z.tar.gz"
+  },
+  {
+    "name": "writeback_store_overlap",
+    "native_sha256": "b1142b61bed214bdcfd665a0f9718dca18f13f508630009f8007f836d59cc012",
+    "stage": "specialization_rejected",
+    "host_archive": "run-20261107T112703385738Z.tar.gz"
+  },
+  {
+    "name": "scalar_vector_load_clear_high",
+    "native_sha256": "7b377f88c0fc305b2b0842e45663a9b0c5d602c23a089ba454c63d4f986d60cc",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T112703385738Z.tar.gz"
+  },
+  {
+    "name": "unpaired_stxr_failure",
+    "native_sha256": "cc18f710c67956078237759625d7fefc65727a4170c193f9ab6ae92109a607ef",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T112703385738Z.tar.gz"
+  },
+  {
+    "name": "unpaired_stlxr_failure",
+    "native_sha256": "eca5e9bb32b67d7cf02066072a3b14c07caf4c8897aae11b651497ce3906c360",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T112703385738Z.tar.gz"
+  },
+  {
+    "name": "paired_stxr_failure",
+    "native_sha256": "15115e53de99c5297833321a2a7d085a1d35e24b45284980af6d679c7a8d47b7",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T112703385738Z.tar.gz"
+  },
+  {
+    "name": "paired_stlxr_failure",
+    "native_sha256": "4d51789865c04e46dbdd0fdd1ebb5d07ab99d484e97c5549b7caa39fc4ba7dcd",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T112703385738Z.tar.gz"
+  },
+  {
+    "name": "stxr_status_data_overlap",
+    "native_sha256": "b648c256af28b5fd786f3aadcc85406ac080be85aad1338386f95d180567ef61",
+    "stage": "specialization_rejected",
+    "host_archive": "run-20261107T112703385738Z.tar.gz"
+  },
+  {
+    "name": "stlxr_status_data_overlap",
+    "native_sha256": "4e99d694c78dba6569d422d9b8245189e098fd58da6b17f5b3fab1795d94ab34",
+    "stage": "specialization_rejected",
+    "host_archive": "run-20261107T112703385738Z.tar.gz"
+  },
+  {
+    "name": "stxr_status_base_overlap",
+    "native_sha256": "8afdf2fd098a7a164c45b31a035d44c39ed290d89d407aea01015503f84ca547",
+    "stage": "specialization_rejected",
+    "host_archive": "run-20261107T112703385738Z.tar.gz"
+  },
+  {
+    "name": "stlxr_status_base_overlap",
+    "native_sha256": "e3ec9b5fb31e585fb268a3bb00d4bbde93a253436cb89a6f69ad301862eed65a",
+    "stage": "specialization_rejected",
+    "host_archive": "run-20261107T112703385738Z.tar.gz"
+  },
+  {
+    "name": "entry_return_address_flags",
+    "native_sha256": "167f607b9c1cbf7bde3b23ba77502f1cae96830b267e1c54d9ca99738148b512",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T112703385738Z.tar.gz"
   }
 ]

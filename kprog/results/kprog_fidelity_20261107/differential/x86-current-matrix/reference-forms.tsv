@@ -1,0 +1,1078 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+0	push rbx	1024	1024	0	0	checked	none
+1	pop rax	1024	1024	0	0	checked	none
+2	push bx	1024	1024	0	0	checked	none
+3	pop ax	1024	1024	0	0	checked	none
+4	nop	1024	1024	0	0	checked	none
+5	cbw	1024	1024	0	0	checked	none
+6	cwde	1024	1024	0	0	checked	none
+7	cdqe	1024	1024	0	0	checked	none
+8	cwd	1024	1024	0	0	checked	none
+9	cdq	1024	1024	0	0	checked	none
+10	cqo	1024	1024	0	0	checked	none
+11	movups xmm0, XMMWORD PTR [rdi]	1024	1024	0	0	checked	none
+12	movups XMMWORD PTR [rdi], xmm0	1024	1024	0	0	checked	none
+13	mov rax, rsp	1024	1024	0	0	checked	none
+14	mov eax, esp	1024	1024	0	0	checked	none
+15	lea rax, [rsp+16]	1024	1024	0	0	checked	none
+16	cmp rsp, 0	1024	1024	0	0	checked	none
+17	mov rsp, rax	1024	1024	0	0	checked	none
+18	mov esp, eax	1024	1024	0	0	checked	none
+19	lea rsp, [rsp+16]	1024	1024	0	0	checked	none
+20	add rsp, 16	1024	1024	0	0	checked	none
+21	push rsp	1024	1024	0	0	checked	none
+22	pop rsp	1024	1024	0	0	checked	none
+23	push sp	1024	1024	0	0	checked	none
+24	pop sp	1024	1024	0	0	checked	none
+25	push -2147483648	1024	1024	0	0	checked	none
+26	push -128	1024	1024	0	0	checked	none
+27	push -1	1024	1024	0	0	checked	none
+28	push 0	1024	1024	0	0	checked	none
+29	push 1	1024	1024	0	0	checked	none
+30	push 127	1024	1024	0	0	checked	none
+31	push 128	1024	1024	0	0	checked	none
+32	push 305419896	1024	1024	0	0	checked	none
+33	pushw -7	1024	1024	0	0	checked	none
+34	push QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+35	push WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+36	pop QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+37	pop WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+38	push QWORD PTR [rsp-16]	1024	1024	0	0	checked	none
+39	pop QWORD PTR [rsp-16]	1024	1024	0	0	checked	none
+40	.byte 0x66, 0x48, 0x53	1024	1024	0	0	checked	none
+41	.byte 0x48, 0x66, 0x53	1024	1024	0	0	checked	none
+42	.byte 0x66, 0x48, 0xff, 0xf3	1024	1024	0	0	checked	none
+43	.byte 0x48, 0x66, 0xff, 0xf3	1024	1024	0	0	checked	none
+44	.byte 0x66, 0x48, 0x58	1024	1024	0	0	checked	none
+45	.byte 0x48, 0x66, 0x58	1024	1024	0	0	checked	none
+46	.byte 0x66, 0x48, 0x8f, 0xc0	1024	1024	0	0	checked	none
+47	.byte 0x48, 0x66, 0x8f, 0xc0	1024	1024	0	0	checked	none
+48	mov al, bl	1024	1024	0	0	checked	none
+49	mov al, 0x7f	1024	1024	0	0	checked	none
+50	mov BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+51	mov al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+52	mov BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+53	add al, bl	1024	1024	0	0	checked	none
+54	add al, 0x7f	1024	1024	0	0	checked	none
+55	add BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+56	add BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+57	add al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+58	adc al, bl	1024	1024	0	0	checked	none
+59	adc al, 0x7f	1024	1024	0	0	checked	none
+60	adc BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+61	adc BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+62	adc al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+63	sub al, bl	1024	1024	0	0	checked	none
+64	sub al, 0x7f	1024	1024	0	0	checked	none
+65	sub BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+66	sub BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+67	sub al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+68	sbb al, bl	1024	1024	0	0	checked	none
+69	sbb al, 0x7f	1024	1024	0	0	checked	none
+70	sbb BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+71	sbb BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+72	sbb al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+73	cmp al, bl	1024	1024	0	0	checked	none
+74	cmp al, 0x7f	1024	1024	0	0	checked	none
+75	cmp BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+76	cmp BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+77	cmp al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+78	test al, bl	1024	1024	0	0	checked	none
+79	test al, 0x7f	1024	1024	0	0	checked	none
+80	test BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+81	test BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+82	and al, bl	1024	1024	0	0	checked	none
+83	and al, 0x7f	1024	1024	0	0	checked	none
+84	and al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+85	and BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+86	and BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+87	or al, bl	1024	1024	0	0	checked	none
+88	or al, 0x7f	1024	1024	0	0	checked	none
+89	or al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+90	or BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+91	or BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+92	xor al, bl	1024	1024	0	0	checked	none
+93	xor al, 0x7f	1024	1024	0	0	checked	none
+94	xor al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+95	xor BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+96	xor BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+97	inc al	1024	1024	0	0	checked	none
+98	inc BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+99	dec al	1024	1024	0	0	checked	none
+100	dec BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+101	neg al	1024	1024	0	0	checked	none
+102	neg BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+103	not al	1024	1024	0	0	checked	none
+104	not BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+105	xchg al, bl	1024	1024	0	0	checked	none
+106	shl al, 0	1024	1024	0	0	checked	none
+107	shl al, 1	1024	1024	0	0	checked	none
+108	shl al, 7	1024	1024	0	0	checked	none
+109	shl al, 8	1024	1024	0	0	checked	none
+110	shl al, 15	1024	1024	0	0	checked	none
+111	shl al, 16	1024	1024	0	0	checked	none
+112	shl al, 31	1024	1024	0	0	checked	none
+113	shl al, 32	1024	1024	0	0	checked	none
+114	shl al, 63	1024	1024	0	0	checked	none
+115	shl al, 64	1024	1024	0	0	checked	none
+116	shl al, 255	1024	1024	0	0	checked	none
+117	shl al, cl	1024	1024	0	0	checked	none
+118	shr al, 0	1024	1024	0	0	checked	none
+119	shr al, 1	1024	1024	0	0	checked	none
+120	shr al, 7	1024	1024	0	0	checked	none
+121	shr al, 8	1024	1024	0	0	checked	none
+122	shr al, 15	1024	1024	0	0	checked	none
+123	shr al, 16	1024	1024	0	0	checked	none
+124	shr al, 31	1024	1024	0	0	checked	none
+125	shr al, 32	1024	1024	0	0	checked	none
+126	shr al, 63	1024	1024	0	0	checked	none
+127	shr al, 64	1024	1024	0	0	checked	none
+128	shr al, 255	1024	1024	0	0	checked	none
+129	shr al, cl	1024	1024	0	0	checked	none
+130	sar al, 0	1024	1024	0	0	checked	none
+131	sar al, 1	1024	1024	0	0	checked	none
+132	sar al, 7	1024	1024	0	0	checked	none
+133	sar al, 8	1024	1024	0	0	checked	none
+134	sar al, 15	1024	1024	0	0	checked	none
+135	sar al, 16	1024	1024	0	0	checked	none
+136	sar al, 31	1024	1024	0	0	checked	none
+137	sar al, 32	1024	1024	0	0	checked	none
+138	sar al, 63	1024	1024	0	0	checked	none
+139	sar al, 64	1024	1024	0	0	checked	none
+140	sar al, 255	1024	1024	0	0	checked	none
+141	sar al, cl	1024	1024	0	0	checked	none
+142	rol al, 0	1024	1024	0	0	checked	none
+143	rol al, 1	1024	1024	0	0	checked	none
+144	rol al, 7	1024	1024	0	0	checked	none
+145	rol al, 8	1024	1024	0	0	checked	none
+146	rol al, 15	1024	1024	0	0	checked	none
+147	rol al, 16	1024	1024	0	0	checked	none
+148	rol al, 31	1024	1024	0	0	checked	none
+149	rol al, 32	1024	1024	0	0	checked	none
+150	rol al, 63	1024	1024	0	0	checked	none
+151	rol al, 64	1024	1024	0	0	checked	none
+152	rol al, 255	1024	1024	0	0	checked	none
+153	rol al, cl	1024	1024	0	0	checked	none
+154	ror al, 0	1024	1024	0	0	checked	none
+155	ror al, 1	1024	1024	0	0	checked	none
+156	ror al, 7	1024	1024	0	0	checked	none
+157	ror al, 8	1024	1024	0	0	checked	none
+158	ror al, 15	1024	1024	0	0	checked	none
+159	ror al, 16	1024	1024	0	0	checked	none
+160	ror al, 31	1024	1024	0	0	checked	none
+161	ror al, 32	1024	1024	0	0	checked	none
+162	ror al, 63	1024	1024	0	0	checked	none
+163	ror al, 64	1024	1024	0	0	checked	none
+164	ror al, 255	1024	1024	0	0	checked	none
+165	ror al, cl	1024	1024	0	0	checked	none
+166	mov ax, bx	1024	1024	0	0	checked	none
+167	mov ax, 0x7f	1024	1024	0	0	checked	none
+168	mov WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+169	mov ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+170	mov WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+171	add ax, bx	1024	1024	0	0	checked	none
+172	add ax, 0x7f	1024	1024	0	0	checked	none
+173	add WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+174	add WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+175	add ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+176	adc ax, bx	1024	1024	0	0	checked	none
+177	adc ax, 0x7f	1024	1024	0	0	checked	none
+178	adc WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+179	adc WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+180	adc ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+181	sub ax, bx	1024	1024	0	0	checked	none
+182	sub ax, 0x7f	1024	1024	0	0	checked	none
+183	sub WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+184	sub WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+185	sub ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+186	sbb ax, bx	1024	1024	0	0	checked	none
+187	sbb ax, 0x7f	1024	1024	0	0	checked	none
+188	sbb WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+189	sbb WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+190	sbb ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+191	cmp ax, bx	1024	1024	0	0	checked	none
+192	cmp ax, 0x7f	1024	1024	0	0	checked	none
+193	cmp WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+194	cmp WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+195	cmp ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+196	test ax, bx	1024	1024	0	0	checked	none
+197	test ax, 0x7f	1024	1024	0	0	checked	none
+198	test WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+199	test WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+200	and ax, bx	1024	1024	0	0	checked	none
+201	and ax, 0x7f	1024	1024	0	0	checked	none
+202	and ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+203	and WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+204	and WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+205	or ax, bx	1024	1024	0	0	checked	none
+206	or ax, 0x7f	1024	1024	0	0	checked	none
+207	or ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+208	or WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+209	or WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+210	xor ax, bx	1024	1024	0	0	checked	none
+211	xor ax, 0x7f	1024	1024	0	0	checked	none
+212	xor ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+213	xor WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+214	xor WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+215	inc ax	1024	1024	0	0	checked	none
+216	inc WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+217	dec ax	1024	1024	0	0	checked	none
+218	dec WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+219	neg ax	1024	1024	0	0	checked	none
+220	neg WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+221	not ax	1024	1024	0	0	checked	none
+222	not WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+223	xchg ax, bx	1024	1024	0	0	checked	none
+224	shl ax, 0	1024	1024	0	0	checked	none
+225	shl ax, 1	1024	1024	0	0	checked	none
+226	shl ax, 7	1024	1024	0	0	checked	none
+227	shl ax, 8	1024	1024	0	0	checked	none
+228	shl ax, 15	1024	1024	0	0	checked	none
+229	shl ax, 16	1024	1024	0	0	checked	none
+230	shl ax, 31	1024	1024	0	0	checked	none
+231	shl ax, 32	1024	1024	0	0	checked	none
+232	shl ax, 63	1024	1024	0	0	checked	none
+233	shl ax, 64	1024	1024	0	0	checked	none
+234	shl ax, 255	1024	1024	0	0	checked	none
+235	shl ax, cl	1024	1024	0	0	checked	none
+236	shr ax, 0	1024	1024	0	0	checked	none
+237	shr ax, 1	1024	1024	0	0	checked	none
+238	shr ax, 7	1024	1024	0	0	checked	none
+239	shr ax, 8	1024	1024	0	0	checked	none
+240	shr ax, 15	1024	1024	0	0	checked	none
+241	shr ax, 16	1024	1024	0	0	checked	none
+242	shr ax, 31	1024	1024	0	0	checked	none
+243	shr ax, 32	1024	1024	0	0	checked	none
+244	shr ax, 63	1024	1024	0	0	checked	none
+245	shr ax, 64	1024	1024	0	0	checked	none
+246	shr ax, 255	1024	1024	0	0	checked	none
+247	shr ax, cl	1024	1024	0	0	checked	none
+248	sar ax, 0	1024	1024	0	0	checked	none
+249	sar ax, 1	1024	1024	0	0	checked	none
+250	sar ax, 7	1024	1024	0	0	checked	none
+251	sar ax, 8	1024	1024	0	0	checked	none
+252	sar ax, 15	1024	1024	0	0	checked	none
+253	sar ax, 16	1024	1024	0	0	checked	none
+254	sar ax, 31	1024	1024	0	0	checked	none
+255	sar ax, 32	1024	1024	0	0	checked	none
+256	sar ax, 63	1024	1024	0	0	checked	none
+257	sar ax, 64	1024	1024	0	0	checked	none
+258	sar ax, 255	1024	1024	0	0	checked	none
+259	sar ax, cl	1024	1024	0	0	checked	none
+260	rol ax, 0	1024	1024	0	0	checked	none
+261	rol ax, 1	1024	1024	0	0	checked	none
+262	rol ax, 7	1024	1024	0	0	checked	none
+263	rol ax, 8	1024	1024	0	0	checked	none
+264	rol ax, 15	1024	1024	0	0	checked	none
+265	rol ax, 16	1024	1024	0	0	checked	none
+266	rol ax, 31	1024	1024	0	0	checked	none
+267	rol ax, 32	1024	1024	0	0	checked	none
+268	rol ax, 63	1024	1024	0	0	checked	none
+269	rol ax, 64	1024	1024	0	0	checked	none
+270	rol ax, 255	1024	1024	0	0	checked	none
+271	rol ax, cl	1024	1024	0	0	checked	none
+272	ror ax, 0	1024	1024	0	0	checked	none
+273	ror ax, 1	1024	1024	0	0	checked	none
+274	ror ax, 7	1024	1024	0	0	checked	none
+275	ror ax, 8	1024	1024	0	0	checked	none
+276	ror ax, 15	1024	1024	0	0	checked	none
+277	ror ax, 16	1024	1024	0	0	checked	none
+278	ror ax, 31	1024	1024	0	0	checked	none
+279	ror ax, 32	1024	1024	0	0	checked	none
+280	ror ax, 63	1024	1024	0	0	checked	none
+281	ror ax, 64	1024	1024	0	0	checked	none
+282	ror ax, 255	1024	1024	0	0	checked	none
+283	ror ax, cl	1024	1024	0	0	checked	none
+284	imul ax, bx	1024	1024	0	0	checked	none
+285	imul ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+286	imul ax, bx, -7	1024	1024	0	0	checked	none
+287	imul ax, WORD PTR [rdi+8], -7	1024	1024	0	0	checked	none
+288	popcnt ax, bx	1024	1024	0	0	checked	none
+289	div bx	1024	1024	0	0	checked	none
+290	bt ax, bx	1024	1024	0	0	checked	none
+291	bt ax, 7	1024	1024	0	0	checked	none
+292	bt WORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+293	movbe ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+294	movbe WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+295	shld ax, bx, 0	1024	1024	0	0	checked	none
+296	shld ax, bx, 1	1024	1024	0	0	checked	none
+297	shld ax, bx, 7	1024	1024	0	0	checked	none
+298	shld ax, bx, 15	1024	1024	0	0	checked	none
+299	shrd ax, bx, 0	1024	1024	0	0	checked	none
+300	shrd ax, bx, 1	1024	1024	0	0	checked	none
+301	shrd ax, bx, 7	1024	1024	0	0	checked	none
+302	shrd ax, bx, 15	1024	1024	0	0	checked	none
+303	mov eax, ebx	1024	1024	0	0	checked	none
+304	mov eax, 0x7f	1024	1024	0	0	checked	none
+305	mov DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+306	mov eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+307	mov DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+308	add eax, ebx	1024	1024	0	0	checked	none
+309	add eax, 0x7f	1024	1024	0	0	checked	none
+310	add DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+311	add DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+312	add eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+313	adc eax, ebx	1024	1024	0	0	checked	none
+314	adc eax, 0x7f	1024	1024	0	0	checked	none
+315	adc DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+316	adc DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+317	adc eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+318	sub eax, ebx	1024	1024	0	0	checked	none
+319	sub eax, 0x7f	1024	1024	0	0	checked	none
+320	sub DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+321	sub DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+322	sub eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+323	sbb eax, ebx	1024	1024	0	0	checked	none
+324	sbb eax, 0x7f	1024	1024	0	0	checked	none
+325	sbb DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+326	sbb DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+327	sbb eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+328	cmp eax, ebx	1024	1024	0	0	checked	none
+329	cmp eax, 0x7f	1024	1024	0	0	checked	none
+330	cmp DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+331	cmp DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+332	cmp eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+333	test eax, ebx	1024	1024	0	0	checked	none
+334	test eax, 0x7f	1024	1024	0	0	checked	none
+335	test DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+336	test DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+337	and eax, ebx	1024	1024	0	0	checked	none
+338	and eax, 0x7f	1024	1024	0	0	checked	none
+339	and eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+340	and DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+341	and DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+342	or eax, ebx	1024	1024	0	0	checked	none
+343	or eax, 0x7f	1024	1024	0	0	checked	none
+344	or eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+345	or DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+346	or DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+347	xor eax, ebx	1024	1024	0	0	checked	none
+348	xor eax, 0x7f	1024	1024	0	0	checked	none
+349	xor eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+350	xor DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+351	xor DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+352	inc eax	1024	1024	0	0	checked	none
+353	inc DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+354	dec eax	1024	1024	0	0	checked	none
+355	dec DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+356	neg eax	1024	1024	0	0	checked	none
+357	neg DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+358	not eax	1024	1024	0	0	checked	none
+359	not DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+360	xchg eax, ebx	1024	1024	0	0	checked	none
+361	shl eax, 0	1024	1024	0	0	checked	none
+362	shl eax, 1	1024	1024	0	0	checked	none
+363	shl eax, 7	1024	1024	0	0	checked	none
+364	shl eax, 8	1024	1024	0	0	checked	none
+365	shl eax, 15	1024	1024	0	0	checked	none
+366	shl eax, 16	1024	1024	0	0	checked	none
+367	shl eax, 31	1024	1024	0	0	checked	none
+368	shl eax, 32	1024	1024	0	0	checked	none
+369	shl eax, 63	1024	1024	0	0	checked	none
+370	shl eax, 64	1024	1024	0	0	checked	none
+371	shl eax, 255	1024	1024	0	0	checked	none
+372	shl eax, cl	1024	1024	0	0	checked	none
+373	shr eax, 0	1024	1024	0	0	checked	none
+374	shr eax, 1	1024	1024	0	0	checked	none
+375	shr eax, 7	1024	1024	0	0	checked	none
+376	shr eax, 8	1024	1024	0	0	checked	none
+377	shr eax, 15	1024	1024	0	0	checked	none
+378	shr eax, 16	1024	1024	0	0	checked	none
+379	shr eax, 31	1024	1024	0	0	checked	none
+380	shr eax, 32	1024	1024	0	0	checked	none
+381	shr eax, 63	1024	1024	0	0	checked	none
+382	shr eax, 64	1024	1024	0	0	checked	none
+383	shr eax, 255	1024	1024	0	0	checked	none
+384	shr eax, cl	1024	1024	0	0	checked	none
+385	sar eax, 0	1024	1024	0	0	checked	none
+386	sar eax, 1	1024	1024	0	0	checked	none
+387	sar eax, 7	1024	1024	0	0	checked	none
+388	sar eax, 8	1024	1024	0	0	checked	none
+389	sar eax, 15	1024	1024	0	0	checked	none
+390	sar eax, 16	1024	1024	0	0	checked	none
+391	sar eax, 31	1024	1024	0	0	checked	none
+392	sar eax, 32	1024	1024	0	0	checked	none
+393	sar eax, 63	1024	1024	0	0	checked	none
+394	sar eax, 64	1024	1024	0	0	checked	none
+395	sar eax, 255	1024	1024	0	0	checked	none
+396	sar eax, cl	1024	1024	0	0	checked	none
+397	rol eax, 0	1024	1024	0	0	checked	none
+398	rol eax, 1	1024	1024	0	0	checked	none
+399	rol eax, 7	1024	1024	0	0	checked	none
+400	rol eax, 8	1024	1024	0	0	checked	none
+401	rol eax, 15	1024	1024	0	0	checked	none
+402	rol eax, 16	1024	1024	0	0	checked	none
+403	rol eax, 31	1024	1024	0	0	checked	none
+404	rol eax, 32	1024	1024	0	0	checked	none
+405	rol eax, 63	1024	1024	0	0	checked	none
+406	rol eax, 64	1024	1024	0	0	checked	none
+407	rol eax, 255	1024	1024	0	0	checked	none
+408	rol eax, cl	1024	1024	0	0	checked	none
+409	ror eax, 0	1024	1024	0	0	checked	none
+410	ror eax, 1	1024	1024	0	0	checked	none
+411	ror eax, 7	1024	1024	0	0	checked	none
+412	ror eax, 8	1024	1024	0	0	checked	none
+413	ror eax, 15	1024	1024	0	0	checked	none
+414	ror eax, 16	1024	1024	0	0	checked	none
+415	ror eax, 31	1024	1024	0	0	checked	none
+416	ror eax, 32	1024	1024	0	0	checked	none
+417	ror eax, 63	1024	1024	0	0	checked	none
+418	ror eax, 64	1024	1024	0	0	checked	none
+419	ror eax, 255	1024	1024	0	0	checked	none
+420	ror eax, cl	1024	1024	0	0	checked	none
+421	imul eax, ebx	1024	1024	0	0	checked	none
+422	imul eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+423	imul eax, ebx, -7	1024	1024	0	0	checked	none
+424	imul eax, DWORD PTR [rdi+8], -7	1024	1024	0	0	checked	none
+425	popcnt eax, ebx	1024	1024	0	0	checked	none
+426	div ebx	1024	1024	0	0	checked	none
+427	bt eax, ebx	1024	1024	0	0	checked	none
+428	bt eax, 7	1024	1024	0	0	checked	none
+429	bt DWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+430	movbe eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+431	movbe DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+432	shld eax, ebx, 0	1024	1024	0	0	checked	none
+433	shld eax, ebx, 1	1024	1024	0	0	checked	none
+434	shld eax, ebx, 7	1024	1024	0	0	checked	none
+435	shld eax, ebx, 15	1024	1024	0	0	checked	none
+436	shrd eax, ebx, 0	1024	1024	0	0	checked	none
+437	shrd eax, ebx, 1	1024	1024	0	0	checked	none
+438	shrd eax, ebx, 7	1024	1024	0	0	checked	none
+439	shrd eax, ebx, 15	1024	1024	0	0	checked	none
+440	lea eax, [rdi+rbx*4-7]	1024	1024	0	0	checked	none
+441	bswap eax	1024	1024	0	0	checked	none
+442	andn eax, ebx, ecx	1024	1024	0	0	checked	none
+443	andn eax, ebx, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+444	bzhi eax, ebx, ecx	1024	1024	0	0	checked	none
+445	bzhi eax, DWORD PTR [rdi+8], ecx	1024	1024	0	0	checked	none
+446	mulx eax, ebx, ecx	1024	1024	0	0	checked	none
+447	shlx eax, ebx, ecx	1024	1024	0	0	checked	none
+448	shlx eax, DWORD PTR [rdi+8], ecx	1024	1024	0	0	checked	none
+449	shrx eax, ebx, ecx	1024	1024	0	0	checked	none
+450	shrx eax, DWORD PTR [rdi+8], ecx	1024	1024	0	0	checked	none
+451	sarx eax, ebx, ecx	1024	1024	0	0	checked	none
+452	sarx eax, DWORD PTR [rdi+8], ecx	1024	1024	0	0	checked	none
+453	rorx eax, ebx, 7	1024	1024	0	0	checked	none
+454	rorx eax, DWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+455	mov rax, rbx	1024	1024	0	0	checked	none
+456	mov rax, 0x7f	1024	1024	0	0	checked	none
+457	mov QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+458	mov rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+459	mov QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+460	add rax, rbx	1024	1024	0	0	checked	none
+461	add rax, 0x7f	1024	1024	0	0	checked	none
+462	add QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+463	add QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+464	add rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+465	adc rax, rbx	1024	1024	0	0	checked	none
+466	adc rax, 0x7f	1024	1024	0	0	checked	none
+467	adc QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+468	adc QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+469	adc rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+470	sub rax, rbx	1024	1024	0	0	checked	none
+471	sub rax, 0x7f	1024	1024	0	0	checked	none
+472	sub QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+473	sub QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+474	sub rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+475	sbb rax, rbx	1024	1024	0	0	checked	none
+476	sbb rax, 0x7f	1024	1024	0	0	checked	none
+477	sbb QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+478	sbb QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+479	sbb rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+480	cmp rax, rbx	1024	1024	0	0	checked	none
+481	cmp rax, 0x7f	1024	1024	0	0	checked	none
+482	cmp QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+483	cmp QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+484	cmp rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+485	test rax, rbx	1024	1024	0	0	checked	none
+486	test rax, 0x7f	1024	1024	0	0	checked	none
+487	test QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+488	test QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+489	and rax, rbx	1024	1024	0	0	checked	none
+490	and rax, 0x7f	1024	1024	0	0	checked	none
+491	and rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+492	and QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+493	and QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+494	or rax, rbx	1024	1024	0	0	checked	none
+495	or rax, 0x7f	1024	1024	0	0	checked	none
+496	or rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+497	or QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+498	or QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+499	xor rax, rbx	1024	1024	0	0	checked	none
+500	xor rax, 0x7f	1024	1024	0	0	checked	none
+501	xor rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+502	xor QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+503	xor QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+504	inc rax	1024	1024	0	0	checked	none
+505	inc QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+506	dec rax	1024	1024	0	0	checked	none
+507	dec QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+508	neg rax	1024	1024	0	0	checked	none
+509	neg QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+510	not rax	1024	1024	0	0	checked	none
+511	not QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+512	xchg rax, rbx	1024	1024	0	0	checked	none
+513	shl rax, 0	1024	1024	0	0	checked	none
+514	shl rax, 1	1024	1024	0	0	checked	none
+515	shl rax, 7	1024	1024	0	0	checked	none
+516	shl rax, 8	1024	1024	0	0	checked	none
+517	shl rax, 15	1024	1024	0	0	checked	none
+518	shl rax, 16	1024	1024	0	0	checked	none
+519	shl rax, 31	1024	1024	0	0	checked	none
+520	shl rax, 32	1024	1024	0	0	checked	none
+521	shl rax, 63	1024	1024	0	0	checked	none
+522	shl rax, 64	1024	1024	0	0	checked	none
+523	shl rax, 255	1024	1024	0	0	checked	none
+524	shl rax, cl	1024	1024	0	0	checked	none
+525	shr rax, 0	1024	1024	0	0	checked	none
+526	shr rax, 1	1024	1024	0	0	checked	none
+527	shr rax, 7	1024	1024	0	0	checked	none
+528	shr rax, 8	1024	1024	0	0	checked	none
+529	shr rax, 15	1024	1024	0	0	checked	none
+530	shr rax, 16	1024	1024	0	0	checked	none
+531	shr rax, 31	1024	1024	0	0	checked	none
+532	shr rax, 32	1024	1024	0	0	checked	none
+533	shr rax, 63	1024	1024	0	0	checked	none
+534	shr rax, 64	1024	1024	0	0	checked	none
+535	shr rax, 255	1024	1024	0	0	checked	none
+536	shr rax, cl	1024	1024	0	0	checked	none
+537	sar rax, 0	1024	1024	0	0	checked	none
+538	sar rax, 1	1024	1024	0	0	checked	none
+539	sar rax, 7	1024	1024	0	0	checked	none
+540	sar rax, 8	1024	1024	0	0	checked	none
+541	sar rax, 15	1024	1024	0	0	checked	none
+542	sar rax, 16	1024	1024	0	0	checked	none
+543	sar rax, 31	1024	1024	0	0	checked	none
+544	sar rax, 32	1024	1024	0	0	checked	none
+545	sar rax, 63	1024	1024	0	0	checked	none
+546	sar rax, 64	1024	1024	0	0	checked	none
+547	sar rax, 255	1024	1024	0	0	checked	none
+548	sar rax, cl	1024	1024	0	0	checked	none
+549	rol rax, 0	1024	1024	0	0	checked	none
+550	rol rax, 1	1024	1024	0	0	checked	none
+551	rol rax, 7	1024	1024	0	0	checked	none
+552	rol rax, 8	1024	1024	0	0	checked	none
+553	rol rax, 15	1024	1024	0	0	checked	none
+554	rol rax, 16	1024	1024	0	0	checked	none
+555	rol rax, 31	1024	1024	0	0	checked	none
+556	rol rax, 32	1024	1024	0	0	checked	none
+557	rol rax, 63	1024	1024	0	0	checked	none
+558	rol rax, 64	1024	1024	0	0	checked	none
+559	rol rax, 255	1024	1024	0	0	checked	none
+560	rol rax, cl	1024	1024	0	0	checked	none
+561	ror rax, 0	1024	1024	0	0	checked	none
+562	ror rax, 1	1024	1024	0	0	checked	none
+563	ror rax, 7	1024	1024	0	0	checked	none
+564	ror rax, 8	1024	1024	0	0	checked	none
+565	ror rax, 15	1024	1024	0	0	checked	none
+566	ror rax, 16	1024	1024	0	0	checked	none
+567	ror rax, 31	1024	1024	0	0	checked	none
+568	ror rax, 32	1024	1024	0	0	checked	none
+569	ror rax, 63	1024	1024	0	0	checked	none
+570	ror rax, 64	1024	1024	0	0	checked	none
+571	ror rax, 255	1024	1024	0	0	checked	none
+572	ror rax, cl	1024	1024	0	0	checked	none
+573	imul rax, rbx	1024	1024	0	0	checked	none
+574	imul rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+575	imul rax, rbx, -7	1024	1024	0	0	checked	none
+576	imul rax, QWORD PTR [rdi+8], -7	1024	1024	0	0	checked	none
+577	popcnt rax, rbx	1024	1024	0	0	checked	none
+578	div rbx	1024	1024	0	0	checked	none
+579	bt rax, rbx	1024	1024	0	0	checked	none
+580	bt rax, 7	1024	1024	0	0	checked	none
+581	bt QWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+582	movbe rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+583	movbe QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+584	shld rax, rbx, 0	1024	1024	0	0	checked	none
+585	shld rax, rbx, 1	1024	1024	0	0	checked	none
+586	shld rax, rbx, 7	1024	1024	0	0	checked	none
+587	shld rax, rbx, 15	1024	1024	0	0	checked	none
+588	shrd rax, rbx, 0	1024	1024	0	0	checked	none
+589	shrd rax, rbx, 1	1024	1024	0	0	checked	none
+590	shrd rax, rbx, 7	1024	1024	0	0	checked	none
+591	shrd rax, rbx, 15	1024	1024	0	0	checked	none
+592	lea rax, [rdi+rbx*4-7]	1024	1024	0	0	checked	none
+593	bswap rax	1024	1024	0	0	checked	none
+594	andn rax, rbx, rcx	1024	1024	0	0	checked	none
+595	andn rax, rbx, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+596	bzhi rax, rbx, rcx	1024	1024	0	0	checked	none
+597	bzhi rax, QWORD PTR [rdi+8], rcx	1024	1024	0	0	checked	none
+598	mulx rax, rbx, rcx	1024	1024	0	0	checked	none
+599	shlx rax, rbx, rcx	1024	1024	0	0	checked	none
+600	shlx rax, QWORD PTR [rdi+8], rcx	1024	1024	0	0	checked	none
+601	shrx rax, rbx, rcx	1024	1024	0	0	checked	none
+602	shrx rax, QWORD PTR [rdi+8], rcx	1024	1024	0	0	checked	none
+603	sarx rax, rbx, rcx	1024	1024	0	0	checked	none
+604	sarx rax, QWORD PTR [rdi+8], rcx	1024	1024	0	0	checked	none
+605	rorx rax, rbx, 7	1024	1024	0	0	checked	none
+606	rorx rax, QWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+607	mov ah, bh	1024	1024	0	0	checked	none
+608	mov ah, 0x7f	1024	1024	0	0	checked	none
+609	mov BYTE PTR [rdi+8], ah	1024	1024	0	0	checked	none
+610	add ah, bh	1024	1024	0	0	checked	none
+611	add ah, 0x7f	1024	1024	0	0	checked	none
+612	adc ah, bh	1024	1024	0	0	checked	none
+613	adc ah, 0x7f	1024	1024	0	0	checked	none
+614	sub ah, bh	1024	1024	0	0	checked	none
+615	sub ah, 0x7f	1024	1024	0	0	checked	none
+616	sbb ah, bh	1024	1024	0	0	checked	none
+617	sbb ah, 0x7f	1024	1024	0	0	checked	none
+618	cmp ah, bh	1024	1024	0	0	checked	none
+619	cmp ah, 0x7f	1024	1024	0	0	checked	none
+620	test ah, bh	1024	1024	0	0	checked	none
+621	test ah, 0x7f	1024	1024	0	0	checked	none
+622	inc ah	1024	1024	0	0	checked	none
+623	dec ah	1024	1024	0	0	checked	none
+624	neg ah	1024	1024	0	0	checked	none
+625	not ah	1024	1024	0	0	checked	none
+626	rol ah, 0	1024	1024	0	0	checked	none
+627	rol ah, 1	1024	1024	0	0	checked	none
+628	rol ah, 7	1024	1024	0	0	checked	none
+629	rol ah, 8	1024	1024	0	0	checked	none
+630	rol ah, 15	1024	1024	0	0	checked	none
+631	rol ah, 16	1024	1024	0	0	checked	none
+632	rol ah, 31	1024	1024	0	0	checked	none
+633	rol ah, 32	1024	1024	0	0	checked	none
+634	rol ah, 63	1024	1024	0	0	checked	none
+635	rol ah, 64	1024	1024	0	0	checked	none
+636	rol ah, 255	1024	1024	0	0	checked	none
+637	rol ah, cl	1024	1024	0	0	checked	none
+638	rol ch, 0	1024	1024	0	0	checked	none
+639	rol ch, 1	1024	1024	0	0	checked	none
+640	rol ch, 7	1024	1024	0	0	checked	none
+641	rol ch, 8	1024	1024	0	0	checked	none
+642	rol ch, 15	1024	1024	0	0	checked	none
+643	rol ch, 16	1024	1024	0	0	checked	none
+644	rol ch, 31	1024	1024	0	0	checked	none
+645	rol ch, 32	1024	1024	0	0	checked	none
+646	rol ch, 63	1024	1024	0	0	checked	none
+647	rol ch, 64	1024	1024	0	0	checked	none
+648	rol ch, 255	1024	1024	0	0	checked	none
+649	rol ch, cl	1024	1024	0	0	checked	none
+650	rol dh, 0	1024	1024	0	0	checked	none
+651	rol dh, 1	1024	1024	0	0	checked	none
+652	rol dh, 7	1024	1024	0	0	checked	none
+653	rol dh, 8	1024	1024	0	0	checked	none
+654	rol dh, 15	1024	1024	0	0	checked	none
+655	rol dh, 16	1024	1024	0	0	checked	none
+656	rol dh, 31	1024	1024	0	0	checked	none
+657	rol dh, 32	1024	1024	0	0	checked	none
+658	rol dh, 63	1024	1024	0	0	checked	none
+659	rol dh, 64	1024	1024	0	0	checked	none
+660	rol dh, 255	1024	1024	0	0	checked	none
+661	rol dh, cl	1024	1024	0	0	checked	none
+662	rol bh, 0	1024	1024	0	0	checked	none
+663	rol bh, 1	1024	1024	0	0	checked	none
+664	rol bh, 7	1024	1024	0	0	checked	none
+665	rol bh, 8	1024	1024	0	0	checked	none
+666	rol bh, 15	1024	1024	0	0	checked	none
+667	rol bh, 16	1024	1024	0	0	checked	none
+668	rol bh, 31	1024	1024	0	0	checked	none
+669	rol bh, 32	1024	1024	0	0	checked	none
+670	rol bh, 63	1024	1024	0	0	checked	none
+671	rol bh, 64	1024	1024	0	0	checked	none
+672	rol bh, 255	1024	1024	0	0	checked	none
+673	rol bh, cl	1024	1024	0	0	checked	none
+674	ror ah, 0	1024	1024	0	0	checked	none
+675	ror ah, 1	1024	1024	0	0	checked	none
+676	ror ah, 7	1024	1024	0	0	checked	none
+677	ror ah, 8	1024	1024	0	0	checked	none
+678	ror ah, 15	1024	1024	0	0	checked	none
+679	ror ah, 16	1024	1024	0	0	checked	none
+680	ror ah, 31	1024	1024	0	0	checked	none
+681	ror ah, 32	1024	1024	0	0	checked	none
+682	ror ah, 63	1024	1024	0	0	checked	none
+683	ror ah, 64	1024	1024	0	0	checked	none
+684	ror ah, 255	1024	1024	0	0	checked	none
+685	ror ah, cl	1024	1024	0	0	checked	none
+686	ror ch, 0	1024	1024	0	0	checked	none
+687	ror ch, 1	1024	1024	0	0	checked	none
+688	ror ch, 7	1024	1024	0	0	checked	none
+689	ror ch, 8	1024	1024	0	0	checked	none
+690	ror ch, 15	1024	1024	0	0	checked	none
+691	ror ch, 16	1024	1024	0	0	checked	none
+692	ror ch, 31	1024	1024	0	0	checked	none
+693	ror ch, 32	1024	1024	0	0	checked	none
+694	ror ch, 63	1024	1024	0	0	checked	none
+695	ror ch, 64	1024	1024	0	0	checked	none
+696	ror ch, 255	1024	1024	0	0	checked	none
+697	ror ch, cl	1024	1024	0	0	checked	none
+698	ror dh, 0	1024	1024	0	0	checked	none
+699	ror dh, 1	1024	1024	0	0	checked	none
+700	ror dh, 7	1024	1024	0	0	checked	none
+701	ror dh, 8	1024	1024	0	0	checked	none
+702	ror dh, 15	1024	1024	0	0	checked	none
+703	ror dh, 16	1024	1024	0	0	checked	none
+704	ror dh, 31	1024	1024	0	0	checked	none
+705	ror dh, 32	1024	1024	0	0	checked	none
+706	ror dh, 63	1024	1024	0	0	checked	none
+707	ror dh, 64	1024	1024	0	0	checked	none
+708	ror dh, 255	1024	1024	0	0	checked	none
+709	ror dh, cl	1024	1024	0	0	checked	none
+710	ror bh, 0	1024	1024	0	0	checked	none
+711	ror bh, 1	1024	1024	0	0	checked	none
+712	ror bh, 7	1024	1024	0	0	checked	none
+713	ror bh, 8	1024	1024	0	0	checked	none
+714	ror bh, 15	1024	1024	0	0	checked	none
+715	ror bh, 16	1024	1024	0	0	checked	none
+716	ror bh, 31	1024	1024	0	0	checked	none
+717	ror bh, 32	1024	1024	0	0	checked	none
+718	ror bh, 63	1024	1024	0	0	checked	none
+719	ror bh, 64	1024	1024	0	0	checked	none
+720	ror bh, 255	1024	1024	0	0	checked	none
+721	ror bh, cl	1024	1024	0	0	checked	none
+722	ror BYTE PTR [rdi+8], 0	1024	1024	0	0	checked	none
+723	ror BYTE PTR [rdi+8], 1	1024	1024	0	0	checked	none
+724	ror BYTE PTR [rdi+8], 7	1024	1024	0	0	checked	none
+725	ror BYTE PTR [rdi+8], 8	1024	1024	0	0	checked	none
+726	ror BYTE PTR [rdi+8], 15	1024	1024	0	0	checked	none
+727	ror BYTE PTR [rdi+8], 16	1024	1024	0	0	checked	none
+728	ror BYTE PTR [rdi+8], 31	1024	1024	0	0	checked	none
+729	ror BYTE PTR [rdi+8], 32	1024	1024	0	0	checked	none
+730	ror BYTE PTR [rdi+8], 63	1024	1024	0	0	checked	none
+731	ror BYTE PTR [rdi+8], 64	1024	1024	0	0	checked	none
+732	ror BYTE PTR [rdi+8], 255	1024	1024	0	0	checked	none
+733	ror BYTE PTR [rdi+8], cl	1024	1024	0	0	checked	none
+734	ror WORD PTR [rdi+8], 0	1024	1024	0	0	checked	none
+735	ror WORD PTR [rdi+8], 1	1024	1024	0	0	checked	none
+736	ror WORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+737	ror WORD PTR [rdi+8], 8	1024	1024	0	0	checked	none
+738	ror WORD PTR [rdi+8], 15	1024	1024	0	0	checked	none
+739	ror WORD PTR [rdi+8], 16	1024	1024	0	0	checked	none
+740	ror WORD PTR [rdi+8], 31	1024	1024	0	0	checked	none
+741	ror WORD PTR [rdi+8], 32	1024	1024	0	0	checked	none
+742	ror WORD PTR [rdi+8], 63	1024	1024	0	0	checked	none
+743	ror WORD PTR [rdi+8], 64	1024	1024	0	0	checked	none
+744	ror WORD PTR [rdi+8], 255	1024	1024	0	0	checked	none
+745	ror WORD PTR [rdi+8], cl	1024	1024	0	0	checked	none
+746	ror DWORD PTR [rdi+8], 0	1024	1024	0	0	checked	none
+747	ror DWORD PTR [rdi+8], 1	1024	1024	0	0	checked	none
+748	ror DWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+749	ror DWORD PTR [rdi+8], 8	1024	1024	0	0	checked	none
+750	ror DWORD PTR [rdi+8], 15	1024	1024	0	0	checked	none
+751	ror DWORD PTR [rdi+8], 16	1024	1024	0	0	checked	none
+752	ror DWORD PTR [rdi+8], 31	1024	1024	0	0	checked	none
+753	ror DWORD PTR [rdi+8], 32	1024	1024	0	0	checked	none
+754	ror DWORD PTR [rdi+8], 63	1024	1024	0	0	checked	none
+755	ror DWORD PTR [rdi+8], 64	1024	1024	0	0	checked	none
+756	ror DWORD PTR [rdi+8], 255	1024	1024	0	0	checked	none
+757	ror DWORD PTR [rdi+8], cl	1024	1024	0	0	checked	none
+758	ror QWORD PTR [rdi+8], 0	1024	1024	0	0	checked	none
+759	ror QWORD PTR [rdi+8], 1	1024	1024	0	0	checked	none
+760	ror QWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+761	ror QWORD PTR [rdi+8], 8	1024	1024	0	0	checked	none
+762	ror QWORD PTR [rdi+8], 15	1024	1024	0	0	checked	none
+763	ror QWORD PTR [rdi+8], 16	1024	1024	0	0	checked	none
+764	ror QWORD PTR [rdi+8], 31	1024	1024	0	0	checked	none
+765	ror QWORD PTR [rdi+8], 32	1024	1024	0	0	checked	none
+766	ror QWORD PTR [rdi+8], 63	1024	1024	0	0	checked	none
+767	ror QWORD PTR [rdi+8], 64	1024	1024	0	0	checked	none
+768	ror QWORD PTR [rdi+8], 255	1024	1024	0	0	checked	none
+769	ror QWORD PTR [rdi+8], cl	1024	1024	0	0	checked	none
+770	movzx ax, bl	1024	1024	0	0	checked	none
+771	movzx ax, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+772	movsx ax, bl	1024	1024	0	0	checked	none
+773	movsx ax, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+774	movzx eax, bl	1024	1024	0	0	checked	none
+775	movzx eax, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+776	movsx eax, bl	1024	1024	0	0	checked	none
+777	movsx eax, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+778	movzx eax, bx	1024	1024	0	0	checked	none
+779	movzx eax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+780	movsx eax, bx	1024	1024	0	0	checked	none
+781	movsx eax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+782	movzx rax, bl	1024	1024	0	0	checked	none
+783	movzx rax, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+784	movsx rax, bl	1024	1024	0	0	checked	none
+785	movsx rax, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+786	movzx rax, bx	1024	1024	0	0	checked	none
+787	movzx rax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+788	movsx rax, bx	1024	1024	0	0	checked	none
+789	movsx rax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+790	movsxd rax, ebx	1024	1024	0	0	checked	none
+791	movsxd rax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+792	lea ax, [rbx]	1024	1024	0	0	checked	none
+793	lea ax, [rbx+127]	1024	1024	0	0	checked	none
+794	lea ax, [rbx-128]	1024	1024	0	0	checked	none
+795	lea ax, [rbx+rcx*2-7]	1024	1024	0	0	checked	none
+796	lea ax, [r8+r9*4+2147483647]	1024	1024	0	0	checked	none
+797	lea ax, [r8+r9*8-2147483648]	1024	1024	0	0	checked	none
+798	lea ax, [rcx*8+127]	1024	1024	0	0	checked	none
+799	lea ax, [0x12345678]	1024	1024	0	0	checked	none
+800	lea ax, [ebx+ecx*4-7]	1024	1024	0	0	checked	none
+801	lea ax, [r8d+r9d*8+127]	1024	1024	0	0	checked	none
+802	lea eax, [rbx]	1024	1024	0	0	checked	none
+803	lea eax, [rbx+127]	1024	1024	0	0	checked	none
+804	lea eax, [rbx-128]	1024	1024	0	0	checked	none
+805	lea eax, [rbx+rcx*2-7]	1024	1024	0	0	checked	none
+806	lea eax, [r8+r9*4+2147483647]	1024	1024	0	0	checked	none
+807	lea eax, [r8+r9*8-2147483648]	1024	1024	0	0	checked	none
+808	lea eax, [rcx*8+127]	1024	1024	0	0	checked	none
+809	lea eax, [0x12345678]	1024	1024	0	0	checked	none
+810	lea eax, [ebx+ecx*4-7]	1024	1024	0	0	checked	none
+811	lea eax, [r8d+r9d*8+127]	1024	1024	0	0	checked	none
+812	lea rax, [rbx]	1024	1024	0	0	checked	none
+813	lea rax, [rbx+127]	1024	1024	0	0	checked	none
+814	lea rax, [rbx-128]	1024	1024	0	0	checked	none
+815	lea rax, [rbx+rcx*2-7]	1024	1024	0	0	checked	none
+816	lea rax, [r8+r9*4+2147483647]	1024	1024	0	0	checked	none
+817	lea rax, [r8+r9*8-2147483648]	1024	1024	0	0	checked	none
+818	lea rax, [rcx*8+127]	1024	1024	0	0	checked	none
+819	lea rax, [0x12345678]	1024	1024	0	0	checked	none
+820	lea rax, [ebx+ecx*4-7]	1024	1024	0	0	checked	none
+821	lea rax, [r8d+r9d*8+127]	1024	1024	0	0	checked	none
+822	lea r8w, [rbx]	1024	1024	0	0	checked	none
+823	lea r8w, [rbx+127]	1024	1024	0	0	checked	none
+824	lea r8w, [rbx-128]	1024	1024	0	0	checked	none
+825	lea r8w, [rbx+rcx*2-7]	1024	1024	0	0	checked	none
+826	lea r8w, [r8+r9*4+2147483647]	1024	1024	0	0	checked	none
+827	lea r8w, [r8+r9*8-2147483648]	1024	1024	0	0	checked	none
+828	lea r8w, [rcx*8+127]	1024	1024	0	0	checked	none
+829	lea r8w, [0x12345678]	1024	1024	0	0	checked	none
+830	lea r8w, [ebx+ecx*4-7]	1024	1024	0	0	checked	none
+831	lea r8w, [r8d+r9d*8+127]	1024	1024	0	0	checked	none
+832	lea r8d, [rbx]	1024	1024	0	0	checked	none
+833	lea r8d, [rbx+127]	1024	1024	0	0	checked	none
+834	lea r8d, [rbx-128]	1024	1024	0	0	checked	none
+835	lea r8d, [rbx+rcx*2-7]	1024	1024	0	0	checked	none
+836	lea r8d, [r8+r9*4+2147483647]	1024	1024	0	0	checked	none
+837	lea r8d, [r8+r9*8-2147483648]	1024	1024	0	0	checked	none
+838	lea r8d, [rcx*8+127]	1024	1024	0	0	checked	none
+839	lea r8d, [0x12345678]	1024	1024	0	0	checked	none
+840	lea r8d, [ebx+ecx*4-7]	1024	1024	0	0	checked	none
+841	lea r8d, [r8d+r9d*8+127]	1024	1024	0	0	checked	none
+842	lea r8, [rbx]	1024	1024	0	0	checked	none
+843	lea r8, [rbx+127]	1024	1024	0	0	checked	none
+844	lea r8, [rbx-128]	1024	1024	0	0	checked	none
+845	lea r8, [rbx+rcx*2-7]	1024	1024	0	0	checked	none
+846	lea r8, [r8+r9*4+2147483647]	1024	1024	0	0	checked	none
+847	lea r8, [r8+r9*8-2147483648]	1024	1024	0	0	checked	none
+848	lea r8, [rcx*8+127]	1024	1024	0	0	checked	none
+849	lea r8, [0x12345678]	1024	1024	0	0	checked	none
+850	lea r8, [ebx+ecx*4-7]	1024	1024	0	0	checked	none
+851	lea r8, [r8d+r9d*8+127]	1024	1024	0	0	checked	none
+852	lea rbx, [rbx+rcx*8]	1024	1024	0	0	checked	none
+853	lea rcx, [rbx+rcx*8]	1024	1024	0	0	checked	none
+854	lea r9, [r8+r9*2-7]	1024	1024	0	0	checked	none
+855	lea ax, fs:[rbx+rcx*2-7]	1024	1024	0	0	checked	none
+856	lea ax, gs:[rbx+rcx*2-7]	1024	1024	0	0	checked	none
+857	lea eax, fs:[rbx+rcx*2-7]	1024	1024	0	0	checked	none
+858	lea eax, gs:[rbx+rcx*2-7]	1024	1024	0	0	checked	none
+859	lea rax, fs:[rbx+rcx*2-7]	1024	1024	0	0	checked	none
+860	lea rax, gs:[rbx+rcx*2-7]	1024	1024	0	0	checked	none
+861	mov ah, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+862	mov ah, BYTE PTR [rsi+16]	1024	1024	0	0	checked	none
+863	mov ah, BYTE PTR [rsp-16]	1024	1024	0	0	checked	none
+864	mov ch, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+865	mov ch, BYTE PTR [rsi+16]	1024	1024	0	0	checked	none
+866	mov ch, BYTE PTR [rsp-16]	1024	1024	0	0	checked	none
+867	mov dh, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+868	mov dh, BYTE PTR [rsi+16]	1024	1024	0	0	checked	none
+869	mov dh, BYTE PTR [rsp-16]	1024	1024	0	0	checked	none
+870	mov bh, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+871	mov bh, BYTE PTR [rsi+16]	1024	1024	0	0	checked	none
+872	mov bh, BYTE PTR [rsp-16]	1024	1024	0	0	checked	none
+873	seta al	1024	1024	0	0	checked	none
+874	seta ah	1024	1024	0	0	checked	none
+875	seta BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+876	setae al	1024	1024	0	0	checked	none
+877	setae ah	1024	1024	0	0	checked	none
+878	setae BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+879	setb al	1024	1024	0	0	checked	none
+880	setb ah	1024	1024	0	0	checked	none
+881	setb BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+882	setbe al	1024	1024	0	0	checked	none
+883	setbe ah	1024	1024	0	0	checked	none
+884	setbe BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+885	sete al	1024	1024	0	0	checked	none
+886	sete ah	1024	1024	0	0	checked	none
+887	sete BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+888	setg al	1024	1024	0	0	checked	none
+889	setg ah	1024	1024	0	0	checked	none
+890	setg BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+891	setge al	1024	1024	0	0	checked	none
+892	setge ah	1024	1024	0	0	checked	none
+893	setge BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+894	setl al	1024	1024	0	0	checked	none
+895	setl ah	1024	1024	0	0	checked	none
+896	setl BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+897	setle al	1024	1024	0	0	checked	none
+898	setle ah	1024	1024	0	0	checked	none
+899	setle BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+900	setne al	1024	1024	0	0	checked	none
+901	setne ah	1024	1024	0	0	checked	none
+902	setne BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+903	setns al	1024	1024	0	0	checked	none
+904	setns ah	1024	1024	0	0	checked	none
+905	setns BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+906	sets al	1024	1024	0	0	checked	none
+907	sets ah	1024	1024	0	0	checked	none
+908	sets BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+909	seto al	1024	1024	0	0	checked	none
+910	seto ah	1024	1024	0	0	checked	none
+911	seto BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+912	setno al	1024	1024	0	0	checked	none
+913	setno ah	1024	1024	0	0	checked	none
+914	setno BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+915	setp al	1024	1024	0	0	checked	none
+916	setp ah	1024	1024	0	0	checked	none
+917	setp BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+918	setpe al	1024	1024	0	0	checked	none
+919	setpe ah	1024	1024	0	0	checked	none
+920	setpe BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+921	setnp al	1024	1024	0	0	checked	none
+922	setnp ah	1024	1024	0	0	checked	none
+923	setnp BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+924	setpo al	1024	1024	0	0	checked	none
+925	setpo ah	1024	1024	0	0	checked	none
+926	setpo BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+927	cmova ax, bx	1024	1024	0	0	checked	none
+928	cmova ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+929	cmova eax, ebx	1024	1024	0	0	checked	none
+930	cmova eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+931	cmova rax, rbx	1024	1024	0	0	checked	none
+932	cmova rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+933	cmovb ax, bx	1024	1024	0	0	checked	none
+934	cmovb ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+935	cmovb eax, ebx	1024	1024	0	0	checked	none
+936	cmovb eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+937	cmovb rax, rbx	1024	1024	0	0	checked	none
+938	cmovb rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+939	cmovbe ax, bx	1024	1024	0	0	checked	none
+940	cmovbe ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+941	cmovbe eax, ebx	1024	1024	0	0	checked	none
+942	cmovbe eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+943	cmovbe rax, rbx	1024	1024	0	0	checked	none
+944	cmovbe rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+945	cmove ax, bx	1024	1024	0	0	checked	none
+946	cmove ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+947	cmove eax, ebx	1024	1024	0	0	checked	none
+948	cmove eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+949	cmove rax, rbx	1024	1024	0	0	checked	none
+950	cmove rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+951	cmovg ax, bx	1024	1024	0	0	checked	none
+952	cmovg ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+953	cmovg eax, ebx	1024	1024	0	0	checked	none
+954	cmovg eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+955	cmovg rax, rbx	1024	1024	0	0	checked	none
+956	cmovg rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+957	cmovge ax, bx	1024	1024	0	0	checked	none
+958	cmovge ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+959	cmovge eax, ebx	1024	1024	0	0	checked	none
+960	cmovge eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+961	cmovge rax, rbx	1024	1024	0	0	checked	none
+962	cmovge rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+963	cmovae ax, bx	1024	1024	0	0	checked	none
+964	cmovae ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+965	cmovae eax, ebx	1024	1024	0	0	checked	none
+966	cmovae eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+967	cmovae rax, rbx	1024	1024	0	0	checked	none
+968	cmovae rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+969	cmovl ax, bx	1024	1024	0	0	checked	none
+970	cmovl ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+971	cmovl eax, ebx	1024	1024	0	0	checked	none
+972	cmovl eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+973	cmovl rax, rbx	1024	1024	0	0	checked	none
+974	cmovl rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+975	cmovle ax, bx	1024	1024	0	0	checked	none
+976	cmovle ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+977	cmovle eax, ebx	1024	1024	0	0	checked	none
+978	cmovle eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+979	cmovle rax, rbx	1024	1024	0	0	checked	none
+980	cmovle rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+981	cmovne ax, bx	1024	1024	0	0	checked	none
+982	cmovne ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+983	cmovne eax, ebx	1024	1024	0	0	checked	none
+984	cmovne eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+985	cmovne rax, rbx	1024	1024	0	0	checked	none
+986	cmovne rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+987	cmovns ax, bx	1024	1024	0	0	checked	none
+988	cmovns ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+989	cmovns eax, ebx	1024	1024	0	0	checked	none
+990	cmovns eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+991	cmovns rax, rbx	1024	1024	0	0	checked	none
+992	cmovns rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+993	cmovs ax, bx	1024	1024	0	0	checked	none
+994	cmovs ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+995	cmovs eax, ebx	1024	1024	0	0	checked	none
+996	cmovs eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+997	cmovs rax, rbx	1024	1024	0	0	checked	none
+998	cmovs rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+999	cmovo ax, bx	1024	1024	0	0	checked	none
+1000	cmovo ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1001	cmovo eax, ebx	1024	1024	0	0	checked	none
+1002	cmovo eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1003	cmovo rax, rbx	1024	1024	0	0	checked	none
+1004	cmovo rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1005	cmovno ax, bx	1024	1024	0	0	checked	none
+1006	cmovno ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1007	cmovno eax, ebx	1024	1024	0	0	checked	none
+1008	cmovno eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1009	cmovno rax, rbx	1024	1024	0	0	checked	none
+1010	cmovno rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1011	cmovp ax, bx	1024	1024	0	0	checked	none
+1012	cmovp ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1013	cmovp eax, ebx	1024	1024	0	0	checked	none
+1014	cmovp eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1015	cmovp rax, rbx	1024	1024	0	0	checked	none
+1016	cmovp rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1017	cmovpe ax, bx	1024	1024	0	0	checked	none
+1018	cmovpe ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1019	cmovpe eax, ebx	1024	1024	0	0	checked	none
+1020	cmovpe eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1021	cmovpe rax, rbx	1024	1024	0	0	checked	none
+1022	cmovpe rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1023	cmovnp ax, bx	1024	1024	0	0	checked	none
+1024	cmovnp ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1025	cmovnp eax, ebx	1024	1024	0	0	checked	none
+1026	cmovnp eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1027	cmovnp rax, rbx	1024	1024	0	0	checked	none
+1028	cmovnp rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1029	cmovpo ax, bx	1024	1024	0	0	checked	none
+1030	cmovpo ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1031	cmovpo eax, ebx	1024	1024	0	0	checked	none
+1032	cmovpo eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1033	cmovpo rax, rbx	1024	1024	0	0	checked	none
+1034	cmovpo rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+1035	ja forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1036	ja backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1037	jae forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1038	jae backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1039	jb forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1040	jb backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1041	jbe forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1042	jbe backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1043	je forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1044	je backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1045	jne forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1046	jne backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1047	jg forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1048	jg backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1049	jge forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1050	jge backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1051	jl forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1052	jl backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1053	jle forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1054	jle backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1055	js forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1056	js backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1057	jns forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1058	jns backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1059	jo forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1060	jo backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1061	jno forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1062	jno backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1063	jp forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1064	jp backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1065	jpe forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1066	jpe backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1067	jnp forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1068	jnp backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1069	jpo forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1070	jpo backward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1071	jmp forward	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1072	call and ret (stack return address)	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+1073	rep movsb	1024	1024	0	0	checked	none
+1074	rep movsw	1024	1024	0	0	checked	none
+1075	rep movsd	1024	1024	0	0	checked	none
+1076	rep movsq	1024	1024	0	0	checked	none
