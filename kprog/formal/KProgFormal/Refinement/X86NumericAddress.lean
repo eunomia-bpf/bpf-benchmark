@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86Arithmetic
 import KProgFormal.X86Immediate
 import KProgFormal.Refinement.X86Logic
 import KProgFormal.Refinement.X86Endian
@@ -633,5 +634,73 @@ theorem logic_immediate_frame_refines (env : Environment) (frame : Frame) (arena
     rfl
   · simp only [test, ↓reduceIte, native_register_write, values]
     rfl
+
+
+/-- Generated narrowing depends only on the native operand-width bits. -/
+theorem arithmetic_narrow_operand_bits (width : Reference.X86.ScalarWidth)
+    (right native : NativeWord) (bits : right.setWidth width.bits = native.setWidth width.bits) :
+    X86Arithmetic.narrow width right = X86Arithmetic.narrow width native := by
+  cases width <;> simp_all only [X86Arithmetic.narrow, X86Scalar.handlerWidth,
+    GeneratedX86Width.narrow, GeneratedX86Width.mask, Reference.X86.ScalarWidth.bits,
+    Reference.X86.ScalarWidth.bytes, Nat.reduceMul, Reference.Word] <;> bv_decide
+
+/-- All arithmetic flag helpers first narrow both operands; high unused
+immediate bits cannot affect carry, parity, auxiliary carry or other flags. -/
+theorem arithmetic_flags_operand_bits (width : Reference.X86.ScalarWidth)
+    (kind : Reference.X86.ArithmeticKind) (left right native old : NativeWord)
+    (bits : right.setWidth width.bits = native.setWidth width.bits) :
+    X86Arithmetic.flags width kind left right old = X86Arithmetic.flags width kind left native old := by
+  simp only [X86Arithmetic.flags, X86Arithmetic.value,
+    arithmetic_narrow_operand_bits width right native bits]
+
+/-- CMP takes both materialized lane operands before replacing flags. Raw
+registers, tags, stack and memory remain exactly as they entered the handler. -/
+def compareRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (dst src : Reference.X86.RegisterSlice) (nextPc : NativeWord) : RegisterState :=
+  let left := readRegister env frame arena state width dst
+  let right := readRegister env frame arena state width src
+  registerPc (registerFlags state (X86Arithmetic.flags width .compare left right state.raw.rflags)) nextPc
+
+theorem compare_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (dst src : Reference.X86.RegisterSlice) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (compareRegister env frame arena state width dst src nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.arithmetic width .compare (.register dst) (.register src) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86Arithmetic.step_refines]
+  simp only [compareRegister, native_register_pc, native_register_flags, native_register_read,
+    X86Arithmetic.handlerStep, X86Scalar.read_refines, Reference.X86.ScalarDestination.source,
+    Reference.X86.scalarRead, List.nil_append, List.append_nil]
+  rfl
+
+/-- CMP_IMM uses the same generated low-imm32/sign-extension helper as the
+production body, without scalarizing or rewriting its raw destination. -/
+def compareImmediate (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (dst : Reference.X86.RegisterSlice) (raw nextPc : NativeWord) : RegisterState :=
+  let left := readRegister env frame arena state width dst
+  let right := GeneratedX86Immediate.value raw (X86Scalar.handlerWidth width)
+  registerPc (registerFlags state (X86Arithmetic.flags width .compare left right state.raw.rflags)) nextPc
+
+theorem compare_immediate_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (dst : Reference.X86.RegisterSlice) (raw native nextPc : NativeWord)
+    (field : ImmediateBinding width raw native) :
+    (⟨nativeRegisters env frame arena (compareImmediate env frame arena state width dst raw nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.arithmetic width .compare (.register dst) (.immediate native) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have bits : (GeneratedX86Immediate.value raw (X86Scalar.handlerWidth width)).setWidth width.bits =
+      native.setWidth width.bits := by
+    rw [x86_immediate_value_refines]
+    exact field.symm
+  have flags (left old : NativeWord) := arithmetic_flags_operand_bits width .compare left _ native old bits
+  rw [← X86Arithmetic.step_refines]
+  simp only [compareImmediate, native_register_pc, native_register_flags, native_register_read,
+    X86Arithmetic.handlerStep, X86Scalar.read_refines, Reference.X86.ScalarDestination.source,
+    Reference.X86.scalarRead, List.nil_append, List.append_nil, flags]
+  rfl
 
 end KProgFormal.Refinement.X86NumericAddress

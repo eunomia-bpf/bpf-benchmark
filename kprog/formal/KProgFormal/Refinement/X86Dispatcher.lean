@@ -264,7 +264,8 @@ theorem logic_register_body_refines (env : EntryEnvironment.Environment) (frame 
 /-- Partial register-handler dispatcher. Existing NOP/MOV steps retain their
 prefix selection; the later singleton CMOV/BSWAP/POPCNT/XCHG gates consume their actual
 raw opcode, width and GPR fields. Logical ALU-register/immediate payloads
-and TEST_REG/TEST_IMM add their generated family/AUX/lane/low-imm32 selection. Other unproved forms remain
+and CMP/TEST register/immediate forms add their generated family/AUX/lane/low-imm32
+selection. Other unproved forms remain
 None. Distinct generated opcode identities prevent an intervening handler
 from taking these gates; None never means production success/rejection. -/
 def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
@@ -279,6 +280,11 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
         pure ⟨nativeRegisters env frame arena
           (logicImmediate env frame arena state width kind destination value nextPc), [], none⟩
+      else if code = GeneratedX86DispatchFamily.code .cmpImm then do
+        let width ← widthOf flags
+        let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
+        pure ⟨nativeRegisters env frame arena
+          (compareImmediate env frame arena state width destination value nextPc), [], none⟩
       else if code = GeneratedX86DispatchFamily.code .testImm then do
         let width ← widthOf flags
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
@@ -291,6 +297,12 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
         pure ⟨nativeRegisters env frame arena
           (logicRegisterBody env frame arena state width kind dst src aux destination source nextPc), [], none⟩
+      else if code = GeneratedX86DispatchFamily.code .cmpReg then do
+        let width ← widthOf flags
+        let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
+        let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
+        pure ⟨nativeRegisters env frame arena
+          (compareRegister env frame arena state width destination source nextPc), [], none⟩
       else if code = GeneratedX86DispatchFamily.code .testReg then do
         let width ← widthOf flags
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
@@ -343,6 +355,12 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
       (immediateField : ImmediateBinding width value nativeValue) :
       RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code op)
         (.logic width kind (.register destination) (.immediate nativeValue) nextPc)
+  | compareImmediate (width : ScalarWidth) (destination : RegisterSlice) (nativeValue : Word)
+      (widthField : WidthBinding flags width)
+      (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination)
+      (immediateField : ImmediateBinding width value nativeValue) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code .cmpImm)
+        (.arithmetic width .compare (.register destination) (.immediate nativeValue) nextPc)
   | testImmediate (width : ScalarWidth) (destination : RegisterSlice) (nativeValue : Word)
       (widthField : WidthBinding flags width)
       (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination)
@@ -360,6 +378,12 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
       (srcField : SliceBinding width src (GeneratedX86RegLaneAux.srcShift aux) source) :
       RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code op)
         (.logic width kind (.register destination) (.register source) nextPc)
+  | compareRegister (width : ScalarWidth) (destination source : RegisterSlice)
+      (widthField : WidthBinding flags width)
+      (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination)
+      (srcField : SliceBinding width src (GeneratedX86RegLaneAux.srcShift aux) source) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code .cmpReg)
+        (.arithmetic width .compare (.register destination) (.register source) nextPc)
   | testRegister (width : ScalarWidth) (destination source : RegisterSlice)
       (widthField : WidthBinding flags width)
       (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination)
@@ -390,7 +414,7 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
 
 /-- One complete raw-frame step for the currently lifted register opcodes:
 NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG plus logical ALU-register
-and immediate family payloads and TEST_REG/TEST_IMM. Neither component handler
+and immediate family payloads and CMP/TEST register/immediate forms. Neither component handler
 semantics nor a chosen condition/value/state equation is assumed. This is a
 partial dispatcher theorem, not all77 operations or a compiled-body claim. -/
 theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
@@ -411,6 +435,13 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
         widthDecoded, kindDecoded, dstDecoded] using
         congrArg some (logic_immediate_frame_refines env frame arena state width kind destination value nativeValue nextPc immediateField)
+  | compareImmediate width destination nativeValue widthField dstField immediateField =>
+      have widthDecoded := width_binding_decodes flags width widthField
+      have dstDecoded := slice_binding_decodes width dst _ destination dstField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, dstDecoded] using
+        congrArg some (compare_immediate_frame_refines env frame arena state width destination value nativeValue nextPc immediateField)
   | testImmediate width destination nativeValue widthField dstField immediateField =>
       have widthDecoded := width_binding_decodes flags width widthField
       have dstDecoded := slice_binding_decodes width dst _ destination dstField
@@ -428,6 +459,14 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
         GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
         widthDecoded, kindDecoded, dstDecoded, srcDecoded] using
         congrArg some (logic_register_body_refines env frame arena state width kind dst src aux destination source nextPc operationField dstField srcField)
+  | compareRegister width destination source widthField dstField srcField =>
+      have widthDecoded := width_binding_decodes flags width widthField
+      have dstDecoded := slice_binding_decodes width dst _ destination dstField
+      have srcDecoded := slice_binding_decodes width src _ source srcField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, dstDecoded, srcDecoded] using
+        congrArg some (compare_register_frame_refines env frame arena state width destination source nextPc)
   | testRegister width destination source widthField dstField srcField =>
       have widthDecoded := width_binding_decodes flags width widthField
       have dstDecoded := slice_binding_decodes width dst _ destination dstField

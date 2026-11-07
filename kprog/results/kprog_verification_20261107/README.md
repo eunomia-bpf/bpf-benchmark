@@ -2378,3 +2378,33 @@ records remain historical; a later publication receipt is added separately.
 Commands, pins, complete proof diff and logs are appended to the existing
 integration JSON/gzip. The logical ALU subsets are partial family coverage;
 full77/72/whole-dispatch/O2/O4 completion remains open.
+
+## CMP register/immediate raw-frame and dispatcher refinement
+
+CMP_REG13 and CMP_IMM12 now use the same raw dispatcher-step theorem as the
+existing register families. The two bodies materialize the destination and
+register-source lanes (or the generated low-imm32 immediate), compute the
+existing generated subtraction flags including PF/AF, and update only flags
+and PC. Raw GPRs, provenance tags, stack and memory are preserved. The theorem
+covers every legal high/low slice, width, alias and incoming flag combination,
+including RSP and private-STACK representations. Opcode, width, lane and
+immediate operand-bit identities are its only bindings; no chosen result,
+flag, native-state or whole-word-immediate equality is assumed. Unused AUX
+payload/high bytes are unconstrained, as are immediate-form SRC/source-shift.
+
+A reusable generated-narrowing lemma derives that unused high immediate bits
+cannot change any arithmetic flag. The former core declarations are retained
+byte-for-byte with one additional import. All previous dispatcher cases also
+compile. Focused92-job Lean build and four audits PASS with only the prior
+propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies. All372
+proof/configuration pins remain stable. Three existing generator checks and
+the cached UBSan comparison-handler2913/route47529 hosts pass with unchanged
+source/dependency and binary hashes; no new tests or duplicate build is added.
+The component-only initial pass is retained separately from the final composed
+pass. Sources, exact diffs, commands, pins, logs and audits are appended to the
+existing integration JSON/gzip.
+
+The sole complete make-check run is still checking immutable5c7549242, which
+precedes this CMP increment. It has passed the repaired POPCNT component and
+DIV at this observation, but is not yet a full PASS. This later CMP increment
+has its own focused validation; full77/72/whole-ISA/O2/O4 work remains open.
