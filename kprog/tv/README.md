@@ -2022,3 +2022,19 @@ reordered and its first pointer guard uses JMP32; exact ordered-event and
 full-width branch correspondence need new validation. The archive and binding
 report retain these observations without substituting the old producer or
 claiming the old certificate covers new bytes.
+
+`make -C kprog/tv trusted-simple-current-audit` checks canonical diagnostics for
+that fresh B30. It proves a cross2^32 abstract interval takes a different first
+guard successor, and constructs successful context-read traces in opposite
+orders. No claim is made that the abstract interval is a realizable Linux XDP
+buffer. The captured B and private candidate literals are checked against the
+actual archive/ELF bytes in `trusted-simple-current-audit.json`.
+
+The archived two-line candidate makes the XDP context view volatile and applies
+the existing empty value barrier. Its exact baseline compilation reproduces
+the captured proof input; the candidate restores ordered loads and a64-bit
+first guard, with canonical local successor/read-order proofs. It adds no
+runtime check. It remains unpromoted and was not kernel-loaded; later guard
+ordering, full-state transport and physical ABI still require completion.
+The canonical production header remains unchanged for the active application
+runs; the patch and exact compiler inputs are retained for its owner.

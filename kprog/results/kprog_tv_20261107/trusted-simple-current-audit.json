@@ -1,0 +1,186 @@
+{
+  "status": "current_B30_unconditional_width_and_order_contract_diagnostics_proved_private_candidate_local_components_pass",
+  "utc": "2026-11-07T15:51:10.086795+00:00",
+  "captured_artifact": {
+    "commit": "d451a9a30ef9ceda089bd4714f748afcc9e584cb",
+    "native_bytes": 60,
+    "accepted_B_instructions": 30,
+    "accepted_B_sha256": "acc12304969d38bda0dbebd36b92c7a840ac7035dfdc2e720c60f742a3853fd4",
+    "literal_matches_actual_capture": true
+  },
+  "claims": [
+    "Canonical decoded current PC4 compares only low32 bits. A144-byte abstract interval from0xfffffff0 to0x100000080 gives native fallthrough17 but B exit27.",
+    "Canonical native two-load execution reads0x1000 then0x1008; actual-byte B evaluated under the declared physical XDP conversion reads0x1008 then0x1000, with all permissions/initialization successful.",
+    "Exact archived C/compiler flags reproduce the actual29-instruction baseline proof input.",
+    "Private two-line candidate emits28 instructions with ordered context loads and64-bit first JGT; canonical step theorem matches BOTH native guard successors for arbitrary64-bit data/end."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-entry-certificate trusted-simple-current-audit",
+    "reproduction": "make -C kprog/tv trusted-simple-current-audit",
+    "entry_dependency": "unchanged entry certificate just checked by full dependent replay2efe17db6",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleCurrent.current_guard_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleCurrent.current_guard_divergence": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleCurrent.native_context_read_order": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleCurrent.current_context_read_order": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleCurrent.context_trace_mismatch": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleCurrent.candidate_guard_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleCurrent.candidate_guard_successor": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleCurrent.candidate_context_read_order": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    "no_sorryAx": true,
+    "log_sha256": "c42e8043c4499f6d150c3eb8e7e57b0ef8d9636fae32d98b6d0dd9f90640cede"
+  },
+  "private_candidate": {
+    "utc": "2026-11-07T15:49:01.134200+00:00",
+    "baseline_header_sha256": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+    "archived_command": [
+      "clang",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/repository/kprog/results/kprog_tv_20261107/current-kernel/trusted-simple/.live-4j7erzqu/requests/request-75re46cs/generated/trusted_x86.bpf.c",
+      "-o",
+      "/workspaces/repository/kprog/results/kprog_tv_20261107/current-kernel/trusted-simple/.live-4j7erzqu/requests/request-75re46cs/generated/trusted_x86.bpf.o"
+    ],
+    "variants": {
+      "baseline": {
+        "instructions": 29,
+        "proof_input_sha256": "ebb572165c64abc3f3029571c02b5c669eff37b8a8cd8ab1e02b3e06f7eb734a",
+        "first_memory_instructions": [
+          {
+            "pc": 2,
+            "code": 97,
+            "registers": 19,
+            "offset": 4,
+            "imm": 0
+          },
+          {
+            "pc": 3,
+            "code": 97,
+            "registers": 17,
+            "offset": 0,
+            "imm": 0
+          }
+        ],
+        "first_conditional": {
+          "pc": 4,
+          "wire": [
+            46,
+            49,
+            22,
+            0
+          ]
+        }
+      },
+      "candidate": {
+        "instructions": 28,
+        "proof_input_sha256": "e1ee9cde8ad14ee5f8e67167adb28d691053f73f88397fb2d028c07ba621bb3c",
+        "first_memory_instructions": [
+          {
+            "pc": 1,
+            "code": 97,
+            "registers": 18,
+            "offset": 0,
+            "imm": 0
+          },
+          {
+            "pc": 2,
+            "code": 97,
+            "registers": 17,
+            "offset": 4,
+            "imm": 0
+          }
+        ],
+        "first_conditional": {
+          "pc": 4,
+          "wire": [
+            45,
+            18,
+            22,
+            0
+          ]
+        }
+      }
+    },
+    "status": "private_compile_candidate_only_not_promoted_or_kernel_loaded",
+    "claims": [
+      "Recompiling archived actual simple C with exact compiler flags reproduces all baseline proof-input bytes.",
+      "Private candidate keeps data before data_end and uses64-bit first JGT (0x2d), rather than baseline reverse-order context reads and JMP32(0x2e).",
+      "Candidate has28 instructions versus29 baseline; no synthetic runtime check was introduced."
+    ],
+    "remaining": [
+      "Not promoted or kernel loaded; existing trusted service still uses unchanged canonical header.",
+      "Candidate later guard arithmetic order and full architectural-state correspondence still need TV.",
+      "General physical ABI validity of the cross2^32 abstract counterexample is not claimed."
+    ]
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "c810a7707495b230af90a4d95dffc012632232eea119080c76c9669f9f5801e3",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/TrustedSimpleSafety.lean": "5537b0f4d04c5b5ebec988c1cb9c63175e9b786d95495265f3273675f82f3bea",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa",
+    "kprog/tv/TrustedSimplePlatform.lean": "1bfe67bb10353fca860197907738815bea87995a0ecb8211d0836e0d6f236f9f",
+    "kprog/tv/TrustedSimpleCurrent.lean": "26ed48520af77f319d52cd02a46afc05f7427e81071f8c5cab70ea95d1119cae",
+    "kprog/tv/Makefile": "6462561fb698eab7069cc1fd614a684a5675cc61cc43e8ded75983d442356d65"
+  },
+  "input_archive_sha256": "1b9159c3317005803e4d9799ca53660b9a5ff3e03f5b4d1a93bf272a83ea9f11",
+  "not_yet_claimed": [
+    "Abstract crossing2^32 interval is a realizable Linux XDP buffer; actual physical ABI needs proof.",
+    "Candidate is promoted, accepted by the kernel, or has a whole-program/full-state certificate.",
+    "Later reordered pure guards/full architectural state, original RET/physical entry ABI, other micro/application TV."
+  ],
+  "trusted": [
+    "same canonical X86/BPF/reference memory semantics, no second ISA",
+    "Lean kernel and reported axioms; native guard existence inherits Lean.ofReduceBool",
+    "declared XDP context expansion and captured-artifact provenance",
+    "ELF/archive parser and compiler invocation/source selection"
+  ]
+}

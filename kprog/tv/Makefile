@@ -853,3 +853,8 @@ unbound-loader-regression: unbound-kernel-check unbound-katran-check
 trusted-simple-platform-certificate: trusted-simple-safety-certificate
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/TrustedSimplePlatform.olean ../tv/TrustedSimplePlatform.lean
+
+.PHONY: trusted-simple-current-audit
+trusted-simple-current-audit: trusted-simple-entry-certificate
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/TrustedSimpleCurrent.olean ../tv/TrustedSimpleCurrent.lean
