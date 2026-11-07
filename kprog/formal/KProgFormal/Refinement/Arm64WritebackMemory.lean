@@ -387,4 +387,210 @@ theorem dispatch_signed_indexed_refines (op : GeneratedArm64LdrSx.LdrSx)
   change some (signedCore op dst output .none i.base (offsetValue i.width s i.offset) s) = _
   rw [signed_indexed_refines op i dst output s width transfer noWriteback alignment accessible]
 
+/-- Two ordered scalar-sized accesses on the non-LSE2 pair profile. Both
+addresses are captured before either register write; the final PC advances once.
+Generated pair direction and width-dependent stride remain explicit. -/
+def pairSuccess (i : PairMemoryInstruction) (address : Word) (s : State) : Transition State :=
+  let load := GeneratedArm64PairMem.access (Arm64PairMemory.opcode i) == .load
+  let firstTransfer := if load then MemoryTransfer.load i.first none else .store i.first
+  let secondTransfer := if load then MemoryTransfer.load i.second none else .store i.second
+  let first := success (Arm64PairMemory.accessWidth i) firstTransfer address s
+  let second := success (Arm64PairMemory.accessWidth i) secondTransfer
+    (Arm64PairMemory.secondAddress i address) first.state
+  { second with state := { second.state with pc := s.pc + 4 }, events := first.events ++ second.events }
+
+/-- Actual successful LDP/STP core on the two-access profile, retaining both
+ordered element events and all state. This is not a single-copy atomicity claim. -/
+theorem pair_success_refines (i : PairMemoryInstruction) (s : State)
+    (alignment : spAlignmentFault s i.base = none) (twoAccesses : s.pairSingleAccess = false)
+    (firstAccess : permitted (if i.load then s.memory.readable else s.memory.writable)
+      (memoryBase s i.base + i.offset) i.width.bytes = true)
+    (secondAccess : permitted (if i.load then s.memory.readable else s.memory.writable)
+      (memoryBase s i.base + i.offset + BitVec.ofNat 64 i.width.bytes) i.width.bytes = true) :
+    pairSuccess i (memoryBase s i.base + i.offset) s = step (.pairMemory i) s := by
+  have storePermission (m : Memory) (address value : Word) (bytes : Nat) :
+      (storeMemory m address value bytes).writable = m.writable := rfl
+  have fields := Arm64PairMemory.fields_refine i s
+  simp only [pairSuccess, fields.2.2.2.1, fields.2.2.2.2, step, pairMemoryStep, alignment,
+    twoAccesses, Bool.false_eq_true, ↓reduceIte]
+  rcases i with ⟨width, load, first, second, base, offset, distinct⟩
+  cases width <;> cases load <;>
+    simp_all only [success, Arm64PairMemory.accessWidth, readMemory, writeMemory,
+      Arm64Memory.load_value, Arm64Memory.store_refines, Arm64Register.write_refines,
+      Arm64Register.read_refines, Arm64Memory.load_result_refines, pairRegisters,
+      Width.bytes, MemoryWidth.bytes, Bool.false_eq_true, ↓reduceIte] <;>
+    simp_all [memoryLoadValue, narrow, Width.bits, MemoryWidth.bits,
+      MemoryWidth.bytes, readReg, writeReg, Arm64Memory.destinationWidth, storePermission]
+
+
+theorem bump_pc_value (s : State) (base : Register) (delta : Word) :
+    (bumpBase s base delta).pc = s.pc := by
+  simp only [Arm64VectorMemory.bump_refines, writeMemoryBase, writeReg]
+  split <;> rfl
+
+theorem bump_pc (s : State) (base : Register) (delta pc : Word) :
+    bumpBase { s with pc := pc } base delta = { bumpBase s base delta with pc := pc } := by
+  simp only [Arm64VectorMemory.bump_refines]
+  by_cases stack : base.val = 31 <;>
+    simp [writeMemoryBase, memoryBase, stack, writeReg]
+
+theorem base_pc (s : State) (base : Register) (pc : Word) :
+    memoryBase { s with pc := pc } base = memoryBase s base := rfl
+
+/-- Both pair data fields are distinct from a written-back GPR base. SP is a
+separate cell even when a transfer field31 denotes ZR. -/
+theorem pair_bump_success (i : PairMemoryInstruction) (address : Word) (s : State)
+    (base : Register) (delta : Word)
+    (firstApart : base.val = 31 ∨ i.first ≠ base)
+    (secondApart : base.val = 31 ∨ i.second ≠ base) :
+    pairSuccess i address (bumpBase s base delta) =
+      { pairSuccess i address s with state := bumpBase (pairSuccess i address s).state base delta } := by
+  let load := GeneratedArm64PairMem.access (Arm64PairMemory.opcode i) == .load
+  have one : separate (if load then .load i.first none else .store i.first) base := by
+    split <;> exact firstApart
+  have two : separate (if load then .load i.second none else .store i.second) base := by
+    split <;> exact secondApart
+  simp only [pairSuccess]
+  rw [bump_success _ _ _ s base delta one]
+  simp only []
+  rw [bump_success _ _ _ _ base delta two]
+  simp only [bump_pc_value, bump_pc] <;> rfl
+
+theorem pair_base_success (i : PairMemoryInstruction) (address : Word) (s : State)
+    (base : Register) (firstApart : base.val = 31 ∨ i.first ≠ base)
+    (secondApart : base.val = 31 ∨ i.second ≠ base) :
+    memoryBase (pairSuccess i address s).state base = memoryBase s base := by
+  let load := GeneratedArm64PairMem.access (Arm64PairMemory.opcode i) == .load
+  have one : separate (if load then .load i.first none else .store i.first) base := by
+    split <;> exact firstApart
+  have two : separate (if load then .load i.second none else .store i.second) base := by
+    split <;> exact secondApart
+  simp only [pairSuccess, base_pc]
+  rw [base_success _ _ _ _ base two, base_success _ _ _ _ base one]
+
+/-- Actual pair pre/access/post order; the pair transfer keeps both ordered
+native-width effects instead of coalescing them into one access. -/
+def pairCore (i : PairMemoryInstruction) (mode : Writeback) (s : State) : Transition State :=
+  let flags := Arm64AddressedMemory.flags mode
+  let before := bumpBase s i.base (GeneratedArm64MemPrepost.preDelta flags i.offset)
+  let offset := GeneratedArm64MemOffset.value
+    (GeneratedArm64MemPrepost.suppressOffset flags) false i.offset 0
+  let transferred := pairSuccess i (Arm64Memory.baseValue before i.base + offset) before
+  { transferred with state := bumpBase transferred.state i.base (GeneratedArm64MemPrepost.postDelta flags i.offset) }
+
+theorem pair_core_eq (i : PairMemoryInstruction) (mode : Writeback) (s : State)
+    (apart : mode ≠ .none → i.base.val ≠ 31 → i.first ≠ i.base ∧ i.second ≠ i.base) :
+    pairCore i mode s =
+      let address := memoryBase s i.base + (if mode = .post then 0 else i.offset)
+      let transferred := pairSuccess i address s
+      { transferred with state := if mode = .none then transferred.state else
+          writeMemoryBase transferred.state i.base (memoryBase s i.base + i.offset) } := by
+  cases mode with
+  | none =>
+    simp [pairCore, Arm64AddressedMemory.flags, GeneratedArm64MemPrepost.preDelta,
+      GeneratedArm64MemPrepost.postDelta, GeneratedArm64MemPrepost.preWriteback,
+      GeneratedArm64MemPrepost.postWriteback, GeneratedArm64MemPrepost.suppressOffset,
+      GeneratedArm64MemPrepost.flags, GeneratedArm64MemOffset.value, bumpBase,
+      Arm64Memory.base_refines, Reference.Word]
+  | pre | post =>
+    have firstApart : i.base.val = 31 ∨ i.first ≠ i.base := by
+      by_cases stack : i.base.val = 31
+      · exact Or.inl stack
+      · exact Or.inr (apart (by decide) stack).1
+    have secondApart : i.base.val = 31 ∨ i.second ≠ i.base := by
+      by_cases stack : i.base.val = 31
+      · exact Or.inl stack
+      · exact Or.inr (apart (by decide) stack).2
+    simp only [pairCore, Arm64Memory.base_refines, Arm64VectorMemory.base_bump, BitVec.add_assoc,
+      Arm64AddressedMemory.access_offset_refines, pair_bump_success i _ s i.base _ firstApart secondApart]
+    rw [Arm64VectorMemory.writeback_base_refines]
+    simp [Reference.Word, pair_base_success i _ s i.base firstApart secondApart]
+
+theorem success_fault (width : MemoryWidth) (transfer : MemoryTransfer)
+    (address : Word) (s : State) : (success width transfer address s).fault = none := by
+  cases transfer <;> rfl
+
+theorem pair_success_fault (i : PairMemoryInstruction) (address : Word) (s : State) :
+    (pairSuccess i address s).fault = none := by
+  simp only [pairSuccess, success_fault]
+
+/-- Full numeric LDP/STP pre/access/post refinement on the two-access profile.
+Each element is accessible, and the original incoming SP passes alignment.
+The canonical noOverlap field supplies exactly the writeback alias restriction;
+no-writeback forms retain legal base/destination aliases. -/
+theorem pair_core_refines (i : AddressedPairMemoryInstruction) (s : State)
+    (alignment : spAlignmentFault s i.instruction.base = none)
+    (twoAccesses : s.pairSingleAccess = false)
+    (firstAccess : permitted (if i.instruction.load then s.memory.readable else s.memory.writable)
+      (memoryBase s i.instruction.base + (if i.writeback = .post then 0 else i.instruction.offset))
+      i.instruction.width.bytes = true)
+    (secondAccess : permitted (if i.instruction.load then s.memory.readable else s.memory.writable)
+      (memoryBase s i.instruction.base + (if i.writeback = .post then 0 else i.instruction.offset) +
+        BitVec.ofNat 64 i.instruction.width.bytes) i.instruction.width.bytes = true) :
+    pairCore i.instruction i.writeback s = step (.addressedPairMemory i) s := by
+  rw [pair_core_eq i.instruction i.writeback s i.noOverlap]
+  let transfer := if i.writeback = .post then { i.instruction with offset := 0 } else i.instruction
+  have aligned : spAlignmentFault s transfer.base = none := by
+    dsimp only [transfer]
+    split <;> exact alignment
+  have first : permitted (if transfer.load then s.memory.readable else s.memory.writable)
+      (memoryBase s transfer.base + transfer.offset) transfer.width.bytes = true := by
+    dsimp only [transfer]
+    split <;> rename_i mode <;> simpa only [mode, ↓reduceIte] using firstAccess
+  have second : permitted (if transfer.load then s.memory.readable else s.memory.writable)
+      (memoryBase s transfer.base + transfer.offset + BitVec.ofNat 64 transfer.width.bytes)
+      transfer.width.bytes = true := by
+    dsimp only [transfer]
+    split <;> rename_i mode <;> simpa only [mode, ↓reduceIte] using secondAccess
+  have refined := pair_success_refines transfer s aligned twoAccesses first second
+  have projection : pairSuccess transfer (memoryBase s transfer.base + transfer.offset) s =
+      pairSuccess i.instruction
+        (memoryBase s i.instruction.base + (if i.writeback = .post then 0 else i.instruction.offset)) s := by
+    dsimp only [transfer]
+    split <;> rename_i mode <;> simp only [mode, ↓reduceIte] <;> rfl
+  rw [projection] at refined
+  simp only [step] at refined
+  simp only [step, addressedPairMemoryStep]
+  change _ = let result := pairMemoryStep transfer s
+    if result.fault.isSome || i.writeback = .none then result else
+      { result with state := writeMemoryBase result.state i.instruction.base (memoryBase s i.instruction.base + i.instruction.offset) }
+  rw [← refined]
+  by_cases mode : i.writeback = .none
+  · simp [mode, pair_success_fault]
+    rw [← pair_success_fault i.instruction (memoryBase s i.instruction.base + i.instruction.offset) s]
+  · simp [mode, pair_success_fault]
+
+/-- Pair dispatcher slice over a decoded descriptor. The refinement theorem
+binds its load/store direction to the selected numeric singleton; this is a
+source-descriptor relation, not a new C runtime guard. -/
+def dispatchPair (op : GeneratedArm64DispatchSingleton.SingletonOp) (i : PairMemoryInstruction)
+    (mode : Writeback) (s : State) : Option (Transition State) :=
+  if GeneratedArm64DispatchSingleton.ldpHandled op then some (pairCore i mode s)
+  else if GeneratedArm64DispatchSingleton.stpHandled op then some (pairCore i mode s)
+  else none
+
+theorem dispatch_pair_refines (i : AddressedPairMemoryInstruction) (s : State)
+    (alignment : spAlignmentFault s i.instruction.base = none)
+    (twoAccesses : s.pairSingleAccess = false)
+    (firstAccess : permitted (if i.instruction.load then s.memory.readable else s.memory.writable)
+      (memoryBase s i.instruction.base + (if i.writeback = .post then 0 else i.instruction.offset))
+      i.instruction.width.bytes = true)
+    (secondAccess : permitted (if i.instruction.load then s.memory.readable else s.memory.writable)
+      (memoryBase s i.instruction.base + (if i.writeback = .post then 0 else i.instruction.offset) +
+        BitVec.ofNat 64 i.instruction.width.bytes) i.instruction.width.bytes = true) :
+    dispatchPair (if i.instruction.load then .ldp else .stp) i.instruction i.writeback s =
+      some (step (.addressedPairMemory i) s) := by
+  have refined := congrArg some (pair_core_refines i s alignment twoAccesses firstAccess secondAccess)
+  cases direction : i.instruction.load <;>
+    simpa only [dispatchPair, direction, Bool.false_eq_true, ↓reduceIte,
+      GeneratedArm64DispatchSingleton.ldpHandled, GeneratedArm64DispatchSingleton.stpHandled,
+      beq_self_eq_true, reduceCtorEq] using refined
+
+theorem dispatch_pair_other (op : GeneratedArm64DispatchSingleton.SingletonOp)
+    (i : PairMemoryInstruction) (mode : Writeback) (s : State)
+    (notLoad : op ≠ .ldp) (notStore : op ≠ .stp) :
+    dispatchPair op i mode s = none := by
+  simp [dispatchPair, GeneratedArm64DispatchSingleton.ldpHandled,
+    GeneratedArm64DispatchSingleton.stpHandled, notLoad, notStore]
+
 end KProgFormal.Refinement.Arm64WritebackMemory

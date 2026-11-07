@@ -233,3 +233,32 @@ passed. The private immutable source/cache export was deleted automatically;
 compressed CALL CPU observations now retain this full run. This result precedes
 the signed-load selector increment `f112d2fb8` and the subsequent pair-body work,
 which require their own full validation.
+
+## Pair pre/access/post transfer composition
+
+`pairSuccess` composes generated pair direction, scalar load/store primitives,
+width-dependent element stride and register writes for W/X LDP/STP. Both native
+addresses are captured before writes, both ordered element effects are retained,
+and the final PC advances once. `pair_core_refines` composes this with the actual
+generated pre/access/post base-update order, equating the complete numeric state
+and events to the same canonical addressed-pair step. `dispatch_pair_refines`
+composes the LDP/STP singleton predicates with the matching decoded direction;
+other singleton opcodes return no result for this slice.
+
+The explicit `pairSingleAccess = false` environment witness selects the two-access
+profile. The theorem also requires original-SP alignment and permission for each
+element. Existing canonical pair validity supplies distinct load destinations and
+writeback-base non-overlap; stores may repeat their source, and no-writeback forms
+retain legal base/destination aliases. No permission guard or fault rollback is
+invented in the C body. The model is sequential: no single-copy atomicity, faulting
+pre/post correspondence, Q16B event merge or Entry/O4 transport is inferred.
+All previous scalar, signed-load and other theorems remain unchanged.
+
+Validation: 40 Lean/reference dependency jobs passed, plus the existing 959
+addressed/vector full-state cases and 18 precise rejects. The pair contract
+freshness check passed. Existing pair semantics, actual pair-route and actual
+pre/post-route hosts passed 465,696, 165,895 and 135,170 cases respectively.
+Early proof attempts exposed only rewrite order, record layout and transition
+eta-expansion obligations; the final proof retains every original architectural
+input and premise. Runtime and oracle source are unchanged. A new immutable full
+check is queued for this published increment together with the signed-load work.

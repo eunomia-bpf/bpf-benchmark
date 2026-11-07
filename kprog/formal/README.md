@@ -60,6 +60,9 @@ STORE singleton compositions preserve the same complete numeric state and effect
 LDRSB/LDRSH/LDRSW additionally compose their generated opcode, memory width and
 sign-operation selections with the same core and numeric family-dispatch gate,
 including no-writeback register-offset forms.
+LDP/STP also compose the two generated element transfers and pre/post updates,
+retaining both ordered effects on the explicit two-access (non-LSE2) profile;
+original-SP alignment, per-element access and canonical alias validity remain explicit.
 Individual module statements define their
 exact scope. Dispatcher coverage/exclusivity is
 **not yet a full simulator-step refinement theorem**; completing the remaining
