@@ -1,0 +1,10 @@
+{
+  "command": "taskset -c 16-19 make -C kprog/tv module-check ARCH=x86 KDIR=/workspaces/repository/kprog/tv/build-kernel-x86",
+  "returncode": 0,
+  "sha256": {
+    "kinsn/module/include/native_lab_group.h": "129a2d2f58afb9c33cb436fd05c642be1fc46093491b78eeaed40524f746e9dc",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "0d35301758c050463f26c71047b7008ae876a5b8d78e50900f759734543ba70c",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "32c132c4928e1035bd003dff644e7d9676441c578e9511335370c07d4e2c7652"
+  },
+  "scope": "Incremental x86 module compilation only; unmatched relocation diagnostic preserves existing rejection. Initial quoting build error retained, then corrected before successful build. Runtime replay pending."
+}

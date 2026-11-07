@@ -593,6 +593,9 @@ static int native_lab_validate_proof(u64 payload, const struct bpf_verifier_env 
 				continue;
 			}
 			if (!found) {
+				pr_err_ratelimited("native_lab: proof relocation unmatched chunk=%u record=%zu kind=%u offset=%u target=0x%llx source_prog=%u\n",
+					chunk, r, reloc->kind, reloc->offset,
+					(unsigned long long)reloc->target, blob->binding.source_prog_id);
 				err = -EINVAL;
 				goto out;
 			}
