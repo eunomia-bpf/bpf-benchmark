@@ -89,9 +89,9 @@ static void model_reset(void)
 	msp = 0;
 	mlr = 0;
 	mn = mz = mc = mv = 0;
-	/* model_reset runs AFTER the entry glue in every scene; the glue leaves
-	 * x0 = &__a64_sim_abi with TAG_ABI (only the sim's own value matches;
-	 * the model lane uses the pointer identity, not a replayed constant). */
+	/* Entry glue follows this reset. XDP x0 names the real context, while
+	 * SKB x0 names its synthetic ABI. Their scenes check the actual pointer
+	 * identity rather than replaying an assumed constant in this model. */
 	model_abi_live = 1;
 	model_stack_reset();
 	mtag[30] = 10U; /* Entry return capability, distinct from scalar zero. */
@@ -1516,8 +1516,18 @@ static __u64 scene_mem_read_tag(void)
 				    ARM64_SIM_TAG_RODATA_ADDR);
 	model_stack_write(16, ARM64_WIDTH_64, pattern_reg(20U),
 			  ARM64_SIM_TAG_RODATA_ADDR);
+	/* Preserve the old unrelated ABI-tagged buffer as a non-context
+	 * control: its address is not a native XDP pointer-field offset. */
 	PLANT_REG(3, (__u64)(unsigned long)&mem_scene_bufs[0],
 		   ARM64_SIM_TAG_ABI);
+	cases = cases + 1U;
+	if (ARM64_SIM_L_MEM_READ_TAG(ARM64_X3, 0xffU, 0ULL, 0ULL, 0ULL,
+				   ARM64_WIDTH_64) != ARM64_SIM_TAG_SCALAR) {
+		printf("MISMATCH mrt unrelated ABI-tagged buffer\n");
+		return 0xDEAD0001ULL;
+	}
+	/* The positive field-tag cases below address the actual entry CTX. */
+	PLANT_REG(3, (__u64)(unsigned long)&xdp_ctx, ARM64_SIM_TAG_ABI);
 	PLANT_REG(5, pattern_reg(5), ARM64_SIM_TAG_RELOC_ADDR);
 	PLANT_REG(6, pattern_reg(6), ARM64_SIM_TAG_SCALAR);
 	PLANT_REG(7, -32ULL, ARM64_SIM_TAG_STACK);
@@ -2050,7 +2060,7 @@ static __u64 scene_guard(void)
 	 * a broke-guard TU still fails here */
 	cases = cases + 2U;
 	if (ARM64_SIM_L_REG_TAG(ARM64_X0) != ARM64_SIM_TAG_ABI ||
-	    ARM64_SIM_L_READ_REG_PTR(ARM64_X0) != (void *)&__a64_sim_abi) {
+	    ARM64_SIM_L_READ_REG_PTR(ARM64_X0) != (void *)&xdp_ctx) {
 		printf("MISMATCH guard reinclude lanes\n");
 		return 0xDEAD0002ULL;
 	}

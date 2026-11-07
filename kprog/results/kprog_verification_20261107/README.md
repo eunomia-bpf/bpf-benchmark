@@ -2500,3 +2500,29 @@ are retained here. The private source/cache export was deleted and the FULL
 slot released. That run predates arithmetic687 and this unary increment;
 focused validations stay separate. The ARM oracle fixture is being corrected
 without changing production ISA/header behavior. No full77/72/O2/O4 claim.
+
+## AArch64 route oracle: real context identity
+
+The original Makefile508 failure was reproduced independently on the exact
+same production header and oracle bytes as immutable464cddd94. The old
+fixture tagged an unrelated buffer ABI but expected native XDP field0/8 tags;
+current production tag selection uses the address relative to the actual
+entry context. Its guard scene also expected the former synthetic ABI pointer
+although XDP x0 now names the real context. The production header and canonical
+ISA are unchanged by this fix.
+
+The positive field-tag cases now plant the actual input xdp_ctx pointer. The
+original unrelated ABI-tagged buffer remains an explicit scalar-tag control;
+no field identity is inferred from its tag alone. The guard still checks both
+live entry tag and exact pointer after re-include, now against the real entry
+context. Existing synthetic-ABI field checks and every other route scene,
+whole-register/tag/SP/NZCV/exit/path assertion remain. A stale reset comment
+is corrected to match entry order and XDP versus SKB pointer identity.
+
+The complete existing route oracle passes both ordinary Makefile-equivalent
+compilation and UBSan:4471 cases each (the extra retained unrelated-buffer
+control adds one case). All dependency pins, including the unchanged production
+header, are stable. Exact initial failure, original/final C, compiler warnings,
+commands, source identities and diff are appended to the existing integration
+JSON/gzip. A fresh full make-check after publication will be a separate record;
+this focused pass does not replace the failed464 result or close77/72/O2/O4.
