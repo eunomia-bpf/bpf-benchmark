@@ -113,3 +113,12 @@ other state preservation under the explicit SP-alignment witness. The checked
 memory branches introduce no new C runtime permission guards. Pre/post writeback
 and Q16B versus two8B effect composition remain separate obligations; these two
 singleton arms are not the complete72-operation dispatcher theorem.
+
+The interrupted V continuation also left a validated base-update draft. Its
+SP/GPR/zero-delta cases are now retained in Arm64VectorMemory. The universal
+`bump_refines` theorem connects the actual numeric update branches to canonical
+base writeback, and `writeback_base_refines` composes the generated pre/post
+deltas for all three modes. Incremental Lean build passed (27 dependency jobs).
+This preserves the draft's useful proof work; it proves base-update algebra,
+not the outstanding intervening-memory/fault composition for a complete
+pre/post-indexed D0 handler.

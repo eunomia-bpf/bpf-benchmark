@@ -144,4 +144,53 @@ theorem dispatch_d_other (op : GeneratedArm64DispatchSingleton.SingletonOp)
   simp [dispatchD, GeneratedArm64DispatchSingleton.loadD0Handled,
     GeneratedArm64DispatchSingleton.storeD0Handled, notLoad, notStore]
 
+open Reference.AArch64
+
+/-- Numeric-state slice of MEM_PREPOST_STEP: retain the zero-delta fast
+path and the separate SP/GPR writes. Values are materialized native words;
+address/provenance and successful-transfer witnesses remain external. -/
+def bumpBase (s : State) (base : Register) (delta : Word) : State :=
+  if delta = 0 then s
+  else if base.val = 31 then { s with sp := s.sp + delta }
+  else Arm64Register.writeReg s base (Arm64Register.readReg s base + delta) .w64
+
+theorem write_base_read (s : State) (base : Register) :
+    writeMemoryBase s base (memoryBase s base) = s := by
+  by_cases h : base.val = 31
+  · simp [writeMemoryBase, memoryBase, h]
+  · simp only [writeMemoryBase, memoryBase, h, ↓reduceIte, writeReg]
+    congr 1
+    funext r
+    split
+    · rename_i equal
+      simp only [readReg, show base.val < 31 by omega, ↓reduceDIte]
+      congr 1
+      apply Fin.ext
+      exact equal.symm
+    · rfl
+
+theorem bump_refines (s : State) (base : Register) (delta : Word) :
+    bumpBase s base delta = writeMemoryBase s base (memoryBase s base + delta) := by
+  by_cases zero : delta = 0
+  · simp [bumpBase, zero, write_base_read]
+  · by_cases stack : base.val = 31
+    · simp only [bumpBase, if_neg zero, if_pos stack, writeMemoryBase, memoryBase]
+      simp [stack, show ¬base.val < 31 by omega]
+    · simp only [bumpBase, if_neg zero, if_neg stack, writeMemoryBase,
+        Arm64Register.read_refines, Arm64Register.write_refines]
+      simp [stack, memoryBase, readReg, show base.val < 31 by omega, narrow, Width.bits]
+/-- The generated pre/post deltas together update the incoming native base
+once. This is base-update algebra; the intervening vector memory transition
+and its fault behavior still require a separate composition theorem. -/
+theorem writeback_base_refines (mode : Writeback) (s : State) (base : Register) (delta : Word) :
+    bumpBase (bumpBase s base
+      (GeneratedArm64MemPrepost.preDelta (Arm64AddressedMemory.flags mode) delta)) base
+      (GeneratedArm64MemPrepost.postDelta (Arm64AddressedMemory.flags mode) delta) =
+    writeMemoryBase s base (memoryBase s base + (if mode = .none then 0 else delta)) := by
+  cases mode <;>
+    simp [Arm64AddressedMemory.flags, GeneratedArm64MemPrepost.preDelta,
+      GeneratedArm64MemPrepost.postDelta, GeneratedArm64MemPrepost.preWriteback,
+      GeneratedArm64MemPrepost.postWriteback, GeneratedArm64MemPrepost.flags,
+      bump_refines, write_base_read]
+
 end KProgFormal.Refinement.Arm64VectorMemory
