@@ -796,3 +796,11 @@ canonical ISA, runtime, generator, oracle or test inputs changed. Modifier
 None outside this native-form slice is not a new C rejection. Native field and
 Entry/O4 materialization/provenance bindings, full77/72 dispatcher steps and
 O2 remain open; exact88ddc9d14's running FULL predates this increment.
+
+Exact `88ddc9d140ec4f4728406c93970cd2d63a56b299` completed the full
+`make -C kprog/formal check` with exit **0**, including actual logical-immediate
+ALU selection, the six logical flag dispatch rows and every earlier Lean,
+contract, reference/wire/compiler and C semantic check. The immutable source/cache
+export was deleted automatically; compressed CALL CPU observations retain this
+440-case run. Later ALU_REG logical and non-flag ADD/SUB dispatcher increments
+remain separate from this exact pass and require a subsequent full check.
