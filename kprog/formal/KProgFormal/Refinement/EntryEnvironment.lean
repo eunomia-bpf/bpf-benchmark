@@ -57,11 +57,19 @@ def write32 (env : Environment) (frame : Frame) (value : Value) : Value :=
 
 theorem add_refines (env : Environment) (frame : Frame) (value : Value) (delta : Reference.Word) :
     materialize env frame (add value delta) = materialize env frame value + delta := by
-  cases value <;> simp only [add, materialize, Reference.Word] <;> bv_decide
+  cases value with
+  | scalar bits => rfl
+  | relative origin offset => exact (BitVec.add_assoc _ _ _).symm
 
 theorem sub_refines (env : Environment) (frame : Frame) (value : Value) (delta : Reference.Word) :
     materialize env frame (sub value delta) = materialize env frame value - delta := by
-  cases value <;> simp only [sub, materialize, Reference.Word] <;> bv_decide
+  cases value with
+  | scalar bits => rfl
+  | relative origin offset =>
+      simp only [sub, materialize]
+      symm
+      apply BitVec.sub_eq_iff_eq_add.mpr
+      rw [BitVec.add_assoc, BitVec.sub_add_cancel]
 
 /-- A native OR of only the low four bits can keep a relative pointer when
 its actual base (including frame bias) is 16-byte aligned. This premise must
