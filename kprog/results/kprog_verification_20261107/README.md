@@ -156,3 +156,11 @@ plus the existing 959 addressed/vector full-state cases and 18 precise rejects.
 Early failed proof attempts involved record syntax and simplifier/if-case glue;
 no reference semantics, theorem premise or native test input was weakened or
 filtered. Every previous D0/Q/base-update theorem remains unchanged.
+
+Exact `68c78982090f7c9153803ffa03c8d39f9bb6f84b` completed the full
+`make -C kprog/formal check` with exit **0**, including the D0 pre/access/post
+success and dispatcher-arm proofs above, every previous Lean theorem and the
+existing generated, reference, compiler, wire and C semantic checks. The private
+immutable source/cache export was deleted automatically. The compressed CALL
+CPU observations now retain this successful full run; shared incremental caches
+remain intact. Subsequent scalar-writeback work requires separate validation.
