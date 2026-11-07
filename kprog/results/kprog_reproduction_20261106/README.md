@@ -525,6 +525,28 @@ gave 1.475x; the longer run is the one to quote).
 reference. Tracee was the reference's only regression below 1; on this
 tree it is one of the larger wins.
 
+## How many programs each app loads
+
+The stock control (`BPFREJIT_SHIM_NATIVE_LOADER=off`,
+`BPFREJIT_BENCH_PASSES=noop`, 1 s workload,
+`corpus/results/x86_kvm_corpus_20261107_153812_231831`) loads cleanly for
+all six apps, which gives the denominator the native counts above are
+measured against:
+
+| app | programs loaded | ran native |
+| --- | ---: | ---: |
+| bcc/set | 26 | 18 |
+| cilium/agent | 56 | 177 (reloads across samples) |
+| katran | 6 | 1 |
+| otelcol | 14 | 14 |
+| tetragon/observer | 82 | 118 |
+| tracee/monitor | 154 | 151 |
+
+Native counts exceed the loaded count for cilium and tetragon because a
+program is replaced once per load and those apps load the same program in
+several processes or per sample. Tracee's 151 of 154 is the cleanest
+coverage figure in the set.
+
 ## Which programs ran natively, per app
 
 The operator asked for this per app. Counts are what the shim log shows;
