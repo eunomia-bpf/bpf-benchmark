@@ -1400,3 +1400,12 @@ semantic/route hosts passed 40080 cases,225292 cases,20168 cases,512 cases,22115
 is byte-identical. No placeholders, new tests, input filtering, ISA/runtime/
 generator/oracle/paper changes; original compiler warnings remain visible.
 The active exactb757 full check predates signed-load and STORE extensions.
+
+Exact `b7575b328c02d2db1cdee3f7c39ee2d4cfec28f7` completed the full
+`make -C kprog/formal check` with exit **0**, including actual byte memory
+bodies and raw-FLAGS LOAD offset/pre/post/indexed dispatch plus every preceding
+Lean, contract, executable-reference/wire/compiler and C semantic check. The
+immutable source/cache export was deleted automatically. Compressed CALL CPU
+observations retain this440-case run. Signed-load and STORE extensions are
+later increments not included in this full pass. Native access/producer/artifact
+bindings, remaining operations and full77/72/O2/O4 completion remain open.
