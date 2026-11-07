@@ -3023,10 +3023,22 @@ fn plan_x86_entry_abi_strip(
         );
     }
 
-    let stack_alloc = insns
-        .get(prologue_regs.len())
-        .and_then(x86_sub_rsp_imm)
-        .unwrap_or(0);
+    // Clang also allocates fixed local slots with PUSH of a caller-saved
+    // register (Tracee sys_exit uses PUSH RAX). These bytes lie below the
+    // saved BPF RBP just like SUB RSP storage, even though they are not saves.
+    let mut stack_alloc = 0u64;
+    for insn in &insns[prologue_regs.len()..] {
+        let amount = if let Some(bytes) = x86_sub_rsp_imm(insn) {
+            bytes
+        } else if insn.mnemonic() == Mnemonic::Push && x86_saved_push_reg(insn).is_none() {
+            u64::try_from(-insn.stack_pointer_increment())
+                .map_err(|_| anyhow!("invalid native entry stack push"))?
+        } else {
+            break;
+        };
+        stack_alloc = stack_alloc.checked_add(amount)
+            .ok_or_else(|| anyhow!("native entry stack allocation overflow"))?;
+    }
     if preserve_existing_abi {
         return x86_tail_call_frame_or_default(
             bytes,
@@ -4783,6 +4795,23 @@ mod tests {
         assert_eq!(preserved.callee_saved_mask, 0);
         assert!(preserved.drop_local_ips.is_empty());
         assert!(preserved.register_renames.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn tail_call_frame_counts_caller_saved_push_allocation() -> Result<()> {
+        for (allocation, cleanup, expected) in [
+            (vec![0x50], vec![0x48,0x83,0xc4,8], 16),
+            (vec![0x50,0x51,0x48,0x83,0xec,24], vec![0x48,0x83,0xc4,40], 48),
+        ] {
+            // Actual Tracee prologue: PUSH RBP; PUSH RBX; PUSH RAX.
+            let bytes = [vec![0x55,0x53], allocation, vec![0x31,0xc0],
+                cleanup.clone(), vec![0x5b,0x5d,0xc3]].concat();
+            let frame = plan_x86_entry_abi_strip(&bytes,0,true,None,true)?;
+            assert_eq!(frame.tail_call_bpf_rbp_rsp_offset,Some(expected));
+            assert!(!frame.tail_call_bpf_rbp_is_live);
+            assert_eq!(frame.tail_call_cleanup_bytes,[cleanup,vec![0x5b,0x5d]].concat());
+        }
         Ok(())
     }
 

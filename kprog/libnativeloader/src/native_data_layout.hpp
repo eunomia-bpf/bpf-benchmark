@@ -31,9 +31,11 @@ inline NativeDataSymbolOffsetResolution resolve_source_data_symbol_offset(
     const NativeDataSymbolLayout &layout,
     uint64_t native_size,
     uint64_t native_offset,
-    uint64_t map_value_size)
+    uint64_t map_value_size,
+    bool local_readonly = false)
 {
     if (!layout.is_datasec) {
+        if (local_readonly) return {NativeDataSymbolOffsetKind::Absent, 0};
         return {NativeDataSymbolOffsetKind::NativeOffset, native_offset};
     }
     if (!layout.section_matches) {

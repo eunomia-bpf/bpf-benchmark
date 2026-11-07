@@ -1,0 +1,21 @@
+{
+  "sha256": {
+    "kprog/libnativeloader/src/native_loader.cpp": "ab731bc297983b32818c08f40b62e67467f92192c446adb555a97741efcc92ad",
+    "kprog/libnativeloader/src/native_data_layout.hpp": "5848f3ee7d411692a65016139151a7de3175ab1f4110e050e33575b60e3f7b6a",
+    "kprog/tv/test_data_layout.cpp": "e44f045528f49794403255bb43fbf6b2c84a1b3c0f446f2410a564a2af1b0dbb",
+    "/workspaces/.agent-state/kprog-lanes/C/readonly-source/build/libnative_loader.so": "8cfc2a234f23864d89ecd02e432324e1d278cbbd89d9ad7debddfc4b8e09d40d",
+    "/workspaces/.agent-state/kprog-lanes/C/tail-frame-target/release/native-link": "52c077fcbedde58c508ffa65fbfaad9df474f4af25e58462a6e8bf1f77722c87"
+  },
+  "loader_source": {
+    "head": "0e24b4c77fab97ad227172aea280b1d7f657e5ce",
+    "overlay": [
+      "kprog/libnativeloader/src/native_loader.cpp",
+      "kprog/libnativeloader/src/native_data_layout.hpp"
+    ]
+  },
+  "linker_source": {
+    "head": "4a858e855ff69f215f22eec71c472a27e77f5e66",
+    "overlay": "kprog/x86/native_lab/native_link/src/x86.rs",
+    "excluded": "unpublished partial-write canonicalizer"
+  }
+}

@@ -32,5 +32,21 @@ int main()
     for (const Layout *wrong : {&name, &offset, &size, &section})
         assert(!same_data_layout(wrong->types.get(), wrong->id, original.types.get(), original.id));
     assert(!same_data_layout(nullptr, 0, original.types.get(), original.id));
+    NativeDataSymbolLayout no_datasec{};
+    // Tracee's "unknown" exists in both pools, at238 vs253. Native offset
+    // must not alias the app map, even when a different literal fits in bounds.
+    for (uint64_t native_offset : {16u,253u}) {
+        auto private_data=resolve_source_data_symbol_offset(no_datasec,8,native_offset,246,true);
+        assert(private_data.kind==NativeDataSymbolOffsetKind::Absent);
+        auto ordinary_data=resolve_source_data_symbol_offset(no_datasec,8,native_offset,246);
+        assert(ordinary_data.kind==NativeDataSymbolOffsetKind::NativeOffset);
+        assert(ordinary_data.offset==native_offset);
+    }
+    auto declared=find_source_data_symbol_layout(original.types.get(),original.id,".bss","counter");
+    auto exact=resolve_source_data_symbol_offset(declared,4,12,16,true);
+    assert(exact.kind==NativeDataSymbolOffsetKind::SourceOffset && exact.offset==0);
+    assert(resolve_source_data_symbol_offset(declared,8,0,16,true).kind==NativeDataSymbolOffsetKind::SizeMismatch);
+    assert(resolve_source_data_symbol_offset(declared,4,0,2,true).kind==NativeDataSymbolOffsetKind::OutOfBounds);
+    std::puts("private readonly/source BTF symbol identity and relocated string pools: PASS");
     std::puts("internal map BTF names/offsets/sizes/sections: PASS");
 }

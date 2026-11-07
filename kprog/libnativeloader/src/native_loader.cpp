@@ -3408,9 +3408,11 @@ std::optional<uint64_t> source_data_symbol_offset(
     const std::string &section_name,
     const std::string &symbol_name,
     uint64_t native_size,
-    uint64_t native_offset)
+    uint64_t native_offset,
+    bool local_readonly)
 {
     if (map.btf_id == 0 || map.btf_value_type_id == 0) {
+        if (local_readonly) return std::nullopt;
         return native_offset;
     }
 
@@ -3427,7 +3429,7 @@ std::optional<uint64_t> source_data_symbol_offset(
     btf__free(btf_obj);
     const NativeDataSymbolOffsetResolution resolution =
         resolve_source_data_symbol_offset(
-            layout, native_size, native_offset, map.value_size);
+            layout, native_size, native_offset, map.value_size, local_readonly);
     if (resolution.kind == NativeDataSymbolOffsetKind::SectionMismatch) {
         fail("native data section " + section_name +
              " does not match the source BTF datasec for map " + map.name);
@@ -3885,18 +3887,15 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 continue;
             }
             const std::optional<uint64_t> off = source_data_symbol_offset(
-                *map, section, name, sym.st_size, native_off);
+                *map, section, name, sym.st_size, native_off,
+                ELF64_ST_BIND(sym.st_info) == STB_LOCAL &&
+                    std::string_view(section).rfind(".rodata", 0) == 0);
             if (!off) {
                 continue;
             }
-            /* A symbol that ends past the app's map value cannot be placed,
-             * but it is not an error: a native object built from a newer
-             * source can carry strings the loaded app never references.
-             * Tracee is the case in point — its .rodata.str1.1 is 261 bytes
-             * where the app's map is 246, the extra bytes being "vdso" and
-             * "unknown" at 248 and 253. Failing here rejected all 112 of
-             * its programs; skipping maps the ones the app does use and
-             * leaves the rest to the app's own bytecode. */
+            /* Private readonly constants use the native linker's own immutable
+             * object storage. Only symbols resolved against source data belong
+             * to the app map; compiler string-pool offsets are not source offsets. */
             if (*off >= map->value_size ||
                 sym.st_size > map->value_size - *off) {
                 continue;
@@ -4562,7 +4561,8 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
         linked.exclusive_sites = parse_native_environment_layout(
             read_text_file_required(source.environment_layout), linked.blob);
 #endif
-        linked.native_link_summary = native_link_plan_summary(link_args, linked);
+        linked.native_link_summary = "cache_key=" + key + " " +
+            native_link_plan_summary(link_args, linked);
         const auto read_end = std::chrono::steady_clock::now();
         publish_cache_file(tmp.proof, cache.proof);
         publish_cache_file(tmp.blob, cache.blob);
@@ -4599,7 +4599,8 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     linked.exclusive_sites = parse_native_environment_layout(
         read_text_file_required(source.environment_layout), linked.blob);
 #endif
-    linked.native_link_summary = native_link_plan_summary(link_args, linked);
+    linked.native_link_summary = "cache_key=" + key + " " +
+            native_link_plan_summary(link_args, linked);
     const auto read_end = std::chrono::steady_clock::now();
     const auto patch_start = std::chrono::steady_clock::now();
     bind_native_map_relocations(linked, map_patches, companion);

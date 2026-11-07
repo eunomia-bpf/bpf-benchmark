@@ -1,0 +1,36 @@
+# x86 application follow-up, 2026-11-07 UTC
+
+This directory records unbound-native loader/runtime repairs and the coordinator's linked-image/map-lowering/compiler experiments. It does not establish generation-bound verification of these applications.
+
+## Tracee functional repair
+
+| Attempt | Native replacements | Loader errors | Application completion |
+|---|---:|---:|---|
+| readonly constant repair only |151/151|0|kernel NULL dereference in sys_exit tail-call sequence|
+| readonly + tail-call frame repair |151/151|0|baseline and native phases both `ok`|
+
+The source and native `.rodata.str1.1` pools have different offsets (e.g. `unknown` at238 vs253). LOCAL immutable literals lacking matching source BTF are now retained in the native linker's private readonly storage. Using a native section offset in the app's map corrupts even literals that fit within bounds. Declared BTF variables continue to require exact identity, size, section and bounds. The data-layout ASAN/UBSAN check passes.
+
+The first real run exposed a separate stack bug: Tracee's `PUSH RBP; PUSH RBX; PUSH RAX` allocates an8-byte local slot with PUSH RAX. Tail-call lowering had read saved BPF RBP at rsp+8 instead of rsp+16. The linker now counts those local PUSH slots, with overflow checking, alongside SUB allocation. All77 isolated linker unit tests pass, including the actual Tracee prologue and a mixed PUSH/SUB case. The private CLI excludes the older unpublished partial-write experiment.
+
+Successful raw result: `corpus/results/x86_kvm_corpus_20261107_040625_927045`; failed first result: `...035123_042659`. Both full result trees and build/run logs are archived in `tracee-readonly-tail-frame-evidence.tar.gz`. Exact frozen source inputs are in `tracee-private-sources.tar.gz`, with hashes/base commits in `tracee-provenance.json`.
+
+Each successful arm records151 BPF programs. Aggregate invocation deltas were9,143,523 baseline and12,426,337 native. Both used the same2-second,7-stressor command and reported7 passed/0 failed. These duration-driven workloads performed different operation counts; this is a functional smoke, not work-equivalent final timing. No events/samples counter equivalence or generation-bound acceptance is claimed.
+
+Commands (from repository root):
+
+```
+make -f corpus/results/kprog_app_coverage_20261107/Makefile readonly-loader-build tail-frame-build
+make -f corpus/results/kprog_app_coverage_20261107/Makefile readonly-image tail-frame-image
+make -f corpus/results/kprog_app_coverage_20261107/Makefile readonly-corpus IMAGE=bpf-benchmark/kprog-tail-frame:c-20261107 IMAGE_TAR=/workspaces/.agent-state/kprog-lanes/C/tail-frame-runtime.image.tar SCRATCH=readonly-v2 APP=tracee/monitor CPUS=12-15 SAMPLES=1 WORKLOAD_DURATION=2
+```
+
+The frozen base image is `sha256:4853a1a52b6a436693df471a237939755f5513abdd0f8baf2acaec483452b03a`; private source/build directories are under lane C state. Recipes never replace the shared runtime image or kernel. The cache capture wrapper runs after the suite. The legacy Make docker recipe hardcodes python3, so the current caller explicitly overrides its command variable; runtime-python alone did not capture the successful smoke's cache.
+
+## Coordinator map/compiler item
+
+Existing runtime logs already show type-specific and inline map lowering. Katran's spec has70 lookup sites:14 ARRAY,42 PERCPU_ARRAY,4 HASH,3 LRU_HASH,7 retained calls. Tetragon hot entry has9:2 ARRAY,1 PERCPU_ARRAY,4 HASH,2 retained calls. These are plan counts; actual linked-byte call classification is pending cache capture. No duplicate map-lowering implementation was added.
+
+A same-image OFF/ON pair for both apps runs sequentially on CPUs0-7,3 samples x30 seconds using the existing `BPFREJIT_NATIVE_DISABLE_MAP_LOWERING` switch. Raw logs remain here; no performance conclusion until both complete and work is inspected.
+
+The isolated compiler experiment enables jump/switch tables and sibling-call optimization. Both PIC hot-entry objects compile and produce proofs. Non-PIC large-model Katran currently exposes an absolute code-address relocation misidentified as helper0; Tetragon exposes unsupported R_X86_64_32 against a map. Those failures are retained in `native-options-v2/commands.json`; no candidate is installed or app program omitted. All canonical proof siblings must be regenerated before any changed object is timed.
