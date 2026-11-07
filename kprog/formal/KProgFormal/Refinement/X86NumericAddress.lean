@@ -1811,4 +1811,62 @@ theorem pop_register_frame_refines (env : Environment) (frame : Frame) (arena : 
       all_goals simp only [same, ↓reduceIte, reduceCtorEq]
       all_goals first | rfl | (subst reg; by_cases rsp : destination = 4 <;> simp only [nativeRegisters, rsp, ↓reduceIte, NativeWord, Reference.Word] <;> bv_decide)
 
+/-- A memory PUSH reads the complete source before decrementing RSP. Both
+source and stack write carry their original initialization/event metadata. -/
+def pushMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.StackWidth)
+    (address nextPc : NativeWord) : Transition Reference.X86.State :=
+  match X86Bt.readOperand width.registerWidth (.memory address) (nativeRegisters env frame arena state) with
+  | .error fault => ⟨nativeRegisters env frame arena state, [.fault fault], some fault⟩
+  | .ok (value, reads) =>
+      let transfer := pushValueFrame env frame arena state width value nextPc
+      ⟨transfer.state, reads ++ transfer.events, transfer.fault⟩
+
+theorem push_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.StackWidth) (address nextPc : NativeWord) :
+    pushMemoryFrame env frame arena state width address nextPc =
+      Reference.X86.step (.pushMemory width address nextPc) (nativeRegisters env frame arena state) := by
+  have bytes_eq : width.registerWidth.bytes = width.bytes := by cases width <;> rfl
+  simp only [pushMemoryFrame, X86Bt.read_refines, bytes_eq, Reference.X86.step]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨value, reads⟩
+      simp only [push_value_frame_refines, Reference.X86.pushTransfer, writeMemory]
+      split <;> simp only [List.nil_append]
+
+/-- Memory POP uses the incoming stack read and an address formed after the
+stack advance. Destination permission is checked before committing the frame. -/
+def popMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.StackWidth)
+    (address nextPc : NativeWord) : Transition Reference.X86.State :=
+  match X86Bt.readOperand width.registerWidth (.memory (registerValue env frame arena state 4))
+      (nativeRegisters env frame arena state) with
+  | .error fault => ⟨nativeRegisters env frame arena state, [.fault fault], some fault⟩
+  | .ok (value, reads) =>
+      if permitted state.raw.memory.writable address width.bytes then
+        let memory := X86Push.store width state.raw.memory address value
+        let advanced := advanceStack state (BitVec.ofNat 64 width.bytes)
+        ⟨nativeRegisters env frame arena (registerPc (registerMemory advanced memory) nextPc),
+          reads ++ [.memory .write address (valueBytes value width.bytes) true], none⟩
+      else ⟨nativeRegisters env frame arena state,
+        reads ++ [.fault (.write address width.bytes)], some (.write address width.bytes)⟩
+
+theorem pop_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.StackWidth) (address nextPc : NativeWord) :
+    popMemoryFrame env frame arena state width address nextPc =
+      Reference.X86.step (.popMemory width address nextPc) (nativeRegisters env frame arena state) := by
+  have bytes_eq : width.registerWidth.bytes = width.bytes := by cases width <;> rfl
+  simp only [popMemoryFrame, X86Bt.read_refines, bytes_eq, Reference.X86.step,
+    show (nativeRegisters env frame arena state).gpr 4 = registerValue env frame arena state 4 from rfl]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state)
+      (.memory (registerValue env frame arena state 4)) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨value, reads⟩
+      simp only [native_register_pc, native_register_memory, native_advance_stack,
+        X86Push.store_refines, writeMemory,
+        show (nativeRegisters env frame arena state).memory = state.raw.memory from rfl]
+      split <;> rename_i allowed <;> simp only [allowed, ↓reduceIte] <;> rfl
+
 end KProgFormal.Refinement.X86NumericAddress

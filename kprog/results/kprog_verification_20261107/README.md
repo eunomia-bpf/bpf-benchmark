@@ -12,7 +12,7 @@ specialization token also has its own row.
 | Reference step family defined | 67/75 | 71/71 |
 | Raw register handler refinement | 32/75 | 0/71 |
 | Raw register dispatcher arm composition | 32/75 | 0/71 |
-| Stack register/immediate model / composed step | 2/75 | 0/71 |
+| Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
 | Additional partial-model handler families | 31/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 69/71 |
 | Declared opcode dispatcher gaps | 0 | 2/71 |
@@ -23,8 +23,8 @@ specialization token also has its own row.
 | Numeric operations awaiting selected replay | 9/75 | 5/71 |
 
 The 36 x86 O2 equalities cover25 direct bodies, nine generic calls and two
-branch-handler bodies. PUSH/POP cover their register/immediate field domain and
-observed guest memory through an explicit arena/permission interface.
+branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
+addresses from the same input, with an explicit arena/permission interface.
 The remaining31 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
@@ -50,7 +50,7 @@ adds 4,096 explicit-monitor observations with that projection premise; the
 finite control composites retain their separately labeled rows in F's source
 ledger. These finite observations support the universal theorem work.
 
-`proved-raw-register`, `proved-stack-register-model`, `partial-model`,
+`proved-raw-register`, `proved-stack-memory-model`, `partial-model`,
 `conditional-observed`, `proved-C-model`
 and `pending` retain their distinct meanings. V updates the table and these
 totals with each proof/status-changing publication; T supplies token/link-law
@@ -3328,3 +3328,31 @@ their stated source scope. Existing totals remain66/75 x86 and65/71 ordinary
 ARM replay operations. The integration archive records source identities,
 initial elaboration diagnostics and final checks under
 `x86_stack_raw_frame_dispatch_tokens`.
+
+### PUSH/POP memory AUX and effective-address composition
+
+PUSH/POP now include mode2 memory operands in the same unified step and token
+laws. Raw AUX selects optional base/index cells and the scale. PUSH samples
+that address and its complete source before the stack decrement. POP forms
+the destination after advancing RSP, including RSP used as an index, and keeps
+its source load at the incoming stack pointer. Full initialization metadata,
+ordered read/write events, read faults, write faults and frame rollback agree
+with the canonical reference. The input bindings derive addresses from shared
+state fields; each operation retains its generic per-token/native-successor law.
+The private-arena/native-memory permission, ABI/definedness/C correspondence,
+compiler and native-link production interfaces retain their universal scope.
+
+Focused/default Lean and10 axiom audits pass with140 stable proof inputs.
+All88 prior numeric-frame and49 dispatcher theorem signatures are retained.
+The existing UBSan route oracle passes347152 checks, preserving its112144
+register/immediate checks and adding6912 memory-transfer cases. These cover
+stack, heap, STACK aliases, absent bases, scaled/RSP/aliased indexes, three
+native bases, overlapping accesses, both direct and dispatcher routes, all
+GPR/tag cells, six flags and XMM0. The first invalid64-byte fixture offset and
+early elaboration diagnostics remain in the raw archive alongside final exits.
+All156 compiled input hashes remain stable. Canonical stack/memory/fault,
+1214scalar plus72CPU anchors, and15371condition checks pass.
+
+Coverage keeps36 C-model O2 tokens,32 pure register operations, two control
+models and two stack-memory models. `x86_stack_memory_dispatch_tokens` records
+the expanded domain, exact source pins and preserved prior interfaces.

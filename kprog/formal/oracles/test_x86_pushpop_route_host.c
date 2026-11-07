@@ -293,6 +293,90 @@ static void check_step(const char *what, unsigned op_is_pop, unsigned flags,
 	}
 }
 
+/* Mode2 distinguishes heap/stack bytes and incoming/advanced RSP addresses. */
+static void check_memory_step(unsigned pop, unsigned flags, unsigned base_kind,
+                              unsigned index_kind, unsigned scale, unsigned slot,
+                              __u64 native_base, unsigned via)
+{
+	static const __s64 targets[] = {-40, -32, -8};
+	__u8 heap[192], eh[192], es[FRAME], mt[16];
+	__u64 mr[16], arena, advanced, base, index, target, disp, value = 0;
+	unsigned w = flags ? flags : 8, i, memory_mismatch;
+	unsigned br = base_kind == 0 ? X86_RSP : base_kind == 3 ? X86_REG_NONE : X86_RBP;
+	unsigned ir = index_kind == 0 ? X86_REG_NONE : index_kind == 1 ? X86_RCX :
+		index_kind == 2 ? X86_RSP : X86_RBP;
+	__u32 aux = (2U << 24) | (scale << 8) | ir;
+	__u8 *source, *destination;
+	X86_SIM_L_DECLARE_STATE();
+	struct x86_sim_xdp_abi __x86_sim_abi = {};
+	struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;
+	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;
+	X86_SIM_L_DECLARE_STACK();
+	(void)__x86_sim_abi; (void)__x86_sim_skb_ctx; (void)__x86_sim_abi_kind;
+	(void)__x86_sim_ret_addr; (void)__x86_sim_helper_abi_base;
+	arena = (__u64)(unsigned long)&__x86_stack_mem.b[FRAME];
+	for (i = 0; i < FRAME; i++)
+		es[i] = __x86_stack_mem.b[i] = pattern_byte(i);
+	for (i = 0; i < sizeof(heap); i++)
+		eh[i] = heap[i] = (__u8)(pattern_byte(i) ^ 0xa5);
+	for (i = 0; i < 16; i++) {
+		mr[i] = pattern_reg(i); mt[i] = X86_SIM_TAG_SCALAR;
+		X86_SIM_L_WRITE_REG_PTR_TAG(i, (void *)(unsigned long)mr[i], mt[i]);
+	}
+	mr[X86_RSP] = (__u64)-32; mr[X86_RCX] = 3;
+	mr[X86_RBP] = base_kind == 2 ? arena - 64 : (__u64)(unsigned long)&heap[48];
+	mt[X86_RBP] = base_kind == 2 ? X86_SIM_TAG_STACK : X86_SIM_TAG_SCALAR;
+	X86_SIM_L_WRITE_REG_PTR_TAG(X86_RSP, (void *)(unsigned long)mr[X86_RSP], mt[X86_RSP]);
+	X86_SIM_L_WRITE_REG_PTR_TAG(X86_RCX, (void *)(unsigned long)mr[X86_RCX], mt[X86_RCX]);
+	X86_SIM_L_WRITE_REG_PTR_TAG(X86_RBP, (void *)(unsigned long)mr[X86_RBP], mt[X86_RBP]);
+	__x86_native_stack_base = native_base;
+	__x86_cf = 1; __x86_zf = 0; __x86_sf = 1;
+	__x86_of = 1; __x86_pf = 0; __x86_af = 1;
+	__x86_xmm0_lo = 0x123456789abcdef0ULL; __x86_xmm0_hi = 0xfedcba9876543210ULL;
+	advanced = mr[X86_RSP] + (pop ? w : 0);
+	base = br == X86_REG_NONE ? 0 : br == X86_RSP ? advanced : mr[br];
+	index = ir == X86_REG_NONE ? 0 : ir == X86_RSP ? advanced + native_base :
+		mt[ir] == X86_SIM_TAG_STACK ? mr[ir] - arena + native_base : mr[ir];
+	target = base_kind == 0 ? (__u64)targets[slot] : base_kind == 2 ? arena + (__u64)targets[slot] :
+		(__u64)(unsigned long)&heap[64 + slot * 16];
+	disp = target - base - (ir == X86_REG_NONE ? 0 : index << scale);
+	if (pop) {
+		source = &es[FRAME - 32];
+		destination = base_kind == 0 || base_kind == 2 ? &es[FRAME + targets[slot]] : &eh[64 + slot * 16];
+		mr[X86_RSP] += w;
+	} else {
+		source = base_kind == 0 || base_kind == 2 ? &es[FRAME + targets[slot]] : &eh[64 + slot * 16];
+		mr[X86_RSP] -= w; destination = &es[FRAME - 32 - w];
+	}
+	for (i = 0; i < w; i++) value |= (__u64)source[i] << (8 * i);
+	for (i = 0; i < w; i++) destination[i] = (__u8)(value >> (8 * i));
+	if (via)
+		X86_SIM_L_EXEC(pop ? X86_OP_POP : X86_OP_PUSH, pop ? br : X86_REG_NONE,
+			pop ? X86_REG_NONE : br, flags, aux, disp);
+	else if (pop) X86_SIM_L_EXEC_POP_OP(br, flags, aux, disp);
+	else X86_SIM_L_EXEC_PUSH_OP(br, flags, aux, disp);
+	cases++;
+	memory_mismatch = memcmp(eh, heap, sizeof(heap)) != 0;
+	for (i = 0; i < FRAME; i++)
+		memory_mismatch |= es[i] != __x86_stack_mem.b[i];
+	if (memory_mismatch) {
+		printf("MISMATCH memory pop=%u flags=%u base=%u index=%u scale=%u slot=%u via=%u\n",
+			pop, flags, base_kind, index_kind, scale, slot, via);
+		failures++; return;
+	}
+	for (i = 0; i < 16; i++) {
+		cases += 2;
+		if ((__u64)(unsigned long)X86_SIM_L_REG_VALUE(i) != mr[i] || X86_SIM_L_REG_TAG(i) != mt[i]) {
+			printf("MISMATCH memory register%u\n", i); failures++; return;
+		}
+	}
+	cases++;
+	if (__x86_cf != 1 || __x86_zf != 0 || __x86_sf != 1 || __x86_of != 1 || __x86_pf != 0 || __x86_af != 1 ||
+	    __x86_xmm0_lo != 0x123456789abcdef0ULL || __x86_xmm0_hi != 0xfedcba9876543210ULL) {
+		printf("MISMATCH memory flags/vector\n"); failures++;
+	}
+}
+
 /* The routed selectors must agree with the contract's tables. */
 static void check_selectors(void)
 {
@@ -381,6 +465,21 @@ int main(void)
 				check_step("native-push", 0, legal_flags[fi], reg, 0, -24,
 					via, bases[bi], ai, immediate);
 		}
+	}
+
+	{
+		static const unsigned mf[] = {0, X86_WIDTH_16, X86_WIDTH_64};
+		static const __u64 nb[] = {0, 0x7fffffffef91ULL, 0xfffffffffffffff9ULL};
+		unsigned bk, ik, scale, slot, bi;
+		for (via = 0; via < 2; via++)
+		for (op = 0; op < 2; op++)
+		for (fi = 0; fi < 3; fi++)
+		for (bk = 0; bk < 4; bk++)
+		for (ik = 0; ik < 4; ik++)
+		for (scale = 0; scale < 4; scale++)
+		for (slot = 0; slot < 3; slot++)
+		for (bi = 0; bi < 3; bi++)
+			check_memory_step(op, mf[fi], bk, ik, scale, slot, nb[bi], via);
 	}
 
 	check_selectors();

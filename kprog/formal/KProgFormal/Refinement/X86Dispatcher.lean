@@ -1807,8 +1807,28 @@ theorem stack_width_binding_decodes (flags : Byte) (width : Reference.X86.StackW
     (binding : StackWidthBinding flags width) : stackWidthOf flags = some width := by
   cases width <;> simp [stackWidthOf, width_binding_decodes flags _ binding]
 
+/-- Raw memory fields select the same base/index numeric observations as LEA.
+A private arena mapping supplies the corresponding guest-memory accesses. -/
+def memoryAddressRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (baseField : Byte)
+    (aux : BitVec 32) (displacement : Reference.Word) : Option Reference.Word := do
+  let base ← optionalRegisterOf baseField
+  let index ← optionalRegisterOf ((GeneratedX86MemAux.index aux).setWidth 8)
+  pure (leaAddress (nativeRegisters env frame arena state) base index aux displacement)
+
+theorem memory_address_registers_refine (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (baseField : Byte) (base index : Option Register)
+    (aux : BitVec 32) (displacement : Reference.Word)
+    (baseBinding : baseField = optionalRegisterByte base)
+    (indexBinding : (GeneratedX86MemAux.index aux).setWidth 8 = optionalRegisterByte index) :
+    memoryAddressRegisters env frame arena state baseField aux displacement =
+      some (leaAddress (nativeRegisters env frame arena state) base index aux displacement) := by
+  simp only [memoryAddressRegisters, baseBinding, indexBinding, optional_register_of_byte, Option.bind_some]
+  rfl
+
 /-- The shared PUSH_OP/POP_OP arms select register and immediate transfers
-from the high AUX byte. Mode2 retains its addressed-memory proof interface. -/
+from the high AUX byte. Mode2 forms PUSH addresses before the transfer and
+POP addresses after the raw stack advance. -/
 def stackRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
     (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Reference.Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
@@ -1816,13 +1836,18 @@ def stackRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironmen
     let width ← stackWidthOf flags
     if GeneratedX86MemAux.op aux = 1 then
       pure (pushValueFrame env frame arena state width value nextPc)
-    else if GeneratedX86MemAux.op aux = 2 then none
+    else if GeneratedX86MemAux.op aux = 2 then do
+      let address ← memoryAddressRegisters env frame arena state src aux value
+      pure (pushMemoryFrame env frame arena state width address nextPc)
     else
       let source ← registerOf src
       pure (pushValueFrame env frame arena state width (registerValue env frame arena state source) nextPc)
   else if code = GeneratedX86Opcode.code .pop then do
     let width ← stackWidthOf flags
-    if GeneratedX86MemAux.op aux = 2 then none
+    if GeneratedX86MemAux.op aux = 2 then do
+      let address ← memoryAddressRegisters env frame arena
+        (advanceStack state (BitVec.ofNat 64 width.bytes)) dst aux value
+      pure (popMemoryFrame env frame arena state width address nextPc)
     else
       let destination ← registerOf dst
       pure (popRegisterFrame env frame arena state width destination nextPc)
@@ -1864,6 +1889,51 @@ theorem stack_registers_refine (env : EntryEnvironment.Environment) (frame : Ent
       exact
         congrArg some (pop_register_frame_refines env frame arena state width destination nextPc)
 
+/-- Input field bindings also derive memory POP's post-increment address.
+The native instruction contains that computed address from the common input. -/
+inductive StackMemoryBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (nativeState : Reference.X86.State) :
+    Nat → Reference.X86.Instruction → Prop where
+  | push (width : Reference.X86.StackWidth) (base index : Option Register)
+      (widthField : StackWidthBinding flags width) (baseField : src = optionalRegisterByte base)
+      (indexField : (GeneratedX86MemAux.index aux).setWidth 8 = optionalRegisterByte index)
+      (modeField : GeneratedX86MemAux.op aux = 2) :
+      StackMemoryBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .push)
+        (.pushMemory width (leaAddress nativeState base index aux value) nextPc)
+  | pop (width : Reference.X86.StackWidth) (base index : Option Register)
+      (widthField : StackWidthBinding flags width) (baseField : dst = optionalRegisterByte base)
+      (indexField : (GeneratedX86MemAux.index aux).setWidth 8 = optionalRegisterByte index)
+      (modeField : GeneratedX86MemAux.op aux = 2) :
+      StackMemoryBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .pop)
+        (.popMemory width (leaAddress
+          { nativeState with gpr := fun r => if r = 4 then nativeState.gpr 4 + BitVec.ofNat 64 width.bytes
+            else nativeState.gpr r } base index aux value) nextPc)
+
+theorem stack_memory_registers_refine (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (value nextPc : Reference.Word) (state : RegisterState) (native : Reference.X86.Instruction)
+    (binding : StackMemoryBinding flags aux dst src value nextPc (nativeRegisters env frame arena state) code native) :
+    stackRegisters env frame arena code flags aux dst src value nextPc state =
+      some (Reference.X86.step native (nativeRegisters env frame arena state)) := by
+  cases binding with
+  | push width base index widthField baseField indexField modeField =>
+      have modeSeparate : GeneratedX86MemAux.op aux ≠ 1 := by rw [modeField]; decide
+      simp only [stackRegisters, if_pos rfl, stack_width_binding_decodes flags width widthField,
+        Option.bind_some, modeSeparate, modeField, ↓reduceIte,
+        memory_address_registers_refine env frame arena state src base index aux value baseField indexField]
+      exact congrArg some (push_memory_frame_refines env frame arena state width _ nextPc)
+  | pop width base index widthField baseField indexField modeField =>
+      have separate : GeneratedX86Opcode.code .pop ≠ GeneratedX86Opcode.code .push := by decide
+      simp only [stackRegisters, separate, if_pos rfl, ↓reduceIte,
+        stack_width_binding_decodes flags width widthField, Option.bind_some, modeField]
+      change (memoryAddressRegisters env frame arena (advanceStack state (BitVec.ofNat 64 width.bytes)) dst aux value >>=
+        fun address => some (popMemoryFrame env frame arena state width address nextPc)) = _
+      rw [memory_address_registers_refine env frame arena (advanceStack state (BitVec.ofNat 64 width.bytes))
+        dst base index aux value baseField indexField]
+      change some (popMemoryFrame env frame arena state width
+        (leaAddress (nativeRegisters env frame arena (advanceStack state (BitVec.ofNat 64 width.bytes))) base index aux value) nextPc) = _
+      rw [pop_memory_frame_refines, native_advance_stack]
+
 /-- Unified partial simulator step: register execution and the producer's
 separate JCC/JMP branch-handler class share one transition interface. Logical
 label/PC and compiled-code correspondence retain their layout/ABI obligations. -/
@@ -1885,6 +1955,9 @@ inductive StepBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (value n
   | stack (code : Nat) (native : Reference.X86.Instruction)
       (fields : StackBinding flags aux dst src value nextPc code native) :
       StepBinding flags aux dst src value nextPc nativeState code native
+  | stackMemory (code : Nat) (native : Reference.X86.Instruction)
+      (fields : StackMemoryBinding flags aux dst src value nextPc nativeState code native) :
+      StepBinding flags aux dst src value nextPc nativeState code native
   | conditional (cc : Fin 16) (conditionField : aux = BitVec.ofNat 32 cc.val) :
       StepBinding flags aux dst src value nextPc nativeState (GeneratedX86Opcode.code .jcc)
         (.branch (some cc) value nextPc)
@@ -1905,6 +1978,12 @@ theorem simulator_step_refines (env : EntryEnvironment.Environment) (frame : Ent
   | stack code native fields =>
       apply exact_dispatch_refines
       have model := stack_registers_refine env frame arena code flags aux dst src value nextPc state native fields
+      cases fields <;>
+        simpa [dispatchStep, dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+          GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code] using model
+  | stackMemory code native fields =>
+      apply exact_dispatch_refines
+      have model := stack_memory_registers_refine env frame arena code flags aux dst src value nextPc state native fields
       cases fields <;>
         simpa [dispatchStep, dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
           GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code] using model
