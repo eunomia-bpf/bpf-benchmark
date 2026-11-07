@@ -92,6 +92,7 @@ int main(void) {
 '''
 (phase/'memory.c').write_text(source)
 command=['cc','-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer',
+         '-include',str(ROOT/'kprog/formal/oracles/arm64_entry_environment_host.h'),
          '-I'+str(ROOT/'vendor/libbpf/src'),'-I'+str(ROOT/'vendor/libbpf/include/uapi'),
          str(phase/'memory.c'),'-o',str(phase/'memory')]
 built=subprocess.run(command,text=True,capture_output=True)

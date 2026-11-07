@@ -25,9 +25,10 @@ Checks against the candidate snapshot:
 The raw archive includes compiler records, exact frozen simulator/generated
 headers, BCC C/native/proof objects, all QEMU verifier logs, and control manifests.
 The production include path is rewritten only for the self-contained snapshot.
-The complete formal check is queued behind V's sole full check. Production
-header changes remain uncommitted until validation. BCC v27 real app startup is
-running separately; tcplife stack use and vfsstat exclusive-loop acceptance
+The complete immutable formal check passes (exit 0); its frozen source manifest
+and complete raw log are retained. The negative artifact plus all 29 micro
+artifacts also rebuilt. Actual BCC v27 startup is recorded separately in
+../runtime-context-v27/; tcplife stack use and vfsstat exclusive-loop acceptance
 remain open. No six-application completion or performance result is claimed.
 
 Rebuild the diagnostic snapshot using the archived Makefile and paths:

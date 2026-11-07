@@ -26,7 +26,11 @@ def main():
         frozen = BUILD / source.name
         frozen.write_text(source.read_text().replace(
             '../arm64/arm64_sim_local_bpf.h', str(PHASE / 'simulator/arm64_sim_local_bpf.h')))
-        command = ['cc', '-Wall', '-Wextra', '-O2', '-I'+str(ROOT/'kprog/formal'),
+        command = ['cc', '-Wall', '-Wextra', '-O2',
+                   '-include', str(ROOT/'kprog/formal/oracles/arm64_entry_environment_host.h'),
+                   '-DKPROG_TEST_EXCLUSIVE_FAILURE=0',
+                   '-include', str(ROOT/'kprog/formal/oracles/arm64_exclusive_choice_host.h'),
+                   '-I'+str(ROOT/'kprog/formal'),
                    '-I'+str(ROOT/'kprog'), '-I'+str(ROOT/'vendor/libbpf/src'),
                    str(frozen), '-o', str(BUILD/name)]
         compiled = subprocess.run(command, text=True, capture_output=True)

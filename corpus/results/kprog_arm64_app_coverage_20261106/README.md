@@ -1002,7 +1002,8 @@ and negative + 29 micro compiler passes, 11,200 memory byte/tag cases, seven QEM
 boundary outcomes and two source/simulator/bound result-37/generation-1 controls.
 Opensnoop maximum stack offset falls from 880 to 472 bytes; tcplife remains 584.
 The extra sparse-payload trial gives no further reduction and is not promoted.
-The full formal check and actual BCC v27 startup continue separately.
+The complete immutable formal check passes; actual BCC v27 startup is recorded
+separately below and still has application failures.
 
 ## Actual BCC v27 startup after stack representation changes
 

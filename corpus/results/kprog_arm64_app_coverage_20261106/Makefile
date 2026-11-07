@@ -662,3 +662,18 @@ arm-abi-boundary-check:
 .PHONY: arm-abi-cross-build
 arm-abi-cross-build:
 	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc taskset -c 16-19 cargo build --release --target aarch64-unknown-linux-gnu --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml --target-dir $(ROOT)/kprog/arm64/build/app-native-link
+
+.PHONY: layout-verifier-build layout-verifier-check
+layout-verifier-build:
+	python3 $(HERE)/layout_verifier_check.py $(HERE)/$(PHASE) prepare
+
+layout-verifier-check:
+	python3 $(HERE)/layout_verifier_check.py $(HERE)/$(PHASE) package $(BASE_INITRAMFS) $(BOUND_MODULE)
+	install -d $(HERE)/$(PHASE)/verify
+	taskset -c 12-15 timeout 600 qemu-system-aarch64 -M virt -cpu max -smp 2 -m 2048 -nographic -no-reboot \
+		-kernel $(BOUND_KERNEL) -initrd $(BUILD)/initramfs.cpio.gz \
+		-fsdev local,id=results,path=$(HERE)/$(PHASE)/verify,security_model=none \
+		-device virtio-9p-device,fsdev=results,mount_tag=results \
+		-append 'console=ttyAMA0 rdinit=/init loglevel=4 panic=30 oops=panic' >$(HERE)/$(PHASE)/qemu.log 2>&1
+	test "$$(cat $(HERE)/$(PHASE)/verify/guest-status)" = 0
+	python3 $(HERE)/layout_verifier_check.py $(HERE)/$(PHASE) collect

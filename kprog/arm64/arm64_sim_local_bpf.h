@@ -562,10 +562,22 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 #define ARM64_SIM_L_STACK_INDEX(OFF)                                       \
 	KPROG_ARM64_STACK_INDEX(OFF, ARM64_SIM_STACK_BIAS)
 
+/* Empty tied-register asm keeps invalid/dynamic accesses visible despite C
+ * array UB. Known in-range indexes need no opacity; retaining their constants
+ * lets LLVM scalarize the private ghost payload without changing BPF values.
+ * The constant-p predicates eliminate this choice before BPF emission. */
+#define ARM64_SIM_L_STACK_INDEX_OPACITY(INDEX, WIDTH)                      \
+    do {                                                                  \
+        if (!__builtin_constant_p(INDEX) || !__builtin_constant_p(WIDTH) || \
+            (INDEX) > ARM64_SIM_STACK_BYTES ||                            \
+            (WIDTH) > ARM64_SIM_STACK_BYTES - (INDEX))                     \
+            asm volatile("" : "+r"(INDEX));                              \
+    } while (0)
+
 #define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
 	({                                                                 \
 		__u32 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
-		asm volatile("" : "+r"(__a64_str_index));     \
+		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_str_index, (WIDTH));     \
 		__u8 __a64_str_width = (WIDTH);                           \
 		__u64 __a64_str_value;                                    \
 		if (KPROG_ARM64_STACK_ARM(                         \
@@ -586,7 +598,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 #define ARM64_SIM_L_STACK_READ_TAG(OFF, WIDTH)                              \
 	({                                                                 \
 		__u32 __a64_srt_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
-		asm volatile("" : "+r"(__a64_srt_index));     \
+		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_srt_index, (WIDTH));     \
 		__u8 __a64_srt_width = (WIDTH);                           \
 		__u8 __a64_srt_source =                                   \
 			KPROG_ARM64_STACK_READ_TAG_SOURCE(                \
@@ -604,7 +616,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 #define ARM64_SIM_L_STACK_WRITE_TAG(OFF, WIDTH, VALUE, TAG)                  \
 	do {                                                               \
 		__u32 __a64_stw_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
-		asm volatile("" : "+r"(__a64_stw_index));     \
+		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_stw_index, (WIDTH));     \
 		__u8 __a64_stw_width = (WIDTH);                           \
 		__u64 __a64_stw_value = KPROG_ARM64_APPLY_WIDTH((VALUE), __a64_stw_width);\
 		__u8 __a64_stw_action = KPROG_ARM64_STACK_WRITE_TAG_ACTION(\
@@ -856,15 +868,15 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
  */
 #define ARM64_SIM_L_MEM_PAYLOAD(BASE, INDEX, AUX, IMM, EXTRA, VALUE, TAG)   \
 	({ __u64 __a64_mp_value = (VALUE); __u8 __a64_mp_tag = (TAG);     \
-	   if (__a64_mp_tag == ARM64_SIM_TAG_STACK ||                     \
-	       __a64_mp_tag == ARM64_SIM_TAG_RETURN) {                    \
+	   switch (__a64_mp_tag) { \
+	   case ARM64_SIM_TAG_STACK: case ARM64_SIM_TAG_RETURN: { \
 		__s64 __a64_mp_base = KPROG_ARM64_MEM_BASE_SRC((BASE) == ARM64_SP) == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER ? __a64_sp :      \
 			(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);        \
 		__s64 __a64_mp_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA); \
 		__u32 __a64_mp_at = ARM64_SIM_L_STACK_INDEX(__a64_mp_base + __a64_mp_off); \
-		asm volatile("" : "+r"(__a64_mp_at));                      \
+		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_mp_at, ARM64_WIDTH_64);                      \
 		__a64_mp_value = __a64_stack_payload[KPROG_ARM64_STACK_WORD_INDEX(__a64_mp_at)]; \
-	   } __a64_mp_value; })
+	   break; } default: break; } __a64_mp_value; })
 
 #define ARM64_SIM_L_MEM_WRITE(BASE, INDEX, AUX, IMM, EXTRA, WIDTH, VALUE, TAG)\
 	do {                                                               \

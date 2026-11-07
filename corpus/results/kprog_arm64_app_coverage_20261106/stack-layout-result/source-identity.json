@@ -1,6 +1,8 @@
 {
   "head": "0f118e0e606e94240ede73a6ebec30f79e2cde99",
   "production_header_sha256": "35b30262efd1679f553494a3160f2c50f426176f7656c7fb82cd8df7c49019ee",
-  "full_check_status": "queued behind V; no full pass claimed",
-  "private_sparse_payload_status": "not promoted: same maximum stack offsets"
+  "full_check_status": "PASS: immutable frozen HEAD plus exact A-owned ARM representation headers",
+  "private_sparse_payload_status": "not promoted: same maximum stack offsets",
+  "full_check_base": "0c1b5a7e7d25ef1c792d2d8e8f7506cb0d0a0fd9",
+  "full_check_source_manifest": "layout-full-v27.sources.gz"
 }
