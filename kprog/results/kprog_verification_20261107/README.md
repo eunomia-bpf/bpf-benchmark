@@ -10,18 +10,18 @@ specialization token also has its own row.
 | Requested operation domain | 77 | 72 |
 | Production numeric operations / specialization tokens | 75 / 75 | 71 / 71 |
 | Reference step family defined | 67/75 | 71/71 |
-| Raw register handler refinement | 28/75 | 0/71 |
-| Raw register dispatcher arm composition | 28/75 | 0/71 |
-| Additional partial-model handler families | 39/75 | 0 |
+| Raw register handler refinement | 30/75 | 0/71 |
+| Raw register dispatcher arm composition | 30/75 | 0/71 |
+| Additional partial-model handler families | 37/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 69/71 |
 | Declared opcode dispatcher gaps | 0 | 2/71 |
-| O2 C-model token-body equality | 28/75 | 0/71 |
+| O2 C-model token-body equality | 30/75 | 0/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 65/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 5/71 |
 
-The 28 x86 O2 equalities cover 22 direct bodies and six unchanged generic calls.
-The remaining 39 x86 reference-family handlers have partial model proofs; eight
+The 30 x86 O2 equalities cover 22 direct bodies and eight unchanged generic calls.
+The remaining 37 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 require ALU-family and
@@ -3009,3 +3009,25 @@ adoption carry separate replay/publication identities. Universal O1/O2 work
 continues against the actual published production definitions.
 
 Full `make check` at published `5b999fc5b7cf41b6964b245d39a32f79ae1022a9` completed with actual make exit **0** and queue exit **0**. All **1140** selected source hashes match that published commit. This snapshot includes the MOVZX/MOVSX raw frame, dispatcher and27-token O2 interface. Complete commands/logs/source manifest/CPU trace remain in `FULL MAKE CHECK 5B999FC5B PASS`; the private export is retired and incremental caches retained. The later MULX increment retains its own focused/default Lean and oracle results.
+
+The SHLD/SHRD raw-frame increment covers16/32/64-bit immediate and CL forms.
+The count mask is proved invariant under byte extraction. `double_shift_cl_binding`
+derives the real RCX byte read from the same incoming raw frame, retaining
+source/destination/RCX aliases. Zero count preserves the physical16/64-bit
+representation;32-bit zero count performs its architectural zero extension.
+Every nonzero count uses the actual value/flag writers and the canonical
+undefined-output masks. The ordered dispatcher and unchanged generic RUN_OP
+bodies compose through the uniform per-token theorem. Coverage advances to
+**30** raw x86 handler/dispatcher operations and **30** C-model O2 tokens
+(22 direct and eight generic), with37 additional partial-model families.
+
+Focused129 and all378 default Lean targets passed. Twelve axiom audits retain
+standard Lean axioms. The existing reference suite covers15,360 actual CPU
+cases,3,072 GNU encodings and32,256 complete reference states. The unchanged
+routed double-shift oracle passed under UBSan; exact command/count/output and
+all source pins are archived. Earlier generic205-chain/534-specialization
+observations from `0c4eb35e4` are reused after every relevant recorded input byte
+is verified equal, with their original execution identity retained. Every prior
+dispatcher theorem signature, oracle case and canonical ISA definition remains.
+A complete full check follows the published source through the shared warm
+verification entry point; the completed full5b999 epoch remains separate.

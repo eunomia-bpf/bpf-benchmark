@@ -2,7 +2,7 @@
 
 Current [coverage and totals](../results/kprog_verification_20261107/README.md)
 track each declared operation and token. The generic C-model O2 interface covers
-28 x86 register tokens; full raw ISA and compiled-simulator closure continue.
+30 x86 register tokens; full raw ISA and compiled-simulator closure continue.
 
 Run the complete verification entry point on an x86-64 Linux host:
 
@@ -42,7 +42,7 @@ The handler refinements retain the complete modeled state, PC, ordered memory
 accesses and faults under their stated field, address and platform witnesses.
 The x86 raw register frame covers RSP offsets and STACK arena pointers, lane
 reads/writes, MOV/MOVZX/MOVSX/CMOV/SETCC/XCHG, reversal/count, logical, arithmetic, unary, multiply/MULX, compare and immediate/CL
-shift, classic ROR, BMI2 and bit-operation register bodies. Its partial raw
+shift, SHLD/SHRD, classic ROR, BMI2 and bit-operation register bodies. Its partial raw
 dispatcher composes the published opcode/AUX/width/GPR bindings into the
 canonical `Step` relation, retaining actual writes to undefined flags. The AArch64
 numeric/code frame composes scalar, memory, vector, exclusive and control
@@ -58,7 +58,7 @@ explicit. A sequential vector footprint does not prove concurrent atomicity.
 Exclusive failure remains a possible outcome on each dynamic attempt; the
 per-instruction proofs supply no bounded-retry or eventual-success guarantee.
 
-Twenty-two direct and six generic register token bodies have semantic equality to interpreter
+Twenty-two direct and eight generic register token bodies have semantic equality to interpreter
 dispatch for arbitrary fields and invocations. Safety work is generic per
 simulator and token; historical per-program proofs are frozen and excluded
 from the argument. Remaining tokens and native-link/compiler preservation

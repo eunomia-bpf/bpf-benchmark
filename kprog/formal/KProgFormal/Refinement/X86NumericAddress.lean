@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86DoubleShift
 import KProgFormal.Refinement.X86Mulx
 import KProgFormal.Refinement.X86Movx
 import KProgFormal.Refinement.X86RotateRight
@@ -1380,5 +1381,109 @@ theorem mulx_register_frame_refines (env : Environment) (frame : Frame) (arena :
   rw [X86Mulx.parts_refine, native_register_pc]
   rw [native_mulx_high_write, native_mulx_low_write]
   rfl
+
+theorem double_shift_step_count_byte (width : Reference.X86.CmovWidth) (left : Bool)
+    (dst source : Reference.X86.Register) (count nextPc : NativeWord) (state : Reference.X86.State) :
+    Reference.X86.step (.doubleShift width left dst source count nextPc) state =
+      Reference.X86.step (.doubleShift width left dst source ((count.setWidth 8).setWidth 64) nextPc) state := by
+  have amount : Reference.X86.doubleShiftCount count width.bits =
+      Reference.X86.doubleShiftCount ((count.setWidth 8).setWidth 64) width.bits := by
+    cases width <;> simp only [Reference.X86.doubleShiftCount, Reference.X86.CmovWidth.bits,
+      Reference.X86.CmovWidth.bytes, Nat.reduceMul, Reference.Word] <;> bv_decide
+  simp only [Reference.X86.step, Reference.X86.doubleShiftStep, Reference.X86.doubleShiftFlags,
+    Reference.X86.doubleShiftValue, amount]
+
+theorem double_shift_zero_write (width : Reference.X86.CmovWidth) (left : Bool)
+    (old source count : NativeWord) (zero : Reference.X86.doubleShiftCount count width.bits = 0) :
+    Reference.X86.writeValue width old
+      (Reference.X86.doubleShiftValue left old source count width.bits) =
+      if width = .w32 then (old.setWidth 32).setWidth 64 else old := by
+  simp only [Reference.X86.doubleShiftValue, zero]
+  cases width <;> cases left <;>
+    simp only [Reference.X86.writeValue, Reference.X86.CmovWidth.bits,
+      Reference.X86.CmovWidth.bytes, Nat.reduceMul, reduceCtorEq, ↓reduceIte, Reference.Word] <;> bv_decide
+
+/-- Zero count preserves the physical representation at16/64 bits and uses
+only the architectural zero-extending numeric write at32 bits. -/
+def doubleShiftRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (left : Bool)
+    (dst source : Reference.X86.Register) (count nextPc : NativeWord) : RegisterState :=
+  let old := registerValue env frame arena state dst
+  let rhs := registerValue env frame arena state source
+  let amount := GeneratedX86ShiftCount.count count (X86Cmov.handlerWidth width)
+  if amount.toNat = 0 then
+    registerPc (if width = .w32 then writeRegister env frame arena state .w32 (.low dst) old
+      else state) nextPc
+  else
+    let result := X86DoubleShift.value width left old rhs count
+    let written := writeRegister env frame arena state (multiplyScalarWidth width) (.low dst) result
+    registerPc (registerFlags written (X86DoubleShift.flags width left old result count state.raw.rflags)) nextPc
+
+theorem double_shift_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (left : Bool)
+    (dst source : Reference.X86.Register) (count nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena
+      (doubleShiftRegister env frame arena state width left dst source count nextPc), [], none⟩ :
+        Transition Reference.X86.State) =
+      Reference.X86.step (.doubleShift width left dst source ((count.setWidth 8).setWidth 64) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← double_shift_step_count_byte]
+  by_cases zero : (GeneratedX86ShiftCount.count count (X86Cmov.handlerWidth width)).toNat = 0
+  · have zeroWord : Reference.X86.doubleShiftCount count width.bits = 0 := by
+      rw [← X86DoubleShift.count_refines]
+      apply BitVec.eq_of_toNat_eq
+      simpa using zero
+    have flagsZero (old a b : NativeWord) : Reference.X86.doubleShiftFlags width left a b count old = old := by
+      simp [Reference.X86.doubleShiftFlags, zeroWord]
+    simp only [doubleShiftRegister, zero, ↓reduceIte]
+    cases width with
+    | w16 =>
+        simp only [reduceCtorEq, ↓reduceIte, native_register_pc, Reference.X86.step,
+          Reference.X86.doubleShiftStep, flagsZero, double_shift_zero_write _ _ _ _ _ zeroWord]
+        simp only [nativeRegisters]
+        congr 2
+        funext r
+        by_cases same : r = dst
+        · subst r
+          simp only [↓reduceIte]
+          simpa only [reduceCtorEq, ↓reduceIte] using
+            (double_shift_zero_write _ left (registerValue env frame arena state dst)
+              (registerValue env frame arena state source) count zeroWord).symm
+        · simp [same]
+    | w32 =>
+        simp only [↓reduceIte]
+        rw [native_register_pc, native_register_write]
+        simp only [Reference.X86.step, Reference.X86.doubleShiftStep, flagsZero,
+          double_shift_zero_write _ _ _ _ _ zeroWord, nativeRegisters]
+        congr 2
+        funext r
+        by_cases same : r = dst
+        · subst r
+          simp only [Reference.X86.RegisterSlice.reg, ↓reduceIte]
+          rw [double_shift_zero_write _ left (registerValue env frame arena state dst)
+            (registerValue env frame arena state source) count zeroWord]
+          simp only [↓reduceIte]
+          rw [← X86Scalar.register_write_refines]
+          simp only [X86Scalar.handlerWidth, X86Scalar.lane, GeneratedX86RegWrite.writeAt,
+            GeneratedX86RegWrite.bitsAt, GeneratedX86RegWrite.bits, Reference.Word]
+          bv_decide
+        · simp [Reference.X86.RegisterSlice.reg, same]
+    | w64 =>
+        simp only [reduceCtorEq, ↓reduceIte, native_register_pc, Reference.X86.step,
+          Reference.X86.doubleShiftStep, flagsZero, double_shift_zero_write _ _ _ _ _ zeroWord]
+        simp only [nativeRegisters]
+        congr 2
+        funext r
+        by_cases same : r = dst
+        · subst r
+          simp only [↓reduceIte]
+          simpa only [reduceCtorEq, ↓reduceIte] using
+            (double_shift_zero_write _ left (registerValue env frame arena state dst)
+              (registerValue env frame arena state source) count zeroWord).symm
+        · simp [same]
+  · simp only [doubleShiftRegister, zero, ↓reduceIte]
+    rw [native_register_pc, native_register_flags, native_register_write]
+    simp only [multiply_scalar_write, X86DoubleShift.value_refines, X86DoubleShift.flags_refine,
+      Reference.X86.step, Reference.X86.doubleShiftStep, Reference.X86.RegisterSlice.reg, nativeRegisters]
 
 end KProgFormal.Refinement.X86NumericAddress

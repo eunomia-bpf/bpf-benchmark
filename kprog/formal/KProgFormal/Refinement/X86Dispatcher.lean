@@ -648,6 +648,13 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         let source ← registerOf src
         pure ⟨nativeRegisters env frame arena
           (populationCountRegister env frame arena state width destination source nextPc), [], none⟩
+      else if code = GeneratedX86Opcode.code .shldImm || code = GeneratedX86Opcode.code .shrdImm then do
+        let width ← cmovWidthOf flags
+        let destination ← registerOf dst
+        let source ← registerOf src
+        pure ⟨nativeRegisters env frame arena
+          (doubleShiftRegister env frame arena state width (code == GeneratedX86Opcode.code .shldImm)
+            destination source value nextPc), [], none⟩
       else if code = GeneratedX86Opcode.code .mulx then do
         let width ← bswapWidthOf flags
         let low ← registerOf dst
@@ -677,6 +684,14 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
   | move (code : Nat) (native : Reference.X86.Instruction)
       (fields : MoveBinding flags aux dst src value nextPc code native) :
       RegisterBinding flags aux dst src value nextPc nativeState code native
+  | doubleShift (width : Reference.X86.CmovWidth) (left : Bool)
+      (destination source : Register) (encoded : Byte)
+      (widthField : WidthBinding flags (cmovScalarWidth width))
+      (dstField : dst = registerByte destination) (srcField : src = registerByte source)
+      (countField : value.setWidth 8 = encoded) :
+      RegisterBinding flags aux dst src value nextPc nativeState
+        (GeneratedX86Opcode.code (if left then .shldImm else .shrdImm))
+        (.doubleShift width left destination source (encoded.setWidth 64) nextPc)
   | mulx (width : Reference.X86.BzhiWidth) (high low source : Register)
       (widthField : WidthBinding flags (bswapScalarWidth width))
       (lowField : dst = registerByte low) (srcField : src = registerByte source)
@@ -897,6 +912,34 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
       RegisterBinding flags aux dst src value nextPc nativeState (GeneratedX86DispatchSingleton.code .xchg)
         (.exchange width (.low destination) (.low source) nextPc)
 
+/-- SHLD/SHRD CL reads the byte from the same incoming raw RCX frame.
+Count capture precedes every destination assignment, including destination RCX. -/
+theorem double_shift_cl_binding (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
+    (arena : Reference.Word) (state : RegisterState) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
+    (nextPc : Reference.Word) (width : Reference.X86.CmovWidth) (left : Bool)
+    (destination source : Register)
+    (widthField : WidthBinding flags (cmovScalarWidth width))
+    (dstField : dst = registerByte destination) (srcField : src = registerByte source) :
+    RegisterBinding flags aux dst src (readRegister env frame arena state .w8 (.low 1)) nextPc
+      (nativeRegisters env frame arena state)
+      (GeneratedX86Opcode.code (if left then .shldImm else .shrdImm))
+      (.doubleShift width left destination source
+        (Reference.X86.scalarRegisterValue (nativeRegisters env frame arena state) .w8 (.low 1)) nextPc) := by
+  have cl : (((readRegister env frame arena state .w8 (.low 1)).setWidth 8).setWidth 64) =
+      Reference.X86.scalarRegisterValue (nativeRegisters env frame arena state) .w8 (.low 1) := by
+    rw [native_register_read]
+    simp only [Reference.X86.scalarRegisterValue, Reference.X86.RegisterSlice.shift,
+      Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes, Nat.reduceMul, Reference.Word]
+    bv_decide
+  have bound : RegisterBinding flags aux dst src (readRegister env frame arena state .w8 (.low 1)) nextPc
+      (nativeRegisters env frame arena state)
+      (GeneratedX86Opcode.code (if left then .shldImm else .shrdImm))
+      (.doubleShift width left destination source
+        (((readRegister env frame arena state .w8 (.low 1)).setWidth 8).setWidth 64) nextPc) :=
+    .doubleShift width left destination source
+      ((readRegister env frame arena state .w8 (.low 1)).setWidth 8) widthField dstField srcField rfl
+  simpa only [cl] using bound
+
 /-- The dynamic IMM argument emitted for classic ROR CL is derived from
 its real raw pre-state read. It is not a chosen count or result premise. -/
 theorem rotate_cl_binding (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
@@ -936,6 +979,15 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
   | move code native fields =>
       apply exact_dispatch_refines
       simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
+  | doubleShift width left destination source encoded widthField dstField srcField countField =>
+      apply exact_dispatch_refines
+      subst dst; subst src
+      have widthDecoded := cmov_width_binding_decodes flags width widthField
+      cases left <;>
+        simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+          GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+          widthDecoded, register_of_byte, countField] using
+          congrArg some (double_shift_register_frame_refines env frame arena state width _ destination source value nextPc)
   | mulx width high low source widthField lowField srcField highField =>
       apply exact_dispatch_refines
       subst dst; subst src; subst aux
@@ -1378,6 +1430,8 @@ def specializedRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvi
   | .xchg => dispatchRegisters env frame arena (GeneratedX86Opcode.code .xchg) flags aux dst src value nextPc state
   | .shiftx => dispatchRegisters env frame arena (GeneratedX86Opcode.code .shiftx) flags aux dst src value nextPc state
   | .bzhi => dispatchRegisters env frame arena (GeneratedX86Opcode.code .bzhi) flags aux dst src value nextPc state
+  | .shldImm => dispatchRegisters env frame arena (GeneratedX86Opcode.code .shldImm) flags aux dst src value nextPc state
+  | .shrdImm => dispatchRegisters env frame arena (GeneratedX86Opcode.code .shrdImm) flags aux dst src value nextPc state
   | _ => none
 
 /-- O2 once per lifted direct token: specializing opcode dispatch retains the
@@ -1436,6 +1490,7 @@ def registerTokenOpcode (token : GeneratedX86Specialization.Op) : Option Generat
   match token with
   | .nop => some .nop | .bswap => some .bswap | .popcnt => some .popcnt
   | .xchg => some .xchg | .shiftx => some .shiftx | .bzhi => some .bzhi
+  | .shldImm => some .shldImm | .shrdImm => some .shrdImm
   | _ => directRegisterOpcode token
 
 theorem register_token_identity (token : GeneratedX86Specialization.Op) (opcode : GeneratedX86Opcode.Op)
