@@ -13,20 +13,20 @@ specialization token also has its own row.
 | Raw register handler refinement | 32/75 | 0/71 |
 | Raw register dispatcher arm composition | 32/75 | 0/71 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
-| Addressed memory model / composed step | 2/75 | 0/71 |
-| Additional partial-model handler families | 29/75 | 0 |
+| Addressed memory model / composed step | 4/75 | 0/71 |
+| Additional partial-model handler families | 27/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 69/71 |
 | Declared opcode dispatcher gaps | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 38/75 | 0/71 |
+| O2 C-model token-body equality | 40/75 | 0/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 65/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 5/71 |
 
-The 38 x86 O2 equalities cover26 direct bodies, ten generic calls and two
+The 40 x86 O2 equalities cover28 direct bodies, ten generic calls and two
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
-The remaining29 x86 reference-family handlers have partial model proofs; eight
+The remaining27 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 require ALU-family and
@@ -3427,3 +3427,37 @@ source manifest, CPU trace and exit receipt are archived under
 `full_make_check_c435a1dac`. This is the corrected runner’s actual addressed-stack
 epoch. The earlier redundant7a7893bc9 signal-15 remains recorded separately;
 subsequent MOVBE source has its own completion evidence.
+
+### Memory condition bodies and full-frame token composition
+
+CMOV_MEM and SETCC_MEM now bind every16 condition code, including PF, from
+AUX's high byte into the unified simulator step and direct-token laws. Optional
+base/index/scale fields derive the memory address from the same input frame.
+CMOV uses the signed high32 displacement, a matched memory/target width or its
+fallback, and captures its complete source read before evaluating the condition.
+True writeback scalarizes the captured value; false32 zero-extends the old
+native destination, while false16/64 retain the raw representation. SETCC uses
+the complete displacement word and an exact one-byte store. Initialization,
+ordered memory effects, faults, rollback, flags, vectors and all GPR/tag cells
+retain the canonical observation through RSP/STACK normalization. The generic
+private-arena/native-memory permission, ABI/definedness, C correspondence,
+compiler and native-link interfaces retain their production scope.
+
+The141-target focused/default Lean builds and9 axiom audits pass with140 stable
+proof inputs. All92 prior numeric-frame and52 dispatcher theorem signatures
+remain available. The trust record retains propext, Classical.choice,
+Quot.sound and Lean.ofReduceBool. The existing CMOV route oracle passes28180495
+UBSan observations: its26526735 original checks remain, and48640 new full-frame
+scenarios add1653760 observations. The condition matrix includes all16 codes
+and32 relevant flag combinations; address cases cover all16 CMOV destinations,
+partialSP/STACK aliases, matched/fallback widths, scaled indexes, three native
+bases, memory/register aliases, direct/dispatcher routes, six flags and XMM0.
+SETCC also exercises an absent base and ignored FLAGS/memory-width fields.
+All156 compiled input hashes stay stable. Canonical stack/memory/fault,
+1214scalar/72CPU-anchor and15371condition suites pass.
+
+O2 now covers40 C-model tokens (28direct/tengeneric/twobranch). Coverage keeps
+32 pure register operations, two control, two stack-memory and four addressed
+memory models separate;27 further reference-family models retain their raw
+field/frame completion interfaces. `x86_condition_memory_dispatch_tokens`
+records the proofs, source identities, original route count and complete checks.

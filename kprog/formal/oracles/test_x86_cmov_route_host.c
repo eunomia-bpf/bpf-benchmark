@@ -51,6 +51,7 @@ typedef signed int __s32;
 #include "x86_no_helpers_host.h"
 
 #include <stdio.h>
+#include <string.h>
 
 static int failures;
 static __u64 model_arena_top;
@@ -408,6 +409,97 @@ static void check_mem(unsigned src, unsigned base_tag, __u8 cc_byte,
 }
 
 /* The routed selectors must agree with the contract's tables. */
+/* Full16 condition truth table with PF independent of CF/ZF/SF/OF. */
+static unsigned memory_cc(unsigned cc, unsigned bits)
+{
+	unsigned c = bits & 1, z = (bits >> 1) & 1, n = (bits >> 2) & 1;
+	unsigned o = (bits >> 3) & 1, p = (bits >> 4) & 1;
+	switch (cc) {
+	case 0: return o; case 1: return !o; case 2: return c; case 3: return !c;
+	case 4: return z; case 5: return !z; case 6: return c || z; case 7: return !c && !z;
+	case 8: return n; case 9: return !n; case 10: return p; case 11: return !p;
+	case 12: return n != o; case 13: return n == o; case 14: return z || n != o;
+	default: return !z && n == o;
+	}
+}
+static __u64 memory_native_cell(const __u64 *r, const __u8 *tags, unsigned reg,
+                                __u64 arena, __u64 base)
+{
+	return reg == X86_RSP ? r[reg] + base :
+		tags[reg] == X86_SIM_TAG_STACK ? r[reg] - arena + base : r[reg];
+}
+static void check_condition_frame(unsigned set, unsigned flags, unsigned data_reg,
+                                  unsigned bk, unsigned ik, unsigned scale,
+                                  __u64 native_base, unsigned cc, unsigned bits, unsigned via)
+{
+	__u8 h[192], eh[192], es[X86_SIM_STACK_BYTES], tags[16];
+	__u64 r[16], arena, base, index, target, off, imm, value = 0, old, mask;
+	unsigned w = flags ? flags : 8, i, bad, taken = memory_cc(cc, bits);
+	unsigned br = bk == 0 ? X86_RSP : bk == 3 ? X86_REG_NONE : X86_RBP;
+	unsigned ir = ik == 0 ? X86_REG_NONE : ik == 1 ? X86_RCX : ik == 2 ? X86_RDX : X86_RBX;
+	__u32 aux = ir | (scale << 8) | ((set ? 0xd3U : (bits & 16 ? w : 0)) << 16) | (cc << 24);
+	__u8 *memory;
+	X86_SIM_L_DECLARE_STATE();
+	struct x86_sim_xdp_abi __x86_sim_abi = {};
+	struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;
+	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;
+	X86_SIM_L_DECLARE_STACK();
+	(void)__x86_sim_abi; (void)__x86_sim_skb_ctx; (void)__x86_sim_abi_kind;
+	(void)__x86_sim_ret_addr; (void)__x86_sim_helper_abi_base;
+	arena = (__u64)(unsigned long)&__x86_stack_mem.b[X86_SIM_STACK_BYTES];
+	for (i = 0; i < X86_SIM_STACK_BYTES; i++) es[i] = __x86_stack_mem.b[i] = (__u8)(i * 37 + 11);
+	for (i = 0; i < sizeof(h); i++) eh[i] = h[i] = (__u8)(i * 19 + 0xa7);
+	for (i = 0; i < 16; i++) {
+		r[i] = 0x123456789abcdef0ULL + i * 0x10101; tags[i] = X86_SIM_TAG_SCALAR;
+		X86_SIM_L_WRITE_REG_PTR_TAG(i, (void *)(unsigned long)r[i], tags[i]);
+	}
+	r[X86_RSP] = (__u64)-32; r[X86_RCX] = 3; r[X86_RDX] = 5; r[X86_RBX] = 7;
+	r[X86_RBP] = bk == 2 ? arena - 40 : (__u64)(unsigned long)&h[48];
+	tags[X86_RBP] = bk == 2 ? X86_SIM_TAG_STACK : X86_SIM_TAG_SCALAR;
+	for (i = 0; i < 16; i++) X86_SIM_L_WRITE_REG_PTR_TAG(i, (void *)(unsigned long)r[i], tags[i]);
+	__x86_native_stack_base = native_base;
+	__x86_cf = bits & 1; __x86_zf = (bits >> 1) & 1; __x86_sf = (bits >> 2) & 1;
+	__x86_of = (bits >> 3) & 1; __x86_pf = (bits >> 4) & 1; __x86_af = 1;
+	__x86_xmm0_lo = 0x12345678abcdef01ULL; __x86_xmm0_hi = 0xfedcba9876543210ULL;
+	base = br == X86_REG_NONE ? 0 : r[br];
+	index = ir == X86_REG_NONE ? 0 : memory_native_cell(r, tags, ir, arena, native_base);
+	target = bk == 0 ? (__u64)-16 : bk == 2 ? arena - 16 : (__u64)(unsigned long)&h[96];
+	off = target - base - (ir == X86_REG_NONE ? 0 : index << scale);
+	imm = set ? off : (((__u64)(__u32)off << 32) | 0x89abcdefULL);
+	memory = bk == 0 || bk == 2 ? &es[X86_SIM_STACK_BYTES - 16] : &eh[96];
+	if (set) memory[0] = (__u8)taken;
+	else {
+		for (i = 0; i < w; i++) value |= (__u64)memory[i] << (8 * i);
+		old = memory_native_cell(r, tags, data_reg, arena, native_base);
+		mask = w == 8 ? ~0ULL : (1ULL << (8 * w)) - 1;
+		if (taken || w == 4) {
+			value = w == 4 ? ((taken ? value : old) & mask) : (old & ~mask) | (value & mask);
+			r[data_reg] = data_reg == X86_RSP ? value - native_base : value;
+			tags[data_reg] = X86_SIM_TAG_SCALAR;
+		}
+	}
+	if (via) X86_SIM_L_EXEC(set ? X86_OP_SETCC_MEM : X86_OP_CMOV_MEM,
+		set ? br : data_reg, set ? X86_REG_NONE : br, flags, aux, imm);
+	else if (set) X86_SIM_L_EXEC_SETCC_MEM(br, aux, imm);
+	else X86_SIM_L_EXEC_CMOV_MEM(data_reg, br, flags, aux, imm);
+	bad = memcmp(h, eh, sizeof(h)) != 0;
+	for (i = 0; i < X86_SIM_STACK_BYTES; i++) bad |= es[i] != __x86_stack_mem.b[i];
+	cases++;
+	if (bad) { printf("MISMATCH condition frame memory set=%u cc=%u bits=%u\n", set, cc, bits); failures++; return; }
+	for (i = 0; i < 16; i++) {
+		cases += 2;
+		if ((__u64)(unsigned long)X86_SIM_L_REG_VALUE(i) != r[i] || X86_SIM_L_REG_TAG(i) != tags[i]) {
+			printf("MISMATCH condition frame reg%u set=%u width=%u dst=%u cc=%u bits=%u\n", i, set, w, data_reg, cc, bits); failures++; return;
+		}
+	}
+	cases++;
+	if (__x86_cf != (bits & 1) || __x86_zf != ((bits >> 1) & 1) || __x86_sf != ((bits >> 2) & 1) ||
+	    __x86_of != ((bits >> 3) & 1) || __x86_pf != ((bits >> 4) & 1) || __x86_af != 1 ||
+	    __x86_xmm0_lo != 0x12345678abcdef01ULL || __x86_xmm0_hi != 0xfedcba9876543210ULL) {
+		printf("MISMATCH condition frame flags/vector\n"); failures++;
+	}
+}
+
 static void check_selectors(void)
 {
 	static const __u32 words[] = { 0U, 0x00000105U, 0x05000004U,
@@ -586,6 +678,21 @@ int main(void)
 				}
 			}
 		}
+	}
+
+	{
+		static const unsigned fw[] = {0, X86_WIDTH_16, X86_WIDTH_32, X86_WIDTH_64};
+		static const __u64 nb[] = {0, 0x7fffffffef91ULL, 0xfffffffffffffff9ULL};
+		unsigned op, vi, wi, cc, bits, bk, dr, ik, sc, bi;
+		for (op = 0; op < 2; op++) for (vi = 0; vi < 2; vi++)
+		for (wi = 0; wi < 4; wi++) for (cc = 0; cc < 16; cc++)
+		for (bits = 0; bits < 32; bits++) for (bk = 0; bk < (op ? 4U : 3U); bk++)
+			check_condition_frame(op, fw[wi], cc, bk, bits % 4, cc % 4, nb[cc % 3], cc, bits, vi);
+		for (op = 0; op < 2; op++) for (vi = 0; vi < 2; vi++)
+		for (wi = 0; wi < 4; wi++) for (dr = 0; dr < (op ? 1U : 16U); dr++)
+		for (bk = 0; bk < (op ? 4U : 3U); bk++) for (ik = 0; ik < 4; ik++)
+		for (sc = 0; sc < 4; sc++) for (bi = 0; bi < 3; bi++)
+			check_condition_frame(op, fw[wi], dr, bk, ik, sc, nb[bi], 10 + dr % 2, (dr + bi) % 32, vi);
 	}
 
 	check_selectors();

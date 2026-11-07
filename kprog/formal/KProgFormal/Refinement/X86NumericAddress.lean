@@ -1922,4 +1922,76 @@ theorem endian_store_frame_refines (env : Environment) (frame : Frame) (arena : 
     show (nativeRegisters env frame arena state).gpr source = registerValue env frame arena state source from rfl]
   split <;> rename_i allowed <;> simp only [allowed, ↓reduceIte]
 
+/-- SETCC memory observes all five condition flags and writes exactly one
+byte through the generated scalar store, retaining the remaining frame. -/
+def setConditionMemory (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (payload : BitVec 32) (address nextPc : NativeWord) : Transition Reference.X86.State :=
+  let taken := (GeneratedX86FullCondition.eval payload
+    (state.raw.rflags.getLsbD 0) (state.raw.rflags.getLsbD 6) (state.raw.rflags.getLsbD 7)
+    (state.raw.rflags.getLsbD 11) (state.raw.rflags.getLsbD 2)).getD false
+  let value : NativeWord := if taken then 1 else 0
+  if permitted state.raw.memory.writable address 1 then
+    let memory := X86Scalar.store state.raw.memory .w8 address value
+    ⟨nativeRegisters env frame arena (registerPc (registerMemory state memory) nextPc),
+      [.memory .write address (valueBytes value 1) true], none⟩
+  else ⟨nativeRegisters env frame arena state, [.fault (.write address 1)], some (.write address 1)⟩
+
+theorem set_condition_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (cc : Fin 16) (address nextPc : NativeWord) :
+    setConditionMemory env frame arena state (BitVec.ofNat 32 cc.val) address nextPc =
+      Reference.X86.step (.setcc cc (.memory address) nextPc) (nativeRegisters env frame arena state) := by
+  have condition := X86Condition.condition_refines cc state.raw.rflags
+  unfold X86Condition.evaluate at condition
+  simp only [setConditionMemory, condition, Option.getD_some, native_register_pc, native_register_memory,
+    X86Scalar.store_refines, Reference.X86.step, Reference.X86.scalarWrite, writeMemory,
+    Reference.X86.ScalarWidth.bytes,
+    show (nativeRegisters env frame arena state).rflags = state.raw.rflags from rfl,
+    show (nativeRegisters env frame arena state).memory = state.raw.memory from rfl]
+  split <;> rename_i allowed <;> simp only [allowed, ↓reduceIte]
+
+/-- CMOV reads memory eagerly, before evaluating the condition. Its true arm
+writes a numeric captured value; false32 zero-extends the old native destination. -/
+def conditionalMemoryFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (payload : BitVec 32)
+    (destination : Reference.X86.Register) (address nextPc : NativeWord) : Transition Reference.X86.State :=
+  match X86Bt.readOperand width (.memory address) (nativeRegisters env frame arena state) with
+  | .error fault => ⟨nativeRegisters env frame arena state, [.fault fault], some fault⟩
+  | .ok (value, reads) =>
+      let taken := (GeneratedX86FullCondition.eval payload
+        (state.raw.rflags.getLsbD 0) (state.raw.rflags.getLsbD 6) (state.raw.rflags.getLsbD 7)
+        (state.raw.rflags.getLsbD 11) (state.raw.rflags.getLsbD 2)).getD false
+      let result := if taken then
+          writeRegister env frame arena state (multiplyScalarWidth width) (.low destination) value
+        else if width = .w32 then
+          writeRegister env frame arena state .w32 (.low destination) (registerValue env frame arena state destination)
+        else state
+      ⟨nativeRegisters env frame arena (registerPc result nextPc), reads, none⟩
+
+theorem conditional_memory_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (cc : Fin 16)
+    (destination : Reference.X86.Register) (address nextPc : NativeWord) :
+    conditionalMemoryFrame env frame arena state width (BitVec.ofNat 32 cc.val) destination address nextPc =
+      Reference.X86.step (.cmov width cc destination (.memory address) nextPc) (nativeRegisters env frame arena state) := by
+  have condition := X86Condition.condition_refines cc state.raw.rflags
+  unfold X86Condition.evaluate at condition
+  simp only [conditionalMemoryFrame, X86Bt.read_refines, Reference.X86.step]
+  cases read : Reference.X86.readSource (nativeRegisters env frame arena state) (.memory address) width.bytes with
+  | error fault => rfl
+  | ok pair =>
+      rcases pair with ⟨value, reads⟩
+      simp only [condition, Option.getD_some]
+      have flags : (nativeRegisters env frame arena state).rflags = state.raw.rflags := rfl
+      cases width <;> cases taken : Reference.X86.condition state.raw.rflags cc <;>
+        simp only [multiplyScalarWidth, flags, taken, Bool.false_eq_true, ↓reduceIte, reduceCtorEq,
+          native_register_pc, native_register_write]
+      all_goals simp only [Reference.X86.cmovValue, nativeRegisters]
+      all_goals congr 1
+      all_goals congr 1
+      all_goals funext reg
+      all_goals by_cases same : reg = destination
+      all_goals simp only [same, ↓reduceIte, Reference.X86.RegisterSlice.reg,
+        Reference.X86.scalarWriteValue, Reference.X86.RegisterSlice.shift,
+        Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes, NativeWord, Reference.Word]
+      all_goals bv_decide
+
 end KProgFormal.Refinement.X86NumericAddress
