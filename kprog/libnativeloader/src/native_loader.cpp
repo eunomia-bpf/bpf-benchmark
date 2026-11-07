@@ -5713,6 +5713,8 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             companion.map_addrs[binding.native_symbol] = map.value_addr + *binding.value_offset;
             companion.native_map_symbols.erase(binding.native_symbol);
         }
+        // Preserve the explicit capsule alias while scanning the remaining ELF.
+        companion.source_map_symbols.insert(binding.native_symbol);
     }
     SimulatorObject simulator_object(nullptr, bpf_object__close);
     std::vector<std::unique_ptr<ScopedFd>> proof_map_fds;

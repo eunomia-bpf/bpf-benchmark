@@ -15,5 +15,15 @@
   "runtime_status": "whole Cilium application replay follows current Tracee batch",
   "kernel_dependency_commit": "c94fbff015cfcf2a6b253a26122e9991036c558b",
   "kernel_resource_regression": "kprog/results/kprog_tv_20261107/trusted-native-resources.json",
-  "raw_sha256": "b55614f4d040cda5b22b188dbbcf27f88a7c1d296ec7805e4b714878773b2700"
+  "raw_sha256": "22b970bc80faf85913a82f7fd2e1175d5cc1b32e0833e4bdbe60daa6faee1d03",
+  "initial_raw_sha256": "b55614f4d040cda5b22b188dbbcf27f88a7c1d296ec7805e4b714878773b2700",
+  "explicit_alias_rescan": {
+    "source_sha256": "82ad104a0974b4152272dd5f98dbcf52e013843d19f70992f0dd2b53f504d732",
+    "build_exit": 0,
+    "service_unit_tests": 12,
+    "binary_sha256": {
+      "libnative_loader.so": "9127e53ce2adbef56be0bfe24fb1efa95bc100a6a53c8bf3bebfa9cc1969c519",
+      "trusted-native-loader": "d2d4339c98fead6dbfde48071951e05408c04b4f4e522d873a4e7d8a2c79d595"
+    }
+  }
 }

@@ -32,3 +32,12 @@ regression receipt. The earlier component receipt records its actual
 pre-publication wire state separately. Universal request lifetime, resource
 identity, ISA/token/native-link and binding laws provide the safety argument;
 component checks and the ensuing application batch provide execution evidence.
+
+
+Explicit capsule-bound aliases now remain in the existing explicit-binding set
+during the subsequent native ELF scan. This preserves the authenticated symbol
+identity when ordinary kernel names share truncations or appear alongside their
+full native aliases. The changed C++ object and both private binaries rebuild
+successfully; all12service tests pass. observations.json records the added
+source/binary epoch separately, and raw.tar.gz nests the original component
+archive alongside the new source/build evidence.
