@@ -56,7 +56,7 @@ def classify(record):
  texts='\n'.join(data.values());error=record.get('error','')
  if ('processed ' in texts and ('BPF_PROG_LOAD' in texts or 'bpf_object__load failed' in texts)):return 'verifier_rejected',texts
  if 'contains no BPF exit' in texts:return 'loader_rejected',texts
- if any(s in error for s in ['unsupported x86','unsupported mnemonic','native ABI','native entry','native return','uninitialized','unsupported instruction','indirect']):return 'specialization_rejected',error+'\n'+texts
+ if any(s in error for s in ['unsupported x86','unsupported arm64 instruction','unsupported mnemonic','native ABI','native entry','native return','uninitialized','unsupported instruction','indirect']):return 'specialization_rejected',error+'\n'+texts
  if 'clang' in error and 'returned non-zero' in error:return 'compiler_rejected',error+'\n'+texts
  return 'pipeline_rejected_unclassified',error+'\n'+texts
 

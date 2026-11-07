@@ -33,9 +33,25 @@ taskset -c 20-23 make -f kprog/results/kprog_fidelity_20261107/negative/arm64-tr
 taskset -c 20-23 make -f kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/Makefile qemu
 ```
 
-The34-input build and static linking passed. The QEMU run is in progress;
-no ARM rejection/execution total is claimed yet. Its eventual compressed run
-archive and summary go under `trusted-arm64-service-result/`, retaining exact
-per-case diagnostics, kernel/worker identities and any failure. Do not restart
-its healthy guest merely because QEMU or clang is slow. The accepted original
-x86 results and prior ARM bound-path results remain separate evidence.
+The34-input build and static linking passed. The first QEMU run completed
+4/4 valid native executions and rejected all11 original requested negatives:
+8 in the verifier,1 in the loader (no BPF exit),2 during specialization.
+The BRK rejection was initially labeled `pipeline_rejected_unclassified` because
+the report classifier lacked the exact `unsupported arm64 instruction` text.
+Its recorded error/traceback proves specialization rejection before proof
+compilation. Only that classification was corrected; the complete original
+run archive remains unchanged, including its guest exit1 and all counterinputs.
+`first-run-counts.json`, `first-run-summary.json` and compressed normalized
+outcomes make that distinction explicit. Kernel/module/worker/loader inputs
+were unchanged during the run. Guest timestamps start at1970; host UTC archive
+and summary timestamps identify the actual run.
+
+The remaining19 extended negatives have not yet run. The continuation uses
+`completed-cases.json` to retain already-completed native identities and run
+only missing cases plus the same safe return2 control. Every skipped completed
+native SHA must equal the saved receipt; no unsafe case is excluded. Each new
+host run gets its own archive under `trusted-arm64-service-result/`; combine
+per-case identities across archives when reporting the full30-negative total.
+There is no complete ARM suite pass claim yet. No production simulator,
+generator, kernel or binding semantics changed for this report correction.
+The accepted original x86 and historical ARM bound-path results remain separate.

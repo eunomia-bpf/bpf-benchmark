@@ -1,0 +1,92 @@
+[
+  {
+    "name": "valid_control",
+    "native_sha256": "0e5c0407b26746fe5465c46615365300dee08573ba7d187b35a1935e540703f5",
+    "stage": "valid_executed",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "valid_copy_restore",
+    "native_sha256": "62deafc04c19cf6157b5a1db9e52f7d2ece1f38958afb4a6ba1962e1aa419d9b",
+    "stage": "valid_executed",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "valid_alias_load",
+    "native_sha256": "f5c5efe2f30e2950ecc98b97ac29f0e9bc7e5e4474a4ea13384d2b0ef3e38d0b",
+    "stage": "valid_executed",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "valid_spill_restore",
+    "native_sha256": "539354542a4e9fbbec15da240a5c8223c0725f644c38cba34ebedc40e42d9e0f",
+    "stage": "valid_executed",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "past_data_end_read",
+    "native_sha256": "b59cfc6568481220ac84c773c748076a79d2343db974edfc7e493b3efaefc030",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "past_data_end_write",
+    "native_sha256": "9f47d4ab36a5e4c84db06e141115d68fe4300671d4167ff115a2c03376e12908",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "missing_data_end_check",
+    "native_sha256": "af2effa86101b552dca5fb6b0fdc69578b705a07ce446a113548707923b31a35",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "map_value_oob",
+    "native_sha256": "a9028b2c67f9402bb6d397da5ba814ca4e359e8ff8a5c43aec3ecaa33e49a650",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "nullable_map_dereference",
+    "native_sha256": "2f4681342b27ef34166b6493942a36f9a4e063cfc959428c48ffb73e65748ad2",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "invalid_helper_argument",
+    "native_sha256": "dad4bdf806f097d9aad6e7c96549664240ad2e44293f14e7e896a6809cb949f9",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "stack_oob",
+    "native_sha256": "fc982ce7fc4a52e051e4c7037c2216aeccd87e1deb48c460dd79c5875a25c8a9",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "uninitialized_stack",
+    "native_sha256": "a50aa1007ba884a8a4a1d12598c5a8d84a9ed25fcf3e73d68d0c07ca6768be04",
+    "stage": "verifier_rejected",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "unbounded_loop",
+    "native_sha256": "4ad10da9f1969bf96619f6f451001c29fb976b638d395a7293e1dbf4b75f90b8",
+    "stage": "loader_rejected",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "unbounded_indirect_jump",
+    "native_sha256": "691911d84bf7d44a61fdedfca7f4f6db68ea79596c1578f8b828b622b89bf0f9",
+    "stage": "specialization_rejected",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  },
+  {
+    "name": "unsupported_instruction",
+    "native_sha256": "5da6847a41519b2fc4aabfb7f59cf5522c7d5a70551276827c213e80d0d7b88d",
+    "stage": "specialization_rejected",
+    "host_archive": "run-20261107T110228603019Z.tar.gz"
+  }
+]

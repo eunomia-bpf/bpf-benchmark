@@ -1,0 +1,17 @@
+{
+  "cases": 15,
+  "valid_executed": 4,
+  "unsafe_rejected": 11,
+  "accepted_unsafe": 0,
+  "stages": {
+    "valid_executed": 4,
+    "verifier_rejected": 8,
+    "loader_rejected": 1,
+    "specialization_rejected": 2
+  },
+  "complete_suite": false,
+  "remaining_unsafe": 19,
+  "classification_corrected_only": "unsupported arm64 instruction: brk #0x0",
+  "original_archive": "run-20261107T110228603019Z.tar.gz",
+  "inputs_unchanged": true
+}

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run the existing native-only safety harness on the retained ARM QEMU runtime."""
 from pathlib import Path
-import importlib.util,json,shutil,sys
+import importlib.util,json,sys
 R=Path('/workspaces/repository');O=Path(__file__).resolve().parent
 s=importlib.util.spec_from_file_location('native_safety',R/'kprog/results/kprog_fidelity_20261107/negative/x86-trusted-sp/check.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
 m.ARCH='arm64';m.OUT=O;m.BUILD=R/'kprog/formal/build/fidelity-trusted-arm64'
@@ -17,7 +17,14 @@ elif len(sys.argv)==2 and sys.argv[1]=='host':
  # Reuse A's unchanged readonly-root transport; output/guest dispatch belong to F.
  transport.HERE=O;transport.__file__=__file__;transport.host()
 elif len(sys.argv) in (3,4) and sys.argv[1]=='guest':
- live=Path(sys.argv[2]);shutil.copyfile(O/'cases.json',live/'cases.json');m.OUT=live
+ live=Path(sys.argv[2]);selected=json.loads((O/'cases.json').read_text())
+ completed=O/'completed-cases.json'
+ if completed.exists():
+  known={r['name']:r for r in json.loads(completed.read_text())}
+  for row in selected:
+   if row['name'] in known:assert row['native_sha256']==known[row['name']]['native_sha256'],'completed native input changed'
+  selected=[r for r in selected if r['name'] not in known or r['name']=='valid_control']
+ (live/'cases.json').write_text(json.dumps(selected,indent=2)+'\n');m.cases=lambda:selected;m.OUT=live
  try:m.check()
  finally:
   p=live/'outcomes.json';rows=json.loads(p.read_text()) if p.exists() else []
