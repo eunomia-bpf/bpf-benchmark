@@ -115,7 +115,7 @@ matching-work measurement continue from the reported failure classes.
 | Cilium | 163 | 1 | 0 | 0 | 1: map declaration | 0 | [201146 batch](native-modules-cilium__agent/README.md) |
 | Tetragon | 289 | 3 | 3 | 2 | 0 | 0 confirmed; 1 native-stub EINVAL | [210552 batch](native-join-tetragon__observer/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [213447 bound batch](katran-tagged-storage/README.md) |
-| Tracee | 151 | 6 | 6 | 5 | 0 | 1: readonly indexed extent | [211016 batch](tracee-join-helper/README.md) |
+| Tracee | 151 | 6 | 6 | 5 | 0 | 1: readonly indexed extent | [214037 batch](tracee-narrow-range/README.md) |
 
 Tracee baseline now completes151 application loads on the coherent kernel BTF
 epoch. The shared native CORE helper-preservation repair48ff82cfb restores its
@@ -193,3 +193,12 @@ section-identity/displacement resolver. Current production native-link tests
 pass88/88, including243constructedELF address/extent combinations and the
 prior-source failure control. Runtime adoption follows the coherent image
 boundary while active runtime inputs retain their recorded executable bytes.
+
+
+The [Tracee whole-application narrow-read replay214037](tracee-narrow-range/README.md)
+records151JIT app loads,6fresh generated/compiled requests and5bound. The next
+request, sys_exit_submit, reaches the verifier indexed-read boundary:80-byte
+readonly object,maximum offset1036,read4bytes,2154processed instructions/91states.
+All6terminal native identities and full logs remain retained; private executed
+sources and the concurrent shared guest.py change are recorded separately.
+The generic CMP representation trial continues from this observed failure class.
