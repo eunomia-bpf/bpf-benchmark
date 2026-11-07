@@ -205,3 +205,16 @@ make -f corpus/results/kprog_app_coverage_20261107/native-only-runtime/Makefile 
 ```
 
 This is a timing command for R; no timing run was launched by this change.
+
+
+###12GiB unwinder compile completes; exact self-XOR rejection retained
+
+Actual160919_656980 generated and compiled3 programs, accepted/bound2, then
+rejected perf_unwind_native at stub34918/proof33648: R3 pointer ^= pointer
+prohibited. No compiler OOM occurred in this12GiB guest. It did not complete
+application startup or native workload. Complete corpus/kernel/service/request
+logs, exact inputs and the failed third proof are preserved in
+otel-native-12g.json and its raw archives. The separate header-repair result
+records the exact native xor edx,edx source of this rejection, CPU validation
+and successful private compilation after repair; a new actual guest acceptance
+remains required. Disk and exported image tar were removed on closure.

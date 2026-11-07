@@ -1,0 +1,60 @@
+{
+  "applications": {
+    "bcc": {
+      "staged_objects": 34,
+      "generated": 33,
+      "generation_failed": 1,
+      "compiled": 19,
+      "compile_failed": 14,
+      "verifier_accepted": null,
+      "runtime_accepted": null
+    },
+    "cilium": {
+      "staged_objects": 82,
+      "generated": 66,
+      "generation_failed": 16,
+      "compiled": 4,
+      "compile_failed": 62,
+      "verifier_accepted": null,
+      "runtime_accepted": null
+    },
+    "katran": {
+      "staged_objects": 6,
+      "generated": 5,
+      "generation_failed": 1,
+      "compiled": 2,
+      "compile_failed": 3,
+      "verifier_accepted": null,
+      "runtime_accepted": null
+    },
+    "otelcol-ebpf-profiler": {
+      "staged_objects": 30,
+      "generated": 30,
+      "generation_failed": 0,
+      "compiled": 12,
+      "compile_failed": 18,
+      "verifier_accepted": null,
+      "runtime_accepted": null
+    },
+    "tetragon": {
+      "staged_objects": 809,
+      "generated": 130,
+      "generation_failed": 679,
+      "compiled": 102,
+      "compile_failed": 28,
+      "verifier_accepted": null,
+      "runtime_accepted": null
+    },
+    "tracee": {
+      "staged_objects": 175,
+      "generated": 119,
+      "generation_failed": 56,
+      "compiled": 59,
+      "compile_failed": 60,
+      "verifier_accepted": null,
+      "runtime_accepted": null
+    }
+  },
+  "source_pins_unchanged": true,
+  "scope": "staged generation/compile only; actual loaded coverage and verifier/runtime acceptance unmeasured"
+}
