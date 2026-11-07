@@ -13,20 +13,20 @@ specialization token also has its own row.
 | Raw register handler refinement | 32/75 | 0/71 |
 | Raw register dispatcher arm composition | 32/75 | 0/71 |
 | Stack register/immediate/memory model / composed step | 2/75 | 0/71 |
-| Addressed memory model / composed step | 4/75 | 0/71 |
-| Additional partial-model handler families | 27/75 | 0 |
+| Addressed memory model / composed step | 6/75 | 0/71 |
+| Additional partial-model handler families | 25/75 | 0 |
 | Conditional modeled handler / observed dispatcher | 0 | 69/71 |
 | Declared opcode dispatcher gaps | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
-| O2 C-model token-body equality | 40/75 | 0/71 |
+| O2 C-model token-body equality | 42/75 | 0/71 |
 | Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 65/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
 | Numeric operations awaiting selected replay | 9/75 | 5/71 |
 
-The 40 x86 O2 equalities cover28 direct bodies, ten generic calls and two
+The 42 x86 O2 equalities cover30 direct bodies, ten generic calls and two
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
-The remaining27 x86 reference-family handlers have partial model proofs; eight
+The remaining25 x86 reference-family handlers have partial model proofs; eight
 pseudo operations require environment/native-link binding. ARM conditional
 entries carry explicit observation, environment, address, code, monitor and ABI
 premises. ARM ADD_IMM/SUB_IMM numeric tokens3/4 require ALU-family and
@@ -3522,3 +3522,36 @@ unchanged pure contracts, original full-log observations and row list.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_6e51953dc`. Every check retains its exact published source identity.
+
+### Ordinary memory-store frame, dispatcher and token refinement
+
+MOV_STORE_REG and MOV_STORE_IMM now compose through the universal x86 step and
+per-token laws. Register stores capture the numeric source before storing its
+low bytes, including the four high-byte registers and RSP/STACK aliases. Input
+field bindings distinguish complete register-form displacements from signed
+high32 immediate displacements and the low32 immediate value/sign extension.
+Both widths/defaults and optional base/index/scale derive addresses from the
+same input. The proofs retain complete observed state, byte initialization,
+ordered writes and permission-fault rollback. Private arena/permission, ABI,
+definedness, C-model correspondence, compiler and native-link interfaces remain
+explicit. The existing general AUX-shift contracts and oracle cases are retained;
+these native bindings use defined shifts0/8.
+
+Focused141-module and default Lean builds and ten theorem axiom audits passed;
+all143 transitive proof/toolchain input hashes are checked against publication.
+The original94 NumericAddress and53 Dispatcher public signatures are retained.
+The existing store route oracle passed1,292,621 UBSan observations:77 original
+checks plus38,016 complete-frame scenarios with34 observations each. It covers
+all16 source GPRs, legal high-byte sources, five widths/defaults, packed sign
+boundaries, three native origins, scaled indices/address aliases, heap/stack
+stores and both direct/dispatcher routes. Finite immediate fixtures use three
+present-base kinds and small indices so their displacement fits signed32; the
+theorems retain the complete bound address domain. Actual C inputs are pinned
+and archived, including main6b3f31731d9d and reg-writecf27e323c885.
+
+Coverage becomes42 O2 tokens (30 direct, ten generic, two branch), six addressed
+memory models and25 additional partial families. Raw-register32, stack2,
+control2 and replay totals retain their scopes. The audits report propext,
+Classical.choice, Quot.sound and Lean.ofReduceBool. Raw logs, initial proof
+diagnostics, source bytes and hashes are retained in the integration archive
+under `x86_store_memory_dispatch_tokens`.

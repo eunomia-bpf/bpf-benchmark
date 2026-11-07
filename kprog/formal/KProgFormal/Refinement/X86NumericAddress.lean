@@ -1994,4 +1994,100 @@ theorem conditional_memory_frame_refines (env : Environment) (frame : Frame) (ar
         Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes, NativeWord, Reference.Word]
       all_goals bv_decide
 
+
+/-- Ordinary stores sample the numeric source and address from the input
+frame. The generated width store changes only guest bytes and initialization. -/
+def storeValueFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (value address nextPc : NativeWord) : Transition Reference.X86.State :=
+  if permitted state.raw.memory.writable address width.bytes then
+    let memory := X86Scalar.store state.raw.memory width address value
+    ⟨nativeRegisters env frame arena (registerPc (registerMemory state memory) nextPc),
+      [.memory .write address (valueBytes value width.bytes) true], none⟩
+  else ⟨nativeRegisters env frame arena state,
+    [.fault (.write address width.bytes)], some (.write address width.bytes)⟩
+
+theorem store_value_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (value address nextPc : NativeWord) :
+    storeValueFrame env frame arena state width value address nextPc =
+      Reference.X86.step (.move width (.memory address) (.immediate value) nextPc)
+        (nativeRegisters env frame arena state) := by
+  simp only [storeValueFrame, native_register_pc, native_register_memory, X86Scalar.store_refines,
+    Reference.X86.step, Reference.X86.moveStep, Reference.X86.scalarRead, Reference.X86.scalarWrite,
+    writeMemory, List.nil_append,
+    show (nativeRegisters env frame arena state).memory = state.raw.memory from rfl]
+  split <;> rename_i allowed <;> simp only [allowed, ↓reduceIte]
+
+/-- A full-width source read followed by the native lane shift and byte
+store observes exactly the same low bytes as the generated narrow lane read. -/
+theorem store_register_byte (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (source : Reference.X86.RegisterSlice) (i : Nat) (inside : i < width.bytes) :
+    (((registerValue env frame arena state source.reg >>> source.shift width) >>> (8 * i)).setWidth 8) =
+      ((readRegister env frame arena state width source >>> (8 * i)).setWidth 8) := by
+  rw [native_register_read]
+  simp only [Reference.X86.scalarRegisterValue, nativeRegisters]
+  cases width <;> cases source <;>
+    simp only [Reference.X86.RegisterSlice.shift, Reference.X86.ScalarWidth.bytes, Reference.X86.ScalarWidth.bits] at *
+  all_goals have options : i = 0 ∨ i = 1 ∨ i = 2 ∨ i = 3 ∨ i = 4 ∨ i = 5 ∨ i = 6 ∨ i = 7 := by omega
+  all_goals rcases options with hi | hi | hi | hi | hi | hi | hi | hi
+  all_goals subst i
+  all_goals first | omega | (simp only [NativeWord, Reference.Word, Reference.X86.RegisterSlice.reg, reduceCtorEq, ↓reduceIte]; bv_decide)
+
+private theorem store_frame_bytes_congr (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (left right address nextPc : NativeWord)
+    (same : ∀ i, i < width.bytes → (left >>> (8 * i)).setWidth 8 = (right >>> (8 * i)).setWidth 8) :
+    storeValueFrame env frame arena state width left address nextPc =
+      storeValueFrame env frame arena state width right address nextPc := by
+  have bytes : valueBytes left width.bytes = valueBytes right width.bytes := by
+    unfold valueBytes
+    apply List.map_congr_left
+    intro i member
+    exact same i (List.mem_range.mp member)
+  have memory : storeMemory state.raw.memory address left width.bytes =
+      storeMemory state.raw.memory address right width.bytes := by
+    unfold storeMemory
+    congr 1
+    funext a
+    dsimp only
+    split <;> rename_i inside
+    · exact same _ inside
+    · rfl
+  simp only [storeValueFrame, X86Scalar.store_refines, bytes, memory]
+
+def storeRegisterFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (source : Reference.X86.RegisterSlice) (address nextPc : NativeWord) : Transition Reference.X86.State :=
+  storeValueFrame env frame arena state width
+    (registerValue env frame arena state source.reg >>> source.shift width) address nextPc
+
+theorem store_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (source : Reference.X86.RegisterSlice) (address nextPc : NativeWord) :
+    storeRegisterFrame env frame arena state width source address nextPc =
+      Reference.X86.step (.move width (.memory address) (.register source) nextPc)
+        (nativeRegisters env frame arena state) := by
+  unfold storeRegisterFrame
+  rw [store_frame_bytes_congr env frame arena state width _ (readRegister env frame arena state width source)
+    address nextPc (store_register_byte env frame arena state width source)]
+  rw [store_value_frame_refines, native_register_read]
+  simp only [Reference.X86.step, Reference.X86.moveStep, Reference.X86.scalarRead]
+
+/-- Immediate stores use the width-aware low32 value rule; the independent
+instruction binding supplies the signed-high32 effective displacement. -/
+def storeImmediateFrame (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth)
+    (artifact address nextPc : NativeWord) : Transition Reference.X86.State :=
+  storeValueFrame env frame arena state width
+    (GeneratedX86Immediate.value artifact (X86Scalar.handlerWidth width)) address nextPc
+
+theorem store_immediate_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (artifact address nextPc : NativeWord) :
+    storeImmediateFrame env frame arena state width artifact address nextPc =
+      Reference.X86.step (.move width (.memory address)
+        (.immediate (KProgFormal.x86ImmediateValueSpec artifact (X86Scalar.handlerWidth width))) nextPc)
+        (nativeRegisters env frame arena state) := by
+  simp only [storeImmediateFrame, KProgFormal.x86_immediate_value_refines, store_value_frame_refines]
+
 end KProgFormal.Refinement.X86NumericAddress

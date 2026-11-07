@@ -2,7 +2,7 @@
 
 Current [coverage and totals](../results/kprog_verification_20261107/README.md)
 track each declared operation and token. The generic C-model O2 interface covers
-40 x86 register/control/memory tokens; full raw ISA and compiled-simulator closure continue.
+42 x86 register/control/memory tokens; full raw ISA and compiled-simulator closure continue.
 
 Run the complete verification entry point on an x86-64 Linux host:
 
@@ -58,7 +58,7 @@ explicit. A sequential vector footprint does not prove concurrent atomicity.
 Exclusive failure remains a possible outcome on each dynamic attempt; the
 per-instruction proofs supply no bounded-retry or eventual-success guarantee.
 
-Twenty-eight direct, ten generic and two branch token bodies have semantic
+Thirty direct, ten generic and two branch token bodies have semantic
 equality to their covered interpreter dispatch for arbitrary fields and
 invocations. PUSH/POP register/immediate/memory forms compose full64 stack offsets,
 partialSP writeback, old-source/post-increment destination addresses and ordered
@@ -67,7 +67,10 @@ relation retains its explicit production interface. MOVBE load/store derive
 raw effective addresses and compose generated reversal, native source bytes
 and RSP/STACK destination writeback with ordered memory/fault effects. CMOV_MEM
 and SETCC_MEM bind all16 conditions/PF, eager CMOV reads and false32 writeback,
-with packed/whole displacements and exact observed guest effects. Safety work is generic per
+with packed/whole displacements and exact observed guest effects. Ordinary
+MOV_STORE_REG/IMM also compose full numeric-frame stores, native source byte
+lanes and packed immediate fields through the same dispatcher/token interface.
+Safety work is generic per
 simulator and token; historical per-program proofs are frozen and excluded
 from the argument. Remaining tokens and native-link/compiler preservation
 are being connected through [generic composition](../tv/Composition.lean).
