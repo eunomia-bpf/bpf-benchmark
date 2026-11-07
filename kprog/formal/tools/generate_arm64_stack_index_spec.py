@@ -1,29 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the shared AArch64 stack-index (frame-offset -> arena-index) contract.
-
-The generated Lean definition `GeneratedArm64StackIndex.index` and the C macro
-`KPROG_ARM64_STACK_INDEX` implement the byte index the AArch64 simulator's stack
-helpers use to reach into its `__a64_stack` arena from an abstract frame offset
-`OFF` (the value the simulator's frame base, `__a64_sp`, resolves to):
-
-  - the offset is added to the arena bias `ARM64_SIM_STACK_BIAS` (96), so a
-    frame base offset of `-bias` lands at index 0 and an offset of 0 lands at
-    byte index `bias` — the frame base sits below the biased arena window, and
-    the abstract frame grows up into it;
-  - the sum is truncated to 32 bits (`__u32`), the index type the C helpers use
-    for the `b[]` byte arena and the `q[]` word arena (`index >> 3`).
-
-The offset is a 64-bit two's-complement quantity in the C code
-(`(__s64)(ARM64_SIM_STACK_BIAS + (OFF))`), so a negative offset below the bias
-wraps; the contract states the sum as wrapping 64-bit addition followed by a
-32-bit truncation, which is exactly the C bit pattern.
-`KProgFormal/Arm64StackIndex.lean` records that the map is the affine offset
-`bias + base + delta`, that the frame base lands at index 0, that the wrap is
-the low 32 bits of the offset, and that two offsets differing by a multiple of
-`2^32` alias.
-
-The C macro evaluates neither flags nor memory: it is a pure index computation.
-"""
+"""Generate full native-width wrapping stack offsets; never alias at 2^32."""
 import argparse
 import json
 from pathlib import Path
@@ -34,7 +10,7 @@ EXPECTED = {
     "index_base": "bias",
     "index_step": 1,
     "accumulate": "wrapping64",
-    "index_mask_bits": 32,
+    "index_mask_bits": 64,
 }
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -56,10 +32,10 @@ def render_lean(spec: dict) -> str:
 import Std
 namespace KProgFormal.GeneratedArm64StackIndex
 /-- The arena byte index for an abstract frame offset `off` in an arena biased
-by `bias` bytes: `bias + off`, truncated to the C helpers' {shift}-bit index
+by `bias` bytes: `bias + off`, retained in the C helpers' {shift}-bit index
 type. `bias` is `ARM64_SIM_STACK_BIAS`. -/
-def index (bias off : BitVec 64) : BitVec 32 :=
-  (bias + off).truncate {shift}
+def index (bias off : BitVec 64) : BitVec 64 :=
+  bias + off
 /-- The biased byte offset the stack pointer helper adds to the arena base, in
 the C `(__s64)` index width (64 bits): `bias + off`, untruncated. -/
 def ptrIndex (bias off : BitVec 64) : BitVec 64 :=
@@ -73,9 +49,9 @@ def render_c(spec: dict) -> str:
 #ifndef KPROG_FORMAL_GENERATED_ARM64_STACK_INDEX_H
 #define KPROG_FORMAL_GENERATED_ARM64_STACK_INDEX_H
 #define KPROG_ARM64_STACK_INDEX(OFF, BIAS)                                  \\
-\t((__u32)((__s64)(BIAS) + (__s64)(OFF)))
+\t((__u64)(BIAS) + (__u64)(OFF))
 #define KPROG_ARM64_STACK_PTR_INDEX(OFF, BIAS)                              \\
-\t((__s64)(BIAS) + (__s64)(OFF))
+\t((__s64)((__u64)(BIAS) + (__u64)(OFF)))
 #endif
 '''
 

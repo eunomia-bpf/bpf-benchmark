@@ -200,9 +200,9 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 /* Packed tag words retain verifier-known bits across field updates. */
 typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 #define ARM64_SIM_TAG_STORAGE_BYTES(CAPACITY) ((KPROG_ARM64_STACK_TAG_SLOTS(CAPACITY)+7U)&~7U)
-#define ARM64_SIM_L_TAG_WORD_PTR(INDEX) ((volatile arm64_sim_tag_word *)(void *)&__a64_stack_tag[(__u32)(INDEX)&~7U])
-#define ARM64_SIM_L_TAG_GET(INDEX) ({ __u32 __ti=(INDEX); (__u8)(*ARM64_SIM_L_TAG_WORD_PTR(__ti) >> ((__ti&7U)*8U)); })
-#define ARM64_SIM_L_TAG_SET(INDEX, TAG) do { __u32 __ti=(INDEX); __u32 __ts=(__ti&7U)*8U; volatile arm64_sim_tag_word *__tp=ARM64_SIM_L_TAG_WORD_PTR(__ti); __u64 __tv=*__tp; *__tp=(__tv&~(255ULL<<__ts))|((__u64)(__u8)(TAG)<<__ts); } while (0)
+#define ARM64_SIM_L_TAG_WORD_PTR(INDEX) ((volatile arm64_sim_tag_word *)(void *)&__a64_stack_tag[(__u64)(INDEX)&~7ULL])
+#define ARM64_SIM_L_TAG_GET(INDEX) ({ __u64 __ti=(INDEX); (__u8)(*ARM64_SIM_L_TAG_WORD_PTR(__ti) >> ((__ti&7U)*8U)); })
+#define ARM64_SIM_L_TAG_SET(INDEX, TAG) do { __u64 __ti=(INDEX); __u32 __ts=(__ti&7U)*8U; volatile arm64_sim_tag_word *__tp=ARM64_SIM_L_TAG_WORD_PTR(__ti); __u64 __tv=*__tp; *__tp=(__tv&~(255ULL<<__ts))|((__u64)(__u8)(TAG)<<__ts); } while (0)
 #ifdef ARM64_SIM_ENABLE_STACK
 #define ARM64_SIM_L_DECLARE_STACK()                                         \
 	volatile union {                                                            \
@@ -576,7 +576,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 
 #define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
 	({                                                                 \
-		__u32 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
+		__u64 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_str_index, (WIDTH));     \
 		__u8 __a64_str_width = (WIDTH);                           \
 		__u64 __a64_str_value;                                    \
@@ -597,7 +597,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 
 #define ARM64_SIM_L_STACK_READ_TAG(OFF, WIDTH)                              \
 	({                                                                 \
-		__u32 __a64_srt_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
+		__u64 __a64_srt_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_srt_index, (WIDTH));     \
 		__u8 __a64_srt_width = (WIDTH);                           \
 		__u8 __a64_srt_source =                                   \
@@ -615,7 +615,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 
 #define ARM64_SIM_L_STACK_WRITE_TAG(OFF, WIDTH, VALUE, TAG)                  \
 	do {                                                               \
-		__u32 __a64_stw_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
+		__u64 __a64_stw_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_stw_index, (WIDTH));     \
 		__u8 __a64_stw_width = (WIDTH);                           \
 		__u64 __a64_stw_value = KPROG_ARM64_APPLY_WIDTH((VALUE), __a64_stw_width);\
@@ -629,7 +629,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 			ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), ((TAG)));\
 		} else {                                                   \
 			ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), (ARM64_SIM_TAG_SCALAR));\
-			__u32 __a64_stw_last = __a64_stw_index + KPROG_ARM64_STACK_WRITE_LANE_COUNT(__a64_stw_width) - 1U; \
+			__u64 __a64_stw_last = __a64_stw_index + KPROG_ARM64_STACK_WRITE_LANE_COUNT(__a64_stw_width) - 1U; \
 			if (KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_last) != KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)) \
 				ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_last), (ARM64_SIM_TAG_SCALAR)); \
 			__a64_stack.b[__a64_stw_index] =                   \
@@ -873,7 +873,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 		__s64 __a64_mp_base = KPROG_ARM64_MEM_BASE_SRC((BASE) == ARM64_SP) == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER ? __a64_sp :      \
 			(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);        \
 		__s64 __a64_mp_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA); \
-		__u32 __a64_mp_at = ARM64_SIM_L_STACK_INDEX(__a64_mp_base + __a64_mp_off); \
+		__u64 __a64_mp_at = ARM64_SIM_L_STACK_INDEX(__a64_mp_base + __a64_mp_off); \
 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_mp_at, ARM64_WIDTH_64);                      \
 		__a64_mp_value = __a64_stack_payload[KPROG_ARM64_STACK_WORD_INDEX(__a64_mp_at)]; \
 	   break; } default: break; } __a64_mp_value; })
@@ -1418,7 +1418,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 #define ARM64_SIM_L_MEMORY_TAG_TRANSFER(DST, DTAG, SRC, STAG, LEN, COPY) \
     do { \
         if ((DTAG) == ARM64_SIM_TAG_STACK) { \
-            __u32 __a64_mt_dst = ARM64_SIM_L_STACK_INDEX(DST); \
+            __u64 __a64_mt_dst = ARM64_SIM_L_STACK_INDEX(DST); \
             __u64 __a64_mt_len = (LEN); \
             for (__u64 __a64_mt_i = 0; __a64_mt_i < __a64_mt_len; __a64_mt_i++) { \
                 __u64 __a64_mt_at = __a64_mt_dst + __a64_mt_i; \

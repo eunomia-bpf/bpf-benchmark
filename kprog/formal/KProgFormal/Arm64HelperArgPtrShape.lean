@@ -115,10 +115,10 @@ theorem arm64_helper_arg_ptr_source_selects_stack (isStackTagged : Bool) :
 /-- **The stack arena pointer source is the 0112 stack index contract.** The
 arena byte the helper's stack-arena-pointer arm addresses is the stack-pointer
 helper's 64-bit biased offset: the index at the simulator's bias (96) is the
-`ptrIndex` sum narrowed to the index type. -/
+`ptrIndex` sum retained at native width. -/
 theorem arm64_helper_arg_ptr_stack_index (off : BitVec 64) :
-    index 96 off = (ptrIndex 96 off).truncate 32 :=
-  arm64_stack_index_ptr_truncation 96 off
+    index 96 off = ptrIndex 96 off :=
+  arm64_stack_index_ptr_equal 96 off
 
 /-- Apply the shared ABI context relation only to an ABI-tagged argument.
 The argument has already passed through the existing stack/raw space mapping. -/

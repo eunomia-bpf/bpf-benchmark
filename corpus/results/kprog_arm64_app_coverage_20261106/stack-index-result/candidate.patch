@@ -1,0 +1,518 @@
+diff --git a/kprog/arm64/arm64_sim_local_bpf.h b/kprog/arm64/arm64_sim_local_bpf.h
+index 070815840..9755f9bbe 100644
+--- a/kprog/arm64/arm64_sim_local_bpf.h
++++ b/kprog/arm64/arm64_sim_local_bpf.h
+@@ -200,9 +200,9 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
+ /* Packed tag words retain verifier-known bits across field updates. */
+ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
+ #define ARM64_SIM_TAG_STORAGE_BYTES(CAPACITY) ((KPROG_ARM64_STACK_TAG_SLOTS(CAPACITY)+7U)&~7U)
+-#define ARM64_SIM_L_TAG_WORD_PTR(INDEX) ((volatile arm64_sim_tag_word *)(void *)&__a64_stack_tag[(__u32)(INDEX)&~7U])
+-#define ARM64_SIM_L_TAG_GET(INDEX) ({ __u32 __ti=(INDEX); (__u8)(*ARM64_SIM_L_TAG_WORD_PTR(__ti) >> ((__ti&7U)*8U)); })
+-#define ARM64_SIM_L_TAG_SET(INDEX, TAG) do { __u32 __ti=(INDEX); __u32 __ts=(__ti&7U)*8U; volatile arm64_sim_tag_word *__tp=ARM64_SIM_L_TAG_WORD_PTR(__ti); __u64 __tv=*__tp; *__tp=(__tv&~(255ULL<<__ts))|((__u64)(__u8)(TAG)<<__ts); } while (0)
++#define ARM64_SIM_L_TAG_WORD_PTR(INDEX) ((volatile arm64_sim_tag_word *)(void *)&__a64_stack_tag[(__u64)(INDEX)&~7ULL])
++#define ARM64_SIM_L_TAG_GET(INDEX) ({ __u64 __ti=(INDEX); (__u8)(*ARM64_SIM_L_TAG_WORD_PTR(__ti) >> ((__ti&7U)*8U)); })
++#define ARM64_SIM_L_TAG_SET(INDEX, TAG) do { __u64 __ti=(INDEX); __u32 __ts=(__ti&7U)*8U; volatile arm64_sim_tag_word *__tp=ARM64_SIM_L_TAG_WORD_PTR(__ti); __u64 __tv=*__tp; *__tp=(__tv&~(255ULL<<__ts))|((__u64)(__u8)(TAG)<<__ts); } while (0)
+ #ifdef ARM64_SIM_ENABLE_STACK
+ #define ARM64_SIM_L_DECLARE_STACK()                                         \
+ 	volatile union {                                                            \
+@@ -576,7 +576,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
+ 
+ #define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
+ 	({                                                                 \
+-		__u32 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
++		__u64 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
+ 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_str_index, (WIDTH));     \
+ 		__u8 __a64_str_width = (WIDTH);                           \
+ 		__u64 __a64_str_value;                                    \
+@@ -597,7 +597,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
+ 
+ #define ARM64_SIM_L_STACK_READ_TAG(OFF, WIDTH)                              \
+ 	({                                                                 \
+-		__u32 __a64_srt_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
++		__u64 __a64_srt_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
+ 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_srt_index, (WIDTH));     \
+ 		__u8 __a64_srt_width = (WIDTH);                           \
+ 		__u8 __a64_srt_source =                                   \
+@@ -615,7 +615,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
+ 
+ #define ARM64_SIM_L_STACK_WRITE_TAG(OFF, WIDTH, VALUE, TAG)                  \
+ 	do {                                                               \
+-		__u32 __a64_stw_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
++		__u64 __a64_stw_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
+ 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_stw_index, (WIDTH));     \
+ 		__u8 __a64_stw_width = (WIDTH);                           \
+ 		__u64 __a64_stw_value = KPROG_ARM64_APPLY_WIDTH((VALUE), __a64_stw_width);\
+@@ -629,7 +629,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
+ 			ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), ((TAG)));\
+ 		} else {                                                   \
+ 			ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index), (ARM64_SIM_TAG_SCALAR));\
+-			__u32 __a64_stw_last = __a64_stw_index + KPROG_ARM64_STACK_WRITE_LANE_COUNT(__a64_stw_width) - 1U; \
++			__u64 __a64_stw_last = __a64_stw_index + KPROG_ARM64_STACK_WRITE_LANE_COUNT(__a64_stw_width) - 1U; \
+ 			if (KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_last) != KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_index)) \
+ 				ARM64_SIM_L_TAG_SET(KPROG_ARM64_STACK_WORD_INDEX(__a64_stw_last), (ARM64_SIM_TAG_SCALAR)); \
+ 			__a64_stack.b[__a64_stw_index] =                   \
+@@ -873,7 +873,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
+ 		__s64 __a64_mp_base = KPROG_ARM64_MEM_BASE_SRC((BASE) == ARM64_SP) == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER ? __a64_sp :      \
+ 			(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);        \
+ 		__s64 __a64_mp_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA); \
+-		__u32 __a64_mp_at = ARM64_SIM_L_STACK_INDEX(__a64_mp_base + __a64_mp_off); \
++		__u64 __a64_mp_at = ARM64_SIM_L_STACK_INDEX(__a64_mp_base + __a64_mp_off); \
+ 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_mp_at, ARM64_WIDTH_64);                      \
+ 		__a64_mp_value = __a64_stack_payload[KPROG_ARM64_STACK_WORD_INDEX(__a64_mp_at)]; \
+ 	   break; } default: break; } __a64_mp_value; })
+@@ -1418,7 +1418,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
+ #define ARM64_SIM_L_MEMORY_TAG_TRANSFER(DST, DTAG, SRC, STAG, LEN, COPY) \
+     do { \
+         if ((DTAG) == ARM64_SIM_TAG_STACK) { \
+-            __u32 __a64_mt_dst = ARM64_SIM_L_STACK_INDEX(DST); \
++            __u64 __a64_mt_dst = ARM64_SIM_L_STACK_INDEX(DST); \
+             __u64 __a64_mt_len = (LEN); \
+             for (__u64 __a64_mt_i = 0; __a64_mt_i < __a64_mt_len; __a64_mt_i++) { \
+                 __u64 __a64_mt_at = __a64_mt_dst + __a64_mt_i; \
+diff --git a/kprog/formal/KProgFormal/Arm64HelperArgPtrShape.lean b/kprog/formal/KProgFormal/Arm64HelperArgPtrShape.lean
+index 7106d428e..dd5f44f69 100644
+--- a/kprog/formal/KProgFormal/Arm64HelperArgPtrShape.lean
++++ b/kprog/formal/KProgFormal/Arm64HelperArgPtrShape.lean
+@@ -115,10 +115,10 @@ theorem arm64_helper_arg_ptr_source_selects_stack (isStackTagged : Bool) :
+ /-- **The stack arena pointer source is the 0112 stack index contract.** The
+ arena byte the helper's stack-arena-pointer arm addresses is the stack-pointer
+ helper's 64-bit biased offset: the index at the simulator's bias (96) is the
+-`ptrIndex` sum narrowed to the index type. -/
++`ptrIndex` sum retained at native width. -/
+ theorem arm64_helper_arg_ptr_stack_index (off : BitVec 64) :
+-    index 96 off = (ptrIndex 96 off).truncate 32 :=
+-  arm64_stack_index_ptr_truncation 96 off
++    index 96 off = ptrIndex 96 off :=
++  arm64_stack_index_ptr_equal 96 off
+ 
+ /-- Apply the shared ABI context relation only to an ABI-tagged argument.
+ The argument has already passed through the existing stack/raw space mapping. -/
+diff --git a/kprog/formal/KProgFormal/Arm64StackArena.lean b/kprog/formal/KProgFormal/Arm64StackArena.lean
+index d8f9426f2..d82338118 100644
+--- a/kprog/formal/KProgFormal/Arm64StackArena.lean
++++ b/kprog/formal/KProgFormal/Arm64StackArena.lean
+@@ -8,6 +8,24 @@ open GeneratedArm64StackArena (wordIndex wordAligned words windowEnd windowFits
+   tagSlotFits pointerFits)
+ open GeneratedArm64ByteLane (ByteLane)
+ 
++/-- Full-width slot arithmetic must retain high32 byte addresses. -/
++theorem arm64_stack_arena_wide_word_index (index : BitVec 64) :
++    GeneratedArm64StackArena.wideWordIndex index = index / 8 := by
++  unfold GeneratedArm64StackArena.wideWordIndex
++  bv_decide
++
++/-- Existing bounded lemmas are the low-width restriction. -/
++theorem arm64_stack_arena_word_index_restriction (index : BitVec 32) :
++    GeneratedArm64StackArena.wideWordIndex (index.zeroExtend 64) =
++      (wordIndex index).zeroExtend 64 := by
++  unfold GeneratedArm64StackArena.wideWordIndex wordIndex
++  bv_decide
++
++theorem arm64_stack_arena_high32_slots :
++    GeneratedArm64StackArena.wideWordIndex 0x100000000 = 0x20000000 ∧
++      GeneratedArm64StackArena.wideWordIndex 0x800000000 = 0x100000000 := by
++  refine ⟨?_, ?_⟩ <;> native_decide
++
+ /-- Independent statement of the word-arena slot: the byte index divided by the
+ word size, matching the union's `b`/`q` aliasing where `q[i]` occupies bytes
+ `8i..8i+8`. A different expression tree (`udiv`) than the generated shift. -/
+diff --git a/kprog/formal/KProgFormal/Arm64StackIndex.lean b/kprog/formal/KProgFormal/Arm64StackIndex.lean
+index eae2ebccb..737d0e828 100644
+--- a/kprog/formal/KProgFormal/Arm64StackIndex.lean
++++ b/kprog/formal/KProgFormal/Arm64StackIndex.lean
+@@ -2,76 +2,57 @@ import KProgFormal.Generated.GeneratedArm64StackIndex
+ import Std.Tactic.BVDecide
+ 
+ namespace KProgFormal
+-
+ open GeneratedArm64StackIndex (index ptrIndex)
+ 
+-/-- Independent statement of the arena byte index: the low 32 bits of the
+-wrapping 64-bit bias-plus-offset sum, agreeing with the C macro
+-`((__u32)((__s64)(BIAS) + (__s64)(OFF)))`. -/
+-def arm64StackIndexSpec (bias off : BitVec 64) : BitVec 32 :=
+-  BitVec.setWidth 32 (bias + off)
++/-- Native-address subtraction and arena bias retain every address bit. -/
++def arm64StackIndexSpec (bias off : BitVec 64) : BitVec 64 :=
++  off - (-bias)
+ 
+-/-- The generated truncation equals the independent 32-bit-width statement for
+-every bias and offset. -/
+ theorem arm64_stack_index_refines (bias off : BitVec 64) :
+     index bias off = arm64StackIndexSpec bias off := by
+-  unfold index arm64StackIndexSpec BitVec.truncate
++  unfold index arm64StackIndexSpec
+   bv_decide
+ 
+-/-- The frame base sits below the biased window: an abstract frame offset of
+-`-bias` (the value `__a64_sp` resolves to at the frame base) lands at arena byte
+-index 0. -/
+ theorem arm64_stack_index_frame_base (bias : BitVec 64) :
+     index bias (-bias) = 0 := by
+   unfold index
+   bv_decide
+ 
+-/-- An offset of zero (the abstract frame base) lands at index `bias` in the
+-byte arena: the bottom of the biased window. -/
+ theorem arm64_stack_index_base_is_bias (bias : BitVec 64) :
+-    index bias 0 = bias.truncate 32 := by
++    index bias 0 = bias := by
+   unfold index
+   bv_decide
+ 
+-/-- The index is the affine offset `bias + off`: advancing the frame offset by
+-`delta` advances the arena index by the low 32 bits of `delta`. -/
+ theorem arm64_stack_index_step (bias off delta : BitVec 64) :
+-    index bias (off + delta) = index bias off + delta.truncate 32 := by
++    index bias (off + delta) = index bias off + delta := by
+   unfold index
+   bv_decide
+ 
+-/-- Two frame offsets that differ by a multiple of `2^32` alias to the same
+-arena index: only the low 32 bits of the sum reach the arena. -/
+-theorem arm64_stack_index_mod_2_32 (bias off off' : BitVec 64)
+-    (high : BitVec 64) (h : off' = off + BitVec.shiftLeft high 32) :
+-    index bias off' = index bias off := by
+-  subst h
++/-- Biasing cannot collapse distinct native addresses, including high32. -/
++theorem arm64_stack_index_injective (bias off off' : BitVec 64) :
++    index bias off' = index bias off ↔ off' = off := by
+   unfold index
+   bv_decide
+ 
+-/-- The stack-pointer helper's 64-bit biased offset is the index before
+-truncation: `index` is `ptrIndex` narrowed to the index type. -/
+-theorem arm64_stack_index_ptr_truncation (bias off : BitVec 64) :
+-    index bias off = (ptrIndex bias off).truncate 32 := by
+-  rfl
++theorem arm64_stack_index_ptr_equal (bias off : BitVec 64) :
++    index bias off = ptrIndex bias off := by rfl
+ 
+-/-- The pointer offset is the plain 64-bit biased sum. -/
+ theorem arm64_stack_index_ptr_sum (bias off : BitVec 64) :
+-    ptrIndex bias off = bias + off := by
+-  rfl
++    ptrIndex bias off = bias + off := by rfl
+ 
+-/-- Concrete arena: bias 96. The frame base (offset `-96`) is index 0, offset 0
+-is byte 96, offset 8 is word slot 13, offset 64 is the top of the frame window
+-at byte 160. -/
+ theorem arm64_stack_index_example :
+     index 96 (-96) = 0 ∧ index 96 0 = 96 ∧ index 96 8 = 104 ∧
+       index 96 64 = 160 := by
+   refine ⟨?_, ?_, ?_, ?_⟩ <;> native_decide
+ 
+-/-- Concrete arena: bias 96. A negative offset below the frame base wraps, as
+-the 32-bit index of the biased arena byte. -/
+ theorem arm64_stack_index_wrap_example :
+-    index 96 (-97) = 0xffffffff ∧ index 96 (-100) = 0xfffffffc := by
++    index 96 (-97) = 0xffffffffffffffff ∧
++      index 96 (-100) = 0xfffffffffffffffc := by
+   refine ⟨?_, ?_⟩ <;> native_decide
+ 
++/-- Both directions of the old 4GiB alias remain outside the arena. -/
++theorem arm64_stack_index_high32 :
++    index 32 (0x100000000 - 32) = 0x100000000 ∧
++      index 32 (-0x100000000 - 32) = 0xffffffff00000000 := by
++  refine ⟨?_, ?_⟩ <;> native_decide
+ end KProgFormal
+diff --git a/kprog/formal/KProgFormal/Generated/GeneratedArm64StackArena.lean b/kprog/formal/KProgFormal/Generated/GeneratedArm64StackArena.lean
+index bbe07bad1..6a2cefd23 100644
+--- a/kprog/formal/KProgFormal/Generated/GeneratedArm64StackArena.lean
++++ b/kprog/formal/KProgFormal/Generated/GeneratedArm64StackArena.lean
+@@ -3,6 +3,9 @@ import Std
+ namespace KProgFormal.GeneratedArm64StackArena
+ /-- Word-arena slot for a stack byte index: the index shifted right 3, the
+ C `INDEX >> 3`. Sound as a slot only when the index is 8-aligned. -/
++def wideWordIndex (index : BitVec 64) : BitVec 64 := index >>> 3
++
++/-- Restriction to a 32-bit index for existing bounded arena lemmas. -/
+ def wordIndex (index : BitVec 32) : BitVec 32 := index >>> 3
+ 
+ /-- The 64-bit fast-path guard: the index is 8-aligned (its low 3
+diff --git a/kprog/formal/KProgFormal/Generated/GeneratedArm64StackIndex.lean b/kprog/formal/KProgFormal/Generated/GeneratedArm64StackIndex.lean
+index 80793de33..a8ce449d4 100644
+--- a/kprog/formal/KProgFormal/Generated/GeneratedArm64StackIndex.lean
++++ b/kprog/formal/KProgFormal/Generated/GeneratedArm64StackIndex.lean
+@@ -2,10 +2,10 @@
+ import Std
+ namespace KProgFormal.GeneratedArm64StackIndex
+ /-- The arena byte index for an abstract frame offset `off` in an arena biased
+-by `bias` bytes: `bias + off`, truncated to the C helpers' 32-bit index
++by `bias` bytes: `bias + off`, retained in the C helpers' 64-bit index
+ type. `bias` is `ARM64_SIM_STACK_BIAS`. -/
+-def index (bias off : BitVec 64) : BitVec 32 :=
+-  (bias + off).truncate 32
++def index (bias off : BitVec 64) : BitVec 64 :=
++  bias + off
+ /-- The biased byte offset the stack pointer helper adds to the arena base, in
+ the C `(__s64)` index width (64 bits): `bias + off`, untruncated. -/
+ def ptrIndex (bias off : BitVec 64) : BitVec 64 :=
+diff --git a/kprog/formal/contracts/arm64_stack_index_spec.json b/kprog/formal/contracts/arm64_stack_index_spec.json
+index b192ac109..6247102c6 100644
+--- a/kprog/formal/contracts/arm64_stack_index_spec.json
++++ b/kprog/formal/contracts/arm64_stack_index_spec.json
+@@ -1 +1 @@
+-{"schema_version":1,"operation":"arm64StackIndex","index_base":"bias","index_step":1,"accumulate":"wrapping64","index_mask_bits":32}
++{"schema_version":1,"operation":"arm64StackIndex","index_base":"bias","index_step":1,"accumulate":"wrapping64","index_mask_bits":64}
+diff --git a/kprog/formal/generated/arm64_stack_arena.h b/kprog/formal/generated/arm64_stack_arena.h
+index b313fe3bb..8bb221bff 100644
+--- a/kprog/formal/generated/arm64_stack_arena.h
++++ b/kprog/formal/generated/arm64_stack_arena.h
+@@ -1,7 +1,7 @@
+ /* Generated by generate_arm64_stack_arena_spec.py from arm64_stack_arena_spec.json. */
+ #ifndef KPROG_FORMAL_GENERATED_ARM64_STACK_ARENA_H
+ #define KPROG_FORMAL_GENERATED_ARM64_STACK_ARENA_H
+-#define KPROG_ARM64_STACK_WORD_INDEX(INDEX) ((__u32)(INDEX) >> 3)
++#define KPROG_ARM64_STACK_WORD_INDEX(INDEX) ((__u64)(INDEX) >> 3)
+ #define KPROG_ARM64_STACK_WORD_ALIGNED(INDEX) \
+ 	((((__u32)(INDEX) & 7U) == 0U) ? 1 : 0)
+ #define KPROG_ARM64_STACK_WORDS(CAPACITY) \
+diff --git a/kprog/formal/generated/arm64_stack_index.h b/kprog/formal/generated/arm64_stack_index.h
+index e9cda641d..dbaf433b2 100644
+--- a/kprog/formal/generated/arm64_stack_index.h
++++ b/kprog/formal/generated/arm64_stack_index.h
+@@ -2,7 +2,7 @@
+ #ifndef KPROG_FORMAL_GENERATED_ARM64_STACK_INDEX_H
+ #define KPROG_FORMAL_GENERATED_ARM64_STACK_INDEX_H
+ #define KPROG_ARM64_STACK_INDEX(OFF, BIAS)                                  \
+-	((__u32)((__s64)(BIAS) + (__s64)(OFF)))
++	((__u64)(BIAS) + (__u64)(OFF))
+ #define KPROG_ARM64_STACK_PTR_INDEX(OFF, BIAS)                              \
+-	((__s64)(BIAS) + (__s64)(OFF))
++	((__s64)((__u64)(BIAS) + (__u64)(OFF)))
+ #endif
+diff --git a/kprog/formal/oracles/test_arm64_stack_arena_host.c b/kprog/formal/oracles/test_arm64_stack_arena_host.c
+index d110d7611..9e0c10db7 100644
+--- a/kprog/formal/oracles/test_arm64_stack_arena_host.c
++++ b/kprog/formal/oracles/test_arm64_stack_arena_host.c
+@@ -46,28 +46,28 @@ static int cases;
+ 
+ #define LANE_BYTE(lane, value) KPROG_ARM64_BYTE_AT(lane, value, __builtin_trap())
+ 
+-static void check_slot(const char *what, __u32 index, __u32 want_slot,
++static void check_slot(const char *what, __u64 index, __u64 want_slot,
+ 		       int want_aligned)
+ {
+-	__u32 slot = KPROG_ARM64_STACK_WORD_INDEX(index);
++	__u64 slot = KPROG_ARM64_STACK_WORD_INDEX(index);
+ 	int aligned = KPROG_ARM64_STACK_WORD_ALIGNED(index);
+-	__u32 indep_slot = index / 8U;
++	__u64 indep_slot = index / 8U;
+ 	int indep_aligned = (index % 8U) == 0U;
+ 
+ 	cases++;
+ 	if (slot != want_slot || slot != indep_slot) {
+-		printf("MISMATCH %s slot: index=%u got=%u indep=%u want=%u\n",
++		printf("MISMATCH %s slot: index=%llu got=%llu indep=%llu want=%llu\n",
+ 		       what, index, slot, indep_slot, want_slot);
+ 		failures++;
+ 	}
+ 	if (aligned != want_aligned || aligned != indep_aligned) {
+-		printf("MISMATCH %s align: index=%u got=%d indep=%d want=%d\n",
++		printf("MISMATCH %s align: index=%llu got=%d indep=%d want=%d\n",
+ 		       what, index, aligned, indep_aligned, want_aligned);
+ 		failures++;
+ 	}
+ 	/* An aligned slot shifted back is the original index. */
+ 	if (aligned && (slot << 3) != index) {
+-		printf("MISMATCH %s roundtrip: index=%u slot=%u\n", what, index,
++		printf("MISMATCH %s roundtrip: index=%llu slot=%llu\n", what, index,
+ 		       slot);
+ 		failures++;
+ 	}
+@@ -172,7 +172,7 @@ static void check_arena_roundtrip(const char *what, __u32 capacity)
+ 	/* Aligned byte index -> slot -> back is the identity, and the word
+ 	 * stored at that slot is the little-endian window of arena bytes. */
+ 	for (index = 0; index + 8 <= capacity; index += 8) {
+-		__u32 slot = KPROG_ARM64_STACK_WORD_INDEX(index);
++		__u64 slot = KPROG_ARM64_STACK_WORD_INDEX(index);
+ 		__u64 via_word = arena.q[slot];
+ 		__u64 via_bytes = 0;
+ 
+@@ -180,7 +180,7 @@ static void check_arena_roundtrip(const char *what, __u32 capacity)
+ 			via_bytes |= (__u64)arena.b[index + k] << (8 * k);
+ 		cases++;
+ 		if (via_word != via_bytes || (slot << 3) != index) {
+-			printf("MISMATCH %s word-window: cap=%u index=%u slot=%u\n",
++			printf("MISMATCH %s word-window: cap=%u index=%u slot=%llu\n",
+ 			       what, capacity, index, slot);
+ 			failures++;
+ 		}
+@@ -227,19 +227,19 @@ static void check_tag_slot(const char *what, __u32 index, __u32 capacity)
+ 	__u32 slots = KPROG_ARM64_STACK_TAG_SLOTS(capacity);
+ 	int fits = KPROG_ARM64_STACK_TAG_SLOT_FITS(index, slots);
+ 	int indep = (index / 8U) < slots;
+-	__u32 slot = KPROG_ARM64_STACK_WORD_INDEX(index);
++	__u64 slot = KPROG_ARM64_STACK_WORD_INDEX(index);
+ 
+ 	cases++;
+ 	if (fits != indep) {
+ 		printf("MISMATCH %s tag slot: index=%u capacity=%u slots=%u "
+-		       "slot=%u got=%d indep=%d\n", what, index, capacity, slots,
++		       "slot=%llu got=%d indep=%d\n", what, index, capacity, slots,
+ 		       slot, fits, indep);
+ 		failures++;
+ 	}
+ 	cases++;
+ 	if (fits && slot >= slots) {
+ 		printf("MISMATCH %s tag slot admitted past the array: index=%u "
+-		       "slot=%u slots=%u\n", what, index, slot, slots);
++		       "slot=%llu slots=%u\n", what, index, slot, slots);
+ 		failures++;
+ 	}
+ }
+@@ -270,6 +270,10 @@ static void check_pointer(const char *what, __s64 index, __u32 capacity)
+ 
+ int main(void)
+ {
++    check_slot("high32", 0x100000000ULL, 0x20000000ULL, 1);
++    check_slot("high35", 0x800000000ULL, 0x100000000ULL, 1);
++    check_slot("negative32", 0xffffffff00000000ULL, 0x1fffffffe0000000ULL, 1);
++
+ 	static const __u32 capacities[] = { 1U, 2U, 7U, 8U, 16U, 20U, 160U };
+ 	static const __u32 indices[] = {
+ 		0U, 1U, 7U, 8U, 9U, 15U, 16U, 96U, 104U, 159U, 160U, 2147483647U,
+diff --git a/kprog/formal/oracles/test_arm64_stack_index_host.c b/kprog/formal/oracles/test_arm64_stack_index_host.c
+index 934eb595a..23a522985 100644
+--- a/kprog/formal/oracles/test_arm64_stack_index_host.c
++++ b/kprog/formal/oracles/test_arm64_stack_index_host.c
+@@ -13,9 +13,8 @@
+  * This oracle drives the *generated* macros and compares them, over a grid that
+  * includes the frame base, the arena top, negative offsets below the base, and
+  * offsets whose high 32 bits are set, against an independent restatement that
+- * accumulates in unsigned 64-bit and keeps the low 32 bits (or the full 64 for
+- * the pointer offset). It also checks the affine law / frame-base-is-zero /
+- * high-32-bit-aliasing properties the refinement module proves. Exit 1 on
++ * accumulates in unsigned 64-bit and retains all native address bits. It also checks the affine law / frame-base-is-zero /
++ * high-32-bit-distinction properties the refinement module proves. Exit 1 on
+  * mismatch.
+  *
+  * Build/run:
+@@ -80,19 +79,19 @@ int main(void)
+ 	}
+ 
+ 	/* Cross-check the generated macros against the independent
+-	 * unsigned-64-bit low-32-bits restatement over a broad grid, including
++	 * unsigned-64-bit restatement over a broad grid, including
+ 	 * offsets below the base and offsets with the high 32 bits set. */
+ 	for (delta = -(long)bias - 8; delta <= 8; delta++) {
+ 		__s64 off = delta;
+ 		unsigned long want = (unsigned long)(((__u64)off +
+-						      (__u64)bias) &
+-						     0xffffffffULL);
++						      (__u64)bias));
+ 		__s64 ptr_want = (__s64)((__u64)off + (__u64)bias);
+ 
+ 		check_index("restate", bias, off, want);
+ 		check_ptr("ptr_restate", bias, off, ptr_want);
+-		/* Aliasing: adding 2^32 to the offset keeps the index. */
+-		check_index("alias", bias, off + 0x100000000LL, want);
++		/* Adding 2^32 retains the changed native address. */
++		check_index("high32", bias, off + 0x100000000LL,
++                    want + 0x100000000UL);
+ 		cases += 3;
+ 	}
+ 
+diff --git a/kprog/formal/tools/generate_arm64_stack_arena_spec.py b/kprog/formal/tools/generate_arm64_stack_arena_spec.py
+index 4bf2e1f71..0e6539015 100755
+--- a/kprog/formal/tools/generate_arm64_stack_arena_spec.py
++++ b/kprog/formal/tools/generate_arm64_stack_arena_spec.py
+@@ -12,7 +12,7 @@ union arena of two overlapping views (kprog/arm64/arm64_sim_local_bpf.h):
+ The stack helpers reach that storage three ways, and this contract fixes the
+ arithmetic each uses so it can be machine-checked:
+ 
+-  - the byte arena `b[]` is indexed directly by the 32-bit stack byte index;
++  - the byte arena `b[]` is indexed directly by the full 64-bit stack byte index;
+   - the word arena `q[]` is indexed by that index shifted right 3, and is only
+     ever used on the 64-bit path when the index is 8-aligned (the `& 7U`
+     guard), so no byte-arena element is skipped;
+@@ -84,6 +84,9 @@ import Std
+ namespace KProgFormal.GeneratedArm64StackArena
+ /-- Word-arena slot for a stack byte index: the index shifted right {shift}, the
+ C `INDEX >> {shift}`. Sound as a slot only when the index is {1 << shift}-aligned. -/
++def wideWordIndex (index : BitVec 64) : BitVec 64 := index >>> {shift}
++
++/-- Restriction to a 32-bit index for existing bounded arena lemmas. -/
+ def wordIndex (index : BitVec 32) : BitVec 32 := index >>> {shift}
+ 
+ /-- The 64-bit fast-path guard: the index is {1 << shift}-aligned (its low {shift}
+@@ -127,7 +130,7 @@ def render_c(spec: dict) -> str:
+     return f'''/* Generated by generate_arm64_stack_arena_spec.py from arm64_stack_arena_spec.json. */
+ #ifndef KPROG_FORMAL_GENERATED_ARM64_STACK_ARENA_H
+ #define KPROG_FORMAL_GENERATED_ARM64_STACK_ARENA_H
+-#define KPROG_ARM64_STACK_WORD_INDEX(INDEX) ((__u32)(INDEX) >> {shift})
++#define KPROG_ARM64_STACK_WORD_INDEX(INDEX) ((__u64)(INDEX) >> {shift})
+ #define KPROG_ARM64_STACK_WORD_ALIGNED(INDEX) \\
+ \t((((__u32)(INDEX) & {mask}U) == 0U) ? 1 : 0)
+ #define KPROG_ARM64_STACK_WORDS(CAPACITY) \\
+diff --git a/kprog/formal/tools/generate_arm64_stack_index_spec.py b/kprog/formal/tools/generate_arm64_stack_index_spec.py
+index 8b9b99834..8a74b6ab1 100755
+--- a/kprog/formal/tools/generate_arm64_stack_index_spec.py
++++ b/kprog/formal/tools/generate_arm64_stack_index_spec.py
+@@ -1,29 +1,5 @@
+ #!/usr/bin/env python3
+-"""Generate the shared AArch64 stack-index (frame-offset -> arena-index) contract.
+-
+-The generated Lean definition `GeneratedArm64StackIndex.index` and the C macro
+-`KPROG_ARM64_STACK_INDEX` implement the byte index the AArch64 simulator's stack
+-helpers use to reach into its `__a64_stack` arena from an abstract frame offset
+-`OFF` (the value the simulator's frame base, `__a64_sp`, resolves to):
+-
+-  - the offset is added to the arena bias `ARM64_SIM_STACK_BIAS` (96), so a
+-    frame base offset of `-bias` lands at index 0 and an offset of 0 lands at
+-    byte index `bias` — the frame base sits below the biased arena window, and
+-    the abstract frame grows up into it;
+-  - the sum is truncated to 32 bits (`__u32`), the index type the C helpers use
+-    for the `b[]` byte arena and the `q[]` word arena (`index >> 3`).
+-
+-The offset is a 64-bit two's-complement quantity in the C code
+-(`(__s64)(ARM64_SIM_STACK_BIAS + (OFF))`), so a negative offset below the bias
+-wraps; the contract states the sum as wrapping 64-bit addition followed by a
+-32-bit truncation, which is exactly the C bit pattern.
+-`KProgFormal/Arm64StackIndex.lean` records that the map is the affine offset
+-`bias + base + delta`, that the frame base lands at index 0, that the wrap is
+-the low 32 bits of the offset, and that two offsets differing by a multiple of
+-`2^32` alias.
+-
+-The C macro evaluates neither flags nor memory: it is a pure index computation.
+-"""
++"""Generate full native-width wrapping stack offsets; never alias at 2^32."""
+ import argparse
+ import json
+ from pathlib import Path
+@@ -34,7 +10,7 @@ EXPECTED = {
+     "index_base": "bias",
+     "index_step": 1,
+     "accumulate": "wrapping64",
+-    "index_mask_bits": 32,
++    "index_mask_bits": 64,
+ }
+ 
+ ROOT = Path(__file__).resolve().parent.parent
+@@ -56,10 +32,10 @@ def render_lean(spec: dict) -> str:
+ import Std
+ namespace KProgFormal.GeneratedArm64StackIndex
+ /-- The arena byte index for an abstract frame offset `off` in an arena biased
+-by `bias` bytes: `bias + off`, truncated to the C helpers' {shift}-bit index
++by `bias` bytes: `bias + off`, retained in the C helpers' {shift}-bit index
+ type. `bias` is `ARM64_SIM_STACK_BIAS`. -/
+-def index (bias off : BitVec 64) : BitVec 32 :=
+-  (bias + off).truncate {shift}
++def index (bias off : BitVec 64) : BitVec 64 :=
++  bias + off
+ /-- The biased byte offset the stack pointer helper adds to the arena base, in
+ the C `(__s64)` index width (64 bits): `bias + off`, untruncated. -/
+ def ptrIndex (bias off : BitVec 64) : BitVec 64 :=
+@@ -73,9 +49,9 @@ def render_c(spec: dict) -> str:
+ #ifndef KPROG_FORMAL_GENERATED_ARM64_STACK_INDEX_H
+ #define KPROG_FORMAL_GENERATED_ARM64_STACK_INDEX_H
+ #define KPROG_ARM64_STACK_INDEX(OFF, BIAS)                                  \\
+-\t((__u32)((__s64)(BIAS) + (__s64)(OFF)))
++\t((__u64)(BIAS) + (__u64)(OFF))
+ #define KPROG_ARM64_STACK_PTR_INDEX(OFF, BIAS)                              \\
+-\t((__s64)(BIAS) + (__s64)(OFF))
++\t((__s64)((__u64)(BIAS) + (__u64)(OFF)))
+ #endif
+ '''
+ 

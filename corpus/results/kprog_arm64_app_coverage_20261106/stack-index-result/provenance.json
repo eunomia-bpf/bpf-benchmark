@@ -1,0 +1,37 @@
+{
+  "frozen_head": "33931765100d36937df620435ac55ff241b8489e",
+  "candidate_sha256": {
+    "kprog/arm64/arm64_sim_local_bpf.h": "06fe00a7100e7e7a0079f999168ba48d151ead815cc53ccd21553f0936fc89b5",
+    "kprog/formal/contracts/arm64_stack_index_spec.json": "c74f7069f0815e8faec92a636f5129947a5a707878f491051b64431814533369",
+    "kprog/formal/tools/generate_arm64_stack_index_spec.py": "4cfe385cd4e68b1e08b531957992f31ca94eaee374e6e50600267499899f196a",
+    "kprog/formal/tools/generate_arm64_stack_arena_spec.py": "e8b186a758c32b89da7e13fdb73364e7643fd3716ad965767285c89d58324010",
+    "kprog/formal/generated/arm64_stack_index.h": "8a6f548dc09ea34b879ca2b7e8a560d7f1a6a978f1b38b85c006808ebf970447",
+    "kprog/formal/generated/arm64_stack_arena.h": "031d768e60dc0475f707d103ebb682b8b2b54d3e5ca8333d8940546f25fe206b",
+    "kprog/formal/KProgFormal/Generated/GeneratedArm64StackIndex.lean": "15e4c6c837b1fea197fa5abdb422c089e4b2831bda1b7c1687cca177c8d8e618",
+    "kprog/formal/KProgFormal/Generated/GeneratedArm64StackArena.lean": "5094790d4631b1baf1296803eeef32508d9482b567124faf7909ca981fd410df",
+    "kprog/formal/KProgFormal/Arm64StackIndex.lean": "d4f4284d31eed894b2a49cb988e93aa2bcc644b6f9bd3f7ebea1f5c119d84244",
+    "kprog/formal/KProgFormal/Arm64StackArena.lean": "f459ba36decf9cf9581abdbf7c686a9040d77a326c62f0be2c33115606b2b118",
+    "kprog/formal/KProgFormal/Arm64HelperArgPtrShape.lean": "9e8a9f116e29955394d228a734a4873d9e56c02fd5c44ae4912f3f4347da69d7",
+    "kprog/formal/oracles/test_arm64_stack_index_host.c": "49e41159df548a377106359e88176593254c15dcd22508de19c43b7ad92413b6",
+    "kprog/formal/oracles/test_arm64_stack_arena_host.c": "44858024502af007178460740ffaf019162d26cb16bce42bf59d7e1681534c76"
+  },
+  "validation": {
+    "full": "failed_x86_map_lookup_fixture_requires_map_identity",
+    "index_oracle_cases": 536,
+    "arena_oracle_cases": 71667,
+    "micro_compile": 29,
+    "native_load_only_before_accepted": 8,
+    "native_load_only_after_rejected": 8,
+    "boundary_expectations_matched": 13,
+    "lean_build": "passed_all_374_build_jobs"
+  },
+  "artifacts_sha256": {
+    "sources.tar.gz": "b0f327148f04d5a09d52e0e410f5ad43ebea237e57481ccf454bd56e975a4724",
+    "layout-native-high32-after-v38-outcomes.json": "367bb05bc4130273da2eb64ed95ec475954faa38d998a001a07576b71d6aa6e6",
+    "layout-high32-after-v38-outcomes.json": "029626c4480a23dd5223b8d39338e78e7063e690d79476a610d1ec8f8f329b6e",
+    "candidate.patch": "b2c8f60f70027e7e7d115a3156a07669637f7abd14ca81127de83743bee0bee7",
+    "raw-logs.tar.gz": "1e3b6cb61beb85605654269c98296624fde682d7ab425ab6f48d847f0f390e9f",
+    "layout-native-high32-before-v38-outcomes.json": "ae9e0bdb59e5512ef9bd779ea579e37e77a43106a521f02a91d5f11e2df684af",
+    "formal-check.tar.gz": "d7af29bd60825e32a0e051314388fa19a64001e26454067a9ad3e3abe5b45d20"
+  }
+}

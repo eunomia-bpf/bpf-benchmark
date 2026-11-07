@@ -3,6 +3,9 @@ import Std
 namespace KProgFormal.GeneratedArm64StackArena
 /-- Word-arena slot for a stack byte index: the index shifted right 3, the
 C `INDEX >> 3`. Sound as a slot only when the index is 8-aligned. -/
+def wideWordIndex (index : BitVec 64) : BitVec 64 := index >>> 3
+
+/-- Restriction to a 32-bit index for existing bounded arena lemmas. -/
 def wordIndex (index : BitVec 32) : BitVec 32 := index >>> 3
 
 /-- The 64-bit fast-path guard: the index is 8-aligned (its low 3

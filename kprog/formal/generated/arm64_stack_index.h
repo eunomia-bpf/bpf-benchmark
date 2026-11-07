@@ -2,7 +2,7 @@
 #ifndef KPROG_FORMAL_GENERATED_ARM64_STACK_INDEX_H
 #define KPROG_FORMAL_GENERATED_ARM64_STACK_INDEX_H
 #define KPROG_ARM64_STACK_INDEX(OFF, BIAS)                                  \
-	((__u32)((__s64)(BIAS) + (__s64)(OFF)))
+	((__u64)(BIAS) + (__u64)(OFF))
 #define KPROG_ARM64_STACK_PTR_INDEX(OFF, BIAS)                              \
-	((__s64)(BIAS) + (__s64)(OFF))
+	((__s64)((__u64)(BIAS) + (__u64)(OFF)))
 #endif

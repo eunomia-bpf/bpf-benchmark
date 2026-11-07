@@ -8,6 +8,24 @@ open GeneratedArm64StackArena (wordIndex wordAligned words windowEnd windowFits
   tagSlotFits pointerFits)
 open GeneratedArm64ByteLane (ByteLane)
 
+/-- Full-width slot arithmetic must retain high32 byte addresses. -/
+theorem arm64_stack_arena_wide_word_index (index : BitVec 64) :
+    GeneratedArm64StackArena.wideWordIndex index = index / 8 := by
+  unfold GeneratedArm64StackArena.wideWordIndex
+  bv_decide
+
+/-- Existing bounded lemmas are the low-width restriction. -/
+theorem arm64_stack_arena_word_index_restriction (index : BitVec 32) :
+    GeneratedArm64StackArena.wideWordIndex (index.zeroExtend 64) =
+      (wordIndex index).zeroExtend 64 := by
+  unfold GeneratedArm64StackArena.wideWordIndex wordIndex
+  bv_decide
+
+theorem arm64_stack_arena_high32_slots :
+    GeneratedArm64StackArena.wideWordIndex 0x100000000 = 0x20000000 ∧
+      GeneratedArm64StackArena.wideWordIndex 0x800000000 = 0x100000000 := by
+  refine ⟨?_, ?_⟩ <;> native_decide
+
 /-- Independent statement of the word-arena slot: the byte index divided by the
 word size, matching the union's `b`/`q` aliasing where `q[i]` occupies bytes
 `8i..8i+8`. A different expression tree (`udiv`) than the generated shift. -/

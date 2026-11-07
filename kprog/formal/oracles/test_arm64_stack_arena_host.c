@@ -46,28 +46,28 @@ static int cases;
 
 #define LANE_BYTE(lane, value) KPROG_ARM64_BYTE_AT(lane, value, __builtin_trap())
 
-static void check_slot(const char *what, __u32 index, __u32 want_slot,
+static void check_slot(const char *what, __u64 index, __u64 want_slot,
 		       int want_aligned)
 {
-	__u32 slot = KPROG_ARM64_STACK_WORD_INDEX(index);
+	__u64 slot = KPROG_ARM64_STACK_WORD_INDEX(index);
 	int aligned = KPROG_ARM64_STACK_WORD_ALIGNED(index);
-	__u32 indep_slot = index / 8U;
+	__u64 indep_slot = index / 8U;
 	int indep_aligned = (index % 8U) == 0U;
 
 	cases++;
 	if (slot != want_slot || slot != indep_slot) {
-		printf("MISMATCH %s slot: index=%u got=%u indep=%u want=%u\n",
+		printf("MISMATCH %s slot: index=%llu got=%llu indep=%llu want=%llu\n",
 		       what, index, slot, indep_slot, want_slot);
 		failures++;
 	}
 	if (aligned != want_aligned || aligned != indep_aligned) {
-		printf("MISMATCH %s align: index=%u got=%d indep=%d want=%d\n",
+		printf("MISMATCH %s align: index=%llu got=%d indep=%d want=%d\n",
 		       what, index, aligned, indep_aligned, want_aligned);
 		failures++;
 	}
 	/* An aligned slot shifted back is the original index. */
 	if (aligned && (slot << 3) != index) {
-		printf("MISMATCH %s roundtrip: index=%u slot=%u\n", what, index,
+		printf("MISMATCH %s roundtrip: index=%llu slot=%llu\n", what, index,
 		       slot);
 		failures++;
 	}
@@ -172,7 +172,7 @@ static void check_arena_roundtrip(const char *what, __u32 capacity)
 	/* Aligned byte index -> slot -> back is the identity, and the word
 	 * stored at that slot is the little-endian window of arena bytes. */
 	for (index = 0; index + 8 <= capacity; index += 8) {
-		__u32 slot = KPROG_ARM64_STACK_WORD_INDEX(index);
+		__u64 slot = KPROG_ARM64_STACK_WORD_INDEX(index);
 		__u64 via_word = arena.q[slot];
 		__u64 via_bytes = 0;
 
@@ -180,7 +180,7 @@ static void check_arena_roundtrip(const char *what, __u32 capacity)
 			via_bytes |= (__u64)arena.b[index + k] << (8 * k);
 		cases++;
 		if (via_word != via_bytes || (slot << 3) != index) {
-			printf("MISMATCH %s word-window: cap=%u index=%u slot=%u\n",
+			printf("MISMATCH %s word-window: cap=%u index=%u slot=%llu\n",
 			       what, capacity, index, slot);
 			failures++;
 		}
@@ -227,19 +227,19 @@ static void check_tag_slot(const char *what, __u32 index, __u32 capacity)
 	__u32 slots = KPROG_ARM64_STACK_TAG_SLOTS(capacity);
 	int fits = KPROG_ARM64_STACK_TAG_SLOT_FITS(index, slots);
 	int indep = (index / 8U) < slots;
-	__u32 slot = KPROG_ARM64_STACK_WORD_INDEX(index);
+	__u64 slot = KPROG_ARM64_STACK_WORD_INDEX(index);
 
 	cases++;
 	if (fits != indep) {
 		printf("MISMATCH %s tag slot: index=%u capacity=%u slots=%u "
-		       "slot=%u got=%d indep=%d\n", what, index, capacity, slots,
+		       "slot=%llu got=%d indep=%d\n", what, index, capacity, slots,
 		       slot, fits, indep);
 		failures++;
 	}
 	cases++;
 	if (fits && slot >= slots) {
 		printf("MISMATCH %s tag slot admitted past the array: index=%u "
-		       "slot=%u slots=%u\n", what, index, slot, slots);
+		       "slot=%llu slots=%u\n", what, index, slot, slots);
 		failures++;
 	}
 }
@@ -270,6 +270,10 @@ static void check_pointer(const char *what, __s64 index, __u32 capacity)
 
 int main(void)
 {
+    check_slot("high32", 0x100000000ULL, 0x20000000ULL, 1);
+    check_slot("high35", 0x800000000ULL, 0x100000000ULL, 1);
+    check_slot("negative32", 0xffffffff00000000ULL, 0x1fffffffe0000000ULL, 1);
+
 	static const __u32 capacities[] = { 1U, 2U, 7U, 8U, 16U, 20U, 160U };
 	static const __u32 indices[] = {
 		0U, 1U, 7U, 8U, 9U, 15U, 16U, 96U, 104U, 159U, 160U, 2147483647U,

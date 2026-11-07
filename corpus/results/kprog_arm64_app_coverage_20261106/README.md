@@ -1051,3 +1051,13 @@ Original map/global declarations and all selectors remain. New frozen-input
 compilation runs independently of the preserved older queue; verifier and app
 completion remain pending. The completed old v15 compiler census is archived
 separately, so its outcomes are not attributed to the new inputs.
+
+## Full-width ARM stack indexes
+
+[The native-width index repair](stack-index-result/README.md) retains every
+address bit in arena byte, word, payload and tag accesses. The matched candidate
+passes all 374 Lean build jobs, 536 index and 71,667 arena oracle cases, the
+negative plus 29 micro builds, and all 13 QEMU boundary expectations. Eight
+previously accepted invalid-address proofs now reject before native execution.
+The overall formal check exits 2 at the existing x86 unknown-map fixture;
+that independent failure and every candidate source hash remain recorded.
