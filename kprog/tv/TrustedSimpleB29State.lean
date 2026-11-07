@@ -18,7 +18,7 @@ def firstGuardView (entry : X86.State) (p : BPF.State) : X86.State :=
       else if r=2 then p.regs 1 else if r=6 then p.regs 2 else entry.gpr r
     rflags := X86.arithmeticFlags .w64 true false (p.regs 2) (p.regs 1) entry.rflags
     memory := p.memory
-    pc := if p.pc=27 then 60 else 17}
+    pc := if p.pc=27 ∨ p.pc=28 ∨ p.pc=29 then 60 else 17}
 
 /-- Equality of the whole native architecture, not only live results or
 memory: all16GPRs, all flags, XMM0, memory, PC, segments and address width. -/
@@ -141,7 +141,7 @@ def secondGuardView (entry : X86.State) (p : BPF.State) : X86.State :=
     rflags := X86.arithmeticFlags .w64 true false (p.regs 3) (p.regs 1)
       (X86.arithmeticFlags .w64 true false (p.regs 2) (p.regs 1) entry.rflags)
     memory := p.memory
-    pc := if p.pc=27 then 60 else 26}
+    pc := if p.pc=27 ∨ p.pc=28 ∨ p.pc=29 then 60 else 26}
 
 theorem second_guard_architecture (entry : X86.State) (p : BPF.State) :
     remainingNative8 (firstGuardView entry p)=secondGuardView entry (guard8After p) := by
@@ -196,7 +196,7 @@ def thirdGuardView (entry : X86.State) (p : BPF.State) : X86.State :=
         (X86.arithmeticFlags .w64 true false (p.regs 2+(8#64)) (p.regs 1)
           (X86.arithmeticFlags .w64 true false (p.regs 2) (p.regs 1) entry.rflags)))
     memory := p.memory
-    pc := if p.pc=27 then 60 else 35}
+    pc := if p.pc=27 ∨ p.pc=28 ∨ p.pc=29 then 60 else 35}
 
 theorem third_guard_architecture (entry : X86.State) (p : BPF.State)
     (temporary : p.regs 3=p.regs 2+(8#64)) :
@@ -233,6 +233,90 @@ theorem third_block_relational_architecture (env : BPF.Environment) (entry n : X
   · simp only [endpoint]
   · simpa only [endpoint] using guard72_execution env p position active
 
+
+theorem third_guard_temporary (p : BPF.State) :
+    (guard72After p).regs 3=(guard72After p).regs 2+(72#64) := by
+  simp +decide [guard72After,guard72Add,guard72Move,BPF.setReg]
+
+/-- The context end value is snapped from actual B r1 at store-block entry,
+where it was established by the real context load. B subsequently kills r1;
+this ghost value preserves native RDX and CMP flags, without another read. -/
+def storeView (entry : X86.State) (limit : Word) (p : BPF.State) : X86.State :=
+  {entry with
+    gpr := fun r => if r=0 then p.regs 0 else if r=1 then p.regs 2
+      else if r=2 then limit else if r=6 then p.regs 2+(72#64)
+      else if r=7 then p.regs 2+(8#64) else entry.gpr r
+    rflags := X86.arithmeticFlags .w64 true false (p.regs 2+(72#64)) limit
+      (X86.arithmeticFlags .w64 false false (p.regs 2) (72#64)
+        (X86.arithmeticFlags .w64 true false (p.regs 2+(8#64)) limit
+          (X86.arithmeticFlags .w64 true false (p.regs 2) limit entry.rflags)))
+    memory := p.memory
+    pc := if p.pc=15 then 35 else if p.pc=19 then 40
+      else if p.pc=22 then 44 else if p.pc=25 then 51 else 60}
+
+theorem successful_store_architecture (entry : X86.State) (p : BPF.State)
+    (temporary : p.regs 3=p.regs 2+(72#64)) :
+    packetNativeFinal (thirdGuardView entry p)=storeView entry (p.regs 1) (storesAfter p) := by
+  simp +decide [packetNativeFinal,packetNativeFourth,packetNativeThird,packetNativeSecond,packetNativeFirst,
+    thirdGuardView,storeView,storesAfter,packetWriteMemory,BPF.setReg,temporary]
+  funext r
+  by_cases zero : r=0 <;> by_cases one : r=1 <;> by_cases two : r=2 <;>
+    by_cases six : r=6 <;> by_cases seven : r=7 <;> simp_all +decide
+
+theorem faulting_store_architecture (entry : X86.State) (p : BPF.State) (index : Nat)
+    (bounded : index<4) (position : p.pc=11) (temporary : p.regs 3=p.regs 2+(72#64)) :
+    packetNativeFaultState (thirdGuardView entry p) index=
+      storeView entry (p.regs 1) (storesFaultState p index) := by
+  have choices : index=0 ∨ index=1 ∨ index=2 ∨ index=3 := by omega
+  rcases choices with rfl | rfl | rfl | rfl
+  all_goals simp +decide [packetNativeFaultState,packetNativeFirst,packetNativeSecond,packetNativeThird,
+    thirdGuardView,storeView,storesFaultState,packetProofFaultState,packetProofBeforeFirst,
+    packetStoredPrefix,BPF.setReg,position,temporary]
+  all_goals funext r
+  all_goals by_cases zero : r=0
+  all_goals by_cases one : r=1
+  all_goals by_cases two : r=2
+  all_goals by_cases six : r=6
+  all_goals by_cases seven : r=7
+  all_goals simp_all +decide
+
+/-- All permission outcomes of the actual store block preserve the complete
+native state, including dead RDX and flags via the actual entry-r1 snapshot.
+Neither successful stores nor a computed native result is a premise. -/
+theorem store_block_relational_architecture (env : BPF.Environment) (entry n : X86.State)
+    (p : BPF.State) (index : Nat) (actual : Transition X86.State)
+    (related : n=thirdGuardView entry p) (position : p.pc=11) (active : p.halted=false)
+    (temporary : p.regs 3=p.regs 2+(72#64))
+    (selected : index=packetFirstFailure p.memory (p.regs 2))
+    (run : CanonicalRelationalPath 0 native (packetNativeOutcomePath index) n actual) :
+    actual.state=storeView entry (p.regs 1) (storesOutcome p index) ∧
+    actual.events=packetOutcomeEvents (p.regs 2) index ∧
+    actual.fault=(if index=4 then none else some (packetStoreFault (p.regs 2) index)) ∧
+    Execution (TrustedSimpleB29.instructionStep env) p actual.events (storesOutcome p index) := by
+  subst n
+  have nativePC : (thirdGuardView entry p).pc=35 := by simp [thirdGuardView,position]
+  obtain ⟨endpoint,proofRun,_⟩ := stores_relational_component env (thirdGuardView entry p) p index actual
+    nativePC position active rfl rfl selected run
+  have bounded := (packet_first_failure_spec p.memory (p.regs 2)).1
+  change packetFirstFailure p.memory (p.regs 2)≤4 at bounded
+  rw [← selected] at bounded
+  refine ⟨?_,?_,?_,proofRun⟩
+  · by_cases success : index=4
+    · simpa only [endpoint,packetNativeOutcome,storesOutcome,success,ite_true] using successful_store_architecture entry p temporary
+    · simpa only [endpoint,packetNativeOutcome,storesOutcome,success,ite_false] using faulting_store_architecture entry p index (by omega) position temporary
+  · simp only [endpoint]
+  · simp only [endpoint]
+
+/-- Actual JA/EXIT moves B through PCs27,28,29 without changing the native
+payload-end architecture. Guard-exit views preserve their path history. -/
+theorem exit_architectures (entry : X86.State) (p : BPF.State) (limit : Word)
+    (position : p.pc=27) :
+    firstGuardView entry (exitAfter p)=firstGuardView entry p ∧
+    secondGuardView entry (exitAfter p)=secondGuardView entry p ∧
+    thirdGuardView entry (exitAfter p)=thirdGuardView entry p ∧
+    storeView entry limit (exitAfter p)=storeView entry limit p := by
+  simp +decide [firstGuardView,secondGuardView,thirdGuardView,storeView,exitAfter,position]
+
 end KProgTV.TrustedSimpleB29State
 #print axioms KProgTV.TrustedSimpleB29State.first_guard_architecture
 #print axioms KProgTV.TrustedSimpleB29State.first_block_relational_architecture
@@ -246,3 +330,9 @@ end KProgTV.TrustedSimpleB29State
 #print axioms KProgTV.TrustedSimpleB29State.second_guard_temporary
 #print axioms KProgTV.TrustedSimpleB29State.third_guard_architecture
 #print axioms KProgTV.TrustedSimpleB29State.third_block_relational_architecture
+
+#print axioms KProgTV.TrustedSimpleB29State.third_guard_temporary
+#print axioms KProgTV.TrustedSimpleB29State.successful_store_architecture
+#print axioms KProgTV.TrustedSimpleB29State.faulting_store_architecture
+#print axioms KProgTV.TrustedSimpleB29State.store_block_relational_architecture
+#print axioms KProgTV.TrustedSimpleB29State.exit_architectures

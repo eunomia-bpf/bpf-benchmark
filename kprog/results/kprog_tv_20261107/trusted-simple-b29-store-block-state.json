@@ -1,0 +1,135 @@
+{
+  "utc": "2026-11-07T18:23:39.709579+00:00",
+  "status": "actual_B29_all_four_native_basic_blocks_full_architectural_correspondence_lemmas_proved_global_TV_relation_pending",
+  "capture_commit": "090564a50dfd6c7a38452b5df27a845948cb7d44",
+  "producer_binding_commit": "56b78767b31222e579895cdbafc73dd78a0bf1da",
+  "accepted_B_sha256": "45062cd04b8ae6b7ffe0d5f1ea42f61bb2041ad5f44a8a034482b238bf94c53c",
+  "native_sha256": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+  "claims": [
+    "First JA boundary native state equals a reconstruction from actual B29 r0/r1/r2, actual B memory/PC, and immutable invocation fields. Equality covers all16GPRs/allRFLAGS/XMM0/memory/PC/FS/GS/address width, not only live registers.",
+    "Flags are rematerialized using the single canonical CMP rule; no copied flag or ISA semantics is introduced and every allowed native XOR AF choice is covered.",
+    "Both first/second context-read fault boundaries reconstruct full native state from actual B state plus unchanged invocation fields; second-load fault uses actual B data value for native RCX.",
+    "Actual byte-decoded native relational first-block execution and actual B29 execution retain identical ordered read/fault effects, with no selected native successor or architectural endpoint premise.",
+    "The +8 LEA/CMP/JA block preserves the full first-block architectural relation and reconstructs every native field from actual B r0/r1/r2/r3 and the immutable invocation frame.",
+    "Every canonical decoded relational +8 block has exactly that reconstructed state and empty effects/fault, with either actual successor and modular64bit addition; no branch outcome or next-state premise is supplied.",
+    "The +72 ADD/CMP/JA block preserves every native architectural field under its reconstructed view; both native/B additions wrap64bits with the same real successor.",
+    "Native RDI retains the earlier +8 value after B overwrites r3; reconstruction derives it from B r2 plus8. The required prior temporary invariant is proved from the actual preceding B ADD, not a new program check or pointer restriction.",
+    "The universal decoded native +72 block has that complete state and empty effects/fault; flags reuse the exact canonical ADD/CMP stages, not a copied ISA semantics.",
+    "Successful store result and all four first-store faults preserve the complete native architecture, exact partial memory, ordered effects and fault, for every memory-permission assignment.",
+    "Native RDX/end and final CMP flags are reconstructed using the actual B r1 snapshot at store-block entry, before that real value is killed by B. This introduces no extra read/check and does not assume a native next state.",
+    "The prior +72 temporary invariant is derived from the actual B ADD. All changed GPRs and flags, including native values no longer live in B, remain represented by actual B values, canonical operations and immutable entry/real-load snapshots.",
+    "JA/EXIT at BPC27/28/29 preserve the corresponding payload-end architecture in every guard-exit/store view; all previous state audits recheck against the extended exit mapping."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-b29-certificate trusted-simple-b29-state-certificate",
+    "reproduction": "make -C kprog/tv trusted-simple-b29-state-certificate",
+    "exit": 0,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleB29State.first_guard_architecture": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.first_block_relational_architecture": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.first_read_fault_architecture": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.second_read_fault_architecture": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.second_guard_architecture": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.second_block_relational_architecture": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.second_guard_temporary": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.third_guard_architecture": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.third_block_relational_architecture": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.third_guard_temporary": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.successful_store_architecture": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.faulting_store_architecture": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.store_block_relational_architecture": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleB29State.exit_architectures": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    "log_sha256": "c3ef278f0fccc58349f336b585689f66756cdc5a6bb4e98e0e3c0a63be884f6a",
+    "dependency_scope": "New state module imports exact previously checked B29 certificate at5a44604f5; reference/Safety/CFG sources unchanged. One new module focused check; the reproduction target includes all prerequisites."
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleB29.lean": "47de242880e7e7c8817341c63586671402b2a0875be8474a5531370d05c9d6f5",
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/Makefile": "c5f5ce2a4fd02a1e4e0ac39c73c7920b9dac6eea090d0bfdb5d16e5cc2f28c9a",
+    "kprog/tv/TrustedSimpleSafety.lean": "5537b0f4d04c5b5ebec988c1cb9c63175e9b786d95495265f3273675f82f3bea",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa",
+    "kprog/tv/TrustedSimpleB29State.lean": "87a19dcfe7f93e825f519123a3e3e4eb9f59d954ed0aaa6e2901d04b0c831cf2"
+  },
+  "premises": [
+    "Same context argument and exact initial memory, bound SP input, nativePC0/BPFPC0 active.",
+    "Successful-read first-block case explicitly takes the two actual read results; separate first/second fault theorems cover failed permissions.",
+    "Declared kernel XDP context map at B29PC1/2 and its physical conversion provenance remain explicit.",
+    "Store-block entry obeys the preceding third-guard reconstruction at nativePC35/BPC11 and its temporary invariant; the end snapshot is exactly actual entry B r1.",
+    "Canonical first-store-failure index is computed from existing memory permissions; neither successful permissions nor a native result is assumed."
+  ],
+  "trusted": [
+    "Verifier soundness for the accepted physical B and its admitted entry; the declared context-conversion relation must describe that physical artifact.",
+    "The single V reference ISA/Memory semantics, whose hardware fidelity is validated separately by F and is not established by this theorem.",
+    "Kernel binding/entry/ABI/metadata enforcement and capture/platform provenance, including XDP conversion.",
+    "Lean kernel, propext, Classical.choice, Quot.sound and explicitly audited Lean.ofReduceBool."
+  ],
+  "remaining": [
+    "Compose the per-basic-block reconstruction relations and real-load snapshots into one full-state TranslationValidation instance, including explicit ghost lineage/CFG mapping.",
+    "Full physical JIT/caller embedding and all other micro/application certificates; per-block lemmas are not yet the complete whole-program TV instance."
+  ]
+}

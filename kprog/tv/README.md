@@ -2272,3 +2272,11 @@ B pointer after r3 is overwritten; the prior temporary invariant is derived
 from the preceding actual B ADD. Canonical ADD/CMP flag stages and modular
 arithmetic are retained. All9 state audits pass. Store/fault/exit views and
 composition into the full architectural TV relation remain open.
+
+`trusted-simple-b29-store-block-state.json` adds full successful/faulting store
+and exit reconstruction. End is snapped from actual B r1 at store-block entry
+before B kills it, preserving native RDX and flags without an extra access.
+All permission outcomes and exact partial states are covered. Guard views map
+BPC27/28/29 to native payload end, and JA/EXIT preserve every view. All14 state
+audits pass. The four native blocks now have correspondence lemmas; their
+relations/real-load snapshots still need composition into the full TV instance.
