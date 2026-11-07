@@ -677,3 +677,11 @@ reference/wire/compiler and semantic checks. The immutable source/cache export
 was deleted automatically; compressed CALL CPU observations retain this 440-case
 full run. The later CCMP and ADDS/SUBS/CMP/CMN actual-field increments still
 require their own combined full check.
+
+Exact `be0666ba400f534002b72c0f86a790b6fd0823c6` completed the full
+`make -C kprog/formal check` with exit **0**, including CCMP packed fields and
+ADDS/SUBS/CMP/CMN actual dispatch, plus all earlier Lean, contract,
+reference/wire/compiler and semantic checks. The immutable source/cache export
+was deleted automatically; compressed CALL CPU observations retain this 440-case
+full run. The later logical-immediate ISA coverage addition is separate and
+requires its own validation; it is not implied by this earlier full pass.
