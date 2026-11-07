@@ -1,0 +1,157 @@
+{
+  "version": 1,
+  "prog_type": 6,
+  "section": "xdp",
+  "maps": [
+    {
+      "name": "stats",
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 16,
+      "max_entries": 1024,
+      "map_flags": 0
+    },
+    {
+      "name": "ctl_array",
+      "map_type": 2,
+      "key_size": 4,
+      "value_size": 8,
+      "max_entries": 16,
+      "map_flags": 0
+    },
+    {
+      "name": "vip_map",
+      "map_type": 1,
+      "key_size": 20,
+      "value_size": 8,
+      "max_entries": 512,
+      "map_flags": 0
+    },
+    {
+      "name": "fallback_cache",
+      "map_type": 9,
+      "key_size": 40,
+      "value_size": 16,
+      "max_entries": 1000,
+      "map_flags": 0
+    },
+    {
+      "name": "lru_mapping",
+      "map_type": 12,
+      "key_size": 4,
+      "value_size": 4,
+      "max_entries": 128,
+      "map_flags": 0,
+      "inner_map": {
+        "map_type": 9,
+        "key_size": 40,
+        "value_size": 16,
+        "max_entries": 1000,
+        "map_flags": 0
+      }
+    },
+    {
+      "name": "ch_rings",
+      "map_type": 2,
+      "key_size": 4,
+      "value_size": 4,
+      "max_entries": 33554944,
+      "map_flags": 0
+    },
+    {
+      "name": "reals",
+      "map_type": 2,
+      "key_size": 4,
+      "value_size": 20,
+      "max_entries": 4096,
+      "map_flags": 0
+    },
+    {
+      "name": "reals_stats",
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 16,
+      "max_entries": 4096,
+      "map_flags": 0
+    },
+    {
+      "name": "lru_miss_stats",
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 4,
+      "max_entries": 4096,
+      "map_flags": 0
+    },
+    {
+      "name": "vip_miss_stats",
+      "map_type": 2,
+      "key_size": 4,
+      "value_size": 20,
+      "max_entries": 1,
+      "map_flags": 0
+    },
+    {
+      "name": "quic_stats_map",
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 104,
+      "max_entries": 1,
+      "map_flags": 0
+    },
+    {
+      "name": "stable_rt_stats",
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 40,
+      "max_entries": 1,
+      "map_flags": 0
+    },
+    {
+      "name": "decap_vip_stats",
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 16,
+      "max_entries": 512,
+      "map_flags": 0
+    },
+    {
+      "name": "server_id_map",
+      "map_type": 2,
+      "key_size": 4,
+      "value_size": 4,
+      "max_entries": 16777214,
+      "map_flags": 0
+    },
+    {
+      "name": "tpr_stats_map",
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 32,
+      "max_entries": 1,
+      "map_flags": 0
+    },
+    {
+      "name": "server_id_stats",
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 16,
+      "max_entries": 512,
+      "map_flags": 0
+    },
+    {
+      "name": "vip_to_down_reals_map",
+      "map_type": 13,
+      "key_size": 20,
+      "value_size": 4,
+      "max_entries": 512,
+      "map_flags": 1,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 4,
+        "value_size": 1,
+        "max_entries": 4096,
+        "map_flags": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "native_sha256": "8e9d78758740ab2c38e085dcaac933d740d5a387b41f4df55813cba6c097a01c",
+  "worker_sha256": "461866a4c9a3b1b033f50c4e000ef118cec7bd0b0e3cde6e290b0911b22db7b9",
+  "compiled_source_sha256": "f533ddd8c21043f170e5e71a47bd293d8b4ba7450af835bad886910784be55c1",
+  "compiled_bpf_sha256": "93a58b4b99eb57839c163c1ddf0563bef7582b8fe09b8ad2b1d7f85209ce907a",
+  "fresh_generate_compile_exit": 0,
+  "libbpf_open_exit": 0,
+  "declared_maps_matched": 17,
+  "metadata_rejections": 7,
+  "indirect_sites": 82,
+  "unique_import_collision_check": "passed",
+  "cleanup_refactor_generated_source_identical": true,
+  "scope": "generation/compiler/libbpf-open; not kernel service admission or app completion"
+}

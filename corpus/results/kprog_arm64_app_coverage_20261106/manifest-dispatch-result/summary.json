@@ -1,0 +1,40 @@
+{
+  "scope": "manifest selectors, not actual loaded-program/verifier/execution coverage",
+  "apps": {
+    "bcc": {
+      "selectors": 32,
+      "finite_target_analysis_complete": 32,
+      "indirect_sites": 0
+    },
+    "cilium": {
+      "selectors": 98,
+      "finite_target_analysis_complete": 88,
+      "indirect_sites": 2505,
+      "failed": 10
+    },
+    "katran": {
+      "selectors": 12,
+      "finite_target_analysis_complete": 12,
+      "indirect_sites": 91
+    },
+    "otelcol-ebpf-profiler": {
+      "selectors": 35,
+      "finite_target_analysis_complete": 33,
+      "indirect_sites": 3938,
+      "failed": 2
+    },
+    "tetragon": {
+      "selectors": 245,
+      "finite_target_analysis_complete": 244,
+      "indirect_sites": 57512,
+      "failed": 1
+    },
+    "tracee": {
+      "selectors": 123,
+      "finite_target_analysis_complete": 106,
+      "indirect_sites": 15419,
+      "failed": 17
+    }
+  },
+  "failure_class": "30 manifest selectors have no explicit symbol field; no indirect-target failure established"
+}

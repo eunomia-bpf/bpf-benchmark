@@ -398,6 +398,13 @@ qemu-context-v2-app:
 runtime-results:
 	python3 $(HERE)/runtime_results.py $(RUNTIME_RESULTS_ARGS)
 
+.PHONY: katran-real-install katran-real-generate
+katran-real-install:
+	python3 $(HERE)/katran_real.py $(HERE)/$(PHASE) install
+
+katran-real-generate: direct-header-generate
+	python3 $(HERE)/katran_real.py $(HERE)/$(PHASE)
+
 .PHONY: katran-root-build
 katran-root-build: direct-header-generate
 	python3 $(HERE)/katran_root.py $(HERE)/$(PHASE)

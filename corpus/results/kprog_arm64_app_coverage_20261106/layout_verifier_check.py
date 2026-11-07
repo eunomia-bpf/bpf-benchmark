@@ -10,7 +10,13 @@ phase=Path(sys.argv[1]).resolve();mode=sys.argv[2]
 if mode=='prepare':
  phase.mkdir();coverage.freeze_simulator(phase)
  for name in ['objects','compile']: (phase/name).mkdir()
- cases=[('fixed','ARM64_SIM_L_STACK_WRITE(-32,8,37); return ARM64_SIM_L_STACK_READ(-32,8)==37?2:0;',0),
+ cases=[('high35','ARM64_SIM_L_STACK_WRITE(0x800000000LL-32,8,37); return ARM64_SIM_L_STACK_READ(0x800000000LL-32,8);',1),
+  ('hightag','ARM64_SIM_L_TAG_SET(0x100000000ULL,ARM64_SIM_TAG_STACK); return ARM64_SIM_L_TAG_GET(0x100000000ULL);',1),
+  ('highword','ARM64_SIM_L_STACK_WRITE(0x100000000LL-32,8,37); return ARM64_SIM_L_STACK_READ(0x100000000LL-32,8);',1),
+  ('lowword','ARM64_SIM_L_STACK_WRITE(-0x100000000LL-32,8,37); return ARM64_SIM_L_STACK_READ(-0x100000000LL-32,8);',1),
+  ('highbyte','ARM64_SIM_L_STACK_WRITE(0x100000000LL-32,1,37); return ARM64_SIM_L_STACK_READ(0x100000000LL-32,1);',1),
+  ('highdynamic','__u64 at=0x100000000ULL; asm volatile("" : "+r"(at)); ARM64_SIM_L_STACK_WRITE(at-32,8,37); return ARM64_SIM_L_STACK_READ(at-32,8);',1),
+  ('fixed','ARM64_SIM_L_STACK_WRITE(-32,8,37); return ARM64_SIM_L_STACK_READ(-32,8)==37?2:0;',0),
   ('dynamic','__u32 at=8; asm volatile("" : "+r"(at)); ARM64_SIM_L_STACK_WRITE((__s64)at-32,8,37); return ARM64_SIM_L_STACK_READ((__s64)at-32,8)==37?2:0;',0),
   ('uninit','return ARM64_SIM_L_STACK_READ(-24,8);',0),
   ('below','ARM64_SIM_L_STACK_WRITE(-33,1,37); return ARM64_SIM_L_STACK_READ(-33,1);',1),

@@ -1,0 +1,139 @@
+{
+  "map_count": 17,
+  "matched_declared_maps": 17,
+  "maps": {
+    "stats": {
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 16,
+      "max_entries": 1024,
+      "map_flags": 0
+    },
+    "vip_map": {
+      "map_type": 1,
+      "key_size": 20,
+      "value_size": 8,
+      "max_entries": 512,
+      "map_flags": 0
+    },
+    "lru_mapping": {
+      "map_type": 12,
+      "key_size": 4,
+      "value_size": 4,
+      "max_entries": 128,
+      "map_flags": 0,
+      "inner_map": {
+        "map_type": 9,
+        "key_size": 40,
+        "value_size": 16,
+        "max_entries": 1000,
+        "map_flags": 0
+      }
+    },
+    "fallback_cache": {
+      "map_type": 9,
+      "key_size": 40,
+      "value_size": 16,
+      "max_entries": 1000,
+      "map_flags": 0
+    },
+    "quic_stats_map": {
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 104,
+      "max_entries": 1,
+      "map_flags": 0
+    },
+    "server_id_stats": {
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 16,
+      "max_entries": 512,
+      "map_flags": 0
+    },
+    "vip_to_down_reals_map": {
+      "map_type": 13,
+      "key_size": 20,
+      "value_size": 4,
+      "max_entries": 512,
+      "map_flags": 1,
+      "inner_map": {
+        "map_type": 1,
+        "key_size": 4,
+        "value_size": 1,
+        "max_entries": 4096,
+        "map_flags": 1
+      }
+    },
+    "reals": {
+      "map_type": 2,
+      "key_size": 4,
+      "value_size": 20,
+      "max_entries": 4096,
+      "map_flags": 0
+    },
+    "ctl_array": {
+      "map_type": 2,
+      "key_size": 4,
+      "value_size": 8,
+      "max_entries": 16,
+      "map_flags": 0
+    },
+    "reals_stats": {
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 16,
+      "max_entries": 4096,
+      "map_flags": 0
+    },
+    "ch_rings": {
+      "map_type": 2,
+      "key_size": 4,
+      "value_size": 4,
+      "max_entries": 33554944,
+      "map_flags": 0
+    },
+    "vip_miss_stats": {
+      "map_type": 2,
+      "key_size": 4,
+      "value_size": 20,
+      "max_entries": 1,
+      "map_flags": 0
+    },
+    "lru_miss_stats": {
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 4,
+      "max_entries": 4096,
+      "map_flags": 0
+    },
+    "server_id_map": {
+      "map_type": 2,
+      "key_size": 4,
+      "value_size": 4,
+      "max_entries": 16777214,
+      "map_flags": 0
+    },
+    "stable_rt_stats": {
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 40,
+      "max_entries": 1,
+      "map_flags": 0
+    },
+    "decap_vip_stats": {
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 16,
+      "max_entries": 512,
+      "map_flags": 0
+    },
+    "tpr_stats_map": {
+      "map_type": 6,
+      "key_size": 4,
+      "value_size": 32,
+      "max_entries": 1,
+      "map_flags": 0
+    }
+  }
+}
