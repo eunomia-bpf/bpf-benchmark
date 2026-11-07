@@ -1,0 +1,97 @@
+{
+  "as_of_utc": "2026-11-07T19:21:29.828642+00:00",
+  "scope": "Closed first-pass cohorts only. Load attempts/unique IDs include recorded probes and retries; resident rows and service requests are separate denominators. Failed startup is not complete corpus coverage.",
+  "applications": [
+    {
+      "app": "bcc",
+      "baseline_load_attempts": 74,
+      "baseline_unique_loaded_ids": 74,
+      "baseline_resident_rows": 23,
+      "native_startup_load_attempts": 69,
+      "service_requests": 19,
+      "proof_compiled": 19,
+      "bound_accepted": 16,
+      "specialization_failed": 0,
+      "verifier_rejected": 3,
+      "other_loader_rejected": 0,
+      "app_status": [
+        "error"
+      ],
+      "raw_load_status_counts": {
+        "loaded": 140,
+        "unfinished": 3
+      },
+      "raw_archive_sha256": "70369c4760749672015fe1a8a1a6c2970e5a6d240c6a17eab42acf23148aeeda",
+      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/bcc-full-start-coverage.json"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "baseline_load_attempts": 16,
+      "baseline_unique_loaded_ids": 15,
+      "baseline_resident_rows": 12,
+      "native_startup_load_attempts": 3,
+      "service_requests": 1,
+      "proof_compiled": 1,
+      "bound_accepted": 0,
+      "specialization_failed": 0,
+      "verifier_rejected": 0,
+      "other_loader_rejected": 1,
+      "app_status": [
+        "error"
+      ],
+      "raw_load_status_counts": {
+        "failed": 2,
+        "loaded": 16,
+        "unfinished": 1
+      },
+      "raw_archive_sha256": "7813fe4ad89fbd34156991d201b91be45f2814e5b36b2aa13a322ba0f2d0a2a7",
+      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-otelcol-ebpf-profiler-result/coverage.json"
+    },
+    {
+      "app": "cilium",
+      "baseline_load_attempts": 8,
+      "baseline_unique_loaded_ids": 5,
+      "baseline_resident_rows": 0,
+      "native_startup_load_attempts": 0,
+      "service_requests": 0,
+      "proof_compiled": 0,
+      "bound_accepted": 0,
+      "specialization_failed": 0,
+      "verifier_rejected": 0,
+      "other_loader_rejected": 0,
+      "app_status": [
+        "error"
+      ],
+      "raw_load_status_counts": {
+        "failed": 3,
+        "loaded": 5
+      },
+      "raw_archive_sha256": "de477778787a7d2c10eda86335e1e019d69ec23e12adb8414a38c32ccdfea0cd",
+      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-cilium-result/coverage.json"
+    },
+    {
+      "app": "tetragon",
+      "baseline_load_attempts": 205,
+      "baseline_unique_loaded_ids": 201,
+      "baseline_resident_rows": 152,
+      "native_startup_load_attempts": 19,
+      "service_requests": 0,
+      "proof_compiled": 0,
+      "bound_accepted": 0,
+      "specialization_failed": 0,
+      "verifier_rejected": 0,
+      "other_loader_rejected": 0,
+      "app_status": [
+        "error"
+      ],
+      "raw_load_status_counts": {
+        "failed": 6,
+        "loaded": 216,
+        "unfinished": 2
+      },
+      "raw_archive_sha256": "41a55dba6e5474a85ed1688f39a6b9bc38a5040f74a8361a7e934f06d5880d28",
+      "coverage_file": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tetragon-result/coverage.json"
+    }
+  ],
+  "raw_startup_rows": 394
+}
