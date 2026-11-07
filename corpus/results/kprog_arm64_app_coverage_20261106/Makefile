@@ -784,3 +784,13 @@ trusted-context-candidate-run:
 .PHONY: trusted-context-candidate-check
 trusted-context-candidate-check:
 	PYTHONDONTWRITEBYTECODE=1 python3 $(HERE)/trusted_context_check.py check
+
+.PHONY: trusted-context-memory-check trusted-context-memory-safety-run trusted-context-memory-katran-run
+trusted-context-memory-check:
+	PYTHONDONTWRITEBYTECODE=1 taskset -c 20-23 python3 $(HERE)/trusted_context_memory.py check
+
+trusted-context-memory-safety-run:
+	PYTHONDONTWRITEBYTECODE=1 python3 $(HERE)/trusted_context_memory.py host safety
+
+trusted-context-memory-katran-run:
+	PYTHONDONTWRITEBYTECODE=1 python3 $(HERE)/trusted_context_memory.py host katran
