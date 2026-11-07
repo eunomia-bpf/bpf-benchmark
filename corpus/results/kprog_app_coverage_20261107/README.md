@@ -102,20 +102,21 @@ R timing commands and exact reproduction inputs are in the linked README.
 
 ## Native-only application coverage, November7 evening batch
 
-Each row follows actual application startup through the common registered
-native-only service. Application totals count accepted baseline load instances;
-resident snapshots and feature-probe counts appear in each linked batch. Source
-and image epochs stay separate across rows. Whole-application completion and
-matching-work measurement continue from the reported failure classes.
+Each row records the latest closed application batch through the common
+registered native-only service. The baseline census lists startup syscall
+attempts (including probes) and resident application snapshots where available;
+each linked report keeps the full named-load inventory. Source and image epochs
+stay separate across rows. Whole-application completion and matching-work
+measurement continue from the reported failure classes.
 
-| Application | Observed app loads | Generated | Compiled | Accepted/bound | Specialization errors | Verifier rejections | Runtime evidence |
+| Application | Baseline census | Generated | Compiled | Accepted/bound | Submission / specialization errors | Verifier rejections | Runtime evidence |
 | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
 | BCC | 25 | 25 | 25 | 25 | 0 | 0 | [Earlier functional batch153239](native-only-runtime/standard-bcc-8g.json) |
-| OTel | 14 | 3 | 3 | 2 | 0 | 1: exploration limit | [192310 batch](otel-narrow-load/README.md) |
-| Cilium | 163 | 1 | 0 | 0 | 1: map declaration | 0 | [201146 batch](native-modules-cilium__agent/README.md) |
-| Tetragon | 311 attempts; 287 resident | 5 | 5 | 4 | 0 | 1: 8193-jump complexity | [223215 batch](tetragon-manifest-replay/README.md) |
+| OTel | 17 startup attempts; 13 resident | 2 | 2 | 1 | 0 | 1: helper size range | [225459 batch](otel-cmp-resources/README.md) |
+| Cilium | 207 startup attempts; 72 resident | 1 | 0 | 0 | 1: helper189 declaration | 0 | [224658 batch](cilium-native-resources/README.md) |
+| Tetragon | 311 startup attempts; 287 resident | 4 | 4 | 3 | 0 | 1: 8193-jump complexity | [225009 batch](tetragon-cmp-resources/README.md) |
 | Katran | 1 | 1 | 1 | 1 | 0 | 0 | [213447 bound batch](katran-tagged-storage/README.md) |
-| Tracee | 151 | 6 | 6 | 5 | 0 | 0 confirmed; 1 activation after startup closes | [223700 batch](tracee-cmp-replay/README.md) |
+| Tracee | 162 startup attempts; 151 resident | 0 | 0 | 0 | 1: kernel resource count before generation | 0 | [230126 batch](tracee-bound-startup/README.md) |
 
 Tracee baseline now completes151 application loads on the coherent kernel BTF
 epoch. The shared native CORE helper-preservation repair48ff82cfb restores its
@@ -246,3 +247,6 @@ The next wholeTracee retry preserves native/workload/ISA/compiler inputs.
 The [Cilium resource-capsule batch224658](cilium-native-resources/README.md) reaches fresh generation with kernel-authenticated extra native maps, then helper189 declaration errors during compilation. Its generic helper/XDP data_meta candidate passes four UBSan ABI controls and compiles the actual generated BPF source. The paired [entry-resource closure](native-resource-scope/README.md) passes89linker/12service checks and scopes Tracee/Cilium first-entry resources to2/6symbols. Whole Tracee then Cilium replay is active.
 
 The [Tetragon CMP/resource batch225009](tetragon-cmp-resources/README.md) generates/compiles4requests and binds3, then reaches8193-jump verifier complexity with189726processed instructions/1926states. The [OTel batch225459](otel-cmp-resources/README.md) generates/compiles2requests and binds1, then reaches perf-event-output size range checking with805processed instructions/27states. The [Tracee verified-startup batch230126](tracee-bound-startup/README.md) records one kernel resource-count refusal before service generation; current scoped-resource replay consumes the common closure repair. Each linked report retains the exact epoch, baseline census, full raw logs and next repair class.
+
+
+The current serial continuation consumes entry-scoped resource metadata for Tracee/Cilium, then the [comparison-identity and native-width stack candidates](native-compare-load-width/README.md) for OTel/Tetragon. Their component checks and compilation pass; whole-application verifier and work receipts follow each closed guest. Earlier epochs retain their individual coverage and source identities in the linked raw archives.
