@@ -1,0 +1,46 @@
+{
+  "comparison": {
+    "host_cases": {
+      "cmpop": 2913,
+      "cmpop_route": 47529,
+      "cmp_mem_route": 2244
+    },
+    "exit": 0,
+    "input": "otel-size-range/request/generated/trusted_x86.bpf.c",
+    "original_bpf_insns": 7407,
+    "candidate_bpf_insns": 7410
+  },
+  "stack": {
+    "host_cases": {
+      "stack_arm_route": 117782,
+      "stack_write_lanes_route": 1401654
+    },
+    "exit": 0,
+    "input": "tetragon-jump-depth/request/generated/trusted_x86.bpf.c",
+    "original_bpf_insns": 4595,
+    "candidate_bpf_insns": 3067
+  },
+  "runtime": "Whole OTel and Tetragon replay queued after the active Tracee/Cilium guests.",
+  "inputs": {
+    "cmp-operand-identity/candidate.h": "6ce695c73cd76c777b85f015f2c57cf45215585cacc32f2d880c16f0016f13fd",
+    "cmp-operand-identity/read.h": "d585cf1e5e2d7ae63ceb6ee5e877ca42ff2eb7c6cfae977337c5ff0867a13621",
+    "cmp-operand-identity/actual-otel.bpf.c": "2999702001bccf82201a9be953d51d2c7fc784a6757e83f42df5f014771297f5",
+    "cmp-operand-identity/actual-otel.bpf.o": "bc8e3126d978636bc6e68808338dfa30711b9bea09a8372e9e79fb43e5cd1bc3",
+    "cmp-operand-identity/run.sh": "2c4a3b67dce06a6e5804a06a12a4790235089694f5ca9cb20e7bdd7a7491f816",
+    "cmp-operand-identity/run.log": "70fe1e7326952139c1987647b9e3ad8c8bb3059e015a224937e35b21323f2eb0",
+    "cmp-operand-identity/run.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "cmp-operand-identity/disassembly.txt": "8e274b55039f1abcef8eb41eeb025afe5fd16a8ee13903479f7033db04085db7",
+    "cmp-operand-identity/test_x86_cmpop_host.c": "ac81f4ae53d76898e04317e38091ddb3d426eaa2c8fb9600245bd981f30a03ca",
+    "cmp-operand-identity/test_x86_cmpop_route_host.c": "6ec8323a9e91e2c347c069f51df201f4cad706601e734ed2c9213b3a09b1a003",
+    "cmp-operand-identity/test_x86_cmp_mem_route_host.c": "4375ebb2da4faf7a4d3f080272a73206e594b0b975f4054b7ea79e8e5abe08ff",
+    "stack-native-width/candidate.h": "2bedec167eebc0b3d2259a796bd5eab6544a97f55e3ab74a8a2bb3a2d5db150f",
+    "stack-native-width/read.h": "d585cf1e5e2d7ae63ceb6ee5e877ca42ff2eb7c6cfae977337c5ff0867a13621",
+    "stack-native-width/actual-tetragon.bpf.c": "6e9bc5f3500e9c201018b55dfcb16a840ce628119724760d19e196fe576dd94d",
+    "stack-native-width/actual-tetragon.bpf.o": "270f0cd30f2f5aae2ee172a3a51f5e2314fbb97b6a93bbc71f1026f07300cef0",
+    "stack-native-width/run.sh": "34589465f055eb0cbbfd8ac61b48af404be7e9cc59fc9a949265d26fd3044c7f",
+    "stack-native-width/run.log": "b421e460b651b6bcadd10594de44a6e8a2ae3f0192220ecc85ff139d977884cc",
+    "stack-native-width/run.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "stack-native-width/test_x86_stack_arm_route_host.c": "9273ab25cd2a23a8a1f64ec091af56b8b98cebb2dbf37ea517738c86aa9539e1",
+    "stack-native-width/test_x86_stack_write_lanes_route_host.c": "96a8a20d2588af64e24a2f2792ecbc4d255413bee0e8a1ac549e05e9f8facdf5"
+  }
+}
