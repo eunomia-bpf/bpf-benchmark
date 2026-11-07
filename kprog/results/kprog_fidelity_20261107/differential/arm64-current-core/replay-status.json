@@ -1,0 +1,14 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "16-19",
+    "make",
+    "-f",
+    "kprog/results/kprog_fidelity_20261107/differential/arm64-current-logical/Makefile",
+    "reference",
+    "OUT=/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/arm64-current-core"
+  ],
+  "exit": 0,
+  "finished": "2026-11-07T18:49:59.219562+00:00"
+}

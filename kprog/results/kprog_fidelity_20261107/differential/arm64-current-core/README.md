@@ -1,21 +1,21 @@
 # Current ARM core807 static handoff refresh
 
-This detached run consumes the published b89015df9528fd5d3dcd4d2f451ba2a8e8b2dad9 ARM simulator snapshot. The old807 handoff captured c82c0832 at14:22 and predates the later b2b6/9004/b890 source changes. Its prior results remain historical in ../arm64-form-completion. Reuse the same incremental build-arm64 cache and unchanged807 form matrix; no production/reference source, mask, kernel/module/image or workload changes.
+This completed run consumes the published b89015df9528fd5d3dcd4d2f451ba2a8e8b2dad9 ARM simulator snapshot. The old807 handoff captured c82c0832 at14:22 and predates the later b2b6/9004/b890 source changes. Its prior results remain historical in ../arm64-form-completion. Reuse the same incremental build-arm64 cache and unchanged807 form matrix; no production/reference source, mask, kernel/module/image or workload changes.
 
-All executions here use QEMU user mode on the x86 host, NOT real ARM CPU evidence. The existing c110 canonical executable is frozen and reused without a root Lake build. Actual compiled inputs and the static ARM executable are captured after build; terminal results require independent review before publication.
+All executions here use QEMU user mode on the x86 host, NOT real ARM CPU evidence. The existing c110 canonical executable is frozen and reused without a root Lake build. Actual compiled inputs and the static ARM executable are captured after build; the terminal result and every per-form reference row are now reviewed below.
 
 ~~~sh
 taskset -c 16-19 make -C kprog/fidelity build ARCH=arm64
 taskset -c 16-19 make -f kprog/results/kprog_fidelity_20261107/differential/arm64-current-logical/Makefile reference OUT=/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/arm64-current-core
 ~~~
 
-After the static artifact is reviewed and published, the coordinator can use the EXISTING hardware-only run script without changing its code:
+The reviewed static artifact is published; the coordinator can use the EXISTING hardware-only run script without changing its code:
 
 ~~~sh
 ARM64_HANDOFF=/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/arm64-current-core/cpu-differential-arm64.gz OUT=/workspaces/repository/kprog/results/kprog_fidelity_20261107/differential/arm64-current-hardware sh kprog/fidelity/run-arm64.sh
 ~~~
 
-The existing script refuses non-AArch64 hosts and preserves per-form case counts and every mismatch input. Hardware results remain pending. Default handoff still points to the earlier validated artifact until this refresh completes.
+The existing script refuses non-AArch64 hosts and preserves per-form case counts and every mismatch input. Hardware results remain pending. The default still points to the earlier validated artifact while the x86 build captures shared Make inputs; the explicit command above selects this current artifact now.
 
 ## Reviewed static handoff and QEMU/C phase
 
@@ -34,8 +34,29 @@ independently verified, including the generator bytes published in 820ef1f.
 Any physical source drift at review is retained in handoff-summary.json.
 
 The static artifact and hardware command above are ready for coordinator use.
-This handoff snapshot does not claim a completed canonical comparison: that
-terminal status and every reference row require their own review. It likewise
+At that static-handoff review, the terminal canonical status had not yet been
+examined. The final review below now establishes its outcome. This likewise
 does not establish entry ABI projection, physical exclusive-monitor/order effects,
 dynamic dispatch or all O1–O4 obligations. Existing full-register-bank and control
 handoffs remain separately scoped. No new ISA model or oracle change is made.
+
+## Completed canonical result
+
+The reference Make job exits **0** at 2026-11-07T18:49:59.219562+00:00. Every one of
+807 forms has 1024 canonical observations: **826,368 states**, with **zero
+QEMU/C, QEMU/reference or C/reference differences** and **zero unavailable
+forms**. reference-forms.tsv records every count. Complete compressed mismatch
+and unavailable streams are empty. No CPU or QEMU rerun or oracle edit was needed.
+
+The exact frozen canonical executable is c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96,
+independently checked against the [already published archive](../x86-current-matrix/canonical-reference.gz).
+This is reuse of that exact executable, not a rebuild of later canonical sources.
+All previously published static/compiled-input artifacts are rechecked unchanged.
+The original 1500684312-byte trace remains in this Workspace, with verified
+layout/length and SHA256 799004447cbb13e7f803571316a2ffff45d5b1156b903ef0a8971792aceb7897.
+summary.json records exact identities, source drift and terminal review time;
+handoff-summary.json retains the earlier handoff timestamp plus this later review.
+
+Real ARM hardware execution remains pending with the coordinator. The static
+binary and existing hardware-only script command above are ready; QEMU and
+reference agreement are not relabeled as real hardware validation.
