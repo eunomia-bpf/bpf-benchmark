@@ -1,0 +1,150 @@
+{
+  "utc": "2026-11-07T16:49:23.247398+00:00",
+  "scope": "one closed real BCC trusted-service request; whole application run remains pending",
+  "entry": "fentry_vfs_read",
+  "native_sha256": "5b6b2aa3db916bcce9a8b9e945f7eb2b290dc7b88f5ec395edc577dbc0219054",
+  "native_matches_kernel_copy": true,
+  "receipt": {
+    "request_id": 1,
+    "source_prog_id": 116,
+    "native_sha256": "5b6b2aa3db916bcce9a8b9e945f7eb2b290dc7b88f5ec395edc577dbc0219054",
+    "started": "1970-01-01T00:04:43.019911+00:00",
+    "status": -5,
+    "error": "Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '1', '116', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-z27c2qw_/requests/request-0w32e_b_/generated/request.native.o', 'fentry_vfs_read', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-z27c2qw_/requests/request-0w32e_b_/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-z27c2qw_/requests/request-0w32e_b_/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '24', '0', '120636', '1', '0', '0', 'stats', '102', '0']' returned non-zero exit status 1.",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader', 'load', '3', '1', '116', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-z27c2qw_/requests/request-0w32e_b_/generated/request.native.o', 'fentry_vfs_read', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-z27c2qw_/requests/request-0w32e_b_/generated/trusted_arm64.proof.o', '/workspaces/repository/kprog/arm64/build/trusted-transport/service-z27c2qw_/requests/request-0w32e_b_/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link', '24', '0', '120636', '1', '0', '0', 'stats', '102', '0']' returned non-zero exit status 1.\n",
+    "failure_archive": "/workspaces/repository/kprog/arm64/build/trusted-transport/service-z27c2qw_/requests/1.failure.tar.gz",
+    "finished": "1970-01-01T00:05:23.495255+00:00"
+  },
+  "kernel_facts": {
+    "prog_type": 26,
+    "expected_attach_type": 24,
+    "prog_flags": 0,
+    "prog_ifindex": 0,
+    "attach_btf_id": 120636,
+    "attach_btf_obj_id": 1,
+    "attach_prog_id": 0,
+    "gpl_compatible": 1,
+    "source_btf_id": 140,
+    "token_present": 0,
+    "id": 116,
+    "maps": [
+      {
+        "map_type": 2,
+        "value_size": 40,
+        "map_flags": 1024,
+        "max_entries": 1,
+        "key_size": 4,
+        "id": 102
+      }
+    ]
+  },
+  "generated": true,
+  "compiled": true,
+  "verifier_accepted": false,
+  "failure_class": "exclusive retry loop termination",
+  "verifier_error": "infinite loop detected at insn 2",
+  "canonical_compact_context_commit": "b89015df9528fd5d3dcd4d2f451ba2a8e8b2dad9",
+  "archive": "request-1.failure.tar.gz",
+  "archive_sha256": "11be0075b2f6a0d51bb2e84c9c0244711c955b6532d18fbfaf9c90a016632912",
+  "generated_source_sha256": "0321b09c78bf95a0657ac6d24c194f7dc1373727f22ef63f5dd89902bf1ebd0d",
+  "proof_object_sha256": "0027228a4829eff8a4983db3347c51f544ecbd3d39e24bae7518041910459344",
+  "compiled_object_sha256": "b1d683b3399425238895e0ab2e6b1c365df6d520e46ec797b7f7351642512c68",
+  "compiled_sections": [
+    {
+      "name": ".text",
+      "instructions": [],
+      "exclusive_markers": []
+    },
+    {
+      "name": "fentry/trusted",
+      "instructions": [
+        {
+          "code": 24,
+          "dst_reg": 2,
+          "src_reg": 0,
+          "off": 0,
+          "imm": 0
+        },
+        {
+          "code": 0,
+          "dst_reg": 0,
+          "src_reg": 0,
+          "off": 0,
+          "imm": 0
+        },
+        {
+          "code": 121,
+          "dst_reg": 1,
+          "src_reg": 2,
+          "off": 0,
+          "imm": 0
+        },
+        {
+          "code": 183,
+          "dst_reg": 0,
+          "src_reg": 9,
+          "off": 5,
+          "imm": 16
+        },
+        {
+          "code": 85,
+          "dst_reg": 0,
+          "src_reg": 0,
+          "off": -3,
+          "imm": 0
+        },
+        {
+          "code": 7,
+          "dst_reg": 1,
+          "src_reg": 0,
+          "off": 0,
+          "imm": 1
+        },
+        {
+          "code": 24,
+          "dst_reg": 2,
+          "src_reg": 0,
+          "off": 0,
+          "imm": 0
+        },
+        {
+          "code": 0,
+          "dst_reg": 0,
+          "src_reg": 0,
+          "off": 0,
+          "imm": 0
+        },
+        {
+          "code": 123,
+          "dst_reg": 2,
+          "src_reg": 1,
+          "off": 0,
+          "imm": 0
+        },
+        {
+          "code": 180,
+          "dst_reg": 0,
+          "src_reg": 0,
+          "off": 0,
+          "imm": 0
+        },
+        {
+          "code": 149,
+          "dst_reg": 0,
+          "src_reg": 0,
+          "off": 0,
+          "imm": 0
+        }
+      ],
+      "exclusive_markers": [
+        {
+          "index": 3,
+          "dst_reg": 0,
+          "src_reg": 9,
+          "off": 5,
+          "source_pc": 16
+        }
+      ]
+    }
+  ]
+}
