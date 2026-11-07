@@ -1,4 +1,4 @@
-import TrustedSimpleX86
+import TrustedSimpleCFG
 
 set_option maxRecDepth 4096
 set_option maxHeartbeats 2000000
@@ -234,6 +234,180 @@ theorem canonical_relational_path_execution {base : Word} {bytes : Array Byte}
   | @next before first rest tail entry instruction decoded step continued suffix ih =>
     exact Execution.next ⟨entry,instruction,first,decoded,step,rfl,rfl⟩ ih
 
+
+/-- Actual closed native states agree completely except that the real XOR
+may choose AF freely until its subsequent CMP atPC12. -/
+def nativeStatesRelated (first second : X86.State) : Prop :=
+  simpleClosedPC first.pc ∧ if first.pc=12 then afEquivalent first second else first=second
+
+theorem native_states_related_refl (s : X86.State) (valid : simpleClosedPC s.pc) :
+    nativeStatesRelated s s := by
+  refine ⟨valid,?_⟩
+  split <;> rfl
+
+/-- The closed CFG and actual decoder determine an arbitrary supplied
+extent. An end-PC witness cannot authorize an instruction. -/
+theorem closed_decoded_extent (s : X86.State) (entry : X86Path.Entry)
+    (instruction : X86.Instruction) (valid : simpleClosedPC s.pc)
+    (decoded : X86Path.decodeAt 0 native entry s=.ok instruction) :
+    s.pc.toNat ∈ simpleNativeOffsets ∧
+      entry=⟨s.pc.toNat,simpleNativeLength s.pc.toNat⟩ := by
+  rcases List.mem_append.mp valid with member | atEnd
+  · have position : s.pc=BitVec.ofNat 64 s.pc.toNat := by simp
+    obtain ⟨offsetEq,lengthEq⟩ := simple_native_extent_unique s s.pc.toNat entry instruction member position decoded
+    refine ⟨member,?_⟩
+    cases entry with
+    | mk offset length =>
+      cases offsetEq
+      cases lengthEq
+      rfl
+  · have position : s.pc=60 := by
+      apply BitVec.eq_of_toNat_eq
+      simpa only [List.mem_singleton] using atEnd
+    exact False.elim (simple_native_end_no_decode s entry instruction position decoded)
+
+theorem closed_decoded_extent_classification (s : X86.State) (entry : X86Path.Entry)
+    (instruction : X86.Instruction) (valid : simpleClosedPC s.pc)
+    (decoded : X86Path.decodeAt 0 native entry s=.ok instruction) :
+    entry ∈ simpleDefinedExtents ∨ entry=⟨10,2⟩ := by
+  obtain ⟨member,same⟩ := closed_decoded_extent s entry instruction valid decoded
+  rw [same]
+  have choices : s.pc.toNat=0 ∨ s.pc.toNat=3 ∨ s.pc.toNat=7 ∨ s.pc.toNat=10 ∨
+      s.pc.toNat=12 ∨ s.pc.toNat=15 ∨ s.pc.toNat=17 ∨ s.pc.toNat=21 ∨
+      s.pc.toNat=24 ∨ s.pc.toNat=26 ∨ s.pc.toNat=30 ∨ s.pc.toNat=33 ∨
+      s.pc.toNat=35 ∨ s.pc.toNat=40 ∨ s.pc.toNat=44 ∨ s.pc.toNat=51 ∨ s.pc.toNat=55 := by
+    simpa [simpleNativeOffsets] using member
+  rcases choices with h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h
+  all_goals simp [h,simpleNativeLength,simpleDefinedExtents]
+
+theorem closed_decodes_agree (s : X86.State) (first second : X86Path.Entry)
+    (firstInstruction secondInstruction : X86.Instruction) (valid : simpleClosedPC s.pc)
+    (firstDecoded : X86Path.decodeAt 0 native first s=.ok firstInstruction)
+    (secondDecoded : X86Path.decodeAt 0 native second s=.ok secondInstruction) :
+    first=second ∧ firstInstruction=secondInstruction := by
+  have firstEq := (closed_decoded_extent s first firstInstruction valid firstDecoded).2
+  have secondEq := (closed_decoded_extent s second secondInstruction valid secondDecoded).2
+  have same := firstEq.trans secondEq.symm
+  rw [← same] at secondDecoded
+  exact ⟨same,Except.ok.inj (firstDecoded.symm.trans secondDecoded)⟩
+
+theorem xor10_decoded_instruction (s : X86.State) (instruction : X86.Instruction)
+    (decoded : X86Path.decodeAt 0 native ⟨10,2⟩ s=.ok instruction) :
+    s.pc=10 ∧ instruction=.logic .w32 .xor (.register (.low 0)) (.register (.low 0)) 12 := by
+  have guarded := (decode_extent_constraints 0 native ⟨10,2⟩ s instruction decoded).1
+  have position : s.pc=10 := by simpa using guarded
+  have raw := decode_extent_reflects_raw 0 native ⟨10,2⟩ s instruction decoded
+  change X86.decode (native.extract 10 12) s=.ok instruction at raw
+  rw [native_decode10] at raw
+  have next : s.pc+2=(12 : Word) := by rw [position]; rfl
+  exact ⟨position,by simpa only [next] using (Except.ok.inj raw).symm⟩
+
+theorem cmp12_decoded_instruction (s : X86.State) (entry : X86Path.Entry)
+    (instruction : X86.Instruction) (position : s.pc=12)
+    (decoded : X86Path.decodeAt 0 native entry s=.ok instruction) :
+    instruction=.arithmetic .w64 .compare (.register (.low 6)) (.register (.low 2)) 15 := by
+  obtain ⟨offsetEq,lengthEq⟩ := simple_native_extent_unique s 12 entry instruction (by decide) position decoded
+  have same : entry=⟨12,3⟩ := by
+    cases entry with
+    | mk offset length => cases offsetEq; cases lengthEq; rfl
+  have raw := decode_extent_reflects_raw 0 native entry s instruction decoded
+  rw [same] at raw
+  change X86.decode (native.extract 12 15) s=.ok instruction at raw
+  rw [native_decode12] at raw
+  have next : s.pc+3=(15 : Word) := by rw [position]; rfl
+  simpa only [next] using (Except.ok.inj raw).symm
+
+/-- All same-input native steps agree on events and related next states.
+The actual XOR case retains every AF choice instead of forcing determinism. -/
+theorem same_input_native_steps_couple (s : X86.State) (valid : simpleClosedPC s.pc)
+    (firstEntry secondEntry : X86Path.Entry) (firstInstruction secondInstruction : X86.Instruction)
+    (first second : Transition X86.State)
+    (firstDecoded : X86Path.decodeAt 0 native firstEntry s=.ok firstInstruction)
+    (secondDecoded : X86Path.decodeAt 0 native secondEntry s=.ok secondInstruction)
+    (firstRun : X86.Step firstInstruction s first) (secondRun : X86.Step secondInstruction s second) :
+    first.events=second.events ∧ nativeStatesRelated first.state second.state := by
+  have closed := simple_native_relational_step_closed s firstEntry firstInstruction first valid firstDecoded firstRun
+  obtain ⟨sameEntry,sameInstruction⟩ := closed_decodes_agree s firstEntry secondEntry
+    firstInstruction secondInstruction valid firstDecoded secondDecoded
+  subst secondEntry
+  subst secondInstruction
+  rcases closed_decoded_extent_classification s firstEntry firstInstruction valid firstDecoded with defined | xor
+  · have firstExact := simple_defined_decoded_step_unique s firstEntry firstInstruction first defined firstDecoded firstRun
+    have secondExact := simple_defined_decoded_step_unique s firstEntry firstInstruction second defined firstDecoded secondRun
+    have same : first=second := firstExact.trans secondExact.symm
+    refine ⟨congrArg Transition.events same,?_⟩
+    rw [← same]
+    exact native_states_related_refl first.state closed
+  · subst firstEntry
+    obtain ⟨_,instructionEq⟩ := xor10_decoded_instruction s firstInstruction firstDecoded
+    rw [instructionEq] at firstRun secondRun
+    let instruction : X86.Instruction := .logic .w32 .xor (.register (.low 0)) (.register (.low 0)) 12
+    have normal : (X86.step instruction s).fault=none := rfl
+    change X86.matchesTransition instruction (X86.step instruction s) first at firstRun
+    change X86.matchesTransition instruction (X86.step instruction s) second at secondRun
+    simp only [X86.matchesTransition,normal,Option.isSome,Bool.false_eq_true,ite_false,
+      instruction,X86.definedFlags,X86.observedRegisters] at firstRun secondRun
+    obtain ⟨firstEvents,_,firstState⟩ := firstRun
+    obtain ⟨secondEvents,_,secondState⟩ := secondRun
+    change afEquivalent (X86.step instruction s).state first.state at firstState
+    change afEquivalent (X86.step instruction s).state second.state at secondState
+    have sameMasked : afEquivalent first.state second.state := Eq.trans (Eq.symm firstState) secondState
+    have at12 : first.state.pc=12 := (congrArg X86.State.pc firstState).symm
+    refine ⟨firstEvents.symm.trans secondEvents,closed,?_⟩
+    simpa [at12] using sameMasked
+
+/-- Every actual step from related states has the same events and related
+successors, including arbitrary accepted extents and all undefined AF values. -/
+theorem related_native_steps_couple (firstState secondState : X86.State)
+    (related : nativeStatesRelated firstState secondState)
+    (firstEntry secondEntry : X86Path.Entry) (firstInstruction secondInstruction : X86.Instruction)
+    (first second : Transition X86.State)
+    (firstDecoded : X86Path.decodeAt 0 native firstEntry firstState=.ok firstInstruction)
+    (secondDecoded : X86Path.decodeAt 0 native secondEntry secondState=.ok secondInstruction)
+    (firstRun : X86.Step firstInstruction firstState first)
+    (secondRun : X86.Step secondInstruction secondState second) :
+    first.events=second.events ∧ nativeStatesRelated first.state second.state := by
+  have valid := related.1
+  by_cases at12 : firstState.pc=12
+  · have masked : afEquivalent firstState secondState := by
+      have branch := related.2
+      rw [if_pos at12] at branch
+      exact branch
+    have shape := (af_equivalent_shape firstState secondState masked).1
+    have samePC := congrArg X86.State.pc shape
+    change secondState.pc=firstState.pc at samePC
+    have secondPC : secondState.pc=12 := samePC.trans at12
+    have firstInstructionEq := cmp12_decoded_instruction firstState firstEntry firstInstruction at12 firstDecoded
+    have secondInstructionEq := cmp12_decoded_instruction secondState secondEntry secondInstruction secondPC secondDecoded
+    rw [firstInstructionEq] at firstRun
+    rw [secondInstructionEq] at secondRun
+    have same := canonical_cmp12_relational_af_equivalent firstState secondState first second masked firstRun secondRun
+    have closed := simple_native_relational_step_closed firstState firstEntry firstInstruction first valid firstDecoded
+      (by simpa only [firstInstructionEq] using firstRun)
+    refine ⟨congrArg Transition.events same,?_⟩
+    rw [← same]
+    exact native_states_related_refl first.state closed
+  · have same : firstState=secondState := by
+      have branch := related.2
+      rw [if_neg at12] at branch
+      exact branch
+    subst secondState
+    exact same_input_native_steps_couple firstState valid firstEntry secondEntry
+      firstInstruction secondInstruction first second firstDecoded secondDecoded firstRun secondRun
+
+theorem related_native_instruction_steps_match
+    {firstState secondState firstNext secondNext : X86.State} {firstEvents secondEvents : List Event}
+    (related : nativeStatesRelated firstState secondState)
+    (firstStep : relationalNativeInstructionStep 0 native firstState firstEvents firstNext)
+    (secondStep : relationalNativeInstructionStep 0 native secondState secondEvents secondNext) :
+    firstEvents=secondEvents ∧ nativeStatesRelated firstNext secondNext := by
+  obtain ⟨firstEntry,firstInstruction,first,firstDecoded,firstRun,firstTrace,firstStateEq⟩ := firstStep
+  obtain ⟨secondEntry,secondInstruction,second,secondDecoded,secondRun,secondTrace,secondStateEq⟩ := secondStep
+  obtain ⟨sameEvents,sameStates⟩ := related_native_steps_couple firstState secondState related
+    firstEntry secondEntry firstInstruction secondInstruction first second firstDecoded secondDecoded firstRun secondRun
+  refine ⟨firstTrace.symm.trans (sameEvents.trans secondTrace),?_⟩
+  simpa only [firstStateEq,secondStateEq] using sameStates
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -258,3 +432,22 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.canonical_execution_relational
 
 #print axioms KProgTV.TrustedSimpleSafety.canonical_relational_path_execution
+
+
+#print axioms KProgTV.TrustedSimpleSafety.native_states_related_refl
+
+#print axioms KProgTV.TrustedSimpleSafety.closed_decoded_extent
+
+#print axioms KProgTV.TrustedSimpleSafety.closed_decoded_extent_classification
+
+#print axioms KProgTV.TrustedSimpleSafety.closed_decodes_agree
+
+#print axioms KProgTV.TrustedSimpleSafety.xor10_decoded_instruction
+
+#print axioms KProgTV.TrustedSimpleSafety.cmp12_decoded_instruction
+
+#print axioms KProgTV.TrustedSimpleSafety.same_input_native_steps_couple
+
+#print axioms KProgTV.TrustedSimpleSafety.related_native_steps_couple
+
+#print axioms KProgTV.TrustedSimpleSafety.related_native_instruction_steps_match

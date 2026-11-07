@@ -1,0 +1,108 @@
+{
+  "status": "captured_arbitrary_native_decoded_steps_match_events_and_preserve_concrete_state_relation",
+  "utc": "2026-11-07T14:05:59.869958+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorem": "KProgTV.TrustedSimpleSafety.related_native_instruction_steps_match",
+  "claims": [
+    "every actual canonical relational instruction step from related states has identical ordered events and related complete successor states",
+    "arbitrary accepted extents and instructions are forced by actual byte decode, not supplied lengths/opcodes",
+    "relation requires actual closed CFG and full state equality except ONLY AF masked atPC12",
+    "all XOR AF choices preserved; actual CMP returns exact full-state equality",
+    "16 fully observed operations plus actual XOR/CMP cases exhaust the actual closed CFG; end60 cannot decode",
+    "no branch/access-success/access-failure/AF-value premise, runtime guard or second ISA semantics"
+  ],
+  "premises": [
+    "concrete nativeStatesRelated initial states",
+    "actual canonical decoded BlockStep witness for each compared step"
+  ],
+  "not_yet_claimed": [
+    "checked events for every finite native execution (requires complete witness and terminal quiet composition)",
+    "terminal/fault-repeat safety argument",
+    "strict per-basic-block B correspondence across reordered guards",
+    "semantic entry/ABI/RET/platform transport",
+    "unconditional whole-artifact TV or other micros/apps"
+  ],
+  "compatibility": {
+    "old_Safety_declarations": "byte-identical after changing ONLY import TrustedSimpleX86 to published TrustedSimpleCFG",
+    "normalized_old_prefix_sha256": "5a31206972d4933821834bcaca8ade15070ce911638198d9a70d2b70a28b7eed",
+    "supported_target": "Safety now depends on CFG certificate matching its import",
+    "ISA_runtime": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-entry-certificate -o trusted-simple-cfg-certificate trusted-simple-safety-certificate",
+    "exit": 0,
+    "reproduction": "make -C kprog/tv trusted-simple-safety-certificate",
+    "checked_base_and_CFG": "unchanged published source/certificate dependencies reused without duplicate cache writes",
+    "binding_mismatch_controls_rejected": 22,
+    "materialization_controls_rejected": 28,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleSafety.native_states_related_refl": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.closed_decoded_extent": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.closed_decoded_extent_classification": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.closed_decodes_agree": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.xor10_decoded_instruction": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.cmp12_decoded_instruction": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.same_input_native_steps_couple": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.related_native_steps_couple": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.related_native_instruction_steps_match": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "current_log_sha256": "3ff0e72d2d752f0d984dd4ff6b9fe99d13ac2fe758434ef5a79a33a83e26a027",
+    "combined_log_sha256": "94abb665076b2be17d0275a38ce65137d83b65aa004c87ce09d2677247c3f6d3"
+  },
+  "trusted": [
+    "single canonical reference ISA/decoder/memory and undefined-output masks",
+    "Lean kernel/logical axioms and reported native reduction",
+    "verifier soundness/kernel binding/entry and platform semantic transport remain explicit in existing safety composition"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "f0b9694a7f256928e83c688f0ac0f4b3101eb8906b7efc0e9dee0b8920167ac6",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/TrustedSimpleSafety.lean": "962ebfce2a2de6bb54fabae72b5cdafdbd128602ba6b56d17c41110536ad5c1e",
+    "kprog/tv/Makefile": "02aeab2e0864840dac9a7a815ec0ae335cb4af559031a438d69d22fa382925eb",
+    "kprog/tv/TrustedSimpleCFG.lean": "d9be908d7ab8c8c038ded1277c9f612dd0ddfdee0a25741c5db8dbdfbfbdf0fa"
+  }
+}

@@ -1833,3 +1833,19 @@ Its permissive fault repeats require the upcoming terminal argument. Six audits
 and the safety target pass; see af-cmp-coupling JSON/log. Full concrete step-event
 matching and arbitrary-prefix checked-events composition remain open, alongside
 entry/ABI/platform/RET transport and strict B block mapping.
+
+### Concrete arbitrary-step event/state relation
+
+`related_native_instruction_steps_match` proves equal ordered events and related
+successor states for every actual decoded canonical step from related inputs.
+The relation retains full architectural equality except ONLY AF atPC12, while
+requiring actual CFG membership. Arbitrary supplied ranges/opcodes are forced
+by the byte decoder; all16 fully observed operations and actual XOR/CMP cases
+are covered, without a branch/access outcome or selected AF value.
+
+The safety module now imports the published CFG certificate and its supported
+Make target builds that dependency. Nine audits and the safety check pass; old
+theorems are byte-identical apart from the import. See related-step-coupling
+JSON/log. Complete-path existence and terminal quiet must still be composed
+to check every finite native execution; ABI/platform/RET transport and strict
+B block mapping remain open.

@@ -803,7 +803,7 @@ trusted-simple-entry-certificate: trusted-binding-check bpf-check
 		-o ../tv/build/TrustedSimpleX86.olean ../tv/TrustedSimpleX86.lean
 
 .PHONY: trusted-simple-safety-certificate
-trusted-simple-safety-certificate: trusted-simple-entry-certificate
+trusted-simple-safety-certificate: trusted-simple-cfg-certificate
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/TrustedSimpleSafety.olean ../tv/TrustedSimpleSafety.lean
 
