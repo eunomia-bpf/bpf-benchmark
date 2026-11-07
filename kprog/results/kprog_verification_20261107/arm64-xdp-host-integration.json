@@ -2355,6 +2355,92 @@
     },
     "source_drift": []
   },
+  "return_route_focused": {
+    "archive_block_sha256": "98b43f626b36e1fa05de751f69b7057524dfe903d58268a1ae014848b3882af6",
+    "commands": [
+      {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.Refinement.Arm64Dispatcher"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "/workspaces/.agent-state/kprog-lanes/V/return-audit.lean"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_arm64_reg_dispatch_spec.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/generate_arm64_reg_presence_spec.py",
+          "--check"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "python3",
+          "tools/check_dispatch_model.py"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "sh",
+          "-ec",
+          "cc -include oracles/arm64_entry_environment_host.h -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_call_ret_route_host.c -o build/test_arm64_call_ret_route_host"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "./build/test_arm64_call_ret_route_host"
+        ],
+        "exit": 0
+      }
+    ],
+    "existing_host_cases": 13,
+    "exit": 0,
+    "fresh_c_hosts": 1,
+    "pins": {
+      "kprog/arm64/arm64_sim.h": "8d69f4e7b1aa1e809ed40861362e13ab7c493a6ede5abf3e0fd38a763d683fbe",
+      "kprog/arm64/arm64_sim_direct.h": "a0e8af116a7aaa666021ed4ffefeb7b54bd3dcf3d16c80762c36f79cec6fdbe7",
+      "kprog/arm64/arm64_sim_local_bpf.h": "d382995ce88de3076d4c7650566d3a5961733c2a624becd8c8de3ddb08118126",
+      "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "1a0680419ddba423942158c4f01f1edba4929fd230f96b6e48b5b2ec0ad2e6a8",
+      "kprog/formal/KProgFormal/Reference/AArch64.lean": "00c08b7441948c762d18d2bed62fac13c91f6f88f06e380323ac38bef66ece4a",
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+      "kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean": "5cbf3b6a9f1cd4d0d20c2604976cb81985a1ecf87b9ad11b72b722491abd63c3",
+      "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69",
+      "kprog/formal/oracles/test_arm64_call_ret_route_host.c": "492b980f939a9bcf23ccd948e25c43bfd8e8182b911b6048257412424826d978"
+    },
+    "prior_declarations_byte_identical": true,
+    "prior_source_commit": "13cd3d1d14943c35860c4e14526f23bf6f14d121",
+    "proof_lines_added": 106,
+    "remaining": [
+      "SKB cb exit synchronization",
+      "physical ABI/continuation transport",
+      "helpers",
+      "compiled bodies",
+      "ordinary CODE arithmetic/memory transport",
+      "full77/72/O2/O4"
+    ],
+    "source_drift": [],
+    "stop_sha256": "6a9c1ee32919154cda9d68f2033856603cc029af2054ed577318cc5a14485d93"
+  },
   "source_emission_composition": {
     "commands": [
       {

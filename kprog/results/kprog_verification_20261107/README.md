@@ -1744,3 +1744,31 @@ no placeholders/new tests/ISA/runtime/oracle edits. Proof SHA256
 The fresh original proof log and source/predecessor pins are appended to the
 existing integration archive/JSON. Exact900 full EXIT2 remains unchanged;
 no new full was run against its unresolved dynamic x86 host failure.
+## Actual outer RETURN and finite CODE return routes
+
+`returnCodeState` materializes RETURN offset cells using the authenticated
+same-invocation outer LR and leaves CODE source tokens for the existing
+layout observation. `returnRoute` follows actual RET_TO branch order and
+tag bytes: raw zero plus RETURN10 selects outer exit; CODE9 plus finite
+membership selects an emitted goto; other inputs retain rejection. The
+producer emits those per-site cases as gotos. ZR has no tag cell.
+
+`return_route_observed_refines` derives the exact same canonical register
+branch for every successful route and every source register, preserving
+all other numeric state/events. Its route premise is the concrete macro
+guard, never component semantic equality. Outer PC is an explicit
+continuation observation; this does not certify the physical C return.
+`outer_return_value` separately derives the actual low32 materialized X0
+result, with ordinary CODE data transport still explicit through its
+not-CODE condition. SKB cb synchronization, physical ABI/continuation,
+helper effects, compiled bodies and full77/72/O2/O4 remain open.
+
+Validation:98-job Lean dependency graph,4 axiom audits,2 existing register
+contracts/model check, and the existing13-case CALL/RET host under UBSan
+all pass. All9 source pins stayed unchanged, earlier declaration bytes
+are identical, and no placeholders/ISA/runtime/oracle/test edits were
+introduced. The two failed proof-normalization attempts and complete final
+commands/output/source pins are retained in the existing integration
+archive/JSON. Exact900 full `make check` EXIT2 at the x86 dynamic POPCNT
+harness remains unchanged; no redundant full was run against that failure.
+Proof SHA256 `5cbf3b6a9f1cd4d0d20c2604976cb81985a1ecf87b9ad11b72b722491abd63c3`.

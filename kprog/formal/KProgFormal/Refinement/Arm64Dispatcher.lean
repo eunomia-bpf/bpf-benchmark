@@ -3695,4 +3695,110 @@ theorem source_emission_step_refines (nativeAddress : Word → Word) (emission :
   | register link src targets successor code allowed successorAddress =>
       exact code_target_observed_refines nativeAddress link src targets successor state code allowed successorAddress
 
+
+/-- Raw tag bytes of the production cells. ZR has no tag cell. Non-CODE/
+RETURN cells are already in the prior numeric stack/data observation. -/
+def returnTag (tags : Reference.AArch64.Gpr → Byte) (src : Register) : Byte :=
+  if h : src.val < 31 then tags ⟨src.val, h⟩ else 0
+
+/-- RETURN carries an offset from this invocation's authenticated outer LR;
+CODE still carries a source token. Applying this frame before the existing
+code view keeps the two address spaces and tag classes distinct. -/
+def returnCodeState (outerReturn : Word) (tags : Reference.AArch64.Gpr → Byte)
+    (raw : Reference.AArch64.State) : CodeState :=
+  ⟨{ raw with gpr := fun r => if tags r = 10 then outerReturn + raw.gpr r else raw.gpr r },
+    fun r => tags r == 9⟩
+
+theorem return_frame_read (outerReturn : Word) (tags : Reference.AArch64.Gpr → Byte)
+    (raw : Reference.AArch64.State) (src : Register) :
+    Reference.AArch64.readReg (returnCodeState outerReturn tags raw).bits src =
+      if returnTag tags src = 10 then outerReturn + Reference.AArch64.readReg raw src
+      else Reference.AArch64.readReg raw src := by
+  by_cases general : src.val < 31 <;>
+    simp [Reference.AArch64.readReg, returnCodeState, returnTag, general]
+
+theorem return_frame_code (outerReturn : Word) (tags : Reference.AArch64.Gpr → Byte)
+    (raw : Reference.AArch64.State) (src : Register) :
+    codeSource (returnCodeState outerReturn tags raw) src = (returnTag tags src == 9) := by
+  by_cases general : src.val < 31 <;> simp [codeSource, returnCodeState, returnTag, general]
+
+/-- This is RET_TO's actual classification, including its raw-zero RETURN
+check and finite CODE switch. Rejected control does not acquire an ISA
+success transition. The u32 result and SKB context copy belong to the
+separate invocation exit interface, not to a native RET instruction. -/
+inductive ReturnRoute where
+  | outer
+  | internal (target : Word)
+  deriving DecidableEq
+
+def returnRoute (tags : Reference.AArch64.Gpr → Byte) (src : Register)
+    (targets : List Word) (raw : Reference.AArch64.State) : Option ReturnRoute :=
+  let target := Arm64Move.Fields.read raw (Arm64Register.registerCode src)
+  if target = 0 ∧ returnTag tags src = 10 then some .outer
+  else if returnTag tags src = 9 ∧ targets.contains target = true then some (.internal target)
+  else none
+
+/-- The source macro terminates in the outer arm. Its native-PC observation
+uses the same-invocation LR witness, not an invented zero return sentinel.
+SKB cb synchronization and the physical compiled continuation remain O2/O4. -/
+def observeReturnRoute (nativeAddress : Word → Word) (outerReturn : Word)
+    (state : CodeState) (route : ReturnRoute) : Transition Reference.AArch64.State :=
+  match route with
+  | .outer => ⟨{ nativeCodeView nativeAddress state with pc := outerReturn }, [], none⟩
+  | .internal target => observeCodeTransition nativeAddress ⟨codePc state target, [], none⟩
+
+/-- All successful RET_TO routes refine the SAME canonical register branch.
+The sole route premise is the concrete macro guard; register target values
+and whole-state preservation are derived, including non-X30 RET operands. -/
+theorem return_route_observed_refines (nativeAddress : Word → Word) (outerReturn : Word)
+    (tags : Reference.AArch64.Gpr → Byte) (src : Register) (targets : List Word)
+    (raw : Reference.AArch64.State) (route : ReturnRoute)
+    (reached : returnRoute tags src targets raw = some route) :
+    observeReturnRoute nativeAddress outerReturn (returnCodeState outerReturn tags raw) route =
+      Reference.AArch64.step (.branchRegister false src)
+        (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw)) := by
+  unfold returnRoute at reached
+  dsimp only at reached
+  split at reached
+  next outer =>
+    obtain ⟨zero, tag⟩ := outer
+    have rawRead : Reference.AArch64.readReg raw src = 0 := by
+      simpa only [Arm64Move.Fields.register_read, Arm64Register.read_refines] using zero
+    have target : Reference.AArch64.readReg
+        (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw)) src = outerReturn := by
+      rw [native_code_read, return_frame_code, tag]
+      simp only [show ((10 : Byte) == 9) = false from rfl, Bool.false_eq_true, ↓reduceIte,
+        return_frame_read, tag, ↓reduceIte, rawRead]
+      exact BitVec.add_zero _
+    cases reached
+    simp only [observeReturnRoute, Reference.AArch64.step, Bool.false_eq_true, ↓reduceIte, target]
+  next notOuter =>
+    split at reached
+    next internal =>
+      obtain ⟨tag, allowed⟩ := internal
+      have target : Reference.AArch64.readReg
+          (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw)) src =
+          nativeAddress (Arm64Move.Fields.read raw (Arm64Register.registerCode src)) := by
+        rw [native_code_read, return_frame_code, tag]
+        simp only [show ((9 : Byte) == 9) = true from rfl, ↓reduceIte, return_frame_read, tag,
+          show (9 : Byte) ≠ 10 from by decide, ↓reduceIte,
+          Arm64Move.Fields.register_read, Arm64Register.read_refines]
+      cases reached
+      simp only [observeReturnRoute, observeCodeTransition, native_code_pc,
+        Reference.AArch64.step, Bool.false_eq_true, ↓reduceIte, target]
+    next rejected => contradiction
+
+/-- ARM64_SIM_RET returns the low32 materialized X0 bits. Ordinary CODE data
+still needs its actual transport; the result equation explicitly excludes
+that unproved case instead of assuming source tokens equal native words. -/
+theorem outer_return_value (nativeAddress : Word → Word) (outerReturn : Word)
+    (tags : Reference.AArch64.Gpr → Byte) (raw : Reference.AArch64.State)
+    (notCode : returnTag tags 0 ≠ 9) :
+    (Reference.AArch64.readReg (returnCodeState outerReturn tags raw).bits 0).setWidth 32 =
+      (Reference.AArch64.readReg
+        (nativeCodeView nativeAddress (returnCodeState outerReturn tags raw)) 0).setWidth 32 := by
+  rw [native_code_read, return_frame_code]
+  simp only [beq_iff_eq]
+  rw [if_neg notCode]
+
 end KProgFormal.Refinement.Arm64Dispatcher

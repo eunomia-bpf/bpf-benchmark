@@ -52,9 +52,12 @@ identities. A separate CODE-token state projection derives LINK/ADR and
 finite CODE-tag BR/BLR/internal-RET primitive refinements, including LR
 aliases. `source_emission_step_refines` joins those primitives with every
 prior numeric/direct-branch case under the same code-state observation. Its
-layout/ordinary-code-value transport is still explicit. Faulting
-writeback, helper/entry/outer-return transport, compiled bodies and full77/72
-completion remain open. Focused
+layout/ordinary-code-value transport is still explicit. RET_TO additionally
+derives the raw-zero RETURN arm and finite CODE return arms against the same
+canonical register branch, using the invocation outer-LR base. The separate
+u32 result equation retains the unresolved ordinary CODE-value condition.
+Faulting writeback, helper/entry/physical-return transport, SKB exit copies,
+compiled bodies and full77/72 completion remain open. Focused
 checks pass with the published ARM entry-selector repair; the latest complete
 check fails in the x86 popcount host harness. Dated results preserve the
 exact failure and separate it from focused validation.
