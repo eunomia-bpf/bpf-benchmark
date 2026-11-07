@@ -1,0 +1,19 @@
+{
+  "name": "bcc_syscount_sys_exit",
+  "object": "corpus/results/kprog_arm64_app_coverage_20261106/bcc-exclusive-v12/objects/bcc_syscount_sys_exit.bpf.o",
+  "program": "bcc_syscount_sys_exit_arm64_sim_xdp",
+  "markers": [
+    {
+      "index": 199,
+      "site": 328
+    },
+    {
+      "index": 283,
+      "site": 424
+    }
+  ],
+  "native_exclusive_sites": [
+    "148:\tc809fe68 \tstlxr\tw9, x8, [x19]",
+    "1a8:\tc80afd09 \tstlxr\tw10, x9, [x8]"
+  ]
+}

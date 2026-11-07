@@ -1,0 +1,14 @@
+{
+  "application_status": "error",
+  "error": "BCC tool opensnoop exited before BPF programs were tracked by shim",
+  "baseline_counter_rows": 23,
+  "native_counter_rows": 0,
+  "startup_replacements": 6,
+  "logged_native_load_failures": 4,
+  "failure_records": [
+    "[174.421802 pid=810 tid=810] native-loader failed prog=fentry_vfs_read manifest=/opt/bpf-benchmark/native-bpf/arm64/bcc/manifest.json source=/tmp/bpfrejit_810_ca9822ef332acdf2.bpf error=BPF_PROG_LOAD native_lab stub: Invalid argument",
+    "[174.645504 pid=804 tid=804] native-loader failed prog=kprobe__cap_cap manifest=/opt/bpf-benchmark/native-bpf/arm64/bcc/manifest.json source=/tmp/bpfrejit_804_4296331b8283033c.bpf error=BPF_PROG_LOAD native_lab stub: Permission denied",
+    "[175.313207 pid=830 tid=830] native-loader failed prog=inet_sock_set_s manifest=/opt/bpf-benchmark/native-bpf/arm64/bcc/manifest.json source=/tmp/bpfrejit_830_8e43f6c8f4b557f0.bpf error=BPF_PROG_LOAD native_lab stub: Permission denied",
+    "[176.468161 pid=813 tid=813] native-loader failed prog=tracepoint__sys manifest=/opt/bpf-benchmark/native-bpf/arm64/bcc/manifest.json source=/tmp/bpfrejit_813_3ee7b67cec664f61.bpf error=BPF_PROG_LOAD native_lab stub: Permission denied"
+  ]
+}

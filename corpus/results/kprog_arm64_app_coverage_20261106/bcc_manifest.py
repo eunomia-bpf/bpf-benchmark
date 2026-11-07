@@ -19,29 +19,36 @@ for line in (run/'details/shim-logs/bcc__set.baseline.log').read_text().splitlin
  if m:
   row=pending.pop(key)
   if int(m[1])>=0:loads[int(m[3])]=row
+pairs=json.loads((phase/'pairing.json').read_text())
+fields=('program','prog_type','source_bytecode_len','source_btf_symbol')
+keys=set();prepared=[]
+for pair in pairs:
+    keyrow=dict(loads[pair['original_id']],source_btf_symbol=pair['original_name'])
+    key=tuple(keyrow[k] for k in fields)
+    if key in keys:raise ValueError(f'ambiguous captured BCC selector: {key}')
+    keys.add(key)
+    native=Path(pair['native_object']);native_proof=Path(pair['native_proof']);source=Path(pair['simulator_object'])
+    for artifact in (native,native_proof,source):
+        if not artifact.is_file():raise ValueError(f'missing paired artifact: {artifact}')
+    record=json.loads((phase/'compile'/(source.stem.removesuffix('.bpf')+'.json')).read_text())
+    if record['returncode']:raise ValueError(f'proof is not compiled: {source}')
+    prepared.append((pair,keyrow,native,native_proof,source))
+# Validate the entire payload before changing the next runtime's staging area.
 stage=ROOT/'kprog/arm64/build/app-verified-stage'
 if not stage.exists():shutil.copytree(ROOT/'vendor/build/native-bpf/arm64/stage',stage)
+path=stage/'bcc/manifest.json';prior=json.loads(path.read_text())
+(phase/'prior-manifest.json').write_text(json.dumps(prior,indent=2)+'\n')
 proofs=stage/'bcc/simulator';proofs.mkdir(exist_ok=True)
-objects=[];keys=set()
-for pair in json.loads((phase/'pairing.json').read_text()):
- keyrow=dict(loads[pair['original_id']],source_btf_symbol=pair['original_name'])
- key=tuple(keyrow[k] for k in ['program','prog_type','source_bytecode_len','source_btf_symbol'])
- if key in keys:raise ValueError(f'ambiguous captured BCC selector: {key}')
- keys.add(key)
- native=Path(pair['native_object'])
- if not native.is_file(): raise ValueError(f'missing paired native ELF: {native}')
- shutil.copy2(native,stage/'bcc'/native.name)
- native_proof=Path(pair['native_proof'])
- if not native_proof.is_file(): raise ValueError(f'missing paired native proof ELF: {native_proof}')
- stem=native.name.removesuffix('.native.o')
- shutil.copy2(native_proof,stage/'bcc'/(stem+'.'+pair['symbol']+'.proof.o'))
- source=Path(pair['simulator_object'])
- record=json.loads((phase/'compile'/(source.stem.removesuffix('.bpf')+'.json')).read_text())
- if record['returncode'] or not source.is_file():raise ValueError(f'proof is not compiled: {source}')
- target=proofs/source.name;shutil.copy2(source,target)
- objects.append(dict(keyrow,native_object=Path(pair['native_object']).name,symbol=pair['symbol'],
-   simulator_object='simulator/'+target.name,simulator_program=pair['simulator_program']))
-manifest=dict(version=1,app='bcc',objects=objects)
-(stage/'bcc/manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+objects=[]
+for pair,keyrow,native,native_proof,source in prepared:
+    shutil.copy2(native,stage/'bcc'/native.name)
+    stem=native.name.removesuffix('.native.o')
+    shutil.copy2(native_proof,stage/'bcc'/(stem+'.'+pair['symbol']+'.proof.o'))
+    target=proofs/source.name;shutil.copy2(source,target)
+    objects.append(dict(keyrow,native_object=native.name,symbol=pair['symbol'],
+        simulator_object='simulator/'+target.name,simulator_program=pair['simulator_program']))
+retained=[entry for entry in prior['objects'] if tuple(entry.get(k) for k in fields) not in keys]
+manifest=dict(prior,version=1,app='bcc',objects=retained+objects)
+path.write_text(json.dumps(manifest,indent=2)+'\n')
 (phase/'verified-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
-print(f'{len(objects)} captured entries have distinct exact full-BTF/type/bytecode-length selectors and compiled simulator proofs')
+print(f'{len(objects)} exact captured BCC entries refreshed; {len(retained)} other startup selectors retained')

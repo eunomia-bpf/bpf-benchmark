@@ -946,3 +946,12 @@ weak stores,copy taint and masked aliases; all14 OTel ELF/BTF candidates
 covering13 observed selectors now generate. Two compiled proof ELFs link/open
 with original map/global bytes intact. Full compilation and actual OTel
 bound workload remain active; all earlier failures and inputs are preserved.
+
+## Fresh BCC exclusive-marked artifacts
+
+[All23 actual BCC proofs](bcc-exclusive-v12/README.md) now compile with current
+exclusive semantics. The exact previously marker-free syscount/sys_exit proof
+now carries both source-site markers, with unchanged native bytes. Manifest
+refresh preserves all9 other startup selectors (32total). [Actual QEMU BCC retry](bcc-runtime-v12/README.md) records six startup replacements
+and four logged verifier failures; the application remains error with no native
+workload counters. The specific sys_exit load is not reached.
