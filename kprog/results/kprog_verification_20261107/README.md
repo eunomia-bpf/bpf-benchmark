@@ -20,9 +20,9 @@ specialization token also has its own row.
 | Alias source-emission binding completion | 0 | 2/71 |
 | Control handler model / composed step | 2/75 | 0/71 |
 | O2 C-model token-body equality | 49/75 | 0/71 |
-| Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 65/71 |
+| Selected CPU/C/reference or QEMU/C/reference agreement | 66/75 | 67/71 |
 | Additional explicit-monitor-only replay | 0 | 1/71 |
-| Numeric operations awaiting selected replay | 9/75 | 5/71 |
+| Numeric operations awaiting selected replay | 9/75 | 3/71 |
 
 The 49 x86 O2 equalities cover37 direct bodies, ten generic calls and two
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
@@ -43,13 +43,13 @@ the current 75/71 numeric catalogs. Five x86 compatibility aliases have separate
 rows and are excluded from operation/token totals. Numeric tokens, native
 instruction forms and control composites retain their distinct identities.
 
-Replay integration uses F's published input set `1fb265102ed767ecfc4e4c8e9264c6ceb3bc24c6`
+Replay integration uses F's published input set `92441b38ac8110766058094409f9758fa3cbd68c`
 ([source ledger](../kprog_fidelity_20261107/differential/replay-inputs/README.md)).
 Each `replay_source_epochs` cell records the actual backend, source snapshot,
 simulator/executable/reference hashes, selected forms, all three comparison
 counts and original evidence paths. Source epochs remain separate. ARM STLXR
 adds 4,096 explicit-monitor observations with that projection premise; the
-65 ordinary ARM replay totals retain their own scope. Architectural LEAVE64 and
+67 ordinary ARM replay totals retain their own scope. Architectural LEAVE64 and
 finite control composites retain their separately labeled rows in F's source
 ledger. These finite observations support the universal theorem work.
 
@@ -80,7 +80,7 @@ The adopted production replay epoch contributes1,144 forms and292,864
 real-CPU/C/canonical cases with all three comparison counts agreeing. Its
 main6b3f3173/tagged-writecf27e323/executable5188ecde identities retain
 the actual initial283,136 cases and9,728 control-completion cases. The source
-ledger now carries15 epochs/219 operation-source rows/72 artifact pins;
+ledger now carries16 epochs/222 operation-source rows/163 artifact pins;
 62 additional source rows extend124 central operation/token rows.
 
 <!-- COVERAGE END -->
@@ -3689,3 +3689,26 @@ separate universal stages. The existing ARM observation and ABI premises
 retain their scope. Coverage now has49 x86 O2 tokens (37 direct, ten generic,
 two branch),13 addressed-memory models and18 additional partial families.
 Replay rows and all T O4 cells retain their values.
+
+### Adopted ARM immediate-alias replay correspondence
+
+F's published92441b38a ledger connects the existing60 raw/direct groups and
+61,440 QEMU/C/canonical observations to the adoptedf0517e493 immediate-alias
+source. Each comparison has zero differences. The ADD_IMM, SUB_IMM and
+ALU_IMM rows each retain20 groups/20,480 observations, the original candidate
+time/binary/reference/trace identities and their separate production bridge.
+All72 compiled C headers equal the adopted source;77 of79 captured source
+files match it exactly, while two Python producer epochs retain their own
+hashes. The current encoder reproduces all60 bindings for10 native forms
+and30 raw/direct native byte pairs. The original candidate's adoption marker
+remains part of its historical summary.
+
+All163 artifact pins and six ledger files match published Git. Six central
+operation/token rows add this source epoch while preserving every prior entry.
+ARM sampled replay coverage becomes67/71 plus one explicit-monitor projection;
+ADRP_GOT, ADRP_RODATA and RET retain their pending selected-replay status.
+The ledger records16 epochs and222 operation/source rows. Formal O1/O2 counts
+retain their distinct scopes:49 x86 C-model tokens,69 ARM observed conditional
+models and two ARM direct immediate-alias components. Universal alias-emission,
+compiler, ABI and native-link stages continue. The receipt
+`arm_immediate_alias_replay_924_epoch` retains the complete source bridge.
