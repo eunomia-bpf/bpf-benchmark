@@ -1,0 +1,34 @@
+{
+  "utc": "2026-11-07T17:30:18.879258+00:00",
+  "route": "actual current production header path; no preinclude or private compiler wrapper",
+  "accepted_B_sha256": "45062cd04b8ae6b7ffe0d5f1ea42f61bb2041ad5f44a8a034482b238bf94c53c",
+  "native_sha256": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+  "B29_Lean_literal_exact": true,
+  "proof_component_commit": "9adffa700ce3c912751b598e1faf70dd056e2b58",
+  "source_pins_before": {
+    "kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+    "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+    "kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+    "kprog/tv/capture_trusted_service.py": "ef139e6cce529af2ac0218ed4485435f61a7323dedaa7672cad7cbf93bc4e80c",
+    "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "273cb89c3d576021d3582a8cd4d361c37ac98495a730749ee0b540d803dd2d79"
+  },
+  "source_pins_after": {
+    "kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+    "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+    "kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+    "kprog/tv/capture_trusted_service.py": "ef139e6cce529af2ac0218ed4485435f61a7323dedaa7672cad7cbf93bc4e80c",
+    "kprog/libnativeloader/build/trusted-native-loader": "cf950a9781e6577ce47f0d178124f966d2958a5271a652dd3aa16662f5a1ef29",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "273cb89c3d576021d3582a8cd4d361c37ac98495a730749ee0b540d803dd2d79"
+  },
+  "header_last_commit_at_review": "18aef1f0cdeaa38d8721d0213412b4ea076ae6a8",
+  "published_header_sha256_at_review": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854",
+  "physical_header_matches_published_at_review": false,
+  "remaining": [
+    "Owner header integration was uncommitted during capture; exact physical source recorded, no published-source attribution.",
+    "B29 components cover context faults and guards; stores/full relation/whole-program TV remain open.",
+    "JIT address/return displacement vary by capture; this receipt does not silently substitute the new JIT bytes into the old same-session Lean JIT certificate."
+  ]
+}

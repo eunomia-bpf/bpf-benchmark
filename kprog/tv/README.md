@@ -2158,3 +2158,12 @@ arithmetic. Complete endpoints and empty effects agree for either exit, and
 the native relational path result is universal over canonical executions.
 All23 accumulated audits pass. Stores, entry/all-block composition, a full
 architectural reconstruction relation and whole-program TV remain open.
+
+`canonical-context/trusted-simple/` is a fresh capture through the current
+production source path, with no private compiler wrapper. Its accepted B29 is
+byte-identical to `TrustedSimpleB29.lean`; all8 exact packet checks and14+14
+invocation/materialization mismatch controls pass. Source hashes are stable
+before/after, including the owner's physical header whose integration was
+uncommitted at capture time. This establishes the actual artifact identity,
+without claiming a published-header snapshot or whole-program TV. Per-session
+JIT addresses are recorded separately from the earlier JIT proof literals.
