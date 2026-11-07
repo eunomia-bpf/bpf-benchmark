@@ -1,0 +1,192 @@
+{
+  "utc": "2026-11-07T23:30:41.013701+00:00",
+  "status": "universal_arm_word_position_storage_and_finaltext_component",
+  "evidence_class": "Universal canonical block/copy component with actual ARM C source observations and explicit implementation correspondence.",
+  "scope": "Every64-bit storage/final base, aligned byte offset, native word cursor and finite selected-site block prefix; successful checked helper emission and exact contained copy.",
+  "implementation_interfaces": {
+    "positions": "The module writes image[start_idx+offset/4] and computes target displacement from final_ip+offset/4. word_index_position/final_word_position derive exact physical/final byte positions from offset%4=0. slot_word_bounds derives all4word bounds from offset+16<=4*reported_words.",
+    "storage": "emit4_view reuses the common Reference.Memory store-view law. stagedNear calculates BL26 bits from final slot while writing physical slot; helper_view/accepted_view retain actual load-time range/representability choices.",
+    "kernel_copy": "emit_kinsn_desc_call_arm64 allocates scratch, passes ctx->ro_image[ctx->idx] as final_ip, checks n_insns/scratch_idx/capacity, writes cpu_to_le32(scratch[i]) to ctx->image[ctx->idx+i], then advances ctx->idx. jit_word_copy composes exact successful word-loop bytes with complete pack finalization at that cursor.",
+    "finaltext": "copied_slot_fetch and copied_site_iff retain every contained4B canonical AArch64 instruction. accepted_final_block and accepted_final_reflects transport the checked helper block relation to final text with full state, ordered effects, faults and all finite prefixes.",
+    "production_correspondence": "C word-loop endian/size/cursor values and finalized byte-copy relation, exact Rust/loader fields/tables, later-fixup separation and executable lifetime remain production interfaces. The canonical data/helper addresses retain their original values."
+  },
+  "validation": {
+    "command": "make -C kprog/tv -o native-link-arm-helper-guard-check -o native-link-final-image-check native-link-arm-placement-check",
+    "reproduction": "make -C kprog/tv native-link-arm-placement-check",
+    "exit": 0,
+    "audits": 12,
+    "axiom_audit": {
+      "KProgTV.NativeLinkArmPlacement.word_index_position": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmPlacement.final_word_position": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmPlacement.emit4_view": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmPlacement.near_view": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmPlacement.helper_view": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmPlacement.accepted_view": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmPlacement.copied_slot_fetch": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmPlacement.copied_site_iff": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmPlacement.accepted_final_block": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmPlacement.accepted_final_reflects": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmPlacement.slot_word_bounds": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkArmPlacement.jit_word_copy": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    "sorryAx_count": 0,
+    "warnings": 0,
+    "proof_budgets": "default recursion and heartbeat; addition/cancellation uses algebraic lemmas"
+  },
+  "source_sha256": {
+    "kprog/formal/KProgFormal/Reference/AArch64.lean": "00c08b7441948c762d18d2bed62fac13c91f6f88f06e380323ac38bef66ece4a",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/NativeLinkArmBL26.lean": "b47b764c27d40d66e6fb69073724893a4129582ca742fd215c17cb287786eeff",
+    "kprog/tv/NativeLinkArmHelper.lean": "66a37c9f89145cc296e7247845cc750e1359008a04b7e651976d39008ef4a169",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/tv/NativeLinkRelocationTable.lean": "3445aff6854ccaa85e433d8e8357a57edc8b7b2b9cdbdc07ceee8eced4c96f46",
+    "kprog/formal/lean-toolchain": "55e97be96000b5e9e290c9e74482e5e317861499a5540353ce845471bded8cea",
+    "kprog/formal/lakefile.toml": "c0d43c10868d20a8ccc08e73c05a29eb4dbc40f05fd04872e597b527a620c91c",
+    "kprog/formal/lake-manifest.json": "8d120d7988d313b3173dd609e81a271dda67812d44b26e8cce6875245a59b4bb",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "0523c2d4d77f9685e37e1d006eb7d462a75b885e6cac50917926a3695792bff5",
+    "kprog/tv/NativeLinkArmHelperGuard.lean": "6409bb161d9a5d4d677d18cd22cb5cad88747470e73f422f691d4a5388a5022b",
+    "kprog/tv/NativeLinkByteLayout.lean": "f52dac77ffda3c040d19b675dbdf5ccba0c250ac94bda09d7cffa1371c3ca2b7",
+    "kprog/tv/NativeLinkChunkLayout.lean": "30f470f181f8d8cdb7cd0779079514a531a550f83102c90c6cd5e0fe216f5076",
+    "kprog/tv/NativeLinkFinalImage.lean": "f89fc724e77e82f33751c5bcdcaf29a42573d8a80ccb2f818d49e36a826b4447",
+    "kprog/tv/NativeLinkGuardedEmission.lean": "0da5a9fda6d301494ffa5e59b4f009c66a9f4ecdb251fd2340ec37d0db28b2b5",
+    "kprog/tv/NativeLinkLiteral.lean": "59a5733a5f8c42fa4235e32ab108bb3604875b10984bf2acab342a819f105530",
+    "kprog/tv/NativeLinkMovabs.lean": "5095a8a33f17cb84f91aba377615af8810ca5285a0b82981d620b0afc21b8390",
+    "kprog/tv/NativeLinkPatchTable.lean": "193d88ad78284bedc178d47063f5ce323d326b9c55c824c85ad18a34c3282224",
+    "kprog/tv/Makefile": "b1a75b25e0c99e05ae890b6ee9e3057da9b79a7c1f29b238cfe4854d818daf50",
+    "kprog/tv/NativeLinkArmPlacement.lean": "37d0b6b50283ca1a0f1c64cf9814dc2be8b540ef8b8b154db9ce3b1da43407da"
+  },
+  "source_git_epoch": {
+    "kprog/formal/KProgFormal/Reference/AArch64.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/tv/Composition.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/tv/NativeLinkArmBL26.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/tv/NativeLinkArmHelper.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/tv/NativeLinkRelocation.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/tv/NativeLinkRelocationTable.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/formal/lean-toolchain": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/formal/lakefile.toml": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/formal/lake-manifest.json": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/tv/NativeLinkArmHelperGuard.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/tv/NativeLinkByteLayout.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/tv/NativeLinkChunkLayout.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/tv/NativeLinkFinalImage.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/tv/NativeLinkGuardedEmission.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/tv/NativeLinkLiteral.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/tv/NativeLinkMovabs.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e",
+    "kprog/tv/NativeLinkPatchTable.lean": "22896239ad46b45ba14f6e216e43e5caf6abde5e"
+  },
+  "implementation_source_observations": {
+    "vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c": {
+      "sha256": "ac27bf85aeb80d02e73f845bf0b13636efcbce2816084a2765c969f2f6ee48d7",
+      "submodule_git_epoch": "9c50491de2a5f7c3067201b10a7182dbf172e541",
+      "submodule_path": "arch/arm64/net/bpf_jit_comp.c"
+    },
+    "vendor/linux-framework/kernel/bpf/core.c": {
+      "sha256": "3553ec2f33d57b27924f10801135e5b0734f6a1cca7833a4d7ae7c1e05342086",
+      "submodule_git_epoch": "9c50491de2a5f7c3067201b10a7182dbf172e541",
+      "submodule_path": "kernel/bpf/core.c"
+    }
+  },
+  "compiled_olean_sha256": {
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/AArch64.olean": "e64ff1d4e35c62851d8208fbb0eddd9930e86aa10125a1af109c77263cc706f5",
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/Memory.olean": "dc3ed5d7d9a0180f57574646597651f8ea628af3a857a628ef5a767283a2d659",
+    "kprog/formal/.lake/build/lib/lean/KProgFormal/Reference/X86.olean": "a556e3c6acb98eca7a1d03819576d912bb5262af49597ffe6c4282930bbd25c8",
+    "kprog/tv/build/Composition.olean": "7e66af8c2ba8a1467ae7405f26d142c6a150b51c977120173c4cba4bf55771d8",
+    "kprog/tv/build/NativeLinkArmBL26.olean": "924c5b38f7ee694a164126d33e131af7f9d95ed7783a7f0458e587f1ac9c8519",
+    "kprog/tv/build/NativeLinkArmHelper.olean": "4379d75ca3e078633d96bc9868d8a6177dc50789543add41c5860b9f0ccc3584",
+    "kprog/tv/build/NativeLinkRelocation.olean": "66e8c45092ce7f42c2040bac5f5f7b94ac84ab95a2dbeb44a6549aa3f03ff929",
+    "kprog/tv/build/NativeLinkRelocationTable.olean": "3349dbe8e06a43ca6b83714db6f313f42394b800b860d2531531e26d03b6c0eb",
+    "kprog/tv/build/NativeLinkArmHelperGuard.olean": "521808a429992ae493929a05075d3cc3f8ef64a95c6de8893c5413d4431a73a6",
+    "kprog/tv/build/NativeLinkByteLayout.olean": "48a9413a7d27163c0ef5cba9da376979683c5a2e4c4330a9b5b2a35281bcc55e",
+    "kprog/tv/build/NativeLinkChunkLayout.olean": "54ac7d47dbd96067603dfaf6b906df564489d0f89804c3b35ecd6480f061d54a",
+    "kprog/tv/build/NativeLinkFinalImage.olean": "a2ba261de2219ca3c7393cb40be5f0ef484819d9824dd653fd9615c796f0ea62",
+    "kprog/tv/build/NativeLinkGuardedEmission.olean": "aab75037cb67d7e522558d29e1a76ab8779a6f8fa5cf4bca5d6b165410b09f5f",
+    "kprog/tv/build/NativeLinkLiteral.olean": "71f590b22e7f11cd6987df11a5b8866e422233dc219c89f3b4c0549eeb32288c",
+    "kprog/tv/build/NativeLinkMovabs.olean": "07fdf80aaaad660bf0ebbadd148ed5fe8a8ce44df295e8775afa2c0d2189fbf1",
+    "kprog/tv/build/NativeLinkPatchTable.olean": "c2a5820644ea097cd10e89ad7bcf17c7edfd98ec59ce39602a0c86e50eb540fb",
+    "kprog/tv/build/NativeLinkArmPlacement.olean": "d0f4bff43e49b79c0f99e01e6b736553f780a7226aaad2cbb7d566f234c5b913"
+  },
+  "dependency_cache_receipts": [
+    "kprog/results/kprog_tv_20261107/generic-native-link-arm-helper-guard.json",
+    "kprog/results/kprog_tv_20261107/generic-native-link-final-image.json"
+  ],
+  "archives": {
+    "kprog/results/kprog_tv_20261107/generic-native-link-arm-placement.log.gz": {
+      "gzip_sha256": "ff9a6c53eeb9a898194fc9fe606b1250ddf0ba4db41b4c51653a0cbc92d19c4a",
+      "raw_sha256": "eda73096be699817bc7128063541257e870db37caa73b910247fc550607b2f89",
+      "raw_bytes": 1661
+    },
+    "kprog/results/kprog_tv_20261107/generic-native-link-arm-placement-attempts.log.gz": {
+      "gzip_sha256": "5dc934f5e044a0c715a51dff716b09bce06a9af5e11a8e098bf8d6f9c2de1d95",
+      "raw_sha256": "90d2b3ba845459fb498ebc1c178b1d67539fad245c2adcc890c12def1b5069b4",
+      "raw_bytes": 16681
+    }
+  },
+  "completion_path": [
+    "A adopts the checked helper emitter9357 at the coherent module/image boundary.",
+    "Extract actual C word-copy, field/cursor and finalization byte identity; preserve native ranges through subsequent patches and executable lifetime.",
+    "Compose actual native-link producer/PC/table mapping and complete helper/caller/entry ABI, then remaining ARM/compiler transformations."
+  ],
+  "trusted": [
+    "Accepted-B verifier soundness.",
+    "Single canonical ISA semantics with F hardware/QEMU fidelity evidence.",
+    "Kernel binding and implementation-value/ABI correspondence.",
+    "Lean kernel and recorded propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies."
+  ]
+}

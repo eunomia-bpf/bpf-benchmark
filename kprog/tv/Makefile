@@ -999,3 +999,8 @@ arm-helper-emitter-check:
 native-link-arm-helper-guard-check: native-link-arm-helper-check arm-helper-emitter-check
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/NativeLinkArmHelperGuard.olean ../tv/NativeLinkArmHelperGuard.lean
+
+.PHONY: native-link-arm-placement-check
+native-link-arm-placement-check: native-link-arm-helper-guard-check native-link-final-image-check
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/NativeLinkArmPlacement.olean ../tv/NativeLinkArmPlacement.lean

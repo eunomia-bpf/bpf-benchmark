@@ -229,6 +229,20 @@ field/table/final-image correspondence and complete helper/caller/entry ABI
 supply the remaining production stages. Reproduce with
 `make -C kprog/tv native-link-arm-helper-guard-check`.
 
+`generic-native-link-arm-placement.json` records12 passing universal audits
+connecting ARM word-index emission to final byte PCs. Aligned offset division,
+physical image/start-index positions and final-slot positions agree exactly.
+The complete16B bound covers all four helper words. The same canonical scalar
+stores commute with the temporary-storage view; near BL bits use the final PC
+while the physical write location moves. Successful checked near/far emission
+then supplies its canonical block TV and reverse execution relation at final
+executable addresses, for every finite prefix and complete architectural state.
+The ARM scratch-word loop and whole-pack finalization compose through explicit
+byte-copy relations. Actual C copy/cursor/field extraction, final-fixup separation,
+executable lifetime and complete helper/caller/entry ABI form the surrounding
+production interfaces. Reproduce with
+`make -C kprog/tv native-link-arm-placement-check`.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations
