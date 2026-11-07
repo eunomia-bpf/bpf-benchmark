@@ -1,0 +1,17 @@
+{
+  "tagged_partial_write": {
+    "before_sha256": "7d76ebfeb14bd54acccb5598f8ef3feb03dfc354c44789fedd46f9b7dd5b0279",
+    "candidate_sha256": "cf27e323c885cdf8258974a8800907af2f6ee56093d7721822b9e75360e72994"
+  },
+  "narrow_read": {
+    "before_sha256": "ea2f60863873509caf64d3d1e50b69eed77248ce4347c5fbe3efc76fc677f685",
+    "candidate_sha256": "d585cf1e5e2d7ae63ceb6ee5e877ca42ff2eb7c6cfae977337c5ff0867a13621",
+    "source_status": "private_generic_candidate"
+  },
+  "mov_host_cases": 100448,
+  "mov_host_exit": 0,
+  "bpf_shape_compile_exit": 0,
+  "source_status": "private_generic_candidates",
+  "runtime_queue": "/workspaces/.agent-state/kprog-lanes/C/representation-runtime-replay",
+  "raw_sha256": "26c7007b125c3032400fe3e5a3d607c7d897de84f7a01055980cf5ae71a85695"
+}
