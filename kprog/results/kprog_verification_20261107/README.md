@@ -51,6 +51,40 @@ universal simulator, token and transformation laws. Historical individual-progra
 proof artifacts remain frozen.
 <!-- COVERAGE END -->
 
+<!-- O4 COVERAGE START -->
+O4 coverage adds **21 universal transformation/composition rows** to
+[coverage.tsv](coverage.tsv), alongside V's operation/token inventory.
+The five appended `o4_*` columns record preservation status, theorem,
+evidence, completion obligations and publication. `source-snapshot:` pins the
+implementation source for completion rows; `outside-o4-scope` marks existing
+operation/token rows. Operation/token totals
+continue to count their own `row_kind` values.
+
+| O4 status | Rows | Scope |
+| --- | ---: | --- |
+| `proved-conditional` | 6 | x86 kind1 slot/table/record layout, private-spill projection, generic block relation, checked-effects composition |
+| `trusted-kernel-implementation` | 1 | Exact code, entry, ABI and metadata binding; full Artifact equality is the composition premise |
+| `pending-universal-law` | 14 | ARM kinds2/3/4/9, shared kinds5/6/7/8, chunk/code layout, spill insertion/reload/control, helper ABI, tail calls, actual compiled B and invocation ABI |
+
+All nine production relocation kinds have explicit rows. The six proved
+components carry their production correspondence premises in `o4_completion`.
+Their published Lean checks and axiom audits have exit 0 and `sorryAx_count=0`;
+the table points to the original source-pinned receipts. The rel32 table/layout
+results build on the slot law; the generic block/effect results share one
+composition receipt. These row counts measure components, with dependencies
+and conditional interfaces retained explicitly.
+
+The next completion steps establish actual producer layout and compiler/frame
+preservation, the remaining transformations, and production entry/binding
+correspondence. V supplies universal O1/O2 token and definedness laws. The
+trusted inputs are accepted-B verifier soundness, the canonical ISA semantics
+with F's hardware/QEMU fidelity evidence, and the kernel binding code. T updates
+these O4 rows and this summary with each preservation-status publication; V
+retains the operation/token rows and totals. Historical individual-program
+material remains frozen.
+<!-- O4 COVERAGE END -->
+
+
 
 Published source increments retain the previous theorems and semantic oracles.
 This checkpoint archives the results before removing finished private exports,
