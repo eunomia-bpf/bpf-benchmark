@@ -23,3 +23,9 @@ durability, not canonical simulator admission or a performance improvement.
 raw.tar.gz preserves both outcomes, exact scripts, header, source snapshots
 and lifecycle checks. The separate CMP result owns its arithmetic/admission
 evidence; this change modifies no simulator, workload, kernel or module.
+
+## Corpus supervisor consumes the same terminal drain
+
+The external corpus bridge in `../native-only-runtime/guest.py` had its own immediate SIGTERM after application exit. It now uses the same private `request.lock` protocol: after registration, acquire the exclusive lock before terminating the idle service, allowing the completed request archive and terminal JSONL record to finish. Startup failures retain their existing shutdown path, and the service stdout pipe is closed after the reader joins. No application/kernel/proof-generation behavior, limits or image changes.
+
+Python syntax compilation and `make -C kprog/libnativeloader trusted-service-check` pass (12 existing tests, including terminal archive completion). This Make target incrementally rebuilt its existing loader dependencies; no image or kernel rebuild. The next actual OTel run with the current CMP/RORX simulator records its own helper/source pins and full terminal archives. That application result is pending at this commit.

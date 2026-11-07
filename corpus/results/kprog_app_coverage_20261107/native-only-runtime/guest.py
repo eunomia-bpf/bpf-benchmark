@@ -1,7 +1,7 @@
 """Keep the registered trusted service outside the unchanged corpus container."""
 from pathlib import Path
 from datetime import datetime,timezone
-import argparse,hashlib,json,os,signal,subprocess,sys,tarfile,tempfile,threading,traceback
+import argparse,fcntl,hashlib,json,os,signal,subprocess,sys,tarfile,tempfile,threading,traceback
 R=Path('/workspaces/repository');O=Path(__file__).resolve().parent
 S=Path('/workspaces/.agent-state/kprog-lanes/C/native-only-runtime')
 p=argparse.ArgumentParser();p.add_argument('--samples',type=int,required=True);p.add_argument('--duration',type=int,required=True);p.add_argument('--apps',required=True);p.add_argument('--state',type=Path,default=S);a=p.parse_args();S=a.state.resolve()
@@ -10,11 +10,12 @@ summary=dict(started=datetime.now(timezone.utc).isoformat(),apps=a.apps,samples=
 with tempfile.TemporaryDirectory(prefix='.live-',dir=O) as directory, tempfile.TemporaryDirectory(prefix='trusted-',dir=S) as private:
  live=Path(directory);state=Path(private)/'requests';state.mkdir(mode=0o700)
  summary['service_state_directory']=str(state);summary['service_state_mode']=oct(state.stat().st_mode & 0o777)
- log=(live/'service.log').open('w');reader=None;reader_errors=[]
+ log=(live/'service.log').open('w');reader=None;reader_errors=[];registered=False
  service=subprocess.Popen([sys.executable,str(R/'kprog/trusted_service.py'),'--arch','1','--endpoint','/sys/kernel/debug/bpf_x86_native_lab/specializer','--state',str(state),'--native-link',str(R/'kprog/x86/native_lab/native_link/target/release/native-link'),'--loader',str(R/'kprog/libnativeloader/build/trusted-native-loader')],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,start_new_session=True)
  try:
   line=service.stdout.readline();log.write(line);log.flush()
   if not json.loads(line)['ready']:raise RuntimeError('trusted service did not register')
+  registered=True
   def drain():
    try:
     for line in service.stdout:log.write(line);log.flush()
@@ -28,9 +29,16 @@ with tempfile.TemporaryDirectory(prefix='.live-',dir=O) as directory, tempfile.T
  except Exception as error:
   summary.update(error=str(error),traceback=traceback.format_exc());raise
  finally:
-  if service.poll() is None:os.killpg(service.pid,signal.SIGTERM)
+  if service.poll() is None:
+   if registered:
+    # COMPLETE wakes the client before the service finishes its terminal archive.
+    with (state/'request.lock').open('rb') as request_lock:
+     fcntl.flock(request_lock,fcntl.LOCK_EX)
+     if service.poll() is None:os.killpg(service.pid,signal.SIGTERM)
+   else:os.killpg(service.pid,signal.SIGTERM)
   service.wait()
   if reader is not None:reader.join()
+  service.stdout.close()
   log.close();summary['finished']=datetime.now(timezone.utc).isoformat()
   with (live/'kernel.log').open('w') as kernel_log:subprocess.run(['dmesg'],stdout=kernel_log,stderr=subprocess.STDOUT)
   (live/'meminfo.txt').write_text(Path('/proc/meminfo').read_text())
