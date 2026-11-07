@@ -1592,15 +1592,18 @@ def render_program(name: str, insns: list[NativeInsn],
                 if original_symbols is None or symbol not in original_symbols}
     trusted_map_bindings = trusted_map_bindings or []
     trusted_names = set()
+    if trusted_map_bindings:
+        from trusted_generation import elf_symbol, c_symbol_aliases
     for binding in trusted_map_bindings:
         if set(binding) != {"native_symbol", "value_offset"}:
             raise ValueError("trusted map binding requires native_symbol/value_offset")
         symbol, offset = binding["native_symbol"], binding["value_offset"]
-        if not isinstance(symbol, str) or re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", symbol) is None or symbol in trusted_names:
+        if elf_symbol(symbol) in trusted_names:
             raise ValueError("invalid/duplicate trusted native map symbol")
         if offset is not None and (type(offset) is not int or not 0 <= offset <= 0xffffffff):
             raise ValueError("trusted map value offset must be null or u32")
         trusted_names.add(symbol)
+    trusted_idents = c_symbol_aliases([b["native_symbol"] for b in trusted_map_bindings], "__x86_trusted_map_") if trusted_map_bindings else {}
     rodata16 = {symbol:value for symbol,value in rodata16.items() if symbol not in trusted_names}
     ret_statement = "X86_SIM_X86_RET();"
     insns = annotated_fixed_count_ops(insns)
@@ -1615,7 +1618,7 @@ def render_program(name: str, insns: list[NativeInsn],
         symbol, offset = binding["native_symbol"], binding["value_offset"]
         # The extern is the native symbol's bound address, including the
         # capsule's direct-value base. ELF addends remain relative to it.
-        source_pointers[symbol] = (offset is not None, symbol)
+        source_pointers[symbol] = (offset is not None, trusted_idents[symbol])
     for binding in source_map_bindings:
         if set(binding) != {"native_symbol", "source_insn", "proof_symbol", "kind", "value_offset"}:
             raise ValueError("source-map binding fields must be explicit")
@@ -1727,7 +1730,9 @@ def render_program(name: str, insns: list[NativeInsn],
         lines.append(source_prelude.rstrip())
         lines.append("")
     for symbol in sorted(trusted_names & referenced):
-        lines.append(f'extern __u8 {symbol}[] __ksym;')
+        ident = trusted_idents[symbol]
+        alias = '' if ident == symbol else ' __asm__(' + json.dumps(symbol) + ')'
+        lines.append(f'extern __u8 {ident}[]{alias} __ksym;')
     if source_map_bindings:
         for binding in source_map_bindings:
             lines.append(f'extern __u8 {binding["proof_symbol"]}[] __ksym;')

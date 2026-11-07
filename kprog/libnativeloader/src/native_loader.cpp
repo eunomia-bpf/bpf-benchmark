@@ -5444,6 +5444,8 @@ native_loader::LoadedProgram submit_trusted_native(
     for (const auto &name : symbols) {
         const auto identity = companion.map_addr_ids.find(name);
         if (identity == companion.map_addr_ids.end()) continue; // Not a bound map/data symbol.
+        // A native object also contains sibling-entry aliases; those are not this source's resources.
+        if (!companion.original_map_ids.contains(identity->second)) continue;
         const auto selected = std::find_if(companion.maps.begin(), companion.maps.end(),
             [&](const auto &map) { return map.kernel_id == identity->second; });
         if (selected == companion.maps.end()) fail("native symbol lacks its source map object: " + name);

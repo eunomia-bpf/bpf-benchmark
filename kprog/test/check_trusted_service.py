@@ -60,6 +60,16 @@ class TrustedMetadata(unittest.TestCase):
         self.assertEqual(names,{'stats'})
         inner['source']='untrusted C'
         with self.assertRaises(ValueError):declarations(typed)
+    def test_dotted_elf_symbol_preserves_identity_and_avoids_c_collision(self):
+        self.envelope['maps'][0]['name']='sys_exit.zero'
+        typed=self.normalize()
+        typed['maps'].append(dict(typed['maps'][0],name='__trusted_map_decl_0'))
+        source,names=declarations(typed)
+        self.assertIn('sys_exit.zero',names)
+        self.assertIn('__trusted_map_decl_0_ __asm__("sys_exit.zero")',source)
+        self.envelope['maps'][0]['name']='bad;code'
+        with self.assertRaises(ValueError):self.normalize()
+
     def test_native_machine_and_entry_checked_before_generation(self):
         with self.assertRaises(ValueError):validate_native(b'', 'entry','EM_X86_64')
         with self.assertRaises(ValueError):validate_native(b'not ELF','entry;code','EM_X86_64')

@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import sys
 import struct
+import subprocess
 import tempfile
 from elftools.elf.elffile import ELFFile
 ROOT=Path(__file__).resolve().parents[2]
@@ -45,6 +46,19 @@ with tempfile.TemporaryDirectory(prefix='trusted-worker-',dir=ROOT/'kprog/libnat
             assert matched and set(matched)=={expected_addend},(entry,offset,matched)
             rows.append(dict(entry=entry,value_offset=offset,external_addends=matched,proof_instructions=symbols[0]['st_size']//8,
                 native_sha256=result['native_sha256'],simulator_sha256=hashlib.sha256(Path(result['simulator_object']).read_bytes()).hexdigest()))
+# Actual ELF relocation rename control: code bytes are unchanged, while the
+# native data symbol needs a C asm alias rather than a dotted C expression.
+with tempfile.TemporaryDirectory(prefix='trusted-symbol-',dir=ROOT/'kprog/libnativeloader/build') as directory:
+    directory=Path(directory);renamed=directory/'renamed.o'
+    subprocess.run(['llvm-objcopy','--redefine-sym','stats=sys_exit.zero',native,renamed],check=True)
+    metadata['maps'][0].update(name='sys_exit.zero',value_offset=0)
+    result=worker.specialize(renamed.read_bytes(),'kprobe_vfs_read',metadata,directory/'generated',
+        ROOT/'kprog/x86/native_lab/native_link/target/release/native-link')
+    with Path(result['simulator_object']).open('rb') as stream:
+        elf=ELFFile(stream)
+        matches=[s for s in elf.get_section_by_name('.symtab').iter_symbols() if s.name=='sys_exit.zero']
+        assert len(matches)==1 and matches[0]['st_shndx']=='SHN_UNDEF'
+    rows.append(dict(entry='kprobe_vfs_read',native_symbol='sys_exit.zero',kind='renamed actual ELF relocation control',compiled=True))
 for machine,entry in [('EM_AARCH64','kprobe_vfs_read'),('EM_X86_64','no_such_entry')]:
     try:validate_native(blob,entry,machine)
     except ValueError:pass

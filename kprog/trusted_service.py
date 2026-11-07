@@ -11,12 +11,11 @@ import importlib.util
 import json
 import os
 from pathlib import Path
-import re
 import subprocess
 import sys
 import tempfile
 
-from trusted_generation import declarations, u32
+from trusted_generation import declarations, u32, elf_symbol
 ROOT = Path(__file__).resolve().parent.parent
 
 class Request(c.Structure):
@@ -151,7 +150,7 @@ def normalize(envelope, actual):
         if type(item) is not dict or set(item) != SHAPE | {'name','map_id','value_offset'}:
             raise ValueError('request map requires exact typed identity/shape/value_offset')
         name = item['name']
-        if not isinstance(name,str) or re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*',name) is None or name in names:
+        if elf_symbol(name) in names:
             raise ValueError('invalid or duplicate map symbol')
         names.add(name)
         mid = u32(item['map_id'],'map_id')

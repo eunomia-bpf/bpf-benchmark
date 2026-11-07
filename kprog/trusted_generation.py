@@ -5,7 +5,29 @@ These functions accept no producer paths, C source or compiler flags.
 """
 from io import BytesIO
 import re
+import json
 from elftools.elf.elffile import ELFFile
+
+def elf_symbol(name):
+    if not isinstance(name,str) or re.fullmatch(r"[A-Za-z_.$][A-Za-z0-9_.$]*",name) is None:
+        raise ValueError("native symbol must be an explicit ELF identifier")
+    return name
+
+
+def c_symbol_aliases(names,prefix):
+    """Keep ELF identities while giving dotted/static symbols legal C names."""
+    names=list(names)
+    for name in names:elf_symbol(name)
+    if len(set(names))!=len(names):raise ValueError("duplicate native symbol")
+    reserved=set(names);result={}
+    for index,name in enumerate(names):
+        if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*",name):result[name]=name
+        else:
+            candidate=prefix+str(index)
+            while candidate in reserved:candidate+="_"
+            reserved.add(candidate);result[name]=candidate
+    return result
+
 
 def u32(value, field):
     if type(value) is not int or not 0 <= value <= 0xffffffff:
@@ -28,6 +50,7 @@ def declarations(metadata):
         raise ValueError("maps must be a list of typed declarations")
     lines = ["#include <linux/bpf.h>", "#include <bpf_helpers.h>"]
     names = set()
+    c_names = c_symbol_aliases([item.get("name") if type(item) is dict else None for item in metadata["maps"]], "__trusted_map_decl_")
     fields = {"map_type", "key_size", "value_size", "max_entries", "map_flags"}
     inner_count = 0
 
@@ -58,13 +81,16 @@ def declarations(metadata):
             f'    __uint(map_flags, {item["map_flags"]});'])
         if inner_type is not None:
             lines.append(f"    __array(values, struct {inner_type});")
-        lines.append(f'}} {name} SEC(".maps");' if name is not None else "};")
+        if name is None:lines.append("};")
+        else:
+            alias = "" if c_names[name] == name else " __asm__(" + json.dumps(name) + ")"
+            lines.append(f'}} {c_names[name]}{alias} SEC(".maps");')
 
     for index, item in enumerate(metadata["maps"]):
         if type(item) is not dict:
             raise ValueError(f"map {index} must be a typed declaration")
         name = item.get("name")
-        if not isinstance(name, str) or re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name) is None or name in names:
+        if elf_symbol(name) in names:
             raise ValueError(f"map {index} has an invalid or duplicate identifier")
         names.add(name)
         emit(item, f"map {name}", name)
