@@ -726,17 +726,28 @@ no measurable cost for this workload.
 
 Only bcc is timeable so far. Tetragon, attempted with the same parameters
 (`corpus/results/x86_kvm_corpus_20261107_204105_213775`), binds 2 of its
-programs and then fails: `trusted specializer refused native program:
-Invalid argument` on **`event_wake_up_new_task`**, after which the app
-reports `Tetragon exited before BPF programs were tracked by shim`, so the
-native arm yields no workload.
+programs and then fails on **`event_wake_up_new_task`**, after which the
+app reports `Tetragon exited before BPF programs were tracked by shim`, so
+the native arm yields no workload.
 
-That symbol has **two** manifest entries, differing only by
-`source_bytecode_len` (7624 for `bpf_fork_v310.native.o`, 10896 for
-`bpf_fork_v511.native.o`). The other 330 tetragon loads bind, so the
-refusal is specific to that duplicate-symbol pair. It is not the clang
-defect fixed earlier: `clang` resolves inside that runtime image, which I
-checked directly.
+The reported message was `trusted specializer refused native program:
+Invalid argument`, which is the kernel relaying the *service's* status —
+the real reason is a Python exception inside the specializer, and it is:
+
+```
+ValueError: native helper source stack relation unresolved at 0x9ab: call rax
+```
+
+from `kprog/x86/micro-prog/x86_abi.py:559`: a copy helper
+(`HELPER_COPY_SOURCES`, e.g. a probe-read) called through an **indirect
+`call rax`**, whose source pointer the analysis cannot attribute to a stack
+origin.
+
+Two hypotheses this rules out. The manifest is not at fault: the symbol has
+two entries differing in `source_bytecode_len` (7624 / 10896) and the live
+program is `insn_cnt=1362` = 10896 bytes, so `bpf_fork_v511` matches
+exactly. ELF validation is not at fault either — `st_size` 3926,
+`STT_FUNC`, inside the text section.
 
 katran, cilium, otelcol and tracee have not been attempted on the
 verified arm; each needs its native-only manifest in that runtime first.
