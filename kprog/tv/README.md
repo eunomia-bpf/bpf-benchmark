@@ -1315,7 +1315,32 @@ explicit remaining obligation. The path evaluator's conservative flag mask
 is retained unchanged.
 
 This discharges the local first-guard correspondence, not a whole-program
-certificate. Composition with the initialized prefix, later guards/stores/
-exit, fault and ABI/platform behavior, relational transport and the bound
+certificate. The entry-prefix composition is supplied below. Later guards/stores/exit,
+fault and ABI/platform behavior, relational transport and the bound
 immutable-P/materialized-artifact connection remain open. Evidence and the
 complete supported-target/axiom audit are in `trusted-simple-first-guard.json`.
+
+
+Actual entry through the first guard
+
+`native_execution_append` concatenates witnesses for the existing canonical
+byte-decoded execution relation, preserving every instruction and successor.
+`entry_first_guard_correspondence` now instantiates this with the actual two
+entry loads and four-instruction guard. Its B execution is likewise one
+`initializedInstructionStep env` execution from pc0 through pc11. Neither
+branch outcome is a premise: loaded pointer > limit leads to native PC60 /
+Bpc34; the other outcome leads to native PC17 / Bpc12.
+
+The theorem retains the complete native and B states and all nine B memory
+events. The precise private-slot projection yields exactly the two original
+guest reads; outside memory agreement includes values, initialization and
+permissions. Native EAX/B r1 zero, native RSI/B r2 pointer and the complete
+post-CMP flags are derived from the composed states. All earlier declarations
+and the fail-closed environment/interface/binding contracts remain unchanged.
+This is an actual first-basic-block correspondence for successful entry
+loads/stack initialization under the explicit platform premises, not a
+whole-program certificate or a universal fault/relational-execution theorem.
+The remaining work is the later guards, stores and exit, canonical relational
+transport through undefined intermediate flags, fault/ABI/platform behavior
+and immutable-P/materialized-artifact transport. Audit and hashes:
+`trusted-simple-entry-first-guard.json`.

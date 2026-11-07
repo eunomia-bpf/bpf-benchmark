@@ -1,0 +1,131 @@
+{
+  "status": "actual_entry_through_first_guard_correspondence_checked",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "utc": "2026-11-07T10:53:40.325200+00:00",
+  "theorem": "KProgTV.TrustedSimpleX86.entry_first_guard_correspondence",
+  "covered_native_instruction_extents": [
+    [
+      0,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      7,
+      3
+    ],
+    [
+      10,
+      2
+    ],
+    [
+      12,
+      3
+    ],
+    [
+      15,
+      2
+    ]
+  ],
+  "covered_B_pcs": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "successors": {
+    "condition": "loaded pointer > loaded limit",
+    "true": {
+      "native": 60,
+      "B": 34
+    },
+    "false": {
+      "native": 17,
+      "B": 12
+    },
+    "branch_outcome_is_a_premise": false
+  },
+  "execution": {
+    "native": "existing canonical byte-decoded X86Path.Execution, complete guardFinal(nativePrefixFinal) state",
+    "B": "single initializedInstructionStep env Execution, complete proofGuardFinal(initializationFinal) state",
+    "actual_B_memory_events": 9,
+    "projected_private_events": 7,
+    "projected_guest_events": 2,
+    "guest_trace": "exact same two original reference-memory reads, in order"
+  },
+  "state_claims": [
+    "all memory values and initialization outside precise 36-byte private footprint agree",
+    "readable/writable permissions agree globally",
+    "native EAX corresponds to B r1 zero",
+    "native RSI corresponds to B r2 loaded pointer",
+    "complete post-CMP flags derived from loaded pointer/limit and original native flags"
+  ],
+  "premises": [
+    "both entry PCs0 and active B",
+    "same initial context pointer and memory",
+    "actual successful context reads",
+    "actual stack read/write permissions at captured widths",
+    "byte-disjoint second context read/private stack footprint",
+    "explicit nativeInput stackPointer witness",
+    "bound kernel virtual/physical XDP context transport remains a platform obligation"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical to HEAD baseline before increment",
+    "old_declarations_sha256": "eb12670ab4e2e77960aa2372c1b1b0340e4da31db28936fc4bc0b5e46b1af073",
+    "ISA_runtime_wire_ABI_metadata_binding_rejection_contracts": "unchanged"
+  },
+  "remaining": [
+    "later guards/stores/exit and whole-program correspondence",
+    "full canonical relational execution transport across undefined intermediate flags",
+    "fault/ABI/nativeInput/kernel platform transport",
+    "immutable P to materialized emitted native artifact"
+  ],
+  "trusted": [
+    "verifier soundness",
+    "canonical reference ISA/memory and explicit platform semantics",
+    "kernel binding/capture and accepted-byte provenance",
+    "registered specialization/link service until whole-program TV",
+    "Lean kernel/logical axioms plus native proof reduction Lean.ofReduceBool in BV/private proofs"
+  ],
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "binding_records": 2,
+    "mismatch_controls_rejected": 22,
+    "no_sorryAx": true,
+    "log_sha256": "ae6bf5556c851d3ca70dfc66b39e955c0beaa489499559d463df5db6abb26fa2",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.native_execution_append": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.entry_first_guard_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    }
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "2ecef0b5d8c5be7a02a520570f8af6f664501ca4f0db3337a95406f0fa766e22",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "21af4d7c5168c0a7346dc978e8eba2ec4be69c99e5f8c92406d12fc633bd6010",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/tv/check_trusted_capture.py": "71642150609627e7ac8de6ef265d79dc6814a58af669260ffc21e602983e29a9",
+    "kprog/tv/Makefile": "2123977b45e69a44f70507dd65b2c1506e23d509f1c244a7d1d5f0799456f9b4"
+  },
+  "raw_output": "summarized and removed after publication; shared incremental caches and STOP retained"
+}

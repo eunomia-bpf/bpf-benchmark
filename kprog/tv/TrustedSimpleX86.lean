@@ -942,6 +942,75 @@ theorem first_guard_correspondence (env : BPF.Environment) (n : X86.State) (p : 
   · simp only [guardFinal,pointer,limit]
   · simpa only [pointer,limit] using guard_final_flags n
 
+
+/-- Concatenate actual canonical byte-decoded executions. This changes no
+instruction or successor and adds no bound to a native execution. -/
+theorem native_execution_append {base : Word} {bytes : Array Byte}
+    {before middle after : X86.State} {first second : List Event}
+    (run : X86Path.Execution base bytes before first middle)
+    (rest : X86Path.Execution base bytes middle second after) :
+    X86Path.Execution base bytes before (first++second) after := by
+  induction run with
+  | refl => exact rest
+  | next entry instruction decoded tail ih =>
+      simpa only [List.append_assoc] using X86Path.Execution.next entry instruction decoded (ih rest)
+
+/-- One entry-to-first-guard correspondence for the actual captured artifacts.
+Both complete states and all nine B events are retained; projection is only
+the proved-private observer, and neither branch outcome is assumed. -/
+theorem entry_first_guard_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (pointer limit stack : Word) (first second : Event)
+    (nativePC : n.pc = 0) (proofPC : p.pc = 0) (active : p.halted = false)
+    (context : n.gpr 7 = p.regs 1) (memory : n.memory = p.memory)
+    (nativeStack : env.nativeInput .stackPointer = .ok stack)
+    (read0 : readMemory p.memory (p.regs 1) 8 = .ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8 = .ok (limit,second))
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8 = true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8 = true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8 = true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8 = true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4 = true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8 = true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8 = true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (guest1 : ∀ i < 8, ¬ initializationPrivateByte (p.regs 10)
+      (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    X86Path.Execution 0 native n [first,second] (guardFinal (nativePrefixFinal n pointer limit)) ∧
+    Execution (initializedInstructionStep env) p
+      (prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit)
+      (proofGuardFinal (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack)) ∧
+    (prefixEvents p pointer first second ++ initializationEvents (p.regs 10) pointer limit).filterMap
+      (initializationProjectEvent (p.regs 10)) = [first,second] ∧
+    (guardFinal (nativePrefixFinal n pointer limit)).pc = (if pointer > limit then 60 else 17) ∧
+    (proofGuardFinal (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack)).pc =
+      (if pointer > limit then 34 else 12) ∧
+    initializationAgreesOutside (p.regs 10) (guardFinal (nativePrefixFinal n pointer limit)).memory
+      (proofGuardFinal (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack)).memory ∧
+    (guardFinal (nativePrefixFinal n pointer limit)).gpr 0 =
+      (proofGuardFinal (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack)).regs 1 ∧
+    (guardFinal (nativePrefixFinal n pointer limit)).gpr 6 =
+      (proofGuardFinal (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack)).regs 2 ∧
+    (guardFinal (nativePrefixFinal n pointer limit)).rflags =
+      X86.arithmeticFlags .w64 true false pointer limit n.rflags := by
+  obtain ⟨nrun,prun,trace,pointerMatch,limitMatch,memoryMatch⟩ :=
+    initialized_prefix_correspondence env n p pointer limit stack first second nativePC proofPC active
+      context memory nativeStack read0 read1 write40 write32 write24 write16 write8 read40 read32 guest0 guest1
+  obtain ⟨nguard,pguard,npc,ppc,flags⟩ := first_guard_correspondence env
+    (nativePrefixFinal n pointer limit)
+    (initializationFinal (proofPrefixFinal p pointer limit) pointer limit stack)
+    (by simp [nativePrefixFinal,nativeAfterSecond,nativeAfter,nativePC]) rfl
+    (by simpa [initializationFinal,proofPrefixFinal,afterSpill,BPF.setReg] using active)
+    pointerMatch limitMatch
+  refine ⟨?_,?_,trace,?_,?_,memoryMatch,?_,?_,?_⟩
+  · simpa only [List.append_nil] using native_execution_append nrun nguard
+  · simpa only [List.append_nil] using prun.append pguard
+  · simpa +decide [initializationFinal,BPF.setReg] using npc
+  · simpa +decide [initializationFinal,BPF.setReg] using ppc
+  · simp +decide [guardFinal,guardCompare,guardZero,proofGuardFinal,initializationFinal,BPF.setReg]
+  · simp +decide [guardFinal,guardCompare,guardZero,guardMove,nativePrefixFinal,nativeAfterSecond,nativeAfter,
+      proofGuardFinal,initializationFinal,BPF.setReg]
+  · simpa +decide [initializationFinal,BPF.setReg,nativePrefixFinal,nativeAfterSecond,nativeAfter] using flags
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -1023,3 +1092,7 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.first_guard_correspondence
 
 #print axioms KProgFormal.Reference.X86.decode_ja_rel8
+
+#print axioms KProgTV.TrustedSimpleX86.native_execution_append
+
+#print axioms KProgTV.TrustedSimpleX86.entry_first_guard_correspondence
