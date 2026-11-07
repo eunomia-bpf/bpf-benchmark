@@ -1,0 +1,1 @@
+Complete resource-control functional replay with paired scoped-resource caller/linker. Guest exit 0; host status True; Make exit 0; stages {"bound_accepted": 1}. Raw app/request/work/clock records retain exact input epochs. Universal theorem and complete six-application work continues.

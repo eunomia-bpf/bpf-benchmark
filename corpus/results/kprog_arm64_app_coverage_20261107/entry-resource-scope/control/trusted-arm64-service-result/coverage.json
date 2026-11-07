@@ -1,0 +1,34 @@
+{
+  "utc": "2026-11-07T23:37:51.052209+00:00",
+  "host_ok": true,
+  "guest_exit": 0,
+  "hashes_unchanged": true,
+  "service_request_attempts": 1,
+  "distinct_source_prog_ids": 1,
+  "proof_generated": 1,
+  "stages": {
+    "bound_accepted": 1
+  },
+  "failure_causes": {},
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 3,
+      "native_sha256": "de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c",
+      "entry": "trusted_entry",
+      "status": 0,
+      "stage": "bound_accepted",
+      "cause": null,
+      "proof_generated": true,
+      "source_generated": true,
+      "prog_id": 8,
+      "request_archive": "run/requests/1.success.tar.gz",
+      "request_archive_sha256": "36e2714604fa4042e57cc525dac7112d4665730ab17689f48d02f6945939b93f",
+      "failed_commands": [],
+      "error": null,
+      "load_stderr": ""
+    }
+  ],
+  "applications": [],
+  "denominators": "Service requests retain retries. Distinct source IDs are recorded separately. Baseline resident programs and every raw phase measurement are retained without using manifest entries as loaded-program counts."
+}
