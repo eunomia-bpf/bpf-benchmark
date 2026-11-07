@@ -52,7 +52,7 @@ def x86_forms(cc_aux):
             forms += [f"{op} {a}, {n}" for n in [0, 1, 7, 8, 15, 16, 31, 32, 63, 64, 255]]
             forms += [f"{op} {a}, cl"]
         if width >= 16:
-            forms += [f"imul {a}, {b}", f"imul {a}, {m}", f"imul {a}, {b}, -7", f"imul {a}, {m}, -7", f"popcnt {a}, {b}", f"div {b}", f"bt {a}, {b}", f"bt {a}, 7", f"bt {m}, 7", f"movbe {a}, {m}", f"movbe {m}, {a}"]
+            forms += [f"imul {a}, {b}", f"imul {a}, {m}", f"imul {a}, {b}, -7", f"imul {a}, {m}, -7", f"popcnt {a}, {b}", f"popcnt {a}, {m}", f"div {b}", f"bt {a}, {b}", f"bt {a}, 7", f"bt {m}, 7", f"movbe {a}, {m}", f"movbe {m}, {a}"]
             for op in ["shld", "shrd"]:
                 forms += [f"{op} {a}, {b}, {n}" for n in [0, 1, 7, 15]]
         if width >= 32:

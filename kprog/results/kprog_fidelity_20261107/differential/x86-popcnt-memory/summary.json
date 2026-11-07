@@ -1,0 +1,26 @@
+{
+  "recorded": "2026-11-07T15:15:52.874626+00:00",
+  "complete": true,
+  "forms": 1080,
+  "cases_per_form": 1024,
+  "total_cases": 1105920,
+  "real_cpu_simulator_mismatches": 0,
+  "real_cpu_reference_mismatches": 0,
+  "simulator_reference_mismatches": 0,
+  "unavailable_forms": 0,
+  "build_exit": 0,
+  "reference_exit": 0,
+  "execution": "real x86-64 host CPU, no QEMU",
+  "new_forms": [
+    "popcnt ax, WORD PTR [rdi+8]",
+    "popcnt eax, DWORD PTR [rdi+8]",
+    "popcnt rax, QWORD PTR [rdi+8]"
+  ],
+  "unchanged_preceding_forms": 1077,
+  "binary_sha256": "1061d5848d0d416785a010e002602c6f26323d7b112ffea57b2a511a9607a03f",
+  "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96",
+  "trace_bytes": 2008350744,
+  "trace_sha256": "a6ee4572cdad33fa9c8c1d80449cd32f991888d8734f35dc46b7a99f92be3407",
+  "compiled_input_files": 94,
+  "scope": "Numeric forms and existing finite Jcc/JMP/CALL observers; separate SP observers, helper ABI, invocation/platform transport and universal O1-O4 require their own evidence"
+}
