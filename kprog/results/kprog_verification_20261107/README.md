@@ -491,3 +491,27 @@ actual multiply route, wide-input and additional multiply route hosts passed
 160,161, 1296, 27,648 and 150 cases. No proof/test failure or input filtering;
 existing C inline redefinition warnings remain visible. The exact1c4a46960 full
 pass precedes this increment; new combined full validation follows publication.
+
+## Extract/reverse/extend actual inputs and dispatcher
+
+`Arm64Extrev` binds EXTR/REV/REV16/SXTB/SXTH/SXTW numeric labels to their
+generated values and actual input-width selector. Only EXTR narrows both
+incoming sources before the shift pair. The other five rows read full sources;
+their second source and immediate may be arbitrary and cannot affect the step.
+Three raw-body and three dispatcher theorems compose this selection with the
+existing canonical extract, reverse and signed-extension full-state steps.
+EXTR retains native Fin-width amount bounds. W/X writes, ZR, aliases, flags,
+vectors, SP, memory and empty effects are preserved with one PC advance.
+
+Other opcodes remain outside this slice. This adds no native form, runtime guard,
+compiler assumption, oracle or second ISA. Existing theorem source is unchanged;
+native decoding/operand/width and Entry/O4 bindings remain separate. It is not
+a complete72 dispatcher or a compiled-artifact certificate.
+
+Validation: 19 Lean dependency jobs, focused reference build and existing
+reference regressions passed, including 3860 AArch64 control/PC complete states.
+Both related freshness checks passed. The existing independent semantic and
+actual-dispatch oracle hosts passed 120,145 and 1680 cases; no proof/test failures
+or filtered inputs. Existing inline redefinition warnings remain visible.
+Exact0a9b8757c's Unary/MOV/MUL full check is queued separately behind F; this
+later increment requires its own combined full validation.

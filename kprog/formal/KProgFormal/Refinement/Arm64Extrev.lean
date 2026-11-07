@@ -80,4 +80,89 @@ theorem step_refines (i : ExtrevInstruction) (s : Reference.AArch64.State) :
 theorem handler_refines (i : ExtrevInstruction) (s : Reference.AArch64.State) :
     Reference.AArch64.Step (.extrev i) s (handlerStep i s) := (step_refines i s).symm
 
+
+/-- Numeric case labels of the production extract/reverse/extend family. -/
+def decodeOpcode (opcode : Nat) : Option GeneratedArm64Extrev.Extrev :=
+  if opcode = GeneratedArm64Extrev.code .extr then some .extr
+  else if opcode = GeneratedArm64Extrev.code .rev then some .rev
+  else if opcode = GeneratedArm64Extrev.code .rev16 then some .rev16
+  else if opcode = GeneratedArm64Extrev.code .sxth then some .sxth
+  else if opcode = GeneratedArm64Extrev.code .sxtw then some .sxtw
+  else if opcode = GeneratedArm64Extrev.code .sxtb then some .sxtb else none
+
+theorem decode_code (op : GeneratedArm64Extrev.Extrev) :
+    decodeOpcode (GeneratedArm64Extrev.code op) = some op := by cases op <;> rfl
+
+/-- The actual numeric EXTR selector narrows both sources before the shift
+pair. All other rows read full sources; their value primitive ignores the
+second source and immediate. All reads precede the destination width write. -/
+def rawStep (op : GeneratedArm64Extrev.Extrev) (width : Width)
+    (dst src src2 : Reference.AArch64.Register) (immediate : Word) (s : Reference.AArch64.State) :
+    Transition Reference.AArch64.State :=
+  let inputWidth := if GeneratedArm64Extrev.code op = GeneratedArm64Extrev.code .extr
+    then handlerWidth width else .w64
+  let lhs := GeneratedArm64Width.narrow (readReg s src) inputWidth
+  let rhs := GeneratedArm64Width.narrow (readReg s src2) inputWidth
+  let value := GeneratedArm64Extrev.value op lhs rhs immediate (handlerWidth width)
+  ⟨{ writeReg s dst value width with pc := s.pc + 4 }, [], none⟩
+
+theorem raw_extract_refines (width : Width) (amount : Fin width.bits)
+    (dst lhs rhs : Reference.AArch64.Register) (s : Reference.AArch64.State) :
+    rawStep .extr width dst lhs rhs (BitVec.ofNat 64 amount.val) s =
+      Reference.AArch64.step (.extrev (.extract width amount dst lhs rhs)) s := by
+  simp only [rawStep, GeneratedArm64Extrev.code, ↓reduceIte]
+  change handlerStep (.extract width amount dst lhs rhs) s = _
+  rw [step_refines]
+
+theorem raw_reverse_refines (width : Width) (halfwords : Bool)
+    (dst src src2 : Reference.AArch64.Register) (immediate : Word) (s : Reference.AArch64.State) :
+    rawStep (if halfwords then .rev16 else .rev) width dst src src2 immediate s =
+      Reference.AArch64.step (.extrev (.reverse width halfwords dst src)) s := by
+  rw [← step_refines]
+  cases halfwords <;>
+    simp only [rawStep, GeneratedArm64Extrev.code, Nat.reduceEqDiff, ↓reduceIte,
+      Arm64Mul.input_full, handlerStep, handlerState, Bool.false_eq_true, GeneratedArm64Extrev.value]
+
+theorem raw_extend_refines (width : Width) (source : ExtendBits)
+    (dst src src2 : Reference.AArch64.Register) (immediate : Word) (s : Reference.AArch64.State) :
+    rawStep (extendOpcode source) width dst src src2 immediate s =
+      Reference.AArch64.step (.extrev (.extend width source dst src)) s := by
+  rw [← step_refines]
+  cases source <;>
+    simp only [rawStep, extendOpcode, GeneratedArm64Extrev.code, Nat.reduceEqDiff, ↓reduceIte,
+      Arm64Mul.input_full, handlerStep, handlerState, GeneratedArm64Extrev.value]
+
+def dispatch (opcode : Nat) (width : Width) (dst src src2 : Reference.AArch64.Register)
+    (immediate : Word) (s : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  (decodeOpcode opcode).map (fun op => rawStep op width dst src src2 immediate s)
+
+theorem dispatch_extract_refines (width : Width) (amount : Fin width.bits)
+    (dst lhs rhs : Reference.AArch64.Register) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Extrev.code .extr) width dst lhs rhs (BitVec.ofNat 64 amount.val) s =
+      some (Reference.AArch64.step (.extrev (.extract width amount dst lhs rhs)) s) := by
+  simp only [dispatch, decode_code]
+  change some (rawStep .extr width dst lhs rhs (BitVec.ofNat 64 amount.val) s) = _
+  rw [raw_extract_refines]
+
+theorem dispatch_reverse_refines (width : Width) (halfwords : Bool)
+    (dst src src2 : Reference.AArch64.Register) (immediate : Word) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Extrev.code (if halfwords then .rev16 else .rev))
+      width dst src src2 immediate s =
+      some (Reference.AArch64.step (.extrev (.reverse width halfwords dst src)) s) := by
+  simp only [dispatch, decode_code]
+  change some (rawStep (if halfwords then .rev16 else .rev) width dst src src2 immediate s) = _
+  rw [raw_reverse_refines]
+
+theorem dispatch_extend_refines (width : Width) (source : ExtendBits)
+    (dst src src2 : Reference.AArch64.Register) (immediate : Word) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Extrev.code (extendOpcode source)) width dst src src2 immediate s =
+      some (Reference.AArch64.step (.extrev (.extend width source dst src)) s) := by
+  simp only [dispatch, decode_code]
+  change some (rawStep (extendOpcode source) width dst src src2 immediate s) = _
+  rw [raw_extend_refines]
+
+theorem dispatch_other (opcode : Nat) (width : Width) (dst src src2 : Reference.AArch64.Register)
+    (immediate : Word) (s : Reference.AArch64.State) (other : ∀ op, opcode ≠ GeneratedArm64Extrev.code op) :
+    dispatch opcode width dst src src2 immediate s = none := by simp [dispatch, decodeOpcode, other]
+
 end KProgFormal.Refinement.Arm64Extrev
