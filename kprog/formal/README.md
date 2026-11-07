@@ -27,7 +27,10 @@ exclusive accesses carry their explicit architectural/environment inputs;
 control uses the current Cortex-A72 base profile without GCS/BTI state. Logical
 immediates decode native bitmask fields and reserved encodings, including
 SP destinations for AND/ORR/EOR and ZR destinations for ANDS/TST. Their generated
-value/width/flag lift preserves the same complete numeric state.
+value/width/flag lift preserves the same complete numeric state. Actual logical-immediate
+ALU AUX selection and all six TST/ANDS/BICS numeric dispatch rows compose
+with their generated operand/value/write/flag primitives. Test aliases retain
+DST/SRC routing; register forms retain native shift bounds and SP/ZR rules.
 
 The proofs establish arithmetic/flags, register and tag operations, memory
 accesses, routing tables, and selected whole-state handler refinements.

@@ -733,3 +733,42 @@ and C semantic checks. The immutable source/cache export was deleted automatical
 compressed CALL CPU observations retain this 440-case run. This exact checkpoint
 predates the subsequent actual logical-dispatch proof and other lanes' later WIP;
 it is not a full check of those later changes or a whole77/72/O2 certificate.
+
+## Actual logical operation fields and dispatcher refinement
+
+`Arm64Logic.ImmediateDispatch` binds ALU_IMM code6 to the independent generated
+RHS table and AUX byte0 ALU selectors. AND/ORR/EOR and normalized BIC values
+compose with the actual width/SP write to the canonical logical-immediate step.
+BIC here describes a normalized complemented operand, not a native immediate
+encoding. Arithmetic ALU members remain in their own slice. The production
+ORR stack-pointer branch is retained: generated pointer addition of disjoint
+bits equals ORR for all64bit words, without adding an alignment, scalar-source
+or small-offset premise to that numeric identity. Both generated ADD/SUB
+pointer gates are proved false for every logical choice. Native pointer reads
+still need the same materialized word/provenance via Entry/O4.
+
+`Arm64Logic.FlagDispatch` binds the six actual numeric ANDS/TST immediate/register
+and BICS/TST-BIC register gates, with membership equality against family and
+singleton tables. It composes generated operand selection, AND/BIC, NZCV and
+writeback against the same canonical full-state steps. TST aliases read DST as
+left operand and SRC as right; writeback reads SRC/SRC2. All reads precede the
+write, including aliases. Immediate forms ignore arbitrary AUX and RHS fields;
+register forms ignore IMM and AUX bytes0/3. Shifted forms retain all four native
+shift kinds and width-sized bounds. Bare NONE ignores arbitrary amount bytes:
+its untrimmed temporary and LSL0 produce identical width results, writes and
+flags. Register field31 discards the destination; no native register-SP logical
+form is invented. The local modifier decoder describes certified native forms;
+None for extensions/unknown bytes does not assert a new production C rejection.
+
+All earlier theorem source is byte-identical; no canonical ISA, runtime,
+generator, oracle or test inputs changed. Both focused Lean Logic/Arithmetic modules
+passed, then the exact-source ARM-only build and ten contract freshness checks,
+direct-dispatch freshness and existing dispatcher-model check passed. Eleven
+existing semantic/actual-route hosts passed 336,5632,256,21688,64,5120,1152,136,
+11083,1115374,225292 cases; original compiler warnings remain visible. A combined
+ReferenceMain build encountered T's concurrent new x86 packet-tail decoder
+lemma at Reference/X86.lean1553, with unresolved immediate-read loop goals;
+that foreign WIP was preserved and reported to T, not changed or hidden as a
+passing check. Native field/mask/width bindings, all77/72 dispatcher steps,
+compiled artifact correspondence and O2/O4 remain open. ExactEA's full pass
+above predates this new dispatcher increment; a new immutable full check follows.
