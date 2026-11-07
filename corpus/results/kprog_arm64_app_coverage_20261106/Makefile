@@ -626,3 +626,20 @@ runtime-loader-build:
 		LIBBPF_PREFIX=$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix \
 		LIBBPF_LIBRARY=$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
 		KERNEL_OFFSETS_INCLUDE=$(ROOT)/micro/programs/build-arm64
+
+.PHONY: original-btf-declarations otel-real-generate otel-real-link otel-real-install
+original-btf-declarations:
+	install -d $(ROOT)/kprog/arm64/build
+	cc -O2 -Wall -Wextra -Werror -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		$(ROOT)/corpus/results/kprog_app_coverage_20261106/original_btf_declarations.c \
+		$(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz \
+		-o $(ROOT)/kprog/arm64/build/original-btf-declarations
+
+otel-real-generate: direct-header-generate original-btf-declarations
+	python3 $(HERE)/otel_real.py $(HERE)/$(PHASE)
+
+otel-real-link:
+	python3 $(HERE)/otel_real.py $(HERE)/$(PHASE) link
+
+otel-real-install:
+	python3 $(HERE)/otel_real.py $(HERE)/$(PHASE) install

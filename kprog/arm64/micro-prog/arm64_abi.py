@@ -19,13 +19,20 @@ CC_FLAGS = {'eq': Z, 'ne': Z, 'cs': C, 'hs': C, 'cc': C, 'lo': C,
             'al': 0, 'nv': 0}
 
 
+@dataclass(frozen=True)
+class PointerAlternatives:
+    # False (external memory) and stack offset0 must remain distinct.
+    offsets: frozenset[int]
+    external: bool
+
+
 @dataclass
 class State:
     defined: tuple[int, ...]
-    aliases: tuple[int | bool | None, ...]
+    aliases: tuple[int | bool | PointerAlternatives | None, ...]
     flags: int
     opaque: dict[int, int]
-    pointers: dict[int, int | bool | None]
+    pointers: dict[int, int | bool | PointerAlternatives | None]
     constants: tuple[int | None, ...]
 
 
@@ -51,14 +58,35 @@ def check_definedness(insns, targets, linked_exit, decode):
     def same(a, b):
         return type(a) is type(b) and a == b
 
+    def joined_pointer(a, b):
+        if same(a, b): return a
+        if a is None or b is None: return None
+        def alternatives(value):
+            if isinstance(value, PointerAlternatives): return value
+            if type(value) is int: return PointerAlternatives(frozenset({value}), False)
+            if value is False: return PointerAlternatives(frozenset(), True)
+            return None
+        left, right = alternatives(a), alternatives(b)
+        if left is None or right is None: return None
+        return PointerAlternatives(left.offsets | right.offsets, left.external or right.external)
+
+    def memory_offset(value, offset):
+        if isinstance(value, PointerAlternatives):
+            return PointerAlternatives(frozenset(p+offset for p in value.offsets), value.external)
+        return value+offset if type(value) is int else value
+
+    def shifted_pointer(value, offset):
+        if type(value) is int: return value + offset
+        # Widen arithmetic on a joined pointer instead of growing loop offsets.
+        return None if offset and isinstance(value, PointerAlternatives) else value
+
     def joined(a, b):
         opaque = {p: a.opaque.get(p, 255) & b.opaque.get(p, 255)
                   for p in a.opaque.keys() | b.opaque.keys()}
         return State(tuple(x & y for x, y in zip(a.defined, b.defined)),
-                     tuple(x if same(x, y) else None for x, y in zip(a.aliases, b.aliases)),
+                     tuple(joined_pointer(x, y) for x, y in zip(a.aliases, b.aliases)),
                      a.flags & b.flags, {p: v for p, v in opaque.items() if v != 255},
-                     {p: a.pointers[p] if p in a.pointers and p in b.pointers and
-                      same(a.pointers[p], b.pointers[p]) else None
+                     {p: joined_pointer(a.pointers.get(p), b.pointers.get(p))
                       for p in a.pointers.keys() | b.pointers.keys()},
                      tuple(x if x == y else None for x,y in zip(a.constants,b.constants)))
 
@@ -111,7 +139,8 @@ def check_definedness(insns, targets, linked_exit, decode):
         flags = incoming.flags
         constants = list(incoming.constants)
 
-        def write(operand, value=None, pointer=False, constant=None):
+        no_pointer = object()
+        def write(operand, value=None, pointer=no_pointer, constant=None):
             parsed = ri(operand)
             if parsed is None or parsed[0] is None: return
             register, width = parsed
@@ -121,6 +150,8 @@ def check_definedness(insns, targets, linked_exit, decode):
                 bits[register] |= ((1 << 128)-1) ^ ((1 << width)-1)
             elif width == 32:
                 bits[register] |= FULL ^ 0xffffffff
+            if pointer is no_pointer:
+                pointer = None if isinstance(incoming.aliases[register], PointerAlternatives) and constant is None else False
             aliases[register] = pointer if width == 64 else False
             constants[register] = constant & ((1 << width)-1) if constant is not None else None
 
@@ -132,16 +163,36 @@ def check_definedness(insns, targets, linked_exit, decode):
             if index is not None:
                 return False if origin is False else None
             offset = 0 if mem.flags & 2 else mem.offset
-            location = origin + offset if type(origin) is int else origin
+            location = memory_offset(origin, offset)
             return location
 
         def load(location, width):
             if type(location) is int:
                 return (sum(opaque.get(location+j, 255) << (8*j) for j in range(width//8)),
                         pointers.get(location, False) if width == 64 else False)
+            if isinstance(location, PointerAlternatives):
+                choices = [load(offset, width) for offset in location.offsets]
+                if location.external: choices.append(((1 << width)-1, False))
+                if not choices: return 0, None
+                value, pointer = choices[0]
+                for other, alias in choices[1:]:
+                    value &= other
+                    pointer = joined_pointer(pointer, alias)
+                return value, pointer
             return (0 if location is None and opaque else (1 << width)-1), None if location is None else False
 
         def store(location, width, value, pointer=False):
+            if isinstance(location, PointerAlternatives):
+                if location.external and value & ((1 << width)-1) != (1 << width)-1:
+                    raise ValueError(f'undefined native ABI value escapes private stack at {where}')
+                for target in location.offsets:
+                    for position in list(pointers):
+                        if position < target + width//8 and position + 8 > target:
+                            pointers[position] = None
+                    for index in range(width//8):
+                        byte = opaque.get(target+index, 255) & ((value >> (8*index)) & 255)
+                        if byte != 255: opaque[target+index] = byte
+                return
             if type(location) is not int:
                 if value & ((1 << width)-1) != (1 << width)-1:
                     raise ValueError(f'undefined native ABI value escapes private stack at {where}')
@@ -208,7 +259,7 @@ def check_definedness(insns, targets, linked_exit, decode):
             elif op == 'ldrsw': width = 32
             for index in range(2 if pair else 1):
                 operand = args[index] if pair else data
-                at = location + index*(width//8) if type(location) is int else location
+                at = memory_offset(location, index*(width//8))
                 if loads:
                     value, pointer = load(at, width)
                     if op in {'ldrsb', 'ldrsh', 'ldrsw'}:
@@ -223,7 +274,7 @@ def check_definedness(insns, targets, linked_exit, decode):
             if mem.flags:
                 base = raw(mem.base)
                 origin = incoming.aliases[ri(base)[0]]
-                write(base, FULL, origin + mem.offset if type(origin) is int else origin)
+                write(base, FULL, shifted_pointer(origin, mem.offset))
         elif op == 'mov' or op == 'fmov':
             source = ri(args[1])
             pointer = incoming.aliases[source[0]] if source and source[0] is not None else False
@@ -234,7 +285,7 @@ def check_definedness(insns, targets, linked_exit, decode):
                        0 if args[1] in {'xzr','wzr'} else None)
             write(args[0], value, pointer, literal)
         elif op in {'adr', 'adrp', 'cset', 'csetm'}:
-            write(args[0])
+            write(args[0], pointer=False)
         elif op == 'movk':
             shift = decode.parse_imm(args[2].split()[-1]) if len(args)>2 else 0
             write(args[0], mask(incoming, args[0]) | (0xffff << shift))
@@ -268,9 +319,9 @@ def check_definedness(insns, targets, linked_exit, decode):
             elif op in {'bic','bics','orr'}: value |= immediate
             source = ri(args[1])
             origin = incoming.aliases[source[0]] if source and source[0] is not None else False
-            pointer = False
+            pointer = None if isinstance(origin, PointerAlternatives) else False
             if op == 'orr' and width == 64 and immediate < 16:
-                pointer = origin | immediate if type(origin) is int else origin
+                pointer = origin | immediate if type(origin) is int else None if isinstance(origin, PointerAlternatives) else origin
             write(args[0], value, pointer)
             if op in {'ands','bics'}:
                 # C and V are defined zero; Z needs every result bit, N only MSB.
@@ -282,7 +333,7 @@ def check_definedness(insns, targets, linked_exit, decode):
             left, right = ri(args[1]), ri(args[2])
             a = incoming.aliases[left[0]] if left and left[0] is not None else False
             b = incoming.aliases[right[0]] if right and right[0] is not None else False
-            write(args[0], pointer=a if op == 'csel' and same(a,b) else None)
+            write(args[0], pointer=joined_pointer(a, b) if op == 'csel' else None)
         elif op not in {'bl', 'blr', 'br', 'ret', 'b', 'nop'} and not op.startswith('b.') and op not in {'cbz','cbnz','tbz','tbnz'}:
             reads = args if op in {'cmp','cmn','tst','ccmp'} else args[1:]
             zero = op in {'eor','sub','subs','cmp'} and len(args)>1 and args[-1] == args[-2] and ri(args[-1])
@@ -295,7 +346,7 @@ def check_definedness(insns, targets, linked_exit, decode):
                     source = ri(args[1])
                     origin = incoming.aliases[source[0]] if source and source[0] is not None else False
                     delta = decode.parse_shifted_imm(args,2)
-                    aliases[ri(args[0])[0]] = origin + (delta if op=='add' else -delta) if type(origin) is int else origin
+                    aliases[ri(args[0])[0]] = shifted_pointer(origin, delta if op=='add' else -delta) if ri(args[0])[1] == 64 else False
 
         if type(aliases[31]) is int:
             stack_min = min(stack_min, aliases[31])
@@ -336,9 +387,17 @@ def check_definedness(insns, targets, linked_exit, decode):
                                 source=incoming.aliases[source_arg]
                                 if source is None:
                                     raise ValueError(f'native helper source stack relation unresolved at {where}')
-                                if type(source) is int:
-                                    written.update({start+p-source:v for p,v in state.opaque.items() if source<=p<source+length})
-                                    saved.update({start+p-source:v for p,v in state.pointers.items() if source<=p and p+8<=source+length})
+                                origins = source.offsets if isinstance(source, PointerAlternatives) else {source} if type(source) is int else set()
+                                for origin in origins:
+                                    for position, value in state.opaque.items():
+                                        if origin <= position < origin+length:
+                                            target = start+position-origin
+                                            written[target] = written.get(target, 255) & value
+                                if len(origins) == 1 and not (isinstance(source, PointerAlternatives) and source.external):
+                                    origin = next(iter(origins))
+                                    saved.update({start+p-origin:v for p,v in state.pointers.items() if origin<=p and p+8<=origin+length})
+                                elif origins:
+                                    for position in range(max(0, length-7)): saved[start+position] = None
                     effects.append(State(state.defined,state.aliases,state.flags,written,saved,state.constants))
                 effect=effects[0]
                 for branch in effects[1:]: effect=joined(effect,branch)

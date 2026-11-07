@@ -937,3 +937,12 @@ entry ABI modes: zero divisors,32-bit truncation,full-width values,destination
 aliasing and preserved equality flags. Source/simulator/native results match,
 with one generation each. Existing F SP/LR numeric wiring and its published
 unsafe-load rejection evidence are linked without claiming a new full proof.
+
+## Finite stack/external ABI alias repair
+
+[Finite ABI aliases](abi-finite-alias-result/README.md) close the actual
+HotSpot/Perl constructor failures. All173 assembled controls pass, including
+weak stores,copy taint and masked aliases; all14 OTel ELF/BTF candidates
+covering13 observed selectors now generate. Two compiled proof ELFs link/open
+with original map/global bytes intact. Full compilation and actual OTel
+bound workload remain active; all earlier failures and inputs are preserved.

@@ -1,0 +1,1040 @@
+[
+  {
+    "name": "tail-helper-args",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register x1 at 0x4: br x8",
+    "passed": true
+  },
+  {
+    "name": "helper-vector-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "blind-save",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "opaque-reload",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x8: ret",
+    "passed": true
+  },
+  {
+    "name": "opaque-escape",
+    "expected_error": "escapes private stack",
+    "message": "undefined native ABI value escapes private stack at 0x0: str x1, [x0]",
+    "passed": true
+  },
+  {
+    "name": "opaque-private-alias",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "opaque-selected-stack",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x24: ret",
+    "passed": true
+  },
+  {
+    "name": "opaque-selected-low-or",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x28: ret",
+    "passed": true
+  },
+  {
+    "name": "partial-movk-low-return",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "partial-movk-unknown-high",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register x1 at 0x4: cmp x1, #0x2",
+    "passed": true
+  },
+  {
+    "name": "partial-movk-low-shift",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "partial-movk-high-shift",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "partial-movk-shift-survivor",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x8: ret",
+    "passed": true
+  },
+  {
+    "name": "partial-four-lanes",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "w-zero-extension",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "flag-entry",
+    "expected_error": "undefined native ABI flags",
+    "message": "undefined native ABI flags at 0x0: b.eq 8 <entry+0x8>",
+    "passed": true
+  },
+  {
+    "name": "unused-nv-flags",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "self-compare",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "join-missing-write",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "join-both-writes",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register x1 at 0xc: cbz x1, 10 <entry+0x10>",
+    "passed": true
+  },
+  {
+    "name": "helper-flags",
+    "expected_error": "undefined native ABI flags",
+    "message": "undefined native ABI flags at 0xc: b.eq 10 <entry+0x10>",
+    "passed": true
+  },
+  {
+    "name": "callee-save-across-helper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "return-sp-unbalanced",
+    "expected_error": "unbalanced stack pointer",
+    "message": "native ABI return has an unbalanced stack pointer at 0x8: ret",
+    "passed": true
+  },
+  {
+    "name": "local-call-context",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "local-call-bad-context",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x8: cbz w0, c <entry+0xc>",
+    "passed": true
+  },
+  {
+    "name": "tbz-defined-bit",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "tbz-unknown-bit",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register x1 at 0x4: tbz x1, #32, 8 <entry+0x8>",
+    "passed": true
+  },
+  {
+    "name": "mask-defined-bits",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "helper-defined-output",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "helper-opaque-copy",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x20: ret",
+    "passed": true
+  },
+  {
+    "name": "helper-string-suffix",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x20: ret",
+    "passed": true
+  },
+  {
+    "name": "memset-defined-output",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "memset-opaque-suffix",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x20: ret",
+    "passed": true
+  },
+  {
+    "name": "memcpy-opaque-copy",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x20: ret",
+    "passed": true
+  },
+  {
+    "name": "joined-external-False",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x20: ret",
+    "passed": true
+  },
+  {
+    "name": "joined-two-stack-False",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x30: ret",
+    "passed": true
+  },
+  {
+    "name": "joined-copy-source-False",
+    "expected_error": "undefined native ABI register",
+    "message": "native helper source stack relation unresolved at 0x20: bl 0 <bpf_probe_read_kernel>",
+    "passed": false
+  },
+  {
+    "name": "joined-external-True",
+    "expected_error": null,
+    "message": "undefined native ABI register w0 at 0x28: ret",
+    "passed": false
+  },
+  {
+    "name": "joined-two-stack-True",
+    "expected_error": null,
+    "message": "undefined native ABI register w0 at 0x34: ret",
+    "passed": false
+  },
+  {
+    "name": "joined-copy-source-True",
+    "expected_error": null,
+    "message": "native helper source stack relation unresolved at 0x28: bl 0 <bpf_probe_read_kernel>",
+    "passed": false
+  },
+  {
+    "name": "joined-weak-store-retains-taint",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x24: ret",
+    "passed": true
+  },
+  {
+    "name": "joined-store-opaque-escape",
+    "expected_error": "escapes private stack",
+    "message": "undefined native ABI value escapes private stack at 0x10: str x1, [x5]",
+    "passed": true
+  },
+  {
+    "name": "joined-mask-retains-opaque",
+    "expected_error": "undefined native ABI register",
+    "message": "generated",
+    "passed": false
+  },
+  {
+    "name": "joined-memory-displacement",
+    "expected_error": null,
+    "message": "undefined native ABI register w0 at 0x28: ret",
+    "passed": false
+  },
+  {
+    "name": "vector-0-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-0-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-0-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-0-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-1-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-1-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-1-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-1-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-2-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-2-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-2-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-2-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-3-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-3-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-3-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-3-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-4-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-4-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-4-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-4-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-5-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-5-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-5-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-5-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-6-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-6-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-6-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-6-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-7-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-7-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-7-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-7-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-8-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-8-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-8-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-8-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-9-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-9-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-9-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-9-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-10-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-10-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-10-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-10-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-11-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-11-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-11-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-11-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-12-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-12-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-12-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-12-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-13-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-13-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-13-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-13-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-14-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-14-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-14-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-14-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-15-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-15-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-15-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-15-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-16-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-16-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-16-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-16-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-17-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-17-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-17-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-17-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-18-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-18-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-18-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-18-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-19-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-19-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-19-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-19-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-20-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-20-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-20-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-20-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-21-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-21-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-21-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-21-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-22-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-22-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-22-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-22-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-23-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-23-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-23-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-23-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-24-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-24-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-24-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-24-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-25-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-25-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-25-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-25-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-26-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-26-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-26-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-26-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-27-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-27-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-27-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-27-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-28-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-28-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-28-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-28-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-29-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-29-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-29-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-29-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-30-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-30-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-30-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-30-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-31-roundtrip",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-31-zero-upper",
+    "expected_error": null,
+    "message": "generated",
+    "passed": true
+  },
+  {
+    "name": "vector-31-distinct",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0xc: ret",
+    "passed": true
+  },
+  {
+    "name": "vector-31-helper-clobber",
+    "expected_error": "undefined native ABI register",
+    "message": "undefined native ABI register w0 at 0x14: ret",
+    "passed": true
+  }
+]

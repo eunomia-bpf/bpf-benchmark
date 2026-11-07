@@ -45,6 +45,20 @@ cases=[
  ('memset-opaque-suffix', 'stp x19,x30,[sp,#-32]!;str x1,[sp,#16];add x0,sp,#16;mov w1,#0;mov x2,#1;bl memset;ldr x0,[sp,#16];ldp x19,x30,[sp],#32;ret', 'undefined native ABI register'),
  ('memcpy-opaque-copy', 'stp x19,x30,[sp,#-32]!;str x1,[sp,#16];add x0,sp,#24;add x1,sp,#16;mov x2,#8;bl memcpy;ldr x0,[sp,#24];ldp x19,x30,[sp],#32;ret', 'undefined native ABI register'),
 ]
+# Finite alias joins must retain every private-stack alternative and its taint.
+for initialized in (False, True):
+ setup='sub sp,sp,#32;str x1,[sp,#24];str x1,[sp];'+('mov w2,#7;str x2,[sp];' if initialized else '')
+ cases.append(('joined-external-'+str(initialized),setup+'mov x3,sp;cmp x0,#0;csel x5,x3,x0,eq;ldr x0,[x5];add sp,sp,#32;ret',None if initialized else 'undefined native ABI register'))
+ setup='sub sp,sp,#32;str x1,[sp,#24];str x1,[sp];str x1,[sp,#8];mov w2,#7;str x2,[sp];'+('str x2,[sp,#8];' if initialized else '')
+ cases.append(('joined-two-stack-'+str(initialized),setup+'mov x3,sp;add x4,sp,#8;cmp x0,#0;csel x5,x3,x4,eq;ldr x0,[x5];add sp,sp,#32;ret',None if initialized else 'undefined native ABI register'))
+ setup='stp x19,x30,[sp,#-64]!;str x1,[sp,#16];'+('mov w4,#7;str x4,[sp,#16];' if initialized else '')
+ cases.append(('joined-copy-source-'+str(initialized),setup+'mov x2,x0;add x3,sp,#16;cmp x0,#0;csel x2,x3,x2,eq;add x0,sp,#32;mov x1,#8;bl bpf_probe_read_kernel;ldr x0,[sp,#32];ldp x19,x30,[sp],#64;ret',None if initialized else 'undefined native ABI register'))
+cases.extend([
+ ('joined-weak-store-retains-taint','sub sp,sp,#32;str x1,[sp];mov x3,sp;cmp x0,#0;csel x5,x3,x0,eq;mov w2,#7;str x2,[x5];ldr x0,[sp];add sp,sp,#32;ret','undefined native ABI register'),
+ ('joined-store-opaque-escape','sub sp,sp,#32;mov x3,sp;cmp x0,#0;csel x5,x3,x0,eq;str x1,[x5];mov w0,#2;add sp,sp,#32;ret','escapes private stack'),
+ ('joined-mask-retains-opaque','sub sp,sp,#32;str x1,[sp];mov x3,sp;cmp x0,#0;csel x5,x3,x0,eq;and x5,x5,#-8;ldr x0,[x5];add sp,sp,#32;ret','undefined native ABI register'),
+ ('joined-memory-displacement','sub sp,sp,#32;str x1,[sp,#24];str x1,[sp,#8];mov w2,#7;str x2,[sp,#8];mov x3,sp;cmp x0,#0;csel x5,x3,x0,eq;ldr x0,[x5,#8];add sp,sp,#32;ret',None),
+])
 for vector in range(32):
  cases.extend([
   (f'vector-{vector}-roundtrip',f'mov x1,#2;fmov d{vector},x1;fmov x0,d{vector};ret',None),
