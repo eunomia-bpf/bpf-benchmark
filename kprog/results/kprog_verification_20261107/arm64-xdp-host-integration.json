@@ -2525,5 +2525,164 @@
     "kprog/arm64/arm64_sim_local_bpf.h": "c82c0832be850e8755478516bea17daacd30424475a5d81348efce3497606787",
     "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69",
     "kprog/formal/oracles/test_arm64_imm_operand_route_host.c": "9b985653d0650ae5a251ed14cb78388fd0cf2540ce05f534e5f3a2273dec7621"
+  },
+  "x86_register_frame": {
+    "archive_block_sha256": "037eccc294ae9bdc5e8dc059ee4922b3520d05a612a58fbfd1497081d3d0cbb5",
+    "commands": [
+      {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.Refinement.X86NumericAddress"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "/workspaces/.agent-state/kprog-lanes/V/x86-frame-audit.lean"
+        ],
+        "exit": 0
+      }
+    ],
+    "exit": 0,
+    "host_validation": {
+      "commands": [
+        {
+          "command": [
+            "python3",
+            "tools/generate_x86_reg_write_spec.py",
+            "--check"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "python3",
+            "tools/generate_x86_reg_read_spec.py",
+            "--check"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "python3",
+            "tools/generate_x86_mov_reg_arm_spec.py",
+            "--check"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "python3",
+            "tools/generate_x86_stack_index_spec.py",
+            "--check"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-fsanitize=undefined",
+            "-fno-sanitize-recover=undefined",
+            "-I.",
+            "-I../x86",
+            "-I../../kprog",
+            "-I../../vendor/libbpf/src",
+            "oracles/test_x86_mov_handler_host.c",
+            "-o",
+            "build/test_x86_mov_handler_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "./build/test_x86_mov_handler_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-fsanitize=undefined",
+            "-fno-sanitize-recover=undefined",
+            "-I.",
+            "-I../x86",
+            "-I../../kprog",
+            "-I../../vendor/libbpf/src",
+            "oracles/test_x86_mov_reg_arm_route_host.c",
+            "-o",
+            "build/test_x86_mov_reg_arm_route_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "./build/test_x86_mov_reg_arm_route_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "cc",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-fsanitize=undefined",
+            "-fno-sanitize-recover=undefined",
+            "-I.",
+            "-I../x86",
+            "-I../../kprog",
+            "-I../../vendor/libbpf/src",
+            "oracles/test_x86_mov_route_host.c",
+            "-o",
+            "build/test_x86_mov_route_host"
+          ],
+          "exit": 0
+        },
+        {
+          "command": [
+            "./build/test_x86_mov_route_host"
+          ],
+          "exit": 0
+        }
+      ],
+      "exit": 0,
+      "pins": {
+        "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69",
+        "kprog/formal/generated/x86_mov_reg_arm.h": "4d90036061ffec933f3390c92ab6cc3aae2ab67865e11fdfb00e761a0c0d5ff7",
+        "kprog/formal/generated/x86_reg_read.h": "ea2f60863873509caf64d3d1e50b69eed77248ce4347c5fbe3efc76fc677f685",
+        "kprog/formal/generated/x86_reg_write.h": "7d76ebfeb14bd54acccb5598f8ef3feb03dfc354c44789fedd46f9b7dd5b0279",
+        "kprog/formal/generated/x86_stack_index.h": "a380689ecbdb79d41a1f6f14c2bc4b9fb3c4b16f19f859a33d6f6d5cfc5a4774",
+        "kprog/formal/oracles/test_x86_mov_handler_host.c": "fa62c875457630e7f2db0d58e210dfa37f3027592580f127f5bbb1fc3ab68e85",
+        "kprog/formal/oracles/test_x86_mov_reg_arm_route_host.c": "8dd0a4c808db4a7b2fcc5414fb0fbe24e2bdc68e24c69b760bfa3810f236edb0",
+        "kprog/formal/oracles/test_x86_mov_route_host.c": "72984c7533a295055717a3b3e108c4af5c43eb4e9a10309c708c7c661883a1ab",
+        "kprog/formal/oracles/x86_no_helpers_host.h": "c47df126fb5e8b86011e99c337273727987cf5fdfaf24a5f9559be77dc4d50ae",
+        "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+        "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854"
+      },
+      "source_drift": []
+    },
+    "pins": {
+      "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+      "kprog/formal/KProgFormal/Reference/X86.lean": "f0b9694a7f256928e83c688f0ac0f4b3101eb8906b7efc0e9dee0b8920167ac6",
+      "kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean": "9185aa823802161136a3ea98a76eb032ee98b22c12972751d305e86fb768f63b",
+      "kprog/formal/KProgFormal/Refinement/X86Scalar.lean": "aa9d8527e111c7bb9e9fbd494045855135defdb670f06e27acc7be7b294b50ce",
+      "kprog/formal/Makefile": "5eadbd72a56b31fd574f2ede1dde1b23060864e73e9b94a6bd95ff2be70dba69",
+      "kprog/x86/x86_sim.h": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3",
+      "kprog/x86/x86_sim_local_bpf.h": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854"
+    },
+    "prior_declarations_byte_identical_except_imports": true,
+    "proof_lines_added": 178,
+    "scope": "actual raw RSP offset/STACK arena-pointer register frame; MOV immediate/register whole-state canonical steps; initial ABI, memory and compiled B remain open",
+    "source_drift": []
   }
 }

@@ -1797,3 +1797,34 @@ no placeholders/ISA/runtime/oracle/test edits were introduced. Exact proof
 SHA256 `861aa645b1a0820dc61aa67632c8b26966f474f210b4e972fe699f1d76d861f5`.
 Complete original proof output/commands/source pins are appended to the
 integration archive/JSON. Exact900 full EXIT2 remains unchanged.
+
+## x86 raw stack-register frame and MOV transport
+
+`X86NumericAddress.RegisterState` retains raw register cells plus the STACK
+predicate over the existing memory/flags/PC observation. The native view
+adds the invocation stack origin to RSP's offset, and translates other STACK
+arena pointers using pointer-minus-arena followed by native-base addition.
+The origins are independent. Actual generated STACK_PTR arithmetic keeps
+all64 offset bits and its biased origin is related without a32-bit window.
+
+The numeric write proof composes the generated lane writer with the actual
+byte/word materialize-before-merge sequence, dword zero extension, qword
+replacement and one destination-RSP normalization. Full MOV retains the
+actual destination-RSP numeric arm, source-RSP arena rebind and other raw
+pointer/tag copies. The derived immediate/register MOV steps preserve the
+entire canonical state/events for every width, high/low lane and alias,
+including self MOV and RSP as either or both operands. Only the STACK
+predicate is represented; other provenance and the initial ABI/private
+memory/compiled-B relation are not certified by this component.
+
+Validation:17-job Lean graph and7 axiom audits PASS, reporting only propext,
+Classical.choice, Lean.ofReduceBool and Quot.sound. Four existing generated
+contracts and all three existing MOV hosts pass under UBSan:100448 handler,
+72866 arm-route and23396 full-route cases. All7 proof and11 host input pins
+remain unchanged; earlier declarations are byte-identical except imports.
+No ISA/runtime/oracle/test edits or proof placeholders. Complete original
+failed proof-normalization logs and final commands/output/pins are appended
+to the existing integration JSON/gzip. Full exact900 `make check` EXIT2 at
+the unresolved dynamic x86 POPCNT harness remains unchanged; no redundant
+full was run. Full77/72/dispatcher/O2/O4 completion is not claimed.
+Proof SHA256 `9185aa823802161136a3ea98a76eb032ee98b22c12972751d305e86fb768f63b`.

@@ -135,7 +135,13 @@ states the same-invocation SP/code/return relation, with explicit frame biases
 and argument/return witnesses. Kernel/JIT, ABI and artifact certificates must
 establish those witnesses and code/provenance/profile bindings. A private
 stack offset alone is not a native numeric address. The entry arithmetic and
-partial-write theorems preserve this distinction.
+partial-write theorems preserve this distinction. `X86NumericAddress` additionally
+relates the actual register representation: RSP stores an offset, other STACK
+cells store private arena pointers, numeric partial writes materialize before
+merging, and RSP writeback normalizes once. Its MOV-immediate/register lifts
+preserve complete native state for all widths, byte lanes and register aliases.
+The invocation stack origin and arena origin remain independent; initial ABI,
+private-memory and compiled-body correspondence still require certificates.
 
 Trust boundary: Lean checks Lean models, not arbitrary C source or compiled
 BPF. The Lean kernel/toolchain are trusted; `native_decide` additionally trusts
