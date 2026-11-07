@@ -43,17 +43,18 @@ uint64_t add64(uint64_t a,uint64_t b){uint64_t f;__asm__ volatile("addq %2,%1;pu
     for name,args in [('cmp32',[ctypes.c_uint32,ctypes.c_uint32]),('add64',[ctypes.c_uint64,ctypes.c_uint64])]:
         fn=getattr(flags,name);fn.argtypes=args;fn.restype=ctypes.c_uint64
     cases=[]
-    for kind in ('array','percpu_array','hash','lru_hash','percpu_hash','call'):
+    for kind,elem_size in [(k,8) for k in ('array','percpu_array','hash','lru_hash','percpu_hash','call')]+[('array',32),('percpu_array',32)]:
+        name=kind if elem_size==8 else kind+'-stride'+str(elem_size)
         plan=dict(version=1,helpers=[dict(name='bpf_map_lookup_elem',addr=0x1000)],lookup_sites=[dict(
-            kind=kind,target_addr=0x12345000,key_offset=48,max_entries=16,elem_size=8,index_mask=15,
+            kind=kind,target_addr=0x12345000,key_offset=48,max_entries=16,elem_size=elem_size,index_mask=15,
             value_offset=128,percpu_base_addr=0x20,map_name=None)])
-        plan_path=out/(kind+'.json');plan_path.write_text(json.dumps(plan)+'\n')
-        blob_path=out/(kind+'.bin');reloc_path=out/(kind+'.relocs')
+        plan_path=out/(name+'.json');plan_path.write_text(json.dumps(plan)+'\n')
+        blob_path=out/(name+'.bin');reloc_path=out/(name+'.relocs')
         command([linker,'--input',out/'lookup.proof.o','--symbol','map_lookup','--output',blob_path,
             '--link-plan',plan_path,'--output-relocs',reloc_path])
         blob=blob_path.read_bytes()
         assembly=command(['objdump','-D','-b','binary','-m','i386:x86-64','-Mintel','--insn-width=16',blob_path])
-        (out/(kind+'.asm')).write_text(assembly)
+        (out/(name+'.asm')).write_text(assembly)
         insns={}
         for line in assembly.splitlines():
             hit=re.match(r'^\s*([0-9a-f]+):\s*((?:[0-9a-f]{2}\s+)+)\s*(\S.*)$',line)
@@ -81,7 +82,7 @@ uint64_t add64(uint64_t a,uint64_t b){uint64_t f;__asm__ volatile("addq %2,%1;pu
                     cells.extend(dict(address=(address+i)&MASK,value=(value>>(8*i))&255,
                         readable=readable,writable=False,initialized=initialized) for i in range(width))
                 memory(0x2003,key,4,mode!='key_fault')
-                slot=(state['registers'][7]+128+key*8)&MASK
+                slot=(state['registers'][7]+128+key*elem_size)&MASK
                 pointer=0xFEDCBA9876543210;cpu_offset=0x123456789ABCDEF0
                 if kind=='percpu_array' and key<16:
                     memory(slot,pointer,8,mode!='slot_fault',True)
@@ -103,7 +104,13 @@ uint64_t add64(uint64_t a,uint64_t b){uint64_t f;__asm__ volatile("addq %2,%1;pu
                         expected['registers'][0]=0
                         expected['flags']=(expected['flags']&~(STATUS^0x10))|0x44
                         expected['defined_flags']=MASK^0x10
-                    elif kind=='percpu_array':
+                    elif elem_size>8:
+                        # SHL is followed by real ADDs of map base and
+                        # value offset. Path masks conservatively retain
+                        # earlier undefined AF/OF even after later writes.
+                        expected['flags']=(expected['flags']&~STATUS)|(flags.add64((key*elem_size+state['registers'][7])&MASK,128)&STATUS)
+                        expected['defined_flags']=MASK^0x810
+                    if key<16 and kind=='percpu_array':
                         if mode=='slot_fault':fault(slot,8,first_pp)
                         else:
                             read(slot,pointer,8,True);expected['registers'][0]=pointer
