@@ -2151,3 +2151,10 @@ byte-decoded relational theorem covers every permitted XOR AF choice before
 CMP, without a selected branch premise. All12 audits pass with their axioms
 reported, including Lean.ofReduceBool. Remaining +8/+72 guards, stores, the
 full architectural relation and production-artifact TV still require proofs.
+
+`trusted-simple-b29-remaining-guards.json` adds the exact six instructions at
+PCs5..10: +8 then +72, with native-order successors and full64-bit modular
+arithmetic. Complete endpoints and empty effects agree for either exit, and
+the native relational path result is universal over canonical executions.
+All23 accumulated audits pass. Stores, entry/all-block composition, a full
+architectural reconstruction relation and whole-program TV remain open.
