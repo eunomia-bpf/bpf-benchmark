@@ -703,6 +703,205 @@ theorem stores_relational_component (env : BPF.Environment) (n : X86.State) (p :
       if index=4 then none else some (packetStoreFault (p.regs 2) index)⟩ := by simpa only [pointer] using unique
   exact ⟨endpoint,by simpa only [endpoint] using proofRun,by simpa only [endpoint] using same⟩
 
+
+def guardsAfter (p : BPF.State) (stack pointer limit : Word) : BPF.State :=
+  let first := guardAfter (contextAfter p stack pointer limit)
+  if pointer>limit then first else remainingAfter first
+
+/-- Connect the actual entry and all three conditional blocks, in their
+native order. No branch outcome or non-wrapping pointer arithmetic is assumed. -/
+theorem entry_guards_execution (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (stack pointer limit : Word) (first second : Event)
+    (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (argument : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (input : env.nativeInput .stackPointer=.ok stack)
+    (read0 : readMemory p.memory (p.regs 1) 8=.ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8=.ok (limit,second)) :
+    X86Path.Execution 0 native n [first,second] (guardedNativeFinal n pointer limit) ∧
+    Execution (instructionStep env) p [first,second] (guardsAfter p stack pointer limit) := by
+  obtain ⟨nativeHead,proofHead,npc,ppc,_,_⟩ := entry_first_guard_component env n p stack pointer limit
+    first second nativePC proofPC active argument memory input read0 read1
+  by_cases reject : pointer>limit
+  · exact ⟨by simpa only [guardedNativeFinal,reject,ite_true] using nativeHead,
+      by simpa only [guardsAfter,reject,ite_true] using proofHead⟩
+  · have at17 : (guardFinal (nativePrefixFinal n pointer limit)).pc=17 := by simpa [reject] using npc
+    have at5 : (guardAfter (contextAfter p stack pointer limit)).pc=5 := by simpa [reject] using ppc
+    have stillActive : (guardAfter (contextAfter p stack pointer limit)).halted=false := by
+      simpa [guardAfter,zeroAfter,contextAfter,dataAfter,stackAfter] using active
+    have ptr : (guardFinal (nativePrefixFinal n pointer limit)).gpr 6=
+        (guardAfter (contextAfter p stack pointer limit)).regs 2 := by
+      simp +decide [guardFinal,guardCompare,guardZero,guardMove,nativePrefixFinal,nativeAfterSecond,nativeAfter,
+        guardAfter,zeroAfter,contextAfter,dataAfter,stackAfter,BPF.setReg]
+    have lim : (guardFinal (nativePrefixFinal n pointer limit)).gpr 2=
+        (guardAfter (contextAfter p stack pointer limit)).regs 1 := by
+      simp +decide [guardFinal,guardCompare,guardZero,guardMove,nativePrefixFinal,nativeAfterSecond,nativeAfter,
+        guardAfter,zeroAfter,contextAfter,dataAfter,stackAfter,BPF.setReg]
+    obtain ⟨nativeTail,proofTail,_,_,_,_⟩ := remaining_component env
+      (guardFinal (nativePrefixFinal n pointer limit)) (guardAfter (contextAfter p stack pointer limit))
+      at17 at5 stillActive ptr lim
+    exact ⟨by simpa only [guardedNativeFinal,reject,ite_false,List.append_nil] using native_execution_append nativeHead nativeTail,
+      by simpa only [guardsAfter,reject,ite_false,List.append_nil] using proofHead.append proofTail⟩
+
+/-- Exact boundary facts derived from full states, including data pointer,
+zero result, memory and the actual exit/store successors. -/
+theorem guards_boundary (n : X86.State) (p : BPF.State) (stack pointer limit : Word)
+    (memory : n.memory=p.memory) (active : p.halted=false) :
+    (guardedNativeFinal n pointer limit).pc=
+      (if pointer>limit ∨ pointer+(8#64)>limit ∨ pointer+(72#64)>limit then 60 else 35) ∧
+    (guardsAfter p stack pointer limit).pc=
+      (if pointer>limit ∨ pointer+(8#64)>limit ∨ pointer+(72#64)>limit then 27 else 11) ∧
+    (guardedNativeFinal n pointer limit).gpr 1=pointer ∧
+    (guardsAfter p stack pointer limit).regs 2=pointer ∧
+    (guardedNativeFinal n pointer limit).gpr 0=(0#64) ∧
+    (guardsAfter p stack pointer limit).regs 0=(0#64) ∧
+    (guardedNativeFinal n pointer limit).memory=(guardsAfter p stack pointer limit).memory ∧
+    (guardsAfter p stack pointer limit).memory=p.memory ∧
+    (guardsAfter p stack pointer limit).halted=false := by
+  by_cases reject : pointer>limit
+  all_goals by_cases reject8 : pointer+(8#64)>limit
+  all_goals by_cases reject72 : pointer+(72#64)>limit
+  all_goals simp +decide [guardedNativeFinal,guardsAfter,remainingNativeFinal,
+    remainingNative72,remainingNativeCmp72,remainingNativeAdd,remainingNative8,remainingNativeCmp8,remainingNativeLea,
+    guardFinal,guardCompare,guardZero,guardMove,nativePrefixFinal,nativeAfterSecond,nativeAfter,
+    remainingAfter,guard72After,guard72Add,guard72Move,guard8After,guard8Add,guard8Move,
+    guardAfter,zeroAfter,contextAfter,dataAfter,stackAfter,BPF.setReg,memory,active,reject,reject8,reject72]
+
+
+def completedAfter (p : BPF.State) (stack pointer limit : Word) : BPF.State :=
+  let guarded := guardsAfter p stack pointer limit
+  if pointer>limit ∨ pointer+(8#64)>limit ∨ pointer+(72#64)>limit then exitAfter guarded
+  else
+    let index := packetFirstFailure p.memory pointer
+    let stored := storesOutcome guarded index
+    if index=4 then exitAfter stored else stored
+
+/-- Connect all actual B29 blocks after the two successful context reads.
+Every store permission assignment and every guard outcome is covered. -/
+theorem completed_proof_execution (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (stack pointer limit : Word) (first second : Event)
+    (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (argument : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (input : env.nativeInput .stackPointer=.ok stack)
+    (read0 : readMemory p.memory (p.regs 1) 8=.ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8=.ok (limit,second)) :
+    Execution (instructionStep env) p ([first,second]++completeGuestSuffix p.memory pointer limit)
+      (completedAfter p stack pointer limit) ∧
+    (completeNativeFinal n pointer limit).memory=(completedAfter p stack pointer limit).memory := by
+  obtain ⟨_,guardRun⟩ := entry_guards_execution env n p stack pointer limit first second
+    nativePC proofPC active argument memory input read0 read1
+  obtain ⟨npc,ppc,np,pp,nzero,pzero,same,pmemory,pactive⟩ := guards_boundary n p stack pointer limit memory active
+  by_cases reject : pointer>limit ∨ pointer+(8#64)>limit ∨ pointer+(72#64)>limit
+  · have at27 : (guardsAfter p stack pointer limit).pc=27 := by simpa [reject] using ppc
+    have exited := exit_execution env (guardsAfter p stack pointer limit) at27 pactive
+    refine ⟨?_,?_⟩
+    · simpa only [completedAfter,completeGuestSuffix,reject,ite_true,List.append_nil] using guardRun.append exited
+    · simpa only [completeNativeFinal,completedAfter,reject,ite_true,exitAfter] using same
+  · have at35 : (guardedNativeFinal n pointer limit).pc=35 := by simpa [reject] using npc
+    have at11 : (guardsAfter p stack pointer limit).pc=11 := by simpa [reject] using ppc
+    have ptr : (guardedNativeFinal n pointer limit).gpr 1=(guardsAfter p stack pointer limit).regs 2 := np.trans pp.symm
+    have selected : packetFirstFailure p.memory pointer=
+        packetFirstFailure (guardsAfter p stack pointer limit).memory ((guardsAfter p stack pointer limit).regs 2) := by rw [pmemory,pp]
+    obtain ⟨_,_,stored,storeMemory⟩ := stores_any_permissions env
+      (guardedNativeFinal n pointer limit) (guardsAfter p stack pointer limit)
+      (packetFirstFailure p.memory pointer) at35 at11 pactive ptr same selected
+    have originalIndex : packetFirstFailure n.memory pointer=packetFirstFailure p.memory pointer := by rw [memory]
+    by_cases success : packetFirstFailure p.memory pointer=4
+    · have storedPC : (storesOutcome (guardsAfter p stack pointer limit) (packetFirstFailure p.memory pointer)).pc=27 := by
+        simp only [storesOutcome,success,ite_true,storesAfter]
+      have storedActive : (storesOutcome (guardsAfter p stack pointer limit) (packetFirstFailure p.memory pointer)).halted=false := by
+        simpa only [storesOutcome,success,ite_true,storesAfter,BPF.setReg] using pactive
+      have exited := exit_execution env _ storedPC storedActive
+      have total := guardRun.append (stored.append exited)
+      refine ⟨?_,?_⟩
+      · simpa only [completedAfter,completeGuestSuffix,reject,ite_false,success,ite_true,
+          pp,List.append_nil] using total
+      · simpa only [completeNativeFinal,completedAfter,reject,ite_false,success,ite_true,
+          originalIndex,exitAfter] using storeMemory
+    · refine ⟨?_,?_⟩
+      · simpa only [completedAfter,completeGuestSuffix,reject,ite_false,success,pp] using guardRun.append stored
+      · simpa only [completeNativeFinal,completedAfter,reject,ite_false,success,originalIndex] using storeMemory
+
+/-- Pair every canonical relational complete native path with actual B29.
+The native endpoint/fault is derived by the single reference semantics; B's
+exact execution has the same ordered guest effects and final memory. -/
+theorem completed_relational_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (stack pointer limit : Word) (first second : Event) (actual : Transition X86.State)
+    (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (argument : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (input : env.nativeInput .stackPointer=.ok stack)
+    (read0 : readMemory p.memory (p.regs 1) 8=.ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8=.ok (limit,second))
+    (run : CanonicalRelationalPath 0 native (completeNativePath n pointer limit) n actual) :
+    actual=completeNativeResult n pointer limit first second ∧
+    Execution (instructionStep env) p actual.events (completedAfter p stack pointer limit) ∧
+    actual.state.memory=(completedAfter p stack pointer limit).memory := by
+  have nativeRead0 : readMemory n.memory (n.gpr 7) 8=.ok (pointer,first) := by simpa only [memory,argument] using read0
+  have nativeRead1 : readMemory n.memory (n.gpr 7+(8#64)) 8=.ok (limit,second) := by simpa only [memory,argument] using read1
+  have endpoint := complete_native_relational_result n pointer limit first second actual nativePC nativeRead0 nativeRead1 run
+  obtain ⟨proofRun,same⟩ := completed_proof_execution env n p stack pointer limit first second
+    nativePC proofPC active argument memory input read0 read1
+  exact ⟨endpoint,by simpa only [endpoint,completeNativeResult,memory] using proofRun,
+    by simpa only [endpoint,completeNativeResult] using same⟩
+
+
+def allInputsAfter (p : BPF.State) (stack : Word) : BPF.State :=
+  match readMemory p.memory (p.regs 1) 8 with
+  | .error _ => stackAfter p stack
+  | .ok (pointer,_) =>
+    match readMemory p.memory (p.regs 1+(8#64)) 8 with
+    | .error _ => dataAfter p stack pointer
+    | .ok (limit,_) => completedAfter p stack pointer limit
+
+/-- One actual B29 execution for every context read, guard and store outcome.
+No guest permission, branch result or native successor is an input premise. -/
+theorem all_inputs_execution (env : BPF.Environment) (n : X86.State) (p : BPF.State) (stack : Word)
+    (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (argument : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (input : env.nativeInput .stackPointer=.ok stack) :
+    Execution (instructionStep env) p (allReadNativeResult n).events (allInputsAfter p stack) ∧
+    (allReadNativeResult n).state.memory=(allInputsAfter p stack).memory := by
+  cases read0 : readMemory p.memory (p.regs 1) 8 with
+  | error fault =>
+    obtain ⟨bad,rfl⟩ := canonical_read_error read0
+    obtain ⟨_,run⟩ := first_context_fault env n p stack nativePC proofPC active argument memory input bad
+    refine ⟨?_,?_⟩
+    · simpa only [allReadNativeResult,allInputsAfter,memory,argument,read0] using run
+    · simp only [allReadNativeResult,allInputsAfter,memory,argument,read0,stackAfter,BPF.setReg]
+  | ok pair =>
+    rcases pair with ⟨pointer,first⟩
+    cases read1 : readMemory p.memory (p.regs 1+(8#64)) 8 with
+    | error fault =>
+      obtain ⟨bad,rfl⟩ := canonical_read_error read1
+      obtain ⟨_,run⟩ := second_context_fault env n p stack pointer first nativePC proofPC active argument memory input read0 bad
+      refine ⟨?_,?_⟩
+      · simpa only [allReadNativeResult,allInputsAfter,memory,argument,read0,read1] using run
+      · simp only [allReadNativeResult,allInputsAfter,memory,argument,read0,read1,
+          nativeAfter,dataAfter,stackAfter,BPF.setReg]
+    | ok pair =>
+      rcases pair with ⟨limit,second⟩
+      obtain ⟨run,same⟩ := completed_proof_execution env n p stack pointer limit first second
+        nativePC proofPC active argument memory input read0 read1
+      refine ⟨?_,?_⟩
+      · simpa only [allReadNativeResult,allInputsAfter,completeNativeResult,memory,argument,read0,read1] using run
+      · simpa only [allReadNativeResult,allInputsAfter,completeNativeResult,memory,argument,read0,read1] using same
+
+/-- Every canonical relational result on the actual selected native path is
+paired with the actual accepted B29, for all input read/write permissions and
+all allowed undefined-AF choices. This is execution/effect composition; the
+full architectural reconstruction and arbitrary-prefix TV remain separate. -/
+theorem all_inputs_relational_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (stack : Word) (actual : Transition X86.State)
+    (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (argument : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (input : env.nativeInput .stackPointer=.ok stack)
+    (run : CanonicalRelationalPath 0 native (allReadNativePath n) n actual) :
+    actual=allReadNativeResult n ∧
+    Execution (instructionStep env) p actual.events (allInputsAfter p stack) ∧
+    actual.state.memory=(allInputsAfter p stack).memory := by
+  have endpoint := all_read_native_relational_result n actual nativePC run
+  obtain ⟨proofRun,same⟩ := all_inputs_execution env n p stack nativePC proofPC active argument memory input
+  exact ⟨endpoint,by simpa only [endpoint] using proofRun,by simpa only [endpoint] using same⟩
+
 end KProgTV.TrustedSimpleB29
 #print axioms KProgTV.TrustedSimpleB29.stack_step
 #print axioms KProgTV.TrustedSimpleB29.data_step
@@ -746,3 +945,12 @@ end KProgTV.TrustedSimpleB29
 
 #print axioms KProgTV.TrustedSimpleB29.stores_any_permissions
 #print axioms KProgTV.TrustedSimpleB29.stores_relational_component
+
+#print axioms KProgTV.TrustedSimpleB29.entry_guards_execution
+#print axioms KProgTV.TrustedSimpleB29.guards_boundary
+
+#print axioms KProgTV.TrustedSimpleB29.completed_proof_execution
+#print axioms KProgTV.TrustedSimpleB29.completed_relational_correspondence
+
+#print axioms KProgTV.TrustedSimpleB29.all_inputs_execution
+#print axioms KProgTV.TrustedSimpleB29.all_inputs_relational_correspondence

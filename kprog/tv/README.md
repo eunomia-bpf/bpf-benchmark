@@ -2211,3 +2211,12 @@ application proof/worker fields remain rejected; the worker must activate a
 live request through the service capability and match the kernel's worker
 identity. The micro runtime has no exception, and bootstrap passes no service
 FD to the application. This review required no loader or kernel rule changes.
+
+`trusted-simple-b29-composition.json` connects actual B29 entry, every guard,
+all store outcomes and JA/EXIT into one execution. It covers both context read
+faults and all successful-read outcomes without permission/branch premises.
+Every canonical relational result on the selected complete native path has
+exactly the same ordered guest effects and final memory as that execution.
+All41 accumulated audits pass. This selected-path composition still requires
+full architectural reconstruction, arbitrary-prefix TV and physical caller
+embedding before an end-to-end safety claim.
