@@ -3092,3 +3092,9 @@ that published commit. Complete log, source manifest, commands and CPU trace
 are archived under `FULL MAKE CHECK 8DB6EB61A PASS`. This snapshot contains the
 30-operation MULX/SHLD/SHRD dispatcher and O2 interface. The later LEA core,
 source findings and candidate comparisons retain their separate identities.
+
+The same offset helper was compiled with clang18 for the BPF target. The
+original signed accumulation emits `add nsw i64`; the unsigned correction
+emits `add i64`, preserving modular64-bit arithmetic in the compiled proof
+body. Both LLVM IR files, source and compiler receipt are archived under
+`LEA MEMORY OFFSET BPF WRAPPING IR`, alongside the8,401-case UBSan result.

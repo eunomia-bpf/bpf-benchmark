@@ -12454,6 +12454,62 @@
       "IMUL_IMM"
     ]
   },
+  "x86_lea_offset_bpf_ir": {
+    "archive_block_sha256": "fdccc4577c9e1a644ff46f17aee183ff751bd5af75e3d173cfa89b889b57329b",
+    "archive_marker": "=== LEA MEMORY OFFSET BPF WRAPPING IR ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/lea-offset-candidate.ll": "2b1b1b6b07d5ffc989339cb191d4a5eb283799f8402f92f918108ee68db30921",
+      "/workspaces/.agent-state/kprog-lanes/V/lea-offset-ir.c": "ef6510e076a3bda1e7977e397f5487da506d5b49e2079e06a632cc9295d9f9fa",
+      "/workspaces/.agent-state/kprog-lanes/V/lea-offset-ir.json": "58da84cea3bf19dc5f9f775cf5251e01b53e36aacc7aa9e2b34cc2899a79446b",
+      "/workspaces/.agent-state/kprog-lanes/V/lea-offset-original.ll": "aaa3a4faa521888dbc54eb214d4f21f6a4d10d6b3643cf9830a8e079a9db85cb"
+    },
+    "report": {
+      "clang_version": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+      "commands": [
+        {
+          "add_instruction": "%3 = add nsw i64 %1, %0",
+          "command": [
+            "clang-18",
+            "-target",
+            "bpfel",
+            "-O2",
+            "-S",
+            "-emit-llvm",
+            "-I/workspaces/repository/kprog/formal",
+            "/workspaces/.agent-state/kprog-lanes/V/lea-offset-ir.c",
+            "-o",
+            "/workspaces/.agent-state/kprog-lanes/V/lea-offset-original.ll"
+          ],
+          "exit": 0,
+          "ir_sha256": "aaa3a4faa521888dbc54eb214d4f21f6a4d10d6b3643cf9830a8e079a9db85cb",
+          "name": "original"
+        },
+        {
+          "add_instruction": "%3 = add i64 %1, %0",
+          "command": [
+            "clang-18",
+            "-target",
+            "bpfel",
+            "-O2",
+            "-S",
+            "-emit-llvm",
+            "-include",
+            "/workspaces/.agent-state/kprog-lanes/V/lea-mem-offset.h",
+            "-I/workspaces/repository/kprog/formal",
+            "/workspaces/.agent-state/kprog-lanes/V/lea-offset-ir.c",
+            "-o",
+            "/workspaces/.agent-state/kprog-lanes/V/lea-offset-candidate.ll"
+          ],
+          "exit": 0,
+          "ir_sha256": "2b1b1b6b07d5ffc989339cb191d4a5eb283799f8402f92f918108ee68db30921",
+          "name": "candidate"
+        }
+      ],
+      "recorded": "2026-11-07T20:42:10.066774+00:00",
+      "scope": "BPF-target compiler receipt for the same offset helper: unsigned candidate preserves wrapping integer addition"
+    },
+    "scope": "BPF-target LLVM compiler receipt for the prepared unsigned memory-offset correction; source adoption follows the coherent production epoch"
+  },
   "x86_lea_raw_frame_core": {
     "archive_block_sha256": "609e888c5084f99f756ace7b4fc204b5703000a93d8c8364121f90f4957964a0",
     "archive_marker": "=== LEA FRAME CORE AND GENERIC SOURCE CORRECTIONS ===",
