@@ -1,0 +1,15 @@
+{
+  "exclusive_monitor": null,
+  "exclusive_inputs": {
+    "physical_address": 0,
+    "reservation": {
+      "physical_start": 0,
+      "bytes": 8
+    },
+    "retain_local": false,
+    "virtual_pass": true,
+    "global_pass": false,
+    "commit_pass": false,
+    "abort_on_failure": true
+  }
+}

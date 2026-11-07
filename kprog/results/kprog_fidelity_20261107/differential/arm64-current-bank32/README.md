@@ -33,3 +33,14 @@ Thus461 forms/472064 QEMU/C states agree, while CPU/canonical is complete
 for453 forms. All four static hardware handoffs and exact source snapshots
 are retained per family; real ARM hardware remains pending. No production
 ISA/runtime/header change or whole O1–O4 claim is made.
+
+## Subsequent exclusive architectural-observation closure
+
+`exclusive/observed-projection/` (or `observed-projection/` from the exclusive
+subdirectory) replays the identical8192 states using an explicit abstract
+witness and three checked canonical observation/admissibility declarations.
+All8 forms have1024 canonical cases with zero QEMU/C/reference architectural
+observation differences and no unavailable form. Actual pre-PC CLREX/X4 and
+every case's memory premises are checked. The representative's physical0 is
+not a hardware mapping claim; monitor/order/paired-success/platform proof
+remains separate. The original generic API rejections above stay preserved.

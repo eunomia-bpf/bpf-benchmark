@@ -30,3 +30,14 @@ Coordinator hardware observation (does not discharge canonical inputs):
 ```sh
 ARM64_HANDOFF=../results/kprog_fidelity_20261107/differential/arm64-current-bank32/exclusive/cpu-differential-arm64.gz OUT=../results/kprog_fidelity_20261107/differential/arm64-current-bank32/exclusive-hardware sh kprog/fidelity/run-arm64.sh
 ```
+
+## Subsequent exclusive architectural-observation closure
+
+`exclusive/observed-projection/` (or `observed-projection/` from the exclusive
+subdirectory) replays the identical8192 states using an explicit abstract
+witness and three checked canonical observation/admissibility declarations.
+All8 forms have1024 canonical cases with zero QEMU/C/reference architectural
+observation differences and no unavailable form. Actual pre-PC CLREX/X4 and
+every case's memory premises are checked. The representative's physical0 is
+not a hardware mapping claim; monitor/order/paired-success/platform proof
+remains separate. The original generic API rejections above stay preserved.

@@ -75,6 +75,7 @@ def main():
     parser.add_argument('--control-paths',action='store_true',help='use the canonical finite-path interface for generated Jcc/JMP/CALL observers')
     parser.add_argument('--linear-paths',action='store_true',help='use canonical finite paths for complete acyclic straight-line stack observers')
     parser.add_argument('--opcode',action='append',help='replay only this production opcode from the saved trace; repeat for multiple families')
+    parser.add_argument('--exclusive-observation-witness',type=Path,help='explicit abstract witness for the proved CLREX observed-state projection; no physical-mapping claim')
     args=parser.parse_args()
     if args.trace and not args.reuse_trace:
         parser.error('--trace requires --reuse-trace')
@@ -90,6 +91,23 @@ def main():
         command=(['qemu-aarch64-static'] if args.arch=='arm64' and platform.machine()!='aarch64' else [])
         cpu_failed=subprocess.run(command+[str(args.binary.resolve()),str(args.cases),str(args.out),str(trace)]).returncode != 0
     native_code=json.loads((args.out/'native-code.json').read_text())
+    witness=None
+    if args.exclusive_observation_witness:
+        if args.arch!='arm64' or not args.reuse_trace:
+            parser.error('exclusive observation requires saved ARM trace')
+        witness=json.loads(args.exclusive_observation_witness.read_text())
+        if set(witness)!={'exclusive_monitor','exclusive_inputs'} or witness['exclusive_monitor'] is not None:
+            raise ValueError('explicit empty-monitor witness required')
+        if any(f['assembly'].split()[0] not in {'ldxr','ldaxr','stxr','stlxr'} or
+               f.get('exclusive_monitor_initial')!='cleared by CLREX before native_pc' for f in forms):
+            raise ValueError('exclusive observation requires recorded CLREX fixture')
+        disassembly=subprocess.check_output(['aarch64-linux-gnu-objdump','-d',str(args.binary)],text=True)
+        instructions={}
+        for line in disassembly.splitlines():
+            m=re.match(r'^\s*([0-9a-f]+):\s+[0-9a-f]{8}\s+(\S+)(.*)$',line)
+            if m:instructions[int(m[1],16)]=(m[2],''.join(m[3].split()))
+        if any(instructions.get(code['pc']-4,('', ''))[0]!='clrex' or '[x4]' not in instructions.get(code['pc'],('', ''))[1] for code in native_code['forms']):
+            raise ValueError('actual binary must clear monitor immediately before every observed PC and use the checked X4 memory base')
     paths=control_extents(args.binary,native_code,forms,args.linear_paths) if (args.control_paths or args.linear_paths) and args.arch=='x86' else {}
     reference=args.reference
     # Only a serialization optimization: every non-composite encoding is
@@ -168,6 +186,14 @@ def main():
                 if index in paths:
                     request.update(native_base=native_code['forms'][index]['pc'],
                         native_path=paths[index] if form['opcode']=='X86_STACK_COMPOSITE' else control_witness(form,paths[index],native))
+                if witness is not None:
+                    # Uniform 8-byte alignment/permissions discharge the store
+                    # theorem for both admitted widths; no physical mapping is inferred.
+                    address=initial['registers'][4]
+                    by_address={cell['address']:cell for cell in cells}
+                    if address%8 or any(address+i not in by_address or not all(by_address[address+i][k] for k in ['readable','writable','initialized']) for i in range(8)):
+                        raise ValueError('exclusive observation theorem memory premises are not satisfied')
+                    architectural_state.update(witness)
                 encoded_request=json.dumps(request,separators=(',',':'))
                 if case==0:
                     probe=subprocess.run([str(reference)],input=encoded_request+'\n',text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)

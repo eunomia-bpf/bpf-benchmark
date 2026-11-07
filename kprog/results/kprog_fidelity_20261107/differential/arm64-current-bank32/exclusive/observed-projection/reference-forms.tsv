@@ -1,0 +1,9 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+0	ldxr w0, [x4]	1024	1024	0	0	checked	none
+1	ldaxr w0, [x4]	1024	1024	0	0	checked	none
+2	stxr w0, w1, [x4]	1024	1024	0	0	checked	none
+3	stlxr w0, w1, [x4]	1024	1024	0	0	checked	none
+4	ldxr x0, [x4]	1024	1024	0	0	checked	none
+5	ldaxr x0, [x4]	1024	1024	0	0	checked	none
+6	stxr w0, x1, [x4]	1024	1024	0	0	checked	none
+7	stlxr w0, x1, [x4]	1024	1024	0	0	checked	none
