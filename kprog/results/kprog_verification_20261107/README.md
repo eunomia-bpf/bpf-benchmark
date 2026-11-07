@@ -1,5 +1,30 @@
 # Lane V verification checkpoint
 
+<!-- COVERAGE START -->
+Coverage is partial. [Per-operation and per-token table](coverage.tsv):
+x86-64 has **25/75 raw register handler and dispatcher proofs**, **25/75 C-model
+O2 token equalities** (19 direct + 6 unchanged generic calls), and selected
+hardware agreement for **62/75** declared operations. AArch64 has **71/71
+conditional modeled dispatcher entries**, **0/71 audited token-body O2
+equalities**, and selected QEMU agreement for **65/71** declared operations.
+Reference steps are defined for **67/75 x86-64** operations; eight pseudo
+operations need environment/native-link binding. ARM reference families are
+defined for **71/71** operations. Compiled-B, ABI/definedness and native-link
+preservation remain universal obligations. Replay cells record exact source
+epochs and selected forms; they are supporting observations.
+
+Inventory: current production headers declare **75 x86-64** numeric opcode IDs
+plus five compatibility aliases, and **71 AArch64** numeric IDs. The requested
+77/72 totals differ by two/one names; inventory reconciliation is recorded
+explicitly. Every declared operation and every corresponding token has its own
+row; aliases have separate excluded rows. No placeholder operation is counted.
+`proved-raw-register`, `partial-model`, `conditional-observed`, `proved-C-model`
+and `pending` retain their distinct meanings in the table. Table status is
+updated with each proof/status-changing publication; historical per-program
+certificates are frozen and excluded from safety evidence.
+<!-- COVERAGE END -->
+
+
 Published source increments retain the previous theorems and semantic oracles.
 This checkpoint archives the results before removing finished private exports,
 scratch probes, raw output and private Git indexes. Shared Lean/Cargo caches are
@@ -2829,3 +2854,32 @@ checks against the new production header. Source hashes stayed stable. The
 production generator/header, access count/width/address and canonical ISA were
 unchanged by this repair. The next full check includes the published fixture
 repair and subsequent generic token-family proof work.
+
+
+### Uniform ALU, compare and generic-token O2 families
+
+The uniform semantic interface now covers 25 x86 register tokens. Nine new
+direct entries are ADD_IMM/ALU_IMM, ADD_REG/XOR_REG/ALU_REG and the four
+CMP/TEST register/immediate forms. Their ALU bodies are shared with the
+interpreter exactly as the production C macros are shared. Six generic entries
+(NOP, BSWAP, POPCNT, XCHG, SHIFTX, BZHI) forward the unchanged opcode and fields
+to RUN_OP. `register_token_body_matches` proves full step equality for all
+fields/states/frames; `register_token_step_refines` and
+`register_token_native_matches` compose the existing O1 interface. The earlier
+direct-token theorem API and all per-operation refinement statements remain.
+
+Focused 114-module and complete default Lean builds passed, with six axiom
+audits. Prior generic semantic host checks from 43a7 were reused after every
+recorded production input byte was independently verified unchanged; this is
+not a new execution result. The published standalone type repair d657 fixes
+the preceding full-check compiler failure. A new immutable full check follows.
+
+`coverage.tsv` implements the coordinator's per-operation/per-token report.
+Every current numeric header entry has separate operation and token rows;
+source aliases are listed separately. Reference families, raw register proofs,
+conditional ARM observations, C-model token equalities and exact-epoch finite
+replays retain distinct status labels. The live 75/71 numeric inventories and
+the requested 77/72 totals are recorded as an explicit scope reconciliation.
+The table adds no invented operation, proof or coverage count. Generic ABI,
+definedness, compiled-B and native-link preservation remain part of the
+whole-simulator proof work, with individual-program certificates frozen.
