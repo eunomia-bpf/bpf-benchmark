@@ -2327,3 +2327,12 @@ This closes the previously missing explicit block-instance packaging for
 exact P60/B29 under the declared model. Physical JIT/caller/stack and context
 conversion provenance remain explicit obligations, and other micro/application
 programs still need certificates. This is not a whole-machine safety claim.
+
+`micro-service-lifetime-review.json` checks the actual9bc63952 raw archive
+against the reported service-after-first-request failure. It contains85
+terminal requests,84 successful and only SocketLB request61 rejected by the
+verifier;24 later requests succeed. The service ran about17.6minutes, with
+request85 finished before cleanup SIGTERM. Current supervisor source matches
+all85 captured physical service-source pins and stops after application return
+and terminal-request drain. No lifecycle patch or rerun follows from that
+claim. Decisive raw records are retained; no workload/timing/TV claim is added.

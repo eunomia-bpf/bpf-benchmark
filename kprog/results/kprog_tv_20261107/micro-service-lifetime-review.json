@@ -1,0 +1,850 @@
+{
+  "utc": "2026-11-07T19:03:59.787655+00:00",
+  "status": "raw_archive_refutes_service_after_first_request_lifetime_claim_no_lifecycle_change_required",
+  "source_archive": "micro/results/trusted-service-9bc63952.tar.gz",
+  "source_archive_sha256": "b294cd9168357c461537f1d1fc1ce7c7a2fba9389764ca209e9adacc23f2b1ee",
+  "source_archive_tracked_at_review": false,
+  "service_summary": {
+    "started": "2026-11-07T18:39:15.927737+00:00",
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--privileged",
+      "--pid=host",
+      "--network=host",
+      "--ipc=host",
+      "--cgroupns=host",
+      "-e",
+      "BPFREJIT_INSIDE_RUNTIME_CONTAINER=1",
+      "-e",
+      "HOME=/root",
+      "-e",
+      "TARGET=x86-kvm",
+      "-e",
+      "RUN_TARGET_NAME=x86-kvm",
+      "-e",
+      "RUN_TOKEN=9bc63952",
+      "-e",
+      "RUN_TARGET_ARCH=x86_64",
+      "-e",
+      "RUN_EXECUTOR=kvm",
+      "-e",
+      "RUN_REMOTE_PYTHON_BIN=python3",
+      "-e",
+      "RUN_RUNTIME_PYTHON_BIN=python3",
+      "-e",
+      "RUN_BPFTOOL_BIN=bpftool",
+      "-e",
+      "RUN_NATIVE_REPOS_CSV=bcc,katran,tracee,tetragon",
+      "-e",
+      "SAMPLES=3",
+      "-e",
+      "WARMUPS=0",
+      "-e",
+      "INNER_REPEAT=100000",
+      "-e",
+      "SUITE=micro/config/micro_pure_jit.yaml",
+      "-e",
+      "RUNTIMES=kernel native_kernel llvmbpf native",
+      "-e",
+      "FUZZ_ROUNDS=1000",
+      "-e",
+      "MERLIN_COMPILETIME_MODE=none",
+      "-e",
+      "CILIUM_PROFILE_ARM=all",
+      "-w",
+      "/workspaces/repository",
+      "-v",
+      "/sys:/sys",
+      "-v",
+      "/sys/fs/bpf:/sys/fs/bpf",
+      "-v",
+      "/sys/kernel/debug:/sys/kernel/debug",
+      "-v",
+      "/lib/modules:/lib/modules:ro",
+      "-v",
+      "/boot:/boot:ro",
+      "-v",
+      "/workspaces/repository/micro/results:/workspaces/repository/micro/results",
+      "bpf-benchmark/runner-runtime:x86_64",
+      "python3",
+      "-m",
+      "runner.suites.micro"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "returncode": 1,
+    "service_returncode": -15,
+    "finished": "2026-11-07T18:56:50.366418+00:00"
+  },
+  "service_elapsed_seconds": 1054.438681,
+  "request_count": 85,
+  "request_ids": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85
+  ],
+  "status_counts": {
+    "0": 84,
+    "-5": 1
+  },
+  "last_request": {
+    "request_id": 85,
+    "source_prog_id": 1430,
+    "native_sha256": "15079ed0a4168927dd14343825dcdb52f33f4fa50f896a6a131b3bf9a4193fca",
+    "started": "2026-11-07T18:56:45.249269+00:00",
+    "prog_id": 1435,
+    "status": 0,
+    "artifact_archive": "/run/bpf-benchmark-trusted-9bc63952/session-nwo419zv/requests/85.success.tar.gz",
+    "finished": "2026-11-07T18:56:48.920053+00:00"
+  },
+  "failed_requests": [
+    {
+      "request_id": 61,
+      "source_prog_id": 1035,
+      "native_sha256": "b5d74a6bce6b658ae085b79e331eb3b94c72e1d4c5c234bb8a8e55b94f899d0f",
+      "started": "2026-11-07T18:53:28.054151+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '61', '1035', '/run/bpf-benchmark-trusted-9bc63952/session-nwo419zv/requests/request-tp8_v6qs/generated/request.native.o', 'cilium_socket_lb_service_select_xdp', '/run/bpf-benchmark-trusted-9bc63952/session-nwo419zv/requests/request-tp8_v6qs/generated/trusted_x86.proof.o', '/run/bpf-benchmark-trusted-9bc63952/session-nwo419zv/requests/request-tp8_v6qs/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 241, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader', 'load', '4', '61', '1035', '/run/bpf-benchmark-trusted-9bc63952/session-nwo419zv/requests/request-tp8_v6qs/generated/request.native.o', 'cilium_socket_lb_service_select_xdp', '/run/bpf-benchmark-trusted-9bc63952/session-nwo419zv/requests/request-tp8_v6qs/generated/trusted_x86.proof.o', '/run/bpf-benchmark-trusted-9bc63952/session-nwo419zv/requests/request-tp8_v6qs/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/run/bpf-benchmark-trusted-9bc63952/session-nwo419zv/requests/61.failure.tar.gz",
+      "finished": "2026-11-07T18:53:32.987658+00:00"
+    }
+  ],
+  "successes_after_failure": 24,
+  "all_terminal_requests_finished_before_service_summary": true,
+  "all_request_archives_present_and_immutable_ELF_hashes_match": true,
+  "request_archives": [
+    {
+      "request_id": 1,
+      "status": 0,
+      "archive": "service/requests/1.success.tar.gz",
+      "sha256": "278838f726fad5cf9c7f7dbe60c12b1a39b398a585cbe6239bafc036ffc10370",
+      "native_sha256": "88e2b781a1aac6c191f85b02a86d868682915e4233c17ff008e0fadcfcb74124"
+    },
+    {
+      "request_id": 2,
+      "status": 0,
+      "archive": "service/requests/2.success.tar.gz",
+      "sha256": "dd1e32e9774d532cafe1c69aa4233bea932fd61c532982bf486a05f6acc43219",
+      "native_sha256": "88e2b781a1aac6c191f85b02a86d868682915e4233c17ff008e0fadcfcb74124"
+    },
+    {
+      "request_id": 3,
+      "status": 0,
+      "archive": "service/requests/3.success.tar.gz",
+      "sha256": "9a04873abb61bec9403af77005f72b286b657ff3594ab75383ae6fd6e49781c5",
+      "native_sha256": "88e2b781a1aac6c191f85b02a86d868682915e4233c17ff008e0fadcfcb74124"
+    },
+    {
+      "request_id": 4,
+      "status": 0,
+      "archive": "service/requests/4.success.tar.gz",
+      "sha256": "c6697fa015049b5ab063442ffd5a9bf7b702133895ab450dad3f54b8ef29c160",
+      "native_sha256": "7a0ca9156e0d8f074068e29c10bdb4ea4ec1d6cec29c2ba058c58a845d368194"
+    },
+    {
+      "request_id": 5,
+      "status": 0,
+      "archive": "service/requests/5.success.tar.gz",
+      "sha256": "8dcb13f7d38bab2b33dfb090c0eb9f170788c6aab4b406d56c21e938ce0af376",
+      "native_sha256": "7a0ca9156e0d8f074068e29c10bdb4ea4ec1d6cec29c2ba058c58a845d368194"
+    },
+    {
+      "request_id": 6,
+      "status": 0,
+      "archive": "service/requests/6.success.tar.gz",
+      "sha256": "b4780f8eee546cd9c506f7fbab0f27fb32902b47314366dceb865194d93f6654",
+      "native_sha256": "7a0ca9156e0d8f074068e29c10bdb4ea4ec1d6cec29c2ba058c58a845d368194"
+    },
+    {
+      "request_id": 7,
+      "status": 0,
+      "archive": "service/requests/7.success.tar.gz",
+      "sha256": "1a45022aad3b4158f0b677b1e2409688efab3052579f59f2aa1bd30c5144095b",
+      "native_sha256": "a205b0cf19ad1aba702c0d368afe2cb882c79cc8a1a7406f46571c2f5fe33588"
+    },
+    {
+      "request_id": 8,
+      "status": 0,
+      "archive": "service/requests/8.success.tar.gz",
+      "sha256": "c174f5350b2357766c78e6cbab53a1bac4bc20a13da816f8935efc98e2745088",
+      "native_sha256": "a205b0cf19ad1aba702c0d368afe2cb882c79cc8a1a7406f46571c2f5fe33588"
+    },
+    {
+      "request_id": 9,
+      "status": 0,
+      "archive": "service/requests/9.success.tar.gz",
+      "sha256": "441d042c458515e1d9a1cb68e18e4d8c8e5562e3643f4b29bf5696f518472f44",
+      "native_sha256": "a205b0cf19ad1aba702c0d368afe2cb882c79cc8a1a7406f46571c2f5fe33588"
+    },
+    {
+      "request_id": 10,
+      "status": 0,
+      "archive": "service/requests/10.success.tar.gz",
+      "sha256": "d83b66c9b65b3e84d45d219a1a064d4815e8f0a8774982923794f89a4f687aba",
+      "native_sha256": "e4ac0408575b81c5bcc161f8be562cf96d31388b6591aeaaa623d8291ea69ca7"
+    },
+    {
+      "request_id": 11,
+      "status": 0,
+      "archive": "service/requests/11.success.tar.gz",
+      "sha256": "952a2d25b3420a677c0e955232f3c9719c2bbef4177b32ac79b1e5171dde4a9d",
+      "native_sha256": "e4ac0408575b81c5bcc161f8be562cf96d31388b6591aeaaa623d8291ea69ca7"
+    },
+    {
+      "request_id": 12,
+      "status": 0,
+      "archive": "service/requests/12.success.tar.gz",
+      "sha256": "6a508a89a5e00e80fd90397d35d1ee14ad2b68339085d1358acbf0923dd6f59a",
+      "native_sha256": "e4ac0408575b81c5bcc161f8be562cf96d31388b6591aeaaa623d8291ea69ca7"
+    },
+    {
+      "request_id": 13,
+      "status": 0,
+      "archive": "service/requests/13.success.tar.gz",
+      "sha256": "ee1df8014f32a0cea81d90a6a2f8eeddaf052d6d79aed7f7e28fee2c8fa53e93",
+      "native_sha256": "79fd5e7df9abda8691265277d8bfa568fd8b47e9678b84230d4457cb4d006cee"
+    },
+    {
+      "request_id": 14,
+      "status": 0,
+      "archive": "service/requests/14.success.tar.gz",
+      "sha256": "a5e3e0fcf8b3e3985045f8711b308adf14843c3b0b02b0dc50efd157d46713d8",
+      "native_sha256": "79fd5e7df9abda8691265277d8bfa568fd8b47e9678b84230d4457cb4d006cee"
+    },
+    {
+      "request_id": 15,
+      "status": 0,
+      "archive": "service/requests/15.success.tar.gz",
+      "sha256": "c753eb4706a74eb3647f6b1402fd90e4962eedb17fff288aaa5dc2511a292c2a",
+      "native_sha256": "79fd5e7df9abda8691265277d8bfa568fd8b47e9678b84230d4457cb4d006cee"
+    },
+    {
+      "request_id": 16,
+      "status": 0,
+      "archive": "service/requests/16.success.tar.gz",
+      "sha256": "99044eec8aeadaa7fef0a81da4c12f702c68855a2614ec78adfee717b7af2b0f",
+      "native_sha256": "bcc2fbd394b8f1e95e40c00ae9b19490710aaf977f84896e673dc4e2bd514b01"
+    },
+    {
+      "request_id": 17,
+      "status": 0,
+      "archive": "service/requests/17.success.tar.gz",
+      "sha256": "45d17833bc7cc4ece666de51dcb93750605365f4da13e75445b7485deb97baab",
+      "native_sha256": "bcc2fbd394b8f1e95e40c00ae9b19490710aaf977f84896e673dc4e2bd514b01"
+    },
+    {
+      "request_id": 18,
+      "status": 0,
+      "archive": "service/requests/18.success.tar.gz",
+      "sha256": "22a55401d7cbbbad10ce8878ce46652ae7f8038aa7494b663a95ccd248e4a389",
+      "native_sha256": "bcc2fbd394b8f1e95e40c00ae9b19490710aaf977f84896e673dc4e2bd514b01"
+    },
+    {
+      "request_id": 19,
+      "status": 0,
+      "archive": "service/requests/19.success.tar.gz",
+      "sha256": "80bff9e78238bec391f2ef4c9f9b306e4e6954bf050cb598ded6b36bb5b3a829",
+      "native_sha256": "e92d2c14d4d5f278b15d8ac32d050acb1b04494d520868ae2c812ad5379270c8"
+    },
+    {
+      "request_id": 20,
+      "status": 0,
+      "archive": "service/requests/20.success.tar.gz",
+      "sha256": "0a8d52adb547577600276446c004dc29d6c660e81ef3ef72a6f7a6a534732a64",
+      "native_sha256": "e92d2c14d4d5f278b15d8ac32d050acb1b04494d520868ae2c812ad5379270c8"
+    },
+    {
+      "request_id": 21,
+      "status": 0,
+      "archive": "service/requests/21.success.tar.gz",
+      "sha256": "dd422d67ca4aa6820572576474df5eabdb37e6d008b9b86272629276b30f6341",
+      "native_sha256": "e92d2c14d4d5f278b15d8ac32d050acb1b04494d520868ae2c812ad5379270c8"
+    },
+    {
+      "request_id": 22,
+      "status": 0,
+      "archive": "service/requests/22.success.tar.gz",
+      "sha256": "82dac50a5b25622e726f845b99e437b0963d1985926a5ee508eda44f9655a58e",
+      "native_sha256": "acd7fd47b73a4f9156502b69332decb78c0e409b6e9fd7eaf1f8e5fd1739de27"
+    },
+    {
+      "request_id": 23,
+      "status": 0,
+      "archive": "service/requests/23.success.tar.gz",
+      "sha256": "6df2814d3264be62cf7f00ffbe16266ed5de0ea8585e1e55ba9d6276317af312",
+      "native_sha256": "acd7fd47b73a4f9156502b69332decb78c0e409b6e9fd7eaf1f8e5fd1739de27"
+    },
+    {
+      "request_id": 24,
+      "status": 0,
+      "archive": "service/requests/24.success.tar.gz",
+      "sha256": "9974b99d118efbaf3593d71fa2fe88482140316fbc6116228d1ec9a23b76bb05",
+      "native_sha256": "acd7fd47b73a4f9156502b69332decb78c0e409b6e9fd7eaf1f8e5fd1739de27"
+    },
+    {
+      "request_id": 25,
+      "status": 0,
+      "archive": "service/requests/25.success.tar.gz",
+      "sha256": "8a814bf3f09b5b486bd46dbd1952486d62d9f930d41209e707d509b07bba872a",
+      "native_sha256": "42e52fb28eb8c51460ca4eac4888547d70f54e3c6318c865838977518566e902"
+    },
+    {
+      "request_id": 26,
+      "status": 0,
+      "archive": "service/requests/26.success.tar.gz",
+      "sha256": "aedb5741dee08ef721590f636a642985fefacaabb5e6126e0afa1cdba8acea4d",
+      "native_sha256": "42e52fb28eb8c51460ca4eac4888547d70f54e3c6318c865838977518566e902"
+    },
+    {
+      "request_id": 27,
+      "status": 0,
+      "archive": "service/requests/27.success.tar.gz",
+      "sha256": "494c7d5e68bee1a0673e4882c4adc806fe0fe83be30140966f3ad31c224a0979",
+      "native_sha256": "42e52fb28eb8c51460ca4eac4888547d70f54e3c6318c865838977518566e902"
+    },
+    {
+      "request_id": 28,
+      "status": 0,
+      "archive": "service/requests/28.success.tar.gz",
+      "sha256": "b80930b19b6e57b84be3e3bb3d6770e52bafc2d315e47afd0f2a516062d9abc5",
+      "native_sha256": "c1ebbd29dc4c30f2ae275bf8202472c1c922a28add4e3efd4c87df843409856a"
+    },
+    {
+      "request_id": 29,
+      "status": 0,
+      "archive": "service/requests/29.success.tar.gz",
+      "sha256": "e2c6ad6ab730a7848d16092ba94f3bacf5243d2eeb046f50043e971aef5aff53",
+      "native_sha256": "c1ebbd29dc4c30f2ae275bf8202472c1c922a28add4e3efd4c87df843409856a"
+    },
+    {
+      "request_id": 30,
+      "status": 0,
+      "archive": "service/requests/30.success.tar.gz",
+      "sha256": "8d674cc412614574e3dc0ad12f974d7cc6f5121c581057ecd03ed02f0066feff",
+      "native_sha256": "c1ebbd29dc4c30f2ae275bf8202472c1c922a28add4e3efd4c87df843409856a"
+    },
+    {
+      "request_id": 31,
+      "status": 0,
+      "archive": "service/requests/31.success.tar.gz",
+      "sha256": "e36f12dae1bbdfd3e6ab95a2f3e0d4dee8a2d35a2685533eea93c04281c368aa",
+      "native_sha256": "0d11cf3d4cb8bc731ec434d53906e09a2b3aa78288db46faa37e67859a2a34ea"
+    },
+    {
+      "request_id": 32,
+      "status": 0,
+      "archive": "service/requests/32.success.tar.gz",
+      "sha256": "54d441987edfdffb92ccf832a3307f143d19c3f913de2a8f47d9e4c80926d600",
+      "native_sha256": "0d11cf3d4cb8bc731ec434d53906e09a2b3aa78288db46faa37e67859a2a34ea"
+    },
+    {
+      "request_id": 33,
+      "status": 0,
+      "archive": "service/requests/33.success.tar.gz",
+      "sha256": "b812e2f62fe8579aeb943f4dc887d0e89858b9a37ad327e2675d08bd4ad0207c",
+      "native_sha256": "0d11cf3d4cb8bc731ec434d53906e09a2b3aa78288db46faa37e67859a2a34ea"
+    },
+    {
+      "request_id": 34,
+      "status": 0,
+      "archive": "service/requests/34.success.tar.gz",
+      "sha256": "76ebcefbec55aab5878b507b75148c6c977b20230fcdf92be1f95d5ee9f21ffc",
+      "native_sha256": "0039873bed0be49a4692d321306f21b3cd0961c29e2ec3f478029609c1709d45"
+    },
+    {
+      "request_id": 35,
+      "status": 0,
+      "archive": "service/requests/35.success.tar.gz",
+      "sha256": "e21e25e7981b9556e28ac41c76dffd4c1b238bccb84d8604a1ac89e4c91b5edf",
+      "native_sha256": "0039873bed0be49a4692d321306f21b3cd0961c29e2ec3f478029609c1709d45"
+    },
+    {
+      "request_id": 36,
+      "status": 0,
+      "archive": "service/requests/36.success.tar.gz",
+      "sha256": "0221477abefa6c72a9f8a772fe2523881b36082cf3bec95f013760e26056ca6f",
+      "native_sha256": "0039873bed0be49a4692d321306f21b3cd0961c29e2ec3f478029609c1709d45"
+    },
+    {
+      "request_id": 37,
+      "status": 0,
+      "archive": "service/requests/37.success.tar.gz",
+      "sha256": "5cc842c171bce2834ee9fcfdaca96c75360e9c38cf75cc52cfabaa13c8598685",
+      "native_sha256": "6642186521b29ffff6c014a76c25d6835d07b45045aa6f2236fd1c1a91c63d8a"
+    },
+    {
+      "request_id": 38,
+      "status": 0,
+      "archive": "service/requests/38.success.tar.gz",
+      "sha256": "c8fa9d10d72c0a1a6f1455363eeeb4387aeccf61e567c962b36f4110341dee64",
+      "native_sha256": "6642186521b29ffff6c014a76c25d6835d07b45045aa6f2236fd1c1a91c63d8a"
+    },
+    {
+      "request_id": 39,
+      "status": 0,
+      "archive": "service/requests/39.success.tar.gz",
+      "sha256": "6b8065c39476f11e9802e13e5429843085c620e3476577eb85e83a81d5021767",
+      "native_sha256": "6642186521b29ffff6c014a76c25d6835d07b45045aa6f2236fd1c1a91c63d8a"
+    },
+    {
+      "request_id": 40,
+      "status": 0,
+      "archive": "service/requests/40.success.tar.gz",
+      "sha256": "72ac3ace02ae3d2a992e7b9557e77ec3c9ee976aa8696d2499db5de1a24b29d3",
+      "native_sha256": "6b6bcfc6519f3474f4dc2a7e886f3469081e1fa09d019ee4e204d0f84e47d695"
+    },
+    {
+      "request_id": 41,
+      "status": 0,
+      "archive": "service/requests/41.success.tar.gz",
+      "sha256": "35586d6c6184faee36e4e1291eb8a9788d3f871a85999388e1537e2bf0074668",
+      "native_sha256": "6b6bcfc6519f3474f4dc2a7e886f3469081e1fa09d019ee4e204d0f84e47d695"
+    },
+    {
+      "request_id": 42,
+      "status": 0,
+      "archive": "service/requests/42.success.tar.gz",
+      "sha256": "6d33b0d0e8699d85c1377e66371cb3de31e4b5fb0e8c60afdc4312e3038c1896",
+      "native_sha256": "6b6bcfc6519f3474f4dc2a7e886f3469081e1fa09d019ee4e204d0f84e47d695"
+    },
+    {
+      "request_id": 43,
+      "status": 0,
+      "archive": "service/requests/43.success.tar.gz",
+      "sha256": "8f49ab775ea330fd7e4f3f1e5eea36e902cfe56cbc1fc391221ab37fe86e6388",
+      "native_sha256": "6efc565cf941125069ab4206d80348a3ed18b184b619642c7afc16d7d626bb6c"
+    },
+    {
+      "request_id": 44,
+      "status": 0,
+      "archive": "service/requests/44.success.tar.gz",
+      "sha256": "18c95652fb21329c3beb3ea46f7c9579931d61f71545b3fd7d5aa5f2473d4cce",
+      "native_sha256": "6efc565cf941125069ab4206d80348a3ed18b184b619642c7afc16d7d626bb6c"
+    },
+    {
+      "request_id": 45,
+      "status": 0,
+      "archive": "service/requests/45.success.tar.gz",
+      "sha256": "53613d60a13ecdb8852e1507e69b3fb9f4d3e7ac1f9a8f0ac1180a62cb75f504",
+      "native_sha256": "6efc565cf941125069ab4206d80348a3ed18b184b619642c7afc16d7d626bb6c"
+    },
+    {
+      "request_id": 46,
+      "status": 0,
+      "archive": "service/requests/46.success.tar.gz",
+      "sha256": "c403ec1da0a9c69f6e92de5324ae8cb5aaf61c109b3988149d10fd4f1edaf87d",
+      "native_sha256": "dbb79507f4e0abda24c2f4b3e64dcb97fb24a2a53964418d28c3e956bff3e06a"
+    },
+    {
+      "request_id": 47,
+      "status": 0,
+      "archive": "service/requests/47.success.tar.gz",
+      "sha256": "f0a1e9c7c63a56e16d8117b1e7836a4510b21e5c50ef1b6d5823fa8ada4f30cf",
+      "native_sha256": "dbb79507f4e0abda24c2f4b3e64dcb97fb24a2a53964418d28c3e956bff3e06a"
+    },
+    {
+      "request_id": 48,
+      "status": 0,
+      "archive": "service/requests/48.success.tar.gz",
+      "sha256": "92dff6bda8d5589418a04e0a143e68e60c242a9014df69d9d399f63059c9e627",
+      "native_sha256": "dbb79507f4e0abda24c2f4b3e64dcb97fb24a2a53964418d28c3e956bff3e06a"
+    },
+    {
+      "request_id": 49,
+      "status": 0,
+      "archive": "service/requests/49.success.tar.gz",
+      "sha256": "eed05029f8ee11be440243a43b9b0fd9bff5faa25cce3dc888e1718928c06635",
+      "native_sha256": "f8e1433423507b6ad462e124f40fb8a8888699d3e75fcd3642553f71687f6201"
+    },
+    {
+      "request_id": 50,
+      "status": 0,
+      "archive": "service/requests/50.success.tar.gz",
+      "sha256": "169933511deec77503308d83e8d97bdfcd99c1723e7f8fc5afbf7872d7ac0874",
+      "native_sha256": "f8e1433423507b6ad462e124f40fb8a8888699d3e75fcd3642553f71687f6201"
+    },
+    {
+      "request_id": 51,
+      "status": 0,
+      "archive": "service/requests/51.success.tar.gz",
+      "sha256": "52d67987451138bd31da944784d094db8c31ad7ec2a1ac0cddce7f67d387139e",
+      "native_sha256": "f8e1433423507b6ad462e124f40fb8a8888699d3e75fcd3642553f71687f6201"
+    },
+    {
+      "request_id": 52,
+      "status": 0,
+      "archive": "service/requests/52.success.tar.gz",
+      "sha256": "893508a38140ecae0e12f1f1cfdedcb1e99b5c6d741e04f851e9c28b17581b89",
+      "native_sha256": "6435841f269d5a63f36aa53f724d012900c945e040ee154c8a62fd63c3c5f390"
+    },
+    {
+      "request_id": 53,
+      "status": 0,
+      "archive": "service/requests/53.success.tar.gz",
+      "sha256": "d3b8dabbd6f3112510b63416238c95c0876bd0fbb33779ae5bb7dbe338a9f564",
+      "native_sha256": "6435841f269d5a63f36aa53f724d012900c945e040ee154c8a62fd63c3c5f390"
+    },
+    {
+      "request_id": 54,
+      "status": 0,
+      "archive": "service/requests/54.success.tar.gz",
+      "sha256": "77da8d9c2ee6d3d0c279f555ab2b589797d8c0a065147ff43d5caeaab774b64d",
+      "native_sha256": "6435841f269d5a63f36aa53f724d012900c945e040ee154c8a62fd63c3c5f390"
+    },
+    {
+      "request_id": 55,
+      "status": 0,
+      "archive": "service/requests/55.success.tar.gz",
+      "sha256": "1177bee3e3806b7abec6f1b5d6aa8346a004cf2db9e2930df44f03f6830f3dc9",
+      "native_sha256": "16f99add3d379da858eec67e98fba1cb09aec83e6197169537cd068804bbad0c"
+    },
+    {
+      "request_id": 56,
+      "status": 0,
+      "archive": "service/requests/56.success.tar.gz",
+      "sha256": "108aec984f43118603e72ef09eebfc3add69c695c139d84ed516b205b87835a1",
+      "native_sha256": "16f99add3d379da858eec67e98fba1cb09aec83e6197169537cd068804bbad0c"
+    },
+    {
+      "request_id": 57,
+      "status": 0,
+      "archive": "service/requests/57.success.tar.gz",
+      "sha256": "85c016837df95a01a98e9f4cb612bd24c15b835331a5e29ad71f154afd2de114",
+      "native_sha256": "16f99add3d379da858eec67e98fba1cb09aec83e6197169537cd068804bbad0c"
+    },
+    {
+      "request_id": 58,
+      "status": 0,
+      "archive": "service/requests/58.success.tar.gz",
+      "sha256": "cef5f2c5a60bdb82bf28849bb46dd339a8fbdeecf52a683316d45d7a0231d6f7",
+      "native_sha256": "3b8222f720bdf1b18811a27553b4cf6c7afc485d7d57b04aea24472d35472ee5"
+    },
+    {
+      "request_id": 59,
+      "status": 0,
+      "archive": "service/requests/59.success.tar.gz",
+      "sha256": "25158785116253d5c7ae845791bfc328e69c642a69eef2130867d2bbebf7b4d9",
+      "native_sha256": "3b8222f720bdf1b18811a27553b4cf6c7afc485d7d57b04aea24472d35472ee5"
+    },
+    {
+      "request_id": 60,
+      "status": 0,
+      "archive": "service/requests/60.success.tar.gz",
+      "sha256": "4c4e4c9e6d18c43f61bd940019d5fbf47a3d32126f5d046b7d50711bfb880200",
+      "native_sha256": "3b8222f720bdf1b18811a27553b4cf6c7afc485d7d57b04aea24472d35472ee5"
+    },
+    {
+      "request_id": 61,
+      "status": -5,
+      "archive": "service/requests/61.failure.tar.gz",
+      "sha256": "00e92fcbe7abd936263573efc865a931e9bd6108f2f7a668289bf82c36ced4ae",
+      "native_sha256": "b5d74a6bce6b658ae085b79e331eb3b94c72e1d4c5c234bb8a8e55b94f899d0f"
+    },
+    {
+      "request_id": 62,
+      "status": 0,
+      "archive": "service/requests/62.success.tar.gz",
+      "sha256": "cf7568f504d5399e45628e432e402976ba4ca061d71f9e14506ab85fac0979b3",
+      "native_sha256": "9a9e5807264be4db4162fdec537b70bf8dececfeefb770f2191fc31d1982a76c"
+    },
+    {
+      "request_id": 63,
+      "status": 0,
+      "archive": "service/requests/63.success.tar.gz",
+      "sha256": "0201ac2dd17d335d9d2d62896794a769f86a2cd8483e23f8716947e7571b1398",
+      "native_sha256": "9a9e5807264be4db4162fdec537b70bf8dececfeefb770f2191fc31d1982a76c"
+    },
+    {
+      "request_id": 64,
+      "status": 0,
+      "archive": "service/requests/64.success.tar.gz",
+      "sha256": "e297dea3de42d72cb6332d04a9a5236d881666facff6cbfcd36733e040db7603",
+      "native_sha256": "9a9e5807264be4db4162fdec537b70bf8dececfeefb770f2191fc31d1982a76c"
+    },
+    {
+      "request_id": 65,
+      "status": 0,
+      "archive": "service/requests/65.success.tar.gz",
+      "sha256": "1d4d4cfaab74abd22276aaef3b26623bd2f765e45468c950219d08f1ec23f2df",
+      "native_sha256": "ff54282bb817676e7817102ef1644a56d507259495076e31f48c7ee74e5d75a0"
+    },
+    {
+      "request_id": 66,
+      "status": 0,
+      "archive": "service/requests/66.success.tar.gz",
+      "sha256": "46a6a0ae660a8f7c5188c87d8368f20a1999af0d0d20a2937baeab2ddfaea5a2",
+      "native_sha256": "ff54282bb817676e7817102ef1644a56d507259495076e31f48c7ee74e5d75a0"
+    },
+    {
+      "request_id": 67,
+      "status": 0,
+      "archive": "service/requests/67.success.tar.gz",
+      "sha256": "320e91ec2ff032ead4539d9bd8ade1f5d85e06a190d2063f3c985fbe9c788af1",
+      "native_sha256": "ff54282bb817676e7817102ef1644a56d507259495076e31f48c7ee74e5d75a0"
+    },
+    {
+      "request_id": 68,
+      "status": 0,
+      "archive": "service/requests/68.success.tar.gz",
+      "sha256": "3185e60747f1ac46b99771256fe3cafe0d96e9915052026e9b1778de54639c73",
+      "native_sha256": "5ff16c53fc5bd6b2b0ef184be91cd8576e756be82a2649ba8d6bdfc8ff975eca"
+    },
+    {
+      "request_id": 69,
+      "status": 0,
+      "archive": "service/requests/69.success.tar.gz",
+      "sha256": "2edc0db8b324132ce77193d95fb31b5db42a1eb2e51d3d82f8c85db3d75fbf56",
+      "native_sha256": "5ff16c53fc5bd6b2b0ef184be91cd8576e756be82a2649ba8d6bdfc8ff975eca"
+    },
+    {
+      "request_id": 70,
+      "status": 0,
+      "archive": "service/requests/70.success.tar.gz",
+      "sha256": "6fe30e1eebf7bd52bcafcbd4a0f9a8926b35f2cccb4f8ca258886babe268ef5a",
+      "native_sha256": "5ff16c53fc5bd6b2b0ef184be91cd8576e756be82a2649ba8d6bdfc8ff975eca"
+    },
+    {
+      "request_id": 71,
+      "status": 0,
+      "archive": "service/requests/71.success.tar.gz",
+      "sha256": "3ed22d9854b4fb34ac47a4215c744dae59f5ef3f3a70d1b0a15800442a775272",
+      "native_sha256": "ba3d1a791f94a20b1a6876ab16be24edf910cc1ec6b10f39245f045629bae0b3"
+    },
+    {
+      "request_id": 72,
+      "status": 0,
+      "archive": "service/requests/72.success.tar.gz",
+      "sha256": "7aaec13a4be60c00f8fab14e0da3586b42bde2608ad0013cdfa694ac71c00c82",
+      "native_sha256": "ba3d1a791f94a20b1a6876ab16be24edf910cc1ec6b10f39245f045629bae0b3"
+    },
+    {
+      "request_id": 73,
+      "status": 0,
+      "archive": "service/requests/73.success.tar.gz",
+      "sha256": "b1ebae2341cc46ef8c3fcab9e0fa78392e08503fad786c73a3e4edf15ef0f79b",
+      "native_sha256": "ba3d1a791f94a20b1a6876ab16be24edf910cc1ec6b10f39245f045629bae0b3"
+    },
+    {
+      "request_id": 74,
+      "status": 0,
+      "archive": "service/requests/74.success.tar.gz",
+      "sha256": "62382a523f660ba13f019cd7ca83c6b075ec911b02b78bc9e32b6f003af26ff0",
+      "native_sha256": "20552e85ea79dbd7556e78fbd36076a71de827408b3d333debd5ee2c2d146256"
+    },
+    {
+      "request_id": 75,
+      "status": 0,
+      "archive": "service/requests/75.success.tar.gz",
+      "sha256": "2e7bb5618dd9356121a4380f3b763a155861e1acc35d2630b0e049daf957a176",
+      "native_sha256": "20552e85ea79dbd7556e78fbd36076a71de827408b3d333debd5ee2c2d146256"
+    },
+    {
+      "request_id": 76,
+      "status": 0,
+      "archive": "service/requests/76.success.tar.gz",
+      "sha256": "3fe4cfb2586793a677f648fef99a00486874284e4bf210f9dbef66f34caa3128",
+      "native_sha256": "20552e85ea79dbd7556e78fbd36076a71de827408b3d333debd5ee2c2d146256"
+    },
+    {
+      "request_id": 77,
+      "status": 0,
+      "archive": "service/requests/77.success.tar.gz",
+      "sha256": "0721bfb3792ea6bf6ca0b59e51e63b4dfc45ffd3a3ef96920961468f7f9eb531",
+      "native_sha256": "679bf638419b8dca97c675c7bedfa594e6d264cdf35753fe4f1cdd78130c1f14"
+    },
+    {
+      "request_id": 78,
+      "status": 0,
+      "archive": "service/requests/78.success.tar.gz",
+      "sha256": "fa0717476fc0f24e33a20352b8149d66acad89f03a9da09aabf5924d036095fd",
+      "native_sha256": "679bf638419b8dca97c675c7bedfa594e6d264cdf35753fe4f1cdd78130c1f14"
+    },
+    {
+      "request_id": 79,
+      "status": 0,
+      "archive": "service/requests/79.success.tar.gz",
+      "sha256": "e7d41494567305256f1273c469ad67f6377d0c914337262f8f411536050e31cd",
+      "native_sha256": "679bf638419b8dca97c675c7bedfa594e6d264cdf35753fe4f1cdd78130c1f14"
+    },
+    {
+      "request_id": 80,
+      "status": 0,
+      "archive": "service/requests/80.success.tar.gz",
+      "sha256": "5e8771748d192f83922774e28c52560a1b64eade3854fd2378256453f16d3a8f",
+      "native_sha256": "3f9bb4157fbc4c2b8b2854adf81e5103e39bdce817dfcbb24934a494fec4d5e6"
+    },
+    {
+      "request_id": 81,
+      "status": 0,
+      "archive": "service/requests/81.success.tar.gz",
+      "sha256": "6c180a407fd5516bc62634baad2a329acb915c6dc771240f54344874d22f3659",
+      "native_sha256": "3f9bb4157fbc4c2b8b2854adf81e5103e39bdce817dfcbb24934a494fec4d5e6"
+    },
+    {
+      "request_id": 82,
+      "status": 0,
+      "archive": "service/requests/82.success.tar.gz",
+      "sha256": "d81dd31cb452458ba194adc2a7f4282b6e501aff3171bbfe3583e7071b91780c",
+      "native_sha256": "3f9bb4157fbc4c2b8b2854adf81e5103e39bdce817dfcbb24934a494fec4d5e6"
+    },
+    {
+      "request_id": 83,
+      "status": 0,
+      "archive": "service/requests/83.success.tar.gz",
+      "sha256": "8c941dcc9db21c28781ddff0dc055c06d28ee0823399fa5edafdccd2acf76dc6",
+      "native_sha256": "15079ed0a4168927dd14343825dcdb52f33f4fa50f896a6a131b3bf9a4193fca"
+    },
+    {
+      "request_id": 84,
+      "status": 0,
+      "archive": "service/requests/84.success.tar.gz",
+      "sha256": "08c368dec35c8daf9e795824f0bb4990fbc31ffc2900c9de5104d52ca30c09a0",
+      "native_sha256": "15079ed0a4168927dd14343825dcdb52f33f4fa50f896a6a131b3bf9a4193fca"
+    },
+    {
+      "request_id": 85,
+      "status": 0,
+      "archive": "service/requests/85.success.tar.gz",
+      "sha256": "8182f0c1c1157113425092b65b478aa80a9873a0fdef5ba6239b95e659b1939f",
+      "native_sha256": "15079ed0a4168927dd14343825dcdb52f33f4fa50f896a6a131b3bf9a4193fca"
+    }
+  ],
+  "captured_source_identity_sets": {
+    "/workspaces/repository/kprog/trusted_service.py": {
+      "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f": 85
+    },
+    "/workspaces/repository/kprog/trusted_generation.py": {
+      "0d4673a7fe500e22fe1709668b6c795e6ad77943a9180e9cdd29bee1782effb4": 85
+    },
+    "/workspaces/repository/kprog/x86/trusted_specializer.py": {
+      "b49b5a4883b1d6f33c440ebdaf2e2a13049efdd1652ece9121673507cffc12b7": 85
+    },
+    "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": {
+      "4fe6817022a81eaf529235979a9d0f0c237e972ae16ede5f5164b524ba5ac307": 64,
+      "47fb55656f2951df3581f5fa1695f720138ae0ab1881ec1a21d359d0587fd34a": 21
+    },
+    "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": {
+      "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137": 85
+    },
+    "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": {
+      "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843": 85
+    },
+    "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": {
+      "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841": 85
+    },
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": {
+      "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd": 85
+    },
+    "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": {
+      "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2": 85
+    }
+  },
+  "reviewed_current_source_sha256": {
+    "kprog/trusted_service.py": "1fcc72228fd17cefbc4cfde78551e30039d7a2f4847170e0e996ebee6606428f",
+    "Makefile": "f7db79eb3ac92af1de7d1e3688c6d8bac4d54e3a24281eb4a0ae311a5abd2311"
+  },
+  "current_service_source_matches_all85_captured_physical_service_source_pins": true,
+  "lifecycle_source_evidence": [
+    "run_application waits for subprocess.run(args.run) before entering cleanup.",
+    "It rejects service exit observed before application return.",
+    "Cleanup waits for the terminal request flock, sends SIGTERM to the idle service, waits and archives all request records.",
+    "Archive service_returncode -15 alone does not show premature termination; 85 terminal records and the last request completion before summary contradict the first-request claim."
+  ],
+  "failure_class": "Only request61 cilium_socket_lb_service_select_xdp failed: generated proof compiled, actual verifier rejects R0 invalid mem access scalar after 105 processed insns. Requests62..85 all succeeded.",
+  "evidence_archive": "micro-service-lifetime-review-inputs.tar.gz",
+  "evidence_archive_sha256": "ed95fac941f0edf14838899266bd9f4ab99754814a2f6dc423237c92656b331f",
+  "limitations": [
+    "Read-only service-lifetime/raw-request audit; no new VM, timing measurement, bootstrap change or proof-upload exemption.",
+    "Status0 is a service/kernel completion record, not independently checked application workload behavior or a per-program TV certificate.",
+    "Captured source pins identify physical files; this review does not independently observe Python imported bytecode. Header/source identity sets are retained rather than claimed frozen.",
+    "Original3MB owner archive was untracked at review; exact decisive raw summary/request log/service log and failure stderr are retained here without duplicating all compiled objects."
+  ]
+}
