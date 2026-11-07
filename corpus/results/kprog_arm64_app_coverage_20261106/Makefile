@@ -794,3 +794,7 @@ trusted-context-memory-safety-run:
 
 trusted-context-memory-katran-run:
 	PYTHONDONTWRITEBYTECODE=1 python3 $(HERE)/trusted_context_memory.py host katran
+
+.PHONY: trusted-bcc-arm64-run
+trusted-bcc-arm64-run:
+	PYTHONDONTWRITEBYTECODE=1 python3 $(HERE)/trusted_service_arm64.py host bcc

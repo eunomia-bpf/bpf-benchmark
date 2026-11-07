@@ -70,6 +70,38 @@ def katran(live):
             (live / "work.json").write_text(json.dumps(work, indent=2) + chr(10))
 
 
+def bcc(live):
+    """Reuse the retained standard two-start corpus.driver recipe unchanged."""
+    import shutil
+    os.environ.update(BPFREJIT_REPO_ARTIFACT_ROOT="/artifacts/user/repo-artifacts/arm64",
+        BPFREJIT_KERNEL_MODULES_ROOT=str(ROOT / "vendor/build/arm64/linux/modules-install"),
+        BPFREJIT_NATIVE_LOADER_SO=str(LOADER / "libnative_loader.so"),
+        BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF="1",
+        BPFREJIT_SHIM_NATIVE_MANIFEST=str(live / "native-only-manifest.json"),
+        BPFREJIT_KEEP_ALL_WORKDIRS="1")
+    os.environ.pop("BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF", None)
+    command = ["sh", "/qemu-run.sh"]
+    work = dict(command=command)
+    try:
+        with (live / "corpus.log").open("w") as output:
+            done = subprocess.run(command, stdout=output, stderr=subprocess.STDOUT)
+        work["returncode"] = done.returncode
+        done.check_returncode()
+    finally:
+        boot = Path("/proc/sys/kernel/random/boot_id").read_text().strip()
+        work["corpus_metadata"] = []
+        for path in sorted((ROOT / "corpus/results").glob("arm64_qemu_corpus_*/metadata.json")):
+            metadata = json.loads(path.read_text())
+            if metadata.get("launcher_boot_id") == boot:
+                work["corpus_metadata"].append(dict(path=str(path), status=metadata["status"],
+                    error_message=metadata.get("error_message")))
+                shutil.copytree(path.parent, live / "corpus-results" / path.parent.name)
+        requests = live / "requests/requests.jsonl"
+        work["completed_requests"] = [json.loads(line) for line in requests.read_text().splitlines()] if requests.exists() else []
+        (live / "work.json").write_text(json.dumps(work, indent=2) + chr(10))
+    return dict(app="bcc/set", **work)
+
+
 def guest(live, case="control"):
     """Use C's unchanged broker and T's unchanged portable application client."""
     live = Path(live)
@@ -98,8 +130,8 @@ def guest(live, case="control"):
         ready = event()
         if not ready.get('ready') or ready['arch'] != 2:
             raise RuntimeError('ARM common service did not register')
-        if case == "katran":
-            summary.update(katran(live), ok=True)
+        if case in {"katran", "bcc"}:
+            summary.update((katran if case == "katran" else bcc)(live), ok=True)
         else:
             result = subprocess.run([LOADER / 'trusted-service-client', LOADER / 'trusted-native.o'],
                 text=True, capture_output=True)
@@ -125,6 +157,9 @@ def guest(live, case="control"):
                 if service.poll() is None:
                     raise
         service.wait(); reader.join()
+        with (live / 'kernel.log').open('w') as output:
+            subprocess.run(['dmesg'], stdout=output, stderr=subprocess.STDOUT, check=True)
+        (live / 'meminfo.txt').write_text(Path('/proc/meminfo').read_text())
         summary['finished'] = datetime.now(timezone.utc).isoformat()
         (live / 'guest.json').write_text(json.dumps(summary, indent=2) + chr(10))
 
@@ -133,7 +168,7 @@ def host(case="control"):
     """Mount the retained runtime read-only; use the new canonical Image/module."""
     build = ROOT / 'kprog/arm64/build/trusted-transport'
     build.mkdir(exist_ok=True)
-    out = HERE / ('trusted-arm64-katran-result' if case == 'katran' else 'trusted-arm64-service-result')
+    out = HERE / ('trusted-arm64-' + case + '-result' if case in {'katran', 'bcc'} else 'trusted-arm64-service-result')
     out.mkdir(exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
     archive = out / ('run-' + stamp + '.tar.gz')
@@ -143,8 +178,8 @@ def host(case="control"):
         image = ROOT / 'vendor/build/arm64/linux/arch/arm64/boot/Image'
         module = ROOT / 'kinsn/module/arm64/build/bpf_arm64_native_lab.ko'
         root = ROOT / 'kprog/arm64/build/app-runtime-v35/root'
-        argv = ['taskset', '-c', '20-23', 'qemu-system-aarch64', '-M', 'virt',
-            '-cpu', 'max', '-smp', '8' if case == 'katran' else '2', '-m', '8192' if case == 'katran' else '4096' if case == 'katran' else '2048', '-nographic', '-no-reboot',
+        argv = ['taskset', '-c', '8-11', 'qemu-system-aarch64', '-M', 'virt',
+            '-cpu', 'max', '-smp', '8' if case in {'katran', 'bcc'} else '2', '-m', '8192' if case in {'katran', 'bcc'} else '2048', '-nographic', '-no-reboot',
             '-kernel', str(image), '-fsdev',
             'local,id=rootfs,path=' + str(root) + ',security_model=none,readonly=on',
             '-device', 'virtio-9p-device,fsdev=rootfs,mount_tag=rootfs',
@@ -157,6 +192,7 @@ def host(case="control"):
             ROOT / 'kprog/arm64/trusted_specializer.py',
             ROOT / 'kprog/arm64/arm64_sim_local_bpf.h', ROOT / 'kprog/arm64/arm64_sim.h',
             ROOT / 'kprog/arm64/micro-prog/generate_micro_sim_proofs.py',
+            ROOT / 'kprog/arm64/micro-prog/arm64_abi.py', ROOT / 'kprog/arm64/arm64_sim_direct.h',
             ROOT / 'kinsn/module/include/native_lab_trusted_wire.h', Path(__file__)]
         if case == 'katran':
             inputs.extend([ROOT / 'bpfopt/shim/build-arm64/libbpfrejit_shim.so', LOADER / 'libnative_loader.so',
@@ -166,6 +202,27 @@ def host(case="control"):
                 ROOT / 'runner/libs/app_runners/katran.py',
                 ROOT / 'vendor/build/arm64/linux/Module.symvers',
                 ROOT / 'vendor/build/arm64/linux/modules-install/lib/modules' / (ROOT / 'vendor/build/arm64/linux/include/config/kernel.release').read_text().strip() / 'modules.dep'])
+        if case == 'bcc':
+            manifest = ROOT / 'kprog/arm64/build/app-verified-stage/bcc/manifest.json'
+            data = json.loads(manifest.read_text())
+            inputs.append(manifest)
+            for row in data['objects']:
+                for key in ['simulator_object', 'simulator_program']:
+                    row.pop(key, None)
+                native = (manifest.parent / row['native_object']).resolve()
+                row['native_object'] = str(native)
+                inputs.append(native)
+            (live / 'native-only-manifest.json').write_text(json.dumps(data, indent=2) + chr(10))
+            inputs.extend([root / 'qemu-run.sh', root / 'qemu-init',
+                ROOT / 'bpfopt/shim/build-arm64/libbpfrejit_shim.so', LOADER / 'libnative_loader.so',
+                ROOT / 'corpus/driver.py', ROOT / 'runner/libs/app_runners/bcc_set.py',
+                ROOT / 'runner/libs/app_runners/bcc.py'])
+            inputs.extend(root / 'usr/local/bin' / name for name in
+                ['capable', 'biosnoop', 'vfsstat', 'opensnoop', 'syscount', 'tcpconnect', 'tcplife', 'runqlat'])
+            inputs.extend([ROOT / 'runner/libs/app_runners/native_loader_env.py',
+                ROOT / 'corpus/config/macro_apps.yaml', ROOT / 'corpus/config/benchmark_config.yaml'])
+            inputs = list(dict.fromkeys(inputs))
+        inputs.extend(sorted((ROOT / 'kprog/formal/generated').glob('*.h')))
         summary['command'] = argv
         summary['hashes_before'] = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}
         (live / 'inputs.json').write_text(json.dumps(summary, indent=2) + chr(10))
@@ -189,10 +246,14 @@ def host(case="control"):
                             'insmod ' + str(module),
                             'cd ' + str(ROOT),
                         ]
-                        if case == 'katran':
+                        if case in {'katran', 'bcc'}:
                             commands.append('mount --bind ' + str(ROOT / 'bpfopt/shim/build-arm64/libbpfrejit_shim.so') + ' /usr/local/lib/bpfrejit/libbpfrejit_shim.so')
+                        if case == 'bcc':
+                            commands.extend(['mount -t bpf bpffs /sys/fs/bpf',
+                                'mount -t tmpfs -o mode=1777 tmpfs /var/tmp',
+                                'install -d -m1777 /dev/shm', 'mount -t tmpfs -o mode=1777 tmpfs /dev/shm', 'ulimit -l unlimited'])
                         commands.extend([
-                            'PATH=/usr/lib/llvm-18/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin PYTHONDONTWRITEBYTECODE=1 python3 ' + str(Path(__file__)) + ' guest ' + str(live) + ' ' + case])
+                            'PATH=' + str(ROOT / 'runner/build-arm64-llvmbpf') + ':/usr/lib/llvm-18/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin PYTHONDONTWRITEBYTECODE=1 python3 ' + str(Path(__file__)) + ' guest ' + str(live) + ' ' + case])
                         qemu.stdin.write((' && '.join(commands) + '; rc=$?; echo $rc > ' + str(live / 'guest.exit') + '; echo o > /proc/sysrq-trigger' + chr(10)).encode())
                         qemu.stdin.flush(); booted = True
             summary['qemu_returncode'] = qemu.wait()
@@ -217,10 +278,10 @@ def host(case="control"):
 if __name__ == '__main__':
     if len(sys.argv) in (2, 3) and sys.argv[1] == 'host':
         case = sys.argv[2] if len(sys.argv) == 3 else 'control'
-        if case not in {'control', 'katran'}:
+        if case not in {'control', 'katran', 'bcc'}:
             raise SystemExit('unknown case')
         host(case)
     elif len(sys.argv) in (3, 4) and sys.argv[1] == 'guest':
         guest(sys.argv[2], sys.argv[3] if len(sys.argv) == 4 else 'control')
     else:
-        raise SystemExit('usage: trusted_service_arm64.py host [katran] | guest LIVE [katran]')
+        raise SystemExit('usage: trusted_service_arm64.py host [katran|bcc] | guest LIVE [katran|bcc]')

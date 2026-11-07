@@ -53,3 +53,22 @@ for source pins, comparison code, compiler artifacts and logs. This establishes
 these exact artifact comparisons; a new canonical BCC guest run and all-six-app
 acceptance remain pending. Existing dated candidate scripts/archives describe the
 historical private replay; the supported producer is `kprog/arm64/trusted_specializer.py`.
+
+## Standard BCC trusted-service replay
+
+Run `make -f corpus/results/kprog_arm64_app_coverage_20261106/Makefile trusted-bcc-arm64-run`.
+This reuses the existing readonly v35 runtime's `/qemu-run.sh` and standard
+`corpus.driver` BCC set (eight tools, two starts, existing four stressors,
+one sample/two seconds). The canonical ARM worker receives only kernel-copied
+native requests. The application manifest contains native identities and source
+matching facts, with proof filenames removed; no prebuilt-proof requirement is
+set. The current loader, kernel and module are reused. The guest has8 GiB/eight
+vCPUs on host8-11; timing is functional only. Raw corpus results, service request
+archives, kernel log and memory snapshot are collected under
+`../../trusted-arm64-bcc-result/`. Runtime completion is pending.
+
+The first BCC bootstrap exited32 before service/application startup because the
+kernel-mounted `/dev` lacked `/dev/shm`. The transport now creates that tmpfs
+mount point, as the standard init does. Its zero-request failure summary and
+raw archive are retained in `trusted-arm64-bcc-result/`; it is not an application
+acceptance result.
