@@ -922,3 +922,11 @@ ten existing semantic/route hosts passed336,5632,256,21688,136,1115374,225292,
 placeholders, new tests, input filtering or runtime/generator/oracle/ISA changes.
 Original compiler warnings remain visible. A subsequent immutable full check
 will include this extension; the ongoing exact96dac03b8 check predates it.
+
+Exact `96dac03b8960700355201726f4ee856f969baf49` completed the full
+`make -C kprog/formal check` with exit **0**, including actual register bytes,
+SP source binding and the leading dispatcher step, plus every prior Lean,
+contract, reference/wire/compiler and C semantic check. The immutable source/cache
+export was deleted automatically; compressed CALL CPU observations retain this
+440-case run. The later uniform-byte ALU composition is a separate increment
+and requires its own subsequent full check; no full77/72/O2/O4 claim follows.
