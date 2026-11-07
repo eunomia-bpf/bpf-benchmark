@@ -816,18 +816,29 @@ def returnStep (release : BitVec 16) (s : State) : Transition State :=
         ⟨{ s with gpr := fun r => if r = 4 then s.gpr 4 + 8 + release.setWidth 64 else s.gpr r, pc := target }, [read], none⟩
       else ⟨s, [read, .fault (.nonCanonical target)], some (.nonCanonical target)⟩
 
-/-- Long-mode LEAVE64 (C9), Intel SDM Vol2A 3-597/598:
+/-- Flat long-mode stack profile, with LASS disabled (its user/supervisor
+policy is not imported from the hardware replay host). Every byte of the
+implicit frame read must have a canonical linear
+address under the same48/57-bit paging profile as CALL/RET. Byte addresses
+wrap at64 bits exactly as in the shared memory model. The incoming old RSP
+is not an address operand of LEAVE. -/
+def leave64FrameCanonical (s : State) : Bool :=
+  canonicalTarget s.addressWidth (s.gpr 5) &&
+  canonicalTarget s.addressWidth (s.gpr 5 + 7)
+
+/-- Long-mode LEAVE64 (C9), Intel SDM Vol2A3-597/598:
 https://cdrdv2-public.intel.com/812383/253666-sdm-vol-2a.pdf
-The implicit eight-byte read is at incoming RBP, not old RSP. Commit both
-registers only after it succeeds. F's8192 real C9 observations confirm that
-read faults preserve ALL incoming GPRs, including old RSP/RBP. Exception
-signal/trap delivery (including RF) is outside this instruction transition;
-the shared memory fault abstracts the failed stack read, as for POP. -/
+A noncanonical stack operand faults before a memory read. Commit RSP/RBP
+only after the incoming-RBP8 read succeeds. F's hardware receipt confirms
+ALL-GPR rollback on faults, including old RSP/RBP. Delivery RF and concrete
+OS trap metadata remain outside the architectural instruction transition. -/
 def leave64Step (nextPc : Word) (s : State) : Transition State :=
-  match readMemory s.memory (s.gpr 5) 8 with
-  | .error fault => ⟨s, [.fault fault], some fault⟩
-  | .ok (value, event) =>
-      ⟨{ s with gpr := (fun r => if r = 4 then s.gpr 5 + 8 else if r = 5 then value else s.gpr r), pc := nextPc }, [event], none⟩
+  if leave64FrameCanonical s then
+    match readMemory s.memory (s.gpr 5) 8 with
+    | .error fault => ⟨s, [.fault fault], some fault⟩
+    | .ok (value, event) =>
+        ⟨{ s with gpr := (fun r => if r = 4 then s.gpr 5 + 8 else if r = 5 then value else s.gpr r), pc := nextPc }, [event], none⟩
+  else ⟨s, [.fault (.nonCanonical (s.gpr 5))], some (.nonCanonical (s.gpr 5))⟩
 
 /-- One architectural instruction with its decoded fall-through address.
 Effective-address decoding supplies the memory source address; reads remain
@@ -1599,21 +1610,31 @@ theorem leave64_decode (s : State) :
 
 /-- Complete successful LEAVE result, retaining the original ordered read. -/
 theorem leave64_read_success (nextPc value : Word) (event : Event) (s : State)
+    (canonical : leave64FrameCanonical s = true)
     (read : readMemory s.memory (s.gpr 5) 8 = .ok (value, event)) :
     step (.leave64 nextPc) s =
       ⟨{ s with gpr := (fun r => if r = 4 then s.gpr 5 + 8 else if r = 5 then value else s.gpr r), pc := nextPc }, [event], none⟩ := by
-  simp only [step, leave64Step, read]
+  simp only [step, leave64Step, canonical, ↓reduceIte, read]
 
 /-- A failed frame read changes no architectural state, including old RSP. -/
 theorem leave64_read_fault (nextPc : Word) (fault : Fault) (s : State)
+    (canonical : leave64FrameCanonical s = true)
     (read : readMemory s.memory (s.gpr 5) 8 = .error fault) :
     step (.leave64 nextPc) s = ⟨s, [.fault fault], some fault⟩ := by
-  simp only [step, leave64Step, read]
+  simp only [step, leave64Step, canonical, ↓reduceIte, read]
 
 theorem leave64_unreadable (nextPc : Word) (s : State)
+    (canonical : leave64FrameCanonical s = true)
     (denied : permitted s.memory.readable (s.gpr 5) 8 = false) :
     step (.leave64 nextPc) s = ⟨s, [.fault (.read (s.gpr 5) 8)], some (.read (s.gpr 5) 8)⟩ := by
-  simp only [step, leave64Step, readMemory, denied, Bool.false_eq_true, ↓reduceIte]
+  simp only [step, leave64Step, canonical, readMemory, denied, Bool.false_eq_true, ↓reduceIte]
+
+/-- The stack-address fault has no read effect and changes no state. -/
+theorem leave64_noncanonical (nextPc : Word) (s : State)
+    (noncanonical : leave64FrameCanonical s = false) :
+    step (.leave64 nextPc) s =
+      ⟨s, [.fault (.nonCanonical (s.gpr 5))], some (.nonCanonical (s.gpr 5))⟩ := by
+  simp only [step, leave64Step, noncanonical, Bool.false_eq_true, ↓reduceIte]
 
 /-- Memory and all flags are preserved on every outcome; no delivery RF or
 write effect is manufactured by the ISA step. -/
@@ -1621,8 +1642,10 @@ theorem leave64_memory_flags (nextPc : Word) (s : State) :
     (step (.leave64 nextPc) s).state.memory = s.memory ∧
       (step (.leave64 nextPc) s).state.rflags = s.rflags := by
   simp only [step, leave64Step]
-  cases read : readMemory s.memory (s.gpr 5) 8 with
-  | error fault => exact ⟨rfl, rfl⟩
-  | ok pair => exact ⟨rfl, rfl⟩
+  split
+  · cases read : readMemory s.memory (s.gpr 5) 8 with
+    | error fault => exact ⟨rfl, rfl⟩
+    | ok pair => exact ⟨rfl, rfl⟩
+  · exact ⟨rfl, rfl⟩
 
 end KProgFormal.Reference.X86

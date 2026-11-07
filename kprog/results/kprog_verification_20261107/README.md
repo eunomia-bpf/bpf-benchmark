@@ -2076,3 +2076,46 @@ LEAVE boundary observations show why the private canonical-span candidate
 is not yet promoted: an actual userspace LASS profile adds stack faults for
 upper-canonical addresses. Fault-profile diagnosis remains separate; the
 strict original1024 fault-kind counterexamples stay preserved.
+
+## LEAVE fault precision at canonical gaps and address wrap
+
+The single canonical C9 step now checks incoming RBP and RBP+7 modulo2^64
+against the existing48/57-bit canonical-address profile before reading.
+A bad span emits nonCanonical at the frame start without a read or state
+change. A good span retains the same success or read-fault transition.
+There is no old-RSP check or nonwrapping restriction. Read-success, read-fault
+and unreadable lemmas now require the canonical-span premise; the new
+leave64_noncanonical lemma proves the address fault. Memory and every flag
+remain preserved on all outcomes. T must derive the address premise for
+caller-frame proofs. Earlier9fca snapshots remain historical evidence.
+
+F's original strict8192 replay failed1024 noncanonical-frame fault classes;
+that published failure stays unchanged. New same-static-observer data
+separates two33792-case profiles with independent DS/SS load controls. Direct
+V tabulation of all33792 no-LASS KVM records confirms zero state/memory
+differences: positive canonical-gap crossings1..7 give #SS before paging;
+upper-canonical start and all8 wrap groups give #PF. An early handwritten
+F notice incorrectly called wrap faults #SS. The obsolete nonwrap prototype
+and its interrupted owner-only build are archived, without a pass claim.
+The corrected rule preserves the actual wrap fault behavior.
+
+The host upper-half faults are separate from the guest no-LASS profile.
+[Intel's LASS specification, chapter9](https://cdrdv2-public.intel.com/819680/architecture-instruction-set-extensions-programming-reference.pdf)
+describes a user/supervisor policy before paging; no user-only address guard
+is imported into the kernel-payload ISA. This LEAVE profile explicitly
+disables LASS. Hardware here exercises48-bit mode, not active57-bit mode.
+No CPL0 platform equivalence or whole JIT/ABI proof is inferred. F owns
+independent same8192 and no-LASS33792 canonical replay, pending here.
+
+Default incremental lake build passes its378-job graph, including every
+library module and the relinked reference executable. All372 physical
+source/configuration pins remain stable. Six public-lemma axiom audits
+report only propext and Quot.sound. Prototype/correction/interruption details,
+final commands/logs/pins, raw-hardware tabulation and canonical diff are in
+the existing integration JSON/gzip. F's collector finalized summary metadata
+after the first raw tabulation; both hashes are retained and the actual raw
+streams/profile bytes stayed unchanged. No header/generator/oracle/test/
+configuration/paper edits. Full exact900 POPCNT compile EXIT2 and the separate
+CMOV-route unaligned-pointer UB remain open; no full-check or full77/72/O2/O4
+pass is claimed.
+Canonical SHA256:494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b.
