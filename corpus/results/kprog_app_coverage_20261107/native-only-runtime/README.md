@@ -231,3 +231,23 @@ it does not change application, guest or proof behavior. Historical diagnostic
 duplicate removal had already checked closed job state and byte-identical
 published archives, but its fuser command was invalid and is not open-file
 evidence. The correction and raw control results are in cleanup-checks.json.
+
+
+### Published self-XOR repair reaches verifier complexity limit
+
+Actual174434_111632 on published d30 header generates and compiles3 programs,
+accepts/binds2, then rejects perf_unwind_native at1000001 processed verifier
+instructions (limit1000000). max_states_per_insn31, total_states66201 and
+peak_states2666 are retained. No compiler OOM occurs; the prior pointer ^=
+pointer error is absent from this load log. The existing two accepted entries
+remain read_task_struct/perf_unwind_stop. This does not establish whole-app
+acceptance: startup fails before the other application loads and no native
+workload completes. No program is excluded or declared unsupported.
+
+otel-header-repair.json, input pins, driver log, complete result tree and
+service archive preserve all3 requests, exact generated C/ELFs, full kernel
+log and the946004-byte verifier log. The same12GiB/kernel/module/native
+input/Clang flags were used; no verifier limit, fuel, branch assertion or
+application code was changed. Both guest disk and exported image tar are
+absent after closure. Continue from this exact complexity rejection after
+the higher-priority micro shared-ELF repair.
