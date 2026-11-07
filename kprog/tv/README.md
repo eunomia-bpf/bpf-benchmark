@@ -1575,3 +1575,13 @@ store permissions are required. This extends the first-store component without
 changing earlier theorems or the ISA. The dated all-store-faults JSON/log records
 the checked certificate. Entry composition, context faults, relational/ABI and
 materialization obligations still remain; no unsafe native test was executed.
+
+### Packet body with arbitrary write permissions
+
+`packet_body_any_permissions` now covers every canonical write-permission
+assignment. The first failed store is derived from memory permissions; no guest
+write success/failure premise or branch outcome is assumed. Actual executions
+either reach nativePC60/B EXIT with return2 or preserve the exact first-fault
+prefix and full partial state. The selection function is proof-only and adds
+no artifact checks. Entry/context/private-frame/ABI and whole-program relational
+transport remain separate obligations. Evidence: dated body-any-permissions JSON/log.

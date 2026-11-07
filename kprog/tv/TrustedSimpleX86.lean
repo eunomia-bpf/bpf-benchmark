@@ -2337,6 +2337,94 @@ theorem all_store_fault_correspondence (env : BPF.Environment) (frame : Word)
           (initialization_store_agrees same (p.regs 2) (24910#64) 2)
           (p.regs 2+(2#64)) (188#64) 1) (p.regs 2+(3#64)) (0#64) 4
 
+
+/-- Proof-only description of the first failed actual store, or4 when all
+four writes succeed. Neither artifact gains a runtime test. -/
+def packetFirstFailure (m : Memory) (pointer : Word) : Nat :=
+  if packetStorePermission m pointer 0 then
+    if packetStorePermission m pointer 1 then
+      if packetStorePermission m pointer 2 then
+        if packetStorePermission m pointer 3 then 4 else 3
+      else 2
+    else 1
+  else 0
+
+/-- The actual canonical permissions determine one outcome; earlier writes
+are successful and no permission is assumed for any later access. -/
+theorem packet_first_failure_spec (m : Memory) (pointer : Word) :
+    let index := packetFirstFailure m pointer
+    index≤4 ∧
+    (index<4 → (∀ i<index, packetStorePermission m pointer i=true) ∧
+      packetStorePermission m pointer index=false) ∧
+    (index=4 → ∀ i<4, packetStorePermission m pointer i=true) := by
+  by_cases w0 : packetStorePermission m pointer 0=true <;>
+    by_cases w1 : packetStorePermission m pointer 1=true <;>
+    by_cases w2 : packetStorePermission m pointer 2=true <;>
+    by_cases w3 : packetStorePermission m pointer 3=true
+  all_goals simp_all [packetFirstFailure]
+  all_goals
+    intro i hi
+    have choices : i=0 ∨ i=1 ∨ i=2 ∨ i=3 := by omega
+    rcases choices with rfl | rfl | rfl | rfl <;> simp_all
+
+theorem packet_failure_index_agrees {frame : Word} {n : X86.State} {p : BPF.State}
+    (same : initializationAgreesOutside frame n.memory p.memory) (pointer : n.gpr 1=p.regs 2) :
+    packetFirstFailure n.memory (n.gpr 1)=packetFirstFailure p.memory (p.regs 2) := by
+  simp only [packetFirstFailure,packetStorePermission,same.2.1,pointer]
+
+def packetNativeOutcome (n : X86.State) (index : Nat) : X86.State :=
+  if index=4 then packetNativeFinal n else packetNativeFaultState n index
+
+def packetProofOutcome (p : BPF.State) (index : Nat) : BPF.State :=
+  if index=4 then proofExitFinal (packetProofFinal p) else packetProofFaultState p index
+
+def packetOutcomeEvents (pointer : Word) (index : Nat) : List Event :=
+  if index=4 then packetWriteEvents pointer else packetFaultEvents pointer index
+
+/-- Total packet-body correspondence for every permission assignment. The
+selection equation is computed from the existing canonical memory; it is not
+a branch outcome premise or an added check in B/native execution. -/
+theorem packet_body_any_permissions (env : BPF.Environment) (frame : Word)
+    (n : X86.State) (p : BPF.State) (index : Nat)
+    (nativePC : n.pc=35) (proofPC : p.pc=18) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2) (same : initializationAgreesOutside frame n.memory p.memory)
+    (selected : index=packetFirstFailure p.memory (p.regs 2)) :
+    index≤4 ∧
+    X86Path.Execution 0 native n (packetOutcomeEvents (p.regs 2) index) (packetNativeOutcome n index) ∧
+    Execution (initializedInstructionStep env) p (packetOutcomeEvents (p.regs 2) index) (packetProofOutcome p index) ∧
+    initializationAgreesOutside frame (packetNativeOutcome n index).memory (packetProofOutcome p index).memory ∧
+    (index=4 → (packetNativeOutcome n index).pc=60 ∧
+      (packetProofOutcome p index).halted=true ∧
+      (packetNativeOutcome n index).gpr 0=(packetProofOutcome p index).regs 0 ∧
+      (packetNativeOutcome n index).gpr 0=(2#64)) := by
+  have spec := packet_first_failure_spec p.memory (p.regs 2)
+  change packetFirstFailure p.memory (p.regs 2)≤4 ∧ _ at spec
+  rw [← selected] at spec
+  by_cases success : index=4
+  · have permissions := spec.2.2 success
+    obtain ⟨nrun,prun,memory,returns,npc,halted⟩ :=
+      packet_body_correspondence env frame n p nativePC proofPC active pointer same
+        (permissions 0 (by omega)) (permissions 1 (by omega))
+        (permissions 2 (by omega)) (permissions 3 (by omega))
+    refine ⟨spec.1,?_,?_,?_,?_⟩
+    · simpa only [packetOutcomeEvents,packetNativeOutcome,success,ite_true] using nrun
+    · simpa only [packetOutcomeEvents,packetProofOutcome,success,ite_true] using prun
+    · simpa only [packetNativeOutcome,packetProofOutcome,success,ite_true] using memory
+    · intro _
+      simp only [packetNativeOutcome,packetProofOutcome,success,ite_true]
+      refine ⟨npc,halted,returns,?_⟩
+      simp only [packetNativeFinal,packetNativeFourth,packetNativeThird,packetNativeSecond,packetNativeFirst,ite_true]
+  · have failed : index<4 := by omega
+    obtain ⟨prior,bad⟩ := spec.2.1 failed
+    obtain ⟨nrun,prun,memory⟩ :=
+      all_store_fault_correspondence env frame n p index failed nativePC proofPC active pointer same prior bad
+    refine ⟨spec.1,?_,?_,?_,?_⟩
+    · simpa only [packetOutcomeEvents,packetNativeOutcome,success,ite_false] using nrun
+    · simpa only [packetOutcomeEvents,packetProofOutcome,success,ite_false] using prun
+    · simpa only [packetNativeOutcome,packetProofOutcome,success,ite_false] using memory
+    · intro wrong
+      exact (success wrong).elim
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -2551,3 +2639,9 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.packet_all_native_store_faults
 
 #print axioms KProgTV.TrustedSimpleX86.all_store_fault_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.packet_first_failure_spec
+
+#print axioms KProgTV.TrustedSimpleX86.packet_failure_index_agrees
+
+#print axioms KProgTV.TrustedSimpleX86.packet_body_any_permissions

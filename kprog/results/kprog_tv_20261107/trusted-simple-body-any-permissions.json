@@ -1,0 +1,64 @@
+{
+  "status": "captured_packet_body_all_permission_assignments_checked",
+  "utc": "2026-11-07T12:26:12.402166+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorem": "KProgTV.TrustedSimpleX86.packet_body_any_permissions",
+  "scope": "Actual native35..60 and B18..36; first store fault or real EXIT for every canonical write-permission assignment.",
+  "claims": [
+    "first failed store index is forced by actual canonical permissions, not supplied as a branch outcome",
+    "no successful or failed guest-write permission premise",
+    "native and B compute same failure index from global permission equality and corresponding pointer",
+    "four successful writes imply actual real EXIT, nativePC60, halted B and identical return2",
+    "any first failure retains all preceding guest writes and exact address/size fault and complete partial state",
+    "outside-private36 memory values/init and global permissions remain related"
+  ],
+  "premises": [
+    "nativePC35/BPC18 and B active",
+    "nativeRCX/B r2 pointer equality",
+    "canonical global permissions and outside-private36 memory/init equality",
+    "selection equation merely names the computed first-failure index"
+  ],
+  "not_yet_claimed": [
+    "entry/guard-to-body composition without write assumptions",
+    "context-load faults",
+    "unconditional whole-program TV",
+    "whole-program relational/architectural transport",
+    "ABI/platform/return-boundary/original ELF materialization"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical prefix and audits",
+    "old_prefix_sha256": "2913938789306e776e38ee5aae87ffa5ce5c9fb90f018134b4d01079edb678ef",
+    "ISA_runtime_binding": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "mismatch_controls_rejected": 22,
+    "no_sorryAx": true,
+    "log_sha256": "fad670201b8394144ed872f8e0248b59c2bacaa19502baded50df8452ad2be38",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.packet_first_failure_spec": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.packet_failure_index_agrees": [
+        "propext"
+      ],
+      "KProgTV.TrustedSimpleX86.packet_body_any_permissions": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "trusted": [
+    "canonical ISA/memory and explicit B platform semantics",
+    "verifier soundness for eventual safety composition",
+    "kernel binding/capture/provenance",
+    "specialization/link service until whole-program TV",
+    "Lean kernel and reported axioms; prior entry theorem also uses Lean.ofReduceBool"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "4bac8482b517290382828ac448cb6e2f31f2d1a2122eb796888b90464c7a7089"
+  }
+}
