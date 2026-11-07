@@ -41,6 +41,55 @@ theorem Execution.append {State : Type} {step : BlockStep State}
   | refl => exact rest
   | next h _ ih => simpa [List.append_assoc] using Execution.next h (ih rest)
 
+
+/-- A deterministic terminal fault may repeat in a prefix relation that has
+no halted bit. It contributes only its already checked effects. -/
+theorem execution_checked_self_loops {State : Type} {step : BlockStep State}
+    (checked : Event → Prop) {s last : State} {trace : List Event}
+    (run : Execution step s trace last)
+    (quiet : ∀ events next, step s events next → next = s ∧ ∀ event ∈ events, checked event) :
+    ∀ event ∈ trace, checked event := by
+  revert quiet
+  induction run with
+  | refl => intro _ event inside; simp at inside
+  | next head rest ih =>
+      intro quiet
+      obtain ⟨same, allowed⟩ := quiet _ _ head
+      have tailQuiet := quiet
+      rw [← same] at tailQuiet
+      have tail := ih tailQuiet
+      intro event inside
+      rcases List.mem_append.mp inside with first | second
+      · exact allowed event first
+      · exact tail event second
+
+/-- Checking one complete deterministic execution checks every finite native
+prefix. The terminal condition covers both a real return and a first fault;
+it cannot authorize a new unchecked effect after that boundary. -/
+theorem execution_checked_of_complete {State : Type} {step : BlockStep State}
+    (deterministic : ∀ {s a t b u}, step s a t → step s b u → a = b ∧ t = u)
+    (checked : Event → Prop) {s terminal : State} {expected : List Event}
+    (complete : Execution step s expected terminal)
+    (allowed : ∀ event ∈ expected, checked event)
+    (quiet : ∀ events next, step terminal events next →
+      next = terminal ∧ ∀ event ∈ events, checked event)
+    {trace : List Event} {last : State} (run : Execution step s trace last) :
+    ∀ event ∈ trace, checked event := by
+  induction complete generalizing trace last with
+  | refl => exact execution_checked_self_loops checked run quiet
+  | next head suffix ih =>
+      cases run with
+      | refl => intro event inside; simp at inside
+      | next actualHead actualTail =>
+          obtain ⟨sameTrace, sameState⟩ := deterministic head actualHead
+          cases sameTrace
+          cases sameState
+          have tail := ih (fun event inside => allowed event (List.mem_append_right _ inside)) quiet actualTail
+          intro event inside
+          rcases List.mem_append.mp inside with first | second
+          · exact allowed event (List.mem_append_left _ first)
+          · exact tail event second
+
 /-- Native-to-proof simulation is the required direction: every native block,
 including either branch successor, has a matching proof execution. The reverse
 direction would allow verifier-only checks to hide unsafe native executions. -/
@@ -95,3 +144,5 @@ end KProgTV
 
 #print axioms KProgTV.validated_execution
 #print axioms KProgTV.native_effects_checked
+
+#print axioms KProgTV.execution_checked_of_complete

@@ -720,3 +720,23 @@ the existing entry premises. Exact inputs and successful Lean output are in
 results/kprog_tv_20261107/checked-entry-stores-return-*. Whole-invocation safety,
 CPU-profile and emitted-artifact binding remain to compose before declaring a
 whole-program certificate.
+
+`matched_invocation` now exhausts simple's guard outcomes and supplies exact
+native/proof traces and closed native terminal states. Using determinism,
+`every_native_prefix_checked` proves that EVERY finite native execution prefix
+has only events checked in the actual expanded B, under explicit verifier and
+platform soundness. `bound_native_prefix_checked` adds verifier acceptance,
+admitted proof entry and equality of the entire executed/validated Artifact;
+the executed native bytes and entry are used directly. Full state and private
+memory proofs above provide the concrete TV, rather than assuming TV as an
+unproved premise. The generic prefix theorem uses only propext; concrete
+axioms retain the existing reduction oracle and have no sorryAx.
+
+Remaining real-world trust/obligations are verifier/platform soundness, the
+canonical ISA's CPU fidelity and kernel/loader binding of actual invocation,
+entry/ABI and specialization inputs. The explicit split-pair CPU profile and
+mapped-context/private-frame premises must be established for the real load.
+These concrete conditional safety theorems do not yet claim that bridge, other
+programs' certificates or the producer-independent trusted loading component.
+Exact evidence is in results/kprog_tv_20261107/checked-simple-prefix-* and
+checked-simple-bound-prefix-final.log.

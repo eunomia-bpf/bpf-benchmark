@@ -1,0 +1,8 @@
+'KProgTV.validated_execution' depends on axioms: [propext]
+'KProgTV.native_effects_checked' depends on axioms: [propext]
+'KProgTV.execution_checked_of_complete' depends on axioms: [propext]
+'KProgTV.SimpleStoreCertificate.native_full_state' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.proof_full_state' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.matching_executions' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.including_faults' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.SimpleStoreCertificate.store_transition_relation' depends on axioms: [propext, Classical.choice, Quot.sound]

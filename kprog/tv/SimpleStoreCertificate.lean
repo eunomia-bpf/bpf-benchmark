@@ -220,7 +220,10 @@ theorem store_transition_relation (related : Memory → Memory → Prop)
         | .memory .write _ bytes _ => bytes.length < 8
         | .fault _ => True
         | _ => False) ∧
-      (nr.fault = none ↔ pr.state.pc = 27) := by
+      (nr.fault = none ↔ pr.state.pc = 27) ∧
+      (∀ reason, nr.fault = some reason →
+        ARM64Path.step 0 native nr.state = .ok ⟨nr.state, [.fault reason], some reason⟩ ∧
+        Event.fault reason ∈ nr.events) := by
   have related1 := storeRelated initial (pointer + (3#64)) 0 4
   have related2 := storeRelated related1 (pointer + (7#64)) 0 1
   have related3 := storeRelated related2 pointer 0x614e 2
@@ -261,7 +264,7 @@ Arbitrary unreadable/uninitialized bytes and wraparound pointers are included. -
 theorem including_faults (n : AArch64.State) (p : BPF.State) (pointer : Word)
     (env : BPF.Environment := noExternals) :
     ∃ result, nativeObserved n pointer = .ok result ∧ proofObserved n p pointer env = .ok result := by
-  obtain ⟨nr, pr, nativeRun, proofRun, _, _, memory, events, fault, pc, _, _⟩ :=
+  obtain ⟨nr, pr, nativeRun, proofRun, _, _, memory, events, fault, pc, _, _, _⟩ :=
     store_transition_relation (fun first second => first = second)
       (by
         intro first second same address value count

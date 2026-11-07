@@ -429,8 +429,11 @@ theorem store_with_spills (n : AArch64.State) (p : BPF.State) (pointer frame : W
       Execution SimpleCheckedPlatform.instructionStep
         (SimpleStoreCertificate.proofInitial { n with memory := p.memory } p pointer) pr.events pr.state ∧
       pr.events.filterMap (PrivateSpills.projectEvent frame) = nr.events ∧
-      (nr.fault = none ↔ pr.state.pc = 27) := by
-  obtain ⟨nr, pr, nativeRun, proofRun, nativeShape, proofShape, memory, events, fault, pc, short, complete⟩ :=
+      (nr.fault = none ↔ pr.state.pc = 27) ∧
+      (∀ reason, nr.fault = some reason →
+        ARM64Path.step 0 native nr.state = .ok ⟨nr.state, [.fault reason], some reason⟩ ∧
+        Event.fault reason ∈ nr.events) := by
+  obtain ⟨nr, pr, nativeRun, proofRun, nativeShape, proofShape, memory, events, fault, pc, short, complete, terminal⟩ :=
     SimpleStoreCertificate.store_transition_relation (PrivateSpills.AgreesOutside frame)
       (by
         intro first second related address value count
@@ -441,7 +444,7 @@ theorem store_with_spills (n : AArch64.State) (p : BPF.State) (pointer frame : W
     (SimpleStoreCertificate.proofInitial { n with memory := p.memory } p pointer)).trans proofRun
   refine ⟨nr, pr, nativeRun, actual, nativeShape, proofShape, memory, events, fault, pc,
     ARM64Path.evaluate_sound _ _ _ _ _ nativeRun,
-    SimpleCheckedPlatform.execution_transport (BPFPath.evaluate_sound _ _ _ _ _ actual), ?_, complete⟩
+    SimpleCheckedPlatform.execution_transport (BPFPath.evaluate_sound _ _ _ _ _ actual), ?_, complete, terminal⟩
   simpa only [← events] using short_write_trace_retained frame nr.events short
 
 
@@ -494,7 +497,10 @@ theorem passed_guards_store (n : AArch64.State) (p : BPF.State)
         (SimpleStoreCertificate.nativeInitial n2 pointer) = .ok nr ∧
       BPFPath.evaluate SimpleCheckedPlatform.externals SimpleCheckedPlatform.physical
         (SimpleStoreCertificate.proofPositions p2.memory pointer)
-        (SimpleStoreCertificate.proofInitial { n2 with memory := p2.memory } p2 pointer) = .ok pr := by
+        (SimpleStoreCertificate.proofInitial { n2 with memory := p2.memory } p2 pointer) = .ok pr ∧
+      (∀ reason, nr.fault = some reason →
+        ARM64Path.step 0 native nr.state = .ok ⟨nr.state, [.fault reason], some reason⟩ ∧
+        Event.fault reason ∈ nr.events) := by
   let n1 := SimpleBlocks.firstNativeFinal n context pointer limit
   let p1 := SimpleBlocks.firstProofFinal p pointer limit
   let n2 := SimpleGuardCertificate.secondFinal n1 pointer limit
@@ -519,14 +525,37 @@ theorem passed_guards_store (n : AArch64.State) (p : BPF.State)
       SimpleGuardCertificate.proofBefore, SimpleBlocks.firstProofFinal, SimpleEntryCertificate.prefixFinal,
       BPF.setReg, Fin.ofNat', Fin.instOfNat]
   have active : p2.halted = false := rfl
-  obtain ⟨nr, pr, nativeRun, proofRun, ns, ps, mem, events, fault, pc, ne, pe, projected, complete⟩ :=
+  obtain ⟨nr, pr, nativeRun, proofRun, ns, ps, mem, events, fault, pc, ne, pe, projected, complete, terminal⟩ :=
     store_with_spills n2 p2 pointer (p.regs 10) memory
   rw [native_store_fixed n2 pointer npc r8] at ne
   rw [proof_store_fixed n2 p2 pointer ppc r1 active] at pe
-  refine ⟨nr, pr, ns, ps, mem, events, fault, pc, complete, ?_, ?_, ?_, nativeRun, proofRun⟩
+  refine ⟨nr, pr, ns, ps, mem, events, fault, pc, complete, ?_, ?_, ?_, nativeRun, proofRun, terminal⟩
   · simpa only [List.append_nil] using (firstRun.1.append nextRun.1).append ne
   · simpa only [List.append_nil] using (firstRun.2.1.append nextRun.2.1).append pe
   · rw [List.filterMap_append, firstRun.2.2.2.1, projected]
+
+
+theorem native_return_terminal (n : AArch64.State) (pc : n.pc = 84)
+    (events : List Event) (next : AArch64.State)
+    (executed : ARM64Path.instructionStep 0 native n events next) : False := by
+  obtain ⟨result, run, _, _⟩ := executed
+  simp +decide [ARM64Path.step, pc, Except.bind, Except.map, Except.pure,
+    Bind.bind, Pure.pure, Except.instMonad] at run
+
+theorem native_fault_terminal (n : AArch64.State) (reason : Fault) (trace : List Event)
+    (repeats : ARM64Path.step 0 native n = .ok ⟨n, [.fault reason], some reason⟩)
+    (present : Event.fault reason ∈ trace) :
+    ∀ events next, ARM64Path.instructionStep 0 native n events next →
+      next = n ∧ ∀ event ∈ events, event ∈ trace := by
+  intro events next executed
+  obtain ⟨result, run, effect, state⟩ := executed
+  rw [repeats] at run
+  cases Except.ok.inj run
+  refine ⟨state.symm, ?_⟩
+  intro event inside
+  rw [← effect] at inside
+  simp only [List.mem_singleton] at inside
+  simpa only [inside] using present
 
 /-- Both passed guards followed by the actual stores and actual return, or
 by the first real fault. No return is appended after a native/proof fault. -/
@@ -555,10 +584,12 @@ theorem passed_guards_complete (n : AArch64.State) (p : BPF.State)
           (SimpleStoreCertificate.nativeInitial n2 pointer) = .ok nr ∧
         BPFPath.evaluate SimpleCheckedPlatform.externals SimpleCheckedPlatform.physical
           (SimpleStoreCertificate.proofPositions p2.memory pointer)
-          (SimpleStoreCertificate.proofInitial { n2 with memory := p2.memory } p2 pointer) = .ok pr) := by
+          (SimpleStoreCertificate.proofInitial { n2 with memory := p2.memory } p2 pointer) = .ok pr) ∧
+      (∀ events next, ARM64Path.instructionStep 0 native ns events next →
+        next = ns ∧ ∀ event ∈ events, event ∈ ([first, second] ++ writes)) := by
   let n2 := SimpleGuardCertificate.secondFinal (SimpleBlocks.firstNativeFinal n context pointer limit) pointer limit
   let p2 := SimpleGuardCertificate.proofSecondFinal (SimpleBlocks.firstProofFinal p pointer limit) pointer limit
-  obtain ⟨nr, pr, ns, ps, memory, events, fault, pc, complete, ne, pe, projected, nativeRun, proofRun⟩ :=
+  obtain ⟨nr, pr, ns, ps, memory, events, fault, pc, complete, ne, pe, projected, nativeRun, proofRun, terminal⟩ :=
     passed_guards_store n p context pointer limit first second entry pass bounds
   by_cases normal : nr.fault = none
   · have ppc : pr.state.pc = 27 := complete.mp normal
@@ -575,16 +606,126 @@ theorem passed_guards_complete (n : AArch64.State) (p : BPF.State)
     have last := return_executions nr.state pr.state 2
     rw [native_return_fixed nr.state 2 npc nvalue, proof_return_fixed pr.state 2 ppc pvalue active] at last
     refine ⟨nativeReturnFinal nr.state 2, proofReturnFinal pr.state 2, nr.events, pr.events,
-      nr.fault, ?_, ?_, ?_, events, projected, ?_, ?_⟩
+      nr.fault, ?_, ?_, ?_, events, projected, ?_, ?_, ?_⟩
     · simpa only [List.append_nil] using ne.append last.1
     · simpa only [List.append_nil] using pe.append last.2.1
     · simpa only [nativeReturnFinal, nativeReturnBefore, proofReturnFinal, proofReturnBefore] using memory
     · intro _; exact ⟨rfl, rfl, rfl, last.2.2.1, last.2.2.2.1⟩
     · intro impossible; exact False.elim (impossible normal)
+    · intro effects next executed
+      exact False.elim (native_return_terminal _ rfl effects next executed)
   · refine ⟨nr.state, pr.state, nr.events, pr.events, nr.fault,
-      ne, pe, memory, events, projected, ?_, ?_⟩
+      ne, pe, memory, events, projected, ?_, ?_, ?_⟩
     · intro impossible; exact False.elim (normal impossible)
     · intro _; exact ⟨nr, pr, rfl, fault.symm, rfl, rfl, ns, ps, nativeRun, proofRun⟩
+    · cases found : nr.fault with
+      | none => exact False.elim (normal found)
+      | some reason =>
+          have repeats := terminal reason found
+          exact native_fault_terminal nr.state reason _ repeats.1 (List.mem_append_right _ repeats.2)
+
+/-- Exhaustive invocation trace matching, with a closed actual native end.
+The known complete execution therefore covers all finite native prefixes. -/
+theorem matched_invocation (n : AArch64.State) (p : BPF.State)
+    (context pointer limit : Word) (first second : Event)
+    (entry : SimpleBlocks.EntryConditions n p context pointer limit first second) :
+    ∃ (ns : AArch64.State) (ps : BPF.State) (nativeTrace proofTrace : List Event),
+      Execution (ARM64Path.instructionStep 0 native) (SimpleEntryCertificate.before n context) nativeTrace ns ∧
+      Execution SimpleCheckedPlatform.instructionStep (SimpleEntryCertificate.proofBefore p context 0) proofTrace ps ∧
+      PrivateSpills.AgreesOutside (p.regs 10) ns.memory ps.memory ∧
+      proofTrace.filterMap (PrivateSpills.projectEvent (p.regs 10)) = nativeTrace ∧
+      (∀ events next, ARM64Path.instructionStep 0 native ns events next →
+        next = ns ∧ ∀ event ∈ events, event ∈ nativeTrace) := by
+  by_cases reject : pointer > limit
+  · have result := first_rejection n p context pointer limit first second entry reject
+    refine ⟨_, _, _, _, result.1, result.2.1, result.2.2.1, result.2.2.2, ?_⟩
+    intro events next executed
+    exact False.elim (native_return_terminal _ rfl events next executed)
+  · by_cases bounds : pointer + (8#64) ≤ limit ∧ pointer + (72#64) ≤ limit
+    · obtain ⟨ns, ps, writes, proofWrites, fault, nr, pr, mem, _, projection, _, _, quiet⟩ :=
+        passed_guards_complete n p context pointer limit first second entry reject bounds
+      exact ⟨ns, ps, _, _, nr, pr, mem, projection, quiet⟩
+    · have result := second_rejection n p context pointer limit first second entry reject bounds
+      refine ⟨_, _, _, _, result.1, result.2.1, result.2.2.1, result.2.2.2, ?_⟩
+      intro events next executed
+      exact False.elim (native_return_terminal _ rfl events next executed)
+
+theorem native_deterministic {s t u : AArch64.State} {first second : List Event}
+    (left : ARM64Path.instructionStep 0 native s first t)
+    (right : ARM64Path.instructionStep 0 native s second u) : first = second ∧ t = u := by
+  obtain ⟨a, runA, effectA, stateA⟩ := left
+  obtain ⟨b, runB, effectB, stateB⟩ := right
+  have same := Except.ok.inj (runA.symm.trans runB)
+  cases same
+  exact ⟨effectA.symm.trans effectB, stateA.symm.trans stateB⟩
+
+theorem projection_retains_identity (frame : Word) (event result : Event)
+    (kept : PrivateSpills.projectEvent frame event = some result) : event = result := by
+  cases event with
+  | memory kind address bytes initialized =>
+      cases kind <;> simp only [PrivateSpills.projectEvent] at kept
+      all_goals first
+        | exact Option.some.inj kept
+        | (split at kept <;> simp_all)
+  | helper | fault | exclusive => exact Option.some.inj kept
+
+/-- Concrete simple safety under verifier/platform soundness: every event of
+EVERY native execution prefix is among those checked for the actual expanded B.
+This includes all branch outcomes, actual private spills and first faults. -/
+theorem every_native_prefix_checked (n : AArch64.State) (p : BPF.State)
+    (context pointer limit : Word) (first second : Event)
+    (entry : SimpleBlocks.EntryConditions n p context pointer limit first second)
+    (checked : Event → Prop)
+    (verifierSound : ∀ trace last,
+      Execution SimpleCheckedPlatform.instructionStep (SimpleEntryCertificate.proofBefore p context 0) trace last →
+      ∀ event ∈ trace, checked event)
+    {trace : List Event} {last : AArch64.State}
+    (run : Execution (ARM64Path.instructionStep 0 native) (SimpleEntryCertificate.before n context) trace last) :
+    ∀ event ∈ trace, checked event := by
+  obtain ⟨ns, ps, nativeTrace, proofTrace, nr, pr, _, projection, quiet⟩ :=
+    matched_invocation n p context pointer limit first second entry
+  have proofChecked := verifierSound proofTrace ps pr
+  have allowed : ∀ event ∈ nativeTrace, checked event := by
+    intro event inside
+    rw [← projection] at inside
+    obtain ⟨original, member, kept⟩ := List.mem_filterMap.mp inside
+    have same := projection_retains_identity (p.regs 10) original event kept
+    simpa only [same] using proofChecked original member
+  exact execution_checked_of_complete (step := ARM64Path.instructionStep 0 native)
+    (fun left right => native_deterministic left right) checked nr allowed
+    (fun events next head =>
+      ⟨(quiet events next head).1, fun event inside => allowed event ((quiet events next head).2 event inside)⟩) run
+
+
+/-- Acceptance, concrete TV and exact artifact binding compose for simple.
+Binding includes bytes, entry, ABI and metadata by Artifact equality. The
+kernel/invocation bridge must still establish this equality and EntryConditions
+for the actual supported CPU profile; this theorem does not invent that bridge. -/
+theorem bound_native_prefix_checked (n : AArch64.State) (p : BPF.State)
+    (context pointer limit : Word) (first second : Event)
+    (entry : SimpleBlocks.EntryConditions n p context pointer limit first second)
+    (accepted : Artifact → Prop) (checked : Artifact → Event → Prop)
+    (proofEntry : Artifact → BPF.State → Prop)
+    (verifierSound : ∀ a, accepted a → a.proofBytes = SimpleChecked.program.toList →
+      proofEntry a (SimpleEntryCertificate.proofBefore p context 0) → ∀ trace last,
+      Execution SimpleCheckedPlatform.instructionStep (SimpleEntryCertificate.proofBefore p context 0) trace last →
+      ∀ event ∈ trace, checked a event)
+    (validated executed : Artifact) (binding : executed = validated)
+    (nativeBytes : validated.nativeBytes = native.toList) (entryPoint : validated.entry = 0)
+    (proofBytes : validated.proofBytes = SimpleChecked.program.toList)
+    (acceptance : accepted validated)
+    (admittedEntry : proofEntry validated (SimpleEntryCertificate.proofBefore p context 0))
+    {trace : List Event} {last : AArch64.State}
+    (run : Execution
+      (ARM64Path.instructionStep (BitVec.ofNat 64 executed.entry) executed.nativeBytes.toArray)
+      (SimpleEntryCertificate.before n context) trace last) :
+    ∀ event ∈ trace, checked validated event := by
+  subst executed
+  have actual : Execution (ARM64Path.instructionStep 0 native)
+      (SimpleEntryCertificate.before n context) trace last := by
+    simpa only [nativeBytes, entryPoint, Array.toArray_toList] using run
+  exact every_native_prefix_checked n p context pointer limit first second entry
+    (checked validated) (verifierSound validated acceptance proofBytes admittedEntry) actual
 
 end KProgTV.SimpleCheckedBlocks
 #print axioms KProgTV.SimpleCheckedBlocks.first_block
@@ -603,3 +744,8 @@ end KProgTV.SimpleCheckedBlocks
 #print axioms KProgTV.SimpleCheckedBlocks.passed_guards_store
 
 #print axioms KProgTV.SimpleCheckedBlocks.passed_guards_complete
+
+#print axioms KProgTV.SimpleCheckedBlocks.matched_invocation
+#print axioms KProgTV.SimpleCheckedBlocks.every_native_prefix_checked
+
+#print axioms KProgTV.SimpleCheckedBlocks.bound_native_prefix_checked
