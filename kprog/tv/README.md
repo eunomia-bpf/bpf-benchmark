@@ -1730,3 +1730,21 @@ actual reads, private-frame and entry/platform premises remain explicit.
 Complete body/fault composition, arbitrary CFG/extent coverage, strict
 per-basic-block mapping and ABI/platform/RET transport remain open. See
 entry-all-guards-relational JSON/log for exact premises and source pins.
+
+### Complete selected path for every guest permission assignment
+
+`captured_all_permissions_relational_correspondence` now covers every canonical
+relational result on the actual selected complete captured path, from entry to
+return or the first guest fault. Both context faults, guard return0, all four
+first-store faults and successful writes/return2 are included, with no guest
+read/write success, failure or branch-outcome premise. Every undefined XOR AF
+choice is retained. Complete native state and fault, exact ordered guest events,
+actual B execution and outside-private36 memory/init/permissions are preserved.
+Setup-only projection never erases a guest suffix, including aliases or faults.
+
+Private-frame permissions/disjointness, initial context/memory relation and
+stack-input/platform premises remain explicit. The path is selected from the
+canonical reads, comparisons and store permissions; proving that every arbitrary
+extent/CFG path is covered, finite-prefix closure, strict per-basic-block mapping,
+ABI/platform/RET transport and unconditional artifact TV remain open. See
+all-permissions-relational JSON/log for the precise scope and source pins.

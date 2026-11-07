@@ -3563,6 +3563,208 @@ theorem entry_all_guards_path_relational_correspondence (env : BPF.Environment) 
     write16 write8 read40 read32 guest0 guest1
   exact ⟨unique,old.2⟩
 
+
+/-- The body entry facts are consequences of the actual guard state. No
+packet permission, non-wrapping arithmetic or branch result is assumed. -/
+theorem guarded_native_body_boundary (n : X86.State) (pointer limit : Word)
+    (allowed : ¬ (pointer>limit ∨ pointer+(8#64)>limit ∨ pointer+(72#64)>limit)) :
+    (guardedNativeFinal n pointer limit).pc=35 ∧
+    (guardedNativeFinal n pointer limit).gpr 1=pointer ∧
+    (guardedNativeFinal n pointer limit).memory=n.memory := by
+  have first : ¬pointer>limit := fun h => allowed (Or.inl h)
+  have second : ¬pointer+(8#64)>limit := fun h => allowed (Or.inr (Or.inl h))
+  have third : ¬pointer+(72#64)>limit := fun h => allowed (Or.inr (Or.inr h))
+  simp +decide [guardedNativeFinal,guardFinal,guardCompare,guardZero,guardMove,
+    nativePrefixFinal,nativeAfterSecond,nativeAfter,remainingNativeFinal,
+    remainingNative8,remainingNativeCmp8,remainingNativeLea,
+    remainingNative72,remainingNativeCmp72,remainingNativeAdd,first,second,third]
+
+def completeNativePath (n : X86.State) (pointer limit : Word) : List X86Path.Entry :=
+  guardedNativePath n pointer limit++
+    if pointer>limit ∨ pointer+(8#64)>limit ∨ pointer+(72#64)>limit then []
+    else packetNativeOutcomePath (packetFirstFailure n.memory pointer)
+
+def completeNativeFault (m : Memory) (pointer limit : Word) : Option Fault :=
+  if pointer>limit ∨ pointer+(8#64)>limit ∨ pointer+(72#64)>limit then none
+  else if packetFirstFailure m pointer=4 then none
+  else some (packetStoreFault pointer (packetFirstFailure m pointer))
+
+def completeNativeResult (n : X86.State) (pointer limit : Word)
+    (first second : Event) : Transition X86.State :=
+  ⟨completeNativeFinal n pointer limit,
+    [first,second]++completeGuestSuffix n.memory pointer limit,
+    completeNativeFault n.memory pointer limit⟩
+
+theorem packet_native_outcome_path_nonempty (index : Nat) (bounded : index≤4) :
+    packetNativeOutcomePath index≠[] := by
+  have cases : index=0 ∨ index=1 ∨ index=2 ∨ index=3 ∨ index=4 := by omega
+  rcases cases with rfl | rfl | rfl | rfl | rfl <;>
+    simp [packetNativeOutcomePath,packetNativeFaultPath]
+
+/-- Every canonical relational result of the actual complete native path,
+for arbitrary write permissions and all undefined AF choices. -/
+theorem complete_native_relational_result (n : X86.State) (pointer limit : Word)
+    (first second : Event) (actual : Transition X86.State) (position : n.pc=0)
+    (read0 : readMemory n.memory (n.gpr 7) 8=.ok (pointer,first))
+    (read1 : readMemory n.memory (n.gpr 7+(8#64)) 8=.ok (limit,second))
+    (run : CanonicalRelationalPath 0 native (completeNativePath n pointer limit) n actual) :
+    actual=completeNativeResult n pointer limit first second := by
+  by_cases reject : pointer>limit ∨ pointer+(8#64)>limit ∨ pointer+(72#64)>limit
+  · have guards : CanonicalRelationalPath 0 native (guardedNativePath n pointer limit) n actual := by
+      simpa only [completeNativePath,reject,ite_true,List.append_nil] using run
+    have unique := guarded_native_relational_result n pointer limit first second actual position read0 read1 guards
+    simpa only [completeNativeResult,completeNativeFinal,completeGuestSuffix,
+      completeNativeFault,reject,ite_true,List.append_nil] using unique
+  · have bound := (packet_first_failure_spec n.memory pointer).1
+    have combined : CanonicalRelationalPath 0 native
+        (guardedNativePath n pointer limit++packetNativeOutcomePath (packetFirstFailure n.memory pointer)) n actual := by
+      simpa only [completeNativePath,reject,ite_false] using run
+    obtain ⟨middle,tail,headRun,_,tailRun,same⟩ := relational_path_split_nonempty
+      (packet_native_outcome_path_nonempty _ bound) combined
+    have middleResult := guarded_native_relational_result n pointer limit first second middle position read0 read1 headRun
+    rw [middleResult] at tailRun same
+    obtain ⟨pc,pointerMatch,memoryMatch⟩ := guarded_native_body_boundary n pointer limit reject
+    have selected : packetFirstFailure n.memory pointer =
+        packetFirstFailure (guardedNativeFinal n pointer limit).memory
+          ((guardedNativeFinal n pointer limit).gpr 1) := by rw [pointerMatch,memoryMatch]
+    have evaluated := packet_native_any_evaluation (guardedNativeFinal n pointer limit)
+      (packetFirstFailure n.memory pointer) pc selected
+    have tailResult := (defined_relational_result_unique tailRun
+      (packet_outcome_path_defined _ bound) evaluated).1
+    rw [same,tailResult]
+    simp only [completeNativeResult,completeNativeFinal,completeGuestSuffix,completeNativeFault,
+      reject,ite_false,pointerMatch]
+
+
+theorem complete_path_relational_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (pointer limit stack : Word) (first second : Event)
+    (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (context : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (nativeStack : env.nativeInput .stackPointer=.ok stack)
+    (read0 : readMemory p.memory (p.regs 1) 8=.ok (pointer,first))
+    (read1 : readMemory p.memory (p.regs 1+(8#64)) 8=.ok (limit,second))
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8=true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8=true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8=true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8=true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4=true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8=true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8=true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (actual : Transition X86.State)
+    (run : CanonicalRelationalPath 0 native (completeNativePath n pointer limit) n actual)
+    (guest1 : ∀ i<8, ¬ initializationPrivateByte (p.regs 10) (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    actual=completeNativeResult n pointer limit first second ∧
+    Execution (initializedInstructionStep env) p
+      ((prefixEvents p pointer first second++initializationEvents (p.regs 10) pointer limit)++
+        completeGuestSuffix p.memory pointer limit) (completeProofFinal p pointer limit stack) ∧
+    ((prefixEvents p pointer first second++initializationEvents (p.regs 10) pointer limit).filterMap
+      (initializationProjectEvent (p.regs 10)))++completeGuestSuffix p.memory pointer limit =
+      [first,second]++completeGuestSuffix p.memory pointer limit ∧
+    initializationAgreesOutside (p.regs 10) (completeNativeFinal n pointer limit).memory
+      (completeProofFinal p pointer limit stack).memory ∧
+    ((pointer > limit ∨ pointer+(8#64) > limit ∨ pointer+(72#64) > limit) ∨
+      packetFirstFailure p.memory pointer=4 →
+      (completeNativeFinal n pointer limit).pc=60 ∧
+      (completeProofFinal p pointer limit stack).halted=true ∧
+      (completeNativeFinal n pointer limit).gpr 0=(completeProofFinal p pointer limit stack).regs 0) := by
+  have nativeRead0 : readMemory n.memory (n.gpr 7) 8=.ok (pointer,first) := by
+    simpa only [memory,context] using read0
+  have nativeRead1 : readMemory n.memory (n.gpr 7+(8#64)) 8=.ok (limit,second) := by
+    simpa only [memory,context] using read1
+  have unique := complete_native_relational_result n pointer limit first second actual
+    nativePC nativeRead0 nativeRead1 run
+  have old := complete_all_store_outcomes_correspondence env n p pointer limit stack first second
+    nativePC proofPC active context memory nativeStack read0 read1 write40 write32 write24
+    write16 write8 read40 read32 guest0 guest1
+  exact ⟨unique,old.2⟩
+
+
+/-- The complete captured path is selected only by canonical reads, actual
+native comparisons and the first canonical store failure. -/
+def allReadNativePath (n : X86.State) : List X86Path.Entry :=
+  match readMemory n.memory (n.gpr 7) 8 with
+  | .error _ => [⟨0,3⟩]
+  | .ok (pointer,_) =>
+    match readMemory n.memory (n.gpr 7+(8#64)) 8 with
+    | .error _ => [⟨0,3⟩,⟨3,4⟩]
+    | .ok (limit,_) => completeNativePath n pointer limit
+
+def allReadNativeResult (n : X86.State) : Transition X86.State :=
+  match readMemory n.memory (n.gpr 7) 8 with
+  | .error fault => ⟨n,[.fault fault],some fault⟩
+  | .ok (pointer,first) =>
+    match readMemory n.memory (n.gpr 7+(8#64)) 8 with
+    | .error fault => ⟨nativeAfter n pointer,[first,.fault fault],some fault⟩
+    | .ok (limit,second) => completeNativeResult n pointer limit first second
+
+/-- Every relational result on the actual selected complete captured path,
+with no guest read/write success, failure or branch outcome premise. -/
+theorem all_read_native_relational_result (n : X86.State) (actual : Transition X86.State)
+    (position : n.pc=0)
+    (run : CanonicalRelationalPath 0 native (allReadNativePath n) n actual) :
+    actual=allReadNativeResult n := by
+  cases read0 : readMemory n.memory (n.gpr 7) 8 with
+  | error fault =>
+    have contextRun : CanonicalRelationalPath 0 native (contextNativePath n) n actual := by
+      simpa only [contextNativePath,allReadNativePath,read0] using run
+    simpa only [contextNativeResult,allReadNativeResult,read0] using
+      context_native_relational_result n actual position contextRun
+  | ok pair =>
+    rcases pair with ⟨pointer,first⟩
+    cases read1 : readMemory n.memory (n.gpr 7+(8#64)) 8 with
+    | error fault =>
+      have contextRun : CanonicalRelationalPath 0 native (contextNativePath n) n actual := by
+        simpa only [contextNativePath,allReadNativePath,read0,read1] using run
+      simpa only [contextNativeResult,allReadNativeResult,read0,read1] using
+        context_native_relational_result n actual position contextRun
+    | ok pair =>
+      rcases pair with ⟨limit,second⟩
+      have completeRun : CanonicalRelationalPath 0 native (completeNativePath n pointer limit) n actual := by
+        simpa only [allReadNativePath,read0,read1] using run
+      simpa only [allReadNativeResult,read0,read1] using
+        complete_native_relational_result n pointer limit first second actual position read0 read1 completeRun
+
+
+theorem captured_all_permissions_relational_correspondence (env : BPF.Environment) (n : X86.State) (p : BPF.State)
+    (stack : Word) (nativePC : n.pc=0) (proofPC : p.pc=0) (active : p.halted=false)
+    (context : n.gpr 7=p.regs 1) (memory : n.memory=p.memory)
+    (nativeStack : env.nativeInput .stackPointer=.ok stack)
+    (write40 : permitted p.memory.writable (p.regs 10-(40#64)) 8=true)
+    (write32 : permitted p.memory.writable (p.regs 10-(32#64)) 8=true)
+    (write24 : permitted p.memory.writable (p.regs 10-(24#64)) 8=true)
+    (write16 : permitted p.memory.writable (p.regs 10-(16#64)) 8=true)
+    (write8 : permitted p.memory.writable (p.regs 10-(8#64)) 4=true)
+    (read40 : permitted p.memory.readable (p.regs 10-(40#64)) 8=true)
+    (read32 : permitted p.memory.readable (p.regs 10-(32#64)) 8=true)
+    (guest0 : ¬ initializationPrivateByte (p.regs 10) (p.regs 1))
+    (actual : Transition X86.State)
+    (run : CanonicalRelationalPath 0 native (allReadNativePath n) n actual)
+    (guest1 : ∀ i<8, ¬ initializationPrivateByte (p.regs 10) (p.regs 1+(8#64)+BitVec.ofNat 64 i)) :
+    actual=allReadNativeResult n ∧
+    actual.state=allReadNativeFinal n p ∧ actual.events=allReadNativeTrace p ∧
+    Execution (initializedInstructionStep env) p (allReadSetupTrace p++allReadGuestTrace p) (allReadProofFinal p stack) ∧
+    (allReadSetupTrace p).filterMap (initializationProjectEvent (p.regs 10))++allReadGuestTrace p = allReadNativeTrace p ∧
+    initializationAgreesOutside (p.regs 10) (allReadNativeFinal n p).memory (allReadProofFinal p stack).memory := by
+  have unique := all_read_native_relational_result n actual nativePC run
+  have stateTrace : (allReadNativeResult n).state=allReadNativeFinal n p ∧
+      (allReadNativeResult n).events=allReadNativeTrace p := by
+    unfold allReadNativeResult allReadNativeFinal allReadNativeTrace
+    simp only [memory,context]
+    cases read0 : readMemory p.memory (p.regs 1) 8 with
+    | error fault => exact ⟨rfl,rfl⟩
+    | ok pair =>
+      rcases pair with ⟨pointer,first⟩
+      cases read1 : readMemory p.memory (p.regs 1+(8#64)) 8 with
+      | error fault => exact ⟨rfl,rfl⟩
+      | ok pair =>
+        rcases pair with ⟨limit,second⟩
+        exact ⟨rfl,by simp only [completeNativeResult,memory]⟩
+  have old := captured_all_read_write_outcomes env n p stack nativePC proofPC active context memory
+    nativeStack write40 write32 write24 write16 write8 read40 read32 guest0 guest1
+  exact ⟨unique,by simpa only [unique] using stateTrace.1,
+    by simpa only [unique] using stateTrace.2,old.2⟩
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -3867,3 +4069,16 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.guarded_native_relational_result
 
 #print axioms KProgTV.TrustedSimpleX86.entry_all_guards_path_relational_correspondence
+
+
+#print axioms KProgTV.TrustedSimpleX86.guarded_native_body_boundary
+
+#print axioms KProgTV.TrustedSimpleX86.packet_native_outcome_path_nonempty
+
+#print axioms KProgTV.TrustedSimpleX86.complete_native_relational_result
+
+#print axioms KProgTV.TrustedSimpleX86.complete_path_relational_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.all_read_native_relational_result
+
+#print axioms KProgTV.TrustedSimpleX86.captured_all_permissions_relational_correspondence
