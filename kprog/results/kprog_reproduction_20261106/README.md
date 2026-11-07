@@ -145,8 +145,9 @@ other way, and it is consistent with the 1.539x against 0.958x.
 
 | set | geomean |
 | --- | ---: |
-| All six apps | **1.120x** |
-| Reference, all six apps | **1.349x** |
+| All six apps, stats on | **1.120x** |
+| All six apps, stats off | **1.062x** |
+| Reference, all six apps (stats on) | **1.349x** |
 
 **The 1.349x six-app reference does not reproduce.** All six apps now
 measure and their geomean is 1.120x. The shortfall is concentrated in
