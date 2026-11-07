@@ -1,0 +1,12 @@
+{
+  "kernel_returncode": 0,
+  "patch_test": "idempotence/conflict PASS",
+  "sha256": {
+    "kprog/tv/native-proof-regions.patch": "a5801cdf184f69d69b8ad3a0d61d80c35129490db465a54d2e521904ded5b2da",
+    "kprog/tv/test_kernel_patch.py": "3fe668adc17e52a2215f6becc07635322873007746618c600174cc2b9a8568d8",
+    "kprog/test/run_trusted_service_guest.py": "302e05761904fdd59e11ecd4b4f67426bb78a3ce41302b74c16b348f5209b28c",
+    "kprog/tv/build-kernel-x86/arch/x86/boot/bzImage": "2f127f70ddf3fce4b90c8ad38a3b83ced0a7de701ff55b55961291d7874218b6",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "c98c7e256af7a173141bc5b67a2fecd5ae31dabb237e9ae655e2954a1f056795"
+  },
+  "module_returncode": 0
+}

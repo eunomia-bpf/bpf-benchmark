@@ -30,11 +30,31 @@ def run_bcc_set(live,environment):
     sys.path.insert(0,str(ROOT))
     from runner.libs.app_runners.bcc_set import BccSetRunner,BCC_SET_TOOL_SPECS
     from runner.libs.agent import bpftool_prog_show_records
+    from runner.libs.rejit import wait_for_app_shim_programs
     runner=BccSetRunner(tool_binaries={s.name:ROOT/'vendor/build/x86/bcc/bin'/s.name for s in BCC_SET_TOOL_SPECS},
                         workload_spec={'kind':'stress_ng_bcc_hook_hot'})
     Path('/proc/sys/kernel/bpf_stats_enabled').write_text('1'+chr(10))
     try:
-        runner.start()
+        # Coverage must observe the other tools even when one tool fails. Use
+        # their existing spawn/readiness paths and preserve the frozen commands.
+        startup={}
+        for spec in BCC_SET_TOOL_SPECS:
+            try:runner._spawn_child(runner._children[spec.name])
+            except Exception as error:startup[spec.name]=dict(ready=False,error=str(error))
+        for spec in BCC_SET_TOOL_SPECS:
+            if spec.name in startup:continue
+            child=runner._children[spec.name]
+            try:
+                wait_for_app_shim_programs(app_pid=int(child.session.process.pid),
+                    process=child.session.process,
+                    snapshot=lambda child=child:runner._child_output_snapshot(child),
+                    process_name='BCC tool '+spec.name)
+                startup[spec.name]=dict(ready=True)
+            except Exception as error:startup[spec.name]=dict(ready=False,error=str(error))
+        (live/'tool-startup.json').write_text(json.dumps(startup,indent=2))
+        (live/'programs-after-startup.json').write_text(json.dumps(bpftool_prog_show_records(),indent=2))
+        failures=[name for name,result in startup.items() if not result['ready']]
+        if failures:raise RuntimeError('BCC tools failed startup: '+', '.join(failures))
         (live/'programs-before-work.json').write_text(json.dumps(bpftool_prog_show_records(),indent=2))
         completed=0
         for _ in range(10000):

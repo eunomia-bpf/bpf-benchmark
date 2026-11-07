@@ -1,6 +1,7 @@
 """Catch --batch auto-reversing an applied patch and partial conflict mutation."""
 from pathlib import Path
 import subprocess
+import re
 import tempfile
 
 from apply_kernel_patch import apply
@@ -29,9 +30,14 @@ with tempfile.TemporaryDirectory() as directory:
         cwd=here.parents[1] / "vendor/linux-framework", capture_output=True)
     if native_input.returncode == 0:
         (kernel / "include/linux/bpf_native_input.h").write_bytes(native_input.stdout)
-    reverse = ["patch", "--batch", "--no-backup-if-mismatch", "-p1", "-d", str(kernel), "--reverse"]
-    if subprocess.run(reverse + ["--dry-run"], input=patch, capture_output=True).returncode == 0:
-        subprocess.run(reverse, input=patch, check=True, capture_output=True)
+    reverse = ["patch", "--batch", "--force", "--no-backup-if-mismatch", "-p1", "-d", str(kernel), "--reverse"]
+    # Kernel HEAD can contain the preceding patch version. Normalize only this
+    # temporary fixture by reversing each already-applied file patch; production
+    # apply() must still reject every partially applied/conflicting whole patch.
+    for file_patch in re.split(rb"(?=^diff --git )", patch, flags=re.MULTILINE):
+        if not file_patch.startswith(b"diff --git "):continue
+        if subprocess.run(reverse + ["--dry-run"], input=file_patch, capture_output=True).returncode == 0:
+            subprocess.run(reverse, input=file_patch, check=True, capture_output=True)
     base = source.read_bytes()
     apply(kernel, patch)
     assert (kernel / "include/linux/bpf_native_input.h").read_bytes() == (

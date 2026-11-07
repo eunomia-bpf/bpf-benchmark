@@ -671,3 +671,22 @@ new file mode 100644
 +})
 +#endif
 +#endif
+
+diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
+--- a/kernel/bpf/syscall.c
++++ b/kernel/bpf/syscall.c
+@@ -3089,10 +3089,14 @@
+ 
+ 	/* run eBPF verifier */
+ 	err = bpf_check(&prog, attr, uattr, uattr_size);
++	if (err < 0 && prog->aux->native_proof)
++		pr_err_ratelimited("native proof load stage=verifier err=%d len=%u\n", err, prog->len);
+ 	if (err < 0)
+ 		goto free_used_maps;
+ 
+ 	prog = bpf_prog_select_runtime(prog, &err);
++	if (err < 0 && prog->aux->native_proof)
++		pr_err_ratelimited("native proof load stage=runtime-selection err=%d len=%u\n", err, prog->len);
+ 	if (err < 0)
+ 		goto free_used_maps;
+ 
