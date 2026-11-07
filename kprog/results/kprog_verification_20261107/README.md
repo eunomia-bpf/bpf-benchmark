@@ -1264,3 +1264,32 @@ checks. The immutable source/cache export was deleted automatically; compressed
 CALL CPU observations retain this440-case run. CCMP/select and memory-base/
 width bridges are later increments and are not included in this full pass.
 The complete77/72 theorem and O2/O4 transport remain open.
+
+## Actual byte-field scalar memory body
+
+`Arm64Dispatcher.scalarMemoryBody` now composes the actual numeric pre/access/
+post sequence using byte-coded base/data/index fields. The physical index byte,
+not the duplicate AUX0 lane, controls index presence. Its independent generated
+presence/value selectors feed the full modifier switch and generated offset.
+The sentinel index255 ignores all modifier/shift bytes and leaves AUX0 arbitrary.
+Full flag-byte identities retain native offset/pre/post modes and generated deltas.
+
+The transfer consumes generated native-width load/store ladders and actual byte
+reads/writes. LOAD retains both generated scalar/tag-preserving branches for
+every incoming tag predicate; no scalar premise removes a branch. All four
+widths, aliases/ZR/discarded destinations and one PC advance compose to the
+existing complete canonical immediate memory step under the original explicit
+SP-alignment, access and native non-overlap witnesses. Ordered events use only
+the selected bytes; the packed8-byte load word is a ghost, not an extra read.
+No runtime permission guard or fault-success replacement is introduced. Entry/
+O2/O4 must still establish materialized pointer/shadow/provenance correspondence
+and native permissions; faulting writeback and dispatcher integration remain open.
+
+Validation: focused94-job dispatcher/reference Lean build,11 existing contract
+freshness checks, direct-dispatch/model checks and16 existing semantic/route
+hosts passed 40080 cases,2048 cases,20168 cases,512 cases,22115 cases,512 cases,6913 cases,257 cases,6401 cases,20024 cases,20024 cases,16486328 cases,17 cases,3015 cases,4608 cases,135170 cases. Exact proof SHA256
+`186a2324dc5bc31af519981d8f852c4e6601e00a1d63f642d45c458b32e369cd` stayed unchanged. Earlier declaration bytes remain
+identical except the shared WritebackMemory and two generated imports. No
+placeholders, new tests, input filters, ISA/runtime/generator/oracle/paper changes.
+Original compiler warnings remain visible. Active exact2c9 full check predates
+this body extension; full77/72/O2/O4 are not discharged.

@@ -4,6 +4,9 @@ import KProgFormal.Refinement.Arm64Mul
 import KProgFormal.Refinement.Arm64Select
 import KProgFormal.Refinement.Arm64Bitfield
 import KProgFormal.Refinement.Arm64VectorMemory
+import KProgFormal.Refinement.Arm64WritebackMemory
+import KProgFormal.Generated.GeneratedArm64MemIndexValue
+import KProgFormal.Generated.GeneratedArm64LoadTag
 import KProgFormal.Refinement.Arm64Movk
 import KProgFormal.Refinement.Arm64Branch
 import KProgFormal.Generated.GeneratedArm64Adrp
@@ -1833,5 +1836,106 @@ theorem scalar_memory_effective_width (flags : Byte) (width : Reference.AArch64.
     cases width <;> rfl
   · rw [absent]
     rfl
+
+
+/-- MEM_BASE_OFF uses the physical index byte, not the duplicate AUX0 lane.
+The independent presence/value selectors feed the full modifier switch at X
+width before the generated immediate/index offset composition. -/
+def memoryOffsetBody (aux : BitVec 32) (index : Byte) (immediate : Word) (s : Reference.AArch64.State) : Word :=
+  let present := GeneratedArm64MemIndex.present index
+  let value := match GeneratedArm64MemIndexValue.sourceOf present with
+    | .zero => 0
+    | .registerIndex => GeneratedArm64Mod.value
+        (Arm64Arithmetic.FlagArithmetic.modifierOf (GeneratedArm64Aux.b1 aux).toNat)
+        (Arm64Move.Fields.read s index) ((GeneratedArm64Aux.b2 aux).setWidth 64) .w64
+  GeneratedArm64MemOffset.value (GeneratedArm64MemPrepost.suppressOffset aux) present immediate value
+
+theorem memory_offset_absent (aux : BitVec 32) (immediate : Word) (s : Reference.AArch64.State) :
+    memoryOffsetBody aux GeneratedArm64MemIndex.indexSentinel immediate s =
+      GeneratedArm64MemOffset.value (GeneratedArm64MemPrepost.suppressOffset aux) false immediate 0 := rfl
+
+theorem memory_flag_fields (aux : BitVec 32) (mode : Reference.AArch64.Writeback) (immediate : Word)
+    (flags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags mode)) :
+    GeneratedArm64MemPrepost.preDelta aux immediate =
+        GeneratedArm64MemPrepost.preDelta (Arm64AddressedMemory.flags mode) immediate ∧
+      GeneratedArm64MemPrepost.postDelta aux immediate =
+        GeneratedArm64MemPrepost.postDelta (Arm64AddressedMemory.flags mode) immediate ∧
+      GeneratedArm64MemPrepost.suppressOffset aux =
+        GeneratedArm64MemPrepost.suppressOffset (Arm64AddressedMemory.flags mode) := by
+  simp only [GeneratedArm64MemPrepost.preDelta, GeneratedArm64MemPrepost.postDelta,
+    GeneratedArm64MemPrepost.suppressOffset, GeneratedArm64MemPrepost.preWriteback,
+    GeneratedArm64MemPrepost.postWriteback, flags, and_self]
+
+/-- Successful scalar transfer through actual byte reads/writes. LOAD retains
+the generated tag-preserving branch for every incoming tag predicate. The
+packed eight-byte word is a ghost; its event and value ladder use only WIDTH
+bytes. This body inserts no C permission/alignment guard. -/
+def scalarMemorySuccess (load : Bool) (width : Reference.AArch64.MemoryWidth) (data : Byte)
+    (address : Word) (tagIsScalar : Bool) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  if load then
+    let loaded := GeneratedArm64LoadBytes.value (Arm64Memory.loadWidth width) (wordAt s.memory address 8)
+    let value := Arm64Memory.loadResult width none loaded
+    let state := if GeneratedArm64LoadTag.preserve (Arm64Memory.valueWidth width) tagIsScalar then
+        Arm64Move.Fields.write s data value .w64
+      else Arm64Move.Fields.write s data value (Arm64Memory.destinationWidth width none)
+    ⟨{ state with pc := s.pc + 4 }, [.memory .read address (bytesAt s.memory address width.bytes)
+      (initializedAt s.memory address width.bytes)], none⟩
+  else
+    let value := Arm64Move.Fields.read s data
+    ⟨{ s with memory := Arm64Memory.store width s.memory address value, pc := s.pc + 4 },
+      [.memory .write address (valueBytes value width.bytes) true], none⟩
+
+theorem scalar_memory_success_typed (load : Bool) (width : Reference.AArch64.MemoryWidth) (data : Register)
+    (address : Word) (tagIsScalar : Bool) (s : Reference.AArch64.State) :
+    scalarMemorySuccess load width (Arm64Register.registerCode data) address tagIsScalar s =
+      Arm64WritebackMemory.success width (if load then .load data none else .store data) address s := by
+  cases load <;> cases width <;> cases tagIsScalar <;>
+    simp only [scalarMemorySuccess, Arm64WritebackMemory.success, Bool.false_eq_true, Bool.not_true,
+      Bool.not_false, Bool.true_and, Bool.false_and, ↓reduceIte,
+      GeneratedArm64LoadTag.preserve, Arm64Memory.valueWidth, Arm64Memory.destinationWidth,
+      Arm64Move.Fields.register_read, Arm64Move.Fields.register_write, beq_self_eq_true, reduceCtorEq]
+  all_goals rfl
+
+/-- The actual numeric MEM_PRE/access/MEM_POST order. Materialized pointers,
+shadow/payload conversion, provenance and accepted access permissions still
+need their Entry/O2/O4 witnesses. Faulting pre/post is not rewritten as success. -/
+def scalarMemoryBody (load : Bool) (width : Reference.AArch64.MemoryWidth) (aux : BitVec 32)
+    (data base index : Byte) (immediate : Word) (tagIsScalar : Bool) (s : Reference.AArch64.State) :
+    Transition Reference.AArch64.State :=
+  let before := bumpMemoryBase base (GeneratedArm64MemPrepost.preDelta aux immediate) s
+  let address := Arm64Move.Fields.read before base + memoryOffsetBody aux index immediate before
+  let transferred := scalarMemorySuccess load width data address tagIsScalar before
+  { transferred with state := bumpMemoryBase base (GeneratedArm64MemPrepost.postDelta aux immediate) transferred.state }
+
+theorem scalar_memory_body_immediate (load : Bool) (width : Reference.AArch64.MemoryWidth)
+    (aux : BitVec 32) (data base : Register) (mode : Reference.AArch64.Writeback) (immediate : Word)
+    (tagIsScalar : Bool) (s : Reference.AArch64.State)
+    (flags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags mode)) :
+    scalarMemoryBody load width aux (Arm64Register.registerCode data) (memoryBaseCode base)
+      GeneratedArm64MemIndex.indexSentinel immediate tagIsScalar s =
+      Arm64WritebackMemory.core width (if load then .load data none else .store data) mode base immediate s := by
+  obtain ⟨pre, post, suppressed⟩ := memory_flag_fields aux mode immediate flags
+  simp only [scalarMemoryBody, Arm64WritebackMemory.core, pre, post, suppressed,
+    memory_offset_absent, memory_base_bump_typed, memory_base_read,
+    scalar_memory_success_typed, Arm64Memory.base_refines]
+
+theorem scalar_memory_immediate_refines (load : Bool) (i : Reference.AArch64.AddressedMemoryInstruction)
+    (data : Register) (aux : BitVec 32) (immediate : Word) (tagIsScalar : Bool) (s : Reference.AArch64.State)
+    (transfer : i.transfer = if load then .load data none else .store data)
+    (offset : i.offset = .immediate immediate)
+    (flags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags i.writeback))
+    (alignment : Reference.AArch64.spAlignmentFault s i.base = none)
+    (accessible : permitted (if load then s.memory.readable else s.memory.writable)
+      (Reference.AArch64.memoryBase s i.base + (if i.writeback = .post then 0 else immediate)) i.width.bytes = true) :
+    scalarMemoryBody load i.width aux (Arm64Register.registerCode data) (memoryBaseCode i.base)
+      GeneratedArm64MemIndex.indexSentinel immediate tagIsScalar s =
+      Reference.AArch64.step (.addressedMemory i) s := by
+  rw [scalar_memory_body_immediate load i.width aux data i.base i.writeback immediate tagIsScalar s flags]
+  have access : permitted (match i.transfer with | .load _ _ => s.memory.readable | .store _ => s.memory.writable)
+      (Reference.AArch64.memoryBase s i.base + (if i.writeback = .post then 0 else immediate)) i.width.bytes = true := by
+    cases load <;> simpa only [transfer, Bool.false_eq_true, ↓reduceIte] using accessible
+  have result := Arm64WritebackMemory.core_refines i immediate s offset alignment access
+  rw [transfer] at result
+  exact result
 
 end KProgFormal.Refinement.Arm64Dispatcher
