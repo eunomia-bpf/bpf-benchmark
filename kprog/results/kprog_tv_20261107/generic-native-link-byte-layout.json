@@ -1,0 +1,187 @@
+{
+  "utc": "2026-11-07T21:09:35.175658+00:00",
+  "status": "universal_encoded_piece_layout_derives_field_separation_template_location_and_wire_order_TV",
+  "scope": "Every finite encoded-piece list with one selected5B/8B field per piece, complete field containment and image length at most2^32; every16GPR fixed10B MOVABS destination,64-bit target/base and production wire permutation.",
+  "implementation_interfaces": {
+    "Rust": "x86.rs uses sym_base=blob.len(), encoded.new_instruction_offsets[i], global_offset=sym_base+off_in_sym; HelperPointer adds2, MapImmediate adds imm_offset; build_x86_movabs_reg declares exact10B with its immediate at2.",
+    "append": "Piece.bytes represents an actual ordered encoded byte segment; Fits requires its complete selected field inside the segment. records follows append lengths, so global offsets and pairwise separation are derived.",
+    "snapshot": "Exact canonical bytesAt equality with byteImage supplies every original template slice at its prefix offset.",
+    "wire": "Actual metadata record identity/order connects through List.Perm; separation and canonical table/MOVABS TV hold for every wire permutation.",
+    "chunk": "selectedRecords uses the loader complete-span filter and offset subtraction; local fits and pairwise separation derive from whole-image layout and compose the existing checked-chunk table theorem."
+  },
+  "claims": [
+    "Append lengths derive every global record position and complete consumed-span separation under the u32 image bound.",
+    "Canonical wrapping-address byte slicing derives each original template from an exact full-image equality.",
+    "The fixed MOVABS builder has a fitting8B field at2; its actual prefix length yields template PC and the literal member atPC+2.",
+    "Existing sequential emitter guards plus the derived template, member and separation instantiate complete canonical MOVABS TV with full architectural state and exact empty trace.",
+    "The loader selection filter and local subtraction preserve fits/separation and supply the earlier checked-chunk theorem inputs.",
+    "Every permutation of the generated record list preserves separation and supplies full-state/exact-effect CALL and MOVABS TV in actual wire order."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o native-link-chunk-layout-check native-link-byte-layout-check",
+    "reproduction": "make -C kprog/tv native-link-byte-layout-check",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.NativeLinkByteLayout.image_length": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkByteLayout.length_append": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkByteLayout.records_append": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkByteLayout.field_record_position": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.records_bounds": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.records_separated": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.bytes_at_append": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.bytes_at_length": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkByteLayout.image_slice": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.layout_table_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.movabs_piece_fits": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.movabs_template": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.movabs_field_member": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.layout_movabs_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.localized_position": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.selected_records_fit": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.selected_records_separated": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.layout_chunk_table_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.wire_records_separated": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.wire_table_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkByteLayout.wire_movabs_preservation": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ]
+    },
+    "sorryAx_count": 0,
+    "log_sha256": "a1db2c479b5acec5795e7fb381dce8496368cb6c884dce56efd165fea01ef45f",
+    "attempts_archive": "kprog/results/kprog_tv_20261107/generic-native-link-byte-layout-attempts.log.gz",
+    "attempts_raw_sha256": "17fc2b71bec37249cf6ca8cd6a118064b0d2a381561cce66496517adc7eb6afc",
+    "proof_elaboration_attempt_exits": [
+      2,
+      2,
+      2
+    ],
+    "intermediate_pass_audits": [
+      14,
+      18
+    ]
+  },
+  "source_sha256": {
+    "kprog/tv/NativeLinkByteLayout.lean": "f52dac77ffda3c040d19b675dbdf5ccba0c250ac94bda09d7cffa1371c3ca2b7",
+    "kprog/tv/NativeLinkChunkLayout.lean": "30f470f181f8d8cdb7cd0779079514a531a550f83102c90c6cd5e0fe216f5076",
+    "kprog/tv/NativeLinkGuardedEmission.lean": "0da5a9fda6d301494ffa5e59b4f009c66a9f4ecdb251fd2340ec37d0db28b2b5",
+    "kprog/tv/NativeLinkMovabs.lean": "5095a8a33f17cb84f91aba377615af8810ca5285a0b82981d620b0afc21b8390",
+    "kprog/tv/NativeLinkPatchTable.lean": "193d88ad78284bedc178d47063f5ce323d326b9c55c824c85ad18a34c3282224",
+    "kprog/tv/NativeLinkLiteral.lean": "59a5733a5f8c42fa4235e32ab108bb3604875b10984bf2acab342a819f105530",
+    "kprog/tv/NativeLinkRelocationTable.lean": "3445aff6854ccaa85e433d8e8357a57edc8b7b2b9cdbdc07ceee8eced4c96f46",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/Makefile": "76d445ec88d97ef240d3927bb3c64dcf35bb5d6a6cac123481555aa3858eb1e3",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "8b63557424953cc7d00d83ea3eab9b37748fd2e3ed3cd4892e0b7b3b0fb34506",
+    "kprog/x86/native_lab/native_link/src/main.rs": "563db62726d8ff0fbbcdc2d0f928eeafbd3d64b0e3fce3046723d2b18ab531d1",
+    "kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "a02aee08743af771028352ae35fc3e8dc97a5b33b2c85df31a60d22c92677713",
+    "kinsn/module/include/native_lab_binding.h": "5abc935861b6920b05a6352064af2999a4febbcbff41d2fb4fc88cb43db02a06",
+    "kinsn/module/include/native_lab_group.h": "5fbd5b82f304bbf6b8fbfeedd3d5152adaa103fb374c08dc5d32d5c3f3cdffc5"
+  },
+  "implementation_source_observations": [
+    {
+      "path": "kinsn/module/include/native_lab_group.h",
+      "observed_sha256": "1ef0bbf95d3b5a8b64aa3cf6db3b5ecea8dc19db7ff4069d63955ecd34158fd5",
+      "published_sha256": "5fbd5b82f304bbf6b8fbfeedd3d5152adaa103fb374c08dc5d32d5c3f3cdffc5",
+      "observed_patch": "diff --git a/kinsn/module/include/native_lab_group.h b/kinsn/module/include/native_lab_group.h\nindex 7992c4106..0ded174ff 100644\n--- a/kinsn/module/include/native_lab_group.h\n+++ b/kinsn/module/include/native_lab_group.h\n@@ -6,6 +6,8 @@\n #include \"native_lab_exclusive.h\"\n #include \"native_lab_checked.h\"\n \n+\n+\n /* Included after native_blob/blobs and decode_native_lab_payload in each\n  * module. The final chunk owns a generation vector for the entire program.\n  * All callers hold blobs_lock.\n",
+      "implementation_body_identity": "identical"
+    }
+  ],
+  "compiled_olean_sha256": {
+    "kprog/tv/build/NativeLinkChunkLayout.olean": "54ac7d47dbd96067603dfaf6b906df564489d0f89804c3b35ecd6480f061d54a",
+    "kprog/tv/build/NativeLinkByteLayout.olean": "48a9413a7d27163c0ef5cba9da376979683c5a2e4c4330a9b5b2a35281bcc55e"
+  },
+  "premises": [
+    "Actual Rust/iced output is represented by the ordered Piece byte segments and selected fields. Fits, original builder bytes and record identity/permutation are a production correspondence interface; the new Lean theorem derives the arithmetic, locations and separation from that interface.",
+    "Exact immutable snapshot/image equality and actual final executable base/byte correspondence connect the physical code to canonical Memory. Existing trusted C/ABI byte-guard extraction supplies CheckedTable.",
+    "Chunk guards map to CheckedGroup; selected record completeness across cuts supplies the actual planner-to-wire correspondence. The chunk theorem covers the selected table and its exact rebase.",
+    "Original CALL opcodes and accepted target ranges, stable retained-map/helper identities, supported invocation ABI and complete Artifact binding remain explicit surrounding inputs."
+  ],
+  "completion_path": [
+    "Establish actual Rust/iced instruction offset/template/field construction, snapshot image identity and complete wire-record permutation, including ELF/GOT pools and every link rewrite.",
+    "Connect actual chunk planner whole-field coverage and physical final JIT chunk-base/code-byte identity; compose the complete ordinary-PC/control partition.",
+    "Compose remaining GOT/memory-table consumers, helper/entry ABI, ARM relocations, tail calls, universal O1/O2/definedness and actual compiler/private-frame preservation through Composition.lean."
+  ],
+  "trusted": [
+    "Canonical ISA/Memory semantics and separate F hardware/QEMU fidelity evidence.",
+    "Kernel binding and C/ABI correspondence for immutable snapshots, existing emitter guards and final executable image.",
+    "Accepted-B verifier soundness for the checked-effects composition.",
+    "Lean kernel and the explicitly audited propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies."
+  ]
+}

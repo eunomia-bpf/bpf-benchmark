@@ -933,3 +933,8 @@ native-link-guarded-emission-check: native-link-movabs-check
 native-link-chunk-layout-check: native-link-guarded-emission-check
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/NativeLinkChunkLayout.olean ../tv/NativeLinkChunkLayout.lean
+
+.PHONY: native-link-byte-layout-check
+native-link-byte-layout-check: native-link-chunk-layout-check
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/NativeLinkByteLayout.olean ../tv/NativeLinkByteLayout.lean

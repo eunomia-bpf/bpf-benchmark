@@ -96,6 +96,18 @@ Actual Rust instruction offsets/templates, within-chunk separation, complete PC
 partition and physical executable chunk-base/byte identity form the next layout
 bridge. Other consumer, ABI, ARM and compiler stages retain their own laws.
 
+`generic-native-link-byte-layout.json` adds 21 passing universal audits.
+Ordered encoded pieces with a fitting selected field derive global offsets and
+complete-span separation. Exact full-image equality supplies original template
+slices. The fixed10B MOVABS piece then derives its PC+2 field member, template
+location and complete canonical TV through the existing emitter guards. The
+loader's complete-span filter and subtraction preserve local fits/separation;
+checked chunk metadata composes the table relation. Arbitrary wire permutations
+retain separation and full-state/exact-effect CALL/MOVABS TV. Actual Rust/iced
+piece construction, complete record identity/permutation and whole-field chunk
+coverage, snapshot/final-image identity and complete control/ABI stages supply
+the production correspondence interfaces.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations
