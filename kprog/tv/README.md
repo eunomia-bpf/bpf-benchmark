@@ -1659,3 +1659,15 @@ supplied by the caller. NativePC10 XOR's undefined AF is handled separately by
 the existing universal guard theorem through CMP. Whole-program relational path
 composition, entry/platform/ABI and RET transport still remain. See the dated
 defined-relational JSON/log; the reference ISA and earlier theorems are unchanged.
+
+### Canonical relational paths and all four store faults
+
+`CanonicalRelationalPath` composes byte-decoded canonical `X86.Step` witnesses;
+a fault terminates the path. `defined_relational_path_evaluation` proves every
+fully observed relational path has the complete certified representative result.
+`all_store_fault_relational_correspondence` then checks every canonical relational
+result on each of the four actual first-store-fault paths against the real B
+execution, retaining exact prior writes, fault and full partial memory state.
+The ISA is reused unchanged. Successful-body and whole-program relational path
+composition, CFG/extent completeness, ABI/platform and RET transport remain open.
+See relational-fault-paths JSON/log for assumptions and reference source hashes.

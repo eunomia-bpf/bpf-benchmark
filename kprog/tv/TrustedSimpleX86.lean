@@ -2886,6 +2886,95 @@ theorem simple_defined_decoded_step_unique (s : X86.State) (entry : X86Path.Entr
   obtain ⟨flags,registers⟩ := simple_defined_decode_observed s entry instruction member decoded
   exact fully_observed_step_unique instruction s actual flags registers run
 
+
+/-- A finite path made only of canonical relational ISA steps. Each extent
+is decoded at the actual PC. A fault is terminal, never skipped or continued.
+This is execution composition, not an alternative instruction semantics. -/
+inductive CanonicalRelationalPath (base : Word) (bytes : Array Byte) :
+    List X86Path.Entry → X86.State → Transition X86.State → Prop
+  | nil (state) : CanonicalRelationalPath base bytes [] state ⟨state,[],none⟩
+  | fault {before effect} (entry instruction)
+      (decoded : X86Path.decodeAt base bytes entry before=.ok instruction)
+      (step : X86.Step instruction before effect) (failed : effect.fault.isSome=true) :
+      CanonicalRelationalPath base bytes [entry] before effect
+  | next {before first rest tail} (entry instruction)
+      (decoded : X86Path.decodeAt base bytes entry before=.ok instruction)
+      (step : X86.Step instruction before first) (continued : first.fault=none)
+      (suffix : CanonicalRelationalPath base bytes rest first.state tail) :
+      CanonicalRelationalPath base bytes (entry::rest) before
+        ⟨tail.state,first.events++tail.events,tail.fault⟩
+
+/-- Fully observed captured instructions lift the actual path evaluator to
+EVERY canonical relational path result, including a terminal fault. -/
+theorem defined_relational_path_evaluation {entries : List X86Path.Entry} {s : X86.State}
+    {actual : Transition X86.State}
+    (run : CanonicalRelationalPath 0 native entries s actual)
+    (members : ∀ entry ∈ entries, entry ∈ simpleDefinedExtents) :
+    X86Path.evaluate 0 native entries s=.ok ⟨actual,(0xffffffffffffffff#64)⟩ := by
+  induction run with
+  | nil state => rfl
+  | @fault before effect entry instruction decoded step failed =>
+    have exactStep := simple_defined_decoded_step_unique before entry instruction effect
+      (members entry (by simp)) decoded step
+    simp only [X86Path.evaluate,decoded,← exactStep,failed,ite_true,List.isEmpty_nil]
+    rfl
+  | @next before first rest tail entry instruction decoded step continued suffix ih =>
+    have exactStep := simple_defined_decoded_step_unique before entry instruction first
+      (members entry (by simp)) decoded step
+    have flags := (simple_defined_decode_observed before entry instruction
+      (members entry (by simp)) decoded).1
+    have tailCertificate := ih (fun e inside => members e (by simp [inside]))
+    simp only [X86Path.evaluate,decoded,← exactStep,continued,Option.isSome,Bool.false_eq_true,
+      ite_false,tailCertificate,flags]
+    rfl
+
+/-- A byte-decoded fully observed relational path cannot choose a different
+complete state, memory/helper event sequence, or fault than its certificate. -/
+theorem defined_relational_result_unique {entries : List X86Path.Entry} {s : X86.State}
+    {actual : Transition X86.State} {expected : X86Path.Result}
+    (run : CanonicalRelationalPath 0 native entries s actual)
+    (members : ∀ entry ∈ entries, entry ∈ simpleDefinedExtents)
+    (evaluated : X86Path.evaluate 0 native entries s=.ok expected) :
+    actual=expected.effect ∧ expected.definedFlags=(0xffffffffffffffff#64) := by
+  have certificate := defined_relational_path_evaluation run members
+  have same : (⟨actual,(0xffffffffffffffff#64)⟩ : X86Path.Result)=expected :=
+    Except.ok.inj (certificate.symm.trans evaluated)
+  exact ⟨congrArg X86Path.Result.effect same,(congrArg X86Path.Result.definedFlags same).symm⟩
+
+theorem packet_fault_path_defined (index : Nat) (bounded : index<4) :
+    ∀ entry ∈ packetNativeFaultPath index, entry ∈ simpleDefinedExtents := by
+  have choices : index=0 ∨ index=1 ∨ index=2 ∨ index=3 := by omega
+  rcases choices with rfl | rfl | rfl | rfl
+  all_goals simp [packetNativeFaultPath,simpleDefinedExtents]
+
+/-- Every canonical relational execution of any actual first-store-fault
+path has the same full partial state and ordered guest trace checked in B. -/
+theorem all_store_fault_relational_correspondence (env : BPF.Environment) (frame : Word)
+    (n : X86.State) (p : BPF.State) (index : Nat) (actual : Transition X86.State)
+    (bounded : index<4) (nativePC : n.pc=35) (proofPC : p.pc=18) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2) (same : initializationAgreesOutside frame n.memory p.memory)
+    (prior : ∀ i<index, packetStorePermission p.memory (p.regs 2) i=true)
+    (bad : packetStorePermission p.memory (p.regs 2) index=false)
+    (run : CanonicalRelationalPath 0 native (packetNativeFaultPath index) n actual) :
+    actual=⟨packetNativeFaultState n index,packetFaultEvents (p.regs 2) index,
+      some (packetStoreFault (p.regs 2) index)⟩ ∧
+    Execution (initializedInstructionStep env) p actual.events (packetProofFaultState p index) ∧
+    initializationAgreesOutside frame actual.state.memory (packetProofFaultState p index).memory := by
+  have permission : ∀ i, packetStorePermission n.memory (n.gpr 1) i=
+      packetStorePermission p.memory (p.regs 2) i := by
+    intro i
+    simp only [packetStorePermission,same.2.1,pointer]
+  have evaluated := packet_all_native_store_faults n index bounded nativePC
+    (by intro i lt; rw [permission]; exact prior i lt) (by rw [permission]; exact bad)
+  obtain ⟨unique,_⟩ := defined_relational_result_unique run (packet_fault_path_defined index bounded) evaluated
+  have exactResult : actual=⟨packetNativeFaultState n index,packetFaultEvents (p.regs 2) index,
+      some (packetStoreFault (p.regs 2) index)⟩ := by simpa only [pointer] using unique
+  obtain ⟨_,proofRun,memory⟩ := all_store_fault_correspondence env frame n p index bounded
+    nativePC proofPC active pointer same prior bad
+  refine ⟨exactResult,?_,?_⟩
+  · simpa only [exactResult] using proofRun
+  · simpa only [exactResult] using memory
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -3130,3 +3219,11 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.simple_defined_decode_observed
 
 #print axioms KProgTV.TrustedSimpleX86.simple_defined_decoded_step_unique
+
+#print axioms KProgTV.TrustedSimpleX86.defined_relational_path_evaluation
+
+#print axioms KProgTV.TrustedSimpleX86.defined_relational_result_unique
+
+#print axioms KProgTV.TrustedSimpleX86.packet_fault_path_defined
+
+#print axioms KProgTV.TrustedSimpleX86.all_store_fault_relational_correspondence
