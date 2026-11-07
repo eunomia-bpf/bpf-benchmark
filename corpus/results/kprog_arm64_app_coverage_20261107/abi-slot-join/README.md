@@ -1,0 +1,9 @@
+# ARM ABI stack-slot join consistency
+
+The production ABI reader represents a missing saved-pointer slot as an external value. The candidate control-flow join uses that same external default on each incoming branch. Explicit unknown origins keep their unknown value, and finite stack/external alternatives retain their members. The one-expression candidate brings the ARM analysis into agreement with the corresponding x86 repair.
+
+The batch exercises four copy helpers, four private-stack source offsets, both branch orders, defined and opaque bytes, mixed/stack/external joins, and four explicit-unknown controls. The original source has 64 outcome differences across 196 cases; the candidate matches all 196 expected outcomes: 128 source generations, 64 undefined-result rejections and four unknown-origin rejections. All 132 adjacent control outcomes remain equal, and all 96 accepted adjacent source digests remain byte-identical.
+
+The same complete matrix assembles into one ARM ELF. Both versions consume its actual objdump-decoded instructions through the production ABI analysis and renderer, with identical outcome counts. The before/after assembly bytes are equal. inputs.tar.gz retains both seven-file source snapshots, the complete batch, diagnostics, assembler/disassembler inputs and outputs, commands and raw reports. Initial fixture operand and newline diagnostics remain archived. candidate.patch passes git apply --check against the retained production source.
+
+The candidate stays private while the existing application source epochs run. Source promotion and subsequent whole-application execution follow their closure. These generic mechanism observations support the universal ABI and helper-preservation work; universal simulator, specialization, binding and native-link preservation theorem work continues toward the complete safety argument. QEMU application coverage continues through the existing serial queue.

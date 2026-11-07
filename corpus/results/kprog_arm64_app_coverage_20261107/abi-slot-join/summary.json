@@ -1,0 +1,49 @@
+{
+  "utc": "2026-11-07T21:12:25.712595+00:00",
+  "scope": "Generic ARM ABI slot-join and helper-copy mechanism; private source candidate",
+  "production_state": "Existing application source epochs retained; candidate promotion follows their closure.",
+  "changed_source": "kprog/arm64/micro-prog/arm64_abi.py",
+  "before_sha256": "9cd5a458b5fe071a880347a2a84fb6c34ce8338388ebb052700f7854f81fcbca",
+  "after_sha256": "65f3ed7d1c53cac6673c88b957fab1e021420cddba8f379ffc9e2685e25b7cbb",
+  "native_cases": 196,
+  "old_expected_outcome_differences": 64,
+  "candidate_expected_outcome_differences": 0,
+  "candidate_outcomes": {
+    "accepted": 128,
+    "undefined": 64,
+    "unresolved": 4
+  },
+  "assembled_native_roundtrip_cases": 196,
+  "assembled_native_candidate_differences": 0,
+  "assembled_native_input_identical_before_after": true,
+  "retained_adjacent_control_outcomes": 132,
+  "retained_accepted_control_source_digests": 96,
+  "patch_application_check_exit": 0,
+  "native_execution_count": 0,
+  "source_files_captured": 7,
+  "tools": {
+    "python": "Python 3.12.3",
+    "gcc": "aarch64-linux-gnu-gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "objdump": "GNU objdump (GNU Binutils for Ubuntu) 2.42"
+  },
+  "source_pins": {
+    "kprog/arm64/micro-prog/generated_arm64_cc_decode.py": "da883b8b8f40516b8cfe88cc08adaed1e66376cee82787a91715b8c459e29511",
+    "kprog/arm64/micro-prog/generated_arm64_helper_idents.py": "fd02214dff34fb5c47644be13571b46518b39258d403326754cc84096bc4003c",
+    "kprog/arm64/micro-prog/arm64_abi.py": "9cd5a458b5fe071a880347a2a84fb6c34ce8338388ebb052700f7854f81fcbca",
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "b9eb4c7cba928342851ff055117e60e6debbc6d9c41dd1a34d5e5fa7e8b8f97f",
+    "kprog/arm64/micro-prog/generated_arm64_decode.py": "2a2ae48c6b70328e5a389adb91a9503cdbc856c85d390d6b1c81e291d27d36d2",
+    "kprog/helper_abi.py": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b",
+    "vendor/libbpf/src/bpf_helper_defs.h": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697"
+  },
+  "batch_assembly_sha256": "44065d6187c734f9471b0b4afbf7caa7df19c60e761ba1005c29660f6efd2818",
+  "batch_elf_sha256": "9acd9540e93c904132a61028b522f3b3fd5f9e5b9b4cc562e095a0c798e34199",
+  "batch_disassembly_sha256": "f668bdd5b110687a5c149d9f795329c31cbe2dc069d8bfb873539d26a3f6db09",
+  "checks": {
+    "check.py": "2c6e56bd78e772847c48bbda05afca1c8dbd67c3cb785ba9b8d693e7a7b512a2",
+    "Makefile": "fc2e6a1f3db4d0ce9821b788ee541ea3988dc2e58395b5f6f393edecd206450f",
+    "check-roundtrip.log": "3d91ca3a050299262cb3097634f29d1db78460e0f7b80b69e04cde6aac8e217c",
+    "candidate.patch": "0d24004ad2a8a5ffcd064ba905d44506fece2aacafadd3c1a60a51f40e2453e6"
+  },
+  "theorem_scope": "Universal ABI read/join consistency and helper copy preservation compose with the common simulator/link safety obligations. This regression records generic analysis and source-generation behavior.",
+  "inputs_archive_sha256": "523955e18922cbfc723fd359664de0227aa332851fe904d75e45e8aabd5824a4"
+}
