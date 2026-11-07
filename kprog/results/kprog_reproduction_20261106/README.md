@@ -323,7 +323,13 @@ forwarding behaviour matches and the comparison is like-for-like. Both
 components ran ~60 s each arm, 120.1 s total, which is the normalizing
 denominator.
 
-**Does not reproduce**: 1.098x against 2.358x, a much larger gap than any
+At the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`,
+`corpus/results/x86_kvm_corpus_20261107_020659_029387`): 177 replaced,
+0 failed, 3 workloads per arm, 709,171,412 received packets baseline
+against 871,897,265 native = **1.229x** (the 60 s run gave 1.098x; both
+are well short and the longer run is the one to quote).
+
+**Does not reproduce**: 1.229x against 2.358x, a much larger gap than any
 other app here. The reference's Cilium advantage was its headline result,
 so this is the most important divergence in the table and is recorded as
 measured.
