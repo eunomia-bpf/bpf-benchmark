@@ -217,6 +217,38 @@ theorem logic_kind_binding_decodes (payload : BitVec 32) (kind : Reference.X86.L
   subst payload
   cases kind <;> simp [logicKindOf, GeneratedX86AluDecode.code, X86Logic.alu] at *
 
+/-- Implementation arithmetic payloads. CMP has its separate flag-only
+opcode; its SUB mapping is used only to state field identities uniformly. -/
+def arithmeticAlu : Reference.X86.ArithmeticKind → GeneratedX86AluDecode.Alu
+  | .add => .add | .adc => .adc | .sub => .sub | .sbb => .sbb | .compare => .sub
+
+/-- Production carry-sensitive routing is tested before generic ADD/SUB.
+Logical payloads remain separate and cannot select either carry handler. -/
+def arithmeticKindOf (payload : BitVec 32) : Option Reference.X86.ArithmeticKind :=
+  match GeneratedX86AluDecode.handlerForCode payload with
+  | .sbb => some .sbb
+  | .adc => some .adc
+  | .generic =>
+      if payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code .add) then some .add
+      else if payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code .sub) then some .sub
+      else none
+
+theorem arithmetic_kind_binding_decodes (payload : BitVec 32) (kind : Reference.X86.ArithmeticKind)
+    (writing : kind ≠ .compare)
+    (field : payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code (arithmeticAlu kind))) :
+    arithmeticKindOf payload = some kind := by
+  subst payload
+  cases kind <;> simp [arithmeticKindOf, arithmeticAlu, GeneratedX86AluDecode.code,
+    GeneratedX86AluDecode.handlerForCode] at *
+
+/-- Arithmetic fields cannot take either a logical branch or the raw XOR
+zero-operand gate. No operand equality or carry value is a premise. -/
+theorem arithmetic_payload_separate (payload : BitVec 32) (kind : Reference.X86.ArithmeticKind)
+    (field : payload = BitVec.ofNat 32 (GeneratedX86AluDecode.code (arithmeticAlu kind))) :
+    logicKindOf payload = none ∧ payload ≠ BitVec.ofNat 32 (GeneratedX86AluDecode.code .xor) := by
+  subst payload
+  cases kind <;> simp [logicKindOf, arithmeticAlu, GeneratedX86AluDecode.code]
+
 /-- C's current same-register/same-lane XOR zero-operand selection, tested
 on raw fields before either read. Partial writes still use the original cell. -/
 def logicRegisterBody (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
@@ -263,7 +295,7 @@ theorem logic_register_body_refines (env : EntryEnvironment.Environment) (frame 
 
 /-- Partial register-handler dispatcher. Existing NOP/MOV steps retain their
 prefix selection; the later singleton CMOV/BSWAP/POPCNT/XCHG gates consume their actual
-raw opcode, width and GPR fields. Logical ALU-register/immediate payloads
+raw opcode, width and GPR fields. Logical and arithmetic ALU-register/immediate payloads
 and CMP/TEST register/immediate forms add their generated family/AUX/lane/low-imm32
 selection. Other unproved forms remain
 None. Distinct generated opcode identities prevent an intervening handler
@@ -276,10 +308,14 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
   | none =>
       if aluImmediateHandled code then do
         let width ← widthOf flags
-        let kind ← logicKindOf (GeneratedX86RegLaneAux.payload aux)
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
-        pure ⟨nativeRegisters env frame arena
-          (logicImmediate env frame arena state width kind destination value nextPc), [], none⟩
+        match logicKindOf (GeneratedX86RegLaneAux.payload aux) with
+        | some kind => pure ⟨nativeRegisters env frame arena
+            (logicImmediate env frame arena state width kind destination value nextPc), [], none⟩
+        | none => do
+            let kind ← arithmeticKindOf (GeneratedX86RegLaneAux.payload aux)
+            pure ⟨nativeRegisters env frame arena
+              (arithmeticImmediate env frame arena state width kind destination value nextPc), [], none⟩
       else if code = GeneratedX86DispatchFamily.code .cmpImm then do
         let width ← widthOf flags
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
@@ -292,11 +328,15 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
           (logicImmediate env frame arena state width .test destination value nextPc), [], none⟩
       else if aluRegisterHandled code then do
         let width ← widthOf flags
-        let kind ← logicKindOf (GeneratedX86RegLaneAux.payload aux)
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
         let source ← sliceOf width src (GeneratedX86RegLaneAux.srcShift aux)
-        pure ⟨nativeRegisters env frame arena
-          (logicRegisterBody env frame arena state width kind dst src aux destination source nextPc), [], none⟩
+        match logicKindOf (GeneratedX86RegLaneAux.payload aux) with
+        | some kind => pure ⟨nativeRegisters env frame arena
+            (logicRegisterBody env frame arena state width kind dst src aux destination source nextPc), [], none⟩
+        | none => do
+            let kind ← arithmeticKindOf (GeneratedX86RegLaneAux.payload aux)
+            pure ⟨nativeRegisters env frame arena
+              (arithmeticRegister env frame arena state width kind destination source nextPc), [], none⟩
       else if code = GeneratedX86DispatchFamily.code .cmpReg then do
         let width ← widthOf flags
         let destination ← sliceOf width dst (GeneratedX86RegLaneAux.dstShift aux)
@@ -344,6 +384,28 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
   | move (code : Nat) (native : Reference.X86.Instruction)
       (fields : MoveBinding flags aux dst src value nextPc code native) :
       RegisterBinding flags aux dst src value nextPc code native
+  | arithmeticImmediate (op : GeneratedX86DispatchFamily.DispatchOp) (width : ScalarWidth)
+      (kind : Reference.X86.ArithmeticKind) (destination : RegisterSlice) (nativeValue : Word)
+      (familyField : GeneratedX86DispatchFamily.aluImmHandled op = true)
+      (writing : kind ≠ .compare)
+      (operationField : GeneratedX86RegLaneAux.payload aux =
+        BitVec.ofNat 32 (GeneratedX86AluDecode.code (arithmeticAlu kind)))
+      (widthField : WidthBinding flags width)
+      (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination)
+      (immediateField : ImmediateBinding width value nativeValue) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code op)
+        (.arithmetic width kind (.register destination) (.immediate nativeValue) nextPc)
+  | arithmeticRegister (op : GeneratedX86DispatchFamily.DispatchOp) (width : ScalarWidth)
+      (kind : Reference.X86.ArithmeticKind) (destination source : RegisterSlice)
+      (familyField : GeneratedX86DispatchFamily.aluRegHandled op = true)
+      (writing : kind ≠ .compare)
+      (operationField : GeneratedX86RegLaneAux.payload aux =
+        BitVec.ofNat 32 (GeneratedX86AluDecode.code (arithmeticAlu kind)))
+      (widthField : WidthBinding flags width)
+      (dstField : SliceBinding width dst (GeneratedX86RegLaneAux.dstShift aux) destination)
+      (srcField : SliceBinding width src (GeneratedX86RegLaneAux.srcShift aux) source) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchFamily.code op)
+        (.arithmetic width kind (.register destination) (.register source) nextPc)
   | logicImmediate (op : GeneratedX86DispatchFamily.DispatchOp) (width : ScalarWidth)
       (kind : Reference.X86.LogicKind) (destination : RegisterSlice) (nativeValue : Word)
       (familyField : GeneratedX86DispatchFamily.aluImmHandled op = true)
@@ -413,7 +475,7 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
         (.exchange width (.low destination) (.low source) nextPc)
 
 /-- One complete raw-frame step for the currently lifted register opcodes:
-NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG plus logical ALU-register
+NOP/MOV/CMOV(all16)/BSWAP/POPCNT/XCHG plus logical/arithmetic ALU-register
 and immediate family payloads and CMP/TEST register/immediate forms. Neither component handler
 semantics nor a chosen condition/value/state equation is assumed. This is a
 partial dispatcher theorem, not all77 operations or a compiled-body claim. -/
@@ -426,6 +488,27 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
   cases binding with
   | move code native fields =>
       simp only [dispatchRegisters, step_through_move_refines env frame arena code flags aux dst src value nextPc state native fields]
+  | arithmeticImmediate op width kind destination nativeValue familyField writing operationField widthField dstField immediateField =>
+      have widthDecoded := width_binding_decodes flags width widthField
+      have kindDecoded := arithmetic_kind_binding_decodes _ kind writing operationField
+      have separate := arithmetic_payload_separate _ kind operationField
+      have dstDecoded := slice_binding_decodes width dst _ destination dstField
+      cases op <;> simp [GeneratedX86DispatchFamily.aluImmHandled] at familyField
+      all_goals simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, kindDecoded, separate.1, dstDecoded] using
+        congrArg some (arithmetic_immediate_frame_refines env frame arena state width kind destination value nativeValue nextPc writing immediateField)
+  | arithmeticRegister op width kind destination source familyField writing operationField widthField dstField srcField =>
+      have widthDecoded := width_binding_decodes flags width widthField
+      have kindDecoded := arithmetic_kind_binding_decodes _ kind writing operationField
+      have separate := arithmetic_payload_separate _ kind operationField
+      have dstDecoded := slice_binding_decodes width dst _ destination dstField
+      have srcDecoded := slice_binding_decodes width src _ source srcField
+      cases op <;> simp [GeneratedX86DispatchFamily.aluRegHandled] at familyField
+      all_goals simpa [dispatchRegisters, dispatchThroughMove, beforeMove, aluImmediateHandled, aluRegisterHandled,
+        GeneratedX86Opcode.code, GeneratedX86DispatchFamily.code, GeneratedX86DispatchSingleton.code,
+        widthDecoded, kindDecoded, separate.1, dstDecoded, srcDecoded] using
+        congrArg some (arithmetic_register_frame_refines env frame arena state width kind destination source nextPc writing)
   | logicImmediate op width kind destination nativeValue familyField writing operationField widthField dstField immediateField =>
       have widthDecoded := width_binding_decodes flags width widthField
       have kindDecoded := logic_kind_binding_decodes _ kind writing operationField

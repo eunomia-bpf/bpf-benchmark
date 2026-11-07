@@ -703,4 +703,71 @@ theorem compare_immediate_frame_refines (env : Environment) (frame : Frame) (are
     Reference.X86.scalarRead, List.nil_append, List.append_nil, flags]
   rfl
 
+
+/-- The arithmetic result consumes only operand-width immediate bits. -/
+theorem arithmetic_value_operand_bits (width : Reference.X86.ScalarWidth) (subtract carry : Bool)
+    (left right native : NativeWord) (bits : right.setWidth width.bits = native.setWidth width.bits) :
+    X86Arithmetic.value width subtract carry left right = X86Arithmetic.value width subtract carry left native := by
+  simp only [X86Arithmetic.value, arithmetic_narrow_operand_bits width right native bits]
+
+/-- ADD/SUB/ADC/SBB read both materialized lanes and the original carry before
+flags or destination writeback. The existing scalar writer normalizes RSP
+and clears a written STACK alias only after the operands have been captured. -/
+def arithmeticRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.ArithmeticKind)
+    (dst src : Reference.X86.RegisterSlice) (nextPc : NativeWord) : RegisterState :=
+  let left := readRegister env frame arena state width dst
+  let right := readRegister env frame arena state width src
+  let carry := kind.carry state.raw.rflags
+  let written := writeRegister env frame arena state width dst
+    (X86Arithmetic.value width kind.subtract carry left right)
+  registerPc (registerFlags written (X86Arithmetic.flags width kind left right state.raw.rflags)) nextPc
+
+theorem arithmetic_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.ArithmeticKind)
+    (dst src : Reference.X86.RegisterSlice) (nextPc : NativeWord) (writing : kind ≠ .compare) :
+    (⟨nativeRegisters env frame arena (arithmeticRegister env frame arena state width kind dst src nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.arithmetic width kind (.register dst) (.register src) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86Arithmetic.step_refines]
+  simp only [arithmeticRegister, native_register_pc, native_register_flags, native_register_write,
+    native_register_read, X86Arithmetic.handlerStep, X86Scalar.read_refines,
+    Reference.X86.ScalarDestination.source, Reference.X86.scalarRead, X86Scalar.write_refines,
+    Reference.X86.scalarWrite, List.nil_append, List.append_nil, writing, ↓reduceIte]
+  rfl
+
+/-- The immediate arithmetic body uses generated low-imm32/sign-extension
+production and samples carry from the same incoming raw flag word. -/
+def arithmeticImmediate (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.ArithmeticKind)
+    (dst : Reference.X86.RegisterSlice) (raw nextPc : NativeWord) : RegisterState :=
+  let left := readRegister env frame arena state width dst
+  let right := GeneratedX86Immediate.value raw (X86Scalar.handlerWidth width)
+  let carry := kind.carry state.raw.rflags
+  let written := writeRegister env frame arena state width dst
+    (X86Arithmetic.value width kind.subtract carry left right)
+  registerPc (registerFlags written (X86Arithmetic.flags width kind left right state.raw.rflags)) nextPc
+
+theorem arithmetic_immediate_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.ArithmeticKind)
+    (dst : Reference.X86.RegisterSlice) (raw native nextPc : NativeWord)
+    (writing : kind ≠ .compare) (field : ImmediateBinding width raw native) :
+    (⟨nativeRegisters env frame arena (arithmeticImmediate env frame arena state width kind dst raw nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.arithmetic width kind (.register dst) (.immediate native) nextPc)
+        (nativeRegisters env frame arena state) := by
+  have bits : (GeneratedX86Immediate.value raw (X86Scalar.handlerWidth width)).setWidth width.bits =
+      native.setWidth width.bits := by
+    rw [x86_immediate_value_refines]
+    exact field.symm
+  have values (left : NativeWord) (carry : Bool) := arithmetic_value_operand_bits width kind.subtract carry left _ native bits
+  have flags (left old : NativeWord) := arithmetic_flags_operand_bits width kind left _ native old bits
+  rw [← X86Arithmetic.step_refines]
+  simp only [arithmeticImmediate, native_register_pc, native_register_flags, native_register_write,
+    native_register_read, X86Arithmetic.handlerStep, X86Scalar.read_refines,
+    Reference.X86.ScalarDestination.source, Reference.X86.scalarRead, X86Scalar.write_refines,
+    Reference.X86.scalarWrite, List.nil_append, List.append_nil, writing, ↓reduceIte, values, flags]
+  rfl
+
 end KProgFormal.Refinement.X86NumericAddress

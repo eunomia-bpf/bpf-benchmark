@@ -2435,3 +2435,35 @@ context programs are checked explicitly as rejections. Exact old/final tool
 sources, generated C, diagnostics, commands and pins accompany the full-run
 failure in the existing integration JSON/gzip. A new full run after this
 repair will be a separate immutable record; no full77/72/O2/O4 claim follows.
+
+## ADD/SUB/ADC/SBB raw-frame and dispatcher composition
+
+The same raw dispatcher-step theorem now includes ADD/SUB/ADC/SBB payloads
+through both actual register and immediate ALU families. The generated
+handlerForCode table selects SBB/ADC before generic ADD/SUB. A field lemma
+also derives that none of these payloads takes a logical or self-XOR branch.
+The opcode name does not override AUX. Every prior binding still compiles.
+
+The raw bodies capture both materialized lane operands and carry from the
+original RFLAGS before flags or writeback. They compose the existing generated
+arithmetic result/flag helpers and the RSP/STACK-aware numeric writer against
+the SAME canonical arithmetic step. Every legal width and high/low byte lane,
+destination/source alias and incoming carry is covered. The immediate form
+uses the generated low-imm32/sign-extension helper and only operand-width
+bit identity; unused high native immediate bits remain unconstrained. The
+result, all six flags, destination merge/zero-extension/scalarization and
+unchanged frame fields are derived without a chosen result/state premise.
+Current production ALU bodies have no separate pointer-preserving ADD arm;
+the existing numeric read/write normalization supplies the raw-frame lift.
+
+Focused92-job Lean build and six audits PASS with only the previously
+reported propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies.
+All372 proof/configuration pins are stable. Five existing generated checks
+and the unchanged ALU-result-route/flag-route/decode oracles pass under UBSan:
+760337, 776162, 3256 cases respectively, with stable dependency pins.
+No new test/oracle or production header/encoder/reference change accompanies
+this increment. Exact original/final proofs, diffs, commands, source pins,
+compiler warnings and logs are appended to the existing integration JSON/gzip.
+The immutable464cddd94 full check still runs independently and predates this
+increment; its outcome is not yet a PASS. Other ALU payloads and the remaining
+operation families, whole-ISA dispatch and compiled-B/O2/O4 remain active work.
