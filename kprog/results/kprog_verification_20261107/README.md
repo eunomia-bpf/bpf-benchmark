@@ -2811,3 +2811,21 @@ full commands/logs/manifest/CPU trace and later drift are retained. Shared
 vendor submodules and warm caches were used; the temporary export was deleted.
 That snapshot predates these new token theorems and C's c0b load casts. The
 focused token checks used the published new load header, SHA256 `3ba4bc78`.
+
+
+### Standalone memory-width fixture type dependencies
+
+The full check at published `43a7fa48d2390b7c2b643628595434040aa6a273`
+ended with actual/queue exit 2 at Makefile line 180. Its BPF memory-width
+fixture declared only u8/u64; C's published narrow-load return casts also use
+u16/u32. All 1,140 source hashes match that Git snapshot. The original
+compiler errors, command, complete log, manifest and CPU trace are retained.
+
+The fixture now declares the matching unsigned 16/32-bit aliases. Its semantic
+cases remain unchanged. The generator check and existing memory-width checker
+passed all ten generic and twenty fixed load forms, fixed/signed-limit
+displacements, three invalid-offset rejections and twelve MOVX access-width
+checks against the new production header. Source hashes stayed stable. The
+production generator/header, access count/width/address and canonical ISA were
+unchanged by this repair. The next full check includes the published fixture
+repair and subsequent generic token-family proof work.

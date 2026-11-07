@@ -1,6 +1,8 @@
 /* Compile the production memory contract to BPF: each guest access must keep
  * its width/address and happen once, including unaligned addresses and width0. */
 typedef unsigned char __u8;
+typedef unsigned short __u16;
+typedef unsigned int __u32;
 typedef unsigned long long __u64;
 #define X86_WIDTH_8 1U
 #define X86_WIDTH_16 2U
