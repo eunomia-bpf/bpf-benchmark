@@ -515,6 +515,45 @@ gave 1.475x; the longer run is the one to quote).
 reference. Tracee was the reference's only regression below 1; on this
 tree it is one of the larger wins.
 
+## Which programs ran natively, per app
+
+The operator asked for this per app. Counts are what the shim log shows;
+"distinct symbols" is the number of distinct `symbol=` values, which is
+smaller than the replacement count where an application loads the same
+program several times (tetragon's probes) or where a program is reloaded
+per sample.
+
+| app | replacements | distinct symbols | load lines | failed |
+| --- | ---: | ---: | ---: | ---: |
+| bcc/set | 18 | 25 (all, of 25) | — | 7 |
+| tetragon/observer | 118 | 14 | 331 | 0 |
+| katran | 1 | 1 | — | 0 |
+| cilium/agent | 177 | 25 | 254 | 0 |
+| otelcol | 14 | 14 | 19 | 0 |
+| tracee/monitor | 151 | 151 | 173 | 0 |
+
+Names that ran natively, first few of each:
+
+- **bcc/set** — 17 of 25 replaced; identity reported at
+  `### Programs that ran native (17)` above with the 8 that did not.
+- **tetragon** — `event_exit_acct_process`,
+  `event_exit_disassociate_ctty`, `event_wake_up_new_task`, and 11 more
+  distinct symbols across 118 replacements (its 331 load lines are many
+  probe instances of few programs).
+- **katran** — `balancer_ingress`, the only program.
+- **cilium** — `cil_from_container`, `cil_from_host`, `cil_from_netdev`,
+  and 22 more.
+- **otelcol** — `custom__generic`, `native_tracer_entry`,
+  `perf_go_labels`, and 11 more.
+- **tracee** — `cgroup_bpf_run_filter_skb`, `cgroup_mkdir_signal`,
+  `cgroup_rmdir_signal`, and 148 more.
+
+The distinguishing fact is tetragon: 118 replacements over 14 distinct
+programs means its hot path is a handful of programs loaded hundreds of
+times, which is consistent with the 20% whole-workload slowdown measured
+with counters off — the per-event cost of those few programs multiplies
+across every event.
+
 # Blockers cleared to reach the native arm
 
 Each was reproducible, and each is named with the evidence that cleared it.
