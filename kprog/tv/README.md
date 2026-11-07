@@ -1948,3 +1948,10 @@ step observations across code origins in both directions. State translation
 is invertible; all17 actual decoded instructions preserve their flag masks
 and complete GPR observations. Undefined AF remains arbitrary. Events, faults
 and memory stay exact; accepted-extent and whole-execution reflection are next.
+
+`trusted-simple-based-step.json` reflects every actual decoded step at any
+codebase to a logical canonical step with identical ordered events and a
+full-state translated successor. Accepted extents, decoded operands, masks
+and transition identities derive from captured bytes. Arbitrary AF, memory
+permissions and branch outcomes remain covered, and logical CFG closure is
+preserved. Whole finite-execution and bound-B composition follow next.

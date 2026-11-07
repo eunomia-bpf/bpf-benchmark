@@ -1894,6 +1894,96 @@ theorem native_relational_code_shift_iff (base : Word) (s : X86.State)
     apply shift_native_state_injective base
     exact run.2.2
 
+
+theorem shift_native_transition_inverse (base : Word) (actual : Transition X86.State) :
+    shiftNativeTransition (-base) (shiftNativeTransition base actual)=actual := by
+  cases actual with
+  | mk state events fault => simp only [shiftNativeTransition,shift_native_state_inverse]
+
+/-- Accepted real-base extents in the shifted closed CFG still name exactly
+the corresponding captured instruction; the logical end cannot decode. -/
+theorem based_closed_decoded_extent (base : Word) (s : X86.State)
+    (entry : X86Path.Entry) (instruction : X86.Instruction) (valid : simpleClosedPC s.pc)
+    (decoded : X86Path.decodeAt base native entry (shiftNativeState base s)=.ok instruction) :
+    s.pc.toNat ∈ simpleNativeOffsets ∧ entry=⟨s.pc.toNat,simpleNativeLength s.pc.toNat⟩ := by
+  rcases List.mem_append.mp valid with member | atEnd
+  · have position : (shiftNativeState base s).pc=base+BitVec.ofNat 64 s.pc.toNat := by
+      simp [shiftNativeState]
+    obtain ⟨offsetEq,lengthEq⟩ := simple_native_based_extent_unique base _ s.pc.toNat
+      entry instruction member position decoded
+    refine ⟨member,?_⟩
+    cases entry with
+    | mk offset length => cases offsetEq; cases lengthEq; rfl
+  · have position : s.pc=60 := by
+      apply BitVec.eq_of_toNat_eq
+      simpa only [List.mem_singleton] using atEnd
+    exact False.elim (simple_native_based_end_no_decode base _ entry instruction
+      (by simp only [shiftNativeState,position]; rfl) decoded)
+
+theorem simple_native_code_shift_decode_pair (base : Word) (s : X86.State) (offset : Nat)
+    (member : offset ∈ simpleNativeOffsets) :
+    ∃ instruction shifted,
+      X86.decode (native.extract offset (offset+simpleNativeLength offset)) s=.ok instruction ∧
+      X86.decode (native.extract offset (offset+simpleNativeLength offset)) (shiftNativeState base s)=.ok shifted ∧
+      X86.step shifted (shiftNativeState base s)=shiftNativeTransition base (X86.step instruction s) ∧
+      X86.definedFlags instruction=X86.definedFlags shifted ∧
+      (∀ state, X86.observedRegisters instruction state=state.gpr) ∧
+      (∀ state, X86.observedRegisters shifted state=state.gpr) := by
+  have canonical := simple_native_canonical_code_shift base s offset member
+  have observation := simple_native_code_shift_observations base s offset member
+  cases first : X86.decode (native.extract offset (offset+simpleNativeLength offset)) s with
+  | error reason => simp only [first] at canonical
+  | ok instruction =>
+    cases second : X86.decode (native.extract offset (offset+simpleNativeLength offset)) (shiftNativeState base s) with
+    | error reason => simp only [first,second] at canonical
+    | ok shifted =>
+      simp only [first,second] at canonical observation
+      exact ⟨instruction,shifted,rfl,rfl,canonical,observation⟩
+
+/-- Every actual real-base decoded step reflects to the logical canonical
+step with identical effects, including arbitrary accepted extents and AF. -/
+theorem simple_native_based_step_reflects (base : Word) (s : X86.State)
+    (valid : simpleClosedPC s.pc) {events : List Event} {next : X86.State}
+    (step : relationalNativeInstructionStep base native (shiftNativeState base s) events next) :
+    ∃ logicalNext, relationalNativeInstructionStep 0 native s events logicalNext ∧
+      shiftNativeState base logicalNext=next ∧ simpleClosedPC logicalNext.pc := by
+  obtain ⟨entry,physicalInstruction,actual,decoded,actualRun,traceEq,stateEq⟩ := step
+  obtain ⟨member,entryEq⟩ := based_closed_decoded_extent base s entry physicalInstruction valid decoded
+  obtain ⟨instruction,shifted,firstRaw,secondRaw,canonical,flags,firstObserved,secondObserved⟩ :=
+    simple_native_code_shift_decode_pair base s s.pc.toNat member
+  have actualRaw := decode_extent_reflects_raw base native entry (shiftNativeState base s) physicalInstruction decoded
+  rw [entryEq] at actualRaw
+  have instructionEq : shifted=physicalInstruction := Except.ok.inj (secondRaw.symm.trans actualRaw)
+  have logicalRaw : X86.decode (native.extract entry.offset (entry.offset+entry.length)) s=.ok instruction := by
+    simpa only [entryEq] using firstRaw
+  have lengthBound := (simple_native_metadata_bounds s.pc.toNat member).2.2
+  have consumed := simple_native_decode_length_shape s s.pc.toNat (simpleNativeLength s.pc.toNat) member lengthBound
+  simp only [Nat.lt_irrefl,ite_false,decodedNativeFallthrough,firstRaw] at consumed
+  have fall : X86.Instruction.fallthrough instruction=s.pc+BitVec.ofNat 64 entry.length := by
+    simpa only [entryEq] using Option.some.inj consumed
+  obtain ⟨_,positive,bounded,inside,_⟩ := decode_extent_constraints base native entry _ _ decoded
+  have position : s.pc=(0 : Word)+BitVec.ofNat 64 entry.offset := by simp [entryEq]
+  have nonzero : entry.length≠0 := by omega
+  have notLong : ¬ 15<entry.length := by omega
+  have notOutside : ¬ native.size<entry.offset+entry.length := by omega
+  have logicalDecoded : X86Path.decodeAt 0 native entry s=.ok instruction := by
+    simp +decide [X86Path.decodeAt,position,nonzero,notLong,notOutside,logicalRaw,fall,
+      X86Path.fallthrough,Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have normalizedRun : X86.Step shifted (shiftNativeState base s) actual := by
+    rw [instructionEq]
+    exact actualRun
+  have back : shiftNativeTransition base (shiftNativeTransition (-base) actual)=actual := by
+    simpa only [BitVec.neg_neg] using shift_native_transition_inverse (-base) actual
+  have logicalStep : X86.Step instruction s (shiftNativeTransition (-base) actual) := by
+    apply (native_relational_code_shift_iff base s instruction shifted _ canonical flags firstObserved secondObserved).mpr
+    rw [back]
+    exact normalizedRun
+  refine ⟨(shiftNativeTransition (-base) actual).state,?_,?_,?_⟩
+  · exact ⟨entry,instruction,shiftNativeTransition (-base) actual,logicalDecoded,logicalStep,traceEq,rfl⟩
+  · have states := congrArg Transition.state back
+    simpa only [shiftNativeTransition,stateEq] using states
+  · exact simple_native_relational_step_closed s entry instruction _ valid logicalDecoded logicalStep
+
 end KProgTV.TrustedSimpleSafety
 
 #print axioms KProgTV.TrustedSimpleSafety.initialization_projection_never_invents
@@ -2019,3 +2109,11 @@ end KProgTV.TrustedSimpleSafety
 #print axioms KProgTV.TrustedSimpleSafety.simple_native_code_shift_observations
 
 #print axioms KProgTV.TrustedSimpleSafety.native_relational_code_shift_iff
+
+#print axioms KProgTV.TrustedSimpleSafety.shift_native_transition_inverse
+
+#print axioms KProgTV.TrustedSimpleSafety.based_closed_decoded_extent
+
+#print axioms KProgTV.TrustedSimpleSafety.simple_native_code_shift_decode_pair
+
+#print axioms KProgTV.TrustedSimpleSafety.simple_native_based_step_reflects
