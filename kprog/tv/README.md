@@ -2288,3 +2288,12 @@ EXACTLY the certified B29, with unchanged nativeP60;8 exact packet checks and
 before/after and the header matches its published commit. Actual byte equality
 supplies this link; per-session JIT addresses and the remaining whole-TV/caller
 obligations are recorded separately.
+
+`trusted-simple-b29-all-state.json` composes all four architectural views.
+Actual B branch history distinguishes shared exits; actual context-read and
+store-entry-r1 snapshots preserve killed values without program rereads.
+Every selected complete canonical native result, including either context
+fault and every guard/store outcome, has the reconstructed whole architecture
+and a matching actual B29 execution with the same ordered effects. All21 state
+audits pass. Packaging observer/CFG/fault coverage into the explicit generic
+TranslationValidation instance and physical JIT/caller transport remain open.
