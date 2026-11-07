@@ -29,7 +29,7 @@ used.
 | Corpus katran | 1 | **1.018x** | 1.102x | **does not** |
 | Corpus cilium | 177 | **1.229x** | 2.358x | **does not** |
 | Corpus otelcol | 14 | **1.013x** | 1.824x | **does not** |
-| Corpus tracee | 151 | **1.475x** | 0.958x | **does not** |
+| Corpus tracee | 151 | **1.539x** | 0.958x | **does not** |
 
 Corpus figures are at the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`)
 and each carries the replaced/failed count from its own shim log.
@@ -38,14 +38,14 @@ and each carries the replaced/failed count from its own shim log.
 
 | set | geomean |
 | --- | ---: |
-| All six apps | **1.112x** |
+| All six apps | **1.120x** |
 | Reference, all six apps | **1.349x** |
 
 **The 1.349x six-app reference does not reproduce.** All six apps now
-measure and their geomean is 1.112x. The shortfall is concentrated in
+measure and their geomean is 1.120x. The shortfall is concentrated in
 cilium (1.229x against 2.358x) and tetragon (1.008x against 1.323x), the
 reference's two large wins; the other four sit near 1.00x in both runs,
-except tracee, whose 1.475x reverses its reference 0.958x.
+except tracee, whose 1.539x reverses its reference 0.958x.
 
 Every pair ran the same duration with the same work counters.
 **One of six corpus apps reproduces its reference ratio; five diverge.**
@@ -318,15 +318,20 @@ corpus/results/x86_kvm_corpus_20261107_041920_105442   status ok
 
 | | tracee/monitor |
 | --- | ---: |
-| bogo-ops, baseline eBPF | 22,549,454 |
-| bogo-ops, native | 33,257,102 |
-| **native/eBPF** | **1.475x** |
+| bogo-ops, baseline eBPF | 226,217,621 |
+| bogo-ops, native | 348,129,617 |
+| **native/eBPF** | **1.539x** |
 | reference (2026-05-29) | **0.958x** |
 
 Both arms ran the same seven stressors (cap, set, sigfd, eventfd, kill,
 futex, prctl) for the same duration, so the comparison is like-for-like.
 
-**Does not reproduce, and reverses**: 1.475x here against 0.958x in the
+At the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`,
+`corpus/results/x86_kvm_corpus_20261107_043912_975575`): 151 replaced,
+0 failed, no oops, 3 workloads per arm, giving **1.539x** (the 60 s run
+gave 1.475x; the longer run is the one to quote).
+
+**Does not reproduce, and reverses**: 1.539x here against 0.958x in the
 reference. Tracee was the reference's only regression below 1; on this
 tree it is one of the larger wins.
 
