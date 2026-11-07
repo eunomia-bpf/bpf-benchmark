@@ -21,6 +21,13 @@ static void layout(void)
  WIRE(native_lab_checked_region, payload, 8);
  WIRE(native_lab_checked_map, pointer, 32);
  WIRE(native_lab_checked_helper, function, 8);
+ WIRE(native_lab_emitted_header, source_prog_id, 8);
+ WIRE(native_lab_emitted_site, generation, 4);
+ WIRE(native_lab_emitted_site, native_size, 8);
+ WIRE(native_lab_emitted_site, abi_mask, 12);
+ WIRE(native_lab_emitted_site, address, 16);
+ _Static_assert(sizeof(struct native_lab_emitted_header) == 16, "emitted header extent");
+ _Static_assert(sizeof(struct native_lab_emitted_site) == 24, "emitted site extent");
  _Static_assert(sizeof(struct native_lab_checked_header) == 120, "checked header extent");
  _Static_assert(sizeof(struct native_lab_checked_region) == 16, "checked region extent");
  _Static_assert(sizeof(struct native_lab_checked_map) == 40, "checked map extent");

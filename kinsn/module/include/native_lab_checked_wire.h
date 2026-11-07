@@ -23,4 +23,14 @@ struct native_lab_checked_map {
 	__u64 pointer;
 };
 struct native_lab_checked_helper { __u32 insn, id; __u64 function; };
+/* Emission callbacks report final RX addresses, not an image byte search.
+ * Header followed by sites records in blob-id order. Diagnostic only; the
+ * accepted snapshot and immutable binding remain the authority. */
+struct native_lab_emitted_header {
+	__u32 version, sites, source_prog_id, reserved;
+};
+struct native_lab_emitted_site {
+	__u32 blob_id, generation, native_size, abi_mask;
+	__u64 address;
+};
 #endif

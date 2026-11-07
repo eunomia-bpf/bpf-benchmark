@@ -593,4 +593,22 @@ capture-loader-build:
 .PHONY: checked-first-block-check
 checked-first-block-check: checked-platform-check simple-blocks-check
 	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64 lake env lean -R ../tv -o ../tv/build/SimpleStoreCertificate.olean ../tv/SimpleStoreCertificate.lean
-	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv ../tv/SimpleCheckedBlocks.lean
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked lake env lean -R ../tv -o ../tv/build/SimpleCheckedBlocks.olean ../tv/SimpleCheckedBlocks.lean
+
+.PHONY: simple-emitted-check simple-emitted-certificate
+simple-emitted-check: checked-first-block-check
+	python3 extract_checked.py build-arm64/checked-kernel.log build/simple-checked --exports build/capture-loader-arm64-emitted
+	python3 test_emitted_sites.py build/capture-loader-arm64-emitted
+	python3 extract_simple_emitted.py build/capture-loader-arm64-emitted build/simple-emitted
+	$(MAKE) simple-emitted-certificate
+
+SIMPLE_EMITTED_DIR ?= build/simple-emitted
+simple-emitted-certificate:
+	@set -e; for source in $(SIMPLE_EMITTED_DIR)/SimpleEmitted_*.lean; do \
+		cd $(CURDIR)/../formal; \
+		LEAN_PATH=../tv/build:../tv/build/simple-arm64:../tv/build/simple-checked \
+		lake env lean -R ../tv/$(SIMPLE_EMITTED_DIR) ../tv/$$source; done
+
+.PHONY: simple-emitted-negative-check
+simple-emitted-negative-check:
+	python3 test_simple_emitted.py build/capture-loader-arm64-emitted

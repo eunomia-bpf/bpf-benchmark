@@ -45,7 +45,7 @@ void capture_bound_artifact(const LinkedBlob &linked, const std::vector<bpf_insn
         fail("verifier artifact differs from this successful generation-bound load");
     bpf_prog_info info = load_prog_info(fd);
     if (info.type != head.binding.prog_type || !info.jited_prog_len ||
-        !info.nr_jited_ksyms || !info.nr_jited_func_lens)
+        !info.nr_jited_ksyms || info.nr_jited_func_lens != info.nr_jited_ksyms)
         fail("successful bound artifact lacks actual JIT bytes/address/layout");
     std::vector<uint8_t> jit(info.jited_prog_len);
     std::vector<uint64_t> addresses(info.nr_jited_ksyms);
@@ -59,6 +59,49 @@ void capture_bound_artifact(const LinkedBlob &linked, const std::vector<bpf_insn
         actual.nr_jited_ksyms != addresses.size() || actual.nr_jited_func_lens != lengths.size() ||
         !addresses.front())
         fail("read actual bound JIT bytes/address/layout: " + std::string(std::strerror(errno)));
+#if defined(__aarch64__)
+    const auto emitted_path = std::filesystem::path(kNativeLabTarget.debugfs_dir) / "emitted_native";
+    std::ifstream emitted_input(emitted_path, std::ios::binary);
+    if (!emitted_input) fail("open emitted native sites " + emitted_path.string());
+    std::vector<uint8_t> emitted{std::istreambuf_iterator<char>(emitted_input), {}};
+    if (emitted_input.bad() || emitted.size() < sizeof(native_lab_emitted_header))
+        fail("read complete emitted native sites");
+    native_lab_emitted_header emitted_head;
+    std::memcpy(&emitted_head, emitted.data(), sizeof(emitted_head));
+    if (emitted_head.version != 1 || emitted_head.reserved || emitted_head.sites != chunks.size() ||
+        emitted_head.source_prog_id != attrs.source_prog_id ||
+        emitted.size() != sizeof(emitted_head) + chunks.size()*sizeof(native_lab_emitted_site))
+        fail("emitted native sites differ from the bound load");
+    size_t total_image_bytes = 0;
+    for (uint32_t length : lengths) {
+        if (!length || length > jit.size()-total_image_bytes)
+            fail("actual JIT function lengths exceed the captured image");
+        total_image_bytes += length;
+    }
+    if (total_image_bytes != jit.size())
+        fail("actual JIT function lengths do not cover the captured image");
+    for (size_t i = 0; i < chunks.size(); ++i) {
+        native_lab_emitted_site site;
+        std::memcpy(&site, emitted.data()+sizeof(emitted_head)+i*sizeof(site), sizeof(site));
+        if (site.blob_id != i || site.generation != generations[i] ||
+            site.native_size != chunks[i].len || site.abi_mask != linked.callee_saved_mask || !site.address)
+            fail("emitted native site differs from its bound generation/ABI/extent");
+        size_t image_offset = 0, matches = 0;
+        for (size_t f = 0; f < addresses.size(); ++f) {
+            if (site.address >= addresses[f] && site.address-addresses[f] <= lengths[f] &&
+                site.native_size <= lengths[f]-(site.address-addresses[f])) {
+                ++matches;
+                const auto begin = image_offset + size_t(site.address-addresses[f]);
+                if (linked.relocs.empty() &&
+                    std::memcmp(jit.data()+begin, linked.blob.data()+chunks[i].offset, site.native_size))
+                    fail("actual JIT native bytes differ at the reported entry");
+            }
+            image_offset += lengths[f];
+        }
+        if (matches != 1 || image_offset != jit.size())
+            fail("reported native entry is not contained in one actual JIT function");
+    }
+#endif
     const auto output = std::filesystem::path(directory) /
         (std::to_string(attrs.source_prog_id) + "-" + std::to_string(info.id));
     std::filesystem::create_directories(output.parent_path());
@@ -67,6 +110,9 @@ void capture_bound_artifact(const LinkedBlob &linked, const std::vector<bpf_insn
     auto save = [&](const char *name, const void *bytes, size_t count) {
         write_binary_file(output/name, static_cast<const uint8_t *>(bytes), count);
     };
+#if defined(__aarch64__)
+    save("emitted.bin", emitted.data(), emitted.size());
+#endif
     save("checked.snapshot.bin", snapshot.data(), snapshot.size());
     save("native.bin", linked.blob.data(), linked.blob.size());
     save("native.relocs", linked.relocs.data(), linked.relocs.size());

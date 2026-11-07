@@ -88,7 +88,7 @@ int main()
                 (std::to_string(item.original_prog_id) + "-" + std::to_string(item.native_prog_id));
         };
         auto print_record = [&](const std::filesystem::path &path) {
-            for (auto name : {"checked.snapshot.bin", "native.bin", "native.relocs", "proof-input.bin",
+            for (auto name : {"emitted.bin", "checked.snapshot.bin", "native.bin", "native.relocs", "proof-input.bin",
                     "jit.bin", "stub.bin", "jit-addresses.bin", "jit-lengths.bin", "load.json"}) {
                 std::printf("TV_EXPORT %s/%s ", path.filename().c_str(), name);
                 for (unsigned char byte : saved(path / name)) std::printf("%02x", byte);
@@ -108,6 +108,7 @@ int main()
         require(next.replaced && next.prog_fd >= 0 && record(next) != first,
             "second load has a distinct program record");
         require(saved(first / "checked.snapshot.bin") == bytes &&
+            saved(first / "emitted.bin") != saved(record(next) / "emitted.bin") &&
             saved(record(next) / "checked.snapshot.bin") != bytes,
             "first snapshot retained after next generation");
         print_record(first);

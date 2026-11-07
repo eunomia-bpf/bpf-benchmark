@@ -740,3 +740,22 @@ These concrete conditional safety theorems do not yet claim that bridge, other
 programs' certificates or the producer-independent trusted loading component.
 Exact evidence is in results/kprog_tv_20261107/checked-simple-prefix-* and
 checked-simple-bound-prefix-final.log.
+
+ARM opt-in capture now exports emitted.bin: final RX entry addresses reported
+by the real JIT callback, with each bound generation/ABI/extent. The loader
+matches those addresses to the actual JIT function ranges and unrelocated
+native bytes, and preserves distinct successful per-load records. The export
+parser's exact-byte certificate currently requires an unrelocated artifact;
+final-patch validation for relocated programs is active work. Ordinary loads
+and generation-zero timing keep their existing behavior.
+
+`make simple-emitted-check` regenerates each actual simple load's Lean Artifact,
+checks emitted/native/checked-B identity and its actual RX byte interval, then
+instantiates concrete accepted/bound prefix safety. `make
+simple-emitted-negative-check` rejects metadata-consistent changed native/JIT
+code or changed checked B at the corresponding Lean identity theorem. Both
+actual GEN4/GEN8 instances pass without sorryAx, as do36 site/JIT corruptions,
+old metadata/instruction/multichunk negatives and legacy captures. Evidence and
+remaining invocation/CPU-profile/native-PC-relocation obligations are recorded
+under results/kprog_tv_20261107/emitted-*. This is conditional per-load safety;
+the real invocation bridge and producer-independent loading remain to complete.

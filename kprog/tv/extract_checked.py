@@ -3,6 +3,7 @@ import argparse
 import json
 import struct
 from pathlib import Path
+from emitted_sites import validate_emitted
 
 
 def decode(data):
@@ -80,7 +81,7 @@ def extract_exports(log, output):
             continue
         fields = line.split(maxsplit=2)
         path = Path(fields[1])
-        if len(path.parts) != 2 or path.name not in names or \
+        if len(path.parts) != 2 or path.name not in names | {"emitted.bin"} or \
                 len(path.parts[0].split('-')) != 2 or not all(x.isdigit() for x in path.parts[0].split('-')):
             raise ValueError('invalid exported artifact path')
         files = records.setdefault(path.parts[0], {})
@@ -91,7 +92,7 @@ def extract_exports(log, output):
         raise ValueError('completed per-program export regression is required')
     inventory = []
     for identity, files in records.items():
-        if files.keys() != names:
+        if files.keys() not in (names, names | {'emitted.bin'}):
             raise ValueError('incomplete per-program export')
         program, metadata = decode(files['checked.snapshot.bin'])
         load = json.loads(files['load.json'])
@@ -105,12 +106,16 @@ def extract_exports(log, output):
                 len(files['jit-lengths.bin'])*2 != len(files['jit-addresses.bin']) or \
                 sum(v[0] for v in struct.iter_unpack('<I', files['jit-lengths.bin'])) != len(files['jit.bin']):
             raise ValueError('successful export differs from bound load identity/extent')
+        emission = None
+        if 'emitted.bin' in files:
+            emission = validate_emitted(files['emitted.bin'], metadata, files['native.bin'],
+                files['native.relocs'], files['jit.bin'], files['jit-addresses.bin'], files['jit-lengths.bin'])
         destination = output/identity
         destination.mkdir(parents=True, exist_ok=True)
         for name, value in files.items():
             (destination/name).write_bytes(value)
         inventory.append(dict(load, native_bytes=len(files['native.bin']), proof_insns=len(program)//8,
-            translation_validation='not_validated'))
+            translation_validation='not_validated', emitted_sites=emission))
     (output/'programs.json').write_text(json.dumps(inventory, indent=2)+'\n')
     print(f'completed per-program exports: {len(inventory)}; translation validation remains separate')
 

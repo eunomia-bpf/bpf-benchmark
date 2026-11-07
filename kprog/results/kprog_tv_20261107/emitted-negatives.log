@@ -1,0 +1,43 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+python3 test_simple_emitted.py build/capture-loader-arm64-emitted
+6-7: emitted native/program/entry/ABI/metadata certificate input generated
+coherent-native-store: metadata consistent, REJECTED by native_is_certified
+6-7: emitted native/program/entry/ABI/metadata certificate input generated
+checked-store: metadata consistent, REJECTED by proof_is_checked
+actual emitted/native and accepted-B byte-identity negative certificates: PASS
+make: Leaving directory '/workspaces/repository/kprog/tv'
+completed per-program exports: 2; translation validation remains separate
+unchanged legacy arm64 exports: PASS
+truncated header: REJECTED
+truncated body: REJECTED
+extra bytes: REJECTED
+wrong version: REJECTED
+wrong program extent: REJECTED
+stale generation: REJECTED
+wrong entry: REJECTED
+wrong ABI: REJECTED
+missing original identity: REJECTED
+missing environment map: REJECTED
+map site differs: REJECTED
+map pointer differs: REJECTED
+helper site differs: REJECTED
+helper identity differs: REJECTED
+actual simple and resolved map/helper snapshots: PASS;14 corruptions rejected
+actual expanded proof: 29 instructions, 1 bound region(s)
+context-width: REJECTED by exact captured-byte Lean certificate
+actual expanded proof: 29 instructions, 1 bound region(s)
+erased-store: REJECTED by exact captured-byte Lean certificate
+actual expanded proof: 29 instructions, 1 bound region(s)
+wrong-redirect: REJECTED by exact captured-byte Lean certificate
+actual expanded proof: 29 instructions, 1 bound region(s)
+erased-stub-exit: REJECTED by exact captured-byte Lean certificate
+multichunk overlap: REJECTED
+multichunk wrong final generation: REJECTED
+multichunk region past program: REJECTED
+multichunk overlap: REJECTED
+multichunk wrong final generation: REJECTED
+multichunk region past program: REJECTED
+multichunk overlap: REJECTED
+multichunk wrong final generation: REJECTED
+multichunk region past program: REJECTED
+actual successful captures: 41 PASS; reverse-order multichunk: 3 PASS

@@ -616,6 +616,18 @@ static int emit_native_lab_arm64(u32 *image, int *idx, bool emit, u64 payload,
 		}
 	}
 
+	if (emit && final_ip && generation && native_lab_capture_checked) {
+		mutex_lock(&blobs_lock);
+		err = native_lab_group_use(blob_id, generation, abi_mask);
+		if (!err)
+			err = native_lab_group_program(prog, blob_id);
+		if (!err)
+			err = native_lab_capture_emit(blob_id, generation, abi_mask, final_ip);
+		mutex_unlock(&blobs_lock);
+		if (err)
+			goto out_free;
+	}
+
 	*idx += snapshot_len / sizeof(u32);
 	err = snapshot_len / sizeof(u32);
 
@@ -1117,6 +1129,13 @@ static int __init bpf_arm64_native_lab_debugfs_init(void)
 
 	checked = debugfs_create_file("checked_proof", 0400, debugfs_root, NULL,
 			      &native_lab_checked_fops);
+	if (IS_ERR(checked)) {
+		debugfs_remove_recursive(debugfs_root);
+		debugfs_root = NULL;
+		return PTR_ERR(checked);
+	}
+	checked = debugfs_create_file("emitted_native", 0400, debugfs_root, NULL,
+			      &native_lab_emitted_fops);
 	if (IS_ERR(checked)) {
 		debugfs_remove_recursive(debugfs_root);
 		debugfs_root = NULL;

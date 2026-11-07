@@ -8,6 +8,9 @@ module_param_named(capture_checked, native_lab_capture_checked, bool, 0600);
 MODULE_PARM_DESC(capture_checked, "Capture exact verified expanded proof before restoration");
 static void *native_lab_checked_bytes;
 static size_t native_lab_checked_size;
+#if NATIVE_LAB_BINDING_ARCH == NATIVE_LAB_ARCH_ARM64
+static struct native_lab_emitted_site native_lab_emitted_sites[NATIVE_LAB_MAX_BLOBS];
+#endif
 
 /* All callers hold blobs_lock. Mutation invalidates stale program evidence. */
 static void native_lab_forget_checked(void)
@@ -15,6 +18,9 @@ static void native_lab_forget_checked(void)
 	kvfree(native_lab_checked_bytes);
 	native_lab_checked_bytes = NULL;
 	native_lab_checked_size = 0;
+#if NATIVE_LAB_BINDING_ARCH == NATIVE_LAB_ARCH_ARM64
+	memset(native_lab_emitted_sites, 0, sizeof(native_lab_emitted_sites));
+#endif
 }
 
 static bool native_lab_checked_map_insn(const struct bpf_insn *insn)
@@ -146,4 +152,78 @@ static const struct file_operations native_lab_checked_fops = {
 	.owner = THIS_MODULE, .open = native_lab_checked_open, .read = native_lab_checked_read,
 	.release = native_lab_checked_release, .llseek = default_llseek,
 };
+
+#if NATIVE_LAB_BINDING_ARCH == NATIVE_LAB_ARCH_ARM64
+/* Called with blobs_lock after the final generation/context recheck. The
+ * address comes from the JIT's final RX image, never its temporary scratch. */
+static int native_lab_capture_emit(u32 blob_id, u32 generation, u32 abi_mask,
+				   const u32 *final_ip)
+{
+	const struct native_lab_checked_header *checked = native_lab_checked_bytes;
+
+	if (!checked || blob_id >= checked->binding.chunk_count ||
+	    checked->actual_generation != blobs[checked->binding.blob_id].generation)
+		return -ESTALE;
+	native_lab_emitted_sites[blob_id] = (struct native_lab_emitted_site) {
+		.blob_id = blob_id, .generation = generation,
+		.native_size = blobs[blob_id].len, .abi_mask = abi_mask,
+		.address = (unsigned long)final_ip,
+	};
+	return 0;
+}
+
+static int native_lab_emitted_open(struct inode *inode, struct file *file)
+{
+	struct native_lab_checked_reader *reader;
+	const struct native_lab_checked_header *checked;
+	struct native_lab_emitted_header header;
+	u32 i;
+	int err = 0;
+
+	if (!capable(CAP_SYS_ADMIN))
+		return -EPERM;
+	reader = kzalloc(sizeof(*reader), GFP_KERNEL);
+	if (!reader)
+		return -ENOMEM;
+	mutex_lock(&blobs_lock);
+	checked = native_lab_checked_bytes;
+	if (!checked) {
+		err = -ENODATA;
+		goto unlock;
+	}
+	header = (struct native_lab_emitted_header) {
+		.version = 1, .sites = checked->binding.chunk_count,
+		.source_prog_id = checked->binding.source_prog_id,
+	};
+	for (i = 0; i < header.sites; i++) {
+		if (!native_lab_emitted_sites[i].address ||
+		    native_lab_emitted_sites[i].generation != blobs[i].generation) {
+			err = -ENODATA;
+			goto unlock;
+		}
+	}
+	reader->size = sizeof(header) + header.sites * sizeof(native_lab_emitted_sites[0]);
+	reader->bytes = kvmalloc(reader->size, GFP_KERNEL);
+	if (!reader->bytes) {
+		err = -ENOMEM;
+		goto unlock;
+	}
+	memcpy(reader->bytes, &header, sizeof(header));
+	memcpy(reader->bytes + sizeof(header), native_lab_emitted_sites,
+	       header.sites * sizeof(native_lab_emitted_sites[0]));
+unlock:
+	mutex_unlock(&blobs_lock);
+	if (err) {
+		kfree(reader);
+		return err;
+	}
+	file->private_data = reader;
+	return 0;
+}
+static const struct file_operations native_lab_emitted_fops = {
+	.owner = THIS_MODULE, .open = native_lab_emitted_open, .read = native_lab_checked_read,
+	.release = native_lab_checked_release, .llseek = default_llseek,
+};
+#endif
+
 #endif

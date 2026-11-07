@@ -97,3 +97,56 @@ private spills, entry/guard/store certificates and concrete prefix/binding
 safety. Every final theorem retains the reported axioms and no sorryAx.
 This closes the pending dependency refresh; actual invocation/profile/emission
 binding continues independently.
+
+Actual ARM JIT entry binding and per-load theorem instances
+---------------------------------------------------------
+
+The opt-in capture_checked path records each final RX entry directly from the
+ARM JIT callback's final_ip, together with blob/generation/ABI/extent and the
+pinned source identity. Records reset with the checked snapshot on mutation;
+readers obtain an immutable snapshot under blobs_lock. The loader checks the
+reported entry against bpf_prog_info function ranges and exact JIT bytes before
+writing emitted.bin and the final successful load.json. There is no byte search
+or new default/performance admission rule. Matching module/loader versions are
+needed only for the opted-in diagnostic export.
+
+Both are actual loads of the same simple P, with distinct native IDs,
+generations and RX addresses:
+
+| source/native ID | generation | native bytes | expanded B insns | JIT entry | JIT offset | Lean instance |
+| --- | --- | --- | --- | --- | --- | --- |
+| 6/7 | 4 | 84 | 29 | 0xffff80008355d8b8 | 40 | PASS, conditional prefix safety |
+| 6/8 | 8 | 84 | 29 | 0xffff80008355d970 | 40 | PASS, conditional prefix safety |
+
+Actual full original/bound executions return2 with the exact8-byte packet change
+and120 untouched bytes. Both generated SimpleEmitted modules prove that actual
+emitted native/checked B equal the certified byte arrays, that the reported RX
+entry selects those exact JIT bytes, and instantiate accepted_bound_prefix_checked
+with the full per-load Artifact (entry/ABI/checked snapshot/emission metadata).
+actual_jit_entry uses only propext; prefix safety retains the existing
+propext/choice/ofReduceBool/Quot.sound and no sorryAx.
+
+Validation: emitted-runtime.log contains the final-source ARM library/capture
+build and real QEMU executions plus x86 host library build. The complete
+simple-emitted-check and both Lean instances pass in emitted-certificates.log.
+The36 site/JIT corruptions reject, including an intact decoy blob elsewhere.
+Two metadata-consistent corruptions (native AND JIT store changed together;
+actual checked B store changed) reject at the corresponding Lean byte-identity
+theorems. Existing14 metadata/4 instruction/9 multichunk negatives and all41
+retained x86 captures plus old ARM exports still pass; x86 module/control builds
+pass. Raw negative output is in emitted-negatives.log. Two initial harness
+mistakes (rfl term diagnostic wording; trying a log exporter on x86's directly
+saved directory) are retained in the source/input archive, with the correct
+actual-record controls and no production behavior weakened.
+
+Remaining obligations are the actual kernel invocation/initial-state and
+CPU-profile bridge (including Cortex-A72 split-pair semantics and native-PC
+relocation), relocated-program final-patch TV, other micros/apps, and the
+priority5 native-only trusted loading component. The kernel/JIT wrapper and
+binding/capture code remain trusted, alongside verifier/platform soundness,
+canonical ISA hardware faithfulness and the stated Lean reduction oracle.
+Inventory remains not_validated until invocation obligations are discharged;
+these successful per-load conditional theorems do not claim full pipeline
+admission or all-program TV. No paper, benchmark, shared runtime image or native
+ISA implementation changed. Exact source/program/negative inputs and source
+pins are in emitted-inputs.tar.gz and emitted-source-pins.txt.

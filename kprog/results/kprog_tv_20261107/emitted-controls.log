@@ -1,0 +1,51 @@
+make: Entering directory '/workspaces/repository/kprog/tv'
+./build/test-binding
+binding entry/ABI/metadata/generation and exact-byte rejection tests: PASS
+make: Leaving directory '/workspaces/repository/kprog/tv'
+make: Entering directory '/workspaces/repository/kprog/tv'
+make -C /workspaces/repository/kprog/tv/build-kernel-x86 M=/workspaces/repository/kprog/tv/build-x86 ARCH=x86 \
+	TV_ARCH=x86 CROSS_COMPILE= modules
+make[1]: Entering directory '/workspaces/repository/kprog/tv/build-kernel-x86'
+make[2]: Entering directory '/workspaces/repository/kprog/tv/build-x86'
+  CC [M]  bpf_x86_native_lab.o
+  MODPOST Module.symvers
+  LD [M]  bpf_x86_native_lab.ko
+  BTF [M] bpf_x86_native_lab.ko
+make[2]: Leaving directory '/workspaces/repository/kprog/tv/build-x86'
+make[1]: Leaving directory '/workspaces/repository/kprog/tv/build-kernel-x86'
+make: Leaving directory '/workspaces/repository/kprog/tv'
+make: Entering directory '/workspaces/repository/kprog/libnativeloader'
+cmake -S . -B "build-tv-binding" \
+	-DNATIVE_LOADER_REPO_ROOT="/workspaces/repository" \
+	-DNATIVE_LOADER_LIBBPF_PREFIX="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix" \
+	-DNATIVE_LOADER_LIBBPF_LIBRARY="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" \
+	-DNATIVE_LOADER_KERNEL_OFFSETS_INCLUDE="/workspaces/repository/micro/programs/build-x86"
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspaces/repository/kprog/libnativeloader/build-tv-binding
+cmake --build "build-tv-binding" --target native_loader native_loader_shared
+gmake[1]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[2]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[ 50%] Building CXX object CMakeFiles/native_loader.dir/src/native_loader.cpp.o
+[100%] Linking CXX static library libnative_loader.a
+gmake[4]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[100%] Built target native_loader
+gmake[3]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[2]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[2]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[3]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[4]: Entering directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[ 50%] Building CXX object CMakeFiles/native_loader_shared.dir/src/native_loader.cpp.o
+[100%] Linking CXX shared library libnative_loader.so
+gmake[4]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+[100%] Built target native_loader_shared
+gmake[3]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[2]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+gmake[1]: Leaving directory '/workspaces/repository/kprog/libnativeloader/build-tv-binding'
+make: Leaving directory '/workspaces/repository/kprog/libnativeloader'
