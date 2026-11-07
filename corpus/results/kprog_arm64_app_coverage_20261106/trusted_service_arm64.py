@@ -17,8 +17,8 @@ import traceback
 
 ROOT = Path(__file__).resolve().parents[3]
 HERE = Path(__file__).resolve().parent
-LOADER = ROOT / 'kprog/libnativeloader/build-arm64-a-map-order-v3'
-NATIVE_LINK = ROOT / 'kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link'
+LOADER = ROOT / 'kprog/libnativeloader/build-arm64-typed-tail-v1'
+NATIVE_LINK = ROOT / 'kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link-arm64-rodata-extents'
 
 
 CORPUS_APPS = {
@@ -160,7 +160,7 @@ def host(case="control", results=None):
     with tempfile.TemporaryDirectory(prefix='service-', dir=build) as temporary:
         live = Path(temporary)
         image = ROOT / 'vendor/build/arm64/linux/arch/arm64/boot/Image'
-        module = ROOT / 'kinsn/module/arm64/build/bpf_arm64_native_lab.ko'
+        module = ROOT / 'kinsn/module/arm64/build-native-resources/bpf_arm64_native_lab.ko'
         root = ROOT / 'kprog/arm64/build/app-runtime-v35/root'
         argv = ['taskset', '-c', '8-11', 'qemu-system-aarch64', '-M', 'virt',
             '-cpu', 'max', '-smp', '8' if case in CORPUS_APPS else '2', '-m', '8192' if case in CORPUS_APPS else '2048', '-nographic', '-no-reboot',
@@ -190,7 +190,7 @@ def host(case="control", results=None):
                 inputs.append(native)
             (live / 'native-only-manifest.json').write_text(json.dumps(data, indent=2) + chr(10))
             inputs.extend([root / 'qemu-run.sh', root / 'qemu-init',
-                ROOT / 'bpfopt/shim/build-arm64/libbpfrejit_shim.so', LOADER / 'libnative_loader.so',
+                ROOT / 'bpfopt/shim/build-arm64-probe-map-fd/libbpfrejit_shim.so', LOADER / 'libnative_loader.so',
                 ROOT / 'corpus/driver.py', ROOT / 'runner/libs/app_runners' / ({'bcc':'bcc_set', 'otelcol-ebpf-profiler':'otel_profiler'}.get(case, case) + '.py')])
             if case == 'bcc':
                 inputs.append(ROOT / 'runner/libs/app_runners/bcc.py')
@@ -204,7 +204,7 @@ def host(case="control", results=None):
                 inputs.append(root / 'usr/local/bin' / ('cilium-agent' if case == 'cilium' else case))
             inputs.extend([ROOT / 'runner/libs/app_runners/native_loader_env.py',
                 ROOT / 'corpus/config/macro_apps.yaml', ROOT / 'corpus/config/benchmark_config.yaml'])
-            inputs.extend(sorted((ROOT / 'kinsn/module/arm64/build').glob('*.ko')))
+            inputs.extend(sorted((ROOT / 'kinsn/module/arm64/build-native-resources').glob('*.ko')))
             inputs.extend([ROOT / 'vendor/build/arm64/linux/Module.symvers',
                 ROOT / 'vendor/build/arm64/linux/modules-install/lib/modules' / (ROOT / 'vendor/build/arm64/linux/include/config/kernel.release').read_text().strip() / 'modules.dep'])
             inputs = list(dict.fromkeys(inputs))
@@ -233,13 +233,18 @@ def host(case="control", results=None):
                             'cd ' + str(ROOT),
                         ]
                         if case in CORPUS_APPS:
-                            commands.append('mount --bind ' + str(ROOT / 'bpfopt/shim/build-arm64/libbpfrejit_shim.so') + ' /usr/local/lib/bpfrejit/libbpfrejit_shim.so')
+                            commands.append('mount --bind ' + str(ROOT / 'bpfopt/shim/build-arm64-probe-map-fd/libbpfrejit_shim.so') + ' /usr/local/lib/bpfrejit/libbpfrejit_shim.so')
                         if case in CORPUS_APPS:
-                            commands.extend(['mount --bind ' + str(ROOT / 'kinsn/module/arm64/build') + ' /artifacts/kinsn',
+                            commands.extend(['mount --bind ' + str(ROOT / 'kinsn/module/arm64/build-native-resources') + ' /artifacts/kinsn',
                                 'mount --bind ' + str(ROOT / 'vendor/build/arm64/linux/modules-install/lib/modules') + ' /artifacts/lib/modules',
                                 'mount -t bpf bpffs /sys/fs/bpf',
                                 'mount -t tmpfs -o mode=1777 tmpfs /var/tmp',
-                                'install -d -m1777 /dev/shm', 'mount -t tmpfs -o mode=1777 tmpfs /dev/shm', 'ulimit -l unlimited'])
+                                'install -d -m1777 /dev/shm', 'mount -t tmpfs -o mode=1777 tmpfs /dev/shm',
+                                'install -d -m0700 /run/runtime-home', 'cp -a /root/. /run/runtime-home/',
+                                'mount --bind /run/runtime-home /root', 'ulimit -l unlimited'])
+                        if case == 'cilium':
+                            commands.extend(['cp -a /var/lib/cilium /run/cilium-lib',
+                                'mount --bind /run/cilium-lib /var/lib/cilium'])
                         commands.extend([
                             'PATH=' + str(ROOT / 'runner/build-arm64-llvmbpf') + ':/usr/lib/llvm-18/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin PYTHONDONTWRITEBYTECODE=1 python3 ' + str(Path(__file__)) + ' guest ' + str(live) + ' ' + case])
                         qemu.stdin.write((' && '.join(commands) + '; rc=$?; echo $rc > ' + str(live / 'guest.exit') + '; echo o > /proc/sysrq-trigger' + chr(10)).encode())
