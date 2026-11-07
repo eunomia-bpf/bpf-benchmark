@@ -11,3 +11,5 @@ Reproduce the source census from the retained raw cohorts:
     make -C corpus/results/kprog_arm64_app_coverage_20261107/indirect-dispatch collect
 
 The collector reads existing archives and produces one application-batch summary. Original runtime artifacts stay in their existing archives. Universal ISA, specialization, binding and native-link preservation theorem work supplies the complete safety argument as those obligations close. Finite-dispatch source counts and verifier acceptance remain supporting runtime observations.
+
+The six-cohort closure includes Tracee: its first common-service request generates a source artifact and compiles successfully, followed by a tail-map-plan loader rejection before verifier submission. This adds the recorded source sites to the application-level census. Aggregate source counts are 22 generated and 17 bound; runtime counters retain their separate application records.

@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-07T21:20:01.104200+00:00",
+  "utc": "2026-11-07T22:15:02.261072+00:00",
   "scope": "Whole-application first-pass finite-dispatch source coverage from original common-service runtime artifacts. Universal O1/O2/O4 theorem work continues.",
   "collector_source_sha256": "57435fa03c2afdc7b35b301f825c4b481c193d6821f7f4363c031d8226dd5736",
   "applications": [
@@ -316,7 +316,56 @@
     },
     {
       "app": "tracee",
-      "state": "running_or_queued"
+      "state": "closed",
+      "host_reported_ok": false,
+      "guest_exit": 1,
+      "raw_archive": "corpus/results/kprog_arm64_app_coverage_20261107/trusted-arm64-tracee-result/run-20261107T202335483042Z.tar.gz",
+      "raw_archive_sha256": "0834321bc7d5fbafe59b0d61afef55ffba012815dcadbf01a199cea562139b9a",
+      "source_summary_sha256": "6a60503b16e97bb687497cee01ba7fc679e0bdffc413b669d829697a74c462ac",
+      "terminal_requests": 1,
+      "request_status_counts": {
+        "refused": 1
+      },
+      "generated_source_artifacts": 1,
+      "generated_source_bytes": 9042,
+      "bound_source_artifacts": 0,
+      "bound_sources_with_indirect_dispatch": 0,
+      "counts": {
+        "blr": 4,
+        "code_target_arms": 0,
+        "helper_target_arms": 4,
+        "tag_partitioned_sites": 4,
+        "register_read_sites": 4,
+        "switches": 8,
+        "reject_defaults": 8,
+        "two_switch_two_default_sites": 4,
+        "classified_literal_case_sites": 4,
+        "return_sites": 1,
+        "return_sites_with_finite_case_macro": 1,
+        "raw_target_register_reads": 4
+      },
+      "bound_counts": {},
+      "bound_target_count_histogram": {},
+      "bound_return_target_count_histogram": {},
+      "target_count_histogram": {
+        "1": 4
+      },
+      "return_target_count_histogram": {
+        "0": 1
+      },
+      "helper_target_histogram": {
+        "bpf_get_current_task": 1,
+        "bpf_map_lookup_elem": 1,
+        "bpf_probe_read_kernel": 1,
+        "bpf_tail_call": 1
+      },
+      "source_artifact_digests": [
+        {
+          "request_archive": "1.failure.tar.gz",
+          "request_archive_sha256": "629a617d314350d7689dcd894c39aa943df4a966b904c40c75b561ebd2766fd3",
+          "generated_source_sha256": "11027d96a1bf83327a0c7b7d62e387870591eb61c54456233d62a78a304bda3c"
+        }
+      ]
     }
   ]
 }
