@@ -93,6 +93,16 @@ that passed through have no native symbol to publish. The operator's rule
 is that a failed native load stays eBPF and does not stop the run, so that
 step is stricter than the rule. Both are reported.
 
+A lane is currently adding address-based disambiguation to the linker, and
+I tested it: it does not resolve this case yet, because the address path
+only fires when the map address is known and **cilium's manifest carries
+no `map_addrs`** — its entries are `native_object`, `program`,
+`source_map_prefix`, `symbol`. So the fix needs both halves: the linker's
+address preference, and cilium's manifest entries carrying the resolved
+kernel map identity, which is `write_native_manifest.py` /
+`vendor/bpf/Makefile`'s `native-cilium` target. The stats-on arm succeeds
+because those programs happened to resolve on the truncation path.
+
 One caveat remains:
 
 - **tetragon's earlier stats-off attempt** (70 of 118 replaced, 1.017x)
