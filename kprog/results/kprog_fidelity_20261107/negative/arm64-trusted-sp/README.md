@@ -113,3 +113,33 @@ plus the run's input pins and selected native identities. The summary gives the
 exact completed count/stages and any source drift at capture. Remaining cases
 are not counted, and this checkpoint makes no full-suite pass claim. The
 historical accepted return-target finding and old-linker archives remain above.
+
+## Completed repaired full replay, 2026-11-07 12:38 UTC
+
+The existing detached replay has now completed all34 unchanged native inputs:
+4 valid controls executed correctly under both kernel and generation-bound
+native paths (result0, retval2), and all30 unsafe inputs were rejected.
+The breakdown is16 verifier rejections,13 specialization rejections and1
+loader rejection. Guest and QEMU exit0; unsafe acceptances0; unsafe native
+executions0. The earlier pending/checkpoint statements above describe their
+historical captures and are superseded by this full-run result.
+
+`fresh-full-summary.json` records every case's stage, exact decisive diagnostic,
+native identity, closed request archive SHA256 and original message SHA256.
+Offline receipt checks matched all34 identities against the saved fixtures,
+request receipts, kernel-owned ELF and specializer input ELF. All34 request
+source-identity maps agree; shared identities match the host's input pins, and
+the transport records unchanged source/binary pins over the full run.
+The original host archive remains in this Workspace at
+`trusted-arm64-service-result/run-20261107T120541064586Z.tar.gz`, SHA256
+`040286c756831a8ce05f53e8fb697147549940766370a45867ee0af87067aede`.
+The existing Makefile qemu command above produced this run; harvesting receipts
+started no new guest or build and did not rerun any native input.
+
+The previously accepted `return_register_overwrite` identity now rejects in
+the verifier with `invalid func unknown#-1`; the native identity is unchanged.
+This closes that saved linker regression. It does not establish universal O3:
+the independent ordinary-context-store admission finding on both ISAs remains
+open in `../context-projection/README.md`, with C/A owning the production
+projection repair. Real-hardware validation of the current ARM771-form
+static differential harness also remains pending.
