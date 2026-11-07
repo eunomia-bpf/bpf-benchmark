@@ -1,0 +1,10 @@
+{
+  "ok": false,
+  "program": "simple",
+  "architecture": "x86",
+  "route": "registered native-only common service",
+  "error": "Command '['/workspaces/repository/kprog/tv/build/trusted-simple-client', '/workspaces/repository/micro/programs/build-host-docker-x86/simple.bpf.o', '/workspaces/repository/micro/programs/build-host-docker-x86/simple.native.so']' returned non-zero exit status 1.",
+  "archive_sha256": "ffe3c2a28e7fd5ee1ff0cbbd8896af1c7e9dede9f864d4e232cc268c4b90b7f0",
+  "diagnostic": "Existing .native.so is ET_DYN; common worker requires ET_REL. Harness now compiles original source directly to relocatable ELF, no service restriction changed",
+  "archive": "shared-elf-rejection.tar.gz"
+}

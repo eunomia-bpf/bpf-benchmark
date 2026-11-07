@@ -1134,3 +1134,27 @@ five fentry programs are freshly verified, bound and attached, with
 bound_required=1, prebuilt_proof=0, application exit0 and statistics output.
 This is the first BCC application path; the full corpus and ARM Katran remain
 separate active obligations.
+
+
+Trusted service simple micro replay
+----------------------------------
+
+`make -C kprog/tv trusted-simple-check` uses the current captured x86
+kernel/module pair and common service. It incrementally compiles the original
+`micro/programs/simple.bpf.c` to a relocatable native ELF with the existing
+kernel offsets, then submits only that P/entry/typed metadata. The client
+loads the original simple BPF for its pinned ABI and compares both executions
+on packet lengths14,71,72,128. All8 TEST_RUN checks require the correct return,
+exact output bytes and every untouched packet byte. The common worker freshly
+generates B and the loader captures actual checked bytes and final native RX
+entry before publishing the result. REQUIRE_BOUND and legacy REQUIRE_PREBUILT
+are both1; the accepted result is prebuilt=false.
+
+`kprog/results/kprog_tv_20261107/trusted-simple/` retains the compact result and
+compressed complete request/compiler/kernel/JIT inputs. The two initial
+harness input-selection diagnostics are compressed separately: a previously
+RET-rewritten proof object fails relinking, and an ET_DYN shared object fails
+the service's ET_REL contract. The final input is compiled directly from the
+original micro source; service/generator policy is unchanged. These runtime
+checks and bound artifacts are inputs to the whole-program certificate; they
+do not establish full-state or exact-event ISA refinement on their own.

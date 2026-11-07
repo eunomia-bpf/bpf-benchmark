@@ -1,0 +1,10 @@
+{
+  "ok": false,
+  "program": "simple",
+  "architecture": "x86",
+  "route": "registered native-only common service",
+  "error": "Command '['/workspaces/repository/kprog/tv/build/trusted-simple-client', '/workspaces/repository/micro/programs/build-host-docker-x86/simple.bpf.o', '/workspaces/repository/kprog/x86/micro-prog/build/native-link/simple.proof.o']' returned non-zero exit status 1.",
+  "archive_sha256": "976fe6aa654377a976f2187131be02e04ec26221e2a52308c937fb37d6cdf349",
+  "diagnostic": "Previously RET-rewritten native-link proof object was accidentally selected as P; relinking rejects branch outside original symbol extent before verification/native execution",
+  "archive": "transformed-input-rejection.tar.gz"
+}

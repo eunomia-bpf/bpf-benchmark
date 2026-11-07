@@ -1,0 +1,69 @@
+{
+  "ok": true,
+  "program": "simple",
+  "architecture": "x86",
+  "route": "registered native-only common service",
+  "client": {
+    "ok": true,
+    "original_prog_id": 6,
+    "native_prog_id": 11,
+    "retval": 2,
+    "prebuilt_proof": false,
+    "packet_lengths": [
+      14,
+      71,
+      72,
+      128
+    ],
+    "exact_packet_checks": 8
+  },
+  "completion": {
+    "request_id": 1,
+    "source_prog_id": 6,
+    "native_sha256": "d5d24d70e70dc8b6dce3d7abc85113227cdd14aef220f86047b5c57e66c580bd",
+    "started": "2026-11-07T09:47:13.955139+00:00",
+    "prog_id": 11,
+    "status": 0,
+    "artifact_archive": "/workspaces/repository/kprog/results/kprog_tv_20261107/trusted-simple/.live-1_zxft3l/requests/1.success.tar.gz",
+    "finished": "2026-11-07T09:47:16.244349+00:00"
+  },
+  "application_inputs": {
+    "kprog/tv/build/trusted-simple-client": "e84e729a12bbaf6eaf3c820241408d8dd517f60b2d5c5531dd279820812d7d9c",
+    "micro/programs/build-host-docker-x86/simple.bpf.o": "907540eb75863c27c21777be1584115c3810ed378bcdae102100ab37d7911b03",
+    "kprog/tv/build/simple.native.o": "d5d24d70e70dc8b6dce3d7abc85113227cdd14aef220f86047b5c57e66c580bd"
+  },
+  "capture_sha256": {
+    "checked.snapshot.bin": "615d3542a151e5abd686fdf1bced7245008ed04490dcfb67c27f9ca9b510f45e",
+    "emitted.bin": "028224001c016c8eb1e133c3cded71e678ec1bc3a28a6144d913d1d747301120",
+    "native.bin": "82373c6ba4a4a71e4a7a1d84cd369dbb364770d95edd2f3f3bbc4634cc135361",
+    "native.relocs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "proof-input.bin": "7af6b892045b8defafcd3dc51298f46c94dc618dc23de2774c9ad3db8b207f83",
+    "jit.bin": "2a90385c370a26e6de72450d6385dd3b75bc63be9c2f38ddc823afedc571c1d4",
+    "jit-addresses.bin": "563a8353509978689e8eaaacb88c45830a26df25c29b9daf2189f10d3a443466",
+    "jit-lengths.bin": "8d4cd219a8179c66acd195d0f07c34721c87ed2241a9de78a228b7b336488bc8",
+    "stub.bin": "390885678d6520b4a8b6895a635d7b6a9678ae6bec5546bbf06632cd338c75fc",
+    "load.json": "b5f14245b6777f4b6072167076109e110da8f0537ba0bb877082aeb3393c7f63"
+  },
+  "sources": {
+    "kprog/libnativeloader/src/native_tv_capture.hpp": "84b0597ac279a40f293451c05273dbd7b57c83289f9380b8fe92ac075d5fe2b6",
+    "kinsn/module/include/native_lab_checked.h": "b6784a78bb1184f097720e25f0ac8352ca0ecd8f3f6a2d22718a72b8691d0d33",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "3d1e78cc172e72c6765be11e26dd2df4debe3321d29e3a219eb8180458e33499",
+    "kprog/tv/build-x86/bpf_x86_native_lab.ko": "6f03b95301fdb094647d3e85e5f06570eb4e5f77df5070e65d8bb6c9ff0d8f2a"
+  },
+  "validated_by_loader": "actual checked binding/generation/context; emission entry inside actual JIT layout; exact native bytes when no relocation",
+  "remaining": "ISA/translation certificate and trust of kernel binding code are not discharged by capture",
+  "archive_sha256": "569acb40ff3753e5d4b03a5ba8a131707db8e34435219a82f025b442a049e731",
+  "capture_layout": {
+    "verifier_insns": 37,
+    "native_bytes": 60,
+    "proof_input_insns": 36,
+    "emitted_sites": 1,
+    "native_relocations": 0,
+    "generation": 4
+  },
+  "input_contract": "Fresh relocatable native ELF compiled from micro/programs/simple.bpf.c with MICRO_NATIVE and existing kernel offsets; not a previously transformed proof or shared library",
+  "harness_sha256": {
+    "kprog/tv/trusted_simple_client.cpp": "bc1d98ab50bda7bf428defb0f3760d6681eb3bc248a63300c0f19f7bd492004a",
+    "kprog/tv/capture_trusted_service.py": "c292b4ebc3ac8f5aaaa3011088888ece5f2494f2877bdd85c9fc080768540b43"
+  }
+}

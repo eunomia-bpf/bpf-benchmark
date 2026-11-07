@@ -762,3 +762,30 @@ guest-trusted-capture-check:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod build-x86/bpf_x86_native_lab.ko capture_checked=1
 	PATH="/usr/lib/llvm-18/bin:$$PATH" PYTHONDONTWRITEBYTECODE=1 python3 capture_trusted_service.py
+
+build/trusted-simple-client: trusted_simple_client.cpp ../libnativeloader/build/libnative_loader.a
+	$(CXX) -std=c++20 -Wall -Wextra -Werror -O2 -D__EXPORTED_HEADERS__ \
+		-I../../vendor/linux-framework/include/uapi -I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		$< ../libnativeloader/build/libnative_loader.a \
+		../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -o $@
+
+.PHONY: trusted-simple-check guest-trusted-simple-check
+trusted-simple-check: build/simple.native.o
+	$(MAKE) -C ../libnativeloader trusted-service
+	$(MAKE) build/trusted-simple-client
+	taskset -c 8-11 vng --run $(CURDIR)/build-kernel-x86/arch/x86/boot/bzImage \
+		--cwd $(abspath ../..) --rwdir $(abspath ../..) --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/tv guest-trusted-simple-check'
+
+guest-trusted-simple-check:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod build-x86/bpf_x86_native_lab.ko capture_checked=1
+	PATH="/usr/lib/llvm-18/bin:$$PATH" PYTHONDONTWRITEBYTECODE=1 python3 capture_trusted_service.py simple
+
+
+build/simple.native.o: ../../micro/programs/simple.bpf.c ../../micro/programs/common.h ../../micro/programs/build-host-docker-x86/kernel_offsets.h
+	install -d build
+	clang -O3 -g -fPIC -fno-plt -DMICRO_NATIVE -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only \
+		-fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
+		-mllvm -switch-to-lookup=false -I../../micro/programs/build-host-docker-x86 -c $< -o $@

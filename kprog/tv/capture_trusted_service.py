@@ -11,16 +11,19 @@ import signal
 import subprocess
 import tarfile
 import tempfile
+import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / 'kprog/results/kprog_tv_20261107/trusted-capture'
+SIMPLE = sys.argv[1:] == ['simple']
+if sys.argv[1:] and not SIMPLE: raise ValueError('expected optional simple case')
+OUT = ROOT / 'kprog/results/kprog_tv_20261107' / ('trusted-simple' if SIMPLE else 'trusted-capture')
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    summary = dict(ok=False, architecture='x86', route='registered native-only common service')
+    summary = dict(ok=False, program='simple' if SIMPLE else 'return2-control', architecture='x86', route='registered native-only common service')
     with tempfile.TemporaryDirectory(prefix='.live-', dir=OUT) as temporary:
         live = Path(temporary)
         state = live / 'requests'
@@ -37,8 +40,12 @@ def main():
             lines.append(service.stdout.readline())
             if not json.loads(lines[-1]).get('ready'):
                 raise RuntimeError('common service did not register')
-            result = subprocess.run([str(ROOT / 'kprog/libnativeloader/build/trusted-service-client'),
-                str(ROOT / 'kprog/libnativeloader/build/trusted-native.o')],
+            client_argv = [ROOT / 'kprog/tv/build/trusted-simple-client',
+                ROOT / 'micro/programs/build-host-docker-x86/simple.bpf.o',
+                ROOT / 'kprog/tv/build/simple.native.o'] if SIMPLE else [
+                ROOT / 'kprog/libnativeloader/build/trusted-service-client',
+                ROOT / 'kprog/libnativeloader/build/trusted-native.o']
+            result = subprocess.run([str(p) for p in client_argv],
                 text=True, capture_output=True)
             (live / 'client.stdout').write_text(result.stdout)
             (live / 'client.stderr').write_text(result.stderr)
@@ -59,6 +66,7 @@ def main():
             if identity['native_prog_id'] != client['native_prog_id'] or identity['source_prog_id'] != client['original_prog_id']:
                 raise RuntimeError('captured load identity differs from returned native program')
             summary.update(ok=True, client=client, completion=completion,
+                application_inputs={str(p.relative_to(ROOT)):digest(p) for p in client_argv},
                 capture_sha256={name: digest(record / name) for name in required},
                 sources={str(path.relative_to(ROOT)): digest(path) for path in [
                     ROOT / 'kprog/libnativeloader/src/native_tv_capture.hpp',
