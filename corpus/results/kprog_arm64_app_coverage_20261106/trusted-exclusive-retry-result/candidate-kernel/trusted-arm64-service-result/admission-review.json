@@ -1,0 +1,354 @@
+{
+  "expected_cases": 9,
+  "completed_cases": 9,
+  "complete": true,
+  "all_load_only": true,
+  "native_executions": 0,
+  "stages": {
+    "accepted_load_only": 2,
+    "verifier_rejected": 6,
+    "loader_rejected": 1
+  },
+  "negative_accepted_load_only": [],
+  "safety_pass": false,
+  "candidate_adopted": false,
+  "driver_exit": 2,
+  "host_reported_ok": false,
+  "guest": {
+    "ok": true,
+    "diagnostic_only": true,
+    "all_load_only": true,
+    "candidate_adopted": false,
+    "cases": 9,
+    "negative_accepted": 0
+  },
+  "rows": [
+    {
+      "name": "valid_private_retry",
+      "symbol": "valid_private_retry",
+      "negative": false,
+      "bug_detected": "private stack retry with both outcomes and exact scalar updates",
+      "expectation": "bound native retval2; current kernel rejection is baseline, not expected repaired behavior",
+      "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+      "stage": "accepted_load_only",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/context_array.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/valid_private_retry.manifest.json"
+      ],
+      "returncode": 0,
+      "native_executed": false
+    },
+    {
+      "name": "valid_private_retry_twice",
+      "symbol": "valid_private_retry_twice",
+      "negative": false,
+      "bug_detected": "two exclusive sites in one sealed region",
+      "expectation": "bound native retval2; current kernel rejection is baseline, not expected repaired behavior",
+      "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+      "stage": "accepted_load_only",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/context_array.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/valid_private_retry_twice.manifest.json"
+      ],
+      "returncode": 0,
+      "native_executed": false
+    },
+    {
+      "name": "unsafe_after_second_failure",
+      "symbol": "unsafe_after_second_failure",
+      "negative": true,
+      "bug_detected": "unsafe memory appears after two failures",
+      "expectation": "reject before native execution",
+      "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+      "stage": "verifier_rejected",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/unsafe_after_second_failure.manifest.json"
+      ],
+      "returncode": 1,
+      "native_executed": false
+    },
+    {
+      "name": "unsafe_success_after_two_failures",
+      "symbol": "unsafe_success_after_two_failures",
+      "negative": true,
+      "bug_detected": "success continuation reads a counter refined by prior failed attempts",
+      "expectation": "reject before native execution",
+      "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+      "stage": "verifier_rejected",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/unsafe_success_after_two_failures.manifest.json"
+      ],
+      "returncode": 1,
+      "native_executed": false
+    },
+    {
+      "name": "unsafe_pointer_after_retry",
+      "symbol": "unsafe_pointer_after_retry",
+      "negative": true,
+      "bug_detected": "success continuation dereferences pointer modified only on failure",
+      "expectation": "reject before native execution",
+      "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+      "stage": "verifier_rejected",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/unsafe_pointer_after_retry.manifest.json"
+      ],
+      "returncode": 1,
+      "native_executed": false
+    },
+    {
+      "name": "unsafe_failure_memory",
+      "symbol": "unsafe_failure_memory",
+      "negative": true,
+      "bug_detected": "every failure has an unsafe memory operation",
+      "expectation": "reject before native execution",
+      "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+      "stage": "verifier_rejected",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/unsafe_failure_memory.manifest.json"
+      ],
+      "returncode": 1,
+      "native_executed": false
+    },
+    {
+      "name": "marker_free_infinite",
+      "symbol": "marker_free_infinite",
+      "negative": true,
+      "bug_detected": "pure native cycle has no exclusive marker",
+      "expectation": "reject before native execution",
+      "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+      "stage": "loader_rejected",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/marker_free_infinite.manifest.json"
+      ],
+      "returncode": 1,
+      "native_executed": false
+    },
+    {
+      "name": "marker_cycle_with_exit",
+      "symbol": "marker_cycle_with_exit",
+      "negative": true,
+      "bug_detected": "marked unbounded cycle with syntactic exit; ignores status",
+      "expectation": "reject before execution",
+      "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+      "stage": "verifier_rejected",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/marker_cycle_with_exit.manifest.json"
+      ],
+      "returncode": 1,
+      "native_executed": false
+    },
+    {
+      "name": "success_cycle_with_exit",
+      "symbol": "success_cycle_with_exit",
+      "negative": true,
+      "bug_detected": "marked unbounded cycle with syntactic exit; success backedge outside retry",
+      "expectation": "reject before execution",
+      "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+      "stage": "verifier_rejected",
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/bound-probe",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/context_hash.bpf.o",
+        "/workspaces/repository/kprog/arm64/build/trusted-transport/exclusive-kernel-diagnostic/success_cycle_with_exit.manifest.json"
+      ],
+      "returncode": 1,
+      "native_executed": false
+    }
+  ],
+  "request_audit": {
+    "utc": "2026-11-07T17:47:37.501168+00:00",
+    "kind": "exclusive-candidate-load-only",
+    "scope": "native byte identity and closed raw results; no compiler/ISA refinement claim",
+    "archive": "run-20261107T173627261151Z.tar.gz",
+    "archive_sha256": "aec599921ac9410fd8ceddf3cf384472fe09203f74e6317c2fecc64b8dc014a1",
+    "host_reported_ok": false,
+    "hashes_unchanged": false,
+    "completed_counts": {
+      "service_accepted": 2,
+      "service_refused": 7
+    },
+    "expected_safety_cases": null,
+    "completed_requests_or_cases": 9,
+    "not_completed": [],
+    "request_identities": [
+      {
+        "request_id": 1,
+        "status": 0,
+        "entry": "valid_private_retry",
+        "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+        "kernel_native_matches_receipt": true,
+        "generated_native_present": true,
+        "generated_native_matches_kernel": true,
+        "request_archive_sha256": "23579bee5b39554ed4d073f2e23cdd8215d26c28dbbee6ba505f32ef9c8ce177",
+        "artifacts": {
+          "request/generated/trusted_arm64.proof.o": "05d23f127372052e2a12e0e8682b85693ce81ce0542223546a460ce78859f562",
+          "request/generated/trusted_arm64.bpf.o": "3b7603d51d8072448101db25169e476ec58523f16aa826dc95d8ce0e66b58e80",
+          "request/generated/trusted_arm64.bpf.c": "d1ee889d35a9f78d06270bc7a25203fbbb30b0fc7edeb3844aceb5132edf1f85",
+          "request/generation.metadata.json": "65f5d58de67f109d4b28c305ac526e5bc7d007b87e5bc111303af2e304e1a891",
+          "request/kernel.facts.json": "261bfa97ef6c4e8f95101c2a640180ec890436250c99b5d6a6b064c1190ff127",
+          "request/source-identities.json": "c3f48b2acc32d4f7fa89065495799a0bcad5b598f9b7558ac858848b5297918d"
+        }
+      },
+      {
+        "request_id": 2,
+        "status": 0,
+        "entry": "valid_private_retry_twice",
+        "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+        "kernel_native_matches_receipt": true,
+        "generated_native_present": true,
+        "generated_native_matches_kernel": true,
+        "request_archive_sha256": "d78ea828b6429bfdad826bbd6194fe2c2b3b8aaa315f00824c506194885b2a98",
+        "artifacts": {
+          "request/generated/trusted_arm64.proof.o": "2796bf872153bf3e244bf32cc83790da877a42ea2310a91c1f9ad9f319680aea",
+          "request/generated/trusted_arm64.bpf.o": "5fceb252fd272e2a45849b29219d7f868809c4dc99700b66b746844c3c09b06d",
+          "request/generated/trusted_arm64.bpf.c": "45f5f7308ad776e50a5e3abf2bdb051241aec53dd5eff659e708d0e9a6d1aaff",
+          "request/generation.metadata.json": "65f5d58de67f109d4b28c305ac526e5bc7d007b87e5bc111303af2e304e1a891",
+          "request/kernel.facts.json": "d011ba52dd393a40cabdb9134a2db7750ff7646bc7eef51e451fab9137a150b4",
+          "request/source-identities.json": "c3f48b2acc32d4f7fa89065495799a0bcad5b598f9b7558ac858848b5297918d"
+        }
+      },
+      {
+        "request_id": 3,
+        "status": -5,
+        "entry": "unsafe_after_second_failure",
+        "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+        "kernel_native_matches_receipt": true,
+        "generated_native_present": true,
+        "generated_native_matches_kernel": true,
+        "request_archive_sha256": "06d1be5f9083b9a5f1577c26d99b4329b79432bd46e0bc470cad3e775a2e85c1",
+        "artifacts": {
+          "request/generated/trusted_arm64.proof.o": "0cc4589dfd857728556b81613e514aca211d44c09583aebbe15ab337fd800ce6",
+          "request/generated/trusted_arm64.bpf.o": "63640db98f19a4b74a77a7f592dfb65974adb7ff967df71a4b0b7a5766897d9f",
+          "request/generated/trusted_arm64.bpf.c": "adee6df4ff6554aeedc3a7a4e042e3da55d6cd676ce1848c6e7c2473e5ddbfd6",
+          "request/generation.metadata.json": "65f5d58de67f109d4b28c305ac526e5bc7d007b87e5bc111303af2e304e1a891",
+          "request/kernel.facts.json": "180b4da724f75e1eeb804486cd3a810f6e60efa028b0393789367869fbcb2a1a",
+          "request/source-identities.json": "c3f48b2acc32d4f7fa89065495799a0bcad5b598f9b7558ac858848b5297918d"
+        }
+      },
+      {
+        "request_id": 4,
+        "status": -5,
+        "entry": "unsafe_success_after_two_failures",
+        "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+        "kernel_native_matches_receipt": true,
+        "generated_native_present": true,
+        "generated_native_matches_kernel": true,
+        "request_archive_sha256": "dc9877b256044f22c512a5425fba97ba6611157e42c125b5b81338526cdd749c",
+        "artifacts": {
+          "request/generated/trusted_arm64.proof.o": "abdf97e2699db5458275322d7ac59a6a7ba9847b753d9963e3241dcb8fc02fb7",
+          "request/generated/trusted_arm64.bpf.o": "a9621815c8b654a384b886f178d2e015083f44c92eb2f508b254ef0ca30c5540",
+          "request/generated/trusted_arm64.bpf.c": "f364fe56bff090126981ec473f98bf5492b8ba5a19f57b72ab2bd036fa6b4f11",
+          "request/generation.metadata.json": "65f5d58de67f109d4b28c305ac526e5bc7d007b87e5bc111303af2e304e1a891",
+          "request/kernel.facts.json": "79de03cd99ca9dbb2200a190a5ff8988d9f6b3c85d50c4bb4549b2f3cfaee877",
+          "request/source-identities.json": "c3f48b2acc32d4f7fa89065495799a0bcad5b598f9b7558ac858848b5297918d"
+        }
+      },
+      {
+        "request_id": 5,
+        "status": -5,
+        "entry": "unsafe_pointer_after_retry",
+        "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+        "kernel_native_matches_receipt": true,
+        "generated_native_present": true,
+        "generated_native_matches_kernel": true,
+        "request_archive_sha256": "7487e43c79a6c417bd83ad16fdc6b41703d5452d9ea2814938238aa5ddcd0397",
+        "artifacts": {
+          "request/generated/trusted_arm64.proof.o": "a1568ad06257fb0d0905e25e5325e0dd2244d678758c5556ca955307dbd79287",
+          "request/generated/trusted_arm64.bpf.o": "14977c5e11bf4ef75dc42be7746b7e26a0cf5cbbc2de54842a16a92f68c04c79",
+          "request/generated/trusted_arm64.bpf.c": "8b8720e3002b8dd4e77f8a63590cead452bdf7cc528299ac5ae39081f83f187b",
+          "request/generation.metadata.json": "65f5d58de67f109d4b28c305ac526e5bc7d007b87e5bc111303af2e304e1a891",
+          "request/kernel.facts.json": "1dc705f41bf0e9b84af64a5187a766cfaffae5bc4c7b3ba6cb0dbb71fc055621",
+          "request/source-identities.json": "f0fe74dbb2d3a8476a4bf98180934fd56b9bb856be9480dad0f915796e2ded15"
+        }
+      },
+      {
+        "request_id": 6,
+        "status": -5,
+        "entry": "unsafe_failure_memory",
+        "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+        "kernel_native_matches_receipt": true,
+        "generated_native_present": true,
+        "generated_native_matches_kernel": true,
+        "request_archive_sha256": "76c9a21dcced16a504b88d57f8f13adf3c9c4bebf656e49dc761362a20bb4ede",
+        "artifacts": {
+          "request/generated/trusted_arm64.proof.o": "02d1b285ff623d0415e051a7aef611e82b4c3cc03e397a4e6709bc2e2b334595",
+          "request/generated/trusted_arm64.bpf.o": "21cbe5926006ae54fec36c48a86ad6728d0f00b158137dfa9992aa1a6c92280b",
+          "request/generated/trusted_arm64.bpf.c": "5c1c2b59af0f5e19e93fe468651c585a58aad5d216bee648b3848d359f52d596",
+          "request/generation.metadata.json": "65f5d58de67f109d4b28c305ac526e5bc7d007b87e5bc111303af2e304e1a891",
+          "request/kernel.facts.json": "c2ca00187cacc1784c60a65676b6ed8e101fd58b718ae137d2b5586465d2bf32",
+          "request/source-identities.json": "f0fe74dbb2d3a8476a4bf98180934fd56b9bb856be9480dad0f915796e2ded15"
+        }
+      },
+      {
+        "request_id": 7,
+        "status": -5,
+        "entry": "marker_free_infinite",
+        "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+        "kernel_native_matches_receipt": true,
+        "generated_native_present": true,
+        "generated_native_matches_kernel": true,
+        "request_archive_sha256": "47ff13d6deccc8148991b882c80ab370f438efa819a72ec5f57343fa86da2d94",
+        "artifacts": {
+          "request/generated/trusted_arm64.proof.o": "02bd5ab35208ae19c8f52cf8b1256d4d46ab151ace656e5dee01229ea95bd580",
+          "request/generated/trusted_arm64.bpf.o": "e09cf7127090b81f07ff05e69321362fe0ce06b8515b57220e3d83f18d61c3f2",
+          "request/generated/trusted_arm64.bpf.c": "e8127da93460dbc4c5fc51689a8bad27dc713da82cc4e20dd75c01bdc0beb930",
+          "request/generation.metadata.json": "65f5d58de67f109d4b28c305ac526e5bc7d007b87e5bc111303af2e304e1a891",
+          "request/kernel.facts.json": "dbe3d24863a6e3cdb0c9e13aaaf43c2da6b75a82b6e5728b0253b7e2e1aeb6b1",
+          "request/source-identities.json": "f0fe74dbb2d3a8476a4bf98180934fd56b9bb856be9480dad0f915796e2ded15"
+        }
+      },
+      {
+        "request_id": 8,
+        "status": -5,
+        "entry": "marker_cycle_with_exit",
+        "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+        "kernel_native_matches_receipt": true,
+        "generated_native_present": true,
+        "generated_native_matches_kernel": true,
+        "request_archive_sha256": "7441902d69f023d8d71e1e24dddfe90e995baaa8e53dd3f7f7d467bb6c974ad2",
+        "artifacts": {
+          "request/generated/trusted_arm64.proof.o": "6c0600a89a9d7eaffae0c508aa1028c8f6541a2c89e8f1ffb6cd68a2ea31047a",
+          "request/generated/trusted_arm64.bpf.o": "3f50ec659dccb697994c1943547daebc1044231f879da52bcae7f6d6f39411b7",
+          "request/generated/trusted_arm64.bpf.c": "4ceb2b1f8c41382423532c9ebb88f86a4a704a85ee87a714606b3d22e4610802",
+          "request/generation.metadata.json": "65f5d58de67f109d4b28c305ac526e5bc7d007b87e5bc111303af2e304e1a891",
+          "request/kernel.facts.json": "12fedfdc664bfe8461853ce8967c8461a5342cfae313854cf1935728d35d449d",
+          "request/source-identities.json": "f0fe74dbb2d3a8476a4bf98180934fd56b9bb856be9480dad0f915796e2ded15"
+        }
+      },
+      {
+        "request_id": 9,
+        "status": -5,
+        "entry": "success_cycle_with_exit",
+        "native_sha256": "13fa2dd6ffe001d3c08682b5640d36ef4b3a4d340ef8e57f22da6e61c039026e",
+        "kernel_native_matches_receipt": true,
+        "generated_native_present": true,
+        "generated_native_matches_kernel": true,
+        "request_archive_sha256": "293ae056c798972229a46b8f67e8950dda40d3eec269c01807f46c412815e2eb",
+        "artifacts": {
+          "request/generated/trusted_arm64.proof.o": "a4a923d6b4d192fc8e1ded1c68ff2698b2168113a915fde6f4fb9148d0024e49",
+          "request/generated/trusted_arm64.bpf.o": "18bf88c4a6e7c3fb697e4f72c6cd1f6fdaa9e9733a335e9ea41d1233a699f40f",
+          "request/generated/trusted_arm64.bpf.c": "5eaeb89df04632ffa795975b3e56d810c7aa091d870fb90505b5e6150732d3f9",
+          "request/generation.metadata.json": "65f5d58de67f109d4b28c305ac526e5bc7d007b87e5bc111303af2e304e1a891",
+          "request/kernel.facts.json": "8cd104f9c3ae669e20e7ea2a10be0ae037fe5c801ae1b4025e8e30bc9afc5793",
+          "request/source-identities.json": "f0fe74dbb2d3a8476a4bf98180934fd56b9bb856be9480dad0f915796e2ded15"
+        }
+      }
+    ],
+    "identity_errors": [],
+    "all_recorded_identities_match": true,
+    "collector_source_sha256": "c2bc29e948378b579635b8f91a3409557679bfc8a702449a3549137a60a628f9"
+  }
+}
