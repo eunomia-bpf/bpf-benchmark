@@ -109,6 +109,16 @@ def arm64_forms():
                 forms += [f"{op} {a}, {b}, #127"]
         for op in ["cmp", "cmn", "tst"]:
             forms += [f"{op} {b}, {c}", f"{op} {b}, {c}, lsl #3"]
+        bits = 32 if width == "w" else 64
+        masks = [1, 0xff, (1 << (bits - 1)), (1 << (bits // 2)) - 1,
+                 int("00ff" * (bits // 16), 16), int("aa" * (bits // 8), 16)]
+        for immediate in masks:
+            for op in ["and", "orr", "eor", "ands"]:
+                forms += [f"{op} {a}, {source}, #{immediate:#x}"
+                          for source in [b, a, width + "zr"]]
+                if op != "ands":
+                    forms += [f"{op} {'wsp' if width == 'w' else 'sp'}, {b}, #{immediate:#x}"]
+            forms += [f"tst {source}, #{immediate:#x}" for source in [b, width + "zr"]]
         forms += [f"mov {a}, {b}", f"mov {a}, #127", f"movk {a}, #0xdead, lsl #16"]
         stack_register = "wsp" if width == "w" else "sp"
         forms += [f"mov {a}, {stack_register}", f"mov {stack_register}, {a}"]

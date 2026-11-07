@@ -1,0 +1,12 @@
+{
+  "architecture": "aarch64",
+  "execution": "qemu-aarch64-static user-mode; not ARM hardware",
+  "forms": 771,
+  "cases": 789504,
+  "mismatches": 0,
+  "cases_per_form": 1024,
+  "added_logical_immediate_forms": 204,
+  "binary_sha256": "6bfdf97a4bdd0d47b190084aeb0366af46f0f6e28cfb927f2d103f5e496ff89d",
+  "native_cpu_status": "pending coordinator hardware run",
+  "canonical_status": "separate reference replay running"
+}

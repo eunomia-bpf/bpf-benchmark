@@ -1,0 +1,30 @@
+kprog/fidelity/build-arm64/cpu-differential: ELF 64-bit LSB executable, ARM aarch64, version 1 (GNU/Linux), statically linked, BuildID[sha1]=e4657576e0cdf44661ce88eab46e23d586d6ea7c, for GNU/Linux 3.7.0, with debug_info, not stripped
+
+Elf file type is EXEC (Executable file)
+Entry point 0x4007c0
+There are 6 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  LOAD           0x0000000000000000 0x0000000000400000 0x0000000000400000
+                 0x00000000000e557a 0x00000000000e557a  R E    0x10000
+  LOAD           0x00000000000efac8 0x00000000004ffac8 0x00000000004ffac8
+                 0x0000000000011e7c 0x00000000000172b8  RW     0x10000
+  NOTE           0x0000000000000190 0x0000000000400190 0x0000000000400190
+                 0x0000000000000044 0x0000000000000044  R      0x4
+  TLS            0x00000000000efac8 0x00000000004ffac8 0x00000000004ffac8
+                 0x0000000000000018 0x0000000000000058  R      0x8
+  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x0000000000000000 0x0000000000000000  RW     0x10
+  GNU_RELRO      0x00000000000efac8 0x00000000004ffac8 0x00000000004ffac8
+                 0x0000000000010538 0x0000000000010538  R      0x1
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .note.gnu.build-id .note.ABI-tag .rela.plt .init .plt .text .fini .rodata .eh_frame .gcc_except_table
+   01     .tdata .init_array .fini_array .data.rel.ro .got .got.plt .data .bss
+   02     .note.gnu.build-id .note.ABI-tag
+   03     .tdata .tbss
+   04
+   05     .tdata .init_array .fini_array .data.rel.ro .got

@@ -5,4 +5,4 @@ if [ "$(uname -m)" != aarch64 ]; then
     exit 1
 fi
 cd "$(dirname "$0")"
-exec make ARCH=arm64 run-handoff CASES="${CASES:-1024}" OUT="${OUT:-../results/kprog_fidelity_20261106/differential/arm64-reference-hardware}"
+exec make ARCH=arm64 run-handoff CASES="${CASES:-1024}" OUT="${OUT:-../results/kprog_fidelity_20261107/differential/arm64-current-hardware}"

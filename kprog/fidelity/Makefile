@@ -34,7 +34,7 @@ run-emulated: build
 	qemu-aarch64-static ./$(BUILD)/cpu-differential $(CASES) $(OUT)
 
 .PHONY: run-handoff
-ARM64_HANDOFF ?= ../results/kprog_fidelity_20261106/differential/cpu-differential-arm64-reference.gz
+ARM64_HANDOFF ?= ../results/kprog_fidelity_20261107/differential/arm64-current-logical/cpu-differential-arm64.gz
 run-handoff:
 	install -d build-arm64 $(OUT)
 	gzip -dc $(ARM64_HANDOFF) > build-arm64/cpu-differential-handoff
