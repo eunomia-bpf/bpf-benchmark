@@ -1,0 +1,29 @@
+{
+  "status": "micro_native_kernel_native_only_submission_source_fix_build_pass_runtime_pending",
+  "utc": "2026-11-07T17:35:39.957281+00:00",
+  "trigger": "Every native_kernel micro submission carried application proof fields and was rejected by native_loader.cpp applications-cannot-supply-proof guard.",
+  "change": [
+    "Runner no longer requires/opens/loads a prebuilt proof or supplies proof_insns/proof_object_path.",
+    "Runner requires the existing bound native-only route explicitly; an unregistered common service is an error, with no unbound downgrade or worker-capability exemption.",
+    "Removed obsolete caller proof-open/verifier-load timing phases; native_load_ns includes the actual common-service request wait."
+  ],
+  "validation": {
+    "incremental_build_command": "cmake --build runner/build-llvmbpf --target micro_exec -j4",
+    "build_exit": 0,
+    "worker_command": "PYTHONDONTWRITEBYTECODE=1 python3 kprog/test/check_trusted_worker.py",
+    "worker_exit": 0,
+    "worker_scope": "actual BCC generation/compilation only, not kernel acceptance",
+    "runtime": "Detached T Stage2 guest still running; no completed runtime claim. C owns standard bootstrap/driver integration and followup guest."
+  },
+  "sha256": {
+    "runner/src/native_lab_runner.cpp": "afa5c2567fc8d8ac486b231849f82ef0018f89455fc58d67970b140e3aedff5d",
+    "runner/build-llvmbpf/micro_exec": "6af68aec1c00f5bc2150beba0a89e610f20ee0f90e13445f04d3621d04720108",
+    "kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+    "kprog/libnativeloader/include/native_loader.hpp": "9bb3e6f903c4037618f69827dbe76463ad554fdc5b714b880933f3bf7a0c7f93"
+  },
+  "deployment": [
+    "Register the same kprog/trusted_service.py once at privileged guest bootstrap before starting the micro application.",
+    "The application receives no service capability. C owns that standard __runtime-vm-micro bootstrap and native_proof routing; this runner commit alone does not deploy it.",
+    "Both labels using this runner take bound P-only execution; old B-only native_proof timing and old unbound measurements are distinct."
+  ]
+}

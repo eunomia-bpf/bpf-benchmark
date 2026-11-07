@@ -2174,3 +2174,12 @@ addresses/values, resulting memory and return value2. Both complete endpoints
 retain untouched fields. All28 accumulated audits pass. Store-success
 permissions are explicit; fault cases, final EXIT, full entry composition and
 architectural reconstruction remain required for whole-program TV.
+
+`micro-native-runner.json` records the runner-side native-only migration.
+The micro application no longer opens or uploads a prebuilt proof and always
+requires the bound route. A separately registered common service must precede
+application startup. Incremental runner build and the existing BCC generation
+check pass; runtime regression is pending in this source receipt. C owns the
+standard micro bootstrap and driver integration. Obsolete caller proof-open
+and proof-verifier timing fields are removed; native_load_ns includes waiting
+for the service. This introduces no application proof-upload exemption.
