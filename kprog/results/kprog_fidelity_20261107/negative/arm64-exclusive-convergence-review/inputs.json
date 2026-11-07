@@ -1,0 +1,30 @@
+{
+  "candidate/exclusive-convergence-candidate.patch": {
+    "size": 2976,
+    "sha256": "2480264e275e8dafab9f745b36f788075f2d32d373771b3780c1bf0005dcb2f3"
+  },
+  "candidate/exclusive-convergence-candidate.json": {
+    "size": 821,
+    "sha256": "292ec4cd7cd99f5d0f6134e745dc6a8f08edf07ececddc1b289f50fb07e97684"
+  },
+  "source/vendor/linux-framework/include/linux/bpf_verifier.h": {
+    "size": 37174,
+    "sha256": "cc21c8c4da376255ac0f232a4076b3997b847886f43299b0d7b7b0c92e12760a"
+  },
+  "source/vendor/linux-framework/kernel/bpf/verifier.c": {
+    "size": 808746,
+    "sha256": "6bccb2ae3244f1d85ffc4b3e7b0c64acafa9aa78d2955944ae1f1bdc870375a1"
+  },
+  "source/kprog/formal/KProgFormal/Reference/AArch64.lean": {
+    "size": 60745,
+    "sha256": "00c08b7441948c762d18d2bed62fac13c91f6f88f06e380323ac38bef66ece4a"
+  },
+  "source/kprog/formal/KProgFormal/Refinement/Arm64Exclusive.lean": {
+    "size": 8180,
+    "sha256": "9657b86d9a34abe16e18df14e86941bbe64b7a30363a4d88f0ada7ec176060e5"
+  },
+  "evidence/existing-loop-rejection.json": {
+    "size": 398,
+    "sha256": "ce2dfc30dc4cd7cc6c80761b2ee3a0952c14ee5c76641031e1c1f47d6e092fbc"
+  }
+}

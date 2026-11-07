@@ -1,0 +1,48 @@
+{
+  "recorded": "2026-11-07T17:05:21.806064+00:00",
+  "scope": "read-only F review; not applied or compiled by F",
+  "captured_head": "549987a82495637fc3a26d546150256e45a17d87",
+  "patch_sha256": "2480264e275e8dafab9f745b36f788075f2d32d373771b3780c1bf0005dcb2f3",
+  "candidate_unsafe_acceptance_measured": false,
+  "candidate_termination_proved": false,
+  "current_kernel_regressions_validate_candidate": false,
+  "findings": [
+    {
+      "id": "progress_contract",
+      "status": "open_requirement",
+      "evidence": [
+        "Candidate changed exclusive counter + in-region checkpoint + states_equal(EXACT), then loop=true/goto hit",
+        "Reference/AArch64.lean:34-43 environment is per dynamic attempt; repeated store failure remains allowed",
+        "verifier.c:20863-20865 iterator convergence separately relies on eventual sticky-NULL termination"
+      ],
+      "conclusion": "Exact abstract-state convergence is not native retry termination. Current O3 unbounded-loop rejection remains a separate obligation."
+    },
+    {
+      "id": "scope_and_regression_coverage",
+      "status": "open_requirement",
+      "evidence": [
+        "in_native_exclusive_region tests the entire bound proof region, not a proved retry-loop/progress relation",
+        "Historical unbounded_loop rejects before state convergence because the bound proof has no BPF exit"
+      ],
+      "conclusion": "The existing marker-free/no-exit fixture cannot validate the candidate policy for marker-bearing cycles. No accepted counterexample is claimed."
+    },
+    {
+      "id": "abstract_equality_and_scc",
+      "status": "retained_mechanism_requires_runtime_validation",
+      "evidence": [
+        "verifier.c:20535-20597 EXACT uses live-register regsafe/stacksafe/refsafe/callsite-frame checks, not whole-state memcmp",
+        "Candidate preserves loop=true and existing hit path",
+        "verifier.c:20979-21050 explains delayed marks, SCC backedges and callchain lifetimes"
+      ],
+      "conclusion": "Retaining SCC machinery is necessary; source review alone does not validate delayed branches, reference states or callchain behavior under the new eligibility condition."
+    }
+  ],
+  "existing_loop_diagnostic": [
+    "trusted-native-loader: native_kernel bound proof contains no BPF exit; insns=1 0:0x5"
+  ],
+  "limitations": [
+    "No candidate kernel/module/image built, booted or loaded by F",
+    "No executable bypass, new unsafe payload or native execution of a negative case",
+    "Current canonical ARM34-case job uses unchanged kernel, not this private patch"
+  ]
+}
