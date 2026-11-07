@@ -1,3 +1,5 @@
+import KProgFormal.Refinement.X86Endian
+import KProgFormal.Refinement.X86Popcount
 import KProgFormal.Refinement.X86Condition
 import KProgFormal.Refinement.EntryEnvironment
 import KProgFormal.X86RegWrite
@@ -420,5 +422,81 @@ theorem conditional_move_word_frame_refines (env : Environment) (frame : Frame) 
     Reference.X86.ScalarWidth.bits, Reference.X86.ScalarWidth.bytes]
   all_goals simp only [NativeWord, Reference.Word] at *
   all_goals bv_decide
+
+
+/-- Raw flag-cell assignment leaves the RSP/STACK address projection intact. -/
+def registerFlags (state : RegisterState) (flags : NativeWord) : RegisterState :=
+  { state with raw := { state.raw with rflags := flags } }
+
+theorem native_register_flags (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (flags : NativeWord) :
+    nativeRegisters env frame arena (registerFlags state flags) =
+      { nativeRegisters env frame arena state with rflags := flags } := rfl
+
+/-- Production BSWAP reads the materialized native value, reverses its bytes
+with the generated ladder, then scalarizes the destination (including RSP). -/
+def byteSwapRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst : Reference.X86.Register) (nextPc : NativeWord) : RegisterState :=
+  let value := GeneratedX86Bswap.value (registerValue env frame arena state dst)
+    (X86Bzhi.handlerWidth width)
+  let scalar := match width with | .w32 => Reference.X86.ScalarWidth.w32 | .w64 => .w64
+  registerPc (writeRegister env frame arena state scalar (.low dst) value) nextPc
+
+theorem byte_swap_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.BzhiWidth)
+    (dst : Reference.X86.Register) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (byteSwapRegister env frame arena state width dst nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.byteSwap width dst nextPc) (nativeRegisters env frame arena state) := by
+  rw [← X86Endian.swap_step_refines width dst nextPc (nativeRegisters env frame arena state) .scalar]
+  unfold byteSwapRegister
+  rw [native_register_pc, native_register_write]
+  simp only [X86Endian.swapStep, nativeRegisters]
+  congr 1
+  congr 1
+  funext r
+  by_cases same : r = dst
+  · subst r
+    simp only [Reference.X86.RegisterSlice.reg, ↓reduceIte]
+    rw [← X86Scalar.register_write_refines]
+    cases width <;> rfl
+  · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
+
+/-- POPCNT captures the materialized source before destination writeback.
+Its generated count and six flag outputs use that same input snapshot. -/
+def populationCountRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth)
+    (dst src : Reference.X86.Register) (nextPc : NativeWord) : RegisterState :=
+  let source := registerValue env frame arena state src
+  let value := X86Popcount.value width source
+  let scalar := match width with
+    | .w16 => Reference.X86.ScalarWidth.w16 | .w32 => .w32 | .w64 => .w64
+  let written := writeRegister env frame arena state scalar (.low dst) value
+  registerPc (registerFlags written (X86Popcount.flags width source state.raw.rflags)) nextPc
+
+theorem population_count_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth)
+    (dst src : Reference.X86.Register) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena
+        (populationCountRegister env frame arena state width dst src nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.popcount width dst (.register src) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86Popcount.step_refines width dst src nextPc (nativeRegisters env frame arena state)]
+  unfold populationCountRegister
+  rw [native_register_pc, native_register_flags, native_register_write]
+  simp only [X86Popcount.handlerStep, nativeRegisters]
+  congr 1
+  congr 1
+  funext r
+  by_cases same : r = dst
+  · subst r
+    simp only [Reference.X86.RegisterSlice.reg, ↓reduceIte]
+    rw [X86Cmov.value_refines]
+    cases width <;> simp only [Reference.X86.scalarWriteValue, Reference.X86.cmovValue,
+      Reference.X86.RegisterSlice.shift, Reference.X86.ScalarWidth.bits,
+      Reference.X86.ScalarWidth.bytes] <;> bv_decide
+  · simp only [Reference.X86.RegisterSlice.reg, same, ↓reduceIte]
 
 end KProgFormal.Refinement.X86NumericAddress
