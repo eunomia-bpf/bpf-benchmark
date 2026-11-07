@@ -19,8 +19,18 @@ With that sole header change, the SAME archived BIOSNOOP C bytes emit the
 relative offset plus native base at the comparison, without scalar-minus-fp.
 The before/after source SHA256 is identical; compiler commands, full BPF
 assembly, object hashes and both compiled objects/source are retained.
-Actual application admission is a separate result: C's next complete BCC replay
-uses the current header; no new BIOSNOOP application-pass claim is made here.
+Actual application admission is now independently confirmed in C's real BCC
+startup: `run-20261107T111332627278Z.tar.gz` request19 accepts `block_rq_issue`
+with programID94/status0 and the repaired header SHA4de0aba5. Its submitted
+native ELF SHA198e8ddd is BYTE-IDENTICAL to the earlier rejected request20 in
+`run-20261107T104637164250Z.tar.gz`. `biosnoop-actual-admission.json` retains
+both exact receipts/source identities and archive hashes;
+`biosnoop-actual-load.stdout` retains the real loader result. The complete
+later run archive belongs to C's results publication; this report does not
+stage C's files. Other generator/kernel diagnostic changes in that run remain
+visible in source identities; the isolated same-C-source comparison above
+establishes the projection-order codegen correction. This is actual native
+admission, not workload timing or full BCC acceptance (opensnoop remains open).
 
 Validation on CPUs16-23:
 

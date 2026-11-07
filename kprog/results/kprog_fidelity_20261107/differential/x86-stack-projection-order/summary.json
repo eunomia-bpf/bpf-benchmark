@@ -13,7 +13,7 @@
   },
   "unsafe_native_executed": false,
   "minimal_map_stack_control": "bound execution passed both before and after; not a failing reproducer",
-  "actual_biosnoop": "same archived source: scalar-minus-fp removed from emitted BPF; real application admission awaits C replay",
+  "actual_biosnoop": "actual C BCC request19/status0/prog94 accepts exact same native ELF198e8ddd after repaired header4de0aba5; full BCC and timing separate",
   "safety_binary_drift": false,
   "header_sha256": "4de0aba51ba40302b26031947f33373bdc6c33eb7974c7106e2895f13be0f539",
   "focused_route_status": "PASS:6existing affected route hosts, no failed route; no new Lean/model change"

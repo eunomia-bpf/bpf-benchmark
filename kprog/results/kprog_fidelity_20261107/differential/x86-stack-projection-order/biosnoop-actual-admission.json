@@ -1,0 +1,63 @@
+{
+  "entry": "block_rq_issue",
+  "native_bytes_identical": true,
+  "runs": [
+    {
+      "host_archive": "corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/run-20261107T104637164250Z.tar.gz",
+      "host_archive_sha256": "b100b9193fc14f09e770c9b0fd2f8edd0949dd224366c0febe465a7c78555f7b",
+      "request_member": "run/requests/20.failure.tar.gz",
+      "request_archive_sha256": "7aafe8f31f7623187a6ad35de5696af091138a0436d1a822dafc35e2a524fa83",
+      "receipt": {
+        "request_id": 20,
+        "source_prog_id": 84,
+        "native_sha256": "198e8dddf5c875001ca72692155fc55822b4e83b4d587406dbf2aafd333c493c",
+        "started": "2026-11-07T10:48:43.011953+00:00",
+        "status": -5,
+        "error": "Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '3', '20', '84', '/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-r90bizx8/requests/request-dae69rl0/generated/request.native.o', 'block_rq_issue', '/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-r90bizx8/requests/request-dae69rl0/generated/trusted_x86.proof.o', '/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-r90bizx8/requests/request-dae69rl0/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '23', '0', '73532', '1', '0', '0', 'LINUX_KERNEL_VERSION', '18', '0', 'cgroup_map', '11', 'null', 'filter_cg', '17', '0', 'filter_dev', '17', '2', 'infobyreq', '13', 'null', 'start', '14', 'null', 'targ_dev', '17', '4', 'targ_queued', '17', '1']' returned non-zero exit status 1.",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 238, in serve\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader', 'load', '3', '20', '84', '/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-r90bizx8/requests/request-dae69rl0/generated/request.native.o', 'block_rq_issue', '/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-r90bizx8/requests/request-dae69rl0/generated/trusted_x86.proof.o', '/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-r90bizx8/requests/request-dae69rl0/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '23', '0', '73532', '1', '0', '0', 'LINUX_KERNEL_VERSION', '18', '0', 'cgroup_map', '11', 'null', 'filter_cg', '17', '0', 'filter_dev', '17', '2', 'infobyreq', '13', 'null', 'start', '14', 'null', 'targ_dev', '17', '4', 'targ_queued', '17', '1']' returned non-zero exit status 1.\n",
+        "failure_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-r90bizx8/requests/20.failure.tar.gz",
+        "finished": "2026-11-07T10:48:50.169360+00:00"
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "b3c5eaf24ca2b67f68b241d9c88ca41d419e7cc4e5795739536adcacd700847c",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "a5eb5b6fd39052a30b31411f24e10593a3ed206e28c4c954bd3926969049360c",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "ffcef53c3a6025045b2d75efc96a462efef4ffc8b9204ae0ddc009fb026844d8",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "1855261172775d854402b56efd0a7d4cfb76eb83aa9eb9e725391b5ef66bd549",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader": "571daa834a86b6660c908c6a5af31844e6e97f3aefecc52abe340ab207d61c5c"
+      }
+    },
+    {
+      "host_archive": "corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/run-20261107T111332627278Z.tar.gz",
+      "host_archive_sha256": "bd3237558f9212f7fc476d349a0923be3c5f611cb22a8e8faf26512577ae36dc",
+      "request_member": "run/requests/19.success.tar.gz",
+      "request_archive_sha256": "cd9c36ab0bfa03d0c1f2750ecc1a553119da629245220e39b3976eaaee5b712d",
+      "receipt": {
+        "request_id": 19,
+        "source_prog_id": 84,
+        "native_sha256": "198e8dddf5c875001ca72692155fc55822b4e83b4d587406dbf2aafd333c493c",
+        "started": "2026-11-07T11:15:48.324042+00:00",
+        "prog_id": 94,
+        "status": 0,
+        "artifact_archive": "/workspaces/repository/corpus/results/kprog_app_coverage_20261107/trusted-service-bcc-set/.live-8bnvhj8x/requests/19.success.tar.gz",
+        "finished": "2026-11-07T11:15:56.049031+00:00"
+      },
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "4de0aba51ba40302b26031947f33373bdc6c33eb7974c7106e2895f13be0f539",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "a5eb5b6fd39052a30b31411f24e10593a3ed206e28c4c954bd3926969049360c",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "ffcef53c3a6025045b2d75efc96a462efef4ffc8b9204ae0ddc009fb026844d8",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "1855261172775d854402b56efd0a7d4cfb76eb83aa9eb9e725391b5ef66bd549",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-native-loader": "571daa834a86b6660c908c6a5af31844e6e97f3aefecc52abe340ab207d61c5c"
+      }
+    }
+  ],
+  "recorded": "2026-11-07T11:19:38.815483+00:00",
+  "claim": "actual trusted-service native program admission; not workload timing or full BCC acceptance"
+}
