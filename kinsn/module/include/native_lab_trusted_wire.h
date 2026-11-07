@@ -51,9 +51,43 @@ struct native_lab_trusted_result {
 	__u64 reserved;
 };
 
+/* Kernel facts for the pinned source, not assertions copied from the app.
+ * These queries require the registered service capability and active request.
+ */
+struct native_lab_trusted_context {
+	__u64 request_id;
+	__u32 prog_type;
+	__u32 expected_attach_type;
+	__u32 prog_flags;
+	__u32 prog_ifindex;
+	__u32 attach_btf_id;
+	__u32 attach_btf_obj_id;
+	__u32 attach_prog_id;
+	__u32 gpl_compatible;
+	__u32 source_btf_id;
+	__u32 token_present;
+};
+struct native_lab_trusted_map {
+	__u64 request_id;
+	__u32 map_id;
+	__u32 depth; /* 0=used source map, 1=its actual inner template, ... */
+	__u32 map_type;
+	__u32 key_size;
+	__u32 value_size;
+	__u32 max_entries;
+	__u32 map_flags;
+	__u32 btf_id;
+	__u32 btf_key_type_id;
+	__u32 btf_value_type_id;
+	__u32 has_inner;
+	__u32 reserved;
+};
+
 #define NATIVE_LAB_TRUSTED_SUBMIT _IOWR('N', 0x70, struct native_lab_trusted_request)
 #define NATIVE_LAB_TRUSTED_NEXT _IOWR('N', 0x71, struct native_lab_trusted_request)
 #define NATIVE_LAB_TRUSTED_ACTIVATE _IOW('N', 0x72, struct native_lab_trusted_activate)
 #define NATIVE_LAB_TRUSTED_COMPLETE _IOW('N', 0x73, struct native_lab_trusted_result)
 #define NATIVE_LAB_TRUSTED_WAIT _IOR('N', 0x74, struct native_lab_trusted_result)
+#define NATIVE_LAB_TRUSTED_CONTEXT _IOWR('N', 0x75, struct native_lab_trusted_context)
+#define NATIVE_LAB_TRUSTED_MAP _IOWR('N', 0x76, struct native_lab_trusted_map)
 #endif

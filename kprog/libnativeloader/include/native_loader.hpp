@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <linux/bpf.h>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -48,17 +49,31 @@ struct LoadedProgram {
     LoadTimings timings;
 };
 
+struct TrustedMapBinding {
+    std::string native_symbol;
+    uint32_t map_id = 0;
+    // Absent means the map object; present means this direct value offset.
+    std::optional<uint32_t> value_offset;
+};
+
 struct FdLoadOptions {
     int original_prog_fd = -1;
+    /* Service-only capability, authenticated by the kernel ACTIVATE ioctl.
+     * Application callers leave these empty and never supply a proof. */
+    int trusted_service_fd = -1;
+    uint64_t trusted_request_id = 0;
+    std::filesystem::path trusted_native_proof_path;
+    std::string trusted_simulator_program;
+    std::vector<TrustedMapBinding> trusted_maps;
     std::filesystem::path manifest_path;
     std::filesystem::path native_object_path;
     std::string symbol_name;
     std::filesystem::path source_bpf_path;
     std::vector<bpf_insn> source_insns;
-    /* Optional verifier proof program. The loader redirects its EXITs past
+    /* Service-generated verifier proof only. The loader redirects its EXITs past
      * the proof region and binds the instructions to the native blob snapshot. */
     std::vector<bpf_insn> proof_insns;
-    /* ELF specialization metadata for an already-loaded raw proof. */
+    /* Service-generated simulator ELF, or metadata for its already-loaded raw proof. */
     std::filesystem::path proof_object_path;
     std::vector<int> source_fd_array;
     std::filesystem::path native_link_path;

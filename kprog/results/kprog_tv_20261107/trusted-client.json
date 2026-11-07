@@ -1,0 +1,49 @@
+{
+  "status": "native_only_client_and_kernel_queries_passed",
+  "checks": {
+    "trusted-query-v4": {
+      "exit_code": 0,
+      "controls": [
+        "application cannot obtain registered service authority: REJECTED (16)",
+        "application proof ELF refused: REJECTED (8)",
+        "unrecognized submission metadata refused: REJECTED (22)",
+        "application cannot complete proof request: REJECTED (1)",
+        "replace submitted native bytes refused: REJECTED (16)",
+        "application cannot read service requests: REJECTED (1)",
+        "capacity probe retains queued request: REJECTED (90)",
+        "immutable native ELF/entry/metadata survive producer mutation: PASS",
+        "kernel source/load attributes and actual outer/inner map shapes: PASS",
+        "invented inner template refused: REJECTED (2)",
+        "map outside pinned source refused: REJECTED (2)",
+        "stale source context request refused: REJECTED (116)",
+        "application proof upload refused with active trusted worker: REJECTED (1)",
+        "application cannot use trusted source query: REJECTED (1)",
+        "wrong native request identity refused: REJECTED (116)",
+        "invalid final errno refused: REJECTED (22)",
+        "unrelated verified BPF program cannot authorize native request: REJECTED (18)",
+        "application cannot replace disconnected trusted registration: REJECTED (16)",
+        "registered trusted transport, immutable P, application proof refusal and fail-closed disconnect: PASS"
+      ]
+    },
+    "trusted-client-v2": {
+      "exit_code": 0,
+      "controls": [
+        "applications submit native programs and cannot supply a proof: REJECTED",
+        "applications submit native programs and cannot supply a proof: REJECTED",
+        "trusted worker capability/request activation refused: REJECTED",
+        "trusted specializer refused native program: Permission denied: REJECTED",
+        "public native-only loader: exact kernel request, proof/prebuilt separation, capability and failure propagation PASS"
+      ]
+    },
+    "trusted-loader-arm64-v2": {
+      "exit_code": 0,
+      "controls": []
+    }
+  },
+  "remaining": [
+    "positive shared service generation and bound execution",
+    "real BCC x86 and Katran ARM trusted path",
+    "all-program translation validation"
+  ],
+  "native_executed": false
+}

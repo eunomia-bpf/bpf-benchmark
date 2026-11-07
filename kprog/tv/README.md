@@ -1031,8 +1031,21 @@ The reference ISA/specializer faithfulness and kernel binding remain trusted
 where a per-program TV certificate is absent.
 
 `make -C kprog/tv trusted-kernel-check` builds the current incremental T kernel
-and runs transport controls without executing native code. Application submit
-plumbing, the shared service/worker integration and the required real BCC/x86
-and Katran/ARM runs remain active; this source increment alone does not claim
-that first working trusted path. Generation-zero experiments retain their
-explicit unbound interpretation.
+and runs transport controls without executing native code. The public loader
+routes REQUIRE_BOUND_PROOF submissions through SUBMIT/WAIT before consulting
+any simulator object. Application-supplied raw/ELF proofs are rejected;
+manifest proof siblings and REQUIRE_PREBUILT cannot select B on this path.
+The service supplies fresh native-proof and simulator objects explicitly,
+with kernel-authenticated ACTIVATE authority. Success is completed while the
+loader owns the program FD, so the kernel pins it before the helper exits.
+
+CONTEXT and MAP query the active capsule's pinned source load attributes and
+used maps, including actual inner-map templates. Only the service capability
+can issue these queries. `make -C kprog/tv trusted-client-check` tests the public
+native-only submission and controlled service-failure path; the transport test
+also checks real source/map queries and rejects foreign maps, invented inner
+templates, stale requests and invalid completion errnos. These real x86 KVM
+controls pass, and both x86 and ARM loader libraries build. No native program
+executes in these controls. Shared service/worker integration and the required
+real BCC/x86 and Katran/ARM runs remain active. Generation-zero experiments
+retain their explicitly unbound interpretation.

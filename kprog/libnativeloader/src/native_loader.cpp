@@ -1,5 +1,6 @@
 #include "native_loader.hpp"
 #include "../../../kinsn/module/include/native_lab_binding.h"
+#include "../../../kinsn/module/include/native_lab_trusted_wire.h"
 #include "../../../kinsn/module/include/native_lab_checked_wire.h"
 
 #include "kernel_offsets.h"
@@ -22,6 +23,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/file.h>
+#include <sys/ioctl.h>
 #include <sys/mount.h>
 #include <sys/syscall.h>
 #include <sys/stat.h>
@@ -2897,6 +2899,7 @@ struct LinkerOutput {
 
 struct NativeLinkArgs {
     std::filesystem::path linker;
+    std::filesystem::path trusted_native_proof;
     struct NameAddr {
         std::string name;
         uint64_t addr = 0;
@@ -4377,10 +4380,13 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     out.environment_layout = base.string() + ".environment-layout.json";
 #endif
 
-    std::optional<std::filesystem::path> prebuilt_proof =
-        find_prebuilt_proof(elf_path, symbol_name);
+    // The registered service names its fresh output explicitly. It never
+    // discovers a sibling supplied by the application or obeys REQUIRE_PREBUILT.
+    std::optional<std::filesystem::path> prebuilt_proof = link_args.trusted_native_proof.empty()
+        ? find_prebuilt_proof(elf_path, symbol_name)
+        : std::optional<std::filesystem::path>(link_args.trusted_native_proof);
     if (prebuilt_proof) {
-        out.prebuilt_proof = true;
+        out.prebuilt_proof = link_args.trusted_native_proof.empty();
         std::error_code copy_ec;
         std::filesystem::copy_file(
             *prebuilt_proof,
@@ -4504,12 +4510,18 @@ void bind_native_map_relocations(LinkedBlob &linked,
 LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_path,
                                     const std::filesystem::path &elf_path,
                                     const std::string &symbol_name,
-                                    const CompanionLoad &companion)
+                                    const CompanionLoad &companion,
+                                    const std::filesystem::path &trusted_native_proof = {})
 {
     const auto cache_lookup_start = std::chrono::steady_clock::now();
     NativeLinkArgs link_args =
         build_native_link_args(native_link_path, companion.map_addrs, companion);
-    const std::filesystem::path cache_dir = kNativeLinkCacheDir;
+    link_args.trusted_native_proof = trusted_native_proof;
+    // Fresh service outputs live in the broker's private per-request directory.
+    // They cannot reuse the application's old shared template/prebuilt cache.
+    const std::filesystem::path cache_dir = trusted_native_proof.empty()
+        ? std::filesystem::path(kNativeLinkCacheDir)
+        : trusted_native_proof.parent_path() / "kernel-link";
     std::error_code ec;
     std::filesystem::create_directories(cache_dir, ec);
     if (ec) {
@@ -5373,6 +5385,91 @@ void close_fd_vector(std::vector<int> &fds)
 }
 
 
+native_loader::LoadedProgram submit_trusted_native(
+    const native_loader::FdLoadOptions &options, const bpf_prog_info &info,
+    const std::filesystem::path &native_path, const std::string &entry,
+    const CompanionLoad &companion)
+{
+    if (options.prog_flags & BPF_F_TOKEN_FD)
+        fail("trusted native submission needs kernel token-FD delegation for a token-bound source");
+    auto native = read_binary_file(native_path);
+    if (native.size() > UINT32_MAX || entry.empty() || entry.size() > UINT32_MAX)
+        fail("trusted native submission extent exceeds request ABI");
+    std::ostringstream metadata;
+    metadata << "{\"version\":1,\"load_context\":{\"prog_type\":" << info.type
+        << ",\"expected_attach_type\":" << options.expected_attach_type
+        << ",\"prog_flags\":" << options.prog_flags
+        << ",\"attach_btf_id\":" << (options.attach_btf_id ? options.attach_btf_id : info.attach_btf_id)
+        << ",\"attach_btf_obj_id\":" << (options.attach_btf_obj_id ? options.attach_btf_obj_id : info.attach_btf_obj_id)
+        << ",\"attach_prog_id\":" << options.attach_prog_id
+        << ",\"prog_ifindex\":" << info.ifindex << "},\"maps\":[";
+    bool first = true;
+    for (const auto &map : companion.maps) {
+        const auto actual = load_map_info(map.fd);
+        const auto address = companion.map_addrs.find(map.name);
+        if (address == companion.map_addrs.end())
+            fail("trusted native submission has an ambiguous map symbol: " + map.name);
+        if (!first) metadata << ',';
+        first = false;
+        metadata << "{\"name\":"; write_json_string(metadata, map.name);
+        metadata << ",\"map_id\":" << actual.id << ",\"map_type\":" << actual.type
+            << ",\"key_size\":" << actual.key_size << ",\"value_size\":" << actual.value_size
+            << ",\"max_entries\":" << actual.max_entries << ",\"map_flags\":" << actual.map_flags
+            << ",\"value_offset\":";
+        if (address->second == map.kernel_addr) metadata << "null";
+        else {
+            if (!map.value_addr || address->second < map.value_addr ||
+                address->second - map.value_addr >= map.value_size)
+                fail("trusted native direct map value exceeds its object: " + map.name);
+            metadata << address->second - map.value_addr;
+        }
+        metadata << '}';
+    }
+    metadata << "]}";
+    const std::string serialized = metadata.str();
+    if (serialized.size() > UINT32_MAX) fail("trusted native metadata exceeds request ABI");
+    const std::string endpoint = std::string(kNativeLabTarget.debugfs_dir) + "/native_submit";
+    ScopedFd submit(open(endpoint.c_str(), O_RDWR | O_CLOEXEC));
+    if (submit.get() < 0) fail("open kernel native submission: " + std::string(std::strerror(errno)));
+    native_lab_trusted_request request{};
+    request.version = NATIVE_LAB_TRUSTED_VERSION;
+#if defined(__aarch64__)
+    request.arch = NATIVE_LAB_ARCH_ARM64;
+#else
+    request.arch = NATIVE_LAB_ARCH_X86;
+#endif
+    request.source_prog_id = info.id;
+    request.native_size = static_cast<uint32_t>(native.size());
+    request.entry_size = static_cast<uint32_t>(entry.size());
+    request.metadata_size = static_cast<uint32_t>(serialized.size());
+    request.native_user = ptr_to_u64(native.data());
+    request.entry_user = ptr_to_u64(entry.data());
+    request.metadata_user = ptr_to_u64(serialized.data());
+    if (ioctl(submit.get(), NATIVE_LAB_TRUSTED_SUBMIT, &request))
+        fail("kernel native submission refused: " + std::string(std::strerror(errno)));
+    native_lab_trusted_result result{};
+    int status;
+    do { status = ioctl(submit.get(), NATIVE_LAB_TRUSTED_WAIT, &result); }
+    while (status < 0 && errno == EINTR);
+    if (status < 0) fail("wait for trusted specializer: " + std::string(std::strerror(errno)));
+    if (result.request_id != request.request_id || result.reserved || result.status > 0 ||
+        result.status < -4095 || (result.status == 0) != (result.prog_id != 0))
+        fail("kernel trusted specializer returned an invalid completion");
+    if (result.status)
+        fail("trusted specializer refused native program: " + std::string(std::strerror(-result.status)));
+    native_loader::LoadedProgram out{};
+    out.prog_fd = bpf_prog_get_fd_by_id(result.prog_id);
+    if (out.prog_fd < 0) fail("open kernel-owned trusted native result: " + std::string(std::strerror(errno)));
+    out.replaced = true;
+    out.original_prog_id = info.id;
+    out.native_prog_id = result.prog_id;
+    out.selected_native_object = native_path.string();
+    out.selected_symbol = entry;
+    out.native_link_summary = "trusted_request=" + std::to_string(request.request_id);
+    return out;
+}
+
+
 } // namespace
 
 namespace native_loader {
@@ -5380,6 +5477,20 @@ namespace native_loader {
 LoadedProgram load_from_fd(const FdLoadOptions &options)
 {
     const auto total_start = std::chrono::steady_clock::now();
+    const bool trusted_worker = options.trusted_service_fd >= 0;
+    if (trusted_worker) {
+        native_lab_trusted_activate activate{options.trusted_request_id};
+        if (!activate.request_id || ioctl(options.trusted_service_fd, NATIVE_LAB_TRUSTED_ACTIVATE, &activate))
+            fail("native_loader: trusted worker capability/request activation refused");
+        if (options.trusted_native_proof_path.empty())
+            fail("native_loader: trusted worker must name its freshly generated native proof input");
+        if (options.native_object_path.empty() || !options.manifest_path.empty())
+            fail("native_loader: trusted worker must use its explicit immutable native input, not an application manifest");
+    } else if (!options.proof_insns.empty() || !options.proof_object_path.empty() ||
+        !options.trusted_native_proof_path.empty() || !options.trusted_simulator_program.empty() ||
+        !options.trusted_maps.empty() || options.trusted_request_id) {
+        fail("native_loader: applications submit native programs and cannot supply a proof");
+    }
     if (options.original_prog_fd < 0) {
         fail("native_loader: missing original_prog_fd");
     }
@@ -5465,6 +5576,18 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         simulator_object_path = std::move(resolution->simulator_object_path);
         simulator_program = std::move(resolution->simulator_program);
     }
+    if (trusted_worker) {
+        if (options.proof_insns.empty()) {
+            simulator_object_path = options.proof_object_path;
+            simulator_program = options.trusted_simulator_program;
+            if (simulator_object_path.empty() || simulator_program.empty())
+                fail("native_loader: trusted worker has no fresh simulator object/entry");
+        }
+    } else {
+        // Manifest proof siblings and REQUIRE_PREBUILT are never app proof inputs.
+        simulator_object_path.clear();
+        simulator_program.clear();
+    }
     if (native_data_object_paths.empty()) {
         native_data_object_paths.push_back(native_object_path);
     }
@@ -5484,9 +5607,22 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             std::move(map_rules));
     companion.expected_attach_type = options.expected_attach_type;
     bind_source_map_symbols(companion, source_map_bindings, source_insns);
+    for (const auto &binding : options.trusted_maps) {
+        const auto selected = std::find_if(companion.maps.begin(), companion.maps.end(),
+            [&](const auto &map) { return map.kernel_id == binding.map_id; });
+        if (selected == companion.maps.end())
+            fail("trusted map identity is not used by the kernel-pinned source program");
+        const MapMeta map = *selected;
+        add_map_symbol_alias_meta(companion, binding.native_symbol, map);
+        if (binding.value_offset) {
+            if (!map.value_addr || *binding.value_offset >= map.value_size)
+                fail("trusted direct map value exceeds the original map");
+            companion.map_addrs[binding.native_symbol] = map.value_addr + *binding.value_offset;
+            companion.native_map_symbols.erase(binding.native_symbol);
+        }
+    }
     SimulatorObject simulator_object(nullptr, bpf_object__close);
     std::vector<std::unique_ptr<ScopedFd>> proof_map_fds;
-    const auto source_proof_metadata = read_proof_metadata(simulator_object_path, ".native_lab.source_maps");
     const auto native_data_symbols_start = std::chrono::steady_clock::now();
     {
         OpenProcessMapsCache open_maps_cache;
@@ -5496,6 +5632,13 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         }
     }
     const auto native_data_symbols_end = std::chrono::steady_clock::now();
+    if (!trusted_worker && env_bool_enabled("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF")) {
+        auto submitted = submit_trusted_native(options, prog_info, native_object_path, symbol_name, companion);
+        submitted.timings.manifest_resolve_ns = manifest_resolve_ns;
+        submitted.timings.total_ns = elapsed_ns(total_start, std::chrono::steady_clock::now());
+        return submitted;
+    }
+    const auto source_proof_metadata = read_proof_metadata(simulator_object_path, ".native_lab.source_maps");
 
     // Native data resolution supplies full ELF map names for truncated kernel
     // names. Resolve those identities before deciding which proof maps to reuse.
@@ -5515,7 +5658,8 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         options.native_link_path,
         native_object_path,
         symbol_name,
-        companion);
+        companion,
+        options.trusted_native_proof_path);
     const auto readonly_bindings = read_proof_readonly_metadata(simulator_object ?
         simulator_object_path : options.proof_object_path);
     if (simulator_object && !source_proof_metadata)
@@ -5614,6 +5758,18 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     out.timings.map_patch_ns = linked.map_patch_ns;
     out.timings.upload_ns = loaded_stub.upload_ns;
     out.timings.prog_load_ns = loaded_stub.prog_load_ns;
+    if (trusted_worker) {
+        native_lab_trusted_result completed{};
+        completed.request_id = options.trusted_request_id;
+        completed.prog_id = out.native_prog_id;
+        // Pin the verified program in the kernel request before a helper can
+        // exit and drop its FD. The broker does not complete success twice.
+        if (ioctl(options.trusted_service_fd, NATIVE_LAB_TRUSTED_COMPLETE, &completed)) {
+            const int error = errno;
+            close_loaded_program(&out);
+            fail("kernel trusted native completion refused: " + std::string(std::strerror(error)));
+        }
+    }
     return out;
 }
 

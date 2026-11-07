@@ -337,7 +337,7 @@ static int native_lab_trusted_complete(void __user *argument)
 	int err = 0;
 	if (copy_from_user(&result, argument, sizeof(result)))
 		return -EFAULT;
-	if (result.reserved || result.status > 0 || result.status == -EINPROGRESS ||
+	if (result.reserved || result.status > 0 || result.status < -MAX_ERRNO || result.status == -EINPROGRESS ||
 	    (!result.status != !!result.prog_id))
 		return -EINVAL;
 	mutex_lock(&native_lab_service_lock);
@@ -377,6 +377,98 @@ out:
 	return err;
 }
 
+static struct native_lab_trusted_capsule *native_lab_active_capsule(u64 id)
+{
+	struct native_lab_trusted_capsule *capsule = ERR_PTR(-ESTALE);
+	mutex_lock(&native_lab_service_lock);
+	if (native_lab_service_active && !native_lab_service_active->abandoned &&
+	    native_lab_service_active->capsule->id == id) {
+		capsule = native_lab_service_active->capsule;
+		kref_get(&capsule->refs);
+	}
+	mutex_unlock(&native_lab_service_lock);
+	return capsule;
+}
+static int native_lab_trusted_context(void __user *argument)
+{
+	struct native_lab_trusted_context context;
+	struct native_lab_trusted_capsule *capsule;
+	struct bpf_prog *source, *target;
+	struct btf *attach;
+	int err = 0;
+	if (copy_from_user(&context, argument, sizeof(context)))
+		return -EFAULT;
+	capsule = native_lab_active_capsule(context.request_id);
+	if (IS_ERR(capsule))
+		return PTR_ERR(capsule);
+	source = capsule->source;
+	context.prog_type = source->type;
+	context.expected_attach_type = source->expected_attach_type;
+	context.prog_flags = source->aux->native_load_flags;
+	context.prog_ifindex = source->aux->native_load_ifindex;
+	context.attach_btf_id = source->aux->attach_btf_id;
+	context.gpl_compatible = source->gpl_compatible;
+	context.source_btf_id = source->aux->btf ? btf_obj_id(source->aux->btf) : 0;
+	context.token_present = !!source->aux->token;
+	mutex_lock(&source->aux->dst_mutex);
+	target = source->aux->dst_prog;
+	attach = target ? target->aux->btf : source->aux->attach_btf;
+	context.attach_prog_id = target ? target->aux->id : 0;
+	context.attach_btf_obj_id = attach ? btf_obj_id(attach) : 0;
+	mutex_unlock(&source->aux->dst_mutex);
+	if (copy_to_user(argument, &context, sizeof(context)))
+		err = -EFAULT;
+	native_lab_trusted_put(capsule);
+	return err;
+}
+static int native_lab_trusted_map(void __user *argument)
+{
+	struct native_lab_trusted_map shape;
+	struct native_lab_trusted_capsule *capsule;
+	struct bpf_map *map = NULL;
+	u32 i;
+	int err = 0;
+	if (copy_from_user(&shape, argument, sizeof(shape)))
+		return -EFAULT;
+	if (shape.reserved)
+		return -EINVAL;
+	capsule = native_lab_active_capsule(shape.request_id);
+	if (IS_ERR(capsule))
+		return PTR_ERR(capsule);
+	for (i = 0; i < capsule->source->aux->used_map_cnt; i++) {
+		struct bpf_map *candidate = capsule->source->aux->used_maps[i];
+		if (candidate->id == shape.map_id) {
+			map = candidate;
+			break;
+		}
+	}
+	if (!map) {
+		err = -ENOENT;
+		goto out;
+	}
+	for (i = 0; i < shape.depth; i++) {
+		map = map->inner_map_meta;
+		if (!map) {
+			err = -ENOENT;
+			goto out;
+		}
+	}
+	shape.map_type = map->map_type;
+	shape.key_size = map->key_size;
+	shape.value_size = map->value_size;
+	shape.max_entries = map->max_entries;
+	shape.map_flags = map->map_flags;
+	shape.btf_id = map->btf ? btf_obj_id(map->btf) : 0;
+	shape.btf_key_type_id = map->btf_key_type_id;
+	shape.btf_value_type_id = map->btf_value_type_id;
+	shape.has_inner = !!map->inner_map_meta;
+	if (copy_to_user(argument, &shape, sizeof(shape)))
+		err = -EFAULT;
+out:
+	native_lab_trusted_put(capsule);
+	return err;
+}
+
 static long native_lab_trusted_ioctl(struct file *file, unsigned int command, unsigned long argument)
 {
 	struct native_lab_trusted_file *owner = file->private_data;
@@ -388,6 +480,8 @@ static long native_lab_trusted_ioctl(struct file *file, unsigned int command, un
 		case NATIVE_LAB_TRUSTED_NEXT: return native_lab_trusted_next(pointer);
 		case NATIVE_LAB_TRUSTED_ACTIVATE: return native_lab_trusted_activate(pointer);
 		case NATIVE_LAB_TRUSTED_COMPLETE: return native_lab_trusted_complete(pointer);
+		case NATIVE_LAB_TRUSTED_CONTEXT: return native_lab_trusted_context(pointer);
+		case NATIVE_LAB_TRUSTED_MAP: return native_lab_trusted_map(pointer);
 		default: return -EPERM;
 		}
 	}

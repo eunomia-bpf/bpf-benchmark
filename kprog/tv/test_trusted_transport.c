@@ -40,12 +40,27 @@ int main(int argc, char **argv)
 	require(snprintf(service_path, sizeof(service_path), "%s/specializer", argv[1]) < (int)sizeof(service_path), "service path");
 	require(snprintf(submit_path, sizeof(submit_path), "%s/native_submit", argv[1]) < (int)sizeof(submit_path), "submit path");
 	require(snprintf(proof_path, sizeof(proof_path), "%s/blob0.proof", argv[1]) < (int)sizeof(proof_path), "proof path");
+	struct bpf_map_create_opts map_options = { .sz = sizeof(map_options) };
+	int inner = bpf_map_create(BPF_MAP_TYPE_ARRAY, "trusted_inner", 4, 8, 1, &map_options);
+	require(inner >= 0, "create real inner template");
+	map_options.inner_map_fd = inner;
+	int outer = bpf_map_create(BPF_MAP_TYPE_ARRAY_OF_MAPS, "trusted_outer", 4, 4, 1, &map_options);
+	require(outer >= 0, "create real source outer map");
+	struct bpf_map_info map_info = {};
+	uint32_t map_info_size = sizeof(map_info);
+	require(!bpf_obj_get_info_by_fd(outer, &map_info, &map_info_size), "source outer identity");
 	struct bpf_insn instructions[] = {
+		{ .code = BPF_LD | BPF_DW | BPF_IMM, .dst_reg = 1, .src_reg = BPF_PSEUDO_MAP_FD, .imm = outer },
+		{ 0 },
+		{ .code = BPF_ALU64 | BPF_MOV | BPF_X, .dst_reg = 2, .src_reg = 10 },
+		{ .code = BPF_ALU64 | BPF_ADD | BPF_K, .dst_reg = 2, .imm = -4 },
+		{ .code = BPF_ST | BPF_W | BPF_MEM, .dst_reg = 10, .off = -4 },
+		{ .code = BPF_JMP | BPF_CALL, .imm = BPF_FUNC_map_lookup_elem },
 		{ .code = BPF_ALU64 | BPF_MOV | BPF_K, .imm = 2 },
 		{ .code = BPF_JMP | BPF_EXIT },
 	};
 	struct bpf_prog_load_opts opts = { .sz = sizeof(opts) };
-	int source = bpf_prog_load(BPF_PROG_TYPE_XDP, "trusted_src", "GPL", instructions, 2, &opts);
+	int source = bpf_prog_load(BPF_PROG_TYPE_XDP, "trusted_src", "GPL", instructions, sizeof(instructions)/sizeof(instructions[0]), &opts);
 	require(source >= 0, "load original ordinary BPF program");
 	struct bpf_prog_info info = {};
 	uint32_t info_size = sizeof(info);
@@ -93,6 +108,8 @@ int main(int argc, char **argv)
 		int proof = open(proof_path, O_WRONLY | O_CLOEXEC);
 		require(proof >= 0, "open legacy proof endpoint control");
 		rejected(write(proof, instructions, sizeof(instructions)), EPERM, "application proof upload refused with active trusted worker");
+		struct native_lab_trusted_context denied_context = { .request_id = request.request_id };
+		rejected(ioctl(submit, NATIVE_LAB_TRUSTED_CONTEXT, &denied_context), EPERM, "application cannot use trusted source query");
 		require(!close(proof), "close legacy proof endpoint");
 		signal_peer(ready[1]);
 		require(!ioctl(submit, NATIVE_LAB_TRUSTED_WAIT, &result) && result.request_id == request.request_id &&
@@ -110,11 +127,36 @@ int main(int argc, char **argv)
 	require(!memcmp(&copied, &native, sizeof(native)) && !memcmp(copied_entry, entry, sizeof(entry)-1) &&
 		!memcmp(copied_metadata, metadata, sizeof(metadata)-1), "producer mutation cannot alter kernel-owned P");
 	puts("immutable native ELF/entry/metadata survive producer mutation: PASS");
+	struct native_lab_trusted_context context = { .request_id = next.request_id };
+	require(!ioctl(service, NATIVE_LAB_TRUSTED_CONTEXT, &context) &&
+		context.prog_type == BPF_PROG_TYPE_XDP && !context.expected_attach_type &&
+		!context.prog_flags && !context.prog_ifindex && !context.attach_btf_id &&
+		!context.attach_btf_obj_id && !context.attach_prog_id && context.gpl_compatible &&
+		!context.source_btf_id && !context.token_present, "actual pinned kernel source context");
+	struct native_lab_trusted_map shape = { .request_id = next.request_id, .map_id = map_info.id };
+	require(!ioctl(service, NATIVE_LAB_TRUSTED_MAP, &shape) &&
+		shape.map_type == BPF_MAP_TYPE_ARRAY_OF_MAPS && shape.key_size == 4 &&
+		shape.value_size == 4 && shape.max_entries == 1 && !shape.map_flags && shape.has_inner,
+		"actual source outer shape");
+	shape.depth = 1;
+	require(!ioctl(service, NATIVE_LAB_TRUSTED_MAP, &shape) &&
+		shape.map_type == BPF_MAP_TYPE_ARRAY && shape.key_size == 4 &&
+		shape.value_size == 8 && shape.max_entries == 1 && !shape.map_flags && !shape.has_inner,
+		"actual source inner template shape");
+	puts("kernel source/load attributes and actual outer/inner map shapes: PASS");
+	shape.depth = 2;
+	rejected(ioctl(service, NATIVE_LAB_TRUSTED_MAP, &shape), ENOENT, "invented inner template refused");
+	shape.depth = 0; shape.map_id = 0;
+	rejected(ioctl(service, NATIVE_LAB_TRUSTED_MAP, &shape), ENOENT, "map outside pinned source refused");
+	context.request_id++;
+	rejected(ioctl(service, NATIVE_LAB_TRUSTED_CONTEXT, &context), ESTALE, "stale source context request refused");
 	struct native_lab_trusted_activate activate = { .request_id = next.request_id };
 	require(!ioctl(service, NATIVE_LAB_TRUSTED_ACTIVATE, &activate), "activate trusted worker capability");
 	signal_peer(proceed[1]); await_peer(ready[0]);
 	result = (struct native_lab_trusted_result) { .request_id = next.request_id+1, .status = -EINVAL };
 	rejected(ioctl(service, NATIVE_LAB_TRUSTED_COMPLETE, &result), ESTALE, "wrong native request identity refused");
+	result.request_id = next.request_id; result.status = -4096;
+	rejected(ioctl(service, NATIVE_LAB_TRUSTED_COMPLETE, &result), EINVAL, "invalid final errno refused");
 	result.request_id = next.request_id; result.status = 0; result.prog_id = info.id;
 	rejected(ioctl(service, NATIVE_LAB_TRUSTED_COMPLETE, &result), EXDEV, "unrelated verified BPF program cannot authorize native request");
 	result.status = -EINVAL; result.prog_id = 0;
@@ -132,7 +174,7 @@ int main(int argc, char **argv)
 	}
 	await_peer(ready[0]); require(!close(service), "disconnect service"); child_ok(child);
 	rejected(open(service_path, O_RDWR | O_CLOEXEC), EBUSY, "application cannot replace disconnected trusted registration");
-	require(!close(source), "close source program");
+	require(!close(source) && !close(outer) && !close(inner), "close source program/maps");
 	puts("registered trusted transport, immutable P, application proof refusal and fail-closed disconnect: PASS");
 	return 0;
 }
