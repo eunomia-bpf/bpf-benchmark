@@ -1,0 +1,145 @@
+{
+  "arch": "x86",
+  "cases": [
+    {
+      "name": "absolute_ax",
+      "assembly": "mov rax,0x1122334455667788; mov r8,0x1122334455667788; lea ax,[0x12345678]; mov r10,1234605616436500088; cmp rax,r10; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=10 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-lea-private-probe/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-lea-addressing-fixed/published/positive/absolute_ax.manifest.json",
+        "0",
+        "2"
+      ]
+    },
+    {
+      "name": "absolute_eax",
+      "assembly": "mov rax,0x1122334455667788; mov r8,0x1122334455667788; lea eax,[0x12345678]; mov r10,305419896; cmp rax,r10; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=20 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-lea-private-probe/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-lea-addressing-fixed/published/positive/absolute_eax.manifest.json",
+        "0",
+        "2"
+      ]
+    },
+    {
+      "name": "absolute_rax",
+      "assembly": "mov rax,0x1122334455667788; mov r8,0x1122334455667788; lea rax,[0x12345678]; mov r10,305419896; cmp rax,r10; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=30 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-lea-private-probe/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-lea-addressing-fixed/published/positive/absolute_rax.manifest.json",
+        "0",
+        "2"
+      ]
+    },
+    {
+      "name": "absolute_r8w",
+      "assembly": "mov rax,0x1122334455667788; mov r8,0x1122334455667788; lea r8w,[0x12345678]; mov r10,1234605616436500088; cmp r8,r10; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=40 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-lea-private-probe/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-lea-addressing-fixed/published/positive/absolute_r8w.manifest.json",
+        "0",
+        "2"
+      ]
+    },
+    {
+      "name": "absolute_r8d",
+      "assembly": "mov rax,0x1122334455667788; mov r8,0x1122334455667788; lea r8d,[0x12345678]; mov r10,305419896; cmp r8,r10; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=50 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-lea-private-probe/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-lea-addressing-fixed/published/positive/absolute_r8d.manifest.json",
+        "0",
+        "2"
+      ]
+    },
+    {
+      "name": "absolute_r8",
+      "assembly": "mov rax,0x1122334455667788; mov r8,0x1122334455667788; lea r8,[0x12345678]; mov r10,305419896; cmp r8,r10; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=60 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-lea-private-probe/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-lea-addressing-fixed/published/positive/absolute_r8.manifest.json",
+        "0",
+        "2"
+      ]
+    },
+    {
+      "name": "addr32_rax_legacy",
+      "assembly": "mov rax,0x12345678fffffffe; mov ecx,3; mov r8,0x12345678fffffffe; mov r9,0xabcdef0100000003; lea rax,[eax+ecx*4-7]; cmp rax,3; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=70 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-lea-private-probe/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-lea-addressing-fixed/published/positive/addr32_rax_legacy.manifest.json",
+        "0",
+        "2"
+      ]
+    },
+    {
+      "name": "addr32_rax_extended",
+      "assembly": "mov rax,0x12345678fffffffe; mov ecx,3; mov r8,0x12345678fffffffe; mov r9,0xabcdef0100000003; lea rax,[r8d+r9d*8+127]; cmp rax,149; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=80 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-lea-private-probe/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-lea-addressing-fixed/published/positive/addr32_rax_extended.manifest.json",
+        "0",
+        "2"
+      ]
+    },
+    {
+      "name": "addr32_r8_legacy",
+      "assembly": "mov rax,0x12345678fffffffe; mov ecx,3; mov r8,0x12345678fffffffe; mov r9,0xabcdef0100000003; lea r8,[eax+ecx*4-7]; cmp r8,3; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=90 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-lea-private-probe/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-lea-addressing-fixed/published/positive/addr32_r8_legacy.manifest.json",
+        "0",
+        "2"
+      ]
+    },
+    {
+      "name": "addr32_r8_extended",
+      "assembly": "mov rax,0x12345678fffffffe; mov ecx,3; mov r8,0x12345678fffffffe; mov r9,0xabcdef0100000003; lea r8,[r8d+r9d*8+127]; cmp r8,149; jne 1f; mov eax,2; ret; 1: mov eax,0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=100 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-lea-private-probe/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-lea-addressing-fixed/published/positive/addr32_r8_extended.manifest.json",
+        "0",
+        "2"
+      ]
+    }
+  ]
+}

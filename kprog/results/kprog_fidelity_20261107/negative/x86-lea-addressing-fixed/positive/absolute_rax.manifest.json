@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-lea-addressing-validation/positive/absolute_rax.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-lea-addressing-validation/positive/absolute_rax.bpf.o",
+      "simulator_program": "absolute_rax_x86_sim_xdp"
+    }
+  ]
+}

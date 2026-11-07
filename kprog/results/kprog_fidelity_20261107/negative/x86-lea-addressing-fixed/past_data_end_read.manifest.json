@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-lea-addressing-validation/negative/past_data_end_read.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-lea-addressing-validation/negative/past_data_end_read.bpf.o",
+      "simulator_program": "past_data_end_read_x86_sim_xdp"
+    }
+  ]
+}

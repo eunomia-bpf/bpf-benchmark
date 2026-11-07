@@ -3872,6 +3872,7 @@ where
             }
         }
         if insn.op_kind(op_i) == OpKind::Memory
+            && insn.mnemonic() != Mnemonic::Lea
             && insn.memory_base() == Register::None
             && insn.memory_index() == Register::None
             && insn.memory_displ_size() != 0
@@ -4507,6 +4508,16 @@ mod tests {
             out.push(insn);
         }
         Ok(out)
+    }
+
+    #[test]
+    fn absolute_lea_computes_an_address_but_absolute_load_still_rejects() -> Result<()> {
+        let lea = decode_x86(&[0x48, 0x8d, 0x04, 0x25, 0x78, 0x56, 0x34, 0x12])?;
+        validate_no_external_refs(&lea[0], &[(0, 8)], |_| false)?;
+        let load = decode_x86(&[0x48, 0x8b, 0x04, 0x25, 0x78, 0x56, 0x34, 0x12])?;
+        let error = validate_no_external_refs(&load[0], &[(0, 8)], |_| false).unwrap_err();
+        assert!(error.to_string().contains("absolute memory address"));
+        Ok(())
     }
 
     fn test_update_site(map_name: &str, target_addr: u64) -> UpdateSiteSpec {

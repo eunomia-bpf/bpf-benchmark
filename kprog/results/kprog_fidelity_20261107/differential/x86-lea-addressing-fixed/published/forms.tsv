@@ -1,0 +1,116 @@
+assembly	opcode	cases	mismatches
+lea rax, [rsp+16]	X86_OP_LEA	1024	1024
+lea rsp, [rsp+16]	X86_OP_LEA	1024	0
+lea eax, [rdi+rbx*4-7]	X86_OP_LEA	1024	0
+lea rax, [rdi+rbx*4-7]	X86_OP_LEA	1024	0
+lea ax, [rbx]	X86_OP_LEA	1024	0
+lea ax, [rbx+127]	X86_OP_LEA	1024	0
+lea ax, [rbx-128]	X86_OP_LEA	1024	0
+lea ax, [rbx+rcx*2-7]	X86_OP_LEA	1024	0
+lea ax, [r8+r9*4+2147483647]	X86_OP_LEA	1024	0
+lea ax, [r8+r9*8-2147483648]	X86_OP_LEA	1024	0
+lea ax, [rcx*8+127]	X86_OP_LEA	1024	0
+lea ax, [0x12345678]	X86_OP_LEA	1024	0
+lea ax, [ebx+ecx*4-7]	X86_OP_LEA	1024	0
+lea ax, [r8d+r9d*8+127]	X86_OP_LEA	1024	0
+lea eax, [rbx]	X86_OP_LEA	1024	0
+lea eax, [rbx+127]	X86_OP_LEA	1024	0
+lea eax, [rbx-128]	X86_OP_LEA	1024	0
+lea eax, [rbx+rcx*2-7]	X86_OP_LEA	1024	0
+lea eax, [r8+r9*4+2147483647]	X86_OP_LEA	1024	0
+lea eax, [r8+r9*8-2147483648]	X86_OP_LEA	1024	0
+lea eax, [rcx*8+127]	X86_OP_LEA	1024	0
+lea eax, [0x12345678]	X86_OP_LEA	1024	0
+lea eax, [ebx+ecx*4-7]	X86_OP_LEA	1024	0
+lea eax, [r8d+r9d*8+127]	X86_OP_LEA	1024	0
+lea rax, [rbx]	X86_OP_LEA	1024	0
+lea rax, [rbx+127]	X86_OP_LEA	1024	0
+lea rax, [rbx-128]	X86_OP_LEA	1024	0
+lea rax, [rbx+rcx*2-7]	X86_OP_LEA	1024	0
+lea rax, [r8+r9*4+2147483647]	X86_OP_LEA	1024	0
+lea rax, [r8+r9*8-2147483648]	X86_OP_LEA	1024	0
+lea rax, [rcx*8+127]	X86_OP_LEA	1024	0
+lea rax, [0x12345678]	X86_OP_LEA	1024	0
+lea rax, [ebx+ecx*4-7]	X86_OP_LEA	1024	0
+lea rax, [r8d+r9d*8+127]	X86_OP_LEA	1024	0
+lea r8w, [rbx]	X86_OP_LEA	1024	0
+lea r8w, [rbx+127]	X86_OP_LEA	1024	0
+lea r8w, [rbx-128]	X86_OP_LEA	1024	0
+lea r8w, [rbx+rcx*2-7]	X86_OP_LEA	1024	0
+lea r8w, [r8+r9*4+2147483647]	X86_OP_LEA	1024	0
+lea r8w, [r8+r9*8-2147483648]	X86_OP_LEA	1024	0
+lea r8w, [rcx*8+127]	X86_OP_LEA	1024	0
+lea r8w, [0x12345678]	X86_OP_LEA	1024	0
+lea r8w, [ebx+ecx*4-7]	X86_OP_LEA	1024	0
+lea r8w, [r8d+r9d*8+127]	X86_OP_LEA	1024	0
+lea r8d, [rbx]	X86_OP_LEA	1024	0
+lea r8d, [rbx+127]	X86_OP_LEA	1024	0
+lea r8d, [rbx-128]	X86_OP_LEA	1024	0
+lea r8d, [rbx+rcx*2-7]	X86_OP_LEA	1024	0
+lea r8d, [r8+r9*4+2147483647]	X86_OP_LEA	1024	0
+lea r8d, [r8+r9*8-2147483648]	X86_OP_LEA	1024	0
+lea r8d, [rcx*8+127]	X86_OP_LEA	1024	0
+lea r8d, [0x12345678]	X86_OP_LEA	1024	0
+lea r8d, [ebx+ecx*4-7]	X86_OP_LEA	1024	0
+lea r8d, [r8d+r9d*8+127]	X86_OP_LEA	1024	0
+lea r8, [rbx]	X86_OP_LEA	1024	0
+lea r8, [rbx+127]	X86_OP_LEA	1024	0
+lea r8, [rbx-128]	X86_OP_LEA	1024	0
+lea r8, [rbx+rcx*2-7]	X86_OP_LEA	1024	0
+lea r8, [r8+r9*4+2147483647]	X86_OP_LEA	1024	0
+lea r8, [r8+r9*8-2147483648]	X86_OP_LEA	1024	0
+lea r8, [rcx*8+127]	X86_OP_LEA	1024	0
+lea r8, [0x12345678]	X86_OP_LEA	1024	0
+lea r8, [ebx+ecx*4-7]	X86_OP_LEA	1024	0
+lea r8, [r8d+r9d*8+127]	X86_OP_LEA	1024	0
+lea rbx, [rbx+rcx*8]	X86_OP_LEA	1024	0
+lea rcx, [rbx+rcx*8]	X86_OP_LEA	1024	0
+lea r9, [r8+r9*2-7]	X86_OP_LEA	1024	0
+lea ax, fs:[rbx+rcx*2-7]	X86_OP_LEA	1024	0
+lea ax, gs:[rbx+rcx*2-7]	X86_OP_LEA	1024	0
+lea eax, fs:[rbx+rcx*2-7]	X86_OP_LEA	1024	0
+lea eax, gs:[rbx+rcx*2-7]	X86_OP_LEA	1024	0
+lea rax, fs:[rbx+rcx*2-7]	X86_OP_LEA	1024	0
+lea rax, gs:[rbx+rcx*2-7]	X86_OP_LEA	1024	0
+ja forward	X86_OP_JCC	1024	0
+ja backward	X86_OP_JCC	1024	0
+jae forward	X86_OP_JCC	1024	0
+jae backward	X86_OP_JCC	1024	0
+jb forward	X86_OP_JCC	1024	0
+jb backward	X86_OP_JCC	1024	0
+jbe forward	X86_OP_JCC	1024	0
+jbe backward	X86_OP_JCC	1024	0
+je forward	X86_OP_JCC	1024	0
+je backward	X86_OP_JCC	1024	0
+jne forward	X86_OP_JCC	1024	0
+jne backward	X86_OP_JCC	1024	0
+jg forward	X86_OP_JCC	1024	0
+jg backward	X86_OP_JCC	1024	0
+jge forward	X86_OP_JCC	1024	0
+jge backward	X86_OP_JCC	1024	0
+jl forward	X86_OP_JCC	1024	0
+jl backward	X86_OP_JCC	1024	0
+jle forward	X86_OP_JCC	1024	0
+jle backward	X86_OP_JCC	1024	0
+js forward	X86_OP_JCC	1024	0
+js backward	X86_OP_JCC	1024	0
+jns forward	X86_OP_JCC	1024	0
+jns backward	X86_OP_JCC	1024	0
+jo forward	X86_OP_JCC	1024	0
+jo backward	X86_OP_JCC	1024	0
+jno forward	X86_OP_JCC	1024	0
+jno backward	X86_OP_JCC	1024	0
+jp forward	X86_OP_JCC	1024	0
+jp backward	X86_OP_JCC	1024	0
+jpe forward	X86_OP_JCC	1024	0
+jpe backward	X86_OP_JCC	1024	0
+jnp forward	X86_OP_JCC	1024	0
+jnp backward	X86_OP_JCC	1024	0
+jpo forward	X86_OP_JCC	1024	0
+jpo backward	X86_OP_JCC	1024	0
+jmp forward	X86_OP_JMP	1024	0
+call and ret (stack return address)	X86_OP_CALL	1024	0
+rep movsb	X86_OP_REP_MOVS	1024	0
+rep movsw	X86_OP_REP_MOVS	1024	0
+rep movsd	X86_OP_REP_MOVS	1024	0
+rep movsq	X86_OP_REP_MOVS	1024	0

@@ -408,6 +408,11 @@ def mem_base_reg(operand: str) -> str:
 def parse_mem_terms(operand: str) -> tuple[str, str, int, int]:
     inner_match = re.search(r"\[(.*?)\]", operand)
     if inner_match is None:
+        # GNU objdump spells SIB no-base absolute operands as ds:0x...,
+        # including LEA, even when the source assembly used [disp32].
+        absolute = operand.rsplit(":", 1)[-1].strip()
+        if is_int(absolute):
+            return "X86_REG_NONE", "X86_REG_NONE", 0, parse_int(absolute)
         return "X86_REG_NONE", "X86_REG_NONE", 0, 0
     inner = inner_match.group(1).replace(" ", "").replace("-", "+-")
     base = "X86_REG_NONE"
@@ -751,8 +756,14 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        flags=WIDTH_CONST[dst_reg[1]], aux="X86_LEA_AUX_RODATA",
                        imm=relocated_data_address(insn,rodata_idents)
                            if insn.reloc_symbol else c_u64(mem_disp(ops[1])))
+        # A 32-bit address is zero-extended even when LEA writes a 64-bit
+        # register. The existing 32-bit writeback performs exactly that
+        # truncation; 16-bit destinations retain their partial-register write.
+        address32 = any(reg_info(name) is not None and reg_info(name)[1] == 32
+                        for name in re.findall(r"[A-Za-z][A-Za-z0-9]*", ops[1]))
+        width = min(dst_reg[1], 32) if address32 else dst_reg[1]
         return enc("X86_OP_LEA", dst=dst_reg[0], src=mem_base_reg(ops[1]),
-                   flags=WIDTH_CONST[dst_reg[1]], aux=mem_aux(ops[1]),
+                   flags=WIDTH_CONST[width], aux=mem_aux(ops[1]),
                    imm=c_u64(mem_disp(ops[1])))
 
     if op in {"cmp", "test"}:

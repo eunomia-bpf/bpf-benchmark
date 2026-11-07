@@ -56,4 +56,16 @@ theorem handler_refines (width : CmovWidth) (dst : Reference.X86.Register)
       (handlerStep width dst base displacement hasIndex scale index nextPc s) := by
   rw [step_refines]
   exact ⟨rfl, rfl, rfl⟩
+/-- Address-size32 followed by a native 64-bit write is the existing
+32-bit LEA writeback. This normalization scalarizes and zero-extends the
+address; it does not add a guard or assume high input bits are zero. -/
+theorem address32_step_refines (dst : Reference.X86.Register)
+    (base displacement : Reference.Word) (hasIndex : Bool) (scale : BitVec 2)
+    (index nextPc : Reference.Word) (s : Reference.X86.State) :
+    handlerStep .w32 dst base displacement hasIndex scale index nextPc s =
+      Reference.X86.step (.lea .w64 dst
+        (((address base displacement hasIndex scale index).setWidth 32).setWidth 64)
+        nextPc) s := by
+  simp [handlerStep, value_refines, Reference.X86.step, Reference.X86.writeValue]
+
 end KProgFormal.Refinement.X86Lea

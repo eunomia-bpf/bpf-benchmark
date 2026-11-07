@@ -1,0 +1,24 @@
+{
+  "arch": "x86",
+  "cases": [
+    {
+      "name": "callee_saved_clobber",
+      "assembly": "mov rbx,0x123456789abcdef0; mov eax,2; ret",
+      "stage": "accepted_finding",
+      "message": "bound program id=8 chunks=1 nonzero_generations=1\n",
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-lea-private-probe/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/x86-lea-addressing-fixed/published/abi-observation/callee_saved_clobber.manifest.json"
+      ],
+      "returncode": 0
+    }
+  ],
+  "guest_uname": [
+    "Linux",
+    "virtme-ng",
+    "7.0.0-rc2+",
+    "#59 SMP PREEMPT_DYNAMIC Fri Nov  6 13:33:32 UTC 2026",
+    "x86_64"
+  ]
+}

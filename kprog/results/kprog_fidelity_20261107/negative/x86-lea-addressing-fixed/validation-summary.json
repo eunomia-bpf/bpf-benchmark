@@ -1,0 +1,13 @@
+{
+  "producer_tree": "f57ab4a4e1de16ebe04108306ab0b59759cf24a5",
+  "full": 0,
+  "link_tests": 78,
+  "positive_bound_cases": 10,
+  "negative_cases": 25,
+  "negative_accepted_findings": [
+    "stack_base_flags"
+  ],
+  "micro_positive_compiles": 29,
+  "micro_negative_compiles": 1,
+  "additional_abi_observation": "GEN1 accepted with callee_saved_mask0; LOAD-ONLY"
+}

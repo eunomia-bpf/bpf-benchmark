@@ -1,0 +1,8 @@
+bound-probe: native-link kernel failed (rc=1)
+stderr:
+native-link: entry=entry (59 bytes), 1 reachable symbol(s) total
+  - entry (vaddr 0x0, 59 bytes) [entry]
+Error: instruction at IP 0x14 uses absolute memory address 0x12345678; userspace constants don't map into kernel
+
+command: /workspaces/repository/kprog/fidelity/../x86/native_lab/native_link/target/release/native-link --input /tmp/native_kernel_link_cache/ff10f15a9b3df3ff.tmp.1059.1059.proof.o --symbol entry --mode kernel --output /tmp/native_kernel_link_cache/ff10f15a9b3df3ff.tmp.1059.1059.blob.bin --output-relocs /tmp/native_kernel_link_cache/ff10f15a9b3df3ff.tmp.1059.1059.relocs.bin --output-map-patches /tmp/native_kernel_link_cache/ff10f15a9b3df3ff.tmp.1059.1059.map-patches.tsv --output-abi /tmp/native_kernel_link_cache/ff10f15a9b3df3ff.tmp.1059.1059.abi.tsv --output-data-layout /tmp/native_kernel_link_cache/ff10f15a9b3df3ff.tmp.1059.1059.data-layout.json --link-plan /tmp/native_kernel_link_cache/ff10f15a9b3df3ff.tmp.1059.1059.link-plan.json
+kernel result=0 retval=2 expected_result=0 expected_retval=2

@@ -1,0 +1,11 @@
+{
+  "objects": [
+    {
+      "program": "neg_source",
+      "native_object": "/workspaces/repository/kprog/fidelity/build-lea-published-validation/positive/addr32_rax_legacy.native.o",
+      "symbol": "entry",
+      "simulator_object": "/workspaces/repository/kprog/fidelity/build-lea-published-validation/positive/addr32_rax_legacy.bpf.o",
+      "simulator_program": "addr32_rax_legacy_x86_sim_xdp"
+    }
+  ]
+}
