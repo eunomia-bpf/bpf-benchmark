@@ -1,0 +1,842 @@
+{
+  "run": "x86_kvm_micro_20261107_173730_247516",
+  "driver_exit": 0,
+  "benchmarks": [
+    {
+      "benchmark": "helper_only_uid_gid",
+      "expected_result": 0,
+      "retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 0,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 0,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 0,
+          "retval": 2
+        }
+      }
+    },
+    {
+      "benchmark": "helper_chain_simple",
+      "expected_result": 0,
+      "retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 0,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 0,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 0,
+          "retval": 2
+        }
+      }
+    },
+    {
+      "benchmark": "map_array_lookup",
+      "expected_result": 16045690984503050241,
+      "retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 16045690984503050241,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 16045690984503050241,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 16045690984503050241,
+          "retval": 2
+        }
+      }
+    },
+    {
+      "benchmark": "map_array_index_packet",
+      "expected_result": 16045690984503098046,
+      "retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 16045690984503098046,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 16045690984503098046,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 16045690984503098046,
+          "retval": 2
+        }
+      }
+    },
+    {
+      "benchmark": "map_hash_lookup",
+      "expected_result": 1234605616436508552,
+      "retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 1234605616436508552,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 1234605616436508552,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 1234605616436508552,
+          "retval": 2
+        }
+      }
+    },
+    {
+      "benchmark": "map_hash_str_key",
+      "expected_result": 18369614221520256751,
+      "retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 18369614221520256751,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 18369614221520256751,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 18369614221520256751,
+          "retval": 2
+        }
+      }
+    },
+    {
+      "benchmark": "map_percpu_array",
+      "expected_result": 18369614221190019774,
+      "retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 18369614221190019774,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 18369614221190019774,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 18369614221190019774,
+          "retval": 2
+        }
+      }
+    },
+    {
+      "benchmark": "map_lru_hash_counter",
+      "expected_result": 1,
+      "retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 1,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 1,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 1,
+          "retval": 2
+        }
+      }
+    },
+    {
+      "benchmark": "map_percpu_hash_counter",
+      "expected_result": 1,
+      "retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 1,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 1,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 1,
+          "retval": 2
+        }
+      }
+    },
+    {
+      "benchmark": "combined_helper_map",
+      "expected_result": 0,
+      "retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 0,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 0,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 0,
+          "retval": 2
+        }
+      }
+    },
+    {
+      "benchmark": "multi_map_policy",
+      "expected_result": 1311768465173141112,
+      "retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 1311768465173141112,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 1311768465173141112,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 1311768465173141112,
+          "retval": 2
+        }
+      }
+    },
+    {
+      "benchmark": "packet_5tuple_classify",
+      "expected_result": 3405691582,
+      "retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 3405691582,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 3405691582,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 3405691582,
+          "retval": 2
+        }
+      }
+    },
+    {
+      "benchmark": "stats_mixed_helpers",
+      "expected_result": 1,
+      "retval": 2,
+      "runtimes": {
+        "native_kernel": {
+          "result": 1,
+          "retval": 2
+        },
+        "native_proof": {
+          "result": 1,
+          "retval": 2
+        },
+        "kernel": {
+          "result": 1,
+          "retval": 2
+        }
+      }
+    }
+  ],
+  "fresh_service_requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 9,
+      "native_sha256": "b9e18bf54b633dfe139660f5912047ecbc2832d4f3f374e0b484153a94c7d44f",
+      "started": "2026-11-07T17:37:30.284268+00:00",
+      "prog_id": 14,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/1.success.tar.gz",
+      "finished": "2026-11-07T17:37:32.855203+00:00",
+      "entry": "helper_only_uid_gid",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 20,
+      "native_sha256": "b9e18bf54b633dfe139660f5912047ecbc2832d4f3f374e0b484153a94c7d44f",
+      "started": "2026-11-07T17:37:32.856228+00:00",
+      "prog_id": 25,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/2.success.tar.gz",
+      "finished": "2026-11-07T17:37:34.208043+00:00",
+      "entry": "helper_only_uid_gid",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 37,
+      "native_sha256": "cbb37ca9e412a4b42ad0f1556449ab942ad30cdad5ed5371740dba987570c3d4",
+      "started": "2026-11-07T17:37:34.297987+00:00",
+      "prog_id": 38,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/3.success.tar.gz",
+      "finished": "2026-11-07T17:37:37.636970+00:00",
+      "entry": "helper_chain_simple",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 44,
+      "native_sha256": "cbb37ca9e412a4b42ad0f1556449ab942ad30cdad5ed5371740dba987570c3d4",
+      "started": "2026-11-07T17:37:37.649186+00:00",
+      "prog_id": 45,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/4.success.tar.gz",
+      "finished": "2026-11-07T17:37:40.898919+00:00",
+      "entry": "helper_chain_simple",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 57,
+      "native_sha256": "0d9c63a25fdbd64ae506f20febc0d81e8a6ce0a67d68494cb08da6841bf02dd1",
+      "started": "2026-11-07T17:37:40.997297+00:00",
+      "prog_id": 58,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/5.success.tar.gz",
+      "finished": "2026-11-07T17:37:43.220812+00:00",
+      "entry": "map_array_lookup",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 64,
+      "native_sha256": "0d9c63a25fdbd64ae506f20febc0d81e8a6ce0a67d68494cb08da6841bf02dd1",
+      "started": "2026-11-07T17:37:43.238754+00:00",
+      "prog_id": 65,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/6.success.tar.gz",
+      "finished": "2026-11-07T17:37:45.475867+00:00",
+      "entry": "map_array_lookup",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 7,
+      "source_prog_id": 77,
+      "native_sha256": "7235ce2e930156f4e00d2e76bfaf61cface9b0e6734d3ffdca18fa9ecf4806af",
+      "started": "2026-11-07T17:37:45.567499+00:00",
+      "prog_id": 78,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/7.success.tar.gz",
+      "finished": "2026-11-07T17:37:47.954033+00:00",
+      "entry": "map_array_index_packet",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 8,
+      "source_prog_id": 84,
+      "native_sha256": "7235ce2e930156f4e00d2e76bfaf61cface9b0e6734d3ffdca18fa9ecf4806af",
+      "started": "2026-11-07T17:37:47.958570+00:00",
+      "prog_id": 85,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/8.success.tar.gz",
+      "finished": "2026-11-07T17:37:50.535173+00:00",
+      "entry": "map_array_index_packet",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 9,
+      "source_prog_id": 97,
+      "native_sha256": "b1e61f0b7b974c6afc5e8ef494150b3510b2ee6b1b3989bd942a6f9a764cf537",
+      "started": "2026-11-07T17:37:50.640726+00:00",
+      "prog_id": 98,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/9.success.tar.gz",
+      "finished": "2026-11-07T17:37:52.954918+00:00",
+      "entry": "map_hash_lookup",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 10,
+      "source_prog_id": 104,
+      "native_sha256": "b1e61f0b7b974c6afc5e8ef494150b3510b2ee6b1b3989bd942a6f9a764cf537",
+      "started": "2026-11-07T17:37:52.974844+00:00",
+      "prog_id": 105,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/10.success.tar.gz",
+      "finished": "2026-11-07T17:37:55.234710+00:00",
+      "entry": "map_hash_lookup",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 11,
+      "source_prog_id": 118,
+      "native_sha256": "364d9f7d4febb344ce64602d8902c438d614e8bfbe5ce58d9a73756b8ebfaa7f",
+      "started": "2026-11-07T17:37:55.341758+00:00",
+      "prog_id": 120,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/11.success.tar.gz",
+      "finished": "2026-11-07T17:37:57.774588+00:00",
+      "entry": "map_hash_str_key",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 12,
+      "source_prog_id": 127,
+      "native_sha256": "364d9f7d4febb344ce64602d8902c438d614e8bfbe5ce58d9a73756b8ebfaa7f",
+      "started": "2026-11-07T17:37:57.775360+00:00",
+      "prog_id": 129,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/12.success.tar.gz",
+      "finished": "2026-11-07T17:38:00.180931+00:00",
+      "entry": "map_hash_str_key",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 13,
+      "source_prog_id": 143,
+      "native_sha256": "5bea9ad073d12b924342527c608a9d4d04c4ebcbfa973070c760e74dde2b6b73",
+      "started": "2026-11-07T17:38:00.278885+00:00",
+      "prog_id": 144,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/13.success.tar.gz",
+      "finished": "2026-11-07T17:38:02.674232+00:00",
+      "entry": "map_percpu_array",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 14,
+      "source_prog_id": 150,
+      "native_sha256": "5bea9ad073d12b924342527c608a9d4d04c4ebcbfa973070c760e74dde2b6b73",
+      "started": "2026-11-07T17:38:02.689398+00:00",
+      "prog_id": 151,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/14.success.tar.gz",
+      "finished": "2026-11-07T17:38:05.047047+00:00",
+      "entry": "map_percpu_array",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 15,
+      "source_prog_id": 163,
+      "native_sha256": "bd13a3732a9c76042f07f478c61dd8686fd096e006595625f3296134b667e3a9",
+      "started": "2026-11-07T17:38:05.154297+00:00",
+      "prog_id": 164,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/15.success.tar.gz",
+      "finished": "2026-11-07T17:38:08.139053+00:00",
+      "entry": "map_lru_hash_counter",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 16,
+      "source_prog_id": 170,
+      "native_sha256": "bd13a3732a9c76042f07f478c61dd8686fd096e006595625f3296134b667e3a9",
+      "started": "2026-11-07T17:38:08.151448+00:00",
+      "prog_id": 171,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/16.success.tar.gz",
+      "finished": "2026-11-07T17:38:11.065879+00:00",
+      "entry": "map_lru_hash_counter",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 17,
+      "source_prog_id": 183,
+      "native_sha256": "f14bb650ac209874d77fe1138e2399f90e17f67c5db07b90fe482f44138801d5",
+      "started": "2026-11-07T17:38:11.160226+00:00",
+      "prog_id": 184,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/17.success.tar.gz",
+      "finished": "2026-11-07T17:38:13.381750+00:00",
+      "entry": "map_percpu_hash_counter",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 18,
+      "source_prog_id": 190,
+      "native_sha256": "f14bb650ac209874d77fe1138e2399f90e17f67c5db07b90fe482f44138801d5",
+      "started": "2026-11-07T17:38:13.395995+00:00",
+      "prog_id": 191,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/18.success.tar.gz",
+      "finished": "2026-11-07T17:38:15.628437+00:00",
+      "entry": "map_percpu_hash_counter",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 19,
+      "source_prog_id": 203,
+      "native_sha256": "e3926285d50e4b779b2e381c002cc311733dedca130ec8d374c6ebf10c8aff12",
+      "started": "2026-11-07T17:38:15.732609+00:00",
+      "prog_id": 204,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/19.success.tar.gz",
+      "finished": "2026-11-07T17:38:18.952383+00:00",
+      "entry": "combined_helper_map",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 20,
+      "source_prog_id": 210,
+      "native_sha256": "e3926285d50e4b779b2e381c002cc311733dedca130ec8d374c6ebf10c8aff12",
+      "started": "2026-11-07T17:38:18.969398+00:00",
+      "prog_id": 211,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/20.success.tar.gz",
+      "finished": "2026-11-07T17:38:22.152682+00:00",
+      "entry": "combined_helper_map",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 21,
+      "source_prog_id": 223,
+      "native_sha256": "1a286a57bd5f9e0a8eac3fd5d18031a18663edd59b1ea0a05eaef615837860ac",
+      "started": "2026-11-07T17:38:22.254003+00:00",
+      "prog_id": 224,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/21.success.tar.gz",
+      "finished": "2026-11-07T17:38:25.765084+00:00",
+      "entry": "multi_map_policy",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 22,
+      "source_prog_id": 230,
+      "native_sha256": "1a286a57bd5f9e0a8eac3fd5d18031a18663edd59b1ea0a05eaef615837860ac",
+      "started": "2026-11-07T17:38:25.772998+00:00",
+      "prog_id": 231,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/22.success.tar.gz",
+      "finished": "2026-11-07T17:38:29.194188+00:00",
+      "entry": "multi_map_policy",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 23,
+      "source_prog_id": 243,
+      "native_sha256": "09ec83d0b2adb13e51bf1198de8207e46fb91fe77b7a539a912da96c03e0c965",
+      "started": "2026-11-07T17:38:29.296458+00:00",
+      "prog_id": 244,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/23.success.tar.gz",
+      "finished": "2026-11-07T17:38:31.795150+00:00",
+      "entry": "packet_5tuple_classify",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 24,
+      "source_prog_id": 250,
+      "native_sha256": "09ec83d0b2adb13e51bf1198de8207e46fb91fe77b7a539a912da96c03e0c965",
+      "started": "2026-11-07T17:38:31.811933+00:00",
+      "prog_id": 251,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/24.success.tar.gz",
+      "finished": "2026-11-07T17:38:34.320914+00:00",
+      "entry": "packet_5tuple_classify",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 25,
+      "source_prog_id": 263,
+      "native_sha256": "f822c41fd59d25ecd241e4101c463db7c7b3ba8b881515e76467038bc0d15664",
+      "started": "2026-11-07T17:38:34.436203+00:00",
+      "prog_id": 264,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/25.success.tar.gz",
+      "finished": "2026-11-07T17:38:37.772429+00:00",
+      "entry": "stats_mixed_helpers",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    },
+    {
+      "request_id": 26,
+      "source_prog_id": 270,
+      "native_sha256": "f822c41fd59d25ecd241e4101c463db7c7b3ba8b881515e76467038bc0d15664",
+      "started": "2026-11-07T17:38:37.793462+00:00",
+      "prog_id": 271,
+      "status": 0,
+      "artifact_archive": "/run/bpf-benchmark-trusted-c-trusted-stage2-20261107/session-t18fz2i1/requests/26.success.tar.gz",
+      "finished": "2026-11-07T17:38:41.067584+00:00",
+      "entry": "stats_mixed_helpers",
+      "source_identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "40db5297859f7c1dd48b8f809a78a57fded3d6abde1d404f73b9462e0c692483",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/x86/trusted_specializer.py": "4f9c9aee4b5b1549d0ef4f04aaf343281167de9cea12b0457a3f85dc601bc581",
+        "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h": "d30d4ff18738cc24ab19776b986bc340fe8a4b8d6a539f4e0bb3008de3895327",
+        "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "073aabf4399bb3f19936589bd65420e2936bb3b1df784304b8ccab1b2a91d6bd",
+        "/workspaces/repository/runner/build-llvmbpf/native_loader/trusted-native-loader": "1a4b2c2285fe7edc1ff4d3ea67f65b66d99273f83ebfeb7b69a2d87c997c0df2"
+      }
+    }
+  ],
+  "requests_total": 26,
+  "requests_successful": 26,
+  "verifier_accepted_bound": 26,
+  "application_supplied_proofs": 0,
+  "scope": "x86 KVM standard __runtime-vm-micro; functional only, 1sample/1repeat/C20-23/4vCPU/8GiB",
+  "temporary_files_remaining": [],
+  "final_supervisor_delta": "Close service stdout after join; lifecycle11tests pass with ResourceWarning promoted to error. Runtime-source copy retained separately.",
+  "archives": {
+    "raw.tar.gz": "0a031f6fd5606e776373946b9d580ebddc46a35ad29b610790f614b038026cb1",
+    "service-requests.tar.gz": "3e7638c1725f1f1ff1cba7bbfd262c0ac29d368fb9e28942926cb3b000ef0e7f"
+  },
+  "captured_runner_sha256": "6af68aec1c00f5bc2150beba0a89e610f20ee0f90e13445f04d3621d04720108",
+  "current_runner_sha256": "90530ee453832eccf0cf2191ef6a98eabdde9460108166e5f8ed2eafa3806533",
+  "captured_runner_matches_later_current_build": false,
+  "runner_provenance_note": "Runtime image retains exact earlier T native-only runner binary; T later removed obsolete proof timing fields/rebuilt. Final-source snapshot and later current binary are distinct from captured runtime binary."
+}

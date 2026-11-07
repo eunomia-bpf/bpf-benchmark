@@ -11,6 +11,50 @@ sys.path.insert(0,str(ROOT/'kprog'))
 import trusted_service as service
 from trusted_generation import declarations, validate_native
 
+class TrustedApplicationBootstrap(unittest.TestCase):
+    def exercise(self, ready, status):
+        import os
+        import tarfile
+        import tempfile
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            marker=root/'application-ran'
+            args=SimpleNamespace(arch=1,endpoint=root/'endpoint',state=root/'private',
+                module=None,native_link=root/'link',loader=root/'loader',
+                results=root/'evidence.tar.gz',run=[sys.executable,'-c',
+                    'from pathlib import Path; import os; '
+                    'assert os.environ["BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF"]=="1"; '
+                    'Path('+repr(str(marker))+').write_text("ran"); raise SystemExit('+str(status)+')'])
+            real_popen=subprocess.Popen
+            def worker(command, **kwargs):
+                if command[1]==str(Path(service.__file__).resolve()):
+                    # This fixture supplies no proof and never models a kernel
+                    # acceptance. It checks supervisor lifecycle only.
+                    command=[sys.executable,'-c',
+                        'import time; print('+repr(json.dumps(dict(ready=ready)))+',flush=True); time.sleep(60)']
+                return real_popen(command,**kwargs)
+            with patch.object(service.subprocess,'Popen',side_effect=worker):
+                if ready:
+                    self.assertEqual(service.run_application(args),status)
+                    self.assertTrue(marker.exists())
+                else:
+                    with self.assertRaisesRegex(RuntimeError,'did not register'):
+                        service.run_application(args)
+                    self.assertFalse(marker.exists())
+            with tarfile.open(args.results) as archive:
+                receipt=json.loads(archive.extractfile('service/summary.json').read())
+                self.assertIsNotNone(receipt['service_returncode'])
+                self.assertEqual(receipt.get('returncode'),status if ready else None)
+                self.assertIn('service/service.log',archive.getnames())
+            self.assertEqual(list(args.state.iterdir()),[])
+    def test_nonzero_application_status_and_evidence_survive_teardown(self):
+        self.exercise(True,7)
+    def test_unregistered_service_never_starts_application(self):
+        self.exercise(False,0)
+
+
 class TrustedMetadata(unittest.TestCase):
     def setUp(self):
         self.actual = dict(id=4,prog_type=2,prog_ifindex=0,attach_btf_id=0,attach_btf_obj_id=0,

@@ -35,6 +35,32 @@ Run a targeted VM benchmark with current knobs:
 make micro BENCH=simple SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
 ```
 
+## Verified native runtime
+
+For x86 KVM, select `native_proof` to execute native code after the registered
+trusted service generates, verifies and binds its proof. The application
+submits only its native ELF, entry and typed metadata. The VM Make entrypoint
+starts the service outside the application container, using a private `/run`
+directory, and archives its requests and logs under
+`micro/results/trusted-service-<RUN_TOKEN>.tar.gz` when the suite closes.
+The `host-runner-x86` build also builds the trusted service loader; reuse the
+existing incremental kernel and image build paths when refreshing artifacts.
+
+```bash
+make micro PLATFORM=kvm ARCH=x86 BENCH=simple RUNTIMES="kernel native_proof" SAMPLES=1 WARMUPS=0 INNER_REPEAT=1
+```
+
+`native_kernel` also requires this same bound native-only path. These two
+labels currently execute the same mechanism; they are not separate unbound
+and verified baselines. Historical `native_proof` results executed a prebuilt
+simulator BPF object and cannot be reused as trusted-path native timings.
+New samples retain actual native-load phases; they do not add a historical
+proof-compilation time from a packaged JSON file. Requested native runs fail
+if service registration or proof binding fails. No micro runner is exempt
+from the application proof-upload rejection. The standalone ARM QEMU and
+other deployment bootstraps must likewise register the service before running
+these native labels; the x86 KVM integration is not evidence for those paths.
+
 ## LLVM Kinsn Backend Path
 
 The experimental LLVM backend path compiles the same `programs/*.bpf.c` sources

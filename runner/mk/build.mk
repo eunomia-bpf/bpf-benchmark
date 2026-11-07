@@ -278,7 +278,7 @@ host-runner-arm64: aarch64-sysroot host-llvm-arm64 host-micro-programs-arm64
 host-runner-x86 host-runner-arm64 host-runner-docker-x86:
 	$(MAKE) -C "$(ROOT_DIR)/vendor/libbpf/src" -j"$(JOBS)" BUILD_STATIC_ONLY=1 $(RUNNER_LIBBPF_ENV) CFLAGS="$(RUNNER_LIBBPF_CFLAGS)" OBJDIR="$(RUNNER_BUILD_DIR_ARCH)/$(RUNNER_LIBBPF_OBJ_SUBDIR)" DESTDIR= PREFIX="$(RUNNER_BUILD_DIR_ARCH)/vendor/libbpf/prefix" "$(RUNNER_BUILD_DIR_ARCH)/$(RUNNER_LIBBPF_OBJ_SUBDIR)/libbpf.a" install_headers
 	$(RUNNER_PKG_CONFIG) cmake -S "$(RUNNER_DIR)" -B "$(RUNNER_BUILD_DIR_ARCH)" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="$(RUNNER_CC)" -DCMAKE_CXX_COMPILER="$(RUNNER_CXX)" -DMICRO_REPO_ROOT="$(ROOT_DIR)" -DMICRO_LIBBPF_PREFIX="$(RUNNER_BUILD_DIR_ARCH)/vendor/libbpf/prefix" -DMICRO_LIBBPF_LIBRARY="$(RUNNER_BUILD_DIR_ARCH)/$(RUNNER_LIBBPF_OBJ_SUBDIR)/libbpf.a" -DMICRO_KERNEL_OFFSETS_INCLUDE="$(RUNNER_KERNEL_OFFSETS_INCLUDE)" -DMICRO_EXEC_ENABLE_LLVMBPF=1 -DLLVM_DIR="$(RUNNER_LLVM_DIR_ARCH)" $(RUNNER_CMAKE_CROSS)
-	cmake --build "$(RUNNER_BUILD_DIR_ARCH)" --target micro_exec native_loader_shared -j"$(JOBS)"
+	cmake --build "$(RUNNER_BUILD_DIR_ARCH)" --target micro_exec native_loader_shared trusted-native-loader -j"$(JOBS)"
 	$(RUNNER_STRIP) --strip-unneeded "$(RUNNER_BUILD_DIR_ARCH)/micro_exec"
 	$(RUNNER_STRIP) --strip-unneeded "$(RUNNER_BUILD_DIR_ARCH)/native_loader/libnative_loader.so"
 

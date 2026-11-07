@@ -262,6 +262,73 @@ def serve(args):
         os.close(fd)
 
 
+def run_application(args):
+    """Register outside the application container; never pass its capability."""
+    import signal
+    import threading
+    import tarfile
+    from datetime import datetime, timezone
+    if not args.results:
+        raise ValueError('--run requires --results for service evidence')
+    args.results.parent.mkdir(parents=True,exist_ok=True)
+    args.state.mkdir(mode=0o700,parents=True,exist_ok=True)
+    if args.module and subprocess.run(['mountpoint','-q','/sys/kernel/debug']).returncode:
+        subprocess.run(['mount','-t','debugfs','debugfs','/sys/kernel/debug'],check=True)
+    if args.module and not Path('/sys/module',args.module.stem).is_dir():
+        subprocess.run(['insmod',str(args.module)],check=True)
+    with tempfile.TemporaryDirectory(prefix='session-',dir=args.state) as temporary:
+        private=Path(temporary)
+        service=None
+        reader=None
+        summary=dict(started=datetime.now(timezone.utc).isoformat(),command=args.run)
+        with (private/'service.log').open('w') as log:
+            try:
+                service=subprocess.Popen([sys.executable,str(Path(__file__).resolve()),
+                    '--arch',str(args.arch),'--endpoint',str(args.endpoint),
+                    '--state',str(private/'requests'),'--native-link',str(args.native_link),
+                    '--loader',str(args.loader)],stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,text=True,start_new_session=True)
+                line=service.stdout.readline()
+                log.write(line);log.flush()
+                ready=json.loads(line)
+                if not ready.get('ready'):
+                    raise RuntimeError('trusted service did not register')
+                summary['service']=ready
+                def drain():
+                    for line in service.stdout:
+                        log.write(line);log.flush()
+                reader=threading.Thread(target=drain)
+                reader.start()
+                env=dict(os.environ,BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1')
+                # Popen closes every non-stdio FD. The service capability also
+                # stays CLOEXEC inside the separately registered process.
+                done=subprocess.run(args.run,env=env,close_fds=True)
+                summary['returncode']=done.returncode
+                if service.poll() is not None:
+                    raise RuntimeError('trusted service exited during the application run')
+                return done.returncode
+            except BaseException as error:
+                summary['error']=repr(error)
+                raise
+            finally:
+                if service is not None:
+                    if service.poll() is None:
+                        os.killpg(service.pid,signal.SIGTERM)
+                    summary['service_returncode']=service.wait()
+                if reader is not None:
+                    reader.join()
+                elif service is not None:
+                    log.write(service.stdout.read())
+                if service is not None:
+                    service.stdout.close()
+                log.flush()
+                summary['finished']=datetime.now(timezone.utc).isoformat()
+                (private/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+                with tarfile.open(args.results,'x:gz') as archive:
+                    archive.add(private,arcname='service')
+                print(json.dumps(dict(trusted_service_archive=str(args.results))),flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--arch',type=int,choices=(1,2),required=True)
@@ -269,7 +336,15 @@ def main():
     parser.add_argument('--state',type=Path,required=True)
     parser.add_argument('--native-link',type=Path,required=True)
     parser.add_argument('--loader',type=Path,required=True)
-    serve(parser.parse_args())
+    parser.add_argument('--module',type=Path)
+    parser.add_argument('--results',type=Path)
+    parser.add_argument('--run',nargs=argparse.REMAINDER)
+    args=parser.parse_args()
+    if args.run is not None:
+        if not args.run:
+            parser.error('--run requires an application command')
+        sys.exit(run_application(args))
+    serve(args)
 
 if __name__ == '__main__':
     main()
