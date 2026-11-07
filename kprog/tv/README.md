@@ -1648,3 +1648,14 @@ This closes a structural byte-identity gap for these two captures. The ELF/parse
 checker and archive provenance are trusted, and RET/ABI/platform semantic transport
 and universal native relational validation remain open. This checker does not
 claim that removing RET is semantically faithful.
+
+### Relational uniqueness for16 captured instruction extents
+
+`simple_defined_decoded_step_unique` proves that every canonical `X86.Step`
+transition at the16 listed fully observed native instruction extents equals the
+complete executable representative transition, including all state, events and
+faults. Observation masks and operands follow from the actual bytes; none are
+supplied by the caller. NativePC10 XOR's undefined AF is handled separately by
+the existing universal guard theorem through CMP. Whole-program relational path
+composition, entry/platform/ABI and RET transport still remain. See the dated
+defined-relational JSON/log; the reference ISA and earlier theorems are unchanged.

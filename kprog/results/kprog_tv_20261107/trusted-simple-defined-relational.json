@@ -1,0 +1,128 @@
+{
+  "status": "all16_captured_fully_observed_decoded_operations_relational_unique_checked",
+  "utc": "2026-11-07T12:49:50.115783+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "theorem": "KProgTV.TrustedSimpleX86.simple_defined_decoded_step_unique",
+  "extents": [
+    [
+      0,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      7,
+      3
+    ],
+    [
+      12,
+      3
+    ],
+    [
+      15,
+      2
+    ],
+    [
+      17,
+      4
+    ],
+    [
+      21,
+      3
+    ],
+    [
+      24,
+      2
+    ],
+    [
+      26,
+      4
+    ],
+    [
+      30,
+      3
+    ],
+    [
+      33,
+      2
+    ],
+    [
+      35,
+      5
+    ],
+    [
+      40,
+      4
+    ],
+    [
+      44,
+      7
+    ],
+    [
+      51,
+      4
+    ],
+    [
+      55,
+      5
+    ]
+  ],
+  "claims": [
+    "actual canonical byte decode determines all instruction operands/successor and full observation masks",
+    "every canonical relational X86.Step at each listed captured extent equals complete executable representative transition",
+    "full GPR/RFLAGS/PC/other state, ordered effects and fault covered, including every memory-permission outcome",
+    "no caller-selected opcode/operands/definedness mask",
+    "no reference ISA change"
+  ],
+  "premises": [
+    "one actual captured listed instruction extent",
+    "decodeAt succeeds at actual pre-state/PC",
+    "canonical relational X86.Step transition"
+  ],
+  "xor_scope": "NativePC10 XOR32 AF is undefined and excluded from fully-observed table; prior native_guard_decoded_relational_block universally quantifies those choices through CMP without discarding them.",
+  "not_yet_claimed": [
+    "universal whole-program relational path correspondence",
+    "artifact TranslationValidation",
+    "entry/kernel-platform/ABI/RET semantic transport"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical prefix and audits retained",
+    "old_prefix_sha256": "929bb7379ff335041365f984ccd873b7e19a29e4441682c441cc77eda4a41b3e",
+    "ISA_runtime_binding": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "binding_mismatch_controls_rejected": 22,
+    "materialization_controls_rejected": 28,
+    "no_sorryAx": true,
+    "log_sha256": "8303cb329aec674bb2c9dc73290dff2ae26022afa70bfe4549be341791330610",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.decode_extent_reflects_raw": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.simple_defined_decode_observed": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.simple_defined_decoded_step_unique": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "trusted": [
+    "canonical reference ISA/memory",
+    "Lean kernel and reported logical axioms/native reduction",
+    "kernel/archive/ELF-parser provenance for eventual artifact composition",
+    "verifier soundness and supported entry/platform/return transport remain explicit"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "4bb6c29e0d6ee6db81df4916b52eecc955eca60306c604c7557f0fa8ba78a7a5"
+  }
+}

@@ -2767,6 +2767,125 @@ theorem captured_all_read_write_outcomes (env : BPF.Environment) (n : X86.State)
       · simpa only [allReadSetupTrace,allReadGuestTrace,allReadNativeTrace,read0,read1] using projection
       · simpa only [allReadNativeFinal,allReadProofFinal,read0,read1] using mem
 
+
+/-- Recover the raw canonical decoder equation from a checked extent, without
+changing its PC, selected instruction length, or decoded successor. -/
+theorem decode_extent_reflects_raw (base : Word) (bytes : Array Byte) (entry : X86Path.Entry)
+    (s : X86.State) (instruction : X86.Instruction)
+    (accepted : X86Path.decodeAt base bytes entry s=.ok instruction) :
+    X86.decode (bytes.extract entry.offset (entry.offset+entry.length)) s=.ok instruction := by
+  unfold X86Path.decodeAt at accepted
+  simp only [Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad] at accepted
+  split at accepted
+  · simp at accepted
+  · split at accepted
+    · simp at accepted
+    · split at accepted
+      · simp at accepted
+      · cases raw : X86.decode (bytes.extract entry.offset (entry.offset+entry.length)) s with
+        | error reason => simp [raw,Except.bind,Bind.bind,Except.instMonad] at accepted
+        | ok decoded =>
+          simp only [raw,Except.bind,Bind.bind,Except.instMonad] at accepted
+          split at accepted
+          · simp at accepted
+          · have same : decoded=instruction := by simpa using accepted
+            cases same
+            rfl
+
+/-- Actual captured extents with fully defined flags/register outputs. The
+XOR atPC10 is deliberately handled by the prior relational guard proof,
+which admits every undefined AF value before the subsequent CMP. -/
+def simpleDefinedExtents : List X86Path.Entry :=
+  [⟨0,3⟩,⟨3,4⟩,⟨7,3⟩,⟨12,3⟩,⟨15,2⟩,⟨17,4⟩,⟨21,3⟩,⟨24,2⟩,
+   ⟨26,4⟩,⟨30,3⟩,⟨33,2⟩,⟨35,5⟩,⟨40,4⟩,⟨44,7⟩,⟨51,4⟩,⟨55,5⟩]
+
+/-- Byte-decoding determines full observation at every listed actual extent;
+no caller supplies the opcode, operands or observation mask. -/
+theorem simple_defined_decode_observed (s : X86.State) (entry : X86Path.Entry)
+    (instruction : X86.Instruction) (member : entry ∈ simpleDefinedExtents)
+    (decoded : X86Path.decodeAt 0 native entry s=.ok instruction) :
+    X86.definedFlags instruction=(0xffffffffffffffff#64) ∧
+    ∀ state, X86.observedRegisters instruction state=state.gpr := by
+  have raw := decode_extent_reflects_raw 0 native entry s instruction decoded
+  simp only [simpleDefinedExtents,List.mem_cons,List.mem_singleton,List.not_mem_nil,or_false] at member
+  rcases member with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
+    rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · change X86.decode (native.extract 0 3) s=.ok instruction at raw
+    rw [native_decode0] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 3 7) s=.ok instruction at raw
+    rw [native_decode3] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 7 10) s=.ok instruction at raw
+    rw [native_decode7] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 12 15) s=.ok instruction at raw
+    rw [native_decode12] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 15 17) s=.ok instruction at raw
+    rw [native_decode15] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 17 21) s=.ok instruction at raw
+    rw [native_decode17] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 21 24) s=.ok instruction at raw
+    rw [native_decode21] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 24 26) s=.ok instruction at raw
+    rw [native_decode24] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 26 30) s=.ok instruction at raw
+    rw [native_decode26] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 30 33) s=.ok instruction at raw
+    rw [native_decode30] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 33 35) s=.ok instruction at raw
+    rw [native_decode33] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 35 40) s=.ok instruction at raw
+    rw [native_decode35] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 40 44) s=.ok instruction at raw
+    rw [native_decode40] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 44 51) s=.ok instruction at raw
+    rw [native_decode44] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 51 55) s=.ok instruction at raw
+    rw [native_decode51] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+  · change X86.decode (native.extract 55 60) s=.ok instruction at raw
+    rw [native_decode55] at raw
+    cases Except.ok.inj raw
+    exact ⟨rfl,fun _ => rfl⟩
+
+/-- Every canonical relational execution of a listed captured instruction has
+exactly the representative's full state, ordered effects and fault, including
+all memory-permission outcomes. XOR's undefined AF is not constrained here. -/
+theorem simple_defined_decoded_step_unique (s : X86.State) (entry : X86Path.Entry)
+    (instruction : X86.Instruction) (actual : Transition X86.State)
+    (member : entry ∈ simpleDefinedExtents)
+    (decoded : X86Path.decodeAt 0 native entry s=.ok instruction)
+    (run : X86.Step instruction s actual) : actual=X86.step instruction s := by
+  obtain ⟨flags,registers⟩ := simple_defined_decode_observed s entry instruction member decoded
+  exact fully_observed_step_unique instruction s actual flags registers run
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -3005,3 +3124,9 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.canonical_read_error
 
 #print axioms KProgTV.TrustedSimpleX86.captured_all_read_write_outcomes
+
+#print axioms KProgTV.TrustedSimpleX86.decode_extent_reflects_raw
+
+#print axioms KProgTV.TrustedSimpleX86.simple_defined_decode_observed
+
+#print axioms KProgTV.TrustedSimpleX86.simple_defined_decoded_step_unique
