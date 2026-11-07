@@ -710,3 +710,20 @@ app-replay-collect:
 .PHONY: otel-memory-input
 otel-memory-input:
 	python3 $(ROOT)/corpus/results/kprog_app_coverage_20261106/embed_memory_runtime.py $(HERE)/otel-real-v15 $(HERE)/otel-memory-input-v36
+
+.PHONY: trusted-transport-arm64-build
+trusted-transport-arm64-build: $(ROOT)/kprog/arm64/build/trusted-transport/test-trusted-transport
+
+$(ROOT)/kprog/arm64/build/trusted-transport/test-trusted-transport: $(ROOT)/kprog/tv/test_trusted_transport.c $(ROOT)/kinsn/module/include/native_lab_trusted_wire.h $(ROOT)/kinsn/module/include/native_lab_binding.h $(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a
+	install -d $(ROOT)/kprog/arm64/build/trusted-transport
+	aarch64-linux-gnu-gcc -Wall -Wextra -Werror -O2 -g -D__EXPORTED_HEADERS__ \
+		-I$(ROOT)/vendor/linux-framework/include/uapi \
+		-I$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include \
+		$(ROOT)/kprog/tv/test_trusted_transport.c \
+		$(ROOT)/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a \
+		-L$(ROOT)/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd \
+		-o $(ROOT)/kprog/arm64/build/trusted-transport/test-trusted-transport
+
+.PHONY: trusted-transport-arm64-run
+trusted-transport-arm64-run: trusted-transport-arm64-build
+	python3 $(HERE)/trusted-arm64-transport-result/replay.py --rootfs "$(TRANSPORT_ROOTFS)"

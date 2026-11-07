@@ -1,0 +1,24 @@
+{
+  "adapter_sha256": "6d6da5a9e6ff9a2d4e94d4662a86177d6d138924d5e94a6f4f0b18ec721d6b1c",
+  "shared_helper_sha256": "73a3a2669dd6b9f0178746e472be35e05b714c75e37af5e9980ab1aad892ab12",
+  "same_17_map_declarations": true,
+  "extra_metadata_fields_rejected": [
+    "proof_object",
+    "source",
+    "compiler_flags"
+  ],
+  "actual_native_entries_validated": [
+    "balancer.native.o",
+    "xdp_root.native.o"
+  ],
+  "cross_adapter_import": {
+    "status": "passed"
+  },
+  "lines_before": 148,
+  "lines_after": 76,
+  "shared_helper_in_head": true,
+  "shared_helper_matches_head": false,
+  "tested_committed_helper_sha256": "3e25aaba1c4d95f74d074efae8fee0986a86691858003ad685ad71a8c21e1a40",
+  "committed_common_checks_passed": true,
+  "workspace_common_differs_from_head": false
+}

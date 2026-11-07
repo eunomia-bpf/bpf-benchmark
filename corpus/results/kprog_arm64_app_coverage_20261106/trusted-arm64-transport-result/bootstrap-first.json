@@ -1,0 +1,6 @@
+{
+  "qemu_exit": 0,
+  "transport_controls_reached": false,
+  "problem": "devtmpfs was already auto-mounted; redundant mount failed before repository mount",
+  "repair": "omit the already fulfilled devtmpfs mount; CONFIG_DEVTMPFS_MOUNT=y in the pinned kernel"
+}

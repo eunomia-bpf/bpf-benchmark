@@ -1,0 +1,37 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "20-23",
+    "qemu-system-aarch64",
+    "-M",
+    "virt",
+    "-cpu",
+    "max",
+    "-smp",
+    "2",
+    "-m",
+    "2048",
+    "-nographic",
+    "-no-reboot",
+    "-kernel",
+    "/workspaces/repository/vendor/build/arm64/linux/arch/arm64/boot/Image",
+    "-fsdev",
+    "local,id=rootfs,path=/workspaces/repository/kprog/arm64/build/app-runtime-v35/root,security_model=none,readonly=on",
+    "-device",
+    "virtio-9p-device,fsdev=rootfs,mount_tag=rootfs",
+    "-fsdev",
+    "local,id=repo,path=/workspaces/repository,security_model=none",
+    "-device",
+    "virtio-9p-device,fsdev=repo,mount_tag=repo",
+    "-append",
+    "console=ttyAMA0 root=rootfs rootfstype=9p rootflags=trans=virtio,version=9p2000.L ro init=/bin/sh loglevel=4 panic=-1 oops=panic"
+  ],
+  "hashes": {
+    "vendor/build/arm64/linux/arch/arm64/boot/Image": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac",
+    "kinsn/module/arm64/build/bpf_arm64_native_lab.ko": "2ebef5adbcd23e22a2a832900c4b1a47d48dacefbf573329c5518e8559ed3787",
+    "kprog/arm64/build/trusted-transport/test-trusted-transport": "3ca533b1150874bebb17d472d336213d5a254d632dad8cb4321a18acb2066385",
+    "kprog/tv/test_trusted_transport.c": "bd010ceaf538775ce11c4c8023b27a805973e5dd4a35d092ffa2c623a17875d1",
+    "kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841"
+  }
+}
