@@ -1,0 +1,240 @@
+[
+  {
+    "name": "valid_control",
+    "assembly": "mov w0,#2; ret",
+    "negative": false,
+    "native_sha256": "0e5c0407b26746fe5465c46615365300dee08573ba7d187b35a1935e540703f5",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/valid_control.manifest.json"
+  },
+  {
+    "name": "valid_copy_restore",
+    "assembly": "mov x1,sp; mov sp,x1; mov w0,#2; ret",
+    "negative": false,
+    "native_sha256": "62deafc04c19cf6157b5a1db9e52f7d2ece1f38958afb4a6ba1962e1aa419d9b",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/valid_copy_restore.manifest.json"
+  },
+  {
+    "name": "valid_alias_load",
+    "assembly": "sub sp,sp,#16; mov x1,#37; str x1,[sp]; mov x2,sp; ldr x3,[x2]; add sp,sp,#16; cmp x3,#37; b.ne 1f; mov w0,#2; ret; 1: mov w0,#0; ret",
+    "negative": false,
+    "native_sha256": "f5c5efe2f30e2950ecc98b97ac29f0e9bc7e5e4474a4ea13384d2b0ef3e38d0b",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/valid_alias_load.manifest.json"
+  },
+  {
+    "name": "valid_spill_restore",
+    "assembly": "sub sp,sp,#32; add x1,sp,#16; str x1,[sp]; ldr x1,[sp]; mov sp,x1; add sp,sp,#16; mov w0,#2; ret",
+    "negative": false,
+    "native_sha256": "539354542a4e9fbbec15da240a5c8223c0725f644c38cba34ebedc40e42d9e0f",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/valid_spill_restore.manifest.json"
+  },
+  {
+    "name": "past_data_end_read",
+    "assembly": "ldr x1, [x0, #8]; ldrb w0, [x1]; ret",
+    "negative": true,
+    "native_sha256": "b59cfc6568481220ac84c773c748076a79d2343db974edfc7e493b3efaefc030",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/past_data_end_read.manifest.json"
+  },
+  {
+    "name": "past_data_end_write",
+    "assembly": "ldr x1, [x0, #8]; mov w2, #1; strb w2, [x1]; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "9f47d4ab36a5e4c84db06e141115d68fe4300671d4167ff115a2c03376e12908",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/past_data_end_write.manifest.json"
+  },
+  {
+    "name": "missing_data_end_check",
+    "assembly": "ldr x1, [x0]; ldrb w0, [x1]; ret",
+    "negative": true,
+    "native_sha256": "af2effa86101b552dca5fb6b0fdc69578b705a07ce446a113548707923b31a35",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/missing_data_end_check.manifest.json"
+  },
+  {
+    "name": "map_value_oob",
+    "assembly": "ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; str x30, [sp, #-16]!; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; ldr x30, [sp], #16; cbz x0, 1f; ldr x0, [x0, #8]; ret; 1: mov x0, #0; ret",
+    "negative": true,
+    "native_sha256": "a9028b2c67f9402bb6d397da5ba814ca4e359e8ff8a5c43aec3ecaa33e49a650",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/map_value_oob.manifest.json"
+  },
+  {
+    "name": "nullable_map_dereference",
+    "assembly": "ldr x1, [x0]; ldr x2, [x0, #8]; add x3, x1, #4; cmp x3, x2; b.hi 1f; str x30, [sp, #-16]!; adrp x0, :got:neg_map; ldr x0, [x0, :got_lo12:neg_map]; bl bpf_map_lookup_elem; ldr x30, [sp], #16; ldr x0, [x0]; ret; 1: mov x0, #0; ret",
+    "negative": true,
+    "native_sha256": "2f4681342b27ef34166b6493942a36f9a4e063cfc959428c48ffb73e65748ad2",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/nullable_map_dereference.manifest.json"
+  },
+  {
+    "name": "invalid_helper_argument",
+    "assembly": "str x30, [sp, #-16]!; mov x0, #1; mov x1, #0; bl bpf_map_lookup_elem; ldr x30, [sp], #16; ret",
+    "negative": true,
+    "native_sha256": "dad4bdf806f097d9aad6e7c96549664240ad2e44293f14e7e896a6809cb949f9",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/invalid_helper_argument.manifest.json"
+  },
+  {
+    "name": "stack_oob",
+    "assembly": "ldr x0, [sp, #1024]; ret",
+    "negative": true,
+    "native_sha256": "fc982ce7fc4a52e051e4c7037c2216aeccd87e1deb48c460dd79c5875a25c8a9",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stack_oob.manifest.json"
+  },
+  {
+    "name": "uninitialized_stack",
+    "assembly": "ldur x0, [sp, #-8]; ret",
+    "negative": true,
+    "native_sha256": "a50aa1007ba884a8a4a1d12598c5a8d84a9ed25fcf3e73d68d0c07ca6768be04",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/uninitialized_stack.manifest.json"
+  },
+  {
+    "name": "unbounded_loop",
+    "assembly": "1: b 1b",
+    "negative": true,
+    "native_sha256": "4ad10da9f1969bf96619f6f451001c29fb976b638d395a7293e1dbf4b75f90b8",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unbounded_loop.manifest.json"
+  },
+  {
+    "name": "unbounded_indirect_jump",
+    "assembly": "ldr x1, [x0]; br x1",
+    "negative": true,
+    "native_sha256": "691911d84bf7d44a61fdedfca7f4f6db68ea79596c1578f8b828b622b89bf0f9",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unbounded_indirect_jump.manifest.json"
+  },
+  {
+    "name": "unsupported_instruction",
+    "assembly": "brk #0; ret",
+    "negative": true,
+    "native_sha256": "5da6847a41519b2fc4aabfb7f59cf5522c7d5a70551276827c213e80d0d7b88d",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unsupported_instruction.manifest.json"
+  },
+  {
+    "name": "misaligned_sp",
+    "assembly": "sub sp, sp, #16; mov w1, #0x2222; str x1, [sp]; add sp, sp, #1; ldrb w0, [sp]; sub sp, sp, #1; add sp, sp, #16; ret",
+    "negative": true,
+    "native_sha256": "f4221688b7d5f9a49606f6b9c290f1640f2d1e4e0f3871712cef663f989a6d17",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/misaligned_sp.manifest.json"
+  },
+  {
+    "name": "overlapping_load_pair",
+    "assembly": "sub sp, sp, #16; mov x1, #2; stp x1, x1, [sp]; ldp x1, x1, [sp]; add sp, sp, #16; mov w0, w1; ret",
+    "negative": true,
+    "native_sha256": "0c21de7f41b9fe37ed93bcd3effd8119a773bf18dfa58c99f916f67294181246",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/overlapping_load_pair.manifest.json"
+  },
+  {
+    "name": "writeback_load_overlap",
+    "assembly": "sub sp, sp, #16; mov x2, #2; stp x2, x2, [sp]; mov x1, sp; ldr x1, [x1], #8; add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "5d87182ae0e9031e2bfbf8ac1e8036a31c23e9dd0b89a6d40b02fea5b9650608",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/writeback_load_overlap.manifest.json"
+  },
+  {
+    "name": "writeback_store_overlap",
+    "assembly": "sub sp, sp, #16; mov x2, #2; stp x2, x2, [sp]; mov x1, sp; str x1, [x1], #8; add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "b1142b61bed214bdcfd665a0f9718dca18f13f508630009f8007f836d59cc012",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/writeback_store_overlap.manifest.json"
+  },
+  {
+    "name": "scalar_vector_load_clear_high",
+    "assembly": "sub sp, sp, #32; mov x1, #1; str xzr, [sp]; str x1, [sp, #8]; ldr q0, [sp]; ldr d0, [sp]; str q0, [sp, #16]; ldr x1, [sp, #24]; cbnz x1, 1f; mov x0, #0; ldr x0, [x0]; 1: add sp, sp, #32; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "7b377f88c0fc305b2b0842e45663a9b0c5d602c23a089ba454c63d4f986d60cc",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/scalar_vector_load_clear_high.manifest.json"
+  },
+  {
+    "name": "unpaired_stxr_failure",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "cc18f710c67956078237759625d7fefc65727a4170c193f9ab6ae92109a607ef",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unpaired_stxr_failure.manifest.json"
+  },
+  {
+    "name": "unpaired_stlxr_failure",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stlxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "eca5e9bb32b67d7cf02066072a3b14c07caf4c8897aae11b651497ce3906c360",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/unpaired_stlxr_failure.manifest.json"
+  },
+  {
+    "name": "paired_stxr_failure",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; ldxr x1, [x2]; stxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "15115e53de99c5297833321a2a7d085a1d35e24b45284980af6d679c7a8d47b7",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/paired_stxr_failure.manifest.json"
+  },
+  {
+    "name": "paired_stlxr_failure",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; ldaxr x1, [x2]; stlxr w0, x1, [x2]; cbz w0, 1f; mov x3, #0; ldr w0, [x3]; 1: add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "4d51789865c04e46dbdd0fdd1ebb5d07ab99d484e97c5549b7caa39fc4ba7dcd",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/paired_stlxr_failure.manifest.json"
+  },
+  {
+    "name": "stxr_status_data_overlap",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stxr w1, x1, [x2]; add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "b648c256af28b5fd786f3aadcc85406ac080be85aad1338386f95d180567ef61",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stxr_status_data_overlap.manifest.json"
+  },
+  {
+    "name": "stlxr_status_data_overlap",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stlxr w1, w1, [x2]; add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "4e99d694c78dba6569d422d9b8245189e098fd58da6b17f5b3fab1795d94ab34",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stlxr_status_data_overlap.manifest.json"
+  },
+  {
+    "name": "stxr_status_base_overlap",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stxr w2, x1, [x2]; add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "8afdf2fd098a7a164c45b31a035d44c39ed290d89d407aea01015503f84ca547",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stxr_status_base_overlap.manifest.json"
+  },
+  {
+    "name": "stlxr_status_base_overlap",
+    "assembly": "sub sp, sp, #16; mov x1, #2; str x1, [sp]; mov x2, sp; stlxr w2, w1, [x2]; add sp, sp, #16; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "e3ec9b5fb31e585fb268a3bb00d4bbde93a253436cb89a6f69ad301862eed65a",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stlxr_status_base_overlap.manifest.json"
+  },
+  {
+    "name": "entry_return_address_flags",
+    "assembly": "mov w0, #2; cmp x30, #0; b.eq 1f; mov x1, #0; ldr w0, [x1]; 1: ret",
+    "negative": true,
+    "native_sha256": "167f607b9c1cbf7bde3b23ba77502f1cae96830b267e1c54d9ca99738148b512",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/entry_return_address_flags.manifest.json"
+  },
+  {
+    "name": "return_register_overwrite",
+    "assembly": "mov x30, #0; mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "462fc8b21938c92c5bd2fd2b2d8fddb6e36a34ca0fd12e427b773850145c9c13",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/return_register_overwrite.manifest.json"
+  },
+  {
+    "name": "stack_base_flags",
+    "assembly": "mov w0, #2; sub sp, sp, #16; add sp, sp, #16; cmp sp, #0; b.eq 1f; mov x1, #0; ldr w0, [x1]; 1: ret",
+    "negative": true,
+    "native_sha256": "14a25095df58aa9dbf3b28706df5a80dff621eab9b89a264f03063f49cd543b1",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/stack_base_flags.manifest.json"
+  },
+  {
+    "name": "undefined_entry_register",
+    "assembly": "cbz x1, 1f; ldr x1, [x0, #8]; ldrb w0, [x1]; ret; 1: mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "39ff34ff8ce52a5ac01cb85e2348cf3ed9568cc9d27a7f3e33dbb354a49bfaea",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/undefined_entry_register.manifest.json"
+  },
+  {
+    "name": "undefined_entry_flags",
+    "assembly": "b.cc 1f; ldr x1, [x0, #8]; ldrb w0, [x1]; ret; 1: mov w0, #2; ret",
+    "negative": true,
+    "native_sha256": "c3fb46ad8e5667536e2b02c613ab73033f31086d7e1cb0bfbde21014351f59b9",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/undefined_entry_flags.manifest.json"
+  },
+  {
+    "name": "helper_clobbered_register",
+    "assembly": "stp x19, x30, [sp, #-16]!; mov x19, x0; mov x1, #0; bl bpf_get_current_uid_gid; cbz x1, 1f; ldr x1, [x19, #8]; ldrb w0, [x1]; b 2f; 1: mov w0, #2; 2: ldp x19, x30, [sp], #16; ret",
+    "negative": true,
+    "native_sha256": "3e77ab66f1632b91e38f609e945bebe946b307e8169811600a6d56cd420e414d",
+    "manifest": "/workspaces/repository/kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/helper_clobbered_register.manifest.json"
+  }
+]

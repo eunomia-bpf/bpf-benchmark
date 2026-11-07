@@ -1,0 +1,78 @@
+{
+  "recorded": "2026-11-07T17:27:21.772000+00:00",
+  "complete": true,
+  "total_cases": 34,
+  "valid_executed": 4,
+  "unsafe_rejected": 30,
+  "accepted_unsafe": 0,
+  "unsafe_native_executed": 0,
+  "stages": {
+    "valid_executed": 4,
+    "verifier_rejected": 16,
+    "loader_rejected": 1,
+    "specialization_rejected": 13
+  },
+  "host_make_exit": 0,
+  "guest_exit": 0,
+  "qemu_returncode": 0,
+  "transport_hashes_unchanged": true,
+  "extra_host_input_changes": [
+    "corpus/results/kprog_arm64_app_coverage_20261106/trusted_service_arm64.py"
+  ],
+  "kernel_native_matches": 34,
+  "generated_native_matches": 34,
+  "source_identity_sets": {
+    "58d8cb8a154714300e51fa87133dfa58b5f10dbaf1d753c16ba3d17c9f588802": {
+      "identities": {
+        "/workspaces/repository/kprog/trusted_service.py": "5e76f0691412728cc70e0213e3e4dc040d737f605c160d6a7368f5558fc710e1",
+        "/workspaces/repository/kprog/trusted_generation.py": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a",
+        "/workspaces/repository/kprog/arm64/trusted_specializer.py": "9c96ba545a3856021520407ab6da93d60534ce5b536ceb6d151c79d498c08497",
+        "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h": "c21833dee58cbdbc85aa176289585f705f189743b1337adfa13908775d6c28c5",
+        "/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "b9eb4c7cba928342851ff055117e60e6debbc6d9c41dd1a34d5e5fa7e8b8f97f",
+        "/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp": "3487e54c15be4e109cc6d22e47f22a9552871cef0e4126696db9d21f5bd5b843",
+        "/workspaces/repository/kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+        "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link": "f9086a5d08126aabfcaa824a6bf93aad9bc47c2b665d3f44b8757ceaaa3f3456",
+        "/workspaces/repository/kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader": "bf44d57f74696235ab999c0a0c55e0d38f93813026142142a9bbd54a94f4832c"
+      },
+      "cases": [
+        "valid_control",
+        "valid_copy_restore",
+        "valid_alias_load",
+        "valid_spill_restore",
+        "past_data_end_read",
+        "past_data_end_write",
+        "missing_data_end_check",
+        "map_value_oob",
+        "nullable_map_dereference",
+        "invalid_helper_argument",
+        "stack_oob",
+        "uninitialized_stack",
+        "unbounded_loop",
+        "unbounded_indirect_jump",
+        "unsupported_instruction",
+        "misaligned_sp",
+        "overlapping_load_pair",
+        "writeback_load_overlap",
+        "writeback_store_overlap",
+        "scalar_vector_load_clear_high",
+        "unpaired_stxr_failure",
+        "unpaired_stlxr_failure",
+        "paired_stxr_failure",
+        "paired_stlxr_failure",
+        "stxr_status_data_overlap",
+        "stlxr_status_data_overlap",
+        "stxr_status_base_overlap",
+        "stlxr_status_base_overlap",
+        "entry_return_address_flags",
+        "return_register_overwrite",
+        "stack_base_flags",
+        "undefined_entry_register",
+        "undefined_entry_flags",
+        "helper_clobbered_register"
+      ]
+    }
+  },
+  "archive": "kprog/results/kprog_fidelity_20261107/negative/arm64-trusted-sp/canonical-worker/trusted-arm64-service-result/run-20261107T170103345123Z.tar.gz",
+  "archive_sha256": "7268e25f495a3b9e0a2cfe73e7685cd00adce4e6eb3168d5f56c80cdf82fcb71",
+  "scope": "current canonical ARM worker/header/ABI/generator with unchanged kernel; does not validate private exclusive-convergence kernel patch"
+}
