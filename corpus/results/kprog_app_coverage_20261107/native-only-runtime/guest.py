@@ -4,7 +4,7 @@ from datetime import datetime,timezone
 import argparse,hashlib,json,os,signal,subprocess,sys,tarfile,tempfile,threading,traceback
 R=Path('/workspaces/repository');O=Path(__file__).resolve().parent
 S=Path('/workspaces/.agent-state/kprog-lanes/C/native-only-runtime')
-p=argparse.ArgumentParser();p.add_argument('--samples',type=int,required=True);p.add_argument('--duration',type=int,required=True);p.add_argument('--apps',required=True);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--samples',type=int,required=True);p.add_argument('--duration',type=int,required=True);p.add_argument('--apps',required=True);p.add_argument('--state',type=Path,default=S);a=p.parse_args();S=a.state.resolve()
 subprocess.run(['insmod',str(R/'kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko')],check=True)
 summary=dict(started=datetime.now(timezone.utc).isoformat(),apps=a.apps,samples=a.samples,duration=a.duration)
 with tempfile.TemporaryDirectory(prefix='.live-',dir=O) as directory, tempfile.TemporaryDirectory(prefix='trusted-',dir=S) as private:

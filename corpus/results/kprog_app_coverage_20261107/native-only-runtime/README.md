@@ -116,3 +116,11 @@ The successful8GiB run's cleanup receipt confirms both removed after the guest
 and collector closed (about15GiB allocated space). Raw results/requests/logs,
 compiled caches and provenance remain. The initial package preparation commands
 and completed build logs remain alongside for rebuilding only when inputs change.
+
+
+Independent experiments can override the existing Make STATE variable. It is
+forwarded explicitly into the guest driver, including the service's private
+work directory and image-tar path. C's OTel continuation uses lane-private
+native-only-otel state; R's BCC timing keeps the default native-only-runtime
+state. Each experiment cleans only its own disk/tar. Timestamped archives are
+unique; the final JSON line names the exact archive for that invocation.
