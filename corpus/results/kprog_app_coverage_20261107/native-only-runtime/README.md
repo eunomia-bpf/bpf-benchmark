@@ -91,3 +91,9 @@ The next replay keeps the SAME image/kernel/modules/workload and raises the
 guest memory4G->8G, within C's12GiB limit. SIGKILL alone has not established OOM;
 the driver now saves full dmesg and meminfo before archiving. No code/simulator
 change, fallback, program omission or kernel rebuild is used for this retry.
+
+
+The corpus recipe removes its guest var-tmp Docker disk and exported image tar
+on exit, after checking for open users. A later run re-exports the cached Docker
+image when its tar is absent; it does not rebuild the image or kernel. Raw results,
+request archives, logs, compiled caches and provenance records are retained.

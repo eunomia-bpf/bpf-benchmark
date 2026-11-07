@@ -88,3 +88,9 @@ failed attempt. Both driver logs, build/check logs and comparison raw outputs
 are archived alongside. Healthy guest/cache inputs and the1136-object scan
 were preserved. R can now update BOTH loader and linker for its longer
 counterbalanced timing runs; no performance acceptance is claimed here.
+
+
+The corpus recipe removes its guest var-tmp Docker disk and exported image tar
+on exit, after checking for open users. A later run re-exports the cached Docker
+image when its tar is absent; it does not rebuild the image or kernel. Raw results,
+request archives, logs, compiled caches and provenance records are retained.
