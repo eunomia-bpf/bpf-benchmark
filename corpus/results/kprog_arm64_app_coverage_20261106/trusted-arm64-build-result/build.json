@@ -1,0 +1,79 @@
+{
+  "command": "taskset -c 8-23 make host-kinsn-arm64 IMAGE_BUILD_JOBS=8",
+  "returncode": 0,
+  "incremental_cache": "vendor/build/arm64/linux",
+  "source": {
+    "head": "ca8d46f436365affe9e85d493a15c49f5225d805",
+    "kernel_source": "9c50491de2a5f7c3067201b10a7182dbf172e541",
+    "sources": {
+      "kprog/tv/native-proof-regions.patch": "82e9b4b39e15fd0da06a47954c1cd09bea9868c56c2e9e6bcf91a267a9366c12",
+      "kinsn/module/arm64/bpf_arm64_native_lab.c": "b019578c79209c9c68a0faeda80642be76b6b2b7406a044c2b2250a25a386ca4",
+      "kinsn/module/include/native_lab_trusted_wire.h": "652aaaf2b63ed4c19c0be4efc6b83991c193eed6f933bb0c91f5e9dacb914841",
+      "kinsn/module/include/native_lab_trusted.h": "c6274fad2057476882475b0fa47d946170f00b8f070029632c212f3cc1f4ed51"
+    }
+  },
+  "source_hashes_unchanged_after_build": true,
+  "artifacts": {
+    "vendor/build/arm64/linux/arch/arm64/boot/Image": {
+      "bytes": 42674688,
+      "sha256": "48343ccf4938702b5487f22782ff3d68965a81321871b2abde66c2e580a1d1ac"
+    },
+    "vendor/build/arm64/linux/arch/arm64/boot/vmlinuz.efi": {
+      "bytes": 12694016,
+      "sha256": "4380e0ba3938b79bb2e4a1126daf67480003e9080ee29292e92b38045ddfbf2a"
+    },
+    "vendor/build/arm64/linux/Module.symvers": {
+      "bytes": 992066,
+      "sha256": "9e2b618efe1172ad4a6134d0dd51bd40db3195b8a50c5201cb5c1fe860f80192"
+    },
+    "vendor/build/arm64/linux/.config": {
+      "bytes": 163032,
+      "sha256": "29ec41dbd9a2c91e46dfd8b2fd5ad649fa0710fcafa80c67593ed406ba64e680"
+    },
+    "kinsn/module/arm64/build/bpf_arm64_ccmp.ko": {
+      "bytes": 622560,
+      "sha256": "73c584277398cb7dcff5dd3da5d8f8438a993d573a90a21a98cdc14eee1f3432"
+    },
+    "kinsn/module/arm64/build/bpf_arm64_csel.ko": {
+      "bytes": 589248,
+      "sha256": "44df0c5490316c3ffee5992c1262a72ae90628ba4bd0a6bc10b40581aa43ae2f"
+    },
+    "kinsn/module/arm64/build/bpf_arm64_extr.ko": {
+      "bytes": 596496,
+      "sha256": "325d64fe65cdc2ae95e5cfbf9dbfb2da9216ae540e0be35d4f187ba211966302"
+    },
+    "kinsn/module/arm64/build/bpf_arm64_ldp.ko": {
+      "bytes": 608624,
+      "sha256": "70c66d3575d3745af6682b3751ca355442e88b096232ac0a580dc058ba16c0ad"
+    },
+    "kinsn/module/arm64/build/bpf_arm64_ldr.ko": {
+      "bytes": 610296,
+      "sha256": "81932134202fbd8ba424652971aca30ec9f51f0c663cf3bc93667c26117b813e"
+    },
+    "kinsn/module/arm64/build/bpf_arm64_mov.ko": {
+      "bytes": 571440,
+      "sha256": "1780a19c2a34f49b07aaf339bccea29c65cb396682a2d191685fd20ca373e0f8"
+    },
+    "kinsn/module/arm64/build/bpf_arm64_native_lab.ko": {
+      "bytes": 1360608,
+      "sha256": "2ebef5adbcd23e22a2a832900c4b1a47d48dacefbf573329c5518e8559ed3787"
+    },
+    "kinsn/module/arm64/build/bpf_arm64_prfm.ko": {
+      "bytes": 568936,
+      "sha256": "4159f1cd590edc008b622cfc9746af2dcd73e5472e069cf14e2dc7516695fee2"
+    },
+    "kinsn/module/arm64/build/bpf_arm64_rev.ko": {
+      "bytes": 586688,
+      "sha256": "4f607fc8865764d87527e4abdbacb1d49138208f00fe4c4de1117b94fc64d225"
+    },
+    "kinsn/module/arm64/build/bpf_arm64_str.ko": {
+      "bytes": 638000,
+      "sha256": "c6c0f388925914601210b7e4771952d36f702e440768e9898f983b92aa31708d"
+    },
+    "kinsn/module/arm64/build/bpf_arm64_ubfm.ko": {
+      "bytes": 574336,
+      "sha256": "0c215fd61afb4d39535d12bc750ce228f467c7b353fabe9369351f2468e244bd"
+    }
+  },
+  "scope": "build only; QEMU transport and generated application service path pending"
+}
