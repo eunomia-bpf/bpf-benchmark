@@ -1171,3 +1171,30 @@ checks. The immutable source/cache export was deleted automatically. Compressed
 CALL CPU observations retain this440-case run. BITFIELD, arithmetic/logical
 flag rows and ORN are later increments and are not included in this pass.
 The complete77/72 theorem and O2/O4 bindings remain open.
+
+## Uniform byte CCMP composed after ORN
+
+`Arm64Dispatcher.dispatchThroughCompare` appends both actual CCMP numeric
+rows. Its byte body reads physical DST as the left operand and selects SRC
+or IMM with the independent generated operand table. The packed condition
+byte controls generated subtraction flags versus fallback NZCV; only the
+fallback ignores its upper four bits. Full flag-word bits outside NZCV,
+all registers/vectors/memory and a single PC advance are preserved. Both
+condition outcomes follow the same canonical reference, with no branch premise.
+
+The derived typed-body equality composes existing full immediate/register
+compare steps. Immediate values retain the native five-bit bound and ignore
+any SRC byte; SRC2/SRC3/AUX2/AUX3 stay arbitrary for both rows. Literal opcode
+disjointness derives reachability past all preceding gates. One
+step_through_compare_refines theorem covers the field/code/condition/fallback
+binding and every earlier case without assuming component-step equalities.
+Native byte/raw-width and O2/O4 transport, remaining families and the complete
+77/72 step theorems still need completion.
+
+Validation: focused77-job dispatcher/reference Lean build,10 existing contract
+freshness checks, direct dispatch/model checks and13 existing semantic/route
+hosts passed 240 cases,40080 cases,5120 cases,122880 cases,2105024 cases,2072 cases,136 cases,512 cases,6913 cases,257 cases,6401 cases,586829 cases,1115374 cases. Exact proof SHA256
+`15c64e35da9e350e580b53201dd74d7cc25301adb2188e8e80752099ecaf6960` stayed unchanged throughout checks. Every earlier
+declaration remains byte-identical. No placeholders, new tests, filtering,
+ISA/runtime/generator/oracle/paper changes. Original compiler warnings remain
+visible. The active exact45d full check predates this extension.

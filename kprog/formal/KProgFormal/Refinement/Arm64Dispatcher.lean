@@ -1517,4 +1517,114 @@ theorem step_through_orn_refines (code : Nat) (aux : BitVec 32) (width : Width) 
   | shifted => apply orn_refines
   | unmodified => apply orn_unmodified_refines
 
+
+/-- CCMP reads its left operand from physical DST and its optional right
+register from SRC. Its generated conditional flags retain both outcomes and
+only the low four fallback bits, without any register write. -/
+def compareBody (op : GeneratedArm64FlagOperand.FlagOp) (predicate : Arm64Cond) (fallback : Byte)
+    (width : Width) (dst src : Byte) (value : Word) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let rhs := if GeneratedArm64FlagOperand.immediate op then value else Arm64Move.Fields.read s src
+  let result := GeneratedArm64CcmpHandler.apply (Arm64Arithmetic.incomingFlags s.flags) predicate
+    (Arm64Move.Fields.read s dst) rhs (Arm64Register.handlerWidth width) fallback
+  ⟨{ s with flags := Arm64Logic.flagsWord s.flags result.flags, pc := s.pc + 4 }, [], none⟩
+
+theorem compare_body_typed (op : GeneratedArm64FlagOperand.FlagOp) (predicate : Arm64Cond) (fallback : Byte)
+    (width : Width) (dst src : Register) (value : Word) (s : Reference.AArch64.State) :
+    compareBody op predicate fallback width (Arm64Register.registerCode dst) (Arm64Register.registerCode src) value s =
+      Arm64Arithmetic.ConditionalCompare.rawStep op width dst src value predicate fallback s := by
+  simp only [compareBody, Arm64Arithmetic.ConditionalCompare.rawStep, Arm64Move.Fields.register_read]
+
+def dispatchThroughCompare (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughOrn code aux width dst src src2 src3 value sourceScalar sourceStack s with
+  | some result => some result
+  | none => (Arm64Arithmetic.ConditionalCompare.decodeOpcode code).bind (fun op =>
+      (Arm64Condition.decode (GeneratedArm64CcmpDecode.ccmpCond aux).toNat).map (fun predicate =>
+        compareBody op predicate ((GeneratedArm64CcmpDecode.ccmpNzcv aux).setWidth 8) width dst src value s))
+
+theorem compare_reached (immediate : Bool) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughCompare (GeneratedArm64DispatchFamily.code (if immediate then .ccmpImm else .ccmpReg))
+      aux width dst src src2 src3 value sourceScalar sourceStack s =
+      (Arm64Condition.decode (GeneratedArm64CcmpDecode.ccmpCond aux).toNat).map (fun predicate =>
+        compareBody (if immediate then .ccmpImm else .ccmpReg) predicate
+          ((GeneratedArm64CcmpDecode.ccmpNzcv aux).setWidth 8) width dst src value s) := by
+  have before : dispatchThroughOrn (GeneratedArm64DispatchFamily.code (if immediate then .ccmpImm else .ccmpReg))
+      aux width dst src src2 src3 value sourceScalar sourceStack s = none := by cases immediate <;> rfl
+  have decoded : Arm64Arithmetic.ConditionalCompare.decodeOpcode
+      (GeneratedArm64DispatchFamily.code (if immediate then .ccmpImm else .ccmpReg)) =
+      some (if immediate then .ccmpImm else .ccmpReg) := by cases immediate <;> rfl
+  unfold dispatchThroughCompare
+  rw [before, decoded]
+  rfl
+
+theorem compare_immediate_refines (width : Width) (dst : Register) (src src2 src3 : Byte) (value : BitVec 5)
+    (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughCompare (GeneratedArm64DispatchFamily.code .ccmpImm)
+      (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3) width
+      (Arm64Register.registerCode dst) src src2 src3 (value.setWidth 64) sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.compare width dst (.immediate value)
+        (Arm64Condition.nativeCode predicate) (fallback.setWidth 4)) s) := by
+  have reached := compare_reached true (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3)
+    width (Arm64Register.registerCode dst) src src2 src3 (value.setWidth 64) sourceScalar sourceStack s
+  simp only [↓reduceIte] at reached
+  rw [reached, Arm64Arithmetic.ConditionalCompare.packed_condition, Arm64Arithmetic.ConditionalCompare.packed_fallback]
+  change some (compareBody .ccmpImm predicate fallback width (Arm64Register.registerCode dst) src (value.setWidth 64) s) = _
+  have ignored : compareBody .ccmpImm predicate fallback width (Arm64Register.registerCode dst) src (value.setWidth 64) s =
+      compareBody .ccmpImm predicate fallback width (Arm64Register.registerCode dst) (Arm64Register.registerCode 31)
+        (value.setWidth 64) s := rfl
+  rw [ignored, compare_body_typed, Arm64Arithmetic.ConditionalCompare.raw_immediate_refines]
+
+theorem compare_register_refines (width : Width) (dst src : Register) (src2 src3 : Byte) (value : Word)
+    (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) (sourceScalar sourceStack : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughCompare (GeneratedArm64DispatchFamily.code .ccmpReg)
+      (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3) width (Arm64Register.registerCode dst)
+      (Arm64Register.registerCode src) src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step (.compare width dst (.register src)
+        (Arm64Condition.nativeCode predicate) (fallback.setWidth 4)) s) := by
+  have reached := compare_reached false (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3)
+    width (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value sourceScalar sourceStack s
+  simp only [Bool.false_eq_true, ↓reduceIte] at reached
+  rw [reached, Arm64Arithmetic.ConditionalCompare.packed_condition, Arm64Arithmetic.ConditionalCompare.packed_fallback]
+  change some (compareBody .ccmpReg predicate fallback width (Arm64Register.registerCode dst)
+    (Arm64Register.registerCode src) value s) = _
+  rw [compare_body_typed, Arm64Arithmetic.ConditionalCompare.raw_register_refines]
+
+theorem compare_earlier_preserved (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : OrnBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughCompare code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  simp only [dispatchThroughCompare,
+    step_through_orn_refines code aux width dst src src2 src3 value sourceScalar sourceStack native s binding]
+
+inductive CompareBinding (pc : Word) : Nat → BitVec 32 → Width → Byte → Byte → Byte → Byte → Word →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte) (value : Word)
+      (native : Reference.AArch64.Instruction) (binding : OrnBinding pc code aux width dst src src2 src3 value native) :
+      CompareBinding pc code aux width dst src src2 src3 value native
+  | immediate (width : Width) (dst : Register) (src src2 src3 : Byte) (value : BitVec 5)
+      (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) :
+      CompareBinding pc (GeneratedArm64DispatchFamily.code .ccmpImm)
+        (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3) width
+        (Arm64Register.registerCode dst) src src2 src3 (value.setWidth 64)
+        (.compare width dst (.immediate value) (Arm64Condition.nativeCode predicate) (fallback.setWidth 4))
+  | register (width : Width) (dst src : Register) (src2 src3 : Byte) (value : Word)
+      (predicate : Arm64Cond) (fallback lane2 lane3 : Byte) :
+      CompareBinding pc (GeneratedArm64DispatchFamily.code .ccmpReg)
+        (Arm64Arithmetic.ConditionalCompare.packedAux predicate fallback lane2 lane3) width
+        (Arm64Register.registerCode dst) (Arm64Register.registerCode src) src2 src3 value
+        (.compare width dst (.register src) (Arm64Condition.nativeCode predicate) (fallback.setWidth 4))
+
+theorem step_through_compare_refines (code : Nat) (aux : BitVec 32) (width : Width) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack : Bool) (native : Reference.AArch64.Instruction)
+    (s : Reference.AArch64.State) (binding : CompareBinding s.pc code aux width dst src src2 src3 value native) :
+    dispatchThroughCompare code aux width dst src src2 src3 value sourceScalar sourceStack s =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier _ _ _ _ _ _ _ _ _ earlier => exact compare_earlier_preserved _ _ _ _ _ _ _ _ _ _ _ s earlier
+  | immediate => apply compare_immediate_refines
+  | register => apply compare_register_refines
+
 end KProgFormal.Refinement.Arm64Dispatcher
