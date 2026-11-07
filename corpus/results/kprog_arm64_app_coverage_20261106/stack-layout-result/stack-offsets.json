@@ -1,0 +1,62 @@
+[
+  {
+    "phase": "bcc-offset-v14",
+    "object": "bcc_opensnoop_tracepoint__syscalls__sys_exit_openat.bpf.o",
+    "sha256": "5180501364cc509a6c47e00785fd2e153ebb4e8554692f3584101820e412a1ca",
+    "max_fp_negative_offset": 880
+  },
+  {
+    "phase": "bcc-offset-v14",
+    "object": "bcc_tcplife_inet_sock_set_state.bpf.o",
+    "sha256": "2c8a94634ec9b1a3bf5c56da3b874f33082ffa1574dcc2da4b7ed31c519b49dc",
+    "max_fp_negative_offset": 584
+  },
+  {
+    "phase": "bcc-stack-fold-v17",
+    "object": "bcc_opensnoop_tracepoint__syscalls__sys_exit_openat.bpf.o",
+    "sha256": "16a60acb4e0c2a2b851f56df2d253cd85f97d9f37874e6797aa2a1c9354f64c3",
+    "max_fp_negative_offset": 872
+  },
+  {
+    "phase": "bcc-stack-fold-v17",
+    "object": "bcc_tcplife_inet_sock_set_state.bpf.o",
+    "sha256": "241a6fbedb92d5d93f0c62963cdf96450bfc6730e040c0f74d289b2438641547",
+    "max_fp_negative_offset": 584
+  },
+  {
+    "phase": "bcc-minimal-layout-v22",
+    "object": "bcc_opensnoop_tracepoint__syscalls__sys_exit_openat.bpf.o",
+    "sha256": "e078671b19b63b12b9256c3cdd4e311f55cc096db56ffcfb3e361691900a2809",
+    "max_fp_negative_offset": 472
+  },
+  {
+    "phase": "bcc-minimal-layout-v22",
+    "object": "bcc_tcplife_inet_sock_set_state.bpf.o",
+    "sha256": "4f277badc95a9c7093be1d017e330a11b21d8c1c645e0b2233eb93911ed68e62",
+    "max_fp_negative_offset": 584
+  },
+  {
+    "phase": "bcc-layout-v27",
+    "object": "bcc_opensnoop_tracepoint__syscalls__sys_exit_openat.bpf.o",
+    "sha256": "d2845b2bfabc3e0712163d241f124580efa8c0397454caaf172a7c847ddfe2fc",
+    "max_fp_negative_offset": 472
+  },
+  {
+    "phase": "bcc-layout-v27",
+    "object": "bcc_tcplife_inet_sock_set_state.bpf.o",
+    "sha256": "9c41a235207bb8b848fe4782068aed28b997858f6f8a2e74aa70706e878bd0bd",
+    "max_fp_negative_offset": 584
+  },
+  {
+    "phase": "bcc-payload-sparse-v28",
+    "object": "bcc_opensnoop_tracepoint__syscalls__sys_exit_openat.bpf.o",
+    "sha256": "d0c5e79f0aae876d8de27db37d22e739994dad940ce07ac9c1a8267ab7d92ba4",
+    "max_fp_negative_offset": 472
+  },
+  {
+    "phase": "bcc-payload-sparse-v28",
+    "object": "bcc_tcplife_inet_sock_set_state.bpf.o",
+    "sha256": "437841f08a515d66ccfc8759cb517e9d6a0e7b8e7b68a7d024d7e75794fae7e9",
+    "max_fp_negative_offset": 584
+  }
+]

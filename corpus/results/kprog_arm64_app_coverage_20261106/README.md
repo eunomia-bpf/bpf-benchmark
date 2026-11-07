@@ -994,3 +994,12 @@ The simulator/native ISA and matched kernel/module are unchanged.
 7compile,5LLVM OOM,2timeouts,0generation failures. The preclean compiler and
 actual application integration continue separately; these are compiler-stage
 counts and do not establish verifier admission or application completion.
+
+## Frozen stack representation diagnostics
+
+[The stack-layout checkpoint](stack-layout-result/README.md) retains 23/23 BCC
+and negative + 29 micro compiler passes, 11,200 memory byte/tag cases, seven QEMU
+boundary outcomes and two source/simulator/bound result-37/generation-1 controls.
+Opensnoop maximum stack offset falls from 880 to 472 bytes; tcplife remains 584.
+The extra sparse-payload trial gives no further reduction and is not promoted.
+The full formal check and actual BCC v27 startup continue separately.
