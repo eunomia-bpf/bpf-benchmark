@@ -2311,6 +2311,26 @@
     "snapshot_file_count": 1140,
     "temporary_export_basename": "source-check-bits-published"
   },
+  "full_make_check_af38184ef": {
+    "actual_exit": 0,
+    "archive_block_sha256": "6f3017abfac8aae4bd9896a88f0657e475c63dcb21417f67737ed1a155c66885",
+    "archive_marker": "=== FULL MAKE CHECK AF38184EF PASS ===",
+    "archived_inputs": {
+      "/workspaces/.agent-state/kprog-lanes/V/div-refinement-full.cpu.jsonl.gz": "7f323fba1fe426e79b2703d96cb9ae2f5a6a80fc52f9dd976a018176d544b635",
+      "/workspaces/.agent-state/kprog-lanes/V/div-refinement-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "/workspaces/.agent-state/kprog-lanes/V/div-refinement-full.head": "1a30942d4e306576f158b0137019dab8bbbe033628cab80aeb9f9d6acffeb2c7",
+      "/workspaces/.agent-state/kprog-lanes/V/div-refinement-full.launch.log": "562e2ffcb4f66fb6e08108e8c121351b0eb04b74279d5a55a39013b0cdf2b08b",
+      "/workspaces/.agent-state/kprog-lanes/V/div-refinement-full.log": "48b63a64873b059b03d1cf1834aca97b3f984d01cb506167261aa7bd41f98057",
+      "/workspaces/.agent-state/kprog-lanes/V/div-refinement-full.py": "fdb89ae2f4321ee6df935903a0636704f49b2748e7baf70f54c874166b526ce4",
+      "/workspaces/.agent-state/kprog-lanes/V/div-refinement-full.sources": "f0c6964104872fc98f43c9720720f672d99d3f10fb0c8e68fc327da612845a5d",
+      "/workspaces/.agent-state/kprog-lanes/V/div-refinement-full.state": "c5806d2c4dfb7ac5e67de17ca3c5558b9064dbe770fb6df25f6f5ea3083635df"
+    },
+    "every_source_sha256_verified_against_git": true,
+    "published_source": "af38184efb3ecc7fd839ca9d4736868643cc08cf",
+    "scope": "Published DIV raw-register/token epoch; subsequent branch proof and adopted LEA C header retain their separate source identities.",
+    "temporary_export_retired": true,
+    "verified_published_source_count": 1140
+  },
   "invocation_emission_composition": {
     "archive_block_sha256": "7d1873e1959b3ff85ee2a9bd3f506b15d0fc18ed00b2d185ae95c9ca46165c52",
     "commands": [
@@ -11016,7 +11036,7 @@
       "kprog/formal/build/divide-handler/narrow_divide_8.c": "cf4ee7c076aaa1abd99f2d2269d1acc458366b61178a3f5db151dcdcce171ccb",
       "kprog/formal/build/divide-handler/narrow_divide_8.o": "840bbc305797033215c29e7cda47ec368c3d7873e77177e884330b78ff8a3c03"
     },
-    "full_make_check": "pending immutable published DIV epoch; full635e79 actual0 retains LEA source identity",
+    "full_make_check": "full_make_check_af38184ef:actual0,1140publishedGitSHA verified,immutableexport retired",
     "handler_oracle_exit": 0,
     "initial_lean_elaboration_failure_count": 4,
     "narrow_abi_controls": 2,

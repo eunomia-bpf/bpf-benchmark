@@ -3213,3 +3213,11 @@ retaining its separate wrapping-model arm pending the C-owned signed-stack sum
 repair. DIV memory-source capture/read-fault/effect composition, whole-ISA raw
 coverage and generic ABI/definedness/C correspondence/compiler/native-link
 preservation retain their explicit completion interfaces.
+
+### Published DIV source full check
+
+`make check` on immutable publishedaf38184ef exits0. Every1140 exported
+source SHA256 matches that commit’s Git blob; its temporary export is retired.
+The full log, source manifest, CPU trace and exit receipt are archived under
+`full_make_check_af38184ef`. The later JCC/JMP proofs and adopted LEA header
+retain their separate source identities.
