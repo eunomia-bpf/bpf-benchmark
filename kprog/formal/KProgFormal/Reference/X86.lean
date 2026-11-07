@@ -1381,6 +1381,11 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     if (modrm / 8) % 8 = 2 then
       let (target, nextPc, _) ← operand bytes s p modrm (count + 2) 0
       return .call (scalarSource p .w64 target) nextPc
+    if (modrm / 8) % 8 = 4 then
+      let (target, nextPc, _) ← operand bytes s p modrm (count + 2) 0
+      match target with
+      | .register src => return .branch none (s.gpr src) nextPc
+      | .memory _ => throw "native indirect jump reference requires a register target"
     if (modrm / 8) % 8 = 6 then
       let (source, nextPc, _) ← operand bytes s p modrm (count + 2) 0
       match source with

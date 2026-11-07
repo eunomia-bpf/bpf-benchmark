@@ -1,0 +1,374 @@
+{
+  "kprog/fidelity/build-x86-control/snapshot/kprog/trusted_generation.py": {
+    "size": 5913,
+    "sha256": "feae9c9ae8a945f9a96d6ec92cc2101929f1d94cfd02258042c45dba6d60e44a"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/helper_abi.py": {
+    "size": 1879,
+    "sha256": "bd72775b1bc67da99e07d0ef1445af1d641971e07c77ea0abf7727f8052e168b"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kinsn/module/include/native_lab_input.h": {
+    "size": 2281,
+    "sha256": "c43adcd858d4c53c500aaa1763e2f95196b9da7f7bc6f284ca305f7d15b1e131"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/x86/x86_sim_local_bpf.h": {
+    "size": 158143,
+    "sha256": "5ab4a0887d77db610d605381ba44377b4f7b4bcf089d7d54e3d461bf6420b854"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/x86/x86_sim.h": {
+    "size": 8844,
+    "sha256": "7505059ff8f4c6135f814897d24cd48e7f753f8d8fa3bd77e1107c901b5148c3"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/x86/micro-prog/generated_x86_opcode.py": {
+    "size": 5442,
+    "sha256": "cadf347e5a8acf877b5d5f6149014da541a2298407b1d1fb664bd56e331fc77a"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/x86/micro-prog/generated_x86_cc_decode.py": {
+    "size": 977,
+    "sha256": "099d0b7ed401af1ceca7e57264cea88cce566434646036d59d02bd7b941d98ea"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/x86/micro-prog/generated_x86_alu_decode.py": {
+    "size": 508,
+    "sha256": "106ba0f45de9218244ac1ca9aed6686306a3fa91fc358bdb9a4ec5c5a4040a90"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/x86/micro-prog/x86_abi.py": {
+    "size": 33757,
+    "sha256": "3462b366fee20d9ab6ef9d15249edbcb8e5f21a8fdffcde2585a0b871f0a9df8"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/x86/micro-prog/generate_micro_sim_proofs.py": {
+    "size": 84652,
+    "sha256": "019e95d29784ef54838853d39a4cf886b7e6d52804c7678096b473ce6310d137"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/x86/micro-prog/generated_x86_specialization.py": {
+    "size": 8368,
+    "sha256": "3b68d720b251fa277114740d04020e017821022a8b410c9cc86d4b9280426a3b"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/x86/micro-prog/generated_x86_reg_lane_aux.py": {
+    "size": 538,
+    "sha256": "f71f20841ee367aa4f738a8bde3852f483ce395716a5fe4608b36dbe95687ac9"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/x86/micro-prog/generated_x86_full_condition.py": {
+    "size": 588,
+    "sha256": "648c6e0f09083376768900eddfe3454e6f3e506797cf641bd0dc4c51a3dbb276"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_mem_aux.h": {
+    "size": 1203,
+    "sha256": "a625c69146bae62ce1c286ecac0c892bcf561afaadc800e3e15b6e492481ab4f"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_sbb_flags.h": {
+    "size": 463,
+    "sha256": "92f097852c9dd9f51bff5e494a293d33e7d73b51d687dbf8318c15e4370a81f2"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_reg_presence.h": {
+    "size": 1776,
+    "sha256": "39b4d2c793a5e375dcf41bc4b77c112a6ddc017a7cabd6353f70b21993df60a7"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_setcc.h": {
+    "size": 2968,
+    "sha256": "72e3658fb0b43a51af0bbb996cccddcf13cbd42d43f2ffeb301d467947949078"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_ptr_write.h": {
+    "size": 3863,
+    "sha256": "49d49c4e5f9d52a4a19ee1394c7a9318a130acbe224d002596bfff17394f5d1f"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_popcount.h": {
+    "size": 710,
+    "sha256": "7ace097a5036fc85acee215964983b31705da92ca9709b984963452e2487abe2"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_not.h": {
+    "size": 265,
+    "sha256": "ea001c7e11dd1322104367f979ecd7d496a7d79f212a45ab33caa9d1beb67e9a"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_width.h": {
+    "size": 1768,
+    "sha256": "c340ce043a9bff0710c60904308b1a77f75d6157177ce0ae53420278dcda0cbe"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_mem_dispatch.h": {
+    "size": 1838,
+    "sha256": "780f6978f87c2fc642895acde55f8e0390baaf3ca4ee59d02df122e188de3635"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_dispatch_family.h": {
+    "size": 6945,
+    "sha256": "04f4c80c4eda61fa3bedb5d4dd48ea033a338ea46c91120738ce768049762c4c"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_pushpop.h": {
+    "size": 2228,
+    "sha256": "aa08c319cc0399a11b1c7fcd30d70a4b3f8bb1bd034a3d1bcceeef72c704e499"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_stack_index.h": {
+    "size": 302,
+    "sha256": "a380689ecbdb79d41a1f6f14c2bc4b9fb3c4b16f19f859a33d6f6d5cfc5a4774"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_stack_write_lanes.h": {
+    "size": 8160,
+    "sha256": "afdea3a17371e1439488f54d88af64032b33888db082700727091f7c7f47b6c5"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_andn.h": {
+    "size": 3232,
+    "sha256": "b9940d306d64ebd957aed06866bd3f48856a7c3d4c985f4da1e190d2f9e45295"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_alu_decode.h": {
+    "size": 693,
+    "sha256": "2dff009da97a2d8f6a78669222ff6e059b911cea8d89bf129666ccfbd27f712c"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_store.h": {
+    "size": 4735,
+    "sha256": "225dc46d0d17755604cecb41a75342e0e4b17cecaa49c3b675f491ccc19fd4d2"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_reg_read.h": {
+    "size": 400,
+    "sha256": "ea2f60863873509caf64d3d1e50b69eed77248ce4347c5fbe3efc76fc677f685"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_bitops.h": {
+    "size": 1083,
+    "sha256": "646d276aa813d1128c37336c42718cefca905ba6333358325f18702b68c674ef"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_signed.h": {
+    "size": 1172,
+    "sha256": "08d5f4c3fbe1dfde98cedba008afde004d41fb8aa4b1304a635eddce85cae58f"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_bzhi.h": {
+    "size": 2863,
+    "sha256": "0830ec33b7d22ab6dee847035ebe792fd07ec208338ba885580ea539cb3da80c"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/abi_load.h": {
+    "size": 1517,
+    "sha256": "618e1ca06aa188eba278a992e815dbdd079c9e004bacb122ff88491d3018b571"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_full_condition.h": {
+    "size": 663,
+    "sha256": "120355f7f2862e018f293d7fe1586304b298cae339754a6894ee82c33f5d6bc0"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_div.h": {
+    "size": 3197,
+    "sha256": "98e8f3cafa319ad5caa6afe69d9d63ea8aa388d21ee4231033817fdd2901f2b2"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_mov_load.h": {
+    "size": 3727,
+    "sha256": "f5376284fd09715035fce0bbe17ba4de8ca4884c3604e84e8eed099510585e2d"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_rep_movs.h": {
+    "size": 1694,
+    "sha256": "fc6953a10600a3da7e8e68d4dc6c976f7a8bcf8077809e534de2dd193e84fa9f"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_immediate.h": {
+    "size": 504,
+    "sha256": "87e13e96a59133776257d86fbdccde52f2d6f49fd773c98ad7cdda9bfc180013"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_cmpop.h": {
+    "size": 6335,
+    "sha256": "76a808165aea471f3f552de22aef02c2e0f2179d94f41ab37b90b67dd2ef2725"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_popcnt_flags.h": {
+    "size": 755,
+    "sha256": "00c5cf90950bf33127ae117da2d47bd4006eb84a757644a99cf9fba779822a02"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_opcode.h": {
+    "size": 6378,
+    "sha256": "b0c77fef814795e82b0937fc820c4b3efae309229b8c0289af353fa0cbf2a031"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_shift_result.h": {
+    "size": 2080,
+    "sha256": "115f51b7f89c8970eb5ef8181466a64e669dda8b76ca13ce8c84b44e9468f95c"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_mem_index.h": {
+    "size": 1398,
+    "sha256": "6e0811aeed32f02e5a32cac49b9394fe43316309952cd6ad4b088277309f673e"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_bt.h": {
+    "size": 2893,
+    "sha256": "976b323fb5faff57795782b1ac2d2551558c0c5a55e8bff7d61b346e37730575"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_mem_offset.h": {
+    "size": 1613,
+    "sha256": "181677ff104eda10108c2339c703df01ef53daab87a58a48f6f32f6447206b5c"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/ptr_add.h": {
+    "size": 493,
+    "sha256": "41cfc08ca5232f507788cb8d00d8fa216df9fb1c3c9ece8e00c5e83b06ae259d"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_mov_reg_arm.h": {
+    "size": 3602,
+    "sha256": "4d90036061ffec933f3390c92ab6cc3aae2ab67865e11fdfb00e761a0c0d5ff7"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_mulx_arm.h": {
+    "size": 2871,
+    "sha256": "9a0b20e69254d28c06ab839a9465f468a7fc7c691382aa69892db5625dc4e966"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_movbe.h": {
+    "size": 3258,
+    "sha256": "b0d360e5ef0cf633d236c94009e766b087c611892f47575e377f4105f655d440"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_shift_count.h": {
+    "size": 314,
+    "sha256": "a2827a7737e969fa8db59ebbb5d24be51c577b4ee7d6e1f05782abf348f62f35"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_helper_dispatch.h": {
+    "size": 19058,
+    "sha256": "5535e8fc78d7aad36e376afcdcf759a33d3f7494602b620ad6c46bd39d6e55dd"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_adc.h": {
+    "size": 509,
+    "sha256": "100396b93353f6f9d6d8901d77e898e98a73d82d8ae0b6acce344dbce6399d4c"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_write_width_arm.h": {
+    "size": 3242,
+    "sha256": "1091909ca9e1e062f9ca2c86a2cde34ded2a51f875701be0f6e9ef03b5abe735"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_logic_flags.h": {
+    "size": 358,
+    "sha256": "6d11b0faf4a6c87f4751f574abb1d90342cb348b1b4f6c7b5c20b87bbe6ef5d7"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_xmm0.h": {
+    "size": 4688,
+    "sha256": "228330852eb435154194ae7b6a2161be76edd977aa9b5f228db0232b3e11c848"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_alu_result.h": {
+    "size": 2447,
+    "sha256": "35d8aa92c3509c90c45a91044c44e7dee99bb70b25a0e8b33545737ae3adcbac"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_alu_flag_arm.h": {
+    "size": 9962,
+    "sha256": "fc9e830cd10fa99a2fec7be953eb39b6e72a575c9ccf55dbe24f87b25e7ef0ed"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_callmem.h": {
+    "size": 982,
+    "sha256": "b1601391745fb8565da56fc478febf516a098a8c4a9612a2e53ade525bf12988"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_branch_emit.h": {
+    "size": 692,
+    "sha256": "3e1e8c3c0aff7372321a2327d376a4c0d2b03ef255f0d92b53c578222687032d"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_movx_shape.h": {
+    "size": 6135,
+    "sha256": "01620a97791aea42be92b534faf19eb24f1ad3c15431615442002cbfc7380da3"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_setcc_mem.h": {
+    "size": 3659,
+    "sha256": "20550746ca7f71586941e1a99269972ab8da3379beb2087e5b2db5070c16f44c"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_doubleshift_arm.h": {
+    "size": 3924,
+    "sha256": "46f618a3c6c7eb9500ef3b5a359307aad092d2467a02e809717a575e515876de"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_add_flags.h": {
+    "size": 430,
+    "sha256": "7ebbaece47e7641680fefb0ff3baaeac210c5aea9b2c00ae6b142e4e657434dd"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_reg_lane_aux.h": {
+    "size": 668,
+    "sha256": "f0ea8ae8f038df703bfbbb3b5c3b3f354e29a043a3d4db3c725fc8c8354dbbbc"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_xchg.h": {
+    "size": 3084,
+    "sha256": "dac0aea0d9243697615cac402ee8c7b29a0fbe22be8c52173cdfbe07acdfe764"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_shift_flags.h": {
+    "size": 1768,
+    "sha256": "330e56f0ff9513fa8913965330ccdf555cc3a2c375461c45b2058eafb5c83770"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_stack_arena.h": {
+    "size": 1590,
+    "sha256": "ad2badc7df1b6a38be92fa2063c71cfb35a26cc9b46a6e4bccd3fec93e38ff16"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_mem_access.h": {
+    "size": 5563,
+    "sha256": "f91533e6a8a031bdfbee072729575f8121f014ec932a4c4ae40a5ca105d85184"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_bzhi_flags.h": {
+    "size": 674,
+    "sha256": "af3190c3b419d1850ffc5b8558059ac4feca917d7676b0c4df3875cc08b5fcef"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_bswap.h": {
+    "size": 1054,
+    "sha256": "7f1864c7f6def18545542e06ada0b756a9170902907b0f79ec788a12bf5d4604"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_aux_flags.h": {
+    "size": 374,
+    "sha256": "87d4aae4964aecb9b23f7f43c04b539595d7d4eedf8d1b76b92098f3f2d8c283"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_cond.h": {
+    "size": 1626,
+    "sha256": "4be0e06995d0a3d18fc258a5afc55d2ba11f7583c8c1243720916598683312ef"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_reg_dispatch.h": {
+    "size": 2599,
+    "sha256": "c67fa25eb62b52a59512795ef7f008bb3dcafc9f7853879524e810659d35b76c"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_stack_arm.h": {
+    "size": 2828,
+    "sha256": "8e003c807a6dd654b151ebd85de25ac9d12fd613cd164b7028591afe159515bb"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_reg_write.h": {
+    "size": 1495,
+    "sha256": "7d76ebfeb14bd54acccb5598f8ef3feb03dfc354c44789fedd46f9b7dd5b0279"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_dispatch_singleton.h": {
+    "size": 14235,
+    "sha256": "d6f10d69791cc0060311830c51e333bc4fe13d283da15b5fd4c575d8b80f8972"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_doubleshift.h": {
+    "size": 1619,
+    "sha256": "89b6454335410eb50202c5604f7075c583bdd9090d7f6d219590733e4ed7c1d5"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_imul_flags.h": {
+    "size": 585,
+    "sha256": "71901232efdc2ba44bebac3cf00bd6272cd0a19b51db412e5cb870929ab0abc2"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_sbb_result.h": {
+    "size": 255,
+    "sha256": "5741ccfa8e2632a111cbdbe23ed305b7b0eb1cd15f9f2a820db9a69aef63d7b7"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_sub_flags.h": {
+    "size": 429,
+    "sha256": "ea614708dac56f7c78b52faf4bfc2ffcb021a2613ab23160130ca16d9f44aca9"
+  },
+  "kprog/fidelity/build-x86-control/snapshot/kprog/formal/generated/x86_cmov.h": {
+    "size": 4030,
+    "sha256": "262be691d055cb0eea8b4d0c20e97037bfc2a97b65cd77d6cd5cbe124346cdb4"
+  },
+  "kprog/fidelity/build-x86-control/generated.c": {
+    "size": 106090,
+    "sha256": "1712be9359ee3d9bd2b72ae61415f7df60bd9bbcc086bd82f141539aba5e39a7"
+  },
+  "kprog/fidelity/build-x86-control/native.S": {
+    "size": 59531,
+    "sha256": "fe58944cd06703dd74986627eefb65e0401f81fea6c0b231baf693df08dff9e7"
+  },
+  "kprog/fidelity/build-x86-control/native.o": {
+    "size": 148152,
+    "sha256": "b4b6ab397e8f436614a4d89bfe2b3a5c50cad5ddfeeeec60ec38a38104b1df66"
+  },
+  "kprog/fidelity/build-x86-control/native.asm": {
+    "size": 272617,
+    "sha256": "778a33bbbf681b69124a414c4a6beb83a0596ccc6d3e19ac87a3a9ba08ef69ec"
+  },
+  "kprog/fidelity/build-x86-control/coverage.json": {
+    "size": 3467,
+    "sha256": "f9d82709029cbd169e1c13d6aa6a1fe884f61ff175d116466d46a3b14b0474e4"
+  },
+  "kprog/fidelity/x86_control.py": {
+    "size": 6372,
+    "sha256": "e9b0e02fefb8fdbac2f0ee85fc16f3342cb84aec3ff839ac9985071b57500aa4"
+  },
+  "kprog/fidelity/x86_reference_path.py": {
+    "size": 6901,
+    "sha256": "ca41a0cd58bef1befa759dbbcc57dd9f41d4568b7a387ae7bb1698f1b3dd5349"
+  },
+  "kprog/fidelity/generate.py": {
+    "size": 22257,
+    "sha256": "872e4f0d4588f29d23a7d1a2e8ea8e48f353618c56dd6f933479dec8e4f913fa"
+  },
+  "kprog/fidelity/driver.c": {
+    "size": 9002,
+    "sha256": "7cadcc3540eb1b8ad85e7fb7f2da411d43acfcaea485177aa757d1b7ccd6e762"
+  },
+  "kprog/fidelity/driver.h": {
+    "size": 1073,
+    "sha256": "1227fc2d3f7794841fbdc09d382ea96e6d47c31c8f15091b4946e251659127a7"
+  },
+  "kprog/fidelity/Makefile": {
+    "size": 14375,
+    "sha256": "78e729238b8996f586566f7969104d60a67d97b86a621fe4fa26120c609201cf"
+  }
+}

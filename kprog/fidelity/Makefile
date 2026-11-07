@@ -265,3 +265,20 @@ check-stack-base-flags:
 	install -d build-x86
 	$(CC) -O2 -I../formal -I../../vendor/libbpf/src test_stack_base_flags.c -o build-x86/stack-base-flags
 	./build-x86/stack-base-flags
+
+.PHONY: x86-control-build x86-control-run
+X86_CONTROL_BUILD ?= build-x86-control
+X86_CONTROL_OUT ?= ../results/kprog_fidelity_20261107/differential/x86-control
+$(X86_CONTROL_BUILD)/generated.c $(X86_CONTROL_BUILD)/native.o &: x86_control.py generate.py tcb.py driver.h ../helper_abi.py ../trusted_generation.py ../../kinsn/module/include/native_lab_input.h $(wildcard ../x86/micro-prog/*.py ../x86/*.h ../formal/generated/*.h)
+	$(PYTHON) x86_control.py $(X86_CONTROL_BUILD)
+
+$(X86_CONTROL_BUILD)/cpu-differential: $(X86_CONTROL_BUILD)/generated.c $(X86_CONTROL_BUILD)/native.o driver.c driver.h
+	$(CC_x86) -O1 -g -std=gnu11 -static -I../../vendor/libbpf/src \
+		driver.c $(X86_CONTROL_BUILD)/generated.c $(X86_CONTROL_BUILD)/native.o \
+		-Wl,--section-start=.kprog_native=0x1000000 -o $@
+
+x86-control-build: $(X86_CONTROL_BUILD)/cpu-differential
+
+x86-control-run: x86-control-build
+	install -d $(X86_CONTROL_OUT)
+	./$(X86_CONTROL_BUILD)/cpu-differential $(CASES) $(X86_CONTROL_OUT) $(X86_CONTROL_OUT)/cpu-states.bin

@@ -1,0 +1,33 @@
+{
+  "recorded": "2026-11-07T15:28:31.019339+00:00",
+  "complete": true,
+  "forms": 35,
+  "cases_per_form": 1024,
+  "total_cases": 35840,
+  "real_cpu_simulator_mismatches": 0,
+  "real_cpu_reference_mismatches": 0,
+  "simulator_reference_mismatches": 0,
+  "reference_build_exit": 0,
+  "cpu_exit": 0,
+  "reference_exit": 0,
+  "unavailable_forms": 0,
+  "min_canonical_steps": 5,
+  "max_canonical_steps": 10,
+  "observer_code_origin": "0x1000000",
+  "execution": "real x86-64 host CPU, no QEMU",
+  "binary_sha256": "4a4e5ac7b75a8fbdf59383ebd1b12e67d9032c41f83669173ca552e890beec99",
+  "reference_sha256": "f1c5d75bef1b16ee3db6bb2e1be18e3131b7b60e940a1be9ef4318d5f39f2a02",
+  "trace_bytes": 65085464,
+  "trace_sha256": "cfb137ba0a21a7b784b70f7820e2ae1b91bf4cdb34d5247e9d8f9b298961a5c8",
+  "compiled_input_files": 103,
+  "preceding_attempt": {
+    "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96",
+    "real_cpu_simulator_mismatches": 0,
+    "real_cpu_cases": 35840,
+    "canonical_forms_completed": 1,
+    "unavailable_encoding": "ff e0 / JMP RAX",
+    "diagnostic": "reference: expected two-byte native opcode",
+    "trace_sha256": "d7caa99ea9c16ddd4211704ba51d9525426b2ad5da29f990c66b3ce4c715f991"
+  },
+  "scope": "Finite actual-byte control observers and the production emitter/macros; not arbitrary code-origin, invocation ABI, real manifests or universal O1-O4"
+}
