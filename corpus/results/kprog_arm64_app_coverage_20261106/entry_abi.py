@@ -13,7 +13,8 @@ tail_helpers=len(sys.argv)>2 and sys.argv[2]=='tail'
 stack_sub=len(sys.argv)>2 and sys.argv[2]=='sub'
 context=len(sys.argv)>2 and sys.argv[2]=='context'
 divide=len(sys.argv)>2 and sys.argv[2]=='divide'
-if len(sys.argv)>2 and not (tail_helpers or stack_sub or context or divide):raise ValueError(sys.argv[2])
+callee_clobber=len(sys.argv)>2 and sys.argv[2]=='callee-clobber'
+if len(sys.argv)>2 and not (tail_helpers or stack_sub or context or divide or callee_clobber):raise ValueError(sys.argv[2])
 body='''stp x19,x30,[sp,#-32]!
 ldr x19,[x0]
 ldr x2,[x0,#8]
@@ -36,9 +37,9 @@ rows=[]
 divisions=[('xz',64,37,0,5),('wz',32,37,0,5),('wtrunc',32,(1<<32)+37,1<<32,5),
     ('wupper',32,(1<<32)+37,(1<<32)+3,5),('xfull',64,(1<<64)-1,3,5),
     ('xalias',64,(1<<64)-1,3,6),('walias',32,(1<<32)-1,3,6),('same',64,(1<<64)-1,(1<<64)-1,5)]
-for preserve,division in [(abi,case) for abi in [False,True] for case in (divisions if divide else [None])]:
+for preserve,division in [(abi,case) for abi in [False,True] for case in (divisions if divide else [19,20,21,22] if callee_clobber else [None])]:
     name=(('tail_helper_'+('local' if preserve else 'direct')) if tail_helpers else
-        ('divide_'+division[0]+'_' if divide else 'helper_ctx_' if context else 'stack_sub_' if stack_sub else 'entry_abi_')+('preserved' if preserve else 'stripped'))
+        (f'abi_x{division}_' if callee_clobber else 'divide_'+division[0]+'_' if divide else 'helper_ctx_' if context else 'stack_sub_' if stack_sub else 'entry_abi_')+('preserved' if preserve else 'stripped'))
     source=phase/'native'/(name+'.S');native=source.with_suffix('.native.o')
     text=body.replace('bl bpf_get_current_uid_gid','bl leaf') if tail_helpers else body
     if stack_sub:
@@ -74,6 +75,9 @@ ret
         text=('ldr x19,[x0]\nldr x2,[x0,#8]\nadd x3,x19,#8\ncmp x3,x2\nb.hi 1f\n'+
             moves(5,lhs)+'\n'+moves(6,rhs)+'\ncmp x5,x5\n'+
             f'udiv {lane}{dst},{lane}5,{lane}6\nb.ne 1f\nstr x{dst},[x19]\nmov w0,#2\nret\n1: mov w0,#0\nret\n')
+    if callee_clobber:
+        text=(f'ldr x2,[x0]\nldr x3,[x0,#8]\nadd x6,x2,#8\ncmp x6,x3\nb.hi 1f\n'
+            f'mov x{division},#37\nstr x{division},[x2]\nmov w0,#2\nret\n1: mov w0,#0\nret\n')
     text='.text\n.global entry\n.type entry,%function\nentry:\n'+text+'.size entry,.-entry\n'
     if tail_helpers:
         text+='\n.global leaf\n.type leaf,%function\nleaf:\nb '+('leaf2' if preserve else 'bpf_get_current_uid_gid')+'\n.size leaf,.-leaf\n'
@@ -93,12 +97,31 @@ ret
     if context:
         workload='if (bpf_xdp_adjust_head(ctx,4)) return 0; p=(void *)(long)ctx->data; e=(void *)(long)ctx->data_end; if (p+8>e) return 0; *(__u64 *)p=37;'
     if divide:workload=f'*(__u64 *)p={expected}ULL;'
+    if callee_clobber:workload='*(__u64 *)p=37;'
     (phase/(name+'.source.bpf.c')).write_text('#include <linux/bpf.h>\n#include <bpf_helpers.h>\n'+
         f'SEC("xdp") int {name}(struct xdp_md *ctx) {{ void *p=(void *)(long)ctx->data; void *e=(void *)(long)ctx->data_end; if (p+8>e) return 0; {workload} return 2; }}\nchar LICENSE[] SEC("license")="GPL";\n')
     (phase/(name+'.manifest.json')).write_text(json.dumps({'objects':[dict(program=name[:15],source_btf_symbol=name,
         native_object='/cases/'+native.name,symbol='entry',simulator_object='/cases/'+name+'.bpf.o',
         simulator_program=name+'_arm64_sim_xdp')]},indent=2)+'\n')
     rows.append(dict(name=name,expected=expected if divide else 0 if stack_sub else 37,preserve_entry_abi=preserve))
+if callee_clobber:
+    from elftools.elf.elffile import ELFFile
+    for row in list(rows):
+        name=row['name'];bad=name+'_under'
+        proof=phase/'native'/(name+'.entry.proof.o')
+        with proof.open('rb') as f:
+            elf=ELFFile(f);metadata=elf.get_section_by_name('.native_link_abi').data().decode()
+            text=elf.get_section_by_name('.text').data()
+        mask=int(metadata.strip().splitlines()[-1].split('\t')[1]);bit=1<<(int(name.split('_')[1][1:])-19)
+        assert mask&bit
+        meta=phase/(bad+'.metadata');meta.write_text(metadata.replace('callee_saved_mask\t'+str(mask),'callee_saved_mask\t'+str(mask&~bit)))
+        mutated=phase/'native'/(bad+'.entry.proof.o')
+        subprocess.run(['llvm-objcopy-18','--update-section','.native_link_abi='+str(meta),str(proof),str(mutated)],check=True)
+        with mutated.open('rb') as f:assert ELFFile(f).get_section_by_name('.text').data()==text
+        shutil.copy2(phase/'native'/(name+'.native.o'),phase/'native'/(bad+'.native.o'))
+        for suffix in ['.bpf.c','.source.bpf.c','.manifest.json']:
+            (phase/(bad+suffix)).write_text((phase/(name+suffix)).read_text().replace(name,bad))
+        rows.append(dict(name=bad,expected=37,reject=True,bound_only=True))
 (phase/'cases.json').write_text(json.dumps(rows,indent=2)+'\n')
 coverage.freeze_simulator(phase)
 for source in phase.glob('*.bpf.c'):

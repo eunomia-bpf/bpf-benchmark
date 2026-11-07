@@ -979,3 +979,11 @@ after constant cleanup precedes SROA, followed by standard LLVM O2/backend.
 The exact source/object, all IR hashes and original O2/O1 OOM traces are
 retained. Fresh14-entry compilation and map/global linking continue separately;
 this result establishes compilation only, with no verifier/app success claim.
+
+## ARM ABI metadata understatement rejected
+
+[The ARM producer now checks the declared saved-register mask](arm-abi-result/README.md)
+against all included bodies before helper/tail cleanup. Exact frozen baseline
+plus ARM patch:79 Rust tests,13 valid ELF controls,14 wrong-mask rejections;
+QEMU8source/proof/bound-native matches and8wrong-mask rejections before upload.
+The simulator/native ISA and matched kernel/module are unchanged.

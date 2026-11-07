@@ -917,9 +917,16 @@ fn read_proof_abi(elf: &object::File) -> Result<Option<u8>> {
 
 fn arm64_effective_callee_saved_mask(
     proof_callee_saved_mask: Option<u8>,
-    entry_callee_saved_mask: u8,
-) -> u8 {
-    proof_callee_saved_mask.unwrap_or(entry_callee_saved_mask)
+    required_callee_saved_mask: u8,
+) -> Result<u8> {
+    if let Some(declared) = proof_callee_saved_mask {
+        if declared & required_callee_saved_mask != required_callee_saved_mask {
+            bail!("arm64 proof ABI mask {declared:#x} understates required native mask {required_callee_saved_mask:#x}");
+        }
+        Ok(declared)
+    } else {
+        Ok(required_callee_saved_mask)
+    }
 }
 
 fn arm64_observed_bpf_callee_saved_mask(bytes: &[u8], nop_word_indices: &HashSet<usize>) -> u8 {
@@ -3674,12 +3681,35 @@ fn rewrite_arm64(
     } else {
         read_proof_abi(elf)?
     };
-    let mut callee_saved_mask = arm64_effective_callee_saved_mask(proof_callee_saved_mask, 0);
+    // Derive the complete ABI before any tail-call cleanup is emitted. A
+    // sidecar may preserve additional registers, but cannot hide body/callee
+    // requirements, including bodies without a save/restore prologue.
+    let keep_entry_abi = (proof_mode && preserve_entry_abi) ||
+        (!proof_mode && proof_callee_saved_mask.is_some());
+    let mut abi_plans = Vec::new();
+    let mut required_callee_saved_mask = 0;
+    for sym in included {
+        let bytes = read_symbol_bytes(elf, sym)?;
+        let is_entry = sym.section_index == entry.section_index && sym.address == entry.address;
+        let plan = if is_entry && !keep_entry_abi {
+            plan_arm64_entry_abi_strip(&bytes)?
+        } else {
+            Arm64EntryAbiStrip {
+                tail_call_cnt_ptr_stack_offset: arm64_saved_reg_stack_offset(&bytes, 26),
+                ..Arm64EntryAbiStrip::default()
+            }
+        };
+        required_callee_saved_mask |= plan.callee_saved_mask |
+            arm64_observed_bpf_callee_saved_mask(&bytes, &plan.nop_word_indices);
+        abi_plans.push(plan);
+    }
+    let callee_saved_mask = arm64_effective_callee_saved_mask(
+        proof_callee_saved_mask, required_callee_saved_mask)?;
     let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
     let mut lookup_site_used = vec![false; lookup_sites.len()];
     let mut update_site_by_map: HashMap<String, usize> = HashMap::new();
 
-    for sym in included {
+    for (sym, mut entry_abi_strip) in included.iter().zip(abi_plans) {
         let is_entry = sym.section_index == entry.section_index && sym.address == entry.address;
         let sym_key = (sym.section_index, sym.address);
         let bytes = read_symbol_bytes(elf, sym)?;
@@ -3694,31 +3724,11 @@ fn rewrite_arm64(
         let mut helper_imm_registers: [Option<u64>; 32] = std::array::from_fn(|_| None);
         let mut helper_imm_word_indices: [Option<usize>; 32] = std::array::from_fn(|_| None);
         let mut helper_imm_read_since_load: [bool; 32] = [false; 32];
-        let keep_entry_abi = (proof_mode && preserve_entry_abi) ||
-            (!proof_mode && proof_callee_saved_mask.is_some());
-        let mut entry_abi_strip = if is_entry && !keep_entry_abi {
-            plan_arm64_entry_abi_strip(&bytes)?
-        } else {
-            Arm64EntryAbiStrip {
-                tail_call_cnt_ptr_stack_offset: arm64_saved_reg_stack_offset(&bytes, 26),
-                ..Arm64EntryAbiStrip::default()
-            }
-        };
         let entry_has_tail_call =
             is_entry && !proof_mode && arm64_symbol_has_tail_call(&bytes, sym, &relocs);
         if entry_has_tail_call {
             entry_abi_strip.tail_call_cleanup_words =
                 plan_arm64_tail_call_cleanup(elf, sym, &bytes, &entry_abi_strip.nop_word_indices)?;
-        }
-        if proof_callee_saved_mask.is_none() {
-            callee_saved_mask |= entry_abi_strip.callee_saved_mask;
-            callee_saved_mask |=
-                arm64_observed_bpf_callee_saved_mask(&bytes, &entry_abi_strip.nop_word_indices);
-        } else if is_entry {
-            callee_saved_mask = arm64_effective_callee_saved_mask(
-                proof_callee_saved_mask,
-                entry_abi_strip.callee_saved_mask,
-            );
         }
 
         let end = sym.address + sym.size;
@@ -5613,9 +5623,14 @@ mod tests {
     }
 
     #[test]
-    fn arm64_proof_callee_saved_mask_wins_for_kernel_rewrite() {
-        assert_eq!(arm64_effective_callee_saved_mask(Some(0xf), 0), 0xf);
-        assert_eq!(arm64_effective_callee_saved_mask(None, 0xc), 0xc);
+    fn arm64_proof_callee_saved_mask_cannot_understate_body_requirements() {
+        assert_eq!(arm64_effective_callee_saved_mask(Some(0xf), 0).unwrap(), 0xf);
+        assert_eq!(arm64_effective_callee_saved_mask(None, 0xc).unwrap(), 0xc);
+        for required in [1, 2, 4, 8, 15] {
+            assert_eq!(arm64_effective_callee_saved_mask(Some(required), required).unwrap(), required);
+            assert!(arm64_effective_callee_saved_mask(Some(0), required).is_err());
+        }
+        assert!(arm64_effective_callee_saved_mask(Some(7), 15).is_err());
     }
 
     #[test]

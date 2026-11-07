@@ -68,9 +68,9 @@ elif sys.argv[2]=='package':
         else:
             commands=[('proof',f'/loader --object /cases/{name}.bpf.o --program {name}_arm64_sim_xdp --input /input.mem --expected-result {expected} --expect-retval 2 --result-channel packet'),
                 ('native',f'/bound-probe /cases/{name}.source.bpf.o /cases/{name}.manifest.json {expected} 2')]
-            if row.get('bound_only'):
-                commands=commands[1:]
             expected_rc=0
+        if row.get('bound_only'):
+            commands=commands[1:]
         for kind,command in commands:
             script += [command+f' >/results/{name}.{kind}.log 2>&1','rc=$?',f'echo "$rc" >/results/{name}.{kind}.rc',f'if [ "$rc" != {expected_rc} ]; then status=1; fi']
     script+=['echo "$status" >/results/guest-status','busybox sync','busybox poweroff -f']

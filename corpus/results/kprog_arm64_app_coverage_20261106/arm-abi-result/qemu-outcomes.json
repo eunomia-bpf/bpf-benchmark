@@ -1,0 +1,122 @@
+[
+  {
+    "name": "abi_x19_stripped",
+    "proof_rc": 0,
+    "native_rc": 0,
+    "program_id": 16,
+    "chunks": 1,
+    "nonzero_generations": 1,
+    "result": 37,
+    "retval": 2
+  },
+  {
+    "name": "abi_x20_stripped",
+    "proof_rc": 0,
+    "native_rc": 0,
+    "program_id": 32,
+    "chunks": 1,
+    "nonzero_generations": 1,
+    "result": 37,
+    "retval": 2
+  },
+  {
+    "name": "abi_x21_stripped",
+    "proof_rc": 0,
+    "native_rc": 0,
+    "program_id": 48,
+    "chunks": 1,
+    "nonzero_generations": 1,
+    "result": 37,
+    "retval": 2
+  },
+  {
+    "name": "abi_x22_stripped",
+    "proof_rc": 0,
+    "native_rc": 0,
+    "program_id": 64,
+    "chunks": 1,
+    "nonzero_generations": 1,
+    "result": 37,
+    "retval": 2
+  },
+  {
+    "name": "abi_x19_preserved",
+    "proof_rc": 0,
+    "native_rc": 0,
+    "program_id": 80,
+    "chunks": 1,
+    "nonzero_generations": 1,
+    "result": 37,
+    "retval": 2
+  },
+  {
+    "name": "abi_x20_preserved",
+    "proof_rc": 0,
+    "native_rc": 0,
+    "program_id": 96,
+    "chunks": 1,
+    "nonzero_generations": 1,
+    "result": 37,
+    "retval": 2
+  },
+  {
+    "name": "abi_x21_preserved",
+    "proof_rc": 0,
+    "native_rc": 0,
+    "program_id": 112,
+    "chunks": 1,
+    "nonzero_generations": 1,
+    "result": 37,
+    "retval": 2
+  },
+  {
+    "name": "abi_x22_preserved",
+    "proof_rc": 0,
+    "native_rc": 0,
+    "program_id": 128,
+    "chunks": 1,
+    "nonzero_generations": 1,
+    "result": 37,
+    "retval": 2
+  },
+  {
+    "name": "abi_x19_stripped_under",
+    "native_rc": 1,
+    "rejection": "understated proof ABI before upload"
+  },
+  {
+    "name": "abi_x20_stripped_under",
+    "native_rc": 1,
+    "rejection": "understated proof ABI before upload"
+  },
+  {
+    "name": "abi_x21_stripped_under",
+    "native_rc": 1,
+    "rejection": "understated proof ABI before upload"
+  },
+  {
+    "name": "abi_x22_stripped_under",
+    "native_rc": 1,
+    "rejection": "understated proof ABI before upload"
+  },
+  {
+    "name": "abi_x19_preserved_under",
+    "native_rc": 1,
+    "rejection": "understated proof ABI before upload"
+  },
+  {
+    "name": "abi_x20_preserved_under",
+    "native_rc": 1,
+    "rejection": "understated proof ABI before upload"
+  },
+  {
+    "name": "abi_x21_preserved_under",
+    "native_rc": 1,
+    "rejection": "understated proof ABI before upload"
+  },
+  {
+    "name": "abi_x22_preserved_under",
+    "native_rc": 1,
+    "rejection": "understated proof ABI before upload"
+  }
+]

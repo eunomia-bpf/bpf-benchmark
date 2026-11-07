@@ -654,3 +654,11 @@ load-offset-check:
 .PHONY: compile-preclean
 compile-preclean:
 	taskset -c 16-23 python3 $(HERE)/coverage.py compile-preclean $(HERE)/$(PHASE) $(COMPILE_ARGS)
+
+.PHONY: arm-abi-boundary-check
+arm-abi-boundary-check:
+	python3 $(HERE)/arm_abi_boundary.py $(HERE)/$(PHASE)
+
+.PHONY: arm-abi-cross-build
+arm-abi-cross-build:
+	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc taskset -c 16-19 cargo build --release --target aarch64-unknown-linux-gnu --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml --target-dir $(ROOT)/kprog/arm64/build/app-native-link
