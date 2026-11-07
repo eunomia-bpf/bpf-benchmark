@@ -709,3 +709,14 @@ survive projection. The older equal-memory observation is derived as an Eq
 instance of this transition relation. The full existing dependency check passes
 without sorryAx; exact inputs/logs are under results/kprog_tv_20261107. Original
 entry-to-store/return and invocation/profile binding composition remain active.
+
+`passed_guards_store` now starts at the original entries, traverses both passed
+guards and the real store sequence through success or first fault, preserving
+full state-edge identities and both actual memories. `passed_guards_complete`
+adds the actual native/BPF returns exactly when the store execution has no
+fault; otherwise both fault witnesses and full states remain at the real first
+fault. Alongside both rejection theorems, all guard outcomes are covered under
+the existing entry premises. Exact inputs and successful Lean output are in
+results/kprog_tv_20261107/checked-entry-stores-return-*. Whole-invocation safety,
+CPU-profile and emitted-artifact binding remain to compose before declaring a
+whole-program certificate.

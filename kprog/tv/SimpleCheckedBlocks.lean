@@ -428,8 +428,9 @@ theorem store_with_spills (n : AArch64.State) (p : BPF.State) (pointer frame : W
         nr.events nr.state ∧
       Execution SimpleCheckedPlatform.instructionStep
         (SimpleStoreCertificate.proofInitial { n with memory := p.memory } p pointer) pr.events pr.state ∧
-      pr.events.filterMap (PrivateSpills.projectEvent frame) = nr.events := by
-  obtain ⟨nr, pr, nativeRun, proofRun, nativeShape, proofShape, memory, events, fault, pc, short⟩ :=
+      pr.events.filterMap (PrivateSpills.projectEvent frame) = nr.events ∧
+      (nr.fault = none ↔ pr.state.pc = 27) := by
+  obtain ⟨nr, pr, nativeRun, proofRun, nativeShape, proofShape, memory, events, fault, pc, short, complete⟩ :=
     SimpleStoreCertificate.store_transition_relation (PrivateSpills.AgreesOutside frame)
       (by
         intro first second related address value count
@@ -440,8 +441,150 @@ theorem store_with_spills (n : AArch64.State) (p : BPF.State) (pointer frame : W
     (SimpleStoreCertificate.proofInitial { n with memory := p.memory } p pointer)).trans proofRun
   refine ⟨nr, pr, nativeRun, actual, nativeShape, proofShape, memory, events, fault, pc,
     ARM64Path.evaluate_sound _ _ _ _ _ nativeRun,
-    SimpleCheckedPlatform.execution_transport (BPFPath.evaluate_sound _ _ _ _ _ actual), ?_⟩
+    SimpleCheckedPlatform.execution_transport (BPFPath.evaluate_sound _ _ _ _ _ actual), ?_, complete⟩
   simpa only [← events] using short_write_trace_retained frame nr.events short
+
+
+theorem native_store_fixed (n : AArch64.State) (pointer : Word)
+    (pc : n.pc = 44) (r8 : n.gpr 8 = pointer) :
+    SimpleStoreCertificate.nativeInitial n pointer = n := by
+  have registers : (fun r : AArch64.Gpr => if r.val = 8 then pointer else n.gpr r) = n.gpr := by
+    funext r
+    by_cases eight : r.val = 8
+    · have same : r = 8 := Fin.ext (by simpa using eight)
+      simp [same, r8]
+    · simp [eight]
+  simp only [SimpleStoreCertificate.nativeInitial, registers, ← pc]
+
+theorem proof_store_fixed (n : AArch64.State) (p : BPF.State) (pointer : Word)
+    (pc : p.pc = 14) (r1 : p.regs 1 = pointer) (active : p.halted = false) :
+    SimpleStoreCertificate.proofInitial { n with memory := p.memory } p pointer = p := by
+  have registers : (fun r : BPF.Register => if r.val = 1 then pointer else p.regs r) = p.regs := by
+    funext r
+    by_cases one : r.val = 1
+    · have same : r = 1 := Fin.ext (by simpa using one)
+      simp [same, r1]
+    · simp [one]
+  simp only [SimpleStoreCertificate.proofInitial, registers, ← pc, ← active]
+
+/-- Starting at the original entries, both real guards pass and the actual
+store block reaches either its first fault or its real return successor.
+Every architectural field and both actual memories cross the block edges. -/
+theorem passed_guards_store (n : AArch64.State) (p : BPF.State)
+    (context pointer limit : Word) (first second : Event)
+    (entry : SimpleBlocks.EntryConditions n p context pointer limit first second)
+    (pass : ¬ pointer > limit)
+    (bounds : pointer + (8#64) ≤ limit ∧ pointer + (72#64) ≤ limit) :
+    let n2 := SimpleGuardCertificate.secondFinal (SimpleBlocks.firstNativeFinal n context pointer limit) pointer limit
+    let p2 := SimpleGuardCertificate.proofSecondFinal (SimpleBlocks.firstProofFinal p pointer limit) pointer limit
+    ∃ (nr : Transition AArch64.State) (pr : Transition BPF.State),
+      nr.state = SimpleStoreCertificate.nativeStoreShape n2 pointer nr.state ∧
+      pr.state = SimpleStoreCertificate.proofStoreShape p2 pointer pr.state ∧
+      PrivateSpills.AgreesOutside (p.regs 10) nr.state.memory pr.state.memory ∧
+      nr.events = pr.events ∧ nr.fault = pr.fault ∧
+      nr.state.pc = SimpleStoreCertificate.proofNativePC pr.state.pc ∧
+      (nr.fault = none ↔ pr.state.pc = 27) ∧
+      Execution (ARM64Path.instructionStep 0 native) (SimpleEntryCertificate.before n context)
+        ([first, second] ++ nr.events) nr.state ∧
+      Execution SimpleCheckedPlatform.instructionStep (SimpleEntryCertificate.proofBefore p context 0)
+        (SimpleEntryCertificate.prefixEvents (p.regs 10) pointer limit first second ++ pr.events) pr.state ∧
+      (SimpleEntryCertificate.prefixEvents (p.regs 10) pointer limit first second ++ pr.events).filterMap
+        (PrivateSpills.projectEvent (p.regs 10)) = [first, second] ++ nr.events ∧
+      ARM64Path.evaluate 0 native (SimpleStoreCertificate.nativePositions n2.memory pointer)
+        (SimpleStoreCertificate.nativeInitial n2 pointer) = .ok nr ∧
+      BPFPath.evaluate SimpleCheckedPlatform.externals SimpleCheckedPlatform.physical
+        (SimpleStoreCertificate.proofPositions p2.memory pointer)
+        (SimpleStoreCertificate.proofInitial { n2 with memory := p2.memory } p2 pointer) = .ok pr := by
+  let n1 := SimpleBlocks.firstNativeFinal n context pointer limit
+  let p1 := SimpleBlocks.firstProofFinal p pointer limit
+  let n2 := SimpleGuardCertificate.secondFinal n1 pointer limit
+  let p2 := SimpleGuardCertificate.proofSecondFinal p1 pointer limit
+  have firstRun := first_block n p context pointer limit first second entry
+  have nextRun := second_block n1 p1 pointer limit
+  rw [first_to_second_native n context pointer limit pass,
+    first_to_second_proof p pointer limit pass] at nextRun
+  have memory : PrivateSpills.AgreesOutside (p.regs 10) n2.memory p2.memory := by
+    simpa only [n2, p2, SimpleGuardCertificate.secondFinal, SimpleGuardCertificate.secondBefore,
+      AArch64.writeReg, SimpleGuardCertificate.proofSecondFinal, BPF.setReg,
+      SimpleGuardCertificate.proofSecondBefore, SimpleGuardCertificate.proofBefore] using firstRun.2.2.1
+  have npc : n2.pc = 44 := by simp [n2, SimpleGuardCertificate.secondFinal, bounds]
+  have ppc : p2.pc = 14 := by simp [p2, SimpleGuardCertificate.proofSecondFinal, bounds]
+  have r8 : n2.gpr 8 = pointer := by
+    simp +decide [n2, n1, SimpleGuardCertificate.secondFinal, SimpleGuardCertificate.secondBefore,
+      SimpleBlocks.firstNativeFinal, SimpleGuardCertificate.final, SimpleGuardCertificate.before,
+      SimpleEntryCertificate.loaded, SimpleEntryCertificate.before, AArch64.writeReg,
+      Fin.ofNat', Fin.instOfNat]
+  have r1 : p2.regs 1 = pointer := by
+    simp +decide [p2, p1, SimpleGuardCertificate.proofSecondFinal, SimpleGuardCertificate.proofSecondBefore,
+      SimpleGuardCertificate.proofBefore, SimpleBlocks.firstProofFinal, SimpleEntryCertificate.prefixFinal,
+      BPF.setReg, Fin.ofNat', Fin.instOfNat]
+  have active : p2.halted = false := rfl
+  obtain ⟨nr, pr, nativeRun, proofRun, ns, ps, mem, events, fault, pc, ne, pe, projected, complete⟩ :=
+    store_with_spills n2 p2 pointer (p.regs 10) memory
+  rw [native_store_fixed n2 pointer npc r8] at ne
+  rw [proof_store_fixed n2 p2 pointer ppc r1 active] at pe
+  refine ⟨nr, pr, ns, ps, mem, events, fault, pc, complete, ?_, ?_, ?_, nativeRun, proofRun⟩
+  · simpa only [List.append_nil] using (firstRun.1.append nextRun.1).append ne
+  · simpa only [List.append_nil] using (firstRun.2.1.append nextRun.2.1).append pe
+  · rw [List.filterMap_append, firstRun.2.2.2.1, projected]
+
+/-- Both passed guards followed by the actual stores and actual return, or
+by the first real fault. No return is appended after a native/proof fault. -/
+theorem passed_guards_complete (n : AArch64.State) (p : BPF.State)
+    (context pointer limit : Word) (first second : Event)
+    (entry : SimpleBlocks.EntryConditions n p context pointer limit first second)
+    (pass : ¬ pointer > limit)
+    (bounds : pointer + (8#64) ≤ limit ∧ pointer + (72#64) ≤ limit) :
+    let n2 := SimpleGuardCertificate.secondFinal (SimpleBlocks.firstNativeFinal n context pointer limit) pointer limit
+    let p2 := SimpleGuardCertificate.proofSecondFinal (SimpleBlocks.firstProofFinal p pointer limit) pointer limit
+    ∃ (ns : AArch64.State) (ps : BPF.State) (writes proofWrites : List Event) (fault : Option Fault),
+      Execution (ARM64Path.instructionStep 0 native) (SimpleEntryCertificate.before n context)
+        ([first, second] ++ writes) ns ∧
+      Execution SimpleCheckedPlatform.instructionStep (SimpleEntryCertificate.proofBefore p context 0)
+        (SimpleEntryCertificate.prefixEvents (p.regs 10) pointer limit first second ++ proofWrites) ps ∧
+      PrivateSpills.AgreesOutside (p.regs 10) ns.memory ps.memory ∧
+      writes = proofWrites ∧
+      (SimpleEntryCertificate.prefixEvents (p.regs 10) pointer limit first second ++ proofWrites).filterMap
+        (PrivateSpills.projectEvent (p.regs 10)) = [first, second] ++ writes ∧
+      (fault = none → ns.pc = 84 ∧ ps.pc = 29 ∧ ps.halted = true ∧ ns.gpr 7 = 2 ∧ ps.regs 0 = 2) ∧
+      (fault ≠ none → ∃ (nr : Transition AArch64.State) (pr : Transition BPF.State),
+        nr.fault = fault ∧ pr.fault = fault ∧ ns = nr.state ∧ ps = pr.state ∧
+        nr.state = SimpleStoreCertificate.nativeStoreShape n2 pointer nr.state ∧
+        pr.state = SimpleStoreCertificate.proofStoreShape p2 pointer pr.state ∧
+        ARM64Path.evaluate 0 native (SimpleStoreCertificate.nativePositions n2.memory pointer)
+          (SimpleStoreCertificate.nativeInitial n2 pointer) = .ok nr ∧
+        BPFPath.evaluate SimpleCheckedPlatform.externals SimpleCheckedPlatform.physical
+          (SimpleStoreCertificate.proofPositions p2.memory pointer)
+          (SimpleStoreCertificate.proofInitial { n2 with memory := p2.memory } p2 pointer) = .ok pr) := by
+  let n2 := SimpleGuardCertificate.secondFinal (SimpleBlocks.firstNativeFinal n context pointer limit) pointer limit
+  let p2 := SimpleGuardCertificate.proofSecondFinal (SimpleBlocks.firstProofFinal p pointer limit) pointer limit
+  obtain ⟨nr, pr, ns, ps, memory, events, fault, pc, complete, ne, pe, projected, nativeRun, proofRun⟩ :=
+    passed_guards_store n p context pointer limit first second entry pass bounds
+  by_cases normal : nr.fault = none
+  · have ppc : pr.state.pc = 27 := complete.mp normal
+    have npc : nr.state.pc = 80 := by simpa [ppc, SimpleStoreCertificate.proofNativePC] using pc
+    have nvalue : nr.state.gpr 0 = 2 := by
+      have shape := congrArg (fun s : AArch64.State => s.gpr 0) ns
+      simpa +decide [SimpleStoreCertificate.nativeStoreShape, Fin.ofNat', Fin.instOfNat] using shape
+    have pvalue : pr.state.regs 0 = 2 := by
+      have shape := congrArg (fun s : BPF.State => s.regs 0) ps
+      simpa +decide [SimpleStoreCertificate.proofStoreShape, ppc, Fin.ofNat', Fin.instOfNat] using shape
+    have active : pr.state.halted = false := by
+      have shape := congrArg BPF.State.halted ps
+      simpa only [SimpleStoreCertificate.proofStoreShape] using shape
+    have last := return_executions nr.state pr.state 2
+    rw [native_return_fixed nr.state 2 npc nvalue, proof_return_fixed pr.state 2 ppc pvalue active] at last
+    refine ⟨nativeReturnFinal nr.state 2, proofReturnFinal pr.state 2, nr.events, pr.events,
+      nr.fault, ?_, ?_, ?_, events, projected, ?_, ?_⟩
+    · simpa only [List.append_nil] using ne.append last.1
+    · simpa only [List.append_nil] using pe.append last.2.1
+    · simpa only [nativeReturnFinal, nativeReturnBefore, proofReturnFinal, proofReturnBefore] using memory
+    · intro _; exact ⟨rfl, rfl, rfl, last.2.2.1, last.2.2.2.1⟩
+    · intro impossible; exact False.elim (impossible normal)
+  · refine ⟨nr.state, pr.state, nr.events, pr.events, nr.fault,
+      ne, pe, memory, events, projected, ?_, ?_⟩
+    · intro impossible; exact False.elim (normal impossible)
+    · intro _; exact ⟨nr, pr, rfl, fault.symm, rfl, rfl, ns, ps, nativeRun, proofRun⟩
 
 end KProgTV.SimpleCheckedBlocks
 #print axioms KProgTV.SimpleCheckedBlocks.first_block
@@ -456,3 +599,7 @@ end KProgTV.SimpleCheckedBlocks
 #print axioms KProgTV.SimpleCheckedBlocks.second_rejection
 
 #print axioms KProgTV.SimpleCheckedBlocks.store_with_spills
+
+#print axioms KProgTV.SimpleCheckedBlocks.passed_guards_store
+
+#print axioms KProgTV.SimpleCheckedBlocks.passed_guards_complete
