@@ -1872,10 +1872,15 @@ extern void x86_sim_unmapped_xdp_read(void)
 		    KPROG_X86_CMPOP_FLAGS_LOGIC)                           \
 			X86_SIM_L_SET_LOGIC_FLAGS(                         \
 				__x86_l_lhs & __x86_l_rhs, __x86_l_width);  \
-		else                                                       \
+		else {                                                     \
 			X86_SIM_L_SET_SUB_FLAGS(__x86_l_lhs, __x86_l_rhs,  \
 				KPROG_X86_SBB_RESULT(__x86_l_lhs,          \
 					__x86_l_rhs, 0), __x86_l_width);   \
+			/* For CMP's exact subtraction, SF xor OF is signed LT. */ \
+			__x86_of = __x86_sf ^                            \
+				((__s64)x86_sign_extend(__x86_l_lhs, __x86_l_width) < \
+				 (__s64)x86_sign_extend(__x86_l_rhs, __x86_l_width)); \
+		}                                                          \
 	} while (0)
 
 #define X86_SIM_L_EXEC_CMP_MEM(OP, DST, SRC, FLAGS, AUX, IMM)               \

@@ -1,0 +1,35 @@
+{
+  "canonical_header_sha256": "4fe6817022a81eaf529235979a9d0f0c237e972ae16ede5f5164b524ba5ac307",
+  "actual_header_capture": "Private mount namespace at original capture; byte-exact canonical promotion afterwards",
+  "native_sha256": "bcc2fbd394b8f1e95e40c00ae9b19490710aaf977f84896e673dc4e2bd514b01",
+  "request": {
+    "request_id": 1,
+    "source_prog_id": 6,
+    "native_sha256": "bcc2fbd394b8f1e95e40c00ae9b19490710aaf977f84896e673dc4e2bd514b01",
+    "started": "2026-11-07T18:22:43.716663+00:00",
+    "prog_id": 11,
+    "status": 0,
+    "artifact_archive": "/run/c-cmp-candidate/session-az6zi2_n/requests/1.success.tar.gz",
+    "finished": "2026-11-07T18:22:48.917255+00:00"
+  },
+  "result": 16,
+  "retval": 2,
+  "host_ubsan_cases": [
+    47529,
+    2244
+  ],
+  "lean_word_widths": [
+    8,
+    16,
+    32,
+    64
+  ],
+  "lean_axioms": [
+    "propext",
+    "Classical.choice",
+    "Lean.ofReduceBool",
+    "Quot.sound"
+  ],
+  "raw_sha256": "667a4c0b7eff6169650057f2ed838559657198f1df3e661d8a037f6dc6c7219c",
+  "scope": "CMP flag expression identity and actual same-input trace admission; not whole-ISA/whole-program TV/all29 acceptance"
+}
