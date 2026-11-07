@@ -3,6 +3,9 @@
 import ast
 import argparse
 import csv
+import gzip
+import hashlib
+from datetime import datetime, timezone
 import json
 import io
 from pathlib import Path
@@ -68,12 +71,21 @@ def main():
     parser.add_argument('--out', type=Path, default=OUT)
     out = parser.parse_args().out.resolve()
     out.mkdir(parents=True,exist_ok=True)
+    started = datetime.now(timezone.utc).isoformat()
+    revision = command('git', 'rev-parse', 'HEAD')
     sim = {arch:includes(ROOT/f'kprog/{arch}/{arch}_sim_local_bpf.h') for arch in ['x86','arm64']}
     shared = sim['x86'] & sim['arm64']
     groups = {f'{arch} simulator (including ISA-specific generated C)':paths-shared for arch,paths in sim.items()}
     groups['shared simulator headers'] = shared
     for arch in ['x86','arm64']:
         groups[f'{arch} native-to-proof generator (including local imports)'] = imports(ROOT/f'kprog/{arch}/micro-prog/generate_micro_sim_proofs.py')
+    groups['trusted service and native input declarations'] = imports(ROOT/'kprog/trusted_service.py')
+    for arch in ['x86', 'arm64']:
+        groups[f'{arch} trusted specialization adapter'] = (
+            imports(ROOT/f'kprog/{arch}/trusted_specializer.py')
+            - groups['trusted service and native input declarations']
+            - groups[f'{arch} native-to-proof generator (including local imports)'])
+    groups['trusted service loader entrypoint'] = {ROOT/'kprog/trusted_loader.cpp'}
     groups['proof build/load orchestration'] = {ROOT/'kprog/run_micro_sim_batch.py'}
     groups['native shared loader/linker integration'] = set((ROOT/'kprog/libnativeloader/src').glob('*.[ch]pp')) | set((ROOT/'kprog/libnativeloader/include').glob('*.hpp'))
     groups['native ELF linker (both ISAs)'] = set((ROOT/'kprog/x86/native_lab/native_link/src').glob('*.rs'))
@@ -81,6 +93,9 @@ def main():
     groups['application syscall shim'] = {p for p in (ROOT/'bpfopt/shim').glob('*.c') if not p.name.startswith('selftest')} | set((ROOT/'bpfopt/shim').glob('*.h'))
     for arch in ['x86','arm64']:
         groups[f'{arch} native kernel module'] = {ROOT/f'kinsn/module/{arch}/bpf_{arch}_native_lab.c'}
+    groups['trusted kernel queue and checked capture (including wire headers)'] = (
+        includes(ROOT/'kinsn/module/include/native_lab_trusted.h')
+        | includes(ROOT/'kinsn/module/include/native_lab_checked.h'))
     groups['shared native module support'] = {ROOT/'kinsn/module/include/kinsn_common.h'}
     groups['x86 native module emitter support'] = {ROOT/'kinsn/module/include/kinsn_x86_emit.h'}
     groups['shared binding and proof-input contracts'] = {
@@ -122,7 +137,16 @@ def main():
         path=ROOT/f'kinsn/module/{arch}/bpf_{arch}_native_lab.c'
         binding += function_spans(path, ['decode_native_lab_payload','native_lab_advance_generation','instantiate_native_lab','blob_write','relocs_write','proof_write','binding_write','generation_read'], contents[path].decode())
     path=ROOT/'kprog/libnativeloader/src/native_loader.cpp'
-    binding += function_spans(path, ['bound_proof_sequence','upload_proof_chunk','read_blob_generation','seal_bound_chunk','upload_bound_proofs','open_simulator_proof','finish_simulator_proof'], contents[path].decode())
+    binding += function_spans(path, ['bound_proof_sequence','upload_proof_chunk','read_blob_generation','seal_bound_chunk','upload_bound_proofs','open_simulator_proof','finish_simulator_proof','submit_trusted_native'], contents[path].decode())
+    path=ROOT/'kinsn/module/include/native_lab_trusted.h'
+    binding += function_spans(path, [
+        'native_lab_trusted_writer_locked', 'native_lab_trusted_writer',
+        'native_lab_trusted_authorized', 'native_lab_trusted_seal',
+        'native_lab_trusted_bind_program', 'native_lab_trusted_submit',
+        'native_lab_trusted_next', 'native_lab_trusted_activate',
+        'native_lab_trusted_complete', 'native_lab_trusted_context',
+        'native_lab_trusted_map', 'native_lab_trusted_ioctl',
+        'native_lab_trusted_open', 'native_lab_trusted_release'], contents[path].decode())
     (out/'binding-functions.json').write_text(json.dumps(binding,indent=2)+'\n')
     (out/'components.json').write_text(json.dumps(totals,indent=2)+'\n')
     with tarfile.open(out/'counted-source.tar.gz','w:gz') as archive:
@@ -133,9 +157,19 @@ def main():
             archive.addfile(entry,io.BytesIO(data))
     kernel=ROOT/'vendor/linux-framework'
     base='6f0caf14e995^'
-    diff=command('git','diff','--numstat',base,cwd=kernel)
+    patch = subprocess.check_output(['git', 'diff', '--binary', base], cwd=kernel)
+    (out/'kernel-changes.patch.gz').write_bytes(gzip.compress(patch, mtime=0))
+    diff = subprocess.check_output(['git', 'apply', '--numstat'], input=patch, cwd=kernel).decode().strip()
     (out/'kernel-changes.tsv').write_text('added\tdeleted\tpath\n'+diff+'\n')
     (out/'provenance.txt').write_text('repository='+command('git','rev-parse','HEAD')+'\nkernel='+command('git','rev-parse','HEAD',cwd=kernel)+'\nkernel_base='+command('git','rev-parse',base,cwd=kernel)+'\n\n'+command('git','status','--short')+'\n\nkernel status:\n'+command('git','status','--short',cwd=kernel)+'\n')
+    manifest = [dict(path=str(path.relative_to(ROOT)), bytes=len(data),
+                     sha256=hashlib.sha256(data).hexdigest())
+                for path, data in sorted(contents.items())]
+    (out/'source-manifest.json').write_text(json.dumps(dict(
+        captured_at=started, repository_at_start=revision,
+        repository_at_end=command('git', 'rev-parse', 'HEAD'),
+        kernel_patch_sha256=hashlib.sha256(patch).hexdigest(),
+        files=manifest), indent=2)+'\n')
     for row in totals:print(f"{row['component']}: {row['files']} files, {row['physical_lines']} physical, {row['nonblank_lines']} nonblank")
 
 

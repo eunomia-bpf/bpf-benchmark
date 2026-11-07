@@ -87,8 +87,9 @@ check-loader-kallsyms: build-x86/test-kallsyms
 	./build-x86/test-kallsyms ../x86/native_lab/native_link/target/release/native-link
 
 .PHONY: tcb
+TCB_OUT ?= ../results/kprog_fidelity_20261106/tcb
 tcb:
-	$(PYTHON) tcb.py
+	$(PYTHON) tcb.py --out $(TCB_OUT)
 
 .PHONY: reference-build reference-check
 reference-build:

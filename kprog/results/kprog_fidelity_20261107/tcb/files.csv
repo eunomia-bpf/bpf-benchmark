@@ -1,0 +1,905 @@
+component,path,physical_lines,nonblank_lines
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_adc.h,12,12
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_add_flags.h,11,11
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_alu_decode.h,22,22
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_alu_flag_arm.h,141,141
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_alu_result.h,74,74
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_andn.h,67,67
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_aux_flags.h,8,8
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_bitops.h,30,27
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_branch_emit.h,13,13
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_bswap.h,29,27
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_bt.h,58,58
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_bzhi.h,56,56
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_bzhi_flags.h,16,16
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_callmem.h,15,15
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_cmov.h,79,79
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_cmpop.h,106,106
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_cond.h,37,34
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_dispatch_family.h,102,102
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_dispatch_singleton.h,207,207
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_div.h,60,60
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_doubleshift.h,44,41
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_doubleshift_arm.h,69,69
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_full_condition.h,16,16
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_helper_dispatch.h,228,228
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_immediate.h,9,9
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_imul_flags.h,11,11
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_logic_flags.h,11,11
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_mem_access.h,131,131
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_mem_aux.h,23,23
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_mem_dispatch.h,34,34
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_mem_index.h,29,29
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_mem_offset.h,35,35
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_mov_load.h,73,72
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_mov_reg_arm.h,60,60
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_movbe.h,64,63
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_movx_shape.h,104,104
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_mulx_arm.h,51,51
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_not.h,6,6
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_opcode.h,93,93
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_popcnt_flags.h,20,20
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_popcount.h,17,17
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_ptr_write.h,67,67
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_pushpop.h,44,43
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_reg_dispatch.h,45,45
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_reg_lane_aux.h,12,12
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_reg_presence.h,37,37
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_reg_read.h,8,8
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_reg_write.h,27,27
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_rep_movs.h,34,34
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_sbb_flags.h,11,11
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_sbb_result.h,5,5
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_setcc.h,64,64
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_setcc_mem.h,70,70
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_shift_count.h,5,5
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_shift_flags.h,34,34
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_shift_result.h,64,55
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_signed.h,31,29
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_stack_arena.h,31,31
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_stack_arm.h,51,51
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_stack_index.h,6,6
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_stack_write_lanes.h,139,139
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_store.h,94,93
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_sub_flags.h,11,11
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_width.h,34,34
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_write_width_arm.h,57,57
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_xchg.h,54,54
+x86 simulator (including ISA-specific generated C),kprog/formal/generated/x86_xmm0.h,89,88
+x86 simulator (including ISA-specific generated C),kprog/x86/x86_sim.h,294,264
+x86 simulator (including ISA-specific generated C),kprog/x86/x86_sim_local_bpf.h,2963,2738
+arm64 simulator (including ISA-specific generated C),kprog/arm64/arm64_sim.h,178,166
+arm64 simulator (including ISA-specific generated C),kprog/arm64/arm64_sim_direct.h,550,550
+arm64 simulator (including ISA-specific generated C),kprog/arm64/arm64_sim_local_bpf.h,1880,1697
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_adrp.h,45,45
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_alu_handler.h,13,10
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_alu_operand.h,9,7
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_alu_operand_select.h,33,33
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_alu_result.h,38,38
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_aux.h,25,25
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_bitfield.h,82,82
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_branch.h,56,56
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_branch_emit.h,13,13
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_byte_lane.h,52,52
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_ccmp_decode.h,31,28
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_ccmp_handler.h,18,16
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_cneg.h,44,44
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_cond.h,39,36
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_csel.h,100,100
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_csel_ptr.h,65,65
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_decode.h,33,30
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_dispatch_family.h,73,73
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_dispatch_singleton.h,82,82
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_dq_mem.h,67,67
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_dq_mem_extra.h,70,70
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_extrev.h,118,118
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_flag_handler.h,40,36
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_flag_operand.h,59,59
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_flags.h,48,48
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_fmov.h,55,55
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_fmov_dest.h,45,45
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_helper_arg_ptr.h,42,42
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_imm_operand.h,39,39
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_ldrsx.h,50,50
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_ldrsx_op.h,44,44
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_load_bytes.h,65,65
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_load_tag.h,40,40
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_logic_flag_handler.h,24,21
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_mem_base_src.h,44,44
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_mem_dispatch.h,54,54
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_mem_index.h,30,30
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_mem_index_value.h,44,44
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_mem_offset.h,32,32
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_mem_prepost.h,43,43
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_mem_write_arm.h,48,48
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_mod.h,112,112
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_mov.h,45,45
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_movk.h,57,57
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_mul.h,108,108
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_orn.h,44,44
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_pair_load_tag.h,55,55
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_pair_mem.h,53,53
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_reduction.h,62,62
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_reg_dispatch.h,60,60
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_reg_presence.h,34,34
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_shift.h,83,83
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_stack_arena.h,36,36
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_stack_arm.h,51,51
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_stack_index.h,8,8
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_stack_read_tag_source.h,49,49
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_stack_tag.h,16,16
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_stack_write_lanes.h,137,137
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_stack_write_tag_action.h,59,59
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_stlxr.h,39,39
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_store_bytes.h,46,46
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_unary.h,48,48
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_vreg.h,87,87
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_vreg_field.h,52,52
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_width.h,34,34
+arm64 simulator (including ISA-specific generated C),kprog/formal/generated/arm64_write_arm.h,56,56
+shared simulator headers,kinsn/module/include/native_lab_input.h,63,60
+shared simulator headers,kprog/formal/generated/abi_load.h,33,29
+shared simulator headers,kprog/formal/generated/ptr_add.h,11,9
+x86 native-to-proof generator (including local imports),kprog/helper_abi.py,55,46
+x86 native-to-proof generator (including local imports),kprog/trusted_generation.py,116,103
+x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generate_micro_sim_proofs.py,1836,1694
+x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generated_x86_alu_decode.py,19,19
+x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generated_x86_cc_decode.py,39,39
+x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generated_x86_full_condition.py,22,22
+x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generated_x86_opcode.py,158,158
+x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generated_x86_reg_lane_aux.py,12,10
+x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/generated_x86_specialization.py,149,149
+x86 native-to-proof generator (including local imports),kprog/x86/micro-prog/x86_abi.py,612,583
+arm64 native-to-proof generator (including local imports),kprog/arm64/micro-prog/arm64_abi.py,454,426
+arm64 native-to-proof generator (including local imports),kprog/arm64/micro-prog/generate_micro_sim_proofs.py,1165,1069
+arm64 native-to-proof generator (including local imports),kprog/arm64/micro-prog/generated_arm64_cc_decode.py,21,21
+arm64 native-to-proof generator (including local imports),kprog/arm64/micro-prog/generated_arm64_decode.py,35,35
+arm64 native-to-proof generator (including local imports),kprog/arm64/micro-prog/generated_arm64_helper_idents.py,80,80
+arm64 native-to-proof generator (including local imports),kprog/helper_abi.py,55,46
+arm64 native-to-proof generator (including local imports),kprog/trusted_generation.py,116,103
+trusted service and native input declarations,kprog/trusted_generation.py,116,103
+trusted service and native input declarations,kprog/trusted_service.py,275,247
+x86 trusted specialization adapter,kprog/x86/trusted_specializer.py,61,55
+arm64 trusted specialization adapter,kprog/arm64/trusted_specializer.py,76,67
+trusted service loader entrypoint,kprog/trusted_loader.cpp,91,88
+proof build/load orchestration,kprog/run_micro_sim_batch.py,616,549
+native shared loader/linker integration,kprog/libnativeloader/include/native_loader.hpp,194,177
+native shared loader/linker integration,kprog/libnativeloader/src/native_data_layout.hpp,128,118
+native shared loader/linker integration,kprog/libnativeloader/src/native_environment_binding.hpp,71,67
+native shared loader/linker integration,kprog/libnativeloader/src/native_loader.cpp,6052,5729
+native shared loader/linker integration,kprog/libnativeloader/src/native_loader_bytecode.hpp,213,203
+native shared loader/linker integration,kprog/libnativeloader/src/native_loader_cache.hpp,17,14
+native shared loader/linker integration,kprog/libnativeloader/src/native_loader_fd_scan.hpp,17,13
+native shared loader/linker integration,kprog/libnativeloader/src/native_loader_link_plan.hpp,158,149
+native shared loader/linker integration,kprog/libnativeloader/src/native_loader_link_schema.hpp,230,220
+native shared loader/linker integration,kprog/libnativeloader/src/native_loader_manifest.hpp,1004,951
+native shared loader/linker integration,kprog/libnativeloader/src/native_rodata_binding.hpp,115,106
+native shared loader/linker integration,kprog/libnativeloader/src/native_source_map_binding.hpp,51,47
+native shared loader/linker integration,kprog/libnativeloader/src/native_tv_capture.hpp,127,126
+native ELF linker (both ISAs),kprog/x86/native_lab/native_link/src/main.rs,5920,5521
+native ELF linker (both ISAs),kprog/x86/native_lab/native_link/src/x86.rs,5011,4758
+standalone proof loader,kprog/loader/src/main.rs,1290,1196
+application syscall shim,bpfopt/shim/jsmn.h,468,437
+application syscall shim,bpfopt/shim/libbpfrejit_shim.c,1870,1769
+application syscall shim,bpfopt/shim/shim_execute_plan.h,1006,954
+application syscall shim,bpfopt/shim/shim_json.h,247,232
+application syscall shim,bpfopt/shim/shim_loadtime.h,1714,1626
+application syscall shim,bpfopt/shim/shim_measure.h,162,151
+application syscall shim,bpfopt/shim/shim_native_loader.h,646,599
+application syscall shim,bpfopt/shim/shim_netlink.h,240,221
+application syscall shim,bpfopt/shim/shim_reload.h,1627,1579
+application syscall shim,bpfopt/shim/shim_snapshot.h,590,566
+application syscall shim,bpfopt/shim/shim_state.h,1406,1314
+x86 native kernel module,kinsn/module/x86/bpf_x86_native_lab.c,1026,923
+arm64 native kernel module,kinsn/module/arm64/bpf_arm64_native_lab.c,1259,1147
+trusted kernel queue and checked capture (including wire headers),kinsn/module/include/native_lab_binding.h,148,138
+trusted kernel queue and checked capture (including wire headers),kinsn/module/include/native_lab_checked.h,223,211
+trusted kernel queue and checked capture (including wire headers),kinsn/module/include/native_lab_checked_wire.h,36,35
+trusted kernel queue and checked capture (including wire headers),kinsn/module/include/native_lab_trusted.h,586,574
+trusted kernel queue and checked capture (including wire headers),kinsn/module/include/native_lab_trusted_wire.h,93,87
+shared native module support,kinsn/module/include/kinsn_common.h,204,185
+x86 native module emitter support,kinsn/module/include/kinsn_x86_emit.h,206,177
+shared binding and proof-input contracts,kinsn/module/include/native_lab_binding.h,148,138
+shared binding and proof-input contracts,kinsn/module/include/native_lab_exclusive.h,42,38
+shared binding and proof-input contracts,kinsn/module/include/native_lab_group.h,617,564
+shared binding and proof-input contracts,kinsn/module/include/native_lab_input.h,63,60
+shared binding and proof-input contracts,kinsn/module/include/native_lab_map_offset.h,88,85
+loader artifact-binding headers (overlap with loader),kprog/libnativeloader/src/native_data_layout.hpp,128,118
+loader artifact-binding headers (overlap with loader),kprog/libnativeloader/src/native_environment_binding.hpp,71,67
+loader artifact-binding headers (overlap with loader),kprog/libnativeloader/src/native_rodata_binding.hpp,115,106
+loader artifact-binding headers (overlap with loader),kprog/libnativeloader/src/native_source_map_binding.hpp,51,47
+"vendored helper declarations (ABI input, not project-owned)",vendor/libbpf/src/bpf_helper_defs.h,4785,4570
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Adrp.lean,44,35
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64AluHandler.lean,202,176
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64AluOperandHandler.lean,86,74
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64AluOperandSelect.lean,127,107
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64AluResult.lean,159,140
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Aux.lean,158,131
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Bitfield.lean,134,116
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Branch.lean,112,98
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64BranchEmit.lean,54,45
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64ByteLane.lean,69,60
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64CcDecode.lean,98,85
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64CcmpDecode.lean,72,61
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64CcmpHandler.lean,113,97
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Cneg.lean,89,74
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64CompareCond.lean,28,23
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Cond.lean,100,88
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64ControlFlow.lean,16,12
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Csel.lean,137,118
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64CselPtr.lean,83,69
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Decode.lean,99,80
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64DispatchFamily.lean,221,183
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64DispatchSingleton.lean,320,257
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64DispatchTotality.lean,116,95
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64DqMemExtraShape.lean,173,150
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64DqMemHandler.lean,106,91
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Extrev.lean,285,248
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64FlagHandler.lean,113,100
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64FlagOperand.lean,90,74
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Flags.lean,128,110
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Fmov.lean,83,72
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64FmovDest.lean,65,53
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64HelperArgPtrShape.lean,137,115
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64HelperIdents.lean,127,120
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64ImmOperand.lean,88,71
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64LdrSx.lean,94,78
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64LdrsxOp.lean,120,101
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64LoadBytes.lean,70,60
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64LoadTag.lean,76,62
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64LogicFlagHandler.lean,99,87
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64MemBaseSrcShape.lean,135,114
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64MemDispatch.lean,73,63
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64MemIndex.lean,91,77
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64MemIndexValueShape.lean,167,142
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64MemOffset.lean,49,40
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64MemPrepost.lean,103,91
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64MemWriteArmShape.lean,180,154
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Mod.lean,160,142
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Mov.lean,71,58
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Movk.lean,81,68
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Mul.lean,364,326
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Orn.lean,82,68
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64PairLoadTag.lean,95,78
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64PairMemHandler.lean,96,81
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Reduction.lean,89,77
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64RegDispatch.lean,167,141
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64RegPresence.lean,93,78
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Shift.lean,119,105
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64StackArena.lean,529,475
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64StackArmShape.lean,193,164
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64StackIndex.lean,58,46
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64StackReadTagSourceShape.lean,132,112
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64StackTag.lean,43,36
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64StackWriteLanesShape.lean,173,150
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64StackWriteTagActionShape.lean,160,139
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Stlxr.lean,55,41
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64StoreBytes.lean,99,88
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Unary.lean,101,84
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Vreg.lean,104,90
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64VregFieldShape.lean,161,136
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64Width.lean,71,71
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Arm64WriteArmShape.lean,152,126
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/ControlFlowTrace.lean,104,93
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/CrossIsaAlu.lean,108,91
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/CrossIsaBranch.lean,133,119
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/CrossIsaCond.lean,90,76
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/CrossIsaFlags.lean,80,70
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/CrossIsaMemOffset.lean,94,80
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/CrossIsaRev.lean,75,63
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/CrossIsaShift.lean,72,60
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/CrossIsaSignExtend.lean,63,52
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/CrossIsaStackArena.lean,88,74
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/CrossIsaWidth.lean,83,67
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedAbiLoad.lean,24,19
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Adrp.lean,26,26
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64AluHandler.lean,20,15
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64AluOperand.lean,18,14
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64AluOperandSelect.lean,22,22
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64AluResult.lean,15,15
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Aux.lean,25,25
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Bitfield.lean,34,34
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Branch.lean,32,32
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64BranchEmit.lean,27,27
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64ByteLane.lean,38,38
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64CcDecode.lean,119,119
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64CcmpDecode.lean,16,12
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64CcmpHandler.lean,26,21
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Cneg.lean,31,31
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Cond.lean,60,55
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Csel.lean,49,49
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64CselPtr.lean,24,24
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Decode.lean,112,108
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64DispatchFamily.lean,81,74
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64DispatchSingleton.lean,105,90
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64DqMem.lean,54,54
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64DqMemExtra.lean,80,80
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Extrev.lean,76,74
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64FlagHandler.lean,41,32
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64FlagOperand.lean,52,52
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Flags.lean,48,48
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Fmov.lean,40,40
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64FmovDest.lean,16,16
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64HelperArgPtr.lean,64,64
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64HelperIdents.lean,239,239
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64ImmOperand.lean,28,28
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64LdrSx.lean,35,35
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64LdrsxOp.lean,28,28
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64LoadBytes.lean,47,47
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64LoadTag.lean,20,20
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64LogicFlagHandler.lean,35,27
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64MemBaseSrc.lean,63,63
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64MemDispatch.lean,47,47
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64MemIndex.lean,26,26
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64MemIndexValue.lean,63,63
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64MemOffset.lean,17,17
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64MemPrepost.lean,40,40
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64MemWriteArm.lean,77,77
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Mod.lean,25,25
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Mov.lean,28,28
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Movk.lean,19,19
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Mul.lean,51,51
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Orn.lean,30,30
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64PairLoadTag.lean,25,25
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64PairMem.lean,31,31
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Reduction.lean,55,55
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64RegDispatch.lean,29,29
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64RegPresence.lean,29,29
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Shift.lean,42,42
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64StackArena.lean,42,35
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64StackArm.lean,77,77
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64StackIndex.lean,13,13
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64StackReadTagSource.lean,68,68
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64StackTag.lean,33,33
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64StackWriteLanes.lean,78,78
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64StackWriteTagAction.lean,74,74
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Stlxr.lean,27,27
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64StoreBytes.lean,36,36
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Unary.lean,34,34
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Vreg.lean,62,62
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64VregField.lean,64,64
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64Width.lean,43,43
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedArm64WriteArm.lean,70,70
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedControlFlowTrace.lean,30,30
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedPtrAdd.lean,12,7
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Adc.lean,6,6
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86AddFlags.lean,5,5
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86AluDecode.lean,64,64
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86AluFlagArm.lean,127,127
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86AluResult.lean,32,32
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Andn.lean,48,48
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86AuxFlags.lean,9,8
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Bitops.lean,23,23
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86BranchEmit.lean,27,27
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Bswap.lean,31,31
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Bt.lean,47,47
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Bzhi.lean,43,43
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86BzhiFlags.lean,26,26
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86CallMem.lean,29,29
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86CcDecode.lean,236,236
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Cmov.lean,133,133
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86CmpOp.lean,92,92
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Cond.lean,39,35
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86DispatchFamily.lean,111,102
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86DispatchSingleton.lean,276,231
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Div.lean,77,77
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86DoubleShift.lean,62,62
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86DoubleShiftArm.lean,56,56
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86FullCondition.lean,27,26
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86HelperDispatch.lean,33,33
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Immediate.lean,13,10
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86ImulFlags.lean,24,24
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86LogicFlags.lean,11,11
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86MemAccess.lean,43,42
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86MemAux.lean,22,22
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86MemDispatch.lean,23,23
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86MemIndex.lean,26,26
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86MemOffset.lean,17,17
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86MovLoad.lean,85,85
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86MovRegArm.lean,51,51
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Movbe.lean,62,62
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86MovxShape.lean,63,63
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86MulxArm.lean,43,43
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Not.lean,13,13
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Opcode.lean,239,239
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86PopcntFlags.lean,22,22
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Popcount.lean,11,11
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86PtrWrite.lean,53,53
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86PushPop.lean,62,62
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86RegDispatch.lean,27,27
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86RegLaneAux.lean,11,11
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86RegPresence.lean,27,27
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86RegRead.lean,14,14
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86RegWrite.lean,34,34
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86RepMovs.lean,28,28
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86SbbFlags.lean,5,5
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86SbbResult.lean,5,5
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Setcc.lean,89,89
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86SetccMem.lean,51,51
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86ShiftCount.lean,8,8
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86ShiftFlags.lean,41,41
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86ShiftResult.lean,36,36
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Signed.lean,27,27
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Specialization.lean,483,475
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86StackArena.lean,43,36
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86StackArm.lean,77,77
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86StackIndex.lean,9,9
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86StackWriteLanes.lean,78,78
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Store.lean,59,59
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86SubFlags.lean,5,5
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Width.lean,43,43
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86WriteWidthArm.lean,60,60
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Xchg.lean,43,43
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Generated/GeneratedX86Xmm0.lean,68,68
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Reference/AArch64.lean,1186,1059
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Reference/Memory.lean,95,77
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Reference/X86.lean,1561,1406
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Reference/X86Path.lean,93,84
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64AddressedMemory.lean,87,75
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Arithmetic.lean,825,719
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Bitfield.lean,134,115
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Branch.lean,173,142
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Condition.lean,44,33
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Dispatcher.lean,2072,1875
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Exclusive.lean,150,133
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Extrev.lean,168,145
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Fmov.lean,164,138
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Logic.lean,523,461
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Memory.lean,163,139
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Move.lean,318,272
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Movk.lean,102,85
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Mul.lean,351,314
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64NumericAddress.lean,80,65
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64PairMemory.lean,106,93
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Reduction.lean,111,93
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Register.lean,71,58
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Select.lean,393,341
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64Shift.lean,325,281
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64VectorMemory.lean,303,270
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/Arm64WritebackMemory.lean,596,546
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/EntryEnvironment.lean,167,142
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Andn.lean,63,54
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Arithmetic.lean,98,87
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86AuxFlags.lean,26,22
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86BmiShift.lean,69,60
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Bt.lean,107,92
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Bzhi.lean,76,64
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Call.lean,102,90
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Cmov.lean,120,105
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Condition.lean,87,75
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Divide.lean,196,175
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86DoubleShift.lean,125,105
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Endian.lean,121,103
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Exchange.lean,56,49
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86HighLoad.lean,42,36
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Lea.lean,71,63
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86LegacyShift.lean,133,116
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Logic.lean,65,55
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Movx.lean,121,108
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Multiply.lean,133,115
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Mulx.lean,67,57
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86NumericAddress.lean,59,49
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Pop.lean,71,60
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Popcount.lean,74,63
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Push.lean,87,76
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86RepMovs.lean,208,186
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86RotateRight.lean,63,54
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Scalar.lean,146,125
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86SignHigh.lean,41,36
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86StackMemory.lean,76,65
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Unary.lean,58,48
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/Refinement/X86Xmm0.lean,96,83
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/TagErasure.lean,240,207
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Adc.lean,33,33
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86AddFlags.lean,15,15
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86AddResult.lean,18,18
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86AluDecode.lean,51,41
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86AluFlagArmShape.lean,239,212
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86AluResultSpec.lean,71,65
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86AluWriteback.lean,1178,1060
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86AndnHandler.lean,356,315
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Bitops.lean,107,91
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86BranchEmit.lean,56,47
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Bswap.lean,60,50
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86BtHandler.lean,304,269
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86BzhiFlags.lean,164,137
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86BzhiHandler.lean,372,327
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86CallMemHandler.lean,200,173
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86CcDecode.lean,108,95
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86CmovHandler.lean,527,473
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86CmpOpHandler.lean,415,378
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86ControlFlow.lean,47,39
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86DispatchFamily.lean,368,325
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86DispatchSingleton.lean,925,774
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86DispatchTotality.lean,125,101
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86DivHandler.lean,239,205
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86DoubleShift.lean,57,48
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86DoubleShiftArmHandler.lean,262,226
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86HelperDispatch.lean,278,241
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Immediate.lean,31,25
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86ImulFlags.lean,77,67
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86ImulRegImmHandler.lean,123,111
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86IncDec.lean,126,106
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86LeaHandler.lean,219,199
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86LogicFlags.lean,16,16
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemAccess.lean,92,80
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemAluHandler.lean,81,73
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemAux.lean,112,98
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemBitHandler.lean,150,138
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemCompareHandler.lean,342,314
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemDispatch.lean,56,47
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemImulHandler.lean,175,161
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemIndex.lean,81,68
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemLogicHandler.lean,103,92
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemOffset.lean,60,50
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemShiftHandler.lean,141,127
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemStoreAluHandler.lean,119,109
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MemUnaryHandler.lean,117,106
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MovHandler.lean,236,213
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MovLoadHandler.lean,379,342
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MovRegShape.lean,271,238
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MovbeHandler.lean,519,474
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MovxRegHandler.lean,185,166
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MovxShape.lean,298,255
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MulxArmHandler.lean,145,121
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86MulxHandler.lean,221,203
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Not.lean,35,27
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Opcode.lean,89,79
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86PopcntFlags.lean,118,98
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Popcount.lean,53,42
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86PtrWriteHandler.lean,338,299
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86PushPopHandler.lean,455,401
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86RegDispatch.lean,163,137
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86RegLaneAux.lean,85,74
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86RegPresence.lean,100,84
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86RegRead.lean,40,32
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86RegWrite.lean,173,148
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86RepMovsHandler.lean,350,308
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86SbbFlags.lean,40,38
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86SbbResult.lean,13,13
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86SetccHandler.lean,323,284
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86SetccMemHandler.lean,483,433
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86ShiftCount.lean,24,19
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86ShiftFlags.lean,152,138
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86ShiftResult.lean,135,114
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Signed.lean,98,86
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Specialization.lean,245,228
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86StackArena.lean,295,261
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86StackArmShape.lean,194,165
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86StackIndex.lean,28,28
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86StackWriteLanesShape.lean,169,146
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86StoreHandler.lean,474,427
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86SubFlags.lean,15,15
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86SubResult.lean,38,32
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86UnaryWriteback.lean,152,134
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Width.lean,60,60
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86WriteWidthArmShape.lean,149,127
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86XchgHandler.lean,247,212
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal/X86Xmm0Handler.lean,592,532
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/KProgFormal.lean,261,261
+"formal model, reference API and proofs (Lean, including generated)",kprog/formal/ReferenceMain.lean,272,251
+formal contracts (JSON),kprog/formal/contracts/abi_load_spec.json,18,18
+formal contracts (JSON),kprog/formal/contracts/arm64_adrp_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_alu_handler_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_alu_operand_select_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_alu_operand_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_alu_result_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_aux_spec.json,25,25
+formal contracts (JSON),kprog/formal/contracts/arm64_bitfield_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_branch_emit_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_branch_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_byte_lane_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_cc_decode_spec.json,24,24
+formal contracts (JSON),kprog/formal/contracts/arm64_ccmp_decode_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_ccmp_handler_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_cneg_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_cond_spec.json,21,21
+formal contracts (JSON),kprog/formal/contracts/arm64_csel_ptr_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_csel_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_decode_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_dispatch_family_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_dispatch_singleton_spec.json,22,22
+formal contracts (JSON),kprog/formal/contracts/arm64_dq_mem_extra_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_dq_mem_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_extrev_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_flag_handler_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_flag_operand_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_flags_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_fmov_dest_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_fmov_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_helper_arg_ptr_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_helper_idents_spec.json,83,83
+formal contracts (JSON),kprog/formal/contracts/arm64_imm_operand_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_ldrsx_op_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_ldrsx_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_load_bytes_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_load_tag_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_logic_flag_handler_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_mem_base_src_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_mem_dispatch_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_mem_index_spec.json,10,10
+formal contracts (JSON),kprog/formal/contracts/arm64_mem_index_value_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_mem_offset_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_mem_prepost_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_mem_write_arm_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_mod_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_mov_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_movk_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_mul_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_orn_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_pair_load_tag_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_pair_mem_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_reduction_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_reg_dispatch_spec.json,40,40
+formal contracts (JSON),kprog/formal/contracts/arm64_reg_presence_spec.json,12,12
+formal contracts (JSON),kprog/formal/contracts/arm64_shift_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_stack_arena_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_stack_arm_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_stack_index_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_stack_read_tag_source_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_stack_tag_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_stack_write_lanes_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_stack_write_tag_action_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_stlxr_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_store_bytes_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_unary_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_vreg_field_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_vreg_spec.json,45,45
+formal contracts (JSON),kprog/formal/contracts/arm64_width_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/arm64_write_arm_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/control_flow_trace_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/ptr_add_spec.json,17,17
+formal contracts (JSON),kprog/formal/contracts/x86_adc_spec.json,11,11
+formal contracts (JSON),kprog/formal/contracts/x86_add_flags_spec.json,10,10
+formal contracts (JSON),kprog/formal/contracts/x86_alu_decode_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_alu_flag_arm_spec.json,108,108
+formal contracts (JSON),kprog/formal/contracts/x86_alu_result_spec.json,17,17
+formal contracts (JSON),kprog/formal/contracts/x86_andn_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_aux_flags_spec.json,6,6
+formal contracts (JSON),kprog/formal/contracts/x86_bitops_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_branch_emit_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_bswap_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_bt_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_bzhi_flags_spec.json,17,17
+formal contracts (JSON),kprog/formal/contracts/x86_bzhi_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_callmem_spec.json,55,55
+formal contracts (JSON),kprog/formal/contracts/x86_cc_decode_spec.json,44,44
+formal contracts (JSON),kprog/formal/contracts/x86_cmov_spec.json,125,125
+formal contracts (JSON),kprog/formal/contracts/x86_cmpop_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_cond_spec.json,20,20
+formal contracts (JSON),kprog/formal/contracts/x86_dispatch_family_spec.json,40,40
+formal contracts (JSON),kprog/formal/contracts/x86_dispatch_singleton_spec.json,54,54
+formal contracts (JSON),kprog/formal/contracts/x86_div_spec.json,50,50
+formal contracts (JSON),kprog/formal/contracts/x86_doubleshift_arm_spec.json,30,30
+formal contracts (JSON),kprog/formal/contracts/x86_doubleshift_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_full_condition_spec.json,8,8
+formal contracts (JSON),kprog/formal/contracts/x86_helper_dispatch_spec.json,411,411
+formal contracts (JSON),kprog/formal/contracts/x86_immediate_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_imul_flags_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_logic_flags_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_mem_access_spec.json,16,16
+formal contracts (JSON),kprog/formal/contracts/x86_mem_aux_spec.json,25,25
+formal contracts (JSON),kprog/formal/contracts/x86_mem_dispatch_spec.json,63,63
+formal contracts (JSON),kprog/formal/contracts/x86_mem_index_spec.json,10,10
+formal contracts (JSON),kprog/formal/contracts/x86_mem_offset_spec.json,8,8
+formal contracts (JSON),kprog/formal/contracts/x86_mov_load_spec.json,497,497
+formal contracts (JSON),kprog/formal/contracts/x86_mov_reg_arm_spec.json,31,31
+formal contracts (JSON),kprog/formal/contracts/x86_movbe_spec.json,68,68
+formal contracts (JSON),kprog/formal/contracts/x86_movx_shape_spec.json,34,34
+formal contracts (JSON),kprog/formal/contracts/x86_mulx_arm_spec.json,26,26
+formal contracts (JSON),kprog/formal/contracts/x86_not_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_opcode_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_popcnt_flags_spec.json,13,13
+formal contracts (JSON),kprog/formal/contracts/x86_popcount_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_ptr_write_spec.json,45,45
+formal contracts (JSON),kprog/formal/contracts/x86_pushpop_spec.json,39,39
+formal contracts (JSON),kprog/formal/contracts/x86_reg_dispatch_spec.json,25,25
+formal contracts (JSON),kprog/formal/contracts/x86_reg_lane_aux_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_reg_presence_spec.json,10,10
+formal contracts (JSON),kprog/formal/contracts/x86_reg_read_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_reg_write_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_rep_movs_spec.json,10,10
+formal contracts (JSON),kprog/formal/contracts/x86_sbb_flags_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_sbb_result_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_setcc_mem_spec.json,59,59
+formal contracts (JSON),kprog/formal/contracts/x86_setcc_spec.json,107,107
+formal contracts (JSON),kprog/formal/contracts/x86_shift_count_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_shift_flags_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_shift_result_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_signed_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_specialization_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_stack_arena_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_stack_arm_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_stack_index_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_stack_write_lanes_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_store_spec.json,74,74
+formal contracts (JSON),kprog/formal/contracts/x86_sub_flags_spec.json,10,10
+formal contracts (JSON),kprog/formal/contracts/x86_width_spec.json,1,1
+formal contracts (JSON),kprog/formal/contracts/x86_write_width_arm_spec.json,40,40
+formal contracts (JSON),kprog/formal/contracts/x86_xchg_spec.json,26,26
+formal contracts (JSON),kprog/formal/contracts/x86_xmm0_spec.json,47,47
+formal contract generators,kprog/formal/tools/generate_abi_load_spec.py,141,116
+formal contract generators,kprog/formal/tools/generate_arm64_adrp_spec.py,188,174
+formal contract generators,kprog/formal/tools/generate_arm64_alu_handler_spec.py,92,72
+formal contract generators,kprog/formal/tools/generate_arm64_alu_operand_select_spec.py,210,186
+formal contract generators,kprog/formal/tools/generate_arm64_alu_operand_spec.py,84,67
+formal contract generators,kprog/formal/tools/generate_arm64_alu_result_spec.py,123,111
+formal contract generators,kprog/formal/tools/generate_arm64_aux_spec.py,172,155
+formal contract generators,kprog/formal/tools/generate_arm64_bitfield_spec.py,227,211
+formal contract generators,kprog/formal/tools/generate_arm64_branch_emit_spec.py,115,100
+formal contract generators,kprog/formal/tools/generate_arm64_branch_spec.py,177,162
+formal contract generators,kprog/formal/tools/generate_arm64_byte_lane_spec.py,138,123
+formal contract generators,kprog/formal/tools/generate_arm64_cc_decode_spec.py,243,217
+formal contract generators,kprog/formal/tools/generate_arm64_ccmp_decode_spec.py,160,135
+formal contract generators,kprog/formal/tools/generate_arm64_ccmp_handler_spec.py,103,85
+formal contract generators,kprog/formal/tools/generate_arm64_cneg_spec.py,202,184
+formal contract generators,kprog/formal/tools/generate_arm64_cond_spec.py,163,135
+formal contract generators,kprog/formal/tools/generate_arm64_csel_ptr_spec.py,170,155
+formal contract generators,kprog/formal/tools/generate_arm64_csel_spec.py,249,231
+formal contract generators,kprog/formal/tools/generate_arm64_decode_spec.py,152,133
+formal contract generators,kprog/formal/tools/generate_arm64_dispatch_family_spec.py,252,223
+formal contract generators,kprog/formal/tools/generate_arm64_dispatch_singleton_spec.py,235,209
+formal contract generators,kprog/formal/tools/generate_arm64_dq_mem_extra_spec.py,362,335
+formal contract generators,kprog/formal/tools/generate_arm64_dq_mem_spec.py,225,208
+formal contract generators,kprog/formal/tools/generate_arm64_extrev_spec.py,309,289
+formal contract generators,kprog/formal/tools/generate_arm64_flag_handler_spec.py,161,135
+formal contract generators,kprog/formal/tools/generate_arm64_flag_operand_spec.py,188,172
+formal contract generators,kprog/formal/tools/generate_arm64_flags_spec.py,163,150
+formal contract generators,kprog/formal/tools/generate_arm64_fmov_dest_spec.py,169,154
+formal contract generators,kprog/formal/tools/generate_arm64_fmov_spec.py,186,170
+formal contract generators,kprog/formal/tools/generate_arm64_helper_arg_ptr_spec.py,317,290
+formal contract generators,kprog/formal/tools/generate_arm64_helper_idents_spec.py,252,232
+formal contract generators,kprog/formal/tools/generate_arm64_imm_operand_spec.py,211,187
+formal contract generators,kprog/formal/tools/generate_arm64_ldrsx_op_spec.py,232,208
+formal contract generators,kprog/formal/tools/generate_arm64_ldrsx_spec.py,190,174
+formal contract generators,kprog/formal/tools/generate_arm64_load_bytes_spec.py,178,164
+formal contract generators,kprog/formal/tools/generate_arm64_load_tag_spec.py,147,131
+formal contract generators,kprog/formal/tools/generate_arm64_logic_flag_handler_spec.py,135,113
+formal contract generators,kprog/formal/tools/generate_arm64_mem_base_src_spec.py,314,287
+formal contract generators,kprog/formal/tools/generate_arm64_mem_dispatch_spec.py,195,180
+formal contract generators,kprog/formal/tools/generate_arm64_mem_index_spec.py,155,139
+formal contract generators,kprog/formal/tools/generate_arm64_mem_index_value_spec.py,317,290
+formal contract generators,kprog/formal/tools/generate_arm64_mem_offset_spec.py,128,112
+formal contract generators,kprog/formal/tools/generate_arm64_mem_prepost_spec.py,178,162
+formal contract generators,kprog/formal/tools/generate_arm64_mem_write_arm_spec.py,326,298
+formal contract generators,kprog/formal/tools/generate_arm64_mod_spec.py,228,213
+formal contract generators,kprog/formal/tools/generate_arm64_mov_spec.py,176,159
+formal contract generators,kprog/formal/tools/generate_arm64_movk_spec.py,175,158
+formal contract generators,kprog/formal/tools/generate_arm64_mul_spec.py,285,266
+formal contract generators,kprog/formal/tools/generate_arm64_orn_spec.py,201,183
+formal contract generators,kprog/formal/tools/generate_arm64_pair_load_tag_spec.py,167,152
+formal contract generators,kprog/formal/tools/generate_arm64_pair_mem_spec.py,199,182
+formal contract generators,kprog/formal/tools/generate_arm64_reduction_spec.py,230,212
+formal contract generators,kprog/formal/tools/generate_arm64_reg_dispatch_spec.py,161,145
+formal contract generators,kprog/formal/tools/generate_arm64_reg_presence_spec.py,168,152
+formal contract generators,kprog/formal/tools/generate_arm64_shift_spec.py,240,223
+formal contract generators,kprog/formal/tools/generate_arm64_stack_arena_spec.py,185,157
+formal contract generators,kprog/formal/tools/generate_arm64_stack_arm_spec.py,332,304
+formal contract generators,kprog/formal/tools/generate_arm64_stack_index_spec.py,75,63
+formal contract generators,kprog/formal/tools/generate_arm64_stack_read_tag_source_spec.py,321,294
+formal contract generators,kprog/formal/tools/generate_arm64_stack_tag_spec.py,127,113
+formal contract generators,kprog/formal/tools/generate_arm64_stack_write_lanes_spec.py,372,340
+formal contract generators,kprog/formal/tools/generate_arm64_stack_write_tag_action_spec.py,342,315
+formal contract generators,kprog/formal/tools/generate_arm64_stlxr_spec.py,172,157
+formal contract generators,kprog/formal/tools/generate_arm64_store_bytes_spec.py,159,145
+formal contract generators,kprog/formal/tools/generate_arm64_unary_spec.py,208,190
+formal contract generators,kprog/formal/tools/generate_arm64_vreg_field_spec.py,321,293
+formal contract generators,kprog/formal/tools/generate_arm64_vreg_spec.py,294,272
+formal contract generators,kprog/formal/tools/generate_arm64_width_spec.py,146,134
+formal contract generators,kprog/formal/tools/generate_arm64_write_arm_spec.py,358,328
+formal contract generators,kprog/formal/tools/generate_control_flow_trace_spec.py,128,113
+formal contract generators,kprog/formal/tools/generate_ptr_add_spec.py,95,72
+formal contract generators,kprog/formal/tools/generate_x86_adc_spec.py,76,76
+formal contract generators,kprog/formal/tools/generate_x86_add_flags_spec.py,64,64
+formal contract generators,kprog/formal/tools/generate_x86_alu_decode_spec.py,130,113
+formal contract generators,kprog/formal/tools/generate_x86_alu_flag_arm_spec.py,437,411
+formal contract generators,kprog/formal/tools/generate_x86_alu_result_spec.py,236,219
+formal contract generators,kprog/formal/tools/generate_x86_andn_spec.py,262,240
+formal contract generators,kprog/formal/tools/generate_x86_aux_flags_spec.py,55,47
+formal contract generators,kprog/formal/tools/generate_x86_bitops_spec.py,126,108
+formal contract generators,kprog/formal/tools/generate_x86_branch_emit_spec.py,117,102
+formal contract generators,kprog/formal/tools/generate_x86_bswap_spec.py,129,113
+formal contract generators,kprog/formal/tools/generate_x86_bt_spec.py,238,218
+formal contract generators,kprog/formal/tools/generate_x86_bzhi_flags_spec.py,201,176
+formal contract generators,kprog/formal/tools/generate_x86_bzhi_spec.py,227,209
+formal contract generators,kprog/formal/tools/generate_x86_callmem_spec.py,63,63
+formal contract generators,kprog/formal/tools/generate_x86_cc_decode_spec.py,263,240
+formal contract generators,kprog/formal/tools/generate_x86_cmov_spec.py,364,341
+formal contract generators,kprog/formal/tools/generate_x86_cmpop_spec.py,333,312
+formal contract generators,kprog/formal/tools/generate_x86_cond_spec.py,138,112
+formal contract generators,kprog/formal/tools/generate_x86_dispatch_family_spec.py,279,252
+formal contract generators,kprog/formal/tools/generate_x86_dispatch_singleton_spec.py,325,299
+formal contract generators,kprog/formal/tools/generate_x86_div_spec.py,330,303
+formal contract generators,kprog/formal/tools/generate_x86_doubleshift_arm_spec.py,335,310
+formal contract generators,kprog/formal/tools/generate_x86_doubleshift_spec.py,163,144
+formal contract generators,kprog/formal/tools/generate_x86_full_condition_spec.py,74,67
+formal contract generators,kprog/formal/tools/generate_x86_helper_dispatch_spec.py,324,298
+formal contract generators,kprog/formal/tools/generate_x86_immediate_spec.py,71,57
+formal contract generators,kprog/formal/tools/generate_x86_imul_flags_spec.py,90,77
+formal contract generators,kprog/formal/tools/generate_x86_logic_flags_spec.py,60,54
+formal contract generators,kprog/formal/tools/generate_x86_mem_access_spec.py,182,171
+formal contract generators,kprog/formal/tools/generate_x86_mem_aux_spec.py,174,156
+formal contract generators,kprog/formal/tools/generate_x86_mem_dispatch_spec.py,178,157
+formal contract generators,kprog/formal/tools/generate_x86_mem_index_spec.py,149,134
+formal contract generators,kprog/formal/tools/generate_x86_mem_offset_spec.py,131,115
+formal contract generators,kprog/formal/tools/generate_x86_mov_load_spec.py,418,392
+formal contract generators,kprog/formal/tools/generate_x86_mov_reg_arm_spec.py,343,310
+formal contract generators,kprog/formal/tools/generate_x86_movbe_spec.py,310,283
+formal contract generators,kprog/formal/tools/generate_x86_movx_shape_spec.py,411,377
+formal contract generators,kprog/formal/tools/generate_x86_mulx_arm_spec.py,274,249
+formal contract generators,kprog/formal/tools/generate_x86_not_spec.py,69,56
+formal contract generators,kprog/formal/tools/generate_x86_opcode_spec.py,290,267
+formal contract generators,kprog/formal/tools/generate_x86_popcnt_flags_spec.py,198,172
+formal contract generators,kprog/formal/tools/generate_x86_popcount_spec.py,89,75
+formal contract generators,kprog/formal/tools/generate_x86_ptr_write_spec.py,298,282
+formal contract generators,kprog/formal/tools/generate_x86_pushpop_spec.py,267,248
+formal contract generators,kprog/formal/tools/generate_x86_reg_dispatch_spec.py,169,153
+formal contract generators,kprog/formal/tools/generate_x86_reg_lane_aux_spec.py,100,83
+formal contract generators,kprog/formal/tools/generate_x86_reg_presence_spec.py,165,149
+formal contract generators,kprog/formal/tools/generate_x86_reg_read_spec.py,82,69
+formal contract generators,kprog/formal/tools/generate_x86_reg_write_spec.py,122,109
+formal contract generators,kprog/formal/tools/generate_x86_rep_movs_spec.py,159,142
+formal contract generators,kprog/formal/tools/generate_x86_sbb_flags_spec.py,62,62
+formal contract generators,kprog/formal/tools/generate_x86_sbb_result_spec.py,44,44
+formal contract generators,kprog/formal/tools/generate_x86_setcc_mem_spec.py,276,257
+formal contract generators,kprog/formal/tools/generate_x86_setcc_spec.py,300,276
+formal contract generators,kprog/formal/tools/generate_x86_shift_count_spec.py,64,51
+formal contract generators,kprog/formal/tools/generate_x86_shift_flags_spec.py,143,130
+formal contract generators,kprog/formal/tools/generate_x86_shift_result_spec.py,152,130
+formal contract generators,kprog/formal/tools/generate_x86_signed_spec.py,129,112
+formal contract generators,kprog/formal/tools/generate_x86_specialization_spec.py,471,417
+formal contract generators,kprog/formal/tools/generate_x86_stack_arena_spec.py,163,139
+formal contract generators,kprog/formal/tools/generate_x86_stack_arm_spec.py,338,308
+formal contract generators,kprog/formal/tools/generate_x86_stack_index_spec.py,67,55
+formal contract generators,kprog/formal/tools/generate_x86_stack_write_lanes_spec.py,393,361
+formal contract generators,kprog/formal/tools/generate_x86_store_spec.py,345,316
+formal contract generators,kprog/formal/tools/generate_x86_sub_flags_spec.py,57,57
+formal contract generators,kprog/formal/tools/generate_x86_width_spec.py,95,95
+formal contract generators,kprog/formal/tools/generate_x86_write_width_arm_spec.py,305,278
+formal contract generators,kprog/formal/tools/generate_x86_xchg_spec.py,275,251
+formal contract generators,kprog/formal/tools/generate_x86_xmm0_spec.py,387,363
+"translation-validation model, checker and proofs (Lean)",kprog/tv/ARM64Path.lean,118,109
+"translation-validation model, checker and proofs (Lean)",kprog/tv/BPF.lean,310,282
+"translation-validation model, checker and proofs (Lean)",kprog/tv/BPFChecks.lean,227,182
+"translation-validation model, checker and proofs (Lean)",kprog/tv/BPFPath.lean,187,174
+"translation-validation model, checker and proofs (Lean)",kprog/tv/BPFPlatform.lean,108,97
+"translation-validation model, checker and proofs (Lean)",kprog/tv/CmovCertificate.lean,94,81
+"translation-validation model, checker and proofs (Lean)",kprog/tv/Composition.lean,148,133
+"translation-validation model, checker and proofs (Lean)",kprog/tv/ContextChecks.lean,95,74
+"translation-validation model, checker and proofs (Lean)",kprog/tv/InputCertificate.lean,85,74
+"translation-validation model, checker and proofs (Lean)",kprog/tv/PacketCheckedBlocks.lean,270,241
+"translation-validation model, checker and proofs (Lean)",kprog/tv/PacketCheckedPlatform.lean,124,113
+"translation-validation model, checker and proofs (Lean)",kprog/tv/PacketEntryCertificate.lean,84,77
+"translation-validation model, checker and proofs (Lean)",kprog/tv/PacketExecutionRelocation.lean,210,192
+"translation-validation model, checker and proofs (Lean)",kprog/tv/PacketGuardCertificate.lean,94,82
+"translation-validation model, checker and proofs (Lean)",kprog/tv/PacketInvocation.lean,219,209
+"translation-validation model, checker and proofs (Lean)",kprog/tv/PacketInvocationABI.lean,262,244
+"translation-validation model, checker and proofs (Lean)",kprog/tv/PacketPCRelocation.lean,106,98
+"translation-validation model, checker and proofs (Lean)",kprog/tv/PacketStoreTransport.lean,301,275
+"translation-validation model, checker and proofs (Lean)",kprog/tv/PrivateSpills.lean,259,220
+"translation-validation model, checker and proofs (Lean)",kprog/tv/SimpleBlocks.lean,83,75
+"translation-validation model, checker and proofs (Lean)",kprog/tv/SimpleCheckedBlocks.lean,751,694
+"translation-validation model, checker and proofs (Lean)",kprog/tv/SimpleCheckedPlatform.lean,167,144
+"translation-validation model, checker and proofs (Lean)",kprog/tv/SimpleEntryCertificate.lean,240,205
+"translation-validation model, checker and proofs (Lean)",kprog/tv/SimpleExecutionRelocation.lean,214,196
+"translation-validation model, checker and proofs (Lean)",kprog/tv/SimpleGuardCertificate.lean,188,157
+"translation-validation model, checker and proofs (Lean)",kprog/tv/SimpleInvocationABI.lean,276,258
+"translation-validation model, checker and proofs (Lean)",kprog/tv/SimplePCRelocation.lean,110,102
+"translation-validation model, checker and proofs (Lean)",kprog/tv/SimpleStoreCertificate.lean,290,255
+"translation-validation model, checker and proofs (Lean)",kprog/tv/SimpleStoreCounterexample.lean,88,71
+"translation-validation model, checker and proofs (Lean)",kprog/tv/TrustedSimpleX86.lean,4213,3738
+translation-validation source and ELF extraction,kprog/tv/capture_context.cpp,72,69
+translation-validation source and ELF extraction,kprog/tv/capture_context_init.cpp,26,25
+translation-validation source and ELF extraction,kprog/tv/extract_arm64_context.py,22,21
+translation-validation source and ELF extraction,kprog/tv/extract_blocks.py,55,53
+translation-validation source and ELF extraction,kprog/tv/extract_checked.py,142,132
+translation-validation source and ELF extraction,kprog/tv/extract_context.py,51,45
+translation-validation source and ELF extraction,kprog/tv/extract_simple_arm64.py,59,51
+translation-validation source and ELF extraction,kprog/tv/extract_simple_context.py,38,37
+translation-validation source and ELF extraction,kprog/tv/extract_simple_emitted.py,149,148
+translation-validation source and ELF extraction,kprog/tv/extract_simple_packet.py,39,38
+constant-op dispatch generator,kprog/arm64/generate_sim_dispatch.py,97,90
+"native-proof kernel patch and application (patch text, not SLOC)",kprog/tv/apply_kernel_patch.py,29,25
+"native-proof kernel patch and application (patch text, not SLOC)",kprog/tv/native-proof-regions.patch,692,647
+existing verifier context (not incremental kernel changes),vendor/linux-framework/include/linux/bpf_verifier.h,1117,1010
+existing verifier context (not incremental kernel changes),vendor/linux-framework/kernel/bpf/verifier.c,26756,23742
