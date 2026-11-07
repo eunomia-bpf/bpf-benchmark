@@ -1,0 +1,418 @@
+[
+  {
+    "form": 0,
+    "assembly": "mov al, bl",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RBX",
+      "flags": "X86_WIDTH_8",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 1,
+    "assembly": "mov al, bl",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RBX",
+      "flags": "X86_WIDTH_8",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 2,
+    "assembly": "mov ah, bl",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RBX",
+      "flags": "X86_WIDTH_8",
+      "aux": "KPROG_X86_REG_LANE_AUX((0), 8, 0)",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 3,
+    "assembly": "mov ah, bl",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RBX",
+      "flags": "X86_WIDTH_8",
+      "aux": "KPROG_X86_REG_LANE_AUX((0), 8, 0)",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 4,
+    "assembly": "mov al, ah",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RAX",
+      "flags": "X86_WIDTH_8",
+      "aux": "KPROG_X86_REG_LANE_AUX((0), 0, 8)",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 5,
+    "assembly": "mov al, ah",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RAX",
+      "flags": "X86_WIDTH_8",
+      "aux": "KPROG_X86_REG_LANE_AUX((0), 0, 8)",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 6,
+    "assembly": "mov ah, al",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RAX",
+      "flags": "X86_WIDTH_8",
+      "aux": "KPROG_X86_REG_LANE_AUX((0), 8, 0)",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 7,
+    "assembly": "mov ah, al",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RAX",
+      "flags": "X86_WIDTH_8",
+      "aux": "KPROG_X86_REG_LANE_AUX((0), 8, 0)",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 8,
+    "assembly": "mov ax, bx",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RBX",
+      "flags": "X86_WIDTH_16",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 9,
+    "assembly": "mov ax, bx",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RBX",
+      "flags": "X86_WIDTH_16",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 10,
+    "assembly": "mov r8b, r9b",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_R8",
+      "src": "X86_R9",
+      "flags": "X86_WIDTH_8",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 11,
+    "assembly": "mov r8b, r9b",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_R8",
+      "src": "X86_R9",
+      "flags": "X86_WIDTH_8",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 12,
+    "assembly": "mov r8w, r9w",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_R8",
+      "src": "X86_R9",
+      "flags": "X86_WIDTH_16",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 13,
+    "assembly": "mov r8w, r9w",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_R8",
+      "src": "X86_R9",
+      "flags": "X86_WIDTH_16",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 14,
+    "assembly": "mov dil, sil",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RDI",
+      "src": "X86_RSI",
+      "flags": "X86_WIDTH_8",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 15,
+    "assembly": "mov dil, sil",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RDI",
+      "src": "X86_RSI",
+      "flags": "X86_WIDTH_8",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 16,
+    "assembly": "mov bpl, dl",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RBP",
+      "src": "X86_RDX",
+      "flags": "X86_WIDTH_8",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 17,
+    "assembly": "mov bpl, dl",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RBP",
+      "src": "X86_RDX",
+      "flags": "X86_WIDTH_8",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 18,
+    "assembly": "mov spl, al",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RSP",
+      "src": "X86_RAX",
+      "flags": "X86_WIDTH_8",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 19,
+    "assembly": "mov spl, al",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RSP",
+      "src": "X86_RAX",
+      "flags": "X86_WIDTH_8",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 20,
+    "assembly": "mov sp, ax",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RSP",
+      "src": "X86_RAX",
+      "flags": "X86_WIDTH_16",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 21,
+    "assembly": "mov sp, ax",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RSP",
+      "src": "X86_RAX",
+      "flags": "X86_WIDTH_16",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 22,
+    "assembly": "mov eax, ebx",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RBX",
+      "flags": "X86_WIDTH_32",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 23,
+    "assembly": "mov eax, ebx",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RBX",
+      "flags": "X86_WIDTH_32",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 24,
+    "assembly": "mov rax, rbx",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RBX",
+      "flags": "X86_WIDTH_64",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 25,
+    "assembly": "mov rax, rbx",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_REG",
+      "dst": "X86_RAX",
+      "src": "X86_RBX",
+      "flags": "X86_WIDTH_64",
+      "aux": "0",
+      "imm": "0"
+    }
+  },
+  {
+    "form": 26,
+    "assembly": "mov al, 0x7f",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_IMM",
+      "dst": "X86_RAX",
+      "src": "X86_REG_NONE",
+      "flags": "X86_WIDTH_8",
+      "aux": "0",
+      "imm": "127ULL"
+    }
+  },
+  {
+    "form": 27,
+    "assembly": "mov al, 0x7f",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_IMM",
+      "dst": "X86_RAX",
+      "src": "X86_REG_NONE",
+      "flags": "X86_WIDTH_8",
+      "aux": "0",
+      "imm": "127ULL"
+    }
+  },
+  {
+    "form": 28,
+    "assembly": "mov ah, 0x7f",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_IMM",
+      "dst": "X86_RAX",
+      "src": "X86_REG_NONE",
+      "flags": "X86_WIDTH_8",
+      "aux": "KPROG_X86_REG_LANE_AUX((0), 8, 0)",
+      "imm": "127ULL"
+    }
+  },
+  {
+    "form": 29,
+    "assembly": "mov ah, 0x7f",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_IMM",
+      "dst": "X86_RAX",
+      "src": "X86_REG_NONE",
+      "flags": "X86_WIDTH_8",
+      "aux": "KPROG_X86_REG_LANE_AUX((0), 8, 0)",
+      "imm": "127ULL"
+    }
+  },
+  {
+    "form": 30,
+    "assembly": "mov ax, 0x7fff",
+    "route": "raw",
+    "encoded": {
+      "op": "X86_OP_MOV_IMM",
+      "dst": "X86_RAX",
+      "src": "X86_REG_NONE",
+      "flags": "X86_WIDTH_16",
+      "aux": "0",
+      "imm": "32767ULL"
+    }
+  },
+  {
+    "form": 31,
+    "assembly": "mov ax, 0x7fff",
+    "route": "direct",
+    "encoded": {
+      "op": "X86_OP_MOV_IMM",
+      "dst": "X86_RAX",
+      "src": "X86_REG_NONE",
+      "flags": "X86_WIDTH_16",
+      "aux": "0",
+      "imm": "32767ULL"
+    }
+  }
+]

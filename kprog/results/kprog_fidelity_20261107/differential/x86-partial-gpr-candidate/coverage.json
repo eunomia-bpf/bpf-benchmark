@@ -1,0 +1,226 @@
+[
+  {
+    "assembly": "mov al, bl",
+    "decoded": "mov    al,bl",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "raw",
+    "form": 0
+  },
+  {
+    "assembly": "mov al, bl",
+    "decoded": "mov    al,bl",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "direct",
+    "form": 1
+  },
+  {
+    "assembly": "mov ah, bl",
+    "decoded": "mov    ah,bl",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "raw",
+    "form": 2
+  },
+  {
+    "assembly": "mov ah, bl",
+    "decoded": "mov    ah,bl",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "direct",
+    "form": 3
+  },
+  {
+    "assembly": "mov al, ah",
+    "decoded": "mov    al,ah",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "raw",
+    "form": 4
+  },
+  {
+    "assembly": "mov al, ah",
+    "decoded": "mov    al,ah",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "direct",
+    "form": 5
+  },
+  {
+    "assembly": "mov ah, al",
+    "decoded": "mov    ah,al",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "raw",
+    "form": 6
+  },
+  {
+    "assembly": "mov ah, al",
+    "decoded": "mov    ah,al",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "direct",
+    "form": 7
+  },
+  {
+    "assembly": "mov ax, bx",
+    "decoded": "mov    ax,bx",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "raw",
+    "form": 8
+  },
+  {
+    "assembly": "mov ax, bx",
+    "decoded": "mov    ax,bx",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "direct",
+    "form": 9
+  },
+  {
+    "assembly": "mov r8b, r9b",
+    "decoded": "mov    r8b,r9b",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "raw",
+    "form": 10
+  },
+  {
+    "assembly": "mov r8b, r9b",
+    "decoded": "mov    r8b,r9b",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "direct",
+    "form": 11
+  },
+  {
+    "assembly": "mov r8w, r9w",
+    "decoded": "mov    r8w,r9w",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "raw",
+    "form": 12
+  },
+  {
+    "assembly": "mov r8w, r9w",
+    "decoded": "mov    r8w,r9w",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "direct",
+    "form": 13
+  },
+  {
+    "assembly": "mov dil, sil",
+    "decoded": "mov    dil,sil",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "raw",
+    "form": 14
+  },
+  {
+    "assembly": "mov dil, sil",
+    "decoded": "mov    dil,sil",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "direct",
+    "form": 15
+  },
+  {
+    "assembly": "mov bpl, dl",
+    "decoded": "mov    bpl,dl",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "raw",
+    "form": 16
+  },
+  {
+    "assembly": "mov bpl, dl",
+    "decoded": "mov    bpl,dl",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "direct",
+    "form": 17
+  },
+  {
+    "assembly": "mov spl, al",
+    "decoded": "mov    spl,al",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "raw",
+    "form": 18
+  },
+  {
+    "assembly": "mov spl, al",
+    "decoded": "mov    spl,al",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "direct",
+    "form": 19
+  },
+  {
+    "assembly": "mov sp, ax",
+    "decoded": "mov    sp,ax",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "raw",
+    "form": 20
+  },
+  {
+    "assembly": "mov sp, ax",
+    "decoded": "mov    sp,ax",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "direct",
+    "form": 21
+  },
+  {
+    "assembly": "mov eax, ebx",
+    "decoded": "mov    eax,ebx",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "raw",
+    "form": 22
+  },
+  {
+    "assembly": "mov eax, ebx",
+    "decoded": "mov    eax,ebx",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "direct",
+    "form": 23
+  },
+  {
+    "assembly": "mov rax, rbx",
+    "decoded": "mov    rax,rbx",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "raw",
+    "form": 24
+  },
+  {
+    "assembly": "mov rax, rbx",
+    "decoded": "mov    rax,rbx",
+    "opcode": "X86_OP_MOV_REG",
+    "route": "direct",
+    "form": 25
+  },
+  {
+    "assembly": "mov al, 0x7f",
+    "decoded": "mov    al,0x7f",
+    "opcode": "X86_OP_MOV_IMM",
+    "route": "raw",
+    "form": 26
+  },
+  {
+    "assembly": "mov al, 0x7f",
+    "decoded": "mov    al,0x7f",
+    "opcode": "X86_OP_MOV_IMM",
+    "route": "direct",
+    "form": 27
+  },
+  {
+    "assembly": "mov ah, 0x7f",
+    "decoded": "mov    ah,0x7f",
+    "opcode": "X86_OP_MOV_IMM",
+    "route": "raw",
+    "form": 28
+  },
+  {
+    "assembly": "mov ah, 0x7f",
+    "decoded": "mov    ah,0x7f",
+    "opcode": "X86_OP_MOV_IMM",
+    "route": "direct",
+    "form": 29
+  },
+  {
+    "assembly": "mov ax, 0x7fff",
+    "decoded": "mov    ax,0x7fff",
+    "opcode": "X86_OP_MOV_IMM",
+    "route": "raw",
+    "form": 30
+  },
+  {
+    "assembly": "mov ax, 0x7fff",
+    "decoded": "mov    ax,0x7fff",
+    "opcode": "X86_OP_MOV_IMM",
+    "route": "direct",
+    "form": 31
+  }
+]

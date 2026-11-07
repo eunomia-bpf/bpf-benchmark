@@ -1,0 +1,6 @@
+{
+  "exit": 1,
+  "diagnostic_sha256": "7a451b9b691056450830bf52e69f01e757f733bc65f910cb86bb67d0f3af0c59",
+  "stage": "source manifest reconciliation",
+  "cause": "Transitive shared Python source appears in compiled snapshot and launch Git; top-level explicit source vector covers a subset."
+}

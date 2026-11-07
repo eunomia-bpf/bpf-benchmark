@@ -1,0 +1,23 @@
+{
+  "original_generator_sha256": "897a1385da018269df070befca388ad26e143fb396a037be0717cf18c9ea8fb6",
+  "selected_generator_sha256": "471a6ce3c35a7dbff28ff3976df318ebc60d6da349a3263791aec13e2d6781dd",
+  "matrix": [
+    "mov al, bl",
+    "mov ah, bl",
+    "mov al, ah",
+    "mov ah, al",
+    "mov ax, bx",
+    "mov r8b, r9b",
+    "mov r8w, r9w",
+    "mov dil, sil",
+    "mov bpl, dl",
+    "mov spl, al",
+    "mov sp, ax",
+    "mov eax, ebx",
+    "mov rax, rbx",
+    "mov al, 0x7f",
+    "mov ah, 0x7f",
+    "mov ax, 0x7fff"
+  ],
+  "inserted_block": "\n    from dataclasses import asdict\n    selected,bindings=[],[]\n    for assembly,e,special,body,decoded in pairs:\n        if assembly not in forms:\n            continue\n        for route in ['raw','direct']:\n            step=(f'X86_SIM_RUN_OP({e.op}, {e.dst}, {e.src}, '\n                  f'{e.flags}, {e.aux}, {e.imm})') if route=='raw' else None\n            selected.append((assembly,e,step,body,decoded))\n            bindings.append(dict(form=len(selected)-1,assembly=assembly,route=route,encoded=asdict(e)))\n    assert len(selected)==32\n    pairs=selected\n    (out/'numeric-bindings.json').write_text(json.dumps(bindings,indent=2)+'\\n')\n"
+}
