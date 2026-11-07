@@ -1,0 +1,1145 @@
+form	assembly	opcode	cases	cpu_simulator_mismatches	reference_cases	cpu_reference_mismatches	simulator_reference_mismatches	reference_status	native_memory_write_cases
+0	push rbx	X86_OP_PUSH	256	0	256	0	0	checked	0
+1	pop rax	X86_OP_POP	256	0	256	0	0	checked	0
+2	push bx	X86_OP_PUSH	256	0	256	0	0	checked	0
+3	pop ax	X86_OP_POP	256	0	256	0	0	checked	0
+4	nop	X86_OP_NOP	256	0	256	0	0	checked	0
+5	cbw	X86_OP_MOVSX_REG	256	0	256	0	0	checked	0
+6	cwde	X86_OP_MOVSX_REG	256	0	256	0	0	checked	0
+7	cdqe	X86_OP_MOVSX_REG	256	0	256	0	0	checked	0
+8	cwd	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+9	cdq	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+10	cqo	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+11	movups xmm0, XMMWORD PTR [rdi]	X86_OP_LOAD_XMM0	256	0	256	0	0	checked	0
+12	movups XMMWORD PTR [rdi], xmm0	X86_OP_STORE_XMM0	256	0	256	0	0	checked	256
+13	mov rax, rsp	X86_OP_MOV_REG	256	0	256	0	0	checked	0
+14	mov eax, esp	X86_OP_MOV_REG	256	0	256	0	0	checked	0
+15	lea rax, [rsp+16]	X86_OP_LEA	256	0	256	0	0	checked	0
+16	cmp rsp, 0	X86_OP_CMP_IMM	256	0	256	0	0	checked	0
+17	mov rsp, rax	X86_OP_MOV_REG	256	0	256	0	0	checked	0
+18	mov esp, eax	X86_OP_MOV_REG	256	0	256	0	0	checked	0
+19	lea rsp, [rsp+16]	X86_OP_LEA	256	0	256	0	0	checked	0
+20	add rsp, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+21	push rsp	X86_OP_PUSH	256	0	256	0	0	checked	0
+22	pop rsp	X86_OP_POP	256	0	256	0	0	checked	0
+23	push sp	X86_OP_PUSH	256	0	256	0	0	checked	0
+24	pop sp	X86_OP_POP	256	0	256	0	0	checked	0
+25	push -2147483648	X86_OP_PUSH	256	0	256	0	0	checked	0
+26	push -128	X86_OP_PUSH	256	0	256	0	0	checked	0
+27	push -1	X86_OP_PUSH	256	0	256	0	0	checked	0
+28	push 0	X86_OP_PUSH	256	0	256	0	0	checked	0
+29	push 1	X86_OP_PUSH	256	0	256	0	0	checked	0
+30	push 127	X86_OP_PUSH	256	0	256	0	0	checked	0
+31	push 128	X86_OP_PUSH	256	0	256	0	0	checked	0
+32	push 305419896	X86_OP_PUSH	256	0	256	0	0	checked	0
+33	pushw -7	X86_OP_PUSH	256	0	256	0	0	checked	0
+34	push QWORD PTR [rdi+8]	X86_OP_PUSH	256	0	256	0	0	checked	0
+35	push WORD PTR [rdi+8]	X86_OP_PUSH	256	0	256	0	0	checked	0
+36	pop QWORD PTR [rdi+8]	X86_OP_POP	256	0	256	0	0	checked	256
+37	pop WORD PTR [rdi+8]	X86_OP_POP	256	0	256	0	0	checked	256
+38	push QWORD PTR [rsp-16]	X86_OP_PUSH	256	0	256	0	0	checked	0
+39	pop QWORD PTR [rsp-16]	X86_OP_POP	256	0	256	0	0	checked	0
+40	.byte 0x66, 0x48, 0x53	X86_OP_PUSH	256	0	256	0	0	checked	0
+41	.byte 0x48, 0x66, 0x53	X86_OP_PUSH	256	0	256	0	0	checked	0
+42	.byte 0x66, 0x48, 0xff, 0xf3	X86_OP_PUSH	256	0	256	0	0	checked	0
+43	.byte 0x48, 0x66, 0xff, 0xf3	X86_OP_PUSH	256	0	256	0	0	checked	0
+44	.byte 0x66, 0x48, 0x58	X86_OP_POP	256	0	256	0	0	checked	0
+45	.byte 0x48, 0x66, 0x58	X86_OP_POP	256	0	256	0	0	checked	0
+46	.byte 0x66, 0x48, 0x8f, 0xc0	X86_OP_POP	256	0	256	0	0	checked	0
+47	.byte 0x48, 0x66, 0x8f, 0xc0	X86_OP_POP	256	0	256	0	0	checked	0
+48	mov al, bl	X86_OP_MOV_REG	256	0	256	0	0	checked	0
+49	mov al, 0x7f	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+50	mov BYTE PTR [rdi+8], al	X86_OP_MOV_STORE_REG	256	0	256	0	0	checked	254
+51	mov al, BYTE PTR [rdi+8]	X86_OP_MOV_LOAD	256	0	256	0	0	checked	0
+52	mov BYTE PTR [rdi+8], 0x7f	X86_OP_MOV_STORE_IMM	256	0	256	0	0	checked	255
+53	add al, bl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+54	add al, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+55	add BYTE PTR [rdi+8], al	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	222
+56	add BYTE PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+57	add al, BYTE PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+58	adc al, bl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+59	adc al, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+60	adc BYTE PTR [rdi+8], al	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	200
+61	adc BYTE PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+62	adc al, BYTE PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+63	sub al, bl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+64	sub al, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+65	sub BYTE PTR [rdi+8], al	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	224
+66	sub BYTE PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+67	sub al, BYTE PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+68	sbb al, bl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+69	sbb al, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+70	sbb BYTE PTR [rdi+8], al	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	198
+71	sbb BYTE PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+72	sbb al, BYTE PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+73	cmp al, bl	X86_OP_CMP_REG	256	0	256	0	0	checked	0
+74	cmp al, 0x7f	X86_OP_CMP_IMM	256	0	256	0	0	checked	0
+75	cmp BYTE PTR [rdi+8], al	X86_OP_CMP_MEM_REG	256	0	256	0	0	checked	0
+76	cmp BYTE PTR [rdi+8], 0x7f	X86_OP_CMP_MEM_IMM	256	0	256	0	0	checked	0
+77	cmp al, BYTE PTR [rdi+8]	X86_OP_CMP_REG_MEM	256	0	256	0	0	checked	0
+78	test al, bl	X86_OP_TEST_REG	256	0	256	0	0	checked	0
+79	test al, 0x7f	X86_OP_TEST_IMM	256	0	256	0	0	checked	0
+80	test BYTE PTR [rdi+8], al	X86_OP_TEST_MEM_REG	256	0	256	0	0	checked	0
+81	test BYTE PTR [rdi+8], 0x7f	X86_OP_TEST_MEM_IMM	256	0	256	0	0	checked	0
+82	and al, bl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+83	and al, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+84	and al, BYTE PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+85	and BYTE PTR [rdi+8], al	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	188
+86	and BYTE PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	117
+87	or al, bl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+88	or al, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+89	or al, BYTE PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+90	or BYTE PTR [rdi+8], al	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	208
+91	or BYTE PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	255
+92	xor al, bl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+93	xor al, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+94	xor al, BYTE PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+95	xor BYTE PTR [rdi+8], al	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	224
+96	xor BYTE PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+97	inc al	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+98	inc BYTE PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+99	dec al	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+100	dec BYTE PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+101	neg al	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+102	neg BYTE PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	255
+103	not al	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+104	not BYTE PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+105	xchg al, bl	X86_OP_XCHG	256	0	256	0	0	checked	0
+106	shl al, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+107	shl al, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+108	shl al, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+109	shl al, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+110	shl al, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+111	shl al, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+112	shl al, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+113	shl al, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+114	shl al, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+115	shl al, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+116	shl al, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+117	shl al, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+118	shr al, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+119	shr al, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+120	shr al, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+121	shr al, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+122	shr al, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+123	shr al, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+124	shr al, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+125	shr al, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+126	shr al, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+127	shr al, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+128	shr al, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+129	shr al, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+130	sar al, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+131	sar al, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+132	sar al, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+133	sar al, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+134	sar al, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+135	sar al, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+136	sar al, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+137	sar al, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+138	sar al, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+139	sar al, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+140	sar al, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+141	sar al, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+142	rol al, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+143	rol al, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+144	rol al, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+145	rol al, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+146	rol al, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+147	rol al, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+148	rol al, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+149	rol al, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+150	rol al, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+151	rol al, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+152	rol al, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+153	rol al, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+154	ror al, 0	X86_OP_ROR	256	0	256	0	0	checked	0
+155	ror al, 1	X86_OP_ROR	256	0	256	0	0	checked	0
+156	ror al, 7	X86_OP_ROR	256	0	256	0	0	checked	0
+157	ror al, 8	X86_OP_ROR	256	0	256	0	0	checked	0
+158	ror al, 15	X86_OP_ROR	256	0	256	0	0	checked	0
+159	ror al, 16	X86_OP_ROR	256	0	256	0	0	checked	0
+160	ror al, 31	X86_OP_ROR	256	0	256	0	0	checked	0
+161	ror al, 32	X86_OP_ROR	256	0	256	0	0	checked	0
+162	ror al, 63	X86_OP_ROR	256	0	256	0	0	checked	0
+163	ror al, 64	X86_OP_ROR	256	0	256	0	0	checked	0
+164	ror al, 255	X86_OP_ROR	256	0	256	0	0	checked	0
+165	ror al, cl	X86_OP_ROR	256	0	256	0	0	checked	0
+166	mov ax, bx	X86_OP_MOV_REG	256	0	256	0	0	checked	0
+167	mov ax, 0x7f	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+168	mov WORD PTR [rdi+8], ax	X86_OP_MOV_STORE_REG	256	0	256	0	0	checked	256
+169	mov ax, WORD PTR [rdi+8]	X86_OP_MOV_LOAD	256	0	256	0	0	checked	0
+170	mov WORD PTR [rdi+8], 0x7f	X86_OP_MOV_STORE_IMM	256	0	256	0	0	checked	256
+171	add ax, bx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+172	add ax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+173	add WORD PTR [rdi+8], ax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	232
+174	add WORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+175	add ax, WORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+176	adc ax, bx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+177	adc ax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+178	adc WORD PTR [rdi+8], ax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	216
+179	adc WORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+180	adc ax, WORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+181	sub ax, bx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+182	sub ax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+183	sub WORD PTR [rdi+8], ax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	232
+184	sub WORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+185	sub ax, WORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+186	sbb ax, bx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+187	sbb ax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+188	sbb WORD PTR [rdi+8], ax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	216
+189	sbb WORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+190	sbb ax, WORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+191	cmp ax, bx	X86_OP_CMP_REG	256	0	256	0	0	checked	0
+192	cmp ax, 0x7f	X86_OP_CMP_IMM	256	0	256	0	0	checked	0
+193	cmp WORD PTR [rdi+8], ax	X86_OP_CMP_MEM_REG	256	0	256	0	0	checked	0
+194	cmp WORD PTR [rdi+8], 0x7f	X86_OP_CMP_MEM_IMM	256	0	256	0	0	checked	0
+195	cmp ax, WORD PTR [rdi+8]	X86_OP_CMP_REG_MEM	256	0	256	0	0	checked	0
+196	test ax, bx	X86_OP_TEST_REG	256	0	256	0	0	checked	0
+197	test ax, 0x7f	X86_OP_TEST_IMM	256	0	256	0	0	checked	0
+198	test WORD PTR [rdi+8], ax	X86_OP_TEST_MEM_REG	256	0	256	0	0	checked	0
+199	test WORD PTR [rdi+8], 0x7f	X86_OP_TEST_MEM_IMM	256	0	256	0	0	checked	0
+200	and ax, bx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+201	and ax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+202	and ax, WORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+203	and WORD PTR [rdi+8], ax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	211
+204	and WORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	255
+205	or ax, bx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+206	or ax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+207	or ax, WORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+208	or WORD PTR [rdi+8], ax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	218
+209	or WORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	253
+210	xor ax, bx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+211	xor ax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+212	xor ax, WORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+213	xor WORD PTR [rdi+8], ax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	232
+214	xor WORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+215	inc ax	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+216	inc WORD PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+217	dec ax	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+218	dec WORD PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+219	neg ax	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+220	neg WORD PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+221	not ax	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+222	not WORD PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+223	xchg ax, bx	X86_OP_XCHG	256	0	256	0	0	checked	0
+224	shl ax, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+225	shl ax, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+226	shl ax, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+227	shl ax, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+228	shl ax, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+229	shl ax, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+230	shl ax, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+231	shl ax, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+232	shl ax, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+233	shl ax, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+234	shl ax, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+235	shl ax, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+236	shr ax, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+237	shr ax, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+238	shr ax, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+239	shr ax, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+240	shr ax, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+241	shr ax, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+242	shr ax, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+243	shr ax, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+244	shr ax, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+245	shr ax, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+246	shr ax, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+247	shr ax, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+248	sar ax, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+249	sar ax, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+250	sar ax, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+251	sar ax, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+252	sar ax, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+253	sar ax, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+254	sar ax, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+255	sar ax, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+256	sar ax, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+257	sar ax, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+258	sar ax, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+259	sar ax, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+260	rol ax, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+261	rol ax, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+262	rol ax, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+263	rol ax, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+264	rol ax, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+265	rol ax, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+266	rol ax, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+267	rol ax, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+268	rol ax, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+269	rol ax, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+270	rol ax, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+271	rol ax, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+272	ror ax, 0	X86_OP_ROR	256	0	256	0	0	checked	0
+273	ror ax, 1	X86_OP_ROR	256	0	256	0	0	checked	0
+274	ror ax, 7	X86_OP_ROR	256	0	256	0	0	checked	0
+275	ror ax, 8	X86_OP_ROR	256	0	256	0	0	checked	0
+276	ror ax, 15	X86_OP_ROR	256	0	256	0	0	checked	0
+277	ror ax, 16	X86_OP_ROR	256	0	256	0	0	checked	0
+278	ror ax, 31	X86_OP_ROR	256	0	256	0	0	checked	0
+279	ror ax, 32	X86_OP_ROR	256	0	256	0	0	checked	0
+280	ror ax, 63	X86_OP_ROR	256	0	256	0	0	checked	0
+281	ror ax, 64	X86_OP_ROR	256	0	256	0	0	checked	0
+282	ror ax, 255	X86_OP_ROR	256	0	256	0	0	checked	0
+283	ror ax, cl	X86_OP_ROR	256	0	256	0	0	checked	0
+284	imul ax, bx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+285	imul ax, WORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+286	imul ax, bx, -7	X86_OP_IMUL_IMM	256	0	256	0	0	checked	0
+287	imul ax, WORD PTR [rdi+8], -7	X86_OP_IMUL_MEM_IMM	256	0	256	0	0	checked	0
+288	popcnt ax, bx	X86_OP_POPCNT	256	0	256	0	0	checked	0
+289	popcnt ax, WORD PTR [rdi+8]	X86_OP_POPCNT_MEM	256	0	256	0	0	checked	0
+290	div bx	X86_OP_DIV	256	0	256	0	0	checked	0
+291	bt ax, bx	X86_OP_BT	256	0	256	0	0	checked	0
+292	bt ax, 7	X86_OP_BT_IMM	256	0	256	0	0	checked	0
+293	bt WORD PTR [rdi+8], 7	X86_OP_BT_MEM_IMM	256	0	256	0	0	checked	0
+294	movbe ax, WORD PTR [rdi+8]	X86_OP_MOVBE_LOAD	256	0	256	0	0	checked	0
+295	movbe WORD PTR [rdi+8], ax	X86_OP_MOVBE_STORE	256	0	256	0	0	checked	256
+296	shld ax, bx, 0	X86_OP_SHLD_IMM	256	0	256	0	0	checked	0
+297	shld ax, bx, 1	X86_OP_SHLD_IMM	256	0	256	0	0	checked	0
+298	shld ax, bx, 7	X86_OP_SHLD_IMM	256	0	256	0	0	checked	0
+299	shld ax, bx, 15	X86_OP_SHLD_IMM	256	0	256	0	0	checked	0
+300	shrd ax, bx, 0	X86_OP_SHRD_IMM	256	0	256	0	0	checked	0
+301	shrd ax, bx, 1	X86_OP_SHRD_IMM	256	0	256	0	0	checked	0
+302	shrd ax, bx, 7	X86_OP_SHRD_IMM	256	0	256	0	0	checked	0
+303	shrd ax, bx, 15	X86_OP_SHRD_IMM	256	0	256	0	0	checked	0
+304	mov eax, ebx	X86_OP_MOV_REG	256	0	256	0	0	checked	0
+305	mov eax, 0x7f	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+306	mov DWORD PTR [rdi+8], eax	X86_OP_MOV_STORE_REG	256	0	256	0	0	checked	256
+307	mov eax, DWORD PTR [rdi+8]	X86_OP_MOV_LOAD	256	0	256	0	0	checked	0
+308	mov DWORD PTR [rdi+8], 0x7f	X86_OP_MOV_STORE_IMM	256	0	256	0	0	checked	256
+309	add eax, ebx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+310	add eax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+311	add DWORD PTR [rdi+8], eax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	240
+312	add DWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+313	add eax, DWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+314	adc eax, ebx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+315	adc eax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+316	adc DWORD PTR [rdi+8], eax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	224
+317	adc DWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+318	adc eax, DWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+319	sub eax, ebx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+320	sub eax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+321	sub DWORD PTR [rdi+8], eax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	240
+322	sub DWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+323	sub eax, DWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+324	sbb eax, ebx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+325	sbb eax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+326	sbb DWORD PTR [rdi+8], eax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	224
+327	sbb DWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+328	sbb eax, DWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+329	cmp eax, ebx	X86_OP_CMP_REG	256	0	256	0	0	checked	0
+330	cmp eax, 0x7f	X86_OP_CMP_IMM	256	0	256	0	0	checked	0
+331	cmp DWORD PTR [rdi+8], eax	X86_OP_CMP_MEM_REG	256	0	256	0	0	checked	0
+332	cmp DWORD PTR [rdi+8], 0x7f	X86_OP_CMP_MEM_IMM	256	0	256	0	0	checked	0
+333	cmp eax, DWORD PTR [rdi+8]	X86_OP_CMP_REG_MEM	256	0	256	0	0	checked	0
+334	test eax, ebx	X86_OP_TEST_REG	256	0	256	0	0	checked	0
+335	test eax, 0x7f	X86_OP_TEST_IMM	256	0	256	0	0	checked	0
+336	test DWORD PTR [rdi+8], eax	X86_OP_TEST_MEM_REG	256	0	256	0	0	checked	0
+337	test DWORD PTR [rdi+8], 0x7f	X86_OP_TEST_MEM_IMM	256	0	256	0	0	checked	0
+338	and eax, ebx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+339	and eax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+340	and eax, DWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+341	and DWORD PTR [rdi+8], eax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	229
+342	and DWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+343	or eax, ebx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+344	or eax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+345	or eax, DWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+346	or DWORD PTR [rdi+8], eax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	224
+347	or DWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	254
+348	xor eax, ebx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+349	xor eax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+350	xor eax, DWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+351	xor DWORD PTR [rdi+8], eax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	240
+352	xor DWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+353	inc eax	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+354	inc DWORD PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+355	dec eax	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+356	dec DWORD PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+357	neg eax	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+358	neg DWORD PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+359	not eax	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+360	not DWORD PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+361	xchg eax, ebx	X86_OP_XCHG	256	0	256	0	0	checked	0
+362	shl eax, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+363	shl eax, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+364	shl eax, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+365	shl eax, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+366	shl eax, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+367	shl eax, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+368	shl eax, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+369	shl eax, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+370	shl eax, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+371	shl eax, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+372	shl eax, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+373	shl eax, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+374	shr eax, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+375	shr eax, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+376	shr eax, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+377	shr eax, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+378	shr eax, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+379	shr eax, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+380	shr eax, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+381	shr eax, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+382	shr eax, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+383	shr eax, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+384	shr eax, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+385	shr eax, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+386	sar eax, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+387	sar eax, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+388	sar eax, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+389	sar eax, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+390	sar eax, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+391	sar eax, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+392	sar eax, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+393	sar eax, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+394	sar eax, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+395	sar eax, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+396	sar eax, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+397	sar eax, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+398	rol eax, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+399	rol eax, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+400	rol eax, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+401	rol eax, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+402	rol eax, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+403	rol eax, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+404	rol eax, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+405	rol eax, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+406	rol eax, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+407	rol eax, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+408	rol eax, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+409	rol eax, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+410	ror eax, 0	X86_OP_ROR	256	0	256	0	0	checked	0
+411	ror eax, 1	X86_OP_ROR	256	0	256	0	0	checked	0
+412	ror eax, 7	X86_OP_ROR	256	0	256	0	0	checked	0
+413	ror eax, 8	X86_OP_ROR	256	0	256	0	0	checked	0
+414	ror eax, 15	X86_OP_ROR	256	0	256	0	0	checked	0
+415	ror eax, 16	X86_OP_ROR	256	0	256	0	0	checked	0
+416	ror eax, 31	X86_OP_ROR	256	0	256	0	0	checked	0
+417	ror eax, 32	X86_OP_ROR	256	0	256	0	0	checked	0
+418	ror eax, 63	X86_OP_ROR	256	0	256	0	0	checked	0
+419	ror eax, 64	X86_OP_ROR	256	0	256	0	0	checked	0
+420	ror eax, 255	X86_OP_ROR	256	0	256	0	0	checked	0
+421	ror eax, cl	X86_OP_ROR	256	0	256	0	0	checked	0
+422	imul eax, ebx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+423	imul eax, DWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+424	imul eax, ebx, -7	X86_OP_IMUL_IMM	256	0	256	0	0	checked	0
+425	imul eax, DWORD PTR [rdi+8], -7	X86_OP_IMUL_MEM_IMM	256	0	256	0	0	checked	0
+426	popcnt eax, ebx	X86_OP_POPCNT	256	0	256	0	0	checked	0
+427	popcnt eax, DWORD PTR [rdi+8]	X86_OP_POPCNT_MEM	256	0	256	0	0	checked	0
+428	div ebx	X86_OP_DIV	256	0	256	0	0	checked	0
+429	bt eax, ebx	X86_OP_BT	256	0	256	0	0	checked	0
+430	bt eax, 7	X86_OP_BT_IMM	256	0	256	0	0	checked	0
+431	bt DWORD PTR [rdi+8], 7	X86_OP_BT_MEM_IMM	256	0	256	0	0	checked	0
+432	movbe eax, DWORD PTR [rdi+8]	X86_OP_MOVBE_LOAD	256	0	256	0	0	checked	0
+433	movbe DWORD PTR [rdi+8], eax	X86_OP_MOVBE_STORE	256	0	256	0	0	checked	256
+434	shld eax, ebx, 0	X86_OP_SHLD_IMM	256	0	256	0	0	checked	0
+435	shld eax, ebx, 1	X86_OP_SHLD_IMM	256	0	256	0	0	checked	0
+436	shld eax, ebx, 7	X86_OP_SHLD_IMM	256	0	256	0	0	checked	0
+437	shld eax, ebx, 15	X86_OP_SHLD_IMM	256	0	256	0	0	checked	0
+438	shrd eax, ebx, 0	X86_OP_SHRD_IMM	256	0	256	0	0	checked	0
+439	shrd eax, ebx, 1	X86_OP_SHRD_IMM	256	0	256	0	0	checked	0
+440	shrd eax, ebx, 7	X86_OP_SHRD_IMM	256	0	256	0	0	checked	0
+441	shrd eax, ebx, 15	X86_OP_SHRD_IMM	256	0	256	0	0	checked	0
+442	lea eax, [rdi+rbx*4-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+443	bswap eax	X86_OP_BSWAP	256	0	256	0	0	checked	0
+444	andn eax, ebx, ecx	X86_OP_ANDN	256	0	256	0	0	checked	0
+445	andn eax, ebx, DWORD PTR [rdi+8]	X86_OP_ANDN_MEM	256	0	256	0	0	checked	0
+446	bzhi eax, ebx, ecx	X86_OP_BZHI	256	0	256	0	0	checked	0
+447	bzhi eax, DWORD PTR [rdi+8], ecx	X86_OP_BZHI_MEM	256	0	256	0	0	checked	0
+448	mulx eax, ebx, ecx	X86_OP_MULX	256	0	256	0	0	checked	0
+449	shlx eax, ebx, ecx	X86_OP_SHIFTX	256	0	256	0	0	checked	0
+450	shlx eax, DWORD PTR [rdi+8], ecx	X86_OP_SHIFTX_MEM	256	0	256	0	0	checked	0
+451	shrx eax, ebx, ecx	X86_OP_SHIFTX	256	0	256	0	0	checked	0
+452	shrx eax, DWORD PTR [rdi+8], ecx	X86_OP_SHIFTX_MEM	256	0	256	0	0	checked	0
+453	sarx eax, ebx, ecx	X86_OP_SHIFTX	256	0	256	0	0	checked	0
+454	sarx eax, DWORD PTR [rdi+8], ecx	X86_OP_SHIFTX_MEM	256	0	256	0	0	checked	0
+455	rorx eax, ebx, 7	X86_OP_RORX	256	0	256	0	0	checked	0
+456	rorx eax, DWORD PTR [rdi+8], 7	X86_OP_RORX_MEM	256	0	256	0	0	checked	0
+457	mov rax, rbx	X86_OP_MOV_REG	256	0	256	0	0	checked	0
+458	mov rax, 0x7f	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+459	mov QWORD PTR [rdi+8], rax	X86_OP_MOV_STORE_REG	256	0	256	0	0	checked	256
+460	mov rax, QWORD PTR [rdi+8]	X86_OP_MOV_LOAD	256	0	256	0	0	checked	0
+461	mov QWORD PTR [rdi+8], 0x7f	X86_OP_MOV_STORE_IMM	256	0	256	0	0	checked	256
+462	add rax, rbx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+463	add rax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+464	add QWORD PTR [rdi+8], rax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	248
+465	add QWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+466	add rax, QWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+467	adc rax, rbx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+468	adc rax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+469	adc QWORD PTR [rdi+8], rax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	240
+470	adc QWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+471	adc rax, QWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+472	sub rax, rbx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+473	sub rax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+474	sub QWORD PTR [rdi+8], rax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	248
+475	sub QWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+476	sub rax, QWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+477	sbb rax, rbx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+478	sbb rax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+479	sbb QWORD PTR [rdi+8], rax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	240
+480	sbb QWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+481	sbb rax, QWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+482	cmp rax, rbx	X86_OP_CMP_REG	256	0	256	0	0	checked	0
+483	cmp rax, 0x7f	X86_OP_CMP_IMM	256	0	256	0	0	checked	0
+484	cmp QWORD PTR [rdi+8], rax	X86_OP_CMP_MEM_REG	256	0	256	0	0	checked	0
+485	cmp QWORD PTR [rdi+8], 0x7f	X86_OP_CMP_MEM_IMM	256	0	256	0	0	checked	0
+486	cmp rax, QWORD PTR [rdi+8]	X86_OP_CMP_REG_MEM	256	0	256	0	0	checked	0
+487	test rax, rbx	X86_OP_TEST_REG	256	0	256	0	0	checked	0
+488	test rax, 0x7f	X86_OP_TEST_IMM	256	0	256	0	0	checked	0
+489	test QWORD PTR [rdi+8], rax	X86_OP_TEST_MEM_REG	256	0	256	0	0	checked	0
+490	test QWORD PTR [rdi+8], 0x7f	X86_OP_TEST_MEM_IMM	256	0	256	0	0	checked	0
+491	and rax, rbx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+492	and rax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+493	and rax, QWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+494	and QWORD PTR [rdi+8], rax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	244
+495	and QWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+496	or rax, rbx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+497	or rax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+498	or rax, QWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+499	or QWORD PTR [rdi+8], rax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	231
+500	or QWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	255
+501	xor rax, rbx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+502	xor rax, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+503	xor rax, QWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+504	xor QWORD PTR [rdi+8], rax	X86_OP_ALU_MEM_REG	256	0	256	0	0	checked	248
+505	xor QWORD PTR [rdi+8], 0x7f	X86_OP_ALU_MEM_IMM	256	0	256	0	0	checked	256
+506	inc rax	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+507	inc QWORD PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+508	dec rax	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+509	dec QWORD PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+510	neg rax	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+511	neg QWORD PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+512	not rax	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+513	not QWORD PTR [rdi+8]	X86_OP_ALU_MEM_UNARY	256	0	256	0	0	checked	256
+514	xchg rax, rbx	X86_OP_XCHG	256	0	256	0	0	checked	0
+515	shl rax, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+516	shl rax, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+517	shl rax, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+518	shl rax, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+519	shl rax, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+520	shl rax, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+521	shl rax, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+522	shl rax, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+523	shl rax, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+524	shl rax, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+525	shl rax, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+526	shl rax, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+527	shr rax, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+528	shr rax, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+529	shr rax, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+530	shr rax, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+531	shr rax, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+532	shr rax, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+533	shr rax, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+534	shr rax, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+535	shr rax, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+536	shr rax, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+537	shr rax, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+538	shr rax, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+539	sar rax, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+540	sar rax, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+541	sar rax, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+542	sar rax, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+543	sar rax, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+544	sar rax, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+545	sar rax, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+546	sar rax, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+547	sar rax, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+548	sar rax, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+549	sar rax, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+550	sar rax, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+551	rol rax, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+552	rol rax, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+553	rol rax, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+554	rol rax, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+555	rol rax, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+556	rol rax, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+557	rol rax, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+558	rol rax, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+559	rol rax, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+560	rol rax, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+561	rol rax, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+562	rol rax, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+563	ror rax, 0	X86_OP_ROR	256	0	256	0	0	checked	0
+564	ror rax, 1	X86_OP_ROR	256	0	256	0	0	checked	0
+565	ror rax, 7	X86_OP_ROR	256	0	256	0	0	checked	0
+566	ror rax, 8	X86_OP_ROR	256	0	256	0	0	checked	0
+567	ror rax, 15	X86_OP_ROR	256	0	256	0	0	checked	0
+568	ror rax, 16	X86_OP_ROR	256	0	256	0	0	checked	0
+569	ror rax, 31	X86_OP_ROR	256	0	256	0	0	checked	0
+570	ror rax, 32	X86_OP_ROR	256	0	256	0	0	checked	0
+571	ror rax, 63	X86_OP_ROR	256	0	256	0	0	checked	0
+572	ror rax, 64	X86_OP_ROR	256	0	256	0	0	checked	0
+573	ror rax, 255	X86_OP_ROR	256	0	256	0	0	checked	0
+574	ror rax, cl	X86_OP_ROR	256	0	256	0	0	checked	0
+575	imul rax, rbx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+576	imul rax, QWORD PTR [rdi+8]	X86_OP_ALU_MEM	256	0	256	0	0	checked	0
+577	imul rax, rbx, -7	X86_OP_IMUL_IMM	256	0	256	0	0	checked	0
+578	imul rax, QWORD PTR [rdi+8], -7	X86_OP_IMUL_MEM_IMM	256	0	256	0	0	checked	0
+579	popcnt rax, rbx	X86_OP_POPCNT	256	0	256	0	0	checked	0
+580	popcnt rax, QWORD PTR [rdi+8]	X86_OP_POPCNT_MEM	256	0	256	0	0	checked	0
+581	div rbx	X86_OP_DIV	256	0	256	0	0	checked	0
+582	bt rax, rbx	X86_OP_BT	256	0	256	0	0	checked	0
+583	bt rax, 7	X86_OP_BT_IMM	256	0	256	0	0	checked	0
+584	bt QWORD PTR [rdi+8], 7	X86_OP_BT_MEM_IMM	256	0	256	0	0	checked	0
+585	movbe rax, QWORD PTR [rdi+8]	X86_OP_MOVBE_LOAD	256	0	256	0	0	checked	0
+586	movbe QWORD PTR [rdi+8], rax	X86_OP_MOVBE_STORE	256	0	256	0	0	checked	256
+587	shld rax, rbx, 0	X86_OP_SHLD_IMM	256	0	256	0	0	checked	0
+588	shld rax, rbx, 1	X86_OP_SHLD_IMM	256	0	256	0	0	checked	0
+589	shld rax, rbx, 7	X86_OP_SHLD_IMM	256	0	256	0	0	checked	0
+590	shld rax, rbx, 15	X86_OP_SHLD_IMM	256	0	256	0	0	checked	0
+591	shrd rax, rbx, 0	X86_OP_SHRD_IMM	256	0	256	0	0	checked	0
+592	shrd rax, rbx, 1	X86_OP_SHRD_IMM	256	0	256	0	0	checked	0
+593	shrd rax, rbx, 7	X86_OP_SHRD_IMM	256	0	256	0	0	checked	0
+594	shrd rax, rbx, 15	X86_OP_SHRD_IMM	256	0	256	0	0	checked	0
+595	lea rax, [rdi+rbx*4-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+596	bswap rax	X86_OP_BSWAP	256	0	256	0	0	checked	0
+597	andn rax, rbx, rcx	X86_OP_ANDN	256	0	256	0	0	checked	0
+598	andn rax, rbx, QWORD PTR [rdi+8]	X86_OP_ANDN_MEM	256	0	256	0	0	checked	0
+599	bzhi rax, rbx, rcx	X86_OP_BZHI	256	0	256	0	0	checked	0
+600	bzhi rax, QWORD PTR [rdi+8], rcx	X86_OP_BZHI_MEM	256	0	256	0	0	checked	0
+601	mulx rax, rbx, rcx	X86_OP_MULX	256	0	256	0	0	checked	0
+602	shlx rax, rbx, rcx	X86_OP_SHIFTX	256	0	256	0	0	checked	0
+603	shlx rax, QWORD PTR [rdi+8], rcx	X86_OP_SHIFTX_MEM	256	0	256	0	0	checked	0
+604	shrx rax, rbx, rcx	X86_OP_SHIFTX	256	0	256	0	0	checked	0
+605	shrx rax, QWORD PTR [rdi+8], rcx	X86_OP_SHIFTX_MEM	256	0	256	0	0	checked	0
+606	sarx rax, rbx, rcx	X86_OP_SHIFTX	256	0	256	0	0	checked	0
+607	sarx rax, QWORD PTR [rdi+8], rcx	X86_OP_SHIFTX_MEM	256	0	256	0	0	checked	0
+608	rorx rax, rbx, 7	X86_OP_RORX	256	0	256	0	0	checked	0
+609	rorx rax, QWORD PTR [rdi+8], 7	X86_OP_RORX_MEM	256	0	256	0	0	checked	0
+610	mov ah, bh	X86_OP_MOV_REG	256	0	256	0	0	checked	0
+611	mov ah, 0x7f	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+612	mov BYTE PTR [rdi+8], ah	X86_OP_MOV_STORE_REG	256	0	256	0	0	checked	256
+613	add ah, bh	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+614	add ah, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+615	adc ah, bh	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+616	adc ah, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+617	sub ah, bh	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+618	sub ah, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+619	sbb ah, bh	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+620	sbb ah, 0x7f	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+621	cmp ah, bh	X86_OP_CMP_REG	256	0	256	0	0	checked	0
+622	cmp ah, 0x7f	X86_OP_CMP_IMM	256	0	256	0	0	checked	0
+623	test ah, bh	X86_OP_TEST_REG	256	0	256	0	0	checked	0
+624	test ah, 0x7f	X86_OP_TEST_IMM	256	0	256	0	0	checked	0
+625	inc ah	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+626	dec ah	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+627	neg ah	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+628	not ah	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+629	rol ah, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+630	rol ah, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+631	rol ah, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+632	rol ah, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+633	rol ah, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+634	rol ah, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+635	rol ah, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+636	rol ah, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+637	rol ah, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+638	rol ah, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+639	rol ah, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+640	rol ah, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+641	rol ch, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+642	rol ch, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+643	rol ch, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+644	rol ch, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+645	rol ch, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+646	rol ch, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+647	rol ch, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+648	rol ch, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+649	rol ch, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+650	rol ch, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+651	rol ch, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+652	rol ch, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+653	rol dh, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+654	rol dh, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+655	rol dh, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+656	rol dh, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+657	rol dh, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+658	rol dh, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+659	rol dh, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+660	rol dh, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+661	rol dh, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+662	rol dh, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+663	rol dh, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+664	rol dh, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+665	rol bh, 0	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+666	rol bh, 1	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+667	rol bh, 7	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+668	rol bh, 8	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+669	rol bh, 15	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+670	rol bh, 16	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+671	rol bh, 31	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+672	rol bh, 32	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+673	rol bh, 63	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+674	rol bh, 64	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+675	rol bh, 255	X86_OP_ALU_IMM	256	0	256	0	0	checked	0
+676	rol bh, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+677	ror ah, 0	X86_OP_ROR	256	0	256	0	0	checked	0
+678	ror ah, 1	X86_OP_ROR	256	0	256	0	0	checked	0
+679	ror ah, 7	X86_OP_ROR	256	0	256	0	0	checked	0
+680	ror ah, 8	X86_OP_ROR	256	0	256	0	0	checked	0
+681	ror ah, 15	X86_OP_ROR	256	0	256	0	0	checked	0
+682	ror ah, 16	X86_OP_ROR	256	0	256	0	0	checked	0
+683	ror ah, 31	X86_OP_ROR	256	0	256	0	0	checked	0
+684	ror ah, 32	X86_OP_ROR	256	0	256	0	0	checked	0
+685	ror ah, 63	X86_OP_ROR	256	0	256	0	0	checked	0
+686	ror ah, 64	X86_OP_ROR	256	0	256	0	0	checked	0
+687	ror ah, 255	X86_OP_ROR	256	0	256	0	0	checked	0
+688	ror ah, cl	X86_OP_ROR	256	0	256	0	0	checked	0
+689	ror ch, 0	X86_OP_ROR	256	0	256	0	0	checked	0
+690	ror ch, 1	X86_OP_ROR	256	0	256	0	0	checked	0
+691	ror ch, 7	X86_OP_ROR	256	0	256	0	0	checked	0
+692	ror ch, 8	X86_OP_ROR	256	0	256	0	0	checked	0
+693	ror ch, 15	X86_OP_ROR	256	0	256	0	0	checked	0
+694	ror ch, 16	X86_OP_ROR	256	0	256	0	0	checked	0
+695	ror ch, 31	X86_OP_ROR	256	0	256	0	0	checked	0
+696	ror ch, 32	X86_OP_ROR	256	0	256	0	0	checked	0
+697	ror ch, 63	X86_OP_ROR	256	0	256	0	0	checked	0
+698	ror ch, 64	X86_OP_ROR	256	0	256	0	0	checked	0
+699	ror ch, 255	X86_OP_ROR	256	0	256	0	0	checked	0
+700	ror ch, cl	X86_OP_ROR	256	0	256	0	0	checked	0
+701	ror dh, 0	X86_OP_ROR	256	0	256	0	0	checked	0
+702	ror dh, 1	X86_OP_ROR	256	0	256	0	0	checked	0
+703	ror dh, 7	X86_OP_ROR	256	0	256	0	0	checked	0
+704	ror dh, 8	X86_OP_ROR	256	0	256	0	0	checked	0
+705	ror dh, 15	X86_OP_ROR	256	0	256	0	0	checked	0
+706	ror dh, 16	X86_OP_ROR	256	0	256	0	0	checked	0
+707	ror dh, 31	X86_OP_ROR	256	0	256	0	0	checked	0
+708	ror dh, 32	X86_OP_ROR	256	0	256	0	0	checked	0
+709	ror dh, 63	X86_OP_ROR	256	0	256	0	0	checked	0
+710	ror dh, 64	X86_OP_ROR	256	0	256	0	0	checked	0
+711	ror dh, 255	X86_OP_ROR	256	0	256	0	0	checked	0
+712	ror dh, cl	X86_OP_ROR	256	0	256	0	0	checked	0
+713	ror bh, 0	X86_OP_ROR	256	0	256	0	0	checked	0
+714	ror bh, 1	X86_OP_ROR	256	0	256	0	0	checked	0
+715	ror bh, 7	X86_OP_ROR	256	0	256	0	0	checked	0
+716	ror bh, 8	X86_OP_ROR	256	0	256	0	0	checked	0
+717	ror bh, 15	X86_OP_ROR	256	0	256	0	0	checked	0
+718	ror bh, 16	X86_OP_ROR	256	0	256	0	0	checked	0
+719	ror bh, 31	X86_OP_ROR	256	0	256	0	0	checked	0
+720	ror bh, 32	X86_OP_ROR	256	0	256	0	0	checked	0
+721	ror bh, 63	X86_OP_ROR	256	0	256	0	0	checked	0
+722	ror bh, 64	X86_OP_ROR	256	0	256	0	0	checked	0
+723	ror bh, 255	X86_OP_ROR	256	0	256	0	0	checked	0
+724	ror bh, cl	X86_OP_ROR	256	0	256	0	0	checked	0
+725	ror BYTE PTR [rdi+8], 0	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+726	ror BYTE PTR [rdi+8], 1	X86_OP_ROR_MEM	256	0	256	0	0	checked	254
+727	ror BYTE PTR [rdi+8], 7	X86_OP_ROR_MEM	256	0	256	0	0	checked	255
+728	ror BYTE PTR [rdi+8], 8	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+729	ror BYTE PTR [rdi+8], 15	X86_OP_ROR_MEM	256	0	256	0	0	checked	249
+730	ror BYTE PTR [rdi+8], 16	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+731	ror BYTE PTR [rdi+8], 31	X86_OP_ROR_MEM	256	0	256	0	0	checked	252
+732	ror BYTE PTR [rdi+8], 32	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+733	ror BYTE PTR [rdi+8], 63	X86_OP_ROR_MEM	256	0	256	0	0	checked	253
+734	ror BYTE PTR [rdi+8], 64	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+735	ror BYTE PTR [rdi+8], 255	X86_OP_ROR_MEM	256	0	256	0	0	checked	253
+736	ror BYTE PTR [rdi+8], cl	X86_OP_ROR_MEM	256	0	256	0	0	checked	228
+737	ror WORD PTR [rdi+8], 0	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+738	ror WORD PTR [rdi+8], 1	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+739	ror WORD PTR [rdi+8], 7	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+740	ror WORD PTR [rdi+8], 8	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+741	ror WORD PTR [rdi+8], 15	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+742	ror WORD PTR [rdi+8], 16	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+743	ror WORD PTR [rdi+8], 31	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+744	ror WORD PTR [rdi+8], 32	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+745	ror WORD PTR [rdi+8], 63	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+746	ror WORD PTR [rdi+8], 64	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+747	ror WORD PTR [rdi+8], 255	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+748	ror WORD PTR [rdi+8], cl	X86_OP_ROR_MEM	256	0	256	0	0	checked	240
+749	ror DWORD PTR [rdi+8], 0	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+750	ror DWORD PTR [rdi+8], 1	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+751	ror DWORD PTR [rdi+8], 7	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+752	ror DWORD PTR [rdi+8], 8	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+753	ror DWORD PTR [rdi+8], 15	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+754	ror DWORD PTR [rdi+8], 16	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+755	ror DWORD PTR [rdi+8], 31	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+756	ror DWORD PTR [rdi+8], 32	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+757	ror DWORD PTR [rdi+8], 63	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+758	ror DWORD PTR [rdi+8], 64	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+759	ror DWORD PTR [rdi+8], 255	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+760	ror DWORD PTR [rdi+8], cl	X86_OP_ROR_MEM	256	0	256	0	0	checked	246
+761	ror QWORD PTR [rdi+8], 0	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+762	ror QWORD PTR [rdi+8], 1	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+763	ror QWORD PTR [rdi+8], 7	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+764	ror QWORD PTR [rdi+8], 8	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+765	ror QWORD PTR [rdi+8], 15	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+766	ror QWORD PTR [rdi+8], 16	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+767	ror QWORD PTR [rdi+8], 31	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+768	ror QWORD PTR [rdi+8], 32	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+769	ror QWORD PTR [rdi+8], 63	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+770	ror QWORD PTR [rdi+8], 64	X86_OP_ROR_MEM	256	0	256	0	0	checked	0
+771	ror QWORD PTR [rdi+8], 255	X86_OP_ROR_MEM	256	0	256	0	0	checked	256
+772	ror QWORD PTR [rdi+8], cl	X86_OP_ROR_MEM	256	0	256	0	0	checked	249
+773	movzx ax, bl	X86_OP_MOVZX_REG	256	0	256	0	0	checked	0
+774	movzx ax, BYTE PTR [rdi+8]	X86_OP_MOV_LOAD	256	0	256	0	0	checked	0
+775	movsx ax, bl	X86_OP_MOVSX_REG	256	0	256	0	0	checked	0
+776	movsx ax, BYTE PTR [rdi+8]	X86_OP_MOVSX_LOAD	256	0	256	0	0	checked	0
+777	movzx eax, bl	X86_OP_MOVZX_REG	256	0	256	0	0	checked	0
+778	movzx eax, BYTE PTR [rdi+8]	X86_OP_MOV_LOAD	256	0	256	0	0	checked	0
+779	movsx eax, bl	X86_OP_MOVSX_REG	256	0	256	0	0	checked	0
+780	movsx eax, BYTE PTR [rdi+8]	X86_OP_MOVSX_LOAD	256	0	256	0	0	checked	0
+781	movzx eax, bx	X86_OP_MOVZX_REG	256	0	256	0	0	checked	0
+782	movzx eax, WORD PTR [rdi+8]	X86_OP_MOV_LOAD	256	0	256	0	0	checked	0
+783	movsx eax, bx	X86_OP_MOVSX_REG	256	0	256	0	0	checked	0
+784	movsx eax, WORD PTR [rdi+8]	X86_OP_MOVSX_LOAD	256	0	256	0	0	checked	0
+785	movzx rax, bl	X86_OP_MOVZX_REG	256	0	256	0	0	checked	0
+786	movzx rax, BYTE PTR [rdi+8]	X86_OP_MOV_LOAD	256	0	256	0	0	checked	0
+787	movsx rax, bl	X86_OP_MOVSX_REG	256	0	256	0	0	checked	0
+788	movsx rax, BYTE PTR [rdi+8]	X86_OP_MOVSX_LOAD	256	0	256	0	0	checked	0
+789	movzx rax, bx	X86_OP_MOVZX_REG	256	0	256	0	0	checked	0
+790	movzx rax, WORD PTR [rdi+8]	X86_OP_MOV_LOAD	256	0	256	0	0	checked	0
+791	movsx rax, bx	X86_OP_MOVSX_REG	256	0	256	0	0	checked	0
+792	movsx rax, WORD PTR [rdi+8]	X86_OP_MOVSX_LOAD	256	0	256	0	0	checked	0
+793	movsxd rax, ebx	X86_OP_MOVSX_REG	256	0	256	0	0	checked	0
+794	movsxd rax, DWORD PTR [rdi+8]	X86_OP_MOVSX_LOAD	256	0	256	0	0	checked	0
+795	lea ax, [rbx]	X86_OP_LEA	256	0	256	0	0	checked	0
+796	lea ax, [rbx+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+797	lea ax, [rbx-128]	X86_OP_LEA	256	0	256	0	0	checked	0
+798	lea ax, [rbx+rcx*2-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+799	lea ax, [r8+r9*4+2147483647]	X86_OP_LEA	256	0	256	0	0	checked	0
+800	lea ax, [r8+r9*8-2147483648]	X86_OP_LEA	256	0	256	0	0	checked	0
+801	lea ax, [rcx*8+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+802	lea ax, [0x12345678]	X86_OP_LEA	256	0	256	0	0	checked	0
+803	lea ax, [ebx+ecx*4-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+804	lea ax, [r8d+r9d*8+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+805	lea eax, [rbx]	X86_OP_LEA	256	0	256	0	0	checked	0
+806	lea eax, [rbx+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+807	lea eax, [rbx-128]	X86_OP_LEA	256	0	256	0	0	checked	0
+808	lea eax, [rbx+rcx*2-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+809	lea eax, [r8+r9*4+2147483647]	X86_OP_LEA	256	0	256	0	0	checked	0
+810	lea eax, [r8+r9*8-2147483648]	X86_OP_LEA	256	0	256	0	0	checked	0
+811	lea eax, [rcx*8+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+812	lea eax, [0x12345678]	X86_OP_LEA	256	0	256	0	0	checked	0
+813	lea eax, [ebx+ecx*4-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+814	lea eax, [r8d+r9d*8+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+815	lea rax, [rbx]	X86_OP_LEA	256	0	256	0	0	checked	0
+816	lea rax, [rbx+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+817	lea rax, [rbx-128]	X86_OP_LEA	256	0	256	0	0	checked	0
+818	lea rax, [rbx+rcx*2-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+819	lea rax, [r8+r9*4+2147483647]	X86_OP_LEA	256	0	256	0	0	checked	0
+820	lea rax, [r8+r9*8-2147483648]	X86_OP_LEA	256	0	256	0	0	checked	0
+821	lea rax, [rcx*8+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+822	lea rax, [0x12345678]	X86_OP_LEA	256	0	256	0	0	checked	0
+823	lea rax, [ebx+ecx*4-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+824	lea rax, [r8d+r9d*8+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+825	lea r8w, [rbx]	X86_OP_LEA	256	0	256	0	0	checked	0
+826	lea r8w, [rbx+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+827	lea r8w, [rbx-128]	X86_OP_LEA	256	0	256	0	0	checked	0
+828	lea r8w, [rbx+rcx*2-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+829	lea r8w, [r8+r9*4+2147483647]	X86_OP_LEA	256	0	256	0	0	checked	0
+830	lea r8w, [r8+r9*8-2147483648]	X86_OP_LEA	256	0	256	0	0	checked	0
+831	lea r8w, [rcx*8+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+832	lea r8w, [0x12345678]	X86_OP_LEA	256	0	256	0	0	checked	0
+833	lea r8w, [ebx+ecx*4-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+834	lea r8w, [r8d+r9d*8+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+835	lea r8d, [rbx]	X86_OP_LEA	256	0	256	0	0	checked	0
+836	lea r8d, [rbx+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+837	lea r8d, [rbx-128]	X86_OP_LEA	256	0	256	0	0	checked	0
+838	lea r8d, [rbx+rcx*2-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+839	lea r8d, [r8+r9*4+2147483647]	X86_OP_LEA	256	0	256	0	0	checked	0
+840	lea r8d, [r8+r9*8-2147483648]	X86_OP_LEA	256	0	256	0	0	checked	0
+841	lea r8d, [rcx*8+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+842	lea r8d, [0x12345678]	X86_OP_LEA	256	0	256	0	0	checked	0
+843	lea r8d, [ebx+ecx*4-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+844	lea r8d, [r8d+r9d*8+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+845	lea r8, [rbx]	X86_OP_LEA	256	0	256	0	0	checked	0
+846	lea r8, [rbx+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+847	lea r8, [rbx-128]	X86_OP_LEA	256	0	256	0	0	checked	0
+848	lea r8, [rbx+rcx*2-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+849	lea r8, [r8+r9*4+2147483647]	X86_OP_LEA	256	0	256	0	0	checked	0
+850	lea r8, [r8+r9*8-2147483648]	X86_OP_LEA	256	0	256	0	0	checked	0
+851	lea r8, [rcx*8+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+852	lea r8, [0x12345678]	X86_OP_LEA	256	0	256	0	0	checked	0
+853	lea r8, [ebx+ecx*4-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+854	lea r8, [r8d+r9d*8+127]	X86_OP_LEA	256	0	256	0	0	checked	0
+855	lea rbx, [rbx+rcx*8]	X86_OP_LEA	256	0	256	0	0	checked	0
+856	lea rcx, [rbx+rcx*8]	X86_OP_LEA	256	0	256	0	0	checked	0
+857	lea r9, [r8+r9*2-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+858	lea ax, fs:[rbx+rcx*2-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+859	lea ax, gs:[rbx+rcx*2-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+860	lea eax, fs:[rbx+rcx*2-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+861	lea eax, gs:[rbx+rcx*2-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+862	lea rax, fs:[rbx+rcx*2-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+863	lea rax, gs:[rbx+rcx*2-7]	X86_OP_LEA	256	0	256	0	0	checked	0
+864	mov ah, BYTE PTR [rdi+8]	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+865	mov ah, BYTE PTR [rsi+16]	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+866	mov ah, BYTE PTR [rsp-16]	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+867	mov ch, BYTE PTR [rdi+8]	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+868	mov ch, BYTE PTR [rsi+16]	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+869	mov ch, BYTE PTR [rsp-16]	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+870	mov dh, BYTE PTR [rdi+8]	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+871	mov dh, BYTE PTR [rsi+16]	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+872	mov dh, BYTE PTR [rsp-16]	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+873	mov bh, BYTE PTR [rdi+8]	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+874	mov bh, BYTE PTR [rsi+16]	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+875	mov bh, BYTE PTR [rsp-16]	X86_OP_MOV_IMM	256	0	256	0	0	checked	0
+876	seta al	X86_OP_SETCC	256	0	256	0	0	checked	0
+877	seta ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+878	seta BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	256
+879	setae al	X86_OP_SETCC	256	0	256	0	0	checked	0
+880	setae ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+881	setae BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	253
+882	setb al	X86_OP_SETCC	256	0	256	0	0	checked	0
+883	setb ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+884	setb BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	253
+885	setbe al	X86_OP_SETCC	256	0	256	0	0	checked	0
+886	setbe ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+887	setbe BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	256
+888	sete al	X86_OP_SETCC	256	0	256	0	0	checked	0
+889	sete ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+890	sete BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	255
+891	setg al	X86_OP_SETCC	256	0	256	0	0	checked	0
+892	setg ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+893	setg BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	255
+894	setge al	X86_OP_SETCC	256	0	256	0	0	checked	0
+895	setge ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+896	setge BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	255
+897	setl al	X86_OP_SETCC	256	0	256	0	0	checked	0
+898	setl ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+899	setl BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	255
+900	setle al	X86_OP_SETCC	256	0	256	0	0	checked	0
+901	setle ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+902	setle BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	255
+903	setne al	X86_OP_SETCC	256	0	256	0	0	checked	0
+904	setne ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+905	setne BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	255
+906	setns al	X86_OP_SETCC	256	0	256	0	0	checked	0
+907	setns ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+908	setns BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	255
+909	sets al	X86_OP_SETCC	256	0	256	0	0	checked	0
+910	sets ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+911	sets BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	256
+912	seto al	X86_OP_SETCC	256	0	256	0	0	checked	0
+913	seto ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+914	seto BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	255
+915	setno al	X86_OP_SETCC	256	0	256	0	0	checked	0
+916	setno ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+917	setno BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	255
+918	setp al	X86_OP_SETCC	256	0	256	0	0	checked	0
+919	setp ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+920	setp BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	256
+921	setpe al	X86_OP_SETCC	256	0	256	0	0	checked	0
+922	setpe ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+923	setpe BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	254
+924	setnp al	X86_OP_SETCC	256	0	256	0	0	checked	0
+925	setnp ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+926	setnp BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	255
+927	setpo al	X86_OP_SETCC	256	0	256	0	0	checked	0
+928	setpo ah	X86_OP_SETCC	256	0	256	0	0	checked	0
+929	setpo BYTE PTR [rdi+8]	X86_OP_SETCC_MEM	256	0	256	0	0	checked	255
+930	cmova ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+931	cmova ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+932	cmova eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+933	cmova eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+934	cmova rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+935	cmova rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+936	cmovb ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+937	cmovb ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+938	cmovb eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+939	cmovb eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+940	cmovb rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+941	cmovb rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+942	cmovbe ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+943	cmovbe ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+944	cmovbe eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+945	cmovbe eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+946	cmovbe rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+947	cmovbe rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+948	cmove ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+949	cmove ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+950	cmove eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+951	cmove eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+952	cmove rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+953	cmove rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+954	cmovg ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+955	cmovg ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+956	cmovg eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+957	cmovg eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+958	cmovg rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+959	cmovg rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+960	cmovge ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+961	cmovge ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+962	cmovge eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+963	cmovge eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+964	cmovge rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+965	cmovge rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+966	cmovae ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+967	cmovae ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+968	cmovae eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+969	cmovae eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+970	cmovae rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+971	cmovae rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+972	cmovl ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+973	cmovl ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+974	cmovl eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+975	cmovl eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+976	cmovl rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+977	cmovl rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+978	cmovle ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+979	cmovle ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+980	cmovle eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+981	cmovle eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+982	cmovle rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+983	cmovle rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+984	cmovne ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+985	cmovne ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+986	cmovne eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+987	cmovne eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+988	cmovne rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+989	cmovne rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+990	cmovns ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+991	cmovns ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+992	cmovns eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+993	cmovns eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+994	cmovns rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+995	cmovns rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+996	cmovs ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+997	cmovs ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+998	cmovs eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+999	cmovs eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1000	cmovs rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1001	cmovs rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1002	cmovo ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1003	cmovo ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1004	cmovo eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1005	cmovo eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1006	cmovo rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1007	cmovo rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1008	cmovno ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1009	cmovno ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1010	cmovno eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1011	cmovno eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1012	cmovno rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1013	cmovno rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1014	cmovp ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1015	cmovp ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1016	cmovp eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1017	cmovp eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1018	cmovp rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1019	cmovp rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1020	cmovpe ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1021	cmovpe ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1022	cmovpe eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1023	cmovpe eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1024	cmovpe rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1025	cmovpe rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1026	cmovnp ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1027	cmovnp ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1028	cmovnp eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1029	cmovnp eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1030	cmovnp rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1031	cmovnp rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1032	cmovpo ax, bx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1033	cmovpo ax, WORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1034	cmovpo eax, ebx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1035	cmovpo eax, DWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1036	cmovpo rax, rbx	X86_OP_CMOV	256	0	256	0	0	checked	0
+1037	cmovpo rax, QWORD PTR [rdi+8]	X86_OP_CMOV_MEM	256	0	256	0	0	checked	0
+1038	xor al, al	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1039	xor cl, cl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1040	xor dl, dl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1041	xor bl, bl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1042	xor spl, spl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1043	xor bpl, bpl	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1044	xor sil, sil	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1045	xor dil, dil	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1046	xor ax, ax	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1047	xor cx, cx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1048	xor dx, dx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1049	xor bx, bx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1050	xor sp, sp	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1051	xor bp, bp	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1052	xor si, si	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1053	xor di, di	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1054	xor eax, eax	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1055	xor ecx, ecx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1056	xor edx, edx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1057	xor ebx, ebx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1058	xor esp, esp	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1059	xor ebp, ebp	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1060	xor esi, esi	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1061	xor edi, edi	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1062	xor rax, rax	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1063	xor rcx, rcx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1064	xor rdx, rdx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1065	xor rbx, rbx	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1066	xor rsp, rsp	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1067	xor rbp, rbp	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1068	xor rsi, rsi	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1069	xor rdi, rdi	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1070	xor r8b, r8b	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1071	xor r8w, r8w	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1072	xor r8d, r8d	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1073	xor r8, r8	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1074	xor r9b, r9b	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1075	xor r9w, r9w	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1076	xor r9d, r9d	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1077	xor r9, r9	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1078	xor r10b, r10b	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1079	xor r10w, r10w	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1080	xor r10d, r10d	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1081	xor r10, r10	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1082	xor r11b, r11b	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1083	xor r11w, r11w	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1084	xor r11d, r11d	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1085	xor r11, r11	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1086	xor r12b, r12b	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1087	xor r12w, r12w	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1088	xor r12d, r12d	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1089	xor r12, r12	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1090	xor r13b, r13b	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1091	xor r13w, r13w	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1092	xor r13d, r13d	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1093	xor r13, r13	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1094	xor r14b, r14b	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1095	xor r14w, r14w	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1096	xor r14d, r14d	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1097	xor r14, r14	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1098	xor r15b, r15b	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1099	xor r15w, r15w	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1100	xor r15d, r15d	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1101	xor r15, r15	X86_OP_ALU_REG	256	0	256	0	0	checked	0
+1102	ja forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1103	ja backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1104	jae forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1105	jae backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1106	jb forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1107	jb backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1108	jbe forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1109	jbe backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1110	je forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1111	je backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1112	jne forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1113	jne backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1114	jg forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1115	jg backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1116	jge forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1117	jge backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1118	jl forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1119	jl backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1120	jle forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1121	jle backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1122	js forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1123	js backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1124	jns forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1125	jns backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1126	jo forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1127	jo backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1128	jno forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1129	jno backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1130	jp forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1131	jp backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1132	jpe forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1133	jpe backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1134	jnp forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1135	jnp backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1136	jpo forward	X86_OP_JCC	256	0	256	0	0	checked	0
+1137	jpo backward	X86_OP_JCC	256	0	256	0	0	checked	0
+1138	jmp forward	X86_OP_JMP	256	0	256	0	0	checked	0
+1139	call and ret (stack return address)	X86_OP_CALL	256	0	256	0	0	checked	0
+1140	rep movsb	X86_OP_REP_MOVS	256	0	256	0	0	checked	256
+1141	rep movsw	X86_OP_REP_MOVS	256	0	256	0	0	checked	256
+1142	rep movsd	X86_OP_REP_MOVS	256	0	256	0	0	checked	256
+1143	rep movsq	X86_OP_REP_MOVS	256	0	256	0	0	checked	256

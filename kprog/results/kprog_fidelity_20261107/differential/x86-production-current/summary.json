@@ -1,0 +1,31 @@
+{
+  "forms": 1144,
+  "cases_per_form": 256,
+  "cases": 292864,
+  "differences": {
+    "cpu_simulator": 0,
+    "cpu_reference": 0,
+    "simulator_reference": 0
+  },
+  "forms_awaiting_reference": 0,
+  "reference_cases": 292864,
+  "initial_command_exit": 2,
+  "canonical_completion_exit": 0,
+  "canonical_finished": "2026-11-07T22:35:38.573565+00:00",
+  "native_memory_write_cases": 35530,
+  "compiled_input_files": 90,
+  "production_snapshot_files": 82,
+  "production_snapshot_git_equal": true,
+  "derived_source_cache_files": 0,
+  "source_head": "be2bbfbb3798cadd2827c30c8fe016346ad903ae",
+  "adopted_write_commit": "9b0aa2b09c1188ede61fea3c0a9d0d3acbebded1",
+  "simulator_header_sha256": "6b3f31731d9d127a36183e3e35cd6b39335d8b5865649a8282fc503a7be0dc11",
+  "register_write_sha256": "cf27e323c885cdf8258974a8800907af2f6ee56093d7721822b9e75360e72994",
+  "reference_sha256": "c110b03a98238272fe72124a4c92e0095b8c759a750891e37ad31f8b81084d96",
+  "binary_sha256": "5188ecdedc827345a010d08d837a2aabf92870f9ddf5660d9d9f7130131fe1f7",
+  "trace_bytes": 531841048,
+  "trace_sha256": "420dcc8529b88e42a3830f09b8e12222a844551ccdd82aabff0557ac5bc9d740",
+  "exit": 2,
+  "finished": "2026-11-07T22:29:37.606830+00:00",
+  "source_drift": {}
+}
