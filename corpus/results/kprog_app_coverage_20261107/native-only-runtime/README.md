@@ -124,3 +124,44 @@ work directory and image-tar path. C's OTel continuation uses lane-private
 native-only-otel state; R's BCC timing keeps the default native-only-runtime
 state. Each experiment cleans only its own disk/tar. Timestamped archives are
 unique; the final JSON line names the exact archive for that invocation.
+
+
+## OTel native-only continuation: missing tail-map transport
+
+Initial actual run154845_053809 completes the JIT mixed-language workload but
+fails native startup. The raw log observes14 application initialization/program
+loads (including read_task_struct),13 resident measurement programs, and three
+feature probes. Only two application loads are reached on the strict native
+restart before it stops;12 are not yet reached, not classified as unsupported.
+
+| Native reached | Simulator generated | Compiled | Accepted/bound | Verifier rejected | Failure |
+| ---: | ---: | ---: | ---: | ---: | --- |
+|2|2|2|1|0|perf_unwind_stop: native-link missing perf_progs tail_call_maps entry|
+
+read_task_struct is fresh-bound. The second request fails during native linking,
+BEFORE verifier admission. Kernel capsule facts already prove PROG_ARRAY ID250
+is used by the pinned source program; canonical perf_progs/kprobe_progs aliases
+are present. The trusted worker reconstructed map aliases from those facts but
+did not populate the existing source_tail_call_maps set. The one-line common
+loader fix calls existing add_source_tail_call_map after exact source-used
+map-ID validation. That helper checks the actual PROG_ARRAY type and deduplicates
+by kernel ID. No map/name/ordinal guess, new authority, verifier relaxation or
+native program omission is introduced. Shared x86/ARM metadata transport is fixed.
+
+Warm static/shared loader and trusted-native-loader builds plus all9 existing
+trusted-service checks pass. Live replay after the fix follows; build success
+alone does not establish OTel application acceptance. The successful BCC raw
+receipts remain separate and unchanged. The client image/kernel/module are reused.
+
+otel-native-only.json is the complete initial receipt; otel-tail-call-transport.json
+captures the actual missing map set and kernel-owned map identities. The receipt
+names its exact service/request archive and hashes, and
+otel-native-only-result.tar.gz
+retains all raw app/shim/work data. otel-native-only-inputs.json pins the launch.
+The process exit0 is distinct from actual application error. Guest disk/tar are
+confirmed absent after this closed run; raw archives and logs are retained.
+
+```
+make -C kprog/libnativeloader trusted-service-check
+make -f corpus/results/kprog_app_coverage_20261107/native-only-runtime/Makefile corpus STATE=/workspaces/.agent-state/kprog-lanes/C/native-only-otel APPS=otelcol-ebpf-profiler/profiling
+```

@@ -5668,6 +5668,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         if (selected == companion.maps.end())
             fail("trusted map identity is not used by the kernel-pinned source program");
         const MapMeta map = *selected;
+        add_source_tail_call_map(companion, map);
         add_map_symbol_alias_meta(companion, binding.native_symbol, map);
         if (binding.value_offset) {
             if (!map.value_addr || *binding.value_offset >= map.value_size)

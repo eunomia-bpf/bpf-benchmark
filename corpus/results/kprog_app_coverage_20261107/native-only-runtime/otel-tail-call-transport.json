@@ -1,0 +1,40 @@
+{
+  "entry": "perf_unwind_stop",
+  "kernel_owned_prog_arrays": [
+    {
+      "name": "kprobe_progs",
+      "map_id": 250,
+      "map_type": 3,
+      "key_size": 4,
+      "value_size": 4,
+      "max_entries": 10,
+      "map_flags": 0,
+      "value_offset": null
+    },
+    {
+      "name": "perf_progs",
+      "map_id": 250,
+      "map_type": 3,
+      "key_size": 4,
+      "value_size": 4,
+      "max_entries": 10,
+      "map_flags": 0,
+      "value_offset": null
+    }
+  ],
+  "source_used_map_ids": [
+    225,
+    230,
+    234,
+    240,
+    241,
+    246,
+    247,
+    250,
+    261,
+    271,
+    272
+  ],
+  "missing_tail_call_maps": [],
+  "cause": "trusted worker reconstructs maps from pinned kernel facts but did not populate existing source_tail_call_maps set"
+}
