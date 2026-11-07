@@ -1,0 +1,89 @@
+{
+  "status": "canonical_AF_equivalent_inputs_cmp_complete_relational_outputs_agree_and_executions_lift",
+  "utc": "2026-11-07T13:56:44.912615+00:00",
+  "program": "actual accepted trusted-service x86 simple b61f291a8, actual canonical CMP operation atPC12",
+  "claims": [
+    "afEquivalent masks ONLY AF and preserves every other complete architectural field",
+    "canonical CMP overwrites AF: any AF-equivalent inputs yield identical full representative and EVERY relational CMP transition",
+    "no selected AF representative or branch/access outcome premise",
+    "existing canonical representative executions and canonical relational paths lift exactly to a decoded canonical relational instruction BlockStep",
+    "wrapper adds no opcode semantics/fuel/input test/forced successor; permissive fault repeats are an overapproximation to be covered by terminal proof"
+  ],
+  "premises": [
+    "AF-masked complete input state equality",
+    "actual canonical CMP step witnesses for relational equality",
+    "actual canonical decode/Step or execution witnesses for lifting"
+  ],
+  "not_yet_claimed": [
+    "full native state-relation step-event matching or arbitrary-prefix checked-events theorem",
+    "terminal/fault-repeat safety instantiation",
+    "strict per-basic-block B relation and entry/ABI/RET/platform transport",
+    "unconditional whole-artifact TV or other programs"
+  ],
+  "compatibility": {
+    "old_Safety_declarations": "byte-identical prefix and previous audits retained",
+    "old_prefix_sha256": "2371ae641bbed7252cace4d8c4bdbceb82a6be971ed20c1e3749b2dc51e76ffa",
+    "ISA_runtime": "unchanged"
+  },
+  "validation": {
+    "command": "make -C kprog/tv -o trusted-simple-entry-certificate trusted-simple-safety-certificate",
+    "exit": 0,
+    "reproduction": "make -C kprog/tv trusted-simple-safety-certificate",
+    "checked_base": "unchanged dependency and22+28mismatch controls in archived related-prefix composition evidence",
+    "binding_mismatch_controls_rejected": 22,
+    "materialization_controls_rejected": 28,
+    "no_sorryAx": true,
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleSafety.af_equivalent_shape": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.compare_flags_ignore_AF": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.canonical_cmp12_af_equivalent": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.canonical_cmp12_relational_af_equivalent": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.canonical_execution_relational": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleSafety.canonical_relational_path_execution": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    "current_log_sha256": "9df5341fa1c2c4a6381aed9aede9a6a48120badb3af37038dba835dc27a82196",
+    "combined_log_sha256": "44a8a3497d6fd6c1a3f56badb6b8382522577a8dca3397ab00c0f2e3e10d6737"
+  },
+  "trusted": [
+    "canonical reference ISA/flags/memory",
+    "Lean kernel/logical axioms and reported native reduction",
+    "concrete verifier/kernel binding/platform/ABI assumptions remain explicit in existing safety composition"
+  ],
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "c5df513655811180ea131177faef5e19b31092c666c185d5dda722b289e7d40e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "f0b9694a7f256928e83c688f0ac0f4b3101eb8906b7efc0e9dee0b8920167ac6",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/Composition.lean": "19523793d6bdc8a66b3f7b5d19cb153551dde38f14beb06a83ac54a4694d2ca3",
+    "kprog/tv/PrivateSpills.lean": "b6a4ce4ea51c4dd86f54f6c386b5b492fbe0d542db45250b0ea31a79057cb463",
+    "kprog/tv/TrustedSimpleSafety.lean": "d4177102ed7bbc42ccd622451788d803081bb6e1fdff38698ba94d07058a4b59",
+    "kprog/tv/Makefile": "8924423892908c26ac8efe7bb19cb08fed6cc5d82e10fbc2a5c93d5318ec5c55"
+  }
+}

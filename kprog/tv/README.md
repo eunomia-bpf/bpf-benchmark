@@ -1818,3 +1818,18 @@ The CFG target and all5 new theorem audits pass; earlier CFG declarations are
 unchanged. See cfg-closed JSON/log. Relating every arbitrary prefix's events to
 B still requires the concrete state/step relation and terminal argument. Strict
 block mapping, entry/ABI/platform/RET transport and other programs remain open.
+
+### Actual AF/CMP coupling and canonical execution lifts
+
+`canonical_cmp12_relational_af_equivalent` proves that arbitrary canonical CMP
+outputs agree in their complete state, events and fault when input states differ
+only in AF. The actual CMP overwrites that bit; no representative AF value is
+selected. `af_equivalent_shape` retains every other architectural field exactly.
+
+`relationalNativeInstructionStep` composes only existing `decodeAt` and `X86.Step`
+witnesses. Both representative executions and canonical relational paths lift
+exactly to it, without another ISA implementation, input check or fuel limit.
+Its permissive fault repeats require the upcoming terminal argument. Six audits
+and the safety target pass; see af-cmp-coupling JSON/log. Full concrete step-event
+matching and arbitrary-prefix checked-events composition remain open, alongside
+entry/ABI/platform/RET transport and strict B block mapping.
