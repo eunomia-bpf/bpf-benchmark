@@ -70,15 +70,18 @@ def main():
     parser.add_argument('--trace',type=Path)
     parser.add_argument('--reference',type=Path,default=ROOT/'kprog/formal/.lake/build/bin/reference')
     parser.add_argument('--control-paths',action='store_true',help='use the canonical finite-path interface for generated Jcc/JMP observers')
+    parser.add_argument('--opcode',action='append',help='replay only this production opcode from the saved trace; repeat for multiple families')
     args=parser.parse_args()
     if args.trace and not args.reuse_trace:
         parser.error('--trace requires --reuse-trace')
     args.out.mkdir(parents=True,exist_ok=True)
     forms=json.loads((args.binary.parent/'coverage.json').read_text())
+    if args.opcode and (not args.reuse_trace or set(args.opcode)-{form['opcode'] for form in forms}):
+        parser.error('--opcode requires --reuse-trace and opcodes present in the saved form matrix')
     trace=args.trace if args.trace else args.out/'cpu-states.bin'
     if args.reuse_trace:
         with (args.out/'forms.tsv').open() as source:
-            cpu_failed=any(int(row['mismatches']) for row in csv.DictReader(source,delimiter='\t'))
+            cpu_failed=any(int(row['mismatches']) for row in csv.DictReader(source,delimiter='\t') if not args.opcode or row['opcode'] in args.opcode)
     else:
         command=(['qemu-aarch64-static'] if args.arch=='arm64' and platform.machine()!='aarch64' else [])
         cpu_failed=subprocess.run(command+[str(args.binary.resolve()),str(args.cases),str(args.out),str(trace)]).returncode != 0
@@ -117,6 +120,9 @@ def main():
         if trace.stat().st_size!=24+count*cases*record_bytes:
             raise RuntimeError('incomplete CPU state trace')
         for index,form in enumerate(forms):
+            if args.opcode and form['opcode'] not in args.opcode:
+                source.seek(cases*record_bytes,1)
+                continue
             if args.arch=='x86' and form['opcode'] in {'X86_OP_JCC','X86_OP_JMP','X86_OP_CALL'} and index not in paths:
                 source.seek(cases*record_bytes,1)
                 reason='control composite requires a reference block-step interface'
@@ -125,7 +131,7 @@ def main():
                 continue
             requests=[];records=[];rejection=None
             omit_memory=(args.arch=='arm64' and form['opcode'] in arm_without_memory) or (
-                args.arch=='x86' and form['opcode'] in x86_without_memory and '[' not in form['assembly']) or index in paths
+                args.arch=='x86' and ((form['opcode'] in x86_without_memory and '[' not in form['assembly']) or form['opcode']=='X86_OP_LEA')) or index in paths
             assembly=form['assembly']
             for case in range(cases):
                 ident=struct.unpack('<2I',source.read(8))

@@ -1,0 +1,5 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+15	lea rax, [rsp+16]	1024	1024	0	1024	checked	none
+19	lea rsp, [rsp+16]	1024	1024	0	0	checked	none
+404	lea eax, [rdi+rbx*4-7]	1024	1024	0	0	checked	none
+544	lea rax, [rdi+rbx*4-7]	1024	1024	0	0	checked	none
