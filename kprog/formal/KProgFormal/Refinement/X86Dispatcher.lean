@@ -166,11 +166,26 @@ theorem cmov_width_binding_decodes (flags : Byte) (width : Reference.X86.CmovWid
   have decoded := width_binding_decodes flags (cmovScalarWidth width) binding
   cases width <;> simp [cmovWidthOf, decoded, cmovScalarWidth] at *
 
+/-- BSWAP selects only its native32/64-bit forms; absent FLAGS still uses
+production64-bit fallback, with no new runtime guard. -/
+def bswapWidthOf (flags : Byte) : Option Reference.X86.BzhiWidth := do
+  match ← widthOf flags with
+  | .w32 => some .w32 | .w64 => some .w64 | _ => none
+
+def bswapScalarWidth : Reference.X86.BzhiWidth → ScalarWidth
+  | .w32 => .w32 | .w64 => .w64
+
+theorem bswap_width_binding_decodes (flags : Byte) (width : Reference.X86.BzhiWidth)
+    (binding : WidthBinding flags (bswapScalarWidth width)) :
+    bswapWidthOf flags = some width := by
+  have decoded := width_binding_decodes flags (bswapScalarWidth width) binding
+  cases width <;> simp [bswapWidthOf, decoded, bswapScalarWidth] at *
+
 /-- Partial register-handler dispatcher. Existing NOP/MOV steps retain their
-prefix selection; the later singleton CMOV/XCHG gates consume their actual
+prefix selection; the later singleton CMOV/BSWAP/POPCNT/XCHG gates consume their actual
 raw opcode, width and GPR fields. Every intervening unproved opcode remains
 None. Distinct generated opcode identities prevent an intervening handler
-from taking these two gates; None never means production success/rejection. -/
+from taking these gates; None never means production success/rejection. -/
 def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
     (arena : Word) (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src : Byte)
     (value nextPc : Word) (state : RegisterState) : Option (Transition Reference.X86.State) :=
@@ -183,6 +198,17 @@ def dispatchRegisters (env : EntryEnvironment.Environment) (frame : EntryEnviron
         let source ← registerOf src
         pure ⟨nativeRegisters env frame arena
           (conditionalMoveWord env frame arena state width aux destination source nextPc), [], none⟩
+      else if code = GeneratedX86DispatchSingleton.code .bswap then do
+        let width ← bswapWidthOf flags
+        let destination ← registerOf dst
+        pure ⟨nativeRegisters env frame arena
+          (byteSwapRegister env frame arena state width destination nextPc), [], none⟩
+      else if code = GeneratedX86DispatchSingleton.code .popcnt then do
+        let width ← cmovWidthOf flags
+        let destination ← registerOf dst
+        let source ← registerOf src
+        pure ⟨nativeRegisters env frame arena
+          (populationCountRegister env frame arena state width destination source nextPc), [], none⟩
       else if code = GeneratedX86DispatchSingleton.code .xchg then do
         let width ← widthOf flags
         let destination ← registerOf dst
@@ -205,6 +231,16 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
       (conditionField : aux = BitVec.ofNat 32 cc.val) :
       RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchSingleton.code .cmov)
         (.cmov width cc destination (.register source) nextPc)
+  | byteSwap (width : Reference.X86.BzhiWidth) (destination : Register)
+      (widthField : WidthBinding flags (bswapScalarWidth width))
+      (dstField : dst = registerByte destination) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchSingleton.code .bswap)
+        (.byteSwap width destination nextPc)
+  | populationCount (width : Reference.X86.CmovWidth) (destination source : Register)
+      (widthField : WidthBinding flags (cmovScalarWidth width))
+      (dstField : dst = registerByte destination) (srcField : src = registerByte source) :
+      RegisterBinding flags aux dst src value nextPc (GeneratedX86DispatchSingleton.code .popcnt)
+        (.popcount width destination (.register source) nextPc)
   | exchange (width : ScalarWidth) (destination source : Register)
       (widthField : WidthBinding flags width)
       (dstField : dst = registerByte destination) (srcField : src = registerByte source) :
@@ -212,7 +248,7 @@ inductive RegisterBinding (flags : Byte) (aux : BitVec 32) (dst src : Byte) (val
         (.exchange width (.low destination) (.low source) nextPc)
 
 /-- One complete raw-frame step for the currently lifted register opcodes:
-NOP/MOV immediate/MOV register/CMOV(all16)/XCHG. Neither component handler
+NOP/MOV immediate/MOV register/CMOV(all16)/BSWAP/POPCNT/XCHG. Neither component handler
 semantics nor a chosen condition/value/state equation is assumed. This is a
 partial dispatcher theorem, not all77 operations or a compiled-body claim. -/
 theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (frame : EntryEnvironment.Frame)
@@ -230,6 +266,18 @@ theorem register_dispatch_step_refines (env : EntryEnvironment.Environment) (fra
       simpa [dispatchRegisters, dispatchThroughMove, beforeMove, GeneratedX86Opcode.code,
         GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
         congrArg some (conditional_move_word_frame_refines env frame arena state width cc destination source nextPc)
+  | byteSwap width destination widthField dstField =>
+      subst dst
+      have decoded := bswap_width_binding_decodes flags width widthField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, GeneratedX86Opcode.code,
+        GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
+        congrArg some (byte_swap_register_frame_refines env frame arena state width destination nextPc)
+  | populationCount width destination source widthField dstField srcField =>
+      subst dst; subst src
+      have decoded := cmov_width_binding_decodes flags width widthField
+      simpa [dispatchRegisters, dispatchThroughMove, beforeMove, GeneratedX86Opcode.code,
+        GeneratedX86DispatchSingleton.code, decoded, register_of_byte] using
+        congrArg some (population_count_register_frame_refines env frame arena state width destination source nextPc)
   | exchange width destination source widthField dstField srcField =>
       subst dst; subst src
       have decoded := width_binding_decodes flags width widthField

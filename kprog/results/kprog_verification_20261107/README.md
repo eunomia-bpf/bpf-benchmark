@@ -2119,3 +2119,32 @@ configuration/paper edits. Full exact900 POPCNT compile EXIT2 and the separate
 CMOV-route unaligned-pointer UB remain open; no full-check or full77/72/O2/O4
 pass is claimed.
 Canonical SHA256:494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b.
+
+## Seven raw register opcode gates in one step theorem
+
+The same `register_dispatch_step_refines` now includes generated BSWAP and
+POPCNT singleton gates between CMOV and XCHG. BSWAP binds32/64-bit width and
+destination only; SRC/AUX/immediate stay arbitrary and unused. POPCNT binds
+16/32/64-bit width and both GPRs; AUX/immediate stay arbitrary and unused.
+All width fields retain the production absent0-to64 fallback. Existing
+NOP/MOV byte lanes, all16 CMOV conditions and XCHG snapshot/alias behavior
+are retained. No admitted operation is removed, no result or semantic
+handler equation becomes a premise, and no runtime guard is added.
+
+The joined theorem derives the complete same canonical step through the
+raw RSP/STACK frame, including all input flags and arbitrary register aliases.
+This covers seven raw opcode gates, not the full77 x86 operations or the
+72 AArch64 operations. Unproved intervening handlers remain outside the
+partial interface. Compiled-body/initial ABI/private-memory transport and
+O2/O4 remain separate obligations.
+
+Focused86-job Lean graph and two axiom audits PASS using only the prior
+propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies. All372
+physical proof/configuration pins remain stable, including the published
+494c LEAVE reference. Earlier theorem declarations and all existing binding
+cases are retained with the two new cases. The complete command/output/audit/
+pin record is appended to the integration JSON/gzip. The three contracts and
+five UBSan hosts for underlying count/reversal/flags were already checked
+for c9e345fd3; they are not rerun or counted twice here. No ISA/header/producer/
+oracle/test/configuration/paper edits. Full-check POPCNT compile and CMOV
+route alignment failures remain open; no whole-check pass is claimed.
