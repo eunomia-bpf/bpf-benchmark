@@ -77,7 +77,6 @@ STACK_READ_END = "#define X86_SIM_L_STACK_PTR(OFF)"
 STACK_SELECTOR = "KPROG_X86_STACK_ARM("
 WORD_ARENA = "__x86_stack_mem.q"
 WORD_INDEX = "KPROG_X86_STACK_WORD_INDEX("
-BYTE_ARENA = "__x86_stack_mem.b["
 WRITE_LADDER = "KPROG_X86_STACK_BYTE("
 READ_LADDER = "KPROG_X86_STACK_ASSEMBLE("
 # The hand-written selection the routed helper must no longer contain: the width
@@ -106,7 +105,7 @@ def stack_read_region():
     return region_between(STACK_READ_START, STACK_READ_END)
 
 
-def check_region(region, ladder):
+def check_region(region, ladder, byte_alias):
     """A routed stack helper must select its body through the generated
     two-fact selector and still keep the word-arena and byte-ladder bodies; it
     must not select by hand."""
@@ -116,8 +115,11 @@ def check_region(region, ladder):
     if WORD_ARENA not in region or WORD_INDEX not in region:
         raise SystemExit(
             "x86 stack helper does not touch the word arena slot")
-    if BYTE_ARENA not in region:
-        raise SystemExit("x86 stack helper does not touch the byte arena")
+    # The volatile byte view prevents Clang from coalescing an unaligned
+    # native stack access into an illegal wide BPF stack load/store.
+    byte_view = f"volatile __u8 *{byte_alias} = __x86_stack_mem.b;"
+    if byte_view not in region or byte_alias + "[" not in region:
+        raise SystemExit("x86 stack helper does not touch its volatile byte arena")
     if ladder not in region:
         raise SystemExit(
             "x86 stack helper does not keep the byte-ladder body")
@@ -130,8 +132,8 @@ def check_region(region, ladder):
 def check_against_header():
     """Both live stack helpers (write and read) must route their body choice
     through the generated selector."""
-    check_region(stack_write_region(), WRITE_LADDER)
-    check_region(stack_read_region(), READ_LADDER)
+    check_region(stack_write_region(), WRITE_LADDER, "__x86_stw_bytes")
+    check_region(stack_read_region(), READ_LADDER, "__x86_str_bytes")
 
 
 def load() -> dict:

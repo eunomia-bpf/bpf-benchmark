@@ -93,7 +93,6 @@ STACK_WRITE_START = "#define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)"
 STACK_WRITE_END = "#define X86_SIM_L_STACK_PTR(OFF)"
 LANE_PREDICATE = "KPROG_X86_STACK_WRITE_LANE_ACTIVE("
 BYTE_LANE = "KPROG_X86_STACK_BYTE("
-BYTE_ARENA = "__x86_stack_mem.b["
 APPLY_WIDTH = "x86_width_mask("
 READ_ASSEMBLE = "KPROG_X86_STACK_ASSEMBLE("
 
@@ -138,9 +137,11 @@ def check_region(region):
     if BYTE_LANE not in region:
         raise SystemExit(
             "x86 stack write ladder does not keep the byte-lane extraction")
-    if BYTE_ARENA not in region:
-        raise SystemExit(
-            "x86 stack ladder does not access the byte arena")
+    for alias in ("__x86_stw_bytes", "__x86_str_bytes"):
+        if (f"volatile __u8 *{alias} = __x86_stack_mem.b;" not in region
+                or alias + "[" not in region):
+            raise SystemExit(
+                "x86 stack ladder does not access its volatile byte arena")
     if APPLY_WIDTH not in region:
         raise SystemExit(
             "x86 stack write ladder does not narrow the value to its width")

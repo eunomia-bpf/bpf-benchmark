@@ -588,43 +588,40 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 			__x86_stack_mem.q                               \
 				[KPROG_X86_STACK_WORD_INDEX(             \
 					__x86_stw_index)] = (VALUE);     \
-		} else if (X86_SIM_L_EFFECTIVE_WIDTH(WIDTH) == X86_WIDTH_64) { \
-			KPROG_X86_MEM_STORE(                              \
-				(void *)&__x86_stack_mem.b[__x86_stw_index], \
-				X86_WIDTH_64, (VALUE));                   \
 		} else {                                                  \
+			volatile __u8 *__x86_stw_bytes = __x86_stack_mem.b; \
 			__u8 __x86_stw_width =                            \
 				X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);         \
 			__u64 __x86_stw_narrowed = (VALUE) &              \
 				x86_width_mask(__x86_stw_width);          \
-			__x86_stack_mem.b[__x86_stw_index] =              \
+			__x86_stw_bytes[__x86_stw_index] =              \
 				KPROG_X86_STACK_BYTE(__x86_stw_narrowed, 0);\
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 1))\
-				__x86_stack_mem.b[__x86_stw_index + 1] =  \
+				__x86_stw_bytes[__x86_stw_index + 1] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 1);   \
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 2))\
-				__x86_stack_mem.b[__x86_stw_index + 2] =  \
+				__x86_stw_bytes[__x86_stw_index + 2] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 2);   \
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 3))\
-				__x86_stack_mem.b[__x86_stw_index + 3] =  \
+				__x86_stw_bytes[__x86_stw_index + 3] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 3);   \
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 4))\
-				__x86_stack_mem.b[__x86_stw_index + 4] =  \
+				__x86_stw_bytes[__x86_stw_index + 4] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 4);   \
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 5))\
-				__x86_stack_mem.b[__x86_stw_index + 5] =  \
+				__x86_stw_bytes[__x86_stw_index + 5] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 5);   \
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 6))\
-				__x86_stack_mem.b[__x86_stw_index + 6] =  \
+				__x86_stw_bytes[__x86_stw_index + 6] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 6);   \
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_stw_width, 7))\
-				__x86_stack_mem.b[__x86_stw_index + 7] =  \
+				__x86_stw_bytes[__x86_stw_index + 7] =  \
 					KPROG_X86_STACK_BYTE(             \
 						__x86_stw_narrowed, 7);   \
 		}                                                         \
@@ -643,38 +640,39 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 				[KPROG_X86_STACK_WORD_INDEX(             \
 					__x86_str_index)];               \
 		} else {                                                  \
+			volatile __u8 *__x86_str_bytes = __x86_stack_mem.b; \
 			__u8 __x86_str_width =                            \
 				X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);         \
 			__x86_str_value =                                 \
-				__x86_stack_mem.b[__x86_str_index];       \
+				__x86_str_bytes[__x86_str_index];       \
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 1))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
-						__x86_stack_mem.b[__x86_str_index + 1], 1);\
+						__x86_str_bytes[__x86_str_index + 1], 1);\
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 2))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
-						__x86_stack_mem.b[__x86_str_index + 2], 2);\
+						__x86_str_bytes[__x86_str_index + 2], 2);\
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 3))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
-						__x86_stack_mem.b[__x86_str_index + 3], 3);\
+						__x86_str_bytes[__x86_str_index + 3], 3);\
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 4))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
-						__x86_stack_mem.b[__x86_str_index + 4], 4);\
+						__x86_str_bytes[__x86_str_index + 4], 4);\
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 5))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
-						__x86_stack_mem.b[__x86_str_index + 5], 5);\
+						__x86_str_bytes[__x86_str_index + 5], 5);\
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 6))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
-						__x86_stack_mem.b[__x86_str_index + 6], 6);\
+						__x86_str_bytes[__x86_str_index + 6], 6);\
 			if (KPROG_X86_STACK_WRITE_LANE_ACTIVE(__x86_str_width, 7))\
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
-						__x86_stack_mem.b[__x86_str_index + 7], 7);\
+						__x86_str_bytes[__x86_str_index + 7], 7);\
 		}                                                         \
 		__x86_str_value;                                          \
 	})
