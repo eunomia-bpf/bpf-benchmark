@@ -1,5 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
-#define X86_SIM_ENABLE_STACK_DEEP 1
+#define X86_SIM_STACK_BYTES 112U
 #include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
@@ -59,22 +59,22 @@ x86_l_35:
 	X86_SIM_X86_JCC(X86_CC_NE, 0x35, 0x11, x86_l_11);
 x86_l_37:
 	/* 0x37: push   rbp */
-	X86_SIM_L_EXEC_PUSH(X86_RBP);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_38:
 	/* 0x38: push   r15 */
-	X86_SIM_L_EXEC_PUSH(X86_R15);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R15, X86_WIDTH_64, 0, 0);
 x86_l_3a:
 	/* 0x3a: push   r14 */
-	X86_SIM_L_EXEC_PUSH(X86_R14);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R14, X86_WIDTH_64, 0, 0);
 x86_l_3c:
 	/* 0x3c: push   r13 */
-	X86_SIM_L_EXEC_PUSH(X86_R13);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R13, X86_WIDTH_64, 0, 0);
 x86_l_3e:
 	/* 0x3e: push   r12 */
-	X86_SIM_L_EXEC_PUSH(X86_R12);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R12, X86_WIDTH_64, 0, 0);
 x86_l_40:
 	/* 0x40: push   rbx */
-	X86_SIM_L_EXEC_PUSH(X86_RBX);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_41:
 	/* 0x41: sub    rsp,0x40 */
 	X86_SIM_L_EXEC_ALU_IMM(X86_RSP, X86_WIDTH_64, X86_ALU_SUB, 64ULL);
@@ -596,22 +596,22 @@ x86_l_2cf:
 	X86_SIM_L_EXEC_ALU_IMM(X86_RSP, X86_WIDTH_64, X86_ALU_ADD, 64ULL);
 x86_l_2d3:
 	/* 0x2d3: pop    rbx */
-	X86_SIM_L_EXEC_POP(X86_RBX, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_2d4:
 	/* 0x2d4: pop    r12 */
-	X86_SIM_L_EXEC_POP(X86_R12, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R12, X86_WIDTH_64, 0, 0);
 x86_l_2d6:
 	/* 0x2d6: pop    r13 */
-	X86_SIM_L_EXEC_POP(X86_R13, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R13, X86_WIDTH_64, 0, 0);
 x86_l_2d8:
 	/* 0x2d8: pop    r14 */
-	X86_SIM_L_EXEC_POP(X86_R14, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R14, X86_WIDTH_64, 0, 0);
 x86_l_2da:
 	/* 0x2da: pop    r15 */
-	X86_SIM_L_EXEC_POP(X86_R15, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R15, X86_WIDTH_64, 0, 0);
 x86_l_2dc:
 	/* 0x2dc: pop    rbp */
-	X86_SIM_L_EXEC_POP(X86_RBP, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_2dd:
 	/* 0x2dd: jmp    2e2 <tetragon_process_event_arg_filter_xdp+0x2e2> ; native-link entry RET */
 	X86_SIM_X86_RET();

@@ -1,4 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
+#define X86_SIM_STACK_BYTES 16U
 #include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
@@ -58,10 +59,10 @@ x86_l_34:
 	X86_SIM_X86_JCC(X86_CC_NE, 0x34, 0x11, x86_l_11);
 x86_l_36:
 	/* 0x36: push   r14 */
-	X86_SIM_L_EXEC_PUSH(X86_R14);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R14, X86_WIDTH_64, 0, 0);
 x86_l_38:
 	/* 0x38: push   rbx */
-	X86_SIM_L_EXEC_PUSH(X86_RBX);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_39:
 	/* 0x39: movabs r8,0x9e3779b97f4a7c15 */
 	X86_SIM_L_EXEC_MOV_IMM(X86_R8, X86_WIDTH_64, 11400714819323198485ULL);
@@ -253,10 +254,10 @@ x86_l_11c:
 	X86_SIM_L_EXEC_MOV_IMM(X86_RAX, X86_WIDTH_32, 2ULL);
 x86_l_121:
 	/* 0x121: pop    rbx */
-	X86_SIM_L_EXEC_POP(X86_RBX, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_122:
 	/* 0x122: pop    r14 */
-	X86_SIM_L_EXEC_POP(X86_R14, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R14, X86_WIDTH_64, 0, 0);
 x86_l_124:
 	/* 0x124: jmp    129 <flow_record_field_scan_xdp+0x129> ; native-link entry RET */
 	X86_SIM_X86_RET();

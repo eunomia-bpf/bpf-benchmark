@@ -1,4 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
+#define X86_SIM_STACK_BYTES 8U
 #include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
@@ -52,7 +53,7 @@ x86_l_31:
 	X86_SIM_X86_JCC(X86_CC_NE, 0x31, 0x11, x86_l_11);
 x86_l_33:
 	/* 0x33: push   rbx */
-	X86_SIM_L_EXEC_PUSH(X86_RBX);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_34:
 	/* 0x34: mov    esi,DWORD PTR [rdx+0xc] */
 	X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RSI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 12ULL);
@@ -271,7 +272,7 @@ x86_l_148:
 	X86_SIM_L_EXEC_MOV_IMM(X86_RAX, X86_WIDTH_32, 2ULL);
 x86_l_14d:
 	/* 0x14d: pop    rbx */
-	X86_SIM_L_EXEC_POP(X86_RBX, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_14e:
 	/* 0x14e: jmp    153 <bcc_runqlat_log2_histogram_bucket_xdp+0x153> ; native-link entry RET */
 	X86_SIM_X86_RET();

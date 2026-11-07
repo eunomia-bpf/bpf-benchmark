@@ -1,5 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
-#define X86_SIM_ENABLE_STACK_DEEP 1
+#define X86_SIM_STACK_BYTES 24U
 #include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
@@ -8,13 +8,13 @@ int katran_lb_consistent_hash_select_x86_sim_xdp(struct xdp_md *ctx)
 	X86_SIM_ENTRY_XDP(ctx);
 x86_l_0:
 	/* 0x0: push   rbp */
-	X86_SIM_L_EXEC_PUSH(X86_RBP);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_1:
 	/* 0x1: push   r12 */
-	X86_SIM_L_EXEC_PUSH(X86_R12);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R12, X86_WIDTH_64, 0, 0);
 x86_l_3:
 	/* 0x3: push   rax */
-	X86_SIM_L_EXEC_PUSH(X86_RAX);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RAX, X86_WIDTH_64, 0, 0);
 x86_l_4:
 	/* 0x4: mov    rcx,QWORD PTR [rdi] */
 	X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_RCX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
@@ -992,10 +992,10 @@ x86_l_507:
 	X86_SIM_L_EXEC_ALU_IMM(X86_RSP, X86_WIDTH_64, X86_ALU_ADD, 8ULL);
 x86_l_50b:
 	/* 0x50b: pop    r12 */
-	X86_SIM_L_EXEC_POP(X86_R12, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R12, X86_WIDTH_64, 0, 0);
 x86_l_50d:
 	/* 0x50d: pop    rbp */
-	X86_SIM_L_EXEC_POP(X86_RBP, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_50e:
 	/* 0x50e: jmp    78d <katran_lb_consistent_hash_select_xdp+0x78d> ; native-link entry RET */
 	X86_SIM_X86_RET();

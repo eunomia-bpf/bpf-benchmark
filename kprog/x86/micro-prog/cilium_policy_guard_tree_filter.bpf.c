@@ -1,4 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
+#define X86_SIM_STACK_BYTES 8U
 #include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
@@ -52,7 +53,7 @@ x86_l_2e:
 	X86_SIM_X86_JCC(X86_CC_NE, 0x2e, 0x11, x86_l_11);
 x86_l_30:
 	/* 0x30: push   rbx */
-	X86_SIM_L_EXEC_PUSH(X86_RBX);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_31:
 	/* 0x31: add    rdx,0x1b */
 	X86_SIM_L_EXEC_ALU_IMM(X86_RDX, X86_WIDTH_64, X86_ALU_ADD, 27ULL);
@@ -322,7 +323,7 @@ x86_l_16f:
 	X86_SIM_L_EXEC_MOV_IMM(X86_RAX, X86_WIDTH_32, 2ULL);
 x86_l_174:
 	/* 0x174: pop    rbx */
-	X86_SIM_L_EXEC_POP(X86_RBX, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_175:
 	/* 0x175: jmp    17a <cilium_policy_guard_tree_filter_xdp+0x17a> ; native-link entry RET */
 	X86_SIM_X86_RET();

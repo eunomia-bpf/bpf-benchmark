@@ -1,4 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
+#define X86_SIM_STACK_BYTES 16U
 #include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
@@ -43,10 +44,10 @@ x86_l_29:
 	X86_SIM_X86_JCC(X86_CC_A, 0x29, 0x1c4, x86_l_1c4);
 x86_l_2f:
 	/* 0x2f: push   rbp */
-	X86_SIM_L_EXEC_PUSH(X86_RBP);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_30:
 	/* 0x30: push   rbx */
-	X86_SIM_L_EXEC_PUSH(X86_RBX);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_31:
 	/* 0x31: mov    r8d,DWORD PTR [rdx+0x8] */
 	X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD, X86_R8, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
@@ -364,10 +365,10 @@ x86_l_1bd:
 	X86_SIM_L_EXEC_MOV_IMM(X86_RAX, X86_WIDTH_32, 2ULL);
 x86_l_1c2:
 	/* 0x1c2: pop    rbx */
-	X86_SIM_L_EXEC_POP(X86_RBX, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_1c3:
 	/* 0x1c3: pop    rbp */
-	X86_SIM_L_EXEC_POP(X86_RBP, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_1c4:
 	/* 0x1c4: jmp    1c9 <bpftrace_string_search_prefix_scan_xdp+0x1c9> ; native-link entry RET */
 	X86_SIM_X86_RET();

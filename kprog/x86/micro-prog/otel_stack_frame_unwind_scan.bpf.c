@@ -1,4 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
+#define X86_SIM_STACK_BYTES 40U
 #include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
@@ -58,19 +59,19 @@ x86_l_35:
 	X86_SIM_X86_JCC(X86_CC_NE, 0x35, 0x11, x86_l_11);
 x86_l_37:
 	/* 0x37: push   rbp */
-	X86_SIM_L_EXEC_PUSH(X86_RBP);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_38:
 	/* 0x38: push   r15 */
-	X86_SIM_L_EXEC_PUSH(X86_R15);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R15, X86_WIDTH_64, 0, 0);
 x86_l_3a:
 	/* 0x3a: push   r14 */
-	X86_SIM_L_EXEC_PUSH(X86_R14);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R14, X86_WIDTH_64, 0, 0);
 x86_l_3c:
 	/* 0x3c: push   r12 */
-	X86_SIM_L_EXEC_PUSH(X86_R12);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R12, X86_WIDTH_64, 0, 0);
 x86_l_3e:
 	/* 0x3e: push   rbx */
-	X86_SIM_L_EXEC_PUSH(X86_RBX);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_3f:
 	/* 0x3f: add    rsi,0x27 */
 	X86_SIM_L_EXEC_ALU_IMM(X86_RSI, X86_WIDTH_64, X86_ALU_ADD, 39ULL);
@@ -322,19 +323,19 @@ x86_l_175:
 	X86_SIM_L_EXEC_MOV_IMM(X86_RAX, X86_WIDTH_32, 2ULL);
 x86_l_17a:
 	/* 0x17a: pop    rbx */
-	X86_SIM_L_EXEC_POP(X86_RBX, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_17b:
 	/* 0x17b: pop    r12 */
-	X86_SIM_L_EXEC_POP(X86_R12, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R12, X86_WIDTH_64, 0, 0);
 x86_l_17d:
 	/* 0x17d: pop    r14 */
-	X86_SIM_L_EXEC_POP(X86_R14, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R14, X86_WIDTH_64, 0, 0);
 x86_l_17f:
 	/* 0x17f: pop    r15 */
-	X86_SIM_L_EXEC_POP(X86_R15, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R15, X86_WIDTH_64, 0, 0);
 x86_l_181:
 	/* 0x181: pop    rbp */
-	X86_SIM_L_EXEC_POP(X86_RBP, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_182:
 	/* 0x182: jmp    187 <otel_stack_frame_unwind_scan_xdp+0x187> ; native-link entry RET */
 	X86_SIM_X86_RET();

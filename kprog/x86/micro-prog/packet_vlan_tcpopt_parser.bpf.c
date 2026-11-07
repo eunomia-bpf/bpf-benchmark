@@ -1,4 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
+#define X86_SIM_STACK_BYTES 32U
 #include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
@@ -40,16 +41,16 @@ x86_l_26:
 	X86_SIM_X86_JCC(X86_CC_A, 0x26, 0x2aa, x86_l_2aa);
 x86_l_2c:
 	/* 0x2c: push   rbp */
-	X86_SIM_L_EXEC_PUSH(X86_RBP);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_2d:
 	/* 0x2d: push   r15 */
-	X86_SIM_L_EXEC_PUSH(X86_R15);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R15, X86_WIDTH_64, 0, 0);
 x86_l_2f:
 	/* 0x2f: push   r14 */
-	X86_SIM_L_EXEC_PUSH(X86_R14);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R14, X86_WIDTH_64, 0, 0);
 x86_l_31:
 	/* 0x31: push   rbx */
-	X86_SIM_L_EXEC_PUSH(X86_RBX);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_32:
 	/* 0x32: movbe  ax,WORD PTR [rdx+0x14] */
 	X86_SIM_RUN_OP(X86_OP_MOVBE_LOAD, X86_RAX, X86_RDX, X86_WIDTH_16, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16), 20ULL);
@@ -481,16 +482,16 @@ x86_l_29e:
 	X86_SIM_X86_JCC(X86_CC_BE, 0x29e, 0xee, x86_l_ee);
 x86_l_2a4:
 	/* 0x2a4: pop    rbx */
-	X86_SIM_L_EXEC_POP(X86_RBX, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_2a5:
 	/* 0x2a5: pop    r14 */
-	X86_SIM_L_EXEC_POP(X86_R14, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R14, X86_WIDTH_64, 0, 0);
 x86_l_2a7:
 	/* 0x2a7: pop    r15 */
-	X86_SIM_L_EXEC_POP(X86_R15, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R15, X86_WIDTH_64, 0, 0);
 x86_l_2a9:
 	/* 0x2a9: pop    rbp */
-	X86_SIM_L_EXEC_POP(X86_RBP, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_2aa:
 	/* 0x2aa: jmp    2af <packet_vlan_tcpopt_parser_xdp+0x2af> ; native-link entry RET */
 	X86_SIM_X86_RET();

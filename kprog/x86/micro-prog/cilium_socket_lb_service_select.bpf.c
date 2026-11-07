@@ -1,4 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
+#define X86_SIM_STACK_BYTES 40U
 #include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
@@ -58,19 +59,19 @@ x86_l_35:
 	X86_SIM_X86_JCC(X86_CC_NE, 0x35, 0x11, x86_l_11);
 x86_l_37:
 	/* 0x37: push   rbp */
-	X86_SIM_L_EXEC_PUSH(X86_RBP);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_38:
 	/* 0x38: push   r15 */
-	X86_SIM_L_EXEC_PUSH(X86_R15);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R15, X86_WIDTH_64, 0, 0);
 x86_l_3a:
 	/* 0x3a: push   r14 */
-	X86_SIM_L_EXEC_PUSH(X86_R14);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R14, X86_WIDTH_64, 0, 0);
 x86_l_3c:
 	/* 0x3c: push   r12 */
-	X86_SIM_L_EXEC_PUSH(X86_R12);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R12, X86_WIDTH_64, 0, 0);
 x86_l_3e:
 	/* 0x3e: push   rbx */
-	X86_SIM_L_EXEC_PUSH(X86_RBX);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_3f:
 	/* 0x3f: add    rdi,0x27 */
 	X86_SIM_L_EXEC_ALU_IMM(X86_RDI, X86_WIDTH_64, X86_ALU_ADD, 39ULL);
@@ -334,19 +335,19 @@ x86_l_15b:
 	X86_SIM_L_EXEC_MOV_IMM(X86_RAX, X86_WIDTH_32, 2ULL);
 x86_l_160:
 	/* 0x160: pop    rbx */
-	X86_SIM_L_EXEC_POP(X86_RBX, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_161:
 	/* 0x161: pop    r12 */
-	X86_SIM_L_EXEC_POP(X86_R12, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R12, X86_WIDTH_64, 0, 0);
 x86_l_163:
 	/* 0x163: pop    r14 */
-	X86_SIM_L_EXEC_POP(X86_R14, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R14, X86_WIDTH_64, 0, 0);
 x86_l_165:
 	/* 0x165: pop    r15 */
-	X86_SIM_L_EXEC_POP(X86_R15, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R15, X86_WIDTH_64, 0, 0);
 x86_l_167:
 	/* 0x167: pop    rbp */
-	X86_SIM_L_EXEC_POP(X86_RBP, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_168:
 	/* 0x168: jmp    16d <cilium_socket_lb_service_select_xdp+0x16d> ; native-link entry RET */
 	X86_SIM_X86_RET();

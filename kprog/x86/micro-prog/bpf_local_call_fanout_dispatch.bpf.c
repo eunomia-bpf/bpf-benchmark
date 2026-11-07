@@ -1,5 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
-#define X86_SIM_ENABLE_STACK_DEEP 1
+#define X86_SIM_STACK_BYTES 48U
 #include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
@@ -8,10 +8,10 @@ int bpf_local_call_fanout_dispatch_x86_sim_xdp(struct xdp_md *ctx)
 	X86_SIM_ENTRY_XDP(ctx);
 x86_l_0:
 	/* 0x0: push   rbp */
-	X86_SIM_L_EXEC_PUSH(X86_RBP);
+	X86_SIM_L_EXEC_PUSH_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_1:
 	/* 0x1: push   r12 */
-	X86_SIM_L_EXEC_PUSH(X86_R12);
+	X86_SIM_L_EXEC_PUSH_OP(X86_R12, X86_WIDTH_64, 0, 0);
 x86_l_3:
 	/* 0x3: sub    rsp,0x18 */
 	X86_SIM_L_EXEC_ALU_IMM(X86_RSP, X86_WIDTH_64, X86_ALU_SUB, 24ULL);
@@ -38,10 +38,10 @@ x86_l_18:
 	X86_SIM_L_EXEC_ALU_IMM(X86_RSP, X86_WIDTH_64, X86_ALU_ADD, 24ULL);
 x86_l_1c:
 	/* 0x1c: pop    r12 */
-	X86_SIM_L_EXEC_POP(X86_R12, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_R12, X86_WIDTH_64, 0, 0);
 x86_l_1e:
 	/* 0x1e: pop    rbp */
-	X86_SIM_L_EXEC_POP(X86_RBP, X86_WIDTH_64);
+	X86_SIM_L_EXEC_POP_OP(X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_1f:
 	/* 0x1f: jmp    2e4 <local_call_bytes+0xdd> ; native-link entry RET */
 	X86_SIM_X86_RET();
