@@ -427,3 +427,32 @@ rewrite and redundant-tactic errors, corrected without weakening premises.
 C route builds retain their existing __always_inline redefinition warnings.
 Exact1c4a46960 full checking remains queued behind the shared full-check slot;
 this increment requires its own full check after publication.
+
+## MOV operand-source and body dispatch
+
+`Arm64Move` now binds numeric MOV_IMM/MOV_REG labels1/2 and the independent
+operand-source table to the actual pointer-preserving-first body order.
+Full-width register moves read the incoming SP/GPR/ZR and use the full write;
+W moves select the scalar register operand and narrow/zero-extend. Immediate
+moves select the immediate independently of the supplied source, then perform
+the scalar width write. `scalar_destination_write` connects their GPR/ZR field
+to the same generated register cells, preserving field31 as ZR rather than SP.
+Register moves retain separately typed SP and ZR operands. The immediate is
+irrelevant to register moves, and unrelated opcodes cannot enter this slice.
+
+Both dispatcher theorems compose to the existing canonical complete-state steps,
+retaining aliases, flags, memory, vectors and ordered empty effects with one PC
+advance. All previous theorem source remains unchanged. This is a numeric
+projection; Entry/O4 must materialize native SP/address values and bind source
+identity, provenance and width flags. It does not prove arbitrary pointer casts,
+compiler correctness or the complete72 dispatcher. No runtime, oracle, test,
+configuration or ISA specification changed.
+
+Validation: 17 Lean dependency jobs and the focused reference build passed,
+including existing reference regressions and 3860 AArch64 control/PC complete
+states. All three related contract freshness checks passed. Existing move/operand
+semantic, actual operand, register-cell semantic and actual register route hosts
+passed 1024, 5120, 3804, 257 and 6401 cases respectively. No proof/test failures or inputs were filtered.
+Existing C warnings about inline redefinition, unused host state and potentially
+uninitialized non-selected macro arms remain visible. Exact1c4a46960 full check
+is running separately; this newer increment awaits its own full validation.

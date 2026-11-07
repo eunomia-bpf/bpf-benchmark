@@ -71,7 +71,9 @@ BITFIELD, MOVK and SHIFT compose packed AUX extraction with generated value
 operations, typed native bounds and dispatcher gates, independently of unused
 AUX bytes. SHIFT also binds immediate/register count selection and the two
 generated tables' numeric operation codes. MVN/NEG also compose AUX modifier/count
-selection, including the identity modifier and its unused shift byte.
+selection, including the identity modifier and its unused shift byte. MOV binds the two
+operand-source tables and the full-width pointer/narrowing branch order;
+immediate field31 remains ZR, while register operands distinguish SP and ZR.
 Individual module statements define their
 exact scope. Dispatcher coverage/exclusivity is
 **not yet a full simulator-step refinement theorem**; completing the remaining

@@ -88,4 +88,88 @@ theorem register_handler_refines (width : Width) (dst src : RegisterRef) (s : Re
     Reference.AArch64.Step (.moveRegister width dst src) s (registerStep width dst src s) :=
   (register_step_refines width dst src s).symm
 
+
+/-- Bind the move gate and the independent immediate-selection contract to
+exactly the same operation numbers. Shift rows in that contract cannot enter
+this move body. -/
+def decodeOpcode (opcode : Nat) : Option GeneratedArm64Mov.Mov :=
+  if opcode = GeneratedArm64Mov.code .movImm then some .movImm
+  else if opcode = GeneratedArm64Mov.code .movReg then some .movReg else none
+
+def operandOp : GeneratedArm64Mov.Mov → GeneratedArm64ImmOperand.ImmOp
+  | .movImm => .movImm | .movReg => .movReg
+
+theorem operand_code (op : GeneratedArm64Mov.Mov) :
+    GeneratedArm64ImmOperand.code (operandOp op) = GeneratedArm64Mov.code op := by cases op <;> rfl
+
+theorem operand_immediate (op : GeneratedArm64Mov.Mov) :
+    GeneratedArm64ImmOperand.immediate (operandOp op) = (op == .movImm) := by cases op <;> rfl
+
+/-- An immediate destination is a GPR/ZR field. Unlike register MOV, it cannot
+silently reinterpret architectural field31 as SP. -/
+def scalarDestination (dst : Register) : RegisterRef :=
+  if h : dst.val < 31 then .general ⟨dst.val, h⟩ else .zero
+
+theorem scalar_destination_write (s : Reference.AArch64.State) (dst : Register)
+    (value : Word) (width : Width) :
+    widthWrite s (scalarDestination dst) value width = Arm64Register.writeReg s dst value width := by
+  unfold scalarDestination
+  split
+  · rfl
+  · have equal : dst = 31 := Fin.ext (by have := dst.isLt; omega)
+    subst dst
+    rfl
+
+/-- The production body tests provenance-preserving MOV_REG/X first. Its
+numeric projection reads the incoming SP/GPR/ZR before any write; the scalar
+arm alone consumes the generated immediate/register selector. Native address
+materialization and provenance transport remain Entry/O4 obligations. -/
+def rawStep (op : GeneratedArm64Mov.Mov) (width : Width) (dst src : RegisterRef)
+    (immediate : Word) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let state := if GeneratedArm64Mov.ptrTagPath op (Arm64Register.handlerWidth width) then
+      widthWrite s dst (readData s src) .w64
+    else
+      let value := if GeneratedArm64ImmOperand.immediate (operandOp op) then immediate else readData s src
+      widthWrite s dst value width
+  ⟨{ state with pc := s.pc + 4 }, [], none⟩
+
+theorem raw_immediate_refines (width : Width) (dst : Register) (src : RegisterRef)
+    (immediate : Word) (s : Reference.AArch64.State) :
+    rawStep .movImm width (scalarDestination dst) src immediate s =
+      Reference.AArch64.step (.moveImmediate width dst immediate) s := by
+  simp only [rawStep, GeneratedArm64Mov.ptrTagPath, Bool.false_eq_true, ↓reduceIte,
+    operandOp, GeneratedArm64ImmOperand.immediate, scalar_destination_write]
+  change immediateStep width dst immediate s = _
+  exact immediate_step_refines width dst immediate s
+
+theorem raw_register_refines (width : Width) (dst src : RegisterRef) (immediate : Word)
+    (s : Reference.AArch64.State) :
+    rawStep .movReg width dst src immediate s =
+      Reference.AArch64.step (.moveRegister width dst src) s := by
+  change registerStep width dst src s = _
+  exact register_step_refines width dst src s
+
+def dispatch (opcode : Nat) (width : Width) (dst src : RegisterRef) (immediate : Word)
+    (s : Reference.AArch64.State) : Option (Transition Reference.AArch64.State) :=
+  (decodeOpcode opcode).map (fun op => rawStep op width dst src immediate s)
+
+theorem dispatch_immediate_refines (width : Width) (dst : Register) (src : RegisterRef)
+    (immediate : Word) (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Mov.code .movImm) width (scalarDestination dst) src immediate s =
+      some (Reference.AArch64.step (.moveImmediate width dst immediate) s) := by
+  change some (rawStep .movImm width (scalarDestination dst) src immediate s) = _
+  rw [raw_immediate_refines]
+
+theorem dispatch_register_refines (width : Width) (dst src : RegisterRef) (immediate : Word)
+    (s : Reference.AArch64.State) :
+    dispatch (GeneratedArm64Mov.code .movReg) width dst src immediate s =
+      some (Reference.AArch64.step (.moveRegister width dst src) s) := by
+  change some (rawStep .movReg width dst src immediate s) = _
+  rw [raw_register_refines]
+
+theorem dispatch_other (opcode : Nat) (width : Width) (dst src : RegisterRef) (immediate : Word)
+    (s : Reference.AArch64.State) (notImm : opcode ≠ GeneratedArm64Mov.code .movImm)
+    (notReg : opcode ≠ GeneratedArm64Mov.code .movReg) :
+    dispatch opcode width dst src immediate s = none := by simp [dispatch, decodeOpcode, notImm, notReg]
+
 end KProgFormal.Refinement.Arm64Move
