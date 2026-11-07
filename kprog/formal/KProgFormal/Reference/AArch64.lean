@@ -820,6 +820,9 @@ inductive Instruction
   | addressedPairMemory (instruction : AddressedPairMemoryInstruction)
   | nop
   | branch (displacement : Word)
+  | branchLink (displacement : Word)
+  | branchRegister (link : Bool) (src : Register)
+  | pcAddress (page : Bool) (dst : Register) (displacement : Word)
   | branchConditional (predicate : Fin 16) (displacement : Word)
   | branchZero (width : Width) (nonzero : Bool) (src : Register) (displacement : Word)
   | branchBit (nonzero : Bool) (src : Register) (bit : BitVec 6) (displacement : Word)
@@ -854,6 +857,16 @@ def step (i : Instruction) (s : State) : Transition State :=
   | .addressedPairMemory instruction => addressedPairMemoryStep instruction s
   | .nop => ⟨{ s with pc := s.pc + 4 }, [], none⟩
   | .branch displacement => branchStep true displacement s
+  | .branchLink displacement =>
+      ⟨{ writeReg s 30 (s.pc + 4) with pc := s.pc + displacement }, [], none⟩
+  | .branchRegister link src =>
+      -- Capture the incoming target before BLR overwrites X30, including BLR X30.
+      let target := readReg s src
+      let afterLink := if link then writeReg s 30 (s.pc + 4) else s
+      ⟨{ afterLink with pc := target }, [], none⟩
+  | .pcAddress page dst displacement =>
+      let base := if page then s.pc &&& 0xfffffffffffff000 else s.pc
+      ⟨{ writeReg s dst (base + displacement) with pc := s.pc + 4 }, [], none⟩
   | .branchConditional predicate displacement => branchStep (condition s.flags predicate) displacement s
   | .branchZero width nonzero src displacement => branchStep (zeroBranch width nonzero (readReg s src)) displacement s
   | .branchBit nonzero src bit displacement => branchStep (bitBranch nonzero (readReg s src) bit) displacement s
@@ -962,6 +975,18 @@ def decode (bytes : Array Byte) : Except String Instruction := do
         return .addressedMemory ⟨accessWidth, transfer, lhs, offset, writeback, noOverlap⟩
       else throw "constrained-unpredictable load/store writeback overlap"
   if word = 0xd503201f then return .nop
+  -- Base A64 control profile (as on Cortex-A72): no guarded control stack
+  -- or BTI state. Branches set PC; fetching the target is a subsequent step.
+  if word &&& 0xfc000000 = 0x94000000 then
+    return .branchLink ((BitVec.ofNat 26 word).signExtend 64 <<< 2)
+  let indirect := word &&& 0xfffffc1f
+  if indirect = 0xd61f0000 ∨ indirect = 0xd63f0000 ∨ indirect = 0xd65f0000 then
+    return .branchRegister (indirect == 0xd63f0000) lhs
+  if word &&& 0x1f000000 = 0x10000000 then
+    let immediate := BitVec.ofNat 21 (((word / 2^5) % 2^19) * 4 + (word / 2^29) % 4)
+    let page := word / 2^31 == 1
+    let displacement := if page then immediate.signExtend 64 <<< 12 else immediate.signExtend 64
+    return .pcAddress page dst displacement
   if word &&& 0xfc000000 = 0x14000000 then
     return .branch ((BitVec.ofNat 26 word).signExtend 64 <<< 2)
   if word &&& 0xff000010 = 0x54000000 then

@@ -83,6 +83,12 @@ with independent signed/unsigned widened sums for overflow and carry. All eight
 register extensions narrow at the operand size before extending and shifting.
 Branch offsets are signed native bytes; both generated goto shapes preserve
 the same PC choice, with W/ZR and tested-bit widths handled explicitly.
+BL/BLR write the native successor to X30; indirect branches and RET capture
+the incoming target before any link write, including BLR X30. ADR/ADRP use
+native signed offsets and page alignment. These core-state refinements retain
+all memory/vector/flag components and emit no helper or memory access; fetching
+a branch target is a later step. Control uses the Cortex-A72 base profile;
+linker target/provenance and platform control features require the same entry/profile relation.
 Scalar memory includes all unsigned and signed load widths, stores, signed
 unscaled and unsigned scaled offsets, exact byte permissions/initialization,
 ordered accesses and faults. Its handler theorem takes the admission witness

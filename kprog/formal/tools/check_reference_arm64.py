@@ -736,6 +736,45 @@ def main():
         if destination is not None:
             expected["registers"][destination] = result
         cases.append((request, expected))
+    # Internal BL/BLR/BR/RET set only the architectural link/PC. In particular
+    # BLR X30 reads its incoming target before writing the successor to X30.
+    # Target fetch is a later instruction; these steps never access memory.
+    control_cases = 0
+    mask = (1 << 64) - 1
+    for pc in (0, 0x1000, 0x12345FFC, mask - 3):
+        for displacement in (0, 4, -4, (1 << 27) - 4, -(1 << 27)):
+            request = copy.deepcopy(base)
+            request['state'].update(pc=pc, flags=0xA5A50000F00ABCDE)
+            word = 0x94000000 | ((displacement // 4) & ((1 << 26) - 1))
+            request['native_bytes'] = list(word.to_bytes(4, 'little'))
+            expected = copy.deepcopy(request['state'])
+            expected['registers'][30] = (pc + 4) & mask
+            expected.update(pc=(pc + displacement) & mask, defined_flags=mask, events=[], fault=None)
+            cases.append((request, expected)); control_cases += 1
+        for opcode, link in ((0xD61F0000, False), (0xD63F0000, True), (0xD65F0000, False)):
+            for source in range(32):
+                for target in (0, 0x123456789ABCDEF0, mask - 3, 0x1000):
+                    request = copy.deepcopy(base)
+                    request['state'].update(pc=pc, flags=0xA5A50000F00ABCDE)
+                    request['state']['registers'][source] = target
+                    request['native_bytes'] = list((opcode | (source << 5)).to_bytes(4, 'little'))
+                    expected = copy.deepcopy(request['state'])
+                    if link: expected['registers'][30] = (pc + 4) & mask
+                    expected.update(pc=target if source < 31 else 0, defined_flags=mask, events=[], fault=None)
+                    cases.append((request, expected)); control_cases += 1
+        for page in (False, True):
+            for destination in range(32):
+                for immediate in (0, 1, -1, 3, -4, 0x12345, -0x12345, (1 << 20) - 1, -(1 << 20)):
+                    request = copy.deepcopy(base)
+                    request['state'].update(pc=pc, flags=0xA5A50000F00ABCDE)
+                    encoded = immediate & ((1 << 21) - 1)
+                    word = (0x90000000 if page else 0x10000000) | ((encoded & 3) << 29) | ((encoded >> 2) << 5) | destination
+                    request['native_bytes'] = list(word.to_bytes(4, 'little'))
+                    expected = copy.deepcopy(request['state'])
+                    if destination < 31:
+                        expected['registers'][destination] = (((pc & ~4095) + immediate * 4096) if page else pc + immediate) & mask
+                    expected.update(pc=(pc + 4) & mask, defined_flags=mask, events=[], fault=None)
+                    cases.append((request, expected)); control_cases += 1
     run = subprocess.run([str(ROOT / ".lake/build/bin/reference")],
                          input="".join(json.dumps(q) + "\n" for q, _ in cases),
                          text=True, stdout=subprocess.PIPE, check=True)
@@ -743,7 +782,7 @@ def main():
     assert len(outputs) == len(cases)
     for (request, expected), out in zip(cases, outputs):
         assert out == expected, (request, out, expected)
-    for word in (0x53474C20, 0xD3074C20, 0x53204C20, 0x53078020, 0x73074C20, 0xF3474C20,
+    for word in (0xD61F0001, 0xD63F0400, 0xD65F0800, 0xD67F0000, 0x53474C20, 0xD3074C20, 0x53204C20, 0x53078020, 0x73074C20, 0xF3474C20,
                  0x2A2183E0, 0x4BC107E0,
                  0x1AE22020, 0x53207C20, 0x131FFC20, 0x0A028020, 0x6A228020,
                  0x72C24680, 0x72E24680, 0x72024680, 0x12C24680, 0x12E24680,
@@ -852,6 +891,7 @@ def main():
             assert str(error).startswith(("invalid move-wide", "invalid NEGS", "invalid AArch64 extend")), error
             continue
         raise AssertionError((mnemonic, operands, "invalid alias was accepted"))
+    print(f"AArch64 internal-control/PC-address reference: {control_cases} complete-state cases PASS")
     print("AArch64 reference: multiply/divide/select/extract/reverse/extend/shift/unary/logical/MOVK/MOVZ/MOVN/MOV-register/FMOV-all32/CNT/UADDLV/CCMP/ADD-SUB-immediate/shifted-register/extended-register/NOP/branches/scalar-memory/LDP-STP, exact native decode, W zero-extension, ZR/SP, aliasing and state preservation OK")
 
 

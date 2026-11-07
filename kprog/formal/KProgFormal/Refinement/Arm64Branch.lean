@@ -107,4 +107,67 @@ theorem bit_handler_refines (nonzero : Bool) (src : Register) (bit : BitVec 6)
   simp only [Reference.AArch64.Step, bitStep, control_refines, bit_predicate_refines,
     Arm64Register.read_refines, Reference.AArch64.step]
 
+/-- Internal calls link to the actual native successor and dispatch to the
+native target. This is the bit-state slice of A64_LINK/A64_CALL after the
+existing code-address and finite-target checks, not a platform helper call. -/
+def callStep (target successor : Reference.Word) (s : Reference.AArch64.State) :
+    Transition Reference.AArch64.State :=
+  ⟨{ Arm64Register.writeReg s 30 successor .w64 with pc := target }, [], none⟩
+
+theorem call_step_refines (displacement : Reference.Word) (s : Reference.AArch64.State) :
+    callStep (s.pc + displacement) (s.pc + 4) s =
+      Reference.AArch64.step (.branchLink displacement) s := by
+  simp only [callStep, Arm64Register.write_refines, Reference.AArch64.step,
+    Reference.AArch64.narrow, Reference.AArch64.Width.bits, BitVec.setWidth_eq]
+
+theorem call_handler_refines (displacement : Reference.Word) (s : Reference.AArch64.State) :
+    Reference.AArch64.Step (.branchLink displacement) s
+      (callStep (s.pc + displacement) (s.pc + 4) s) :=
+  (call_step_refines displacement s).symm
+
+/-- Target selection reads the incoming register before the link write.
+BR/RET keep X30 unchanged; BLR X30 branches to the old X30 value. -/
+def indirectStep (link : Bool) (src : Register) (s : Reference.AArch64.State) :
+    Transition Reference.AArch64.State :=
+  let target := Arm64Register.readReg s src
+  if link then callStep target (s.pc + 4) s else ⟨{ s with pc := target }, [], none⟩
+
+theorem indirect_step_refines (link : Bool) (src : Register) (s : Reference.AArch64.State) :
+    indirectStep link src s = Reference.AArch64.step (.branchRegister link src) s := by
+  cases link <;> simp only [indirectStep, callStep, Arm64Register.read_refines,
+    Arm64Register.write_refines, Reference.AArch64.step, Reference.AArch64.narrow,
+    Reference.AArch64.Width.bits, BitVec.setWidth_eq, Bool.false_eq_true, ↓reduceIte]
+
+theorem indirect_handler_refines (link : Bool) (src : Register) (s : Reference.AArch64.State) :
+    Reference.AArch64.Step (.branchRegister link src) s (indirectStep link src s) :=
+  (indirect_step_refines link src s).symm
+
+/-- Independent page arithmetic: remove the low twelve bits by subtraction,
+then add the signed byte displacement (already shifted for ADRP). -/
+def pcAddress (page : Bool) (pc displacement : Reference.Word) : Reference.Word :=
+  (if page then pc - (pc &&& 0xfff) else pc) + displacement
+
+theorem pc_address_refines (page : Bool) (pc displacement : Reference.Word) :
+    pcAddress page pc displacement =
+      (if page then pc &&& 0xfffffffffffff000 else pc) + displacement := by
+  cases page <;> simp only [pcAddress, Bool.false_eq_true, ↓reduceIte, Reference.Word] <;> bv_decide
+
+/-- ADR and linked ADRP materialize this native address in a full-width GPR.
+Relocation identity and provenance tags remain the existing linker/entry
+relation; the core preserves every other state component and emits no read. -/
+def pcAddressStep (page : Bool) (dst : Register) (displacement : Reference.Word)
+    (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  ⟨{ Arm64Register.writeReg s dst (pcAddress page s.pc displacement) .w64 with pc := s.pc + 4 }, [], none⟩
+
+theorem pc_address_step_refines (page : Bool) (dst : Register) (displacement : Reference.Word)
+    (s : Reference.AArch64.State) :
+    pcAddressStep page dst displacement s = Reference.AArch64.step (.pcAddress page dst displacement) s := by
+  simp only [pcAddressStep, pc_address_refines, Arm64Register.write_refines,
+    Reference.AArch64.step, Reference.AArch64.narrow, Reference.AArch64.Width.bits, BitVec.setWidth_eq]
+
+theorem pc_address_handler_refines (page : Bool) (dst : Register) (displacement : Reference.Word)
+    (s : Reference.AArch64.State) :
+    Reference.AArch64.Step (.pcAddress page dst displacement) s (pcAddressStep page dst displacement s) :=
+  (pc_address_step_refines page dst displacement s).symm
+
 end KProgFormal.Refinement.Arm64Branch
