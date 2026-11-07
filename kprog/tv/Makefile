@@ -673,3 +673,7 @@ simple-packet-entry-check: checked-platform-check simple-packet-guard-check
 
 simple-packet-entry-negative-check:
 	python3 test_packet_entry.py
+
+.PHONY: simple-packet-store-check
+simple-packet-store-check: checked-first-block-check simple-packet-entry-check
+	cd ../formal && LEAN_PATH=../tv/build:../tv/build/simple-checked:../tv/build/simple-arm64:../tv/build/simple-packet-arm64 lake env lean -R ../tv -o ../tv/build/PacketStoreTransport.olean ../tv/PacketStoreTransport.lean

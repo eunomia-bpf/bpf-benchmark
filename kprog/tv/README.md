@@ -914,3 +914,30 @@ to prove every event of ANY native prefix on a rejected guard path was checked
 for the same expanded B, under explicit verifier/platform soundness. The store
 path, actual RX transport, host ABI and full accepted artifact binding still
 need to be composed for simple_packet.
+
+
+The actual packet store block and every first fault
+-------------------------------------------------
+
+`make -C kprog/tv simple-packet-store-check` proves the whole actual store block
+using `PacketStoreTransport`. All eight byte-decoded native steps and thirteen
+actual physical BPF steps preserve complete states, effects and fault metadata
+under the checked PC correspondence. The final native branch has its real
+four-byte displacement; source Simple's corresponding branch has eight bytes.
+The generic execution-transport lemmas in ARM64Path/BPFPath lift successful
+source witnesses through these proved actual target steps, without selecting
+or forcing a target PC or adding an executable permission/termination check.
+
+The complete store theorem reuses SimpleStoreCertificate's canonical/BPF
+certificate on two related memories with equal write permissions. It retains
+all architectural fields, all earlier 4/1/2/1-byte writes, the exact first fault,
+corresponding successor/fault PCs and the memory relation. Faults occur at a
+proved actual store position; repeating the native fault state adds only its
+already observed fault event. No guest effect is erased by the PC mapping.
+The two compiler-spill memories remain distinct.
+
+The semantic negative command now additionally rejects native store width,
+BPF store width and BPF address changes. Both BPF arrays change together, and
+all affected modules are rebuilt against each changed definition. The full
+original-entry/positive-store/return composition, RX/ABI transport and accepted
+artifact theorem remain active for this program.

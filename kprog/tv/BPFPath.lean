@@ -127,6 +127,55 @@ theorem evaluate_program_congr_if_wide (env : Environment) (first second : Array
           simp [active, atPosition, firstDecode, secondDecode, execution, ih suffix]
         · simp [evaluate, active, atPosition]
 
+/-- Transfer a successful witness using actual pointwise target transitions.
+The source checks every selected PC; the target relation must be established
+for the whole state and exact ordered effects at each such step. -/
+theorem evaluate_execution_transport (env : Environment) (source : Array Byte)
+    (stateMap : State → State) (target : BlockStep State) (allowed : Nat → Prop)
+    (stepMap : ∀ s position, allowed position → s.pc = (position : Int) →
+      ∀ result, step env source s = .ok result →
+      target (stateMap s) result.events (stateMap result.state))
+    (positions : List Nat) (inside : ∀ position ∈ positions, allowed position)
+    (state : State) (result : Transition State)
+    (accepted : evaluate env source positions state = .ok result) :
+    Execution target (stateMap state) result.events (stateMap result.state) := by
+  induction positions generalizing state result with
+  | nil =>
+      simp [evaluate] at accepted
+      cases accepted
+      exact Execution.refl _
+  | cons pc rest ih =>
+    cases active : state.halted with
+    | true => simp [evaluate, active] at accepted
+    | false =>
+      by_cases position : state.pc = (pc : Int)
+      · cases decoded : decode source pc with
+        | error error => simp [evaluate, active, position, decoded] at accepted
+        | ok instruction =>
+          cases executed : execute env source state instruction with
+          | error error => simp [evaluate, active, position, decoded, executed] at accepted
+          | ok first =>
+            have actual : step env source state = .ok first := by
+              simp [step, active, position, decoded, executed]
+            have head := stepMap state pc (inside pc (by simp)) position first actual
+            cases fault : first.fault with
+            | some reason =>
+              cases rest with
+              | nil =>
+                simp [evaluate, active, position, decoded, executed, fault] at accepted
+                cases accepted
+                simpa using Execution.next head (Execution.refl (stateMap result.state))
+              | cons next tail => simp [evaluate, active, position, decoded, executed, fault] at accepted
+            | none =>
+              cases continued : evaluate env source rest first.state with
+              | error error => simp [evaluate, active, position, decoded, executed, fault, continued] at accepted
+              | ok tail =>
+                simp [evaluate, active, position, decoded, executed, fault, continued] at accepted
+                cases accepted
+                exact Execution.next head (ih (fun pos member => inside pos (List.mem_cons_of_mem _ member))
+                  first.state tail continued)
+      · simp [evaluate, active, position] at accepted
+
 end KProgTV.BPFPath
 
 #print axioms KProgTV.BPFPath.evaluate_sound
@@ -134,3 +183,5 @@ end KProgTV.BPFPath
 #print axioms KProgTV.BPFPath.evaluate_program_congr
 
 #print axioms KProgTV.BPFPath.evaluate_program_congr_if_wide
+
+#print axioms KProgTV.BPFPath.evaluate_execution_transport

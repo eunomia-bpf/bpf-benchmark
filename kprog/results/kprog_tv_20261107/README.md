@@ -349,3 +349,26 @@ All axioms are the existing propext/choice/ofReduceBool/Quot.sound, with no
 sorryAx. New source, exact generated arrays and proof logs are retained in
 packet-return-inputs.tar.gz. The actual RX/ABI/binding and store/fault path
 composition remains active; this is not a whole-program certificate yet.
+
+
+`simple_packet`: actual store execution and every first fault
+-----------------------------------------------------------
+
+`packet-entry-full.log` records EXIT0 for the complete entry/guard/return/
+rejected-prefix dependency refresh. `packet-store-final.log` checks the merged
+PacketStoreTransport source: all8 native and13 BPF actual byte steps, complete
+store execution/state/effect witnesses on related memories, matching first
+faults/PCs, and actual native fault closure. It also rejects all6 entry/store
+semantic mutations, with every preceding dependent rebuilt. New store cases
+are native width, BPF width and BPF address changes; both BPF arrays mutate
+consistently. No mutated native program is run.
+
+The generic ARM/BPF witness-transport proofs print only propext/Quot.sound;
+native step/fault-location transport has propext/choice/Quot.sound, BPF step
+transport has propext/Quot.sound, and the complete store witness has the existing
+propext/choice/ofReduceBool/Quot.sound. No positive proof has sorryAx. Source,
+actual generated arrays, mutation cases/logs and the earlier finite-index/
+normalization/source-rewrite development failures are retained in
+packet-store-inputs.tar.gz with source/module pins adjacent. This proves the
+whole store block; original-entry/positive-store composition and the complete
+RX/ABI/accepted invocation still remain to compose.

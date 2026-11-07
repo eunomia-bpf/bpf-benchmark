@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parent
 FORMAL = ROOT.parent/'formal'
 compiled = (ROOT/'build/simple-packet-arm64/PacketCompiled.lean').read_text()
 modules = ['PacketCompiled', 'PacketGuardCertificate', 'PacketEntryCertificate',
-           'PacketCheckedPlatform', 'PacketCheckedBlocks']
+           'PacketCheckedPlatform', 'PacketStoreTransport', 'PacketCheckedBlocks']
 cases = [
     ('native-ldp-destination', ['native'], 0, 0x08, 0x09,
      'PacketEntryCertificate', 'decode0'),
@@ -16,6 +16,12 @@ cases = [
      'PacketEntryCertificate', 'prefix_instruction'),
     ('proof-context-offset', ['proof', 'program'], 18, 4, 8,
      'PacketCheckedPlatform', 'second_virtual'),
+    ('native-store-width', ['native'], 43, 0xb8, 0x38,
+     'PacketStoreTransport', 'packet_decode40'),
+    ('proof-store-width', ['proof', 'program'], 112, 0x63, 0x73,
+     'PacketStoreTransport', 'packet_proofDecode14'),
+    ('proof-store-address', ['proof', 'program'], 100, 3, 4,
+     'PacketStoreTransport', 'packet_proofDecode12'),
 ]
 for name, arrays, offset, old, new, expected_module, expected_theorem in cases:
     directory = ROOT/'build/packet-entry-mutations'/name
@@ -60,4 +66,4 @@ for name, arrays, offset, old, new, expected_module, expected_theorem in cases:
     if not rejected:
         raise AssertionError('accepted coherent mutation: '+name)
     print(f'{name}: REJECTED by {expected_module}.{expected_theorem}; all preceding dependents rebuilt', flush=True)
-print('actual entry/context/private-spill semantic mutation certificates: PASS')
+print('actual entry/context/private-spill/store semantic mutation certificates: PASS')

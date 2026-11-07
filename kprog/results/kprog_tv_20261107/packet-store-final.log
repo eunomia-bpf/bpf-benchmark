@@ -1,0 +1,14 @@
+'KProgTV.PacketStoreTransport.all_store_steps' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgTV.PacketStoreTransport.all_proof_store_steps' depends on axioms: [propext, Quot.sound]
+'KProgTV.PacketStoreTransport.store_execution_witnesses' depends on axioms: [propext,
+ Classical.choice,
+ Lean.ofReduceBool,
+ Quot.sound]
+python3 test_packet_entry.py
+native-ldp-destination: REJECTED by PacketEntryCertificate.decode0; all preceding dependents rebuilt
+proof-spill-address: REJECTED by PacketEntryCertificate.prefix_instruction; all preceding dependents rebuilt
+proof-context-offset: REJECTED by PacketCheckedPlatform.second_virtual; all preceding dependents rebuilt
+native-store-width: REJECTED by PacketStoreTransport.packet_decode40; all preceding dependents rebuilt
+proof-store-width: REJECTED by PacketStoreTransport.packet_proofDecode14; all preceding dependents rebuilt
+proof-store-address: REJECTED by PacketStoreTransport.packet_proofDecode12; all preceding dependents rebuilt
+actual entry/context/private-spill/store semantic mutation certificates: PASS
