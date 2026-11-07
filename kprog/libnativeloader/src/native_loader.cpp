@@ -1797,12 +1797,8 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
             log_size--;
         }
         if (log_size != 0) {
-            constexpr size_t kMaxVerifierLogTail = 8192;
-            const size_t start = log_size > kMaxVerifierLogTail
-                ? log_size - kMaxVerifierLogTail
-                : 0;
-            message += "\nverifier log tail:\n";
-            message.append(verifier_log.data() + start, log_size - start);
+            message += "\nverifier log:\n";
+            message.append(verifier_log.data(), log_size);
         }
         message += native_lab_kernel_log_tail();
         fail(message);
