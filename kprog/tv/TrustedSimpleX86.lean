@@ -2059,6 +2059,69 @@ theorem conditional_complete_payload_correspondence (env : BPF.Environment) (n :
     · simpa only [conditionalNativeFinal,reject,ite_false] using donePC
     · simpa only [conditionalProofFinal,reject,ite_false] using doneHalted
 
+
+theorem native_immediate_store_fault (s : X86.State) (width : X86.ScalarWidth)
+    (address value nextPC : Word)
+    (permission : permitted s.memory.writable address width.bytes=false) :
+    X86.step (.move width (.memory address) (.immediate value) nextPC) s =
+      ⟨s,[.fault (.write address width.bytes)],some (.write address width.bytes)⟩ := by
+  simp only [X86.step,X86.moveStep,X86.scalarRead,X86.scalarWrite,writeMemory,
+    permission,Bool.false_eq_true,ite_false,List.nil_append]
+
+def packetProofBeforeFirst (p : BPF.State) : BPF.State :=
+  {BPF.setReg (BPF.setReg (BPF.setReg p 1 (0#64)) 3 (p.regs 2)) 4 (24910#64) with pc := 22}
+
+/-- The failed first guest store produces the actual fault, with no write,
+no PC advancement and no later instruction in the checked path. -/
+theorem packet_proof_first_fault_block (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=18) (active : p.halted=false)
+    (bad : permitted p.memory.writable (p.regs 2) 2=false) :
+    BPFPath.evaluate env proof [18,19,20,21,22] p =
+      .ok ⟨packetProofBeforeFirst p,[.fault (.write (p.regs 2) 2)],some (.write (p.regs 2) 2)⟩ := by
+  simp +decide [BPFPath.evaluate,virtual_decode18,virtual_decode19,virtual_decode20,
+    virtual_decode21,virtual_decode22,BPF.execute,BPF.source,BPF.alu,BPF.setReg,BPF.store,
+    writeMemory,position,active,bad,packetProofBeforeFirst,
+    Except.bind,Except.map,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  funext index
+  by_cases one : index=1 <;> by_cases three : index=3 <;> by_cases four : index=4 <;>
+    simp [one,three,four]
+
+theorem packet_proof_first_fault (env : BPF.Environment) (p : BPF.State)
+    (position : p.pc=18) (active : p.halted=false)
+    (bad : permitted p.memory.writable (p.regs 2) 2=false) :
+    Execution (initializedInstructionStep env) p [.fault (.write (p.regs 2) 2)] (packetProofBeforeFirst p) := by
+  exact ordinary_path_execution env [18,19,20,21,22] p
+    ⟨packetProofBeforeFirst p,[.fault (.write (p.regs 2) 2)],some (.write (p.regs 2) 2)⟩
+    (by intro pc inside; simp at inside; omega) (packet_proof_first_fault_block env p position active bad)
+
+theorem packet_native_first_fault (s : X86.State) (position : s.pc=35)
+    (bad : permitted s.memory.writable (s.gpr 1) 2=false) :
+    X86Path.Execution 0 native s [.fault (.write (s.gpr 1) 2)] s := by
+  have decoded : X86Path.decodeAt 0 native ⟨35,5⟩ s = .ok
+      (.move .w16 (.memory (s.gpr 1)) (.immediate (24910#64)) 40) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode35,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have step := native_immediate_store_fault s .w16 (s.gpr 1) (24910#64) 40 bad
+  have run := X86Path.Execution.next ⟨35,5⟩ _ decoded
+    (X86Path.Execution.refl (X86.step (.move .w16 (.memory (s.gpr 1)) (.immediate (24910#64)) 40) s).state)
+  rw [step] at run
+  simpa only [List.append_nil] using run
+
+/-- Model-only failed-access correspondence; no unsafe native execution is
+run. The actual first fault is retained and both memories stay related. -/
+theorem first_store_fault_correspondence (env : BPF.Environment) (frame : Word) (n : X86.State) (p : BPF.State)
+    (nativePC : n.pc=35) (proofPC : p.pc=18) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2) (same : initializationAgreesOutside frame n.memory p.memory)
+    (bad : permitted p.memory.writable (p.regs 2) 2=false) :
+    X86Path.Execution 0 native n [.fault (.write (p.regs 2) 2)] n ∧
+    Execution (initializedInstructionStep env) p [.fault (.write (p.regs 2) 2)] (packetProofBeforeFirst p) ∧
+    initializationAgreesOutside frame n.memory (packetProofBeforeFirst p).memory := by
+  have nbad : permitted n.memory.writable (n.gpr 1) 2=false := by
+    simpa only [same.2.1,pointer] using bad
+  refine ⟨?_,packet_proof_first_fault env p proofPC active bad,same⟩
+  simpa only [pointer] using packet_native_first_fault n nativePC nbad
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -2255,3 +2318,13 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.packet_body_correspondence
 
 #print axioms KProgTV.TrustedSimpleX86.conditional_complete_payload_correspondence
+
+#print axioms KProgTV.TrustedSimpleX86.native_immediate_store_fault
+
+#print axioms KProgTV.TrustedSimpleX86.packet_proof_first_fault_block
+
+#print axioms KProgTV.TrustedSimpleX86.packet_proof_first_fault
+
+#print axioms KProgTV.TrustedSimpleX86.packet_native_first_fault
+
+#print axioms KProgTV.TrustedSimpleX86.first_store_fault_correspondence

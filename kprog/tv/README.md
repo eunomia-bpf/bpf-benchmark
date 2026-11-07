@@ -1553,3 +1553,13 @@ cases and unchanged KatranServerSession. The captured GET_INFO stub must contain
 multiple sequential generation-zero chunks with mask15. The current real
 balancer passes with80 chunks and driver-mode attachment. The AArch64 module
 also passes all16 masks/three chunks under QEMU; see the same dated evidence.
+
+### First guest-store fault
+
+`first_store_fault_correspondence` pairs the captured native MOV16 atPC35
+with the actual accepted B path18..22 when its write permission is false.
+Both retain the exact width2/address fault, perform no write, and preserve
+outside-private memory agreement. The canonical native state remains atPC35;
+B retains its actual setup state atPC22. This is a model-only component proof;
+no unsafe native test is executed. Remaining fault positions, entry composition,
+ABI/materialization and unconditional whole-program TV remain open.
