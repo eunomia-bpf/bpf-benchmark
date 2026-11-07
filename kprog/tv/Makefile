@@ -908,3 +908,8 @@ native-link-relocation-table-check: native-link-relocation-check
 private-spill-projection-check: bpf-check
 	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
 		-o ../tv/build/PrivateSpillProjection.olean ../tv/PrivateSpillProjection.lean
+
+.PHONY: native-link-literal-check
+native-link-literal-check: native-link-relocation-table-check
+	cd ../formal && LEAN_PATH=../tv/build lake env lean -R ../tv \
+		-o ../tv/build/NativeLinkLiteral.olean ../tv/NativeLinkLiteral.lean

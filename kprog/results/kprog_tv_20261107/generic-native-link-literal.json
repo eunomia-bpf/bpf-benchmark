@@ -1,0 +1,140 @@
+{
+  "utc": "2026-11-07T20:06:51.927661+00:00",
+  "status": "universal_stable_map_resolution_and_shared_literal_writer_components_proved",
+  "scope": "Every retained map list, stable u32 ID/value offset, callback response, u64 target/address and canonical memory; shared relocation kinds5/6/7.",
+  "claims": [
+    "Low32 stable map ID and high32 value offset encode/decode exactly for every pair.",
+    "Lookup commits to the first matching retained ID. Successful pointer resolution requires zero offset; successful value resolution requires the kernel value-size bound and the callback result plus that same offset exactly once.",
+    "Every successful resolution supplies the retained object, exact ID, accepted offset and resolved target witness.",
+    "The shared eight-byte writer produces exact little-endian bytes and recovers the complete u64 target at wrapping addresses; it initializes each written byte and retains permissions and every outside value/initialization bit.",
+    "Canonical permitted consumption has exactly one initialized eight-byte read event, retaining the actual address, bytes and target value.",
+    "Checked emission tests the immutable original placeholder and range, then writes the current destination image. Range/placeholder mismatches reject for every input; u32 offset plus8 fits the supported64-bit size_t.",
+    "Map literal composition retains the actual resolved target and its stable-ID/callback witness. Helper literals use the same exact writer with their supplied target."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o native-link-relocation-table-check native-link-literal-check",
+    "reproduction": "make -C kprog/tv native-link-literal-check",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.NativeLinkLiteral.map_id_encoding": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkLiteral.map_offset_encoding": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkLiteral.map_target_sound": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkLiteral.resolve_map_sound": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkLiteral.first_matching_map": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkLiteral.pointer_offset_rejected": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkLiteral.literal_bytes": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkLiteral.literal_word": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkLiteral.literal_permissions": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkLiteral.literal_outside": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkLiteral.map_literal_matches": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkLiteral.checked_literal_sound": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkLiteral.literal_size_arithmetic": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkLiteral.literal_initialized": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkLiteral.literal_read": [
+        "propext",
+        "Classical.choice",
+        "Lean.ofReduceBool",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkLiteral.checked_literal_range_rejected": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkLiteral.checked_literal_placeholder_rejected": [
+        "propext"
+      ]
+    },
+    "sorryAx_count": 0,
+    "log_sha256": "02432d1294338d5c35f70b878e66824ecaadd2a15f314c85b21cf9f690b82c76",
+    "attempts_archive": "kprog/results/kprog_tv_20261107/generic-native-link-literal-attempts.log.gz",
+    "attempts_raw_sha256": "0060d5e5c77392a4ea4a64ac48de43f5916b1bb9cd6148b0d003b2942bf066b6",
+    "proof_elaboration_attempt_exits": [
+      2,
+      2,
+      2
+    ],
+    "intermediate_13_audit_exit": 0,
+    "dependency_scope": "Warm generic Composition/rel32/table and canonical Memory/X86 source identities equal the published table/layout receipt; individual-program material stays frozen."
+  },
+  "source_sha256": {
+    "kprog/tv/NativeLinkLiteral.lean": "59a5733a5f8c42fa4235e32ab108bb3604875b10984bf2acab342a819f105530",
+    "kprog/tv/NativeLinkRelocationTable.lean": "3445aff6854ccaa85e433d8e8357a57edc8b7b2b9cdbdc07ceee8eced4c96f46",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/Makefile": "e7c4451f4c343de7e3ad128405224b6535e4855469a5703cfe609f1ee7571ec4",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kinsn/module/include/native_lab_group.h": "1ef0bbf95d3b5a8b64aa3cf6db3b5ecea8dc19db7ff4069d63955ecd34158fd5",
+    "kinsn/module/include/native_lab_binding.h": "5abc935861b6920b05a6352064af2999a4febbcbff41d2fb4fc88cb43db02a06",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "a02aee08743af771028352ae35fc3e8dc97a5b33b2c85df31a60d22c92677713",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "a7d44bb00fa2fad8653e15c4d2d15dec1266ef80a7b434140c49fe94444ff343",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "8b63557424953cc7d00d83ea3eab9b37748fd2e3ed3cd4892e0b7b3b0fb34506"
+  },
+  "compiled_olean_sha256": {
+    "kprog/tv/build/Composition.olean": "7e66af8c2ba8a1467ae7405f26d142c6a150b51c977120173c4cba4bf55771d8",
+    "kprog/tv/build/NativeLinkRelocation.olean": "66e8c45092ce7f42c2040bac5f5f7b94ac84ab95a2dbeb44a6549aa3f03ff929",
+    "kprog/tv/build/NativeLinkRelocationTable.olean": "3349dbe8e06a43ca6b83714db6f313f42394b800b860d2531531e26d03b6c0eb",
+    "kprog/tv/build/NativeLinkLiteral.olean": "71f590b22e7f11cd6987df11a5b8866e422233dc219c89f3b4c0549eeb32288c"
+  },
+  "premises": [
+    "RetainedMap fields denote the actual pinned prog->aux->used_maps objects, kernel pointer/value size and direct_value_addr callback response. Option success represents callback success; the kernel C/ABI bridge supplies concrete errno and object lifetime.",
+    "Canonical memory bytes represent the actual immutable placeholder and current destination at the final emitted base. The supported C profile is64-bit size_t with little-endian memcpy representation.",
+    "Kernel code/entry/ABI/metadata identity binds these inputs to verifier instantiation and native emit. Consumer instruction decoding, compiler output and invocation relations supply the next composition stage."
+  ],
+  "completion_path": [
+    "Connect actual producer offset/chunk layout and C lookup/memchr_inv/memcpy to the universal metadata/memory model, carrying stable object lifetime and final code identity.",
+    "Prove each actual native/B literal consumer and map/helper ABI lowering against the canonical ISA, then compose whole mixed relocation tables and the universal block relation.",
+    "Combine V O1/O2/definedness, generic compiler/private-frame preservation and remaining tail-call/ARM transformations with Composition.lean."
+  ],
+  "trusted": [
+    "Canonical ISA/Memory semantics and separate hardware/QEMU fidelity evidence.",
+    "Kernel binding, retained map/callback identity and supported C/ABI/environment correspondence.",
+    "Accepted-B verifier soundness for the final composition.",
+    "Lean kernel plus the explicitly reported propext/Classical.choice/Lean.ofReduceBool/Quot.sound axioms."
+  ]
+}

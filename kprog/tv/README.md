@@ -39,6 +39,18 @@ Six audits pass; full Artifact binding composes the checked-effects theorem.
 Private-frame ownership and spill insertion/reload/control preservation form
 the concrete compiler/layout obligations for this adapter.
 
+`generic-native-link-literal.json` proves 17 universal components of the
+shared kinds5/6/7 writer. Stable map-ID/high32-offset packing, first matching
+retained object, zero pointer offset, bounded value offset and callback-base
+addition preserve the resolved target. The checked writer uses the immutable
+original zero placeholder and current destination, emits exact8B little-endian
+bytes, recovers every64-bit target and initializes those bytes. Permissions
+and outside bytes remain intact. Canonical consumption has one exact8B read
+with the actual address, target bytes and initialized status. Range/placeholder
+mismatch laws reject universally. Source/C object correspondence, mixed-table
+layout, physical instruction consumption and helper/entry ABI form the next
+composition bridge; the central O4 rows label these as proved components.
+
 Universal completion includes V's full token/dispatcher and definedness laws,
 specialization preservation through actual compiler output, remaining link
 transformations, and kernel entry/ABI/metadata correspondence. The relations
