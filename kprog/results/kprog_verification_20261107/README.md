@@ -67,6 +67,13 @@ label/native-PC, return-target fusion, ABI/definedness and compiled-code
 correspondence retain their universal completion interfaces.
 The added finite CL replay epochs contribute98304 observations and preserve
 the66/75 numeric replay total and each original source identity.
+Register-writing rows also pin the production9b0aa2b09 epoch: headercf27e323c885
+and generatorb8644bc7eaeb. All28 currently covered writer families link the
+source receipt; the pure Lean/JSON bit contract retains its original bytes.
+The published8aa94baa2 full check and current memory-condition oracles both
+use this header. C/Lean and compiler correspondence retain their stated trust
+and production interfaces.
+
 <!-- COVERAGE END -->
 
 <!-- O4 COVERAGE START -->
@@ -3490,3 +3497,21 @@ records the proofs, source identities, original route count and complete checks.
 SHA256 values match its Git blobs; its private export is retired. Full log,
 source manifest, CPU trace and exit receipt are archived under
 `full_make_check_8aa94baa2`. Every check retains its exact published source identity.
+
+### Production partial-register source epoch
+
+The coordinator’s9b0aa2b09 register-write update is checked against the current
+physical files, published Git blobs and8aa94baa2 full-source manifest. Header
+cf27e323c885 preserves whole storage for tagged byte/word writes through its
+volatile temporary; generatorb8644bc7eaeb emits those branches. The generated
+Lean model06cf3092860b and JSON0aea09b5a5c2 are byte-identical to the parent
+commit. Fresh regeneration and three existing register-write axiom audits pass.
+The bit/lane/scalarization and RSP/STACK frame theorems retain their scope.
+
+All28 covered writer families (56 operation/token rows) now link this source
+receipt. The complete8aa94baa2 `make check` exits0 and all1140 source hashes
+match Git, including all four register-write inputs. Its existing MOV/MOVX/CMOV
+route observations and the current28180495 memory-condition UBSan checks use
+headercf27. Universal C/Lean and compiler correspondence remains its explicit
+production interface. `x86_register_write_9b0_epoch` records the source pins,
+unchanged pure contracts, original full-log observations and row list.
