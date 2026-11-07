@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def x86_forms(cc_aux):
-    forms = ["push rbx", "pop rax", "push bx", "pop ax", "nop", "cdqe", "movups xmm0, XMMWORD PTR [rdi]", "movups XMMWORD PTR [rdi], xmm0"]
+    forms = ["push rbx", "pop rax", "push bx", "pop ax", "nop", "cbw", "cwde", "cdqe", "cwd", "cdq", "cqo", "movups xmm0, XMMWORD PTR [rdi]", "movups XMMWORD PTR [rdi], xmm0"]
     forms += ["mov rax, rsp", "mov eax, esp", "lea rax, [rsp+16]", "cmp rsp, 0",
               "mov rsp, rax", "mov esp, eax", "lea rsp, [rsp+16]", "add rsp, 16",
               "push rsp", "pop rsp", "push sp", "pop sp"]
@@ -68,6 +68,9 @@ def x86_forms(cc_aux):
             for op in ["movzx", "movsx"]:
                 forms += [f"{op} {dst}, {src}", f"{op} {dst}, {mem} PTR [rdi+8]"]
     forms += ["movsxd rax, ebx", "movsxd rax, DWORD PTR [rdi+8]"]
+    forms += [f"mov {reg}, BYTE PTR {address}"
+              for reg in ["ah", "ch", "dh", "bh"]
+              for address in ["[rdi+8]", "[rsi+16]", "[rsp-16]"]]
     for mnemonic in (name for name in cc_aux if name.startswith("set")):
         forms += [f"{mnemonic} al", f"{mnemonic} ah", f"{mnemonic} BYTE PTR [rdi+8]"]
     for mnemonic in (name for name in cc_aux if name.startswith("cmov")):

@@ -1,0 +1,18 @@
+assembly	cases	mismatches
+cbw	1024	0
+cwde	1024	0
+cwd	1024	0
+cdq	1024	0
+cqo	1024	0
+mov ah, BYTE PTR [rdi+8]	1024	0
+mov ah, BYTE PTR [rsi+16]	1024	0
+mov ah, BYTE PTR [rsp-16]	1024	0
+mov ch, BYTE PTR [rdi+8]	1024	0
+mov ch, BYTE PTR [rsi+16]	1024	0
+mov ch, BYTE PTR [rsp-16]	1024	0
+mov dh, BYTE PTR [rdi+8]	1024	0
+mov dh, BYTE PTR [rsi+16]	1024	0
+mov dh, BYTE PTR [rsp-16]	1024	0
+mov bh, BYTE PTR [rdi+8]	1024	0
+mov bh, BYTE PTR [rsi+16]	1024	0
+mov bh, BYTE PTR [rsp-16]	1024	0

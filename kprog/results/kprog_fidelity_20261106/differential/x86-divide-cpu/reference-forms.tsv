@@ -1,0 +1,31 @@
+assembly	cases	native_faults	simulator_faults	cpu_mismatches	simulator_mismatches
+div al	1024	638	638	0	0
+div cl	1024	635	635	0	0
+div dl	1024	636	636	0	0
+div bl	1024	635	635	0	0
+div ah	1024	1024	1024	0	0
+div ch	1024	651	651	0	0
+div dh	1024	651	651	0	0
+div bh	1024	654	654	0	0
+div sil	1024	638	638	0	0
+div dil	1024	653	653	0	0
+div r8b	1024	644	644	0	0
+div BYTE PTR [rdi+8]	1024	648	648	0	0
+div ax	1024	641	641	0	0
+div cx	1024	645	645	0	0
+div dx	1024	1024	1024	0	0
+div bx	1024	644	644	0	0
+div r8w	1024	640	640	0	0
+div WORD PTR [rdi+8]	1024	645	645	0	0
+div eax	1024	620	620	0	0
+div ecx	1024	647	647	0	0
+div edx	1024	1024	1024	0	0
+div ebx	1024	646	646	0	0
+div r8d	1024	644	644	0	0
+div DWORD PTR [rdi+8]	1024	635	635	0	0
+div rax	1024	640	640	0	0
+div rcx	1024	626	626	0	0
+div rdx	1024	1024	1024	0	0
+div rbx	1024	645	645	0	0
+div r8	1024	646	646	0	0
+div QWORD PTR [rdi+8]	1024	641	641	0	0

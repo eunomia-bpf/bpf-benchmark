@@ -102,3 +102,5 @@ exact counted-source bytes. Pure simple15 load-time confirmation remains open.
 Current V MOVX replay checks551/799forms and564224 savedCPUcases: CPU/reference0, unchanged modelSP10240;248 decoder/block forms remain explicit. See differential/x86-movx-reference/ for all per-form outcomes and26 newly checked forms.
 
 Numeric Arm repair:567forms/580608QEMU-C-reference cases and97control sequences/99328cases all agree. All30 unsafe bound fixtures now reject, including SP and outer-return flags;5 legitimate spill controls remain admitted. See differential/arm64-numeric/ and negative/arm64-numeric/.
+
+New x86 CPU observers:816forms/835584cases,17sign-high/high-byte-memory forms add17408zero-difference cases;10old SP rows retain10240counterexamples. Focused DIV30forms/30720CPU-C-canonical cases agree, including20784native#DE faults and full128-bit dividends. See differential/x86-high-load-cpu/ and differential/x86-divide-cpu/.
