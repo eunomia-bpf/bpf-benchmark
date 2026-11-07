@@ -45,8 +45,8 @@ def dividendHighOfArm : Arm -> String
   | .b16 => "rdx"
   | .b32 => "rdx"
   | .b64 => "rdx"
-/-- Whether each body gates its split on the high-half dividend register being
-zero (the architectural `DIV` overflow gate). -/
+/-- Retained selector metadata: only the qword body needs software processing
+of the high half. This bit is not an architectural overflow predicate. -/
 def highGateOfArm : Arm -> Bool
   | .b8 => false
   | .b16 => false

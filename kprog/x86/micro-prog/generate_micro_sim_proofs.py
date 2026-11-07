@@ -505,7 +505,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                    aux="X86_MAP_PTR_AUX_VALUE" if is_value else "0",
                    imm=c_ptr_u64(expression))
     if insn.reloc_type=="R_X86_64_PC32" and op not in {
-        "mov","movabs","movzx","movsx","movsxd","lea","popcnt"
+        "mov","movabs","movzx","movsx","movsxd","lea","popcnt","div"
     }:
         raise ValueError(f"unresolved PC-relative data instruction: {insn.raw}")
     if insn.reloc_type and "GOTPCREL" in insn.reloc_type and insn.symbol_offset:
@@ -525,6 +525,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         (op in {"cmp", "test"} and len(ops) == 2 and
          reg_info(ops[0]) is not None and
          (is_int(ops[1]) or reg_info(ops[1]) is not None)) or
+        (op == "div" and len(ops) == 1 and reg_info(ops[0]) is not None) or
         (op in {"movzx", "movsx"} and len(ops) == 2 and
          reg_info(ops[0]) is not None and reg_info(ops[1]) is not None) or
         (op in {"dec", "inc", "neg", "not"} and len(ops) == 1 and
@@ -1027,9 +1028,25 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        aux=mem_aux(ops[1], dst[1]), imm=c_u64(packed))
         raise ValueError(f"cannot encode {insn.raw}")
     if op == "div":
-        src = reg_info(ops[0]) if ops else None
-        return enc("X86_OP_DIV", src=src[0] if src else "X86_REG_NONE",
-                   flags=WIDTH_CONST[src[1]] if src else "X86_WIDTH_64")
+        if len(ops) != 1:
+            raise ValueError(f"cannot encode {insn.raw}")
+        src = reg_info(ops[0])
+        if src is not None:
+            if src[2]:
+                return enc("X86_OP_DIV", src="X86_REG_NONE", flags=WIDTH_CONST[src[1]],
+                    imm=f"X86_SIM_L_READ_REG_WIDTH_SHIFT({src[0]}, X86_WIDTH_8, 8)")
+            return enc("X86_OP_DIV", src=src[0], flags=WIDTH_CONST[src[1]])
+        if is_mem(ops[0]):
+            width = operand_width(ops[0], 0)
+            if width not in WIDTH_CONST:
+                raise ValueError(f"DIV memory operand requires its native width: {insn.raw}")
+            if insn.reloc_symbol and (is_helper_symbol(insn.reloc_symbol) or
+                    insn.reloc_type not in {"R_X86_64_PC32", "R_X86_64_32", "R_X86_64_32S"}):
+                raise ValueError(f"unresolved DIV data relocation: {insn.raw}")
+            address = relocated_data_address(insn,rodata_idents) if insn.reloc_symbol else c_u64(mem_disp(ops[0]))
+            value = f"X86_SIM_L_READ_MEM_VALUE({mem_base_reg(ops[0])}, {mem_aux(ops[0])}, {address}, {WIDTH_CONST[width]}, 0)"
+            return enc("X86_OP_DIV", src="X86_REG_NONE", flags=WIDTH_CONST[width], imm=value)
+        raise ValueError(f"cannot encode {insn.raw}")
     if op == "shld":
         if len(ops) != 3:
             raise ValueError(f"cannot encode {insn.raw}")

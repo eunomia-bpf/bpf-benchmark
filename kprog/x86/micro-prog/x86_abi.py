@@ -455,7 +455,14 @@ def check_definedness(insns, targets, exit_addr, decode):
                         raise ValueError(f'undefined native ABI stack value at {where}')
             if op=='rep':
                 for reg in ('rcx','rsi','rdi'): need(incoming,reg,where)
-            if op in {'mul','imul','div','idiv'} and len(args)==1:
+            if op=='div' and len(args)==1:
+                width = ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0])
+                low, high = {8: ('ax', None), 16: ('ax', 'dx'), 32: ('eax', 'edx'), 64: ('rax', 'rdx')}[width]
+                need(incoming,low,where)
+                if high is not None: need(incoming,high,where)
+                write('ax' if width==8 else low)
+                if high is not None: write(high)
+            elif op in {'mul','imul','idiv'} and len(args)==1:
                 need(incoming,'rax',where)
                 if op in {'div','idiv'}: need(incoming,'rdx',where)
                 write('rax');write('rdx')

@@ -113,8 +113,8 @@ theorem x86_div_dividend_high :
       dividendHighOfArm .b64 = "rdx" := by
   refine ⟨?_, ?_, ?_, ?_⟩ <;> rfl
 
-/-- Only the qword case gates its split on the high-half dividend being zero —
-the architectural `DIV` overflow gate; the byte/word/dword cases do not. -/
+/-- Retained selector metadata singles out qword software high-half processing.
+This theorem is about the case table, not the ISA overflow predicate. -/
 theorem x86_div_only_qword_gated :
     highGateOfArm .b8 = false ∧
       highGateOfArm .b16 = false ∧
@@ -124,7 +124,7 @@ theorem x86_div_only_qword_gated :
 
 /-- The qword case is the selector's default arm, so every resolved width code
 that is not one of the byte/word/dword codes — including the absent code — is
-high-gated and every real byte/word/dword code is not. -/
+marked for software high-half processing and every real byte/word/dword code is not. -/
 theorem x86_div_gated_only_default (width : Nat) (h1 : width ≠ 1)
     (h2 : width ≠ 2) (h3 : width ≠ 4) :
     highGateOfArm (armOf width) = true := by
@@ -132,8 +132,7 @@ theorem x86_div_gated_only_default (width : Nat) (h1 : width ≠ 1)
   rw [if_neg h1, if_neg h2, if_neg h3]
   rfl
 
-/-- The three non-default cases are not high-gated, so the gate is exclusive to
-the qword case. -/
+/-- The software high-half-processing marker is exclusive to the qword case. -/
 theorem x86_div_nondefault_not_gated :
     highGateOfArm (armOf 1) = false ∧
       highGateOfArm (armOf 2) = false ∧

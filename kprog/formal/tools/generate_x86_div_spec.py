@@ -12,11 +12,15 @@ on the *resolved* operand width (`__x86_l_width`, already the effective width):
     writes `AX` and `DX` (two writes, `RDX` is the high half);
   * at the dword width code it divides the `RDX:EAX` pair by the dword divisor
     and writes `EAX` and `EDX` (two writes, `RDX` is the high half);
-  * at every other code it divides the `RDX:RAX` pair by the qword divisor: as
-    the CPU's `DIV` does, when the high half `RDX` is zero it writes the
-    quotient to `RAX` and the remainder to `RDX`, and when `RDX` is nonzero it
-    traps into the architectural overflow result (`RAX` = all ones, `RDX`
-    preserved). This is the one case with a *high-half gate*.
+  * at every other code it divides the complete `RDX:RAX` pair by the
+    qword divisor using a 64-iteration arithmetic algorithm. All four cases
+    raise a native-fault marker for zero divisor or quotient overflow before
+    writing either register. Nonzero RDX alone is not an overflow condition.
+
+The retained `high_gate` selector metadata singles out the qword case, whose
+high half requires software double-width processing. It does not state an ISA
+fault predicate. The canonical arithmetic and fault semantics are defined in
+`KProgFormal/Reference/X86.lean`.
 
 The ladder's final arm is the *default*: it is the body selected by every width
 code that is not one of the byte/word/dword codes, so the selector is total
@@ -201,8 +205,8 @@ def writeCountOfArm : Arm -> Nat
 body divides a single register at the byte width. -/
 def dividendHighOfArm : Arm -> String
 {high_of}
-/-- Whether each body gates its split on the high-half dividend register being
-zero (the architectural `DIV` overflow gate). -/
+/-- Retained selector metadata: only the qword body needs software processing
+of the high half. This bit is not an architectural overflow predicate. -/
 def highGateOfArm : Arm -> Bool
 {gate_of}
 /-- The effect each body performs on the quotient/remainder registers. -/

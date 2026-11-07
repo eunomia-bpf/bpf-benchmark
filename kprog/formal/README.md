@@ -51,6 +51,15 @@ CWD/CDQ/CQO use the same MOV writer for DX/EDX/RDX. Their canonical native
 0x99 decoder follows active operand-size/REX prefixes; whole-state refinements
 preserve RAX, every other register, flags and memory. The widening check also
 compares the generated sign-high handlers with the actual x86 CPU.
+DIV's reference uses the complete AX/DX:AX/EDX:EAX/RDX:RAX dividend and
+preserves state on zero divisor or quotient overflow, including completed
+operand reads. The C handler exposes these native faults to the verifier;
+its qword arithmetic processes all128 dividend bits, using ordinary division
+when the high half is zero. The radix-two arithmetic has a checked prefix
+invariant and quotient/remainder theorem; the DIV step composes it with
+register writes and ordered read/fault effects. Register/memory encodings and
+successful arithmetic are also checked against the CPU, with fault markers
+checked in compiled BPF. The compiler remains part of the trust boundary.
 All sixteen native conditions refine the reference, including PF, through
 CMOV, SETcc and direct branches. SETcc includes high-byte/REX destinations,
 exact one-byte stores and write faults; CMOV retains eager read faults.

@@ -8,8 +8,8 @@
  * `RAX` by the byte divisor and packs the quotient and remainder into `RAX`),
  * the word/dword cases at the 16/32-bit widths (divide `RDX:RAX` and write
  * both registers), and the qword case at every other code (divides `RDX:RAX`,
- * gating the split on the high half being zero — the architectural `DIV`
- * overflow result otherwise). This oracle drives the real `X86_SIM_L_EXEC` body
+ * with the complete 128-bit dividend). Zero divisor or a quotient outside the
+ * destination width raises a fault before any architectural register write. This oracle drives the real `X86_SIM_L_EXEC` body
  * and restates the effect from the raw register cells and the resolved width;
  * the two must agree on the value *and* tag of every one of the 16 cells, and
  * no third cell may move. It also checks that the routed selector and the
@@ -31,8 +31,28 @@ typedef signed int __s32;
 
 #define __always_inline inline
 
+#include <setjmp.h>
+static jmp_buf divide_fault;
+static __u64 fault_values[16];
+static __u8 fault_tags[16];
+static unsigned fault_flags;
+
 #include "../x86/x86_sim_local_bpf.h"
 #include "x86_no_helpers_host.h"
+
+/* Observe the simulator fault at its call site before leaving its local state.
+ * Snapshot globals remain defined across longjmp, even if a buggy handler
+ * changed a register before raising the fault. No native faulting DIV runs. */
+#undef X86_SIM_L_DIVIDE_FAULT
+#define X86_SIM_L_DIVIDE_FAULT() do { \
+    for (unsigned fault_i = 0; fault_i < 16; ++fault_i) { \
+        fault_values[fault_i] = (__u64)(long)X86_SIM_L_REG_VALUE(fault_i); \
+        fault_tags[fault_i] = X86_SIM_L_REG_TAG(fault_i); \
+    } \
+    fault_flags = __x86_cf | __x86_zf | __x86_sf | __x86_of | __x86_af | __x86_pf; \
+    longjmp(divide_fault, 1); \
+} while (0)
+
 
 #include <stdio.h>
 
@@ -82,56 +102,28 @@ static __u64 model_partial_write(__u64 old, __u64 v, unsigned width)
 /* Restate the routed arm's effect on the modeled register file: the byte case
  * packs quotient and remainder into `RAX` with one 16-bit write, the wider
  * cases write `RAX` (quotient) and `RDX` (remainder) at the access width, and
- * the qword case gates on the high half. Every written cell is scalarized. */
-static void model_div(unsigned srcreg, unsigned flags)
+ * all faults preserve every cell. Every successful written cell is scalarized. */
+static int model_div(unsigned srcreg, unsigned flags)
 {
-	unsigned w = resolve_width(flags);
-	__u64 divisor = mreg[srcreg];
-	__u64 rax = mreg[X86_RAX];
-	__u64 rdx = mreg[X86_RDX];
-
-	if (w == X86_WIDTH_8) {
-		__u32 dividend = (__u16)rax;
-		__u8 d = (__u8)divisor;
-		__u8 q = (__u8)(dividend / d);
-		__u8 rem = (__u8)(dividend % d);
-		__u64 packed = ((__u64)rem << 8) | (__u64)q;
-
-		mreg[X86_RAX] = model_partial_write(rax, packed, X86_WIDTH_16);
-		mtag[X86_RAX] = X86_SIM_TAG_SCALAR;
-	} else if (w == X86_WIDTH_16) {
-		__u32 dividend = ((__u32)(__u16)rdx << 16) | (__u16)rax;
-		__u16 d = (__u16)divisor;
-		__u64 q = dividend / d;
-		__u64 rem = dividend % d;
-
-		mreg[X86_RAX] = model_partial_write(rax, q, X86_WIDTH_16);
-		mreg[X86_RDX] = model_partial_write(rdx, rem, X86_WIDTH_16);
-		mtag[X86_RAX] = X86_SIM_TAG_SCALAR;
-		mtag[X86_RDX] = X86_SIM_TAG_SCALAR;
-	} else if (w == X86_WIDTH_32) {
-		__u64 dividend = ((__u64)(__u32)rdx << 32) | (__u32)rax;
-		__u32 d = (__u32)divisor;
-		__u64 q = dividend / d;
-		__u64 rem = dividend % d;
-
-		mreg[X86_RAX] = model_partial_write(rax, q, X86_WIDTH_32);
-		mreg[X86_RDX] = model_partial_write(rdx, rem, X86_WIDTH_32);
-		mtag[X86_RAX] = X86_SIM_TAG_SCALAR;
-		mtag[X86_RDX] = X86_SIM_TAG_SCALAR;
-	} else {
-		__u64 q = 0xffffffffffffffffULL;
-		__u64 rem = rdx;
-
-		if (rdx == 0) {
-			q = rax / divisor;
-			rem = rax % divisor;
-		}
-		mreg[X86_RAX] = q;
-		mreg[X86_RDX] = rem;
-		mtag[X86_RAX] = X86_SIM_TAG_SCALAR;
-		mtag[X86_RDX] = X86_SIM_TAG_SCALAR;
-	}
+    unsigned w = resolve_width(flags);
+    unsigned bits = w == X86_WIDTH_8 ? 8 : w == X86_WIDTH_16 ? 16 : w == X86_WIDTH_32 ? 32 : 64;
+    __u64 mask = bits == 64 ? ~0ULL : (1ULL << bits)-1;
+    __u64 divisor = mreg[srcreg] & mask;
+    __u64 rax = mreg[X86_RAX], rdx = mreg[X86_RDX];
+    __uint128_t dividend = bits == 8 ? (__u16)rax :
+        ((__uint128_t)(rdx & mask) << bits) | (rax & mask);
+    if (divisor == 0 || dividend / divisor > mask)
+        return 1;
+    __u64 q = dividend / divisor, rem = dividend % divisor;
+    if (bits == 8) {
+        mreg[X86_RAX] = model_partial_write(rax, (rem << 8) | q, X86_WIDTH_16);
+        mtag[X86_RAX] = X86_SIM_TAG_SCALAR;
+    } else {
+        mreg[X86_RAX] = model_partial_write(rax, q, w);
+        mreg[X86_RDX] = model_partial_write(rdx, rem, w);
+        mtag[X86_RAX] = mtag[X86_RDX] = X86_SIM_TAG_SCALAR;
+    }
+    return 0;
 }
 
 /* Plant a case's operands in the simulator state and the model file: the
@@ -208,12 +200,35 @@ static void check_div(unsigned srcreg, unsigned flags, __u64 rax, __u64 rdx,
 	PLANT_REGS(rax, rdx, srcreg, divisor);
 
 	/* ---- independent model ---- */
-	model_div(srcreg, flags);
+    int expected_fault = model_div(srcreg, flags);
 
-	/* ---- run the real routed arm ---- */
-	X86_SIM_L_EXEC(X86_OP_DIV, X86_RCX, srcreg, flags, 0U, 0ULL);
+    /* ---- run the real routed arm, retaining every overflow/zero case ---- */
+    if (setjmp(divide_fault) == 0) {
+        X86_SIM_L_EXEC(X86_OP_DIV, X86_RCX, srcreg, flags, 0U, 0ULL);
+        if (expected_fault) {
+            printf("MISMATCH src=%u flags=%u missing divide fault\n", srcreg, flags);
+            failures++;
+            return;
+        }
+    } else {
+        cases++;
+        if (!expected_fault || fault_flags != 0) {
+            printf("MISMATCH src=%u flags=%u unexpected/modified divide fault\n", srcreg, flags);
+            failures++;
+            return;
+        }
+        for (unsigned i = 0; i < 16; ++i) {
+            cases += 2;
+            if (fault_values[i] != mreg[i] || fault_tags[i] != mtag[i]) {
+                printf("MISMATCH src=%u flags=%u divide fault wrote reg%u\n", srcreg, flags, i);
+                failures++;
+                return;
+            }
+        }
+        return;
+    }
 
-	COMPARE_ALL(srcreg, flags);
+    COMPARE_ALL(srcreg, flags);
 
 	/* The divide never touches the flags. */
 	cases++;
@@ -261,9 +276,9 @@ int main(void)
 	static const unsigned flags_codes[5] = {
 		0U, X86_WIDTH_8, X86_WIDTH_16, X86_WIDTH_32, X86_WIDTH_64,
 	};
-	/* Divisors nonzero in their low byte, low word, and low dword, so
-	 * every byte/word/dword divide is well-defined. */
-	static const __u64 divisors[7] = {
+	/* Include zero, narrow truncation and every original nonzero divisor. */
+	static const __u64 divisors[] = {
+        0ULL,
 		1ULL, 2ULL, 7ULL, 0xffULL, 0x01010101ULL,
 		0x0102030405060708ULL, 0xffffffffffffffffULL,
 	};
@@ -272,11 +287,11 @@ int main(void)
 		0ULL, 1ULL, 0xffffULL, 0xffffffffULL, 0x7fffffffffffffffULL,
 		0xffffffffffffffffULL, 0x9f5abf2108f64a04ULL,
 	};
-	/* The high half, including zero (the qword gate) and nonzero. */
+	/* The high half, including zero and nonzero full-width dividends. */
 	static const __u64 highs[3] = {
 		0ULL, 1ULL, 0xffffffffffffffffULL,
 	};
-	static const unsigned srcregs[2] = { X86_RCX, X86_RBX };
+	static const unsigned srcregs[] = { X86_RCX, X86_RBX, X86_RAX, X86_RDX };
 	unsigned f;
 	unsigned s;
 	unsigned a;
@@ -286,10 +301,10 @@ int main(void)
 	check_selectors();
 
 	for (f = 0; f < 5U; f++)
-		for (s = 0; s < 2U; s++)
+		for (s = 0; s < sizeof(srcregs)/sizeof(srcregs[0]); s++)
 			for (a = 0; a < 7U; a++)
 				for (h = 0; h < 3U; h++)
-					for (d = 0; d < 7U; d++)
+					for (d = 0; d < sizeof(divisors)/sizeof(divisors[0]); d++)
 						check_div(srcregs[s],
 							  flags_codes[f],
 							  dividends[a],

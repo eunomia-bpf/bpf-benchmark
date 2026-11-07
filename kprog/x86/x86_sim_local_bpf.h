@@ -2048,6 +2048,44 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 				(void *)(long)(IMM), __x86_l_pw_tag);     \
 	} while (0)
 
+/* A native #DE path must remain verifier-rejectable, rather than inherit
+ * eBPF's defined division-by-zero result. It never reaches a native run. */
+#if defined(__bpf__)
+#define X86_SIM_L_DIVIDE_FAULT() do {                                    \
+    __asm__ volatile("r0 = 0; *(u64 *)(r0 + 0) = r0; exit;" ::: "r0", "memory"); \
+    __builtin_unreachable();                                             \
+} while (0)
+#else
+#define X86_SIM_L_DIVIDE_FAULT() __builtin_trap()
+#endif
+
+struct x86_sim_divmod64 {
+    __u64 quotient;
+    __u64 remainder;
+};
+
+/* Exact radix-two division of the complete high:low pair. The caller has
+ * established divisor != 0 and high < divisor, so the quotient fits 64 bits.
+ * Every input bit is consumed once; this loop is the arithmetic algorithm. */
+static __always_inline struct x86_sim_divmod64
+x86_sim_divmod128(__u64 high, __u64 low, __u64 divisor)
+{
+    struct x86_sim_divmod64 result = {0, high};
+#ifdef __clang__
+#pragma unroll
+#endif
+    for (int bit = 63; bit >= 0; --bit) {
+        __u64 carry = result.remainder >> 63;
+        result.remainder = (result.remainder << 1) | ((low >> bit) & 1ULL);
+        result.quotient <<= 1;
+        if (carry || result.remainder >= divisor) {
+            result.remainder -= divisor;
+            result.quotient |= 1ULL;
+        }
+    }
+    return result;
+}
+
 /*
  * The opcode dispatch chain.
  *
@@ -2259,37 +2297,44 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 				X86_SIM_L_WRITE_REG_WIDTH((SRC),           \
 					__x86_l_dst_value, __x86_l_width);  \
 			}                                                   \
-		} else if (KPROG_X86_DISP_DIV_HANDLED(OP)) {             \
-			__u64 __x86_l_divisor = X86_SIM_L_READ_REG(SRC);  \
-			__u64 __x86_l_rax = X86_SIM_L_READ_REG(X86_RAX);  \
-			__u64 __x86_l_rdx = X86_SIM_L_READ_REG(X86_RDX);  \
-			if (KPROG_X86_DIV_ARM(__x86_l_width) ==            \
-			    KPROG_X86_DIV_ARM_B8) {                        \
-				__u32 __x86_l_dividend = (__u16)__x86_l_rax;\
-				__u8 __x86_l_q = __x86_l_dividend / (__u8)__x86_l_divisor;\
-				__u8 __x86_l_rem = __x86_l_dividend % (__u8)__x86_l_divisor;\
-				X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, ((__u16)__x86_l_rem << 8) | __x86_l_q, X86_WIDTH_16);\
-			} else if (KPROG_X86_DIV_ARM(__x86_l_width) ==     \
-				   KPROG_X86_DIV_ARM_B16) {                \
-				__u32 __x86_l_dividend = ((__u32)(__u16)__x86_l_rdx << 16) | (__u16)__x86_l_rax;\
-				X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_l_dividend / (__u16)__x86_l_divisor, X86_WIDTH_16);\
-				X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, __x86_l_dividend % (__u16)__x86_l_divisor, X86_WIDTH_16);\
-			} else if (KPROG_X86_DIV_ARM(__x86_l_width) ==     \
-				   KPROG_X86_DIV_ARM_B32) {                \
-				__u64 __x86_l_dividend = ((__u64)(__u32)__x86_l_rdx << 32) | (__u32)__x86_l_rax;\
-				__u64 __x86_l_div = (__u32)__x86_l_divisor;\
-				X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_l_dividend / __x86_l_div, X86_WIDTH_32);\
-				X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, __x86_l_dividend % __x86_l_div, X86_WIDTH_32);\
-			} else {                                             \
-				__u64 __x86_l_q = 0xffffffffffffffffULL;     \
-				__u64 __x86_l_rem = __x86_l_rdx;             \
-				if (__x86_l_rdx == 0) {                      \
-					__x86_l_q = __x86_l_rax / __x86_l_divisor;\
-					__x86_l_rem = __x86_l_rax % __x86_l_divisor;\
-				}                                             \
-				X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_l_q, X86_WIDTH_64);\
-				X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, __x86_l_rem, X86_WIDTH_64);\
-			}                                                   \
+		} else if (KPROG_X86_DISP_DIV_HANDLED(OP)) { \
+            __u64 __x86_l_divisor = (SRC) == X86_REG_NONE ? (IMM) : X86_SIM_L_READ_REG(SRC); \
+            __u64 __x86_l_rax = X86_SIM_L_READ_REG(X86_RAX); \
+            __u64 __x86_l_rdx = X86_SIM_L_READ_REG(X86_RDX); \
+            if (KPROG_X86_DIV_ARM(__x86_l_width) == KPROG_X86_DIV_ARM_B8) { \
+                __u32 __x86_l_dividend = (__u16)__x86_l_rax; \
+                __u8 __x86_l_div = (__u8)__x86_l_divisor; \
+                if (__x86_l_div == 0 || (__x86_l_dividend >> 8) >= __x86_l_div) \
+                    X86_SIM_L_DIVIDE_FAULT(); \
+                __u8 __x86_l_q = __x86_l_dividend / __x86_l_div; \
+                __u8 __x86_l_rem = __x86_l_dividend % __x86_l_div; \
+                X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, ((__u16)__x86_l_rem << 8) | __x86_l_q, X86_WIDTH_16); \
+            } else if (KPROG_X86_DIV_ARM(__x86_l_width) == KPROG_X86_DIV_ARM_B16) { \
+                __u32 __x86_l_dividend = ((__u32)(__u16)__x86_l_rdx << 16) | (__u16)__x86_l_rax; \
+                __u16 __x86_l_div = (__u16)__x86_l_divisor; \
+                if (__x86_l_div == 0 || (__u16)__x86_l_rdx >= __x86_l_div) \
+                    X86_SIM_L_DIVIDE_FAULT(); \
+                X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_l_dividend / __x86_l_div, X86_WIDTH_16); \
+                X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, __x86_l_dividend % __x86_l_div, X86_WIDTH_16); \
+            } else if (KPROG_X86_DIV_ARM(__x86_l_width) == KPROG_X86_DIV_ARM_B32) { \
+                __u64 __x86_l_dividend = ((__u64)(__u32)__x86_l_rdx << 32) | (__u32)__x86_l_rax; \
+                __u32 __x86_l_div = (__u32)__x86_l_divisor; \
+                if (__x86_l_div == 0 || (__u32)__x86_l_rdx >= __x86_l_div) \
+                    X86_SIM_L_DIVIDE_FAULT(); \
+                X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_l_dividend / __x86_l_div, X86_WIDTH_32); \
+                X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, __x86_l_dividend % __x86_l_div, X86_WIDTH_32); \
+            } else { \
+                if (__x86_l_divisor == 0 || __x86_l_rdx >= __x86_l_divisor) \
+                    X86_SIM_L_DIVIDE_FAULT(); \
+                if (__x86_l_rdx == 0) { \
+                    X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_l_rax / __x86_l_divisor, X86_WIDTH_64); \
+                    X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, __x86_l_rax % __x86_l_divisor, X86_WIDTH_64); \
+                } else { \
+                    struct x86_sim_divmod64 __x86_l_result = x86_sim_divmod128(__x86_l_rdx, __x86_l_rax, __x86_l_divisor); \
+                    X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, __x86_l_result.quotient, X86_WIDTH_64); \
+                    X86_SIM_L_WRITE_REG_WIDTH(X86_RDX, __x86_l_result.remainder, X86_WIDTH_64); \
+                } \
+            } \
 		} else if (KPROG_X86_DOUBLE_SHIFT_HANDLED(OP)) {          \
 			__u64 __x86_l_dst = X86_SIM_L_READ_REG(DST);     \
 			__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);     \

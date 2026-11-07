@@ -50,6 +50,7 @@ typedef signed long long __s64;
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <setjmp.h>
 
 #define HEAP_BYTES 512U
 
@@ -183,6 +184,19 @@ static unsigned long stack_ptr_value(long off)
 		memcpy((S)->stack, __x86_stack_mem.b, X86_SIM_STACK_BYTES); \
 		memcpy((S)->heap, heap, HEAP_BYTES);                       \
 	} while (0)
+
+/* Observe #DE before leaving the dispatcher's local state. Keeping the fault
+ * snapshot global makes its contents defined across longjmp. */
+static jmp_buf divide_fault;
+static struct snap divide_fault_snapshot;
+static unsigned observed_divide_fault, model_divide_fault, observing_divide;
+#undef X86_SIM_L_DIVIDE_FAULT
+#define X86_SIM_L_DIVIDE_FAULT() do { \
+    if (!observing_divide) __builtin_trap(); \
+    CAPTURE_ALL(&divide_fault_snapshot); \
+    observed_divide_fault = 1; \
+    longjmp(divide_fault, 1); \
+} while (0)
 
 /* Equality with a diagnostic naming the first diverging cell. */
 static int snap_eq(const struct snap *a, const struct snap *b, const char *what,
@@ -1496,60 +1510,25 @@ static void model_xchg(unsigned dst, unsigned src, unsigned flags,
 /* div: the four width arms of the byte-ladder; B8's single 16-bit quotient
  * write and the three split divide-and-write pairs. */
 static void model_div(unsigned src, unsigned flags, const struct snap *seed,
-		      struct snap *b)
+                      struct snap *b)
 {
-	unsigned w = resolve_width(flags);
-	__u64 divisor = seed->x[src];
-
-	if (w == X86_WIDTH_8) {
-		__u32 dividend = (__u16)seed->x[X86_RAX];
-		__u8 q = (__u8)(dividend / (__u8)divisor);
-		__u8 rem = (__u8)(dividend % (__u8)divisor);
-
-		b->x[X86_RAX] = (b->x[X86_RAX] &
-				 ~((__u64)0xffffULL)) |
-				(((__u64)rem << 8) | (__u64)q);
-		b->t[X86_RAX] = X86_SIM_TAG_SCALAR;
-	} else if (w == X86_WIDTH_16) {
-		__u32 dividend = ((__u32)(__u16)seed->x[X86_RDX] << 16) |
-				 (__u16)seed->x[X86_RAX];
-		__u64 q = dividend / (__u16)divisor;
-		__u64 rem = dividend % (__u16)divisor;
-
-		b->x[X86_RAX] = model_partial_write(b->x[X86_RAX], q,
-						    X86_WIDTH_16);
-		b->t[X86_RAX] = X86_SIM_TAG_SCALAR;
-		b->x[X86_RDX] = model_partial_write(b->x[X86_RDX], rem,
-						    X86_WIDTH_16);
-		b->t[X86_RDX] = X86_SIM_TAG_SCALAR;
-	} else if (w == X86_WIDTH_32) {
-		__u64 dividend = ((__u64)(__u32)seed->x[X86_RDX] << 32) |
-				 (__u32)seed->x[X86_RAX];
-		__u64 dvs = (__u32)divisor;
-
-		b->x[X86_RAX] = model_partial_write(b->x[X86_RAX],
-						    dividend / dvs,
-						    X86_WIDTH_32);
-		b->t[X86_RAX] = X86_SIM_TAG_SCALAR;
-		b->x[X86_RDX] = model_partial_write(b->x[X86_RDX],
-						    dividend % dvs,
-						    X86_WIDTH_32);
-		b->t[X86_RDX] = X86_SIM_TAG_SCALAR;
-	} else {
-		__u64 q = 0xffffffffffffffffULL;
-		__u64 rem = seed->x[X86_RDX];
-
-		if (seed->x[X86_RDX] == 0ULL) {
-			q = seed->x[X86_RAX] / divisor;
-			rem = seed->x[X86_RAX] % divisor;
-		}
-		b->x[X86_RAX] = model_partial_write(b->x[X86_RAX], q,
-						    X86_WIDTH_64);
-		b->t[X86_RAX] = X86_SIM_TAG_SCALAR;
-		b->x[X86_RDX] = model_partial_write(b->x[X86_RDX], rem,
-						    X86_WIDTH_64);
-		b->t[X86_RDX] = X86_SIM_TAG_SCALAR;
-	}
+    unsigned w = resolve_width(flags), bits = width_bits(w);
+    __u64 mask = width_mask(w), divisor = seed->x[src] & mask;
+    __uint128_t dividend = bits == 8 ? (__u16)seed->x[X86_RAX] :
+        ((__uint128_t)(seed->x[X86_RDX] & mask) << bits) | (seed->x[X86_RAX] & mask);
+    if (divisor == 0 || dividend / divisor > mask) {
+        model_divide_fault = 1;
+        return;
+    }
+    __u64 quotient = dividend / divisor, remainder = dividend % divisor;
+    if (bits == 8) {
+        b->x[X86_RAX] = model_partial_write(seed->x[X86_RAX], (remainder << 8) | quotient, X86_WIDTH_16);
+        b->t[X86_RAX] = X86_SIM_TAG_SCALAR;
+    } else {
+        b->x[X86_RAX] = model_partial_write(seed->x[X86_RAX], quotient, w);
+        b->x[X86_RDX] = model_partial_write(seed->x[X86_RDX], remainder, w);
+        b->t[X86_RAX] = b->t[X86_RDX] = X86_SIM_TAG_SCALAR;
+    }
 }
 
 /* push: the PUSH body reads the whole-64 source, pre-decrements the stack
@@ -1776,15 +1755,28 @@ static void check_arm(const char *what, unsigned op, unsigned dst,
 		stack_arena_base =
 			(unsigned long)(void *)&__x86_stack_mem.b[0];
 		CAPTURE_ALL(&seed);
-		X86_SIM_L_EXEC(op, dst, src, flags, aux, imm);
-		CAPTURE_ALL(&a);
+        observed_divide_fault = 0;
+        observing_divide = 1;
+        if (setjmp(divide_fault) == 0) {
+            X86_SIM_L_EXEC(op, dst, src, flags, aux, imm);
+            CAPTURE_ALL(&a);
+        } else {
+            a = divide_fault_snapshot;
+        }
+        observing_divide = 0;
 	}
 
-	b = seed;
-	apply_model(op, dst, src, flags, aux, imm, &seed, &b);
+    b = seed;
+    model_divide_fault = 0;
+    apply_model(op, dst, src, flags, aux, imm, &seed, &b);
 
-	cases++;
-	if (!snap_eq(&a, &b, what, flags))
+    cases++;
+    if (observed_divide_fault != model_divide_fault) {
+        printf("MISMATCH %s width=%u divide fault got %u want %u\n", what, flags,
+               observed_divide_fault, model_divide_fault);
+        failures++;
+    }
+    if (!snap_eq(&a, &b, what, flags))
 		failures++;
 	cases++;
 }
