@@ -47,7 +47,7 @@ with tempfile.TemporaryDirectory(prefix='.live-',dir=O) as directory, tempfile.T
   root=state.parent if state.is_dir() else None
   if root is not None and root.is_dir():
    # The service writes beside --state, not only inside requests/.
-   keep=O/('trusted-state-'+summary['started'].replace(':','').replace('-','')[:15])
+   keep=R/'corpus/results'/('trusted-state-'+summary['started'].replace(':','').replace('-','')[:15])
    for item in sorted(root.rglob('*')):
     if item.is_file() and (item.suffix in ('.json','.jsonl') or item.name.endswith('.failure.tar.gz')):
      rel=item.relative_to(root);keep.mkdir(parents=True,exist_ok=True)
