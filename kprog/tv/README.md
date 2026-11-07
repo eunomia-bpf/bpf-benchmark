@@ -18,6 +18,15 @@ quantify O1, O2 and link laws over **every Artifact/token**, then instantiate
 the existing exact binding/verifier theorem. Six new audits pass (only
 `propext`, or no axioms); the generic BPF semantics checks also pass.
 
+`generic-native-link-rel32.json` is the first concrete universal link-stage
+increment. `NativeLinkRelocation.lean` mirrors the existing kind1 signed32
+range guard and E8 byte writer, decodes through the single canonical ISA,
+and proves forward TV plus reverse step preservation for every successfully
+relocated slot and caller state. It also preserves bytes outside the immediate
+patch. Six audits pass. This is slot-local: arbitrary relocation-table/code
+binding, other relocation kinds, maps, helper identity/prototype and tail-call
+transforms remain required; no program-specific proof is involved.
+
 These are composition theorems, not a claim that their concrete premises are
 already discharged. V's complete token/dispatcher refinement, specialization
 to the actual compiler output, and actual relocation/map/private-spill/helper/

@@ -1,0 +1,80 @@
+{
+  "utc": "2026-11-07T19:26:51.857524+00:00",
+  "status": "universal_x86_kind1_rel32_slot_target_decoder_and_bidirectional_CALL_preservation_proved_other_link_transformations_and_global_link_composition_open",
+  "scope": "All64-bit slot/target values, all32-bit displacements, all canonical X86 states, every successful existing kernel signed32 round-trip acceptance; no program instance/literal/certificate or captured run.",
+  "implementation_contract": [
+    "Rust x86.rs X86_HELPER_CALL_REL32_SLOT is E8,0,0,0,0; HelperCallRel32 patches record the checked slot offset, kind1 and target.",
+    "Kernel kind1 checks slot bounds, exact placeholder and final emitted IP, calculates target-(slot+5), round-trips signed32 and rejects truncation, then copies the four displacement bytes at slot+1.",
+    "checkedRel32 models the existing load-time signed cast guard. callBytes models those four little-endian emitted bits; canonical Reference.X86.decode supplies all ISA meaning."
+  ],
+  "claims": [
+    "Successful signed32 relocation reaches exactly its bound target, for arbitrary PC/target values with architectural64-bit wrapping.",
+    "The canonical decoder recognizes the emitted E8 bytes for every32-bit displacement; the four-byte reconstruction is proved rather than postulated or sampled.",
+    "Every accepted emitted slot decodes to the intended canonical CALL with the exact fall-through.",
+    "rel32_call_preservation is an actual Composition.TranslationValidation instance with equality of the whole X86 state, preserving every canonical CALL event/fault/control behavior in the native-to-emitted direction.",
+    "relocated_call_reflects gives the reverse step implication, ruling out a different control/memory check introduced by this slot presentation.",
+    "The four-byte immediate patch preserves every code byte and initialization bit outside its range and changes no permissions, using the single reference memory writer."
+  ],
+  "validation": {
+    "command": "make -C kprog/tv -o bpf-check native-link-relocation-check",
+    "reproduction": "make -C kprog/tv native-link-relocation-check",
+    "exit": 0,
+    "axiom_audit": {
+      "KProgTV.NativeLinkRelocation.checked_rel32_target": [
+        "propext"
+      ],
+      "KProgTV.NativeLinkRelocation.decode_call_bytes": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocation.checked_call_decode": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocation.rel32_call_preservation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocation.relocated_call_reflects": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.NativeLinkRelocation.immediate_patch_preserves_outside": [
+        "propext"
+      ]
+    },
+    "no_sorryAx": true,
+    "log_sha256": "929f36032b76505777adeaf27020a02500accd3dfc8a239e682c0b973b8ef32c",
+    "dependency_scope": "Only generic Composition, canonical Reference.X86/Memory and standard proof tactics. No individual-program proof/certificate imported or used as evidence. Previously checked bpf-check dependency reused."
+  },
+  "source_sha256": {
+    "kprog/tv/Composition.lean": "7865ac61ebc39d3328ff114260c02d7f4fbfbec5374c0a77cb2971ff7261e3ae",
+    "kprog/tv/NativeLinkRelocation.lean": "e26f5606f96a48e5e0faea66a8de895c501ae88dab163dcf21cdf7645d9ae31e",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "494c5413e9d8a4f073dac915c7af294a7bf51de8826c69f5b0738d74b81df13b",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "8b63557424953cc7d00d83ea3eab9b37748fd2e3ed3cd4892e0b7b3b0fb34506",
+    "kprog/x86/native_lab/native_link/src/main.rs": "563db62726d8ff0fbbcdc2d0f928eeafbd3d64b0e3fce3046723d2b18ab531d1",
+    "kinsn/module/x86/bpf_x86_native_lab.c": "a02aee08743af771028352ae35fc3e8dc97a5b33b2c85df31a60d22c92677713",
+    "kprog/tv/Makefile": "7630ccc228b61419e8e4c292c7dafbe45ceb824d6e790bbbbf38842fb0c67790"
+  },
+  "implementation_sources_physically_equal_HEAD": true,
+  "premises": [
+    "Preservation applies after the emitter existing signed32 range check succeeds; this is a load-time transformation acceptance condition, not a new native runtime instruction.",
+    "Per-slot bounds/exact-placeholder/final-IP and code/entry/ABI/relocation-record binding must come from the actual native-link/kernel artifact invariants. This proof does not silently supply global record noninterference.",
+    "The kernel uses the supported x86 little-endian two-complement C profile for the checked cast/byte writer; kernel binding/emission implementation correspondence remains accountable."
+  ],
+  "remaining": [
+    "Compose slot preservation across arbitrary well-formed relocation tables and the actual emitter/code/entry binding; the current theorem is slot-local and universal, not a complete native-link correctness theorem.",
+    "Other relocation kinds/ISAs, map lowering, general private spill erasure, helper identity/prototype binding and tail-call transformations each need their own universal preservation theorem.",
+    "Finish V native-to-token O1/O2 laws and generic compiler-to-actual-B preservation; then discharge the universal linkLaw required by generic_program_block_validation."
+  ],
+  "trusted": [
+    "Single canonical ISA/Memory semantics and separate hardware fidelity validation.",
+    "Kernel binding/emission code correspondence and supported C/ABI profile.",
+    "Lean kernel and the reported propext/Classical.choice/Quot.sound; no sorryAx."
+  ]
+}
