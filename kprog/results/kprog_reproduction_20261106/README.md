@@ -308,11 +308,12 @@ corpus/results/x86_kvm_corpus_20261107_024322_358412   status ok
 | **native/eBPF** | **1.003x** |
 | reference (2026-05-29) | **1.824x** |
 
-The work counter is each language worker's own `ops=` line on stderr
-(`python3 int_loop ops=252954034 elapsed_s=60 ... sink=318863927`), summed
-over 11 components per arm (python3, ruby, perl and the other profiled
-runtimes); `sink=` counts climb in both arms too. Both arms ran 60 s with
-`rc=0`.
+Both arms did the same work: the counter is each language worker's own
+`ops=` line on stderr (`python3 int_loop ops=252954034 elapsed_s=60 ...
+sink=318863927`), summed over the same 11 components per arm (python3,
+ruby, perl and the other profiled runtimes), and every component's
+`sink=` count climbs in both arms too. All components returned `rc=0` in
+both arms.
 
 At the operator recipe (`SAMPLES=3 WORKLOAD_DURATION=180`,
 `corpus/results/x86_kvm_corpus_20261107_025604_139037`): 14 replaced,
@@ -374,9 +375,13 @@ corpus/results/x86_kvm_corpus_20261107_020659_029387   status ok
 | **native/eBPF** | **1.229x** |
 | reference (2026-05-29) | **2.358x** |
 
-Both arms forward essentially everything and drop in the same classes
-(`reason=139,direction=2` and `reason=3,direction=1`), so the comparison
-is like-for-like.
+Both arms did the same work: each forwarded essentially everything and
+dropped in the same classes, baseline 1 × `reason=139,direction=2` and
+1 × `reason=3,direction=1` out of 159,385,781 verdicts, native 2 and 2
+out of 175,058,207, with `rx_dropped`/`tx_dropped`/`rx_errors` zero at
+every receiver in both. Both components ran 180 s per arm in the recipe
+run, which is the normalizing denominator. The comparison is
+like-for-like.
 
 **Does not reproduce**: 1.229x against 2.358x, the largest gap here.
 
