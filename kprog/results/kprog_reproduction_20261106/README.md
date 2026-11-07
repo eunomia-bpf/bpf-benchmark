@@ -405,6 +405,25 @@ defects do not affect it.
 neither the ~107 ms that was patched out nor the sub-millisecond a hash
 lookup implies. Recorded as measured, not as evidence the patch works.
 
+# The verified (generation-bound) arm
+
+Attempted and blocked at the shim, not at configuration. With
+`BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1` every app program fails:
+
+```
+verified native runtime requires a generation-bound simulator proof for <prog>
+```
+
+`native_loader.cpp:4639` fails when `proof_insns` is empty under that
+requirement, `:5428` takes `proof_insns` from `options.proof_insns`, and
+nothing in `bpfopt/shim/shim_native_loader.h` sets it (no match for
+`proof_insns` in that header) — the same gap lane A reported on 2026-11-06.
+So no manifest can satisfy the verified arm; it needs the shim to pass
+compiled proof instructions. Tried with both manifest locations
+(`/artifacts/user/native-bpf/x86_64/bcc/` with 25 entries and
+`/opt/bpf-benchmark/native-bpf/x86_64/bcc/` with 29), 0 replaced / 8
+failed in each.
+
 # Not claimed
 
 - These are the micro and corpus workload numbers as the reference runs
