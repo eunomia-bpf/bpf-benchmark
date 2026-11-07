@@ -64,7 +64,8 @@ simulator and token; historical per-program proofs are frozen and excluded
 from the argument. Remaining tokens and native-link/compiler preservation
 are being connected through [generic composition](../tv/Composition.lean).
 
-The trusted boundary includes Lean's kernel/toolchain, the contract generation
+The trusted boundary includes Lean's kernel/toolchain and bitvector reduction
+bridge (`Lean.ofReduceBool`), the contract generation
 and C/Lean correspondence, native decoding/encoding, and the C/BPF compilers.
 Initial ABI, provenance/permissions, physical exclusive monitor/order/site
 identity and runtime artifact binding must be established by their callers or
@@ -75,3 +76,7 @@ second ISA. Finite hardware/oracle checks complement the universal theorems.
 retain exact source hashes, commands, original failures and subsequent checks.
 They distinguish focused proofs/oracles from complete make-check outcomes.
 [Artifact validation](../tv/README.md) records the separate end-to-end work.
+
+The LEA raw register-frame core and address normalization are proved; its
+production-field/dispatcher/O2 connection uses the tested correction patch
+linked by the current coverage report.

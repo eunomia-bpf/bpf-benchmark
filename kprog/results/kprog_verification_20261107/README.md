@@ -52,6 +52,11 @@ totals with each proof/status-changing publication; T supplies token/link-law
 status and F supplies source-pinned replay inputs. Safety evidence follows the
 universal simulator, token and transformation laws. Historical individual-program
 proof artifacts remain frozen.
+LEA's raw pointer/numeric frame, address-size32 case and unit-index/base step
+identity are proved. Its production-field bridge includes the RCX AUX-marker
+normalization and defined64-bit offset accumulation in the tested
+[correction patch](lea-corrections.patch.gz). The handler/dispatcher/O2 totals
+retain their30-operation scope while C aligns the production source epoch.
 <!-- COVERAGE END -->
 
 <!-- O4 COVERAGE START -->
@@ -3052,3 +3057,38 @@ is verified equal, with their original execution identity retained. Every prior
 dispatcher theorem signature, oracle case and canonical ISA definition remains.
 A complete full check follows the published source through the shared warm
 verification entry point; the completed full5b999 epoch remains separate.
+
+LEA source review confirmed two generic correction points. A64-bit index-only
+RCX address at unit scale shares AUX=1 with the rodata marker. The original
+encoder/handler produced8,064 differences over8,192 instruction-form CPU cases;
+normalizing the address to the equivalent RCX base form produced zero CPU or
+canonical-reference differences across16 destinations,8 signed displacements
+and64 incoming RCX words. Twenty adjacent encoder controls retain every field.
+The recorded76 project/vendor compiler inputs match the published main-header
+epoch and actual vendor heads. The normalization preserves the complete
+canonical step for every input state, as proved by `unit_index_step_refines`.
+
+The memory-offset helper's signed accumulation raises UBSan on1+LONG_MAX.
+The prepared generator/header correction uses unsigned64-bit arithmetic and
+retains the signed offset result type, JSON contract and generated Lean bytes.
+The existing routed oracle retains all old cases and extends to8,401 boundary
+cases: the original header retains its signed-overflow diagnostic, and the
+candidate completes all8,401 with zero differences. The combined patch applies
+cleanly to the captured production source. C's active service epochs retain
+their source; the correction patch supplies the next coherent adoption input.
+
+The raw LEA core covers optional bases, source/destination aliasing, RSP
+normalization, STACK pointer preservation,16/32/64-bit writeback and the
+address-size32/64-bit-destination normalization. All378 Lean targets and seven
+axiom audits passed. The audit records `propext`, `Classical.choice`,
+`Quot.sound` and the bitvector reduction bridge `Lean.ofReduceBool` explicitly.
+LEA remains a partial handler entry while its raw-field dispatcher and
+production correction are synchronized. The source ISA and existing semantic
+oracle cases retain their definitions.
+
+Full `make check` at `8db6eb61a81f80ed80124314dac9ab11cd9fad11` completed
+with actual make exit0 and queue exit0. All1,140 selected source hashes match
+that published commit. Complete log, source manifest, commands and CPU trace
+are archived under `FULL MAKE CHECK 8DB6EB61A PASS`. This snapshot contains the
+30-operation MULX/SHLD/SHRD dispatcher and O2 interface. The later LEA core,
+source findings and candidate comparisons retain their separate identities.

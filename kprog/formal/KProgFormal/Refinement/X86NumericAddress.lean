@@ -1,3 +1,4 @@
+import KProgFormal.Refinement.X86Lea
 import KProgFormal.Refinement.X86DoubleShift
 import KProgFormal.Refinement.X86Mulx
 import KProgFormal.Refinement.X86Movx
@@ -1485,5 +1486,95 @@ theorem double_shift_register_frame_refines (env : Environment) (frame : Frame) 
     rw [native_register_pc, native_register_flags, native_register_write]
     simp only [multiply_scalar_write, X86DoubleShift.value_refines, X86DoubleShift.flags_refine,
       Reference.X86.step, Reference.X86.doubleShiftStep, Reference.X86.RegisterSlice.reg, nativeRegisters]
+
+def leaBaseValue (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (source : Option Reference.X86.Register) : NativeWord :=
+  (source.map (registerValue env frame arena state)).getD 0
+
+/-- Full-width LEA preserves the source pointer origin, rebinds an RSP source
+through the arena, and normalizes an RSP destination through the numeric writer. -/
+def leaPointer (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (dst : Reference.X86.Register)
+    (source : Option Reference.X86.Register) (offset : NativeWord) : RegisterState :=
+  if dst = 4 then writeRegister env frame arena state .w64 (.low dst)
+    (leaBaseValue env frame arena state source + offset)
+  else
+    let rawBase := (source.map state.raw.gpr).getD 0
+    let stackReference := decide (source = some 4)
+    let pointer := if stackReference then arena + (rawBase + offset) else rawBase + offset
+    let tag := if stackReference then true else (source.map state.stack).getD false
+    ⟨{ state.raw with gpr := fun r => if r = dst then pointer else state.raw.gpr r },
+      fun r => if r = dst then tag else state.stack r⟩
+
+theorem native_lea_pointer (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (dst : Reference.X86.Register)
+    (source : Option Reference.X86.Register) (offset : NativeWord) :
+    nativeRegisters env frame arena (leaPointer env frame arena state dst source offset) =
+      { nativeRegisters env frame arena state with gpr := fun r =>
+          if r = dst then (leaBaseValue env frame arena state source + offset)
+          else (nativeRegisters env frame arena state).gpr r } := by
+  unfold leaPointer
+  split
+  next dstRsp =>
+    rw [native_register_write]
+    simp only [Reference.X86.RegisterSlice.reg, register_write64]
+    rfl
+  next dstOther =>
+    simp only [nativeRegisters]
+    congr 1
+    funext r
+    by_cases same : r = dst
+    · subst r
+      cases source with
+      | none => simp [leaBaseValue, registerValue, dstOther]
+      | some src =>
+          by_cases srcRsp : src = 4
+          · subst src
+            simp [leaBaseValue, registerValue, dstOther, projectAddress]
+            simp only [NativeWord, Reference.Word]
+            bv_decide
+          · by_cases tagged : state.stack src = true <;>
+              simp [leaBaseValue, registerValue, dstOther, srcRsp, tagged, projectAddress] <;>
+              simp only [NativeWord, Reference.Word] <;> bv_decide
+    · simp [registerValue, same]
+
+/-- Address operands and their index contribution are captured before either
+pointer/tag transfer or the narrow numeric write. Flags and memory are retained. -/
+def leaRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (dst : Reference.X86.Register)
+    (source : Option Reference.X86.Register) (offset nextPc : NativeWord) : RegisterState :=
+  registerPc (if width = .w64 then leaPointer env frame arena state dst source offset
+    else writeRegister env frame arena state (multiplyScalarWidth width) (.low dst)
+      (leaBaseValue env frame arena state source + offset)) nextPc
+
+theorem lea_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.CmovWidth) (dst : Reference.X86.Register)
+    (source : Option Reference.X86.Register) (offset nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (leaRegister env frame arena state width dst source offset nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.lea width dst (leaBaseValue env frame arena state source + offset) nextPc)
+        (nativeRegisters env frame arena state) := by
+  unfold leaRegister
+  cases width <;> simp only [reduceCtorEq, ↓reduceIte]
+  all_goals rw [native_register_pc]
+  all_goals first | rw [native_lea_pointer] | rw [native_register_write]
+  all_goals simp only [multiply_scalar_write, Reference.X86.step, Reference.X86.RegisterSlice.reg, nativeRegisters]
+  all_goals congr 2
+  all_goals funext r
+  all_goals by_cases same : r = dst
+  all_goals simp [same, Reference.X86.writeValue, Reference.Word]
+
+/-- The existing32-bit LEA writer implements address-size32 followed by a
+64-bit destination write, retaining the canonical zero-extended address. -/
+theorem lea_address32_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (dst : Reference.X86.Register)
+    (source : Option Reference.X86.Register) (offset nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (leaRegister env frame arena state .w32 dst source offset nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.lea .w64 dst
+        (((leaBaseValue env frame arena state source + offset).setWidth 32).setWidth 64) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [lea_register_frame_refines]
+  simp [Reference.X86.step, Reference.X86.writeValue]
 
 end KProgFormal.Refinement.X86NumericAddress

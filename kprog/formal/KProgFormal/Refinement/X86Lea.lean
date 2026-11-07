@@ -68,4 +68,19 @@ theorem address32_step_refines (dst : Reference.X86.Register)
         nextPc) s := by
   simp [handlerStep, value_refines, Reference.X86.step, Reference.X86.writeValue]
 
+/-- Unit-scale index-only addressing has the same native address as the
+corresponding base-only form, for every wrapping64-bit displacement/index. -/
+theorem unit_index_to_base (index displacement : Reference.Word) :
+    address 0 displacement true 0 index = address index displacement false 0 0 := by
+  simp only [address, ↓reduceIte, Reference.Word]
+  bv_decide
+
+/-- The producer normalization preserves the complete canonical LEA step,
+including every other register, flags, PC, memory and ordered effects/faults. -/
+theorem unit_index_step_refines (width : CmovWidth) (dst : Reference.X86.Register)
+    (index displacement nextPc : Reference.Word) (s : Reference.X86.State) :
+    Reference.X86.step (.lea width dst (address 0 displacement true 0 index) nextPc) s =
+      Reference.X86.step (.lea width dst (address index displacement false 0 0) nextPc) s := by
+  rw [unit_index_to_base]
+
 end KProgFormal.Refinement.X86Lea
