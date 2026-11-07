@@ -1,0 +1,21 @@
+{
+  "bpf_stats": true,
+  "config": {
+    "enabled_passes": []
+  },
+  "details_dir": "details",
+  "error_message": "corpus suite reported errors",
+  "generated_at": "1970-01-01T00:03:09.875729+00:00",
+  "last_updated_at": "1970-01-01T00:03:09.875659+00:00",
+  "launcher_boot_id": "733c7232-2b1a-481e-bbb4-97fa456cc010",
+  "launcher_pid": 506,
+  "launcher_start_ticks": 364,
+  "manifest": "/workspaces/repository/corpus/config/macro_apps.yaml",
+  "run_type": "arm64_qemu_corpus",
+  "samples": 1,
+  "started_at": "1970-01-01T00:00:10.879201+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_only": false,
+  "workload_seconds": 2.0
+}

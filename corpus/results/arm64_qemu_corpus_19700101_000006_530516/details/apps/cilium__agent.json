@@ -1,0 +1,770 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {
+      "167": {
+        "bytes_jited": 640,
+        "bytes_xlated": 880,
+        "id": 167,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "168": {
+        "bytes_jited": 4176,
+        "bytes_xlated": 6368,
+        "id": 168,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "169": {
+        "bytes_jited": 472,
+        "bytes_xlated": 696,
+        "id": 169,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "170": {
+        "bytes_jited": 64,
+        "bytes_xlated": 16,
+        "id": 170,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "172": {
+        "bytes_jited": 1544,
+        "bytes_xlated": 2112,
+        "id": 172,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "173": {
+        "bytes_jited": 6792,
+        "bytes_xlated": 11024,
+        "id": 173,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "174": {
+        "bytes_jited": 7200,
+        "bytes_xlated": 10984,
+        "id": 174,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "176": {
+        "bytes_jited": 1392,
+        "bytes_xlated": 1720,
+        "id": 176,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 102100,
+        "run_time_ns_delta": 1357440160,
+        "type": "sched_cls"
+      },
+      "177": {
+        "bytes_jited": 6128,
+        "bytes_xlated": 9904,
+        "id": 177,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "178": {
+        "bytes_jited": 64,
+        "bytes_xlated": 16,
+        "id": 178,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "179": {
+        "bytes_jited": 3200,
+        "bytes_xlated": 4920,
+        "id": 179,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "180": {
+        "bytes_jited": 6240,
+        "bytes_xlated": 9224,
+        "id": 180,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "181": {
+        "bytes_jited": 1128,
+        "bytes_xlated": 1616,
+        "id": 181,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "182": {
+        "bytes_jited": 6992,
+        "bytes_xlated": 11104,
+        "id": 182,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "183": {
+        "bytes_jited": 13400,
+        "bytes_xlated": 21584,
+        "id": 183,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "184": {
+        "bytes_jited": 6472,
+        "bytes_xlated": 10368,
+        "id": 184,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "185": {
+        "bytes_jited": 6872,
+        "bytes_xlated": 10104,
+        "id": 185,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "187": {
+        "bytes_jited": 6424,
+        "bytes_xlated": 9592,
+        "id": 187,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "188": {
+        "bytes_jited": 9376,
+        "bytes_xlated": 14392,
+        "id": 188,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "189": {
+        "bytes_jited": 504,
+        "bytes_xlated": 752,
+        "id": 189,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "190": {
+        "bytes_jited": 4496,
+        "bytes_xlated": 7040,
+        "id": 190,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "191": {
+        "bytes_jited": 984,
+        "bytes_xlated": 1512,
+        "id": 191,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "192": {
+        "bytes_jited": 6872,
+        "bytes_xlated": 10104,
+        "id": 192,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "193": {
+        "bytes_jited": 9600,
+        "bytes_xlated": 15112,
+        "id": 193,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "194": {
+        "bytes_jited": 4176,
+        "bytes_xlated": 6368,
+        "id": 194,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "195": {
+        "bytes_jited": 472,
+        "bytes_xlated": 696,
+        "id": 195,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "196": {
+        "bytes_jited": 3200,
+        "bytes_xlated": 4920,
+        "id": 196,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "197": {
+        "bytes_jited": 6424,
+        "bytes_xlated": 9592,
+        "id": 197,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "198": {
+        "bytes_jited": 1128,
+        "bytes_xlated": 1616,
+        "id": 198,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "200": {
+        "bytes_jited": 1392,
+        "bytes_xlated": 1720,
+        "id": 200,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 101700,
+        "run_time_ns_delta": 1342864016,
+        "type": "sched_cls"
+      },
+      "201": {
+        "bytes_jited": 6240,
+        "bytes_xlated": 9224,
+        "id": 201,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "202": {
+        "bytes_jited": 64,
+        "bytes_xlated": 16,
+        "id": 202,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "204": {
+        "bytes_jited": 1544,
+        "bytes_xlated": 2112,
+        "id": 204,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "205": {
+        "bytes_jited": 6128,
+        "bytes_xlated": 9904,
+        "id": 205,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "206": {
+        "bytes_jited": 6792,
+        "bytes_xlated": 11024,
+        "id": 206,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "208": {
+        "bytes_jited": 6472,
+        "bytes_xlated": 10368,
+        "id": 208,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "209": {
+        "bytes_jited": 6992,
+        "bytes_xlated": 11104,
+        "id": 209,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "210": {
+        "bytes_jited": 9416,
+        "bytes_xlated": 14312,
+        "id": 210,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "211": {
+        "bytes_jited": 9600,
+        "bytes_xlated": 15112,
+        "id": 211,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "213": {
+        "bytes_jited": 504,
+        "bytes_xlated": 752,
+        "id": 213,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "214": {
+        "bytes_jited": 984,
+        "bytes_xlated": 1512,
+        "id": 214,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "215": {
+        "bytes_jited": 7200,
+        "bytes_xlated": 10984,
+        "id": 215,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "216": {
+        "bytes_jited": 13424,
+        "bytes_xlated": 21632,
+        "id": 216,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "217": {
+        "bytes_jited": 3216,
+        "bytes_xlated": 4952,
+        "id": 217,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "220": {
+        "bytes_jited": 1544,
+        "bytes_xlated": 2112,
+        "id": 220,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "221": {
+        "bytes_jited": 6792,
+        "bytes_xlated": 11024,
+        "id": 221,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "222": {
+        "bytes_jited": 5752,
+        "bytes_xlated": 8912,
+        "id": 222,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "223": {
+        "bytes_jited": 4048,
+        "bytes_xlated": 5936,
+        "id": 223,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "224": {
+        "bytes_jited": 13424,
+        "bytes_xlated": 21632,
+        "id": 224,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "225": {
+        "bytes_jited": 3216,
+        "bytes_xlated": 4952,
+        "id": 225,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "227": {
+        "bytes_jited": 9416,
+        "bytes_xlated": 14312,
+        "id": 227,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "228": {
+        "bytes_jited": 504,
+        "bytes_xlated": 752,
+        "id": 228,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "229": {
+        "bytes_jited": 9600,
+        "bytes_xlated": 15112,
+        "id": 229,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.162",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "pktgen_cpu": 0,
+              "pktgen_thread_index": 0,
+              "src_ip": "10.244.0.8",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 3.8624688800000513,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.162  dst_max: 10.244.0.162\n     src_min: 10.244.0.8  src_max: 10.244.0.8\n     src_mac: d6:04:50:e3:eb:48 dst_mac: 86:7d:02:d7:b3:ea\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 102091  errors: 0\n     started: 526270314us  stopped: 529878579us idle: 0us\n     seq_num: 102092  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.8  cur_daddr: 10.244.0.162\n     cur_udp_dst: 36558  cur_udp_src: 36558\n     cur_queue_map: 0\n     flows: 66736\nResult: OK: 3608265(c3608265+d0) usec, 102091 (64byte,-1frags)\n  28293pps 14Mb/sec (14486016bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.8",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "pktgen_cpu": 1,
+              "pktgen_thread_index": 1,
+              "src_ip": "10.244.0.162",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 3.8686780160001035,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.8  dst_max: 10.244.0.8\n     src_min: 10.244.0.162  src_max: 10.244.0.162\n     src_mac: aa:85:b1:0b:14:71 dst_mac: e2:f5:9b:9d:2f:01\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 101690  errors: 0\n     started: 526280478us  stopped: 529848275us idle: 0us\n     seq_num: 101691  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.162  cur_daddr: 10.244.0.8\n     cur_udp_dst: 36157  cur_udp_src: 36157\n     cur_queue_map: 0\n     flows: 66465\nResult: OK: 3567796(c3567796+d0) usec, 101690 (64byte,-1frags)\n  28502pps 14Mb/sec (14593024bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "network_softirq_delta_by_cpu": {
+            "NET_RX": {
+              "CPU0": 102091,
+              "CPU1": 101691
+            },
+            "NET_TX": {
+              "CPU0": 0,
+              "CPU1": 0
+            }
+          },
+          "outcomes": {
+            "after": {
+              "cilium_metrics_map_ids": [
+                150
+              ],
+              "receivers": {
+                "bpfbench-cepa": {
+                  "rx_bytes": 13754634,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 214906,
+                  "tx_bytes": 13757706,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 214954
+                },
+                "bpfbench-cepb": {
+                  "rx_bytes": 13757748,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 214955,
+                  "tx_bytes": 13754676,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 214907
+                }
+              },
+              "verdicts": {
+                "reason=0,direction=1": {
+                  "bytes": 27510384,
+                  "count": 429834
+                },
+                "reason=0,direction=2": {
+                  "bytes": 27510804,
+                  "count": 429840
+                },
+                "reason=139,direction=2": {
+                  "bytes": 560,
+                  "count": 8
+                },
+                "reason=3,direction=1": {
+                  "bytes": 280,
+                  "count": 4
+                }
+              }
+            },
+            "before": {
+              "cilium_metrics_map_ids": [
+                150
+              ],
+              "receivers": {
+                "bpfbench-cepa": {
+                  "rx_bytes": 7245646,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 113207,
+                  "tx_bytes": 7223054,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 112854
+                },
+                "bpfbench-cepb": {
+                  "rx_bytes": 7223054,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 112854,
+                  "tx_bytes": 7245646,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 113207
+                }
+              },
+              "verdicts": {
+                "reason=0,direction=1": {
+                  "bytes": 14466744,
+                  "count": 226035
+                },
+                "reason=0,direction=2": {
+                  "bytes": 14467164,
+                  "count": 226041
+                },
+                "reason=139,direction=2": {
+                  "bytes": 560,
+                  "count": 8
+                },
+                "reason=3,direction=1": {
+                  "bytes": 280,
+                  "count": 4
+                }
+              }
+            },
+            "delta": {
+              "cilium_metrics_map_ids": [
+                150
+              ],
+              "receivers": {
+                "bpfbench-cepa": {
+                  "rx_bytes": 6508988,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 101699,
+                  "tx_bytes": 6534652,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 102100
+                },
+                "bpfbench-cepb": {
+                  "rx_bytes": 6534694,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 102101,
+                  "tx_bytes": 6509030,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 101700
+                }
+              },
+              "verdicts": {
+                "reason=0,direction=1": {
+                  "bytes": 13043640,
+                  "count": 203799
+                },
+                "reason=0,direction=2": {
+                  "bytes": 13043640,
+                  "count": 203799
+                },
+                "reason=139,direction=2": {
+                  "bytes": 0,
+                  "count": 0
+                },
+                "reason=3,direction=1": {
+                  "bytes": 0,
+                  "count": 0
+                }
+              }
+            },
+            "settle_seconds": 1.0
+          },
+          "path": "bidirectional-endpoint-to-endpoint",
+          "pktgen_cpus": [
+            0,
+            1
+          ]
+        },
+        "workload_name": "cilium_endpoint_pktgen"
+      }
+    ]
+  },
+  "error": "Remote end closed connection without response; cilium-agent output tail:\nea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/conntrack.h:646:14: warning: taking address of packed member 'dport' of class or structure 'ipv6_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105072944Z level=warn msg=\"  646 |                                           dir, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105217552Z level=warn msg=\"      |                                                 ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105355488Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/conntrack.h:783:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105514512Z level=warn msg=\"  783 |                                   CT_EGRESS, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105650928Z level=warn msg=\"      |                                               ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105786784Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/conntrack.h:904:14: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105949968Z level=warn msg=\"  904 |                                           dir, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.106086448Z level=warn msg=\"      |                                                 ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.106227424Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/bpf_xdp.c:47:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.106378112Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nodeport.h:11:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.106542736Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nat.h:833:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.10675624Z level=warn msg=\"  833 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.106900336Z level=warn msg=\"      |                                                  ^~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.10703984Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nat.h:946:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.107206048Z level=warn msg=\"  946 |                                          CT_EGRESS, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.107349344Z level=warn msg=\"      |                                                      ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.107487552Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nat.h:1060:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.107674096Z level=warn msg=\" 1060 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.107843136Z level=warn msg=\"      |                                                  ^~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.107984432Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nat.h:1159:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.108145408Z level=warn msg=\" 1159 |                                          CT_INGRESS, &tuple.dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.108293472Z level=warn msg=\"      |                                                       ^~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.1084476Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/bpf_xdp.c:47:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.108614752Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nodeport.h:14:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.108766224Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/lb.h:1674:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.108926096Z level=warn msg=\" 1674 |                                           CT_EGRESS, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109064784Z level=warn msg=\"      |                                                       ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109210512Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/lb.h:2057:17: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109372416Z level=warn msg=\" 2057 |                 if (READ_ONCE(val->last_used) +\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109510352Z level=warn msg=\"      |                               ^~~~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109649616Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../compiler.h:108:37: note: expanded from macro 'READ_ONCE'\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109805344Z level=warn msg=\"  108 |                         ({ typeof(X) __val = __READ_ONCE(X);    \\\\\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109982768Z level=warn msg=\"      |                                                          ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.110283008Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../compiler.h:97:51: note: expanded from macro '__READ_ONCE'\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.110456112Z level=warn msg=\"   97 | # define __READ_ONCE(X)         (*(volatile typeof(X) *)&X)\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.110600864Z level=warn msg=\"      |                                                          ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.110741024Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/bpf_xdp.c:47:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.110890992Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nodeport.h:14:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.111040304Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/lb.h:2068:14: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11120376Z level=warn msg=\" 2068 |                 WRITE_ONCE(val->last_used, now);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.111342944Z level=warn msg=\"      |                            ^~~~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11148584Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../compiler.h:116:21: note: expanded from macro 'WRITE_ONCE'\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11167624Z level=warn msg=\"  116 |                                    __WRITE_ONCE(X, __val);      \\\\\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.111821248Z level=warn msg=\"      |                                                 ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.111963344Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../compiler.h:101:54: note: expanded from macro '__WRITE_ONCE'\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.112119968Z level=warn msg=\"  101 | # define __WRITE_ONCE(X, V)     (*(volatile typeof(X) *)&X) = (V)\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.112268544Z level=warn msg=\"      |                                                          ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11241016Z level=warn msg=\"14 warnings generated.\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.112546416Z level=warn msg=\"native-link: arm64 entry=cil_xdp_entry (980 bytes), 1 reachable symbol(s) total\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11268688Z level=warn msg=\"  - cil_xdp_entry (vaddr 0x0, 980 bytes) [entry]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.112825888Z level=warn msg=\"native-link: wrote proof object 988 bytes, 18 reloc(s) -> /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/objects/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699.cil_xdp_entry.proof.o\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11300144Z level=warn msg=\"native-link: arm64 entry=tail_drop_notify (896 bytes), 1 reachable symbol(s) total\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.113143168Z level=warn msg=\"  - tail_drop_notify (vaddr 0x0, 896 bytes) [entry]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.113285376Z level=warn msg=\"Error: arm64 entry ABI uses unsupported callee-saved x28; compile native objects with -ffixed-x26 through -ffixed-x28\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.113427616Z level=warn msg=\"Traceback (most recent call last):\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11359264Z level=warn msg=\"  File \\\"/usr/local/lib/bpfrejit/merlin/merlin_bpf_clang.py\\\", line 313, in <module>\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11373432Z level=warn msg=\"    raise SystemExit(main())\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11387272Z level=warn msg=\"                     ^^^^^^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114026736Z level=warn msg=\"  File \\\"/usr/local/lib/bpfrejit/merlin/merlin_bpf_clang.py\\\", line 235, in main\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114168864Z level=warn msg=\"    return run_paired_cilium_compile(args.clang, clang_args)\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114313232Z level=warn msg=\"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114451872Z level=warn msg=\"  File \\\"/workspaces/repository/runner/libs/cilium_native_build.py\\\", line 766, in run_paired_cilium_compile\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114593312Z level=warn msg=\"    subprocess.run(\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114729488Z level=warn msg=\"  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 571, in run\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114868304Z level=warn msg=\"    raise CalledProcessError(retcode, process.args,\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.115007712Z level=warn msg=\"subprocess.CalledProcessError: Command '['/usr/local/bin/native-link', '--input', '/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/objects/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699.native.o', '--symbol', 'tail_drop_notify', '--output', '/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/objects/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699.tail_drop_notify.proof.o', '--mode', 'proof', '--preserve-entry-abi']' returned non-zero exit status 1.\" module=agent.datapath.loader\ntime=1970-01-01T00:11:39.116113952Z level=fatal msg=\"Failed to compile XDP program\" module=agent.datapath.loader error=\"attaching XDP program to interface bpfbench0: Failed to compile bpf_xdp.o: exit status 1\"",
+  "post_rejit": null,
+  "rejit_result": {
+    "enabled_passes": [],
+    "mode": "verified_native_loader",
+    "status": "ok"
+  },
+  "runner": "cilium",
+  "runner_details": {
+    "command_used": [
+      "/usr/local/bin/cilium-agent",
+      "--enable-k8s=false",
+      "--agent-health-require-k8s-connectivity=false",
+      "--enable-ipv4=true",
+      "--enable-ipv6=false",
+      "--enable-l7-proxy=false",
+      "--enable-health-checking=false",
+      "--enable-endpoint-health-checking=false",
+      "--enable-drift-checker=false",
+      "--enable-dynamic-config=false",
+      "--enable-dynamic-lifecycle-manager=false",
+      "--endpoint-bpf-prog-watchdog-interval=0",
+      "--endpoint-regen-interval=0",
+      "--enable-monitor=false",
+      "--enable-hubble=false",
+      "--enable-l2-neigh-discovery=false",
+      "--enable-policy=always",
+      "--policy-audit-mode=true",
+      "--enable-bpf-masquerade=true",
+      "--enable-bpf-clock-probe=true",
+      "--enable-ipv4-fragment-tracking=true",
+      "--enable-pmtu-discovery=true",
+      "--enable-extended-ip-protocols=true",
+      "--bpf-conntrack-accounting=true",
+      "--enable-xdp-prefilter=true",
+      "--bpf-lb-acceleration=native",
+      "--ipam=cluster-pool",
+      "--ipv4-range=10.244.0.0/24",
+      "--ipv4-native-routing-cidr=10.244.0.0/24",
+      "--kvstore=etcd",
+      "--kvstore-opt=etcd.address=127.0.0.1:55935",
+      "--cluster-name=default",
+      "--cluster-id=0",
+      "--routing-mode=native",
+      "--bpf-root=/var/tmp/ciliumrunner_y5wv2r0u/bpffs",
+      "--state-dir=/var/tmp/ciliumrunner_y5wv2r0u/state",
+      "--socket-path=/var/tmp/ciliumrunner_y5wv2r0u/state/cilium.sock",
+      "--devices=bpfbench0",
+      "--direct-routing-device=bpfbench0"
+    ],
+    "process_output": {
+      "returncode": 255,
+      "stderr_tail": "",
+      "stdout_tail": "time=1970-01-01T00:10:01.088149088Z level=info msg=\"Local boot ID\" module=agent.controlplane.local-node-sync bootID=e47a201e-f193-4194-a49c-90c2afb7e90a\ntime=1970-01-01T00:10:01.099798784Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"sync-local-node (node.NewLocalNodeStore.func1.1 (pkg/node/local_node_store.go:118))\" duration=5.354784ms\ntime=1970-01-01T00:10:01.115049744Z level=info msg=\"No identity checkpoint file found, skipping restoration\" module=agent.controlplane.identity.identity file-path=/var/tmp/ciliumrunner_y5wv2r0u/state/state/local_allocator_state.json\ntime=1970-01-01T00:10:01.121698576Z level=info msg=\"Removed map pin, recreating and re-pinning map\" bpfMapPath=cilium_ipcache_v2 bpfMapName=cilium_ipcache_v2\ntime=1970-01-01T00:10:01.215048976Z level=info msg=\"Devices changed\" module=agent.datapath.devices-controller devices=[bpfbench0]\ntime=1970-01-01T00:10:01.248673712Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"backgroundSync (manager.(*manager).backgroundSync)\" duration=192.128\u00b5s\ntime=1970-01-01T00:10:01.26575488Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::544b:2cff:feed:3aa4 (primary)\" device=*\ntime=1970-01-01T00:10:01.271717808Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"10.244.0.175 (primary), fe80::7cfb:97ff:fee2:f314\" device=cilium_host\ntime=1970-01-01T00:10:01.272848624Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary, nodeport), fe80::544b:2cff:feed:3aa4\" device=bpfbench0\ntime=1970-01-01T00:10:01.282925312Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::544b:2cff:feed:3aa4 (primary)\" device=*\ntime=1970-01-01T00:10:01.291597872Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"node-address-update (tables.(*nodeAddressController).register.func1.1 (.../datapath/tables/node_address.go:249))\" duration=3.542288ms\ntime=1970-01-01T00:10:01.293089248Z level=info msg=\"Establishing connection to kvstore\" module=agent.infra.kvstore-client backendName=etcd\ntime=1970-01-01T00:10:01.294829408Z level=info msg=\"Creating etcd client\" module=agent.infra.kvstore-client backendName=etcd configPath=\"\" keepAliveHeartbeat=15s keepAliveTimeout=25s rateLimit=20 maxInflight=20 listLimit=256\ntime=1970-01-01T00:10:01.40535544Z level=info msg=\"Connecting to etcd server...\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\"\ntime=1970-01-01T00:10:01.594289328Z level=info msg=\"New lease successfully acquired\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" leaseID=7065303390564948998 ttl=25s\ntime=1970-01-01T00:10:01.609821296Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" prefix=cilium/.heartbeat\ntime=1970-01-01T00:10:01.6858368Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" prefix=cilium/.heartbeat count=0 revision=1\ntime=1970-01-01T00:10:01.686901424Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" prefix=cilium/.heartbeat revision=2\ntime=1970-01-01T00:10:01.687136688Z level=info msg=\"Initial etcd connection established\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\"\ntime=1970-01-01T00:10:01.69851072Z level=info msg=\"Connection to kvstore successfully established\" module=agent.infra.kvstore-client backendName=etcd\ntime=1970-01-01T00:10:01.69973824Z level=info msg=\"Start hook executed\" function=\"*kvstore.clientImpl.Start (agent.infra.kvstore-client)\" duration=407.060544ms\ntime=1970-01-01T00:10:02.050645312Z level=info msg=\"Start hook executed\" function=\"iptables.newManager.func1 (.../datapath/iptables/iptables.go:456) (agent.datapath.iptables)\" duration=329.135504ms\ntime=1970-01-01T00:10:03.38938856Z level=info msg=\"Start hook executed\" function=\"*iptables.manager.Start (agent.datapath.iptables)\" duration=1.337841792s\ntime=1970-01-01T00:10:04.26328056Z level=info msg=\"Start hook executed\" function=\"prefilter.newPreFilter.func1 (.../datapath/prefilter/prefilter.go:258) (agent.datapath.prefilter)\" duration=842.232112ms\ntime=1970-01-01T00:10:04.440262144Z level=info msg=\"Start hook executed\" function=\"policymap.createFactory.func1 (.../maps/policymap/cell.go:158) (agent.datapath.maps.policymap)\" duration=171.897904ms\ntime=1970-01-01T00:10:04.446158944Z level=info msg=\"Starting IP identity watcher\" module=agent.controlplane.ipcache\ntime=1970-01-01T00:10:04.469326128Z level=info msg=\"Starting restartable watch store\" module=agent.infra.kvstore-utils clusterName=default prefix=cilium/state/ip/v1/default/\ntime=1970-01-01T00:10:04.471234928Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" prefix=cilium/state/ip/v1/default/\ntime=1970-01-01T00:10:04.478943328Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" prefix=cilium/state/ip/v1/default/ count=0 revision=3\ntime=1970-01-01T00:10:04.48358528Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" prefix=cilium/state/ip/v1/default/ revision=4\ntime=1970-01-01T00:10:04.608079632Z level=info msg=\"Start hook executed\" function=\"*maps.BPFLBMaps.Start (agent.controlplane.loadbalancer-maps)\" duration=116.7088ms\ntime=1970-01-01T00:10:04.735447664Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"mtu-updater (mtu.(*MTUManager).Updater)\" duration=28.304\u00b5s\ntime=1970-01-01T00:10:04.803874432Z level=info msg=\"BPF host routing requires kube-proxy-replacement. Falling back to legacy host routing (enable-host-legacy-routing=true).\" module=agent.controlplane.kube-proxy-replacement-init\ntime=1970-01-01T00:10:04.804322368Z level=info msg=\"kube-proxy replacement starting with the following config\" module=agent.controlplane.kube-proxy-replacement-init kprConfiguration=\"{KubeProxyReplacement:false EnableSocketLB:false}\"\ntime=1970-01-01T00:10:04.8044392Z level=info msg=\"Datapath signal listener running\" module=agent.controlplane.signal\ntime=1970-01-01T00:10:04.823167248Z level=info msg=\"Starting connection tracking garbage collector\" module=agent.datapath.maps.ct-nat-map-gc\ntime=1970-01-01T00:10:04.861483648Z level=info msg=\"Restored node IDs from the BPF map\" module=agent.datapath count=0\ntime=1970-01-01T00:10:04.862523504Z level=info msg=\"Removing stale endpoint interfaces\" module=agent.controlplane.endpoint-restore\ntime=1970-01-01T00:10:04.86601936Z level=info msg=\"Reading old endpoints...\" module=agent.controlplane.endpoint-restore\ntime=1970-01-01T00:10:04.870507136Z level=info msg=\"No old endpoints found.\" module=agent.controlplane.endpoint-restore\ntime=1970-01-01T00:10:04.872299584Z level=info msg=\"Initializing daemon\" module=agent.controlplane.daemon\ntime=1970-01-01T00:10:04.874547744Z level=info msg=\"Direct routing device detected\" module=agent.controlplane.daemon direct-routing-device=bpfbench0\ntime=1970-01-01T00:10:04.886651264Z level=info msg=\"Initializing node addressing\" module=agent.controlplane.ipam\ntime=1970-01-01T00:10:04.892253136Z level=info msg=\"Initializing IPAM\" module=agent.controlplane.ipam mode=cluster-pool v4Prefix=10.244.0.0/24 v6Prefix=<nil>\ntime=1970-01-01T00:10:04.926154992Z level=info msg=\"Restoring endpoints...\" module=agent.controlplane.endpoint-restore\ntime=1970-01-01T00:10:04.928218736Z level=info msg=\"Endpoints restored\" module=agent.controlplane.endpoint-restore restored=0 failed=0\ntime=1970-01-01T00:10:04.984779776Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::544b:2cff:feed:3aa4 (primary)\" device=*\ntime=1970-01-01T00:10:05.020756784Z level=info msg=\"More than one stale router IP was found on the cilium_host device after restoration, cleaning up old router IPs.\" module=agent.controlplane.agent-infra-endpoints\ntime=1970-01-01T00:10:05.032851616Z level=info msg=\"Adding local node to cluster\" module=agent.controlplane.nodediscovery node=(none)\ntime=1970-01-01T00:10:05.038553584Z level=info msg=\"Node updated\" module=agent.controlplane.node-manager clusterName=default nodeName=(none) spi=0\ntime=1970-01-01T00:10:05.043907792Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" prefix=cilium/state/nodes/v1\ntime=1970-01-01T00:10:05.05446112Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" prefix=cilium/state/nodes/v1 count=0 revision=3\ntime=1970-01-01T00:10:05.058383248Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" prefix=cilium/state/nodes/v1 revision=4\ntime=1970-01-01T00:10:05.075429728Z level=info msg=\"Initializing identity allocator\" module=agent.controlplane.identity.identity\ntime=1970-01-01T00:10:05.083714176Z level=info msg=\"Allocating identities between range\" module=agent.controlplane.identity.identity min=256 max=65535 clusterID=0\ntime=1970-01-01T00:10:05.134509936Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::544b:2cff:feed:3aa4 (primary)\" device=*\ntime=1970-01-01T00:10:05.155317664Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=fe80::7cfb:97ff:fee2:f314 device=cilium_host\ntime=1970-01-01T00:10:05.14139104Z level=info msg=\"Validating configured node address ranges\" module=agent.controlplane.daemon\ntime=1970-01-01T00:10:05.171532016Z level=info msg=\"Daemon initialization completed\" module=agent.controlplane.daemon\ntime=1970-01-01T00:10:05.172701552Z level=info msg=\"Start hook executed\" function=\"cmd.daemonLegacyInitialization.func1 (cmd/daemon_main.go:1286) (agent.controlplane.daemon)\" duration=300.431424ms\ntime=1970-01-01T00:10:05.204320448Z level=info msg=\"Hubble server is disabled\" module=agent.controlplane.hubble\ntime=1970-01-01T00:10:05.263735072Z level=info msg=\"New lease successfully acquired\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" leaseID=7065303390564949006 ttl=15m0s\ntime=1970-01-01T00:10:05.274117712Z level=info msg=\"Serving cilium API at unix:///var/tmp/ciliumrunner_y5wv2r0u/state/cilium.sock\" module=agent.infra.cilium-api-server\ntime=1970-01-01T00:10:05.288105424Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"nat-stats (stats.(*Stats).countNat)\" duration=36.304\u00b5s\ntime=1970-01-01T00:10:05.339867696Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"reconcile (reconciler.Register[...].func2 (.../statedb/reconciler/builder.go:84))\" duration=59.28\u00b5s\ntime=1970-01-01T00:10:05.341368272Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"refresh (reconciler.Register[...].func3 (.../statedb/reconciler/builder.go:86))\" duration=32.352\u00b5s\ntime=1970-01-01T00:10:05.352312368Z level=info msg=\"Starting healthz status API server\" module=agent.infra.agent-healthz address=127.0.0.1:9879\ntime=1970-01-01T00:10:05.365584544Z level=info msg=\"Regenerating restored endpoints\" module=agent.controlplane.endpoint-restore restored=0\ntime=1970-01-01T00:10:05.552784608Z level=info msg=\"Fence waiting\" module=agent.controlplane.endpoint-api name=cni-deletion-queue remaining=1\ntime=1970-01-01T00:10:05.561134608Z level=info msg=\"Creating host endpoint\" module=agent.controlplane.agent-infra-endpoints\ntime=1970-01-01T00:10:05.633343632Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" prefix=cilium/state/identities/v1/id\ntime=1970-01-01T00:10:05.676777584Z level=info msg=\"Processing queued deletion requests\" module=agent.controlplane.endpoint-api lenEndpoints=0\ntime=1970-01-01T00:10:05.686284Z level=info msg=\"Fence done\" module=agent.controlplane.endpoint-api name=cni-deletion-queue remaining=1 duration=133.608352ms\ntime=1970-01-01T00:10:05.687686256Z level=info msg=\"Finished regenerating restored endpoints\" module=agent.controlplane.endpoint-restore regenerated=0 failed=0 total=0\ntime=1970-01-01T00:10:05.711151072Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"dns-garbage-collector-job (namemanager.(*manager).doGC)\" duration=65.136\u00b5s\ntime=1970-01-01T00:10:05.713585152Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=true\ntime=1970-01-01T00:10:05.794217344Z level=info msg=\"initial gc of ct and nat maps completed\" module=agent.datapath.maps.ct-nat-map-gc duration=81.414624ms\ntime=1970-01-01T00:10:05.795813664Z level=info msg=\"Initial scan of connection tracking completed, starting ctmap pressure metrics controller\" module=agent.datapath.maps.ct-nat-map-gc\ntime=1970-01-01T00:10:05.809613856Z level=info msg=\"New endpoint\" containerInterface=\"\" ipv6=\"\" ipv4=\"\" endpointID=879 ciliumEndpointName=/ k8sPodName=/ containerID=\"\" subsys=endpoint\ntime=1970-01-01T00:10:05.817939328Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" prefix=cilium/state/identities/v1/id count=0 revision=4\ntime=1970-01-01T00:10:05.818918688Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:55935] config=\"\" prefix=cilium/state/identities/v1/id revision=5\ntime=1970-01-01T00:10:05.837242384Z level=info msg=\"Resolving identity labels (blocking)\" containerInterface=\"\" ipv6=\"\" ipv4=\"\" endpointID=879 ciliumEndpointName=/ k8sPodName=/ containerID=\"\" subsys=endpoint identityLabels=reserved:host\ntime=1970-01-01T00:10:05.844210672Z level=info msg=\"Identity of endpoint changed\" containerInterface=\"\" ipv6=\"\" ipv4=\"\" endpointID=879 ciliumEndpointName=/ k8sPodName=/ containerID=\"\" subsys=endpoint new-identity=1 old-identity=\"no identity\" identityLabels=\"map[host:{Key:host Value: Source:reserved cidr:<nil>}]\"\ntime=1970-01-01T00:10:06.004780672Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_y5wv2r0u/bpffs/tc/globals/cilium_cidr_v6_dyn\ntime=1970-01-01T00:10:06.005292528Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_y5wv2r0u/bpffs/tc/globals/cilium_cidr_v6_fix\ntime=1970-01-01T00:10:06.005629184Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_y5wv2r0u/bpffs/tc/globals/cilium_lb4_maglev\ntime=1970-01-01T00:10:05.999958784Z level=info msg=\"Shell listening\" module=agent.infra.shell socket=/var/run/cilium/shell.sock\ntime=1970-01-01T00:10:06.149704048Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::544b:2cff:feed:3aa4 (primary)\" device=*\ntime=1970-01-01T00:10:06.151542224Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"10.244.0.140 (primary), fe80::7cfb:97ff:fee2:f314\" device=cilium_host\ntime=1970-01-01T00:10:06.797027248Z level=info msg=\"Start hook executed\" function=\"datapath.initDatapath.func1 (pkg/datapath/cells.go:175) (agent.datapath)\" duration=1.417708528s\ntime=1970-01-01T00:10:06.869294096Z level=info msg=\"Started hive\" duration=5.831783008s\ntime=1970-01-01T00:10:07.62079008Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::544b:2cff:feed:3aa4 (primary)\" device=*\ntime=1970-01-01T00:10:07.825131456Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::544b:2cff:feed:3aa4 (primary)\" device=*\ntime=1970-01-01T00:10:08.018469888Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::544b:2cff:feed:3aa4 (primary)\" device=*\ntime=1970-01-01T00:10:09.421306752Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::544b:2cff:feed:3aa4 (primary)\" device=*\ntime=1970-01-01T00:10:10.615244288Z level=info msg=\"Create endpoint request\" module=agent.controlplane.endpoint-api addressing=\"&{IPv4:10.244.0.102 IPv4ExpirationUUID: IPv4PoolName:default IPv6: IPv6ExpirationUUID: IPv6PoolName:}\" containerID=bpfbench-cepa containerInterface=eth0 datapathConfiguration=\"&{DisableSipVerification:false ExternalIpam:false InstallEndpointRoute:false RequireArpPassthrough:false RequireEgressProg:false RequireRouting:<nil>}\" interface=lxcbench0 k8sPodName=/ k8sUID=\"\" labels=\"[container:app=bpfbench-cilium container:instance=a]\" sync-build=true\ntime=1970-01-01T00:10:10.6368112Z level=info msg=\"New endpoint\" ciliumEndpointName=/ containerInterface=\"\" ipv6=\"\" k8sPodName=/ ipv4=10.244.0.102 containerID=bpfbench-c endpointID=1727 subsys=endpoint\ntime=1970-01-01T00:10:10.637830896Z level=info msg=\"Resolving identity labels (blocking)\" ciliumEndpointName=/ containerInterface=\"\" ipv6=\"\" k8sPodName=/ ipv4=10.244.0.102 containerID=bpfbench-c endpointID=1727 subsys=endpoint identityLabels=\"container:app=bpfbench-cilium,container:instance=a\"\ntime=1970-01-01T00:10:10.828368912Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::544b:2cff:feed:3aa4 (primary)\" device=*\ntime=1970-01-01T00:10:10.937100448Z level=info msg=\"Identity of endpoint changed\" ciliumEndpointName=/ containerInterface=\"\" ipv6=\"\" k8sPodName=/ ipv4=10.244.0.102 containerID=bpfbench-c endpointID=1727 subsys=endpoint new-identity=22033 old-identity=\"no identity\" identityLabels=\"map[app:{Key:app Value:bpfbench-cilium Source:container cidr:<nil>} instance:{Key:instance Value:a Source:container cidr:<nil>}]\"\ntime=1970-01-01T00:10:10.967549552Z level=info msg=\"Waiting for endpoint to be generated\" ciliumEndpointName=/ containerInterface=\"\" ipv6=\"\" k8sPodName=/ ipv4=10.244.0.102 identity=22033 containerID=bpfbench-c endpointID=1727 subsys=endpoint\ntime=1970-01-01T00:11:37.095908224Z level=error msg=\"Failed to compile bpf_xdp.o: exit status 1\" module=agent.datapath.loader compilerPID=2301\ntime=1970-01-01T00:11:37.099817392Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/bpf_xdp.c:4:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.100347744Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/xdp.h:18:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.100587152Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../loader.h:8:9: warning: '__uint' macro redefined [-Wmacro-redefined]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.100773792Z level=warn msg=\"    8 | #define __uint(name, val) int(*(name))[val]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.100936736Z level=warn msg=\"      |         ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.101080224Z level=warn msg=\"/usr/local/lib/bpfrejit/native/native_compat.h:22:9: note: previous definition is here\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.101229168Z level=warn msg=\"   22 | #define __uint(name, val) int (*name)[val]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.101368032Z level=warn msg=\"      |         ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.101502864Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/bpf_xdp.c:4:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.101650976Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/xdp.h:18:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.10180032Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../loader.h:9:9: warning: '__type' macro redefined [-Wmacro-redefined]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.10199736Z level=warn msg=\"    9 | #define __type(name, val) typeof(val) *(name)\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.10213808Z level=warn msg=\"      |         ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.102279424Z level=warn msg=\"/usr/local/lib/bpfrejit/native/native_compat.h:25:9: note: previous definition is here\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.102419456Z level=warn msg=\"   25 | #define __type(name, val) typeof(val) *name\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.102557808Z level=warn msg=\"      |         ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.10269232Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/bpf_xdp.c:4:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.102841664Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/xdp.h:18:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.102991728Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../loader.h:10:9: warning: '__array' macro redefined [-Wmacro-redefined]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.10314616Z level=warn msg=\"   10 | #define __array(name, val) typeof(val) *(name)[]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.103289296Z level=warn msg=\"      |         ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.103440544Z level=warn msg=\"/usr/local/lib/bpfrejit/native/native_compat.h:28:9: note: previous definition is here\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.103585904Z level=warn msg=\"   28 | #define __array(name, val) typeof(val) *name[]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.103722608Z level=warn msg=\"      |         ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.103857584Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/bpf_xdp.c:47:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.104022848Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nodeport.h:11:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.104256528Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nat.h:18:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.104457008Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/conntrack.h:524:19: warning: taking address of packed member 'dport' of class or structure 'ipv6_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.104627952Z level=warn msg=\"  524 |                                   CT_EGRESS, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.104767232Z level=warn msg=\"      |                                               ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.104914416Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/conntrack.h:646:14: warning: taking address of packed member 'dport' of class or structure 'ipv6_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105072944Z level=warn msg=\"  646 |                                           dir, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105217552Z level=warn msg=\"      |                                                 ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105355488Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/conntrack.h:783:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105514512Z level=warn msg=\"  783 |                                   CT_EGRESS, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105650928Z level=warn msg=\"      |                                               ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105786784Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/conntrack.h:904:14: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.105949968Z level=warn msg=\"  904 |                                           dir, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.106086448Z level=warn msg=\"      |                                                 ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.106227424Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/bpf_xdp.c:47:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.106378112Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nodeport.h:11:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.106542736Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nat.h:833:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.10675624Z level=warn msg=\"  833 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.106900336Z level=warn msg=\"      |                                                  ^~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.10703984Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nat.h:946:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.107206048Z level=warn msg=\"  946 |                                          CT_EGRESS, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.107349344Z level=warn msg=\"      |                                                      ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.107487552Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nat.h:1060:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.107674096Z level=warn msg=\" 1060 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.107843136Z level=warn msg=\"      |                                                  ^~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.107984432Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nat.h:1159:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.108145408Z level=warn msg=\" 1159 |                                          CT_INGRESS, &tuple.dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.108293472Z level=warn msg=\"      |                                                       ^~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.1084476Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/bpf_xdp.c:47:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.108614752Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nodeport.h:14:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.108766224Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/lb.h:1674:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.108926096Z level=warn msg=\" 1674 |                                           CT_EGRESS, &tuple->dport);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109064784Z level=warn msg=\"      |                                                       ^~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109210512Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/lb.h:2057:17: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109372416Z level=warn msg=\" 2057 |                 if (READ_ONCE(val->last_used) +\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109510352Z level=warn msg=\"      |                               ^~~~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109649616Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../compiler.h:108:37: note: expanded from macro 'READ_ONCE'\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109805344Z level=warn msg=\"  108 |                         ({ typeof(X) __val = __READ_ONCE(X);    \\\\\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.109982768Z level=warn msg=\"      |                                                          ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.110283008Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../compiler.h:97:51: note: expanded from macro '__READ_ONCE'\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.110456112Z level=warn msg=\"   97 | # define __READ_ONCE(X)         (*(volatile typeof(X) *)&X)\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.110600864Z level=warn msg=\"      |                                                          ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.110741024Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/bpf_xdp.c:47:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.110890992Z level=warn msg=\"In file included from /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/nodeport.h:14:\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.111040304Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/lib/lb.h:2068:14: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11120376Z level=warn msg=\" 2068 |                 WRITE_ONCE(val->last_used, now);\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.111342944Z level=warn msg=\"      |                            ^~~~~~~~~~~~~~\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11148584Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../compiler.h:116:21: note: expanded from macro 'WRITE_ONCE'\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11167624Z level=warn msg=\"  116 |                                    __WRITE_ONCE(X, __val);      \\\\\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.111821248Z level=warn msg=\"      |                                                 ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.111963344Z level=warn msg=\"/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/parity/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/native-abi-overlay/include/bpf/ctx/../compiler.h:101:54: note: expanded from macro '__WRITE_ONCE'\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.112119968Z level=warn msg=\"  101 | # define __WRITE_ONCE(X, V)     (*(volatile typeof(X) *)&X) = (V)\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.112268544Z level=warn msg=\"      |                                                          ^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11241016Z level=warn msg=\"14 warnings generated.\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.112546416Z level=warn msg=\"native-link: arm64 entry=cil_xdp_entry (980 bytes), 1 reachable symbol(s) total\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11268688Z level=warn msg=\"  - cil_xdp_entry (vaddr 0x0, 980 bytes) [entry]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.112825888Z level=warn msg=\"native-link: wrote proof object 988 bytes, 18 reloc(s) -> /workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/objects/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699.cil_xdp_entry.proof.o\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11300144Z level=warn msg=\"native-link: arm64 entry=tail_drop_notify (896 bytes), 1 reachable symbol(s) total\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.113143168Z level=warn msg=\"  - tail_drop_notify (vaddr 0x0, 896 bytes) [entry]\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.113285376Z level=warn msg=\"Error: arm64 entry ABI uses unsupported callee-saved x28; compile native objects with -ffixed-x26 through -ffixed-x28\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.113427616Z level=warn msg=\"Traceback (most recent call last):\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11359264Z level=warn msg=\"  File \\\"/usr/local/lib/bpfrejit/merlin/merlin_bpf_clang.py\\\", line 313, in <module>\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11373432Z level=warn msg=\"    raise SystemExit(main())\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.11387272Z level=warn msg=\"                     ^^^^^^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114026736Z level=warn msg=\"  File \\\"/usr/local/lib/bpfrejit/merlin/merlin_bpf_clang.py\\\", line 235, in main\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114168864Z level=warn msg=\"    return run_paired_cilium_compile(args.clang, clang_args)\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114313232Z level=warn msg=\"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114451872Z level=warn msg=\"  File \\\"/workspaces/repository/runner/libs/cilium_native_build.py\\\", line 766, in run_paired_cilium_compile\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114593312Z level=warn msg=\"    subprocess.run(\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114729488Z level=warn msg=\"  File \\\"/usr/lib/python3.12/subprocess.py\\\", line 571, in run\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.114868304Z level=warn msg=\"    raise CalledProcessError(retcode, process.args,\" module=agent.datapath.loader\ntime=1970-01-01T00:11:37.115007712Z level=warn msg=\"subprocess.CalledProcessError: Command '['/usr/local/bin/native-link', '--input', '/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/objects/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699.native.o', '--symbol', 'tail_drop_notify', '--output', '/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000006_530516/details/cilium-native-config/objects/bpf_xdp/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699/5a897491b91818ea5d5a00f4b3462af84680da620ec0d84c724e89d0a192c699.tail_drop_notify.proof.o', '--mode', 'proof', '--preserve-entry-abi']' returned non-zero exit status 1.\" module=agent.datapath.loader\ntime=1970-01-01T00:11:39.116113952Z level=fatal msg=\"Failed to compile XDP program\" module=agent.datapath.loader error=\"attaching XDP program to interface bpfbench0: Failed to compile bpf_xdp.o: exit status 1\""
+    }
+  },
+  "selected_workload": "cilium_endpoint_pktgen",
+  "status": "error"
+}
