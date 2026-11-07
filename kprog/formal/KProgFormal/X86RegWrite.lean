@@ -159,7 +159,8 @@ theorem x86_byte_mov_widen_projected (old value live : BitVec 64)
     (h : live &&& 0xffffffffffffff00 = 0) :
     GeneratedX86RegWrite.bits old value .w8 &&& live =
       GeneratedX86RegWrite.bits old (value &&& 0xff) .w32 &&& live := by
-  unfold GeneratedX86RegWrite.bits
+  change ((old &&& 0xffffffffffffff00) ||| (value &&& 0xff)) &&& live =
+    ((value &&& 0xff) &&& 0xffffffff) &&& live
   bv_decide
 
 /-- Both MOV forms scalarize the destination and preserve every flag; the

@@ -35,7 +35,13 @@ The two projected byte-MOV lemmas preserve prior useful proof work; they do not
 enable a link-time optimization. Those optimizations are deferred by the current
 operator priorities.
 
-The combined post-cleanup full check is pending at this checkpoint. None of the
+The combined post-cleanup full check at exact `aacc36597` exited 2: three
+modules importing both X86RegWrite and X86ShiftResult encountered duplicate
+`GeneratedX86Width.Width.enumToBitVec` definitions. The forward fix preserves
+the MOV theorem statement and exposes its constant-width bit-vector goal before
+`bv_decide`. All three affected import compositions then passed an incremental
+81-job focused build. A new combined full check is required after publication.
+None of the
 focused results above establishes all 77/72 handler refinements or a complete
 dispatcher-step theorem. XMM C lane projection still assumes successful aligned
 access; REP C core assumes bounded matching count, forward/default addressing
