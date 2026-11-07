@@ -1,0 +1,12 @@
+[
+  {
+    "name": "helper_ctx_stripped",
+    "expected": 37,
+    "preserve_entry_abi": false
+  },
+  {
+    "name": "helper_ctx_preserved",
+    "expected": 37,
+    "preserve_entry_abi": true
+  }
+]

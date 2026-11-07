@@ -904,3 +904,12 @@ arms finish: JIT250388 and bound268634 program runs, matching their packet
 counts and zero pktgen errors. XDP/map/receiver/drop counters are retained.
 OTel records12 baseline programs and0 native replacements; mixed extern/private
 readonly relocation handling is under repair. QEMU timing is functional only.
+
+## Real helper context and packet-view refresh
+
+[The ARM helper-context bridge](context-helper-result/README.md) preserves
+the original context identity and refreshes XDP packet pointers after adjust
+helpers. Six focused cases,154 helper ABI cases and the isolated complete
+formal check pass. Both source/simulator/bound QEMU controls write37/return2
+after adjust_head4, with generation1. The complete built replay is retained;
+numeric SP/LR changes remain owned by F.

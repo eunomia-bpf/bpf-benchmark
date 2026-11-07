@@ -600,7 +600,15 @@ code-dispatch-build: direct-header-generate
 		-c $$source -o $${source%.c}.o || exit 1; \
 	done
 
-.PHONY: entry-abi-build
+.PHONY: entry-abi-build context-helper-host-check
+context-helper-host-check:
+	cd $(ROOT)/kprog/formal && taskset -c 16-19 lake build KProgFormal.Arm64HelperArgPtrShape
+	install -d $(ROOT)/kprog/arm64/build
+	cc -Wall -Wextra -Werror -O2 -I$(ROOT) -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/vendor/libbpf/src -I/usr/include/x86_64-linux-gnu $(HERE)/context_helper_host.c -o $(ROOT)/kprog/arm64/build/context-helper-host
+	$(ROOT)/kprog/arm64/build/context-helper-host
+	cd $(ROOT)/kprog/formal && cc -DKPROG_TEST_EXCLUSIVE_FAILURE=0 -include oracles/arm64_exclusive_choice_host.h -Wall -Wextra -O2 -I. -I../arm64 -I../../kprog -I../../vendor/libbpf/src oracles/test_arm64_helper_call_host.c -o build/test_arm64_helper_call_host
+	$(ROOT)/kprog/formal/build/test_arm64_helper_call_host
+
 entry-abi-build: direct-header-generate
 	python3 $(HERE)/entry_abi.py $(HERE)/$(PHASE) $(ENTRY_ABI_ARGS)
 	for source in $(HERE)/$(PHASE)/*.bpf.c; do \
