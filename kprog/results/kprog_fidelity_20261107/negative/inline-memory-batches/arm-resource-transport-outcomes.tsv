@@ -1,0 +1,35 @@
+control	outcome	errno	record_kind	operation_kind	isa
+application cannot obtain registered service authority	REJECTED	16	individual_outcome	protocol_refusal	aarch64
+application proof ELF refused	REJECTED	8	individual_outcome	protocol_refusal	aarch64
+unrecognized submission metadata refused	REJECTED	22	individual_outcome	protocol_refusal	aarch64
+application cannot complete proof request	REJECTED	1	individual_outcome	protocol_refusal	aarch64
+service endpoint resource submission refused	REJECTED	1	individual_outcome	protocol_refusal	aarch64
+resource reserved field refused	REJECTED	22	individual_outcome	protocol_refusal	aarch64
+resource count beyond verifier limit refused	REJECTED	7	individual_outcome	protocol_refusal	aarch64
+empty resource pointer ambiguity refused	REJECTED	22	individual_outcome	protocol_refusal	aarch64
+resource vector inaccessible memory refused	REJECTED	14	individual_outcome	protocol_refusal	aarch64
+partial resource vector invalid FD refused	REJECTED	9	individual_outcome	protocol_refusal	aarch64
+duplicate resource identity refused	REJECTED	17	individual_outcome	protocol_refusal	aarch64
+ordinary file resource refused	REJECTED	22	individual_outcome	protocol_refusal	aarch64
+resource submission proof ELF refused	REJECTED	8	individual_outcome	protocol_refusal	aarch64
+resource request copyback failure refused	REJECTED	14	individual_outcome	protocol_refusal	aarch64
+failed submissions release partial resource references	REJECTED	2	individual_outcome	lifetime_map_id_lookup	aarch64
+submitted resource vector replacement refused	REJECTED	16	individual_outcome	protocol_refusal	aarch64
+replace submitted native bytes refused	REJECTED	16	individual_outcome	protocol_refusal	aarch64
+application cannot read service requests	REJECTED	1	individual_outcome	protocol_refusal	aarch64
+capacity probe retains queued request	REJECTED	90	individual_outcome	protocol_refusal	aarch64
+immutable native ELF/entry/metadata survive producer mutation	PASS		individual_outcome	protocol_observation	aarch64
+valid omitted application resource refused	REJECTED	2	individual_outcome	protocol_refusal	aarch64
+native-only map capability survives descriptor mutation and close	PASS		individual_outcome	protocol_observation	aarch64
+kernel source/load attributes and actual outer/inner map shapes	PASS		individual_outcome	protocol_observation	aarch64
+invented inner template refused	REJECTED	2	individual_outcome	protocol_refusal	aarch64
+map outside pinned source refused	REJECTED	2	individual_outcome	protocol_refusal	aarch64
+stale source context request refused	REJECTED	116	individual_outcome	protocol_refusal	aarch64
+application proof upload refused with active trusted worker	REJECTED	1	individual_outcome	protocol_refusal	aarch64
+application cannot use trusted source query	REJECTED	1	individual_outcome	protocol_refusal	aarch64
+wrong native request identity refused	REJECTED	116	individual_outcome	protocol_refusal	aarch64
+invalid final errno refused	REJECTED	22	individual_outcome	protocol_refusal	aarch64
+unrelated verified BPF program cannot authorize native request	REJECTED	18	individual_outcome	protocol_refusal	aarch64
+completed request releases native resource references	REJECTED	2	individual_outcome	lifetime_map_id_lookup	aarch64
+application cannot replace disconnected trusted registration	REJECTED	16	individual_outcome	protocol_refusal	aarch64
+registered trusted transport, immutable P, application proof refusal and fail-closed disconnect	PASS		suite_summary	suite_summary	aarch64

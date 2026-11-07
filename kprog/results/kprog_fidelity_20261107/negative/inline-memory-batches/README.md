@@ -106,6 +106,68 @@ batches,17 old input pins, terminal/transport tables and full failure archive.
 C/A own coherent caller/service/module adoption and actual application runs;
 V/T continue the universal resource, compiler and binding laws.
 
+## AArch64 resource and fresh-service observations
+
+The same reader consumes A's immutable publication
+340a4ea5e07c38d415031c51aca057b57f62d955. Its portable transport cohort runs
+under full-system AArch64 QEMU with two vCPUs, 2 GiB and host CPUs16-19.
+All34 labels, outcomes, errno values and ordering equal the x86 resource
+cohort above. arm-resource-transport-outcomes.tsv keeps the original fields
+and ISA label. The28 protocol refusals, two map-ID lifetime lookups, three
+positive protocol observations and one closing summary retain their distinct
+operation kinds. Both lifetime lookups return libbpf_result=-2 and errno=2.
+The archived transport result and guest status exit0.
+
+A separate registered-service control in the same publication runs with two
+vCPUs, 2 GiB and host CPUs8-11. Its source program3 binds as native program9
+after fresh generation and BPF compilation; the client returns2 with
+prebuilt_proof=false. Kernel-owned native bytes, worker-copy bytes, service
+receipt and the actual service input native SHA agree:
+
+~~~text
+29c718c0dd9c592fb66ebdfe5a4f59b29bdf1bd53818f53771c13795f95bba4e
+~~~
+
+The raw client JSON equals its corresponding guest fields. Request membership,
+entry, kernel source ID, successful loader reply and every artifact hash from
+A's identity audit agree with the nested raw archive. The two actual generation
+commands return0. Source and bound IDs equal3 and9 throughout. Kernel facts
+record an empty maps vector for this scalar control. Native-only map-capability
+and reference-lifetime observations come from the portable transport cohort;
+the separate scalar control supplies an actual execution through the adopted
+module, caller and registered service. C/A continue whole-application replay.
+
+The archive supplies41 captured source files and six AArch64 ELF artifacts.
+All41 source hashes equal the frozen build manifest. Forty corresponding Git
+sources are available;39 match byte for byte, and the common group header
+retains its documented two additional empty lines with equal remaining lines.
+The kernel Module.symvers bytes are retained in the source archive. Four further
+request-generation sources are checked against their published Git bytes.
+The49 immutable input pins include these source and result identities.
+
+The module digest is
+0fd8117fb76b2301ecdde335a0731c549a977f492eb88914f458212a2649bec0,
+the caller DSO digest is
+25a55681c481afcd85b6098b67b6608b35de0700dc75fca1a41dc038a8e57994,
+and the transport executable digest is
+53a409e4ff7bbed3c9b8da206cd0ed00df8677a45baf1051120f2078a9b76ae8.
+All six archived ELF machine fields identify AArch64. The packaged baseline
+fixture retains digest de7821296054060c79cf4ff821a0939b63e8b01b8efb75e8c5b68deb987dfe2c;
+the actual service mount selects the29c718 control above. Both identities
+remain explicit. The module and caller hashes join the actual service input
+vector, whose157 paths remain recorded metadata; eight overlapping paths agree
+with the request's nine-field source/binary vector, and archived caller-source
+bytes cover its remaining field.
+
+arm-resource-increment.json records exact retention of every prior summary
+field, all four existing outcome/failure files and the prior collection log.
+The collector uses immutable published input blobs and exits0. Its first
+schema pass reached a caller-source field carried in the source archive;
+the completed join compares overlapping service fields and the full archived
+source vector. Original source and diagnostic are retained in F's
+arm-resource-review-initial.tar.gz. Runtime source, guest inputs, workload
+bytes and universal V/T theorem interfaces retain their captured epochs.
+
 ## Source and binary identities
 
 The collector verifies 13 production source SHA values against their published

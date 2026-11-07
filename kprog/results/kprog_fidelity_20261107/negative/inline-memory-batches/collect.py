@@ -116,6 +116,152 @@ def resource_observations(previous_outcomes):
     return report,rows
 
 
+
+def arm_resource_observations(x86_rows):
+    publication='340a4ea5e07c38d415031c51aca057b57f62d955'
+    base='corpus/results/kprog_arm64_app_coverage_20261107/native-resources/'
+    service_base=base+'replay/trusted-arm64-service-result/'
+    pins={}
+    def published(path):
+        value=subprocess.check_output(['git','show',publication+':'+path],cwd=ROOT)
+        pins[path]=dict(publication=publication,sha256=sha(value),bytes=len(value))
+        return value
+    metadata=json.loads(published(base+'summary.json'))
+    service=json.loads(published(service_base+'summary.json'))
+    audit=json.loads(published(service_base+'native-identity-audit.json'))
+    raw=published(base+'inputs-and-controls.tar.gz')
+    packed=published(service_base+service['archive'])
+    assert sha(packed)==service['archive_sha256']==audit['archive_sha256']
+    source_bytes={};source_hashes={};git_sources={};source_observations={}
+    with tarfile.open(fileobj=io.BytesIO(raw)) as archive:
+        data=lambda path:archive.extractfile(path).read()
+        captured=json.loads(data('control/inputs.json'))
+        for key in ['source_pins','kernel_interface_commit','caller_commit']:
+            assert captured[key]==metadata[key]
+        for path,digest in metadata['source_pins'].items():
+            value=data('source/'+path);source_bytes[path]=value
+            assert sha(value)==digest;source_hashes[path]=digest
+            if path=='vendor/build/arm64/linux/Module.symvers':
+                continue
+            git_value=published(path);git_sources[path]=sha(git_value)
+            if value!=git_value:
+                assert path=='kinsn/module/include/native_lab_group.h'
+                assert [line for line in value.splitlines() if line.strip()]==[
+                    line for line in git_value.splitlines() if line.strip()]
+                source_observations[path]=dict(archived_sha256=digest,published_sha256=sha(git_value),
+                    observation='Captured header retains two additional empty lines.')
+        assert len(source_hashes)==41 and len(git_sources)==40
+        artifact_bytes={'bpf_arm64_native_lab.ko':data('bin/bpf_arm64_native_lab.ko')}
+        artifact_bytes.update({name:data('bin/'+name) for name in metadata['loader_binaries']})
+        artifacts={name:sha(value) for name,value in artifact_bytes.items()}
+        assert artifacts['bpf_arm64_native_lab.ko']==metadata['module_sha256']
+        assert all(artifacts[name]==digest for name,digest in metadata['loader_binaries'].items())
+        transport_inputs=json.loads(data('control/transport-output/inputs.json'))
+        transport_binary=data('control/transport-output/test-trusted-transport')
+        transport_hashes=transport_inputs['hashes']
+        assert sha(transport_binary)==transport_hashes['kprog/arm64/build/trusted-transport/test-trusted-transport']
+        assert transport_hashes['kinsn/module/arm64/build/bpf_arm64_native_lab.ko']==metadata['module_sha256']
+        for path in ['kprog/tv/test_trusted_transport.c','kinsn/module/include/native_lab_trusted_wire.h']:
+            assert transport_hashes[path]==source_hashes[path]
+        for name,value in {**artifact_bytes,'test-trusted-transport':transport_binary}.items():
+            assert value[:4]==b'\x7fELF' and int.from_bytes(value[18:20],'little')==183,name
+        artifacts['test-trusted-transport']=sha(transport_binary)
+        log=data('control/transport-output/console.log').decode()
+        markers=[];api=[]
+        for line in log.splitlines():
+            if re.fullmatch(r'(.+): (PASS|REJECTED)(?: \((\d+)\))?',line):
+                markers.append(line)
+            match=re.fullmatch(r'(.+): libbpf_result=(-?\d+) errno=(\d+)',line)
+            if match:api.append(dict(control=match[1],libbpf_result=int(match[2]),errno=int(match[3])))
+        assert markers==metadata['transport_markers'] and len(markers)==34
+        for marker,row in zip(markers,x86_rows):
+            match=re.fullmatch(r'(.+): (PASS|REJECTED)(?: \((\d+)\))?',marker)
+            assert (match[1],match[2],match[3] or '')==(row['control'],row['outcome'],row['errno'])
+        assert len(api)==2 and all(row['libbpf_result']==-2 and row['errno']==2 for row in api)
+        assert {row['control'] for row in api}=={
+            row['control'] for row in x86_rows if row['operation_kind']=='lifetime_map_id_lookup'}
+        rows=[dict(row,isa='aarch64') for row in x86_rows]
+        for name in ['module','loader','transport-build','transport']:
+            assert int(data('control/'+name+'.exit'))==0
+        assert int(data('control/transport-output/exit'))==int(data('control/transport-output/guest-status'))==0
+        assert json.loads(data('control/transport-output/result.json'))==metadata['transport_result']
+        control_hashes={name:sha(data('control/'+name)) for name in
+            ['freeze.sh','service.sh','transport.sh','run.py','module-build.sh','transport-output/console.log']}
+    with tarfile.open(fileobj=io.BytesIO(packed)) as archive:
+        data=lambda path:archive.extractfile(path).read()
+        guest=json.loads(data('run/guest.json'));client=json.loads(data('run/client.stdout'))
+        assert guest==service['guest']
+        assert all(client[key]==guest[key] for key in client)
+        assert guest['ok'] and service['ok'] and metadata['service_host_ok']
+        assert int(data('run/guest.exit'))==service['guest_exit']==service['qemu_returncode']==0
+        assert metadata['service_guest_exit']==0 and guest['retval']==metadata['service_retval']==2
+        assert guest['prebuilt_proof'] is False and guest['returncode']==0
+        events=[json.loads(line) for line in data('run/requests/requests.jsonl').splitlines()]
+        assert events==[guest['receipt']] and len(events)==audit['completed_requests_or_cases']==1
+        event=events[0]
+        assert event['status']==0 and event['source_prog_id']==guest['original_prog_id']==3
+        assert event['prog_id']==guest['native_prog_id']==9
+        request_name='run/requests/'+Path(event['artifact_archive']).name
+        request_bytes=data(request_name);identity=audit['request_identities'][0]
+        assert sha(request_bytes)==identity['request_archive_sha256']
+        service_inputs=json.loads(data('run/inputs.json'))
+        assert service_inputs['hashes_before']==service['hashes_before']
+        assert service_inputs['command']==service['command']
+        with tarfile.open(fileobj=io.BytesIO(request_bytes)) as request:
+            data=lambda path:request.extractfile(path).read()
+            native=data('request/kernel.native.o')
+            assert native==data('request/generated/request.native.o')
+            assert sha(native)==event['native_sha256']==identity['native_sha256']
+            assert native[:4]==b'\x7fELF' and int.from_bytes(native[18:20],'little')==183
+            assert data('request/kernel.entry').decode().strip()=='trusted_entry'
+            facts=json.loads(data('request/kernel.facts.json'))
+            assert facts['id']==event['source_prog_id'] and facts['maps']==[]
+            reply=json.loads(data('request/load.stdout'))
+            assert reply=={key:event[key] for key in ['request_id','prog_id','status']}
+            for path,digest in identity['artifacts'].items():assert sha(data(path))==digest
+            identities=json.loads(data('request/source-identities.json'))
+            for path,digest in identities.items():
+                relative=path.removeprefix('/workspaces/repository/')
+                if relative in service['hashes_before']:
+                    assert digest==service['hashes_before'][relative]
+                if relative in source_bytes:
+                    assert sha(source_bytes[relative])==digest
+                elif '/build/' not in relative and 'build-arm64-' not in relative:
+                    assert sha(published(relative))==digest
+            loader='kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native-loader'
+            assert identities['/workspaces/repository/'+loader]==artifacts['trusted-native-loader']
+            assert service['hashes_before']['kinsn/module/arm64/build/bpf_arm64_native_lab.ko']==metadata['module_sha256']
+            assert service['hashes_before']['kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link']==metadata['linker_sha256']
+            assert sha(native)==service['hashes_before']['kprog/libnativeloader/build-arm64-a-map-order-v3/trusted-native.o']
+            commands=[json.loads(line) for line in data('request/generated/commands.jsonl').splitlines()]
+            assert len(commands)==2 and all(row['returncode']==0 for row in commands)
+            assert '-target' in commands[1]['command'] and 'bpf' in commands[1]['command']
+            request_hashes={path:sha(data(path)) for path in identity['artifacts']}
+    assert metadata['identity_errors']==audit['identity_errors']==[]
+    assert audit['all_recorded_identities_match'] and service['hashes_unchanged']
+    assert len(markers)==len(rows)==34
+    report=dict(source_publication=publication,input_pins=pins,
+        archived_source_sha256=source_hashes,published_source_sha256=git_sources,
+        source_observations=source_observations,archived_runtime_artifact_sha256=artifacts,
+        recorded_retained_runtime_sha256=metadata['retained_runtime'],
+        transport_command=transport_inputs['command'],service_command=service['command'],
+        transport_log_sha256=control_hashes['transport-output/console.log'],
+        archived_control_sha256=control_hashes,outcomes=34,named_outcomes=33,
+        protocol_refusal_outcomes=28,lifetime_map_id_lookup_outcomes=2,
+        positive_protocol_observations=3,suite_summaries=1,
+        rendered_refusal_outcomes=metadata['transport_rejection_count'],
+        lifetime_api_observations=api,x86_outcomes_equal=True,
+        actual_service_requests=1,fresh_compiled_bound_requests=1,actual_native_executions=1,
+        observed_retval=2,source_prog_id=3,bound_prog_id=9,
+        kernel_worker_receipt_native_sha256=sha(native),source_map_count=len(facts['maps']),
+        packaged_baseline_native_sha256=artifacts['trusted-native.o'],
+        request_archive_sha256=sha(request_bytes),request_artifact_sha256=request_hashes,
+        recorded_source_identities=identities,service_input_identities=service['hashes_before'],
+        transport_guest_exit=0,service_guest_exit=0,
+        scope='Portable resource transport observations and a fresh registered-service scalar native execution.')
+    return report,rows
+
+
 def main():
     pins={}
     def published(path,commit=PUBLICATION):
@@ -248,7 +394,8 @@ def main():
     assert len(final)==4 and Counter(row['stage'] for row in final)==Counter(bound=3,verifier_rejected=1)
     assert len({row['recorded_source_set_sha256'] for row in final})==1
     resource_report,resource_rows=resource_observations(transports)
-    for path,rows in [('terminal-outcomes.tsv',records),('transport-outcomes.tsv',transports),('resource-transport-outcomes.tsv',resource_rows)]:
+    arm_report,arm_rows=arm_resource_observations(resource_rows)
+    for path,rows in [('terminal-outcomes.tsv',records),('transport-outcomes.tsv',transports),('resource-transport-outcomes.tsv',resource_rows),('arm-resource-transport-outcomes.tsv',arm_rows)]:
         with (OUT/path).open('w') as output:
             columns=list(rows[0])
             if path=='terminal-outcomes.tsv':
@@ -268,7 +415,9 @@ def main():
                 source_observations=metadata['source_observations'],
                 scope='Offline batch runtime/source identity reconciliation supporting generic memory binding and refusal.')
     report['resource_transport_batch']=resource_report
+    report['arm_resource_batch']=arm_report
     (OUT/'summary.json').write_text(json.dumps(report,indent=2)+'\n')
-    print(json.dumps({k:v for k,v in report.items() if k not in ['input_pins','tested_artifact_sha256','recorded_source_vectors','source_observations','resource_transport_batch']},indent=2))
+    print(json.dumps({k:v for k,v in report.items() if k not in ['input_pins','tested_artifact_sha256','recorded_source_vectors','source_observations','resource_transport_batch','arm_resource_batch']},indent=2))
     print(json.dumps(dict(resource_transport={key:resource_report[key] for key in ['source_publication','outcomes','named_outcomes','protocol_refusal_outcomes','lifetime_map_id_lookup_outcomes','positive_protocol_observations','suite_summaries','prior_outcomes_preserved']}),indent=2))
+    print(json.dumps(dict(arm_resource={key:arm_report[key] for key in ['source_publication','outcomes','protocol_refusal_outcomes','lifetime_map_id_lookup_outcomes','positive_protocol_observations','actual_native_executions','observed_retval','kernel_worker_receipt_native_sha256']}),indent=2))
 if __name__=='__main__':main()
