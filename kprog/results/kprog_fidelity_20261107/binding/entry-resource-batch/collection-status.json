@@ -1,0 +1,18 @@
+{
+  "exit": 0,
+  "command": [
+    "taskset",
+    "-c",
+    "16-19",
+    "make",
+    "-f",
+    "kprog/results/kprog_fidelity_20261107/binding/entry-resource-batch/Makefile",
+    "replay"
+  ],
+  "collector_sha256": "360bf4b878d4128d047ff80d89dfd49a9ec0c3d1ad88985f2591fdeea175572f",
+  "makefile_sha256": "cb3b6f1a0b57bdbd44f0ffa62cc185d7fe8ae5d6dd09579a54255f015df1d47c",
+  "raw_run_log_sha256": "fd0d1bc98c5ea1d8036c31dac1247251cf053bad61f210e3e9350aed992e34ff",
+  "query_records": 609,
+  "independent_log_table_matches": 609,
+  "initial_setup_archive_sha256": "1bec828db96614bed48c8e4eae91e1a5c4ac62d34eea33e052e44aa7bc4a1bd4"
+}
