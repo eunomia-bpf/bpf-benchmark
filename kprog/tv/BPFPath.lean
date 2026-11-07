@@ -76,6 +76,34 @@ theorem evaluate_sound (env : Environment) (program : Array Byte)
                             exact Execution.next head (ih first.state tail continued)
           · simp [evaluate, active, position] at accepted
 
+
+/-- Equality at the actual path positions and their possible LDDW
+continuations transports a certificate to another captured program. -/
+theorem evaluate_program_congr (env : Environment) (first second : Array Byte)
+    (positions : List Nat)
+    (same : ∀ pc ∈ positions, decode first pc = decode second pc ∧
+      decode first (pc + 1) = decode second (pc + 1)) (state : State) :
+    evaluate env first positions state = evaluate env second positions state := by
+  induction positions generalizing state with
+  | nil => rfl
+  | cons pc rest ih =>
+      have head := same pc (by simp)
+      have suffix : ∀ next ∈ rest, decode first next = decode second next ∧
+          decode first (next + 1) = decode second (next + 1) :=
+        fun next inside => same next (by simp [inside])
+      by_cases active : state.halted = true
+      · simp [evaluate, active]
+      · by_cases atPosition : state.pc = (pc : Int)
+        · have continuation : decode first (state.pc.toNat + 1) = decode second (state.pc.toNat + 1) := by
+            simpa [atPosition] using head.2
+          have executed : ∀ i, execute env first state i = execute env second state i :=
+            fun i => execute_program_congr env first second state i continuation
+          simp only [evaluate]
+          simp [active, atPosition, head.1, executed, ih suffix]
+        · simp [evaluate, active, atPosition]
+
 end KProgTV.BPFPath
 
 #print axioms KProgTV.BPFPath.evaluate_sound
+
+#print axioms KProgTV.BPFPath.evaluate_program_congr
