@@ -1,0 +1,61 @@
+{
+  "arch": "x86",
+  "cases": [
+    {
+      "name": "div8_valid",
+      "assembly": "mov rax, 512; mov edx, 0; mov ecx, 7; div cl; cmp ax, 329; jne 1f; mov eax, 2; ret; 1: mov eax, 0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=10 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-x86/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261106/negative/x86-divide-fault-fixed/positive/div8_valid.manifest.json",
+        "0",
+        "2"
+      ]
+    },
+    {
+      "name": "div16_valid",
+      "assembly": "mov rax, 6; mov edx, 1; mov ecx, 7; div cx; cmp ax, 9363; jne 1f; cmp dx, 1; jne 1f; mov eax, 2; ret; 1: mov eax, 0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=20 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-x86/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261106/negative/x86-divide-fault-fixed/positive/div16_valid.manifest.json",
+        "0",
+        "2"
+      ]
+    },
+    {
+      "name": "div32_valid",
+      "assembly": "mov rax, 6; mov edx, 1; mov ecx, 7; div ecx; cmp eax, 613566757; jne 1f; cmp edx, 3; jne 1f; mov eax, 2; ret; 1: mov eax, 0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=30 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-x86/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261106/negative/x86-divide-fault-fixed/positive/div32_valid.manifest.json",
+        "0",
+        "2"
+      ]
+    },
+    {
+      "name": "div64_valid",
+      "assembly": "mov rax, 6; mov edx, 1; mov ecx, 7; div rcx; mov r8, 2635249153387078803; cmp rax, r8; jne 1f; cmp rdx, 1; jne 1f; mov eax, 2; ret; 1: mov eax, 0; ret",
+      "stage": "correct_native_bound",
+      "message": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nbound program id=40 chunks=1 nonzero_generations=1\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2\n",
+      "returncode": 0,
+      "command": [
+        "/workspaces/repository/kprog/fidelity/build-x86/bound-probe",
+        "/workspaces/repository/kprog/fidelity/build-x86/negative-companion.bpf.o",
+        "/workspaces/repository/kprog/results/kprog_fidelity_20261106/negative/x86-divide-fault-fixed/positive/div64_valid.manifest.json",
+        "0",
+        "2"
+      ]
+    }
+  ]
+}

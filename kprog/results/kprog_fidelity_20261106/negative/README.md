@@ -320,6 +320,6 @@ arm64-vector-clear/. These do not count as application-program negatives.
 
 Numeric Arm repair now rejects30/30 unsafe bound fixtures, with5 valid spill controls admitted; exact final and prototype evidence is in arm64-numeric/. The new x86 divide-fault item retains8 accepted native#DE programs (load only), plus the existing x86 stack-flags acceptance; see x86-divide-fault/.
 
-Numeric Arm repair now rejects30/30 unsafe bound fixtures, with5 valid spill controls admitted; exact final and prototype evidence is in arm64-numeric/. The new x86 divide-fault item retains8 accepted native#DE programs (load only), plus the existing x86 stack-flags acceptance; see x86-divide-fault/.
-
 DIV repair replay: x86-divide-fault-fixed/ rejects all8 formerly accepted DIV faults in the real bound KVM verifier path. All25 cases ran; only stack_base_flags remains accepted. Exact candidate bytes and first-accept history are retained.
+
+DIV valid controls also pass actual bound KVM execution at8/16/32/64bits, including nonzero high dividends. Quotient/remainder checks return2, packet result0, generation1; see x86-divide-fault-fixed/positive/. All8fault controls stillreject; stack_base_flags remains the sole accepted25-suite case.

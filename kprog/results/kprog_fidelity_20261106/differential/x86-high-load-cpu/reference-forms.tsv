@@ -1,0 +1,817 @@
+form	assembly	cases	reference_cases	cpu_mismatches	simulator_mismatches	status	reference_error
+0	push rbx	1024	1024	0	0	checked	none
+1	pop rax	1024	1024	0	0	checked	none
+2	push bx	1024	1024	0	0	checked	none
+3	pop ax	1024	1024	0	0	checked	none
+4	nop	1024	1024	0	0	checked	none
+5	cbw	1024	1024	0	0	checked	none
+6	cwde	1024	1024	0	0	checked	none
+7	cdqe	1024	1024	0	0	checked	none
+8	cwd	1024	1024	0	0	checked	none
+9	cdq	1024	1024	0	0	checked	none
+10	cqo	1024	1024	0	0	checked	none
+11	movups xmm0, XMMWORD PTR [rdi]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+12	movups XMMWORD PTR [rdi], xmm0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+13	mov rax, rsp	1024	1024	0	1024	checked	none
+14	mov eax, esp	1024	1024	0	1024	checked	none
+15	lea rax, [rsp+16]	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+16	cmp rsp, 0	1024	1024	0	1024	checked	none
+17	mov rsp, rax	1024	1024	0	1024	checked	none
+18	mov esp, eax	1024	1024	0	1024	checked	none
+19	lea rsp, [rsp+16]	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+20	add rsp, 16	1024	1024	0	0	checked	none
+21	push rsp	1024	1024	0	1024	checked	none
+22	pop rsp	1024	1024	0	1024	checked	none
+23	push sp	1024	1024	0	1024	checked	none
+24	pop sp	1024	1024	0	1024	checked	none
+25	push -2147483648	1024	1024	0	0	checked	none
+26	push -128	1024	1024	0	0	checked	none
+27	push -1	1024	1024	0	0	checked	none
+28	push 0	1024	1024	0	0	checked	none
+29	push 1	1024	1024	0	0	checked	none
+30	push 127	1024	1024	0	0	checked	none
+31	push 128	1024	1024	0	0	checked	none
+32	push 305419896	1024	1024	0	0	checked	none
+33	pushw -7	1024	1024	0	0	checked	none
+34	push QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+35	push WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+36	pop QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+37	pop WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+38	push QWORD PTR [rsp-16]	1024	1024	0	0	checked	none
+39	pop QWORD PTR [rsp-16]	1024	1024	0	0	checked	none
+40	.byte 0x66, 0x48, 0x53	1024	1024	0	0	checked	none
+41	.byte 0x48, 0x66, 0x53	1024	1024	0	0	checked	none
+42	.byte 0x66, 0x48, 0xff, 0xf3	1024	1024	0	0	checked	none
+43	.byte 0x48, 0x66, 0xff, 0xf3	1024	1024	0	0	checked	none
+44	.byte 0x66, 0x48, 0x58	1024	1024	0	0	checked	none
+45	.byte 0x48, 0x66, 0x58	1024	1024	0	0	checked	none
+46	.byte 0x66, 0x48, 0x8f, 0xc0	1024	1024	0	0	checked	none
+47	.byte 0x48, 0x66, 0x8f, 0xc0	1024	1024	0	0	checked	none
+48	mov al, bl	1024	1024	0	0	checked	none
+49	mov al, 0x7f	1024	1024	0	0	checked	none
+50	mov BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+51	mov al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+52	mov BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+53	add al, bl	1024	1024	0	0	checked	none
+54	add al, 0x7f	1024	1024	0	0	checked	none
+55	add BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+56	add BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+57	add al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+58	adc al, bl	1024	1024	0	0	checked	none
+59	adc al, 0x7f	1024	1024	0	0	checked	none
+60	adc BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+61	adc BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+62	adc al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+63	sub al, bl	1024	1024	0	0	checked	none
+64	sub al, 0x7f	1024	1024	0	0	checked	none
+65	sub BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+66	sub BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+67	sub al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+68	sbb al, bl	1024	1024	0	0	checked	none
+69	sbb al, 0x7f	1024	1024	0	0	checked	none
+70	sbb BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+71	sbb BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+72	sbb al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+73	cmp al, bl	1024	1024	0	0	checked	none
+74	cmp al, 0x7f	1024	1024	0	0	checked	none
+75	cmp BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+76	cmp BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+77	cmp al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+78	test al, bl	1024	1024	0	0	checked	none
+79	test al, 0x7f	1024	1024	0	0	checked	none
+80	test BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+81	test BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+82	and al, bl	1024	1024	0	0	checked	none
+83	and al, 0x7f	1024	1024	0	0	checked	none
+84	and al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+85	and BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+86	and BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+87	or al, bl	1024	1024	0	0	checked	none
+88	or al, 0x7f	1024	1024	0	0	checked	none
+89	or al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+90	or BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+91	or BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+92	xor al, bl	1024	1024	0	0	checked	none
+93	xor al, 0x7f	1024	1024	0	0	checked	none
+94	xor al, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+95	xor BYTE PTR [rdi+8], al	1024	1024	0	0	checked	none
+96	xor BYTE PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+97	inc al	1024	1024	0	0	checked	none
+98	inc BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+99	dec al	1024	1024	0	0	checked	none
+100	dec BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+101	neg al	1024	1024	0	0	checked	none
+102	neg BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+103	not al	1024	1024	0	0	checked	none
+104	not BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+105	xchg al, bl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+106	shl al, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+107	shl al, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+108	shl al, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+109	shl al, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+110	shl al, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+111	shl al, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+112	shl al, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+113	shl al, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+114	shl al, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+115	shl al, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+116	shl al, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+117	shl al, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+118	shr al, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+119	shr al, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+120	shr al, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+121	shr al, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+122	shr al, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+123	shr al, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+124	shr al, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+125	shr al, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+126	shr al, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+127	shr al, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+128	shr al, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+129	shr al, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+130	sar al, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+131	sar al, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+132	sar al, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+133	sar al, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+134	sar al, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+135	sar al, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+136	sar al, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+137	sar al, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+138	sar al, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+139	sar al, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+140	sar al, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+141	sar al, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+142	rol al, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+143	rol al, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+144	rol al, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+145	rol al, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+146	rol al, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+147	rol al, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+148	rol al, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+149	rol al, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+150	rol al, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+151	rol al, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+152	rol al, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+153	rol al, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+154	mov ax, bx	1024	1024	0	0	checked	none
+155	mov ax, 0x7f	1024	1024	0	0	checked	none
+156	mov WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+157	mov ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+158	mov WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+159	add ax, bx	1024	1024	0	0	checked	none
+160	add ax, 0x7f	1024	1024	0	0	checked	none
+161	add WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+162	add WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+163	add ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+164	adc ax, bx	1024	1024	0	0	checked	none
+165	adc ax, 0x7f	1024	1024	0	0	checked	none
+166	adc WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+167	adc WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+168	adc ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+169	sub ax, bx	1024	1024	0	0	checked	none
+170	sub ax, 0x7f	1024	1024	0	0	checked	none
+171	sub WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+172	sub WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+173	sub ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+174	sbb ax, bx	1024	1024	0	0	checked	none
+175	sbb ax, 0x7f	1024	1024	0	0	checked	none
+176	sbb WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+177	sbb WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+178	sbb ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+179	cmp ax, bx	1024	1024	0	0	checked	none
+180	cmp ax, 0x7f	1024	1024	0	0	checked	none
+181	cmp WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+182	cmp WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+183	cmp ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+184	test ax, bx	1024	1024	0	0	checked	none
+185	test ax, 0x7f	1024	1024	0	0	checked	none
+186	test WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+187	test WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+188	and ax, bx	1024	1024	0	0	checked	none
+189	and ax, 0x7f	1024	1024	0	0	checked	none
+190	and ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+191	and WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+192	and WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+193	or ax, bx	1024	1024	0	0	checked	none
+194	or ax, 0x7f	1024	1024	0	0	checked	none
+195	or ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+196	or WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+197	or WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+198	xor ax, bx	1024	1024	0	0	checked	none
+199	xor ax, 0x7f	1024	1024	0	0	checked	none
+200	xor ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+201	xor WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+202	xor WORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+203	inc ax	1024	1024	0	0	checked	none
+204	inc WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+205	dec ax	1024	1024	0	0	checked	none
+206	dec WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+207	neg ax	1024	1024	0	0	checked	none
+208	neg WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+209	not ax	1024	1024	0	0	checked	none
+210	not WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+211	xchg ax, bx	1024	0	0	0	reference_rejected_encoding	reference: truncated native encoding
+212	shl ax, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+213	shl ax, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+214	shl ax, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+215	shl ax, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+216	shl ax, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+217	shl ax, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+218	shl ax, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+219	shl ax, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+220	shl ax, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+221	shl ax, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+222	shl ax, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+223	shl ax, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+224	shr ax, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+225	shr ax, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+226	shr ax, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+227	shr ax, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+228	shr ax, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+229	shr ax, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+230	shr ax, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+231	shr ax, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+232	shr ax, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+233	shr ax, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+234	shr ax, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+235	shr ax, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+236	sar ax, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+237	sar ax, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+238	sar ax, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+239	sar ax, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+240	sar ax, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+241	sar ax, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+242	sar ax, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+243	sar ax, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+244	sar ax, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+245	sar ax, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+246	sar ax, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+247	sar ax, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+248	rol ax, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+249	rol ax, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+250	rol ax, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+251	rol ax, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+252	rol ax, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+253	rol ax, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+254	rol ax, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+255	rol ax, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+256	rol ax, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+257	rol ax, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+258	rol ax, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+259	rol ax, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+260	imul ax, bx	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+261	imul ax, WORD PTR [rdi+8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+262	imul ax, bx, -7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+263	imul ax, WORD PTR [rdi+8], -7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+264	popcnt ax, bx	1024	1024	0	0	checked	none
+265	div bx	1024	1024	0	0	checked	none
+266	bt ax, bx	1024	1024	0	0	checked	none
+267	bt ax, 7	1024	1024	0	0	checked	none
+268	bt WORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+269	movbe ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+270	movbe WORD PTR [rdi+8], ax	1024	1024	0	0	checked	none
+271	shld ax, bx, 0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+272	shld ax, bx, 1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+273	shld ax, bx, 7	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+274	shld ax, bx, 15	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+275	shrd ax, bx, 0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+276	shrd ax, bx, 1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+277	shrd ax, bx, 7	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+278	shrd ax, bx, 15	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+279	mov eax, ebx	1024	1024	0	0	checked	none
+280	mov eax, 0x7f	1024	1024	0	0	checked	none
+281	mov DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+282	mov eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+283	mov DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+284	add eax, ebx	1024	1024	0	0	checked	none
+285	add eax, 0x7f	1024	1024	0	0	checked	none
+286	add DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+287	add DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+288	add eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+289	adc eax, ebx	1024	1024	0	0	checked	none
+290	adc eax, 0x7f	1024	1024	0	0	checked	none
+291	adc DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+292	adc DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+293	adc eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+294	sub eax, ebx	1024	1024	0	0	checked	none
+295	sub eax, 0x7f	1024	1024	0	0	checked	none
+296	sub DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+297	sub DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+298	sub eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+299	sbb eax, ebx	1024	1024	0	0	checked	none
+300	sbb eax, 0x7f	1024	1024	0	0	checked	none
+301	sbb DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+302	sbb DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+303	sbb eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+304	cmp eax, ebx	1024	1024	0	0	checked	none
+305	cmp eax, 0x7f	1024	1024	0	0	checked	none
+306	cmp DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+307	cmp DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+308	cmp eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+309	test eax, ebx	1024	1024	0	0	checked	none
+310	test eax, 0x7f	1024	1024	0	0	checked	none
+311	test DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+312	test DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+313	and eax, ebx	1024	1024	0	0	checked	none
+314	and eax, 0x7f	1024	1024	0	0	checked	none
+315	and eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+316	and DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+317	and DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+318	or eax, ebx	1024	1024	0	0	checked	none
+319	or eax, 0x7f	1024	1024	0	0	checked	none
+320	or eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+321	or DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+322	or DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+323	xor eax, ebx	1024	1024	0	0	checked	none
+324	xor eax, 0x7f	1024	1024	0	0	checked	none
+325	xor eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+326	xor DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+327	xor DWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+328	inc eax	1024	1024	0	0	checked	none
+329	inc DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+330	dec eax	1024	1024	0	0	checked	none
+331	dec DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+332	neg eax	1024	1024	0	0	checked	none
+333	neg DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+334	not eax	1024	1024	0	0	checked	none
+335	not DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+336	xchg eax, ebx	1024	0	0	0	reference_rejected_encoding	reference: truncated native encoding
+337	shl eax, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+338	shl eax, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+339	shl eax, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+340	shl eax, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+341	shl eax, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+342	shl eax, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+343	shl eax, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+344	shl eax, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+345	shl eax, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+346	shl eax, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+347	shl eax, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+348	shl eax, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+349	shr eax, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+350	shr eax, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+351	shr eax, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+352	shr eax, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+353	shr eax, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+354	shr eax, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+355	shr eax, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+356	shr eax, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+357	shr eax, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+358	shr eax, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+359	shr eax, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+360	shr eax, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+361	sar eax, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+362	sar eax, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+363	sar eax, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+364	sar eax, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+365	sar eax, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+366	sar eax, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+367	sar eax, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+368	sar eax, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+369	sar eax, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+370	sar eax, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+371	sar eax, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+372	sar eax, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+373	rol eax, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+374	rol eax, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+375	rol eax, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+376	rol eax, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+377	rol eax, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+378	rol eax, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+379	rol eax, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+380	rol eax, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+381	rol eax, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+382	rol eax, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+383	rol eax, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+384	rol eax, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+385	imul eax, ebx	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+386	imul eax, DWORD PTR [rdi+8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+387	imul eax, ebx, -7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+388	imul eax, DWORD PTR [rdi+8], -7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+389	popcnt eax, ebx	1024	1024	0	0	checked	none
+390	div ebx	1024	1024	0	0	checked	none
+391	bt eax, ebx	1024	1024	0	0	checked	none
+392	bt eax, 7	1024	1024	0	0	checked	none
+393	bt DWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+394	movbe eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+395	movbe DWORD PTR [rdi+8], eax	1024	1024	0	0	checked	none
+396	shld eax, ebx, 0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+397	shld eax, ebx, 1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+398	shld eax, ebx, 7	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+399	shld eax, ebx, 15	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+400	shrd eax, ebx, 0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+401	shrd eax, ebx, 1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+402	shrd eax, ebx, 7	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+403	shrd eax, ebx, 15	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+404	lea eax, [rdi+rbx*4-7]	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+405	bswap eax	1024	1024	0	0	checked	none
+406	andn eax, ebx, ecx	1024	1024	0	0	checked	none
+407	andn eax, ebx, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+408	bzhi eax, ebx, ecx	1024	1024	0	0	checked	none
+409	bzhi eax, DWORD PTR [rdi+8], ecx	1024	1024	0	0	checked	none
+410	mulx eax, ebx, ecx	1024	0	0	0	reference_rejected_encoding	reference: invalid BMI VEX encoding
+411	shlx eax, ebx, ecx	1024	1024	0	0	checked	none
+412	shlx eax, DWORD PTR [rdi+8], ecx	1024	1024	0	0	checked	none
+413	shrx eax, ebx, ecx	1024	1024	0	0	checked	none
+414	shrx eax, DWORD PTR [rdi+8], ecx	1024	1024	0	0	checked	none
+415	sarx eax, ebx, ecx	1024	1024	0	0	checked	none
+416	sarx eax, DWORD PTR [rdi+8], ecx	1024	1024	0	0	checked	none
+417	rorx eax, ebx, 7	1024	1024	0	0	checked	none
+418	rorx eax, DWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+419	mov rax, rbx	1024	1024	0	0	checked	none
+420	mov rax, 0x7f	1024	1024	0	0	checked	none
+421	mov QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+422	mov rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+423	mov QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+424	add rax, rbx	1024	1024	0	0	checked	none
+425	add rax, 0x7f	1024	1024	0	0	checked	none
+426	add QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+427	add QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+428	add rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+429	adc rax, rbx	1024	1024	0	0	checked	none
+430	adc rax, 0x7f	1024	1024	0	0	checked	none
+431	adc QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+432	adc QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+433	adc rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+434	sub rax, rbx	1024	1024	0	0	checked	none
+435	sub rax, 0x7f	1024	1024	0	0	checked	none
+436	sub QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+437	sub QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+438	sub rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+439	sbb rax, rbx	1024	1024	0	0	checked	none
+440	sbb rax, 0x7f	1024	1024	0	0	checked	none
+441	sbb QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+442	sbb QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+443	sbb rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+444	cmp rax, rbx	1024	1024	0	0	checked	none
+445	cmp rax, 0x7f	1024	1024	0	0	checked	none
+446	cmp QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+447	cmp QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+448	cmp rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+449	test rax, rbx	1024	1024	0	0	checked	none
+450	test rax, 0x7f	1024	1024	0	0	checked	none
+451	test QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+452	test QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+453	and rax, rbx	1024	1024	0	0	checked	none
+454	and rax, 0x7f	1024	1024	0	0	checked	none
+455	and rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+456	and QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+457	and QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+458	or rax, rbx	1024	1024	0	0	checked	none
+459	or rax, 0x7f	1024	1024	0	0	checked	none
+460	or rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+461	or QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+462	or QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+463	xor rax, rbx	1024	1024	0	0	checked	none
+464	xor rax, 0x7f	1024	1024	0	0	checked	none
+465	xor rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+466	xor QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+467	xor QWORD PTR [rdi+8], 0x7f	1024	1024	0	0	checked	none
+468	inc rax	1024	1024	0	0	checked	none
+469	inc QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+470	dec rax	1024	1024	0	0	checked	none
+471	dec QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+472	neg rax	1024	1024	0	0	checked	none
+473	neg QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+474	not rax	1024	1024	0	0	checked	none
+475	not QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+476	xchg rax, rbx	1024	0	0	0	reference_rejected_encoding	reference: truncated native encoding
+477	shl rax, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+478	shl rax, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+479	shl rax, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+480	shl rax, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+481	shl rax, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+482	shl rax, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+483	shl rax, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+484	shl rax, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+485	shl rax, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+486	shl rax, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+487	shl rax, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+488	shl rax, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+489	shr rax, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+490	shr rax, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+491	shr rax, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+492	shr rax, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+493	shr rax, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+494	shr rax, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+495	shr rax, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+496	shr rax, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+497	shr rax, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+498	shr rax, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+499	shr rax, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+500	shr rax, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+501	sar rax, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+502	sar rax, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+503	sar rax, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+504	sar rax, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+505	sar rax, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+506	sar rax, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+507	sar rax, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+508	sar rax, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+509	sar rax, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+510	sar rax, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+511	sar rax, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+512	sar rax, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+513	rol rax, 0	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+514	rol rax, 1	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+515	rol rax, 7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+516	rol rax, 8	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+517	rol rax, 15	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+518	rol rax, 16	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+519	rol rax, 31	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+520	rol rax, 32	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+521	rol rax, 63	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+522	rol rax, 64	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+523	rol rax, 255	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+524	rol rax, cl	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+525	imul rax, rbx	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+526	imul rax, QWORD PTR [rdi+8]	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+527	imul rax, rbx, -7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+528	imul rax, QWORD PTR [rdi+8], -7	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+529	popcnt rax, rbx	1024	1024	0	0	checked	none
+530	div rbx	1024	1024	0	0	checked	none
+531	bt rax, rbx	1024	1024	0	0	checked	none
+532	bt rax, 7	1024	1024	0	0	checked	none
+533	bt QWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+534	movbe rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+535	movbe QWORD PTR [rdi+8], rax	1024	1024	0	0	checked	none
+536	shld rax, rbx, 0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+537	shld rax, rbx, 1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+538	shld rax, rbx, 7	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+539	shld rax, rbx, 15	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+540	shrd rax, rbx, 0	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+541	shrd rax, rbx, 1	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+542	shrd rax, rbx, 7	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+543	shrd rax, rbx, 15	1024	0	0	0	reference_rejected_encoding	reference: unrecognized native opcode
+544	lea rax, [rdi+rbx*4-7]	1024	0	0	0	reference_rejected_encoding	reference: expected two-byte native opcode
+545	bswap rax	1024	1024	0	0	checked	none
+546	andn rax, rbx, rcx	1024	1024	0	0	checked	none
+547	andn rax, rbx, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+548	bzhi rax, rbx, rcx	1024	1024	0	0	checked	none
+549	bzhi rax, QWORD PTR [rdi+8], rcx	1024	1024	0	0	checked	none
+550	mulx rax, rbx, rcx	1024	0	0	0	reference_rejected_encoding	reference: invalid BMI VEX encoding
+551	shlx rax, rbx, rcx	1024	1024	0	0	checked	none
+552	shlx rax, QWORD PTR [rdi+8], rcx	1024	1024	0	0	checked	none
+553	shrx rax, rbx, rcx	1024	1024	0	0	checked	none
+554	shrx rax, QWORD PTR [rdi+8], rcx	1024	1024	0	0	checked	none
+555	sarx rax, rbx, rcx	1024	1024	0	0	checked	none
+556	sarx rax, QWORD PTR [rdi+8], rcx	1024	1024	0	0	checked	none
+557	rorx rax, rbx, 7	1024	1024	0	0	checked	none
+558	rorx rax, QWORD PTR [rdi+8], 7	1024	1024	0	0	checked	none
+559	mov ah, bh	1024	1024	0	0	checked	none
+560	mov ah, 0x7f	1024	1024	0	0	checked	none
+561	mov BYTE PTR [rdi+8], ah	1024	1024	0	0	checked	none
+562	add ah, bh	1024	1024	0	0	checked	none
+563	add ah, 0x7f	1024	1024	0	0	checked	none
+564	adc ah, bh	1024	1024	0	0	checked	none
+565	adc ah, 0x7f	1024	1024	0	0	checked	none
+566	sub ah, bh	1024	1024	0	0	checked	none
+567	sub ah, 0x7f	1024	1024	0	0	checked	none
+568	sbb ah, bh	1024	1024	0	0	checked	none
+569	sbb ah, 0x7f	1024	1024	0	0	checked	none
+570	cmp ah, bh	1024	1024	0	0	checked	none
+571	cmp ah, 0x7f	1024	1024	0	0	checked	none
+572	test ah, bh	1024	1024	0	0	checked	none
+573	test ah, 0x7f	1024	1024	0	0	checked	none
+574	inc ah	1024	1024	0	0	checked	none
+575	dec ah	1024	1024	0	0	checked	none
+576	neg ah	1024	1024	0	0	checked	none
+577	not ah	1024	1024	0	0	checked	none
+578	movzx ax, bl	1024	1024	0	0	checked	none
+579	movzx ax, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+580	movsx ax, bl	1024	1024	0	0	checked	none
+581	movsx ax, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+582	movzx eax, bl	1024	1024	0	0	checked	none
+583	movzx eax, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+584	movsx eax, bl	1024	1024	0	0	checked	none
+585	movsx eax, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+586	movzx eax, bx	1024	1024	0	0	checked	none
+587	movzx eax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+588	movsx eax, bx	1024	1024	0	0	checked	none
+589	movsx eax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+590	movzx rax, bl	1024	1024	0	0	checked	none
+591	movzx rax, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+592	movsx rax, bl	1024	1024	0	0	checked	none
+593	movsx rax, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+594	movzx rax, bx	1024	1024	0	0	checked	none
+595	movzx rax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+596	movsx rax, bx	1024	1024	0	0	checked	none
+597	movsx rax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+598	movsxd rax, ebx	1024	1024	0	0	checked	none
+599	movsxd rax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+600	mov ah, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+601	mov ah, BYTE PTR [rsi+16]	1024	1024	0	0	checked	none
+602	mov ah, BYTE PTR [rsp-16]	1024	1024	0	0	checked	none
+603	mov ch, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+604	mov ch, BYTE PTR [rsi+16]	1024	1024	0	0	checked	none
+605	mov ch, BYTE PTR [rsp-16]	1024	1024	0	0	checked	none
+606	mov dh, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+607	mov dh, BYTE PTR [rsi+16]	1024	1024	0	0	checked	none
+608	mov dh, BYTE PTR [rsp-16]	1024	1024	0	0	checked	none
+609	mov bh, BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+610	mov bh, BYTE PTR [rsi+16]	1024	1024	0	0	checked	none
+611	mov bh, BYTE PTR [rsp-16]	1024	1024	0	0	checked	none
+612	seta al	1024	1024	0	0	checked	none
+613	seta ah	1024	1024	0	0	checked	none
+614	seta BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+615	setae al	1024	1024	0	0	checked	none
+616	setae ah	1024	1024	0	0	checked	none
+617	setae BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+618	setb al	1024	1024	0	0	checked	none
+619	setb ah	1024	1024	0	0	checked	none
+620	setb BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+621	setbe al	1024	1024	0	0	checked	none
+622	setbe ah	1024	1024	0	0	checked	none
+623	setbe BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+624	sete al	1024	1024	0	0	checked	none
+625	sete ah	1024	1024	0	0	checked	none
+626	sete BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+627	setg al	1024	1024	0	0	checked	none
+628	setg ah	1024	1024	0	0	checked	none
+629	setg BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+630	setge al	1024	1024	0	0	checked	none
+631	setge ah	1024	1024	0	0	checked	none
+632	setge BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+633	setl al	1024	1024	0	0	checked	none
+634	setl ah	1024	1024	0	0	checked	none
+635	setl BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+636	setle al	1024	1024	0	0	checked	none
+637	setle ah	1024	1024	0	0	checked	none
+638	setle BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+639	setne al	1024	1024	0	0	checked	none
+640	setne ah	1024	1024	0	0	checked	none
+641	setne BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+642	setns al	1024	1024	0	0	checked	none
+643	setns ah	1024	1024	0	0	checked	none
+644	setns BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+645	sets al	1024	1024	0	0	checked	none
+646	sets ah	1024	1024	0	0	checked	none
+647	sets BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+648	seto al	1024	1024	0	0	checked	none
+649	seto ah	1024	1024	0	0	checked	none
+650	seto BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+651	setno al	1024	1024	0	0	checked	none
+652	setno ah	1024	1024	0	0	checked	none
+653	setno BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+654	setp al	1024	1024	0	0	checked	none
+655	setp ah	1024	1024	0	0	checked	none
+656	setp BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+657	setpe al	1024	1024	0	0	checked	none
+658	setpe ah	1024	1024	0	0	checked	none
+659	setpe BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+660	setnp al	1024	1024	0	0	checked	none
+661	setnp ah	1024	1024	0	0	checked	none
+662	setnp BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+663	setpo al	1024	1024	0	0	checked	none
+664	setpo ah	1024	1024	0	0	checked	none
+665	setpo BYTE PTR [rdi+8]	1024	1024	0	0	checked	none
+666	cmova ax, bx	1024	1024	0	0	checked	none
+667	cmova ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+668	cmova eax, ebx	1024	1024	0	0	checked	none
+669	cmova eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+670	cmova rax, rbx	1024	1024	0	0	checked	none
+671	cmova rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+672	cmovb ax, bx	1024	1024	0	0	checked	none
+673	cmovb ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+674	cmovb eax, ebx	1024	1024	0	0	checked	none
+675	cmovb eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+676	cmovb rax, rbx	1024	1024	0	0	checked	none
+677	cmovb rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+678	cmovbe ax, bx	1024	1024	0	0	checked	none
+679	cmovbe ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+680	cmovbe eax, ebx	1024	1024	0	0	checked	none
+681	cmovbe eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+682	cmovbe rax, rbx	1024	1024	0	0	checked	none
+683	cmovbe rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+684	cmove ax, bx	1024	1024	0	0	checked	none
+685	cmove ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+686	cmove eax, ebx	1024	1024	0	0	checked	none
+687	cmove eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+688	cmove rax, rbx	1024	1024	0	0	checked	none
+689	cmove rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+690	cmovg ax, bx	1024	1024	0	0	checked	none
+691	cmovg ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+692	cmovg eax, ebx	1024	1024	0	0	checked	none
+693	cmovg eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+694	cmovg rax, rbx	1024	1024	0	0	checked	none
+695	cmovg rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+696	cmovge ax, bx	1024	1024	0	0	checked	none
+697	cmovge ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+698	cmovge eax, ebx	1024	1024	0	0	checked	none
+699	cmovge eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+700	cmovge rax, rbx	1024	1024	0	0	checked	none
+701	cmovge rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+702	cmovae ax, bx	1024	1024	0	0	checked	none
+703	cmovae ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+704	cmovae eax, ebx	1024	1024	0	0	checked	none
+705	cmovae eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+706	cmovae rax, rbx	1024	1024	0	0	checked	none
+707	cmovae rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+708	cmovl ax, bx	1024	1024	0	0	checked	none
+709	cmovl ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+710	cmovl eax, ebx	1024	1024	0	0	checked	none
+711	cmovl eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+712	cmovl rax, rbx	1024	1024	0	0	checked	none
+713	cmovl rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+714	cmovle ax, bx	1024	1024	0	0	checked	none
+715	cmovle ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+716	cmovle eax, ebx	1024	1024	0	0	checked	none
+717	cmovle eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+718	cmovle rax, rbx	1024	1024	0	0	checked	none
+719	cmovle rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+720	cmovne ax, bx	1024	1024	0	0	checked	none
+721	cmovne ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+722	cmovne eax, ebx	1024	1024	0	0	checked	none
+723	cmovne eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+724	cmovne rax, rbx	1024	1024	0	0	checked	none
+725	cmovne rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+726	cmovns ax, bx	1024	1024	0	0	checked	none
+727	cmovns ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+728	cmovns eax, ebx	1024	1024	0	0	checked	none
+729	cmovns eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+730	cmovns rax, rbx	1024	1024	0	0	checked	none
+731	cmovns rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+732	cmovs ax, bx	1024	1024	0	0	checked	none
+733	cmovs ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+734	cmovs eax, ebx	1024	1024	0	0	checked	none
+735	cmovs eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+736	cmovs rax, rbx	1024	1024	0	0	checked	none
+737	cmovs rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+738	cmovo ax, bx	1024	1024	0	0	checked	none
+739	cmovo ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+740	cmovo eax, ebx	1024	1024	0	0	checked	none
+741	cmovo eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+742	cmovo rax, rbx	1024	1024	0	0	checked	none
+743	cmovo rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+744	cmovno ax, bx	1024	1024	0	0	checked	none
+745	cmovno ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+746	cmovno eax, ebx	1024	1024	0	0	checked	none
+747	cmovno eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+748	cmovno rax, rbx	1024	1024	0	0	checked	none
+749	cmovno rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+750	cmovp ax, bx	1024	1024	0	0	checked	none
+751	cmovp ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+752	cmovp eax, ebx	1024	1024	0	0	checked	none
+753	cmovp eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+754	cmovp rax, rbx	1024	1024	0	0	checked	none
+755	cmovp rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+756	cmovpe ax, bx	1024	1024	0	0	checked	none
+757	cmovpe ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+758	cmovpe eax, ebx	1024	1024	0	0	checked	none
+759	cmovpe eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+760	cmovpe rax, rbx	1024	1024	0	0	checked	none
+761	cmovpe rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+762	cmovnp ax, bx	1024	1024	0	0	checked	none
+763	cmovnp ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+764	cmovnp eax, ebx	1024	1024	0	0	checked	none
+765	cmovnp eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+766	cmovnp rax, rbx	1024	1024	0	0	checked	none
+767	cmovnp rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+768	cmovpo ax, bx	1024	1024	0	0	checked	none
+769	cmovpo ax, WORD PTR [rdi+8]	1024	1024	0	0	checked	none
+770	cmovpo eax, ebx	1024	1024	0	0	checked	none
+771	cmovpo eax, DWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+772	cmovpo rax, rbx	1024	1024	0	0	checked	none
+773	cmovpo rax, QWORD PTR [rdi+8]	1024	1024	0	0	checked	none
+774	ja forward	1024	1024	0	0	checked	none
+775	ja backward	1024	1024	0	0	checked	none
+776	jae forward	1024	1024	0	0	checked	none
+777	jae backward	1024	1024	0	0	checked	none
+778	jb forward	1024	1024	0	0	checked	none
+779	jb backward	1024	1024	0	0	checked	none
+780	jbe forward	1024	1024	0	0	checked	none
+781	jbe backward	1024	1024	0	0	checked	none
+782	je forward	1024	1024	0	0	checked	none
+783	je backward	1024	1024	0	0	checked	none
+784	jne forward	1024	1024	0	0	checked	none
+785	jne backward	1024	1024	0	0	checked	none
+786	jg forward	1024	1024	0	0	checked	none
+787	jg backward	1024	1024	0	0	checked	none
+788	jge forward	1024	1024	0	0	checked	none
+789	jge backward	1024	1024	0	0	checked	none
+790	jl forward	1024	1024	0	0	checked	none
+791	jl backward	1024	1024	0	0	checked	none
+792	jle forward	1024	1024	0	0	checked	none
+793	jle backward	1024	1024	0	0	checked	none
+794	js forward	1024	1024	0	0	checked	none
+795	js backward	1024	1024	0	0	checked	none
+796	jns forward	1024	1024	0	0	checked	none
+797	jns backward	1024	1024	0	0	checked	none
+798	jo forward	1024	1024	0	0	checked	none
+799	jo backward	1024	1024	0	0	checked	none
+800	jno forward	1024	1024	0	0	checked	none
+801	jno backward	1024	1024	0	0	checked	none
+802	jp forward	1024	1024	0	0	checked	none
+803	jp backward	1024	1024	0	0	checked	none
+804	jpe forward	1024	1024	0	0	checked	none
+805	jpe backward	1024	1024	0	0	checked	none
+806	jnp forward	1024	1024	0	0	checked	none
+807	jnp backward	1024	1024	0	0	checked	none
+808	jpo forward	1024	1024	0	0	checked	none
+809	jpo backward	1024	1024	0	0	checked	none
+810	jmp forward	1024	1024	0	0	checked	none
+811	call and ret (stack return address)	1024	0	0	0	awaiting_reference_block	control composite requires a reference block-step interface
+812	rep movsb	1024	0	0	0	reference_rejected_encoding	reference: truncated native encoding
+813	rep movsw	1024	0	0	0	reference_rejected_encoding	reference: truncated native encoding
+814	rep movsd	1024	0	0	0	reference_rejected_encoding	reference: truncated native encoding
+815	rep movsq	1024	0	0	0	reference_rejected_encoding	reference: truncated native encoding

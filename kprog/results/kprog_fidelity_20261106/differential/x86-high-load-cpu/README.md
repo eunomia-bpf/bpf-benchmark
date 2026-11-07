@@ -20,10 +20,17 @@ cases with CPU0/modelSP10240 and248 remaining reference encodings/blocks.
 Its exact rows and source are retained in ../x86-movx-reference/. That older
 matrix did not contain the17 new forms reported here.
 
-The expanded816-form replay against the exact good canonical DIV/high-load/
-sign-high source is now running as a separate retained-same-state comparison;
-its completed result is not claimed in this CPU-only report. Its trace stays
-in this Workspace (`cpu-states.bin`, hash recorded) while the reader runs.
+The expanded canonical replay now checks571/816 forms and584704 identical CPU
+states against exact published fb7c2b362: zero CPU/reference differences and
+9216 simulator/reference differences across9 SP rows. All17 added forms
+(17408 cases) agree with both CPU and canonical reference. The remaining245
+forms are244 decoder encodings and1 CALL block. `reference-forms.tsv` records
+every status; `reference-unavailable.jsonl.gz` preserves each exact request
+and diagnostic. `reference-mismatches.jsonl.gz` retains all9216 inputs and
+poststates. The tenth raw CPU/C SP row, `lea rax,[rsp+16]`, is among the missing
+LEA decodings; it was not fixed or waived by the smaller canonical count.
+The immutable trace remains in this Workspace (`cpu-states.bin`, hash
+recorded), and reference-run.log.gz retains the nonzero Make result.
 
 ```sh
 taskset -c 20-23 make -C kprog/results/kprog_fidelity_20261106/differential/x86-high-load-cpu build cpu

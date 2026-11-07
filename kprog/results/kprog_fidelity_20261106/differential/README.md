@@ -704,3 +704,5 @@ Canonical x86 MOVX replay:551forms/564224cases, CPU0/modelSP10240,248 remaining 
 Numeric Arm closure: see arm64-numeric/README.md.567forms/580608QEMU-C-reference cases and97control sequences/99328cases have zero mismatches. New static hardware handoffs are retained; hardware execution of this increment remains pending.
 
 Additional native x86 coverage: x86-high-load-cpu/ adds17sign-high/high-byte-memory forms (17408 cases, zero differences) to816 total forms;10SP rows retain10240differences. x86-divide-cpu/ checks30native operand forms and30720CPU/C/canonical cases with20784hardware#DE faults and zero differences. Exact source, per-form counts and all inputs retained; expanded canonical sweep remains running separately.
+
+Completed expanded canonical replay:571/816forms,584704identical CPU states,CPU0/modelSP9216. All17 new sign-high/highbyte-load forms agree.245reference gaps remain explicit; the tenth raw SP row(LEA fromRSP) is still undecoded. Exact rows, diagnostics and counterexample inputs in x86-high-load-cpu/.
