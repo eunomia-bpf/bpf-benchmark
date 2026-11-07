@@ -47,6 +47,10 @@ faults. Every status flag is preserved. The shared MOVX body serves both
 specialized and dispatcher calls; its source encoding respects REX constraints.
 Implicit accumulator extensions propagate known bits without inventing unknown
 source bits or requiring unrelated upper register bits.
+CWD/CDQ/CQO use the same MOV writer for DX/EDX/RDX. Their canonical native
+0x99 decoder follows active operand-size/REX prefixes; whole-state refinements
+preserve RAX, every other register, flags and memory. The widening check also
+compares the generated sign-high handlers with the actual x86 CPU.
 All sixteen native conditions refine the reference, including PF, through
 CMOV, SETcc and direct branches. SETcc includes high-byte/REX destinations,
 exact one-byte stores and write faults; CMOV retains eager read faults.

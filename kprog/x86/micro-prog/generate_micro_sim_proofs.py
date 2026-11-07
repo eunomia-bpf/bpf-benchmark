@@ -725,6 +725,13 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                            if insn.reloc_type=="R_X86_64_PC32" else c_u64(mem_disp(ops[1])))
         raise ValueError(f"cannot encode {insn.raw}")
 
+    if op in {"cwd", "cdq", "cqo"}:
+        if ops:
+            raise ValueError(f"cannot encode {insn.raw}")
+        width = {"cwd": 16, "cdq": 32, "cqo": 64}[op]
+        value = f"(0ULL - ((X86_SIM_L_READ_REG(X86_RAX) >> {width - 1}) & 1ULL))"
+        return enc("X86_OP_MOV_IMM", dst="X86_RDX", flags=WIDTH_CONST[width], imm=value)
+
     if op in {"cbw", "cwde", "cdqe"}:
         if ops:
             raise ValueError(f"cannot encode {insn.raw}")
