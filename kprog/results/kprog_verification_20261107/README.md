@@ -1634,3 +1634,47 @@ Source-owner publication and a new immutable full check are pending; the
 old exact967 full EXIT2 is retained unchanged. All commands/source pins and
 complete original output are appended to the existing integration receipt
 and compressed log. V commits only its proof/doc/result paths.
+
+## Outer direct branches composed with L_EXEC
+
+`Emission` models the production emitter's choice between numeric L_EXEC
+and the separate B/B.cond/CBZ/CBNZ/TBZ/TBNZ C macros. It is not an ISA
+decoder or another numeric opcode table. `dispatchEmission` composes their
+actual predicate, register byte, W truncation and low6 bit-mask behavior
+with every preceding L_EXEC case in one `emission_step_refines` theorem.
+Native NV15 retains its actual AL normalization, and the actual forward/
+backward code shape is selected using source-label coordinates.
+
+`EmissionBinding` contains encoded/source/current/lexical-next/target address
+identities. The label→native-PC map remains explicit: source coordinates
+are not assumed to be native runtime addresses. No branch-outcome or
+component semantic equality premise is introduced. Original-native access/
+exclusive/pair/vector witnesses remain separate for L_EXEC. Calls, ADR/code
+tokens, indirect/RET/helper/entry/compiled-body/platform transport and
+full77/72/O2/O4 remain open. In particular the current CODE materializer
+leaves source tokens unchanged, unlike STACK/RETURN bases; real code-word
+transport cannot be silently inferred for the next call/ADR proof.
+
+Validation:98-job Lean graph,3 axiom audits,8 existing contracts, model
+check and ALL12 existing semantic hosts pass:80256branch,64emit,1201emit-route,
+240condition,80condition-decode,40080width,1280effective-width,257register,
+6401register-route,586829AUX,1115374AUX-route,3804immediate-route cases.
+All9 source pins stayed unchanged, all previous declaration bytes are
+identical, and no placeholders/new tests/ISA/runtime/oracle edits appear.
+Proof SHA256 `027adbfbfbdf8cf8d361a88439da8a799f569260e59e170ab5dd5f6b27744edd`.
+
+The publication waiter froze exact
+`900422f7c3a4cc364f1597f76aefc5a583e3c32a` after A published its tested
+ARM entry-selector repair. That full `make check` exits **2**, at
+Makefile176 / `tools/check_x86_popcount_memory.py`; the generated dynamic
+C harness triggers `x86_sim_unmapped_xdp_read` at x86 header941. It includes
+published L_EXEC/Q proofs and the ARM repair, and predates this direct-
+branch extension. C/A own the forward integration investigation; no oracle
+is skipped or weakened. Original complete logs/source manifest are appended
+to the existing compressed archive, with exact pins and focused exits in JSON.
+
+The private full runner initially recorded the correct make EXIT2 but
+returned Python0 to its waiter. Its status propagation is now fixed; the
+waiter metadata was corrected from the authoritative make exit/log. This
+was never a complete-check pass. Immutable export was deleted automatically;
+shared caches and permanent STOP are retained.

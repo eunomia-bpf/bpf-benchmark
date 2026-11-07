@@ -3378,4 +3378,137 @@ theorem exec_observed_step_refines (code : Nat) (flags : Byte) (aux : BitVec 32)
       simp only [observeExclusiveDispatch, exclusiveSeparate, ↓reduceIte, observeQDispatch, qSeparate]
       exact exec_reduction_refines op flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s
 
+
+/-- Producer-level emission alternatives, not another ISA decoder or numeric
+opcode table. Direct branches are emitted as C macros outside L_EXEC. Their
+source-label coordinates are deliberately distinct from native PC words. -/
+inductive Emission where
+  | exec (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
+  | jump (current target : Word)
+  | condition (code : Nat) (current fallthrough target : Word)
+  | zero (width : Width) (nonzero : Bool) (src : Byte) (current fallthrough target : Word)
+  | bit (nonzero : Bool) (src : Byte) (bit : Word) (current fallthrough target : Word)
+
+/-- The generated backward/forward shape is chosen in SOURCE coordinates;
+only the selected label is materialized through `nativeAddress`. -/
+def mappedBranchStep (nativeAddress : Word → Word) (current fallthrough target : Word) (taken : Bool)
+    (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  ⟨{ s with pc := (Arm64Branch.choosePc (GeneratedArm64BranchEmit.shape current.toNat target.toNat)
+      taken (nativeAddress fallthrough) (nativeAddress target)) }, [], none⟩
+
+theorem mapped_branch_refines (nativeAddress : Word → Word) (current fallthrough target : Word)
+    (taken : Bool) (displacement : Word) (s : Reference.AArch64.State)
+    (fallAddress : nativeAddress fallthrough = s.pc + 4)
+    (targetAddress : nativeAddress target = s.pc + displacement) :
+    mappedBranchStep nativeAddress current fallthrough target taken s =
+      Reference.AArch64.branchStep taken displacement s := by
+  simp only [mappedBranchStep, Arm64Branch.pc_refines, fallAddress, targetAddress]
+  rfl
+
+/-- TBZ/TBNZ consume exactly low6 of the physical bit argument, as the
+production predicate does; upper bits never become a native bit number. -/
+theorem branch_bit_argument (nonzero : Bool) (value rawBit : Word) :
+    GeneratedArm64Branch.value (if nonzero then .tbnz else .tbz) value rawBit =
+      GeneratedArm64Branch.value (if nonzero then .tbnz else .tbz) value ((rawBit.setWidth 6).setWidth 64) := by
+  have masked : rawBit &&& 63 = ((rawBit.setWidth 6).setWidth 64 &&& 63) := by
+    simp only [Reference.Word]; bv_decide
+  cases nonzero <;> simp only [Bool.false_eq_true, ↓reduceIte, GeneratedArm64Branch.value] <;> rw [masked]
+
+/-- Numeric generated step. L_EXEC's explicit observations remain visible;
+branch macros neither modify data state nor invent guest memory effects. The
+label map/field binding must be established from the bound native artifact. -/
+def dispatchEmission (nativeAddress : Word → Word) (emission : Emission)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match emission with
+  | .exec code flags aux dst src src2 src3 value =>
+      observeExclusiveDispatch code flags release failure src2 s
+        (observeQDispatch code (dispatchExec code flags aux dst src src2 src3 value
+          sourceScalar sourceStack firstScalar secondScalar failure s))
+  | .jump _ target => some ⟨{ s with pc := nativeAddress target }, [], none⟩
+  | .condition code current fallthrough target =>
+      (Arm64Condition.decode code).map (fun predicate => mappedBranchStep nativeAddress current fallthrough target
+        (generatedArm64Cond (Arm64Condition.flags s.flags) predicate) s)
+  | .zero width nonzero src current fallthrough target =>
+      some (mappedBranchStep nativeAddress current fallthrough target
+        (GeneratedArm64Branch.value (if nonzero then .cbnz else .cbz)
+          (Arm64Branch.zeroSource width (Arm64Move.Fields.read s src)) 0) s)
+  | .bit nonzero src bit current fallthrough target =>
+      some (mappedBranchStep nativeAddress current fallthrough target
+        (GeneratedArm64Branch.value (if nonzero then .tbnz else .tbz) (Arm64Move.Fields.read s src) bit) s)
+
+/-- Source/native coordinate identities only. The current, lexical next and
+selected target are each tied to the actual native PC; equality between the
+source coordinate and native address is never assumed. Permissions/profile/
+exclusive witnesses stay outside this binding, as for L_EXEC. -/
+inductive EmissionBinding (nativeAddress : Word → Word) (pc : Word) (release : Bool) :
+    Emission → Reference.AArch64.Instruction → Prop where
+  | exec (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
+      (native : Reference.AArch64.Instruction) (binding : ExecBinding pc code flags aux dst src src2 src3 value release native) :
+      EmissionBinding nativeAddress pc release (.exec code flags aux dst src src2 src3 value) native
+  | jump (current target displacement : Word) (currentAddress : nativeAddress current = pc)
+      (targetAddress : nativeAddress target = pc + displacement) :
+      EmissionBinding nativeAddress pc release (.jump current target) (.branch displacement)
+  | condition (predicate : Arm64Cond) (current fallthrough target displacement : Word)
+      (currentAddress : nativeAddress current = pc) (nextLabel : fallthrough = current + 4)
+      (fallAddress : nativeAddress fallthrough = pc + 4) (targetAddress : nativeAddress target = pc + displacement) :
+      EmissionBinding nativeAddress pc release (.condition (GeneratedArm64Cond.code predicate) current fallthrough target)
+        (.branchConditional (Arm64Condition.nativeCode predicate) displacement)
+  | nv (current fallthrough target displacement : Word)
+      (currentAddress : nativeAddress current = pc) (nextLabel : fallthrough = current + 4)
+      (fallAddress : nativeAddress fallthrough = pc + 4) (targetAddress : nativeAddress target = pc + displacement) :
+      EmissionBinding nativeAddress pc release (.condition (GeneratedArm64CcDecode.code .nv) current fallthrough target)
+        (.branchConditional 15 displacement)
+  | zero (width : Width) (nonzero : Bool) (src : Register) (current fallthrough target displacement : Word)
+      (currentAddress : nativeAddress current = pc) (nextLabel : fallthrough = current + 4)
+      (fallAddress : nativeAddress fallthrough = pc + 4) (targetAddress : nativeAddress target = pc + displacement) :
+      EmissionBinding nativeAddress pc release (.zero width nonzero (Arm64Register.registerCode src) current fallthrough target)
+        (.branchZero width nonzero src displacement)
+  | bit (nonzero : Bool) (src : Register) (bit : Word) (current fallthrough target displacement : Word)
+      (currentAddress : nativeAddress current = pc) (nextLabel : fallthrough = current + 4)
+      (fallAddress : nativeAddress fallthrough = pc + 4) (targetAddress : nativeAddress target = pc + displacement) :
+      EmissionBinding nativeAddress pc release (.bit nonzero (Arm64Register.registerCode src) bit current fallthrough target)
+        (.branchBit nonzero src (bit.setWidth 6) displacement)
+
+/-- One generated-step theorem combines all numeric L_EXEC cases with B,
+B.cond including normalized NV, W/X CBZ/CBNZ and masked TBZ/TBNZ, using the
+actual source-selected branch shape and native label map. No component step
+equality or branch-outcome premise is supplied by the caller. -/
+theorem emission_step_refines (nativeAddress : Word → Word) (emission : Emission)
+    (sourceScalar sourceStack firstScalar secondScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (binding : EmissionBinding nativeAddress s.pc release emission native)
+    (access : scalarMemoryAccess native s) (environment : exclusiveStoreEnvironment native failure s)
+    (pairAccess : pairMemoryAccess native s) (vectorAccess : vectorMemoryAccess native s) :
+    dispatchEmission nativeAddress emission sourceScalar sourceStack firstScalar secondScalar release failure s =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | exec code flags aux dst src src2 src3 value native earlier =>
+      exact exec_observed_step_refines code flags aux dst src src2 src3 value sourceScalar sourceStack
+        firstScalar secondScalar release failure native s earlier access environment pairAccess vectorAccess
+  | jump current target displacement currentAddress targetAddress =>
+      simp only [dispatchEmission, targetAddress, Reference.AArch64.step]
+      rfl
+  | condition predicate current fallthrough target displacement currentAddress nextLabel fallAddress targetAddress =>
+      simp only [dispatchEmission, Arm64Condition.decode_code]
+      change some (mappedBranchStep nativeAddress current fallthrough target _ s) = _
+      rw [mapped_branch_refines nativeAddress current fallthrough target _ displacement s fallAddress targetAddress,
+        Arm64Condition.condition_refines]
+      rfl
+  | nv current fallthrough target displacement currentAddress nextLabel fallAddress targetAddress =>
+      simp only [dispatchEmission, Arm64Condition.decode_normalized_nv]
+      change some (mappedBranchStep nativeAddress current fallthrough target _ s) = _
+      rw [mapped_branch_refines nativeAddress current fallthrough target _ displacement s fallAddress targetAddress]
+      rfl
+  | zero width nonzero src current fallthrough target displacement currentAddress nextLabel fallAddress targetAddress =>
+      simp only [dispatchEmission, Arm64Move.Fields.register_read, Arm64Register.read_refines,
+        Arm64Branch.zero_predicate_refines]
+      rw [mapped_branch_refines nativeAddress current fallthrough target _ displacement s fallAddress targetAddress]
+      rfl
+  | bit nonzero src bit current fallthrough target displacement currentAddress nextLabel fallAddress targetAddress =>
+      simp only [dispatchEmission, Arm64Move.Fields.register_read, Arm64Register.read_refines]
+      rw [branch_bit_argument, Arm64Branch.bit_predicate_refines]
+      rw [mapped_branch_refines nativeAddress current fallthrough target _ displacement s fallAddress targetAddress]
+      rfl
+
 end KProgFormal.Refinement.Arm64Dispatcher

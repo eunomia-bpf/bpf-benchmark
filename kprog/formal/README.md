@@ -45,11 +45,14 @@ events; the explicit architectural observation checks direction, adjacency
 and lengths before concatenating bytes/init, preserving every ordered byte
 address and value. Exclusive monitor/order events are explicit ghost
 observations. Neither observation proves concurrent atomicity or platform
-ordering. Faulting writeback, the outer control/helper/entry/return dispatcher,
-compiled-body transport and full77/72 completion remain open. Latest focused
-checks pass with a pinned entry-selector header repair; the repaired complete
-check remains pending. Dated verification results retain the previous full
-failure and distinguish source publication from focused validation.
+ordering. `emission_step_refines` additionally composes B/B.cond, W/X CBZ/CBNZ and
+TBZ/TBNZ through the actual source-selected branch shapes. Source labels and
+native PC words stay distinct under explicit current/next/target address
+identities. Faulting writeback, internal/indirect calls, helper/entry/return
+transport, compiled bodies and full77/72 completion remain open. Focused
+checks pass with the published ARM entry-selector repair; the latest complete
+check fails in the x86 popcount host harness. Dated results preserve the
+exact failure and separate it from focused validation.
 
 The proofs establish arithmetic/flags, register and tag operations, memory
 accesses, routing tables, and selected whole-state handler refinements.
