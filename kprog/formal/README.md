@@ -20,8 +20,9 @@ memory, permissions, initialization, effects and faults in
 [`Reference/Memory.lean`](KProgFormal/Reference/Memory.lean). Their headers
 identify the Intel/Arm architectural sources; they import no simulator or
 generated implementation contracts. Unwritten native memory has arbitrary
-contents, not invented zeros. Undefined x86 flags are masked by the relational
-step instead of assigning them architectural guarantees. ARM memory and
+contents, not invented zeros. Undefined x86 flags and double-shift destination bits are masked by the
+relational step instead of assigning them architectural guarantees. Single-step
+responses include `defined_registers` when destination bits are undefined. ARM memory and
 exclusive accesses carry their explicit architectural/environment inputs;
 control uses the current Cortex-A72 base profile without GCS/BTI state.
 
@@ -77,7 +78,8 @@ The same reference builds as `.lake/build/bin/reference`: JSON lines on stdin,
 one complete transition per output line. Inputs provide native bytes, actual
 registers/PC and explicit memory cells (value, permissions, initialization).
 x86 also supplies XMM0/FS/GS and supports finite native paths whose byte extents
-and actual successors are checked. AArch64 currently accepts one four-byte
+and actual successors are checked. Path outputs are executable representatives;
+the producer's definedness evidence must justify observations of undefined state. AArch64 currently accepts one four-byte
 instruction per request, with explicit SIMD/environment fields when needed.
 The `tools/check_reference*` scripts are concrete examples. They execute these
 Lean definitions, not a second Python/C ISA interpreter. F's hardware replay

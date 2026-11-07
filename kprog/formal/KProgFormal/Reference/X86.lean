@@ -682,6 +682,25 @@ def divideStep (width : ScalarWidth) (source : ScalarSource) (nextPc : Word)
           let high := scalarWriteValue (s.gpr 2) (BitVec.ofNat 64 remainder) width (.low 2)
           ⟨{ s with gpr := (fun r => if r = 0 then low else if r = 2 then high else s.gpr r), pc := nextPc }, reads, none⟩
 
+/-- Double-shift status flags; the executable preserves undefined AF/OF
+representatives. `definedFlags` below removes their architectural guarantees. -/
+def doubleShiftFlags (width : CmovWidth) (left : Bool) (destination source count old : Word) : Word :=
+  let amount := doubleShiftCount count width.bits
+  let n := amount.toNat
+  let result := doubleShiftValue left destination source count width.bits
+  let a := (destination.setWidth width.bits).setWidth 64
+  let cf := if left then (if n ≤ width.bits then a.getLsbD (width.bits - n) else false)
+    else (if n ≤ width.bits then a.getLsbD (n - 1) else false)
+  let of := doubleShiftOverflow destination result amount width.bits (old.getLsbD 11)
+  if n = 0 then old else
+    setFlag (setFlag (setFlag (setFlag (setFlag old 0 cf) 11 of)
+      2 (evenParity result)) 6 (result == 0)) 7 (result.getLsbD (width.bits - 1))
+
+def doubleShiftStep (width : CmovWidth) (left : Bool) (dst source : Register)
+    (count nextPc : Word) (s : State) : Transition State :=
+  let result := doubleShiftValue left (s.gpr dst) (s.gpr source) count width.bits
+  ⟨{ s with gpr := fun r => if r = dst then writeValue width (s.gpr r) result else s.gpr r, rflags := doubleShiftFlags width left (s.gpr dst) (s.gpr source) count s.rflags, pc := nextPc }, [], none⟩
+
 /-- CWD/CDQ/CQO take the upper half of a signed double-width accumulator.
 The low accumulator and all flags are preserved. -/
 def signHighValue (width : CmovWidth) (source : Word) : Word :=
@@ -691,6 +710,7 @@ def signHighValue (width : CmovWidth) (source : Word) : Word :=
 Effective-address decoding supplies the memory source address; reads remain
 part of this step, so a false-condition CMOV cannot suppress an access fault. -/
 inductive Instruction
+  | doubleShift (width : CmovWidth) (left : Bool) (dst source : Register) (count nextPc : Word)
   | mulx (width : BzhiWidth) (high low : Register) (source : Source) (nextPc : Word)
   | multiply (width : CmovWidth) (dst : Register) (source : Source) (immediate : Option (BitVec 32)) (nextPc : Word)
   | rotateRight (width : ScalarWidth) (dst : ScalarDestination) (count nextPc : Word)
@@ -730,7 +750,7 @@ inductive Instruction
 /-- The encoded instruction's fall-through, independently of its chosen
 successor. Path certificates use this to check the consumed byte extent. -/
 def Instruction.fallthrough : Instruction → Word
-  | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
+  | .doubleShift _ _ _ _ _ next | .mulx _ _ _ _ next | .multiply _ _ _ _ next | .rotateRight _ _ _ next | .exchange _ _ _ next | .legacyShift _ _ _ _ next | .lea _ _ _ next | .divide _ _ next | .signHigh _ next | .extend _ _ _ _ _ next | .popcount _ _ _ next | .unary _ _ _ next | .logic _ _ _ _ next | .nop next
   | .branch _ _ next | .setcc _ _ next | .arithmetic _ _ _ _ next
   | .move _ _ _ next | .push _ _ next | .pushImmediate _ _ next
   | .pushMemory _ _ next | .popMemory _ _ next | .pop _ _ next
@@ -740,6 +760,7 @@ def Instruction.fallthrough : Instruction → Word
 
 def step (instruction : Instruction) (s : State) : Transition State :=
   match instruction with
+  | .doubleShift width left dst source count nextPc => doubleShiftStep width left dst source count nextPc s
   | .mulx width high low source nextPc => mulxStep width high low source nextPc s
   | .multiply width dst source immediate nextPc => multiplyStep width dst source immediate nextPc s
   | .rotateRight width dst count nextPc => rotateRightStep width dst count nextPc s
@@ -836,6 +857,10 @@ def step (instruction : Instruction) (s : State) : Transition State :=
 are undefined. BZHI leaves only AF/PF undefined. The mask is consumed by hardware
 checks and the step relation, rather than imposing values on undefined bits. -/
 def definedFlags : Instruction → Word
+  | .doubleShift width _ _ _ count _ =>
+      let n := (doubleShiftCount count width.bits).toNat
+      if n = 0 then 0xffffffffffffffff else if width.bits < n then 0xfffffffffffff72a
+      else if n = 1 then 0xffffffffffffffef else 0xfffffffffffff7ef
   | .mulx .. => 0xffffffffffffffff
   | .multiply .. => 0xffffffffffffff2b
   | .rotateRight width _ count _ => legacyDefinedFlags width .rotateLeft count
@@ -860,13 +885,27 @@ def definedFlags : Instruction → Word
   | .andn .. => 0xffffffffffffffeb
   | .bzhi .. => 0xffffffffffffffeb
 
+/-- Counts exceeding a double-shift operand size leave that destination
+lane undefined; all other register bits remain architectural obligations. -/
+def definedRegister (i : Instruction) (r : Register) : Word :=
+  match i with
+  | .doubleShift width _ dst _ count _ =>
+      if r = dst ∧ width.bits < (doubleShiftCount count width.bits).toNat
+      then ~~~(BitVec.ofNat 64 (2^width.bits) - 1) else 0xffffffffffffffff
+  | _ => 0xffffffffffffffff
+
+def observedRegisters (i : Instruction) (s : State) : Register → Word :=
+  match i with
+  | .doubleShift .. => fun r => s.gpr r &&& definedRegister i r
+  | _ => s.gpr
+
 /-- The executable gives a representative for undefined flags. The relational
 ISA semantics below admits every value for those bits, as required by the SDM. -/
 def matchesTransition (i : Instruction) (expected actual : Transition State) : Prop :=
   expected.events = actual.events ∧ expected.fault = actual.fault ∧
     let mask := if expected.fault.isSome then 0xffffffffffffffff else definedFlags i
-    { expected.state with rflags := expected.state.rflags &&& mask } =
-      { actual.state with rflags := actual.state.rflags &&& mask }
+    { expected.state with rflags := expected.state.rflags &&& mask, gpr := if expected.fault.isSome then expected.state.gpr else observedRegisters i expected.state } =
+      { actual.state with rflags := actual.state.rflags &&& mask, gpr := if expected.fault.isSome then actual.state.gpr else observedRegisters i actual.state }
 
 def Step (i : Instruction) (before : State) (after : Transition State) : Prop :=
   matchesTransition i (step i before) after
@@ -1253,6 +1292,16 @@ def decode (bytes : Array Byte) (s : State) : Except String Instruction := do
     return .bzhi width dst source index nextPc
   let opcode ← byteAt bytes (count + 1)
   if first ≠ 0x0f then throw "expected two-byte native opcode"
+  if opcode = 0xa4 ∨ opcode = 0xa5 ∨ opcode = 0xac ∨ opcode = 0xad then
+    let modrm ← byteAt bytes (count + 2)
+    if modrm / 64 ≠ 3 then throw "double-shift reference requires a register destination"
+    let immediate := opcode == 0xa4 || opcode == 0xac
+    let (source, nextPc, cursor) ← operand bytes s p modrm (count + 3) (if immediate then 1 else 0)
+    let amount ← if immediate then pure (BitVec.ofNat 64 (← byteAt bytes cursor)) else pure (s.gpr 1)
+    let src := registerCode ((modrm / 8) % 8 + 8 * ((p.rex / 4) % 2))
+    let dst ← match source with | .register r => pure r | .memory _ => throw "double-shift destination is not a register"
+    let width := if p.rex / 8 = 1 then CmovWidth.w64 else if p.operand16 then .w16 else .w32
+    return .doubleShift width (opcode == 0xa4 || opcode == 0xa5) dst src amount nextPc
   if 0xc8 ≤ opcode ∧ opcode ≤ 0xcf then
     let length := count + 2
     if length > 15 then throw "native encoding exceeds the architectural 15-byte limit"

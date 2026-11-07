@@ -166,6 +166,7 @@ check:
 	python3 tools/check_reference_x86_divide.py
 	python3 tools/check_reference_x86_multiply.py
 	python3 tools/check_reference_x86_mulx.py
+	python3 tools/check_reference_x86_double_shift.py
 	python3 tools/check_x86_divide_handler.py
 	python3 tools/check_x86_rotate_handler.py
 	python3 tools/check_x86_high_load.py

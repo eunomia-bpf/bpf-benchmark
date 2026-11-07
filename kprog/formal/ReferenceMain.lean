@@ -97,19 +97,21 @@ private def executeX86 (request : Json) : Except String Json := do
   let cells ← parseCells (← state.getObjVal? "memory")
   let initial ← parseState state cells
   let bytes ← parseNativeBytes (← request.getObjVal? "native_bytes")
-  let (output, mask) ← match request.getObjVal? "native_path" with
+  let (output, mask, registers) ← match request.getObjVal? "native_path" with
     | .error _ => do
         let instruction ← X86.decode bytes initial
         let output := X86.step instruction initial
-        pure (output, if output.fault.isSome then 0xffffffffffffffff else X86.definedFlags instruction)
+        let masks := (List.finRange 16).map (fun r => (X86.definedRegister instruction r).toNat)
+        let metadata := if masks.all (· == 2^64-1) then [] else [("defined_registers", toJson masks)]
+        pure (output, if output.fault.isSome then 0xffffffffffffffff else X86.definedFlags instruction, metadata)
     | .ok path => do
         let base ← fieldWord request "native_base"
         let entries ← (← path.getArr?).toList.mapM fun row => do
           pure (⟨← fieldNat row "offset", ← fieldNat row "length"⟩ : X86Path.Entry)
         let result ← X86Path.evaluate base bytes entries initial
-        pure (result.effect, result.definedFlags)
+        pure (result.effect, result.definedFlags, [])
   let s := output.state
-  pure <| Json.mkObj [
+  pure <| Json.mkObj <| registers ++ [
     ("registers", toJson ((List.finRange 16).map (fun r => (s.gpr r).toNat))),
     ("flags", number s.rflags.toNat),
     ("defined_flags", number mask.toNat), ("pc", number s.pc.toNat), ("xmm0", number s.xmm0.toNat),
