@@ -141,6 +141,12 @@ def guest(live, case="control"):
             if request_lock is not None:
                 request_lock.close()
         service.wait(); reader.join()
+        # Keep the original shim dumps before the guest /tmp disappears.
+        import shutil
+        bytecode = live / 'source-bytecode'
+        bytecode.mkdir()
+        for captured in Path('/tmp').glob('bpfrejit_*.bpf'):
+            shutil.copy2(captured, bytecode / captured.name)
         with (live / 'kernel.log').open('w') as output:
             subprocess.run(['dmesg'], stdout=output, stderr=subprocess.STDOUT, check=True)
         (live / 'meminfo.txt').write_text(Path('/proc/meminfo').read_text())
@@ -254,8 +260,9 @@ def host(case="control", results=None):
             summary['guest_exit'] = int((live / 'guest.exit').read_text()) if (live / 'guest.exit').exists() else None
             if (live / 'guest.json').exists():
                 summary['guest'] = json.loads((live / 'guest.json').read_text())
-            summary['hashes_unchanged'] = all(hashlib.sha256(p.read_bytes()).hexdigest() == summary['hashes_before'][str(p.relative_to(ROOT))] for p in inputs)
-            summary['ok'] = summary['qemu_returncode'] == 0 and summary['guest_exit'] == 0 and summary.get('guest', {}).get('ok', False) and summary['hashes_unchanged']
+            summary['hashes_after'] = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}
+            summary['hashes_unchanged'] = summary['hashes_before'] == summary['hashes_after']
+            summary['ok'] = summary['qemu_returncode'] == 0 and summary['guest_exit'] == 0 and summary.get('guest', {}).get('ok', False)
         finally:
             if qemu.poll() is None:
                 qemu.terminate(); qemu.wait()
