@@ -612,8 +612,10 @@ shared semantic map result alone does not establish those facts.
 This affects existing code: `configure_lookup_site_for_shape` in
 [the loader](../libnativeloader/src/native_loader.cpp) and
 `build_x86_array_lookup` / `build_x86_lookup_call_postprocess` in
-[the linker](../x86/native_lab/native_link/src/x86.rs) already lower several map
-kinds. The kernel's [`do_misc_fixups`](../../vendor/linux-framework/kernel/bpf/verifier.c)
+[the linker](../x86/native_lab/native_link/src/x86.rs) already implement candidate
+lowerings for several map kinds. Their use in a particular run requires the
+actual final linked image and link plan; source presence and pre-link call
+counts do not establish it. The kernel's [`do_misc_fixups`](../../vendor/linux-framework/kernel/bpf/verifier.c)
 uses the real map generator after checking the virtual helper operation;
 [`array_map_gen_lookup`](../../vendor/linux-framework/kernel/bpf/arraymap.c) and
 [`htab_map_gen_lookup`](../../vendor/linux-framework/kernel/bpf/hashtab.c) define
@@ -642,3 +644,18 @@ following continuation. The theorem's axioms are
 propext/Classical.choice/Lean.ofReduceBool/Quot.sound, without sorryAx.
 Second-block/store/return and invocation/CPU-profile composition remain active
 before this becomes a whole-program TV certificate.
+
+For a direct map-type call, B can keep the checked map-lookup operation while
+its platform helper contract resolves to the exact pinned map's
+`ops->map_lookup_elem` (or the generated internal call). Unlike the fully
+inlined array case, the comparison retains an actual call event for that
+selected callee. Its contract must relate the same map/key arguments, result,
+null case, memory effects and ABI clobbers under the same kernel invocation and
+map lifetime/RCU conditions. This is a certified helper specialization, not
+permission to equate arbitrary function addresses with Linux helper ID1.
+The wrapper in `kernel/bpf/helpers.c` delegates to the map operation and checks
+the RCU context; `do_misc_fixups` provides the kernel's concrete specialization.
+The existing target check establishes eligibility/identity, while the composed
+semantic and binding relation must establish the rest. In both cases the proof
+models the final emitted P, including any surviving internal hash call and
+post-call lookup operations.

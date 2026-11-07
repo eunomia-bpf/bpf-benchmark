@@ -904,3 +904,15 @@ actual LDDW, avoiding a false dependence on the rewritten next-block EXIT.
 `checked-bb0-inputs.tar.gz` retains checker sources, exact native/checked B
 arrays, binding snapshot and layout inputs. This remains a BB0 certificate;
 remaining blocks, invocation relation and CPU-profile binding are pending.
+
+The coordinator's 04:05 correction is incorporated: pre-link indirect-call
+counts do not describe the linked artifact. A direct map-type call retains the
+actual selected call event and needs a bound helper-specialization contract
+for the same pinned map/key, result/null, effects, clobbers and invocation/RCU
+conditions. An inlined array lookup instead expands into its literal accesses
+and branches with no synthetic call. Existing lowering code is evidence of
+available implementation, not evidence that a measured run used it; inspect
+that run's final linked image/plan. Source review for this decision covered the
+loader/link schema, native linker, kernel verifier/map generators/helper
+wrapper, TV event semantics and binding/capture implementation. No executable
+change or new test was needed for this read-only design item.
