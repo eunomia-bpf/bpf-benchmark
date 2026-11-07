@@ -1,0 +1,160 @@
+{
+  "status": "actual_native_B_successful_packet_body_correspondence_checked",
+  "program": "actual accepted trusted-service x86 simple b61f291a8",
+  "utc": "2026-11-07T11:48:34.049663+00:00",
+  "theorem": "KProgTV.TrustedSimpleX86.packet_body_correspondence",
+  "native_instruction_extents": [
+    [
+      35,
+      5
+    ],
+    [
+      40,
+      4
+    ],
+    [
+      44,
+      7
+    ],
+    [
+      51,
+      4
+    ],
+    [
+      55,
+      5
+    ]
+  ],
+  "covered_B_pcs": [
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36
+  ],
+  "guest_writes": [
+    {
+      "offset": 0,
+      "bytes": 2,
+      "value": 24910
+    },
+    {
+      "offset": 2,
+      "bytes": 1,
+      "value": 188
+    },
+    {
+      "offset": 3,
+      "bytes": 4,
+      "value": 0
+    },
+    {
+      "offset": 7,
+      "bytes": 1,
+      "value": 0
+    }
+  ],
+  "claims": [
+    "actual byte-decoded native execution through PC60 and actual B execution through PC37/halted EXIT",
+    "complete native/B successor states",
+    "exact same four ordered memory events: address/size/kind/value",
+    "sign-extended native0xbc immediate retained and low-byte memory/event equivalence proved",
+    "private-footprint memory agreement including permissions and initialization preserved by actual writes",
+    "native EAX/B r0 return values agree at2; no packet event projected away"
+  ],
+  "premises": [
+    "native PC35",
+    "B PC18 and active",
+    "matching native RCX/B r2 store pointer",
+    "initial private-footprint memory agreement including global permissions",
+    "four actual writable-memory permissions at store widths"
+  ],
+  "compatibility": {
+    "old_declarations": "byte-identical before namespace end in both files",
+    "old_declarations_sha256": {
+      "kprog/tv/TrustedSimpleX86.lean": "1c47f7f7c2c4eb928f55e727436826a3ef4b6b6f9e34e1073d0f8a3e1e7ebcd9",
+      "kprog/formal/KProgFormal/Reference/X86.lean": "e1722e90962478850b9641ef0e51d0fb01f53851f8ed134cad29da9b79fa3849"
+    },
+    "canonical_change": "one public five-equation packet-tail decoder theorem; no ISA definition changed",
+    "runtime_wire_ABI_metadata_binding_rejection_contracts": "unchanged"
+  },
+  "remaining": [
+    "entry/guard/body/exit composition",
+    "failed-store and entry-fault cases",
+    "whole-program architectural/canonical relational simulation",
+    "ABI/return-boundary/platform behavior",
+    "immutable P to emitted artifact transport"
+  ],
+  "trusted": [
+    "verifier soundness",
+    "canonical ISA/memory and explicit platform semantics",
+    "kernel binding/capture and accepted-byte provenance",
+    "registered specialization/link service until whole-program TV",
+    "Lean kernel/logical axioms and native proof reduction where audited"
+  ],
+  "validation": {
+    "command": "make -C kprog/tv trusted-simple-entry-certificate",
+    "exit": 0,
+    "binding_records": 2,
+    "mismatch_controls_rejected": 22,
+    "no_sorryAx": true,
+    "log_sha256": "b5d5a4e913159c81403d43f3390c692205f6bdf85ef4a297955dcf051d16223b",
+    "axiom_audit": {
+      "KProgTV.TrustedSimpleX86.store_byte_value_congr": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.native_immediate_store_step": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.native_packet_execution": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgTV.TrustedSimpleX86.initialization_store_agrees": [
+        "propext"
+      ],
+      "KProgTV.TrustedSimpleX86.packet_memory_agrees": [
+        "propext"
+      ],
+      "KProgTV.TrustedSimpleX86.packet_body_correspondence": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.Reference.X86.decode_simple_packet_tail": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "source_sha256": {
+    "kprog/tv/TrustedSimpleX86.lean": "a425f30c738f7528d66f834d8c6514da0bec48eebfc851cad94808097002d2cd",
+    "kprog/formal/KProgFormal/Reference/X86.lean": "8f910e1dcd9b512c2b0407f94e785047a3051334de3fec8685d563c689409684",
+    "kprog/formal/KProgFormal/Reference/X86Path.lean": "5ef75abe4d351209f24427d51c9e59fbfc639fa47f12c1a38082f0d04d5ea583",
+    "kprog/formal/KProgFormal/Reference/Memory.lean": "7f4942bbadaabfca4e2f414f2388aebc205d21f03e399aea3352c387889fad4b",
+    "kprog/tv/BPF.lean": "14d6476a14d488720c26326d6e5b410ce82af123e7b87b222ff5f4892005978c",
+    "kprog/tv/BPFPath.lean": "e07c9d7db685124c0c41590bdbb66aa28cf7cd4befefc8804b8ce3e288acc251",
+    "kprog/tv/BPFPlatform.lean": "e1a2cf83cdea1e3deee21060c6a9c2edf4c11225171e7ad1c4d84c0a25c928d8",
+    "kprog/tv/check_trusted_capture.py": "71642150609627e7ac8de6ef265d79dc6814a58af669260ffc21e602983e29a9",
+    "kprog/tv/Makefile": "2123977b45e69a44f70507dd65b2c1506e23d509f1c244a7d1d5f0799456f9b4"
+  },
+  "raw_output": "summarized and retired after publication; STOP/shared caches retained"
+}

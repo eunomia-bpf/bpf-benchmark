@@ -1725,6 +1725,232 @@ theorem packet_proof_return (env : BPF.Environment) (p : BPF.State)
   · simpa only [List.append_nil] using body.append tailRun
   · simp +decide [proofExitFinal,packetProofFinal,BPF.setReg]
 
+
+theorem native_decode35 (s : X86.State) :
+    X86.decode (native.extract 35 40) s = .ok
+      (.move .w16 (.memory (s.gpr 1)) (.immediate 24910) (s.pc+5)) := by
+  have bytes : native.extract 35 40 = #[0x66,0xc7,0x01,0x4e,0x61] := by decide
+  rw [bytes]
+  exact (X86.decode_simple_packet_tail s).1
+
+theorem native_decode40 (s : X86.State) :
+    X86.decode (native.extract 40 44) s = .ok
+      (.move .w8 (.memory (s.gpr 1+2)) (.immediate ((188#8).signExtend 64)) (s.pc+4)) := by
+  have bytes : native.extract 40 44 = #[0xc6,0x41,0x02,0xbc] := by decide
+  rw [bytes]
+  exact (X86.decode_simple_packet_tail s).2.1
+
+theorem native_decode44 (s : X86.State) :
+    X86.decode (native.extract 44 51) s = .ok
+      (.move .w32 (.memory (s.gpr 1+3)) (.immediate 0) (s.pc+7)) := by
+  have bytes : native.extract 44 51 = #[0xc7,0x41,0x03,0x00,0x00,0x00,0x00] := by decide
+  rw [bytes]
+  exact (X86.decode_simple_packet_tail s).2.2.1
+
+theorem native_decode51 (s : X86.State) :
+    X86.decode (native.extract 51 55) s = .ok
+      (.move .w8 (.memory (s.gpr 1+7)) (.immediate 0) (s.pc+4)) := by
+  have bytes : native.extract 51 55 = #[0xc6,0x41,0x07,0x00] := by decide
+  rw [bytes]
+  exact (X86.decode_simple_packet_tail s).2.2.2.1
+
+theorem native_decode55 (s : X86.State) :
+    X86.decode (native.extract 55 60) s = .ok
+      (.move .w32 (.register (.low 0)) (.immediate 2) (s.pc+5)) := by
+  have bytes : native.extract 55 60 = #[0xb8,0x02,0x00,0x00,0x00] := by decide
+  rw [bytes]
+  exact (X86.decode_simple_packet_tail s).2.2.2.2
+
+/-- A one-byte memory store observes exactly the low byte, including wrap.
+This is equality in the existing reference memory model, not a new ISA rule. -/
+theorem store_byte_value_congr (m : Memory) (base first second : Word)
+    (same : first.setWidth 8=second.setWidth 8) :
+    storeMemory m base first 1 = storeMemory m base second 1 := by
+  unfold storeMemory
+  congr 1
+  funext address
+  by_cases inside : (address-base).toNat < 1
+  · have zero : (address-base).toNat=0 := by omega
+    simpa [inside,zero] using same
+  · simp only [inside,ite_false]
+
+theorem native_immediate_store_step (s : X86.State) (width : X86.ScalarWidth)
+    (address value nextPC : Word)
+    (permission : permitted s.memory.writable address width.bytes=true) :
+    X86.step (.move width (.memory address) (.immediate value) nextPC) s =
+      ⟨{s with memory := storeMemory s.memory address value width.bytes, pc := nextPC},
+        [.memory .write address (valueBytes value width.bytes) true],none⟩ := by
+  simp only [X86.step,X86.moveStep,X86.scalarRead,X86.scalarWrite,writeMemory,
+    permission,ite_true,List.nil_append]
+
+def packetNativeFirst (s : X86.State) : X86.State :=
+  {s with memory := storeMemory s.memory (s.gpr 1) (24910#64) 2, pc := 40}
+
+def packetNativeSecond (s : X86.State) : X86.State :=
+  {packetNativeFirst s with
+    memory := storeMemory (packetNativeFirst s).memory (s.gpr 1+(2#64)) (188#64) 1
+    pc := 44}
+
+def packetNativeThird (s : X86.State) : X86.State :=
+  {packetNativeSecond s with
+    memory := storeMemory (packetNativeSecond s).memory (s.gpr 1+(3#64)) (0#64) 4
+    pc := 51}
+
+def packetNativeFourth (s : X86.State) : X86.State :=
+  {packetNativeThird s with
+    memory := storeMemory (packetNativeThird s).memory (s.gpr 1+(7#64)) (0#64) 1
+    pc := 55}
+
+def packetNativeFinal (s : X86.State) : X86.State :=
+  {packetNativeFourth s with gpr := fun r => if r=0 then (2#64) else s.gpr r, pc := 60}
+
+theorem packet_native_first_step (s : X86.State)
+    (permission : permitted s.memory.writable (s.gpr 1) 2=true) :
+    X86.step (.move .w16 (.memory (s.gpr 1)) (.immediate (24910#64)) 40) s =
+      ⟨packetNativeFirst s,[.memory .write (s.gpr 1) (valueBytes (24910#64) 2) true],none⟩ := by
+  exact native_immediate_store_step s .w16 (s.gpr 1) (24910#64) 40 permission
+
+theorem packet_native_second_step (s : X86.State)
+    (permission : permitted s.memory.writable (s.gpr 1+(2#64)) 1=true) :
+    X86.step (.move .w8 (.memory (s.gpr 1+(2#64))) (.immediate ((188#8).signExtend 64)) 44)
+      (packetNativeFirst s) =
+      ⟨packetNativeSecond s,[.memory .write (s.gpr 1+(2#64)) (valueBytes (188#64) 1) true],none⟩ := by
+  have allowed : permitted (packetNativeFirst s).memory.writable (s.gpr 1+(2#64)) 1=true := permission
+  have normalized : storeMemory (packetNativeFirst s).memory (s.gpr 1+(2#64)) ((188#8).signExtend 64) 1 =
+      storeMemory (packetNativeFirst s).memory (s.gpr 1+(2#64)) (188#64) 1 :=
+    store_byte_value_congr _ _ _ _ (by decide)
+  have event : valueBytes ((188#8).signExtend 64) 1=valueBytes (188#64) 1 := by decide
+  simpa only [X86.ScalarWidth.bytes,normalized,event,packetNativeSecond] using
+    native_immediate_store_step (packetNativeFirst s) .w8 (s.gpr 1+(2#64)) ((188#8).signExtend 64) 44 allowed
+
+theorem packet_native_third_step (s : X86.State)
+    (permission : permitted s.memory.writable (s.gpr 1+(3#64)) 4=true) :
+    X86.step (.move .w32 (.memory (s.gpr 1+(3#64))) (.immediate (0#64)) 51) (packetNativeSecond s) =
+      ⟨packetNativeThird s,[.memory .write (s.gpr 1+(3#64)) (valueBytes (0#64) 4) true],none⟩ := by
+  exact native_immediate_store_step (packetNativeSecond s) .w32 (s.gpr 1+(3#64)) (0#64) 51 permission
+
+theorem packet_native_fourth_step (s : X86.State)
+    (permission : permitted s.memory.writable (s.gpr 1+(7#64)) 1=true) :
+    X86.step (.move .w8 (.memory (s.gpr 1+(7#64))) (.immediate (0#64)) 55) (packetNativeThird s) =
+      ⟨packetNativeFourth s,[.memory .write (s.gpr 1+(7#64)) (valueBytes (0#64) 1) true],none⟩ := by
+  exact native_immediate_store_step (packetNativeThird s) .w8 (s.gpr 1+(7#64)) (0#64) 55 permission
+
+theorem packet_native_result_step (s : X86.State) :
+    X86.step (.move .w32 (.register (.low 0)) (.immediate (2#64)) 60) (packetNativeFourth s) =
+      ⟨packetNativeFinal s,[],none⟩ := by
+  simp +decide [X86.step,X86.moveStep,X86.scalarRead,X86.scalarWrite,X86.scalarWriteValue,
+    X86.RegisterSlice.reg,X86.RegisterSlice.shift,X86.ScalarWidth.bits,X86.ScalarWidth.bytes,
+    packetNativeFinal,packetNativeFourth,packetNativeThird,packetNativeSecond,packetNativeFirst]
+
+
+/-- All five actual tail instructions, including the four ordered guest
+writes and the EAX write. Each extent and successor is checked by the decoder. -/
+theorem native_packet_execution (s : X86.State) (position : s.pc=35)
+    (write0 : permitted s.memory.writable (s.gpr 1) 2=true)
+    (write2 : permitted s.memory.writable (s.gpr 1+(2#64)) 1=true)
+    (write3 : permitted s.memory.writable (s.gpr 1+(3#64)) 4=true)
+    (write7 : permitted s.memory.writable (s.gpr 1+(7#64)) 1=true) :
+    X86Path.Execution 0 native s (packetWriteEvents (s.gpr 1)) (packetNativeFinal s) := by
+  have d0 : X86Path.decodeAt 0 native ⟨35,5⟩ s = .ok
+      (.move .w16 (.memory (s.gpr 1)) (.immediate (24910#64)) 40) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode35,position,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have pc1 : (packetNativeFirst s).pc=40 := rfl
+  have pc2 : (packetNativeSecond s).pc=44 := rfl
+  have pc3 : (packetNativeThird s).pc=51 := rfl
+  have pc4 : (packetNativeFourth s).pc=55 := rfl
+  have ptr1 : (packetNativeFirst s).gpr 1=s.gpr 1 := rfl
+  have ptr2 : (packetNativeSecond s).gpr 1=s.gpr 1 := rfl
+  have ptr3 : (packetNativeThird s).gpr 1=s.gpr 1 := rfl
+  have d1 : X86Path.decodeAt 0 native ⟨40,4⟩ (packetNativeFirst s) = .ok
+      (.move .w8 (.memory (s.gpr 1+(2#64))) (.immediate ((188#8).signExtend 64)) 44) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode40,pc1,ptr1,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have d2 : X86Path.decodeAt 0 native ⟨44,7⟩ (packetNativeSecond s) = .ok
+      (.move .w32 (.memory (s.gpr 1+(3#64))) (.immediate (0#64)) 51) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode44,pc2,ptr2,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have d3 : X86Path.decodeAt 0 native ⟨51,4⟩ (packetNativeThird s) = .ok
+      (.move .w8 (.memory (s.gpr 1+(7#64))) (.immediate (0#64)) 55) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode51,pc3,ptr3,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have d4 : X86Path.decodeAt 0 native ⟨55,5⟩ (packetNativeFourth s) = .ok
+      (.move .w32 (.register (.low 0)) (.immediate (2#64)) 60) := by
+    simp +decide [X86Path.decodeAt,native_size,native_decode55,pc4,
+      X86Path.fallthrough,X86.Instruction.fallthrough,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+  have evaluated : X86Path.evaluate 0 native [⟨35,5⟩,⟨40,4⟩,⟨44,7⟩,⟨51,4⟩,⟨55,5⟩] s =
+      .ok ⟨⟨packetNativeFinal s,packetWriteEvents (s.gpr 1),none⟩,(0xffffffffffffffff#64)⟩ := by
+    simp only [X86Path.evaluate,d0,d1,d2,d3,d4,packet_native_first_step s write0,
+      packet_native_second_step s write2,packet_native_third_step s write3,
+      packet_native_fourth_step s write7,packet_native_result_step,X86.definedFlags,
+      Option.isSome,Bool.false_eq_true,List.isEmpty_cons,List.isEmpty_nil,
+      List.nil_append,List.cons_append,List.append_nil,ite_false,packetWriteEvents]
+    rfl
+  exact X86Path.evaluate_sound _ _ _ _ _ evaluated
+
+/-- Equal actual writes preserve the previously proved private-footprint
+relation. Guest values, initialization and global permissions all remain related. -/
+theorem initialization_store_agrees {frame : Word} {first second : Memory}
+    (same : initializationAgreesOutside frame first second) (base value : Word) (count : Nat) :
+    initializationAgreesOutside frame (storeMemory first base value count) (storeMemory second base value count) := by
+  refine ⟨same.1,same.2.1,?_⟩
+  intro address outside
+  by_cases inside : (address-base).toNat < count
+  · simp only [storeMemory,inside,ite_true]
+    trivial
+  · simpa only [storeMemory,inside,ite_false] using same.2.2 address outside
+
+theorem packet_memory_agrees (frame : Word) (first second : Memory) (pointer : Word)
+    (same : initializationAgreesOutside frame first second) :
+    initializationAgreesOutside frame (packetWriteMemory first pointer) (packetWriteMemory second pointer) := by
+  unfold packetWriteMemory
+  apply initialization_store_agrees
+  apply initialization_store_agrees
+  apply initialization_store_agrees
+  apply initialization_store_agrees
+  exact same
+
+/-- The actual native tail and the actual accepted B tail through EXIT,
+including identical ordered guest effects, related memories and return value.
+Writable premises describe successful stores; no guest event is projected away. -/
+theorem packet_body_correspondence (env : BPF.Environment) (frame : Word) (n : X86.State) (p : BPF.State)
+    (nativePC : n.pc=35) (proofPC : p.pc=18) (active : p.halted=false)
+    (pointer : n.gpr 1=p.regs 2)
+    (same : initializationAgreesOutside frame n.memory p.memory)
+    (write0 : permitted p.memory.writable (p.regs 2) 2=true)
+    (write2 : permitted p.memory.writable (p.regs 2+(2#64)) 1=true)
+    (write3 : permitted p.memory.writable (p.regs 2+(3#64)) 4=true)
+    (write7 : permitted p.memory.writable (p.regs 2+(7#64)) 1=true) :
+    X86Path.Execution 0 native n (packetWriteEvents (p.regs 2)) (packetNativeFinal n) ∧
+    Execution (initializedInstructionStep env) p (packetWriteEvents (p.regs 2))
+      (proofExitFinal (packetProofFinal p)) ∧
+    initializationAgreesOutside frame (packetNativeFinal n).memory
+      (proofExitFinal (packetProofFinal p)).memory ∧
+    (packetNativeFinal n).gpr 0 = (proofExitFinal (packetProofFinal p)).regs 0 ∧
+    (packetNativeFinal n).pc=60 ∧ (proofExitFinal (packetProofFinal p)).halted=true := by
+  have nwrite0 : permitted n.memory.writable (n.gpr 1) 2=true := by
+    simpa only [same.2.1,pointer] using write0
+  have nwrite2 : permitted n.memory.writable (n.gpr 1+(2#64)) 1=true := by
+    simpa only [same.2.1,pointer] using write2
+  have nwrite3 : permitted n.memory.writable (n.gpr 1+(3#64)) 4=true := by
+    simpa only [same.2.1,pointer] using write3
+  have nwrite7 : permitted n.memory.writable (n.gpr 1+(7#64)) 1=true := by
+    simpa only [same.2.1,pointer] using write7
+  obtain ⟨prun,halted,result⟩ := packet_proof_return env p proofPC active write0 write2 write3 write7
+  refine ⟨?_,prun,?_,?_,rfl,halted⟩
+  · simpa only [pointer] using native_packet_execution n nativePC nwrite0 nwrite2 nwrite3 nwrite7
+  · change initializationAgreesOutside frame (packetWriteMemory n.memory (n.gpr 1))
+      (packetWriteMemory p.memory (p.regs 2))
+    rw [pointer]
+    exact packet_memory_agrees frame n.memory p.memory (p.regs 2) same
+  · rw [result]
+    simp +decide [packetNativeFinal]
+
 end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.native_decode0
 #print axioms KProgTV.TrustedSimpleX86.native_load
@@ -1885,3 +2111,37 @@ end KProgTV.TrustedSimpleX86
 #print axioms KProgTV.TrustedSimpleX86.proof_exit_execution
 
 #print axioms KProgTV.TrustedSimpleX86.packet_proof_return
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode35
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode40
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode44
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode51
+
+#print axioms KProgTV.TrustedSimpleX86.native_decode55
+
+#print axioms KProgTV.TrustedSimpleX86.store_byte_value_congr
+
+#print axioms KProgTV.TrustedSimpleX86.native_immediate_store_step
+
+#print axioms KProgTV.TrustedSimpleX86.packet_native_first_step
+
+#print axioms KProgTV.TrustedSimpleX86.packet_native_second_step
+
+#print axioms KProgTV.TrustedSimpleX86.packet_native_third_step
+
+#print axioms KProgTV.TrustedSimpleX86.packet_native_fourth_step
+
+#print axioms KProgTV.TrustedSimpleX86.packet_native_result_step
+
+#print axioms KProgFormal.Reference.X86.decode_simple_packet_tail
+
+#print axioms KProgTV.TrustedSimpleX86.native_packet_execution
+
+#print axioms KProgTV.TrustedSimpleX86.initialization_store_agrees
+
+#print axioms KProgTV.TrustedSimpleX86.packet_memory_agrees
+
+#print axioms KProgTV.TrustedSimpleX86.packet_body_correspondence

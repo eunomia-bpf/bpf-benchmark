@@ -1537,4 +1537,25 @@ theorem decode_add_rsi72 (s : State) :
     scalarWidth,scalarSlice,scalarDestination,integerBinary,
     Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
 
+
+/-- The five actual instructions of the captured simple packet-write tail.
+Signed immediate decoding is retained even for the one-byte 0xbc store. -/
+theorem decode_simple_packet_tail (s : State) :
+    decode #[0x66,0xc7,0x01,0x4e,0x61] s = .ok
+      (.move .w16 (.memory (s.gpr 1)) (.immediate 24910) (s.pc+5)) ∧
+    decode #[0xc6,0x41,0x02,0xbc] s = .ok
+      (.move .w8 (.memory (s.gpr 1+2)) (.immediate ((188#8).signExtend 64)) (s.pc+4)) ∧
+    decode #[0xc7,0x41,0x03,0x00,0x00,0x00,0x00] s = .ok
+      (.move .w32 (.memory (s.gpr 1+3)) (.immediate 0) (s.pc+7)) ∧
+    decode #[0xc6,0x41,0x07,0x00] s = .ok
+      (.move .w8 (.memory (s.gpr 1+7)) (.immediate 0) (s.pc+4)) ∧
+    decode #[0xb8,0x02,0x00,0x00,0x00] s = .ok
+      (.move .w32 (.register (.low 0)) (.immediate 2) (s.pc+5)) := by
+  refine ⟨?_,?_,?_,?_,?_⟩
+  all_goals
+    simp +decide [decode,prefixes,byteAt,operand,addressParts,signedDisplacement,registerCode,
+      scalarWidth,scalarSlice,scalarSource,scalarDestination,ScalarWidth.bytes,ScalarWidth.bits,fallthrough,
+      List.range'_succ,
+      Except.bind,Except.pure,Bind.bind,Pure.pure,Except.instMonad]
+
 end KProgFormal.Reference.X86

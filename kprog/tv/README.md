@@ -1479,3 +1479,29 @@ write-memory/event correspondence, failed-store paths, complete entry/program
 composition, canonical relational simulation and ABI/immutable-artifact
 transport remain open. Scope, source hashes and audit:
 `trusted-simple-B-packet-return.json`.
+
+
+Actual native packet-write bytes paired with accepted B through EXIT
+
+`native_decode35/40/44/51/55` check the five actual native instructions.
+The public `Reference.X86.decode_simple_packet_tail` theorem exposes the
+same canonical decoder, including signed immediate decoding of 0xbc.
+`store_byte_value_congr` proves that a one-byte store depends on the low
+byte in the existing memory model, including architectural wraparound.
+The actual sign-extended native immediate therefore has exactly B's byte188
+store state and event; the decoder's operand is retained unchanged.
+
+`native_packet_execution` checks every actual extent/successor, all four
+ordered memory writes, complete successor states and the zero-extending
+EAX write. `packet_body_correspondence` pairs this with the actual B body
+through MOV32/JA/EXIT under the same explicit platform environment. Both
+ordered guest traces are identical. Equal actual writes preserve the prior
+private-footprint memory relation, including initialization and permissions;
+the final native and B return values agree at2. No packet event is erased.
+
+The premises explicitly describe successful stores. Full entry/guard/body
+composition, failed-store and entry-fault cases, program-wide canonical
+relational simulation, ABI/return-boundary/platform behavior and immutable-P/
+materialized-artifact transport remain open. This is a successful body
+certificate, not whole-program TV. Evidence:
+`trusted-simple-native-B-packet.json`.
