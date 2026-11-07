@@ -1370,3 +1370,33 @@ semantic/route hosts passed 40080 cases,120145 cases,1680 cases,256 cases,256 ca
 no placeholders, new tests, input filtering, ISA/runtime/generator/oracle/paper edits.
 Original compiler warnings remain visible. Active exactb757 full check predates
 this signed-load extension.
+
+## Actual byte STORE composed after signed loads
+
+`Arm64Dispatcher.dispatchThroughStore` adds the next production STORE gate,
+using physical DST as base, SRC as data and SRC2 as index. The same raw FLAGS
+byte selects exact1/2/4/8-byte stores, independently of signed-load output width.
+Derived body/core equalities compose native offset/pre/post immediate and indexed
+UXTW/SXTW/LSL/SXTX forms, including scaling, ZR data/index, omitted unscaled X
+modifiers and native alias/non-overlap conditions. Index presence uses actual
+SRC2/NONE255, with unused AUX0/SRC3 arbitrary. Source values are read before the
+transfer, exact native-width bytes become initialized and ordered write events
+match the same canonical ISA; PC advances once and other state is retained.
+
+Literal numeric disjointness derives reachability after all prior gates. One
+step_through_store_refines theorem composes every earlier case plus both store
+addressing classes. StoreBinding contains only field/code/width/modifier/amount
+identities; scalarMemoryAccess separately requires original native SP alignment
+and per-byte WRITABLE permissions. Read permission, private shadow writability
+or tag predicates do not establish that native premise. No runtime guard,
+fault-success replacement or assumed component step equality is introduced.
+Faulting writeback, native producer/compiled-body/Entry/O2/O4 transport, remaining
+families and full77/72 completion are still open.
+
+Validation: focused94-job dispatcher/reference Lean build (first compile passed),
+11 existing contract freshness checks, direct-dispatch/model checks and17 existing
+semantic/route hosts passed 40080 cases,225292 cases,20168 cases,512 cases,22115 cases,512 cases,6913 cases,257 cases,6401 cases,20024 cases,16486328 cases,24 cases,17758119 cases,17 cases,3015 cases,4608 cases,135170 cases. Exact proof SHA256
+`7dfe53aa926d4cc4521201ee1734af201fa55d94bfc8c94904a4bb12bdd23d46` stayed unchanged through checks. Every prior declaration
+is byte-identical. No placeholders, new tests, input filtering, ISA/runtime/
+generator/oracle/paper changes; original compiler warnings remain visible.
+The active exactb757 full check predates signed-load and STORE extensions.
