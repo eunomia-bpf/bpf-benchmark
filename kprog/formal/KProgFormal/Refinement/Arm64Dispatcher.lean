@@ -2711,4 +2711,162 @@ theorem step_through_exclusive_at_observed_refines (code : Nat) (flags : Byte) (
   step_through_exclusive_observed_refines code flags aux dst src src2 src3 site sourceScalar sourceStack tagIsScalar
     release (outcomeAt site != 0) native s binding access environment
 
+
+/-- Two native-width elements, with both tag-preserving LOAD branches. The
+address is captured before either destination write, including base aliases;
+the second element uses WIDTH as stride, not an unconditional eight bytes. -/
+def pairByteSuccess (load : Bool) (width : Width) (first second : Byte) (address : Word)
+    (firstScalar secondScalar : Bool) (s : Reference.AArch64.State) : Transition Reference.AArch64.State :=
+  let one := scalarMemorySuccess load (Arm64Exclusive.accessWidth width) first address firstScalar s
+  let two := scalarMemorySuccess load (Arm64Exclusive.accessWidth width) second
+    (address + BitVec.ofNat 64 (GeneratedArm64Width.code (Arm64Register.handlerWidth width))) secondScalar one.state
+  { two with state := { two.state with pc := s.pc + 4 }, events := one.events ++ two.events }
+
+theorem pair_byte_success_typed (i : Reference.AArch64.PairMemoryInstruction) (address : Word)
+    (firstScalar secondScalar : Bool) (s : Reference.AArch64.State) :
+    pairByteSuccess i.load i.width (Arm64Register.registerCode i.first) (Arm64Register.registerCode i.second)
+      address firstScalar secondScalar s = Arm64WritebackMemory.pairSuccess i address s := by
+  simp only [pairByteSuccess, scalar_memory_success_typed, Arm64WritebackMemory.pairSuccess,
+    (Arm64PairMemory.fields_refine i s).2.2.2.1]
+  rfl
+
+/-- Actual pair pre/access/post sequence. SRC3 is the physical index byte;
+AUX0 is not used as a substitute. Native LDP/STP have immediate addressing,
+so their binding selects NONE while keeping AUX0/modifier bytes arbitrary. -/
+def pairByteBody (load : Bool) (width : Width) (aux : BitVec 32) (first second base index : Byte)
+    (immediate : Word) (firstScalar secondScalar : Bool) (s : Reference.AArch64.State) :
+    Transition Reference.AArch64.State :=
+  let before := bumpMemoryBase base (GeneratedArm64MemPrepost.preDelta aux immediate) s
+  let address := Arm64Move.Fields.read before base + memoryOffsetBody aux index immediate before
+  let transferred := pairByteSuccess load width first second address firstScalar secondScalar before
+  { transferred with state := bumpMemoryBase base (GeneratedArm64MemPrepost.postDelta aux immediate) transferred.state }
+
+theorem pair_byte_body_typed (i : Reference.AArch64.PairMemoryInstruction) (mode : Reference.AArch64.Writeback)
+    (aux : BitVec 32) (firstScalar secondScalar : Bool) (s : Reference.AArch64.State)
+    (flags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags mode)) :
+    pairByteBody i.load i.width aux (Arm64Register.registerCode i.first) (Arm64Register.registerCode i.second)
+      (memoryBaseCode i.base) GeneratedArm64MemIndex.indexSentinel i.offset firstScalar secondScalar s =
+      Arm64WritebackMemory.pairCore i mode s := by
+  obtain ⟨pre, post, suppressed⟩ := memory_flag_fields aux mode i.offset flags
+  simp only [pairByteBody, Arm64WritebackMemory.pairCore, pre, post, suppressed,
+    memory_offset_absent, memory_base_bump_typed, memory_base_read, pair_byte_success_typed,
+    Arm64Memory.base_refines]
+
+def pairCode (load : Bool) : Nat := GeneratedArm64DispatchSingleton.code (if load then .ldp else .stp)
+
+/-- LDP routes DST/SRC as the two destinations, SRC2 as base and SRC3 as
+index. STP routes SRC/SRC2 as data, DST as base and SRC3 as index. -/
+def dispatchThroughPair (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    Option (Transition Reference.AArch64.State) :=
+  match dispatchThroughExclusive code flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar failure s with
+  | some result => some result
+  | none => if code = pairCode true then
+      (decodeDataWidth flags).map (fun width => pairByteBody true width aux dst src src2 src3 value firstScalar secondScalar s)
+    else if code = pairCode false then
+      (decodeDataWidth flags).map (fun width => pairByteBody false width aux src src2 dst src3 value firstScalar secondScalar s)
+    else none
+
+theorem pair_before_none (load : Bool) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack tagIsScalar failure : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughExclusive (pairCode load) flags aux dst src src2 src3 value
+      sourceScalar sourceStack tagIsScalar failure s = none := by
+  unfold dispatchThroughExclusive dispatchThroughStore dispatchThroughSigned dispatchThroughLoad dispatchEncodedPrefix
+  cases decoded : decodeDataWidth flags with
+  | none => cases load <;> rfl
+  | some width => cases load <;> rfl
+
+theorem pair_reached (load : Bool) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State) :
+    dispatchThroughPair (pairCode load) flags aux dst src src2 src3 value
+      sourceScalar sourceStack firstScalar secondScalar failure s =
+      (decodeDataWidth flags).map (fun width => pairByteBody load width aux
+        (if load then dst else src) (if load then src else src2) (if load then src2 else dst) src3 value
+        firstScalar secondScalar s) := by
+  unfold dispatchThroughPair
+  rw [pair_before_none]
+  cases load <;> rfl
+
+/-- Profile and access witnesses refer to the original native memory. Each
+ordered element needs its own permission; no private tag/shadow permission
+supplies it. The two-access profile is explicit rather than coalesced to LSE2. -/
+def pairMemoryAccess (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State) : Prop :=
+  match native with
+  | .addressedPairMemory i =>
+      Reference.AArch64.spAlignmentFault s i.instruction.base = none ∧ s.pairSingleAccess = false ∧
+      permitted (if i.instruction.load then s.memory.readable else s.memory.writable)
+        (Reference.AArch64.memoryBase s i.instruction.base + (if i.writeback = .post then 0 else i.instruction.offset))
+        i.instruction.width.bytes = true ∧
+      permitted (if i.instruction.load then s.memory.readable else s.memory.writable)
+        (Reference.AArch64.memoryBase s i.instruction.base + (if i.writeback = .post then 0 else i.instruction.offset) +
+          BitVec.ofNat 64 i.instruction.width.bytes) i.instruction.width.bytes = true
+  | _ => True
+
+inductive PairBinding (pc : Word) : Nat → Byte → BitVec 32 → Byte → Byte → Byte → Byte → Word → Bool →
+    Reference.AArch64.Instruction → Prop where
+  | earlier (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte) (value : Word)
+      (release : Bool) (native : Reference.AArch64.Instruction)
+      (binding : ExclusiveBinding pc code flags aux dst src src2 src3 value release native) :
+      PairBinding pc code flags aux dst src src2 src3 value release native
+  | pair (i : Reference.AArch64.AddressedPairMemoryInstruction) (flags : Byte) (aux : BitVec 32) (release : Bool)
+      (encoded : GeneratedArm64Width.effective flags.toNat =
+        GeneratedArm64Width.code (Arm64Register.handlerWidth i.instruction.width))
+      (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags i.writeback)) :
+      PairBinding pc (pairCode i.instruction.load) flags aux
+        (if i.instruction.load then Arm64Register.registerCode i.instruction.first else memoryBaseCode i.instruction.base)
+        (if i.instruction.load then Arm64Register.registerCode i.instruction.second else Arm64Register.registerCode i.instruction.first)
+        (if i.instruction.load then memoryBaseCode i.instruction.base else Arm64Register.registerCode i.instruction.second)
+        GeneratedArm64MemIndex.indexSentinel i.instruction.offset release (.addressedPairMemory i)
+
+theorem pair_byte_refines (i : Reference.AArch64.AddressedPairMemoryInstruction) (flags : Byte) (aux : BitVec 32)
+    (sourceScalar sourceStack firstScalar secondScalar failure : Bool) (s : Reference.AArch64.State)
+    (encoded : GeneratedArm64Width.effective flags.toNat = GeneratedArm64Width.code (Arm64Register.handlerWidth i.instruction.width))
+    (memoryFlags : GeneratedArm64MemPrepost.flags aux = GeneratedArm64MemPrepost.flags (Arm64AddressedMemory.flags i.writeback))
+    (access : pairMemoryAccess (.addressedPairMemory i) s) :
+    dispatchThroughPair (pairCode i.instruction.load) flags aux
+      (if i.instruction.load then Arm64Register.registerCode i.instruction.first else memoryBaseCode i.instruction.base)
+      (if i.instruction.load then Arm64Register.registerCode i.instruction.second else Arm64Register.registerCode i.instruction.first)
+      (if i.instruction.load then memoryBaseCode i.instruction.base else Arm64Register.registerCode i.instruction.second)
+      GeneratedArm64MemIndex.indexSentinel i.instruction.offset sourceScalar sourceStack firstScalar secondScalar failure s =
+      some (Reference.AArch64.step (.addressedPairMemory i) s) := by
+  rw [pair_reached, decode_data_width flags i.instruction.width encoded]
+  have routing : ∀ (load : Bool) (first second base : Byte),
+      (if load then (if load then first else base) else (if load then second else first)) = first ∧
+      (if load then (if load then second else first) else (if load then base else second)) = second ∧
+      (if load then (if load then base else second) else (if load then first else base)) = base := by
+    intro load first second base; cases load <;> exact ⟨rfl, rfl, rfl⟩
+  obtain ⟨first, second, base⟩ := routing i.instruction.load (Arm64Register.registerCode i.instruction.first)
+    (Arm64Register.registerCode i.instruction.second) (memoryBaseCode i.instruction.base)
+  change some (pairByteBody i.instruction.load i.instruction.width aux _ _ _ GeneratedArm64MemIndex.indexSentinel
+    i.instruction.offset firstScalar secondScalar s) = _
+  rw [first, second, base, pair_byte_body_typed i.instruction i.writeback aux firstScalar secondScalar s memoryFlags]
+  rcases access with ⟨alignment, profile, one, two⟩
+  exact congrArg some (Arm64WritebackMemory.pair_core_refines i s alignment profile one two)
+
+theorem step_through_pair_observed_refines (code : Nat) (flags : Byte) (aux : BitVec 32) (dst src src2 src3 : Byte)
+    (value : Word) (sourceScalar sourceStack firstScalar secondScalar release failure : Bool)
+    (native : Reference.AArch64.Instruction) (s : Reference.AArch64.State)
+    (binding : PairBinding s.pc code flags aux dst src src2 src3 value release native)
+    (access : scalarMemoryAccess native s) (environment : exclusiveStoreEnvironment native failure s)
+    (pairAccess : pairMemoryAccess native s) :
+    observeExclusiveDispatch code flags release failure src2 s
+      (dispatchThroughPair code flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar secondScalar failure s) =
+      some (Reference.AArch64.step native s) := by
+  cases binding with
+  | earlier code flags aux dst src src2 src3 value release native earlier =>
+      have result := step_through_exclusive_observed_refines code flags aux dst src src2 src3 value sourceScalar
+        sourceStack firstScalar release failure native s earlier access environment
+      have numeric : ∃ prior, dispatchThroughExclusive code flags aux dst src src2 src3 value
+          sourceScalar sourceStack firstScalar failure s = some prior := by
+        cases raw : dispatchThroughExclusive code flags aux dst src src2 src3 value sourceScalar sourceStack firstScalar failure s with
+        | none => simp [raw, observeExclusiveDispatch] at result; split at result <;> simp_all
+        | some prior => exact ⟨prior, rfl⟩
+      obtain ⟨prior, reached⟩ := numeric
+      simpa only [dispatchThroughPair, reached] using result
+  | pair i flags aux release encoded memoryFlags =>
+      have separate : pairCode i.instruction.load ≠ GeneratedArm64Stlxr.code .stlxr := by
+        cases i.instruction.load <;> decide
+      simp only [observeExclusiveDispatch, separate, ↓reduceIte]
+      exact pair_byte_refines i flags aux sourceScalar sourceStack firstScalar secondScalar failure s encoded memoryFlags pairAccess
+
 end KProgFormal.Refinement.Arm64Dispatcher

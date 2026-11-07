@@ -1454,3 +1454,35 @@ command exits and complete compressed original full/focused logs are retained
 in `arm64-xdp-host-integration.json` and `arm64-xdp-host-integration.log.gz`.
 The temporary full source/cache export was deleted automatically; shared
 incremental caches and every semantic oracle remain intact.
+
+## Actual LDP/STP byte fields and combined observed step
+
+`dispatchThroughPair` adds both next production gates after STLXR. LDP takes
+first/second destinations from DST/SRC and base from SRC2; STP takes data from
+SRC/SRC2 and base from DST. SRC3 is the real index byte, bound to NONE for
+native pair-immediate forms; AUX0/modifier bytes stay arbitrary. Raw FLAGS
+binds W/X widths, including zero's doubleword default. Second-element stride
+is WIDTH, so W pairs use four bytes. Both LOAD tag branches preserve the same
+numeric values. Addresses are captured before destination writes; native
+base/destination aliases and canonical writeback non-overlap stay intact.
+
+Derived byte-to-typed success/body equalities retain ordered element events,
+exact initialized write bytes, all other state and one PC advance. The single
+`step_through_pair_observed_refines` theorem composes every preceding gate and
+both pair rows through field-only `PairBinding`. Separate `pairMemoryAccess`
+requires original SP alignment, permissions for each element and the canonical
+two-access profile. No LSE2 atomic-access equivalence is asserted; preceding
+exclusive monitor/order observations and their environment witnesses remain
+explicit. Faulting writeback/producer/artifact/O2/O4 and full77/72 stay open.
+
+Validation: Lean93/93 and12 existing contract/model checks pass;10 of13
+existing semantic hosts pass (including465696 pair-value and4096 pair-tag
+cases). Three existing route hosts fail compilation in the unchanged
+production XDP read branch: pair_mem_route, mem_base_src_route and
+mem_prepost_route. Failed stale binaries were not executed. The previously
+archived exact967 full failure is unchanged; no duplicate full was started.
+The same integration JSON/compressed archive now retains the complete pair
+commands and original log. No source/ISA/runtime/oracle/test weakening.
+Four proof audits use only propext/Quot.sound plus the existing
+Classical.choice/Lean.ofReduceBool dependencies. Prior declaration bytes
+remain identical; proof SHA256 `952a1a7ae78a4eb56111819b7c828544787ca0ea06a95bf41996138328628f1f`.
