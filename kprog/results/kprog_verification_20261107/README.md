@@ -2202,3 +2202,32 @@ Host LASS behavior, active57-bit execution, unobserved SIMD/segments, CPL0
 platform correspondence, simulator LEAVE support and whole JIT/ABI/O2/O4
 remain separate. Neither the complete formal check nor full77/72 coverage
 is claimed by this one-instruction result.
+
+## Register AND/OR/XOR/TEST through the raw frame
+
+logic_register_frame_refines composes both materialized native lane reads,
+the existing generated logical result/flag primitives and the real raw
+width-aware writer against the SAME canonical register-logic step. Both
+operands and flags are captured from the input before writeback. AND/OR/XOR
+scalarize their destination; TEST updates only flags/PC and retains raw
+register values and STACK predicates. Byte/word writes preserve untouched
+lanes, dword writes zero-extend and RSP normalization occurs once.
+
+The theorem derives the complete state and empty register-only effects for
+all typed logical kinds/widths/lanes, source/destination aliases and input
+flags, under the same raw RSP-offset/STACK-arena frame. No operand-value,
+computed-result, chosen flags or state-equality premise is supplied. This
+is the register-logic core; actual operation/AUX field decoding, singleton/
+family dispatch composition, immediate-production semantics, memory routes,
+compiled B and initial ABI remain separate. The existing seven-opcode raw
+dispatcher is recompiled as a consumer; it is not relabeled as already
+covering these new raw opcode/ALU payload combinations.
+
+Focused91-job Lean graph and one axiom audit PASS with only the prior
+propext/Classical.choice/Lean.ofReduceBool/Quot.sound dependencies. All372
+physical source/configuration pins remain stable, including canonical494c.
+All older declarations are byte-identical; no ISA/header/generator/oracle/
+test/configuration/paper change. Complete commands/log/audit/pins are appended
+to the existing integration archive. This proof-only composition does not
+rerun or recount underlying existing C oracles. Full77/72/dispatcher/O2/O4
+and the known complete-check failures remain open.

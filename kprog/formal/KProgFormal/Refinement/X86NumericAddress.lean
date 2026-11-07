@@ -542,4 +542,38 @@ theorem self_xor_register_frame_refines (env : Environment) (frame : Frame) (are
     X86Scalar.write_refines, Reference.X86.scalarWrite, List.nil_append, List.append_nil]
   rfl
 
+
+/-- Actual materialized register-logic core. Both lane reads are captured
+before flags/writeback; TEST retains the raw register representation, while
+AND/OR/XOR scalarize through the same partial/full-width destination writer. -/
+def logicRegister (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LogicKind)
+    (dst src : Reference.X86.RegisterSlice) (nextPc : NativeWord) : RegisterState :=
+  let left := readRegister env frame arena state width dst
+  let right := readRegister env frame arena state width src
+  let value := X86Logic.value width kind left right
+  let written := if kind = .test then state else writeRegister env frame arena state width dst value
+  registerPc (registerFlags written (X86Logic.flags width kind left right state.raw.rflags)) nextPc
+
+/-- Whole native-frame lift for all four logical kinds, every width/lane,
+all aliases and arbitrary input flags. The two register reads and all flag
+outputs are derived, without a scalar-state or result equality premise. -/
+theorem logic_register_frame_refines (env : Environment) (frame : Frame) (arena : NativeWord)
+    (state : RegisterState) (width : Reference.X86.ScalarWidth) (kind : Reference.X86.LogicKind)
+    (dst src : Reference.X86.RegisterSlice) (nextPc : NativeWord) :
+    (⟨nativeRegisters env frame arena (logicRegister env frame arena state width kind dst src nextPc), [], none⟩ :
+      Transition Reference.X86.State) =
+      Reference.X86.step (.logic width kind (.register dst) (.register src) nextPc)
+        (nativeRegisters env frame arena state) := by
+  rw [← X86Logic.step_refines]
+  simp only [logicRegister, native_register_pc, native_register_flags, native_register_read,
+    X86Logic.handlerStep, X86Scalar.read_refines, Reference.X86.ScalarDestination.source,
+    Reference.X86.scalarRead, X86Scalar.write_refines, Reference.X86.scalarWrite,
+    List.nil_append, List.append_nil]
+  by_cases test : kind = .test
+  · subst kind
+    rfl
+  · simp only [test, ↓reduceIte, native_register_write]
+    rfl
+
 end KProgFormal.Refinement.X86NumericAddress
