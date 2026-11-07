@@ -1,0 +1,39 @@
+{
+  "utc": "2026-11-07T23:36:52.009907+00:00",
+  "kind": "tetragon",
+  "scope": "native byte identity and closed raw results; no compiler/ISA refinement claim",
+  "archive": "run-20261107T231024944237Z.tar.gz",
+  "archive_sha256": "ec3c5c275cf2c634adf4449f09d7ee8301d86d532db5cd36763bd0ba92a7fe4d",
+  "host_reported_ok": false,
+  "hashes_unchanged": true,
+  "completed_counts": {
+    "service_accepted": 0,
+    "service_refused": 1
+  },
+  "expected_safety_cases": null,
+  "completed_requests_or_cases": 1,
+  "not_completed": [],
+  "request_identities": [
+    {
+      "request_id": 1,
+      "status": -5,
+      "entry": "event_exit_acct_process",
+      "native_sha256": "7620cc8d34b1d50c5d504a233b6db0ca1383b78e6c49d462e3ae64e19976b937",
+      "kernel_native_matches_receipt": true,
+      "generated_native_present": true,
+      "generated_native_matches_kernel": true,
+      "request_archive_sha256": "857baf83c87ce4fb700cc8d6dbbf5913d508ad83bf5c06199eef0feab2857dda",
+      "artifacts": {
+        "request/generated/trusted_arm64.proof.o": "c95a66159bf1672289319dadc16cc2d73a9ed9634bc8c17f2e8404c45a0c9d96",
+        "request/generated/trusted_arm64.bpf.o": "959de24c3917e6c594143f0781fabc264ad0a65deac055a30209fe5b383ad7eb",
+        "request/generated/trusted_arm64.bpf.c": "32fe5f08e98cbc26b0546db754798d8ebc3d5ede57034516db51120532f2e16a",
+        "request/generation.metadata.json": "3540a13e9603c6d65792ba3348d7c95e416eedcef8015112c76e5195a73a5c2c",
+        "request/kernel.facts.json": "5001ab6cf2d0567f2da3993ef0d22bb634065358487067111ea4678fe301465f",
+        "request/source-identities.json": "07cf2b19ea900aecafb01e12be4d955dbe07c89ee5e7d6f81f105566c33cdc58"
+      }
+    }
+  ],
+  "identity_errors": [],
+  "all_recorded_identities_match": true,
+  "collector_source_sha256": "c2bc29e948378b579635b8f91a3409557679bfc8a702449a3549137a60a628f9"
+}
